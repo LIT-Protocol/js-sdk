@@ -1,5 +1,9 @@
 {
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
-  "projects": {}
+  "projects": {
+    "..-apps-example-nextjs": "apps/example-nextjs",
+    "..-apps-example-nextjs-e2e": "apps/example-nextjs-e2e",
+    "utils": "packages/utils"
+  }
 }
