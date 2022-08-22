@@ -8,14 +8,16 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
-    "module": "esnext",
-    "lib": ["es2017", "dom"],
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": ["ES2022", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@litprotocol/utils": ["packages/utils/src/index.ts"]
+      "@lit-js-sdk-v2/constants": ["packages/constants/src/index.ts"],
+      "@litprotocol/utils": ["packages/utils/src/index.ts"],
+      "LibraryName": ["packages/library-name/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

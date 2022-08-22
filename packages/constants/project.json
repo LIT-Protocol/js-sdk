@@ -1,0 +1,52 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/constants/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/constants",
+        "main": "packages/constants/src/index.ts",
+        "tsConfig": "packages/constants/tsconfig.lib.json",
+        "assets": ["packages/constants/*.md"]
+      }
+    },
+    "buildToExampleHTMLApp": {
+      "executor":  "@nrwl/web:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "project":"packages/constants/package.json",
+        "outputPath": "apps/example-html/src/packages/constants",
+        "entryFile": "packages/constants/src/index.ts",
+        "tsConfig": "packages/constants/tsconfig.lib.json"
+      }
+    },
+
+    "esbuild-build": {
+      "executor": "nx-plugin-esbuild:build",
+      "options": {
+        "main": "packages/constants/src/index.ts",
+        "outputPath": "apps/example-html/src/packages/constants",
+        "tsConfig": "packages/constants/tsconfig.lib.json"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/constants/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/constants"],
+      "options": {
+        "jestConfig": "packages/constants/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

@@ -2,8 +2,11 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
+    "..-apps-example-html": "apps/example-html",
+    "..-apps-example-html-e2e": "apps/example-html-e2e",
     "..-apps-example-nextjs": "apps/example-nextjs",
     "..-apps-example-nextjs-e2e": "apps/example-nextjs-e2e",
+    "constants": "packages/constants",
     "utils": "packages/utils"
   }
 }
