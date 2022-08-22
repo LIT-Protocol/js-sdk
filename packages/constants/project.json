@@ -3,7 +3,13 @@
   "sourceRoot": "packages/constants/src",
   "projectType": "library",
   "targets": {
-    "build": {
+    "buildAll":{
+      "executor": "nx:run-commands",
+        "options": {
+          "command": "yarn nx run constants:_buildTsc && yarn nx run constants:_buildVanilla"
+        }
+    },
+    "_buildTsc": {
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -13,7 +19,7 @@
         "assets": ["packages/constants/*.md"]
       }
     },
-    "buildVanilla": {
+    "_buildVanilla": {
       "executor":  "@nrwl/web:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {

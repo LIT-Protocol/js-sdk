@@ -1,3 +1,10 @@
+export const NETWORK_PUB_KEY : string =
+  "9971e835a1fe1a4d78e381eebbe0ddc84fde5119169db816900de796d10187f3c53d65c1202ac083d099a517f34a9b62";
+
+// you can either pass a "chain" param to lit functions, which it uses to tell which network your sig came from.
+// or, you can pass a authSig that has and of these keys in it to tell which network your sig came from.
+export const LIT_AUTH_SIG_CHAIN_KEYS : Array<string> = ["ethereum", "solana", "cosmos", "kyve"];
+
 /**
  * 
  * The default required properties of all chains
@@ -13,6 +20,7 @@ export type LITChainRequiredProps = {
   vmType: string,
 }
 
+
 /**
  * @typedef { Object } LITEVMChain
  * @property {string} contractAddress - The address of the token contract for the optional predeployed ERC1155 contract.  Only present on EVM chains.
@@ -25,10 +33,12 @@ export type LITEVMChain = LITChainRequiredProps & {
   type: string | null,
 }
 
+
 /**
  * @typedef { Object } LITSVMChain
  */
 export type LITSVMChain = LITChainRequiredProps
+
 
 /**
  * @typedef { Object } LITCosmosChain
@@ -38,6 +48,7 @@ export type LITCosmosChain = LITChainRequiredProps & {
   chainId: string,
 }
 
+
 /**
  * @typedef {Object} LITChain
  * @property {string} vmType - Either EVM for an Ethereum compatible chain or SVM for a Solana compatible chain
@@ -46,6 +57,7 @@ export type LITCosmosChain = LITChainRequiredProps & {
 export type LITChain<T> = {
   [chainName: string]: T
 }
+
 
 /**
  * EVM Chains supported by the LIT protocol.  Each chain includes an optional pre-deployed token contract that you may use for minting LITs.  These are ERC1155 contracts that let you mint any quantity of a given token.  Use the chain name as a key in this object.
@@ -61,9 +73,7 @@ export type LITChain<T> = {
     symbol: "ETH",
     decimals: 18,
     type: "ERC1155",
-    rpcUrls: [
-      "https://eth-mainnet.alchemyapi.io/v2/EuGnkVlzVoEkzdg0lpCarhm8YHOxWVxE",
-    ],
+    rpcUrls: ["https://eth-mainnet.alchemyapi.io/v2/EuGnkVlzVoEkzdg0lpCarhm8YHOxWVxE"],
     blockExplorerUrls: ["https://etherscan.io"],
     vmType: "EVM",
   },
@@ -313,6 +323,8 @@ export type LITChain<T> = {
   },
 };
 
+export const LIT_EVM_CHAINS = LIT_CHAINS;
+
 /**
  * Solana Chains supported by the LIT protocol.  Use the chain name as a key in this object.
  * @constant
@@ -345,6 +357,7 @@ export const LIT_SVM_CHAINS : LITChain<LITSVMChain> = {
     vmType: "SVM",
   },
 };
+
 
 /**
  * Cosmos Chains supported by the LIT protocol.  Use the chain name as a key in this object.
@@ -391,6 +404,7 @@ export const LIT_COSMOS_CHAINS : LITChain<LITCosmosChain> = {
   },
 };
 
+
 /**
  * All Chains supported by the LIT protocol.  Use the chain name as a key in this object.
  * @type { LITChain<LITEVMChain | LITSVMChain | LITCosmosChain> }
@@ -400,10 +414,3 @@ export const ALL_LIT_CHAINS : LITChain<LITEVMChain | LITSVMChain | LITCosmosChai
   ...LIT_SVM_CHAINS,
   ...LIT_COSMOS_CHAINS,
 };
-
-export const NETWORK_PUB_KEY : string =
-  "9971e835a1fe1a4d78e381eebbe0ddc84fde5119169db816900de796d10187f3c53d65c1202ac083d099a517f34a9b62";
-
-// you can either pass a "chain" param to lit functions, which it uses to tell which network your sig came from.
-// or, you can pass a authSig that has and of these keys in it to tell which network your sig came from.
-export const LIT_AUTH_SIG_CHAIN_KEYS : Array<string> = ["ethereum", "solana", "cosmos", "kyve"];
