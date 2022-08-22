@@ -1,33 +1,59 @@
 /**
- * @typedef {Object} LITChain
- * @property {string} vmType - Either EVM for an Ethereum compatible chain or SVM for a Solana compatible chain
- * @property {string} name - The human readable name of the chain
+ * 
+ * The default required properties of all chains
+ * 
+ * @typedef { Object } LITChainRequiredProps
  */
+export type LITChainRequiredProps = {
+  name: string,
+  symbol: string,
+  decimals: number,
+  rpcUrls: Array<String>,
+  blockExplorerUrls: Array<String>,
+  vmType: string,
+}
 
 /**
- * @typedef {Object} LITEVMChain
+ * @typedef { Object } LITEVMChain
  * @property {string} contractAddress - The address of the token contract for the optional predeployed ERC1155 contract.  Only present on EVM chains.
  * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for EVM chains.
  * @property {string} name - The human readable name of the chain
  */
+export type LITEVMChain = LITChainRequiredProps & {
+  contractAddress: string | null,
+  chainId: number,
+  type: string | null,
+}
 
 /**
- * @typedef {Object} LITSVMChain
- * @property {string} name - The human readable name of the chain
+ * @typedef { Object } LITSVMChain
  */
+export type LITSVMChain = LITChainRequiredProps
 
 /**
- * @typedef {Object} LITCosmosChain
+ * @typedef { Object } LITCosmosChain
+ * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for Cosmos chains.
+ */
+export type LITCosmosChain = LITChainRequiredProps & {
+  chainId: string,
+}
+
+/**
+ * @typedef {Object} LITChain
+ * @property {string} vmType - Either EVM for an Ethereum compatible chain or SVM for a Solana compatible chain
  * @property {string} name - The human readable name of the chain
  */
+export type LITChain<T> = {
+  [chainName: string]: T
+}
 
 /**
  * EVM Chains supported by the LIT protocol.  Each chain includes an optional pre-deployed token contract that you may use for minting LITs.  These are ERC1155 contracts that let you mint any quantity of a given token.  Use the chain name as a key in this object.
  * @constant
- * @type {LITEVMChain}
+ * @type { LITEVMChain }
  * @default
  */
- export const LIT_CHAINS = {
+ export const LIT_CHAINS : LITChain<LITEVMChain> = {
   ethereum: {
     contractAddress: "0xA54F7579fFb3F98bd8649fF02813F575f9b3d353",
     chainId: 1,
@@ -290,10 +316,10 @@
 /**
  * Solana Chains supported by the LIT protocol.  Use the chain name as a key in this object.
  * @constant
- * @type {LITSVMChain}
+ * @type { LITSVMChain }
  * @default
  */
-export const LIT_SVM_CHAINS = {
+export const LIT_SVM_CHAINS : LITChain<LITSVMChain> = {
   solana: {
     name: "Solana",
     symbol: "SOL",
@@ -323,10 +349,10 @@ export const LIT_SVM_CHAINS = {
 /**
  * Cosmos Chains supported by the LIT protocol.  Use the chain name as a key in this object.
  * @constant
- * @type {LITCosmosChain}
+ * @type { LITCosmosChain }
  * @default
  */
-export const LIT_COSMOS_CHAINS = {
+export const LIT_COSMOS_CHAINS : LITChain<LITCosmosChain> = {
   cosmos: {
     name: "Cosmos",
     symbol: "ATOM",
@@ -367,19 +393,17 @@ export const LIT_COSMOS_CHAINS = {
 
 /**
  * All Chains supported by the LIT protocol.  Use the chain name as a key in this object.
- * @constant
- * @type {LITChain}
- * @default
+ * @type { LITChain<LITEVMChain | LITSVMChain | LITCosmosChain> }
  */
-export const ALL_LIT_CHAINS = {
+export const ALL_LIT_CHAINS : LITChain<LITEVMChain | LITSVMChain | LITCosmosChain> = {
   ...LIT_CHAINS,
   ...LIT_SVM_CHAINS,
   ...LIT_COSMOS_CHAINS,
 };
 
-export const NETWORK_PUB_KEY =
+export const NETWORK_PUB_KEY : string =
   "9971e835a1fe1a4d78e381eebbe0ddc84fde5119169db816900de796d10187f3c53d65c1202ac083d099a517f34a9b62";
 
 // you can either pass a "chain" param to lit functions, which it uses to tell which network your sig came from.
 // or, you can pass a authSig that has and of these keys in it to tell which network your sig came from.
-export const LIT_AUTH_SIG_CHAIN_KEYS = ["ethereum", "solana", "cosmos", "kyve"];
+export const LIT_AUTH_SIG_CHAIN_KEYS : Array<string> = ["ethereum", "solana", "cosmos", "kyve"];

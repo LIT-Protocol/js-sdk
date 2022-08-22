@@ -1,4 +1,7 @@
 {
   "name": "@lit-js-sdk-v2/constants",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "devDependencies": {
+    "typedoc": "^0.23.10"
+  }
 }

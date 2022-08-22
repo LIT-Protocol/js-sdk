@@ -19,7 +19,11 @@
         "assets": [
           "apps/example-html/src/favicon.ico",
           "apps/example-html/src/assets",
-          "apps/example-html/src/packages"
+          {
+            "glob": "**/*",
+            "input": "dist/packages/constants",
+            "output": "./constants"
+          }
         ],
         "styles": ["apps/example-html/src/styles.css"],
         "scripts": []
