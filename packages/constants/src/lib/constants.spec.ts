@@ -7,7 +7,6 @@ describe('constants', () => {
   const MUST_HAVE_SOL_CHAINS = ['solana', 'solanaDevnet', 'solanaTestnet'];
   const MUST_HAVE_COSMOS_CHAINS = ['cosmos', 'kyve', 'evmosCosmos', 'evmosCosmosTestnet'];
 
-
   const networkPubKey = '9971e835a1fe1a4d78e381eebbe0ddc84fde5119169db816900de796d10187f3c53d65c1202ac083d099a517f34a9b62'
 
   it(`LIT_CHAINS should have ${MUST_HAVE_EVM_CHAINS.toString()}`, () => {
