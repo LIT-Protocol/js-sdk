@@ -13,12 +13,12 @@
         "assets": ["packages/constants/*.md"]
       }
     },
-    "buildWeb": {
+    "buildVanilla": {
       "executor":  "@nrwl/web:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "outputPath": "dist/packages/constants/vanilla",
         "project":"packages/constants/package.json",
-        "outputPath": "dist/packages/constants",
         "entryFile": "packages/constants/src/index.ts",
         "tsConfig": "packages/constants/tsconfig.lib.json"
       }

@@ -24,7 +24,14 @@
       "options": {
         "buildTarget": "..-apps-example-nextjs:build",
         "dev": true,
-        "port": 4001
+        "port": 4001,
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "dist/packages/constants",
+            "output": "./constants"
+          }
+        ]
       },
       "configurations": {
         "development": {
