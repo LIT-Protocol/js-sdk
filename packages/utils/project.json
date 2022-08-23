@@ -3,7 +3,7 @@
   "sourceRoot": "packages/utils/src",
   "projectType": "library",
   "targets": {
-    "buildPackage": {
+    "build": {
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {

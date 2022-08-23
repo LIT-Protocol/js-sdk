@@ -15,6 +15,16 @@
         }
       ]
     },
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/constants",
+        "main": "packages/constants/src/index.ts",
+        "tsConfig": "packages/constants/tsconfig.lib.json",
+        "assets": ["packages/constants/*.md"]
+      }
+    },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
