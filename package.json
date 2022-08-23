@@ -7,7 +7,7 @@
     "build:all": "nx run-many --target=build",
     "pub": "nx run-many --target=publish"
   },
-  "private": true,
+  "private": false,
   "dependencies": {
     "core-js": "^3.6.5",
     "next": "12.2.3",
