@@ -1,10 +1,10 @@
 {
   "name": "@litprotocol-dev/constants",
-  "version": "0.0.2-alpha.6+813f8ba",
-  "gitHead": "813f8bac8b93e6bd0f2bf5126ad0007cd4a56053",
+  "version": "0.0.2-alpha.7+728fd8a",
+  "gitHead": "728fd8af48b506354e6202ce6c2c619dc1f19d69",
   "license": "MIT",
   "publishConfig": {
     "access": "public",
-    "directory": "dist/packages/constants"
+    "directory": "../../dist/packages/constants"
   }
 }

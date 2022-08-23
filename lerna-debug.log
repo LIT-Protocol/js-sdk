@@ -9,48 +9,46 @@
 1 notice cli v5.4.3
 2 verbose rootPath /Users/anson/Projects/lit-js-sdk-v2
 3 info canary enabled
-4 verbose session 3c6a7050d6e8f687
+4 verbose session 6e221b712f36503a
 5 verbose user-agent lerna/5.4.3/node@v16.16.0+arm64 (darwin)
-6 warn Yarn's registry proxy is broken, replacing with public npm registry
-7 warn If you don't have an npm token, you should exit and run `npm login`
-8 verbose git-describe undefined => "v0.0.1-7-g813f8ba"
-9 silly git-describe parsed => {"lastTagName":"v0.0.1","lastVersion":"v0.0.1","refCount":"7","sha":"813f8ba","isDirty":false}
-10 silly hasTags
-11 verbose hasTags true
-12 silly git-describe.sync "v0.0.1-7-g813f8ba" => {"lastTagName":"v0.0.1","lastVersion":"v0.0.1","refCount":"7","sha":"813f8ba","isDirty":false}
-13 info Looking for changed packages since 813f8ba^..813f8ba
-14 silly checking diff packages/constants
-15 silly found diff in packages/constants/package.json
-16 verbose filtered diff [ 'packages/constants/package.json' ]
-17 silly checking diff packages/utils
-18 silly found diff in packages/utils/package.json
-19 verbose filtered diff [ 'packages/utils/package.json' ]
-20 verbose updated @litprotocol-dev/constants
-21 verbose updated @litprotocol-dev/utils
-22 verbose git-describe "v*.*.*" => "v0.0.1-7-g813f8ba"
-23 silly git-describe parsed => {"lastTagName":"v0.0.1","lastVersion":"v0.0.1","refCount":"7","sha":"813f8ba","isDirty":false}
-24 info publish Publishing packages to npm...
-25 silly getCurrentSHA
-26 verbose getCurrentSHA 813f8bac8b93e6bd0f2bf5126ad0007cd4a56053
-27 silly lifecycle No script for "prepublish" in "@litprotocol-dev/js-sdk", continuing
-28 silly lifecycle No script for "prepare" in "@litprotocol-dev/js-sdk", continuing
-29 silly lifecycle No script for "prepublishOnly" in "@litprotocol-dev/js-sdk", continuing
-30 silly lifecycle No script for "prepack" in "@litprotocol-dev/js-sdk", continuing
-31 verbose pack-directory packages/constants/dist/packages/constants
-32 verbose pack-directory packages/utils/dist/packages/utils
-33 silly lifecycle No script for "prepublish" in "@litprotocol-dev/constants", continuing
-34 silly lifecycle No script for "prepublish" in "@litprotocol-dev/utils", continuing
-35 silly lifecycle No script for "prepare" in "@litprotocol-dev/constants", continuing
-36 silly lifecycle No script for "prepare" in "@litprotocol-dev/utils", continuing
-37 silly lifecycle No script for "prepublishOnly" in "@litprotocol-dev/utils", continuing
-38 silly lifecycle No script for "prepublishOnly" in "@litprotocol-dev/constants", continuing
-39 silly lifecycle No script for "prepack" in "@litprotocol-dev/utils", continuing
-40 silly lifecycle No script for "prepack" in "@litprotocol-dev/constants", continuing
+6 verbose git-describe undefined => "v0.0.1-8-g728fd8a"
+7 silly git-describe parsed => {"lastTagName":"v0.0.1","lastVersion":"v0.0.1","refCount":"8","sha":"728fd8a","isDirty":false}
+8 silly hasTags
+9 verbose hasTags true
+10 silly git-describe.sync "v0.0.1-8-g728fd8a" => {"lastTagName":"v0.0.1","lastVersion":"v0.0.1","refCount":"8","sha":"728fd8a","isDirty":false}
+11 info Looking for changed packages since 728fd8a^..728fd8a
+12 silly checking diff packages/constants
+13 silly found diff in packages/constants/package.json
+14 verbose filtered diff [ 'packages/constants/package.json' ]
+15 silly checking diff packages/utils
+16 silly found diff in packages/utils/package.json
+17 verbose filtered diff [ 'packages/utils/package.json' ]
+18 verbose updated @litprotocol-dev/constants
+19 verbose updated @litprotocol-dev/utils
+20 verbose git-describe "v*.*.*" => "v0.0.1-8-g728fd8a"
+21 silly git-describe parsed => {"lastTagName":"v0.0.1","lastVersion":"v0.0.1","refCount":"8","sha":"728fd8a","isDirty":false}
+22 info publish Publishing packages to npm...
+23 silly getCurrentSHA
+24 verbose getCurrentSHA 728fd8af48b506354e6202ce6c2c619dc1f19d69
+25 silly lifecycle No script for "prepublish" in "@litprotocol-dev/js-sdk", continuing
+26 silly lifecycle No script for "prepare" in "@litprotocol-dev/js-sdk", continuing
+27 silly lifecycle No script for "prepublishOnly" in "@litprotocol-dev/js-sdk", continuing
+28 silly lifecycle No script for "prepack" in "@litprotocol-dev/js-sdk", continuing
+29 verbose pack-directory packages/constants/dist/packages/constants
+30 verbose pack-directory packages/utils/dist/packages/utils
+31 silly lifecycle No script for "prepublish" in "@litprotocol-dev/constants", continuing
+32 silly lifecycle No script for "prepublish" in "@litprotocol-dev/utils", continuing
+33 silly lifecycle No script for "prepare" in "@litprotocol-dev/constants", continuing
+34 silly lifecycle No script for "prepare" in "@litprotocol-dev/utils", continuing
+35 silly lifecycle No script for "prepublishOnly" in "@litprotocol-dev/constants", continuing
+36 silly lifecycle No script for "prepublishOnly" in "@litprotocol-dev/utils", continuing
+37 silly lifecycle No script for "prepack" in "@litprotocol-dev/constants", continuing
+38 silly lifecycle No script for "prepack" in "@litprotocol-dev/utils", continuing
+39 silly lifecycle No script for "postpack" in "@litprotocol-dev/constants", continuing
+40 verbose packed packages/constants/dist/packages/constants
 41 silly lifecycle No script for "postpack" in "@litprotocol-dev/utils", continuing
 42 verbose packed packages/utils/dist/packages/utils
-43 silly lifecycle No script for "postpack" in "@litprotocol-dev/constants", continuing
-44 verbose packed packages/constants/dist/packages/constants
-45 silly lifecycle No script for "postpack" in "@litprotocol-dev/js-sdk", continuing
-46 verbose publish @litprotocol-dev/constants
-47 verbose publish @litprotocol-dev/utils
-48 error
+43 silly lifecycle No script for "postpack" in "@litprotocol-dev/js-sdk", continuing
+44 verbose publish @litprotocol-dev/constants
+45 verbose publish @litprotocol-dev/utils
+46 error
