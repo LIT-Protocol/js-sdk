@@ -1,4 +1,4 @@
-import { ALL_LIT_CHAINS, LIT_CHAINS } from '@lit-js-sdk-v2/constants';
+import { ALL_LIT_CHAINS, LIT_CHAINS } from '@litprotocol-dev/constants';
 
 const Index = () => {
 

@@ -1,9 +1,10 @@
 {
-  "name": "@litprotocol/js-sdk",
+  "name": "@litprotocol-dev/js-sdk",
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
-    "doc": "typedoc --options ./typedoc.json --tsconfig ./tsconfig.doc.json --excludeNotDocumented"
+    "doc": "typedoc --options ./typedoc.json --tsconfig ./tsconfig.doc.json --excludeNotDocumented",
+    "reset": "sh ./tools/scripts/reset.sh"
   },
   "private": true,
   "dependencies": {

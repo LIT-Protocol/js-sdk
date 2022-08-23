@@ -1,4 +1,4 @@
-import { utils } from '@litprotocol/utils';
+import { utils } from '@litprotocol-dev/utils';
 
 const Utils = () => {
 
