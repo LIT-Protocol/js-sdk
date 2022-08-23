@@ -3,11 +3,11 @@
   "sourceRoot": "packages/constants/src",
   "projectType": "library",
   "targets": {
-    "buildAll":{
+    "buildPackage":{
       "executor": "nx:run-commands",
-        "options": {
-          "command": "yarn nx run constants:_buildTsc && yarn nx run constants:_buildVanilla"
-        }
+      "options": {
+        "command": "yarn nx run constants:_buildTsc && yarn nx run constants:_buildVanilla"
+      }
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
@@ -43,7 +43,7 @@
         "lintFilePatterns": ["packages/constants/**/*.ts"]
       }
     },
-    "test": {
+    "testPackage": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/packages/constants"],
       "options": {

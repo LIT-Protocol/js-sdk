@@ -3,7 +3,7 @@
   "sourceRoot": "packages/utils/src",
   "projectType": "library",
   "targets": {
-    "build": {
+    "buildPackage": {
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -32,7 +32,7 @@
         "lintFilePatterns": ["packages/utils/**/*.ts"]
       }
     },
-    "test": {
+    "testPackage": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/packages/utils"],
       "options": {
