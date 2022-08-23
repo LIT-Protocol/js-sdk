@@ -345,4 +345,4 @@ nx affected:e2e</pre>
       `;
   }
 }
-customElements.define('lit-js-sdk-v2-root', AppElement);
+customElements.define('litprotocol-dev-root', AppElement);

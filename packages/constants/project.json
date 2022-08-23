@@ -3,11 +3,23 @@
   "sourceRoot": "packages/constants/src",
   "projectType": "library",
   "targets": {
-    "buildAll":{
+    "build":{
       "executor": "nx:run-commands",
         "options": {
           "command": "yarn nx run constants:_buildTsc && yarn nx run constants:_buildVanilla"
         }
+    },
+    "publish": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "node tools/scripts/publish.mjs constants {args.ver} {args.tag}"
+      },
+      "dependsOn": [
+        {
+          "projects": "self",
+          "target": "build"
+        }
+      ]
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",

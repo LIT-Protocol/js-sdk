@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@lit-js-sdk-v2/constants": ["packages/constants/src/index.ts"],
+      "@litprotocol-dev/constants": ["packages/constants/src/index.ts"],
       "@litprotocol/utils": ["packages/utils/src/index.ts"],
       "LibraryName": ["packages/library-name/src/index.ts"]
     }
