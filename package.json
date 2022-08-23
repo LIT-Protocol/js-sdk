@@ -5,7 +5,7 @@
   "scripts": {
     "doc": "typedoc --options ./typedoc.json --tsconfig ./tsconfig.doc.json --excludeNotDocumented",
     "build:all": "nx run-many --target=build",
-    "pub": "npx lerna publish --canary"
+    "pub": "npx lerna publish --canary --preid beta"
   },
   "private": false,
   "dependencies": {
