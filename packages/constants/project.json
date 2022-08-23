@@ -3,7 +3,7 @@
   "sourceRoot": "packages/constants/src",
   "projectType": "library",
   "targets": {
-    "build":{
+    "buildAll":{
       "executor": "nx:run-commands",
         "options": {
           "command": "yarn nx run constants:_buildTsc && yarn nx run constants:_buildVanilla"
@@ -17,7 +17,7 @@
       "dependsOn": [
         {
           "projects": "self",
-          "target": "build"
+          "target": "buildAll"
         }
       ]
     },
