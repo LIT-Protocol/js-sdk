@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "reset": "sh ./tools/scripts/reset.sh",
-    "build:packages": "nx run-many --target=buildPackage",
+    "build:packages": "nx run-many --target=build",
     "test:packages": "nx run-many --target=testPackage",
     "publish:packages": "npx lerna publish --yes",
     "gitAdd": "git add *",

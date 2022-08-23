@@ -3,7 +3,7 @@
   "sourceRoot": "apps/example-nextjs",
   "projectType": "application",
   "targets": {
-    "build": {
+    "buildApp": {
       "executor": "@nrwl/next:build",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",

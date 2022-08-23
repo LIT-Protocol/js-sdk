@@ -3,7 +3,14 @@
   "sourceRoot": "packages/utils/src",
   "projectType": "library",
   "targets": {
-    "build": {
+
+    "build":{
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn nx run utils:_buildTsc && yarn nx run utils:_buildVanilla"
+      }
+    },
+    "_buildTsc": {
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -11,13 +18,17 @@
         "main": "packages/utils/src/index.ts",
         "tsConfig": "packages/utils/tsconfig.lib.json",
         "assets": ["packages/utils/*.md"]
-      },
-      "dependsOn": [
-        {
-          "projects": "self",
-          "target": "testPackage"
-        }
-      ]
+      }
+    },
+    "_buildVanilla": {
+      "executor":  "@nrwl/web:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/utils/vanilla",
+        "project":"packages/utils/package.json",
+        "entryFile": "packages/utils/src/index.ts",
+        "tsConfig": "packages/utils/tsconfig.lib.json"
+      }
     },
     "publish": {
       "executor": "@nrwl/workspace:run-commands",
