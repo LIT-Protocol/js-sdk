@@ -4,5 +4,6 @@
   "type": "commonjs",
   "dependencies": {
     "uint8arrays": "^3.1.0"
-  }
+  },
+  "gitHead": "7d6f0d56c1694e475a0f9cda0e726e50290abea2"
 }

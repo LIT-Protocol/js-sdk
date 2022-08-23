@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "doc": "typedoc --options ./typedoc.json --tsconfig ./tsconfig.doc.json --excludeNotDocumented",
-    "build:all": "nx run-many --target=build"
+    "build:all": "nx run-many --target=build",
+    "pub": "nx run-many --target=publish"
   },
   "private": true,
   "dependencies": {
