@@ -2085,11 +2085,11 @@
 
 "@litprotocol-dev/constants@file:/Users/anson/Projects/lit-js-sdk-v2/packages/constants":
   "resolved" "file:packages/constants"
-  "version" "0.0.7"
+  "version" "0.0.8-alpha.0"
 
 "@litprotocol-dev/utils@file:/Users/anson/Projects/lit-js-sdk-v2/packages/utils":
   "resolved" "file:packages/utils"
-  "version" "0.0.7"
+  "version" "0.0.8-alpha.0"
   dependencies:
     "uint8arrays" "^3.1.0"
 
