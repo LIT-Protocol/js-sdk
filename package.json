@@ -7,7 +7,6 @@
     "build:packages": "nx run-many --target=buildPackage",
     "test:packages": "nx run-many --target=testPackage",
     "publish:packages": "npx lerna publish",
-    "publish:packages:dev": "npx lerna publish --canary --preid dev --yes",
     "gitAdd": "git add *",
     "gitCommit": "git commit -m 'test: publish'",
     "gitPush": "git push"
