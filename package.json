@@ -1,5 +1,5 @@
 {
-  "name": "@litprotocol-dev/js-sdk",
+  "name": "@litprotocol-dev/sdk",
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
