@@ -1,6 +1,6 @@
 {
   "name": "@litprotocol-dev/utils",
-  "version": "0.0.7-dev.3+c6a6dbf",
+  "version": "0.0.7-dev.4+e1514c7",
   "type": "commonjs",
   "dependencies": {
     "uint8arrays": "^3.1.0"
@@ -9,5 +9,5 @@
     "access": "public",
     "directory": "../../dist/packages/utils"
   },
-  "gitHead": "c6a6dbf6899ddd0bf87e7e3369f24e054cc96fd5"
+  "gitHead": "e1514c73dd7af95ae9ec209e0e4645f4d2746827"
 }
