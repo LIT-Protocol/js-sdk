@@ -6,7 +6,7 @@
     "reset": "sh ./tools/scripts/reset.sh",
     "build:packages": "nx run-many --target=buildPackage",
     "test:packages": "nx run-many --target=testPackage",
-    "publish:patch": "npx lerna publish --canary preminor"
+    "publish:packages:patch": "npx lerna publish from-git --tag-version-prefix='dev'"
   },
   "private": true,
   "dependencies": {
