@@ -1,7 +1,7 @@
 {
   "name": "@litprotocol-dev/constants",
-  "version": "0.0.2-alpha.4+21af20e",
-  "gitHead": "21af20e145a70dc2fa0ed7091079b1f3ff3f8958",
+  "version": "0.0.2-alpha.6+813f8ba",
+  "gitHead": "813f8bac8b93e6bd0f2bf5126ad0007cd4a56053",
   "license": "MIT",
   "publishConfig": {
     "access": "public",
