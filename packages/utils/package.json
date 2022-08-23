@@ -1,9 +1,9 @@
 {
   "name": "@litprotocol-dev/utils",
-  "version": "0.0.1",
+  "version": "0.0.2-alpha.0+a7a9a8d",
   "type": "commonjs",
   "dependencies": {
     "uint8arrays": "^3.1.0"
   },
-  "gitHead": "7d6f0d56c1694e475a0f9cda0e726e50290abea2"
+  "gitHead": "a7a9a8d56c9181d19322ff433ec456c116a7774b"
 }
