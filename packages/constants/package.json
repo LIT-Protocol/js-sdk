@@ -1,9 +1,9 @@
 {
   "name": "@litprotocol-dev/constants",
-  "version": "0.0.1-dev.17+fec1946",
+  "version": "0.0.2-dev.18+756a02d",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/constants"
   },
-  "gitHead": "fec194657e2e61c17a737c03c74a450985fafed9"
+  "gitHead": "756a02d568779c0f24db35eaf202492c0d8f632c"
 }
