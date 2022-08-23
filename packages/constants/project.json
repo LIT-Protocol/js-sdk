@@ -7,7 +7,13 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "yarn nx run constants:_buildTsc && yarn nx run constants:_buildVanilla"
-      }
+      },
+      "dependsOn": [
+        {
+          "projects": "self",
+          "target": "testPackage"
+        }
+      ]
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",

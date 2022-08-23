@@ -11,7 +11,13 @@
         "main": "packages/utils/src/index.ts",
         "tsConfig": "packages/utils/tsconfig.lib.json",
         "assets": ["packages/utils/*.md"]
-      }
+      },
+      "dependsOn": [
+        {
+          "projects": "self",
+          "target": "testPackage"
+        }
+      ]
     },
     "publish": {
       "executor": "@nrwl/workspace:run-commands",
