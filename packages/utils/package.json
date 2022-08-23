@@ -1,10 +1,13 @@
 {
   "name": "@litprotocol-dev/utils",
-  "version": "0.0.2-alpha.3+d5b7ea1",
+  "version": "0.0.2-alpha.4+21af20e",
   "type": "commonjs",
   "dependencies": {
     "uint8arrays": "^3.1.0"
   },
-  "gitHead": "d5b7ea102e4013827dca2fda3bac6d2141d68ad5",
-  "license": "MIT"
+  "gitHead": "21af20e145a70dc2fa0ed7091079b1f3ff3f8958",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }
