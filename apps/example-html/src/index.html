@@ -9,8 +9,8 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
 
     <!-- import built packages from dist -->
-    <script src='./constants/web/src/index.js'>
-      // import { LIT_CHAINS } from './constants/web/src/index.js';
+    <script type="module">
+      import { LIT_CHAINS } from 'https://cdn.jsdelivr.net/npm/@litprotocol-dev/constants@0.0.2-alpha.4/vanilla/index.js';
       console.log("LIT_CHAINS:", LIT_CHAINS);
     </script>
   </head>
