@@ -1,5 +1,9 @@
 {
   "name": "@llitprotocol-dev/constants",
   "version": "0.0.1",
-  "devDependencies": {}
+  "devDependencies": {},
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/constants"
+  }
 }

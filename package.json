@@ -5,7 +5,8 @@
   "scripts": {
     "reset": "sh ./tools/scripts/reset.sh",
     "build:packages": "nx run-many --target=buildPackage",
-    "test:packages": "nx run-many --target=testPackage"
+    "test:packages": "nx run-many --target=testPackage",
+    "publish:patch": "npx lerna publish --canary preminor"
   },
   "private": true,
   "dependencies": {
@@ -45,6 +46,7 @@
     "eslint-plugin-react": "7.30.1",
     "eslint-plugin-react-hooks": "4.6.0",
     "jest": "27.5.1",
+    "lerna": "^5.4.3",
     "nx": "14.5.8",
     "nx-plugin-devkit": "^1.3.1",
     "prettier": "^2.6.2",
@@ -53,5 +55,8 @@
     "ts-node": "10.9.1",
     "typedoc": "^0.23.10",
     "typescript": "~4.7.2"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }
