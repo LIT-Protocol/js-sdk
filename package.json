@@ -6,7 +6,10 @@
     "reset": "sh ./tools/scripts/reset.sh",
     "build:packages": "nx run-many --target=buildPackage",
     "test:packages": "nx run-many --target=testPackage",
-    "publish:packages:dev": "npx lerna publish --canary --preid dev"
+    "publish:packages:dev": "npx lerna publish --canary --preid dev",
+    "gitAdd": "git add *",
+    "gitCommit": "git commit -m 'test: publish'",
+    "gitPush": "git push"
   },
   "private": true,
   "dependencies": {

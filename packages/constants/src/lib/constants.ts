@@ -1,4 +1,7 @@
 /**
+ * Test 1
+ */
+/**
  * Lit Protocol Network Public Key
  */
 export const NETWORK_PUB_KEY : string =
