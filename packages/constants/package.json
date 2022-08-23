@@ -4,6 +4,7 @@
   "gitHead": "21af20e145a70dc2fa0ed7091079b1f3ff3f8958",
   "license": "MIT",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "dist/packages/constants"
   }
 }
