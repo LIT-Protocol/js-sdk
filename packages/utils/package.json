@@ -1,6 +1,6 @@
 {
   "name": "@litprotocol-dev/utils",
-  "version": "0.0.2-dev.18+756a02d",
+  "version": "0.0.1",
   "type": "commonjs",
   "dependencies": {
     "uint8arrays": "^3.1.0"
