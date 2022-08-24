@@ -30,6 +30,16 @@
         "tsConfig": "packages/utils/tsconfig.lib.json"
       }
     },
+    "_buildWeb": {
+      "executor": "@wanews/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_Utils",
+        "outfile":"dist/packages/utils/bundled/utils.js",
+        "entryPoints": ["./packages/utils/src/index.ts"],
+        "bundle": true,
+        "define": { "global": "window" }
+      }
+    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],

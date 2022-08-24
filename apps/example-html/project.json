@@ -28,6 +28,11 @@
             "glob": "**/*",
             "input": "dist/packages/utils/vanilla",
             "output": "./utils/vanilla"
+          },
+          {
+            "glob": "**/*",
+            "input": "dist/packages/utils/bundled",
+            "output": "./utils/bundled"
           }
         ],
         "styles": ["apps/example-html/src/styles.css"],

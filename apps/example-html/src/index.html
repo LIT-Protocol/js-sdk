@@ -12,42 +12,38 @@
   <style> body{padding: 12px;} #js-content{ display: grid; gap: 12px; } </style>
   
   <body>
-    <script type="module">
-      
-      import * as constantModulesFromCDN from 'https://cdn.jsdelivr.net/npm/@litprotocol-dev/constants@0.0.10/vanilla/index.js';
-      import * as constantModulesLocal from './constants/vanilla/index.js';
-      import * as utilsModulesFromLocal from './utils/vanilla/index.js'
 
-      const tests = [
-        {
-          id: 'constantModulesFromCDN',
-          module: constantModulesFromCDN,
-        },
-        {
-          id: 'constantModulesLocal',
-          module: constantModulesLocal,
-        },
-        {
-          id: 'utilsModulesFromLocal',
-          module: utilsModulesFromLocal,
-        },
-      ]
+    <script src="./utils/bundled/utils.js"></script>
 
-      // -- setting up buttons
-      tests.forEach((test) => {
+    <script>
+
+      window.addEventListener('load', () => {
         
-        const btnElement = document.createElement('button');
-        btnElement.setAttribute('id', test.id);
-        btnElement.innerText = 'print ' + test.id;
-
-        // -- add onClick listener
-        btnElement.addEventListener('click', () => {
-          console.log(`${test.id}:`, test.module);
+        const tests = [
+          {
+            id: 'utilsModulesBundled',
+            module: LitJsSdk_Utils,
+          }
+        ]
+  
+        // -- setting up buttons
+        tests.forEach((test) => {
+          
+          const btnElement = document.createElement('button');
+          btnElement.setAttribute('id', test.id);
+          btnElement.innerText = 'print ' + test.id;
+  
+          // -- add onClick listener
+          btnElement.addEventListener('click', () => {
+            console.log(`${test.id}:`, test.module);
+          })
+  
+          document.getElementById('js-content').append(btnElement)
+  
         })
 
-        document.getElementById('js-content').append(btnElement)
-
       })
+
 
     </script>
 
