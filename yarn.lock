@@ -2083,13 +2083,13 @@
     "npmlog" "^6.0.2"
     "write-file-atomic" "^4.0.1"
 
-"@litprotocol-dev/constants@*", "@litprotocol-dev/constants@file:/Users/anson/Projects/lit-js-sdk-v2/packages/constants":
+"@litprotocol-dev/constants@file:/Users/anson/Projects/lit-js-sdk-v2/packages/constants":
   "resolved" "file:packages/constants"
-  "version" "0.0.21"
+  "version" "0.0.24"
 
 "@litprotocol-dev/utils@file:/Users/anson/Projects/lit-js-sdk-v2/packages/utils":
   "resolved" "file:packages/utils"
-  "version" "0.0.21"
+  "version" "0.0.24"
   dependencies:
     "uint8arrays" "^3.1.0"
 

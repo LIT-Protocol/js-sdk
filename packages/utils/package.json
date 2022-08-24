@@ -2,7 +2,8 @@
   "name": "@litprotocol-dev/utils",
   "version": "0.0.24",
   "dependencies": {
-    "uint8arrays": "^3.1.0"
+    "uint8arrays": "^3.1.0",
+    "@litprotocol-dev/constants": "*"
   },
   "publishConfig": {
     "access": "public",
