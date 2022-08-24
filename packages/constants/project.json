@@ -36,6 +36,23 @@
         ]
       }
     },
+    "_buildNode": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "bundle": false,
+        "globalName": "LitJsSdk_Constants",
+        "platform": "node",
+        "outfile":"dist/packages/constants/node/constants.js",
+        "entryPoints": ["./packages/constants/src/index.ts"],
+        "define": { "global": "window" },
+        "plugins":[
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
     "generateDoc":{
       "executor": "nx:run-commands",
         "options": {
