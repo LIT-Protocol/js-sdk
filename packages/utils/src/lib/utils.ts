@@ -1,5 +1,5 @@
 import * as constantsModule from '@litprotocol-dev/constants/dist';
-import * as constantsModuleVanilla from '@litprotocol-dev/constants/vanilla';
+// import * as constantsModuleVanilla from '@litprotocol-dev/constants/vanilla';
 
 /**
  * Test 8

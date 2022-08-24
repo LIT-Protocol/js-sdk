@@ -19,7 +19,8 @@
       "@litprotocol-dev/constants/dist": ["dist/packages/constants/src"],
       "@litprotocol-dev/constants/vanilla": ["dist/packages/constants/vanilla"],
       "@litprotocol-dev/utils": ["packages/utils/src/index.ts"],
-      "LibraryName": ["packages/library-name/src/index.ts"]
+      "@litprotocol-dev/utils/dist": ["dist/packages/utils/src"],
+      "@litprotocol-dev/utils/vanilla": ["dist/packages/utils/vanilla"]
     }
   },
   "exclude": ["node_modules", "tmp"]
