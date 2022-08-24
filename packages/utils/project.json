@@ -21,7 +21,8 @@
         "main": "packages/utils/src/index.ts",
         "tsConfig": "packages/utils/tsconfig.lib.json",
         "assets": ["packages/utils/*.md"]
-      }
+      },
+      "updateBuildableProjectDepsInPackageJson": true
     },
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",

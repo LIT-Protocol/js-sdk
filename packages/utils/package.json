@@ -1,11 +1,8 @@
 {
   "name": "@litprotocol-dev/utils",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "dependencies": {
     "uint8arrays": "^3.1.0"
-  },
-  "peerDependencies": {
-    "@litprotocol-dev/constants": "^latest"
   },
   "publishConfig": {
     "access": "public",
