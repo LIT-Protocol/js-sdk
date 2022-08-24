@@ -28,7 +28,7 @@
 37 error npm ERR! See /Users/anson/.npm/eresolve-report.txt for a full report.
 37 error
 37 error npm ERR! A complete log of this run can be found in:
-37 error npm ERR!     /Users/anson/.npm/_logs/2022-08-24T22_26_56_540Z-debug-0.log
+37 error npm ERR!     /Users/anson/.npm/_logs/2022-08-24T22_27_37_176Z-debug-0.log
 37 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
 37 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
 37 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
