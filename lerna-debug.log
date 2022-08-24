@@ -1,35 +1,36 @@
-38 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
-38 error npm ERR! code ERESOLVE
-38 error npm ERR! ERESOLVE could not resolve
-38 error npm ERR!
-38 error npm ERR! While resolving: nx-plugin-devkit@1.3.1
-38 error npm ERR! Found: esbuild@0.15.5
-38 error npm ERR! node_modules/esbuild
-38 error npm ERR!   dev esbuild@"^0.15.5" from the root project
-38 error npm ERR!   peer esbuild@">0.11.0" from @websaam/nx-esbuild@0.0.1
-38 error npm ERR!   node_modules/@websaam/nx-esbuild
-38 error npm ERR!     @websaam/nx-esbuild@"^0.0.1" from the root project
-38 error npm ERR!
-38 error npm ERR! Could not resolve dependency:
-38 error npm ERR! peer esbuild@"^0.14.0" from nx-plugin-devkit@1.3.1
-38 error npm ERR! node_modules/nx-plugin-devkit
-38 error npm ERR!   dev nx-plugin-devkit@"^1.3.1" from the root project
-38 error npm ERR!
-38 error npm ERR! Conflicting peer dependency: esbuild@0.14.54
-38 error npm ERR! node_modules/esbuild
-38 error npm ERR!   peer esbuild@"^0.14.0" from nx-plugin-devkit@1.3.1
-38 error npm ERR!   node_modules/nx-plugin-devkit
-38 error npm ERR!     dev nx-plugin-devkit@"^1.3.1" from the root project
-38 error npm ERR!
-38 error npm ERR! Fix the upstream dependency conflict, or retry
-38 error npm ERR! this command with --force, or --legacy-peer-deps
-38 error npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
-38 error npm ERR!
-38 error npm ERR! See /Users/anson/.npm/eresolve-report.txt for a full report.
-38 error
-38 error npm ERR! A complete log of this run can be found in:
-38 error npm ERR!     /Users/anson/.npm/_logs/2022-08-24T22_32_29_874Z-debug-0.log
-38 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
-38 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
-38 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
-38 error     at async Promise.all (index 0)
+36 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
+36 error npm ERR! code ERESOLVE
+36 error npm ERR! ERESOLVE could not resolve
+36 error npm ERR!
+36 error npm ERR! While resolving: @litprotocol-dev/utils@0.0.22
+36 error npm ERR! Found: @litprotocol-dev/constants@0.0.21
+36 error npm ERR! node_modules/@litprotocol-dev/constants
+36 error npm ERR!   workspace packages/constants from the root project
+36 error npm ERR!
+36 error npm ERR! Could not resolve dependency:
+36 error npm ERR! peer @litprotocol-dev/constants@"latest" from @litprotocol-dev/utils@0.0.22
+36 error npm ERR! packages/utils
+36 error npm ERR!   @litprotocol-dev/utils@0.0.21
+36 error npm ERR!   node_modules/@litprotocol-dev/utils
+36 error npm ERR!     workspace packages/utils from the root project
+36 error npm ERR!
+36 error npm ERR! Conflicting peer dependency: @litprotocol-dev/constants@0.0.20
+36 error npm ERR! node_modules/@litprotocol-dev/constants
+36 error npm ERR!   peer @litprotocol-dev/constants@"latest" from @litprotocol-dev/utils@0.0.22
+36 error npm ERR!   packages/utils
+36 error npm ERR!     @litprotocol-dev/utils@0.0.21
+36 error npm ERR!     node_modules/@litprotocol-dev/utils
+36 error npm ERR!       workspace packages/utils from the root project
+36 error npm ERR!
+36 error npm ERR! Fix the upstream dependency conflict, or retry
+36 error npm ERR! this command with --force, or --legacy-peer-deps
+36 error npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+36 error npm ERR!
+36 error npm ERR! See /Users/anson/.npm/eresolve-report.txt for a full report.
+36 error
+36 error npm ERR! A complete log of this run can be found in:
+36 error npm ERR!     /Users/anson/.npm/_logs/2022-08-24T22_42_59_949Z-debug-0.log
+36 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
+36 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
+36 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
+36 error     at async Promise.all (index 0)
