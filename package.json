@@ -8,7 +8,7 @@
     "workspace:reset:cache": "rm -rf ./node_modules/.cache",
     "build:packages": "nx run-many --target=build",
     "test:packages": "nx run-many --target=testPackage",
-    "publish:packages": "npx lerna publish --yes",
+    "publish:packages": "npx lerna publish",
     "gitAdd": "git add *",
     "gitCommit": "git commit -m 'test: publish'",
     "gitPush": "git push"
