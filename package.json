@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
-    "reset": "sh ./tools/scripts/reset.sh",
+    "workspace:reset:all": "sh ./tools/scripts/reset.sh",
+    "workspace:reset:cache": "rm -rf ./node_modules/.cache",
     "build:packages": "nx run-many --target=build",
     "test:packages": "nx run-many --target=testPackage",
     "publish:packages": "npx lerna publish --yes",
