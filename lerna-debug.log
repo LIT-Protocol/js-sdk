@@ -28,7 +28,7 @@
 38 error npm ERR! See /Users/anson/.npm/eresolve-report.txt for a full report.
 38 error
 38 error npm ERR! A complete log of this run can be found in:
-38 error npm ERR!     /Users/anson/.npm/_logs/2022-08-24T22_28_02_535Z-debug-0.log
+38 error npm ERR!     /Users/anson/.npm/_logs/2022-08-24T22_29_15_856Z-debug-0.log
 38 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
 38 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
 38 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)

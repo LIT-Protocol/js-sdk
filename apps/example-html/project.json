@@ -4,7 +4,7 @@
   "sourceRoot": "apps/example-html/src",
   "tags": [],
   "targets": {
-    "build": {
+    "buildApp": {
       "executor": "@nrwl/web:webpack",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",

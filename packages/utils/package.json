@@ -1,6 +1,6 @@
 {
   "name": "@litprotocol-dev/utils",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "dependencies": {
     "uint8arrays": "^3.1.0"
   },
