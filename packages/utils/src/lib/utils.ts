@@ -1,5 +1,5 @@
 import * as constantsModule from '@litprotocol-dev/constants/dist';
-// import * as constantsModuleVanilla from '@litprotocol-dev/constants/vanilla';
+import * as constantsModuleVanilla from '@litprotocol-dev/constants/vanilla';
 
 /**
  * Test 8
@@ -12,6 +12,11 @@ export const utils = () => {
 export const testImportedConstantModules = () => {
 
   console.log("[utils] import<constantsModule>:", constantsModule);
-  // console.log("[utils] import<constantsModuleVanilla>:", constantsModuleVanilla);
+  console.log("[utils] import<constantsModuleVanilla>:", constantsModuleVanilla);
+
+  return {
+    constantsModule,
+    constantsModuleVanilla,
+  }
 
 }
