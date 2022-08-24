@@ -1,35 +1,35 @@
-35 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
-35 error npm ERR! code ERESOLVE
-35 error npm ERR! ERESOLVE could not resolve
-35 error npm ERR!
-35 error npm ERR! While resolving: nx-plugin-devkit@1.3.1
-35 error npm ERR! Found: esbuild@0.15.5
-35 error npm ERR! node_modules/esbuild
-35 error npm ERR!   dev esbuild@"^0.15.5" from the root project
-35 error npm ERR!   peer esbuild@">0.11.0" from @websaam/nx-esbuild@0.0.1
-35 error npm ERR!   node_modules/@websaam/nx-esbuild
-35 error npm ERR!     @websaam/nx-esbuild@"^0.0.1" from the root project
-35 error npm ERR!
-35 error npm ERR! Could not resolve dependency:
-35 error npm ERR! peer esbuild@"^0.14.0" from nx-plugin-devkit@1.3.1
-35 error npm ERR! node_modules/nx-plugin-devkit
-35 error npm ERR!   dev nx-plugin-devkit@"^1.3.1" from the root project
-35 error npm ERR!
-35 error npm ERR! Conflicting peer dependency: esbuild@0.14.54
-35 error npm ERR! node_modules/esbuild
-35 error npm ERR!   peer esbuild@"^0.14.0" from nx-plugin-devkit@1.3.1
-35 error npm ERR!   node_modules/nx-plugin-devkit
-35 error npm ERR!     dev nx-plugin-devkit@"^1.3.1" from the root project
-35 error npm ERR!
-35 error npm ERR! Fix the upstream dependency conflict, or retry
-35 error npm ERR! this command with --force, or --legacy-peer-deps
-35 error npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
-35 error npm ERR!
-35 error npm ERR! See /Users/anson/.npm/eresolve-report.txt for a full report.
-35 error
-35 error npm ERR! A complete log of this run can be found in:
-35 error npm ERR!     /Users/anson/.npm/_logs/2022-08-24T22_26_20_533Z-debug-0.log
-35 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
-35 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
-35 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
-35 error     at async Promise.all (index 0)
+37 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
+37 error npm ERR! code ERESOLVE
+37 error npm ERR! ERESOLVE could not resolve
+37 error npm ERR!
+37 error npm ERR! While resolving: nx-plugin-devkit@1.3.1
+37 error npm ERR! Found: esbuild@0.15.5
+37 error npm ERR! node_modules/esbuild
+37 error npm ERR!   dev esbuild@"^0.15.5" from the root project
+37 error npm ERR!   peer esbuild@">0.11.0" from @websaam/nx-esbuild@0.0.1
+37 error npm ERR!   node_modules/@websaam/nx-esbuild
+37 error npm ERR!     @websaam/nx-esbuild@"^0.0.1" from the root project
+37 error npm ERR!
+37 error npm ERR! Could not resolve dependency:
+37 error npm ERR! peer esbuild@"^0.14.0" from nx-plugin-devkit@1.3.1
+37 error npm ERR! node_modules/nx-plugin-devkit
+37 error npm ERR!   dev nx-plugin-devkit@"^1.3.1" from the root project
+37 error npm ERR!
+37 error npm ERR! Conflicting peer dependency: esbuild@0.14.54
+37 error npm ERR! node_modules/esbuild
+37 error npm ERR!   peer esbuild@"^0.14.0" from nx-plugin-devkit@1.3.1
+37 error npm ERR!   node_modules/nx-plugin-devkit
+37 error npm ERR!     dev nx-plugin-devkit@"^1.3.1" from the root project
+37 error npm ERR!
+37 error npm ERR! Fix the upstream dependency conflict, or retry
+37 error npm ERR! this command with --force, or --legacy-peer-deps
+37 error npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+37 error npm ERR!
+37 error npm ERR! See /Users/anson/.npm/eresolve-report.txt for a full report.
+37 error
+37 error npm ERR! A complete log of this run can be found in:
+37 error npm ERR!     /Users/anson/.npm/_logs/2022-08-24T22_26_56_540Z-debug-0.log
+37 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
+37 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
+37 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
+37 error     at async Promise.all (index 0)
