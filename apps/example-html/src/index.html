@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ExampleHtml</title>
+    <base href="/" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  </head>
+
+  <style> body{padding: 12px;} #js-content{ display: grid; gap: 12px; } </style>
+  
+  <body>
+    <script type="module">
+      
+      import * as constantModulesFromCDN from 'https://cdn.jsdelivr.net/npm/@litprotocol-dev/constants@0.0.10/vanilla/index.js';
+      import * as constantModulesLocal from './constants/vanilla/index.js';
+
+      const tests = [
+        {
+          id: 'constantModulesFromCDN',
+          module: constantModulesFromCDN,
+        },
+        {
+          id: 'constantModulesLocal',
+          module: constantModulesLocal,
+        }
+      ]
+
+      // -- setting up buttons
+      tests.forEach((test) => {
+        
+        const btnElement = document.createElement('button');
+        btnElement.setAttribute('id', test.id);
+        btnElement.innerText = 'print ' + test.id;
+
+        // -- add onClick listener
+        btnElement.addEventListener('click', () => {
+          console.log(`${test.id}:`, test.module);
+        })
+
+        document.getElementById('js-content').append(btnElement)
+
+      })
+
+    </script>
+
+    <!-- ===== Testing Modules ===== -->
+    <div id="js-content"></div>
+
+  </body>
+</html>

@@ -1,4 +1,4 @@
-import * as constantsModule from '@litprotocol-dev/constants';
+import * as constantsModule from '@litprotocol-dev/constants/dist';
 import * as constantsModuleVanilla from '@litprotocol-dev/constants/vanilla';
 
 const Index = () => {

@@ -1,4 +1,5 @@
-import { LIT_CHAINS } from "@litprotocol-dev/constants";
+import * as constantsModule from '@litprotocol-dev/constants/dist';
+import * as constantsModuleVanilla from '@litprotocol-dev/constants/vanilla';
 
 /**
  * Test 8
@@ -8,8 +9,9 @@ export const utils = () => {
   return 'utils()';
 }
 
-export const testConstants = () => {
+export const testImportedConstantModules = () => {
 
-  console.log("LIT_CHAINS:", LIT_CHAINS);
+  console.log("[utils] import<constantsModule>:", constantsModule);
+  // console.log("[utils] import<constantsModuleVanilla>:", constantsModuleVanilla);
 
 }
