@@ -16,6 +16,7 @@
       
       import * as constantModulesFromCDN from 'https://cdn.jsdelivr.net/npm/@litprotocol-dev/constants@0.0.10/vanilla/index.js';
       import * as constantModulesLocal from './constants/vanilla/index.js';
+      import * as utilsModulesFromLocal from './utils/vanilla/index.js'
 
       const tests = [
         {
@@ -25,7 +26,11 @@
         {
           id: 'constantModulesLocal',
           module: constantModulesLocal,
-        }
+        },
+        {
+          id: 'utilsModulesFromLocal',
+          module: utilsModulesFromLocal,
+        },
       ]
 
       // -- setting up buttons

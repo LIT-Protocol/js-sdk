@@ -23,6 +23,11 @@
             "glob": "**/*",
             "input": "dist/packages/constants/vanilla",
             "output": "./constants/vanilla"
+          },
+          {
+            "glob": "**/*",
+            "input": "dist/packages/utils/vanilla",
+            "output": "./utils/vanilla"
           }
         ],
         "styles": ["apps/example-html/src/styles.css"],
