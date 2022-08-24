@@ -7,7 +7,7 @@
     "build":{
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn nx run constants:_buildTsc && yarn nx run constants:_buildVanilla"
+        "command": "yarn nx run constants:_buildTsc && yarn nx run constants:_buildWeb"
       }
     },
 
@@ -21,14 +21,19 @@
         "assets": ["packages/constants/*.md"]
       }
     },
-    "_buildVanilla": {
-      "executor":  "@nrwl/web:rollup",
-      "outputs": ["{options.outputPath}"],
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
       "options": {
-        "outputPath": "dist/packages/constants/vanilla",
-        "project":"packages/constants/package.json",
-        "entryFile": "packages/constants/src/index.ts",
-        "tsConfig": "packages/constants/tsconfig.lib.json"
+        "globalName": "LitJsSdk_Constants",
+        "outfile":"dist/packages/constants/web/constants.js",
+        "entryPoints": ["./packages/constants/src/index.ts"],
+        "define": { "global": "window" },
+        "plugins":[
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
       }
     },
     "generateDoc":{

@@ -13,17 +13,16 @@
   
   <body>
 
-    <script src="./utils/bundled/utils.js"></script>
+    <script src="./packages/constants/web/constants.js"></script>
+    <script src="./packages/utils/web/utils.js"></script>
 
     <script>
 
       window.addEventListener('load', () => {
         
         const tests = [
-          {
-            id: 'utilsModulesBundled',
-            module: LitJsSdk_Utils,
-          }
+          { id: 'LitJsSdk_Constants', module: LitJsSdk_Constants },
+          { id: 'LitJsSdk_Utils', module: LitJsSdk_Utils },
         ]
   
         // -- setting up buttons
@@ -38,7 +37,9 @@
             console.log(`${test.id}:`, test.module);
           })
   
-          document.getElementById('js-content').append(btnElement)
+          document.getElementById('js-content').append(btnElement);
+
+          window[test.id] = test.module;
   
         })
 
@@ -47,6 +48,7 @@
 
     </script>
 
+    <h1>Testing Web Modules</h1>
     <!-- ===== Testing Modules ===== -->
     <div id="js-content"></div>
 

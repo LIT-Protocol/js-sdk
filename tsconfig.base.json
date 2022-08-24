@@ -17,11 +17,11 @@
     "paths": {
       "@litprotocol-dev/constants": ["packages/constants/src/index.ts"],
       "@litprotocol-dev/constants/dist": ["dist/packages/constants/src"],
-      "@litprotocol-dev/constants/vanilla": ["dist/packages/constants/vanilla"],
+      "@litprotocol-dev/constants/web": ["dist/packages/constants/web"],
+      
       "@litprotocol-dev/utils": ["packages/utils/src/index.ts"],
       "@litprotocol-dev/utils/dist": ["dist/packages/utils/src"],
-      "@litprotocol-dev/utils/vanilla": ["dist/packages/utils/vanilla"],
-      "@litprotocol-dev/utils/bundled": ["dist/packages/utils/bundled"]
+      "@litprotocol-dev/utils/web": ["dist/packages/utils/web"]
     }
   },
   "exclude": ["node_modules", "tmp"]

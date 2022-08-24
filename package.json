@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "workspace:reset:all": "sh ./tools/scripts/reset.sh",
+    "workspace:reset:dist": "rm -rf ./dist",
     "workspace:reset:cache": "rm -rf ./node_modules/.cache",
     "build:packages": "nx run-many --target=build",
     "test:packages": "nx run-many --target=testPackage",
@@ -14,7 +15,7 @@
   },
   "private": true,
   "dependencies": {
-    "@wanews/nx-esbuild": "^0.24.1",
+    "@websaam/nx-esbuild": "^0.0.1",
     "core-js": "^3.6.5",
     "next": "12.2.3",
     "react": "18.2.0",

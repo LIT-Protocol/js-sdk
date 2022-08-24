@@ -1,68 +1,31 @@
-import * as constantsModuleDir from '@litprotocol-dev/constants';
+import * as constantsModuleLocal from '@litprotocol-dev/constants';
 import * as constantsModuleDist from '@litprotocol-dev/constants/dist';
-import * as constantsModuleVanilla from '@litprotocol-dev/constants/vanilla';
-import * as utilsDir from '@litprotocol-dev/utils';
-import * as utilsDist from '@litprotocol-dev/utils/dist';
-import * as utilsVanillia from '@litprotocol-dev/utils/vanilla';
+
+import * as utilsModuleLocal from '@litprotocol-dev/utils';
+import * as utilsModuleDist from '@litprotocol-dev/utils/dist';
 
 import { useEffect, useState } from 'react';
 
 // ========== Test Cases ==========
 const tests = [
-  {
-    id: 'constantsModuleDir',
-    module: constantsModuleDir
-  },
-  {
-    id: 'constantsModuleDist',
-    module: constantsModuleDist
-  },
-  {
-    id: 'constantsModuleVanilla',
-    module: constantsModuleVanilla
-  },
-  {
-    id: 'utilsDir',
-    module: utilsDir,
-    tests: [
-      {
-        id: 'utils',
-        module: utilsDir['utils'],
-      },
-      {
-        id: 'testImportedConstantModules',
-        module: utilsDir['testImportedConstantModules'],
-      },
-    ],
-  },
-  {
-    id: 'utilsDist',
-    module: utilsDist,
-    tests: [
-      {
-        id: 'utils',
-        module: utilsDist['utils'],
-      },
-      {
-        id: 'testImportedConstantModules',
-        module: utilsDist['testImportedConstantModules'],
-      },
-    ],
-  },
-  {
-    id: 'utilsVanillia',
-    module: utilsVanillia,
-    tests: [
-      {
-        id: 'utils',
-        module: utilsVanillia['utils'],
-      },
-      {
-        id: 'testImportedConstantModules',
-        module: utilsVanillia['testImportedConstantModules'],
-      },
-    ],
-  },
+  { id: 'constantsModuleLocal', module: constantsModuleLocal },
+  { id: 'constantsModuleDist', module: constantsModuleDist },
+  { id: 'utilsModuleLocal', module: utilsModuleLocal },
+  { id: 'utilsModuleDist', module: utilsModuleDist },
+  // {
+  //   id: 'utilsDist',
+  //   module: utilsDist,
+  //   tests: [
+  //     {
+  //       id: 'utils',
+  //       module: utilsDist['utils'],
+  //     },
+  //     {
+  //       id: 'testImportedConstantModules',
+  //       module: utilsDist['testImportedConstantModules'],
+  //     },
+  //   ],
+  // },
 ]
 
 const Index = () => {
@@ -71,6 +34,10 @@ const Index = () => {
 
   useEffect(() => {
     setLoaded(true);
+
+    // -- make it public
+    tests.forEach( test => window[test.id] = test.module );
+
   })
 
   const recursiveDir = (dir, isBase = false) => {
@@ -88,7 +55,7 @@ const Index = () => {
                 {
                   typeof test.module === 'function' ?
                   <button id={test.id} onClick={() => console.log(`[test:function] ${test.id}:`, test.module())}>run {test.id}()</button> : 
-                  <button id={test.id} onClick={() => console.log(`[test:module] ${test.id}:`, test.module)}>print {test.id}</button>
+                  <button id={test.id} onClick={() => console.log(`[test:module] ${test.id}:`, test.module)}>console.log({test.id})</button>
                 }
                 
                 { recursiveDir(test, false) }

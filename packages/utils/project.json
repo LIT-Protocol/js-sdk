@@ -7,8 +7,11 @@
     "build":{
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn nx run utils:_buildTsc && yarn nx run utils:_buildVanilla"
-      }
+        "command": "yarn nx run utils:_buildTsc && yarn nx run utils:_buildWeb"
+      },
+      "dependsOn": [
+        "_buildConstants"
+      ]
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
@@ -20,24 +23,25 @@
         "assets": ["packages/utils/*.md"]
       }
     },
-    "_buildVanilla": {
-      "executor":  "@nrwl/web:rollup",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/packages/utils/vanilla",
-        "project":"packages/utils/package.json",
-        "entryFile": "packages/utils/src/index.ts",
-        "tsConfig": "packages/utils/tsconfig.lib.json"
-      }
-    },
     "_buildWeb": {
-      "executor": "@wanews/nx-esbuild:package",
+      "executor": "@websaam/nx-esbuild:package",
       "options": {
         "globalName": "LitJsSdk_Utils",
-        "outfile":"dist/packages/utils/bundled/utils.js",
+        "outfile":"dist/packages/utils/web/utils.js",
         "entryPoints": ["./packages/utils/src/index.ts"],
-        "bundle": true,
-        "define": { "global": "window" }
+        "define": { "global": "window" },
+        "plugins":[
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "_buildConstants":{
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn nx run constants:build"
       }
     },
     "lint": {
@@ -56,5 +60,6 @@
       }
     }
   },
-  "tags": []
+  "tags": [],
+  "implicitDependencies": ["constants"]
 }
