@@ -43,7 +43,6 @@
     "@typescript-eslint/parser": "^5.29.0",
     "babel-jest": "27.5.1",
     "cypress": "^10.2.0",
-    "esbuild": "^0.15.5",
     "esbuild-node-builtins": "^0.1.0",
     "eslint": "~8.15.0",
     "eslint-config-next": "12.2.3",
