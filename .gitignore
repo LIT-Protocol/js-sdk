@@ -39,3 +39,6 @@ testem.log
 Thumbs.db
 
 .vscode
+
+# Next.js
+.next
