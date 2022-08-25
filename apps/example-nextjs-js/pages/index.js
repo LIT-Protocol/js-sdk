@@ -1,4 +1,4 @@
-import * as constantsModuleLocal from '@litprotocol-dev-constants';
+import * as constantsModuleLocal from '@litprotocol-dev/constants';
 import * as constantsModuleDist from '@litprotocol-dev/constants-dist';
 
 import * as utilsModuleLocal from '@litprotocol-dev/utils';
