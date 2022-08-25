@@ -17,9 +17,13 @@
     "paths": {
       "@litprotocol-dev/constants": ["packages/constants/src/index.ts"],
       "@litprotocol-dev/constants/dist": ["dist/packages/constants/src"],
-      "@litprotocol-dev/constants/node": ["dist/packages/constants/node"],
+      "@litprotocol-dev/constants/dist/node": ["dist/packages/constants/node/src/index.js"],
       "@litprotocol-dev/constants/web": ["dist/packages/constants/web"],
+
       "@litprotocol-dev/foo": ["packages/foo/src/index.ts"],
+      "@litprotocol-dev/foo-dist": ["dist/packages/foo/test"],
+      "@litprotocol-dev/foo-dist-node": ["dist/packages/foo/node"],
+
       "@litprotocol-dev/utils": ["packages/utils/src/index.ts"],
       "@litprotocol-dev/utils/dist": ["dist/packages/utils/src"],
       "@litprotocol-dev/utils/web": ["dist/packages/utils/web"]

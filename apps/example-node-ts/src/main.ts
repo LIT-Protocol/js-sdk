@@ -1,4 +1,5 @@
-import { foo } from "@litprotocol-dev/foo";
+const fooDist = require("@litprotocol-dev/foo-dist");
+// const fooDistNode = require("@litprotocol-dev/foo-dist-node");
 
-const test = foo();
-console.log("test:", test)
+console.log("fooDist:", fooDist);
+// console.log("fooDistNode:", fooDistNode);

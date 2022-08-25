@@ -7,11 +7,31 @@
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/foo",
+        "outputPath": "dist/packages/foo/test",
         "tsConfig": "packages/foo/tsconfig.lib.json",
         "packageJson": "packages/foo/package.json",
         "main": "packages/foo/src/index.ts",
         "assets": ["packages/foo/*.md"]
+      }
+    },
+    "_buildNode": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "bundle": true,
+        "globalName": "LitJsSdk_Foo",
+        "platform": "node",
+        "outdir": "dist/packages/foo/node",
+        "entryPoints": [
+          "./packages/foo/src/index.ts",
+          "./packages/foo/src/lib/foo.ts"
+        ],
+        "define": { "global": "window" },
+        "plugins":[
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
       }
     },
     "lint": {

@@ -37,20 +37,14 @@
       }
     },
     "_buildNode": {
-      "executor": "@websaam/nx-esbuild:package",
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "bundle": false,
-        "globalName": "LitJsSdk_Constants",
-        "platform": "node",
-        "outfile":"dist/packages/constants/node/constants.js",
-        "entryPoints": ["./packages/constants/src/index.ts"],
-        "define": { "global": "window" },
-        "plugins":[
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
+        "outputPath": "dist/packages/constants/node",
+        "main": "packages/constants/src/index.ts",
+        "tsConfig": "packages/constants/tsconfig.node.json",
+        "assets": ["packages/constants/*.md"],
+        "packageJson": "packages/constants/package.json"
       }
     },
     "generateDoc":{
