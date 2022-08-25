@@ -3,7 +3,7 @@
   "sourceRoot": "apps/example-node-ts/src",
   "projectType": "application",
   "targets": {
-    "build": {
+    "buildApp": {
       "executor": "@nrwl/node:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -29,11 +29,11 @@
     "serve": {
       "executor": "@nrwl/node:node",
       "options": {
-        "buildTarget": "example-node-ts:build"
+        "buildTarget": "example-node-ts:buildApp"
       },
       "configurations": {
         "production": {
-          "buildTarget": "example-node-ts:build:production"
+          "buildTarget": "example-node-ts:buildApp:production"
         }
       }
     },

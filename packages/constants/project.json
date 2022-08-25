@@ -36,17 +36,6 @@
         ]
       }
     },
-    "_buildNode": {
-      "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/packages/constants/node",
-        "main": "packages/constants/src/index.ts",
-        "tsConfig": "packages/constants/tsconfig.node.json",
-        "assets": ["packages/constants/*.md"],
-        "packageJson": "packages/constants/package.json"
-      }
-    },
     "generateDoc":{
       "executor": "nx:run-commands",
         "options": {

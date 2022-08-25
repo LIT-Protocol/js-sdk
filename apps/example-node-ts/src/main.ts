@@ -1,5 +1,5 @@
-const fooDist = require("@litprotocol-dev/foo-dist");
-// const fooDistNode = require("@litprotocol-dev/foo-dist-node");
+const constantsDist = require("@litprotocol-dev/constants-dist");
+const constantsWeb = require("@litprotocol-dev/constants-dist-web");
 
-console.log("fooDist:", fooDist);
-// console.log("fooDistNode:", fooDistNode);
+console.log("constantsDist:", constantsDist);
+console.log("constantsWeb:", constantsWeb);

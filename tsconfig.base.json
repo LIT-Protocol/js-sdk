@@ -16,17 +16,15 @@
     "baseUrl": ".",
     "paths": {
       "@litprotocol-dev/constants": ["packages/constants/src/index.ts"],
-      "@litprotocol-dev/constants/dist": ["dist/packages/constants/src"],
-      "@litprotocol-dev/constants/dist/node": ["dist/packages/constants/node/src/index.js"],
-      "@litprotocol-dev/constants/web": ["dist/packages/constants/web"],
+      "@litprotocol-dev/constants-dist": ["dist/packages/constants/src"],
+      "@litprotocol-dev/constants-dist-web": ["dist/packages/constants/web/constants.js"],
 
       "@litprotocol-dev/foo": ["packages/foo/src/index.ts"],
       "@litprotocol-dev/foo-dist": ["dist/packages/foo/test"],
-      "@litprotocol-dev/foo-dist-node": ["dist/packages/foo/node"],
 
       "@litprotocol-dev/utils": ["packages/utils/src/index.ts"],
-      "@litprotocol-dev/utils/dist": ["dist/packages/utils/src"],
-      "@litprotocol-dev/utils/web": ["dist/packages/utils/web"]
+      "@litprotocol-dev/utils-dist": ["dist/packages/utils/src"],
+      "@litprotocol-dev/utils-web": ["dist/packages/utils/web"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -48,11 +48,11 @@
     "serve": {
       "executor": "@nrwl/web:dev-server",
       "options": {
-        "buildTarget": "example-html:build"
+        "buildTarget": "example-html:buildApp"
       },
       "configurations": {
         "production": {
-          "buildTarget": "example-html:build:production"
+          "buildTarget": "example-html:buildApp:production"
         }
       }
     },

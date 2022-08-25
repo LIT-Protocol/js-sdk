@@ -1,8 +1,8 @@
-import * as constantsModuleLocal from '@litprotocol-dev/constants';
-import * as constantsModuleDist from '@litprotocol-dev/constants/dist';
+import * as constantsModuleLocal from '@litprotocol-dev-constants';
+import * as constantsModuleDist from '@litprotocol-dev/constants-dist';
 
 import * as utilsModuleLocal from '@litprotocol-dev/utils';
-import * as utilsModuleDist from '@litprotocol-dev/utils/dist';
+import * as utilsModuleDist from '@litprotocol-dev/utils-dist';
 
 import { useEffect, useState } from 'react';
 
