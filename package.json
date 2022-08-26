@@ -8,8 +8,8 @@
     "workspace:reset:cache": "rm -rf ./node_modules/.cache",
     "build:packages": "nx run-many --target=build",
     "test:packages": "nx run-many --target=testPackage",
-    "publish:packages:resetDependencies": "node ./tools/scripts/forceLatestDependencies.mjs @litprotocol-dev",
-    "publish:packages": "npx lerna publish --yes",
+    "publish:packages:forceDepVersion": "node ./tools/scripts/forceDepVersion.mjs --contains=@litprotocol-dev --workspace=lib --version=*",
+    "publish:packages": "npx lerna publish --yes && yarn publish:packages:forceDepVersion",
     "gitAdd": "git add *",
     "gitCommit": "git commit -m 'test: publish'",
     "gitPush": "git push"

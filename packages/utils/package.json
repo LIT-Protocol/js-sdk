@@ -2,12 +2,12 @@
   "name": "@litprotocol-dev/utils",
   "version": "0.0.31",
   "dependencies": {
-    "@litprotocol-dev/constants": "^0.0.31",
+    "@litprotocol-dev/constants": "*",
     "uint8arrays": "^3.1.0"
   },
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/utils"
   },
-  "gitHead": "13124e8f00fa02fa44d47ac35dff31fae225fa10"
+  "gitHead": "e7003203b6130913754992b18232023845d88b32"
 }
