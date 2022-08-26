@@ -1,8 +1,8 @@
 {
   "name": "@litprotocol-dev/utils",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "dependencies": {
-    "@litprotocol-dev/constants": "*",
+    "@litprotocol-dev/constants": "^0.0.31",
     "uint8arrays": "^3.1.0"
   },
   "publishConfig": {
