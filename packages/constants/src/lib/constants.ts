@@ -8,6 +8,8 @@ export const NETWORK_PUB_KEY : string =
 // or, you can pass a authSig that has and of these keys in it to tell which network your sig came from.
 export const LIT_AUTH_SIG_CHAIN_KEYS : Array<string> = ["ethereum", "solana", "cosmos", "kyve"];
 
+export const AUTH_SIGNATURE_BODY = "I am creating an account to use Lit Protocol at {{timestamp}}";
+
 /**
  * 
  * The default required properties of all chains

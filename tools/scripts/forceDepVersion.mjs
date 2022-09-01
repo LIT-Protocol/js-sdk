@@ -65,8 +65,3 @@ libs.forEach((lib, i) => {
     }
     console.log("");
 })
-
-// Object.keys(nodes).forEach((key, i) => {
-//     nodes[key]
-// })
-// console.log("libs:", libs);
