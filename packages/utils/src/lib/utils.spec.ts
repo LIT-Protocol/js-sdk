@@ -1,4 +1,4 @@
-import { LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
+import { ILitError, LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
 import * as utilsModule from './utils';
 
 describe('utils', () => {
@@ -167,12 +167,46 @@ describe('utils', () => {
       functionName: 'functionName4'
     })).toBe(true);
 
-    expect(utilsModule.checkType({
-      value: new Uint8Array([1, 2, 3]),
-      allowedTypes: ["Number"],
-      paramName: "paramName5",
-      functionName: 'functionName5'
-    })).toBe(false);
+  });
+
+  it('should check auth type', () => {
+
+    const authSig = {
+      sig: "",
+      derivedVia: "web3.eth.personal.sign",
+      signedMessage:
+        "I am creating an account to use Lit Protocol at 2022-04-12T09:23:31.290Z",
+      address: "0x7e7763BE1379Bb48AFEE4F5c232Fb67D7c03947F",
+    };
+
+    expect(utilsModule.checkIfAuthSigRequiresChainParam(
+      authSig,
+      'ethereum',
+      'fName'
+    )).toBe(true);
+
+    expect(utilsModule.checkIfAuthSigRequiresChainParam(
+      {
+        ethereum: "foo",
+      },
+      123,
+      'fName'
+    )).toBe(true);
+
+    let failCase;
+
+    try{
+      failCase = utilsModule.checkIfAuthSigRequiresChainParam(
+        {},
+        123,
+        'fName'
+      );
+    }catch(e){
+      failCase = e;
+    }
+
+    expect((failCase as ILitError).errorCode).toBe(LIT_ERROR_TYPE['INVALID_PARAM'].CODE);
+
 
   });
 

@@ -1,5 +1,5 @@
 import * as constantsModule from '@litprotocol-dev/constants'
-import { ILitError, LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
+import { ILitError, LIT_AUTH_SIG_CHAIN_KEYS, LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
 
 // ----- Testing Modules -----
 export const utils = () => {
@@ -182,5 +182,38 @@ export const log = (...args: any) : void => {
   }
 
   // -- else
+  return true;
+};
+
+
+export const checkIfAuthSigRequiresChainParam = (
+  authSig: any,
+  chain: any,
+  functionName: any,
+) => {
+
+  
+  console.log("checkIfAuthSigRequiresChainParam");
+  for (const key of LIT_AUTH_SIG_CHAIN_KEYS) {
+    if (key in authSig) {
+      console.log("Testing 1");
+      return true;
+    }
+  }
+
+  // if we're here, then we need the chain param
+  if (
+    !checkType({
+      value: chain,
+      allowedTypes: ["String"],
+      paramName: "chain",
+      functionName,
+    })
+  ){
+    console.log("Testing 2");
+    return false;
+  }
+
+  console.log("Testing 3");
   return true;
 };
