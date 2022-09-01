@@ -1,4 +1,4 @@
-import { ILitError, LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
+import { LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
 import * as utilsModule from './utils';
 
 describe('utils', () => {
@@ -113,16 +113,16 @@ describe('utils', () => {
 
   it('should get value type by a given value', () => {
 
-    let fooString: string = 'fooString';
-    let fooBool: boolean = true;
-    let fooNumber: number = 6;
-    let fooList: number[] = [1, 2, 3];
-    let fooArray: Array<string> = ['a', 'b', 'c']
-    let fooTuple: [string, number] = ["hello", 10];
-    let fooUint8Arr = new Uint8Array([1,2,3,4,5]);
-    let fooUint16Arr = new Uint16Array([1,2,3,4,5]);
-    let fooBlob = new Blob([fooUint8Arr as BlobPart], {});
-    let fooFile = new File([fooUint8Arr as BlobPart], '')
+    const fooString = 'fooString';
+    const fooBool = true;
+    const fooNumber = 6;
+    const fooList: number[] = [1, 2, 3];
+    const fooArray: Array<string> = ['a', 'b', 'c']
+    const fooTuple: [string, number] = ["hello", 10];
+    const fooUint8Arr = new Uint8Array([1,2,3,4,5]);
+    const fooUint16Arr = new Uint16Array([1,2,3,4,5]);
+    const fooBlob = new Blob([fooUint8Arr as BlobPart], {});
+    const fooFile = new File([fooUint8Arr as BlobPart], '')
 
     expect(utilsModule.getVarType(fooString)).toBe('String');
     expect(utilsModule.getVarType(fooBool)).toBe('Boolean');
@@ -154,7 +154,7 @@ describe('utils', () => {
     })).toBe(true);
 
     expect(utilsModule.checkType({
-      value: new Array(1, 2),
+      value: [1, 2],
       allowedTypes: ["Number", "Array"],
       paramName: "paramName3",
       functionName: 'functionName3'
@@ -189,23 +189,9 @@ describe('utils', () => {
       {
         ethereum: "foo",
       },
-      123,
+      '123',
       'fName'
     )).toBe(true);
-
-    let failCase;
-
-    try{
-      failCase = utilsModule.checkIfAuthSigRequiresChainParam(
-        {},
-        123,
-        'fName'
-      );
-    }catch(e){
-      failCase = e;
-    }
-
-    expect((failCase as ILitError).errorCode).toBe(LIT_ERROR_TYPE['INVALID_PARAM'].CODE);
 
 
   });

@@ -13,7 +13,7 @@ import { SupportedEncodings } from "uint8arrays/util/bases";
  * 
  * @param { Uint8Array } uint8array The Uint8Array to convert to a string
  * @param { SupportedEncodings } encoding The encoding to use when converting the Uint8Array to a string.
- * @returns { String } The string representation of the Uint8Array
+ * @returns { string } The string representation of the Uint8Array
  */
 export const uint8arrayToString = (uint8array: Uint8Array, encoding: SupportedEncodings) : string => {
 
@@ -28,7 +28,7 @@ export const uint8arrayToString = (uint8array: Uint8Array, encoding: SupportedEn
  * This is a re-export of https://www.npmjs.com/package/uint8arrays and you can 
  * find the list of supported encodings here https://github.com/multiformats/multibase/blob/master/multibase.csv
  * 
- * @param { String } str The string to convert to a Uint8Array
+ * @param { string } str The string to convert to a Uint8Array
  * @param { SupportedEncodings } encoding The encoding to use when converting the string to a Uint8Array.
  * @returns { Uint8Array } The Uint8Array representation of the data from the string
  */
@@ -43,9 +43,9 @@ export const uint8arrayFromString = (str: string, encoding: SupportedEncodings) 
  * Convert a Blob to a base64urlpad string.  Note: This function returns a promise.
  * 
  * @param { Blob | File } blob The Blob or File to turn into a base64 string
- * @returns { Promise<String> } A promise that resolves to the base64 string
+ * @returns { Promise<string> } A promise that resolves to the base64 string
  */
-export const blobToBase64String = async (blob: Blob | File) : Promise<String> => {
+export const blobToBase64String = async (blob: Blob | File) : Promise<string> => {
 
     const arrayBuffer = await blob.arrayBuffer();
 
@@ -60,7 +60,7 @@ export const blobToBase64String = async (blob: Blob | File) : Promise<String> =>
  * Convert a base64urlpad string to a Blob.  
  * Note: This function DOES NOT return a promise
  * 
- * @param { String } base64String The base64 string that to turn into a Blob
+ * @param { string } base64String The base64 string that to turn into a Blob
  * @returns { Blob }  A blob that contains the decoded base64 data
  */
 export const base64StringToBlob = (base64String: string) : Blob => {
@@ -75,11 +75,11 @@ export const base64StringToBlob = (base64String: string) : Blob => {
  * A data URL is a string representation of a file.
  * 
  * @param { File } file The file to turn into a data url
- * @returns { String } The data URL.  This is a string representation that can be used anywhere the original file would be used.
+ * @returns { string } The data URL.  This is a string representation that can be used anywhere the original file would be used.
  */
 export const fileToDataUrl = (file: File)  : Promise<string | ArrayBuffer | null> => {
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => {
             resolve(reader.result);
@@ -107,7 +107,7 @@ export const downloadFile = ({ fileName, data, mimeType } : {
     mimeType: string
 }) : void => {
 
-    var element = document.createElement("a");
+    const element = document.createElement("a");
 
     element.setAttribute(
         "href",

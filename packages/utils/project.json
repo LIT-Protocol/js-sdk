@@ -8,10 +8,7 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "yarn nx run utils:_buildTsc && yarn nx run utils:_buildWeb"
-      },
-      "dependsOn": [
-        "_buildConstants"
-      ]
+      }
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
@@ -21,7 +18,10 @@
         "main": "packages/utils/src/index.ts",
         "tsConfig": "packages/utils/tsconfig.lib.json",
         "assets": ["packages/utils/*.md"]
-      }
+      },
+      "dependsOn": [
+        "_buildConstants"
+      ]
     },
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",

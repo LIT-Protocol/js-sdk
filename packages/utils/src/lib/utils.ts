@@ -1,5 +1,6 @@
 import * as constantsModule from '@litprotocol-dev/constants'
-import { ILitError, LIT_AUTH_SIG_CHAIN_KEYS, LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
+import { LIT_AUTH_SIG_CHAIN_KEYS, LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
+import { ILitError } from '@litprotocol-dev/constants'
 
 // ----- Testing Modules -----
 export const utils = () => {
@@ -122,7 +123,7 @@ export const log = (...args: any) : void => {
  * or simply a `string` or `int` type
  *
  * @param { any } value
- * @returns { String } type
+ * @returns { string } type
  */
  export const getVarType = (value: any) : string => {
   return Object.prototype.toString.call(value).slice(8, -1);
@@ -152,7 +153,7 @@ export const log = (...args: any) : void => {
   throwOnError = true,
 }: {
   value: any,
-  allowedTypes: Array<String> | any,
+  allowedTypes: Array<string> | any,
   paramName: string,
   functionName : string,
   throwOnError?: boolean,
@@ -161,9 +162,7 @@ export const log = (...args: any) : void => {
   // -- validate
   if (!allowedTypes.includes(getVarType(value))) {
 
-    let message : string;
-
-    message = `Expecting ${allowedTypes.join(
+    const message = `Expecting ${allowedTypes.join(
       " or "
     )} type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
@@ -186,11 +185,20 @@ export const log = (...args: any) : void => {
 };
 
 
+
+/**
+ * 
+ * @param { object } authSig 
+ * @param { string } chain 
+ * @param { string } functionName 
+ * 
+ * @returns { boolean }
+ */
 export const checkIfAuthSigRequiresChainParam = (
-  authSig: any,
-  chain: any,
-  functionName: any,
-) => {
+  authSig: object,
+  chain: string,
+  functionName: string,
+) : boolean => {
 
   
   console.log("checkIfAuthSigRequiresChainParam");
