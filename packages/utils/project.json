@@ -20,7 +20,8 @@
         "assets": ["packages/utils/*.md"]
       },
       "dependsOn": [
-        "_buildConstants"
+        "_buildConstants",
+        "testPackage"
       ]
     },
     "_buildWeb": {

@@ -419,3 +419,18 @@ export const ALL_LIT_CHAINS : LITChain<LITEVMChain | LITSVMChain | LITCosmosChai
   ...LIT_SVM_CHAINS,
   ...LIT_COSMOS_CHAINS,
 };
+
+/**
+ * Local storage key constants
+ */
+export const LOCAL_STORAGE_KEYS = {
+  COSMOS_SIGNATURE : 'lit-auth-cosmos-signature',
+}
+
+/**
+ * Symmetric key algorithm parameters
+ */
+export const SYMM_KEY_ALGO_PARAMS = {
+  name: "AES-CBC",
+  length: 256,
+};

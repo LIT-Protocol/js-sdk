@@ -1,0 +1,7 @@
+{
+  "name": "@litprotocol-dev/core",
+  "version": "0.0.1",
+  "dependencies": {
+    "pako": "^2.0.4"
+  }
+}

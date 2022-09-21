@@ -19,7 +19,7 @@ const testCases = [
       {
         id: 'blobToBase64String',
         module: utilsModuleLocal['blobToBase64String'],
-        params: [ new Blob([1,2,3,4,5]) ]
+        // params: [ new Blob([1,2,3,4,5]) ]
       }
     ]
   },

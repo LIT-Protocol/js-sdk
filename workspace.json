@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "constants": "packages/constants",
+    "core": "packages/core",
     "example-html": "apps/example-html",
     "example-html-e2e": "apps/example-html-e2e",
     "example-nextjs-js": "apps/example-nextjs-js",
