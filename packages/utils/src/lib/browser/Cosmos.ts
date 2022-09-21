@@ -6,13 +6,14 @@ import {
 import { AUTH_SIGNATURE_BODY, LIT_COSMOS_CHAINS, LIT_ERROR_TYPE, LOCAL_STORAGE_KEYS } from '@litprotocol-dev/constants';
 import { log, sortedObject, throwError } from '../utils';
 
-
+/** ---------- Declaration ---------- */
 declare global {
     interface Window {
         keplr?: any
     }
 }
 
+/** ---------- Local Interfaces ---------- */
 interface CosmosProvider {
     provider: any,
     account: string,
@@ -45,6 +46,7 @@ interface CosmosSignDoc {
     memo: string,
 }
 
+/** ---------- Local Helpers ---------- */
 /**
  * 
  * Get the COSMOS provider from the browser web3 extension
@@ -70,7 +72,7 @@ const getProvider = () : any => {
     })
 }
 
-
+/** ---------- Exports ---------- */
 /**
  * 
  * Get cosmos provider details

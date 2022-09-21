@@ -1,15 +1,18 @@
 /** ---------- Common Interfaces ---------- */
 export interface ILitError{
     message?: string,
-    name: string,
-    errorCode: string,
+    name?: string,
+    errorCode?: string,
+    error?: ILitErrorTypeParams,
 }
 
 export interface ILitErrorType{
-    [key: string] : {
-        NAME: string,
-        CODE: string,
-    }
+    [key: string] : ILitErrorTypeParams
+}
+
+export interface ILitErrorTypeParams{
+    NAME: string,
+    CODE: string,
 }
 
 /** ---------- Access Control Conditions Interfaces ---------- */

@@ -54,6 +54,7 @@ export const mostCommonString = (arr: Array<any>) : any => {
 /**
  * 
  * Standardized way to throw error in Lit Protocol projects
+ * TODO: remove errorCode and use standardized ILitError type instead
  * 
  * @param { ILitError }
  * @property { string } message
@@ -63,7 +64,8 @@ export const mostCommonString = (arr: Array<any>) : any => {
 export const throwError = ({ 
   message, 
   name, 
-  errorCode
+  errorCode,
+  error,
 }: ILitError) : never => {
 
   const errConstructorFunc = function(
@@ -79,8 +81,8 @@ export const throwError = ({
 
   throw new (errConstructorFunc as any)(
     message, 
-    name, 
-    errorCode
+    name = error?.NAME ?? name,
+    errorCode = error?.CODE ?? errorCode,
   );
 };
 

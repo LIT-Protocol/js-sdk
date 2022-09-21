@@ -1,8 +1,9 @@
 import { ABIParams, AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsOperatorParams, AccsRegularParams, AccsSOLV2Params, ILitError, ILitErrorType, LIT_ERROR_TYPE } from "@litprotocol-dev/constants";
 import { log, throwError } from "../utils";
 
-/** ---------- Local Functions ---------- */
+// TODO: Update error type on formatters
 
+/** ---------- Local Functions ---------- */
 /**
  * 
  * Canonical ABI Params
@@ -10,7 +11,7 @@ import { log, throwError } from "../utils";
  * @param { Array<ABIParams> } params 
  * @returns { Array<ABIParams> }
  */
- const canonicalAbiParamss = (params: Array<ABIParams>) : Array<ABIParams> => {
+const canonicalAbiParamss = (params: Array<ABIParams>) : Array<ABIParams> => {
     return params.map((param) => ({
         name: param.name,
         type: param.type,
@@ -61,6 +62,21 @@ export const hashUnifiedAccessControlConditions = (
 
 }
 
+/**
+ * 
+ * Get operator param
+ * 
+ * @param { object | [] } cond 
+ * @returns { AccsOperatorParams }
+ */
+const getOperatorParam = (cond: object | []) : AccsOperatorParams => {
+
+    const _cond = cond as AccsOperatorParams;
+
+    return {
+        operator: _cond.operator,
+    };
+}
 
 /**
  * 
@@ -71,9 +87,6 @@ export const hashUnifiedAccessControlConditions = (
  */
 export const canonicalUnifiedAccessControlConditionFormatter = (cond: object | []) : any[] | AccsOperatorParams | any =>  {
 
-    // -- set error
-    const _error = LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS'];
-
     // -- if it's an array
     if (Array.isArray(cond)) {
         return cond.map((c: object) => canonicalUnifiedAccessControlConditionFormatter(c));
@@ -81,12 +94,7 @@ export const canonicalUnifiedAccessControlConditionFormatter = (cond: object | [
     
     // -- if there's a `operator` key in the object
     if ("operator" in cond) {
-
-        const _cond = cond as AccsOperatorParams;
-
-        return {
-            operator: _cond.operator,
-        };
+        return getOperatorParam(cond);
     }
     
     // -- otherwise 
@@ -103,21 +111,18 @@ export const canonicalUnifiedAccessControlConditionFormatter = (cond: object | [
         } else if (_cond.conditionType === "cosmos") {
             return canonicalCosmosConditionFormatter(cond);
         } else {
-
             throwError({
                 message: `You passed an invalid access control condition that is missing or has a wrong "conditionType": ${JSON.stringify(
                     cond
                 )}`,
-                name: _error.NAME,
-                errorCode: _error.CODE,
+                error: LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS']
             });
         }
     }
   
     throwError({
       message: `You passed an invalid access control condition: ${cond}`,
-      name: _error.NAME,
-      errorCode: _error.CODE,
+      error: LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS']
     });
   }
 
@@ -154,27 +159,18 @@ export const canonicalUnifiedAccessControlConditionFormatter = (cond: object | [
  * @returns { any[] | AccsOperatorParams | AccsRegularParams | AccsSOLV2Params | ILitError | any }
  */
 export const canonicalSolRpcConditionFormatter = (
-    cond: object,
+    cond: object | [],
     requireV2Conditions: boolean = false
 ) : any[] | AccsOperatorParams | AccsRegularParams | AccsSOLV2Params | ILitError | any => {
-
-
-    // -- set error
-    const _error = LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS'];
 
     // -- if is array
     if (Array.isArray(cond)) {
         return cond.map((c: object) => canonicalSolRpcConditionFormatter(c, requireV2Conditions));
     }
 
-    // -- if it operator
+    // -- if there's a `operator` key in the object
     if ("operator" in cond) {
-
-        const _cond = (cond as AccsOperatorParams);
-
-        return {
-            operator: _cond.operator,
-        };
+        return getOperatorParam(cond);
     }
 
     // -- if it has a return value
@@ -196,7 +192,6 @@ export const canonicalSolRpcConditionFormatter = (
 
             const _assumedV2Cond = (cond as AccsSOLV2Params);
             
-
             // -- SOL version 1:: return V2 must have params
             if (
                 !("pdaInterface" in _assumedV2Cond) ||
@@ -207,8 +202,7 @@ export const canonicalSolRpcConditionFormatter = (
 
                 throwError({
                     message: `Solana RPC Conditions have changed and there are some new fields you must include in your condition.  Check the docs here: https://developer.litprotocol.com/AccessControlConditions/solRpcConditions`,
-                    name: _error.NAME,
-                    errorCode: _error.CODE,
+                    error: LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS']
                 });
             }
 
@@ -251,8 +245,7 @@ export const canonicalSolRpcConditionFormatter = (
     // -- else
     throwError({
         message: `You passed an invalid access control condition: ${cond}`,
-        name: _error.NAME,
-        errorCode: _error.CODE,
+        error: LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS']
     });
 }
 
@@ -277,24 +270,16 @@ export const canonicalSolRpcConditionFormatter = (
  *  
  * @returns { any[] | AccsOperatorParams | AccsDefaultParams | any }
  */
-export const canonicalAccessControlConditionFormatter = (cond: object) : any[] | AccsOperatorParams | AccsDefaultParams | any => {
-
-    // -- set error
-    const _error = LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS'];
+export const canonicalAccessControlConditionFormatter = (cond: object | []) : any[] | AccsOperatorParams | AccsDefaultParams | any => {
     
     // -- if it's an array
     if (Array.isArray(cond)) {
         return cond.map((c) => canonicalAccessControlConditionFormatter(c));
     }
   
-    // -- if it operator
+    // -- if there's a `operator` key in the object
     if ("operator" in cond) {
-
-        const _cond = (cond as AccsOperatorParams);
-
-        return {
-            operator: _cond.operator,
-        };
+        return getOperatorParam(cond);
     }
 
     if ("returnValueTest" in cond) {
@@ -318,8 +303,7 @@ export const canonicalAccessControlConditionFormatter = (cond: object) : any[] |
   
     throwError({
         message: `You passed an invalid access control condition: ${cond}`,
-        name: _error.NAME,
-        errorCode: _error.CODE,
+        error: LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS']
     });
   }
 
@@ -344,10 +328,7 @@ export const canonicalAccessControlConditionFormatter = (cond: object) : any[] |
  *  
  * @returns 
  */
-export const canonicalEVMContractConditionFormatter = (cond:object) : any[] | AccsOperatorParams | AccsEVMParams | any => {
-
-    // -- set error
-    const _error = LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS'];
+export const canonicalEVMContractConditionFormatter = (cond:object | []) : any[] | AccsOperatorParams | AccsEVMParams | any => {
 
     // -- if it's an array
     if (Array.isArray(cond)) {
@@ -417,8 +398,7 @@ export const canonicalEVMContractConditionFormatter = (cond:object) : any[] | Ac
 
     throwError({
         message: `You passed an invalid access control condition: ${cond}`,
-        name: _error.NAME,
-        errorCode: _error.CODE,
+        error: LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS']
     });
 }
 
@@ -440,9 +420,7 @@ export const canonicalEVMContractConditionFormatter = (cond:object) : any[] | Ac
  * @returns 
  */
 export const canonicalCosmosConditionFormatter = (cond: object) : any[] | AccsOperatorParams | AccsCOSMOSParams | any => {
-  
-    // -- set error
-    const _error = LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS'];
+
 
     // -- if it's an array
     if (Array.isArray(cond)) {
@@ -472,15 +450,14 @@ export const canonicalCosmosConditionFormatter = (cond: object) : any[] | AccsOp
         };
 
         return {
-        path: _cosmosCond.path,
-        chain: _cosmosCond.chain,
-        returnValueTest: canonicalReturnValueTest,
+            path: _cosmosCond.path,
+            chain: _cosmosCond.chain,
+            returnValueTest: canonicalReturnValueTest,
         };
     }
   
     throwError({
       message: `You passed an invalid access control condition: ${cond}`,
-      name: _error.NAME,
-      errorCode: _error.CODE,
+      error: LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS'],
     });
   }

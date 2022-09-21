@@ -45,4 +45,9 @@ export const LIT_ERROR_TYPE : ILitErrorType = {
         NAME: 'NoWalletException',
         CODE: 'no_wallet_exception',
     },
+    WRONG_PARAM_FORMAT: {
+        NAME: 'WrongParamFormatException',
+        CODE: 'wrong_param_format_exception',
+    },
+    
 }
