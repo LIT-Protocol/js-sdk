@@ -1,2 +1,10 @@
-.page {
+.flex{
+    display: flex;
+}
+.currentResult {
+    width: 500px;
+    height: 300px;
+    padding: 12px;
+    border: 1px solid grey;
+    font-size: 10px;
 }

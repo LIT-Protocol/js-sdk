@@ -3,7 +3,8 @@ import { log, throwError } from "../utils";
 import { ABI_LIT, ABI_ERC20 } from "@litprotocol-dev/core";
 import { ethers } from "ethers";
 import WalletConnectProvider from "@walletconnect/ethereum-provider";
-import * as LitConnectModal from "lit-connect-modal";
+
+import LitConnectModal from "lit-connect-modal";
 
 import { Web3Provider } from "@ethersproject/providers";
 
@@ -11,9 +12,20 @@ import { Web3Provider } from "@ethersproject/providers";
 interface ConnectWeb3{
     chainId: number,
 }
-
 interface RPCUrls{
     [chainId: number]: string | String,
+}
+
+interface Web3ProviderOptions {
+    walletconnect: {
+        package: WalletConnectProvider | any,
+        options: {
+            infuraId?: string,
+            rpc: RPCUrls,
+            chainId: number,
+        }
+
+    }
 }
 
 /** ---------- Local Helpers ---------- */
@@ -67,13 +79,38 @@ export const chainHexIdToChainName = (chainHexId: string) : void | string => {
     })
 }
 
+/**
+ * 
+ * Get RPC Urls in the correct format
+ * need to make it look like this:
+   ---
+   rpc: {
+        1: "https://mainnet.mycustomnode.com",
+        3: "https://ropsten.mycustomnode.com",
+        100: "https://dai.poa.network",
+        // ...
+    },
+   ---
+ * 
+ * @returns
+ */
+export const getRPCUrls = () : RPCUrls => {
 
-// export function encodeCallData({ abi, functionName, functionParams }) {
-//     const iface = new ethers.utils.Interface(abi);
-//     const callData = iface.encodeFunctionData(functionName, functionParams);
-//     return callData;
-// }
+    let rpcUrls : RPCUrls = {};
+    
+    const keys : Array<string> = Object.keys(LIT_CHAINS);
 
+    for (let i = 0; i < keys.length; i++) {
+        const chainName = keys[i];
+        const chainId = LIT_CHAINS[chainName].chainId;
+        const rpcUrl = LIT_CHAINS[chainName].rpcUrls[0];
+        rpcUrls[chainId] = rpcUrl;
+    }
+
+    return rpcUrls;
+}
+
+/** ---------- Local Interfaces ---------- */
 interface IABI{
     inputs: any[],
     name: string,
@@ -98,6 +135,7 @@ interface IABIDecode{
     data: any
 }
 
+/** ---------- Exports ---------- */
 /**
  * 
  * (ABI) Encode call data
@@ -133,7 +171,8 @@ export const decodeCallResult = ({ abi, functionName, data }: IABIDecode) : { an
 }
 
 /**
- * 
+ * // #browser
+ * // TEST: connectWeb3()
  * Connect to web 3 
  * 
  * @param { ConnectWeb3 } 
@@ -141,51 +180,36 @@ export const decodeCallResult = ({ abi, functionName, data }: IABIDecode) : { an
  */
 export const connectWeb3 = async ({ chainId = 1 }: ConnectWeb3) => {
     
-    let rpcUrls : RPCUrls = {};
+    const rpcUrls : RPCUrls = getRPCUrls();
 
-    // need to make it look like this:
-    // rpc: {
-    //   1: "https://mainnet.mycustomnode.com",
-    //   3: "https://ropsten.mycustomnode.com",
-    //   100: "https://dai.poa.network",
-    //   // ...
-    // },
-  
-    for (let i = 0; i < Object.keys(LIT_CHAINS).length; i++) {
-      const chainName = Object.keys(LIT_CHAINS)[i];
-      const chainId = LIT_CHAINS[chainName].chainId;
-      const rpcUrl = LIT_CHAINS[chainName].rpcUrls[0];
-      rpcUrls[chainId] = rpcUrl;
-    }
-  
-    const providerOptions = {
-      walletconnect: {
-        package: WalletConnectProvider, // required
-        options: {
-          // infuraId: "cd614bfa5c2f4703b7ab0ec0547d9f81",
-          rpc: rpcUrls,
-          chainId,
+    const providerOptions : Web3ProviderOptions = {
+        walletconnect: {
+            package: WalletConnectProvider, // required
+            options: {
+                // infuraId: "cd614bfa5c2f4703b7ab0ec0547d9f81",
+                rpc: rpcUrls,
+                chainId,
+            },
         },
-      },
     };
-  
-    log("getting provider via lit connect modal");
-  
-    const dialog = new LitConnectModal({
-      providerOptions,
-    });
 
+    log("getting provider via lit connect modal");
+
+    const dialog = new LitConnectModal({
+        providerOptions,
+    });
+    
     const provider = await dialog.getWalletProvider();
-  
+
     log("got provider", provider);
     const web3 = new Web3Provider(provider);
-  
+
     // const provider = await detectEthereumProvider();
     // const web3 = new Web3Provider(provider);
-  
+
     // trigger metamask popup
     await provider.enable();
-  
+
     log("listing accounts");
     const accounts = await web3.listAccounts();
     // const accounts = await provider.request({
@@ -194,6 +218,6 @@ export const connectWeb3 = async ({ chainId = 1 }: ConnectWeb3) => {
     // });
     log("accounts", accounts);
     const account = accounts[0].toLowerCase();
-  
+
     return { web3, account };
-  }
+}

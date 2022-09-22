@@ -1,8 +1,6 @@
 import { ABIParams, AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsOperatorParams, AccsRegularParams, AccsSOLV2Params, ILitError, ILitErrorType, LIT_ERROR_TYPE } from "@litprotocol-dev/constants";
 import { log, throwError } from "../utils";
 
-// TODO: Update error type on formatters
-
 /** ---------- Local Functions ---------- */
 /**
  * 
@@ -38,7 +36,8 @@ const canonicalAbiParamss = (params: Array<ABIParams>) : Array<ABIParams> => {
 /** ---------- Exports ---------- */
 
 /**
- * 
+ * // #browser: TextEncoder() is browser only 
+ * // TEST: Add E2E Test
  * Hash the unified access control conditions using SHA-256 in a deterministic way.
  * 
  * @param { Array<object> } unifiedAccessControlConditions - The unified access control conditions to hash.
@@ -47,6 +46,8 @@ const canonicalAbiParamss = (params: Array<ABIParams>) : Array<ABIParams> => {
 export const hashUnifiedAccessControlConditions = (
     unifiedAccessControlConditions: Array<object>
 ) : Promise<ArrayBuffer> => {
+
+    console.log("unifiedAccessControlConditions:", unifiedAccessControlConditions);
 
     const conditions = unifiedAccessControlConditions.map((condition: object) => {
         canonicalUnifiedAccessControlConditionFormatter(condition);
@@ -101,22 +102,28 @@ export const canonicalUnifiedAccessControlConditionFormatter = (cond: object | [
     if ("returnValueTest" in cond) {
         
         const _cond = (cond as AccsRegularParams);
+        const _conditionType = _cond.conditionType;
 
-        if (_cond.conditionType === "solRpc") {
-            return canonicalSolRpcConditionFormatter(cond, true);
-        } else if (_cond.conditionType === "evmBasic") {
-            return canonicalAccessControlConditionFormatter(cond);
-        } else if (_cond.conditionType === "evmContract") {
-            return canonicalEVMContractConditionFormatter(cond);
-        } else if (_cond.conditionType === "cosmos") {
-            return canonicalCosmosConditionFormatter(cond);
-        } else {
-            throwError({
-                message: `You passed an invalid access control condition that is missing or has a wrong "conditionType": ${JSON.stringify(
-                    cond
-                )}`,
-                error: LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS']
-            });
+        switch(_conditionType){
+            case 'solRpc':
+                return canonicalSolRpcConditionFormatter(cond, true);
+
+            case 'evmBasic':
+                return canonicalAccessControlConditionFormatter(cond);
+
+            case 'evmContract':
+                return canonicalEVMContractConditionFormatter(cond);
+
+            case 'cosmos':
+                return canonicalCosmosConditionFormatter(cond);
+                
+            default:
+                throwError({
+                    message: `You passed an invalid access control condition that is missing or has a wrong "conditionType": ${JSON.stringify(
+                        cond
+                    )}`,
+                    error: LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS']
+                });
         }
     }
   
@@ -176,9 +183,7 @@ export const canonicalSolRpcConditionFormatter = (
     // -- if it has a return value
     if ("returnValueTest" in cond) {
 
-        const _cond = (cond as AccsRegularParams);
-
-        const { returnValueTest } = _cond;
+        const { returnValueTest } = (cond as AccsRegularParams);
 
         const canonicalReturnValueTest = {
             key: returnValueTest.key,
@@ -188,18 +193,17 @@ export const canonicalSolRpcConditionFormatter = (
 
         // -- check if this is a sol v1 or v2 condition
         // -- v1 conditions didn't have any pda params or pda interface or pda key
+        // -- SOL version 1:: return V2 must have params
         if ("pdaParams" in cond || requireV2Conditions) {
 
             const _assumedV2Cond = (cond as AccsSOLV2Params);
             
-            // -- SOL version 1:: return V2 must have params
             if (
                 !("pdaInterface" in _assumedV2Cond) ||
                 !("pdaKey" in _assumedV2Cond) ||
                 !("offset" in _assumedV2Cond.pdaInterface) ||
                 !("fields" in _assumedV2Cond.pdaInterface)
             ) {
-
                 throwError({
                     message: `Solana RPC Conditions have changed and there are some new fields you must include in your condition.  Check the docs here: https://developer.litprotocol.com/AccessControlConditions/solRpcConditions`,
                     error: LIT_ERROR_TYPE['INVALID_ACCESS_CONTROL_CONDITIONS']
@@ -214,7 +218,7 @@ export const canonicalSolRpcConditionFormatter = (
 
             const _solV2Cond = (cond as AccsSOLV2Params);
 
-            const _returnCond : AccsSOLV2Params = {
+            const _requiredParams : AccsSOLV2Params = {
                 method: _solV2Cond.method,
                 params: _solV2Cond.params,
                 pdaParams: _solV2Cond.pdaParams,
@@ -224,21 +228,21 @@ export const canonicalSolRpcConditionFormatter = (
                 returnValueTest: canonicalReturnValueTest,
             };
 
-            return _returnCond;
+            return _requiredParams;
 
         // -- SOL version 2:: return default params
         } else {
 
             const _solV1Cond = (cond as AccsRegularParams);
             
-            const _returnCond : AccsRegularParams = {
+            const _requiredParams : AccsRegularParams = {
                 method: _solV1Cond.method,
                 params: _solV1Cond.params,
                 chain: _solV1Cond.chain,
                 returnValueTest: canonicalReturnValueTest,
             };
             
-            return _returnCond
+            return _requiredParams
         }
     }
 

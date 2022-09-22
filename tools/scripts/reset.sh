@@ -14,4 +14,6 @@ rm -f ./packages/core/yarn.lock &&
 rm -rf ./doc &&
 rm -rf ./tmp &&
 rm -f ./yarn-error.log &&
-rm -f ./yarn.lock
+rm -f ./yarn.lock &&
+rm -f ./package-lock.json &&
+rm -f ./lerna-debug.log

@@ -5,7 +5,7 @@ import {
 import { SupportedEncodings } from "uint8arrays/util/bases";
 
 /** 
- * 
+ * // TEST: unit8arrayToString
  * (Helper)
  * Convert a Uint8Array to a string.  Supports various encodings.  
  * This is a re-export of https://www.npmjs.com/package/uint8arrays and you can 
@@ -22,7 +22,7 @@ export const uint8arrayToString = (uint8array: Uint8Array, encoding: SupportedEn
 }
 
 /** 
- * 
+ * // TEST: uint8arrayFromString
  * (Helper)
  * Convert a string to a Uint8Array.  Supports various encodings.  
  * This is a re-export of https://www.npmjs.com/package/uint8arrays and you can 
@@ -39,7 +39,7 @@ export const uint8arrayFromString = (str: string, encoding: SupportedEncodings) 
 }
 
 /** 
- * 
+ * // TEST: blobToBase64String
  * Convert a Blob to a base64urlpad string.  Note: This function returns a promise.
  * 
  * @param { Blob | File } blob The Blob or File to turn into a base64 string
@@ -56,7 +56,8 @@ export const blobToBase64String = async (blob: Blob | File) : Promise<string> =>
 }
 
 /** 
- * 
+ * // #browser: base64StringToBlob
+ * // TEST: base64StringToBlob
  * Convert a base64urlpad string to a Blob.  
  * Note: This function DOES NOT return a promise
  * 
@@ -70,7 +71,8 @@ export const base64StringToBlob = (base64String: string) : Blob => {
 }
 
 /**
- * 
+ * // #browser: fileToDataUrl
+ * // TEST: fileToDataUrl
  * Convert a file to a data URL, which could then be embedded in a LIT.  
  * A data URL is a string representation of a file.
  * 
@@ -90,7 +92,8 @@ export const fileToDataUrl = (file: File)  : Promise<string | ArrayBuffer | null
 }
 
 /**
- * 
+ * // #browser: downloadFile
+ * // TEST: downloadFile
  * Download a file in memory to the user's computer
  * 
  * @param { Object } params
@@ -125,7 +128,8 @@ export const downloadFile = ({ fileName, data, mimeType } : {
 }
 
 /**
- * 
+ * // #browser: injectViewerIFrame
+ * // TEST: injectViewerIFrame
  * Inject an iFrame into the current page that will display a LIT.  
  * This function safely sandboxes the content in the iFrame so that the LIT cannot see cookies or localStorage of the parent website.
  * 
