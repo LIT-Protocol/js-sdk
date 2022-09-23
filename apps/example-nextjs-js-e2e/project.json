@@ -10,7 +10,10 @@
         "devServerTarget": "example-nextjs-js:serve:development",
         "testingType": "e2e",
         "watch": true,
-        "browser": "chrome"
+        "browser": "chrome",
+        "env":{
+          "SKIP_METAMASK_SETUP": true
+        }
       },
       "configurations": {
         "production": {

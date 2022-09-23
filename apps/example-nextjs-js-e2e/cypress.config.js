@@ -10,7 +10,8 @@ export default defineConfig({
     ...nxE2EPreset(__dirname),
     setupNodeEvents(on, config) {
       // e2e testing node events setup code
-      require('cypress-metamask-v2/cypress/plugins')(on)
+      // require('cypress-metamask-v2/cypress/plugins')(on)
+      require('@websaam/synpress/plugins')(on)
     },
   }
 })

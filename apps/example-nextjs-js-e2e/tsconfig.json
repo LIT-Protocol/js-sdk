@@ -4,7 +4,13 @@
     "sourceMap": false,
     "outDir": "../../dist/out-tsc",
     "allowJs": true,
-    "types": ["cypress", "node"]
+    "types": [
+      "cypress", 
+      "node",
+      "@synthetixio/synpress/support",
+      "cypress-wait-until",
+      "@testing-library/cypress"
+    ]
   },
   "include": ["src/**/*.ts", "src/**/*.js", "cypress.config.js"]
 }
