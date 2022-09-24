@@ -1,4 +1,4 @@
-import { LIT_CHAINS, LIT_ERROR_TYPE } from "@litprotocol-dev/constants";
+import { LIT_CHAINS, LIT_ERROR_TYPE, LOCAL_STORAGE_KEYS } from "@litprotocol-dev/constants";
 import { log, throwError } from "../utils";
 import { ABI_LIT, ABI_ERC20 } from "@litprotocol-dev/core";
 import { ethers } from "ethers";
@@ -177,6 +177,7 @@ export const decodeCallResult = ({ abi, functionName, data }: IABIDecode) : { an
  * 
  * @param { ConnectWeb3 } 
  * 
+ * @return { Web3Provider, string } web3, account
  */
 export const connectWeb3 = async ({ chainId = 1 }: ConnectWeb3) => {
     
@@ -221,3 +222,22 @@ export const connectWeb3 = async ({ chainId = 1 }: ConnectWeb3) => {
 
     return { web3, account };
 }
+
+/**
+ * 
+ * Delete any saved AuthSigs from local storage. Takes no params and returns
+ * nothing. This will also clear out the WalletConnect cache in local storage. 
+ * We often run this function as a result of the user pressing a "Logout" button.
+ * 
+ * @return { void } 
+ */
+export const disconnectWeb3 = () : void => {
+
+    const storage = LOCAL_STORAGE_KEYS;
+
+    localStorage.removeItem(storage.WALLET_CONNECT);
+    localStorage.removeItem(storage.AUTH_SIGNATURE);
+    localStorage.removeItem(storage.AUTH_SOL_SIGNATURE);
+    localStorage.removeItem(storage.AUTH_COSMOS_SIGNATURE);
+    localStorage.removeItem(storage.WEB3_PROVIDER);
+  }

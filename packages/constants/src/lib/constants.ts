@@ -424,7 +424,12 @@ export const ALL_LIT_CHAINS : LITChain<LITEVMChain | LITSVMChain | LITCosmosChai
  * Local storage key constants
  */
 export const LOCAL_STORAGE_KEYS = {
-  COSMOS_SIGNATURE : 'lit-auth-cosmos-signature',
+  AUTH_COSMOS_SIGNATURE : 'lit-auth-cosmos-signature',
+  WALLET_CONNECT: 'walletconnect',
+  AUTH_SIGNATURE: 'lit-auth-signature',
+  AUTH_SOL_SIGNATURE: 'lit-auth-sol-signature',
+  WEB3_PROVIDER: 'lit-web3-provider',
+
 }
 
 /**

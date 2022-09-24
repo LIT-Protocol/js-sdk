@@ -119,7 +119,7 @@ export const checkAndSignCosmosAuthMessage = async ({ chain }: {
 
     const connectedCosmosProvider = await connectCosmosProvider({ chain });
 
-    const storageKey = LOCAL_STORAGE_KEYS.COSMOS_SIGNATURE;
+    const storageKey = LOCAL_STORAGE_KEYS.AUTH_COSMOS_SIGNATURE;
 
     let authSig : AuthSig | any = localStorage.getItem(storageKey);
 
@@ -205,7 +205,7 @@ export const signAndSaveAuthMessage = async (connectedCosmosProvider: CosmosProv
         address: account,
     };
 
-    localStorage.setItem(LOCAL_STORAGE_KEYS.COSMOS_SIGNATURE, JSON.stringify(authSig));
+    localStorage.setItem(LOCAL_STORAGE_KEYS.AUTH_COSMOS_SIGNATURE, JSON.stringify(authSig));
 
 }
 

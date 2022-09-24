@@ -9,6 +9,7 @@
     "example-nextjs-js": "apps/example-nextjs-js",
     "example-nextjs-js-e2e": "apps/example-nextjs-js-e2e",
     "example-node-ts": "apps/example-node-ts",
+    "testing": "apps/testing",
     "utils": "packages/utils"
   }
 }

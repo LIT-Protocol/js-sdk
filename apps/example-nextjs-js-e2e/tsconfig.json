@@ -4,6 +4,9 @@
     "sourceMap": false,
     "outDir": "../../dist/out-tsc",
     "allowJs": true,
+   
+    "module": "commonjs",
+   
     "types": [
       "cypress", 
       "node",
