@@ -8,12 +8,20 @@
       "options": {
         "cypressConfig": "apps/testing/cypress.config.ts",
         "devServerTarget": "example-nextjs-js:serve:development",
-        "testingType": "e2e"
+        "testingType": "e2e",
+        "watch": true,
+        "browser": "chrome"
       },
       "configurations": {
         "production": {
           "devServerTarget": "example-nextjs-js:serve:production"
         }
+      }
+    },
+    "testing":{
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "CYPRESS_REMOTE_DEBUGGING_PORT=9222 yarn cypress open"
       }
     }
   },

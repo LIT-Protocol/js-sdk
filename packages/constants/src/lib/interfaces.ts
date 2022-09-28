@@ -15,6 +15,50 @@ export interface ILitErrorTypeParams{
     CODE: string,
 }
 
+/**
+ * The only either possible error types
+ */
+ export const enum IEitherErrorType{
+    ERROR = 'ERROR',
+    SUCCESS = 'SUCCESS',
+}
+
+/**
+ * A standardized way to return either error or success
+ */
+export interface IEither{
+    type: 'ERROR' | 'SUCCESS',
+    result: any | ILitError
+}
+
+/**
+ * 
+ * This method should be used when there's an expected error
+ * 
+ * @param { any } result 
+ * @returns { IEither }
+ */
+export const ELeft = (result: any) : IEither => {
+    return {
+        type: IEitherErrorType.ERROR,
+        result: result,
+    }
+}
+
+/**
+ * 
+ * This method should be used when there's an expected success outcome
+ * 
+ * @param result 
+ * @returns 
+ */
+export const ERight = (result: any) : IEither => {
+    return {
+        type: IEitherErrorType.SUCCESS,
+        result: result,
+    }
+}
+
 /** ---------- Access Control Conditions Interfaces ---------- */
 /**
  * TODO: We should probably create a schema for these different types of params
@@ -73,4 +117,24 @@ export interface AccsEVMParams extends AccsRegularParams{
 
 export interface AccsCOSMOSParams extends AccsRegularParams{
     path: string,
+}
+
+/** ---------- Auth Sig ---------- */
+
+// TODO: This should ideally be generated from the rust side
+// pub struct JsonAuthSig {
+//     pub sig: String,
+//     pub derived_via: String,
+//     pub signed_message: String,
+//     pub address: String,
+//     pub capabilities: Option<Vec<JsonAuthSig>>,
+//     pub algo: Option<String>,
+// }
+export interface JsonAuthSig{
+    sig: string,
+    derivedVia: string,
+    signedMessage: string,
+    address: string,
+    capabilities?: [],
+    algo?: [],
 }

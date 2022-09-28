@@ -48,6 +48,11 @@ const testCases = [
         id: 'connectWeb3',
         module: utilsLocal.eth['connectWeb3'],
         params: [42220]
+      },
+      {
+        id: 'disconnectWeb3',
+        module: utilsLocal.eth.disconnectWeb3,
+        params: []
       }
     ]
   }

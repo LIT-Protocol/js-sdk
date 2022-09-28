@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.
@@ -42,8 +41,24 @@ Cypress.on('window:before:load', win => {
   });
 });
 
-before(async () => {
-  if (!Cypress.env('SKIP_METAMASK_SETUP')) {
-    await cy.setupMetamask();
-  }
-});
+// before(() => {
+//   if (!Cypress.env('SKIP_METAMASK_SETUP')) {
+//     cy.setupMetamask();
+//   }
+// });
+
+// before(async () => {
+//   if (!Cypress.env('SKIP_METAMASK_SETUP')) {
+//     await cy.setupMetamask();
+//   }
+// });
+// before(() => {
+//     window.ethereum.request({
+//         method: 'wallet_requestPermissions',
+//         params: [{ eth_accounts: {} }]
+//     });
+// })
+
+// console.log("cy:", cy);
+
+// cy.acceptMetamaskAccess().should("be.true");

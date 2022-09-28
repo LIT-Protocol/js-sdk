@@ -4,18 +4,18 @@ describe('example-nextjs-js', () => {
   before(() => {
     // cy.setupMetamask();
     // cy.changeMetamaskNetwork('localhost')
-    cy.visit('/')
+    // cy.visit('/')
   });
 
-  it(`NEXTJS setupMetamask should finish metamask setup using secret words`, () => {
-    cy.setupMetamask(
-      'shuffle stay hair student wagon senior problem drama parrot creek enact pluck',
-      'goerli',
-      'Tester@1234',
-    ).then(setupFinished => {
-      expect(setupFinished).to.be.true;
-    });
-  });
+  // it(`NEXTJS setupMetamask should finish metamask setup using secret words`, () => {
+  //   cy.setupMetamask(
+  //     'shuffle stay hair student wagon senior problem drama parrot creek enact pluck',
+  //     'goerli',
+  //     'Tester@1234',
+  //   ).then(setupFinished => {
+  //     expect(setupFinished).to.be.true;
+  //   });
+  // });
 
   // it('should test', async () => {
   //   // cy.get('#connectWeb3').click();

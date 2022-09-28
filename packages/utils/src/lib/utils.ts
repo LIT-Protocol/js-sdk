@@ -1,5 +1,5 @@
 import * as constantsModule from '@litprotocol-dev/constants'
-import { LIT_AUTH_SIG_CHAIN_KEYS, LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
+import { ELeft, ERight, IEither, LIT_AUTH_SIG_CHAIN_KEYS, LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
 import { ILitError } from '@litprotocol-dev/constants'
 
 // ----- Testing Modules -----
@@ -252,4 +252,37 @@ export const checkIfAuthSigRequiresChainParam = (
   });
 
   return result;
+}
+
+/**
+ * 
+ * Convert number to hex
+ * @param { number } v
+ * @return { string } hex value prexied with 0x
+ */
+export const numberToHex = (v: number) : string => {
+  return "0x" + v.toString(16);
+}
+
+
+/**
+ * 
+ * Get the local storage item by key
+ * 
+ * @param { string } key 
+ */
+export const getStorageItem = (key: string) : IEither => {
+
+  let keyOrError : IEither;
+
+  try{
+    keyOrError = ERight(localStorage.getItem(key));
+  }catch(e){
+
+    keyOrError = ELeft({
+        message: `Failed to get ${key} from local storage`,
+        error: LIT_ERROR_TYPE['LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION']
+    });
+  }
+  return keyOrError;
 }

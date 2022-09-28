@@ -1,4 +1,8 @@
 // @ts-nocheck
+
+import '@testing-library/cypress/add-commands';
+import 'cypress-wait-until';
+
 // ***********************************************
 // This example commands.js shows you how to
 // create various custom commands and overwrite
@@ -12,60 +16,14 @@
 declare namespace Cypress {
   interface Chainable<Subject> {
     login(email: string, password: string): void;
-    initPlaywright(): void;
-    assignWindows(): void;
-    assignActiveTabName(tabName: any): void;
-    isMetamaskWindowActive(): void;
-    isCypressWindowActive(): void;
-    switchToCypressWindow(): void;
-    switchToMetamaskWindow(): void;
-    switchToMetamaskNotification(): void;
-    addMetamaskNetwork(network: any): void;
-    changeMetamaskNetwork(network: any): void;
-    importMetamaskAccount(privateKey: any): void;
-    createMetamaskAccount(accountName: any): void;
-    switchMetamaskAccount(accountNameOrAccountNumber: any): void;
-    getMetamaskWalletAddress(): void;
-    activateCustomNonceInMetamask(): void;
-    resetMetamaskAccount(): void;
-    disconnectMetamaskWalletFromDapp(): void;
-    disconnectMetamaskWalletFromAllDapps(): void;
-    confirmMetamaskSignatureRequest(): void;
-    confirmMetamaskEncryptionPublicKeyRequest(): void;
-    rejectMetamaskEncryptionPublicKeyRequest(): void;
-    confirmMetamaskDecryptionRequest(): void;
-    rejectMetamaskDecryptionRequest(): void;
-    rejectMetamaskSignatureRequest(): void;
-    rejectMetamaskDataSignatureRequest(): void;
-    confirmMetamaskDataSignatureRequest(): void;
-    confirmMetamaskPermissionToSpend(): void;
-    rejectMetamaskPermissionToSpend(): void;
-    acceptMetamaskAccess(allAccounts: any): void;
-    confirmMetamaskTransaction(gasConfig: any): void;
-    rejectMetamaskTransaction(): void;
-    allowMetamaskToAddNetwork(waitForEvent: any): void;
-    rejectMetamaskToAddNetwork(): void;
-    allowMetamaskToSwitchNetwork(): void;
-    rejectMetamaskToSwitchNetwork(): void;
-    allowMetamaskToAddAndSwitchNetwork(): void;
-    unlockMetamask(): void;
-    fetchMetamaskWalletAddress(): void;
-    setupMetamask(secretWordsOrPrivateKey: any, network: any, password: any): void;
-    getNetwork(): void;
-    snxExchangerSettle(asset: any, walletAddress: any, privateKey: any): void;
-    snxCheckWaitingPeriod(asset, walletAddress): void;
-    etherscanGetTransactionStatus(txid: any): void;
-    etherscanWaitForTxSuccess(txid: any): void;
-    waitForResources(): void;
-    topIsWithinViewport(): void;
-    isWithinViewport(): void;
   }
 }
 //
 // -- This is a parent command --
-Cypress.Commands.add('login', (email, password) => {
-  console.log('Custom command example: Login', email, password);
-});
+// Cypress.Commands.add('login', (email, password) => {
+//   console.log('Custom command example: Login', email, password);
+// });
+
 //
 // -- This is a child command --
 // Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
@@ -198,6 +156,10 @@ Cypress.Commands.add('rejectMetamaskPermissionToSpend', () => {
 
 Cypress.Commands.add('acceptMetamaskAccess', allAccounts => {
   return cy.task('acceptMetamaskAccess', allAccounts);
+});
+
+Cypress.Commands.add('testing', () => {
+  return cy.task('testing');
 });
 
 Cypress.Commands.add('confirmMetamaskTransaction', gasConfig => {
