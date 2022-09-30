@@ -273,16 +273,19 @@ export const numberToHex = (v: number) : string => {
  */
 export const getStorageItem = (key: string) : IEither => {
 
+  const item = localStorage.getItem(key);
+
   let keyOrError : IEither;
 
-  try{
-    keyOrError = ERight(localStorage.getItem(key));
-  }catch(e){
-
+  if( ! item ){
     keyOrError = ELeft({
-        message: `Failed to get ${key} from local storage`,
-        error: LIT_ERROR_TYPE['LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION']
+      message: `Failed to get ${key} from local storage`,
+      error: LIT_ERROR_TYPE['LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION']
     });
+  }else{
+    keyOrError = ERight(item);
   }
+
   return keyOrError;
+  
 }

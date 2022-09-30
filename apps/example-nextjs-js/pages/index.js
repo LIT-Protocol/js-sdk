@@ -53,6 +53,16 @@ const testCases = [
         id: 'disconnectWeb3',
         module: utilsLocal.eth.disconnectWeb3,
         params: []
+      },
+      {
+        id: 'checkAndSignEVMAuthMessage',
+        module: utilsLocal.eth.checkAndSignEVMAuthMessage,
+        params: [{chain: 'ethereum', resources: [], switchChain: false}]
+      },
+      {
+        id: 'checkAndSignEVMAuthMessage-switchChain',
+        module: utilsLocal.eth.checkAndSignEVMAuthMessage,
+        params: [{chain: 'ethereum', resources: [], switchChain: true}]
       }
     ]
   }
@@ -77,7 +87,6 @@ const Index = () => {
     // -- highlight button
     [...document.querySelectorAll('button')].forEach(btn => {
 
-      
         btn.addEventListener('click', () => {
     
             [...document.querySelectorAll('button')].forEach(btn => {

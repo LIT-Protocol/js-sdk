@@ -429,7 +429,7 @@ export const LOCAL_STORAGE_KEYS = {
   AUTH_SIGNATURE: 'lit-auth-signature',
   AUTH_SOL_SIGNATURE: 'lit-auth-sol-signature',
   WEB3_PROVIDER: 'lit-web3-provider',
-
+  KEY_PAIR: 'lit-comms-keypair',
 }
 
 /**
