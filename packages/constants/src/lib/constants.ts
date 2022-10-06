@@ -28,9 +28,9 @@ export type LITChainRequiredProps = {
 
 /**
  * @typedef { Object } LITEVMChain
- * @property {string} contractAddress - The address of the token contract for the optional predeployed ERC1155 contract.  Only present on EVM chains.
- * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for EVM chains.
- * @property {string} name - The human readable name of the chain
+ * @property { string } contractAddress - The address of the token contract for the optional predeployed ERC1155 contract.  Only present on EVM chains.
+ * @property { string } chainId - The chain ID of the chain that this token contract is deployed on.  Used for EVM chains.
+ * @property { string } name - The human readable name of the chain
  */
 export type LITEVMChain = LITChainRequiredProps & {
   contractAddress: string | null,

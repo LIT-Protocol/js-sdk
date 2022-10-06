@@ -1,6 +1,5 @@
-import { ELeft, ERight, IEither, IEitherErrorType, ILitError, JsonAuthSig, LIT_CHAINS, LIT_ERROR_TYPE, LOCAL_STORAGE_KEYS } from "@litprotocol-dev/constants";
-import { log, throwError, numberToHex, getStorageItem } from "../utils";
-import { ABI_LIT, ABI_ERC20 } from "@litprotocol-dev/core";
+import { CheckAndSignAuthParams, ELeft, ERight, IEither, IEitherErrorType, JsonAuthSig, LIT_CHAINS, LIT_ERROR_TYPE, LOCAL_STORAGE_KEYS } from "@litprotocol-dev/constants";
+import { log, throwError, numberToHex, getStorageItem } from "../../utils";
 import { ethers } from "ethers";
 import WalletConnectProvider from "@walletconnect/ethereum-provider";
 import { toUtf8Bytes } from "@ethersproject/strings";
@@ -10,8 +9,7 @@ import LitConnectModal from "lit-connect-modal";
 
 import { 
     Web3Provider, 
-    JsonRpcSigner,
-    JsonRpcProvider
+    JsonRpcSigner
 } from "@ethersproject/providers";
 
 import { SiweMessage } from "lit-siwe";
@@ -43,12 +41,6 @@ interface Web3ProviderOptions {
             chainId: number,
         }
     }
-}
-
-interface CheckAndSignAuthParams {
-    chain: string,
-    resources: any[],
-    switchChain: boolean,
 }
 
 interface signAndSaveAuthParams {
@@ -361,7 +353,7 @@ export const checkAndSignEVMAuthMessage = async ({
     chain,
     resources,
     switchChain,
-}: CheckAndSignAuthParams) => {
+}: CheckAndSignAuthParams) : Promise<JsonAuthSig | void> => {
 
     // --- scoped methods ---
     const _throwIncorrectNetworkError = (error: any) => {

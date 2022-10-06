@@ -7,7 +7,7 @@ export interface ILitError{
 }
 
 export interface ILitErrorType{
-    [key: string] : ILitErrorTypeParams
+    [key: string ] : ILitErrorTypeParams
 }
 
 export interface ILitErrorTypeParams{
@@ -137,4 +137,24 @@ export interface JsonAuthSig{
     address: string,
     capabilities?: [],
     algo?: [],
+}
+
+export interface CheckAndSignAuthParams {
+    chain: string,
+    resources: any[],
+    switchChain: boolean,
+}
+
+/** ---------- Web3 ---------- */
+export interface IProvider{
+    provider: any,
+    account: string,
+}
+
+
+/** ---------- Crypto ---------- */
+export interface EncryptedString{
+    symmetricKey: Uint8Array,
+    encryptedString: Blob,
+    encryptedData?: Blob
 }

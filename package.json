@@ -39,7 +39,6 @@
     "etherscan-api": "^10.2.0",
     "find-config": "^1.0.0",
     "g": "^2.0.1",
-    "lit-siwe": "^1.1.8",
     "next": "12.2.3",
     "node-fetch": "^2.6.1",
     "react": "18.2.0",
@@ -48,9 +47,7 @@
     "serve": "^14.0.1",
     "start-server-and-test": "^1.14.0",
     "synthetix-js": "^2.74.1",
-    "tslib": "^2.3.0",
-    "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1"
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@nrwl/cypress": "14.5.10",

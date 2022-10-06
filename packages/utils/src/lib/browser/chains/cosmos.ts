@@ -3,8 +3,8 @@ import {
     toString as uint8arrayToString,
   } from "uint8arrays";
   
-import { AUTH_SIGNATURE_BODY, LIT_COSMOS_CHAINS, LIT_ERROR_TYPE, LOCAL_STORAGE_KEYS } from '@litprotocol-dev/constants';
-import { log, sortedObject, throwError } from '../utils';
+import { AUTH_SIGNATURE_BODY, JsonAuthSig, LIT_COSMOS_CHAINS, LIT_ERROR_TYPE, LOCAL_STORAGE_KEYS } from '@litprotocol-dev/constants';
+import { log, sortedObject, throwError } from '../../utils';
 
 /** ---------- Declaration ---------- */
 declare global {
@@ -115,7 +115,7 @@ export const connectCosmosProvider = async ({ chain } : {
  */
 export const checkAndSignCosmosAuthMessage = async ({ chain }: {
     chain: string,
-}) : Promise<AuthSig> => {
+}) : Promise<JsonAuthSig | void> => {
 
     const connectedCosmosProvider = await connectCosmosProvider({ chain });
 

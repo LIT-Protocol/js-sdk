@@ -63,6 +63,17 @@ const testCases = [
         id: 'checkAndSignEVMAuthMessage-switchChain',
         module: utilsLocal.eth.checkAndSignEVMAuthMessage,
         params: [{chain: 'ethereum', resources: [], switchChain: true}]
+      },
+    ]
+  },
+  {
+    id: 'utilsLocal.lit',
+    module: utilsLocal.lit,
+    tests:[
+      {
+        id: 'checkAndSignAuthMessage',
+        module: utilsLocal.lit.checkAndSignAuthMessage,
+        params: [{chain: 'ethereum', resources: [], switchChain: true}]
       }
     ]
   }
