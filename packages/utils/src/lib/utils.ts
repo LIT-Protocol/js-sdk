@@ -1,5 +1,5 @@
 import * as constantsModule from '@litprotocol-dev/constants'
-import { ELeft, ERight, IEither, LIT_AUTH_SIG_CHAIN_KEYS, LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
+import { ELeft, EncryptFileAndZipWithMetadataProps, ERight, IEither, LIT_AUTH_SIG_CHAIN_KEYS, LIT_ERROR_TYPE, paramsValidators } from '@litprotocol-dev/constants';
 import { ILitError } from '@litprotocol-dev/constants'
 
 // ----- Testing Modules -----
@@ -186,7 +186,24 @@ export const log = (...args: any) : void => {
   return true;
 };
 
+export const safeParams = ({
+  functionName,
+  params,
+}: {
+  functionName: string,
+  params: any[] | any,
+}) => {
 
+  const validator = paramsValidators[functionName](params);
+
+  if ( ! validator ){
+    log(`This function ${functionName} is skipping params safe guarding.`);
+    return true;
+  }
+
+  return validator;
+
+}
 
 /**
  * 
