@@ -79,8 +79,7 @@ describe('utils', () => {
     try{
       err = utilsModule.throwError({
         message: 'custom message',
-        name: LIT_ERROR_TYPE['INVALID_PARAM'].NAME,
-        errorCode: LIT_ERROR_TYPE['INVALID_PARAM'].CODE,
+        error: LIT_ERROR_TYPE.INVALID_PARAM
       })
     }catch(e){
       err = (e as Error);

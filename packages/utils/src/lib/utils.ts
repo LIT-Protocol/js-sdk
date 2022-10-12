@@ -93,7 +93,7 @@ declare global {
 export const throwRemovedFunctionError = (functionName: string) => {
   throwError({
     message: `This function "${functionName}" has been removed. Please use the old SDK.`,
-    error: LIT_ERROR_TYPE['REMOVED_FUNCTION_ERROR']
+    error: LIT_ERROR_TYPE.REMOVED_FUNCTION_ERROR
   });
 }
 
@@ -182,8 +182,7 @@ export const log = (...args: any) : void => {
     if (throwOnError) {
       throwError({
         message,
-        name: LIT_ERROR_TYPE['INVALID_PARAM'].NAME,
-        errorCode: LIT_ERROR_TYPE['INVALID_PARAM'].CODE,
+        error: LIT_ERROR_TYPE.INVALID_PARAM,
       });
     }
     return false;
@@ -304,7 +303,7 @@ export const getStorageItem = (key: string) : IEither => {
   if( ! item ){
     keyOrError = ELeft({
       message: `Failed to get ${key} from local storage`,
-      error: LIT_ERROR_TYPE['LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION']
+      error: LIT_ERROR_TYPE.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION
     });
   }else{
     keyOrError = ERight(item);

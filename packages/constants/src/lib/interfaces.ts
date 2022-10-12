@@ -1,3 +1,4 @@
+import { LIT_ERROR_TYPE } from "./errors";
 import { Accs, EVMAccs, SOLAccs, UnifiedAccs } from "./types"
 
 /** ---------- Common Interfaces ---------- */
@@ -8,9 +9,7 @@ export interface ILitError{
     error?: ILitErrorTypeParams,
 }
 
-export interface ILitErrorType{
-    [key: string ] : ILitErrorTypeParams
-}
+export type ILitErrorType = typeof LIT_ERROR_TYPE;
 
 export interface ILitErrorTypeParams{
     NAME: string,

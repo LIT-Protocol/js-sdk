@@ -1,6 +1,4 @@
-import { ILitErrorType } from "./interfaces";
-
-export const LIT_ERROR_TYPE : ILitErrorType = {
+export const LIT_ERROR_TYPE = {
     INVALID_PARAM : {
         NAME: 'invalidParamType',
         CODE: 'invalid_param_type',

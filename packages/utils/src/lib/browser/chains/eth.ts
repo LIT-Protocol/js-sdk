@@ -114,7 +114,7 @@ export const chainHexIdToChainName = (chainHexId: string) : void | string => {
 
         throwError({
             message: `${chainHexId} should begin with "0x"`,
-            error: LIT_ERROR_TYPE['WRONG_PARAM_FORMAT'],
+            error: LIT_ERROR_TYPE.WRONG_PARAM_FORMAT,
         })
 
     }
@@ -124,7 +124,7 @@ export const chainHexIdToChainName = (chainHexId: string) : void | string => {
 
         throwError({
             message: `${chainHexId} cannot be found in LIT_CHAINS`,
-            error: LIT_ERROR_TYPE['UNSUPPORTED_CHAIN_EXCEPTION'],
+            error: LIT_ERROR_TYPE.UNSUPPORTED_CHAIN_EXCEPTION,
         })
         
     }
@@ -140,7 +140,7 @@ export const chainHexIdToChainName = (chainHexId: string) : void | string => {
     // -- fail case
     throwError({
         message: `Failed to convert ${chainHexId}`,
-        error: LIT_ERROR_TYPE['UNKNOWN_ERROR'],
+        error: LIT_ERROR_TYPE.UNKNOWN_ERROR,
     })
 }
 
@@ -163,7 +163,7 @@ export const getChainId = async (chain: string, web3: Web3Provider) : Promise<IE
 
         resultOrError = ELeft({
             message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
-            error: LIT_ERROR_TYPE['WRONG_NETWORK_EXCEPTION']
+            error: LIT_ERROR_TYPE.WRONG_NETWORK_EXCEPTION,
         });
     }
 
@@ -363,7 +363,7 @@ export const checkAndSignEVMAuthMessage = async ({
         if (error.code === WALLET_ERROR.NO_SUCH_METHOD) {
             throwError({
                 message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
-                error: LIT_ERROR_TYPE['WRONG_NETWORK_EXCEPTION']
+                error: LIT_ERROR_TYPE.WRONG_NETWORK_EXCEPTION
             })
         } else {
             throw error;
@@ -389,7 +389,7 @@ export const checkAndSignEVMAuthMessage = async ({
         if( authSigOrError.type === 'ERROR'){
             throwError({
                 message: 'Failed to get authSig from local storage',
-                error: LIT_ERROR_TYPE['LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION']
+                error: LIT_ERROR_TYPE.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION
             });
         }
 
@@ -434,7 +434,7 @@ export const checkAndSignEVMAuthMessage = async ({
         if (web3.provider instanceof WalletConnectProvider) {
             throwError({
                 message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
-                error: LIT_ERROR_TYPE['WRONG_NETWORK_EXCEPTION']
+                error: LIT_ERROR_TYPE.WRONG_NETWORK_EXCEPTION
             });
             return;
         }

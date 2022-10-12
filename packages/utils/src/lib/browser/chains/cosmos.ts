@@ -63,7 +63,7 @@ const getProvider = () : any => {
     // -- finally
     const message = "No web3 wallet was found that works with Cosmos.  Install a Cosmos wallet or choose another chain";
 
-    const error = LIT_ERROR_TYPE['NO_WALLET_EXCEPTION'];
+    const error = LIT_ERROR_TYPE.NO_WALLET_EXCEPTION;
 
     throwError({
         message,

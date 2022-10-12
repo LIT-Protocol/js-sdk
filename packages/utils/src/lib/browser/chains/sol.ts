@@ -25,10 +25,11 @@ import {
         // -- finally
         const message = "No web3 wallet was found that works with Solana.  Install a Solana wallet or choose another chain";
     
-        const error = LIT_ERROR_TYPE['NO_WALLET_EXCEPTION'];
+        const error = LIT_ERROR_TYPE.NO_WALLET_EXCEPTION;
     
         resultOrError = ELeft({
             message,
+            error: LIT_ERROR_TYPE.NO_WALLET_EXCEPTION,
             name: error.NAME,
             errorCode: error.CODE,
         })
