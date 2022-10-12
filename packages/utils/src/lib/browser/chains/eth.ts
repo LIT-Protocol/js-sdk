@@ -6,10 +6,12 @@ import { toUtf8Bytes } from "@ethersproject/strings";
 import { hexlify } from "@ethersproject/bytes";
 import { verifyMessage } from "@ethersproject/wallet";
 import LitConnectModal from "lit-connect-modal";
+import { Contract } from "@ethersproject/contracts";
 
 import { 
     Web3Provider, 
-    JsonRpcSigner
+    JsonRpcSigner,
+    JsonRpcProvider
 } from "@ethersproject/providers";
 
 import { SiweMessage } from "lit-siwe";
@@ -17,6 +19,7 @@ import { getAddress } from "ethers/lib/utils";
 
 import naclUtil from "tweetnacl-util";
 import nacl from "tweetnacl";
+import { ABI_ERC20 } from "@litprotocol-dev/core";
 
 /** ---------- Local Interfaces ---------- */
 interface ConnectWeb3{
@@ -682,3 +685,28 @@ export const signMessageAsync = async (
         return await signer.signMessage(messageBytes);
     }
 };
+
+/**
+ * 
+ * Get the number of decimal places in a token
+ * 
+ * @property { string } contractAddress The token contract address
+ * @property { string } chain The chain on which the token is deployed
+ * 
+ * @returns { number } The number of decimal places in the token
+ */
+export const decimalPlaces = async ({ 
+    contractAddress, chain 
+}: {
+    contractAddress: string,
+    chain: string,
+}) : Promise<number> => {
+
+    const rpcUrl= (LIT_CHAINS[chain].rpcUrls[0] as string);
+
+    const web3 = new JsonRpcProvider(rpcUrl);
+
+    const contract = new Contract(contractAddress, (ABI_ERC20 as any).abi, web3);
+
+    return await contract['decimals']();
+  }

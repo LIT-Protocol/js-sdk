@@ -90,6 +90,13 @@ declare global {
   var litConfig: any;
 }
 
+export const throwRemovedFunctionError = (functionName: string) => {
+  throwError({
+    message: `This function "${functionName}" has been removed. Please use the old SDK.`,
+    error: LIT_ERROR_TYPE['REMOVED_FUNCTION_ERROR']
+  });
+}
+
 
 
 /**
@@ -306,4 +313,3 @@ export const getStorageItem = (key: string) : IEither => {
   return keyOrError;
   
 }
-

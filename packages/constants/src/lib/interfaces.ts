@@ -1,3 +1,5 @@
+import { Accs, EVMAccs, SOLAccs, UnifiedAccs } from "./types"
+
 /** ---------- Common Interfaces ---------- */
 export interface ILitError{
     message?: string,
@@ -185,7 +187,7 @@ export interface EncryptFileAndZipWithMetadataProps{
     solRpcConditions: Array<AccsSOLV2Params>,
 
     // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-    unifiedAccessControlConditions:Array<AccsRegularParams | AccsDefaultParams | AccsSOLV2Params | AccsEVMParams | AccsCOSMOSParams>,
+    unifiedAccessControlConditions: Array<AccsRegularParams | AccsDefaultParams | AccsSOLV2Params | AccsEVMParams | AccsCOSMOSParams>,
 
     // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
     chain: string,
@@ -235,4 +237,40 @@ export interface DecryptZipFileWithMetadata{
 export interface EncryptedFile{
     encryptedFile: Blob,
     symmetricKey: CryptoKey | Uint8Array,
+}
+
+export interface DecryptFileProps{
+    file: Blob | File,
+    symmetricKey: Uint8Array
+}
+
+
+export interface VerifyJWTProps{
+
+    // A JWT signed by the LIT network using the BLS12-381 algorithm
+    jwt: string
+}
+
+export interface IJWT{
+    verified: boolean,
+    header: object,
+    payload: object,
+    signature: Uint8Array
+}
+
+export interface HumanizedAccsProps{
+
+    // The array of access control conditions that you want to humanize
+    accessControlConditions: Array<AccsRegularParams | AccsDefaultParams>;
+
+    // The array of evm contract conditions that you want to humanize
+    evmContractConditions: Array<AccsEVMParams>,
+
+    // The array of Solana RPC conditions that you want to humanize
+    solRpcConditions: Array<AccsSOLV2Params>,
+
+    // The array of unified access control conditions that you want to humanize
+    unifiedAccessControlConditions: Array< AccsRegularParams |  AccsDefaultParams |  AccsSOLV2Params |  AccsEVMParams |  AccsCOSMOSParams>;
+    tokenList: Array<any | string>,
+    myWalletAddress: string,
 }

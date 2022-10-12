@@ -52,5 +52,9 @@ export const LIT_ERROR_TYPE : ILitErrorType = {
     LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION: {
         NAME: 'LocalStorageItemNotFoundException',
         CODE: 'local_storage_item_not_found_exception'
-    }
+    },
+    REMOVED_FUNCTION_ERROR: {
+        NAME: 'RemovedFunctionError',
+        CODE: 'removed_function_error'
+    },
 }

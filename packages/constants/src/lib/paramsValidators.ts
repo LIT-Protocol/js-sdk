@@ -1,9 +1,62 @@
 import { checkIfAuthSigRequiresChainParam, checkType } from "@litprotocol-dev/utils";
-import { DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps } from "./interfaces";
+import { DecryptFileProps, DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps } from "./interfaces";
 
 export const paramsValidators : {
-    [key: string] : any
+    [key: string] : any,
 } = {
+
+    "decryptString": (params: any) => {
+
+        const encryptedStringBlob : Blob = params[0];
+        const symmKey: Uint8Array = params[1];
+
+        // -- validate
+        if (
+            !checkType({
+                value: encryptedStringBlob,
+                allowedTypes: ["Blob", "File"],
+                paramName: "encryptedStringBlob",
+                functionName: "decryptString",
+                })
+        ) return false;
+    
+        if (
+            !checkType({
+                value: symmKey,
+                allowedTypes: ["Uint8Array"],
+                paramName: "symmKey",
+                functionName: "decryptString",
+            })
+        ) return false;
+
+        // -- success
+        return true;
+
+    },
+    "decryptFile": (params: DecryptFileProps) => {
+
+        // -- validate
+        if (
+            !checkType({
+              value: params.file,
+              allowedTypes: ["Blob", "File"],
+              paramName: "file",
+              functionName: "decryptFile",
+            })
+          ) return false;
+            
+          // -- validate
+          if (
+            !checkType({
+              value: params.symmetricKey,
+              allowedTypes: ["Uint8Array"],
+              paramName: "symmetricKey",
+              functionName: "decryptFile",
+            })
+          ) return false;
+
+          return true;
+    },
 
     "decryptZipFileWithMetadata": (params: DecryptZipFileWithMetadataProps) => {
 
