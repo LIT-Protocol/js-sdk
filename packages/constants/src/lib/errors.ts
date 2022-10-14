@@ -1,4 +1,4 @@
-export const LIT_ERROR_TYPE = {
+export const LIT_ERROR = {
     INVALID_PARAM : {
         NAME: 'invalidParamType',
         CODE: 'invalid_param_type',
@@ -55,4 +55,22 @@ export const LIT_ERROR_TYPE = {
         NAME: 'RemovedFunctionError',
         CODE: 'removed_function_error'
     },
+    LIT_NODE_CLIENT_BAD_CONFIG_ERROR: {
+        NAME: 'LitNodeClientBadConfigError',
+        CODE: 'lit_node_client_bad_config_error'
+    },
+    PARAMS_MISSING_ERROR: {
+        NAME: 'ParamsMissingError',
+        CODE: 'params_missing_error'
+    },
+    UNKNOWN_SIGNATURE_TYPE:{
+        NAME: 'UnknownSignatureType',
+        CODE: 'unknown_signature_type'
+    },
+    PARAM_NULL_ERROR:{
+        NAME: 'ParamNullError',
+        CODE: 'param_null_error'
+    }
+    
+
 }

@@ -439,3 +439,51 @@ export const SYMM_KEY_ALGO_PARAMS = {
   name: "AES-CBC",
   length: 256,
 };
+
+
+/**
+ * 
+ * ALL LIT NETWORKS
+ * 
+ */
+export const LIT_NETWORKS = {
+  jalapeno: [
+    "https://node2.litgateway.com:7370",
+    "https://node2.litgateway.com:7371",
+    "https://node2.litgateway.com:7372",
+    "https://node2.litgateway.com:7373",
+    "https://node2.litgateway.com:7374",
+    "https://node2.litgateway.com:7375",
+    "https://node2.litgateway.com:7376",
+    "https://node2.litgateway.com:7377",
+    "https://node2.litgateway.com:7378",
+    "https://node2.litgateway.com:7379",
+  ],
+  serrano: [
+    "https://serrano.litgateway.com:7370",
+    "https://serrano.litgateway.com:7371",
+    "https://serrano.litgateway.com:7372",
+    "https://serrano.litgateway.com:7373",
+    "https://serrano.litgateway.com:7374",
+    "https://serrano.litgateway.com:7375",
+    "https://serrano.litgateway.com:7376",
+    "https://serrano.litgateway.com:7377",
+    "https://serrano.litgateway.com:7378",
+    "https://serrano.litgateway.com:7379",
+  ],
+  localhost: [
+    "http://localhost:7470",
+    "http://localhost:7471",
+    "http://localhost:7472",
+    "http://localhost:7473",
+    "http://localhost:7474",
+    "http://localhost:7475",
+    "http://localhost:7476",
+    "http://localhost:7477",
+    "http://localhost:7478",
+    "http://localhost:7479",
+  ],
+  custom: [],
+};
+
+export type LIT_NETWORKS_KEYS = keyof typeof LIT_NETWORKS;

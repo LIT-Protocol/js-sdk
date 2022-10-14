@@ -1,4 +1,5 @@
-import { LIT_ERROR_TYPE } from "./errors";
+import { LIT_NETWORKS_KEYS } from "./constants";
+import { LIT_ERROR } from "./errors";
 import { Accs, EVMAccs, SOLAccs, UnifiedAccs } from "./types"
 
 /** ---------- Common Interfaces ---------- */
@@ -273,3 +274,95 @@ export interface HumanizedAccsProps{
     tokenList: Array<any | string>,
     myWalletAddress: string,
 }
+
+/** ---------- Key Value Type ---------- */
+export interface KV{
+    [key: string] : any
+}
+
+/** ---------- Lit Node Client ---------- */
+export interface LitNodeClientConfig{
+    alertWhenUnauthorized: boolean;
+    minNodeCount: number;
+    debug: boolean;
+    bootstrapUrls: Array<string>;
+    litNetwork: LIT_NETWORKS_KEYS;
+}
+
+/**
+ * Struct in rust
+ * -----
+ pub struct JsonExecutionRequest {
+    pub code: Option<String>,
+    pub ipfs_id: Option<String>,
+    pub auth_sig: AuthSigItem,
+    pub js_params: Option<serde_json::Value>,
+}
+ */
+export interface JsonExecutionRequest{
+    authSig: JsonAuthSig,
+    jsParams: any,
+    code?: string,
+    ipfsId?: string,
+}
+
+export interface ExecuteJsProps extends JsonExecutionRequest{
+    debug: boolean,
+}
+
+// export interface FetchJsExecutionShares extends JsonExecutionRequest{
+//     url: string,
+// }
+
+export interface LitNodePromise{
+
+}
+
+export interface SendNodeCommand{
+    url: string,
+    data: any,
+}
+
+export interface SuccessNodePromises{
+    success: boolean,
+    values: any,
+}
+
+export interface RejectedNodePromises{
+    success: boolean,
+    error: any,
+}
+
+export interface NodePromiseResponse{
+    status?: string,
+    value?: any,
+    reason?: any,
+}
+
+export interface NodeError{
+    error: {
+        errorCode: string,
+    }
+}
+
+export interface SuccessResponseData{
+    signedData: any,
+}
+
+export interface SigShare{
+    sigType: any;
+    shareHex: any;
+    shareIndex: any;
+    localX: any;
+    localY: any;
+    publicKey: any;
+    dataSigned: any;
+}
+
+export type SigShares = Array<SigShare>;
+
+export interface BLSSharesCombined{
+    signature: any,
+}
+
+export interface ECDSASharesCombined extends BLSSharesCombined{}

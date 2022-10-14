@@ -1,10 +1,8 @@
 import { checkIfAuthSigRequiresChainParam, checkType } from "@litprotocol-dev/utils";
 import { DecryptFileProps, DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps } from "./interfaces";
 
-export const paramsValidators : {
-    [key: string] : any,
-} = {
-
+export const paramsValidators = {
+    
     "decryptString": (params: any) => {
 
         const encryptedStringBlob : Blob = params[0];
@@ -33,6 +31,7 @@ export const paramsValidators : {
         return true;
 
     },
+
     "decryptFile": (params: DecryptFileProps) => {
 
         // -- validate
@@ -206,3 +205,5 @@ export const paramsValidators : {
 
     }
 }
+
+export type ParamsValidatorsType = typeof paramsValidators;

@@ -1,5 +1,5 @@
-import { AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsRegularParams, AccsSOLV2Params, ALL_LIT_CHAINS, CheckAndSignAuthParams, DecryptFileProps, DecryptZipFileWithMetadata, DecryptZipFileWithMetadataProps, EncryptedFile, EncryptedString, EncryptedZip, EncryptFileAndZipWithMetadataProps, HumanizedAccsProps, IJWT, ILitError, JsonAuthSig, LIT_ERROR_TYPE, NETWORK_PUB_KEY, ThreeKeys, VerifyJWTProps, VMTYPE } from "@litprotocol-dev/constants";
-import { checkIfAuthSigRequiresChainParam, checkType, log, throwError, safeParams, throwRemovedFunctionError, humanizeEvmBasicAccessControlConditions, humanizeEvmContractConditions, humanizeSolRpcConditions, humanizeUnifiedAccessControlConditions } from "@litprotocol-dev/utils";
+import { ALL_LIT_CHAINS, CheckAndSignAuthParams, DecryptFileProps, DecryptZipFileWithMetadata, DecryptZipFileWithMetadataProps, EncryptedFile, EncryptedString, EncryptedZip, EncryptFileAndZipWithMetadataProps, HumanizedAccsProps, IJWT, JsonAuthSig, LIT_ERROR, NETWORK_PUB_KEY, ThreeKeys, VerifyJWTProps, VMTYPE } from "@litprotocol-dev/constants";
+import { checkType, log, throwError, safeParams, throwRemovedFunctionError, humanizeEvmBasicAccessControlConditions, humanizeEvmContractConditions, humanizeSolRpcConditions, humanizeUnifiedAccessControlConditions } from "@litprotocol-dev/utils";
 import { wasmBlsSdkHelpers } from '@litprotocol-dev/core'
 
 import JSZip from "jszip";
@@ -17,9 +17,6 @@ import {
     generateSymmetricKey,
     importSymmetricKey,
 } from "./crypto";
-
-
-const PACKAGE_CACHE = {};
 
 // ---------- Local Interfaces ----------
 
@@ -97,7 +94,7 @@ export const checkAndSignAuthMessage = ({
             message: `Unsupported chain selected.  Please select one of: ${Object.keys(
                 ALL_LIT_CHAINS
             )}`,
-            error: LIT_ERROR_TYPE.UNSUPPORTED_CHAIN_EXCEPTION
+            error: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION
         });
     }
 
@@ -113,7 +110,7 @@ export const checkAndSignAuthMessage = ({
             message: `vmType not found for this chain: ${chain}.  This should not happen.  Unsupported chain selected.  Please select one of: ${Object.keys(
                 ALL_LIT_CHAINS
             )}`,
-            error: LIT_ERROR_TYPE.UNSUPPORTED_CHAIN_EXCEPTION,
+            error: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION,
         });
     }
 }
@@ -254,7 +251,7 @@ export const zipAndEncryptString = async (
                 paramName: `files[${i}]`,
                 functionName: "zipAndEncryptFiles",
             })
-        )return;
+        ) return;
 
         const folder : JSZip | null = zip.folder("encryptedAssets");
 
@@ -784,6 +781,7 @@ export const verifyJwt = ({
 
 
 // ---------- Deprecated Functions ----------
+const PACKAGE_CACHE = {};
 const getNpmPackage = () => throwRemovedFunctionError("getNpmPackage");
 export const createHtmlLIT = () => throwRemovedFunctionError("createHtmlLIT");
 export const toggleLock = () => throwRemovedFunctionError("toggleLock");

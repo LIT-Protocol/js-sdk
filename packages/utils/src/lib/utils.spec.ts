@@ -1,4 +1,4 @@
-import { LIT_ERROR_TYPE } from '@litprotocol-dev/constants';
+import { LIT_ERROR } from '@litprotocol-dev/constants';
 import * as utilsModule from './utils';
 
 describe('utils', () => {
@@ -79,7 +79,7 @@ describe('utils', () => {
     try{
       err = utilsModule.throwError({
         message: 'custom message',
-        error: LIT_ERROR_TYPE.INVALID_PARAM
+        error: LIT_ERROR.INVALID_PARAM
       })
     }catch(e){
       err = (e as Error);

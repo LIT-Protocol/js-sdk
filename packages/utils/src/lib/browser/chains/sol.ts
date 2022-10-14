@@ -1,4 +1,4 @@
-import { AUTH_SIGNATURE_BODY, ELeft, ERight, IEither, IProvider, JsonAuthSig, LIT_ERROR_TYPE, LOCAL_STORAGE_KEYS } from "@litprotocol-dev/constants";
+import { AUTH_SIGNATURE_BODY, ELeft, ERight, IEither, IProvider, JsonAuthSig, LIT_ERROR, LOCAL_STORAGE_KEYS } from "@litprotocol-dev/constants";
 import {
     fromString as uint8arrayFromString,
     toString as uint8arrayToString,
@@ -25,11 +25,11 @@ import {
         // -- finally
         const message = "No web3 wallet was found that works with Solana.  Install a Solana wallet or choose another chain";
     
-        const error = LIT_ERROR_TYPE.NO_WALLET_EXCEPTION;
+        const error = LIT_ERROR.NO_WALLET_EXCEPTION;
     
         resultOrError = ELeft({
             message,
-            error: LIT_ERROR_TYPE.NO_WALLET_EXCEPTION,
+            error: LIT_ERROR.NO_WALLET_EXCEPTION,
             name: error.NAME,
             errorCode: error.CODE,
         })

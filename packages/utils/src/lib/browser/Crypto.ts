@@ -1,5 +1,8 @@
-import { ABIParams, AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsOperatorParams, AccsRegularParams, AccsSOLV2Params, ILitError, LIT_ERROR_TYPE, SYMM_KEY_ALGO_PARAMS } from "@litprotocol-dev/constants";
+import { ABIParams, AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsOperatorParams, AccsRegularParams, AccsSOLV2Params, BLSSharesCombined, ECDSASharesCombined, ILitError, LIT_ERROR, SigShare, SigShares, SYMM_KEY_ALGO_PARAMS } from "@litprotocol-dev/constants";
+import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
+import * as wasmECDSA from "@litprotocol-dev/core";
 import { log, throwError } from "../utils";
+import { uint8arrayFromString, uint8arrayToString } from "./Browser";
 
 /** ---------- Local Functions ---------- */
 /**
@@ -15,23 +18,6 @@ const canonicalAbiParamss = (params: Array<ABIParams>) : Array<ABIParams> => {
         type: param.type,
     }));
 }
-
-/**
- * TODO: a template for Canonical Condition Formatter
- */
-// const canonicalFormatter = (cond: object, options: CanonicalFormatterOptions) => {
-
-//     // -- set error
-
-//     // -- if it's an array
-
-//     // -- if it's an operator
-
-//     // -- callback custom
-
-//     // -- throw error
-
-// }
 
 /** ---------- Exports ---------- */
 
@@ -122,16 +108,16 @@ export const canonicalUnifiedAccessControlConditionFormatter = (cond: object | [
                     message: `You passed an invalid access control condition that is missing or has a wrong "conditionType": ${JSON.stringify(
                         cond
                     )}`,
-                    error: LIT_ERROR_TYPE.INVALID_ACCESS_CONTROL_CONDITIONS
+                    error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
                 });
         }
     }
   
     throwError({
       message: `You passed an invalid access control condition: ${cond}`,
-      error: LIT_ERROR_TYPE.INVALID_ACCESS_CONTROL_CONDITIONS
+      error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
     });
-  }
+}
 
 
 /**
@@ -206,7 +192,7 @@ export const canonicalSolRpcConditionFormatter = (
             ) {
                 throwError({
                     message: `Solana RPC Conditions have changed and there are some new fields you must include in your condition.  Check the docs here: https://developer.litprotocol.com/AccessControlConditions/solRpcConditions`,
-                    error: LIT_ERROR_TYPE.INVALID_ACCESS_CONTROL_CONDITIONS
+                    error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
                 });
             }
 
@@ -249,7 +235,7 @@ export const canonicalSolRpcConditionFormatter = (
     // -- else
     throwError({
         message: `You passed an invalid access control condition: ${cond}`,
-        error: LIT_ERROR_TYPE.INVALID_ACCESS_CONTROL_CONDITIONS
+        error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
     });
 }
 
@@ -307,7 +293,7 @@ export const canonicalAccessControlConditionFormatter = (cond: object | []) : an
   
     throwError({
         message: `You passed an invalid access control condition: ${cond}`,
-        error: LIT_ERROR_TYPE.INVALID_ACCESS_CONTROL_CONDITIONS
+        error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
     });
   }
 
@@ -402,7 +388,7 @@ export const canonicalEVMContractConditionFormatter = (cond:object | []) : any[]
 
     throwError({
         message: `You passed an invalid access control condition: ${cond}`,
-        error: LIT_ERROR_TYPE.INVALID_ACCESS_CONTROL_CONDITIONS
+        error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
     });
 }
 
@@ -462,7 +448,7 @@ export const canonicalCosmosConditionFormatter = (cond: object) : any[] | AccsOp
   
     throwError({
       message: `You passed an invalid access control condition: ${cond}`,
-      error: LIT_ERROR_TYPE.INVALID_ACCESS_CONTROL_CONDITIONS,
+      error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
     });
 }
 
@@ -565,3 +551,69 @@ export const generateSymmetricKey = async () : Promise<CryptoKey> => {
     
     return decryptedZip;
 }
+
+/**
+ * 
+ * Combine BLS Shares
+ * 
+ * @param { SigShares | Array<SigShare> } sigSharesWithEverything
+ * @param { string } networkPubKeySet
+ * 
+ * @returns { BLSSharesCombined }
+ * 
+ */
+export const combineBlsShares = (
+    sigSharesWithEverything: SigShares, 
+    networkPubKeySet: string
+) : BLSSharesCombined => {
+
+    const pkSetAsBytes = uint8arrayFromString(networkPubKeySet, "base16");
+
+    log("pkSetAsBytes", pkSetAsBytes);
+  
+    const sigShares = sigSharesWithEverything.map((s) => ({
+      shareHex: s.shareHex,
+      shareIndex: s.shareIndex,
+    }));
+    
+    const combinedSignatures = wasmBlsSdkHelpers.combine_signatures(
+      pkSetAsBytes,
+      sigShares
+    );
+
+    const signature = uint8arrayToString(combinedSignatures, "base16");
+    
+    log("signature is ", signature);
+  
+    return { signature };
+}
+
+/**
+ * 
+ * Combine ECDSA Shares
+ * 
+ * @param { SigShares | Array<SigShare> } sigShares
+ * 
+ * @returns { ECDSASharesCombined }
+ * 
+ */
+export const combineEcdsaShares = (
+    sigShares: SigShares
+) : ECDSASharesCombined => {
+
+    // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
+    const R_x = sigShares[0].localX;
+    const R_y = sigShares[0].localY;
+
+    // the public key can come from any node - it obviously will be identical from each node
+    const publicKey = sigShares[0].publicKey;
+    const dataSigned = "0x" + sigShares[0].dataSigned;
+    const validShares = sigShares.map((s) => s.shareHex);
+    const shares = JSON.stringify(validShares);
+    log("shares is", shares);
+    const sig = JSON.parse(wasmECDSA.combine_signature(R_x, R_y, shares));
+  
+    log("signature", sig);
+  
+    return sig;
+  }

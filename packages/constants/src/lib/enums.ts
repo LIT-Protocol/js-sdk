@@ -4,3 +4,8 @@ export enum VMTYPE{
     SVM = 'SVM',
     CVM = 'CVM',
 }
+
+export enum SIGTYPE{
+    BLS = 'BLS',
+    ECDSA = 'ECDSA',
+}

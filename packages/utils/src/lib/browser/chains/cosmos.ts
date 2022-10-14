@@ -3,7 +3,7 @@ import {
     toString as uint8arrayToString,
   } from "uint8arrays";
   
-import { AUTH_SIGNATURE_BODY, JsonAuthSig, LIT_COSMOS_CHAINS, LIT_ERROR_TYPE, LOCAL_STORAGE_KEYS } from '@litprotocol-dev/constants';
+import { AUTH_SIGNATURE_BODY, JsonAuthSig, LIT_COSMOS_CHAINS, LIT_ERROR, LOCAL_STORAGE_KEYS } from '@litprotocol-dev/constants';
 import { log, sortedObject, throwError } from '../../utils';
 
 /** ---------- Declaration ---------- */
@@ -63,7 +63,7 @@ const getProvider = () : any => {
     // -- finally
     const message = "No web3 wallet was found that works with Cosmos.  Install a Cosmos wallet or choose another chain";
 
-    const error = LIT_ERROR_TYPE.NO_WALLET_EXCEPTION;
+    const error = LIT_ERROR.NO_WALLET_EXCEPTION;
 
     throwError({
         message,
