@@ -15,7 +15,7 @@ export const paramsValidators = {
                 allowedTypes: ["Blob", "File"],
                 paramName: "encryptedStringBlob",
                 functionName: "decryptString",
-                })
+            })
         ) return false;
     
         if (

@@ -1,4 +1,5 @@
-import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse } from "@litprotocol-dev/constants";
+import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand } from "@litprotocol-dev/constants";
+import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
 import { uint8arrayFromString, uint8arrayToString } from "./browser/Browser";
 import { combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares } from "./browser/crypto";
 import { convertLitActionsParams, getStorageItem, log, mostCommonString, throwError } from "./utils";
@@ -32,7 +33,7 @@ export abstract class ILitNodeClient {
     
     // -- business logic methods
     executeJs = async (params: ExecuteJsProps) : Promise<any> => {}
-    getSignedChainDataToken = async () => {}
+    getSignedChainDataToken = async (params: SignedChainDataToken) : Promise<any> => {}
     getSignedToken = async () => {}
     saveSigningCondition = async () => {}
     getEncryptionKey = async () => {}
@@ -41,11 +42,15 @@ export abstract class ILitNodeClient {
     validate_and_sign_ecdsa = async () => {}
     storeSigningConditionWithNode = async () => {}
     storeEncryptionConditionWithNode = async () => {}
-    getChainDataSigningShare = async () => {}
     getSigningShare = async () => {}
     getDecryptionShare = async () => {}
-    getJsExecutionShares = async (url: string, params : JsonExecutionRequest) => {}
     handshakeWithSgx = async () => {}
+    
+    // -- JSON Requests
+    getJsExecutionShares = async (url: string, params : JsonExecutionRequest) : Promise<any> => {}
+
+    getChainDataSigningShare = async (url:string, params: JsonSignChainDataRequest) : Promise<any> => {}
+
     sendCommandToNode = async (params: SendNodeCommand) : Promise<any> => {}
     
     throwNodeError = (res: RejectedNodePromises) => {}
@@ -400,7 +405,7 @@ export default class LitNodeClient implements ILitNodeClient{
      * @returns { Array<any> } 
      * 
      */
-    getDecryptions = (decryptedData: Array<any>) : Array< any>=> {
+    getDecryptions = (decryptedData: Array<any>) : Array<any>=> {
 
         let decryptions : any;
 
@@ -496,7 +501,7 @@ export default class LitNodeClient implements ILitNodeClient{
      * @returns { Promise<Response> }
      * 
      */
-    sendCommandToNode = async ({ url, data } : SendNodeCommand) : Promise<Response> => {
+    sendCommandToNode = async ({ url, data } : SendNodeCommand) : Promise<NodeCommand> => {
         
         log(`sendCommandToNode with url ${url} and data`, data);
 
@@ -532,9 +537,12 @@ export default class LitNodeClient implements ILitNodeClient{
      * 
      * @param { JsonExecutionRequest } params
      *  
-     * @returns 
-     */
-    getJsExecutionShares = async (url: string, params : JsonExecutionRequest) : Promise<any> => {
+     * @returns { Promise<any> }
+    */
+    getJsExecutionShares = async (
+        url: string, 
+        params : JsonExecutionRequest
+    ) : Promise<NodeCommand> => {
 
         const { code, ipfsId, authSig, jsParams } = params;
 
@@ -547,6 +555,36 @@ export default class LitNodeClient implements ILitNodeClient{
             ipfsId,
             authSig,
             jsParams,
+        };
+
+        return await this.sendCommandToNode({ url: urlWithPath, data });
+    }
+
+    /**
+     * 
+     * Get Chain Data Signing Shares
+     * 
+     * @param { JsonSignChainDataRequest } params
+     * 
+     * @returns { Promise<any> }
+     * 
+    */
+    getChainDataSigningShare = async (
+        url:string, 
+        params: JsonSignChainDataRequest
+    ) : Promise<NodeCommand> => { 
+        
+        const { callRequests, chain, iat, exp } = params;
+
+        log("getChainDataSigningShare");
+
+        const urlWithPath = `${url}/web/signing/sign_chain_data`;
+
+        const data : JsonSignChainDataRequest = {
+            callRequests,
+            chain,
+            iat,
+            exp,
         };
 
         return await this.sendCommandToNode({ url: urlWithPath, data });
@@ -659,5 +697,127 @@ export default class LitNodeClient implements ILitNodeClient{
 
         return returnVal;
 
+    }
+
+    /**
+     * 
+     * Request a signed JWT of any solidity function call from the LIT network.  There are no prerequisites for this function.  You should use this function if you need to transmit information across chains, or from a blockchain to a centralized DB or server.  The signature of the returned JWT verifies that the response is genuine.
+     * 
+     * @param { SignedChainDataToken } params
+     * 
+     * @returns { Promise<string | undefined>}
+     */
+    getSignedChainDataToken = async (
+        params: SignedChainDataToken
+    ) : Promise<string | undefined> => {
+
+        // ========== Prepare Params ==========
+        const { callRequests, chain } = params;
+
+        // ========== Pre-Validations ==========
+        // -- validate if it's ready
+        if ( ! this.ready ) {
+            const message = "LitNodeClient is not ready.  Please call await litNodeClient.connect() first.";
+            throwError({ message, error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR });
+        }
+
+        // -- validate if this.networkPubKeySet is null
+        if (this.networkPubKeySet === null) {
+            throwError({
+                message: "networkPubKeySet cannot be null",
+                error: LIT_ERROR.PARAM_NULL_ERROR,
+            });
+            return;
+        }
+
+        // ========== Prepare ==========
+        // we need to send jwt params iat (issued at) and exp (expiration)
+        // because the nodes may have different wall clock times
+        // the nodes will verify that these params are withing a grace period
+        const now = Date.now();
+        const iat = Math.floor(now / 1000);
+        const exp = iat + 12 * 60 * 60; // 12 hours in seconds
+
+        // ========== Get Node Promises ==========
+        // -- fetch shares from nodes
+        const nodePromises = this.getNodePromises( (url: string) => {
+            return this.getChainDataSigningShare(url, {
+                callRequests,
+                chain,
+                iat,
+                exp,
+            })
+        });
+
+        // -- resolve promises
+        const signatureShares = await Promise.all(nodePromises);
+        log("signatureShares", signatureShares);
+
+        // -- total of good shares
+        const goodShares = signatureShares.filter((d) => d.signatureShare !== "");
+
+        // ========== Shares Validations ==========
+        // -- validate if we have enough good shares
+        if (goodShares.length < this.config.minNodeCount) {
+
+          log(
+            `majority of shares are bad. goodShares is ${JSON.stringify(
+              goodShares
+            )}`
+          );
+
+          if (this.config.alertWhenUnauthorized) {
+            alert(
+              "You are not authorized to receive a signature to grant access to this content"
+            );
+          }
+    
+          throwError({
+            message: `You are not authorized to recieve a signature on this item`,
+            error: LIT_ERROR.UNAUTHROZIED_EXCEPTION
+          });
+        }
+
+        // -- sanity check
+        if ( ! signatureShares.every( (val, i, arr) => val.unsignedJwt === arr[0].unsignedJwt )) {
+            const msg =
+            "Unsigned JWT is not the same from all the nodes.  This means the combined signature will be bad because the nodes signed the wrong things";
+            log(msg);
+            alert(msg);
+        }
+
+        // ========== Sorting ==========
+        // -- sort the sig shares by share index.  this is important when combining the shares.
+        signatureShares.sort((a, b) => a.shareIndex - b.shareIndex);
+
+        // ========== Combine Shares ==========
+        const pkSetAsBytes : Uint8Array = uint8arrayFromString(this.networkPubKeySet, "base16");
+        log("pkSetAsBytes", pkSetAsBytes);
+
+        const sigShares = signatureShares.map((s) => ({
+            shareHex: s.signatureShare,
+            shareIndex: s.shareIndex,
+        }));
+
+        const signature = wasmBlsSdkHelpers.combine_signatures(
+            pkSetAsBytes,
+            sigShares
+        );
+
+        log("raw sig", signature);
+        log("signature is ", uint8arrayToString(signature, "base16"));
+    
+        const unsignedJwt = mostCommonString(
+          signatureShares.map((s) => s.unsignedJwt)
+        );
+            
+        // ========== Result ==========
+        // convert the sig to base64 and append to the jwt
+        const finalJwt : string = `${unsignedJwt}.${uint8arrayToString(
+          signature,
+          "base64url"
+        )}`;
+    
+        return finalJwt;
     }
 }

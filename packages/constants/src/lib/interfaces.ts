@@ -314,6 +314,23 @@ export interface JsonExecutionRequest{
     ipfsId?: string,
 }
 
+/**
+ * Struct in rust
+ * -----
+pub struct JsonSignChainDataRequest {
+    pub call_requests: Vec<web3::types::CallRequest>,
+    pub chain: String,
+    pub iat: u64,
+    pub exp: u64,
+}
+*/
+export interface JsonSignChainDataRequest{
+    callRequests: Array<CallRequest>,
+    chain: string,
+    iat: number,
+    exp: number,
+}
+
 export interface ExecuteJsProps extends JsonExecutionRequest{
     
     // A boolean that defines if debug info will be returned or not.
@@ -395,3 +412,32 @@ export interface NodeResponse{
 export interface NodeLog{
     logs: any,
 }
+
+export interface CallRequest{
+
+    // to - The address of the contract that will be queried
+    to: string,
+
+    // The address calling the function.
+    from?: string,
+
+    // Hex encoded data to send to the contract.
+    data: string,
+}
+
+export interface SignedChainDataToken{
+
+    // The call requests to make.  The responses will be signed and returned.
+    callRequests: Array<CallRequest>,
+
+    // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
+    chain: string,
+}
+
+export type JsonRequest = JsonExecutionRequest | JsonSignChainDataRequest;
+
+export interface NodeCommand{
+    url: string,
+    data: JsonRequest,
+}
+
