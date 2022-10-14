@@ -31,7 +31,7 @@ export abstract class ILitNodeClient {
     getSignatures = (signedData: Array<SignedData>) => {}
     
     // -- business logic methods
-    executeJs = async (params: ExecuteJsProps) => {}
+    executeJs = async (params: ExecuteJsProps) : Promise<any> => {}
     getSignedChainDataToken = async () => {}
     getSignedToken = async () => {}
     saveSigningCondition = async () => {}
@@ -402,7 +402,7 @@ export default class LitNodeClient implements ILitNodeClient{
      */
     getDecryptions = (decryptedData: Array<any>) : Array< any>=> {
 
-        let decryptions : Array<any>;
+        let decryptions : any;
 
         Object.keys(decryptedData[0]).forEach((key) => {
 
@@ -553,8 +553,20 @@ export default class LitNodeClient implements ILitNodeClient{
     }
     
     // ========== Scoped Business Logics ==========
-    executeJs = async (params : ExecuteJsProps) : ExecuteJsResponse => {
-        
+
+    /**
+     * 
+     * Execute JS on the nodes and combine and return any resulting signatures
+     * 
+     * @param { ExecuteJsRequest } params
+     * 
+     * @returns { ExecuteJsResponse }
+     * 
+     */
+    executeJs = async (
+        params : ExecuteJsProps
+    ) : Promise<ExecuteJsResponse | undefined> => {
+
         // ========== Prepare Params ==========
         const { code, ipfsId, authSig, jsParams, debug } = params;
 

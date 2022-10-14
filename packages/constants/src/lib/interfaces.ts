@@ -300,16 +300,31 @@ export interface LitNodeClientConfig{
 }
  */
 export interface JsonExecutionRequest{
+
+    // the authSig to use to authorize the user with the nodes
     authSig: JsonAuthSig,
+
+    // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
     jsParams: any,
+
+    // JS code to run on the nodes
     code?: string,
+
+    // The IPFS ID of some JS code to run on the nodes
     ipfsId?: string,
 }
 
 export interface ExecuteJsProps extends JsonExecutionRequest{
+    
+    // A boolean that defines if debug info will be returned or not.
     debug: boolean,
 }
 
+/**
+ * 
+ * An object containing the resulting signatures.  Each signature comes with the public key and the data signed.
+ * 
+ */
 export interface ExecuteJsResponse{
     signatures: any;
     decryptions: any[];
