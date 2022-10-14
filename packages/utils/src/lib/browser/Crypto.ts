@@ -617,3 +617,58 @@ export const combineEcdsaShares = (
   
     return sig;
   }
+
+  /**
+ * //TODO: Fix 'any' types
+ * Combine BLS Decryption Shares
+ * 
+ * @param { Array<any> } decryptionShares
+ * @param { string } networkPubKeySet
+ * @param { string } toDecrypt
+ * 
+ * @returns { ECDSASharesCombined }
+ * 
+ */
+  export const combineBlsDecryptionShares = (
+    decryptionShares: Array<any>,
+    networkPubKeySet: string,
+    toDecrypt: any
+  ) : any => {
+
+    // sort the decryption shares by share index.  this is important when combining the shares.
+    decryptionShares.sort((a, b) => a.shareIndex - b.shareIndex);
+  
+    // combine the decryption shares
+    // log("combineBlsDecryptionShares");
+    // log("decryptionShares", decryptionShares);
+    // log("networkPubKeySet", networkPubKeySet);
+    // log("toDecrypt", toDecrypt);
+  
+    // set decryption shares bytes in wasm
+    decryptionShares.forEach((s, idx) => {
+      wasmExports.set_share_indexes(idx, s.shareIndex);
+      const shareAsBytes = uint8arrayFromString(s.decryptionShare, "base16");
+      for (let i = 0; i < shareAsBytes.length; i++) {
+        wasmExports.set_decryption_shares_byte(i, idx, shareAsBytes[i]);
+      }
+    });
+  
+    // set the public key set bytes in wasm
+    const pkSetAsBytes = uint8arrayFromString(networkPubKeySet, "base16");
+    wasmBlsSdkHelpers.set_mc_bytes(pkSetAsBytes);
+  
+    // set the ciphertext bytes
+    const ciphertextAsBytes = uint8arrayFromString(toDecrypt, "base16");
+    for (let i = 0; i < ciphertextAsBytes.length; i++) {
+      wasmExports.set_ct_byte(i, ciphertextAsBytes[i]);
+    }
+  
+    const decrypted = wasmBlsSdkHelpers.combine_decryption_shares(
+      decryptionShares.length,
+      pkSetAsBytes.length,
+      ciphertextAsBytes.length
+    );
+
+    // log("decrypted is ", uint8arrayToString(decrypted, "base16"));
+    return decrypted;
+}

@@ -310,9 +310,17 @@ export interface ExecuteJsProps extends JsonExecutionRequest{
     debug: boolean,
 }
 
-// export interface FetchJsExecutionShares extends JsonExecutionRequest{
-//     url: string,
-// }
+export interface ExecuteJsResponse{
+    signatures: any;
+    decryptions: any[];
+    response: string;
+    logs: string;
+    debug?: {
+        allNodeResponses: [],
+        allNodeLogs: [],
+        rawNodeHTTPResponses: any
+    };
+}
 
 export interface LitNodePromise{
 
@@ -345,10 +353,6 @@ export interface NodeError{
     }
 }
 
-export interface SuccessResponseData{
-    signedData: any,
-}
-
 export interface SigShare{
     sigType: any;
     shareHex: any;
@@ -361,8 +365,18 @@ export interface SigShare{
 
 export type SigShares = Array<SigShare>;
 
-export interface BLSSharesCombined{
-    signature: any,
+export interface SignedData{
+    signedData: any,
 }
 
-export interface ECDSASharesCombined extends BLSSharesCombined{}
+export interface DecryptedData{
+    decryptedData: any,
+}
+
+export interface NodeResponse{
+    response: any,
+}
+
+export interface NodeLog{
+    logs: any,
+}

@@ -1,6 +1,6 @@
-import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SuccessResponseData, SigShare, SigShares, SIGTYPE, BLSSharesCombined, ECDSASharesCombined } from "@litprotocol-dev/constants";
+import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse } from "@litprotocol-dev/constants";
 import { uint8arrayFromString, uint8arrayToString } from "./browser/Browser";
-import { combineBlsShares, combineEcdsaShares } from "./browser/crypto";
+import { combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares } from "./browser/crypto";
 import { convertLitActionsParams, getStorageItem, log, mostCommonString, throwError } from "./utils";
 
 /** ---------- Local Types ---------- */
@@ -28,7 +28,7 @@ export abstract class ILitNodeClient {
     handleNodePromises = (nodePromises: Array<Promise<any>>) => {}
 
     // --- shares resolvers
-    getSignatures = (signedData: Array<SuccessResponseData>) => {}
+    getSignatures = (signedData: Array<SignedData>) => {}
     
     // -- business logic methods
     executeJs = async (params: ExecuteJsProps) => {}
@@ -314,20 +314,22 @@ export default class LitNodeClient implements ILitNodeClient{
             });
         }
     }
+    
+    // ========== Shares Resolvers ==========
 
     /**
      * 
      * Get signatures from signed data
      * 
-     * @param { Array<SuccessResponseData> } signedData
+     * @param { Array<any> } signedData
      * 
-     * @returns { Array<BLSSharesCombined | ECDSASharesCombined> | any }
+     * @returns { any }
      * 
      */
-    getSignatures = (signedData: Array<SuccessResponseData>) => {
+    getSignatures = (signedData: Array<any>):  any =>{
 
         // -- prepare
-        let signatures : Array<BLSSharesCombined | ECDSASharesCombined> | any;
+        let signatures : any;
 
         // TOOD: get keys of signedData
         const keys = Object.keys(signedData[0]);
@@ -371,7 +373,7 @@ export default class LitNodeClient implements ILitNodeClient{
                 return;
             }
 
-            let signature : BLSSharesCombined | ECDSASharesCombined = {signature: {}};
+            let signature : any;
 
             if (sigType === SIGTYPE.BLS) {
                 signature = combineBlsShares(sigShares, this.networkPubKeySet);
@@ -389,9 +391,98 @@ export default class LitNodeClient implements ILitNodeClient{
         return signatures;
     }
 
-    // ========== Shares Resolvers ==========
+    /**
+     * 
+     * Get the decryptions from the decrypted data list
+     * 
+     * @param { Array<any> } decryptedData
+     * 
+     * @returns { Array<any> } 
+     * 
+     */
+    getDecryptions = (decryptedData: Array<any>) : Array< any>=> {
 
+        let decryptions : Array<any>;
+
+        Object.keys(decryptedData[0]).forEach((key) => {
+
+            // -- prepare
+            const shares = decryptedData.map((r) => r[key]);
+
+            const decShares = shares.map((s) => ({
+                algorithmType: s.algorithmType,
+                decryptionShare: s.decryptionShare,
+                shareIndex: s.shareIndex,
+                publicKey: s.publicKey,
+                ciphertext: s.ciphertext,
+            }));
+
+            const algorithmType = mostCommonString(
+                decShares.map((s) => s.algorithmType)
+            );
+            const ciphertext = mostCommonString(decShares.map((s) => s.ciphertext));
+
+            // -- validate if this.networkPubKeySet is null
+            if (this.networkPubKeySet === null) {
+                throwError({
+                    message: "networkPubKeySet cannot be null",
+                    error: LIT_ERROR.PARAM_NULL_ERROR,
+                });
+                return;
+            }
+
+
+            let decrypted;
+            if (algorithmType === "BLS") {
+                decrypted = combineBlsDecryptionShares(
+                    decShares,
+                    this.networkPubKeySet,
+                    ciphertext
+                );
+            } else {
+                throwError({
+                    message: "Unknown decryption algorithm type",
+                    name: "UnknownDecryptionAlgorithmTypeError",
+                    errorCode: "unknown_decryption_algorithm_type",
+                });
+            }
     
+            decryptions[key] = {
+                decrypted: uint8arrayToString(decrypted, "base16"),
+                publicKey: mostCommonString(decShares.map((s) => s.publicKey)),
+                ciphertext: mostCommonString(decShares.map((s) => s.ciphertext)),
+            };
+        });
+
+        return decryptions;
+
+    }
+
+    /**
+     * 
+     * Parse the response string to JSON
+     * 
+     * @param { string } responseString
+     * 
+     * @returns { any } JSON object
+     * 
+     */
+    parseResponses = (responseString: string) : any => {
+
+        let response : any;
+
+        try {
+            response = JSON.parse(responseString);
+        } catch (e) {
+            log(
+                "Error parsing response as json.  Swallowing and returning as string.",
+                responseString
+            );
+        }
+
+        return response;
+    }
+
 
 
     // ========== API Calls to Nodes ==========
@@ -462,7 +553,7 @@ export default class LitNodeClient implements ILitNodeClient{
     }
     
     // ========== Scoped Business Logics ==========
-    executeJs = async (params : ExecuteJsProps) => {
+    executeJs = async (params : ExecuteJsProps) : ExecuteJsResponse => {
         
         // ========== Prepare Params ==========
         const { code, ipfsId, authSig, jsParams, debug } = params;
@@ -512,17 +603,49 @@ export default class LitNodeClient implements ILitNodeClient{
             return;     
         }
         
-        // -- case: promises success
+        // -- case: promises success (TODO: check the keys of "values")
         const responseData = (res as SuccessNodePromises).values;
         log("responseData", JSON.stringify(responseData, null, 2));
+        
+        // ========== Extract shares from response data ==========
+        // -- 1. combine signed data as a list, and get the signatures from it
+        const signedDataList : [] = responseData.map((r: SignedData) => r.signedData);
+        const signatures = this.getSignatures(signedDataList);
+        
+        // -- 2. combine decrypted data a list, and get the decryptions from it
+        const decryptedDataList : [] = responseData.map((r: DecryptedData) => r.decryptedData);
+        const decryptions = this.getDecryptions(decryptedDataList);
 
-        // -- combine the signatures
-        const signedData : Array<SuccessResponseData> = responseData.map((r: SuccessResponseData) => r.signedData);
+        // -- 3. combine responses as a string, and get parse it as JSON
+        let response : string = mostCommonString(responseData.map((r: NodeResponse) => r.response));
         
-        // -- prepare: signatures
-        const signatures = this.getSignatures(signedData);
-        
-        // const signatures = {};
+        response = this.parseResponses(response);
+
+        // -- 4. combine logs 
+        const mostCommonLogs : string = mostCommonString(responseData.map((r: NodeLog) => r.logs));
+
+        // ========== Result ==========
+        let returnVal : ExecuteJsResponse = {
+            signatures,
+            decryptions,
+            response,
+            logs: mostCommonLogs,
+        };
+
+        // -- case: debug mode
+        if (debug) {
+
+            const allNodeResponses = responseData.map((r: NodeResponse) => r.response);
+            const allNodeLogs = responseData.map((r: NodeLog) => r.logs);
+
+            returnVal.debug = {
+                allNodeResponses,
+                allNodeLogs,
+                rawNodeHTTPResponses: responseData,
+            };
+        }
+
+        return returnVal;
 
     }
 }
