@@ -199,7 +199,9 @@ export default class LitNodeClient implements ILitNodeClient{
      * @returns { JsonExecutionRequest }
      * 
      */
-    getLitActionRequestBody = (params: ExecuteJsProps) : JsonExecutionRequest => {
+    getLitActionRequestBody = (
+        params: ExecuteJsProps
+    ) : JsonExecutionRequest => {
 
         const reqBody : JsonExecutionRequest = { 
             authSig: params.authSig, 
@@ -218,6 +220,20 @@ export default class LitNodeClient implements ILitNodeClient{
         }
 
         return reqBody;
+    }
+
+    /**
+     * 
+     * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
+     * 
+     */
+    getJWTParams = () => {
+
+        const now = Date.now();
+        const iat = Math.floor(now / 1000);
+        const exp = iat + 12 * 60 * 60; // 12 hours in seconds
+
+        return { iat, exp }
     }
 
 
@@ -734,9 +750,7 @@ export default class LitNodeClient implements ILitNodeClient{
         // we need to send jwt params iat (issued at) and exp (expiration)
         // because the nodes may have different wall clock times
         // the nodes will verify that these params are withing a grace period
-        const now = Date.now();
-        const iat = Math.floor(now / 1000);
-        const exp = iat + 12 * 60 * 60; // 12 hours in seconds
+        const { iat, exp } = this.getJWTParams();
 
         // ========== Get Node Promises ==========
         // -- fetch shares from nodes
