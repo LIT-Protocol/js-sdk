@@ -4,61 +4,6 @@ import { uint8arrayFromString, uint8arrayToString } from "./browser/Browser";
 import { combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares } from "./browser/crypto";
 import { convertLitActionsParams, getStorageItem, log, mostCommonString, throwError } from "./utils";
 
-/** ---------- Local Types ---------- */
-export abstract class ILitNodeClient {
-
-    // -- properties
-    config!: LitNodeClientConfig;
-    connectedNodes!: SetConstructor | Set<any>;
-    serverKeys!: object;
-    ready!: boolean;
-    subnetPubKey!: string | null;
-    networkPubKey!: string | null;
-    networkPubKeySet!: string | null;
-
-    // -- constructor
-    constructor(customConfig: LitNodeClientConfig){}
-
-    // -- local methods
-    overrideConfigsFromLocalStorage = () => {}
-    setCustomBootstrapUrls = () => {}
-    getLitActionRequestBody = (params: ExecuteJsProps) => {}
-    getNodePromises = (func: Function) => {}
-
-    // -- handlers
-    handleNodePromises = (nodePromises: Array<Promise<any>>) => {}
-
-    // --- shares resolvers
-    getSignatures = (signedData: Array<SignedData>) => {}
-    
-    // -- business logic methods
-    executeJs = async (params: ExecuteJsProps) : Promise<any> => {}
-    getSignedChainDataToken = async (params: SignedChainDataToken) : Promise<any> => {}
-    getSignedToken = async () => {}
-    saveSigningCondition = async () => {}
-    getEncryptionKey = async () => {}
-    saveEncryptionKey = async () => {}
-    signWithEcdsa = async () => {}
-    validate_and_sign_ecdsa = async () => {}
-    storeSigningConditionWithNode = async () => {}
-    storeEncryptionConditionWithNode = async () => {}
-    getSigningShare = async () => {}
-    getDecryptionShare = async () => {}
-    handshakeWithSgx = async () => {}
-    
-    // -- JSON Requests
-    getJsExecutionShares = async (url: string, params : JsonExecutionRequest) : Promise<any> => {}
-
-    getChainDataSigningShare = async (url:string, params: JsonSignChainDataRequest) : Promise<any> => {}
-
-    sendCommandToNode = async (params: SendNodeCommand) : Promise<any> => {}
-    
-    throwNodeError = (res: RejectedNodePromises) => {}
-    signECDSA = async () => {}
-    sign_condition_ecdsa = async () => {}
-    connect = () => {}
-}
-
 /** ---------- Local Constants ---------- */
 export const defaultConfig : LitNodeClientConfig= {
     alertWhenUnauthorized: true,
@@ -93,7 +38,7 @@ const browserOnly = (callback: Function) => {
 
 /** ---------- Main Export Class ---------- */
 
-export default class LitNodeClient implements ILitNodeClient{
+export default class LitNodeClient{
 
     config: LitNodeClientConfig;
     connectedNodes: SetConstructor | Set<any> | any;
@@ -834,4 +779,6 @@ export default class LitNodeClient implements ILitNodeClient{
     
         return finalJwt;
     }
+
+    
 }

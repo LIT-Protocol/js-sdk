@@ -331,6 +331,34 @@ export interface JsonSignChainDataRequest{
     exp: number,
 }
 
+/**
+ * Struct in rust
+ * -----
+pub struct JsonSigningRetrieveRequest {
+    pub access_control_conditions: Option<Vec<AccessControlConditionItem>>,
+    pub evm_contract_conditions: Option<Vec<EVMContractConditionItem>>,
+    pub sol_rpc_conditions: Option<Vec<SolRpcConditionItem>>,
+    pub unified_access_control_conditions: Option<Vec<UnifiedAccessControlConditionItem>>,
+    pub chain: Option<String>,
+    pub resource_id: JsonSigningResourceId,
+    pub auth_sig: AuthSigItem,
+    pub iat: u64,
+    pub exp: u64,
+}
+*/
+export interface JsonSigningRetrieveRequest{
+    accessControlConditions?: Array<AccsRegularParams | AccsDefaultParams>,
+    evmContractConditions?: Array<AccsEVMParams>,
+    solRpcConditions?: Array<AccsSOLV2Params>,
+    unifiedAccessControlConditions?: Array<AccsRegularParams | AccsDefaultParams | AccsSOLV2Params | AccsEVMParams | AccsCOSMOSParams>,
+    chain?: string,
+    resourceId: JsonSigningResourceId,
+    authSig: JsonAuthSig,
+    iat: number,
+    exp: number,
+}
+
+
 export interface ExecuteJsProps extends JsonExecutionRequest{
     
     // A boolean that defines if debug info will be returned or not.
