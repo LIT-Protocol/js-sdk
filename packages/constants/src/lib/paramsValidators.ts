@@ -1,7 +1,66 @@
-import { checkIfAuthSigRequiresChainParam, checkType } from "@litprotocol-dev/utils";
-import { DecryptFileProps, DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps } from "./interfaces";
+import { checkIfAuthSigRequiresChainParam, checkType, is } from "@litprotocol-dev/utils";
+import { DecryptFileProps, DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps, JsonEncryptionRetrieveRequest } from "./interfaces";
 
 export const paramsValidators = {
+
+    "getEncryptionKey": (
+        params: JsonEncryptionRetrieveRequest
+    ) => {
+
+        const { 
+            accessControlConditions,
+            evmContractConditions,
+            solRpcConditions,
+            unifiedAccessControlConditions,
+            toDecrypt,
+            authSig,
+            chain,
+         } = params;
+
+    // -- validate
+    if (
+        accessControlConditions &&
+        !is(
+            accessControlConditions,
+            "Array",
+            "accessControlConditions",
+            "getEncryptionKey"
+        )
+    ) return false;
+      
+    if (
+        evmContractConditions &&
+        !is(
+            evmContractConditions,
+            "Array",
+            "evmContractConditions",
+            "getEncryptionKey"
+        )
+        )
+    return false;
+
+    if (
+        solRpcConditions &&
+        !is(solRpcConditions, "Array", "solRpcConditions", "getEncryptionKey")
+    )
+    return false;
+      
+    if (
+        unifiedAccessControlConditions &&
+        !is(
+            unifiedAccessControlConditions,
+            "Array",
+            "unifiedAccessControlConditions",
+            "getEncryptionKey"
+        )
+      ) return false;
+
+      if (!is(toDecrypt, "string", "toDecrypt", "getEncryptionKey")) return false;
+      if (!is(authSig, "Object", "authSig", "getEncryptionKey")) return false;
+      if (!checkIfAuthSigRequiresChainParam(authSig, chain, "getEncryptionKey")) return false;
+
+      return true
+    },
     
     "decryptString": (params: any) => {
 

@@ -373,7 +373,7 @@ export interface JsonAccsRequest{
     chain?: string,
 
     // The resourceId representing something on the web via a URL
-    resourceId: JsonSigningResourceId,
+    resourceId?: JsonSigningResourceId,
 
     // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
     authSig: JsonAuthSig,
@@ -427,12 +427,32 @@ export interface JsonSigningStoreRequest{
     authSig: JsonAuthSig,
 }
 
+/**
+ * Struct in rust
+ * -----
+ pub struct JsonEncryptionRetrieveRequest {
+    pub access_control_conditions: Option<Vec<AccessControlConditionItem>>,
+    pub evm_contract_conditions: Option<Vec<EVMContractConditionItem>>,
+    pub sol_rpc_conditions: Option<Vec<SolRpcConditionItem>>,
+    pub unified_access_control_conditions: Option<Vec<UnifiedAccessControlConditionItem>>,
+    pub chain: Option<String>,
+    pub to_decrypt: String,
+    pub auth_sig: AuthSigItem,
+}
+ */
+export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest{
+
+    // The ciphertext that you wish to decrypt encoded as a hex string
+    toDecrypt: string,
+}
+
 export interface ExecuteJsProps extends JsonExecutionRequest{
     
     // A boolean that defines if debug info will be returned or not.
     debug: boolean,
 }
 
+export type SupportedJsonRequests = JsonSigningRetrieveRequest | JsonEncryptionRetrieveRequest;
 /**
  * 
  * An object containing the resulting signatures.  Each signature comes with the public key and the data signed.

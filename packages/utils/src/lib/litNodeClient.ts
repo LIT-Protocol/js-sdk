@@ -1,8 +1,8 @@
-import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare, JsonStoreSigningRequest, JsonSigningStoreRequest } from "@litprotocol-dev/constants";
+import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare, JsonStoreSigningRequest, JsonSigningStoreRequest, JsonEncryptionRetrieveRequest, SupportedJsonRequests } from "@litprotocol-dev/constants";
 import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
 import { uint8arrayFromString, uint8arrayToString } from "./browser/Browser";
 import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter, combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares, hashAccessControlConditions, hashEVMContractConditions, hashResourceId, hashSolRpcConditions, hashUnifiedAccessControlConditions } from "./browser/crypto";
-import { convertLitActionsParams, getStorageItem, log, mostCommonString, throwError } from "./utils";
+import { convertLitActionsParams, getStorageItem, log, mostCommonString, safeParams, throwError } from "./utils";
 
 /** ---------- Local Constants ---------- */
 export const defaultConfig : LitNodeClientConfig= {
@@ -247,13 +247,13 @@ export default class LitNodeClient{
      * 
      * Get different formats of access control conditions, eg. evm, sol, unified etc.
      * 
-     * @param { JsonSigningRetrieveRequest } params
+     * @param { SupportedJsonRequests } params
      * 
      * @returns { FormattedMultipleAccs }
      * 
      */
     getFormattedAccessControlConditions = (
-        params: JsonSigningRetrieveRequest
+        params: SupportedJsonRequests
     ) : FormattedMultipleAccs => {
 
         // -- prepare params
@@ -758,6 +758,31 @@ export default class LitNodeClient{
 
     /**
      * 
+     * Ger Decryption Shares from Nodes
+     * 
+     * @param { string } url
+     * @param { JsonEncryptionRetrieveRequest } params
+     * 
+     * @returns { Promise<any> }
+     * 
+     */
+    getDecryptionShare = async (
+        url: string,
+        params: JsonEncryptionRetrieveRequest
+    ) : Promise<NodeCommand> => {
+
+        log("getDecryptionShare");
+        const urlWithPath = `${url}/web/encryption/retrieve`;
+
+        return await this.sendCommandToNode({ 
+            url: urlWithPath, 
+            data: params 
+        });
+
+    }
+
+    /**
+     * 
      * Store signing conditions to nodes
      * 
      * @param { JsonSigningStoreRequest } params
@@ -1042,6 +1067,14 @@ export default class LitNodeClient{
             return;
         }
 
+        if( ! resourceId ){
+            throwError({
+                message: `You must provide a resourceId`,
+                error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+            });
+            return;
+        }
+
         const formattedResourceId = canonicalResourceIdFormatter(resourceId);
 
         // ========== Get Node Promises ==========
@@ -1085,8 +1118,14 @@ export default class LitNodeClient{
      * 
      * Associated access control conditions with a resource on the web.  After calling this function, users may use the getSignedToken function to request a signed JWT from the LIT network.  This JWT proves that the user meets the access control conditions, and is authorized to access the resource you specified in the resourceId parameter of the saveSigningCondition function.
      * 
+     * @param { JsonStoreSigningRequest } params
+     * 
+     * @returns { Promise<boolean | undefined } 
+     * 
      */
-    saveSigningCondition = async (params: JsonStoreSigningRequest) : Promise<boolean | undefined> => {
+    saveSigningCondition = async (
+        params: JsonStoreSigningRequest
+    ) : Promise<boolean | undefined> => {
         
         // -- validate if it's ready
         if ( ! this.ready ) {
@@ -1160,4 +1199,94 @@ export default class LitNodeClient{
 
     }
 
+    /**
+     * 
+     * Retrieve the symmetric encryption key from the LIT nodes.  Note that this will only work if the current user meets the access control conditions specified when the data was encrypted.  That access control condition is typically that the user is a holder of the NFT that corresponds to this encrypted data.  This NFT token address and ID was specified when this LIT was created.
+     * 
+     */
+     getEncryptionKey = async (
+        params: JsonEncryptionRetrieveRequest
+     ) : Promise<Uint8Array | undefined> => {
+
+        // -- validate if it's ready
+        if ( ! this.ready ) {
+            const message = "LitNodeClient is not ready.  Please call await litNodeClient.connect() first.";
+            throwError({ message, error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR });
+        }
+
+        // -- validate if this.networkPubKeySet is null
+        if ( ! this.networkPubKeySet ) {
+            const message = "LitNodeClient is not ready.  Please call await litNodeClient.connect() first.";
+            throwError({ message, error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR });
+            return;
+        }
+
+
+        // ========== Prepare Params ==========
+        const {
+            chain,
+            authSig,
+            resourceId,
+            toDecrypt,
+        } = params;
+
+        // ========== Validate Params ==========
+        const paramsIsSafe = safeParams({
+            functionName: 'getEncryptionKey',
+            params: [params],
+        });
+
+        if( ! paramsIsSafe ) return;
+
+        // ========== Formatting Access Control Conditions =========
+        const {
+            error,
+            formattedAccessControlConditions, formattedEVMContractConditions,
+            formattedSolRpcConditions, formattedUnifiedAccessControlConditions
+        } : FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
+
+        if( error ){
+            throwError({
+                message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+                error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+            });
+            return;
+        }
+
+        // ========== Node Promises ==========
+        const nodePromises = this.getNodePromises( (url: string) => {
+            return this.getDecryptionShare(url, {
+                accessControlConditions: formattedAccessControlConditions,
+                evmContractConditions: formattedEVMContractConditions,
+                solRpcConditions: formattedSolRpcConditions,
+                unifiedAccessControlConditions:
+                  formattedUnifiedAccessControlConditions,
+                toDecrypt,
+                authSig,
+                chain,
+              })
+        });
+
+        // -- resolve promises
+        const res = await this.handleNodePromises(nodePromises);
+
+        // -- case: promises rejected
+        if (res.success === false) {
+            this.throwNodeError(res as RejectedNodePromises);
+            return;     
+        }
+
+        const decryptionShares : Array<NodeShare> = (res as SuccessNodePromises).values;
+
+        log("decryptionShares", decryptionShares);
+
+        // ========== Combine Shares ==========
+        const decrypted = combineBlsDecryptionShares(
+            decryptionShares,
+            this.networkPubKeySet,
+            toDecrypt
+        );
+
+        return decrypted;
+     }
 }

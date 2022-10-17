@@ -316,6 +316,44 @@ export const getStorageItem = (key: string) : IEither => {
 }
 
 /**
+ *
+ *  Check if the given value is the given type
+ *  If not, throw `invalidParamType` error
+ *
+ * @param { any } value
+ * @param { string } type
+ * @param { string } paramName
+ * @param { string } functionName
+ * @returns { Boolean } true/false
+ */
+ export const is = (
+  value: any,
+  type: string,
+  paramName: string,
+  functionName: string,
+  throwOnError = true
+) => {
+  if (getVarType(value) !== type) {
+    let message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
+      value
+    )}" type instead. value: ${
+      value instanceof Object ? JSON.stringify(value) : value
+    }`;
+
+    if (throwOnError) {
+      throwError({
+        message,
+        name: "invalidParamType",
+        errorCode: "invalid_param_type",
+      });
+    }
+    return false;
+  }
+
+  return true;
+};
+
+/**
  * Convert types before sending to Lit Actions as jsParams, some JS types don't serialize well, so we will convert them before sending to the nodes
  * 
  * @param { object } params.jsParams The jsParams you are sending

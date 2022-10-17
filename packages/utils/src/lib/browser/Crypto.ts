@@ -744,7 +744,7 @@ export const combineEcdsaShares = (
  * @param { string } networkPubKeySet
  * @param { string } toDecrypt
  * 
- * @returns { ECDSASharesCombined }
+ * @returns { any }
  * 
  */
   export const combineBlsDecryptionShares = (
