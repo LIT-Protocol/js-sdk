@@ -1,8 +1,9 @@
-import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare, JsonStoreSigningRequest, JsonSigningStoreRequest, JsonEncryptionRetrieveRequest, SupportedJsonRequests, JsonSaveEncryptionKeyRequest } from "@litprotocol-dev/constants";
+import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare, JsonStoreSigningRequest, JsonSigningStoreRequest, JsonEncryptionRetrieveRequest, SupportedJsonRequests, JsonSaveEncryptionKeyRequest, SignWithECDSA } from "@litprotocol-dev/constants";
 import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
 import { uint8arrayFromString, uint8arrayToString } from "./browser/Browser";
 import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter, combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares, hashAccessControlConditions, hashEVMContractConditions, hashResourceId, hashSolRpcConditions, hashUnifiedAccessControlConditions } from "./browser/crypto";
 import { convertLitActionsParams, getStorageItem, log, mostCommonString, safeParams, throwError } from "./utils";
+import * as wasmECDSA from "@litprotocol-dev/core";
 
 /** ---------- Local Constants ---------- */
 export const defaultConfig : LitNodeClientConfig= {
@@ -785,9 +786,10 @@ export default class LitNodeClient{
      * 
      * Store signing conditions to nodes
      * 
+     * @param { string } url
      * @param { JsonSigningStoreRequest } params
      * 
-     * @returns { Promise<any> }
+     * @returns { Promise<NodeCommand> }
      * 
      */
     storeSigningConditionWithNode = async (
@@ -811,6 +813,16 @@ export default class LitNodeClient{
         });
     }
 
+    /**
+     * 
+     * Store encryption conditions to nodes
+     * 
+     * @param { string } urk
+     * @param { JsonEncryptionStoreRequest } params
+     * 
+     * @returns { Promise<NodeCommand> }
+     * 
+     */
     storeEncryptionConditionWithNode = async (
         url: string,
         params: JsonSigningStoreRequest,
@@ -828,6 +840,31 @@ export default class LitNodeClient{
 
         return await this.sendCommandToNode({ url: urlWithPath, data });
 
+    }
+
+    /**
+     * 
+     * Sign wit ECDSA
+     * 
+     * @param { string } url
+     * @param { SignWithECDSA } params
+     * 
+     * @returns { Promise}
+     * 
+     */
+    signECDSA = async (
+        url: string, 
+        params: SignWithECDSA
+    ) : Promise<NodeCommand> => {
+
+        console.log("sign_message_ecdsa");
+
+        const urlWithPath = `${url}/web/signing/sign_message_ecdsa`;
+
+        return await this.sendCommandToNode({ 
+            url: urlWithPath, 
+            data: params,
+        });
     }
     
     // ========== Scoped Business Logics ==========
@@ -1169,6 +1206,17 @@ export default class LitNodeClient{
             // permanant,
             permanent,
         } = params;
+
+        // ----- validate params -----
+        // validate if resourceId is null
+        if ( ! resourceId ) {
+            throwError({
+                message: "resourceId cannot be null",
+                error: LIT_ERROR.PARAM_NULL_ERROR,
+            });
+            return;
+        }
+
         
         // ========== Hashing Resource ID & Conditions ==========
         // hash the resource id
@@ -1412,5 +1460,59 @@ export default class LitNodeClient{
 
         return encryptedKey;
 
+    }
+
+    /**
+     * 
+     * Signs a message with Lit threshold ECDSA algorithms.
+     * 
+     * @param { SignWithECDSA } params
+     * 
+     * @returns { Promise<string> } 
+     * 
+     */
+    signWithEcdsa = async (
+        params: SignWithECDSA
+    ) : Promise<string> => {
+
+        // ========== Prepare Params ==========
+        const { message, chain } = params;
+
+        // ----- Node Promises -----
+        const nodePromises = this.getNodePromises( (url: string) => {
+            return this.signECDSA(url, {
+                message,
+                chain,
+                iat: 0,
+                exp: 0,
+              })
+        });
+
+        // ----- Resolve Promises -----
+        try {
+            const share_data = await Promise.all(nodePromises);
+
+            // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
+            const R_x = share_data[0].local_x;
+            const R_y = share_data[0].local_y;
+
+            // the public key can come from any node - it obviously will be identical from each node
+            const public_key = share_data[0].public_key;
+            const valid_shares = share_data.map((s) => s.signature_share);
+            const shares = JSON.stringify(valid_shares);
+
+            await wasmECDSA.initWasmEcdsaSdk(); // init WASM
+            const signature = wasmECDSA.combine_signature(R_x, R_y, shares);
+            console.log("raw ecdsav sig", signature);
+
+            // ----- Result -----
+            return signature;
+        } catch (e) {
+            console.log("Error - signed_ecdsa_messages ");
+            const signed_ecdsa_message = nodePromises[0];
+
+            // ----- Result -----
+            return signed_ecdsa_message;
+        }
     }
 }

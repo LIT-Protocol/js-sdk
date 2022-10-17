@@ -583,3 +583,15 @@ export interface FormattedMultipleAccs {
     formattedSolRpcConditions: any,
     formattedUnifiedAccessControlConditions: any,
 }
+
+export interface SignWithECDSA{
+
+    // TODO: The message to be signed - note this message is not currently converted to a digest!!!!!
+    message: string,
+
+    // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
+    chain: string,
+
+    iat: number,
+    exp: number,
+}
