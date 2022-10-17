@@ -331,6 +331,26 @@ export interface JsonSignChainDataRequest{
     exp: number,
 }
 
+
+/**
+ * Struct in rust
+ * -----
+ pub struct JsonSigningResourceId {
+    pub base_url: String,
+    pub path: String,
+    pub org_id: String,
+    pub role: String,
+    pub extra_data: String,
+}
+*/
+export interface JsonSigningResourceId{
+    baseUrl: string,
+    path: string,
+    orgId: string,
+    role: string,
+    extraData: string,
+}
+
 /**
  * Struct in rust
  * -----
@@ -358,7 +378,6 @@ export interface JsonSigningRetrieveRequest{
     exp: number,
 }
 
-
 export interface ExecuteJsProps extends JsonExecutionRequest{
     
     // A boolean that defines if debug info will be returned or not.
@@ -376,8 +395,8 @@ export interface ExecuteJsResponse{
     response: string;
     logs: string;
     debug?: {
-        allNodeResponses: [],
-        allNodeLogs: [],
+        allNodeResponses: NodeResponse[],
+        allNodeLogs: NodeLog[],
         rawNodeHTTPResponses: any
     };
 }
@@ -391,9 +410,18 @@ export interface SendNodeCommand{
     data: any,
 }
 
+export interface NodeShare{
+    shareIndex: any,
+    unsignedJwt: any,
+    signedData: any,
+    decryptedData: any,
+    response: any,
+    logs: any,
+}
+
 export interface SuccessNodePromises{
     success: boolean,
-    values: any,
+    values: Array<NodeShare>,
 }
 
 export interface RejectedNodePromises{
@@ -469,3 +497,10 @@ export interface NodeCommand{
     data: JsonRequest,
 }
 
+export interface FormattedMultipleAccs {
+    error: boolean,
+    formattedAccessControlConditions: any,
+    formattedEVMContractConditions: any,
+    formattedSolRpcConditions: any,
+    formattedUnifiedAccessControlConditions: any,
+}

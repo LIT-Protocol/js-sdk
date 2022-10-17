@@ -1,4 +1,4 @@
-import { ABIParams, AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsOperatorParams, AccsRegularParams, AccsSOLV2Params, BLSSharesCombined, ECDSASharesCombined, ILitError, LIT_ERROR, SigShare, SigShares, SYMM_KEY_ALGO_PARAMS } from "@litprotocol-dev/constants";
+import { ABIParams, AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsOperatorParams, AccsRegularParams, AccsSOLV2Params, ILitError, JsonSigningResourceId, LIT_ERROR, SigShare, SigShares, SYMM_KEY_ALGO_PARAMS } from "@litprotocol-dev/constants";
 import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
 import * as wasmECDSA from "@litprotocol-dev/core";
 import { log, throwError } from "../utils";
@@ -450,6 +450,29 @@ export const canonicalCosmosConditionFormatter = (cond: object) : any[] | AccsOp
       message: `You passed an invalid access control condition: ${cond}`,
       error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
     });
+}
+
+/**
+ * 
+ * Canonical ResourceId Formatter returning JSON signing resource id
+ * 
+ * @param { JsonSigningResourceId } resId
+ * 
+ * @returns { JsonSigningResourceId }
+ * 
+ */
+export const canonicalResourceIdFormatter = (
+    resId: JsonSigningResourceId
+) : JsonSigningResourceId =>
+{
+    // need to return in the exact format below:
+    return {
+      baseUrl: resId.baseUrl,
+      path: resId.path,
+      orgId: resId.orgId,
+      role: resId.role,
+      extraData: resId.extraData,
+    };
 }
 
 /**

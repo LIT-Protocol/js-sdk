@@ -1,7 +1,7 @@
-import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand } from "@litprotocol-dev/constants";
+import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare } from "@litprotocol-dev/constants";
 import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
 import { uint8arrayFromString, uint8arrayToString } from "./browser/Browser";
-import { combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares } from "./browser/crypto";
+import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter, combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares } from "./browser/crypto";
 import { convertLitActionsParams, getStorageItem, log, mostCommonString, throwError } from "./utils";
 
 /** ---------- Local Constants ---------- */
@@ -179,6 +179,142 @@ export default class LitNodeClient{
         const exp = iat + 12 * 60 * 60; // 12 hours in seconds
 
         return { iat, exp }
+    }
+
+    /**
+     * 
+     * Combine Shares from network public key set and signature shares
+     * 
+     * @param { string } networkPubKeySet
+     * @param { any } signatureShares
+     * 
+     * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
+     * 
+     */
+    combineSharesAndGetJWT = (
+        networkPubKeySet: string, 
+        signatureShares: Array<NodeShare>
+    ) : string => {
+
+        // ========== Shares Validations ==========
+        // -- sanity check
+        if ( ! signatureShares.every( (val, i, arr) => val.unsignedJwt === arr[0].unsignedJwt )) {
+            const msg =
+            "Unsigned JWT is not the same from all the nodes.  This means the combined signature will be bad because the nodes signed the wrong things";
+            log(msg);
+            alert(msg);
+        }
+
+        // ========== Sorting ==========
+        // -- sort the sig shares by share index.  this is important when combining the shares.
+        signatureShares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
+
+        // ========== Combine Shares ==========
+        const pkSetAsBytes : Uint8Array = uint8arrayFromString(networkPubKeySet, "base16");
+        log("pkSetAsBytes", pkSetAsBytes);
+
+        const sigShares = signatureShares.map((s: any) => ({
+            shareHex: s.signatureShare,
+            shareIndex: s.shareIndex,
+        }));
+
+        const signature = wasmBlsSdkHelpers.combine_signatures(
+            pkSetAsBytes,
+            sigShares
+        );
+
+        log("raw sig", signature);
+        log("signature is ", uint8arrayToString(signature, "base16"));
+    
+        const unsignedJwt = mostCommonString(
+          signatureShares.map((s: any) => s.unsignedJwt)
+        );
+            
+        // ========== Result ==========
+        // convert the sig to base64 and append to the jwt
+        const finalJwt : string = `${unsignedJwt}.${uint8arrayToString(
+          signature,
+          "base64url"
+        )}`;
+
+        return finalJwt;
+
+    }
+
+
+
+    /**
+     * 
+     * Get different formats of access control conditions, eg. evm, sol, unified etc.
+     * 
+     * @param { JsonSigningRetrieveRequest }
+     * 
+     * @returns { FormattedMultipleAccs }
+     * 
+     */
+    getFormattedAccessControlConditions = (
+        params: JsonSigningRetrieveRequest
+    ) : FormattedMultipleAccs => {
+
+        // -- prepare params
+        const {
+            accessControlConditions,
+            evmContractConditions,
+            solRpcConditions,
+            unifiedAccessControlConditions
+        } = params;
+
+        // -- execute
+        let formattedAccessControlConditions;
+        let formattedEVMContractConditions;
+        let formattedSolRpcConditions;
+        let formattedUnifiedAccessControlConditions;
+        let error = false;
+        
+        if (accessControlConditions) {
+          formattedAccessControlConditions = accessControlConditions.map((c) =>
+            canonicalAccessControlConditionFormatter(c)
+          );
+          log(
+            "formattedAccessControlConditions",
+            JSON.stringify(formattedAccessControlConditions)
+          );
+        } else if (evmContractConditions) {
+          formattedEVMContractConditions = evmContractConditions.map((c) =>
+            canonicalEVMContractConditionFormatter(c)
+          );
+          log(
+            "formattedEVMContractConditions",
+            JSON.stringify(formattedEVMContractConditions)
+          );
+        } else if (solRpcConditions) {
+          formattedSolRpcConditions = solRpcConditions.map((c) =>
+            canonicalSolRpcConditionFormatter(c)
+          );
+          log(
+            "formattedSolRpcConditions",
+            JSON.stringify(formattedSolRpcConditions)
+          );
+        } else if (unifiedAccessControlConditions) {
+          formattedUnifiedAccessControlConditions =
+            unifiedAccessControlConditions.map((c) =>
+              canonicalUnifiedAccessControlConditionFormatter(c)
+            );
+          log(
+            "formattedUnifiedAccessControlConditions",
+            JSON.stringify(formattedUnifiedAccessControlConditions)
+          );
+        } else {
+          error = true;
+        }
+
+        return {
+            error,
+            formattedAccessControlConditions,
+            formattedEVMContractConditions,
+            formattedSolRpcConditions,
+            formattedUnifiedAccessControlConditions,
+        }
     }
 
 
@@ -525,6 +661,7 @@ export default class LitNodeClient{
      * 
      * Get Chain Data Signing Shares
      * 
+     * @param { string } url
      * @param { JsonSignChainDataRequest } params
      * 
      * @returns { Promise<any> }
@@ -549,6 +686,30 @@ export default class LitNodeClient{
         };
 
         return await this.sendCommandToNode({ url: urlWithPath, data });
+    }
+
+    /**
+     * 
+     * Get Signing Shares from Nodes
+     * 
+     * @param { string } url
+     * @param { JsonSigningRetrieveRequest } params
+     * 
+     * @returns { Promise<any>}
+     * 
+     */
+    getSigningShare = async (
+        url: string,
+        params: JsonSigningRetrieveRequest
+    ) : Promise<NodeCommand> => {
+
+        log("getSigningShare");
+        const urlWithPath = `${url}/web/signing/retrieve`;
+
+        return await this.sendCommandToNode({ 
+            url: urlWithPath, 
+            data: params,
+        });
     }
     
     // ========== Scoped Business Logics ==========
@@ -620,11 +781,11 @@ export default class LitNodeClient{
         
         // ========== Extract shares from response data ==========
         // -- 1. combine signed data as a list, and get the signatures from it
-        const signedDataList : [] = responseData.map((r: SignedData) => r.signedData);
+        const signedDataList = responseData.map((r) => (r as SignedData).signedData);
         const signatures = this.getSignatures(signedDataList);
         
         // -- 2. combine decrypted data a list, and get the decryptions from it
-        const decryptedDataList : [] = responseData.map((r: DecryptedData) => r.decryptedData);
+        const decryptedDataList : any[] = responseData.map((r: DecryptedData) => r.decryptedData);
         const decryptions = this.getDecryptions(decryptedDataList);
 
         // -- 3. combine responses as a string, and get parse it as JSON
@@ -744,41 +905,114 @@ export default class LitNodeClient{
             log(msg);
             alert(msg);
         }
-
-        // ========== Sorting ==========
-        // -- sort the sig shares by share index.  this is important when combining the shares.
-        signatureShares.sort((a, b) => a.shareIndex - b.shareIndex);
-
-        // ========== Combine Shares ==========
-        const pkSetAsBytes : Uint8Array = uint8arrayFromString(this.networkPubKeySet, "base16");
-        log("pkSetAsBytes", pkSetAsBytes);
-
-        const sigShares = signatureShares.map((s) => ({
-            shareHex: s.signatureShare,
-            shareIndex: s.shareIndex,
-        }));
-
-        const signature = wasmBlsSdkHelpers.combine_signatures(
-            pkSetAsBytes,
-            sigShares
-        );
-
-        log("raw sig", signature);
-        log("signature is ", uint8arrayToString(signature, "base16"));
-    
-        const unsignedJwt = mostCommonString(
-          signatureShares.map((s) => s.unsignedJwt)
-        );
             
         // ========== Result ==========
-        // convert the sig to base64 and append to the jwt
-        const finalJwt : string = `${unsignedJwt}.${uint8arrayToString(
-          signature,
-          "base64url"
-        )}`;
+        const finalJwt : string = this.combineSharesAndGetJWT(
+            this.networkPubKeySet,
+            signatureShares,
+        );
     
         return finalJwt;
     }
 
-    
+    /**
+     * 
+     * Request a signed JWT from the LIT network. Before calling this function, you must either create or know of a resource id and access control conditions for the item you wish to gain authorization for. You can create an access control condition using the saveSigningCondition function.
+     * 
+     * @param { JsonSigningRetrieveRequest } params
+     * 
+     * @returns { Promise<string> } final JWT
+     * 
+     */
+     getSignedToken = async (
+        params: JsonSigningRetrieveRequest
+    ) : Promise<string | undefined> => {
+
+        // ========== Prepare Params ==========
+        const {
+            // accessControlConditions,
+            // evmContractConditions,
+            // solRpcConditions,
+            // unifiedAccessControlConditions,
+            chain,
+            authSig,
+            resourceId,
+        } = params;
+
+        // ========== Pre-Validations ==========
+        // -- validate if it's ready
+        if ( ! this.ready ) {
+            const message = "LitNodeClient is not ready.  Please call await litNodeClient.connect() first.";
+            throwError({ message, error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR });
+        }
+
+        // -- validate if this.networkPubKeySet is null
+        if (this.networkPubKeySet === null) {
+            throwError({
+                message: "networkPubKeySet cannot be null",
+                error: LIT_ERROR.PARAM_NULL_ERROR,
+            });
+            return;
+        }
+
+        // ========== Prepare ==========
+        // we need to send jwt params iat (issued at) and exp (expiration)
+        // because the nodes may have different wall clock times
+        // the nodes will verify that these params are withing a grace period
+        const { iat, exp } = this.getJWTParams();
+
+        // ========== Formatting Access Control Conditions =========
+        const {
+            error,
+            formattedAccessControlConditions, formattedEVMContractConditions, 
+            formattedSolRpcConditions, formattedUnifiedAccessControlConditions
+        } : FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
+
+        if( error ){
+            throwError({
+                message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+                error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+            });
+            return;
+        }
+
+        const formattedResourceId = canonicalResourceIdFormatter(resourceId);
+
+        // ========== Get Node Promises ==========
+        const nodePromises = this.getNodePromises( (url: string) => {
+            return this.getSigningShare(url, {
+                accessControlConditions: formattedAccessControlConditions,
+                evmContractConditions: formattedEVMContractConditions,
+                solRpcConditions: formattedSolRpcConditions,
+                unifiedAccessControlConditions: formattedUnifiedAccessControlConditions,
+                chain,
+                authSig,
+                resourceId: formattedResourceId,
+                iat,
+                exp,
+            })
+        });
+
+        // -- resolve promises
+        const res = await this.handleNodePromises(nodePromises);
+
+        // -- case: promises rejected
+        if (res.success === false) {
+            this.throwNodeError(res as RejectedNodePromises);
+            return;     
+        }
+
+        const signatureShares : Array<NodeShare> = (res as SuccessNodePromises).values;
+
+        log("signatureShares", signatureShares);
+
+        // ========== Result ==========
+        const finalJwt : string = this.combineSharesAndGetJWT(
+            this.networkPubKeySet,
+            signatureShares,
+        );
+
+        return finalJwt;
+    }
+
 }
