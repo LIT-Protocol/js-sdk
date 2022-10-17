@@ -1,7 +1,7 @@
-import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare } from "@litprotocol-dev/constants";
+import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare, JsonStoreSigningRequest, JsonSigningStoreRequest } from "@litprotocol-dev/constants";
 import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
 import { uint8arrayFromString, uint8arrayToString } from "./browser/Browser";
-import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter, combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares } from "./browser/crypto";
+import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter, combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares, hashAccessControlConditions, hashEVMContractConditions, hashResourceId, hashSolRpcConditions, hashUnifiedAccessControlConditions } from "./browser/crypto";
 import { convertLitActionsParams, getStorageItem, log, mostCommonString, throwError } from "./utils";
 
 /** ---------- Local Constants ---------- */
@@ -247,7 +247,7 @@ export default class LitNodeClient{
      * 
      * Get different formats of access control conditions, eg. evm, sol, unified etc.
      * 
-     * @param { JsonSigningRetrieveRequest }
+     * @param { JsonSigningRetrieveRequest } params
      * 
      * @returns { FormattedMultipleAccs }
      * 
@@ -315,6 +315,50 @@ export default class LitNodeClient{
             formattedSolRpcConditions,
             formattedUnifiedAccessControlConditions,
         }
+    }
+
+    /**
+     * 
+     * Get hash of access control conditions
+     * 
+     * @param { JsonStoreSigningRequest } params
+     * 
+     * @returns { Promise<ArrayBuffer | undefined> } 
+     * 
+     */
+    getHashedAccessControlConditions = async (
+        params: JsonStoreSigningRequest
+    ) : Promise<ArrayBuffer | undefined> => {
+
+        let hashOfConditions : ArrayBuffer;
+
+        // ========== Prepare Params ==========
+        const {
+            accessControlConditions,
+            evmContractConditions,
+            solRpcConditions,
+            unifiedAccessControlConditions,
+        } = params;
+
+        // ========== Hash ==========
+        if (accessControlConditions) {
+            hashOfConditions = await hashAccessControlConditions(
+                accessControlConditions
+            );
+        } else if (evmContractConditions) {
+            hashOfConditions = await hashEVMContractConditions(evmContractConditions);
+        } else if (solRpcConditions) {
+            hashOfConditions = await hashSolRpcConditions(solRpcConditions);
+        } else if (unifiedAccessControlConditions) {
+            hashOfConditions = await hashUnifiedAccessControlConditions(
+                unifiedAccessControlConditions
+            );
+        } else {
+            return;
+        }
+
+        // ========== Result ==========
+        return hashOfConditions;
     }
 
 
@@ -711,6 +755,36 @@ export default class LitNodeClient{
             data: params,
         });
     }
+
+    /**
+     * 
+     * Store signing conditions to nodes
+     * 
+     * @param { JsonSigningStoreRequest } params
+     * 
+     * @returns { Promise<any> }
+     * 
+     */
+    storeSigningConditionWithNode = async (
+        url: string,
+        params: JsonSigningStoreRequest,
+    ) : Promise<NodeCommand> => {
+            
+        log("storeSigningConditionWithNode");
+
+        const urlWithPath = `${url}/web/signing/store`;
+
+        return await this.sendCommandToNode({ 
+            url: urlWithPath, 
+            data: {
+                key: params.key,
+                val: params.val,
+                authSig: params.authSig,
+                chain: params.chain,
+                permanant: params.permanent,
+            } 
+        });
+    }
     
     // ========== Scoped Business Logics ==========
 
@@ -898,14 +972,6 @@ export default class LitNodeClient{
           });
         }
 
-        // -- sanity check
-        if ( ! signatureShares.every( (val, i, arr) => val.unsignedJwt === arr[0].unsignedJwt )) {
-            const msg =
-            "Unsigned JWT is not the same from all the nodes.  This means the combined signature will be bad because the nodes signed the wrong things";
-            log(msg);
-            alert(msg);
-        }
-            
         // ========== Result ==========
         const finalJwt : string = this.combineSharesAndGetJWT(
             this.networkPubKeySet,
@@ -1013,6 +1079,85 @@ export default class LitNodeClient{
         );
 
         return finalJwt;
+    }
+
+    /**
+     * 
+     * Associated access control conditions with a resource on the web.  After calling this function, users may use the getSignedToken function to request a signed JWT from the LIT network.  This JWT proves that the user meets the access control conditions, and is authorized to access the resource you specified in the resourceId parameter of the saveSigningCondition function.
+     * 
+     */
+    saveSigningCondition = async (params: JsonStoreSigningRequest) : Promise<boolean | undefined> => {
+        
+        // -- validate if it's ready
+        if ( ! this.ready ) {
+            const message = "LitNodeClient is not ready.  Please call await litNodeClient.connect() first.";
+            throwError({ message, error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR });
+        }
+
+        // this is to fix my spelling mistake that we must now maintain forever lol
+        if (typeof params.permanant !== "undefined") {
+            params.permanent = params.permanant;
+        }
+
+        // ========== Prepare Params ==========
+        const {
+            // accessControlConditions,
+            // evmContractConditions,
+            // solRpcConditions,
+            // unifiedAccessControlConditions,
+            chain,
+            authSig,
+            resourceId,
+            // permanant,
+            permanent,
+        } = params;
+        
+        // ========== Hashing Resource ID & Conditions ==========
+        // hash the resource id
+        const hashOfResourceId = await hashResourceId(resourceId);
+
+        const hashOfResourceIdStr = uint8arrayToString(
+            new Uint8Array(hashOfResourceId),
+            "base16"
+        );
+
+        let hashOfConditions : ArrayBuffer | undefined = await this.getHashedAccessControlConditions(params);
+
+        if ( ! hashOfConditions ){
+            throwError({
+                message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+                error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+            });
+            return;
+        }
+
+        const hashOfConditionsStr = uint8arrayToString(
+            new Uint8Array(hashOfConditions),
+            "base16"
+        );
+
+        // ========== Get Node Promises ==========
+        const nodePromises = this.getNodePromises( (url: string) => {
+            return this.storeSigningConditionWithNode(url, {
+                key: hashOfResourceIdStr,
+                val: hashOfConditionsStr,
+                authSig,
+                chain,
+                permanent: permanent ? 1 : 0,
+            })
+        });
+
+        // -- resolve promises
+        const res = await this.handleNodePromises(nodePromises);
+
+        // -- case: promises rejected
+        if (res.success === false) {
+            this.throwNodeError(res as RejectedNodePromises);
+            return;     
+        }
+
+        return true;
+
     }
 
 }

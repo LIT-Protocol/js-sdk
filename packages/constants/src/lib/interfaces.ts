@@ -62,9 +62,12 @@ export const ERight = (result: any) : IEither => {
 }
 
 /** ---------- Access Control Conditions Interfaces ---------- */
-/**
- * TODO: We should probably create a schema for these different types of params
- */
+
+export type AccessControlConditions = Array<AccsRegularParams | AccsDefaultParams>;
+export type EvmContractConditions = Array<AccsEVMParams>;
+export type SolRpcConditions = Array<AccsSOLV2Params>;
+export type UnifiedAccessControlConditions = Array<AccsRegularParams | AccsDefaultParams | AccsSOLV2Params | AccsEVMParams | AccsCOSMOSParams>;
+
 export interface AccsOperatorParams { 
     operator: string
 }
@@ -141,6 +144,7 @@ export interface JsonAuthSig{
     algo?: [],
 }
 
+
 export interface CheckAndSignAuthParams {
 
     // The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
@@ -178,16 +182,16 @@ export interface EncryptFileAndZipWithMetadataProps{
     authSig: JsonAuthSig,
 
     // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-    accessControlConditions: Array<AccsRegularParams | AccsDefaultParams>,
+    accessControlConditions: AccessControlConditions,
 
     // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
     evmContractConditions: Array<AccsEVMParams>,
 
     // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.
-    solRpcConditions: Array<AccsSOLV2Params>,
+    solRpcConditions: SolRpcConditions,
 
     // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-    unifiedAccessControlConditions: Array<AccsRegularParams | AccsDefaultParams | AccsSOLV2Params | AccsEVMParams | AccsCOSMOSParams>,
+    unifiedAccessControlConditions: UnifiedAccessControlConditions;
 
     // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
     chain: string,
@@ -261,16 +265,16 @@ export interface IJWT{
 export interface HumanizedAccsProps{
 
     // The array of access control conditions that you want to humanize
-    accessControlConditions: Array<AccsRegularParams | AccsDefaultParams>;
+    accessControlConditions: AccessControlConditions;
 
     // The array of evm contract conditions that you want to humanize
-    evmContractConditions: Array<AccsEVMParams>,
+    evmContractConditions: EvmContractConditions,
 
     // The array of Solana RPC conditions that you want to humanize
-    solRpcConditions: Array<AccsSOLV2Params>,
+    solRpcConditions: SolRpcConditions,
 
     // The array of unified access control conditions that you want to humanize
-    unifiedAccessControlConditions: Array< AccsRegularParams |  AccsDefaultParams |  AccsSOLV2Params |  AccsEVMParams |  AccsCOSMOSParams>;
+    unifiedAccessControlConditions: UnifiedAccessControlConditions;
     tokenList: Array<any | string>,
     myWalletAddress: string,
 }
@@ -351,6 +355,30 @@ export interface JsonSigningResourceId{
     extraData: string,
 }
 
+export interface JsonAccsRequest{
+
+    // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+    accessControlConditions?: AccessControlConditions,
+
+    // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+    evmContractConditions?: EvmContractConditions,
+
+    // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.
+    solRpcConditions?: SolRpcConditions,
+
+    // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+    unifiedAccessControlConditions?: UnifiedAccessControlConditions,
+
+    // The chain name of the chain that you are querying.  See ALL_LIT_CHAINS for currently supported chains.
+    chain?: string,
+
+    // The resourceId representing something on the web via a URL
+    resourceId: JsonSigningResourceId,
+
+    // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
+    authSig: JsonAuthSig,
+}
+
 /**
  * Struct in rust
  * -----
@@ -366,16 +394,37 @@ pub struct JsonSigningRetrieveRequest {
     pub exp: u64,
 }
 */
-export interface JsonSigningRetrieveRequest{
-    accessControlConditions?: Array<AccsRegularParams | AccsDefaultParams>,
-    evmContractConditions?: Array<AccsEVMParams>,
-    solRpcConditions?: Array<AccsSOLV2Params>,
-    unifiedAccessControlConditions?: Array<AccsRegularParams | AccsDefaultParams | AccsSOLV2Params | AccsEVMParams | AccsCOSMOSParams>,
-    chain?: string,
-    resourceId: JsonSigningResourceId,
-    authSig: JsonAuthSig,
+export interface JsonSigningRetrieveRequest extends JsonAccsRequest{
     iat: number,
     exp: number,
+}
+
+
+export interface JsonStoreSigningRequest extends JsonAccsRequest{
+
+    // Whether or not the access control condition should be saved permanently.  If false, the access control conditions will be updateable by the creator.  If you don't pass this param, it's set to true by default.
+    permanant : boolean,
+    permanent : boolean,
+}
+
+/**
+ * Struct in rust
+ * -----
+pub struct JsonSigningStoreRequest {
+    pub key: String,
+    pub val: String,
+    pub chain: Option<String>,
+    pub permanant: Option<usize>,
+    pub auth_sig: AuthSigItem,
+}
+ */
+export interface JsonSigningStoreRequest{
+    key: string,
+    val: string,
+    chain?: string,
+    permanant?: number,
+    permanent?: number,
+    authSig: JsonAuthSig,
 }
 
 export interface ExecuteJsProps extends JsonExecutionRequest{

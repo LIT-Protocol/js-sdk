@@ -1,4 +1,4 @@
-import { ABIParams, AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsOperatorParams, AccsRegularParams, AccsSOLV2Params, ILitError, JsonSigningResourceId, LIT_ERROR, SigShare, SigShares, SYMM_KEY_ALGO_PARAMS } from "@litprotocol-dev/constants";
+import { ABIParams, AccessControlConditions, AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsOperatorParams, AccsRegularParams, AccsSOLV2Params, EvmContractConditions, ILitError, JsonSigningResourceId, LIT_ERROR, SigShare, SigShares, SolRpcConditions, SYMM_KEY_ALGO_PARAMS, UnifiedAccessControlConditions } from "@litprotocol-dev/constants";
 import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
 import * as wasmECDSA from "@litprotocol-dev/core";
 import { log, throwError } from "../utils";
@@ -47,6 +47,101 @@ export const hashUnifiedAccessControlConditions = (
     const data = encoder.encode(toHash);
     return crypto.subtle.digest("SHA-256", data);
 
+}
+
+/**
+ * 
+ * Hash resource id
+ * 
+ * @param { JsonSigningResourceId } resourceId
+ * 
+ * @returns { Promise<ArrayBuffer> }
+ * 
+ */
+export const hashResourceId = (
+    resourceId: JsonSigningResourceId
+) : Promise<ArrayBuffer> => {
+
+    const resId = canonicalResourceIdFormatter(resourceId);
+    const toHash = JSON.stringify(resId);
+    const encoder = new TextEncoder();
+    const data = encoder.encode(toHash);
+    
+    return crypto.subtle.digest("SHA-256", data);
+}
+
+/**
+ * 
+ * Hash access control conditions
+ * 
+ * @param { AccessControlConditions } accessControlConditions
+ * 
+ * @returns { Promise<ArrayBuffer> }
+ * 
+ */
+export const hashAccessControlConditions = (
+    accessControlConditions: AccessControlConditions
+) : Promise<ArrayBuffer> => {
+
+    const conds = accessControlConditions.map((c) =>
+        canonicalAccessControlConditionFormatter(c)
+    );
+
+    const toHash = JSON.stringify(conds);
+    log("Hashing access control conditions: ", toHash);
+    const encoder = new TextEncoder();
+    const data = encoder.encode(toHash);
+
+    return crypto.subtle.digest("SHA-256", data);
+}
+
+/**
+ * 
+ * Hash EVM access control conditions
+ * 
+ * @param { EvmContractConditions } evmContractConditions
+ * 
+ * @returns { Promise<ArrayBuffer> }
+ * 
+ */
+export const hashEVMContractConditions = (
+    evmContractConditions: EvmContractConditions
+) : Promise<ArrayBuffer> => {
+
+    const conds = evmContractConditions.map((c) =>
+        canonicalEVMContractConditionFormatter(c)
+    );
+
+    const toHash = JSON.stringify(conds);
+    log("Hashing evm contract conditions: ", toHash);
+    const encoder = new TextEncoder();
+    const data = encoder.encode(toHash);
+    return crypto.subtle.digest("SHA-256", data);
+}
+
+/**
+ * 
+ * Hash SOL access control conditions
+ * 
+ * @param { SolRpcConditions } solRpcConditions
+ * 
+ * @returns { Promise<ArrayBuffer> }
+ * 
+ */
+export const hashSolRpcConditions = (
+    solRpcConditions: SolRpcConditions,
+) : Promise<ArrayBuffer> => {
+
+    const conds = solRpcConditions.map((c) =>
+        canonicalSolRpcConditionFormatter(c)
+    );
+
+    const toHash = JSON.stringify(conds);
+    log("Hashing sol rpc conditions: ", toHash);
+    const encoder = new TextEncoder();
+    const data = encoder.encode(toHash);
+
+    return crypto.subtle.digest("SHA-256", data);
 }
 
 /**
@@ -582,13 +677,13 @@ export const generateSymmetricKey = async () : Promise<CryptoKey> => {
  * @param { SigShares | Array<SigShare> } sigSharesWithEverything
  * @param { string } networkPubKeySet
  * 
- * @returns { BLSSharesCombined }
+ * @returns { any }
  * 
  */
 export const combineBlsShares = (
     sigSharesWithEverything: SigShares, 
     networkPubKeySet: string
-) : BLSSharesCombined => {
+) : any => {
 
     const pkSetAsBytes = uint8arrayFromString(networkPubKeySet, "base16");
 
@@ -617,12 +712,12 @@ export const combineBlsShares = (
  * 
  * @param { SigShares | Array<SigShare> } sigShares
  * 
- * @returns { ECDSASharesCombined }
+ * @returns { any }
  * 
  */
 export const combineEcdsaShares = (
     sigShares: SigShares
-) : ECDSASharesCombined => {
+) : any => {
 
     // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
     const R_x = sigShares[0].localX;
