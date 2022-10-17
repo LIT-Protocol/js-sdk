@@ -1,7 +1,111 @@
 import { checkIfAuthSigRequiresChainParam, checkType, is } from "@litprotocol-dev/utils";
-import { DecryptFileProps, DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps, JsonEncryptionRetrieveRequest } from "./interfaces";
+import { DecryptFileProps, DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps, JsonEncryptionRetrieveRequest, JsonSaveEncryptionKeyRequest } from "./interfaces";
 
 export const paramsValidators = {
+
+    "saveEncryptionKey": (params: JsonSaveEncryptionKeyRequest) => {
+
+        // -- prepare params
+        const {
+            accessControlConditions,
+            evmContractConditions,
+            solRpcConditions,
+            unifiedAccessControlConditions,
+            authSig,
+            chain,
+            symmetricKey,
+            encryptedSymmetricKey,
+            permanant,
+            permanent,
+        } = params;
+
+        if (
+            accessControlConditions &&
+            !is(
+              accessControlConditions,
+              "Array",
+              "accessControlConditions",
+              "saveEncryptionKey"
+            )
+          )
+            return false;
+          if (
+            evmContractConditions &&
+            !is(
+              evmContractConditions,
+              "Array",
+              "evmContractConditions",
+              "saveEncryptionKey"
+            )
+          )
+            return false;
+          if (
+            solRpcConditions &&
+            !is(solRpcConditions, "Array", "solRpcConditions", "saveEncryptionKey")
+          )
+            return false;
+          if (
+            unifiedAccessControlConditions &&
+            !is(
+              unifiedAccessControlConditions,
+              "Array",
+              "unifiedAccessControlConditions",
+              "saveEncryptionKey"
+            )
+          )
+            return false;
+      
+          if (!is(authSig, "Object", "authSig", "saveEncryptionKey")) return false;
+          if (!checkIfAuthSigRequiresChainParam(authSig, chain, "saveEncryptionKey"))
+            return false;
+          if (
+            symmetricKey &&
+            !is(symmetricKey, "Uint8Array", "symmetricKey", "saveEncryptionKey")
+          )
+            return false;
+          if (
+            encryptedSymmetricKey &&
+            !is(
+              encryptedSymmetricKey,
+              "Uint8Array",
+              "encryptedSymmetricKey",
+              "saveEncryptionKey"
+            )
+          )
+          return false;
+      
+          // to fix spelling mistake
+          if (typeof params.permanant !== "undefined") {
+            params.permanent = params.permanant;
+          }
+      
+          if (
+            (!symmetricKey || symmetricKey == "") &&
+            (!encryptedSymmetricKey || encryptedSymmetricKey == "")
+          ) {
+            throw new Error(
+              "symmetricKey and encryptedSymmetricKey are blank.  You must pass one or the other"
+            );
+          }
+      
+          if (
+            (!accessControlConditions || accessControlConditions.length == 0) &&
+            (!evmContractConditions || evmContractConditions.length == 0) &&
+            (!solRpcConditions || solRpcConditions.length == 0) &&
+            (!unifiedAccessControlConditions ||
+              unifiedAccessControlConditions.length == 0)
+          ) {
+            throw new Error(
+              "accessControlConditions and evmContractConditions and solRpcConditions and unifiedAccessControlConditions are blank"
+            );
+          }
+          if (!authSig) {
+            throw new Error("authSig is blank");
+          }
+
+        //   -- case: success
+        return true;
+    },
 
     "getEncryptionKey": (
         params: JsonEncryptionRetrieveRequest

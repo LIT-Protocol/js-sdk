@@ -403,8 +403,8 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest{
 export interface JsonStoreSigningRequest extends JsonAccsRequest{
 
     // Whether or not the access control condition should be saved permanently.  If false, the access control conditions will be updateable by the creator.  If you don't pass this param, it's set to true by default.
-    permanant : boolean,
-    permanent : boolean,
+    permanant?: number,
+    permanent?: number,
 }
 
 /**
@@ -453,6 +453,16 @@ export interface ExecuteJsProps extends JsonExecutionRequest{
 }
 
 export type SupportedJsonRequests = JsonSigningRetrieveRequest | JsonEncryptionRetrieveRequest;
+
+export interface JsonSaveEncryptionKeyRequest extends JsonStoreSigningRequest{
+
+    // The symmetric encryption key that was used to encrypt the locked content inside the LIT as a Uint8Array.  You should use zipAndEncryptString or zipAndEncryptFiles to get this encryption key.  This key will be hashed and the hash will be sent to the LIT nodes.  You must pass either symmetricKey or encryptedSymmetricKey.
+    symmetricKey: string,
+
+    // The encrypted symmetric key of the item you with to update.  You must pass either symmetricKey or encryptedSymmetricKey.
+    encryptedSymmetricKey: string | Uint8Array,
+}
+
 /**
  * 
  * An object containing the resulting signatures.  Each signature comes with the public key and the data signed.

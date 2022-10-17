@@ -1,4 +1,4 @@
-import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare, JsonStoreSigningRequest, JsonSigningStoreRequest, JsonEncryptionRetrieveRequest, SupportedJsonRequests } from "@litprotocol-dev/constants";
+import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare, JsonStoreSigningRequest, JsonSigningStoreRequest, JsonEncryptionRetrieveRequest, SupportedJsonRequests, JsonSaveEncryptionKeyRequest } from "@litprotocol-dev/constants";
 import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
 import { uint8arrayFromString, uint8arrayToString } from "./browser/Browser";
 import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter, combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares, hashAccessControlConditions, hashEVMContractConditions, hashResourceId, hashSolRpcConditions, hashUnifiedAccessControlConditions } from "./browser/crypto";
@@ -810,6 +810,25 @@ export default class LitNodeClient{
             } 
         });
     }
+
+    storeEncryptionConditionWithNode = async (
+        url: string,
+        params: JsonSigningStoreRequest,
+    ) : Promise<NodeCommand> => {
+
+        log("storeEncryptionConditionWithNode");
+        const urlWithPath = `${url}/web/encryption/store`;
+        const data =  {
+            key: params.key,
+            val: params.val,
+            authSig: params.authSig,
+            chain: params.chain,
+            permanant: params.permanent,
+        };
+
+        return await this.sendCommandToNode({ url: urlWithPath, data });
+
+    }
     
     // ========== Scoped Business Logics ==========
 
@@ -1216,7 +1235,7 @@ export default class LitNodeClient{
 
         // -- validate if this.networkPubKeySet is null
         if ( ! this.networkPubKeySet ) {
-            const message = "LitNodeClient is not ready.  Please call await litNodeClient.connect() first.";
+            const message ="networkPubKeySet cannot be null";
             throwError({ message, error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR });
             return;
         }
@@ -1289,4 +1308,109 @@ export default class LitNodeClient{
 
         return decrypted;
      }
+
+     /**
+      * 
+      * Securely save the association between access control conditions and something that you wish to decrypt
+      * 
+      * @param { JsonSaveEncryptionKeyRequest } params
+      * 
+      * @returns { Promise<Uint8Array | undefined }
+      * 
+      */
+    saveEncryptionKey = async (
+        params: JsonSaveEncryptionKeyRequest
+    ) : Promise<Uint8Array | undefined>=> {
+
+        // ========= Prepare Params ==========
+        const {
+            encryptedSymmetricKey,
+            symmetricKey,
+            authSig,
+            chain,
+            permanent,
+        } = params;
+
+        // ========== Validate Params ==========
+        // -- validate if it's ready
+        if ( ! this.ready ) {
+            const message = "LitNodeClient is not ready.  Please call await litNodeClient.connect() first.";
+            throwError({ message, error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR });
+        }
+
+        // -- validate if this.subnetPubKey is null
+        if ( ! this.subnetPubKey ) {
+            const message ="subnetPubKey cannot be null";
+            throwError({ message, error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR });
+            return;
+        }
+        
+        const paramsIsSafe = safeParams({
+            functionName: 'saveEncryptionKey',
+            params: [params],
+        });
+
+        if( ! paramsIsSafe ) return;
+
+        // ========== Encryption ==========
+        // -- encrypt with network pubkey
+        let encryptedKey;
+
+        if (encryptedSymmetricKey) {
+            encryptedKey = encryptedSymmetricKey;
+        } else {
+            encryptedKey = wasmBlsSdkHelpers.encrypt(
+                uint8arrayFromString(this.subnetPubKey, "base16"),
+                symmetricKey
+            );
+        log(
+            "symmetric key encrypted with LIT network key: ",
+            uint8arrayToString(encryptedKey, "base16")
+        );
+        }
+
+        // ========== Hashing ==========
+        // -- hash the encrypted pubkey
+        const hashOfKey = await crypto.subtle.digest("SHA-256", encryptedKey);
+        const hashOfKeyStr = uint8arrayToString(new Uint8Array(hashOfKey), "base16");
+
+        // hash the access control conditions
+        let hashOfConditions : ArrayBuffer | undefined = await this.getHashedAccessControlConditions(params);
+
+        if ( ! hashOfConditions ){
+            throwError({
+                message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+                error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+            });
+            return;
+        }
+
+        const hashOfConditionsStr = uint8arrayToString(
+            new Uint8Array(hashOfConditions),
+            "base16"
+        );
+
+        // ========== Node Promises ==========
+        const nodePromises = this.getNodePromises( (url: string) => {
+            return this.storeEncryptionConditionWithNode(url, {
+                key: hashOfKeyStr,
+                val: hashOfConditionsStr,
+                authSig,
+                chain,
+                permanent: permanent ? 1 : 0,
+            })
+        });
+
+        // -- resolve promises
+        const res = await this.handleNodePromises(nodePromises);
+
+        // -- case: promises rejected
+        if (res.success === false) {
+            this.throwNodeError(res as RejectedNodePromises);
+            return;     
+        }
+
+        return encryptedKey;
+
+    }
 }
