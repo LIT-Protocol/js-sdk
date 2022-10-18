@@ -1,5 +1,5 @@
 import * as constantsModule from '@litprotocol-dev/constants'
-import { ELeft, EncryptFileAndZipWithMetadataProps, ERight, IEither, KV, LIT_AUTH_SIG_CHAIN_KEYS, LIT_ERROR, paramsValidators, ParamsValidatorsType } from '@litprotocol-dev/constants';
+import { ELeft, ERight, IEither, KV, LIT_AUTH_SIG_CHAIN_KEYS, LIT_ERROR, paramsValidators, ParamsValidatorsType } from '@litprotocol-dev/constants';
 import { ILitError } from '@litprotocol-dev/constants'
 
 // ----- Testing Modules -----

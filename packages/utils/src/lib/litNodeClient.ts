@@ -1,4 +1,5 @@
-import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShare, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommand, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare, JsonStoreSigningRequest, JsonSigningStoreRequest, JsonEncryptionRetrieveRequest, SupportedJsonRequests, JsonSaveEncryptionKeyRequest, SignWithECDSA, ValidateAndSignECDSA, SingConditionECDSA } from "@litprotocol-dev/constants";
+import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommandResponse, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare, JsonStoreSigningRequest, JsonSigningStoreRequest, JsonEncryptionRetrieveRequest, SupportedJsonRequests, JsonSaveEncryptionKeyRequest, SignWithECDSA, ValidateAndSignECDSA, SingConditionECDSA, HandshakeWithSgx, KV, NodeCommandServerKeysResponse, JsonHandshakeResponse } from "@litprotocol-dev/constants";
+
 import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
 import { uint8arrayFromString, uint8arrayToString } from "./browser/Browser";
 import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter, combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares, hashAccessControlConditions, hashEVMContractConditions, hashResourceId, hashSolRpcConditions, hashUnifiedAccessControlConditions } from "./browser/crypto";
@@ -38,12 +39,11 @@ const browserOnly = (callback: Function) => {
 }
 
 /** ---------- Main Export Class ---------- */
-
 export default class LitNodeClient{
 
     config: LitNodeClientConfig;
     connectedNodes: SetConstructor | Set<any> | any;
-    serverKeys: object;
+    serverKeys: KV | any;
     ready: boolean;
     subnetPubKey: string | null;
     networkPubKey: string | null;
@@ -669,10 +669,14 @@ export default class LitNodeClient{
      * 
      * @param { SendNodeCommand } 
      * 
-     * @returns { Promise<Response> }
+     * @returns { Promise<any> }
      * 
      */
-    sendCommandToNode = async ({ url, data } : SendNodeCommand) : Promise<NodeCommand> => {
+    sendCommandToNode = async ({ 
+        url, 
+        data 
+    } : SendNodeCommand
+    ) : Promise<any> => {
         
         log(`sendCommandToNode with url ${url} and data`, data);
 
@@ -713,7 +717,7 @@ export default class LitNodeClient{
     getJsExecutionShares = async (
         url: string, 
         params : JsonExecutionRequest
-    ) : Promise<NodeCommand> => {
+    ) : Promise<NodeCommandResponse> => {
 
         const { code, ipfsId, authSig, jsParams } = params;
 
@@ -744,7 +748,7 @@ export default class LitNodeClient{
     getChainDataSigningShare = async (
         url:string, 
         params: JsonSignChainDataRequest
-    ) : Promise<NodeCommand> => { 
+    ) : Promise<NodeCommandResponse> => { 
         
         const { callRequests, chain, iat, exp } = params;
 
@@ -775,7 +779,7 @@ export default class LitNodeClient{
     getSigningShare = async (
         url: string,
         params: JsonSigningRetrieveRequest
-    ) : Promise<NodeCommand> => {
+    ) : Promise<NodeCommandResponse> => {
 
         log("getSigningShare");
         const urlWithPath = `${url}/web/signing/retrieve`;
@@ -799,7 +803,7 @@ export default class LitNodeClient{
     getDecryptionShare = async (
         url: string,
         params: JsonEncryptionRetrieveRequest
-    ) : Promise<NodeCommand> => {
+    ) : Promise<NodeCommandResponse> => {
 
         log("getDecryptionShare");
         const urlWithPath = `${url}/web/encryption/retrieve`;
@@ -818,13 +822,13 @@ export default class LitNodeClient{
      * @param { string } url
      * @param { JsonSigningStoreRequest } params
      * 
-     * @returns { Promise<NodeCommand> }
+     * @returns { Promise<NodeCommandResponse> }
      * 
      */
     storeSigningConditionWithNode = async (
         url: string,
         params: JsonSigningStoreRequest,
-    ) : Promise<NodeCommand> => {
+    ) : Promise<NodeCommandResponse> => {
             
         log("storeSigningConditionWithNode");
 
@@ -849,13 +853,13 @@ export default class LitNodeClient{
      * @param { string } urk
      * @param { JsonEncryptionStoreRequest } params
      * 
-     * @returns { Promise<NodeCommand> }
+     * @returns { Promise<NodeCommandResponse> }
      * 
      */
     storeEncryptionConditionWithNode = async (
         url: string,
         params: JsonSigningStoreRequest,
-    ) : Promise<NodeCommand> => {
+    ) : Promise<NodeCommandResponse> => {
 
         log("storeEncryptionConditionWithNode");
         const urlWithPath = `${url}/web/encryption/store`;
@@ -884,7 +888,7 @@ export default class LitNodeClient{
     signECDSA = async (
         url: string, 
         params: SignWithECDSA
-    ) : Promise<NodeCommand> => {
+    ) : Promise<NodeCommandResponse> => {
 
         console.log("sign_message_ecdsa");
 
@@ -903,13 +907,13 @@ export default class LitNodeClient{
      * @param { string } url
      * @param { SignConditionECDSA } params
      * 
-     * @returns { Promise<NodeCommand> }
+     * @returns { Promise<NodeCommandResponse> }
      * 
      */
     sign_condition_ecdsa = async (
         url: string,
         params: SingConditionECDSA
-    ) : Promise<NodeCommand> => {
+    ) : Promise<NodeCommandResponse> => {
 
         log("sign_condition_ecdsa");
         const urlWithPath = `${url}/web/signing/sign_condition_ecdsa`;
@@ -928,6 +932,39 @@ export default class LitNodeClient{
             url: urlWithPath, 
             data 
         });
+    }
+
+    
+    /**
+     * 
+     * Handshake with SGX
+     * 
+     * @param { HandshakeWithSgx } params 
+     * 
+     * @returns { Promise<NodeCommandServerKeysResponse> }
+     * 
+     */
+    handshakeWithSgx = async (
+        params: HandshakeWithSgx
+    ) : Promise<NodeCommandServerKeysResponse> => {
+
+        // -- get properties from params
+        const { url } = params;
+
+        // -- create url with path
+        const urlWithPath = `${url}/web/handshake`;
+
+        log(`handshakeWithSgx ${urlWithPath}`);
+
+        const data = {
+          clientPublicKey: "test",
+        };
+
+        return await this.sendCommandToNode({ 
+            url: urlWithPath, 
+            data 
+        });
+
     }
     
     // ========== Scoped Business Logics ==========
@@ -1571,13 +1608,17 @@ export default class LitNodeClient{
     }
 
     /**
-     * Validates a condition, and then signs the condition if the validation returns true.   Before calling this function, you must know the on chain conditions that you wish to validate.
      * 
-     * @param { }
+     * Validates a condition, and then signs the condition if the validation returns true. 
+     * Before calling this function, you must know the on chain conditions that you wish to validate.
+     * 
+     * @param { ValidateAndSignECDSA } params
+     * 
+     * @returns { Promise<string> } 
      */
     validate_and_sign_ecdsa = async (
         params: ValidateAndSignECDSA
-    ) => {
+    ) : Promise<string | undefined> => {
 
         // ========== Validate Params ==========
         // -- validate if it's ready
@@ -1647,5 +1688,73 @@ export default class LitNodeClient{
             const signed_ecdsa_message = nodePromises[0];
             return signed_ecdsa_message;
           }
+    }
+
+
+    /**
+     * 
+     * Connect to the LIT nodes
+     * 
+     * @returns { Promise } A promise that resolves when the nodes are connected.
+     * 
+     */
+    connect = () : Promise<any> => {
+        
+        // -- handshake with each node
+        for (const url of this.config.bootstrapUrls) {
+
+            this.handshakeWithSgx({ url }).then((resp) => {
+
+                this.connectedNodes.add(url);
+
+                let keys : JsonHandshakeResponse = {
+                    serverPubKey: resp.serverPublicKey,
+                    subnetPubKey: resp.subnetPublicKey,
+                    networkPubKey: resp.networkPublicKey,
+                    networkPubKeySet: resp.networkPublicKeySet,
+                };
+                
+                this.serverKeys[url] = keys;
+            });
+        }
+
+        // -- get promise
+        const promise = new Promise((resolve) => {
+
+            const interval = setInterval(() => {
+
+              if (Object.keys(this.serverKeys).length >= this.config.minNodeCount) {
+                clearInterval(interval);
+
+                // pick the most common public keys for the subnet and network from the bunch, in case some evil node returned a bad key
+                this.subnetPubKey = mostCommonString(
+                  Object.values(this.serverKeys).map(
+                    (keysFromSingleNode: any) => keysFromSingleNode.subnetPubKey
+                  )
+                );
+                this.networkPubKey = mostCommonString(
+                  Object.values(this.serverKeys).map(
+                    (keysFromSingleNode: any) => keysFromSingleNode.networkPubKey
+                  )
+                );
+                this.networkPubKeySet = mostCommonString(
+                  Object.values(this.serverKeys).map(
+                    (keysFromSingleNode: any) => keysFromSingleNode.networkPubKeySet
+                  )
+                );
+                this.ready = true;
+
+                log("lit is ready");
+                if (typeof document !== "undefined") {
+                  document.dispatchEvent(new Event("lit-ready"));
+                }
+
+                // @ts-ignore: Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?ts(2794)
+                resolve();
+              }
+            }, 500);
+        });
+
+        return promise;
     }
 }

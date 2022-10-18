@@ -1,4 +1,4 @@
-import { ALL_LIT_CHAINS, CheckAndSignAuthParams, DecryptFileProps, DecryptZipFileWithMetadata, DecryptZipFileWithMetadataProps, EncryptedFile, EncryptedString, EncryptedZip, EncryptFileAndZipWithMetadataProps, HumanizedAccsProps, IJWT, JsonAuthSig, LIT_ERROR, NETWORK_PUB_KEY, ThreeKeys, VerifyJWTProps, VMTYPE } from "@litprotocol-dev/constants";
+import { ALL_LIT_CHAINS, CheckAndSignAuthParams, DecryptFileProps, DecryptZipFileWithMetadata,  EncryptedFile, EncryptedString, EncryptedZip, HumanizedAccsProps, IJWT, JsonAuthSig, LIT_ERROR, NETWORK_PUB_KEY, ThreeKeys, VerifyJWTProps, VMTYPE } from "@litprotocol-dev/constants";
 import { checkType, log, throwError, safeParams, throwRemovedFunctionError, humanizeEvmBasicAccessControlConditions, humanizeEvmContractConditions, humanizeSolRpcConditions, humanizeUnifiedAccessControlConditions } from "@litprotocol-dev/utils";
 import { wasmBlsSdkHelpers } from '@litprotocol-dev/core'
 
@@ -17,6 +17,7 @@ import {
     generateSymmetricKey,
     importSymmetricKey,
 } from "./crypto";
+import { DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps } from "../interfaces";
 
 // ---------- Local Interfaces ----------
 
@@ -550,6 +551,11 @@ export const decryptZipFileWithMetadata = async ({
       throw e;
     }
   }
+
+  if ( !symmKey ) {
+    return;
+  }
+
   const importedSymmKey = await importSymmetricKey(symmKey);
 
   const folder : JSZip | null = zip.folder("encryptedAssets");
