@@ -1,4 +1,4 @@
-import { AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsRegularParams, AccsSOLV2Params, LIT_ERROR_TYPE } from "@litprotocol-dev/constants";
+import { AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsRegularParams, AccsSOLV2Params, LIT_ERROR } from "@litprotocol-dev/constants";
 import { formatEther, formatUnits } from "ethers/lib/utils";
 import { log, throwError } from "../utils";
 import { decimalPlaces } from "./chains/eth";
