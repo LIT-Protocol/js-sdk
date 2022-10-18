@@ -1,3 +1,5 @@
+import { LITChain, LITCosmosChain, LITEVMChain, LITSVMChain } from "./types";
+
 /**
  * Lit Protocol Network Public Key
  */
@@ -9,60 +11,6 @@ export const NETWORK_PUB_KEY : string =
 export const LIT_AUTH_SIG_CHAIN_KEYS : Array<string> = ["ethereum", "solana", "cosmos", "kyve"];
 
 export const AUTH_SIGNATURE_BODY = "I am creating an account to use Lit Protocol at {{timestamp}}";
-
-/**
- * 
- * The default required properties of all chains
- * 
- * @typedef { Object } LITChainRequiredProps
- */
-export type LITChainRequiredProps = {
-  name: string,
-  symbol: string,
-  decimals: number,
-  rpcUrls: Array<String>,
-  blockExplorerUrls: Array<String>,
-  vmType: string,
-}
-
-
-/**
- * @typedef { Object } LITEVMChain
- * @property { string } contractAddress - The address of the token contract for the optional predeployed ERC1155 contract.  Only present on EVM chains.
- * @property { string } chainId - The chain ID of the chain that this token contract is deployed on.  Used for EVM chains.
- * @property { string } name - The human readable name of the chain
- */
-export type LITEVMChain = LITChainRequiredProps & {
-  contractAddress: string | null,
-  chainId: number,
-  type: string | null,
-}
-
-
-/**
- * @typedef { Object } LITSVMChain
- */
-export type LITSVMChain = LITChainRequiredProps
-
-
-/**
- * @typedef { Object } LITCosmosChain
- * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for Cosmos chains.
- */
-export type LITCosmosChain = LITChainRequiredProps & {
-  chainId: string,
-}
-
-
-/**
- * @typedef {Object} LITChain
- * @property {string} vmType - Either EVM for an Ethereum compatible chain or SVM for a Solana compatible chain
- * @property {string} name - The human readable name of the chain
- */
-export type LITChain<T> = {
-  [chainName: string]: T
-}
-
 
 /**
  * EVM Chains supported by the LIT protocol.  Each chain includes an optional pre-deployed token contract that you may use for minting LITs.  These are ERC1155 contracts that let you mint any quantity of a given token.  Use the chain name as a key in this object.
@@ -485,5 +433,3 @@ export const LIT_NETWORKS = {
   ],
   custom: [],
 };
-
-export type LIT_NETWORKS_KEYS = keyof typeof LIT_NETWORKS;

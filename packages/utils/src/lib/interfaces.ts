@@ -1,4 +1,14 @@
-import { AccessControlConditions, AccsEVMParams, JsonAuthSig, SolRpcConditions, UnifiedAccessControlConditions } from "@litprotocol-dev/constants";
+import { 
+    AccsEVMParams, 
+    JsonAuthSig 
+} from "@litprotocol-dev/constants";
+
+import { 
+    AccessControlConditions, 
+    SolRpcConditions, 
+    UnifiedAccessControlConditions 
+} from "packages/constants/src/lib/types";
+
 import LitNodeClient from "./litNodeClient";
 
 export interface EncryptFileAndZipWithMetadataProps{

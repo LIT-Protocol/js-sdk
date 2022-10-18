@@ -1,11 +1,49 @@
-import { ALL_LIT_CHAINS, CheckAndSignAuthParams, DecryptFileProps, DecryptZipFileWithMetadata,  EncryptedFile, EncryptedString, EncryptedZip, HumanizedAccsProps, IJWT, JsonAuthSig, LIT_ERROR, NETWORK_PUB_KEY, ThreeKeys, VerifyJWTProps, VMTYPE } from "@litprotocol-dev/constants";
-import { checkType, log, throwError, safeParams, throwRemovedFunctionError, humanizeEvmBasicAccessControlConditions, humanizeEvmContractConditions, humanizeSolRpcConditions, humanizeUnifiedAccessControlConditions } from "@litprotocol-dev/utils";
-import { wasmBlsSdkHelpers } from '@litprotocol-dev/core'
+import { 
+  ALL_LIT_CHAINS, 
+  CheckAndSignAuthParams, 
+  DecryptFileProps, 
+  DecryptZipFileWithMetadata, 
+  EncryptedFile, 
+  EncryptedString, 
+  EncryptedZip, 
+  HumanizedAccsProps, 
+  IJWT, 
+  JsonAuthSig, 
+  LIT_ERROR, 
+  NETWORK_PUB_KEY, 
+  ThreeKeys, 
+  VerifyJWTProps, 
+  VMTYPE 
+} from "@litprotocol-dev/constants";
+
+import { 
+  checkType, 
+  log, 
+  throwError, 
+  safeParams, 
+  throwRemovedFunctionError, 
+  humanizeEvmBasicAccessControlConditions, 
+  humanizeEvmContractConditions, 
+  humanizeSolRpcConditions, 
+  humanizeUnifiedAccessControlConditions
+} from "@litprotocol-dev/utils";
+
+import { 
+  wasmBlsSdkHelpers
+} from '@litprotocol-dev/core'
 
 import JSZip from "jszip";
-import { checkAndSignCosmosAuthMessage } from "./chains/cosmos";
-import { checkAndSignEVMAuthMessage, decimalPlaces } from "./chains/eth";
-import { checkAndSignSolAuthMessage } from "./chains/sol";
+import { 
+  checkAndSignCosmosAuthMessage
+} from "./chains/cosmos";
+import { 
+  checkAndSignEVMAuthMessage 
+} from "./chains/eth";
+
+import { 
+  checkAndSignSolAuthMessage
+} from "./chains/sol";
+
 import {
     fromString as uint8arrayFromString,
     toString as uint8arrayToString,
@@ -17,6 +55,7 @@ import {
     generateSymmetricKey,
     importSymmetricKey,
 } from "./crypto";
+
 import { DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps } from "../interfaces";
 
 // ---------- Local Interfaces ----------

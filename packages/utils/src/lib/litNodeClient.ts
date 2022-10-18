@@ -1,10 +1,77 @@
-import { RejectedNodePromises, ExecuteJsProps, JsonExecutionRequest, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodePromiseResponse, SendNodeCommand, SuccessNodePromises, version, SignedData, SigShares, SIGTYPE, DecryptedData, NodeResponse, NodeLog, ExecuteJsResponse, SignedChainDataToken, JsonSignChainDataRequest, NodeCommandResponse, JsonSigningRetrieveRequest, FormattedMultipleAccs, NodeShare, JsonStoreSigningRequest, JsonSigningStoreRequest, JsonEncryptionRetrieveRequest, SupportedJsonRequests, JsonSaveEncryptionKeyRequest, SignWithECDSA, ValidateAndSignECDSA, SingConditionECDSA, HandshakeWithSgx, KV, NodeCommandServerKeysResponse, JsonHandshakeResponse } from "@litprotocol-dev/constants";
+import { 
+    RejectedNodePromises, 
+    ExecuteJsProps, 
+    JsonExecutionRequest, 
+    LitNodeClientConfig, 
+    LIT_ERROR, 
+    LIT_NETWORKS, 
+    NodePromiseResponse, 
+    SendNodeCommand, 
+    SuccessNodePromises, 
+    version, 
+    SignedData, 
+    SIGTYPE, 
+    DecryptedData, 
+    NodeResponse, 
+    NodeLog, 
+    ExecuteJsResponse, 
+    SignedChainDataToken, 
+    JsonSignChainDataRequest, 
+    NodeCommandResponse, 
+    JsonSigningRetrieveRequest, 
+    FormattedMultipleAccs, 
+    NodeShare, 
+    JsonStoreSigningRequest, 
+    JsonSigningStoreRequest, 
+    JsonEncryptionRetrieveRequest, 
+    JsonSaveEncryptionKeyRequest, 
+    SignWithECDSA, 
+    ValidateAndSignECDSA, 
+    SingConditionECDSA, 
+    HandshakeWithSgx, 
+    KV, 
+    NodeCommandServerKeysResponse, 
+    JsonHandshakeResponse, 
+    SigShare
+} from "@litprotocol-dev/constants";
 
-import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
-import { uint8arrayFromString, uint8arrayToString } from "./browser/Browser";
-import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter, combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares, hashAccessControlConditions, hashEVMContractConditions, hashResourceId, hashSolRpcConditions, hashUnifiedAccessControlConditions } from "./browser/crypto";
-import { convertLitActionsParams, getStorageItem, log, mostCommonString, safeParams, throwError } from "./utils";
+import { 
+    wasmBlsSdkHelpers
+} from "@litprotocol-dev/core";
+import { 
+    uint8arrayFromString, 
+    uint8arrayToString
+} from "./browser/Browser";
+import {
+    canonicalAccessControlConditionFormatter,
+    canonicalEVMContractConditionFormatter,
+    canonicalResourceIdFormatter,
+    canonicalSolRpcConditionFormatter,
+    canonicalUnifiedAccessControlConditionFormatter,
+    combineBlsDecryptionShares,
+    combineBlsShares,
+    combineEcdsaShares,
+    hashAccessControlConditions,
+    hashEVMContractConditions,
+    hashResourceId,
+    hashSolRpcConditions,
+    hashUnifiedAccessControlConditions
+} from "./browser/crypto";
+
+import {
+    convertLitActionsParams,
+    getStorageItem,
+    log,
+    mostCommonString,
+    safeParams,
+    throwError
+} from "./utils";
+
 import * as wasmECDSA from "@litprotocol-dev/core";
+
+import { 
+    SupportedJsonRequests
+} from "packages/constants/src/lib/types";
 
 /** ---------- Local Constants ---------- */
 export const defaultConfig : LitNodeClientConfig= {
@@ -203,7 +270,6 @@ export default class LitNodeClient{
             const msg =
             "Unsigned JWT is not the same from all the nodes.  This means the combined signature will be bad because the nodes signed the wrong things";
             log(msg);
-            alert(msg);
         }
 
         // ========== Sorting ==========
@@ -450,7 +516,7 @@ export default class LitNodeClient{
                 res.error.errorCode === "not_authorized" &&
                 this.config.alertWhenUnauthorized
             ) {
-                alert("You are not authorized to access to this content");
+                log("[Alert originally] You are not authorized to access to this content");
             }
 
             throwError({ ...res.error, name: "NodeError" });
@@ -488,7 +554,7 @@ export default class LitNodeClient{
 
             shares.sort((a, b) => a.shareIndex - b.shareIndex);
 
-            const sigShares : SigShares = shares.map((s) => ({
+            const sigShares : Array<SigShare> = shares.map((s) => ({
                 sigType: s.sigType,
                 shareHex: s.signatureShare,
                 shareIndex: s.shareIndex,
@@ -1468,7 +1534,7 @@ export default class LitNodeClient{
       */
     saveEncryptionKey = async (
         params: JsonSaveEncryptionKeyRequest
-    ) : Promise<Uint8Array | undefined>=> {
+    ) : Promise<Uint8Array | undefined> => {
 
         // ========= Prepare Params ==========
         const {
@@ -1511,10 +1577,10 @@ export default class LitNodeClient{
                 uint8arrayFromString(this.subnetPubKey, "base16"),
                 symmetricKey
             );
-        log(
-            "symmetric key encrypted with LIT network key: ",
-            uint8arrayToString(encryptedKey, "base16")
-        );
+            log(
+                "symmetric key encrypted with LIT network key: ",
+                uint8arrayToString(encryptedKey, "base16")
+            );
         }
 
         // ========== Hashing ==========
@@ -1559,7 +1625,6 @@ export default class LitNodeClient{
         }
 
         return encryptedKey;
-
     }
 
     /**
@@ -1682,12 +1747,12 @@ export default class LitNodeClient{
             const signature = this.getSignature(shareData);
             
             return signature;
-          } catch (e) {
+        } catch (e) {
 
             console.log("Error - signed_ecdsa_messages - ", e);
             const signed_ecdsa_message = nodePromises[0];
             return signed_ecdsa_message;
-          }
+        }
     }
 
 

@@ -1,5 +1,6 @@
-import { checkIfAuthSigRequiresChainParam, checkType, is } from "@litprotocol-dev/utils";
-import { DecryptFileProps, DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps, JsonEncryptionRetrieveRequest, JsonSaveEncryptionKeyRequest } from "./interfaces";
+import { DecryptFileProps, JsonEncryptionRetrieveRequest, JsonSaveEncryptionKeyRequest } from "@litprotocol-dev/constants";
+import { DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps } from "./interfaces";
+import { checkIfAuthSigRequiresChainParam, checkType, is } from "./utils";
 
 export const paramsValidators = {
 
@@ -89,11 +90,10 @@ export const paramsValidators = {
           }
       
           if (
-            (!accessControlConditions || accessControlConditions.length == 0) &&
-            (!evmContractConditions || evmContractConditions.length == 0) &&
-            (!solRpcConditions || solRpcConditions.length == 0) &&
-            (!unifiedAccessControlConditions ||
-              unifiedAccessControlConditions.length == 0)
+            ( !accessControlConditions ) &&
+            ( !evmContractConditions ) &&
+            ( !solRpcConditions ) &&
+            ( !unifiedAccessControlConditions)
           ) {
             throw new Error(
               "accessControlConditions and evmContractConditions and solRpcConditions and unifiedAccessControlConditions are blank"
@@ -161,6 +161,12 @@ export const paramsValidators = {
 
       if (!is(toDecrypt, "string", "toDecrypt", "getEncryptionKey")) return false;
       if (!is(authSig, "Object", "authSig", "getEncryptionKey")) return false;
+
+      // -- validate if 'chain' is null
+      if( ! chain ){
+        return false;
+      }
+
       if (!checkIfAuthSigRequiresChainParam(authSig, chain, "getEncryptionKey")) return false;
 
       return true
@@ -220,7 +226,9 @@ export const paramsValidators = {
           return true;
     },
 
-    "decryptZipFileWithMetadata": (params: DecryptZipFileWithMetadataProps) => {
+    "decryptZipFileWithMetadata": (
+      params: DecryptZipFileWithMetadataProps
+    ) => {
 
         // -- validate
         if (
@@ -271,7 +279,9 @@ export const paramsValidators = {
         return true;
     },
 
-    "encryptFileAndZipWithMetadata": (params: EncryptFileAndZipWithMetadataProps) => {
+    "encryptFileAndZipWithMetadata": (
+      params: EncryptFileAndZipWithMetadataProps
+    ) => {
         
         // -- validate
         if(

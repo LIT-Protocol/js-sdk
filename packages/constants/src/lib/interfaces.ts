@@ -1,6 +1,13 @@
-import { LIT_NETWORKS_KEYS } from "./constants";
-import { LIT_ERROR } from "./errors";
-import { Accs, EVMAccs, SOLAccs, UnifiedAccs } from "./types"
+
+import { 
+    AccessControlConditions, 
+    Chain, 
+    EvmContractConditions, 
+    JsonRequest, 
+    LIT_NETWORKS_KEYS, 
+    SolRpcConditions, 
+    UnifiedAccessControlConditions
+} from "./types";
 
 /** ---------- Common Interfaces ---------- */
 export interface ILitError{
@@ -61,12 +68,6 @@ export const ERight = (result: any) : IEither => {
 
 /** ---------- Access Control Conditions Interfaces ---------- */
 
-export type AccessControlConditions = Array<AccsRegularParams | AccsDefaultParams>;
-
-export type EvmContractConditions = Array<AccsEVMParams>;
-export type SolRpcConditions = Array<AccsSOLV2Params>;
-export type UnifiedAccessControlConditions = Array<AccsRegularParams | AccsDefaultParams | AccsSOLV2Params | AccsEVMParams | AccsCOSMOSParams>;
-
 export interface AccsOperatorParams { 
     operator: string
 }
@@ -80,7 +81,7 @@ export interface AccsRegularParams{
     },
     method?: string,
     params?: [],
-    chain: string,
+    chain: Chain,
 }
 
 export interface AccsDefaultParams extends AccsRegularParams{
@@ -147,7 +148,7 @@ export interface JsonAuthSig{
 export interface CheckAndSignAuthParams {
 
     // The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
-    chain: string,
+    chain: Chain,
 
     // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
     resources: any[],
@@ -277,14 +278,14 @@ export interface JsonExecutionRequest{
  * -----
 pub struct JsonSignChainDataRequest {
     pub call_requests: Vec<web3::types::CallRequest>,
-    pub chain: String,
+    pub chain: Chain,
     pub iat: u64,
     pub exp: u64,
 }
 */
 export interface JsonSignChainDataRequest{
     callRequests: Array<CallRequest>,
-    chain: string,
+    chain: Chain,
     iat: number,
     exp: number,
 }
@@ -406,15 +407,25 @@ export interface ExecuteJsProps extends JsonExecutionRequest{
     debug: boolean,
 }
 
-export type SupportedJsonRequests = JsonSigningRetrieveRequest | JsonEncryptionRetrieveRequest;
 
-export interface JsonSaveEncryptionKeyRequest extends JsonStoreSigningRequest{
+
+export interface JsonSaveEncryptionKeyRequest{
+
+    accessControlConditions: AccessControlConditions,
+    evmContractConditions: EvmContractConditions,
+    solRpcConditions: SolRpcConditions,
+    unifiedAccessControlConditions: UnifiedAccessControlConditions,
+    authSig: JsonAuthSig,
+    chain: Chain,
 
     // The symmetric encryption key that was used to encrypt the locked content inside the LIT as a Uint8Array.  You should use zipAndEncryptString or zipAndEncryptFiles to get this encryption key.  This key will be hashed and the hash will be sent to the LIT nodes.  You must pass either symmetricKey or encryptedSymmetricKey.
     symmetricKey: string | Uint8Array,
 
     // The encrypted symmetric key of the item you with to update.  You must pass either symmetricKey or encryptedSymmetricKey.
     encryptedSymmetricKey?: string | Uint8Array,
+
+    permanant?: number,
+    permanent?: number,
 }
 
 export interface SingConditionECDSA{
@@ -422,7 +433,7 @@ export interface SingConditionECDSA{
     evmContractConditions: undefined,
     solRpcConditions: undefined,
     auth_sig: JsonAuthSig,
-    chain: string,
+    chain: Chain,
     iat: number,
     exp: number,
   }
@@ -494,8 +505,6 @@ export interface SigShare{
     dataSigned: any;
 }
 
-export type SigShares = Array<SigShare>;
-
 export interface SignedData{
     signedData: any,
 }
@@ -530,10 +539,9 @@ export interface SignedChainDataToken{
     callRequests: Array<CallRequest>,
 
     // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-    chain: string,
+    chain: Chain,
 }
 
-export type JsonRequest = JsonExecutionRequest | JsonSignChainDataRequest;
 
 export interface NodeCommandResponse{
     url: string,
@@ -561,7 +569,7 @@ export interface SignWithECDSA{
     message: string,
 
     // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-    chain: string,
+    chain: Chain,
 
     iat: number,
     exp: number,
@@ -569,7 +577,7 @@ export interface SignWithECDSA{
 
 export interface ValidateAndSignECDSA{
     accessControlConditions: AccessControlConditions,
-    chain: string,
+    chain: Chain,
     auth_sig: JsonAuthSig,
 }
 

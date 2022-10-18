@@ -1,8 +1,39 @@
-import { ABIParams, AccessControlConditions, AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsOperatorParams, AccsRegularParams, AccsSOLV2Params, EvmContractConditions, ILitError, JsonSigningResourceId, LIT_ERROR, SigShare, SigShares, SolRpcConditions, SYMM_KEY_ALGO_PARAMS, UnifiedAccessControlConditions } from "@litprotocol-dev/constants";
-import { wasmBlsSdkHelpers } from "@litprotocol-dev/core";
+import { 
+    ABIParams, 
+    AccsCOSMOSParams, 
+    AccsDefaultParams, 
+    AccsEVMParams, 
+    AccsOperatorParams, 
+    AccsRegularParams, 
+    AccsSOLV2Params, 
+    ILitError, 
+    JsonSigningResourceId, 
+    LIT_ERROR, 
+    SigShare, 
+    SYMM_KEY_ALGO_PARAMS 
+} from "@litprotocol-dev/constants";
+
+import { 
+    wasmBlsSdkHelpers
+} from "@litprotocol-dev/core";
+
 import * as wasmECDSA from "@litprotocol-dev/core";
-import { log, throwError } from "../utils";
-import { uint8arrayFromString, uint8arrayToString } from "./Browser";
+
+import { 
+    log, 
+    throwError 
+} from "../utils";
+
+import { 
+    uint8arrayFromString, 
+    uint8arrayToString
+} from "./Browser";
+
+import { 
+    AccessControlConditions, 
+    EvmContractConditions, 
+    SolRpcConditions
+} from "packages/constants/src/lib/types";
 
 /** ---------- Local Functions ---------- */
 /**
@@ -674,14 +705,14 @@ export const generateSymmetricKey = async () : Promise<CryptoKey> => {
  * 
  * Combine BLS Shares
  * 
- * @param { SigShares | Array<SigShare> } sigSharesWithEverything
+ * @param { Array<SigShare> } sigSharesWithEverything
  * @param { string } networkPubKeySet
  * 
  * @returns { any }
  * 
  */
 export const combineBlsShares = (
-    sigSharesWithEverything: SigShares, 
+    sigSharesWithEverything: Array<SigShare>, 
     networkPubKeySet: string
 ) : any => {
 
@@ -716,7 +747,7 @@ export const combineBlsShares = (
  * 
  */
 export const combineEcdsaShares = (
-    sigShares: SigShares
+    sigShares: Array<SigShare>
 ) : any => {
 
     // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
