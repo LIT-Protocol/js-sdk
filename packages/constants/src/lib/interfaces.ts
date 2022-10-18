@@ -10,8 +10,6 @@ export interface ILitError{
     error?: ILitErrorTypeParams,
 }
 
-export type ILitErrorType = typeof LIT_ERROR_TYPE;
-
 export interface ILitErrorTypeParams{
     NAME: string,
     CODE: string,
@@ -64,6 +62,7 @@ export const ERight = (result: any) : IEither => {
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 export type AccessControlConditions = Array<AccsRegularParams | AccsDefaultParams>;
+
 export type EvmContractConditions = Array<AccsEVMParams>;
 export type SolRpcConditions = Array<AccsSOLV2Params>;
 export type UnifiedAccessControlConditions = Array<AccsRegularParams | AccsDefaultParams | AccsSOLV2Params | AccsEVMParams | AccsCOSMOSParams>;
@@ -463,6 +462,16 @@ export interface JsonSaveEncryptionKeyRequest extends JsonStoreSigningRequest{
     encryptedSymmetricKey: string | Uint8Array,
 }
 
+export interface SingConditionECDSA{
+    accessControlConditions: any,
+    evmContractConditions: undefined,
+    solRpcConditions: undefined,
+    auth_sig: JsonAuthSig,
+    chain: string,
+    iat: number,
+    exp: number,
+  }
+
 /**
  * 
  * An object containing the resulting signatures.  Each signature comes with the public key and the data signed.
@@ -594,4 +603,10 @@ export interface SignWithECDSA{
 
     iat: number,
     exp: number,
+}
+
+export interface ValidateAndSignECDSA{
+    accessControlConditions: AccessControlConditions,
+    chain: string,
+    auth_sig: JsonAuthSig,
 }
