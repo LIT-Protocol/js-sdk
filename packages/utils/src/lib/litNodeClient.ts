@@ -51,7 +51,7 @@ import {
     hashResourceId,
     hashSolRpcConditions,
     hashUnifiedAccessControlConditions,
-} from '@litprotocol-dev/utils'
+} from '@litprotocol-dev/utils';
 
 import {
     convertLitActionsParams,

@@ -713,7 +713,7 @@ export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT | undefined => {
     log('verifyJwt', jwt);
 
     // verify that the wasm was loaded
-    if ( ! globalThis.wasmExports) {
+    if (!globalThis.wasmExports) {
         log('wasmExports is not loaded.');
     }
 

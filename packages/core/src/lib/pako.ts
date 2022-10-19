@@ -1,3 +1,3 @@
-declare module 'pako'{
-    export function inflate() : Function
-};
+declare module 'pako' {
+    export function inflate(): Function;
+}

@@ -120,7 +120,6 @@ export const humanizeEvmBasicAccessControlConditions = async ({
     // -- execute
     const promises = await Promise.all(
         fixedConditions.map(async (acc: any) => {
-
             if (Array.isArray(acc)) {
                 // this is a group.  recurse.
                 const group = await humanizeEvmBasicAccessControlConditions({
