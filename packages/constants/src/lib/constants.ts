@@ -1,4 +1,4 @@
-import { LITChain, LITCosmosChain, LITEVMChain, LITSVMChain } from "./types";
+import { LITChain, LITCosmosChain, LITEVMChain, LITSVMChain } from "@litprotocol-dev/constants";
 
 /**
  * Lit Protocol Network Public Key

@@ -70,6 +70,14 @@ export const LIT_ERROR = {
     PARAM_NULL_ERROR:{
         NAME: 'ParamNullError',
         CODE: 'param_null_error'
+    },
+    UNKNOWN_DECRYPTION_ALGORITHM_TYPE_ERROR:{
+        NAME: 'UnknownDecryptionAlgorithmTypeError',
+        CODE: 'unknown_decryption_algorithm_type_error'
+    },
+    WASM_INIT_ERROR:{
+        NAME: 'WasmInitError',
+        CODE: 'wasm_init_error'
     }
     
 

@@ -1,4 +1,5 @@
-import { LIT_NETWORKS } from "./constants";
+import { LIT_NETWORKS } from "@litprotocol-dev/constants";
+
 import { 
     AccsCOSMOSParams, 
     AccsDefaultParams, 
@@ -8,9 +9,8 @@ import {
     JsonEncryptionRetrieveRequest, 
     JsonExecutionRequest,
     JsonSignChainDataRequest,
-    JsonSigningRetrieveRequest,
-    SigShare
-} from "./interfaces";
+    JsonSigningRetrieveRequest
+} from "@litprotocol-dev/constants";
 
 export type AccessControlConditions = [
     AccsRegularParams | 

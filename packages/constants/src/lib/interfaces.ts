@@ -7,7 +7,7 @@ import {
     LIT_NETWORKS_KEYS, 
     SolRpcConditions, 
     UnifiedAccessControlConditions
-} from "./types";
+} from "@litprotocol-dev/constants";
 
 /** ---------- Common Interfaces ---------- */
 export interface ILitError{

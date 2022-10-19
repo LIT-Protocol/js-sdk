@@ -1,11 +1,16 @@
-import { DecryptFileProps, JsonEncryptionRetrieveRequest, JsonSaveEncryptionKeyRequest } from "@litprotocol-dev/constants";
-import { DecryptZipFileWithMetadataProps, EncryptFileAndZipWithMetadataProps } from "./interfaces";
-import { checkIfAuthSigRequiresChainParam, checkType, is } from "./utils";
+import {
+    DecryptFileProps,
+    JsonEncryptionRetrieveRequest,
+    JsonSaveEncryptionKeyRequest,
+} from '@litprotocol-dev/constants';
+import {
+    DecryptZipFileWithMetadataProps,
+    EncryptFileAndZipWithMetadataProps,
+} from './interfaces';
+import { checkIfAuthSigRequiresChainParam, checkType, is } from './utils';
 
 export const paramsValidators = {
-
-    "saveEncryptionKey": (params: JsonSaveEncryptionKeyRequest) => {
-
+    saveEncryptionKey: (params: JsonSaveEncryptionKeyRequest) => {
         // -- prepare params
         const {
             accessControlConditions,
@@ -23,95 +28,104 @@ export const paramsValidators = {
         if (
             accessControlConditions &&
             !is(
-              accessControlConditions,
-              "Array",
-              "accessControlConditions",
-              "saveEncryptionKey"
+                accessControlConditions,
+                'Array',
+                'accessControlConditions',
+                'saveEncryptionKey'
             )
-          )
+        )
             return false;
-          if (
+        if (
             evmContractConditions &&
             !is(
-              evmContractConditions,
-              "Array",
-              "evmContractConditions",
-              "saveEncryptionKey"
+                evmContractConditions,
+                'Array',
+                'evmContractConditions',
+                'saveEncryptionKey'
             )
-          )
+        )
             return false;
-          if (
+        if (
             solRpcConditions &&
-            !is(solRpcConditions, "Array", "solRpcConditions", "saveEncryptionKey")
-          )
+            !is(
+                solRpcConditions,
+                'Array',
+                'solRpcConditions',
+                'saveEncryptionKey'
+            )
+        )
             return false;
-          if (
+        if (
             unifiedAccessControlConditions &&
             !is(
-              unifiedAccessControlConditions,
-              "Array",
-              "unifiedAccessControlConditions",
-              "saveEncryptionKey"
+                unifiedAccessControlConditions,
+                'Array',
+                'unifiedAccessControlConditions',
+                'saveEncryptionKey'
             )
-          )
+        )
             return false;
-      
-          if (!is(authSig, "Object", "authSig", "saveEncryptionKey")) return false;
-          if (!checkIfAuthSigRequiresChainParam(authSig, chain, "saveEncryptionKey"))
+
+        if (!is(authSig, 'Object', 'authSig', 'saveEncryptionKey'))
             return false;
-          if (
+        if (
+            !checkIfAuthSigRequiresChainParam(
+                authSig,
+                chain,
+                'saveEncryptionKey'
+            )
+        )
+            return false;
+        if (
             symmetricKey &&
-            !is(symmetricKey, "Uint8Array", "symmetricKey", "saveEncryptionKey")
-          )
+            !is(symmetricKey, 'Uint8Array', 'symmetricKey', 'saveEncryptionKey')
+        )
             return false;
-          if (
+        if (
             encryptedSymmetricKey &&
             !is(
-              encryptedSymmetricKey,
-              "Uint8Array",
-              "encryptedSymmetricKey",
-              "saveEncryptionKey"
+                encryptedSymmetricKey,
+                'Uint8Array',
+                'encryptedSymmetricKey',
+                'saveEncryptionKey'
             )
-          )
-          return false;
-      
-          // to fix spelling mistake
-          if (typeof params.permanant !== "undefined") {
+        )
+            return false;
+
+        // to fix spelling mistake
+        if (typeof params.permanant !== 'undefined') {
             params.permanent = params.permanant;
-          }
-      
-          if (
-            (!symmetricKey || symmetricKey == "") &&
-            (!encryptedSymmetricKey || encryptedSymmetricKey == "")
-          ) {
+        }
+
+        if (
+            (!symmetricKey || symmetricKey == '') &&
+            (!encryptedSymmetricKey || encryptedSymmetricKey == '')
+        ) {
             throw new Error(
-              "symmetricKey and encryptedSymmetricKey are blank.  You must pass one or the other"
+                'symmetricKey and encryptedSymmetricKey are blank.  You must pass one or the other'
             );
-          }
-      
-          if (
-            ( !accessControlConditions ) &&
-            ( !evmContractConditions ) &&
-            ( !solRpcConditions ) &&
-            ( !unifiedAccessControlConditions)
-          ) {
+        }
+
+        if (
+            !accessControlConditions &&
+            !evmContractConditions &&
+            !solRpcConditions &&
+            !unifiedAccessControlConditions
+        ) {
             throw new Error(
-              "accessControlConditions and evmContractConditions and solRpcConditions and unifiedAccessControlConditions are blank"
+                'accessControlConditions and evmContractConditions and solRpcConditions and unifiedAccessControlConditions are blank'
             );
-          }
-          if (!authSig) {
-            throw new Error("authSig is blank");
-          }
+        }
+        if (!authSig) {
+            throw new Error('authSig is blank');
+        }
 
         //   -- case: success
         return true;
     },
 
-    "getEncryptionKey": (
-        params: JsonEncryptionRetrieveRequest
-    ) => {
-
-        const { 
+    getEncryptionKey: (params: JsonEncryptionRetrieveRequest) => {
+        const {
             accessControlConditions,
             evmContractConditions,
             solRpcConditions,
@@ -119,264 +133,280 @@ export const paramsValidators = {
             toDecrypt,
             authSig,
             chain,
-         } = params;
+        } = params;
 
-    // -- validate
-    if (
-        accessControlConditions &&
-        !is(
-            accessControlConditions,
-            "Array",
-            "accessControlConditions",
-            "getEncryptionKey"
+        // -- validate
+        if (
+            accessControlConditions &&
+            !is(
+                accessControlConditions,
+                'Array',
+                'accessControlConditions',
+                'getEncryptionKey'
+            )
         )
-    ) return false;
-      
-    if (
-        evmContractConditions &&
-        !is(
-            evmContractConditions,
-            "Array",
-            "evmContractConditions",
-            "getEncryptionKey"
+            return false;
+
+        if (
+            evmContractConditions &&
+            !is(
+                evmContractConditions,
+                'Array',
+                'evmContractConditions',
+                'getEncryptionKey'
+            )
         )
+            return false;
+
+        if (
+            solRpcConditions &&
+            !is(
+                solRpcConditions,
+                'Array',
+                'solRpcConditions',
+                'getEncryptionKey'
+            )
         )
-    return false;
+            return false;
 
-    if (
-        solRpcConditions &&
-        !is(solRpcConditions, "Array", "solRpcConditions", "getEncryptionKey")
-    )
-    return false;
-      
-    if (
-        unifiedAccessControlConditions &&
-        !is(
-            unifiedAccessControlConditions,
-            "Array",
-            "unifiedAccessControlConditions",
-            "getEncryptionKey"
+        if (
+            unifiedAccessControlConditions &&
+            !is(
+                unifiedAccessControlConditions,
+                'Array',
+                'unifiedAccessControlConditions',
+                'getEncryptionKey'
+            )
         )
-      ) return false;
+            return false;
 
-      if (!is(toDecrypt, "string", "toDecrypt", "getEncryptionKey")) return false;
-      if (!is(authSig, "Object", "authSig", "getEncryptionKey")) return false;
+        if (!is(toDecrypt, 'string', 'toDecrypt', 'getEncryptionKey'))
+            return false;
+        if (!is(authSig, 'Object', 'authSig', 'getEncryptionKey')) return false;
 
-      // -- validate if 'chain' is null
-      if( ! chain ){
-        return false;
-      }
+        // -- validate if 'chain' is null
+        if (!chain) {
+            return false;
+        }
 
-      if (!checkIfAuthSigRequiresChainParam(authSig, chain, "getEncryptionKey")) return false;
+        if (
+            !checkIfAuthSigRequiresChainParam(
+                authSig,
+                chain,
+                'getEncryptionKey'
+            )
+        )
+            return false;
 
-      return true
+        return true;
     },
-    
-    "decryptString": (params: any) => {
 
-        const encryptedStringBlob : Blob = params[0];
+    decryptString: (params: any) => {
+        const encryptedStringBlob: Blob = params[0];
         const symmKey: Uint8Array = params[1];
 
         // -- validate
         if (
             !checkType({
                 value: encryptedStringBlob,
-                allowedTypes: ["Blob", "File"],
-                paramName: "encryptedStringBlob",
-                functionName: "decryptString",
+                allowedTypes: ['Blob', 'File'],
+                paramName: 'encryptedStringBlob',
+                functionName: 'decryptString',
             })
-        ) return false;
-    
+        )
+            return false;
+
         if (
             !checkType({
                 value: symmKey,
-                allowedTypes: ["Uint8Array"],
-                paramName: "symmKey",
-                functionName: "decryptString",
+                allowedTypes: ['Uint8Array'],
+                paramName: 'symmKey',
+                functionName: 'decryptString',
             })
-        ) return false;
+        )
+            return false;
 
         // -- success
         return true;
-
     },
 
-    "decryptFile": (params: DecryptFileProps) => {
+    decryptFile: (params: DecryptFileProps) => {
+        // -- validate
+        if (
+            !checkType({
+                value: params.file,
+                allowedTypes: ['Blob', 'File'],
+                paramName: 'file',
+                functionName: 'decryptFile',
+            })
+        )
+            return false;
 
         // -- validate
         if (
             !checkType({
-              value: params.file,
-              allowedTypes: ["Blob", "File"],
-              paramName: "file",
-              functionName: "decryptFile",
+                value: params.symmetricKey,
+                allowedTypes: ['Uint8Array'],
+                paramName: 'symmetricKey',
+                functionName: 'decryptFile',
             })
-          ) return false;
-            
-          // -- validate
-          if (
-            !checkType({
-              value: params.symmetricKey,
-              allowedTypes: ["Uint8Array"],
-              paramName: "symmetricKey",
-              functionName: "decryptFile",
-            })
-          ) return false;
+        )
+            return false;
 
-          return true;
+        return true;
     },
 
-    "decryptZipFileWithMetadata": (
-      params: DecryptZipFileWithMetadataProps
-    ) => {
-
+    decryptZipFileWithMetadata: (params: DecryptZipFileWithMetadataProps) => {
         // -- validate
         if (
             !checkType({
                 value: params.authSig,
-                allowedTypes: ["Object"],
-                paramName: "authSig",
-                functionName: "decryptZipFileWithMetadata",
+                allowedTypes: ['Object'],
+                paramName: 'authSig',
+                functionName: 'decryptZipFileWithMetadata',
             })
-        ) return false;
+        )
+            return false;
 
         // -- validate
         if (
             !checkType({
-              value: params.file,
-              allowedTypes: ["Blob", "File"],
-              paramName: "file",
-              functionName: "decryptZipFileWithMetadata",
+                value: params.file,
+                allowedTypes: ['Blob', 'File'],
+                paramName: 'file',
+                functionName: 'decryptZipFileWithMetadata',
             })
-        )return false;
+        )
+            return false;
 
         // -- success case
         return true;
     },
 
-    "decryptZip": (encryptedZipBlob: Blob | File, symmKey: Uint8Array) => { 
-
+    decryptZip: (encryptedZipBlob: Blob | File, symmKey: Uint8Array) => {
         // -- validate
         if (
             !checkType({
                 value: encryptedZipBlob,
-                allowedTypes: ["Blob", "File"],
-                paramName: "encryptedZipBlob",
-                functionName: "decryptZip",
+                allowedTypes: ['Blob', 'File'],
+                paramName: 'encryptedZipBlob',
+                functionName: 'decryptZip',
             })
-        ) return false;
-        
+        )
+            return false;
+
         // -- validate
         if (
             !checkType({
                 value: symmKey,
-                allowedTypes: ["Uint8Array"],
-                paramName: "symmKey",
-                functionName: "decryptZip",
+                allowedTypes: ['Uint8Array'],
+                paramName: 'symmKey',
+                functionName: 'decryptZip',
             })
-        ) return false;
+        )
+            return false;
 
         return true;
     },
 
-    "encryptFileAndZipWithMetadata": (
-      params: EncryptFileAndZipWithMetadataProps
+    encryptFileAndZipWithMetadata: (
+        params: EncryptFileAndZipWithMetadataProps
     ) => {
-        
         // -- validate
-        if(
+        if (
             !checkType({
                 value: params.authSig,
-                allowedTypes: ["Object"],
-                paramName: "authSig",
-                functionName: "encryptFileAndZipWithMetadata",
+                allowedTypes: ['Object'],
+                paramName: 'authSig',
+                functionName: 'encryptFileAndZipWithMetadata',
             })
-        ) return false;
+        )
+            return false;
 
         // -- validate
-        if(
+        if (
             params.accessControlConditions &&
             !checkType({
                 value: params.accessControlConditions,
-                allowedTypes: ["Array"],
-                paramName: "accessControlConditions",
-                functionName: "encryptFileAndZipWithMetadata",
+                allowedTypes: ['Array'],
+                paramName: 'accessControlConditions',
+                functionName: 'encryptFileAndZipWithMetadata',
             })
-        ) return false;
+        )
+            return false;
 
         // -- validate
         if (
             params.evmContractConditions &&
             !checkType({
                 value: params.evmContractConditions,
-                allowedTypes: ["Array"],
-                paramName: "evmContractConditions",
-                functionName: "encryptFileAndZipWithMetadata",
+                allowedTypes: ['Array'],
+                paramName: 'evmContractConditions',
+                functionName: 'encryptFileAndZipWithMetadata',
             })
         )
-        return false;
+            return false;
 
         // -- validate
         if (
             params.solRpcConditions &&
             !checkType({
                 value: params.solRpcConditions,
-                allowedTypes: ["Array"],
-                paramName: "solRpcConditions",
-                functionName: "encryptFileAndZipWithMetadata",
+                allowedTypes: ['Array'],
+                paramName: 'solRpcConditions',
+                functionName: 'encryptFileAndZipWithMetadata',
             })
         )
-        return false;
-        
+            return false;
+
         // -- validate
         if (
             params.unifiedAccessControlConditions &&
             !checkType({
                 value: params.unifiedAccessControlConditions,
-                allowedTypes: ["Array"],
-                paramName: "unifiedAccessControlConditions",
-                functionName: "encryptFileAndZipWithMetadata",
+                allowedTypes: ['Array'],
+                paramName: 'unifiedAccessControlConditions',
+                functionName: 'encryptFileAndZipWithMetadata',
             })
         )
-        return false;
-            
+            return false;
+
         // -- validate
         if (
             !checkIfAuthSigRequiresChainParam(
                 params.authSig,
                 params.chain,
-                "encryptFileAndZipWithMetadata"
+                'encryptFileAndZipWithMetadata'
             )
         )
-        return false;
-                
+            return false;
+
         // -- validate
         if (
             !checkType({
                 value: params.file,
-                allowedTypes: ["File"],
-                paramName: "file",
-                functionName: "encryptFileAndZipWithMetadata",
+                allowedTypes: ['File'],
+                paramName: 'file',
+                functionName: 'encryptFileAndZipWithMetadata',
             })
         )
-        return false;
-        
+            return false;
+
         // -- validate
         if (
             params.readme &&
             !checkType({
-              value: params.readme,
-              allowedTypes: ["String"],
-              paramName: "readme",
-              functionName: "encryptFileAndZipWithMetadata",
+                value: params.readme,
+                allowedTypes: ['String'],
+                paramName: 'readme',
+                functionName: 'encryptFileAndZipWithMetadata',
             })
         )
-        return false;
+            return false;
 
         // -- success case
         return true;
-
-    }
-}
+    },
+};
 
 export type ParamsValidatorsType = typeof paramsValidators;

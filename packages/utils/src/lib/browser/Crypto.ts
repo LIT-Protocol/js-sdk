@@ -1,222 +1,216 @@
-import { 
-    ABIParams, 
-    AccsCOSMOSParams, 
-    AccsDefaultParams, 
-    AccsEVMParams, 
-    AccsOperatorParams, 
-    AccsRegularParams, 
-    AccsSOLV2Params, 
-    ILitError, 
-    JsonSigningResourceId, 
-    LIT_ERROR, 
-    SigShare, 
-    SYMM_KEY_ALGO_PARAMS 
-} from "@litprotocol-dev/constants";
+import {
+    ABIParams,
+    AccsCOSMOSParams,
+    AccsDefaultParams,
+    AccsEVMParams,
+    AccsOperatorParams,
+    AccsRegularParams,
+    AccsSOLV2Params,
+    ILitError,
+    JsonSigningResourceId,
+    LIT_ERROR,
+    SigShare,
+    SYMM_KEY_ALGO_PARAMS,
+} from '@litprotocol-dev/constants';
 
-import { 
-    wasmBlsSdkHelpers
-} from "@litprotocol-dev/core";
+import { wasmBlsSdkHelpers } from '@litprotocol-dev/core';
 
-import * as wasmECDSA from "@litprotocol-dev/core";
+import * as wasmECDSA from '@litprotocol-dev/core';
 
-import { 
-    log, 
-    throwError 
-} from "../utils";
+import { log, throwError } from '../utils';
 
-import { 
-    uint8arrayFromString, 
-    uint8arrayToString
-} from "./Browser";
+import { uint8arrayFromString, uint8arrayToString } from './Browser';
 
-import { 
-    AccessControlConditions, 
-    EvmContractConditions, 
-    SolRpcConditions
-} from "packages/constants/src/lib/types";
+import {
+    AccessControlConditions,
+    EvmContractConditions,
+    SolRpcConditions,
+} from '@litprotocol-dev/constants';
+
+const util = require('util');
 
 /** ---------- Local Functions ---------- */
 /**
- * 
+ *
  * Canonical ABI Params
- * 
- * @param { Array<ABIParams> } params 
+ *
+ * @param { Array<ABIParams> } params
  * @returns { Array<ABIParams> }
  */
-const canonicalAbiParamss = (params: Array<ABIParams>) : Array<ABIParams> => {
+const canonicalAbiParamss = (params: Array<ABIParams>): Array<ABIParams> => {
     return params.map((param) => ({
         name: param.name,
         type: param.type,
     }));
-}
+};
 
 /** ---------- Exports ---------- */
 
 /**
- * // #browser: TextEncoder() is browser only 
+ * // #browser: TextEncoder() is browser only
  * // TEST: Add E2E Test
  * Hash the unified access control conditions using SHA-256 in a deterministic way.
- * 
+ *
  * @param { Array<object> } unifiedAccessControlConditions - The unified access control conditions to hash.
  * @returns { Promise<ArrayBuffer> } A promise that resolves to an ArrayBuffer that contains the hash
  */
 export const hashUnifiedAccessControlConditions = (
     unifiedAccessControlConditions: Array<object>
-) : Promise<ArrayBuffer> => {
+): Promise<ArrayBuffer> => {
+    console.log(
+        'unifiedAccessControlConditions:',
+        unifiedAccessControlConditions
+    );
 
-    console.log("unifiedAccessControlConditions:", unifiedAccessControlConditions);
-
-    const conditions = unifiedAccessControlConditions.map((condition: object) => {
-        canonicalUnifiedAccessControlConditionFormatter(condition);
-    })
+    const conditions = unifiedAccessControlConditions.map(
+        (condition: object) => {
+            canonicalUnifiedAccessControlConditionFormatter(condition);
+        }
+    );
 
     const toHash = JSON.stringify(conditions);
 
-    log("Hashing unified access control conditions: ", toHash);
-    
-    const encoder = new TextEncoder();
-    const data = encoder.encode(toHash);
-    return crypto.subtle.digest("SHA-256", data);
+    log('Hashing unified access control conditions: ', toHash);
 
-}
+    const encoder = new util.TextEncoder();
+    const data = encoder.encode(toHash);
+    return crypto.subtle.digest('SHA-256', data);
+};
 
 /**
- * 
+ *
  * Hash resource id
- * 
+ *
  * @param { JsonSigningResourceId } resourceId
- * 
+ *
  * @returns { Promise<ArrayBuffer> }
- * 
+ *
  */
 export const hashResourceId = (
     resourceId: JsonSigningResourceId
-) : Promise<ArrayBuffer> => {
-
+): Promise<ArrayBuffer> => {
     const resId = canonicalResourceIdFormatter(resourceId);
     const toHash = JSON.stringify(resId);
-    const encoder = new TextEncoder();
+    const encoder = new util.TextEncoder();
     const data = encoder.encode(toHash);
-    
-    return crypto.subtle.digest("SHA-256", data);
-}
+
+    return crypto.subtle.digest('SHA-256', data);
+};
 
 /**
- * 
+ *
  * Hash access control conditions
- * 
+ *
  * @param { AccessControlConditions } accessControlConditions
- * 
+ *
  * @returns { Promise<ArrayBuffer> }
- * 
+ *
  */
 export const hashAccessControlConditions = (
     accessControlConditions: AccessControlConditions
-) : Promise<ArrayBuffer> => {
-
+): Promise<ArrayBuffer> => {
     const conds = accessControlConditions.map((c) =>
         canonicalAccessControlConditionFormatter(c)
     );
 
     const toHash = JSON.stringify(conds);
-    log("Hashing access control conditions: ", toHash);
-    const encoder = new TextEncoder();
+    log('Hashing access control conditions: ', toHash);
+    const encoder = new util.TextEncoder();
     const data = encoder.encode(toHash);
 
-    return crypto.subtle.digest("SHA-256", data);
-}
+    return crypto.subtle.digest('SHA-256', data);
+};
 
 /**
- * 
+ *
  * Hash EVM access control conditions
- * 
+ *
  * @param { EvmContractConditions } evmContractConditions
- * 
+ *
  * @returns { Promise<ArrayBuffer> }
- * 
+ *
  */
 export const hashEVMContractConditions = (
     evmContractConditions: EvmContractConditions
-) : Promise<ArrayBuffer> => {
-
+): Promise<ArrayBuffer> => {
     const conds = evmContractConditions.map((c) =>
         canonicalEVMContractConditionFormatter(c)
     );
 
     const toHash = JSON.stringify(conds);
-    log("Hashing evm contract conditions: ", toHash);
-    const encoder = new TextEncoder();
+    log('Hashing evm contract conditions: ', toHash);
+    const encoder = new util.TextEncoder();
     const data = encoder.encode(toHash);
-    return crypto.subtle.digest("SHA-256", data);
-}
+    return crypto.subtle.digest('SHA-256', data);
+};
 
 /**
- * 
+ *
  * Hash SOL access control conditions
- * 
+ *
  * @param { SolRpcConditions } solRpcConditions
- * 
+ *
  * @returns { Promise<ArrayBuffer> }
- * 
+ *
  */
 export const hashSolRpcConditions = (
-    solRpcConditions: SolRpcConditions,
-) : Promise<ArrayBuffer> => {
-
+    solRpcConditions: SolRpcConditions
+): Promise<ArrayBuffer> => {
     const conds = solRpcConditions.map((c) =>
         canonicalSolRpcConditionFormatter(c)
     );
 
     const toHash = JSON.stringify(conds);
-    log("Hashing sol rpc conditions: ", toHash);
-    const encoder = new TextEncoder();
+    log('Hashing sol rpc conditions: ', toHash);
+    const encoder = new util.TextEncoder();
     const data = encoder.encode(toHash);
 
-    return crypto.subtle.digest("SHA-256", data);
-}
+    return crypto.subtle.digest('SHA-256', data);
+};
 
 /**
- * 
+ *
  * Get operator param
- * 
- * @param { object | [] } cond 
+ *
+ * @param { object | [] } cond
  * @returns { AccsOperatorParams }
  */
-const getOperatorParam = (cond: object | []) : AccsOperatorParams => {
-
+const getOperatorParam = (cond: object | []): AccsOperatorParams => {
     const _cond = cond as AccsOperatorParams;
 
     return {
         operator: _cond.operator,
     };
-}
+};
 
 /**
- * 
+ *
  * Canonical Unified Access Control Condition Formatter
- * 
- * @param { object } cond 
- * @returns { any[] | AccsOperatorParams | any } 
+ *
+ * @param { object } cond
+ * @returns { any[] | AccsOperatorParams | any }
  */
-export const canonicalUnifiedAccessControlConditionFormatter = (cond: object | []) : any[] | AccsOperatorParams | any =>  {
-
+export const canonicalUnifiedAccessControlConditionFormatter = (
+    cond: object | []
+): any[] | AccsOperatorParams | any => {
     // -- if it's an array
     if (Array.isArray(cond)) {
-        return cond.map((c: object) => canonicalUnifiedAccessControlConditionFormatter(c));
+        return cond.map((c: object) =>
+            canonicalUnifiedAccessControlConditionFormatter(c)
+        );
     }
-    
+
     // -- if there's a `operator` key in the object
-    if ("operator" in cond) {
+    if ('operator' in cond) {
         return getOperatorParam(cond);
     }
-    
-    // -- otherwise 
-    if ("returnValueTest" in cond) {
-        
-        const _cond = (cond as AccsRegularParams);
+
+    // -- otherwise
+    if ('returnValueTest' in cond) {
+        const _cond = cond as AccsRegularParams;
         const _conditionType = _cond.conditionType;
 
-        switch(_conditionType){
+        switch (_conditionType) {
             case 'solRpc':
                 return canonicalSolRpcConditionFormatter(cond, true);
 
@@ -228,23 +222,22 @@ export const canonicalUnifiedAccessControlConditionFormatter = (cond: object | [
 
             case 'cosmos':
                 return canonicalCosmosConditionFormatter(cond);
-                
+
             default:
                 throwError({
                     message: `You passed an invalid access control condition that is missing or has a wrong "conditionType": ${JSON.stringify(
                         cond
                     )}`,
-                    error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
+                    error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
                 });
         }
     }
-  
-    throwError({
-      message: `You passed an invalid access control condition: ${cond}`,
-      error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
-    });
-}
 
+    throwError({
+        message: `You passed an invalid access control condition: ${cond}`,
+        error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+    });
+};
 
 /**
  * 
@@ -280,22 +273,28 @@ export const canonicalUnifiedAccessControlConditionFormatter = (cond: object | [
 export const canonicalSolRpcConditionFormatter = (
     cond: object | [],
     requireV2Conditions: boolean = false
-) : any[] | AccsOperatorParams | AccsRegularParams | AccsSOLV2Params | ILitError | any => {
-
+):
+    | any[]
+    | AccsOperatorParams
+    | AccsRegularParams
+    | AccsSOLV2Params
+    | ILitError
+    | any => {
     // -- if is array
     if (Array.isArray(cond)) {
-        return cond.map((c: object) => canonicalSolRpcConditionFormatter(c, requireV2Conditions));
+        return cond.map((c: object) =>
+            canonicalSolRpcConditionFormatter(c, requireV2Conditions)
+        );
     }
 
     // -- if there's a `operator` key in the object
-    if ("operator" in cond) {
+    if ('operator' in cond) {
         return getOperatorParam(cond);
     }
 
     // -- if it has a return value
-    if ("returnValueTest" in cond) {
-
-        const { returnValueTest } = (cond as AccsRegularParams);
+    if ('returnValueTest' in cond) {
+        const { returnValueTest } = cond as AccsRegularParams;
 
         const canonicalReturnValueTest = {
             key: returnValueTest.key,
@@ -306,19 +305,18 @@ export const canonicalSolRpcConditionFormatter = (
         // -- check if this is a sol v1 or v2 condition
         // -- v1 conditions didn't have any pda params or pda interface or pda key
         // -- SOL version 1:: return V2 must have params
-        if ("pdaParams" in cond || requireV2Conditions) {
+        if ('pdaParams' in cond || requireV2Conditions) {
+            const _assumedV2Cond = cond as AccsSOLV2Params;
 
-            const _assumedV2Cond = (cond as AccsSOLV2Params);
-            
             if (
-                !("pdaInterface" in _assumedV2Cond) ||
-                !("pdaKey" in _assumedV2Cond) ||
-                !("offset" in _assumedV2Cond.pdaInterface) ||
-                !("fields" in _assumedV2Cond.pdaInterface)
+                !('pdaInterface' in _assumedV2Cond) ||
+                !('pdaKey' in _assumedV2Cond) ||
+                !('offset' in _assumedV2Cond.pdaInterface) ||
+                !('fields' in _assumedV2Cond.pdaInterface)
             ) {
                 throwError({
                     message: `Solana RPC Conditions have changed and there are some new fields you must include in your condition.  Check the docs here: https://developer.litprotocol.com/AccessControlConditions/solRpcConditions`,
-                    error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
+                    error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
                 });
             }
 
@@ -328,9 +326,9 @@ export const canonicalSolRpcConditionFormatter = (
                 fields: _assumedV2Cond.pdaInterface.fields,
             };
 
-            const _solV2Cond = (cond as AccsSOLV2Params);
+            const _solV2Cond = cond as AccsSOLV2Params;
 
-            const _requiredParams : AccsSOLV2Params = {
+            const _requiredParams: AccsSOLV2Params = {
                 method: _solV2Cond.method,
                 params: _solV2Cond.params,
                 pdaParams: _solV2Cond.pdaParams,
@@ -342,29 +340,27 @@ export const canonicalSolRpcConditionFormatter = (
 
             return _requiredParams;
 
-        // -- SOL version 2:: return default params
+            // -- SOL version 2:: return default params
         } else {
+            const _solV1Cond = cond as AccsRegularParams;
 
-            const _solV1Cond = (cond as AccsRegularParams);
-            
-            const _requiredParams : AccsRegularParams = {
+            const _requiredParams: AccsRegularParams = {
                 method: _solV1Cond.method,
                 params: _solV1Cond.params,
                 chain: _solV1Cond.chain,
                 returnValueTest: canonicalReturnValueTest,
             };
-            
-            return _requiredParams
+
+            return _requiredParams;
         }
     }
 
     // -- else
     throwError({
         message: `You passed an invalid access control condition: ${cond}`,
-        error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
+        error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
     });
-}
-
+};
 
 /**
  * 
@@ -386,23 +382,23 @@ export const canonicalSolRpcConditionFormatter = (
  *  
  * @returns { any[] | AccsOperatorParams | AccsDefaultParams | any }
  */
-export const canonicalAccessControlConditionFormatter = (cond: object | []) : any[] | AccsOperatorParams | AccsDefaultParams | any => {
-    
+export const canonicalAccessControlConditionFormatter = (
+    cond: object | []
+): any[] | AccsOperatorParams | AccsDefaultParams | any => {
     // -- if it's an array
     if (Array.isArray(cond)) {
         return cond.map((c) => canonicalAccessControlConditionFormatter(c));
     }
-  
+
     // -- if there's a `operator` key in the object
-    if ("operator" in cond) {
+    if ('operator' in cond) {
         return getOperatorParam(cond);
     }
 
-    if ("returnValueTest" in cond) {
-
+    if ('returnValueTest' in cond) {
         const _cond = cond as AccsDefaultParams;
 
-        const _return : AccsDefaultParams = {
+        const _return: AccsDefaultParams = {
             contractAddress: _cond.contractAddress,
             chain: _cond.chain,
             standardContractType: _cond.standardContractType,
@@ -416,13 +412,12 @@ export const canonicalAccessControlConditionFormatter = (cond: object | []) : an
 
         return _return;
     }
-  
+
     throwError({
         message: `You passed an invalid access control condition: ${cond}`,
-        error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
+        error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
     });
-  }
-
+};
 
 /**
  * 
@@ -444,16 +439,16 @@ export const canonicalAccessControlConditionFormatter = (cond: object | []) : an
  *  
  * @returns 
  */
-export const canonicalEVMContractConditionFormatter = (cond:object | []) : any[] | AccsOperatorParams | AccsEVMParams | any => {
-
+export const canonicalEVMContractConditionFormatter = (
+    cond: object | []
+): any[] | AccsOperatorParams | AccsEVMParams | any => {
     // -- if it's an array
     if (Array.isArray(cond)) {
         return cond.map((c) => canonicalEVMContractConditionFormatter(c));
     }
 
     // -- if there's a `operator` key in the object
-    if ("operator" in cond) {
-
+    if ('operator' in cond) {
         const _cond = cond as AccsOperatorParams;
 
         return {
@@ -461,7 +456,7 @@ export const canonicalEVMContractConditionFormatter = (cond:object | []) : any[]
         };
     }
 
-    if ("returnValueTest" in cond) {
+    if ('returnValueTest' in cond) {
         /* abi needs to match:
         pub name: String,
         /// Function input.
@@ -488,9 +483,9 @@ export const canonicalEVMContractConditionFormatter = (cond:object | []) : any[]
             inputs: canonicalAbiParamss(functionAbi.inputs),
             outputs: canonicalAbiParamss(functionAbi.outputs),
             constant:
-                typeof functionAbi.constant === "undefined"
-                ? false
-                : functionAbi.constant,
+                typeof functionAbi.constant === 'undefined'
+                    ? false
+                    : functionAbi.constant,
             stateMutability: functionAbi.stateMutability,
         };
 
@@ -500,23 +495,23 @@ export const canonicalEVMContractConditionFormatter = (cond:object | []) : any[]
             value: returnValueTest.value,
         };
 
-        const _return : AccsEVMParams = {
+        const _return: AccsEVMParams = {
             contractAddress: evmCond.contractAddress,
             functionName: evmCond.functionName,
             functionParams: evmCond.functionParams,
             functionAbi: canonicalAbi,
             chain: evmCond.chain,
             returnValueTest: canonicalReturnValueTest,
-        }
+        };
 
-        return _return
+        return _return;
     }
 
     throwError({
         message: `You passed an invalid access control condition: ${cond}`,
-        error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS
+        error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
     });
-}
+};
 
 /**
  * 
@@ -535,26 +530,24 @@ export const canonicalEVMContractConditionFormatter = (cond:object | []) : any[]
  * @param { object } cond 
  * @returns 
  */
-export const canonicalCosmosConditionFormatter = (cond: object) : any[] | AccsOperatorParams | AccsCOSMOSParams | any => {
-
-
+export const canonicalCosmosConditionFormatter = (
+    cond: object
+): any[] | AccsOperatorParams | AccsCOSMOSParams | any => {
     // -- if it's an array
     if (Array.isArray(cond)) {
         return cond.map((c) => canonicalCosmosConditionFormatter(c));
     }
 
     // -- if there's a `operator` key in the object
-    if ("operator" in cond) {
-
+    if ('operator' in cond) {
         const _cond = cond as AccsOperatorParams;
 
         return {
             operator: _cond.operator,
         };
     }
-  
-    if ("returnValueTest" in cond) {
 
+    if ('returnValueTest' in cond) {
         const _cosmosCond = cond as AccsCOSMOSParams;
 
         const { returnValueTest } = _cosmosCond;
@@ -571,253 +564,260 @@ export const canonicalCosmosConditionFormatter = (cond: object) : any[] | AccsOp
             returnValueTest: canonicalReturnValueTest,
         };
     }
-  
+
     throwError({
-      message: `You passed an invalid access control condition: ${cond}`,
-      error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+        message: `You passed an invalid access control condition: ${cond}`,
+        error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
     });
-}
+};
 
 /**
- * 
+ *
  * Canonical ResourceId Formatter returning JSON signing resource id
- * 
+ *
  * @param { JsonSigningResourceId } resId
- * 
+ *
  * @returns { JsonSigningResourceId }
- * 
+ *
  */
 export const canonicalResourceIdFormatter = (
     resId: JsonSigningResourceId
-) : JsonSigningResourceId =>
-{
+): JsonSigningResourceId => {
     // need to return in the exact format below:
     return {
-      baseUrl: resId.baseUrl,
-      path: resId.path,
-      orgId: resId.orgId,
-      role: resId.role,
-      extraData: resId.extraData,
+        baseUrl: resId.baseUrl,
+        path: resId.path,
+        orgId: resId.orgId,
+        role: resId.role,
+        extraData: resId.extraData,
     };
-}
+};
 
 /**
- * 
+ *
  * Generate a new random symmetric key using WebCrypto subtle API.  You should only use this if you're handling your own key generation and management with Lit.  Typically, Lit handles this internally for you.
- * 
+ *
  * @returns { Promise<CryptoKey> } A promise that resolves to the generated key
  */
-export const generateSymmetricKey = async () : Promise<CryptoKey> => {
-
-    const symmKey = await crypto.subtle.generateKey(SYMM_KEY_ALGO_PARAMS, true, [
-        "encrypt",
-        "decrypt",
-    ]);
+export const generateSymmetricKey = async (): Promise<CryptoKey> => {
+    const symmKey = await crypto.subtle.generateKey(
+        SYMM_KEY_ALGO_PARAMS,
+        true,
+        ['encrypt', 'decrypt']
+    );
 
     return symmKey;
-}
+};
 
 /**
- * 
+ *
  * Encrypt a blob with a symmetric key
- * 
+ *
  * @param { CryptoKey } symmKey The symmetric key
  * @param { BufferSource | Uint8Array } data The blob to encrypt
- * 
+ *
  * @returns { Promise<Blob> } The encrypted blob
  */
- export const encryptWithSymmetricKey = async (
-    symmKey: CryptoKey, 
+export const encryptWithSymmetricKey = async (
+    symmKey: CryptoKey,
     data: BufferSource | Uint8Array
-) : Promise<Blob> => {
-    
+): Promise<Blob> => {
     // encrypt the zip with symmetric key
     const iv = crypto.getRandomValues(new Uint8Array(16));
-  
+
     const encryptedZipData = await crypto.subtle.encrypt(
-      {
-        name: "AES-CBC",
-        iv,
-      },
-      symmKey,
-      data,
+        {
+            name: 'AES-CBC',
+            iv,
+        },
+        symmKey,
+        data
     );
 
     const encryptedZipBlob = new Blob([iv, new Uint8Array(encryptedZipData)], {
-      type: "application/octet-stream",
+        type: 'application/octet-stream',
     });
-    
+
     return encryptedZipBlob;
-}
+};
 
 /**
- * 
+ *
  * Import a symmetric key from a Uint8Array to a webcrypto key.  You should only use this if you're handling your own key generation and management with Lit.  Typically, Lit handles this internally for you.
- * 
+ *
  * @param { Uint8Array } symmKey The symmetric key to import
- * 
+ *
  * @returns { Promise<CryptoKey> } A promise that resolves to the imported key
  */
- export const importSymmetricKey = async (
+export const importSymmetricKey = async (
     symmKey: BufferSource | Uint8Array
-) : Promise<CryptoKey> => {
-
+): Promise<CryptoKey> => {
     const importedSymmKey = await crypto.subtle.importKey(
-        "raw",
+        'raw',
         symmKey,
         SYMM_KEY_ALGO_PARAMS,
         true,
-        ["encrypt", "decrypt"]
+        ['encrypt', 'decrypt']
     );
 
     return importedSymmKey;
-}
+};
 
 /**
- * 
+ *
  * Decrypt an encrypted blob with a symmetric key.  Uses AES-CBC via SubtleCrypto
- * 
+ *
  * @param { Blob } encryptedBlob The encrypted blob that should be decrypted
  * @param { CryptoKey } symmKey The symmetric key
- * 
+ *
  * @returns { Uint8Array } The decrypted blob
  */
- export const decryptWithSymmetricKey = async (
-    encryptedBlob: Blob, 
+export const decryptWithSymmetricKey = async (
+    encryptedBlob: Blob,
     symmKey: CryptoKey
-) : Promise<Uint8Array> => {
-
+): Promise<Uint8Array> => {
     const recoveredIv = await encryptedBlob.slice(0, 16).arrayBuffer();
     const encryptedZipArrayBuffer = await encryptedBlob.slice(16).arrayBuffer();
     const decryptedZip = await crypto.subtle.decrypt(
-      {
-        name: "AES-CBC",
-        iv: recoveredIv,
-      },
-      symmKey,
-      encryptedZipArrayBuffer
+        {
+            name: 'AES-CBC',
+            iv: recoveredIv,
+        },
+        symmKey,
+        encryptedZipArrayBuffer
     );
-    
+
     return decryptedZip;
-}
+};
 
 /**
- * 
+ *
  * Combine BLS Shares
- * 
+ *
  * @param { Array<SigShare> } sigSharesWithEverything
  * @param { string } networkPubKeySet
- * 
+ *
  * @returns { any }
- * 
+ *
  */
 export const combineBlsShares = (
-    sigSharesWithEverything: Array<SigShare>, 
+    sigSharesWithEverything: Array<SigShare>,
     networkPubKeySet: string
-) : any => {
+): any => {
+    const pkSetAsBytes = uint8arrayFromString(networkPubKeySet, 'base16');
 
-    const pkSetAsBytes = uint8arrayFromString(networkPubKeySet, "base16");
+    log('pkSetAsBytes', pkSetAsBytes);
 
-    log("pkSetAsBytes", pkSetAsBytes);
-  
     const sigShares = sigSharesWithEverything.map((s) => ({
-      shareHex: s.shareHex,
-      shareIndex: s.shareIndex,
+        shareHex: s.shareHex,
+        shareIndex: s.shareIndex,
     }));
-    
+
     const combinedSignatures = wasmBlsSdkHelpers.combine_signatures(
-      pkSetAsBytes,
-      sigShares
+        pkSetAsBytes,
+        sigShares
     );
 
-    const signature = uint8arrayToString(combinedSignatures, "base16");
-    
-    log("signature is ", signature);
-  
+    const signature = uint8arrayToString(combinedSignatures, 'base16');
+
+    log('signature is ', signature);
+
     return { signature };
-}
+};
 
 /**
- * 
+ *
  * Combine ECDSA Shares
- * 
+ *
  * @param { SigShares | Array<SigShare> } sigShares
- * 
+ *
  * @returns { any }
- * 
+ *
  */
-export const combineEcdsaShares = (
-    sigShares: Array<SigShare>
-) : any => {
-
+export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
     // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
     const R_x = sigShares[0].localX;
     const R_y = sigShares[0].localY;
 
     // the public key can come from any node - it obviously will be identical from each node
     const publicKey = sigShares[0].publicKey;
-    const dataSigned = "0x" + sigShares[0].dataSigned;
+    const dataSigned = '0x' + sigShares[0].dataSigned;
     const validShares = sigShares.map((s) => s.shareHex);
     const shares = JSON.stringify(validShares);
-    log("shares is", shares);
+    log('shares is', shares);
     const sig = JSON.parse(wasmECDSA.combine_signature(R_x, R_y, shares));
-  
-    log("signature", sig);
-  
-    return sig;
-  }
 
-  /**
+    log('signature', sig);
+
+    return sig;
+};
+
+/**
  * //TODO: Fix 'any' types
  * Combine BLS Decryption Shares
- * 
+ *
  * @param { Array<any> } decryptionShares
  * @param { string } networkPubKeySet
  * @param { string } toDecrypt
- * 
+ * @param { any } provider
+ *
  * @returns { any }
- * 
+ *
  */
-  export const combineBlsDecryptionShares = (
+export const combineBlsDecryptionShares = (
     decryptionShares: Array<any>,
     networkPubKeySet: string,
-    toDecrypt: any
-  ) : any => {
+    toDecrypt: any,
+    provider: {
+        wasmBlsSdk: any;
+    }
+): any => {
+    // ========== Prepare Params ===========
+    // -- validate if wasmBlsSdk is empty
+    if (provider.wasmBlsSdk === undefined) {
+        throwError({
+            message: 'wasmBlsSdk is undefined',
+            error: LIT_ERROR.WASM_INIT_ERROR,
+        });
+        return;
+    }
+
+    let wasmBlsSdk = provider.wasmBlsSdk;
 
     // sort the decryption shares by share index.  this is important when combining the shares.
-    decryptionShares.sort((a, b) => a.shareIndex - b.shareIndex);
-  
+    decryptionShares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
+
     // combine the decryption shares
     // log("combineBlsDecryptionShares");
     // log("decryptionShares", decryptionShares);
     // log("networkPubKeySet", networkPubKeySet);
     // log("toDecrypt", toDecrypt);
-  
+
     // set decryption shares bytes in wasm
-    decryptionShares.forEach((s, idx) => {
-      wasmExports.set_share_indexes(idx, s.shareIndex);
-      const shareAsBytes = uint8arrayFromString(s.decryptionShare, "base16");
-      for (let i = 0; i < shareAsBytes.length; i++) {
-        wasmExports.set_decryption_shares_byte(i, idx, shareAsBytes[i]);
-      }
+    decryptionShares.forEach((s: any, idx: any) => {
+        wasmBlsSdk.set_share_indexes(idx, s.shareIndex);
+        const shareAsBytes = uint8arrayFromString(s.decryptionShare, 'base16');
+        for (let i = 0; i < shareAsBytes.length; i++) {
+            wasmBlsSdk.set_decryption_shares_byte(i, idx, shareAsBytes[i]);
+        }
     });
-  
+
     // set the public key set bytes in wasm
-    const pkSetAsBytes = uint8arrayFromString(networkPubKeySet, "base16");
+    const pkSetAsBytes = uint8arrayFromString(networkPubKeySet, 'base16');
     wasmBlsSdkHelpers.set_mc_bytes(pkSetAsBytes);
-  
+
     // set the ciphertext bytes
-    const ciphertextAsBytes = uint8arrayFromString(toDecrypt, "base16");
+    const ciphertextAsBytes = uint8arrayFromString(toDecrypt, 'base16');
     for (let i = 0; i < ciphertextAsBytes.length; i++) {
-      wasmExports.set_ct_byte(i, ciphertextAsBytes[i]);
+        wasmBlsSdk.set_ct_byte(i, ciphertextAsBytes[i]);
     }
-  
+
     const decrypted = wasmBlsSdkHelpers.combine_decryption_shares(
-      decryptionShares.length,
-      pkSetAsBytes.length,
-      ciphertextAsBytes.length
+        decryptionShares.length,
+        pkSetAsBytes.length,
+        ciphertextAsBytes.length
     );
 
     // log("decrypted is ", uint8arrayToString(decrypted, "base16"));
     return decrypted;
-}
+};

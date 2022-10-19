@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "paths": {
       "@litprotocol-dev/constants": ["packages/constants/src/index.ts"],
       "@litprotocol-dev/constants-dist": ["dist/packages/constants/src"],

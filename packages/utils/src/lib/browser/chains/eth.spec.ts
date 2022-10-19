@@ -1,5 +1,4 @@
 import * as ethModule from './eth';
-import { ABI_LIT, ABI_ERC20 } from "@litprotocol-dev/core";
 
 describe('eth.ts', () => {
 

@@ -8,6 +8,8 @@ import {
     Web3Provider
 } from "@ethersproject/providers";
 
+const util = require('util');
+
 /**
  * 
  * Get the Solana provider from the browser web3 extension
@@ -131,7 +133,7 @@ export const signAndSaveAuthMessage = async ({ provider } : {
     const now = new Date().toISOString();
     const body = AUTH_SIGNATURE_BODY.replace("{{timestamp}}", now);
 
-    const data = new TextEncoder().encode(body);
+    const data = new util.TextEncoder().encode(body);
     const signed = await provider.signMessage(data, "utf8");
 
     const hexSig = uint8arrayToString(signed.signature, "base16");
