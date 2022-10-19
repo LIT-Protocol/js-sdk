@@ -1,4 +1,4 @@
-import { LIT_NETWORKS } from "@litprotocol-dev/constants";
+import { AccsOperatorParams, LIT_NETWORKS } from "@litprotocol-dev/constants";
 
 import { 
     AccsCOSMOSParams, 
@@ -92,3 +92,7 @@ export type LITChain<T> = {
 }
 
 export type LIT_NETWORKS_KEYS = keyof typeof LIT_NETWORKS;
+
+export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
+
+export type ConditionItem = AccsOperatorParams | AccsRegularParams;

@@ -6,6 +6,7 @@ import {
     AccsOperatorParams,
     AccsRegularParams,
     AccsSOLV2Params,
+    ConditionItem,
     ILitError,
     JsonSigningResourceId,
     LIT_ERROR,
@@ -19,10 +20,10 @@ import { throwError } from '@litprotocol-dev/utils';
  *
  * Get operator param
  *
- * @param { object | [] } cond
+ * @param { ConditionItem } cond
  * @returns { AccsOperatorParams }
  */
-const getOperatorParam = (cond: object | []): AccsOperatorParams => {
+const getOperatorParam = (cond: ConditionItem ): AccsOperatorParams => {
     const _cond = cond as AccsOperatorParams;
 
     return {
@@ -48,15 +49,15 @@ const canonicalAbiParamss = (params: Array<ABIParams>): Array<ABIParams> => {
  *
  * Canonical Unified Access Control Condition Formatter
  *
- * @param { object } cond
+ * @param { ConditionItem } cond
  * @returns { any[] | AccsOperatorParams | any }
  */
 export const canonicalUnifiedAccessControlConditionFormatter = (
-    cond: object | []
+    cond: ConditionItem
 ): any[] | AccsOperatorParams | any => {
     // -- if it's an array
     if (Array.isArray(cond)) {
-        return cond.map((c: object) =>
+        return cond.map((c) =>
             canonicalUnifiedAccessControlConditionFormatter(c)
         );
     }
@@ -132,7 +133,7 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
  * @returns { any[] | AccsOperatorParams | AccsRegularParams | AccsSOLV2Params | ILitError | any }
  */
 export const canonicalSolRpcConditionFormatter = (
-    cond: object | [],
+    cond: ConditionItem,
     requireV2Conditions: boolean = false
 ):
     | any[]
@@ -143,7 +144,7 @@ export const canonicalSolRpcConditionFormatter = (
     | any => {
     // -- if is array
     if (Array.isArray(cond)) {
-        return cond.map((c: object) =>
+        return cond.map((c: ConditionItem) =>
             canonicalSolRpcConditionFormatter(c, requireV2Conditions)
         );
     }
@@ -244,7 +245,7 @@ export const canonicalSolRpcConditionFormatter = (
  * @returns { any[] | AccsOperatorParams | AccsDefaultParams | any }
  */
 export const canonicalAccessControlConditionFormatter = (
-    cond: object | []
+    cond: ConditionItem,
 ): any[] | AccsOperatorParams | AccsDefaultParams | any => {
     // -- if it's an array
     if (Array.isArray(cond)) {
@@ -296,12 +297,12 @@ export const canonicalAccessControlConditionFormatter = (
     }
     ---
  * 
- * @param { object } cond
+ * @param { ConditionItem } cond
  *  
  * @returns 
  */
 export const canonicalEVMContractConditionFormatter = (
-    cond: object | []
+    cond: ConditionItem
 ): any[] | AccsOperatorParams | AccsEVMParams | any => {
     // -- if it's an array
     if (Array.isArray(cond)) {
@@ -388,11 +389,11 @@ export const canonicalEVMContractConditionFormatter = (
    ---
  * 
  * 
- * @param { object } cond 
+ * @param { ConditionItem } cond 
  * @returns 
  */
 export const canonicalCosmosConditionFormatter = (
-    cond: object
+    cond: ConditionItem
 ): any[] | AccsOperatorParams | AccsCOSMOSParams | any => {
     // -- if it's an array
     if (Array.isArray(cond)) {

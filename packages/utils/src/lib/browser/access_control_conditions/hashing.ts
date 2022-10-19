@@ -1,8 +1,10 @@
 import {
     AccessControlConditions,
+    ConditionItem,
     EvmContractConditions,
     JsonSigningResourceId,
     SolRpcConditions,
+    UnifiedAccessControlConditions,
 } from '@litprotocol-dev/constants';
 import {
     canonicalAccessControlConditionFormatter,
@@ -21,11 +23,11 @@ const util = require('util');
  * // TEST: Add E2E Test
  * Hash the unified access control conditions using SHA-256 in a deterministic way.
  *
- * @param { Array<object> } unifiedAccessControlConditions - The unified access control conditions to hash.
+ * @param { UnifiedAccessControlConditions } unifiedAccessControlConditions - The unified access control conditions to hash.
  * @returns { Promise<ArrayBuffer> } A promise that resolves to an ArrayBuffer that contains the hash
  */
 export const hashUnifiedAccessControlConditions = (
-    unifiedAccessControlConditions: Array<object>
+    unifiedAccessControlConditions: UnifiedAccessControlConditions
 ): Promise<ArrayBuffer> => {
     console.log(
         'unifiedAccessControlConditions:',
@@ -33,7 +35,7 @@ export const hashUnifiedAccessControlConditions = (
     );
 
     const conditions = unifiedAccessControlConditions.map(
-        (condition: object) => {
+        (condition: ConditionItem) => {
             canonicalUnifiedAccessControlConditionFormatter(condition);
         }
     );

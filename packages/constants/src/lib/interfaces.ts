@@ -2,6 +2,7 @@
 import { 
     AccessControlConditions, 
     Chain, 
+    ConditionType, 
     EvmContractConditions, 
     JsonRequest, 
     LIT_NETWORKS_KEYS, 
@@ -73,7 +74,7 @@ export interface AccsOperatorParams {
 }
 
 export interface AccsRegularParams{
-    conditionType?: string,
+    conditionType?: ConditionType,
     returnValueTest: {
         key?: string,
         comparator: string,
