@@ -1,12 +1,15 @@
 import {
-    canonicalUnifiedAccessControlConditionFormatter,
-    // hashUnifiedAccessControlConditions,
-    // TEST: hashUnifiedAccessControlConditions
+    canonicalUnifiedAccessControlConditionFormatter
     // TEST: canonicalSolRpcConditionFormatter
     // TEST: canonicalAccessControlConditionFormatter
     // TEST: canonicalEVMContractConditionFormatter
     // TEST: canonicalCosmosConditionFormatter
-} from './crypto';
+} from '@litprotocol-dev/utils'
+
+// import {
+    // hashUnifiedAccessControlConditions,
+    // TEST: hashUnifiedAccessControlConditions
+// } from './access_control_conditions/hashing'
 
 // ---------- Mock Accs ----------
 const MOCK_ACCS_MATCH_ETH_AND_SOL_WALLET_ADDRESS = [
@@ -82,11 +85,9 @@ describe('eth.ts', () => {
         expect(1).toBe(1);
     })
 
-    // TODO: the "hashing" function from crypto.ts should be placed in another file 
-    // because it's using a browser function "TextEncoder" which is not available in node,
-    // That means, we can't test the following cases in node, only in the browser.
-
+    // TODO: unit8arrays multi-encoding has issue with TextEncoder in node env
     // it('should format canonical unified access control (ETH + SOLANA Wallet Addresses with "AND" operator)', async () => {
+        
     //     const test = canonicalUnifiedAccessControlConditionFormatter(
     //         MOCK_ACCS_MATCH_ETH_AND_SOL_WALLET_ADDRESS
     //     );

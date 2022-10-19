@@ -51,7 +51,7 @@ import {
     hashResourceId,
     hashSolRpcConditions,
     hashUnifiedAccessControlConditions,
-} from './browser/crypto';
+} from '@litprotocol-dev/utils'
 
 import {
     convertLitActionsParams,

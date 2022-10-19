@@ -1,12 +1,9 @@
 import { AUTH_SIGNATURE_BODY, ELeft, ERight, IEither, IProvider, JsonAuthSig, LIT_ERROR, LOCAL_STORAGE_KEYS } from "@litprotocol-dev/constants";
 import {
-    fromString as uint8arrayFromString,
     toString as uint8arrayToString,
 } from "uint8arrays";
+
 import { throwError, log, getStorageItem } from "../../utils";
-import { 
-    Web3Provider
-} from "@ethersproject/providers";
 
 const util = require('util');
 
