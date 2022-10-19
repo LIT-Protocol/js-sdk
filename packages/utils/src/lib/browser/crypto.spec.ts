@@ -1,14 +1,14 @@
 import {
-    canonicalUnifiedAccessControlConditionFormatter
+    canonicalUnifiedAccessControlConditionFormatter,
     // TEST: canonicalSolRpcConditionFormatter
     // TEST: canonicalAccessControlConditionFormatter
     // TEST: canonicalEVMContractConditionFormatter
     // TEST: canonicalCosmosConditionFormatter
-} from '@litprotocol-dev/utils'
+} from '@litprotocol-dev/utils';
 
 // import {
-    // hashUnifiedAccessControlConditions,
-    // TEST: hashUnifiedAccessControlConditions
+// hashUnifiedAccessControlConditions,
+// TEST: hashUnifiedAccessControlConditions
 // } from './access_control_conditions/hashing'
 
 // ---------- Mock Accs ----------
@@ -83,11 +83,11 @@ const MOCK_ACCS_UNKNOWN_KEY = [
 describe('eth.ts', () => {
     it('pass', () => {
         expect(1).toBe(1);
-    })
+    });
 
     // TODO: unit8arrays multi-encoding has issue with TextEncoder in node env
     // it('should format canonical unified access control (ETH + SOLANA Wallet Addresses with "AND" operator)', async () => {
-        
+
     //     const test = canonicalUnifiedAccessControlConditionFormatter(
     //         MOCK_ACCS_MATCH_ETH_AND_SOL_WALLET_ADDRESS
     //     );

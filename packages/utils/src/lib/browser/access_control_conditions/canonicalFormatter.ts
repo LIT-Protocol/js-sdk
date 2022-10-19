@@ -23,7 +23,7 @@ import { throwError } from '@litprotocol-dev/utils';
  * @param { ConditionItem } cond
  * @returns { AccsOperatorParams }
  */
-const getOperatorParam = (cond: ConditionItem ): AccsOperatorParams => {
+const getOperatorParam = (cond: ConditionItem): AccsOperatorParams => {
     const _cond = cond as AccsOperatorParams;
 
     return {
@@ -54,7 +54,7 @@ const canonicalAbiParamss = (params: Array<ABIParams>): Array<ABIParams> => {
  */
 export const canonicalUnifiedAccessControlConditionFormatter = (
     cond: ConditionItem
-): any[] | AccsOperatorParams | any => {
+): AccsOperatorParams | any => {
     // -- if it's an array
     if (Array.isArray(cond)) {
         return cond.map((c) =>
@@ -245,7 +245,7 @@ export const canonicalSolRpcConditionFormatter = (
  * @returns { any[] | AccsOperatorParams | AccsDefaultParams | any }
  */
 export const canonicalAccessControlConditionFormatter = (
-    cond: ConditionItem,
+    cond: ConditionItem
 ): any[] | AccsOperatorParams | AccsDefaultParams | any => {
     // -- if it's an array
     if (Array.isArray(cond)) {

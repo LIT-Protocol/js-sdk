@@ -6,7 +6,4 @@ export * from './lib/ecdsa-sdk';
 const ABI_LIT = import('./abis/LIT.json');
 const ABI_ERC20 = import('./abis/ERC20.json');
 
-export {
-    ABI_LIT,
-    ABI_ERC20
-}
+export { ABI_LIT, ABI_ERC20 };

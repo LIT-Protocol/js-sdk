@@ -1,4 +1,4 @@
-import { AccsEVMParams, JsonAuthSig } from '@litprotocol-dev/constants';
+import { JsonAuthSig } from '@litprotocol-dev/constants';
 
 import {
     AccessControlConditions,
