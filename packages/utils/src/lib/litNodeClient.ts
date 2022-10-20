@@ -33,6 +33,8 @@ import {
     NodeCommandServerKeysResponse,
     JsonHandshakeResponse,
     SigShare,
+    defaultLitnodeClientConfig,
+    ILitNodeClient,
 } from '@litprotocol-dev/constants';
 
 import { initWasmBlsSdk, wasmBlsSdkHelpers } from '@litprotocol-dev/core';
@@ -66,28 +68,7 @@ import * as wasmECDSA from '@litprotocol-dev/core';
 
 import { SupportedJsonRequests } from '@litprotocol-dev/constants';
 
-/** ---------- Local Constants ---------- */
-export const defaultConfig: LitNodeClientConfig = {
-    alertWhenUnauthorized: true,
-    minNodeCount: 6,
-    debug: true,
-    bootstrapUrls: [
-        'https://node2.litgateway.com:7370',
-        'https://node2.litgateway.com:7371',
-        'https://node2.litgateway.com:7372',
-        'https://node2.litgateway.com:7373',
-        'https://node2.litgateway.com:7374',
-        'https://node2.litgateway.com:7375',
-        'https://node2.litgateway.com:7376',
-        'https://node2.litgateway.com:7377',
-        'https://node2.litgateway.com:7378',
-        'https://node2.litgateway.com:7379',
-    ],
-    litNetwork: 'jalapeno',
-};
-
 /** ---------- Local Helpers ---------- */
-
 const override = (original: any, custom: any) => {
     return { ...original, ...custom };
 };
@@ -99,7 +80,8 @@ const browserOnly = (callback: Function) => {
 };
 
 /** ---------- Main Export Class ---------- */
-export default class LitNodeClient {
+export default class LitNodeClient implements ILitNodeClient{
+
     config: LitNodeClientConfig;
     connectedNodes: SetConstructor | Set<any> | any;
     serverKeys: KV | any;
@@ -111,7 +93,7 @@ export default class LitNodeClient {
     // ========== Constructor ==========
     constructor(customConfig: LitNodeClientConfig) {
         // -- initialize default config
-        this.config = defaultConfig;
+        this.config = defaultLitnodeClientConfig;
 
         // -- if config params are specified, replace it
         if (customConfig) {
