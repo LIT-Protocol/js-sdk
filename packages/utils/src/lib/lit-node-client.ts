@@ -38,7 +38,7 @@ import {
 } from '@litprotocol-dev/constants';
 
 import { initWasmBlsSdk, wasmBlsSdkHelpers } from '@litprotocol-dev/core';
-import { uint8arrayFromString, uint8arrayToString } from './browser/Browser';
+import { uint8arrayFromString, uint8arrayToString } from './browser/browser';
 import {
     canonicalAccessControlConditionFormatter,
     canonicalEVMContractConditionFormatter,

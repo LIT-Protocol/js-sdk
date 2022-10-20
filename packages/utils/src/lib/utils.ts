@@ -8,7 +8,7 @@ import {
     LIT_ERROR,
 } from '@litprotocol-dev/constants';
 import { ILitError } from '@litprotocol-dev/constants';
-import { paramsValidators } from './paramsValidators';
+import { paramsValidators } from './params-validators';
 
 // ----- Testing Modules -----
 export const utils = () => {

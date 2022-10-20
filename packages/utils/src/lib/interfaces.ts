@@ -7,7 +7,7 @@ import {
     UnifiedAccessControlConditions,
 } from '@litprotocol-dev/constants';
 
-import LitNodeClient from './litNodeClient';
+import LitNodeClient from './lit-node-client';
 
 export interface EncryptFileAndZipWithMetadataProps {
     // The authSig of the user.  Returned via the checkAndSignAuthMessage function

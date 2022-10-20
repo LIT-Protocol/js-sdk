@@ -1,5 +1,5 @@
-import { SupportedJsonRequests } from '@litprotocol-dev/constants';
 import {
+    SupportedJsonRequests,
     ExecuteJsProps,
     ExecuteJsResponse,
     FormattedMultipleAccs,
@@ -23,7 +23,7 @@ import {
     SingConditionECDSA,
     SuccessNodePromises,
     ValidateAndSignECDSA,
-} from '../interfaces';
+} from '@litprotocol-dev/constants';
 
 export interface ILitNodeClient {
     config: LitNodeClientConfig;

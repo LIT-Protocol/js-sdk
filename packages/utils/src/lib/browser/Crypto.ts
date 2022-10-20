@@ -10,7 +10,7 @@ import * as wasmECDSA from '@litprotocol-dev/core';
 
 import { log, throwError } from '../utils';
 
-import { uint8arrayFromString, uint8arrayToString } from './Browser';
+import { uint8arrayFromString, uint8arrayToString } from './browser';
 
 /** ---------- Exports ---------- */
 
