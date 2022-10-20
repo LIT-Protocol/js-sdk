@@ -2,11 +2,10 @@ import {
     DecryptFileProps,
     JsonEncryptionRetrieveRequest,
     JsonSaveEncryptionKeyRequest,
-} from '@litprotocol-dev/constants';
-import {
     DecryptZipFileWithMetadataProps,
     EncryptFileAndZipWithMetadataProps,
-} from './interfaces';
+} from '@litprotocol-dev/constants';
+
 import { checkIfAuthSigRequiresChainParam, checkType, is } from './utils';
 
 export const paramsValidators = {

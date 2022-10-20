@@ -1,5 +1,6 @@
 import {
     AUTH_SIGNATURE_BODY,
+    EITHER_TYPE,
     ELeft,
     ERight,
     IEither,
@@ -31,13 +32,9 @@ const getProvider = (): IEither => {
         const message =
             'No web3 wallet was found that works with Solana.  Install a Solana wallet or choose another chain';
 
-        const error = LIT_ERROR.NO_WALLET_EXCEPTION;
-
         resultOrError = ELeft({
             message,
             error: LIT_ERROR.NO_WALLET_EXCEPTION,
-            name: error.NAME,
-            errorCode: error.CODE,
         });
     }
 
@@ -90,12 +87,12 @@ export const checkAndSignSolAuthMessage =
         let authSig: JsonAuthSig;
 
         // -- case: if unable to get auth from local storage
-        if (authSigOrError.type === 'ERROR') {
+        if (authSigOrError.type === EITHER_TYPE.ERROR) {
             log('signing auth message because sig is not in local storage');
 
             await signAndSaveAuthMessage({ provider });
 
-            authSigOrError.type = 'SUCCESS';
+            authSigOrError.type = EITHER_TYPE.SUCCESS;
             authSigOrError.result = getStorageItem(key);
         }
 
@@ -108,7 +105,7 @@ export const checkAndSignSolAuthMessage =
             );
             await signAndSaveAuthMessage({ provider });
 
-            authSigOrError.type = 'SUCCESS';
+            authSigOrError.type = EITHER_TYPE.SUCCESS;
             authSigOrError.result = getStorageItem(key);
             authSig = JSON.parse(authSigOrError.result);
         }

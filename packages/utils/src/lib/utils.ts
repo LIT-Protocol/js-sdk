@@ -84,8 +84,8 @@ export const throwError = ({
 
     throw new (errConstructorFunc as any)(
         message,
-        (name = error?.NAME ?? name),
-        (errorCode = error?.CODE ?? errorCode)
+        (name = error?.name ?? name),
+        (errorCode = error?.code ?? errorCode)
     );
 };
 

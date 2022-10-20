@@ -36,6 +36,14 @@
         ]
       }
     },
+
+    "copyJSONFilesToDist": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "mkdir -p dist/packages/constants/web/abis && cp ./packages/constants/src/lib/abis/ERC20.json dist/packages/constants/web/abis/ERC20.json && cp ./packages/constants/src/lib/abis/LIT.json dist/packages/constants/web/abis/LIT.json"
+      }
+    },
+
     "generateDoc":{
       "executor": "nx:run-commands",
         "options": {

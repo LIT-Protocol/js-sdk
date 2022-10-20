@@ -6,7 +6,7 @@
     "build":{
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn nx run core:_buildTsc && yarn nx run core:_buildWeb && yarn nx run core:copyJSONFilesToDist"
+        "command": "yarn nx run core:_buildTsc && yarn nx run core:_buildWeb"
       }
     },
     "_buildTsc": {
@@ -32,12 +32,6 @@
             "function": "nodeBuiltIns"
           }
         ]
-      }
-    },
-    "copyJSONFilesToDist": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "mkdir -p dist/packages/core/web/abis && cp ./packages/core/src/abis/ERC20.json dist/packages/core/web/abis/ERC20.json && cp ./packages/core/src/abis/LIT.json dist/packages/core/web/abis/LIT.json"
       }
     },
     "lint": {

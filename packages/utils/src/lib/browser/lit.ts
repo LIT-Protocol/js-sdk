@@ -3,9 +3,11 @@ import {
     CheckAndSignAuthParams,
     DecryptFileProps,
     DecryptZipFileWithMetadata,
+    DecryptZipFileWithMetadataProps,
     EncryptedFile,
     EncryptedString,
     EncryptedZip,
+    EncryptFileAndZipWithMetadataProps,
     HumanizedAccsProps,
     IJWT,
     JsonAuthSig,
@@ -47,11 +49,6 @@ import {
     generateSymmetricKey,
     importSymmetricKey,
 } from './crypto';
-
-import {
-    DecryptZipFileWithMetadataProps,
-    EncryptFileAndZipWithMetadataProps,
-} from '../interfaces';
 
 // ---------- Local Interfaces ----------
 

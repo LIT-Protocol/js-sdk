@@ -38,7 +38,7 @@ import {
 } from '@litprotocol-dev/constants';
 
 import { initWasmBlsSdk, wasmBlsSdkHelpers } from '@litprotocol-dev/core';
-import { uint8arrayFromString, uint8arrayToString } from './browser/browser';
+
 import {
     canonicalAccessControlConditionFormatter,
     canonicalEVMContractConditionFormatter,
@@ -53,16 +53,16 @@ import {
     hashResourceId,
     hashSolRpcConditions,
     hashUnifiedAccessControlConditions,
-} from '@litprotocol-dev/utils';
-
-import {
+    uint8arrayFromString,
+    uint8arrayToString,
     convertLitActionsParams,
     getStorageItem,
     log,
     mostCommonString,
     safeParams,
     throwError,
-} from './utils';
+} from '@litprotocol-dev/utils';
+
 
 import * as wasmECDSA from '@litprotocol-dev/core';
 
@@ -80,8 +80,7 @@ const browserOnly = (callback: Function) => {
 };
 
 /** ---------- Main Export Class ---------- */
-export default class LitNodeClient implements ILitNodeClient{
-
+export default class LitNodeClient implements ILitNodeClient {
     config: LitNodeClientConfig;
     connectedNodes: SetConstructor | Set<any> | any;
     serverKeys: KV | any;

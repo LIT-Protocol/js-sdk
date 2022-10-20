@@ -188,7 +188,7 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
 export const combineBlsDecryptionShares = (
     decryptionShares: Array<any>,
     networkPubKeySet: string,
-    toDecrypt: any,
+    toDecrypt: string,
     provider: {
         wasmBlsSdk: any;
     }

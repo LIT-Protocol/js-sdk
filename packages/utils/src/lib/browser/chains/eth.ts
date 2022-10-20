@@ -3,11 +3,12 @@ import {
     ELeft,
     ERight,
     IEither,
-    IEitherErrorType,
+    EITHER_TYPE,
     JsonAuthSig,
     LIT_CHAINS,
     LIT_ERROR,
     LOCAL_STORAGE_KEYS,
+    ABI_ERC20,
 } from '@litprotocol-dev/constants';
 import { log, throwError, numberToHex, getStorageItem } from '../../utils';
 import { ethers } from 'ethers';
@@ -29,7 +30,6 @@ import { getAddress } from 'ethers/lib/utils';
 
 import naclUtil from 'tweetnacl-util';
 import nacl from 'tweetnacl';
-import { ABI_ERC20 } from '@litprotocol-dev/core';
 
 /** ---------- Local Interfaces ---------- */
 interface ConnectWeb3 {
@@ -436,7 +436,7 @@ export const checkAndSignEVMAuthMessage = async ({
     console.log('authSigOrError:', authSigOrError);
 
     // -- 3. check all variables before executing business logic
-    if (currentChainIdOrError.type === IEitherErrorType.ERROR) {
+    if (currentChainIdOrError.type === EITHER_TYPE.ERROR) {
         throwError(currentChainIdOrError.result);
         return;
     }
@@ -512,7 +512,7 @@ export const checkAndSignEVMAuthMessage = async ({
     // -- 5. case: Lit auth signature is NOT in the local storage
     log('checking if sig is in local storage');
 
-    if (authSigOrError.type === IEitherErrorType.ERROR) {
+    if (authSigOrError.type === EITHER_TYPE.ERROR) {
         log('signing auth message because sig is not in local storage');
 
         authSigOrError.result = await _signAndGetAuth({

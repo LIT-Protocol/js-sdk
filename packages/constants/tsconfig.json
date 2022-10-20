@@ -1,36 +1,16 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "target": "ES2015",
-      "module": "ES2015",
-      "moduleResolution": "node",
-      // "allowSyntheticDefaultImports": true,
-      // "importHelpers": true,
-      // "removeComments": true,
-      // "declaration": true,
-      // "sourceMap": true,
-      // "rootDir": "src",
-      // "outDir": "src_built_from_ts",
-      // "strict": true,
-      // "noImplicitReturns": true,
-      // "noFallthroughCasesInSwitch": true,
-      // "noUnusedLocals": true,
-      // "noUnusedParameters": true,
-      "skipLibCheck": true,
-      // "forceConsistentCasingInFileNames": true,
-      // "jsx": "react",
-      "resolveJsonModule": true,
-      "esModuleInterop": true,
-      // "allowJs": false,
-  },
-  "files": [],
-  "include": [],
-  "references": [
-    {
-      "path": "./tsconfig.lib.json"
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "esModuleInterop": true
     },
-    {
-      "path": "./tsconfig.spec.json"
-    }
-  ]
+    "files": ["src/lib/abis/ERC20.json", "src/lib/abis/LIT.json"],
+    "include": [],
+    "references": [
+        {
+            "path": "./tsconfig.lib.json"
+        },
+        {
+            "path": "./tsconfig.spec.json"
+        }
+    ]
 }

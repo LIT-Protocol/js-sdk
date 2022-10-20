@@ -9,3 +9,11 @@ export enum SIGTYPE {
     BLS = 'BLS',
     ECDSA = 'ECDSA',
 }
+
+/**
+ * The only either possible error types
+ */
+ export const enum EITHER_TYPE {
+    ERROR = 'ERROR',
+    SUCCESS = 'SUCCESS',
+}
