@@ -35,9 +35,12 @@ import {
     SigShare,
     defaultLitnodeClientConfig,
     ILitNodeClient,
+    SupportedJsonRequests,
 } from '@litprotocol-dev/constants';
 
 import { initWasmBlsSdk, wasmBlsSdkHelpers } from '@litprotocol-dev/core';
+
+import * as wasmECDSA from '@litprotocol-dev/core';
 
 import {
     canonicalAccessControlConditionFormatter,
@@ -63,10 +66,6 @@ import {
     throwError,
 } from '@litprotocol-dev/utils';
 
-
-import * as wasmECDSA from '@litprotocol-dev/core';
-
-import { SupportedJsonRequests } from '@litprotocol-dev/constants';
 
 /** ---------- Local Helpers ---------- */
 const override = (original: any, custom: any) => {
