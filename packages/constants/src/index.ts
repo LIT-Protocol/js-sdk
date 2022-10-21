@@ -1,29 +1,33 @@
-// ==================== Version ====================
+// ----------- Version -----------
 export * from './lib/version';
 
-// ==================== Constants ====================
+// ----------- Constants -----------
 export * from './lib/constants/constants';
 export * from './lib/constants/defaultLitNodeClientConfig';
 
-// ==================== Interfaces ====================
+// ----------- Interfaces -----------
 export * from './lib/interfaces/interfaces';
 export * from './lib/interfaces/i-errors';
 export * from './lib/interfaces/ILitNodeClient';
 
-// ==================== ENUMS ====================
+// ----------- ENUMS -----------
 export * from './lib/enums';
 
-// ==================== Errors ====================
+// ----------- Errors -----------
 export * from './lib/errors';
 
-// ==================== Types ====================
+// ----------- Types -----------
 export * from './lib/types';
 
-// ==================== Utils ====================
+// ----------- Utils -----------
 export * from './lib/utils';
 
-// ==================== ABIs ====================
+// ----------- ABIs -----------
 const ABI_LIT = import('./lib/abis/LIT.json');
 const ABI_ERC20 = import('./lib/abis/ERC20.json');
 
 export { ABI_LIT, ABI_ERC20 };
+
+// ---------- BLS & ECDSA SDKS ----------
+export * from './crypto-sdks/bls-sdk';
+export * from './crypto-sdks/ecdsa-sdk';

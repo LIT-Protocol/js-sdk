@@ -1,4 +1,14 @@
 // @ts-nocheck
+
+if (
+    typeof global.TextEncoder === 'undefined' ||
+    typeof global.TextDecoder === 'undefined'
+) {
+    const { TextEncoder, TextDecoder } = require('util');
+    global.TextEncoder = TextEncoder;
+    global.TextDecoder = TextDecoder;
+}
+
 // Contants
 const skLen = 32; // bytes
 const pkLen = 48; // bytes
@@ -245,7 +255,7 @@ const uint8ArrayToBase64 = (bytes: any) => {
 
 import * as pako from 'pako';
 
-const util = require('util');
+const util = import('util');
 
 //https://gist.github.com/enepomnyaschih/72c423f727d395eeaa09697058238727
 /*

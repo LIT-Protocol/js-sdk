@@ -4,9 +4,9 @@ import {
     SYMM_KEY_ALGO_PARAMS,
 } from '@litprotocol-dev/constants';
 
-import { wasmBlsSdkHelpers } from '@litprotocol-dev/core';
+import { wasmBlsSdkHelpers } from '@litprotocol-dev/constants';
 
-import * as wasmECDSA from '@litprotocol-dev/core';
+import * as wasmECDSA from '@litprotocol-dev/constants';
 
 import { log, throwError } from '../utils';
 

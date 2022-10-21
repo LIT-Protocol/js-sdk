@@ -30,7 +30,7 @@ import {
     humanizeUnifiedAccessControlConditions,
 } from '@litprotocol-dev/utils';
 
-import { wasmBlsSdkHelpers } from '@litprotocol-dev/core';
+import { wasmBlsSdkHelpers } from '@litprotocol-dev/constants';
 
 import JSZip from 'jszip';
 import { checkAndSignCosmosAuthMessage } from './chains/cosmos';

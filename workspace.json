@@ -3,7 +3,6 @@
     "version": 2,
     "projects": {
         "constants": "packages/constants",
-        "core": "packages/core",
         "core-browser": "packages/core-browser",
         "e2e": "apps/e2e",
         "example-html": "apps/example-html",
