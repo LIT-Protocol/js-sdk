@@ -38,9 +38,9 @@ import {
     SupportedJsonRequests,
 } from '@litprotocol-dev/constants';
 
-import { initWasmBlsSdk, wasmBlsSdkHelpers } from '@litprotocol-dev/core';
+import { initWasmBlsSdk, wasmBlsSdkHelpers } from '@litprotocol-dev/core-browser';
 
-import * as wasmECDSA from '@litprotocol-dev/core';
+import * as wasmECDSA from '@litprotocol-dev/core-browser';
 
 import {
     canonicalAccessControlConditionFormatter,

@@ -301,7 +301,7 @@ function addHeapObject(obj) {
     return idx;
 }
 
-let cachedTextDecoder = new util.TextDecoder('utf-8', {
+let cachedTextDecoder = new TextDecoder('utf-8', {
     ignoreBOM: true,
     fatal: true,
 });

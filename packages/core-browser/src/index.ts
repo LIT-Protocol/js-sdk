@@ -13,13 +13,15 @@ export * from './lib/lit-node-client';
 
 // ----- Initialization -----
 
+log("---------- Lit Protocol's core-browser package is being initialized...---------- ");
+
 // 1. -- Initialize the BLS SDK
 initWasmBlsSdk().then((exports) => {
     globalThis.wasmExports = exports;
-    log("BLS wasmExports loaded");
+    log(`✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length} functions available.`);
 });
 
 // 2. -- Initialize the ECDSA SDK
 wasmECDSA.initWasmEcdsaSdk().then(() => {
-    log("wasmECDSA loaded");
+    log(`✅ [ECDSA SDK] wasmECDSA loaded. ${Object.keys(wasmECDSA).length} functions available.`);
 });
