@@ -60,7 +60,7 @@ interface signAndSaveAuthParams {
     web3: Web3Provider;
     account: string;
     chainId: number;
-    resources: any[];
+    resources: any;
 }
 
 interface IABI {
@@ -437,8 +437,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
     // -- 3. check all variables before executing business logic
     if (currentChainIdOrError.type === EITHER_TYPE.ERROR) {
-        throwError(currentChainIdOrError.result);
-        return;
+        return throwError(currentChainIdOrError.result);
     }
 
     log('chainId from web3', currentChainIdOrError);
@@ -451,11 +450,10 @@ export const checkAndSignEVMAuthMessage = async ({
     if (currentChainIdOrError.result !== selectedChainId && switchChain) {
         // -- validate the provider type
         if (web3.provider instanceof WalletConnectProvider) {
-            throwError({
+            return throwError({
                 message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
                 error: LIT_ERROR.WRONG_NETWORK_EXCEPTION,
             });
-            return;
         }
 
         const provider = web3.provider as WalletConnectProvider;

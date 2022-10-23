@@ -1422,7 +1422,7 @@ export default class LitNodeClient implements ILitNodeClient {
     ): Promise<Uint8Array | undefined> => {
         
         // -- prepare BLS SDK
-        const wasmBlsSdk: any = await initWasmBlsSdk();
+        // const wasmBlsSdk: any = await initWasmBlsSdk();
 
         // -- validate if it's ready
         if (!this.ready) {
@@ -1506,7 +1506,7 @@ export default class LitNodeClient implements ILitNodeClient {
             decryptionShares,
             this.networkPubKeySet,
             toDecrypt,
-            { wasmBlsSdk }
+            // { wasmBlsSdk }
         );
 
         return decrypted;
