@@ -1,10 +1,26 @@
-38 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
-38 error npm ERR! code EINVALIDTAGNAME
-38 error npm ERR! Invalid tag name "^latest" of package "@litprotocol-dev/constants@^latest": Tags may not have any characters that encodeURIComponent encodes.
-38 error
-38 error npm ERR! A complete log of this run can be found in:
-38 error npm ERR!     /Users/anson/.npm/_logs/2022-08-24T22_43_41_248Z-debug-0.log
-38 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
-38 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
-38 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
-38 error     at async Promise.all (index 0)
+47 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
+47 error npm ERR! code ERESOLVE
+47 error npm ERR! ERESOLVE unable to resolve dependency tree
+47 error npm ERR!
+47 error npm ERR! While resolving: @litprotocol-dev/sdk@0.0.1
+47 error npm ERR! Found: react@18.2.0
+47 error npm ERR! node_modules/react
+47 error npm ERR!   react@"18.2.0" from the root project
+47 error npm ERR!
+47 error npm ERR! Could not resolve dependency:
+47 error npm ERR! peer react@"^=16.x || ^=17.x" from @cypress/react@6.2.0
+47 error npm ERR! node_modules/@cypress/react
+47 error npm ERR!   @cypress/react@"^6.2.0" from the root project
+47 error npm ERR!
+47 error npm ERR! Fix the upstream dependency conflict, or retry
+47 error npm ERR! this command with --force, or --legacy-peer-deps
+47 error npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+47 error npm ERR!
+47 error npm ERR! See /Users/anson/.npm/eresolve-report.txt for a full report.
+47 error
+47 error npm ERR! A complete log of this run can be found in:
+47 error npm ERR!     /Users/anson/.npm/_logs/2022-10-23T22_53_07_553Z-debug.log
+47 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
+47 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
+47 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
+47 error     at async Promise.all (index 0)
