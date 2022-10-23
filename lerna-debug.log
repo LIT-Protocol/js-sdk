@@ -1,10 +1,10 @@
 44 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
-44 error (node:83425) [LRU_CACHE_OPTION_maxAge] DeprecationWarning: The maxAge option is deprecated. Please use options.ttl instead.
+44 error (node:83542) [LRU_CACHE_OPTION_maxAge] DeprecationWarning: The maxAge option is deprecated. Please use options.ttl instead.
 44 error (Use `node --trace-deprecation ...` to show where the warning was created)
 44 error npm ERR! builtins is not a function
 44 error
 44 error npm ERR! A complete log of this run can be found in:
-44 error npm ERR!     /Users/anson/.npm/_logs/2022-10-23T23_15_59_710Z-debug.log
+44 error npm ERR!     /Users/anson/.npm/_logs/2022-10-23T23_16_33_380Z-debug.log
 44 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
 44 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
 44 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
