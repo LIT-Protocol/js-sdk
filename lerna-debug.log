@@ -1,11 +1,11 @@
 44 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
 44 error npm ERR! code ETARGET
-44 error npm ERR! notarget No matching version found for @litprotocol-dev/utils@^0.0.40.
+44 error npm ERR! notarget No matching version found for @litprotocol-dev/utils@^0.0.41.
 44 error npm ERR! notarget In most cases you or one of your dependencies are requesting
 44 error npm ERR! notarget a package version that doesn't exist.
 44 error
 44 error npm ERR! A complete log of this run can be found in:
-44 error npm ERR!     /Users/anson/.npm/_logs/2022-10-23T23_08_52_413Z-debug.log
+44 error npm ERR!     /Users/anson/.npm/_logs/2022-10-23T23_13_22_121Z-debug.log
 44 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
 44 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
 44 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
