@@ -1,9 +1,9 @@
 {
   "name": "@litprotocol-dev/core-browser",
-  "version": "0.0.39",
+  "version": "0.0.40",
   "dependencies": {
-    "@litprotocol-dev/constants": "^0.0.39",
-    "@litprotocol-dev/utils": "^0.0.39",
+    "@litprotocol-dev/constants": "^0.0.40",
+    "@litprotocol-dev/utils": "^0.0.40",
     "pako": "^2.0.4"
   }
 }
