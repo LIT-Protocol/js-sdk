@@ -7,6 +7,7 @@
 
 # dependencies
 node_modules
+/apps/e2e/node_modules
 
 # IDEs and editors
 /.idea
