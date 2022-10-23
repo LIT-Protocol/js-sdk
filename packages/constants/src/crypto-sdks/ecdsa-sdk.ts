@@ -1,13 +1,13 @@
 // @ts-nocheck
 
-if (
-    typeof global.TextEncoder === 'undefined' ||
-    typeof global.TextDecoder === 'undefined'
-) {
-    const { TextEncoder, TextDecoder } = require('util');
-    global.TextEncoder = TextEncoder;
-    global.TextDecoder = TextDecoder;
-}
+// if (
+//     typeof global.TextEncoder === 'undefined' ||
+//     typeof global.TextDecoder === 'undefined'
+// ) {
+//     const { TextEncoder, TextDecoder } = require('util');
+//     global.TextEncoder = TextEncoder;
+//     global.TextDecoder = TextDecoder;
+// }
 
 // Contants
 const skLen = 32; // bytes

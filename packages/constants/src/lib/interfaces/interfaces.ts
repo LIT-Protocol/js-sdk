@@ -31,7 +31,7 @@ export interface AccsRegularParams {
 export interface AccsDefaultParams extends AccsRegularParams {
     contractAddress?: string;
     standardContractType?: string;
-    parameters?: [];
+    parameters?: any;
 }
 
 export interface AccsSOLV2Params extends AccsRegularParams {
@@ -93,10 +93,10 @@ export interface CheckAndSignAuthParams {
     chain: Chain;
 
     // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
-    resources: any[];
+    resources?: any[];
 
     // ptional and only used with EVM chains right now.  Set to true by default.  Whether or not to ask Metamask or the user's wallet to switch chains before signing.  This may be desired if you're going to have the user send a txn on that chain.  On the other hand, if all you care about is the user's wallet signature, then you probably don't want to make them switch chains for no reason.  Pass false here to disable this chain switching behavior.
-    switchChain: boolean;
+    switchChain?: boolean;
 }
 
 /** ---------- Web3 ---------- */
@@ -157,18 +157,18 @@ export interface IJWT {
 
 export interface HumanizedAccsProps {
     // The array of access control conditions that you want to humanize
-    accessControlConditions: AccessControlConditions;
+    accessControlConditions?: AccessControlConditions;
 
     // The array of evm contract conditions that you want to humanize
-    evmContractConditions: EvmContractConditions;
+    evmContractConditions?: EvmContractConditions;
 
     // The array of Solana RPC conditions that you want to humanize
-    solRpcConditions: SolRpcConditions;
+    solRpcConditions?: SolRpcConditions;
 
     // The array of unified access control conditions that you want to humanize
-    unifiedAccessControlConditions: UnifiedAccessControlConditions;
-    tokenList: Array<any | string>;
-    myWalletAddress: string;
+    unifiedAccessControlConditions?: UnifiedAccessControlConditions;
+    tokenList?: Array<any | string>;
+    myWalletAddress?: string;
 }
 
 /** ---------- Key Value Type ---------- */
@@ -338,10 +338,10 @@ export interface ExecuteJsProps extends JsonExecutionRequest {
 }
 
 export interface JsonSaveEncryptionKeyRequest {
-    accessControlConditions: AccessControlConditions;
-    evmContractConditions: EvmContractConditions;
-    solRpcConditions: SolRpcConditions;
-    unifiedAccessControlConditions: UnifiedAccessControlConditions;
+    accessControlConditions?: AccessControlConditions;
+    evmContractConditions?: EvmContractConditions;
+    solRpcConditions?: SolRpcConditions;
+    unifiedAccessControlConditions?: UnifiedAccessControlConditions;
     authSig: JsonAuthSig;
     chain: Chain;
 

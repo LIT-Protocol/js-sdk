@@ -10,6 +10,7 @@ import {
     EncryptFileAndZipWithMetadataProps,
     HumanizedAccsProps,
     IJWT,
+    ILitNodeClient,
     JsonAuthSig,
     LIT_ERROR,
     NETWORK_PUB_KEY,
@@ -116,9 +117,10 @@ export const checkAndSignAuthMessage = ({
     chain,
     resources,
     switchChain,
-}: CheckAndSignAuthParams): Promise<JsonAuthSig | void> => {
+}: CheckAndSignAuthParams): Promise<JsonAuthSig> => {
     const chainInfo = ALL_LIT_CHAINS[chain];
 
+    console.log("chain:", chain);
     // -- validate: if chain info not found
     if (!chainInfo) {
         throwError({
@@ -306,7 +308,7 @@ export const decryptZip = async (
 ): Promise<{ [key: string]: JSZip.JSZipObject } | undefined> => {
     // -- validate
     const paramsIsSafe = safeParams({
-        functionName: 'encryptFileAndZipWithMetadata',
+        functionName: 'decryptZip',
         params: {
             encryptedZipBlob,
             symmKey,
@@ -684,6 +686,9 @@ export const decryptFile = async ({
 
 declare global {
     var wasmExports: any;
+    var wasmECDSA: any;
+    var LitNodeClient: any;
+    var litNodeClient: ILitNodeClient;
 }
 
 /**

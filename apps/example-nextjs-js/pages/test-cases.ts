@@ -1,75 +1,18 @@
-import * as constantsLocal from '@litprotocol-dev/constants';
-import * as constantsDist from '@litprotocol-dev/constants-dist';
+import {
+  CASE_000_EXPORTS,
+} from './cases/CASE_000_EXPORTS'
 
-import * as utilsLocal from '@litprotocol-dev/utils';
-import * as utilsDist from '@litprotocol-dev/utils-dist';
+import { 
+  CASE_001_ENCRYPT_AND_DECRYPT_STRING
+} from './cases/CASE_001_ENCRYPT_AND_DECRYPT_STRING';
+
+import { 
+  CASE_002_ENCRYPT_AND_DECRYPT_ZIP_WITH_AN_UPDATE,
+} from './cases/CASE_002_ENCRYPT_AND_DECRYPT_ZIP_WITH_AN_UPDATE';
 
 
 export const testCases = [
-    { id: 'constantsLocal', module: constantsLocal },
-    { id: 'constantsDist', module: constantsDist },
-    { 
-      id: 'utilsLocal', 
-      module: utilsLocal,
-      tests: [
-        {
-          id: 'blobToBase64String',
-          module: utilsLocal['blobToBase64String'],
-          // params: [ new Blob([1,2,3,4,5]) ]
-        }
-      ]
-    },
-    { id: 'utilsDist', module: utilsDist },
-    // {
-    //   id: 'utilsDist',
-    //   module: utilsDist,
-    //   tests: [
-    //     {
-    //       id: 'utils',
-    //       module: utilsDist['utils'],
-    //     },
-    //     {
-    //       id: 'testImportedConstantModules',
-    //       module: utilsDist['testImportedConstantModules'],
-    //     },
-    //   ],
-    // },
-    {
-      id: 'utilsLocal.eth',
-      module: utilsLocal.eth,
-      tests: [
-        {
-          id: 'connectWeb3',
-          module: utilsLocal.eth['connectWeb3'],
-          params: [42220]
-        },
-        {
-          id: 'disconnectWeb3',
-          module: utilsLocal.eth.disconnectWeb3,
-          params: []
-        },
-        {
-          id: 'checkAndSignEVMAuthMessage',
-          module: utilsLocal.eth.checkAndSignEVMAuthMessage,
-          params: [{chain: 'ethereum', resources: [], switchChain: false}]
-        },
-        {
-          id: 'checkAndSignEVMAuthMessage-switchChain',
-          module: utilsLocal.eth.checkAndSignEVMAuthMessage,
-          params: [{chain: 'ethereum', resources: [], switchChain: true}]
-        },
-      ]
-    },
-    {
-      id: 'utilsLocal.lit',
-      module: utilsLocal.lit,
-      tests:[
-        {
-          id: 'checkAndSignAuthMessage',
-          module: utilsLocal.lit.checkAndSignAuthMessage,
-          params: [{chain: 'ethereum', resources: [], switchChain: true}]
-        }
-      ]
-    }
-  ]
-  
+  ...CASE_000_EXPORTS,
+  ...CASE_001_ENCRYPT_AND_DECRYPT_STRING,
+  ...CASE_002_ENCRYPT_AND_DECRYPT_ZIP_WITH_AN_UPDATE,
+]

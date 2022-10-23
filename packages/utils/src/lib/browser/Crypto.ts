@@ -189,31 +189,31 @@ export const combineBlsDecryptionShares = (
     decryptionShares: Array<any>,
     networkPubKeySet: string,
     toDecrypt: string,
-    provider: {
-        wasmBlsSdk: any;
-    }
+    // provider: {
+    //     wasmBlsSdk: any;
+    // }
 ): any => {
     // ========== Prepare Params ===========
     // -- validate if wasmBlsSdk is empty
-    if (provider.wasmBlsSdk === undefined) {
-        throwError({
-            message: 'wasmBlsSdk is undefined',
-            error: LIT_ERROR.WASM_INIT_ERROR,
-        });
-        return;
-    }
+    // if (provider.wasmBlsSdk === undefined) {
+    //     throwError({
+    //         message: 'wasmBlsSdk is undefined',
+    //         error: LIT_ERROR.WASM_INIT_ERROR,
+    //     });
+    //     return;
+    // }
 
-    let wasmBlsSdk = provider.wasmBlsSdk;
+    // let wasmBlsSdk = provider.wasmBlsSdk;
 
     // -- sort the decryption shares by share index.  this is important when combining the shares.
     decryptionShares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
     // set decryption shares bytes in wasm
     decryptionShares.forEach((s: any, idx: any) => {
-        wasmBlsSdk.set_share_indexes(idx, s.shareIndex);
+        wasmExports.set_share_indexes(idx, s.shareIndex);
         const shareAsBytes = uint8arrayFromString(s.decryptionShare, 'base16');
         for (let i = 0; i < shareAsBytes.length; i++) {
-            wasmBlsSdk.set_decryption_shares_byte(i, idx, shareAsBytes[i]);
+            wasmExports.set_decryption_shares_byte(i, idx, shareAsBytes[i]);
         }
     });
 
@@ -224,7 +224,7 @@ export const combineBlsDecryptionShares = (
     // -- set the ciphertext bytes
     const ciphertextAsBytes = uint8arrayFromString(toDecrypt, 'base16');
     for (let i = 0; i < ciphertextAsBytes.length; i++) {
-        wasmBlsSdk.set_ct_byte(i, ciphertextAsBytes[i]);
+        wasmExports.set_ct_byte(i, ciphertextAsBytes[i]);
     }
 
     // ========== Result ==========

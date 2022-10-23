@@ -65,6 +65,7 @@ export const paramsValidators = {
         )
             return false;
 
+        console.log("authSig:", authSig);
         if (!is(authSig, 'Object', 'authSig', 'saveEncryptionKey'))
             return false;
         if (
@@ -179,7 +180,9 @@ export const paramsValidators = {
         )
             return false;
 
-        if (!is(toDecrypt, 'string', 'toDecrypt', 'getEncryptionKey'))
+
+        console.log("TYPEOF:", typeof toDecrypt);
+        if (!is(toDecrypt, 'String', 'toDecrypt', 'getEncryptionKey'))
             return false;
         if (!is(authSig, 'Object', 'authSig', 'getEncryptionKey')) return false;
 
@@ -282,7 +285,12 @@ export const paramsValidators = {
         return true;
     },
 
-    decryptZip: (encryptedZipBlob: Blob | File, symmKey: Uint8Array) => {
+    decryptZip: (params: any) => {
+        
+        const { encryptedZipBlob, symmKey } = params;
+
+        console.log("encryptedZipBlob:", encryptedZipBlob);
+
         // -- validate
         if (
             !checkType({
@@ -291,8 +299,7 @@ export const paramsValidators = {
                 paramName: 'encryptedZipBlob',
                 functionName: 'decryptZip',
             })
-        )
-            return false;
+        )return false;
 
         // -- validate
         if (
@@ -302,8 +309,7 @@ export const paramsValidators = {
                 paramName: 'symmKey',
                 functionName: 'decryptZip',
             })
-        )
-            return false;
+        )return false;
 
         return true;
     },
@@ -312,6 +318,9 @@ export const paramsValidators = {
         params: EncryptFileAndZipWithMetadataProps
     ) => {
         // -- validate
+
+        console.log("params:", params);
+
         if (
             !checkType({
                 value: params.authSig,

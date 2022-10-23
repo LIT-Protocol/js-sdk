@@ -218,10 +218,10 @@ export const checkIfAuthSigRequiresChainParam = (
     chain: string,
     functionName: string
 ): boolean => {
-    console.log('checkIfAuthSigRequiresChainParam');
+    log('checkIfAuthSigRequiresChainParam');
     for (const key of LIT_AUTH_SIG_CHAIN_KEYS) {
         if (key in authSig) {
-            console.log('Testing 1');
+            log('Testing 1');
             return true;
         }
     }
@@ -235,11 +235,11 @@ export const checkIfAuthSigRequiresChainParam = (
             functionName,
         })
     ) {
-        console.log('Testing 2');
+        log('Testing 2');
         return false;
     }
 
-    console.log('Testing 3');
+    log('Testing 3');
     return true;
 };
 

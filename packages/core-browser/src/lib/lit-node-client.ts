@@ -89,7 +89,7 @@ export default class LitNodeClient implements ILitNodeClient {
     networkPubKeySet: string | null;
 
     // ========== Constructor ==========
-    constructor(customConfig: LitNodeClientConfig) {
+    constructor(customConfig?: LitNodeClientConfig) {
         // -- initialize default config
         this.config = defaultLitnodeClientConfig;
 
@@ -132,7 +132,7 @@ export default class LitNodeClient implements ILitNodeClient {
 
             // -- validate
             if (storageConfigOrError.type === 'ERROR') {
-                console.log('Error accessing local storage');
+                console.warn(`Storage key "${storageKey}" is missing. `);
                 return;
             }
 
@@ -231,7 +231,7 @@ export default class LitNodeClient implements ILitNodeClient {
         // -- sanity check
         if (
             !signatureShares.every(
-                (val, i, arr) => val.unsignedJwt === arr[0].unsignedJwt
+                (val: any, i: any, arr: any) => val.unsignedJwt === arr[0].unsignedJwt
             )
         ) {
             const msg =
@@ -584,18 +584,20 @@ export default class LitNodeClient implements ILitNodeClient {
      * @returns { Promise<Array<any> }
      *
      */
-    getDecryptions = async (decryptedData: Array<any>): Promise<Array<any>> => {
+    getDecryptions = async (
+        decryptedData: Array<any>
+    ): Promise<Array<any>> => {
         // -- prepare BLS SDK
-        const wasmBlsSdk: any = await initWasmBlsSdk();
+        // const wasmBlsSdk: any = await initWasmBlsSdk();
 
         // -- prepare params
         let decryptions: any;
 
         Object.keys(decryptedData[0]).forEach(async (key: any) => {
             // -- prepare
-            const shares = decryptedData.map((r) => r[key]);
+            const shares = decryptedData.map((r: any) => r[key]);
 
-            const decShares = shares.map((s) => ({
+            const decShares = shares.map((s: any) => ({
                 algorithmType: s.algorithmType,
                 decryptionShare: s.decryptionShare,
                 shareIndex: s.shareIndex,
@@ -604,10 +606,10 @@ export default class LitNodeClient implements ILitNodeClient {
             }));
 
             const algorithmType = mostCommonString(
-                decShares.map((s) => s.algorithmType)
+                decShares.map((s: any) => s.algorithmType)
             );
             const ciphertext = mostCommonString(
-                decShares.map((s) => s.ciphertext)
+                decShares.map((s: any) => s.ciphertext)
             );
 
             // -- validate if this.networkPubKeySet is null
@@ -624,8 +626,7 @@ export default class LitNodeClient implements ILitNodeClient {
                 decrypted = await combineBlsDecryptionShares(
                     decShares,
                     this.networkPubKeySet,
-                    ciphertext,
-                    { wasmBlsSdk }
+                    ciphertext
                 );
             } else {
                 throwError({
@@ -636,9 +637,9 @@ export default class LitNodeClient implements ILitNodeClient {
 
             decryptions[key] = {
                 decrypted: uint8arrayToString(decrypted, 'base16'),
-                publicKey: mostCommonString(decShares.map((s) => s.publicKey)),
+                publicKey: mostCommonString(decShares.map((s: any) => s.publicKey)),
                 ciphertext: mostCommonString(
-                    decShares.map((s) => s.ciphertext)
+                    decShares.map((s: any) => s.ciphertext)
                 ),
             };
         });
@@ -686,7 +687,7 @@ export default class LitNodeClient implements ILitNodeClient {
 
         // the public key can come from any node - it obviously will be identical from each node
         const public_key = shareData[0].public_key;
-        const valid_shares = shareData.map((s) => s.signature_share);
+        const valid_shares = shareData.map((s: any) => s.signature_share);
         const shares = JSON.stringify(valid_shares);
 
         await wasmECDSA.initWasmEcdsaSdk(); // init WASM
@@ -1060,7 +1061,7 @@ export default class LitNodeClient implements ILitNodeClient {
         // ========== Extract shares from response data ==========
         // -- 1. combine signed data as a list, and get the signatures from it
         const signedDataList = responseData.map(
-            (r) => (r as SignedData).signedData
+            (r: any) => (r as SignedData).signedData
         );
         const signatures = this.getSignatures(signedDataList);
 
@@ -1419,6 +1420,7 @@ export default class LitNodeClient implements ILitNodeClient {
     getEncryptionKey = async (
         params: JsonEncryptionRetrieveRequest
     ): Promise<Uint8Array | undefined> => {
+        
         // -- prepare BLS SDK
         const wasmBlsSdk: any = await initWasmBlsSdk();
 
@@ -1448,7 +1450,7 @@ export default class LitNodeClient implements ILitNodeClient {
         // ========== Validate Params ==========
         const paramsIsSafe = safeParams({
             functionName: 'getEncryptionKey',
-            params: [params],
+            params: params,
         });
 
         if (!paramsIsSafe) return;
@@ -1554,7 +1556,7 @@ export default class LitNodeClient implements ILitNodeClient {
 
         const paramsIsSafe = safeParams({
             functionName: 'saveEncryptionKey',
-            params: [params],
+            params,
         });
 
         if (!paramsIsSafe) return;
@@ -1755,7 +1757,7 @@ export default class LitNodeClient implements ILitNodeClient {
     connect = (): Promise<any> => {
         // -- handshake with each node
         for (const url of this.config.bootstrapUrls) {
-            this.handshakeWithSgx({ url }).then((resp) => {
+            this.handshakeWithSgx({ url }).then((resp: any) => {
                 this.connectedNodes.add(url);
 
                 let keys: JsonHandshakeResponse = {
@@ -1799,7 +1801,10 @@ export default class LitNodeClient implements ILitNodeClient {
                     );
                     this.ready = true;
 
-                    log('lit is ready');
+                    log(`🔥 lit is ready. "litNodeClient" variable is ready to use globally.`);
+                    globalThis.litNodeClient = this;
+
+                    // browser only
                     if (typeof document !== 'undefined') {
                         document.dispatchEvent(new Event('lit-ready'));
                     }

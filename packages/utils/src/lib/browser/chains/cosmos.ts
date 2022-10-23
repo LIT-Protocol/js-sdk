@@ -122,7 +122,7 @@ export const checkAndSignCosmosAuthMessage = async ({
     chain,
 }: {
     chain: string;
-}): Promise<JsonAuthSig | void> => {
+}): Promise<JsonAuthSig> => {
     const connectedCosmosProvider = await connectCosmosProvider({ chain });
 
     const storageKey = LOCAL_STORAGE_KEYS.AUTH_COSMOS_SIGNATURE;

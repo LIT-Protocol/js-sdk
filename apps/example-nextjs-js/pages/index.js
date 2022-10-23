@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import indexCss from './index.module.css';
-import * as module from '@litprotocol-dev/core-browser';
-
-const testCases = [];
-
+import { testCases } from './test-cases';
+import { ACTION } from './enum';
 // const { blobToBase64String } = require('@litprotocol-dev/utils');
 // console.log('blobToBase64String:', blobToBase64String);
 
@@ -14,7 +12,12 @@ const Index = () => {
   const [loaded, setLoaded] = useState(false);
   const [tests, setTests] = useState([]);
   const [currentResult, setCurrentResult] = useState([]);
+  const [currentCounters, setCurrentCounters] = useState({});
+  const [tested, setTested] = useState({});
 
+  /**
+   * ----- React Hook: useEffect -----
+   */
   useEffect(() => {
 
     setLoaded(true);
@@ -41,6 +44,190 @@ const Index = () => {
 
   }, [tests])
 
+  const CALL_RENDERER = (test) => {
+
+      // -- handle click
+      const handleClick = async () => {
+
+        var start = new Date().getTime();
+      
+        let callResult;
+
+        try{
+          callResult = test.params === undefined 
+                      ? await test.module
+                      : await test.module(...test.params);
+        
+          const res = callResult === undefined 
+                       ? 'Probably returned a VOID'
+                       : callResult;
+
+          let result = typeof res === 'object'
+                          ? res  
+                          : await res();
+
+          var end = new Date().getTime();
+
+          const benchmark = (end - start) + 'ms';
+
+          console.log(`[TEST:CALL] ${test.id}:`, { benchmark, result })
+
+          setCurrentResult({ benchmark, result });
+
+          const counter = {...currentCounters, ...tested}[test.id];
+          console.log("counter:", counter);
+          counter = counter + 1;
+          
+          const newList = {...currentCounters, ...tested, [test.id]: counter};
+
+          console.log("newList:", newList);
+
+          const _coverage = {};
+          const _tested = {};
+
+          Object.entries(newList).forEach((item) => {
+            if ( item[1] > 0){
+              _tested[item[0]] = item[1];
+            }else{
+              _coverage[item[0]] = item[1];
+            }
+          });
+
+          console.log("_coverage", _coverage);
+
+          setCurrentCounters(_coverage);
+          setTested(_tested);
+          
+      }catch(e){
+        console.error("Error:", e);
+        setCurrentResult(e);
+        return;
+      }
+  
+      }
+
+      return <button id={test.id} onClick={handleClick}>
+        {test.action}: {test.id}()
+      </button>;
+  }
+
+  const SET_RENDERER = (test) => {
+
+      // -- handle click
+      const handleClick = async () => {
+
+        var start = new Date().getTime();
+      
+        let callResult;
+
+        try{
+          callResult = test.params === undefined 
+                      ? await test.module
+                      : await test.module(...test.params);
+        
+          const res = callResult === undefined 
+                       ? 'Probably returned a VOID'
+                       : callResult;
+
+          let result = typeof res === 'object'
+                          ? res  
+                          : await res();
+
+          var end = new Date().getTime();
+
+          const benchmark = (end - start) + 'ms';
+
+          console.log(`[TEST:SET] ${test.id}:`, { benchmark, result })
+
+          setCurrentResult({ benchmark, result });
+      }catch(e){
+        console.error("Error:", e);
+        setCurrentResult(e);
+        return;
+      }
+  
+      }
+
+      return <button className={indexCss.setter} id={test.id} onClick={handleClick}>
+        {test.action}UP: {test.id}
+      </button>;
+  }
+
+  const PRINT_RENDERER = (test) => {
+      // -- handle click
+      const handleClick = async () => {
+
+        const obj = Object.keys(test.module);
+
+        console.log(`[TEST:PRINT] ${test.id}:`, obj);
+
+        setCurrentResult(obj);
+
+        if( test.setCounters ){
+
+          const counters = {};
+
+          obj.forEach( key => {
+            counters[key] = 0;
+          });
+
+          console.log("counters:", counters);
+
+          setCurrentCounters({...currentCounters, ...counters});
+
+        }
+      }
+
+      return <button id={test.id} onClick={handleClick}>
+        {test.action}: {test.id}
+      </button>
+  }
+
+  const CLASS_RENDERER = (test) => {
+      // -- handle click
+      const handleClick = async () => {
+        // console.log("Testing:", await test.module());
+        const callResult = new test.module();
+        console.log(`[TEST:CLASS] ${test.id}:`, callResult)
+
+        const obj = Object.keys(callResult);
+        setCurrentResult(obj);
+
+        if( test.setCounters ){
+
+          const counters = {};
+
+          obj.forEach( key => {
+            counters[key] = 0;
+          });
+
+          console.log("counters:", counters);
+
+          setCurrentCounters({...currentCounters, ...counters});
+
+        }
+      }
+
+      return <button id={test.id} onClick={handleClick}>
+        {test.action}: {test.id}
+      </button>;
+  }
+
+  const getTestType = (test) => {
+    switch(test.action){
+      case ACTION.CLASS:
+        return CLASS_RENDERER(test);
+      case ACTION.SET:
+        return SET_RENDERER(test);
+      case ACTION.CALL:
+        return CALL_RENDERER(test);
+      case ACTION.PRINT:
+        return PRINT_RENDERER(test);
+      default: 
+        return 'Not recognized';
+    }
+  }
+
   const recursiveDir = (dir, isBase = false) => {
 
     const tree = isBase ? dir : dir?.tests;
@@ -53,20 +240,7 @@ const Index = () => {
           {
             tree.map((test, i) => {
               return <li key={i}>
-                {
-                  typeof test.module === 'function' ?
-                  <button id={test.id} onClick={async () => {
-                    const callResult = await test.module(...test.params);
-                    console.log(`[test:function] ${test.id}:`, callResult)
-                    setCurrentResult(callResult);
-                    
-                  }}>run {test.id}()</button> : 
-                  <button id={test.id} onClick={() => {
-                    console.log(`[test:module] ${test.id}:`, test.module);
-                    setCurrentResult(test.module);
-                  }}>console.log({test.id})</button>
-                }
-                
+                { getTestType(test) }
                 { recursiveDir(test, false) }
               </li>
             })
@@ -78,40 +252,37 @@ const Index = () => {
 
   }
 
-  function censor(censor) {
-    var i = 0;
-    
-    return function(key, value) {
-      if(i !== 0 && typeof(censor) === 'object' && typeof(value) == 'object' && censor == value) 
-        return '[Circular]'; 
-      
-      if(i >= 29) // seems to be a harded maximum of 30 serialized objects?
-        return '[Unknown]';
-      
-      ++i; // so we know we aren't using the original object anymore
-      
-      return value;  
-    }
-  }
-
-
   if ( ! loaded ) return <>Loading...</>
   if ( ! tests ) return <>Loading tests...</>
 
   return (
-    <>
-      <h1>Testing Next.js - JS</h1><br/>
+    <div className={indexCss.main}>
+      <h1 className={indexCss.header}>[Lit-JS-SDK] Testing Next.js - JS</h1><br/>
       <div className={indexCss.flex}>
         {/* ------ Testing Modules ----- */}
         { recursiveDir(tests, true) }
 
         {/* ---------- Current Result ---------- */}
-        <div>
-          <h1>Current Result</h1>
-          <textarea id="current-result" className={indexCss.currentResult} value={ JSON.stringify(currentResult, censor(currentResult)) }></textarea>
+        <div className={indexCss.resultContainer}>
+          <div className={indexCss.resultTop}>
+
+            <p>Result</p>
+            <textarea id="current-result" className={indexCss.currentResult} value={ JSON.stringify(currentResult, null, 2)} onChange={() => {}}></textarea>
+          </div>
+
+          <div className={indexCss.resultBottom}>
+            <div className={indexCss.resultBottomLeft}>
+              <p>Coverage: {Object.keys(currentCounters).length}</p>
+              <textarea id="current-result" className={indexCss.currentResult} value={ JSON.stringify(currentCounters, null, 2)} onChange={() => {}}></textarea>
+            </div>
+            <div className={indexCss.resultBottomRight}>
+              <p>Tested: {Object.keys(tested).length}</p>
+              <textarea id="current-result" className={indexCss.currentResult} value={ JSON.stringify(tested, null, 2)} onChange={() => {}}></textarea>
+            </div>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 export default Index;

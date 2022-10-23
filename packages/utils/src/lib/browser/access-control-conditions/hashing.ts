@@ -15,9 +15,6 @@ import {
     log,
 } from '@litprotocol-dev/utils';
 
-// -- For TextEncoder()
-const util = require('util');
-
 /**
  * // #browser: TextEncoder() is browser only
  * // TEST: Add E2E Test
@@ -87,7 +84,7 @@ export const hashAccessControlConditions = (
 
     const toHash = JSON.stringify(conds);
     log('Hashing access control conditions: ', toHash);
-    const encoder = new util.TextEncoder();
+    const encoder = new TextEncoder();
     const data = encoder.encode(toHash);
 
     return crypto.subtle.digest('SHA-256', data);

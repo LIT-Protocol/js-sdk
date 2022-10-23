@@ -70,16 +70,15 @@ export const connectSolProvider = async (): Promise<IProvider | undefined> => {
  * @returns { JsonAuthSig }
  */
 export const checkAndSignSolAuthMessage =
-    async (): Promise<JsonAuthSig | void> => {
+    async (): Promise<JsonAuthSig> => {
         const res = await connectSolProvider();
 
-        if (!res) {
+        if (! res ) {
             log('Failed to connect sol provider');
-            return;
         }
 
-        const provider = res.provider;
-        const account = res.account;
+        const provider = res?.provider;
+        const account = res?.account;
         const key = LOCAL_STORAGE_KEYS.AUTH_SOL_SIGNATURE;
         let authSigOrError: IEither = getStorageItem(key);
 

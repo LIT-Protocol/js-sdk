@@ -373,7 +373,7 @@ export const checkAndSignEVMAuthMessage = async ({
     chain,
     resources,
     switchChain,
-}: CheckAndSignAuthParams): Promise<JsonAuthSig | void> => {
+}: CheckAndSignAuthParams): Promise<JsonAuthSig> => {
     // --- scoped methods ---
     const _throwIncorrectNetworkError = (error: any) => {
         if (error.code === WALLET_ERROR.NO_SUCH_METHOD) {

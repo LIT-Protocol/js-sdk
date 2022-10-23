@@ -80,8 +80,8 @@ export const humanizeEvmBasicAccessControlConditions = async ({
     myWalletAddress,
 }: {
     accessControlConditions: Array<AccsRegularParams | AccsDefaultParams | any>;
-    tokenList: Array<any | string>;
-    myWalletAddress: string;
+    tokenList?: Array<any | string>;
+    myWalletAddress?: string;
 }): Promise<string> => {
     log('humanizing evm basic access control conditions');
     log('myWalletAddress', myWalletAddress);
@@ -283,8 +283,8 @@ export const humanizeEvmContractConditions = async ({
     myWalletAddress,
 }: {
     evmContractConditions: Array<AccsEVMParams>;
-    tokenList: Array<any | string>;
-    myWalletAddress: string;
+    tokenList?: Array<any | string>;
+    myWalletAddress?: string;
 }): Promise<string> => {
     log('humanizing evm contract conditions');
     log('myWalletAddress', myWalletAddress);
@@ -343,8 +343,8 @@ export const humanizeSolRpcConditions = async ({
     myWalletAddress,
 }: {
     solRpcConditions: Array<AccsSOLV2Params>;
-    tokenList: Array<any | string>;
-    myWalletAddress: string;
+    tokenList?: Array<any | string>;
+    myWalletAddress?: string;
 }): Promise<string> => {
     log('humanizing sol rpc conditions');
     log('myWalletAddress', myWalletAddress);
@@ -417,8 +417,8 @@ export const humanizeCosmosConditions = async ({
     myWalletAddress,
 }: {
     cosmosConditions: Array<AccsCOSMOSParams | any>;
-    tokenList: Array<any | string>;
-    myWalletAddress: string;
+    tokenList?: Array<any | string>;
+    myWalletAddress?: string;
 }): Promise<string> => {
     log('humanizing cosmos conditions');
     log('myWalletAddress', myWalletAddress);
@@ -501,8 +501,8 @@ export const humanizeUnifiedAccessControlConditions = async ({
         | AccsEVMParams
         | AccsCOSMOSParams
     >;
-    tokenList: Array<any | string>;
-    myWalletAddress: string;
+    tokenList?: Array<any | string>;
+    myWalletAddress?: string;
 }): Promise<string> => {
     const promises = await Promise.all(
         unifiedAccessControlConditions.map(async (acc: any): Promise<any> => {
