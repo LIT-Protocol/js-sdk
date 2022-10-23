@@ -2,11 +2,11 @@ import { AccessControlConditions } from '@litprotocol-dev/constants';
 import * as LitJsSdk from '@litprotocol-dev/core-browser';
 import { ACTION } from '../enum';
 
-export const CASE_001_ENCRYPT_AND_DECRYPT_STRING = [
+export const CASE_005_ENCRYPT_AND_DECRYPT_FILE = [
     {
-        id: 'CASE 001 - Encrypt then decrypt string',
+        id: 'CASE 005 - Encrypt file then decrypt file',
         action: ACTION.SET,
-        module: async () => {
+        module: (async () => {
             const chain = 'ethereum';
 
             const authSig = await LitJsSdk.checkAndSignAuthMessage({
@@ -35,7 +35,7 @@ export const CASE_001_ENCRYPT_AND_DECRYPT_STRING = [
             };
 
             return globalThis.CASE;
-        },
+        }),
     },
     {
         id: 'connect',
@@ -49,33 +49,25 @@ export const CASE_001_ENCRYPT_AND_DECRYPT_STRING = [
         params: [{ chain: 'ethereum' }],
     },
     {
-        id: 'humanizeAccessControlConditions',
-        action: ACTION.CALL,
-        module: (async () => {
-
-            console.log(globalThis.CASE.accs)
-
-            const humanized = await LitJsSdk.humanizeAccessControlConditions({
-                accessControlConditions: globalThis.CASE.accs,
-            });
-            return humanized;
-        }),
-    },
-    {
-        id: 'encryptString',
+        id: 'encryptFile',
         module: async () => {
-            const { encryptedString, symmetricKey } =
-                await LitJsSdk.encryptString('Hello World!');
 
-            console.log('encryptedString:', encryptedString);
-            const base64 = await LitJsSdk.blobToBase64String(encryptedString);
-            console.log('encryptedString(string):', base64);
+            // create a new file 
+            const file = new File(["Hello, world!"], "hello.txt", {
+                type: "text/plain",
+            });
 
-            globalThis.CASE.encryptedString = base64;
+            const { encryptedFile, symmetricKey } =
+                await LitJsSdk.encryptFile({file});
+
+            const base64 = await LitJsSdk.blobToBase64String(encryptedFile);
+            console.log('encryptedZip(string):', base64);
+
+            globalThis.CASE.encryptedZip = base64;
             globalThis.CASE.symmetricKey = symmetricKey;
 
             return {
-                encryptedString: base64,
+                encryptedZip: base64,
                 symmetricKey,
             };
         },
@@ -85,7 +77,7 @@ export const CASE_001_ENCRYPT_AND_DECRYPT_STRING = [
         id: 'saveEncryptionKey',
         action: ACTION.CALL,
         module: async () => {
-            const { encryptedString, symmetricKey } =
+            const { encryptedFile, symmetricKey } =
                 globalThis.CASE;
 
             console.warn('symmetricKey:', symmetricKey);
@@ -111,24 +103,13 @@ export const CASE_001_ENCRYPT_AND_DECRYPT_STRING = [
         },
     },
     {
-        id: 'uint8arrayToString',
-        action: ACTION.CALL,
-        module: (async () => {
-
-            globalThis.CASE.toDecrypt = LitJsSdk.uint8arrayToString(
-                globalThis.CASE.encryptedSymmetricKey,
-                'base16'
-            );
-
-            return globalThis.CASE.toDecrypt;
-
-        }),
-    },
-    {
         id: 'getEncryptionKey',
         action: ACTION.CALL,
         module: async () => {
-            const toDecrypt = globalThis.CASE.toDecrypt;
+            const toDecrypt = LitJsSdk.uint8arrayToString(
+                globalThis.CASE.encryptedSymmetricKey,
+                'base16'
+            );
 
             console.log('toDecrypt', toDecrypt);
 
@@ -153,31 +134,23 @@ export const CASE_001_ENCRYPT_AND_DECRYPT_STRING = [
         },
     },
     {
-        id: 'base64StringToBlob',
-        action: ACTION.CALL,
-        module: (async () => {
-            const { encryptedString, retrievedSymmKey } =
-                globalThis.CASE;
-            
-            const blob = LitJsSdk.base64StringToBlob(encryptedString);
-
-            return `Type of "LitJsSdk.base64StringToBlob(encryptedString)" is ${LitJsSdk.getVarType(blob)}`;
-        }),
-    },
-    {
-        id: 'decryptString',
+        id: 'decryptFile',
         module: async () => {
-            const { encryptedString, retrievedSymmKey } =
+            const { encryptedZip, retrievedSymmKey } =
                 globalThis.CASE;
 
-            const decryptedString = await LitJsSdk.decryptString(
-                LitJsSdk.base64StringToBlob(encryptedString),
-                retrievedSymmKey
-            );
+            const blob = LitJsSdk.base64StringToBlob(encryptedZip);
 
-            console.log('decryptedString:', decryptedString);
+            console.log("Blob:", blob);
+   
+            const decryptedFiles = await LitJsSdk.decryptFile({
+                file: blob,
+                symmetricKey: retrievedSymmKey,
+            });
 
-            return decryptedString;
+            console.log("decryptedFiles:", LitJsSdk.uint8arrayToString(decryptedFiles));
+
+            return LitJsSdk.uint8arrayToString(decryptedFiles);
         },
         action: ACTION.CALL,
     }

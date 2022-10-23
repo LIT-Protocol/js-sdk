@@ -49,6 +49,7 @@ import {
     humanizeAccessControlConditions,
     blobToBase64String,
     base64StringToBlob,
+    getVarType,
 } from '@litprotocol-dev/utils';
 
 import {
@@ -74,8 +75,11 @@ export {
     encryptFileAndZipWithMetadata,
     decryptZipFileWithMetadata,
     humanizeAccessControlConditions,
+
+    // -- utils
     blobToBase64String,
     base64StringToBlob,
+    getVarType,
 
     // uint8arrays
     uint8arrayFromString,

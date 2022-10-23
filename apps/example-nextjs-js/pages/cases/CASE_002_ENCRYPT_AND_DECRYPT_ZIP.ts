@@ -2,9 +2,9 @@ import { AccessControlConditions } from '@litprotocol-dev/constants';
 import * as LitJsSdk from '@litprotocol-dev/core-browser';
 import { ACTION } from '../enum';
 
-export const CASE_002_ENCRYPT_AND_DECRYPT_ZIP_WITH_AN_UPDATE = [
+export const CASE_002_ENCRYPT_AND_DECRYPT_ZIP = [
     {
-        id: 'CASE 002 - Encrypt then decrypt zip with an update',
+        id: 'CASE 002 - Zip and encrypt string then decrypt zip',
         action: ACTION.SET,
         module: (async () => {
             const chain = 'ethereum';

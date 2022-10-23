@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import indexCss from './index.module.css';
 import { testCases } from './test-cases';
 import { ACTION } from './enum';
+import { IGNORED_FUNCTIONS } from './cases/IGNORED_FUNCTIONS';
 // const { blobToBase64String } = require('@litprotocol-dev/utils');
 // console.log('blobToBase64String:', blobToBase64String);
 
@@ -75,17 +76,15 @@ const Index = () => {
           setCurrentResult({ benchmark, result });
 
           const counter = {...currentCounters, ...tested}[test.id];
-          console.log("counter:", counter);
           counter = counter + 1;
           
           const newList = {...currentCounters, ...tested, [test.id]: counter};
-
-          console.log("newList:", newList);
 
           const _coverage = {};
           const _tested = {};
 
           Object.entries(newList).forEach((item) => {
+
             if ( item[1] > 0){
               _tested[item[0]] = item[1];
             }else{
@@ -157,7 +156,7 @@ const Index = () => {
       // -- handle click
       const handleClick = async () => {
 
-        const obj = Object.keys(test.module);
+        const obj = Object.keys(test.module).filter(key => !IGNORED_FUNCTIONS.includes(key));
 
         console.log(`[TEST:PRINT] ${test.id}:`, obj);
 
@@ -190,7 +189,8 @@ const Index = () => {
         const callResult = new test.module();
         console.log(`[TEST:CLASS] ${test.id}:`, callResult)
 
-        const obj = Object.keys(callResult);
+        const obj = Object.keys(callResult).filter(key => !IGNORED_FUNCTIONS.includes(key));
+        
         setCurrentResult(obj);
 
         if( test.setCounters ){

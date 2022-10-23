@@ -24,7 +24,7 @@ export interface AccsRegularParams {
         value: string;
     };
     method?: string;
-    params?: [];
+    params?: any[];
     chain: Chain;
 }
 
@@ -37,8 +37,8 @@ export interface AccsDefaultParams extends AccsRegularParams {
 export interface AccsSOLV2Params extends AccsRegularParams {
     pdaKey: string;
     pdaInterface: {
-        offset: string;
-        fields: string;
+        offset: string | number;
+        fields: string | object;
     };
     pdaParams: [];
 }
@@ -55,13 +55,15 @@ export interface FunctionABI {
     inputs: Array<ABIParams | any>;
     outputs: Array<ABIParams | any>;
     constant: string | boolean;
+    payable?: boolean;
 }
 
 export interface AccsEVMParams extends AccsRegularParams {
     functionAbi: FunctionABI;
     contractAddress: string;
     functionName: string;
-    functionParams: [];
+    functionParams: any[];
+    
 }
 
 export interface AccsCOSMOSParams extends AccsRegularParams {
@@ -518,16 +520,16 @@ export interface EncryptFileAndZipWithMetadataProps {
     authSig: JsonAuthSig;
 
     // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-    accessControlConditions: AccessControlConditions;
+    accessControlConditions?: AccessControlConditions;
 
     // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-    evmContractConditions: EvmContractConditions;
+    evmContractConditions?: EvmContractConditions;
 
     // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.
-    solRpcConditions: SolRpcConditions;
+    solRpcConditions?: SolRpcConditions;
 
     // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
-    unifiedAccessControlConditions: UnifiedAccessControlConditions;
+    unifiedAccessControlConditions?: UnifiedAccessControlConditions;
 
     // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
     chain: string;
@@ -547,11 +549,11 @@ export interface DecryptZipFileWithMetadataProps {
     authSig: JsonAuthSig;
 
     // The zip file blob with metadata inside it and the encrypted asset
-    file: File;
+    file: File | Blob;
 
     // An instance of LitNodeClient that is already connected
     litNodeClient: ILitNodeClient;
 
     // Addtional access control conditions
-    additionalAccessControlConditions: any[];
+    additionalAccessControlConditions?: any[];
 }
