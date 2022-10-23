@@ -2700,11 +2700,11 @@
 
 "@litprotocol-dev/constants@*", "@litprotocol-dev/constants@file:/Users/anson/Projects/lit-js-sdk-v2/packages/constants":
   "resolved" "file:packages/constants"
-  "version" "0.0.37"
+  "version" "0.0.38"
 
 "@litprotocol-dev/core-browser@file:/Users/anson/Projects/lit-js-sdk-v2/packages/core-browser":
   "resolved" "file:packages/core-browser"
-  "version" "0.0.37"
+  "version" "0.0.38"
   dependencies:
     "@litprotocol-dev/constants" "*"
     "@litprotocol-dev/utils" "*"
@@ -2712,7 +2712,7 @@
 
 "@litprotocol-dev/utils@*", "@litprotocol-dev/utils@file:/Users/anson/Projects/lit-js-sdk-v2/packages/utils":
   "resolved" "file:packages/utils"
-  "version" "0.0.37"
+  "version" "0.0.38"
   dependencies:
     "@litprotocol-dev/constants" "*"
     "@walletconnect/ethereum-provider" "^1.7.8"
