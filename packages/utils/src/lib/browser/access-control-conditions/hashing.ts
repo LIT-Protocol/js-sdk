@@ -16,8 +16,7 @@ import {
 } from '@litprotocol-dev/utils';
 
 /**
- * // #browser: TextEncoder() is browser only
- * // TEST: Add E2E Test
+ * 
  * Hash the unified access control conditions using SHA-256 in a deterministic way.
  *
  * @param { UnifiedAccessControlConditions } unifiedAccessControlConditions - The unified access control conditions to hash.
@@ -41,7 +40,7 @@ export const hashUnifiedAccessControlConditions = (
 
     log('Hashing unified access control conditions: ', toHash);
 
-    const encoder = new util.TextEncoder();
+    const encoder = new TextEncoder();
     const data = encoder.encode(toHash);
     return crypto.subtle.digest('SHA-256', data);
 };
@@ -60,7 +59,7 @@ export const hashResourceId = (
 ): Promise<ArrayBuffer> => {
     const resId = canonicalResourceIdFormatter(resourceId);
     const toHash = JSON.stringify(resId);
-    const encoder = new util.TextEncoder();
+    const encoder = new TextEncoder();
     const data = encoder.encode(toHash);
 
     return crypto.subtle.digest('SHA-256', data);
@@ -108,7 +107,7 @@ export const hashEVMContractConditions = (
 
     const toHash = JSON.stringify(conds);
     log('Hashing evm contract conditions: ', toHash);
-    const encoder = new util.TextEncoder();
+    const encoder = new TextEncoder();
     const data = encoder.encode(toHash);
     return crypto.subtle.digest('SHA-256', data);
 };
@@ -131,7 +130,7 @@ export const hashSolRpcConditions = (
 
     const toHash = JSON.stringify(conds);
     log('Hashing sol rpc conditions: ', toHash);
-    const encoder = new util.TextEncoder();
+    const encoder = new TextEncoder();
     const data = encoder.encode(toHash);
 
     return crypto.subtle.digest('SHA-256', data);
