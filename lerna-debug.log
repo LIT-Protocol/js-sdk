@@ -1,4 +1,5 @@
 47 error Error: Command failed with exit code 1: npm install --package-lock-only --ignore-scripts
+47 error Debugger attached.
 47 error npm ERR! code ERESOLVE
 47 error npm ERR! ERESOLVE unable to resolve dependency tree
 47 error npm ERR!
@@ -19,7 +20,8 @@
 47 error npm ERR! See /Users/anson/.npm/eresolve-report.txt for a full report.
 47 error
 47 error npm ERR! A complete log of this run can be found in:
-47 error npm ERR!     /Users/anson/.npm/_logs/2022-10-23T22_53_07_553Z-debug.log
+47 error npm ERR!     /Users/anson/.npm/_logs/2022-10-23T22_55_38_697Z-debug.log
+47 error Waiting for the debugger to disconnect...
 47 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
 47 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
 47 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)

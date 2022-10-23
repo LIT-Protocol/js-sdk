@@ -1,8 +1,8 @@
 {
   "name": "@litprotocol-dev/utils",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "dependencies": {
-    "@litprotocol-dev/constants": "^0.0.33",
+    "@litprotocol-dev/constants": "^0.0.34",
     "@walletconnect/ethereum-provider": "^1.7.8",
     "ethers": "^5.7.1",
     "jszip": "^3.6.0",
