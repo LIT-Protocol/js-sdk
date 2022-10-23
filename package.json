@@ -9,13 +9,15 @@
     "build:packages": "nx run-many --target=build",
     "test:packages": "nx run-many --target=testPackage",
     "publish:packages:forceDepVersion": "node ./tools/scripts/forceDepVersion.mjs --contains=@litprotocol-dev --workspace=lib --version=*",
-    "publish:packages": "lerna bootstrap -- -- --legacy-peer-deps && npx lerna publish --yes && yarn publish:packages:forceDepVersion",
+    "lerna:bootstrap": "lerna bootstrap -- -- --legacy-peer-deps",
+    "publish:packages": "npx lerna publish --yes && yarn publish:packages:forceDepVersion",
     "gitAdd": "git add *",
     "gitCommit": "git commit -m 'test: publish'",
     "gitPush": "git push"
   },
   "private": true,
   "dependencies": {
+    "--legacy-peer-deps": "^0.0.1-security.6",
     "@cypress/code-coverage": "^3.10.0",
     "@cypress/react": "^6.2.0",
     "@cypress/webpack-dev-server": "^2.3.0",
