@@ -5,16 +5,17 @@
 ### Publising
 
 ```js
-// 1. Force dependencies on each package.json to "*" instead of a specific version
-yarn publish:packages:forceDepVersion
 
-// 2. Build the packages
+// 1. Force dependencies on each package.json to "*" instead of a specific version, then build the packages
 yarn build:packages
 
-// 3. Git add, commit, and push
+// 2. Git add, commit, and push
 - yarn gitAdd OR git add *
 - yarn gitCommit OR git commit -m "message"
 - yarn gitPush OR git push
+
+// 3. Publish using lerna and a custom script that creates a separated vanilla version of the SDK (Make sure you run `yarn npm login` first.)
+yarn publish:packages
 
 ```
 
