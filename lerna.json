@@ -2,12 +2,10 @@
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
   "useNx": true,
   "useWorkspaces": true,
-  "version": "0.0.31",
+  "version": "0.0.32",
   "command": {
     "bootstrap": {
-      "npmClientArgs": [
-        "--legacy-peer-deps"
-      ]
+      "npmClientArgs": ["--legacy-peer-deps"]
     }
   }
 }
