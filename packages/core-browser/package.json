@@ -2,13 +2,13 @@
   "name": "@litprotocol-dev/core-browser",
   "version": "0.1.15",
   "dependencies": {
-    "@litprotocol-dev/constants": "^0.1.15",
-    "@litprotocol-dev/utils": "^0.1.15",
+    "@litprotocol-dev/constants": "*",
+    "@litprotocol-dev/utils": "*",
     "util": "0.12.5"
   },
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/core-browser"
   },
-  "gitHead": "6a9db493a33ca665262a4705aefe9aa98f7fa66a"
+  "gitHead": "05e444ab8a6ec7d4892106f36f8de6eeb3678e35"
 }

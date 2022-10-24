@@ -2,7 +2,7 @@
   "name": "@litprotocol-dev/utils",
   "version": "0.1.15",
   "dependencies": {
-    "@litprotocol-dev/constants": "^0.1.15",
+    "@litprotocol-dev/constants": "*",
     "@walletconnect/ethereum-provider": "^1.7.8",
     "ethers": "^5.7.1",
     "jszip": "^3.6.0",
@@ -16,5 +16,5 @@
     "access": "public",
     "directory": "../../dist/packages/utils"
   },
-  "gitHead": "6a9db493a33ca665262a4705aefe9aa98f7fa66a"
+  "gitHead": "05e444ab8a6ec7d4892106f36f8de6eeb3678e35"
 }
