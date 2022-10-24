@@ -10,7 +10,7 @@
     "test:packages": "nx run-many --target=testPackage",
     "lerna:bootstrap": "lerna bootstrap -- -- --legacy-peer-deps",
     "publish:packages:forceDepVersion": "node ./tools/scripts/forceDepVersion.mjs --contains=@litprotocol-dev --workspace=lib --version=*",
-    "publish:packages": "npx lerna publish --yes && yarn publish:packages:forceDepVersion",
+    "publish:packages": "npx lerna publish --yes",
     "gitAdd": "git add *",
     "gitCommit": "git commit -m 'test: publish'",
     "gitPush": "git push"
