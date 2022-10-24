@@ -10,9 +10,9 @@ rm -rf ./packages/utils/node_modules &&
 rm -rf ./packages/utils/dist &&
 rm -f ./packages/utils/yarn.lock &&
 
-rm -rf ./packages/core/node_modules &&
-rm -rf ./packages/core/dist &&
-rm -f ./packages/core/yarn.lock &&
+rm -rf ./packages/core-browser/node_modules &&
+rm -rf ./packages/core-browser/dist &&
+rm -f ./packages/core-browser/yarn.lock &&
 
 rm -rf ./apps/e2e/node_modules &&
 
