@@ -2,7 +2,7 @@
   "name": "@litprotocol-dev/utils",
   "version": "0.1.1",
   "dependencies": {
-    "@litprotocol-dev/constants": "^0.1.1",
+    "@litprotocol-dev/constants": "*",
     "@walletconnect/ethereum-provider": "^1.7.8",
     "ethers": "^5.7.1",
     "jszip": "^3.6.0",
