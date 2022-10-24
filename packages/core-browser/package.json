@@ -3,7 +3,7 @@
   "version": "0.1.9",
   "dependencies": {
     "@litprotocol-dev/constants": "*",
-    "@litprotocol-dev/utils": "^0.1.9",
+    "@litprotocol-dev/utils": "*",
     "util": "0.12.5"
   },
   "publishConfig": {

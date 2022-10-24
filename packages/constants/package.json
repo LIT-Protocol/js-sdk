@@ -1,6 +1,10 @@
 {
   "name": "@litprotocol-dev/constants",
   "version": "0.1.8",
+  "dependencies": {
+    "pako": "^2.0.4",
+    "util": "^0.12.5"
+  },
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/constants"
