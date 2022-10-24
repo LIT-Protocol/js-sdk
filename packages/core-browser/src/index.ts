@@ -54,12 +54,6 @@ import {
     uint8arrayToString,
 } from '@litprotocol-dev/utils';
 
-// import {
-//     fromString as uint8arrayFromString,
-//     toString as uint8arrayToString,
-// } from 'uint8arrays';
-
-
 export { 
     LitNodeClient,
 
