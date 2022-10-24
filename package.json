@@ -1,6 +1,6 @@
 {
   "name": "@litprotocol-dev/sdk",
-  "version": "0.0.3",
+  "version": "0.0.1",
   "license": "MIT",
   "scripts": {
     "workspace:reset:all": "sh ./tools/scripts/reset.sh",
