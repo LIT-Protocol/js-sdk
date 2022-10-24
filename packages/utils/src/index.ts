@@ -1,3 +1,8 @@
+import {
+    fromString as uint8arrayFromString,
+    toString as uint8arrayToString,
+} from 'uint8arrays';
+
 /** ----- Utils ----- */
 export * from './lib/utils';
 
@@ -13,3 +18,8 @@ export * as eth from './lib/browser/chains/eth';
 /** ------ Access Control Conditions ----- */
 export * from './lib/browser/access-control-conditions/hashing';
 export * from './lib/browser/access-control-conditions/canonicalFormatter';
+
+export {
+    uint8arrayFromString,
+    uint8arrayToString
+}

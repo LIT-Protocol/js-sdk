@@ -50,12 +50,14 @@ import {
     blobToBase64String,
     base64StringToBlob,
     getVarType,
+    uint8arrayFromString,
+    uint8arrayToString,
 } from '@litprotocol-dev/utils';
 
-import {
-    fromString as uint8arrayFromString,
-    toString as uint8arrayToString,
-} from 'uint8arrays';
+// import {
+//     fromString as uint8arrayFromString,
+//     toString as uint8arrayToString,
+// } from 'uint8arrays';
 
 
 export { 
