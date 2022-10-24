@@ -11,7 +11,7 @@
     "build:packages": "yarn build:packages:forceDepVersion && nx run-many --target=build && yarn build:matchFolderNameAsPackageName",
     "test:packages": "nx run-many --target=testPackage",
     "lerna:bootstrap": "lerna bootstrap -- -- --legacy-peer-deps",
-    "publish:packages": "concurrently 'npx lerna publish --yes' 'yarn publish:vanilla'",
+    "publish:packages": "npx lerna publish --yes && yarn publish:vanilla",
     "gitAdd": "git add *",
     "gitCommit": "git commit -m 'test: publish'",
     "gitPush": "git push",
