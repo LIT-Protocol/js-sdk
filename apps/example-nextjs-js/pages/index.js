@@ -3,8 +3,6 @@ import indexCss from './index.module.css';
 import { testCases } from './test-cases';
 import { ACTION } from './enum';
 import { IGNORED_FUNCTIONS } from './cases/IGNORED_FUNCTIONS';
-// const { blobToBase64String } = require('@litprotocol-dev/utils');
-// console.log('blobToBase64String:', blobToBase64String);
 
 // ========== Test Cases ==========
 
