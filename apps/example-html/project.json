@@ -18,8 +18,7 @@
         "tsConfig": "apps/example-html/tsconfig.app.json",
         "assets": [
           "apps/example-html/src/favicon.ico",
-          "apps/example-html/src/assets",
-          "apps/example-html/src/dist/constants-web"
+          "apps/example-html/src/assets"
         ],
         "styles": ["apps/example-html/src/styles.css"],
         "scripts": []

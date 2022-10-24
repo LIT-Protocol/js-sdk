@@ -22,6 +22,9 @@
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
       "options": {
+        "banner": {
+          "js": "import { createRequire } from 'module';const require = createRequire(import.meta.url);"
+        },
         "globalName": "LitJsSdk_CoreBrowser",
         "outfile":"dist/packages/core-browser-vanilla/core-browser.js",
         "entryPoints": ["./packages/core-browser/src/index.ts"],

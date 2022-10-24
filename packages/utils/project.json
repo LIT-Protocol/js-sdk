@@ -27,6 +27,9 @@
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
       "options": {
+        "banner": {
+          "js": "import { createRequire } from 'module';const require = createRequire(import.meta.url);"
+        },
         "globalName": "LitJsSdk_Utils",
         "outfile":"dist/packages/utils-vanilla/utils.js",
         "entryPoints": ["./packages/utils/src/index.ts"],
