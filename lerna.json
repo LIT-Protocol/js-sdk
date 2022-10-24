@@ -3,9 +3,5 @@
   "useNx": true,
   "useWorkspaces": true,
   "version": "0.0.32",
-  "command": {
-    "bootstrap": {
-      "npmClientArgs": ["--legacy-peer-deps"]
-    }
-  }
+  "debug": false
 }
