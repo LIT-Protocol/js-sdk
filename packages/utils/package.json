@@ -1,6 +1,6 @@
 {
   "name": "@litprotocol-dev/utils",
-  "version": "0.0.42",
+  "version": "0.0.31",
   "dependencies": {
     "@litprotocol-dev/constants": "*",
     "@walletconnect/ethereum-provider": "^1.7.8",
