@@ -1,6 +1,6 @@
 {
   "name": "@litprotocol-dev/constants",
-  "version": "0.0.34",
+  "version": "0.0.35",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/constants"
