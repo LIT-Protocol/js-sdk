@@ -1,9 +1,9 @@
 {
   "name": "@litprotocol-dev/core-browser",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "dependencies": {
-    "@litprotocol-dev/constants": "*",
-    "@litprotocol-dev/utils": "*"
+    "@litprotocol-dev/constants": "^0.1.8",
+    "@litprotocol-dev/utils": "^0.1.8"
   },
   "publishConfig": {
     "access": "public",
