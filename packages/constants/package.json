@@ -1,6 +1,6 @@
 {
   "name": "@litprotocol-dev/constants",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "dependencies": {
     "pako": "^2.0.4",
     "util": "^0.12.5"
