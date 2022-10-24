@@ -25,7 +25,7 @@
       "executor": "@websaam/nx-esbuild:package",
       "options": {
         "globalName": "LitJsSdk_Constants",
-        "outfile":"dist/packages/constants-web/constants.js",
+        "outfile":"dist/packages/constants-vanilla/constants.js",
         "entryPoints": ["./packages/constants/src/index.ts"],
         "define": { "global": "window" },
         "plugins":[
