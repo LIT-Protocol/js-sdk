@@ -28,7 +28,7 @@
       "executor": "@websaam/nx-esbuild:package",
       "options": {
         "globalName": "LitJsSdk_Utils",
-        "outfile":"dist/packages/utils/web/utils.js",
+        "outfile":"dist/packages/utils-web/utils.js",
         "entryPoints": ["./packages/utils/src/index.ts"],
         "define": { "global": "window" },
         "plugins":[

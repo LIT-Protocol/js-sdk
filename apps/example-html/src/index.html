@@ -13,7 +13,7 @@
   
   <body>
 
-    <script src="./packages/constants/web/constants.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@litprotocol-dev/constants/web/constants.js"></script> -->
     <!-- <script src="./packages/utils/web/utils.js"></script> -->
     
     <!-- <script src="https://cdn.jsdelivr.net/npm/@litprotocol-dev/constants@0.0.12/web/constants.js"></script>
@@ -24,11 +24,17 @@
       window.addEventListener('load', () => {
         
         const tests = [
-          { id: 'LitJsSdk_Constants', module: LitJsSdk_Constants },
+          // { id: 'LitJsSdk_Constants', module: LitJsSdk_Constants },
           // { id: 'LitJsSdk_Utils', module: LitJsSdk_Utils },
         ]
   
         // -- setting up buttons
+
+        if (!tests.length){
+          console.warn('No tests can be found.')
+          return
+        } 
+
         tests.forEach((test) => {
           
           const btnElement = document.createElement('button');

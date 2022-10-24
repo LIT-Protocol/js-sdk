@@ -1,7 +1,9 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": [
-    "./packages/constants/src/index.ts"
+    "./packages/constants/src/index.ts",
+    "./packages/utils/src/index.ts",
+    "./packages/core-browser/src/index.ts"
   ],
   "out": "doc"
 }

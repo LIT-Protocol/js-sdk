@@ -19,11 +19,7 @@
         "assets": [
           "apps/example-html/src/favicon.ico",
           "apps/example-html/src/assets",
-          {
-            "glob": "**/*",
-            "input": "dist/packages",
-            "output": "./packages"
-          }
+          "apps/example-html/src/dist/constants-web"
         ],
         "styles": ["apps/example-html/src/styles.css"],
         "scripts": []
@@ -43,6 +39,18 @@
           "extractLicenses": true,
           "vendorChunk": false
         }
+      }
+    },
+    "cloneDist": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "mkdir -p ./apps/example-html/src/dist && cp -r ./dist/packages/constants-web ./apps/example-html/src/dist/constants-web"
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn nx run example-html:cloneDist && yarn nx run example-html:serve"
       }
     },
     "serve": {

@@ -23,7 +23,7 @@
       "executor": "@websaam/nx-esbuild:package",
       "options": {
         "globalName": "LitJsSdk_CoreBrowser",
-        "outfile":"dist/packages/core-browser/web/core-browser.js",
+        "outfile":"dist/packages/core-browser-web/core-browser.js",
         "entryPoints": ["./packages/core-browser/src/index.ts"],
         "define": { "global": "window" },
         "plugins":[
