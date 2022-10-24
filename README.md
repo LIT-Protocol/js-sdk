@@ -1,8 +1,46 @@
-
-
 # LitJsSdkV2
 
 ## Workflow
+
+### Publising
+
+```js
+// 1. Force dependencies on each package.json to "*" instead of a specific version
+yarn publish:packages:forceDepVersion
+
+// 2. Build the packages
+yarn build:packages
+
+// 3. Git add, commit, and push
+- yarn gitAdd OR git add *
+- yarn gitCommit OR git commit -m "message"
+- yarn gitPush OR git push
+
+```
+
+<details>
+  <summary>More</summary>
+  
+  Packages inside the `packages` folder will be published automatically providing each `package.json` in each package has provide a `publichConfig` path, eg:
+
+```json
+{
+  "name": "...",
+  ...
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/core-browser"
+  },
+  ...
+}
+```
+
+</details>
+
+# Default NX README.md
+
+<details>
+<summary>Default NX README.md</summary>
 
 Download [Nx](https://nx.dev) and open this project
 
@@ -83,8 +121,6 @@ Run `nx graph` to see a diagram of the dependencies of your projects.
 
 Visit the [Nx Documentation](https://nx.dev) to learn more.
 
-
-
 ## ☁ Nx Cloud
 
 ### Distributed Computation Caching & Distributed Task Execution
@@ -96,3 +132,5 @@ Nx Cloud pairs with Nx in order to enable you to build and test code more rapidl
 Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
 
 Visit [Nx Cloud](https://nx.app/) to learn more.
+
+</details>
