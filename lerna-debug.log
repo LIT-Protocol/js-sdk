@@ -1,6 +1,0 @@
-58 error Error: Command failed with exit code 128: git tag v0.0.32 -m v0.0.32
-58 error fatal: tag 'v0.0.32' already exists
-58 error     at makeError (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/lib/error.js:60:11)
-58 error     at handlePromise (/Users/anson/Projects/lit-js-sdk-v2/node_modules/execa/index.js:118:26)
-58 error     at processTicksAndRejections (node:internal/process/task_queues:96:5)
-58 error     at async Promise.all (index 0)
