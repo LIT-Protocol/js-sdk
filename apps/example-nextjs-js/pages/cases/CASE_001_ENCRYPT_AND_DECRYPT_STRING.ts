@@ -13,7 +13,7 @@ export const CASE_001_ENCRYPT_AND_DECRYPT_STRING = [
                 chain,
             });
 
-            const accs: AccessControlConditions = [
+            const accs = [
                 {
                     contractAddress: '',
                     standardContractType: '',

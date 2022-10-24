@@ -1,34 +1,33 @@
 import { AccsOperatorParams, LIT_NETWORKS } from '@litprotocol-dev/constants';
 
 import {
-    AccsCOSMOSParams,
-    AccsDefaultParams,
-    AccsEVMParams,
-    AccsRegularParams,
-    AccsSOLV2Params,
-    JsonEncryptionRetrieveRequest,
-    JsonExecutionRequest,
-    JsonSignChainDataRequest,
-    JsonSigningRetrieveRequest,
+  AccsCOSMOSParams,
+  AccsDefaultParams,
+  AccsEVMParams,
+  AccsRegularParams,
+  AccsSOLV2Params,
+  JsonEncryptionRetrieveRequest,
+  JsonExecutionRequest,
+  JsonSignChainDataRequest,
+  JsonSigningRetrieveRequest,
 } from '@litprotocol-dev/constants';
 
-export type AccessControlConditions = [AccsRegularParams | AccsDefaultParams];
+export type AccessControlConditions = AccsRegularParams[] | AccsDefaultParams[];
 
-export type EvmContractConditions = [AccsEVMParams];
-export type SolRpcConditions = [AccsSOLV2Params];
-export type UnifiedAccessControlConditions = [
-    | AccsRegularParams
-    | AccsDefaultParams
-    | AccsSOLV2Params
-    | AccsEVMParams
-    | AccsCOSMOSParams
-];
+export type EvmContractConditions = AccsEVMParams[];
+export type SolRpcConditions = AccsSOLV2Params[];
+export type UnifiedAccessControlConditions =
+  | AccsRegularParams[]
+  | AccsDefaultParams[]
+  | AccsEVMParams[]
+  | AccsSOLV2Params[]
+  | AccsCOSMOSParams[];
 
 export type JsonRequest = JsonExecutionRequest | JsonSignChainDataRequest;
 
 export type SupportedJsonRequests =
-    | JsonSigningRetrieveRequest
-    | JsonEncryptionRetrieveRequest;
+  | JsonSigningRetrieveRequest
+  | JsonEncryptionRetrieveRequest;
 
 export type Chain = string;
 
@@ -39,12 +38,12 @@ export type Chain = string;
  * @typedef { Object } LITChainRequiredProps
  */
 export type LITChainRequiredProps = {
-    name: string;
-    symbol: string;
-    decimals: number;
-    rpcUrls: Array<String>;
-    blockExplorerUrls: Array<String>;
-    vmType: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  rpcUrls: Array<String>;
+  blockExplorerUrls: Array<String>;
+  vmType: string;
 };
 
 /**
@@ -54,9 +53,9 @@ export type LITChainRequiredProps = {
  * @property { string } name - The human readable name of the chain
  */
 export type LITEVMChain = LITChainRequiredProps & {
-    contractAddress: string | null;
-    chainId: number;
-    type: string | null;
+  contractAddress: string | null;
+  chainId: number;
+  type: string | null;
 };
 
 /**
@@ -69,7 +68,7 @@ export type LITSVMChain = LITChainRequiredProps;
  * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for Cosmos chains.
  */
 export type LITCosmosChain = LITChainRequiredProps & {
-    chainId: string;
+  chainId: string;
 };
 
 /**
@@ -78,7 +77,7 @@ export type LITCosmosChain = LITChainRequiredProps & {
  * @property {string} name - The human readable name of the chain
  */
 export type LITChain<T> = {
-    [chainName: string]: T;
+  [chainName: string]: T;
 };
 
 export type LIT_NETWORKS_KEYS = keyof typeof LIT_NETWORKS;
