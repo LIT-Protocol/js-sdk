@@ -24,9 +24,9 @@
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
       "options": {
-        "banner": {
-          "js": "import { createRequire } from 'module';const require = createRequire(import.meta.url);"
-        },
+        "bundle": true,        
+        "sourcemap": true,
+        "metafile": true,
         "globalName": "LitJsSdk_Constants",
         "outfile":"dist/packages/constants-vanilla/constants.js",
         "entryPoints": ["./packages/constants/src/index.ts"],

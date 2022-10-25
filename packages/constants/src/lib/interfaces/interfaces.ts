@@ -99,6 +99,11 @@ export interface CheckAndSignAuthParams {
 
     // ptional and only used with EVM chains right now.  Set to true by default.  Whether or not to ask Metamask or the user's wallet to switch chains before signing.  This may be desired if you're going to have the user send a txn on that chain.  On the other hand, if all you care about is the user's wallet signature, then you probably don't want to make them switch chains for no reason.  Pass false here to disable this chain switching behavior.
     switchChain?: boolean;
+
+    // --- Following for Session Auth ---
+    expiration?: any,
+
+    uri?: string,
 }
 
 /** ---------- Web3 ---------- */
@@ -557,3 +562,38 @@ export interface DecryptZipFileWithMetadataProps {
     // Addtional access control conditions
     additionalAccessControlConditions?: any[];
 }
+
+/**
+ * Struct in rust
+ * -----
+ pub struct SessionKeySignedMessage {
+    pub session_key: String,
+    pub resources: Vec<String>,
+    pub capabilities: Vec<String>,
+    pub issued_at: String,
+    pub expiration: String,
+    pub node_address: String,
+}
+ */
+export interface SessionKeySignedMessage {
+    sessionKey: string,
+    resources?: any[],
+    capabilities: string[],
+    issuedAt: string,
+    expiration: string,
+    nodeAddress: string,
+}
+
+export interface SessionSigsProp{
+    expiration: any,
+    chain: Chain,
+    resources: any[],
+    sessionCapabilities: any,
+    switchChain: boolean,
+    litNodeClient: ILitNodeClient,
+}
+
+export interface SessionKeyPair{
+    publicKey: string,
+    secretKey: string,
+};

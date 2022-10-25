@@ -1,5 +1,5 @@
 {
-  "name": "@litprotocol-dev/constants",
+  "name": "@litprotocol-dev/constants-vanilla",
   "version": "0.1.16",
   "dependencies": {
     "pako": "^2.0.4",
@@ -7,7 +7,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/constants"
+    "directory": "../../dist/packages/constants-vanilla"
   },
   "gitHead": "05e444ab8a6ec7d4892106f36f8de6eeb3678e35"
 }

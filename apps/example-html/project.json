@@ -18,7 +18,8 @@
         "tsConfig": "apps/example-html/tsconfig.app.json",
         "assets": [
           "apps/example-html/src/favicon.ico",
-          "apps/example-html/src/assets"
+          "apps/example-html/src/assets",
+          "apps/example-html/src/dist/constants-vanilla"
         ],
         "styles": ["apps/example-html/src/styles.css"],
         "scripts": []
@@ -43,7 +44,7 @@
     "cloneDist": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "mkdir -p ./apps/example-html/src/dist && cp -r ./dist/packages/constants-web ./apps/example-html/src/dist/constants-web"
+        "command": "mkdir -p ./apps/example-html/src/dist && cp -r ./dist/packages/constants-vanilla ./apps/example-html/src/dist/constants-vanilla"
       }
     },
     "dev": {

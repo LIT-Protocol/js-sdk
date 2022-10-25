@@ -399,6 +399,8 @@ export const LOCAL_STORAGE_KEYS = {
     AUTH_SOL_SIGNATURE: 'lit-auth-sol-signature',
     WEB3_PROVIDER: 'lit-web3-provider',
     KEY_PAIR: 'lit-comms-keypair',
+    SESSION_KEY: 'lit-session-key',
+    WALLET_SIGNATURE: 'lit-wallet-sig',
 };
 
 /**
@@ -453,3 +455,6 @@ export const LIT_NETWORKS = {
     ],
     custom: [],
 };
+
+// ========== Lit Sessions ==========
+export const LIT_SESSION_KEY_URI = 'lit:session:';

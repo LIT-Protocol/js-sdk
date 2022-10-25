@@ -1,5 +1,6 @@
 import {
     LIT_ERROR,
+    SessionKeyPair,
     SigShare,
     SYMM_KEY_ALGO_PARAMS,
 } from '@litprotocol-dev/constants';
@@ -11,6 +12,7 @@ import * as wasmECDSA from '@litprotocol-dev/constants';
 import { log, throwError } from '../utils';
 
 import { uint8arrayFromString, uint8arrayToString } from './browser';
+import nacl from 'tweetnacl';
 
 /** ---------- Exports ---------- */
 
@@ -236,3 +238,20 @@ export const combineBlsDecryptionShares = (
 
     return decrypted;
 };
+
+/**
+ * 
+ * Generate a session key pair
+ * 
+ * @returns { SessionKeyPair } sessionKeyPair
+ */
+export const generateSessionKeyPair = () : SessionKeyPair => {
+    const keyPair = nacl.sign.keyPair();
+
+    const sessionKeyPair : SessionKeyPair = {
+        publicKey: uint8arrayToString(keyPair.publicKey, "base16"),
+        secretKey: uint8arrayToString(keyPair.secretKey, "base16"),
+    };
+    
+    return sessionKeyPair;
+}

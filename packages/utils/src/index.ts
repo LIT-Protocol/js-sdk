@@ -6,10 +6,14 @@ import {
 /** ----- Utils ----- */
 export * from './lib/utils';
 
+// -- browser
 export * from './lib/browser/browser';
-export * from './lib/browser/lit';
 export * from './lib/browser/humanizer';
 export * from './lib/browser/crypto';
+
+// -- browser/lit
+export * from './lib/browser/lit/lit';
+export * from './lib/browser/lit/session';
 
 /** ----- Chains ----- */
 export * as cosmos from './lib/browser/chains/cosmos';
