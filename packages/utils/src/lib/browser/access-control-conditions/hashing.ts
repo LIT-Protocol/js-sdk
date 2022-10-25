@@ -1,48 +1,49 @@
 import {
-    AccessControlConditions,
-    ConditionItem,
-    EvmContractConditions,
-    JsonSigningResourceId,
-    SolRpcConditions,
-    UnifiedAccessControlConditions,
+  AccessControlConditions,
+  ConditionItem,
+  EvmContractConditions,
+  JsonSigningResourceId,
+  SolRpcConditions,
+  UnifiedAccessControlConditions,
 } from '@litprotocol-dev/constants';
 import {
-    canonicalAccessControlConditionFormatter,
-    canonicalEVMContractConditionFormatter,
-    canonicalResourceIdFormatter,
-    canonicalSolRpcConditionFormatter,
-    canonicalUnifiedAccessControlConditionFormatter,
-    log,
+  canonicalAccessControlConditionFormatter,
+  canonicalEVMContractConditionFormatter,
+  canonicalResourceIdFormatter,
+  canonicalSolRpcConditionFormatter,
+  canonicalUnifiedAccessControlConditionFormatter,
+  log,
+  uint8arrayToString,
 } from '@litprotocol-dev/utils';
 
 /**
- * 
+ *
  * Hash the unified access control conditions using SHA-256 in a deterministic way.
  *
  * @param { UnifiedAccessControlConditions } unifiedAccessControlConditions - The unified access control conditions to hash.
  * @returns { Promise<ArrayBuffer> } A promise that resolves to an ArrayBuffer that contains the hash
  */
 export const hashUnifiedAccessControlConditions = (
-    unifiedAccessControlConditions: UnifiedAccessControlConditions
+  unifiedAccessControlConditions: UnifiedAccessControlConditions
 ): Promise<ArrayBuffer> => {
-    console.log(
-        'unifiedAccessControlConditions:',
-        unifiedAccessControlConditions
-    );
+  console.log(
+    'unifiedAccessControlConditions:',
+    unifiedAccessControlConditions
+  );
 
-    const conditions = unifiedAccessControlConditions.map(
-        (condition: ConditionItem) => {
-            canonicalUnifiedAccessControlConditionFormatter(condition);
-        }
-    );
+  const conditions = unifiedAccessControlConditions.map(
+    (condition: ConditionItem) => {
+      canonicalUnifiedAccessControlConditionFormatter(condition);
+    }
+  );
 
-    const toHash = JSON.stringify(conditions);
+  const toHash = JSON.stringify(conditions);
 
-    log('Hashing unified access control conditions: ', toHash);
+  log('Hashing unified access control conditions: ', toHash);
 
-    const encoder = new TextEncoder();
-    const data = encoder.encode(toHash);
-    return crypto.subtle.digest('SHA-256', data);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(toHash);
+  return crypto.subtle.digest('SHA-256', data);
 };
 
 /**
@@ -55,14 +56,29 @@ export const hashUnifiedAccessControlConditions = (
  *
  */
 export const hashResourceId = (
-    resourceId: JsonSigningResourceId
+  resourceId: JsonSigningResourceId
 ): Promise<ArrayBuffer> => {
-    const resId = canonicalResourceIdFormatter(resourceId);
-    const toHash = JSON.stringify(resId);
-    const encoder = new TextEncoder();
-    const data = encoder.encode(toHash);
+  const resId = canonicalResourceIdFormatter(resourceId);
+  const toHash = JSON.stringify(resId);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(toHash);
 
-    return crypto.subtle.digest('SHA-256', data);
+  return crypto.subtle.digest('SHA-256', data);
+};
+
+/**
+ *
+ * Hash resourceId for signing
+ *
+ * @param { JSONSigningResourceId } resourceId
+ *
+ * @returns { string }
+ */
+export const hashResourceIdForSigning = async (
+  resourceId: JsonSigningResourceId
+): Promise<string> => {
+  const hashed = await hashResourceId(resourceId);
+  return uint8arrayToString(new Uint8Array(hashed), 'base16');
 };
 
 /**
@@ -75,18 +91,18 @@ export const hashResourceId = (
  *
  */
 export const hashAccessControlConditions = (
-    accessControlConditions: AccessControlConditions
+  accessControlConditions: AccessControlConditions
 ): Promise<ArrayBuffer> => {
-    const conds = accessControlConditions.map((c) =>
-        canonicalAccessControlConditionFormatter(c)
-    );
+  const conds = accessControlConditions.map((c) =>
+    canonicalAccessControlConditionFormatter(c)
+  );
 
-    const toHash = JSON.stringify(conds);
-    log('Hashing access control conditions: ', toHash);
-    const encoder = new TextEncoder();
-    const data = encoder.encode(toHash);
+  const toHash = JSON.stringify(conds);
+  log('Hashing access control conditions: ', toHash);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(toHash);
 
-    return crypto.subtle.digest('SHA-256', data);
+  return crypto.subtle.digest('SHA-256', data);
 };
 
 /**
@@ -99,17 +115,17 @@ export const hashAccessControlConditions = (
  *
  */
 export const hashEVMContractConditions = (
-    evmContractConditions: EvmContractConditions
+  evmContractConditions: EvmContractConditions
 ): Promise<ArrayBuffer> => {
-    const conds = evmContractConditions.map((c) =>
-        canonicalEVMContractConditionFormatter(c)
-    );
+  const conds = evmContractConditions.map((c) =>
+    canonicalEVMContractConditionFormatter(c)
+  );
 
-    const toHash = JSON.stringify(conds);
-    log('Hashing evm contract conditions: ', toHash);
-    const encoder = new TextEncoder();
-    const data = encoder.encode(toHash);
-    return crypto.subtle.digest('SHA-256', data);
+  const toHash = JSON.stringify(conds);
+  log('Hashing evm contract conditions: ', toHash);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(toHash);
+  return crypto.subtle.digest('SHA-256', data);
 };
 
 /**
@@ -122,16 +138,16 @@ export const hashEVMContractConditions = (
  *
  */
 export const hashSolRpcConditions = (
-    solRpcConditions: SolRpcConditions
+  solRpcConditions: SolRpcConditions
 ): Promise<ArrayBuffer> => {
-    const conds = solRpcConditions.map((c) =>
-        canonicalSolRpcConditionFormatter(c)
-    );
+  const conds = solRpcConditions.map((c) =>
+    canonicalSolRpcConditionFormatter(c)
+  );
 
-    const toHash = JSON.stringify(conds);
-    log('Hashing sol rpc conditions: ', toHash);
-    const encoder = new TextEncoder();
-    const data = encoder.encode(toHash);
+  const toHash = JSON.stringify(conds);
+  log('Hashing sol rpc conditions: ', toHash);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(toHash);
 
-    return crypto.subtle.digest('SHA-256', data);
+  return crypto.subtle.digest('SHA-256', data);
 };
