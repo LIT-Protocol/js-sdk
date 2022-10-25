@@ -5,8 +5,6 @@ import {
 import { SupportedEncodings } from 'uint8arrays/util/bases';
 
 /**
- * 
- * (Helper)
  * Convert a Uint8Array to a string.  Supports various encodings.
  * This is a re-export of https://www.npmjs.com/package/uint8arrays and you can
  * find the list of supported encodings here https://github.com/multiformats/multibase/blob/master/multibase.csv
@@ -23,8 +21,6 @@ export const uint8arrayToString = (
 };
 
 /**
- * 
- * (Helper)
  * Convert a string to a Uint8Array.  Supports various encodings.
  * This is a re-export of https://www.npmjs.com/package/uint8arrays and you can
  * find the list of supported encodings here https://github.com/multiformats/multibase/blob/master/multibase.csv
@@ -41,7 +37,6 @@ export const uint8arrayFromString = (
 };
 
 /**
- * 
  * Convert a Blob to a base64urlpad string.  Note: This function returns a promise.
  *
  * @param { Blob | File } blob The Blob or File to turn into a base64 string
@@ -71,7 +66,6 @@ export const base64StringToBlob = (base64String: string): Blob => {
 
 /**
  * 
- * // TEST: fileToDataUrl
  * Convert a file to a data URL, which could then be embedded in a LIT.
  * A data URL is a string representation of a file.
  *

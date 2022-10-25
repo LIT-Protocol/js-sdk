@@ -34,6 +34,8 @@ if( ! globalThis.LitNodeClient ){
 
 // ----- Utils -----
 import { 
+
+    // > lit.ts
     checkAndSignAuthMessage,
     encryptString,
     decryptString,
@@ -47,17 +49,27 @@ import {
     encryptFileAndZipWithMetadata,
     decryptZipFileWithMetadata,
     humanizeAccessControlConditions,
+
+    // > browser.ts
     blobToBase64String,
     base64StringToBlob,
     getVarType,
     uint8arrayFromString,
     uint8arrayToString,
+
+    // > session.ts
+    getSessionSigs,
+    getSessionKeyUri,
+    parseResource,
+
 } from '@litprotocol-dev/utils';
 
 export { 
     LitNodeClient,
 
-    // '@litprotocol-dev/utils'
+    // ===== '@litprotocol-dev/utils' =====
+
+    // > lit.ts
     checkAndSignAuthMessage,
     encryptString,
     decryptString,
@@ -72,12 +84,15 @@ export {
     decryptZipFileWithMetadata,
     humanizeAccessControlConditions,
 
-    // -- utils
+    // > session.ts
+    getSessionSigs,
+    getSessionKeyUri,
+    parseResource,
+
+    // > browser.ts
     blobToBase64String,
     base64StringToBlob,
     getVarType,
-
-    // uint8arrays
     uint8arrayFromString,
     uint8arrayToString
 };

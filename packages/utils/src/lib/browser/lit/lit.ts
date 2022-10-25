@@ -34,10 +34,10 @@ import {
 import { wasmBlsSdkHelpers } from '@litprotocol-dev/constants';
 
 import JSZip from 'jszip';
-import { checkAndSignCosmosAuthMessage } from './chains/cosmos';
-import { checkAndSignEVMAuthMessage } from './chains/eth';
+import { checkAndSignCosmosAuthMessage } from '../chains/cosmos';
+import { checkAndSignEVMAuthMessage } from '../chains/eth';
 
-import { checkAndSignSolAuthMessage } from './chains/sol';
+import { checkAndSignSolAuthMessage } from '../chains/sol';
 
 import {
     fromString as uint8arrayFromString,
@@ -49,7 +49,7 @@ import {
     encryptWithSymmetricKey,
     generateSymmetricKey,
     importSymmetricKey,
-} from './crypto';
+} from '../crypto';
 
 // ---------- Local Interfaces ----------
 
