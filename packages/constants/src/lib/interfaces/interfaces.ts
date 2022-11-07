@@ -192,6 +192,10 @@ export interface LitNodeClientConfig {
     litNetwork: LIT_NETWORKS_KEYS;
 }
 
+export interface CustomNetwork {
+    litNetwork: LIT_NETWORKS_KEYS;
+}
+
 /**
  * Struct in rust
  * -----
@@ -272,7 +276,7 @@ export interface JsonAccsRequest {
     resourceId?: JsonSigningResourceId;
 
     // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
-    authSig: JsonAuthSig;
+    authSig?: JsonAuthSig;
 }
 
 /**
@@ -291,14 +295,16 @@ pub struct JsonSigningRetrieveRequest {
 }
 */
 export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
-    iat: number;
-    exp: number;
+    iat?: number;
+    exp?: number;
+    sessionSigs?: any,
 }
 
 export interface JsonStoreSigningRequest extends JsonAccsRequest {
     // Whether or not the access control condition should be saved permanently.  If false, the access control conditions will be updateable by the creator.  If you don't pass this param, it's set to true by default.
     permanant?: number;
     permanent?: number;
+    sessionSigs?: any;
 }
 
 /**
@@ -585,11 +591,11 @@ export interface SessionKeySignedMessage {
 }
 
 export interface SessionSigsProp{
-    expiration: any,
+    expiration?: any,
     chain: Chain,
     resources: any[],
-    sessionCapabilities: any,
-    switchChain: boolean,
+    sessionCapabilities?: any,
+    switchChain?: boolean,
     litNodeClient: ILitNodeClient,
 }
 

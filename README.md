@@ -1,8 +1,25 @@
 # LitJsSdkV2
 
-## Workflow
+## Recommended
+- Install [NX Console](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console) for Visual Studio Code
+- Setting up workflow
+  - Open the VS Command Palette (Ctrl+Shift+P), type and open `Nx Console: Focus on Common NX Commands View`
+  > You should have a view like this
+  ![](https://i.ibb.co/HtpRN6b/image.png)
 
-### Publising
+## Adding Test Cases
+
+- Run `example-nextjs-js` app in the `apps/example-nextjs-js` folder
+  - Option 1: Use the NX Console and click `serve` under `example-nextjs-js` 
+  - Option 2: Run `yarn nx run example-nextjs-js:serve` 
+
+- In the `./pages/cases/` folder is where you add new the test cases
+- Then you import and export it in `./pages/test-cases.ts`
+- Then you should see the new cases on the page
+
+
+
+## Publising
 
 ```js
 
@@ -14,7 +31,7 @@ yarn build:packages
 - yarn gitCommit OR git commit -m "message"
 - yarn gitPush OR git push
 
-// 3. Publish using lerna and a custom script that creates a separated vanilla version of the SDK (Make sure you run `yarn npm login` first.)
+// 3. Publish using lerna and a custom script that creates a separated vanilla version of the SDK (Make sure you run `yarn npm login`)
 yarn publish:packages
 
 ```

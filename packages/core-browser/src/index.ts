@@ -62,6 +62,10 @@ import {
     getSessionKeyUri,
     parseResource,
 
+    // > hashing.ts
+    hashResourceIdForSigning,
+
+
 } from '@litprotocol-dev/utils';
 
 export { 
@@ -94,5 +98,9 @@ export {
     base64StringToBlob,
     getVarType,
     uint8arrayFromString,
-    uint8arrayToString
+    uint8arrayToString,
+
+    // > hashing.ts
+    hashResourceIdForSigning,
+
 };
