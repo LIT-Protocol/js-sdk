@@ -12,7 +12,7 @@ import {
     LIT_ERROR,
 } from '@litprotocol-dev/constants';
 
-import { throwError } from '@litprotocol-dev/utils';
+import { throwError } from '@litprotocol-dev/shared-utils';
 
 /** ---------- Local Functions ---------- */
 
@@ -49,11 +49,11 @@ const canonicalAbiParamss = (params: Array<ABIParams>): Array<ABIParams> => {
  *
  * Canonical Unified Access Control Condition Formatter
  *
- * @param { ConditionItem } cond
+ * @param { ConditionItem | Array<ConditionItem> } cond
  * @returns { any[] | AccsOperatorParams | any }
  */
 export const canonicalUnifiedAccessControlConditionFormatter = (
-    cond: ConditionItem
+    cond: ConditionItem | Array<ConditionItem>
 ): AccsOperatorParams | any => {
     // -- if it's an array
     if (Array.isArray(cond)) {

@@ -5,6 +5,6 @@
     "declaration": true,
     "types": []
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "src/lib/utils/uint8arrays.ts"],
   "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"]
 }

@@ -1,5 +1,7 @@
 # LitJsSdkV2
 
+# Idea
+
 ## Recommended
 - Install [NX Console](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console) for Visual Studio Code
 - Setting up workflow
@@ -20,7 +22,6 @@
 - In the `./pages/cases/` folder is where you add new the test cases
 - Then you import and export it in `./pages/test-cases.ts`
 - Then you should see the new cases on the page
-
 
 
 ## Publising

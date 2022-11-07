@@ -17,6 +17,7 @@ import {
     ThreeKeys,
     VerifyJWTProps,
     VMTYPE,
+    wasmBlsSdkHelpers,
 } from '@litprotocol-dev/constants';
 
 import {
@@ -29,9 +30,8 @@ import {
     humanizeEvmContractConditions,
     humanizeSolRpcConditions,
     humanizeUnifiedAccessControlConditions,
-} from '@litprotocol-dev/utils';
+} from '@litprotocol-dev/shared-utils';
 
-import { wasmBlsSdkHelpers } from '@litprotocol-dev/constants';
 
 import JSZip from 'jszip';
 import { checkAndSignCosmosAuthMessage } from '../chains/cosmos';

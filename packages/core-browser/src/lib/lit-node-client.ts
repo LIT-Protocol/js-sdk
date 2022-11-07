@@ -36,7 +36,6 @@ import {
   defaultLitnodeClientConfig,
   ILitNodeClient,
   SupportedJsonRequests,
-  LIT_NETWORKS_KEYS,
   CustomNetwork,
 } from '@litprotocol-dev/constants';
 
@@ -66,7 +65,7 @@ import {
   mostCommonString,
   safeParams,
   throwError,
-} from '@litprotocol-dev/utils';
+} from '@litprotocol-dev/shared-utils';
 
 /** ---------- Local Helpers ---------- */
 const override = (original: any, custom: any) => {

@@ -84,4 +84,5 @@ export type LIT_NETWORKS_KEYS = keyof typeof LIT_NETWORKS;
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
-export type ConditionItem = AccsOperatorParams | AccsRegularParams;
+// union type for all the different types of conditions
+export type ConditionItem = (AccsOperatorParams | AccsRegularParams | AccsDefaultParams | AccsSOLV2Params);

@@ -1,7 +1,7 @@
 import { initWasmBlsSdk } from '@litprotocol-dev/constants';
 import * as wasmECDSA from '@litprotocol-dev/constants';
 
-import { log } from '@litprotocol-dev/utils';
+import { log } from '@litprotocol-dev/shared-utils';
 
 // ----- Initialization -----
 
@@ -66,12 +66,12 @@ import {
     hashResourceIdForSigning,
 
 
-} from '@litprotocol-dev/utils';
+} from '@litprotocol-dev/shared-utils';
 
 export { 
     LitNodeClient,
 
-    // ===== '@litprotocol-dev/utils' =====
+    // ===== '@litprotocol-dev/shared-utils' =====
 
     // > lit.ts
     checkAndSignAuthMessage,

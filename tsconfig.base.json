@@ -18,15 +18,9 @@
     "resolveJsonModule": true,
     "paths": {
       "@litprotocol-dev/constants": ["packages/constants/src/index.ts"],
-      "@litprotocol-dev/constants-dist": ["dist/packages/constants/src"],
-      "@litprotocol-dev/constants-dist-web": ["dist/packages/constants/web/constants.js"],
-      "@litprotocol-dev/core": ["packages/core-browser/src/index.ts"],
       "@litprotocol-dev/core-browser": ["packages/core-browser/src/index.ts"],
-      // "@litprotocol-dev/foo": ["packages/foo/src/index.ts"],
-      // "@litprotocol-dev/foo-dist": ["dist/packages/foo/test"],
-      "@litprotocol-dev/utils": ["packages/utils/src/index.ts"],
-      "@litprotocol-dev/utils-dist": ["dist/packages/utils/src"],
-      "@litprotocol-dev/utils-web": ["dist/packages/utils/web"]
+      "@litprotocol-dev/shared-utils": ["packages/shared-utils/src/index.ts"],
+      "@litprotocol-dev/uint8arrays": ["packages/uint8arrays/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

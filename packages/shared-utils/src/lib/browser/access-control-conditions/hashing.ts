@@ -6,6 +6,7 @@ import {
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@litprotocol-dev/constants';
+
 import {
   canonicalAccessControlConditionFormatter,
   canonicalEVMContractConditionFormatter,
@@ -14,7 +15,7 @@ import {
   canonicalUnifiedAccessControlConditionFormatter,
   log,
   uint8arrayToString,
-} from '@litprotocol-dev/utils';
+} from '@litprotocol-dev/shared-utils';
 
 /**
  *

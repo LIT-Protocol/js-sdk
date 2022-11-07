@@ -13,7 +13,7 @@ import {
   getStorageItem,
   uint8arrayFromString,
   uint8arrayToString,
-} from '@litprotocol-dev/utils';
+} from '@litprotocol-dev/shared-utils';
 import { SiweMessage } from 'lit-siwe';
 import nacl from 'tweetnacl';
 /** ========== Local Helpers ========== */

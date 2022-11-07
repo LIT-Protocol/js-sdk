@@ -2,6 +2,7 @@ import {
     fromString as uint8arrayFromStringFromLib,
     toString as uint8arrayToStringFromLib,
 } from 'uint8arrays';
+
 import { SupportedEncodings } from 'uint8arrays/util/bases';
 
 /**

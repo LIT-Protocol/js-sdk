@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/utils/src",
+  "sourceRoot": "packages/shared-utils/src",
   "projectType": "library",
   "targets": {
 
@@ -14,10 +14,10 @@
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/utils",
-        "main": "packages/utils/src/index.ts",
-        "tsConfig": "packages/utils/tsconfig.lib.json",
-        "assets": ["packages/utils/*.md"]
+        "outputPath": "dist/packages/shared-utils",
+        "main": "packages/shared-utils/src/index.ts",
+        "tsConfig": "packages/shared-utils/tsconfig.lib.json",
+        "assets": ["packages/shared-utils/*.md"]
       },
       "dependsOn": [
         "_buildConstants",
@@ -31,8 +31,8 @@
           "js": "import { createRequire } from 'module';const require = createRequire(import.meta.url);"
         },
         "globalName": "LitJsSdk_Utils",
-        "outfile":"dist/packages/utils-vanilla/utils.js",
-        "entryPoints": ["./packages/utils/src/index.ts"],
+        "outfile":"dist/packages/shared-utils-vanilla/shared-utils.js",
+        "entryPoints": ["./packages/shared-utils/src/index.ts"],
         "define": { "global": "window" },
         "plugins":[
           {
@@ -52,14 +52,14 @@
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/utils/**/*.ts"]
+        "lintFilePatterns": ["packages/shared-utils/**/*.ts"]
       }
     },
     "testPackage": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/utils"],
+      "outputs": ["coverage/packages/shared-utils"],
       "options": {
-        "jestConfig": "packages/utils/jest.config.ts",
+        "jestConfig": "packages/shared-utils/jest.config.ts",
         "passWithNoTests": true
       }
     }

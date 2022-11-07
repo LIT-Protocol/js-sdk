@@ -191,6 +191,10 @@ export const paramsValidators = {
             return false;
         }
 
+        if ( ! authSig ) {
+            return;
+        }
+
         if (
             !checkIfAuthSigRequiresChainParam(
                 authSig,

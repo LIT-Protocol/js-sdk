@@ -20,7 +20,7 @@ export * from './lib/errors';
 export * from './lib/types';
 
 // ----------- Utils -----------
-export * from './lib/utils';
+export * from './lib/utils/utils';
 
 // ----------- ABIs -----------
 const ABI_LIT = import('./lib/abis/LIT.json');
