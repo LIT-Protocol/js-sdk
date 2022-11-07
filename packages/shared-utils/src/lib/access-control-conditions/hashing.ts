@@ -37,7 +37,7 @@ export const hashUnifiedAccessControlConditions = (
       canonicalUnifiedAccessControlConditionFormatter(condition);
     }
   );
-
+  console.log('conditions:', conditions);
   const toHash = JSON.stringify(conditions);
 
   log('Hashing unified access control conditions: ', toHash);
@@ -73,7 +73,7 @@ export const hashResourceId = (
  *
  * @param { JSONSigningResourceId } resourceId
  *
- * @returns { string }
+ * @returns { string } example: "5b36d72f2145af3617e5da2a8a626f9f42e64ed14340622bdfe1a6f0702b9e8d"
  */
 export const hashResourceIdForSigning = async (
   resourceId: JsonSigningResourceId
@@ -88,7 +88,7 @@ export const hashResourceIdForSigning = async (
  *
  * @param { AccessControlConditions } accessControlConditions
  *
- * @returns { Promise<ArrayBuffer> }
+ * @returns { Promise<ArrayBuffer> } example: {"data": [83, 176, 31, 130, 12, 130, 232, 109, 126, 76, 216, 4, 184, 166, 246, 134, 130, 34, 30, 235, 125, 247, 111, 212, 62, 231, 119, 200, 202, 171, 86, 40], "type": "Buffer"}
  *
  */
 export const hashAccessControlConditions = (

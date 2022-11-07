@@ -10,7 +10,7 @@ import {
     LOCAL_STORAGE_KEYS,
     ABI_ERC20,
 } from '@litprotocol-dev/constants';
-import { log, throwError, numberToHex, getStorageItem } from '../../utils';
+import { log, throwError, numberToHex, getStorageItem } from '../utils';
 import { ethers } from 'ethers';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { toUtf8Bytes } from '@ethersproject/strings';

@@ -11,7 +11,7 @@ import {
     canonicalEVMContractConditionFormatter,
     canonicalCosmosConditionFormatter,
     canonicalResourceIdFormatter
-} from '@litprotocol-dev/shared-utils';
+} from './canonicalFormatter';
 
 // import {
 // hashUnifiedAccessControlConditions,
@@ -20,7 +20,7 @@ import {
 
 
 // ---------- Test Cases ----------
-describe('eth.ts', () => {
+describe('canonicalFormatter.ts', () => {
 
     it('should format canonical unified access control (ETH + SOLANA Wallet Addresses with "AND" operator)', async () => {
 

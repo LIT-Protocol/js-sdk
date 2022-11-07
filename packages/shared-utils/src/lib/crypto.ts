@@ -9,7 +9,7 @@ import { wasmBlsSdkHelpers } from '@litprotocol-dev/constants';
 
 import * as wasmECDSA from '@litprotocol-dev/constants';
 
-import { log, throwError } from '../utils';
+import { log, throwError } from './utils';
 
 import { uint8arrayFromString, uint8arrayToString } from './browser';
 import nacl from 'tweetnacl';

@@ -11,7 +11,7 @@ import {
 } from '@litprotocol-dev/constants';
 import { toString as uint8arrayToString } from 'uint8arrays';
 
-import { throwError, log, getStorageItem } from '../../utils';
+import { throwError, log, getStorageItem } from '../utils';
 
 const util = require('util');
 

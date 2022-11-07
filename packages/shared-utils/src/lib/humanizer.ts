@@ -7,7 +7,7 @@ import {
     LIT_ERROR,
 } from '@litprotocol-dev/constants';
 import { formatEther, formatUnits } from 'ethers/lib/utils';
-import { log, throwError } from '../utils';
+import { log, throwError } from './utils';
 import { decimalPlaces } from './chains/eth';
 
 /**
