@@ -6,10 +6,11 @@ global.TextDecoder = TextDecoder
 import { ConditionItem } from '@litprotocol-dev/constants';
 import {
     canonicalUnifiedAccessControlConditionFormatter,
-    // TEST: canonicalSolRpcConditionFormatter
-    // TEST: canonicalAccessControlConditionFormatter
-    // TEST: canonicalEVMContractConditionFormatter
-    // TEST: canonicalCosmosConditionFormatter
+    canonicalSolRpcConditionFormatter,
+    canonicalAccessControlConditionFormatter,
+    canonicalEVMContractConditionFormatter,
+    canonicalCosmosConditionFormatter,
+    canonicalResourceIdFormatter
 } from '@litprotocol-dev/shared-utils';
 
 // import {
@@ -20,9 +21,6 @@ import {
 
 // ---------- Test Cases ----------
 describe('eth.ts', () => {
-    it('pass', () => {
-        expect(1).toBe(1);
-    });
 
     it('should format canonical unified access control (ETH + SOLANA Wallet Addresses with "AND" operator)', async () => {
 
@@ -157,4 +155,77 @@ describe('eth.ts', () => {
             'invalid_access_control_condition'
         );
     });
+
+    it('should throw error when format canonical sol rpc condition', async () => {
+        console.log = jest.fn();
+
+        const MOCK_ACCS_UNKNOWN_KEY : any = [
+            {
+                foo: 'bar',
+            },
+            {
+                conditionType: 'evmBasic',
+                contractAddress: '',
+                standardContractType: '',
+                chain: 'ethereum',
+                method: '',
+                parameters: [':userAddress'],
+                returnValueTest: {
+                    comparator: '=',
+                    value: '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A2',
+                },
+            },
+        ];
+
+        try {
+            test = canonicalSolRpcConditionFormatter(
+                MOCK_ACCS_UNKNOWN_KEY
+            );
+        } catch (e) {
+            console.log(e);
+        }
+
+        expect((console.log as any).mock.calls[0][0].errorCode).toBe(
+            'invalid_access_control_condition'
+        );
+    });
+
+    it('should call "canonicalAccessControlConditionFormatter" in node.js', () => {
+
+        const params : any = [];
+        
+        const OUTPUT = canonicalAccessControlConditionFormatter(params);
+
+
+        expect(OUTPUT.length).toBe(0);
+    })
+
+    it('should call canonicalEVMContractConditionFormatter in node.js', () => {
+
+        const params : any = [];
+        
+        const OUTPUT = canonicalEVMContractConditionFormatter(params);
+
+        expect(OUTPUT.length).toBe(0);
+    })
+    
+    it('should call canonicalCosmosConditionFormatter in node.js', () => {
+
+        const params : any = [];
+        
+        const OUTPUT = canonicalCosmosConditionFormatter(params);
+
+        expect(OUTPUT.length).toBe(0);
+    })
+
+    it('should call canonicalResourceIdFormatter in node.js', () => {
+
+        const params : any = [];
+        
+        const OUTPUT = canonicalResourceIdFormatter(params);
+
+        // const res = (console.log as any).mock.calls[0][0];
+
+        expect(OUTPUT.baseUrl).toBe(undefined);
+    })
 });
