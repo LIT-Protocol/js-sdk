@@ -372,3 +372,18 @@ export const convertLitActionsParams = (jsParams: object): object => {
 
     return convertedParams;
 };
+
+export const isNode = () => {
+    var isNode = false;    
+    if (typeof process === 'object') {
+      if (typeof process.versions === 'object') {
+        if (typeof process.versions.node !== 'undefined') {
+          isNode = true;
+        }
+      }
+    }
+    return isNode;
+}
+export const isBrowser = () => {
+    return isNode() === false;
+}

@@ -1,4 +1,12 @@
+import { TextEncoder, TextDecoder } from 'util'
+global.TextEncoder = TextEncoder
+// @ts-ignore
+global.TextDecoder = TextDecoder
+
+
+import { isBrowser, isNode } from '@litprotocol-dev/shared-utils';
 import * as ethModule from './eth';
+import { getChainId, getMustResign, getRPCUrls, connectWeb3, disconnectWeb3, checkAndSignEVMAuthMessage } from './eth';
 
 describe('eth.ts', () => {
     it('should convert chain hex to chane name', async () => {
@@ -12,8 +20,6 @@ describe('eth.ts', () => {
 
         expect(test).toBe('polygon');
     });
-
-    // TEST: Test other chains, uncomment console.log("hexIds:", hexIds) to check all chain hex ids
 
     it('should return error if string doesnt include 0x', async () => {
         console.log = jest.fn();
@@ -73,4 +79,66 @@ describe('eth.ts', () => {
             '955305': 'https://host-76-74-28-226.contentfabric.io/eth',
         });
     });
+
+    it('should getChainId', async () => {
+        // @ts-ignore
+        const OUTPUT = await getChainId('ethereum', null);
+
+        expect(OUTPUT.result.error.code).toBe('wrong_network');
+    });
+
+    it('should getMustResign', async () => {
+        // @ts-ignore
+        const test = getMustResign('ethereum', null);
+
+        expect(test).toBe(true);
+    });
+
+    it('should getRPCUrls', async () => {
+        // @ts-ignore
+        const test = getRPCUrls('ethereum', null);
+
+        expect(test[1]).toStrictEqual('https://eth-mainnet.alchemyapi.io/v2/EuGnkVlzVoEkzdg0lpCarhm8YHOxWVxE');
+        expect(test[10]).toStrictEqual('https://mainnet.optimism.io');
+    });
+
+    it('should FAIL to connectWeb3() as NodeJS is not supported.', async () => {
+        
+        const OUTPUT = await connectWeb3({chainId: 1});
+
+        expect(OUTPUT.account).toBe(null)
+        expect(OUTPUT.web3).toBe(null)
+    });
+
+    it('should FAIL to disconnectWeb3() as NodeJS is not supported.', async () => {
+        
+        const OUTPUT = disconnectWeb3();
+
+        expect(OUTPUT).toBe(undefined)
+    });
+
+    it('should FAIL to checkAndSignEVMAuthMessage() as NodeJS is not supported.', async () => {
+        
+        const OUTPUT = await checkAndSignEVMAuthMessage({
+            chain: 'ethereum'
+        });
+
+        expect(OUTPUT.address).toBe('')
+        expect(OUTPUT.derivedVia).toBe('')
+        expect(OUTPUT.signedMessage).toBe('')
+    });
+
+    // it('should FAIL to signAndSaveAuthMessage() as NodeJS is not supported.', async () => {
+        
+    //     const OUTPUT = await ethModule.signAndSaveAuthMessage({
+    //         web3: ({} as any),
+    //         account :'',
+    //         chainId: 1,
+    //         resources: [],
+    //     });
+
+    //     expect(OUTPUT).toBe('')
+    // });
+
+
 });

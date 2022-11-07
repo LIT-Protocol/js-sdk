@@ -10,6 +10,7 @@
     "build:matchFolderNameAsPackageName": "node ./tools/scripts/matchFolderNameAsPackageName.mjs",
     "build:packages": "yarn workspace:reset:dist && yarn build:packages:forceDepVersion && nx run-many --target=build && yarn build:matchFolderNameAsPackageName",
     "test:packages": "nx run-many --target=testPackage",
+    "test:watch": "nx run-many --target=testPackage --watch",
     "publish:packages": "npx lerna publish --yes && yarn publish:vanilla",
     "publish:vanilla": "concurrently 'cd dist/packages/constants-vanilla && npm publish' 'cd dist/packages/utils-vanilla && npm publish' 'cd dist/packages/core-browser-vanilla && npm publish'",
     "gitAdd": "git add *",

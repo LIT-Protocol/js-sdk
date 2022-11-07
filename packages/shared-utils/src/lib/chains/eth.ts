@@ -10,7 +10,7 @@ import {
     LOCAL_STORAGE_KEYS,
     ABI_ERC20,
 } from '@litprotocol-dev/constants';
-import { log, throwError, numberToHex, getStorageItem } from '../utils';
+import { log, throwError, numberToHex, getStorageItem, isNode, isBrowser } from '../utils';
 import { ethers } from 'ethers';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { toUtf8Bytes } from '@ethersproject/strings';
@@ -37,8 +37,8 @@ interface ConnectWeb3 {
 }
 
 interface ConnectWeb3Result {
-    web3: Web3Provider;
-    account: string;
+    web3: Web3Provider | any;
+    account: string | any;
 }
 
 interface RPCUrls {
@@ -256,7 +256,7 @@ export const getRPCUrls = (): RPCUrls => {
 
 /** ---------- Exports ---------- */
 /**
- *
+ * @deprecated
  * (ABI) Encode call data
  *
  * @param { IABIEncode }
@@ -267,18 +267,11 @@ export const encodeCallData = ({
     functionName,
     functionParams,
 }: IABIEncode): string => {
-    const _interface = new ethers.utils.Interface(abi);
-
-    const callData = _interface.encodeFunctionData(
-        functionName,
-        functionParams
-    );
-
-    return callData;
+    throw new Error("encodeCallData has been removed.");
 };
 
 /**
- *
+ * @deprecated
  * (ABI) Decode call data
  * TODO: fix "any"
  *
@@ -298,7 +291,7 @@ export const decodeCallResult = ({
 };
 
 /**
- * // #browser
+ * @browserOnly
  * Connect to web 3
  *
  * @param { ConnectWeb3 }
@@ -308,6 +301,13 @@ export const decodeCallResult = ({
 export const connectWeb3 = async ({
     chainId = 1,
 }: ConnectWeb3): Promise<ConnectWeb3Result> => {
+
+    // -- check if it's nodejs
+    if( isNode() ) {
+        console.error("connectWeb3 is not supported in nodejs.");
+        return {web3: null, account: null};
+    }
+
     const rpcUrls: RPCUrls = getRPCUrls();
 
     const providerOptions: Web3ProviderOptions = {
@@ -345,7 +345,7 @@ export const connectWeb3 = async ({
 };
 
 /**
- *
+ * @browserOnly
  * Delete any saved AuthSigs from local storage. Takes no params and returns
  * nothing. This will also clear out the WalletConnect cache in local storage.
  * We often run this function as a result of the user pressing a "Logout" button.
@@ -353,6 +353,12 @@ export const connectWeb3 = async ({
  * @return { void }
  */
 export const disconnectWeb3 = (): void => {
+
+    if( isNode() ) {
+        console.error("disconnectWeb3 is not supported in nodejs.");
+        return;
+    }
+    
     const storage = LOCAL_STORAGE_KEYS;
 
     localStorage.removeItem(storage.WALLET_CONNECT);
@@ -363,7 +369,7 @@ export const disconnectWeb3 = (): void => {
 };
 
 /**
- *
+ * @browserOnly
  * Check and sign EVM auth message
  *
  * @param { CheckAndSignAuthParams }
@@ -374,6 +380,13 @@ export const checkAndSignEVMAuthMessage = async ({
     resources,
     switchChain,
 }: CheckAndSignAuthParams): Promise<JsonAuthSig> => {
+
+    // -- check if it's nodejs
+    if( isNode() ) {
+        console.error("checkAndSignEVMAuthMessage is not supported in nodejs.");
+        return ({sig: '', derivedVia: '', signedMessage: '', address: ''} as JsonAuthSig)
+    }
+
     // --- scoped methods ---
     const _throwIncorrectNetworkError = (error: any) => {
         if (error.code === WALLET_ERROR.NO_SUCH_METHOD) {
@@ -555,7 +568,7 @@ export const checkAndSignEVMAuthMessage = async ({
 };
 
 /**
- *
+ * TODO: TEST THIS!!
  * Sign the auth message with the user's wallet, and store it in localStorage.
  * Called by checkAndSignAuthMessage if the user does not have a signature stored.
  *
@@ -600,19 +613,23 @@ export const signAndSaveAuthMessage = async ({
     };
 
     // -- 4. store auth and a keypair in localstorage for communication with sgx
-    localStorage.setItem(
-        LOCAL_STORAGE_KEYS.AUTH_SIGNATURE,
-        JSON.stringify(authSig)
-    );
+    if ( isBrowser() ){
+        localStorage.setItem(
+            LOCAL_STORAGE_KEYS.AUTH_SIGNATURE,
+            JSON.stringify(authSig)
+        );
+    }
     const commsKeyPair = nacl.box.keyPair();
 
-    localStorage.setItem(
-        LOCAL_STORAGE_KEYS.KEY_PAIR,
-        JSON.stringify({
-            publicKey: naclUtil.encodeBase64(commsKeyPair.publicKey),
-            secretKey: naclUtil.encodeBase64(commsKeyPair.secretKey),
-        })
-    );
+    if ( isBrowser() ){
+        localStorage.setItem(
+            LOCAL_STORAGE_KEYS.KEY_PAIR,
+            JSON.stringify({
+                publicKey: naclUtil.encodeBase64(commsKeyPair.publicKey),
+                secretKey: naclUtil.encodeBase64(commsKeyPair.secretKey),
+            })
+        );
+    }
 
     log(`generated and saved ${LOCAL_STORAGE_KEYS.KEY_PAIR}`);
     return authSig;

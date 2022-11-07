@@ -112,7 +112,7 @@ export const hashAccessControlConditions = (
  *
  * @param { EvmContractConditions } evmContractConditions
  *
- * @returns { Promise<ArrayBuffer> }
+ * @returns { Promise<ArrayBuffer> } {"data": [216, 92, 128, 31, 171, 114, 74, 115, 133, 44, 234, 171, 214, 205, 228, 137, 117, 238, 14, 229, 254, 239, 97, 126, 1, 20, 166, 144, 176, 147, 217, 32], "type": "Buffer"}
  *
  */
 export const hashEVMContractConditions = (

@@ -79,4 +79,8 @@ export const LIT_ERROR = {
         name: 'WasmInitError',
         code: 'wasm_init_error',
     },
+    NODE_NOT_SUPPORTED_ERROR:{
+        name: 'NodeNotSupportedError',
+        code: 'node_not_supported_error',
+    }
 };
