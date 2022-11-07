@@ -4,8 +4,12 @@
 - Install [NX Console](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console) for Visual Studio Code
 - Setting up workflow
   - Open the VS Command Palette (Ctrl+Shift+P), type and open `Nx Console: Focus on Common NX Commands View`
-  > You should have a view like this
+  <summary><h3>You should have a view like this</h3></summary>
+  <details>
   ![](https://i.ibb.co/HtpRN6b/image.png)
+  </details>
+  
+
 
 ## Adding Test Cases
 
