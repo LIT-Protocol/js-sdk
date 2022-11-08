@@ -1,3 +1,8 @@
+/**
+ * Param Validators is an abstraction of validating params of a function, each validator
+ * returns a boolean value indicating whether the validation is passed or not.
+ */
+
 import {
     DecryptFileProps,
     JsonEncryptionRetrieveRequest,

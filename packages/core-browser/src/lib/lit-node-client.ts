@@ -920,12 +920,12 @@ export default class LitNodeClient implements ILitNodeClient {
    * @returns { Promise<NodeCommandResponse> }
    *
    */
-  sign_condition_ecdsa = async (
+  signConditionEcdsa = async (
     url: string,
     params: SingConditionECDSA
   ): Promise<NodeCommandResponse> => {
-    log('sign_condition_ecdsa');
-    const urlWithPath = `${url}/web/signing/sign_condition_ecdsa`;
+    log('signConditionEcdsa');
+    const urlWithPath = `${url}/web/signing/signConditionEcdsa`;
 
     const data = {
       access_control_conditions: params.accessControlConditions,
@@ -1701,7 +1701,7 @@ export default class LitNodeClient implements ILitNodeClient {
 
     // ========== Node Promises ==========
     const nodePromises = this.getNodePromises((url: string) => {
-      return this.sign_condition_ecdsa(url, {
+      return this.signConditionEcdsa(url, {
         accessControlConditions: formattedAccessControlConditions,
         evmContractConditions: undefined,
         solRpcConditions: undefined,

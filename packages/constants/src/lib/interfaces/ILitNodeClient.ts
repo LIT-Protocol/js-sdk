@@ -311,7 +311,7 @@ export interface ILitNodeClient {
      * @returns { Promise<NodeCommandResponse> }
      *
      */
-    sign_condition_ecdsa(
+    signConditionEcdsa(
         url: string,
         params: SingConditionECDSA
     ): Promise<NodeCommandResponse>;

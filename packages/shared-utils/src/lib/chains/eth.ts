@@ -9,6 +9,7 @@ import {
     LIT_ERROR,
     LOCAL_STORAGE_KEYS,
     ABI_ERC20,
+    Chain,
 } from '@litprotocol-dev/constants';
 import { log, throwError, numberToHex, getStorageItem, isNode, isBrowser } from '../utils';
 import { ethers } from 'ethers';
@@ -568,7 +569,7 @@ export const checkAndSignEVMAuthMessage = async ({
 };
 
 /**
- * TODO: TEST THIS!!
+ * @browserOnly
  * Sign the auth message with the user's wallet, and store it in localStorage.
  * Called by checkAndSignAuthMessage if the user does not have a signature stored.
  *
@@ -581,6 +582,18 @@ export const signAndSaveAuthMessage = async ({
     chainId,
     resources,
 }: signAndSaveAuthParams): Promise<JsonAuthSig> => {
+
+    // check if it's nodejs
+    if ( isNode() ) {
+        console.error("checkAndSignEVMAuthMessage is not supported in nodejs.");
+        return {
+            sig: '',
+            derivedVia: '',
+            signedMessage: '',
+            address: '',
+        }
+    }
+
     // -- 1. prepare 'sign-in with ethereum' message
     const preparedMessage: Partial<SiweMessage> = {
         domain: globalThis.location.host,
@@ -636,7 +649,7 @@ export const signAndSaveAuthMessage = async ({
 };
 
 /**
- *
+ * @browserOnly
  * Sign Messags
  *
  * @param { SignMessageParams }
@@ -648,6 +661,16 @@ export const signMessage = async ({
     web3,
     account,
 }: SignMessageParams): Promise<SignedMessage> => {
+
+    // check if it's nodejs
+    if ( isNode() ) {
+        console.error("signMessage is not supported in nodejs.");
+        return {
+            signature: '',
+            address: '',
+        }
+    }
+
     // -- validate
     if (!web3 || !account) {
         log(`web3: ${web3} OR ${account} not found. Connecting web3..`);
@@ -679,7 +702,7 @@ export const signMessage = async ({
 };
 
 /**
- *
+ * @browserOnly
  * wrapper around signMessage that tries personal_sign first.  this is to fix a
  * bug with walletconnect where just using signMessage was failing
  *
@@ -694,6 +717,13 @@ export const signMessageAsync = async (
     address: string,
     message: string
 ): Promise<any | JsonRpcSigner> => {
+
+    // check if it's nodejs
+    if ( isNode() ) {
+        console.error("signMessageAsync is not supported in nodejs.");
+        return null;
+    }
+
     const messageBytes = toUtf8Bytes(message);
 
     if (signer instanceof JsonRpcSigner) {
@@ -720,7 +750,7 @@ export const signMessageAsync = async (
 };
 
 /**
- *
+ * 
  * Get the number of decimal places in a token
  *
  * @property { string } contractAddress The token contract address
@@ -733,7 +763,7 @@ export const decimalPlaces = async ({
     chain,
 }: {
     contractAddress: string;
-    chain: string;
+    chain: Chain;
 }): Promise<number> => {
     const rpcUrl = LIT_CHAINS[chain].rpcUrls[0] as string;
 

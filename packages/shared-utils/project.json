@@ -7,7 +7,7 @@
     "build":{
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn nx run utils:_buildTsc && yarn nx run utils:_buildWeb"
+        "command": "yarn nx run shared-utils:_buildTsc && yarn nx run shared-utils:_buildWeb"
       }
     },
     "_buildTsc": {
