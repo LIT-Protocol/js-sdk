@@ -30,6 +30,10 @@ import {
   CASE_007_SESSION_KEY,
 } from './cases/CASE_007_SESSION_KEY';
 
+import {
+  CASE_008_LIT_NODE_CLIENT,
+} from './cases/CASE_008_LIT_NODE_CLIENT';
+
 export const testCases = [
   ...CASE_000_EXPORTS,
   ...CASE_001_ENCRYPT_AND_DECRYPT_STRING,
@@ -39,4 +43,5 @@ export const testCases = [
   ...CASE_005_ENCRYPT_AND_DECRYPT_FILE,
   ...CASE_006_ENCRYPT_AND_ZIP_METADATA,
   ...CASE_007_SESSION_KEY,
+  ...CASE_008_LIT_NODE_CLIENT,
 ]
