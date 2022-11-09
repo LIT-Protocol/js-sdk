@@ -5,7 +5,7 @@ import { getArgs, getFiles, redLog } from './utils.mjs';
 // ---------- Configuration ----------
 const TARGET_DIR = './apps/example-nextjs-js/pages/cases/';
 const TEMPLATE_FILE = TARGET_DIR + 'CASE_XXX_TEMPLATE.ts';
-const OUTPUT_FILE = './apps/example-nextjs-js/pages/test.ts';
+const OUTPUT_FILE = './apps/example-nextjs-js/pages/test-cases.ts';
 
 const args = getArgs();
 
@@ -103,3 +103,4 @@ if( flag === '--dry-run' ) {
     fs.writeFileSync(OUTPUT_FILE, indexFile);
 }
 
+exit();

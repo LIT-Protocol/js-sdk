@@ -1,13 +1,12 @@
 import * as LitJsSdk from '@litprotocol-dev/core-browser';
 import { ACTION } from '../enum';
+// import * as ecdsaSdk from '@litprotocol-dev/ecdsa-sdk';
 
-export const CASE_XXX_TEMPLATE = [
+export const CASE_008_TEST_ECDSA_SDK = [
   {
-    id: 'CASE_XXX_TEMPLATE',
+    id: 'CASE_008_TEST_ECDSA_SDK',
     action: ACTION.SET,
     module: async () => {
-
-      globalThis.CASE = {};
 
       globalThis.CASE.chain = 'ethereum';
 
@@ -33,8 +32,10 @@ export const CASE_XXX_TEMPLATE = [
     },
   },
   {
-    id: '',
+    id: 'ecdsasdk',
     action: ACTION.CALL,
-    module: async () => {}
+    module: async () => {
+      // return Object.keys(ecdsasdk);
+    }
   }
 ];

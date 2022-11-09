@@ -1,9 +1,10 @@
 import * as LitJsSdk from '@litprotocol-dev/core-browser';
 import { ACTION } from '../enum';
+import * as blsSdk from '@litprotocol-dev/bls-sdk';
 
 export const CASE_007_TEST_BLSSDK = [
   {
-    id: 'CASE_007_TEST_BLSSDK',
+    id: 'CASE_007 - BLS SDK Object keys',
     action: ACTION.SET,
     module: async () => {
 
@@ -29,5 +30,12 @@ export const CASE_007_TEST_BLSSDK = [
 
       return globalThis.CASE;
     },
+  },
+  {
+    id: 'blsSdk',
+    action: ACTION.CALL,
+    module: async () => {
+      return Object.keys(blsSdk);
+    }
   }
 ];

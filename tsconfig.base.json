@@ -38,6 +38,9 @@
       "@litprotocol-dev/ecdsa-sdk": [
         "packages/ecdsa-sdk/src/index.ts"
       ],
+      "@litprotocol-dev/ecdsa-sdk-vanilla": [
+        "packages/ecdsa-sdk-vanilla/src/index.ts"
+      ],
       "@litprotocol-dev/shared-utils": [
         "packages/shared-utils/src/index.ts"
       ]
