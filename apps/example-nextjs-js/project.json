@@ -10,12 +10,6 @@
       "options": {
         "root": "apps/example-nextjs-js",
         "outputPath": "dist/apps/example-nextjs-js"
-      },
-      "configurations": {
-        "development": {
-          "outputPath": "apps/example-nextjs-js"
-        },
-        "production": {}
       }
     },
     "serve": {
@@ -24,37 +18,6 @@
       "options": {
         "buildTarget": "example-nextjs-js:buildApp",
         "dev": true
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "example-nextjs-js:buildApp:development",
-          "dev": true
-        },
-        "production": {
-          "buildTarget": "example-nextjs-js:buildApp:production",
-          "dev": false
-        }
-      }
-    },
-    "export": {
-      "executor": "@nrwl/next:export",
-      "options": {
-        "buildTarget": "example-nextjs-js:buildApp:production"
-      }
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/example-nextjs-js"],
-      "options": {
-        "jestConfig": "apps/example-nextjs-js/jest.config.js",
-        "passWithNoTests": true
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/example-nextjs-js/**/*.{ts,tsx,js,jsx}"]
       }
     }
   },

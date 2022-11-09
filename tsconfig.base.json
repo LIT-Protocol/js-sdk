@@ -20,11 +20,23 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
+      "@litprotocol-dev/bls-sdk": [
+        "packages/bls-sdk/src/index.ts"
+      ],
+      "@litprotocol-dev/bls-sdk-dist-vanilla": [
+        "dist/packages/bls-sdk/src/index.js"
+      ],
       "@litprotocol-dev/constants": [
         "packages/constants/src/index.ts"
       ],
+      "@litprotocol-dev/constants-dist-vanilla": [
+        "dist/packages/constants-vanilla/constants.js"
+      ],
       "@litprotocol-dev/core-browser": [
         "packages/core-browser/src/index.ts"
+      ],
+      "@litprotocol-dev/ecdsa-sdk": [
+        "packages/ecdsa-sdk/src/index.ts"
       ],
       "@litprotocol-dev/shared-utils": [
         "packages/shared-utils/src/index.ts"

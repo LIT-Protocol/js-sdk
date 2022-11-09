@@ -1,27 +1,5 @@
 // @ts-nocheck
 
-// const isNode = () => {
-//     var isNode = false;    
-//     if (typeof process === 'object') {
-//       if (typeof process.versions === 'object') {
-//         if (typeof process.versions.node !== 'undefined') {
-//           isNode = true;
-//         }
-//       }
-//     }
-//     return isNode;
-// }
-
-// const isBrowser = () => {
-//     return isNode() === false;
-// }
-
-// if ( isNode() ) {
-//     const { TextEncoder, TextDecoder } = require('util');
-//     globalThis.TextEncoder = TextEncoder;
-//     globalThis.TextDecoder = TextDecoder;
-// }
-
 // Contants
 const skLen = 32; // bytes
 const pkLen = 48; // bytes

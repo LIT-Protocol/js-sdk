@@ -1,0 +1,25 @@
+{
+  "name": "nodejs",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/nodejs/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/nodejs",
+        "main": "apps/nodejs/main.ts",
+        "tsConfig": "apps/nodejs/tsconfig.app.json",
+        "assets": []
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "nodejs:build"
+      }
+    }
+  },
+  "tags": []
+}

@@ -57,6 +57,10 @@ export const redLog = (msg) => {
     console.log('\x1b[31m%s\x1b[0m', `- ${msg}`);
 }
 
+export const greenLog = (msg) => {
+    console.log('\x1b[32m%s\x1b[0m', `- ${msg}`);
+}
+
 export const question = (str, {
     yes,
     no,
@@ -74,3 +78,9 @@ export const question = (str, {
         });
     });
 }
+
+export const getFiles = (path) => new Promise((resolve, reject) => {
+    fs.readdir(path, (err, files) => {
+        resolve(files)
+    });
+});

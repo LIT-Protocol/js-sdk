@@ -1,0 +1,50 @@
+{
+  "name": "ecdsa-sdk",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/ecdsa-sdk/src",
+  "projectType": "library",
+  "targets": {
+    "build":{
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn nx run ecdsa-sdk:_buildTsc && yarn nx run ecdsa-sdk:_buildWeb && yarn build:matchFolderNameAsPackageName"
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/ecdsa-sdk",
+        "main": "packages/ecdsa-sdk/src/index.ts",
+        "tsConfig": "packages/ecdsa-sdk/tsconfig.lib.json",
+        "assets": ["packages/ecdsa-sdk/*.md"]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_ecdsaSdk",
+        "outfile": "dist/packages/ecdsa-sdk-vanilla/ecdsa-sdk.js",
+        "entryPoints": ["./packages/ecdsa-sdk/src/index.ts"],
+        "define": {
+          "process.env.NODE_DEBUG": "false"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/ecdsa-sdk"],
+      "options": {
+        "jestConfig": "packages/ecdsa-sdk/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

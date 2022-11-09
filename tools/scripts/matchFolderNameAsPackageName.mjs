@@ -1,107 +1,43 @@
 import { readCachedProjectGraph } from '@nrwl/devkit';
-import { readFileSync, writeFileSync } from 'fs';
 import chalk from 'chalk';
-
+import { exit } from 'process';
+import { getArgs, greenLog, readJsonFile, redLog, writeJsonFile } from './utils.mjs';
 const graph = readCachedProjectGraph();
 const nodes = graph.nodes;
 
-const libs = [];
+const run = async () => new Promise((resolve) => {
+    Object.entries(nodes).forEach(async (node, i) => {
 
-Object.entries(nodes).forEach(async (node) => {
-    if(node[1].data.projectType === 'library'){
-
-        const packageJsonPath = 'dist/packages/' + node[1].name + '/' + 'package.json';
-
-        let packageJson;
-
-        try {
-            packageJson = JSON.parse(readFileSync(packageJsonPath).toString());
-            let vanillaPackageJson = packageJson;
-            delete vanillaPackageJson.main;
-            delete vanillaPackageJson.typings;
-            delete vanillaPackageJson.peerDependencies;
+        if (node[1].data.projectType === 'library') {
     
-            vanillaPackageJson.name += '-vanilla';
-            vanillaPackageJson.publishConfig.directory += '-vanilla';
+            const packageJsonPath = 'dist/packages/' + node[1].name + '/' + 'package.json';
     
-            let newPath = 'dist/packages/' + node[1].name + '-vanilla/package.json';
+            try {
+                const packageJson = await readJsonFile(packageJsonPath);
+                // console.log(packageJson)
+                // -- create vanilla version
+                let vanillaPackageJson = packageJson;
+                delete vanillaPackageJson.main;
+                delete vanillaPackageJson.typings;
+                delete vanillaPackageJson.peerDependencies;
     
-            writeFileSync(newPath, JSON.stringify(vanillaPackageJson, null, 2));
+                vanillaPackageJson.name += '-vanilla';
+                vanillaPackageJson.publishConfig.directory += '-vanilla';
     
-            libs.push({
-                vanillaPackageJson,
-                newPath
-            });
-
-        } catch (e) {
-            console.error(
-                chalk.bold.red(`Error reading package.json file from library build output.`)
-            );
+                let newPath = 'dist/packages/' + node[1].name + '-vanilla/package.json';
+                greenLog(`Writing vanilla package.json to ${newPath}`);
+                await writeJsonFile(newPath, vanillaPackageJson);
+    
+            } catch (e) {
+                redLog(`skipping '${packageJsonPath}', because it does not exist.`);
+            }
         }
-    }
-})
 
-console.log(libs);
+        if (i === Object.entries(nodes).length - 1) {
+            resolve();
+        }
+    })
+});
 
-
-// const libs = [];
-
-// const arg = (argString) => argString.split('=')[1]
-
-// // Executing publish script: node path/to/forceLatestDependencies.mjs {mustContains} --workspace={workspace}
-// const [, , mustContains, workspace, version] = process.argv;
-
-// const _mustContains = arg(mustContains)
-// const _workspace = arg(workspace) ?? 'lib'; // default: lib
-// const _version = arg(version) ?? '*';
-
-// console.log("====== Getting Ready ======");
-// console.log(chalk.bold.green(`- Dependency must contain =>`), _mustContains);
-// console.log(chalk.bold.green(`- Targeted workspace =>`), _workspace);
-// console.log(chalk.bold.green(`- Targeted Version =>`), _version);
-// console.log("");
-
-// Object.entries(nodes).forEach(node => {
-//     if( node[1].type !== _workspace ) return;
-//     libs.push(node[1]);
-// })
-
-// libs.forEach((lib, i) => {
-    
-//     const packageJson = lib.data.root + '/' + 'package.json';
-//     console.log(`(${i}) FOUND: ${packageJson}`);
-
-//     let json;
-
-//     try {
-//         json = JSON.parse(readFileSync(packageJson).toString());
-//     } catch (e) {
-//         console.error(
-//             chalk.bold.red(`Error reading package.json file from library build output.`)
-//         );
-//     }
-
-//     try{
-//         Object.entries(json?.dependencies).forEach((dep) => {
-
-//             const depName = dep[0];
-
-//             const containsWord = new RegExp(_mustContains, 'g').test(depName);
-
-//             if( containsWord ){
-
-//                 if( json.dependencies[depName] == _version){
-//                     console.log(chalk.bold.green("- Nothing to change."));
-//                     return;
-//                 }
-//                 console.log(chalk.bold.green(`- Updated "${depName}": "${json.dependencies[depName]}" => "${depName}": "${_version}"`));
-//                 json.dependencies[depName] = _version.toString();
-//             }
-//         })
-    
-//         writeFileSync(packageJson, JSON.stringify(json, null, 2));
-//     }catch (e) {
-//         console.log(chalk.bold.green(`- Cannot find dependencies contains ${_mustContains}`));
-//     }
-//     console.log("");
-// })
+await run();
+exit();

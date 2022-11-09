@@ -1,0 +1,9 @@
+{
+  "name": "@litprotocol-dev/bls-sdk",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/bls-sdk"
+  }
+}

@@ -1,3 +1,8 @@
+import { TextEncoder, TextDecoder } from 'util'
+global.TextEncoder = TextEncoder
+// @ts-ignore
+global.TextDecoder = TextDecoder
+
 import { LIT_ERROR } from '@litprotocol-dev/constants';
 import * as utilsModule from './utils';
 

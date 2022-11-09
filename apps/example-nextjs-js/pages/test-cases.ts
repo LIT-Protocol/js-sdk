@@ -26,9 +26,6 @@ import {
   CASE_006_ENCRYPT_AND_ZIP_METADATA,
 } from './cases/CASE_006_ENCRYPT_AND_ZIP_METADATA';
 
-import {
-  CASE_007_SESSION_KEY,
-} from './cases/CASE_007_SESSION_KEY';
 
 export const testCases = [
   ...CASE_000_EXPORTS,
@@ -38,5 +35,4 @@ export const testCases = [
   ...CASE_004_ENCRYPT_AND_DECRYPT_FILE,
   ...CASE_005_ENCRYPT_AND_DECRYPT_FILE,
   ...CASE_006_ENCRYPT_AND_ZIP_METADATA,
-  ...CASE_007_SESSION_KEY,
 ]

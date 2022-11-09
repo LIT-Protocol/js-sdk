@@ -2,6 +2,11 @@
 
 # Idea
 
+## Notes
+
+### Testing on node apps
+- The `node` app loads the packages from `./dist`, so make sure you build the dependencies first
+
 ## Recommended
 - Install [NX Console](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console) for Visual Studio Code
 - Setting up workflow
@@ -11,7 +16,6 @@
   ![](https://i.ibb.co/HtpRN6b/image.png)
   </details>
   
-
 
 ## Adding Test Cases
 

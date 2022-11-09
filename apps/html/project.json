@@ -1,0 +1,16 @@
+{
+    "name": "html",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/html/src",
+    "projectType": "application",
+    "targets": {
+      "serve":{
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "node apps/html/server.js "
+        }
+      }
+    },
+    "tags": []
+  }
+  
