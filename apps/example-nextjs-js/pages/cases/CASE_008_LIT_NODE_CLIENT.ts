@@ -1,4 +1,4 @@
-import { AccessControlConditions, ExecuteJsProps, JsonStoreSigningRequest, SupportedJsonRequests} from '@litprotocol-dev/constants';
+import { AccessControlConditions, ExecuteJsProps, JsonStoreSigningRequest, RejectedNodePromises, SignedData, SignWithECDSA, SuccessNodePromises, SupportedJsonRequests} from '@litprotocol-dev/constants';
 import * as LitJsSdk from '@litprotocol-dev/core-browser';
 import { ACTION } from '../enum';
 
@@ -120,10 +120,127 @@ export const CASE_008_LIT_NODE_CLIENT = [
                 // sessionSigs,
                 permanant: 0,
             }
+            // Not returning but res is correct
             const res = await litNodeClient.getHashedAccessControlConditions(params);
             console.log("res");
             console.log(res);
             return res;
         },
-    }
+    },
+    {
+        id: 'getNodePromises',
+        action: ACTION.CALL,
+        module: async () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            await litNodeClient.connect();
+            return litNodeClient.getNodePromises(() => litNodeClient.getJWTParams());
+        }
+    },
+    {
+        id: 'handleNodePromises',
+        action: ACTION.CALL,
+        module: async () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            await litNodeClient.connect();
+            const nodePromises = litNodeClient.getNodePromises(() => litNodeClient.getJWTParams());
+            return litNodeClient.handleNodePromises(nodePromises);
+        }
+    },
+    {
+        id: 'throwNodeError',
+        action: ACTION.CALL,
+        module: () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            const res: RejectedNodePromises = {
+                success: false,
+                error: {
+                    errorCode: 'not_authorized',
+                },
+            }
+            try {
+                litNodeClient.throwNodeError(res);
+            } catch (e) {
+                return e;
+            }
+        }
+    },
+    {
+        id: 'throwNodeError',
+        action: ACTION.CALL,
+        module: () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            const res: RejectedNodePromises = {
+                success: false,
+                error: {},
+            }
+            try {
+                litNodeClient.throwNodeError(res);
+            } catch (e) {
+                return e;
+            }
+        }
+    },
+    // {
+    //     id: 'getSignatures',
+    //     action: ACTION.CALL,
+    //     module: async () => {
+    //         const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+    //         await litNodeClient.connect();
+    //         const nodePromises = litNodeClient.getNodePromises(() => litNodeClient.getJWTParams());
+    //         const res = await litNodeClient.handleNodePromises(nodePromises);
+    //         console.log(res);
+
+    //         // -- case: promises rejected
+    //         if (res.success === false) {
+    //             litNodeClient.throwNodeError(res as RejectedNodePromises);
+    //             return;
+    //         }
+
+    //         // -- case: promises success
+    //         const responseData = (res as SuccessNodePromises).values;
+    //         console.log(responseData);
+    //         // log('responseData', JSON.stringify(responseData, null, 2));
+
+    //         // ========== Extract shares from response data ==========
+    //         // -- 1. combine signed data as a list, and get the signatures from it
+    //         const signedDataList = responseData.map(
+    //           (r: any) => (r as SignedData).signedData
+    //         );
+    //         console.log("signedDataList");
+    //         console.log(signedDataList);
+    //         const signatures = litNodeClient.getSignatures(signedDataList);
+    //         console.log("signatures");
+    //         console.log(signatures);
+    //         return signatures;
+    //     }
+    // },
+    {
+        id: 'parseResponses',
+        action: ACTION.CALL,
+        // module: new LitJsSdk.LitNodeClient({ litNetwork: "serrano" }).parseResponses("Hello World!"),
+        module: () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            // Error
+            const res = litNodeClient.parseResponses("Hello World!");
+            console.log(res);
+            return res;
+        }
+    },
+    // {
+    //     id: 'signECDSA',
+    //     action: ACTION.CALL,
+    //     module: async () => {
+    //         const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+    //         const { iat, exp } = litNodeClient.getJWTParams();
+    //         const params: SignWithECDSA = {
+    //             message: "www.google.com",
+    //             chain: globalThis.CASE.chain,
+    //             iat,
+    //             exp,
+    //         }
+    //         const res = await litNodeClient.signECDSA("www.google.com", params);
+    //         console.log(res);
+    //         return res;
+    //     },
+    // }
 ];
