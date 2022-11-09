@@ -27,7 +27,7 @@
         "bundle": true,        
         "sourcemap": true,
         "metafile": true,
-        "globalName": "LitJsSdk_Constants",
+        "globalName": "LitJsSdk_constants",
         "outfile":"dist/packages/constants-vanilla/constants.js",
         "entryPoints": ["./packages/constants/src/index.ts"],
         "define": { "global": "window" },

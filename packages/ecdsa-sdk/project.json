@@ -42,7 +42,8 @@
       "outputs": ["coverage/packages/ecdsa-sdk"],
       "options": {
         "jestConfig": "packages/ecdsa-sdk/jest.config.ts",
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "watch": true
       }
     }
   },

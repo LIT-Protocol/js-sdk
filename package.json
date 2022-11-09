@@ -17,7 +17,9 @@
     "gitCommit": "git commit -m 'test: publish'",
     "gitPush": "git push",
     "tool:delete": "yarn node ./tools/scripts/delete.mjs",
-    "tool:createTest": "yarn node ./tools/scripts/create-case.mjs"
+    "tool:createTest": "yarn node ./tools/scripts/create-case.mjs",
+    "tool:genHtml": "yarn node ./tools/scripts/gen-html.mjs",
+    "graph": "nx graph"
   },
   "private": true,
   "dependencies": {

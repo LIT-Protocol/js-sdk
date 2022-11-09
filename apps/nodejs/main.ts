@@ -1,4 +1,5 @@
 import * as blsSdk from '@litprotocol-dev/bls-sdk';
+import * as ecdsaSdk from '@litprotocol-dev/ecdsa-sdk';
 
 // check if an object's has items
 const hasItems = (obj: any) => {
@@ -13,3 +14,4 @@ const hasItems = (obj: any) => {
 };
 
 console.log("blsSdk:", hasItems(blsSdk));
+console.log("ecdsaSdk:", hasItems(ecdsaSdk));
