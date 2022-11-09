@@ -1,4 +1,4 @@
-import { AccessControlConditions, ExecuteJsProps, JsonExecutionRequest, JsonStoreSigningRequest, RejectedNodePromises, SendNodeCommand, SignedData, SignWithECDSA, SuccessNodePromises, SupportedJsonRequests} from '@litprotocol-dev/constants';
+import { AccessControlConditions, ExecuteJsProps, HandshakeWithSgx, JsonExecutionRequest, JsonSigningStoreRequest, JsonStoreSigningRequest, RejectedNodePromises, SendNodeCommand, SignedData, SignWithECDSA, SuccessNodePromises, SupportedJsonRequests} from '@litprotocol-dev/constants';
 import * as LitJsSdk from '@litprotocol-dev/core-browser';
 import { ACTION } from '../enum';
 
@@ -232,60 +232,60 @@ export const CASE_008_LIT_NODE_CLIENT = [
     //     module: async () => {
     //         const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
     //         const { iat, exp } = litNodeClient.getJWTParams();
-    //         const params: SignWithECDSA = {
-    //             message: "www.google.com",
+    //         const params: ExecuteJsProps = {
+    //             message: 'Hey there',
     //             chain: globalThis.CASE.chain,
     //             iat,
     //             exp,
     //         }
-    //         const res = await litNodeClient.signECDSA("www.google.com", params);
+    //         const data: SignWithECDSA = litNodeClient.getLitActionRequestBody(params);
+    //         const res = await litNodeClient.signECDSA('https://serrano.litgateway.com:7371', data);
     //         console.log(res);
     //         return res;
     //     },
     // },
-    // {
-    //     id: 'sendCommandToNode',
-    //     action: ACTION.CALL,
-    //     module: async () => {
-    //         const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
-    //         await litNodeClient.connect();
-    //         const data: JsonExecutionRequest = {
-    //             authSig: globalThis.CASE.authSig,
-    //             jsParams: {},
-    //             code: "console.log('Hello World!')",
-    //         }
-    //         const params: SendNodeCommand = {url: 'https://serrano.litgateway.com:7370/web/execute', data};
-    //         const res = await litNodeClient.sendCommandToNode(params);
-    //         console.log(res);
-    //         return res;   
-    //     }
-    // },
-    // {
-    //     id: 'getJsExecutionShares',
-    //     action: ACTION.CALL,
-    //     module: async () => {
-    //         // const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
-    //         const litNodeClient = new LitJsSdk.LitNodeClient();
-    //         await litNodeClient.connect();
-    //         const litActionCode = `
-    //         (async () => {
-    //             console.log("Hello World!");
-    //         })();
-    //         `;
-    //         const params: JsonExecutionRequest = {
-    //             authSig: globalThis.CASE.authSig,
-    //             jsParams: {},
-    //             // code: 'console.log("Hello World!")',
-    //             code: litActionCode,
-    //             // code: "LitActions.setResponse({response: JSON.stringify({hello: 'world'})})",
-    //             // ipfsId: "QmRwN9GKHvCn4Vk7biqtr6adjXMs7PzzYPCzNCRjPFiDjm",
-    //         }
-    //         const res = await litNodeClient.getJsExecutionShares('https://serrano.litgateway.com:7379', params);
-    //         // const res = await litNodeClient.getJsExecutionShares('http://localhost:7470', params);
-    //         console.log(res);
-    //         return res;   
-    //     }
-    // },
+    {
+        id: 'sendCommandToNode',
+        action: ACTION.CALL,
+        module: async () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            await litNodeClient.connect();
+            const params: ExecuteJsProps = {
+                authSig: globalThis.CASE.authSig,
+                jsParams: {},
+                code: "console.log('Hi Wind!')",
+                debug: true,
+            };
+            const data: JsonExecutionRequest = litNodeClient.getLitActionRequestBody(params);
+            const reqBody: SendNodeCommand = {url: 'https://serrano.litgateway.com:7371/web/execute', data};
+            const res = await litNodeClient.sendCommandToNode(reqBody);
+            console.log(res);
+            return res;   
+        }
+    },
+    {
+        id: 'getJsExecutionShares',
+        action: ACTION.CALL,
+        module: async () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            const litActionCode = `
+                const go = () => {
+                    LitActions.setResponse({response: JSON.stringify({hello: 'planet'})});
+                };
+                go();
+            `;
+            const params: ExecuteJsProps = {
+                authSig: globalThis.CASE.authSig,
+                jsParams: {},
+                code: litActionCode,
+                debug: true,
+            };
+            const reqBody: JsonExecutionRequest = litNodeClient.getLitActionRequestBody(params);
+            const res = await litNodeClient.getJsExecutionShares('https://serrano.litgateway.com:7371', reqBody);
+            console.log(res);
+            return res;   
+        }
+    },
     {
         id: 'executeJs',
         action: ACTION.CALL,
@@ -295,12 +295,23 @@ export const CASE_008_LIT_NODE_CLIENT = [
             const data: ExecuteJsProps = {
                 authSig: globalThis.CASE.authSig,
                 jsParams: {},
-                code: "console.log('Hello World!')",
+                code: "LitActions.setResponse({response: JSON.stringify({hello: 'world'})})",
                 debug: true,
             }
             const res = litNodeClient.executeJs(data);
             console.log(res);
             return res;
         }
-    }
+    },
+    {
+        id: 'handshakeWithSgx',
+        action: ACTION.CALL,
+        module: async () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            const params: HandshakeWithSgx = { url: "https://serrano.litgateway.com:7371" };
+            const res = await litNodeClient.handshakeWithSgx(params);
+            console.log(res);
+            return res;
+        }
+    },
 ];
