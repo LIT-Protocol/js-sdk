@@ -11,4 +11,10 @@ export const IGNORED_FUNCTIONS = [
 
     // This is being used in 'zipAndEncryptString'
     'encryptZip',
+
+    // Below functions gives errors
+    'signECDSA',
+    'signWithEcdsa',
+    'sign_condition_ecdsa',
+    'validate_and_sign_ecdsa',
 ]
