@@ -74,6 +74,12 @@ export const question = (str, {
             if (answer === 'yes' || answer === 'y') {
                 yes.call(answer);
             }
+
+            // if nethers of the above, assume yes
+            if (answer !== 'yes' && answer !== 'y' && answer !== 'no' && answer !== 'n') {
+                redLog('Invalid answer, exiting...');
+            }
+
             resolve();
         });
     });
@@ -83,4 +89,9 @@ export const getFiles = (path) => new Promise((resolve, reject) => {
     fs.readdir(path, (err, files) => {
         resolve(files)
     });
+});
+
+// wait for 1 second
+export const wait = (ms) => new Promise((resolve) => {
+    setTimeout(resolve, ms);
 });

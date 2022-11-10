@@ -5,13 +5,19 @@ import {
     SYMM_KEY_ALGO_PARAMS,
 } from '@litprotocol-dev/constants';
 
-import { wasmBlsSdkHelpers } from '@litprotocol-dev/constants';
+import { wasmBlsSdkHelpers } from '@litprotocol-dev/bls-sdk';
 
-import * as wasmECDSA from '@litprotocol-dev/constants';
+import * as wasmECDSA from '@litprotocol-dev/ecdsa-sdk';
 
 import { log, throwError } from './utils';
 
-import { uint8arrayFromString, uint8arrayToString } from './browser';
+// import { uint8arrayFromString, uint8arrayToString } from './browser';
+
+import {
+    uint8arrayFromString,
+    uint8arrayToString,
+  } from '@litprotocol-dev/uint8arrays';
+
 import nacl from 'tweetnacl';
 
 /** ---------- Exports ---------- */
@@ -110,7 +116,7 @@ export const decryptWithSymmetricKey = async (
         encryptedZipArrayBuffer
     );
 
-    return decryptedZip;
+    return (decryptedZip as Uint8Array);
 };
 
 /**

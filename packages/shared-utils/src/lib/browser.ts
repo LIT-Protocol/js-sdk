@@ -1,7 +1,12 @@
+// import {
+//     fromString as uint8arrayFromStringFromLib,
+//     toString as uint8arrayToStringFromLib,
+// } from 'uint8arrays';
+
 import {
-    fromString as uint8arrayFromStringFromLib,
-    toString as uint8arrayToStringFromLib,
-} from 'uint8arrays';
+  uint8arrayFromString as uint8arrayFromStringFromLib,
+  uint8arrayToString as uint8arrayToStringFromLib,
+} from '@litprotocol-dev/uint8arrays';
 
 import { SupportedEncodings } from 'uint8arrays/util/bases';
 

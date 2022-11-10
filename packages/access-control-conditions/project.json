@@ -1,0 +1,63 @@
+{
+  "name": "access-control-conditions",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/access-control-conditions/src",
+  "projectType": "library",
+  "targets": {
+    "build":{
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "yarn build:target constants --skip",
+          "yarn build:target misc --skip",
+          "yarn build:target uint8arrays --skip",
+          "yarn build:target access-control-conditions"
+        ],
+        "parallel": false
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/access-control-conditions",
+        "main": "packages/access-control-conditions/src/index.ts",
+        "tsConfig": "packages/access-control-conditions/tsconfig.lib.json",
+        "assets": ["packages/access-control-conditions/*.md"]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_accessControlConditions",
+        "outfile": "dist/packages/access-control-conditions-vanilla/access-control-conditions.js",
+        "entryPoints": ["./packages/access-control-conditions/src/index.ts"],
+        "define": {
+          "process.env.NODE_DEBUG": "false"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/access-control-conditions/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/access-control-conditions"],
+      "options": {
+        "jestConfig": "packages/access-control-conditions/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

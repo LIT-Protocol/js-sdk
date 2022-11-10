@@ -7,7 +7,12 @@
     "build":{
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn nx run ecdsa-sdk:_buildTsc && yarn nx run ecdsa-sdk:_buildWeb && yarn build:matchFolderNameAsPackageName"
+        "commands": [
+          "yarn nx run ecdsa-sdk:_buildTsc",
+          "yarn nx run ecdsa-sdk:_buildWeb",
+          "yarn build:postBuild"
+        ],
+        "parallel": false
       }
     },
     "_buildTsc": {

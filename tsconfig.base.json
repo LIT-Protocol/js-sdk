@@ -10,44 +10,34 @@
     "importHelpers": true,
     "target": "ES2020",
     "module": "ES2020",
-    "lib": [
-      "ES2020",
-      "dom"
-    ],
+    "lib": ["ES2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
-      "@litprotocol-dev/bls-sdk": [
-        "packages/bls-sdk/src/index.ts"
+      "@litprotocol-dev/access-control-conditions": [
+        "packages/access-control-conditions/src/index.ts"
       ],
+      "@litprotocol-dev/bls-sdk": ["packages/bls-sdk/src/index.ts"],
       "@litprotocol-dev/bls-sdk-dist-vanilla": [
         "dist/packages/bls-sdk/src/index.js"
       ],
-      "@litprotocol-dev/constants": [
-        "packages/constants/src/index.ts"
-      ],
+      "@litprotocol-dev/constants": ["packages/constants/src/index.ts"],
       "@litprotocol-dev/constants-dist-vanilla": [
         "dist/packages/constants-vanilla/constants.js"
       ],
-      "@litprotocol-dev/core-browser": [
-        "packages/core-browser/src/index.ts"
-      ],
-      "@litprotocol-dev/ecdsa-sdk": [
-        "packages/ecdsa-sdk/src/index.ts"
-      ],
+      "@litprotocol-dev/core-browser": ["packages/core-browser/src/index.ts"],
+      "@litprotocol-dev/ecdsa-sdk": ["packages/ecdsa-sdk/src/index.ts"],
       "@litprotocol-dev/ecdsa-sdk-vanilla": [
         "packages/ecdsa-sdk-vanilla/src/index.ts"
       ],
-      "@litprotocol-dev/shared-utils": [
-        "packages/shared-utils/src/index.ts"
-      ]
+      "@litprotocol-dev/foo": ["packages/foo/src/index.ts"],
+      "@litprotocol-dev/misc": ["packages/misc/src/index.ts"],
+      "@litprotocol-dev/shared-utils": ["packages/shared-utils/src/index.ts"],
+      "@litprotocol-dev/uint8arrays": ["packages/uint8arrays/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }

@@ -1,0 +1,9 @@
+{
+  "name": "@litprotocol-dev/uint8arrays",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/uint8arrays"
+  }
+}

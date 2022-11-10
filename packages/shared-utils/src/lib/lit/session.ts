@@ -7,15 +7,17 @@ import {
   SessionKeyPair,
   SessionSigsProp,
 } from '@litprotocol-dev/constants';
-import {
-  checkAndSignAuthMessage,
-  generateSessionKeyPair,
-  getStorageItem,
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@litprotocol-dev/shared-utils';
 import { SiweMessage } from 'lit-siwe';
 import nacl from 'tweetnacl';
+// import { uint8arrayFromString, uint8arrayToString } from '../browser';
+import {
+  uint8arrayFromString,
+  uint8arrayToString,
+} from '@litprotocol-dev/uint8arrays';
+
+import { generateSessionKeyPair } from '../crypto';
+import { getStorageItem } from '../utils';
+import { checkAndSignAuthMessage } from './lit';
 /** ========== Local Helpers ========== */
 
 /**
@@ -118,13 +120,13 @@ export async function getSessionSigs(params: SessionSigsProp) {
 
   // -- get wallet signature
   let walletSig: JsonAuthSig = await getWalletSignature(params, sessionKeyUri);
-  
+
   //   ========== Validate Signature ==========
   // Check a few things, including that:
   // 1. the sig isn't expired
   // 2. the sig is for the correct session key
   // 3. the sig has the sessionCapabilities requires to fulfill the resources requested
-  
+
   // NOTE: "verify" doesn't exist on SwieMessage
   const siweMessage: any = new SiweMessage(walletSig.signedMessage);
   let needToReSignSessionKey = false;
@@ -185,7 +187,7 @@ export async function getSessionSigs(params: SessionSigsProp) {
     issuedAt: new Date().toISOString(),
     expiration: sessionExpiration.toISOString(),
   };
-  const signatures : any = {};
+  const signatures: any = {};
 
   litNodeClient.connectedNodes.forEach((nodeAddress: any) => {
     const toSign = {

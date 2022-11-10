@@ -7,7 +7,12 @@
     "build":{
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn nx run shared-utils:_buildTsc && yarn nx run shared-utils:_buildWeb"
+        "commands": [
+          "yarn nx run shared-utils:_buildTsc",
+          "yarn nx run shared-utils:_buildWeb",
+          "yarn build:postBuild"
+        ],
+        "parallel": false
       }
     },
     "_buildTsc": {
@@ -18,28 +23,17 @@
         "main": "packages/shared-utils/src/index.ts",
         "tsConfig": "packages/shared-utils/tsconfig.lib.json",
         "assets": ["packages/shared-utils/*.md"]
-      },
-      "dependsOn": [
-        "_buildConstants",
-        "testPackage"
-      ]
+      }
     },
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
       "options": {
-        "banner": {
-          "js": "import { createRequire } from 'module';const require = createRequire(import.meta.url);"
-        },
-        "globalName": "LitJsSdk_Utils",
+        "bundle": true,
+        "inject": ["tools/esbuild/polyfills.js"],
+        "globalName": "LitJsSdk_sharedUtils",
         "outfile":"dist/packages/shared-utils-vanilla/shared-utils.js",
         "entryPoints": ["./packages/shared-utils/src/index.ts"],
-        "define": { "global": "window" },
-        "plugins":[
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
+        "define": { "global": "window" }
       }
     },
     "_buildConstants":{

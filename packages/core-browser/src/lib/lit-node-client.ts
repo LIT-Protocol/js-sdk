@@ -39,9 +39,9 @@ import {
   CustomNetwork,
 } from '@litprotocol-dev/constants';
 
-import { wasmBlsSdkHelpers } from '@litprotocol-dev/constants';
+import { wasmBlsSdkHelpers } from '@litprotocol-dev/bls-sdk';
 
-import * as wasmECDSA from '@litprotocol-dev/constants';
+import * as wasmECDSA from '@litprotocol-dev/ecdsa-sdk';
 
 import {
   canonicalAccessControlConditionFormatter,
@@ -303,7 +303,7 @@ export default class LitNodeClient implements ILitNodeClient {
     let error = false;
 
     if (accessControlConditions) {
-      formattedAccessControlConditions = accessControlConditions.map((c) =>
+      formattedAccessControlConditions = accessControlConditions.map((c: any) =>
         canonicalAccessControlConditionFormatter(c)
       );
       log(
@@ -311,7 +311,7 @@ export default class LitNodeClient implements ILitNodeClient {
         JSON.stringify(formattedAccessControlConditions)
       );
     } else if (evmContractConditions) {
-      formattedEVMContractConditions = evmContractConditions.map((c) =>
+      formattedEVMContractConditions = evmContractConditions.map((c: any) =>
         canonicalEVMContractConditionFormatter(c)
       );
       log(
@@ -319,7 +319,7 @@ export default class LitNodeClient implements ILitNodeClient {
         JSON.stringify(formattedEVMContractConditions)
       );
     } else if (solRpcConditions) {
-      formattedSolRpcConditions = solRpcConditions.map((c) =>
+      formattedSolRpcConditions = solRpcConditions.map((c: any) =>
         canonicalSolRpcConditionFormatter(c)
       );
       log(
@@ -328,7 +328,7 @@ export default class LitNodeClient implements ILitNodeClient {
       );
     } else if (unifiedAccessControlConditions) {
       formattedUnifiedAccessControlConditions =
-        unifiedAccessControlConditions.map((c) =>
+        unifiedAccessControlConditions.map((c: any) =>
           canonicalUnifiedAccessControlConditionFormatter(c)
         );
       log(
@@ -430,14 +430,14 @@ export default class LitNodeClient implements ILitNodeClient {
 
     // -- get fulfilled responses
     const successes: Array<NodePromiseResponse> = responses.filter(
-      (r) => r.status === 'fulfilled'
+      (r: any) => r.status === 'fulfilled'
     );
 
     // -- case: success (when success responses are more than minNodeCount)
     if (successes.length >= this.config.minNodeCount) {
       const successPromises: SuccessNodePromises = {
         success: true,
-        values: successes.map((r) => r.value),
+        values: successes.map((r: any) => r.value),
       };
 
       return successPromises;
@@ -446,7 +446,7 @@ export default class LitNodeClient implements ILitNodeClient {
     // -- case: if we're here, then we did not succeed.  time to handle and report errors.
 
     // -- get "rejected" responses
-    const rejected = responses.filter((r) => r.status === 'rejected');
+    const rejected = responses.filter((r: any) => r.status === 'rejected');
 
     const mostCommonError = JSON.parse(
       mostCommonString(
@@ -512,12 +512,12 @@ export default class LitNodeClient implements ILitNodeClient {
     const keys = Object.keys(signedData[0]);
 
     // -- execute
-    keys.forEach((key) => {
+    keys.forEach((key: any) => {
       const shares = signedData.map((r: any) => r[key]);
 
-      shares.sort((a, b) => a.shareIndex - b.shareIndex);
+      shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      const sigShares: Array<SigShare> = shares.map((s) => ({
+      const sigShares: Array<SigShare> = shares.map((s: any) => ({
         sigType: s.sigType,
         shareHex: s.signatureShare,
         shareIndex: s.shareIndex,
@@ -529,7 +529,7 @@ export default class LitNodeClient implements ILitNodeClient {
 
       console.log('sigShares', sigShares);
 
-      const sigType = mostCommonString(sigShares.map((s) => s.sigType));
+      const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
       // -- validate if this.networkPubKeySet is null
       if (this.networkPubKeySet === null) {
@@ -559,8 +559,8 @@ export default class LitNodeClient implements ILitNodeClient {
 
       signatures[key] = {
         ...signature,
-        publicKey: mostCommonString(sigShares.map((s) => s.publicKey)),
-        dataSigned: mostCommonString(sigShares.map((s) => s.dataSigned)),
+        publicKey: mostCommonString(sigShares.map((s: any) => s.publicKey)),
+        dataSigned: mostCommonString(sigShares.map((s: any) => s.dataSigned)),
       };
     });
 
@@ -1691,7 +1691,7 @@ export default class LitNodeClient implements ILitNodeClient {
     // -- formatted access control conditions
     let formattedAccessControlConditions: any;
 
-    formattedAccessControlConditions = accessControlConditions.map((c) =>
+    formattedAccessControlConditions = accessControlConditions.map((c: any) =>
       canonicalAccessControlConditionFormatter(c)
     );
     log(
@@ -1753,7 +1753,7 @@ export default class LitNodeClient implements ILitNodeClient {
     }
 
     // -- get promise
-    const promise = new Promise((resolve) => {
+    const promise = new Promise((resolve: any) => {
       const interval = setInterval(() => {
         if (Object.keys(this.serverKeys).length >= this.config.minNodeCount) {
           clearInterval(interval);

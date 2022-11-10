@@ -1,16 +1,8 @@
-import { AccsOperatorParams, LIT_NETWORKS } from '@litprotocol-dev/constants';
-
 import {
-  AccsCOSMOSParams,
-  AccsDefaultParams,
-  AccsEVMParams,
-  AccsRegularParams,
-  AccsSOLV2Params,
-  JsonEncryptionRetrieveRequest,
-  JsonExecutionRequest,
-  JsonSignChainDataRequest,
-  JsonSigningRetrieveRequest,
-} from '@litprotocol-dev/constants';
+
+  LIT_NETWORKS,
+} from './constants/constants';
+import { AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsOperatorParams, AccsRegularParams, AccsSOLV2Params, JsonEncryptionRetrieveRequest, JsonExecutionRequest, JsonSignChainDataRequest, JsonSigningRetrieveRequest } from './interfaces/interfaces';
 
 export type AccessControlConditions = AccsRegularParams[] | AccsDefaultParams[];
 

@@ -27,7 +27,3 @@ const ABI_LIT = import('./lib/abis/LIT.json');
 const ABI_ERC20 = import('./lib/abis/ERC20.json');
 
 export { ABI_LIT, ABI_ERC20 };
-
-// ---------- BLS & ECDSA SDKS ----------
-export * from './crypto-sdks/bls-sdk';
-export * from './crypto-sdks/ecdsa-sdk';

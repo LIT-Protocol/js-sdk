@@ -1,0 +1,57 @@
+{
+  "name": "misc",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/misc/src",
+  "projectType": "library",
+  "targets": {
+    "build":{
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target misc"
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/misc",
+        "main": "packages/misc/src/index.ts",
+        "tsConfig": "packages/misc/tsconfig.lib.json",
+        "assets": ["packages/misc/*.md"]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_misc",
+        "outfile": "dist/packages/misc-vanilla/misc.js",
+        "entryPoints": ["./packages/misc/src/index.ts"],
+        "define": {
+          "process.env.NODE_DEBUG": "false"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/misc/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/misc"],
+      "options": {
+        "jestConfig": "packages/misc/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

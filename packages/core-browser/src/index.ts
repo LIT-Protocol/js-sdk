@@ -1,15 +1,11 @@
-import { initWasmBlsSdk } from '@litprotocol-dev/constants';
-import * as wasmECDSA from '@litprotocol-dev/constants';
+import { initWasmBlsSdk } from '@litprotocol-dev/bls-sdk';
+import * as wasmECDSA from '@litprotocol-dev/ecdsa-sdk'
 
 import { log } from '@litprotocol-dev/shared-utils';
 
 // ----- Initialization -----
 
 log("---------- Lit Protocol's core-browser package is being initialized...---------- ");
-
-// ----- Cross Envs (browser & node) Supports -----
-import { crossEnvSupport } from './cross-env-support';
-crossEnvSupport();
 
 // 1. -- Initialize the BLS SDK
 initWasmBlsSdk().then((exports) => {

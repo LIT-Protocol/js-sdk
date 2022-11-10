@@ -4,7 +4,7 @@ function CustomApp({ Component, pageProps }) {
   return (
     <>
       <Head>
-        <title>Welcome to example-nextjs-js!</title>
+        <title>(Next.js) Lit Test</title>
       </Head>
       <main className="app">
         <Component {...pageProps} />

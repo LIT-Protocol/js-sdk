@@ -1,37 +1,25 @@
 import {
-    ALL_LIT_CHAINS,
-    CheckAndSignAuthParams,
-    DecryptFileProps,
-    DecryptZipFileWithMetadata,
-    DecryptZipFileWithMetadataProps,
-    EncryptedFile,
-    EncryptedString,
-    EncryptedZip,
-    EncryptFileAndZipWithMetadataProps,
-    HumanizedAccsProps,
-    IJWT,
-    ILitNodeClient,
-    JsonAuthSig,
-    LIT_ERROR,
-    NETWORK_PUB_KEY,
-    ThreeKeys,
-    VerifyJWTProps,
-    VMTYPE,
-    wasmBlsSdkHelpers,
+  ALL_LIT_CHAINS,
+  CheckAndSignAuthParams,
+  DecryptFileProps,
+  DecryptZipFileWithMetadata,
+  DecryptZipFileWithMetadataProps,
+  EncryptedFile,
+  EncryptedString,
+  EncryptedZip,
+  EncryptFileAndZipWithMetadataProps,
+  HumanizedAccsProps,
+  IJWT,
+  ILitNodeClient,
+  JsonAuthSig,
+  LIT_ERROR,
+  NETWORK_PUB_KEY,
+  ThreeKeys,
+  VerifyJWTProps,
+  VMTYPE,
 } from '@litprotocol-dev/constants';
 
-import {
-    checkType,
-    log,
-    throwError,
-    safeParams,
-    throwRemovedFunctionError,
-    humanizeEvmBasicAccessControlConditions,
-    humanizeEvmContractConditions,
-    humanizeSolRpcConditions,
-    humanizeUnifiedAccessControlConditions,
-} from '@litprotocol-dev/shared-utils';
-
+import { wasmBlsSdkHelpers } from '@litprotocol-dev/bls-sdk';
 
 import JSZip from 'jszip';
 import { checkAndSignCosmosAuthMessage } from '../chains/cosmos';
@@ -39,31 +27,49 @@ import { checkAndSignEVMAuthMessage } from '../chains/eth';
 
 import { checkAndSignSolAuthMessage } from '../chains/sol';
 
-import {
-    fromString as uint8arrayFromString,
-    toString as uint8arrayToString,
-} from 'uint8arrays';
+// import {
+//   fromString as uint8arrayFromString,
+//   toString as uint8arrayToString,
+// } from 'uint8arrays';
 
 import {
-    decryptWithSymmetricKey,
-    encryptWithSymmetricKey,
-    generateSymmetricKey,
-    importSymmetricKey,
+  uint8arrayFromString,
+  uint8arrayToString,
+} from '@litprotocol-dev/uint8arrays';
+
+import {
+  decryptWithSymmetricKey,
+  encryptWithSymmetricKey,
+  generateSymmetricKey,
+  importSymmetricKey,
 } from '../crypto';
+import {
+  humanizeEvmBasicAccessControlConditions,
+  humanizeEvmContractConditions,
+  humanizeSolRpcConditions,
+  humanizeUnifiedAccessControlConditions,
+} from '../humanizer';
+import {
+  checkType,
+  log,
+  safeParams,
+  throwError,
+  throwRemovedFunctionError,
+} from '../utils';
 
 // ---------- Local Interfaces ----------
 
 // TODO: unsure about types
 interface MetadataForFile {
-    name: string | any;
-    type: string | any;
-    size: string | number | any;
-    accessControlConditions: any[] | any;
-    evmContractConditions: any[] | any;
-    solRpcConditions: any[] | any;
-    unifiedAccessControlConditions: any[] | any;
-    chain: string;
-    encryptedSymmetricKey: Uint8Array | any;
+  name: string | any;
+  type: string | any;
+  size: string | number | any;
+  accessControlConditions: any[] | any;
+  evmContractConditions: any[] | any;
+  solRpcConditions: any[] | any;
+  unifiedAccessControlConditions: any[] | any;
+  chain: string;
+  encryptedSymmetricKey: Uint8Array | any;
 }
 
 // ---------- Local Helpers ----------
@@ -78,6 +84,17 @@ interface MetadataForFile {
  *
  */
 const metadataForFile = ({
+  name,
+  type,
+  size,
+  accessControlConditions,
+  evmContractConditions,
+  solRpcConditions,
+  unifiedAccessControlConditions,
+  chain,
+  encryptedSymmetricKey,
+}: MetadataForFile): MetadataForFile => {
+  return {
     name,
     type,
     size,
@@ -86,22 +103,8 @@ const metadataForFile = ({
     solRpcConditions,
     unifiedAccessControlConditions,
     chain,
-    encryptedSymmetricKey,
-}: MetadataForFile): MetadataForFile => {
-    return {
-        name,
-        type,
-        size,
-        accessControlConditions,
-        evmContractConditions,
-        solRpcConditions,
-        unifiedAccessControlConditions,
-        chain,
-        encryptedSymmetricKey: uint8arrayToString(
-            encryptedSymmetricKey,
-            'base16'
-        ),
-    };
+    encryptedSymmetricKey: uint8arrayToString(encryptedSymmetricKey, 'base16'),
+  };
 };
 
 // ---------- Local Helpers ----------
@@ -114,38 +117,38 @@ const metadataForFile = ({
  *  @returns { AuthSig } The AuthSig created or retrieved
  */
 export const checkAndSignAuthMessage = ({
-    chain,
-    resources,
-    switchChain,
+  chain,
+  resources,
+  switchChain,
 }: CheckAndSignAuthParams): Promise<JsonAuthSig> => {
-    const chainInfo = ALL_LIT_CHAINS[chain];
+  const chainInfo = ALL_LIT_CHAINS[chain];
 
-    console.log("chain:", chain);
-    // -- validate: if chain info not found
-    if (!chainInfo) {
-        throwError({
-            message: `Unsupported chain selected.  Please select one of: ${Object.keys(
-                ALL_LIT_CHAINS
-            )}`,
-            error: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION,
-        });
-    }
+  console.log('chain:', chain);
+  // -- validate: if chain info not found
+  if (!chainInfo) {
+    throwError({
+      message: `Unsupported chain selected.  Please select one of: ${Object.keys(
+        ALL_LIT_CHAINS
+      )}`,
+      error: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION,
+    });
+  }
 
-    // -- check and sign auth message based on chain
-    if (chainInfo.vmType === VMTYPE.EVM) {
-        return checkAndSignEVMAuthMessage({ chain, resources, switchChain });
-    } else if (chainInfo.vmType === VMTYPE.SVM) {
-        return checkAndSignSolAuthMessage();
-    } else if (chainInfo.vmType === VMTYPE.CVM) {
-        return checkAndSignCosmosAuthMessage({ chain });
-    } else {
-        return throwError({
-            message: `vmType not found for this chain: ${chain}.  This should not happen.  Unsupported chain selected.  Please select one of: ${Object.keys(
-                ALL_LIT_CHAINS
-            )}`,
-            error: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION,
-        });
-    }
+  // -- check and sign auth message based on chain
+  if (chainInfo.vmType === VMTYPE.EVM) {
+    return checkAndSignEVMAuthMessage({ chain, resources, switchChain });
+  } else if (chainInfo.vmType === VMTYPE.SVM) {
+    return checkAndSignSolAuthMessage();
+  } else if (chainInfo.vmType === VMTYPE.CVM) {
+    return checkAndSignCosmosAuthMessage({ chain });
+  } else {
+    return throwError({
+      message: `vmType not found for this chain: ${chain}.  This should not happen.  Unsupported chain selected.  Please select one of: ${Object.keys(
+        ALL_LIT_CHAINS
+      )}`,
+      error: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION,
+    });
+  }
 };
 
 /**
@@ -156,38 +159,38 @@ export const checkAndSignAuthMessage = ({
  * @returns { Promise<Object> } A promise containing the encryptedString as a Blob and the symmetricKey used to encrypt it, as a Uint8Array.
  */
 export const encryptString = async (
-    str: string
+  str: string
 ): Promise<EncryptedString | undefined> => {
-    // -- validate
-    if (
-        !checkType({
-            value: str,
-            allowedTypes: ['String'],
-            paramName: 'str',
-            functionName: 'encryptString',
-        })
-    )
-        return;
+  // -- validate
+  if (
+    !checkType({
+      value: str,
+      allowedTypes: ['String'],
+      paramName: 'str',
+      functionName: 'encryptString',
+    })
+  )
+    return;
 
-    // -- prepare
-    const encodedString: Uint8Array = uint8arrayFromString(str, 'utf8');
+  // -- prepare
+  const encodedString: Uint8Array = uint8arrayFromString(str, 'utf8');
 
-    const symmKey: CryptoKey = await generateSymmetricKey();
+  const symmKey: CryptoKey = await generateSymmetricKey();
 
-    const encryptedString: Blob = await encryptWithSymmetricKey(
-        symmKey,
-        encodedString.buffer
-    );
+  const encryptedString: Blob = await encryptWithSymmetricKey(
+    symmKey,
+    encodedString.buffer
+  );
 
-    const exportedSymmKey: Uint8Array = new Uint8Array(
-        await crypto.subtle.exportKey('raw', symmKey)
-    );
+  const exportedSymmKey: Uint8Array = new Uint8Array(
+    await crypto.subtle.exportKey('raw', symmKey)
+  );
 
-    return {
-        symmetricKey: exportedSymmKey,
-        encryptedString,
-        encryptedData: encryptedString,
-    };
+  return {
+    symmetricKey: exportedSymmKey,
+    encryptedString,
+    encryptedData: encryptedString,
+  };
 };
 
 /**
@@ -200,27 +203,26 @@ export const encryptString = async (
  * @returns { Promise<string> } A promise containing the decrypted string
  */
 export const decryptString = async (
-    encryptedStringBlob: Blob,
-    symmKey: Uint8Array
+  encryptedStringBlob: Blob,
+  symmKey: Uint8Array
 ): Promise<string | undefined> => {
-    // -- validate
-    const paramsIsSafe = safeParams({
-        functionName: 'decryptString',
-        params: [encryptedStringBlob, symmKey],
-    });
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'decryptString',
+    params: [encryptedStringBlob, symmKey],
+  });
 
-    if (!paramsIsSafe) return;
+  if (!paramsIsSafe) return;
 
-    // -- import the decrypted symm key
-    const importedSymmKey: CryptoKey = await importSymmetricKey(symmKey);
+  // -- import the decrypted symm key
+  const importedSymmKey: CryptoKey = await importSymmetricKey(symmKey);
 
-    const decryptedStringArrayBuffer: Uint8Array =
-        await decryptWithSymmetricKey(encryptedStringBlob, importedSymmKey);
+  const decryptedStringArrayBuffer: Uint8Array = await decryptWithSymmetricKey(
+    encryptedStringBlob,
+    importedSymmKey
+  );
 
-    return uint8arrayToString(
-        new Uint8Array(decryptedStringArrayBuffer),
-        'utf8'
-    );
+  return uint8arrayToString(new Uint8Array(decryptedStringArrayBuffer), 'utf8');
 };
 
 /**
@@ -232,24 +234,24 @@ export const decryptString = async (
  * @returns { Promise<Object> } A promise containing the encryptedZip as a Blob and the symmetricKey used to encrypt it, as a Uint8Array.  The encrypted zip will contain a single file called "string.txt"
  */
 export const zipAndEncryptString = async (
-    string: string
+  string: string
 ): Promise<EncryptedZip | undefined> => {
-    // -- validate
-    if (
-        !checkType({
-            value: string,
-            allowedTypes: ['String'],
-            paramName: 'string',
-            functionName: 'zipAndEncryptString',
-        })
-    )
-        return;
+  // -- validate
+  if (
+    !checkType({
+      value: string,
+      allowedTypes: ['String'],
+      paramName: 'string',
+      functionName: 'zipAndEncryptString',
+    })
+  )
+    return;
 
-    const zip: JSZip = new JSZip();
+  const zip: JSZip = new JSZip();
 
-    zip.file('string.txt', string);
+  zip.file('string.txt', string);
 
-    return encryptZip(zip);
+  return encryptZip(zip);
 };
 
 /**
@@ -262,35 +264,35 @@ export const zipAndEncryptString = async (
  
 */
 export const zipAndEncryptFiles = async (
-    files: Array<File>
+  files: Array<File>
 ): Promise<EncryptedZip | undefined> => {
-    // let's zip em
-    const zip = new JSZip();
+  // let's zip em
+  const zip = new JSZip();
 
-    // -- zip each file
-    for (let i = 0; i < files.length; i++) {
-        // -- validate
-        if (
-            !checkType({
-                value: files[i],
-                allowedTypes: ['File'],
-                paramName: `files[${i}]`,
-                functionName: 'zipAndEncryptFiles',
-            })
-        )
-            return;
+  // -- zip each file
+  for (let i = 0; i < files.length; i++) {
+    // -- validate
+    if (
+      !checkType({
+        value: files[i],
+        allowedTypes: ['File'],
+        paramName: `files[${i}]`,
+        functionName: 'zipAndEncryptFiles',
+      })
+    )
+      return;
 
-        const folder: JSZip | null = zip.folder('encryptedAssets');
+    const folder: JSZip | null = zip.folder('encryptedAssets');
 
-        if (!folder) {
-            log("Failed to get 'encryptedAssets' from zip.folder() ");
-            return;
-        }
-
-        folder.file(files[i].name, files[i]);
+    if (!folder) {
+      log("Failed to get 'encryptedAssets' from zip.folder() ");
+      return;
     }
 
-    return encryptZip(zip);
+    folder.file(files[i].name, files[i]);
+  }
+
+  return encryptZip(zip);
 };
 
 /**
@@ -303,33 +305,33 @@ export const zipAndEncryptFiles = async (
  * @returns { Promise<Object> } A promise containing a JSZip object indexed by the filenames of the zipped files.  For example, if you have a file called "meow.jpg" in the root of your zip, you could get it from the JSZip object by doing this: const imageBlob = await decryptedZip['meow.jpg'].async('blob')
  */
 export const decryptZip = async (
-    encryptedZipBlob: Blob | File,
-    symmKey: Uint8Array
+  encryptedZipBlob: Blob | File,
+  symmKey: Uint8Array
 ): Promise<{ [key: string]: JSZip.JSZipObject } | undefined> => {
-    // -- validate
-    const paramsIsSafe = safeParams({
-        functionName: 'decryptZip',
-        params: {
-            encryptedZipBlob,
-            symmKey,
-        },
-    });
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'decryptZip',
+    params: {
+      encryptedZipBlob,
+      symmKey,
+    },
+  });
 
-    if (!paramsIsSafe) return;
+  if (!paramsIsSafe) return;
 
-    // import the decrypted symm key
-    const importedSymmKey = await importSymmetricKey(symmKey);
+  // import the decrypted symm key
+  const importedSymmKey = await importSymmetricKey(symmKey);
 
-    const decryptedZipArrayBuffer = await decryptWithSymmetricKey(
-        encryptedZipBlob,
-        importedSymmKey
-    );
+  const decryptedZipArrayBuffer = await decryptWithSymmetricKey(
+    encryptedZipBlob,
+    importedSymmKey
+  );
 
-    // unpack the zip
-    const zip = new JSZip();
-    const unzipped = await zip.loadAsync(decryptedZipArrayBuffer);
+  // unpack the zip
+  const zip = new JSZip();
+  const unzipped = await zip.loadAsync(decryptedZipArrayBuffer);
 
-    return unzipped.files;
+  return unzipped.files;
 };
 
 /**
@@ -341,30 +343,30 @@ export const decryptZip = async (
  * @returns { Promise<Object> } A promise containing the encryptedZip as a Blob and the symmetricKey used to encrypt it, as a Uint8Array string.
  */
 export const encryptZip = async (zip: JSZip): Promise<EncryptedZip> => {
-    const zipBlob = await zip.generateAsync({ type: 'blob' });
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
 
-    const zipBlobArrayBuffer: ArrayBuffer = await zipBlob.arrayBuffer();
+  const zipBlobArrayBuffer: ArrayBuffer = await zipBlob.arrayBuffer();
 
-    const symmKey: CryptoKey = await generateSymmetricKey();
+  const symmKey: CryptoKey = await generateSymmetricKey();
 
-    const encryptedZipBlob: Blob = await encryptWithSymmetricKey(
-        symmKey,
-        zipBlobArrayBuffer
-    );
+  const encryptedZipBlob: Blob = await encryptWithSymmetricKey(
+    symmKey,
+    zipBlobArrayBuffer
+  );
 
-    // to download the encrypted zip file for testing, uncomment this
-    // saveAs(encryptedZipBlob, 'encrypted.bin')
+  // to download the encrypted zip file for testing, uncomment this
+  // saveAs(encryptedZipBlob, 'encrypted.bin')
 
-    const exportedSymmKey: Uint8Array = new Uint8Array(
-        await crypto.subtle.exportKey('raw', symmKey)
-    );
+  const exportedSymmKey: Uint8Array = new Uint8Array(
+    await crypto.subtle.exportKey('raw', symmKey)
+  );
 
-    const encryptedZip: EncryptedZip = {
-        symmetricKey: exportedSymmKey,
-        encryptedZip: encryptedZipBlob,
-    };
+  const encryptedZip: EncryptedZip = {
+    symmetricKey: exportedSymmKey,
+    encryptedZip: encryptedZipBlob,
+  };
 
-    return encryptedZip;
+  return encryptedZip;
 };
 
 /**
@@ -377,96 +379,96 @@ export const encryptZip = async (zip: JSZip): Promise<EncryptedZip> => {
  *
  */
 export const encryptFileAndZipWithMetadata = async ({
+  authSig,
+  accessControlConditions,
+  evmContractConditions,
+  solRpcConditions,
+  unifiedAccessControlConditions,
+  chain,
+  file,
+  litNodeClient,
+  readme,
+}: EncryptFileAndZipWithMetadataProps): Promise<ThreeKeys | undefined> => {
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'encryptFileAndZipWithMetadata',
+    params: {
+      authSig,
+      accessControlConditions,
+      evmContractConditions,
+      solRpcConditions,
+      unifiedAccessControlConditions,
+      chain,
+      file,
+      litNodeClient,
+      readme,
+    },
+  });
+
+  if (!paramsIsSafe) return;
+
+  // -- validate
+  const symmetricKey = await generateSymmetricKey();
+  const exportedSymmKey = new Uint8Array(
+    await crypto.subtle.exportKey('raw', symmetricKey)
+  );
+  // log('exportedSymmKey in hex', uint8arrayToString(exportedSymmKey, 'base16'))
+
+  const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
+    accessControlConditions,
+    evmContractConditions,
+    solRpcConditions,
+    unifiedAccessControlConditions,
+    symmetricKey: exportedSymmKey,
     authSig,
+    chain,
+  });
+
+  log('encrypted key saved to Lit', encryptedSymmetricKey);
+
+  // encrypt the file
+  var fileAsArrayBuffer = await file.arrayBuffer();
+  const encryptedZipBlob = await encryptWithSymmetricKey(
+    symmetricKey,
+    fileAsArrayBuffer
+  );
+
+  const zip = new JSZip();
+  const metadata = metadataForFile({
+    name: file.name,
+    type: file.type,
+    size: file.size,
+    encryptedSymmetricKey,
     accessControlConditions,
     evmContractConditions,
     solRpcConditions,
     unifiedAccessControlConditions,
     chain,
-    file,
-    litNodeClient,
-    readme,
-}: EncryptFileAndZipWithMetadataProps): Promise<ThreeKeys | undefined> => {
-    // -- validate
-    const paramsIsSafe = safeParams({
-        functionName: 'encryptFileAndZipWithMetadata',
-        params: {
-            authSig,
-            accessControlConditions,
-            evmContractConditions,
-            solRpcConditions,
-            unifiedAccessControlConditions,
-            chain,
-            file,
-            litNodeClient,
-            readme,
-        },
-    });
+  });
 
-    if (!paramsIsSafe) return;
+  zip.file('lit_protocol_metadata.json', JSON.stringify(metadata));
+  if (readme) {
+    zip.file('readme.txt', readme);
+  }
 
-    // -- validate
-    const symmetricKey = await generateSymmetricKey();
-    const exportedSymmKey = new Uint8Array(
-        await crypto.subtle.exportKey('raw', symmetricKey)
-    );
-    // log('exportedSymmKey in hex', uint8arrayToString(exportedSymmKey, 'base16'))
+  const folder: JSZip | null = zip.folder('encryptedAssets');
 
-    const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-        accessControlConditions,
-        evmContractConditions,
-        solRpcConditions,
-        unifiedAccessControlConditions,
-        symmetricKey: exportedSymmKey,
-        authSig,
-        chain,
-    });
+  if (!folder) {
+    log("Failed to get 'encryptedAssets' from zip.folder() ");
+    return;
+  }
 
-    log('encrypted key saved to Lit', encryptedSymmetricKey);
+  folder.file(file.name, encryptedZipBlob);
 
-    // encrypt the file
-    var fileAsArrayBuffer = await file.arrayBuffer();
-    const encryptedZipBlob = await encryptWithSymmetricKey(
-        symmetricKey,
-        fileAsArrayBuffer
-    );
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
 
-    const zip = new JSZip();
-    const metadata = metadataForFile({
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        encryptedSymmetricKey,
-        accessControlConditions,
-        evmContractConditions,
-        solRpcConditions,
-        unifiedAccessControlConditions,
-        chain,
-    });
+  const threeKeys: ThreeKeys = {
+    zipBlob,
+    encryptedSymmetricKey,
+    symmetricKey: exportedSymmKey,
+  };
 
-    zip.file('lit_protocol_metadata.json', JSON.stringify(metadata));
-    if (readme) {
-        zip.file('readme.txt', readme);
-    }
-
-    const folder: JSZip | null = zip.folder('encryptedAssets');
-
-    if (!folder) {
-        log("Failed to get 'encryptedAssets' from zip.folder() ");
-        return;
-    }
-
-    folder.file(file.name, encryptedZipBlob);
-
-    const zipBlob = await zip.generateAsync({ type: 'blob' });
-
-    const threeKeys: ThreeKeys = {
-        zipBlob,
-        encryptedSymmetricKey,
-        symmetricKey: exportedSymmKey,
-    };
-
-    return threeKeys;
+  return threeKeys;
 };
 
 /**
@@ -478,134 +480,131 @@ export const encryptFileAndZipWithMetadata = async ({
  * @returns { Promise<DecryptZipFileWithMetadata> } A promise containing an object that contains decryptedFile and metadata properties.  The decryptedFile is an ArrayBuffer that is ready to use, and metadata is an object that contains all the properties of the file like it's name and size and type.
  */
 export const decryptZipFileWithMetadata = async ({
-    authSig,
-    file,
-    litNodeClient,
-    additionalAccessControlConditions,
+  authSig,
+  file,
+  litNodeClient,
+  additionalAccessControlConditions,
 }: DecryptZipFileWithMetadataProps): Promise<
-    DecryptZipFileWithMetadata | undefined
+  DecryptZipFileWithMetadata | undefined
 > => {
-    // -- validate
-    const paramsIsSafe = safeParams({
-        functionName: 'decryptZipFileWithMetadata',
-        params: {
-            authSig,
-            file,
-            litNodeClient,
-            additionalAccessControlConditions,
-        },
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'decryptZipFileWithMetadata',
+    params: {
+      authSig,
+      file,
+      litNodeClient,
+      additionalAccessControlConditions,
+    },
+  });
+
+  if (!paramsIsSafe) return;
+
+  // -- execute
+  const zip = await JSZip.loadAsync(file);
+
+  const jsonFile: JSZip.JSZipObject | null = zip.file(
+    'lit_protocol_metadata.json'
+  );
+
+  if (!jsonFile) {
+    log(`Failed to read lit_protocol_metadata.json while zip.file()`);
+    return;
+  }
+
+  const metadata = JSON.parse(await jsonFile.async('string'));
+
+  log('zip metadata', metadata);
+
+  let symmKey;
+
+  try {
+    symmKey = await litNodeClient.getEncryptionKey({
+      accessControlConditions: metadata.accessControlConditions,
+      evmContractConditions: metadata.evmContractConditions,
+      solRpcConditions: metadata.solRpcConditions,
+      unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
+      toDecrypt: metadata.encryptedSymmetricKey,
+      chain: metadata.chain, // -- validate
+      authSig,
     });
+  } catch (e: any) {
+    if (e.errorCode === 'not_authorized') {
+      // try more additionalAccessControlConditions
+      if (!additionalAccessControlConditions) {
+        throw e;
+      }
+      log('trying additionalAccessControlConditions');
 
-    if (!paramsIsSafe) return;
+      // -- loop start
+      for (let i = 0; i < additionalAccessControlConditions.length; i++) {
+        const accessControlConditions =
+          additionalAccessControlConditions[i].accessControlConditions;
 
-    // -- execute
-    const zip = await JSZip.loadAsync(file);
+        log('trying additional condition', accessControlConditions);
 
-    const jsonFile: JSZip.JSZipObject | null = zip.file(
-        'lit_protocol_metadata.json'
-    );
-
-    if (!jsonFile) {
-        log(`Failed to read lit_protocol_metadata.json while zip.file()`);
-        return;
-    }
-
-    const metadata = JSON.parse(await jsonFile.async('string'));
-
-    log('zip metadata', metadata);
-
-    let symmKey;
-
-    try {
-        symmKey = await litNodeClient.getEncryptionKey({
-            accessControlConditions: metadata.accessControlConditions,
-            evmContractConditions: metadata.evmContractConditions,
-            solRpcConditions: metadata.solRpcConditions,
-            unifiedAccessControlConditions:
-                metadata.unifiedAccessControlConditions,
-            toDecrypt: metadata.encryptedSymmetricKey,
-            chain: metadata.chain, // -- validate
+        try {
+          symmKey = await litNodeClient.getEncryptionKey({
+            accessControlConditions: accessControlConditions,
+            toDecrypt:
+              additionalAccessControlConditions[i].encryptedSymmetricKey,
+            chain: metadata.chain,
             authSig,
-        });
-    } catch (e: any) {
-        if (e.errorCode === 'not_authorized') {
-            // try more additionalAccessControlConditions
-            if (!additionalAccessControlConditions) {
-                throw e;
-            }
-            log('trying additionalAccessControlConditions');
+          });
 
-            // -- loop start
-            for (let i = 0; i < additionalAccessControlConditions.length; i++) {
-                const accessControlConditions =
-                    additionalAccessControlConditions[i]
-                        .accessControlConditions;
+          // okay we got the additional symmkey, now we need to decrypt the symmkey and then use it to decrypt the original symmkey
+          // const importedAdditionalSymmKey = await importSymmetricKey(symmKey)
+          // symmKey = await decryptWithSymmetricKey(additionalAccessControlConditions[i].encryptedSymmetricKey, importedAdditionalSymmKey)
 
-                log('trying additional condition', accessControlConditions);
-
-                try {
-                    symmKey = await litNodeClient.getEncryptionKey({
-                        accessControlConditions: accessControlConditions,
-                        toDecrypt:
-                            additionalAccessControlConditions[i]
-                                .encryptedSymmetricKey,
-                        chain: metadata.chain,
-                        authSig,
-                    });
-
-                    // okay we got the additional symmkey, now we need to decrypt the symmkey and then use it to decrypt the original symmkey
-                    // const importedAdditionalSymmKey = await importSymmetricKey(symmKey)
-                    // symmKey = await decryptWithSymmetricKey(additionalAccessControlConditions[i].encryptedSymmetricKey, importedAdditionalSymmKey)
-
-                    break; // it worked, we can leave the loop and stop checking additional access control conditions
-                } catch (e: any) {
-                    // swallow not_authorized because we are gonna try some more accessControlConditions
-                    if (e.errorCode !== 'not_authorized') {
-                        throw e;
-                    }
-                }
-            }
-            // -- loop ends
-
-            if (!symmKey) {
-                // we tried all the access control conditions and none worked
-                throw e;
-            }
-        } else {
+          break; // it worked, we can leave the loop and stop checking additional access control conditions
+        } catch (e: any) {
+          // swallow not_authorized because we are gonna try some more accessControlConditions
+          if (e.errorCode !== 'not_authorized') {
             throw e;
+          }
         }
+      }
+      // -- loop ends
+
+      if (!symmKey) {
+        // we tried all the access control conditions and none worked
+        throw e;
+      }
+    } else {
+      throw e;
     }
+  }
 
-    if (!symmKey) {
-        return;
-    }
+  if (!symmKey) {
+    return;
+  }
 
-    const importedSymmKey = await importSymmetricKey(symmKey);
+  const importedSymmKey = await importSymmetricKey(symmKey);
 
-    const folder: JSZip | null = zip.folder('encryptedAssets');
+  const folder: JSZip | null = zip.folder('encryptedAssets');
 
-    if (!folder) {
-        log("Failed to get 'encryptedAssets' from zip.folder() ");
-        return;
-    }
+  if (!folder) {
+    log("Failed to get 'encryptedAssets' from zip.folder() ");
+    return;
+  }
 
-    const _file: JSZip.JSZipObject | null = folder.file(metadata.name);
+  const _file: JSZip.JSZipObject | null = folder.file(metadata.name);
 
-    if (!_file) {
-        log("Failed to get 'metadata.name' while zip.folder().file()");
-        return;
-    }
+  if (!_file) {
+    log("Failed to get 'metadata.name' while zip.folder().file()");
+    return;
+  }
 
-    const encryptedFile = await _file.async('blob');
+  const encryptedFile = await _file.async('blob');
 
-    const decryptedFile = await decryptWithSymmetricKey(
-        encryptedFile,
-        importedSymmKey
-    );
+  const decryptedFile = await decryptWithSymmetricKey(
+    encryptedFile,
+    importedSymmKey
+  );
 
-    const data: DecryptZipFileWithMetadata = { decryptedFile, metadata };
+  const data: DecryptZipFileWithMetadata = { decryptedFile, metadata };
 
-    return data;
+  return data;
 };
 
 /**
@@ -618,36 +617,36 @@ export const decryptZipFileWithMetadata = async ({
  * @returns { Promise<Object> } A promise containing an object with keys encryptedFile and symmetricKey.  encryptedFile is a Blob, and symmetricKey is a Uint8Array that can be used to decrypt the file.
  */
 export const encryptFile = async ({ file }: { file: File | Blob }) => {
-    // -- validate
-    if (
-        !checkType({
-            value: file,
-            allowedTypes: ['Blob', 'File'],
-            paramName: 'file',
-            functionName: 'encryptFile',
-        })
-    )
-        return;
+  // -- validate
+  if (
+    !checkType({
+      value: file,
+      allowedTypes: ['Blob', 'File'],
+      paramName: 'file',
+      functionName: 'encryptFile',
+    })
+  )
+    return;
 
-    // generate a random symmetric key
-    const symmetricKey = await generateSymmetricKey();
-    const exportedSymmKey = new Uint8Array(
-        await crypto.subtle.exportKey('raw', symmetricKey)
-    );
+  // generate a random symmetric key
+  const symmetricKey = await generateSymmetricKey();
+  const exportedSymmKey = new Uint8Array(
+    await crypto.subtle.exportKey('raw', symmetricKey)
+  );
 
-    // encrypt the file
-    var fileAsArrayBuffer = await file.arrayBuffer();
-    const encryptedFile = await encryptWithSymmetricKey(
-        symmetricKey,
-        fileAsArrayBuffer
-    );
+  // encrypt the file
+  var fileAsArrayBuffer = await file.arrayBuffer();
+  const encryptedFile = await encryptWithSymmetricKey(
+    symmetricKey,
+    fileAsArrayBuffer
+  );
 
-    const _encryptedFile: EncryptedFile = {
-        encryptedFile,
-        symmetricKey: exportedSymmKey,
-    };
+  const _encryptedFile: EncryptedFile = {
+    encryptedFile,
+    symmetricKey: exportedSymmKey,
+  };
 
-    return _encryptedFile;
+  return _encryptedFile;
 };
 
 /**
@@ -661,34 +660,34 @@ export const encryptFile = async ({ file }: { file: File | Blob }) => {
  * @returns { Promise<Object> } A promise containing the decrypted file.  The file is an ArrayBuffer.
  */
 export const decryptFile = async ({
-    file,
-    symmetricKey,
+  file,
+  symmetricKey,
 }: DecryptFileProps): Promise<Uint8Array | undefined> => {
-    // -- validate
-    const paramsIsSafe = safeParams({
-        functionName: 'decryptFile',
-        params: {
-            file,
-            symmetricKey,
-        },
-    });
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'decryptFile',
+    params: {
+      file,
+      symmetricKey,
+    },
+  });
 
-    if (!paramsIsSafe) return;
+  if (!paramsIsSafe) return;
 
-    // -- execute
-    const importedSymmKey = await importSymmetricKey(symmetricKey);
+  // -- execute
+  const importedSymmKey = await importSymmetricKey(symmetricKey);
 
-    // decrypt the file
-    const decryptedFile = await decryptWithSymmetricKey(file, importedSymmKey);
+  // decrypt the file
+  const decryptedFile = await decryptWithSymmetricKey(file, importedSymmKey);
 
-    return decryptedFile;
+  return decryptedFile;
 };
 
 declare global {
-    var wasmExports: any;
-    var wasmECDSA: any;
-    var LitNodeClient: any;
-    var litNodeClient: ILitNodeClient;
+  var wasmExports: any;
+  var wasmECDSA: any;
+  var LitNodeClient: any;
+  var litNodeClient: ILitNodeClient;
 }
 
 /**
@@ -701,55 +700,55 @@ declare global {
  * @returns { IJWT } An object with 4 keys: "verified": A boolean that represents whether or not the token verifies successfully.  A true result indicates that the token was successfully verified.  "header": the JWT header.  "payload": the JWT payload which includes the resource being authorized, etc.  "signature": A uint8array that represents the raw  signature of the JWT.
  */
 export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT | undefined => {
-    // -- validate
-    if (
-        !checkType({
-            value: jwt,
-            allowedTypes: ['String'],
-            paramName: 'jwt',
-            functionName: 'verifyJwt',
-        })
-    )
-        return;
+  // -- validate
+  if (
+    !checkType({
+      value: jwt,
+      allowedTypes: ['String'],
+      paramName: 'jwt',
+      functionName: 'verifyJwt',
+    })
+  )
+    return;
 
-    log('verifyJwt', jwt);
+  log('verifyJwt', jwt);
 
-    // verify that the wasm was loaded
-    if (!globalThis.wasmExports) {
-        log('wasmExports is not loaded.');
-    }
+  // verify that the wasm was loaded
+  if (!globalThis.wasmExports) {
+    log('wasmExports is not loaded.');
+  }
 
-    const pubKey = uint8arrayFromString(NETWORK_PUB_KEY, 'base16');
-    // log("pubkey is ", pubKey);
+  const pubKey = uint8arrayFromString(NETWORK_PUB_KEY, 'base16');
+  // log("pubkey is ", pubKey);
 
-    const jwtParts = jwt.split('.');
-    const sig = uint8arrayFromString(jwtParts[2], 'base64url');
-    // log("sig is ", uint8arrayToString(sig, "base16"));
+  const jwtParts = jwt.split('.');
+  const sig = uint8arrayFromString(jwtParts[2], 'base64url');
+  // log("sig is ", uint8arrayToString(sig, "base16"));
 
-    const unsignedJwt = `${jwtParts[0]}.${jwtParts[1]}`;
-    // log("unsignedJwt is ", unsignedJwt);
+  const unsignedJwt = `${jwtParts[0]}.${jwtParts[1]}`;
+  // log("unsignedJwt is ", unsignedJwt);
 
-    const message = uint8arrayFromString(unsignedJwt);
-    // log("message is ", message);
+  const message = uint8arrayFromString(unsignedJwt);
+  // log("message is ", message);
 
-    // p is public key uint8array
-    // s is signature uint8array
-    // m is message uint8array
-    // function is: function (p, s, m)
-    const verified = Boolean(wasmBlsSdkHelpers.verify(pubKey, sig, message));
+  // p is public key uint8array
+  // s is signature uint8array
+  // m is message uint8array
+  // function is: function (p, s, m)
+  const verified = Boolean(wasmBlsSdkHelpers.verify(pubKey, sig, message));
 
-    const _jwt: IJWT = {
-        verified,
-        header: JSON.parse(
-            uint8arrayToString(uint8arrayFromString(jwtParts[0], 'base64url'))
-        ),
-        payload: JSON.parse(
-            uint8arrayToString(uint8arrayFromString(jwtParts[1], 'base64url'))
-        ),
-        signature: sig,
-    };
+  const _jwt: IJWT = {
+    verified,
+    header: JSON.parse(
+      uint8arrayToString(uint8arrayFromString(jwtParts[0], 'base64url'))
+    ),
+    payload: JSON.parse(
+      uint8arrayToString(uint8arrayFromString(jwtParts[1], 'base64url'))
+    ),
+    signature: sig,
+  };
 
-    return _jwt;
+  return _jwt;
 };
 
 /**
@@ -761,45 +760,43 @@ export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT | undefined => {
  * @returns { Promise<string> } A promise containing a human readable description of the access control conditions
  */
 export const humanizeAccessControlConditions = async ({
-    accessControlConditions,
-    evmContractConditions,
-    solRpcConditions,
-    unifiedAccessControlConditions,
-    tokenList,
-    myWalletAddress,
+  accessControlConditions,
+  evmContractConditions,
+  solRpcConditions,
+  unifiedAccessControlConditions,
+  tokenList,
+  myWalletAddress,
 }: HumanizedAccsProps): Promise<string | undefined> => {
-    // -- check if each condition exists in linear
-    if (accessControlConditions) {
-        return humanizeEvmBasicAccessControlConditions({
-            accessControlConditions,
-            tokenList,
-            myWalletAddress,
-        });
-    } else if (evmContractConditions) {
-        return humanizeEvmContractConditions({
-            evmContractConditions,
-            tokenList,
-            myWalletAddress,
-        });
-    } else if (solRpcConditions) {
-        return humanizeSolRpcConditions({
-            solRpcConditions,
-            tokenList,
-            myWalletAddress,
-        });
-    } else if (unifiedAccessControlConditions) {
-        return humanizeUnifiedAccessControlConditions({
-            unifiedAccessControlConditions,
-            tokenList,
-            myWalletAddress,
-        });
-    }
+  // -- check if each condition exists in linear
+  if (accessControlConditions) {
+    return humanizeEvmBasicAccessControlConditions({
+      accessControlConditions,
+      tokenList,
+      myWalletAddress,
+    });
+  } else if (evmContractConditions) {
+    return humanizeEvmContractConditions({
+      evmContractConditions,
+      tokenList,
+      myWalletAddress,
+    });
+  } else if (solRpcConditions) {
+    return humanizeSolRpcConditions({
+      solRpcConditions,
+      tokenList,
+      myWalletAddress,
+    });
+  } else if (unifiedAccessControlConditions) {
+    return humanizeUnifiedAccessControlConditions({
+      unifiedAccessControlConditions,
+      tokenList,
+      myWalletAddress,
+    });
+  }
 
-    // -- undefined
-    return;
+  // -- undefined
+  return;
 };
-
-
 
 // ---------- Deprecated Functions ----------
 const PACKAGE_CACHE = {};
@@ -807,7 +804,7 @@ const getNpmPackage = () => throwRemovedFunctionError('getNpmPackage');
 export const createHtmlLIT = () => throwRemovedFunctionError('createHtmlLIT');
 export const toggleLock = () => throwRemovedFunctionError('toggleLock');
 export const unlockLitWithKey = () =>
-    throwRemovedFunctionError('unlockLitWithKey');
+  throwRemovedFunctionError('unlockLitWithKey');
 export const getTokenList = () => throwRemovedFunctionError('getTokenList');
 export const sendMessageToFrameParent = () =>
-    throwRemovedFunctionError('sendMessageToFrameParent');
+  throwRemovedFunctionError('sendMessageToFrameParent');

@@ -1,4 +1,4 @@
-import { LitNodeClientConfig } from "@litprotocol-dev/constants";
+import { LitNodeClientConfig } from "../interfaces/interfaces";
 
 export const defaultLitnodeClientConfig: LitNodeClientConfig = {
     alertWhenUnauthorized: true,

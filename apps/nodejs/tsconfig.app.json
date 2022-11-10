@@ -5,5 +5,5 @@
     "types": ["node"]
   },
   "exclude": [],
-  "include": ["**/*.ts", "main.ts"]
+  "include": ["**/*.ts", "main.ts", "main.js"]
 }

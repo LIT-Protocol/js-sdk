@@ -1,4 +1,4 @@
-import { IEither, EITHER_TYPE } from '@litprotocol-dev/constants';
+import { EITHER_TYPE, IEither } from '@litprotocol-dev/constants';
 
 /**
  *
@@ -8,10 +8,10 @@ import { IEither, EITHER_TYPE } from '@litprotocol-dev/constants';
  * @returns { IEither }
  */
 export const ELeft = (result: any): IEither => {
-    return {
-        type: EITHER_TYPE.ERROR,
-        result: result,
-    };
+  return {
+    type: EITHER_TYPE.ERROR,
+    result: result,
+  };
 };
 
 /**
@@ -22,8 +22,8 @@ export const ELeft = (result: any): IEither => {
  * @returns
  */
 export const ERight = (result: any): IEither => {
-    return {
-        type: EITHER_TYPE.SUCCESS,
-        result: result,
-    };
+  return {
+    type: EITHER_TYPE.SUCCESS,
+    result: result,
+  };
 };

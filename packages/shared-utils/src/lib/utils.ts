@@ -1,4 +1,3 @@
-import * as constantsModule from '@litprotocol-dev/constants';
 import {
     ELeft,
     ERight,
@@ -9,20 +8,6 @@ import {
 } from '@litprotocol-dev/constants';
 import { ILitError } from '@litprotocol-dev/constants';
 import { paramsValidators } from './params-validators';
-
-// ----- Testing Modules -----
-export const utils = () => {
-    console.log('[utils] has been called!');
-    return 'utils()';
-};
-
-export const testImportedConstantModules = () => {
-    console.log('[utils] import<constantsModule>:', constantsModule);
-
-    return {
-        constantsModule,
-    };
-};
 
 // ----- Real Modules -----
 /**

@@ -2,14 +2,18 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
+    "access-control-conditions": "packages/access-control-conditions",
     "bls-sdk": "packages/bls-sdk",
     "constants": "packages/constants",
     "core-browser": "packages/core-browser",
     "e2e": "apps/e2e",
     "ecdsa-sdk": "packages/ecdsa-sdk",
     "example-nextjs-js": "apps/example-nextjs-js",
+    "foo": "packages/foo",
     "html": "apps/html",
+    "misc": "packages/misc",
     "nodejs": "apps/nodejs",
-    "shared-utils": "packages/shared-utils"
+    "shared-utils": "packages/shared-utils",
+    "uint8arrays": "packages/uint8arrays"
   }
 }

@@ -1,0 +1,9 @@
+{
+  "name": "@litprotocol-dev/misc",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/misc"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "name": "foo",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/foo/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target foo"
+      }
+    },
+    "_buildTsc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target foo"
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_foo",
+        "outfile": "dist/packages/foo-vanilla/foo.js",
+        "entryPoints": [
+          "./packages/foo/src/index.ts"
+        ],
+        "define": {
+          "process.env.NODE_DEBUG": "false"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/foo/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/foo"
+      ],
+      "options": {
+        "jestConfig": "packages/foo/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

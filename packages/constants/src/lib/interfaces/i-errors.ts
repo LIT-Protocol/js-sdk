@@ -1,4 +1,4 @@
-import { EITHER_TYPE } from "@litprotocol-dev/constants";
+import { EITHER_TYPE } from "../enums";
 
 export interface ILitError {
     message?: string;

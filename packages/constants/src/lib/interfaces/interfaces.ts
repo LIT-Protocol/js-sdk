@@ -1,16 +1,9 @@
-import {
-    AccessControlConditions,
-    Chain,
-    ConditionType,
-    EvmContractConditions,
-    ILitNodeClient,
-    JsonRequest,
-    LIT_NETWORKS_KEYS,
-    SolRpcConditions,
-    UnifiedAccessControlConditions,
-} from '@litprotocol-dev/constants';
+
 
 /** ---------- Access Control Conditions Interfaces ---------- */
+
+import { AccessControlConditions, Chain, ConditionType, EvmContractConditions, JsonRequest, LIT_NETWORKS_KEYS, SolRpcConditions, UnifiedAccessControlConditions } from "../types";
+import { ILitNodeClient } from "./ILitNodeClient";
 
 export interface AccsOperatorParams {
     operator: string;

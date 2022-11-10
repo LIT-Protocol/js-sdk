@@ -1,4 +1,5 @@
 {
+  "name": "constants",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/constants/src",
   "projectType": "library",
@@ -7,7 +8,7 @@
     "build":{
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn nx run constants:_buildTsc && yarn nx run constants:_buildWeb"
+        "command": "yarn build:target constants"
       }
     },
 

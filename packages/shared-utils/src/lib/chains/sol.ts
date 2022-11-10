@@ -9,7 +9,12 @@ import {
     LIT_ERROR,
     LOCAL_STORAGE_KEYS,
 } from '@litprotocol-dev/constants';
-import { toString as uint8arrayToString } from 'uint8arrays';
+// import { toString as uint8arrayToString } from 'uint8arrays';
+
+import {
+    uint8arrayFromString,
+    uint8arrayToString,
+  } from '@litprotocol-dev/uint8arrays';
 
 import { throwError, log, getStorageItem } from '../utils';
 

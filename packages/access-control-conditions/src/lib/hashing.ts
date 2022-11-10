@@ -6,16 +6,9 @@ import {
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@litprotocol-dev/constants';
-
-import {
-  canonicalAccessControlConditionFormatter,
-  canonicalEVMContractConditionFormatter,
-  canonicalResourceIdFormatter,
-  canonicalSolRpcConditionFormatter,
-  canonicalUnifiedAccessControlConditionFormatter,
-  log,
-  uint8arrayToString,
-} from '@litprotocol-dev/shared-utils';
+import { log } from '@litprotocol-dev/misc';
+import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter } from './canonicalFormatter';
+import { uint8arrayToString } from '@litprotocol-dev/uint8arrays';
 
 /**
  *

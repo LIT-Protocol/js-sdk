@@ -1,29 +1,6 @@
-import {
-    SupportedJsonRequests,
-    ExecuteJsProps,
-    ExecuteJsResponse,
-    FormattedMultipleAccs,
-    HandshakeWithSgx,
-    JsonEncryptionRetrieveRequest,
-    JsonExecutionRequest,
-    JsonSaveEncryptionKeyRequest,
-    JsonSignChainDataRequest,
-    JsonSigningRetrieveRequest,
-    JsonSigningStoreRequest,
-    JsonStoreSigningRequest,
-    KV,
-    LitNodeClientConfig,
-    NodeCommandResponse,
-    NodeCommandServerKeysResponse,
-    NodeShare,
-    RejectedNodePromises,
-    SendNodeCommand,
-    SignedChainDataToken,
-    SignWithECDSA,
-    SingConditionECDSA,
-    SuccessNodePromises,
-    ValidateAndSignECDSA,
-} from '@litprotocol-dev/constants';
+import { SupportedJsonRequests } from "../types";
+import { ExecuteJsProps, ExecuteJsResponse, FormattedMultipleAccs, HandshakeWithSgx, JsonEncryptionRetrieveRequest, JsonExecutionRequest, JsonSaveEncryptionKeyRequest, JsonSignChainDataRequest, JsonSigningRetrieveRequest, JsonSigningStoreRequest, JsonStoreSigningRequest, KV, LitNodeClientConfig, NodeCommandResponse, NodeCommandServerKeysResponse, NodeShare, RejectedNodePromises, SendNodeCommand, SignedChainDataToken, SignWithECDSA, SingConditionECDSA, SuccessNodePromises, ValidateAndSignECDSA } from "./interfaces";
+
 
 export interface ILitNodeClient {
     config: LitNodeClientConfig;

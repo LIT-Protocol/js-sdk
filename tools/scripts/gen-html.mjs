@@ -23,7 +23,7 @@ const TEMPLATE = {
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Lit Protocol - Testing imports of bundled SDKs</title>
+        <title>(HTML): Lit Protocol - Testing imports of bundled SDKs</title>
     </head>
     <body>
     `,
@@ -35,12 +35,11 @@ const TEMPLATE = {
 }
 
 
-
 const files = (await getFiles(DIST_DIR))
     .filter((file) => file.includes('vanilla'))
     .map((file) => DIST_DIR + file + '/' + file.split('/').pop().replace('-vanilla', '') + '.js');
 
-const scriptTags = files.map((file) => `        <script src="${file}"></script>`)
+const scriptTags = files.map((file) => `<script src="${file}"></script>`)
 
 let consoleLogs = files.map((file) => { 
     
@@ -49,14 +48,22 @@ let consoleLogs = files.map((file) => {
     // replace hyphens with underscores and capitalize the first letter
     varName = globalVarPrefix + varName.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
     
-    return `if(typeof ${varName} === 'undefined') {console.error("${varName}:", ${varName});}else{console.warn("${varName}:", ${varName});}`;
+    // --- Template look something like this ---
+    // if(typeof LitJsSdk_uint8arrays === 'undefined') {
+    //     console.error("LitJsSdk_uint8arrays:", LitJsSdk_uint8arrays);
+    //  }else{
+    //     console.warn("LitJsSdk_uint8arrays:", LitJsSdk_uint8arrays);
+    //     window.LitJsSdk_uint8arrays = LitJsSdk_uint8arrays;
+    //  }
+
+    return `if(typeof ${varName} === 'undefined') {\n   console.error("${varName}:", ${varName});\n}else{\n   console.warn("${varName}:", ${varName});\n   window.${varName} = ${varName};\n}\n`;
     // return `console.log("${varName}:", ${varName});`
 })
 
 // append the open and close script tags to consolelogs
-consoleLogs = consoleLogs.map((log) => `        <script>${log}</script>\n\n`)
+consoleLogs = consoleLogs.map((log) => `<script>\n${log}</script>\n\n`)
 
-TEMPLATE.BODY = banner + '<br/>' + scriptTags.join('\n') + '\n\n' + consoleLogs.join('\n');
+TEMPLATE.BODY = banner + '<br/>\n' + scriptTags.join('\n') + '\n\n' + consoleLogs.join('\n');
 
 await writeFile(HTML_FILE, TEMPLATE.HEADER + TEMPLATE.BODY + TEMPLATE.FOOTER);
 
