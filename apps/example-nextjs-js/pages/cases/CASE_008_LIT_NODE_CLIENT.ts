@@ -1,5 +1,6 @@
-import { AccessControlConditions, ExecuteJsProps, HandshakeWithSgx, JsonEncryptionRetrieveRequest, JsonExecutionRequest, JsonSigningRetrieveRequest, JsonSigningStoreRequest, JsonStoreSigningRequest, RejectedNodePromises, SendNodeCommand, SignedData, SignWithECDSA, SingConditionECDSA, SuccessNodePromises, SupportedJsonRequests, ValidateAndSignECDSA} from '@litprotocol-dev/constants';
+import { AccessControlConditions, DecryptedData, ExecuteJsProps, HandshakeWithSgx, JsonEncryptionRetrieveRequest, JsonExecutionRequest, JsonSigningRetrieveRequest, JsonSigningStoreRequest, JsonStoreSigningRequest, LIT_ERROR, RejectedNodePromises, SendNodeCommand, SignedData, SignWithECDSA, SingConditionECDSA, SuccessNodePromises, SupportedJsonRequests, ValidateAndSignECDSA, wasmBlsSdkHelpers} from '@litprotocol-dev/constants';
 import * as LitJsSdk from '@litprotocol-dev/core-browser';
+import { hashResourceId, safeParams, throwError } from '@litprotocol-dev/utils';
 import { ACTION } from '../enum';
 
 
@@ -348,11 +349,11 @@ export const CASE_008_LIT_NODE_CLIENT = [
             const { encryptedString, symmetricKey } = await LitJsSdk.encryptString('Hi Ron!');
             console.log("1, ", symmetricKey);
             const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-                    accessControlConditions: globalThis.CASE.accs,
-                    symmetricKey,
-                    authSig: globalThis.CASE.authSig,
-                    chain: globalThis.CASE.chain,
-                });
+                accessControlConditions: globalThis.CASE.accs,
+                symmetricKey,
+                authSig: globalThis.CASE.authSig,
+                chain: globalThis.CASE.chain,
+            });
             console.log("2, ", encryptedSymmetricKey);
             const toDecrypt = LitJsSdk.uint8arrayToString(encryptedSymmetricKey, 'base16');
             console.log("3, ", toDecrypt);
@@ -495,5 +496,242 @@ export const CASE_008_LIT_NODE_CLIENT = [
             console.log(signatures);
             return signatures;
         }
+    },
+    {
+        id: 'getDecryptions',
+        action: ACTION.CALL,
+        module: async () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            await litNodeClient.connect();
+            const litActionCode = `
+                const go = async () => {
+                    const sigShare = await Lit.Actions.signEcdsa({
+                        toSign: [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100],
+                        publicKey: "0x041270149148d3eece72d57471232d96308063cd16038f6f8f0daf4ce267e3e76273d02e89e482cb5e0bc944ca98df0594403021614e0a0409264cd13944000767",
+                        sigName: "sig1",
+                      });
+                    // LitActions.setResponse({response: JSON.stringify({hello: 'planet'})});
+                };
+                go();
+            `;
+            const params: ExecuteJsProps = {
+                authSig: globalThis.CASE.authSig,
+                jsParams: {},
+                code: litActionCode,
+                debug: true,
+            };
+
+            const reqBody: JsonExecutionRequest = litNodeClient.getLitActionRequestBody(params);
+
+            // ========== Get Node Promises ==========
+            // -- fetch shares from nodes
+            const nodePromises = litNodeClient.getNodePromises((url: string) => {
+            return litNodeClient.getJsExecutionShares(url, {
+                ...reqBody,
+            });
+            });
+
+            // -- resolve promises
+            const res = await litNodeClient.handleNodePromises(nodePromises);
+
+            // -- case: promises rejected
+            if (res.success === false) {
+            litNodeClient.throwNodeError(res as RejectedNodePromises);
+            return;
+            }
+
+            // -- case: promises success (TODO: check the keys of "values")
+            const responseData = (res as SuccessNodePromises).values;
+            console.log('responseData', JSON.stringify(responseData, null, 2));
+
+            // ========== Extract shares from response data ==========
+            // -- 1. combine signed data as a list, and get the signatures from it
+            const signedDataList = responseData.map(
+            (r: any) => (r as SignedData).signedData
+            );
+            const signatures = litNodeClient.getSignatures(signedDataList);
+
+            // -- 2. combine decrypted data a list, and get the decryptions from it
+            const decryptedDataList: any[] = responseData.map(
+            (r: DecryptedData) => r.decryptedData
+            );
+            // no return value
+            console.log("decryptions1");
+            const decryptions = await litNodeClient.getDecryptions(decryptedDataList);
+            console.log("decryptions");
+            console.log(decryptions);
+            return decryptions;
+        }
+    },
+    {
+        id: 'storeSigningConditionWithNode',
+        action: ACTION.CALL,
+        module: async () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            await litNodeClient.connect();
+            const { iat, exp } = litNodeClient.getJWTParams();
+            console.log("1, ", iat, exp);
+            let randomPath: string =
+              '/' +
+              Math.random().toString(36).substring(2, 15) +
+              Math.random().toString(36).substring(2, 15);
+            const resourceId = {
+                baseUrl: 'my-dynamic-content-server.com',
+                path: randomPath,
+                orgId: '',
+                role: '',
+                extraData: '',
+            };
+            console.log("2, ", resourceId);
+            const hashOfResourceId = await hashResourceId(resourceId);
+
+            const hashOfResourceIdStr = LitJsSdk.uint8arrayToString(
+                new Uint8Array(hashOfResourceId),
+                'base16'
+            );
+
+            const params = {
+                chain: globalThis.CASE.chain,
+                authSig: globalThis.CASE.authSig,
+                resourceId,
+                permanent: 1,
+                accessControlConditions: globalThis.CASE.accs,
+            }
+
+            let hashOfConditions: ArrayBuffer | undefined = await litNodeClient.getHashedAccessControlConditions(params);
+
+            if (!hashOfConditions) {
+                throwError({
+                    message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+                    error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+                });
+                return;
+            }
+
+            const hashOfConditionsStr = LitJsSdk.uint8arrayToString(
+                new Uint8Array(hashOfConditions),
+                'base16'
+            );
+
+            const url = 'https://serrano.litgateway.com:7371';
+            return litNodeClient.storeSigningConditionWithNode(url, {
+                key: hashOfResourceIdStr,
+                val: hashOfConditionsStr,
+                authSig: globalThis.CASE.authSig,
+                chain: globalThis.CASE.chain,
+                permanent: 1,
+            });
+        }
+    },
+    {
+        id: 'storeEncryptionConditionWithNode',
+        action: ACTION.CALL,
+        module: async () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            await litNodeClient.connect();
+            // ========= Prepare Params ==========
+            // const { encryptedSymmetricKey, symmetricKey, authSig, chain, permanent } =
+            // params;
+
+            // ========== Validate Params ==========
+            // -- validate if it's ready
+            if (!litNodeClient.ready) {
+            const message =
+                'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+            throwError({
+                message,
+                error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+            });
+            }
+
+            // -- validate if litNodeClient.subnetPubKey is null
+            if (!litNodeClient.subnetPubKey) {
+            const message = 'subnetPubKey cannot be null';
+            throwError({
+                message,
+                error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+            });
+            return;
+            }
+
+            // const paramsIsSafe = safeParams({
+            //     functionName: 'saveEncryptionKey',
+            //     params,
+            // });
+
+            // if (!paramsIsSafe) return;
+
+            // ========== Encryption ==========
+            // -- encrypt with network pubkey
+            let encryptedKey;
+
+            const { encryptedString, symmetricKey } = await LitJsSdk.encryptString('Hi Ron!');
+            console.log("1, ", symmetricKey);
+            const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
+                accessControlConditions: globalThis.CASE.accs,
+                symmetricKey,
+                authSig: globalThis.CASE.authSig,
+                chain: globalThis.CASE.chain,
+            });
+
+            if (encryptedSymmetricKey) {
+                encryptedKey = encryptedSymmetricKey;
+                } else {
+                encryptedKey = wasmBlsSdkHelpers.encrypt(
+                    LitJsSdk.uint8arrayFromString(litNodeClient.subnetPubKey, 'base16'),
+                    symmetricKey
+                );
+                console.log(
+                    'symmetric key encrypted with LIT network key: ',
+                    LitJsSdk.uint8arrayToString(encryptedKey, 'base16')
+                );
+            }
+
+            // ========== Hashing ==========
+            // -- hash the encrypted pubkey
+            const hashOfKey = await crypto.subtle.digest('SHA-256', encryptedKey);
+            const hashOfKeyStr = LitJsSdk.uint8arrayToString(new Uint8Array(hashOfKey), 'base16');
+
+            let randomPath: string =
+              '/' +
+              Math.random().toString(36).substring(2, 15) +
+              Math.random().toString(36).substring(2, 15);
+            const resourceId = {
+                baseUrl: 'my-dynamic-content-server.com',
+                path: randomPath,
+                orgId: '',
+                role: '',
+                extraData: '',
+            };
+            const params = {
+                chain: globalThis.CASE.chain,
+                authSig: globalThis.CASE.authSig,
+                resourceId,
+                permanent: 1,
+                accessControlConditions: globalThis.CASE.accs,
+            }
+            // hash the access control conditions
+            let hashOfConditions: ArrayBuffer | undefined =
+            await litNodeClient.getHashedAccessControlConditions(params);
+
+            if (!hashOfConditions) {
+                throwError({
+                    message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+                    error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+                });
+                return;
+            }
+
+            const hashOfConditionsStr = LitJsSdk.uint8arrayToString(new Uint8Array(hashOfConditions), 'base16');
+
+            const url = 'https://serrano.litgateway.com:7371';
+            return litNodeClient.storeEncryptionConditionWithNode(url, {
+                key: hashOfKeyStr,
+                val: hashOfConditionsStr,
+                authSig: globalThis.CASE.authSig,
+                chain: globalThis.CASE.chain,
+                permanent: 1,
+            });
+        },
     }
 ];
