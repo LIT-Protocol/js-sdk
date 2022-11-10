@@ -3,18 +3,12 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/ecdsa-sdk/src",
   "projectType": "library",
-  "targets": {
-    "build":{
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          "yarn nx run ecdsa-sdk:_buildTsc",
-          "yarn nx run ecdsa-sdk:_buildWeb",
-          "yarn build:postBuild"
-        ],
-        "parallel": false
-      }
-    },
+  "targets": {   "build":{
+    "executor": "nx:run-commands",
+    "options": {
+      "command": "yarn build:target ecdsa-sdk"
+    }
+  },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],

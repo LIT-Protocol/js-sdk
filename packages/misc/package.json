@@ -2,6 +2,9 @@
   "name": "@litprotocol-dev/misc",
   "version": "0.0.1",
   "type": "commonjs",
+  "dependencies": {
+    "ethers": "^5.7.1"
+  },
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/misc"

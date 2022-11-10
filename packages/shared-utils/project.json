@@ -8,11 +8,8 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "yarn nx run shared-utils:_buildTsc",
-          "yarn nx run shared-utils:_buildWeb",
-          "yarn build:postBuild"
-        ],
-        "parallel": false
+          "yarn build:target shared-utils"
+        ]
       }
     },
     "_buildTsc": {

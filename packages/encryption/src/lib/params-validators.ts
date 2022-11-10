@@ -11,9 +11,27 @@ import {
     EncryptFileAndZipWithMetadataProps,
     KV,
 } from '@litprotocol-dev/constants';
+import { checkIfAuthSigRequiresChainParam, checkType, is, log } from '@litprotocol-dev/misc';
 
-import { checkIfAuthSigRequiresChainParam, checkType, is, log } from './utils';
 
+export const safeParams = ({
+    functionName,
+    params,
+}: {
+    functionName: string;
+    params: any[] | any;
+}) => {
+    const validators = paramsValidators as KV;
+
+    const validator = validators[functionName](params);
+
+    if (!validator) {
+        log(`This function ${functionName} is skipping params safe guarding.`);
+        return true;
+    }
+
+    return validator;
+};
   
 
 export const paramsValidators = {

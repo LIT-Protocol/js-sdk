@@ -6,7 +6,7 @@
     "build":{
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn nx run core-browser:_buildTsc && yarn nx run core-browser:_buildWeb && yarn build:postBuild"
+        "command": "yarn build:target core-browser"
       }
     },
     "_buildTsc": {

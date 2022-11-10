@@ -1,12 +1,10 @@
 // Usage: node tools/scripts/gen-lib.mjs
 
-import { runCommand, getArgs, writeJsonFile, question, greenLog } from './utils.mjs';
+import { runCommand, getArgs, writeJsonFile, question, greenLog, wait } from './utils.mjs';
 import { readCachedProjectGraph } from '@nrwl/devkit';
 import { exit } from 'process';
 const args = getArgs();
 const name = args[0];
-const graph = readCachedProjectGraph();
-const nodes = graph.nodes
 
 let alreadyExists = false;
 
@@ -16,6 +14,8 @@ try {
     greenLog(`${name} already exists.`);
     alreadyExists = true;
 }
+
+await wait(1000);
 
 const createBuild = (name) => {
     return {
@@ -54,36 +54,43 @@ const createBuildWeb = (name, { globalPrefix = 'LitJsSdk' }) => {
 }
 
 const go = async () => {
+
+    const graph = readCachedProjectGraph();
+    const nodes = graph.nodes;
+
     const project = nodes[name].data;
+
+
     delete project.files;
     delete project.root;
     delete project.targets.build.dependsOn;
-    
+
     project.targets['_buildTsc'] = project.targets.build;
     project.targets['_buildWeb'] = createBuildWeb(name, { globalPrefix: 'LitJsSdk' })._buildWeb;
     project.targets['build'] = createBuild(name).build;
-    
+
     // move 'lint' and 'test' objects to the end
     const { lint, test, ...rest } = project.targets;
     project.targets = { ...rest, lint, test };
-    
+
     const writePath = project.sourceRoot.split('src')[0] + 'project.json';
-    
+
     await writeJsonFile(writePath, project);
 }
 
-if( alreadyExists ){
-    await question(`Do you want to update ${name} project.json?`, {
-        yes: async () => {
-            await go();
-            exit();
-        },
-        no: () => {
-            exit();
-        }
-    });
-}else{
+if (!alreadyExists) {
     await go();
-}
+    exit();
+};
+
+await question(`Do you want to update ${name} project.json?`, {
+    yes: async () => {
+        await go();
+        exit();
+    },
+    no: () => {
+        exit();
+    }
+});
 
 exit();

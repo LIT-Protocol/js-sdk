@@ -1,0 +1,69 @@
+{
+  "name": "encryption",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/encryption/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target encryption"
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/encryption",
+        "main": "packages/encryption/src/index.ts",
+        "tsConfig": "packages/encryption/tsconfig.lib.json",
+        "assets": [
+          "packages/encryption/*.md"
+        ]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_encryption",
+        "outfile": "dist/packages/encryption-vanilla/encryption.js",
+        "entryPoints": [
+          "./packages/encryption/src/index.ts"
+        ],
+        "define": {
+          "process.env.NODE_DEBUG": "false"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/encryption/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/encryption"
+      ],
+      "options": {
+        "jestConfig": "packages/encryption/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

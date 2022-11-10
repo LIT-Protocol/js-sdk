@@ -3,13 +3,23 @@
 import { hasItems } from './helper';
 
 import * as accessControlConditions from '@litprotocol-dev/access-control-conditions';
+import * as blsSdk from '@litprotocol-dev/bls-sdk';
 import * as constants from '@litprotocol-dev/constants';
+import * as crypto from '@litprotocol-dev/crypto';
+import * as ecdsaSdk from '@litprotocol-dev/ecdsa-sdk';
+import * as encryption from '@litprotocol-dev/encryption';
 import * as foo from '@litprotocol-dev/foo';
 import * as misc from '@litprotocol-dev/misc';
+import * as miscBrowser from '@litprotocol-dev/misc-browser';
 import * as uint8arrays from '@litprotocol-dev/uint8arrays';
 
 console.log("accessControlConditions:", hasItems(accessControlConditions));
+console.log("blsSdk:", hasItems(blsSdk));
 console.log("constants:", hasItems(constants));
+console.log("crypto:", hasItems(crypto));
+console.log("ecdsaSdk:", hasItems(ecdsaSdk));
+console.log("encryption:", hasItems(encryption));
 console.log("foo:", hasItems(foo));
 console.log("misc:", hasItems(misc));
+console.log("miscBrowser:", hasItems(miscBrowser));
 console.log("uint8arrays:", hasItems(uint8arrays));

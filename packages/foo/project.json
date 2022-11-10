@@ -11,9 +11,17 @@
       }
     },
     "_buildTsc": {
-      "executor": "nx:run-commands",
+      "executor": "@nrwl/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
-        "command": "yarn build:target foo"
+        "outputPath": "dist/packages/foo",
+        "main": "packages/foo/src/index.ts",
+        "tsConfig": "packages/foo/tsconfig.lib.json",
+        "assets": [
+          "packages/foo/*.md"
+        ]
       }
     },
     "_buildWeb": {

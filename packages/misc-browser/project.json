@@ -1,0 +1,69 @@
+{
+  "name": "misc-browser",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/misc-browser/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target misc-browser"
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/misc-browser",
+        "main": "packages/misc-browser/src/index.ts",
+        "tsConfig": "packages/misc-browser/tsconfig.lib.json",
+        "assets": [
+          "packages/misc-browser/*.md"
+        ]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_miscBrowser",
+        "outfile": "dist/packages/misc-browser-vanilla/misc-browser.js",
+        "entryPoints": [
+          "./packages/misc-browser/src/index.ts"
+        ],
+        "define": {
+          "process.env.NODE_DEBUG": "false"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/misc-browser/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/misc-browser"
+      ],
+      "options": {
+        "jestConfig": "packages/misc-browser/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

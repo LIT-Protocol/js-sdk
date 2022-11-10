@@ -4,15 +4,10 @@
   "sourceRoot": "packages/bls-sdk/src",
   "projectType": "library",
   "targets": {
-    "build":{
+    "build": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "yarn nx run bls-sdk:_buildTsc",
-          "yarn nx run bls-sdk:_buildWeb",
-          "yarn build:postBuild"
-        ],
-        "parallel": false
+        "command": "yarn build:target bls-sdk"
       }
     },
     "_buildTsc": {

@@ -24,7 +24,6 @@ import { wasmBlsSdkHelpers } from '@litprotocol-dev/bls-sdk';
 import JSZip from 'jszip';
 import { checkAndSignCosmosAuthMessage } from '../chains/cosmos';
 import { checkAndSignEVMAuthMessage } from '../chains/eth';
-
 import { checkAndSignSolAuthMessage } from '../chains/sol';
 
 // import {
@@ -750,61 +749,3 @@ export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT | undefined => {
 
   return _jwt;
 };
-
-/**
- *
- * The human readable name for an access control condition
- *
- * @param { HumanizedAccsProps } params
- *
- * @returns { Promise<string> } A promise containing a human readable description of the access control conditions
- */
-export const humanizeAccessControlConditions = async ({
-  accessControlConditions,
-  evmContractConditions,
-  solRpcConditions,
-  unifiedAccessControlConditions,
-  tokenList,
-  myWalletAddress,
-}: HumanizedAccsProps): Promise<string | undefined> => {
-  // -- check if each condition exists in linear
-  if (accessControlConditions) {
-    return humanizeEvmBasicAccessControlConditions({
-      accessControlConditions,
-      tokenList,
-      myWalletAddress,
-    });
-  } else if (evmContractConditions) {
-    return humanizeEvmContractConditions({
-      evmContractConditions,
-      tokenList,
-      myWalletAddress,
-    });
-  } else if (solRpcConditions) {
-    return humanizeSolRpcConditions({
-      solRpcConditions,
-      tokenList,
-      myWalletAddress,
-    });
-  } else if (unifiedAccessControlConditions) {
-    return humanizeUnifiedAccessControlConditions({
-      unifiedAccessControlConditions,
-      tokenList,
-      myWalletAddress,
-    });
-  }
-
-  // -- undefined
-  return;
-};
-
-// ---------- Deprecated Functions ----------
-const PACKAGE_CACHE = {};
-const getNpmPackage = () => throwRemovedFunctionError('getNpmPackage');
-export const createHtmlLIT = () => throwRemovedFunctionError('createHtmlLIT');
-export const toggleLock = () => throwRemovedFunctionError('toggleLock');
-export const unlockLitWithKey = () =>
-  throwRemovedFunctionError('unlockLitWithKey');
-export const getTokenList = () => throwRemovedFunctionError('getTokenList');
-export const sendMessageToFrameParent = () =>
-  throwRemovedFunctionError('sendMessageToFrameParent');

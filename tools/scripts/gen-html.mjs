@@ -5,7 +5,7 @@
 // *******************************************************************************************************
 
 import { exit } from "process";
-import { writeFile, getFiles, greenLog} from "./utils.mjs";
+import { writeFile, getFiles, greenLog } from "./utils.mjs";
 
 // ------ Config ------
 const TARGET_DIR = 'apps/html/';
@@ -24,11 +24,56 @@ const TEMPLATE = {
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>(HTML): Lit Protocol - Testing imports of bundled SDKs</title>
+        <style>
+        body {
+            color: white;
+            background: #16181C;
+            padding: 12px;
+        }
+        .code {
+            display: none;
+        }
+        #result{
+            height: 100%;
+            width: 50%;
+            position: fixed;
+            top: 0;
+            right: 0;
+            border-left: 2px solid black;
+            padding: 48px;
+            box-sizing: border-box;
+            font-size: 18px;
+            overflow: auto;
+        }
+        .key:hover {
+            text-decoration: underline;
+            color: red;
+        }
+        pre {
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+           }
+        </style>
     </head>
     <body>
     `,
     BODY: '',
     FOOTER: `
+    <div id="root"></div>
+    <pre><code id="result"></code></pre>
+    <script>
+        window.onload = function() {
+            [...document.getElementsByClassName('key')].forEach((e) => {
+                e.addEventListener('mouseover', (ele) => {
+                    var code = ele.target.nextElementSibling.innerText;
+                    document.getElementById('result').innerText = code;
+                });
+            });
+        };
+    </script>
     </body>
 </html>
 `
@@ -41,22 +86,38 @@ const files = (await getFiles(DIST_DIR))
 
 const scriptTags = files.map((file) => `<script src="${file}"></script>`)
 
-let consoleLogs = files.map((file) => { 
-    
+let consoleLogs = files.map((file) => {
+
     let varName = file.split('/').pop().replace('.js', '');
-    
+
     // replace hyphens with underscores and capitalize the first letter
     varName = globalVarPrefix + varName.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-    
+
     // --- Template look something like this ---
-    // if(typeof LitJsSdk_uint8arrays === 'undefined') {
-    //     console.error("LitJsSdk_uint8arrays:", LitJsSdk_uint8arrays);
+    // if(typeof LitJsSdk_constants === 'undefined') {
+    //     console.error("LitJsSdk_constants:", LitJsSdk_constants);
     //  }else{
-    //     console.warn("LitJsSdk_uint8arrays:", LitJsSdk_uint8arrays);
-    //     window.LitJsSdk_uint8arrays = LitJsSdk_uint8arrays;
+    //     console.warn("LitJsSdk_constants:", LitJsSdk_constants);
+    //     window.LitJsSdk_constants = LitJsSdk_constants;
     //  }
 
-    return `if(typeof ${varName} === 'undefined') {\n   console.error("${varName}:", ${varName});\n}else{\n   console.warn("${varName}:", ${varName});\n   window.${varName} = ${varName};\n}\n`;
+    //  window.addEventListener('load', function() {
+    //      let LitJsSdk_constants_entries = Object.entries(LitJsSdk_constants);
+    //      let LitJsSdk_constantslis = LitJsSdk_constants_entries.map(([key, value]) => '<li><span class="key">' + key + '</span><pre class="code"><code>' + JSON.stringify(value) + '</code></pre></li>');
+    //      LitJsSdk_constantslis = LitJsSdk_constantslis.join(',', '').replaceAll(',', '');
+    //      let LitJsSdk_constantstemplate = `<div class="cat"><h1>LitJsSdk_constants has ${LitJsSdk_constants_entries.length} functions</h1><ul>${ LitJsSdk_constantslis }</ul></div>`;
+    //      document.getElementById('root').insertAdjacentHTML('beforeend', LitJsSdk_constantstemplate);
+    //  });
+
+    return `if(typeof ${varName} === 'undefined') {\n   console.error("${varName}:", ${varName});\n}else{\n   console.warn("${varName}:", ${varName});\n   window.${varName} = ${varName};\n}\n
+    window.addEventListener('load', function() {
+        let ${varName}_entries = Object.entries(${varName});
+        let ${varName}lis = ${varName}_entries.map(([key, value]) => '<li><span class="key">' + key + '</span><pre class="code"><code>' + (typeof value === 'function' ? value : JSON.stringify(value, null, 2)) + '</code></pre></li>');
+        ${varName}lis = ${varName}lis.join(',', '').replaceAll(',', '');
+        let ${varName}template = \`<div class="cat"><h1>${varName} has \${${varName}_entries.length} functions</h1><ul>\${ ${varName}lis }</ul></div>\`;
+        document.getElementById('root').insertAdjacentHTML('beforeend', ${varName}template);
+    });
+    `;
     // return `console.log("${varName}:", ${varName});`
 })
 

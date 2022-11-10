@@ -1,4 +1,15 @@
-import { ELeft, ERight, IEither, ILitError, KV, LIT_AUTH_SIG_CHAIN_KEYS, LIT_ERROR } from '@litprotocol-dev/constants';
+import {
+  ABI_ERC20,
+  Chain,
+  ELeft,
+  ERight,
+  IEither,
+  ILitError,
+  KV,
+  LIT_AUTH_SIG_CHAIN_KEYS,
+  LIT_CHAINS,
+  LIT_ERROR,
+} from '@litprotocol-dev/constants';
 // import { LIT_AUTH_SIG_CHAIN_KEYS } from 'packages/constants/src/lib/constants/constants';
 // import { LIT_ERROR } from 'packages/constants/src/lib/errors';
 // import {
@@ -6,6 +17,12 @@ import { ELeft, ERight, IEither, ILitError, KV, LIT_AUTH_SIG_CHAIN_KEYS, LIT_ERR
 //   ILitError,
 // } from 'packages/constants/src/lib/interfaces/i-errors';
 // import { KV } from 'packages/constants/src/lib/interfaces/interfaces';
+import {
+  Web3Provider,
+  JsonRpcSigner,
+  JsonRpcProvider,
+} from '@ethersproject/providers';
+import { Contract } from '@ethersproject/contracts';
 
 /**
  *
@@ -351,4 +368,29 @@ export const isNode = () => {
 };
 export const isBrowser = () => {
   return isNode() === false;
+};
+
+/**
+ *
+ * Get the number of decimal places in a token
+ *
+ * @property { string } contractAddress The token contract address
+ * @property { string } chain The chain on which the token is deployed
+ *
+ * @returns { number } The number of decimal places in the token
+ */
+export const decimalPlaces = async ({
+  contractAddress,
+  chain,
+}: {
+  contractAddress: string;
+  chain: Chain;
+}): Promise<number> => {
+  const rpcUrl = LIT_CHAINS[chain].rpcUrls[0] as string;
+
+  const web3 = new JsonRpcProvider(rpcUrl);
+
+  const contract = new Contract(contractAddress, (ABI_ERC20 as any).abi, web3);
+
+  return await contract['decimals']();
 };
