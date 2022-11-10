@@ -301,33 +301,75 @@ export const CASE_008_LIT_NODE_CLIENT = [
         module: async () => {
             const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
             const { iat, exp } = litNodeClient.getJWTParams();
+            console.log("1, ", iat, exp);
+            let randomPath: string =
+              '/' +
+              Math.random().toString(36).substring(2, 15) +
+              Math.random().toString(36).substring(2, 15);
+            const resourceId = {
+                baseUrl: 'my-dynamic-content-server.com',
+                path: randomPath,
+                orgId: '',
+                role: '',
+                extraData: '',
+            };
+            console.log("2, ", resourceId);
+            // const sessionSigs = await LitJsSdk.getSessionSigs({
+            //     chain: globalThis.CASE.chain,
+            //     litNodeClient: window.litNodeClient,
+            //     resources: [
+            //       `litSigningCondition://${globalThis.CASE.hashedResourceId}`,
+            //     ],
+            // });
+            // console.log("3, ", sessionSigs);
             const params: JsonSigningRetrieveRequest = {
+                accessControlConditions: globalThis.CASE.accs,
+                chain: globalThis.CASE.chain,
+                authSig: globalThis.CASE.authSig,
+                resourceId,
+                // sessionSigs,
                 iat,
                 exp,
             };
+            console.log("4, ", params);
             // Error: bad input
             const url = 'https://serrano.litgateway.com:7371';
             const res = await litNodeClient.getSigningShare(url, params);
+            console.log("5, ", res);
             return res;
         },
     },
-    // {
-    //     id: 'getDecryptionShare',
-    //     action: ACTION.CALL,
-    //     module: async () => {
-    //         const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
-    //         const params: JsonEncryptionRetrieveRequest = {
-    //             accessControlConditions: globalThis.CASE.accs,
-    //             chain: globalThis.CASE.chain,
-    //             authSig: globalThis.CASE.authSig,
-    //             toDecrypt: ''
-    //         };
-    //         const url = 'https://serrano.litgateway.com:7371';
-    //         const res = await litNodeClient.getDecryptionShare(url, params);
-    //         return res;
-    //     },
-    // },
-    //
+    {
+        id: 'getDecryptionShare',
+        action: ACTION.CALL,
+        module: async () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            await litNodeClient.connect();
+            const { encryptedString, symmetricKey } = await LitJsSdk.encryptString('Hi Ron!');
+            console.log("1, ", symmetricKey);
+            const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
+                    accessControlConditions: globalThis.CASE.accs,
+                    symmetricKey,
+                    authSig: globalThis.CASE.authSig,
+                    chain: globalThis.CASE.chain,
+                });
+            console.log("2, ", encryptedSymmetricKey);
+            const toDecrypt = LitJsSdk.uint8arrayToString(encryptedSymmetricKey, 'base16');
+            console.log("3, ", toDecrypt);
+            const params: JsonEncryptionRetrieveRequest = {
+                accessControlConditions: globalThis.CASE.accs,
+                chain: globalThis.CASE.chain,
+                authSig: globalThis.CASE.authSig,
+                toDecrypt,
+            };
+            console.log("4, ", params);
+            const url = 'https://serrano.litgateway.com:7371';
+            const res = await litNodeClient.getDecryptionShare(url, params);
+            console.log("5, ", res);
+            return res;
+        },
+    },
+
     // Below functions gives errors, added to IGNORED_FUNCTIONS.ts
     // {
     //     id: 'signECDSA',
@@ -394,6 +436,64 @@ export const CASE_008_LIT_NODE_CLIENT = [
         module: async () => {
             const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
             return await litNodeClient.connect();
+        }
+    },
+    {
+        id: 'getSignatures',
+        action: ACTION.CALL,
+        module: async () => {
+            const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+            await litNodeClient.connect();
+            const litActionCode = `
+                const go = async () => {
+                    const sigShare = await Lit.Actions.signEcdsa({
+                        toSign: [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100],
+                        publicKey: "0x041270149148d3eece72d57471232d96308063cd16038f6f8f0daf4ce267e3e76273d02e89e482cb5e0bc944ca98df0594403021614e0a0409264cd13944000767",
+                        sigName: "sig1",
+                      });
+                    // LitActions.setResponse({response: JSON.stringify({hello: 'planet'})});
+                };
+                go();
+            `;
+            const params: ExecuteJsProps = {
+                authSig: globalThis.CASE.authSig,
+                jsParams: {},
+                code: litActionCode,
+                debug: true,
+            };
+            const reqBody: JsonExecutionRequest = litNodeClient.getLitActionRequestBody(params);
+
+            // ========== Get Node Promises ==========
+            // -- fetch shares from nodes
+            const nodePromises = litNodeClient.getNodePromises((url: string) => {
+                return litNodeClient.getJsExecutionShares(url, {
+                    ...reqBody,
+                });
+            });
+
+            // -- resolve promises
+            const res = await litNodeClient.handleNodePromises(nodePromises);
+
+            // -- case: promises rejected
+            if (res.success === false) {
+                litNodeClient.throwNodeError(res as RejectedNodePromises);
+                return;
+            }
+
+            // -- case: promises success (TODO: check the keys of "values")
+            const responseData = (res as SuccessNodePromises).values;
+            console.log('responseData', JSON.stringify(responseData, null, 2));
+
+            // ========== Extract shares from response data ==========
+            // -- 1. combine signed data as a list, and get the signatures from it
+            const signedDataList = responseData.map(
+                (r: any) => (r as SignedData).signedData
+            );
+            console.log(signedDataList);
+            // not returning anything
+            const signatures = litNodeClient.getSignatures(signedDataList);
+            console.log(signatures);
+            return signatures;
         }
     }
 ];
