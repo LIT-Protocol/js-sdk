@@ -10,7 +10,7 @@ import {
   LIT_ERROR,
   LOCAL_STORAGE_KEYS,
 } from '@litprotocol-dev/constants';
-import { log, sortedObject, throwError } from '../utils';
+import { log, sortedObject, throwError } from '@litprotocol-dev/misc';
 
 /** ---------- Declaration ---------- */
 declare global {

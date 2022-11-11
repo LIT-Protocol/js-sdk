@@ -33,7 +33,8 @@
           "./packages/auth-browser/src/index.ts"
         ],
         "define": {
-          "process.env.NODE_DEBUG": "false"
+          "process.env.NODE_DEBUG": "false",
+          "global": "window"
         },
         "plugins": [
           {

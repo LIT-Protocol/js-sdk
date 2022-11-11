@@ -9,6 +9,7 @@ import {
     LIT_ERROR,
     LOCAL_STORAGE_KEYS,
 } from '@litprotocol-dev/constants';
+import { getStorageItem, log, throwError } from '@litprotocol-dev/misc';
 // import { toString as uint8arrayToString } from 'uint8arrays';
 
 import {
@@ -16,7 +17,6 @@ import {
     uint8arrayToString,
   } from '@litprotocol-dev/uint8arrays';
 
-import { throwError, log, getStorageItem } from '../utils';
 
 const util = require('util');
 

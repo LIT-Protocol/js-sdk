@@ -11,14 +11,13 @@ import {
     ABI_ERC20,
     Chain,
 } from '@litprotocol-dev/constants';
-import { log, throwError, numberToHex, getStorageItem, isNode, isBrowser } from '../utils';
 import { ethers } from 'ethers';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { hexlify } from '@ethersproject/bytes';
 import { verifyMessage } from '@ethersproject/wallet';
 import LitConnectModal from 'lit-connect-modal';
-import { Contract } from '@ethersproject/contracts';
+// import { Contract } from '@ethersproject/contracts';
 
 import {
     Web3Provider,
@@ -31,6 +30,7 @@ import { getAddress } from 'ethers/lib/utils';
 
 import naclUtil from 'tweetnacl-util';
 import nacl from 'tweetnacl';
+import { getStorageItem, isBrowser, isNode, log, numberToHex, throwError } from '@litprotocol-dev/misc';
 
 /** ---------- Local Interfaces ---------- */
 interface ConnectWeb3 {

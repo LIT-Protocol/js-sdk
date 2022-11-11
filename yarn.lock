@@ -15904,6 +15904,13 @@ listr2@^3.8.3:
     through "^2.3.8"
     wrap-ansi "^7.0.0"
 
+lit-connect-modal@0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/lit-connect-modal/-/lit-connect-modal-0.1.8.tgz#4d8c53ee339948359cc8b19676bd3d0d43643f78"
+  integrity sha512-dxBqSRFDtDGBLQbCqCHlx4b0M0Xc+5p/OId34F8mAccOKeOavQI/Iy/PKfwspfnEg1q+yWjcf2k7vOcJKU4loA==
+  dependencies:
+    micromodal "^0.4.10"
+
 lit-connect-modal@^0.1.8:
   version "0.1.10"
   resolved "https://registry.yarnpkg.com/lit-connect-modal/-/lit-connect-modal-0.1.10.tgz#b9f6008aaa10a19e9accd2bf447853429fbe270c"
