@@ -1,7 +1,31 @@
+import { ELeft, ERight, IEither, LIT_ERROR } from '@litprotocol-dev/constants';
 import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@litprotocol-dev/uint8arrays';
+
+/**
+ *
+ * Get the local storage item by key
+ *
+ * @param { string } key
+ */
+ export const getStorageItem = (key: string): IEither => {
+  const item = localStorage.getItem(key);
+
+  let keyOrError: IEither;
+
+  if (!item) {
+    keyOrError = ELeft({
+      message: `Failed to get ${key} from local storage`,
+      error: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION,
+    });
+  } else {
+    keyOrError = ERight(item);
+  }
+
+  return keyOrError;
+};
 
 /**
  * Convert a Blob to a base64urlpad string.  Note: This function returns a promise.

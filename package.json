@@ -7,7 +7,7 @@
     "workspace:reset:dist": "rm -rf ./dist",
     "workspace:reset:cache": "rm -rf ./node_modules/.cache",
     "build:packages:forceDepVersion": "node ./tools/scripts/forceDepVersion.mjs --contains=@litprotocol-dev --workspace=lib --version=*",
-    "build:matchFolderNameAsPackageName": "node ./tools/scripts/matchFolderNameAsPackageName.mjs",
+    "build:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",
     "build:packages": "yarn workspace:reset:dist && yarn build:packages:forceDepVersion && nx run-many --target=build && yarn build:target",
     "build:target": "yarn node tools/scripts/build.mjs",
     "test:packages": "nx run-many --target=testPackage",

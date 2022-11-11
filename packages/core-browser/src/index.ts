@@ -1,8 +1,6 @@
 import { initWasmBlsSdk } from '@litprotocol-dev/bls-sdk';
 import * as wasmECDSA from '@litprotocol-dev/ecdsa-sdk'
 
-import { log } from '@litprotocol-dev/shared-utils';
-
 // ----- Initialization -----
 
 log("---------- Lit Protocol's core-browser package is being initialized...---------- ");
@@ -63,6 +61,7 @@ import {
 
 
 } from '@litprotocol-dev/shared-utils';
+import { log } from '@litprotocol-dev/misc';
 
 export { 
     LitNodeClient,

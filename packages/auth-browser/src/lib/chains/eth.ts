@@ -22,7 +22,6 @@ import LitConnectModal from 'lit-connect-modal';
 import {
     Web3Provider,
     JsonRpcSigner,
-    JsonRpcProvider,
 } from '@ethersproject/providers';
 
 import { SiweMessage } from 'lit-siwe';
@@ -30,7 +29,8 @@ import { getAddress } from 'ethers/lib/utils';
 
 import naclUtil from 'tweetnacl-util';
 import nacl from 'tweetnacl';
-import { getStorageItem, isBrowser, isNode, log, numberToHex, throwError } from '@litprotocol-dev/misc';
+import { isBrowser, isNode, log, numberToHex, throwError } from '@litprotocol-dev/misc';
+import { getStorageItem } from '@litprotocol-dev/misc-browser';
 
 /** ---------- Local Interfaces ---------- */
 interface ConnectWeb3 {

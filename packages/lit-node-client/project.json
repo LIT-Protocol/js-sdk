@@ -1,13 +1,17 @@
 {
-  "name": "foo",
+  "name": "lit-node-client",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/foo/src",
+  "sourceRoot": "packages/lit-node-client/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target foo"
+        "commands": [
+          "yarn build:target crypto --skip",
+          "yarn build:target lit-node-client"
+        ],
+        "parallel": false
       }
     },
     "_buildTsc": {
@@ -16,24 +20,25 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/packages/foo",
-        "main": "packages/foo/src/index.ts",
-        "tsConfig": "packages/foo/tsconfig.lib.json",
+        "outputPath": "dist/packages/lit-node-client",
+        "main": "packages/lit-node-client/src/index.ts",
+        "tsConfig": "packages/lit-node-client/tsconfig.lib.json",
         "assets": [
-          "packages/foo/*.md"
+          "packages/lit-node-client/*.md"
         ]
       }
     },
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
       "options": {
-        "globalName": "LitJsSdk_foo",
-        "outfile": "dist/packages/foo-vanilla/foo.js",
+        "globalName": "LitJsSdk_litNodeClient",
+        "outfile": "dist/packages/lit-node-client-vanilla/lit-node-client.js",
         "entryPoints": [
-          "./packages/foo/src/index.ts"
+          "./packages/lit-node-client/src/index.ts"
         ],
         "define": {
-          "process.env.NODE_DEBUG": "false"
+          "process.env.NODE_DEBUG": "false",
+          "global": "window"
         },
         "plugins": [
           {
@@ -50,17 +55,17 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "packages/foo/**/*.ts"
+          "packages/lit-node-client/**/*.ts"
         ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": [
-        "coverage/packages/foo"
+        "coverage/packages/lit-node-client"
       ],
       "options": {
-        "jestConfig": "packages/foo/jest.config.ts",
+        "jestConfig": "packages/lit-node-client/jest.config.ts",
         "passWithNoTests": true
       }
     }

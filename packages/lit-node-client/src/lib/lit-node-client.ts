@@ -1,25 +1,78 @@
-import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter, hashAccessControlConditions, hashEVMContractConditions, hashResourceId, hashSolRpcConditions, hashUnifiedAccessControlConditions } from "@litprotocol-dev/access-control-conditions";
-import { wasmBlsSdkHelpers } from "@litprotocol-dev/bls-sdk";
-import { CustomNetwork, DecryptedData, defaultLitnodeClientConfig, ExecuteJsProps, ExecuteJsResponse, FormattedMultipleAccs, HandshakeWithSgx, ILitNodeClient, JsonEncryptionRetrieveRequest, JsonExecutionRequest, JsonHandshakeResponse, JsonSaveEncryptionKeyRequest, JsonSignChainDataRequest, JsonSigningRetrieveRequest, JsonSigningStoreRequest, JsonStoreSigningRequest, KV, LitNodeClientConfig, LIT_ERROR, LIT_NETWORKS, NodeCommandResponse, NodeCommandServerKeysResponse, NodeLog, NodePromiseResponse, NodeResponse, NodeShare, RejectedNodePromises, SendNodeCommand, SignedChainDataToken, SignedData, SignWithECDSA, SigShare, SIGTYPE, SingConditionECDSA, SuccessNodePromises, SupportedJsonRequests, ValidateAndSignECDSA, version } from "@litprotocol-dev/constants";
-import { combineBlsDecryptionShares, combineBlsShares, combineEcdsaShares } from "@litprotocol-dev/crypto";
-import { safeParams } from "@litprotocol-dev/encryption";
-import { convertLitActionsParams, log, mostCommonString, throwError } from "@litprotocol-dev/misc";
-import { getStorageItem } from "@litprotocol-dev/misc-browser";
-import { uint8arrayFromString, uint8arrayToString } from "@litprotocol-dev/uint8arrays";
-
-/** ---------- Local Helpers ---------- */
-const override = (original: any, custom: any) => {
-  return { ...original, ...custom };
-};
-
-const browserOnly = (callback: Function) => {
-  if (typeof window !== 'undefined' && window && window.localStorage) {
-    callback();
-  }
-};
+import {
+  canonicalAccessControlConditionFormatter,
+  canonicalEVMContractConditionFormatter,
+  canonicalResourceIdFormatter,
+  canonicalSolRpcConditionFormatter,
+  canonicalUnifiedAccessControlConditionFormatter,
+  hashAccessControlConditions,
+  hashEVMContractConditions,
+  hashResourceId,
+  hashSolRpcConditions,
+  hashUnifiedAccessControlConditions,
+} from '@litprotocol-dev/access-control-conditions';
+import { wasmBlsSdkHelpers } from '@litprotocol-dev/bls-sdk';
+import {
+  CustomNetwork,
+  DecryptedData,
+  defaultLitnodeClientConfig,
+  ExecuteJsProps,
+  ExecuteJsResponse,
+  FormattedMultipleAccs,
+  HandshakeWithSgx,
+  ILitNodeClient,
+  JsonEncryptionRetrieveRequest,
+  JsonExecutionRequest,
+  JsonHandshakeResponse,
+  JsonSaveEncryptionKeyRequest,
+  JsonSignChainDataRequest,
+  JsonSigningRetrieveRequest,
+  JsonSigningStoreRequest,
+  JsonStoreSigningRequest,
+  KV,
+  LitNodeClientConfig,
+  LIT_ERROR,
+  LIT_NETWORKS,
+  NodeCommandResponse,
+  NodeCommandServerKeysResponse,
+  NodeLog,
+  NodePromiseResponse,
+  NodeResponse,
+  NodeShare,
+  RejectedNodePromises,
+  SendNodeCommand,
+  SignedChainDataToken,
+  SignedData,
+  SignWithECDSA,
+  SigShare,
+  SIGTYPE,
+  SingConditionECDSA,
+  SuccessNodePromises,
+  SupportedJsonRequests,
+  ValidateAndSignECDSA,
+  version,
+} from '@litprotocol-dev/constants';
+import {
+  combineBlsDecryptionShares,
+  combineBlsShares,
+  combineEcdsaShares,
+} from '@litprotocol-dev/crypto';
+import { safeParams } from '@litprotocol-dev/encryption';
+import {
+  convertLitActionsParams,
+  isBrowser,
+  isNode,
+  log,
+  mostCommonString,
+  throwError,
+} from '@litprotocol-dev/misc';
+import { getStorageItem } from '@litprotocol-dev/misc-browser';
+import {
+  uint8arrayFromString,
+  uint8arrayToString,
+} from '@litprotocol-dev/uint8arrays';
 
 /** ---------- Main Export Class ---------- */
-export default class LitNodeClient implements ILitNodeClient {
+export class LitNodeClient implements ILitNodeClient {
   config: LitNodeClientConfig;
   connectedNodes: SetConstructor | Set<any> | any;
   serverKeys: KV | any;
@@ -35,7 +88,8 @@ export default class LitNodeClient implements ILitNodeClient {
 
     // -- if config params are specified, replace it
     if (customConfig) {
-      this.config = override(this.config, customConfig);
+      this.config = { ...this.config, ...customConfig };
+      // this.config = override(this.config, customConfig);
     }
 
     // -- init default properties
@@ -66,20 +120,22 @@ export default class LitNodeClient implements ILitNodeClient {
    *
    */
   overrideConfigsFromLocalStorage = (): void => {
-    browserOnly(() => {
-      const storageKey = 'LitNodeClientConfig';
-      const storageConfigOrError = getStorageItem(storageKey);
+    
+    if( isNode() ) return;
 
-      // -- validate
-      if (storageConfigOrError.type === 'ERROR') {
-        console.warn(`Storage key "${storageKey}" is missing. `);
-        return;
-      }
+    const storageKey = 'LitNodeClientConfig';
+    const storageConfigOrError = getStorageItem(storageKey);
 
-      // -- execute
-      const storageConfig = JSON.parse(storageConfigOrError.result);
-      this.config = override(this.config, storageConfig);
-    });
+    // -- validate
+    if (storageConfigOrError.type === 'ERROR') {
+      console.warn(`Storage key "${storageKey}" is missing. `);
+      return;
+    }
+
+    // -- execute
+    const storageConfig = JSON.parse(storageConfigOrError.result);
+    // this.config = override(this.config, storageConfig);
+    this.config = { ...this.config, ...storageConfig }
   };
 
   /**
@@ -517,8 +573,6 @@ export default class LitNodeClient implements ILitNodeClient {
    *
    */
   getDecryptions = async (decryptedData: Array<any>): Promise<Array<any>> => {
-    // -- prepare BLS SDK
-    // const wasmBlsSdk: any = await initWasmBlsSdk();
 
     // -- prepare params
     let decryptions: any;
@@ -1349,8 +1403,6 @@ export default class LitNodeClient implements ILitNodeClient {
   getEncryptionKey = async (
     params: JsonEncryptionRetrieveRequest
   ): Promise<Uint8Array | undefined> => {
-    // -- prepare BLS SDK
-    // const wasmBlsSdk: any = await initWasmBlsSdk();
 
     // -- validate if it's ready
     if (!this.ready) {
@@ -1432,7 +1484,6 @@ export default class LitNodeClient implements ILitNodeClient {
       decryptionShares,
       this.networkPubKeySet,
       toDecrypt
-      // { wasmBlsSdk }
     );
 
     return decrypted;
@@ -1722,7 +1773,7 @@ export default class LitNodeClient implements ILitNodeClient {
           globalThis.litNodeClient = this;
 
           // browser only
-          if (typeof document !== 'undefined') {
+          if ( isBrowser() ) {
             document.dispatchEvent(new Event('lit-ready'));
           }
 

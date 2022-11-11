@@ -1,14 +1,14 @@
+declare global {
+  var wasmExports: any;
+  var wasmECDSA: any;
+}
+
+import { wasmBlsSdkHelpers, initWasmBlsSdk } from '@litprotocol-dev/bls-sdk';
 import {
   SessionKeyPair,
   SigShare,
   SYMM_KEY_ALGO_PARAMS,
 } from '@litprotocol-dev/constants';
-
-declare global {
-  var wasmExports: any;
-}
-
-import { wasmBlsSdkHelpers, initWasmBlsSdk } from '@litprotocol-dev/bls-sdk';
 
 import * as wasmECDSA from '@litprotocol-dev/ecdsa-sdk';
 
@@ -33,6 +33,16 @@ if (!globalThis.wasmExports) {
   });
 }
 
+if (!globalThis.wasmECDSA) {
+  wasmECDSA.initWasmEcdsaSdk().then((sdk: any) => {
+    globalThis.wasmECDSA = sdk;
+    log(
+      `✅ [ECDSA SDK] wasmECDSA loaded. ${
+        Object.keys(wasmECDSA).length
+      } functions available. Run 'wasmECDSA' in the console to see them.`
+    );
+  });
+}
 /** ---------- Exports ---------- */
 
 /**
@@ -181,8 +191,8 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   const R_y = sigShares[0].localY;
 
   // the public key can come from any node - it obviously will be identical from each node
-  const publicKey = sigShares[0].publicKey;
-  const dataSigned = '0x' + sigShares[0].dataSigned;
+  // const publicKey = sigShares[0].publicKey;
+  // const dataSigned = '0x' + sigShares[0].dataSigned;
   const validShares = sigShares.map((s: any) => s.shareHex);
   const shares = JSON.stringify(validShares);
   log('shares is', shares);
@@ -209,22 +219,7 @@ export const combineBlsDecryptionShares = (
   decryptionShares: Array<any>,
   networkPubKeySet: string,
   toDecrypt: string
-  // provider: {
-  //     wasmBlsSdk: any;
-  // }
 ): any => {
-  // ========== Prepare Params ===========
-  // -- validate if wasmBlsSdk is empty
-  // if (provider.wasmBlsSdk === undefined) {
-  //     throwError({
-  //         message: 'wasmBlsSdk is undefined',
-  //         error: LIT_ERROR.WASM_INIT_ERROR,
-  //     });
-  //     return;
-  // }
-
-  // let wasmBlsSdk = provider.wasmBlsSdk;
-
   // -- sort the decryption shares by share index.  this is important when combining the shares.
   decryptionShares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 

@@ -7,16 +7,17 @@ const args = getArgs();
 
 // const TARGET = 'packages/auth-browser';
 const TARGET = args[0];
-const FLAG = args[1]?.split('=')[0];
-const VALUE = args[1]?.split('=')[1];
-
-const FLAG2 = args[2]?.split('=')[0];
-const VALUE2 = args[2]?.split('=')[1];
 
 if (!TARGET) {
     redLog('Please provide a target directory');
     exit();
 }
+
+const FLAG = args[1]
+const VALUE = args[2]
+
+const FLAG2 = args[3]
+const VALUE2 = args[4]
 
 const dirs = await listDirsRelative(TARGET);
 
@@ -69,11 +70,11 @@ if (FLAG === '--filter') {
         }
     });
 
-    if( filtered.size === 0 ) {
-        redLog(`No imports found that match ${VALUE}`, true);
+    if (filtered.size === 0) {
+        redLog(`No imports found that match '${VALUE}'`, true);
         exit();
-    }else{
-        console.log(`Filtered that matches ${VALUE}:`, filtered);
+    } else {
+        console.log(`Filtered that matches '${VALUE}':`, filtered);
     }
 
     if (FLAG2 == '--write') {

@@ -71,7 +71,7 @@
     <script src="dist/packages/crypto-vanilla/crypto.js"></script>
     <script src="dist/packages/ecdsa-sdk-vanilla/ecdsa-sdk.js"></script>
     <script src="dist/packages/encryption-vanilla/encryption.js"></script>
-    <script src="dist/packages/foo-vanilla/foo.js"></script>
+    <script src="dist/packages/lit-node-client-vanilla/lit-node-client.js"></script>
     <script src="dist/packages/misc-browser-vanilla/misc-browser.js"></script>
     <script src="dist/packages/misc-vanilla/misc.js"></script>
     <script src="dist/packages/uint8arrays-vanilla/uint8arrays.js"></script>
@@ -512,22 +512,22 @@
     </script>
     
 
-    <!-- (8): FOO -->
+    <!-- (8): LITNODECLIENT -->
     <script>
-        if(typeof LitJsSdk_foo === 'undefined') {
-            console.error("LitJsSdk_foo:", LitJsSdk_foo);
+        if(typeof LitJsSdk_litNodeClient === 'undefined') {
+            console.error("LitJsSdk_litNodeClient:", LitJsSdk_litNodeClient);
         }else{
-            console.warn("LitJsSdk_foo:", LitJsSdk_foo);
-            window.LitJsSdk_foo = LitJsSdk_foo;
+            console.warn("LitJsSdk_litNodeClient:", LitJsSdk_litNodeClient);
+            window.LitJsSdk_litNodeClient = LitJsSdk_litNodeClient;
         }
         window.addEventListener('load', function() {
             var root = document.getElementById('root');
             var result = document.getElementById('result');
-            var entries = Object.entries(LitJsSdk_foo);
+            var entries = Object.entries(LitJsSdk_litNodeClient);
             var lis = entries.map(([key, value]) => `
             <li>
                 <span class="key" onClick="(async () => {
-                    var fn = LitJsSdk_foo['${key}'];
+                    var fn = LitJsSdk_litNodeClient['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
                     if ( fnType === 'string' ) return;
@@ -563,7 +563,7 @@
             lis = lis.join(' ');
             var template = `
             <div class="cat">
-                <h1>LitJsSdk_foo has ${entries.length} functions</h1>
+                <h1>LitJsSdk_litNodeClient has ${entries.length} functions</h1>
                     <ul>
                         ${ lis }
                     </ul>

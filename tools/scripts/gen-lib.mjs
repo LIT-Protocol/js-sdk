@@ -40,7 +40,8 @@ const createBuildWeb = (name, { globalPrefix = 'LitJsSdk' }) => {
                 "outfile": `dist/packages/${name}-vanilla/${name}.js`,
                 "entryPoints": [`./packages/${name}/src/index.ts`],
                 "define": {
-                    "process.env.NODE_DEBUG": "false"
+                    "process.env.NODE_DEBUG": "false",
+                    "global": "window"
                 },
                 "plugins": [
                     {

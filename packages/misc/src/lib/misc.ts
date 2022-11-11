@@ -1,27 +1,13 @@
 import {
   ABI_ERC20,
   Chain,
-  ELeft,
-  ERight,
-  IEither,
   ILitError,
   KV,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
   LIT_ERROR,
 } from '@litprotocol-dev/constants';
-// import { LIT_AUTH_SIG_CHAIN_KEYS } from 'packages/constants/src/lib/constants/constants';
-// import { LIT_ERROR } from 'packages/constants/src/lib/errors';
-// import {
-//   IEither,
-//   ILitError,
-// } from 'packages/constants/src/lib/interfaces/i-errors';
-// import { KV } from 'packages/constants/src/lib/interfaces/interfaces';
-import {
-  Web3Provider,
-  JsonRpcSigner,
-  JsonRpcProvider,
-} from '@ethersproject/providers';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 
 /**
@@ -255,29 +241,6 @@ export const sortedObject = (obj: any): any => {
  */
 export const numberToHex = (v: number): string => {
   return '0x' + v.toString(16);
-};
-
-/**
- *
- * Get the local storage item by key
- *
- * @param { string } key
- */
-export const getStorageItem = (key: string): IEither => {
-  const item = localStorage.getItem(key);
-
-  let keyOrError: IEither;
-
-  if (!item) {
-    keyOrError = ELeft({
-      message: `Failed to get ${key} from local storage`,
-      error: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION,
-    });
-  } else {
-    keyOrError = ERight(item);
-  }
-
-  return keyOrError;
 };
 
 /**

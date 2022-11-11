@@ -1,5 +1,5 @@
 import { exit } from "process";
-import { getArgs, readJsonFile, redLog, runCommand, writeJsonFile, question } from "./utils.mjs";
+import { getArgs, readJsonFile, redLog, runCommand, writeJsonFile, question, greenLog } from "./utils.mjs";
 
 const args = getArgs();
 
@@ -27,6 +27,8 @@ const FILES_TO_MODIFIED = {
     CONFIG: 'tsconfig.base.json',
     WORKSPACE: 'workspace.json',
     PROJECT: projectPath,
+    DIST: './dist/' + projectPath.replace('./', ''),
+    DIST_VANILLA: './dist/' + projectPath.replace('./', '') + '-vanilla',
 }
 
 console.log("- Files to be modified/deleted:");
@@ -97,5 +99,29 @@ await question(`Delete '${FILES_TO_MODIFIED.PROJECT}'?`,
             await runCommand(`rm -rf ${FILES_TO_MODIFIED.PROJECT}`);
         },
     })
+
+await question(`Delete '${FILES_TO_MODIFIED.DIST}'?`,
+    {
+        no: () => {
+            console.log("Not overwritting " + FILES_TO_MODIFIED.DIST);
+        },
+        yes: async () => {
+            await runCommand(`rm -rf ${FILES_TO_MODIFIED.DIST}`);
+        },
+    })
+
+await question(`Delete '${FILES_TO_MODIFIED.DIST_VANILLA}'?`,
+    {
+        no: () => {
+            console.log("Not overwritting " + FILES_TO_MODIFIED.DIST_VANILLA);
+        },
+        yes: async () => {
+            await runCommand(`rm -rf ${FILES_TO_MODIFIED.DIST_VANILLA}`);
+        },
+    })
+
+    greenLog('Re-generating your HTML & NodeJS apps');
+    await runCommand(`yarn tool:genNodejs`);
+    await runCommand(`yarn tool:genHtml`);
 
 exit();

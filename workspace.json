@@ -12,13 +12,12 @@
     "ecdsa-sdk": "packages/ecdsa-sdk",
     "encryption": "packages/encryption",
     "example-nextjs-js": "apps/example-nextjs-js",
-    "foo": "packages/foo",
     "html": "apps/html",
+    "lit-node-client": "packages/lit-node-client",
     "misc": "packages/misc",
     "misc-browser": "packages/misc-browser",
     "nodejs": "apps/nodejs",
     "react": "apps/react",
-    "shared-utils": "packages/shared-utils",
     "uint8arrays": "packages/uint8arrays"
   }
 }

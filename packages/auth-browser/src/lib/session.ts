@@ -15,7 +15,7 @@ import {
   uint8arrayToString,
 } from '@litprotocol-dev/uint8arrays';
 
-import { getStorageItem } from '@litprotocol-dev/misc';
+import { getStorageItem } from '@litprotocol-dev/misc-browser';
 import { generateSessionKeyPair } from '@litprotocol-dev/crypto';
 import { checkAndSignAuthMessage } from './auth-browser';
 /** ========== Local Helpers ========== */
