@@ -1,6 +1,6 @@
 {
   "name": "@litprotocol-dev/misc",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "type": "commonjs",
   "dependencies": {
     "ethers": "^5.7.1"
@@ -9,5 +9,5 @@
     "access": "public",
     "directory": "../../dist/packages/misc"
   },
-  "gitHead": "61f09ef405c90ebc6801c7db564c30346b73b7ea"
+  "gitHead": "364d838bfe35544045dc88b1897dece080f2528e"
 }
