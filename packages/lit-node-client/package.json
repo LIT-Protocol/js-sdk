@@ -1,9 +1,10 @@
 {
   "name": "@litprotocol-dev/lit-node-client",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/lit-node-client"
-  }
+  },
+  "gitHead": "61f09ef405c90ebc6801c7db564c30346b73b7ea"
 }
