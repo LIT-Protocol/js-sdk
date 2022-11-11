@@ -9,15 +9,15 @@ import {
 } from '@litprotocol-dev/constants';
 import { SiweMessage } from 'lit-siwe';
 import nacl from 'tweetnacl';
-// import { uint8arrayFromString, uint8arrayToString } from '../browser';
+
 import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@litprotocol-dev/uint8arrays';
 
-import { generateSessionKeyPair } from '../crypto';
-import { getStorageItem } from '../utils';
-import { checkAndSignAuthMessage } from './lit';
+import { getStorageItem } from '@litprotocol-dev/misc';
+import { generateSessionKeyPair } from '@litprotocol-dev/crypto';
+import { checkAndSignAuthMessage } from './auth-browser';
 /** ========== Local Helpers ========== */
 
 /**

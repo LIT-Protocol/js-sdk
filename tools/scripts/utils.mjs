@@ -3,6 +3,9 @@ import path from 'path';
 import { exec } from 'child_process';
 import { exit } from 'process';
 import readline from 'readline';
+import { join } from 'path';
+// import { promises as fs } from 'fs';
+
 const rl = readline.createInterface(process.stdin, process.stdout);
 
 // read the file and return as json
@@ -57,8 +60,12 @@ export const redLog = (msg) => {
     console.log('\x1b[31m%s\x1b[0m', `- ${msg}`);
 }
 
-export const greenLog = (msg) => {
-    console.log('\x1b[32m%s\x1b[0m', `- ${msg}`);
+export const greenLog = (msg, noDash = false) => {
+    if (noDash) {
+        console.log('\x1b[32m%s\x1b[0m', msg);
+    } else {
+        console.log('\x1b[32m%s\x1b[0m', `- ${msg}`);
+    }
 }
 
 export const question = (str, {
@@ -95,3 +102,67 @@ export const getFiles = (path) => new Promise((resolve, reject) => {
 export const wait = (ms) => new Promise((resolve) => {
     setTimeout(resolve, ms);
 });
+
+// recursively list all directories in a directory and return paths relative to root
+export const listDirsRelative = async (dir) => {
+    const root = join(dir, '..', '..');
+    const files = await fs.promises.readdir(dir, { withFileTypes: true });
+    const dirs = [];
+    for (const file of files) {
+        if (file.isDirectory()) {
+            const path = join(dir, file.name);
+            dirs.push(path);
+            dirs.push(...(await listDirsRelative(path)));
+        }
+    }
+    return dirs;
+}
+
+export const findImportsFromDir = async (dir) => {
+
+    return new Promise(async (resolve, reject) => {
+        const root = join(dir, '..', '..');
+
+        const files = await fs.promises.readdir(root, { withFileTypes: true });
+
+        const size = files.length;
+        // console.log("size:", size)
+
+        const packages = new Set();
+
+        for (const file of files) {
+
+            // get index
+            const index = files.indexOf(file);
+
+            if (file.isDirectory()) {
+                const pkg = file.name;
+                const pkgRoot = join(root, pkg);
+                const pkgFiles = await fs.promises.readdir(pkgRoot, { withFileTypes: true });
+                for (const pkgFile of pkgFiles) {
+
+                    // if file name ends with .js, .ts, .mjs, .cjs
+                    if (pkgFile.isFile() && (pkgFile.name.match(/\.([cm]?js|ts)$/))) {
+
+                        const contents = await fs.promises.readFile(join(pkgRoot, pkgFile.name), 'utf-8');
+
+                        // use regex to find all from 'package-name'
+                        const regex = /from\s+['"]([^'"]+)['"]/g;
+                        let match;
+                        while ((match = regex.exec(contents)) !== null) {
+                            const pkg = match[1];
+                            packages.add(pkg);
+                        }
+
+                    }
+                }
+            }
+
+            if (index === size - 1) {
+                resolve(packages);
+            }
+        }
+
+        return packages;
+    })
+}

@@ -22,6 +22,7 @@
     "tool:genHtml": "yarn node ./tools/scripts/gen-html.mjs",
     "tool:genNodejs": "yarn node tools/scripts/gen-nodejs.mjs",
     "tool:genLib": "yarn node tools/scripts/gen-lib.mjs",
+    "tool:findImported": "yarn node tools/scripts/find-imported-packages.mjs",
     "graph": "nx graph"
   },
   "private": true,
