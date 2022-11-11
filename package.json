@@ -13,7 +13,7 @@
     "test:packages": "nx run-many --target=testPackage",
     "test:watch": "nx run-many --target=testPackage --watch",
     "publish:packages": "npx lerna publish --yes",
-    "publish:vanilla": "yarn tools/scripts/pub.mjs --filter vanilla --dry-run",
+    "publish:vanilla": "yarn node ./tools/scripts/pub.mjs --filter vanilla",
     "gitAdd": "git add *",
     "gitCommit": "git commit -m 'test: publish'",
     "gitPush": "git push",
