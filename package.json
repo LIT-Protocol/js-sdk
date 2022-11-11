@@ -12,8 +12,8 @@
     "build:target": "yarn node tools/scripts/build.mjs",
     "test:packages": "nx run-many --target=testPackage",
     "test:watch": "nx run-many --target=testPackage --watch",
-    "publish:packages": "npx lerna publish --yes && yarn publish:vanilla",
-    "publish:vanilla": "concurrently 'cd dist/packages/constants-vanilla && npm publish' 'cd dist/packages/utils-vanilla && npm publish' 'cd dist/packages/core-browser-vanilla && npm publish'",
+    "publish:packages": "npx lerna publish --yes",
+    "publish:vanilla": "yarn tools/scripts/pub.mjs --filter vanilla --dry-run",
     "gitAdd": "git add *",
     "gitCommit": "git commit -m 'test: publish'",
     "gitPush": "git push",
@@ -23,7 +23,8 @@
     "tool:genNodejs": "yarn node tools/scripts/gen-nodejs.mjs",
     "tool:genLib": "yarn node tools/scripts/gen-lib.mjs",
     "tool:findImported": "yarn node tools/scripts/find-imported-packages.mjs",
-    "graph": "nx graph"
+    "graph": "nx graph",
+    "npm:login": "npm login"
   },
   "private": true,
   "dependencies": {

@@ -104,7 +104,7 @@ export const wait = (ms) => new Promise((resolve) => {
 });
 
 // recursively list all directories in a directory and return paths relative to root
-export const listDirsRelative = async (dir) => {
+export const listDirsRelative = async (dir, recursive = true) => {
     const root = join(dir, '..', '..');
     const files = await fs.promises.readdir(dir, { withFileTypes: true });
     const dirs = [];
@@ -112,7 +112,11 @@ export const listDirsRelative = async (dir) => {
         if (file.isDirectory()) {
             const path = join(dir, file.name);
             dirs.push(path);
-            dirs.push(...(await listDirsRelative(path)));
+
+            if( recursive ){
+                dirs.push(...(await listDirsRelative(path)));
+            }
+
         }
     }
     return dirs;
