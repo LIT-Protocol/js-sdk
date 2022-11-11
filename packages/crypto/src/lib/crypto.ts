@@ -1,9 +1,7 @@
-declare global {
-  var wasmExports: any;
-  var wasmECDSA: any;
-}
+// @ts-nocheck
 
 import { wasmBlsSdkHelpers, initWasmBlsSdk } from '@litprotocol-dev/bls-sdk';
+
 import {
   SessionKeyPair,
   SigShare,

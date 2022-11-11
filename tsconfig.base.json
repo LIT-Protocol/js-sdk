@@ -38,9 +38,6 @@
       "@litprotocol-dev/constants-dist-vanilla": [
         "dist/packages/constants-vanilla/constants.js"
       ],
-      "@litprotocol-dev/core-browser": [
-        "packages/core-browser/src/index.ts"
-      ],
       "@litprotocol-dev/crypto": [
         "packages/crypto/src/index.ts"
       ],
