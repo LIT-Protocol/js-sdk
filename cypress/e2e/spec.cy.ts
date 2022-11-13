@@ -45,15 +45,8 @@ describe('User can load passge', () => {
 
   it('click', () => {
     cy.get('#metamask').click().then(() => {
-      cy.acceptMetamaskAccess().should("be.true").then(() => {
-        
-      });
+      cy.acceptMetamaskAccess().should("be.true").then();
     });
-  })
-  it('click', () => {
-    cy.confirmMetamaskSignatureRequest().then(() => {
-      // expect(localStorage.getItem('lit-web3-provider')).to.eq('metamask');
-    });  
   })
 
   // it('is expected to display the local wallet address', () => {

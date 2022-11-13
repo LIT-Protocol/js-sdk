@@ -29,6 +29,9 @@ const build = async (name) => {
         
         greenLog("...generating apps/html/index.html");
         await runCommand('yarn tool:genHtml')
+
+        greenLog("...generating apps/react/src/app/app.tsx");
+        await runCommand('yarn tool:genReact')
         
         greenLog("...generating apps/nodejs/main.ts");
         await runCommand('yarn tool:genNodejs')

@@ -123,5 +123,6 @@ await question(`Delete '${FILES_TO_MODIFIED.DIST_VANILLA}'?`,
     greenLog('Re-generating your HTML & NodeJS apps');
     await runCommand(`yarn tool:genNodejs`);
     await runCommand(`yarn tool:genHtml`);
+    await runCommand(`yarn tool:genReact`);
 
 exit();

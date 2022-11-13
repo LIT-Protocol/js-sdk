@@ -18,6 +18,7 @@
     "tool:delete": "yarn node ./tools/scripts/delete.mjs",
     "tool:createTest": "yarn node ./tools/scripts/create-case.mjs",
     "tool:genHtml": "yarn node ./tools/scripts/gen-html.mjs",
+    "tool:genReact": "yarn node ./tools/scripts/gen-react.mjs",
     "tool:genNodejs": "yarn node tools/scripts/gen-nodejs.mjs",
     "tool:genLib": "yarn node tools/scripts/gen-lib.mjs",
     "tool:findImported": "yarn node tools/scripts/find-imported-packages.mjs",
