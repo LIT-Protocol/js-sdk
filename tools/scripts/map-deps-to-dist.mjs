@@ -41,9 +41,11 @@ await asyncForEach(packagesDir, async(packageDir) => {
 
         const packageJson = await readJsonFile(packageJsonPath);
         
-        await asyncForEach((dependencies), async (dep) => {
-            packageJson.dependencies[dep] = '*';
-        })
+        // await asyncForEach((dependencies), async (dep) => {
+        //     packageJson.dependencies[dep] = packageJson.version;
+        // })
+
+        packageJson.dependencies = packageJson.peerDependencies;
         
         await writeJsonFile(packageJsonPath, packageJson);
 

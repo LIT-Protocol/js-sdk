@@ -3,7 +3,6 @@ global.TextEncoder = TextEncoder;
 // @ts-ignore
 global.TextDecoder = TextDecoder;
 
-// import { isBrowser, isNode } from '@litprotocol-dev/shared-utils';
 import * as ethModule from './eth';
 import {
   getChainId,
@@ -15,7 +14,6 @@ import {
   signMessageAsync,
   // decimalPlaces,
 } from './eth';
-// import { ethers } from 'ethers';
 
 describe('eth.ts', () => {
   it('should convert chain hex to chane name', async () => {

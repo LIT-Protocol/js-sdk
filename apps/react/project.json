@@ -22,26 +22,7 @@
         "webpackConfig": "@nrwl/react/plugins/webpack"
       },
       "configurations": {
-        "development": {
-          "extractLicenses": false,
-          "optimization": false,
-          "sourceMap": true,
-          "vendorChunk": true
-        },
-        "production": {
-          "fileReplacements": [
-            {
-              "replace": "apps/react/src/environments/environment.ts",
-              "with": "apps/react/src/environments/environment.prod.ts"
-            }
-          ],
-          "optimization": true,
-          "outputHashing": "all",
-          "sourceMap": false,
-          "namedChunks": false,
-          "extractLicenses": true,
-          "vendorChunk": false
-        }
+
       }
     },
     "serve": {
@@ -49,16 +30,11 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "react:build",
-        "hmr": true
+        "hmr": true,
+        "port": 4003,
+        "open": true
       },
       "configurations": {
-        "development": {
-          "buildTarget": "react:build:development"
-        },
-        "production": {
-          "buildTarget": "react:build:production",
-          "hmr": false
-        }
       }
     }
   },
