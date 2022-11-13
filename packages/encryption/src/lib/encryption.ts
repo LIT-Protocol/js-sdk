@@ -201,7 +201,6 @@ export const zipAndEncryptString = async (
 export const zipAndEncryptFiles = async (
   files: Array<File>
 ): Promise<EncryptedZip | undefined> => {
-  
   // let's zip em
   const zip = new JSZip();
 

@@ -56,8 +56,12 @@ export const getArgs = () => {
     return args;
 }
 
-export const redLog = (msg) => {
-    console.log('\x1b[31m%s\x1b[0m', `- ${msg}`);
+export const redLog = (msg, noDash = false) => {
+    if (noDash) {
+        console.log('\x1b[31m%s\x1b[0m', msg);
+    } else {
+        console.log('\x1b[31m%s\x1b[0m', `- ${msg}`);
+    }
 }
 
 export const greenLog = (msg, noDash = false) => {
@@ -113,7 +117,7 @@ export const listDirsRelative = async (dir, recursive = true) => {
             const path = join(dir, file.name);
             dirs.push(path);
 
-            if( recursive ){
+            if (recursive) {
                 dirs.push(...(await listDirsRelative(path)));
             }
 
@@ -124,49 +128,33 @@ export const listDirsRelative = async (dir, recursive = true) => {
 
 export const findImportsFromDir = async (dir) => {
 
-    return new Promise(async (resolve, reject) => {
-        const root = join(dir, '..', '..');
+    const files = await fs.promises.readdir(dir, { withFileTypes: true });
 
-        const files = await fs.promises.readdir(root, { withFileTypes: true });
+    const packages = [];
 
-        const size = files.length;
-        // console.log("size:", size)
+    await asyncForEach(files, async (file) => {
 
-        const packages = new Set();
+        if (!file.isDirectory()) {
+            const filePath = join(dir, file.name);
+            // greenLog(`    - Scanning => ${filePath}`, true);
 
-        for (const file of files) {
+            const contents = await fs.promises.readFile(filePath, 'utf-8');
 
-            // get index
-            const index = files.indexOf(file);
-
-            if (file.isDirectory()) {
-                const pkg = file.name;
-                const pkgRoot = join(root, pkg);
-                const pkgFiles = await fs.promises.readdir(pkgRoot, { withFileTypes: true });
-                for (const pkgFile of pkgFiles) {
-
-                    // if file name ends with .js, .ts, .mjs, .cjs
-                    if (pkgFile.isFile() && (pkgFile.name.match(/\.([cm]?js|ts)$/))) {
-
-                        const contents = await fs.promises.readFile(join(pkgRoot, pkgFile.name), 'utf-8');
-
-                        // use regex to find all from 'package-name'
-                        const regex = /from\s+['"]([^'"]+)['"]/g;
-                        let match;
-                        while ((match = regex.exec(contents)) !== null) {
-                            const pkg = match[1];
-                            packages.add(pkg);
-                        }
-
-                    }
-                }
-            }
-
-            if (index === size - 1) {
-                resolve(packages);
+            // use regex to find all from 'package-name'
+            const regex = /from\s+['"]([^'"]+)['"]/g;
+            let match;
+            while ((match = regex.exec(contents)) !== null) {
+                const pkg = match[1];
+                packages.push(pkg);
             }
         }
+    });
 
-        return packages;
-    })
+    return packages;
+}
+
+export const createDirs = (path) => {
+    if (!fs.existsSync(path)) {
+        fs.mkdirSync((path.split('/').slice(0, -1))[0], { recursive: true });
+    }
 }

@@ -39,8 +39,7 @@
         "define": {
           "process.env.NODE_DEBUG": "false",
           "global": "window",
-          "Buffer": "Buffer",
-          "Buffer": "buffer"
+          "Buffer": "Buffer"
         },
         "plugins": [
           {
