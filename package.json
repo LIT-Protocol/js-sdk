@@ -22,7 +22,9 @@
     "tool:genLib": "yarn node tools/scripts/gen-lib.mjs",
     "tool:findImported": "yarn node tools/scripts/find-imported-packages.mjs",
     "graph": "nx graph",
-    "npm:login": "npm login"
+    "npm:login": "npm login",
+    "cy:open": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress open",
+    "cy:open2": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress run --browser chrome --headed --no-exit"
   },
   "private": true,
   "dependencies": {
@@ -84,8 +86,9 @@
     "@typescript-eslint/eslint-plugin": "^5.29.0",
     "@typescript-eslint/parser": "^5.29.0",
     "babel-jest": "27.5.1",
-    "cypress": "^10.2.0",
+    "cypress": "11.0.1",
     "cypress-metamask": "^1.0.5-development",
+    "cypress-metamask-v2": "^1.7.2",
     "esbuild": ">0.11.0",
     "esbuild-node-builtins": "^0.1.0",
     "eslint": "~8.15.0",

@@ -5395,7 +5395,7 @@
   dependencies:
     defer-to-connect "^2.0.1"
 
-"@testing-library/cypress@^8.0.3":
+"@testing-library/cypress@^8.0.2", "@testing-library/cypress@^8.0.3":
   version "8.0.3"
   resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-8.0.3.tgz#24ab34df34d7896866603ade705afbdd186e273c"
   integrity sha512-nY2YaSbmuPo5k6kL0iLj/pGPPfka3iwb3kpTx8QN/vOCns92Saz9wfACqB8FJzcR7+lfA4d5HUOWqmTddBzczg==
@@ -8697,7 +8697,7 @@ byte-size@^7.0.0:
   resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-7.0.1.tgz#b1daf3386de7ab9d706b941a748dbfc71130dee3"
   integrity sha512-crQdqyCwhokxwV1UyDzLZanhkugAgft7vt0qbbdt60C6Zf3CAiGmtUCylbtYwrU6loOUw3euGrNtW1J651ot1A==
 
-bytes32@^0.0.3:
+bytes32@0.0.3, bytes32@^0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/bytes32/-/bytes32-0.0.3.tgz#85d90c220a74cce02fa6f7062dc1a2b5de3b3f78"
   integrity sha512-uQM5zGcelcBEk0R7vkIRVN7GnrDd2S5EeWrxv7dSFLPVoI5FwYiSYOOLaFwnsav0oSr3hZQ6mFq6QNi8Vt6n8w==
@@ -10227,6 +10227,29 @@ csstype@^3.0.2:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.1.tgz#841b532c45c758ee546a11d5bd7b7b473c8c30b9"
   integrity sha512-DJR/VvkAvSZW9bTouZue2sSxDwdTN92uHjqeKVm+0dAqdfNykRzQ95tay8aXMBAAPpUiq4Qcug2L7neoRh2Egw==
 
+cypress-metamask-v2@^1.7.2:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/cypress-metamask-v2/-/cypress-metamask-v2-1.7.2.tgz#2b49b7c2fad9ed5a8a5c847547ba38578773c2fa"
+  integrity sha512-gZAbeFLVsHVPcGfjvMOJyCi0ueXKjWwlRDIrP9SIOh6L4uwcxny7kTxeQtbKMH54uwb2/CwOUyw1gDmnjwvUIw==
+  dependencies:
+    "@playwright/test" "^1.27.1"
+    "@synthetixio/js" "^2.41.0"
+    "@testing-library/cypress" "^8.0.2"
+    axios "^1.1.2"
+    bytes32 "0.0.3"
+    cypress "^10.10.0"
+    cypress-wait-until "^1.7.2"
+    debug "^4.3.4"
+    dotenv "^16.0.3"
+    dotenv-parse-variables "^2.0.0"
+    download "^8.0.0"
+    eslint-plugin-cypress "^2.12.1"
+    ethers "^5.1.4"
+    node-fetch "^2.6.1"
+    serve "^14.0.1"
+    start-server-and-test "^1.14.0"
+    synthetix-js "^2.74.1"
+
 cypress-metamask@^1.0.5-development:
   version "1.0.5-development"
   resolved "https://registry.yarnpkg.com/cypress-metamask/-/cypress-metamask-1.0.5-development.tgz#509268830cb4e3c3e8a176117bc68e8c9fc53196"
@@ -10258,7 +10281,7 @@ cypress-watch-and-reload@^1.10.3:
     chokidar "3.5.3"
     ws "8.11.0"
 
-cypress@*:
+cypress@*, cypress@11.0.1:
   version "11.0.1"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-11.0.1.tgz#5332a1825b37ab3f4f81d74389930c55cc7cf31d"
   integrity sha512-NuEfd0Vim492RJ3m/+bbTZ3OZrqXgfAfuLaZfIQ9D5lKocS3EDr2tyAarZdAhKwLyoh7OJ33jwMeMFIDbzYqog==
@@ -10306,7 +10329,7 @@ cypress@*:
     untildify "^4.0.0"
     yauzl "^2.10.0"
 
-cypress@^10.10.0, cypress@^10.2.0:
+cypress@^10.10.0:
   version "10.11.0"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-10.11.0.tgz#e9fbdd7638bae3d8fb7619fd75a6330d11ebb4e8"
   integrity sha512-lsaE7dprw5DoXM00skni6W5ElVVLGAdRUUdZjX2dYsGjbY/QnpzWZ95Zom1mkGg0hAaO/QVTZoFVS7Jgr/GUPA==
