@@ -25,7 +25,7 @@ const build = async (name) => {
     if ( ! skipGen ){
         
         greenLog("...mapping dist package name to package.json name");
-        await runCommand('yarn build:mapDistFolderNameToPackageJson')
+        await runCommand('yarn postBuild:mapDistFolderNameToPackageJson')
         
         greenLog("...generating apps/html/index.html");
         await runCommand('yarn tool:genHtml')
