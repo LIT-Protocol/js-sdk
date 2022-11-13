@@ -51,7 +51,7 @@ export function App() {
             var entries = Object.entries(LitJsSdk_accessControlConditions);
             var lis = entries.map(([key, value]) => `
             <li>
-                <span id="LitJsSdk_accessControlConditions" class="key" onClick="(async () => {
+                <span id="LitJsSdk_accessControlConditions_${key}" class="key" onClick="(async () => {
                     var fn = LitJsSdk_accessControlConditions['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
@@ -113,7 +113,7 @@ export function App() {
             var entries = Object.entries(LitJsSdk_authBrowser);
             var lis = entries.map(([key, value]) => `
             <li>
-                <span id="LitJsSdk_authBrowser" class="key" onClick="(async () => {
+                <span id="LitJsSdk_authBrowser_${key}" class="key" onClick="(async () => {
                     var fn = LitJsSdk_authBrowser['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
@@ -175,7 +175,7 @@ export function App() {
             var entries = Object.entries(LitJsSdk_blsSdk);
             var lis = entries.map(([key, value]) => `
             <li>
-                <span id="LitJsSdk_blsSdk" class="key" onClick="(async () => {
+                <span id="LitJsSdk_blsSdk_${key}" class="key" onClick="(async () => {
                     var fn = LitJsSdk_blsSdk['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
@@ -237,7 +237,7 @@ export function App() {
             var entries = Object.entries(LitJsSdk_constants);
             var lis = entries.map(([key, value]) => `
             <li>
-                <span id="LitJsSdk_constants" class="key" onClick="(async () => {
+                <span id="LitJsSdk_constants_${key}" class="key" onClick="(async () => {
                     var fn = LitJsSdk_constants['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
@@ -299,7 +299,7 @@ export function App() {
             var entries = Object.entries(LitJsSdk_crypto);
             var lis = entries.map(([key, value]) => `
             <li>
-                <span id="LitJsSdk_crypto" class="key" onClick="(async () => {
+                <span id="LitJsSdk_crypto_${key}" class="key" onClick="(async () => {
                     var fn = LitJsSdk_crypto['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
@@ -361,7 +361,7 @@ export function App() {
             var entries = Object.entries(LitJsSdk_ecdsaSdk);
             var lis = entries.map(([key, value]) => `
             <li>
-                <span id="LitJsSdk_ecdsaSdk" class="key" onClick="(async () => {
+                <span id="LitJsSdk_ecdsaSdk_${key}" class="key" onClick="(async () => {
                     var fn = LitJsSdk_ecdsaSdk['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
@@ -423,7 +423,7 @@ export function App() {
             var entries = Object.entries(LitJsSdk_encryption);
             var lis = entries.map(([key, value]) => `
             <li>
-                <span id="LitJsSdk_encryption" class="key" onClick="(async () => {
+                <span id="LitJsSdk_encryption_${key}" class="key" onClick="(async () => {
                     var fn = LitJsSdk_encryption['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
@@ -485,7 +485,7 @@ export function App() {
             var entries = Object.entries(LitJsSdk_litNodeClient);
             var lis = entries.map(([key, value]) => `
             <li>
-                <span id="LitJsSdk_litNodeClient" class="key" onClick="(async () => {
+                <span id="LitJsSdk_litNodeClient_${key}" class="key" onClick="(async () => {
                     var fn = LitJsSdk_litNodeClient['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
@@ -547,7 +547,7 @@ export function App() {
             var entries = Object.entries(LitJsSdk_misc);
             var lis = entries.map(([key, value]) => `
             <li>
-                <span id="LitJsSdk_misc" class="key" onClick="(async () => {
+                <span id="LitJsSdk_misc_${key}" class="key" onClick="(async () => {
                     var fn = LitJsSdk_misc['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
@@ -609,7 +609,7 @@ export function App() {
             var entries = Object.entries(LitJsSdk_miscBrowser);
             var lis = entries.map(([key, value]) => `
             <li>
-                <span id="LitJsSdk_miscBrowser" class="key" onClick="(async () => {
+                <span id="LitJsSdk_miscBrowser_${key}" class="key" onClick="(async () => {
                     var fn = LitJsSdk_miscBrowser['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
@@ -671,7 +671,7 @@ export function App() {
             var entries = Object.entries(LitJsSdk_uint8arrays);
             var lis = entries.map(([key, value]) => `
             <li>
-                <span id="LitJsSdk_uint8arrays" class="key" onClick="(async () => {
+                <span id="LitJsSdk_uint8arrays_${key}" class="key" onClick="(async () => {
                     var fn = LitJsSdk_uint8arrays['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');

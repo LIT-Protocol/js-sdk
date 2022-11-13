@@ -100,7 +100,7 @@ export const getConsoleTemplate = (name, i, globalVarPrefix, isReact=false) => {
             var entries = Object.entries(${name});
             var lis = entries.map(([key, value]) => \`
             <li>
-                <span id="${name}" class="key" onClick="(async () => {
+                <span id="${name}_\${key}" class="key" onClick="(async () => {
                     var fn = ${name}['\${key}'];
                     var fnType = typeof fn;
                     console.warn('[\${key}] is type of [' + fnType + ']');
