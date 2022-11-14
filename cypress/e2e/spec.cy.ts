@@ -26,21 +26,21 @@ describe('User can load passge', () => {
   //   });
   // });
 
-  it('is expected to display a sussess message', async () => {
+  it('should check and sign auth message', async () => {
+    // scroll to div
 
     cy.window().then(async (window) => {
 
-      // -- set param
-      window.params = { chain: 'ethereum' };
-
-      cy.get('#LitJsSdk_authBrowser_checkAndSignAuthMessage')
-        .click().then(() => {
-          cy.get('#metamask').click().then(() => {
-            cy.confirmMetamaskSignatureRequest().then(() => {
-              console.log("Done!");
+        // -- set param
+        window.params = { chain: 'ethereum' };
+        cy.get('#LitJsSdk_authBrowser_checkAndSignAuthMessage')
+          .click().then((e) => {
+            cy.get('#metamask').click().then(() => {
+              cy.confirmMetamaskSignatureRequest().then(() => {
+                console.log("Done!");
+              })
             })
-          })
-        });
+          });
     });
   });
 

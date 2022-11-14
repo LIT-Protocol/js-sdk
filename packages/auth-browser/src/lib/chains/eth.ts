@@ -7,9 +7,7 @@ import {
     JsonAuthSig,
     LIT_CHAINS,
     LIT_ERROR,
-    LOCAL_STORAGE_KEYS,
-    ABI_ERC20,
-    Chain,
+    LOCAL_STORAGE_KEYS
 } from '@litprotocol-dev/constants';
 import { ethers } from 'ethers';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
@@ -17,7 +15,6 @@ import { toUtf8Bytes } from '@ethersproject/strings';
 import { hexlify } from '@ethersproject/bytes';
 import { verifyMessage } from '@ethersproject/wallet';
 import LitConnectModal from 'lit-connect-modal';
-// import { Contract } from '@ethersproject/contracts';
 
 import {
     Web3Provider,
@@ -632,7 +629,8 @@ export const signAndSaveAuthMessage = async ({
             JSON.stringify(authSig)
         );
     }
-    const commsKeyPair = nacl.box.keyPair();
+    console.warn("nacl:", nacl);
+    const commsKeyPair = nacl?.box?.keyPair();
 
     if ( isBrowser() ){
         localStorage.setItem(

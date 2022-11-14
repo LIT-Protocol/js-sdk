@@ -1,10 +1,13 @@
 {
   "name": "@litprotocol-dev/bls-sdk",
-  "version": "0.1.28",
+  "version": "0.1.29",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/bls-sdk"
   },
-  "gitHead": "364d838bfe35544045dc88b1897dece080f2528e"
+  "gitHead": "364d838bfe35544045dc88b1897dece080f2528e",
+  "peerDependencies": {
+    "pako": "^2.1.0"
+  }
 }
