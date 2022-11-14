@@ -1,12 +1,12 @@
 {
   "name": "@litprotocol-dev/auth-browser",
-  "version": "0.1.60",
+  "version": "0.1.61",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/auth-browser"
   },
-  "gitHead": "364d838bfe35544045dc88b1897dece080f2528e",
+  "gitHead": "2d61c9755df43da7b0dc6fcae36f9bb121ad322f",
   "peerDependencies": {
     "@walletconnect/ethereum-provider": "^2.1.2",
     "lit-siwe": "^1.1.8",

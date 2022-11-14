@@ -1,10 +1,10 @@
 {
   "name": "@litprotocol-dev/access-control-conditions",
-  "version": "0.1.60",
+  "version": "0.1.61",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/access-control-conditions"
   },
-  "gitHead": "364d838bfe35544045dc88b1897dece080f2528e"
+  "gitHead": "2d61c9755df43da7b0dc6fcae36f9bb121ad322f"
 }
