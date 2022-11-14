@@ -1,6 +1,6 @@
 {
   "name": "@litprotocol-dev/crypto",
-  "version": "0.1.35",
+  "version": "0.1.36",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
