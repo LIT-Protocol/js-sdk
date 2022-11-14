@@ -16,14 +16,14 @@ let savedParams: any = {
         value: '0',
       },
     },
-  ]
+  ],
 };
 let LitJsSdk: any;
 
 describe('Encrypt and Decrypt String', () => {
   // -- before
   before(() => {
-    cy.visit('http://localhost:/' + process.env.PORT, {
+    cy.visit('/', {
       onBeforeLoad(win) {
         win.disableIntercom = true;
       },
@@ -64,7 +64,6 @@ describe('Encrypt and Decrypt String', () => {
   });
 
   it('connect lit node client', async () => {
-
     LitJsSdk = window.LitJsSdk_litNodeClient;
 
     const client = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' });
@@ -112,7 +111,6 @@ describe('Encrypt and Decrypt String', () => {
   });
 
   it('gets toDecrypt by turning encryptedSymmetricKey(uint8array) to string', async () => {
-
     savedParams.toDecrypt = await LitJsSdk.uint8arrayToString(
       savedParams.encryptedSymmetricKey,
       'base16'
@@ -137,15 +135,73 @@ describe('Encrypt and Decrypt String', () => {
     const blob = await LitJsSdk.base64StringToBlob(savedParams.encryptedString);
     savedParams.encryptedStringBlob = blob;
     expect(savedParams.encryptedStringBlob).to.be.a('Blob');
-  })
+  });
 
   it('decrypts string', async () => {
     const decryptedString = await LitJsSdk.decryptString(
       savedParams.encryptedStringBlob,
-      savedParams.encryptionKey,
+      savedParams.encryptionKey
     );
     expect(decryptedString).to.eq('This test is working! Omg!');
   });
+});
 
+describe('Zip and encrypt string then decrypt zip', () => {
+  it('zips string', async () => {
+    const zip = await LitJsSdk.zipAndEncryptString(
+      'This test is working! Omg!'
+    );
+    savedParams.zip = zip;
+    expect(savedParams.zip.symmetricKey).to.be.a('Uint8Array');
+    expect(savedParams.zip.encryptedZip).to.be.a('Blob');
+  });
 
+  it('saves encryption key', async () => {
+    const encryptedSymmetricKey =
+      await savedParams.litNodeClient.saveEncryptionKey({
+        accessControlConditions: savedParams.accs,
+        symmetricKey: savedParams.zip.symmetricKey,
+        authSig: savedParams.authSig,
+        chain: 'ethereum',
+      });
+
+    savedParams.encryptedSymmetricKey = encryptedSymmetricKey;
+
+    expect(savedParams.encryptedSymmetricKey).to.be.an('Uint8Array');
+  });
+
+  it('gets encryption key', async () => {
+    const toDecrypt = await LitJsSdk.uint8arrayToString(
+      savedParams.encryptedSymmetricKey,
+      'base16'
+    );
+
+    const encryptionKey = await savedParams.litNodeClient.getEncryptionKey({
+      accessControlConditions: savedParams.accs,
+      toDecrypt,
+      authSig: savedParams.authSig,
+      chain: 'ethereum',
+    });
+
+    savedParams.encryptionKey = encryptionKey;
+
+    expect(savedParams.encryptionKey).to.be.a('Uint8Array');
+  });
+
+  it('decrypt zip', async () => {
+    const decryptedZip = await LitJsSdk.decryptZip(
+      savedParams.zip.encryptedZip,
+      savedParams.encryptionKey
+    );
+
+    savedParams.decryptZip = decryptedZip;
+    expect(savedParams.decryptZip).to.be.an('Object');
+  });
+
+  it('gets the decrypted zip content', async () => {
+    const decryptedString = await savedParams.decryptZip["string.txt"].async(
+      "text"
+    );
+    expect(decryptedString).to.eq('This test is working! Omg!');
+  });
 });

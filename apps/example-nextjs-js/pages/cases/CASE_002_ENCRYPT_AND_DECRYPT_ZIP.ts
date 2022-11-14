@@ -1,5 +1,5 @@
 import { AccessControlConditions } from '@litprotocol-dev/constants';
-import * as LitJsSdk from '@litprotocol-dev/core-browser';
+import * as LitJsSdk from '@litprotocol-dev/lit-node-client';
 import { ACTION } from '../enum';
 
 export const CASE_002_ENCRYPT_AND_DECRYPT_ZIP = [
