@@ -46,21 +46,30 @@ export function App() {
             window.LitJsSdk_accessControlConditions = LitJsSdk_accessControlConditions;
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(LitJsSdk_accessControlConditions);
             var lis = entries.map(([key, value]) => `
             <li>
-                <div id="LitJsSdk_accessControlConditions_${key}" class="key" onClick="(async () => {
+                <div id="LitJsSdk_accessControlConditions_${key}" class="key" onClick="(async (e) => {
                     var fn = LitJsSdk_accessControlConditions['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -73,6 +82,7 @@ export function App() {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
@@ -108,21 +118,30 @@ export function App() {
             window.LitJsSdk_authBrowser = LitJsSdk_authBrowser;
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(LitJsSdk_authBrowser);
             var lis = entries.map(([key, value]) => `
             <li>
-                <div id="LitJsSdk_authBrowser_${key}" class="key" onClick="(async () => {
+                <div id="LitJsSdk_authBrowser_${key}" class="key" onClick="(async (e) => {
                     var fn = LitJsSdk_authBrowser['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -135,6 +154,7 @@ export function App() {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
@@ -170,21 +190,30 @@ export function App() {
             window.LitJsSdk_blsSdk = LitJsSdk_blsSdk;
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(LitJsSdk_blsSdk);
             var lis = entries.map(([key, value]) => `
             <li>
-                <div id="LitJsSdk_blsSdk_${key}" class="key" onClick="(async () => {
+                <div id="LitJsSdk_blsSdk_${key}" class="key" onClick="(async (e) => {
                     var fn = LitJsSdk_blsSdk['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -197,6 +226,7 @@ export function App() {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
@@ -232,21 +262,30 @@ export function App() {
             window.LitJsSdk_constants = LitJsSdk_constants;
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(LitJsSdk_constants);
             var lis = entries.map(([key, value]) => `
             <li>
-                <div id="LitJsSdk_constants_${key}" class="key" onClick="(async () => {
+                <div id="LitJsSdk_constants_${key}" class="key" onClick="(async (e) => {
                     var fn = LitJsSdk_constants['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -259,6 +298,7 @@ export function App() {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
@@ -294,21 +334,30 @@ export function App() {
             window.LitJsSdk_crypto = LitJsSdk_crypto;
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(LitJsSdk_crypto);
             var lis = entries.map(([key, value]) => `
             <li>
-                <div id="LitJsSdk_crypto_${key}" class="key" onClick="(async () => {
+                <div id="LitJsSdk_crypto_${key}" class="key" onClick="(async (e) => {
                     var fn = LitJsSdk_crypto['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -321,6 +370,7 @@ export function App() {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
@@ -356,21 +406,30 @@ export function App() {
             window.LitJsSdk_ecdsaSdk = LitJsSdk_ecdsaSdk;
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(LitJsSdk_ecdsaSdk);
             var lis = entries.map(([key, value]) => `
             <li>
-                <div id="LitJsSdk_ecdsaSdk_${key}" class="key" onClick="(async () => {
+                <div id="LitJsSdk_ecdsaSdk_${key}" class="key" onClick="(async (e) => {
                     var fn = LitJsSdk_ecdsaSdk['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -383,6 +442,7 @@ export function App() {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
@@ -418,21 +478,30 @@ export function App() {
             window.LitJsSdk_encryption = LitJsSdk_encryption;
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(LitJsSdk_encryption);
             var lis = entries.map(([key, value]) => `
             <li>
-                <div id="LitJsSdk_encryption_${key}" class="key" onClick="(async () => {
+                <div id="LitJsSdk_encryption_${key}" class="key" onClick="(async (e) => {
                     var fn = LitJsSdk_encryption['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -445,6 +514,7 @@ export function App() {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
@@ -480,21 +550,30 @@ export function App() {
             window.LitJsSdk_litNodeClient = LitJsSdk_litNodeClient;
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(LitJsSdk_litNodeClient);
             var lis = entries.map(([key, value]) => `
             <li>
-                <div id="LitJsSdk_litNodeClient_${key}" class="key" onClick="(async () => {
+                <div id="LitJsSdk_litNodeClient_${key}" class="key" onClick="(async (e) => {
                     var fn = LitJsSdk_litNodeClient['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -507,6 +586,7 @@ export function App() {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
@@ -542,21 +622,30 @@ export function App() {
             window.LitJsSdk_misc = LitJsSdk_misc;
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(LitJsSdk_misc);
             var lis = entries.map(([key, value]) => `
             <li>
-                <div id="LitJsSdk_misc_${key}" class="key" onClick="(async () => {
+                <div id="LitJsSdk_misc_${key}" class="key" onClick="(async (e) => {
                     var fn = LitJsSdk_misc['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -569,6 +658,7 @@ export function App() {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
@@ -604,21 +694,30 @@ export function App() {
             window.LitJsSdk_miscBrowser = LitJsSdk_miscBrowser;
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(LitJsSdk_miscBrowser);
             var lis = entries.map(([key, value]) => `
             <li>
-                <div id="LitJsSdk_miscBrowser_${key}" class="key" onClick="(async () => {
+                <div id="LitJsSdk_miscBrowser_${key}" class="key" onClick="(async (e) => {
                     var fn = LitJsSdk_miscBrowser['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -631,6 +730,7 @@ export function App() {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
@@ -666,21 +766,30 @@ export function App() {
             window.LitJsSdk_uint8arrays = LitJsSdk_uint8arrays;
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(LitJsSdk_uint8arrays);
             var lis = entries.map(([key, value]) => `
             <li>
-                <div id="LitJsSdk_uint8arrays_${key}" class="key" onClick="(async () => {
+                <div id="LitJsSdk_uint8arrays_${key}" class="key" onClick="(async (e) => {
                     var fn = LitJsSdk_uint8arrays['${key}'];
                     var fnType = typeof fn;
                     console.warn('[${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -693,6 +802,7 @@ export function App() {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
@@ -726,6 +836,10 @@ export function App() {
             e.addEventListener('mouseover', (ele) => {
                 var code = ele.target.nextElementSibling.innerText;
                 document.getElementById('result').innerText = code;
+            });
+
+            e.addEventListener('click', (ele) => {
+                ele.target.classList.add('active')
             });
         });
     };
@@ -778,7 +892,7 @@ ul {
     font-size: 14px;
     overflow: auto;
 }
-.key:hover {
+.key:hover, .active {
     text-decoration: underline;
     color: red;
     cursor: pointer;

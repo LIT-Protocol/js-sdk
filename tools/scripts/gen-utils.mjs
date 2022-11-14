@@ -39,7 +39,7 @@ ul {
     font-size: 14px;
     overflow: auto;
 }
-.key:hover {
+.key:hover, .active {
     text-decoration: underline;
     color: red;
     cursor: pointer;
@@ -61,6 +61,10 @@ export const GEN_FOOTER_SCRIPTS = `
                 var code = ele.target.nextElementSibling.innerText;
                 document.getElementById('result').innerText = code;
             });
+
+            e.addEventListener('click', (ele) => {
+                ele.target.classList.add('active')
+            });
         });
     };
 </script>`;
@@ -81,7 +85,7 @@ export const GEN_FOOTER_SCRIPTS = `
 //     document.getElementById('root').insertAdjacentHTML('beforeend', template);
 // });
  */
-export const getConsoleTemplate = (name, i, globalVarPrefix, isReact=false) => {
+export const getConsoleTemplate = (name, i, globalVarPrefix, isReact = false) => {
 
     const capitalisedName = name.split(globalVarPrefix)[1].toUpperCase();
 
@@ -95,21 +99,30 @@ export const getConsoleTemplate = (name, i, globalVarPrefix, isReact=false) => {
             window.${name} = ${name};
         }
         window.addEventListener('load', function() {
+
             var root = document.getElementById('root');
             var result = document.getElementById('result');
             var entries = Object.entries(${name});
             var lis = entries.map(([key, value]) => \`
             <li>
-                <div id="${name}_\${key}" class="key" onClick="(async () => {
+                <div id="${name}_\${key}" class="key" onClick="(async (e) => {
                     var fn = ${name}['\${key}'];
                     var fnType = typeof fn;
                     console.warn('[\${key}] is type of [' + fnType + ']');
+
                     if ( fnType === 'string' ) return;
 
                     if( fnType === 'function' ){
                         try{
                             console.log('params:', globalThis.params);
-                            var res = await fn(globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
                             res = JSON.stringify(res, null, 2);
                             result.innerText = res;
                             console.log(res);
@@ -122,6 +135,7 @@ export const getConsoleTemplate = (name, i, globalVarPrefix, isReact=false) => {
 
                     if( fnType === 'object' ){
                         var res = await fn;
+                        window.output = res;
                         res = JSON.stringify(res, null, 2);
                         result.innerText = res;
                         console.log(res);
