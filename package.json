@@ -24,7 +24,8 @@
     "tool:findImported": "yarn node tools/scripts/find-imported-packages.mjs",
     "graph": "nx graph",
     "npm:login": "npm login",
-    "cy:open": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress open",
+    "cy:open:html": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4002 cypress open",
+    "cy:open:react": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4003 cypress open",
     "cy:open2": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress run --browser chrome --headed --no-exit"
   },
   "private": true,

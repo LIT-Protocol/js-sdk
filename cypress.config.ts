@@ -22,6 +22,6 @@ export default defineConfig({
 
       return config;
     },
-    baseUrl: 'http://localhost:4002',
+    baseUrl: 'http://localhost:' + (process.env.PORT ?? 3000),
   },
 });

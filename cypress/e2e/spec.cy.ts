@@ -2,12 +2,28 @@
 // let savedData: any;
 // import state from '../fixtures/state.json';
 
-let savedParams: any;
+let window: any;
+let savedParams: any = {
+  accs: [
+    {
+      contractAddress: '',
+      standardContractType: '',
+      chain: 'ethereum',
+      method: 'eth_getBalance',
+      parameters: [':userAddress', 'latest'],
+      returnValueTest: {
+        comparator: '>=',
+        value: '0',
+      },
+    },
+  ]
+};
+let LitJsSdk: any;
 
-describe('User can load passge', () => {
+describe('Encrypt and Decrypt String', () => {
   // -- before
   before(() => {
-    cy.visit('http://localhost:4003/', {
+    cy.visit('http://localhost:/' + process.env.PORT, {
       onBeforeLoad(win) {
         win.disableIntercom = true;
       },
@@ -20,74 +36,116 @@ describe('User can load passge', () => {
   });
 
   it('should check and sign auth message', async () => {
-    const window = await cy.window();
+    window = await cy.window();
 
     // cy.window().then(async (window) => {
+
     // -- set param
     window.params = { chain: 'ethereum' };
 
-    savedParams = 456;
-
     // -- Click the event
-    await cy.get('#LitJsSdk_authBrowser_checkAndSignAuthMessage').click()
+    await cy.get('#LitJsSdk_authBrowser_checkAndSignAuthMessage').click();
     // await cy.wait(100);
     await cy.get('#metamask').click();
     // await cy.wait(100);
-    const confirmed = await cy.confirmMetamaskSignatureRequest();
+    await cy.confirmMetamaskSignatureRequest();
     await cy.wait(100);
     await cy.confirmMetamaskSignatureRequest();
     await cy.wait(100).then(() => {
-      savedParams = JSON.parse(window.output);
-
-      // expect it to be an object
-      expect(savedParams).to.be.an('object');
-      
-      // expect output not empty
-      // expect(window.output).to.not.be.empty;
-      // expect(window.output).to.eq(1);
+      console.log('window.output:', window.output);
+      savedParams.authSig = JSON.parse(window.output);
+      expect(savedParams.authSig).to.be.an('object');
     });
-    // await cy.confirmMetamaskSignatureRequest()
-    //   .get('#metamask')
-    //   .click()
-    //   .wait(100)
-    //   .confirmMetamaskSignatureRequest()
-    //   .wait(100)
-    //   // Buffer not defined so have to sign again
-    //   .confirmMetamaskSignatureRequest()
-    //   .wait(100)
-    //   .then(() => {
-    //     // expect object to have key authSig
-    //     OUTPUT = window.output;
-    //     expect(JSON.parse(window.output)).to.have.property('sig');
-    //   });
   });
 
-  it('encrypt and decrypt string', async () => {
+  it('authSig is saved', () => {
+    // expect saveParams not empty
+    expect(savedParams.authSig).to.be.an('object');
+  });
 
-    expect(savedParams).to.equal(123);
-      // -- Click the event
-    // await cy.get('#LitJsSdk_litNodeClient_checkAndSignAuthMessage').click();
+  it('connect lit node client', async () => {
 
-    // await cy.get('#metamask').click();
-    // await cy.wait(100);
-    // await cy.confirmMetamaskSignatureRequest().wait(100);
-    // // Buffer not defined so have to sign again
-    // await cy
-    //   .confirmMetamaskSignatureRequest()
-    //   .wait(100)
-    //   .should(async () => {
-    //     const authSig = window.output;
-    //     const LitJsSdk = window.LitJsSdk_litNodeClient;
+    LitJsSdk = window.LitJsSdk_litNodeClient;
 
-    //     const { encryptedString, symmetricKey } =
-    //       await LitJsSdk.encryptString('Hello World!');
+    const client = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' });
 
-    //     expect(encryptedString).to.be.a('Blob');
-    //     expect(symmetricKey).to.be.a('Uint8Array');
+    await client.connect();
 
-    //     const base64 = await LitJsSdk.blobToBase64String(encryptedString);
-    //     expect(base64).to.be.a('string');
+    savedParams.litNodeClient = client;
 
+    await cy.wait(100).then(() => {
+      // expect to have property of executeJs
+      expect(savedParams.litNodeClient).to.have.property('executeJs');
+    });
+  });
+
+  it('encrypts string', async () => {
+    const res = await LitJsSdk.encryptString('This test is working! Omg!');
+    savedParams.encryptedString = res.encryptedString;
+    savedParams.symmetricKey = res.symmetricKey;
+    expect(savedParams.encryptedString).to.be.a('Blob');
+    expect(savedParams.symmetricKey).to.be.a('Uint8Array');
+  });
+
+  it('turns blob to base64 string', async () => {
+    const base64 = await LitJsSdk.blobToBase64String(
+      savedParams.encryptedString
+    );
+    savedParams.encryptedString = base64;
+    expect(savedParams.encryptedString).to.be.a('string');
+  });
+
+  it('saves encryption key', async () => {
+    // const { encryptedString, symmetricKey } = savedParams;
+
+    const encryptedSymmetricKey =
+      await savedParams.litNodeClient.saveEncryptionKey({
+        accessControlConditions: savedParams.accs,
+        symmetricKey: savedParams.symmetricKey,
+        authSig: savedParams.authSig,
+        chain: 'ethereum',
       });
-  // });
+
+    savedParams.encryptedSymmetricKey = encryptedSymmetricKey;
+
+    expect(savedParams.encryptedSymmetricKey).to.be.an('Uint8Array');
+  });
+
+  it('gets toDecrypt by turning encryptedSymmetricKey(uint8array) to string', async () => {
+
+    savedParams.toDecrypt = await LitJsSdk.uint8arrayToString(
+      savedParams.encryptedSymmetricKey,
+      'base16'
+    );
+    expect(savedParams.toDecrypt).to.be.a('string');
+  });
+
+  it('gets encryption key', async () => {
+    const encryptionKey = await savedParams.litNodeClient.getEncryptionKey({
+      accessControlConditions: savedParams.accs,
+      toDecrypt: savedParams.toDecrypt,
+      authSig: savedParams.authSig,
+      chain: 'ethereum',
+    });
+
+    savedParams.encryptionKey = encryptionKey;
+
+    expect(savedParams.encryptionKey).to.be.a('Uint8Array');
+  });
+
+  it('turns base64 to Blob', async () => {
+    const blob = await LitJsSdk.base64StringToBlob(savedParams.encryptedString);
+    savedParams.encryptedStringBlob = blob;
+    expect(savedParams.encryptedStringBlob).to.be.a('Blob');
+  })
+
+  it('decrypts string', async () => {
+    const decryptedString = await LitJsSdk.decryptString(
+      savedParams.encryptedStringBlob,
+      savedParams.encryptionKey,
+    );
+    expect(decryptedString).to.eq('This test is working! Omg!');
+  });
+
+
 });
