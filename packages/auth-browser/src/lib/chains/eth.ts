@@ -24,10 +24,24 @@ import {
 import { SiweMessage } from 'lit-siwe';
 import { getAddress } from 'ethers/lib/utils';
 
-import naclUtil from 'tweetnacl-util';
-import nacl from 'tweetnacl';
+// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
+import * as naclUtil from 'tweetnacl-util';
+
+// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
+import * as nacl from 'tweetnacl';
+
 import { isBrowser, isNode, log, numberToHex, throwError } from '@litprotocol-dev/misc';
 import { getStorageItem } from '@litprotocol-dev/misc-browser';
+
+console.log("naclUtil:", naclUtil);
+console.log("nacl:", nacl);
+
+// -- fix import issues
+// let _nacl = nacl === undefined ? nacl['default'] : nacl;
+// let _naclUtil = naclUtil === undefined ? naclUtil['default'] : naclUtil;
+
+// console.log("_nacl:", _nacl);
+// console.log("_naclUtil:", _naclUtil);
 
 /** ---------- Local Interfaces ---------- */
 interface ConnectWeb3 {
@@ -629,8 +643,7 @@ export const signAndSaveAuthMessage = async ({
             JSON.stringify(authSig)
         );
     }
-    console.warn("nacl:", nacl);
-    const commsKeyPair = nacl?.box?.keyPair();
+    const commsKeyPair = nacl.box.keyPair();
 
     if ( isBrowser() ){
         localStorage.setItem(
