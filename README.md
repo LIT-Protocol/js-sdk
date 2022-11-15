@@ -39,7 +39,7 @@ Download: <a href="https://nx.dev/core-features/integrate-with-editors">https://
 
 Download: <a href="https://marketplace.visualstudio.com/items?itemName=EthanSK.restore-terminals">https://marketplace.visualstudio.com/items?itemName=EthanSK.restore-terminals</a>
 
-```json
+```js
   "restoreTerminals.terminals": [
     {
       "splitTerminals": [
@@ -69,165 +69,70 @@ Download: <a href="https://marketplace.visualstudio.com/items?itemName=EthanSK.r
 ```
 </details>
 
-# Idea
 
-## Notes
+# Workflow
 
-### Testing on node apps
+## Building
 
-- The `node` app loads the packages from `./dist`, so make sure you build the dependencies first
+### Building all packages
 
-## Recommended
-
-- Install [NX Console](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console) for Visual Studio Code
-- Setting up workflow
-  - Open the VS Command Palette (Ctrl+Shift+P), type and open `Nx Console: Focus on Common NX Commands View`
-  <summary><h3>You should have a view like this</h3></summary>
-  <details>
-  ![](https://i.ibb.co/HtpRN6b/image.png)
-  </details>
-
-## Adding Test Cases
-
-- Run `example-nextjs-js` app in the `apps/example-nextjs-js` folder
-
-  - Option 1: Use the NX Console and click `serve` under `example-nextjs-js`
-  - Option 2: Run `yarn nx run example-nextjs-js:serve`
-
-- In the `./pages/cases/` folder is where you add new the test cases
-- Then you import and export it in `./pages/test-cases.ts`
-- Then you should see the new cases on the page
-
-## Publising
-
-```js
-
-// 1. Force dependencies on each package.json to "*" instead of a specific version, then build the packages
+```jsx
+// 1. run the 'build' command in all projects specified in `project.json`
+// 2. map the 'peerDependencies' to 'dependencies' in the dist folders, so that dependencies will be installed when a user 'yarn add'
+// 3. generate a package summary inside README.md between the <!-- autogen:package --> tags
+// src: tools/scripts/build.mjs
 yarn build:packages
+```
 
-// 2. Git add, commit, and push
-- yarn gitAdd OR git add *
-- yarn gitCommit OR git commit -m "message"
-- yarn gitPush OR git push
+### Building a specific package
 
-// 3. Publish using lerna and a custom script that creates a separated vanilla version of the SDK (Make sure you run `yarn npm login`)
+```jsx
+// OPTION 1: (MAIN)
+// 1. build tsc & web bundle
+// 2. map each dist folder name to package.json name (for publishing)
+// 3. generate html, react, and nodejs test apps
+yarn nx run <project-name>:build
+
+// OPTION 2: (Building tsc)
+// output: dist/packages/<project-name>
+yarn nx run <project-name>:_buildTsc
+
+// OPTION 3: (esBuilding vanilla web bundle)
+// output: dist/package/<project-name>-vanilla
+yarn nx run <project-name>:_buildWeb
+```
+
+## Publishing
+
+### Publishing everything
+
+```jsx
+// This will publish everything inside the `dist` folder
 yarn publish:packages
-
 ```
 
-<details>
-  <summary>More</summary>
-  
-  Packages inside the `packages` folder will be published automatically providing each `package.json` in each package has provide a `publichConfig` path, eg:
+### Publishing vanilla packages only
 
-```json
-{
-  "name": "...",
-  ...
-  "publishConfig": {
-    "access": "public",
-    "directory": "../../dist/packages/core-browser"
-  },
-  ...
-}
+```jsx
+// It will scans through the dist folder and filter out the folders that contains the word `vanilla` 
+// cd in there && npm publish --acces public
+// src: tools/scripts/pub.mjs
+yarn publish:vanilla
 ```
 
-</details>
+# Testing
 
-# Default NX README.md
+There are currently three environments can be tested on, each of which can be generated from a custom command, which would automatically import all the libraries in `./packages/*`. The UI of HTML & React are visually identical but they are using different libraries.
 
-<details>
-<summary>Default NX README.md</summary>
+| Environment | Generate Command | Test Location |
+--- | --- | --- |
+| HTML | `yarn tool:genHtml` | http://localhost:4002
+| React | `yarn tool:genReact` | http://localhost:4003
+| NodeJs | `yarn tool:genNodejs` | `yarn nx run nodejs:serve`
 
-Download [Nx](https://nx.dev) and open this project
+> Note: Personally I like to use the "Restore Terminal" VSCode plugin to automatically open all these environments.
+<div style="width:100%;height:0px;position:relative;padding-bottom:58.158%;"><iframe src="https://streamable.com/e/5g52m4" frameborder="0" width="100%" height="100%" allowfullscreen style="width:100%;height:100%;position:absolute;left:0px;top:0px;overflow:hidden;"></iframe></div>
+## Opening test apps
 
-This project was generated using [Nx](https://nx.dev).
 
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="450"></p>
-
-🔎 **Smart, Fast and Extensible Build System**
-
-## Adding capabilities to your workspace
-
-Nx supports many plugins which add capabilities for developing different types of applications and different tools.
-
-These capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
-
-Below are our core plugins:
-
-- [React](https://reactjs.org)
-  - `npm install --save-dev @nrwl/react`
-- Web (no framework frontends)
-  - `npm install --save-dev @nrwl/web`
-- [Angular](https://angular.io)
-  - `npm install --save-dev @nrwl/angular`
-- [Nest](https://nestjs.com)
-  - `npm install --save-dev @nrwl/nest`
-- [Express](https://expressjs.com)
-  - `npm install --save-dev @nrwl/express`
-- [Node](https://nodejs.org)
-  - `npm install --save-dev @nrwl/node`
-
-There are also many [community plugins](https://nx.dev/community) you could add.
-
-## Generate an application
-
-Run `nx g @nrwl/react:app my-app` to generate an application.
-
-> You can use any of the plugins above to generate applications as well.
-
-When using Nx, you can create multiple applications and libraries in the same workspace.
-
-## Generate a library
-
-Run `nx g @nrwl/react:lib my-lib` to generate a library.
-
-> You can also use any of the plugins above to generate libraries as well.
-
-Libraries are shareable across libraries and applications. They can be imported from `@litprotocol-dev/mylib`.
-
-## Development server
-
-Run `nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `nx g @nrwl/react:component my-component --project=my-app` to generate a new component.
-
-## Build
-
-Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
-
-## Running end-to-end tests
-
-Run `nx e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
-
-Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
-
-## Understand your workspace
-
-Run `nx graph` to see a diagram of the dependencies of your projects.
-
-## Further help
-
-Visit the [Nx Documentation](https://nx.dev) to learn more.
-
-## ☁ Nx Cloud
-
-### Distributed Computation Caching & Distributed Task Execution
-
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-cloud-card.png"></p>
-
-Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
-
-Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
-
-Visit [Nx Cloud](https://nx.app/) to learn more.
-
-</details>
+## E2E with Metamask
