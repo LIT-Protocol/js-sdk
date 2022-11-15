@@ -27,7 +27,17 @@ const badge = (lib, text) => {
 }
 
 const jsdelivLink = (lib) => {
-    return `[![https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge)](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge)](https://www.jsdelivr.com/package/npm/${lib}-vanilla)`;
+    return `[![](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge)](https://www.jsdelivr.com/package/npm/${lib}-vanilla)`;
+}
+
+const getSize = (lib) => {
+    return `![](https://img.shields.io/bundlephobia/min/${lib})`;
+};
+
+const getNpm = (lib) => {
+    // return `https://www.npmjs.com/package/${lib}`;
+
+    return `![https://img.shields.io/npm/dw/@litprotocol-dev/lit-node-client?label=NPM](https://img.shields.io/npm/dw/@litprotocol-dev/lit-node-client?label=NPM)`;
 }
 
 const libs = (await listDirsRelative('packages', false)).map(lib => lib.replace('packages/', ''));
@@ -45,8 +55,10 @@ libs.map(lib => {
     const _vanillaJs = jsdelivLink(name);
     const _tag = badge(lib, tags[0]);
     const _version = version;
+    // const _size = getSize(name);
+    const _download = `${getNpm(name)}<br/>jsDelivr`;
 
-    const content = `| ${_package} | ${_vanillaJs}| ${_tag} | ${_version} |`;
+    const content = `| ${_package} | ${_tag} | ${_version} | ${_download}`;
 
     if (tags[0] === 'universal') {
         universals.push(content);
@@ -62,7 +74,7 @@ libs.map(lib => {
 let rows = [...bundled, ...universals, ...browsers,];
 
 const tables = {
-    "headers": ["Package", "Vanilla JS", "Category", "Version"],
+    "headers": ["Package", "Category", "Version", "Download"],
     "rows": rows
 }
 
