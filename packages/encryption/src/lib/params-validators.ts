@@ -10,8 +10,8 @@ import {
     DecryptZipFileWithMetadataProps,
     EncryptFileAndZipWithMetadataProps,
     KV,
-} from '@litprotocol-dev/constants';
-import { checkIfAuthSigRequiresChainParam, checkType, is, log } from '@litprotocol-dev/misc';
+} from '@lit-protocol/constants';
+import { checkIfAuthSigRequiresChainParam, checkType, is, log } from '@lit-protocol/misc';
 
 
 export const safeParams = ({

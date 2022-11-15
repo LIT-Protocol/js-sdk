@@ -1,21 +1,21 @@
 // @ts-nocheck
 
-import { wasmBlsSdkHelpers, initWasmBlsSdk } from '@litprotocol-dev/bls-sdk';
+import { wasmBlsSdkHelpers, initWasmBlsSdk } from '@lit-protocol/bls-sdk';
 
 import {
   SessionKeyPair,
   SigShare,
   SYMM_KEY_ALGO_PARAMS,
-} from '@litprotocol-dev/constants';
+} from '@lit-protocol/constants';
 
-import * as wasmECDSA from '@litprotocol-dev/ecdsa-sdk';
+import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
-import { log } from '@litprotocol-dev/misc';
+import { log } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
   uint8arrayToString,
-} from '@litprotocol-dev/uint8arrays';
+} from '@lit-protocol/uint8arrays';
 
 import nacl from 'tweetnacl';
 

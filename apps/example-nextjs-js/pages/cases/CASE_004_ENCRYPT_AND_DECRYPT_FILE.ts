@@ -1,5 +1,5 @@
-import { AccessControlConditions } from '@litprotocol-dev/constants';
-import * as LitJsSdk from '@litprotocol-dev/core-browser';
+import { AccessControlConditions } from '@lit-protocol/constants';
+import * as LitJsSdk from '@lit-protocol/core-browser';
 import { ACTION } from '../enum';
 
 export const CASE_004_ENCRYPT_AND_DECRYPT_FILE = [

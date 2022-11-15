@@ -8,15 +8,15 @@ import {
     JsonAuthSig,
     LIT_ERROR,
     LOCAL_STORAGE_KEYS,
-} from '@litprotocol-dev/constants';
-import { log, throwError } from '@litprotocol-dev/misc';
-import { getStorageItem } from '@litprotocol-dev/misc-browser';
+} from '@lit-protocol/constants';
+import { log, throwError } from '@lit-protocol/misc';
+import { getStorageItem } from '@lit-protocol/misc-browser';
 // import { toString as uint8arrayToString } from 'uint8arrays';
 
 import {
     uint8arrayFromString,
     uint8arrayToString,
-  } from '@litprotocol-dev/uint8arrays';
+  } from '@lit-protocol/uint8arrays';
 
 
 const util = require('util');

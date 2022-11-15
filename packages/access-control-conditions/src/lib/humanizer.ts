@@ -6,8 +6,8 @@ import {
   AccsSOLV2Params,
   HumanizedAccsProps,
   LIT_ERROR,
-} from '@litprotocol-dev/constants';
-import { decimalPlaces, log, throwError } from '@litprotocol-dev/misc';
+} from '@lit-protocol/constants';
+import { decimalPlaces, log, throwError } from '@lit-protocol/misc';
 import { formatEther, formatUnits } from 'ethers/lib/utils';
 
 /**

@@ -1,5 +1,5 @@
-import { AccessControlConditions } from '@litprotocol-dev/constants';
-import * as LitJsSdk from '@litprotocol-dev/lit-node-client';
+import { AccessControlConditions } from '@lit-protocol/constants';
+import * as LitJsSdk from '@lit-protocol/lit-node-client';
 import { ACTION } from '../enum';
 
 export const CASE_001_ENCRYPT_AND_DECRYPT_STRING = [

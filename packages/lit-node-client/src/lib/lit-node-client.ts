@@ -9,8 +9,8 @@ import {
   hashResourceId,
   hashSolRpcConditions,
   hashUnifiedAccessControlConditions,
-} from '@litprotocol-dev/access-control-conditions';
-import { wasmBlsSdkHelpers } from '@litprotocol-dev/bls-sdk';
+} from '@lit-protocol/access-control-conditions';
+import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 import {
   CustomNetwork,
   DecryptedData,
@@ -50,13 +50,13 @@ import {
   SupportedJsonRequests,
   ValidateAndSignECDSA,
   version,
-} from '@litprotocol-dev/constants';
+} from '@lit-protocol/constants';
 import {
   combineBlsDecryptionShares,
   combineBlsShares,
   combineEcdsaShares,
-} from '@litprotocol-dev/crypto';
-import { safeParams } from '@litprotocol-dev/encryption';
+} from '@lit-protocol/crypto';
+import { safeParams } from '@lit-protocol/encryption';
 import {
   convertLitActionsParams,
   isBrowser,
@@ -64,12 +64,12 @@ import {
   log,
   mostCommonString,
   throwError,
-} from '@litprotocol-dev/misc';
-import { getStorageItem } from '@litprotocol-dev/misc-browser';
+} from '@lit-protocol/misc';
+import { getStorageItem } from '@lit-protocol/misc-browser';
 import {
   uint8arrayFromString,
   uint8arrayToString,
-} from '@litprotocol-dev/uint8arrays';
+} from '@lit-protocol/uint8arrays';
 
 /** ---------- Main Export Class ---------- */
 export class LitNodeClient implements ILitNodeClient {

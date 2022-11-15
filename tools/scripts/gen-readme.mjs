@@ -4,6 +4,7 @@
 // and <!-- autogen:package:end --> with the package.json content
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { exit } from 'process';
 import { listDirsRelative } from './utils.mjs';
 
 const readmePath = join('README.md');
@@ -106,3 +107,5 @@ const newReadme = readme.replace(
 
 writeFileSync
     (readmePath, newReadme, 'utf8');
+
+    exit();

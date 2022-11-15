@@ -1,7 +1,7 @@
 import {
   uint8arrayFromString,
   uint8arrayToString,
-} from '@litprotocol-dev/uint8arrays';
+} from '@lit-protocol/uint8arrays';
 
 import {
   AUTH_SIGNATURE_BODY,
@@ -9,8 +9,8 @@ import {
   LIT_COSMOS_CHAINS,
   LIT_ERROR,
   LOCAL_STORAGE_KEYS,
-} from '@litprotocol-dev/constants';
-import { log, sortedObject, throwError } from '@litprotocol-dev/misc';
+} from '@lit-protocol/constants';
+import { log, sortedObject, throwError } from '@lit-protocol/misc';
 
 /** ---------- Declaration ---------- */
 declare global {

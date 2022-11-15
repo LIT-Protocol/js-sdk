@@ -2,17 +2,17 @@
 
 import { hasItems } from './helper';
 
-import * as accessControlConditions from '@litprotocol-dev/access-control-conditions';
-import * as authBrowser from '@litprotocol-dev/auth-browser';
-import * as blsSdk from '@litprotocol-dev/bls-sdk';
-import * as constants from '@litprotocol-dev/constants';
-import * as crypto from '@litprotocol-dev/crypto';
-import * as ecdsaSdk from '@litprotocol-dev/ecdsa-sdk';
-import * as encryption from '@litprotocol-dev/encryption';
-import * as litNodeClient from '@litprotocol-dev/lit-node-client';
-import * as misc from '@litprotocol-dev/misc';
-import * as miscBrowser from '@litprotocol-dev/misc-browser';
-import * as uint8arrays from '@litprotocol-dev/uint8arrays';
+import * as accessControlConditions from '@lit-protocol/access-control-conditions';
+import * as authBrowser from '@lit-protocol/auth-browser';
+import * as blsSdk from '@lit-protocol/bls-sdk';
+import * as constants from '@lit-protocol/constants';
+import * as crypto from '@lit-protocol/crypto';
+import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
+import * as encryption from '@lit-protocol/encryption';
+import * as litNodeClient from '@lit-protocol/lit-node-client';
+import * as misc from '@lit-protocol/misc';
+import * as miscBrowser from '@lit-protocol/misc-browser';
+import * as uint8arrays from '@lit-protocol/uint8arrays';
 
 console.log("accessControlConditions:", hasItems(accessControlConditions));
 console.log("authBrowser:", hasItems(authBrowser));

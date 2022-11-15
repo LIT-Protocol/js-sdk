@@ -1,8 +1,8 @@
-import { ELeft, ERight, IEither, LIT_ERROR } from '@litprotocol-dev/constants';
+import { ELeft, ERight, IEither, LIT_ERROR } from '@lit-protocol/constants';
 import {
   uint8arrayFromString,
   uint8arrayToString,
-} from '@litprotocol-dev/uint8arrays';
+} from '@lit-protocol/uint8arrays';
 
 /**
  *

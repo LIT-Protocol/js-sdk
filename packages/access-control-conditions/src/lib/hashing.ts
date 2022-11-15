@@ -5,10 +5,10 @@ import {
   JsonSigningResourceId,
   SolRpcConditions,
   UnifiedAccessControlConditions,
-} from '@litprotocol-dev/constants';
-import { log } from '@litprotocol-dev/misc';
+} from '@lit-protocol/constants';
+import { log } from '@lit-protocol/misc';
 import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter } from './canonicalFormatter';
-import { uint8arrayToString } from '@litprotocol-dev/uint8arrays';
+import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 
 /**
  *

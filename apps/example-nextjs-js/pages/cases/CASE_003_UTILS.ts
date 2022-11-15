@@ -1,5 +1,5 @@
-import { AccessControlConditions, LIT_ERROR, RejectedNodePromises } from '@litprotocol-dev/constants';
-import * as LitJsSdk from '@litprotocol-dev/lit-node-client';
+import { AccessControlConditions, LIT_ERROR, RejectedNodePromises } from '@lit-protocol/constants';
+import * as LitJsSdk from '@lit-protocol/lit-node-client';
 import { ACTION } from '../enum';
 
 export const CASE_003_UTILS = [

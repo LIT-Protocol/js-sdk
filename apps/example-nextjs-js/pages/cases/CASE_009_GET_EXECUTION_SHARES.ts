@@ -1,5 +1,5 @@
-import { JsonExecutionRequest } from '@litprotocol-dev/constants';
-import * as LitJsSdk from '@litprotocol-dev/core-browser';
+import { JsonExecutionRequest } from '@lit-protocol/constants';
+import * as LitJsSdk from '@lit-protocol/core-browser';
 import { ACTION } from '../enum';
 
 export const CASE_009_GET_EXECUTION_SHARES = [

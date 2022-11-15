@@ -6,17 +6,17 @@ import {
   LOCAL_STORAGE_KEYS,
   SessionKeyPair,
   SessionSigsProp,
-} from '@litprotocol-dev/constants';
+} from '@lit-protocol/constants';
 import { SiweMessage } from 'lit-siwe';
 import nacl from 'tweetnacl';
 
 import {
   uint8arrayFromString,
   uint8arrayToString,
-} from '@litprotocol-dev/uint8arrays';
+} from '@lit-protocol/uint8arrays';
 
-import { getStorageItem } from '@litprotocol-dev/misc-browser';
-import { generateSessionKeyPair } from '@litprotocol-dev/crypto';
+import { getStorageItem } from '@lit-protocol/misc-browser';
+import { generateSessionKeyPair } from '@lit-protocol/crypto';
 import { checkAndSignAuthMessage } from './auth-browser';
 /** ========== Local Helpers ========== */
 

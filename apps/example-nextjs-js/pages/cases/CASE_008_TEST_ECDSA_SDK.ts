@@ -1,6 +1,6 @@
-import * as LitJsSdk from '@litprotocol-dev/core-browser';
+import * as LitJsSdk from '@lit-protocol/core-browser';
 import { ACTION } from '../enum';
-// import * as ecdsaSdk from '@litprotocol-dev/ecdsa-sdk';
+// import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
 
 export const CASE_008_TEST_ECDSA_SDK = [
   {

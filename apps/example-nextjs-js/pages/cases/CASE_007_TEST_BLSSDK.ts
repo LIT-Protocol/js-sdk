@@ -1,6 +1,6 @@
-import * as LitJsSdk from '@litprotocol-dev/core-browser';
+import * as LitJsSdk from '@lit-protocol/core-browser';
 import { ACTION } from '../enum';
-import * as blsSdk from '@litprotocol-dev/bls-sdk';
+import * as blsSdk from '@lit-protocol/bls-sdk';
 
 export const CASE_007_TEST_BLSSDK = [
   {

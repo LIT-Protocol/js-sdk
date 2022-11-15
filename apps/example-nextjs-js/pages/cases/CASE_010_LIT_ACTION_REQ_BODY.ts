@@ -1,4 +1,4 @@
-import * as LitJsSdk from '@litprotocol-dev/core-browser';
+import * as LitJsSdk from '@lit-protocol/core-browser';
 import { ACTION } from '../enum';
 
 export const CASE_010_LIT_ACTION_REQ_BODY = [
