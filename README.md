@@ -8,7 +8,6 @@
 The Lit JavaScript SDK provides developers with a framework for implementing Lit functionality into their own applications. Get started with the Lit SDK based on your use case.
 <br /><br />
 
-
 # Packages
 <!-- autogen:package:start -->
 
@@ -164,7 +163,7 @@ There are currently three environments can be tested on, each of which can be ge
 
 > Note: Personally I like to use the "Restore Terminal" VSCode plugin to automatically open all these environments. See [Video](https://streamable.com/e/5g52m4)
 
-### Unit Testing (for Node)
+### Unit Tests (for Node)
 
 ```
 yarn test:packages
