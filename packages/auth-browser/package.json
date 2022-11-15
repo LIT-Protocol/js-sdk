@@ -1,6 +1,6 @@
 {
-  "name": "@litprotocol-dev/auth-browser",
-  "version": "0.1.61",
+  "name": "@lit-protocol/auth-browser",
+  "version": "0.0.2",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
@@ -15,5 +15,7 @@
     "util": "^0.12.4",
     "web-vitals": "^3.0.4"
   },
-  "tags": ["browser"]
+  "tags": [
+    "browser"
+  ]
 }

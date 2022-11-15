@@ -1,11 +1,13 @@
 {
-  "name": "@litprotocol-dev/lit-node-client",
-  "version": "0.1.61",
+  "name": "@lit-protocol/lit-node-client",
+  "version": "0.0.2",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/lit-node-client"
   },
   "gitHead": "2d61c9755df43da7b0dc6fcae36f9bb121ad322f",
-  "tags": ["bundled"]
+  "tags": [
+    "bundled"
+  ]
 }

@@ -1,6 +1,6 @@
 {
-  "name": "@litprotocol-dev/bls-sdk",
-  "version": "0.1.61",
+  "name": "@lit-protocol/bls-sdk",
+  "version": "0.0.2",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
@@ -10,5 +10,7 @@
   "peerDependencies": {
     "pako": "^2.1.0"
   },
-  "tags": ["universal"]
+  "tags": [
+    "universal"
+  ]
 }

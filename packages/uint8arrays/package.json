@@ -1,11 +1,13 @@
 {
-  "name": "@litprotocol-dev/uint8arrays",
-  "version": "0.1.61",
+  "name": "@lit-protocol/uint8arrays",
+  "version": "0.0.2",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/uint8arrays"
   },
   "gitHead": "2d61c9755df43da7b0dc6fcae36f9bb121ad322f",
-  "tags": ["universal"]
+  "tags": [
+    "universal"
+  ]
 }
