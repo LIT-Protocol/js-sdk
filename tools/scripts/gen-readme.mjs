@@ -23,11 +23,11 @@ const badge = (lib, text) => {
         color = 'E98869';
     }
 
-    return `![${lib}](https://img.shields.io/badge/-${text}-${color} "${lib}"){:target="_blank"}`;
+    return `![${lib}](https://img.shields.io/badge/-${text}-${color} "${lib}")`;
 }
 
 const jsdelivLink = (lib) => {
-    return `[![](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge)](https://www.jsdelivr.com/package/npm/${lib}-vanilla)`;
+    return `[![](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge/?target=_blank)](https://www.jsdelivr.com/package/npm/${lib}-vanilla)`;
 }
 
 const libs = (await listDirsRelative('packages', false)).map(lib => lib.replace('packages/', ''));
