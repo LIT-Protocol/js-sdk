@@ -9,5 +9,6 @@
   "gitHead": "2d61c9755df43da7b0dc6fcae36f9bb121ad322f",
   "peerDependencies": {
     "pako": "^2.1.0"
-  }
+  },
+  "tags": ["universal"]
 }

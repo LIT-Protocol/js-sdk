@@ -9,5 +9,6 @@
     "access": "public",
     "directory": "../../dist/packages/misc"
   },
-  "gitHead": "2d61c9755df43da7b0dc6fcae36f9bb121ad322f"
+  "gitHead": "2d61c9755df43da7b0dc6fcae36f9bb121ad322f",
+  "tags": ["universal"]
 }

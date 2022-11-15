@@ -14,5 +14,6 @@
     "tweetnacl-util": "^0.13.3",
     "util": "^0.12.4",
     "web-vitals": "^3.0.4"
-  }
+  },
+  "tags": ["browser"]
 }
