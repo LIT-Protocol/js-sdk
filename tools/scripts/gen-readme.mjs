@@ -35,9 +35,8 @@ const getSize = (lib) => {
 };
 
 const getNpm = (lib) => {
-    // return `https://www.npmjs.com/package/${lib}`;
 
-    return `![https://img.shields.io/npm/dw/@litprotocol-dev/lit-node-client?label=NPM](https://img.shields.io/npm/dw/@litprotocol-dev/lit-node-client?label=NPM)`;
+    return `![https://www.npmjs.com/package/${lib}](https://img.shields.io/npm/dw/@litprotocol-dev/lit-node-client?label=NPM)`;
 }
 
 const libs = (await listDirsRelative('packages', false)).map(lib => lib.replace('packages/', ''));
