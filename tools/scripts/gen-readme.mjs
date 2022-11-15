@@ -1,7 +1,7 @@
 // #Usage: node tools/scripts/gen-readme.mjs
 
-// Read the file and replace between <!-- package:start -->
-// and <!-- package:end --> with the package.json content
+// Read the file and replace between <!-- autogen:package:start -->
+// and <!-- autogen:package:end --> with the package.json content
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { listDirsRelative } from './utils.mjs';
@@ -96,10 +96,10 @@ ${body}
 
 let content = table(tables);
 
-// use regex to replace the content between the comments <!-- package:start --> and <!-- package:end -->
+// use regex to replace the content between the comments <!-- autogen:package:start --> and <!-- autogen:package:end -->
 const newReadme = readme.replace(
-    /<!-- package:start -->[\s\S]*<!-- package:end -->/m,
-    `<!-- package:start -->\n${content}\n<!-- package:end -->`
+    /<!-- autogen:package:start -->[\s\S]*<!-- autogen:package:end -->/m,
+    `<!-- autogen:package:start -->\n${content}\n<!-- autogen:package:end -->`
 );
 
 // console.log(newReadme);

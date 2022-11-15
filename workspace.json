@@ -8,7 +8,6 @@
     "constants": "packages/constants",
     "crypto": "packages/crypto",
     "e2e": "apps/e2e",
-    "pkp-walletconnect": "apps/pkp-walletconnect",
     "ecdsa-sdk": "packages/ecdsa-sdk",
     "encryption": "packages/encryption",
     "example-nextjs-js": "apps/example-nextjs-js",

@@ -3,11 +3,14 @@
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
 <img src="https://img.shields.io/twitter/follow/litprotocol?label=Follow&style=social"/>
+<br/>
+<br/>
+The Lit JavaScript SDK provides developers with a framework for implementing Lit functionality into their own applications. Get started with the Lit SDK based on your use case.
 <br /><br />
 
 
 # Packages
-<!-- package:start -->
+<!-- autogen:package:start -->
 
 Package | Category | Version | Download
 --- | --- | --- | ---
@@ -23,7 +26,7 @@ Package | Category | Version | Download
 | [@litprotocol-dev/auth-browser](packages/auth-browser) | ![auth-browser](https://img.shields.io/badge/-browser-E98869 "auth-browser") | 0.1.61 | <a target="_blank" href="https://www.npmjs.com/package/@litprotocol-dev/auth-browser">npm</a><br/><a target="_blank" href="https://www.jsdelivr.com/package/npm/@litprotocol-dev/auth-browser-vanilla">Vanilla JS</a>
 | [@litprotocol-dev/misc-browser](packages/misc-browser) | ![misc-browser](https://img.shields.io/badge/-browser-E98869 "misc-browser") | 0.1.61 | <a target="_blank" href="https://www.npmjs.com/package/@litprotocol-dev/misc-browser">npm</a><br/><a target="_blank" href="https://www.jsdelivr.com/package/npm/@litprotocol-dev/misc-browser-vanilla">Vanilla JS</a>
 
-<!-- package:end -->
+<!-- autogen:package:end -->
 </div>
 
 # Idea
