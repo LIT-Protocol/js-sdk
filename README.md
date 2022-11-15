@@ -176,13 +176,13 @@ yarn test:watch
 
 Since both HTML & React UIs are identical, we can run the same test suite against two different environments of libraries. This is done by setting the `PORT` number before Cypress launch.
 
-<b>HTML</b>See [Video](https://streamable.com/qik31d)
+<b>HTML</b> See [Video](https://streamable.com/qik31d)
 ```
 // E2E HTML
 yarn cy:open:html
 ```
 
-<b>React</b>See [Video](https://streamable.com/vgk45q)
+<b>React</b> See [Video](https://streamable.com/vgk45q)
 ```
 // E2E React
 yarn cy:open:react
