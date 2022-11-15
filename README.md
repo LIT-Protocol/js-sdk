@@ -29,6 +29,40 @@ Package | Category | Version | Download
 <!-- autogen:package:end -->
 </div>
 
+# Recommended VSCode Extensions
+- [Nx Console](https://nx.dev/core-features/integrate-with-editors)
+<details>
+<summary>Restore Terminal</summary>
+```json
+  "restoreTerminals.terminals": [
+    {
+      "splitTerminals": [
+        // {
+        //   "name": "nx graph",
+        //   "commands": ["yarn graph"]
+        // },
+        {
+          "name": "nodejs",
+          "commands": ["yarn nx run nodejs:serve"]
+        },
+        {
+          "name": "html",
+          "commands": ["yarn nx run html:serve"]
+        },
+        {
+          "name": "react",
+          "commands": ["yarn nx run react:serve"]
+        },
+        {
+          "name": "custom",
+          "commands": ["clear"]
+        }
+      ]
+    }
+  ]
+```
+</details>
+
 # Idea
 
 ## Notes
