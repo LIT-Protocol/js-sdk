@@ -27,7 +27,7 @@ const badge = (lib, text) => {
 }
 
 const jsdelivLink = (lib) => {
-    return `<a href="https://www.jsdelivr.com/package/npm/${lib}-vanilla">Vanilla JS</a>`;
+    return `<a target="_blank" href="https://www.jsdelivr.com/package/npm/${lib}-vanilla">Vanilla JS</a>`;
     return `[![](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge)](https://www.jsdelivr.com/package/npm/${lib}-vanilla)`;
 }
 
@@ -36,7 +36,7 @@ const getSize = (lib) => {
 };
 
 const getNpm = (lib) => {
-    return `<a href="https://www.npmjs.com/package/${lib}">npm</a>`;
+    return `<a target="_blank" href="https://www.npmjs.com/package/${lib}">npm</a>`;
     return `<a href="https://www.npmjs.com/package/${lib}"><img src="https://img.shields.io/npm/dw/${lib}?label=NPM"/></a>`;
 }
 
