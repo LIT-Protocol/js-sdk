@@ -23,7 +23,7 @@ const badge = (lib, text) => {
         color = 'E98869';
     }
 
-    return `![${lib}](https://img.shields.io/badge/-${text}-${color} "${lib}")`;
+    return `![${lib}](https://img.shields.io/badge/-${text}-${color} "${lib}"){:target="_blank"}`;
 }
 
 const jsdelivLink = (lib) => {
