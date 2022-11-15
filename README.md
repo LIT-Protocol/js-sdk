@@ -30,9 +30,15 @@ Package | Category | Version | Download
 </div>
 
 # Recommended VSCode Extensions
-- [Nx Console](https://nx.dev/core-features/integrate-with-editors)
+<details>
+<summary>Nx Console</summary>
+Download: <a href="https://nx.dev/core-features/integrate-with-editors">https://nx.dev/core-features/integrate-with-editors</a>
+</details>
 <details>
 <summary>Restore Terminal</summary>
+
+Download: <a href="https://marketplace.visualstudio.com/items?itemName=EthanSK.restore-terminals">https://marketplace.visualstudio.com/items?itemName=EthanSK.restore-terminals</a>
+
 ```json
   "restoreTerminals.terminals": [
     {
