@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/bls-sdk",
-  "version": "0.1.70",
+  "version": "0.1.71",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
