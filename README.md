@@ -75,7 +75,7 @@ Download: <a href="https://marketplace.visualstudio.com/items?itemName=EthanSK.r
 ## Creating a new library
 
 By default, NX provides a command to generate a library
-`nx generate @nrwl/js:library`. However, it doesn't have a esbuild built-in so that we've created a custom tool that modify the build commands.
+`nx generate @nrwl/js:library`. However, it doesn't have an esbuild built-in so that we've created a custom tool that modify the build commands.
 
 ```js
 yarn tool:genLib <package-name>
