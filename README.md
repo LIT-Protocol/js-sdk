@@ -72,6 +72,29 @@ Download: <a href="https://marketplace.visualstudio.com/items?itemName=EthanSK.r
 
 # Workflow
 
+## Creating a new library
+
+By default, NX provides a command to generate a library
+`nx generate @nrwl/js:library`. However, it doesn't have a esbuild built-in so that we've created a custom tool that modify the build commands.
+
+```js
+yarn tool:genLib <package-name>
+
+// NOTE! If you intend to publish this package, you have to add the following to your package.json
+publishConfig: { 
+  access: 'public', 
+  directory: '../../dist/packages/<package-name>' 
+},
+```
+
+## Deleting a library
+
+```
+yarn tool:delete (--package OR --app) <project-name>
+```
+
+
+
 ## Building
 
 ### Building all packages
@@ -120,7 +143,15 @@ yarn publish:packages
 yarn publish:vanilla
 ```
 
-# Testing
+### Publising HTML Test app to Vercel
+
+```
+yarn tool:buildHtml
+```
+
+## Testing
+
+### Environments
 
 There are currently three environments can be tested on, each of which can be generated from a custom command, which would automatically import all the libraries in `./packages/*`. The UI of HTML & React are visually identical but they are using different libraries.
 
@@ -132,7 +163,91 @@ There are currently three environments can be tested on, each of which can be ge
 
 > Note: Personally I like to use the "Restore Terminal" VSCode plugin to automatically open all these environments. See [Video](https://streamable.com/e/5g52m4)
 
-## Opening test apps
+### Unit Testing (for Node)
 
+```
+yarn test:packages
 
-## E2E with Metamask
+// watch mode
+yarn test:watch
+```
+
+### E2E Testing with Metamask using Cypress (for Browser)
+
+Since both HTML & React UIs are identical, we can run the same test suite against two different environments of libraries. This is done by setting the `PORT` number before Cypress launch.
+
+<b>HTML</b>See [Video](https://streamable.com/qik31d)
+```
+// E2E HTML
+yarn cy:open:html
+```
+
+<b>React</b>See [Video](https://streamable.com/vgk45q)
+```
+// E2E React
+yarn cy:open:react
+```
+
+## Other Commands
+
+### Interactive graph dependencies using NX
+
+```
+yarn graph
+```
+
+![](https://i.ibb.co/2dLyMTW/Screenshot-2022-11-15-at-15-18-46.png)
+
+# FAQs & Common Errors
+
+<details>
+<summary>Web bundling using esbuild</summary>
+
+It’s currently using a custom plugin [@websaam/nx-esbuild](https://www.npmjs.com/package/@websaam/nx-esbuild) which is a fork from [@wanews/nx-esbuild](https://www.npmjs.com/package/@wanews/nx-esbuild)
+
+```json
+"_buildWeb": {
+    "executor": "@websaam/nx-esbuild:package",
+    "options": {
+      "banner": {
+        "js": "import { createRequire } from 'module';const require = createRequire(import.meta.url);"
+      },
+      "globalName": "LitJsSdk_CoreBrowser",
+      "outfile":"dist/packages/core-browser-vanilla/core-browser.js",
+      "entryPoints": ["./packages/core-browser/src/index.ts"],
+      "define": { "global": "window" },
+      "plugins":[
+        {
+          "package": "esbuild-node-builtins",
+          "function": "nodeBuiltIns"
+        }
+      ]
+    }
+  }
+```
+
+</details>
+
+<details>
+<summary>Reference Error: crypto is not defined</summary>
+
+```js
+import crypto, { createHash } from 'crypto';
+Object.defineProperty((globalThis), 'crypto', {
+  value: {
+    getRandomValues: (arr: any) => crypto.randomBytes(arr.length),
+    subtle: {
+      digest: (algorithm: string, data: Uint8Array) => {
+        return new Promise((resolve, reject) =>
+          resolve(
+            createHash(algorithm.toLowerCase().replace('-', ''))
+              .update(data)
+              .digest()
+          )
+        );
+      },
+    },
+  },
+});
+```
+</details>
