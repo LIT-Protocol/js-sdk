@@ -1,7 +1,4 @@
 // @ts-nocheck
-// let savedData: any;
-// import state from '../fixtures/state.json';
-
 let window: any;
 let savedParams: any = {
   accs: [
@@ -45,9 +42,7 @@ describe('Encrypt and Decrypt String', () => {
 
     // -- Click the event
     await cy.get('#LitJsSdk_authBrowser_checkAndSignAuthMessage').click();
-    // await cy.wait(100);
     await cy.get('#metamask').click();
-    // await cy.wait(100);
     await cy.confirmMetamaskSignatureRequest();
     await cy.wait(100);
     await cy.confirmMetamaskSignatureRequest();
@@ -258,8 +253,7 @@ describe('Encrypt and decrypt file', () => {
     expect(savedParams.encryptionKey).to.be.a('Uint8Array');
   });
 
-  it('decrypt file', async() => {
-
+  it('decrypt file', async () => {
     const blob = LitJsSdk.base64StringToBlob(savedParams.encryptedZipBase64);
 
     const decryptedZip = await LitJsSdk.decryptFile({
@@ -273,6 +267,46 @@ describe('Encrypt and decrypt file', () => {
     const decryptedFile = await LitJsSdk.uint8arrayToString(decryptedZip);
 
     expect(decryptedFile).to.contains('Hello, world!');
+  });
+});
+
+describe('Encrypt and zip metadata', () => {
+  it('encrypts file and zips with metadata', async () => {
+    const file = new File(['Hello, world!'], 'hello.txt', {
+      type: 'text/plain',
+    });
+    const { zipBlob } = await LitJsSdk.encryptFileAndZipWithMetadata({
+      file,
+      accessControlConditions: savedParams.accs,
+      authSig: savedParams.authSig,
+      chain: 'ethereum',
+      litNodeClient: savedParams.litNodeClient,
+      readme: 'this is a test',
+    });
+
+    savedParams.zipBlob = zipBlob;
+    expect(savedParams.zipBlob).to.be.a('Blob');
+  });
+
+  it('turns blob to base64 string', async () => {
+    const base64 = await LitJsSdk.blobToBase64String(savedParams.zipBlob);
+    savedParams.zipBlobBase64 = base64;
+    expect(savedParams.zipBlobBase64).to.be.a('string');
+  });
+
+  it('decrypts zip file with metadata', async() => {
+    const file = LitJsSdk.base64StringToBlob(savedParams.zipBlobBase64);
+
+    const { decryptedFile } = await LitJsSdk.decryptZipFileWithMetadata({
+      authSig: savedParams.authSig,
+      litNodeClient: savedParams.litNodeClient,
+      file,
+    });
+
+    const decryptedFileString = await LitJsSdk.uint8arrayToString(decryptedFile);
+
+    expect(decryptedFileString).to.contains('Hello, world!');
+
   })
 });
 
