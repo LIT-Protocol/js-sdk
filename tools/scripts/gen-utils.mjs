@@ -62,9 +62,9 @@ export const GEN_FOOTER_SCRIPTS = `
                 document.getElementById('result').innerText = code;
             });
 
-            e.addEventListener('click', (ele) => {
-                ele.target.classList.add('active')
-            });
+            // e.addEventListener('click', (ele) => {
+            //     ele.target.classList.add('active')
+            // });
         });
     };
 </script>`;

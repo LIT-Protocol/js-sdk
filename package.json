@@ -22,6 +22,7 @@
     "tool:genNodejs": "yarn node tools/scripts/gen-nodejs.mjs",
     "tool:genLib": "yarn node tools/scripts/gen-lib.mjs",
     "tool:findImported": "yarn node tools/scripts/find-imported-packages.mjs",
+    "tool:buildHtml": "yarn node tools/scripts/build-html.mjs && cd dist/apps/html && vercel",
     "graph": "nx graph",
     "npm:login": "npm login",
     "cy:open:html": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4002 cypress open",
