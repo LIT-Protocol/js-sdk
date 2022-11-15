@@ -27,7 +27,7 @@ const badge = (lib, text) => {
 }
 
 const jsdelivLink = (lib) => {
-    return `[![](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge/?target=_blank)](https://www.jsdelivr.com/package/npm/${lib}-vanilla)`;
+    return `[![](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge)](https://www.jsdelivr.com/package/npm/${lib}-vanilla/?target=_blank)`;
 }
 
 const libs = (await listDirsRelative('packages', false)).map(lib => lib.replace('packages/', ''));
