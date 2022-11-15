@@ -130,8 +130,8 @@ There are currently three environments can be tested on, each of which can be ge
 | React | `yarn tool:genReact` | http://localhost:4003
 | NodeJs | `yarn tool:genNodejs` | `yarn nx run nodejs:serve`
 
-> Note: Personally I like to use the "Restore Terminal" VSCode plugin to automatically open all these environments.
-<div style="width:100%;height:0px;position:relative;padding-bottom:58.158%;"><iframe src="https://streamable.com/e/5g52m4" frameborder="0" width="100%" height="100%" allowfullscreen style="width:100%;height:100%;position:absolute;left:0px;top:0px;overflow:hidden;"></iframe></div>
+> Note: Personally I like to use the "Restore Terminal" VSCode plugin to automatically open all these environments. See [Video](https://streamable.com/e/5g52m4)
+
 ## Opening test apps
 
 
