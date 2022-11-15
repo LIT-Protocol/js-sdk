@@ -35,8 +35,7 @@ const getSize = (lib) => {
 };
 
 const getNpm = (lib) => {
-
-    return `![https://www.npmjs.com/package/${lib}](https://img.shields.io/npm/dw/${lib}?label=NPM)`;
+    return `<a href="https://www.npmjs.com/package/${lib}"><img src="https://img.shields.io/npm/dw/${lib}?label=NPM"/></a>`;
 }
 
 const libs = (await listDirsRelative('packages', false)).map(lib => lib.replace('packages/', ''));
@@ -55,7 +54,7 @@ libs.map(lib => {
     const _tag = badge(lib, tags[0]);
     const _version = version;
     // const _size = getSize(name);
-    const _download = `${getNpm(name)}<br/>jsDelivr`;
+    const _download = `${getNpm(name)}<br/>${_vanillaJs}`;
 
     const content = `| ${_package} | ${_tag} | ${_version} | ${_download}`;
 
