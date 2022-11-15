@@ -27,7 +27,8 @@ const badge = (lib, text) => {
     return `![${lib}](https://img.shields.io/badge/-${text}-${color} "${lib}")`;
 }
 
-const jsdelivLink = (lib) => {
+const CDNLink = (lib) => {
+    return `<a href="https://unpkg.com/${lib}-vanilla/${lib.split('/')[1]}.js">Vanilla JS</a>`;
     return `<a target="_blank" href="https://www.jsdelivr.com/package/npm/${lib}-vanilla">Vanilla JS</a>`;
     return `[![](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge)](https://www.jsdelivr.com/package/npm/${lib}-vanilla)`;
 }
@@ -53,7 +54,7 @@ libs.map(lib => {
     const { name, description, version, tags } = pkg;
 
     const _package = `[${name}](packages/${lib})`;
-    const _vanillaJs = jsdelivLink(name);
+    const _vanillaJs = CDNLink(name);
     const _tag = badge(lib, tags[0]);
     const _version = version;
     // const _size = getSize(name);
