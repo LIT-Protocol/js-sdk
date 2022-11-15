@@ -1,6 +1,6 @@
-<center>
+<p align="center">
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
-</center>
+</p>
 
 
 # Packages
