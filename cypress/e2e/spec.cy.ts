@@ -199,9 +199,82 @@ describe('Zip and encrypt string then decrypt zip', () => {
   });
 
   it('gets the decrypted zip content', async () => {
-    const decryptedString = await savedParams.decryptZip["string.txt"].async(
-      "text"
+    const decryptedString = await savedParams.decryptZip['string.txt'].async(
+      'text'
     );
     expect(decryptedString).to.eq('This test is working! Omg!');
   });
 });
+
+describe('Encrypt and decrypt file', () => {
+  it('zip and encrypt files', async () => {
+    // create a new file
+    const file = new File(['Hello, world!'], 'hello.txt', {
+      type: 'text/plain',
+    });
+
+    savedParams.zipFiles = await LitJsSdk.zipAndEncryptFiles([file]);
+
+    expect(savedParams.zipFiles.symmetricKey).to.be.a('Uint8Array');
+  });
+
+  it('turns blob to base 64 string', async () => {
+    const base64 = await LitJsSdk.blobToBase64String(
+      savedParams.zipFiles.encryptedZip
+    );
+    savedParams.encryptedZipBase64 = base64;
+    expect(savedParams.encryptedZipBase64).to.be.a('string');
+  });
+
+  it('saves encryption key', async () => {
+    const encryptedSymmetricKey =
+      await savedParams.litNodeClient.saveEncryptionKey({
+        accessControlConditions: savedParams.accs,
+        symmetricKey: savedParams.zipFiles.symmetricKey,
+        authSig: savedParams.authSig,
+        chain: 'ethereum',
+      });
+
+    savedParams.encryptedSymmetricKey = encryptedSymmetricKey;
+
+    expect(savedParams.encryptedSymmetricKey).to.be.an('Uint8Array');
+  });
+
+  it('gets encryption key', async () => {
+    const toDecrypt = await LitJsSdk.uint8arrayToString(
+      savedParams.encryptedSymmetricKey,
+      'base16'
+    );
+
+    const encryptionKey = await savedParams.litNodeClient.getEncryptionKey({
+      accessControlConditions: savedParams.accs,
+      toDecrypt,
+      authSig: savedParams.authSig,
+      chain: 'ethereum',
+    });
+
+    savedParams.encryptionKey = encryptionKey;
+
+    expect(savedParams.encryptionKey).to.be.a('Uint8Array');
+  });
+
+  it('decrypt file', async() => {
+
+    const blob = LitJsSdk.base64StringToBlob(savedParams.encryptedZipBase64);
+
+    const decryptedZip = await LitJsSdk.decryptFile({
+      file: blob,
+      symmetricKey: savedParams.encryptionKey,
+    });
+
+    savedParams.decryptZip = decryptedZip;
+
+    // turn uint8array into string
+    const decryptedFile = await LitJsSdk.uint8arrayToString(decryptedZip);
+
+    expect(decryptedFile).to.contains('Hello, world!');
+  })
+});
+
+// how many doubles to make a million
+// const doubles = Math.log(1000000) / Math.log(2);
