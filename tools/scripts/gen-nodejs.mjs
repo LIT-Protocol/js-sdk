@@ -22,7 +22,7 @@ const TEMPLATE = {
 }
 
 const files = (await getFiles(DIST_DIR))
-    .filter((file) => ! file.includes('vanilla') && !file.includes('index.zip'))
+    .filter((file) => ! file.includes('vanilla') && !file.includes('index.zip') && !file.includes('.DS_Store'))
 
 const scriptTags = files.map((file) => {
     let varName = file.split('/').pop().replace('.js', '');

@@ -6,7 +6,7 @@
     "access": "public",
     "directory": "../../dist/packages/auth-browser"
   },
-  "gitHead": "2d61c9755df43da7b0dc6fcae36f9bb121ad322f",
+  "gitHead": "96fde26226258980ad062c72683340c743840ae3",
   "peerDependencies": {
     "@walletconnect/ethereum-provider": "^2.1.2",
     "lit-siwe": "^1.1.8",
