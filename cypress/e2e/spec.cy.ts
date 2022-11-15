@@ -294,7 +294,7 @@ describe('Encrypt and zip metadata', () => {
     expect(savedParams.zipBlobBase64).to.be.a('string');
   });
 
-  it('decrypts zip file with metadata', async() => {
+  it('decrypts zip file with metadata', async () => {
     const file = LitJsSdk.base64StringToBlob(savedParams.zipBlobBase64);
 
     const { decryptedFile } = await LitJsSdk.decryptZipFileWithMetadata({
@@ -303,11 +303,37 @@ describe('Encrypt and zip metadata', () => {
       file,
     });
 
-    const decryptedFileString = await LitJsSdk.uint8arrayToString(decryptedFile);
+    const decryptedFileString = await LitJsSdk.uint8arrayToString(
+      decryptedFile
+    );
 
     expect(decryptedFileString).to.contains('Hello, world!');
+  });
+});
 
-  })
+describe('Lit Action', () => {
+  it('Gets JS execution shares', async () => {
+    const litActionCode = `
+      (async () => {
+        console.log("Hello World!");
+      })();
+      `;
+
+    const params = {
+      authSig: savedParams.authSig,
+      jsParams: {},
+      code: litActionCode,
+    };
+
+    const reqBody = await savedParams.litNodeClient.getLitActionRequestBody(params);
+
+    const res = await savedParams.litNodeClient.getJsExecutionShares(
+      'https://serrano.litgateway.com:7379',
+      reqBody
+    );
+
+    expect(res).to.have.property('logs').and.contains('Hello World!');
+  });
 });
 
 // how many doubles to make a million
