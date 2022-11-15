@@ -38,10 +38,11 @@ Download: <a href="https://nx.dev/core-features/integrate-with-editors">https://
 <summary>Restore Terminal</summary>
 
 Download: <a href="https://marketplace.visualstudio.com/items?itemName=EthanSK.restore-terminals">https://marketplace.visualstudio.com/items?itemName=EthanSK.restore-terminals</a>
+See [Video](https://streamable.com/e/5g52m4)
 
 ```js
   "restoreTerminals.terminals": [
-    {
+    {See [Video](https://streamable.com/e/5g52m4)
       "splitTerminals": [
         // {
         //   "name": "nx graph",
