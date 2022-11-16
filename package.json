@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/sdk",
+  "name": "@lit-protocol/js-sdk",
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
@@ -21,6 +21,7 @@
     "tool:genReact": "yarn node ./tools/scripts/gen-react.mjs",
     "tool:genNodejs": "yarn node tools/scripts/gen-nodejs.mjs",
     "tool:genLib": "yarn node tools/scripts/gen-lib.mjs",
+    "tool:genDoc": "node tools/scripts/gen-doc.mjs",
     "tool:genReadme": "yarn node tools/scripts/gen-readme.mjs",
     "tool:buildHtml": "yarn node tools/scripts/build-html.mjs && cd dist/apps/html && vercel",
     "graph": "nx graph",

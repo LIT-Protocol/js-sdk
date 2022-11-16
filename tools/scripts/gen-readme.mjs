@@ -29,8 +29,8 @@ const badge = (lib, text) => {
 
 const CDNLink = (lib) => {
     return `<a href="https://cdn.jsdelivr.net/npm/${lib}-vanilla/${lib.split('/')[1]}.js">Vanilla JS</a>`;
-    return `<a target="_blank" href="https://www.jsdelivr.com/package/npm/${lib}-vanilla">Vanilla JS</a>`;
-    return `[![](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge)](https://www.jsdelivr.com/package/npm/${lib}-vanilla)`;
+    // return `<a target="_blank" href="https://www.jsdelivr.com/package/npm/${lib}-vanilla">Vanilla JS</a>`;
+    // return `[![](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge)](https://www.jsdelivr.com/package/npm/${lib}-vanilla)`;
 }
 
 const getSize = (lib) => {
@@ -53,7 +53,8 @@ libs.map(lib => {
     const pkg = JSON.parse(readFileSync(`packages/${lib}/package.json`, 'utf8'));
     const { name, description, version, tags } = pkg;
 
-    const _package = `[${name}](packages/${lib})`;
+    const _packagePath = 'https://github.com/LIT-Protocol/js-sdk/tree/master/';
+    const _package = `[${name}](${_packagePath}packages/${lib})`;
     const _vanillaJs = CDNLink(name);
     const _tag = badge(lib, tags[0]);
     const _version = version;

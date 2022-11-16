@@ -5,7 +5,7 @@
 // *******************************************************************************************************
 import fs from 'fs';
 import { exit } from "process";
-import { writeFile, getFiles, greenLog, createDirs, wait, runCommand } from "./utils.mjs";
+import { writeFile, getFiles, greenLog, wait, runCommand } from "./utils.mjs";
 import { GEN_STYLE, GEN_FOOTER_SCRIPTS, getConsoleTemplate } from './gen-utils.mjs';
 
 // ------ Config ------

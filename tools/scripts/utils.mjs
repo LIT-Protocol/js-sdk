@@ -155,6 +155,6 @@ export const findImportsFromDir = async (dir) => {
 
 export const createDirs = (path) => {
     if (!fs.existsSync(path)) {
-        fs.mkdirSync((path.split('/').slice(0, -1))[0], { recursive: true });
+        fs.mkdirSync(path, { recursive: true });
     }
 }

@@ -10,7 +10,6 @@
     "e2e": "apps/e2e",
     "ecdsa-sdk": "packages/ecdsa-sdk",
     "encryption": "packages/encryption",
-    "example-nextjs-js": "apps/example-nextjs-js",
     "html": "apps/html",
     "lit-node-client": "packages/lit-node-client",
     "misc": "packages/misc",

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { authBrowser } from './auth-browser';
 
 describe('authBrowser', () => {

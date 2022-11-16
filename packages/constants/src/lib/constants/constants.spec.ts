@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
     LIT_CHAINS,
     LIT_COSMOS_CHAINS,
