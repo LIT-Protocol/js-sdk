@@ -26,6 +26,11 @@ Package | Category | Version | Download
 | [@lit-protocol/misc-browser](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc-browser) | ![misc-browser](https://img.shields.io/badge/-browser-E98869 "misc-browser") | 0.1.78 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc-browser">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/misc-browser-vanilla/misc-browser.js">Vanilla JS</a>
 
 <!-- autogen:package:end -->
+
+Docs: http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
+Demo(HTML): http://docs.lit-js-sdk-v2.litprotocol.com/
+
+
 </div>
 
 # Recommended VSCode Extensions

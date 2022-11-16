@@ -72,6 +72,7 @@ import {
 } from '@lit-protocol/uint8arrays';
 
 /** ---------- Main Export Class ---------- */
+
 export class LitNodeClient implements ILitNodeClient {
   config: LitNodeClientConfig;
   connectedNodes: SetConstructor | Set<any> | any;
