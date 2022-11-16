@@ -28,7 +28,7 @@ Package | Category | Version | Download
 <!-- autogen:package:end -->
 
 Docs: http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
-Demo(HTML): http://docs.lit-js-sdk-v2.litprotocol.com/
+Demo(HTML): http://test.lit-js-sdk-v2.html.litprotocol.com/
 
 
 </div>
