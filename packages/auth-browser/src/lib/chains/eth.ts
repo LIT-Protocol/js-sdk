@@ -33,8 +33,8 @@ import * as nacl from 'tweetnacl';
 import { isBrowser, isNode, log, numberToHex, throwError } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 
-console.log("naclUtil:", naclUtil);
-console.log("nacl:", nacl);
+// console.log("naclUtil:", naclUtil);
+// console.log("nacl:", nacl);
 
 // -- fix import issues
 // let _nacl = nacl === undefined ? nacl['default'] : nacl;

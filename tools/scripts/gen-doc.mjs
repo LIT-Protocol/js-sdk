@@ -52,7 +52,7 @@ if (FLAG === '--open') {
 
     redLog(`If this is your first time running, you might have to run 'cd doc && vercel' to setup manually.`);
     greenLog("Trying to push to Vercel, takes about a minute. If not, there must be an error.");
-    const link = await runCommand(`vercel --cwd=doc --prod`);
+    const link = await runCommand(`cd doc && vercel --prod`);
     console.log("Deployed:", link);
     exit();
 } else {

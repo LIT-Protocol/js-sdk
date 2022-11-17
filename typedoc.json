@@ -13,5 +13,6 @@
     "./packages/misc-browser/src/index.ts",
     "./packages/uint8arrays/src/index.ts"
   ],
-  "out": "doc"
+  "out": "doc",
+  "skipErrorChecking": true
 }

@@ -1,6 +1,4 @@
 import {
-  ALL_LIT_CHAINS,
-  CheckAndSignAuthParams,
   DecryptFileProps,
   DecryptZipFileWithMetadata,
   DecryptZipFileWithMetadataProps,
