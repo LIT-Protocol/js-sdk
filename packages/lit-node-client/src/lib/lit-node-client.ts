@@ -1648,7 +1648,7 @@ export class LitNodeClient implements ILitNodeClient {
    *
    * @returns { Promise<string> }
    */
-  validate_and_sign_ecdsa = async (
+   validateAndSignEcdsa = async (
     params: ValidateAndSignECDSA
   ): Promise<string | undefined> => {
     // ========== Validate Params ==========
@@ -1786,4 +1786,7 @@ export class LitNodeClient implements ILitNodeClient {
 
     return promise;
   };
+
+  /** ============================== SESSION ============================== */
+
 }
