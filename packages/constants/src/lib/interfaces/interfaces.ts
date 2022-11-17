@@ -340,7 +340,7 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
 
 export interface ExecuteJsProps extends JsonExecutionRequest {
     // A boolean that defines if debug info will be returned or not.
-    debug: boolean;
+    debug?: boolean;
 }
 
 export interface JsonSaveEncryptionKeyRequest {
