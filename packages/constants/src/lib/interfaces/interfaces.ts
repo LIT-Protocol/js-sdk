@@ -47,7 +47,7 @@ export interface FunctionABI {
     stateMutability: string;
     inputs: Array<ABIParams | any>;
     outputs: Array<ABIParams | any>;
-    constant: string | boolean;
+    constant?: string | boolean;
     payable?: boolean;
 }
 
@@ -56,7 +56,6 @@ export interface AccsEVMParams extends AccsRegularParams {
     contractAddress: string;
     functionName: string;
     functionParams: any[];
-    
 }
 
 export interface AccsCOSMOSParams extends AccsRegularParams {

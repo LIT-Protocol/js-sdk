@@ -55,7 +55,8 @@
       "outputs": ["coverage/packages/access-control-conditions"],
       "options": {
         "jestConfig": "packages/access-control-conditions/jest.config.ts",
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "watch": true
       }
     }
   },

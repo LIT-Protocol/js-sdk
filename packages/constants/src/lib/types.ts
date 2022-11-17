@@ -9,11 +9,12 @@ export type AccessControlConditions = AccsRegularParams[] | AccsDefaultParams[];
 export type EvmContractConditions = AccsEVMParams[];
 export type SolRpcConditions = AccsSOLV2Params[];
 export type UnifiedAccessControlConditions =
-  | AccsRegularParams[]
-  | AccsDefaultParams[]
-  | AccsEVMParams[]
-  | AccsSOLV2Params[]
-  | AccsCOSMOSParams[];
+  (AccsRegularParams
+  | AccsDefaultParams
+  | AccsEVMParams
+  | AccsSOLV2Params
+  | AccsCOSMOSParams
+  | AccsOperatorParams)[];
 
 export type JsonRequest = JsonExecutionRequest | JsonSignChainDataRequest;
 

@@ -6,6 +6,7 @@ import {
   AccsSOLV2Params,
   HumanizedAccsProps,
   LIT_ERROR,
+  UnifiedAccessControlConditions,
 } from '@lit-protocol/constants';
 import { decimalPlaces, log, throwError } from '@lit-protocol/misc';
 import { formatEther, formatUnits } from 'ethers/lib/utils';
@@ -120,6 +121,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   // -- execute
   const promises = await Promise.all(
     fixedConditions.map(async (acc: any) => {
+      
       if (Array.isArray(acc)) {
         // this is a group.  recurse.
         const group = await humanizeEvmBasicAccessControlConditions({
@@ -316,6 +318,7 @@ export const humanizeEvmContractConditions = async ({
       return msg;
     })
   );
+
   return promises.join('');
 };
 
@@ -487,13 +490,7 @@ export const humanizeUnifiedAccessControlConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  unifiedAccessControlConditions: Array<
-    | AccsRegularParams
-    | AccsDefaultParams
-    | AccsSOLV2Params
-    | AccsEVMParams
-    | AccsCOSMOSParams
-  >;
+  unifiedAccessControlConditions: UnifiedAccessControlConditions;
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
