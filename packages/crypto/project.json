@@ -63,6 +63,17 @@
         "jestConfig": "packages/crypto/jest.config.ts",
         "passWithNoTests": true
       }
+    },
+    "testWatch": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/crypto"
+      ],
+      "options": {
+        "jestConfig": "packages/crypto/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
     }
   },
   "tags": []

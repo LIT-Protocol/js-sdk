@@ -63,6 +63,17 @@
         "jestConfig": "packages/encryption/jest.config.ts",
         "passWithNoTests": true
       }
+    },
+    "testWatch": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/encryption"
+      ],
+      "options": {
+        "jestConfig": "packages/encryption/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
     }
   },
   "tags": []

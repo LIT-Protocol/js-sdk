@@ -595,3 +595,40 @@ export interface SessionKeyPair{
     publicKey: string,
     secretKey: string,
 };
+
+/** ========== Session ========== */
+
+// pub struct AuthMethod {
+//     pub auth_method_type: u32,
+//     pub access_token: String,
+// }
+export interface AuthMethod {
+    authMethodType: number,
+    accessToken: string,
+}
+
+// pub struct JsonSignSessionKeyRequest {
+//     pub session_key: String,
+//     pub auth_methods: Vec<AuthMethod>,
+//     pub pkp_public_key: String,
+//     pub auth_sig: Option<AuthSigItem>,
+//     pub siwe_message: String,
+// }
+export interface SignSessionKeyProp{
+
+    // The session key to sign
+    sessionKey: string;
+
+    // The auth methods to use to sign the session key
+    authMethods: AuthMethod[];
+
+    // The public key of the PKP
+    pkpPublicKey: string;
+
+    // The auth sig of the user.  Returned via the checkAndSignAuthMessage function
+    authSig?: JsonAuthSig;
+
+    // The siwe message
+    siweMessage: string;
+
+}

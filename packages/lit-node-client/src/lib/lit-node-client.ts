@@ -42,6 +42,7 @@ import {
   SendNodeCommand,
   SignedChainDataToken,
   SignedData,
+  SignSessionKeyProp,
   SignWithECDSA,
   SigShare,
   SIGTYPE,
@@ -1788,5 +1789,9 @@ export class LitNodeClient implements ILitNodeClient {
   };
 
   /** ============================== SESSION ============================== */
+  signSessionKey = async (params: SignSessionKeyProp) => {
+    
+  }
+
 
 }

@@ -75,6 +75,8 @@ export const throwError = ({
 
 declare global {
   var litConfig: any;
+  var wasmExport: any;
+  var wasmECDSA: any;
 }
 
 export const throwRemovedFunctionError = (functionName: string) => {
