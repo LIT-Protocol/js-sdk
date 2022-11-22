@@ -18,6 +18,8 @@ import {
   ExecuteJsProps,
   ExecuteJsResponse,
   FormattedMultipleAccs,
+  GetSessionSigsProps,
+  GetSignSessionKeySharesProp,
   HandshakeWithSgx,
   ILitNodeClient,
   JsonEncryptionRetrieveRequest,
@@ -40,6 +42,7 @@ import {
   NodeShare,
   RejectedNodePromises,
   SendNodeCommand,
+  SessionRequestBody,
   SignedChainDataToken,
   SignedData,
   SignSessionKeyProp,
@@ -71,6 +74,10 @@ import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
+
+import { computeAddress } from '@ethersproject/transactions';
+import { SiweMessage } from 'lit-siwe';
+import { joinSignature } from 'ethers/lib/utils';
 
 /** ---------- Main Export Class ---------- */
 
@@ -122,8 +129,7 @@ export class LitNodeClient implements ILitNodeClient {
    *
    */
   overrideConfigsFromLocalStorage = (): void => {
-    
-    if( isNode() ) return;
+    if (isNode()) return;
 
     const storageKey = 'LitNodeClientConfig';
     const storageConfigOrError = getStorageItem(storageKey);
@@ -137,7 +143,7 @@ export class LitNodeClient implements ILitNodeClient {
     // -- execute
     const storageConfig = JSON.parse(storageConfigOrError.result);
     // this.config = override(this.config, storageConfig);
-    this.config = { ...this.config, ...storageConfig }
+    this.config = { ...this.config, ...storageConfig };
   };
 
   /**
@@ -502,6 +508,86 @@ export class LitNodeClient implements ILitNodeClient {
    * @returns { any }
    *
    */
+  getSessionSignatures = (signedData: Array<any>): any => {
+    // -- prepare
+    let signatures: any;
+
+    // TOOD: get keys of signedData
+    const keys = Object.keys(signedData[0]);
+
+    // -- execute
+    keys.forEach((key: any) => {
+      const shares = signedData.map((r: any) => r[key]);
+
+      shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
+
+      const sigShares: Array<SigShare> = shares.map((s: any) => ({
+        sigType: s.sigType,
+        shareHex: s.signatureShare,
+        shareIndex: s.shareIndex,
+        localX: s.localX,
+        localY: s.localY,
+        publicKey: s.publicKey,
+        dataSigned: s.dataSigned,
+        siweMessage: s.siweMessage,
+      }));
+
+      console.log('sigShares', sigShares);
+
+      const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
+
+      // -- validate if this.networkPubKeySet is null
+      if (this.networkPubKeySet === null) {
+        throwError({
+          message: 'networkPubKeySet cannot be null',
+          error: LIT_ERROR.PARAM_NULL_ERROR,
+        });
+        return;
+      }
+
+      // -- validate if signature type is BLS or ECDSA
+      if (sigType !== 'BLS' && sigType !== 'ECDSA') {
+        throwError({
+          message: 'signature type is not BLS or ECDSA',
+          error: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE,
+        });
+        return;
+      }
+
+      let signature: any;
+
+      if (sigType === SIGTYPE.BLS) {
+        signature = combineBlsShares(sigShares, this.networkPubKeySet);
+      } else if (sigType === SIGTYPE.ECDSA) {
+        signature = combineEcdsaShares(sigShares);
+      }
+
+      const encodedSig = joinSignature({
+        r: '0x' + signature.r,
+        s: '0x' + signature.s,
+        v: signature.recid,
+      });
+
+      signatures[key] = {
+        ...signature,
+        signature: encodedSig,
+        publicKey: mostCommonString(sigShares.map((s: any) => s.publicKey)),
+        dataSigned: mostCommonString(sigShares.map((s: any) => s.dataSigned)),
+        siweMessage: mostCommonString(sigShares.map((s) => s.siweMessage)),
+      };
+    });
+
+    return signatures;
+  };
+  /**
+   *
+   * Get signatures from signed data
+   *
+   * @param { Array<any> } signedData
+   *
+   * @returns { any }
+   *
+   */
   getSignatures = (signedData: Array<any>): any => {
     // -- prepare
     let signatures: any;
@@ -575,7 +661,6 @@ export class LitNodeClient implements ILitNodeClient {
    *
    */
   getDecryptions = async (decryptedData: Array<any>): Promise<Array<any>> => {
-
     // -- prepare params
     let decryptions: any;
 
@@ -1405,7 +1490,6 @@ export class LitNodeClient implements ILitNodeClient {
   getEncryptionKey = async (
     params: JsonEncryptionRetrieveRequest
   ): Promise<Uint8Array | undefined> => {
-
     // -- validate if it's ready
     if (!this.ready) {
       const message =
@@ -1649,7 +1733,7 @@ export class LitNodeClient implements ILitNodeClient {
    *
    * @returns { Promise<string> }
    */
-   validateAndSignEcdsa = async (
+  validateAndSignEcdsa = async (
     params: ValidateAndSignECDSA
   ): Promise<string | undefined> => {
     // ========== Validate Params ==========
@@ -1775,7 +1859,7 @@ export class LitNodeClient implements ILitNodeClient {
           globalThis.litNodeClient = this;
 
           // browser only
-          if ( isBrowser() ) {
+          if (isBrowser()) {
             document.dispatchEvent(new Event('lit-ready'));
           }
 
@@ -1789,9 +1873,91 @@ export class LitNodeClient implements ILitNodeClient {
   };
 
   /** ============================== SESSION ============================== */
+
+  /**
+   * Sign a session key using a PKP
+   * @returns {Object} An object containing the resulting signature.
+   */
+
   signSessionKey = async (params: SignSessionKeyProp) => {
-    
-  }
+    // ========== Validate Params ==========
+    // -- validate: If it's NOT ready
+    if (!this.ready) {
+      const message =
+        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
+      throwError({
+        message,
+        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+      });
+    }
 
+    const pkpEthAddress = computeAddress(params.pkpPublicKey);
+
+    const _expiration =
+      params.expiration ||
+      new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    let siweMessage: SiweMessage = new SiweMessage({
+      domain: globalThis.location.host,
+      address: pkpEthAddress,
+      statement: 'Lit Protocol PKP session signature',
+      uri: params.sessionKey,
+      version: '1',
+      chainId: 1,
+      expirationTime: _expiration,
+      resources: params.resources,
+    });
+
+    let siweMessageStr: string = siweMessage.prepareMessage();
+
+    let reqBody: SessionRequestBody = {
+      sessionKey: params.sessionKey,
+      authMethods: params.authMethods,
+      pkpPublicKey: params.pkpPublicKey,
+      authSig: params.authSig,
+      siweMessage: siweMessageStr,
+    };
+
+    // ========== Node Promises ==========
+    const nodePromises = this.getNodePromises((url: string) => {
+      return this.getSignSessionKeyShares({
+        body: reqBody,
+      });
+    });
+
+    // -- resolve promises
+    const res = await this.handleNodePromises(nodePromises);
+
+    // -- case: promises rejected
+    if (res.success === false) {
+      this.throwNodeError(res as RejectedNodePromises);
+      return;
+    }
+
+    const responseData = (res as SuccessNodePromises).values;
+
+    log('responseData', JSON.stringify(responseData, null, 2));
+
+    // ========== Extract shares from response data ==========
+    // -- 1. combine signed data as a list, and get the signatures from it
+    const signedDataList = responseData.map(
+      (r: any) => (r as SignedData).signedData
+    );
+
+    const signatures = this.getSessionSignatures(signedDataList);
+
+    const { sessionSig } = signatures;
+
+    return {
+      sig: sessionSig.signature,
+      derivedVia: 'web3.eth.personal.sign via Lit PKP',
+      signedMessage: sessionSig.siweMessage,
+      address: computeAddress(sessionSig.publicKey),
+    };
+  };
+
+  getSignSessionKeyShares = async (params: GetSignSessionKeySharesProp) => {};
+
+  getSessionSigs = async (params: GetSessionSigsProps) => {};
 }
