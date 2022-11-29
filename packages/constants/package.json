@@ -1,11 +1,11 @@
 {
   "name": "@lit-protocol/constants",
-  "version": "0.1.80",
+  "version": "0.1.81",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/constants"
   },
-  "gitHead": "96fde26226258980ad062c72683340c743840ae3",
+  "gitHead": "cb68c2323251ce02e9202013f445bef4498899d4",
   "tags": [
     "universal"
   ]
