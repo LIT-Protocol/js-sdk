@@ -334,6 +334,179 @@ describe('Lit Action', () => {
 
     expect(res).to.have.property('logs').and.contains('Hello World!');
   });
+
+  it('Gets JS execution shared for IPFS code', async () => {
+    const params = {
+      authSig: savedParams.authSig,
+      jsParams: {},
+      ipfsId: "QmTLZxMgjHoZiNZyGnS4CXjSjbpZSnie3y32HoqK1ykmkW",
+    };
+
+    const reqBody = await savedParams.litNodeClient.getLitActionRequestBody(params);
+    const res = await savedParams.litNodeClient.getJsExecutionShares(
+      'https://serrano.litgateway.com:7379',
+      reqBody
+    );
+
+    expect(res).to.have.property('response').and.contains('0x352e559b06e9c6c72edbf5af2bf52c61f088db71');
+  });
+
+  it('Gets JWT params', () => {
+    const jwtParams = savedParams.litNodeClient.getJWTParams();
+
+    expect(jwtParams).to.have.property('exp').and.to.be.a('number');
+    expect(jwtParams).to.have.property('iat').and.to.be.a('number');
+  });
+
+  it('Format accessControlConditions', () => {
+    const { iat, exp } = savedParams.litNodeClient.getJWTParams();
+    const params = {
+      accessControlConditions: savedParams.accs,
+      chain: 'ethereum',
+      authSig: savedParams.authSig,
+      iat,
+      exp,
+    }
+    const formattedAcc = savedParams.litNodeClient.getFormattedAccessControlConditions(params);
+    expect(formattedAcc).to.have.property('error').and.equal(false);
+    const acc = [ // should be same as savedParams.accs
+      {
+        contractAddress: '',
+        standardContractType: '',
+        chain: 'ethereum',
+        method: 'eth_getBalance',
+        parameters: [':userAddress', 'latest'],
+        returnValueTest: {
+          comparator: '>=',
+          value: '0',
+        },
+      },
+    ];
+    expect(formattedAcc).to.have.property('formattedAccessControlConditions').and.deep.members(acc);
+  });
+
+  it('Format evmContractConditions', () => {
+    const evmContractConditions = [
+      {
+        contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
+        functionName: "balanceOf",
+        functionParams: [":userAddress", "8"],
+        functionAbi: {
+          type: "function",
+          stateMutability: "view",
+          outputs: [
+            {
+              type: "uint256",
+              name: "",
+              internalType: "uint256",
+            },
+          ],
+          name: "balanceOf",
+          inputs: [
+            {
+              type: "address",
+              name: "account",
+              internalType: "address",
+            },
+            {
+              type: "uint256",
+              name: "id",
+              internalType: "uint256",
+            },
+          ],
+        },
+        chain: 'mumbai',
+        returnValueTest: {
+          key: "",
+          comparator: ">",
+          value: "0",
+        },
+      },
+    ];
+
+    const exptectedEvmContractConditions = [
+      {
+        contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
+        functionName: "balanceOf",
+        functionParams: [":userAddress", "8"],
+        functionAbi: {
+          // type: "function",
+          constant: false,
+          stateMutability: "view",
+          outputs: [
+            {
+              type: "uint256",
+              name: "",
+              // internalType: "uint256",
+            },
+          ],
+          name: "balanceOf",
+          inputs: [
+            {
+              type: "address",
+              name: "account",
+              // internalType: "address",
+            },
+            {
+              type: "uint256",
+              name: "id",
+              // internalType: "uint256",
+            },
+          ],
+        },
+        chain: 'mumbai',
+        returnValueTest: {
+          key: "",
+          comparator: ">",
+          value: "0",
+        },
+      },
+    ];
+
+    const { iat, exp } = savedParams.litNodeClient.getJWTParams();
+    const params = {
+      evmContractConditions,
+      chain: 'mumbai',
+      authSig: savedParams.authSig,
+      iat,
+      exp,
+    }
+    const formattedEvmConditions = savedParams.litNodeClient.getFormattedAccessControlConditions(params);
+    expect(formattedEvmConditions).to.have.property('error').and.equal(false);
+    expect(formattedEvmConditions).to.have.property('formattedEVMContractConditions').and.deep.members(exptectedEvmContractConditions);
+  });
+
+  it('Format solRpcConditions', async () => {
+    const solRpcConditions = [
+      {
+        method: "getBalance",
+        params: [":userAddress"],
+        pdaParams: [],
+        pdaInterface: { offset: 0, fields: {} },
+        pdaKey: "",
+        chain: "solana",
+        returnValueTest: {
+          key: "",
+          comparator: ">=",
+          value: "100000000", // equals 0.1 SOL
+        },
+      },
+    ];
+
+    const expectedHashArray = [-914009333, -1738606745, 413792910, 1300522606, 917018267, -1524535853, 1804555918, -1453561713];
+
+    const { iat, exp } = savedParams.litNodeClient.getJWTParams();
+    const params = {
+      solRpcConditions,
+      chain: 'solana',
+      authSig: savedParams.authSig,
+      iat,
+      exp,
+    }
+    const formattedSolConditions = await savedParams.litNodeClient.getHashedAccessControlConditions(params);
+    const hashArray = Array.from(new Int32Array(formattedSolConditions));
+    expect(hashArray).to.have.all.members(expectedHashArray);
+  });
 });
 
 // how many doubles to make a million
