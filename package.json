@@ -23,7 +23,7 @@
     "tool:genLib": "yarn node tools/scripts/gen-lib.mjs",
     "tool:genDoc": "node tools/scripts/gen-doc.mjs",
     "tool:genReadme": "yarn node tools/scripts/gen-readme.mjs",
-    "tool:buildHtml": "yarn node tools/scripts/build-html.mjs && cd dist/apps/html && vercel",
+    "tool:buildHtml": "yarn node tools/scripts/build-html.mjs && cd dist/apps/html && vercel --prod",
     "graph": "nx graph",
     "npm:login": "npm login",
     "cy:open:html": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4002 cypress open",
