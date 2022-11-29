@@ -181,7 +181,7 @@ export function HelperMixin<Base extends Class>(base: Base) {
       resources: Array<any>
     ): Array<any> => {
       if (!capabilities || capabilities.length == 0) {
-        capabilities = resources.map((resource) => {
+        capabilities = resources.map((resource: any) => {
           const { protocol, resourceId } = parseResource({ resource });
 
           return `${protocol}Capability://*`;
@@ -305,7 +305,7 @@ export function HelperMixin<Base extends Class>(base: Base) {
         const { protocol, resourceId } = parseResource({ resource });
 
         // check if we have blanket permissions or if we authed the specific resource for the protocol
-        const permissionsFound = sessionCapabilities.some((capability) => {
+        const permissionsFound = sessionCapabilities.some((capability: any) => {
           const capabilityParts = parseResource({ resource: capability });
           return (
             capabilityParts.protocol === protocol &&

@@ -3,12 +3,7 @@
     "sourceRoot": "apps/e2e/src",
     "projectType": "application",
     "targets": {
-      "test":{
-        "executor": "nx:run-commands",
-        "options": {
-          "command": "yarn start-test 'yarn nx run example-nextjs-js:serve' 4200 'SKIP_METAMASK_SETUP=true SYNPRESS_LOCAL_TEST=true node ./apps/e2e/synpress.js run --configFile=./apps/e2e/synpress.config.js --noExit'"
-        }
-      }
+
     },
     "tags": []
   }

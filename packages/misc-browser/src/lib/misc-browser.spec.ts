@@ -1,7 +1,6 @@
-// import { miscBrowser } from './misc-browser';
 
-// describe('miscBrowser', () => {
-//   it('should work', () => {
-//     expect(miscBrowser()).toEqual('misc-browser');
-//   });
-// });
+describe('miscBrowser', () => {
+  it('should work', () => {
+    expect(1).toBe(1);
+  });
+});

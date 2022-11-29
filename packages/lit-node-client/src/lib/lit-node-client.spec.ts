@@ -9,7 +9,8 @@ import { LitNodeClient } from './lit-node-client';
 import { hashResourceIdForSigning } from '@lit-protocol/access-control-conditions';
 
 globalThis.fetch = fetch;
-// import * as nacl from '@lit-protocol/nacl';
+import { nacl } from '@lit-protocol/nacl';
+globalThis.nacl = nacl;
 
 import crypto, { createHash } from 'crypto';
 import { getSessionKeyUri } from '@lit-protocol/auth-browser';
@@ -97,23 +98,23 @@ describe('litNodeClient', () => {
     );
   });
 
-  it('gets session key', () => {
-    let sessionKey = litNodeClient.getSessionKey();
+  // it('gets session key', () => {
+  //   let sessionKey = litNodeClient.getSessionKey();
 
-    // sessionKey has 'publicKey' property
-    expect(sessionKey).toHaveProperty('publicKey');
-  });
+  //   // sessionKey has 'publicKey' property
+  //   expect(sessionKey).toHaveProperty('publicKey');
+  // });
 
-  it('gets sessionKeyUri', () => {
-    let sessionKey = litNodeClient.getSessionKey();
-    sessionKey.publicKey =
-      '41cf12fde8e8dd8ba7e1f9f443bbf8a60be6aae4771109083f0378511f9ca599';
-    let sessionKeyUri = getSessionKeyUri({ publicKey: sessionKey.publicKey });
+  // it('gets sessionKeyUri', () => {
+  //   let sessionKey = litNodeClient.getSessionKey();
+  //   sessionKey.publicKey =
+  //     '41cf12fde8e8dd8ba7e1f9f443bbf8a60be6aae4771109083f0378511f9ca599';
+  //   let sessionKeyUri = getSessionKeyUri({ publicKey: sessionKey.publicKey });
 
-    expect(sessionKeyUri).toBe(
-      'lit:session:41cf12fde8e8dd8ba7e1f9f443bbf8a60be6aae4771109083f0378511f9ca599'
-    );
-  });
+  //   expect(sessionKeyUri).toBe(
+  //     'lit:session:41cf12fde8e8dd8ba7e1f9f443bbf8a60be6aae4771109083f0378511f9ca599'
+  //   );
+  // });
 
   it('gets capabilities', async () => {
     const path = '/bglyaysu8rvblxlk7x0ksn';
