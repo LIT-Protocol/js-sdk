@@ -398,7 +398,7 @@ export interface ILitNodeClient {
      *
      * @returns { Promise<string> }
      */
-    validate_and_sign_ecdsa(
+    validateAndSignEcdsa(
         params: ValidateAndSignECDSA
     ): Promise<string | undefined>;
 

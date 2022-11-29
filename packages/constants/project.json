@@ -69,6 +69,15 @@
         "jestConfig": "packages/constants/jest.config.ts",
         "passWithNoTests": true
       }
+    },
+    "testWatch": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/constants"],
+      "options": {
+        "jestConfig": "packages/constants/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
     }
   },
   "tags": []

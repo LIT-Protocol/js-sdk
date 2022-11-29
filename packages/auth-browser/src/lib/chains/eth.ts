@@ -14,6 +14,8 @@ import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { hexlify } from '@ethersproject/bytes';
 import { verifyMessage } from '@ethersproject/wallet';
+
+// @ts-ignore
 import LitConnectModal from 'lit-connect-modal';
 
 import {
@@ -129,7 +131,7 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
     const keys = Object.keys(LIT_CHAINS);
     const entries = Object.entries(LIT_CHAINS);
     const hexIds = Object.values(LIT_CHAINS).map(
-        (chain) => '0x' + chain.chainId.toString(16)
+        (chain: any) => '0x' + chain.chainId.toString(16)
     );
 
     // -- validate:: must begin with 0x
@@ -151,7 +153,7 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
     // -- search
     const chainName =
         entries.find(
-            (data) => '0x' + data[1].chainId.toString(16) === chainHexId
+            (data: any) => '0x' + data[1].chainId.toString(16) === chainHexId
         ) || null;
 
     // -- success case
@@ -691,7 +693,7 @@ export const signMessage = async ({
     }
 
     log('pausing...');
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve: any) => setTimeout(resolve, 500));
     log('signing with ', account);
 
     const signature = await signMessageAsync(web3.getSigner(), account, body);

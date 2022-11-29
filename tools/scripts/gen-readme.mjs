@@ -5,7 +5,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { exit } from 'process';
-import { listDirsRelative } from './utils.mjs';
+import { listDirsRelative, redLog } from './utils.mjs';
 
 const readmePath = join('README.md');
 const readme = readFileSync(readmePath, 'utf8');
@@ -56,7 +56,13 @@ libs.map(lib => {
     const _packagePath = 'https://github.com/LIT-Protocol/js-sdk/tree/master/';
     const _package = `[${name}](${_packagePath}packages/${lib})`;
     const _vanillaJs = CDNLink(name);
-    const _tag = badge(lib, tags[0]);
+    let _tag;
+
+    try{
+       _tag = badge(lib, tags[0]);
+    }catch(e){
+        redLog(`${name}/package.json doesn't have "tags" property`);
+    }
     const _version = version;
     // const _size = getSize(name);
     const _download = `${getNpm(name)}<br/>${_vanillaJs}`;

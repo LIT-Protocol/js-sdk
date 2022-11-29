@@ -66,7 +66,7 @@ export const base64StringToBlob = (base64String: string): Blob => {
 export const fileToDataUrl = (
   file: File
 ): Promise<string | ArrayBuffer | null> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve: any) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       resolve(reader.result);
