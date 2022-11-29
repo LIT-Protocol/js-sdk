@@ -28,7 +28,7 @@ const badge = (lib, text) => {
 }
 
 const CDNLink = (lib) => {
-    return `<a href="https://cdn.jsdelivr.net/npm/${lib}-vanilla/${lib.split('/')[1]}.js">Vanilla JS</a>`;
+    return `<a href="https://cdn.jsdelivr.net/npm/${lib}-vanilla/${lib.split('/')[1]}.min.js">Vanilla JS</a>`;
     // return `<a target="_blank" href="https://www.jsdelivr.com/package/npm/${lib}-vanilla">Vanilla JS</a>`;
     // return `[![](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge)](https://www.jsdelivr.com/package/npm/${lib}-vanilla)`;
 }
