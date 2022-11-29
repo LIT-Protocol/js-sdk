@@ -11,6 +11,7 @@ import * as LitJsSdk_encryption from 'dist/packages/encryption';
 import * as LitJsSdk_litNodeClient from 'dist/packages/lit-node-client';
 import * as LitJsSdk_misc from 'dist/packages/misc';
 import * as LitJsSdk_miscBrowser from 'dist/packages/misc-browser';
+import * as LitJsSdk_nacl from 'dist/packages/nacl';
 import * as LitJsSdk_uint8arrays from 'dist/packages/uint8arrays';
 
 declare global {
@@ -25,6 +26,7 @@ declare global {
     LitJsSdk_litNodeClient: any;
     LitJsSdk_misc: any;
     LitJsSdk_miscBrowser: any;
+    LitJsSdk_nacl: any;
     LitJsSdk_uint8arrays: any;
   }
 }
@@ -747,6 +749,78 @@ export function App() {
             var template = `
             <div class="cat">
                 <h1>LitJsSdk_miscBrowser has ${entries.length} functions</h1>
+                    <ul>
+                        ${ lis }
+                    </ul>
+                </div>
+            `;
+            root.insertAdjacentHTML('beforeend', template);
+        });
+    
+    
+
+    
+    
+        if(typeof LitJsSdk_nacl === 'undefined') {
+            console.error("LitJsSdk_nacl:", LitJsSdk_nacl);
+        }else{
+            console.warn("LitJsSdk_nacl:", LitJsSdk_nacl);
+            window.LitJsSdk_nacl = LitJsSdk_nacl;
+        }
+        window.addEventListener('load', function() {
+
+            var root = document.getElementById('root');
+            var result = document.getElementById('result');
+            var entries = Object.entries(LitJsSdk_nacl);
+            var lis = entries.map(([key, value]) => `
+            <li>
+                <div id="LitJsSdk_nacl_${key}" class="key" onClick="(async (e) => {
+                    var fn = LitJsSdk_nacl['${key}'];
+                    var fnType = typeof fn;
+                    console.warn('[${key}] is type of [' + fnType + ']');
+
+                    if ( fnType === 'string' ) return;
+
+                    if( fnType === 'function' ){
+                        try{
+                            console.log('params:', globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
+                            res = JSON.stringify(res, null, 2);
+                            result.innerText = res;
+                            console.log(res);
+                        }catch(e){
+                            console.error('Please set the [params] variable in the console then click again');
+                            console.log(e);
+                        }
+                        return;
+                    }
+
+                    if( fnType === 'object' ){
+                        var res = await fn;
+                        window.output = res;
+                        res = JSON.stringify(res, null, 2);
+                        result.innerText = res;
+                        console.log(res);
+                        return;
+                    }
+                    
+                    
+                })();">${key}</div>
+                <pre class="code">
+<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                </pre>
+            </li>`);
+            lis = lis.join(' ');
+            var template = `
+            <div class="cat">
+                <h1>LitJsSdk_nacl has ${entries.length} functions</h1>
                     <ul>
                         ${ lis }
                     </ul>

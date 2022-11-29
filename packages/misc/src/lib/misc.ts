@@ -359,3 +359,16 @@ export const decimalPlaces = async ({
 
   return await contract['decimals']();
 };
+
+
+/**
+ * 
+ * Generate a random path (for testing)
+ * 
+ * @returns { string } The random path
+ */
+export const genRandomPath = () : string => {
+  return "/" +
+  Math.random().toString(36).substring(2, 15) +
+  Math.random().toString(36).substring(2, 15);
+}

@@ -620,7 +620,7 @@ declare global {
   var wasmExports: any;
   var wasmECDSA: any;
   var LitNodeClient: any;
-  var litNodeClient: ILitNodeClient;
+  // var litNodeClient: ILitNodeClient;
 }
 
 /**

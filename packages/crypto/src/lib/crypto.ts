@@ -18,27 +18,34 @@ import {
 } from '@lit-protocol/uint8arrays';
 
 import nacl from 'tweetnacl';
+// import { nacl } from '@lit-protocol/nacl';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
   initWasmBlsSdk().then((exports) => {
     globalThis.wasmExports = exports;
-    log(
-      `✅ [BLS SDK] wasmExports loaded. ${
-        Object.keys(exports).length
-      } functions available. Run 'wasmExports' in the console to see them.`
-    );
+
+    if (!globalThis.jestTesting) {
+      log(
+        `✅ [BLS SDK] wasmExports loaded. ${
+          Object.keys(exports).length
+        } functions available. Run 'wasmExports' in the console to see them.`
+      );
+    }
   });
 }
 
 if (!globalThis.wasmECDSA) {
   wasmECDSA.initWasmEcdsaSdk().then((sdk: any) => {
     globalThis.wasmECDSA = sdk;
-    log(
-      `✅ [ECDSA SDK] wasmECDSA loaded. ${
-        Object.keys(wasmECDSA).length
-      } functions available. Run 'wasmECDSA' in the console to see them.`
-    );
+
+    if (!globalThis.jestTesting) {
+      log(
+        `✅ [ECDSA SDK] wasmECDSA loaded. ${
+          Object.keys(wasmECDSA).length
+        } functions available. Run 'wasmECDSA' in the console to see them.`
+      );
+    }
   });
 }
 /** ---------- Exports ---------- */

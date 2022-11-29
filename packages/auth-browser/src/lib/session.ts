@@ -112,7 +112,7 @@ export async function getSessionSigs(params: SessionSigsProp) {
   // if the user passed no sessionCapabilities, let's create them for them
   // with wildcards so the user doesn't have to sign every time
   if (!sessionCapabilities || sessionCapabilities.length === 0) {
-    sessionCapabilities = resources.map((resource) => {
+    sessionCapabilities = resources.map((resource: any) => {
       const { protocol, resourceId } = parseResource({ resource });
       return `${protocol}Capability://*`;
     });

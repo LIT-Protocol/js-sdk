@@ -82,5 +82,9 @@ export const LIT_ERROR = {
     NODEJS_EXCEPTION:{
         name: 'NodeJsException',
         code: 'nodejs_exception',
+    },
+    WALLET_SIGNATURE_NOT_FOUND_ERROR: {
+        name: 'WalletSignatureNotFoundError',
+        code: 'wallet_signature_not_found_error',
     }
 };

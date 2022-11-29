@@ -35,12 +35,12 @@
         "packages/ecdsa-sdk-vanilla/src/index.ts"
       ],
       "@lit-protocol/encryption": ["packages/encryption/src/index.ts"],
-      "@lit-protocol/foo": ["packages/foo/src/index.ts"],
       "@lit-protocol/lit-node-client": [
         "packages/lit-node-client/src/index.ts"
       ],
       "@lit-protocol/misc": ["packages/misc/src/index.ts"],
       "@lit-protocol/misc-browser": ["packages/misc-browser/src/index.ts"],
+      "@lit-protocol/nacl": ["packages/nacl/src/index.ts"],
       "@lit-protocol/uint8arrays": ["packages/uint8arrays/src/index.ts"]
     }
   },

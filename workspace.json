@@ -14,6 +14,7 @@
     "lit-node-client": "packages/lit-node-client",
     "misc": "packages/misc",
     "misc-browser": "packages/misc-browser",
+    "nacl": "packages/nacl",
     "nodejs": "apps/nodejs",
     "react": "apps/react",
     "uint8arrays": "packages/uint8arrays"

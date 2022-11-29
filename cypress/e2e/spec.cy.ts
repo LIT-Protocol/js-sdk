@@ -1,4 +1,5 @@
 // @ts-nocheck
+
 let window: any;
 let savedParams: any = {
   accs: [
@@ -325,7 +326,9 @@ describe('Lit Action', () => {
       code: litActionCode,
     };
 
-    const reqBody = await savedParams.litNodeClient.getLitActionRequestBody(params);
+    const reqBody = await savedParams.litNodeClient.getLitActionRequestBody(
+      params
+    );
 
     const res = await savedParams.litNodeClient.getJsExecutionShares(
       'https://serrano.litgateway.com:7379',
@@ -336,5 +339,137 @@ describe('Lit Action', () => {
   });
 });
 
-// how many doubles to make a million
-// const doubles = Math.log(1000000) / Math.log(2);
+describe('Session', () => {
+
+  it('hashes a resource id', async () => {
+    window = await cy.window();
+
+    const path = '/bglyaysu8rvblxlk7x0ksn';
+
+    let resourceId = {
+      baseUrl: 'my-dynamic-content-server.com',
+      path,
+      orgId: '',
+      role: '',
+      extraData: '',
+    };
+
+    savedParams.hashedResourceId =
+      await window.LitJsSdk_accessControlConditions.hashResourceIdForSigning(
+        resourceId
+      );
+
+    expect(savedParams.hashedResourceId).to.be.eq(
+      'd3b7c933579ff8cce79a9db8f135cf93d8e4b1d206129cbe28405ed81dad7cb1'
+    );
+  });
+
+  it('gets session key', () => {
+    let sessionKey = savedParams.litNodeClient.getSessionKey();
+
+    // sessionKey has 'publicKey' property
+    expect(sessionKey).to.have.property('publicKey');
+  });
+
+  it('gets capabilities', async () => {
+    const path = '/bglyaysu8rvblxlk7x0ksn';
+
+    let resourceId = {
+      baseUrl: 'my-dynamic-content-server.com',
+      path,
+      orgId: '',
+      role: '',
+      extraData: '',
+    };
+
+    let hashedResourceId =
+      await window.LitJsSdk_accessControlConditions.hashResourceIdForSigning(
+        resourceId
+      );
+
+    let resources = [`litSigningCondition://${hashedResourceId}`];
+
+    let capabilities = savedParams.litNodeClient.getSessionCapabilities(
+      [],
+      resources
+    );
+    expect(capabilities[0]).to.be.eq('litSigningConditionCapability://*');
+  });
+
+  it('gets expiration', () => {
+    const expiration = savedParams.litNodeClient.getExpiration();
+
+    // expect expiration to contains 'T'
+    expect(expiration).to.contains('T');
+  });
+
+  it('gets session signatures', async () => {
+    const path = '/bglyaysu8rvblxlk7x0ksn';
+
+    let resourceId = {
+      baseUrl: 'my-dynamic-content-server.com',
+      path,
+      orgId: '',
+      role: '',
+      extraData: '',
+    };
+
+    let hashedResourceId =
+      await window.LitJsSdk_accessControlConditions.hashResourceIdForSigning(
+        resourceId
+      );
+
+    // no await to simulate click event
+    let sessionSigs = savedParams.litNodeClient.getSessionSigs({
+      chain: 'ethereum',
+      resources: [`litSigningCondition://${hashedResourceId}`],
+    });
+
+    await cy.wait(500);
+    await cy.get('#metamask').click();
+    await cy.confirmMetamaskSignatureRequest();
+    await cy.wait(100);
+    await cy.confirmMetamaskSignatureRequest();
+    sessionSigs = await sessionSigs;
+
+    // expect sessionSigs is an object and its lenght is more than 5 and each of the item in the object has property of 'sig', 'derivedVia', 'signedMessage', 'address', and 'algo'
+    expect(sessionSigs).to.be.an('object');
+    expect(Object.values(sessionSigs)).to.have.lengthOf.above(5);
+
+    Object.entries(sessionSigs).forEach((item, i) => {
+      expect(item[1]).to.have.property('sig');
+      expect(item[1]).to.have.property('derivedVia');
+      expect(item[1]).to.have.property('signedMessage');
+      expect(item[1]).to.have.property('address');
+      expect(item[1]).to.have.property('algo');
+    });
+  });
+
+  // it('gets the session signatures', async () => {
+  //   window = await cy.window();
+
+  //   LitJsSdk = window.LitJsSdk_litNodeClient;
+
+  //   savedParams.litNodeClient = new LitJsSdk.LitNodeClient({
+  //     litNetwork: 'serrano',
+  //   });
+
+  //   await savedParams.litNodeClient.connect();
+
+  //   let sessionSigs = savedParams.litNodeClient.getSessionSigs({
+  //     chain: 'ethereum',
+  //     resources: [
+  //       `litSigningCondition://d3b7c933579ff8cce79a9db8f135cf93d8e4b1d206129cbe28405ed81dad7cb1`,
+  //     ],
+  //   }).then((res) => {
+  //     console.log("res:", res)
+  //     expect(res).to.be.an('1');
+  //   });
+
+  //   await cy.wait(1000);
+  //   console.log('Testing!');
+  //   await cy.wait(1000);
+  //   await cy.get('#metamask').click();
+  //   // expect(sessionSigs).to.be.eq(1);
+  // });
+});
