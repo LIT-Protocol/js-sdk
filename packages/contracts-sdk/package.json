@@ -1,0 +1,9 @@
+{
+  "name": "@lit-protocol/contracts-sdk",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/contracts-sdk"
+  }
+}

@@ -29,6 +29,7 @@
       "@lit-protocol/constants-dist-vanilla": [
         "dist/packages/constants-vanilla/constants.js"
       ],
+      "@lit-protocol/contracts-sdk": ["packages/contracts-sdk/src/index.ts"],
       "@lit-protocol/crypto": ["packages/crypto/src/index.ts"],
       "@lit-protocol/ecdsa-sdk": ["packages/ecdsa-sdk/src/index.ts"],
       "@lit-protocol/ecdsa-sdk-vanilla": [

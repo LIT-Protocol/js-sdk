@@ -3,6 +3,7 @@
 import { hasItems } from './helper';
 
 import * as accessControlConditions from '@lit-protocol/access-control-conditions';
+import * as accessControlConditions-2 from '@lit-protocol/access-control-conditions-2';
 import * as authBrowser from '@lit-protocol/auth-browser';
 import * as blsSdk from '@lit-protocol/bls-sdk';
 import * as constants from '@lit-protocol/constants';
@@ -16,6 +17,7 @@ import * as nacl from '@lit-protocol/nacl';
 import * as uint8arrays from '@lit-protocol/uint8arrays';
 
 console.log("accessControlConditions:", hasItems(accessControlConditions));
+console.log("accessControlConditions-2:", hasItems(accessControlConditions-2));
 console.log("authBrowser:", hasItems(authBrowser));
 console.log("blsSdk:", hasItems(blsSdk));
 console.log("constants:", hasItems(constants));

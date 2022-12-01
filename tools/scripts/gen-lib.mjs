@@ -1,22 +1,30 @@
 // Usage: node tools/scripts/gen-lib.mjs
 
-import { runCommand, getArgs, writeJsonFile, question, greenLog, wait } from './utils.mjs';
+import { runCommand, getArgs, writeJsonFile, question, greenLog, wait, readJsonFile } from './utils.mjs';
 import { readCachedProjectGraph } from '@nrwl/devkit';
 import { exit } from 'process';
 const args = getArgs();
-const name = args[0];
+const PROJECT_NAME = args[0];
 
 let alreadyExists = false;
 
+greenLog(`Creating ${PROJECT_NAME} library...`);
 try {
-    await runCommand(`yarn nx generate @nrwl/js:library --name=${name}`);
+    await runCommand(`yarn nx generate @nrwl/js:library --name=${PROJECT_NAME}`);
 } catch (e) {
-    greenLog(`${name} already exists.`);
+    greenLog(`${PROJECT_NAME} already exists.`);
     alreadyExists = true;
 }
 
 await wait(1000);
 
+/**
+ * 
+ * This function modify the default built config in the project.json
+ * file under "targets" property
+ * @param { string } name the name of the package
+ * @return { object } the new config
+ */
 const createBuild = (name) => {
     return {
         "build": {
@@ -28,6 +36,15 @@ const createBuild = (name) => {
     }
 }
 
+/**
+ * 
+ * This function creates a new build config for esbuild, 
+ * and add it under the "targets" property in the project.json
+ * @param { string } name the name of the project
+ * @param { object } 
+ *  @property { string } globalPrefix the prefix of the global variable
+ * 
+ */
 const createBuildWeb = (name, { globalPrefix = 'LitJsSdk' }) => {
 
     const camelCase = name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
@@ -54,21 +71,25 @@ const createBuildWeb = (name, { globalPrefix = 'LitJsSdk' }) => {
     }
 }
 
-const go = async () => {
+/**
+ * 
+ * Edit the project project.json file
+ * 
+ */
+const editProjectJson = async () => {
 
     const graph = readCachedProjectGraph();
     const nodes = graph.nodes;
 
-    const project = nodes[name].data;
-
+    const project = nodes[PROJECT_NAME].data;
 
     delete project.files;
     delete project.root;
     delete project.targets.build.dependsOn;
 
     project.targets['_buildTsc'] = project.targets.build;
-    project.targets['_buildWeb'] = createBuildWeb(name, { globalPrefix: 'LitJsSdk' })._buildWeb;
-    project.targets['build'] = createBuild(name).build;
+    project.targets['_buildWeb'] = createBuildWeb(PROJECT_NAME, { globalPrefix: 'LitJsSdk' })._buildWeb;
+    project.targets['build'] = createBuild(PROJECT_NAME).build;
 
     // move 'lint' and 'test' objects to the end
     const { lint, test, ...rest } = project.targets;
@@ -79,14 +100,39 @@ const go = async () => {
     await writeJsonFile(writePath, project);
 }
 
+const editPackageJson = async () => {
+
+    const graph = readCachedProjectGraph();
+    const nodes = graph.nodes;
+
+    const project = nodes[PROJECT_NAME].data;
+
+    const packageJson = project.root + '/package.json';
+
+    const packageJsonData = await readJsonFile(packageJson);
+
+    packageJsonData.publishConfig = {
+        "access": "public",
+        "directory": `../../dist/packages/${PROJECT_NAME}`
+    }
+
+    const writePath = project.sourceRoot.split('src')[0] + 'package.json';
+
+    await writeJsonFile(writePath, packageJsonData);
+
+
+}
+
 if (!alreadyExists) {
-    await go();
+    await editProjectJson();
+    await editPackageJson();
     exit();
 };
 
-await question(`Do you want to update ${name} project.json?`, {
+await question(`Do you want to update ${PROJECT_NAME} project.json & package.json?`, {
     yes: async () => {
-        await go();
+        await editProjectJson();
+        await editPackageJson();
         exit();
     },
     no: () => {

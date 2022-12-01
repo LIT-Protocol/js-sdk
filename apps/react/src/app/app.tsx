@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 
 import * as LitJsSdk_accessControlConditions from 'dist/packages/access-control-conditions';
+import * as LitJsSdk_accessControlConditions-2 from 'dist/packages/access-control-conditions-2';
 import * as LitJsSdk_authBrowser from 'dist/packages/auth-browser';
 import * as LitJsSdk_blsSdk from 'dist/packages/bls-sdk';
 import * as LitJsSdk_constants from 'dist/packages/constants';
@@ -17,6 +18,7 @@ import * as LitJsSdk_uint8arrays from 'dist/packages/uint8arrays';
 declare global {
   interface Window {
     LitJsSdk_accessControlConditions: any;
+    LitJsSdk_accessControlConditions-2: any;
     LitJsSdk_authBrowser: any;
     LitJsSdk_blsSdk: any;
     LitJsSdk_constants: any;
@@ -101,6 +103,78 @@ export function App() {
             var template = `
             <div class="cat">
                 <h1>LitJsSdk_accessControlConditions has ${entries.length} functions</h1>
+                    <ul>
+                        ${ lis }
+                    </ul>
+                </div>
+            `;
+            root.insertAdjacentHTML('beforeend', template);
+        });
+    
+    
+
+    
+    
+        if(typeof LitJsSdk_accessControlConditions-2 === 'undefined') {
+            console.error("LitJsSdk_accessControlConditions-2:", LitJsSdk_accessControlConditions-2);
+        }else{
+            console.warn("LitJsSdk_accessControlConditions-2:", LitJsSdk_accessControlConditions-2);
+            window.LitJsSdk_accessControlConditions-2 = LitJsSdk_accessControlConditions-2;
+        }
+        window.addEventListener('load', function() {
+
+            var root = document.getElementById('root');
+            var result = document.getElementById('result');
+            var entries = Object.entries(LitJsSdk_accessControlConditions-2);
+            var lis = entries.map(([key, value]) => `
+            <li>
+                <div id="LitJsSdk_accessControlConditions-2_${key}" class="key" onClick="(async (e) => {
+                    var fn = LitJsSdk_accessControlConditions-2['${key}'];
+                    var fnType = typeof fn;
+                    console.warn('[${key}] is type of [' + fnType + ']');
+
+                    if ( fnType === 'string' ) return;
+
+                    if( fnType === 'function' ){
+                        try{
+                            console.log('params:', globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
+                            res = JSON.stringify(res, null, 2);
+                            result.innerText = res;
+                            console.log(res);
+                        }catch(e){
+                            console.error('Please set the [params] variable in the console then click again');
+                            console.log(e);
+                        }
+                        return;
+                    }
+
+                    if( fnType === 'object' ){
+                        var res = await fn;
+                        window.output = res;
+                        res = JSON.stringify(res, null, 2);
+                        result.innerText = res;
+                        console.log(res);
+                        return;
+                    }
+                    
+                    
+                })();">${key}</div>
+                <pre class="code">
+<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                </pre>
+            </li>`);
+            lis = lis.join(' ');
+            var template = `
+            <div class="cat">
+                <h1>LitJsSdk_accessControlConditions-2 has ${entries.length} functions</h1>
                     <ul>
                         ${ lis }
                     </ul>
