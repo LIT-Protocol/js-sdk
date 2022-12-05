@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/lit-node-client",
-  "version": "0.1.85",
+  "version": "0.1.86",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",

@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/misc",
-  "version": "0.1.85",
+  "version": "0.1.86",
   "type": "commonjs",
   "dependencies": {
     "ethers": "^5.7.1"
