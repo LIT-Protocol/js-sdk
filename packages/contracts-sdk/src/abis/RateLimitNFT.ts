@@ -1,5 +1,13 @@
 import { ContractTransaction } from 'ethers';
-import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils';
+import { BigNumber, BigNumberish } from 'ethers';
+        
+        export interface Arrayish {
+            toHexString(): string;
+            slice(start?: number, end?: number): Arrayish;
+            length: number;
+            [index: number]: number;
+          }
+        
 import { EthersContractContext } from 'ethereum-abi-types-generator';
 
 export type ContractContext = EthersContractContext<

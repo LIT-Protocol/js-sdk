@@ -37,7 +37,7 @@ export class LitContracts {
   pubkeyRouterContract: pubkeyRouterContract.ContractContext;
   rateLimitNftContract: rateLimitNftContract.ContractContext;
   stakingContract: stakingContract.ContractContext;
-  // ----- autogen:declares:end  -----
+// ----- autogen:declares:end  -----
 
   // make the constructor args optional
   constructor(args?: { provider?: ethers.providers.JsonRpcProvider | any }) {
@@ -108,7 +108,7 @@ export class LitContracts {
       staking.abi as any,
       this.provider
     ) as unknown as stakingContract.ContractContext;
-    // ----- autogen:init:end  -----
+// ----- autogen:init:end  -----
   }
 
   utils = {

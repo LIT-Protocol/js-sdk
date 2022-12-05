@@ -117,10 +117,8 @@ export const getContractAddresses = async (LitConfig) => {
         let correctedName = item[0].replace('ContractAddress', '');
         let exportName = correctedName;
 
-
         // capitalize first letter
         correctedName = correctedName.charAt(0).toUpperCase() + correctedName.slice(1);
-
 
         // replace Pkp with PKP
         correctedName = correctedName.replace('Pkp', 'PKP');

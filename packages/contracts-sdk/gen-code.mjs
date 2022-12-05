@@ -1,5 +1,5 @@
 import { exit } from "process";
-import { getFiles, greenLog, readFile, writeFile } from "../../tools/scripts/utils.mjs";
+import { asyncForEach, getFiles, greenLog, readFile, writeFile } from "../../tools/scripts/utils.mjs";
 
 /** ====== Helper ====== */
 
@@ -152,4 +152,34 @@ newContent = replaceAutogen({
 
 writeFile('./packages/contracts-sdk/src/lib/contracts-sdk.ts', newContent);
 greenLog('Done generating code in ./packages/contracts-sdk/src/lib/contracts-sdk.ts');
+
+
+const contextFiles = (await getFiles('./packages/contracts-sdk/src/abis')).filter((file) => file.includes('.ts') && !file.includes('.data.ts'));
+
+console.log("contextFiles:", contextFiles)
+await asyncForEach(contextFiles, async (fileName) => {
+    // path
+    const filePath = `./packages/contracts-sdk/src/abis/${fileName}`;
+
+    // read file
+    const fileContent = await readFile(filePath);
+
+    const newContent = fileContent.replace(
+        `import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils';`,
+        `import { BigNumber, BigNumberish } from 'ethers';
+        
+        export interface Arrayish {
+            toHexString(): string;
+            slice(start?: number, end?: number): Arrayish;
+            length: number;
+            [index: number]: number;
+        }
+        `)
+
+    // write file
+    await writeFile(filePath, newContent);
+
+    greenLog(`Done fixing imports in ${filePath}`);
+});
+
 exit();
