@@ -55,9 +55,8 @@ describe('contractsSdk', () => {
 
   it('litTokenContract should get the totalSupply()', async () => {
     let output = await litContracts.litTokenContract.totalSupply();
-    output = output.toString();
-
-    expect(output).toBe('1000000000000000000000000000');
+    let converted = (BigNumber.from(output)).toString();
+    expect(converted).toBe('1000000000000000000000000000');
   });
 
   // it('pkpContract getEthAddress ', async () => {
@@ -156,12 +155,12 @@ describe('contractsSdk', () => {
     expect(output.length).toBe(2);
   });
 
-  it('should mint', async () => {
-    const mintCost = await litContracts.pkpNftContract.mintCost();
-    let output = await litContracts.pkpNftContractUtil.write.mint(mintCost);
+  // it('should mint', async () => {
+  //   const mintCost = await litContracts.pkpNftContract.mintCost();
+  //   let output = await litContracts.pkpNftContractUtil.write.mint(mintCost);
 
-    // expect output to be an array
-    expect(output).toBeDefined();
+  //   // expect output to be an array
+  //   expect(output).toBeDefined();
 
-  })
+  // })
 });
