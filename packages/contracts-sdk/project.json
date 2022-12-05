@@ -64,6 +64,17 @@
         "jestConfig": "packages/contracts-sdk/jest.config.ts",
         "passWithNoTests": true
       }
+    },
+    "testWatch": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/contracts-sdk"
+      ],
+      "options": {
+        "jestConfig": "packages/contracts-sdk/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
     }
   },
   "tags": []

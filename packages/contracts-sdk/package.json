@@ -2,6 +2,7 @@
   "name": "@lit-protocol/contracts-sdk",
   "version": "0.0.1",
   "type": "commonjs",
+  "scripts": {},
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/contracts-sdk"

@@ -1,0 +1,8 @@
+{
+  "root": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/",
+  "contracts": "deployed_contracts_serrano.json",
+  "abis": {
+    "dir": "deployments/mumbai_80001/",
+    "ignoreProperties": ["metadata", "bytecode", "deployedBytecode"]
+  }
+}
