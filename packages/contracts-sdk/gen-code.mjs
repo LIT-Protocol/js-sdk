@@ -46,6 +46,7 @@ const specialCases = (fileName) => {
         .replace('NFT', 'nft')
         .replace('pkpnft', 'pkpNft')
         .replace('RateLimitnft', 'rateLimitNft')
+        .replace('pkppermissions', 'pkpPermissions')
 }
 
 const generatedStrs = {
@@ -72,14 +73,14 @@ const generatedStrs = {
         .filter((file) => file.includes('.ts') && !file.includes('data.ts')
         ).map((fileName) => {
 
-            // append Contract at the end
-            const importName = specialCases(fileName)
-                .replace(fileName.charAt(0), fileName.charAt(0).toLowerCase())
-                + 'Contract';
+            const varName = specialCases(fileName) + 'Contract';
+
+            // make first letter lowercase
+            const varNameLower = varName.charAt(0).toLowerCase() + varName.slice(1);
 
             const importPath = `'../abis/${fileName.replace('.ts', '')}'`;
 
-            const importStr = `import * as ${importName} from ${importPath};`;
+            const importStr = `import * as ${varNameLower} from ${importPath};`;
 
             return importStr;
         }).join('\n'),
@@ -88,12 +89,17 @@ const generatedStrs = {
         .filter((file) => file.includes('.ts') && !file.includes('data.ts')
         ).map((fileName) => {
 
+            const varName = specialCases(fileName) + 'Contract';
+
+            // make first letter lowercase
+            const varNameLower = varName.charAt(0).toLowerCase() + varName.slice(1);
+
             // append Contract at the end
             const importName = specialCases(fileName)
                 .replace(fileName.charAt(0), fileName.charAt(0).toLowerCase())
                 + 'Contract';
 
-            const importStr = `  ${importName}: ${importName}.ContractContext;`;
+            const importStr = `  ${importName}: ${varNameLower}.ContractContext;`;
 
             return importStr;
         }).join('\n'),
@@ -101,6 +107,7 @@ const generatedStrs = {
         await getFiles('./packages/contracts-sdk/src/abis'))
         .filter((file) => file.includes('.ts') && !file.includes('data.ts')
         ).map((fileName) => {
+
 
             // append Contract at the end
             const importName = specialCases(fileName)
@@ -112,11 +119,13 @@ const generatedStrs = {
             // make first letter lowercase
             const varNameLower = varName.charAt(0).toLowerCase() + varName.slice(1);
 
+            const contractName = varNameLower + 'Contract';
+
             const importStr = `    this.${importName} = new ethers.Contract(
       ${varNameLower}.address,
       ${varNameLower}.abi as any,
       this.provider
-    ) as unknown as ${importName}.ContractContext;`;
+    ) as unknown as ${contractName}.ContractContext;`;
 
             return importStr;
         }).join('\n\n'),
@@ -156,7 +165,7 @@ greenLog('Done generating code in ./packages/contracts-sdk/src/lib/contracts-sdk
 
 const contextFiles = (await getFiles('./packages/contracts-sdk/src/abis')).filter((file) => file.includes('.ts') && !file.includes('.data.ts'));
 
-console.log("contextFiles:", contextFiles)
+// console.log("contextFiles:", contextFiles)
 await asyncForEach(contextFiles, async (fileName) => {
     // path
     const filePath = `./packages/contracts-sdk/src/abis/${fileName}`;

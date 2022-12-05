@@ -19,7 +19,7 @@ import * as litTokenContract from '../abis/LITToken';
 import * as multisenderContract from '../abis/Multisender';
 import * as pkpHelperContract from '../abis/PKPHelper';
 import * as pkpNftContract from '../abis/PKPNFT';
-import * as pkppermissionsContract from '../abis/PKPPermissions';
+import * as pkpPermissionsContract from '../abis/PKPPermissions';
 import * as pubkeyRouterContract from '../abis/PubkeyRouter';
 import * as rateLimitNftContract from '../abis/RateLimitNFT';
 import * as stakingContract from '../abis/Staking';
@@ -33,7 +33,7 @@ export class LitContracts {
   multisenderContract: multisenderContract.ContractContext;
   pkpHelperContract: pkpHelperContract.ContractContext;
   pkpNftContract: pkpNftContract.ContractContext;
-  pkppermissionsContract: pkppermissionsContract.ContractContext;
+  pkppermissionsContract: pkpPermissionsContract.ContractContext;
   pubkeyRouterContract: pubkeyRouterContract.ContractContext;
   rateLimitNftContract: rateLimitNftContract.ContractContext;
   stakingContract: stakingContract.ContractContext;
@@ -89,7 +89,7 @@ export class LitContracts {
       pkpPermissions.address,
       pkpPermissions.abi as any,
       this.provider
-    ) as unknown as pkppermissionsContract.ContractContext;
+    ) as unknown as pkpPermissionsContract.ContractContext;
 
     this.pubkeyRouterContract = new ethers.Contract(
       pubkeyRouter.address,
