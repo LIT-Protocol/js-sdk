@@ -257,3 +257,8 @@ Object.defineProperty((globalThis), 'crypto', {
 });
 ```
 </details>
+<details>
+<summary>error Command failed with exit code 13.</summary>
+
+Make sure your node version is above v16.16.0
+</details>

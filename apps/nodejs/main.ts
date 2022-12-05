@@ -3,10 +3,10 @@
 import { hasItems } from './helper';
 
 import * as accessControlConditions from '@lit-protocol/access-control-conditions';
-import * as accessControlConditions-2 from '@lit-protocol/access-control-conditions-2';
 import * as authBrowser from '@lit-protocol/auth-browser';
 import * as blsSdk from '@lit-protocol/bls-sdk';
 import * as constants from '@lit-protocol/constants';
+import * as contractsSdk from '@lit-protocol/contracts-sdk';
 import * as crypto from '@lit-protocol/crypto';
 import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
 import * as encryption from '@lit-protocol/encryption';
@@ -17,10 +17,10 @@ import * as nacl from '@lit-protocol/nacl';
 import * as uint8arrays from '@lit-protocol/uint8arrays';
 
 console.log("accessControlConditions:", hasItems(accessControlConditions));
-console.log("accessControlConditions-2:", hasItems(accessControlConditions-2));
 console.log("authBrowser:", hasItems(authBrowser));
 console.log("blsSdk:", hasItems(blsSdk));
 console.log("constants:", hasItems(constants));
+console.log("contractsSdk:", hasItems(contractsSdk));
 console.log("crypto:", hasItems(crypto));
 console.log("ecdsaSdk:", hasItems(ecdsaSdk));
 console.log("encryption:", hasItems(encryption));

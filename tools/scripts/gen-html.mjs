@@ -44,6 +44,8 @@ const files = (await getFiles(DIST_DIR))
     .filter((file) => file.includes('vanilla'))
     .map((file) => DIST_DIR + file + '/' + file.split('/').pop().replace('-vanilla', '') + '.js');
 
+console.log("files:", files);
+
 // -- script tags to import libs
 const scriptTags = files.map((file) => `<script src="${file}"></script>`)
 const scriptTagsHTML = scriptTags.map((tag) => `    ${tag}`).join('\n');
