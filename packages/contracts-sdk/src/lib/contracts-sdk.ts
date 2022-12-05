@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { hexToDec } from './hex2dec';
 
 // ----- autogen:import-data:start  -----
 import { accessControlConditions } from '../abis/AccessControlConditions.data';
@@ -23,7 +24,6 @@ import * as pubkeyRouterContract from '../abis/PubkeyRouter';
 import * as rateLimitNftContract from '../abis/RateLimitNFT';
 import * as stakingContract from '../abis/Staking';
 // ----- autogen:imports:end  -----
-
 export class LitContracts {
   provider: ethers.providers.JsonRpcProvider;
 
@@ -40,9 +40,7 @@ export class LitContracts {
   // ----- autogen:declares:end  -----
 
   // make the constructor args optional
-  constructor(args?: {
-    provider?: ethers.providers.JsonRpcProvider | any;
-  }) {
+  constructor(args?: { provider?: ethers.providers.JsonRpcProvider | any }) {
     this.provider = args?.provider;
 
     // if provider is not set, use the default provider
@@ -112,4 +110,113 @@ export class LitContracts {
     ) as unknown as stakingContract.ContractContext;
     // ----- autogen:init:end  -----
   }
+
+  utils = {
+    hexToDec,
+  };
+
+  pkpNftContractUtil = {
+    read: {
+      /**
+       * (IERC721Enumerable)
+       *
+       * Get all PKPs by a given address
+       *
+       * @param { string } ownerAddress
+       * @retu
+       * */
+
+      getTokensByAddress: async (
+        ownerAddress: string
+      ): Promise<Array<string>> => {
+        // -- validate
+        if (!ethers.utils.isAddress(ownerAddress)) {
+          throw new Error(
+            `Given string is not a valid address "${ownerAddress}"`
+          );
+        }
+
+        let tokens = [];
+
+        for (let i = 0; ; i++) {
+          let token;
+
+          try {
+            token = await this.pkpNftContract.tokenOfOwnerByIndex(
+              ownerAddress,
+              i
+            );
+
+            token = this.utils.hexToDec(token.toHexString()) as string;
+
+            tokens.push(token);
+          } catch (e) {
+            console.log(`[getTokensByAddress] Ended search on index: ${i}`);
+            break;
+          }
+        }
+
+        return tokens;
+      },
+
+      /**
+       * (IERC721Enumerable)
+       *
+       * Get the x latest number of tokens
+       *
+       * @param { number } latestNumberOfTokens
+       *
+       * @returns { Array<string> } a list of PKP NFTs
+       *
+       */
+      getTokens: async (
+        latestNumberOfTokens: number
+      ): Promise<Array<string>> => {
+        let tokens = [];
+
+        for (let i = 0; ; i++) {
+          if (i >= latestNumberOfTokens) {
+            break;
+          }
+
+          let token;
+
+          try {
+            token = await this.pkpNftContract.tokenByIndex(i);
+
+            token = this.utils.hexToDec(token.toHexString()) as string;
+
+            tokens.push(token);
+          } catch (e) {
+            console.log(`[getTokensByAddress] Ended search on index: ${i}`);
+            break;
+          }
+        }
+
+        return tokens;
+      },
+    },
+    write: {
+      mint: async (mintCost: { value: any }) => {
+        const ECDSA_KEY = 2;
+
+        const tx = await this.pkpNftContract.mintNext(ECDSA_KEY, mintCost);
+
+        const res: any = await tx.wait();
+
+        // // if winow
+        // window.mint = res;
+
+        // console.warn('[DEBUG] window.mint:', window.mint);
+
+        let tokenIdFromEvent;
+
+        // mumbai
+        tokenIdFromEvent = res.events[1].topics[3];
+        console.warn('tokenIdFromEvent:', tokenIdFromEvent);
+
+        return { tx, tokenId: tokenIdFromEvent };
+      },
+    },
+  };
 }

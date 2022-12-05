@@ -140,9 +140,28 @@ describe('contractsSdk', () => {
     expect(output).toBe('Programmable Keypair');
   });
 
-  // it('gets address of PubkeyRouter Contract', async () => {
-  //   let output = await litContracts.pubkeyRouterContract.address;
+  it('gets tokens by address', async () => {
+    let output = await litContracts.pkpNftContractUtil.read.getTokensByAddress(
+      '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A1'
+    );
 
-  //   expect(output).toBe('0xEA287AF8d8835eb20175875e89576bf583539B37');
-  // });
+    // expect output to be an array
+    expect(Array.isArray(output)).toBe(true);
+  });
+
+  it('gets the x latest amount of tokens', async () => {
+    let output = await litContracts.pkpNftContractUtil.read.getTokens(2);
+
+    // expect output to be an array
+    expect(output.length).toBe(2);
+  });
+
+  it('should mint', async () => {
+    const mintCost = await litContracts.pkpNftContract.mintCost();
+    let output = await litContracts.pkpNftContractUtil.write.mint(mintCost);
+
+    // expect output to be an array
+    expect(output).toBeDefined();
+
+  })
 });
