@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/ecdsa-sdk",
-  "version": "0.1.90",
+  "version": "0.1.91",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
