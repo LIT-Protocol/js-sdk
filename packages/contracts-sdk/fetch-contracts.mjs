@@ -3,6 +3,7 @@ import path from 'path';
 import { exit } from 'process';
 import fetch from 'node-fetch';
 import { exec } from 'child_process';
+import { greenLog, redLog } from '../../tools/scripts/utils.mjs';
 
 // ----- Helper
 /**
@@ -150,8 +151,6 @@ const LitConfig = await readJsonFile(`${root}lit-contracts.config.json`);
 const deployedContracts = await getContractAddresses(LitConfig);
 
 await writeJsonFile(src + 'deployed-contracts.json', deployedContracts);
-console.log(`Wrote ${deployedContracts.length} contracts to ${src}deployed-contracts.json`);
-
 
 await asyncForEach(deployedContracts, async (contract) => {
     let json;
@@ -159,7 +158,7 @@ await asyncForEach(deployedContracts, async (contract) => {
     try {
         json = await fetch(contract.abiPath).then((res) => res.text())
     } catch (e) {
-        console.error(`Failed to fetch ${contract.abiPath}`);
+        redLog(`Failed to fetch ${contract.abiPath}`);
     }
 
     json = JSON.parse(json);
@@ -184,7 +183,7 @@ await asyncForEach(deployedContracts, async (contract) => {
 
     await runCommand(`yarn abi-types-generator ${abiPath} --provider=ethers`);
 
-    console.log(`Wrote ${abiPath}`);
+    greenLog(`Wrote => ${abiPath}`);
 });
 
 exit();

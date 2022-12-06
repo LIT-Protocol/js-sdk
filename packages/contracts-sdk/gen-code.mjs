@@ -1,5 +1,5 @@
 import { exit } from "process";
-import { asyncForEach, getFiles, greenLog, readFile, writeFile } from "../../tools/scripts/utils.mjs";
+import { asyncForEach, getFiles, greenLog, readFile, writeFile, yellowLog } from "../../tools/scripts/utils.mjs";
 
 /** ====== Helper ====== */
 
@@ -160,13 +160,33 @@ newContent = replaceAutogen({
 });
 
 writeFile('./packages/contracts-sdk/src/lib/contracts-sdk.ts', newContent);
-greenLog('Done generating code in ./packages/contracts-sdk/src/lib/contracts-sdk.ts');
+greenLog(`
+Code generation complete for ./packages/contracts-sdk/src/lib/contracts-sdk.ts
+------------------------------------------------------------------------------
+- 1. Filled between => autogen:import-data:start and autogen:import-data:end
+- 2. Filled between => autogen:imports:start and autogen:imports:end
+- 3. Filled between => autogen:declares:start and autogen:declares:end
+- 4. Filled between => autogen:init:start and autogen:init:end
+`, true);
 
 
 const contextFiles = (await getFiles('./packages/contracts-sdk/src/abis')).filter((file) => file.includes('.ts') && !file.includes('.data.ts'));
 
-// console.log("contextFiles:", contextFiles)
-await asyncForEach(contextFiles, async (fileName) => {
+yellowLog(`
+Fixing imports on the following files because it's using legacy version 4 of ethers.js
+--------------------------------------------------------------------------------------
+1. Replacing "import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils'"
+With "import { BigNumber, BigNumberish } from 'ethers"
+
+2. Adding Arrayish interface (https://docs.ethers.io/v4/api-utils.html#arrayish)
+export interface Arrayish {
+    toHexString(): string;
+    slice(start?: number, end?: number): Arrayish;
+    length: number;
+    [index: number]: number;
+}
+`, true);
+await asyncForEach(contextFiles, async (fileName, i) => {
     // path
     const filePath = `./packages/contracts-sdk/src/abis/${fileName}`;
 
@@ -188,7 +208,7 @@ await asyncForEach(contextFiles, async (fileName) => {
     // write file
     await writeFile(filePath, newContent);
 
-    greenLog(`Done fixing imports in ${filePath}`);
+    greenLog(`Fixed => ${filePath}`);
 });
 
 exit();

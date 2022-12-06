@@ -45,6 +45,40 @@ export async function runCommand(command) {
     });
 }
 
+/**
+ * Asynchronously runs the specified command and returns the output.
+ *
+ * @param {string} command The command to run.
+ *
+ * @return {Promise<string>} A promise that resolves with the output of the command.
+ *
+ * @throws {Error} If the command fails to run.
+ */
+export async function childRunCommand(command) {
+    return new Promise((resolve, reject) => {
+        const child = exec(command, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+            resolve(stdout.trim());
+        });
+        child.stdout.on('data', (data) => {
+            console.log(data.toString().replace(/\n$/, ''));
+        });
+
+        child.stderr.on('data', (data) => {
+            console.error(`stderr: ${data}`);
+        });
+
+        // child.on('close', (code) => {
+        //     console.log(`child process exited with code ${code}`);
+        //     exit();
+        // });
+
+    });
+}
+
 export const asyncForEach = async (array, callback) => {
     for (let index = 0; index < array.length; index++) {
         await callback(array[index], index, array);
@@ -71,6 +105,15 @@ export const greenLog = (msg, noDash = false) => {
         console.log('\x1b[32m%s\x1b[0m', `- ${msg}`);
     }
 }
+
+export const yellowLog = (msg, noDash = false) => {
+    if (noDash) {
+        console.log('\x1b[33m%s\x1b[0m', msg);
+    } else {
+        console.log('\x1b[33m%s\x1b[0m', `- ${msg}`);
+    }
+}
+
 
 export const question = (str, {
     yes,
