@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 import { hexToDec, decToHex } from './hex2dec';
 import bs58 from 'bs58';
 import { CID } from 'multiformats';
+import { isBrowser, isNode } from '@litprotocol/misc';
 
 // ----- autogen:import-data:start  -----
 import { accessControlConditions } from '../abis/AccessControlConditions.data';
@@ -57,12 +58,29 @@ export interface IPFSHash {
   size: number;
 }
 
+declare global {
+  interface Window {
+    ethereum: any;
+  }
+}
+
+/**
+ * Logs a message to the console.
+ *
+ * @param {string} str The message to log.
+ * @param {any} [opt] An optional value to log with the message.
+ */
+const log = (str: string, opt?: any) => {
+  console.log(`[@litprotocol/contracts-sdk] ${str}`, opt ?? '');
+};
+
 // This code defines a LitContracts class that acts as a container for a collection of smart contracts. The class has a constructor that accepts an optional args object with provider and rpc properties. If no provider is specified, the class will create a default provider using the specified rpc URL. If no rpc URL is specified, the class will use a default URL.
 // The class has a number of properties that represent the smart contract instances, such as accessControlConditionsContract, litTokenContract, pkpNftContract, etc. These smart contract instances are created by passing the contract address, ABI, and provider to the ethers.Contract constructor.
 // The class also has a utils object with helper functions for converting between hexadecimal and decimal representation of numbers, as well as functions for working with multihashes and timestamps.
 export class LitContracts {
-  provider: ethers.providers.JsonRpcProvider;
+  provider: ethers.providers.JsonRpcProvider | any;
   rpc: string;
+  signer: ethers.Signer;
 
   // ----- autogen:declares:start  -----
   accessControlConditionsContract: accessControlConditionsContract.ContractContext;
@@ -78,24 +96,88 @@ export class LitContracts {
 
   // make the constructor args optional
   constructor(args?: {
-    provider?: ethers.providers.JsonRpcProvider | any;
+    // provider?: ethers.providers.JsonRpcProvider | any;
     rpc?: string | any;
+    signer?: ethers.Signer | any;
   }) {
-    this.provider = args?.provider;
+    // this.provider = args?.provider;
     this.rpc = args?.rpc;
+    this.signer = args?.signer;
+    this.provider;
 
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
       this.rpc = 'https://matic-mumbai.chainstacklabs.com';
     }
 
-    // if provider is not set, use the default provider
-    if (!this.provider) {
-      console.log(
-        `If no provider is specified, we can use the default provider 'new ethers.providers.JsonRpcProvider('${this.rpc}')'`
+    // -- if node environment
+    if (isNode()) {
+      log(
+        "--- Node environment detected. Using 'ethers.providers.JsonRpcProvider' ---"
       );
-      this.provider = new ethers.providers.JsonRpcProvider(this.rpc);
+
+      // -- If signer is not provided, we will use a random private key to create a signer
+      if (!this.signer) {
+        log(
+          `No signer is provided, we can generate a random private key to create a signer`
+        );
+        // generate random private key
+        const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+        this.provider = new ethers.providers.JsonRpcProvider(this.rpc);
+        this.signer = new ethers.Wallet(privateKey, this.provider);
+      }
+      
+      // -- If signer is provider
+      if ( this.signer ){
+        this.provider = this.signer.provider;
+      }
     }
+
+    // -- if browser environment
+    if (isBrowser()) {
+      log(
+        "--- Browser environment detected. Using 'ethers.providers.Web3Provider' ---"
+      );
+
+      // -- check if window.ethereum is available
+      if (!window.ethereum) {
+        throw new Error(
+          'window.ethereum is not available. Please install a web3 provider such as Brave or MetaMask.'
+        );
+      }
+
+      this.provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+    }
+
+    // ----- autogen:blank-init:start  -----
+    this.accessControlConditionsContract = {} as accessControlConditionsContract.ContractContext;
+    this.litTokenContract = {} as litTokenContract.ContractContext;
+    this.multisenderContract = {} as multisenderContract.ContractContext;
+    this.pkpHelperContract = {} as pkpHelperContract.ContractContext;
+    this.pkpNftContract = {} as pkpNftContract.ContractContext;
+    this.pkpPermissionsContract = {} as pkpPermissionsContract.ContractContext;
+    this.pubkeyRouterContract = {} as pubkeyRouterContract.ContractContext;
+    this.rateLimitNftContract = {} as rateLimitNftContract.ContractContext;
+    this.stakingContract = {} as stakingContract.ContractContext;
+// ----- autogen:blank-init:end  -----
+  }
+
+  /**
+   * Connect all contracts to a provider.
+   */
+  connect = async () => {
+    if (!this.provider) {
+      throw new Error('Provider is not available');
+    }
+
+    if (isBrowser()) {
+      await this.provider.send('eth_requestAccounts', []);
+      this.signer = this.provider.getSigner();
+      console.log('this.provider:', this.provider);
+      console.log('this.signer:', this.signer);
+    }
+
+    log('Connecting to contracts...');
 
     // ----- autogen:init:start  -----
     this.accessControlConditionsContract = new ethers.Contract(
@@ -103,56 +185,65 @@ export class LitContracts {
       accessControlConditions.abi as any,
       this.provider
     ) as unknown as accessControlConditionsContract.ContractContext;
+    this.accessControlConditionsContract = this.accessControlConditionsContract.connect(this.signer);
 
     this.litTokenContract = new ethers.Contract(
       litToken.address,
       litToken.abi as any,
       this.provider
     ) as unknown as litTokenContract.ContractContext;
+    this.litTokenContract = this.litTokenContract.connect(this.signer);
 
     this.multisenderContract = new ethers.Contract(
       multisender.address,
       multisender.abi as any,
       this.provider
     ) as unknown as multisenderContract.ContractContext;
+    this.multisenderContract = this.multisenderContract.connect(this.signer);
 
     this.pkpHelperContract = new ethers.Contract(
       pkpHelper.address,
       pkpHelper.abi as any,
       this.provider
     ) as unknown as pkpHelperContract.ContractContext;
+    this.pkpHelperContract = this.pkpHelperContract.connect(this.signer);
 
     this.pkpNftContract = new ethers.Contract(
       pkpNft.address,
       pkpNft.abi as any,
       this.provider
     ) as unknown as pkpNftContract.ContractContext;
+    this.pkpNftContract = this.pkpNftContract.connect(this.signer);
 
     this.pkpPermissionsContract = new ethers.Contract(
       pkpPermissions.address,
       pkpPermissions.abi as any,
       this.provider
     ) as unknown as pkpPermissionsContract.ContractContext;
+    this.pkpPermissionsContract = this.pkpPermissionsContract.connect(this.signer);
 
     this.pubkeyRouterContract = new ethers.Contract(
       pubkeyRouter.address,
       pubkeyRouter.abi as any,
       this.provider
     ) as unknown as pubkeyRouterContract.ContractContext;
+    this.pubkeyRouterContract = this.pubkeyRouterContract.connect(this.signer);
 
     this.rateLimitNftContract = new ethers.Contract(
       rateLimitNft.address,
       rateLimitNft.abi as any,
       this.provider
     ) as unknown as rateLimitNftContract.ContractContext;
+    this.rateLimitNftContract = this.rateLimitNftContract.connect(this.signer);
 
     this.stakingContract = new ethers.Contract(
       staking.address,
       staking.abi as any,
       this.provider
     ) as unknown as stakingContract.ContractContext;
+    this.stakingContract = this.stakingContract.connect(this.signer);
 // ----- autogen:init:end  -----
-  }
+  };
 
   utils = {
     hexToDec,
@@ -233,6 +324,10 @@ export class LitContracts {
       getTokensByAddress: async (
         ownerAddress: string
       ): Promise<Array<string>> => {
+        if (!this.pkpNftContract) {
+          throw new Error('Contract is not available');
+        }
+
         // -- validate
         if (!ethers.utils.isAddress(ownerAddress)) {
           throw new Error(
@@ -255,7 +350,7 @@ export class LitContracts {
 
             tokens.push(token);
           } catch (e) {
-            console.log(`[getTokensByAddress] Ended search on index: ${i}`);
+            log(`[getTokensByAddress] Ended search on index: ${i}`);
             break;
           }
         }
@@ -276,6 +371,10 @@ export class LitContracts {
       getTokens: async (
         latestNumberOfTokens: number
       ): Promise<Array<string>> => {
+        if (!this.pkpNftContract) {
+          throw new Error('Contract is not available');
+        }
+
         let tokens = [];
 
         for (let i = 0; ; i++) {
@@ -292,7 +391,7 @@ export class LitContracts {
 
             tokens.push(token);
           } catch (e) {
-            console.log(`[getTokensByAddress] Ended search on index: ${i}`);
+            log(`[getTokensByAddress] Ended search on index: ${i}`);
             break;
           }
         }
@@ -302,16 +401,18 @@ export class LitContracts {
     },
     write: {
       mint: async (mintCost: { value: any }) => {
+        if (!this.pkpNftContract) {
+          throw new Error('Contract is not available');
+        }
         const ECDSA_KEY = 2;
 
-        const tx = await this.pkpNftContract.mintNext(ECDSA_KEY, mintCost);
+        const tx = await this.pkpNftContract.mintNext(ECDSA_KEY, {
+          value: mintCost.value,
+        });
+
+        console.log('tx:', tx);
 
         const res: any = await tx.wait();
-
-        // // if winow
-        // window.mint = res;
-
-        // console.warn('[DEBUG] window.mint:', window.mint);
 
         let tokenIdFromEvent;
 
@@ -339,6 +440,10 @@ export class LitContracts {
         tokenId: string,
         address: string
       ): Promise<boolean> => {
+        if (!this.pkpPermissionsContract) {
+          throw new Error('Contract is not available');
+        }
+
         const pkpIdHex = this.utils.decToHex(tokenId, null);
 
         const bool = await this.pkpPermissionsContract.isPermittedAddress(
@@ -352,7 +457,11 @@ export class LitContracts {
       getPermittedAddresses: async (
         tokenId: string
       ): Promise<Array<string>> => {
-        console.log('[getPermittedAddresses] input<tokenId>:', tokenId);
+        if (!this.pkpPermissionsContract) {
+          throw new Error('Contract is not available');
+        }
+
+        log('[getPermittedAddresses] input<tokenId>:', tokenId);
 
         let addresses: Array<string> = [];
 
@@ -372,7 +481,7 @@ export class LitContracts {
               break;
             }
           } catch (e: any) {
-            console.log(
+            log(
               `[getPermittedAddresses] error<e.message | ${tries}>:`,
               e.message
             );
@@ -393,6 +502,10 @@ export class LitContracts {
        *
        */
       getPermittedActions: async (tokenId: any): Promise<Array<any>> => {
+        if (!this.pkpPermissionsContract) {
+          throw new Error('Contract is not available');
+        }
+
         let actions: Array<any> = [];
 
         const maxTries = 5;
@@ -412,7 +525,7 @@ export class LitContracts {
               break;
             }
           } catch (e: any) {
-            console.log(
+            log(
               `[getPermittedActions] error<e.message | ${tries}>:`,
               e.message
             );
@@ -436,11 +549,15 @@ export class LitContracts {
         pkpId: string,
         ipfsId: string
       ): Promise<boolean> => {
-        console.log('[isPermittedAction] input<pkpId>:', pkpId);
-        console.log('[isPermittedAction] input<ipfsId>:', ipfsId);
+        if (!this.pkpPermissionsContract) {
+          throw new Error('Contract is not available');
+        }
+
+        log('[isPermittedAction] input<pkpId>:', pkpId);
+        log('[isPermittedAction] input<ipfsId>:', ipfsId);
 
         const ipfsHash = this.utils.getBytesFromMultihash(ipfsId);
-        console.log('[isPermittedAction] converted<ipfsHash>:', ipfsHash);
+        log('[isPermittedAction] converted<ipfsHash>:', ipfsHash);
 
         const bool = await this.pkpPermissionsContract.isPermittedAction(
           pkpId,
@@ -465,31 +582,32 @@ export class LitContracts {
         pkpId: string,
         ipfsId: string
       ): Promise<any> => {
-        console.log('[addPermittedAction] input<pkpId>:', pkpId);
+        if (!this.pkpPermissionsContract || !this.pubkeyRouterContract) {
+          throw new Error('Contract is not available');
+        }
+
+        log('[addPermittedAction] input<pkpId>:', pkpId);
 
         const pubKey = await this.pubkeyRouterContract.getPubkey(pkpId);
-        console.log('[addPermittedAction] converted<pubKey>:', pubKey);
+        log('[addPermittedAction] converted<pubKey>:', pubKey);
 
         const pubKeyHash = ethers.utils.keccak256(pubKey);
-        console.log('[addPermittedAction] converted<pubKeyHash>:', pubKeyHash);
+        log('[addPermittedAction] converted<pubKeyHash>:', pubKeyHash);
 
         const tokenId = ethers.BigNumber.from(pubKeyHash);
-        console.log('[addPermittedAction] converted<tokenId>:', tokenId);
+        log('[addPermittedAction] converted<tokenId>:', tokenId);
 
-        console.log('[addPermittedAction] input<ipfsId>:', ipfsId);
+        log('[addPermittedAction] input<ipfsId>:', ipfsId);
 
         const ipfsIdBytes = this.utils.getBytesFromMultihash(ipfsId);
-        console.log(
-          '[addPermittedAction] converted<ipfsIdBytes>:',
-          ipfsIdBytes
-        );
+        log('[addPermittedAction] converted<ipfsIdBytes>:', ipfsIdBytes);
 
         const tx = await this.pkpPermissionsContract.addPermittedAction(
           tokenId,
           ipfsIdBytes as any,
           []
         );
-        console.log('[addPermittedAction] output<tx>:', tx);
+        log('[addPermittedAction] output<tx>:', tx);
 
         return tx;
       },
@@ -507,10 +625,14 @@ export class LitContracts {
         pkpId: string,
         ownerAddress: string
       ): Promise<any> => {
-        console.log('[addPermittedAddress] input<pkpId>:', pkpId);
-        console.log('[addPermittedAddress] input<ownerAddress>:', ownerAddress);
+        if (!this.pkpPermissionsContract) {
+          throw new Error('Contract is not available');
+        }
 
-        console.log('[addPermittedAddress] input<pkpId>:', pkpId);
+        log('[addPermittedAddress] input<pkpId>:', pkpId);
+        log('[addPermittedAddress] input<ownerAddress>:', ownerAddress);
+
+        log('[addPermittedAddress] input<pkpId>:', pkpId);
 
         const tx = await this.pkpPermissionsContract.addPermittedAddress(
           pkpId,
@@ -518,7 +640,7 @@ export class LitContracts {
           []
         );
 
-        console.log('[addPermittedAddress] output<tx>:', tx);
+        log('[addPermittedAddress] output<tx>:', tx);
 
         return tx;
       },
@@ -535,17 +657,21 @@ export class LitContracts {
         pkpId: string,
         ipfsId: string
       ): Promise<any> => {
-        console.log('[revokePermittedAction] input<pkpId>:', pkpId);
-        console.log('[revokePermittedAction] input<ipfsId>:', ipfsId);
+        if (!this.pkpPermissionsContract) {
+          throw new Error('Contract is not available');
+        }
+
+        log('[revokePermittedAction] input<pkpId>:', pkpId);
+        log('[revokePermittedAction] input<ipfsId>:', ipfsId);
 
         const ipfsHash = this.utils.getBytesFromMultihash(ipfsId);
-        console.log('[revokePermittedAction] converted<ipfsHash>:', ipfsHash);
+        log('[revokePermittedAction] converted<ipfsHash>:', ipfsHash);
 
         const tx = await this.pkpPermissionsContract.removePermittedAction(
           pkpId,
           ipfsHash as any
         );
-        console.log('[revokePermittedAction] output<tx>:', tx);
+        log('[revokePermittedAction] output<tx>:', tx);
 
         return tx;
       },
@@ -568,7 +694,7 @@ export class LitContracts {
        *  Example:
        *
        *  const capacity = await getCapacityByIndex(1);
-       *  console.log(capacity);
+       *  log(capacity);
        *  // Output: {
        *  //   requestsPerMillisecond: 100,
        *  //   expiresAt: {
@@ -580,6 +706,10 @@ export class LitContracts {
        * }
        */
       getCapacityByIndex: async (index: number): Promise<any> => {
+        if (!this.rateLimitNftContract) {
+          throw new Error('Contract is not available');
+        }
+
         const capacity = await this.rateLimitNftContract.capacity(index);
 
         return {
@@ -603,12 +733,16 @@ export class LitContracts {
        *  Example:
        *
        *  const URI = await getTokenURIByIndex(1);
-       *  console.log(URI);
+       *  log(URI);
        *  // Output: 'https://tokens.com/1'
        *
        * }
        */
       getTokenURIByIndex: async (index: number): Promise<string> => {
+        if (!this.rateLimitNftContract) {
+          throw new Error('Contract is not available');
+        }
+
         const base64 = await this.rateLimitNftContract.tokenURI(index);
 
         const data = base64.split('data:application/json;base64,')[1];
@@ -630,7 +764,7 @@ export class LitContracts {
        *  Example:
        *
        *  const tokens = await getTokensByOwnerAddress('0x1234...5678');
-       *  console.log(tokens);
+       *  log(tokens);
        *  // Output: [
        *  //   {
        *  //     tokenId: 1,
@@ -650,6 +784,10 @@ export class LitContracts {
        * }
        */
       getTokensByOwnerAddress: async (ownerAddress: string): Promise<any> => {
+        if (!this.rateLimitNftContract) {
+          throw new Error('Contract is not available');
+        }
+
         // -- validate
         if (!ethers.utils.isAddress(ownerAddress)) {
           throw Error(`Given string is not a valid address "${ownerAddress}"`);
@@ -663,6 +801,10 @@ export class LitContracts {
         const tokens = await asyncForEachReturn(
           [...new Array(total)],
           async (_: undefined, i: number) => {
+            if (!this.rateLimitNftContract) {
+              throw new Error('Contract is not available');
+            }
+
             const token = await this.rateLimitNftContract.tokenOfOwnerByIndex(
               ownerAddress,
               i
@@ -706,7 +848,7 @@ export class LitContracts {
        *  Example:
        *
        *  const tokens = await getTokens();
-       *  console.log(tokens);
+       *  log(tokens);
        *  // Output: [
        *  //   {
        *  //     tokenId: 1,
@@ -726,12 +868,20 @@ export class LitContracts {
        * }
        */
       getTokens: async (): Promise<any> => {
+        if (!this.rateLimitNftContract) {
+          throw new Error('Contract is not available');
+        }
+
         let total: any = await this.rateLimitNftContract.totalSupply();
         total = parseInt(total.toString());
 
         const tokens = await asyncForEachReturn(
           [...new Array(total)],
           async (_: any, i: number) => {
+            if (!this.rateLimitNftContract) {
+              throw new Error('Contract is not available');
+            }
+
             const token = await this.rateLimitNftContract.tokenByIndex(i);
 
             const tokenIndex = parseInt(token.toString());
@@ -772,6 +922,10 @@ export class LitContracts {
         };
         timestamp: number;
       }) => {
+        if (!this.rateLimitNftContract) {
+          throw new Error('Contract is not available');
+        }
+
         const tx = await this.rateLimitNftContract.mint(timestamp, mintCost);
 
         const res: any = await tx.wait();
@@ -798,13 +952,17 @@ export class LitContracts {
         toAddress: string;
         RLITokenAddress: string;
       }): Promise<any> => {
+        if (!this.rateLimitNftContract) {
+          throw new Error('Contract is not available');
+        }
+
         const tx = await this.rateLimitNftContract.safeTransferFrom(
           fromAddress,
           toAddress,
           RLITokenAddress
         );
 
-        console.log('tx:', tx);
+        log('tx:', tx);
 
         // const res = await tx.wait();
 
@@ -831,9 +989,9 @@ export class LitContracts {
        * @return { Promise<string> }
        */
       // getIpfsIds: async (solidityIpfsId: string): Promise<string> => {
-      //   console.log('[getIpfsIds] input<solidityIpfsId>:', solidityIpfsId);
+      //   log('[getIpfsIds] input<solidityIpfsId>:', solidityIpfsId);
       //   const ipfsId = this.utils.getMultihashFromBytes(solidityIpfsId);
-      //   console.log('[getIpfsIds] output<ipfsId>:', ipfsId);
+      //   log('[getIpfsIds] output<ipfsId>:', ipfsId);
       //   return ipfsId;
       // },
     },

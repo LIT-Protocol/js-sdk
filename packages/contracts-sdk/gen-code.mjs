@@ -103,6 +103,28 @@ const generatedStrs = {
 
             return importStr;
         }).join('\n'),
+    blankInit: (
+        await getFiles('./packages/contracts-sdk/src/abis'))
+        .filter((file) => file.includes('.ts') && !file.includes('data.ts')
+        ).map((fileName) => {
+
+
+            // append Contract at the end
+            const importName = specialCases(fileName)
+                .replace(fileName.charAt(0), fileName.charAt(0).toLowerCase())
+                + 'Contract';
+
+            const varName = specialCases(fileName);
+
+            // make first letter lowercase
+            const varNameLower = varName.charAt(0).toLowerCase() + varName.slice(1);
+
+            const contractName = varNameLower + 'Contract';
+
+            const importStr = `    this.${contractName} = {} as ${contractName}.ContractContext;`;
+
+            return importStr;
+        }).join('\n'),
     init: (
         await getFiles('./packages/contracts-sdk/src/abis'))
         .filter((file) => file.includes('.ts') && !file.includes('data.ts')
@@ -125,7 +147,8 @@ const generatedStrs = {
       ${varNameLower}.address,
       ${varNameLower}.abi as any,
       this.provider
-    ) as unknown as ${contractName}.ContractContext;`;
+    ) as unknown as ${contractName}.ContractContext;
+    this.${contractName} = this.${contractName}.connect(this.signer);`;
 
             return importStr;
         }).join('\n\n'),
@@ -150,6 +173,13 @@ newContent = replaceAutogen({
     endsWith: "// ----- autogen:declares:end  -----",
     oldContent: newContent,
     newContent: generatedStrs.declares,
+});
+
+newContent = replaceAutogen({
+    startsWith: "// ----- autogen:blank-init:start  -----",
+    endsWith: "// ----- autogen:blank-init:end  -----",
+    oldContent: newContent,
+    newContent: generatedStrs.blankInit,
 });
 
 newContent = replaceAutogen({

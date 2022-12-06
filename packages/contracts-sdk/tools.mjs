@@ -1,12 +1,11 @@
 import { exit } from "process";
 import { childRunCommand, getArgs, greenLog } from "../../tools/scripts/utils.mjs";
-import { spawn } from 'child_process';
 
 const args = getArgs();
 
 const OPTION = args[0];
 
-if (!OPTION || OPTION === '' || OPTION === 'help') {
+if (!OPTION || OPTION === '' || OPTION === '--help') {
     greenLog(`
         Usage: node 'packages/contracts-sdk/tools.mjs' [option]
         Options:

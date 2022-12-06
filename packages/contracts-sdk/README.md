@@ -16,15 +16,17 @@ yarn add @litprotocol/contracts-sdk
 //     rpc: 'https://localhost:3000',
 // });
 
-// -- custom provider
+// -- custom signer
 // const litContracts = new LitContracts({
-//     provider: new ethers.provider.JsonRpcProvider('https://localhost:300')
+//     signer:
 // })
 //
+
 // -- default: it uses the mumbai rpc from https://matic-mumbai.chainstacklabs.com
 const litContracts = new LitContracts();
+await contracts.connect();
 
-// example: using the pkpNftContract raw functions
+// -- READ: using the pkpNftContract raw functions
 const PKP_TOKEN_ID = BigNumber.from('38350640033302...4285614');
 const PKP_ETH_ADDRESS = '0x...123';
 
@@ -32,25 +34,48 @@ let ethAddress = await litContracts.pkpNftContract.getEthAddress(PKP_TOKEN_ID);
 let pkpPubKey = await litContracts.pkpNftContract.getPubKey(PKP_TOKEN_ID);
 let mintCost = await litContracts.pkpNftContract.mintCost();
 
-// accessing additional functions
+// -- accessing additional functions
 let addressTokens =
   await litContracts.pkpNftContractUtil.read.getTokensByAddress(PKP_ETH_ADDRES);
 
 let last2TokensOfTheContract =
   await litContracts.pkpNftContractUtil.read.getToken(2);
 
-// example: using the pkpPermissionsContract raw functions
+// -- WRITE:
+const tx = await contracts.pkpNftContract.mintNext(2, { value: mintCost });
+const tx = await contracts.pkpNftContract.mintNext(2, {
+  // The maximum units of gas for the transaction to use
+  gasLimit: 23000,
+
+  // The price (in wei) per unit of gas
+  gasPrice: ethers.utils.parseUnits('9.0', 'gwei'),
+
+  // The nonce to use in the transaction
+  nonce: 123,
+
+  // The amount to send with the transaction (i.e. msg.value)
+  value: ethers.utils.parseEther('1.0'),
+
+  // The chain ID (or network ID) to use
+  chainId: 1,
+});
+
+// -- example: using the pkpPermissionsContract raw functions
 let permittedAddresses = await litContracts.pkpPermissionsContract(
   PKP_TOKEN_ID
 );
 
-// example of using addtional utils
+// -- accessing additional functions
 let ipfsIsPermitted =
   await litContracts.pkpPermissionsContractUtil.read.isPermittedAction(
     PKP_TOKEN_ID,
     'QmZKLGf3vgYsboM7WVUS9X56cJSdLzQVacNp841wmEDRkW'
   );
 ```
+
+### Other contracts can be accessed from `litContracts.`
+
+![](https://i.ibb.co/rHyt81y/image.png)
 
 # Dev scripts
 

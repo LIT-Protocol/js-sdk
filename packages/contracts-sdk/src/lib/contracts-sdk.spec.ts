@@ -6,10 +6,56 @@ describe('contractsSdk', () => {
   const TOKEN_ID =
     '38350640033302067025725861340690983594840943860586799982363890572232824285614';
   const PKP_ETH_ADDRESS = '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A1';
-  beforeEach(() => {
-    // Create a new instance of the LitContracts class before each test
+
+  // beforeEach(() => {
+  //   // Create a new instance of the LitContracts class before each test
+  //   litContracts = new LitContracts();
+  // });
+
+  it('should create an instance without args', async () => {
+    // Create a new instance of the LitContracts class
     litContracts = new LitContracts();
+    await litContracts.connect();
+    expect(litContracts).toBeDefined();
+
+    const mintCost = await litContracts.pkpNftContract?.mintCost();
+    let res: any;
+
+    try {
+      res = await litContracts.pkpNftContract?.mintNext(2, { value: mintCost });
+    } catch (e) {
+      res = e;
+    }
+
+    // expect res to contains insufficient funds for intrinsic transaction cost
+    expect(res.toString()).toContain(
+      'insufficient funds for intrinsic transaction cost'
+    );
   });
+
+  it('should create an instance with custom signer', async () => {
+
+    const privateKey = '0x4cc303e56f1ff14e762a33534d7fbaa8a76e52509fd96373f24045baae99cc38';
+    const provider = new ethers.providers.JsonRpcProvider('https://matic-mumbai.chainstacklabs.com');
+    const signer = new ethers.Wallet(privateKey, provider);
+    litContracts = new LitContracts({ signer });
+    await litContracts.connect();
+
+    const mintCost = await litContracts.pkpNftContract?.mintCost();
+    let res: any;
+
+    try {
+      res = await litContracts.pkpNftContract?.mintNext(2, { value: mintCost });
+    } catch (e) {
+      res = e;
+    }
+
+    // expect res to contains insufficient funds for intrinsic transaction cost
+    expect(res.toString()).toContain(
+      'insufficient funds for intrinsic transaction cost'
+    );
+
+  })
 
   it('uses default provider when no provider is specified', () => {
     expect(litContracts.provider.connection.url).toBe(
@@ -17,21 +63,21 @@ describe('contractsSdk', () => {
     );
   });
 
-  it('uses specified provider when provider is specified', () => {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'https://example.com'
-    );
-    litContracts = new LitContracts({ provider });
-    expect(litContracts.provider.connection.url).toBe('https://example.com');
-  });
+  // it('uses specified provider when provider is specified', () => {
+  //   const provider = new ethers.providers.JsonRpcProvider(
+  //     'https://example.com'
+  //   );
+  //   litContracts = new LitContracts({ provider });
+  //   expect(litContracts.provider.connection.url).toBe('https://example.com');
+  // });
 
   it('initializes contract instances with the correct provider', () => {
     // Test that the contract instances have been correctly initialized
     // with the correct provider
-    expect(litContracts.accessControlConditionsContract.provider).toBe(
+    expect(litContracts.accessControlConditionsContract?.provider).toBe(
       litContracts.provider
     );
-    expect(litContracts.litTokenContract.provider).toBe(litContracts.provider);
+    expect(litContracts.litTokenContract?.provider).toBe(litContracts.provider);
     // Repeat this for all other contract instances...
   });
 
@@ -205,5 +251,4 @@ describe('contractsSdk', () => {
     // expect output to be an array
     expect(Array.isArray(output)).toBe(true);
   });
-
 });

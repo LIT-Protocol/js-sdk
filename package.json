@@ -24,12 +24,12 @@
     "tool:genDoc": "node tools/scripts/gen-doc.mjs",
     "tool:genReadme": "yarn node tools/scripts/gen-readme.mjs",
     "tool:buildHtml": "yarn node tools/scripts/build-html.mjs && cd dist/apps/html && vercel --prod",
+    "tool:contractsSdk": "yarn node ./packages/contracts-sdk/tools.mjs",
     "graph": "nx graph",
     "npm:login": "npm login",
     "cy:open:html": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4002 cypress open",
     "cy:open:react": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4003 cypress open",
-    "cy:open2": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress run --browser chrome --headed --no-exit",
-    "tool:contractsSdk": "yarn node ./packages/contracts-sdk/tools.mjs"
+    "cy:open2": "cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress run --browser chrome --headed --no-exit"
   },
   "private": true,
   "dependencies": {
@@ -70,7 +70,9 @@
     "synthetix-js": "^2.74.1",
     "tslib": "^2.3.0",
     "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1"
+    "tweetnacl-util": "^0.15.1",
+    "bs58": "^5.0.0",
+    "date-and-time": "^2.4.1"
   },
   "devDependencies": {
     "@nrwl/cypress": "14.5.10",

@@ -7,6 +7,10 @@
     "access": "public",
     "directory": "../../dist/packages/contracts-sdk"
   },
+  "peerDependencies": {
+    "bs58": "^5.0.0",
+    "date-and-time": "^2.4.1"
+  },
   "gitHead": "f6aabb226615d19ce5c706b80b86040357d6aa55",
   "tags": [
     "universal"
