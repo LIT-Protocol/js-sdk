@@ -99,7 +99,7 @@ const generatedStrs = {
                 .replace(fileName.charAt(0), fileName.charAt(0).toLowerCase())
                 + 'Contract';
 
-            const importStr = `  ${importName}: ${varNameLower}.ContractContext;`;
+            const importStr = `  ${varNameLower}: ${varNameLower}.ContractContext;`;
 
             return importStr;
         }).join('\n'),
@@ -121,7 +121,7 @@ const generatedStrs = {
 
             const contractName = varNameLower + 'Contract';
 
-            const importStr = `    this.${importName} = new ethers.Contract(
+            const importStr = `    this.${contractName} = new ethers.Contract(
       ${varNameLower}.address,
       ${varNameLower}.abi as any,
       this.provider

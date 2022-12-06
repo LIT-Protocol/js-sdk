@@ -3,61 +3,63 @@ import { LitContracts } from './contracts-sdk';
 
 describe('contractsSdk', () => {
   let litContracts: LitContracts;
-
+  const TOKEN_ID =
+    '38350640033302067025725861340690983594840943860586799982363890572232824285614';
+  const PKP_ETH_ADDRESS = '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A1';
   beforeEach(() => {
     // Create a new instance of the LitContracts class before each test
     litContracts = new LitContracts();
   });
 
-  it('uses default provider when no provider is specified', () => {
-    expect(litContracts.provider.connection.url).toBe(
-      'https://rpc-mumbai.matic.today'
-    );
-  });
+  // it('uses default provider when no provider is specified', () => {
+  //   expect(litContracts.provider.connection.url).toBe(
+  //     'https://matic-mumbai.chainstacklabs.com'
+  //   );
+  // });
 
-  it('uses specified provider when provider is specified', () => {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'https://example.com'
-    );
-    litContracts = new LitContracts({ provider });
-    expect(litContracts.provider.connection.url).toBe('https://example.com');
-  });
+  // it('uses specified provider when provider is specified', () => {
+  //   const provider = new ethers.providers.JsonRpcProvider(
+  //     'https://example.com'
+  //   );
+  //   litContracts = new LitContracts({ provider });
+  //   expect(litContracts.provider.connection.url).toBe('https://example.com');
+  // });
 
-  it('initializes contract instances with the correct provider', () => {
-    // Test that the contract instances have been correctly initialized
-    // with the correct provider
-    expect(litContracts.accessControlConditionsContract.provider).toBe(
-      litContracts.provider
-    );
-    expect(litContracts.litTokenContract.provider).toBe(litContracts.provider);
-    // Repeat this for all other contract instances...
-  });
+  // it('initializes contract instances with the correct provider', () => {
+  //   // Test that the contract instances have been correctly initialized
+  //   // with the correct provider
+  //   expect(litContracts.accessControlConditionsContract.provider).toBe(
+  //     litContracts.provider
+  //   );
+  //   expect(litContracts.litTokenContract.provider).toBe(litContracts.provider);
+  //   // Repeat this for all other contract instances...
+  // });
 
-  it('assigns contract instances to the correct class properties', () => {
-    // Test that the contract instances have been correctly assigned
-    // to the corresponding class properties
-    expect(litContracts.accessControlConditionsContract).toBeDefined();
-    expect(litContracts.litTokenContract).toBeDefined();
-    // Repeat this for all other contract instances...
-  });
+  // it('assigns contract instances to the correct class properties', () => {
+  //   // Test that the contract instances have been correctly assigned
+  //   // to the corresponding class properties
+  //   expect(litContracts.accessControlConditionsContract).toBeDefined();
+  //   expect(litContracts.litTokenContract).toBeDefined();
+  //   // Repeat this for all other contract instances...
+  // });
 
-  it('Test that the accessControlConditionsContract, litTokenContract, and other contract properties are properly initialized with the expected values.', () => {
-    expect(litContracts.accessControlConditionsContract).toBeDefined();
-    expect(litContracts.litTokenContract).toBeDefined();
-    expect(litContracts.multisenderContract).toBeDefined();
-    expect(litContracts.pkpHelperContract).toBeDefined();
-    expect(litContracts.pkpNftContract).toBeDefined();
-    expect(litContracts.pkppermissionsContract).toBeDefined();
-    expect(litContracts.pubkeyRouterContract).toBeDefined();
-    expect(litContracts.rateLimitNftContract).toBeDefined();
-    expect(litContracts.stakingContract).toBeDefined();
-  });
+  // it('Test that the accessControlConditionsContract, litTokenContract, and other contract properties are properly initialized with the expected values.', () => {
+  //   expect(litContracts.accessControlConditionsContract).toBeDefined();
+  //   expect(litContracts.litTokenContract).toBeDefined();
+  //   expect(litContracts.multisenderContract).toBeDefined();
+  //   expect(litContracts.pkpHelperContract).toBeDefined();
+  //   expect(litContracts.pkpNftContract).toBeDefined();
+  //   expect(litContracts.pkpPermissionsContract).toBeDefined();
+  //   expect(litContracts.pubkeyRouterContract).toBeDefined();
+  //   expect(litContracts.rateLimitNftContract).toBeDefined();
+  //   expect(litContracts.stakingContract).toBeDefined();
+  // });
 
-  it('litTokenContract should get the totalSupply()', async () => {
-    let output = await litContracts.litTokenContract.totalSupply();
-    let converted = (BigNumber.from(output)).toString();
-    expect(converted).toBe('1000000000000000000000000000');
-  });
+  // it('litTokenContract should get the totalSupply()', async () => {
+  //   let output = await litContracts.litTokenContract.totalSupply();
+  //   let converted = (BigNumber.from(output)).toString();
+  //   expect(converted).toBe('1000000000000000000000000000');
+  // });
 
   // it('pkpContract getEthAddress ', async () => {
   //   let output = await litContracts.pkpNftContract.getEthAddress(
@@ -90,11 +92,11 @@ describe('contractsSdk', () => {
   //   expect(output).toBe('0');
   // });
 
-  it('pkpContract mintCost', async () => {
-    let output = (await litContracts.pkpNftContract.mintCost()).toString();
+  // it('pkpContract mintCost', async () => {
+  //   let output = (await litContracts.pkpNftContract.mintCost()).toString();
 
-    expect(output).toBe('100000000000000');
-  });
+  //   expect(output).toBe('100000000000000');
+  // });
 
   // it('pkpContract ownerOf', async () => {
   //   let output =
@@ -102,7 +104,7 @@ describe('contractsSdk', () => {
   //       '38350640033302067025725861340690983594840943860586799982363890572232824285614'
   //     ))).toString();
 
-  //   expect(output).toBe('0x3B5dD260598B7579A0b015A1F3BBF322aDC499A1');
+  //   expect(output).toBe(PKP_ETH_ADDRESS);
   // });
 
   // it('pkpContract pkpPermissions', async () => {
@@ -111,56 +113,97 @@ describe('contractsSdk', () => {
   //   expect(output).toBe('0x274d0C69fCfC40f71E57f81E8eA5Bd786a96B832');
   // })
 
-  it('gets RateLimitNft contractBalance()', async () => {
-    let output = (
-      await litContracts.rateLimitNftContract.contractBalance()
-    ).toString();
+  // it('gets RateLimitNft contractBalance()', async () => {
+  //   let output = (
+  //     await litContracts.rateLimitNftContract.contractBalance()
+  //   ).toString();
 
-    expect(output).toBe('97345767225660000');
+  //   expect(output).toBe('97345767225660000');
+  // });
+
+  // it('gets defaultRateLimitWindowMilliseconds()', async () => {
+  //   let output = (
+  //     await litContracts.rateLimitNftContract.defaultRateLimitWindowMilliseconds()
+  //   ).toString();
+
+  //   expect(output).toBe('3600000');
+  // });
+
+  // it('gets name() for RLI Contract', async () => {
+  //   let output = await litContracts.rateLimitNftContract.name();
+
+  //   expect(output).toBe('Rate Limit Increases on Lit Protocol');
+  // });
+
+  // it('gets name() of PKPNFT Contract', async () => {
+  //   let output = await litContracts.pkpNftContract.name();
+
+  //   expect(output).toBe('Programmable Keypair');
+  // });
+
+  // it('gets tokens by address', async () => {
+  //   let output = await litContracts.pkpNftContractUtil.read.getTokensByAddress(
+  //     PKP_ETH_ADDRESS
+  //   );
+
+  //   // expect output to be an array
+  //   expect(Array.isArray(output)).toBe(true);
+  // });
+
+  // it('gets the x latest amount of tokens', async () => {
+  //   let output = await litContracts.pkpNftContractUtil.read.getTokens(2);
+
+  //   // expect output to be an array
+  //   expect(output.length).toBe(2);
+  // });
+
+  it('gets pkpPermissions getPermittedAddresses()', async () => {
+    let output =
+      await litContracts.pkpPermissionsContract.getPermittedAddresses(TOKEN_ID);
+
+    // expect output to be an array
+    expect(Array.isArray(output)).toBe(true);
   });
 
-  it('gets defaultRateLimitWindowMilliseconds()', async () => {
-    let output = (
-      await litContracts.rateLimitNftContract.defaultRateLimitWindowMilliseconds()
-    ).toString();
-
-    expect(output).toBe('3600000');
-  });
-
-  it('gets name() for RLI Contract', async () => {
-    let output = await litContracts.rateLimitNftContract.name();
-
-    expect(output).toBe('Rate Limit Increases on Lit Protocol');
-  });
-
-  it('gets name() of PKPNFT Contract', async () => {
-    let output = await litContracts.pkpNftContract.name();
-
-    expect(output).toBe('Programmable Keypair');
-  });
-
-  it('gets tokens by address', async () => {
-    let output = await litContracts.pkpNftContractUtil.read.getTokensByAddress(
-      '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A1'
+  it('gets pkpPermissions getPermittedActions()', async () => {
+    let output = await litContracts.pkpPermissionsContract.getPermittedActions(
+      TOKEN_ID
     );
 
     // expect output to be an array
     expect(Array.isArray(output)).toBe(true);
   });
 
-  it('gets the x latest amount of tokens', async () => {
-    let output = await litContracts.pkpNftContractUtil.read.getTokens(2);
+  it('gets pkpPermissions isPermittedAction', async () => {
+    let output =
+      await litContracts.pkpPermissionsContractUtil.read.isPermittedAction(
+        TOKEN_ID,
+        'QmZKLGf3vgYsboM7WVUS9X56cJSdLzQVacNp841wmEDRkW'
+      );
 
     // expect output to be an array
-    expect(output.length).toBe(2);
+    expect(output).toBe(true);
   });
 
-  // it('should mint', async () => {
-  //   const mintCost = await litContracts.pkpNftContract.mintCost();
-  //   let output = await litContracts.pkpNftContractUtil.write.mint(mintCost);
+  it('gets pkpPermssions isPermittedAddress', async () => {
+    let output =
+      await litContracts.pkpPermissionsContractUtil.read.isPermittedAddress(
+        TOKEN_ID,
+        PKP_ETH_ADDRESS
+      );
 
-  //   // expect output to be an array
-  //   expect(output).toBeDefined();
+    // expect output to be an array
+    expect(output).toBe(true);
+  });
 
-  // })
+  it('gets rateLimit getTokensByOwnerAddress', async () => {
+    let output =
+      await litContracts.rateLimitNftContractUtil.read.getTokensByOwnerAddress(
+        PKP_ETH_ADDRESS
+      );
+
+    // expect output to be an array
+    expect(Array.isArray(output)).toBe(true);
+  });
+
 });
