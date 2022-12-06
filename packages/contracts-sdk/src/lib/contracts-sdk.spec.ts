@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from 'ethers';
+// import { BigNumber, ethers } from 'ethers';
 import { LitContracts } from './contracts-sdk';
 
 describe('contractsSdk', () => {
