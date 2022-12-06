@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { exit } from 'process';
 import readline from 'readline';
 import { join } from 'path';
@@ -76,6 +76,26 @@ export async function childRunCommand(command) {
         //     exit();
         // });
 
+    });
+}
+
+
+export const spawnCommand = (command, args, options = {}) => {
+    
+    // Use the spawn() function to run the command in a child process
+    const child = spawn(command, args, options);
+
+    // Handle child process output
+    child.stdout.on("data", data => {
+        console.log(`child stdout:\n${data}`);
+    });
+
+    child.stderr.on("data", data => {
+        console.error(`child stderr:\n${data}`);
+    });
+
+    child.on("exit", code => {
+        console.log(`child process exited with code ${code}`);
     });
 }
 

@@ -1,8 +1,9 @@
 import { ethers } from 'ethers';
 import { hexToDec, decToHex } from './hex2dec';
 import bs58 from 'bs58';
-import { CID } from 'multiformats';
+import * as mf from 'multiformats';
 import { isBrowser, isNode } from '@litprotocol/misc';
+const CID = mf.CID;
 
 // ----- autogen:import-data:start  -----
 import { accessControlConditions } from '../abis/AccessControlConditions.data';

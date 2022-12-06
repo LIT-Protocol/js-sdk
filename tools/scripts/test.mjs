@@ -1,8 +1,8 @@
 // # Usage: node tools/scripts/pub.mjs
 
 import { exit } from "process";
-import { asyncForEach, greenLog, listDirsRelative, runCommand, getArgs } from "./utils.mjs";
-import { exec } from 'child_process';
+import { asyncForEach, greenLog, listDirsRelative, runCommand, getArgs, spawnCommand } from "./utils.mjs";
+import { exec, spawn} from 'child_process';
 
 const args = getArgs();
 const FLAG = args[0];
@@ -15,16 +15,25 @@ if( FLAG === '--filter' ) {
     dirs = dirs.filter((dir) => dir.includes(VALUE));
 }
 
-await asyncForEach(dirs, async (dir) => {
-    greenLog(`Publishing ${dir}`);
+if(FLAG === '--pub'){
 
-    if (FLAG2 !== '--dry-run') {
-        
-        // await runCommand(`cd ${dir} && npm publish --access public`);
-        exec("echo 123");
-    }else{
-        greenLog(`Dry run, skipping publish`);
-    }
-});
+    await asyncForEach(dirs, async (dir) => {
+        greenLog(`Publishing ${dir}`);
+    
+        if (FLAG2 !== '--dry-run') {
+            
+            // await runCommand(`cd ${dir} && npm publish --access public`);
+            exec("echo 123");
+        }else{
+            greenLog(`Dry run, skipping publish`);
+        }
+    });
+}
 
-exit();
+// create a child spawn process to run the command
+
+
+if( FLAG === '--spawn'){
+    spawnCommand("ls", ["-l"], {cwd: "./apps"});
+    spawnCommand("ls", ["-l"], {cwd: "./apps"});
+}
