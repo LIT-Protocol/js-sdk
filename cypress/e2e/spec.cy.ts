@@ -510,6 +510,146 @@ describe('Lit Action', () => {
     const hashArray = Array.from(new Int32Array(formattedSolConditions));
     expect(hashArray).to.have.all.members(expectedHashArray);
   });
+
+  it('Handle node promises', async () => {
+    const litActionCode = `
+      (async () => {
+        console.log("Hello World!");
+      })();
+      `;
+
+    const params = {
+      authSig: savedParams.authSig,
+      jsParams: {},
+      code: litActionCode,
+    };
+
+    const reqBody = await savedParams.litNodeClient.getLitActionRequestBody(
+      params
+    );
+
+    const nodePromises = savedParams.litNodeClient.getNodePromises((url: string) => {
+      return savedParams.litNodeClient.getJsExecutionShares(
+        url,
+        reqBody
+      );
+    });
+
+    expect(nodePromises.length).to.equal(10);
+
+    // should be serrano.litgateway
+    // const resolvedPromises = savedParams.litNodeClient.handleNodePromises(nodePromises);
+    // console.log(resolvedPromises);
+  });
+
+  it('Throw Node Error', () => {
+    const res: RejectedNodePromises = {
+      success: false,
+      error: {
+        errorCode: 'not_authorized',
+      },
+    }
+    try {
+      savedParams.litNodeClient.throwNodeError(res);
+    } catch (error) {
+      console.log(error);
+      expect(error).to.have.property('errorCode', 'not_authorized');
+      expect(error).to.have.property('name', 'NodeError');
+    }
+  });
+
+  it('Parse Response', () => {
+    const jsonString = '{"result":true, "count":42}';
+    const res = savedParams.litNodeClient.parseResponses(jsonString);
+    expect(res).to.have.property('result', true);
+    expect(res).to.have.property('count', 42);
+  });
+
+  it('Send command to node', async () => {
+    const params: ExecuteJsProps = {
+        authSig: savedParams.authSig,
+        jsParams: {},
+        code: "console.log('Hi Wind!')",
+        debug: true,
+    };
+    const data: JsonExecutionRequest = savedParams.litNodeClient.getLitActionRequestBody(params);
+    const reqBody: SendNodeCommand = {url: 'https://serrano.litgateway.com:7371/web/execute', data};
+    const res = await savedParams.litNodeClient.sendCommandToNode(reqBody);
+    expect(res).to.have.property('success', true);
+  });
+
+  // // Error: bad request
+  // it('Get signing share',async () => {
+  //   const { iat, exp } = savedParams.litNodeClient.getJWTParams();
+  //   let randomPath: string =
+  //     '/' +
+  //     Math.random().toString(36).substring(2, 15) +
+  //     Math.random().toString(36).substring(2, 15);
+  //   const resourceId = {
+  //       baseUrl: 'my-dynamic-content-server.com',
+  //       path: randomPath,
+  //       orgId: '',
+  //       role: '',
+  //       extraData: '',
+  //   };
+  //   const params: JsonSigningRetrieveRequest = {
+  //       accessControlConditions: savedParams.accs,
+  //       chain: 'ethereum',
+  //       authSig: savedParams.authSig,
+  //       resourceId,
+  //       iat,
+  //       exp,
+  //   };
+
+  //   // Error: bad request
+  //   const url = 'https://serrano.litgateway.com:7379';
+  //   const res = await savedParams.litNodeClient.getSigningShare(url, params);
+  // });
+
+  // // Error: bad request
+  // it('Get Decryption Share', async () => {
+  //   const params: JsonEncryptionRetrieveRequest = {
+  //       accessControlConditions: savedParams.accs,
+  //       chain: 'ethereum',
+  //       authSig: savedParams.authSig,
+  //       toDecrypt: savedParams.toDecrypt,
+  //   };
+  //   const url = 'https://serrano.litgateway.com:7379';
+  //   // Error
+  //   const res = await savedParams.litNodeClient.getDecryptionShare(url, params);
+  // });
+
+  // // Error: 404 Not found
+  // it('Sign ECDSA', async () => {
+  //     const { iat, exp } = savedParams.litNodeClient.getJWTParams();
+  //     const params: SignWithECDSA = {
+  //         message: 'msg',
+  //         chain: 'ethereum',
+  //         iat,
+  //         exp,
+  //     }
+  //     const res = await savedParams.litNodeClient.signECDSA('https://serrano.litgateway.com:7370', params);
+  //     console.log(res);
+  // });
+
+  it('Handshake with Sgx', async () => {
+    const params: HandshakeWithSgx = { url: "https://serrano.litgateway.com:7371" };
+    const res = await savedParams.litNodeClient.handshakeWithSgx(params);
+    expect(res).to.have.keys('networkPublicKey', 'networkPublicKeySet', 'serverPublicKey', 'subnetPublicKey');
+  });
+
+  // // Error: 404
+  // it('Execute JS', async () => {
+  //   const data: ExecuteJsProps = {
+  //     authSig: savedParams.authSig,
+  //     jsParams: {},
+  //     code: "LitActions.setResponse({response: JSON.stringify({hello: 'world'})})",
+  //     debug: true,
+  //   }
+    
+  //   // Error: 404
+  //   const res = await savedParams.litNodeClient.executeJs(data);
+  // });
 });
 
 describe('Session', () => {
