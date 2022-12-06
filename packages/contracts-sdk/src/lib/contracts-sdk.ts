@@ -174,8 +174,8 @@ export class LitContracts {
     if (isBrowser()) {
       await this.provider.send('eth_requestAccounts', []);
       this.signer = this.provider.getSigner();
-      console.log('this.provider:', this.provider);
-      console.log('this.signer:', this.signer);
+      log('this.provider:', this.provider);
+      log('this.signer:', this.signer);
     }
 
     log('Connecting to contracts...');

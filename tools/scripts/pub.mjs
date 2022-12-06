@@ -2,7 +2,7 @@
 // import { exec } from 'child_process';
 
 import { exit } from "process";
-import { asyncForEach, greenLog, listDirsRelative, runCommand, getArgs, childRunCommand } from "./utils.mjs";
+import { asyncForEach, greenLog, listDirsRelative, runCommand, getArgs, childRunCommand, spawnCommand } from "./utils.mjs";
 
 const args = getArgs();
 const FLAG = args[0];
@@ -11,19 +11,19 @@ const FLAG2 = args[2];
 
 let dirs = await listDirsRelative('dist/packages', false);
 
-if( FLAG === '--filter' ) {
+if (FLAG === '--filter') {
     dirs = dirs.filter((dir) => dir.includes(VALUE));
 }
 
-await asyncForEach(dirs, async (dir) => {
+dirs.forEach((dir) => {
     greenLog(`Publishing ${dir}`);
 
     if (FLAG2 !== '--dry-run') {
-        await childRunCommand(`cd ${dir} && npm publish --access public`);
+        spawnCommand('npm', ['publish', '--access', 'public'], {
+            cwd: dir
+        });
         // exec(`cd ${dir} && npm publish --access public`);
-    }else{
+    } else {
         greenLog(`Dry run, skipping publish`);
     }
-});
-
-exit();
+})
