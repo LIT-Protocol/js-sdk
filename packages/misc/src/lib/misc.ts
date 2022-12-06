@@ -6,7 +6,7 @@ import {
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
   LIT_ERROR,
-} from '@lit-protocol/constants';
+} from '@litprotocol/constants';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 

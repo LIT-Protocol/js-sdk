@@ -6,6 +6,7 @@ const graph = readCachedProjectGraph();
 const nodes = graph.nodes;
 
 const run = async () => new Promise((resolve) => {
+    
     Object.entries(nodes).forEach(async (node, i) => {
 
         if (node[1].data.projectType === 'library') {

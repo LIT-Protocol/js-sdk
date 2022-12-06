@@ -17,31 +17,32 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
-      "@lit-protocol/access-control-conditions": [
+      "@litprotocol/access-control-conditions": [
         "packages/access-control-conditions/src/index.ts"
       ],
-      "@lit-protocol/auth-browser": ["packages/auth-browser/src/index.ts"],
-      "@lit-protocol/bls-sdk": ["packages/bls-sdk/src/index.ts"],
-      "@lit-protocol/bls-sdk-dist-vanilla": [
+      "@litprotocol/auth-browser": ["packages/auth-browser/src/index.ts"],
+      "@litprotocol/bls-sdk": ["packages/bls-sdk/src/index.ts"],
+      "@litprotocol/bls-sdk-dist-vanilla": [
         "dist/packages/bls-sdk/src/index.js"
       ],
-      "@lit-protocol/constants": ["packages/constants/src/index.ts"],
-      "@lit-protocol/constants-dist-vanilla": [
+      "@litprotocol/constants": ["packages/constants/src/index.ts"],
+      "@litprotocol/constants-dist-vanilla": [
         "dist/packages/constants-vanilla/constants.js"
       ],
-      "@lit-protocol/crypto": ["packages/crypto/src/index.ts"],
-      "@lit-protocol/ecdsa-sdk": ["packages/ecdsa-sdk/src/index.ts"],
-      "@lit-protocol/ecdsa-sdk-vanilla": [
+      "@litprotocol/contracts-sdk": ["packages/contracts-sdk/src/index.ts"],
+      "@litprotocol/crypto": ["packages/crypto/src/index.ts"],
+      "@litprotocol/ecdsa-sdk": ["packages/ecdsa-sdk/src/index.ts"],
+      "@litprotocol/ecdsa-sdk-vanilla": [
         "packages/ecdsa-sdk-vanilla/src/index.ts"
       ],
-      "@lit-protocol/encryption": ["packages/encryption/src/index.ts"],
-      "@lit-protocol/lit-node-client": [
+      "@litprotocol/encryption": ["packages/encryption/src/index.ts"],
+      "@litprotocol/lit-node-client": [
         "packages/lit-node-client/src/index.ts"
       ],
-      "@lit-protocol/misc": ["packages/misc/src/index.ts"],
-      "@lit-protocol/misc-browser": ["packages/misc-browser/src/index.ts"],
-      "@lit-protocol/nacl": ["packages/nacl/src/index.ts"],
-      "@lit-protocol/uint8arrays": ["packages/uint8arrays/src/index.ts"]
+      "@litprotocol/misc": ["packages/misc/src/index.ts"],
+      "@litprotocol/misc-browser": ["packages/misc-browser/src/index.ts"],
+      "@litprotocol/nacl": ["packages/nacl/src/index.ts"],
+      "@litprotocol/uint8arrays": ["packages/uint8arrays/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

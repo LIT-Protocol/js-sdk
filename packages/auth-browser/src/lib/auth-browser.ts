@@ -1,5 +1,5 @@
-import { ALL_LIT_CHAINS, CheckAndSignAuthParams, JsonAuthSig, LIT_ERROR, VMTYPE } from "@lit-protocol/constants";
-import { throwError } from "@lit-protocol/misc";
+import { ALL_LIT_CHAINS, CheckAndSignAuthParams, JsonAuthSig, LIT_ERROR, VMTYPE } from "@litprotocol/constants";
+import { throwError } from "@litprotocol/misc";
 import { checkAndSignCosmosAuthMessage } from "./chains/cosmos";
 import { checkAndSignEVMAuthMessage } from "./chains/eth";
 import { checkAndSignSolAuthMessage } from "./chains/sol";

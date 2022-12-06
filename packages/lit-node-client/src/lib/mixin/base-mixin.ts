@@ -5,9 +5,9 @@ import {
   LitNodeClientConfig,
   LIT_ERROR,
   LIT_NETWORKS,
-} from '@lit-protocol/constants';
-import { isNode, throwError } from '@lit-protocol/misc';
-import { getStorageItem } from '@lit-protocol/misc-browser';
+} from '@litprotocol/constants';
+import { isNode, throwError } from '@litprotocol/misc';
+import { getStorageItem } from '@litprotocol/misc-browser';
 import { Class } from './mixin';
 
 export function BaseMixin<Base extends Class>(base: Base) {

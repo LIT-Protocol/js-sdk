@@ -1,13 +1,13 @@
 # Installation
 
 ```
-yarn add @lit-protocol/bls-sdk
+yarn add @litprotocol/bls-sdk
 ```
 
 # Usage
 
 ```js
-import { initWasmBlsSdk } from '@lit-protocol/bls-sdk';
+import { initWasmBlsSdk } from '@litprotocol/bls-sdk';
 
 initWasmBlsSdk().then((exports) => {
   globalThis.wasmExports = exports;

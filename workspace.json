@@ -6,6 +6,7 @@
     "auth-browser": "packages/auth-browser",
     "bls-sdk": "packages/bls-sdk",
     "constants": "packages/constants",
+    "contracts-sdk": "packages/contracts-sdk",
     "crypto": "packages/crypto",
     "e2e": "apps/e2e",
     "ecdsa-sdk": "packages/ecdsa-sdk",

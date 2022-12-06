@@ -1,12 +1,12 @@
 {
-  "name": "@lit-protocol/ecdsa-sdk",
-  "version": "0.1.85",
+  "name": "@litprotocol/ecdsa-sdk",
+  "version": "0.1.92",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/ecdsa-sdk"
   },
-  "gitHead": "05c6fb688794522030629db90917345c8fc05051",
+  "gitHead": "f6aabb226615d19ce5c706b80b86040357d6aa55",
   "tags": [
     "universal"
   ]
