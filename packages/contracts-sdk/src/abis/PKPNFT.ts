@@ -6,7 +6,7 @@ import { BigNumber, BigNumberish } from 'ethers';
             slice(start?: number, end?: number): Arrayish;
             length: number;
             [index: number]: number;
-          }
+        }
         
 import { EthersContractContext } from 'ethereum-abi-types-generator';
 

@@ -1,14 +1,14 @@
 {
-  "name": "@lit-protocol/js-sdk",
+  "name": "@litprotocol/js-sdk",
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
     "workspace:reset:all": "sh ./tools/scripts/reset.sh",
     "workspace:reset:dist": "rm -rf ./dist",
     "workspace:reset:cache": "rm -rf ./node_modules/.cache",
-    "build:packages:forceDepVersion": "node ./tools/scripts/forceDepVersion.mjs --contains=@lit-protocol --workspace=lib --version=*",
+    "build:packages:forceDepVersion": "node ./tools/scripts/forceDepVersion.mjs --contains=@litprotocol --workspace=lib --version=*",
     "postBuild:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",
-    "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist @lit-protocol",
+    "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist @litprotocol",
     "build:packages": "nx run-many --target=build --exclude=e2e,example-nextjs-js,html,nodejs,react && yarn postBuild:mapDepsToDist && yarn tool:genReadme",
     "build:target": "yarn node tools/scripts/build.mjs",
     "test:packages": "nx run-many --target=test",

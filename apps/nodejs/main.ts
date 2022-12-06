@@ -2,19 +2,19 @@
 
 import { hasItems } from './helper';
 
-import * as accessControlConditions from '@lit-protocol/access-control-conditions';
-import * as authBrowser from '@lit-protocol/auth-browser';
-import * as blsSdk from '@lit-protocol/bls-sdk';
-import * as constants from '@lit-protocol/constants';
-import * as contractsSdk from '@lit-protocol/contracts-sdk';
-import * as crypto from '@lit-protocol/crypto';
-import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
-import * as encryption from '@lit-protocol/encryption';
-import * as litNodeClient from '@lit-protocol/lit-node-client';
-import * as misc from '@lit-protocol/misc';
-import * as miscBrowser from '@lit-protocol/misc-browser';
-import * as nacl from '@lit-protocol/nacl';
-import * as uint8arrays from '@lit-protocol/uint8arrays';
+import * as accessControlConditions from '@litprotocol/access-control-conditions';
+import * as authBrowser from '@litprotocol/auth-browser';
+import * as blsSdk from '@litprotocol/bls-sdk';
+import * as constants from '@litprotocol/constants';
+import * as contractsSdk from '@litprotocol/contracts-sdk';
+import * as crypto from '@litprotocol/crypto';
+import * as ecdsaSdk from '@litprotocol/ecdsa-sdk';
+import * as encryption from '@litprotocol/encryption';
+import * as litNodeClient from '@litprotocol/lit-node-client';
+import * as misc from '@litprotocol/misc';
+import * as miscBrowser from '@litprotocol/misc-browser';
+import * as nacl from '@litprotocol/nacl';
+import * as uint8arrays from '@litprotocol/uint8arrays';
 
 console.log("accessControlConditions:", hasItems(accessControlConditions));
 console.log("authBrowser:", hasItems(authBrowser));
