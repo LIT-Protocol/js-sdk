@@ -1,6 +1,6 @@
 {
   "name": "@litprotocol/contracts-sdk",
-  "version": "0.1.95",
+  "version": "0.1.96",
   "type": "commonjs",
   "scripts": {},
   "publishConfig": {
@@ -10,7 +10,7 @@
   "peerDependencies": {
     "bs58": "^5.0.0",
     "date-and-time": "^2.4.1",
-    "multiformats": "^10.0.2"
+    "multiformats": "^9.7.1"
   },
   "gitHead": "f6aabb226615d19ce5c706b80b86040357d6aa55",
   "tags": [
