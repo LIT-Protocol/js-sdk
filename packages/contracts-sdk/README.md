@@ -10,23 +10,37 @@ yarn add @litprotocol/contracts-sdk
 
 ## Quick Start
 
+### Initialize an instance
+
 ```js
+// -- Default
+// Environments:
+//    -- [NodeJs]: It will generate a random private key to create a signer
+//    -- [Browser]: It will use window.ethereum as a signer
+// RPC: https://matic-mumbai.chainstacklabs.com
+const litContracts = new LitContracts();
+await litContracts.connect();
+
 // -- custom rpc
-// const litContracts = new LitContracts({
-//     rpc: 'https://localhost:3000',
-// });
+const litContracts = new LitContracts({
+    rpc: 'https://localhost:3000',
+});
 
 // -- custom signer
-// const litContracts = new LitContracts({
-//     signer:
-// })
-//
+const privateKey = '0x4cc303e56f1ff14e762a33534d7fbaa8a76e52509fd96373f24045baae99cc38';
+const provider = new ethers.providers.JsonRpcProvider('https://matic-mumbai.chainstacklabs.com');
+const signer = new ethers.Wallet(privateKey, provider);
+const litContracts = new LitContracts({ signer });
+await litContracts.connect();
 
-// -- default: it uses the mumbai rpc from https://matic-mumbai.chainstacklabs.com
-const litContracts = new LitContracts();
-await contracts.connect();
+```
 
-// -- READ: using the pkpNftContract raw functions
+### Usage
+
+```js
+
+// -------------------- READ --------------------
+// -- calling the pkpNftContract raw functions
 const PKP_TOKEN_ID = BigNumber.from('38350640033302...4285614');
 const PKP_ETH_ADDRESS = '0x...123';
 
@@ -34,14 +48,20 @@ let ethAddress = await litContracts.pkpNftContract.getEthAddress(PKP_TOKEN_ID);
 let pkpPubKey = await litContracts.pkpNftContract.getPubKey(PKP_TOKEN_ID);
 let mintCost = await litContracts.pkpNftContract.mintCost();
 
-// -- accessing additional functions
-let addressTokens =
-  await litContracts.pkpNftContractUtil.read.getTokensByAddress(PKP_ETH_ADDRES);
+// -- calling the pkpPermissionsContract raw functions
+let permittedAddresses = await litContracts.pkpPermissionsContract(PKP_TOKEN_ID);
 
-let last2TokensOfTheContract =
-  await litContracts.pkpNftContractUtil.read.getToken(2);
+// -------------------- ADDTIONAL READS --------------------
+let ipfsIsPermitted = await litContracts.pkpPermissionsContractUtil.read.isPermittedAction(
+  PKP_TOKEN_ID,
+  'QmZKLGf3vgYsboM7WVUS9X56cJSdLzQVacNp841wmEDRkW'
+);
 
-// -- WRITE:
+let addressTokens = await litContracts.pkpNftContractUtil.read.getTokensByAddress(PKP_ETH_ADDRES);
+
+let last2TokensOfTheContract = await litContracts.pkpNftContractUtil.read.getToken(2);
+
+// -------------------- WRITE --------------------
 const tx = await contracts.pkpNftContract.mintNext(2, { value: mintCost });
 const tx = await contracts.pkpNftContract.mintNext(2, {
   // The maximum units of gas for the transaction to use
@@ -60,17 +80,6 @@ const tx = await contracts.pkpNftContract.mintNext(2, {
   chainId: 1,
 });
 
-// -- example: using the pkpPermissionsContract raw functions
-let permittedAddresses = await litContracts.pkpPermissionsContract(
-  PKP_TOKEN_ID
-);
-
-// -- accessing additional functions
-let ipfsIsPermitted =
-  await litContracts.pkpPermissionsContractUtil.read.isPermittedAction(
-    PKP_TOKEN_ID,
-    'QmZKLGf3vgYsboM7WVUS9X56cJSdLzQVacNp841wmEDRkW'
-  );
 ```
 
 ### Other contracts can be accessed from `litContracts.`

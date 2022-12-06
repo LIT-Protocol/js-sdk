@@ -196,7 +196,8 @@ Code generation complete for ./packages/contracts-sdk/src/lib/contracts-sdk.ts
 - 1. Filled between => autogen:import-data:start and autogen:import-data:end
 - 2. Filled between => autogen:imports:start and autogen:imports:end
 - 3. Filled between => autogen:declares:start and autogen:declares:end
-- 4. Filled between => autogen:init:start and autogen:init:end
+- 4. Filled between => autogen:blank-init:start and autogen:blank-init:end
+- 5. Filled between => autogen:init:start and autogen:init:end
 `, true);
 
 
