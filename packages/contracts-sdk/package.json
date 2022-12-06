@@ -1,6 +1,6 @@
 {
-  "name": "@litprotocol/contracts-sdk",
-  "version": "0.1.96",
+  "name": "@lit-protocol/contracts-sdk",
+  "version": "0.1.97",
   "type": "commonjs",
   "scripts": {},
   "publishConfig": {

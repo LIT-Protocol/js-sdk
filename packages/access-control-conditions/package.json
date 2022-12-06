@@ -1,6 +1,6 @@
 {
-  "name": "@litprotocol/access-control-conditions",
-  "version": "0.1.96",
+  "name": "@lit-protocol/access-control-conditions",
+  "version": "0.1.97",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
