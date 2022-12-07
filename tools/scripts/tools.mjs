@@ -58,7 +58,7 @@ if (OPTION === '--create-react-app') {
     await childRunCommand(`cd ${INSTALL_PATH} && yarn install`);
 
     greenLog(`Creating a project.json for nx workspace`);
-
+    
     const projectJson = await readFile(`tools/scripts/project.json.template`);
     const newProjectJson = projectJson
         .replaceAll('PROJECT_NAME', APP_NAME)
