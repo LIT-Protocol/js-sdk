@@ -4,7 +4,7 @@ global.TextEncoder = TextEncoder;
 // @ts-ignore
 global.TextDecoder = TextDecoder;
 
-import { LIT_ERROR } from '@litprotocol/constants';
+import { LIT_ERROR } from '@lit-protocol/constants';
 import * as utilsModule from './misc';
 
 describe('utils', () => {

@@ -8,6 +8,38 @@ import { join } from 'path';
 
 const rl = readline.createInterface(process.stdin, process.stdout);
 
+/**
+ * replaceAutogen - Replaces the content between the specified start and end delimiters
+ * with new content.
+ *
+ * @param {string} startDelimiter - The string that marks the start of the content to be replaced.
+ * @param {string} endDelimiter - The string that marks the end of the content to be replaced.
+ * @param {string} newContent - The new content that will replace the old content.
+ *
+ * @returns {string} The input string with the content between the start and end
+ * delimiters replaced with the new content.
+ */
+
+ export const replaceAutogen = ({
+    oldContent,
+    startsWith = "// ----- autogen:imports:start  -----",
+    endsWith = "// ----- autogen:imports:end  -----",
+    newContent,
+}) => {
+
+    // Find the start and end indices of the content to be replaced.
+    const startIndex = oldContent.indexOf(startsWith) + startsWith.length;
+    const endIndex = oldContent.indexOf(endsWith);
+
+    // Extract the content to be replaced.
+    const _oldContent = oldContent.substring(startIndex, endIndex);
+
+    // Replace the old content with the new content.
+    const newStr = oldContent.replace(_oldContent, `\n${newContent}\n`);
+
+    return newStr;
+}
+
 // read the file and return as json
 export async function readJsonFile(filename) {
     const filePath = path.join(process.cwd(), filename);
@@ -71,10 +103,10 @@ export async function childRunCommand(command) {
             console.error(`stderr: ${data}`);
         });
 
-        // child.on('close', (code) => {
-        //     console.log(`child process exited with code ${code}`);
-        //     exit();
-        // });
+        child.on('close', (code) => {
+            console.log(`child process exited with code ${code}`);
+            // exit();
+        });
 
     });
 }

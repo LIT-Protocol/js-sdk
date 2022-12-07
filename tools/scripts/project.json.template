@@ -1,0 +1,16 @@
+{
+    "name": "PROJECT_NAME",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "PROJECT_PATH/src",
+    "projectType": "application",
+    "targets": {
+      "serve":{
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cd PROJECT_PATH && yarn start"
+        }
+      }
+    },
+    "tags": []
+  }
+  

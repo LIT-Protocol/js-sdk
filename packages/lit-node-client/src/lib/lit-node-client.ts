@@ -9,8 +9,8 @@ import {
   hashResourceId,
   hashSolRpcConditions,
   hashUnifiedAccessControlConditions,
-} from '@litprotocol/access-control-conditions';
-import { wasmBlsSdkHelpers } from '@litprotocol/bls-sdk';
+} from '@lit-protocol/access-control-conditions';
+import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 import {
   DecryptedData,
   ExecuteJsProps,
@@ -42,23 +42,23 @@ import {
   SuccessNodePromises,
   SupportedJsonRequests,
   ValidateAndSignECDSA,
-} from '@litprotocol/constants';
+} from '@lit-protocol/constants';
 import {
   combineBlsDecryptionShares,
   combineBlsShares,
   combineEcdsaShares,
-} from '@litprotocol/crypto';
-import { safeParams } from '@litprotocol/encryption';
+} from '@lit-protocol/crypto';
+import { safeParams } from '@lit-protocol/encryption';
 import {
   isBrowser,
   log,
   mostCommonString,
   throwError,
-} from '@litprotocol/misc';
+} from '@lit-protocol/misc';
 import {
   uint8arrayFromString,
   uint8arrayToString,
-} from '@litprotocol/uint8arrays';
+} from '@lit-protocol/uint8arrays';
 
 import { computeAddress } from '@ethersproject/transactions';
 import { SiweMessage } from 'lit-siwe';
@@ -66,9 +66,9 @@ import { joinSignature } from 'ethers/lib/utils';
 import {
   checkAndSignAuthMessage,
   getSessionKeyUri,
-} from '@litprotocol/auth-browser';
+} from '@lit-protocol/auth-browser';
 
-import { nacl } from '@litprotocol/nacl';
+import { nacl } from '@lit-protocol/nacl';
 import { NodeAPIsMixin } from './mixin/node-apis-mixin';
 import { BaseMixin } from './mixin/base-mixin';
 import { HelperMixin } from './mixin/helper-mixin';

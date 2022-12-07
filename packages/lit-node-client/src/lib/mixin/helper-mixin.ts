@@ -1,7 +1,7 @@
 import {
   checkAndSignAuthMessage,
   parseResource,
-} from '@litprotocol/auth-browser';
+} from '@lit-protocol/auth-browser';
 import {
   ExecuteJsProps,
   JsonAuthSig,
@@ -9,14 +9,14 @@ import {
   LIT_ERROR,
   LOCAL_STORAGE_KEYS,
   SessionKeyPair,
-} from '@litprotocol/constants';
-import { generateSessionKeyPair } from '@litprotocol/crypto';
-import { convertLitActionsParams, log, throwError } from '@litprotocol/misc';
-import { getStorageItem } from '@litprotocol/misc-browser';
+} from '@lit-protocol/constants';
+import { generateSessionKeyPair } from '@lit-protocol/crypto';
+import { convertLitActionsParams, log, throwError } from '@lit-protocol/misc';
+import { getStorageItem } from '@lit-protocol/misc-browser';
 import {
   uint8arrayFromString,
   uint8arrayToString,
-} from '@litprotocol/uint8arrays';
+} from '@lit-protocol/uint8arrays';
 import { SiweMessage } from 'lit-siwe';
 import { Class } from './mixin';
 

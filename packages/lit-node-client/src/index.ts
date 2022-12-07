@@ -1,4 +1,4 @@
-import { isNode, log } from '@litprotocol/misc';
+import { isNode, log } from '@lit-protocol/misc';
 import * as _LitNodeClient from './lib/lit-node-client';
 
 // ==================== Environment ====================
@@ -22,7 +22,7 @@ export {
   getSessionKeyUri,
   getSessionSigs,
   parseResource,
-} from '@litprotocol/auth-browser';
+} from '@lit-protocol/auth-browser';
 
 export {
   decryptFile,
@@ -36,19 +36,19 @@ export {
   verifyJwt,
   zipAndEncryptFiles,
   zipAndEncryptString,
-} from '@litprotocol/encryption';
+} from '@lit-protocol/encryption';
 
 export {
   hashResourceIdForSigning,
   humanizeAccessControlConditions,
-} from '@litprotocol/access-control-conditions';
+} from '@lit-protocol/access-control-conditions';
 
 export {
   base64StringToBlob,
   blobToBase64String,
-} from '@litprotocol/misc-browser';
+} from '@lit-protocol/misc-browser';
 
 export {
   uint8arrayFromString,
   uint8arrayToString,
-} from '@litprotocol/uint8arrays';
+} from '@lit-protocol/uint8arrays';

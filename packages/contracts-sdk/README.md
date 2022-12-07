@@ -5,7 +5,7 @@ ContractsSDK is a bundled package that allows you to make calls to Lit Protocol 
 ## Installation
 
 ```js
-yarn add @litprotocol/contracts-sdk
+yarn add @lit-protocol/contracts-sdk
 ```
 
 ## Quick Start

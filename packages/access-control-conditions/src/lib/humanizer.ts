@@ -7,8 +7,8 @@ import {
   HumanizedAccsProps,
   LIT_ERROR,
   UnifiedAccessControlConditions,
-} from '@litprotocol/constants';
-import { decimalPlaces, log, throwError } from '@litprotocol/misc';
+} from '@lit-protocol/constants';
+import { decimalPlaces, log, throwError } from '@lit-protocol/misc';
 import { formatEther, formatUnits } from 'ethers/lib/utils';
 
 /**

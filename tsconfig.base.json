@@ -10,40 +10,68 @@
     "importHelpers": true,
     "target": "ES2020",
     "module": "ES2020",
-    "lib": ["ES2020", "dom"],
+    "lib": [
+      "ES2020",
+      "dom"
+    ],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
-      "@litprotocol/access-control-conditions": [
+      "@lit-protocol/access-control-conditions": [
         "packages/access-control-conditions/src/index.ts"
       ],
-      "@litprotocol/auth-browser": ["packages/auth-browser/src/index.ts"],
-      "@litprotocol/bls-sdk": ["packages/bls-sdk/src/index.ts"],
-      "@litprotocol/bls-sdk-dist-vanilla": [
+      "@lit-protocol/auth-browser": [
+        "packages/auth-browser/src/index.ts"
+      ],
+      "@lit-protocol/bls-sdk": [
+        "packages/bls-sdk/src/index.ts"
+      ],
+      "@lit-protocol/bls-sdk-dist-vanilla": [
         "dist/packages/bls-sdk/src/index.js"
       ],
-      "@litprotocol/constants": ["packages/constants/src/index.ts"],
-      "@litprotocol/constants-dist-vanilla": [
+      "@lit-protocol/constants": [
+        "packages/constants/src/index.ts"
+      ],
+      "@lit-protocol/constants-dist-vanilla": [
         "dist/packages/constants-vanilla/constants.js"
       ],
-      "@litprotocol/contracts-sdk": ["packages/contracts-sdk/src/index.ts"],
-      "@litprotocol/crypto": ["packages/crypto/src/index.ts"],
-      "@litprotocol/ecdsa-sdk": ["packages/ecdsa-sdk/src/index.ts"],
-      "@litprotocol/ecdsa-sdk-vanilla": [
+      "@lit-protocol/contracts-sdk": [
+        "packages/contracts-sdk/src/index.ts"
+      ],
+      "@lit-protocol/crypto": [
+        "packages/crypto/src/index.ts"
+      ],
+      "@lit-protocol/ecdsa-sdk": [
+        "packages/ecdsa-sdk/src/index.ts"
+      ],
+      "@lit-protocol/ecdsa-sdk-vanilla": [
         "packages/ecdsa-sdk-vanilla/src/index.ts"
       ],
-      "@litprotocol/encryption": ["packages/encryption/src/index.ts"],
-      "@litprotocol/lit-node-client": [
+      "@lit-protocol/encryption": [
+        "packages/encryption/src/index.ts"
+      ],
+      "@lit-protocol/lit-node-client": [
         "packages/lit-node-client/src/index.ts"
       ],
-      "@litprotocol/misc": ["packages/misc/src/index.ts"],
-      "@litprotocol/misc-browser": ["packages/misc-browser/src/index.ts"],
-      "@litprotocol/nacl": ["packages/nacl/src/index.ts"],
-      "@litprotocol/uint8arrays": ["packages/uint8arrays/src/index.ts"]
+      "@lit-protocol/misc": [
+        "packages/misc/src/index.ts"
+      ],
+      "@lit-protocol/misc-browser": [
+        "packages/misc-browser/src/index.ts"
+      ],
+      "@lit-protocol/nacl": [
+        "packages/nacl/src/index.ts"
+      ],
+      "@lit-protocol/uint8arrays": [
+        "packages/uint8arrays/src/index.ts"
+      ]
     }
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": [
+    "node_modules",
+    "tmp"
+  ]
 }

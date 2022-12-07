@@ -1,39 +1,7 @@
 import { exit } from "process";
-import { asyncForEach, getFiles, greenLog, readFile, writeFile, yellowLog } from "../../tools/scripts/utils.mjs";
+import { replaceAutogen, asyncForEach, getFiles, greenLog, readFile, writeFile, yellowLog } from "../../tools/scripts/utils.mjs";
 
 /** ====== Helper ====== */
-
-/**
- * replaceAutogen - Replaces the content between the specified start and end delimiters
- * with new content.
- *
- * @param {string} startDelimiter - The string that marks the start of the content to be replaced.
- * @param {string} endDelimiter - The string that marks the end of the content to be replaced.
- * @param {string} newContent - The new content that will replace the old content.
- *
- * @returns {string} The input string with the content between the start and end
- * delimiters replaced with the new content.
- */
-
-export const replaceAutogen = ({
-    oldContent,
-    startsWith = "// ----- autogen:imports:start  -----",
-    endsWith = "// ----- autogen:imports:end  -----",
-    newContent,
-}) => {
-
-    // Find the start and end indices of the content to be replaced.
-    const startIndex = oldContent.indexOf(startsWith) + startsWith.length;
-    const endIndex = oldContent.indexOf(endsWith);
-
-    // Extract the content to be replaced.
-    const _oldContent = oldContent.substring(startIndex, endIndex);
-
-    // Replace the old content with the new content.
-    const newStr = oldContent.replace(_oldContent, `\n${newContent}\n`);
-
-    return newStr;
-}
 
 
 const contractSdkFileContent = await readFile('./packages/contracts-sdk/src/lib/contracts-sdk.ts');

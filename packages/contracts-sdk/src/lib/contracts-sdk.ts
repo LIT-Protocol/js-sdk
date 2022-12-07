@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { hexToDec, decToHex } from './hex2dec';
 import bs58 from 'bs58';
 import * as mf from 'multiformats';
-import { isBrowser, isNode } from '@litprotocol/misc';
+import { isBrowser, isNode } from '@lit-protocol/misc';
 const CID = mf.CID;
 
 // ----- autogen:import-data:start  -----
@@ -72,7 +72,7 @@ declare global {
  * @param {any} [opt] An optional value to log with the message.
  */
 const log = (str: string, opt?: any) => {
-  console.log(`[@litprotocol/contracts-sdk] ${str}`, opt ?? '');
+  console.log(`[@lit-protocol/contracts-sdk] ${str}`, opt ?? '');
 };
 
 // This code defines a LitContracts class that acts as a container for a collection of smart contracts. The class has a constructor that accepts an optional args object with provider and rpc properties. If no provider is specified, the class will create a default provider using the specified rpc URL. If no rpc URL is specified, the class will use a default URL.

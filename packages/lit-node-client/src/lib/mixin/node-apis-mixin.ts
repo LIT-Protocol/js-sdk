@@ -11,8 +11,8 @@ import {
   SignWithECDSA,
   SingConditionECDSA,
   version,
-} from '@litprotocol/constants';
-import { log } from '@litprotocol/misc';
+} from '@lit-protocol/constants';
+import { log } from '@lit-protocol/misc';
 import { Class } from './mixin';
 
 export function NodeAPIsMixin<Base extends Class>(base: Base) {

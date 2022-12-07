@@ -12,14 +12,14 @@ import {
   KV,
   ExecuteJsProps,
   LIT_ERROR,
-} from '@litprotocol/constants';
+} from '@lit-protocol/constants';
 import {
   checkIfAuthSigRequiresChainParam,
   checkType,
   is,
   log,
   throwError,
-} from '@litprotocol/misc';
+} from '@lit-protocol/misc';
 
 export const safeParams = ({
   functionName,

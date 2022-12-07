@@ -4,7 +4,7 @@ global.TextEncoder = TextEncoder;
 // @ts-ignore
 global.TextDecoder = TextDecoder;
 
-import { ConditionItem } from '@litprotocol/constants';
+import { ConditionItem } from '@lit-protocol/constants';
 import {
   canonicalUnifiedAccessControlConditionFormatter,
   canonicalSolRpcConditionFormatter,

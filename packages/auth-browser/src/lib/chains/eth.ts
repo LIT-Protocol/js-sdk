@@ -8,7 +8,7 @@ import {
     LIT_CHAINS,
     LIT_ERROR,
     LOCAL_STORAGE_KEYS
-} from '@litprotocol/constants';
+} from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { toUtf8Bytes } from '@ethersproject/strings';
@@ -32,8 +32,8 @@ import * as naclUtil from 'tweetnacl-util';
 // @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import * as nacl from 'tweetnacl';
 
-import { isBrowser, isNode, log, numberToHex, throwError } from '@litprotocol/misc';
-import { getStorageItem } from '@litprotocol/misc-browser';
+import { isBrowser, isNode, log, numberToHex, throwError } from '@lit-protocol/misc';
+import { getStorageItem } from '@lit-protocol/misc-browser';
 
 // console.log("naclUtil:", naclUtil);
 // console.log("nacl:", nacl);

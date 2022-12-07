@@ -6,14 +6,14 @@ global.TextDecoder = TextDecoder;
 global.jestTesting = true;
 import fetch from 'node-fetch';
 import { LitNodeClient } from './lit-node-client';
-import { hashResourceIdForSigning } from '@litprotocol/access-control-conditions';
+import { hashResourceIdForSigning } from '@lit-protocol/access-control-conditions';
 
 globalThis.fetch = fetch;
-import { nacl } from '@litprotocol/nacl';
+import { nacl } from '@lit-protocol/nacl';
 globalThis.nacl = nacl;
 
 import crypto, { createHash } from 'crypto';
-import { getSessionKeyUri } from '@litprotocol/auth-browser';
+import { getSessionKeyUri } from '@lit-protocol/auth-browser';
 Object.defineProperty(global.self, 'crypto', {
   value: {
     getRandomValues: (arr: any) => crypto.randomBytes(arr.length),

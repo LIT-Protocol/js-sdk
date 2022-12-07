@@ -27,7 +27,7 @@ import {
   AccsEVMParams,
   AccsSOLV2Params,
   UnifiedAccessControlConditions,
-} from '@litprotocol/constants';
+} from '@lit-protocol/constants';
 
 // ---------- Test Cases ----------
 describe('humanizer.ts', () => {

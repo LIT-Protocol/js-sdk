@@ -10,8 +10,8 @@ import {
   ILitError,
   JsonSigningResourceId,
   LIT_ERROR,
-} from '@litprotocol/constants';
-import { throwError } from '@litprotocol/misc';
+} from '@lit-protocol/constants';
+import { throwError } from '@lit-protocol/misc';
 
 /** ---------- Local Functions ---------- */
 /**

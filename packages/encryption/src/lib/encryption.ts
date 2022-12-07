@@ -11,25 +11,25 @@ import {
   NETWORK_PUB_KEY,
   ThreeKeys,
   VerifyJWTProps,
-} from '@litprotocol/constants';
+} from '@lit-protocol/constants';
 
-import { wasmBlsSdkHelpers } from '@litprotocol/bls-sdk';
+import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 
 import JSZip from 'jszip';
 
 import {
   uint8arrayFromString,
   uint8arrayToString,
-} from '@litprotocol/uint8arrays';
+} from '@lit-protocol/uint8arrays';
 
 import {
   decryptWithSymmetricKey,
   encryptWithSymmetricKey,
   generateSymmetricKey,
   importSymmetricKey,
-} from '@litprotocol/crypto';
+} from '@lit-protocol/crypto';
 
-import { checkType, log } from '@litprotocol/misc';
+import { checkType, log } from '@lit-protocol/misc';
 
 import { safeParams } from './params-validators';
 

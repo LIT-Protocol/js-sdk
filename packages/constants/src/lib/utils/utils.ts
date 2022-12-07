@@ -1,4 +1,4 @@
-import { EITHER_TYPE, IEither } from '@litprotocol/constants';
+import { EITHER_TYPE, IEither } from '@lit-protocol/constants';
 
 /**
  *

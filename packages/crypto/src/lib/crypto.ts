@@ -1,24 +1,24 @@
 // @ts-nocheck
 
-import { wasmBlsSdkHelpers, initWasmBlsSdk } from '@litprotocol/bls-sdk';
+import { wasmBlsSdkHelpers, initWasmBlsSdk } from '@lit-protocol/bls-sdk';
 
 import {
   SessionKeyPair,
   SigShare,
   SYMM_KEY_ALGO_PARAMS,
-} from '@litprotocol/constants';
+} from '@lit-protocol/constants';
 
-import * as wasmECDSA from '@litprotocol/ecdsa-sdk';
+import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
-import { log } from '@litprotocol/misc';
+import { log } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
   uint8arrayToString,
-} from '@litprotocol/uint8arrays';
+} from '@lit-protocol/uint8arrays';
 
 import nacl from 'tweetnacl';
-// import { nacl } from '@litprotocol/nacl';
+// import { nacl } from '@lit-protocol/nacl';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
