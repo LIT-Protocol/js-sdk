@@ -134,17 +134,17 @@ The `gen-code` and `fetch-contracts` actions are executed together in this actio
 node ./packages/contracts-sdk/tools.mjs --update
 ```
 
-## gen-code.mjs
+## fetch-contracts.mjs
 
-This script automatically generates a `contracts-sdk.ts`. It does this by reading the file names from a specified directory, generating import statements and declarations based on those file names, and replacing certain sections of the contracts-sdk.ts file with the generated content.
+This script fetches and processes ABI files for a set of deployed contracts. It writes the ABI files and contract data to the file system and runs a command to generate additional files based on the ABIs.
 
 ```js
 node ./packages/contracts-sdk/tools.mjs --fetch
 ```
 
-## fetch-contracts.mjs
+## gen-code.mjs
 
-This script fetches and processes ABI files for a set of deployed contracts. It writes the ABI files and contract data to the file system and runs a command to generate additional files based on the ABIs.
+This script automatically generates a `contracts-sdk.ts`. It does this by reading the file names from a specified directory, generating import statements and declarations based on those file names, and replacing certain sections of the contracts-sdk.ts file with the generated content.
 
 ```js
 node ./packages/contracts-sdk/tools.mjs --gen

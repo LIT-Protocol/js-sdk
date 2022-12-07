@@ -180,7 +180,12 @@ function App() {
       <header className="App-header">
         <LitLogo />
         <h4>
-          React Demo for: {appName}
+          React Demo for: {appName}<br/>
+          <span>
+            <a target="_blank" href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/contracts-sdk">npm repo</a>&nbsp;|&nbsp;
+            <a target="_blank" href="https://github.com/LIT-Protocol/js-sdk/blob/master/apps/demo-contracts-sdk-react">demo repo</a>
+          </span>
+          
         </h4>
         <button onClick={createInstance}>Create Instance</button>
         <h6>- Read -</h6>
