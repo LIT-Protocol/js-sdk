@@ -18,6 +18,7 @@
     "nacl": "packages/nacl",
     "nodejs": "apps/nodejs",
     "react": "apps/react",
-    "uint8arrays": "packages/uint8arrays"
+    "uint8arrays": "packages/uint8arrays",
+    "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react"
   }
 }

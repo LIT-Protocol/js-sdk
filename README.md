@@ -94,13 +94,17 @@ publishConfig: {
 },
 ```
 
+## Create a new react demo app
+
+```js
+yarn tools --create-react-app contracts-sdk --demo
+```
+
 ## Deleting a library
 
 ```
 yarn tool:delete (--package OR --app) <project-name>
 ```
-
-
 
 ## Building
 

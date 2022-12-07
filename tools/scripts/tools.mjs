@@ -7,10 +7,11 @@ const OPTION = args[0];
 
 if (!OPTION || OPTION === '' || OPTION === '--help') {
     greenLog(`
-        Usage: node packages/contracts-sdk/tools.mjs [option] [arg]
+        Usage: node packages/contracts-sdk/tools.mjs [option][...args]
         Options:
             --help: show this help
             --create-react-app: create a new react app
+            --project-path: project directory to run commands in
     `, true);
     exit();
 }
@@ -36,8 +37,6 @@ if (OPTION === '--create-react-app') {
 
     const INSTALL_PATH = `apps/${APP_NAME}`;
 
-    // await childRunCommand(`rm -rf ${INSTALL_PATH}`);
-
     await childRunCommand(`git clone https://github.com/LIT-Protocol/demo-project-react-template ${INSTALL_PATH}`);
 
     await writeFile(`${INSTALL_PATH}/src/App.js`, replaceAutogen({
@@ -60,8 +59,6 @@ if (OPTION === '--create-react-app') {
 
     greenLog(`Creating a project.json for nx workspace`);
 
-    // create a file called project.json if it doesn't exist
-
     const projectJson = await readFile(`tools/scripts/project.json.template`);
     const newProjectJson = projectJson
         .replaceAll('PROJECT_NAME', APP_NAME)
@@ -80,4 +77,20 @@ if (OPTION === '--create-react-app') {
 
     greenLog("Done!");
 
+}
+
+if(OPTION === '--project-path'){
+    const PROJECT_PATH = args[1];
+    const COMMANDS = args.slice(2);
+
+    if (!PROJECT_PATH || PROJECT_PATH === '' || PROJECT_PATH === '--help') {
+        greenLog(`
+        Usage: node packages/contracts-sdk/tools.mjs --project-path [project-path] [commands]
+            [project-path]: the path of the project
+            [commands]: the commands to run
+    `, true);
+        exit();
+    }
+
+    spawnCommand(COMMANDS[0], COMMANDS.slice(1), { cwd: PROJECT_PATH });
 }
