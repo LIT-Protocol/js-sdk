@@ -45,3 +45,8 @@
     transform: scale(2);
   }
 }
+
+h6{
+  margin-top: 12px;
+  margin-bottom: 12px;
+}

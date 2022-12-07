@@ -244,6 +244,9 @@ export class LitContracts {
     ) as unknown as stakingContract.ContractContext;
     this.stakingContract = this.stakingContract.connect(this.signer);
 // ----- autogen:init:end  -----
+
+log('Connected to all contracts');
+
   };
 
   utils = {

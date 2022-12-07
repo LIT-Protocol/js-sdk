@@ -29,6 +29,7 @@ button {
   padding: 8px 32px;
   text-transform: uppercase;
   box-sizing: border-box;
+  margin: 4px;
 }
 
 .editor {
