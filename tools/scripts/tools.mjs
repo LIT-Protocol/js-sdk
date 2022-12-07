@@ -1,5 +1,5 @@
 import { exit } from "process";
-import { childRunCommand, getArgs, greenLog, readFile, readJsonFile, redLog, replaceAutogen, spawnCommand, writeFile } from "./utils.mjs";
+import { childRunCommand, findImportsFromDir, getArgs, greenLog, readFile, readJsonFile, redLog, replaceAutogen, spawnCommand, writeFile } from "./utils.mjs";
 
 const args = getArgs();
 
@@ -13,6 +13,7 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
             --create-react-app: create a new react app
             --project-path: project directory to run commands in
             --test: run tests
+            --find: different search options
     `, true);
     exit();
 }
@@ -125,7 +126,7 @@ if (OPTION === '--test') {
         `, true);
     }
 
-    if (TEST_TYPE === '--e2e'){
+    if (TEST_TYPE === '--e2e') {
 
         const ENV = args[2];
 
@@ -147,5 +148,50 @@ if (OPTION === '--test') {
         if (ENV === 'html') {
             await childRunCommand('cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4002 yarn cypress open');
         }
+    }
+}
+
+if (OPTION === '--find') {
+    const FIND_TYPE = args[1];
+
+    if (!FIND_TYPE || FIND_TYPE === '' || FIND_TYPE === '--help') {
+
+        greenLog(`
+        Usage: node packages/contracts-sdk/tools.mjs --find [find-type]
+            [find-type]: the type of find to run
+                --imports: find all imports from a directory
+    `, true);
+        exit();
+    }
+
+    if (FIND_TYPE === '--imports') {
+
+        const TARGET_DIR = args[2];
+        const FILTER = args[3];
+
+        if (!TARGET_DIR || TARGET_DIR === '' || TARGET_DIR === '--help') {
+            greenLog(`
+            Usage: node packages/contracts-sdk/tools.mjs --find --imports [target-dir]
+                [target-dir]: the directory to find imports from
+        `, true);
+            exit();
+        }
+
+        let res = await findImportsFromDir(TARGET_DIR);
+
+        greenLog(`
+            Usage: node packages/contracts-sdk/tools.mjs --find --imports [target-dir] --filter [keyword]
+                [keyword]: the keyword to filter the results by
+        `, true);
+
+        if (FILTER === '--filter') {
+
+            const keyword = args[4];
+
+            res = res.filter((item) => item.includes(keyword))
+        }
+
+        console.log(res);
+        exit();
     }
 }
