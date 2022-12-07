@@ -2,6 +2,7 @@ import './App.css';
 import { useState } from 'react';
 import LitLogo from './LitLogo';
 import Editor from '@monaco-editor/react';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 function App() {
 
@@ -28,7 +29,8 @@ const [appName, setAppName] = useState('demo-contracts-sdk-react');
         <h4>
           React Demo for: {appName}
         </h4>
-        <button onClick={go}>Go!</button>
+        <button onClick={go}>Mint</button>
+        <button onClick={go}>Mint</button>
       </header>
 
       <div className='editor'>

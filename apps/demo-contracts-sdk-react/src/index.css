@@ -30,3 +30,9 @@ button {
   text-transform: uppercase;
   box-sizing: border-box;
 }
+
+.editor {
+  width: 50%;
+  position: fixed;
+  right: 0;
+}

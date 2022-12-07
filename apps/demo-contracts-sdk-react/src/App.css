@@ -16,7 +16,7 @@
 }
 
 .App-header {
-  background-color: #33257F;
+  background-color: #33257f;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -24,6 +24,11 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  position: fixed;
+  left: 0;
+  width: 50%;
+  overflow: auto;
+  height: 100vh;
 }
 
 .App-link {
@@ -37,6 +42,6 @@
     /* transform: rotate(0deg); */
   }
   to {
-    transform: scale(2)
+    transform: scale(2);
   }
 }
