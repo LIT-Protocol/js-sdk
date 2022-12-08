@@ -19,6 +19,7 @@
     "nodejs": "apps/nodejs",
     "react": "apps/react",
     "uint8arrays": "packages/uint8arrays",
-    "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react"
+    "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react",
+    "demo-pkp-ethers-react": "apps/demo-pkp-ethers-react"
   }
 }

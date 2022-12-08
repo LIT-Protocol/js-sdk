@@ -48,6 +48,10 @@ if (OPTION === '--create-react-app') {
         newContent: `const [appName, setAppName] = useState('${APP_NAME}');`
     }));
 
+    const indexHtml = await readFile(`${INSTALL_PATH}/public/index.html`);
+    const newHtml = indexHtml.replace('Demo', `Demo: ${APP_NAME}`);
+    await writeFile(`${INSTALL_PATH}/public/index.html`, newHtml);
+
     await childRunCommand(`rm -rf ${INSTALL_PATH}/.git`);
 
 

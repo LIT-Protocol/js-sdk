@@ -1,0 +1,90 @@
+.App {
+  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #33257f;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  position: fixed;
+  left: 0;
+  width: 50%;
+  overflow: auto;
+  height: 100vh;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    /* zoom  */
+    transform: scale(1);
+    /* transform: rotate(0deg); */
+  }
+  to {
+    transform: scale(2);
+  }
+}
+
+h6{
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+a{
+  color: white;
+  text-decoration: none;
+}
+a:hover{
+  border-bottom: 1px solid white;
+}
+span{
+  font-size: 14px;
+}
+/* small minimalist table */
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 400px;
+  margin-bottom: 12px;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+/* style input fields */
+input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
