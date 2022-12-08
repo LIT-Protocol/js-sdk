@@ -437,7 +437,11 @@ export const checkAndSignEVMAuthMessage = async ({
             });
         }
 
-        return authSigOrError.result;
+        let authSig: JsonAuthSig = typeof authSigOrError.result === 'string' 
+            ? JSON.parse(authSigOrError.result)
+            : authSigOrError.result;
+
+        return authSig;
     };
 
     // -- 1. prepare
@@ -546,10 +550,13 @@ export const checkAndSignEVMAuthMessage = async ({
             chainId: selectedChain.chainId,
             resources,
         });
+        authSigOrError.type = EITHER_TYPE.SUCCESS;
+        log("5. authSigOrError:", authSigOrError);
     }
 
     // -- 6. case: Lit auth signature IS in the local storage
-    let authSig: JsonAuthSig = JSON.parse(authSigOrError.result);
+    let authSig: JsonAuthSig = authSigOrError.result;
+    log("6. authSig:", authSig);
 
     // -- 7. case: when we are NOT on the right wallet address
     if (account !== authSig.address) {
@@ -562,8 +569,9 @@ export const checkAndSignEVMAuthMessage = async ({
             chainId: selectedChain.chainId,
             resources,
         });
+        log("7. authSig:", authSig);
 
-        // -- 8. case: we are on the right wallet, but need to check the resources of the sig and re-sign if they don't match
+    // -- 8. case: we are on the right wallet, but need to check the resources of the sig and re-sign if they don't match
     } else {
         let mustResign: boolean = getMustResign(authSig, resources);
 
@@ -575,9 +583,9 @@ export const checkAndSignEVMAuthMessage = async ({
                 resources,
             });
         }
+        log("8. mustResign:", mustResign);
     }
-
-    log('got auth sig', authSig);
+    
     return authSig;
 };
 

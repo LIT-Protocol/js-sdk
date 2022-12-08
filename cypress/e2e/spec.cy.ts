@@ -49,7 +49,7 @@ describe('Encrypt and Decrypt String', () => {
     await cy.confirmMetamaskSignatureRequest();
     await cy.wait(100).then(() => {
       console.log('window.output:', window.output);
-      savedParams.authSig = JSON.parse(window.output);
+      savedParams.authSig = window.output;
       expect(savedParams.authSig).to.be.an('object');
     });
   });
