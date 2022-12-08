@@ -1,5 +1,6 @@
 <div align="center">
 <h1> Lit Protocol Javascript/Typescript SDK</h1>
+<p>*New* This new SDK is written in typescript and is a complete rewrite of the old SDK.  It is much more modular and easier to use.  It is also much more secure and has a much smaller bundle size.</p>
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
 <a href="https://twitter.com/LitProtocol"><img src="https://img.shields.io/twitter/follow/litprotocol?label=Follow&style=social"/></a>
