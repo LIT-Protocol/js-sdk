@@ -1,14 +1,16 @@
 <div align="center">
-<h1> Lit Protocol Javascript/Typescript SDK</h1>
-<p>*New* This new SDK is written in typescript and is a complete rewrite of the old SDK.  It is much more modular and easier to use.  It is also much more secure and has a much smaller bundle size.</p>
+<h1>Lit Protocol Javascript/Typescript SDK</h1>
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
 <a href="https://twitter.com/LitProtocol"><img src="https://img.shields.io/twitter/follow/litprotocol?label=Follow&style=social"/></a>
 <br/>
 <br/>
 The Lit JavaScript SDK provides developers with a framework for implementing Lit functionality into their own applications. Find installation instructions in the docs to get started with the Lit SDK based on your use case: <a href="https://developer.litprotocol.com/SDK/Explanation/installation">https://developer.litprotocol.com/SDK/Explanation/installation</a>
+
+<p>This new SDK is written in Typescript and is a complete rewrite of the old SDK.  It is much more modular and easier to use, and has a much smaller bundle size.</p>
+
 <br /><br />
-Alternatively, individual packages are below so that you can import the minimum required packages for your use case.
+Individual packages are below so that you can import the minimum required packages for your use case.
 <br /><br />
 
 # Packages
