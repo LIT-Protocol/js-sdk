@@ -116,7 +116,7 @@ const generatedStrs = {
       ${varNameLower}.abi as any,
       this.provider
     ) as unknown as ${contractName}.ContractContext;
-    this.${contractName} = this.${contractName}.connect(this.signer);`;
+    this.${contractName} = this.${contractName}.connect(this.provider);`;
 
             return importStr;
         }).join('\n\n'),

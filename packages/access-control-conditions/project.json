@@ -14,10 +14,7 @@
           "yarn build:target access-control-conditions"
         ],
         "parallel": false
-      },
-      "dependsOn": [
-        "test"
-      ]
+      }
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",

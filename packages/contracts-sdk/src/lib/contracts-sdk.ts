@@ -82,6 +82,7 @@ export class LitContracts {
   provider: ethers.providers.JsonRpcProvider | any;
   rpc: string;
   signer: ethers.Signer;
+  privateKey: string | undefined;
 
   // ----- autogen:declares:start  -----
   accessControlConditionsContract: accessControlConditionsContract.ContractContext;
@@ -100,10 +101,12 @@ export class LitContracts {
     // provider?: ethers.providers.JsonRpcProvider | any;
     rpc?: string | any;
     signer?: ethers.Signer | any;
+    privateKey?: string | undefined;
   }) {
     // this.provider = args?.provider;
     this.rpc = args?.rpc;
     this.signer = args?.signer;
+    this.privateKey = args?.privateKey;
     this.provider;
 
     // if rpc is not specified, use the default rpc
@@ -123,7 +126,7 @@ export class LitContracts {
           `No signer is provided, we can generate a random private key to create a signer`
         );
         // generate random private key
-        const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+        const privateKey = this.privateKey ?? ethers.utils.hexlify(ethers.utils.randomBytes(32));
         this.provider = new ethers.providers.JsonRpcProvider(this.rpc);
         this.signer = new ethers.Wallet(privateKey, this.provider);
       }

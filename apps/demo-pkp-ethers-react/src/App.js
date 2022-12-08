@@ -5,6 +5,7 @@ import Editor from '@monaco-editor/react';
 import { benchmark } from './utils';
 import { PKPWallet } from '@lit-protocol/pkp-ethers.js';
 import { ethers } from "ethers";
+import { pkpNft } from './pkp-nft';
 
 function App() {
 
@@ -13,7 +14,7 @@ function App() {
   // ----- autogen:app-name:end  -----
 
   const [npmRepo, setNpmRepo] = useState('https://www.npmjs.com/package/@lit-protocol/pkp-ethers.js');
-  const [demoRepo, setDemoRepo] = useState('');
+  const [demoRepo, setDemoRepo] = useState('https://github.com/LIT-Protocol/js-sdk/tree/master/apps/demo-pkp-ethers-react');
   const [lang, setLang] = useState('json');
   const [data, setData] = useState({
     data: {
@@ -28,6 +29,104 @@ function App() {
   const [controllerAuthSig, setControllerAuthSig] = useState({ "sig": "0x8c4b3b2a2f8f0b33ad8092719a604e94ffd2d938c115741e7155cdea3653fca75285ed2499ec1c6f60ab4b1e5e9fab2d4e6cf36abf32fe515d67de152736dfcd1b", "derivedVia": "web3.eth.personal.sign", "signedMessage": "localhost:3000 wants you to sign in with your Ethereum account:\n0x5B8A8d043f2235a29E4b063c20299050931832Dc\n\n\nURI: http://localhost:3000/\nVersion: 1\nChain ID: 80001\nNonce: McW3494o8EuALAzJn\nIssued At: 2022-12-06T18:09:09.646Z\nExpiration Time: 2022-12-13T18:09:09.644Z", "address": "0x5B8A8d043f2235a29E4b063c20299050931832Dc" });
 
   const [pkpWallet, setPkpWallet] = useState();
+
+  const contractCall = async () => {
+
+    if (!pkpWallet) {
+      setLang('javascript');
+      setData("// PKP Wallet not initialized. ");
+      return;
+    }
+
+    let code = `import { pkpNft } from './pkp-nft';
+
+const provider = pkpWallet.rpcProvider; // for read
+const signer = pkpWallet; // for write
+
+const contractRead = new ethers.Contract(pkpNft.address, pkpNft.abi, provider);
+const contractWrite = new ethers.Contract(pkpNft.address, pkpNft.abi, signer);
+
+// { ms }
+// { Loading... }
+const mintCost = await contractRead.mintCost();
+
+// { ms }
+// { Loading... }
+const tx = await contractWrite.populateTransaction.mintNext(2, { 
+  value: mintCost 
+} );
+
+// { ms }
+// { Loading... }
+const signedTx = await signer.signTransaction(tx);
+
+// { ms }
+// { Loading... }
+const sentTx = await signer.sendTransaction(signedTx);
+
+// { txLink }
+`;
+
+    setData(code);
+
+    console.log(pkpNft);
+
+    const provider = pkpWallet.rpcProvider; // for read
+    const signer = pkpWallet; // for write
+
+    const contractRead = new ethers.Contract(pkpNft.address, pkpNft.abi, provider);
+    const contractWrite = new ethers.Contract(pkpNft.address, pkpNft.abi, signer);
+
+    benchmark(async () => {
+      const mintCost = await contractRead.mintCost();
+      return mintCost;
+    }, (ms, mintCost) => {
+      code = code.replace('{ ms }', `[${ms}]`);
+      code = code.replace('{ Loading... }', `mintCost: ${mintCost}`)
+      setData(code);
+
+      benchmark(async () => {
+        const tx = await contractWrite.populateTransaction.mintNext(2, { value: mintCost });
+        return tx;
+      }, (ms, tx) => {
+        code = code.replace('{ ms }', `[${ms}]`);
+        code = code.replace('{ Loading... }', `tx: ${JSON.stringify(tx)}`)
+        setData(code);
+
+        benchmark(async () => {
+          const signedTx = await signer.signTransaction(tx);
+          return signedTx;
+        }, (ms, signedTx) => {
+          code = code.replace('{ ms }', `[${ms}]`);
+          code = code.replace('{ Loading... }', `signedTx: ${JSON.stringify(signedTx)}`)
+          setData(code);
+
+          benchmark(async () => {
+            const sentTx = await signer.sendTransaction(signedTx);
+            return sentTx;
+          }, (ms, sentTx) => {
+            code = code.replace('{ ms }', `[${ms}]`);
+            code = code.replace('{ Loading... }', `sentTx: ${JSON.stringify(sentTx)}`)
+            code = code.replace('{ txLink }', `https://mumbai.polygonscan.com/tx/${sentTx.hash}`);
+            setData(code);
+          })
+
+        })
+
+      })
+
+    })
+
+
+    // const tx = await contract.populateTransaction.mintNext(2, { value: 100000000000000 } );
+    // console.log("tx:", tx);
+
+    // const signedTx = await pkpSigner.signTransaction(tx2);
+    // console.log("signedTx:", signedTx);
+
+    // const sentTx = await pkpWallet.sendTransaction(signedTx);
+    // console.log("sentTx:", sentTx);
+  }
 
   const signMessage = async () => {
 
@@ -157,6 +256,7 @@ await _pkpWallet.init();
         </table>
         <button onClick={go}>Create PKP Wallet instance</button>
         <button onClick={signMessage}>Sign Message</button>
+        <button onClick={contractCall}>Contract Call</button>
       </header>
 
       <div className='editor'>
