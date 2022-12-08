@@ -7,7 +7,8 @@
 <br/>
 The Lit JavaScript SDK provides developers with a framework for implementing Lit functionality into their own applications. Find installation instructions in the docs to get started with the Lit SDK based on your use case: <a href="https://developer.litprotocol.com/SDK/Explanation/installation">https://developer.litprotocol.com/SDK/Explanation/installation</a>
 
-<p>This new SDK is written in Typescript and is a complete rewrite of the old SDK.  It is much more modular and easier to use, and has a much smaller bundle size.</p>
+<br /><br />
+This new SDK is written in Typescript and is a complete rewrite of the old SDK. It is much more modular and easier to use, and has a much smaller bundle size.
 
 <br /><br />
 Individual packages are below so that you can import the minimum required packages for your use case.
