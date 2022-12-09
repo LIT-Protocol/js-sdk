@@ -59,6 +59,7 @@ Package | Category | Version | Download
 <!-- autogen:package:end -->
 
 API Docs: http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
+Demo App(Simple Encrypt Decrypt): https://demo-encrypt-decrypt-react.vercel.app/<br/>
 Test App(HTML): http://test.lit-js-sdk-v2.html.litprotocol.com/<br/>
 Test App(REACT): http://test.lit-js-sdk-v2.react.litprotocol.com/
 
