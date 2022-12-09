@@ -567,6 +567,9 @@ export const checkAndSignEVMAuthMessage = async ({
     });
     authSigOrError.type = EITHER_TYPE.SUCCESS;
     log('5. authSigOrError:', authSigOrError);
+  } else {
+    // auth sig came from local storage.  we need to convert it to JSON
+    authSigOrError.result = JSON.parse(authSigOrError.result);
   }
 
   // -- 6. case: Lit auth signature IS in the local storage
