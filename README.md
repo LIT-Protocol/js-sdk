@@ -63,12 +63,15 @@ http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
 
 </div>
 
-## Demo
+## Demo Apps
 
 - Simple Encrypt Decrypt: https://demo-encrypt-decrypt-react.vercel.app/<br/>
 - Contracts SDK: https://demo-contracts-sdk-react.vercel.app/
 
 ## Test Apps
+
+- Html: http://test.lit-js-sdk-v2.html.litprotocol.com/<br/>
+- React: http://test.lit-js-sdk-v2.react.litprotocol.com/
 
 All packages and functions can be called inside the browser console.
 
@@ -76,9 +79,6 @@ All packages and functions can be called inside the browser console.
 // eg.
 window.LitJsSdk_[package_name].[function_name]
 ```
-
-- Html: http://test.lit-js-sdk-v2.html.litprotocol.com/<br/>
-- React: http://test.lit-js-sdk-v2.react.litprotocol.com/
 
 
 
