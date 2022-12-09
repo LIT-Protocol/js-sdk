@@ -76,7 +76,6 @@ http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
 All packages and functions can be called inside the browser console.
 
 ```jsx
-// eg.
 window.LitJsSdk_[package_name].[function_name]
 ```
 
