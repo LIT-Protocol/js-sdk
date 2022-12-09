@@ -1,8 +1,14 @@
-import { ALL_LIT_CHAINS, CheckAndSignAuthParams, JsonAuthSig, LIT_ERROR, VMTYPE } from "@lit-protocol/constants";
-import { throwError } from "@lit-protocol/misc";
-import { checkAndSignCosmosAuthMessage } from "./chains/cosmos";
-import { checkAndSignEVMAuthMessage } from "./chains/eth";
-import { checkAndSignSolAuthMessage } from "./chains/sol";
+import {
+  ALL_LIT_CHAINS,
+  CheckAndSignAuthParams,
+  JsonAuthSig,
+  LIT_ERROR,
+  VMTYPE,
+} from '@lit-protocol/constants';
+import { throwError } from '@lit-protocol/misc';
+import { checkAndSignCosmosAuthMessage } from './chains/cosmos';
+import { checkAndSignEVMAuthMessage } from './chains/eth';
+import { checkAndSignSolAuthMessage } from './chains/sol';
 
 /**
  *
@@ -12,10 +18,12 @@ import { checkAndSignSolAuthMessage } from "./chains/sol";
  *
  *  @returns { AuthSig } The AuthSig created or retrieved
  */
- export const checkAndSignAuthMessage = ({
+export const checkAndSignAuthMessage = ({
   chain,
   resources,
   switchChain,
+  expiration,
+  uri,
 }: CheckAndSignAuthParams): Promise<JsonAuthSig> => {
   const chainInfo = ALL_LIT_CHAINS[chain];
 
@@ -30,9 +38,20 @@ import { checkAndSignSolAuthMessage } from "./chains/sol";
     });
   }
 
+  if (!expiration) {
+    // set default of 1 week
+    expiration = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString();
+  }
+
   // -- check and sign auth message based on chain
   if (chainInfo.vmType === VMTYPE.EVM) {
-    return checkAndSignEVMAuthMessage({ chain, resources, switchChain });
+    return checkAndSignEVMAuthMessage({
+      chain,
+      resources,
+      switchChain,
+      expiration,
+      uri,
+    });
   } else if (chainInfo.vmType === VMTYPE.SVM) {
     return checkAndSignSolAuthMessage();
   } else if (chainInfo.vmType === VMTYPE.CVM) {
