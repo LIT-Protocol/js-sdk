@@ -102,15 +102,15 @@ export async function childRunCommand(command) {
             }
         });
         child.stdout.on('data', (data) => {
-            console.log(data.toString().replace(/\n$/, ''));
+            console.log(`${data.toString().replace(/\n$/, '')}`);
         });
 
         child.stderr.on('data', (data) => {
-            console.error(`stderr: ${data}`);
+            console.warn(`${data.toString().replace(/\n$/, '')}`);
         });
 
         child.on('close', (code) => {
-            console.log(`child process exited with code ${code}`);
+            // console.log(`child process exited with code ${code}`);
             // exit();
         });
 

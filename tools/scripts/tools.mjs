@@ -10,7 +10,7 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
         Usage: node tools/scripts/tools.mjs [option][...args]
         Options:
             --help: show this help
-            --create-react-app: create a new react app
+            --create: create a new app
             --project-path: project directory to run commands in
             --test: run tests
             --find: different search options
@@ -22,73 +22,118 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
 }
 
 
-if (OPTION === '--create-react-app') {
+if (OPTION === '--create') {
 
-    let APP_NAME = args[1];
-    const TYPE = args[2];
+    let APP_TYPE = args[1];
 
-    if (!APP_NAME || APP_NAME === '' || APP_NAME === '--help') {
+    if (!APP_TYPE || APP_TYPE === '' || APP_TYPE === '--help') {
         greenLog(`
-        Usage: node tools/scripts/tools.mjs --create-react-app [app-name] [option]
-            [app-name]: the name of the react app
+        Usage: node tools/scripts/tools.mjs --create [app-type]
+        [app-type]: the type of app to create
         Options:
-            --demo: prepend name with "demo-" and append "-react"
-    `, true);
+        --react: create a react app
+        --html: create a html app
+        --node: create a node app
+        `, true);
         exit();
     }
 
-    if (TYPE === '--demo') {
-        APP_NAME = `demo-${APP_NAME}-react`;
+    let APP_NAME = args[2];
+    const TYPE = args[3];
+
+    if (APP_TYPE === '--react') {
+
+        if (!TYPE || TYPE === '' || TYPE === '--help') {
+            greenLog(`
+            Usage: node tools/scripts/tools.mjs --create --react [app_name] [type]
+            [type]: the type of react app to create
+            Options:
+            --demo: prepend 'demo' and append '-react' to the app name
+            `, true);
+        }
+
+        if(TYPE === '--demo'){
+            APP_NAME = `demo-${APP_NAME}-react`;
+        }
+
+        const INSTALL_PATH = `apps/${APP_NAME}`;
+
+        await childRunCommand(`git clone https://github.com/LIT-Protocol/demo-project-react-template ${INSTALL_PATH}`);
+
+        await writeFile(`${INSTALL_PATH}/src/App.js`, replaceAutogen({
+            oldContent: await readFile(`${INSTALL_PATH}/src/App.js`),
+            startsWith: '// ----- autogen:app-name:start  -----',
+            endsWith: '// ----- autogen:app-name:end  -----',
+            newContent: `const [appName, setAppName] = useState('${APP_NAME}');`
+        }));
+
+        const indexHtml = await readFile(`${INSTALL_PATH}/public/index.html`);
+        const newHtml = indexHtml.replace('Demo', `Demo: ${APP_NAME}`);
+        await writeFile(`${INSTALL_PATH}/public/index.html`, newHtml);
+
+        await childRunCommand(`rm -rf ${INSTALL_PATH}/.git`);
+
+
+        const packageJson = await readJsonFile(`${INSTALL_PATH}/package.json`);
+        packageJson.name = APP_NAME;
+
+        // generate a port number between 4100 and 4200
+        const port = Math.floor(Math.random() * 100) + 4100;
+        packageJson.scripts.start = `PORT=${port} react-scripts start`;
+
+        await writeFile(`${INSTALL_PATH}/package.json`, JSON.stringify(packageJson, null, 2));
+
+        await childRunCommand(`cd ${INSTALL_PATH} && yarn install`);
+
+        greenLog(`Creating a project.json for nx workspace`);
+
+        const projectJson = await readFile(`tools/scripts/project.json.template`);
+        const newProjectJson = projectJson
+            .replaceAll('PROJECT_NAME', APP_NAME)
+            .replaceAll('PROJECT_PATH', `apps/${APP_NAME}`)
+            .replaceAll('PROJECT_PORT', port)
+
+        await writeFile(`${INSTALL_PATH}/project.json`, newProjectJson);
+
+        greenLog("Adding project to nx workspace");
+
+        const workspaceJson = await readJsonFile(`workspace.json`);
+
+        workspaceJson.projects[APP_NAME] = INSTALL_PATH;
+
+        await writeFile(`workspace.json`, JSON.stringify(workspaceJson, null, 2));
+
+        greenLog("Done!");
+
     }
 
-    const INSTALL_PATH = `apps/${APP_NAME}`;
+    if( APP_TYPE == '--html'){
+        if (!TYPE || TYPE === '' || TYPE === '--help') {
+            greenLog(`
+            Usage: node tools/scripts/tools.mjs --create --html [type]
+            [type]: the type of html app to create
+            Options:
+            --demo: prepend 'demo' and append '-html' to the app name
+            `, true);
+        }
 
-    await childRunCommand(`git clone https://github.com/LIT-Protocol/demo-project-react-template ${INSTALL_PATH}`);
+        redLog("Not implemented yet");
+        exit();
+    }
 
-    await writeFile(`${INSTALL_PATH}/src/App.js`, replaceAutogen({
-        oldContent: await readFile(`${INSTALL_PATH}/src/App.js`),
-        startsWith: '// ----- autogen:app-name:start  -----',
-        endsWith: '// ----- autogen:app-name:end  -----',
-        newContent: `const [appName, setAppName] = useState('${APP_NAME}');`
-    }));
+    if( APP_TYPE == '--node'){
+        if (!TYPE || TYPE === '' || TYPE === '--help') {
+            greenLog(`
+            Usage: node tools/scripts/tools.mjs --create --node [type]
+            [type]: the type of node app to create
+            Options:
+            --demo: prepend 'demo' and append '-node' to the app name
+            `, true);
+        }
 
-    const indexHtml = await readFile(`${INSTALL_PATH}/public/index.html`);
-    const newHtml = indexHtml.replace('Demo', `Demo: ${APP_NAME}`);
-    await writeFile(`${INSTALL_PATH}/public/index.html`, newHtml);
-
-    await childRunCommand(`rm -rf ${INSTALL_PATH}/.git`);
-
-
-    const packageJson = await readJsonFile(`${INSTALL_PATH}/package.json`);
-    packageJson.name = APP_NAME;
-
-    // generate a port number between 4100 and 4200
-    const port = Math.floor(Math.random() * 100) + 4100;
-    packageJson.scripts.start = `PORT=${port} react-scripts start`;
-
-    await writeFile(`${INSTALL_PATH}/package.json`, JSON.stringify(packageJson, null, 2));
-
-    await childRunCommand(`cd ${INSTALL_PATH} && yarn install`);
-
-    greenLog(`Creating a project.json for nx workspace`);
-
-    const projectJson = await readFile(`tools/scripts/project.json.template`);
-    const newProjectJson = projectJson
-        .replaceAll('PROJECT_NAME', APP_NAME)
-        .replaceAll('PROJECT_PATH', `apps/${APP_NAME}`)
-        .replaceAll('PROJECT_PORT', port)
-
-    await writeFile(`${INSTALL_PATH}/project.json`, newProjectJson);
-
-    greenLog("Adding project to nx workspace");
-
-    const workspaceJson = await readJsonFile(`workspace.json`);
-
-    workspaceJson.projects[APP_NAME] = INSTALL_PATH;
-
-    await writeFile(`workspace.json`, JSON.stringify(workspaceJson, null, 2));
-
-    greenLog("Done!");
+        redLog("Not implemented yet");
+        exit();
+    }
 
 }
 
@@ -204,7 +249,7 @@ if (OPTION === '--find') {
     }
 }
 
-if(OPTION === '--build') {
+if (OPTION === '--build') {
 
     const BUILD_TYPE = args[1];
 
@@ -296,7 +341,7 @@ if (OPTION === '--publish') {
     }
 }
 
-if (OPTION === '--yalc'){
+if (OPTION === '--yalc') {
 
     const OPTION2 = args[1];
 

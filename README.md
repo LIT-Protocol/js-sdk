@@ -129,7 +129,7 @@ yarn tool:genLib <package-name>
 ## Create a new react demo app using the Lit JS SDK
 
 ```js
-yarn tools --create-react-app contracts-sdk --demo
+yarn tools --create --react contracts-sdk --demo
 ```
 
 ## Deleting a library

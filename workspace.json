@@ -20,6 +20,7 @@
     "react": "apps/react",
     "uint8arrays": "packages/uint8arrays",
     "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react",
-    "demo-pkp-ethers-react": "apps/demo-pkp-ethers-react"
+    "demo-pkp-ethers-react": "apps/demo-pkp-ethers-react",
+    "demo-encrypt-decrypt-react": "apps/demo-encrypt-decrypt-react"
   }
 }
