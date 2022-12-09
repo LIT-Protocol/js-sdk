@@ -130,11 +130,11 @@ export const spawnCommand = (command, args, options = {}, options2={
 
     // Handle child process output
     child.stdout.on("data", data => {
-        console.log(`${data}`);
+        console.log(`${data.toString().replace(/\n$/, '')}`);
     });
 
     child.stderr.on("data", data => {
-        console.error(`child stderr:\n${data}`);
+        console.log(`${data.toString().replace(/\n$/, '')}`);
     });
 
     child.on("exit", code => {

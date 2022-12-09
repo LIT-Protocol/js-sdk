@@ -1,1 +1,0 @@
-This is a template of creating a react demo

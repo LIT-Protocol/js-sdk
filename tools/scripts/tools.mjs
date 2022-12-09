@@ -11,7 +11,7 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
         Options:
             --help: show this help
             --create: create a new app
-            --project-path: project directory to run commands in
+            --path: a directory to run commands in
             --test: run tests
             --find: different search options
             --publish: publish to npm
@@ -52,7 +52,7 @@ if (OPTION === '--create') {
             `, true);
         }
 
-        if(TYPE === '--demo'){
+        if (TYPE === '--demo') {
             APP_NAME = `demo-${APP_NAME}-react`;
         }
 
@@ -107,7 +107,7 @@ if (OPTION === '--create') {
 
     }
 
-    if( APP_TYPE == '--html'){
+    if (APP_TYPE == '--html') {
         if (!TYPE || TYPE === '' || TYPE === '--help') {
             greenLog(`
             Usage: node tools/scripts/tools.mjs --create --html [type]
@@ -121,7 +121,7 @@ if (OPTION === '--create') {
         exit();
     }
 
-    if( APP_TYPE == '--node'){
+    if (APP_TYPE == '--node') {
         if (!TYPE || TYPE === '' || TYPE === '--help') {
             greenLog(`
             Usage: node tools/scripts/tools.mjs --create --node [type]
@@ -137,13 +137,13 @@ if (OPTION === '--create') {
 
 }
 
-if (OPTION === '--project-path') {
+if (OPTION === '--path') {
     const PROJECT_PATH = args[1];
     const COMMANDS = args.slice(2);
 
     if (!PROJECT_PATH || PROJECT_PATH === '' || PROJECT_PATH === '--help') {
         greenLog(`
-        Usage: node tools/scripts/tools.mjs --project-path [project-path] [commands]
+        Usage: node tools/scripts/tools.mjs --path [project-path] [commands]
             [project-path]: the path of the project
             [commands]: the commands to run
     `, true);
