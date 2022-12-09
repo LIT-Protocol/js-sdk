@@ -161,8 +161,8 @@ if (OPTION === '--find') {
     if (!FIND_TYPE || FIND_TYPE === '' || FIND_TYPE === '--help') {
 
         greenLog(`
-        Usage: node tools/scripts/tools.mjs --find [find-type]
-            [find-type]: the type of find to run
+        Usage: node tools/scripts/tools.mjs --find [option]
+            [option]: 
                 --imports: find all imports from a directory
     `, true);
         exit();
@@ -209,7 +209,7 @@ if (OPTION === '--publish') {
         greenLog(`
         Usage: node tools/scripts/tools.mjs --publish [option]
             [option]: the option to run
-                --pre-build: build packages before publishing
+                --build: build packages before publishing
                 --no-build: publish without building
     `, true);
 
@@ -217,7 +217,7 @@ if (OPTION === '--publish') {
 
     }
 
-    if (OPTION2 === '--pre-build') {
+    if (OPTION2 === '--build') {
         spawnListener('yarn build:packages', {
             onDone: () => {
                 spawnListener('yarn npx lerna publish --force-publish', {
