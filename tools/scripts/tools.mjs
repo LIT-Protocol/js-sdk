@@ -235,19 +235,21 @@ if(OPTION === '--build') {
     }
 
     if (BUILD_TYPE === '--apps') {
-        spawnListener('yarn build:apps', {
-            onDone: () => {
-                console.log("Done!");
-            }
-        });
+        redLog("not implemented yet");
+        // spawnListener('yarn build:apps', {
+        //     onDone: () => {
+        //         console.log("Done!");
+        //     }
+        // });
     }
 
     if (BUILD_TYPE === '--all') {
-        spawnListener('yarn build:all', {
-            onDone: () => {
-                console.log("Done!");
-            }
-        });
+        redLog("not implemented yet");
+        // spawnListener('yarn build:all', {
+        //     onDone: () => {
+        //         console.log("Done!");
+        //     }
+        // });
     }
 
 }
@@ -287,5 +289,50 @@ if (OPTION === '--publish') {
                 console.log("Done!");
             }
         });
+    }
+}
+
+if (OPTION === '--yalc'){
+
+    const OPTION2 = args[1];
+
+    if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
+
+        greenLog(`
+        Usage: node tools/scripts/tools.mjs --yalc [option]
+            [option]: the option to run
+                --publish: publish packages to yalc
+                --push: push packages to yalc
+                --remove: remove packages from yalc
+    `, true);
+
+        exit();
+
+    }
+
+    const dirs = (await listDirsRecursive('./dist/packages', false)).map((item) => item.replace('dist/packages/', ''));
+
+    if (OPTION2 === '--publish') {
+        dirs.forEach((name) => {
+            spawnCommand('yalc', ['publish'], {
+                cwd: `dist/packages/${name}`,
+            }, { logExit: false })
+        })
+    }
+
+    if (OPTION2 === '--push') {
+        dirs.forEach((name) => {
+            spawnCommand('yalc', ['push'], {
+                cwd: `dist/packages/${name}`,
+            }, { logExit: false })
+        })
+    }
+
+    if (OPTION2 === '--remove') {
+        dirs.forEach((name) => {
+            spawnCommand('yalc', ['remove', name], {
+                cwd: `dist/packages/${name}`,
+            }, { logExit: false })
+        })
     }
 }

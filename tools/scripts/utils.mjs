@@ -118,14 +118,19 @@ export async function childRunCommand(command) {
 }
 
 
-export const spawnCommand = (command, args, options = {}) => {
+export const spawnCommand = (command, args, options = {}, options2={
+    logExit: true,
+}) => {
 
     // Use the spawn() function to run the command in a child process
-    const child = spawn(command, args, options);
+    const child = spawn(command, args, {...options, env: {
+        ...process.env,
+        FORCE_COLOR: true,
+    }});
 
     // Handle child process output
     child.stdout.on("data", data => {
-        console.log(`child stdout:\n${data}`);
+        console.log(`${data}`);
     });
 
     child.stderr.on("data", data => {
@@ -133,7 +138,9 @@ export const spawnCommand = (command, args, options = {}) => {
     });
 
     child.on("exit", code => {
-        console.log(`child process exited with code ${code}`);
+        if( options2.logExit ){
+            console.log(`child process exited with code ${code}`);
+        }
     });
 }
 
