@@ -15,7 +15,7 @@ This new SDK is written in Typescript and is a complete rewrite of the old SDK. 
 
 # Quick Start
 
-### node.js
+### node.js / browser
 
 ```
 yarn add @lit-protocol/lit-node-client
@@ -26,15 +26,17 @@ yarn add @lit-protocol/lit-node-client
 ```js
 <script src="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.js"></script>
 <script>
-  console authSig = LitJsSdk_litNodeClient.checkAndSignAuthMessage({chain: 'ethereum'});
+  const authSig = LitJsSdk_litNodeClient.checkAndSignAuthMessage({chain: 'ethereum'});
 </script>
 ```
 
-<br /><br />
-Individual packages are below so that you can import the minimum required packages for your use case.
-<br /><br />
 </div>
+
 <div align="center">
+
+# Packages
+
+Individual packages are below so that you can import the minimum required packages for your use case.
 
 <!-- autogen:package:start -->
 
