@@ -70,6 +70,13 @@ http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
 
 ## Test Apps
 
+All packages and functions can be called inside the browser console.
+
+```jsx
+// eg.
+window.LitJsSdk_[package_name].[function_name]
+```
+
 - Html: http://test.lit-js-sdk-v2.html.litprotocol.com/<br/>
 - React: http://test.lit-js-sdk-v2.react.litprotocol.com/
 
