@@ -14,9 +14,13 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
             --project-path: project directory to run commands in
             --test: run tests
             --find: different search options
+            --publish: publish to npm
+            --yalc: publish to yalc
+            --build: build the project
     `, true);
     exit();
 }
+
 
 if (OPTION === '--create-react-app') {
 
