@@ -111,6 +111,12 @@ See [Video](https://streamable.com/e/5g52m4)
 
 # Workflow
 
+## CLI (WIP)
+
+```
+yarn tools
+```
+
 ## Creating a new library
 
 By default, NX provides a command to generate a library
@@ -118,12 +124,6 @@ By default, NX provides a command to generate a library
 
 ```js
 yarn tool:genLib <package-name>
-
-// NOTE! If you intend to publish this package, you have to add the following to your package.json
-publishConfig: {
-  access: 'public',
-  directory: '../../dist/packages/<package-name>'
-},
 ```
 
 ## Create a new react demo app using the Lit JS SDK
@@ -140,20 +140,14 @@ yarn tool:delete (--package OR --app) <project-name>
 
 ## Building
 
-### Building all packages
-
 ```jsx
-// 1. run the 'build' command in all projects specified in `project.json`
-// 2. map the 'peerDependencies' to 'dependencies' in the dist folders, so that dependencies will be installed when a user 'yarn add'
-// 3. generate a package summary inside README.md between the <!-- autogen:package --> tags
-// src: tools/scripts/build.mjs
-yarn build:packages
+yarn tools --build
 ```
 
-### Building a specific package
+### Building target package
 
 ```jsx
-// OPTION 1: (MAIN)
+// OPTION 1: (Build both ESM & UMD)
 // 1. build tsc & web bundle
 // 2. map each dist folder name to package.json name (for publishing)
 // 3. generate html, react, and nodejs test apps
@@ -170,23 +164,19 @@ yarn nx run <project-name>:_buildWeb
 
 ## Publishing
 
-### Publishing everything
+### to npm
 
-```jsx
-// This will publish everything inside the `dist` folder
-yarn publish:packages
+```
+yarn tools --publish
 ```
 
-### Publishing vanilla packages only
+### to yalc
 
-```jsx
-// It will scans through the dist folder and filter out the folders that contains the word `vanilla`
-// cd in there && npm publish --acces public
-// src: tools/scripts/pub.mjs
-yarn publish:vanilla
+```
+yalc tools --yalc
 ```
 
-### Publising HTML Test app to Vercel
+### HTML Test app to Vercel
 
 ```
 yarn tool:buildHtml
@@ -208,7 +198,7 @@ There are currently three environments can be tested on, each of which can be ge
 
 ### Unit Tests (for Node)
 
-```
+```jsx
 yarn test:packages
 
 // watch mode
@@ -219,18 +209,18 @@ yarn test:watch
 
 Since both HTML & React UIs are identical, we can run the same test suite against two different environments of libraries. This is done by setting the `PORT` number before Cypress launch.
 
-<b>HTML</b> See [Video](https://streamable.com/qik31d)
+<b>HTML</b>
 
-```
+```jsx
 // E2E HTML
-yarn cy:open:html
+yarn tools --test --e2e html
 ```
 
-<b>React</b> See [Video](https://streamable.com/vgk45q)
+<b>React</b>
 
-```
+```jsx
 // E2E React
-yarn cy:open:react
+yarn tools --test --e2e react
 ```
 
 ## Other Commands
