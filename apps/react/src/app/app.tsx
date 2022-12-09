@@ -6,7 +6,6 @@ import * as LitJsSdk_authBrowser from 'dist/packages/auth-browser';
 import * as LitJsSdk_blsSdk from 'dist/packages/bls-sdk';
 import * as LitJsSdk_constants from 'dist/packages/constants';
 import * as LitJsSdk_contractsSdk from 'dist/packages/contracts-sdk';
-import * as LitJsSdk_coreBrowser from 'dist/packages/core-browser';
 import * as LitJsSdk_crypto from 'dist/packages/crypto';
 import * as LitJsSdk_ecdsaSdk from 'dist/packages/ecdsa-sdk';
 import * as LitJsSdk_encryption from 'dist/packages/encryption';
@@ -15,7 +14,6 @@ import * as LitJsSdk_misc from 'dist/packages/misc';
 import * as LitJsSdk_miscBrowser from 'dist/packages/misc-browser';
 import * as LitJsSdk_nacl from 'dist/packages/nacl';
 import * as LitJsSdk_uint8arrays from 'dist/packages/uint8arrays';
-import * as LitJsSdk_utils from 'dist/packages/utils';
 
 declare global {
   interface Window {
@@ -24,7 +22,6 @@ declare global {
     LitJsSdk_blsSdk: any;
     LitJsSdk_constants: any;
     LitJsSdk_contractsSdk: any;
-    LitJsSdk_coreBrowser: any;
     LitJsSdk_crypto: any;
     LitJsSdk_ecdsaSdk: any;
     LitJsSdk_encryption: any;
@@ -33,7 +30,6 @@ declare global {
     LitJsSdk_miscBrowser: any;
     LitJsSdk_nacl: any;
     LitJsSdk_uint8arrays: any;
-    LitJsSdk_utils: any;
   }
 }
 
@@ -395,78 +391,6 @@ export function App() {
             var template = `
             <div class="cat">
                 <h1>LitJsSdk_contractsSdk has ${entries.length} functions</h1>
-                    <ul>
-                        ${ lis }
-                    </ul>
-                </div>
-            `;
-            root.insertAdjacentHTML('beforeend', template);
-        });
-    
-    
-
-    
-    
-        if(typeof LitJsSdk_coreBrowser === 'undefined') {
-            console.error("LitJsSdk_coreBrowser:", LitJsSdk_coreBrowser);
-        }else{
-            console.warn("LitJsSdk_coreBrowser:", LitJsSdk_coreBrowser);
-            window.LitJsSdk_coreBrowser = LitJsSdk_coreBrowser;
-        }
-        window.addEventListener('load', function() {
-
-            var root = document.getElementById('root');
-            var result = document.getElementById('result');
-            var entries = Object.entries(LitJsSdk_coreBrowser);
-            var lis = entries.map(([key, value]) => `
-            <li>
-                <div id="LitJsSdk_coreBrowser_${key}" class="key" onClick="(async (e) => {
-                    var fn = LitJsSdk_coreBrowser['${key}'];
-                    var fnType = typeof fn;
-                    console.warn('[${key}] is type of [' + fnType + ']');
-
-                    if ( fnType === 'string' ) return;
-
-                    if( fnType === 'function' ){
-                        try{
-                            console.log('params:', globalThis.params);
-
-                            var res;
-                            try{
-                                res = new fn(globalThis.params);
-                            }catch{
-                                res = await fn(globalThis.params);
-                            }
-                            window.output = res;
-                            res = JSON.stringify(res, null, 2);
-                            result.innerText = res;
-                            console.log(res);
-                        }catch(e){
-                            console.error('Please set the [params] variable in the console then click again');
-                            console.log(e);
-                        }
-                        return;
-                    }
-
-                    if( fnType === 'object' ){
-                        var res = await fn;
-                        window.output = res;
-                        res = JSON.stringify(res, null, 2);
-                        result.innerText = res;
-                        console.log(res);
-                        return;
-                    }
-                    
-                    
-                })();">${key}</div>
-                <pre class="code">
-<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
-                </pre>
-            </li>`);
-            lis = lis.join(' ');
-            var template = `
-            <div class="cat">
-                <h1>LitJsSdk_coreBrowser has ${entries.length} functions</h1>
                     <ul>
                         ${ lis }
                     </ul>
@@ -1043,78 +967,6 @@ export function App() {
             var template = `
             <div class="cat">
                 <h1>LitJsSdk_uint8arrays has ${entries.length} functions</h1>
-                    <ul>
-                        ${ lis }
-                    </ul>
-                </div>
-            `;
-            root.insertAdjacentHTML('beforeend', template);
-        });
-    
-    
-
-    
-    
-        if(typeof LitJsSdk_utils === 'undefined') {
-            console.error("LitJsSdk_utils:", LitJsSdk_utils);
-        }else{
-            console.warn("LitJsSdk_utils:", LitJsSdk_utils);
-            window.LitJsSdk_utils = LitJsSdk_utils;
-        }
-        window.addEventListener('load', function() {
-
-            var root = document.getElementById('root');
-            var result = document.getElementById('result');
-            var entries = Object.entries(LitJsSdk_utils);
-            var lis = entries.map(([key, value]) => `
-            <li>
-                <div id="LitJsSdk_utils_${key}" class="key" onClick="(async (e) => {
-                    var fn = LitJsSdk_utils['${key}'];
-                    var fnType = typeof fn;
-                    console.warn('[${key}] is type of [' + fnType + ']');
-
-                    if ( fnType === 'string' ) return;
-
-                    if( fnType === 'function' ){
-                        try{
-                            console.log('params:', globalThis.params);
-
-                            var res;
-                            try{
-                                res = new fn(globalThis.params);
-                            }catch{
-                                res = await fn(globalThis.params);
-                            }
-                            window.output = res;
-                            res = JSON.stringify(res, null, 2);
-                            result.innerText = res;
-                            console.log(res);
-                        }catch(e){
-                            console.error('Please set the [params] variable in the console then click again');
-                            console.log(e);
-                        }
-                        return;
-                    }
-
-                    if( fnType === 'object' ){
-                        var res = await fn;
-                        window.output = res;
-                        res = JSON.stringify(res, null, 2);
-                        result.innerText = res;
-                        console.log(res);
-                        return;
-                    }
-                    
-                    
-                })();">${key}</div>
-                <pre class="code">
-<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
-                </pre>
-            </li>`);
-            lis = lis.join(' ');
-            var template = `
-            <div class="cat">
-                <h1>LitJsSdk_utils has ${entries.length} functions</h1>
                     <ul>
                         ${ lis }
                     </ul>
