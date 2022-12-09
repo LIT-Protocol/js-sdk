@@ -1,12 +1,12 @@
 // #Usage: node tools/scripts/yalc.mjs
 import { exit } from 'process';
-import { asyncForEach, getArgs, greenLog, listDirsRelative, runCommand } from './utils.mjs';
+import { asyncForEach, getArgs, greenLog, listDirsRecursive, runCommand } from './utils.mjs';
 
 const args = getArgs();
 
 const TARGET = args[0] || 'all';
 
-const dirs = (await listDirsRelative('dist/packages', false))
+const dirs = (await listDirsRecursive('dist/packages', false))
     .filter((dir) => ! dir.includes('vanilla'));
 
 if( TARGET === 'all'){

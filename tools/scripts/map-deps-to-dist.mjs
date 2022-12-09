@@ -1,7 +1,7 @@
 // # Usage: node tools/scripts/map-deps-to-dist <path-to-packages-dir> <path-to-dist-dir>
 // # Example Usage: node tools/scripts/map-deps-to-dist packages dist/packages
 import { exit } from 'process';
-import { findImportsFromDir, getArgs, redLog, listDirsRelative, asyncForEach, greenLog, readJsonFile, writeJsonFile, question } from './utils.mjs'
+import { findImportsFromDir, getArgs, redLog, listDirsRecursive, asyncForEach, greenLog, readJsonFile, writeJsonFile, question } from './utils.mjs'
 
 const args = getArgs();
 
@@ -19,11 +19,11 @@ if (!PACKAGES_DIR || !DIST_DIR || !FILTER) {
     exit();
 }
 
-const packagesDir = await listDirsRelative(PACKAGES_DIR, false);
+const packagesDir = await listDirsRecursive(PACKAGES_DIR, false);
 
 await asyncForEach(packagesDir, async(packageDir) => {
 
-    const packageInsideDirs = await listDirsRelative(packageDir);
+    const packageInsideDirs = await listDirsRecursive(packageDir);
     let imports = [];
     
     await asyncForEach(packageInsideDirs, async (insideDir) => {

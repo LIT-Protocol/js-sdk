@@ -1,5 +1,5 @@
 import { exit } from "process";
-import { childRunCommand, findImportsFromDir, getArgs, greenLog, readFile, readJsonFile, redLog, replaceAutogen, spawnCommand, spawnListener, writeFile } from "./utils.mjs";
+import { childRunCommand, findImportsFromDir, getArgs, greenLog, listDirsRecursive, readFile, readJsonFile, redLog, replaceAutogen, spawnCommand, spawnListener, writeFile } from "./utils.mjs";
 
 const args = getArgs();
 
@@ -198,6 +198,58 @@ if (OPTION === '--find') {
         console.log(res);
         exit();
     }
+}
+
+if(OPTION === '--build') {
+
+    const BUILD_TYPE = args[1];
+
+    if (!BUILD_TYPE || BUILD_TYPE === '' || BUILD_TYPE === '--help') {
+
+        greenLog(`
+        Usage: node tools/scripts/tools.mjs --build [option]
+            [option]: the option to run
+                --packages: build packages
+                --apps: build apps
+                --all: build all
+    `, true);
+
+        exit();
+
+    }
+
+    if (BUILD_TYPE === '--packages') {
+
+        const ignoreList = (await listDirsRecursive('./apps', false))
+            .map((item) => item.replace('apps/', ''))
+            .join(',')
+
+        const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
+
+        spawnListener(command, {
+            onDone: () => {
+                console.log("Done!");
+                exit();
+            }
+        });
+    }
+
+    if (BUILD_TYPE === '--apps') {
+        spawnListener('yarn build:apps', {
+            onDone: () => {
+                console.log("Done!");
+            }
+        });
+    }
+
+    if (BUILD_TYPE === '--all') {
+        spawnListener('yarn build:all', {
+            onDone: () => {
+                console.log("Done!");
+            }
+        });
+    }
+
 }
 
 if (OPTION === '--publish') {

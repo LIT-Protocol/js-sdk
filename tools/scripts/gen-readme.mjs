@@ -5,7 +5,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { exit } from 'process';
-import { listDirsRelative, redLog } from './utils.mjs';
+import { listDirsRecursive, redLog } from './utils.mjs';
 
 const readmePath = join('README.md');
 const readme = readFileSync(readmePath, 'utf8');
@@ -42,7 +42,7 @@ const getNpm = (lib) => {
     return `<a href="https://www.npmjs.com/package/${lib}"><img src="https://img.shields.io/npm/dw/${lib}?label=NPM"/></a>`;
 }
 
-const libs = (await listDirsRelative('packages', false)).map(lib => lib.replace('packages/', ''));
+const libs = (await listDirsRecursive('packages', false)).map(lib => lib.replace('packages/', ''));
 
 // create rows to array
 let universals = [];

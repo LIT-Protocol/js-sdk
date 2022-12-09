@@ -95,6 +95,11 @@ export async function childRunCommand(command) {
                 return;
             }
             resolve(stdout.trim());
+        }, {
+            env: {
+                ...process.env,
+                FORCE_COLOR: true,
+            }
         });
         child.stdout.on('data', (data) => {
             console.log(data.toString().replace(/\n$/, ''));
@@ -249,7 +254,7 @@ export const wait = (ms) => new Promise((resolve) => {
 });
 
 // recursively list all directories in a directory and return paths relative to root
-export const listDirsRelative = async (dir, recursive = true) => {
+export const listDirsRecursive = async (dir, recursive = true) => {
     const root = join(dir, '..', '..');
     const files = await fs.promises.readdir(dir, { withFileTypes: true });
     const dirs = [];
@@ -259,7 +264,7 @@ export const listDirsRelative = async (dir, recursive = true) => {
             dirs.push(path);
 
             if (recursive) {
-                dirs.push(...(await listDirsRelative(path)));
+                dirs.push(...(await listDirsRecursive(path)));
             }
 
         }

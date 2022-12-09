@@ -5,7 +5,7 @@
 // *******************************************************************************************************
 
 import { exit } from "process";
-import { writeFile, getFiles, greenLog, listDirsRelative } from "./utils.mjs";
+import { writeFile, getFiles, greenLog, listDirsRecursive } from "./utils.mjs";
 import { GEN_STYLE, GEN_FOOTER_SCRIPTS, getConsoleTemplate } from './gen-utils.mjs';
 
 // ------ Config ------
@@ -23,7 +23,7 @@ const TEMPLATE = {
 };
 
 // -- 
-const modules = (await listDirsRelative(DIST_DIR, false))
+const modules = (await listDirsRecursive(DIST_DIR, false))
     .filter((dir) => !dir.includes('vanilla'))
     .map((dir) => {
         // replace hyphen with camel case

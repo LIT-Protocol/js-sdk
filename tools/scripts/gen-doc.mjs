@@ -1,7 +1,7 @@
 // #Usage: node tools/scripts/gen-doc.mjs
 
 import { exit } from "process";
-import { greenLog, listDirsRelative, readJsonFile, runCommand, writeJsonFile, getArgs, redLog, createDirs } from "./utils.mjs";
+import { greenLog, listDirsRecursive, readJsonFile, runCommand, writeJsonFile, getArgs, redLog, createDirs } from "./utils.mjs";
 import * as liveServer from 'live-server'
 
 const args = getArgs();
@@ -20,7 +20,7 @@ const TARGET = 'typedoc.json';
 
 const jsonFile = await readJsonFile(TARGET);
 
-const dirs = (await listDirsRelative('packages', false))
+const dirs = (await listDirsRecursive('packages', false))
     .map((dir) => `./${dir}/src/index.ts`);
 
 jsonFile.entryPoints = dirs;
