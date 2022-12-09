@@ -1,11 +1,16 @@
-# lit-node-client
+# Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+### node.js / browser
 
-## Building
+```
+yarn add @lit-protocol/lit-node-client
+```
 
-Run `nx build lit-node-client` to build the library.
+### Vanilla JS (UMD)
 
-## Running unit tests
-
-Run `nx test lit-node-client` to execute the unit tests via [Jest](https://jestjs.io).
+```js
+<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.js"></script>
+<script>
+  const authSig = LitJsSdk_litNodeClient.checkAndSignAuthMessage({chain: 'ethereum'});
+</script>
+```
