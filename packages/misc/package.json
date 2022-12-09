@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/misc",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "type": "commonjs",
   "dependencies": {
     "ethers": "^5.7.1"
@@ -9,7 +9,7 @@
     "access": "public",
     "directory": "../../dist/packages/misc"
   },
-  "gitHead": "63f218895d79343ef3df9fb3f6dc204612ad2a8b",
+  "gitHead": "9bbc00f9166f2a42dbae1d705069502cae52ec7f",
   "tags": [
     "universal"
   ]
