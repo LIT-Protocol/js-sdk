@@ -29,7 +29,8 @@
     "graph": "nx graph",
     "npm:login": "npm login",
     "cy:open:html": "yarn tools --test --e2e html",
-    "cy:open:react": "yarn tools --test --e2e react"
+    "cy:open:react": "yarn tools --test --e2e react",
+    "yalc:publish": "nx run-many --target=yalcPublish --exclude=e2e,example-nextjs-js,html,nodejs,react,demo-pkp-ethers-react,demo-contracts-sdk-react,demo-mix-pkp-ethers-contracts-sdk-react "
   },
   "private": true,
   "dependencies": {

@@ -574,7 +574,7 @@ export const checkAndSignEVMAuthMessage = async ({
   log('6. authSig:', authSig);
 
   // -- 7. case: when we are NOT on the right wallet address
-  if (account !== authSig.address) {
+  if (account.toLowerCase() !== authSig.address.toLowerCase()) {
     log(
       'signing auth message because account is not the same as the address in the auth sig'
     );
