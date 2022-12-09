@@ -1,5 +1,5 @@
 import { exit } from "process";
-import { childRunCommand, findImportsFromDir, getArgs, greenLog, readFile, readJsonFile, redLog, replaceAutogen, spawnCommand, writeFile } from "./utils.mjs";
+import { childRunCommand, findImportsFromDir, getArgs, greenLog, readFile, readJsonFile, redLog, replaceAutogen, spawnCommand, spawnListener, writeFile } from "./utils.mjs";
 
 const args = getArgs();
 
@@ -7,7 +7,7 @@ const OPTION = args[0];
 
 if (!OPTION || OPTION === '' || OPTION === '--help') {
     greenLog(`
-        Usage: node packages/contracts-sdk/tools.mjs [option][...args]
+        Usage: node tools/scripts/tools.mjs [option][...args]
         Options:
             --help: show this help
             --create-react-app: create a new react app
@@ -25,7 +25,7 @@ if (OPTION === '--create-react-app') {
 
     if (!APP_NAME || APP_NAME === '' || APP_NAME === '--help') {
         greenLog(`
-        Usage: node packages/contracts-sdk/tools.mjs --create-react-app [app-name] [option]
+        Usage: node tools/scripts/tools.mjs --create-react-app [app-name] [option]
             [app-name]: the name of the react app
         Options:
             --demo: prepend name with "demo-" and append "-react"
@@ -94,7 +94,7 @@ if (OPTION === '--project-path') {
 
     if (!PROJECT_PATH || PROJECT_PATH === '' || PROJECT_PATH === '--help') {
         greenLog(`
-        Usage: node packages/contracts-sdk/tools.mjs --project-path [project-path] [commands]
+        Usage: node tools/scripts/tools.mjs --project-path [project-path] [commands]
             [project-path]: the path of the project
             [commands]: the commands to run
     `, true);
@@ -111,7 +111,7 @@ if (OPTION === '--test') {
     if (!TEST_TYPE || TEST_TYPE === '' || TEST_TYPE === '--help') {
 
         greenLog(`
-        Usage: node packages/contracts-sdk/tools.mjs --test [test-type]
+        Usage: node tools/scripts/tools.mjs --test [test-type]
             [test-type]: the type of test to run
                 --unit: run unit tests
                 --e2e: run e2e tests
@@ -137,7 +137,7 @@ if (OPTION === '--test') {
         if (!ENV || ENV === '' || ENV === '--help') {
 
             greenLog(`
-            Usage: node packages/contracts-sdk/tools.mjs --test --e2e [env]
+            Usage: node tools/scripts/tools.mjs --test --e2e [env]
                 [env]: the environment to run the tests in
                     react: run tests on react app on port 4003
                     html: run tests on html app on port 4002
@@ -161,7 +161,7 @@ if (OPTION === '--find') {
     if (!FIND_TYPE || FIND_TYPE === '' || FIND_TYPE === '--help') {
 
         greenLog(`
-        Usage: node packages/contracts-sdk/tools.mjs --find [find-type]
+        Usage: node tools/scripts/tools.mjs --find [find-type]
             [find-type]: the type of find to run
                 --imports: find all imports from a directory
     `, true);
@@ -175,7 +175,7 @@ if (OPTION === '--find') {
 
         if (!TARGET_DIR || TARGET_DIR === '' || TARGET_DIR === '--help') {
             greenLog(`
-            Usage: node packages/contracts-sdk/tools.mjs --find --imports [target-dir]
+            Usage: node tools/scripts/tools.mjs --find --imports [target-dir]
                 [target-dir]: the directory to find imports from
         `, true);
             exit();
@@ -184,7 +184,7 @@ if (OPTION === '--find') {
         let res = await findImportsFromDir(TARGET_DIR);
 
         greenLog(`
-            Usage: node packages/contracts-sdk/tools.mjs --find --imports [target-dir] --filter [keyword]
+            Usage: node tools/scripts/tools.mjs --find --imports [target-dir] --filter [keyword]
                 [keyword]: the keyword to filter the results by
         `, true);
 
@@ -197,5 +197,43 @@ if (OPTION === '--find') {
 
         console.log(res);
         exit();
+    }
+}
+
+if (OPTION === '--publish') {
+
+    let OPTION2 = args[1];
+
+    if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
+
+        greenLog(`
+        Usage: node tools/scripts/tools.mjs --publish [option]
+            [option]: the option to run
+                --pre-build: build packages before publishing
+                --no-build: publish without building
+    `, true);
+
+        exit();
+
+    }
+
+    if (OPTION2 === '--pre-build') {
+        spawnListener('yarn build:packages', {
+            onDone: () => {
+                spawnListener('yarn npx lerna publish --force-publish', {
+                    onDone: () => {
+                        console.log("Done!");
+                    }
+                });
+            }
+        });
+    }
+
+    if (OPTION2 === '--no-build') {
+        spawnListener('yarn npx lerna publish --force-publish', {
+            onDone: () => {
+                console.log("Done!");
+            }
+        });
     }
 }

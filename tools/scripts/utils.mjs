@@ -4,7 +4,8 @@ import { exec, spawn } from 'child_process';
 import { exit } from 'process';
 import readline from 'readline';
 import { join } from 'path';
-// import { promises as fs } from 'fs';
+import events from 'events'
+const eventsEmitter = new events.EventEmitter();
 
 const rl = readline.createInterface(process.stdin, process.stdout);
 
@@ -20,7 +21,7 @@ const rl = readline.createInterface(process.stdin, process.stdout);
  * delimiters replaced with the new content.
  */
 
- export const replaceAutogen = ({
+export const replaceAutogen = ({
     oldContent,
     startsWith = "// ----- autogen:imports:start  -----",
     endsWith = "// ----- autogen:imports:end  -----",
@@ -113,7 +114,7 @@ export async function childRunCommand(command) {
 
 
 export const spawnCommand = (command, args, options = {}) => {
-    
+
     // Use the spawn() function to run the command in a child process
     const child = spawn(command, args, options);
 
@@ -129,6 +130,51 @@ export const spawnCommand = (command, args, options = {}) => {
     child.on("exit", code => {
         console.log(`child process exited with code ${code}`);
     });
+}
+
+export const spawnListener = (commands, callback) => {
+
+    let _commands = commands.split(" ");
+    // let eventName = _commands.join('-');
+
+    // make commands to pass to spawn
+    const command = _commands[0];
+    const args = _commands.slice(1);
+
+    // Use the spawn() function to run the command in a child process
+    let bob = spawn(command, args, {
+        env: {
+            ...process.env,
+            FORCE_COLOR: true,
+        }
+    });
+
+    bob.on('exit', (exitCode) => {
+        if (parseInt(exitCode) !== 0) {
+            // handle non-exit code
+            redLog(`child process exited with code ${exitCode} when running ${command}`);
+
+            if( callback?.onExit){
+                callback?.onExit(exitCode);
+            }
+            exit();
+        }
+        // eventsEmitter.emit(eventName);
+
+        if( callback?.onDone ){
+            callback?.onDone(exitCode);
+        }
+    })
+
+    // Handle child process output
+    bob.stdout.pipe(process.stdout);
+
+    // foward the key to the child process
+    process.stdin.on('data', (key) => {
+        bob.stdin.write(key);
+    })
+
+    return bob;
 }
 
 export const asyncForEach = async (array, callback) => {
