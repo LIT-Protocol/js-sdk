@@ -69,6 +69,7 @@ http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
 ## Demo
 
 - Simple Encrypt Decrypt: https://demo-encrypt-decrypt-react.vercel.app/<br/>
+- Contracts SDK: https://demo-contracts-sdk-react.vercel.app/
 
 ## Test Apps
 
