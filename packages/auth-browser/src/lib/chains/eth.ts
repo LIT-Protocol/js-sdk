@@ -567,9 +567,6 @@ export const checkAndSignEVMAuthMessage = async ({
     });
     authSigOrError.type = EITHER_TYPE.SUCCESS;
     log('5. authSigOrError:', authSigOrError);
-  } else {
-    // auth sig came from local storage.  we need to convert it to JSON
-    authSigOrError.result = JSON.parse(authSigOrError.result);
   }
 
   // -- 6. case: Lit auth signature IS in the local storage
@@ -577,7 +574,7 @@ export const checkAndSignEVMAuthMessage = async ({
   log('6. authSig:', authSig);
 
   // -- 7. case: when we are NOT on the right wallet address
-  if (account.toLowerCase() !== authSig.address.toLowerCase()) {
+  if (account !== authSig.address) {
     log(
       'signing auth message because account is not the same as the address in the auth sig'
     );
