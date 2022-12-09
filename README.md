@@ -65,25 +65,16 @@ http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
 
 </div>
 
-## Demo Apps
+## Demo
 
-| App                    | Link                                          |
-| ---------------------- | --------------------------------------------- |
-| Simple Encrypt Decrypt | https://demo-encrypt-decrypt-react.vercel.app |
-| Contracts SDK          | https://demo-contracts-sdk-react.vercel.app/  |
+| App                    | Link                                             |
+| ---------------------- | ------------------------------------------------ |
+| Simple Encrypt Decrypt | https://demo-encrypt-decrypt-react.vercel.app    |
+| Contracts SDK          | https://demo-contracts-sdk-react.vercel.app/     |
+| (Test) Html                   | http://test.lit-js-sdk-v2.html.litprotocol.com/  |
+| (Test) React                  | http://test.lit-js-sdk-v2.react.litprotocol.com/ |
 
-## Test Apps
-
-| App   | Link                                             |
-| ----- | ------------------------------------------------ |
-| Html  | http://test.lit-js-sdk-v2.html.litprotocol.com/  |
-| React | http://test.lit-js-sdk-v2.react.litprotocol.com/ |
-
-All packages and functions can be called inside the browser console.
-
-```jsx
-window.LitJsSdk_[package_name].[function_name]
-```
+> NOTE: For (Test) apps, all packages and functions can be called inside the browser console. eg. `window.LitJsSdk_[package_name].[function_name]`
 
 # Contributing and developing to this SDK
 
