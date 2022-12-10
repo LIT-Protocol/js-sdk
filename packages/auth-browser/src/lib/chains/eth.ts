@@ -29,6 +29,10 @@ import * as naclUtil from 'tweetnacl-util';
 // @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import * as nacl from 'tweetnacl';
 
+import { Buffer } from 'buffer';
+
+global.Buffer = Buffer;
+
 import {
   isBrowser,
   isNode,
@@ -214,7 +218,7 @@ export const getMustResign = (
   authSig: JsonAuthSig,
   resources: any
 ): boolean => {
-  let mustResign!: boolean;
+  let mustResign: boolean = false;
 
   try {
     const parsedSiwe = new SiweMessage(authSig.signedMessage);
@@ -574,7 +578,7 @@ export const checkAndSignEVMAuthMessage = async ({
   log('6. authSig:', authSig);
 
   // -- 7. case: when we are NOT on the right wallet address
-  if (account.toLowerCase() !== authSig.address.toLowerCase()) {
+  if (account?.toLowerCase() !== authSig.address?.toLowerCase()) {
     log(
       'signing auth message because account is not the same as the address in the auth sig'
     );
@@ -590,6 +594,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
     // -- 8. case: we are on the right wallet, but need to check the resources of the sig and re-sign if they don't match
   } else {
+    
     let mustResign: boolean = getMustResign(authSig, resources);
 
     if (mustResign) {
