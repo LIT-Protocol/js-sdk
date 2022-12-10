@@ -491,7 +491,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
   log('chainId from web3', currentChainIdOrError);
   log(
-    `checkAndSignAuthMessage with chainId ${currentChainIdOrError} and chain set to ${chain} and selectedChain is `,
+    `checkAndSignAuthMessage with chainId ${currentChainIdOrError.result} and chain set to ${chain} and selectedChain is `,
     selectedChain
   );
 
@@ -575,7 +575,14 @@ export const checkAndSignEVMAuthMessage = async ({
 
   // -- 6. case: Lit auth signature IS in the local storage
   let authSig: JsonAuthSig = authSigOrError.result;
+
+  if(typeof authSig === 'string'){
+    authSig = JSON.parse(authSig);
+  }
+
   log('6. authSig:', authSig);
+  console.log("account:", account);
+  console.log("authSig.address:", authSig.address);
 
   // -- 7. case: when we are NOT on the right wallet address
   if (account?.toLowerCase() !== authSig.address?.toLowerCase()) {
