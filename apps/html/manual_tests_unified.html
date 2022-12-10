@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+    <title>Unified Access Control Conditions</title>
+
+    <script
+      src="/dist/packages/lit-node-client-vanilla/lit-node-client.js"
+    ></script>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <script>
+
+      const LitJsSdk = LitJsSdk_litNodeClient;
+
+      const litNodeClient = new LitNodeClient({litNetwork: 'serrano'});
+      litNodeClient.connect();
+      
+      //var authSig = JSON.parse("{\"sig\":\"0x18a173d68d2f78cc5c13da0dfe36eec2a293285bee6d42547b9577bf26cdc985660ed3dddc4e75d422366cac07e8a9fc77669b10373bef9c7b8e4280252dfddf1b\",\"derivedVia\":\"web3.eth.personal.sign\",\"signedMessage\":\"I am creating an account to use LITs at 2021-08-04T20:14:04.918Z\",\"address\":\"0xdbd360f30097fb6d938dcc8b7b62854b36160b45\"}")
+
+      var randomPath = () =>
+        "/" +
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+      var testProvisoningAndSigning = async ({
+        unifiedAccessControlConditions,
+        testName,
+      }) => {
+        document.getElementById("status").innerText = `Testing ${testName}...`;
+        document.getElementById(
+          "humanized"
+        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
+          { unifiedAccessControlConditions }
+        )}`;
+
+        var solAuthSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: "solana",
+        });
+        var ethAuthSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: "ethereum",
+        });
+
+        let resourceId = {
+          baseUrl: "my-dynamic-content-server.com",
+          path: randomPath(),
+          orgId: "",
+          role: "",
+          extraData: "",
+        };
+
+        await litNodeClient.saveSigningCondition({
+          unifiedAccessControlConditions,
+          authSig: {
+            solana: solAuthSig,
+            ethereum: ethAuthSig,
+          },
+          resourceId,
+        });
+
+        let jwt = await litNodeClient.getSignedToken({
+          unifiedAccessControlConditions,
+          authSig: {
+            solana: solAuthSig,
+            ethereum: ethAuthSig,
+          },
+          resourceId,
+        });
+        console.log("jwt", jwt);
+
+        // uncomment this to break the jwt, to test an invalid jwt
+        // jwt = jwt.replace(/.$/, "3");
+
+        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
+        console.log("verified", verified);
+        console.log("header", header);
+        console.log("payload", payload);
+
+        if (jwt && verified) {
+          document.getElementById("status").innerText = `${testName}: Success`;
+        } else {
+          document.getElementById("status").innerText = `${testName}: Failure`;
+        }
+      };
+
+      var testProvisoningEncryptingAndDecrypting = async ({
+        unifiedAccessControlConditions,
+        sleepTime,
+        testName,
+      }) => {
+        document.getElementById("status").innerText = `Testing ${testName}...`;
+        var solAuthSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: "solana",
+        });
+        var ethAuthSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: "ethereum",
+        });
+
+        document.getElementById(
+          "humanized"
+        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
+          { unifiedAccessControlConditions }
+        )}`;
+
+        const { encryptedZip, symmetricKey } =
+          await LitJsSdk.zipAndEncryptString("this is a secret message");
+
+        const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
+          unifiedAccessControlConditions,
+          symmetricKey,
+          authSig: {
+            ethereum: ethAuthSig,
+            solana: solAuthSig,
+          },
+        });
+
+        console.log("encrypted symmetric key", encryptedSymmetricKey);
+
+        if (sleepTime) {
+          let failed = false;
+          try {
+            const retrievedSymmKey = await litNodeClient.getEncryptionKey({
+              unifiedAccessControlConditions,
+              toDecrypt: LitJsSdk.uint8arrayToString(
+                encryptedSymmetricKey,
+                "base16"
+              ),
+              authSig: {
+                ethereum: ethAuthSig,
+                solana: solAuthSig,
+              },
+            });
+          } catch (e) {
+            console.log("exception thrown when unlocking", e);
+            if (e.errorCode === "not_authorized") {
+              failed = true;
+            }
+          }
+          if (failed === false) {
+            document.getElementById(
+              "status"
+            ).innerText = `Test failed because I was able to unlock the content before the timelock elapsed.`;
+            return;
+          }
+
+          document.getElementById(
+            "status"
+          ).innerText = `Previous failure is good.  Sleeping for ${sleepTime}ms before trying retrieval again...`;
+
+          await new Promise((resolve) => setTimeout(resolve, sleepTime));
+        }
+
+        const retrievedSymmKey = await litNodeClient.getEncryptionKey({
+          unifiedAccessControlConditions,
+          toDecrypt: LitJsSdk.uint8arrayToString(
+            encryptedSymmetricKey,
+            "base16"
+          ),
+          authSig: {
+            ethereum: ethAuthSig,
+            solana: solAuthSig,
+          },
+        });
+
+        const decryptedFiles = await LitJsSdk.decryptZip(
+          encryptedZip,
+          retrievedSymmKey
+        );
+        const decryptedString = await decryptedFiles["string.txt"].async(
+          "text"
+        );
+        console.log("decrypted string", decryptedString);
+
+        document.getElementById(
+          "status"
+        ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
+      };
+
+      // Actual tests are below here
+      var BalanceSigning = async () => {
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: "solRpc",
+            method: "getBalance",
+            params: [":userAddress"],
+            chain: "solana",
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            returnValueTest: {
+              key: "",
+              comparator: ">=",
+              value: "100000000", // equals 0.1 SOL
+            },
+          },
+          { operator: "or" },
+          {
+            conditionType: "evmBasic",
+            contractAddress: "",
+            standardContractType: "",
+            chain: "ethereum",
+            method: "eth_getBalance",
+            parameters: [":userAddress", "latest"],
+            returnValueTest: {
+              comparator: ">=",
+              value: "10000000000000",
+            },
+          },
+          { operator: "or" },
+          {
+            conditionType: "evmContract",
+            contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
+            functionName: "balanceOf",
+            functionParams: [":userAddress", "8"],
+            functionAbi: {
+              type: "function",
+              stateMutability: "view",
+              outputs: [
+                {
+                  type: "uint256",
+                  name: "",
+                  internalType: "uint256",
+                },
+              ],
+              name: "balanceOf",
+              inputs: [
+                {
+                  type: "address",
+                  name: "account",
+                  internalType: "address",
+                },
+                {
+                  type: "uint256",
+                  name: "id",
+                  internalType: "uint256",
+                },
+              ],
+            },
+            chain: "polygon",
+            returnValueTest: {
+              key: "",
+              comparator: ">",
+              value: "0",
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          unifiedAccessControlConditions,
+          testName: "BalanceSigning",
+        });
+      };
+
+      var BalanceEncrypt = async () => {
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: "solRpc",
+            method: "getBalance",
+            params: [":userAddress"],
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            chain: "solana",
+            returnValueTest: {
+              key: "",
+              comparator: ">=",
+              value: "100000000", // equals 0.1 SOL
+            },
+          },
+          { operator: "or" },
+          {
+            conditionType: "evmBasic",
+            contractAddress: "",
+            standardContractType: "",
+            chain: "ethereum",
+            method: "eth_getBalance",
+            parameters: [":userAddress", "latest"],
+            returnValueTest: {
+              comparator: ">=",
+              value: "10000000000000",
+            },
+          },
+          { operator: "or" },
+          {
+            conditionType: "evmContract",
+            contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
+            functionName: "balanceOf",
+            functionParams: [":userAddress", "8"],
+            functionAbi: {
+              type: "function",
+              stateMutability: "view",
+              outputs: [
+                {
+                  type: "uint256",
+                  name: "",
+                  internalType: "uint256",
+                },
+              ],
+              name: "balanceOf",
+              inputs: [
+                {
+                  type: "address",
+                  name: "account",
+                  internalType: "address",
+                },
+                {
+                  type: "uint256",
+                  name: "id",
+                  internalType: "uint256",
+                },
+              ],
+            },
+            chain: "polygon",
+            returnValueTest: {
+              key: "",
+              comparator: ">",
+              value: "0",
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          unifiedAccessControlConditions,
+          testName: "BalanceEncrypt",
+        });
+      };
+
+      var TimeLockEncryptDecrypt = async () => {
+        const futureTimestamp = new Date(new Date().getTime() + 5000);
+        const futureTimestampString = Math.floor(
+          futureTimestamp.getTime() / 1000
+        ).toString();
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: "evmBasic",
+            contractAddress: "",
+            standardContractType: "timestamp",
+            chain: "ethereum",
+            method: "eth_getBlockByNumber",
+            parameters: ["latest"],
+            returnValueTest: {
+              comparator: ">=",
+              value: futureTimestampString,
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          unifiedAccessControlConditions,
+          sleepTime: 45000,
+          testName: "TimeLockEncryptDecrypt",
+        });
+      };
+
+      var IsPermittedAction = async () => {
+        /*
+        { contract_address: "0x9e1DDB2499C6834204347F047Ace1ae18E830449", chain: "mumbai", standard_contract_type: "PubkeyRouterAndPermissions", method: "isPermittedAction", parameters: ["0xab9704fbd33d96c0475f6d2f1e6e7ff3497d4eceb10df78d0fcf012ab3b09300", "0x12203577a857f9d58507be2f4a87d969cc582dd00a1d0486281113e68208163cb5e8"], return_value_test: JsonReturnValueTest { comparator: "=", value: "true" } }
+        */
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: "evmBasic",
+            contractAddress: "0x9e1DDB2499C6834204347F047Ace1ae18E830449",
+            chain: "mumbai",
+            standardContractType: "PubkeyRouterAndPermissions",
+            method: "isPermittedAction",
+            parameters: [
+              "0xab9704fbd33d96c0475f6d2f1e6e7ff3497d4eceb10df78d0fcf012ab3b09300",
+              "0x12203577a857f9d58507be2f4a87d969cc582dd00a1d0486281113e68208163cb5e8",
+            ],
+            returnValueTest: { comparator: "=", value: "true" },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          unifiedAccessControlConditions,
+          testName: "IsPermittedAction",
+        });
+      };
+
+      var logout = async () => {
+        const testName = "Logout";
+        document.getElementById("status").innerText = `Testing ${testName}...`;
+
+        LitJsSdk.disconnectWeb3();
+
+        document.getElementById(
+          "status"
+        ).innerText = `${testName}: Success - Logged out`;
+      };
+
+      document.addEventListener(
+        "lit-ready",
+        function (e) {
+          console.log("LIT network is ready");
+          document.getElementById("networkStatus").innerText =
+            "Success!  Connected to Lit Protocol Network";
+        },
+        false
+      );
+    </script>
+  </head>
+
+  <body>
+    <h1>Manual tests</h1>
+    <br />
+    <br />
+    <div id="networkStatus">Connecting to Lit Protocol Network...</div>
+    <br />
+    <br />
+    <button onclick="BalanceSigning()">BalanceSigning</button>
+    <br />
+    <br />
+    <button onclick="BalanceEncrypt()">BalanceEncrypt</button>
+    <br />
+    <br />
+
+    <button onclick="TimeLockEncryptDecrypt()">TimeLockEncryptDecrypt</button>
+    <br />
+    <br />
+
+    <button onclick="IsPermittedAction()">IsPermittedAction</button>
+    <br />
+    <br />
+
+    <button onclick="logout()">Logout</button>
+    <br />
+    <br />
+    <h2 id="status"></h2>
+    <br />
+    <p id="humanized"></p>
+  </body>
+</html>
