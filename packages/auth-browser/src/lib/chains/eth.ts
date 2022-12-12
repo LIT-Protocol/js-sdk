@@ -29,6 +29,12 @@ import * as naclUtil from 'tweetnacl-util';
 // @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import * as nacl from 'tweetnacl';
 
+import { Buffer as BufferPolyfill } from 'buffer';
+
+if (typeof global.Buffer === 'undefined') {
+  global.Buffer = BufferPolyfill;
+}
+
 import {
   isBrowser,
   isNode,
@@ -571,6 +577,9 @@ export const checkAndSignEVMAuthMessage = async ({
 
   // -- 6. case: Lit auth signature IS in the local storage
   let authSig: JsonAuthSig = authSigOrError.result;
+  if (typeof authSig === 'string') {
+    authSig = JSON.parse(authSig);
+  }
   log('6. authSig:', authSig);
 
   // -- 7. case: when we are NOT on the right wallet address
