@@ -118,15 +118,17 @@ export async function childRunCommand(command) {
 }
 
 
-export const spawnCommand = (command, args, options = {}, options2={
+export const spawnCommand = (command, args, options = {}, options2 = {
     logExit: true,
 }) => {
 
     // Use the spawn() function to run the command in a child process
-    const child = spawn(command, args, {...options, env: {
-        ...process.env,
-        FORCE_COLOR: true,
-    }});
+    const child = spawn(command, args, {
+        ...options, env: {
+            ...process.env,
+            FORCE_COLOR: true,
+        }
+    });
 
     // Handle child process output
     child.stdout.on("data", data => {
@@ -138,7 +140,7 @@ export const spawnCommand = (command, args, options = {}, options2={
     });
 
     child.on("exit", code => {
-        if( options2.logExit ){
+        if (options2.logExit) {
             console.log(`child process exited with code ${code}`);
         }
     });
@@ -166,14 +168,14 @@ export const spawnListener = (commands, callback) => {
             // handle non-exit code
             redLog(`child process exited with code ${exitCode} when running ${command}`);
 
-            if( callback?.onExit){
+            if (callback?.onExit) {
                 callback?.onExit(exitCode);
             }
             exit();
         }
         // eventsEmitter.emit(eventName);
 
-        if( callback?.onDone ){
+        if (callback?.onDone) {
             callback?.onDone(exitCode);
         }
     })
@@ -310,4 +312,19 @@ export const createDirs = (path) => {
     if (!fs.existsSync(path)) {
         fs.mkdirSync(path, { recursive: true });
     }
+}
+export const customSort = (arr, orderJson) => {
+    arr.sort((a, b) => {
+        if (orderJson[a] !== undefined && orderJson[b] !== undefined) {
+            return orderJson[a] - orderJson[b];
+        } else if (orderJson[a] !== undefined) {
+            return -1;
+        } else if (orderJson[b] !== undefined) {
+            return 1;
+        } else {
+            return 0;
+        }
+    });
+
+    return arr;
 }
