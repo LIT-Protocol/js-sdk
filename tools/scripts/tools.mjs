@@ -398,105 +398,105 @@ if (OPTION === '--build') {
             // });
         }
     }
+}
 
-    if (OPTION === '--publish') {
-        let OPTION2 = args[1];
+if (OPTION === '--publish') {
+    let OPTION2 = args[1];
 
-        if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
-            greenLog(
-                `
+    if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
+        greenLog(
+            `
         Usage: node tools/scripts/tools.mjs --publish [option]
             [option]: the option to run
                 --build: build packages before publishing
                 --no-build: publish without building
     `,
-                true
-            );
+            true
+        );
 
-            exit();
-        }
-
-        if (OPTION2 === '--build') {
-            spawnListener('yarn build:packages', {
-                onDone: () => {
-                    spawnListener('yarn npx lerna publish --force-publish', {
-                        onDone: () => {
-                            console.log('Done!');
-                        },
-                    });
-                },
-            });
-        }
-
-        if (OPTION2 === '--no-build') {
-            spawnListener('yarn npx lerna publish --force-publish', {
-                onDone: () => {
-                    console.log('Done!');
-                },
-            });
-        }
+        exit();
     }
 
-    if (OPTION === '--yalc') {
-        const OPTION2 = args[1];
+    if (OPTION2 === '--build') {
+        spawnListener('yarn build:packages', {
+            onDone: () => {
+                spawnListener('yarn npx lerna publish --force-publish', {
+                    onDone: () => {
+                        console.log('Done!');
+                    },
+                });
+            },
+        });
+    }
 
-        if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
-            greenLog(
-                `
+    if (OPTION2 === '--no-build') {
+        spawnListener('yarn npx lerna publish --force-publish', {
+            onDone: () => {
+                console.log('Done!');
+            },
+        });
+    }
+}
+
+if (OPTION === '--yalc') {
+    const OPTION2 = args[1];
+
+    if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
+        greenLog(
+            `
         Usage: node tools/scripts/tools.mjs --yalc [option]
             [option]: the option to run
                 --publish: publish packages to yalc
                 --push: push packages to yalc
                 --remove: remove packages from yalc
     `,
-                true
-            );
-
-            exit();
-        }
-
-        const dirs = (await listDirsRecursive('./dist/packages', false)).map((item) =>
-            item.replace('dist/packages/', '')
+            true
         );
 
-        if (OPTION2 === '--publish') {
-            dirs.forEach((name) => {
-                spawnCommand(
-                    'yalc',
-                    ['publish', '--push'],
-                    {
-                        cwd: `dist/packages/${name}`,
-                    },
-                    { logExit: false }
-                );
-            });
-        }
-
-        if (OPTION2 === '--push') {
-            dirs.forEach((name) => {
-                spawnCommand(
-                    'yalc',
-                    ['push'],
-                    {
-                        cwd: `dist/packages/${name}`,
-                    },
-                    { logExit: false }
-                );
-            });
-        }
-
-        if (OPTION2 === '--remove') {
-            dirs.forEach((name) => {
-                spawnCommand(
-                    'yalc',
-                    ['remove', name],
-                    {
-                        cwd: `dist/packages/${name}`,
-                    },
-                    { logExit: false }
-                );
-            });
-        }
         exit();
     }
+
+    const dirs = (await listDirsRecursive('./dist/packages', false)).map((item) =>
+        item.replace('dist/packages/', '')
+    );
+
+    if (OPTION2 === '--publish') {
+        dirs.forEach((name) => {
+            spawnCommand(
+                'yalc',
+                ['publish', '--push'],
+                {
+                    cwd: `dist/packages/${name}`,
+                },
+                { logExit: false }
+            );
+        });
+    }
+
+    if (OPTION2 === '--push') {
+        dirs.forEach((name) => {
+            spawnCommand(
+                'yalc',
+                ['push'],
+                {
+                    cwd: `dist/packages/${name}`,
+                },
+                { logExit: false }
+            );
+        });
+    }
+
+    if (OPTION2 === '--remove') {
+        dirs.forEach((name) => {
+            spawnCommand(
+                'yalc',
+                ['remove', name],
+                {
+                    cwd: `dist/packages/${name}`,
+                },
+                { logExit: false }
+            );
+        });
+    }
+    exit();
 }
