@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/misc-browser",
-  "version": "2.0.14",
+  "version": "2.0.15",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
