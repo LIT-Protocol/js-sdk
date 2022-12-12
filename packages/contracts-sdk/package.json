@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/contracts-sdk",
-  "version": "2.0.20",
+  "version": "2.0.23",
   "type": "commonjs",
   "scripts": {},
   "publishConfig": {
@@ -12,7 +12,7 @@
     "date-and-time": "^2.4.1",
     "multiformats": "^9.7.1"
   },
-  "gitHead": "a7a8ea07062848839ef824558fbd833ef7b19f59",
+  "gitHead": "4286f7e0e7800839f88b04b7db44aa481acb75e8",
   "tags": [
     "universal"
   ]
