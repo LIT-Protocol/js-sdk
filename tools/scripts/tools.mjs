@@ -3,6 +3,7 @@ import {
     childRunCommand,
     customSort,
     findImportsFromDir,
+    findStrFromDir,
     getArgs,
     greenLog,
     listDirsRecursive,
@@ -499,4 +500,60 @@ if (OPTION === '--yalc') {
         });
     }
     exit();
+}
+
+if (OPTION === '--switch') {
+    const FROM_NAME = args[1];
+    const TO_NAME = args[2];
+
+    if (!FROM_NAME || FROM_NAME === '' || FROM_NAME === '--help') {
+        greenLog(
+            `
+        Usage: node tools/scripts/tools.mjs --switch [from] [to]
+            [from]: the npm to switch from
+            [to]: the npm to switch to
+    `,
+            true
+        );
+
+        exit();
+    }
+
+    const dirs = await listDirsRecursive('./packages', true);
+
+    let paths = [];
+
+    for (let i = 0; i < dirs.length; i++) {
+        const dir = dirs[i];
+        let _paths = await findStrFromDir(dir, FROM_NAME);
+        paths.push(_paths);
+    }
+
+    // remove empty array
+    paths = paths.filter((item) => item.length > 0);
+
+    // flatten array
+    paths = paths.flat();
+
+    const root = await findStrFromDir('./', FROM_NAME);
+    const tools = await findStrFromDir('./tools/scripts', FROM_NAME);
+
+    const filesThatContainStr = [...root, ...tools, ...paths];
+
+    // for each file that contains the string, replace it
+    for (let i = 0; i < filesThatContainStr.length; i++) {
+        const file = filesThatContainStr[i];
+        let content = await readFile(file);
+        content = content.replaceAll(FROM_NAME, TO_NAME);
+        await writeFile(file, content);
+
+        console.log(`Replaced ${FROM_NAME} with ${TO_NAME} in ${file}`);
+
+        if (i === filesThatContainStr.length - 1) {
+            console.log('Done!');
+        }
+
+        exit();
+    }
+
 }
