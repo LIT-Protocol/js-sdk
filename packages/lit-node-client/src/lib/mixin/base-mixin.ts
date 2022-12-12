@@ -24,6 +24,7 @@ export function BaseMixin<Base extends Class>(base: Base) {
     constructor(...args: any[LitNodeClientConfig | CustomNetwork | any]) {
       super();
 
+      console.log('args', args);
       let customConfig = args[0];
 
       console.log('Creating litNodeClient and customConfig is ', customConfig);
