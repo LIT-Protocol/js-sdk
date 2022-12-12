@@ -33,7 +33,7 @@ export function BaseMixin<Base extends Class>(base: Base) {
 
       // -- if config params are specified, replace it
       if (customConfig) {
-        this.config = { ...this.config, ...customConfig };
+        this.config = { ...this.config, ...customConfig[0] };
         // this.config = override(this.config, customConfig);
       }
 
