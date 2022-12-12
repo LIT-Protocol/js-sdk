@@ -577,17 +577,9 @@ export const checkAndSignEVMAuthMessage = async ({
 
   // -- 6. case: Lit auth signature IS in the local storage
   let authSig: JsonAuthSig = authSigOrError.result;
-<<<<<<< HEAD
   if (typeof authSig === 'string') {
     authSig = JSON.parse(authSig);
   }
-=======
-
-  if(typeof authSig === 'string'){
-    authSig = JSON.parse(authSig);
-  }
-
->>>>>>> feat/add-old-tests
   log('6. authSig:', authSig);
   console.log("account:", account);
   console.log("authSig.address:", authSig.address);
@@ -623,6 +615,7 @@ export const checkAndSignEVMAuthMessage = async ({
       });
     }
     log('8. mustResign:', mustResign);
+    console.log("9. authSig", authSig);
   }
 
   return authSig;
