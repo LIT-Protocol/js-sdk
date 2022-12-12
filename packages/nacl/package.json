@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/nacl",
-  "version": "2.0.15",
+  "version": "2.0.16",
   "type": "commonjs",
   "tags": [
     "universal"
