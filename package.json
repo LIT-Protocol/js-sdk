@@ -29,7 +29,9 @@
     "graph": "nx graph",
     "npm:login": "npm login",
     "cy:open:html": "yarn tools --test --e2e html",
-    "cy:open:react": "yarn tools --test --e2e react"
+    "cy:open:react": "yarn tools --test --e2e react",
+    "buildAndPublish": "yarn build:packages && yarn publish:packages",
+    "dev": "nodemon --watch packages --exec \"yarn build:packages && yarn tools --yalc --publish\""
   },
   "private": true,
   "dependencies": {
