@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+    <title>Unified Access Control Conditions</title>
+
+    <script
+      src="/dist/packages/lit-node-client-vanilla/lit-node-client.js"
+    ></script>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <script>
+
+      const LitJsSdk = LitJsSdk_litNodeClient;
+
+      const litNodeClient = new LitNodeClient({litNetwork: 'serrano'});
+      litNodeClient.connect();
+      //var authSig = JSON.parse("{\"sig\":\"0x18a173d68d2f78cc5c13da0dfe36eec2a293285bee6d42547b9577bf26cdc985660ed3dddc4e75d422366cac07e8a9fc77669b10373bef9c7b8e4280252dfddf1b\",\"derivedVia\":\"web3.eth.personal.sign\",\"signedMessage\":\"I am creating an account to use LITs at 2021-08-04T20:14:04.918Z\",\"address\":\"0xdbd360f30097fb6d938dcc8b7b62854b36160b45\"}")
+
+      var testProvisoningEncryptingAndDecrypting = async ({
+        file,
+        zip,
+        unifiedAccessControlConditions,
+        testName,
+      }) => {
+        document.getElementById("status").innerText = `Testing ${testName}...`;
+        document.getElementById("log").innerText = "";
+        let log = "";
+        let totalTimeElapsed = 0;
+
+        var ethAuthSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: "ethereum",
+        });
+
+        let encryptedFile, symmetricKey, before, after;
+        if (zip) {
+          before = new Date();
+          const res = await LitJsSdk.zipAndEncryptFiles([file]);
+          after = new Date();
+          log += `zipAndEncryptFiles took ${after - before}ms\n`;
+          totalTimeElapsed += after - before;
+          encryptedFile = res.encryptedZip;
+          symmetricKey = res.symmetricKey;
+        } else {
+          before = new Date();
+          const res = await LitJsSdk.encryptFile({
+            file,
+          });
+          after = new Date();
+          log += `encryptFile took ${after - before}ms\n`;
+          totalTimeElapsed += after - before;
+          encryptedFile = res.encryptedFile;
+          symmetricKey = res.symmetricKey;
+        }
+
+        const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
+          unifiedAccessControlConditions,
+          symmetricKey,
+          authSig: {
+            ethereum: ethAuthSig,
+          },
+        });
+
+        console.log("encrypted symmetric key", encryptedSymmetricKey);
+
+        const retrievedSymmKey = await litNodeClient.getEncryptionKey({
+          unifiedAccessControlConditions,
+          toDecrypt: LitJsSdk.uint8arrayToString(
+            encryptedSymmetricKey,
+            "base16"
+          ),
+          authSig: {
+            ethereum: ethAuthSig,
+          },
+        });
+
+        if (zip) {
+          before = new Date();
+          const decryptedFiles = await LitJsSdk.decryptZip(
+            encryptedFile,
+            retrievedSymmKey
+          );
+          after = new Date();
+          log += `decryptZip took ${after - before}ms\n`;
+          totalTimeElapsed += after - before;
+          console.log("decrypted files", decryptedFiles);
+        } else {
+          before = new Date();
+          const decryptedFile = await LitJsSdk.decryptFile({
+            file: encryptedFile,
+            symmetricKey: retrievedSymmKey,
+          });
+          after = new Date();
+          log += `decryptFile took ${after - before}ms\n`;
+          totalTimeElapsed += after - before;
+          console.log("decrypted file", decryptedFile);
+        }
+
+        log += `total time to encrypt then decrypt was ${totalTimeElapsed}ms\n`;
+
+        document.getElementById("status").innerText = `${testName}: Success`;
+        document.getElementById("log").innerText = log;
+      };
+
+      // Actual tests are below here
+
+      var BasicEncrypt = async () => {
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: "evmBasic",
+            contractAddress: "",
+            standardContractType: "",
+            chain: "ethereum",
+            method: "eth_getBalance",
+            parameters: [":userAddress", "latest"],
+            returnValueTest: {
+              comparator: ">=",
+              value: "10000000000000",
+            },
+          },
+        ];
+
+        const selectedFile = document.getElementById("fileToUpload").files[0];
+
+        await testProvisoningEncryptingAndDecrypting({
+          file: selectedFile,
+          zip: false,
+          unifiedAccessControlConditions,
+          testName: "BasicEncrypt",
+        });
+      };
+
+      var ZipAndEncrypt = async () => {
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: "evmBasic",
+            contractAddress: "",
+            standardContractType: "",
+            chain: "ethereum",
+            method: "eth_getBalance",
+            parameters: [":userAddress", "latest"],
+            returnValueTest: {
+              comparator: ">=",
+              value: "10000000000000",
+            },
+          },
+        ];
+
+        const selectedFile = document.getElementById("fileToUpload").files[0];
+
+        await testProvisoningEncryptingAndDecrypting({
+          file: selectedFile,
+          zip: true,
+          unifiedAccessControlConditions,
+          testName: "BasicEncrypt",
+        });
+      };
+
+      var logout = async () => {
+        const testName = "Logout";
+        document.getElementById("status").innerText = `Testing ${testName}...`;
+
+        LitJsSdk.disconnectWeb3();
+
+        document.getElementById(
+          "status"
+        ).innerText = `${testName}: Success - Logged out`;
+      };
+
+      document.addEventListener(
+        "lit-ready",
+        function (e) {
+          console.log("LIT network is ready");
+          document.getElementById("networkStatus").innerText =
+            "Success!  Connected to Lit Protocol Network";
+        },
+        false
+      );
+    </script>
+  </head>
+
+  <body>
+    <h1>Manual tests</h1>
+    <br />
+    <br />
+    <div id="networkStatus">Connecting to Lit Protocol Network...</div>
+    <br />
+    <br />
+    <input type="file" id="fileToUpload" />
+    <br />
+    <br />
+    <button onclick="BasicEncrypt()">BasicEncrypt</button>
+    <br />
+    <br />
+    <button onclick="ZipAndEncrypt()">ZipAndEncrypt</button>
+    <br />
+    <br />
+
+    <button onclick="logout()">Logout</button>
+    <br />
+    <br />
+    <pre id="log"></pre>
+    <br />
+    <h2 id="status"></h2>
+    <br />
+    <p id="humanized"></p>
+  </body>
+</html>

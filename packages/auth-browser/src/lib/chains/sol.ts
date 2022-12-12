@@ -44,6 +44,8 @@ const getProvider = (): IEither => {
         });
     }
 
+    console.log("resultOrError:", resultOrError);
+
     return resultOrError;
 };
 
@@ -51,10 +53,15 @@ const getProvider = (): IEither => {
  *
  * Get Solana provider
  *
- * @returns { Promise<IProvider | undefined }
+ * @returns { Promise<IProvider> | undefined }
  */
 export const connectSolProvider = async (): Promise<IProvider | undefined> => {
+
+    console.log("connectSolProvider:", connectSolProvider);
+    
     const providerOrError: IEither = getProvider();
+
+    console.log("providerOrError:", providerOrError);
 
     if (providerOrError.type === 'ERROR') {
         throwError(providerOrError.result);

@@ -220,7 +220,7 @@ export const getMustResign = (
   authSig: JsonAuthSig,
   resources: any
 ): boolean => {
-  let mustResign!: boolean;
+  let mustResign: boolean = false;
 
   try {
     const parsedSiwe = new SiweMessage(authSig.signedMessage);
@@ -493,7 +493,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
   log('chainId from web3', currentChainIdOrError);
   log(
-    `checkAndSignAuthMessage with chainId ${currentChainIdOrError} and chain set to ${chain} and selectedChain is `,
+    `checkAndSignAuthMessage with chainId ${currentChainIdOrError.result} and chain set to ${chain} and selectedChain is `,
     selectedChain
   );
 
@@ -577,13 +577,23 @@ export const checkAndSignEVMAuthMessage = async ({
 
   // -- 6. case: Lit auth signature IS in the local storage
   let authSig: JsonAuthSig = authSigOrError.result;
+<<<<<<< HEAD
   if (typeof authSig === 'string') {
     authSig = JSON.parse(authSig);
   }
+=======
+
+  if(typeof authSig === 'string'){
+    authSig = JSON.parse(authSig);
+  }
+
+>>>>>>> feat/add-old-tests
   log('6. authSig:', authSig);
+  console.log("account:", account);
+  console.log("authSig.address:", authSig.address);
 
   // -- 7. case: when we are NOT on the right wallet address
-  if (account.toLowerCase() !== authSig.address.toLowerCase()) {
+  if (account?.toLowerCase() !== authSig.address?.toLowerCase()) {
     log(
       'signing auth message because account is not the same as the address in the auth sig'
     );
@@ -599,6 +609,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
     // -- 8. case: we are on the right wallet, but need to check the resources of the sig and re-sign if they don't match
   } else {
+    
     let mustResign: boolean = getMustResign(authSig, resources);
 
     if (mustResign) {
