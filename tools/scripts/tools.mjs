@@ -327,27 +327,13 @@ if (OPTION === '--build') {
             Usage: node tools/scripts/tools.mjs --build --packages [option]
 
                 [option]: the option to run
-                    --parallel: build packages in parallel
+                    --async: build packages in sequential
             `,
                 true
             );
         }
 
-        if (MODE === '--parallel') {
-            
-            const ignoreList = (await listDirsRecursive('./apps', false))
-                .map((item) => item.replace('apps/', ''))
-                .join(',');
-
-            const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
-
-            spawnListener(command, {
-                onDone: () => {
-                    console.log('Done!');
-                    exit();
-                },
-            });
-        } else {
+        if (MODE === '--async') {
 
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -376,6 +362,20 @@ if (OPTION === '--build') {
             }
 
             exit();
+        } else {
+            const ignoreList = (await listDirsRecursive('./apps', false))
+                .map((item) => item.replace('apps/', ''))
+                .join(',');
+
+            const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
+
+            spawnListener(command, {
+                onDone: () => {
+                    console.log('Done!');
+                    exit();
+                },
+            });
+
         }
 
 
