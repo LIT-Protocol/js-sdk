@@ -5,6 +5,7 @@ import { exit } from 'process';
 import readline from 'readline';
 import { join } from 'path';
 import events from 'events'
+import util from 'util';
 const eventsEmitter = new events.EventEmitter();
 
 const rl = readline.createInterface(process.stdin, process.stdout);
@@ -146,7 +147,7 @@ export const spawnCommand = (command, args, options = {}, options2 = {
     });
 }
 
-export const spawnListener = (commands, callback) => {
+export const spawnListener = (commands, callback, prefix = '', color = 31) => {
 
     let _commands = commands.split(" ");
     // let eventName = _commands.join('-');
@@ -181,7 +182,16 @@ export const spawnListener = (commands, callback) => {
     })
 
     // Handle child process output
-    bob.stdout.pipe(process.stdout);
+    // bob.stdout.pipe(process.stdout);
+    // randomize the color
+    
+    if (! color ){
+        color = Math.floor(Math.random() * 6) + 31;
+    }
+
+    bob.stdout.on('data', (data) => {
+        console.log(`\x1b[${color}m%s\x1b[0m: %s`, prefix, data.toString().replace(/\n$/, ''));
+    })
 
     // foward the key to the child process
     process.stdin.on('data', (key) => {
