@@ -16,6 +16,7 @@
     "test:watch": "nx run-many --target=test --watch",
     "publish:packages": "npx lerna publish --force-publish && yarn publish:vanilla",
     "publish:vanilla": "yarn node ./tools/scripts/pub.mjs --filter vanilla",
+    "publish:dev": "yarn tools --publish --tag dev",
     "tool:delete": "yarn node ./tools/scripts/delete.mjs",
     "tool:createTest": "yarn node ./tools/scripts/create-case.mjs",
     "tool:genHtml": "yarn node ./tools/scripts/gen-html.mjs",
