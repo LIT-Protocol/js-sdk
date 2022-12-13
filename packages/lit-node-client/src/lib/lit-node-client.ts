@@ -1531,7 +1531,7 @@ export class LitNodeClient extends BaseMixin(
       sig: sessionSig.signature,
       derivedVia: 'web3.eth.personal.sign via Lit PKP',
       signedMessage: sessionSig.siweMessage,
-      address: computeAddress(sessionSig.publicKey),
+      address: computeAddress('0x' + sessionSig.publicKey),
     };
   };
 
