@@ -3,6 +3,7 @@ import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
+import { log } from '@lit-protocol/misc';
 
 /**
  *
@@ -10,8 +11,13 @@ import {
  *
  * @param { string } key
  */
- export const getStorageItem = (key: string): IEither => {
-  const item = localStorage.getItem(key);
+export const getStorageItem = (key: string): IEither => {
+  let item;
+  try {
+    item = localStorage.getItem(key);
+  } catch (e) {
+    // swallowing
+  }
 
   let keyOrError: IEither;
 

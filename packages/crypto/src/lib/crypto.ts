@@ -17,8 +17,8 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-import nacl from 'tweetnacl';
-// import { nacl } from '@lit-protocol/nacl';
+// import nacl from 'tweetnacl';
+import { nacl } from '@lit-protocol/nacl';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {

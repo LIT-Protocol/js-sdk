@@ -1,0 +1,20 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  master:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: nrwl/nx-set-shas@v3
+        with:
+          main-branch-name: 'master'
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn test:packages
