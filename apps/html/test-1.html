@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script src="dist/packages/lit-node-client-vanilla/lit-node-client.js"></script>
+
+    <script>
+        (async () => {
+            const LitJsSdk = window.LitJsSdk_litNodeClient;
+            const litNodeClient = new LitJsSdk.LitNodeClient({
+                litNetwork: 'serrano',
+            });
+            await litNodeClient.connect();
+
+            const sessionSigs = await litNodeClient.getSessionSigs({
+                expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
+                chain: 'ethereum',
+                resources: [`litEncryptionCondition://*`],
+                switchChain: false,
+            });
+            console.log('sessionSigs before saving encryption key: ', sessionSigs);
+
+            const { encryptedZip, symmetricKey } = await LitJsSdk.zipAndEncryptString(
+                'this is a secret message'
+            );
+
+            console.log('encryptedZip:', encryptedZip);
+            console.log('symmetricKey:', symmetricKey);
+        })();
+    </script>
+</body>
+
+</html>
