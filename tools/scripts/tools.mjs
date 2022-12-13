@@ -811,27 +811,42 @@ if (OPTION === '--watch') {
 
         const TARGET = args[2];
 
+        greenLog(`
+            Usage: node tools/scripts/tools.mjs --watch --target [target] [option]
+                [target]: the target to watch
+                [option]: the option to use
+                    --deps: with dependencies
+        `, true);
+
         if (!TARGET || TARGET === '' || TARGET === '--help') {
-
-            greenLog(`
-                Usage: node tools/scripts/tools.mjs --watch --target [target]
-                    [target]: the target to watch
-            `, true);
-
-            exit();
+            exit()
+        } else {
+            await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
         // check if directory exists
-        if (!fs.existsSync(`./packages/${TARGET}`)) {
+        const path = `./packages/${TARGET}`;
+        if (!fs.existsSync(path)) {
             redLog(`Target "${TARGET}" does not exist!`);
             exit();
         }
 
+        if (args[3] === '--deps') {
+            const projectNameSpace = (await readFile(`package.json`)).match(/"name": "(.*)"/)[1].split('/')[0];
+            let res = (await findImportsFromDir(`${path}/src`)).filter((item) => item.includes(projectNameSpace)).map((item) => {
+                return item.replace(projectNameSpace, '').replace('/', '');
+            });
 
-        greenLog(`Watching ${TARGET}...`, true);
-        // wait 1 second
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await childRunCommand(`nodemon --watch packages/${TARGET} --ext js,ts --exec "yarn tools --build --target ${TARGET}"`);
+            res.forEach((pkg) => {
+                greenLog(`Watching ${pkg}...`, true);
+                childRunCommand(`nodemon --watch ${pkg} --ext js,ts --exec "yarn tools --build --target ${pkg}"`);
+            });
+
+        } else {
+            greenLog(`Watching ${TARGET}...`, true);
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            childRunCommand(`nodemon --watch packages/${TARGET} --ext js,ts --exec "yarn tools --build --target ${TARGET}"`);
+        }
     }
 
 }
