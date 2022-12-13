@@ -4,7 +4,7 @@
   "sourceRoot": "packages/misc/src",
   "projectType": "library",
   "targets": {
-    "build":{
+    "build": {
       "executor": "nx:run-commands",
       "options": {
         "command": "yarn build:target misc"
@@ -46,7 +46,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/misc"],
+      "outputs": ["{workspaceRoot}/coverage/packages/misc"],
       "options": {
         "jestConfig": "packages/misc/jest.config.ts",
         "passWithNoTests": true

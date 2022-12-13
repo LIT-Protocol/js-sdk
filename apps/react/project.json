@@ -5,7 +5,7 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/web:webpack",
+      "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
@@ -21,20 +21,17 @@
         "scripts": [],
         "webpackConfig": "@nrwl/react/plugins/webpack"
       },
-      "configurations": {
-
-      }
+      "configurations": {}
     },
     "serve": {
-      "executor": "@nrwl/web:dev-server",
+      "executor": "@nrwl/webpack:dev-server",
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "react:build",
         "hmr": true,
         "port": 4003
       },
-      "configurations": {
-      }
+      "configurations": {}
     }
   },
   "tags": []

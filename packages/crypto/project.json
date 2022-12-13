@@ -12,16 +12,12 @@
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/crypto",
         "main": "packages/crypto/src/index.ts",
         "tsConfig": "packages/crypto/tsconfig.lib.json",
-        "assets": [
-          "packages/crypto/*.md"
-        ]
+        "assets": ["packages/crypto/*.md"]
       }
     },
     "_buildWeb": {
@@ -29,9 +25,7 @@
       "options": {
         "globalName": "LitJsSdk_crypto",
         "outfile": "dist/packages/crypto-vanilla/crypto.js",
-        "entryPoints": [
-          "./packages/crypto/src/index.ts"
-        ],
+        "entryPoints": ["./packages/crypto/src/index.ts"],
         "define": {
           "process.env.NODE_DEBUG": "false"
         },
@@ -45,20 +39,14 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/crypto/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/crypto/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/crypto"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/crypto"],
       "options": {
         "jestConfig": "packages/crypto/jest.config.ts",
         "passWithNoTests": true
@@ -66,9 +54,7 @@
     },
     "testWatch": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/crypto"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/crypto"],
       "options": {
         "jestConfig": "packages/crypto/jest.config.ts",
         "passWithNoTests": true,

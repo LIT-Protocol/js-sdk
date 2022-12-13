@@ -4,14 +4,12 @@
   "sourceRoot": "packages/constants/src",
   "projectType": "library",
   "targets": {
-
-    "build":{
+    "build": {
       "executor": "nx:run-commands",
       "options": {
         "command": "yarn build:target constants"
       }
     },
-
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
@@ -25,14 +23,16 @@
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
       "options": {
-        "bundle": true,        
+        "bundle": true,
         "sourcemap": true,
         "metafile": true,
         "globalName": "LitJsSdk_constants",
-        "outfile":"dist/packages/constants-vanilla/constants.js",
+        "outfile": "dist/packages/constants-vanilla/constants.js",
         "entryPoints": ["./packages/constants/src/index.ts"],
-        "define": { "global": "window" },
-        "plugins":[
+        "define": {
+          "global": "window"
+        },
+        "plugins": [
           {
             "package": "esbuild-node-builtins",
             "function": "nodeBuiltIns"
@@ -40,21 +40,18 @@
         ]
       }
     },
-
     "copyJSONFilesToDist": {
       "executor": "nx:run-commands",
       "options": {
         "command": "mkdir -p dist/packages/constants/web/abis && cp ./packages/constants/src/lib/abis/ERC20.json dist/packages/constants/web/abis/ERC20.json && cp ./packages/constants/src/lib/abis/LIT.json dist/packages/constants/web/abis/LIT.json"
       }
     },
-
-    "generateDoc":{
+    "generateDoc": {
       "executor": "nx:run-commands",
-        "options": {
-          "command": "yarn typedoc --entryPointStrategy expand packages/constants/src --exclude packages/constants/src/**/*.spec.** --tsconfig packages/constants/tsconfig.json"
-        }
+      "options": {
+        "command": "yarn typedoc --entryPointStrategy expand packages/constants/src --exclude packages/constants/src/**/*.spec.** --tsconfig packages/constants/tsconfig.json"
+      }
     },
-
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
@@ -64,7 +61,7 @@
     },
     "testPackage": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/constants"],
+      "outputs": ["{workspaceRoot}/coverage/packages/constants"],
       "options": {
         "jestConfig": "packages/constants/jest.config.ts",
         "passWithNoTests": true
@@ -72,7 +69,7 @@
     },
     "testWatch": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/constants"],
+      "outputs": ["{workspaceRoot}/coverage/packages/constants"],
       "options": {
         "jestConfig": "packages/constants/jest.config.ts",
         "passWithNoTests": true,

@@ -3,12 +3,13 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/ecdsa-sdk/src",
   "projectType": "library",
-  "targets": {   "build":{
-    "executor": "nx:run-commands",
-    "options": {
-      "command": "yarn build:target ecdsa-sdk"
-    }
-  },
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target ecdsa-sdk"
+      }
+    },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
@@ -38,7 +39,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/ecdsa-sdk"],
+      "outputs": ["{workspaceRoot}/coverage/packages/ecdsa-sdk"],
       "options": {
         "jestConfig": "packages/ecdsa-sdk/jest.config.ts",
         "passWithNoTests": true,

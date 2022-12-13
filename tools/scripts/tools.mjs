@@ -440,13 +440,38 @@ if (OPTION === '--publish') {
         });
     }
 
-    if( OPTION2 === '--tag') {
-        const dirs = (await listDirsRecursive('./dist/packages', false));
+    if (OPTION2 === '--tag') {
 
-        await asyncForEach(dirs, async (dir) => {
-            await childRunCommand(`cd ${dir} && npm publish --tag test`);
-        })
-        exit();
+        const TAG = args[2];
+
+        if (!TAG || TAG === '' || TAG === '--help') {
+            greenLog(
+                `
+            Usage: node tools/scripts/tools.mjs --publish --tag [tag]
+                [tag]: the tag to publish with
+            `,
+                true
+            );
+        }
+
+        spawnListener(`yarn npx lerna publish --force-publish --dist-tag ${TAG}`, {
+            onDone: async () => {
+                const dirs = (await listDirsRecursive('./dist/packages', false)).filter((item) => item.includes('-vanilla'));
+
+                await asyncForEach(dirs, async (dir) => {
+                    await childRunCommand(`cd ${dir} && npm publish --tag ${TAG}`);
+                })
+
+                exit();
+            },
+        });   
+        // const dirs = (await listDirsRecursive('./dist/packages', false));
+
+        // await asyncForEach(dirs, async (dir) => {
+        //     await childRunCommand(`cd ${dir} && npm publish --tag ${TAG}`);
+        // })
+
+        // console.log(dirs);
     }
 }
 

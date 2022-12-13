@@ -4,7 +4,7 @@
   "sourceRoot": "packages/uint8arrays/src",
   "projectType": "library",
   "targets": {
-    "build":{
+    "build": {
       "executor": "nx:run-commands",
       "options": {
         "command": "yarn build:target uint8arrays"
@@ -39,7 +39,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/uint8arrays"],
+      "outputs": ["{workspaceRoot}/coverage/packages/uint8arrays"],
       "options": {
         "jestConfig": "packages/uint8arrays/jest.config.ts",
         "passWithNoTests": true

@@ -12,16 +12,12 @@
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/encryption",
         "main": "packages/encryption/src/index.ts",
         "tsConfig": "packages/encryption/tsconfig.lib.json",
-        "assets": [
-          "packages/encryption/*.md"
-        ]
+        "assets": ["packages/encryption/*.md"]
       }
     },
     "_buildWeb": {
@@ -29,9 +25,7 @@
       "options": {
         "globalName": "LitJsSdk_encryption",
         "outfile": "dist/packages/encryption-vanilla/encryption.js",
-        "entryPoints": [
-          "./packages/encryption/src/index.ts"
-        ],
+        "entryPoints": ["./packages/encryption/src/index.ts"],
         "define": {
           "process.env.NODE_DEBUG": "false"
         },
@@ -45,20 +39,14 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/encryption/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/encryption/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/encryption"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/encryption"],
       "options": {
         "jestConfig": "packages/encryption/jest.config.ts",
         "passWithNoTests": true
@@ -66,9 +54,7 @@
     },
     "testWatch": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/encryption"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/encryption"],
       "options": {
         "jestConfig": "packages/encryption/jest.config.ts",
         "passWithNoTests": true,

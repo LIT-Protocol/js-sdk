@@ -52,7 +52,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/lit-node-client"],
+      "outputs": ["{workspaceRoot}/coverage/packages/lit-node-client"],
       "options": {
         "jestConfig": "packages/lit-node-client/jest.config.ts",
         "passWithNoTests": true
@@ -60,7 +60,7 @@
     },
     "testWatch": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/lit-node-client"],
+      "outputs": ["{workspaceRoot}/coverage/packages/lit-node-client"],
       "options": {
         "jestConfig": "packages/lit-node-client/jest.config.ts",
         "passWithNoTests": true,

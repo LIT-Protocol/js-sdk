@@ -12,16 +12,12 @@
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/auth-browser",
         "main": "packages/auth-browser/src/index.ts",
         "tsConfig": "packages/auth-browser/tsconfig.lib.json",
-        "assets": [
-          "packages/auth-browser/*.md"
-        ]
+        "assets": ["packages/auth-browser/*.md"]
       }
     },
     "_buildWeb": {
@@ -29,9 +25,7 @@
       "options": {
         "globalName": "LitJsSdk_authBrowser",
         "outfile": "dist/packages/auth-browser-vanilla/auth-browser.js",
-        "entryPoints": [
-          "./packages/auth-browser/src/index.ts"
-        ],
+        "entryPoints": ["./packages/auth-browser/src/index.ts"],
         "define": {
           "process.env.NODE_DEBUG": "false",
           "global": "window"
@@ -46,20 +40,14 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/auth-browser/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/auth-browser/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/auth-browser"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/auth-browser"],
       "options": {
         "jestConfig": "packages/auth-browser/jest.config.ts",
         "passWithNoTests": true

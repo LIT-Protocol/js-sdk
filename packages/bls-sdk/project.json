@@ -39,7 +39,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/bls-sdk"],
+      "outputs": ["{workspaceRoot}/coverage/packages/bls-sdk"],
       "options": {
         "jestConfig": "packages/bls-sdk/jest.config.ts",
         "passWithNoTests": true
