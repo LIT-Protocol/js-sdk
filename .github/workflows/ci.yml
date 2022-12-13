@@ -17,4 +17,5 @@ jobs:
           main-branch-name: 'master'
       - run: yarn install --frozen-lockfile
 
-      - run: yarn test:packages
+      - run: 'git branch --track main origin/main'
+      - run: npx nx affected --target=test --parallel=3 --ci --code-coverage
