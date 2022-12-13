@@ -457,7 +457,7 @@ export class LitNodeClient extends BaseMixin(
    */
   getSignatures = (signedData: Array<any>): any => {
     // -- prepare
-    let signatures: any;
+    let signatures: any = {};
 
     // TOOD: get keys of signedData
     const keys = Object.keys(signedData[0]);
