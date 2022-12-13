@@ -15,6 +15,6 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'master'
-      - run: npm ci
+      - run: yarn install --frozen-lockfile
 
       - run: npx nx affected --target=test --parallel=3 --ci --code-coverage
