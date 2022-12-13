@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+    <title>Manual Tests V2</title>
+
+    <script
+      src="/dist/packages/lit-node-client-vanilla/lit-node-client.js"
+    ></script>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <script>
+
+      const LitJsSdk = LitJsSdk_litNodeClient;
+
+      const litNodeClient = new LitNodeClient({litNetwork: 'serrano'});
+      litNodeClient.connect();
+      
+      var chain = "solana";
+
+      //var authSig = JSON.parse("{\"sig\":\"0x18a173d68d2f78cc5c13da0dfe36eec2a293285bee6d42547b9577bf26cdc985660ed3dddc4e75d422366cac07e8a9fc77669b10373bef9c7b8e4280252dfddf1b\",\"derivedVia\":\"web3.eth.personal.sign\",\"signedMessage\":\"I am creating an account to use LITs at 2021-08-04T20:14:04.918Z\",\"address\":\"0xdbd360f30097fb6d938dcc8b7b62854b36160b45\"}")
+
+      var randomPath = () =>
+        "/" +
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+      var testProvisoningAndSigning = async ({
+        solRpcConditions,
+        chain = "solana",
+        testName,
+      }) => {
+        document.getElementById("status").innerText = `Testing ${testName}...`;
+        document.getElementById(
+          "humanized"
+        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
+          { solRpcConditions }
+        )}`;
+
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
+
+        let resourceId = {
+          baseUrl: "my-dynamic-content-server.com",
+          path: randomPath(),
+          orgId: "",
+          role: "",
+          extraData: "",
+        };
+
+        await litNodeClient.saveSigningCondition({
+          solRpcConditions,
+          chain,
+          authSig,
+          resourceId,
+        });
+
+        let jwt = await litNodeClient.getSignedToken({
+          solRpcConditions,
+          chain,
+          authSig,
+          resourceId,
+        });
+        console.log("jwt", jwt);
+
+        // uncomment this to break the jwt, to test an invalid jwt
+        // jwt = jwt.replace(/.$/, "3");
+
+        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
+        console.log("verified", verified);
+        console.log("header", header);
+        console.log("payload", payload);
+
+        if (jwt && verified) {
+          document.getElementById("status").innerText = `${testName}: Success`;
+        } else {
+          document.getElementById("status").innerText = `${testName}: Failure`;
+        }
+      };
+
+      var testProvisoningEncryptingAndDecrypting = async ({
+        solRpcConditions,
+        chain = "solana",
+        testName,
+      }) => {
+        document.getElementById("status").innerText = `Testing ${testName}...`;
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain,
+        });
+
+        document.getElementById(
+          "humanized"
+        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
+          { solRpcConditions }
+        )}`;
+
+        const { encryptedZip, symmetricKey } =
+          await LitJsSdk.zipAndEncryptString("this is a secret message");
+
+        const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
+          solRpcConditions,
+          symmetricKey,
+          authSig,
+          chain,
+        });
+
+        console.log("encrypted symmetric key", encryptedSymmetricKey);
+
+        const retrievedSymmKey = await litNodeClient.getEncryptionKey({
+          solRpcConditions,
+          toDecrypt: LitJsSdk.uint8arrayToString(
+            encryptedSymmetricKey,
+            "base16"
+          ),
+          chain,
+          authSig,
+        });
+
+        const decryptedFiles = await LitJsSdk.decryptZip(
+          encryptedZip,
+          retrievedSymmKey
+        );
+        const decryptedString = await decryptedFiles["string.txt"].async(
+          "text"
+        );
+        console.log("decrypted string", decryptedString);
+
+        document.getElementById(
+          "status"
+        ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
+      };
+
+      // Actual tests are below here
+      var SolBalanceSigningV1Cond = async () => {
+        var solRpcConditions = [
+          {
+            method: "getBalance",
+            params: [":userAddress"],
+            chain,
+            returnValueTest: {
+              key: "",
+              comparator: ">=",
+              value: "100000000", // equals 0.1 SOL
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          solRpcConditions,
+          testName: "SolBalanceSigningV1Cond",
+        });
+      };
+
+      var SolBalanceEncryptV1Cond = async () => {
+        var solRpcConditions = [
+          {
+            method: "getBalance",
+            params: [":userAddress"],
+            chain,
+            returnValueTest: {
+              key: "",
+              comparator: ">=",
+              value: "100000000", // equals 0.1 SOL
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          solRpcConditions,
+          testName: "SolBalanceEncryptV1Cond",
+        });
+      };
+
+      var SolBalanceEncryptDevnet = async () => {
+        const chain = "solanaDevnet";
+        var solRpcConditions = [
+          {
+            method: "getBalance",
+            params: [":userAddress"],
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            chain,
+            returnValueTest: {
+              key: "",
+              comparator: ">=",
+              value: "100000000", // equals 0.1 SOL
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          solRpcConditions,
+          chain,
+          testName: "SolBalanceEncryptDevnet",
+        });
+      };
+
+      var SolBalanceEncryptTestnet = async () => {
+        const chain = "solanaTestnet";
+        var solRpcConditions = [
+          {
+            method: "getBalance",
+            params: [":userAddress"],
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            chain,
+            returnValueTest: {
+              key: "",
+              comparator: ">=",
+              value: "100000000", // equals 0.1 SOL
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          solRpcConditions,
+          chain,
+          testName: "SolBalanceEncryptTestnet",
+        });
+      };
+
+      var SolSpecificWalletAddressSigning = async () => {
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
+        var solRpcConditions = [
+          {
+            method: "",
+            params: [":userAddress"],
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            chain,
+            returnValueTest: {
+              key: "",
+              comparator: "=",
+              value: authSig.address,
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          solRpcConditions,
+          testName: "SolSpecificWalletAddressSigning",
+        });
+      };
+
+      var SolSpecificWalletAddressEncrypt = async () => {
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
+        var solRpcConditions = [
+          {
+            method: "",
+            params: [":userAddress"],
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            chain,
+            returnValueTest: {
+              key: "",
+              comparator: "=",
+              value: authSig.address,
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          solRpcConditions,
+          testName: "SolSpecificWalletAddressEncrypt",
+        });
+      };
+
+      var SolSpecificNftBalanceSigning = async () => {
+        var solRpcConditions = [
+          {
+            method: "getTokenAccountBalance",
+            params: ["tn2WEWk4Kqj157XsSdmBBcjWumVhkyJECXCKPq9ReL9"],
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            chain,
+            returnValueTest: {
+              key: "$.amount",
+              comparator: ">",
+              value: "0",
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          solRpcConditions,
+          testName: "SolSpecificNftBalanceSigning",
+        });
+      };
+
+      var SolSpecificNftBalanceEncrypt = async () => {
+        var solRpcConditions = [
+          {
+            method: "getTokenAccountBalance",
+            params: ["tn2WEWk4Kqj157XsSdmBBcjWumVhkyJECXCKPq9ReL9"],
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            chain,
+            returnValueTest: {
+              key: "$.amount",
+              comparator: ">",
+              value: "0",
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          solRpcConditions,
+          testName: "SolSpecificNftBalanceEncrypt",
+        });
+      };
+
+      var SolGetTokenAccountsByOwnerEncrypt = async () => {
+        var solRpcConditions = [
+          {
+            method: "getTokenAccountsByOwner",
+            params: [
+              ":userAddress",
+              {
+                programId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+              },
+              {
+                encoding: "jsonParsed",
+              },
+            ],
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            chain,
+            returnValueTest: {
+              key: '$[?(@.account.data.parsed.info.mint == "FrYwrqLcGfmXrgJKcZfrzoWsZ3pqQB9pjjUC9PxSq3xT")].account.data.parsed.info.tokenAmount.amount',
+              comparator: ">",
+              value: "0",
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          solRpcConditions,
+          testName: "SolGetTokenAccountsByOwnerEncrypt",
+        });
+      };
+
+      var SolNftInACollection = async () => {
+        var solRpcConditions = [
+          {
+            method: "balanceOfMetaplexCollection",
+            params: ["FfyafED6kiJUFwEhogyTRQHiL6NguqNg9xcdeoyyJs33"],
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            chain,
+            returnValueTest: {
+              key: "",
+              comparator: ">",
+              value: "0",
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          solRpcConditions,
+          testName: "SolNftInACollection",
+        });
+      };
+
+      var SolNftInACollectionThatsNotActuallyAcollection = async () => {
+        var solRpcConditions = [
+          [
+            {
+              method: "balanceOfMetaplexCollection",
+              params: ["SMBH3wF6baUj6JWtzYvqcKuj2XCKWDqQxzspY12xPND"],
+              pdaParams: [],
+              pdaInterface: { offset: 0, fields: {} },
+              pdaKey: "",
+              chain: "solana",
+              returnValueTest: {
+                key: "",
+                comparator: ">=",
+                value: "1",
+              },
+            },
+          ],
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          solRpcConditions,
+          testName: "SolNftInACollectionThatsNotActuallyAcollection",
+        });
+      };
+
+      var SolBalanceOfToken = async () => {
+        var solRpcConditions = [
+          {
+            method: "balanceOfToken",
+            params: ["FrYwrqLcGfmXrgJKcZfrzoWsZ3pqQB9pjjUC9PxSq3xT"],
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            chain,
+            returnValueTest: {
+              key: "$.amount",
+              comparator: ">",
+              value: "0",
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          solRpcConditions,
+          testName: "SolBalanceOfToken",
+        });
+      };
+
+      var SolPDABalance = async () => {
+        var solRpcConditions = [
+          {
+            method: "getBalance(getPDA)",
+            params: [],
+            pdaParams: [
+              "chatGL6yNgZT2Z3BeMYGcgdMpcBKdmxko4C5UhEX4To",
+              "delegate-wallet",
+              ":userAddress",
+            ],
+            pdaInterface: { offset: 8, fields: { owner_wallet: 32 } },
+            pdaKey: "owner_wallet",
+            chain: "solana",
+            returnValueTest: {
+              key: "",
+              comparator: ">=",
+              value: "100000000", // equals 0.1 SOL
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          solRpcConditions,
+          testName: "SolPDABalance",
+        });
+      };
+
+      // this test should fail.  that means it worked.  because I only have 1 of the NFTs and this is >1
+      var SolUserTest = async () => {
+        var solRpcConditions = [
+          {
+            method: "balanceOfMetaplexCollection",
+            params: ["XXvLhyHFR8M2er6ZSUxjX9j8qWaXcvAx5DgawosUX8v"],
+            pdaParams: [],
+            pdaInterface: { offset: 0, fields: {} },
+            pdaKey: "",
+            chain: "solana",
+            returnValueTest: { key: "", comparator: ">", value: "1" },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          solRpcConditions,
+          testName: "SolUserTest",
+        });
+      };
+
+      var logout = async () => {
+        const testName = "Logout";
+        document.getElementById("status").innerText = `Testing ${testName}...`;
+
+        LitJsSdk.disconnectWeb3();
+
+        document.getElementById(
+          "status"
+        ).innerText = `${testName}: Success - Logged out`;
+      };
+
+      document.addEventListener(
+        "lit-ready",
+        function (e) {
+          console.log("LIT network is ready");
+          document.getElementById("networkStatus").innerText =
+            "Success!  Connected to Lit Protocol Network";
+        },
+        false
+      );
+    </script>
+  </head>
+
+  <body>
+    <h1>Manual tests</h1>
+    <br />
+    <br />
+    <div id="networkStatus">Connecting to Lit Protocol Network...</div>
+    <br />
+    <br />
+    <button onclick="SolBalanceSigningV1Cond()">SolBalanceSigningV1Cond</button>
+    <br />
+    <br />
+    <button onclick="SolBalanceEncryptV1Cond()">SolBalanceEncryptV1Cond</button>
+    <br />
+    <br />
+
+    <button onclick="SolBalanceEncryptDevnet()">SolBalanceEncryptDevnet</button>
+    <br />
+    <br />
+
+    <button onclick="SolBalanceEncryptTestnet()">
+      SolBalanceEncryptTestnet
+    </button>
+    <br />
+    <br />
+
+    <button onclick="SolSpecificWalletAddressSigning()">
+      SolSpecificWalletAddressSigning
+    </button>
+    <br />
+    <br />
+    <button onclick="SolSpecificWalletAddressEncrypt()">
+      SolSpecificWalletAddressEncrypt
+    </button>
+    <br />
+    <br />
+
+    <button onclick="SolSpecificNftBalanceSigning()">
+      SolSpecificNftBalanceSigning
+    </button>
+    <br />
+    <br />
+    <button onclick="SolSpecificNftBalanceEncrypt()">
+      SolSpecificNftBalanceEncrypt
+    </button>
+    <br />
+    <br />
+
+    <button onclick="SolGetTokenAccountsByOwnerEncrypt()">
+      SolGetTokenAccountsByOwnerEncrypt
+    </button>
+    <br />
+    <br />
+
+    <button onclick="SolNftInACollection()">SolNftInACollection</button>
+    <br />
+    <br />
+
+    <button onclick="SolNftInACollectionThatsNotActuallyAcollection()">
+      SolNftInACollectionThatsNotActuallyAcollection
+    </button>
+    <br />
+    <br />
+
+    <button onclick="SolBalanceOfToken()">SolBalanceOfToken</button>
+    <br />
+    <br />
+
+    <button onclick="SolPDABalance()">SolPDABalance</button>
+    <br />
+    <br />
+
+    <button onclick="SolUserTest()">SolUserTest</button>
+    <br />
+    <br />
+
+    <button onclick="logout()">Logout</button>
+    <br />
+    <br />
+    <h2 id="status"></h2>
+    <br />
+    <p id="humanized"></p>
+  </body>
+</html>

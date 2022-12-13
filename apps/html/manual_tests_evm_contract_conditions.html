@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+    <title>Manual Tests V2</title>
+
+    <script
+      src="/dist/packages/lit-node-client-vanilla/lit-node-client.js"
+    ></script>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <script>
+
+      const LitJsSdk = LitJsSdk_litNodeClient;
+
+      const litNodeClient = new LitNodeClient({litNetwork: 'serrano'});
+      litNodeClient.connect();
+      var chain = "polygon";
+
+      //var authSig = JSON.parse("{\"sig\":\"0x18a173d68d2f78cc5c13da0dfe36eec2a293285bee6d42547b9577bf26cdc985660ed3dddc4e75d422366cac07e8a9fc77669b10373bef9c7b8e4280252dfddf1b\",\"derivedVia\":\"web3.eth.personal.sign\",\"signedMessage\":\"I am creating an account to use LITs at 2021-08-04T20:14:04.918Z\",\"address\":\"0xdbd360f30097fb6d938dcc8b7b62854b36160b45\"}")
+
+      var randomPath = () =>
+        "/" +
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+      var testProvisoningAndSigning = async ({
+        evmContractConditions,
+        testName,
+      }) => {
+        document.getElementById("status").innerText = `Testing ${testName}...`;
+        // document.getElementById(
+        //   "humanized"
+        // ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
+        //   { evmContractConditions }
+        // )}`;
+
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
+
+        let resourceId = {
+          baseUrl: "my-dynamic-content-server.com",
+          path: randomPath(),
+          orgId: "",
+          role: "",
+          extraData: "",
+        };
+
+        await litNodeClient.saveSigningCondition({
+          evmContractConditions,
+          chain,
+          authSig,
+          resourceId,
+        });
+
+        let jwt = await litNodeClient.getSignedToken({
+          evmContractConditions,
+          chain,
+          authSig,
+          resourceId,
+        });
+        console.log("jwt", jwt);
+
+        // uncomment this to break the jwt, to test an invalid jwt
+        // jwt = jwt.replace(/.$/, "3");
+
+        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
+        console.log("verified", verified);
+        console.log("header", header);
+        console.log("payload", payload);
+
+        if (jwt && verified) {
+          document.getElementById("status").innerText = `${testName}: Success`;
+        } else {
+          document.getElementById("status").innerText = `${testName}: Failure`;
+        }
+      };
+
+      var testProvisoningEncryptingAndDecrypting = async ({
+        evmContractConditions,
+        testName,
+      }) => {
+        document.getElementById("status").innerText = `Testing ${testName}...`;
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain,
+        });
+        // const authSig = {
+        //   sig: "0x49ae73506caef12d0bf8e5f7864b265c94352926fdddcf62d8b818a04a75529a1aa73b67f9cd938c756a61a6959c55ea8a2845209b28a1d2a6903555314e3a291b",
+        //   derivedVia: "web3.eth.personal.sign",
+        //   signedMessage:
+        //     "I am creating an account to use Lit Protocol at 2022-04-12T09:23:31.290Z",
+        //   address: "0x7e7763BE1379Bb48AFEE4F5c232Fb67D7c03947F",
+        // };
+
+        // document.getElementById(
+        //   "humanized"
+        // ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
+        //   { accessControlConditions }
+        // )}`;
+
+        const { encryptedZip, symmetricKey } =
+          await LitJsSdk.zipAndEncryptString("this is a secret message");
+
+        const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
+          evmContractConditions,
+          symmetricKey,
+          authSig,
+          chain,
+        });
+
+        console.log("encrypted symmetric key", encryptedSymmetricKey);
+
+        const retrievedSymmKey = await litNodeClient.getEncryptionKey({
+          evmContractConditions,
+          toDecrypt: LitJsSdk.uint8arrayToString(
+            encryptedSymmetricKey,
+            "base16"
+          ),
+          chain,
+          authSig,
+        });
+
+        const decryptedFiles = await LitJsSdk.decryptZip(
+          encryptedZip,
+          retrievedSymmKey
+        );
+        const decryptedString = await decryptedFiles["string.txt"].async(
+          "text"
+        );
+        console.log("decrypted string", decryptedString);
+
+        document.getElementById(
+          "status"
+        ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
+      };
+
+      // Actual tests are below here
+      var MolochDAOSharesSigning = async () => {
+        var evmContractConditions = [
+          {
+            contractAddress: "0xb71a679cfff330591d556c4b9f21c7739ca9590c",
+            functionName: "members",
+            functionParams: [":userAddress"],
+            functionAbi: {
+              constant: true,
+              inputs: [
+                {
+                  name: "",
+                  type: "address",
+                },
+              ],
+              name: "members",
+              outputs: [
+                {
+                  name: "delegateKey",
+                  type: "address",
+                },
+                {
+                  name: "shares",
+                  type: "uint256",
+                },
+                {
+                  name: "loot",
+                  type: "uint256",
+                },
+                {
+                  name: "exists",
+                  type: "bool",
+                },
+                {
+                  name: "highestIndexYesVote",
+                  type: "uint256",
+                },
+                {
+                  name: "jailed",
+                  type: "uint256",
+                },
+              ],
+              payable: false,
+              stateMutability: "view",
+              type: "function",
+            },
+            chain: "xdai",
+            returnValueTest: {
+              key: "shares",
+              comparator: ">=",
+              value: "1",
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          evmContractConditions,
+          testName: "MolochDAOSharesSigning",
+        });
+      };
+
+      var MolochDAOSharesEncryptDecrypt = async () => {
+        var evmContractConditions = [
+          {
+            contractAddress: "0xb71a679cfff330591d556c4b9f21c7739ca9590c",
+            functionName: "members",
+            functionParams: [":userAddress"],
+            functionAbi: {
+              constant: true,
+              inputs: [
+                {
+                  name: "",
+                  type: "address",
+                },
+              ],
+              name: "members",
+              outputs: [
+                {
+                  name: "delegateKey",
+                  type: "address",
+                },
+                {
+                  name: "shares",
+                  type: "uint256",
+                },
+                {
+                  name: "loot",
+                  type: "uint256",
+                },
+                {
+                  name: "exists",
+                  type: "bool",
+                },
+                {
+                  name: "highestIndexYesVote",
+                  type: "uint256",
+                },
+                {
+                  name: "jailed",
+                  type: "uint256",
+                },
+              ],
+              payable: false,
+              stateMutability: "view",
+              type: "function",
+            },
+            chain: "xdai",
+            returnValueTest: {
+              key: "shares",
+              comparator: ">=",
+              value: "1",
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          evmContractConditions,
+          testName: "MolochDAOSharesEncryptDecrypt",
+        });
+      };
+
+      var ERC1155Signing = async () => {
+        var evmContractConditions = [
+          {
+            contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
+            functionName: "balanceOf",
+            functionParams: [":userAddress", "8"],
+            functionAbi: {
+              type: "function",
+              stateMutability: "view",
+              outputs: [
+                {
+                  type: "uint256",
+                  name: "",
+                  internalType: "uint256",
+                },
+              ],
+              name: "balanceOf",
+              inputs: [
+                {
+                  type: "address",
+                  name: "account",
+                  internalType: "address",
+                },
+                {
+                  type: "uint256",
+                  name: "id",
+                  internalType: "uint256",
+                },
+              ],
+            },
+            chain,
+            returnValueTest: {
+              key: "",
+              comparator: ">",
+              value: "0",
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          evmContractConditions,
+          testName: "ERC1155Signing",
+        });
+      };
+
+      var ERC1155EncryptDecrypt = async () => {
+        var evmContractConditions = [
+          {
+            contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
+            functionName: "balanceOf",
+            functionParams: [":userAddress", "8"],
+            functionAbi: {
+              type: "function",
+              stateMutability: "view",
+              outputs: [
+                {
+                  type: "uint256",
+                  name: "",
+                  internalType: "uint256",
+                },
+              ],
+              name: "balanceOf",
+              inputs: [
+                {
+                  type: "address",
+                  name: "account",
+                  internalType: "address",
+                },
+                {
+                  type: "uint256",
+                  name: "id",
+                  internalType: "uint256",
+                },
+              ],
+            },
+            chain,
+            returnValueTest: {
+              key: "",
+              comparator: ">",
+              value: "0",
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          evmContractConditions,
+          testName: "ERC1155EncryptDecrypt",
+        });
+      };
+
+      var EncryptDecryptAGroup = async () => {
+        var evmContractConditions = [
+          {
+            contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
+            functionName: "balanceOf",
+            functionParams: [":userAddress", "8"],
+            functionAbi: {
+              type: "function",
+              stateMutability: "view",
+              outputs: [
+                {
+                  type: "uint256",
+                  name: "",
+                  internalType: "uint256",
+                },
+              ],
+              name: "balanceOf",
+              inputs: [
+                {
+                  type: "address",
+                  name: "account",
+                  internalType: "address",
+                },
+                {
+                  type: "uint256",
+                  name: "id",
+                  internalType: "uint256",
+                },
+              ],
+            },
+            chain,
+            returnValueTest: {
+              key: "",
+              comparator: ">",
+              value: "0",
+            },
+          },
+          { operator: "and" },
+          {
+            contractAddress: "0x319ba3aab86e04a37053e984bd411b2c63bf229e",
+            chain,
+            functionName: "ownerOf",
+            functionParams: ["5954"],
+            functionAbi: {
+              constant: true,
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "tokenId",
+                  type: "uint256",
+                },
+              ],
+              name: "ownerOf",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              payable: false,
+              stateMutability: "view",
+              type: "function",
+            },
+            returnValueTest: {
+              key: "",
+              comparator: "=",
+              value: ":userAddress",
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          evmContractConditions,
+          testName: "EncryptDecryptAGroup",
+        });
+      };
+
+      var SignAGroup = async () => {
+        var evmContractConditions = [
+          {
+            contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
+            functionName: "balanceOf",
+            functionParams: [":userAddress", "8"],
+            functionAbi: {
+              type: "function",
+              stateMutability: "view",
+              outputs: [
+                {
+                  type: "uint256",
+                  name: "",
+                  internalType: "uint256",
+                },
+              ],
+              name: "balanceOf",
+              inputs: [
+                {
+                  type: "address",
+                  name: "account",
+                  internalType: "address",
+                },
+                {
+                  type: "uint256",
+                  name: "id",
+                  internalType: "uint256",
+                },
+              ],
+            },
+            chain,
+            returnValueTest: {
+              key: "",
+              comparator: ">",
+              value: "0",
+            },
+          },
+          { operator: "and" },
+          {
+            contractAddress: "0x319ba3aab86e04a37053e984bd411b2c63bf229e",
+            chain,
+            functionName: "ownerOf",
+            functionParams: ["5954"],
+            functionAbi: {
+              constant: true,
+              inputs: [
+                {
+                  internalType: "uint256",
+                  name: "tokenId",
+                  type: "uint256",
+                },
+              ],
+              name: "ownerOf",
+              outputs: [
+                {
+                  internalType: "address",
+                  name: "",
+                  type: "address",
+                },
+              ],
+              payable: false,
+              stateMutability: "view",
+              type: "function",
+            },
+            returnValueTest: {
+              key: "",
+              comparator: "=",
+              value: ":userAddress",
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          evmContractConditions,
+          testName: "SignAGroup",
+        });
+      };
+
+      var RandomTestFromUser = async () => {
+        var evmContractConditions = [
+          {
+            contractAddress: "0xCA120e8aEaA69Ea37077E492b27E1a6F197DDA63",
+            functionName: "hasAccess",
+            functionParams: [
+              ":userAddress",
+              "c230000000000000000000000000000000000000000000000000000000000000",
+            ],
+            functionAbi: {
+              constant: true,
+              inputs: [
+                {
+                  name: "user",
+                  type: "address",
+                },
+                {
+                  name: "id",
+                  type: "bytes32",
+                },
+              ],
+              name: "hasAccess",
+              outputs: [
+                {
+                  name: "access",
+                  type: "bool",
+                },
+              ],
+              payable: false,
+              stateMutability: "view",
+              type: "function",
+            },
+            chain: "xdai",
+            returnValueTest: {
+              key: "",
+              comparator: "=",
+              value: "true",
+            },
+          },
+        ];
+
+        await testProvisoningEncryptingAndDecrypting({
+          evmContractConditions,
+          testName: "RandomTestFromUser",
+        });
+      };
+
+      var logout = async () => {
+        const testName = "Logout";
+        document.getElementById("status").innerText = `Testing ${testName}...`;
+
+        LitJsSdk.disconnectWeb3();
+
+        document.getElementById(
+          "status"
+        ).innerText = `${testName}: Success - Logged out`;
+      };
+
+      document.addEventListener(
+        "lit-ready",
+        function (e) {
+          console.log("LIT network is ready");
+          document.getElementById("networkStatus").innerText =
+            "Success!  Connected to Lit Protocol Network";
+        },
+        false
+      );
+    </script>
+  </head>
+
+  <body>
+    <h1>Manual tests</h1>
+    <br />
+    <br />
+    <div id="networkStatus">Connecting to Lit Protocol Network...</div>
+    <br />
+    <br />
+    <button onclick="MolochDAOSharesSigning()">MolochDAOSharesSigning</button>
+    <br />
+    <br />
+    <button onclick="MolochDAOSharesEncryptDecrypt()">
+      MolochDAOSharesEncryptDecrypt
+    </button>
+    <br />
+    <br />
+
+    <button onclick="ERC1155Signing()">ERC1155Signing</button>
+    <br />
+    <br />
+    <button onclick="ERC1155EncryptDecrypt()">ERC1155EncryptDecrypt</button>
+    <br />
+    <br />
+
+    <button onclick="EncryptDecryptAGroup()">EncryptDecryptAGroup</button>
+    <br />
+    <br />
+
+    <button onclick="SignAGroup()">SignAGroup</button>
+    <br />
+    <br />
+
+    <button onclick="RandomTestFromUser()">RandomTestFromUser</button>
+    <br />
+    <br />
+
+    <button onclick="logout()">Logout</button>
+    <br />
+    <br />
+    <h2 id="status"></h2>
+    <br />
+    <p id="humanized"></p>
+  </body>
+</html>
