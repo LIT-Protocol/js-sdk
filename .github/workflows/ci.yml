@@ -13,8 +13,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: nrwl/nx-set-shas@v3
-       with:
-        main-branch-name: 'master'
+        with:
+          main-branch-name: 'master'
       - run: npm ci
 
       - run: npx nx affected --target=test --parallel=3 --ci --code-coverage
