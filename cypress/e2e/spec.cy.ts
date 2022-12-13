@@ -15,6 +15,7 @@ let savedParams: any = {
       },
     },
   ],
+  authSig: null,
 };
 let LitJsSdk: any;
 
@@ -33,44 +34,40 @@ describe('Encrypt and Decrypt String', () => {
     );
   });
 
-  it('should check and sign auth message', async () => {
-    window = await cy.window();
-
-    // cy.window().then(async (window) => {
-
-    // -- set param
-    window.params = { chain: 'ethereum' };
-
-    // -- Click the event
-    await cy.get('#LitJsSdk_authBrowser_checkAndSignAuthMessage').click();
-    await cy.get('#metamask').click();
-    await cy.confirmMetamaskSignatureRequest();
-    await cy.wait(100);
-    await cy.confirmMetamaskSignatureRequest();
-    await cy.wait(100).then(() => {
-      console.log('window.output:', window.output);
-      savedParams.authSig = window.output;
-      expect(savedParams.authSig).to.be.an('object');
+  it('should check and sign auth message', () => {
+    cy.window().then(async (window) => {
+      window.params = { chain: 'ethereum' };
+      cy.get('#LitJsSdk_authBrowser_checkAndSignAuthMessage')
+        .click()
+        .then(() => {
+          cy.get('#metamask')
+            .click()
+            .then(() => {
+              cy.confirmMetamaskSignatureRequest().then(() => {
+                cy.wait(100).then(() => {
+                  console.log('window.output:', window.output);
+                  savedParams.authSig = window.output;
+                  LitJsSdk = window.LitJsSdk_litNodeClient;
+                  expect(savedParams.authSig).to.be.an('object');
+                });
+              });
+            });
+        });
     });
   });
 
   it('authSig is saved', () => {
+    // window = await cy.window();
     // expect saveParams not empty
     expect(savedParams.authSig).to.be.an('object');
   });
 
-  it('connect lit node client', async () => {
-    LitJsSdk = window.LitJsSdk_litNodeClient;
-
-    const client = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' });
-
-    await client.connect();
-
-    savedParams.litNodeClient = client;
-
-    await cy.wait(100).then(() => {
-      // expect to have property of executeJs
-      expect(savedParams.litNodeClient).to.have.property('executeJs');
+  it('connect lit node client', () => {
+    cy.window().then(async (window) => {
+      const client = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' });
+      await client.connect();
+      savedParams.litNodeClient = client;
+      expect(client.config.litNetwork).to.be.eq('serrano');
     });
   });
 
@@ -315,10 +312,10 @@ describe('Encrypt and zip metadata', () => {
 describe('Lit Action', () => {
   it('Gets JS execution shares', async () => {
     const litActionCode = `
-      (async () => {
-        console.log("Hello World!");
-      })();
-      `;
+        (async () => {
+          console.log("Hello World!");
+        })();
+        `;
 
     const params = {
       authSig: savedParams.authSig,
@@ -342,16 +339,20 @@ describe('Lit Action', () => {
     const params = {
       authSig: savedParams.authSig,
       jsParams: {},
-      ipfsId: "QmTLZxMgjHoZiNZyGnS4CXjSjbpZSnie3y32HoqK1ykmkW",
+      ipfsId: 'QmTLZxMgjHoZiNZyGnS4CXjSjbpZSnie3y32HoqK1ykmkW',
     };
 
-    const reqBody = await savedParams.litNodeClient.getLitActionRequestBody(params);
+    const reqBody = await savedParams.litNodeClient.getLitActionRequestBody(
+      params
+    );
     const res = await savedParams.litNodeClient.getJsExecutionShares(
       'https://serrano.litgateway.com:7379',
       reqBody
     );
 
-    expect(res).to.have.property('response').and.contains('0x352e559b06e9c6c72edbf5af2bf52c61f088db71');
+    expect(res)
+      .to.have.property('response')
+      .and.contains('0x352e559b06e9c6c72edbf5af2bf52c61f088db71');
   });
 
   it('Gets JWT params', () => {
@@ -369,10 +370,12 @@ describe('Lit Action', () => {
       authSig: savedParams.authSig,
       iat,
       exp,
-    }
-    const formattedAcc = savedParams.litNodeClient.getFormattedAccessControlConditions(params);
+    };
+    const formattedAcc =
+      savedParams.litNodeClient.getFormattedAccessControlConditions(params);
     expect(formattedAcc).to.have.property('error').and.equal(false);
-    const acc = [ // should be same as savedParams.accs
+    const acc = [
+      // should be same as savedParams.accs
       {
         contractAddress: '',
         standardContractType: '',
@@ -385,83 +388,85 @@ describe('Lit Action', () => {
         },
       },
     ];
-    expect(formattedAcc).to.have.property('formattedAccessControlConditions').and.deep.members(acc);
+    expect(formattedAcc)
+      .to.have.property('formattedAccessControlConditions')
+      .and.deep.members(acc);
   });
 
   it('Format evmContractConditions', () => {
     const evmContractConditions = [
       {
-        contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
-        functionName: "balanceOf",
-        functionParams: [":userAddress", "8"],
+        contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
+        functionName: 'balanceOf',
+        functionParams: [':userAddress', '8'],
         functionAbi: {
-          type: "function",
-          stateMutability: "view",
+          type: 'function',
+          stateMutability: 'view',
           outputs: [
             {
-              type: "uint256",
-              name: "",
-              internalType: "uint256",
+              type: 'uint256',
+              name: '',
+              internalType: 'uint256',
             },
           ],
-          name: "balanceOf",
+          name: 'balanceOf',
           inputs: [
             {
-              type: "address",
-              name: "account",
-              internalType: "address",
+              type: 'address',
+              name: 'account',
+              internalType: 'address',
             },
             {
-              type: "uint256",
-              name: "id",
-              internalType: "uint256",
+              type: 'uint256',
+              name: 'id',
+              internalType: 'uint256',
             },
           ],
         },
         chain: 'mumbai',
         returnValueTest: {
-          key: "",
-          comparator: ">",
-          value: "0",
+          key: '',
+          comparator: '>',
+          value: '0',
         },
       },
     ];
 
     const exptectedEvmContractConditions = [
       {
-        contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
-        functionName: "balanceOf",
-        functionParams: [":userAddress", "8"],
+        contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
+        functionName: 'balanceOf',
+        functionParams: [':userAddress', '8'],
         functionAbi: {
           // type: "function",
           constant: false,
-          stateMutability: "view",
+          stateMutability: 'view',
           outputs: [
             {
-              type: "uint256",
-              name: "",
+              type: 'uint256',
+              name: '',
               // internalType: "uint256",
             },
           ],
-          name: "balanceOf",
+          name: 'balanceOf',
           inputs: [
             {
-              type: "address",
-              name: "account",
+              type: 'address',
+              name: 'account',
               // internalType: "address",
             },
             {
-              type: "uint256",
-              name: "id",
+              type: 'uint256',
+              name: 'id',
               // internalType: "uint256",
             },
           ],
         },
         chain: 'mumbai',
         returnValueTest: {
-          key: "",
-          comparator: ">",
-          value: "0",
+          key: '',
+          comparator: '>',
+          value: '0',
         },
       },
     ];
@@ -473,30 +478,36 @@ describe('Lit Action', () => {
       authSig: savedParams.authSig,
       iat,
       exp,
-    }
-    const formattedEvmConditions = savedParams.litNodeClient.getFormattedAccessControlConditions(params);
+    };
+    const formattedEvmConditions =
+      savedParams.litNodeClient.getFormattedAccessControlConditions(params);
     expect(formattedEvmConditions).to.have.property('error').and.equal(false);
-    expect(formattedEvmConditions).to.have.property('formattedEVMContractConditions').and.deep.members(exptectedEvmContractConditions);
+    expect(formattedEvmConditions)
+      .to.have.property('formattedEVMContractConditions')
+      .and.deep.members(exptectedEvmContractConditions);
   });
 
   it('Format solRpcConditions', async () => {
     const solRpcConditions = [
       {
-        method: "getBalance",
-        params: [":userAddress"],
+        method: 'getBalance',
+        params: [':userAddress'],
         pdaParams: [],
         pdaInterface: { offset: 0, fields: {} },
-        pdaKey: "",
-        chain: "solana",
+        pdaKey: '',
+        chain: 'solana',
         returnValueTest: {
-          key: "",
-          comparator: ">=",
-          value: "100000000", // equals 0.1 SOL
+          key: '',
+          comparator: '>=',
+          value: '100000000', // equals 0.1 SOL
         },
       },
     ];
 
-    const expectedHashArray = [-914009333, -1738606745, 413792910, 1300522606, 917018267, -1524535853, 1804555918, -1453561713];
+    const expectedHashArray = [
+      -914009333, -1738606745, 413792910, 1300522606, 917018267, -1524535853,
+      1804555918, -1453561713,
+    ];
 
     const { iat, exp } = savedParams.litNodeClient.getJWTParams();
     const params = {
@@ -505,18 +516,19 @@ describe('Lit Action', () => {
       authSig: savedParams.authSig,
       iat,
       exp,
-    }
-    const formattedSolConditions = await savedParams.litNodeClient.getHashedAccessControlConditions(params);
+    };
+    const formattedSolConditions =
+      await savedParams.litNodeClient.getHashedAccessControlConditions(params);
     const hashArray = Array.from(new Int32Array(formattedSolConditions));
     expect(hashArray).to.have.all.members(expectedHashArray);
   });
 
   it('Handle node promises', async () => {
     const litActionCode = `
-      (async () => {
-        console.log("Hello World!");
-      })();
-      `;
+        (async () => {
+          console.log("Hello World!");
+        })();
+        `;
 
     const params = {
       authSig: savedParams.authSig,
@@ -528,12 +540,11 @@ describe('Lit Action', () => {
       params
     );
 
-    const nodePromises = savedParams.litNodeClient.getNodePromises((url: string) => {
-      return savedParams.litNodeClient.getJsExecutionShares(
-        url,
-        reqBody
-      );
-    });
+    const nodePromises = savedParams.litNodeClient.getNodePromises(
+      (url: string) => {
+        return savedParams.litNodeClient.getJsExecutionShares(url, reqBody);
+      }
+    );
 
     expect(nodePromises.length).to.equal(10);
 
@@ -548,7 +559,7 @@ describe('Lit Action', () => {
       error: {
         errorCode: 'not_authorized',
       },
-    }
+    };
     try {
       savedParams.litNodeClient.throwNodeError(res);
     } catch (error) {
@@ -567,13 +578,17 @@ describe('Lit Action', () => {
 
   it('Send command to node', async () => {
     const params: ExecuteJsProps = {
-        authSig: savedParams.authSig,
-        jsParams: {},
-        code: "console.log('Hi Wind!')",
-        debug: true,
+      authSig: savedParams.authSig,
+      jsParams: {},
+      code: "console.log('Hi Wind!')",
+      debug: true,
     };
-    const data: JsonExecutionRequest = savedParams.litNodeClient.getLitActionRequestBody(params);
-    const reqBody: SendNodeCommand = {url: 'https://serrano.litgateway.com:7371/web/execute', data};
+    const data: JsonExecutionRequest =
+      savedParams.litNodeClient.getLitActionRequestBody(params);
+    const reqBody: SendNodeCommand = {
+      url: 'https://serrano.litgateway.com:7371/web/execute',
+      data,
+    };
     const res = await savedParams.litNodeClient.sendCommandToNode(reqBody);
     expect(res).to.have.property('success', true);
   });
@@ -633,9 +648,16 @@ describe('Lit Action', () => {
   // });
 
   it('Handshake with Sgx', async () => {
-    const params: HandshakeWithSgx = { url: "https://serrano.litgateway.com:7371" };
+    const params: HandshakeWithSgx = {
+      url: 'https://serrano.litgateway.com:7371',
+    };
     const res = await savedParams.litNodeClient.handshakeWithSgx(params);
-    expect(res).to.have.keys('networkPublicKey', 'networkPublicKeySet', 'serverPublicKey', 'subnetPublicKey');
+    expect(res).to.have.keys(
+      'networkPublicKey',
+      'networkPublicKeySet',
+      'serverPublicKey',
+      'subnetPublicKey'
+    );
   });
 
   // // Error: 404
@@ -646,14 +668,13 @@ describe('Lit Action', () => {
   //     code: "LitActions.setResponse({response: JSON.stringify({hello: 'world'})})",
   //     debug: true,
   //   }
-    
+
   //   // Error: 404
   //   const res = await savedParams.litNodeClient.executeJs(data);
   // });
 });
 
 describe('Session', () => {
-
   it('hashes a resource id', async () => {
     window = await cy.window();
 

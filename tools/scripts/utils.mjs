@@ -118,15 +118,17 @@ export async function childRunCommand(command) {
 }
 
 
-export const spawnCommand = (command, args, options = {}, options2={
+export const spawnCommand = (command, args, options = {}, options2 = {
     logExit: true,
 }) => {
 
     // Use the spawn() function to run the command in a child process
-    const child = spawn(command, args, {...options, env: {
-        ...process.env,
-        FORCE_COLOR: true,
-    }});
+    const child = spawn(command, args, {
+        ...options, env: {
+            ...process.env,
+            FORCE_COLOR: true,
+        }
+    });
 
     // Handle child process output
     child.stdout.on("data", data => {
@@ -138,7 +140,7 @@ export const spawnCommand = (command, args, options = {}, options2={
     });
 
     child.on("exit", code => {
-        if( options2.logExit ){
+        if (options2.logExit) {
             console.log(`child process exited with code ${code}`);
         }
     });
@@ -166,14 +168,14 @@ export const spawnListener = (commands, callback) => {
             // handle non-exit code
             redLog(`child process exited with code ${exitCode} when running ${command}`);
 
-            if( callback?.onExit){
+            if (callback?.onExit) {
                 callback?.onExit(exitCode);
             }
             exit();
         }
         // eventsEmitter.emit(eventName);
 
-        if( callback?.onDone ){
+        if (callback?.onDone) {
             callback?.onDone(exitCode);
         }
     })
@@ -306,8 +308,85 @@ export const findImportsFromDir = async (dir) => {
     return packages;
 }
 
+export const findStrFromDir = async (dir, str) => {
+
+    const files = await fs.promises.readdir(dir, { withFileTypes: true });
+
+    const paths = [];
+
+    await asyncForEach(files, async (file) => {
+
+        if (!file.isDirectory()) {
+            const filePath = join(dir, file.name);
+            // greenLog(`    - Scanning => ${filePath}`, true);
+
+            const contents = await fs.promises.readFile(filePath, 'utf-8');
+
+            // use regex to find if content has str
+            const regex = new RegExp(str, 'g');
+
+            let match;
+            while ((match = regex.exec(contents)) !== null) {
+                paths.push(filePath);
+            }
+        }
+    });
+
+    const uniquePaths = [...new Set(paths)];
+
+    return uniquePaths;
+}
+
 export const createDirs = (path) => {
     if (!fs.existsSync(path)) {
         fs.mkdirSync(path, { recursive: true });
     }
+}
+export const customSort = (arr, orderJson) => {
+    arr.sort((a, b) => {
+        if (orderJson[a] !== undefined && orderJson[b] !== undefined) {
+            return orderJson[a] - orderJson[b];
+        } else if (orderJson[a] !== undefined) {
+            return -1;
+        } else if (orderJson[b] !== undefined) {
+            return 1;
+        } else {
+            return 0;
+        }
+    });
+
+    return arr;
+}
+
+// create a function that recursively find all files content contains a string 'hello'
+export const findFilesWithContent = async (dir, content) => {
+    const files = await fs.promises
+        .readir(dir, { withFileTypes: true })
+        .catch((err) => {
+            console.log(err);
+        }
+        );
+
+    const foundFiles = [];
+
+    await asyncForEach(files, async (file) => {
+        if (!file.isDirectory()) {
+            const filePath = join(dir, file.name);
+            const contents = await fs.promises.readFile
+                (filePath, 'utf-8')
+                .catch((err) => {
+                    console.log(err);
+                }
+                );
+
+            if (contents.includes(content)) {
+                foundFiles.push(filePath);
+            }
+        } else {
+            const path = join(dir, file.name);
+            foundFiles.push(...(await findFilesWithContent(path, content)));
+        }
+    });
+
+    return foundFiles;
 }
