@@ -12,6 +12,7 @@ import {
     readJsonFile,
     redLog,
     replaceAutogen,
+    replaceFileContent,
     spawnCommand,
     spawnListener,
     writeFile,
@@ -34,6 +35,8 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
             --publish: publish to npm
             --yalc: publish to yalc
             --build: build the project
+            --switch: 
+            --dev: run dev stuff 
     `,
         true
     );
@@ -413,6 +416,7 @@ if (OPTION === '--publish') {
                 --build: build packages before publishing
                 --no-build: publish without building
                 --tag: publish with a tag
+                --target: publish a specific package
     `,
             true
         );
@@ -464,7 +468,7 @@ if (OPTION === '--publish') {
 
                 exit();
             },
-        });   
+        });
         // const dirs = (await listDirsRecursive('./dist/packages', false));
 
         // await asyncForEach(dirs, async (dir) => {
@@ -472,6 +476,23 @@ if (OPTION === '--publish') {
         // })
 
         // console.log(dirs);
+    }
+
+    if (OPTION2 === '--target') {
+        const TARGET = args[2];
+
+        if (!TARGET || TARGET === '' || TARGET === '--help') {
+            greenLog(
+                `
+            Usage: node tools/scripts/tools.mjs --publish --target [target]
+                [target]: the target to publish
+            `,
+                true
+            );
+        }
+
+        await childRunCommand(`cd dist/packages/${TARGET} && npm publish --access public`);
+        exit();
     }
 }
 
@@ -539,15 +560,15 @@ if (OPTION === '--yalc') {
 }
 
 if (OPTION === '--switch') {
-    const FROM_NAME = args[1];
-    const TO_NAME = args[2];
+    const SCOPE = args[1];
 
-    if (!FROM_NAME || FROM_NAME === '' || FROM_NAME === '--help') {
+
+    if (!SCOPE || SCOPE === '' || SCOPE === '--help') {
         greenLog(
             `
-        Usage: node tools/scripts/tools.mjs --switch [from] [to]
-            [from]: the npm to switch from
-            [to]: the npm to switch to
+        Usage: node tools/scripts/tools.mjs --switch [scope]
+            [scope]: the scope to switch
+                --all: switch all packages
     `,
             true
         );
@@ -555,41 +576,153 @@ if (OPTION === '--switch') {
         exit();
     }
 
-    const dirs = await listDirsRecursive('./dist/packages', true);
+    if (SCOPE == '--all') {
 
-    let paths = [];
+        const FROM_NAME = args[2];
+        const TO_NAME = args[3];
 
-    for (let i = 0; i < dirs.length; i++) {
-        const dir = dirs[i];
-        let _paths = await findStrFromDir(dir, FROM_NAME);
-        paths.push(_paths);
+        if (!FROM_NAME || FROM_NAME === '' || FROM_NAME === '--help' || !TO_NAME || TO_NAME === '' || TO_NAME === '--help') {
+
+            greenLog(
+                `
+            Usage: node tools/scripts/tools.mjs --switch --all [from] [to]
+                [from]: the string to replace
+                [to]: the string to replace with
+        `,
+                true
+            );
+
+            exit();
+        }
+
+        const dirs = await listDirsRecursive('./dist/packages', true);
+
+        let paths = [];
+
+        for (let i = 0; i < dirs.length; i++) {
+            const dir = dirs[i];
+            let _paths = await findStrFromDir(dir, FROM_NAME);
+            paths.push(_paths);
+        }
+
+        // remove empty array
+        paths = paths.filter((item) => item.length > 0);
+
+        // flatten array
+        paths = paths.flat();
+
+        // for each file that contains the string, replace it
+        for (let i = 0; i < paths.length; i++) {
+            const file = paths[i];
+            await replaceFileContent(paths[i], FROM_NAME, TO_NAME);
+            greenLog(`Replaced ${FROM_NAME} with ${TO_NAME} in ${file}`);
+
+            if (i === paths.length - 1) {
+                console.log('Done!');
+            }
+        }
+
+        exit();
+    }
+}
+
+if (OPTION === '--clone') {
+
+    const PROJECT_NAME = args[1];
+    const NPM_NAME = args[2];
+
+    greenLog(
+        `
+        Usage: node tools/scripts/tools.mjs --clone [project-name] [npm-name] [option]
+
+            [project-name]: the name of the project
+            [npm-name]: the npm name of the clone
+
+            [option]: the option to run
+                --publish: publish packages to npm
+        `,
+        true
+    );
+
+    if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
+        exit();
+    } else {
+        await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
-    // remove empty array
-    paths = paths.filter((item) => item.length > 0);
+    const dirs = (await listDirsRecursive('./dist/packages', false))
+        .filter((item) => item.includes(PROJECT_NAME))
+        .map((path) => {
 
-    // flatten array
-    paths = paths.flat();
+            const name = path.replace('dist/packages/', '');
 
-    // for each file that contains the string, replace it
-    for (let i = 0; i < paths.length; i++) {
-        const file = paths[i];
-        let content = await readFile(file);
-        content = content.replaceAll(FROM_NAME, TO_NAME);
-        await writeFile(file, content);
+            const folderName = NPM_NAME.replaceAll('/', '-')
+            let clonePath = path.replace(PROJECT_NAME, folderName);
 
-        greenLog(`Replaced ${FROM_NAME} with ${TO_NAME} in ${file}`);
+            let npmName = clonePath.includes('-vanilla') ? `${NPM_NAME}-vanilla` : NPM_NAME;
 
-        if (i === paths.length - 1) {
-            console.log('Done!');
-        }
+            return {
+                name,
+                path,
+                projectName: PROJECT_NAME,
+                npmName,
+                clonePath,
+            }
+        });
+
+
+    // for loop clone a copy from path to clonePath
+    for (let i = 0; i < dirs.length; i++) {
+
+        greenLog(`Cloning ${dirs[i].name} to ${dirs[i].clonePath}`)
+
+        const dir = dirs[i];
+
+        await childRunCommand(`cp -r ${dir.path} ${dir.clonePath}`);
+
+        // replace the name in package.json
+        const packageJson = JSON.parse(await readFile(`${dir.clonePath}/package.json`));
+
+        packageJson.name = dir.npmName;
+        packageJson.publishConfig.directory = `../../dist/packages/${dir.npmName}`;
+
+        // bump version
+        // const version = packageJson.version.split('.');
+        // version[2] = parseInt(version[2]) + 1;
+        // packageJson.version = version.join('.');
+        // packageJson.version = packageJson.version;
+
+        await writeFile(`${dir.clonePath}/package.json`, JSON.stringify(packageJson, null, 4));
+    };
+
+    const OPTION2 = args[3];
+
+    if (OPTION2 === '--publish') {
+
+        // for loop publish each package
+        for (let i = 0; i < dirs.length; i++) {
+            const dir = dirs[i];
+
+            await childRunCommand(`cd ${dir.clonePath} && npm publish --access public`);
+
+        };
+
+        // for loop to delete the clone
+        for (let i = 0; i < dirs.length; i++) {
+            const dir = dirs[i];
+
+            // delete the clone 
+            if (args[4] === '--remove') {
+                await childRunCommand(`rm -rf ${dir.clonePath}`);
+            }
+        };
     }
 
     exit();
 
 }
 
-if (OPTION === '--dev'){
+if (OPTION === '--dev') {
 
     const TYPE = args[1];
 
@@ -606,7 +739,7 @@ if (OPTION === '--dev'){
         exit();
     }
 
-    if( TYPE === '--app'){
+    if (TYPE === '--app') {
 
         // go to apps/react/project.json and find the port
         const reactPort = JSON.parse(await readFile('./apps/react/project.json')).targets.serve.options.port;

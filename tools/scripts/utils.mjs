@@ -184,8 +184,8 @@ export const spawnListener = (commands, callback, prefix = '', color = 31) => {
     // Handle child process output
     // bob.stdout.pipe(process.stdout);
     // randomize the color
-    
-    if (! color ){
+
+    if (!color) {
         color = Math.floor(Math.random() * 6) + 31;
     }
 
@@ -399,4 +399,12 @@ export const findFilesWithContent = async (dir, content) => {
     });
 
     return foundFiles;
+}
+
+export const replaceFileContent = async (path, oldContent, newContent) => {
+    const file = path;
+    let content = await readFile(file);
+    content = content.replaceAll(oldContent, newContent);
+    await writeFile(file, content);
+    return content;
 }
