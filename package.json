@@ -31,7 +31,7 @@
     "cy:open:html": "yarn tools --test --e2e html",
     "cy:open:react": "yarn tools --test --e2e react",
     "buildAndPublish": "yarn build:packages && yarn publish:packages",
-    "dev": "nodemon --watch packages --exec \"yarn build:packages && yarn tools --yalc --publish\""
+    "dev": "nodemon --watch packages --ext js,ts --exec \"yarn build:packages && yarn tools --yalc --publish\""
   },
   "private": true,
   "dependencies": {
