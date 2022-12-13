@@ -392,6 +392,8 @@ if (OPTION === '--build') {
                 await childRunCommand(`yarn build:target ${name}`);
             }
 
+            await childRunCommand(`yarn postBuild:mapDepsToDist`);
+            await childRunCommand(`yarn tool:genReadme`)
             exit();
         } else {
             const ignoreList = (await listDirsRecursive('./apps', false))

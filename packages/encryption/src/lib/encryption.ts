@@ -8,6 +8,7 @@ import {
   EncryptFileAndZipWithMetadataProps,
   IJWT,
   ILitNodeClient,
+  LIT_ERROR,
   NETWORK_PUB_KEY,
   ThreeKeys,
   VerifyJWTProps,
@@ -29,7 +30,7 @@ import {
   importSymmetricKey,
 } from '@lit-protocol/crypto';
 
-import { checkType, log } from '@lit-protocol/misc';
+import { checkType, log, throwError } from '@lit-protocol/misc';
 
 import { safeParams } from './params-validators';
 
@@ -168,7 +169,7 @@ export const decryptString = async (
  */
 export const zipAndEncryptString = async (
   string: string
-): Promise<EncryptedZip | undefined> => {
+): Promise<EncryptedZip> => {
   // -- validate
   if (
     !checkType({
@@ -178,7 +179,10 @@ export const zipAndEncryptString = async (
       functionName: 'zipAndEncryptString',
     })
   )
-    return;
+    throwError({
+      message: 'Invalid string',
+      error: LIT_ERROR.INVALID_PARAM,
+    });
 
   const zip: JSZip = new JSZip();
 
@@ -198,7 +202,7 @@ export const zipAndEncryptString = async (
 */
 export const zipAndEncryptFiles = async (
   files: Array<File>
-): Promise<EncryptedZip | undefined> => {
+): Promise<EncryptedZip> => {
   // let's zip em
   const zip = new JSZip();
 
@@ -213,13 +217,19 @@ export const zipAndEncryptFiles = async (
         functionName: 'zipAndEncryptFiles',
       })
     )
-      return;
+      throwError({
+        message: 'Invalid file type',
+        error: LIT_ERROR.INVALID_PARAM,
+      });
 
     const folder: JSZip | null = zip.folder('encryptedAssets');
 
     if (!folder) {
       log("Failed to get 'encryptedAssets' from zip.folder() ");
-      return;
+      return throwError({
+        message: "Failed to get 'encryptedAssets' from zip.folder() ",
+        error: LIT_ERROR.UNKNOWN_ERROR,
+      });
     }
 
     folder.file(files[i].name, files[i]);
