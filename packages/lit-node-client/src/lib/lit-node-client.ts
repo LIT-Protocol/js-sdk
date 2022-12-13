@@ -508,8 +508,15 @@ export class LitNodeClient extends BaseMixin(
         signature = combineEcdsaShares(sigShares);
       }
 
+      const encodedSig = joinSignature({
+        r: '0x' + signature.r,
+        s: '0x' + signature.s,
+        v: signature.recid,
+      });
+
       signatures[key] = {
         ...signature,
+        signature: encodedSig,
         publicKey: mostCommonString(sigShares.map((s: any) => s.publicKey)),
         dataSigned: mostCommonString(sigShares.map((s: any) => s.dataSigned)),
       };
