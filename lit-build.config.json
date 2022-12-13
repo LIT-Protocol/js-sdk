@@ -1,0 +1,12 @@
+{
+    "build":{
+      "order": [
+          "constants",
+          "uint8arrays",
+          "crypto",
+          "nacl",
+          "misc",
+          "misc-browser"
+      ]
+    }
+  }
