@@ -1317,7 +1317,18 @@ _nacl.setPRNG = function (fn) {
     });
   } else if (typeof require !== 'undefined') {
     // Node.js.
-    crypto = require('crypto');
+
+    // this nodeRequire hack was added by Chris Cassano
+    // because webpack was complaining that "you might try to require crypto and that's not bundled" by webpack automatically anymore.
+    // but this code path will only run on nodejs so it's a non-issue.
+    // thus we have this hack to make webpack happy.
+    const nodeVer = typeof process !== 'undefined' && process.versions?.node;
+    const nodeRequire = nodeVer
+      ? typeof __webpack_require__ === 'function'
+        ? __non_webpack_require__
+        : require
+      : undefined;
+    crypto = nodeRequire('crypto');
     if (crypto && crypto.randomBytes) {
       _nacl.setPRNG(function (x, n) {
         var i,
