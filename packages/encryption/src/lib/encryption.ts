@@ -7,7 +7,6 @@ import {
   EncryptedZip,
   EncryptFileAndZipWithMetadataProps,
   IJWT,
-  ILitNodeClient,
   LIT_ERROR,
   NETWORK_PUB_KEY,
   ThreeKeys,
@@ -16,7 +15,9 @@ import {
 
 import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 
-import JSZip from 'jszip';
+// import JSZip from 'jszip';
+// @ts-ignore
+import * as JSZip from 'jszip/dist/jszip.js';
 
 import {
   uint8arrayFromString,
@@ -30,7 +31,7 @@ import {
   importSymmetricKey,
 } from '@lit-protocol/crypto';
 
-import { checkType, log, throwError } from '@lit-protocol/misc';
+import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
 
 import { safeParams } from './params-validators';
 
@@ -184,7 +185,13 @@ export const zipAndEncryptString = async (
       error: LIT_ERROR.INVALID_PARAM,
     });
 
-  const zip: JSZip = new JSZip();
+  let zip;
+
+  try{
+    zip = new JSZip.default();
+  }catch(e){
+    zip = new JSZip();
+  }
 
   zip.file('string.txt', string);
 
@@ -204,7 +211,13 @@ export const zipAndEncryptFiles = async (
   files: Array<File>
 ): Promise<EncryptedZip> => {
   // let's zip em
-  const zip = new JSZip();
+  let zip;
+
+  try{
+    zip = new JSZip.default();
+  }catch(e){
+    zip = new JSZip();
+  }
 
   // -- zip each file
   for (let i = 0; i < files.length; i++) {
@@ -271,7 +284,13 @@ export const decryptZip = async (
   );
 
   // unpack the zip
-  const zip = new JSZip();
+  let zip;
+
+  try{
+    zip = new JSZip.default();
+  }catch(e){
+    zip = new JSZip();
+  }
   const unzipped = await zip.loadAsync(decryptedZipArrayBuffer);
 
   return unzipped.files;
@@ -286,11 +305,18 @@ export const decryptZip = async (
  * @returns { Promise<Object> } A promise containing the encryptedZip as a Blob and the symmetricKey used to encrypt it, as a Uint8Array string.
  */
 export const encryptZip = async (zip: JSZip): Promise<EncryptedZip> => {
-  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  let zipBlob;
+  let zipBlobArrayBuffer: ArrayBuffer;
 
-  const zipBlobArrayBuffer: ArrayBuffer = await zipBlob.arrayBuffer();
+  if (isBrowser()) {
+    zipBlob = await zip.generateAsync({ type: 'blob' });
+    zipBlobArrayBuffer = await zipBlob.arrayBuffer();
+  } else {
+    zipBlobArrayBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+  }
 
   const symmKey: CryptoKey = await generateSymmetricKey();
+  console.log("symmKey:", symmKey);
 
   const encryptedZipBlob: Blob = await encryptWithSymmetricKey(
     symmKey,
@@ -376,7 +402,13 @@ export const encryptFileAndZipWithMetadata = async ({
     fileAsArrayBuffer
   );
 
-  const zip = new JSZip();
+  let zip;
+
+  try{
+    zip = new JSZip.default();
+  }catch(e){
+    zip = new JSZip();
+  }
   const metadata = metadataForFile({
     name: file.name,
     type: file.type,
