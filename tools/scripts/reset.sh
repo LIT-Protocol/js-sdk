@@ -25,4 +25,4 @@ rm -f ./lerna-debug.log &&
 
 rm -rf ./apps/demo-contracts-sdk-react/node_modules &&
 rm -rf ./apps/demo-encrypt-decrypt-react/node_modules &&
-rm -rf ./apps/demo-pkp-ethers-react/node_modules
+rm -rf ./apps/demo-pkp-ethers-react/node_modules 

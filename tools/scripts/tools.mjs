@@ -1,5 +1,6 @@
 import { exit } from 'process';
 import {
+    asyncForEach,
     childRunCommand,
     customSort,
     findImportsFromDir,
@@ -411,6 +412,7 @@ if (OPTION === '--publish') {
             [option]: the option to run
                 --build: build packages before publishing
                 --no-build: publish without building
+                --tag: publish with a tag
     `,
             true
         );
@@ -436,6 +438,15 @@ if (OPTION === '--publish') {
                 console.log('Done!');
             },
         });
+    }
+
+    if( OPTION2 === '--tag') {
+        const dirs = (await listDirsRecursive('./dist/packages', false));
+
+        await asyncForEach(dirs, async (dir) => {
+            await childRunCommand(`cd ${dir} && npm publish --tag test`);
+        })
+        exit();
     }
 }
 
@@ -519,7 +530,7 @@ if (OPTION === '--switch') {
         exit();
     }
 
-    const dirs = await listDirsRecursive('./packages', true);
+    const dirs = await listDirsRecursive('./dist/packages', true);
 
     let paths = [];
 
@@ -535,25 +546,20 @@ if (OPTION === '--switch') {
     // flatten array
     paths = paths.flat();
 
-    const root = await findStrFromDir('./', FROM_NAME);
-    const tools = await findStrFromDir('./tools/scripts', FROM_NAME);
-
-    const filesThatContainStr = [...root, ...tools, ...paths];
-
     // for each file that contains the string, replace it
-    for (let i = 0; i < filesThatContainStr.length; i++) {
-        const file = filesThatContainStr[i];
+    for (let i = 0; i < paths.length; i++) {
+        const file = paths[i];
         let content = await readFile(file);
         content = content.replaceAll(FROM_NAME, TO_NAME);
         await writeFile(file, content);
 
-        console.log(`Replaced ${FROM_NAME} with ${TO_NAME} in ${file}`);
+        greenLog(`Replaced ${FROM_NAME} with ${TO_NAME} in ${file}`);
 
-        if (i === filesThatContainStr.length - 1) {
+        if (i === paths.length - 1) {
             console.log('Done!');
         }
-
-        exit();
     }
+
+    exit();
 
 }
