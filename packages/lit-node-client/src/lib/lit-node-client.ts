@@ -12,25 +12,38 @@ import {
 } from '@lit-protocol/access-control-conditions';
 import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 import {
+  CustomNetwork,
   DecryptedData,
+  defaultLitnodeClientConfig,
   ExecuteJsProps,
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetSessionSigsProps,
   GetSignSessionKeySharesProp,
+  HandshakeWithSgx,
   JsonAuthSig,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonHandshakeResponse,
   JsonSaveEncryptionKeyRequest,
+  JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
+  JsonSigningStoreRequest,
   JsonStoreSigningRequest,
+  KV,
+  LitNodeClientConfig,
   LIT_ERROR,
+  LIT_NETWORKS,
+  LOCAL_STORAGE_KEYS,
+  NodeCommandResponse,
+  NodeCommandServerKeysResponse,
   NodeLog,
   NodePromiseResponse,
   NodeResponse,
   NodeShare,
   RejectedNodePromises,
+  SendNodeCommand,
+  SessionKeyPair,
   SessionRequestBody,
   SessionSigningTemplate,
   SignedChainDataToken,
@@ -39,18 +52,23 @@ import {
   SignWithECDSA,
   SigShare,
   SIGTYPE,
+  SingConditionECDSA,
   SuccessNodePromises,
   SupportedJsonRequests,
   ValidateAndSignECDSA,
+  version,
 } from '@lit-protocol/constants';
 import {
   combineBlsDecryptionShares,
   combineBlsShares,
   combineEcdsaShares,
+  generateSessionKeyPair,
 } from '@lit-protocol/crypto';
 import { safeParams } from '@lit-protocol/encryption';
 import {
+  convertLitActionsParams,
   isBrowser,
+  isNode,
   log,
   mostCommonString,
   throwError,
@@ -66,12 +84,11 @@ import { joinSignature } from 'ethers/lib/utils';
 import {
   checkAndSignAuthMessage,
   getSessionKeyUri,
+  parseResource,
 } from '@lit-protocol/auth-browser';
 
 import { nacl } from '@lit-protocol/nacl';
-import { NodeAPIsMixin } from './mixin/node-apis-mixin';
-import { BaseMixin } from './mixin/base-mixin';
-import { HelperMixin } from './mixin/helper-mixin';
+import { getStorageItem } from '@lit-protocol/misc-browser';
 
 declare global {
   var litNodeClient: LitNodeClient;
@@ -79,9 +96,683 @@ declare global {
 
 /** ---------- Main Export Class ---------- */
 
-export class LitNodeClient extends BaseMixin(
-  HelperMixin(NodeAPIsMixin(class {}))
-) {
+export class LitNodeClient {
+  config: LitNodeClientConfig;
+  connectedNodes: SetConstructor | Set<any> | any;
+  serverKeys: KV | any;
+  ready: boolean;
+  subnetPubKey: string | null;
+  networkPubKey: string | null;
+  networkPubKeySet: string | null;
+
+  // ========== Constructor ==========
+  constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
+    let customConfig = args;
+
+    // -- initialize default config
+    this.config = defaultLitnodeClientConfig;
+
+    // -- if config params are specified, replace it
+    if (customConfig) {
+      this.config = { ...this.config, ...customConfig };
+      // this.config = override(this.config, customConfig);
+    }
+
+    // -- init default properties
+    this.connectedNodes = new Set();
+    this.serverKeys = {};
+    this.ready = false;
+    this.subnetPubKey = null;
+    this.networkPubKey = null;
+    this.networkPubKeySet = null;
+
+    // -- override configs
+    this.overrideConfigsFromLocalStorage();
+
+    // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
+    this.setCustomBootstrapUrls();
+
+    // -- set global variables
+    globalThis.litConfig = this.config;
+  }
+
+  // ========== Scoped Class Helpers ==========
+
+  /**
+   *
+   * (Browser Only) Get the config from browser local storage and override default config
+   *
+   * @returns { void }
+   *
+   */
+  overrideConfigsFromLocalStorage = (): void => {
+    if (isNode()) return;
+
+    const storageKey = 'LitNodeClientConfig';
+    const storageConfigOrError = getStorageItem(storageKey);
+
+    // -- validate
+    if (storageConfigOrError.type === 'ERROR') {
+      console.warn(`Storage key "${storageKey}" is missing. `);
+      return;
+    }
+
+    // -- execute
+    const storageConfig = JSON.parse(storageConfigOrError.result);
+    // this.config = override(this.config, storageConfig);
+    this.config = { ...this.config, ...storageConfig };
+  };
+
+  /**
+   *
+   * Set bootstrapUrls to match the network litNetwork unless it's set to custom
+   *
+   * @returns { void }
+   *
+   */
+  setCustomBootstrapUrls = (): void => {
+    // -- validate
+    if (this.config.litNetwork === 'custom') return;
+
+    // -- execute
+    const hasNetwork: boolean = this.config.litNetwork in LIT_NETWORKS;
+
+    if (!hasNetwork) {
+      // network not found, report error
+      throwError({
+        message:
+          'the litNetwork specified in the LitNodeClient config not found in LIT_NETWORKS',
+        error: LIT_ERROR.LIT_NODE_CLIENT_BAD_CONFIG_ERROR,
+      });
+      return;
+    }
+
+    this.config.bootstrapUrls = LIT_NETWORKS[this.config.litNetwork];
+  };
+
+  /**
+   *
+   * Get either auth sig or session auth sig
+   *
+   */
+  getAuthSigOrSessionAuthSig = ({
+    authSig,
+    sessionSigs,
+    url,
+  }: {
+    authSig: JsonAuthSig | any;
+    sessionSigs: any;
+    url: string;
+  }) => {
+    // -- if there's session
+    let sigToPassToNode = authSig;
+
+    if (sessionSigs) {
+      sigToPassToNode = sessionSigs[url];
+
+      if (!sigToPassToNode) {
+        throwError({
+          message: `You passed sessionSigs but we could not find session sig for node ${url}`,
+          error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        });
+      }
+    }
+    return sigToPassToNode;
+  };
+
+  /**
+   *
+   * Get the request body of the lit action
+   *
+   * @param { ExecuteJsProps } params
+   *
+   * @returns { JsonExecutionRequest }
+   *
+   */
+  getLitActionRequestBody = (params: ExecuteJsProps): JsonExecutionRequest => {
+    const reqBody: JsonExecutionRequest = {
+      authSig: params.authSig,
+      jsParams: convertLitActionsParams(params.jsParams),
+    };
+
+    if (params.code) {
+      const _uint8Array = uint8arrayFromString(params.code, 'utf8');
+      const encodedJs = uint8arrayToString(_uint8Array, 'base64');
+
+      reqBody.code = encodedJs;
+    }
+
+    if (params.ipfsId) {
+      reqBody.ipfsId = params.ipfsId;
+    }
+
+    return reqBody;
+  };
+
+  /**
+   *
+   * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
+   *
+   */
+  getJWTParams = () => {
+    const now = Date.now();
+    const iat = Math.floor(now / 1000);
+    const exp = iat + 12 * 60 * 60; // 12 hours in seconds
+
+    return { iat, exp };
+  };
+
+  /**
+   *
+   * Parse the response string to JSON
+   *
+   * @param { string } responseString
+   *
+   * @returns { any } JSON object
+   *
+   */
+  parseResponses = (responseString: string): any => {
+    let response: any;
+
+    try {
+      response = JSON.parse(responseString);
+    } catch (e) {
+      log(
+        'Error parsing response as json.  Swallowing and returning as string.',
+        responseString
+      );
+    }
+
+    return response;
+  };
+
+  // ==================== SESSIONS ====================
+  /**
+   *
+   * Try to get the session key in the local storage,
+   * if not, generates one.
+   * @param { string } supposedSessionKey
+   * @return { }
+   */
+  getSessionKey = (supposedSessionKey?: string): SessionKeyPair => {
+    let sessionKey: any = supposedSessionKey ?? '';
+
+    const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
+    const storedSessionKeyOrError = getStorageItem(storageKey);
+
+    if (sessionKey === '') {
+      // check if we already have a session key + signature for this chain
+      // let storedSessionKey;
+      let storedSessionKey: any;
+
+      // -- (TRY) to get it in the local storage
+      if (storedSessionKeyOrError.type === 'ERROR') {
+        console.warn(
+          `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+        );
+      } else {
+        storedSessionKey = storedSessionKeyOrError.result;
+      }
+
+      // -- IF NOT: Generates one
+      if (!storedSessionKey || storedSessionKey == '') {
+        sessionKey = generateSessionKeyPair();
+
+        // (TRY) to set to local storage
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(sessionKey));
+        } catch (e) {
+          console.warn(
+            `Localstorage not available. Not a problem. Contiune...`
+          );
+        }
+      } else {
+        console.log('storedSessionKeyOrError');
+        sessionKey = JSON.parse(storedSessionKeyOrError.result);
+      }
+    }
+
+    return sessionKey as SessionKeyPair;
+  };
+
+  /**
+   *
+   * Get session capabilities from user, it not, generates one
+   * @param { Array<any> } capabilities
+   * @param { Array<any> } resources
+   * @return { Array<any> }
+   */
+  getSessionCapabilities = (
+    capabilities: Array<any>,
+    resources: Array<any>
+  ): Array<any> => {
+    if (!capabilities || capabilities.length == 0) {
+      capabilities = resources.map((resource: any) => {
+        const { protocol, resourceId } = parseResource({ resource });
+
+        return `${protocol}Capability://*`;
+      });
+    }
+
+    return capabilities;
+  };
+
+  /**
+   *
+   * Get expiration for session
+   *
+   */
+  getExpiration = () => {
+    return new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+  };
+
+  /**
+   *
+   * Get the signature from local storage, if not, generates one
+   *
+   */
+  getWalletSig = async ({
+    authNeededCallback,
+    chain,
+    capabilities,
+    switchChain,
+    expiration,
+    sessionKeyUri,
+  }: {
+    authNeededCallback: any;
+    chain: string;
+    capabilities: Array<any>;
+    switchChain: boolean;
+    expiration: string;
+    sessionKeyUri: string;
+  }): Promise<JsonAuthSig> => {
+    let walletSig;
+
+    const storageKey = LOCAL_STORAGE_KEYS.WALLET_SIGNATURE;
+    const storedWalletSigOrError = getStorageItem(storageKey);
+
+    // -- (TRY) to get it in the local storage
+    if (storedWalletSigOrError.type === 'ERROR') {
+      console.warn(
+        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+      );
+    } else {
+      walletSig = storedWalletSigOrError.result;
+    }
+
+    // -- IF NOT: Generates one
+    if (!storedWalletSigOrError.result || storedWalletSigOrError.result == '') {
+      if (authNeededCallback) {
+        walletSig = await authNeededCallback({
+          chain,
+          resources: capabilities,
+          switchChain,
+          expiration,
+          uri: sessionKeyUri,
+        });
+      } else {
+        walletSig = await checkAndSignAuthMessage({
+          chain,
+          resources: capabilities,
+          switchChain,
+          expiration,
+          uri: sessionKeyUri,
+        });
+      }
+    } else {
+      try {
+        walletSig = JSON.parse(storedWalletSigOrError.result);
+      } catch (e) {
+        console.warn('Error parsing walletSig', e);
+      }
+    }
+
+    return walletSig;
+  };
+
+  /**
+   *
+   * Check if a session key needs to be resigned
+   *
+   */
+  checkNeedToResignSessionKey = async ({
+    siweMessage,
+    walletSignature,
+    sessionKeyUri,
+    resources,
+    sessionCapabilities,
+  }: {
+    siweMessage: SiweMessage;
+    walletSignature: any;
+    sessionKeyUri: any;
+    resources: any;
+    sessionCapabilities: Array<any>;
+  }): Promise<boolean> => {
+    let needToResign = false;
+
+    try {
+      // @ts-ignore
+      await siweMessage.verify({ signature: walletSignature });
+    } catch (e) {
+      needToResign = true;
+    }
+
+    // make sure the sig is for the correct session key
+    if (siweMessage.uri !== sessionKeyUri) {
+      needToResign = true;
+    }
+
+    // make sure the sig has the session capabilities required to fulfill the resources requested
+    for (let i = 0; i < resources.length; i++) {
+      const resource = resources[i];
+      const { protocol, resourceId } = parseResource({ resource });
+
+      // check if we have blanket permissions or if we authed the specific resource for the protocol
+      const permissionsFound = sessionCapabilities.some((capability: any) => {
+        const capabilityParts = parseResource({ resource: capability });
+        return (
+          capabilityParts.protocol === protocol &&
+          (capabilityParts.resourceId === '*' ||
+            capabilityParts.resourceId === resourceId)
+        );
+      });
+      if (!permissionsFound) {
+        needToResign = true;
+      }
+    }
+
+    return needToResign;
+  };
+
+  // ==================== SENDING COMMAND ====================
+  /**
+   *
+   * Send a command to nodes
+   *
+   * @param { SendNodeCommand }
+   *
+   * @returns { Promise<any> }
+   *
+   */
+  sendCommandToNode = async ({ url, data }: SendNodeCommand): Promise<any> => {
+    log(`sendCommandToNode with url ${url} and data`, data);
+
+    const req: RequestInit = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'lit-js-sdk-version': version,
+      },
+      body: JSON.stringify(data),
+    };
+
+    return fetch(url, req).then(async (response) => {
+      const isJson = response.headers
+        .get('content-type')
+        ?.includes('application/json');
+
+      const data = isJson ? await response.json() : null;
+
+      if (!response.ok) {
+        // get error message from body or default to response status
+        const error = data || response.status;
+        return Promise.reject(error);
+      }
+
+      return data;
+    });
+  };
+
+  // ==================== API Calls to Nodes ====================
+  /**
+   *
+   * Get JS Execution Shares from Nodes
+   *
+   * @param { JsonExecutionRequest } params
+   *
+   * @returns { Promise<any> }
+   */
+  getJsExecutionShares = async (
+    url: string,
+    params: JsonExecutionRequest
+  ): Promise<NodeCommandResponse> => {
+    const { code, ipfsId, authSig, jsParams, sessionSigs } = params;
+
+    log('getJsExecutionShares');
+
+    // -- execute
+    const urlWithPath = `${url}/web/execute`;
+
+    const data: JsonExecutionRequest = {
+      code,
+      ipfsId,
+      authSig,
+      jsParams,
+    };
+
+    return await this.sendCommandToNode({ url: urlWithPath, data });
+  };
+
+  /**
+   *
+   * Get Chain Data Signing Shares
+   *
+   * @param { string } url
+   * @param { JsonSignChainDataRequest } params
+   *
+   * @returns { Promise<any> }
+   *
+   */
+  getChainDataSigningShare = async (
+    url: string,
+    params: JsonSignChainDataRequest
+  ): Promise<NodeCommandResponse> => {
+    const { callRequests, chain, iat, exp } = params;
+
+    log('getChainDataSigningShare');
+
+    const urlWithPath = `${url}/web/signing/sign_chain_data`;
+
+    const data: JsonSignChainDataRequest = {
+      callRequests,
+      chain,
+      iat,
+      exp,
+    };
+
+    return await this.sendCommandToNode({ url: urlWithPath, data });
+  };
+
+  /**
+   *
+   * Get Signing Shares from Nodes
+   *
+   * @param { string } url
+   * @param { JsonSigningRetrieveRequest } params
+   *
+   * @returns { Promise<any>}
+   *
+   */
+  getSigningShare = async (
+    url: string,
+    params: JsonSigningRetrieveRequest
+  ): Promise<NodeCommandResponse> => {
+    log('getSigningShare');
+    const urlWithPath = `${url}/web/signing/retrieve`;
+
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data: params,
+    });
+  };
+
+  /**
+   *
+   * Ger Decryption Shares from Nodes
+   *
+   * @param { string } url
+   * @param { JsonEncryptionRetrieveRequest } params
+   *
+   * @returns { Promise<any> }
+   *
+   */
+  getDecryptionShare = async (
+    url: string,
+    params: JsonEncryptionRetrieveRequest
+  ): Promise<NodeCommandResponse> => {
+    log('getDecryptionShare');
+    const urlWithPath = `${url}/web/encryption/retrieve`;
+
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data: params,
+    });
+  };
+
+  /**
+   *
+   * Store signing conditions to nodes
+   *
+   * @param { string } url
+   * @param { JsonSigningStoreRequest } params
+   *
+   * @returns { Promise<NodeCommandResponse> }
+   *
+   */
+  storeSigningConditionWithNode = async (
+    url: string,
+    params: JsonSigningStoreRequest
+  ): Promise<NodeCommandResponse> => {
+    log('storeSigningConditionWithNode');
+
+    const urlWithPath = `${url}/web/signing/store`;
+
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data: {
+        key: params.key,
+        val: params.val,
+        authSig: params.authSig,
+        chain: params.chain,
+        permanant: params.permanent,
+      },
+    });
+  };
+
+  /**
+   *
+   * Store encryption conditions to nodes
+   *
+   * @param { string } urk
+   * @param { JsonEncryptionStoreRequest } params
+   *
+   * @returns { Promise<NodeCommandResponse> }
+   *
+   */
+  storeEncryptionConditionWithNode = async (
+    url: string,
+    params: JsonSigningStoreRequest
+  ): Promise<NodeCommandResponse> => {
+    log('storeEncryptionConditionWithNode');
+    const urlWithPath = `${url}/web/encryption/store`;
+    const data = {
+      key: params.key,
+      val: params.val,
+      authSig: params.authSig,
+      chain: params.chain,
+      permanant: params.permanent,
+    };
+
+    return await this.sendCommandToNode({ url: urlWithPath, data });
+  };
+
+  /**
+   *
+   * Sign wit ECDSA
+   *
+   * @param { string } url
+   * @param { SignWithECDSA } params
+   *
+   * @returns { Promise}
+   *
+   */
+  signECDSA = async (
+    url: string,
+    params: SignWithECDSA
+  ): Promise<NodeCommandResponse> => {
+    console.log('sign_message_ecdsa');
+
+    const urlWithPath = `${url}/web/signing/sign_message_ecdsa`;
+
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data: params,
+    });
+  };
+
+  /**
+   *
+   * Sign Condition ECDSA
+   *
+   * @param { string } url
+   * @param { SignConditionECDSA } params
+   *
+   * @returns { Promise<NodeCommandResponse> }
+   *
+   */
+  signConditionEcdsa = async (
+    url: string,
+    params: SingConditionECDSA
+  ): Promise<NodeCommandResponse> => {
+    log('signConditionEcdsa');
+    const urlWithPath = `${url}/web/signing/signConditionEcdsa`;
+
+    const data = {
+      access_control_conditions: params.accessControlConditions,
+      evmContractConditions: params.evmContractConditions,
+      solRpcConditions: params.solRpcConditions,
+      auth_sig: params.auth_sig,
+      chain: params.chain,
+      iat: params.iat,
+      exp: params.exp,
+    };
+
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data,
+    });
+  };
+
+  /**
+   *
+   * Handshake with SGX
+   *
+   * @param { HandshakeWithSgx } params
+   *
+   * @returns { Promise<NodeCommandServerKeysResponse> }
+   *
+   */
+  handshakeWithSgx = async (
+    params: HandshakeWithSgx
+  ): Promise<NodeCommandServerKeysResponse> => {
+    // -- get properties from params
+    const { url } = params;
+
+    // -- create url with path
+    const urlWithPath = `${url}/web/handshake`;
+
+    log(`handshakeWithSgx ${urlWithPath}`);
+
+    const data = {
+      clientPublicKey: 'test',
+    };
+
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data,
+    });
+  };
+
   /**
    *
    * Combine Shares from network public key set and signature shares

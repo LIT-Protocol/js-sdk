@@ -17,6 +17,7 @@ import {
     spawnListener,
     writeFile,
 } from './utils.mjs';
+import fs from 'fs';
 
 const args = getArgs();
 
@@ -36,7 +37,8 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
             --yalc: publish to yalc
             --build: build the project
             --switch: 
-            --dev: run dev stuff 
+            --dev: run dev stuff
+            --watch: watch for changes
     `,
         true
     );
@@ -311,6 +313,7 @@ if (OPTION === '--build') {
         Usage: node tools/scripts/tools.mjs --build [option]
             [option]: the option to run
                 --packages: build packages
+                --target: build a target package
                 --apps: build apps
                 --all: build all
     `,
@@ -318,6 +321,29 @@ if (OPTION === '--build') {
         );
 
         exit();
+    }
+
+    if (BUILD_TYPE === '--target') {
+        const TARGET = args[2];
+
+        if (!TARGET || TARGET === '' || TARGET === '--help') {
+            greenLog(
+                `
+            Usage: node tools/scripts/tools.mjs --build --target [target]
+                [target]: the target to build
+            `,
+                true
+            );
+            exit();
+        }
+
+        spawnListener(`yarn nx run ${TARGET}:_buildTsc`);
+        spawnListener(`yarn nx run ${TARGET}:_buildWeb`);
+        spawnListener(`yarn postBuild:mapDistFolderNameToPackageJson`);
+        spawnListener(`yarn tool:genHtml`);
+        spawnListener(`yarn tool:genReact`);
+        spawnListener(`yarn tool:genNodejs`);
+
     }
 
     if (BUILD_TYPE === '--packages') {
@@ -366,6 +392,8 @@ if (OPTION === '--build') {
                 await childRunCommand(`yarn build:target ${name}`);
             }
 
+            await childRunCommand(`yarn postBuild:mapDepsToDist`);
+            await childRunCommand(`yarn tool:genReadme`)
             exit();
         } else {
             const ignoreList = (await listDirsRecursive('./apps', false))
@@ -739,7 +767,7 @@ if (OPTION === '--dev') {
         exit();
     }
 
-    if (TYPE === '--app') {
+    if (TYPE === '--apps' || TYPE === '--app') {
 
         // go to apps/react/project.json and find the port
         const reactPort = JSON.parse(await readFile('./apps/react/project.json')).targets.serve.options.port;
@@ -759,4 +787,68 @@ if (OPTION === '--dev') {
             spawnListener('yarn nx run html:serve', {}, '[html]', 33);
         }, 2000);
     }
+}
+
+if (OPTION === '--watch') {
+    const OPTION = args[1];
+
+    if (!OPTION || OPTION === '' || OPTION === '--help') {
+
+        greenLog(`
+            Usage: node tools/scripts/tools.mjs --watch [option]
+                [option]: the option to use
+                    --all: watch all
+                    --target: watch a target
+        `, true);
+
+        exit();
+    }
+
+    if (OPTION === '--all') {
+        greenLog('Watching all...', true);
+        await childRunCommand('nodemon --watch packages --ext js,ts --exec "yarn tools --build --packages --async"');
+    }
+
+    if (OPTION === '--target') {
+
+        const TARGET = args[2];
+
+        greenLog(`
+            Usage: node tools/scripts/tools.mjs --watch --target [target] [option]
+                [target]: the target to watch
+                [option]: the option to use
+                    --deps: with dependencies
+        `, true);
+
+        if (!TARGET || TARGET === '' || TARGET === '--help') {
+            exit()
+        } else {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+
+        // check if directory exists
+        const path = `./packages/${TARGET}`;
+        if (!fs.existsSync(path)) {
+            redLog(`Target "${TARGET}" does not exist!`);
+            exit();
+        }
+
+        if (args[3] === '--deps') {
+            const projectNameSpace = (await readFile(`package.json`)).match(/"name": "(.*)"/)[1].split('/')[0];
+            let res = (await findImportsFromDir(`${path}/src`)).filter((item) => item.includes(projectNameSpace)).map((item) => {
+                return item.replace(projectNameSpace, '').replace('/', '');
+            });
+
+            res.forEach((pkg) => {
+                greenLog(`Watching ${pkg}...`, true);
+                childRunCommand(`nodemon --watch ${pkg} --ext js,ts --exec "yarn tools --build --target ${pkg}"`);
+            });
+
+        } else {
+            greenLog(`Watching ${TARGET}...`, true);
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            childRunCommand(`nodemon --watch packages/${TARGET} --ext js,ts --exec "yarn tools --build --target ${TARGET}"`);
+        }
+    }
+
 }

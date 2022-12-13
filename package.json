@@ -10,7 +10,6 @@
     "postBuild:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",
     "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist @lit-protocol",
     "build": "yarn build:packages",
-    "build --async": "yarn tools --build --packages --async",
     "build:packages": "yarn tools --build --packages && yarn postBuild:mapDepsToDist && yarn tool:genReadme",
     "build:target": "yarn node tools/scripts/build.mjs",
     "test:packages": "nx run-many --target=test",
@@ -35,7 +34,8 @@
     "cy:open:html": "yarn tools --test --e2e html",
     "cy:open:react": "yarn tools --test --e2e react",
     "buildAndPublish": "yarn build:packages && yarn publish:packages",
-    "dev": "nodemon --watch packages --ext js,ts --exec \"yarn build:packages && yarn tools --yalc --publish\""
+    "dev": "nodemon --watch packages --ext js,ts --exec \"yarn build:packages && yarn tools --yalc --publish\"",
+    "watch": "yarn tools --watch"
   },
   "private": true,
   "dependencies": {
