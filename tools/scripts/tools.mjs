@@ -340,6 +340,7 @@ if (OPTION === '--build') {
         await childRunCommand(`yarn nx run ${TARGET}:_buildTsc`);
         spawnListener(`yarn nx run ${TARGET}:_buildWeb`);
         await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
+        await childRunCommand(`yarn postBuild:mapDepsToDist`);
         await childRunCommand(`yarn tool:genHtml`);
         await childRunCommand(`yarn tool:genReact`);
         await childRunCommand(`yarn tool:genNodejs`);
