@@ -17,109 +17,97 @@ const specialCases = (fileName) => {
         .replace('pkppermissions', 'pkpPermissions')
 }
 
+const abis = (await getFiles('./packages/contracts-sdk/src/abis')).filter((file) => file.includes('.ts') && !file.includes('data.ts')).map((fileName) => {
+    return {
+        fileName,
+        varName: specialCases(fileName),
+        varNameCamel: specialCases(fileName).charAt(0).toLowerCase() + specialCases(fileName).slice(1),
+        varNameContract: specialCases(fileName) + 'Contract',
+        varNameContractCamel: specialCases(fileName).charAt(0).toLowerCase() + specialCases(fileName).slice(1) + 'Contract',
+    }
+})
+
+console.log(abis);
+
+// exit();
+
 const generatedStrs = {
-    importData: (
-        await getFiles('./packages/contracts-sdk/src/abis'))
-        .filter((file) => file.includes('.ts') && !file.includes('data.ts')
-        ).map((fileName) => {
 
-            // append Contract at the end
-            const varName = specialCases(fileName);
+    // eg.
+    // import { accessControlConditions } from '../abis/AccessControlConditions.data';
+    // --------------------------------------
+    importData: abis.map(({ fileName, varNameCamel }) => {
 
-            // make first letter lowercase
-            const varNameLower = varName.charAt(0).toLowerCase() + varName.slice(1);
+        // remove .ts
+        const importPath = fileName.replace('.ts', '');
 
-            // remove .ts
-            const importPath = fileName.replace('.ts', '');
+        const importStr = `import { ${varNameCamel} } from '../abis/${importPath}.data';`;
 
-            const importStr = `import { ${varNameLower} } from '../abis/${importPath}.data';`;
+        return importStr;
+    }).join('\n'),
 
-            return importStr;
-        }).join('\n'),
-    importContracts: (
-        await getFiles('./packages/contracts-sdk/src/abis'))
-        .filter((file) => file.includes('.ts') && !file.includes('data.ts')
-        ).map((fileName) => {
+    // eg.
+    // import * as accessControlConditionsContract from '../abis/AccessControlConditions';
+    // --------------------------------------
+    importContracts: abis.map(({ fileName, varNameContractCamel }) => {
 
-            const varName = specialCases(fileName) + 'Contract';
+        const importPath = `'../abis/${fileName.replace('.ts', '')}'`;
 
-            // make first letter lowercase
-            const varNameLower = varName.charAt(0).toLowerCase() + varName.slice(1);
+        const importStr = `import * as ${varNameContractCamel} from ${importPath};`;
 
-            const importPath = `'../abis/${fileName.replace('.ts', '')}'`;
+        return importStr;
+    }).join('\n'),
 
-            const importStr = `import * as ${varNameLower} from ${importPath};`;
+    // eg.
+    // accessControlConditionsContract: accessControlConditionsContract.ContractContext;
+    // accessControlConditionsContractSigner: accessControlConditionsContract.ContractContext;
+    // --------------------------------------
+    declares: abis.map(({ varNameContractCamel }) => {
 
-            return importStr;
-        }).join('\n'),
-    declares: (
-        await getFiles('./packages/contracts-sdk/src/abis'))
-        .filter((file) => file.includes('.ts') && !file.includes('data.ts')
-        ).map((fileName) => {
+        const importStr = `  ${varNameContractCamel}: {
+    read: ${varNameContractCamel}.ContractContext,
+    write: ${varNameContractCamel}.ContractContext,
+  }
+            `;
 
-            const varName = specialCases(fileName) + 'Contract';
+        return importStr;
+    }).join('\n'),
 
-            // make first letter lowercase
-            const varNameLower = varName.charAt(0).toLowerCase() + varName.slice(1);
+    // eg.
+    // this.accessControlConditionsContract = {} as any
+    // --------------------------------------
+    blankInit: abis.map(({ varNameContractCamel }) => {
 
-            // append Contract at the end
-            const importName = specialCases(fileName)
-                .replace(fileName.charAt(0), fileName.charAt(0).toLowerCase())
-                + 'Contract';
+        const importStr = `    this.${varNameContractCamel} = {} as any`;
 
-            const importStr = `  ${varNameLower}: ${varNameLower}.ContractContext;`;
+        return importStr;
+    }).join('\n'),
 
-            return importStr;
-        }).join('\n'),
-    blankInit: (
-        await getFiles('./packages/contracts-sdk/src/abis'))
-        .filter((file) => file.includes('.ts') && !file.includes('data.ts')
-        ).map((fileName) => {
+    // eg.
+    // this.accessControlConditionsContract = new ethers.Contract(
+    //     accessControlConditions.address,
+    //     accessControlConditions.abi as any,
+    //     this.provider
+    //   ) as unknown as accessControlConditionsContract.ContractContext;
+    //   this.accessControlConditionsContract = this.accessControlConditionsContract.connect(this.provider);
+    // --------------------------------------
+    init: abis.map(({ varNameCamel, varNameContractCamel }) => {
 
-
-            // append Contract at the end
-            const importName = specialCases(fileName)
-                .replace(fileName.charAt(0), fileName.charAt(0).toLowerCase())
-                + 'Contract';
-
-            const varName = specialCases(fileName);
-
-            // make first letter lowercase
-            const varNameLower = varName.charAt(0).toLowerCase() + varName.slice(1);
-
-            const contractName = varNameLower + 'Contract';
-
-            const importStr = `    this.${contractName} = {} as ${contractName}.ContractContext;`;
-
-            return importStr;
-        }).join('\n'),
-    init: (
-        await getFiles('./packages/contracts-sdk/src/abis'))
-        .filter((file) => file.includes('.ts') && !file.includes('data.ts')
-        ).map((fileName) => {
-
-
-            // append Contract at the end
-            const importName = specialCases(fileName)
-                .replace(fileName.charAt(0), fileName.charAt(0).toLowerCase())
-                + 'Contract';
-
-            const varName = specialCases(fileName);
-
-            // make first letter lowercase
-            const varNameLower = varName.charAt(0).toLowerCase() + varName.slice(1);
-
-            const contractName = varNameLower + 'Contract';
-
-            const importStr = `    this.${contractName} = new ethers.Contract(
-      ${varNameLower}.address,
-      ${varNameLower}.abi as any,
-      this.provider
-    ) as unknown as ${contractName}.ContractContext;
-    this.${contractName} = this.${contractName}.connect(this.provider);`;
-
-            return importStr;
-        }).join('\n\n'),
+        const importStr = `
+    this.${varNameContractCamel} = {
+        read: (new ethers.Contract(
+            ${varNameCamel}.address,
+            ${varNameCamel}.abi as any,
+            this.provider
+        ) as unknown as ${varNameContractCamel}.ContractContext).connect(this.provider),
+        write: (new ethers.Contract(
+            ${varNameCamel}.address,
+            ${varNameCamel}.abi as any,
+            this.provider
+        ) as unknown as ${varNameContractCamel}.ContractContext).connect(this.provider)
+    };`;
+        return importStr;
+    }).join('\n\n'),
 };
 
 let newContent = replaceAutogen({

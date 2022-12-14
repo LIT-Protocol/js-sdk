@@ -1,9 +1,14 @@
 import { ethers } from 'ethers';
 import { hexToDec, decToHex } from './hex2dec';
 import bs58 from 'bs58';
-import * as mf from 'multiformats';
 import { isBrowser, isNode } from '@lit-protocol/misc';
-const CID = mf.CID;
+
+let CID: any;
+try {
+  CID = require('multiformats/cid');
+} catch (e) {
+  console.log('CID not found');
+}
 
 // ----- autogen:import-data:start  -----
 import { accessControlConditions } from '../abis/AccessControlConditions.data';
@@ -85,20 +90,56 @@ export class LitContracts {
   privateKey: string | undefined;
 
   // ----- autogen:declares:start  -----
-  accessControlConditionsContract: accessControlConditionsContract.ContractContext;
-  litTokenContract: litTokenContract.ContractContext;
-  multisenderContract: multisenderContract.ContractContext;
-  pkpHelperContract: pkpHelperContract.ContractContext;
-  pkpNftContract: pkpNftContract.ContractContext;
-  pkpPermissionsContract: pkpPermissionsContract.ContractContext;
-  pubkeyRouterContract: pubkeyRouterContract.ContractContext;
-  rateLimitNftContract: rateLimitNftContract.ContractContext;
-  stakingContract: stakingContract.ContractContext;
-// ----- autogen:declares:end  -----
+  accessControlConditionsContract: {
+    read: accessControlConditionsContract.ContractContext;
+    write: accessControlConditionsContract.ContractContext;
+  };
+
+  litTokenContract: {
+    read: litTokenContract.ContractContext;
+    write: litTokenContract.ContractContext;
+  };
+
+  multisenderContract: {
+    read: multisenderContract.ContractContext;
+    write: multisenderContract.ContractContext;
+  };
+
+  pkpHelperContract: {
+    read: pkpHelperContract.ContractContext;
+    write: pkpHelperContract.ContractContext;
+  };
+
+  pkpNftContract: {
+    read: pkpNftContract.ContractContext;
+    write: pkpNftContract.ContractContext;
+  };
+
+  pkpPermissionsContract: {
+    read: pkpPermissionsContract.ContractContext;
+    write: pkpPermissionsContract.ContractContext;
+  };
+
+  pubkeyRouterContract: {
+    read: pubkeyRouterContract.ContractContext;
+    write: pubkeyRouterContract.ContractContext;
+  };
+
+  rateLimitNftContract: {
+    read: rateLimitNftContract.ContractContext;
+    write: rateLimitNftContract.ContractContext;
+  };
+
+  stakingContract: {
+    read: stakingContract.ContractContext;
+    write: stakingContract.ContractContext;
+  };
+
+  // ----- autogen:declares:end  -----
 
   // make the constructor args optional
   constructor(args?: {
-    // provider?: ethers.providers.JsonRpcProvider | any;
+    provider?: ethers.providers.JsonRpcProvider | any;
     rpc?: string | any;
     signer?: ethers.Signer | any;
     privateKey?: string | undefined;
@@ -126,13 +167,14 @@ export class LitContracts {
           `No signer is provided, we can generate a random private key to create a signer`
         );
         // generate random private key
-        const privateKey = this.privateKey ?? ethers.utils.hexlify(ethers.utils.randomBytes(32));
+        const privateKey =
+          this.privateKey ?? ethers.utils.hexlify(ethers.utils.randomBytes(32));
         this.provider = new ethers.providers.JsonRpcProvider(this.rpc);
         this.signer = new ethers.Wallet(privateKey, this.provider);
       }
-      
+
       // -- If signer is provider
-      if ( this.signer ){
+      if (this.signer) {
         this.provider = this.signer.provider;
       }
     }
@@ -154,16 +196,16 @@ export class LitContracts {
     }
 
     // ----- autogen:blank-init:start  -----
-    this.accessControlConditionsContract = {} as accessControlConditionsContract.ContractContext;
-    this.litTokenContract = {} as litTokenContract.ContractContext;
-    this.multisenderContract = {} as multisenderContract.ContractContext;
-    this.pkpHelperContract = {} as pkpHelperContract.ContractContext;
-    this.pkpNftContract = {} as pkpNftContract.ContractContext;
-    this.pkpPermissionsContract = {} as pkpPermissionsContract.ContractContext;
-    this.pubkeyRouterContract = {} as pubkeyRouterContract.ContractContext;
-    this.rateLimitNftContract = {} as rateLimitNftContract.ContractContext;
-    this.stakingContract = {} as stakingContract.ContractContext;
-// ----- autogen:blank-init:end  -----
+    this.accessControlConditionsContract = {} as any;
+    this.litTokenContract = {} as any;
+    this.multisenderContract = {} as any;
+    this.pkpHelperContract = {} as any;
+    this.pkpNftContract = {} as any;
+    this.pkpPermissionsContract = {} as any;
+    this.pubkeyRouterContract = {} as any;
+    this.rateLimitNftContract = {} as any;
+    this.stakingContract = {} as any;
+    // ----- autogen:blank-init:end  -----
   }
 
   /**
@@ -184,72 +226,162 @@ export class LitContracts {
     log('Connecting to contracts...');
 
     // ----- autogen:init:start  -----
-    this.accessControlConditionsContract = new ethers.Contract(
-      accessControlConditions.address,
-      accessControlConditions.abi as any,
-      this.provider
-    ) as unknown as accessControlConditionsContract.ContractContext;
-    this.accessControlConditionsContract = this.accessControlConditionsContract.connect(this.signer);
 
-    this.litTokenContract = new ethers.Contract(
-      litToken.address,
-      litToken.abi as any,
-      this.provider
-    ) as unknown as litTokenContract.ContractContext;
-    this.litTokenContract = this.litTokenContract.connect(this.signer);
+    this.accessControlConditionsContract = {
+      read: (
+        new ethers.Contract(
+          accessControlConditions.address,
+          accessControlConditions.abi as any,
+          this.provider
+        ) as unknown as accessControlConditionsContract.ContractContext
+      ).connect(this.provider),
+      write: (
+        new ethers.Contract(
+          accessControlConditions.address,
+          accessControlConditions.abi as any,
+          this.provider
+        ) as unknown as accessControlConditionsContract.ContractContext
+      ).connect(this.provider),
+    };
 
-    this.multisenderContract = new ethers.Contract(
-      multisender.address,
-      multisender.abi as any,
-      this.provider
-    ) as unknown as multisenderContract.ContractContext;
-    this.multisenderContract = this.multisenderContract.connect(this.signer);
+    this.litTokenContract = {
+      read: (
+        new ethers.Contract(
+          litToken.address,
+          litToken.abi as any,
+          this.provider
+        ) as unknown as litTokenContract.ContractContext
+      ).connect(this.provider),
+      write: (
+        new ethers.Contract(
+          litToken.address,
+          litToken.abi as any,
+          this.provider
+        ) as unknown as litTokenContract.ContractContext
+      ).connect(this.provider),
+    };
 
-    this.pkpHelperContract = new ethers.Contract(
-      pkpHelper.address,
-      pkpHelper.abi as any,
-      this.provider
-    ) as unknown as pkpHelperContract.ContractContext;
-    this.pkpHelperContract = this.pkpHelperContract.connect(this.signer);
+    this.multisenderContract = {
+      read: (
+        new ethers.Contract(
+          multisender.address,
+          multisender.abi as any,
+          this.provider
+        ) as unknown as multisenderContract.ContractContext
+      ).connect(this.provider),
+      write: (
+        new ethers.Contract(
+          multisender.address,
+          multisender.abi as any,
+          this.provider
+        ) as unknown as multisenderContract.ContractContext
+      ).connect(this.provider),
+    };
 
-    this.pkpNftContract = new ethers.Contract(
-      pkpNft.address,
-      pkpNft.abi as any,
-      this.provider
-    ) as unknown as pkpNftContract.ContractContext;
-    this.pkpNftContract = this.pkpNftContract.connect(this.signer);
+    this.pkpHelperContract = {
+      read: (
+        new ethers.Contract(
+          pkpHelper.address,
+          pkpHelper.abi as any,
+          this.provider
+        ) as unknown as pkpHelperContract.ContractContext
+      ).connect(this.provider),
+      write: (
+        new ethers.Contract(
+          pkpHelper.address,
+          pkpHelper.abi as any,
+          this.provider
+        ) as unknown as pkpHelperContract.ContractContext
+      ).connect(this.provider),
+    };
 
-    this.pkpPermissionsContract = new ethers.Contract(
-      pkpPermissions.address,
-      pkpPermissions.abi as any,
-      this.provider
-    ) as unknown as pkpPermissionsContract.ContractContext;
-    this.pkpPermissionsContract = this.pkpPermissionsContract.connect(this.signer);
+    this.pkpNftContract = {
+      read: (
+        new ethers.Contract(
+          pkpNft.address,
+          pkpNft.abi as any,
+          this.provider
+        ) as unknown as pkpNftContract.ContractContext
+      ).connect(this.provider),
+      write: (
+        new ethers.Contract(
+          pkpNft.address,
+          pkpNft.abi as any,
+          this.provider
+        ) as unknown as pkpNftContract.ContractContext
+      ).connect(this.provider),
+    };
 
-    this.pubkeyRouterContract = new ethers.Contract(
-      pubkeyRouter.address,
-      pubkeyRouter.abi as any,
-      this.provider
-    ) as unknown as pubkeyRouterContract.ContractContext;
-    this.pubkeyRouterContract = this.pubkeyRouterContract.connect(this.signer);
+    this.pkpPermissionsContract = {
+      read: (
+        new ethers.Contract(
+          pkpPermissions.address,
+          pkpPermissions.abi as any,
+          this.provider
+        ) as unknown as pkpPermissionsContract.ContractContext
+      ).connect(this.provider),
+      write: (
+        new ethers.Contract(
+          pkpPermissions.address,
+          pkpPermissions.abi as any,
+          this.provider
+        ) as unknown as pkpPermissionsContract.ContractContext
+      ).connect(this.provider),
+    };
 
-    this.rateLimitNftContract = new ethers.Contract(
-      rateLimitNft.address,
-      rateLimitNft.abi as any,
-      this.provider
-    ) as unknown as rateLimitNftContract.ContractContext;
-    this.rateLimitNftContract = this.rateLimitNftContract.connect(this.signer);
+    this.pubkeyRouterContract = {
+      read: (
+        new ethers.Contract(
+          pubkeyRouter.address,
+          pubkeyRouter.abi as any,
+          this.provider
+        ) as unknown as pubkeyRouterContract.ContractContext
+      ).connect(this.provider),
+      write: (
+        new ethers.Contract(
+          pubkeyRouter.address,
+          pubkeyRouter.abi as any,
+          this.provider
+        ) as unknown as pubkeyRouterContract.ContractContext
+      ).connect(this.provider),
+    };
 
-    this.stakingContract = new ethers.Contract(
-      staking.address,
-      staking.abi as any,
-      this.provider
-    ) as unknown as stakingContract.ContractContext;
-    this.stakingContract = this.stakingContract.connect(this.signer);
-// ----- autogen:init:end  -----
+    this.rateLimitNftContract = {
+      read: (
+        new ethers.Contract(
+          rateLimitNft.address,
+          rateLimitNft.abi as any,
+          this.provider
+        ) as unknown as rateLimitNftContract.ContractContext
+      ).connect(this.provider),
+      write: (
+        new ethers.Contract(
+          rateLimitNft.address,
+          rateLimitNft.abi as any,
+          this.provider
+        ) as unknown as rateLimitNftContract.ContractContext
+      ).connect(this.provider),
+    };
 
-log('Connected to all contracts');
+    this.stakingContract = {
+      read: (
+        new ethers.Contract(
+          staking.address,
+          staking.abi as any,
+          this.provider
+        ) as unknown as stakingContract.ContractContext
+      ).connect(this.provider),
+      write: (
+        new ethers.Contract(
+          staking.address,
+          staking.abi as any,
+          this.provider
+        ) as unknown as stakingContract.ContractContext
+      ).connect(this.provider),
+    };
+    // ----- autogen:init:end  -----
 
+    log('Connected to all contracts');
   };
 
   utils = {
@@ -348,7 +480,7 @@ log('Connected to all contracts');
           let token;
 
           try {
-            token = await this.pkpNftContract.tokenOfOwnerByIndex(
+            token = await this.pkpNftContract.read.tokenOfOwnerByIndex(
               ownerAddress,
               i
             );
@@ -392,7 +524,7 @@ log('Connected to all contracts');
           let token;
 
           try {
-            token = await this.pkpNftContract.tokenByIndex(i);
+            token = await this.pkpNftContract.read.tokenByIndex(i);
 
             token = this.utils.hexToDec(token.toHexString()) as string;
 
@@ -413,7 +545,7 @@ log('Connected to all contracts');
         }
         const ECDSA_KEY = 2;
 
-        const tx = await this.pkpNftContract.mintNext(ECDSA_KEY, {
+        const tx = await this.pkpNftContract.write.mintNext(ECDSA_KEY, {
           value: mintCost.value,
         });
 
@@ -453,7 +585,7 @@ log('Connected to all contracts');
 
         const pkpIdHex = this.utils.decToHex(tokenId, null);
 
-        const bool = await this.pkpPermissionsContract.isPermittedAddress(
+        const bool = await this.pkpPermissionsContract.read.isPermittedAddress(
           pkpIdHex as any,
           address
         );
@@ -477,9 +609,10 @@ log('Connected to all contracts');
 
         while (tries < maxTries) {
           try {
-            addresses = await this.pkpPermissionsContract.getPermittedAddresses(
-              tokenId
-            );
+            addresses =
+              await this.pkpPermissionsContract.read.getPermittedAddresses(
+                tokenId
+              );
             if (addresses.length <= 0) {
               await new Promise((resolve) => setTimeout(resolve, 1000));
               tries++;
@@ -520,9 +653,10 @@ log('Connected to all contracts');
 
         while (tries < maxTries) {
           try {
-            actions = await this.pkpPermissionsContract.getPermittedActions(
-              tokenId
-            );
+            actions =
+              await this.pkpPermissionsContract.read.getPermittedActions(
+                tokenId
+              );
 
             if (actions.length <= 0) {
               await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -566,7 +700,7 @@ log('Connected to all contracts');
         const ipfsHash = this.utils.getBytesFromMultihash(ipfsId);
         log('[isPermittedAction] converted<ipfsHash>:', ipfsHash);
 
-        const bool = await this.pkpPermissionsContract.isPermittedAction(
+        const bool = await this.pkpPermissionsContract.read.isPermittedAction(
           pkpId,
           ipfsHash as any
         );
@@ -595,7 +729,7 @@ log('Connected to all contracts');
 
         log('[addPermittedAction] input<pkpId>:', pkpId);
 
-        const pubKey = await this.pubkeyRouterContract.getPubkey(pkpId);
+        const pubKey = await this.pubkeyRouterContract.read.getPubkey(pkpId);
         log('[addPermittedAction] converted<pubKey>:', pubKey);
 
         const pubKeyHash = ethers.utils.keccak256(pubKey);
@@ -609,7 +743,7 @@ log('Connected to all contracts');
         const ipfsIdBytes = this.utils.getBytesFromMultihash(ipfsId);
         log('[addPermittedAction] converted<ipfsIdBytes>:', ipfsIdBytes);
 
-        const tx = await this.pkpPermissionsContract.addPermittedAction(
+        const tx = await this.pkpPermissionsContract.write.addPermittedAction(
           tokenId,
           ipfsIdBytes as any,
           []
@@ -641,7 +775,7 @@ log('Connected to all contracts');
 
         log('[addPermittedAddress] input<pkpId>:', pkpId);
 
-        const tx = await this.pkpPermissionsContract.addPermittedAddress(
+        const tx = await this.pkpPermissionsContract.write.addPermittedAddress(
           pkpId,
           ownerAddress,
           []
@@ -674,10 +808,11 @@ log('Connected to all contracts');
         const ipfsHash = this.utils.getBytesFromMultihash(ipfsId);
         log('[revokePermittedAction] converted<ipfsHash>:', ipfsHash);
 
-        const tx = await this.pkpPermissionsContract.removePermittedAction(
-          pkpId,
-          ipfsHash as any
-        );
+        const tx =
+          await this.pkpPermissionsContract.write.removePermittedAction(
+            pkpId,
+            ipfsHash as any
+          );
         log('[revokePermittedAction] output<tx>:', tx);
 
         return tx;
@@ -717,7 +852,7 @@ log('Connected to all contracts');
           throw new Error('Contract is not available');
         }
 
-        const capacity = await this.rateLimitNftContract.capacity(index);
+        const capacity = await this.rateLimitNftContract.read.capacity(index);
 
         return {
           requestsPerMillisecond: parseInt(capacity[0].toString()),
@@ -750,7 +885,7 @@ log('Connected to all contracts');
           throw new Error('Contract is not available');
         }
 
-        const base64 = await this.rateLimitNftContract.tokenURI(index);
+        const base64 = await this.rateLimitNftContract.read.tokenURI(index);
 
         const data = base64.split('data:application/json;base64,')[1];
 
@@ -800,7 +935,7 @@ log('Connected to all contracts');
           throw Error(`Given string is not a valid address "${ownerAddress}"`);
         }
 
-        let total: any = await this.rateLimitNftContract.balanceOf(
+        let total: any = await this.rateLimitNftContract.read.balanceOf(
           ownerAddress
         );
         total = parseInt(total.toString());
@@ -812,10 +947,11 @@ log('Connected to all contracts');
               throw new Error('Contract is not available');
             }
 
-            const token = await this.rateLimitNftContract.tokenOfOwnerByIndex(
-              ownerAddress,
-              i
-            );
+            const token =
+              await this.rateLimitNftContract.read.tokenOfOwnerByIndex(
+                ownerAddress,
+                i
+              );
 
             const tokenIndex = parseInt(token.toString());
 
@@ -829,7 +965,7 @@ log('Connected to all contracts');
                 tokenIndex
               );
 
-            const isExpired = await this.rateLimitNftContract.isExpired(
+            const isExpired = await this.rateLimitNftContract.read.isExpired(
               tokenIndex
             );
 
@@ -879,7 +1015,7 @@ log('Connected to all contracts');
           throw new Error('Contract is not available');
         }
 
-        let total: any = await this.rateLimitNftContract.totalSupply();
+        let total: any = await this.rateLimitNftContract.read.totalSupply();
         total = parseInt(total.toString());
 
         const tokens = await asyncForEachReturn(
@@ -889,7 +1025,7 @@ log('Connected to all contracts');
               throw new Error('Contract is not available');
             }
 
-            const token = await this.rateLimitNftContract.tokenByIndex(i);
+            const token = await this.rateLimitNftContract.read.tokenByIndex(i);
 
             const tokenIndex = parseInt(token.toString());
 
@@ -903,7 +1039,7 @@ log('Connected to all contracts');
                 tokenIndex
               );
 
-            const isExpired = await this.rateLimitNftContract.isExpired(
+            const isExpired = await this.rateLimitNftContract.read.isExpired(
               tokenIndex
             );
 
@@ -933,7 +1069,10 @@ log('Connected to all contracts');
           throw new Error('Contract is not available');
         }
 
-        const tx = await this.rateLimitNftContract.mint(timestamp, mintCost);
+        const tx = await this.rateLimitNftContract.write.mint(
+          timestamp,
+          mintCost
+        );
 
         const res: any = await tx.wait();
 
@@ -963,7 +1102,7 @@ log('Connected to all contracts');
           throw new Error('Contract is not available');
         }
 
-        const tx = await this.rateLimitNftContract.safeTransferFrom(
+        const tx = await this.rateLimitNftContract.write.safeTransferFrom(
           fromAddress,
           toAddress,
           RLITokenAddress
