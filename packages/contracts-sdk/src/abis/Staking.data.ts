@@ -106,6 +106,19 @@ export const staking = {
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "address",
+          "name": "resolverContractAddress",
+          "type": "address"
+        }
+      ],
+      "name": "ResolverContractAddressChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "address",
           "name": "staker",
@@ -198,7 +211,7 @@ export const staking = {
         {
           "indexed": true,
           "internalType": "address",
-          "name": "staker",
+          "name": "reporter",
           "type": "address"
         },
         {
@@ -206,6 +219,18 @@ export const staking = {
           "internalType": "address",
           "name": "validatorStakerAddress",
           "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "reason",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
         }
       ],
       "name": "VotedToKickValidatorInNextEpoch",
@@ -409,6 +434,16 @@ export const staking = {
           "internalType": "address",
           "name": "validatorStakerAddress",
           "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "reason",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
         }
       ],
       "name": "kickValidatorInNextEpoch",
@@ -553,6 +588,19 @@ export const staking = {
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "resolverContractAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -644,6 +692,19 @@ export const staking = {
         }
       ],
       "name": "setMinimumStake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newResolverContractAddress",
+          "type": "address"
+        }
+      ],
+      "name": "setResolverContractAddress",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

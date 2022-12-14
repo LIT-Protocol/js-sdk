@@ -63,6 +63,7 @@ export type StakingEvents =
   | 'Recovered'
   | 'RequestToJoin'
   | 'RequestToLeave'
+  | 'ResolverContractAddressChanged'
   | 'RewardPaid'
   | 'RewardsDurationUpdated'
   | 'Staked'
@@ -78,6 +79,7 @@ export interface StakingEventsContext {
   Recovered(...parameters: any): EventFilter;
   RequestToJoin(...parameters: any): EventFilter;
   RequestToLeave(...parameters: any): EventFilter;
+  ResolverContractAddressChanged(...parameters: any): EventFilter;
   RewardPaid(...parameters: any): EventFilter;
   RewardsDurationUpdated(...parameters: any): EventFilter;
   Staked(...parameters: any): EventFilter;
@@ -110,11 +112,13 @@ export type StakingMethodNames =
   | 'renounceOwnership'
   | 'requestToJoin'
   | 'requestToLeave'
+  | 'resolverContractAddress'
   | 'rewardOf'
   | 'setEpochLength'
   | 'setIpPortNodeAddressAndCommunicationPubKeys'
   | 'setKickPenaltyPercent'
   | 'setMinimumStake'
+  | 'setResolverContractAddress'
   | 'setStakingToken'
   | 'setTokenRewardPerTokenPerEpoch'
   | 'shouldKickValidator'
@@ -154,6 +158,9 @@ export interface RequestToJoinEventEmittedResponse {
 export interface RequestToLeaveEventEmittedResponse {
   staker: string;
 }
+export interface ResolverContractAddressChangedEventEmittedResponse {
+  resolverContractAddress: string;
+}
 export interface RewardPaidEventEmittedResponse {
   staker: string;
   reward: BigNumberish;
@@ -175,8 +182,10 @@ export interface ValidatorKickedFromNextEpochEventEmittedResponse {
   staker: string;
 }
 export interface VotedToKickValidatorInNextEpochEventEmittedResponse {
-  staker: string;
+  reporter: string;
   validatorStakerAddress: string;
+  reason: BigNumberish;
+  data: Arrayish;
 }
 export interface WithdrawnEventEmittedResponse {
   staker: string;
@@ -338,9 +347,13 @@ export interface Staking {
    * StateMutability: nonpayable
    * Type: function
    * @param validatorStakerAddress Type: address, Indexed: false
+   * @param reason Type: uint256, Indexed: false
+   * @param data Type: bytes, Indexed: false
    */
   kickValidatorInNextEpoch(
     validatorStakerAddress: string,
+    reason: BigNumberish,
+    data: Arrayish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>;
   /**
@@ -439,6 +452,13 @@ export interface Staking {
    * Constant: true
    * StateMutability: view
    * Type: function
+   */
+  resolverContractAddress(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
    * @param account Type: address, Indexed: false
    */
   rewardOf(
@@ -497,6 +517,17 @@ export interface Staking {
    */
   setMinimumStake(
     newMinimumStake: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param newResolverContractAddress Type: address, Indexed: false
+   */
+  setResolverContractAddress(
+    newResolverContractAddress: string,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction>;
   /**
