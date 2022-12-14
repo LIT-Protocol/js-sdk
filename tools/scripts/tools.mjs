@@ -16,6 +16,7 @@ import {
     spawnCommand,
     spawnListener,
     writeFile,
+    yellowLog,
 } from './utils.mjs';
 import fs from 'fs';
 
@@ -888,7 +889,7 @@ if (OPTION === '--polyfills') {
         greenLog("Polyfills injected into index.js");
 
     } catch (e) {
-        yellowLog("No polyfills found for " + PROJECT_NAME);
+        yellowLog(`No packages/${PROJECT_NAME}/polyfills.js found for ` + PROJECT_NAME);
     }
     exit();
 }
