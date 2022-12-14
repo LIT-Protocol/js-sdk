@@ -37,7 +37,6 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
             --publish: publish to npm
             --yalc: publish to yalc
             --build: build the project
-            --switch: 
             --dev: run dev stuff
             --watch: watch for changes
     `,
