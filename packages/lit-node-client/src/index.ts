@@ -52,3 +52,7 @@ export {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
+
+// ----- autogen:polyfills:start  -----
+//
+// ----- autogen:polyfills:end  -----

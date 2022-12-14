@@ -15,7 +15,6 @@ import {
 
 import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 
-// import JSZip from 'jszip';
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
 
@@ -316,7 +315,6 @@ export const encryptZip = async (zip: JSZip): Promise<EncryptedZip> => {
   }
 
   const symmKey: CryptoKey = await generateSymmetricKey();
-  console.log("symmKey:", symmKey);
 
   const encryptedZipBlob: Blob = await encryptWithSymmetricKey(
     symmKey,

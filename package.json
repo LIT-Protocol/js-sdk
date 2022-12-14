@@ -124,6 +124,7 @@
     "nx-plugin-devkit": "^1.3.1",
     "path": "^0.12.7",
     "prettier": "^2.6.2",
+    "react-router-dom": "^6.4.5",
     "react-test-renderer": "18.0.0",
     "start-server-and-test": "^1.14.0",
     "ts-jest": "27.1.4",

@@ -337,12 +337,13 @@ if (OPTION === '--build') {
             exit();
         }
 
-        spawnListener(`yarn nx run ${TARGET}:_buildTsc`);
+        await childRunCommand(`yarn nx run ${TARGET}:_buildTsc`);
         spawnListener(`yarn nx run ${TARGET}:_buildWeb`);
-        spawnListener(`yarn postBuild:mapDistFolderNameToPackageJson`);
-        spawnListener(`yarn tool:genHtml`);
-        spawnListener(`yarn tool:genReact`);
-        spawnListener(`yarn tool:genNodejs`);
+        await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
+        await childRunCommand(`yarn tool:genHtml`);
+        await childRunCommand(`yarn tool:genReact`);
+        await childRunCommand(`yarn tool:genNodejs`);
+        await childRunCommand(`yarn tools --polyfills ${TARGET}`);
 
     }
 
@@ -823,7 +824,7 @@ if (OPTION === '--watch') {
         if (!TARGET || TARGET === '' || TARGET === '--help') {
             exit()
         } else {
-            await new Promise((resolve) => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 300));
         }
 
         // check if directory exists
@@ -846,9 +847,48 @@ if (OPTION === '--watch') {
 
         } else {
             greenLog(`Watching ${TARGET}...`, true);
-            await new Promise((resolve) => setTimeout(resolve, 500));
             childRunCommand(`nodemon --watch packages/${TARGET} --ext js,ts --exec "yarn tools --build --target ${TARGET}"`);
+            // spawnListener(`yarn tools --polyfills lit-node-client`);
         }
     }
 
+}
+
+if (OPTION === '--polyfills') {
+
+    const PROJECT_NAME = args[1];
+
+    if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
+        greenLog(
+            `
+        Usage: node tools/scripts/tools.mjs --polyfills [project]
+            [project]: the project to add polyfills to
+        `,
+            true
+        );
+
+        exit();
+    }
+
+    try {
+        const polyfill = await readFile(`packages/${PROJECT_NAME}/polyfills.js`);
+
+        const buildIndexJsPath = `dist/packages/${PROJECT_NAME}/src/index.js`;
+        const builtIndexJs = await readFile(buildIndexJsPath);
+
+        const newBuiltIndexJs = replaceAutogen({
+            oldContent: builtIndexJs,
+            startsWith: "// ----- autogen:polyfills:start  -----",
+            endsWith: "// ----- autogen:polyfills:end  -----",
+            newContent: polyfill
+        });
+
+        await writeFile(buildIndexJsPath, newBuiltIndexJs);
+
+        greenLog("Polyfills injected into index.js");
+
+    } catch (e) {
+        yellowLog("No polyfills found for " + PROJECT_NAME);
+    }
+    exit();
 }
