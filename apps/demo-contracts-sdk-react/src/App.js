@@ -19,7 +19,9 @@ function App() {
       installation: 'yarn add @lit-protocol/contracts-sdk',
     }
   });
-
+  // ===================================
+  //          create instance                                    
+  // ===================================
   const createInstance = async () => {
     setLang('javascript');
     let code = `import { LitContracts } from '@lit-protocol/contracts-sdk';
@@ -38,7 +40,9 @@ function App() {
     window.litContracts = litContracts;
   }
 
-
+  // =======================================================
+  //          get mint cost from pkp nft contract                                    
+  // =======================================================
   const getMintCost = async () => {
     setLang('javascript');
     let code = `import { LitContracts } from '@lit-protocol/contracts-sdk';
@@ -49,7 +53,7 @@ function App() {
 
   // getting mint cost { ms }
   // { Loading... } 
-  const mintCost = await litContracts.pkpNftContract.mintCost();
+  const mintCost = await litContracts.pkpNftContract.read.mintCost();
 })();
 `;
     setData(code);
@@ -67,7 +71,9 @@ function App() {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     benchmark(async () => {
-      return await litContracts.pkpNftContract.mintCost();
+      const mintCost = await litContracts.pkpNftContract.read.mintCost();
+      console.log("mintCost: ", mintCost);
+      return mintCost;
     }, (ms, mintCost) => {
       code = code.replace('{ Loading... }', mintCost);
       code = code.replace('{ ms }', `[${ms}]`);
@@ -75,6 +81,9 @@ function App() {
     })
   }
 
+  // ===============================================
+  //          get tokens by owner address                                    
+  // ===============================================
   const getTokensByAddress = async () => {
     setLang('javascript');
     let code = `import { LitContracts } from '@lit-protocol/contracts-sdk';
@@ -120,6 +129,9 @@ function App() {
     })
   }
 
+  // ============================================================
+  //          use pkp nft contract to mint a new token                                    
+  // ============================================================
   const mintNext = async () => {
     setLang('javascript');
     let code = `import { LitContracts } from '@lit-protocol/contracts-sdk';
@@ -130,11 +142,15 @@ function App() {
 
   // getting mint cost { ms }
   // { Loading... } 
-  const mintCost = await litContracts.pkpNftContract.mintCost();
+  const mintCost = await litContracts.pkpNftContract.read.mintCost();
 
-  // minting { ms2 }
-  // { Loading2... }
-  const tx = await litContracts.pkpNftContract.mintNext(2, { value: mintCost });
+  // minting { ms }
+  // { Loading... }
+  const tx = await litContracts.pkpNftContract.write.mintNext(2, { value: mintCost });
+
+  // { ms }
+  // { Loading... }
+  const tokenId = (await tx.wait()).events[1].topics[3];
 })();
 `;
     setData(code);
@@ -148,7 +164,7 @@ function App() {
     let mintCost;
 
     await benchmark(async () => {
-      mintCost = await litContracts.pkpNftContract.mintCost();
+      mintCost = await litContracts.pkpNftContract.read.mintCost();
       return mintCost;
     }, (ms, mintCost) => {
 
@@ -161,18 +177,33 @@ function App() {
     let tx;
 
     await benchmark(async () => {
-      tx = await litContracts.pkpNftContract.mintNext(2, { value: mintCost });
+      tx = await litContracts.pkpNftContract.write.mintNext(2, { value: mintCost });
       return tx;
     }, (ms, tx) => {
 
       console.log(tx);
       console.log(tx.hash);
 
-      code = code.replace('{ Loading2... }', `hash: ${tx.hash}`);
+      code = code.replace('{ Loading... }', `hash: ${tx.hash}`);
       code = code.replaceAll('// ,', '// ')
-      code = code.replace('{ ms2 }', `[${ms}]`);
+      code = code.replace('{ ms }', `[${ms}]`);
       setData(code);
     })
+
+    await benchmark(async () => {
+      const tokenId = (await tx.wait()).events[1].topics[3]
+      return tokenId;
+    }, (ms, tokenId) => {
+
+      console.log("tokenId:", tokenId);
+
+      // convert to decimal, then to string from hex
+
+      code = code.replace('{ Loading... }', `tokenId: ${tokenId}`);
+      code = code.replaceAll('// ,', '// ')
+      code = code.replace('{ ms }', `[${ms}]`);
+      setData(code);
+    });
   }
 
   return (
@@ -180,22 +211,17 @@ function App() {
       <header className="App-header">
         <LitLogo />
         <h4>
-          React Demo for: {appName}<br/>
+          React Demo for: {appName}: "2.0.40"<br />
           <span>
             <a target="_blank" href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/contracts-sdk">npm repo</a>&nbsp;|&nbsp;
             <a target="_blank" href="https://github.com/LIT-Protocol/js-sdk/blob/master/apps/demo-contracts-sdk-react">demo repo</a>
           </span>
-          
+
         </h4>
         <button onClick={createInstance}>Create Instance</button>
-        <h6>- Read -</h6>
-        <button onClick={getMintCost}>pkpnftcontracts.mintCost()</button>
-
-        <h6>- Addtional Read -</h6>
-        <button onClick={getTokensByAddress}>pkpNftContractUtil.getTokensByAddress()</button>
-
-        <h6>- Write -</h6>
-        <button onClick={mintNext}>pkpNftContractUtil.mintNext()</button>
+        <button onClick={getMintCost}>Get mint cost from pkp nft contract</button>
+        <button onClick={getTokensByAddress}>Get tokens by owner address</button>
+        <button onClick={mintNext}>Use pkp nft contract to mint a new token</button>
       </header>
 
       <div className='editor'>

@@ -307,7 +307,7 @@ export class LitContracts {
       //          Ask Metamask to sign
       // ----------------------------------------
       if (isBrowser() && wallet && !SETUP_DONE) {
-        console.log('HERE????');
+        // console.log('HERE????');
         console.log('this.signer:', this.signer);
         this.signer = wallet.getSigner();
       }
