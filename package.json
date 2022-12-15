@@ -14,7 +14,7 @@
     "build:target": "yarn node tools/scripts/build.mjs",
     "test:packages": "nx run-many --target=test",
     "test:watch": "nx run-many --target=test --watch",
-    "test:ci": "nx affected --target=test --ci --code-coverage",
+    "test:ci": "nx affected --target=test --all --code-coverage",
     "publish:packages": "npx lerna publish --force-publish && yarn publish:vanilla",
     "publish:vanilla": "yarn node ./tools/scripts/pub.mjs --filter vanilla",
     "publish:dev": "yarn tools --publish --tag dev",
