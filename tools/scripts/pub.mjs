@@ -36,4 +36,4 @@ dirs.forEach((dir) => {
   }
 });
 
-exit(0);
+// exit(0);
