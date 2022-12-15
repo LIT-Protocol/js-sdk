@@ -1,11 +1,16 @@
-# auth-browser
+# Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+### node.js / browser
 
-## Building
+```
+yarn add @lit-protocol/auth-browser
+```
 
-Run `nx build auth-browser` to build the library.
+### Vanilla JS (UMD)
 
-## Running unit tests
-
-Run `nx test auth-browser` to execute the unit tests via [Jest](https://jestjs.io).
+```js
+<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/auth-browser-vanilla/auth-browser.js"></script>
+<script>
+  console.log(LitJsSdk_authBrowser);
+</script>
+```

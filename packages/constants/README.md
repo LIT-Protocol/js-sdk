@@ -1,11 +1,16 @@
-# constants
+# Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+### node.js / browser
 
-## Building
+```
+yarn add @lit-protocol/constants
+```
 
-Run `nx build constants` to build the library.
+### Vanilla JS (UMD)
 
-## Running unit tests
-
-Run `nx test constants` to execute the unit tests via [Jest](https://jestjs.io).
+```js
+<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/constants-vanilla/constants.js"></script>
+<script>
+  console.log(LitJsSdk_constants);
+</script>
+```

@@ -1,11 +1,16 @@
-# access-control-conditions
+# Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+### node.js / browser
 
-## Building
+```
+yarn add @lit-protocol/access-control-conditions
+```
 
-Run `nx build access-control-conditions` to build the library.
+### Vanilla JS (UMD)
 
-## Running unit tests
-
-Run `nx test access-control-conditions` to execute the unit tests via [Jest](https://jestjs.io).
+```js
+<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/access-control-conditions-vanilla/access-control-conditions.js"></script>
+<script>
+  console.log(LitJsSdk_accessControlConditions);
+</script>
+```

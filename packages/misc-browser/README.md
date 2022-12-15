@@ -1,11 +1,16 @@
-# misc-browser
+# Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+### node.js / browser
 
-## Building
+```
+yarn add @lit-protocol/misc-browser
+```
 
-Run `nx build misc-browser` to build the library.
+### Vanilla JS (UMD)
 
-## Running unit tests
-
-Run `nx test misc-browser` to execute the unit tests via [Jest](https://jestjs.io).
+```js
+<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/misc-browser-vanilla/misc-browser.js"></script>
+<script>
+  console.log(LitJsSdk_miscBrowser);
+</script>
+```

@@ -1,11 +1,16 @@
-# encryption
+# Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+### node.js / browser
 
-## Building
+```
+yarn add @lit-protocol/encryption
+```
 
-Run `nx build encryption` to build the library.
+### Vanilla JS (UMD)
 
-## Running unit tests
-
-Run `nx test encryption` to execute the unit tests via [Jest](https://jestjs.io).
+```js
+<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/encryption-vanilla/encryption.js"></script>
+<script>
+  console.log(LitJsSdk_encryption);
+</script>
+```

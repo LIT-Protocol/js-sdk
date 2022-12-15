@@ -1,11 +1,16 @@
-# nacl
+# Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+### node.js / browser
 
-## Building
+```
+yarn add @lit-protocol/nacl
+```
 
-Run `nx build nacl` to build the library.
+### Vanilla JS (UMD)
 
-## Running unit tests
-
-Run `nx test nacl` to execute the unit tests via [Jest](https://jestjs.io).
+```js
+<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/nacl-vanilla/nacl.js"></script>
+<script>
+  console.log(LitJsSdk_nacl);
+</script>
+```

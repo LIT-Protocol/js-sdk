@@ -10,7 +10,7 @@ Demo: https://demo-contracts-sdk-react.vercel.app/
 yarn add @lit-protocol/contracts-sdk
 ```
 
-## Vanilla JS
+## Vanilla JS (UMD)
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@lit-protocol/contracts-sdk-vanilla/contracts-sdk.js"></script>

@@ -1,11 +1,16 @@
-# crypto
+# Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+### node.js / browser
 
-## Building
+```
+yarn add @lit-protocol/crypto
+```
 
-Run `nx build crypto` to build the library.
+### Vanilla JS (UMD)
 
-## Running unit tests
-
-Run `nx test crypto` to execute the unit tests via [Jest](https://jestjs.io).
+```js
+<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/crypto-vanilla/crypto.js"></script>
+<script>
+  console.log(LitJsSdk_crypto);
+</script>
+```

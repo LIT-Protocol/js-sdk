@@ -1,11 +1,16 @@
-# uint8arrays
+# Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+### node.js / browser
 
-## Building
+```
+yarn add @lit-protocol/uint8array
+```
 
-Run `nx build uint8arrays` to build the library.
+### Vanilla JS (UMD)
 
-## Running unit tests
-
-Run `nx test uint8arrays` to execute the unit tests via [Jest](https://jestjs.io).
+```js
+<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/uint8array-vanilla/uint8array.js"></script>
+<script>
+  console.log(LitJsSdk_uint8array);
+</script>
+```

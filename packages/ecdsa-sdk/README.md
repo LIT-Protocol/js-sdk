@@ -1,11 +1,16 @@
-# ecdsa-sdk
+# Quick Start
 
-This library was generated with [Nx](https://nx.dev).
+### node.js / browser
 
-## Building
+```
+yarn add @lit-protocol/ecdsa-sdk
+```
 
-Run `nx build ecdsa-sdk` to build the library.
+### Vanilla JS (UMD)
 
-## Running unit tests
-
-Run `nx test ecdsa-sdk` to execute the unit tests via [Jest](https://jestjs.io).
+```js
+<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/ecdsa-sdk-vanilla/ecdsa-sdk.js"></script>
+<script>
+  console.log(LitJsSdk_ecdsaSdk);
+</script>
+```
