@@ -313,16 +313,18 @@ export class LitContracts {
       }
     }
 
-    if ('litNodeClient' in this.signer && 'rpcProvider' in this.signer) {
-      console.warn(`
-// ***********************************************************************************************
-//          THIS IS A PKP WALLET, USING IT AS A SIGNER AND ITS RPC PROVIDER AS PROVIDER                                    
-// ***********************************************************************************************
-      `);
+    if (this.signer !== undefined && this.signer !== null) {
+      if ('litNodeClient' in this.signer && 'rpcProvider' in this.signer) {
+        console.warn(`
+  // ***********************************************************************************************
+  //          THIS IS A PKP WALLET, USING IT AS A SIGNER AND ITS RPC PROVIDER AS PROVIDER                                    
+  // ***********************************************************************************************
+        `);
 
-      // @ts-ignore
-      this.provider = this.signer.rpcProvider;
-      this.isPKP = true;
+        // @ts-ignore
+        this.provider = this.signer.rpcProvider;
+        this.isPKP = true;
+      }
     }
 
     console.log('Your Signer:', this.signer);

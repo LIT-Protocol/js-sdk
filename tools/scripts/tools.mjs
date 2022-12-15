@@ -35,6 +35,7 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
             --test: run tests
             --find: different search options
             --publish: publish to npm
+            --clone: clone a package from ./dist and publish to npm
             --yalc: publish to yalc
             --build: build the project
             --dev: run dev stuff

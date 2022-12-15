@@ -49,13 +49,13 @@ describe('contractsSdk', () => {
     expect(litContracts_NoArgs).toBeDefined();
 
     // -- check read
-    const mintCost = (await litContracts_NoArgs.pkpNftContract.mintCost()).toNumber();
+    const mintCost = (await litContracts_NoArgs.pkpNftContract.read.mintCost()).toNumber();
 
     expect(mintCost).toBe(100000000000000);
   });
 
   // it('[Random Private Key Signer] should fail on write attemp', async () => {
-  //   const tx = await litContracts_NoArgs.pkpNftContract.mintNext(2, {value: 100000000000000});
+  //   const tx = await litContracts_NoArgs.pkpNftContract.read.mintNext(2, {value: 100000000000000});
   //   expect(tx).toBe(1);
   // })
 
@@ -75,7 +75,7 @@ describe('contractsSdk', () => {
     expect(litContracts_privateKeySigner.signer).toBeInstanceOf(ethers.Wallet);
 
     // -- check read
-    const mintCost = (await litContracts_privateKeySigner.pkpNftContract.mintCost()).toNumber();
+    const mintCost = (await litContracts_privateKeySigner.pkpNftContract.read.mintCost()).toNumber();
 
     expect(mintCost).toBe(100000000000000);
     
@@ -109,7 +109,7 @@ describe('contractsSdk', () => {
   //   await litContracts_pkpWallet.connect();
 
   //   // -- check read
-  //   const mintCost = await litContracts_pkpWallet.pkpNftContract.mintCost();
+  //   const mintCost = await litContracts_pkpWallet.pkpNftContract.read.mintCost();
 
   //   expect(mintCost.toNumber()).toBe(100000000000000);
 
@@ -117,7 +117,7 @@ describe('contractsSdk', () => {
   //   expect(await pkpWallet.getAddress()).toBe("0x014b9D4B8B369d85E75Ed9e2e6daF28C0d50c364");
 
   //   // -- check write
-  //   const tx = await litContracts_pkpWallet.pkpNftContract.mintNext(2, {
+  //   const tx = await litContracts_pkpWallet.pkpNftContract.read.mintNext(2, {
   //     value: mintCost,
   //   });
 
@@ -138,7 +138,7 @@ describe('contractsSdk', () => {
 
   //   expect(litContracts_privateKeySigner).toBeDefined();
 
-  //   const mintCost = (await litContracts_privateKeySigner.pkpNftContract.mintCost()).toNumber();
+  //   const mintCost = (await litContracts_privateKeySigner.pkpNftContract.read.mintCost()).toNumber();
 
   //   expect(mintCost).toBe(100000000000000);
 
@@ -176,13 +176,13 @@ describe('contractsSdk', () => {
 
   //     expect(pkpAddress).toBe("0x014b9D4B8B369d85E75Ed9e2e6daF28C0d50c364");
 
-  //     const mintCost = await litContracts.pkpNftContract.mintCost();
+  //     const mintCost = await litContracts.pkpNftContract.read.mintCost();
 
   //     console.log(mintCost);
 
   //     // expect(mintCost.toString()).toBe("100000000000000");
 
-  //     // const mintTx = await litContracts.pkpNftContract.mintNext(2, {
+  //     // const mintTx = await litContracts.pkpNftContract.read.mintNext(2, {
   //     //   value: mintCost,
   //     // });
 
@@ -321,7 +321,7 @@ describe('contractsSdk', () => {
   // });
 
   // it('pkpContract mintCost', async () => {
-  //   let output = (await litContracts.pkpNftContract.mintCost()).toString();
+  //   let output = (await litContracts.pkpNftContract.read.mintCost()).toString();
 
   //   expect(output).toBe('100000000000000');
   // });

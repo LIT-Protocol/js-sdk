@@ -1,7 +1,6 @@
 import * as LitJsSdk from 'dist/packages/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { PKPWallet } from '@lit-protocol/pkp-ethers.js';
-import '../../../html/style.css';
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
 
