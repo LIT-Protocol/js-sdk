@@ -893,3 +893,45 @@ if (OPTION === '--polyfills') {
     }
     exit();
 }
+
+if (OPTION === '--comment') {
+    const C = args[1] ?? '=';
+
+    // combine args except for the first index
+    const MESSAGE = args.slice(2).join(' ');
+
+    if (!MESSAGE || MESSAGE === '' || MESSAGE === '--help') {
+        greenLog(
+            `
+        Usage: node tools/scripts/tools.mjs --comment [message]
+            [message]: the message to add to the comment block
+        `,
+            true
+        );
+
+        exit();
+    }
+
+
+    let up = [];
+    let down = [];
+
+    for (let i = 0; i < MESSAGE.length; i++) {
+
+        up.push(C);
+        down.push(C);
+
+    }
+
+    // create a line with 10 ${C}
+    const line = `${C}${C}${C}${C}${C}${C}${C}${C}${C}${C}`;
+
+    console.log(
+        `
+// ${line}${up.join('')}${line}
+//          ${MESSAGE}                                    
+// ${line}${down.join('')}${line}
+    `);
+    exit();
+
+}

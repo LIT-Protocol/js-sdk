@@ -1,16 +1,23 @@
 import { ContractTransaction } from 'ethers';
+
+// --- Replaced Content ---
+import { TransactionRequest } from "@ethersproject/abstract-provider";
 import { BigNumber, BigNumberish } from 'ethers';
-        
-        export interface Arrayish {
-            toHexString(): string;
-            slice(start?: number, end?: number): Arrayish;
-            length: number;
-            [index: number]: number;
-        }
-        
+
+export interface Arrayish {
+    toHexString(): string;
+    slice(start?: number, end?: number): Arrayish;
+    length: number;
+    [index: number]: number;
+}
+
+export type ContractContext = ContractContextLegacy & {
+    populateTransaction: ContractContextLegacy
+}
+// --- Replaced Content ---
 import { EthersContractContext } from 'ethereum-abi-types-generator';
 
-export type ContractContext = EthersContractContext<
+export type ContractContextLegacy = EthersContractContext<
   PKPHelper,
   PKPHelperEventsContext,
   PKPHelperEvents
@@ -89,7 +96,7 @@ export interface PKPHelper {
     _pkpNft: string,
     _pkpPermissions: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: true
    * Constant: false
@@ -112,7 +119,7 @@ export interface PKPHelper {
     addPkpEthAddressAsPermittedAddress: boolean,
     sendPkpToItself: boolean,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: true
    * Constant: false
@@ -143,7 +150,7 @@ export interface PKPHelper {
     addPkpEthAddressAsPermittedAddress: boolean,
     sendPkpToItself: boolean,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: true
@@ -190,7 +197,7 @@ export interface PKPHelper {
    */
   renounceOwnership(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -201,7 +208,7 @@ export interface PKPHelper {
   setPkpNftAddress(
     newPkpNftAddress: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -212,7 +219,7 @@ export interface PKPHelper {
   setPkpPermissionsAddress(
     newPkpPermissionsAddress: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -223,5 +230,5 @@ export interface PKPHelper {
   transferOwnership(
     newOwner: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
 }

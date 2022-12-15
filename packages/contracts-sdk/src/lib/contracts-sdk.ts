@@ -86,8 +86,15 @@ const log = (str: string, opt?: any) => {
 export class LitContracts {
   provider: ethers.providers.JsonRpcProvider | any;
   rpc: string;
-  signer: ethers.Signer;
+  rpcs: string[];
+  signer: ethers.Signer | ethers.Wallet;
   privateKey: string | undefined;
+  options?: {
+    storeOrUseStorageKey?: boolean;
+  };
+  randomPrivateKey: boolean = false;
+  connected: boolean = false;
+  isPKP: boolean = false;
 
   // ----- autogen:declares:start  -----
   accessControlConditionsContract: {
@@ -140,59 +147,31 @@ export class LitContracts {
   // make the constructor args optional
   constructor(args?: {
     provider?: ethers.providers.JsonRpcProvider | any;
+    rpcs?: string[] | any;
     rpc?: string | any;
     signer?: ethers.Signer | any;
     privateKey?: string | undefined;
+    randomPrivatekey?: boolean;
+    options?: {
+      storeOrUseStorageKey?: boolean;
+    };
   }) {
     // this.provider = args?.provider;
     this.rpc = args?.rpc;
+    this.rpcs = args?.rpcs;
     this.signer = args?.signer;
     this.privateKey = args?.privateKey;
-    this.provider;
+    this.provider = args?.provider;
+    this.randomPrivateKey = args?.randomPrivatekey ?? false;
+    this.options = args?.options;
 
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
       this.rpc = 'https://matic-mumbai.chainstacklabs.com';
     }
 
-    // -- if node environment
-    if (isNode()) {
-      log(
-        "--- Node environment detected. Using 'ethers.providers.JsonRpcProvider' ---"
-      );
-
-      // -- If signer is not provided, we will use a random private key to create a signer
-      if (!this.signer) {
-        log(
-          `No signer is provided, we can generate a random private key to create a signer`
-        );
-        // generate random private key
-        const privateKey =
-          this.privateKey ?? ethers.utils.hexlify(ethers.utils.randomBytes(32));
-        this.provider = new ethers.providers.JsonRpcProvider(this.rpc);
-        this.signer = new ethers.Wallet(privateKey, this.provider);
-      }
-
-      // -- If signer is provider
-      if (this.signer) {
-        this.provider = this.signer.provider;
-      }
-    }
-
-    // -- if browser environment
-    if (isBrowser()) {
-      log(
-        "--- Browser environment detected. Using 'ethers.providers.Web3Provider' ---"
-      );
-
-      // -- check if window.ethereum is available
-      if (!window.ethereum) {
-        throw new Error(
-          'window.ethereum is not available. Please install a web3 provider such as Brave or MetaMask.'
-        );
-      }
-
-      this.provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+    if (!this.rpcs) {
+      this.rpcs = [this.rpc];
     }
 
     // ----- autogen:blank-init:start  -----
@@ -208,181 +187,303 @@ export class LitContracts {
     // ----- autogen:blank-init:end  -----
   }
 
-  /**
-   * Connect all contracts to a provider.
-   */
   connect = async () => {
+    // =======================================
+    //          SETTING UP PROVIDER
+    // =======================================
+
+    // -------------------------------------------------
+    //          (Browser) Setting up Provider
+    // -------------------------------------------------
+    let wallet;
+    let SETUP_DONE = false;
+
+    if (isBrowser() && !this.signer) {
+      console.log("----- We're in the browser! -----");
+
+      const web3Provider = window.ethereum;
+
+      if (!web3Provider) {
+        const msg =
+          'No web3 provider found. Please install Brave, MetaMask or another web3 provider.';
+        alert(msg);
+        throw new Error(msg);
+      }
+
+      const web3ProviderRequest = {
+        method: 'wallet_addEthereumChain',
+        params: [
+          {
+            chainId: '0x13881',
+            chainName: 'Mumbai',
+            nativeCurrency: { name: 'Matic', symbol: 'MATIC', decimals: 18 },
+            rpcUrls: this.rpcs,
+            blockExplorerUrls: ['https://mumbai.polygonscan.com/'],
+            iconUrls: ['future'],
+          },
+        ],
+      };
+
+      await web3Provider.request(web3ProviderRequest);
+
+      wallet = new ethers.providers.Web3Provider(web3Provider);
+
+      await wallet.send('eth_requestAccounts', []);
+
+      // this will ask metamask to connect to the wallet
+      // this.signer = wallet.getSigner();
+
+      this.provider = wallet;
+    }
+
+    // ----------------------------------------------
+    //          (Node) Setting up Provider
+    // ----------------------------------------------
+    if (isNode()) {
+      console.log("----- We're in node! -----");
+      this.provider = new ethers.providers.JsonRpcProvider(this.rpc);
+    }
+
+    // ======================================
+    //          CUSTOM PRIVATE KEY
+    // ======================================
+    if (this.privateKey) {
+      console.log('Using your own private key');
+      this.signer = new ethers.Wallet(this.privateKey, this.provider);
+      this.provider = this.signer.provider;
+      SETUP_DONE = true;
+    }
+
+    // =====================================
+    //          SETTING UP SIGNER
+    // =====================================
+    if (
+      (!this.privateKey && this.randomPrivateKey) ||
+      this.options?.storeOrUseStorageKey
+    ) {
+      console.warn('THIS.SIGNER:', this.signer);
+
+      let STORAGE_KEY = 'lit-contracts-sdk-private-key';
+
+      console.log("Let's see if you have a private key in your local storage!");
+
+      // -- find private key in local storage
+      let storagePrivateKey;
+
+      try {
+        storagePrivateKey = localStorage.getItem(STORAGE_KEY);
+      } catch (e) {
+        // swallow
+        // console.log('Not a problem.');
+      }
+
+      // -- (NOT FOUND) no private key found
+      if (!storagePrivateKey) {
+        console.log('Not a problem, we will generate a random private key');
+        storagePrivateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+      }
+
+      // -- (FOUND) private key found
+      else {
+        console.log("Found your private key in local storage. Let's use it!");
+      }
+
+      this.signer = new ethers.Wallet(storagePrivateKey, this.provider);
+
+      console.log('- Your private key:', storagePrivateKey);
+      console.log('- Your address:', await this.signer.getAddress());
+      console.log('- this.signer:', this.signer);
+      console.log('- this.provider.getSigner():', this.provider.getSigner());
+
+      // -- (OPTION) store private key in local storage
+      if (this.options?.storeOrUseStorageKey) {
+        console.warn(
+          "You've set the option to store your private key in local storage."
+        );
+        localStorage.setItem(STORAGE_KEY, storagePrivateKey);
+      }
+    } else {
+      // ----------------------------------------
+      //          Ask Metamask to sign
+      // ----------------------------------------
+      if (isBrowser() && wallet && !SETUP_DONE) {
+        console.log('HERE????');
+        console.log('this.signer:', this.signer);
+        this.signer = wallet.getSigner();
+      }
+    }
+
+    if ('litNodeClient' in this.signer && 'rpcProvider' in this.signer) {
+      console.warn(`
+// ***********************************************************************************************
+//          THIS IS A PKP WALLET, USING IT AS A SIGNER AND ITS RPC PROVIDER AS PROVIDER                                    
+// ***********************************************************************************************
+      `);
+
+      // @ts-ignore
+      this.provider = this.signer.rpcProvider;
+      this.isPKP = true;
+    }
+
+    console.log('Your Signer:', this.signer);
+    console.log('Your Provider:', this.provider);
+
     if (!this.provider) {
-      throw new Error('Provider is not available');
+      console.log('No provide found. Will try to use the one from the signer.');
+      this.provider = this.signer.provider;
+      console.log('Your Provider(from signer):', this.provider);
     }
-
-    if (isBrowser()) {
-      await this.provider.send('eth_requestAccounts', []);
-      this.signer = this.provider.getSigner();
-      log('this.provider:', this.provider);
-      log('this.signer:', this.signer);
-    }
-
-    log('Connecting to contracts...');
 
     // ----- autogen:init:start  -----
 
     this.accessControlConditionsContract = {
-      read: (
-        new ethers.Contract(
-          accessControlConditions.address,
-          accessControlConditions.abi as any,
-          this.provider
-        ) as unknown as accessControlConditionsContract.ContractContext
-      ).connect(this.provider),
-      write: (
-        new ethers.Contract(
-          accessControlConditions.address,
-          accessControlConditions.abi as any,
-          this.provider
-        ) as unknown as accessControlConditionsContract.ContractContext
-      ).connect(this.provider),
+      read: new ethers.Contract(
+        accessControlConditions.address,
+        accessControlConditions.abi as any,
+        this.provider
+      ) as unknown as accessControlConditionsContract.ContractContext,
+      write: new ethers.Contract(
+        accessControlConditions.address,
+        accessControlConditions.abi as any,
+        this.signer
+      ) as unknown as accessControlConditionsContract.ContractContext,
     };
 
     this.litTokenContract = {
-      read: (
-        new ethers.Contract(
-          litToken.address,
-          litToken.abi as any,
-          this.provider
-        ) as unknown as litTokenContract.ContractContext
-      ).connect(this.provider),
-      write: (
-        new ethers.Contract(
-          litToken.address,
-          litToken.abi as any,
-          this.provider
-        ) as unknown as litTokenContract.ContractContext
-      ).connect(this.provider),
+      read: new ethers.Contract(
+        litToken.address,
+        litToken.abi as any,
+        this.provider
+      ) as unknown as litTokenContract.ContractContext,
+      write: new ethers.Contract(
+        litToken.address,
+        litToken.abi as any,
+        this.signer
+      ) as unknown as litTokenContract.ContractContext,
     };
 
     this.multisenderContract = {
-      read: (
-        new ethers.Contract(
-          multisender.address,
-          multisender.abi as any,
-          this.provider
-        ) as unknown as multisenderContract.ContractContext
-      ).connect(this.provider),
-      write: (
-        new ethers.Contract(
-          multisender.address,
-          multisender.abi as any,
-          this.provider
-        ) as unknown as multisenderContract.ContractContext
-      ).connect(this.provider),
+      read: new ethers.Contract(
+        multisender.address,
+        multisender.abi as any,
+        this.provider
+      ) as unknown as multisenderContract.ContractContext,
+      write: new ethers.Contract(
+        multisender.address,
+        multisender.abi as any,
+        this.signer
+      ) as unknown as multisenderContract.ContractContext,
     };
 
     this.pkpHelperContract = {
-      read: (
-        new ethers.Contract(
-          pkpHelper.address,
-          pkpHelper.abi as any,
-          this.provider
-        ) as unknown as pkpHelperContract.ContractContext
-      ).connect(this.provider),
-      write: (
-        new ethers.Contract(
-          pkpHelper.address,
-          pkpHelper.abi as any,
-          this.provider
-        ) as unknown as pkpHelperContract.ContractContext
-      ).connect(this.provider),
+      read: new ethers.Contract(
+        pkpHelper.address,
+        pkpHelper.abi as any,
+        this.provider
+      ) as unknown as pkpHelperContract.ContractContext,
+      write: new ethers.Contract(
+        pkpHelper.address,
+        pkpHelper.abi as any,
+        this.signer
+      ) as unknown as pkpHelperContract.ContractContext,
     };
 
     this.pkpNftContract = {
-      read: (
-        new ethers.Contract(
-          pkpNft.address,
-          pkpNft.abi as any,
-          this.provider
-        ) as unknown as pkpNftContract.ContractContext
-      ).connect(this.provider),
-      write: (
-        new ethers.Contract(
-          pkpNft.address,
-          pkpNft.abi as any,
-          this.provider
-        ) as unknown as pkpNftContract.ContractContext
-      ).connect(this.provider),
+      read: new ethers.Contract(
+        pkpNft.address,
+        pkpNft.abi as any,
+        this.provider
+      ) as unknown as pkpNftContract.ContractContext,
+      write: new ethers.Contract(
+        pkpNft.address,
+        pkpNft.abi as any,
+        this.signer
+      ) as unknown as pkpNftContract.ContractContext,
     };
 
     this.pkpPermissionsContract = {
-      read: (
-        new ethers.Contract(
-          pkpPermissions.address,
-          pkpPermissions.abi as any,
-          this.provider
-        ) as unknown as pkpPermissionsContract.ContractContext
-      ).connect(this.provider),
-      write: (
-        new ethers.Contract(
-          pkpPermissions.address,
-          pkpPermissions.abi as any,
-          this.provider
-        ) as unknown as pkpPermissionsContract.ContractContext
-      ).connect(this.provider),
+      read: new ethers.Contract(
+        pkpPermissions.address,
+        pkpPermissions.abi as any,
+        this.provider
+      ) as unknown as pkpPermissionsContract.ContractContext,
+      write: new ethers.Contract(
+        pkpPermissions.address,
+        pkpPermissions.abi as any,
+        this.signer
+      ) as unknown as pkpPermissionsContract.ContractContext,
     };
 
     this.pubkeyRouterContract = {
-      read: (
-        new ethers.Contract(
-          pubkeyRouter.address,
-          pubkeyRouter.abi as any,
-          this.provider
-        ) as unknown as pubkeyRouterContract.ContractContext
-      ).connect(this.provider),
-      write: (
-        new ethers.Contract(
-          pubkeyRouter.address,
-          pubkeyRouter.abi as any,
-          this.provider
-        ) as unknown as pubkeyRouterContract.ContractContext
-      ).connect(this.provider),
+      read: new ethers.Contract(
+        pubkeyRouter.address,
+        pubkeyRouter.abi as any,
+        this.provider
+      ) as unknown as pubkeyRouterContract.ContractContext,
+      write: new ethers.Contract(
+        pubkeyRouter.address,
+        pubkeyRouter.abi as any,
+        this.signer
+      ) as unknown as pubkeyRouterContract.ContractContext,
     };
 
     this.rateLimitNftContract = {
-      read: (
-        new ethers.Contract(
-          rateLimitNft.address,
-          rateLimitNft.abi as any,
-          this.provider
-        ) as unknown as rateLimitNftContract.ContractContext
-      ).connect(this.provider),
-      write: (
-        new ethers.Contract(
-          rateLimitNft.address,
-          rateLimitNft.abi as any,
-          this.provider
-        ) as unknown as rateLimitNftContract.ContractContext
-      ).connect(this.provider),
+      read: new ethers.Contract(
+        rateLimitNft.address,
+        rateLimitNft.abi as any,
+        this.provider
+      ) as unknown as rateLimitNftContract.ContractContext,
+      write: new ethers.Contract(
+        rateLimitNft.address,
+        rateLimitNft.abi as any,
+        this.signer
+      ) as unknown as rateLimitNftContract.ContractContext,
     };
 
     this.stakingContract = {
-      read: (
-        new ethers.Contract(
-          staking.address,
-          staking.abi as any,
-          this.provider
-        ) as unknown as stakingContract.ContractContext
-      ).connect(this.provider),
-      write: (
-        new ethers.Contract(
-          staking.address,
-          staking.abi as any,
-          this.provider
-        ) as unknown as stakingContract.ContractContext
-      ).connect(this.provider),
+      read: new ethers.Contract(
+        staking.address,
+        staking.abi as any,
+        this.provider
+      ) as unknown as stakingContract.ContractContext,
+      write: new ethers.Contract(
+        staking.address,
+        staking.abi as any,
+        this.signer
+      ) as unknown as stakingContract.ContractContext,
     };
     // ----- autogen:init:end  -----
 
-    log('Connected to all contracts');
+    this.connected = true;
   };
+
+  // getRandomPrivateKeySignerProvider = () => {
+  //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+
+  //   let provider;
+
+  //   if (isBrowser()) {
+  //     provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+  //   } else {
+  //     provider = new ethers.providers.JsonRpcProvider(this.rpc);
+  //   }
+  //   const signer = new ethers.Wallet(privateKey, provider);
+
+  //   return { privateKey, signer, provider };
+  // };
+
+  // getPrivateKeySignerProvider = (privateKey: string) => {
+  //   let provider;
+
+  //   if (isBrowser()) {
+  //     provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+  //   } else {
+  //     provider = new ethers.providers.JsonRpcProvider(this.rpc);
+  //   }
+  //   const signer = new ethers.Wallet(privateKey, provider);
+
+  //   return { privateKey, signer, provider };
+  // };
 
   utils = {
     hexToDec,
@@ -463,6 +564,11 @@ export class LitContracts {
       getTokensByAddress: async (
         ownerAddress: string
       ): Promise<Array<string>> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
         if (!this.pkpNftContract) {
           throw new Error('Contract is not available');
         }
@@ -510,6 +616,11 @@ export class LitContracts {
       getTokens: async (
         latestNumberOfTokens: number
       ): Promise<Array<string>> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
         if (!this.pkpNftContract) {
           throw new Error('Contract is not available');
         }
@@ -539,27 +650,66 @@ export class LitContracts {
       },
     },
     write: {
-      mint: async (mintCost: { value: any }) => {
+      mint: async () => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.pkpNftContract) {
           throw new Error('Contract is not available');
         }
-        const ECDSA_KEY = 2;
 
-        const tx = await this.pkpNftContract.write.mintNext(ECDSA_KEY, {
-          value: mintCost.value,
-        });
+        let mintCost;
 
-        console.log('tx:', tx);
+        try {
+          mintCost = await this.pkpNftContract.read.mintCost();
+        } catch (e) {
+          throw new Error('Could not get mint cost');
+        }
 
-        const res: any = await tx.wait();
+        let sentTx;
+
+        if (this.isPKP) {
+          console.log(
+            "This is a PKP wallet, so we'll use the PKP wallet to sign the tx"
+          );
+
+          console.log('...populating tx');
+          let tx = await this.pkpNftContract.write.populateTransaction.mintNext(
+            2,
+            { value: mintCost }
+          );
+          console.log('tx:', tx);
+
+          console.log('...signing tx');
+          let signedTx = await this.signer.signTransaction(tx);
+          console.log('signedTx:', signedTx);
+
+          console.log('sending signed tx...');
+          sentTx = await this.signer.sendTransaction(
+            signedTx as ethers.providers.TransactionRequest
+          );
+        } else {
+          sentTx = await this.pkpNftContract.write.mintNext(2, {
+            value: mintCost,
+          });
+        }
+
+        console.log('sentTx:', sentTx);
+
+        const res: any = await sentTx.wait();
+        console.log('res:', res);
+
+        let events = 'events' in res ? res.events : res.logs;
 
         let tokenIdFromEvent;
 
-        // mumbai
-        tokenIdFromEvent = res.events[1].topics[3];
+        tokenIdFromEvent = events[1].topics[3];
         console.warn('tokenIdFromEvent:', tokenIdFromEvent);
 
-        return { tx, tokenId: tokenIdFromEvent };
+        return { tx: sentTx, tokenId: tokenIdFromEvent };
       },
     },
   };
@@ -579,6 +729,12 @@ export class LitContracts {
         tokenId: string,
         address: string
       ): Promise<boolean> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.pkpPermissionsContract) {
           throw new Error('Contract is not available');
         }
@@ -596,6 +752,11 @@ export class LitContracts {
       getPermittedAddresses: async (
         tokenId: string
       ): Promise<Array<string>> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
         if (!this.pkpPermissionsContract) {
           throw new Error('Contract is not available');
         }
@@ -642,6 +803,12 @@ export class LitContracts {
        *
        */
       getPermittedActions: async (tokenId: any): Promise<Array<any>> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.pkpPermissionsContract) {
           throw new Error('Contract is not available');
         }
@@ -690,6 +857,12 @@ export class LitContracts {
         pkpId: string,
         ipfsId: string
       ): Promise<boolean> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.pkpPermissionsContract) {
           throw new Error('Contract is not available');
         }
@@ -723,6 +896,12 @@ export class LitContracts {
         pkpId: string,
         ipfsId: string
       ): Promise<any> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.pkpPermissionsContract || !this.pubkeyRouterContract) {
           throw new Error('Contract is not available');
         }
@@ -766,6 +945,12 @@ export class LitContracts {
         pkpId: string,
         ownerAddress: string
       ): Promise<any> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.pkpPermissionsContract) {
           throw new Error('Contract is not available');
         }
@@ -798,6 +983,12 @@ export class LitContracts {
         pkpId: string,
         ipfsId: string
       ): Promise<any> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.pkpPermissionsContract) {
           throw new Error('Contract is not available');
         }
@@ -848,6 +1039,12 @@ export class LitContracts {
        * }
        */
       getCapacityByIndex: async (index: number): Promise<any> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.rateLimitNftContract) {
           throw new Error('Contract is not available');
         }
@@ -881,6 +1078,12 @@ export class LitContracts {
        * }
        */
       getTokenURIByIndex: async (index: number): Promise<string> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.rateLimitNftContract) {
           throw new Error('Contract is not available');
         }
@@ -926,6 +1129,12 @@ export class LitContracts {
        * }
        */
       getTokensByOwnerAddress: async (ownerAddress: string): Promise<any> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.rateLimitNftContract) {
           throw new Error('Contract is not available');
         }
@@ -1011,6 +1220,12 @@ export class LitContracts {
        * }
        */
       getTokens: async (): Promise<any> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.rateLimitNftContract) {
           throw new Error('Contract is not available');
         }
@@ -1065,6 +1280,12 @@ export class LitContracts {
         };
         timestamp: number;
       }) => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.rateLimitNftContract) {
           throw new Error('Contract is not available');
         }
@@ -1098,6 +1319,12 @@ export class LitContracts {
         toAddress: string;
         RLITokenAddress: string;
       }): Promise<any> => {
+        if (!this.connected) {
+          throw new Error(
+            'Contracts are not connected. Please call connect() first'
+          );
+        }
+
         if (!this.rateLimitNftContract) {
           throw new Error('Contract is not available');
         }

@@ -99,12 +99,12 @@ const generatedStrs = {
             ${varNameCamel}.address,
             ${varNameCamel}.abi as any,
             this.provider
-        ) as unknown as ${varNameContractCamel}.ContractContext).connect(this.provider),
+        ) as unknown as ${varNameContractCamel}.ContractContext),
         write: (new ethers.Contract(
             ${varNameCamel}.address,
             ${varNameCamel}.abi as any,
-            this.provider
-        ) as unknown as ${varNameContractCamel}.ContractContext).connect(this.provider)
+            this.signer
+        ) as unknown as ${varNameContractCamel}.ContractContext)
     };`;
         return importStr;
     }).join('\n\n'),
@@ -174,23 +174,41 @@ export interface Arrayish {
 }
 `, true);
 await asyncForEach(contextFiles, async (fileName, i) => {
+
+    // pure file name
+    const fileNamePure = fileName.replace('.ts', '');
+
     // path
     const filePath = `./packages/contracts-sdk/src/abis/${fileName}`;
 
     // read file
     const fileContent = await readFile(filePath);
 
-    const newContent = fileContent.replace(
+    let newContent;
+
+    newContent = fileContent.replace(
         `import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils';`,
-        `import { BigNumber, BigNumberish } from 'ethers';
-        
-        export interface Arrayish {
-            toHexString(): string;
-            slice(start?: number, end?: number): Arrayish;
-            length: number;
-            [index: number]: number;
-        }
-        `)
+        `
+// --- Replaced Content ---
+import { TransactionRequest } from "@ethersproject/abstract-provider";
+import { BigNumber, BigNumberish } from 'ethers';
+
+export interface Arrayish {
+    toHexString(): string;
+    slice(start?: number, end?: number): Arrayish;
+    length: number;
+    [index: number]: number;
+}
+
+export type ContractContext = ContractContextLegacy & {
+    populateTransaction: ContractContextLegacy
+}
+// --- Replaced Content ---`)
+
+newContent = newContent
+.replace('export type ContractContext = EthersContractContext<', 'export type ContractContextLegacy = EthersContractContext<')
+.replaceAll('Promise<ContractTransaction>', 'Promise<ContractTransaction & TransactionRequest>');
+
 
     // write file
     await writeFile(filePath, newContent);

@@ -1,16 +1,23 @@
 import { ContractTransaction } from 'ethers';
+
+// --- Replaced Content ---
+import { TransactionRequest } from "@ethersproject/abstract-provider";
 import { BigNumber, BigNumberish } from 'ethers';
-        
-        export interface Arrayish {
-            toHexString(): string;
-            slice(start?: number, end?: number): Arrayish;
-            length: number;
-            [index: number]: number;
-        }
-        
+
+export interface Arrayish {
+    toHexString(): string;
+    slice(start?: number, end?: number): Arrayish;
+    length: number;
+    [index: number]: number;
+}
+
+export type ContractContext = ContractContextLegacy & {
+    populateTransaction: ContractContextLegacy
+}
+// --- Replaced Content ---
 import { EthersContractContext } from 'ethereum-abi-types-generator';
 
-export type ContractContext = EthersContractContext<
+export type ContractContextLegacy = EthersContractContext<
   AccessControlConditions,
   AccessControlConditionsEventsContext,
   AccessControlConditionsEvents
@@ -117,7 +124,7 @@ export interface AccessControlConditions {
    * StateMutability: nonpayable
    * Type: constructor
    */
-  'new'(overrides?: ContractTransactionOverrides): Promise<ContractTransaction>;
+  'new'(overrides?: ContractTransactionOverrides): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: true
@@ -144,7 +151,7 @@ export interface AccessControlConditions {
    */
   renounceOwnership(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -155,7 +162,7 @@ export interface AccessControlConditions {
   setSigner(
     newSigner: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: true
@@ -181,7 +188,7 @@ export interface AccessControlConditions {
     chainId: BigNumberish,
     permanent: boolean,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -202,7 +209,7 @@ export interface AccessControlConditions {
     permanent: boolean,
     creatorAddress: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: true
@@ -224,5 +231,5 @@ export interface AccessControlConditions {
   transferOwnership(
     newOwner: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
 }

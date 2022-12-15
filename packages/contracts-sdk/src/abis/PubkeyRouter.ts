@@ -1,16 +1,23 @@
 import { ContractTransaction } from 'ethers';
+
+// --- Replaced Content ---
+import { TransactionRequest } from "@ethersproject/abstract-provider";
 import { BigNumber, BigNumberish } from 'ethers';
-        
-        export interface Arrayish {
-            toHexString(): string;
-            slice(start?: number, end?: number): Arrayish;
-            length: number;
-            [index: number]: number;
-        }
-        
+
+export interface Arrayish {
+    toHexString(): string;
+    slice(start?: number, end?: number): Arrayish;
+    length: number;
+    [index: number]: number;
+}
+
+export type ContractContext = ContractContextLegacy & {
+    populateTransaction: ContractContextLegacy
+}
+// --- Replaced Content ---
 import { EthersContractContext } from 'ethereum-abi-types-generator';
 
-export type ContractContext = EthersContractContext<
+export type ContractContextLegacy = EthersContractContext<
   PubkeyRouter,
   PubkeyRouterEventsContext,
   PubkeyRouterEvents
@@ -143,7 +150,7 @@ export interface PubkeyRouter {
   'new'(
     _pkpNft: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: true
@@ -243,7 +250,7 @@ export interface PubkeyRouter {
    */
   renounceOwnership(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -254,7 +261,7 @@ export interface PubkeyRouter {
   setPkpNftAddress(
     newPkpNftAddress: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -271,7 +278,7 @@ export interface PubkeyRouter {
     stakingContract: string,
     keyType: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -282,7 +289,7 @@ export interface PubkeyRouter {
   transferOwnership(
     newOwner: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -299,5 +306,5 @@ export interface PubkeyRouter {
     stakingContract: string,
     keyType: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
 }
