@@ -230,9 +230,9 @@ const Test1 = () => {
     console.log('res:', res);
   };
 
-  // =======================================
+  // =================================================
   //          PKPWallet as Signer With Util
-  // =======================================
+  // =================================================
   const mintWithPKPWalletUtil = async () => {
     console.warn('\n\nPKPWallet as Signer\n\n\n');
 

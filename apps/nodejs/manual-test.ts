@@ -175,9 +175,9 @@ const mintWithPKPWalletUtil = async () => {
   console.log('tokenId:', tokenId);
 };
 
-// ==================================
-//          Get util stuff
-// ==================================
+// =================================================
+//          PKPWallet as Signer With Util                                    
+// =================================================
 const getUtilStuff = async () => {
   const pkpWallet = await setupPKP();
 
@@ -214,7 +214,7 @@ export const manualTest = async () => {
   // useRandomPrivateKey();
   // useCustomPrivateKey();
   // mintWithPKPWallet();
-  // mintWithPKPWalletUtil();
+  mintWithPKPWalletUtil();
   // useCustomSigner();
   // getUtilStuff();
   // console.log('test:', test);
