@@ -1,14 +1,27 @@
 import * as LitJsSdk from 'dist/packages/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { PKPWallet } from '@lit-protocol/pkp-ethers.js';
-import { useEffect } from 'react';
 import { ethers } from 'ethers';
 
+// ***********************************************
+//          Configuration for this test
+// ***********************************************
 const TEST_FUNDED_PRIVATE_KEY =
   '3dfb4f70b15b6fccc786347aaea445f439a7f10fd10c55dd50cafc3d5a0abac1';
+const PKP_PUBKEY =
+  '0x0447972cdf33b1b0329c3ddeea661c023e6b251d8b1aeaa92da881cc6d0d1eff22c2cbd6a5fead8ba860064881cdaabd7176ca2cade0d50829460d729bd13514f3';
+const CONTROLLER_AUTHSIG = {
+  sig: '0x694a3ff6e16ab7d7189b7507df9b73ec118d1966abad7f0e3984df19991ddc2d558abca2fcc5b4acfb710d455c63ca2ad538f4d603d64bd93a1f124b119eac031b',
+  derivedVia: 'web3.eth.personal.sign',
+  signedMessage:
+    'demo-encrypt-decrypt-react.vercel.app wants you to sign in with your Ethereum account:\n0x1cD4147AF045AdCADe6eAC4883b9310FD286d95a\n\n\nURI: https://demo-encrypt-decrypt-react.vercel.app/\nVersion: 1\nChain ID: 1\nNonce: MrgYgnIW5yHCTKetV\nIssued At: 2022-12-14T02:29:48.420Z\nExpiration Time: 2022-12-21T02:29:48.401Z',
+  address: '0x1cd4147af045adcade6eac4883b9310fd286d95a',
+};
 
 const Test1 = () => {
-  // ========== zipAndEncryptString ==========
+  // =======================================
+  //          zipAndEncryptString
+  // =======================================
   const zipAndEncryptString = async () => {
     const litNodeClient = new LitJsSdk.LitNodeClient({
       litNetwork: 'serrano',
@@ -36,16 +49,6 @@ const Test1 = () => {
   //          PKP Setup
   // =============================
   const setupPKP = async () => {
-    const PKP_PUBKEY =
-      '0x0447972cdf33b1b0329c3ddeea661c023e6b251d8b1aeaa92da881cc6d0d1eff22c2cbd6a5fead8ba860064881cdaabd7176ca2cade0d50829460d729bd13514f3';
-    const CONTROLLER_AUTHSIG = {
-      sig: '0x694a3ff6e16ab7d7189b7507df9b73ec118d1966abad7f0e3984df19991ddc2d558abca2fcc5b4acfb710d455c63ca2ad538f4d603d64bd93a1f124b119eac031b',
-      derivedVia: 'web3.eth.personal.sign',
-      signedMessage:
-        'demo-encrypt-decrypt-react.vercel.app wants you to sign in with your Ethereum account:\n0x1cD4147AF045AdCADe6eAC4883b9310FD286d95a\n\n\nURI: https://demo-encrypt-decrypt-react.vercel.app/\nVersion: 1\nChain ID: 1\nNonce: MrgYgnIW5yHCTKetV\nIssued At: 2022-12-14T02:29:48.420Z\nExpiration Time: 2022-12-21T02:29:48.401Z',
-      address: '0x1cd4147af045adcade6eac4883b9310fd286d95a',
-    };
-
     const pkpWallet = new PKPWallet({
       pkpPubKey: PKP_PUBKEY,
       controllerAuthSig: CONTROLLER_AUTHSIG,
@@ -64,10 +67,6 @@ const Test1 = () => {
   //          Business Logic
   // ==================================
   const runLogic = async (contract: LitContracts) => {
-    // -------------------------------------
-    //          Logic starts here
-    // -------------------------------------
-
     let mintCost;
     let tx;
 
@@ -101,6 +100,9 @@ const Test1 = () => {
       return;
     }
 
+    // -------------------------------------------
+    //          regular minting process
+    // -------------------------------------------
     try {
       mintCost = await contract.pkpNftContract.read.mintCost();
       console.log('mintCost:', mintCost.toString());
@@ -267,6 +269,9 @@ const Test1 = () => {
     console.log('tokens:', tokens);
   };
 
+  // *****************************
+  //          HTML AREA
+  // *****************************
   return (
     <>
       <h1>(Manual) React Test</h1>
