@@ -218,7 +218,11 @@ export interface JsonExecutionRequest {
   // The IPFS ID of some JS code to run on the nodes
   ipfsId?: string;
 
-  sessionSigs?: any
+  // the session signatures to use to authorize the user with the nodes
+  sessionSigs?: any;
+
+  // random request id
+  requestId: string;
 }
 
 /**
@@ -370,10 +374,10 @@ export interface JsonSaveEncryptionKeyRequest {
   permanant?: number;
   permanent?: number;
 
-  sessionSigs?: any,
+  sessionSigs?: any;
 }
 
-export interface SingConditionECDSA {
+export interface SignConditionECDSA {
   accessControlConditions: any;
   evmContractConditions: undefined;
   solRpcConditions: undefined;
@@ -690,15 +694,15 @@ export interface SessionRequestBody {
   siweMessage: string;
 }
 
-export interface WalletSig{
+export interface WalletSig {
   signedMessage: string;
   sig: any;
 }
 
-export interface SessionSigningTemplate{
-  sessionKey: string,
-  resources: any[],
-  capabilities: any[],
-  issuedAt: string,
-  expiration: string,
+export interface SessionSigningTemplate {
+  sessionKey: string;
+  resources: any[];
+  capabilities: any[];
+  issuedAt: string;
+  expiration: string;
 }

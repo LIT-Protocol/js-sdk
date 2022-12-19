@@ -52,7 +52,7 @@ import {
   SignWithECDSA,
   SigShare,
   SIGTYPE,
-  SingConditionECDSA,
+  SignConditionECDSA,
   SuccessNodePromises,
   SupportedJsonRequests,
   ValidateAndSignECDSA,
@@ -233,6 +233,7 @@ export class LitNodeClient {
     const reqBody: JsonExecutionRequest = {
       authSig: params.authSig,
       jsParams: convertLitActionsParams(params.jsParams),
+      requestId: Math.random().toString(16).slice(2),
     };
 
     if (params.code) {
@@ -722,7 +723,7 @@ export class LitNodeClient {
    */
   signConditionEcdsa = async (
     url: string,
-    params: SingConditionECDSA
+    params: SignConditionECDSA
   ): Promise<NodeCommandResponse> => {
     log('signConditionEcdsa');
     const urlWithPath = `${url}/web/signing/signConditionEcdsa`;
