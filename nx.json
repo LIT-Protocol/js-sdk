@@ -62,5 +62,5 @@
       "unitTestRunner": "jest"
     }
   },
-  "defaultProject": "example-nextjs-js"
+  "defaultProject": "lit-node-client"
 }
