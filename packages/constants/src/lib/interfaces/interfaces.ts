@@ -222,7 +222,7 @@ export interface JsonExecutionRequest {
   sessionSigs?: any;
 
   // random request id
-  requestId: string;
+  requestId?: string;
 }
 
 /**
