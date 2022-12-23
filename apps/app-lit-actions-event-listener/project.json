@@ -1,0 +1,65 @@
+{
+  "name": "app-lit-actions-event-listener",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/app-lit-actions-event-listener",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "root": "apps/app-lit-actions-event-listener",
+        "outputPath": "dist/apps/app-lit-actions-event-listener"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "apps/app-lit-actions-event-listener"
+        },
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "app-lit-actions-event-listener:build",
+        "dev": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "app-lit-actions-event-listener:build:development",
+          "dev": true
+        },
+        "production": {
+          "buildTarget": "app-lit-actions-event-listener:build:production",
+          "dev": false
+        }
+      }
+    },
+    "export": {
+      "executor": "@nrwl/next:export",
+      "options": {
+        "buildTarget": "app-lit-actions-event-listener:build:production"
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/app-lit-actions-event-listener"],
+      "options": {
+        "jestConfig": "apps/app-lit-actions-event-listener/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "apps/app-lit-actions-event-listener/**/*.{ts,tsx,js,jsx}"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

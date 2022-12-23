@@ -3,11 +3,15 @@
   "version": 2,
   "projects": {
     "access-control-conditions": "packages/access-control-conditions",
+    "app-lit-actions-event-listener": "apps/app-lit-actions-event-listener",
     "auth-browser": "packages/auth-browser",
     "bls-sdk": "packages/bls-sdk",
     "constants": "packages/constants",
     "contracts-sdk": "packages/contracts-sdk",
     "crypto": "packages/crypto",
+    "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react",
+    "demo-encrypt-decrypt-react": "apps/demo-encrypt-decrypt-react",
+    "demo-pkp-ethers-react": "apps/demo-pkp-ethers-react",
     "e2e": "apps/e2e",
     "ecdsa-sdk": "packages/ecdsa-sdk",
     "encryption": "packages/encryption",
@@ -18,9 +22,6 @@
     "nacl": "packages/nacl",
     "nodejs": "apps/nodejs",
     "react": "apps/react",
-    "uint8arrays": "packages/uint8arrays",
-    "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react",
-    "demo-pkp-ethers-react": "apps/demo-pkp-ethers-react",
-    "demo-encrypt-decrypt-react": "apps/demo-encrypt-decrypt-react"
+    "ui": "packages/ui"
   }
 }

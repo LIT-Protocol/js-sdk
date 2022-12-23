@@ -3,11 +3,8 @@ import { useEffect, useRef } from 'react';
 
 import * as LitJsSdk_accessControlConditions from 'dist/packages/access-control-conditions';
 import * as LitJsSdk_authBrowser from 'dist/packages/auth-browser';
-import * as LitJsSdk_blsSdk from 'dist/packages/bls-sdk';
-import * as LitJsSdk_constants from 'dist/packages/constants';
 import * as LitJsSdk_contractsSdk from 'dist/packages/contracts-sdk';
 import * as LitJsSdk_crypto from 'dist/packages/crypto';
-import * as LitJsSdk_ecdsaSdk from 'dist/packages/ecdsa-sdk';
 import * as LitJsSdk_encryption from 'dist/packages/encryption';
 import * as LitJsSdk_litNodeClient from 'dist/packages/lit-node-client';
 import * as LitJsSdk_misc from 'dist/packages/misc';
@@ -19,11 +16,8 @@ declare global {
   interface Window {
     LitJsSdk_accessControlConditions: any;
     LitJsSdk_authBrowser: any;
-    LitJsSdk_blsSdk: any;
-    LitJsSdk_constants: any;
     LitJsSdk_contractsSdk: any;
     LitJsSdk_crypto: any;
-    LitJsSdk_ecdsaSdk: any;
     LitJsSdk_encryption: any;
     LitJsSdk_litNodeClient: any;
     LitJsSdk_misc: any;
@@ -187,150 +181,6 @@ export function App() {
 
     
     
-        if(typeof LitJsSdk_blsSdk === 'undefined') {
-            console.error("LitJsSdk_blsSdk:", LitJsSdk_blsSdk);
-        }else{
-            console.warn("LitJsSdk_blsSdk:", LitJsSdk_blsSdk);
-            window.LitJsSdk_blsSdk = LitJsSdk_blsSdk;
-        }
-        window.addEventListener('load', function() {
-
-            var root = document.getElementById('root');
-            var result = document.getElementById('result');
-            var entries = Object.entries(LitJsSdk_blsSdk);
-            var lis = entries.map(([key, value]) => `
-            <li>
-                <div id="LitJsSdk_blsSdk_${key}" class="key" onClick="(async (e) => {
-                    var fn = LitJsSdk_blsSdk['${key}'];
-                    var fnType = typeof fn;
-                    console.warn('[${key}] is type of [' + fnType + ']');
-
-                    if ( fnType === 'string' ) return;
-
-                    if( fnType === 'function' ){
-                        try{
-                            console.log('params:', globalThis.params);
-
-                            var res;
-                            try{
-                                res = new fn(globalThis.params);
-                            }catch{
-                                res = await fn(globalThis.params);
-                            }
-                            window.output = res;
-                            res = JSON.stringify(res, null, 2);
-                            result.innerText = res;
-                            console.log(res);
-                        }catch(e){
-                            console.error('Please set the [params] variable in the console then click again');
-                            console.log(e);
-                        }
-                        return;
-                    }
-
-                    if( fnType === 'object' ){
-                        var res = await fn;
-                        window.output = res;
-                        res = JSON.stringify(res, null, 2);
-                        result.innerText = res;
-                        console.log(res);
-                        return;
-                    }
-                    
-                    
-                })();">${key}</div>
-                <pre class="code">
-<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
-                </pre>
-            </li>`);
-            lis = lis.join(' ');
-            var template = `
-            <div class="cat">
-                <h1>LitJsSdk_blsSdk has ${entries.length} functions</h1>
-                    <ul>
-                        ${ lis }
-                    </ul>
-                </div>
-            `;
-            root.insertAdjacentHTML('beforeend', template);
-        });
-    
-    
-
-    
-    
-        if(typeof LitJsSdk_constants === 'undefined') {
-            console.error("LitJsSdk_constants:", LitJsSdk_constants);
-        }else{
-            console.warn("LitJsSdk_constants:", LitJsSdk_constants);
-            window.LitJsSdk_constants = LitJsSdk_constants;
-        }
-        window.addEventListener('load', function() {
-
-            var root = document.getElementById('root');
-            var result = document.getElementById('result');
-            var entries = Object.entries(LitJsSdk_constants);
-            var lis = entries.map(([key, value]) => `
-            <li>
-                <div id="LitJsSdk_constants_${key}" class="key" onClick="(async (e) => {
-                    var fn = LitJsSdk_constants['${key}'];
-                    var fnType = typeof fn;
-                    console.warn('[${key}] is type of [' + fnType + ']');
-
-                    if ( fnType === 'string' ) return;
-
-                    if( fnType === 'function' ){
-                        try{
-                            console.log('params:', globalThis.params);
-
-                            var res;
-                            try{
-                                res = new fn(globalThis.params);
-                            }catch{
-                                res = await fn(globalThis.params);
-                            }
-                            window.output = res;
-                            res = JSON.stringify(res, null, 2);
-                            result.innerText = res;
-                            console.log(res);
-                        }catch(e){
-                            console.error('Please set the [params] variable in the console then click again');
-                            console.log(e);
-                        }
-                        return;
-                    }
-
-                    if( fnType === 'object' ){
-                        var res = await fn;
-                        window.output = res;
-                        res = JSON.stringify(res, null, 2);
-                        result.innerText = res;
-                        console.log(res);
-                        return;
-                    }
-                    
-                    
-                })();">${key}</div>
-                <pre class="code">
-<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
-                </pre>
-            </li>`);
-            lis = lis.join(' ');
-            var template = `
-            <div class="cat">
-                <h1>LitJsSdk_constants has ${entries.length} functions</h1>
-                    <ul>
-                        ${ lis }
-                    </ul>
-                </div>
-            `;
-            root.insertAdjacentHTML('beforeend', template);
-        });
-    
-    
-
-    
-    
         if(typeof LitJsSdk_contractsSdk === 'undefined') {
             console.error("LitJsSdk_contractsSdk:", LitJsSdk_contractsSdk);
         }else{
@@ -463,78 +313,6 @@ export function App() {
             var template = `
             <div class="cat">
                 <h1>LitJsSdk_crypto has ${entries.length} functions</h1>
-                    <ul>
-                        ${ lis }
-                    </ul>
-                </div>
-            `;
-            root.insertAdjacentHTML('beforeend', template);
-        });
-    
-    
-
-    
-    
-        if(typeof LitJsSdk_ecdsaSdk === 'undefined') {
-            console.error("LitJsSdk_ecdsaSdk:", LitJsSdk_ecdsaSdk);
-        }else{
-            console.warn("LitJsSdk_ecdsaSdk:", LitJsSdk_ecdsaSdk);
-            window.LitJsSdk_ecdsaSdk = LitJsSdk_ecdsaSdk;
-        }
-        window.addEventListener('load', function() {
-
-            var root = document.getElementById('root');
-            var result = document.getElementById('result');
-            var entries = Object.entries(LitJsSdk_ecdsaSdk);
-            var lis = entries.map(([key, value]) => `
-            <li>
-                <div id="LitJsSdk_ecdsaSdk_${key}" class="key" onClick="(async (e) => {
-                    var fn = LitJsSdk_ecdsaSdk['${key}'];
-                    var fnType = typeof fn;
-                    console.warn('[${key}] is type of [' + fnType + ']');
-
-                    if ( fnType === 'string' ) return;
-
-                    if( fnType === 'function' ){
-                        try{
-                            console.log('params:', globalThis.params);
-
-                            var res;
-                            try{
-                                res = new fn(globalThis.params);
-                            }catch{
-                                res = await fn(globalThis.params);
-                            }
-                            window.output = res;
-                            res = JSON.stringify(res, null, 2);
-                            result.innerText = res;
-                            console.log(res);
-                        }catch(e){
-                            console.error('Please set the [params] variable in the console then click again');
-                            console.log(e);
-                        }
-                        return;
-                    }
-
-                    if( fnType === 'object' ){
-                        var res = await fn;
-                        window.output = res;
-                        res = JSON.stringify(res, null, 2);
-                        result.innerText = res;
-                        console.log(res);
-                        return;
-                    }
-                    
-                    
-                })();">${key}</div>
-                <pre class="code">
-<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
-                </pre>
-            </li>`);
-            lis = lis.join(' ');
-            var template = `
-            <div class="cat">
-                <h1>LitJsSdk_ecdsaSdk has ${entries.length} functions</h1>
                     <ul>
                         ${ lis }
                     </ul>
@@ -1056,7 +834,7 @@ pre {
                     `,
                 }}
             />
-            (REACT) THIS FILE IS AUTOMATICALLY GENERATED FROM tools/scripts/gen-react.mjs
+            (REACT) THIS FILE IS AUTOMATICALLY GENERATED FROM tools/scripts/gen-react.mjs Fri, 23 Dec 2022 01:52:22 GMT
             <div id="root"></div>
              <pre><code id="result"></code></pre>
         </>
