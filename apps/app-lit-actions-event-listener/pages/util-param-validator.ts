@@ -6,7 +6,6 @@ export const validateParams = (type: string, params: Array<any>) => {
 
     const paramName = Object.entries(param)[0][0];
     let validated: boolean = false;
-    let msg: string;
 
     if (type === 'must_have') {
       validated = value !== undefined && value !== null && value !== '';

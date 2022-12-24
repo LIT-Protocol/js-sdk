@@ -790,6 +790,11 @@ if (OPTION === '--dev') {
             spawnListener('yarn nx run html:serve', {}, '[html]', 33);
         }, 2000);
     }
+
+    if(TYPE === 'lit-actions'){
+        spawnListener('node apps/api-lit-actions-event-listener/main.js', {}, '[express]', 31);
+        spawnListener('yarn nx run app-lit-actions-event-listener:serve', {}, '[nextjs]', 32);
+    }
 }
 
 if (OPTION === '--watch') {

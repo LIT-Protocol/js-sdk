@@ -22,6 +22,8 @@
     "nacl": "packages/nacl",
     "nodejs": "apps/nodejs",
     "react": "apps/react",
-    "ui": "packages/ui"
+    "ui": "packages/ui",
+    "uint8arrays": "packages/uint8arrays",
+    "api-lit-actions-event-listener": "apps/api-lit-actions-event-listener"
   }
 }

@@ -28,6 +28,9 @@
     var(--brand-primary2) 100%
   );
   --border-radius: 12px;
+  --red: rgb(193, 9, 9);
+  --green: rgb(0, 128, 0);
+  --animate-1: 0.3s cubic-bezier(0.075, 0.82, 0.165, 1) all;
 }
 html,
 body {
@@ -63,16 +66,16 @@ body {
 .flex-col {
   flex-direction: column;
 }
-.flex{
+.flex {
   display: flex;
 }
-.space-between{
+.space-between {
   justify-content: space-between;
 }
-.gap-12{
-  gap:12px;
+.gap-12 {
+  gap: 12px;
 }
-.w-full{
+.w-full {
   width: 100%;
 }
 .h-3 {
@@ -118,7 +121,7 @@ body {
   padding: 24px;
   margin: auto;
   max-width: 600px;
-  width: 100%;
+  /* width: 100%; */
   display: flex;
   flex-direction: column;
 }
@@ -136,6 +139,61 @@ body {
   background: #1e1e1e;
   padding: 12px;
   box-sizing: border-box;
+}
+.cls-message {
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 14px;
+}
+.red.cls-message {
+  border: 1px solid var(--red);
+  color: var(--red);
+}
+.green.cls-message {
+  border: 1px solid var(--green);
+  color: var(--green);
+}
+.DEBUG {
+  z-index: -1;
+  position: fixed;
+  color: white;
+  font-size: 12px;
+  padding: 4px;
+  width: 250px;
+  border: 2px solid black;
+  border-radius: 12px;
+  margin: 12px;
+  visibility: hidden;
+  transition: var(--animate-1);
+  opacity: 0;
+  pointer-events: none;
+}
+.DEBUG ul {
+  padding: 0;
+}
+.DEBUG ul li {
+  border-bottom: 1px solid white;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.DEBUG ul li:nth-child(odd) {
+  background-color: #8c40b5;
+}
+
+.debug .DEBUG {
+  pointer-events: all;
+  opacity: 1;
+  visibility: visible;
+}
+.wrapper-message {
+  visibility: hidden;
+  height: 0;
+  transition: var(--animate-1);
+}
+.active.wrapper-message {
+  visibility: visible;
+  /* max-height: auto; */
+  height: 68px;
 }
 /* 
 // --------------------------
@@ -190,13 +248,13 @@ input {
   box-shadow: 0 0 0 2px black;
 }
 
-
 /* reset */
 button {
   all: unset;
 }
 
-.SelectTrigger, .button {
+.SelectTrigger,
+.button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -212,7 +270,8 @@ button {
   box-shadow: 0 2px 10px var(--blackA7);
   cursor: pointer;
 }
-.SelectTrigger:hover, .button:hover {
+.SelectTrigger:hover,
+.button:hover {
   background-color: var(--mauve3);
 }
 .SelectTrigger:focus {
@@ -317,7 +376,8 @@ button {
 .ToastRoot {
   background-color: white;
   border-radius: 6px;
-  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
   padding: 15px;
   display: flex;
   grid-template-areas: 'title action' 'description action';
@@ -424,7 +484,7 @@ button {
   color: var(--green11);
   box-shadow: inset 0 0 0 1px var(--green7);
 }
-.Button.red{
+.Button.red {
   background-color: var(--red2);
   color: var(--red11);
   box-shadow: inset 0 0 0 1px var(--red7);
@@ -445,7 +505,8 @@ button {
 .AlertDialogContent {
   background-color: white;
   border-radius: 6px;
-  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px,
+    hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
   position: fixed;
   top: 50%;
   left: 50%;

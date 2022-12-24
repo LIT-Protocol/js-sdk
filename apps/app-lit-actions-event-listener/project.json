@@ -24,7 +24,8 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "app-lit-actions-event-listener:build",
-        "dev": true
+        "dev": true,
+        "proxyConfig": "apps/app-lit-actions-event-listener/proxy.conf.json"
       },
       "configurations": {
         "development": {

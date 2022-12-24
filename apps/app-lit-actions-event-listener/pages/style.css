@@ -1,29 +1,10 @@
-.cls-message{
-    border-radius: 12px;
-    padding: 12px;
-    font-size: 14px;
-}
-.red.cls-message{
-    border: 1px solid rgb(193, 9, 9);
-    color: rgb(193, 9, 9);
-}
-.green.cls-message{
-    border: 1px solid rgb(0, 128, 0);
-    color: rgb(0, 128, 0);
-}
-.DEBUG{
+.logo{
     position: fixed;
-    color: white;
-    font-size: 12px;
-    padding: 4px;
+    left: 12px;
+    top: 12px;
+    opacity: 0.1;
+    filter: blur(1px)
 }
-.wrapper-message{
-    visibility: hidden;
-    height: 0;
-    transition: 0.3s cubic-bezier(0.075, 0.82, 0.165, 1) all;
-}
-.active.wrapper-message{
-    visibility: visible;
-    /* max-height: auto; */
-    height: 68px;
+.logo svg {
+  color: white;
 }

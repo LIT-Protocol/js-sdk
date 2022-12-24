@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@ceramicnetwork/http-client": "^2.12.0",
+    "@ceramicnetwork/stream-tile": "^2.11.0",
+    "@lit-protocol/lit-node-client": "^2.0.40",
+    "body-parser": "^1.20.1",
+    "dids": "^3.4.0",
+    "express": "^4.18.2",
+    "key-did-provider-ed25519": "^2.0.1",
+    "key-did-resolver": "^2.3.0"
+  }
+}
