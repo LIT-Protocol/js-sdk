@@ -1,5 +1,5 @@
 // -- ceramic
-import { CeramicClient } from '@ceramicnetwork/http-client'
+import { CeramicClient } from '@ceramicnetwork/http-client';
 import { authenticateCeramic, createDocument } from './ceramic-helper.js';
 
 // -- lit
@@ -18,7 +18,7 @@ const router = express.Router();
 let litNodeClient;
 let ceramic;
 const SEED = 'a8c6322d6a0caaf5cc62c242574a123d96f1fd22a4030120eb38f65df128abf1';
-const SIZE_LIMIT = '250kb';
+const SIZE_LIMIT = '1024kb'; // 1mb hard limit
 
 // --------------------------------
 //          Server Setup
@@ -62,7 +62,8 @@ app.get('/api', (req, res) => {
 //          Post Requests
 // ---------------------------------
 router.post('/api/register', async (req, res) => {
-  console.log("Registering...");
+  console.log('Registering...');
+
   if (!serverReady()) {
     res.status(500).send({ message: 'Server is not ready' });
     return;

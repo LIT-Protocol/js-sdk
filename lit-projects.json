@@ -1,0 +1,59 @@
+{
+  "projects": {
+    "LitJsSdk": {
+      "type": "package",
+      "includes": [
+        {
+          "name": "access-control-conditions",
+          "dir": "./packages/access-control-conditions"
+        },
+        { "name": "auth-browser", "dir": "./packages/auth-browser" },
+        { "name": "bls-sdk", "dir": "./packages/bls-sdk" },
+        { "name": "constants", "dir": "./packages/constants" },
+        { "name": "crypto", "dir": "./packages/crypto" },
+        { "name": "ecdsa-sdk", "dir": "./packages/ecdsa-sdk" },
+        { "name": "encryption", "dir": "./packages/encryption" },
+        { "name": "lit-node-client", "dir": "./packages/lit-node-client" },
+        { "name": "misc", "dir": "./packages/misc" },
+        { "name": "misc-browser", "dir": "./packages/misc-browser" },
+        { "name": "nacl", "dir": "./packages/nacl" },
+        { "name": "uint8arrays", "dir": "./packages/uint8arrays" }
+      ]
+    },
+    "Lit Actions Event Listener": {
+      "type": "app",
+      "script": {
+        "dev:backend": "node apps/api-lit-actions-event-listener/main.js",
+        "dev:frontend": "yarn nx run app-lit-actions-event-listener:serve"
+      },
+      "includes": [
+        {
+          "name": "frontend",
+          "dir": "./apps/api-lit-actions-event-listener"
+        },
+        {
+          "name": "backend",
+          "dir": "./apps/app-lit-actions-event-listener"
+        }
+      ]
+    },
+    "Contracts SDK": {
+      "type": "package",
+      "includes": [
+        {
+          "name": "package",
+          "dir": "./packages/contracts-sdk"
+        }
+      ]
+    },
+    "UI/UX": {
+      "type": "package",
+      "includes": [
+        {
+          "name": "ui",
+          "dir": "./packages/ui"
+        }
+      ]
+    }
+  }
+}

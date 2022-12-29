@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "access-control-conditions": "packages/access-control-conditions",
+    "api-lit-actions-event-listener": "apps/api-lit-actions-event-listener",
     "app-lit-actions-event-listener": "apps/app-lit-actions-event-listener",
     "auth-browser": "packages/auth-browser",
     "bls-sdk": "packages/bls-sdk",
@@ -23,7 +24,6 @@
     "nodejs": "apps/nodejs",
     "react": "apps/react",
     "ui": "packages/ui",
-    "uint8arrays": "packages/uint8arrays",
-    "api-lit-actions-event-listener": "apps/api-lit-actions-event-listener"
+    "uint8arrays": "packages/uint8arrays"
   }
 }

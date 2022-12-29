@@ -35,11 +35,11 @@ export function Index() {
       type: 'label',
     },
     {
-      name: 'block event',
+      name: 'periodic event',
       enabled: true,
     },
     {
-      name: 'periodic event',
+      name: 'block event',
       enabled: true,
     },
     {
@@ -147,7 +147,7 @@ export function Index() {
     //   return;
     // }
 
-    const randomString = (length) => {
+    const randomString = (length: number) => {
       let result = '';
       const characters =
         'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

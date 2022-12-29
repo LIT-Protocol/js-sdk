@@ -1,0 +1,16 @@
+{
+  "name": "api-lit-actions-event-listener",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/api-lit-actions-event-listener/src",
+  "projectType": "application",
+  "targets": {
+
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node apps/api-lit-actions-event-listener/main.js"
+      }
+    }
+  },
+  "tags": []
+}
