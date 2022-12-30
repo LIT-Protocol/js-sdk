@@ -23,7 +23,7 @@
     "Lit Actions Event Listener": {
       "type": "app",
       "script": {
-        "dev:backend": "node apps/api-lit-actions-event-listener/main.js",
+        "dev:backend": "yarn nx run api-lit-actions-event-listener:serve",
         "dev:frontend": "yarn nx run app-lit-actions-event-listener:serve"
       },
       "includes": [

@@ -4,7 +4,10 @@
     "outDir": "../../dist/out-tsc",
     "module": "es6",
     "target": "ES6",
-    "types": ["node"]
+    "types": ["node"],
+    "sourceMap": false,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true
   },
   "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"],
   "include": ["**/*.ts"]

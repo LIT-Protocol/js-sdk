@@ -52,7 +52,7 @@ export const moveQueue = async ({
   // do a async for each
   jobs.forEach(async (job: Bull.Job) => {
     if (debug) {
-      Log.info(`...adding ${JSON.stringify(job.data)}`);
+      Log.info(`[MoveQueue] ...adding ${JSON.stringify(job.data)}`);
     }
 
     to.add(job.data);
@@ -65,5 +65,5 @@ export const moveQueue = async ({
     }
   });
 
-  Log.info(`moved ${jobs.length} jobs from ${from.name} to ${to.name}`);
+  Log.info(`[MoveQueue] moved ${jobs.length} jobs from ${from.name} to ${to.name}`);
 };

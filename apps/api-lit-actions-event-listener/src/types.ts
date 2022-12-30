@@ -1,4 +1,4 @@
-import * as Bull from "bull";
+import * as Bull from 'bull';
 
 export interface JobFilter {
   name: string;
@@ -7,6 +7,9 @@ export interface JobFilter {
 
 export interface ActionListener {
   filters: Array<JobFilter>;
+  start: any;
+  waitingList: Bull.Queue;
+  processList: Bull.Queue;
 }
 
 export type ActionEventParam = {};
