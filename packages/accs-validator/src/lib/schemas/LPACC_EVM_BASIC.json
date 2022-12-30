@@ -1,0 +1,96 @@
+{
+  "$id": "https://litprotocol.com/schemas/LPACC_EVM_BASIC.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LPACC_EVM_BASIC",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "contractAddress": {
+      "type": "string"
+    },
+    "chain": {
+      "enum": [
+        "ethereum",
+        "polygon",
+        "fantom",
+        "xdai",
+        "bsc",
+        "arbitrum",
+        "avalanche",
+        "fuji",
+        "harmony",
+        "kovan",
+        "mumbai",
+        "goerli",
+        "ropsten",
+        "rinkeby",
+        "cronos",
+        "optimism",
+        "celo",
+        "aurora",
+        "eluvio",
+        "alfajores",
+        "xdc",
+        "evmos",
+        "evmosTestnet"
+      ]
+    },
+    "standardContractType": {
+      "enum": [
+        "",
+        "ERC20",
+        "ERC721",
+        "ERC1155",
+        "POAP",
+        "timestamp",
+        "MolochDAOv2.1",
+        "ProofOfHumanity",
+        "SIWE"
+      ]
+    },
+    "method": {
+      "type": "string"
+    },
+    "parameters": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "returnValueTest": {
+      "type": "object",
+      "properties": {
+        "comparator": {
+          "enum": [
+            "contains",
+            "=",
+            ">",
+            ">=",
+            "<",
+            "<="
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "comparator",
+        "value"
+      ]
+    }
+  },
+  "required": [
+    "contractAddress",
+    "chain",
+    "standardContractType",
+    "method",
+    "parameters",
+    "returnValueTest"
+  ]
+}

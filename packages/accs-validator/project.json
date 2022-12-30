@@ -1,0 +1,81 @@
+{
+  "name": "accs-validator",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/accs-validator/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target accs-validator"
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/accs-validator",
+        "main": "packages/accs-validator/src/index.ts",
+        "tsConfig": "packages/accs-validator/tsconfig.lib.json",
+        "assets": [
+          "packages/accs-validator/*.md"
+        ]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_accsValidator",
+        "outfile": "dist/packages/accs-validator-vanilla/accs-validator.js",
+        "entryPoints": [
+          "./packages/accs-validator/src/index.ts"
+        ],
+        "define": {
+          "process.env.NODE_DEBUG": "false",
+          "global": "window"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/accs-validator/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/accs-validator"
+      ],
+      "options": {
+        "jestConfig": "packages/accs-validator/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "testWatch": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/accs-validator"
+      ],
+      "options": {
+        "jestConfig": "packages/accs-validator/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
+    }
+  },
+  "tags": []
+}

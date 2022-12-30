@@ -1,20 +1,37 @@
+import { LIT_NETWORKS } from './constants/constants';
 import {
-
-  LIT_NETWORKS,
-} from './constants/constants';
-import { AccsCOSMOSParams, AccsDefaultParams, AccsEVMParams, AccsOperatorParams, AccsRegularParams, AccsSOLV2Params, JsonEncryptionRetrieveRequest, JsonExecutionRequest, JsonSignChainDataRequest, JsonSigningRetrieveRequest } from './interfaces/interfaces';
+  AccsCOSMOSParams,
+  AccsDefaultParams,
+  AccsEVMParams,
+  AccsOperatorParams,
+  AccsRegularParams,
+  AccsSOLV2Params,
+  JsonEncryptionRetrieveRequest,
+  JsonExecutionRequest,
+  JsonSignChainDataRequest,
+  JsonSigningRetrieveRequest,
+} from './interfaces/interfaces';
 
 export type AccessControlConditions = AccsRegularParams[] | AccsDefaultParams[];
 
 export type EvmContractConditions = AccsEVMParams[];
 export type SolRpcConditions = AccsSOLV2Params[];
-export type UnifiedAccessControlConditions =
-  (AccsRegularParams
+export type UnifiedAccessControlCondition =
+  | AccsRegularParams
   | AccsDefaultParams
   | AccsEVMParams
   | AccsSOLV2Params
   | AccsCOSMOSParams
-  | AccsOperatorParams)[];
+  | AccsOperatorParams;
+
+export type UnifiedAccessControlConditions = (
+  | AccsRegularParams
+  | AccsDefaultParams
+  | AccsEVMParams
+  | AccsSOLV2Params
+  | AccsCOSMOSParams
+  | AccsOperatorParams
+)[];
 
 export type JsonRequest = JsonExecutionRequest | JsonSignChainDataRequest;
 
@@ -34,8 +51,8 @@ export type LITChainRequiredProps = {
   name: string;
   symbol: string;
   decimals: number;
-  rpcUrls: Array<String>;
-  blockExplorerUrls: Array<String>;
+  rpcUrls: Array<string>;
+  blockExplorerUrls: Array<string>;
   vmType: string;
 };
 
@@ -75,7 +92,16 @@ export type LITChain<T> = {
 
 export type LIT_NETWORKS_KEYS = keyof typeof LIT_NETWORKS;
 
-export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
+export type ConditionType =
+  | 'solRpc'
+  | 'evmBasic'
+  | 'evmContract'
+  | 'cosmos'
+  | string;
 
 // union type for all the different types of conditions
-export type ConditionItem = (AccsOperatorParams | AccsRegularParams | AccsDefaultParams | AccsSOLV2Params);
+export type ConditionItem =
+  | AccsOperatorParams
+  | AccsRegularParams
+  | AccsDefaultParams
+  | AccsSOLV2Params;

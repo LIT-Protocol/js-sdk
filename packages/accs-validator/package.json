@@ -1,0 +1,9 @@
+{
+  "name": "@lit-protocol/accs-validator",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/accs-validator"
+  }
+}

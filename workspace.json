@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "access-control-conditions": "packages/access-control-conditions",
+    "accs-validator": "packages/accs-validator",
     "api-lit-actions-event-listener": "apps/api-lit-actions-event-listener",
     "app-lit-actions-event-listener": "apps/app-lit-actions-event-listener",
     "auth-browser": "packages/auth-browser",
