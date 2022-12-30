@@ -274,6 +274,33 @@ button {
 .button:hover {
   background-color: var(--mauve3);
 }
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+.button2 {
+  border-color: #fff;
+  color: #fff;
+  display: block;
+  /* margin: 50px auto 0; */
+  background-color: transparent;
+  border: 1px solid;
+  border-radius: 28px;
+  cursor: pointer;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  line-height: 24px;
+  padding: 8px 32px;
+  text-transform: uppercase;
+  box-sizing: border-box;
+  margin: 4px;
+}
+
+.editor {
+  width: 50%;
+  position: fixed;
+  right: 0;
+}
 .SelectTrigger:focus {
   box-shadow: 0 0 0 2px black;
 }
@@ -596,4 +623,63 @@ button {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
   }
+}
+
+.App {
+  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #33257f;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  position: fixed;
+  left: 0;
+  width: 50%;
+  overflow: auto;
+  height: 100vh;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    /* zoom  */
+    transform: scale(1);
+    /* transform: rotate(0deg); */
+  }
+  to {
+    transform: scale(2);
+  }
+}
+
+a{
+  color: white;
+  text-decoration: none;
+}
+a:hover{
+  border-bottom: 1px solid white;
+}
+span{
+  font-size: 14px;
 }

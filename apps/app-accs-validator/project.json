@@ -1,0 +1,84 @@
+{
+  "name": "app-accs-validator",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/app-accs-validator/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/web:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "dist/apps/app-accs-validator",
+        "index": "apps/app-accs-validator/src/index.html",
+        "baseHref": "/",
+        "main": "apps/app-accs-validator/src/main.tsx",
+        "polyfills": "apps/app-accs-validator/src/polyfills.ts",
+        "tsConfig": "apps/app-accs-validator/tsconfig.app.json",
+        "assets": [
+          "apps/app-accs-validator/src/favicon.ico",
+          "apps/app-accs-validator/src/assets"
+        ],
+        "styles": ["apps/app-accs-validator/src/styles.css"],
+        "scripts": [],
+        "webpackConfig": "@nrwl/react/plugins/webpack"
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/app-accs-validator/src/environments/environment.ts",
+              "with": "apps/app-accs-validator/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/web:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "app-accs-validator:build",
+        "hmr": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "app-accs-validator:build:development"
+        },
+        "production": {
+          "buildTarget": "app-accs-validator:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/app-accs-validator/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/app-accs-validator"],
+      "options": {
+        "jestConfig": "apps/app-accs-validator/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
