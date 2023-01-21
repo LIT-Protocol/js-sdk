@@ -223,6 +223,9 @@ export interface JsonExecutionRequest {
 
   // random request id
   requestId?: string;
+
+  // whether to run this on a single node or many
+  singleNode?: boolean;
 }
 
 /**

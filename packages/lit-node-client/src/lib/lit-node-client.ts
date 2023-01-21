@@ -80,15 +80,18 @@ import {
 
 import { computeAddress } from '@ethersproject/transactions';
 import { SiweMessage } from 'lit-siwe';
-import { joinSignature } from 'ethers/lib/utils';
+import { joinSignature, sha256 } from 'ethers/lib/utils';
 import {
   checkAndSignAuthMessage,
   getSessionKeyUri,
   parseResource,
 } from '@lit-protocol/auth-browser';
+import { importer } from 'ipfs-unixfs-importer';
+import { MemoryBlockstore } from 'blockstore-core/memory';
 
 import { nacl } from '@lit-protocol/nacl';
 import { getStorageItem } from '@lit-protocol/misc-browser';
+import { BigNumber } from 'ethers';
 
 declare global {
   var litNodeClient: LitNodeClient;
@@ -234,6 +237,7 @@ export class LitNodeClient {
       authSig: params.authSig,
       jsParams: convertLitActionsParams(params.jsParams),
       requestId: Math.random().toString(16).slice(2),
+      singleNode: params.singleNode ?? false,
     };
 
     if (params.code) {
@@ -1028,6 +1032,87 @@ export class LitNodeClient {
   };
 
   /**
+   * Run lit action on a single deterministicly selected node. It's important that the nodes use the same deterministic selection algorithm.
+   *
+   * @param { JsonExecutionRequest } reqBody
+   *
+   * @returns { Promise<SuccessNodePromises | RejectedNodePromises> }
+   *
+   */
+  runOnSingleNode = async (
+    params: ExecuteJsProps
+  ): Promise<SuccessNodePromises> => {
+    const { code, authSig, jsParams, debug, sessionSigs, singleNode } = params;
+
+    // determine which node to run on
+    let ipfsId;
+    if (params.code) {
+      // hash the code to get IPFS id
+      const blockstore = new MemoryBlockstore();
+
+      let content;
+      if (typeof content === 'string') {
+        content = new TextEncoder().encode(content);
+      } else {
+        throwError({
+          message:
+            'Invalid code content type for single node execution.  Your code param must be a string',
+          error: LIT_ERROR.UNKNOWN_ERROR,
+        });
+      }
+
+      let lastCid;
+      for await (const { cid } of importer([{ content }], blockstore, {
+        onlyHash: true,
+      })) {
+        lastCid = cid;
+      }
+
+      ipfsId = lastCid;
+    } else {
+      ipfsId = params.ipfsId;
+    }
+
+    // should we mix in the jsParams?  to do this, we need a canonical way to serialize the jsParams object that will be identical in rust.
+    // const jsParams = params.jsParams || {};
+    // const jsParamsString = JSON.stringify(jsParams);
+
+    const hash = await sha256(`${ipfsId}`);
+    const hashAsNumber = BigNumber.from(hash);
+
+    // FIXME: we are using this.config.bootstrapUrls to pick the selected node, but we
+    // should be using something like the list of nodes from the staking contract
+    // because the staking nodes can change, and the rust code will use the same list
+    const nodeIndex = hashAsNumber
+      .mod(this.config.bootstrapUrls.length)
+      .toNumber();
+    const url = this.config.bootstrapUrls[nodeIndex];
+
+    log(`running on node ${nodeIndex} at ${url}`);
+
+    const reqBody: JsonExecutionRequest = this.getLitActionRequestBody(params);
+
+    // -- choose the right signature
+    let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
+      authSig,
+      sessionSigs,
+      url,
+    });
+    reqBody.authSig = sigToPassToNode;
+
+    let executionResponse = await this.getJsExecutionShares(url, {
+      ...reqBody,
+    });
+
+    const successPromises: SuccessNodePromises = {
+      success: true,
+      values: [executionResponse as any],
+    };
+
+    return successPromises;
+  };
+
+  /**
    *
    * Throw node error
    *
@@ -1323,7 +1408,8 @@ export class LitNodeClient {
     params: ExecuteJsProps
   ): Promise<ExecuteJsResponse | undefined> => {
     // ========== Prepare Params ==========
-    const { code, ipfsId, authSig, jsParams, debug, sessionSigs } = params;
+    const { code, ipfsId, authSig, jsParams, debug, sessionSigs, singleNode } =
+      params;
 
     // ========== Validate Params ==========
     // -- validate: If it's NOT ready
@@ -1344,28 +1430,33 @@ export class LitNodeClient {
 
     if (!paramsIsSafe) return;
 
-    // ========== Prepare Variables ==========
-    // -- prepare request body
-    const reqBody: JsonExecutionRequest = this.getLitActionRequestBody(params);
+    let res;
+    if (singleNode) {
+      res = await this.runOnSingleNode(params);
+    } else {
+      // ========== Prepare Variables ==========
+      // -- prepare request body
+      const reqBody: JsonExecutionRequest =
+        this.getLitActionRequestBody(params);
 
-    // ========== Get Node Promises ==========
-    // -- fetch shares from nodes
-    const nodePromises = this.getNodePromises((url: string) => {
-      // -- choose the right signature
-      let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
-        authSig,
-        sessionSigs,
-        url,
+      // ========== Get Node Promises ==========
+      // -- fetch shares from nodes
+      const nodePromises = this.getNodePromises((url: string) => {
+        // -- choose the right signature
+        let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
+          authSig,
+          sessionSigs,
+          url,
+        });
+        reqBody.authSig = sigToPassToNode;
+
+        return this.getJsExecutionShares(url, {
+          ...reqBody,
+        });
       });
-      reqBody.authSig = sigToPassToNode;
-
-      return this.getJsExecutionShares(url, {
-        ...reqBody,
-      });
-    });
-
-    // -- resolve promises
-    const res = await this.handleNodePromises(nodePromises);
+      // -- resolve promises
+      res = await this.handleNodePromises(nodePromises);
+    }
 
     // -- case: promises rejected
     if (res.success === false) {
