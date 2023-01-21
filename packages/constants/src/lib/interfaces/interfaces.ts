@@ -692,6 +692,8 @@ export interface SessionRequestBody {
   pkpPublicKey: string;
   authSig?: JsonAuthSig;
   siweMessage: string;
+  // the random unique request id
+  requestId: string;
 }
 
 export interface WalletSig {

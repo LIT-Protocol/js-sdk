@@ -2187,6 +2187,7 @@ export class LitNodeClient {
       pkpPublicKey: params.pkpPublicKey,
       authSig: params.authSig,
       siweMessage: siweMessageStr,
+      requestId: Math.random().toString(16).slice(2),
     };
 
     // ========== Node Promises ==========
