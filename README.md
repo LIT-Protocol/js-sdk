@@ -202,6 +202,23 @@ yarn tools --watch <package-name>
 yarn tools --watch <package-name>--deps
 ```
 
+## Building Local Changes
+
+During development you may wish to build your code changes in `packages/` in a client application to test the correctness of the functionality.
+
+If you would like to establish a dependency between packages within this monorepo and an external client application that consumes these packages,
+
+1. Run `npm link` at the root of the specific package you are making code changes in.
+2. Run `yarn build:target <package>` to build that specific package.
+3. In the client application, run `npm link <package> --force` to ensure that the `package.json` of the client application is updated with a `file:` link to the dependency. This effectively creates a symlink in the `node_modules` of the client application to the local dependency in this repository.
+
+Having done this setup, this is what the development cycle looks like moving forward:
+
+1. Make code change
+2. Rebuild specific package
+3. Rebuild client application.
+
+
 ## Publishing
 
 ### to npm
