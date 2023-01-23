@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@lit-protocol/lit-node-client": "^2.0.12",
+    "@lit-protocol/lit-node-client": "file:../../packages/lit-node-client",
+    "@lit-protocol/auth-browser": "file:../../packages/auth-browser",
     "@monaco-editor/react": "^4.4.6",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -16,7 +17,6 @@
   "scripts": {
     "start": "PORT=4147 react-scripts start",
     "build": "react-scripts build",
-    
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

@@ -4,6 +4,7 @@ import LitLogo from './LitLogo';
 import Editor from '@monaco-editor/react';
 import { benchmark } from './utils';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
+import * as LitJsSdk_authBrowser from '@lit-protocol/auth-browser';
 
 function App() {
 
@@ -23,6 +24,27 @@ function App() {
   const [str, setStr] = useState('This test is working! Omg!');
 
   const go = async () => {
+    const litNodeClient = new LitJsSdk.LitNodeClient({
+      litNetwork: 'serrano',
+    });
+    await litNodeClient.connect();
+
+    console.log('litNodeClient:', litNodeClient);
+
+    const sessionSigs = await LitJsSdk_authBrowser.getSessionSigs({
+      chain: 'ethereum',
+      resources: [
+        'litSigningCondition://c5b5c8f30bfb526dcff2411874205bd90f43b13ed4052fcb50599f8abe846269',
+      ],
+      sessionCapabilities: [
+        `urn:recap:lit:session:eyJkZWYiOlsibGl0U2lnbmluZ0NvbmRpdGlvbiJdfQ==`,
+      ],
+      litNodeClient,
+    });
+
+    console.log('sessionSigs:', sessionSigs);
+
+    return;
     let code = `import * as LitJsSdk from '@lit-protocol/lit-node-client';
 
 const litNodeClient = new LitJsSdk.LitNodeClient({
