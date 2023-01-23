@@ -8,6 +8,7 @@ import {
     getArgs,
     greenLog,
     listDirsRecursive,
+    prefixPathWithDir,
     readFile,
     readJsonFile,
     redLog,
@@ -16,6 +17,7 @@ import {
     spawnCommand,
     spawnListener,
     writeFile,
+    writeJsonFile,
     yellowLog,
 } from './utils.mjs';
 import fs from 'fs';
@@ -935,4 +937,51 @@ if (OPTION === '--comment') {
     `);
     exit();
 
+}
+
+if (OPTION === '--setup-local-dev') {
+    const PROJECT_NAME = args[1];
+
+    if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
+        greenLog(
+            `
+              Usage: node tools/scripts/tools.mjs --setup-local-dev [project-name]
+                  [project-name]: the name of the project
+              `,
+            true
+        );
+
+        exit();
+    }
+
+    // First, remove existing dist symlink if exists.
+    const dirPathToCreate = `packages/${PROJECT_NAME}/dist`;
+    if (fs.existsSync(dirPathToCreate)) {
+        greenLog(`Removing symlink ${dirPathToCreate} ...`);
+        await childRunCommand(`rm ${dirPathToCreate}`);
+    }
+
+    // Then, create a symlink of each package's `dist` folder to their corresponding
+    // package directory location under the root `dist`.
+    const symLinkTarget = `../../dist/packages/${PROJECT_NAME}`; // relative to symlink directory
+    greenLog(`Creating symlink ${dirPathToCreate} -> ${symLinkTarget} ...`);
+    await childRunCommand(`ln -s ${symLinkTarget} ${dirPathToCreate}`);
+
+    // Then, update each package's `package.json` to have the same `main` and `typings` path
+    // as the `package.json` in the dist, except prefixed with `dist`.
+    const packageJsonPath = `packages/${PROJECT_NAME}/package.json`;
+    const distPackageJsonPath = `dist/packages/${PROJECT_NAME}/package.json`;
+    const packageJson = await readJsonFile(packageJsonPath);
+    const distPackageJson = await readJsonFile(distPackageJsonPath);
+
+    packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
+    packageJson.typings = prefixPathWithDir(distPackageJson.typings, 'dist');
+
+    greenLog(`Updating ${packageJsonPath}...`);
+    greenLog(`packageJson.main: ${packageJson.main}`);
+    greenLog(`packageJson.typings: ${packageJson.typings}`);
+
+    await writeJsonFile(packageJsonPath, packageJson);
+
+    exit();
 }

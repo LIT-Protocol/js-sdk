@@ -12,6 +12,7 @@
     "build": "yarn build:packages",
     "build:packages": "yarn tools --build --packages && yarn postBuild:mapDepsToDist && yarn tool:genReadme",
     "build:target": "yarn node tools/scripts/build.mjs",
+    "build:setupLocalDev": "yarn tools --setup-local-dev",
     "test:packages": "nx run-many --target=test",
     "test:watch": "nx run-many --target=test --watch",
     "test:ci": "nx affected --target=test --all --code-coverage",
