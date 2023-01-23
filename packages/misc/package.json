@@ -2,13 +2,23 @@
   "name": "@lit-protocol/misc",
   "version": "2.0.41",
   "type": "commonjs",
-  "dependencies": {
-    "ethers": "^5.7.1"
-  },
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/misc"
   },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@lit-protocol/constants": "*",
+    "ethers": "^5.7.1"
+  },
+  "files": [
+    "dist"
+  ],
   "gitHead": "9253b8b5e1e5b72f9c5b30a2b4508ebeb733422d",
   "tags": [
     "universal"

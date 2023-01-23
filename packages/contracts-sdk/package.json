@@ -2,11 +2,22 @@
   "name": "@lit-protocol/contracts-sdk",
   "version": "2.0.41",
   "type": "commonjs",
-  "scripts": {},
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/contracts-sdk"
   },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@lit-protocol/misc": "*"
+  },
+  "files": [
+    "dist"
+  ],
   "peerDependencies": {
     "bs58": "^5.0.0",
     "date-and-time": "^2.4.1",

@@ -6,10 +6,19 @@
     "access": "public",
     "directory": "../../dist/packages/bls-sdk"
   },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json"
+  },
   "gitHead": "9253b8b5e1e5b72f9c5b30a2b4508ebeb733422d",
   "peerDependencies": {
     "pako": "^2.1.0"
   },
+  "files": [
+    "dist"
+  ],
   "tags": [
     "universal"
   ]

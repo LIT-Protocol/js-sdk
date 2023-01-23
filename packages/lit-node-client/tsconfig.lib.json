@@ -1,10 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": ".",
     "declaration": true,
     "types": []
   },
-  "include": ["**/*.ts", "../auth-browser/src/lib/chains/lit-connect-modal.d.ts"],
+  "include": ["src", "../auth-browser/src/lib/chains/lit-connect-modal.d.ts"],
   "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"]
 }

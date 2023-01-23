@@ -5,6 +5,15 @@
   "tags": [
     "universal"
   ],
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json"
+  },
+  "files": [
+    "dist"
+  ],
   "gitHead": "9253b8b5e1e5b72f9c5b30a2b4508ebeb733422d",
   "publishConfig": {
     "access": "public",

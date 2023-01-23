@@ -1,10 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": ".",
     "declaration": true,
     "types": []
   },
-  "include": ["**/*.ts", "src/lib/utils/uint8arrays.ts"],
+  "include": ["src"],
   "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"]
 }
