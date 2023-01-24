@@ -237,7 +237,8 @@ export class LitNodeClient {
       authSig: params.authSig,
       jsParams: convertLitActionsParams(params.jsParams),
       requestId: Math.random().toString(16).slice(2),
-      singleNode: params.singleNode ?? false,
+      // singleNode: params.singleNode ?? false,
+      targetNodeRange: params.targetNodeRange ?? 0,
     };
 
     if (params.code) {
@@ -1034,18 +1035,20 @@ export class LitNodeClient {
   /**
    * Run lit action on a single deterministicly selected node. It's important that the nodes use the same deterministic selection algorithm.
    *
-   * @param { JsonExecutionRequest } reqBody
+   * @param { ExecuteJsProps } params
    *
    * @returns { Promise<SuccessNodePromises | RejectedNodePromises> }
    *
    */
   runOnSingleNode = async (
     params: ExecuteJsProps
-  ): Promise<SuccessNodePromises> => {
-    const { code, authSig, jsParams, debug, sessionSigs, singleNode } = params;
+  ): Promise<SuccessNodePromises | RejectedNodePromises> => {
+    const { code, authSig, jsParams, debug, sessionSigs, targetNodeRange } =
+      params;
 
     // determine which node to run on
     let ipfsId;
+
     if (params.code) {
       // hash the code to get IPFS id
       const blockstore = new MemoryBlockstore();
@@ -1057,7 +1060,7 @@ export class LitNodeClient {
         throwError({
           message:
             'Invalid code content type for single node execution.  Your code param must be a string',
-          error: LIT_ERROR.UNKNOWN_ERROR,
+          error: LIT_ERROR.INVALID_PARAM,
         });
       }
 
@@ -1100,16 +1103,20 @@ export class LitNodeClient {
     });
     reqBody.authSig = sigToPassToNode;
 
-    let executionResponse = await this.getJsExecutionShares(url, {
+    // this return { url: string, data: JsonRequest }
+    let singleNodePromise = this.getJsExecutionShares(url, {
       ...reqBody,
     });
 
-    const successPromises: SuccessNodePromises = {
-      success: true,
-      values: [executionResponse as any],
-    };
+    // -- handle response
+    return await this.handleNodePromises([singleNodePromise]);
 
-    return successPromises;
+    // const successPromises: SuccessNodePromises = {
+    //   success: true,
+    //   values: [executionResponse as any],
+    // };
+
+    // return successPromises;
   };
 
   /**
@@ -1408,8 +1415,15 @@ export class LitNodeClient {
     params: ExecuteJsProps
   ): Promise<ExecuteJsResponse | undefined> => {
     // ========== Prepare Params ==========
-    const { code, ipfsId, authSig, jsParams, debug, sessionSigs, singleNode } =
-      params;
+    const {
+      code,
+      ipfsId,
+      authSig,
+      jsParams,
+      debug,
+      sessionSigs,
+      targetNodeRange,
+    } = params;
 
     // ========== Validate Params ==========
     // -- validate: If it's NOT ready
@@ -1431,8 +1445,15 @@ export class LitNodeClient {
     if (!paramsIsSafe) return;
 
     let res;
-    if (singleNode) {
+
+    // -- only run on a single node
+    if (targetNodeRange && targetNodeRange === 1) {
       res = await this.runOnSingleNode(params);
+
+      // -- run on multiple nodes
+    } else if (targetNodeRange && targetNodeRange > 1) {
+      throw new Error('this.runOnMultipleNodes(params) not implemented yet');
+      // -- run on all nodes (default)
     } else {
       // ========== Prepare Variables ==========
       // -- prepare request body
