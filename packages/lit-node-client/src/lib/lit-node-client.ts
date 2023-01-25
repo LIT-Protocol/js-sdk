@@ -97,7 +97,7 @@ console.log('IpfsUnixfsImporterPkg:', IpfsUnixfsImporterPkg);
 
 import { nacl } from '@lit-protocol/nacl';
 import { getStorageItem } from '@lit-protocol/misc-browser';
-// import { BigNumber } from 'ethers';
+import { BigNumber } from 'ethers';
 
 declare global {
   var litNodeClient: LitNodeClient;
@@ -1097,16 +1097,6 @@ export class LitNodeClient {
       ipfsId = params.ipfsId;
     }
 
-    // should we mix in the jsParams?  to do this, we need a canonical way to serialize the jsParams object that will be identical in rust.
-    // const jsParams = params.jsParams || {};
-    // const jsParamsString = JSON.stringify(jsParams);
-
-    const cidBuffer = Buffer.from(ipfsId.toString(), 'hex');
-
-    const hash = sha256(cidBuffer);
-
-    // const hashAsNumber = BigNumber.from(hash);
-
     // select targetNodeRange number of random index of the bootstrapUrls.length
     const randomSelectedNodeIndexes: Array<number> = [];
     while (randomSelectedNodeIndexes.length < targetNodeRange) {
@@ -1123,7 +1113,21 @@ export class LitNodeClient {
     const nodePromises = [];
 
     for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
-      const nodeIndex = randomSelectedNodeIndexes[i];
+      // should we mix in the jsParams?  to do this, we need a canonical way to serialize the jsParams object that will be identical in rust.
+      // const jsParams = params.jsParams || {};
+      // const jsParamsString = JSON.stringify(jsParams);
+
+      const str = `${i}:${ipfsId.toString()}`;
+
+      const cidBuffer = Buffer.from(str, 'hex');
+
+      const hash = sha256(cidBuffer);
+
+      const hashAsNumber = BigNumber.from(hash);
+
+      const nodeIndex = hashAsNumber
+        .mod(this.config.bootstrapUrls.length)
+        .toNumber();
 
       // FIXME: we are using this.config.bootstrapUrls to pick the selected node, but we
       // should be using something like the list of nodes from the staking contract
