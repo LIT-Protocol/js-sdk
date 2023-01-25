@@ -10,7 +10,7 @@ const LitNodeClientPage = () => {
     await client.connect();
 
     const res = await client.executeJs({
-      targetNodeRange: 1,
+      targetNodeRange: 3,
       authSig: {
         sig: '0x721a354498677a1024fb48a78e56c68fd11ad705565933dd9ac770501cecad8811e8591453e21ab50d2579c3d2fe7b0dcbcb1b6436c67e9c6263169c182f50bd1b',
         derivedVia: 'web3.eth.personal.sign',
@@ -20,10 +20,10 @@ const LitNodeClientPage = () => {
       },
 
       jsParams: {},
-      //   code: `(async() => {
-      //           console.log("TEST RUN BABY!");
-      //         })();`,
-      ipfsId: 'QmPxtvDXmBb3H5YSG3kJJcoSknfvwp6P6T1aZjNUWcm5Cb',
+        code: `(async() => {
+                console.log("RUN TEST BABY!");
+              })();`,
+      // ipfsId: 'QmPxtvDXmBb3H5YSG3kJJcoSknfvwp6P6T1aZjNUWcm5Cb',
     });
 
     console.log('res:', res);

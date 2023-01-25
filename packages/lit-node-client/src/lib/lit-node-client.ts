@@ -92,8 +92,8 @@ import * as IpfsUnixfsImporterPkg from 'ipfs-unixfs-importer';
 // @ts-ignore
 import * as BlockstoreCorePkg from 'blockstore-core';
 
-console.log('BlockstoreCorePkg:', BlockstoreCorePkg);
-console.log('IpfsUnixfsImporterPkg:', IpfsUnixfsImporterPkg);
+log('BlockstoreCorePkg:', BlockstoreCorePkg);
+log('IpfsUnixfsImporterPkg:', IpfsUnixfsImporterPkg);
 
 import { nacl } from '@lit-protocol/nacl';
 import { getStorageItem } from '@lit-protocol/misc-browser';
@@ -102,9 +102,12 @@ import { BigNumber } from 'ethers';
 declare global {
   var litNodeClient: LitNodeClient;
   var IpfsUnixfsImporter: any;
-  var BlockstoreCore: any;
+  var BlockstoreCore: {
+    MemoryBlockstore: any;
+  };
 }
-const MemoryBlockstore = BlockstoreCore.MemoryBlockstore;
+
+const MemoryBlockstore = globalThis.BlockstoreCore?.MemoryBlockstore;
 
 /** ---------- Main Export Class ---------- */
 
@@ -342,7 +345,7 @@ export class LitNodeClient {
           );
         }
       } else {
-        console.log('storedSessionKeyOrError');
+        log('storedSessionKeyOrError');
         sessionKey = JSON.parse(storedSessionKeyOrError.result);
       }
     }
@@ -715,7 +718,7 @@ export class LitNodeClient {
     url: string,
     params: SignWithECDSA
   ): Promise<NodeCommandResponse> => {
-    console.log('sign_message_ecdsa');
+    log('sign_message_ecdsa');
 
     const urlWithPath = `${url}/web/signing/sign_message_ecdsa`;
 
@@ -1049,11 +1052,13 @@ export class LitNodeClient {
    * @returns { Promise<SuccessNodePromises | RejectedNodePromises> }
    *
    */
-  runOnTargettedNodes = async (
+  runOnTargetedNodes = async (
     params: ExecuteJsProps
   ): Promise<SuccessNodePromises | RejectedNodePromises> => {
     const { code, authSig, jsParams, debug, sessionSigs, targetNodeRange } =
       params;
+
+    log('running runOnTargetedNodes:', targetNodeRange);
 
     if (!targetNodeRange) {
       return throwError({
@@ -1099,16 +1104,34 @@ export class LitNodeClient {
 
     // select targetNodeRange number of random index of the bootstrapUrls.length
     const randomSelectedNodeIndexes: Array<number> = [];
-    while (randomSelectedNodeIndexes.length < targetNodeRange) {
-      const randomIndex = Math.floor(
-        Math.random() * this.config.bootstrapUrls.length
-      );
 
-      // must be unique
-      if (!randomSelectedNodeIndexes.includes(randomIndex)) {
-        randomSelectedNodeIndexes.push(randomIndex);
+    let nodeIndex = 0;
+
+    while (randomSelectedNodeIndexes.length < targetNodeRange) {
+      const str = `${nodeIndex}:${ipfsId.toString()}`;
+      const cidBuffer = Buffer.from(str);
+      const hash = sha256(cidBuffer);
+      const hashAsNumber = BigNumber.from(hash);
+
+      nodeIndex = hashAsNumber.mod(this.config.bootstrapUrls.length).toNumber();
+
+      log('nodeIndex:', nodeIndex);
+
+      // must be unique & less than bootstrapUrls.length
+      if (
+        !randomSelectedNodeIndexes.includes(nodeIndex) &&
+        nodeIndex < this.config.bootstrapUrls.length
+      ) {
+        randomSelectedNodeIndexes.push(nodeIndex);
+      } else {
+        nodeIndex++;
       }
+
+      // wait 1 seconds
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
+
+    log('Final Selected Indexes:', randomSelectedNodeIndexes);
 
     const nodePromises = [];
 
@@ -1117,17 +1140,7 @@ export class LitNodeClient {
       // const jsParams = params.jsParams || {};
       // const jsParamsString = JSON.stringify(jsParams);
 
-      const str = `${i}:${ipfsId.toString()}`;
-
-      const cidBuffer = Buffer.from(str, 'hex');
-
-      const hash = sha256(cidBuffer);
-
-      const hashAsNumber = BigNumber.from(hash);
-
-      const nodeIndex = hashAsNumber
-        .mod(this.config.bootstrapUrls.length)
-        .toNumber();
+      const nodeIndex = randomSelectedNodeIndexes[i];
 
       // FIXME: we are using this.config.bootstrapUrls to pick the selected node, but we
       // should be using something like the list of nodes from the staking contract
@@ -1229,7 +1242,7 @@ export class LitNodeClient {
         siweMessage: s.siweMessage,
       }));
 
-      console.log('sigShares', sigShares);
+      log('sigShares', sigShares);
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
@@ -1308,7 +1321,7 @@ export class LitNodeClient {
         dataSigned: s.dataSigned,
       }));
 
-      console.log('sigShares', sigShares);
+      log('sigShares', sigShares);
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
@@ -1441,7 +1454,7 @@ export class LitNodeClient {
 
     await wasmECDSA.initWasmEcdsaSdk(); // init WASM
     const signature = wasmECDSA.combine_signature(R_x, R_y, shares);
-    console.log('raw ecdsa sig', signature);
+    log('raw ecdsa sig', signature);
 
     return signature;
   };
@@ -1494,7 +1507,7 @@ export class LitNodeClient {
 
     // -- only run on a single node
     if (targetNodeRange) {
-      res = await this.runOnTargettedNodes(params);
+      res = await this.runOnTargetedNodes(params);
     } else {
       // ========== Prepare Variables ==========
       // -- prepare request body
@@ -2138,7 +2151,7 @@ export class LitNodeClient {
       // ----- Result -----
       return signature;
     } catch (e) {
-      console.log('Error - signed_ecdsa_messages ');
+      log('Error - signed_ecdsa_messages ');
       const signed_ecdsa_message = nodePromises[0];
 
       // ----- Result -----
@@ -2221,7 +2234,7 @@ export class LitNodeClient {
 
       return signature;
     } catch (e) {
-      console.log('Error - signed_ecdsa_messages - ', e);
+      log('Error - signed_ecdsa_messages - ', e);
       const signed_ecdsa_message = nodePromises[0];
       return signed_ecdsa_message;
     }
@@ -2500,7 +2513,7 @@ export class LitNodeClient {
 
       const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
       let signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
-      // console.log("signature", signature);
+      // log("signature", signature);
       signatures[nodeAddress] = {
         sig: uint8arrayToString(signature, 'base16'),
         derivedVia: 'litSessionSignViaNacl',
@@ -2510,7 +2523,7 @@ export class LitNodeClient {
       };
     });
 
-    console.log('signatures:', signatures);
+    log('signatures:', signatures);
 
     return signatures;
   };
