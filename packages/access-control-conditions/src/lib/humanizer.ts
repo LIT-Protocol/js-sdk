@@ -217,7 +217,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
         let tokenFromList;
         if (tokenList) {
           tokenFromList = tokenList.find(
-            (t) => t.address === acc.contractAddress
+            (t: any) => t.address === acc.contractAddress
           );
         }
         let decimals, name;

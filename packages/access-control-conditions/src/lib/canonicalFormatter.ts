@@ -393,7 +393,7 @@ export const canonicalCosmosConditionFormatter = (
 ): any[] | AccsOperatorParams | AccsCOSMOSParams | any => {
   // -- if it's an array
   if (Array.isArray(cond)) {
-    return cond.map((c) => canonicalCosmosConditionFormatter(c));
+    return cond.map((c: any) => canonicalCosmosConditionFormatter(c));
   }
 
   // -- if there's a `operator` key in the object

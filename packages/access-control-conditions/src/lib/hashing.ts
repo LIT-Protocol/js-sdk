@@ -134,7 +134,7 @@ export const hashEVMContractConditions = (
 export const hashSolRpcConditions = (
   solRpcConditions: SolRpcConditions
 ): Promise<ArrayBuffer> => {
-  const conds = solRpcConditions.map((c) =>
+  const conds = solRpcConditions.map((c: any) =>
     canonicalSolRpcConditionFormatter(c)
   );
 

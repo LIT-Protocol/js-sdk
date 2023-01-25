@@ -33,8 +33,8 @@ export const printError = (e: Error): void => {
 export const mostCommonString = (arr: Array<any>): any => {
   return arr
     .sort(
-      (a, b) =>
-        arr.filter((v) => v === a).length - arr.filter((v) => v === b).length
+      (a: any, b: any) =>
+        arr.filter((v: any) => v === a).length - arr.filter((v: any) => v === b).length
     )
     .pop();
 };
@@ -228,7 +228,7 @@ export const sortedObject = (obj: any): any => {
   const result: any = {};
 
   // NOTE: Use forEach instead of reduce for performance with large objects eg Wasm code
-  sortedKeys.forEach((key) => {
+  sortedKeys.forEach((key: any) => {
     result[key] = sortedObject(obj[key]);
   });
 
