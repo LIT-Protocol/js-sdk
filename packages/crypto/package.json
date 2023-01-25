@@ -1,12 +1,12 @@
 {
   "name": "@lit-protocol/crypto",
-  "version": "2.0.42",
+  "version": "2.0.43",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/crypto"
   },
-  "gitHead": "9253b8b5e1e5b72f9c5b30a2b4508ebeb733422d",
+  "gitHead": "ce822cd9a07f282e86c99d8973663f46e08f20e2",
   "tags": [
     "universal"
   ]
