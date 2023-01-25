@@ -1054,8 +1054,8 @@ export class LitNodeClient {
       const blockstore = new MemoryBlockstore();
 
       let content;
-      if (typeof content === 'string') {
-        content = new TextEncoder().encode(content);
+      if (typeof params.code === 'string') {
+        content = new TextEncoder().encode(params.code);
       } else {
         throwError({
           message:
