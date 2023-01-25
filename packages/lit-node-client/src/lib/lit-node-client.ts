@@ -86,16 +86,25 @@ import {
   getSessionKeyUri,
   parseResource,
 } from '@lit-protocol/auth-browser';
-import { importer } from 'ipfs-unixfs-importer';
-import { MemoryBlockstore } from 'blockstore-core/memory';
+
+// @ts-ignore
+import * as IpfsUnixfsImporterPkg from 'ipfs-unixfs-importer';
+// @ts-ignore
+import * as BlockstoreCorePkg from 'blockstore-core';
+
+console.log('BlockstoreCorePkg:', BlockstoreCorePkg);
+console.log('IpfsUnixfsImporterPkg:', IpfsUnixfsImporterPkg);
 
 import { nacl } from '@lit-protocol/nacl';
 import { getStorageItem } from '@lit-protocol/misc-browser';
-import { BigNumber } from 'ethers';
+// import { BigNumber } from 'ethers';
 
 declare global {
   var litNodeClient: LitNodeClient;
+  var IpfsUnixfsImporter: any;
+  var BlockstoreCore: any;
 }
+const MemoryBlockstore = BlockstoreCore.MemoryBlockstore;
 
 /** ---------- Main Export Class ---------- */
 
@@ -989,12 +998,12 @@ export class LitNodeClient {
    *
    */
   handleNodePromises = async (
-    nodePromises: Array<Promise<any>>
+    nodePromises: Array<Promise<any>>,
+    minNodeCount?: number
   ): Promise<SuccessNodePromises | RejectedNodePromises> => {
     // -- prepare
     const responses = await Promise.allSettled(nodePromises);
-
-    log('responses', responses);
+    const minNodes = minNodeCount ?? this.config.minNodeCount;
 
     // -- get fulfilled responses
     const successes: Array<NodePromiseResponse> = responses.filter(
@@ -1002,7 +1011,7 @@ export class LitNodeClient {
     );
 
     // -- case: success (when success responses are more than minNodeCount)
-    if (successes.length >= this.config.minNodeCount) {
+    if (successes.length >= minNodes) {
       const successPromises: SuccessNodePromises = {
         success: true,
         values: successes.map((r: any) => r.value),
@@ -1040,11 +1049,18 @@ export class LitNodeClient {
    * @returns { Promise<SuccessNodePromises | RejectedNodePromises> }
    *
    */
-  runOnSingleNode = async (
+  runOnTargettedNodes = async (
     params: ExecuteJsProps
   ): Promise<SuccessNodePromises | RejectedNodePromises> => {
     const { code, authSig, jsParams, debug, sessionSigs, targetNodeRange } =
       params;
+
+    if (!targetNodeRange) {
+      return throwError({
+        message: 'targetNodeRange is required',
+        error: LIT_ERROR.INVALID_PARAM,
+      });
+    }
 
     // determine which node to run on
     let ipfsId;
@@ -1053,7 +1069,8 @@ export class LitNodeClient {
       // hash the code to get IPFS id
       const blockstore = new MemoryBlockstore();
 
-      let content;
+      let content: string | Uint8Array = params.code;
+
       if (typeof content === 'string') {
         content = new TextEncoder().encode(content);
       } else {
@@ -1065,9 +1082,13 @@ export class LitNodeClient {
       }
 
       let lastCid;
-      for await (const { cid } of importer([{ content }], blockstore, {
-        onlyHash: true,
-      })) {
+      for await (const { cid } of IpfsUnixfsImporter.importer(
+        [{ content }],
+        blockstore,
+        {
+          onlyHash: true,
+        }
+      )) {
         lastCid = cid;
       }
 
@@ -1080,43 +1101,64 @@ export class LitNodeClient {
     // const jsParams = params.jsParams || {};
     // const jsParamsString = JSON.stringify(jsParams);
 
-    const hash = await sha256(`${ipfsId}`);
-    const hashAsNumber = BigNumber.from(hash);
+    const cidBuffer = Buffer.from(ipfsId.toString(), 'hex');
 
-    // FIXME: we are using this.config.bootstrapUrls to pick the selected node, but we
-    // should be using something like the list of nodes from the staking contract
-    // because the staking nodes can change, and the rust code will use the same list
-    const nodeIndex = hashAsNumber
-      .mod(this.config.bootstrapUrls.length)
-      .toNumber();
-    const url = this.config.bootstrapUrls[nodeIndex];
+    const hash = sha256(cidBuffer);
 
-    log(`running on node ${nodeIndex} at ${url}`);
+    // const hashAsNumber = BigNumber.from(hash);
 
-    const reqBody: JsonExecutionRequest = this.getLitActionRequestBody(params);
+    // select targetNodeRange number of random index of the bootstrapUrls.length
+    const randomSelectedNodeIndexes: Array<number> = [];
+    while (randomSelectedNodeIndexes.length < targetNodeRange) {
+      const randomIndex = Math.floor(
+        Math.random() * this.config.bootstrapUrls.length
+      );
 
-    // -- choose the right signature
-    let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
-      authSig,
-      sessionSigs,
-      url,
-    });
-    reqBody.authSig = sigToPassToNode;
+      // must be unique
+      if (!randomSelectedNodeIndexes.includes(randomIndex)) {
+        randomSelectedNodeIndexes.push(randomIndex);
+      }
+    }
 
-    // this return { url: string, data: JsonRequest }
-    let singleNodePromise = this.getJsExecutionShares(url, {
-      ...reqBody,
-    });
+    const nodePromises = [];
+
+    for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
+      const nodeIndex = randomSelectedNodeIndexes[i];
+
+      // FIXME: we are using this.config.bootstrapUrls to pick the selected node, but we
+      // should be using something like the list of nodes from the staking contract
+      // because the staking nodes can change, and the rust code will use the same list
+      const url = this.config.bootstrapUrls[nodeIndex];
+
+      log(`running on node ${nodeIndex} at ${url}`);
+
+      const reqBody: JsonExecutionRequest =
+        this.getLitActionRequestBody(params);
+
+      // -- choose the right signature
+      let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
+        authSig,
+        sessionSigs,
+        url,
+      });
+
+      reqBody.authSig = sigToPassToNode;
+
+      // this return { url: string, data: JsonRequest }
+      let singleNodePromise = this.getJsExecutionShares(url, {
+        ...reqBody,
+      });
+
+      nodePromises.push(singleNodePromise);
+    }
+
+    const handledPromise = await this.handleNodePromises(
+      nodePromises,
+      targetNodeRange
+    );
 
     // -- handle response
-    return await this.handleNodePromises([singleNodePromise]);
-
-    // const successPromises: SuccessNodePromises = {
-    //   success: true,
-    //   values: [executionResponse as any],
-    // };
-
-    // return successPromises;
+    return handledPromise;
   };
 
   /**
@@ -1447,13 +1489,8 @@ export class LitNodeClient {
     let res;
 
     // -- only run on a single node
-    if (targetNodeRange && targetNodeRange === 1) {
-      res = await this.runOnSingleNode(params);
-
-      // -- run on multiple nodes
-    } else if (targetNodeRange && targetNodeRange > 1) {
-      throw new Error('this.runOnMultipleNodes(params) not implemented yet');
-      // -- run on all nodes (default)
+    if (targetNodeRange) {
+      res = await this.runOnTargettedNodes(params);
     } else {
       // ========== Prepare Variables ==========
       // -- prepare request body
