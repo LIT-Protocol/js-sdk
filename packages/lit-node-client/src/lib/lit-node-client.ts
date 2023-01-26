@@ -57,6 +57,7 @@ import {
   SupportedJsonRequests,
   ValidateAndSignECDSA,
   version,
+  LIT_SESSION_KEY_URI,
 } from '@lit-protocol/constants';
 import {
   combineBlsDecryptionShares,
@@ -81,19 +82,21 @@ import {
 import { computeAddress } from '@ethersproject/transactions';
 import { SiweMessage } from 'lit-siwe';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-import {
-  checkAndSignAuthMessage,
-  getSessionKeyUri,
-  parseResource,
-} from '@lit-protocol/auth-browser';
+// import {
+// checkAndSignAuthMessage,
+// getSessionKeyUri,
+// parseResource,
+// } from '@lit-protocol/auth-browser';
 
 // @ts-ignore
-import * as IpfsUnixfsImporterPkg from 'ipfs-unixfs-importer';
+// import * as IpfsUnixfsImporterPkg from 'ipfs-unixfs-importer';
 // @ts-ignore
 import * as BlockstoreCorePkg from 'blockstore-core';
 
-log('BlockstoreCorePkg:', BlockstoreCorePkg);
-log('IpfsUnixfsImporterPkg:', IpfsUnixfsImporterPkg);
+import { LitThirdPartyLibs } from '@lit-protocol/lit-third-party-libs';
+
+log('LitThirdPartyLibs:', LitThirdPartyLibs);
+// log('IpfsUnixfsImporterPkg:', IpfsUnixfsImporterPkg);
 
 import { nacl } from '@lit-protocol/nacl';
 import { getStorageItem } from '@lit-protocol/misc-browser';
@@ -101,13 +104,7 @@ import { BigNumber } from 'ethers';
 
 declare global {
   var litNodeClient: LitNodeClient;
-  var IpfsUnixfsImporter: any;
-  var BlockstoreCore: {
-    MemoryBlockstore: any;
-  };
 }
-
-const MemoryBlockstore = globalThis.BlockstoreCore?.MemoryBlockstore;
 
 /** ---------- Main Export Class ---------- */
 
@@ -366,7 +363,7 @@ export class LitNodeClient {
   ): Array<any> => {
     if (!capabilities || capabilities.length == 0) {
       capabilities = resources.map((resource: any) => {
-        const { protocol, resourceId } = parseResource({ resource });
+        const { protocol, resourceId } = this.parseResource({ resource });
 
         return `${protocol}Capability://*`;
       });
@@ -429,13 +426,13 @@ export class LitNodeClient {
           uri: sessionKeyUri,
         });
       } else {
-        walletSig = await checkAndSignAuthMessage({
-          chain,
-          resources: capabilities,
-          switchChain,
-          expiration,
-          uri: sessionKeyUri,
-        });
+        // walletSig = await checkAndSignAuthMessage({
+        //   chain,
+        //   resources: capabilities,
+        //   switchChain,
+        //   expiration,
+        //   uri: sessionKeyUri,
+        // });
       }
     } else {
       try {
@@ -483,11 +480,11 @@ export class LitNodeClient {
     // make sure the sig has the session capabilities required to fulfill the resources requested
     for (let i = 0; i < resources.length; i++) {
       const resource = resources[i];
-      const { protocol, resourceId } = parseResource({ resource });
+      const { protocol, resourceId } = this.parseResource({ resource });
 
       // check if we have blanket permissions or if we authed the specific resource for the protocol
       const permissionsFound = sessionCapabilities.some((capability: any) => {
-        const capabilityParts = parseResource({ resource: capability });
+        const capabilityParts = this.parseResource({ resource: capability });
         return (
           capabilityParts.protocol === protocol &&
           (capabilityParts.resourceId === '*' ||
@@ -1072,7 +1069,7 @@ export class LitNodeClient {
 
     if (params.code) {
       // hash the code to get IPFS id
-      const blockstore = new MemoryBlockstore();
+      const blockstore = new LitThirdPartyLibs.MemoryBlockstore();
 
       let content: string | Uint8Array = params.code;
 
@@ -1087,7 +1084,7 @@ export class LitNodeClient {
       }
 
       let lastCid;
-      for await (const { cid } of IpfsUnixfsImporter.importer(
+      for await (const { cid } of LitThirdPartyLibs.importer(
         [{ content }],
         blockstore,
         {
@@ -1113,7 +1110,9 @@ export class LitNodeClient {
       const hash = sha256(cidBuffer);
       const hashAsNumber = BigNumber.from(hash);
 
-      const nodeIndex = hashAsNumber.mod(this.config.bootstrapUrls.length).toNumber();
+      const nodeIndex = hashAsNumber
+        .mod(this.config.bootstrapUrls.length)
+        .toNumber();
 
       log('nodeIndex:', nodeIndex);
 
@@ -1123,7 +1122,7 @@ export class LitNodeClient {
         nodeIndex < this.config.bootstrapUrls.length
       ) {
         randomSelectedNodeIndexes.push(nodeIndex);
-      } 
+      }
       nodeCounter++;
     }
 
@@ -2401,6 +2400,18 @@ export class LitNodeClient {
     });
   };
 
+  parseResource = ({
+    resource,
+  }: {
+    resource: any;
+  }): {
+    protocol: any;
+    resourceId: any;
+  } => {
+    const [protocol, resourceId] = resource.split('://');
+    return { protocol, resourceId };
+  };
+
   /**
    * Get session signatures for a set of resources
    *
@@ -2416,7 +2427,7 @@ export class LitNodeClient {
     // Try to get it from local storage, if not generates one~
     let sessionKey = this.getSessionKey(params.sessionKey);
 
-    let sessionKeyUri = getSessionKeyUri({ publicKey: sessionKey.publicKey });
+    let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
     let capabilities = this.getSessionCapabilities(
       params.sessionCapabilities,
       params.resources
@@ -2455,13 +2466,13 @@ export class LitNodeClient {
           litNodeClient: this,
         });
       } else {
-        walletSig = await checkAndSignAuthMessage({
-          chain: params.chain,
-          resources: capabilities,
-          switchChain: params.switchChain,
-          expiration,
-          uri: sessionKeyUri,
-        });
+        // walletSig = await checkAndSignAuthMessage({
+        //   chain: params.chain,
+        //   resources: capabilities,
+        //   switchChain: params.switchChain,
+        //   expiration,
+        //   uri: sessionKeyUri,
+        // });
       }
     }
 
