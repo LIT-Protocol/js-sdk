@@ -1,12 +1,12 @@
 {
   "name": "@lit-protocol/access-control-conditions",
-  "version": "2.1.1",
+  "version": "2.0.56",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/access-control-conditions"
   },
-  "gitHead": "f53993ec11bc0deca97ea8cfd5b19797d8c02a7f",
+  "gitHead": "d52685a5664444fe2474b119c93e27886ab566ed",
   "tags": [
     "universal"
   ]
