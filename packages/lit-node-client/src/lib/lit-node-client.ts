@@ -1105,15 +1105,15 @@ export class LitNodeClient {
     // select targetNodeRange number of random index of the bootstrapUrls.length
     const randomSelectedNodeIndexes: Array<number> = [];
 
-    let nodeIndex = 0;
+    let nodeCounter = 0;
 
     while (randomSelectedNodeIndexes.length < targetNodeRange) {
-      const str = `${nodeIndex}:${ipfsId.toString()}`;
+      const str = `${nodeCounter}:${ipfsId.toString()}`;
       const cidBuffer = Buffer.from(str);
       const hash = sha256(cidBuffer);
       const hashAsNumber = BigNumber.from(hash);
 
-      nodeIndex = hashAsNumber.mod(this.config.bootstrapUrls.length).toNumber();
+      const nodeIndex = hashAsNumber.mod(this.config.bootstrapUrls.length).toNumber();
 
       log('nodeIndex:', nodeIndex);
 
@@ -1123,12 +1123,8 @@ export class LitNodeClient {
         nodeIndex < this.config.bootstrapUrls.length
       ) {
         randomSelectedNodeIndexes.push(nodeIndex);
-      } else {
-        nodeIndex++;
-      }
-
-      // wait 1 seconds
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      } 
+      nodeCounter++;
     }
 
     log('Final Selected Indexes:', randomSelectedNodeIndexes);
