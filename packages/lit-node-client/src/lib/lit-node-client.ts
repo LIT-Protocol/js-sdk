@@ -507,21 +507,25 @@ export class LitNodeClient {
       body: JSON.stringify(data),
     };
 
-    return fetch(url, req).then(async (response) => {
-      const isJson = response.headers
-        .get('content-type')
-        ?.includes('application/json');
+    return fetch(url, req)
+      .then(async (response) => {
+        const isJson = response.headers
+          .get('content-type')
+          ?.includes('application/json');
 
-      const data = isJson ? await response.json() : null;
+        const data = isJson ? await response.json() : null;
 
-      if (!response.ok) {
-        // get error message from body or default to response status
-        const error = data || response.status;
+        if (!response.ok) {
+          // get error message from body or default to response status
+          const error = data || response.status;
+          return Promise.reject(error);
+        }
+
+        return data;
+      })
+      .catch((error) => {
         return Promise.reject(error);
-      }
-
-      return data;
-    });
+      });
   };
 
   // ==================== API Calls to Nodes ====================
@@ -768,7 +772,7 @@ export class LitNodeClient {
       clientPublicKey: 'test',
     };
 
-    return await this.sendCommandToNode({
+    return this.sendCommandToNode({
       url: urlWithPath,
       data,
     });
