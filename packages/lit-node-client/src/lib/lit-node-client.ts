@@ -153,7 +153,7 @@ export class LitNodeClient {
 
     // -- validate
     if (storageConfigOrError.type === 'ERROR') {
-      console.warn(`Storage key "${storageKey}" is missing. `);
+      log(`Storage key "${storageKey}" is missing. `);
       return;
     }
 
