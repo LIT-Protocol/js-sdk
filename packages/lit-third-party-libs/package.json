@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/lit-third-party-libs",
-  "version": "2.0.58",
+  "version": "2.0.59",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
@@ -9,5 +9,5 @@
   "tags": [
     "universal"
   ],
-  "gitHead": "2ecdadc2fb4e8d73fc537387f93a624dbb4f621b"
+  "gitHead": "dc69d68da2c92ee400b2c1f55339345b34b36519"
 }
