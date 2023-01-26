@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/auth-browser",
-  "version": "2.1.9",
+  "version": "2.1.10",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
