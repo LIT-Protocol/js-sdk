@@ -15,7 +15,7 @@
     "test:packages": "nx run-many --target=test",
     "test:watch": "nx run-many --target=test --watch",
     "test:ci": "nx affected --target=test --all --code-coverage",
-    "publish:packages": "npx lerna publish --force-publish && yarn publish:vanilla",
+    "publish:packages": "npx lerna exec -- npm publish && yarn publish:vanilla",
     "publish:vanilla": "yarn node ./tools/scripts/pub.mjs --filter vanilla",
     "publish:dev": "yarn tools --publish --tag dev",
     "tool:delete": "yarn node ./tools/scripts/delete.mjs",
@@ -33,7 +33,7 @@
     "npm:login": "npm login",
     "cy:open:html": "yarn tools --test --e2e html",
     "cy:open:react": "yarn tools --test --e2e react",
-    "buildAndPublish": "yarn build:packages && yarn publish:packages",
+    "buildAndPublish": "npx lerna version --force-publish && yarn build:packages && yarn publish:packages",
     "dev": "nodemon --watch packages --ext js,ts --exec \"yarn build:packages && yarn tools --yalc --publish\"",
     "watch": "yarn tools --watch"
   },
