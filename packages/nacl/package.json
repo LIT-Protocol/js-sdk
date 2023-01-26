@@ -1,11 +1,11 @@
 {
   "name": "@lit-protocol/nacl",
-  "version": "2.1.7",
+  "version": "2.1.8",
   "type": "commonjs",
   "tags": [
     "universal"
   ],
-  "gitHead": "74e5418ecd8bd554d87833e8f59e2629ba2f5990",
+  "gitHead": "7d74167cc178bd3973c860a8b3c969cfa6ae3caf",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/nacl"
