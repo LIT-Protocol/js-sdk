@@ -8,19 +8,20 @@
     "constants": "packages/constants",
     "contracts-sdk": "packages/contracts-sdk",
     "crypto": "packages/crypto",
+    "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react",
+    "demo-encrypt-decrypt-react": "apps/demo-encrypt-decrypt-react",
+    "demo-pkp-ethers-react": "apps/demo-pkp-ethers-react",
     "e2e": "apps/e2e",
     "ecdsa-sdk": "packages/ecdsa-sdk",
     "encryption": "packages/encryption",
     "html": "apps/html",
     "lit-node-client": "packages/lit-node-client",
+    "lit-third-party-libs": "packages/lit-third-party-libs",
     "misc": "packages/misc",
     "misc-browser": "packages/misc-browser",
     "nacl": "packages/nacl",
     "nodejs": "apps/nodejs",
     "react": "apps/react",
-    "uint8arrays": "packages/uint8arrays",
-    "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react",
-    "demo-pkp-ethers-react": "apps/demo-pkp-ethers-react",
-    "demo-encrypt-decrypt-react": "apps/demo-encrypt-decrypt-react"
+    "uint8arrays": "packages/uint8arrays"
   }
 }
