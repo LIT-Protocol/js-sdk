@@ -1,15 +1,15 @@
 export const LIT_ERROR = {
-    INVALID_PARAM: {
-        name: 'invalidParamType',
+    INVALID_PARAM_TYPE: {
+        name: 'InvalidParamType',
         code: 'invalid_param_type',
     },
     INVALID_ACCESS_CONTROL_CONDITIONS: {
-        name: 'InvalidAccessControlCondition',
-        code: 'invalid_access_control_condition',
+        name: 'InvalidAccessControlConditions',
+        code: 'invalid_access_control_conditions',
     },
     WRONG_NETWORK_EXCEPTION: {
         name: 'WrongNetworkException',
-        code: 'wrong_network',
+        code: 'wrong_network_exception',
     },
     MINTING_NOT_SUPPORTED: {
         name: 'MintingNotSupported',
@@ -17,7 +17,7 @@ export const LIT_ERROR = {
     },
     UNSUPPORTED_CHAIN_EXCEPTION: {
         name: 'UnsupportedChainException',
-        code: 'unsupported_chain',
+        code: 'unsupported_chain_exception',
     },
     INVALID_UNIFIED_CONDITION_TYPE: {
         name: 'InvalidUnifiedConditionType',
@@ -28,8 +28,8 @@ export const LIT_ERROR = {
         code: 'lit_node_client_not_ready_error',
     },
     UNAUTHROZIED_EXCEPTION: {
-        name: 'UnauthorizedException',
-        code: 'not_authorized',
+        name: 'UnauthroziedException',
+        code: 'unauthrozied_exception',
     },
     INVALID_ARGUMENT_EXCEPTION: {
         name: 'InvalidArgumentException',
@@ -44,8 +44,8 @@ export const LIT_ERROR = {
         code: 'no_wallet_exception',
     },
     WRONG_PARAM_FORMAT: {
-        name: 'WrongParamFormatException',
-        code: 'wrong_param_format_exception',
+        name: 'WrongParamFormat',
+        code: 'wrong_param_format',
     },
     LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION: {
         name: 'LocalStorageItemNotFoundException',
@@ -80,7 +80,7 @@ export const LIT_ERROR = {
         code: 'wasm_init_error',
     },
     NODEJS_EXCEPTION:{
-        name: 'NodeJsException',
+        name: 'NodejsException',
         code: 'nodejs_exception',
     },
     WALLET_SIGNATURE_NOT_FOUND_ERROR: {

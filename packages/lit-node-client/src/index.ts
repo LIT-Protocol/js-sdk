@@ -17,12 +17,12 @@ if (!globalThis.LitNodeClient) {
 
 export * from './lib/lit-node-client';
 
-export {
-  checkAndSignAuthMessage,
-  getSessionKeyUri,
-  getSessionSigs,
-  parseResource,
-} from '@lit-protocol/auth-browser';
+// export {
+//   checkAndSignAuthMessage,
+//   getSessionKeyUri,
+//   getSessionSigs,
+//   parseResource,
+// } from '@lit-protocol/auth-browser';
 
 export {
   decryptFile,

@@ -149,7 +149,7 @@ describe('canonicalFormatter.ts', () => {
     }
 
     expect((console.log as any).mock.calls[0][0].errorCode).toBe(
-      'invalid_access_control_condition'
+      'invalid_access_control_conditions'
     );
   });
 
@@ -181,7 +181,7 @@ describe('canonicalFormatter.ts', () => {
     }
 
     expect((console.log as any).mock.calls[0][0].errorCode).toBe(
-      'invalid_access_control_condition'
+      'invalid_access_control_conditions'
     );
   });
 

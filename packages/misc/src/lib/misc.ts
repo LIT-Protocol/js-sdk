@@ -162,7 +162,7 @@ export const checkType = ({
     if (throwOnError) {
       throwError({
         message,
-        error: LIT_ERROR.INVALID_PARAM,
+        error: LIT_ERROR.INVALID_PARAM_TYPE,
       });
     }
     return false;

@@ -181,7 +181,7 @@ export const zipAndEncryptString = async (
   )
     throwError({
       message: 'Invalid string',
-      error: LIT_ERROR.INVALID_PARAM,
+      error: LIT_ERROR.INVALID_PARAM_TYPE,
     });
 
   let zip;
@@ -231,7 +231,7 @@ export const zipAndEncryptFiles = async (
     )
       throwError({
         message: 'Invalid file type',
-        error: LIT_ERROR.INVALID_PARAM,
+        error: LIT_ERROR.INVALID_PARAM_TYPE,
       });
 
     const folder: JSZip | null = zip.folder('encryptedAssets');

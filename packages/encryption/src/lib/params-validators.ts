@@ -56,7 +56,7 @@ export const paramsValidators = {
     if (code && ipfsId) {
       const message = "You cannot have both 'code' and 'ipfs' at the same time";
 
-      throwError({ message, error: LIT_ERROR.INVALID_PARAM });
+      throwError({ message, error: LIT_ERROR.INVALID_PARAM_TYPE });
       return false;
     }
 

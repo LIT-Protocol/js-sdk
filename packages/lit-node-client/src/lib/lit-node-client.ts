@@ -82,21 +82,10 @@ import {
 import { computeAddress } from '@ethersproject/transactions';
 import { SiweMessage } from 'lit-siwe';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-// import {
-// checkAndSignAuthMessage,
-// getSessionKeyUri,
-// parseResource,
-// } from '@lit-protocol/auth-browser';
-
-// @ts-ignore
-// import * as IpfsUnixfsImporterPkg from 'ipfs-unixfs-importer';
-// @ts-ignore
-import * as BlockstoreCorePkg from 'blockstore-core';
 
 import { LitThirdPartyLibs } from '@lit-protocol/lit-third-party-libs';
 
 log('LitThirdPartyLibs:', LitThirdPartyLibs);
-// log('IpfsUnixfsImporterPkg:', IpfsUnixfsImporterPkg);
 
 import { nacl } from '@lit-protocol/nacl';
 import { getStorageItem } from '@lit-protocol/misc-browser';
@@ -1060,7 +1049,7 @@ export class LitNodeClient {
     if (!targetNodeRange) {
       return throwError({
         message: 'targetNodeRange is required',
-        error: LIT_ERROR.INVALID_PARAM,
+        error: LIT_ERROR.INVALID_PARAM_TYPE,
       });
     }
 
@@ -1079,7 +1068,7 @@ export class LitNodeClient {
         throwError({
           message:
             'Invalid code content type for single node execution.  Your code param must be a string',
-          error: LIT_ERROR.INVALID_PARAM,
+          error: LIT_ERROR.INVALID_PARAM_TYPE,
         });
       }
 

@@ -1,4 +1,5 @@
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
+import * as authBrowser from '@lit-protocol/auth-browser';
 
 const LitNodeClientPage = () => {
   async function go() {
@@ -20,7 +21,7 @@ const LitNodeClientPage = () => {
       },
 
       jsParams: {},
-        code: `(async() => {
+      code: `(async() => {
                 console.log("RUN TEST BABY!");
               })();`,
       // ipfsId: 'QmPxtvDXmBb3H5YSG3kJJcoSknfvwp6P6T1aZjNUWcm5Cb',
@@ -29,9 +30,20 @@ const LitNodeClientPage = () => {
     console.log('res:', res);
   }
 
+  const authBrowserTest = async () => {
+    console.log('authBrowser:', authBrowser);
+
+    // @ts-ignore 
+    globalThis.authBrowser = authBrowser;
+
+    const authsig = await authBrowser.checkAndSignAuthMessage({ chain: 'ethereum' });
+    console.log('authsig:', authsig)
+  };
+
   return (
     <>
       <button onClick={go}>Go</button>
+      <button onClick={authBrowserTest}>AuthBrowser test</button>
     </>
   );
 };

@@ -36,9 +36,6 @@
         "packages/ecdsa-sdk-vanilla/src/index.ts"
       ],
       "@lit-protocol/encryption": ["packages/encryption/src/index.ts"],
-      "@lit-protocol/lib-third-party-libs": [
-        "packages/lib-third-party-libs/src/index.ts"
-      ],
       "@lit-protocol/lit-node-client": [
         "packages/lit-node-client/src/index.ts"
       ],
@@ -48,7 +45,7 @@
       "@lit-protocol/misc": ["packages/misc/src/index.ts"],
       "@lit-protocol/misc-browser": ["packages/misc-browser/src/index.ts"],
       "@lit-protocol/nacl": ["packages/nacl/src/index.ts"],
-      "@lit-protocol/uint8arrays": ["packages/uint8arrays/src/index.ts"],
+      "@lit-protocol/uint8arrays": ["packages/uint8arrays/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

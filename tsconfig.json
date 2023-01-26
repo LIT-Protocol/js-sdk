@@ -56,6 +56,9 @@
       "@lit-protocol/lit-node-client": [
         "packages/lit-node-client/src/index.ts"
       ],
+      "@lit-protocol/lit-third-party-libs": [
+        "packages/lit-third-party-libs/src/index.ts"
+      ],
       "@lit-protocol/misc": [
         "packages/misc/src/index.ts"
       ],

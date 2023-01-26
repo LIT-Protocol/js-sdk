@@ -10,10 +10,13 @@ import {
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
-import WalletConnectProvider from '@walletconnect/ethereum-provider';
+// import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { hexlify } from '@ethersproject/bytes';
 import { verifyMessage } from '@ethersproject/wallet';
+
+// @ts-ignore
+import * as WalletConnectProviderPkg from '@walletconnect/ethereum-provider/dist/esm/index.js';
 
 // @ts-ignore
 import LitConnectModal from 'lit-connect-modal';
@@ -35,6 +38,12 @@ if (typeof global.Buffer === 'undefined') {
   global.Buffer = BufferPolyfill;
 }
 
+if (isBrowser()) {
+  // @ts-ignore
+  globalThis.WalletConnectProviderPkg = WalletConnectProviderPkg;
+  log('WalletConnectProviderPkg:', WalletConnectProviderPkg);
+}
+
 import {
   isBrowser,
   isNode,
@@ -44,15 +53,15 @@ import {
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 
-// console.log("naclUtil:", naclUtil);
-// console.log("nacl:", nacl);
+// log("naclUtil:", naclUtil);
+// log("nacl:", nacl);
 
 // -- fix import issues
 // let _nacl = nacl === undefined ? nacl['default'] : nacl;
 // let _naclUtil = naclUtil === undefined ? naclUtil['default'] : naclUtil;
 
-// console.log("_nacl:", _nacl);
-// console.log("_naclUtil:", _naclUtil);
+// log("_nacl:", _nacl);
+// log("_naclUtil:", _naclUtil);
 
 /** ---------- Local Interfaces ---------- */
 interface ConnectWeb3 {
@@ -70,7 +79,7 @@ interface RPCUrls {
 
 interface Web3ProviderOptions {
   walletconnect: {
-    package: WalletConnectProvider | any;
+    package: any;
     options: {
       infuraId?: string;
       rpc: RPCUrls;
@@ -326,7 +335,7 @@ export const connectWeb3 = async ({
 }: ConnectWeb3): Promise<ConnectWeb3Result> => {
   // -- check if it's nodejs
   if (isNode()) {
-    console.error('connectWeb3 is not supported in nodejs.');
+    log('connectWeb3 is not supported in nodejs.');
     return { web3: null, account: null };
   }
 
@@ -334,7 +343,7 @@ export const connectWeb3 = async ({
 
   const providerOptions: Web3ProviderOptions = {
     walletconnect: {
-      package: WalletConnectProvider, // required
+      package: WalletConnectProviderPkg.default, // required
       options: {
         // infuraId: "cd614bfa5c2f4703b7ab0ec0547d9f81",
         rpc: rpcUrls,
@@ -376,7 +385,7 @@ export const connectWeb3 = async ({
  */
 export const disconnectWeb3 = (): void => {
   if (isNode()) {
-    console.error('disconnectWeb3 is not supported in nodejs.');
+    log('disconnectWeb3 is not supported in nodejs.');
     return;
   }
 
@@ -405,7 +414,7 @@ export const checkAndSignEVMAuthMessage = async ({
 }: CheckAndSignAuthParams): Promise<JsonAuthSig> => {
   // -- check if it's nodejs
   if (isNode()) {
-    console.error(
+    log(
       'checkAndSignEVMAuthMessage is not supported in nodejs.  You can create a SIWE on your own using the SIWE package.'
     );
     return {
@@ -481,10 +490,10 @@ export const checkAndSignEVMAuthMessage = async ({
     LOCAL_STORAGE_KEYS.AUTH_SIGNATURE
   );
 
-  console.log('currentChainIdOrError:', currentChainIdOrError);
-  console.log('selectedChainId:', selectedChainId);
-  console.log('selectedChainIdHex:', selectedChainIdHex);
-  console.log('authSigOrError:', authSigOrError);
+  log('currentChainIdOrError:', currentChainIdOrError);
+  log('selectedChainId:', selectedChainId);
+  log('selectedChainIdHex:', selectedChainIdHex);
+  log('authSigOrError:', authSigOrError);
 
   // -- 3. check all variables before executing business logic
   if (currentChainIdOrError.type === EITHER_TYPE.ERROR) {
@@ -500,14 +509,14 @@ export const checkAndSignEVMAuthMessage = async ({
   // -- 4. case: (current chain id is NOT equal to selected chain) AND is set to switch chain
   if (currentChainIdOrError.result !== selectedChainId && switchChain) {
     // -- validate the provider type
-    if (web3.provider instanceof WalletConnectProvider) {
-      return throwError({
-        message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
-        error: LIT_ERROR.WRONG_NETWORK_EXCEPTION,
-      });
-    }
+    // if (web3.provider instanceof walletProvider) {
+    //   return throwError({
+    //     message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
+    //     error: LIT_ERROR.WRONG_NETWORK_EXCEPTION,
+    //   });
+    // }
 
-    const provider = web3.provider as WalletConnectProvider;
+    const provider = web3.provider as any;
 
     // -- (case) if able to switch chain id
     try {
@@ -563,14 +572,22 @@ export const checkAndSignEVMAuthMessage = async ({
   if (authSigOrError.type === EITHER_TYPE.ERROR) {
     log('signing auth message because sig is not in local storage');
 
-    authSigOrError.result = await _signAndGetAuth({
-      web3,
-      account,
-      chainId: selectedChain.chainId,
-      resources,
-      expiration,
-      uri,
-    });
+    try {
+      authSigOrError.result = await _signAndGetAuth({
+        web3,
+        account,
+        chainId: selectedChain.chainId,
+        resources,
+        expiration,
+        uri,
+      });
+    } catch (e: any) {
+      log(e);
+      return throwError({
+        message: e.message,
+        error: LIT_ERROR.UNKNOWN_ERROR,
+      });
+    }
     authSigOrError.type = EITHER_TYPE.SUCCESS;
     log('5. authSigOrError:', authSigOrError);
   }
@@ -635,7 +652,7 @@ export const signAndSaveAuthMessage = async ({
 }: signAndSaveAuthParams): Promise<JsonAuthSig> => {
   // check if it's nodejs
   if (isNode()) {
-    console.error('checkAndSignEVMAuthMessage is not supported in nodejs.');
+    log('checkAndSignEVMAuthMessage is not supported in nodejs.');
     return {
       sig: '',
       derivedVia: '',
@@ -719,7 +736,7 @@ export const signMessage = async ({
 }: SignMessageParams): Promise<SignedMessage> => {
   // check if it's nodejs
   if (isNode()) {
-    console.error('signMessage is not supported in nodejs.');
+    log('signMessage is not supported in nodejs.');
     return {
       signature: '',
       address: '',
@@ -747,7 +764,7 @@ export const signMessage = async ({
 
   if (address !== account) {
     const msg = `ruh roh, the user signed with a different address (${address}) then they\'re using with web3 (${account}).  this will lead to confusion.`;
-    console.error(msg);
+    log(msg);
     alert(
       'something seems to be wrong with your wallets message signing.  maybe restart your browser or your wallet.  your recovered sig address does not match your web3 account address'
     );
@@ -774,7 +791,7 @@ export const signMessageAsync = async (
 ): Promise<any | JsonRpcSigner> => {
   // check if it's nodejs
   if (isNode()) {
-    console.error('signMessageAsync is not supported in nodejs.');
+    log('signMessageAsync is not supported in nodejs.');
     return null;
   }
 
