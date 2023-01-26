@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/encryption",
-  "version": "2.0.43",
+  "version": "2.1.0",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
