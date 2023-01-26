@@ -16,7 +16,7 @@ import { hexlify } from '@ethersproject/bytes';
 import { verifyMessage } from '@ethersproject/wallet';
 
 // @ts-ignore
-import * as WalletConnectProviderPkg from '@walletconnect/ethereum-provider/dist/esm/index.js';
+import WalletConnectProviderPkg from '@walletconnect/ethereum-provider/dist/cjs/index';
 
 // @ts-ignore
 import LitConnectModal from 'lit-connect-modal';
@@ -34,6 +34,15 @@ import * as nacl from 'tweetnacl';
 
 import { Buffer as BufferPolyfill } from 'buffer';
 
+import {
+  isBrowser,
+  isNode,
+  log,
+  numberToHex,
+  throwError,
+} from '@lit-protocol/misc';
+import { getStorageItem } from '@lit-protocol/misc-browser';
+
 if (typeof global.Buffer === 'undefined') {
   global.Buffer = BufferPolyfill;
 }
@@ -43,15 +52,6 @@ if (isBrowser()) {
   globalThis.WalletConnectProviderPkg = WalletConnectProviderPkg;
   log('WalletConnectProviderPkg:', WalletConnectProviderPkg);
 }
-
-import {
-  isBrowser,
-  isNode,
-  log,
-  numberToHex,
-  throwError,
-} from '@lit-protocol/misc';
-import { getStorageItem } from '@lit-protocol/misc-browser';
 
 // log("naclUtil:", naclUtil);
 // log("nacl:", nacl);
@@ -343,7 +343,7 @@ export const connectWeb3 = async ({
 
   const providerOptions: Web3ProviderOptions = {
     walletconnect: {
-      package: WalletConnectProviderPkg.default, // required
+      package: WalletConnectProviderPkg, // required
       options: {
         // infuraId: "cd614bfa5c2f4703b7ab0ec0547d9f81",
         rpc: rpcUrls,

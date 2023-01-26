@@ -85,11 +85,10 @@ import { joinSignature, sha256 } from 'ethers/lib/utils';
 
 import { LitThirdPartyLibs } from '@lit-protocol/lit-third-party-libs';
 
-log('LitThirdPartyLibs:', LitThirdPartyLibs);
-
 import { nacl } from '@lit-protocol/nacl';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 import { BigNumber } from 'ethers';
+import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 
 declare global {
   var litNodeClient: LitNodeClient;
@@ -415,13 +414,13 @@ export class LitNodeClient {
           uri: sessionKeyUri,
         });
       } else {
-        // walletSig = await checkAndSignAuthMessage({
-        //   chain,
-        //   resources: capabilities,
-        //   switchChain,
-        //   expiration,
-        //   uri: sessionKeyUri,
-        // });
+        walletSig = await checkAndSignAuthMessage({
+          chain,
+          resources: capabilities,
+          switchChain,
+          expiration,
+          uri: sessionKeyUri,
+        });
       }
     } else {
       try {
@@ -2455,13 +2454,13 @@ export class LitNodeClient {
           litNodeClient: this,
         });
       } else {
-        // walletSig = await checkAndSignAuthMessage({
-        //   chain: params.chain,
-        //   resources: capabilities,
-        //   switchChain: params.switchChain,
-        //   expiration,
-        //   uri: sessionKeyUri,
-        // });
+        walletSig = await checkAndSignAuthMessage({
+          chain: params.chain,
+          resources: capabilities,
+          switchChain: params.switchChain,
+          expiration,
+          uri: sessionKeyUri,
+        });
       }
     }
 
