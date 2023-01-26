@@ -176,7 +176,7 @@ const mintWithPKPWalletUtil = async () => {
 };
 
 // =================================================
-//          PKPWallet as Signer With Util                                    
+//          PKPWallet as Signer With Util
 // =================================================
 const getUtilStuff = async () => {
   const pkpWallet = await setupPKP();
