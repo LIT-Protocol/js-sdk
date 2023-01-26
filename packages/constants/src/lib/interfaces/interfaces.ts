@@ -189,6 +189,7 @@ export interface LitNodeClientConfig {
   debug: boolean;
   bootstrapUrls: Array<string>;
   litNetwork: LIT_NETWORKS_KEYS;
+  connectTimeout: number;
 }
 
 export interface CustomNetwork {
