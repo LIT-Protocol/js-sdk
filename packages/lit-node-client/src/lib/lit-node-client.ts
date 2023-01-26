@@ -507,21 +507,25 @@ export class LitNodeClient {
       body: JSON.stringify(data),
     };
 
-    return fetch(url, req).then(async (response) => {
-      const isJson = response.headers
-        .get('content-type')
-        ?.includes('application/json');
+    return fetch(url, req)
+      .then(async (response) => {
+        const isJson = response.headers
+          .get('content-type')
+          ?.includes('application/json');
 
-      const data = isJson ? await response.json() : null;
+        const data = isJson ? await response.json() : null;
 
-      if (!response.ok) {
-        // get error message from body or default to response status
-        const error = data || response.status;
+        if (!response.ok) {
+          // get error message from body or default to response status
+          const error = data || response.status;
+          return Promise.reject(error);
+        }
+
+        return data;
+      })
+      .catch((error) => {
         return Promise.reject(error);
-      }
-
-      return data;
-    });
+      });
   };
 
   // ==================== API Calls to Nodes ====================
@@ -768,7 +772,7 @@ export class LitNodeClient {
       clientPublicKey: 'test',
     };
 
-    return await this.sendCommandToNode({
+    return this.sendCommandToNode({
       url: urlWithPath,
       data,
     });
@@ -2084,22 +2088,27 @@ export class LitNodeClient {
   connect = (): Promise<any> => {
     // -- handshake with each node
     for (const url of this.config.bootstrapUrls) {
-      this.handshakeWithSgx({ url }).then((resp: any) => {
-        this.connectedNodes.add(url);
+      this.handshakeWithSgx({ url })
+        .then((resp: any) => {
+          this.connectedNodes.add(url);
 
-        let keys: JsonHandshakeResponse = {
-          serverPubKey: resp.serverPublicKey,
-          subnetPubKey: resp.subnetPublicKey,
-          networkPubKey: resp.networkPublicKey,
-          networkPubKeySet: resp.networkPublicKeySet,
-        };
+          let keys: JsonHandshakeResponse = {
+            serverPubKey: resp.serverPublicKey,
+            subnetPubKey: resp.subnetPublicKey,
+            networkPubKey: resp.networkPublicKey,
+            networkPubKeySet: resp.networkPublicKeySet,
+          };
 
-        this.serverKeys[url] = keys;
-      });
+          this.serverKeys[url] = keys;
+        })
+        .catch((e: any) => {
+          log('Error connecting to node ', url, e);
+        });
     }
 
     // -- get promise
-    const promise = new Promise((resolve: any) => {
+    const promise = new Promise((resolve: any, reject: any) => {
+      const startTime = Date.now();
       const interval = setInterval(() => {
         if (Object.keys(this.serverKeys).length >= this.config.minNodeCount) {
           clearInterval(interval);
@@ -2135,6 +2144,20 @@ export class LitNodeClient {
 
           // @ts-ignore: Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?ts(2794)
           resolve();
+        } else {
+          const now = Date.now();
+          if (now - startTime > this.config.connectTimeout) {
+            clearInterval(interval);
+            const msg = `Error: Could not connect to enough nodes after timeout of ${
+              this.config.connectTimeout
+            }ms.  Could only connect to ${
+              Object.keys(this.serverKeys).length
+            } of ${
+              this.config.minNodeCount
+            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            log(msg);
+            reject(msg);
+          }
         }
       }, 500);
     });
