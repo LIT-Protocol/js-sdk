@@ -1,0 +1,12 @@
+{
+  "name": "@lit-protocol/lit-third-party-libs",
+  "version": "2.0.55",
+  "type": "commonjs",
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/lit-third-party-libs"
+  },
+  "tags": [
+    "universal"
+  ]
+}
