@@ -95,6 +95,9 @@ describe('utils', () => {
   it('should prepend [Lit-JS-SDK] in the console.log', () => {
     console.log = jest.fn();
 
+    // turn on debug mode so that it prints stuff
+    globalThis.litConfig = { debug: true };
+
     utilsModule.log('foo', 'bar', 'hola');
 
     expect((console.log as any).mock.calls[0][0]).toBe('[Lit-JS-SDK]');
