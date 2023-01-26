@@ -153,7 +153,7 @@ export class LitNodeClient {
 
     // -- validate
     if (storageConfigOrError.type === 'ERROR') {
-      console.warn(`Storage key "${storageKey}" is missing. `);
+      log(`Storage key "${storageKey}" is missing. `);
       return;
     }
 
@@ -328,7 +328,7 @@ export class LitNodeClient {
           );
         }
       } else {
-        console.log('storedSessionKeyOrError');
+        log('storedSessionKeyOrError');
         sessionKey = JSON.parse(storedSessionKeyOrError.result);
       }
     }
@@ -701,7 +701,7 @@ export class LitNodeClient {
     url: string,
     params: SignWithECDSA
   ): Promise<NodeCommandResponse> => {
-    console.log('sign_message_ecdsa');
+    log('sign_message_ecdsa');
 
     const urlWithPath = `${url}/web/signing/sign_message_ecdsa`;
 
@@ -1091,7 +1091,7 @@ export class LitNodeClient {
         siweMessage: s.siweMessage,
       }));
 
-      console.log('sigShares', sigShares);
+      log('sigShares', sigShares);
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
@@ -1170,7 +1170,7 @@ export class LitNodeClient {
         dataSigned: s.dataSigned,
       }));
 
-      console.log('sigShares', sigShares);
+      log('sigShares', sigShares);
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
@@ -1303,7 +1303,7 @@ export class LitNodeClient {
 
     await wasmECDSA.initWasmEcdsaSdk(); // init WASM
     const signature = wasmECDSA.combine_signature(R_x, R_y, shares);
-    console.log('raw ecdsa sig', signature);
+    log('raw ecdsa sig', signature);
 
     return signature;
   };
@@ -1985,7 +1985,7 @@ export class LitNodeClient {
       // ----- Result -----
       return signature;
     } catch (e) {
-      console.log('Error - signed_ecdsa_messages ');
+      log('Error - signed_ecdsa_messages ', e);
       const signed_ecdsa_message = nodePromises[0];
 
       // ----- Result -----
@@ -2068,7 +2068,7 @@ export class LitNodeClient {
 
       return signature;
     } catch (e) {
-      console.log('Error - signed_ecdsa_messages - ', e);
+      log('Error - signed_ecdsa_messages - ', e);
       const signed_ecdsa_message = nodePromises[0];
       return signed_ecdsa_message;
     }
@@ -2347,7 +2347,6 @@ export class LitNodeClient {
 
       const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
       let signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
-      // console.log("signature", signature);
       signatures[nodeAddress] = {
         sig: uint8arrayToString(signature, 'base16'),
         derivedVia: 'litSessionSignViaNacl',
@@ -2357,7 +2356,7 @@ export class LitNodeClient {
       };
     });
 
-    console.log('signatures:', signatures);
+    log('signatures:', signatures);
 
     return signatures;
   };

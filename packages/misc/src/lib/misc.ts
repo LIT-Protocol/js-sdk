@@ -10,6 +10,8 @@ import {
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 
+const logBuffer: Array<Array<any>> = [];
+
 /**
  *
  * Print error message based on Error interface
@@ -95,17 +97,33 @@ export const throwRemovedFunctionError = (functionName: string) => {
  * @returns { void }
  */
 export const log = (...args: any): void => {
-  // -- validate
-  if (
-    globalThis &&
-    globalThis?.litConfig &&
-    globalThis?.litConfig.debug === false
-  ) {
+  // append the prefix
+  args.unshift('[Lit-JS-SDK]');
+
+  if (!globalThis) {
+    // there is no globalThis, just print the log
+    console.log(...args);
     return;
   }
 
-  // -- execute
-  args.unshift('[Lit-JS-SDK]');
+  // check if config is loaded yet
+  if (!globalThis?.litConfig) {
+    // config isn't loaded yet, push into buffer
+    logBuffer.push(args);
+    return;
+  }
+
+  if (globalThis?.litConfig?.debug !== true) {
+    return;
+  }
+  // config is loaded, and debug is true
+
+  // if there are there are logs in buffer, print them first and empty the buffer.
+  while (logBuffer.length > 0) {
+    const log = logBuffer.shift() ?? '';
+    console.log(...log);
+  }
+
   console.log(...args);
 };
 
@@ -360,15 +378,16 @@ export const decimalPlaces = async ({
   return await contract['decimals']();
 };
 
-
 /**
- * 
+ *
  * Generate a random path (for testing)
- * 
+ *
  * @returns { string } The random path
  */
-export const genRandomPath = () : string => {
-  return "/" +
-  Math.random().toString(36).substring(2, 15) +
-  Math.random().toString(36).substring(2, 15);
-}
+export const genRandomPath = (): string => {
+  return (
+    '/' +
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
+};

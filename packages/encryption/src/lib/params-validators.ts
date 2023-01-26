@@ -136,7 +136,7 @@ export const paramsValidators = {
     )
       return false;
 
-    console.log('authSig:', authSig);
+    log('authSig:', authSig);
     if (!is(authSig, 'Object', 'authSig', 'saveEncryptionKey')) return false;
     if (!checkIfAuthSigRequiresChainParam(authSig, chain, 'saveEncryptionKey'))
       return false;
@@ -239,7 +239,7 @@ export const paramsValidators = {
     )
       return false;
 
-    console.log('TYPEOF:', typeof toDecrypt);
+    log('TYPEOF:', typeof toDecrypt);
     if (!is(toDecrypt, 'String', 'toDecrypt', 'getEncryptionKey')) return false;
     if (!is(authSig, 'Object', 'authSig', 'getEncryptionKey')) return false;
 
@@ -343,7 +343,7 @@ export const paramsValidators = {
   decryptZip: (params: any) => {
     const { encryptedZipBlob, symmKey } = params;
 
-    console.log('encryptedZipBlob:', encryptedZipBlob);
+    log('encryptedZipBlob:', encryptedZipBlob);
 
     // -- validate
     if (
@@ -375,7 +375,7 @@ export const paramsValidators = {
   ) => {
     // -- validate
 
-    console.log('params:', params);
+    log('params:', params);
 
     if (
       !checkType({
