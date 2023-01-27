@@ -42,6 +42,8 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
             --build: build the project
             --dev: run dev stuff
             --watch: watch for changes
+            --setup-local-dev: setup local dev
+            --remove-local-dev: remove local dev
     `,
         true
     );
