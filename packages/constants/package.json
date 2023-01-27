@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/constants",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/constants"
@@ -8,5 +8,7 @@
   "gitHead": "7d74167cc178bd3973c860a8b3c969cfa6ae3caf",
   "tags": [
     "universal"
-  ]
+  ],
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }

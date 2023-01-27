@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/lit-third-party-libs",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
@@ -9,5 +9,7 @@
   "tags": [
     "universal"
   ],
-  "gitHead": "7d74167cc178bd3973c860a8b3c969cfa6ae3caf"
+  "gitHead": "7d74167cc178bd3973c860a8b3c969cfa6ae3caf",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }

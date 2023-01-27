@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/nacl",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "type": "commonjs",
   "tags": [
     "universal"
@@ -9,5 +9,7 @@
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/nacl"
-  }
+  },
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }

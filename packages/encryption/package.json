@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/encryption",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
@@ -9,5 +9,7 @@
   "gitHead": "7d74167cc178bd3973c860a8b3c969cfa6ae3caf",
   "tags": [
     "universal"
-  ]
+  ],
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }
