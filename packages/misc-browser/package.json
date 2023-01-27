@@ -1,12 +1,12 @@
 {
   "name": "@lit-protocol/misc-browser",
-  "version": "2.1.15",
+  "version": "2.1.16",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/misc-browser"
   },
-  "gitHead": "5365289b4a9d635bafa1a32c11e577e0ae4fc8cc",
+  "gitHead": "e0ce4c630d3b79fb21ca3142aa4d478b893726c2",
   "tags": [
     "browser"
   ],
