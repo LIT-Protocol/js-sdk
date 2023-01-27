@@ -1,14 +1,14 @@
 {
   "name": "@lit-protocol/constants",
-  "version": "2.1.12",
+  "version": "2.1.13",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/constants"
   },
-  "gitHead": "7d74167cc178bd3973c860a8b3c969cfa6ae3caf",
+  "gitHead": "5365289b4a9d635bafa1a32c11e577e0ae4fc8cc",
   "tags": [
     "universal"
   ],
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  "main": "./dist/dist/dist/dist/src/index.js",
+  "typings": "./dist/dist/dist/dist/src/index.d.ts"
 }

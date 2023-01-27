@@ -1,18 +1,18 @@
 {
   "name": "@lit-protocol/bls-sdk",
-  "version": "2.1.12",
+  "version": "2.1.13",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/bls-sdk"
   },
-  "gitHead": "7d74167cc178bd3973c860a8b3c969cfa6ae3caf",
+  "gitHead": "5365289b4a9d635bafa1a32c11e577e0ae4fc8cc",
   "peerDependencies": {
     "pako": "^2.1.0"
   },
   "tags": [
     "universal"
   ],
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  "main": "./dist/dist/dist/dist/src/index.js",
+  "typings": "./dist/dist/dist/dist/src/index.d.ts"
 }
