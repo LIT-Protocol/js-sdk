@@ -421,3 +421,44 @@ export const prefixPathWithDir = (path, dirName) => {
         return `./${dirName}/${path}`;
     }
 };
+
+// lerna.json version x.x.x must be greater than each individual package.json version x.x.x
+export const versionChecker =  (pkg, lernaVersion) => {
+
+const version = pkg.version;
+
+  // version cannot be the same as lerna.json version
+  if (version === lernaVersion) {
+
+    return { status: 500, message: `Skipping ${pkg.name} as version is the same as lerna.json version` };
+  }
+
+    // lerna.json version x.x.x must be greater than package.json version x.x.x
+    const lernaVersionArr = lernaVersion.split('.');
+    const versionArr = version.split('.');
+    const lernaVersionMajor = parseInt(lernaVersionArr[0]);
+    const lernaVersionMinor = parseInt(lernaVersionArr[1]);
+    const lernaVersionPatch = parseInt(lernaVersionArr[2]);
+    const versionMajor = parseInt(versionArr[0]);
+    const versionMinor = parseInt(versionArr[1]);
+    const versionPatch = parseInt(versionArr[2]);
+  
+    if (lernaVersionMajor < versionMajor) {
+      return { status: 500, message: `Skipping ${pkg.name} as lerna.json version is less than package.json version` };
+    }
+
+    if (lernaVersionMajor === versionMajor && lernaVersionMinor < versionMinor) {
+        return { status: 500, message: `Skipping ${pkg.name} as lerna.json version is less than package.json version` };
+    }
+
+    if (
+        lernaVersionMajor === versionMajor &&
+        lernaVersionMinor === versionMinor &&
+        lernaVersionPatch <= versionPatch
+    ) {
+        return { status: 500, message: `Skipping ${pkg.name} as lerna.json version is less than package.json version` };
+    }
+
+    return { status: 200, message: `${pkg.name}@${version} => @${lernaVersion}`};
+
+}
