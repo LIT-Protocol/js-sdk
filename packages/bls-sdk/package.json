@@ -13,6 +13,6 @@
   "tags": [
     "universal"
   ],
-  "main": "./dist/dist/dist/dist/src/index.js",
-  "typings": "./dist/dist/dist/dist/src/index.d.ts"
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }
