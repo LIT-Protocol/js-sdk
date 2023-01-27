@@ -939,6 +939,25 @@ if (OPTION === '--comment') {
 
 }
 
+if(OPTION === '--remove-local-dev'){
+
+    // First, remove existing dist symlink if exists.
+    const removeList = (await listDirsRecursive('./packages', false))
+    .map((item) => item.replace('packages/', ''))
+
+    console.log("removeList", removeList);
+
+    await asyncForEach(removeList, (item) => {
+        const dirPathToCreate = `packages/${item}/dist`;
+        if (fs.existsSync(dirPathToCreate)) {
+            greenLog(`Removing symlink ${dirPathToCreate} ...`);
+            return childRunCommand(`rm ${dirPathToCreate}`);
+        }
+    })
+
+    exit();
+}
+
 if (OPTION === '--setup-local-dev') {
     const PROJECT_NAME = args[1];
 
