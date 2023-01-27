@@ -949,60 +949,93 @@ if(OPTION === '--remove-local-dev'){
 
     console.log("removeList", removeList);
 
-    await asyncForEach(removeList, (item) => {
-        const dirPathToCreate = `packages/${item}/dist`;
-        if (fs.existsSync(dirPathToCreate)) {
-            greenLog(`Removing symlink ${dirPathToCreate} ...`);
-            return childRunCommand(`rm ${dirPathToCreate}`);
-        }
+    await asyncForEach(removeList, async (item) => {
+        
+        greenLog(`Removing:
+- symlink packages/${item}/dist
+- "main" and "typings" from packages/${item}/package.json
+        `, true);
+        await childRunCommand(`rm -rf packages/${item}/dist`);
+
+        const packageJson = await readJsonFile(`packages/${item}/package.json`);
+
+        delete packageJson.main;
+        delete packageJson.typings;
+
+        await writeJsonFile(`packages/${item}/package.json`, packageJson);
+
     })
 
     exit();
 }
 
 if (OPTION === '--setup-local-dev') {
+
     const PROJECT_NAME = args[1];
 
     if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
         greenLog(
             `
-              Usage: node tools/scripts/tools.mjs --setup-local-dev [project-name]
-                  [project-name]: the name of the project
+              Usage: node tools/scripts/tools.mjs --setup-local-dev [options]
+                  [options]:
+                    --target [project]: the project to setup local dev for
               `,
             true
         );
 
-        exit();
+        // await 2 seconds
+        await new Promise((resolve) => setTimeout(resolve, 2000));
     }
 
-    // First, remove existing dist symlink if exists.
-    const dirPathToCreate = `packages/${PROJECT_NAME}/dist`;
-    if (fs.existsSync(dirPathToCreate)) {
-        greenLog(`Removing symlink ${dirPathToCreate} ...`);
-        await childRunCommand(`rm ${dirPathToCreate}`);
+    /**
+     * Setup symlink for a project eg. `packages/my-project/dist` -> `dist/packages/my-project`
+     * @param {string} projectName
+     * @returns {Promise<void>}
+     */
+    const setupSymlink = async (projectName) => {
+        // First, remove existing dist symlink if exists.
+        const dirPathToCreate = `packages/${projectName}/dist`;
+        if (fs.existsSync(dirPathToCreate)) {
+            greenLog(`Removing symlink ${dirPathToCreate} ...`);
+            await childRunCommand(`rm -rf ${dirPathToCreate}`);
+        }
+
+        // Then, create a symlink of each package's `dist` folder to their corresponding
+        // package directory location under the root `dist`.
+        const symLinkTarget = `../../dist/packages/${projectName}`; // relative to symlink directory
+        greenLog(`Creating symlink ${dirPathToCreate} -> ${symLinkTarget} ...`);
+        await childRunCommand(`ln -s ${symLinkTarget} ${dirPathToCreate}`);
+
+        // Then, update each package's `package.json` to have the same `main` and `typings` path
+        // as the `package.json` in the dist, except prefixed with `dist`.
+        const packageJsonPath = `packages/${projectName}/package.json`;
+        const distPackageJsonPath = `dist/packages/${projectName}/package.json`;
+        const packageJson = await readJsonFile(packageJsonPath);
+        const distPackageJson = await readJsonFile(distPackageJsonPath);
+
+        packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
+        packageJson.typings = prefixPathWithDir(distPackageJson.typings, 'dist');
+
+        greenLog(`Updating ${packageJsonPath}...`);
+        greenLog(`packageJson.main: ${packageJson.main}`);
+        greenLog(`packageJson.typings: ${packageJson.typings}`);
+
+        await writeJsonFile(packageJsonPath, packageJson);
     }
 
-    // Then, create a symlink of each package's `dist` folder to their corresponding
-    // package directory location under the root `dist`.
-    const symLinkTarget = `../../dist/packages/${PROJECT_NAME}`; // relative to symlink directory
-    greenLog(`Creating symlink ${dirPathToCreate} -> ${symLinkTarget} ...`);
-    await childRunCommand(`ln -s ${symLinkTarget} ${dirPathToCreate}`);
+    if( PROJECT_NAME === '--target' ){
 
-    // Then, update each package's `package.json` to have the same `main` and `typings` path
-    // as the `package.json` in the dist, except prefixed with `dist`.
-    const packageJsonPath = `packages/${PROJECT_NAME}/package.json`;
-    const distPackageJsonPath = `dist/packages/${PROJECT_NAME}/package.json`;
-    const packageJson = await readJsonFile(packageJsonPath);
-    const distPackageJson = await readJsonFile(distPackageJsonPath);
+        const TARGET = args[2];
 
-    packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
-    packageJson.typings = prefixPathWithDir(distPackageJson.typings, 'dist');
+        await setupSymlink(TARGET);
 
-    greenLog(`Updating ${packageJsonPath}...`);
-    greenLog(`packageJson.main: ${packageJson.main}`);
-    greenLog(`packageJson.typings: ${packageJson.typings}`);
-
-    await writeJsonFile(packageJsonPath, packageJson);
+    } else {
+        const packageList = (await listDirsRecursive('./packages', false))
+        .map((item) => item.replace('packages/', ''))
+        await asyncForEach(packageList, async (item) => {
+            await setupSymlink(item);
+        })
+    }
 
     exit();
 }

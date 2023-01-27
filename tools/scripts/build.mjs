@@ -25,11 +25,11 @@ if (projectName === undefined) {
 
 const build = async (name) => {
   // Only proceed to build if not already built, by checking for dist/packages folder
-  const nxDistPath = `dist/packages/${name}`;
-  if (fs.existsSync(nxDistPath)) {
-    yellowLog(`Skipping build for ${name}, because it has already been built.`);
-    return;
-  }
+  // const nxDistPath = `dist/packages/${name}`;
+  // if (fs.existsSync(nxDistPath)) {
+  //   yellowLog(`Skipping build for ${name}, because it has already been built.`);
+  //   return;
+  // }
 
   greenLog('Building project: ' + name);
 
@@ -48,8 +48,8 @@ const build = async (name) => {
   greenLog('Polyfilling...');
   await childRunCommand(`yarn tools --polyfills ${name}`);
 
-  greenLog('Setting up local development tools...');
-  await childRunCommand(`yarn build:setupLocalDev ${name}`);
+  // greenLog('Setting up local development tools...');
+  // await childRunCommand(`yarn build:setupLocalDev ${name}`);
 
   if (!skipGen) {
     greenLog('...mapping dist package name to package.json name');
