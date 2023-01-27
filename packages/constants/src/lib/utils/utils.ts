@@ -1,4 +1,5 @@
-import { EITHER_TYPE, IEither } from '@lit-protocol/constants';
+import { EITHER_TYPE } from '../enums';
+import { IEither } from '../interfaces/i-errors';
 
 /**
  *

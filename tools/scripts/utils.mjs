@@ -408,3 +408,16 @@ export const replaceFileContent = async (path, oldContent, newContent) => {
     await writeFile(file, content);
     return content;
 }
+
+/**
+ * Examples:
+ * 1. prefixPathWithDir('./src/index.js', 'components') => './components/src/index.js'
+ * 2. prefixPathWithDir('src/index.js', 'components') => './components/src/index.js'
+ */
+export const prefixPathWithDir = (path, dirName) => {
+    if (path.slice(0, 2) === './') {
+        return `./${dirName}/${path.slice(2)}`;
+    } else {
+        return `./${dirName}/${path}`;
+    }
+};
