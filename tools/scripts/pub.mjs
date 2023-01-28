@@ -15,6 +15,7 @@ import {
   redLog,
   question,
   writeJsonFile,
+  yellowLog,
 } from './utils.mjs';
 
 const args = getArgs();
@@ -97,7 +98,7 @@ await question('Are you sure you want to publish to? (y/n)', {
       const pkg = await readJsonFile(`${dir}/package.json`);
 
       // also read the individual package.json and update the version
-      try{
+      try {
         const pkg2 = await readJsonFile(
           `${dir.replace('dist/', '')}/package.json`
         );
@@ -105,8 +106,15 @@ await question('Are you sure you want to publish to? (y/n)', {
 
         // write the package.json file
         await writeJsonFile(`${dir.replace('dist/', '')}/package.json`, pkg2);
-      }catch(e){
-        // swallow
+      } catch (e) {
+
+        const path = `${dir.replace('dist/', '')}/package.json`;
+
+        // swallow error if it's not a vanilla package
+        if(!path.includes('vanilla')){
+          yellowLog(`No such file or directory: ${path}`);
+        }
+
       }
 
       // update version
@@ -135,24 +143,3 @@ await question('Are you sure you want to publish to? (y/n)', {
     exit(0);
   },
 });
-
-// exit();
-
-// if (FLAG === '--filter') {
-//   dirs = dirs.filter((dir) => dir.includes(VALUE));
-// }
-
-// dirs.forEach((dir) => {
-//   greenLog(`Publishing ${dir}`);
-
-//   if (FLAG2 !== '--dry-run') {
-//     spawnCommand('npm', ['publish', '--access', 'public'], {
-//       cwd: dir,
-//     });
-//     // exec(`cd ${dir} && npm publish --access public`);
-//   } else {
-//     greenLog(`Dry run, skipping publish`);
-//   }
-// });
-
-// // exit(0);
