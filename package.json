@@ -73,6 +73,7 @@
     "g": "^2.0.1",
     "ipfs-unixfs-importer": "^12.0.0",
     "jszip": "^3.10.1",
+    "js-base64": "^3.7.2",
     "lit-connect-modal": "0.1.8",
     "lit-siwe": "^1.1.8",
     "multiformats": "^10.0.2",

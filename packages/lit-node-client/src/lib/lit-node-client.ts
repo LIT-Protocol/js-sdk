@@ -58,6 +58,7 @@ import {
   ValidateAndSignECDSA,
   version,
   LIT_SESSION_KEY_URI,
+  SessionCapabilityObject,
 } from '@lit-protocol/constants';
 import {
   combineBlsDecryptionShares,
@@ -86,9 +87,10 @@ import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { LitThirdPartyLibs } from '@lit-protocol/lit-third-party-libs';
 
 import { nacl } from '@lit-protocol/nacl';
-import { getStorageItem } from '@lit-protocol/misc-browser';
+import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
 import { BigNumber } from 'ethers';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
+import { Base64 } from 'js-base64';
 
 declare global {
   var litNodeClient: LitNodeClient;
@@ -340,24 +342,39 @@ export class LitNodeClient {
 
   /**
    *
-   * Get session capabilities from user, it not, generates one
-   * @param { Array<any> } capabilities
-   * @param { Array<any> } resources
-   * @return { Array<any> }
+   * Get session capability object from user, if not, generates one
+   * with wildcards so the user doesn't have to sign every time.
+   *
+   * @param { SessionCapabilityObject } sessionCapabilityObject
+   * @param { Array<string> } resources
+   * @return { SessionCapabilityObject }
    */
-  getSessionCapabilities = (
-    capabilities: Array<any>,
-    resources: Array<any>
-  ): Array<any> => {
-    if (!capabilities || capabilities.length == 0) {
-      capabilities = resources.map((resource: any) => {
-        const { protocol, resourceId } = this.parseResource({ resource });
-
-        return `${protocol}Capability://*`;
-      });
+  getSessionCapabilityObject = (
+    resources: Array<string>,
+    sessionCapabilityObject?: SessionCapabilityObject
+  ): SessionCapabilityObject => {
+    // Return the capabilities if they are already set
+    if (
+      sessionCapabilityObject &&
+      Object.keys(sessionCapabilityObject).length > 0
+    ) {
+      return sessionCapabilityObject;
     }
 
-    return capabilities;
+    let capabilityObject: SessionCapabilityObject = {
+      def: [],
+    };
+    let defaultActionsToAdd = new Set<string>();
+
+    resources.forEach((resource) => {
+      const { protocol, resourceId } = this.parseResource({ resource });
+
+      if (!defaultActionsToAdd.has(protocol)) {
+        defaultActionsToAdd.add(protocol);
+      }
+    });
+    capabilityObject.def = Array.from(defaultActionsToAdd);
+    return capabilityObject;
   };
 
   /**
@@ -377,14 +394,14 @@ export class LitNodeClient {
   getWalletSig = async ({
     authNeededCallback,
     chain,
-    capabilities,
+    sessionCapabilityObject,
     switchChain,
     expiration,
     sessionKeyUri,
   }: {
     authNeededCallback: any;
     chain: string;
-    capabilities: Array<any>;
+    sessionCapabilityObject: SessionCapabilityObject;
     switchChain: boolean;
     expiration: string;
     sessionKeyUri: string;
@@ -397,7 +414,7 @@ export class LitNodeClient {
     // -- (TRY) to get it in the local storage
     if (storedWalletSigOrError.type === 'ERROR') {
       console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
       );
     } else {
       walletSig = storedWalletSigOrError.result;
@@ -408,7 +425,11 @@ export class LitNodeClient {
       if (authNeededCallback) {
         walletSig = await authNeededCallback({
           chain,
-          resources: capabilities,
+          resources: [
+            this.encodeSessionCapabilityObjectAsSiweResource(
+              sessionCapabilityObject
+            ),
+          ],
           switchChain,
           expiration,
           uri: sessionKeyUri,
@@ -416,11 +437,26 @@ export class LitNodeClient {
       } else {
         walletSig = await checkAndSignAuthMessage({
           chain,
-          resources: capabilities,
+          resources: [
+            this.encodeSessionCapabilityObjectAsSiweResource(
+              sessionCapabilityObject
+            ),
+          ],
           switchChain,
           expiration,
           uri: sessionKeyUri,
         });
+      }
+
+      // (TRY) to set walletSig to local storage
+      const storeNewWalletSigOrError = setStorageItem(
+        storageKey,
+        JSON.stringify(walletSig)
+      );
+      if (storeNewWalletSigOrError.type === 'ERROR') {
+        console.warn(
+          `Unable to store walletSig in local storage. Not a problem. Continue...`
+        );
       }
     } else {
       try {
@@ -435,6 +471,23 @@ export class LitNodeClient {
 
   /**
    *
+   * Encodes the session capability object as a SIWE resource string.
+   *
+   * Context: The SIWE ReCap standard encodes the session capability object as a resource.
+   *
+   * @param { SessionCapabilityObject } sessionCapabilityObject is the session capability object.
+   * @returns { string } the encoded resource string.
+   *
+   */
+  encodeSessionCapabilityObjectAsSiweResource = (
+    sessionCapabilityObject: SessionCapabilityObject
+  ): string =>
+    `urn:recap:lit:session:${Base64.encode(
+      JSON.stringify(sessionCapabilityObject)
+    )}`;
+
+  /**
+   *
    * Check if a session key needs to be resigned
    *
    */
@@ -443,48 +496,41 @@ export class LitNodeClient {
     walletSignature,
     sessionKeyUri,
     resources,
-    sessionCapabilities,
+    sessionCapabilityObject,
   }: {
     siweMessage: SiweMessage;
     walletSignature: any;
     sessionKeyUri: any;
-    resources: any;
-    sessionCapabilities: Array<any>;
+    resources: string[];
+    sessionCapabilityObject: SessionCapabilityObject;
   }): Promise<boolean> => {
-    let needToResign = false;
-
     try {
       // @ts-ignore
       await siweMessage.verify({ signature: walletSignature });
     } catch (e) {
-      needToResign = true;
+      return true;
     }
 
     // make sure the sig is for the correct session key
     if (siweMessage.uri !== sessionKeyUri) {
-      needToResign = true;
+      return true;
     }
 
     // make sure the sig has the session capabilities required to fulfill the resources requested
     for (let i = 0; i < resources.length; i++) {
       const resource = resources[i];
-      const { protocol, resourceId } = this.parseResource({ resource });
 
       // check if we have blanket permissions or if we authed the specific resource for the protocol
-      const permissionsFound = sessionCapabilities.some((capability: any) => {
-        const capabilityParts = this.parseResource({ resource: capability });
-        return (
-          capabilityParts.protocol === protocol &&
-          (capabilityParts.resourceId === '*' ||
-            capabilityParts.resourceId === resourceId)
-        );
-      });
+      const permissionsFound = this.findPermissionsForResource(
+        resource,
+        sessionCapabilityObject
+      );
       if (!permissionsFound) {
-        needToResign = true;
+        return true;
       }
     }
 
-    return needToResign;
+    return false;
   };
 
   // ==================== SENDING COMMAND ====================
@@ -2414,10 +2460,10 @@ export class LitNodeClient {
   parseResource = ({
     resource,
   }: {
-    resource: any;
+    resource: string;
   }): {
-    protocol: any;
-    resourceId: any;
+    protocol: string;
+    resourceId: string;
   } => {
     const [protocol, resourceId] = resource.split('://');
     return { protocol, resourceId };
@@ -2438,8 +2484,8 @@ export class LitNodeClient {
     // Try to get it from local storage, if not generates one~
     let sessionKey = this.getSessionKey(params.sessionKey);
 
-    let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
-    let capabilities = this.getSessionCapabilities(
+    let sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
+    let sessionCapabilityObject = this.getSessionCapabilityObject(
       params.sessionCapabilities,
       params.resources
     );
@@ -2449,7 +2495,7 @@ export class LitNodeClient {
     let walletSig = await this.getWalletSig({
       authNeededCallback: params.authNeededCallback,
       chain: params.chain,
-      capabilities: capabilities,
+      sessionCapabilityObject,
       switchChain: params.switchChain,
       expiration: expiration,
       sessionKeyUri: sessionKeyUri,
@@ -2462,7 +2508,7 @@ export class LitNodeClient {
       walletSignature: walletSig?.sig,
       sessionKeyUri,
       resources: params.resources,
-      sessionCapabilities: capabilities,
+      sessionCapabilityObject,
     });
 
     // -- (CHECK) if we need to resign the session key
@@ -2471,7 +2517,11 @@ export class LitNodeClient {
       if (params.authNeededCallback) {
         walletSig = await params.authNeededCallback({
           chain: params.chain,
-          resources: capabilities,
+          resources: [
+            this.encodeSessionCapabilityObjectAsSiweResource(
+              sessionCapabilityObject
+            ),
+          ],
           expiration,
           uri: sessionKeyUri,
           litNodeClient: this,
@@ -2479,7 +2529,11 @@ export class LitNodeClient {
       } else {
         walletSig = await checkAndSignAuthMessage({
           chain: params.chain,
-          resources: capabilities,
+          resources: [
+            this.encodeSessionCapabilityObjectAsSiweResource(
+              sessionCapabilityObject
+            ),
+          ],
           switchChain: params.switchChain,
           expiration,
           uri: sessionKeyUri,
@@ -2500,7 +2554,7 @@ export class LitNodeClient {
       return;
     }
 
-    // ===== AFTER we have Valid Signed Session Key =====
+    // ===== AFTER we have Valid Wallet Signature containing Session Key =====
     // - Let's sign the resources with the session key
     // - 5 minutes is the default expiration for a session signature
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
@@ -2544,5 +2598,48 @@ export class LitNodeClient {
     log('signatures:', signatures);
 
     return signatures;
+  };
+
+  // check if we have blanket permissions or if we authed the specific resource for the protocol
+  findPermissionsForResource = (
+    resource: string,
+    sessionCapabilityObject: SessionCapabilityObject
+  ) => {
+    const { protocol, resourceId } = this.parseResource({ resource });
+
+    // first check default permitted actions
+    if (sessionCapabilityObject.def) {
+      for (const defaultAction of sessionCapabilityObject.def) {
+        if (defaultAction === '*' || defaultAction === protocol) {
+          return true;
+        }
+      }
+    }
+
+    // then check specific targets
+    if (sessionCapabilityObject.tar) {
+      if (Object.keys(sessionCapabilityObject.tar).indexOf(resourceId) === -1) {
+        return false;
+      }
+
+      for (const permittedAction of sessionCapabilityObject.tar[resourceId]) {
+        if (permittedAction === '*' || permittedAction === protocol) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
+  /**
+   *
+   * Get Session Key URI eg. lit:session:0x1234
+   *
+   * @param publicKey is the public key of the session key
+   * @returns { string } the session key uri
+   */
+  getSessionKeyUri = (publicKey: string): string => {
+    return LIT_SESSION_KEY_URI + publicKey;
   };
 }

@@ -85,7 +85,6 @@ export interface JsonAuthSig {
   derivedVia: string;
   signedMessage: string;
   address: string;
-  capabilities?: [];
   algo?: [];
 }
 
@@ -94,7 +93,7 @@ export interface CheckAndSignAuthParams {
   chain: Chain;
 
   // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
-  resources?: any[];
+  resources?: string[];
 
   // ptional and only used with EVM chains right now.  Set to true by default.  Whether or not to ask Metamask or the user's wallet to switch chains before signing.  This may be desired if you're going to have the user send a txn on that chain.  On the other hand, if all you care about is the user's wallet signature, then you probably don't want to make them switch chains for no reason.  Pass false here to disable this chain switching behavior.
   switchChain?: boolean;
@@ -611,6 +610,12 @@ export interface SessionSigsProp {
   sessionCapabilities?: any;
   switchChain?: boolean;
   litNodeClient: ILitNodeClient;
+}
+
+export interface SessionCapabilityObject {
+  def?: string[];
+  tar?: { [key: string]: string };
+  ext?: { [key: string]: string };
 }
 
 export interface SessionKeyPair {
