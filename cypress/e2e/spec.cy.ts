@@ -1,5 +1,7 @@
 // @ts-nocheck
 
+import { SessionCapabilityObject } from '@lit-protocol/auth';
+
 let window: any;
 let savedParams: any = {
   accs: [
@@ -722,12 +724,13 @@ describe('Session', () => {
       );
 
     let resources = [`litSigningCondition://${hashedResourceId}`];
-
-    let capabilities = savedParams.litNodeClient.getSessionCapabilities(
-      [],
-      resources
+    let capabilityObject = savedParams.litNodeClient.getSessionCapabilityObject(
+      resources,
+      new SessionCapabilityObject()
     );
-    expect(capabilities[0]).to.be.eq('litSigningConditionCapability://*');
+    expect(capabilityObject.getCapableActionsForAllResources()[0]).to.be.eq(
+      'litSigningCondition'
+    );
   });
 
   it('gets expiration', () => {

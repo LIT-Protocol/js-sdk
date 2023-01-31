@@ -1,0 +1,16 @@
+# Quick Start
+
+### node.js / browser
+
+```
+yarn add @lit-protocol/auth
+```
+
+### Vanilla JS (UMD)
+
+```js
+<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/auth-vanilla/auth.js"></script>
+<script>
+  console.log(LitJsSdk_auth);
+</script>
+```

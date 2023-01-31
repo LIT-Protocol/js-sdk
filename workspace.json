@@ -3,6 +3,7 @@
   "version": 2,
   "projects": {
     "access-control-conditions": "packages/access-control-conditions",
+    "auth": "packages/auth",
     "auth-browser": "packages/auth-browser",
     "bls-sdk": "packages/bls-sdk",
     "constants": "packages/constants",

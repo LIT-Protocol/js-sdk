@@ -13,7 +13,7 @@ import { nacl } from '@lit-protocol/nacl';
 globalThis.nacl = nacl;
 
 import crypto, { createHash } from 'crypto';
-import { getSessionKeyUri } from '@lit-protocol/auth-browser';
+import { SessionCapabilityObject } from '@lit-protocol/auth';
 Object.defineProperty(global.self, 'crypto', {
   value: {
     getRandomValues: (arr: any) => crypto.randomBytes(arr.length),
@@ -133,8 +133,13 @@ describe('litNodeClient', () => {
 
     let resources = [`litSigningCondition://${hashedResourceId}`];
 
-    let capabilities = litNodeClient.getSessionCapabilities([], resources);
-    expect(capabilities[0]).toBe('litSigningConditionCapability://*');
+    let capabilityObject = litNodeClient.getSessionCapabilityObject(
+      resources,
+      new SessionCapabilityObject()
+    );
+    expect(capabilityObject.getCapableActionsForAllResources()[0]).toBe(
+      'litSigningCondition'
+    );
   });
 
   it('gets expiration', () => {

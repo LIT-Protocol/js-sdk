@@ -1,0 +1,77 @@
+{
+  "name": "auth",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/auth/src",
+  "projectType": "library",
+  "targets": {
+
+    "build":{
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target auth"
+      }
+    },
+
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/auth",
+        "main": "packages/auth/src/index.ts",
+        "tsConfig": "packages/auth/tsconfig.lib.json",
+        "assets": ["packages/auth/*.md"]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "bundle": true,        
+        "sourcemap": true,
+        "metafile": true,
+        "globalName": "LitJsSdk_auth",
+        "outfile":"dist/packages/auth-vanilla/auth.js",
+        "entryPoints": ["./packages/auth/src/index.ts"],
+        "define": { "global": "window" },
+        "plugins":[
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+
+    "generateDoc":{
+      "executor": "nx:run-commands",
+        "options": {
+          "command": "yarn typedoc --entryPointStrategy expand packages/auth/src --exclude packages/auth/src/**/*.spec.** --tsconfig packages/auth/tsconfig.json"
+        }
+    },
+
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/auth/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/auth"],
+      "options": {
+        "jestConfig": "packages/auth/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "testWatch": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/auth"],
+      "options": {
+        "jestConfig": "packages/auth/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
+    }
+  },
+  "tags": []
+}
