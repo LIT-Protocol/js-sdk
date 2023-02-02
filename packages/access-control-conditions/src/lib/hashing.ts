@@ -3,11 +3,18 @@ import {
   ConditionItem,
   EvmContractConditions,
   JsonSigningResourceId,
+  LIT_ERROR,
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/constants';
-import { log } from '@lit-protocol/misc';
-import { canonicalAccessControlConditionFormatter, canonicalEVMContractConditionFormatter, canonicalResourceIdFormatter, canonicalSolRpcConditionFormatter, canonicalUnifiedAccessControlConditionFormatter } from './canonicalFormatter';
+import { log, throwError } from '@lit-protocol/misc';
+import {
+  canonicalAccessControlConditionFormatter,
+  canonicalEVMContractConditionFormatter,
+  canonicalResourceIdFormatter,
+  canonicalSolRpcConditionFormatter,
+  canonicalUnifiedAccessControlConditionFormatter,
+} from './canonicalFormatter';
 import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 
 /**
@@ -20,17 +27,30 @@ import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 export const hashUnifiedAccessControlConditions = (
   unifiedAccessControlConditions: UnifiedAccessControlConditions
 ): Promise<ArrayBuffer> => {
-  console.log(
-    'unifiedAccessControlConditions:',
-    unifiedAccessControlConditions
-  );
+  log('unifiedAccessControlConditions:', unifiedAccessControlConditions);
 
   const conditions = unifiedAccessControlConditions.map(
     (condition: ConditionItem) => {
-      canonicalUnifiedAccessControlConditionFormatter(condition);
+      return canonicalUnifiedAccessControlConditionFormatter(condition);
     }
   );
-  console.log('conditions:', conditions);
+  log('conditions:', conditions);
+
+  // check if there's any undefined in the conditions
+  const hasUndefined = conditions.some((c) => c === undefined);
+  if (hasUndefined) {
+    throwError({
+      message: 'Invalid access control conditions',
+      error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+    });
+  }
+
+  if (conditions.length === 0) {
+    throwError({
+      message: 'No conditions provided',
+      error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+    });
+  }
   const toHash = JSON.stringify(conditions);
 
   log('Hashing unified access control conditions: ', toHash);

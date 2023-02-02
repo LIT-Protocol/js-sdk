@@ -92,9 +92,7 @@ const metadataForFile = ({
  * @param { string } str The string to encrypt
  * @returns { Promise<Object> } A promise containing the encryptedString as a Blob and the symmetricKey used to encrypt it, as a Uint8Array.
  */
-export const encryptString = async (
-  str: string
-): Promise<EncryptedString | undefined> => {
+export const encryptString = async (str: string): Promise<EncryptedString> => {
   // -- validate
   if (
     !checkType({
@@ -103,8 +101,13 @@ export const encryptString = async (
       paramName: 'str',
       functionName: 'encryptString',
     })
-  )
-    return;
+  ) {
+    throwError({
+      message: `{${str}} must be a string`,
+      error: LIT_ERROR.INVALID_PARAM_TYPE,
+    });
+    throw new Error(`{${str}} must be a string`);
+  }
 
   // -- prepare
   const encodedString: Uint8Array = uint8arrayFromString(str, 'utf8');
@@ -186,9 +189,9 @@ export const zipAndEncryptString = async (
 
   let zip;
 
-  try{
+  try {
     zip = new JSZip.default();
-  }catch(e){
+  } catch (e) {
     zip = new JSZip();
   }
 
@@ -212,9 +215,9 @@ export const zipAndEncryptFiles = async (
   // let's zip em
   let zip;
 
-  try{
+  try {
     zip = new JSZip.default();
-  }catch(e){
+  } catch (e) {
     zip = new JSZip();
   }
 
@@ -285,9 +288,9 @@ export const decryptZip = async (
   // unpack the zip
   let zip;
 
-  try{
+  try {
     zip = new JSZip.default();
-  }catch(e){
+  } catch (e) {
     zip = new JSZip();
   }
   const unzipped = await zip.loadAsync(decryptedZipArrayBuffer);
@@ -402,9 +405,9 @@ export const encryptFileAndZipWithMetadata = async ({
 
   let zip;
 
-  try{
+  try {
     zip = new JSZip.default();
-  }catch(e){
+  } catch (e) {
     zip = new JSZip();
   }
   const metadata = metadataForFile({

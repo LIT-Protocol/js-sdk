@@ -17,6 +17,8 @@ if (!globalThis.LitNodeClient) {
 
 export * from './lib/lit-node-client';
 
+export { LitNodeClient };
+
 export {
   checkAndSignAuthMessage,
   getSessionKeyUri,
