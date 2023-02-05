@@ -142,14 +142,19 @@ export const encryptString = async (str: string): Promise<EncryptedString> => {
 export const decryptString = async (
   encryptedStringBlob: Blob,
   symmKey: Uint8Array
-): Promise<string | undefined> => {
+): Promise<string> => {
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'decryptString',
     params: [encryptedStringBlob, symmKey],
   });
 
-  if (!paramsIsSafe) return;
+  if (!paramsIsSafe) {
+    throwError({
+      message: 'Invalid params',
+      error: LIT_ERROR.INVALID_PARAM_TYPE,
+    });
+  }
 
   // -- import the decrypted symm key
   const importedSymmKey: CryptoKey = await importSymmetricKey(symmKey);

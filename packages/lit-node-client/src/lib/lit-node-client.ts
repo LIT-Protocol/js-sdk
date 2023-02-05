@@ -1457,9 +1457,7 @@ export class LitNodeClient {
    * @returns { ExecuteJsResponse }
    *
    */
-  executeJs = async (
-    params: ExecuteJsProps
-  ): Promise<ExecuteJsResponse | undefined> => {
+  executeJs = async (params: ExecuteJsProps): Promise<ExecuteJsResponse> => {
     // ========== Prepare Params ==========
     const {
       code,
@@ -1488,7 +1486,11 @@ export class LitNodeClient {
       params: params,
     });
 
-    if (!paramsIsSafe) return;
+    if (!paramsIsSafe) {
+      return throwError({
+        message: 'executeJs params are not valid',
+      });
+    }
 
     let res;
 
@@ -1523,7 +1525,6 @@ export class LitNodeClient {
     // -- case: promises rejected
     if (res.success === false) {
       this.throwNodeError(res as RejectedNodePromises);
-      return;
     }
 
     // -- case: promises success (TODO: check the keys of "values")
@@ -1586,11 +1587,11 @@ export class LitNodeClient {
    *
    * @param { SignedChainDataToken } params
    *
-   * @returns { Promise<string | undefined>}
+   * @returns { Promise<string>}
    */
   getSignedChainDataToken = async (
     params: SignedChainDataToken
-  ): Promise<string | undefined> => {
+  ): Promise<string> => {
     // ========== Prepare Params ==========
     const { callRequests, chain } = params;
 
@@ -1599,7 +1600,7 @@ export class LitNodeClient {
     if (!this.ready) {
       const message =
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throwError({
+      return throwError({
         message,
         error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
       });
@@ -1607,11 +1608,10 @@ export class LitNodeClient {
 
     // -- validate if this.networkPubKeySet is null
     if (this.networkPubKeySet === null) {
-      throwError({
+      return throwError({
         message: 'networkPubKeySet cannot be null',
         error: LIT_ERROR.PARAM_NULL_ERROR,
       });
-      return;
     }
 
     // ========== Prepare ==========
@@ -1681,7 +1681,7 @@ export class LitNodeClient {
    */
   getSignedToken = async (
     params: JsonSigningRetrieveRequest
-  ): Promise<string | undefined> => {
+  ): Promise<string> => {
     // ========== Prepare Params ==========
     const {
       // accessControlConditions,
@@ -1707,11 +1707,10 @@ export class LitNodeClient {
 
     // -- validate if this.networkPubKeySet is null
     if (this.networkPubKeySet === null) {
-      throwError({
+      return throwError({
         message: 'networkPubKeySet cannot be null',
         error: LIT_ERROR.PARAM_NULL_ERROR,
       });
-      return;
     }
 
     // ========== Prepare ==========
@@ -1730,19 +1729,17 @@ export class LitNodeClient {
     }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
 
     if (error) {
-      throwError({
+      return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
         error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
       });
-      return;
     }
 
     if (!resourceId) {
-      throwError({
+      return throwError({
         message: `You must provide a resourceId`,
         error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
       });
-      return;
     }
 
     const formattedResourceId = canonicalResourceIdFormatter(resourceId);
@@ -1771,7 +1768,6 @@ export class LitNodeClient {
     // -- case: promises rejected
     if (res.success === false) {
       this.throwNodeError(res as RejectedNodePromises);
-      return;
     }
 
     const signatureShares: Array<NodeShare> = (res as SuccessNodePromises)
@@ -1794,12 +1790,12 @@ export class LitNodeClient {
    *
    * @param { JsonStoreSigningRequest } params
    *
-   * @returns { Promise<boolean | undefined }
+   * @returns { Promise<boolean> }
    *
    */
   saveSigningCondition = async (
     params: JsonStoreSigningRequest
-  ): Promise<boolean | undefined> => {
+  ): Promise<boolean> => {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
@@ -1832,11 +1828,10 @@ export class LitNodeClient {
     // ----- validate params -----
     // validate if resourceId is null
     if (!resourceId) {
-      throwError({
+      return throwError({
         message: 'resourceId cannot be null',
         error: LIT_ERROR.PARAM_NULL_ERROR,
       });
-      return;
     }
 
     // ========== Hashing Resource ID & Conditions ==========
@@ -1852,11 +1847,10 @@ export class LitNodeClient {
       await this.getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
-      throwError({
+      return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
         error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
       });
-      return;
     }
 
     const hashOfConditionsStr = uint8arrayToString(
@@ -1884,7 +1878,6 @@ export class LitNodeClient {
     // -- case: promises rejected
     if (res.success === false) {
       this.throwNodeError(res as RejectedNodePromises);
-      return;
     }
 
     return true;
@@ -1897,7 +1890,7 @@ export class LitNodeClient {
    */
   getEncryptionKey = async (
     params: JsonEncryptionRetrieveRequest
-  ): Promise<Uint8Array | undefined> => {
+  ): Promise<Uint8Array> => {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
@@ -1915,7 +1908,6 @@ export class LitNodeClient {
         message,
         error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
       });
-      return;
     }
 
     // ========== Prepare Params ==========
@@ -1927,7 +1919,11 @@ export class LitNodeClient {
       params: params,
     });
 
-    if (!paramsIsSafe) return;
+    if (!paramsIsSafe) {
+      throwError({
+        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+      });
+    }
 
     // ========== Formatting Access Control Conditions =========
     const {
@@ -1943,7 +1939,6 @@ export class LitNodeClient {
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
         error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
       });
-      return;
     }
 
     // ========== Node Promises ==========
@@ -1972,13 +1967,19 @@ export class LitNodeClient {
     // -- case: promises rejected
     if (res.success === false) {
       this.throwNodeError(res as RejectedNodePromises);
-      return;
     }
 
     const decryptionShares: Array<NodeShare> = (res as SuccessNodePromises)
       .values;
 
     log('decryptionShares', decryptionShares);
+
+    if (!this.networkPubKeySet) {
+      return throwError({
+        message: 'networkPubKeySet cannot be null',
+        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+      });
+    }
 
     // ========== Combine Shares ==========
     const decrypted = combineBlsDecryptionShares(
@@ -1996,12 +1997,12 @@ export class LitNodeClient {
    *
    * @param { JsonSaveEncryptionKeyRequest } params
    *
-   * @returns { Promise<Uint8Array | undefined }
+   * @returns { Promise<Uint8Array> }
    *
    */
   saveEncryptionKey = async (
     params: JsonSaveEncryptionKeyRequest
-  ): Promise<Uint8Array | undefined> => {
+  ): Promise<Uint8Array> => {
     // ========= Prepare Params ==========
     const { encryptedSymmetricKey, symmetricKey, authSig, chain, permanent } =
       params;
@@ -2020,11 +2021,10 @@ export class LitNodeClient {
     // -- validate if this.subnetPubKey is null
     if (!this.subnetPubKey) {
       const message = 'subnetPubKey cannot be null';
-      throwError({
+      return throwError({
         message,
         error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
       });
-      return;
     }
 
     const paramsIsSafe = safeParams({
@@ -2032,7 +2032,12 @@ export class LitNodeClient {
       params,
     });
 
-    if (!paramsIsSafe) return;
+    if (!paramsIsSafe) {
+      return throwError({
+        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+      });
+    }
 
     // ========== Encryption ==========
     // -- encrypt with network pubkey
@@ -2064,11 +2069,10 @@ export class LitNodeClient {
       await this.getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
-      throwError({
+      return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
         error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
       });
-      return;
     }
 
     const hashOfConditionsStr = uint8arrayToString(
@@ -2100,7 +2104,6 @@ export class LitNodeClient {
     // -- case: promises rejected
     if (res.success === false) {
       this.throwNodeError(res as RejectedNodePromises);
-      return;
     }
 
     return encryptedKey;
@@ -2157,7 +2160,7 @@ export class LitNodeClient {
    */
   validateAndSignEcdsa = async (
     params: ValidateAndSignECDSA
-  ): Promise<string | undefined> => {
+  ): Promise<string> => {
     // ========== Validate Params ==========
     // -- validate if it's ready
     if (!this.ready) {
@@ -2180,11 +2183,10 @@ export class LitNodeClient {
 
     // -- validate
     if (!accessControlConditions) {
-      throwError({
+      return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions`,
         error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
       });
-      return;
     }
 
     // -- formatted access control conditions

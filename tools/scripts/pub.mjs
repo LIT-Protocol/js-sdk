@@ -87,6 +87,30 @@ greenLog(
   true
 );
 
+// get latest version
+let publishVersion;
+
+try {
+  let res = await fetch(
+    'https://registry.npmjs.org/@lit-protocol/lit-node-client'
+  );
+
+  res = await res.json();
+
+  // get the last one
+  const modified = Object.keys(res.time).pop();
+
+  // increase x from 0.0.x to 0.0.x+1
+  const version = modified.split('.');
+  version[2] = parseInt(version[2]) + 1;
+  publishVersion = version.join('.');
+  console.log('publishVersion', publishVersion);
+} catch (e) {
+  yellowLog(
+    "Couldn't get latest version from npm, will use lerna.json version"
+  );
+}
+
 await question('Are you sure you want to publish to? (y/n)', {
   yes: async () => {
     greenLog('Publishing...');
@@ -102,19 +126,22 @@ await question('Are you sure you want to publish to? (y/n)', {
         const pkg2 = await readJsonFile(
           `${dir.replace('dist/', '')}/package.json`
         );
-        pkg2.version = lernaVersion;
+
+        if (OPTION === '--tag' && (VALUE === 'dev' || VALUE === 'test')) {
+          pkg2.version = publishVersion;
+        } else {
+          pkg2.version = lernaVersion;
+        }
 
         // write the package.json file
         await writeJsonFile(`${dir.replace('dist/', '')}/package.json`, pkg2);
       } catch (e) {
-
         const path = `${dir.replace('dist/', '')}/package.json`;
 
         // swallow error if it's not a vanilla package
-        if(!path.includes('vanilla')){
+        if (!path.includes('vanilla')) {
           yellowLog(`No such file or directory: ${path}`);
         }
-
       }
 
       // update version
@@ -126,15 +153,25 @@ await question('Are you sure you want to publish to? (y/n)', {
       if (OPTION === '--tag') {
         greenLog(`Publishing ${dir} with tag ${VALUE}`);
 
-        spawnCommand('npm', ['publish', '--access', 'public', '--tag', VALUE], {
-          cwd: dir,
-        }, {logExit: false});
+        spawnCommand(
+          'npm',
+          ['publish', '--access', 'public', '--tag', VALUE],
+          {
+            cwd: dir,
+          },
+          { logExit: false }
+        );
       }
 
       if (OPTION === '--prod') {
-        spawnCommand('npm', ['publish', '--access', 'public'], {
-          cwd: dir,
-        }, {logExit: false});
+        spawnCommand(
+          'npm',
+          ['publish', '--access', 'public'],
+          {
+            cwd: dir,
+          },
+          { logExit: false }
+        );
       }
     });
   },
