@@ -187,7 +187,7 @@ export class LitContracts {
    * @param {any} [opt] An optional value to log with the message.
    */
   log = (str: string, opt?: any) => {
-    if (this.debug) return;
+    if (!this.debug) return;
     console.log(`[@lit-protocol/contracts-sdk] ${str}`, opt ?? '');
   };
 
