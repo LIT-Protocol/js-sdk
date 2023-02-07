@@ -1,25 +1,22 @@
 import {
-    AUTH_SIGNATURE_BODY,
-    EITHER_TYPE,
-    ELeft,
-    ERight,
-    IEither,
-    IProvider,
-    JsonAuthSig,
-    LIT_ERROR,
-    LOCAL_STORAGE_KEYS,
+  AUTH_SIGNATURE_BODY,
+  EITHER_TYPE,
+  ELeft,
+  ERight,
+  IEither,
+  IProvider,
+  JsonAuthSig,
+  LIT_ERROR,
+  LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
 import { log, throwError } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 // import { toString as uint8arrayToString } from 'uint8arrays';
 
 import {
-    uint8arrayFromString,
-    uint8arrayToString,
-  } from '@lit-protocol/uint8arrays';
-
-
-const util = require('util');
+  uint8arrayFromString,
+  uint8arrayToString,
+} from '@lit-protocol/uint8arrays';
 
 /**
  *
@@ -28,23 +25,23 @@ const util = require('util');
  * @returns { object || never }
  */
 const getProvider = (): IEither => {
-    let resultOrError: IEither;
+  let resultOrError: IEither;
 
-    // -- validate
-    if ('solana' in window) {
-        resultOrError = ERight(window?.keplr);
-    } else {
-        // -- finally
-        const message =
-            'No web3 wallet was found that works with Solana.  Install a Solana wallet or choose another chain';
+  // -- validate
+  if ('solana' in window) {
+    resultOrError = ERight(window?.keplr ?? window?.solana);
+  } else {
+    // -- finally
+    const message =
+      'No web3 wallet was found that works with Solana.  Install a Solana wallet or choose another chain';
 
-        resultOrError = ELeft({
-            message,
-            error: LIT_ERROR.NO_WALLET_EXCEPTION,
-        });
-    }
+    resultOrError = ELeft({
+      message,
+      error: LIT_ERROR.NO_WALLET_EXCEPTION,
+    });
+  }
 
-    return resultOrError;
+  return resultOrError;
 };
 
 /**
@@ -54,19 +51,19 @@ const getProvider = (): IEither => {
  * @returns { Promise<IProvider | undefined }
  */
 export const connectSolProvider = async (): Promise<IProvider | undefined> => {
-    const providerOrError: IEither = getProvider();
+  const providerOrError: IEither = getProvider();
 
-    if (providerOrError.type === 'ERROR') {
-        throwError(providerOrError.result);
-        return;
-    }
+  if (providerOrError.type === 'ERROR') {
+    throwError(providerOrError.result);
+    return;
+  }
 
-    let provider: any = providerOrError.result;
+  let provider: any = providerOrError.result;
 
-    await provider.connect();
-    const account = provider.publicKey.toBase58();
+  await provider.connect();
+  const account = provider.publicKey.toBase58();
 
-    return { provider, account };
+  return { provider, account };
 };
 
 /**
@@ -75,50 +72,60 @@ export const connectSolProvider = async (): Promise<IProvider | undefined> => {
  *
  * @returns { JsonAuthSig }
  */
-export const checkAndSignSolAuthMessage =
-    async (): Promise<JsonAuthSig> => {
-        const res = await connectSolProvider();
+export const checkAndSignSolAuthMessage = async (): Promise<JsonAuthSig> => {
+  const res = await connectSolProvider();
 
-        if (! res ) {
-            log('Failed to connect sol provider');
-        }
+  if (!res) {
+    log('Failed to connect sol provider');
+  }
 
-        const provider = res?.provider;
-        const account = res?.account;
-        const key = LOCAL_STORAGE_KEYS.AUTH_SOL_SIGNATURE;
-        let authSigOrError: IEither = getStorageItem(key);
+  const provider = res?.provider;
+  const account = res?.account;
+  const key = LOCAL_STORAGE_KEYS.AUTH_SOL_SIGNATURE;
 
-        // let authSig = localStorage.getItem("lit-auth-sol-signature");
-        let authSig: JsonAuthSig;
+  let authSigOrError: IEither = getStorageItem(key);
 
-        // -- case: if unable to get auth from local storage
-        if (authSigOrError.type === EITHER_TYPE.ERROR) {
-            log('signing auth message because sig is not in local storage');
+  // let authSig = localStorage.getItem("lit-auth-sol-signature");
+  let authSig: JsonAuthSig;
 
-            await signAndSaveAuthMessage({ provider });
+  // -- case: if unable to get auth from local storage
+  if (authSigOrError.type === EITHER_TYPE.ERROR) {
+    log('signing auth message because sig is not in local storage');
 
-            authSigOrError.type = EITHER_TYPE.SUCCESS;
-            authSigOrError.result = getStorageItem(key);
-        }
+    await signAndSaveAuthMessage({ provider });
 
-        authSig = JSON.parse(authSigOrError.result);
+    authSigOrError.type = EITHER_TYPE.SUCCESS;
+    authSigOrError.result = getStorageItem(key);
+  }
 
-        // -- if the wallet address isn't the same as the address from local storage
-        if (account !== authSig.address) {
-            log(
-                'signing auth message because account is not the same as the address in the auth sig'
-            );
-            await signAndSaveAuthMessage({ provider });
+  //   @ts-ignore
+  window.test = authSigOrError;
 
-            authSigOrError.type = EITHER_TYPE.SUCCESS;
-            authSigOrError.result = getStorageItem(key);
-            authSig = JSON.parse(authSigOrError.result);
-        }
+  try {
+    // when it's not in local storage, it's a string
+    authSig = JSON.parse(authSigOrError.result.result);
+  } catch (e) {
+    // when it's in local storage, it's an object
+    authSig = JSON.parse(authSigOrError.result);
+  }
 
-        log('authSig', authSig);
+  // -- if the wallet address isn't the same as the address from local storage
+  if (account !== authSig.address) {
+    log(
+      'signing auth message because account is not the same as the address in the auth sig'
+    );
 
-        return authSig;
-    };
+    await signAndSaveAuthMessage({ provider });
+
+    authSigOrError.type = EITHER_TYPE.SUCCESS;
+    authSigOrError.result = getStorageItem(key);
+    authSig = JSON.parse(authSigOrError.result);
+  }
+
+  log('authSig', authSig);
+
+  return authSig;
+};
 
 /**
  *
@@ -129,29 +136,32 @@ export const checkAndSignSolAuthMessage =
  *
  */
 export const signAndSaveAuthMessage = async ({
-    provider,
+  provider,
 }: {
-    provider: any;
+  provider: any;
 }): Promise<JsonAuthSig | undefined> => {
-    const now = new Date().toISOString();
-    const body = AUTH_SIGNATURE_BODY.replace('{{timestamp}}', now);
+  const now = new Date().toISOString();
+  const body = AUTH_SIGNATURE_BODY.replace('{{timestamp}}', now);
 
-    const data = new util.TextEncoder().encode(body);
-    const signed = await provider.signMessage(data, 'utf8');
+  //   turn body into Uint8Array
+  const data = uint8arrayFromString(body, 'utf8');
 
-    const hexSig = uint8arrayToString(signed.signature, 'base16');
+  //   const data = naclUtil.encode(body);
+  const signed = await provider.signMessage(data, 'utf8');
 
-    const authSig: JsonAuthSig = {
-        sig: hexSig,
-        derivedVia: 'solana.signMessage',
-        signedMessage: body,
-        address: provider.publicKey.toBase58(),
-    };
+  const hexSig = uint8arrayToString(signed.signature, 'base16');
 
-    localStorage.setItem(
-        LOCAL_STORAGE_KEYS.AUTH_SOL_SIGNATURE,
-        JSON.stringify(authSig)
-    );
+  const authSig: JsonAuthSig = {
+    sig: hexSig,
+    derivedVia: 'solana.signMessage',
+    signedMessage: body,
+    address: provider.publicKey.toBase58(),
+  };
 
-    return authSig;
+  localStorage.setItem(
+    LOCAL_STORAGE_KEYS.AUTH_SOL_SIGNATURE,
+    JSON.stringify(authSig)
+  );
+
+  return authSig;
 };

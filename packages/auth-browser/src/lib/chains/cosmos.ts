@@ -16,6 +16,7 @@ import { log, sortedObject, throwError } from '@lit-protocol/misc';
 declare global {
   interface Window {
     keplr?: any;
+    solana?: any;
   }
 }
 

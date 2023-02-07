@@ -145,7 +145,11 @@ await question('Are you sure you want to publish to? (y/n)', {
       }
 
       // update version
-      pkg.version = lernaVersion;
+      if (OPTION === '--tag' && (VALUE === 'dev' || VALUE === 'test')) {
+        pkg.version = publishVersion;
+      } else {
+        pkg.version = lernaVersion;
+      }
 
       // write the package.json file
       await writeJsonFile(`${dir}/package.json`, pkg);

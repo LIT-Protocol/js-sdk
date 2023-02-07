@@ -27,7 +27,6 @@ export const checkAndSignAuthMessage = ({
 }: CheckAndSignAuthParams): Promise<JsonAuthSig> => {
   const chainInfo = ALL_LIT_CHAINS[chain];
 
-  console.log('chain:', chain);
   // -- validate: if chain info not found
   if (!chainInfo) {
     throwError({
