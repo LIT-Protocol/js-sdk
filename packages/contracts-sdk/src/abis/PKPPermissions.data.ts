@@ -7,11 +7,6 @@ export const pkpPermissions = {
           "internalType": "address",
           "name": "_pkpNft",
           "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_router",
-          "type": "address"
         }
       ],
       "stateMutability": "nonpayable",
@@ -155,6 +150,31 @@ export const pkpPermissions = {
       "type": "event"
     },
     {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "group",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "root",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RootHashUpdated",
+      "type": "event"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -208,19 +228,26 @@ export const pkpPermissions = {
           "type": "uint256"
         },
         {
-          "internalType": "uint256",
-          "name": "authMethodType",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes",
-          "name": "id",
-          "type": "bytes"
-        },
-        {
-          "internalType": "bytes",
-          "name": "userPubkey",
-          "type": "bytes"
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "authMethodType",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "id",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "userPubkey",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct PKPPermissions.AuthMethod",
+          "name": "authMethod",
+          "type": "tuple"
         },
         {
           "internalType": "uint256[]",
@@ -740,19 +767,6 @@ export const pkpPermissions = {
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "router",
-      "outputs": [
-        {
-          "internalType": "contract PubkeyRouter",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "address",
@@ -768,12 +782,22 @@ export const pkpPermissions = {
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "newRouterAddress",
-          "type": "address"
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "group",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "root",
+          "type": "bytes32"
         }
       ],
-      "name": "setRouterAddress",
+      "name": "setRootHash",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -789,6 +813,79 @@ export const pkpPermissions = {
       "name": "transferOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "group",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "proof",
+          "type": "bytes32[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "leaf",
+          "type": "bytes32"
+        }
+      ],
+      "name": "verifyState",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "group",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "proof",
+          "type": "bytes32[]"
+        },
+        {
+          "internalType": "bool[]",
+          "name": "proofFlags",
+          "type": "bool[]"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "leaves",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "verifyStates",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     }
   ]

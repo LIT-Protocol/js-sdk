@@ -68,13 +68,15 @@ export type PKPPermissionsEvents =
   | 'PermittedAuthMethodAdded'
   | 'PermittedAuthMethodRemoved'
   | 'PermittedAuthMethodScopeAdded'
-  | 'PermittedAuthMethodScopeRemoved';
+  | 'PermittedAuthMethodScopeRemoved'
+  | 'RootHashUpdated';
 export interface PKPPermissionsEventsContext {
   OwnershipTransferred(...parameters: any): EventFilter;
   PermittedAuthMethodAdded(...parameters: any): EventFilter;
   PermittedAuthMethodRemoved(...parameters: any): EventFilter;
   PermittedAuthMethodScopeAdded(...parameters: any): EventFilter;
   PermittedAuthMethodScopeRemoved(...parameters: any): EventFilter;
+  RootHashUpdated(...parameters: any): EventFilter;
 }
 export type PKPPermissionsMethodNames =
   | 'new'
@@ -103,10 +105,11 @@ export type PKPPermissionsMethodNames =
   | 'removePermittedAuthMethod'
   | 'removePermittedAuthMethodScope'
   | 'renounceOwnership'
-  | 'router'
   | 'setPkpNftAddress'
-  | 'setRouterAddress'
-  | 'transferOwnership';
+  | 'setRootHash'
+  | 'transferOwnership'
+  | 'verifyState'
+  | 'verifyStates';
 export interface OwnershipTransferredEventEmittedResponse {
   previousOwner: string;
   newOwner: string;
@@ -134,6 +137,16 @@ export interface PermittedAuthMethodScopeRemovedEventEmittedResponse {
   id: Arrayish;
   scopeId: BigNumberish;
 }
+export interface RootHashUpdatedEventEmittedResponse {
+  tokenId: BigNumberish;
+  group: BigNumberish;
+  root: Arrayish;
+}
+export interface AddPermittedAuthMethodRequest {
+  authMethodType: BigNumberish;
+  id: Arrayish;
+  userPubkey: Arrayish;
+}
 export interface AuthMethodsResponse {
   authMethodType: BigNumber;
   0: BigNumber;
@@ -158,11 +171,9 @@ export interface PKPPermissions {
    * StateMutability: nonpayable
    * Type: constructor
    * @param _pkpNft Type: address, Indexed: false
-   * @param _router Type: address, Indexed: false
    */
   'new'(
     _pkpNft: string,
-    _router: string,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -201,16 +212,12 @@ export interface PKPPermissions {
    * StateMutability: nonpayable
    * Type: function
    * @param tokenId Type: uint256, Indexed: false
-   * @param authMethodType Type: uint256, Indexed: false
-   * @param id Type: bytes, Indexed: false
-   * @param userPubkey Type: bytes, Indexed: false
+   * @param authMethod Type: tuple, Indexed: false
    * @param scopes Type: uint256[], Indexed: false
    */
   addPermittedAuthMethod(
     tokenId: BigNumberish,
-    authMethodType: BigNumberish,
-    id: Arrayish,
-    userPubkey: Arrayish,
+    authMethod: AddPermittedAuthMethodRequest,
     scopes: BigNumberish[],
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
@@ -494,13 +501,6 @@ export interface PKPPermissions {
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  router(overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
@@ -515,10 +515,14 @@ export interface PKPPermissions {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
-   * @param newRouterAddress Type: address, Indexed: false
+   * @param tokenId Type: uint256, Indexed: false
+   * @param group Type: uint256, Indexed: false
+   * @param root Type: bytes32, Indexed: false
    */
-  setRouterAddress(
-    newRouterAddress: string,
+  setRootHash(
+    tokenId: BigNumberish,
+    group: BigNumberish,
+    root: Arrayish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -532,4 +536,40 @@ export interface PKPPermissions {
     newOwner: string,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   * @param group Type: uint256, Indexed: false
+   * @param proof Type: bytes32[], Indexed: false
+   * @param leaf Type: bytes32, Indexed: false
+   */
+  verifyState(
+    tokenId: BigNumberish,
+    group: BigNumberish,
+    proof: Arrayish[],
+    leaf: Arrayish,
+    overrides?: ContractCallOverrides
+  ): Promise<boolean>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   * @param group Type: uint256, Indexed: false
+   * @param proof Type: bytes32[], Indexed: false
+   * @param proofFlags Type: bool[], Indexed: false
+   * @param leaves Type: bytes32[], Indexed: false
+   */
+  verifyStates(
+    tokenId: BigNumberish,
+    group: BigNumberish,
+    proof: Arrayish[],
+    proofFlags: boolean[],
+    leaves: Arrayish[],
+    overrides?: ContractCallOverrides
+  ): Promise<boolean>;
 }

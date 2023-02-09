@@ -35,6 +35,19 @@ export const pubkeyRouter = {
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newPkpNftAddress",
+          "type": "address"
+        }
+      ],
+      "name": "PkpNftAddressSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "uint256",
           "name": "tokenId",

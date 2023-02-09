@@ -65,10 +65,12 @@ export interface ContractCallOverrides {
 }
 export type PubkeyRouterEvents =
   | 'OwnershipTransferred'
+  | 'PkpNftAddressSet'
   | 'PubkeyRoutingDataSet'
   | 'PubkeyRoutingDataVote';
 export interface PubkeyRouterEventsContext {
   OwnershipTransferred(...parameters: any): EventFilter;
+  PkpNftAddressSet(...parameters: any): EventFilter;
   PubkeyRoutingDataSet(...parameters: any): EventFilter;
   PubkeyRoutingDataVote(...parameters: any): EventFilter;
 }
@@ -91,6 +93,9 @@ export type PubkeyRouterMethodNames =
 export interface OwnershipTransferredEventEmittedResponse {
   previousOwner: string;
   newOwner: string;
+}
+export interface PkpNftAddressSetEventEmittedResponse {
+  newPkpNftAddress: string;
 }
 export interface PubkeyRoutingDataSetEventEmittedResponse {
   tokenId: BigNumberish;

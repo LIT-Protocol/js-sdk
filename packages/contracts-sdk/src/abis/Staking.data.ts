@@ -16,6 +16,45 @@ export const staking = {
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newEpochLength",
+          "type": "uint256"
+        }
+      ],
+      "name": "EpochLengthSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newKickPenaltyPercent",
+          "type": "uint256"
+        }
+      ],
+      "name": "KickPenaltyPercentSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newMinimumStake",
+          "type": "uint256"
+        }
+      ],
+      "name": "MinimumStakeSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "address",
           "name": "previousOwner",
@@ -108,11 +147,11 @@ export const staking = {
         {
           "indexed": false,
           "internalType": "address",
-          "name": "resolverContractAddress",
+          "name": "newResolverContractAddress",
           "type": "address"
         }
       ],
-      "name": "ResolverContractAddressChanged",
+      "name": "ResolverContractAddressSet",
       "type": "event"
     },
     {
@@ -171,12 +210,38 @@ export const staking = {
       "inputs": [
         {
           "indexed": false,
+          "internalType": "address",
+          "name": "newStakingTokenAddress",
+          "type": "address"
+        }
+      ],
+      "name": "StakingTokenSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
           "internalType": "enum Staking.States",
           "name": "newState",
           "type": "uint8"
         }
       ],
       "name": "StateChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newTokenRewardPerTokenPerEpoch",
+          "type": "uint256"
+        }
+      ],
+      "name": "TokenRewardPerTokenPerEpochSet",
       "type": "event"
     },
     {

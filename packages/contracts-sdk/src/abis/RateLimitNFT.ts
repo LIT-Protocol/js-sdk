@@ -64,15 +64,27 @@ export interface ContractCallOverrides {
   gasLimit?: number;
 }
 export type RateLimitNFTEvents =
+  | 'AdditionalRequestsPerSecondCostSet'
   | 'Approval'
   | 'ApprovalForAll'
+  | 'FreeMintSignerSet'
+  | 'FreeRequestsPerRateLimitWindowSet'
   | 'OwnershipTransferred'
-  | 'Transfer';
+  | 'RLIHolderRateLimitWindowMillisecondsSet'
+  | 'RateLimitWindowMillisecondsSet'
+  | 'Transfer'
+  | 'Withdrew';
 export interface RateLimitNFTEventsContext {
+  AdditionalRequestsPerSecondCostSet(...parameters: any): EventFilter;
   Approval(...parameters: any): EventFilter;
   ApprovalForAll(...parameters: any): EventFilter;
+  FreeMintSignerSet(...parameters: any): EventFilter;
+  FreeRequestsPerRateLimitWindowSet(...parameters: any): EventFilter;
   OwnershipTransferred(...parameters: any): EventFilter;
+  RLIHolderRateLimitWindowMillisecondsSet(...parameters: any): EventFilter;
+  RateLimitWindowMillisecondsSet(...parameters: any): EventFilter;
   Transfer(...parameters: any): EventFilter;
+  Withdrew(...parameters: any): EventFilter;
 }
 export type RateLimitNFTMethodNames =
   | 'new'
@@ -84,7 +96,6 @@ export type RateLimitNFTMethodNames =
   | 'calculateCost'
   | 'calculateRequestsPerSecond'
   | 'capacity'
-  | 'contractBalance'
   | 'defaultRateLimitWindowMilliseconds'
   | 'freeMint'
   | 'freeMintSigTest'
@@ -118,6 +129,9 @@ export type RateLimitNFTMethodNames =
   | 'transferFrom'
   | 'transferOwnership'
   | 'withdraw';
+export interface AdditionalRequestsPerSecondCostSetEventEmittedResponse {
+  newAdditionalRequestsPerMillisecondCost: BigNumberish;
+}
 export interface ApprovalEventEmittedResponse {
   owner: string;
   approved: string;
@@ -128,14 +142,29 @@ export interface ApprovalForAllEventEmittedResponse {
   operator: string;
   approved: boolean;
 }
+export interface FreeMintSignerSetEventEmittedResponse {
+  newFreeMintSigner: string;
+}
+export interface FreeRequestsPerRateLimitWindowSetEventEmittedResponse {
+  newFreeRequestsPerRateLimitWindow: BigNumberish;
+}
 export interface OwnershipTransferredEventEmittedResponse {
   previousOwner: string;
   newOwner: string;
+}
+export interface RLIHolderRateLimitWindowMillisecondsSetEventEmittedResponse {
+  newRLIHolderRateLimitWindowMilliseconds: BigNumberish;
+}
+export interface RateLimitWindowMillisecondsSetEventEmittedResponse {
+  newRateLimitWindowMilliseconds: BigNumberish;
 }
 export interface TransferEventEmittedResponse {
   from: string;
   to: string;
   tokenId: BigNumberish;
+}
+export interface WithdrewEventEmittedResponse {
+  amount: BigNumberish;
 }
 export interface CapacityResponse {
   requestsPerMillisecond: BigNumber;
@@ -242,13 +271,6 @@ export interface RateLimitNFT {
     parameter0: BigNumberish,
     overrides?: ContractCallOverrides
   ): Promise<CapacityResponse>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  contractBalance(overrides?: ContractCallOverrides): Promise<BigNumber>;
   /**
    * Payable: false
    * Constant: true

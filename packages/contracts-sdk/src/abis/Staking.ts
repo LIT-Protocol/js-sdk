@@ -64,33 +64,43 @@ export interface ContractCallOverrides {
   gasLimit?: number;
 }
 export type StakingEvents =
+  | 'EpochLengthSet'
+  | 'KickPenaltyPercentSet'
+  | 'MinimumStakeSet'
   | 'OwnershipTransferred'
   | 'Paused'
   | 'ReadyForNextEpoch'
   | 'Recovered'
   | 'RequestToJoin'
   | 'RequestToLeave'
-  | 'ResolverContractAddressChanged'
+  | 'ResolverContractAddressSet'
   | 'RewardPaid'
   | 'RewardsDurationUpdated'
   | 'Staked'
+  | 'StakingTokenSet'
   | 'StateChanged'
+  | 'TokenRewardPerTokenPerEpochSet'
   | 'Unpaused'
   | 'ValidatorKickedFromNextEpoch'
   | 'VotedToKickValidatorInNextEpoch'
   | 'Withdrawn';
 export interface StakingEventsContext {
+  EpochLengthSet(...parameters: any): EventFilter;
+  KickPenaltyPercentSet(...parameters: any): EventFilter;
+  MinimumStakeSet(...parameters: any): EventFilter;
   OwnershipTransferred(...parameters: any): EventFilter;
   Paused(...parameters: any): EventFilter;
   ReadyForNextEpoch(...parameters: any): EventFilter;
   Recovered(...parameters: any): EventFilter;
   RequestToJoin(...parameters: any): EventFilter;
   RequestToLeave(...parameters: any): EventFilter;
-  ResolverContractAddressChanged(...parameters: any): EventFilter;
+  ResolverContractAddressSet(...parameters: any): EventFilter;
   RewardPaid(...parameters: any): EventFilter;
   RewardsDurationUpdated(...parameters: any): EventFilter;
   Staked(...parameters: any): EventFilter;
+  StakingTokenSet(...parameters: any): EventFilter;
   StateChanged(...parameters: any): EventFilter;
+  TokenRewardPerTokenPerEpochSet(...parameters: any): EventFilter;
   Unpaused(...parameters: any): EventFilter;
   ValidatorKickedFromNextEpoch(...parameters: any): EventFilter;
   VotedToKickValidatorInNextEpoch(...parameters: any): EventFilter;
@@ -145,6 +155,15 @@ export type StakingMethodNames =
   | 'validatorsInNextEpochAreLocked'
   | 'votesToKickValidatorsInNextEpoch'
   | 'withdraw';
+export interface EpochLengthSetEventEmittedResponse {
+  newEpochLength: BigNumberish;
+}
+export interface KickPenaltyPercentSetEventEmittedResponse {
+  newKickPenaltyPercent: BigNumberish;
+}
+export interface MinimumStakeSetEventEmittedResponse {
+  newMinimumStake: BigNumberish;
+}
 export interface OwnershipTransferredEventEmittedResponse {
   previousOwner: string;
   newOwner: string;
@@ -165,8 +184,8 @@ export interface RequestToJoinEventEmittedResponse {
 export interface RequestToLeaveEventEmittedResponse {
   staker: string;
 }
-export interface ResolverContractAddressChangedEventEmittedResponse {
-  resolverContractAddress: string;
+export interface ResolverContractAddressSetEventEmittedResponse {
+  newResolverContractAddress: string;
 }
 export interface RewardPaidEventEmittedResponse {
   staker: string;
@@ -179,8 +198,14 @@ export interface StakedEventEmittedResponse {
   staker: string;
   amount: BigNumberish;
 }
+export interface StakingTokenSetEventEmittedResponse {
+  newStakingTokenAddress: string;
+}
 export interface StateChangedEventEmittedResponse {
   newState: BigNumberish;
+}
+export interface TokenRewardPerTokenPerEpochSetEventEmittedResponse {
+  newTokenRewardPerTokenPerEpoch: BigNumberish;
 }
 export interface UnpausedEventEmittedResponse {
   account: string;

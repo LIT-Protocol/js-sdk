@@ -66,20 +66,33 @@ export interface ContractCallOverrides {
 export type PKPNFTEvents =
   | 'Approval'
   | 'ApprovalForAll'
+  | 'FreeMintSignerSet'
+  | 'MintCostSet'
   | 'OwnershipTransferred'
-  | 'Transfer';
+  | 'PkpNftMetadataAddressSet'
+  | 'PkpPermissionsAddressSet'
+  | 'PkpRouted'
+  | 'RouterAddressSet'
+  | 'Transfer'
+  | 'Withdrew';
 export interface PKPNFTEventsContext {
   Approval(...parameters: any): EventFilter;
   ApprovalForAll(...parameters: any): EventFilter;
+  FreeMintSignerSet(...parameters: any): EventFilter;
+  MintCostSet(...parameters: any): EventFilter;
   OwnershipTransferred(...parameters: any): EventFilter;
+  PkpNftMetadataAddressSet(...parameters: any): EventFilter;
+  PkpPermissionsAddressSet(...parameters: any): EventFilter;
+  PkpRouted(...parameters: any): EventFilter;
+  RouterAddressSet(...parameters: any): EventFilter;
   Transfer(...parameters: any): EventFilter;
+  Withdrew(...parameters: any): EventFilter;
 }
 export type PKPNFTMethodNames =
   | 'new'
   | 'approve'
   | 'balanceOf'
   | 'burn'
-  | 'contractBalance'
   | 'exists'
   | 'freeMintGrantAndBurnNext'
   | 'freeMintNext'
@@ -133,14 +146,36 @@ export interface ApprovalForAllEventEmittedResponse {
   operator: string;
   approved: boolean;
 }
+export interface FreeMintSignerSetEventEmittedResponse {
+  newFreeMintSigner: string;
+}
+export interface MintCostSetEventEmittedResponse {
+  newMintCost: BigNumberish;
+}
 export interface OwnershipTransferredEventEmittedResponse {
   previousOwner: string;
   newOwner: string;
+}
+export interface PkpNftMetadataAddressSetEventEmittedResponse {
+  pkpNftMetadataAddress: string;
+}
+export interface PkpPermissionsAddressSetEventEmittedResponse {
+  pkpPermissionsAddress: string;
+}
+export interface PkpRoutedEventEmittedResponse {
+  tokenId: BigNumberish;
+  keyType: BigNumberish;
+}
+export interface RouterAddressSetEventEmittedResponse {
+  routerAddress: string;
 }
 export interface TransferEventEmittedResponse {
   from: string;
   to: string;
   tokenId: BigNumberish;
+}
+export interface WithdrewEventEmittedResponse {
+  amount: BigNumberish;
 }
 export interface PKPNFT {
   /**
@@ -185,13 +220,6 @@ export interface PKPNFT {
     tokenId: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  contractBalance(overrides?: ContractCallOverrides): Promise<BigNumber>;
   /**
    * Payable: false
    * Constant: true

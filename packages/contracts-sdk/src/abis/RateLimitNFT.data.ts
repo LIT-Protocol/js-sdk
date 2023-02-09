@@ -10,6 +10,19 @@ export const rateLimitNft = {
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newAdditionalRequestsPerMillisecondCost",
+          "type": "uint256"
+        }
+      ],
+      "name": "AdditionalRequestsPerSecondCostSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "address",
           "name": "owner",
@@ -62,6 +75,32 @@ export const rateLimitNft = {
         {
           "indexed": true,
           "internalType": "address",
+          "name": "newFreeMintSigner",
+          "type": "address"
+        }
+      ],
+      "name": "FreeMintSignerSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newFreeRequestsPerRateLimitWindow",
+          "type": "uint256"
+        }
+      ],
+      "name": "FreeRequestsPerRateLimitWindowSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
           "name": "previousOwner",
           "type": "address"
         },
@@ -73,6 +112,32 @@ export const rateLimitNft = {
         }
       ],
       "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newRLIHolderRateLimitWindowMilliseconds",
+          "type": "uint256"
+        }
+      ],
+      "name": "RLIHolderRateLimitWindowMillisecondsSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newRateLimitWindowMilliseconds",
+          "type": "uint256"
+        }
+      ],
+      "name": "RateLimitWindowMillisecondsSet",
       "type": "event"
     },
     {
@@ -98,6 +163,19 @@ export const rateLimitNft = {
         }
       ],
       "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "Withdrew",
       "type": "event"
     },
     {
@@ -242,19 +320,6 @@ export const rateLimitNft = {
         {
           "internalType": "uint256",
           "name": "expiresAt",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "contractBalance",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
           "type": "uint256"
         }
       ],
