@@ -365,6 +365,7 @@ export const connectWeb3 = async ({
 
   // trigger metamask popup
   try {
+    log("@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.");
     await provider.enable();
   } catch (e) {
     log(
