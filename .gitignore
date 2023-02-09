@@ -46,3 +46,5 @@ Thumbs.db
 # Next.js
 .next
 lerna-debug.log
+
+dev.sh

@@ -364,7 +364,15 @@ export const connectWeb3 = async ({
   const web3 = new Web3Provider(provider);
 
   // trigger metamask popup
-  await provider.enable();
+  try {
+    log("@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.");
+    await provider.enable();
+  } catch (e) {
+    log(
+      "error enabling provider but swallowed it because it's not important.  most wallets use a different function now to enable the wallet so you can ignore this error, because those other methods will be tried.",
+      e
+    );
+  }
 
   log('listing accounts');
   const accounts = await web3.listAccounts();
