@@ -26,7 +26,31 @@ const args = getArgs();
 
 const OPTION = args[0];
 
-if (!OPTION || OPTION === '' || OPTION === '--help') {
+const optionMaps = new Map([
+    ['--help', () => helpFunc()],
+    ['--create', () => createFunc()],
+    ['--path', () => pathFunc()],
+    ['--test', () => testFunc()],
+    ['--find', () => findFunc()],
+    ['--build', () => buildFunc()],
+    ['--switch', () => switchFunc()],
+    ['--dev', () => devFunc()],
+    ['--watch', () => watchFunc()],
+    ['--polyfills', () => polyfillsFunc()],
+    ['--comment', () => commentFunc()],
+    ['--remove-local-dev', () => removeLocalDevFunc()],
+    ['--setup-local-dev', () => setupLocalDevFunc()],
+    ['default', () => helpFunc()],
+])
+
+const setup = () => {
+    const result = optionMaps.get(OPTION) || optionMaps.get('default')
+    result()
+}
+
+setup()
+
+function helpFunc() {
     greenLog(
         `
         Usage: node tools/scripts/tools.mjs [option][...args]
@@ -50,7 +74,7 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
     exit();
 }
 
-if (OPTION === '--create') {
+async function createFunc() {
     let APP_TYPE = args[1];
 
     if (!APP_TYPE || APP_TYPE === '' || APP_TYPE === '--help') {
@@ -180,7 +204,7 @@ if (OPTION === '--create') {
     }
 }
 
-if (OPTION === '--path') {
+async function pathFunc() {
     const PROJECT_PATH = args[1];
     const COMMANDS = args.slice(2);
 
@@ -199,7 +223,7 @@ if (OPTION === '--path') {
     spawnCommand(COMMANDS[0], COMMANDS.slice(1), { cwd: PROJECT_PATH });
 }
 
-if (OPTION === '--test') {
+async function testFunc() {
     const TEST_TYPE = args[1];
 
     if (!TEST_TYPE || TEST_TYPE === '' || TEST_TYPE === '--help') {
@@ -257,8 +281,7 @@ if (OPTION === '--test') {
         }
     }
 }
-
-if (OPTION === '--find') {
+async function findFunc() {
     const FIND_TYPE = args[1];
 
     if (!FIND_TYPE || FIND_TYPE === '' || FIND_TYPE === '--help') {
@@ -309,7 +332,7 @@ if (OPTION === '--find') {
     }
 }
 
-if (OPTION === '--build') {
+async function buildFunc() {
     const BUILD_TYPE = args[1];
 
     if (!BUILD_TYPE || BUILD_TYPE === '' || BUILD_TYPE === '--help') {
@@ -440,7 +463,7 @@ if (OPTION === '--build') {
     }
 }
 
-if (OPTION === '--publish') {
+async function publishFunc() {
     let OPTION2 = args[1];
 
     if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
@@ -530,8 +553,7 @@ if (OPTION === '--publish') {
         exit();
     }
 }
-
-if (OPTION === '--yalc') {
+async function yalcFunc() {
     const OPTION2 = args[1];
 
     if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
@@ -594,7 +616,7 @@ if (OPTION === '--yalc') {
     exit();
 }
 
-if (OPTION === '--switch') {
+async function switchFunc() {
     const SCOPE = args[1];
 
 
@@ -660,8 +682,7 @@ if (OPTION === '--switch') {
         exit();
     }
 }
-
-if (OPTION === '--clone') {
+async function cloneFunc() {
 
     const PROJECT_NAME = args[1];
     const NPM_NAME = args[2];
@@ -756,8 +777,7 @@ if (OPTION === '--clone') {
     exit();
 
 }
-
-if (OPTION === '--dev') {
+async function devFunc() {
 
     const TYPE = args[1];
 
@@ -796,7 +816,7 @@ if (OPTION === '--dev') {
     }
 }
 
-if (OPTION === '--watch') {
+async function watchFunc() {
     const OPTION = args[1];
 
     if (!OPTION || OPTION === '' || OPTION === '--help') {
@@ -860,7 +880,7 @@ if (OPTION === '--watch') {
 
 }
 
-if (OPTION === '--polyfills') {
+async function polyfillsFunc() {
 
     const PROJECT_NAME = args[1];
 
@@ -899,7 +919,7 @@ if (OPTION === '--polyfills') {
     exit();
 }
 
-if (OPTION === '--comment') {
+async function commentFunc() {
     const C = args[1] ?? '=';
 
     // combine args except for the first index
@@ -941,16 +961,16 @@ if (OPTION === '--comment') {
 
 }
 
-if(OPTION === '--remove-local-dev'){
+async function removeLocalDevFunc() {
 
     // First, remove existing dist symlink if exists.
     const removeList = (await listDirsRecursive('./packages', false))
-    .map((item) => item.replace('packages/', ''))
+        .map((item) => item.replace('packages/', ''))
 
     console.log("removeList", removeList);
 
     await asyncForEach(removeList, async (item) => {
-        
+
         greenLog(`Removing:
 - symlink packages/${item}/dist
 - "main" and "typings" from packages/${item}/package.json
@@ -969,7 +989,7 @@ if(OPTION === '--remove-local-dev'){
     exit();
 }
 
-if (OPTION === '--setup-local-dev') {
+async function setupLocalDevFunc() {
 
     const PROJECT_NAME = args[1];
 
@@ -1023,7 +1043,7 @@ if (OPTION === '--setup-local-dev') {
         await writeJsonFile(packageJsonPath, packageJson);
     }
 
-    if( PROJECT_NAME === '--target' ){
+    if (PROJECT_NAME === '--target') {
 
         const TARGET = args[2];
 
@@ -1031,7 +1051,7 @@ if (OPTION === '--setup-local-dev') {
 
     } else {
         const packageList = (await listDirsRecursive('./packages', false))
-        .map((item) => item.replace('packages/', ''))
+            .map((item) => item.replace('packages/', ''))
         await asyncForEach(packageList, async (item) => {
             await setupSymlink(item);
         })
