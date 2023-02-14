@@ -3,16 +3,10 @@
 import { hasItems } from './helper';
 import { manualTest } from './manual-test';
 
-import * as blsSdk from '@lit-protocol/bls-sdk';
 import * as constants from '@lit-protocol/constants';
 import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
-import * as litThirdPartyLibs from '@lit-protocol/lit-third-party-libs';
-import * as nacl from '@lit-protocol/nacl';
 
-console.log("blsSdk:", hasItems(blsSdk));
 console.log("constants:", hasItems(constants));
 console.log("ecdsaSdk:", hasItems(ecdsaSdk));
-console.log("litThirdPartyLibs:", hasItems(litThirdPartyLibs));
-console.log("nacl:", hasItems(nacl));
 
 manualTest();

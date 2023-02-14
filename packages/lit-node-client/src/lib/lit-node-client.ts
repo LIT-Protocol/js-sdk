@@ -702,7 +702,7 @@ export class LitNodeClient {
   storeEncryptionConditionWithNode = async (
     url: string,
     params: JsonSigningStoreRequest,
-    requestId
+    requestId: string
   ): Promise<NodeCommandResponse> => {
     log('storeEncryptionConditionWithNode');
     const urlWithPath = `${url}/web/encryption/store`;
@@ -2144,46 +2144,6 @@ export class LitNodeClient {
 
   /**
    *
-   * Signs a message with Lit threshold ECDSA algorithms.
-   *
-   * @param { SignWithECDSA } params
-   *
-   * @returns { Promise<string> }
-   *
-   */
-  signWithEcdsa = async (params: SignWithECDSA): Promise<string> => {
-    // ========== Prepare Params ==========
-    const { message, chain } = params;
-
-    // ----- Node Promises -----
-    const nodePromises = this.getNodePromises((url: string) => {
-      return this.signECDSA(url, {
-        message,
-        chain,
-        iat: 0,
-        exp: 0,
-      });
-    });
-
-    // ----- Resolve Promises -----
-    try {
-      const shareData = await Promise.all(nodePromises);
-
-      const signature = this.getSignature(shareData);
-
-      // ----- Result -----
-      return signature;
-    } catch (e) {
-      log('Error - signed_ecdsa_messages ');
-      const signed_ecdsa_message = nodePromises[0];
-
-      // ----- Result -----
-      return signed_ecdsa_message;
-    }
-  };
-
-  /**
-   *
    * Validates a condition, and then signs the condition if the validation returns true.
    * Before calling this function, you must know the on chain conditions that you wish to validate.
    *
@@ -2403,10 +2363,15 @@ export class LitNodeClient {
     };
 
     // ========== Node Promises ==========
+    const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
-      return this.getSignSessionKeyShares(url, {
-        body: reqBody,
-      });
+      return this.getSignSessionKeyShares(
+        url,
+        {
+          body: reqBody,
+        },
+        requestId
+      );
     });
 
     // -- resolve promises
@@ -2443,7 +2408,7 @@ export class LitNodeClient {
   getSignSessionKeyShares = async (
     url: string,
     params: GetSignSessionKeySharesProp,
-    requestId
+    requestId: string
   ) => {
     log('getSignSessionKeyShares');
     const urlWithPath = `${url}/web/sign_session_key`;
