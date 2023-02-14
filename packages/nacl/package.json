@@ -9,7 +9,5 @@
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/nacl"
-  },
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  }
 }

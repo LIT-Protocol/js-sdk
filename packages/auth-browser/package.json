@@ -17,7 +17,5 @@
   },
   "tags": [
     "browser"
-  ],
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  ]
 }

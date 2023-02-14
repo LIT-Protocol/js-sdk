@@ -222,9 +222,6 @@ export interface JsonExecutionRequest {
   // the session signatures to use to authorize the user with the nodes
   sessionSigs?: any;
 
-  // random request id
-  requestId?: string;
-
   // whether to run this on a single node or many
   targetNodeRange?: number;
 }
@@ -413,6 +410,7 @@ export interface LitNodePromise {}
 export interface SendNodeCommand {
   url: string;
   data: any;
+  requestId: string;
 }
 
 export interface NodeShare {
