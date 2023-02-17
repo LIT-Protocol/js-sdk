@@ -24,13 +24,6 @@ if (projectName === undefined) {
 }
 
 const build = async (name) => {
-  // Only proceed to build if not already built, by checking for dist/packages folder
-  // const nxDistPath = `dist/packages/${name}`;
-  // if (fs.existsSync(nxDistPath)) {
-  //   yellowLog(`Skipping build for ${name}, because it has already been built.`);
-  //   return;
-  // }
-
   greenLog('Building project: ' + name);
 
   const packageDistPath = `packages/${name}/dist`;
@@ -38,6 +31,8 @@ const build = async (name) => {
     greenLog(`Removing ${packageDistPath} ...`);
     await runCommand(`rm ${packageDistPath}`);
   }
+
+  greenLog(`Matching packages/${name}/project.json versions to lerna.json...`);
 
   greenLog('Building Tsc...');
   await runCommand(`yarn nx run ${name}:_buildTsc`);

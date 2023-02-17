@@ -40,6 +40,7 @@ const optionMaps = new Map([
     ['--comment', () => commentFunc()],
     ['--remove-local-dev', () => removeLocalDevFunc()],
     ['--setup-local-dev', () => setupLocalDevFunc()],
+    ['--match-versions', () => matchVersionsFunc()],
     ['default', () => helpFunc()],
 ])
 
@@ -66,8 +67,9 @@ function helpFunc() {
             --build: build the project
             --dev: run dev stuff
             --watch: watch for changes
-            --setup-local-dev: setup local dev
             --remove-local-dev: remove local dev
+            --setup-local-dev: setup local dev
+            --match-versions: match versions
     `,
         true
     );
@@ -426,6 +428,9 @@ async function buildFunc() {
             await childRunCommand(`yarn tool:genReadme`)
             exit();
         } else {
+
+            await childRunCommand(`yarn tools --match-versions`);
+
             const ignoreList = (await listDirsRecursive('./apps', false))
                 .map((item) => item.replace('apps/', ''))
                 .join(',');
@@ -1056,6 +1061,26 @@ async function setupLocalDevFunc() {
             await setupSymlink(item);
         })
     }
+
+    exit();
+}
+
+async function matchVersionsFunc() {
+
+    // async foreach packages 
+    const packageList = (await listDirsRecursive('./packages', false))
+
+    // get lerna version
+    const lernaJson = await readJsonFile(`lerna.json`);
+
+    await asyncForEach(packageList, async (pkg) => {
+        const packageJson = await readJsonFile(`${pkg}/package.json`);
+        packageJson.version = lernaJson.version;
+
+        greenLog(`Updating ${pkg}/package.json version ${packageJson.version} => ${lernaJson.version}...`);
+        await writeJsonFile(`${pkg}/package.json`, packageJson);
+
+    });
 
     exit();
 }
