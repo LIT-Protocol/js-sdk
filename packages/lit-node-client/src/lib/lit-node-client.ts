@@ -233,7 +233,6 @@ export class LitNodeClient {
     const reqBody: JsonExecutionRequest = {
       authSig: params.authSig,
       jsParams: convertLitActionsParams(params.jsParams),
-      requestId: Math.random().toString(16).slice(2),
       // singleNode: params.singleNode ?? false,
       targetNodeRange: params.targetNodeRange ?? 0,
     };
@@ -487,6 +486,17 @@ export class LitNodeClient {
     return needToResign;
   };
 
+  /**
+   *
+   * Get a random request ID
+   *   *
+   * @returns { string }
+   *
+   */
+  getRequestId() {
+    return Math.random().toString(16).slice(2);
+  }
+
   // ==================== SENDING COMMAND ====================
   /**
    *
@@ -497,14 +507,20 @@ export class LitNodeClient {
    * @returns { Promise<any> }
    *
    */
-  sendCommandToNode = async ({ url, data }: SendNodeCommand): Promise<any> => {
+  sendCommandToNode = async ({
+    url,
+    data,
+    requestId,
+  }: SendNodeCommand): Promise<any> => {
     log(`sendCommandToNode with url ${url} and data`, data);
 
     const req: RequestInit = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'lit-js-sdk-version': version,
+        'X-Lit-SDK-Version': version,
+        'X-Lit-SDK-Type': 'Typescript',
+        'X-Request-Id': 'lit_' + requestId,
       },
       body: JSON.stringify(data),
     };
@@ -541,7 +557,8 @@ export class LitNodeClient {
    */
   getJsExecutionShares = async (
     url: string,
-    params: JsonExecutionRequest
+    params: JsonExecutionRequest,
+    requestId: string
   ): Promise<NodeCommandResponse> => {
     const { code, ipfsId, authSig, jsParams, sessionSigs } = params;
 
@@ -557,7 +574,7 @@ export class LitNodeClient {
       jsParams,
     };
 
-    return await this.sendCommandToNode({ url: urlWithPath, data });
+    return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
   };
 
   /**
@@ -572,7 +589,8 @@ export class LitNodeClient {
    */
   getChainDataSigningShare = async (
     url: string,
-    params: JsonSignChainDataRequest
+    params: JsonSignChainDataRequest,
+    requestId: string
   ): Promise<NodeCommandResponse> => {
     const { callRequests, chain, iat, exp } = params;
 
@@ -587,7 +605,7 @@ export class LitNodeClient {
       exp,
     };
 
-    return await this.sendCommandToNode({ url: urlWithPath, data });
+    return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
   };
 
   /**
@@ -602,7 +620,8 @@ export class LitNodeClient {
    */
   getSigningShare = async (
     url: string,
-    params: JsonSigningRetrieveRequest
+    params: JsonSigningRetrieveRequest,
+    requestId: string
   ): Promise<NodeCommandResponse> => {
     log('getSigningShare');
     const urlWithPath = `${url}/web/signing/retrieve`;
@@ -610,6 +629,7 @@ export class LitNodeClient {
     return await this.sendCommandToNode({
       url: urlWithPath,
       data: params,
+      requestId,
     });
   };
 
@@ -625,7 +645,8 @@ export class LitNodeClient {
    */
   getDecryptionShare = async (
     url: string,
-    params: JsonEncryptionRetrieveRequest
+    params: JsonEncryptionRetrieveRequest,
+    requestId: string
   ): Promise<NodeCommandResponse> => {
     log('getDecryptionShare');
     const urlWithPath = `${url}/web/encryption/retrieve`;
@@ -633,6 +654,7 @@ export class LitNodeClient {
     return await this.sendCommandToNode({
       url: urlWithPath,
       data: params,
+      requestId,
     });
   };
 
@@ -648,7 +670,8 @@ export class LitNodeClient {
    */
   storeSigningConditionWithNode = async (
     url: string,
-    params: JsonSigningStoreRequest
+    params: JsonSigningStoreRequest,
+    requestId: string
   ): Promise<NodeCommandResponse> => {
     log('storeSigningConditionWithNode');
 
@@ -663,6 +686,7 @@ export class LitNodeClient {
         chain: params.chain,
         permanant: params.permanent,
       },
+      requestId,
     });
   };
 
@@ -678,7 +702,8 @@ export class LitNodeClient {
    */
   storeEncryptionConditionWithNode = async (
     url: string,
-    params: JsonSigningStoreRequest
+    params: JsonSigningStoreRequest,
+    requestId: string
   ): Promise<NodeCommandResponse> => {
     log('storeEncryptionConditionWithNode');
     const urlWithPath = `${url}/web/encryption/store`;
@@ -690,31 +715,7 @@ export class LitNodeClient {
       permanant: params.permanent,
     };
 
-    return await this.sendCommandToNode({ url: urlWithPath, data });
-  };
-
-  /**
-   *
-   * Sign wit ECDSA
-   *
-   * @param { string } url
-   * @param { SignWithECDSA } params
-   *
-   * @returns { Promise}
-   *
-   */
-  signECDSA = async (
-    url: string,
-    params: SignWithECDSA
-  ): Promise<NodeCommandResponse> => {
-    log('sign_message_ecdsa');
-
-    const urlWithPath = `${url}/web/signing/sign_message_ecdsa`;
-
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: params,
-    });
+    return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
   };
 
   /**
@@ -729,7 +730,8 @@ export class LitNodeClient {
    */
   signConditionEcdsa = async (
     url: string,
-    params: SignConditionECDSA
+    params: SignConditionECDSA,
+    requestId: string
   ): Promise<NodeCommandResponse> => {
     log('signConditionEcdsa');
     const urlWithPath = `${url}/web/signing/signConditionEcdsa`;
@@ -747,6 +749,7 @@ export class LitNodeClient {
     return await this.sendCommandToNode({
       url: urlWithPath,
       data,
+      requestId,
     });
   };
 
@@ -760,7 +763,8 @@ export class LitNodeClient {
    *
    */
   handshakeWithSgx = async (
-    params: HandshakeWithSgx
+    params: HandshakeWithSgx,
+    requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
     // -- get properties from params
     const { url } = params;
@@ -777,6 +781,7 @@ export class LitNodeClient {
     return this.sendCommandToNode({
       url: urlWithPath,
       data,
+      requestId,
     });
   };
 
@@ -1120,6 +1125,7 @@ export class LitNodeClient {
 
     log('Final Selected Indexes:', randomSelectedNodeIndexes);
 
+    const requestId = this.getRequestId();
     const nodePromises = [];
 
     for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
@@ -1149,9 +1155,11 @@ export class LitNodeClient {
       reqBody.authSig = sigToPassToNode;
 
       // this return { url: string, data: JsonRequest }
-      let singleNodePromise = this.getJsExecutionShares(url, {
-        ...reqBody,
-      });
+      let singleNodePromise = this.getJsExecutionShares(
+        url,
+        reqBody,
+        requestId
+      );
 
       nodePromises.push(singleNodePromise);
     }
@@ -1505,6 +1513,7 @@ export class LitNodeClient {
 
       // ========== Get Node Promises ==========
       // -- fetch shares from nodes
+      const requestId = this.getRequestId();
       const nodePromises = this.getNodePromises((url: string) => {
         // -- choose the right signature
         let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
@@ -1514,9 +1523,7 @@ export class LitNodeClient {
         });
         reqBody.authSig = sigToPassToNode;
 
-        return this.getJsExecutionShares(url, {
-          ...reqBody,
-        });
+        return this.getJsExecutionShares(url, reqBody, requestId);
       });
       // -- resolve promises
       res = await this.handleNodePromises(nodePromises);
@@ -1622,13 +1629,18 @@ export class LitNodeClient {
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
+    const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
-      return this.getChainDataSigningShare(url, {
-        callRequests,
-        chain,
-        iat,
-        exp,
-      });
+      return this.getChainDataSigningShare(
+        url,
+        {
+          callRequests,
+          chain,
+          iat,
+          exp,
+        },
+        requestId
+      );
     });
 
     // -- resolve promises
@@ -1745,21 +1757,27 @@ export class LitNodeClient {
     const formattedResourceId = canonicalResourceIdFormatter(resourceId);
 
     // ========== Get Node Promises ==========
+    const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
       let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
-      return this.getSigningShare(url, {
-        accessControlConditions: formattedAccessControlConditions,
-        evmContractConditions: formattedEVMContractConditions,
-        solRpcConditions: formattedSolRpcConditions,
-        unifiedAccessControlConditions: formattedUnifiedAccessControlConditions,
-        chain,
-        authSig: authSigToSend,
-        resourceId: formattedResourceId,
-        iat,
-        exp,
-      });
+      return this.getSigningShare(
+        url,
+        {
+          accessControlConditions: formattedAccessControlConditions,
+          evmContractConditions: formattedEVMContractConditions,
+          solRpcConditions: formattedSolRpcConditions,
+          unifiedAccessControlConditions:
+            formattedUnifiedAccessControlConditions,
+          chain,
+          authSig: authSigToSend,
+          resourceId: formattedResourceId,
+          iat,
+          exp,
+        },
+        requestId
+      );
     });
 
     // -- resolve promises
@@ -1859,17 +1877,22 @@ export class LitNodeClient {
     );
 
     // ========== Get Node Promises ==========
+    const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
       let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
-      return this.storeSigningConditionWithNode(url, {
-        key: hashOfResourceIdStr,
-        val: hashOfConditionsStr,
-        authSig: authSigToSend,
-        chain,
-        permanent: permanent ? 1 : 0,
-      });
+      return this.storeSigningConditionWithNode(
+        url,
+        {
+          key: hashOfResourceIdStr,
+          val: hashOfConditionsStr,
+          authSig: authSigToSend,
+          chain,
+          permanent: permanent ? 1 : 0,
+        },
+        requestId
+      );
     });
 
     // -- resolve promises
@@ -1942,6 +1965,7 @@ export class LitNodeClient {
     }
 
     // ========== Node Promises ==========
+    const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- choose the right signature
       let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
@@ -1950,15 +1974,20 @@ export class LitNodeClient {
         url,
       });
 
-      return this.getDecryptionShare(url, {
-        accessControlConditions: formattedAccessControlConditions,
-        evmContractConditions: formattedEVMContractConditions,
-        solRpcConditions: formattedSolRpcConditions,
-        unifiedAccessControlConditions: formattedUnifiedAccessControlConditions,
-        toDecrypt,
-        authSig: sigToPassToNode,
-        chain,
-      });
+      return this.getDecryptionShare(
+        url,
+        {
+          accessControlConditions: formattedAccessControlConditions,
+          evmContractConditions: formattedEVMContractConditions,
+          solRpcConditions: formattedSolRpcConditions,
+          unifiedAccessControlConditions:
+            formattedUnifiedAccessControlConditions,
+          toDecrypt,
+          authSig: sigToPassToNode,
+          chain,
+        },
+        requestId
+      );
     });
 
     // -- resolve promises
@@ -2081,6 +2110,7 @@ export class LitNodeClient {
     );
 
     // ========== Node Promises ==========
+    const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- choose the right signature
       let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
@@ -2089,13 +2119,17 @@ export class LitNodeClient {
         url,
       });
 
-      return this.storeEncryptionConditionWithNode(url, {
-        key: hashOfKeyStr,
-        val: hashOfConditionsStr,
-        authSig: sigToPassToNode,
-        chain,
-        permanent: permanent ? 1 : 0,
-      });
+      return this.storeEncryptionConditionWithNode(
+        url,
+        {
+          key: hashOfKeyStr,
+          val: hashOfConditionsStr,
+          authSig: sigToPassToNode,
+          chain,
+          permanent: permanent ? 1 : 0,
+        },
+        requestId
+      );
     });
 
     // -- resolve promises
@@ -2107,46 +2141,6 @@ export class LitNodeClient {
     }
 
     return encryptedKey;
-  };
-
-  /**
-   *
-   * Signs a message with Lit threshold ECDSA algorithms.
-   *
-   * @param { SignWithECDSA } params
-   *
-   * @returns { Promise<string> }
-   *
-   */
-  signWithEcdsa = async (params: SignWithECDSA): Promise<string> => {
-    // ========== Prepare Params ==========
-    const { message, chain } = params;
-
-    // ----- Node Promises -----
-    const nodePromises = this.getNodePromises((url: string) => {
-      return this.signECDSA(url, {
-        message,
-        chain,
-        iat: 0,
-        exp: 0,
-      });
-    });
-
-    // ----- Resolve Promises -----
-    try {
-      const shareData = await Promise.all(nodePromises);
-
-      const signature = this.getSignature(shareData);
-
-      // ----- Result -----
-      return signature;
-    } catch (e) {
-      log('Error - signed_ecdsa_messages ');
-      const signed_ecdsa_message = nodePromises[0];
-
-      // ----- Result -----
-      return signed_ecdsa_message;
-    }
   };
 
   /**
@@ -2201,16 +2195,21 @@ export class LitNodeClient {
     );
 
     // ========== Node Promises ==========
+    const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
-      return this.signConditionEcdsa(url, {
-        accessControlConditions: formattedAccessControlConditions,
-        evmContractConditions: undefined,
-        solRpcConditions: undefined,
-        auth_sig,
-        chain,
-        iat,
-        exp,
-      });
+      return this.signConditionEcdsa(
+        url,
+        {
+          accessControlConditions: formattedAccessControlConditions,
+          evmContractConditions: undefined,
+          solRpcConditions: undefined,
+          auth_sig,
+          chain,
+          iat,
+          exp,
+        },
+        requestId
+      );
     });
 
     // ----- Resolve Promises -----
@@ -2238,8 +2237,9 @@ export class LitNodeClient {
    */
   connect = (): Promise<any> => {
     // -- handshake with each node
+    const requestId = this.getRequestId();
     for (const url of this.config.bootstrapUrls) {
-      this.handshakeWithSgx({ url })
+      this.handshakeWithSgx({ url }, requestId)
         .then((resp: any) => {
           this.connectedNodes.add(url);
 
@@ -2364,10 +2364,15 @@ export class LitNodeClient {
     };
 
     // ========== Node Promises ==========
+    const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
-      return this.getSignSessionKeyShares(url, {
-        body: reqBody,
-      });
+      return this.getSignSessionKeyShares(
+        url,
+        {
+          body: reqBody,
+        },
+        requestId
+      );
     });
 
     // -- resolve promises
@@ -2403,13 +2408,15 @@ export class LitNodeClient {
 
   getSignSessionKeyShares = async (
     url: string,
-    params: GetSignSessionKeySharesProp
+    params: GetSignSessionKeySharesProp,
+    requestId: string
   ) => {
     log('getSignSessionKeyShares');
     const urlWithPath = `${url}/web/sign_session_key`;
     return await this.sendCommandToNode({
       url: urlWithPath,
       data: params.body,
+      requestId,
     });
   };
 

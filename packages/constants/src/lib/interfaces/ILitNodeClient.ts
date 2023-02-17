@@ -199,7 +199,7 @@ export interface ILitNodeClient {
   getSignature(shareData: Array<any>): Promise<any>;
 
   // ========== API Calls to Nodes ==========
-  sendCommandToNode({ url, data }: SendNodeCommand): Promise<any>;
+  sendCommandToNode({ url, data, requestId }: SendNodeCommand): Promise<any>;
 
   /**
    *
@@ -211,7 +211,8 @@ export interface ILitNodeClient {
    */
   getJsExecutionShares(
     url: string,
-    params: JsonExecutionRequest
+    params: JsonExecutionRequest,
+    requestId: string
   ): Promise<NodeCommandResponse>;
 
   /**
@@ -226,7 +227,8 @@ export interface ILitNodeClient {
    */
   getChainDataSigningShare(
     url: string,
-    params: JsonSignChainDataRequest
+    params: JsonSignChainDataRequest,
+    requestId: string
   ): Promise<NodeCommandResponse>;
 
   /**
@@ -241,7 +243,8 @@ export interface ILitNodeClient {
    */
   getSigningShare(
     url: string,
-    params: JsonSigningRetrieveRequest
+    params: JsonSigningRetrieveRequest,
+    requestId: string
   ): Promise<NodeCommandResponse>;
 
   /**
@@ -256,7 +259,8 @@ export interface ILitNodeClient {
    */
   getDecryptionShare(
     url: string,
-    params: JsonEncryptionRetrieveRequest
+    params: JsonEncryptionRetrieveRequest,
+    requestId: string
   ): Promise<NodeCommandResponse>;
 
   /**
@@ -271,7 +275,8 @@ export interface ILitNodeClient {
    */
   storeSigningConditionWithNode(
     url: string,
-    params: JsonSigningStoreRequest
+    params: JsonSigningStoreRequest,
+    requestId: string
   ): Promise<NodeCommandResponse>;
 
   /**
@@ -286,20 +291,9 @@ export interface ILitNodeClient {
    */
   storeEncryptionConditionWithNode(
     url: string,
-    params: JsonSigningStoreRequest
+    params: JsonSigningStoreRequest,
+    requestId: string
   ): Promise<NodeCommandResponse>;
-
-  /**
-   *
-   * Sign wit ECDSA
-   *
-   * @param { string } url
-   * @param { SignWithECDSA } params
-   *
-   * @returns { Promise}
-   *
-   */
-  signECDSA(url: string, params: SignWithECDSA): Promise<NodeCommandResponse>;
 
   /**
    *
@@ -313,7 +307,8 @@ export interface ILitNodeClient {
    */
   signConditionEcdsa(
     url: string,
-    params: SignConditionECDSA
+    params: SignConditionECDSA,
+    requestId: string
   ): Promise<NodeCommandResponse>;
 
   /**
@@ -326,7 +321,8 @@ export interface ILitNodeClient {
    *
    */
   handshakeWithSgx(
-    params: HandshakeWithSgx
+    params: HandshakeWithSgx,
+    requestId: string
   ): Promise<NodeCommandServerKeysResponse>;
 
   // ========== Scoped Business Logics ==========
