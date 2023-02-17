@@ -60,16 +60,23 @@ await asyncForEach(dirs, async (dir) => {
   // read the package.json file
   const pkg = await readJsonFile(`${dir}/package.json`);
 
-  // check version
-  const res = versionChecker(pkg, lernaVersion);
+  greenLog(`${pkg.name} => ${pkg.version}`);
 
-  if (res.status === 500) {
-    redLog(res.message);
-  }
+  // remove peer dependencies
+  delete pkg.peerDependencies;
 
-  if (res.status === 200) {
-    greenLog(res.message);
-  }
+  // write the package.json file
+  await writeJsonFile(`${dir}/package.json`, pkg);
+  // // check version
+  // const res = versionChecker(pkg, lernaVersion);
+
+  // if (res.status === 500) {
+  //   redLog(res.message);
+  // }
+
+  // if (res.status === 200) {
+  //   greenLog(res.message);
+  // }
 });
 
 // prompt user to confirm publish
