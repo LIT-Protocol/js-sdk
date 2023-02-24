@@ -12,6 +12,8 @@ import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
 import { log } from '@lit-protocol/misc';
 
+import { Blob } from 'buffer';
+
 import {
   uint8arrayFromString,
   uint8arrayToString,
