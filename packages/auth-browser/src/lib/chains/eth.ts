@@ -16,7 +16,7 @@ import { hexlify } from '@ethersproject/bytes';
 import { verifyMessage } from '@ethersproject/wallet';
 
 // @ts-ignore
-import WalletConnectProviderPkg from '@walletconnect/ethereum-provider/dist/cjs/index';
+import WalletConnectProviderPkg from '@walletconnect/ethereum-provider';
 
 // @ts-ignore
 import LitConnectModal from 'lit-connect-modal';
