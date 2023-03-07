@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/lit-third-party-libs",
-  "version": "2.1.43",
+  "version": "2.1.49",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
