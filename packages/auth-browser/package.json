@@ -1,6 +1,18 @@
 {
   "name": "@lit-protocol/auth-browser",
-  "version": "2.1.49",
+  "version": "2.1.50",
+  "license": "MIT",
+  "homepage": "https://github.com/Lit-Protocol/js-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LIT-Protocol/js-sdk"
+  },
+  "keywords": [
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/LIT-Protocol/js-sdk/issues"
+  },
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
