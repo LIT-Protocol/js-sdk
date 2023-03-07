@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/uint8arrays",
-  "version": "2.1.37",
+  "version": "2.1.43",
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
