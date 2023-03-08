@@ -1,19 +1,8 @@
-# pkp-ethers
+# Getting started
 
-This library was generated with [Nx](https://nx.dev).
+```
+yarn add @lit-protocol/pkp-ethers ethers
+```
 
-
-
-## Building
-
-Run `nx build pkp-ethers` to build the library.
-
-
-
-
-
-## Running unit tests
-
-Run `nx test pkp-ethers` to execute the unit tests via [Jest](https://jestjs.io).
-
-
+More info here:
+https://github.com/LIT-Protocol/pkp-ethers/tree/master/packages/wallet
