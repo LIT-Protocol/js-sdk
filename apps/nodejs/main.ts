@@ -16,6 +16,7 @@ import * as litThirdPartyLibs from '@lit-protocol/lit-third-party-libs';
 import * as misc from '@lit-protocol/misc';
 import * as miscBrowser from '@lit-protocol/misc-browser';
 import * as nacl from '@lit-protocol/nacl';
+import * as pkpEthers from '@lit-protocol/pkp-ethers';
 import * as uint8arrays from '@lit-protocol/uint8arrays';
 
 console.log("accessControlConditions:", hasItems(accessControlConditions));
@@ -31,6 +32,7 @@ console.log("litThirdPartyLibs:", hasItems(litThirdPartyLibs));
 console.log("misc:", hasItems(misc));
 console.log("miscBrowser:", hasItems(miscBrowser));
 console.log("nacl:", hasItems(nacl));
+console.log("pkpEthers:", hasItems(pkpEthers));
 console.log("uint8arrays:", hasItems(uint8arrays));
 
 manualTest();

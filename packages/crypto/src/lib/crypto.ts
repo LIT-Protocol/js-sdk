@@ -192,7 +192,7 @@ export const combineBlsShares = (
  */
 export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
 
-  console.log("sigShares:", sigShares);
+  log("sigShares:", sigShares);
 
   // the public key can come from any node - it obviously will be identical from each node
   // const publicKey = sigShares[0].publicKey;
@@ -200,7 +200,7 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   // filter out empty shares
   const validShares = sigShares.reduce((acc, val) => {
     if (val.shareHex !== '') {
-      acc.push(val.shareHex);
+      acc.push(val);
     }
     return acc;
   }, []);
