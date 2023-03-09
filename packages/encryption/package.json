@@ -22,6 +22,10 @@
   "tags": [
     "universal"
   ],
+  "browser": {
+    "crypto": false,
+    "stream": false
+  },
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
