@@ -1,4 +1,9 @@
 import {
+  ILitError,
+  LIT_ERROR,
+} from '@lit-protocol/constants';
+
+import {
   ABIParams,
   AccsCOSMOSParams,
   AccsDefaultParams,
@@ -7,10 +12,9 @@ import {
   AccsRegularParams,
   AccsSOLV2Params,
   ConditionItem,
-  ILitError,
   JsonSigningResourceId,
-  LIT_ERROR,
-} from '@lit-protocol/constants';
+} from '@lit-protocol/types';
+
 import { throwError } from '@lit-protocol/misc';
 
 /** ---------- Local Functions ---------- */

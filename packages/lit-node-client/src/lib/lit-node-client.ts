@@ -11,10 +11,20 @@ import {
   hashUnifiedAccessControlConditions,
 } from '@lit-protocol/access-control-conditions';
 import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
+
+import { 
+  defaultLitnodeClientConfig,
+  LIT_ERROR,
+  LIT_NETWORKS,
+  LOCAL_STORAGE_KEYS,
+  SIGTYPE,
+  version,
+  LIT_SESSION_KEY_URI,
+} from '@lit-protocol/constants';
+
 import {
   CustomNetwork,
   DecryptedData,
-  defaultLitnodeClientConfig,
   ExecuteJsProps,
   ExecuteJsResponse,
   FormattedMultipleAccs,
@@ -32,9 +42,7 @@ import {
   JsonStoreSigningRequest,
   KV,
   LitNodeClientConfig,
-  LIT_ERROR,
-  LIT_NETWORKS,
-  LOCAL_STORAGE_KEYS,
+  
   NodeCommandResponse,
   NodeCommandServerKeysResponse,
   NodeLog,
@@ -51,14 +59,11 @@ import {
   SignSessionKeyProp,
   SignWithECDSA,
   SigShare,
-  SIGTYPE,
   SignConditionECDSA,
   SuccessNodePromises,
   SupportedJsonRequests,
   ValidateAndSignECDSA,
-  version,
-  LIT_SESSION_KEY_URI,
-} from '@lit-protocol/constants';
+} from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
   combineBlsShares,

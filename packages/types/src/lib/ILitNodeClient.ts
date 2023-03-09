@@ -1,4 +1,4 @@
-import { SupportedJsonRequests } from '../types';
+import { SupportedJsonRequests } from './types';
 import {
   ExecuteJsProps,
   ExecuteJsResponse,

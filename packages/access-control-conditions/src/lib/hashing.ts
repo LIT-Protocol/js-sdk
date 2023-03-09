@@ -1,12 +1,14 @@
+import { LIT_ERROR } from '@lit-protocol/constants';
+
 import {
   AccessControlConditions,
   ConditionItem,
   EvmContractConditions,
   JsonSigningResourceId,
-  LIT_ERROR,
   SolRpcConditions,
   UnifiedAccessControlConditions,
-} from '@lit-protocol/constants';
+} from '@lit-protocol/types';
+
 import { log, throwError } from '@lit-protocol/misc';
 import {
   canonicalAccessControlConditionFormatter,

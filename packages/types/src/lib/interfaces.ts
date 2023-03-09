@@ -9,7 +9,7 @@ import {
   LIT_NETWORKS_KEYS,
   SolRpcConditions,
   UnifiedAccessControlConditions,
-} from '../types';
+} from './types';
 import { ILitNodeClient } from './ILitNodeClient';
 
 export interface AccsOperatorParams {
@@ -19,9 +19,9 @@ export interface AccsOperatorParams {
 export interface AccsRegularParams {
   conditionType?: ConditionType;
   returnValueTest: {
-    key?: string;
-    comparator: string;
-    value: string;
+    key?: string,
+    comparator: string,
+    value: string,
   };
   method?: string;
   params?: any[];
@@ -37,8 +37,8 @@ export interface AccsDefaultParams extends AccsRegularParams {
 export interface AccsSOLV2Params extends AccsRegularParams {
   pdaKey: string;
   pdaInterface: {
-    offset: string | number;
-    fields: string | object;
+    offset: string | number,
+    fields: string | object,
   };
   pdaParams: [];
 }
@@ -399,9 +399,9 @@ export interface ExecuteJsResponse {
   response: string;
   logs: string;
   debug?: {
-    allNodeResponses: NodeResponse[];
-    allNodeLogs: NodeLog[];
-    rawNodeHTTPResponses: any;
+    allNodeResponses: NodeResponse[],
+    allNodeLogs: NodeLog[],
+    rawNodeHTTPResponses: any,
   };
 }
 
@@ -440,7 +440,7 @@ export interface NodePromiseResponse {
 
 export interface NodeError {
   error: {
-    errorCode: string;
+    errorCode: string,
   };
 }
 
