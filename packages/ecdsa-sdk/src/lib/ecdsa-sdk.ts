@@ -498,8 +498,11 @@ async function init(input) {
         return ret;
     };
     imports.wbg.__wbg_require_edfaedd93e302925 = function () {
+        console.warn("[ECDSA-SDK] __wbg_require_edfaedd93e302925");
         return handleError(function (arg0, arg1, arg2) {
-            var ret = require(getStringFromWasm0(arg1, arg2));
+            // var ret = require(getStringFromWasm0(arg1, arg2));
+            var ret = getStringFromWasm0(arg1, arg2);
+            console.warn("[ECDSA-SDK] ret:", ret);
             return addHeapObject(ret);
         }, arguments);
     };
