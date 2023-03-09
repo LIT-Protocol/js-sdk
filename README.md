@@ -300,6 +300,23 @@ yarn graph
 # FAQs & Common Errors
 
 <details>
+<summary>(React) Failed to parse source map from</summary>
+
+In your React package.json, add `GENERATE_SOURCEMAP=false` to your start script
+
+eg.
+```
+  "scripts": {
+    "start": "GENERATE_SOURCEMAP=false react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+```
+
+</details>
+
+<details>
 <summary>Web bundling using esbuild</summary>
 
 It’s currently using a custom plugin [@websaam/nx-esbuild](https://www.npmjs.com/package/@websaam/nx-esbuild) which is a fork from [@wanews/nx-esbuild](https://www.npmjs.com/package/@wanews/nx-esbuild)
