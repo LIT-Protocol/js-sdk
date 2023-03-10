@@ -57,7 +57,6 @@ import {
   SignedChainDataToken,
   SignedData,
   SignSessionKeyProp,
-  SignWithECDSA,
   SigShare,
   SignConditionECDSA,
   SuccessNodePromises,
