@@ -30,9 +30,9 @@ if (!PROJECT_NAME) {
   exit();
 }
 
-if (TAG !== 'universal' && TAG !== 'bundle' && TAG !== 'vanilla') {
+if (TAG !== 'universal' && TAG !== 'bundle' && TAG !== 'vanilla' && TAG !== 'node') {
   redLog(
-    `Please provide a tag: universal OR bundle OR vanilla
+    `Please provide a tag: universal OR bundle OR vanilla OR node
 
     yarn gen:lib ${PROJECT_NAME} universal 
   `,
