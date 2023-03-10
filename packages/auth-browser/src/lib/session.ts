@@ -1,12 +1,14 @@
 import {
   EITHER_TYPE,
   IEither,
-  JsonAuthSig,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
+} from '@lit-protocol/constants';
+import {
+  JsonAuthSig,
   SessionKeyPair,
   SessionSigsProp,
-} from '@lit-protocol/constants';
+} from '@lit-protocol/types'
 import { SiweMessage } from 'lit-siwe';
 import nacl from 'tweetnacl';
 
