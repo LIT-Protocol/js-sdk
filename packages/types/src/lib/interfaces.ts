@@ -654,6 +654,8 @@ export interface SignSessionKeyProp {
   expiration: string;
 
   resources: any;
+
+  chainId?: number;
 }
 
 export interface GetSignSessionKeySharesProp {

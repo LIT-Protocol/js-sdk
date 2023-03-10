@@ -2352,7 +2352,7 @@ export class LitNodeClient {
       statement: 'Lit Protocol PKP session signature',
       uri: params.sessionKey,
       version: '1',
-      chainId: 1,
+      chainId: params.chainId ?? 1,
       expirationTime: _expiration,
       resources: params.resources,
     });
