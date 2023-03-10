@@ -17,18 +17,18 @@
     --dark-hl-7: #D4D4D4;
     --light-hl-8: #008000;
     --dark-hl-8: #6A9955;
-    --light-hl-9: #000000;
-    --dark-hl-9: #C8C8C8;
-    --light-hl-10: #AF00DB;
-    --dark-hl-10: #C586C0;
+    --light-hl-9: #AF00DB;
+    --dark-hl-9: #C586C0;
+    --light-hl-10: #000000;
+    --dark-hl-10: #C8C8C8;
     --light-hl-11: #0070C1;
     --dark-hl-11: #4FC1FF;
-    --light-hl-12: #0451A5;
-    --dark-hl-12: #9CDCFE;
-    --light-hl-13: #795E26;
-    --dark-hl-13: #DCDCAA;
-    --light-hl-14: #267F99;
-    --dark-hl-14: #4EC9B0;
+    --light-hl-12: #267F99;
+    --dark-hl-12: #4EC9B0;
+    --light-hl-13: #0451A5;
+    --dark-hl-13: #9CDCFE;
+    --light-hl-14: #795E26;
+    --dark-hl-14: #DCDCAA;
     --light-code-background: #FFFFFF;
     --dark-code-background: #1E1E1E;
 }

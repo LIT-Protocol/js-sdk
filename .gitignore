@@ -48,3 +48,9 @@ Thumbs.db
 lerna-debug.log
 
 dev.sh
+
+doc
+
+apps/demo-contracts-sdk-react/package-lock.json
+apps/demo-encrypt-decrypt-react/package-lock.json
+apps/demo-pkp-ethers-react/package-lock.json
