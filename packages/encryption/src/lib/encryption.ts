@@ -89,11 +89,11 @@ const metadataForFile = ({
 
 /**
  *
- * Encrypt a string, save the key to the Lit network, and then uploads all the metadata required to decrypt to IPFS & returns the IPFS CID.
+ * Encrypt a string, save the key to the Lit network, and then uploads all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS & returns the IPFS CID.
  *
  * @param { EncryptStringAndUploadMetadataToIpfsProps }
  *
- * @returns { Promise<string> }
+ * @returns { Promise<string | undefined> }
  *
  */
 export const encryptStringAndUploadMetadataToIpfs = async ({
@@ -139,26 +139,13 @@ export const encryptStringAndUploadMetadataToIpfs = async ({
 
   const encryptedSymmetricKeyString = uint8arrayToString(encryptedSymmetricKey, "base16");
 
-  console.log(`encryptedString: ${encryptedString}, encryptedSymmetricKeyString: ${encryptedSymmetricKeyString}`);
-
-  console.log("a-");
-  //   @ts-ignore
-  console.log(process.env.PINATA_API_KEY);
-  //   @ts-ignore
-  console.log(process.env.PINATA_SECRET_API_KEY);
   //   @ts-ignore
   if (!process.env.PINATA_API_KEY || !process.env.PINATA_SECRET_API_KEY) {
     throw new Error('Please provide your pinata API key and secret key');
   }
   //   @ts-ignore
   const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_API_KEY, pinataSecretApiKey: process.env.PINATA_SECRET_API_KEY});
-  // console.log("b-");
-  const buffer = await encryptedString.arrayBuffer();
-  console.log("buffer");
-  console.log(buffer);
-  const encryptedStringJson = Buffer.from(buffer).toJSON();
-  console.log("encryptedStringJson");
-  console.log(encryptedStringJson);
+  const encryptedStringJson = Buffer.from(await encryptedString.arrayBuffer()).toJSON();
   const res = await pinata.pinJSONToIPFS({
     encryptedString: encryptedStringJson,
     encryptedSymmetricKeyString,
@@ -168,19 +155,17 @@ export const encryptStringAndUploadMetadataToIpfs = async ({
     unifiedAccessControlConditions,
     chain
   });
-  console.log("res");
-  console.log(res);
 
   return res.IpfsHash;
 }
 
 /**
  *
- * Encrypt a string, save the key to the Lit network, and then uploads all the metadata required to decrypt to IPFS & returns the IPFS CID.
+ * Decrypt the string, using its metadata stored on IPFS with the given ipfsCid.
  *
  * @param { DecryptStringWithIpfsProps }
  *
- * @returns { Promise<string> }
+ * @returns { Promise<string | undefined> }
  *
  */
 export const decryptStringWithIpfs = async ({
@@ -200,38 +185,21 @@ export const decryptStringWithIpfs = async ({
 
   if (!paramsIsSafe) return;
 
-  const res = await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`);
-  console.log("res-");
-  const val = await res.json();
-  console.log("val-");
-  console.log(val);
-  const encryptedString = val.encryptedString;
-  const encryptedSymmetricKey = val.encryptedSymmetricKeyString;
-  const accessControlConditions = val.accessControlConditions;
-  const evmContractConditions = val.evmContractConditions;
-  const solRpcConditions = val.solRpcConditions;
-  const unifiedAccessControlConditions = val.unifiedAccessControlConditions;
-  const chain = val.chain;
-  console.log(`encryptedString- ${encryptedString}`);
-  console.log(`encryptedSymmetricKey- ${encryptedSymmetricKey}`);
-  console.log(`accessControlConditions- ${accessControlConditions}`);
-  console.log(`chain- ${chain}`);
-
+  const metadata = await (await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`)).json();
   const symmetricKey = await litNodeClient.getEncryptionKey({
-    accessControlConditions,
-    evmContractConditions,
-    solRpcConditions,
-    unifiedAccessControlConditions,
-    toDecrypt: encryptedSymmetricKey,
-    chain,
+    accessControlConditions: metadata.accessControlConditions,
+    evmContractConditions: metadata.evmContractConditions,
+    solRpcConditions: metadata.solRpcConditions,
+    unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
+    toDecrypt: metadata.encryptedSymmetricKeyString,
+    chain: metadata.chain,
     authSig
   });
 
   if (!symmetricKey) return;
 
-  const encryptedStringBlob = new Blob([Buffer.from(encryptedString)], { type: 'application/octet-stream' });
-  const decryptedString = await decryptString(encryptedStringBlob, symmetricKey);
-  return decryptedString;
+  const encryptedStringBlob = new Blob([Buffer.from(metadata.encryptedString)], { type: 'application/octet-stream' });
+  return await decryptString(encryptedStringBlob, symmetricKey);
 }
 
 // ---------- Local Helpers ----------
