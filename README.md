@@ -229,7 +229,7 @@ You must manually update the version in lerna.json before publishing.
 ### to npm
 
 ```
-yarn tools --publish
+yarn publish:packages
 ```
 
 ### clone & publish to npm
