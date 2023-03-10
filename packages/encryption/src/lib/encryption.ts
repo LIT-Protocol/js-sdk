@@ -1,4 +1,9 @@
 import {
+  LIT_ERROR,
+  NETWORK_PUB_KEY,
+} from '@lit-protocol/constants';
+
+import {
   DecryptFileProps,
   DecryptZipFileWithMetadata,
   DecryptZipFileWithMetadataProps,
@@ -7,11 +12,9 @@ import {
   EncryptedZip,
   EncryptFileAndZipWithMetadataProps,
   IJWT,
-  LIT_ERROR,
-  NETWORK_PUB_KEY,
   ThreeKeys,
   VerifyJWTProps,
-} from '@lit-protocol/constants';
+} from '@lit-protocol/types';
 
 import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 

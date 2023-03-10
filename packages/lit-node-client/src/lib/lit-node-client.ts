@@ -11,10 +11,20 @@ import {
   hashUnifiedAccessControlConditions,
 } from '@lit-protocol/access-control-conditions';
 import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
+
+import { 
+  defaultLitnodeClientConfig,
+  LIT_ERROR,
+  LIT_NETWORKS,
+  LOCAL_STORAGE_KEYS,
+  SIGTYPE,
+  version,
+  LIT_SESSION_KEY_URI,
+} from '@lit-protocol/constants';
+
 import {
   CustomNetwork,
   DecryptedData,
-  defaultLitnodeClientConfig,
   ExecuteJsProps,
   ExecuteJsResponse,
   FormattedMultipleAccs,
@@ -32,9 +42,7 @@ import {
   JsonStoreSigningRequest,
   KV,
   LitNodeClientConfig,
-  LIT_ERROR,
-  LIT_NETWORKS,
-  LOCAL_STORAGE_KEYS,
+  
   NodeCommandResponse,
   NodeCommandServerKeysResponse,
   NodeLog,
@@ -49,16 +57,12 @@ import {
   SignedChainDataToken,
   SignedData,
   SignSessionKeyProp,
-  SignWithECDSA,
   SigShare,
-  SIGTYPE,
   SignConditionECDSA,
   SuccessNodePromises,
   SupportedJsonRequests,
   ValidateAndSignECDSA,
-  version,
-  LIT_SESSION_KEY_URI,
-} from '@lit-protocol/constants';
+} from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
   combineBlsShares,
@@ -2348,7 +2352,7 @@ export class LitNodeClient {
       statement: 'Lit Protocol PKP session signature',
       uri: params.sessionKey,
       version: '1',
-      chainId: 1,
+      chainId: params.chainId ?? 1,
       expirationTime: _expiration,
       resources: params.resources,
     });

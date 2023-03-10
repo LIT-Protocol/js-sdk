@@ -1,3 +1,5 @@
+import { LIT_ERROR } from '@lit-protocol/constants';
+
 import {
   AccsCOSMOSParams,
   AccsDefaultParams,
@@ -5,9 +7,9 @@ import {
   AccsRegularParams,
   AccsSOLV2Params,
   HumanizedAccsProps,
-  LIT_ERROR,
   UnifiedAccessControlConditions,
-} from '@lit-protocol/constants';
+} from '@lit-protocol/types';
+
 import { decimalPlaces, log, throwError } from '@lit-protocol/misc';
 import { formatEther, formatUnits } from 'ethers/lib/utils';
 
@@ -80,9 +82,9 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  accessControlConditions: Array<AccsRegularParams | AccsDefaultParams | any>;
-  tokenList?: Array<any | string>;
-  myWalletAddress?: string;
+  accessControlConditions: Array<AccsRegularParams | AccsDefaultParams | any>,
+  tokenList?: Array<any | string>,
+  myWalletAddress?: string,
 }): Promise<string> => {
   log('humanizing evm basic access control conditions');
   log('myWalletAddress', myWalletAddress);
@@ -121,7 +123,6 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   // -- execute
   const promises = await Promise.all(
     fixedConditions.map(async (acc: any) => {
-      
       if (Array.isArray(acc)) {
         // this is a group.  recurse.
         const group = await humanizeEvmBasicAccessControlConditions({
@@ -277,9 +278,9 @@ export const humanizeEvmContractConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  evmContractConditions: Array<AccsEVMParams>;
-  tokenList?: Array<any | string>;
-  myWalletAddress?: string;
+  evmContractConditions: Array<AccsEVMParams>,
+  tokenList?: Array<any | string>,
+  myWalletAddress?: string,
 }): Promise<string> => {
   log('humanizing evm contract conditions');
   log('myWalletAddress', myWalletAddress);
@@ -338,9 +339,9 @@ export const humanizeSolRpcConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  solRpcConditions: Array<AccsSOLV2Params>;
-  tokenList?: Array<any | string>;
-  myWalletAddress?: string;
+  solRpcConditions: Array<AccsSOLV2Params>,
+  tokenList?: Array<any | string>,
+  myWalletAddress?: string,
 }): Promise<string> => {
   log('humanizing sol rpc conditions');
   log('myWalletAddress', myWalletAddress);
@@ -412,9 +413,9 @@ export const humanizeCosmosConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  cosmosConditions: Array<AccsCOSMOSParams | any>;
-  tokenList?: Array<any | string>;
-  myWalletAddress?: string;
+  cosmosConditions: Array<AccsCOSMOSParams | any>,
+  tokenList?: Array<any | string>,
+  myWalletAddress?: string,
 }): Promise<string> => {
   log('humanizing cosmos conditions');
   log('myWalletAddress', myWalletAddress);
@@ -490,9 +491,9 @@ export const humanizeUnifiedAccessControlConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  unifiedAccessControlConditions: UnifiedAccessControlConditions;
-  tokenList?: Array<any | string>;
-  myWalletAddress?: string;
+  unifiedAccessControlConditions: UnifiedAccessControlConditions,
+  tokenList?: Array<any | string>,
+  myWalletAddress?: string,
 }): Promise<string> => {
   const promises = await Promise.all(
     unifiedAccessControlConditions.map(async (acc: any): Promise<any> => {

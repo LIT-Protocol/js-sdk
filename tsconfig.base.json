@@ -25,6 +25,9 @@
       ],
       "@lit-protocol/pkp-ethers": [
         "packages/pkp-ethers/src/index.ts"
+      ],
+      "@lit-protocol/types": [
+        "packages/types/src/index.ts"
       ]
     }
   },

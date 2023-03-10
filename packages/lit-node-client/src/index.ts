@@ -20,7 +20,6 @@ export * from './lib/lit-node-client';
 export {
   checkAndSignAuthMessage,
   getSessionKeyUri,
-  getSessionSigs,
   parseResource,
 } from '@lit-protocol/auth-browser';
 

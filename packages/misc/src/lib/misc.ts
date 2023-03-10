@@ -1,12 +1,15 @@
 import {
   ABI_ERC20,
-  Chain,
   ILitError,
-  KV,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
   LIT_ERROR,
 } from '@lit-protocol/constants';
+
+import {
+  Chain,
+  KV
+} from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 
