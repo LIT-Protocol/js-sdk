@@ -152,7 +152,7 @@ By default, NX provides a command to generate a library
 `nx generate @nrwl/js:library`. However, it doesn't have an esbuild built-in so that we've created a custom tool that modify the build commands.
 
 ```js
-yarn tool:genLib <package-name>
+yarn gen:lib <package-name> <tag>
 ```
 
 ## Create a new react demo app using the Lit JS SDK

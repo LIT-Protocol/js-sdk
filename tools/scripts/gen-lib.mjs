@@ -14,11 +14,35 @@ import { readCachedProjectGraph } from '@nrwl/devkit';
 import { exit } from 'process';
 const args = getArgs();
 const PROJECT_NAME = args[0];
+const TAG = args[1];
 
 let alreadyExists = false;
 
 if (!PROJECT_NAME) {
-  redLog('Please provide a project name', true);
+  redLog(
+    `
+  Please provide a project name:
+
+  yarn gen:lib my-lib <universal | bundle | vanilla | node>
+  `,
+    true
+  );
+  exit();
+}
+
+if (
+  TAG !== 'universal' &&
+  TAG !== 'bundle' &&
+  TAG !== 'vanilla' &&
+  TAG !== 'node'
+) {
+  redLog(
+    `Please provide a tag: universal OR bundle OR vanilla OR node
+
+    yarn gen:lib ${PROJECT_NAME} universal 
+  `,
+    true
+  );
   exit();
 }
 
@@ -143,6 +167,11 @@ const editPackageJson = async () => {
       },
       main: './dist/src/index.js',
       typings: './dist/src/index.d.ts',
+      browser: {
+        crypto: false,
+        stream: false,
+      },
+      tags: [TAG],
     },
   };
 
