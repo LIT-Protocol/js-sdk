@@ -1,24 +1,24 @@
 import { exit } from 'process';
 import {
-    asyncForEach,
-    childRunCommand,
-    customSort,
-    findImportsFromDir,
-    findStrFromDir,
-    getArgs,
-    greenLog,
-    listDirsRecursive,
-    prefixPathWithDir,
-    readFile,
-    readJsonFile,
-    redLog,
-    replaceAutogen,
-    replaceFileContent,
-    spawnCommand,
-    spawnListener,
-    writeFile,
-    writeJsonFile,
-    yellowLog,
+  asyncForEach,
+  childRunCommand,
+  customSort,
+  findImportsFromDir,
+  findStrFromDir,
+  getArgs,
+  greenLog,
+  listDirsRecursive,
+  prefixPathWithDir,
+  readFile,
+  readJsonFile,
+  redLog,
+  replaceAutogen,
+  replaceFileContent,
+  spawnCommand,
+  spawnListener,
+  writeFile,
+  writeJsonFile,
+  yellowLog,
 } from './utils.mjs';
 import fs from 'fs';
 
@@ -27,33 +27,33 @@ const args = getArgs();
 const OPTION = args[0];
 
 const optionMaps = new Map([
-    ['--help', () => helpFunc()],
-    ['--create', () => createFunc()],
-    ['--path', () => pathFunc()],
-    ['--test', () => testFunc()],
-    ['--find', () => findFunc()],
-    ['--build', () => buildFunc()],
-    ['--switch', () => switchFunc()],
-    ['--dev', () => devFunc()],
-    ['--watch', () => watchFunc()],
-    ['--polyfills', () => polyfillsFunc()],
-    ['--comment', () => commentFunc()],
-    ['--remove-local-dev', () => removeLocalDevFunc()],
-    ['--setup-local-dev', () => setupLocalDevFunc()],
-    ['--match-versions', () => matchVersionsFunc()],
-    ['default', () => helpFunc()],
-])
+  ['--help', () => helpFunc()],
+  ['--create', () => createFunc()],
+  ['--path', () => pathFunc()],
+  ['--test', () => testFunc()],
+  ['--find', () => findFunc()],
+  ['--build', () => buildFunc()],
+  ['--switch', () => switchFunc()],
+  ['--dev', () => devFunc()],
+  ['--watch', () => watchFunc()],
+  ['--polyfills', () => polyfillsFunc()],
+  ['--comment', () => commentFunc()],
+  ['--remove-local-dev', () => removeLocalDevFunc()],
+  ['--setup-local-dev', () => setupLocalDevFunc()],
+  ['--match-versions', () => matchVersionsFunc()],
+  ['default', () => helpFunc()],
+]);
 
 const setup = () => {
-    const result = optionMaps.get(OPTION) || optionMaps.get('default')
-    result()
-}
+  const result = optionMaps.get(OPTION) || optionMaps.get('default');
+  result();
+};
 
-setup()
+setup();
 
 function helpFunc() {
-    greenLog(
-        `
+  greenLog(
+    `
         Usage: node tools/scripts/tools.mjs [option][...args]
         Options:
             --help: show this help
@@ -71,17 +71,17 @@ function helpFunc() {
             --setup-local-dev: setup local dev
             --match-versions: match versions
     `,
-        true
-    );
-    exit();
+    true
+  );
+  exit();
 }
 
 async function createFunc() {
-    let APP_TYPE = args[1];
+  let APP_TYPE = args[1];
 
-    if (!APP_TYPE || APP_TYPE === '' || APP_TYPE === '--help') {
-        greenLog(
-            `
+  if (!APP_TYPE || APP_TYPE === '' || APP_TYPE === '--help') {
+    greenLog(
+      `
         Usage: node tools/scripts/tools.mjs --create [app-type]
         [app-type]: the type of app to create
         Options:
@@ -89,257 +89,257 @@ async function createFunc() {
         --html: create a html app
         --node: create a node app
         `,
-            true
-        );
-        exit();
-    }
+      true
+    );
+    exit();
+  }
 
-    let APP_NAME = args[2];
-    const TYPE = args[3];
+  let APP_NAME = args[2];
+  const TYPE = args[3];
 
-    if (APP_TYPE === '--react') {
-        if (!TYPE || TYPE === '' || TYPE === '--help') {
-            greenLog(
-                `
+  if (APP_TYPE === '--react') {
+    if (!TYPE || TYPE === '' || TYPE === '--help') {
+      greenLog(
+        `
             Usage: node tools/scripts/tools.mjs --create --react [app_name] [type]
             [type]: the type of react app to create
             Options:
             --demo: prepend 'demo' and append '-react' to the app name
             `,
-                true
-            );
-        }
-
-        if (TYPE === '--demo') {
-            APP_NAME = `demo-${APP_NAME}-react`;
-        }
-
-        const INSTALL_PATH = `apps/${APP_NAME}`;
-
-        await childRunCommand(
-            `git clone https://github.com/LIT-Protocol/demo-project-react-template ${INSTALL_PATH}`
-        );
-
-        await writeFile(
-            `${INSTALL_PATH}/src/App.js`,
-            replaceAutogen({
-                oldContent: await readFile(`${INSTALL_PATH}/src/App.js`),
-                startsWith: '// ----- autogen:app-name:start  -----',
-                endsWith: '// ----- autogen:app-name:end  -----',
-                newContent: `const [appName, setAppName] = useState('${APP_NAME}');`,
-            })
-        );
-
-        const indexHtml = await readFile(`${INSTALL_PATH}/public/index.html`);
-        const newHtml = indexHtml.replace('Demo', `Demo: ${APP_NAME}`);
-        await writeFile(`${INSTALL_PATH}/public/index.html`, newHtml);
-
-        await childRunCommand(`rm -rf ${INSTALL_PATH}/.git`);
-
-        const packageJson = await readJsonFile(`${INSTALL_PATH}/package.json`);
-        packageJson.name = APP_NAME;
-
-        // generate a port number between 4100 and 4200
-        const port = Math.floor(Math.random() * 100) + 4100;
-        packageJson.scripts.start = `PORT=${port} react-scripts start`;
-
-        await writeFile(
-            `${INSTALL_PATH}/package.json`,
-            JSON.stringify(packageJson, null, 2)
-        );
-
-        await childRunCommand(`cd ${INSTALL_PATH} && yarn install`);
-
-        greenLog(`Creating a project.json for nx workspace`);
-
-        const projectJson = await readFile(`tools/scripts/project.json.template`);
-        const newProjectJson = projectJson
-            .replaceAll('PROJECT_NAME', APP_NAME)
-            .replaceAll('PROJECT_PATH', `apps/${APP_NAME}`)
-            .replaceAll('PROJECT_PORT', port);
-
-        await writeFile(`${INSTALL_PATH}/project.json`, newProjectJson);
-
-        greenLog('Adding project to nx workspace');
-
-        const workspaceJson = await readJsonFile(`workspace.json`);
-
-        workspaceJson.projects[APP_NAME] = INSTALL_PATH;
-
-        await writeFile(`workspace.json`, JSON.stringify(workspaceJson, null, 2));
-
-        greenLog('Done!');
+        true
+      );
     }
 
-    if (APP_TYPE == '--html') {
-        if (!TYPE || TYPE === '' || TYPE === '--help') {
-            greenLog(
-                `
+    if (TYPE === '--demo') {
+      APP_NAME = `demo-${APP_NAME}-react`;
+    }
+
+    const INSTALL_PATH = `apps/${APP_NAME}`;
+
+    await childRunCommand(
+      `git clone https://github.com/LIT-Protocol/demo-project-react-template ${INSTALL_PATH}`
+    );
+
+    await writeFile(
+      `${INSTALL_PATH}/src/App.js`,
+      replaceAutogen({
+        oldContent: await readFile(`${INSTALL_PATH}/src/App.js`),
+        startsWith: '// ----- autogen:app-name:start  -----',
+        endsWith: '// ----- autogen:app-name:end  -----',
+        newContent: `const [appName, setAppName] = useState('${APP_NAME}');`,
+      })
+    );
+
+    const indexHtml = await readFile(`${INSTALL_PATH}/public/index.html`);
+    const newHtml = indexHtml.replace('Demo', `Demo: ${APP_NAME}`);
+    await writeFile(`${INSTALL_PATH}/public/index.html`, newHtml);
+
+    await childRunCommand(`rm -rf ${INSTALL_PATH}/.git`);
+
+    const packageJson = await readJsonFile(`${INSTALL_PATH}/package.json`);
+    packageJson.name = APP_NAME;
+
+    // generate a port number between 4100 and 4200
+    const port = Math.floor(Math.random() * 100) + 4100;
+    packageJson.scripts.start = `PORT=${port} react-scripts start`;
+
+    await writeFile(
+      `${INSTALL_PATH}/package.json`,
+      JSON.stringify(packageJson, null, 2)
+    );
+
+    await childRunCommand(`cd ${INSTALL_PATH} && yarn install`);
+
+    greenLog(`Creating a project.json for nx workspace`);
+
+    const projectJson = await readFile(`tools/scripts/project.json.template`);
+    const newProjectJson = projectJson
+      .replaceAll('PROJECT_NAME', APP_NAME)
+      .replaceAll('PROJECT_PATH', `apps/${APP_NAME}`)
+      .replaceAll('PROJECT_PORT', port);
+
+    await writeFile(`${INSTALL_PATH}/project.json`, newProjectJson);
+
+    greenLog('Adding project to nx workspace');
+
+    const workspaceJson = await readJsonFile(`workspace.json`);
+
+    workspaceJson.projects[APP_NAME] = INSTALL_PATH;
+
+    await writeFile(`workspace.json`, JSON.stringify(workspaceJson, null, 2));
+
+    greenLog('Done!');
+  }
+
+  if (APP_TYPE == '--html') {
+    if (!TYPE || TYPE === '' || TYPE === '--help') {
+      greenLog(
+        `
             Usage: node tools/scripts/tools.mjs --create --html [type]
             [type]: the type of html app to create
             Options:
             --demo: prepend 'demo' and append '-html' to the app name
             `,
-                true
-            );
-        }
-
-        redLog('Not implemented yet');
-        exit();
+        true
+      );
     }
 
-    if (APP_TYPE == '--node') {
-        if (!TYPE || TYPE === '' || TYPE === '--help') {
-            greenLog(
-                `
+    redLog('Not implemented yet');
+    exit();
+  }
+
+  if (APP_TYPE == '--node') {
+    if (!TYPE || TYPE === '' || TYPE === '--help') {
+      greenLog(
+        `
             Usage: node tools/scripts/tools.mjs --create --node [type]
             [type]: the type of node app to create
             Options:
             --demo: prepend 'demo' and append '-node' to the app name
             `,
-                true
-            );
-        }
-
-        redLog('Not implemented yet');
-        exit();
+        true
+      );
     }
+
+    redLog('Not implemented yet');
+    exit();
+  }
 }
 
 async function pathFunc() {
-    const PROJECT_PATH = args[1];
-    const COMMANDS = args.slice(2);
+  const PROJECT_PATH = args[1];
+  const COMMANDS = args.slice(2);
 
-    if (!PROJECT_PATH || PROJECT_PATH === '' || PROJECT_PATH === '--help') {
-        greenLog(
-            `
+  if (!PROJECT_PATH || PROJECT_PATH === '' || PROJECT_PATH === '--help') {
+    greenLog(
+      `
         Usage: node tools/scripts/tools.mjs --path [project-path] [commands]
             [project-path]: the path of the project
             [commands]: the commands to run
     `,
-            true
-        );
-        exit();
-    }
+      true
+    );
+    exit();
+  }
 
-    spawnCommand(COMMANDS[0], COMMANDS.slice(1), { cwd: PROJECT_PATH });
+  spawnCommand(COMMANDS[0], COMMANDS.slice(1), { cwd: PROJECT_PATH });
 }
 
 async function testFunc() {
-    const TEST_TYPE = args[1];
+  const TEST_TYPE = args[1];
 
-    if (!TEST_TYPE || TEST_TYPE === '' || TEST_TYPE === '--help') {
-        greenLog(
-            `
+  if (!TEST_TYPE || TEST_TYPE === '' || TEST_TYPE === '--help') {
+    greenLog(
+      `
         Usage: node tools/scripts/tools.mjs --test [test-type]
             [test-type]: the type of test to run
                 --unit: run unit tests
                 --e2e: run e2e tests
     `,
-            true
-        );
-        exit();
-    }
+      true
+    );
+    exit();
+  }
 
-    if (TEST_TYPE === '--unit') {
-        // spawnCommand('yarn', ['nx', 'run-many', '--target=test']);
-        // await childRunCommand('yarn nx run-many --target=test');
-        redLog(
-            `
+  if (TEST_TYPE === '--unit') {
+    // spawnCommand('yarn', ['nx', 'run-many', '--target=test']);
+    // await childRunCommand('yarn nx run-many --target=test');
+    redLog(
+      `
             To take advantage of nx colorful console messages, please run the following command to run unit tests:
 
             yarn nx run-many --target=test
         `,
-            true
-        );
-    }
+      true
+    );
+  }
 
-    if (TEST_TYPE === '--e2e') {
-        const ENV = args[2];
+  if (TEST_TYPE === '--e2e') {
+    const ENV = args[2];
 
-        if (!ENV || ENV === '' || ENV === '--help') {
-            greenLog(
-                `
+    if (!ENV || ENV === '' || ENV === '--help') {
+      greenLog(
+        `
             Usage: node tools/scripts/tools.mjs --test --e2e [env]
                 [env]: the environment to run the tests in
                     react: run tests on react app on port 4003
                     html: run tests on html app on port 4002
         `,
-                true
-            );
-            exit();
-        }
-
-        if (ENV === 'react') {
-            await childRunCommand(
-                'cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4003 yarn cypress open'
-            );
-        }
-
-        if (ENV === 'html') {
-            await childRunCommand(
-                'cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4002 yarn cypress open'
-            );
-        }
+        true
+      );
+      exit();
     }
+
+    if (ENV === 'react') {
+      await childRunCommand(
+        'cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4003 yarn cypress open'
+      );
+    }
+
+    if (ENV === 'html') {
+      await childRunCommand(
+        'cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4002 yarn cypress open'
+      );
+    }
+  }
 }
 async function findFunc() {
-    const FIND_TYPE = args[1];
+  const FIND_TYPE = args[1];
 
-    if (!FIND_TYPE || FIND_TYPE === '' || FIND_TYPE === '--help') {
-        greenLog(
-            `
+  if (!FIND_TYPE || FIND_TYPE === '' || FIND_TYPE === '--help') {
+    greenLog(
+      `
         Usage: node tools/scripts/tools.mjs --find [option]
             [option]: 
                 --imports: find all imports from a directory
     `,
-            true
-        );
-        exit();
-    }
+      true
+    );
+    exit();
+  }
 
-    if (FIND_TYPE === '--imports') {
-        const TARGET_DIR = args[2];
-        const FILTER = args[3];
+  if (FIND_TYPE === '--imports') {
+    const TARGET_DIR = args[2];
+    const FILTER = args[3];
 
-        if (!TARGET_DIR || TARGET_DIR === '' || TARGET_DIR === '--help') {
-            greenLog(
-                `
+    if (!TARGET_DIR || TARGET_DIR === '' || TARGET_DIR === '--help') {
+      greenLog(
+        `
             Usage: node tools/scripts/tools.mjs --find --imports [target-dir]
                 [target-dir]: the directory to find imports from
         `,
-                true
-            );
-            exit();
-        }
+        true
+      );
+      exit();
+    }
 
-        let res = await findImportsFromDir(TARGET_DIR);
+    let res = await findImportsFromDir(TARGET_DIR);
 
-        greenLog(
-            `
+    greenLog(
+      `
             Usage: node tools/scripts/tools.mjs --find --imports [target-dir] --filter [keyword]
                 [keyword]: the keyword to filter the results by
         `,
-            true
-        );
+      true
+    );
 
-        if (FILTER === '--filter') {
-            const keyword = args[4];
+    if (FILTER === '--filter') {
+      const keyword = args[4];
 
-            res = res.filter((item) => item.includes(keyword));
-        }
-
-        console.log(res);
-        exit();
+      res = res.filter((item) => item.includes(keyword));
     }
+
+    console.log(res);
+    exit();
+  }
 }
 
 async function buildFunc() {
-    const BUILD_TYPE = args[1];
+  const BUILD_TYPE = args[1];
 
-    if (!BUILD_TYPE || BUILD_TYPE === '' || BUILD_TYPE === '--help') {
-        greenLog(
-            `
+  if (!BUILD_TYPE || BUILD_TYPE === '' || BUILD_TYPE === '--help') {
+    greenLog(
+      `
         Usage: node tools/scripts/tools.mjs --build [option]
             [option]: the option to run
                 --packages: build packages
@@ -347,133 +347,126 @@ async function buildFunc() {
                 --apps: build apps
                 --all: build all
     `,
-            true
-        );
+      true
+    );
 
-        exit();
-    }
+    exit();
+  }
 
-    if (BUILD_TYPE === '--target') {
-        const TARGET = args[2];
+  if (BUILD_TYPE === '--target') {
+    const TARGET = args[2];
 
-        if (!TARGET || TARGET === '' || TARGET === '--help') {
-            greenLog(
-                `
+    if (!TARGET || TARGET === '' || TARGET === '--help') {
+      greenLog(
+        `
             Usage: node tools/scripts/tools.mjs --build --target [target]
                 [target]: the target to build
             `,
-                true
-            );
-            exit();
-        }
-
-        await childRunCommand(`yarn nx run ${TARGET}:_buildTsc`);
-        spawnListener(`yarn nx run ${TARGET}:_buildWeb`);
-        await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
-        await childRunCommand(`yarn postBuild:mapDepsToDist`);
-        await childRunCommand(`yarn tool:genHtml`);
-        await childRunCommand(`yarn tool:genReact`);
-        await childRunCommand(`yarn tool:genNodejs`);
-        await childRunCommand(`yarn tools --polyfills ${TARGET}`);
-
+        true
+      );
+      exit();
     }
 
-    if (BUILD_TYPE === '--packages') {
+    await childRunCommand(`yarn nx run ${TARGET}:_buildTsc`);
+    spawnListener(`yarn nx run ${TARGET}:_buildWeb`);
+    await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
+    await childRunCommand(`yarn postBuild:mapDepsToDist`);
+    await childRunCommand(`yarn tool:genHtml`);
+    await childRunCommand(`yarn tool:genReact`);
+    await childRunCommand(`yarn tool:genNodejs`);
+    await childRunCommand(`yarn tools --polyfills ${TARGET}`);
+  }
 
-        const MODE = args[2];
-        console.log("MODE:", MODE);
+  if (BUILD_TYPE === '--packages') {
+    const MODE = args[2];
+    console.log('MODE:', MODE);
 
-        if (!MODE || MODE === '' || MODE === '--help') {
-
-            greenLog(
-                `
+    if (!MODE || MODE === '' || MODE === '--help') {
+      greenLog(
+        `
             Usage: node tools/scripts/tools.mjs --build --packages [option]
 
                 [option]: the option to run
                     --async: build packages in sequential
             `,
-                true
-            );
-        }
-
-        if (MODE === '--async') {
-
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-
-            const packages = (await listDirsRecursive('./packages', false));
-            let pkgNames = packages.map((item) => item.replace('packages/', ''));
-
-            const orderJson = {};
-
-            (await readJsonFile('./lit-build.config.json')).build.order.forEach((item, i) => {
-                orderJson[item] = i;
-            })
-
-            pkgNames = customSort(pkgNames, orderJson);
-
-            console.log(pkgNames);
-
-            for (let i = 0; i < pkgNames.length; i++) {
-
-                let name = pkgNames[i];
-
-                if (i < (pkgNames.length - 1)) {
-                    name = name + ' --skip';
-                }
-
-                await childRunCommand(`yarn build:target ${name}`);
-            }
-
-            await childRunCommand(`yarn postBuild:mapDepsToDist`);
-            await childRunCommand(`yarn tool:genReadme`)
-            exit();
-        } else {
-
-            await childRunCommand(`yarn tools --match-versions`);
-
-            const ignoreList = (await listDirsRecursive('./apps', false))
-                .map((item) => item.replace('apps/', ''))
-                .join(',');
-
-            const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
-
-            spawnListener(command, {
-                onDone: () => {
-                    console.log('Done!');
-                    exit();
-                },
-            });
-
-        }
-
-
-
-        if (BUILD_TYPE === '--apps') {
-            redLog('not implemented yet');
-            // spawnListener('yarn build:apps', {
-            //     onDone: () => {
-            //         console.log("Done!");
-            //     }
-            // });
-        }
-
-        if (BUILD_TYPE === '--all') {
-            redLog('not implemented yet');
-            // spawnListener('yarn build:all', {
-            //     onDone: () => {
-            //         console.log("Done!");
-            //     }
-            // });
-        }
+        true
+      );
     }
+
+    if (MODE === '--async') {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const packages = await listDirsRecursive('./packages', false);
+      let pkgNames = packages.map((item) => item.replace('packages/', ''));
+
+      const orderJson = {};
+
+      (await readJsonFile('./lit-build.config.json')).build.order.forEach(
+        (item, i) => {
+          orderJson[item] = i;
+        }
+      );
+
+      pkgNames = customSort(pkgNames, orderJson);
+
+      console.log(pkgNames);
+
+      for (let i = 0; i < pkgNames.length; i++) {
+        let name = pkgNames[i];
+
+        if (i < pkgNames.length - 1) {
+          name = name + ' --skip';
+        }
+
+        await childRunCommand(`yarn build:target ${name}`);
+      }
+
+      await childRunCommand(`yarn postBuild:mapDepsToDist`);
+      await childRunCommand(`yarn tool:genReadme`);
+      exit();
+    } else {
+      await childRunCommand(`yarn tools --match-versions`);
+
+      const ignoreList = (await listDirsRecursive('./apps', false))
+        .map((item) => item.replace('apps/', ''))
+        .join(',');
+
+      const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
+
+      spawnListener(command, {
+        onDone: () => {
+          console.log('Done!');
+          exit();
+        },
+      });
+    }
+
+    if (BUILD_TYPE === '--apps') {
+      redLog('not implemented yet');
+      // spawnListener('yarn build:apps', {
+      //     onDone: () => {
+      //         console.log("Done!");
+      //     }
+      // });
+    }
+
+    if (BUILD_TYPE === '--all') {
+      redLog('not implemented yet');
+      // spawnListener('yarn build:all', {
+      //     onDone: () => {
+      //         console.log("Done!");
+      //     }
+      // });
+    }
+  }
 }
 
 async function publishFunc() {
-    let OPTION2 = args[1];
+  let OPTION2 = args[1];
 
-    if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
-        greenLog(
-            `
+  if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
+    greenLog(
+      `
         Usage: node tools/scripts/tools.mjs --publish [option]
             [option]: the option to run
                 --build: build packages before publishing
@@ -481,219 +474,225 @@ async function publishFunc() {
                 --tag: publish with a tag
                 --target: publish a specific package
     `,
-            true
-        );
+      true
+    );
 
-        exit();
-    }
+    exit();
+  }
 
-    if (OPTION2 === '--build') {
-        spawnListener('yarn build:packages', {
-            onDone: () => {
-                spawnListener('yarn npx lerna publish --force-publish', {
-                    onDone: () => {
-                        console.log('Done!');
-                    },
-                });
-            },
-        });
-    }
-
-    if (OPTION2 === '--no-build') {
+  if (OPTION2 === '--build') {
+    spawnListener('yarn build:packages', {
+      onDone: () => {
         spawnListener('yarn npx lerna publish --force-publish', {
-            onDone: () => {
-                console.log('Done!');
-            },
+          onDone: () => {
+            console.log('Done!');
+          },
         });
-    }
+      },
+    });
+  }
 
-    if (OPTION2 === '--tag') {
+  if (OPTION2 === '--no-build') {
+    spawnListener('yarn npx lerna publish --force-publish', {
+      onDone: () => {
+        console.log('Done!');
+      },
+    });
+  }
 
-        const TAG = args[2];
+  if (OPTION2 === '--tag') {
+    const TAG = args[2];
 
-        if (!TAG || TAG === '' || TAG === '--help') {
-            greenLog(
-                `
+    if (!TAG || TAG === '' || TAG === '--help') {
+      greenLog(
+        `
             Usage: node tools/scripts/tools.mjs --publish --tag [tag]
                 [tag]: the tag to publish with
             `,
-                true
-            );
-        }
-
-        spawnListener(`yarn npx lerna publish --force-publish --dist-tag ${TAG}`, {
-            onDone: async () => {
-                const dirs = (await listDirsRecursive('./dist/packages', false)).filter((item) => item.includes('-vanilla'));
-
-                await asyncForEach(dirs, async (dir) => {
-                    await childRunCommand(`cd ${dir} && npm publish --tag ${TAG}`);
-                })
-
-                exit();
-            },
-        });
-        // const dirs = (await listDirsRecursive('./dist/packages', false));
-
-        // await asyncForEach(dirs, async (dir) => {
-        //     await childRunCommand(`cd ${dir} && npm publish --tag ${TAG}`);
-        // })
-
-        // console.log(dirs);
+        true
+      );
     }
 
-    if (OPTION2 === '--target') {
-        const TARGET = args[2];
+    spawnListener(`yarn npx lerna publish --force-publish --dist-tag ${TAG}`, {
+      onDone: async () => {
+        const dirs = (await listDirsRecursive('./dist/packages', false)).filter(
+          (item) => item.includes('-vanilla')
+        );
 
-        if (!TARGET || TARGET === '' || TARGET === '--help') {
-            greenLog(
-                `
+        await asyncForEach(dirs, async (dir) => {
+          await childRunCommand(`cd ${dir} && npm publish --tag ${TAG}`);
+        });
+
+        exit();
+      },
+    });
+    // const dirs = (await listDirsRecursive('./dist/packages', false));
+
+    // await asyncForEach(dirs, async (dir) => {
+    //     await childRunCommand(`cd ${dir} && npm publish --tag ${TAG}`);
+    // })
+
+    // console.log(dirs);
+  }
+
+  if (OPTION2 === '--target') {
+    const TARGET = args[2];
+
+    if (!TARGET || TARGET === '' || TARGET === '--help') {
+      greenLog(
+        `
             Usage: node tools/scripts/tools.mjs --publish --target [target]
                 [target]: the target to publish
             `,
-                true
-            );
-        }
-
-        await childRunCommand(`cd dist/packages/${TARGET} && npm publish --access public`);
-        exit();
+        true
+      );
     }
+
+    await childRunCommand(
+      `cd dist/packages/${TARGET} && npm publish --access public`
+    );
+    exit();
+  }
 }
 async function yalcFunc() {
-    const OPTION2 = args[1];
+  const OPTION2 = args[1];
 
-    if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
-        greenLog(
-            `
+  if (!OPTION2 || OPTION2 === '' || OPTION2 === '--help') {
+    greenLog(
+      `
         Usage: node tools/scripts/tools.mjs --yalc [option]
             [option]: the option to run
                 --publish: publish packages to yalc
                 --push: push packages to yalc
                 --remove: remove packages from yalc
     `,
-            true
-        );
-
-        exit();
-    }
-
-    const dirs = (await listDirsRecursive('./dist/packages', false)).map((item) =>
-        item.replace('dist/packages/', '')
+      true
     );
 
-    if (OPTION2 === '--publish') {
-        dirs.forEach((name) => {
-            spawnCommand(
-                'yalc',
-                ['publish', '--push'],
-                {
-                    cwd: `dist/packages/${name}`,
-                },
-                { logExit: false }
-            );
-        });
-    }
-
-    if (OPTION2 === '--push') {
-        dirs.forEach((name) => {
-            spawnCommand(
-                'yalc',
-                ['push'],
-                {
-                    cwd: `dist/packages/${name}`,
-                },
-                { logExit: false }
-            );
-        });
-    }
-
-    if (OPTION2 === '--remove') {
-        dirs.forEach((name) => {
-            spawnCommand(
-                'yalc',
-                ['remove', name],
-                {
-                    cwd: `dist/packages/${name}`,
-                },
-                { logExit: false }
-            );
-        });
-    }
     exit();
+  }
+
+  const dirs = (await listDirsRecursive('./dist/packages', false)).map((item) =>
+    item.replace('dist/packages/', '')
+  );
+
+  if (OPTION2 === '--publish') {
+    dirs.forEach((name) => {
+      spawnCommand(
+        'yalc',
+        ['publish', '--push'],
+        {
+          cwd: `dist/packages/${name}`,
+        },
+        { logExit: false }
+      );
+    });
+  }
+
+  if (OPTION2 === '--push') {
+    dirs.forEach((name) => {
+      spawnCommand(
+        'yalc',
+        ['push'],
+        {
+          cwd: `dist/packages/${name}`,
+        },
+        { logExit: false }
+      );
+    });
+  }
+
+  if (OPTION2 === '--remove') {
+    dirs.forEach((name) => {
+      spawnCommand(
+        'yalc',
+        ['remove', name],
+        {
+          cwd: `dist/packages/${name}`,
+        },
+        { logExit: false }
+      );
+    });
+  }
+  exit();
 }
 
 async function switchFunc() {
-    const SCOPE = args[1];
+  const SCOPE = args[1];
 
-
-    if (!SCOPE || SCOPE === '' || SCOPE === '--help') {
-        greenLog(
-            `
+  if (!SCOPE || SCOPE === '' || SCOPE === '--help') {
+    greenLog(
+      `
         Usage: node tools/scripts/tools.mjs --switch [scope]
             [scope]: the scope to switch
                 --all: switch all packages
     `,
-            true
-        );
+      true
+    );
 
-        exit();
-    }
+    exit();
+  }
 
-    if (SCOPE == '--all') {
+  if (SCOPE == '--all') {
+    const FROM_NAME = args[2];
+    const TO_NAME = args[3];
 
-        const FROM_NAME = args[2];
-        const TO_NAME = args[3];
-
-        if (!FROM_NAME || FROM_NAME === '' || FROM_NAME === '--help' || !TO_NAME || TO_NAME === '' || TO_NAME === '--help') {
-
-            greenLog(
-                `
+    if (
+      !FROM_NAME ||
+      FROM_NAME === '' ||
+      FROM_NAME === '--help' ||
+      !TO_NAME ||
+      TO_NAME === '' ||
+      TO_NAME === '--help'
+    ) {
+      greenLog(
+        `
             Usage: node tools/scripts/tools.mjs --switch --all [from] [to]
                 [from]: the string to replace
                 [to]: the string to replace with
         `,
-                true
-            );
+        true
+      );
 
-            exit();
-        }
-
-        const dirs = await listDirsRecursive('./dist/packages', true);
-
-        let paths = [];
-
-        for (let i = 0; i < dirs.length; i++) {
-            const dir = dirs[i];
-            let _paths = await findStrFromDir(dir, FROM_NAME);
-            paths.push(_paths);
-        }
-
-        // remove empty array
-        paths = paths.filter((item) => item.length > 0);
-
-        // flatten array
-        paths = paths.flat();
-
-        // for each file that contains the string, replace it
-        for (let i = 0; i < paths.length; i++) {
-            const file = paths[i];
-            await replaceFileContent(paths[i], FROM_NAME, TO_NAME);
-            greenLog(`Replaced ${FROM_NAME} with ${TO_NAME} in ${file}`);
-
-            if (i === paths.length - 1) {
-                console.log('Done!');
-            }
-        }
-
-        exit();
+      exit();
     }
+
+    const dirs = await listDirsRecursive('./dist/packages', true);
+
+    let paths = [];
+
+    for (let i = 0; i < dirs.length; i++) {
+      const dir = dirs[i];
+      let _paths = await findStrFromDir(dir, FROM_NAME);
+      paths.push(_paths);
+    }
+
+    // remove empty array
+    paths = paths.filter((item) => item.length > 0);
+
+    // flatten array
+    paths = paths.flat();
+
+    // for each file that contains the string, replace it
+    for (let i = 0; i < paths.length; i++) {
+      const file = paths[i];
+      await replaceFileContent(paths[i], FROM_NAME, TO_NAME);
+      greenLog(`Replaced ${FROM_NAME} with ${TO_NAME} in ${file}`);
+
+      if (i === paths.length - 1) {
+        console.log('Done!');
+      }
+    }
+
+    exit();
+  }
 }
 async function cloneFunc() {
+  const PROJECT_NAME = args[1];
+  const NPM_NAME = args[2];
 
-    const PROJECT_NAME = args[1];
-    const NPM_NAME = args[2];
-
-    greenLog(
-        `
+  greenLog(
+    `
         Usage: node tools/scripts/tools.mjs --clone [project-name] [npm-name] [option]
 
             [project-name]: the name of the project
@@ -702,385 +701,400 @@ async function cloneFunc() {
             [option]: the option to run
                 --publish: publish packages to npm
         `,
-        true
+    true
+  );
+
+  if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
+    exit();
+  } else {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  const dirs = (await listDirsRecursive('./dist/packages', false))
+    .filter((item) => item.includes(PROJECT_NAME))
+    .map((path) => {
+      const name = path.replace('dist/packages/', '');
+
+      const folderName = NPM_NAME.replaceAll('/', '-');
+      let clonePath = path.replace(PROJECT_NAME, folderName);
+
+      let npmName = clonePath.includes('-vanilla')
+        ? `${NPM_NAME}-vanilla`
+        : NPM_NAME;
+
+      return {
+        name,
+        path,
+        projectName: PROJECT_NAME,
+        npmName,
+        clonePath,
+      };
+    });
+
+  // for loop clone a copy from path to clonePath
+  for (let i = 0; i < dirs.length; i++) {
+    greenLog(`Cloning ${dirs[i].name} to ${dirs[i].clonePath}`);
+
+    const dir = dirs[i];
+
+    await childRunCommand(`cp -r ${dir.path} ${dir.clonePath}`);
+
+    // replace the name in package.json
+    const packageJson = JSON.parse(
+      await readFile(`${dir.clonePath}/package.json`)
     );
 
-    if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
-        exit();
-    } else {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-    }
+    packageJson.name = dir.npmName;
+    packageJson.publishConfig.directory = `../../dist/packages/${dir.npmName}`;
 
-    const dirs = (await listDirsRecursive('./dist/packages', false))
-        .filter((item) => item.includes(PROJECT_NAME))
-        .map((path) => {
+    // bump version
+    // const version = packageJson.version.split('.');
+    // version[2] = parseInt(version[2]) + 1;
+    // packageJson.version = version.join('.');
+    // packageJson.version = packageJson.version;
 
-            const name = path.replace('dist/packages/', '');
+    await writeFile(
+      `${dir.clonePath}/package.json`,
+      JSON.stringify(packageJson, null, 4)
+    );
+  }
 
-            const folderName = NPM_NAME.replaceAll('/', '-')
-            let clonePath = path.replace(PROJECT_NAME, folderName);
+  const OPTION2 = args[3];
 
-            let npmName = clonePath.includes('-vanilla') ? `${NPM_NAME}-vanilla` : NPM_NAME;
-
-            return {
-                name,
-                path,
-                projectName: PROJECT_NAME,
-                npmName,
-                clonePath,
-            }
-        });
-
-
-    // for loop clone a copy from path to clonePath
+  if (OPTION2 === '--publish') {
+    // for loop publish each package
     for (let i = 0; i < dirs.length; i++) {
+      const dir = dirs[i];
 
-        greenLog(`Cloning ${dirs[i].name} to ${dirs[i].clonePath}`)
-
-        const dir = dirs[i];
-
-        await childRunCommand(`cp -r ${dir.path} ${dir.clonePath}`);
-
-        // replace the name in package.json
-        const packageJson = JSON.parse(await readFile(`${dir.clonePath}/package.json`));
-
-        packageJson.name = dir.npmName;
-        packageJson.publishConfig.directory = `../../dist/packages/${dir.npmName}`;
-
-        // bump version
-        // const version = packageJson.version.split('.');
-        // version[2] = parseInt(version[2]) + 1;
-        // packageJson.version = version.join('.');
-        // packageJson.version = packageJson.version;
-
-        await writeFile(`${dir.clonePath}/package.json`, JSON.stringify(packageJson, null, 4));
-    };
-
-    const OPTION2 = args[3];
-
-    if (OPTION2 === '--publish') {
-
-        // for loop publish each package
-        for (let i = 0; i < dirs.length; i++) {
-            const dir = dirs[i];
-
-            await childRunCommand(`cd ${dir.clonePath} && npm publish --access public`);
-
-        };
-
-        // for loop to delete the clone
-        for (let i = 0; i < dirs.length; i++) {
-            const dir = dirs[i];
-
-            // delete the clone 
-            if (args[4] === '--remove') {
-                await childRunCommand(`rm -rf ${dir.clonePath}`);
-            }
-        };
+      await childRunCommand(
+        `cd ${dir.clonePath} && npm publish --access public`
+      );
     }
 
-    exit();
+    // for loop to delete the clone
+    for (let i = 0; i < dirs.length; i++) {
+      const dir = dirs[i];
 
+      // delete the clone
+      if (args[4] === '--remove') {
+        await childRunCommand(`rm -rf ${dir.clonePath}`);
+      }
+    }
+  }
+
+  exit();
 }
 async function devFunc() {
+  const TYPE = args[1];
 
-    const TYPE = args[1];
-
-    if (!TYPE || TYPE === '' || TYPE === '--help') {
-        greenLog(
-            `
+  if (!TYPE || TYPE === '' || TYPE === '--help') {
+    greenLog(
+      `
         Usage: node tools/scripts/tools.mjs --dev [type]
             [type]: the type of dev to run
                 --apps: run dev on apps
     `,
-            true
-        );
+      true
+    );
 
-        exit();
-    }
+    exit();
+  }
 
-    if (TYPE === '--apps' || TYPE === '--app') {
+  if (TYPE === '--apps' || TYPE === '--app') {
+    // go to apps/react/project.json and find the port
+    const reactPort = JSON.parse(await readFile('./apps/react/project.json'))
+      .targets.serve.options.port;
+    const htmlPort = (await readFile('./apps/html/server.js')).match(
+      /port: (\d+)/
+    )[1];
 
-        // go to apps/react/project.json and find the port
-        const reactPort = JSON.parse(await readFile('./apps/react/project.json')).targets.serve.options.port;
-        const htmlPort = (await readFile('./apps/html/server.js')).match(/port: (\d+)/)[1];
-
-        greenLog(`
+    greenLog(
+      `
             Running apps...
             html: http://localhost:${htmlPort}
             react: http://localhost:${reactPort}
             nodejs: in this terminal
-        `, true);
+        `,
+      true
+    );
 
-        // wait for 2 seconds before running the apps
-        setTimeout(() => {
-            spawnListener('yarn nx run nodejs:serve', {}, '[nodejs]', 31);
-            spawnListener('yarn nx run react:serve', {}, '[react]', 32);
-            spawnListener('yarn nx run html:serve', {}, '[html]', 33);
-        }, 2000);
-    }
+    // wait for 2 seconds before running the apps
+    setTimeout(() => {
+      spawnListener('yarn nx run nodejs:serve', {}, '[nodejs]', 31);
+      spawnListener('yarn nx run react:serve', {}, '[react]', 32);
+      spawnListener('yarn nx run html:serve', {}, '[html]', 33);
+    }, 2000);
+  }
 }
 
 async function watchFunc() {
-    const OPTION = args[1];
+  const OPTION = args[1];
 
-    if (!OPTION || OPTION === '' || OPTION === '--help') {
-
-        greenLog(`
+  if (!OPTION || OPTION === '' || OPTION === '--help') {
+    greenLog(
+      `
             Usage: node tools/scripts/tools.mjs --watch [option]
                 [option]: the option to use
                     --all: watch all
                     --target: watch a target
-        `, true);
+        `,
+      true
+    );
 
-        exit();
-    }
+    exit();
+  }
 
-    if (OPTION === '--all') {
-        greenLog('Watching all...', true);
-        await childRunCommand('nodemon --watch packages --ext js,ts --exec "yarn tools --build --packages --async"');
-    }
+  if (OPTION === '--all') {
+    greenLog('Watching all...', true);
+    await childRunCommand(
+      'nodemon --watch packages --ext js,ts --exec "yarn tools --build --packages --async"'
+    );
+  }
 
-    if (OPTION === '--target') {
+  if (OPTION === '--target') {
+    const TARGET = args[2];
 
-        const TARGET = args[2];
-
-        greenLog(`
+    greenLog(
+      `
             Usage: node tools/scripts/tools.mjs --watch --target [target] [option]
                 [target]: the target to watch
                 [option]: the option to use
                     --deps: with dependencies
-        `, true);
+        `,
+      true
+    );
 
-        if (!TARGET || TARGET === '' || TARGET === '--help') {
-            exit()
-        } else {
-            await new Promise((resolve) => setTimeout(resolve, 300));
-        }
-
-        // check if directory exists
-        const path = `./packages/${TARGET}`;
-        if (!fs.existsSync(path)) {
-            redLog(`Target "${TARGET}" does not exist!`);
-            exit();
-        }
-
-        if (args[3] === '--deps') {
-            const projectNameSpace = (await readFile(`package.json`)).match(/"name": "(.*)"/)[1].split('/')[0];
-            let res = (await findImportsFromDir(`${path}/src`)).filter((item) => item.includes(projectNameSpace)).map((item) => {
-                return item.replace(projectNameSpace, '').replace('/', '');
-            });
-
-            res.forEach((pkg) => {
-                greenLog(`Watching ${pkg}...`, true);
-                childRunCommand(`nodemon --watch ${pkg} --ext js,ts --exec "yarn tools --build --target ${pkg}"`);
-            });
-
-        } else {
-            greenLog(`Watching ${TARGET}...`, true);
-            childRunCommand(`nodemon --watch packages/${TARGET} --ext js,ts --exec "yarn tools --build --target ${TARGET}"`);
-            // spawnListener(`yarn tools --polyfills lit-node-client`);
-        }
+    if (!TARGET || TARGET === '' || TARGET === '--help') {
+      exit();
+    } else {
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
 
+    // check if directory exists
+    const path = `./packages/${TARGET}`;
+    if (!fs.existsSync(path)) {
+      redLog(`Target "${TARGET}" does not exist!`);
+      exit();
+    }
+
+    if (args[3] === '--deps') {
+      const projectNameSpace = (await readFile(`package.json`))
+        .match(/"name": "(.*)"/)[1]
+        .split('/')[0];
+      let res = (await findImportsFromDir(`${path}/src`))
+        .filter((item) => item.includes(projectNameSpace))
+        .map((item) => {
+          return item.replace(projectNameSpace, '').replace('/', '');
+        });
+
+      res.forEach((pkg) => {
+        greenLog(`Watching ${pkg}...`, true);
+        childRunCommand(
+          `nodemon --watch ${pkg} --ext js,ts --exec "yarn tools --build --target ${pkg}"`
+        );
+      });
+    } else {
+      greenLog(`Watching ${TARGET}...`, true);
+      childRunCommand(
+        `nodemon --watch packages/${TARGET} --ext js,ts --exec "yarn tools --build --target ${TARGET}"`
+      );
+      // spawnListener(`yarn tools --polyfills lit-node-client`);
+    }
+  }
 }
 
 async function polyfillsFunc() {
+  const PROJECT_NAME = args[1];
 
-    const PROJECT_NAME = args[1];
-
-    if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
-        greenLog(
-            `
+  if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
+    greenLog(
+      `
         Usage: node tools/scripts/tools.mjs --polyfills [project]
             [project]: the project to add polyfills to
         `,
-            true
-        );
+      true
+    );
 
-        exit();
-    }
-
-    try {
-        const polyfill = await readFile(`packages/${PROJECT_NAME}/polyfills.js`);
-
-        const buildIndexJsPath = `dist/packages/${PROJECT_NAME}/src/index.js`;
-        const builtIndexJs = await readFile(buildIndexJsPath);
-
-        const newBuiltIndexJs = replaceAutogen({
-            oldContent: builtIndexJs,
-            startsWith: "// ----- autogen:polyfills:start  -----",
-            endsWith: "// ----- autogen:polyfills:end  -----",
-            newContent: polyfill
-        });
-
-        await writeFile(buildIndexJsPath, newBuiltIndexJs);
-
-        greenLog("Polyfills injected into index.js");
-
-    } catch (e) {
-        yellowLog(`No packages/${PROJECT_NAME}/polyfills.js found for ` + PROJECT_NAME);
-    }
     exit();
+  }
+
+  try {
+    const polyfill = await readFile(`packages/${PROJECT_NAME}/polyfills.js`);
+
+    const buildIndexJsPath = `dist/packages/${PROJECT_NAME}/src/index.js`;
+    const builtIndexJs = await readFile(buildIndexJsPath);
+
+    const newBuiltIndexJs = replaceAutogen({
+      oldContent: builtIndexJs,
+      startsWith: '// ----- autogen:polyfills:start  -----',
+      endsWith: '// ----- autogen:polyfills:end  -----',
+      newContent: polyfill,
+    });
+
+    await writeFile(buildIndexJsPath, newBuiltIndexJs);
+
+    greenLog('Polyfills injected into index.js');
+  } catch (e) {
+    yellowLog(
+      `No packages/${PROJECT_NAME}/polyfills.js found for ` + PROJECT_NAME
+    );
+  }
+  exit();
 }
 
 async function commentFunc() {
-    const C = args[1] ?? '=';
+  const C = args[1] ?? '=';
 
-    // combine args except for the first index
-    const MESSAGE = args.slice(2).join(' ');
+  // combine args except for the first index
+  const MESSAGE = args.slice(2).join(' ');
 
-    if (!MESSAGE || MESSAGE === '' || MESSAGE === '--help') {
-        greenLog(
-            `
+  if (!MESSAGE || MESSAGE === '' || MESSAGE === '--help') {
+    greenLog(
+      `
         Usage: node tools/scripts/tools.mjs --comment [message]
             [message]: the message to add to the comment block
         `,
-            true
-        );
+      true
+    );
 
-        exit();
-    }
+    exit();
+  }
 
+  let up = [];
+  let down = [];
 
-    let up = [];
-    let down = [];
+  for (let i = 0; i < MESSAGE.length; i++) {
+    up.push(C);
+    down.push(C);
+  }
 
-    for (let i = 0; i < MESSAGE.length; i++) {
+  // create a line with 10 ${C}
+  const line = `${C}${C}${C}${C}${C}${C}${C}${C}${C}${C}`;
 
-        up.push(C);
-        down.push(C);
-
-    }
-
-    // create a line with 10 ${C}
-    const line = `${C}${C}${C}${C}${C}${C}${C}${C}${C}${C}`;
-
-    console.log(
-        `
+  console.log(
+    `
 // ${line}${up.join('')}${line}
 //          ${MESSAGE}                                    
 // ${line}${down.join('')}${line}
-    `);
-    exit();
-
+    `
+  );
+  exit();
 }
 
 async function removeLocalDevFunc() {
+  // First, remove existing dist symlink if exists.
+  const removeList = (await listDirsRecursive('./packages', false)).map(
+    (item) => item.replace('packages/', '')
+  );
 
-    // First, remove existing dist symlink if exists.
-    const removeList = (await listDirsRecursive('./packages', false))
-        .map((item) => item.replace('packages/', ''))
+  console.log('removeList', removeList);
 
-    console.log("removeList", removeList);
-
-    await asyncForEach(removeList, async (item) => {
-
-        greenLog(`Removing:
+  await asyncForEach(removeList, async (item) => {
+    greenLog(
+      `Removing:
 - symlink packages/${item}/dist
 - "main" and "typings" from packages/${item}/package.json
-        `, true);
-        await childRunCommand(`rm -rf packages/${item}/dist`);
+        `,
+      true
+    );
+    await childRunCommand(`rm -rf packages/${item}/dist`);
 
-        const packageJson = await readJsonFile(`packages/${item}/package.json`);
+    const packageJson = await readJsonFile(`packages/${item}/package.json`);
 
-        delete packageJson.main;
-        delete packageJson.typings;
+    delete packageJson.main;
+    delete packageJson.typings;
 
-        await writeJsonFile(`packages/${item}/package.json`, packageJson);
+    await writeJsonFile(`packages/${item}/package.json`, packageJson);
+  });
 
-    })
-
-    exit();
+  exit();
 }
 
 async function setupLocalDevFunc() {
+  const PROJECT_NAME = args[1];
 
-    const PROJECT_NAME = args[1];
-
-    if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
-        greenLog(
-            `
+  if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
+    greenLog(
+      `
               Usage: node tools/scripts/tools.mjs --setup-local-dev [options]
                   [options]:
                     --target [project]: the project to setup local dev for
               `,
-            true
-        );
+      true
+    );
 
-        // await 2 seconds
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+    // await 2 seconds
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+
+  /**
+   * Setup symlink for a project eg. `packages/my-project/dist` -> `dist/packages/my-project`
+   * @param {string} projectName
+   * @returns {Promise<void>}
+   */
+  const setupSymlink = async (projectName) => {
+    // First, remove existing dist symlink if exists.
+    const dirPathToCreate = `packages/${projectName}/dist`;
+    if (fs.existsSync(dirPathToCreate)) {
+      greenLog(`Removing symlink ${dirPathToCreate} ...`);
+      await childRunCommand(`rm -rf ${dirPathToCreate}`);
     }
 
-    /**
-     * Setup symlink for a project eg. `packages/my-project/dist` -> `dist/packages/my-project`
-     * @param {string} projectName
-     * @returns {Promise<void>}
-     */
-    const setupSymlink = async (projectName) => {
-        // First, remove existing dist symlink if exists.
-        const dirPathToCreate = `packages/${projectName}/dist`;
-        if (fs.existsSync(dirPathToCreate)) {
-            greenLog(`Removing symlink ${dirPathToCreate} ...`);
-            await childRunCommand(`rm -rf ${dirPathToCreate}`);
-        }
+    // Then, create a symlink of each package's `dist` folder to their corresponding
+    // package directory location under the root `dist`.
+    const symLinkTarget = `../../dist/packages/${projectName}`; // relative to symlink directory
+    greenLog(`Creating symlink ${dirPathToCreate} -> ${symLinkTarget} ...`);
+    await childRunCommand(`ln -s ${symLinkTarget} ${dirPathToCreate}`);
 
-        // Then, create a symlink of each package's `dist` folder to their corresponding
-        // package directory location under the root `dist`.
-        const symLinkTarget = `../../dist/packages/${projectName}`; // relative to symlink directory
-        greenLog(`Creating symlink ${dirPathToCreate} -> ${symLinkTarget} ...`);
-        await childRunCommand(`ln -s ${symLinkTarget} ${dirPathToCreate}`);
+    // Then, update each package's `package.json` to have the same `main` and `typings` path
+    // as the `package.json` in the dist, except prefixed with `dist`.
+    const packageJsonPath = `packages/${projectName}/package.json`;
+    const distPackageJsonPath = `dist/packages/${projectName}/package.json`;
+    const packageJson = await readJsonFile(packageJsonPath);
+    const distPackageJson = await readJsonFile(distPackageJsonPath);
 
-        // Then, update each package's `package.json` to have the same `main` and `typings` path
-        // as the `package.json` in the dist, except prefixed with `dist`.
-        const packageJsonPath = `packages/${projectName}/package.json`;
-        const distPackageJsonPath = `dist/packages/${projectName}/package.json`;
-        const packageJson = await readJsonFile(packageJsonPath);
-        const distPackageJson = await readJsonFile(distPackageJsonPath);
+    packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
+    packageJson.typings = prefixPathWithDir(distPackageJson.typings, 'dist');
 
-        packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
-        packageJson.typings = prefixPathWithDir(distPackageJson.typings, 'dist');
+    greenLog(`Updating ${packageJsonPath}...`);
+    greenLog(`packageJson.main: ${packageJson.main}`);
+    greenLog(`packageJson.typings: ${packageJson.typings}`);
 
-        greenLog(`Updating ${packageJsonPath}...`);
-        greenLog(`packageJson.main: ${packageJson.main}`);
-        greenLog(`packageJson.typings: ${packageJson.typings}`);
+    await writeJsonFile(packageJsonPath, packageJson);
+  };
 
-        await writeJsonFile(packageJsonPath, packageJson);
-    }
+  if (PROJECT_NAME === '--target') {
+    const TARGET = args[2];
 
-    if (PROJECT_NAME === '--target') {
+    await setupSymlink(TARGET);
+  } else {
+    const packageList = (await listDirsRecursive('./packages', false)).map(
+      (item) => item.replace('packages/', '')
+    );
+    await asyncForEach(packageList, async (item) => {
+      await setupSymlink(item);
+    });
+  }
 
-        const TARGET = args[2];
-
-        await setupSymlink(TARGET);
-
-    } else {
-        const packageList = (await listDirsRecursive('./packages', false))
-            .map((item) => item.replace('packages/', ''))
-        await asyncForEach(packageList, async (item) => {
-            await setupSymlink(item);
-        })
-    }
-
-    exit();
+  exit();
 }
 
 async function matchVersionsFunc() {
+  // async foreach packages
+  const packageList = await listDirsRecursive('./packages', false);
 
-    // async foreach packages 
-    const packageList = (await listDirsRecursive('./packages', false))
+  // get lerna version
+  const lernaJson = await readJsonFile(`lerna.json`);
 
-    // get lerna version
-    const lernaJson = await readJsonFile(`lerna.json`);
+  await asyncForEach(packageList, async (pkg) => {
+    const packageJson = await readJsonFile(`${pkg}/package.json`);
+    packageJson.version = lernaJson.version;
 
-    await asyncForEach(packageList, async (pkg) => {
-        const packageJson = await readJsonFile(`${pkg}/package.json`);
-        packageJson.version = lernaJson.version;
+    greenLog(
+      `Updating ${pkg}/package.json version ${packageJson.version} => ${lernaJson.version}...`
+    );
+    await writeJsonFile(`${pkg}/package.json`, packageJson);
+  });
 
-        greenLog(`Updating ${pkg}/package.json version ${packageJson.version} => ${lernaJson.version}...`);
-        await writeJsonFile(`${pkg}/package.json`, packageJson);
-
-    });
-
-    exit();
+  exit();
 }
