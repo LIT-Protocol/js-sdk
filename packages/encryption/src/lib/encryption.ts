@@ -6,6 +6,8 @@ import {
   EncryptedString,
   EncryptedZip,
   EncryptFileAndZipWithMetadataProps,
+  EncryptStringAndUploadMetadataToIpfsProps,
+  DecryptStringWithIpfsProps,
   IJWT,
   LIT_ERROR,
   NETWORK_PUB_KEY,
@@ -33,6 +35,8 @@ import {
 import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
 
 import { safeParams } from './params-validators';
+
+import * as pinataSDK from '@pinata/sdk';
 
 // ---------- Local Interfaces ----------
 
@@ -82,6 +86,153 @@ const metadataForFile = ({
     encryptedSymmetricKey: uint8arrayToString(encryptedSymmetricKey, 'base16'),
   };
 };
+
+/**
+ *
+ * Encrypt a string, save the key to the Lit network, and then uploads all the metadata required to decrypt to IPFS & returns the IPFS CID.
+ *
+ * @param { EncryptStringAndUploadMetadataToIpfsProps }
+ *
+ * @returns { Promise<string> }
+ *
+ */
+export const encryptStringAndUploadMetadataToIpfs = async ({
+  authSig,
+  accessControlConditions,
+  evmContractConditions,
+  solRpcConditions,
+  unifiedAccessControlConditions,
+  chain,
+  string,
+  litNodeClient,
+}: EncryptStringAndUploadMetadataToIpfsProps): Promise<string | undefined> => {
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'encryptStringAndUploadMetadataToIpfs',
+    params: {
+      authSig,
+      accessControlConditions,
+      evmContractConditions,
+      solRpcConditions,
+      unifiedAccessControlConditions,
+      chain,
+      string,
+      litNodeClient,
+    },
+  });
+
+  if (!paramsIsSafe) return;
+
+  const { encryptedString, symmetricKey } = await encryptString(string);
+
+  const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
+    accessControlConditions,
+    evmContractConditions,
+    solRpcConditions,
+    unifiedAccessControlConditions,
+    symmetricKey,
+    authSig,
+    chain,
+  });
+
+  log('encrypted key saved to Lit', encryptedSymmetricKey);
+
+  const encryptedSymmetricKeyString = uint8arrayToString(encryptedSymmetricKey, "base16");
+
+  console.log(`encryptedString: ${encryptedString}, encryptedSymmetricKeyString: ${encryptedSymmetricKeyString}`);
+
+  console.log("a-");
+  //   @ts-ignore
+  console.log(process.env.PINATA_API_KEY);
+  //   @ts-ignore
+  console.log(process.env.PINATA_SECRET_API_KEY);
+  //   @ts-ignore
+  if (!process.env.PINATA_API_KEY || !process.env.PINATA_SECRET_API_KEY) {
+    throw new Error('Please provide your pinata API key and secret key');
+  }
+  //   @ts-ignore
+  const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_API_KEY, pinataSecretApiKey: process.env.PINATA_SECRET_API_KEY});
+  // console.log("b-");
+  const buffer = await encryptedString.arrayBuffer();
+  console.log("buffer");
+  console.log(buffer);
+  const encryptedStringJson = Buffer.from(buffer).toJSON();
+  console.log("encryptedStringJson");
+  console.log(encryptedStringJson);
+  const res = await pinata.pinJSONToIPFS({
+    encryptedString: encryptedStringJson,
+    encryptedSymmetricKeyString,
+    accessControlConditions,
+    evmContractConditions,
+    solRpcConditions,
+    unifiedAccessControlConditions,
+    chain
+  });
+  console.log("res");
+  console.log(res);
+
+  return res.IpfsHash;
+}
+
+/**
+ *
+ * Encrypt a string, save the key to the Lit network, and then uploads all the metadata required to decrypt to IPFS & returns the IPFS CID.
+ *
+ * @param { DecryptStringWithIpfsProps }
+ *
+ * @returns { Promise<string> }
+ *
+ */
+export const decryptStringWithIpfs = async ({
+  authSig,
+  ipfsCid,
+  litNodeClient,
+}: DecryptStringWithIpfsProps): Promise<string | undefined> => {
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'decryptStringWithIpfs',
+    params: {
+      authSig,
+      ipfsCid,
+      litNodeClient,
+    },
+  });
+
+  if (!paramsIsSafe) return;
+
+  const res = await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`);
+  console.log("res-");
+  const val = await res.json();
+  console.log("val-");
+  console.log(val);
+  const encryptedString = val.encryptedString;
+  const encryptedSymmetricKey = val.encryptedSymmetricKeyString;
+  const accessControlConditions = val.accessControlConditions;
+  const evmContractConditions = val.evmContractConditions;
+  const solRpcConditions = val.solRpcConditions;
+  const unifiedAccessControlConditions = val.unifiedAccessControlConditions;
+  const chain = val.chain;
+  console.log(`encryptedString- ${encryptedString}`);
+  console.log(`encryptedSymmetricKey- ${encryptedSymmetricKey}`);
+  console.log(`accessControlConditions- ${accessControlConditions}`);
+  console.log(`chain- ${chain}`);
+
+  const symmetricKey = await litNodeClient.getEncryptionKey({
+    accessControlConditions,
+    evmContractConditions,
+    solRpcConditions,
+    unifiedAccessControlConditions,
+    toDecrypt: encryptedSymmetricKey,
+    chain,
+    authSig
+  });
+
+  if (!symmetricKey) return;
+
+  const encryptedStringBlob = new Blob([Buffer.from(encryptedString)], { type: 'application/octet-stream' });
+  const decryptedString = await decryptString(encryptedStringBlob, symmetricKey);
+  return decryptedString;
+}
 
 // ---------- Local Helpers ----------
 

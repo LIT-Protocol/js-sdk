@@ -9,6 +9,8 @@ import {
   JsonSaveEncryptionKeyRequest,
   DecryptZipFileWithMetadataProps,
   EncryptFileAndZipWithMetadataProps,
+  EncryptStringAndUploadMetadataToIpfsProps,
+  DecryptStringWithIpfsProps,
   KV,
   ExecuteJsProps,
   LIT_ERROR,
@@ -367,6 +369,117 @@ export const paramsValidators = {
     )
       return false;
 
+    return true;
+  },
+
+  encryptStringAndUploadMetadataToIpfs: (
+    params: EncryptStringAndUploadMetadataToIpfsProps
+  ) => {
+    // -- validate
+
+    log('params:', params);
+
+    if (
+      !checkType({
+        value: params.authSig,
+        allowedTypes: ['Object'],
+        paramName: 'authSig',
+        functionName: 'encryptStringAndUploadMetadataToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      params.accessControlConditions &&
+      !checkType({
+        value: params.accessControlConditions,
+        allowedTypes: ['Array'],
+        paramName: 'accessControlConditions',
+        functionName: 'encryptStringAndUploadMetadataToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      params.evmContractConditions &&
+      !checkType({
+        value: params.evmContractConditions,
+        allowedTypes: ['Array'],
+        paramName: 'evmContractConditions',
+        functionName: 'encryptStringAndUploadMetadataToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      params.solRpcConditions &&
+      !checkType({
+        value: params.solRpcConditions,
+        allowedTypes: ['Array'],
+        paramName: 'solRpcConditions',
+        functionName: 'encryptStringAndUploadMetadataToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      params.unifiedAccessControlConditions &&
+      !checkType({
+        value: params.unifiedAccessControlConditions,
+        allowedTypes: ['Array'],
+        paramName: 'unifiedAccessControlConditions',
+        functionName: 'encryptStringAndUploadMetadataToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      !checkIfAuthSigRequiresChainParam(
+        params.authSig,
+        params.chain,
+        'encryptStringAndUploadMetadataToIpfs'
+      )
+    )
+      return false;
+
+    // -- validate
+    if (
+      !checkType({
+        value: params.string,
+        allowedTypes: ['String'],
+        paramName: 'string',
+        functionName: 'encryptStringAndUploadMetadataToIpfs',
+      })
+    )
+      return false;
+
+    // -- success case
+    return true;
+  },
+
+  decryptStringWithIpfs: (
+    params: DecryptStringWithIpfsProps
+  ) => {
+    // -- validate
+
+    log('params:', params);
+
+    if (
+      !checkType({
+        value: params.authSig,
+        allowedTypes: ['Object'],
+        paramName: 'authSig',
+        functionName: 'encryptStringAndUploadMetadataToIpfs',
+      })
+    )
+      return false;
+
+    // -- success case
     return true;
   },
 
