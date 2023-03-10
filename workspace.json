@@ -23,6 +23,7 @@
     "pkp-ethers": "packages/pkp-ethers",
     "react": "apps/react",
     "types": "packages/types",
-    "uint8arrays": "packages/uint8arrays"
+    "uint8arrays": "packages/uint8arrays",
+    "utils": "packages/utils"
   }
 }

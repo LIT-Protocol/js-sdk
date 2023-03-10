@@ -1,0 +1,36 @@
+{
+  "name": "@lit-protocol/utils",
+  "version": "2.1.59",
+  "type": "commonjs",
+  "license": "MIT",
+  "homepage": "https://github.com/Lit-Protocol/js-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LIT-Protocol/js-sdk"
+  },
+  "keywords": [
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/LIT-Protocol/js-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/utils"
+  },
+  "tags": [
+    "universal"
+  ],
+  "browser": {
+    "crypto": false,
+    "stream": false,
+    "fs": false,
+    "http": false,
+    "https": false,
+    "os": false,
+    "zlib": false,
+    "tty": false
+  },
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
+}

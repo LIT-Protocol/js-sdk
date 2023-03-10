@@ -244,7 +244,7 @@ export const paramsValidators = {
       return false;
 
     log('TYPEOF:', typeof toDecrypt);
-    if (is(toDecrypt, 'String', 'toDecrypt', 'getEncryptionKey')) return false;
+    if (!is(toDecrypt, 'String', 'toDecrypt', 'getEncryptionKey')) return false;
     if (!is(authSig, 'Object', 'authSig', 'getEncryptionKey')) return false;
 
     // -- validate if 'chain' is null
