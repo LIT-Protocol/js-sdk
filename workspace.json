@@ -24,6 +24,6 @@
     "react": "apps/react",
     "types": "packages/types",
     "uint8arrays": "packages/uint8arrays",
-    "utils": "packages/utils"
+    "utils-node": "packages/utils-node"
   }
 }

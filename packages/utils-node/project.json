@@ -1,13 +1,13 @@
 {
-  "name": "utils",
+  "name": "utils-node",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/utils/src",
+  "sourceRoot": "packages/utils-node/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target utils"
+        "command": "yarn build:target utils-node"
       }
     },
     "_buildTsc": {
@@ -16,21 +16,21 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/packages/utils",
-        "main": "packages/utils/src/index.ts",
-        "tsConfig": "packages/utils/tsconfig.lib.json",
+        "outputPath": "dist/packages/utils-node",
+        "main": "packages/utils-node/src/index.ts",
+        "tsConfig": "packages/utils-node/tsconfig.lib.json",
         "assets": [
-          "packages/utils/*.md"
+          "packages/utils-node/*.md"
         ]
       }
     },
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
       "options": {
-        "globalName": "LitJsSdk_utils",
-        "outfile": "dist/packages/utils-vanilla/utils.js",
+        "globalName": "LitJsSdk_utilsNode",
+        "outfile": "dist/packages/utils-node-vanilla/utils-node.js",
         "entryPoints": [
-          "./packages/utils/src/index.ts"
+          "./packages/utils-node/src/index.ts"
         ],
         "define": {
           "process.env.NODE_DEBUG": "false",
@@ -51,17 +51,17 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "packages/utils/**/*.ts"
+          "packages/utils-node/**/*.ts"
         ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": [
-        "coverage/packages/utils"
+        "coverage/packages/utils-node"
       ],
       "options": {
-        "jestConfig": "packages/utils/jest.config.ts",
+        "jestConfig": "packages/utils-node/jest.config.ts",
         "passWithNoTests": true
       }
     }

@@ -1,5 +1,5 @@
 {
-  "name": "@lit-protocol/utils",
+  "name": "@lit-protocol/utils-node",
   "version": "2.1.59",
   "type": "commonjs",
   "license": "MIT",
@@ -16,21 +16,15 @@
   },
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/utils"
+    "directory": "../../dist/packages/utils-node"
   },
-  "tags": [
-    "universal"
-  ],
   "browser": {
     "crypto": false,
-    "stream": false,
-    "fs": false,
-    "http": false,
-    "https": false,
-    "os": false,
-    "zlib": false,
-    "tty": false
+    "stream": false
   },
+  "tags": [
+    "node"
+  ],
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

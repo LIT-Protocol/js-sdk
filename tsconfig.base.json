@@ -29,8 +29,8 @@
       "@lit-protocol/types": [
         "packages/types/src/index.ts"
       ],
-      "@lit-protocol/utils": [
-        "packages/utils/src/index.ts"
+      "@lit-protocol/utils-node": [
+        "packages/utils-node/src/index.ts"
       ]
     }
   },
