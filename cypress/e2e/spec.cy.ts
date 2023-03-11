@@ -1,4 +1,5 @@
 // @ts-nocheck
+// PLEASE NOTE THAT ONLY WORKS ON CYPRESS 11.2.0
 
 let window: any;
 let savedParams: any = {
@@ -352,7 +353,7 @@ describe('Lit Action', () => {
 
     expect(res)
       .to.have.property('response')
-      .and.contains('0x352e559b06e9c6c72edbf5af2bf52c61f088db71');
+      .and.contains('0xed34eca8fc8c982837920b313a0d5ad137d45de0');
   });
 
   it('Gets JWT params', () => {
