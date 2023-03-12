@@ -710,3 +710,35 @@ export interface SessionSigningTemplate {
   issuedAt: string;
   expiration: string;
 }
+
+export interface GetWebAuthnAuthenticationAuthSigProps {
+  verificationParams: WebAuthnAuthenticationVerificationParams;
+  username: string;
+  sessionKey?: any;
+  // The expiration of the auth sig that will be signed. This is a RFC3339 timestamp. The default is 24 hours from now.
+  expiration?: string;
+  resources?: any;
+}
+
+export interface GetVerifyWebAuthnAuthenticationKeyShareProps {
+  credential: WebAuthnAuthenticationVerificationParams;
+  sessionPubkey: string;
+  siweMessage: string;
+  username: string;
+}
+
+export interface WebAuthnAuthenticationVerificationParams {
+  id: string;
+  rawId: string;
+  response: {
+    authenticatorData: string;
+    clientDataJSON: string;
+    signature: string;
+    userHandle: string;
+  };
+  type: string;
+  clientExtensionResults: object;
+  authenticatorAttachment: AuthenticatorAttachment;
+}
+
+export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
