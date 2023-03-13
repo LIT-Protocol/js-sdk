@@ -474,7 +474,7 @@ export const paramsValidators = {
         value: params.authSig,
         allowedTypes: ['Object'],
         paramName: 'authSig',
-        functionName: 'encryptStringAndUploadMetadataToIpfs',
+        functionName: 'decryptStringWithIpfs',
       })
     )
       return false;
