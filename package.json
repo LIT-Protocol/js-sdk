@@ -18,6 +18,7 @@
     "test:packages": "nx run-many --target=test",
     "test:watch": "nx run-many --target=test --watch",
     "test:ci": "nx affected --target=test --all --code-coverage",
+    "test:e2e": "yarn tools --test --e2e run-react-and-test",
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:dev": "yarn node ./tools/scripts/pub.mjs --tag dev",
     "publish:test": "yarn node ./tools/scripts/pub.mjs --tag test",
@@ -38,7 +39,11 @@
     "cy:open:react": "yarn tools --test --e2e react",
     "buildAndPublish": "yarn build:packages && yarn publish:packages",
     "dev": "nodemon --watch packages --ext js,ts --exec \"yarn build:packages && yarn tools --yalc --publish\"",
-    "watch": "yarn tools --watch"
+    "watch": "yarn tools --watch",
+    "v": "yarn tools --v",
+    "bump": "yarn tools --v --patch",
+    "bump:minor": "yarn tools --v --minor",
+    "bump:major": "yarn tools --v --major"
   },
   "private": true,
   "dependencies": {
