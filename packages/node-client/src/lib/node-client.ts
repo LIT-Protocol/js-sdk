@@ -117,7 +117,7 @@ export class NodeClient {
     this.config = defaultLitnodeClientConfig;
 
     // -- initialize default auth callback
-    this.defaultAuthCallback = args.defaultAuthCallback ?? null;
+    this.defaultAuthCallback = args?.defaultAuthCallback;
 
     // -- if config params are specified, replace it
     if (customConfig) {
@@ -133,9 +133,6 @@ export class NodeClient {
     this.networkPubKey = null;
     this.networkPubKeySet = null;
 
-    // -- override configs
-    this.overrideConfigsFromLocalStorage();
-
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
@@ -144,31 +141,6 @@ export class NodeClient {
   }
 
   // ========== Scoped Class Helpers ==========
-
-  /**
-   *
-   * (Browser Only) Get the config from browser local storage and override default config
-   *
-   * @returns { void }
-   *
-   */
-  overrideConfigsFromLocalStorage = (): void => {
-    if (isNode()) return;
-
-    const storageKey = 'LitNodeClientConfig';
-    const storageConfigOrError = getStorageItem(storageKey);
-
-    // -- validate
-    if (storageConfigOrError.type === 'ERROR') {
-      log(`Storage key "${storageKey}" is missing. `);
-      return;
-    }
-
-    // -- execute
-    const storageConfig = JSON.parse(storageConfigOrError.result);
-    // this.config = override(this.config, storageConfig);
-    this.config = { ...this.config, ...storageConfig };
-  };
 
   /**
    *

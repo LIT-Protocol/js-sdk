@@ -23,34 +23,7 @@ export {
   parseResource,
 } from '@lit-protocol/auth-browser';
 
-export {
-  decryptFile,
-  decryptString,
-  decryptZip,
-  decryptZipFileWithMetadata,
-  encryptFile,
-  encryptFileAndZipWithMetadata,
-  encryptString,
-  encryptZip,
-  verifyJwt,
-  zipAndEncryptFiles,
-  zipAndEncryptString,
-} from '@lit-protocol/encryption';
-
-export {
-  hashResourceIdForSigning,
-  humanizeAccessControlConditions,
-} from '@lit-protocol/access-control-conditions';
-
-export {
-  base64StringToBlob,
-  blobToBase64String,
-} from '@lit-protocol/misc-browser';
-
-export {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
+export * from '@lit-protocol/node-client';
 
 // ----- autogen:polyfills:start  -----
 //
