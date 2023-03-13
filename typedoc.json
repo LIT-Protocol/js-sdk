@@ -10,6 +10,7 @@
     "./packages/ecdsa-sdk/src/index.ts",
     "./packages/encryption/src/index.ts",
     "./packages/lit-node-client/src/index.ts",
+    "./packages/lit-node-client-nodejs/src/index.ts",
     "./packages/lit-third-party-libs/src/index.ts",
     "./packages/misc/src/index.ts",
     "./packages/misc-browser/src/index.ts",

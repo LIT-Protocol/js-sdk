@@ -23,7 +23,7 @@
     "stream": false
   },
   "tags": [
-    "node"
+    "nodejs"
   ],
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
