@@ -1,6 +1,7 @@
 {
-  "name": "@lit-protocol/auth-browser",
+  "name": "@lit-protocol/lit-node-client-nodejs",
   "version": "2.1.63",
+  "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
@@ -13,22 +14,16 @@
   "bugs": {
     "url": "https://github.com/LIT-Protocol/js-sdk/issues"
   },
-  "type": "commonjs",
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/auth-browser"
+    "directory": "../../dist/packages/lit-node-client-nodejs"
   },
-  "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
-  "peerDependencies": {
-    "@walletconnect/ethereum-provider": "^2.1.2",
-    "lit-siwe": "^1.1.8",
-    "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.13.3",
-    "util": "^0.12.4",
-    "web-vitals": "^3.0.4"
+  "browser": {
+    "crypto": false,
+    "stream": false
   },
   "tags": [
-    "browser"
+    "node"
   ],
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"

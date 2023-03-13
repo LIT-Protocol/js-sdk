@@ -89,5 +89,5 @@ export const LIT_ERROR = {
   },
   NO_VALID_SHARES: {
     name: 'NoValidShares',
-  },
+  }
 };

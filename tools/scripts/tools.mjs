@@ -42,6 +42,8 @@ const optionMaps = new Map([
     ['--setup-local-dev', () => setupLocalDevFunc()],
     ['--match-versions', () => matchVersionsFunc()],
     ['default', () => helpFunc()],
+    ['--v', () => versionFunc()],
+    ['--version', () => versionFunc()],
 ])
 
 const setup = () => {
@@ -70,6 +72,7 @@ function helpFunc() {
             --remove-local-dev: remove local dev
             --setup-local-dev: setup local dev
             --match-versions: match versions
+            --version: show version
     `,
         true
     );
@@ -264,6 +267,7 @@ async function testFunc() {
                 [env]: the environment to run the tests in
                     react: run tests on react app on port 4003
                     html: run tests on html app on port 4002
+                    run-react-and-test: run the react app and run e2e tests on it
         `,
                 true
             );
@@ -280,6 +284,15 @@ async function testFunc() {
             await childRunCommand(
                 'cp tsconfig.base.json tsconfig.json && CYPRESS_REMOTE_DEBUGGING_PORT=9222 PORT=4002 yarn cypress open'
             );
+        }
+
+        if(ENV === 'run-react-and-test'){
+            spawnListener('yarn tools --dev --apps');
+
+            // wait 3 seconds for the apps to start
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+
+            spawnListener('yarn tools --test --e2e react');
         }
     }
 }
@@ -1081,6 +1094,122 @@ async function matchVersionsFunc() {
         await writeJsonFile(`${pkg}/package.json`, packageJson);
 
     });
+
+    exit();
+}
+
+async function versionFunc(){
+
+    greenLog("Getting latest version from npm...");
+
+    let res = await fetch(
+        'https://registry.npmjs.org/@lit-protocol/lit-node-client'
+    );
+    
+    res = await res.json();
+
+    // get the last one
+    const currentVersion = Object.keys(res.time).pop();
+
+    const lernaJson = await readJsonFile(`lerna.json`);
+    const versionTs = (await readFile(`packages/constants/src/lib/version.ts`)).match(/'([^']+)'/)[1];
+
+    greenLog(`📦 Current NPM version: ${currentVersion}`, true);
+    greenLog(`➡ Current lerna.json version: ${lernaJson.version}`, true);
+    greenLog(`➡ Current version.ts version: ${versionTs}`, true);
+
+    const OPT = args[1];
+
+    const supportedOptions = ['--major', '--minor', '--patch', '--custom'];
+
+    if(!OPT || OPT === '' || OPT === '--help' || !supportedOptions.includes(OPT)){
+        greenLog(
+            `
+            Usage: node tools/scripts/tools.mjs --v [options]
+                [options]:
+                    --major: increase major version
+                    --minor: increase minor version
+                    --patch: increase patch version
+                    --custom: custom version
+            `,
+            true
+        );            
+        exit()
+    }
+
+    let newVersion;
+
+    if(OPT === '--patch'){
+        // increase x from 0.0.x to 0.0.x+1
+        const version = currentVersion.split('.');
+        version[2] = parseInt(version[2]) + 1;
+        const patchVersion = version.join('.');
+        greenLog(`Patch Version: ${patchVersion}`);
+        newVersion = patchVersion;
+    }
+
+    if(OPT === '--minor'){
+        // increase x from 0.x.0 to 0.x+1.0
+        const version = currentVersion.split('.');
+        version[1] = parseInt(version[1]) + 1;
+        version[2] = 0;
+        const minorVersion = version.join('.');
+        greenLog(`Minor Version: ${minorVersion}`);
+        newVersion = minorVersion;
+    }
+
+    if(OPT === '--major'){
+        // increase x from x.0.0 to x+1.0.0
+        const version = currentVersion.split('.');
+        version[0] = parseInt(version[0]) + 1;
+        version[1] = 0;
+        version[2] = 0;
+        const majorVersion = version.join('.');
+        greenLog(`Major Version: ${majorVersion}`);
+        newVersion = majorVersion;
+    }
+
+    if(OPT === '--custom'){
+        // increase x from x.0.0 to x+1.0.0
+        const version = args[2];
+        greenLog(`Custom Version: ${version}`);
+        newVersion = version;
+    }
+
+    greenLog(`New version: ${newVersion}`);
+
+    const OPT2 = args[2];
+    // update lerna.json
+    try{
+        const lernaJson = await readJsonFile(`lerna.json`);
+        lernaJson.version = newVersion;
+
+        if(OPT2 !== '--dry-run'){
+            await writeJsonFile(`lerna.json`, lernaJson);
+        }else{
+            greenLog(`Dry run, not updating lerna.json`);
+            console.log(lernaJson);
+        }
+    }catch(e){
+        redLog(e);
+        exit();
+    }
+
+    // update version.ts in constants
+    try{
+        const versionTsNew = `export const version = '${newVersion}';`;
+
+        if(OPT2 !== '--dry-run'){
+            await writeFile(`packages/constants/src/lib/version.ts`, versionTsNew);
+        }else{
+            greenLog(`Dry run, not updating packages/constants/src/lib/version.ts`);
+            console.log(versionTsNew);
+        }
+        
+    }catch(e){
+        redLog(e);
+        exit();
+    }
 
     exit();
 }
