@@ -1,19 +1,23 @@
-# lit-node-client-nodejs
+# Getting Started
 
-This library was generated with [Nx](https://nx.dev).
+This `LitNodeClientNodeJs` is created solely to run on Node.js.
 
+The usual `checkAndSignAuthMessage` is not included in this package, so you need to add it manually to the constructor if you decide to use it on a browser, or with any custom auth callback.
 
+```js
 
-## Building
+import * as LitJsSdkNodeJs from "@lit-protocol/lit-node-client-nodejs";
+import { checkAndSignAuthMessage } from "@lit-protocol/auth-browser";
 
-Run `nx build lit-node-client-nodejs` to build the library.
+const client = new LitJsSdk.LitNodeClientNodeJs({
+  litNetwork: "serrano",
+  defaultAuthCallback: checkAndSignAuthMessage,
+});
 
+await client.connect();
 
+const authSig = await checkAndSignAuthMessage({
+    chain: "ethereum",
+});
 
-
-
-## Running unit tests
-
-Run `nx test lit-node-client-nodejs` to execute the unit tests via [Jest](https://jestjs.io).
-
-
+```
