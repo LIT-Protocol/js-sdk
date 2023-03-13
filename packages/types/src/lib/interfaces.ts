@@ -190,6 +190,7 @@ export interface LitNodeClientConfig {
   bootstrapUrls: Array<string>;
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
+  defaultAuthCallback?: (authSigParams: CheckAndSignAuthParams) => Promise<JsonAuthSig>;
 }
 
 export interface CustomNetwork {
