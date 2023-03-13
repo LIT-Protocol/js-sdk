@@ -1111,7 +1111,12 @@ async function versionFunc(){
     // get the last one
     const currentVersion = Object.keys(res.time).pop();
 
-    greenLog(`Current version: ${currentVersion}`);
+    const lernaJson = await readJsonFile(`lerna.json`);
+    const versionTs = (await readFile(`packages/constants/src/lib/version.ts`)).match(/'([^']+)'/)[1];
+
+    greenLog(`📦 Current NPM version: ${currentVersion}`, true);
+    greenLog(`➡ Current lerna.json version: ${lernaJson.version}`, true);
+    greenLog(`➡ Current version.ts version: ${versionTs}`, true);
 
     const OPT = args[1];
 
