@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'node-client',
+  displayName: 'lit-node-client-nodejs',
   preset: '../../jest.preset.js',
   globals: {
     'ts-jest': {
@@ -11,5 +11,5 @@ export default {
     '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/node-client',
+  coverageDirectory: '../../coverage/packages/lit-node-client-nodejs',
 };

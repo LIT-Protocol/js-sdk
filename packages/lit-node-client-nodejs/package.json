@@ -1,6 +1,6 @@
 {
-  "name": "@lit-protocol/node-client",
-  "version": "2.1.62",
+  "name": "@lit-protocol/lit-node-client-nodejs",
+  "version": "2.1.63",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -16,7 +16,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/node-client"
+    "directory": "../../dist/packages/lit-node-client-nodejs"
   },
   "browser": {
     "crypto": false,

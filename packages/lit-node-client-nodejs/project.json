@@ -1,13 +1,13 @@
 {
-  "name": "node-client",
+  "name": "lit-node-client-nodejs",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/node-client/src",
+  "sourceRoot": "packages/lit-node-client-nodejs/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target node-client"
+        "command": "yarn build:target lit-node-client-nodejs"
       }
     },
     "_buildTsc": {
@@ -16,11 +16,11 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/packages/node-client",
-        "main": "packages/node-client/src/index.ts",
-        "tsConfig": "packages/node-client/tsconfig.lib.json",
+        "outputPath": "dist/packages/lit-node-client-nodejs",
+        "main": "packages/lit-node-client-nodejs/src/index.ts",
+        "tsConfig": "packages/lit-node-client-nodejs/tsconfig.lib.json",
         "assets": [
-          "packages/node-client/*.md"
+          "packages/lit-node-client-nodejs/*.md"
         ]
       }
     },
@@ -28,9 +28,9 @@
       "executor": "@websaam/nx-esbuild:package",
       "options": {
         "globalName": "LitJsSdk_nodeClient",
-        "outfile": "dist/packages/node-client-vanilla/node-client.js",
+        "outfile": "dist/packages/lit-node-client-nodejs-vanilla/lit-node-client-nodejs.js",
         "entryPoints": [
-          "./packages/node-client/src/index.ts"
+          "./packages/lit-node-client-nodejs/src/index.ts"
         ],
         "define": {
           "process.env.NODE_DEBUG": "false",
@@ -51,17 +51,17 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "packages/node-client/**/*.ts"
+          "packages/lit-node-client-nodejs/**/*.ts"
         ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": [
-        "coverage/packages/node-client"
+        "coverage/packages/lit-node-client-nodejs"
       ],
       "options": {
-        "jestConfig": "packages/node-client/jest.config.ts",
+        "jestConfig": "packages/lit-node-client-nodejs/jest.config.ts",
         "passWithNoTests": true
       }
     }

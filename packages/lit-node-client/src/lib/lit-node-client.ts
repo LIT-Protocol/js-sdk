@@ -1,10 +1,10 @@
-import { NodeClient } from '@lit-protocol/node-client';
+import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 import { CustomNetwork, LitNodeClientConfig } from '@lit-protocol/types';
 import { isNode, log } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 
-export class LitNodeClient extends NodeClient {
+export class LitNodeClient extends LitNodeClientNodeJs {
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
     super({
       ...args,

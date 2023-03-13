@@ -99,7 +99,7 @@ import { BigNumber } from 'ethers';
 
 /** ---------- Main Export Class ---------- */
 
-export class NodeClient {
+export class LitNodeClientNodeJs {
   config: LitNodeClientConfig;
   connectedNodes: SetConstructor | Set<any> | any;
   serverKeys: KV | any;

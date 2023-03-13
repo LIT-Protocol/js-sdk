@@ -1,5 +1,5 @@
 import { isNode, log } from '@lit-protocol/misc';
-import * as _NodeClient from './lib/node-client';
+import * as _LitNodeClientNodeJs from './lib/lit-node-client-nodejs';
 
 // ==================== Environment ====================
 if (isNode()) {
@@ -9,16 +9,16 @@ if (isNode()) {
 }
 
 declare global {
-    var NodeClient: any;
+    var LitNodeClientNodeJs: any;
 }
 
-const NodeClient = _NodeClient.NodeClient;
-if (!globalThis.NodeClient) {
-  globalThis.NodeClient = NodeClient;
+const LitNodeClientNodeJs = _LitNodeClientNodeJs.LitNodeClientNodeJs;
+if (!globalThis.LitNodeClientNodeJs) {
+  globalThis.LitNodeClientNodeJs = LitNodeClientNodeJs;
 }
 
 // ==================== Exports ====================
-export * from './lib/node-client';
+export * from './lib/lit-node-client-nodejs';
 
 export {
     decryptFile,
