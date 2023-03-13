@@ -23,6 +23,9 @@
       "@lit-protocol/*": [
         "packages/*/src"
       ],
+      "@lit-protocol/node-client": [
+        "packages/node-client/src/index.ts"
+      ],
       "@lit-protocol/pkp-ethers": [
         "packages/pkp-ethers/src/index.ts"
       ],
