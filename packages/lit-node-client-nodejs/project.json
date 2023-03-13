@@ -64,6 +64,18 @@
         "jestConfig": "packages/lit-node-client-nodejs/jest.config.ts",
         "passWithNoTests": true
       }
+    },
+    "testWatch":
+    {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/lit-node-client-nodejs"
+      ],
+      "options": {
+        "jestConfig": "packages/lit-node-client-nodejs/jest.config.ts",
+        "watch": true,
+        "passWithNoTests": true
+      }
     }
   },
   "tags": []
