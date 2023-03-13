@@ -14,7 +14,7 @@ This new V2 SDK is written in Typescript and is a complete rewrite of the old SD
 
 <div align="left">
 
-[ChangeLog: All notable changes to this project will be documented in this file.](https://github.com/LIT-Protocol/js-sdk/CHANGELOG.MD) 
+[ChangeLog: All notable changes to this project will be documented in this file.](https://github.com/LIT-Protocol/js-sdk/blob/master/CHANGELOG.md) 
 
 # Quick Start
 
