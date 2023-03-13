@@ -14,9 +14,19 @@ This new V2 SDK is written in Typescript and is a complete rewrite of the old SD
 
 <div align="left">
 
+[ChangeLog: All notable changes to this project will be documented in this file.](https://github.com/LIT-Protocol/js-sdk/CHANGELOG.MD) 
+
 # Quick Start
 
-### node.js / browser
+### NodeJS Only
+
+Removed browser related methods eg. checkAndSignAuthSig
+
+```
+yarn add @lit-protocol/lit-node-client-nodejs
+```
+
+### (Isomorphic) works on Node.js/browser
 
 ```
 yarn add @lit-protocol/lit-node-client
@@ -249,7 +259,9 @@ yarn tool:buildHtml
 
 ## Testing
 
-# Quick Start on E2E Testing
+### Quick Start on E2E Testing
+
+The following will serve the react testing app and launch the cypress e2e testing after
 
 ```
 yarn test:e2e
