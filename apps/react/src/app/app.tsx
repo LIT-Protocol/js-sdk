@@ -10,11 +10,11 @@ import * as LitJsSdk_crypto from 'dist/packages/crypto';
 import * as LitJsSdk_ecdsaSdk from 'dist/packages/ecdsa-sdk';
 import * as LitJsSdk_encryption from 'dist/packages/encryption';
 import * as LitJsSdk_litNodeClient from 'dist/packages/lit-node-client';
+import * as LitJsSdk_litNodeClientNodejs from 'dist/packages/lit-node-client-nodejs';
 import * as LitJsSdk_litThirdPartyLibs from 'dist/packages/lit-third-party-libs';
 import * as LitJsSdk_misc from 'dist/packages/misc';
 import * as LitJsSdk_miscBrowser from 'dist/packages/misc-browser';
 import * as LitJsSdk_nacl from 'dist/packages/nacl';
-import * as LitJsSdk_nodeClient from 'dist/packages/node-client';
 import * as LitJsSdk_pkpEthers from 'dist/packages/pkp-ethers';
 import * as LitJsSdk_types from 'dist/packages/types';
 import * as LitJsSdk_uint8arrays from 'dist/packages/uint8arrays';
@@ -30,11 +30,11 @@ declare global {
     LitJsSdk_ecdsaSdk: any;
     LitJsSdk_encryption: any;
     LitJsSdk_litNodeClient: any;
+    LitJsSdk_litNodeClientNodejs: any;
     LitJsSdk_litThirdPartyLibs: any;
     LitJsSdk_misc: any;
     LitJsSdk_miscBrowser: any;
     LitJsSdk_nacl: any;
-    LitJsSdk_nodeClient: any;
     LitJsSdk_pkpEthers: any;
     LitJsSdk_types: any;
     LitJsSdk_uint8arrays: any;
@@ -699,6 +699,78 @@ export function App() {
 
     
     
+        if(typeof LitJsSdk_litNodeClientNodejs === 'undefined') {
+            console.error("LitJsSdk_litNodeClientNodejs:", LitJsSdk_litNodeClientNodejs);
+        }else{
+            console.warn("LitJsSdk_litNodeClientNodejs:", LitJsSdk_litNodeClientNodejs);
+            window.LitJsSdk_litNodeClientNodejs = LitJsSdk_litNodeClientNodejs;
+        }
+        window.addEventListener('load', function() {
+
+            var root = document.getElementById('root');
+            var result = document.getElementById('result');
+            var entries = Object.entries(LitJsSdk_litNodeClientNodejs);
+            var lis = entries.map(([key, value]) => `
+            <li>
+                <div id="LitJsSdk_litNodeClientNodejs_${key}" class="key" onClick="(async (e) => {
+                    var fn = LitJsSdk_litNodeClientNodejs['${key}'];
+                    var fnType = typeof fn;
+                    console.warn('[${key}] is type of [' + fnType + ']');
+
+                    if ( fnType === 'string' ) return;
+
+                    if( fnType === 'function' ){
+                        try{
+                            console.log('params:', globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
+                            res = JSON.stringify(res, null, 2);
+                            result.innerText = res;
+                            console.log(res);
+                        }catch(e){
+                            console.error('Please set the [params] variable in the console then click again');
+                            console.log(e);
+                        }
+                        return;
+                    }
+
+                    if( fnType === 'object' ){
+                        var res = await fn;
+                        window.output = res;
+                        res = JSON.stringify(res, null, 2);
+                        result.innerText = res;
+                        console.log(res);
+                        return;
+                    }
+                    
+                    
+                })();">${key}</div>
+                <pre class="code">
+<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                </pre>
+            </li>`);
+            lis = lis.join(' ');
+            var template = `
+            <div class="cat">
+                <h1>LitJsSdk_litNodeClientNodejs has ${entries.length} functions</h1>
+                    <ul>
+                        ${ lis }
+                    </ul>
+                </div>
+            `;
+            root.insertAdjacentHTML('beforeend', template);
+        });
+    
+    
+
+    
+    
         if(typeof LitJsSdk_litThirdPartyLibs === 'undefined') {
             console.error("LitJsSdk_litThirdPartyLibs:", LitJsSdk_litThirdPartyLibs);
         }else{
@@ -975,78 +1047,6 @@ export function App() {
             var template = `
             <div class="cat">
                 <h1>LitJsSdk_nacl has ${entries.length} functions</h1>
-                    <ul>
-                        ${ lis }
-                    </ul>
-                </div>
-            `;
-            root.insertAdjacentHTML('beforeend', template);
-        });
-    
-    
-
-    
-    
-        if(typeof LitJsSdk_nodeClient === 'undefined') {
-            console.error("LitJsSdk_nodeClient:", LitJsSdk_nodeClient);
-        }else{
-            console.warn("LitJsSdk_nodeClient:", LitJsSdk_nodeClient);
-            window.LitJsSdk_nodeClient = LitJsSdk_nodeClient;
-        }
-        window.addEventListener('load', function() {
-
-            var root = document.getElementById('root');
-            var result = document.getElementById('result');
-            var entries = Object.entries(LitJsSdk_nodeClient);
-            var lis = entries.map(([key, value]) => `
-            <li>
-                <div id="LitJsSdk_nodeClient_${key}" class="key" onClick="(async (e) => {
-                    var fn = LitJsSdk_nodeClient['${key}'];
-                    var fnType = typeof fn;
-                    console.warn('[${key}] is type of [' + fnType + ']');
-
-                    if ( fnType === 'string' ) return;
-
-                    if( fnType === 'function' ){
-                        try{
-                            console.log('params:', globalThis.params);
-
-                            var res;
-                            try{
-                                res = new fn(globalThis.params);
-                            }catch{
-                                res = await fn(globalThis.params);
-                            }
-                            window.output = res;
-                            res = JSON.stringify(res, null, 2);
-                            result.innerText = res;
-                            console.log(res);
-                        }catch(e){
-                            console.error('Please set the [params] variable in the console then click again');
-                            console.log(e);
-                        }
-                        return;
-                    }
-
-                    if( fnType === 'object' ){
-                        var res = await fn;
-                        window.output = res;
-                        res = JSON.stringify(res, null, 2);
-                        result.innerText = res;
-                        console.log(res);
-                        return;
-                    }
-                    
-                    
-                })();">${key}</div>
-                <pre class="code">
-<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
-                </pre>
-            </li>`);
-            lis = lis.join(' ');
-            var template = `
-            <div class="cat">
-                <h1>LitJsSdk_nodeClient has ${entries.length} functions</h1>
                     <ul>
                         ${ lis }
                     </ul>
@@ -1352,7 +1352,7 @@ pre {
                     `,
                 }}
             />
-            (REACT) THIS FILE IS AUTOMATICALLY GENERATED FROM tools/scripts/gen-react.mjs Mon, 13 Mar 2023 14:35:40 GMT
+            (REACT) THIS FILE IS AUTOMATICALLY GENERATED FROM tools/scripts/gen-react.mjs Mon, 13 Mar 2023 16:19:32 GMT
             <div id="root"></div>
              <pre><code id="result"></code></pre>
         </>
