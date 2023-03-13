@@ -20,7 +20,15 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
-      "@lit-protocol/*": ["packages/*/src"]
+      "@lit-protocol/*": [
+        "packages/*/src"
+      ],
+      "@lit-protocol/pkp-ethers": [
+        "packages/pkp-ethers/src/index.ts"
+      ],
+      "@lit-protocol/types": [
+        "packages/types/src/index.ts"
+      ]
     }
   },
   "exclude": [

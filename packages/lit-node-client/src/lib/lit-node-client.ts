@@ -96,10 +96,6 @@ import { getStorageItem } from '@lit-protocol/misc-browser';
 import { BigNumber } from 'ethers';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 
-declare global {
-  var litNodeClient: LitNodeClient;
-}
-
 /** ---------- Main Export Class ---------- */
 
 export class LitNodeClient {
@@ -2292,6 +2288,7 @@ export class LitNodeClient {
             `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`
           );
 
+          // @ts-ignore
           globalThis.litNodeClient = this;
 
           // browser only
