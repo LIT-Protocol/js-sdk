@@ -1,13 +1,16 @@
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 import {
+  AcceptedFileType,
   AccessControlConditions,
   Chain,
   ConditionType,
+  EncryptedSymmetricKey,
   EvmContractConditions,
   JsonRequest,
   LIT_NETWORKS_KEYS,
   SolRpcConditions,
+  SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
 import { ILitNodeClient } from './ILitNodeClient';
@@ -113,13 +116,13 @@ export interface IProvider {
 
 /** ---------- Crypto ---------- */
 export interface EncryptedString {
-  symmetricKey: Uint8Array;
+  symmetricKey: SymmetricKey;
   encryptedString: Blob;
   encryptedData?: Blob;
 }
 
 export interface EncryptedZip {
-  symmetricKey: Uint8Array;
+  symmetricKey: SymmetricKey;
   encryptedZip: Blob;
 }
 
@@ -128,10 +131,10 @@ export interface ThreeKeys {
   zipBlob: any;
 
   // encryptedSymmetricKey is the symmetric key needed to decrypt the content, encrypted with the Lit network public key.  You may wish to store encryptedSymmetricKey in your own database to support quicker re-encryption operations when adding additional access control conditions in the future, but this is entirely optional, and this key is already stored inside the zipBlob.
-  encryptedSymmetricKey: Uint8Array | any;
+  encryptedSymmetricKey: EncryptedSymmetricKey
 
   // symmetricKey is the raw symmetric key used to encrypt the files.  DO NOT STORE IT.  It is provided in case you wish to create additional "OR" access control conditions for the same file.
-  symmetricKey: Uint8Array;
+  symmetricKey: SymmetricKey;
 }
 
 export interface DecryptZipFileWithMetadata {
@@ -141,12 +144,12 @@ export interface DecryptZipFileWithMetadata {
 
 export interface EncryptedFile {
   encryptedFile: Blob;
-  symmetricKey: CryptoKey | Uint8Array;
+  symmetricKey: SymmetricKey;
 }
 
 export interface DecryptFileProps {
-  file: Blob | File;
-  symmetricKey: Uint8Array;
+  file: AcceptedFileType
+  symmetricKey: SymmetricKey;
 }
 
 export interface VerifyJWTProps {
@@ -368,10 +371,10 @@ export interface JsonSaveEncryptionKeyRequest {
   chain: Chain;
 
   // The symmetric encryption key that was used to encrypt the locked content inside the LIT as a Uint8Array.  You should use zipAndEncryptString or zipAndEncryptFiles to get this encryption key.  This key will be hashed and the hash will be sent to the LIT nodes.  You must pass either symmetricKey or encryptedSymmetricKey.
-  symmetricKey: string | Uint8Array;
+  symmetricKey: SymmetricKey;
 
   // The encrypted symmetric key of the item you with to update.  You must pass either symmetricKey or encryptedSymmetricKey.
-  encryptedSymmetricKey?: string | Uint8Array;
+  encryptedSymmetricKey?: EncryptedSymmetricKey;
 
   permanant?: number;
   permanent?: number;

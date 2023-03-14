@@ -1118,6 +1118,19 @@ async function versionFunc(){
     greenLog(`➡ Current lerna.json version: ${lernaJson.version}`, true);
     greenLog(`➡ Current version.ts version: ${versionTs}`, true);
 
+    // if lerna.json and version.ts patch version is greater than currentVersion
+    // then console.log that we can upgrade
+    const lernaVersion = lernaJson.version.split('.');
+    const versionTsVersion = versionTs.split('.');
+    const currentVersionVersion = currentVersion.split('.');
+    if(
+        parseInt(lernaVersion[2]) === parseInt(currentVersionVersion[2]) ||
+        parseInt(versionTsVersion[2]) === parseInt(currentVersionVersion[2])
+    ){
+        greenLog(`Both versions are the same. You can bump your local version`, true);
+    }
+
+    
     const OPT = args[1];
 
     const supportedOptions = ['--major', '--minor', '--patch', '--custom'];

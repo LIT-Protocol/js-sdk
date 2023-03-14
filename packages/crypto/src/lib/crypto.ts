@@ -106,7 +106,7 @@ export const encryptWithSymmetricKey = async (
  * @returns { Promise<CryptoKey> } A promise that resolves to the imported key
  */
 export const importSymmetricKey = async (
-  symmKey: BufferSource | Uint8Array
+  symmKey: SymmetricKey
 ): Promise<CryptoKey> => {
   const importedSymmKey = await crypto.subtle.importKey(
     'raw',
