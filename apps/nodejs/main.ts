@@ -12,10 +12,13 @@ import * as crypto from '@lit-protocol/crypto';
 import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
 import * as encryption from '@lit-protocol/encryption';
 import * as litNodeClient from '@lit-protocol/lit-node-client';
+import * as litNodeClientNodejs from '@lit-protocol/lit-node-client-nodejs';
 import * as litThirdPartyLibs from '@lit-protocol/lit-third-party-libs';
 import * as misc from '@lit-protocol/misc';
 import * as miscBrowser from '@lit-protocol/misc-browser';
 import * as nacl from '@lit-protocol/nacl';
+import * as pkpEthers from '@lit-protocol/pkp-ethers';
+import * as types from '@lit-protocol/types';
 import * as uint8arrays from '@lit-protocol/uint8arrays';
 
 console.log("accessControlConditions:", hasItems(accessControlConditions));
@@ -27,10 +30,13 @@ console.log("crypto:", hasItems(crypto));
 console.log("ecdsaSdk:", hasItems(ecdsaSdk));
 console.log("encryption:", hasItems(encryption));
 console.log("litNodeClient:", hasItems(litNodeClient));
+console.log("litNodeClientNodejs:", hasItems(litNodeClientNodejs));
 console.log("litThirdPartyLibs:", hasItems(litThirdPartyLibs));
 console.log("misc:", hasItems(misc));
 console.log("miscBrowser:", hasItems(miscBrowser));
 console.log("nacl:", hasItems(nacl));
+console.log("pkpEthers:", hasItems(pkpEthers));
+console.log("types:", hasItems(types));
 console.log("uint8arrays:", hasItems(uint8arrays));
 
 manualTest();

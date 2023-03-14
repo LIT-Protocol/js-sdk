@@ -1,10 +1,7 @@
-import {
-  ALL_LIT_CHAINS,
-  CheckAndSignAuthParams,
-  JsonAuthSig,
-  LIT_ERROR,
-  VMTYPE,
-} from '@lit-protocol/constants';
+import { ALL_LIT_CHAINS, LIT_ERROR, VMTYPE } from '@lit-protocol/constants';
+
+import { CheckAndSignAuthParams, JsonAuthSig } from '@lit-protocol/types';
+
 import { throwError } from '@lit-protocol/misc';
 import { checkAndSignCosmosAuthMessage } from './chains/cosmos';
 import { checkAndSignEVMAuthMessage } from './chains/eth';

@@ -1,4 +1,10 @@
 import {
+  LIT_ERROR,
+  NETWORK_PUB_KEY,
+} from '@lit-protocol/constants';
+
+import {
+  AcceptedFileType,
   DecryptFileProps,
   DecryptZipFileWithMetadata,
   DecryptZipFileWithMetadataProps,
@@ -9,11 +15,10 @@ import {
   EncryptStringAndUploadMetadataToIpfsProps,
   DecryptStringWithIpfsProps,
   IJWT,
-  LIT_ERROR,
-  NETWORK_PUB_KEY,
+  SymmetricKey,
   ThreeKeys,
   VerifyJWTProps,
-} from '@lit-protocol/constants';
+} from '@lit-protocol/types';
 
 import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 
@@ -277,7 +282,7 @@ export const encryptString = async (str: string): Promise<EncryptedString> => {
  *
  * Decrypt a string that was encrypted with the encryptString function.
  *
- * @param { Blob|File } encryptedStringBlob The encrypted string as a Blob
+ * @param { AcceptedFileType } encryptedStringBlob The encrypted string as a Blob
  * @param { Uint8Array } symmKey The symmetric key used that will be used to decrypt this.
  *
  * @returns { Promise<string> } A promise containing the decrypted string
@@ -405,15 +410,15 @@ export const zipAndEncryptFiles = async (
  *
  * Decrypt and unzip a zip that was created using encryptZip, zipAndEncryptString, or zipAndEncryptFiles.
  *
- * @param { Blob|File } encryptedZipBlob The encrypted zip as a Blob
- * @param { Uint8Array } symmKey The symmetric key used that will be used to decrypt this zip.
+ * @param { AcceptedFileType } encryptedZipBlob The encrypted zip as a Blob
+ * @param { SymmetricKey } symmKey The symmetric key used that will be used to decrypt this zip.
  *
  * @returns { Promise<Object> } A promise containing a JSZip object indexed by the filenames of the zipped files.  For example, if you have a file called "meow.jpg" in the root of your zip, you could get it from the JSZip object by doing this: const imageBlob = await decryptedZip['meow.jpg'].async('blob')
  */
 export const decryptZip = async (
-  encryptedZipBlob: Blob | File,
-  symmKey: Uint8Array
-): Promise<{ [key: string]: JSZip.JSZipObject } | undefined> => {
+  encryptedZipBlob: AcceptedFileType,
+  symmKey: SymmetricKey
+): Promise<{ [key: string]: JSZip.JSZipObject }> => {
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'decryptZip',
@@ -423,7 +428,12 @@ export const decryptZip = async (
     },
   });
 
-  if (!paramsIsSafe) return;
+  if (!paramsIsSafe){
+    throwError({
+      message: `encryptedZipBlob must be a Blob or File. symmKey must be a Uint8Array`,
+      error: LIT_ERROR.INVALID_PARAM_TYPE,
+    });
+  };
 
   // import the decrypted symm key
   const importedSymmKey = await importSymmetricKey(symmKey);
@@ -493,7 +503,7 @@ export const encryptZip = async (zip: JSZip): Promise<EncryptedZip> => {
  *
  * @param { EncryptFileAndZipWithMetadataProps }
  *
- * @returns { Promise<ThreeKeys | undefined> }
+ * @returns { Promise<ThreeKeys> }
  *
  */
 export const encryptFileAndZipWithMetadata = async ({
@@ -506,7 +516,7 @@ export const encryptFileAndZipWithMetadata = async ({
   file,
   litNodeClient,
   readme,
-}: EncryptFileAndZipWithMetadataProps): Promise<ThreeKeys | undefined> => {
+}: EncryptFileAndZipWithMetadataProps): Promise<ThreeKeys> => {
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'encryptFileAndZipWithMetadata',
@@ -523,7 +533,10 @@ export const encryptFileAndZipWithMetadata = async ({
     },
   });
 
-  if (!paramsIsSafe) return;
+  if (!paramsIsSafe) return throwError({
+    message: `authSig, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, file, litNodeClient, and readme must be provided`,
+    error: LIT_ERROR.INVALID_PARAM_TYPE,
+  });
 
   // -- validate
   const symmetricKey = await generateSymmetricKey();
@@ -579,7 +592,10 @@ export const encryptFileAndZipWithMetadata = async ({
 
   if (!folder) {
     log("Failed to get 'encryptedAssets' from zip.folder() ");
-    return;
+    return throwError({
+      message: `Failed to get 'encryptedAssets' from zip.folder()`,
+      error: LIT_ERROR.UNKNOWN_ERROR,
+    });
   }
 
   folder.file(file.name, encryptedZipBlob);
@@ -736,11 +752,11 @@ export const decryptZipFileWithMetadata = async ({
  * Encrypt a file without doing any zipping or packing.  This is useful for large files.  A 1gb file can be encrypted in only 2 seconds, for example.  A new random symmetric key will be created and returned along with the encrypted file.
  *
  * @param { Object } params
- * @param { Blob|File } params.file The file you wish to encrypt
+ * @param { AcceptedFileType } params.file The file you wish to encrypt
  *
  * @returns { Promise<Object> } A promise containing an object with keys encryptedFile and symmetricKey.  encryptedFile is a Blob, and symmetricKey is a Uint8Array that can be used to decrypt the file.
  */
-export const encryptFile = async ({ file }: { file: File | Blob }) => {
+export const encryptFile = async ({ file }: { file: AcceptedFileType }) : Promise<EncryptedFile>=> {
   // -- validate
   if (
     !checkType({
@@ -749,8 +765,12 @@ export const encryptFile = async ({ file }: { file: File | Blob }) => {
       paramName: 'file',
       functionName: 'encryptFile',
     })
-  )
-    return;
+  ){
+    return throwError({
+      message: 'file must be a Blob or File',
+      error: LIT_ERROR.INVALID_PARAM_TYPE
+    })
+  }
 
   // generate a random symmetric key
   const symmetricKey = await generateSymmetricKey();
@@ -778,7 +798,7 @@ export const encryptFile = async ({ file }: { file: File | Blob }) => {
  * Decrypt a file that was encrypted with the encryptFile function, without doing any unzipping or unpacking.  This is useful for large files.  A 1gb file can be decrypted in only 1 second, for example.
  *
  * @property { Object } params
- * @property { Blob | File } params.file The file you wish to decrypt
+ * @property { AcceptedFileType } params.file The file you wish to decrypt
  * @property { Uint8Array } params.symmetricKey The symmetric key used that will be used to decrypt this.
  *
  * @returns { Promise<Object> } A promise containing the decrypted file.  The file is an ArrayBuffer.
@@ -786,7 +806,7 @@ export const encryptFile = async ({ file }: { file: File | Blob }) => {
 export const decryptFile = async ({
   file,
   symmetricKey,
-}: DecryptFileProps): Promise<Uint8Array | undefined> => {
+}: DecryptFileProps): Promise<Uint8Array> => {
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'decryptFile',
@@ -796,7 +816,12 @@ export const decryptFile = async ({
     },
   });
 
-  if (!paramsIsSafe) return;
+  if (!paramsIsSafe){
+    return throwError({
+      message: `file type must be Blob or File, and symmetricKey type must be Uint8Array | string | CryptoKey | BufferSource`,
+      error: LIT_ERROR.INVALID_PARAM_TYPE
+    })
+  };
 
   // -- execute
   const importedSymmKey = await importSymmetricKey(symmetricKey);
@@ -823,7 +848,7 @@ declare global {
  *
  * @returns { IJWT } An object with 4 keys: "verified": A boolean that represents whether or not the token verifies successfully.  A true result indicates that the token was successfully verified.  "header": the JWT header.  "payload": the JWT payload which includes the resource being authorized, etc.  "signature": A uint8array that represents the raw  signature of the JWT.
  */
-export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT | undefined => {
+export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT => {
   // -- validate
   if (
     !checkType({
@@ -833,7 +858,10 @@ export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT | undefined => {
       functionName: 'verifyJwt',
     })
   )
-    return;
+    return throwError({
+      message: 'jwt must be a string',
+      error: LIT_ERROR.INVALID_PARAM_TYPE
+    });
 
   log('verifyJwt', jwt);
 

@@ -24,6 +24,10 @@ const badge = (lib, text) => {
         color = 'E98869';
     }
 
+    if(text === 'nodejs'){
+        color = '2E8B57';
+    }
+
     return `![${lib}](https://img.shields.io/badge/-${text}-${color} "${lib}")`;
 }
 
@@ -48,6 +52,7 @@ const libs = (await listDirsRecursive('packages', false)).map(lib => lib.replace
 let universals = [];
 let browsers = [];
 let bundled = [];
+let nodejs = [];
 
 libs.map(lib => {
     const pkg = JSON.parse(readFileSync(`packages/${lib}/package.json`, 'utf8'));
@@ -78,9 +83,25 @@ libs.map(lib => {
     if (tags[0] === 'bundled') {
         bundled.push(content);
     }
+    if (tags[0] === 'nodejs') {
+        nodejs.push(content);
+    }
 });
 
-let rows = [...bundled, ...universals, ...browsers,];
+let rows = [...bundled, ...universals, ...browsers, ...nodejs];
+
+// sort rows always to have @lit-protocol/lit-node-client at the top
+rows = rows.sort((a, b) => {
+    const aName = a.split('|')[1].trim();
+    const bName = b.split('|')[1].trim();
+    if (aName.includes('@lit-protocol/lit-node-client')) {
+        return -1;
+    }
+    if (bName.includes('@lit-protocol/lit-node-client')) {
+        return 1;
+    }
+    return 0;
+});
 
 const tables = {
     "headers": ["Package", "Category", "Version", "Download"],

@@ -1,14 +1,19 @@
 import {
   ABI_ERC20,
-  Chain,
   ILitError,
-  KV,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
   LIT_ERROR,
 } from '@lit-protocol/constants';
+
+import {
+  Chain,
+  KV
+} from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
+
+import { version } from '@lit-protocol/constants';
 
 const logBuffer: Array<Array<any>> = [];
 
@@ -98,7 +103,7 @@ export const throwRemovedFunctionError = (functionName: string) => {
  */
 export const log = (...args: any): void => {
   // append the prefix
-  args.unshift('[Lit-JS-SDK]');
+  args.unshift(`[Lit-JS-SDK v${version}]`);
 
   if (!globalThis) {
     // there is no globalThis, just print the log

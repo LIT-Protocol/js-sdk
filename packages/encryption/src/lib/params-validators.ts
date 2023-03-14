@@ -4,6 +4,10 @@
  */
 
 import {
+  LIT_ERROR,
+} from '@lit-protocol/constants';
+
+import {
   DecryptFileProps,
   JsonEncryptionRetrieveRequest,
   JsonSaveEncryptionKeyRequest,
@@ -13,8 +17,8 @@ import {
   DecryptStringWithIpfsProps,
   KV,
   ExecuteJsProps,
-  LIT_ERROR,
-} from '@lit-protocol/constants';
+} from '@lit-protocol/types';
+
 import {
   checkIfAuthSigRequiresChainParam,
   checkType,

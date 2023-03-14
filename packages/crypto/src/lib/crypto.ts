@@ -10,7 +10,7 @@ import {
 
 import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
-import { log } from '@lit-protocol/misc';
+import { log, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
@@ -106,7 +106,7 @@ export const encryptWithSymmetricKey = async (
  * @returns { Promise<CryptoKey> } A promise that resolves to the imported key
  */
 export const importSymmetricKey = async (
-  symmKey: BufferSource | Uint8Array
+  symmKey: SymmetricKey
 ): Promise<CryptoKey> => {
   const importedSymmKey = await crypto.subtle.importKey(
     'raw',
@@ -191,17 +191,50 @@ export const combineBlsShares = (
  *
  */
 export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
-  // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
-  const R_x = sigShares[0].localX;
-  const R_y = sigShares[0].localY;
+
+  log("sigShares:", sigShares);
 
   // the public key can come from any node - it obviously will be identical from each node
   // const publicKey = sigShares[0].publicKey;
   // const dataSigned = '0x' + sigShares[0].dataSigned;
-  const validShares = sigShares.map((s: any) => s.shareHex);
-  const shares = JSON.stringify(validShares);
+  // filter out empty shares
+  const validShares = sigShares.reduce((acc, val) => {
+    if (val.shareHex !== '') {
+      acc.push(val);
+    }
+    return acc;
+  }, []);
+
+  log("Valid Shares:", validShares);
+
+  // if there are no valid shares, throw an error
+  if (validShares.length === 0) {
+    return throwError({
+      code: 'NO_VALID_SHARES',
+      message: 'No valid shares to combine',
+    })
+  }
+
+  // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
+  const R_x = validShares[0].localX;
+  const R_y = validShares[0].localY;
+
+  log("R_x:", R_x);
+  log("R_y:", R_y);
+  
+  const shareHexes = validShares.map((s: any) => s.shareHex);
+  log('shareHexes:', shareHexes);
+
+  const shares = JSON.stringify(shareHexes);
   log('shares is', shares);
-  const sig = JSON.parse(wasmECDSA.combine_signature(R_x, R_y, shares));
+
+  let sig: string = '';
+
+  try{
+    sig = JSON.parse(wasmECDSA.combine_signature(R_x, R_y, shares));
+  }catch(e){
+    log("Failed to combine signatures:", e);
+  }
 
   log('signature', sig);
 

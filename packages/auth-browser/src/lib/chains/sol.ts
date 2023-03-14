@@ -4,11 +4,11 @@ import {
   ELeft,
   ERight,
   IEither,
-  IProvider,
-  JsonAuthSig,
   LIT_ERROR,
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
+
+import { IProvider, JsonAuthSig } from '@lit-protocol/types';
 import { log, throwError } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 // import { toString as uint8arrayToString } from 'uint8arrays';
@@ -138,7 +138,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<JsonAuthSig> => {
 export const signAndSaveAuthMessage = async ({
   provider,
 }: {
-  provider: any;
+  provider: any,
 }): Promise<JsonAuthSig | undefined> => {
   const now = new Date().toISOString();
   const body = AUTH_SIGNATURE_BODY.replace('{{timestamp}}', now);

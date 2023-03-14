@@ -5,11 +5,14 @@ import {
 
 import {
   AUTH_SIGNATURE_BODY,
-  JsonAuthSig,
   LIT_COSMOS_CHAINS,
   LIT_ERROR,
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
+
+import { 
+  JsonAuthSig
+} from '@lit-protocol/types';
 import { log, sortedObject, throwError } from '@lit-protocol/misc';
 
 /** ---------- Declaration ---------- */

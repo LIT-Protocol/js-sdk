@@ -1,4 +1,9 @@
-import { LITChain, LITCosmosChain, LITEVMChain, LITSVMChain } from '../types';
+import {
+  LITChain,
+  LITCosmosChain,
+  LITEVMChain,
+  LITSVMChain,
+} from '@lit-protocol/types';
 
 /**
  * Lit Protocol Network Public Key
@@ -301,6 +306,39 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     decimals: 18,
     rpcUrls: ['https://goerli.base.org'],
     blockExplorerUrls: ['https://goerli.basescan.org'],
+    type: null,
+    vmType: 'EVM',
+  },
+  moonbeam: {
+    contractAddress: null,
+    chainId: 1284,
+    name: 'Moonbeam',
+    symbol: 'GLMR',
+    decimals: 18,
+    rpcUrls: ['https://rpc.api.moonbeam.network'],
+    blockExplorerUrls: ['https://moonscan.io'],
+    type: null,
+    vmType: 'EVM',
+  },
+  moonriver: {
+    contractAddress: null,
+    chainId: 1285,
+    name: 'Moonriver',
+    symbol: 'MOVR',
+    decimals: 18,
+    rpcUrls: ['https://rpc.api.moonriver.moonbeam.network'],
+    blockExplorerUrls: ['https://moonriver.moonscan.io'],
+    type: null,
+    vmType: 'EVM',
+  },
+  moonbaseAlpha: {
+    contractAddress: null,
+    chainId: 1287,
+    name: 'Moonbase Alpha',
+    symbol: 'DEV',
+    decimals: 18,
+    rpcUrls: ['https://rpc.api.moonbase.moonbeam.network'],
+    blockExplorerUrls: ['https://moonbase.moonscan.io/'],
     type: null,
     vmType: 'EVM',
   },

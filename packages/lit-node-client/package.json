@@ -1,6 +1,18 @@
 {
   "name": "@lit-protocol/lit-node-client",
-  "version": "2.1.43",
+  "version": "2.1.66",
+  "license": "MIT",
+  "homepage": "https://github.com/Lit-Protocol/js-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LIT-Protocol/js-sdk"
+  },
+  "keywords": [
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/LIT-Protocol/js-sdk/issues"
+  },
   "type": "commonjs",
   "publishConfig": {
     "access": "public",
@@ -8,8 +20,12 @@
   },
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
   "tags": [
-    "bundled"
+    "universal"
   ],
+  "browser": {
+    "crypto": false,
+    "stream": false
+  },
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

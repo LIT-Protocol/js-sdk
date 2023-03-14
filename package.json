@@ -18,6 +18,7 @@
     "test:packages": "nx run-many --target=test",
     "test:watch": "nx run-many --target=test --watch",
     "test:ci": "nx affected --target=test --all --code-coverage",
+    "test:e2e": "yarn tools --test --e2e run-react-and-test",
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:dev": "yarn node ./tools/scripts/pub.mjs --tag dev",
     "publish:test": "yarn node ./tools/scripts/pub.mjs --tag test",
@@ -26,7 +27,7 @@
     "tool:genHtml": "yarn node ./tools/scripts/gen-html.mjs",
     "tool:genReact": "yarn node ./tools/scripts/gen-react.mjs",
     "tool:genNodejs": "yarn node ./tools/scripts/gen-nodejs.mjs",
-    "tool:genLib": "yarn node ./tools/scripts/gen-lib.mjs",
+    "gen:lib": "yarn node ./tools/scripts/gen-lib.mjs",
     "tool:genDoc": "node ./tools/scripts/gen-doc.mjs",
     "tool:genReadme": "yarn node ./tools/scripts/gen-readme.mjs",
     "tool:buildHtml": "yarn node ./tools/scripts/build-html.mjs && cd dist/apps/html && vercel --prod",
@@ -38,7 +39,11 @@
     "cy:open:react": "yarn tools --test --e2e react",
     "buildAndPublish": "yarn build:packages && yarn publish:packages",
     "dev": "nodemon --watch packages --ext js,ts --exec \"yarn build:packages && yarn tools --yalc --publish\"",
-    "watch": "yarn tools --watch"
+    "watch": "yarn tools --watch",
+    "v": "yarn tools --v",
+    "bump": "yarn tools --v --patch",
+    "bump:minor": "yarn tools --v --minor",
+    "bump:major": "yarn tools --v --major"
   },
   "private": true,
   "dependencies": {
@@ -53,7 +58,7 @@
     "@testing-library/cypress": "^8.0.3",
     "@testing-library/react": "^13.4.0",
     "@types/testing-library__cypress": "^5.0.9",
-    "@walletconnect/ethereum-provider": "1.7.8",
+    "@walletconnect/ethereum-provider": "^2.4.7",
     "@websaam/nx-esbuild": "^0.0.1",
     "axios": "^0.27.2",
     "blockstore-core": "^3.0.0",

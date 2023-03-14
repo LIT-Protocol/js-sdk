@@ -1,14 +1,18 @@
 import {
-  CheckAndSignAuthParams,
   ELeft,
   ERight,
   IEither,
   EITHER_TYPE,
-  JsonAuthSig,
   LIT_CHAINS,
   LIT_ERROR,
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
+
+import{
+  JsonAuthSig,
+  CheckAndSignAuthParams,
+}from '@lit-protocol/types'
+
 import { ethers } from 'ethers';
 // import WalletConnectProvider from '@walletconnect/ethereum-provider';
 import { toUtf8Bytes } from '@ethersproject/strings';
@@ -16,7 +20,7 @@ import { hexlify } from '@ethersproject/bytes';
 import { verifyMessage } from '@ethersproject/wallet';
 
 // @ts-ignore
-import WalletConnectProviderPkg from '@walletconnect/ethereum-provider/dist/cjs/index';
+import WalletConnectProviderPkg from '@walletconnect/ethereum-provider';
 
 // @ts-ignore
 import LitConnectModal from 'lit-connect-modal';

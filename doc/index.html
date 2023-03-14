@@ -13,7 +13,7 @@
 <div class="tsd-page-title">
 <h2>@lit-protocol/js-sdk</h2></div>
 <div class="tsd-panel tsd-typography"><div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V2</h1>
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
 <a href="https://twitter.com/LitProtocol"><img src="https://img.shields.io/twitter/follow/litprotocol?label=Follow&style=social"/></a>
@@ -22,18 +22,26 @@
 The Lit JavaScript SDK provides developers with a framework for implementing Lit functionality into their own applications. Find installation instructions in the docs to get started with the Lit SDK based on your use case: <a href="https://developer.litprotocol.com/SDK/Explanation/installation">https://developer.litprotocol.com/SDK/Explanation/installation</a>
 
 <p><br /><br />
-This new SDK is written in Typescript and is a complete rewrite of the old SDK. It is much more modular and easier to use, and has a much smaller bundle size.</p>
+This new V2 SDK is written in Typescript and is a complete rewrite of the old SDK. It is much more modular and easier to use, and has a much smaller bundle size.</p>
 </div>
 
 <div align="left">
 
+<p><a href="https://github.com/LIT-Protocol/js-sdk/CHANGELOG.MD">ChangeLog: All notable changes to this project will be documented in this file.</a> </p>
 
 <a href="#quick-start" id="quick-start" style="color: inherit; text-decoration: none;">
   <h1>Quick Start</h1>
 </a>
 
-<a href="#nodejs--browser" id="nodejs--browser" style="color: inherit; text-decoration: none;">
-  <h3>node.js / browser</h3>
+<a href="#nodejs-only" id="nodejs-only" style="color: inherit; text-decoration: none;">
+  <h3>NodeJS Only</h3>
+</a>
+<p>Removed browser related methods eg. checkAndSignAuthSig</p>
+<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">add</span><span class="hl-1"> @</span><span class="hl-0">lit</span><span class="hl-1">-</span><span class="hl-0">protocol</span><span class="hl-1">/</span><span class="hl-0">lit</span><span class="hl-1">-</span><span class="hl-0">node</span><span class="hl-1">-</span><span class="hl-0">client</span><span class="hl-1">-</span><span class="hl-0">nodejs</span>
+</code></pre>
+
+<a href="#isomorphic-works-on-nodejsbrowser" id="isomorphic-works-on-nodejsbrowser" style="color: inherit; text-decoration: none;">
+  <h3>(Isomorphic) works on Node.js/browser</h3>
 </a>
 <pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">add</span><span class="hl-1"> @</span><span class="hl-0">lit</span><span class="hl-1">-</span><span class="hl-0">protocol</span><span class="hl-1">/</span><span class="hl-0">lit</span><span class="hl-1">-</span><span class="hl-0">node</span><span class="hl-1">-</span><span class="hl-0">client</span>
 </code></pre>
@@ -64,91 +72,148 @@ This new SDK is written in Typescript and is a complete rewrite of the old SDK. 
 </tr>
 </thead>
 <tbody><tr>
+<td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client-nodejs">@lit-protocol/lit-node-client-nodejs</a></td>
+<td><img src="https://img.shields.io/badge/-nodejs-2E8B57" alt="lit-node-client-nodejs" title="lit-node-client-nodejs"></td>
+<td>2.1.64</td>
+<td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client-nodejs">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-nodejs-vanilla/lit-node-client-nodejs.min.js">Vanilla JS (UMD)</a></td>
+</tr>
+<tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client">@lit-protocol/lit-node-client</a></td>
-<td><img src="https://img.shields.io/badge/-bundled-17224B" alt="lit-node-client" title="lit-node-client"></td>
-<td>2.0.13</td>
+<td><img src="https://img.shields.io/badge/-universal-8A6496" alt="lit-node-client" title="lit-node-client"></td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/access-control-conditions">@lit-protocol/access-control-conditions</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="access-control-conditions" title="access-control-conditions"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/access-control-conditions">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/access-control-conditions-vanilla/access-control-conditions.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/bls-sdk">@lit-protocol/bls-sdk</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="bls-sdk" title="bls-sdk"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/bls-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/bls-sdk-vanilla/bls-sdk.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/constants">@lit-protocol/constants</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="constants" title="constants"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/constants">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/constants-vanilla/constants.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/contracts-sdk">@lit-protocol/contracts-sdk</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="contracts-sdk" title="contracts-sdk"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/contracts-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/contracts-sdk-vanilla/contracts-sdk.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/crypto">@lit-protocol/crypto</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="crypto" title="crypto"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/crypto">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/crypto-vanilla/crypto.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/ecdsa-sdk">@lit-protocol/ecdsa-sdk</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="ecdsa-sdk" title="ecdsa-sdk"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/ecdsa-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/ecdsa-sdk-vanilla/ecdsa-sdk.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/encryption">@lit-protocol/encryption</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="encryption" title="encryption"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/encryption">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/encryption-vanilla/encryption.min.js">Vanilla JS (UMD)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-third-party-libs">@lit-protocol/lit-third-party-libs</a></td>
+<td><img src="https://img.shields.io/badge/-universal-8A6496" alt="lit-third-party-libs" title="lit-third-party-libs"></td>
+<td>2.1.64</td>
+<td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-third-party-libs">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-third-party-libs-vanilla/lit-third-party-libs.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc">@lit-protocol/misc</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="misc" title="misc"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/misc-vanilla/misc.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/nacl">@lit-protocol/nacl</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="nacl" title="nacl"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/nacl">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/nacl-vanilla/nacl.min.js">Vanilla JS (UMD)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-ethers">@lit-protocol/pkp-ethers</a></td>
+<td><img src="https://img.shields.io/badge/-universal-8A6496" alt="pkp-ethers" title="pkp-ethers"></td>
+<td>2.1.64</td>
+<td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-ethers">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-ethers-vanilla/pkp-ethers.min.js">Vanilla JS (UMD)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/types">@lit-protocol/types</a></td>
+<td><img src="https://img.shields.io/badge/-universal-8A6496" alt="types" title="types"></td>
+<td>2.1.64</td>
+<td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/types">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/types-vanilla/types.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/uint8arrays">@lit-protocol/uint8arrays</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="uint8arrays" title="uint8arrays"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/uint8arrays">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/uint8arrays-vanilla/uint8arrays.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-browser">@lit-protocol/auth-browser</a></td>
 <td><img src="https://img.shields.io/badge/-browser-E98869" alt="auth-browser" title="auth-browser"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-browser">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/auth-browser-vanilla/auth-browser.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc-browser">@lit-protocol/misc-browser</a></td>
 <td><img src="https://img.shields.io/badge/-browser-E98869" alt="misc-browser" title="misc-browser"></td>
-<td>2.0.13</td>
+<td>2.1.64</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc-browser">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/misc-browser-vanilla/misc-browser.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 </tbody></table>
 <!-- autogen:package:end -->
 
-<p>API Docs: <a href="http://docs.lit-js-sdk-v2.litprotocol.com/">http://docs.lit-js-sdk-v2.litprotocol.com/</a> <br/>
-Demo(HTML): <a href="http://test.lit-js-sdk-v2.html.litprotocol.com/">http://test.lit-js-sdk-v2.html.litprotocol.com/</a>
-Demo(REACT): <a href="http://test.lit-js-sdk-v2.react.litprotocol.com/">http://test.lit-js-sdk-v2.react.litprotocol.com/</a></p>
+
+<a href="#api-doc" id="api-doc" style="color: inherit; text-decoration: none;">
+  <h2>API Doc</h2>
+</a>
+<p><a href="http://docs.lit-js-sdk-v2.litprotocol.com/">http://docs.lit-js-sdk-v2.litprotocol.com/</a> <br/></p>
 </div>
 
+
+<a href="#demo" id="demo" style="color: inherit; text-decoration: none;">
+  <h2>Demo</h2>
+</a>
+<table>
+<thead>
+<tr>
+<th>App</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Simple Encrypt Decrypt</td>
+<td><a href="https://demo.encrypt-decrypt.react.litprotocol.com/">https://demo.encrypt-decrypt.react.litprotocol.com/</a></td>
+</tr>
+<tr>
+<td>Contracts SDK</td>
+<td><a href="https://demo.contracts-sdk.react.litprotocol.com/">https://demo.contracts-sdk.react.litprotocol.com/</a></td>
+</tr>
+<tr>
+<td>(Test) Html</td>
+<td><a href="http://test.lit-js-sdk-v2.html.litprotocol.com/">http://test.lit-js-sdk-v2.html.litprotocol.com/</a></td>
+</tr>
+<tr>
+<td>(Test) React</td>
+<td><a href="http://test.lit-js-sdk-v2.react.litprotocol.com/">http://test.lit-js-sdk-v2.react.litprotocol.com/</a></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>NOTE: For (Test) apps, all packages and functions can be called inside the browser console. eg. <code>window.LitJsSdk_[package_name].[function_name]</code></p>
+</blockquote>
 
 <a href="#contributing-and-developing-to-this-sdk" id="contributing-and-developing-to-this-sdk" style="color: inherit; text-decoration: none;">
   <h1>Contributing and developing to this SDK</h1>
@@ -175,67 +240,106 @@ See <a href="https://streamable.com/e/5g52m4">Video</a></p>
   <h1>Workflow</h1>
 </a>
 
+<a href="#cli-wip" id="cli-wip" style="color: inherit; text-decoration: none;">
+  <h2>CLI (WIP)</h2>
+</a>
+<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span>
+</code></pre>
+
+<a href="#dev" id="dev" style="color: inherit; text-decoration: none;">
+  <h2>Dev</h2>
+</a>
+<pre><code class="language-jsx"><span class="hl-8">// this will open</span><br/><span class="hl-8">// html: http://localhost:4002</span><br/><span class="hl-8">// react: http://localhost:4003</span><br/><span class="hl-8">// nodejs: in this terminal</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">dev</span><span class="hl-1"> --</span><span class="hl-0">apps</span><br/><br/><span class="hl-8">// usually i will open another temrinal to watch the package</span><br/><span class="hl-8">// i&#39;m developing</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">watch</span><span class="hl-1"> --</span><span class="hl-0">target</span><span class="hl-1"> &lt;</span><span class="hl-9">package</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;</span>
+</code></pre>
+
 <a href="#creating-a-new-library" id="creating-a-new-library" style="color: inherit; text-decoration: none;">
   <h2>Creating a new library</h2>
 </a>
 <p>By default, NX provides a command to generate a library
 <code>nx generate @nrwl/js:library</code>. However, it doesn&#39;t have an esbuild built-in so that we&#39;ve created a custom tool that modify the build commands.</p>
-<pre><code class="language-js"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">tool</span><span class="hl-1">:</span><span class="hl-0">genLib</span><span class="hl-1"> &lt;</span><span class="hl-10">package</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;</span><br/><br/><span class="hl-8">// NOTE! If you intend to publish this package, you have to add the following to your package.json</span><br/><span class="hl-9">publishConfig</span><span class="hl-1">: {</span><br/><span class="hl-1">  </span><span class="hl-9">access</span><span class="hl-1">: </span><span class="hl-5">&#39;public&#39;</span><span class="hl-1">,</span><br/><span class="hl-1">  </span><span class="hl-9">directory</span><span class="hl-1">: </span><span class="hl-5">&#39;../../dist/packages/&lt;package-name&gt;&#39;</span><br/><span class="hl-1">},</span>
+<pre><code class="language-js"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-10">gen</span><span class="hl-1">:</span><span class="hl-0">lib</span><span class="hl-1"> &lt;</span><span class="hl-9">package</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt; </span><span class="hl-2">&lt;</span><span class="hl-3">tag</span><span class="hl-2">&gt;</span>
 </code></pre>
 
 <a href="#create-a-new-react-demo-app-using-the-lit-js-sdk" id="create-a-new-react-demo-app-using-the-lit-js-sdk" style="color: inherit; text-decoration: none;">
   <h2>Create a new react demo app using the Lit JS SDK</h2>
 </a>
-<pre><code class="language-js"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">create</span><span class="hl-1">-</span><span class="hl-0">react</span><span class="hl-1">-</span><span class="hl-0">app</span><span class="hl-1"> </span><span class="hl-0">contracts</span><span class="hl-1">-</span><span class="hl-0">sdk</span><span class="hl-1"> --</span><span class="hl-0">demo</span>
+<pre><code class="language-js"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">create</span><span class="hl-1"> --</span><span class="hl-0">react</span><span class="hl-1"> </span><span class="hl-0">contracts</span><span class="hl-1">-</span><span class="hl-0">sdk</span><span class="hl-1"> --</span><span class="hl-0">demo</span>
 </code></pre>
 
 <a href="#deleting-a-library" id="deleting-a-library" style="color: inherit; text-decoration: none;">
   <h2>Deleting a library</h2>
 </a>
-<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">tool</span><span class="hl-1">:</span><span class="hl-6">delete</span><span class="hl-1"> (--</span><span class="hl-0">package</span><span class="hl-1"> </span><span class="hl-11">OR</span><span class="hl-1"> --</span><span class="hl-0">app</span><span class="hl-1">) &lt;</span><span class="hl-0">project</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;</span>
+<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-10">tool</span><span class="hl-1">:</span><span class="hl-6">delete</span><span class="hl-1"> (--</span><span class="hl-0">package</span><span class="hl-1"> </span><span class="hl-11">OR</span><span class="hl-1"> --</span><span class="hl-0">app</span><span class="hl-1">) &lt;</span><span class="hl-0">project</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;</span>
 </code></pre>
 
 <a href="#building" id="building" style="color: inherit; text-decoration: none;">
   <h2>Building</h2>
 </a>
-
-<a href="#building-all-packages" id="building-all-packages" style="color: inherit; text-decoration: none;">
-  <h3>Building all packages</h3>
-</a>
-<pre><code class="language-jsx"><span class="hl-8">// 1. run the &#39;build&#39; command in all projects specified in `project.json`</span><br/><span class="hl-8">// 2. map the &#39;peerDependencies&#39; to &#39;dependencies&#39; in the dist folders, so that dependencies will be installed when a user &#39;yarn add&#39;</span><br/><span class="hl-8">// 3. generate a package summary inside README.md between the &lt;!-- autogen:package --&gt; tags</span><br/><span class="hl-8">// src: tools/scripts/build.mjs</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">build</span><span class="hl-1">:</span><span class="hl-0">packages</span>
+<pre><code class="language-jsx"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">build</span><br/><br/><span class="hl-8">// or</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">build</span><br/><br/><span class="hl-8">// build in order specified in lit-build.config.js</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">build</span><span class="hl-1"> --</span><span class="hl-0">packages</span><span class="hl-1"> --</span><span class="hl-0">async</span>
 </code></pre>
 
-<a href="#building-a-specific-package" id="building-a-specific-package" style="color: inherit; text-decoration: none;">
-  <h3>Building a specific package</h3>
+<a href="#building-target-package" id="building-target-package" style="color: inherit; text-decoration: none;">
+  <h3>Building target package</h3>
 </a>
-<pre><code class="language-jsx"><span class="hl-8">// OPTION 1: (MAIN)</span><br/><span class="hl-8">// 1. build tsc &amp; web bundle</span><br/><span class="hl-8">// 2. map each dist folder name to package.json name (for publishing)</span><br/><span class="hl-8">// 3. generate html, react, and nodejs test apps</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> &lt;</span><span class="hl-0">project</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;:</span><span class="hl-0">build</span><br/><br/><span class="hl-8">// OPTION 2: (Building tsc)</span><br/><span class="hl-8">// output: dist/packages/&lt;project-name&gt;</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> &lt;</span><span class="hl-0">project</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;:</span><span class="hl-0">_buildTsc</span><br/><br/><span class="hl-8">// OPTION 3: (esBuilding vanilla web bundle)</span><br/><span class="hl-8">// output: dist/package/&lt;project-name&gt;-vanilla</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> &lt;</span><span class="hl-0">project</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;:</span><span class="hl-0">_buildWeb</span>
+<pre><code class="language-jsx"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> &lt;</span><span class="hl-0">project</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;:</span><span class="hl-0">build</span><br/><br/><span class="hl-8">// or</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">build</span><span class="hl-1"> --</span><span class="hl-0">target</span><span class="hl-1"> &lt;</span><span class="hl-0">project</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;</span><br/><br/><span class="hl-8">// or targeted env</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> &lt;</span><span class="hl-0">project</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;:</span><span class="hl-0">_buildTsc</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> &lt;</span><span class="hl-0">project</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;:</span><span class="hl-0">_buildWeb</span>
 </code></pre>
+
+<a href="#watching" id="watching" style="color: inherit; text-decoration: none;">
+  <h2>Watching</h2>
+</a>
+<pre><code class="language-jsx"><span class="hl-8">// watch all packages change</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">watch</span><br/><br/><span class="hl-8">// watch a target package</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">watch</span><span class="hl-1"> &lt;</span><span class="hl-9">package</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;</span><br/><br/><span class="hl-8">// watch a target package with all its monorepo dependencies</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">watch</span><span class="hl-1"> &lt;</span><span class="hl-9">package</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;--</span><span class="hl-0">deps</span>
+</code></pre>
+
+<a href="#building-local-changes" id="building-local-changes" style="color: inherit; text-decoration: none;">
+  <h2>Building Local Changes</h2>
+</a>
+<p>During development you may wish to build your code changes in <code>packages/</code> in a client application to test the correctness of the functionality.</p>
+<p>If you would like to establish a dependency between packages within this monorepo and an external client application that consumes these packages,</p>
+<ol>
+<li>Run <code>npm link</code> at the root of the specific package you are making code changes in.</li>
+<li>Run <code>yarn build:target &lt;package&gt;</code> to build that specific package.</li>
+<li>In the client application, run <code>npm link &lt;package&gt; --force</code> to ensure that the <code>package.json</code> of the client application is updated with a <code>file:</code> link to the dependency. This effectively creates a symlink in the <code>node_modules</code> of the client application to the local dependency in this repository.</li>
+</ol>
+<p>Having done this setup, this is what the development cycle looks like moving forward:</p>
+<ol>
+<li>Make code change</li>
+<li>Rebuild specific package</li>
+<li>Rebuild client application.</li>
+</ol>
 
 <a href="#publishing" id="publishing" style="color: inherit; text-decoration: none;">
   <h2>Publishing</h2>
 </a>
+<p>You must manually update the version in lerna.json before publishing.</p>
 
-<a href="#publishing-everything" id="publishing-everything" style="color: inherit; text-decoration: none;">
-  <h3>Publishing everything</h3>
+<a href="#to-npm" id="to-npm" style="color: inherit; text-decoration: none;">
+  <h3>to npm</h3>
 </a>
-<pre><code class="language-jsx"><span class="hl-8">// This will publish everything inside the `dist` folder</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">publish</span><span class="hl-1">:</span><span class="hl-0">packages</span>
+<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-10">publish</span><span class="hl-1">:</span><span class="hl-0">packages</span>
 </code></pre>
 
-<a href="#publishing-vanilla-packages-only" id="publishing-vanilla-packages-only" style="color: inherit; text-decoration: none;">
-  <h3>Publishing vanilla packages only</h3>
+<a href="#clone-amp-publish-to-npm" id="clone-amp-publish-to-npm" style="color: inherit; text-decoration: none;">
+  <h3>clone &amp; publish to npm</h3>
 </a>
-<pre><code class="language-jsx"><span class="hl-8">// It will scans through the dist folder and filter out the folders that contains the word `vanilla`</span><br/><span class="hl-8">// cd in there &amp;&amp; npm publish --acces public</span><br/><span class="hl-8">// src: tools/scripts/pub.mjs</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">publish</span><span class="hl-1">:</span><span class="hl-0">vanilla</span>
+<pre><code class="language-jsx"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">clone</span><span class="hl-1"> &lt;</span><span class="hl-0">project</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt; </span><span class="hl-2">&lt;</span><span class="hl-12">clone-project-name</span><span class="hl-2">&gt;</span><span class="hl-1"> &lt;(?) --publish&gt; &lt;(?) --remove-after&gt;</span><br/><br/><span class="hl-1">// eg</span><br/><span class="hl-1">yarn tools --clone lit-node-client @litprotocol/dev --publish --remove-after</span>
 </code></pre>
 
-<a href="#publising-html-test-app-to-vercel" id="publising-html-test-app-to-vercel" style="color: inherit; text-decoration: none;">
-  <h3>Publising HTML Test app to Vercel</h3>
+<a href="#html-test-app-to-vercel" id="html-test-app-to-vercel" style="color: inherit; text-decoration: none;">
+  <h3>HTML Test app to Vercel</h3>
 </a>
-<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">tool</span><span class="hl-1">:</span><span class="hl-0">buildHtml</span>
+<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-10">tool</span><span class="hl-1">:</span><span class="hl-0">buildHtml</span>
 </code></pre>
 
 <a href="#testing" id="testing" style="color: inherit; text-decoration: none;">
   <h2>Testing</h2>
 </a>
+
+<a href="#quick-start-on-e2e-testing" id="quick-start-on-e2e-testing" style="color: inherit; text-decoration: none;">
+  <h3>Quick Start on E2E Testing</h3>
+</a>
+<p>The following will serve the react testing app and launch the cypress e2e testing after</p>
+<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-10">test</span><span class="hl-1">:</span><span class="hl-0">e2e</span>
+</code></pre>
 
 <a href="#environments" id="environments" style="color: inherit; text-decoration: none;">
   <h3>Environments</h3>
@@ -272,18 +376,18 @@ See <a href="https://streamable.com/e/5g52m4">Video</a></p>
 <a href="#unit-tests-for-node" id="unit-tests-for-node" style="color: inherit; text-decoration: none;">
   <h3>Unit Tests (for Node)</h3>
 </a>
-<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">test</span><span class="hl-1">:</span><span class="hl-0">packages</span><br/><br/><span class="hl-8">// watch mode</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">test</span><span class="hl-1">:</span><span class="hl-0">watch</span>
+<pre><code class="language-jsx"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-10">test</span><span class="hl-1">:</span><span class="hl-0">packages</span><br/><br/><span class="hl-8">// watch mode</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-10">test</span><span class="hl-1">:</span><span class="hl-0">watch</span>
 </code></pre>
 
 <a href="#e2e-testing-with-metamask-using-cypress-for-browser" id="e2e-testing-with-metamask-using-cypress-for-browser" style="color: inherit; text-decoration: none;">
   <h3>E2E Testing with Metamask using Cypress (for Browser)</h3>
 </a>
 <p>Since both HTML &amp; React UIs are identical, we can run the same test suite against two different environments of libraries. This is done by setting the <code>PORT</code> number before Cypress launch.</p>
-<p><b>HTML</b> See <a href="https://streamable.com/qik31d">Video</a></p>
-<pre><code><span class="hl-8">// E2E HTML</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">cy</span><span class="hl-1">:</span><span class="hl-9">open</span><span class="hl-1">:</span><span class="hl-0">html</span>
+<p><b>HTML</b></p>
+<pre><code class="language-jsx"><span class="hl-8">// E2E HTML</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">test</span><span class="hl-1"> --</span><span class="hl-0">e2e</span><span class="hl-1"> </span><span class="hl-0">html</span>
 </code></pre>
-<p><b>React</b> See <a href="https://streamable.com/vgk45q">Video</a></p>
-<pre><code><span class="hl-8">// E2E React</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">cy</span><span class="hl-1">:</span><span class="hl-9">open</span><span class="hl-1">:</span><span class="hl-0">react</span>
+<p><b>React</b></p>
+<pre><code class="language-jsx"><span class="hl-8">// E2E React</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">test</span><span class="hl-1"> --</span><span class="hl-0">e2e</span><span class="hl-1"> </span><span class="hl-0">react</span>
 </code></pre>
 
 <a href="#other-commands" id="other-commands" style="color: inherit; text-decoration: none;">
@@ -301,17 +405,26 @@ See <a href="https://streamable.com/e/5g52m4">Video</a></p>
   <h1>FAQs &amp; Common Errors</h1>
 </a>
 <details>
+<summary>(React) Failed to parse source map from</summary>
+
+<p>In your React package.json, add <code>GENERATE_SOURCEMAP=false</code> to your start script</p>
+<p>eg.</p>
+<pre><code><span class="hl-1">  </span><span class="hl-5">&quot;scripts&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">    </span><span class="hl-5">&quot;start&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-5">&quot;GENERATE_SOURCEMAP=false react-scripts start&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">&quot;build&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-5">&quot;react-scripts build&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">&quot;test&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-5">&quot;react-scripts test&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">&quot;eject&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-5">&quot;react-scripts eject&quot;</span><br/><span class="hl-1">  },</span>
+</code></pre>
+</details>
+
+<details>
 <summary>Web bundling using esbuild</summary>
 
 <p>It’s currently using a custom plugin <a href="https://www.npmjs.com/package/@websaam/nx-esbuild">@websaam/nx-esbuild</a> which is a fork from <a href="https://www.npmjs.com/package/@wanews/nx-esbuild">@wanews/nx-esbuild</a></p>
-<pre><code class="language-json"><span class="hl-5">&quot;_buildWeb&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">    </span><span class="hl-12">&quot;executor&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;@websaam/nx-esbuild:package&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-12">&quot;options&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;banner&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">        </span><span class="hl-12">&quot;js&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;import { createRequire } from &#39;module&#39;;const require = createRequire(import.meta.url);&quot;</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;globalName&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;LitJsSdk_CoreBrowser&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;outfile&quot;</span><span class="hl-1">:</span><span class="hl-5">&quot;dist/packages/core-browser-vanilla/core-browser.js&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;entryPoints&quot;</span><span class="hl-1">: [</span><span class="hl-5">&quot;./packages/core-browser/src/index.ts&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;define&quot;</span><span class="hl-1">: { </span><span class="hl-12">&quot;global&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;window&quot;</span><span class="hl-1"> },</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;plugins&quot;</span><span class="hl-1">:[</span><br/><span class="hl-1">        {</span><br/><span class="hl-1">          </span><span class="hl-12">&quot;package&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;esbuild-node-builtins&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">          </span><span class="hl-12">&quot;function&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;nodeBuiltIns&quot;</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">      ]</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">  }</span>
+<pre><code class="language-json"><span class="hl-5">&quot;_buildWeb&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">    </span><span class="hl-13">&quot;executor&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;@websaam/nx-esbuild:package&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-13">&quot;options&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">      </span><span class="hl-13">&quot;banner&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">        </span><span class="hl-13">&quot;js&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;import { createRequire } from &#39;module&#39;;const require = createRequire(import.meta.url);&quot;</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">      </span><span class="hl-13">&quot;globalName&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;LitJsSdk_CoreBrowser&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-13">&quot;outfile&quot;</span><span class="hl-1">:</span><span class="hl-5">&quot;dist/packages/core-browser-vanilla/core-browser.js&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-13">&quot;entryPoints&quot;</span><span class="hl-1">: [</span><span class="hl-5">&quot;./packages/core-browser/src/index.ts&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">      </span><span class="hl-13">&quot;define&quot;</span><span class="hl-1">: { </span><span class="hl-13">&quot;global&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;window&quot;</span><span class="hl-1"> },</span><br/><span class="hl-1">      </span><span class="hl-13">&quot;plugins&quot;</span><span class="hl-1">:[</span><br/><span class="hl-1">        {</span><br/><span class="hl-1">          </span><span class="hl-13">&quot;package&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;esbuild-node-builtins&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">          </span><span class="hl-13">&quot;function&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;nodeBuiltIns&quot;</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">      ]</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">  }</span>
 </code></pre>
 </details>
 
 <details>
 <summary>Reference Error: crypto is not defined</summary>
 
-<pre><code class="language-js"><span class="hl-10">import</span><span class="hl-1"> </span><span class="hl-0">crypto</span><span class="hl-1">, { </span><span class="hl-0">createHash</span><span class="hl-1"> } </span><span class="hl-10">from</span><span class="hl-1"> </span><span class="hl-5">&#39;crypto&#39;</span><span class="hl-1">;</span><br/><span class="hl-0">Object</span><span class="hl-1">.</span><span class="hl-13">defineProperty</span><span class="hl-1">(</span><span class="hl-0">globalThis</span><span class="hl-1">, </span><span class="hl-5">&#39;crypto&#39;</span><span class="hl-1">, {</span><br/><span class="hl-1">  </span><span class="hl-0">value:</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-13">getRandomValues</span><span class="hl-0">:</span><span class="hl-1"> (</span><span class="hl-0">arr</span><span class="hl-1">: </span><span class="hl-14">any</span><span class="hl-1">) </span><span class="hl-6">=&gt;</span><span class="hl-1"> </span><span class="hl-0">crypto</span><span class="hl-1">.</span><span class="hl-13">randomBytes</span><span class="hl-1">(</span><span class="hl-0">arr</span><span class="hl-1">.</span><span class="hl-0">length</span><span class="hl-1">),</span><br/><span class="hl-1">    </span><span class="hl-0">subtle:</span><span class="hl-1"> {</span><br/><span class="hl-1">      </span><span class="hl-13">digest</span><span class="hl-0">:</span><span class="hl-1"> (</span><span class="hl-0">algorithm</span><span class="hl-1">: </span><span class="hl-14">string</span><span class="hl-1">, </span><span class="hl-0">data</span><span class="hl-1">: </span><span class="hl-14">Uint8Array</span><span class="hl-1">) </span><span class="hl-6">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-10">return</span><span class="hl-1"> </span><span class="hl-6">new</span><span class="hl-1"> </span><span class="hl-14">Promise</span><span class="hl-1">((</span><span class="hl-0">resolve</span><span class="hl-1">, </span><span class="hl-0">reject</span><span class="hl-1">) </span><span class="hl-6">=&gt;</span><br/><span class="hl-1">          </span><span class="hl-13">resolve</span><span class="hl-1">(</span><br/><span class="hl-1">            </span><span class="hl-13">createHash</span><span class="hl-1">(</span><span class="hl-0">algorithm</span><span class="hl-1">.</span><span class="hl-13">toLowerCase</span><span class="hl-1">().</span><span class="hl-13">replace</span><span class="hl-1">(</span><span class="hl-5">&#39;-&#39;</span><span class="hl-1">, </span><span class="hl-5">&#39;&#39;</span><span class="hl-1">))</span><br/><span class="hl-1">              .</span><span class="hl-13">update</span><span class="hl-1">(</span><span class="hl-0">data</span><span class="hl-1">)</span><br/><span class="hl-1">              .</span><span class="hl-13">digest</span><span class="hl-1">()</span><br/><span class="hl-1">          )</span><br/><span class="hl-1">        );</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">    },</span><br/><span class="hl-1">  },</span><br/><span class="hl-1">});</span>
+<pre><code class="language-js"><span class="hl-9">import</span><span class="hl-1"> </span><span class="hl-0">crypto</span><span class="hl-1">, { </span><span class="hl-0">createHash</span><span class="hl-1"> } </span><span class="hl-9">from</span><span class="hl-1"> </span><span class="hl-5">&#39;crypto&#39;</span><span class="hl-1">;</span><br/><span class="hl-0">Object</span><span class="hl-1">.</span><span class="hl-14">defineProperty</span><span class="hl-1">(</span><span class="hl-0">globalThis</span><span class="hl-1">, </span><span class="hl-5">&#39;crypto&#39;</span><span class="hl-1">, {</span><br/><span class="hl-1">  </span><span class="hl-0">value:</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-14">getRandomValues</span><span class="hl-0">:</span><span class="hl-1"> (</span><span class="hl-0">arr</span><span class="hl-1">: </span><span class="hl-12">any</span><span class="hl-1">) </span><span class="hl-6">=&gt;</span><span class="hl-1"> </span><span class="hl-0">crypto</span><span class="hl-1">.</span><span class="hl-14">randomBytes</span><span class="hl-1">(</span><span class="hl-0">arr</span><span class="hl-1">.</span><span class="hl-0">length</span><span class="hl-1">),</span><br/><span class="hl-1">    </span><span class="hl-0">subtle:</span><span class="hl-1"> {</span><br/><span class="hl-1">      </span><span class="hl-14">digest</span><span class="hl-0">:</span><span class="hl-1"> (</span><span class="hl-0">algorithm</span><span class="hl-1">: </span><span class="hl-12">string</span><span class="hl-1">, </span><span class="hl-0">data</span><span class="hl-1">: </span><span class="hl-12">Uint8Array</span><span class="hl-1">) </span><span class="hl-6">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-9">return</span><span class="hl-1"> </span><span class="hl-6">new</span><span class="hl-1"> </span><span class="hl-12">Promise</span><span class="hl-1">((</span><span class="hl-0">resolve</span><span class="hl-1">, </span><span class="hl-0">reject</span><span class="hl-1">) </span><span class="hl-6">=&gt;</span><br/><span class="hl-1">          </span><span class="hl-14">resolve</span><span class="hl-1">(</span><br/><span class="hl-1">            </span><span class="hl-14">createHash</span><span class="hl-1">(</span><span class="hl-0">algorithm</span><span class="hl-1">.</span><span class="hl-14">toLowerCase</span><span class="hl-1">().</span><span class="hl-14">replace</span><span class="hl-1">(</span><span class="hl-5">&#39;-&#39;</span><span class="hl-1">, </span><span class="hl-5">&#39;&#39;</span><span class="hl-1">))</span><br/><span class="hl-1">              .</span><span class="hl-14">update</span><span class="hl-1">(</span><span class="hl-0">data</span><span class="hl-1">)</span><br/><span class="hl-1">              .</span><span class="hl-14">digest</span><span class="hl-1">()</span><br/><span class="hl-1">          )</span><br/><span class="hl-1">        );</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">    },</span><br/><span class="hl-1">  },</span><br/><span class="hl-1">});</span>
 </code></pre>
 </details>
 <details>
@@ -352,10 +465,14 @@ See <a href="https://streamable.com/e/5g52m4">Video</a></p>
 <li class="tsd-kind-module"><a href="modules/crypto_src.html">crypto/src</a></li>
 <li class="tsd-kind-module"><a href="modules/ecdsa_sdk_src.html">ecdsa-<wbr/>sdk/src</a></li>
 <li class="tsd-kind-module"><a href="modules/encryption_src.html">encryption/src</a></li>
+<li class="tsd-kind-module"><a href="modules/lit_node_client_nodejs_src.html">lit-<wbr/>node-<wbr/>client-<wbr/>nodejs/src</a></li>
 <li class="tsd-kind-module"><a href="modules/lit_node_client_src.html">lit-<wbr/>node-<wbr/>client/src</a></li>
+<li class="tsd-kind-module"><a href="modules/lit_third_party_libs_src.html">lit-<wbr/>third-<wbr/>party-<wbr/>libs/src</a></li>
 <li class="tsd-kind-module"><a href="modules/misc_browser_src.html">misc-<wbr/>browser/src</a></li>
 <li class="tsd-kind-module"><a href="modules/misc_src.html">misc/src</a></li>
 <li class="tsd-kind-module"><a href="modules/nacl_src.html">nacl/src</a></li>
+<li class="tsd-kind-module"><a href="modules/pkp_ethers_src.html">pkp-<wbr/>ethers/src</a></li>
+<li class="tsd-kind-module"><a href="modules/types_src.html">types/src</a></li>
 <li class="tsd-kind-module"><a href="modules/uint8arrays_src.html">uint8arrays/src</a></li></ul></li></ul></div></details></nav></div></div>
 <div class="container tsd-generator">
 <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>
