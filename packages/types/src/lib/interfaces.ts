@@ -542,7 +542,7 @@ export interface JsonHandshakeResponse {
   networkPubKeySet: string;
 }
 
-export interface EncryptStringAndUploadMetadataToIpfsProps {
+export interface EncryptAndUploadMetadataToIpfsProps {
   // The authSig of the user.  Returned via the checkAndSignAuthMessage function
   authSig: JsonAuthSig;
 
@@ -563,6 +563,9 @@ export interface EncryptStringAndUploadMetadataToIpfsProps {
 
   // The string you wish to encrypt
   string: string;
+
+  // The file you wish to encrypt
+  file: AcceptedFileType;
 
   // An instance of LitNodeClient that is already connected
   litNodeClient: ILitNodeClient;

@@ -13,7 +13,7 @@ import {
   JsonSaveEncryptionKeyRequest,
   DecryptZipFileWithMetadataProps,
   EncryptFileAndZipWithMetadataProps,
-  EncryptStringAndUploadMetadataToIpfsProps,
+  EncryptAndUploadMetadataToIpfsProps,
   DecryptStringWithIpfsProps,
   KV,
   ExecuteJsProps,
@@ -376,8 +376,8 @@ export const paramsValidators = {
     return true;
   },
 
-  encryptStringAndUploadMetadataToIpfs: (
-    params: EncryptStringAndUploadMetadataToIpfsProps
+  encryptAndUploadMetadataToIpfs: (
+    params: EncryptAndUploadMetadataToIpfsProps
   ) => {
     // -- validate
 
@@ -388,7 +388,7 @@ export const paramsValidators = {
         value: params.authSig,
         allowedTypes: ['Object'],
         paramName: 'authSig',
-        functionName: 'encryptStringAndUploadMetadataToIpfs',
+        functionName: 'encryptAndUploadMetadataToIpfs',
       })
     )
       return false;
@@ -400,7 +400,7 @@ export const paramsValidators = {
         value: params.accessControlConditions,
         allowedTypes: ['Array'],
         paramName: 'accessControlConditions',
-        functionName: 'encryptStringAndUploadMetadataToIpfs',
+        functionName: 'encryptAndUploadMetadataToIpfs',
       })
     )
       return false;
@@ -412,7 +412,7 @@ export const paramsValidators = {
         value: params.evmContractConditions,
         allowedTypes: ['Array'],
         paramName: 'evmContractConditions',
-        functionName: 'encryptStringAndUploadMetadataToIpfs',
+        functionName: 'encryptAndUploadMetadataToIpfs',
       })
     )
       return false;
@@ -424,7 +424,7 @@ export const paramsValidators = {
         value: params.solRpcConditions,
         allowedTypes: ['Array'],
         paramName: 'solRpcConditions',
-        functionName: 'encryptStringAndUploadMetadataToIpfs',
+        functionName: 'encryptAndUploadMetadataToIpfs',
       })
     )
       return false;
@@ -436,7 +436,7 @@ export const paramsValidators = {
         value: params.unifiedAccessControlConditions,
         allowedTypes: ['Array'],
         paramName: 'unifiedAccessControlConditions',
-        functionName: 'encryptStringAndUploadMetadataToIpfs',
+        functionName: 'encryptAndUploadMetadataToIpfs',
       })
     )
       return false;
@@ -446,7 +446,7 @@ export const paramsValidators = {
       !checkIfAuthSigRequiresChainParam(
         params.authSig,
         params.chain,
-        'encryptStringAndUploadMetadataToIpfs'
+        'encryptAndUploadMetadataToIpfs'
       )
     )
       return false;
@@ -455,9 +455,20 @@ export const paramsValidators = {
     if (
       !checkType({
         value: params.string,
-        allowedTypes: ['String'],
+        allowedTypes: ['String', 'Undefined'],
         paramName: 'string',
-        functionName: 'encryptStringAndUploadMetadataToIpfs',
+        functionName: 'encryptAndUploadMetadataToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      !checkType({
+        value: params.file,
+        allowedTypes: ['Blob', 'File', 'Undefined'],
+        paramName: 'file',
+        functionName: 'encryptAndUploadMetadataToIpfs',
       })
     )
       return false;

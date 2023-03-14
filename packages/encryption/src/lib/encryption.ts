@@ -12,7 +12,7 @@ import {
   EncryptedString,
   EncryptedZip,
   EncryptFileAndZipWithMetadataProps,
-  EncryptStringAndUploadMetadataToIpfsProps,
+  EncryptAndUploadMetadataToIpfsProps,
   DecryptStringWithIpfsProps,
   IJWT,
   SymmetricKey,
@@ -94,14 +94,14 @@ const metadataForFile = ({
 
 /**
  *
- * Encrypt a string, save the key to the Lit network, and then uploads all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS & returns the IPFS CID.
+ * Encrypt a string or file, save the key to the Lit network, and then uploads all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS & returns the IPFS CID.
  *
- * @param { EncryptStringAndUploadMetadataToIpfsProps }
+ * @param { EncryptAndUploadMetadataToIpfsProps }
  *
  * @returns { Promise<string | undefined> }
  *
  */
-export const encryptStringAndUploadMetadataToIpfs = async ({
+export const encryptAndUploadMetadataToIpfs = async ({
   authSig,
   accessControlConditions,
   evmContractConditions,
@@ -109,11 +109,12 @@ export const encryptStringAndUploadMetadataToIpfs = async ({
   unifiedAccessControlConditions,
   chain,
   string,
+  file,
   litNodeClient,
-}: EncryptStringAndUploadMetadataToIpfsProps): Promise<string | undefined> => {
+}: EncryptAndUploadMetadataToIpfsProps): Promise<string | undefined> => {
   // -- validate
   const paramsIsSafe = safeParams({
-    functionName: 'encryptStringAndUploadMetadataToIpfs',
+    functionName: 'encryptAndUploadMetadataToIpfs',
     params: {
       authSig,
       accessControlConditions,
@@ -122,13 +123,26 @@ export const encryptStringAndUploadMetadataToIpfs = async ({
       unifiedAccessControlConditions,
       chain,
       string,
+      file,
       litNodeClient,
     },
   });
 
   if (!paramsIsSafe) return;
 
-  const { encryptedString, symmetricKey } = await encryptString(string);
+  if (!string && !file) return;
+
+  let encryptedData;
+  let symmetricKey;
+  if (string) {
+    const encryptedString = await encryptString(string);
+    encryptedData = encryptedString.encryptedString;
+    symmetricKey = encryptedString.symmetricKey;
+  } else {
+    const encryptedString = await encryptFile({ file });
+    encryptedData = encryptedString.encryptedFile;
+    symmetricKey = encryptedString.symmetricKey;
+  }
 
   const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
     accessControlConditions,
@@ -149,7 +163,6 @@ export const encryptStringAndUploadMetadataToIpfs = async ({
     throw new Error('Please provide your Infura API key and secret key');
   }
 
-  log("creating");
   //   @ts-ignore
   const authorization = 'Basic ' + Buffer.from(process.env.INFURA_ID + ':' + process.env.INFURA_SECRET_KEY).toString('base64');
   const ipfs = ipfsClient.create({
@@ -159,11 +172,9 @@ export const encryptStringAndUploadMetadataToIpfs = async ({
     }
   });
 
-  log("done create");
-  const encryptedStringJson = Buffer.from(await encryptedString.arrayBuffer()).toJSON();
-  log("encryptedStringJson- ", encryptedStringJson);
+  const encryptedDataJson = Buffer.from(await encryptedData.arrayBuffer()).toJSON();
   const res = await ipfs.add(JSON.stringify({
-    encryptedString: encryptedStringJson,
+    encryptedData: encryptedDataJson,
     encryptedSymmetricKeyString,
     accessControlConditions,
     evmContractConditions,
@@ -172,8 +183,6 @@ export const encryptStringAndUploadMetadataToIpfs = async ({
     chain
   }));
 
-  log("res");
-  log(res);
   return res.path;
 }
 
@@ -216,8 +225,8 @@ export const decryptStringWithIpfs = async ({
 
   if (!symmetricKey) return;
 
-  const encryptedStringBlob = new Blob([Buffer.from(metadata.encryptedString)], { type: 'application/octet-stream' });
-  return await decryptString(encryptedStringBlob, symmetricKey);
+  const encryptedDataBlob = new Blob([Buffer.from(metadata.encryptedData)], { type: 'application/octet-stream' });
+  return await decryptString(encryptedDataBlob, symmetricKey);
 }
 
 // ---------- Local Helpers ----------
