@@ -91,3 +91,7 @@ export type ConditionItem =
   | AccsRegularParams
   | AccsDefaultParams
   | AccsSOLV2Params;
+
+export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
+export type EncryptedSymmetricKey = string | Uint8Array | any;
+export type AcceptedFileType = File | Blob;
