@@ -41,8 +41,6 @@ import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
 
 import { safeParams } from './params-validators';
 
-// import * as pinataSDK from '@pinata/sdk';
-
 import * as ipfsClient from 'ipfs-http-client';
 
 // ---------- Local Interfaces ----------
@@ -146,13 +144,6 @@ export const encryptStringAndUploadMetadataToIpfs = async ({
 
   const encryptedSymmetricKeyString = uint8arrayToString(encryptedSymmetricKey, "base16");
 
-  // //   @ts-ignore
-  // if (!process.env.PINATA_API_KEY || !process.env.PINATA_SECRET_API_KEY) {
-  //   throw new Error('Please provide your pinata API key and secret key');
-  // }
-  // //   @ts-ignore
-  // const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_API_KEY, pinataSecretApiKey: process.env.PINATA_SECRET_API_KEY});
-
   //   @ts-ignore
   if (!process.env.INFURA_ID || !process.env.INFURA_SECRET_KEY) {
     throw new Error('Please provide your Infura API key and secret key');
@@ -171,7 +162,6 @@ export const encryptStringAndUploadMetadataToIpfs = async ({
   log("done create");
   const encryptedStringJson = Buffer.from(await encryptedString.arrayBuffer()).toJSON();
   log("encryptedStringJson- ", encryptedStringJson);
-  // const res = await pinata.pinJSONToIPFS({
   const res = await ipfs.add(JSON.stringify({
     encryptedString: encryptedStringJson,
     encryptedSymmetricKeyString,
@@ -182,7 +172,6 @@ export const encryptStringAndUploadMetadataToIpfs = async ({
     chain
   }));
 
-  // return res.IpfsHash;
   log("res");
   log(res);
   return res.path;
