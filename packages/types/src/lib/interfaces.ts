@@ -559,7 +559,7 @@ export interface EncryptAndUploadMetadataToIpfsProps {
   unifiedAccessControlConditions?: UnifiedAccessControlConditions;
 
   // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-  chain: string;
+  chain: Chain;
 
   // The string you wish to encrypt
   string?: string;

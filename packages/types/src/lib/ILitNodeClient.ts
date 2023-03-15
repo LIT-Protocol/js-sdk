@@ -19,7 +19,7 @@ import {
   RejectedNodePromises,
   SendNodeCommand,
   SignedChainDataToken,
-  SignWithECDSA,
+  // SignWithECDSA,
   SignConditionECDSA,
   SuccessNodePromises,
   ValidateAndSignECDSA,
@@ -406,7 +406,7 @@ export interface ILitNodeClient {
    * @returns { Promise<string> }
    *
    */
-  signWithEcdsa(params: SignWithECDSA): Promise<string>;
+  // signWithEcdsa(params: SignWithECDSA): Promise<string>;
 
   /**
    *
