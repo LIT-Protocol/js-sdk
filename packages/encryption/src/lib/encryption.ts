@@ -111,6 +111,8 @@ export const encryptAndUploadMetadataToIpfs = async ({
   string,
   file,
   litNodeClient,
+  infuraId,
+  infuraSecretKey,
 }: EncryptAndUploadMetadataToIpfsProps): Promise<string> => {
   // -- validate
   const paramsIsSafe = safeParams({
@@ -138,9 +140,8 @@ export const encryptAndUploadMetadataToIpfs = async ({
     error: LIT_ERROR.INVALID_PARAM_TYPE,
   });
 
-  //   @ts-ignore
-  if (!process.env.INFURA_ID || !process.env.INFURA_SECRET_KEY) {
-    throw new Error('Please provide your INFURA_ID and INFURA_SECRET_KEY as env variables');
+  if (!infuraId || !infuraSecretKey) {
+    throw new Error('Please provide your Infura Project Id and Infura API Key Secret to add the encrypted metadata on IPFS');
   }
 
   let encryptedData;
@@ -171,8 +172,7 @@ export const encryptAndUploadMetadataToIpfs = async ({
 
   const encryptedSymmetricKeyString = uint8arrayToString(encryptedSymmetricKey, "base16");
 
-  //   @ts-ignore
-  const authorization = 'Basic ' + Buffer.from(process.env.INFURA_ID + ':' + process.env.INFURA_SECRET_KEY).toString('base64');
+  const authorization = 'Basic ' + Buffer.from(`${infuraId}:${infuraSecretKey}`).toString('base64');
   const ipfs = ipfsClient.create({
     url: "https://ipfs.infura.io:5001/api/v0",
     headers:{
@@ -227,19 +227,23 @@ export const decryptStringWithIpfs = async ({
     error: LIT_ERROR.INVALID_PARAM_TYPE,
   });
 
-  const metadata = await (await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`)).json();
-  const symmetricKey = await litNodeClient.getEncryptionKey({
-    accessControlConditions: metadata.accessControlConditions,
-    evmContractConditions: metadata.evmContractConditions,
-    solRpcConditions: metadata.solRpcConditions,
-    unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
-    toDecrypt: metadata.encryptedSymmetricKeyString,
-    chain: metadata.chain,
-    authSig
-  });
-
-  const encryptedDataBlob = new Blob([Buffer.from(metadata.encryptedData)], { type: 'application/octet-stream' });
-  return await decryptString(encryptedDataBlob, symmetricKey);
+  try {
+    const metadata = await (await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`)).json();
+    const symmetricKey = await litNodeClient.getEncryptionKey({
+      accessControlConditions: metadata.accessControlConditions,
+      evmContractConditions: metadata.evmContractConditions,
+      solRpcConditions: metadata.solRpcConditions,
+      unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
+      toDecrypt: metadata.encryptedSymmetricKeyString,
+      chain: metadata.chain,
+      authSig
+    });
+  
+    const encryptedDataBlob = new Blob([Buffer.from(metadata.encryptedData)], { type: 'application/octet-stream' });
+    return await decryptString(encryptedDataBlob, symmetricKey);
+  } catch(e) {
+    throw new Error('Invalid ipfsCid');
+  }
 }
 
 // ---------- Local Helpers ----------
