@@ -562,10 +562,10 @@ export interface EncryptAndUploadMetadataToIpfsProps {
   chain: string;
 
   // The string you wish to encrypt
-  string: string;
+  string?: string;
 
   // The file you wish to encrypt
-  file: AcceptedFileType;
+  file?: AcceptedFileType;
 
   // An instance of LitNodeClient that is already connected
   litNodeClient: ILitNodeClient;

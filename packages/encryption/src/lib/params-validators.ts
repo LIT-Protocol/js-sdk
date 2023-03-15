@@ -453,9 +453,10 @@ export const paramsValidators = {
 
     // -- validate
     if (
+      params.string !== undefined &&
       !checkType({
         value: params.string,
-        allowedTypes: ['String', 'Undefined'],
+        allowedTypes: ['String'],
         paramName: 'string',
         functionName: 'encryptAndUploadMetadataToIpfs',
       })
@@ -464,9 +465,10 @@ export const paramsValidators = {
 
     // -- validate
     if (
+      params.file !== undefined &&
       !checkType({
         value: params.file,
-        allowedTypes: ['Blob', 'File', 'Undefined'],
+        allowedTypes: ['Blob', 'File'],
         paramName: 'file',
         functionName: 'encryptAndUploadMetadataToIpfs',
       })

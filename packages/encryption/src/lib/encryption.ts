@@ -94,11 +94,11 @@ const metadataForFile = ({
 
 /**
  *
- * Encrypt a string or file, save the key to the Lit network, and then uploads all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS & returns the IPFS CID.
+ * Encrypt a string or file, save the key to the Lit network, and upload all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS using the ipfs-client-http SDK & returns the IPFS CID.
  *
  * @param { EncryptAndUploadMetadataToIpfsProps }
  *
- * @returns { Promise<string | undefined> }
+ * @returns { Promise<string> }
  *
  */
 export const encryptAndUploadMetadataToIpfs = async ({
@@ -111,7 +111,7 @@ export const encryptAndUploadMetadataToIpfs = async ({
   string,
   file,
   litNodeClient,
-}: EncryptAndUploadMetadataToIpfsProps): Promise<string | undefined> => {
+}: EncryptAndUploadMetadataToIpfsProps): Promise<string> => {
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'encryptAndUploadMetadataToIpfs',
@@ -128,18 +128,31 @@ export const encryptAndUploadMetadataToIpfs = async ({
     },
   });
 
-  if (!paramsIsSafe) return;
+  if (!paramsIsSafe) return throwError({
+    message: `authSig, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, litNodeClient, string or file must be provided`,
+    error: LIT_ERROR.INVALID_PARAM_TYPE,
+  });
 
-  if (!string && !file) return;
+  if (string === undefined && file === undefined) return throwError({
+    message: `Either string or file must be provided`,
+    error: LIT_ERROR.INVALID_PARAM_TYPE,
+  });
+
+  //   @ts-ignore
+  if (!process.env.INFURA_ID || !process.env.INFURA_SECRET_KEY) {
+    throw new Error('Please provide your INFURA_ID and INFURA_SECRET_KEY as env variables');
+  }
 
   let encryptedData;
   let symmetricKey;
-  if (string) {
+  if (string !== undefined && file !== undefined) {
+    throw new Error('Provide only either a string or file to encrypt');
+  } else if (string !== undefined) {
     const encryptedString = await encryptString(string);
     encryptedData = encryptedString.encryptedString;
     symmetricKey = encryptedString.symmetricKey;
   } else {
-    const encryptedString = await encryptFile({ file });
+    const encryptedString = await encryptFile({ file: file! });
     encryptedData = encryptedString.encryptedFile;
     symmetricKey = encryptedString.symmetricKey;
   }
@@ -159,11 +172,6 @@ export const encryptAndUploadMetadataToIpfs = async ({
   const encryptedSymmetricKeyString = uint8arrayToString(encryptedSymmetricKey, "base16");
 
   //   @ts-ignore
-  if (!process.env.INFURA_ID || !process.env.INFURA_SECRET_KEY) {
-    throw new Error('Please provide your Infura API key and secret key');
-  }
-
-  //   @ts-ignore
   const authorization = 'Basic ' + Buffer.from(process.env.INFURA_ID + ':' + process.env.INFURA_SECRET_KEY).toString('base64');
   const ipfs = ipfsClient.create({
     url: "https://ipfs.infura.io:5001/api/v0",
@@ -173,22 +181,26 @@ export const encryptAndUploadMetadataToIpfs = async ({
   });
 
   const encryptedDataJson = Buffer.from(await encryptedData.arrayBuffer()).toJSON();
-  const res = await ipfs.add(JSON.stringify({
-    encryptedData: encryptedDataJson,
-    encryptedSymmetricKeyString,
-    accessControlConditions,
-    evmContractConditions,
-    solRpcConditions,
-    unifiedAccessControlConditions,
-    chain
-  }));
+  try {
+    const res = await ipfs.add(JSON.stringify({
+      encryptedData: encryptedDataJson,
+      encryptedSymmetricKeyString,
+      accessControlConditions,
+      evmContractConditions,
+      solRpcConditions,
+      unifiedAccessControlConditions,
+      chain
+    }));
 
-  return res.path;
+    return res.path;
+  } catch(e) {
+    throw new Error("Provided INFURA_ID or INFURA_SECRET_KEY in invalid hence can't upload to IPFS");
+  }
 }
 
 /**
  *
- * Decrypt the string, using its metadata stored on IPFS with the given ipfsCid.
+ * Decrypt & return the string or file using its metadata stored on IPFS with the given ipfsCid.
  *
  * @param { DecryptStringWithIpfsProps }
  *
@@ -210,7 +222,10 @@ export const decryptStringWithIpfs = async ({
     },
   });
 
-  if (!paramsIsSafe) return;
+  if (!paramsIsSafe) return throwError({
+    message: `authSig, ipfsCid, litNodeClient must be provided`,
+    error: LIT_ERROR.INVALID_PARAM_TYPE,
+  });
 
   const metadata = await (await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`)).json();
   const symmetricKey = await litNodeClient.getEncryptionKey({
