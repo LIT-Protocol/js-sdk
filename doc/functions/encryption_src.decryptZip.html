@@ -18,7 +18,7 @@
 <h1>Function decryptZip</h1></div>
 <section class="tsd-panel">
 <ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-<li class="tsd-signature tsd-anchor-link" id="decryptZip">decrypt<wbr/>Zip<span class="tsd-signature-symbol">(</span>encryptedZipBlob<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Blob</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">File</span>, symmKey<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span><br/><span>    </span>[key: <span class="tsd-signature-type">string</span>]<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">JSZip.JSZipObject</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">&gt;</span><a href="#decryptZip" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="decryptZip">decrypt<wbr/>Zip<span class="tsd-signature-symbol">(</span>encryptedZipBlob<span class="tsd-signature-symbol">: </span><a href="../types/types_src.AcceptedFileType.html" class="tsd-signature-type" data-tsd-kind="Type alias">AcceptedFileType</a>, symmKey<span class="tsd-signature-symbol">: </span><a href="../types/types_src.SymmetricKey.html" class="tsd-signature-type" data-tsd-kind="Type alias">SymmetricKey</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span><br/><span>    </span>[key: <span class="tsd-signature-type">string</span>]<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">JSZip.JSZipObject</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">&gt;</span><a href="#decryptZip" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Decrypt and unzip a zip that was created using encryptZip, zipAndEncryptString, or zipAndEncryptFiles.</p>
 
@@ -28,16 +28,16 @@
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5>encryptedZipBlob: <span class="tsd-signature-type">Blob</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">File</span></h5>
+<h5>encryptedZipBlob: <a href="../types/types_src.AcceptedFileType.html" class="tsd-signature-type" data-tsd-kind="Type alias">AcceptedFileType</a></h5>
 <div class="tsd-comment tsd-typography"><p>The encrypted zip as a Blob</p>
 </div></li>
 <li>
-<h5>symmKey: <span class="tsd-signature-type">Uint8Array</span></h5>
+<h5>symmKey: <a href="../types/types_src.SymmetricKey.html" class="tsd-signature-type" data-tsd-kind="Type alias">SymmetricKey</a></h5>
 <div class="tsd-comment tsd-typography"><p>The symmetric key used that will be used to decrypt this zip.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span><br/><span>    </span>[key: <span class="tsd-signature-type">string</span>]<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">JSZip.JSZipObject</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/LIT-Protocol/js-sdk/blob/0bcf9c9/packages/encryption/src/lib/encryption.ts#L273">packages/encryption/src/lib/encryption.ts:273</a></li></ul></aside></li></ul></section></div>
+<li>Defined in <a href="https://github.com/LIT-Protocol/js-sdk/blob/7f8d8b8/packages/encryption/src/lib/encryption.ts#L275">packages/encryption/src/lib/encryption.ts:275</a></li></ul></aside></li></ul></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
