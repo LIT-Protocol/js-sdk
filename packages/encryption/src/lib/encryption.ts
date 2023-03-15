@@ -204,14 +204,14 @@ export const encryptAndUploadMetadataToIpfs = async ({
  *
  * @param { DecryptStringWithIpfsProps }
  *
- * @returns { Promise<string | undefined> }
+ * @returns { Promise<string> }
  *
  */
 export const decryptStringWithIpfs = async ({
   authSig,
   ipfsCid,
   litNodeClient,
-}: DecryptStringWithIpfsProps): Promise<string | undefined> => {
+}: DecryptStringWithIpfsProps): Promise<string> => {
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'decryptStringWithIpfs',
@@ -237,8 +237,6 @@ export const decryptStringWithIpfs = async ({
     chain: metadata.chain,
     authSig
   });
-
-  if (!symmetricKey) return;
 
   const encryptedDataBlob = new Blob([Buffer.from(metadata.encryptedData)], { type: 'application/octet-stream' });
   return await decryptString(encryptedDataBlob, symmetricKey);

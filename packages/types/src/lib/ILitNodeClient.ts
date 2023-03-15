@@ -382,7 +382,7 @@ export interface ILitNodeClient {
    */
   getEncryptionKey(
     params: JsonEncryptionRetrieveRequest
-  ): Promise<Uint8Array | undefined>;
+  ): Promise<Uint8Array>;
 
   /**
    *
