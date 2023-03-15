@@ -577,7 +577,7 @@ export interface EncryptAndUploadMetadataToIpfsProps {
   infuraSecretKey: string;
 }
 
-export interface DecryptStringWithIpfsProps {
+export interface DecryptWithIpfsProps {
   // The authSig of the user.  Returned via the checkAndSignAuthMessage function
   authSig: JsonAuthSig;
 

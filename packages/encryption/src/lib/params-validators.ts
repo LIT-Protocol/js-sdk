@@ -14,7 +14,7 @@ import {
   DecryptZipFileWithMetadataProps,
   EncryptFileAndZipWithMetadataProps,
   EncryptAndUploadMetadataToIpfsProps,
-  DecryptStringWithIpfsProps,
+  DecryptWithIpfsProps,
   KV,
   ExecuteJsProps,
 } from '@lit-protocol/types';
@@ -479,8 +479,8 @@ export const paramsValidators = {
     return true;
   },
 
-  decryptStringWithIpfs: (
-    params: DecryptStringWithIpfsProps
+  decryptWithIpfs: (
+    params: DecryptWithIpfsProps
   ) => {
     // -- validate
 
@@ -491,7 +491,7 @@ export const paramsValidators = {
         value: params.authSig,
         allowedTypes: ['Object'],
         paramName: 'authSig',
-        functionName: 'decryptStringWithIpfs',
+        functionName: 'decryptWithIpfs',
       })
     )
       return false;

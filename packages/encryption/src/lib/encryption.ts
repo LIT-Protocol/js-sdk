@@ -13,7 +13,7 @@ import {
   EncryptedZip,
   EncryptFileAndZipWithMetadataProps,
   EncryptAndUploadMetadataToIpfsProps,
-  DecryptStringWithIpfsProps,
+  DecryptWithIpfsProps,
   IJWT,
   SymmetricKey,
   ThreeKeys,
@@ -160,9 +160,9 @@ export const encryptAndUploadMetadataToIpfs = async ({
     encryptedData = encryptedString.encryptedString;
     symmetricKey = encryptedString.symmetricKey;
   } else {
-    const encryptedString = await encryptFile({ file: file! });
-    encryptedData = encryptedString.encryptedFile;
-    symmetricKey = encryptedString.symmetricKey;
+    const encryptedFile = await encryptFile({ file: file! });
+    encryptedData = encryptedFile.encryptedFile;
+    symmetricKey = encryptedFile.symmetricKey;
   }
 
   const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
@@ -190,7 +190,7 @@ export const encryptAndUploadMetadataToIpfs = async ({
   const encryptedDataJson = Buffer.from(await encryptedData.arrayBuffer()).toJSON();
   try {
     const res = await ipfs.add(JSON.stringify({
-      encryptedData: encryptedDataJson,
+      [string !== undefined ? "encryptedString" : "encryptedFile"]: encryptedDataJson,
       encryptedSymmetricKeyString,
       accessControlConditions,
       evmContractConditions,
@@ -210,21 +210,21 @@ export const encryptAndUploadMetadataToIpfs = async ({
 
 /**
  *
- * Decrypt & return the string or file using its metadata stored on IPFS with the given ipfsCid.
+ * Decrypt & return the string or file (in Uint8Array format) using its metadata stored on IPFS with the given ipfsCid.
  *
- * @param { DecryptStringWithIpfsProps }
+ * @param { DecryptWithIpfsProps }
  *
- * @returns { Promise<string> }
+ * @returns { Promise<string | Uint8Array> }
  *
  */
-export const decryptStringWithIpfs = async ({
+export const decryptWithIpfs = async ({
   authSig,
   ipfsCid,
   litNodeClient,
-}: DecryptStringWithIpfsProps): Promise<string> => {
+}: DecryptWithIpfsProps): Promise<string | Uint8Array> => {
   // -- validate
   const paramsIsSafe = safeParams({
-    functionName: 'decryptStringWithIpfs',
+    functionName: 'decryptWithIpfs',
     params: {
       authSig,
       ipfsCid,
@@ -249,8 +249,13 @@ export const decryptStringWithIpfs = async ({
       authSig
     });
   
-    const encryptedDataBlob = new Blob([Buffer.from(metadata.encryptedData)], { type: 'application/octet-stream' });
-    return await decryptString(encryptedDataBlob, symmetricKey);
+    if (metadata.encryptedString !== undefined) {
+      const encryptedStringBlob = new Blob([Buffer.from(metadata.encryptedString)], { type: 'application/octet-stream' });
+      return await decryptString(encryptedStringBlob, symmetricKey);
+    }
+
+    const encryptedFileBlob = new Blob([Buffer.from(metadata.encryptedFile)], { type: 'application/octet-stream' });
+    return await decryptFile({ file: encryptedFileBlob, symmetricKey });
   } catch(e) {
     return throwError({
       message: 'Invalid ipfsCid',
