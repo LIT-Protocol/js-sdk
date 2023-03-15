@@ -141,13 +141,20 @@ export const encryptAndUploadMetadataToIpfs = async ({
   });
 
   if (!infuraId || !infuraSecretKey) {
-    throw new Error('Please provide your Infura Project Id and Infura API Key Secret to add the encrypted metadata on IPFS');
+    return throwError({
+      message: 'Please provide your Infura Project Id and Infura API Key Secret to add the encrypted metadata on IPFS',
+      error: LIT_ERROR.INVALID_PARAM_TYPE,
+    })
   }
 
   let encryptedData;
   let symmetricKey;
   if (string !== undefined && file !== undefined) {
-    throw new Error('Provide only either a string or file to encrypt');
+    return throwError({
+      message: 'Provide only either a string or file to encrypt',
+      error: LIT_ERROR.INVALID_PARAM_TYPE,
+    })
+
   } else if (string !== undefined) {
     const encryptedString = await encryptString(string);
     encryptedData = encryptedString.encryptedString;
@@ -194,7 +201,10 @@ export const encryptAndUploadMetadataToIpfs = async ({
 
     return res.path;
   } catch(e) {
-    throw new Error("Provided INFURA_ID or INFURA_SECRET_KEY in invalid hence can't upload to IPFS");
+    return throwError({
+      message: 'Provided INFURA_ID or INFURA_SECRET_KEY in invalid hence can\'t upload to IPFS',
+      error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+    })
   }
 }
 
@@ -242,7 +252,10 @@ export const decryptStringWithIpfs = async ({
     const encryptedDataBlob = new Blob([Buffer.from(metadata.encryptedData)], { type: 'application/octet-stream' });
     return await decryptString(encryptedDataBlob, symmetricKey);
   } catch(e) {
-    throw new Error('Invalid ipfsCid');
+    return throwError({
+      message: 'Invalid ipfsCid',
+      error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+    })
   }
 }
 
@@ -265,11 +278,10 @@ export const encryptString = async (str: string): Promise<EncryptedString> => {
       functionName: 'encryptString',
     })
   ) {
-    throwError({
+    return throwError({
       message: `{${str}} must be a string`,
       error: LIT_ERROR.INVALID_PARAM_TYPE,
-    });
-    throw new Error(`{${str}} must be a string`);
+    })
   }
 
   // -- prepare
