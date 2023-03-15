@@ -2494,13 +2494,13 @@ export class LitNodeClientNodeJs {
 
     console.log('signatures', signatures);
 
-    const { sessionSig } = signatures;
+    const { authSig } = signatures;
 
     return {
-      sig: sessionSig.signature,
+      sig: authSig.signature,
       derivedVia: 'webauthn via Lit PKP',
-      signedMessage: sessionSig.siweMessage,
-      address: computeAddress('0x' + sessionSig.publicKey),
+      signedMessage: authSig.siweMessage,
+      address: computeAddress('0x' + authSig.publicKey),
     };
   };
 
