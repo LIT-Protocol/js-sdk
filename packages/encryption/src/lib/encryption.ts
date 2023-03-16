@@ -12,8 +12,8 @@ import {
   EncryptedString,
   EncryptedZip,
   EncryptFileAndZipWithMetadataProps,
-  EncryptAndUploadMetadataToIpfsProps,
-  DecryptWithIpfsProps,
+  EncryptToIpfsProps,
+  DecryptFromIpfsProps,
   IJWT,
   SymmetricKey,
   ThreeKeys,
@@ -96,12 +96,12 @@ const metadataForFile = ({
  *
  * Encrypt a string or file, save the key to the Lit network, and upload all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS using the ipfs-client-http SDK & returns the IPFS CID.
  *
- * @param { EncryptAndUploadMetadataToIpfsProps }
+ * @param { EncryptToIpfsProps }
  *
  * @returns { Promise<string> }
  *
  */
-export const encryptAndUploadMetadataToIpfs = async ({
+export const encryptToIpfs = async ({
   authSig,
   accessControlConditions,
   evmContractConditions,
@@ -113,10 +113,10 @@ export const encryptAndUploadMetadataToIpfs = async ({
   litNodeClient,
   infuraId,
   infuraSecretKey,
-}: EncryptAndUploadMetadataToIpfsProps): Promise<string> => {
+}: EncryptToIpfsProps): Promise<string> => {
   // -- validate
   const paramsIsSafe = safeParams({
-    functionName: 'encryptAndUploadMetadataToIpfs',
+    functionName: 'encryptToIpfs',
     params: {
       authSig,
       accessControlConditions,
@@ -212,19 +212,19 @@ export const encryptAndUploadMetadataToIpfs = async ({
  *
  * Decrypt & return the string or file (in Uint8Array format) using its metadata stored on IPFS with the given ipfsCid.
  *
- * @param { DecryptWithIpfsProps }
+ * @param { DecryptFromIpfsProps }
  *
  * @returns { Promise<string | Uint8Array> }
  *
  */
-export const decryptWithIpfs = async ({
+export const decryptFromIpfs = async ({
   authSig,
   ipfsCid,
   litNodeClient,
-}: DecryptWithIpfsProps): Promise<string | Uint8Array> => {
+}: DecryptFromIpfsProps): Promise<string | Uint8Array> => {
   // -- validate
   const paramsIsSafe = safeParams({
-    functionName: 'decryptWithIpfs',
+    functionName: 'decryptFromIpfs',
     params: {
       authSig,
       ipfsCid,
