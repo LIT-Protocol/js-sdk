@@ -1,0 +1,12 @@
+# yarn build:packages && cd packages/lit-node-client && npm link && cd ../..
+yarn build:packages
+
+cd packages/lit-node-client && npm link && cd ../..
+cd packages/lit-node-client-nodejs && npm link && cd ../..
+cd packages/auth-browser && npm link && cd ../..
+cd packages/encryption && npm link && cd ../..
+cd packages/uint8arrays && npm link && cd ../..
+# cd packages/pkp-ethers && npm link && cd ../..
+# cd packages/utils-node && npm link && cd ../..
+
+# then in your project, do `npm link @lit-protocol/lit-node-client`
