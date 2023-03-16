@@ -19,7 +19,6 @@ import { toUtf8Bytes } from '@ethersproject/strings';
 import { hexlify } from '@ethersproject/bytes';
 import { verifyMessage } from '@ethersproject/wallet';
 
-// @ts-ignore
 import WalletConnectProviderPkg from '@walletconnect/ethereum-provider';
 
 // @ts-ignore
