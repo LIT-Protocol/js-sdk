@@ -542,7 +542,7 @@ export interface JsonHandshakeResponse {
   networkPubKeySet: string;
 }
 
-export interface EncryptAndUploadMetadataToIpfsProps {
+export interface EncryptToIpfsProps {
   // The authSig of the user.  Returned via the checkAndSignAuthMessage function
   authSig: JsonAuthSig;
 
@@ -577,7 +577,7 @@ export interface EncryptAndUploadMetadataToIpfsProps {
   infuraSecretKey: string;
 }
 
-export interface DecryptWithIpfsProps {
+export interface DecryptFromIpfsProps {
   // The authSig of the user.  Returned via the checkAndSignAuthMessage function
   authSig: JsonAuthSig;
 
