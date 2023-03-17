@@ -21,6 +21,7 @@ const logger = new Logger(version);
 export interface PKPWalletProp{
   pkpPubKey: string;
   controllerAuthSig: any;
+  controllerSessionSigs: any;
   provider: string;
   litNetwork?: any;
   debug?: boolean;
@@ -57,14 +58,15 @@ export class PKPWallet extends Signer implements ExternallyOwnedAccount, TypedDa
 
   async runLitAction(toSign: Uint8Array | BytesLike, sigName: string): Promise<any> {
 
-      if ( ! this.pkpWalletProp.controllerAuthSig || ! this.pkpWalletProp.pkpPubKey) {
-          throw new Error("controllerAuthSig and pkpPubKey are required");
+      if (! this.pkpWalletProp.pkpPubKey) {
+          throw new Error("pkpPubKey is required");
       }
 
       const executeJsArgs = {
         ...(this.litActionCode && {code: this.litActionCode}),
         ...(this.litActionIPFS && {ipfsId: this.litActionIPFS}),
         authSig: this.pkpWalletProp.controllerAuthSig,
+        sessionSigs: this.pkpWalletProp.controllerSessionSigs,
         jsParams: {
 					...{
 						toSign,
@@ -79,12 +81,17 @@ export class PKPWallet extends Signer implements ExternallyOwnedAccount, TypedDa
 
       this.log("executeJsArgs:", executeJsArgs);
 
+      try {
       const res = await this.litNodeClient.executeJs(executeJsArgs);
 
       this.log("res:", res);
       this.log("res.signatures[sigName]:", res.signatures[sigName]);
       
       return res.signatures[sigName]
+      } catch (err) {
+        this.log("err:", err);
+        throw err;
+      }
   }
 
   constructor(prop: PKPWalletProp) {

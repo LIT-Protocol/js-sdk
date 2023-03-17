@@ -357,7 +357,25 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
   toDecrypt: string;
 }
 
-export interface ExecuteJsProps extends JsonExecutionRequest {
+export interface ExecuteJsProps {
+   // the authSig to use to authorize the user with the nodes
+   authSig?: JsonAuthSig;
+
+   // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
+   jsParams: any;
+ 
+   // JS code to run on the nodes
+   code?: string;
+ 
+   // The IPFS ID of some JS code to run on the nodes
+   ipfsId?: string;
+ 
+   // the session signatures to use to authorize the user with the nodes
+   sessionSigs?: any;
+ 
+   // whether to run this on a single node or many
+   targetNodeRange?: number;
+   
   // A boolean that defines if debug info will be returned or not.
   debug?: boolean;
 }
