@@ -228,6 +228,9 @@ export interface JsonExecutionRequest {
 
   // whether to run this on a single node or many
   targetNodeRange?: number;
+
+  // auth methods to resolve 
+  authMethods?: Array<Object>;
 }
 
 /**
