@@ -47,7 +47,7 @@ export const safeParams = ({
 export const paramsValidators = {
   executeJs: (params: ExecuteJsProps) => {
     // -- prepare params
-    const { code, ipfsId, authSig, jsParams, debug, sessionSigs } = params;
+    const { code, ipfsId, authSig, jsParams, debug, sessionSigs, authMethods = [] } = params;
 
     // -- validate: either 'code' or 'ipfsId' must exists
     if (!code && !ipfsId) {
@@ -71,6 +71,18 @@ export const paramsValidators = {
         value: authSig,
         allowedTypes: ['Object'],
         paramName: 'authSig',
+        functionName: 'executeJs',
+      })
+    )
+      return false;
+
+    // -- validate: authMethods and its type is correct
+    if (
+      authMethods && authMethods.length > 0 &&
+      !checkType({
+        value: authMethods,
+        allowedTypes: ['Array'],
+        paramName: 'authMethods',
         functionName: 'executeJs',
       })
     )
