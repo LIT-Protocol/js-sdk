@@ -504,11 +504,11 @@ async function init(input) {
             var ret;
 
             try{
-                ret = require(getStringFromWasm0(arg1, arg2));
-            }catch(e){
                 // this function probably not run on browser
                 console.warn("[ECDSA-SDK] REPORT THIS ERROR TO DEVELOPER");
                 ret = getStringFromWasm0(arg1, arg2);
+            }catch(e){
+                ret = require(getStringFromWasm0(arg1, arg2));
             }
             console.warn("[ECDSA-SDK] ret:", ret);
             return addHeapObject(ret);
