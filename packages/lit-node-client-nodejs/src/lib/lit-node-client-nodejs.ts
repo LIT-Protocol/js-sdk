@@ -12,7 +12,7 @@ import {
 } from '@lit-protocol/access-control-conditions';
 import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 
-import { 
+import {
   defaultLitnodeClientConfig,
   LIT_ERROR,
   LIT_NETWORKS,
@@ -29,7 +29,7 @@ import {
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetSessionSigsProps,
-  GetSignSessionKeySharesProp,  
+  GetSignSessionKeySharesProp,
   GetVerifyWebAuthnAuthenticationKeyShareProps,
   HandshakeWithSgx,
   JsonAuthSig,
@@ -43,7 +43,6 @@ import {
   JsonStoreSigningRequest,
   KV,
   LitNodeClientConfig,
-  
   NodeCommandResponse,
   NodeCommandServerKeysResponse,
   NodeLog,
@@ -107,7 +106,9 @@ export class LitNodeClientNodeJs {
   subnetPubKey: string | null;
   networkPubKey: string | null;
   networkPubKeySet: string | null;
-  defaultAuthCallback?: (authSigParams: CheckAndSignAuthParams) => Promise<JsonAuthSig>;
+  defaultAuthCallback?: (
+    authSigParams: CheckAndSignAuthParams
+  ) => Promise<JsonAuthSig>;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -225,6 +226,10 @@ export class LitNodeClientNodeJs {
 
     if (params.ipfsId) {
       reqBody.ipfsId = params.ipfsId;
+    }
+
+    if (params.authMethods && params.authMethods.length > 0) {
+      reqBody.authMethods = params.authMethods;
     }
 
     return reqBody;
@@ -392,12 +397,11 @@ export class LitNodeClientNodeJs {
           uri: sessionKeyUri,
         });
       } else {
-        
-        if(!this.defaultAuthCallback){
+        if (!this.defaultAuthCallback) {
           return throwError({
             message: 'No default auth callback provided',
             error: LIT_ERROR.PARAMS_MISSING_ERROR,
-          })
+          });
         }
         walletSig = await this.defaultAuthCallback({
           chain,
@@ -2445,7 +2449,7 @@ export class LitNodeClientNodeJs {
 
     let siweMessage: SiweMessage = new SiweMessage({
       domain: globalThis.location.host,
-      address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // This will be populated by the node.
+      address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // This will be populated by the node.
       statement: 'Lit Protocol PKP session signature',
       uri: sessionKeyUri,
       version: '1',
@@ -2584,11 +2588,11 @@ export class LitNodeClientNodeJs {
           litNodeClient: this,
         });
       } else {
-        if(!this.defaultAuthCallback){
+        if (!this.defaultAuthCallback) {
           return throwError({
             message: 'No default auth callback provided',
             error: LIT_ERROR.PARAMS_MISSING_ERROR,
-          })
+          });
         }
         walletSig = await this.defaultAuthCallback({
           chain: params.chain,
