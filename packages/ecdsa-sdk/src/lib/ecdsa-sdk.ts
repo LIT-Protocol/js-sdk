@@ -510,7 +510,7 @@ async function init(input) {
             // }catch(e){
             //     ret = require(getStringFromWasm0(arg1, arg2));
             // }
-            console.warn("[ECDSA-SDK] ret:", ret);
+            // console.warn("[ECDSA-SDK] ret:", ret);
             return addHeapObject(ret);
         }, arguments);
     };
