@@ -500,16 +500,16 @@ async function init(input) {
     imports.wbg.__wbg_require_edfaedd93e302925 = function () {
         console.warn("[ECDSA-SDK] __wbg_require_edfaedd93e302925");
         return handleError(function (arg0, arg1, arg2) {
+            var ret = require(getStringFromWasm0(arg1, arg2));
 
-            var ret;
-
-            try{
-                // this function probably not run on browser
-                console.warn("[ECDSA-SDK] REPORT THIS ERROR TO DEVELOPER");
-                ret = getStringFromWasm0(arg1, arg2);
-            }catch(e){
-                ret = require(getStringFromWasm0(arg1, arg2));
-            }
+            // Note: This function can probably be removed for browser
+            // try{
+            //     // this function probably not run on browser
+            //     console.warn("[ECDSA-SDK] REPORT THIS ERROR TO DEVELOPER");
+            //     ret = getStringFromWasm0(arg1, arg2);
+            // }catch(e){
+            //     ret = require(getStringFromWasm0(arg1, arg2));
+            // }
             console.warn("[ECDSA-SDK] ret:", ret);
             return addHeapObject(ret);
         }, arguments);
