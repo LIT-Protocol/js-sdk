@@ -22,9 +22,9 @@ export interface AccsOperatorParams {
 export interface AccsRegularParams {
   conditionType?: ConditionType;
   returnValueTest: {
-    key?: string,
-    comparator: string,
-    value: string,
+    key?: string;
+    comparator: string;
+    value: string;
   };
   method?: string;
   params?: any[];
@@ -40,8 +40,8 @@ export interface AccsDefaultParams extends AccsRegularParams {
 export interface AccsSOLV2Params extends AccsRegularParams {
   pdaKey: string;
   pdaInterface: {
-    offset: string | number,
-    fields: string | object,
+    offset: string | number;
+    fields: string | object;
   };
   pdaParams: [];
 }
@@ -131,7 +131,7 @@ export interface ThreeKeys {
   zipBlob: any;
 
   // encryptedSymmetricKey is the symmetric key needed to decrypt the content, encrypted with the Lit network public key.  You may wish to store encryptedSymmetricKey in your own database to support quicker re-encryption operations when adding additional access control conditions in the future, but this is entirely optional, and this key is already stored inside the zipBlob.
-  encryptedSymmetricKey: EncryptedSymmetricKey
+  encryptedSymmetricKey: EncryptedSymmetricKey;
 
   // symmetricKey is the raw symmetric key used to encrypt the files.  DO NOT STORE IT.  It is provided in case you wish to create additional "OR" access control conditions for the same file.
   symmetricKey: SymmetricKey;
@@ -148,7 +148,7 @@ export interface EncryptedFile {
 }
 
 export interface DecryptFileProps {
-  file: AcceptedFileType
+  file: AcceptedFileType;
   symmetricKey: SymmetricKey;
 }
 
@@ -193,7 +193,9 @@ export interface LitNodeClientConfig {
   bootstrapUrls: Array<string>;
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
-  defaultAuthCallback?: (authSigParams: CheckAndSignAuthParams) => Promise<JsonAuthSig>;
+  defaultAuthCallback?: (
+    authSigParams: CheckAndSignAuthParams
+  ) => Promise<JsonAuthSig>;
 }
 
 export interface CustomNetwork {
@@ -212,7 +214,7 @@ export interface CustomNetwork {
  */
 export interface JsonExecutionRequest {
   // the authSig to use to authorize the user with the nodes
-  authSig: JsonAuthSig;
+  authSig?: JsonAuthSig;
 
   // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
   jsParams: any;
@@ -229,7 +231,7 @@ export interface JsonExecutionRequest {
   // whether to run this on a single node or many
   targetNodeRange?: number;
 
-  // auth methods to resolve 
+  // auth methods to resolve
   authMethods?: Array<Object>;
 }
 
@@ -360,25 +362,7 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
   toDecrypt: string;
 }
 
-export interface ExecuteJsProps {
-   // the authSig to use to authorize the user with the nodes
-   authSig?: JsonAuthSig;
-
-   // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
-   jsParams: any;
- 
-   // JS code to run on the nodes
-   code?: string;
- 
-   // The IPFS ID of some JS code to run on the nodes
-   ipfsId?: string;
- 
-   // the session signatures to use to authorize the user with the nodes
-   sessionSigs?: any;
- 
-   // whether to run this on a single node or many
-   targetNodeRange?: number;
-   
+export interface ExecuteJsProps extends JsonExecutionRequest {
   // A boolean that defines if debug info will be returned or not.
   debug?: boolean;
 }
@@ -424,9 +408,9 @@ export interface ExecuteJsResponse {
   response: string;
   logs: string;
   debug?: {
-    allNodeResponses: NodeResponse[],
-    allNodeLogs: NodeLog[],
-    rawNodeHTTPResponses: any,
+    allNodeResponses: NodeResponse[];
+    allNodeLogs: NodeLog[];
+    rawNodeHTTPResponses: any;
   };
 }
 
@@ -465,7 +449,7 @@ export interface NodePromiseResponse {
 
 export interface NodeError {
   error: {
-    errorCode: string,
+    errorCode: string;
   };
 }
 
