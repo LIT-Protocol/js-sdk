@@ -336,10 +336,12 @@ describe('Lit Action', () => {
   });
 
   it('Gets JS execution shared for IPFS code', async () => {
+    const ipfsId = 'QmTLZxMgjHoZiNZyGnS4CXjSjbpZSnie3y32HoqK1ykmkW';
+
     const params = {
       authSig: savedParams.authSig,
       jsParams: {},
-      ipfsId: 'QmTLZxMgjHoZiNZyGnS4CXjSjbpZSnie3y32HoqK1ykmkW',
+      ipfsId,
     };
 
     const reqBody = await savedParams.litNodeClient.getLitActionRequestBody(
@@ -350,9 +352,13 @@ describe('Lit Action', () => {
       reqBody
     );
 
-    expect(res)
-      .to.have.property('response')
-      .and.contains('0x352e559b06e9c6c72edbf5af2bf52c61f088db71');
+    // expect JSON.parse(res.response)['Lit.Auth'] to contain the IPFS code in the array
+    const litAuth = JSON.parse(res.response)['Lit.Auth'];
+    const keys = Object.keys(litAuth);
+
+    expect(keys).to.contain('actionIpfsIds');
+
+    expect(litAuth.actionIpfsIds).to.contain(ipfsId);
   });
 
   it('Gets JWT params', () => {
