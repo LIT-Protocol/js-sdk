@@ -13,6 +13,8 @@ import {
   JsonSaveEncryptionKeyRequest,
   DecryptZipFileWithMetadataProps,
   EncryptFileAndZipWithMetadataProps,
+  EncryptToIpfsProps,
+  DecryptFromIpfsProps,
   KV,
   ExecuteJsProps,
 } from '@lit-protocol/types';
@@ -383,6 +385,130 @@ export const paramsValidators = {
     )
       return false;
 
+    return true;
+  },
+
+  encryptToIpfs: (
+    params: EncryptToIpfsProps
+  ) => {
+    // -- validate
+
+    log('params:', params);
+
+    if (
+      !checkType({
+        value: params.authSig,
+        allowedTypes: ['Object'],
+        paramName: 'authSig',
+        functionName: 'encryptToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      params.accessControlConditions &&
+      !checkType({
+        value: params.accessControlConditions,
+        allowedTypes: ['Array'],
+        paramName: 'accessControlConditions',
+        functionName: 'encryptToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      params.evmContractConditions &&
+      !checkType({
+        value: params.evmContractConditions,
+        allowedTypes: ['Array'],
+        paramName: 'evmContractConditions',
+        functionName: 'encryptToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      params.solRpcConditions &&
+      !checkType({
+        value: params.solRpcConditions,
+        allowedTypes: ['Array'],
+        paramName: 'solRpcConditions',
+        functionName: 'encryptToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      params.unifiedAccessControlConditions &&
+      !checkType({
+        value: params.unifiedAccessControlConditions,
+        allowedTypes: ['Array'],
+        paramName: 'unifiedAccessControlConditions',
+        functionName: 'encryptToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      !checkIfAuthSigRequiresChainParam(
+        params.authSig,
+        params.chain,
+        'encryptToIpfs'
+      )
+    )
+      return false;
+
+    // -- validate
+    if (
+      params.string !== undefined &&
+      !checkType({
+        value: params.string,
+        allowedTypes: ['String'],
+        paramName: 'string',
+        functionName: 'encryptToIpfs',
+      })
+    )
+      return false;
+
+    // -- validate
+    if (
+      params.file !== undefined &&
+      !checkType({
+        value: params.file,
+        allowedTypes: ['Blob', 'File'],
+        paramName: 'file',
+        functionName: 'encryptToIpfs',
+      })
+    )
+      return false;
+
+    // -- success case
+    return true;
+  },
+
+  decryptFromIpfs: (
+    params: DecryptFromIpfsProps
+  ) => {
+    // -- validate
+
+    log('params:', params);
+
+    if (
+      !checkType({
+        value: params.authSig,
+        allowedTypes: ['Object'],
+        paramName: 'authSig',
+        functionName: 'decryptFromIpfs',
+      })
+    )
+      return false;
+
+    // -- success case
     return true;
   },
 

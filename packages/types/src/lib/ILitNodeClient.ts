@@ -19,7 +19,7 @@ import {
   RejectedNodePromises,
   SendNodeCommand,
   SignedChainDataToken,
-  SignWithECDSA,
+  // SignWithECDSA,
   SignConditionECDSA,
   SuccessNodePromises,
   ValidateAndSignECDSA,
@@ -382,7 +382,7 @@ export interface ILitNodeClient {
    */
   getEncryptionKey(
     params: JsonEncryptionRetrieveRequest
-  ): Promise<Uint8Array | undefined>;
+  ): Promise<Uint8Array>;
 
   /**
    *
@@ -406,7 +406,7 @@ export interface ILitNodeClient {
    * @returns { Promise<string> }
    *
    */
-  signWithEcdsa(params: SignWithECDSA): Promise<string>;
+  // signWithEcdsa(params: SignWithECDSA): Promise<string>;
 
   /**
    *

@@ -12,6 +12,8 @@ import {
   EncryptedString,
   EncryptedZip,
   EncryptFileAndZipWithMetadataProps,
+  EncryptToIpfsProps,
+  DecryptFromIpfsProps,
   IJWT,
   SymmetricKey,
   ThreeKeys,
@@ -38,6 +40,8 @@ import {
 import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
 
 import { safeParams } from './params-validators';
+
+import * as ipfsClient from 'ipfs-http-client';
 
 // ---------- Local Interfaces ----------
 
@@ -88,6 +92,178 @@ const metadataForFile = ({
   };
 };
 
+/**
+ *
+ * Encrypt a string or file, save the key to the Lit network, and upload all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS using the ipfs-client-http SDK & returns the IPFS CID.
+ *
+ * @param { EncryptToIpfsProps }
+ *
+ * @returns { Promise<string> }
+ *
+ */
+export const encryptToIpfs = async ({
+  authSig,
+  accessControlConditions,
+  evmContractConditions,
+  solRpcConditions,
+  unifiedAccessControlConditions,
+  chain,
+  string,
+  file,
+  litNodeClient,
+  infuraId,
+  infuraSecretKey,
+}: EncryptToIpfsProps): Promise<string> => {
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'encryptToIpfs',
+    params: {
+      authSig,
+      accessControlConditions,
+      evmContractConditions,
+      solRpcConditions,
+      unifiedAccessControlConditions,
+      chain,
+      string,
+      file,
+      litNodeClient,
+    },
+  });
+
+  if (!paramsIsSafe) return throwError({
+    message: `authSig, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, litNodeClient, string or file must be provided`,
+    error: LIT_ERROR.INVALID_PARAM_TYPE,
+  });
+
+  if (string === undefined && file === undefined) return throwError({
+    message: `Either string or file must be provided`,
+    error: LIT_ERROR.INVALID_PARAM_TYPE,
+  });
+
+  if (!infuraId || !infuraSecretKey) {
+    return throwError({
+      message: 'Please provide your Infura Project Id and Infura API Key Secret to add the encrypted metadata on IPFS',
+      error: LIT_ERROR.INVALID_PARAM_TYPE,
+    })
+  }
+
+  let encryptedData;
+  let symmetricKey;
+  if (string !== undefined && file !== undefined) {
+    return throwError({
+      message: 'Provide only either a string or file to encrypt',
+      error: LIT_ERROR.INVALID_PARAM_TYPE,
+    })
+
+  } else if (string !== undefined) {
+    const encryptedString = await encryptString(string);
+    encryptedData = encryptedString.encryptedString;
+    symmetricKey = encryptedString.symmetricKey;
+  } else {
+    const encryptedFile = await encryptFile({ file: file! });
+    encryptedData = encryptedFile.encryptedFile;
+    symmetricKey = encryptedFile.symmetricKey;
+  }
+
+  const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
+    accessControlConditions,
+    evmContractConditions,
+    solRpcConditions,
+    unifiedAccessControlConditions,
+    symmetricKey,
+    authSig,
+    chain,
+  });
+
+  log('encrypted key saved to Lit', encryptedSymmetricKey);
+
+  const encryptedSymmetricKeyString = uint8arrayToString(encryptedSymmetricKey, "base16");
+
+  const authorization = 'Basic ' + Buffer.from(`${infuraId}:${infuraSecretKey}`).toString('base64');
+  const ipfs = ipfsClient.create({
+    url: "https://ipfs.infura.io:5001/api/v0",
+    headers:{
+      authorization
+    }
+  });
+
+  const encryptedDataJson = Buffer.from(await encryptedData.arrayBuffer()).toJSON();
+  try {
+    const res = await ipfs.add(JSON.stringify({
+      [string !== undefined ? "encryptedString" : "encryptedFile"]: encryptedDataJson,
+      encryptedSymmetricKeyString,
+      accessControlConditions,
+      evmContractConditions,
+      solRpcConditions,
+      unifiedAccessControlConditions,
+      chain
+    }));
+
+    return res.path;
+  } catch(e) {
+    return throwError({
+      message: 'Provided INFURA_ID or INFURA_SECRET_KEY in invalid hence can\'t upload to IPFS',
+      error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+    })
+  }
+}
+
+/**
+ *
+ * Decrypt & return the string or file (in Uint8Array format) using its metadata stored on IPFS with the given ipfsCid.
+ *
+ * @param { DecryptFromIpfsProps }
+ *
+ * @returns { Promise<string | Uint8Array> }
+ *
+ */
+export const decryptFromIpfs = async ({
+  authSig,
+  ipfsCid,
+  litNodeClient,
+}: DecryptFromIpfsProps): Promise<string | Uint8Array> => {
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'decryptFromIpfs',
+    params: {
+      authSig,
+      ipfsCid,
+      litNodeClient,
+    },
+  });
+
+  if (!paramsIsSafe) return throwError({
+    message: `authSig, ipfsCid, litNodeClient must be provided`,
+    error: LIT_ERROR.INVALID_PARAM_TYPE,
+  });
+
+  try {
+    const metadata = await (await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`)).json();
+    const symmetricKey = await litNodeClient.getEncryptionKey({
+      accessControlConditions: metadata.accessControlConditions,
+      evmContractConditions: metadata.evmContractConditions,
+      solRpcConditions: metadata.solRpcConditions,
+      unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
+      toDecrypt: metadata.encryptedSymmetricKeyString,
+      chain: metadata.chain,
+      authSig
+    });
+  
+    if (metadata.encryptedString !== undefined) {
+      const encryptedStringBlob = new Blob([Buffer.from(metadata.encryptedString)], { type: 'application/octet-stream' });
+      return await decryptString(encryptedStringBlob, symmetricKey);
+    }
+
+    const encryptedFileBlob = new Blob([Buffer.from(metadata.encryptedFile)], { type: 'application/octet-stream' });
+    return await decryptFile({ file: encryptedFileBlob, symmetricKey });
+  } catch(e) {
+    return throwError({
+      message: 'Invalid ipfsCid',
+      error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+    })
+  }
+}
+
 // ---------- Local Helpers ----------
 
 /**
@@ -107,11 +283,10 @@ export const encryptString = async (str: string): Promise<EncryptedString> => {
       functionName: 'encryptString',
     })
   ) {
-    throwError({
+    return throwError({
       message: `{${str}} must be a string`,
       error: LIT_ERROR.INVALID_PARAM_TYPE,
-    });
-    throw new Error(`{${str}} must be a string`);
+    })
   }
 
   // -- prepare

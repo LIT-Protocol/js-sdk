@@ -48,6 +48,7 @@ Thumbs.db
 lerna-debug.log
 
 dev.sh
+dev
 
 doc
 
