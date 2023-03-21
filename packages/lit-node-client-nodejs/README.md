@@ -9,7 +9,7 @@ The usual `checkAndSignAuthMessage` is not included in this package, so you need
 import * as LitJsSdkNodeJs from "@lit-protocol/lit-node-client-nodejs";
 import { checkAndSignAuthMessage } from "@lit-protocol/auth-browser";
 
-const client = new LitJsSdk.LitNodeClientNodeJs({
+const client = new LitJsSdkNodeJs.LitNodeClientNodeJs({
   litNetwork: "serrano",
   defaultAuthCallback: checkAndSignAuthMessage,
 });
