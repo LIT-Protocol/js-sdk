@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.94] - 2023-03-21
+
+- [#40](https://github.com/LIT-Protocol/js-sdk/pull/40) Simplified the multi-step process of encrypting & decrypting static content and storing all its metadata on IPFS in a single function `encryptToIPFS` & `decryptFromIpfs`.
+
 ## [2.1.84] - 2023-03-16
 
 - [#47](https://github.com/LIT-Protocol/js-sdk/pull/47) Upgraded `@walletconnect/ethereum-provider` to version `2.5.1` and added `@web3modal/standalone` as a depdency to the `auth-browser` repo
