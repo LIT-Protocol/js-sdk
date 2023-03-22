@@ -3,9 +3,7 @@
  * returns a boolean value indicating whether the validation is passed or not.
  */
 
-import {
-  LIT_ERROR,
-} from '@lit-protocol/constants';
+import { LIT_ERROR } from '@lit-protocol/constants';
 
 import {
   DecryptFileProps,
@@ -49,7 +47,15 @@ export const safeParams = ({
 export const paramsValidators = {
   executeJs: (params: ExecuteJsProps) => {
     // -- prepare params
-    const { code, ipfsId, authSig, jsParams, debug, sessionSigs, authMethods = [] } = params;
+    const {
+      code,
+      ipfsId,
+      authSig,
+      jsParams,
+      debug,
+      sessionSigs,
+      authMethods = [],
+    } = params;
 
     // -- validate: either 'code' or 'ipfsId' must exists
     if (!code && !ipfsId) {
@@ -78,9 +84,14 @@ export const paramsValidators = {
     )
       return false;
 
+    // -- validate: sessionSigs and its type is correct
+    if (sessionSigs && !is(sessionSigs, 'Object', 'sessionSigs', 'executeJs'))
+      return false;
+
     // -- validate: authMethods and its type is correct
     if (
-      authMethods && authMethods.length > 0 &&
+      authMethods &&
+      authMethods.length > 0 &&
       !checkType({
         value: authMethods,
         allowedTypes: ['Array'],
@@ -116,6 +127,7 @@ export const paramsValidators = {
       encryptedSymmetricKey,
       permanant,
       permanent,
+      sessionSigs,
     } = params;
 
     if (
@@ -154,10 +166,30 @@ export const paramsValidators = {
     )
       return false;
 
-    log('authSig:', authSig);
-    if (!is(authSig, 'Object', 'authSig', 'saveEncryptionKey')) return false;
-    if (!checkIfAuthSigRequiresChainParam(authSig, chain, 'saveEncryptionKey'))
+    // log('authSig:', authSig);
+    if (authSig && !is(authSig, 'Object', 'authSig', 'saveEncryptionKey'))
       return false;
+    if (
+      authSig &&
+      !checkIfAuthSigRequiresChainParam(authSig, chain, 'saveEncryptionKey')
+    )
+      return false;
+
+    if (
+      sessionSigs &&
+      !is(sessionSigs, 'Object', 'sessionSigs', 'saveEncryptionKey')
+    )
+      return false;
+
+    if (!sessionSigs && !authSig) {
+      throwError({
+        message: 'You must pass either authSig or sessionSigs',
+        name: 'InvalidArgumentException',
+        errorCode: 'invalid_argument',
+      });
+      return false;
+    }
+
     if (
       symmetricKey &&
       !is(symmetricKey, 'Uint8Array', 'symmetricKey', 'saveEncryptionKey')
@@ -215,6 +247,7 @@ export const paramsValidators = {
       toDecrypt,
       authSig,
       chain,
+      sessionSigs,
     } = params;
 
     // -- validate
@@ -257,9 +290,25 @@ export const paramsValidators = {
     )
       return false;
 
-    log('TYPEOF:', typeof toDecrypt);
+    log('TYPEOF toDecrypt in getEncryptionKey():', typeof toDecrypt);
     if (!is(toDecrypt, 'String', 'toDecrypt', 'getEncryptionKey')) return false;
-    if (!is(authSig, 'Object', 'authSig', 'getEncryptionKey')) return false;
+    if (authSig && !is(authSig, 'Object', 'authSig', 'getEncryptionKey'))
+      return false;
+    if (
+      sessionSigs &&
+      !is(sessionSigs, 'Object', 'sessionSigs', 'getEncryptionKey')
+    )
+      return false;
+
+    // -- validate: if sessionSig and authSig exists
+    if (!sessionSigs && !authSig) {
+      throwError({
+        message: 'You must pass either authSig or sessionSigs',
+        name: 'InvalidArgumentException',
+        errorCode: 'invalid_argument',
+      });
+      return false;
+    }
 
     // -- validate if 'chain' is null
     if (!chain) {
@@ -388,9 +437,7 @@ export const paramsValidators = {
     return true;
   },
 
-  encryptToIpfs: (
-    params: EncryptToIpfsProps
-  ) => {
+  encryptToIpfs: (params: EncryptToIpfsProps) => {
     // -- validate
 
     log('params:', params);
@@ -491,9 +538,7 @@ export const paramsValidators = {
     return true;
   },
 
-  decryptFromIpfs: (
-    params: DecryptFromIpfsProps
-  ) => {
+  decryptFromIpfs: (params: DecryptFromIpfsProps) => {
     // -- validate
 
     log('params:', params);

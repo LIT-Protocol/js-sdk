@@ -22,9 +22,9 @@ export interface AccsOperatorParams {
 export interface AccsRegularParams {
   conditionType?: ConditionType;
   returnValueTest: {
-    key?: string,
-    comparator: string,
-    value: string,
+    key?: string;
+    comparator: string;
+    value: string;
   };
   method?: string;
   params?: any[];
@@ -40,8 +40,8 @@ export interface AccsDefaultParams extends AccsRegularParams {
 export interface AccsSOLV2Params extends AccsRegularParams {
   pdaKey: string;
   pdaInterface: {
-    offset: string | number,
-    fields: string | object,
+    offset: string | number;
+    fields: string | object;
   };
   pdaParams: [];
 }
@@ -131,7 +131,7 @@ export interface ThreeKeys {
   zipBlob: any;
 
   // encryptedSymmetricKey is the symmetric key needed to decrypt the content, encrypted with the Lit network public key.  You may wish to store encryptedSymmetricKey in your own database to support quicker re-encryption operations when adding additional access control conditions in the future, but this is entirely optional, and this key is already stored inside the zipBlob.
-  encryptedSymmetricKey: EncryptedSymmetricKey
+  encryptedSymmetricKey: EncryptedSymmetricKey;
 
   // symmetricKey is the raw symmetric key used to encrypt the files.  DO NOT STORE IT.  It is provided in case you wish to create additional "OR" access control conditions for the same file.
   symmetricKey: SymmetricKey;
@@ -148,7 +148,7 @@ export interface EncryptedFile {
 }
 
 export interface DecryptFileProps {
-  file: AcceptedFileType
+  file: AcceptedFileType;
   symmetricKey: SymmetricKey;
 }
 
@@ -193,7 +193,9 @@ export interface LitNodeClientConfig {
   bootstrapUrls: Array<string>;
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
-  defaultAuthCallback?: (authSigParams: CheckAndSignAuthParams) => Promise<JsonAuthSig>;
+  defaultAuthCallback?: (
+    authSigParams: CheckAndSignAuthParams
+  ) => Promise<JsonAuthSig>;
 }
 
 export interface CustomNetwork {
@@ -229,7 +231,7 @@ export interface JsonExecutionRequest {
   // whether to run this on a single node or many
   targetNodeRange?: number;
 
-  // auth methods to resolve 
+  // auth methods to resolve
   authMethods?: Array<Object>;
 }
 
@@ -291,7 +293,7 @@ export interface JsonAccsRequest {
   // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
   authSig?: JsonAuthSig;
 
-  sessionSigs?: any;
+  sessionSigs?: object;
 }
 
 /**
@@ -339,7 +341,8 @@ export interface JsonSigningStoreRequest {
   chain?: string;
   permanant?: number;
   permanent?: number;
-  authSig: JsonAuthSig;
+  authSig?: JsonAuthSig;
+  sessionSigs?: object;
 }
 
 /**
@@ -370,7 +373,7 @@ export interface JsonSaveEncryptionKeyRequest {
   evmContractConditions?: EvmContractConditions;
   solRpcConditions?: SolRpcConditions;
   unifiedAccessControlConditions?: UnifiedAccessControlConditions;
-  authSig: JsonAuthSig;
+  authSig?: JsonAuthSig;
   chain: Chain;
 
   // The symmetric encryption key that was used to encrypt the locked content inside the LIT as a Uint8Array.  You should use zipAndEncryptString or zipAndEncryptFiles to get this encryption key.  This key will be hashed and the hash will be sent to the LIT nodes.  You must pass either symmetricKey or encryptedSymmetricKey.
@@ -382,7 +385,7 @@ export interface JsonSaveEncryptionKeyRequest {
   permanant?: number;
   permanent?: number;
 
-  sessionSigs?: any;
+  sessionSigs?: object;
 }
 
 export interface SignConditionECDSA {
@@ -406,9 +409,9 @@ export interface ExecuteJsResponse {
   response: string;
   logs: string;
   debug?: {
-    allNodeResponses: NodeResponse[],
-    allNodeLogs: NodeLog[],
-    rawNodeHTTPResponses: any,
+    allNodeResponses: NodeResponse[];
+    allNodeLogs: NodeLog[];
+    rawNodeHTTPResponses: any;
   };
 }
 
@@ -447,7 +450,7 @@ export interface NodePromiseResponse {
 
 export interface NodeError {
   error: {
-    errorCode: string,
+    errorCode: string;
   };
 }
 
@@ -585,7 +588,7 @@ export interface DecryptFromIpfsProps {
   authSig: JsonAuthSig;
 
   // The ipfsCid/ipfsHash of the encrypted string & metadata stored on IPFS
-  ipfsCid: string,
+  ipfsCid: string;
 
   // An instance of LitNodeClient that is already connected
   litNodeClient: ILitNodeClient;
