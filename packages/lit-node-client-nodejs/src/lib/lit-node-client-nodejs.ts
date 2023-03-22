@@ -294,7 +294,7 @@ export class LitNodeClientNodeJs {
       // -- (TRY) to get it in the local storage
       if (storedSessionKeyOrError.type === 'ERROR') {
         console.warn(
-          `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+          `Storage key "${storageKey}" is missing. Not a problem. Continue...`
         );
       } else {
         storedSessionKey = storedSessionKeyOrError.result;
@@ -309,7 +309,7 @@ export class LitNodeClientNodeJs {
           localStorage.setItem(storageKey, JSON.stringify(sessionKey));
         } catch (e) {
           console.warn(
-            `Localstorage not available. Not a problem. Contiune...`
+            `Localstorage not available. Not a problem. Continue...`
           );
         }
       } else {
@@ -380,7 +380,7 @@ export class LitNodeClientNodeJs {
     // -- (TRY) to get it in the local storage
     if (storedWalletSigOrError.type === 'ERROR') {
       console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
       );
     } else {
       walletSig = storedWalletSigOrError.result;
@@ -2333,8 +2333,15 @@ export class LitNodeClientNodeJs {
       params.expiration ||
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
+    let _domain = params.domain || 'localhost';
+    try {
+      _domain = globalThis.location.host;
+    } catch (err) {
+      log('Unable to grab domain from globalThis. Not a problem. Continue...');
+    }
+
     let siweMessage: SiweMessage = new SiweMessage({
-      domain: globalThis.location.host,
+      domain: _domain,
       address: pkpEthAddress,
       statement: 'Lit Protocol PKP session signature',
       uri: params.sessionKey,
