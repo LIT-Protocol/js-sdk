@@ -195,7 +195,7 @@ export const checkType = ({
 
 /**
  *
- * @param { object } authSig
+ * @param { JsonAuthSig } authSig
  * @param { string } chain
  * @param { string } functionName
  *
