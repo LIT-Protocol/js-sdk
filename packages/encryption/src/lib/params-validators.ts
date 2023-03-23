@@ -383,6 +383,7 @@ export const paramsValidators = {
   decryptZipFileWithMetadata: (params: DecryptZipFileWithMetadataProps) => {
     // -- validate
     if (
+      params.authSig &&
       !checkType({
         value: params.authSig,
         allowedTypes: ['Object'],
@@ -391,6 +392,20 @@ export const paramsValidators = {
       })
     )
       return false;
+
+    // -- validate: sessionSigs and its type is correct
+    if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'decryptZipFileWithMetadata'))
+      return false;
+
+    // -- validate: if sessionSig and authSig exists
+    if (!params.sessionSigs && !params.authSig) {
+      throwError({
+        message: 'You must pass either authSig or sessionSigs',
+        name: 'InvalidArgumentException',
+        errorCode: 'invalid_argument',
+      });
+      return false;
+    }
 
     // -- validate
     if (
@@ -513,7 +528,7 @@ export const paramsValidators = {
       return false;
 
     // -- validate: sessionSigs and its type is correct
-    if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'executeJs'))
+    if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'encryptToIpfs'))
       return false;
 
     // -- validate: if sessionSig and authSig exists
@@ -571,7 +586,7 @@ export const paramsValidators = {
       return false;
 
     // -- validate: sessionSigs and its type is correct
-    if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'executeJs'))
+    if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'decryptFromIpfs'))
       return false;
 
     // -- validate: if sessionSig and authSig exists
@@ -596,6 +611,7 @@ export const paramsValidators = {
     log('params:', params);
 
     if (
+      params.authSig &&
       !checkType({
         value: params.authSig,
         allowedTypes: ['Object'],
@@ -655,6 +671,7 @@ export const paramsValidators = {
 
     // -- validate
     if (
+      params.authSig &&
       !checkIfAuthSigRequiresChainParam(
         params.authSig,
         params.chain,
@@ -662,6 +679,20 @@ export const paramsValidators = {
       )
     )
       return false;
+
+    // -- validate: sessionSigs and its type is correct
+    if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'encryptFileAndZipWithMetadata'))
+      return false;
+
+    // -- validate: if sessionSig and authSig exists
+    if (!params.sessionSigs && !params.authSig) {
+      throwError({
+        message: 'You must pass either authSig or sessionSigs',
+        name: 'InvalidArgumentException',
+        errorCode: 'invalid_argument',
+      });
+      return false;
+    }
 
     // -- validate
     if (
