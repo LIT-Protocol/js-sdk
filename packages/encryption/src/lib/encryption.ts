@@ -103,6 +103,7 @@ const metadataForFile = ({
  */
 export const encryptToIpfs = async ({
   authSig,
+  sessionSigs,
   accessControlConditions,
   evmContractConditions,
   solRpcConditions,
@@ -119,6 +120,7 @@ export const encryptToIpfs = async ({
     functionName: 'encryptToIpfs',
     params: {
       authSig,
+      sessionSigs,
       accessControlConditions,
       evmContractConditions,
       solRpcConditions,
@@ -131,7 +133,7 @@ export const encryptToIpfs = async ({
   });
 
   if (!paramsIsSafe) return throwError({
-    message: `authSig, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, litNodeClient, string or file must be provided`,
+    message: `authSig, sessionSigs, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, litNodeClient, string or file must be provided`,
     error: LIT_ERROR.INVALID_PARAM_TYPE,
   });
 
@@ -172,6 +174,7 @@ export const encryptToIpfs = async ({
     unifiedAccessControlConditions,
     symmetricKey,
     authSig,
+    sessionSigs,
     chain,
   });
 
@@ -219,6 +222,7 @@ export const encryptToIpfs = async ({
  */
 export const decryptFromIpfs = async ({
   authSig,
+  sessionSigs,
   ipfsCid,
   litNodeClient,
 }: DecryptFromIpfsProps): Promise<string | Uint8Array> => {
@@ -227,13 +231,14 @@ export const decryptFromIpfs = async ({
     functionName: 'decryptFromIpfs',
     params: {
       authSig,
+      sessionSigs,
       ipfsCid,
       litNodeClient,
     },
   });
 
   if (!paramsIsSafe) return throwError({
-    message: `authSig, ipfsCid, litNodeClient must be provided`,
+    message: `authSig, sessionSigs, ipfsCid, litNodeClient must be provided`,
     error: LIT_ERROR.INVALID_PARAM_TYPE,
   });
 
@@ -246,7 +251,8 @@ export const decryptFromIpfs = async ({
       unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
       toDecrypt: metadata.encryptedSymmetricKeyString,
       chain: metadata.chain,
-      authSig
+      authSig,
+      sessionSigs,
     });
   
     if (metadata.encryptedString !== undefined) {

@@ -550,7 +550,10 @@ export interface JsonHandshakeResponse {
 
 export interface EncryptToIpfsProps {
   // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig: JsonAuthSig;
+  authSig?: JsonAuthSig;
+
+  // the session signatures to use to authorize the user with the nodes
+  sessionSigs?: any;
 
   // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
   accessControlConditions?: AccessControlConditions;
@@ -585,7 +588,10 @@ export interface EncryptToIpfsProps {
 
 export interface DecryptFromIpfsProps {
   // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig: JsonAuthSig;
+  authSig?: JsonAuthSig;
+
+  // the session signatures to use to authorize the user with the nodes
+  sessionSigs?: any;
 
   // The ipfsCid/ipfsHash of the encrypted string & metadata stored on IPFS
   ipfsCid: string;
