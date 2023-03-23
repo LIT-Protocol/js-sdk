@@ -101,10 +101,20 @@ export const paramsValidators = {
     )
       return false;
 
-    // -- validate: if sessionSig and authSig exists
+    // -- validate: if sessionSig or authSig exists
     if (!sessionSigs && !authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
+        name: 'InvalidArgumentException',
+        errorCode: 'invalid_argument',
+      });
+      return false;
+    }
+
+    // -- validate: if sessionSig and authSig exists
+    if (sessionSigs && authSig) {
+      throwError({
+        message: 'You must pass only one authSig or sessionSigs',
         name: 'InvalidArgumentException',
         errorCode: 'invalid_argument',
       });
@@ -300,10 +310,20 @@ export const paramsValidators = {
     )
       return false;
 
-    // -- validate: if sessionSig and authSig exists
+    // -- validate: if sessionSig or authSig exists
     if (!sessionSigs && !authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
+        name: 'InvalidArgumentException',
+        errorCode: 'invalid_argument',
+      });
+      return false;
+    }
+
+    // -- validate: if sessionSig and authSig exists
+    if (sessionSigs && authSig) {
+      throwError({
+        message: 'You must pass only one authSig or sessionSigs',
         name: 'InvalidArgumentException',
         errorCode: 'invalid_argument',
       });
@@ -397,10 +417,20 @@ export const paramsValidators = {
     if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'decryptZipFileWithMetadata'))
       return false;
 
-    // -- validate: if sessionSig and authSig exists
+    // -- validate: if sessionSig or authSig exists
     if (!params.sessionSigs && !params.authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
+        name: 'InvalidArgumentException',
+        errorCode: 'invalid_argument',
+      });
+      return false;
+    }
+
+    // -- validate: if sessionSig and authSig exists
+    if (params.sessionSigs && params.authSig) {
+      throwError({
+        message: 'You must pass only one authSig or sessionSigs',
         name: 'InvalidArgumentException',
         errorCode: 'invalid_argument',
       });
@@ -531,10 +561,20 @@ export const paramsValidators = {
     if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'encryptToIpfs'))
       return false;
 
-    // -- validate: if sessionSig and authSig exists
+    // -- validate: if sessionSig or authSig exists
     if (!params.sessionSigs && !params.authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
+        name: 'InvalidArgumentException',
+        errorCode: 'invalid_argument',
+      });
+      return false;
+    }
+
+    // -- validate: if sessionSig and authSig exists
+    if (params.sessionSigs && params.authSig) {
+      throwError({
+        message: 'You must pass only one authSig or sessionSigs',
         name: 'InvalidArgumentException',
         errorCode: 'invalid_argument',
       });
@@ -589,10 +629,20 @@ export const paramsValidators = {
     if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'decryptFromIpfs'))
       return false;
 
-    // -- validate: if sessionSig and authSig exists
+    // -- validate: if sessionSig or authSig exists
     if (!params.sessionSigs && !params.authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
+        name: 'InvalidArgumentException',
+        errorCode: 'invalid_argument',
+      });
+      return false;
+    }
+
+    // -- validate: if sessionSig and authSig exists
+    if (params.sessionSigs && params.authSig) {
+      throwError({
+        message: 'You must pass only one authSig or sessionSigs',
         name: 'InvalidArgumentException',
         errorCode: 'invalid_argument',
       });
@@ -684,10 +734,20 @@ export const paramsValidators = {
     if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'encryptFileAndZipWithMetadata'))
       return false;
 
-    // -- validate: if sessionSig and authSig exists
+    // -- validate: if sessionSig or authSig exists
     if (!params.sessionSigs && !params.authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
+        name: 'InvalidArgumentException',
+        errorCode: 'invalid_argument',
+      });
+      return false;
+    }
+
+    // -- validate: if sessionSig and authSig exists
+    if (params.sessionSigs && params.authSig) {
+      throwError({
+        message: 'You must pass only one authSig or sessionSigs',
         name: 'InvalidArgumentException',
         errorCode: 'invalid_argument',
       });
