@@ -23,7 +23,7 @@ if (!PROJECT_NAME) {
     `
   Please provide a project name:
 
-  yarn gen:lib my-lib <universal | bundle | vanilla | nodejs>
+  yarn gen:lib my-lib <universal | vanilla | nodejs>
   `,
     true
   );
@@ -37,7 +37,7 @@ if (
   TAG !== 'nodejs'
 ) {
   redLog(
-    `Please provide a tag: universal OR bundle OR vanilla OR nodejs
+    `Please provide a tag: universal OR vanilla OR nodejs
 
     yarn gen:lib ${PROJECT_NAME} universal 
   `,

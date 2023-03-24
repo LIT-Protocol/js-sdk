@@ -858,11 +858,12 @@ async function watchFunc() {
 
         const TARGET = args[2];
 
+
         greenLog(`
             Usage: node tools/scripts/tools.mjs --watch --target [target] [option]
-                [target]: the target to watch
-                [option]: the option to use
-                    --deps: with dependencies
+                [target]: the target package to watch eg. "encryption"
+                [option]:
+                    --deps: watch the dependencies of the target as well
         `, true);
 
         if (!TARGET || TARGET === '' || TARGET === '--help') {
@@ -879,19 +880,29 @@ async function watchFunc() {
         }
 
         if (args[3] === '--deps') {
+
+            yellowLog(`\n***** EXPERIMENTAL: At this moment it only watches the ./src and ./src/lib folders ******\n`, true);
+            
             const projectNameSpace = (await readFile(`package.json`)).match(/"name": "(.*)"/)[1].split('/')[0];
-            let res = (await findImportsFromDir(`${path}/src`)).filter((item) => item.includes(projectNameSpace)).map((item) => {
+
+            let res = [
+                ...(await findImportsFromDir(`${path}/src`)), 
+                ...(await findImportsFromDir(`${path}/src/lib`))]
+                .filter((item) => item.includes(projectNameSpace)).map((item) => {
                 return item.replace(projectNameSpace, '').replace('/', '');
             });
 
+            console.log("res:", res)
+
             res.forEach((pkg) => {
-                greenLog(`Watching ${pkg}...`, true);
-                childRunCommand(`nodemon --watch ${pkg} --ext js,ts --exec "yarn tools --build --target ${pkg}"`);
+                const TARGET = pkg;
+                greenLog(`Watching ${TARGET}...`, true);
+                childRunCommand(`nodemon --ignore packages/${TARGET}/dist/ --watch packages/${TARGET} --ext js,ts --exec "yarn build:target ${TARGET} && yarn tools --setup-local-dev --target ${TARGET}"`);
             });
 
         } else {
             greenLog(`Watching ${TARGET}...`, true);
-            childRunCommand(`nodemon --watch packages/${TARGET} --ext js,ts --exec "yarn tools --build --target ${TARGET}"`);
+            childRunCommand(`nodemon --ignore packages/${TARGET}/dist/ --watch packages/${TARGET} --ext js,ts --exec "yarn build:target ${TARGET} && yarn tools --setup-local-dev --target ${TARGET}"`);
             // spawnListener(`yarn tools --polyfills lit-node-client`);
         }
     }
@@ -1051,8 +1062,11 @@ async function setupLocalDevFunc() {
         const packageJson = await readJsonFile(packageJsonPath);
         const distPackageJson = await readJsonFile(distPackageJsonPath);
 
-        packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
-        packageJson.typings = prefixPathWithDir(distPackageJson.typings, 'dist');
+        // packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
+        // packageJson.typings = prefixPathWithDir(distPackageJson.typings, 'dist');
+
+        packageJson.main = './dist/src/index.js';
+        packageJson.typings = './dist/src/index.d.ts';
 
         greenLog(`Updating ${packageJsonPath}...`);
         greenLog(`packageJson.main: ${packageJson.main}`);
