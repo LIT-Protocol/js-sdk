@@ -49,8 +49,8 @@ const logger = new Logger(version);
 
 export interface PKPWalletProp {
   pkpPubKey: string;
-  controllerAuthSig: any;
-  controllerSessionSigs: any;
+  controllerAuthSig?: any;
+  controllerSessionSigs?: any;
   provider: string;
   litNetwork?: any;
   debug?: boolean;
