@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'contracts-sdk',
+  displayName: 'pkp-cosmos',
   preset: '../../jest.preset.js',
   globals: {
     'ts-jest': {
@@ -11,5 +11,6 @@ export default {
     '^.+\\.[t]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/contracts-sdk',
+  coverageDirectory: '../../coverage/packages/pkp-cosmos',
+  setupFilesAfterEnv: ['../../jest.setup.js']
 };
