@@ -15,6 +15,8 @@
     "./packages/misc/src/index.ts",
     "./packages/misc-browser/src/index.ts",
     "./packages/nacl/src/index.ts",
+    "./packages/pkp-base/src/index.ts",
+    "./packages/pkp-cosmos/src/index.ts",
     "./packages/pkp-ethers/src/index.ts",
     "./packages/types/src/index.ts",
     "./packages/uint8arrays/src/index.ts"

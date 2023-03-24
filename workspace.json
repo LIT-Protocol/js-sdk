@@ -22,6 +22,8 @@
     "nacl": "packages/nacl",
     "nodejs": "apps/nodejs",
     "pkp-client": "packages/pkp-client",
+    "pkp-base": "packages/pkp-base",
+    "pkp-cosmos": "packages/pkp-cosmos",
     "pkp-ethers": "packages/pkp-ethers",
     "react": "apps/react",
     "types": "packages/types",

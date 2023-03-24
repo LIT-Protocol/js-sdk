@@ -22,9 +22,9 @@ export interface AccsOperatorParams {
 export interface AccsRegularParams {
   conditionType?: ConditionType;
   returnValueTest: {
-    key?: string,
-    comparator: string,
-    value: string,
+    key?: string;
+    comparator: string;
+    value: string;
   };
   method?: string;
   params?: any[];
@@ -40,8 +40,8 @@ export interface AccsDefaultParams extends AccsRegularParams {
 export interface AccsSOLV2Params extends AccsRegularParams {
   pdaKey: string;
   pdaInterface: {
-    offset: string | number,
-    fields: string | object,
+    offset: string | number;
+    fields: string | object;
   };
   pdaParams: [];
 }
@@ -131,7 +131,7 @@ export interface ThreeKeys {
   zipBlob: any;
 
   // encryptedSymmetricKey is the symmetric key needed to decrypt the content, encrypted with the Lit network public key.  You may wish to store encryptedSymmetricKey in your own database to support quicker re-encryption operations when adding additional access control conditions in the future, but this is entirely optional, and this key is already stored inside the zipBlob.
-  encryptedSymmetricKey: EncryptedSymmetricKey
+  encryptedSymmetricKey: EncryptedSymmetricKey;
 
   // symmetricKey is the raw symmetric key used to encrypt the files.  DO NOT STORE IT.  It is provided in case you wish to create additional "OR" access control conditions for the same file.
   symmetricKey: SymmetricKey;
@@ -148,7 +148,7 @@ export interface EncryptedFile {
 }
 
 export interface DecryptFileProps {
-  file: AcceptedFileType
+  file: AcceptedFileType;
   symmetricKey: SymmetricKey;
 }
 
@@ -193,7 +193,9 @@ export interface LitNodeClientConfig {
   bootstrapUrls: Array<string>;
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
-  defaultAuthCallback?: (authSigParams: CheckAndSignAuthParams) => Promise<JsonAuthSig>;
+  defaultAuthCallback?: (
+    authSigParams: CheckAndSignAuthParams
+  ) => Promise<JsonAuthSig>;
 }
 
 export interface CustomNetwork {
@@ -229,7 +231,7 @@ export interface JsonExecutionRequest {
   // whether to run this on a single node or many
   targetNodeRange?: number;
 
-  // auth methods to resolve 
+  // auth methods to resolve
   authMethods?: Array<Object>;
 }
 
@@ -406,9 +408,9 @@ export interface ExecuteJsResponse {
   response: string;
   logs: string;
   debug?: {
-    allNodeResponses: NodeResponse[],
-    allNodeLogs: NodeLog[],
-    rawNodeHTTPResponses: any,
+    allNodeResponses: NodeResponse[];
+    allNodeLogs: NodeLog[];
+    rawNodeHTTPResponses: any;
   };
 }
 
@@ -447,7 +449,7 @@ export interface NodePromiseResponse {
 
 export interface NodeError {
   error: {
-    errorCode: string,
+    errorCode: string;
   };
 }
 
@@ -585,7 +587,7 @@ export interface DecryptFromIpfsProps {
   authSig: JsonAuthSig;
 
   // The ipfsCid/ipfsHash of the encrypted string & metadata stored on IPFS
-  ipfsCid: string,
+  ipfsCid: string;
 
   // An instance of LitNodeClient that is already connected
   litNodeClient: ILitNodeClient;
@@ -795,3 +797,27 @@ export interface WebAuthnAuthenticationVerificationParams {
 }
 
 export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
+
+/**
+ * ========== PKP ==========
+ */
+
+export interface PKPBaseWalletProp {
+  pkpPubKey: string;
+  rpc: string;
+  controllerAuthSig?: JsonAuthSig;
+  controllerSessionSigs?: string;
+  litNetwork?: any;
+  debug?: boolean;
+  litActionCode?: string;
+  litActionIPFS?: string;
+  litActionJsParams?: any;
+}
+
+export interface PKPWalletProp extends PKPBaseWalletProp {
+  provider: string;
+}
+
+export interface PKPCosmosWalletProp extends PKPBaseWalletProp {
+  addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
+}
