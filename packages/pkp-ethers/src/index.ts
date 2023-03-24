@@ -44,20 +44,9 @@ import { version } from 'ethers';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
 
 import { ethers, Wallet } from 'ethers';
+import { JsonAuthSig, PKPWalletProp } from '@lit-protocol/types';
 
 const logger = new Logger(version);
-
-export interface PKPWalletProp {
-  pkpPubKey: string;
-  controllerAuthSig: any;
-  controllerSessionSigs: any;
-  provider: string;
-  litNetwork?: any;
-  debug?: boolean;
-  litActionCode?: string;
-  litActionIPFS?: string;
-  litActionJsParams?: any;
-}
 
 export interface PKPSigner {
   initPKP(prop: PKPWalletProp): any;
@@ -118,7 +107,9 @@ export class PKPWallet
       this.pkpWalletProp.controllerSessionSigs &&
       Object.values(this.pkpWalletProp.controllerSessionSigs).length > 0
     ) {
-      authSig = Object.values(this.pkpWalletProp.controllerSessionSigs)[0];
+      authSig = Object.values(
+        this.pkpWalletProp.controllerSessionSigs
+      )[0] as unknown as JsonAuthSig;
     }
 
     const executeJsArgs = {
