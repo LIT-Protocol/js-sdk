@@ -46,18 +46,18 @@
   }
 }
 
-h6{
+h6 {
   margin-top: 12px;
   margin-bottom: 12px;
 }
-a{
+a {
   color: white;
   text-decoration: none;
 }
-a:hover{
+a:hover {
   border-bottom: 1px solid white;
 }
-span{
+span {
   font-size: 14px;
 }
 /* small minimalist table */
@@ -68,7 +68,8 @@ table {
   margin-bottom: 12px;
 }
 
-td, th {
+td,
+th {
   border: 1px solid #dddddd;
   text-align: left;
   padding: 8px;
@@ -80,7 +81,8 @@ tr:nth-child(even) {
 }
 
 /* style input fields */
-input[type=text], select {
+input[type='text'],
+select {
   width: 100%;
   padding: 12px 20px;
   margin: 8px 0;
@@ -88,4 +90,14 @@ input[type=text], select {
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
+}
+
+.copy {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
 }
