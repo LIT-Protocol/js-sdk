@@ -15,6 +15,8 @@ import * as LitJsSdk_litThirdPartyLibs from 'dist/packages/lit-third-party-libs'
 import * as LitJsSdk_misc from 'dist/packages/misc';
 import * as LitJsSdk_miscBrowser from 'dist/packages/misc-browser';
 import * as LitJsSdk_nacl from 'dist/packages/nacl';
+import * as LitJsSdk_pkpBase from 'dist/packages/pkp-base';
+import * as LitJsSdk_pkpCosmos from 'dist/packages/pkp-cosmos';
 import * as LitJsSdk_pkpEthers from 'dist/packages/pkp-ethers';
 import * as LitJsSdk_types from 'dist/packages/types';
 import * as LitJsSdk_uint8arrays from 'dist/packages/uint8arrays';
@@ -35,6 +37,8 @@ declare global {
     LitJsSdk_misc: any;
     LitJsSdk_miscBrowser: any;
     LitJsSdk_nacl: any;
+    LitJsSdk_pkpBase: any;
+    LitJsSdk_pkpCosmos: any;
     LitJsSdk_pkpEthers: any;
     LitJsSdk_types: any;
     LitJsSdk_uint8arrays: any;
@@ -1059,6 +1063,150 @@ export function App() {
 
     
     
+        if(typeof LitJsSdk_pkpBase === 'undefined') {
+            console.error("LitJsSdk_pkpBase:", LitJsSdk_pkpBase);
+        }else{
+            console.warn("LitJsSdk_pkpBase:", LitJsSdk_pkpBase);
+            window.LitJsSdk_pkpBase = LitJsSdk_pkpBase;
+        }
+        window.addEventListener('load', function() {
+
+            var root = document.getElementById('root');
+            var result = document.getElementById('result');
+            var entries = Object.entries(LitJsSdk_pkpBase);
+            var lis = entries.map(([key, value]) => `
+            <li>
+                <div id="LitJsSdk_pkpBase_${key}" class="key" onClick="(async (e) => {
+                    var fn = LitJsSdk_pkpBase['${key}'];
+                    var fnType = typeof fn;
+                    console.warn('[${key}] is type of [' + fnType + ']');
+
+                    if ( fnType === 'string' ) return;
+
+                    if( fnType === 'function' ){
+                        try{
+                            console.log('params:', globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
+                            res = JSON.stringify(res, null, 2);
+                            result.innerText = res;
+                            console.log(res);
+                        }catch(e){
+                            console.error('Please set the [params] variable in the console then click again');
+                            console.log(e);
+                        }
+                        return;
+                    }
+
+                    if( fnType === 'object' ){
+                        var res = await fn;
+                        window.output = res;
+                        res = JSON.stringify(res, null, 2);
+                        result.innerText = res;
+                        console.log(res);
+                        return;
+                    }
+                    
+                    
+                })();">${key}</div>
+                <pre class="code">
+<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                </pre>
+            </li>`);
+            lis = lis.join(' ');
+            var template = `
+            <div class="cat">
+                <h1>LitJsSdk_pkpBase has ${entries.length} functions</h1>
+                    <ul>
+                        ${ lis }
+                    </ul>
+                </div>
+            `;
+            root.insertAdjacentHTML('beforeend', template);
+        });
+    
+    
+
+    
+    
+        if(typeof LitJsSdk_pkpCosmos === 'undefined') {
+            console.error("LitJsSdk_pkpCosmos:", LitJsSdk_pkpCosmos);
+        }else{
+            console.warn("LitJsSdk_pkpCosmos:", LitJsSdk_pkpCosmos);
+            window.LitJsSdk_pkpCosmos = LitJsSdk_pkpCosmos;
+        }
+        window.addEventListener('load', function() {
+
+            var root = document.getElementById('root');
+            var result = document.getElementById('result');
+            var entries = Object.entries(LitJsSdk_pkpCosmos);
+            var lis = entries.map(([key, value]) => `
+            <li>
+                <div id="LitJsSdk_pkpCosmos_${key}" class="key" onClick="(async (e) => {
+                    var fn = LitJsSdk_pkpCosmos['${key}'];
+                    var fnType = typeof fn;
+                    console.warn('[${key}] is type of [' + fnType + ']');
+
+                    if ( fnType === 'string' ) return;
+
+                    if( fnType === 'function' ){
+                        try{
+                            console.log('params:', globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
+                            res = JSON.stringify(res, null, 2);
+                            result.innerText = res;
+                            console.log(res);
+                        }catch(e){
+                            console.error('Please set the [params] variable in the console then click again');
+                            console.log(e);
+                        }
+                        return;
+                    }
+
+                    if( fnType === 'object' ){
+                        var res = await fn;
+                        window.output = res;
+                        res = JSON.stringify(res, null, 2);
+                        result.innerText = res;
+                        console.log(res);
+                        return;
+                    }
+                    
+                    
+                })();">${key}</div>
+                <pre class="code">
+<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                </pre>
+            </li>`);
+            lis = lis.join(' ');
+            var template = `
+            <div class="cat">
+                <h1>LitJsSdk_pkpCosmos has ${entries.length} functions</h1>
+                    <ul>
+                        ${ lis }
+                    </ul>
+                </div>
+            `;
+            root.insertAdjacentHTML('beforeend', template);
+        });
+    
+    
+
+    
+    
         if(typeof LitJsSdk_pkpEthers === 'undefined') {
             console.error("LitJsSdk_pkpEthers:", LitJsSdk_pkpEthers);
         }else{
@@ -1352,7 +1500,7 @@ pre {
                     `,
                 }}
             />
-            (REACT) THIS FILE IS AUTOMATICALLY GENERATED FROM tools/scripts/gen-react.mjs Tue, 21 Mar 2023 17:16:04 GMT
+            (REACT) THIS FILE IS AUTOMATICALLY GENERATED FROM tools/scripts/gen-react.mjs Fri, 24 Mar 2023 17:26:23 GMT
             <div id="root"></div>
              <pre><code id="result"></code></pre>
         </>
