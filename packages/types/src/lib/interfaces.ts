@@ -766,7 +766,6 @@ export interface SessionSigningTemplate {
 
 export interface GetWebAuthnAuthenticationAuthSigProps {
   verificationParams: WebAuthnAuthenticationVerificationParams;
-  username: string;
   sessionKey?: any;
   // The expiration of the auth sig that will be signed. This is a RFC3339 timestamp. The default is 24 hours from now.
   expiration?: string;
@@ -777,7 +776,6 @@ export interface GetVerifyWebAuthnAuthenticationKeyShareProps {
   credential: WebAuthnAuthenticationVerificationParams;
   sessionPubkey: string;
   siweMessage: string;
-  username: string;
 }
 
 export interface WebAuthnAuthenticationVerificationParams {

@@ -2467,7 +2467,6 @@ export class LitNodeClientNodeJs {
       return this.getVerifyWebAuthnAuthenticationKeyShare(
         url,
         {
-          username: params.username,
           credential: params.verificationParams,
           sessionPubkey: sessionKey.publicKey,
           siweMessage: siweMessageStr,
