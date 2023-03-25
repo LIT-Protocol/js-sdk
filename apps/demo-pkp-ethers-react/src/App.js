@@ -3,18 +3,18 @@ import { useEffect, useState } from 'react';
 import LitLogo from './LitLogo';
 import Editor from '@monaco-editor/react';
 import { benchmark } from './utils';
-import { PKPWallet } from '@lit-protocol/pkp-ethers.js';
+import { PKPWallet } from '@lit-protocol/pkp-ethers';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ethers } from 'ethers';
 import { pkpNft } from './pkp-nft';
 
 function App() {
   // ----- autogen:app-name:start  -----
-  const [appName, setAppName] = useState('@lit-protocol/pkp-ethers.js');
+  const [appName, setAppName] = useState('@lit-protocol/pkp-ethers');
   // ----- autogen:app-name:end  -----
 
   const [npmRepo, setNpmRepo] = useState(
-    'https://www.npmjs.com/package/@lit-protocol/pkp-ethers.js'
+    'https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-ethers'
   );
   const [demoRepo, setDemoRepo] = useState(
     'https://github.com/LIT-Protocol/js-sdk/tree/master/apps/demo-pkp-ethers-react'
@@ -338,32 +338,36 @@ function App() {
           </span>
         </h4>
         <table>
-          <tr>
-            <td>
-              <label>PKP Public Key</label>
-            </td>
-            <td>
-              <label>Controller Session Sigs</label>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <input
-                type="text"
-                value={pkpPubKey}
-                onChange={(e) => setPkpPubKey(e.target.value)}
-              />
-            </td>
-            <td>
-              <input
-                type="text"
-                value={JSON.stringify(controllerSessionSigs)}
-                onChange={(e) =>
-                  setControllerSessionSigs(JSON.parse(e.target.value))
-                }
-              />
-            </td>
-          </tr>
+          <thead>
+            <tr>
+              <td>
+                <label>PKP Public Key</label>
+              </td>
+              <td>
+                <label>Controller Session Sigs</label>
+              </td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <input
+                  type="text"
+                  value={pkpPubKey}
+                  onChange={(e) => setPkpPubKey(e.target.value)}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  value={JSON.stringify(controllerSessionSigs)}
+                  onChange={(e) =>
+                    setControllerSessionSigs(JSON.parse(e.target.value))
+                  }
+                />
+              </td>
+            </tr>
+          </tbody>
         </table>
 
         <p>Setup:</p>
