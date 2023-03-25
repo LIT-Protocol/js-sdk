@@ -57,4 +57,4 @@ apps/demo-encrypt-decrypt-react/package-lock.json
 apps/demo-pkp-ethers-react/package-lock.json
 
 
-dev-graph.json
+dep-graph.json
