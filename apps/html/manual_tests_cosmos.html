@@ -4,26 +4,23 @@
     <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
     <title>Manual Tests V2</title>
 
-    <script
-      src="/dist/packages/lit-node-client-vanilla/lit-node-client.js"
-    ></script>
+    <script src="/dist/packages/lit-node-client-vanilla/lit-node-client.js"></script>
     <script
       src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
       type="application/javascript"
     ></script>
     <script>
-
       const LitJsSdk = LitJsSdk_litNodeClient;
 
-      const litNodeClient = new LitNodeClient({litNetwork: 'serrano'});
+      const litNodeClient = new LitNodeClient({ litNetwork: 'serrano' });
       litNodeClient.connect();
-      
-      var chain = "cosmos";
+
+      var chain = 'cosmos';
 
       //var authSig = JSON.parse("{\"sig\":\"0x18a173d68d2f78cc5c13da0dfe36eec2a293285bee6d42547b9577bf26cdc985660ed3dddc4e75d422366cac07e8a9fc77669b10373bef9c7b8e4280252dfddf1b\",\"derivedVia\":\"web3.eth.personal.sign\",\"signedMessage\":\"I am creating an account to use LITs at 2021-08-04T20:14:04.918Z\",\"address\":\"0xdbd360f30097fb6d938dcc8b7b62854b36160b45\"}")
 
       var randomPath = () =>
-        "/" +
+        '/' +
         Math.random().toString(36).substring(2, 15) +
         Math.random().toString(36).substring(2, 15);
       var testProvisoningAndSigning = async ({
@@ -31,19 +28,19 @@
         testName,
         authSig,
       }) => {
-        document.getElementById("status").innerText = `Testing ${testName}...`;
+        document.getElementById('status').innerText = `Testing ${testName}...`;
         document.getElementById(
-          "humanized"
+          'humanized'
         ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
           { unifiedAccessControlConditions }
         )}`;
 
         let resourceId = {
-          baseUrl: "my-dynamic-content-server.com",
+          baseUrl: 'my-dynamic-content-server.com',
           path: randomPath(),
-          orgId: "",
-          role: "",
-          extraData: "",
+          orgId: '',
+          role: '',
+          extraData: '',
         };
 
         await litNodeClient.saveSigningCondition({
@@ -59,20 +56,20 @@
           chain,
           resourceId,
         });
-        console.log("jwt", jwt);
+        console.log('jwt', jwt);
 
         // uncomment this to break the jwt, to test an invalid jwt
         // jwt = jwt.replace(/.$/, "3");
 
         const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
-        console.log("verified", verified);
-        console.log("header", header);
-        console.log("payload", payload);
+        console.log('verified', verified);
+        console.log('header', header);
+        console.log('payload', payload);
 
         if (jwt && verified) {
-          document.getElementById("status").innerText = `${testName}: Success`;
+          document.getElementById('status').innerText = `${testName}: Success`;
         } else {
-          document.getElementById("status").innerText = `${testName}: Failure`;
+          document.getElementById('status').innerText = `${testName}: Failure`;
         }
       };
 
@@ -81,16 +78,16 @@
         testName,
         authSig,
       }) => {
-        document.getElementById("status").innerText = `Testing ${testName}...`;
+        document.getElementById('status').innerText = `Testing ${testName}...`;
 
         document.getElementById(
-          "humanized"
+          'humanized'
         ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
           { unifiedAccessControlConditions }
         )}`;
 
         const { encryptedZip, symmetricKey } =
-          await LitJsSdk.zipAndEncryptString("this is a secret message");
+          await LitJsSdk.zipAndEncryptString('this is a secret message');
 
         const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
           unifiedAccessControlConditions,
@@ -99,13 +96,13 @@
           authSig,
         });
 
-        console.log("encrypted symmetric key", encryptedSymmetricKey);
+        console.log('encrypted symmetric key', encryptedSymmetricKey);
 
         const retrievedSymmKey = await litNodeClient.getEncryptionKey({
           unifiedAccessControlConditions,
           toDecrypt: LitJsSdk.uint8arrayToString(
             encryptedSymmetricKey,
-            "base16"
+            'base16'
           ),
           authSig,
           chain,
@@ -115,13 +112,13 @@
           encryptedZip,
           retrievedSymmKey
         );
-        const decryptedString = await decryptedFiles["string.txt"].async(
-          "text"
+        const decryptedString = await decryptedFiles['string.txt'].async(
+          'text'
         );
-        console.log("decrypted string", decryptedString);
+        console.log('decrypted string', decryptedString);
 
         document.getElementById(
-          "status"
+          'status'
         ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
       };
 
@@ -129,23 +126,23 @@
       var CosmosBalanceSigning = async () => {
         var unifiedAccessControlConditions = [
           {
-            conditionType: "cosmos",
-            path: "/cosmos/bank/v1beta1/balances/:userAddress",
+            conditionType: 'cosmos',
+            path: '/cosmos/bank/v1beta1/balances/:userAddress',
             chain,
             returnValueTest: {
-              key: "$.balances[0].amount",
-              comparator: ">=",
-              value: "1000000", // equals 1 ATOM
+              key: '$.balances[0].amount',
+              comparator: '>=',
+              value: '1000000', // equals 1 ATOM
             },
           },
         ];
         var authSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain: "cosmos",
+          chain: 'cosmos',
         });
 
         await testProvisoningAndSigning({
           unifiedAccessControlConditions,
-          testName: "CosmosBalanceSigning",
+          testName: 'CosmosBalanceSigning',
           authSig,
         });
       };
@@ -153,45 +150,45 @@
       var CosmosBalanceEncrypt = async () => {
         var unifiedAccessControlConditions = [
           {
-            conditionType: "cosmos",
-            path: "/cosmos/bank/v1beta1/balances/:userAddress",
+            conditionType: 'cosmos',
+            path: '/cosmos/bank/v1beta1/balances/:userAddress',
             chain,
             returnValueTest: {
-              key: "$.balances[0].amount",
-              comparator: ">=",
-              value: "1000000", // equals 1 ATOM
+              key: '$.balances[0].amount',
+              comparator: '>=',
+              value: '1000000', // equals 1 ATOM
             },
           },
         ];
         var authSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain: "cosmos",
+          chain: 'cosmos',
         });
         await testProvisoningEncryptingAndDecrypting({
           unifiedAccessControlConditions,
-          testName: "CosmosBalanceEncrypt",
+          testName: 'CosmosBalanceEncrypt',
           authSig: { cosmos: authSig },
         });
       };
 
       var CosmosSpecificWalletAddressSigning = async () => {
         var authSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain: "cosmos",
+          chain: 'cosmos',
         });
         var unifiedAccessControlConditions = [
           {
-            conditionType: "cosmos",
-            path: ":userAddress",
+            conditionType: 'cosmos',
+            path: ':userAddress',
             chain,
             returnValueTest: {
-              key: "",
-              comparator: "=",
-              value: "cosmos1vn6zl0924yj86jrp330wcwjclzdharljq03a8h",
+              key: '',
+              comparator: '=',
+              value: 'cosmos1vn6zl0924yj86jrp330wcwjclzdharljq03a8h',
             },
           },
         ];
         await testProvisoningAndSigning({
           unifiedAccessControlConditions,
-          testName: "CosmosSpecificWalletAddressSigning",
+          testName: 'CosmosSpecificWalletAddressSigning',
           authSig,
         });
       };
@@ -200,99 +197,122 @@
         var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
         var unifiedAccessControlConditions = [
           {
-            conditionType: "cosmos",
-            path: ":userAddress",
+            conditionType: 'cosmos',
+            path: ':userAddress',
             chain,
             returnValueTest: {
-              key: "",
-              comparator: "=",
-              value: "cosmos1vn6zl0924yj86jrp330wcwjclzdharljq03a8h",
+              key: '',
+              comparator: '=',
+              value: 'cosmos1vn6zl0924yj86jrp330wcwjclzdharljq03a8h',
             },
           },
         ];
         await testProvisoningEncryptingAndDecrypting({
           unifiedAccessControlConditions,
-          testName: "CosmosSpecificWalletAddressEncrypt",
+          testName: 'CosmosSpecificWalletAddressEncrypt',
           authSig: { cosmos: authSig },
         });
       };
 
       var KyveFundersSigning = async () => {
-        var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain: "kyve" });
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain: 'kyve' });
         var unifiedAccessControlConditions = [
           {
-            conditionType: "cosmos",
-            path: "/kyve/registry/v1beta1/funders_list/0",
-            chain: "kyve",
+            conditionType: 'cosmos',
+            path: '/kyve/registry/v1beta1/funders_list/0',
+            chain: 'kyve',
             returnValueTest: {
-              key: "$.funders.*.account",
-              comparator: "contains",
-              value: "kyve14n6s289f7fs8nkegcj4yjp7wfk057zatrwuva0",
+              key: '$.funders.*.account',
+              comparator: 'contains',
+              value: 'kyve14n6s289f7fs8nkegcj4yjp7wfk057zatrwuva0',
             },
           },
         ];
         await testProvisoningAndSigning({
           unifiedAccessControlConditions,
-          testName: "KyveFundersSigning",
+          testName: 'KyveFundersSigning',
           authSig: { kyve: authSig },
         });
       };
 
       var KyveFundersEncryptDecrypt = async () => {
-        var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain: "kyve" });
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain: 'kyve' });
         var unifiedAccessControlConditions = [
           {
-            conditionType: "cosmos",
-            path: "/kyve/registry/v1beta1/funders_list/0",
-            chain: "kyve",
+            conditionType: 'cosmos',
+            path: '/kyve/registry/v1beta1/funders_list/0',
+            chain: 'kyve',
             returnValueTest: {
-              key: "$.funders.*.account",
-              comparator: "contains",
-              value: "kyve14n6s289f7fs8nkegcj4yjp7wfk057zatrwuva0",
+              key: '$.funders.*.account',
+              comparator: 'contains',
+              value: 'kyve14n6s289f7fs8nkegcj4yjp7wfk057zatrwuva0',
             },
           },
         ];
         await testProvisoningEncryptingAndDecrypting({
           unifiedAccessControlConditions,
-          testName: "KyveFundersEncryptDecrypt",
+          testName: 'KyveFundersEncryptDecrypt',
           authSig: { kyve: authSig },
+        });
+      };
+
+      var CheqdEncryptDecrypt = async () => {
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'cheqd',
+        });
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: 'cosmos',
+            path: "/cosmos/tx/v1beta1/txs?events=transfer.recipient='cheqd19a26gff0gd4jlaupgp360ajte6mg907kjlqqky'&events=transfer.sender='cheqd1s5ct8eamdp7m7y3vllnj60frxxyypdr6zvpwvw'&events=transfer.amount='13000000000ncheq'&order_by=2",
+            chain: 'cheqd',
+            returnValueTest: {
+              key: '$.txs.*.body.memo',
+              comparator: 'contains',
+              value: 'test',
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          unifiedAccessControlConditions,
+          testName: 'KyveFundersEncryptDecrypt',
+          authSig: { cheqd: authSig },
         });
       };
 
       var CosmosBalancePlusKyveFundersEncryptDecrypt = async () => {
         var cosmosAuthSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain: "cosmos",
+          chain: 'cosmos',
         });
         var kyveAuthSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain: "kyve",
+          chain: 'kyve',
         });
 
         var unifiedAccessControlConditions = [
           {
-            conditionType: "cosmos",
-            path: "/kyve/registry/v1beta1/funders_list/0",
-            chain: "kyve",
+            conditionType: 'cosmos',
+            path: '/kyve/registry/v1beta1/funders_list/0',
+            chain: 'kyve',
             returnValueTest: {
-              key: "$.funders.*.account",
-              comparator: "contains",
-              value: "kyve14n6s289f7fs8nkegcj4yjp7wfk057zatrwuva0",
+              key: '$.funders.*.account',
+              comparator: 'contains',
+              value: 'kyve14n6s289f7fs8nkegcj4yjp7wfk057zatrwuva0',
             },
           },
-          { operator: "or" },
+          { operator: 'or' },
           {
-            conditionType: "cosmos",
-            path: "/cosmos/bank/v1beta1/balances/:userAddress",
-            chain: "cosmos",
+            conditionType: 'cosmos',
+            path: '/cosmos/bank/v1beta1/balances/:userAddress',
+            chain: 'cosmos',
             returnValueTest: {
-              key: "$.balances[0].amount",
-              comparator: ">=",
-              value: "1000000", // equals 1 ATOM
+              key: '$.balances[0].amount',
+              comparator: '>=',
+              value: '1000000', // equals 1 ATOM
             },
           },
         ];
         await testProvisoningEncryptingAndDecrypting({
           unifiedAccessControlConditions,
-          testName: "KyveFundersEncryptDecrypt",
+          testName: 'KyveFundersEncryptDecrypt',
           authSig: {
             cosmos: cosmosAuthSig,
             kyve: kyveAuthSig,
@@ -301,22 +321,22 @@
       };
 
       var logout = async () => {
-        const testName = "Logout";
-        document.getElementById("status").innerText = `Testing ${testName}...`;
+        const testName = 'Logout';
+        document.getElementById('status').innerText = `Testing ${testName}...`;
 
         LitJsSdk.disconnectWeb3();
 
         document.getElementById(
-          "status"
+          'status'
         ).innerText = `${testName}: Success - Logged out`;
       };
 
       document.addEventListener(
-        "lit-ready",
+        'lit-ready',
         function (e) {
-          console.log("LIT network is ready");
-          document.getElementById("networkStatus").innerText =
-            "Success!  Connected to Lit Protocol Network";
+          console.log('LIT network is ready');
+          document.getElementById('networkStatus').innerText =
+            'Success!  Connected to Lit Protocol Network';
         },
         false
       );
@@ -354,6 +374,10 @@
     <button onclick="KyveFundersEncryptDecrypt()">
       KyveFundersEncryptDecrypt
     </button>
+    <br />
+    <br />
+
+    <button onclick="CheqdEncryptDecrypt()">CheqdEncryptDecrypt</button>
     <br />
     <br />
 
