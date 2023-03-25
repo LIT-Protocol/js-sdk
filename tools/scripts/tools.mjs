@@ -881,28 +881,48 @@ async function watchFunc() {
 
         if (args[3] === '--deps') {
 
-            yellowLog(`\n***** EXPERIMENTAL: At this moment it only watches the ./src and ./src/lib folders ******\n`, true);
+            yellowLog(`\n***** EXPERIMENTAL ******\n`, true);
+
+            await childRunCommand(`yarn nx dep-graph --file=dep-graph.json`);
+
+            const depGraph = JSON.parse(await readFile(`dep-graph.json`));
+
+            const pkgs = depGraph.graph.dependencies[args[2]].map((item) => item.target);
+
+            pkgs.push(args[2]);
             
-            const projectNameSpace = (await readFile(`package.json`)).match(/"name": "(.*)"/)[1].split('/')[0];
+            yellowLog(`It's important to note that the order of the packages is important. It is necessary to build and compile the dependent package first. This ensures that the latest changes in the dependent package are available for the package that relies on it. `, true);
+            yellowLog(`Here's the order of the packages to be built:`, true);
+            
+            // show the order of the packages to be built
+            for (let i = 0; i < pkgs.length; i++) {
+                const pkg = pkgs[i];
+                yellowLog(`${i + 1}. ${pkg}`, true);
+            }
 
-            let res = [
-                ...(await findImportsFromDir(`${path}/src`)), 
-                ...(await findImportsFromDir(`${path}/src/lib`))]
-                .filter((item) => item.includes(projectNameSpace)).map((item) => {
-                return item.replace(projectNameSpace, '').replace('/', '');
-            });
+            // const projectNameSpace = (await readFile(`package.json`)).match(/"name": "(.*)"/)[1].split('/')[0];
 
-            console.log("res:", res)
+            // let res = [
+            //     ...(await findImportsFromDir(`${path}/src`)), 
+            //     ...(await findImportsFromDir(`${path}/src/lib`))]
+            //     .filter((item) => item.includes(projectNameSpace)).map((item) => {
+            //     return item.replace(projectNameSpace, '').replace('/', '');
+            // });
 
-            res.forEach((pkg) => {
+            // console.log("res:", res)
+
+            const getCmd = (t) => `yarn build:target ${t} && yarn tools --setup-local-dev --target ${t}`
+
+            await asyncForEach(pkgs, async (pkg) => {
                 const TARGET = pkg;
-                greenLog(`Watching ${TARGET}...`, true);
-                childRunCommand(`nodemon --ignore packages/${TARGET}/dist/ --watch packages/${TARGET} --ext js,ts --exec "yarn build:target ${TARGET} && yarn tools --setup-local-dev --target ${TARGET}"`);
+                greenLog(`Building ${TARGET} and its dependencies...`, true);
+                await childRunCommand(getCmd(TARGET));
             });
 
+            process.exit();
         } else {
             greenLog(`Watching ${TARGET}...`, true);
-            childRunCommand(`nodemon --ignore packages/${TARGET}/dist/ --watch packages/${TARGET} --ext js,ts --exec "yarn build:target ${TARGET} && yarn tools --setup-local-dev --target ${TARGET}"`);
+            await childRunCommand(`nodemon --ignore packages/${TARGET}/dist/ --watch packages/${TARGET} --ext js,ts --exec "yarn build:target ${TARGET} && yarn tools --setup-local-dev --target ${TARGET}"`);
             // spawnListener(`yarn tools --polyfills lit-node-client`);
         }
     }

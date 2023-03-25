@@ -1,13 +1,22 @@
-# yarn build:packages && cd packages/lit-node-client && npm link && cd ../..
+#!/bin/bash
+
 yarn build:packages
 
-cd packages/lit-node-client && npm link && cd ../..
-cd packages/lit-node-client-nodejs && npm link && cd ../..
-cd packages/auth-browser && npm link && cd ../..
-cd packages/encryption && npm link && cd ../..
-cd packages/uint8arrays && npm link && cd ../..
-cd packages/types && npm link && cd ../..
-cd packages/pkp-cosmos && npm link && cd ../..
-# cd packages/utils-node && npm link && cd ../..
+packages=(
+  "lit-node-client"
+  "lit-node-client-nodejs"
+  "auth-browser"
+  "encryption"
+  "uint8arrays"
+  "types"
+  "pkp-cosmos"
+  "pkp-ethers"
+)
 
 # then in your project, do `npm link @lit-protocol/lit-node-client`
+
+pids=()
+for package in "${packages[@]}"; do
+  cd packages/$package && npm link && cd ../..
+  pids+=($!)
+done
