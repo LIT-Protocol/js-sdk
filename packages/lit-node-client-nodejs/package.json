@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/lit-node-client-nodejs",
-  "version": "2.1.94",
+  "version": "2.1.96",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
