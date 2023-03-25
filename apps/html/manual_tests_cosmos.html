@@ -275,7 +275,7 @@
         await testProvisoningEncryptingAndDecrypting({
           unifiedAccessControlConditions,
           testName: 'KyveFundersEncryptDecrypt',
-          authSig: { kyve: authSig },
+          authSig: { cheqd: authSig },
         });
       };
 
@@ -374,6 +374,10 @@
     <button onclick="KyveFundersEncryptDecrypt()">
       KyveFundersEncryptDecrypt
     </button>
+    <br />
+    <br />
+
+    <button onclick="CheqdEncryptDecrypt()">CheqdEncryptDecrypt</button>
     <br />
     <br />
 

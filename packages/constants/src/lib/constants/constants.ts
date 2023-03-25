@@ -422,6 +422,15 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     blockExplorerUrls: ['https://testnet.bigdipper.live'],
     vmType: 'CVM',
   },
+  cheqd: {
+    name: 'Cheqd',
+    symbol: 'CHEQ',
+    decimals: 9,
+    chainId: 'cheqd-mainnet-1',
+    rpcUrls: ['https://api.cheqd.network'],
+    blockExplorerUrls: ['https://explorer.cheqd.io'],
+    vmType: 'CVM',
+  },
 };
 
 /**
