@@ -1,1 +1,1 @@
-export { PKPBaseWallet } from './lib/pkp-base';
+export { PKPBase } from './lib/pkp-base';

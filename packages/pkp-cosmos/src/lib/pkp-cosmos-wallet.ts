@@ -25,7 +25,7 @@ import {
   OfflineDirectSigner,
 } from '@cosmjs/proto-signing';
 
-import { PKPBaseWallet } from '@lit-protocol/pkp-base';
+import { PKPBase } from '@lit-protocol/pkp-base';
 import { PKPCosmosWalletProp } from '@lit-protocol/types';
 
 const DEFAULT_COSMOS_RPC_URL =
@@ -35,7 +35,7 @@ const DEFAULT_COSMOS_RPC_URL =
  * Similar to "DirectSecp256k1HdWallet", but uses PKP to sign
  */
 export class PKPCosmosWallet
-  extends PKPBaseWallet
+  extends PKPBase
   implements OfflineDirectSigner
 {
   // Address prefix for Bech32 addresses

@@ -802,7 +802,7 @@ export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
  * ========== PKP ==========
  */
 
-export interface PKPBaseWalletProp {
+export interface PKPBaseProp {
   pkpPubKey: string;
   rpc: string;
   controllerAuthSig?: JsonAuthSig;
@@ -814,10 +814,8 @@ export interface PKPBaseWalletProp {
   litActionJsParams?: any;
 }
 
-export interface PKPWalletProp extends PKPBaseWalletProp {
-  provider: string;
-}
+export interface PKPEthersWalletProp extends PKPBaseProp {}
 
-export interface PKPCosmosWalletProp extends PKPBaseWalletProp {
+export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
 }

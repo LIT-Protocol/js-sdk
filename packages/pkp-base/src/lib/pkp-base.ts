@@ -1,26 +1,36 @@
 /**
- * This module defines the PKPBaseWallet class, which provides a base implementation for wallet functionality
+ * This module defines the PKPBase class, which provides a base implementation for wallet functionality
  * that can be shared between Ethers and Cosmos signers. The class is responsible for managing public key
  * compression, initializing and connecting to the LIT node, and running LIT actions based on provided properties.
  * The class also includes debug functions for logging and error handling.
  *
- * The module exports the PKPBaseWallet class, as well as the PKPBaseWalletProp type definition used for
+ * The module exports the PKPBase class, as well as the PKPBaseProp type definition used for
  * initializing the class instances.
  */
 
-import {
-  ExecuteJsProps,
-  PKPBaseWalletProp,
-  JsonAuthSig,
-} from '@lit-protocol/types';
+import { ExecuteJsProps, PKPBaseProp, JsonAuthSig } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import EthCrypto from 'eth-crypto';
+import { publicKeyConvert } from 'secp256k1';
+
+const compressPubKey = (pubKey: string): string => {
+  let testBuffer = Buffer.from(pubKey, 'hex');
+  if (testBuffer.length === 64) {
+    pubKey = '04' + pubKey;
+  }
+
+  // const hex = Buffer.from(pubKey, 'hex');
+  const uint8array = new Uint8Array(Buffer.from(pubKey, 'hex'));
+  const compressedKey = publicKeyConvert(uint8array, true);
+  const hex = Buffer.from(compressedKey).toString('hex');
+
+  return hex;
+};
 
 /**
  * A base class that can be shared between Ethers and Cosmos signers.
  */
-export class PKPBaseWallet {
-  pkpWalletProp: PKPBaseWalletProp;
+export class PKPBase {
+  pkpWalletProp: PKPBaseProp;
   uncompressedPubKey!: string;
   uncompressedPubKeyBuffer!: Uint8Array;
   compressedPubKey!: string;
@@ -37,18 +47,18 @@ export class PKPBaseWallet {
   })();`;
 
   // -- debug things
-  PREFIX = '[PKPCosmosWallet]';
+  PREFIX = '[PKPBase]';
   orange = '\x1b[33m';
   reset = '\x1b[0m';
   red = '\x1b[31m';
 
   /**
-   * Constructor for the PKPBaseWallet class.
+   * Constructor for the PKPBase class.
    * Initializes the instance with the provided properties.
    *
-   * @param { PKPBaseWalletProp } prop - The properties for the PKPBaseWallet instance.
+   * @param { PKPBaseProp } prop - The properties for the PKPBase instance.
    */
-  constructor(prop: PKPBaseWalletProp) {
+  constructor(prop: PKPBaseProp) {
     if (prop.pkpPubKey.startsWith('0x')) {
       prop.pkpPubKey = prop.pkpPubKey.slice(2);
     }
@@ -70,9 +80,9 @@ export class PKPBaseWallet {
   /**
    * Sets the uncompressed public key and its buffer representation.
    *
-   * @param { PKPBaseWalletProp } prop - The properties for the PKPBaseWallet instance.
+   * @param { PKPBaseProp } prop - The properties for the PKPBase instance.
    */
-  setUncompressPubKeyAndBuffer(prop: PKPBaseWalletProp): void | never {
+  setUncompressPubKeyAndBuffer(prop: PKPBaseProp): void | never {
     try {
       this.uncompressedPubKey = prop.pkpPubKey;
       this.uncompressedPubKeyBuffer = Buffer.from(prop.pkpPubKey, 'hex');
@@ -86,11 +96,11 @@ export class PKPBaseWallet {
   /**
    * Sets the compressed public key and its buffer representation.
    *
-   * @param {PKPBaseWalletProp} prop - The properties for the PKPBaseWallet instance.
+   * @param {PKPBaseProp} prop - The properties for the PKPBase instance.
    */
-  setCompressedPubKeyAndBuffer(prop: PKPBaseWalletProp): void | never {
+  setCompressedPubKeyAndBuffer(prop: PKPBaseProp): void | never {
     try {
-      this.compressedPubKey = EthCrypto.publicKey.compress(prop.pkpPubKey);
+      this.compressedPubKey = compressPubKey(prop.pkpPubKey);
       this.compressedPubKeyBuffer = Buffer.from(this.compressedPubKey, 'hex');
     } catch (e) {
       return this.throwError('Failed to set compressed public key and buffer');
@@ -100,9 +110,9 @@ export class PKPBaseWallet {
   /**
    * Sets the LIT action code or IPFS hash.
    *
-   * @param {PKPBaseWalletProp} prop - The properties for the PKPBaseWallet instance.
+   * @param {PKPBaseProp} prop - The properties for the PKPBase instance.
    */
-  setLitAction(prop: PKPBaseWalletProp): never | void {
+  setLitAction(prop: PKPBaseProp): never | void {
     this.litActionCode = prop.litActionCode;
     this.litActionIPFS = prop.litActionIPFS;
 
@@ -121,7 +131,7 @@ export class PKPBaseWallet {
   }
 
   /**
-   * Initializes the PKPBaseWallet instance by connecting to the LIT node.
+   * Initializes the PKPBase instance by connecting to the LIT node.
    */
   async init(): Promise<void | never> {
     try {
