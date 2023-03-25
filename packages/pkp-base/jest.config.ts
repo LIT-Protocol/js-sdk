@@ -12,4 +12,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/pkp-base',
+  setupFilesAfterEnv: ['../../jest.setup.js']
 };

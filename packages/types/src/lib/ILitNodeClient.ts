@@ -395,7 +395,7 @@ export interface ILitNodeClient {
    */
   saveEncryptionKey(
     params: JsonSaveEncryptionKeyRequest
-  ): Promise<Uint8Array | undefined>;
+  ): Promise<Uint8Array>;
 
   /**
    *

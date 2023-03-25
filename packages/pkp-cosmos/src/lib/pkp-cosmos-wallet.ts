@@ -34,10 +34,7 @@ const DEFAULT_COSMOS_RPC_URL =
 /**
  * Similar to "DirectSecp256k1HdWallet", but uses PKP to sign
  */
-export class PKPCosmosWallet
-  extends PKPBase
-  implements OfflineDirectSigner
-{
+export class PKPCosmosWallet extends PKPBase implements OfflineDirectSigner {
   // Address prefix for Bech32 addresses
   addressPrefix: string;
 
