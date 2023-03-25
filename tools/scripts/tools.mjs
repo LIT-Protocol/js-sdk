@@ -418,9 +418,16 @@ async function buildFunc() {
 
             const orderJson = {};
 
-            (await readJsonFile('./lit-build.config.json')).build.order.forEach((item, i) => {
-                orderJson[item] = i;
-            })
+            // SEE LINE 914 or if (args[3] === '--deps') { 
+            try{
+                (await readJsonFile('./lit-build.config.json')).build.order.forEach((item, i) => {
+                    orderJson[item] = i;
+                })
+
+            }catch(e){
+                console.error("This is being deprecated");
+                return;
+            }
 
             pkgNames = customSort(pkgNames, orderJson);
 
@@ -1078,9 +1085,9 @@ async function setupLocalDevFunc() {
         // Then, update each package's `package.json` to have the same `main` and `typings` path
         // as the `package.json` in the dist, except prefixed with `dist`.
         const packageJsonPath = `packages/${projectName}/package.json`;
-        const distPackageJsonPath = `dist/packages/${projectName}/package.json`;
+        // const distPackageJsonPath = `dist/packages/${projectName}/package.json`;
         const packageJson = await readJsonFile(packageJsonPath);
-        const distPackageJson = await readJsonFile(distPackageJsonPath);
+        // const distPackageJson = await readJsonFile(distPackageJsonPath);
 
         // packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
         // packageJson.typings = prefixPathWithDir(distPackageJson.typings, 'dist');
