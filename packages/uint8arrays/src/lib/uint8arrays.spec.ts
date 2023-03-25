@@ -1,21 +1,27 @@
-// @ts-nocheck
-import { TextEncoder, TextDecoder } from 'util';
-global.TextEncoder = TextEncoder;
-// @ts-ignore
-global.TextDecoder = TextDecoder;
+import { uint8arrayFromString, uint8arrayToString } from './uint8arrays';
 
-import { uint8arrayFromString, uint8arrayToString } from '../index';
+describe('Encoding Functions', () => {
+  const testCases = [
+    { str: 'Hello, World!', encoding: 'utf8' },
+    { str: 'こんにちは、世界！', encoding: 'utf8' },
+    { str: 'Привет, мир!', encoding: 'utf8' },
+    { str: '1234567890', encoding: 'utf8' },
+    { str: 'abcdefABCDEF', encoding: 'utf8' },
+    { str: '48656c6c6f2c20576f726c6421', encoding: 'base16' },
+  ];
 
-describe('uint8arrays', () => {
-  it('result of uint8arrayToString should be the reverse of uint8arrayFromString', () => {
+  testCases.forEach((testCase) => {
+    it(`should encode and decode a string using ${testCase.encoding} encoding`, () => {
+      const uint8Array = uint8arrayFromString(testCase.str, testCase.encoding);
+      const decodedStr = uint8arrayToString(uint8Array, testCase.encoding);
+      expect(decodedStr).toEqual(testCase.str);
+    });
+  });
 
-    const str = 'hello world';
-
-    const uint8 = uint8arrayFromString(str);
-
-    const str2 = uint8arrayToString(uint8);
-
-    expect(str2).toEqual(str);
-
+  it('should throw an error for an unsupported encoding', () => {
+    expect(() =>
+      uint8arrayFromString('Hello, World!', 'unsupported')
+    ).toThrow();
+    expect(() => uint8arrayToString(new Uint8Array(), 'unsupported')).toThrow();
   });
 });

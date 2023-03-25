@@ -1,7 +1,7 @@
-// import { pkpBase } from './pkp-base';
+import { PKPBase } from './pkp-base';
 
-// describe('pkpBase', () => {
-//   it('should work', () => {
-//     expect(pkpBase()).toEqual('pkp-base');
-//   });
-// });
+describe('pkpBase', () => {
+  it('should work', () => {
+    expect(PKPBase).toBeDefined();
+  });
+});
