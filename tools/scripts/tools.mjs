@@ -287,7 +287,8 @@ async function testFunc() {
         }
 
         if(ENV === 'run-react-and-test'){
-            spawnListener('yarn tools --dev --apps');
+            // spawnListener('yarn tools --dev --apps');
+            spawnListener('yarn nx run react:serve');
 
             // wait 3 seconds for the apps to start
             await new Promise((resolve) => setTimeout(resolve, 3000));
