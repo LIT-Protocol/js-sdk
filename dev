@@ -4,10 +4,6 @@ yarn build:packages
 
 packages=(
   "lit-node-client"
-  "lit-node-client-nodejs"
-  "auth-browser"
-  "encryption"
-  "uint8arrays"
   "types"
   "pkp-cosmos"
   "pkp-ethers"
