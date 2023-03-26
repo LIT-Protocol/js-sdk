@@ -12,4 +12,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/lit-third-party-libs',
+  setupFilesAfterEnv: ['../../jest.setup.js'],
 };
