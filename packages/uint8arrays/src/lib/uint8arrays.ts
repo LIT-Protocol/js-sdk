@@ -1,11 +1,11 @@
-/**
-utf8Encode - Encodes a given string into a UTF-8 encoded Uint8Array.
-@param {string} str - The input string to be encoded.
-@returns {Uint8Array} utf8Array - The UTF-8 encoded Uint8Array of the input string.
-*/
+// /**
+// utf8Encode - Encodes a given string into a UTF-8 encoded Uint8Array.
+// @param {string} str - The input string to be encoded.
+// @returns {Uint8Array} utf8Array - The UTF-8 encoded Uint8Array of the input string.
+// */
 function utf8Encode(str: string): Uint8Array {
   // Initialize an empty array to store the UTF-8 encoded dat
-  let utf8Array = [];
+  let utf8Array: number[] = [];
 
   // Iterate through the characters of the input string
   for (let i = 0; i < str.length; i++) {
@@ -53,12 +53,12 @@ function utf8Encode(str: string): Uint8Array {
   return new Uint8Array(utf8Array);
 }
 
-/**
+// /**
 
-utf8Decode - Decodes a given UTF-8 encoded Uint8Array into a string.
-@param {Uint8Array} utf8Array - The input UTF-8 encoded Uint8Array to be decoded.
-@returns {string} str - The decoded string from the input UTF-8 encoded Uint8Array.
-*/
+// utf8Decode - Decodes a given UTF-8 encoded Uint8Array into a string.
+// @param {Uint8Array} utf8Array - The input UTF-8 encoded Uint8Array to be decoded.
+// @returns {string} str - The decoded string from the input UTF-8 encoded Uint8Array.
+// */
 export function utf8Decode(utf8Array: Uint8Array): string {
   let str = '';
   let i = 0;
@@ -112,6 +112,17 @@ export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
   return btoa(binaryStr);
 }
 
+function base64UrlPadToBase64(base64UrlPadStr: string): string {
+  return (
+    base64UrlPadStr.replace('-', '+').replace('_', '/') +
+    '='.repeat((4 - (base64UrlPadStr.length % 4)) % 4)
+  );
+}
+
+function base64ToBase64UrlPad(base64Str: string): string {
+  return base64Str.replace('+', '-').replace('/', '_').replace(/=+$/, '');
+}
+
 export function uint8arrayFromString(str: string, encoding = 'utf8') {
   switch (encoding) {
     case 'utf8':
@@ -124,21 +135,27 @@ export function uint8arrayFromString(str: string, encoding = 'utf8') {
       return new Uint8Array(arr);
     case 'base64':
       return base64ToUint8Array(str);
+    case 'base64urlpad':
+      return base64ToUint8Array(base64UrlPadToBase64(str));
     default:
       throw new Error(`Unsupported encoding "${encoding}"`);
   }
 }
 
 export function uint8arrayToString(uint8array: Uint8Array, encoding = 'utf8') {
+  let _uint8array = new Uint8Array(uint8array);
+
   switch (encoding) {
     case 'utf8':
-      return utf8Decode(uint8array);
+      return utf8Decode(_uint8array);
     case 'base16':
-      return Array.from(uint8array)
+      return Array.from(_uint8array)
         .map((byte) => byte.toString(16).padStart(2, '0'))
         .join('');
     case 'base64':
-      return uint8ArrayToBase64(uint8array);
+      return uint8ArrayToBase64(_uint8array);
+    case 'base64urlpad':
+      return base64ToBase64UrlPad(uint8ArrayToBase64(_uint8array));
     default:
       throw new Error(`Unsupported encoding "${encoding}"`);
   }
