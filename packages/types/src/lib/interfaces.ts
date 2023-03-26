@@ -819,3 +819,7 @@ export interface PKPEthersWalletProp extends PKPBaseProp {}
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
 }
+
+export interface PKPClientProp
+  extends PKPEthersWalletProp,
+    PKPCosmosWalletProp {}
