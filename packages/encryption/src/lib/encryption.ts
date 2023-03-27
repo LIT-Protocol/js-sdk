@@ -103,6 +103,7 @@ const metadataForFile = ({
  */
 export const encryptToIpfs = async ({
   authSig,
+  sessionSigs,
   accessControlConditions,
   evmContractConditions,
   solRpcConditions,
@@ -119,6 +120,7 @@ export const encryptToIpfs = async ({
     functionName: 'encryptToIpfs',
     params: {
       authSig,
+      sessionSigs,
       accessControlConditions,
       evmContractConditions,
       solRpcConditions,
@@ -131,7 +133,7 @@ export const encryptToIpfs = async ({
   });
 
   if (!paramsIsSafe) return throwError({
-    message: `authSig, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, litNodeClient, string or file must be provided`,
+    message: `authSig, sessionSigs, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, litNodeClient, string or file must be provided`,
     error: LIT_ERROR.INVALID_PARAM_TYPE,
   });
 
@@ -172,6 +174,7 @@ export const encryptToIpfs = async ({
     unifiedAccessControlConditions,
     symmetricKey,
     authSig,
+    sessionSigs,
     chain,
   });
 
@@ -219,6 +222,7 @@ export const encryptToIpfs = async ({
  */
 export const decryptFromIpfs = async ({
   authSig,
+  sessionSigs,
   ipfsCid,
   litNodeClient,
 }: DecryptFromIpfsProps): Promise<string | Uint8Array> => {
@@ -227,13 +231,14 @@ export const decryptFromIpfs = async ({
     functionName: 'decryptFromIpfs',
     params: {
       authSig,
+      sessionSigs,
       ipfsCid,
       litNodeClient,
     },
   });
 
   if (!paramsIsSafe) return throwError({
-    message: `authSig, ipfsCid, litNodeClient must be provided`,
+    message: `authSig, sessionSigs, ipfsCid, litNodeClient must be provided`,
     error: LIT_ERROR.INVALID_PARAM_TYPE,
   });
 
@@ -246,7 +251,8 @@ export const decryptFromIpfs = async ({
       unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
       toDecrypt: metadata.encryptedSymmetricKeyString,
       chain: metadata.chain,
-      authSig
+      authSig,
+      sessionSigs,
     });
   
     if (metadata.encryptedString !== undefined) {
@@ -540,6 +546,7 @@ export const encryptZip = async (zip: JSZip): Promise<EncryptedZip> => {
  */
 export const encryptFileAndZipWithMetadata = async ({
   authSig,
+  sessionSigs,
   accessControlConditions,
   evmContractConditions,
   solRpcConditions,
@@ -554,6 +561,7 @@ export const encryptFileAndZipWithMetadata = async ({
     functionName: 'encryptFileAndZipWithMetadata',
     params: {
       authSig,
+      sessionSigs,
       accessControlConditions,
       evmContractConditions,
       solRpcConditions,
@@ -566,7 +574,7 @@ export const encryptFileAndZipWithMetadata = async ({
   });
 
   if (!paramsIsSafe) return throwError({
-    message: `authSig, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, file, litNodeClient, and readme must be provided`,
+    message: `authSig, sessionSigs, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, file, litNodeClient, and readme must be provided`,
     error: LIT_ERROR.INVALID_PARAM_TYPE,
   });
 
@@ -584,6 +592,7 @@ export const encryptFileAndZipWithMetadata = async ({
     unifiedAccessControlConditions,
     symmetricKey: exportedSymmKey,
     authSig,
+    sessionSigs,
     chain,
   });
 
@@ -653,6 +662,7 @@ export const encryptFileAndZipWithMetadata = async ({
  */
 export const decryptZipFileWithMetadata = async ({
   authSig,
+  sessionSigs,
   file,
   litNodeClient,
   additionalAccessControlConditions,
@@ -664,6 +674,7 @@ export const decryptZipFileWithMetadata = async ({
     functionName: 'decryptZipFileWithMetadata',
     params: {
       authSig,
+      sessionSigs,
       file,
       litNodeClient,
       additionalAccessControlConditions,
@@ -699,6 +710,7 @@ export const decryptZipFileWithMetadata = async ({
       toDecrypt: metadata.encryptedSymmetricKey,
       chain: metadata.chain, // -- validate
       authSig,
+      sessionSigs,
     });
   } catch (e: any) {
     if (e.errorCode === 'not_authorized') {
@@ -722,6 +734,7 @@ export const decryptZipFileWithMetadata = async ({
               additionalAccessControlConditions[i].encryptedSymmetricKey,
             chain: metadata.chain,
             authSig,
+            sessionSigs,
           });
 
           // okay we got the additional symmkey, now we need to decrypt the symmkey and then use it to decrypt the original symmkey

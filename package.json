@@ -15,6 +15,7 @@
     "build:packages": "yarn reset && yarn tools --build --packages && yarn tools --setup-local-dev && yarn postBuild:mapDepsToDist && yarn tool:genReadme",
     "build:target": "yarn node tools/scripts/build.mjs",
     "build:setupLocalDev": "yarn tools --setup-local-dev",
+    "build:verify": "yarn tools --verify",
     "test:packages": "nx run-many --target=test",
     "test:watch": "nx run-many --target=test --watch",
     "test:ci": "nx affected --target=test --all --code-coverage",
