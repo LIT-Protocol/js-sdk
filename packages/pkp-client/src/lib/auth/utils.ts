@@ -29,7 +29,7 @@ export function isOAuthProviderSupported(provider: string): boolean {
  * @returns {string} - Login url
  */
 export function prepareLoginUrl(provider: string, redirectUri: string): string {
-  const baseUrl = 'https://lit-login-server.herokuapp.com';
+  const baseUrl = 'https://login.litgateway.com';
   const loginUrl = `${baseUrl}${getLoginRoute(provider)}`;
   const state = encode(setStateParam());
   const authParams = {
