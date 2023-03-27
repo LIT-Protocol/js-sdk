@@ -171,6 +171,10 @@ export interface WalletAuthParams {
    */
   sessionParams: GetSessionSigsProps;
   /**
+   * Chain to use when creating authSig if authSig is not provided
+   */
+  chain?: string;
+  /**
    * Signature from Eth wallet
    */
   authSig?: AuthSig | null;

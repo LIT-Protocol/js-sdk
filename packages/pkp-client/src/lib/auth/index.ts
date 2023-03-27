@@ -99,8 +99,9 @@ export class Auth {
    * Create session signatures for a given authorized Eth Wallet
    *
    * @param {WalletAuthParams} params
-   * @param {AuthSig} params.authSig - Signature of authorized wallet
    * @param {SessionParams} params.sessionParams - Parameters for creating session signatures
+   * @param {string} [params.chain] - Chain to use when creating authSig if authSig is not provided
+   * @param {AuthSig} [params.authSig] - Signature of authorized wallet
    * @param {string} [params.pkpPublicKey] - Public key of PKP to use for creating session signatures
    *
    * @returns {Promise<SessionSigs>} - Session signatures
@@ -111,7 +112,8 @@ export class Auth {
     try {
       let authSig = params.authSig;
       if (!authSig) {
-        authSig = await checkAndSignAuthMessage({ chain: 'ethereum' });
+        const chain = params.chain || 'ethereum';
+        authSig = await checkAndSignAuthMessage({ chain });
       }
       const sessionSigs = await this.walletProvider.createSession(params);
       return sessionSigs;
