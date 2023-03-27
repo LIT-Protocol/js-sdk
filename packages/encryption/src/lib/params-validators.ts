@@ -240,8 +240,15 @@ export const paramsValidators = {
         'accessControlConditions and evmContractConditions and solRpcConditions and unifiedAccessControlConditions are blank'
       );
     }
-    if (!authSig) {
-      throw new Error('authSig is blank');
+
+    // -- validate: if sessionSig and authSig exists
+    if (sessionSigs && authSig) {
+      throwError({
+        message: 'You must pass only one authSig or sessionSigs',
+        name: 'InvalidArgumentException',
+        errorCode: 'invalid_argument',
+      });
+      return false;
     }
 
     //   -- case: success
@@ -335,11 +342,7 @@ export const paramsValidators = {
       return false;
     }
 
-    if (!authSig) {
-      return;
-    }
-
-    if (!checkIfAuthSigRequiresChainParam(authSig, chain, 'getEncryptionKey'))
+    if (authSig && !checkIfAuthSigRequiresChainParam(authSig, chain, 'getEncryptionKey'))
       return false;
 
     return true;
