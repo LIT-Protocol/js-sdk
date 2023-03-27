@@ -79,6 +79,7 @@
     "download": "^8.0.0",
     "ethers": "^5.7.1",
     "etherscan-api": "^10.2.0",
+    "events": "^3.3.0",
     "find-config": "^1.0.0",
     "g": "^2.0.1",
     "ipfs-http-client": "56.0.0",
