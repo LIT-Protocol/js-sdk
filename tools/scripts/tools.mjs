@@ -44,6 +44,7 @@ const optionMaps = new Map([
     ['default', () => helpFunc()],
     ['--v', () => versionFunc()],
     ['--version', () => versionFunc()],
+    ['--verify', () => validateDependencyVersions()],
 ])
 
 const setup = () => {
@@ -73,6 +74,7 @@ function helpFunc() {
             --setup-local-dev: setup local dev
             --match-versions: match versions
             --version: show version
+            --verify: validate dependency versions
     `,
         true
     );
@@ -1267,4 +1269,67 @@ async function versionFunc(){
     }
 
     exit();
+}
+
+async function validateDependencyVersions(){
+
+    const PREFIX = '@lit-protocol';
+    const ignoreList = ['@lit-protocol/pkp-ethers.js-node'];
+
+    const packageList = (await listDirsRecursive('./packages', false)).map((item) => {
+        return `dist/${item}/package.json`;
+    });
+
+    let _total = packageList.length;
+    let _passes = 0;
+    let _fails = 0;
+
+    await asyncForEach(packageList, async (pkg) => {
+
+        let packageJson;
+        try{
+            packageJson = await readJsonFile(pkg);
+        }catch(e){
+            redLog(`❌ ${pkg} does not exist`);
+            _fails++;
+            return;
+        }
+        const pkgVersion = packageJson.version;
+        
+        const dependencies = packageJson.dependencies;
+
+        let total = 0;
+        let passes = 0;
+        let fails = 0;
+
+        // search for dependencies that start with @lit-protocol
+        for (const [key, value] of Object.entries(dependencies)) {
+            if(key.includes(PREFIX) && !ignoreList.includes(key)){
+                total++;
+                if(value !== pkgVersion){
+                    fails++;
+                }else{
+                    passes++;
+                }
+            }
+        }
+
+        if(fails > 0){
+            redLog(`❌ ${pkg} has ${fails} dependencies that do not match the version`);
+            _fails++;
+        }else{
+            greenLog(`✅ ${pkg} has all dependencies that match the version`);
+            _passes++;
+        }
+    });
+
+    console.log('')
+    greenLog(`💚 Passes: ${_passes}`, true);
+    
+    if(_fails > 0){
+        redLog(`💔 Fails: ${_fails}`, true);
+        yellowLog(`This usually happens when you switch branches some dependencies/packages are not updated. \nTry running 'yarn' and 'yarn build' again\n`, true);
+    }
+    console.log('');
+    process.exit();
 }
