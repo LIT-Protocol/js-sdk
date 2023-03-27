@@ -1280,8 +1280,20 @@ async function validateDependencyVersions(){
         return `dist/${item}/package.json`;
     });
 
+    let _total = packageList.length;
+    let _passes = 0;
+    let _fails = 0;
+
     await asyncForEach(packageList, async (pkg) => {
-        const packageJson = await readJsonFile(pkg);
+
+        let packageJson;
+        try{
+            packageJson = await readJsonFile(pkg);
+        }catch(e){
+            redLog(`❌ ${pkg} does not exist`);
+            _fails++;
+            return;
+        }
         const pkgVersion = packageJson.version;
         
         const dependencies = packageJson.dependencies;
@@ -1304,9 +1316,20 @@ async function validateDependencyVersions(){
 
         if(fails > 0){
             redLog(`❌ ${pkg} has ${fails} dependencies that do not match the version`);
+            _fails++;
         }else{
             greenLog(`✅ ${pkg} has all dependencies that match the version`);
+            _passes++;
         }
     });
+
+    console.log('')
+    greenLog(`💚 Passes: ${_passes}`, true);
+    
+    if(_fails > 0){
+        redLog(`💔 Fails: ${_fails}`, true);
+        yellowLog(`This usually happens when you switch branches some dependencies/packages are not updated. \nTry running 'yarn' and 'yarn build' again\n`, true);
+    }
+    console.log('');
     process.exit();
 }
