@@ -17,4 +17,5 @@ export default {
       'node_modules/ipfs-unixfs-importer/dist/index.min.js',
     '^blockstore-core': 'node_modules/blockstore-core/dist/index.min.js',
   },
+  setupFilesAfterEnv: ['../../jest.setup.js'],
 };
