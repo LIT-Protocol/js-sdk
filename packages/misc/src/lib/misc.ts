@@ -6,10 +6,7 @@ import {
   LIT_ERROR,
 } from '@lit-protocol/constants';
 
-import {
-  Chain,
-  KV
-} from '@lit-protocol/types';
+import { Chain, JsonAuthSig, KV } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 
@@ -41,7 +38,8 @@ export const mostCommonString = (arr: Array<any>): any => {
   return arr
     .sort(
       (a: any, b: any) =>
-        arr.filter((v: any) => v === a).length - arr.filter((v: any) => v === b).length
+        arr.filter((v: any) => v === a).length -
+        arr.filter((v: any) => v === b).length
     )
     .pop();
 };
@@ -197,21 +195,20 @@ export const checkType = ({
 
 /**
  *
- * @param { object } authSig
+ * @param { JsonAuthSig } authSig
  * @param { string } chain
  * @param { string } functionName
  *
  * @returns { boolean }
  */
 export const checkIfAuthSigRequiresChainParam = (
-  authSig: object,
+  authSig: JsonAuthSig,
   chain: string,
   functionName: string
 ): boolean => {
   log('checkIfAuthSigRequiresChainParam');
   for (const key of LIT_AUTH_SIG_CHAIN_KEYS) {
     if (key in authSig) {
-      log('Testing 1');
       return true;
     }
   }
@@ -225,11 +222,9 @@ export const checkIfAuthSigRequiresChainParam = (
       functionName,
     })
   ) {
-    log('Testing 2');
     return false;
   }
 
-  log('Testing 3');
   return true;
 };
 
