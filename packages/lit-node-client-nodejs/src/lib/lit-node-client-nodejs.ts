@@ -2309,7 +2309,7 @@ export class LitNodeClientNodeJs {
   /** ============================== SESSION ============================== */
 
   /**
-   * Sign a session key using a PKP
+   * Sign a session public key using a PKP, which generates an authSig.
    * @returns {Object} An object containing the resulting signature.
    */
 
@@ -2424,30 +2424,24 @@ export class LitNodeClientNodeJs {
     });
   };
 
-  generateAuthMethodForWebAuthn = async (
+  generateAuthMethodForWebAuthn = (
     params: WebAuthnAuthenticationVerificationParams
-  ): Promise<AuthMethod> => ({
+  ): AuthMethod => ({
     authMethodType: AUTH_METHOD_TYPE_IDS.WEBAUTHN,
     accessToken: JSON.stringify(params),
   });
 
-  generateAuthMethodForDiscord = async (
-    access_token: string
-  ): Promise<AuthMethod> => ({
+  generateAuthMethodForDiscord = (access_token: string): AuthMethod => ({
     authMethodType: AUTH_METHOD_TYPE_IDS.DISCORD,
     accessToken: access_token,
   });
 
-  generateAuthMethodForGoogle = async (
-    access_token: string
-  ): Promise<AuthMethod> => ({
+  generateAuthMethodForGoogle = (access_token: string): AuthMethod => ({
     authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE,
     accessToken: access_token,
   });
 
-  generateAuthMethodForGoogleJWT = async (
-    access_token: string
-  ): Promise<AuthMethod> => ({
+  generateAuthMethodForGoogleJWT = (access_token: string): AuthMethod => ({
     authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE_JWT,
     accessToken: access_token,
   });
