@@ -1,78 +1,34 @@
 import {
-  RelayerConfig,
   AuthMethodType,
-  RelayFetchResponse,
-  RelayMintResponse,
-  RelayPollStatusResponse,
-  AUTH_CLIENT_EVENTS,
-} from './types';
-import { EventEmitter } from 'events';
+  IRelay,
+  IRelayFetchResponse,
+  IRelayMintResponse,
+  IRelayPollStatusResponse,
+  LitRelayConfig,
+} from '@lit-protocol/types';
 
 /**
- * Class that communicates with a relay server
+ * Class that communicates with Lit relay server
  */
-export class Relayer {
+export class LitRelay implements IRelay {
   /**
-   * URL for relay server
+   * URL for Lit's relay server
    */
-  public readonly relayUrl: string;
+  private readonly relayUrl: string =
+    'https://relay-server-staging.herokuapp.com/';
   /**
-   * API key for relay server (required when using Lit's relay server)
+   * API key for Lit's relay server
    */
-  private readonly relayApiKey: string;
-
-  public events: EventEmitter = new EventEmitter();
+  private readonly relayApiKey: string = '';
 
   /**
-   * Create a Relayer instance
+   * Create a Relay instance
    *
-   * @param {RelayerConfig} config - Configuration object
-   * @param {string} config.relayUrl - URL for relay server
-   * @param {string} config.relayApiKey - API key for relay server
+   * @param {LitRelayConfig} config
+   * @param {string} config.relayApiKey - API key for Lit's relay server
    */
-  constructor(config: RelayerConfig) {
-    this.relayUrl = config.relayUrl
-      ? config.relayUrl
-      : 'https://relay-server-staging.herokuapp.com/';
-    this.relayApiKey = config.relayApiKey ? config.relayApiKey : '';
-  }
-
-  // -- Relayer methods --
-
-  /**
-   * Fetch PKPs associated with the given auth method
-   *
-   * @param {AuthMethodType} authMethodType - Auth method type
-   * @param {string} body - Body of the request
-   *
-   * @returns Response from the relay server
-   */
-  public async fetchPKPs(
-    authMethodType: AuthMethodType,
-    body: string
-  ): Promise<RelayFetchResponse> {
-    const route = this._getFetchPKPsRoute(authMethodType);
-    const response = await fetch(`${this.relayUrl}${route}`, {
-      method: 'POST',
-      headers: {
-        'api-key': this.relayApiKey,
-        'Content-Type': 'application/json',
-      },
-      body: body,
-    });
-
-    if (response.status < 200 || response.status >= 400) {
-      console.warn('Something wrong with the API call', await response.json());
-      // console.log("Uh oh, something's not quite right.");
-      const err = new Error('Unable to fetch PKPs through relay server');
-      this.events.emit(AUTH_CLIENT_EVENTS.ERROR, err);
-      throw err;
-    } else {
-      const resBody = await response.json();
-      console.log('Response OK', { body: resBody });
-      console.log('Successfully fetched PKPs with relayer');
-      return resBody;
-    }
+  constructor(config: LitRelayConfig) {
+    this.relayApiKey = config.relayApiKey;
   }
 
   /**
@@ -81,14 +37,12 @@ export class Relayer {
    * @param {AuthMethodType} authMethodType - Auth method type
    * @param {string} body - Body of the request
    *
-   * @returns Response from the relay server
+   * @returns {Promise<IRelayMintResponse>} Response from the relay server
    */
   public async mintPKP(
     authMethodType: AuthMethodType,
     body: string
-  ): Promise<RelayMintResponse> {
-    this.events.emit(AUTH_CLIENT_EVENTS.MINTING, { body });
-
+  ): Promise<IRelayMintResponse> {
     const route = this._getMintPKPRoute(authMethodType);
     const response = await fetch(`${this.relayUrl}${route}`, {
       method: 'POST',
@@ -102,11 +56,9 @@ export class Relayer {
     if (response.status < 200 || response.status >= 400) {
       console.warn('Something wrong with the API call', await response.json());
       const err = new Error('Unable to mint PKP through relay server');
-      this.events.emit(AUTH_CLIENT_EVENTS.ERROR, err);
       throw err;
     } else {
       const resBody = await response.json();
-      console.log('Response OK', { body: resBody });
       console.log('Successfully initiated minting PKP with relayer');
       return resBody;
     }
@@ -116,19 +68,17 @@ export class Relayer {
    * Poll the relay server for status of minting request
    *
    * @param {string} requestId - Request ID to poll, likely the minting transaction hash
+   * @param {number} [pollInterval] - Polling interval in milliseconds
+   * @param {number} [maxPollCount] - Maximum number of times to poll
    *
-   * @returns Response from the relay server
+   * @returns {Promise<IRelayPollStatusResponse>} Response from the relay server
    */
   public async pollRequestUntilTerminalState(
-    requestId: string
-  ): Promise<RelayPollStatusResponse> {
-    const maxPollCount = 20;
+    requestId: string,
+    pollInterval = 15000,
+    maxPollCount = 20
+  ): Promise<IRelayPollStatusResponse> {
     for (let i = 0; i < maxPollCount; i++) {
-      this.events.emit(AUTH_CLIENT_EVENTS.POLLING, {
-        pollCount: i,
-        requestId: requestId,
-      });
-
       const response = await fetch(
         `${this.relayUrl}/auth/status/${requestId}`,
         {
@@ -147,7 +97,6 @@ export class Relayer {
         const err = new Error(
           `Unable to poll the status of this mint PKP transaction: ${requestId}`
         );
-        this.events.emit(AUTH_CLIENT_EVENTS.ERROR, err);
         throw err;
       }
 
@@ -160,24 +109,55 @@ export class Relayer {
           error: resBody.error,
         });
         const err = new Error(resBody.error);
-        this.events.emit(AUTH_CLIENT_EVENTS.ERROR, err);
         throw err;
       } else if (resBody.status === 'Succeeded') {
         // exit loop since success
         console.info('Successfully authed', { ...resBody });
-        this.events.emit(AUTH_CLIENT_EVENTS.MINTED, { ...resBody });
         return resBody;
       }
 
       // otherwise, sleep then continue polling
-      await new Promise((r) => setTimeout(r, 15000));
+      await new Promise((r) => setTimeout(r, pollInterval));
     }
 
     // at this point, polling ended and still no success, set failure status
     // console.error(`Hmm this is taking longer than expected...`);
     const err = new Error('Polling for mint PKP transaction status timed out');
-    this.events.emit(AUTH_CLIENT_EVENTS.ERROR, err);
     throw err;
+  }
+
+  /**
+   * Fetch PKPs associated with the given auth method
+   *
+   * @param {AuthMethodType} authMethodType - Auth method type
+   * @param {string} body - Body of the request
+   *
+   * @returns {Promise<IRelayFetchResponse>} Response from the relay server
+   */
+  public async fetchPKPs(
+    authMethodType: AuthMethodType,
+    body: string
+  ): Promise<IRelayFetchResponse> {
+    const route = this._getFetchPKPsRoute(authMethodType);
+    const response = await fetch(`${this.relayUrl}${route}`, {
+      method: 'POST',
+      headers: {
+        'api-key': this.relayApiKey,
+        'Content-Type': 'application/json',
+      },
+      body: body,
+    });
+
+    if (response.status < 200 || response.status >= 400) {
+      console.warn('Something wrong with the API call', await response.json());
+      // console.log("Uh oh, something's not quite right.");
+      const err = new Error('Unable to fetch PKPs through relay server');
+      throw err;
+    } else {
+      const resBody = await response.json();
+      console.log('Successfully fetched PKPs with relayer');
+      return resBody;
+    }
   }
 
   /**
@@ -185,7 +165,7 @@ export class Relayer {
    *
    * @param {AuthMethodType} authMethodType - Auth method type
    *
-   * @returns route
+   * @returns {string} Fetching route
    */
   private _getFetchPKPsRoute(authMethodType: AuthMethodType): string {
     switch (authMethodType) {
@@ -207,7 +187,7 @@ export class Relayer {
    *
    * @param {AuthMethodType} authMethodType - Auth method type
    *
-   * @returns route
+   * @returns {string} Minting route
    */
   private _getMintPKPRoute(authMethodType: AuthMethodType): string {
     switch (authMethodType) {
@@ -222,16 +202,5 @@ export class Relayer {
           `Auth method type "${authMethodType}" is not supported`
         );
     }
-  }
-
-  // --- Event listener methods ---
-  /**
-   * Register an event listener that will be invoked every time the named event is emitted
-   *
-   * @param {string} event - Event name
-   * @param {Function} listener - Callback function
-   */
-  public on(event: string, listener: any): void {
-    this.events.on(event, listener);
   }
 }

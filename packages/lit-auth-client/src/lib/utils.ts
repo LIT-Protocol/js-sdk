@@ -1,13 +1,7 @@
-import {
-  AuthMethod,
-  AuthMethodType,
-  AuthNeededCallbackParams,
-  LoginUrlParams,
-} from './types';
-import { ethers } from 'ethers';
-import { SiweMessage } from 'lit-siwe';
 import { nanoid } from 'nanoid';
-import { STATE_PARAM_KEY } from './constants';
+import { LoginUrlParams } from '@lit-protocol/types';
+
+export const STATE_PARAM_KEY = 'lit-state-param';
 
 /**
  * Check if OAuth provider is supported
@@ -16,7 +10,7 @@ import { STATE_PARAM_KEY } from './constants';
  *
  * @returns {boolean} - True if provider is supported
  */
-export function isOAuthProviderSupported(provider: string): boolean {
+export function isSocialLoginSupported(provider: string): boolean {
   return ['google', 'discord'].includes(provider);
 }
 
@@ -104,7 +98,7 @@ export function parseLoginParams(search: string): LoginUrlParams {
  *
  * @returns {string} - State param
  */
-function setStateParam(): string {
+export function setStateParam(): string {
   const state = nanoid(15);
   sessionStorage.setItem(STATE_PARAM_KEY, state);
   return state;
@@ -148,109 +142,4 @@ export function encode(value: string): string {
  */
 export function decode(value: string): string {
   return window.atob(value);
-}
-
-/**
- * Default callback to prompt the user to authenticate with their PKP via non-wallet auth methods such as social login
- *
- * @param {AuthMethod[]} authMethods - Auth method array that includes the auth method type and data
- * @param {string} pkpPublicKey - Public key of the PKP
- *
- * @returns callback function
- */
-export function getDefaultAuthNeededCallback(
-  authMethods: AuthMethod[],
-  pkpPublicKey: string
-): any {
-  const defaultCallback = async ({
-    chainId,
-    resources,
-    expiration,
-    uri,
-    litNodeClient,
-  }: AuthNeededCallbackParams) => {
-    const sessionSig = await litNodeClient.signSessionKey({
-      sessionKey: uri,
-      authMethods: authMethods,
-      pkpPublicKey: pkpPublicKey,
-      expiration,
-      resources,
-      chainId,
-    });
-    return sessionSig;
-  };
-
-  return defaultCallback;
-}
-
-/**
- * Default callback to prompt the user to authenticate with their PKP using wallet signatures
- *
- * @param {string} domain - Domain that is requesting the signing
- * @param {string} ethAddress - Ethereum address of authorized wallet
- * @param {ethers.Signer} signer - Signer to sign the message
- * @param {string} pkpPublicKey - Public key of the PKP to auth with
- * @param {number} chainId - Chain ID to use
- * @param {string} [statement] - Optional statement to include in the message
- *
- * @returns callback function
- */
-export function getDefaultWalletAuthNeededCallback(
-  domain: string,
-  ethAddress: string,
-  signer: ethers.Signer,
-  pkpPublicKey: string,
-  chainId: number,
-  statement?: string
-): any {
-  const defaultCallback = async ({
-    chainId,
-    resources,
-    expiration,
-    uri,
-    litNodeClient,
-  }: AuthNeededCallbackParams) => {
-    const statementParam = statement
-      ? statement
-      : 'Lit Protocol PKP session signature';
-    const message = new SiweMessage({
-      domain,
-      address: ethAddress,
-      statement: statementParam,
-      uri,
-      version: '1',
-      // it's a string here https://github.com/LIT-Protocol/lit-js-sdk/blob/serrano/src/utils/litNodeClient.js#L519
-      chainId: chainId,
-      expirationTime: expiration,
-      resources,
-    });
-    const toSign = message.prepareMessage();
-    const signature = await signer.signMessage(toSign);
-
-    const authSig = {
-      sig: signature,
-      derivedVia: 'web3.eth.personal.sign',
-      signedMessage: toSign,
-      address: ethAddress,
-    };
-
-    const sessionSig = await litNodeClient.signSessionKey({
-      sessionKey: uri,
-      pkpPublicKey: pkpPublicKey,
-      authSig: authSig,
-      authMethods: [
-        {
-          authMethodType: AuthMethodType.EthWallet,
-          accessToken: ethAddress,
-        },
-      ],
-      expiration,
-      resources,
-      chainId,
-    });
-
-    return sessionSig;
-  };
-
-  return defaultCallback;
 }

@@ -15,7 +15,6 @@ export class PKPClient {
   constructor(prop: PKPClientProp) {
     this.wallets = new Map<string, PKPBase>();
     this.registerWallet('eth', new PKPEthersWallet(prop));
-
     this.registerWallet(
       'cosmos',
       new PKPCosmosWallet({
