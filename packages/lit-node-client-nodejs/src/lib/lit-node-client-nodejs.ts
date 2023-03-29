@@ -2339,7 +2339,9 @@ export class LitNodeClientNodeJs {
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
     const pkpEthAddress = (function () {
       if (params.pkpPublicKey) return computeAddress(params.pkpPublicKey);
-      return '0x00000000'; // This will be populated by the node.
+
+      // This will be populated by the node, using dummy value for now.
+      return '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
     })();
 
     let siweMessage: SiweMessage = new SiweMessage({
