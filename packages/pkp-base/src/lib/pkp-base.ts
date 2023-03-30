@@ -26,10 +26,16 @@ const compressPubKey = (pubKey: string): string => {
   return hex;
 };
 
+interface DefaultType {
+  toSign: Uint8Array;
+  publicKey: Uint8Array;
+  sigName: string;
+}
+
 /**
  * A base class that can be shared between Ethers and Cosmos signers.
  */
-export class PKPBase {
+export class PKPBase<T = DefaultType> {
   pkpWalletProp: PKPBaseProp;
   uncompressedPubKey!: string;
   uncompressedPubKeyBuffer!: Uint8Array;
@@ -39,7 +45,7 @@ export class PKPBase {
   litNodeClientReady: boolean = false;
   litActionCode?: string;
   litActionIPFS?: string;
-  litActionJsParams: any;
+  litActionJsParams!: T;
   debug: boolean;
   defaultLitActionCode: string = `
   (async () => {
@@ -70,7 +76,7 @@ export class PKPBase {
     this.setCompressedPubKeyAndBuffer(prop);
     this.debug = prop.debug || false;
     this.setLitAction(prop);
-    this.litActionJsParams = prop.litActionJsParams || {};
+    this.setLitActionJsParams(prop.litActionJsParams || {});
     this.litNodeClient = new LitNodeClient({
       litNetwork: prop.litNetwork ?? 'serrano',
       debug: this.debug,
@@ -128,6 +134,17 @@ export class PKPBase {
       );
       this.litActionCode = this.defaultLitActionCode;
     }
+  }
+
+  /**
+  A function that sets the value of the litActionJsParams property to the given params object.
+  @template CustomType - A generic type that extends T, where T is the type of the litActionJsParams property.
+  @param { CustomType } params - An object of type CustomType that contains the parameters to be set as litActionJsParams.
+  @returns { void }
+  @memberOf SomeClass
+  */
+  setLitActionJsParams<CustomType extends T = T>(params: CustomType): void {
+    this.litActionJsParams = params;
   }
 
   /**
