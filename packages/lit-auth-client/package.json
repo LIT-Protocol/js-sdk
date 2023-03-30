@@ -25,6 +25,9 @@
   "tags": [
     "vanilla"
   ],
+  "peerDependencies": {
+    "nanoid": "3.3.4"
+  },
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
