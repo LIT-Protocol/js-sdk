@@ -1,6 +1,6 @@
 # This repo re-exports funtionalities from
 
-## LitThirdPartyLibs
+## IPFSBundledSDK
 ```
 import { importer } from "ipfs-unixfs-importer";
 import { MemoryBlockstore } from "blockstore-core/memory";

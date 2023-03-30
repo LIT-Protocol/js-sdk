@@ -26,6 +26,7 @@ import {
 } from '@cosmjs/proto-signing';
 
 import { CosmosBundledSDK } from '@lit-protocol/lit-third-party-libs';
+
 const {
   encodeSecp256k1Signature,
   rawSecp256k1PubkeyToRawAddress,
