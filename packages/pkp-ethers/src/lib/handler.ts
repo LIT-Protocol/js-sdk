@@ -19,10 +19,8 @@ import {
   ETHHandlerReq,
   ETHHandlerRes,
   ETHRequestHandler,
-  ETHRequestPayload,
   ETHSignature,
   LitTypeDataSigner,
-  SupportedETHSigningMethods,
   UnknownETHMethod,
 } from './pkp-ethers-types';
 import { ethers } from 'ethers';
@@ -91,12 +89,30 @@ export const signTypedDataHandler: ETHRequestHandler = async ({
   return { signature };
 };
 
+/**
+ * An object mapping Ethereum JSON-RPC signing methods to their respective
+ * request handlers. The request handlers take an ETHHandlerReq object
+ * as input and return a promise that resolves to the signature result.
+ * Currently supported methods:
+ * eth_signTypedData
+ * @type {{ eth_signTypedData: ETHRequestHandler;} & UnknownETHMethod}
+ */
 export const methodHandlers: {
   eth_signTypedData: ETHRequestHandler;
 } & UnknownETHMethod = {
   eth_signTypedData: signTypedDataHandler,
 };
 
+/**
+ * Handles Ethereum JSON-RPC signing requests by dispatching them to the appropriate
+ * signing function based on the provided method.
+ *
+ * @param {ETHHandlerReq} params - The request parameters, including the signer and the payload.
+ * @param {LitTypeDataSigner} params.signer - The signer instance used for signing.
+ * @param {ETHRequestSigningPayload} params.payload - The payload containing the method and necessary data.
+ * @returns {Promise<ETHSignature>} A promise that resolves to the signature result.
+ * @throws {Error} If the provided method is not supported or if an error occurs during signing.
+ */
 export const requestHandler = async ({
   signer,
   payload,

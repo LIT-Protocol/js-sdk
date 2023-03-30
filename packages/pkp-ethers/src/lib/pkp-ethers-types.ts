@@ -39,20 +39,20 @@ export interface EIP712TypedData {
 
 export type SupportedETHSigningMethods = 'eth_signTypedData';
 
-export interface ETHRequestPayload {
+export interface ETHRequestSigningPayload {
   method: SupportedETHSigningMethods;
   params: any[];
 }
 
 export type ETHHandlerReq = {
   signer: LitTypeDataSigner;
-  payload: ETHRequestPayload;
+  payload: ETHRequestSigningPayload;
 };
 
 export type ETHSignature = string;
 
 export type ETHHandlerRes = {
-  signature: ETHSignature;
+  signature: ETHSignature; // 0x...
 };
 
 export type ETHRequestHandler = (
