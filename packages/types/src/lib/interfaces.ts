@@ -837,3 +837,9 @@ export interface PKPCosmosWalletProp extends PKPBaseProp {
 export interface PKPClientProp extends PKPBaseProp {
   cosmosAddressPrefix?: string | 'cosmos';
 }
+
+export interface PKPBaseDefaultParams {
+  toSign: Uint8Array;
+  publicKey: Uint8Array;
+  sigName: string;
+}

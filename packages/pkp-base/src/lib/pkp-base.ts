@@ -8,10 +8,20 @@
  * initializing the class instances.
  */
 
-import { ExecuteJsProps, PKPBaseProp, JsonAuthSig } from '@lit-protocol/types';
+import {
+  ExecuteJsProps,
+  PKPBaseProp,
+  JsonAuthSig,
+  PKPBaseDefaultParams,
+} from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
 
+/**
+ * Compresses a given public key.
+ * @param {string} pubKey - The public key to be compressed.
+ * @returns {string} - The compressed public key.
+ */
 const compressPubKey = (pubKey: string): string => {
   let testBuffer = Buffer.from(pubKey, 'hex');
   if (testBuffer.length === 64) {
@@ -26,16 +36,10 @@ const compressPubKey = (pubKey: string): string => {
   return hex;
 };
 
-interface DefaultType {
-  toSign: Uint8Array;
-  publicKey: Uint8Array;
-  sigName: string;
-}
-
 /**
  * A base class that can be shared between Ethers and Cosmos signers.
  */
-export class PKPBase<T = DefaultType> {
+export class PKPBase<T = PKPBaseDefaultParams> {
   pkpWalletProp: PKPBaseProp;
   uncompressedPubKey!: string;
   uncompressedPubKeyBuffer!: Uint8Array;
@@ -114,10 +118,13 @@ export class PKPBase<T = DefaultType> {
   }
 
   /**
-   * Sets the LIT action code or IPFS hash.
+   * Sets the Lit action to be executed by the LitNode client.
    *
-   * @param {PKPBaseProp} prop - The properties for the PKPBase instance.
+   * @param {PKPBaseProp} prop - An object containing the parameters for the Lit action.
+   *
+   * @returns {never | void} - If both `litActionCode` and `litActionIPFS` are present, throws an Error. Otherwise, does not return a value.
    */
+
   setLitAction(prop: PKPBaseProp): never | void {
     this.litActionCode = prop.litActionCode;
     this.litActionIPFS = prop.litActionIPFS;
@@ -161,12 +168,16 @@ export class PKPBase<T = DefaultType> {
   }
 
   /**
-   * Runs the LIT action with the given parameters.
+   * Runs the specified Lit action with the given parameters.
    *
-   * @param {Uint8Array} toSign - The data to be signed.
-   * @param {string} sigName - The signature name.
-   * @returns {Promise<any>} - The result of the LIT action.
+   * @param {Uint8Array} toSign - The data to be signed by the Lit action.
+   * @param {string} sigName - The name of the signature to be returned by the Lit action.
+   *
+   * @returns {Promise<any>} - A Promise that resolves with the signature returned by the Lit action.
+   *
+   * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, if `executeJsArgs` does not have either `code` or `ipfsId`, or if an error occurs during the execution of the Lit action.
    */
+
   async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
     // If no PKP public key is provided, throw error
     if (!this.pkpWalletProp.pkpPubKey) {
@@ -248,18 +259,39 @@ export class PKPBase<T = DefaultType> {
     }
   }
 
+  /**
+   * Ensures that the LitNode client is ready for use by waiting for initialization if necessary.
+   * If the client is already ready, this function does nothing.
+   *
+   * @returns {Promise<void>} - A Promise that resolves when the LitNode client is ready for use.
+   */
   async ensureLitNodeClientReady(): Promise<void> {
     if (!this.litNodeClientReady) {
       await this.init();
     }
   }
 
-  // Debug functions
+  /**
+   * Logs the provided arguments to the console, but only if debugging is enabled.
+   *
+   * @param {...any[]} args - The values to be logged to the console.
+   *
+   * @returns {void} - This function does not return a value.
+   */
+
   log(...args: any[]): void {
     if (this.debug) {
       console.log(this.orange + this.PREFIX + this.reset, ...args);
     }
   }
+
+  /**
+   * Logs an error message to the console and throws an Error with the same message.
+   *
+   * @param {string} message - The error message to be logged and thrown.
+   *
+   * @returns {never} - This function does not return a value since it always throws an Error.
+   */
 
   throwError = (message: string): never => {
     console.error(

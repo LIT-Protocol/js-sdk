@@ -7,7 +7,7 @@ import * as LITCONFIG from 'lit.config.json';
 describe('pkpClient', () => {
   let pkpClient: PKPClient;
 
-  it('should work', () => {
+  it('should be defined', () => {
     expect(PKPClient).toBeDefined();
   });
 

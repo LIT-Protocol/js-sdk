@@ -14,5 +14,6 @@
     "signedMessage": "localhost:4003 wants you to sign in with your Ethereum account:\n0x18f987D15a973776f6a60652B838688a1833fE95\n\n\nURI: http://localhost:4003/\nVersion: 1\nChain ID: 1\nNonce: o0ihUgFpC5RaAFQGf\nIssued At: 2023-03-29T17:37:59.343Z\nExpiration Time: 2297-01-10T17:37:40.600Z",
     "address": "0x18f987d15a973776f6a60652b838688a1833fe95"
   },
-  "PKP_PUBKEY": "0x04cd5fc4b661a2ae2dc425aa42abbfeaa187c07063928322a8c748ebb7611868144c0ff28b1910faeafedea914ec8a23baa579b6ff7f03efa322e7eb098e62dd8f"
+  "PKP_PUBKEY": "0x04cd5fc4b661a2ae2dc425aa42abbfeaa187c07063928322a8c748ebb7611868144c0ff28b1910faeafedea914ec8a23baa579b6ff7f03efa322e7eb098e62dd8f",
+  "PKP_ADDRESS": "0xf675E8Cdc5DbE5f78a47D23A3b1CCD07b986f17f"
 }

@@ -10,6 +10,10 @@
  * Source: https://github.com/cosmos/cosmjs/blob/4c8b278c1d988be3de415f767ce2f65ab3d40bd9/packages/proto-signing/src/directsecp256k1wallet.ts
  */
 
+// 🟡 !NOTE!: This is how we should import the dependencies, but we can't do that atm. because of the following error in React:
+// ERROR in ./node_modules/@cosmjs/crypto/build/pbkdf2.js 50:71-88
+// Module not found: Error: Can't resolve 'crypto' in '/Users/user/cosmos-test/node_modules/@cosmjs/crypto/build'
+
 // import {
 //   encodeSecp256k1Signature,
 //   rawSecp256k1PubkeyToRawAddress,
@@ -25,6 +29,7 @@ import {
   OfflineDirectSigner,
 } from '@cosmjs/proto-signing';
 
+// 🟢 SOLUTION, for now, is to import the dependencies from the @lit-protocol/lit-third-party-libs package
 import { CosmosBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 const {
