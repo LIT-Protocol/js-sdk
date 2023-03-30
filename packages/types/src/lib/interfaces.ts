@@ -7,6 +7,7 @@ import {
   ConditionType,
   EncryptedSymmetricKey,
   EvmContractConditions,
+  IRelayAuthStatus,
   JsonRequest,
   LIT_NETWORKS_KEYS,
   SolRpcConditions,
@@ -810,3 +811,243 @@ export interface WebAuthnAuthenticationVerificationParams {
 }
 
 export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
+
+/**
+ * ========== Lit Auth Client ==========
+ */
+
+export interface LitAuthClientOptions {
+  /**
+   * Domain of the app using LitAuthClient
+   */
+  domain: string;
+  /**
+   * The redirect URI that Lit's login server should send the user back to
+   */
+  redirectUri: string;
+  /**
+   * API key for Lit's relay server
+   */
+  litRelayApiKey?: string;
+  /**
+   * Pass in a custom relay server
+   */
+  customRelay?: IRelay;
+}
+
+export interface SignInWithEthWalletParams {
+  /**
+   * Ethereum wallet address
+   */
+  address: string;
+  /**
+   * Function to sign message
+   *
+   * @param {string} message - Message to sign
+   *
+   * @returns {Promise<string>} - Raw signature of message
+   */
+  signMessage: (message: string) => Promise<string>;
+  /**
+   * Origin of signing request
+   */
+  origin?: string;
+  /**
+   * Name of chain to use for signature
+   */
+  chain?: string;
+  /**
+   * When the auth signature expires
+   */
+  expiration?: string;
+}
+
+export interface LoginUrlParams {
+  /**
+   * Auth method name
+   */
+  provider: string | null;
+  /**
+   * Access token
+   */
+  accessToken: string | null;
+  /**
+   * ID token
+   */
+  idToken: string | null;
+  /**
+   * OAuth state param
+   */
+  state: string | null;
+  /**
+   * Error codes from Lit's login server
+   */
+  error: string | null;
+}
+
+export interface IRelay {
+  /**
+   * Mint a new PKP for the given auth method
+   *
+   * @param {number} authMethodType - Auth method type
+   * @param {string} body - Body of the request
+   *
+   * @returns {Promise<IRelayMintResponse>} Response from the relay server
+   */
+  mintPKP(authMethodType: number, body: string): Promise<IRelayMintResponse>;
+  /**
+   * Poll the relay server for status of minting request
+   *
+   * @param {string} requestId - Request ID to poll, likely the minting transaction hash
+   *
+   * @returns {Promise<IRelayPollStatusResponse>} Response from the relay server
+   */
+  pollRequestUntilTerminalState(
+    requestId: string
+  ): Promise<IRelayPollStatusResponse>;
+  /**
+   * Fetch PKPs associated with the given auth method
+   *
+   * @param {number} authMethodType - Auth method type
+   * @param {string} body - Body of the request
+   *
+   * @returns {Promise<IRelayFetchResponse>} Response from the relay server
+   */
+  fetchPKPs(authMethodType: number, body: string): Promise<IRelayFetchResponse>;
+}
+
+export interface LitRelayConfig {
+  /**
+   * API key for Lit's relay server
+   */
+  relayApiKey: string;
+}
+
+export interface IRelayMintResponse {
+  /**
+   * Transaction hash of PKP being minted
+   */
+  requestId?: string;
+  /**
+   * Error from relay server
+   */
+  error?: string;
+}
+
+export interface IRelayFetchResponse {
+  /**
+   * Fetched PKPs
+   */
+  pkps?: IRelayPKP[];
+  /**
+   * Error from relay server
+   */
+  error?: string;
+}
+
+export interface IRelayPollingEvent {
+  /**
+   * Polling count
+   */
+  pollCount: number;
+  /**
+   * Transaction hash of PKP being minted
+   */
+  requestId: string;
+}
+
+export interface IRelayPollStatusResponse {
+  /**
+   * Polling status
+   */
+  status?: IRelayAuthStatus;
+  /**
+   * Token ID of PKP being minted
+   */
+  pkpTokenId?: string;
+  /**
+   * Eth address of new PKP
+   */
+  pkpEthAddress?: string;
+  /**
+   * Public key of new PKP
+   */
+  pkpPublicKey?: string;
+  /**
+   * Polling error
+   */
+  error?: string;
+}
+
+export interface IRelayPKP {
+  /**
+   * PKP token ID
+   */
+  tokenId: string;
+  /**
+   * PKP public key
+   */
+  publicKey: string;
+  /**
+   * PKP Eth address
+   */
+  ethAddress: string;
+}
+
+export interface SocialAuthNeededCallbackParams {
+  /**
+   * Auth methods to use
+   */
+  authMethods: AuthMethod[];
+  /**
+   * Public key of the PKP to use for signing
+   */
+  pkpPublicKey: string;
+}
+
+export interface EthWalletAuthNeededCallbackParams {
+  /**
+   * Domain that is requesting the signing
+   */
+  domain: string;
+  /**
+   * Ethereum address to sign with
+   */
+  address: string;
+  /**
+   * Function to sign message
+   *
+   * @param {string} message - Message to sign
+   *
+   * @returns {Promise<string>} - Raw signature of message
+   */
+  signMessage: (message: string) => Promise<string>;
+  /**
+   * Copy to show user before signing
+   */
+  statement?: string;
+}
+
+export interface DefaultAuthNeededCallbackParams {
+  /**
+   * Chain to use
+   */
+  chainId: number;
+  /**
+   * Resources that will be signed with session key
+   */
+  resources: string[];
+  /**
+   * Expiration date for when sigs will expire
+   */
+  expiration: string;
+  /**
+   * Session key to sign
+   */
+  uri: string;
+  /**
+   * Client to connect to Lit nodes
+   */
+  // TODO: update type
+  litNodeClient: any;
+}

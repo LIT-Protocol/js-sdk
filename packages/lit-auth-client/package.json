@@ -1,6 +1,7 @@
 {
-  "name": "@lit-protocol/constants",
+  "name": "@lit-protocol/lit-auth-client",
   "version": "2.1.101",
+  "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
@@ -15,11 +16,14 @@
   },
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/constants"
+    "directory": "../../dist/packages/lit-auth-client"
   },
-  "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
+  "browser": {
+    "crypto": false,
+    "stream": false
+  },
   "tags": [
-    "universal"
+    "vanilla"
   ],
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
