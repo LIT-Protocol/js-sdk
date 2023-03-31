@@ -1,8 +1,9 @@
-import { PKPEthersWallet } from '@lit-protocol/pkp-ethers/dist';
+import { PKPEthersWallet } from './pkp-ethers';
+
 import * as LITCONFIG from 'lit.config.json';
 import {
   EIP712TypedData,
-  ETHRequestPayload,
+  ETHRequestSigningPayload,
   LitTypeDataSigner,
 } from './pkp-ethers-types';
 import {
@@ -11,6 +12,7 @@ import {
 } from '@metamask/eth-sig-util';
 
 import { signTypedData, requestHandler } from './handler';
+
 import { ethers } from 'ethers';
 
 describe('pkp ethers JSON RPC handler', () => {
@@ -80,7 +82,7 @@ describe('pkp ethers JSON RPC handler', () => {
     describe('[requestHandler] Signed typed data', () => {
       const msgParamStr = JSON.stringify(msgParams);
 
-      const payload: ETHRequestPayload = {
+      const payload: ETHRequestSigningPayload = {
         method: 'eth_signTypedData',
         params: [LITCONFIG.PKP_ADDRESS, msgParamStr],
       };
