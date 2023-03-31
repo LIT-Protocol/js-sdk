@@ -303,6 +303,17 @@ async function testFunc() {
 
     if(TEST_TYPE === '--custom'){
 
+        function formatNxLine(path) {
+            const bold = '\x1b[1m';
+            const orangeBg = '\x1b[48;5;208m';
+            const black = '\x1b[30m';
+            const orange = '\x1b[38;5;208m';
+            const reset = '\x1b[0m';
+            
+            const formattedLine = `${orange} >  ${bold}${orangeBg} LIT ${reset}   ${orange}Running target ${bold}${path}${reset} `;
+            return formattedLine;
+        }
+
         function findSpecFiles(directory, filePattern) {
             const files = fs.readdirSync(directory, { withFileTypes: true });
             let specFiles = [];
@@ -323,7 +334,8 @@ async function testFunc() {
         const specFiles = findSpecFiles('./packages', /\.spec\.mjs$/);
 
         await asyncForEach([...specFiles], async (specFile) => {
-            greenLog(`Running ${specFile}...`, true)
+            const output = formatNxLine(specFile);
+            console.log(output);
             await childRunCommand(`node ${specFile}`);
         });
 
