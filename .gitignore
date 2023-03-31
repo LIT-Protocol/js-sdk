@@ -58,3 +58,7 @@ apps/demo-pkp-ethers-react/package-lock.json
 
 
 dep-graph.json
+
+apps/html/index.html
+apps/nodejs/main.ts
+apps/react/src/app/app.tsx
