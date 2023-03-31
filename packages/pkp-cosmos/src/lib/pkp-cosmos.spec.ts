@@ -13,7 +13,7 @@ jest.useRealTimers();
 
 describe('PKPCosmosWallet', () => {
   it('should create a wallet', async () => {
-    const { PKPCosmosWallet } = await import('./pkp-cosmos-wallet');
+    const { PKPCosmosWallet } = await import('./pkp-cosmos');
     const wallet = new PKPCosmosWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
@@ -27,7 +27,7 @@ describe('PKPCosmosWallet', () => {
     );
   });
   it('should connects to lit node client', async () => {
-    const { PKPCosmosWallet } = await import('./pkp-cosmos-wallet');
+    const { PKPCosmosWallet } = await import('./pkp-cosmos');
     const wallet = new PKPCosmosWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
@@ -39,7 +39,7 @@ describe('PKPCosmosWallet', () => {
     expect(wallet.litNodeClientReady).toEqual(true);
   });
   it('should retrieve account balance', async () => {
-    const { PKPCosmosWallet } = await import('./pkp-cosmos-wallet');
+    const { PKPCosmosWallet } = await import('./pkp-cosmos');
     const wallet = new PKPCosmosWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
@@ -58,7 +58,7 @@ describe('PKPCosmosWallet', () => {
   });
 
   it('should send a transaction to itself', async () => {
-    const { PKPCosmosWallet } = await import('./pkp-cosmos-wallet');
+    const { PKPCosmosWallet } = await import('./pkp-cosmos');
     const wallet = new PKPCosmosWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,

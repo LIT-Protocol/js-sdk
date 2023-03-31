@@ -6,7 +6,7 @@ import { importer } from "ipfs-unixfs-importer";
 import { MemoryBlockstore } from "blockstore-core/memory";
 ```
 
-## CosmosBundledSDK
+<!-- ## CosmosBundledSDK
 ```
 import {
   encodeSecp256k1Signature,
@@ -16,4 +16,4 @@ import { Secp256k1, sha256, ExtendedSecp256k1Signature } from "@cosmjs/crypto";
 import { toBech32, fromHex } from "@cosmjs/encoding";
 
 import { makeSignBytes } from "@cosmjs/proto-signing";
-```
+``` -->
