@@ -21,6 +21,7 @@ import {
     yellowLog,
 } from './utils.mjs';
 import fs from 'fs';
+import path from 'path';
 
 const args = getArgs();
 
@@ -240,6 +241,7 @@ async function testFunc() {
             [test-type]: the type of test to run
                 --unit: run unit tests
                 --e2e: run e2e tests
+                --custom: run custom tests
     `,
             true
         );
@@ -297,6 +299,35 @@ async function testFunc() {
 
             spawnListener('yarn tools --test --e2e react');
         }
+    }
+
+    if(TEST_TYPE === '--custom'){
+
+        function findSpecFiles(directory, filePattern) {
+            const files = fs.readdirSync(directory, { withFileTypes: true });
+            let specFiles = [];
+          
+            for (const file of files) {
+              const fullPath = path.join(directory, file.name);
+          
+              if (file.isDirectory()) {
+                specFiles = specFiles.concat(findSpecFiles(fullPath, filePattern));
+              } else if (file.isFile() && file.name.match(filePattern)) {
+                specFiles.push(fullPath);
+              }
+            }
+          
+            return specFiles;
+          }
+
+        const specFiles = findSpecFiles('./packages', /\.spec\.mjs$/);
+
+        await asyncForEach([...specFiles], async (specFile) => {
+            greenLog(`Running ${specFile}...`, true)
+            await childRunCommand(`node ${specFile}`);
+        });
+
+        process.exit();
     }
 }
 async function findFunc() {

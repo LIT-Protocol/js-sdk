@@ -462,3 +462,64 @@ const version = pkg.version;
     return { status: 200, message: `${pkg.name}@${version} => @${lernaVersion}`};
 
 }
+
+// mini custom test framework
+
+// Describe function
+export function describe(description, callback) {
+    greenLog(`\n${description}`, true);
+    callback();
+  }
+  
+  // It function
+  export function it(testDescription, testFunction) {
+    try {
+      testFunction();
+      greenLog(`✅ ${testDescription}`);
+    } catch (error) {
+      redLog(`❌ ${testDescription}`);
+      redLog(error);
+    }
+  }
+  
+  // Expect function
+  export function expect(value) {
+
+    console.log("value:", value);
+
+    return {
+      toBe(expectedValue) {
+        if (value !== expectedValue) {
+          redLog(`❌ Expected ${value} to be ${expectedValue}`);
+          throw new Error(`Expected ${value} to be ${expectedValue}`);
+        }
+      },
+      toEqual(expectedValue) {
+        if (JSON.stringify(value) !== JSON.stringify(expectedValue)) {
+          redLog(`❌ Expected ${JSON.stringify(value)} to equal ${JSON.stringify(expectedValue)}`);
+          throw new Error(`Expected ${JSON.stringify(value)} to equal ${JSON.stringify(expectedValue)}`);
+        }
+      },
+      toBeDefined(){
+        if (value === undefined) {
+            redLog(`❌ Expected ${value} to be defined`);
+          throw new Error(`Expected ${value} to be defined`);
+        }
+      },
+      toMatch(regex) {
+        if (!regex.test(value)) {
+            redLog(`❌ Expected ${value} to match ${regex}`)
+          throw new Error(`Expected ${value} to match ${regex}`);
+        }
+      },
+      // Add more assertions as needed
+    };
+  }
+  
+  export const getTestConfig = async  () => {
+    const LITCONFIG = JSON.parse(
+        await fs.promises.readFile(`${process.cwd()}/lit.config.json`, 'utf8')
+      );
+
+    return LITCONFIG;
+  }
