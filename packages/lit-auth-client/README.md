@@ -12,6 +12,8 @@ Check out the [API reference]().
 
 ## 📦 Installation
 
+Get started by installing the package:
+
 ```bash
 yarn add @lit-protocol/lit-auth-client
 ```
@@ -19,6 +21,8 @@ yarn add @lit-protocol/lit-auth-client
 <br>
 
 ## 💻 Usage
+
+Easily integrate `lit-auth-client` in your web app.
 
 - [Initialize `LitAuthClient`](#initialize-litauthclient)
 <!-- prettier-ignore -->
@@ -38,8 +42,6 @@ yarn add @lit-protocol/lit-auth-client
 
 Create an instance of `LitAuthClient` to handle authentication for PKPs.
 
-> Note: If you are using Lit's relay server, you will need to request an api key [here](https://forms.gle/RNZYtGYTY9BcD9MEA).
-
 ```js
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
@@ -52,6 +54,8 @@ const litAuthClient = new LitAuthClient({
   litRelayApiKey: '<Your Lit Relay Server API Key>',
 });
 ```
+
+If you are using Lit's relay server, you will need to request an api key [here](https://forms.gle/RNZYtGYTY9BcD9MEA).
 
 <br>
 
@@ -140,6 +144,8 @@ const pkps = await litAuthClient.fetchPKPsByAuthMethod(authMethod);
 
 You will need to generate a **session signature** for the PKP that you want to use for signing and more.
 
+<br>
+
 #### Setup: Initialize `LitNodeClient`
 
 Create an instance of `LitNodeClient` from the `@lit-protocol/lit-node-client` package to interact with the Lit nodes.
@@ -157,9 +163,14 @@ await this.litNodeClient.connect();
 
 <br>
 
-#### Example: Session signatures for social login
+`lit-auth-client` provides two helper functions `getSocialAuthNeededCallback` and `getEthWalletAuthNeededCallback` to help you generate session signatures for PKPs tied to social login and Ethereum accounts, respectively. Pass these functions to the [`getSessionSigs` method](https://js-sdk.litprotocol.com/classes/lit_node_client_src.LitNodeClientNodeJs.html#getSessionSigs).
+
+<br>
+
+#### Example: Create session signatures for social login
 
 ```js
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { getSocialAuthNeededCallback } from '@lit-protocol/lit-auth-client';
 
 const authNeededCallback = getSocialAuthNeededCallback({
@@ -179,10 +190,11 @@ const sessionSigs = await litNodeClient.getSessionSigs({
 
 <br>
 
-#### Example: Session signatures for Ethereum account
+#### Example: Create session signatures for Ethereum account
 
 ```js
-import { getSocialAuthNeededCallback } from '@lit-protocol/lit-auth-client';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { getEthWalletAuthNeededCallback } from '@lit-protocol/lit-auth-client';
 
 // Create your own signMessage function
 const signMessage = async (message: string) => {
@@ -209,7 +221,7 @@ const sessionSigs = await litNodeClient.getSessionSigs({
 
 Learn more about the session resources you can request in the [developer docs](https://developer.litprotocol.com/SDK/Explanation/WalletSigs/sessionSigs#resources-you-can-request).
 
-<br/>
+<br>
 
 ## 🙌 Contributing
 
