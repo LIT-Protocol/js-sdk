@@ -78,8 +78,8 @@ const recoveredAddr = recoverTypedSignature({
 console.log('recoveredAddr', recoveredAddr);
 
 if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ADDRESS.toLowerCase()) {
-  throw new Error('❌ Recovered address does not match PKP address');
+  throw new Error('    ❌ Recovered address does not match PKP address');
 }
 
-console.log('✅ Recovered address matches PKP address');
+console.log('    ✅ Recovered address matches PKP address');
 process.exit();
