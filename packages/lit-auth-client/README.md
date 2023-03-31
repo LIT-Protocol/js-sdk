@@ -20,12 +20,17 @@ yarn add @lit-protocol/lit-auth-client
 
 ## 💻 Usage
 
-- Initialize `LitAuthClient`
-- Auth with social login (Google, Discord)
-- Auth with Ethereum Wallet
-- Mint a PKP with an auth method
-- Fetch PKPs linked to an auth method
-- Generate session signatures for PKPs tied to auth methods
+- [Initialize `LitAuthClient`](#initialize-litauthclient)
+<!-- prettier-ignore -->
+- [Auth with social login](#auth-with-social-login)
+<!-- prettier-ignore -->
+- [Auth with Ethereum account](#auth-with-ethereum-account)
+<!-- prettier-ignore -->
+- [Mint a PKP with an auth method](#mint-a-pkp-with-an-auth-method)
+<!-- prettier-ignore -->
+- [Fetch PKPs linked to an auth method](#fetch-pkps-linked-to-an-auth-method)
+<!-- prettier-ignore -->
+- [Generate session signatures for PKPs tied to auth methods](#generate-session-signatures-for-pkps-tied-to-auth-methods)
 
 <br>
 
@@ -50,7 +55,7 @@ const litAuthClient = new LitAuthClient({
 
 <br>
 
-### Auth with social login (Google, Discord)
+### Auth with social login
 
 #### Step 1: Start the social login flow
 
@@ -84,7 +89,7 @@ The `handleSignInRedirect` method validates the URL parameters returned from Lit
 
 <br>
 
-### Auth with Ethereum Wallet
+### Auth with Ethereum account
 
 Enable users to authenticate using their Ethereum accounts and generate PKPs that are safely owned by their Ethereum wallets.
 
