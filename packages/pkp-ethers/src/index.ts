@@ -5,20 +5,32 @@
 import { PKPEthersWallet } from './lib/pkp-ethers';
 
 import {
-  signTypedData,
-  signTypedDataLegacy,
-  validateAddressesMatch,
-  signTypedDataHandler,
   methodHandlers,
   requestHandler,
+  getTypedDataVersionInfo,
+  validateSignature,
+  validateAddressesMatch,
+  signHandler,
+  personalSignHandler,
+  signTypedDataHandler,
+  signTypedData,
+  signTypedDataLegacy,
+  sendTransactionHandler,
+  sendRawTransactionHandler,
 } from './lib/handler';
 
 export {
   PKPEthersWallet,
-  signTypedData,
-  signTypedDataLegacy,
-  validateAddressesMatch,
-  signTypedDataHandler,
   methodHandlers,
   requestHandler,
+  getTypedDataVersionInfo,
+  validateSignature,
+  validateAddressesMatch,
+  signHandler,
+  personalSignHandler,
+  signTypedDataHandler,
+  signTypedData,
+  signTypedDataLegacy,
+  sendTransactionHandler,
+  sendRawTransactionHandler,
 };

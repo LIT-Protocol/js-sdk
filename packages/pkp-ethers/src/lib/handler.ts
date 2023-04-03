@@ -5,14 +5,6 @@
 import { joinSignature } from '@ethersproject/bytes';
 import { typedSignatureHash } from '@metamask/eth-sig-util';
 
-// import { convertHexToUtf8, getTransactionToSign } from './helper';
-import {
-  ExternallyOwnedAccount,
-  Signer,
-  TypedDataDomain,
-  TypedDataField,
-  TypedDataSigner,
-} from '@ethersproject/abstract-signer';
 import { PKPEthersWallet } from './pkp-ethers';
 import {
   EIP712TypedData,
@@ -25,6 +17,7 @@ import {
   ETHRequestSigningPayload,
 } from './pkp-ethers-types';
 import { ethers } from 'ethers';
+import { convertHexToUtf8, getTransactionToSign } from './helper';
 
 /**
  * Signs an EIP-712 typed data object or a JSON string representation of the typed data object.
@@ -118,6 +111,57 @@ export const validateAddressesMatch = (
 };
 
 /**
+ * Validate the input signature by checking if it is null, undefined, or an empty string.
+ * If the signature is invalid, it throws an error.
+ *
+ * @param {string} signature - The signature to validate.
+ * @throws {Error} If the signature is null, undefined, or an empty string.
+ */
+export const validateSignature = (signature: string) => {
+  if (signature === null || signature === undefined || signature === '') {
+    throw new Error('Signature is null or undefined');
+  }
+};
+
+/**
+ * Returns an object with version info based on isAddress boolean value.
+ * If true, returns version 3 or 4 data properties.
+ * If false, returns version 1 data properties.
+ * @param { ETHRequestSigningPayload } payload
+ */
+export function getTypedDataVersionInfo({ signer, payload }: ETHHandlerReq) {
+  if (!payload.params[0]) {
+    throw new Error(`signTypedDataHandler: payload.params[0] is not defined`);
+  }
+
+  const ethersIsAddress = ethers.utils.isAddress(payload.params[0]);
+
+  let info;
+
+  if (ethersIsAddress) {
+    info = {
+      logMessage: 'RUNNING VERSION 3 or 4',
+      addressIndex: 0,
+      msgParamsIndex: 1,
+      signTypedDataFn: signTypedData,
+    };
+  } else {
+    info = {
+      logMessage: 'RUNNING VERSION 1',
+      addressIndex: 1,
+      msgParamsIndex: 0,
+      signTypedDataFn: signTypedDataLegacy,
+    };
+  }
+
+  let addressRequested: string = payload.params[info.addressIndex];
+  validateAddressesMatch((signer as PKPEthersWallet).address, addressRequested);
+  let msgParams = payload.params[info.msgParamsIndex];
+
+  return { addressRequested, msgParams, info };
+}
+
+/**
  *  An ETHRequestHandler function that signs EIP-712 typed data using an Ethereum wallet.
  *  @param {ETHHandlerReq} params - An object containing the signer and payload.
  *  @throws {Error} Throws an error if the signer or payload is not defined, or if the validation of the signer and requester addresses fails.
@@ -134,48 +178,114 @@ export const signTypedDataHandler: ETHRequestHandler = async ({
     throw new Error(`signer or payload is not defined`);
   }
 
-  /**
-   * Returns an object with version info based on isAddress boolean value.
-   * If true, returns version 3 or 4 data properties.
-   * If false, returns version 1 data properties.
-   * @param { ETHRequestSigningPayload } payload
-   */
-  function getTypedDataVersionInfo(payload: ETHRequestSigningPayload) {
-    if (!payload.params[0]) {
-      throw new Error(`signTypedDataHandler: payload.params[0] is not defined`);
-    }
+  const { msgParams, info } = getTypedDataVersionInfo({
+    signer,
+    payload,
+  });
 
-    const ethersIsAddress = ethers.utils.isAddress(payload.params[0]);
+  let signature = await info.signTypedDataFn(signer, msgParams);
 
-    if (ethersIsAddress) {
-      return {
-        logMessage: 'RUNNING VERSION 3 or 4',
-        addressIndex: 0,
-        msgParamsIndex: 1,
-        signTypedDataFn: signTypedData,
-      };
-    } else {
-      return {
-        logMessage: 'RUNNING VERSION 1',
-        addressIndex: 1,
-        msgParamsIndex: 0,
-        signTypedDataFn: signTypedDataLegacy,
-      };
-    }
-  }
+  validateSignature(signature);
 
-  const versionInfo = getTypedDataVersionInfo(payload);
+  return { signature };
+};
 
-  console.log(versionInfo.logMessage);
+/**
+ * Handle sending a transaction by signing it with the provided signer.
+ * Validate the address of the signer and the address requested from the transaction parameters.
+ * If the signature is valid, it returns an object containing the signature.
+ *
+ * @param {ETHHandlerReq} { signer, payload } - The input object containing the signer and payload.
+ * @returns {Promise<ETHHandlerRes>} A Promise that resolves to an object containing the signature.
+ * @throws {Error} If the addresses do not match or if the signature is invalid.
+ */
+export const sendTransactionHandler = async ({
+  signer,
+  payload,
+}: ETHHandlerReq): Promise<ETHHandlerRes> => {
+  const txParams = payload.params[0];
+  const addressRequested = txParams.from;
 
-  let addressRequested = payload.params[versionInfo.addressIndex];
   validateAddressesMatch((signer as PKPEthersWallet).address, addressRequested);
-  let msgParams = payload.params[versionInfo.msgParamsIndex];
-  let signature = await versionInfo.signTypedDataFn(signer, msgParams);
 
-  if (signature === '') {
-    throw new Error('signTypedDataHandler failed to sign');
-  }
+  const tx = getTransactionToSign(txParams);
+  const signature = await (signer as PKPEthersWallet).signTransaction(tx);
+
+  validateSignature(signature);
+
+  return { signature };
+};
+
+/**
+ * Handle sending a raw transaction by signing it with the provided signer.
+ * If the signature is valid, it returns an object containing the signature.
+ *
+ * @param {ETHHandlerReq} { signer, payload } - The input object containing the signer and payload.
+ * @returns {Promise<ETHHandlerRes>} A Promise that resolves to an object containing the signature.
+ * @throws {Error} If the signature is invalid.
+ */
+export const sendRawTransactionHandler = async ({
+  signer,
+  payload,
+}: ETHHandlerReq): Promise<ETHHandlerRes> => {
+  const tx = getTransactionToSign(payload.params[0]);
+
+  const signature = await (signer as PKPEthersWallet).sendTransaction(tx);
+
+  validateSignature(signature);
+
+  return { signature };
+};
+
+/**
+ * Handle signing a message with the provided signer.
+ * Validate the address of the signer and the address requested from the payload.
+ * Convert the message from hex to UTF-8, if necessary, and sign it.
+ * If the signature is valid, it returns an object containing the signature.
+ *
+ * @param {ETHHandlerReq} { signer, payload } - The input object containing the signer and payload.
+ * @returns {Promise<ETHHandlerRes>} A Promise that resolves to an object containing the signature.
+ * @throws {Error} If the addresses do not match or if the signature is invalid.
+ */
+
+export const signHandler = async ({
+  signer,
+  payload,
+}: ETHHandlerReq): Promise<ETHHandlerRes> => {
+  const addressRequested = payload.params[0];
+
+  validateAddressesMatch((signer as PKPEthersWallet).address, addressRequested);
+
+  const msg = convertHexToUtf8(payload.params[1]);
+  const signature = await (signer as PKPEthersWallet).signMessage(msg);
+
+  validateSignature(signature);
+
+  return { signature };
+};
+
+/**
+ * Handle signing a message with the provided signer using the 'personal_sign' method.
+ * Validate the address of the signer and the address requested from the payload.
+ * Convert the message from hex to UTF-8, if necessary, and sign it.
+ * If the signature is valid, it returns an object containing the signature.
+ *
+ * @param {ETHHandlerReq} { signer, payload } - The input object containing the signer and payload.
+ * @returns {Promise<ETHHandlerRes>} A Promise that resolves to an object containing the signature.
+ * @throws {Error} If the addresses do not match or if the signature is invalid.
+ */
+export const personalSignHandler = async ({
+  signer,
+  payload,
+}: ETHHandlerReq): Promise<ETHHandlerRes> => {
+  const addressRequested = payload.params[1];
+
+  validateAddressesMatch((signer as PKPEthersWallet).address, addressRequested);
+
+  const msg = convertHexToUtf8(payload.params[0]);
+  const signature = await (signer as PKPEthersWallet).signMessage(msg);
+
+  validateSignature(signature);
 
   return { signature };
 };
@@ -190,8 +300,21 @@ export const signTypedDataHandler: ETHRequestHandler = async ({
  */
 export const methodHandlers: {
   eth_signTypedData: ETHRequestHandler;
+  eth_signTypedData_v1: any;
 } & UnknownETHMethod = {
+  // signing
+  eth_sign: signHandler,
+  personal_sign: personalSignHandler,
+
+  // signing typed data - the handler will choose the correct version to use
   eth_signTypedData: signTypedDataHandler,
+  eth_signTypedData_v1: signTypedDataHandler,
+  eth_signTypedData_v3: signTypedDataHandler,
+  eth_signTypedData_v4: signTypedDataHandler,
+
+  // tx
+  eth_sendTransaction: sendTransactionHandler,
+  eth_sendRawTransaction: sendRawTransactionHandler,
 };
 
 /**
