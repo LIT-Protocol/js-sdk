@@ -523,3 +523,20 @@ export function describe(description, callback) {
 
     return LITCONFIG;
   }
+
+  export const log = Object.assign(
+  (...args) => {
+    console.log('\x1b[90m', ...args, '\x1b[0m');
+  },
+  {
+    green: (...args) => {
+      console.log('\x1b[32m   ✓', '\x1b[90m', ...args, '\x1b[0m');
+    },
+    red: (...args) => {
+      console.log('\x1b[31m   ✕', '\x1b[90m', ...args, '\x1b[0m');
+    },
+    blue: (...args) => {
+      console.log('\x1b[34m   !', '\x1b[90m', ...args, '\x1b[0m');
+    },
+  }
+);

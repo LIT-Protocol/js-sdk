@@ -6,7 +6,7 @@ import { PKPEthersWallet } from './lib/pkp-ethers';
 
 import {
   methodHandlers,
-  requestHandler,
+  ethRequestHandler,
   getTypedDataVersionInfo,
   validateSignature,
   validateAddressesMatch,
@@ -22,7 +22,7 @@ import {
 export {
   PKPEthersWallet,
   methodHandlers,
-  requestHandler,
+  ethRequestHandler,
   getTypedDataVersionInfo,
   validateSignature,
   validateAddressesMatch,

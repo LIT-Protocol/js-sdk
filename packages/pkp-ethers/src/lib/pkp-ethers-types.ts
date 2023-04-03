@@ -7,6 +7,7 @@ import {
   TypedDataSigner,
 } from '@ethersproject/abstract-signer';
 import { SignatureLike } from '@ethersproject/bytes';
+import { Transaction } from 'ethers';
 
 export type LitTypeDataSigner = PKPEthersWallet | TypedDataSigner;
 
@@ -37,7 +38,15 @@ export interface EIP712TypedData {
   };
 }
 
-export type SupportedETHSigningMethods = 'eth_signTypedData';
+export type SupportedETHSigningMethods =
+  | 'eth_sign'
+  | 'personal_sign'
+  | 'eth_signTypedData'
+  | 'eth_signTypedData_v1'
+  | 'eth_signTypedData_v3'
+  | 'eth_signTypedData_v4'
+  | 'eth_sendTransaction'
+  | 'eth_sendRawTransaction';
 
 export interface ETHRequestSigningPayload {
   method: SupportedETHSigningMethods;
@@ -49,14 +58,16 @@ export type ETHHandlerReq = {
   payload: ETHRequestSigningPayload;
 };
 
-export type ETHSignature = string;
-
-export type ETHHandlerRes = {
-  signature: ETHSignature; // 0x...
-};
-
 export type ETHRequestHandler = (
   request: ETHHandlerReq
 ) => Promise<ETHHandlerRes>;
 
 export type UnknownETHMethod = Record<string, Function>;
+
+export type ETHSignature = string;
+
+export type ETHTxRes = Transaction;
+
+export type ETHHandlerRes =
+  | { signature: ETHSignature }
+  | { txRes: Transaction };

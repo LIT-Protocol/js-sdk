@@ -4,6 +4,7 @@
   },
   "MNEUMONIC": "island arrow object divide umbrella snap essay seminar top develop oyster success",
   "RPC_ENDPOINT": "https://cosmos-mainnet-rpc.allthatnode.com:26657",
+  "ETH_RPC_ENDPOINT": "https://rpc-mumbai.maticvigil.com",
   "RECIPIENT": "cosmos1jyz3m6gxuwceq63e44fqpgyw2504ux85ta8vma",
   "DENOM": "uatom",
   "AMOUNT": 1,

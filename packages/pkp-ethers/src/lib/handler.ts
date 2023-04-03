@@ -15,8 +15,9 @@ import {
   LitTypeDataSigner,
   UnknownETHMethod,
   ETHRequestSigningPayload,
+  ETHTxRes,
 } from './pkp-ethers-types';
-import { ethers } from 'ethers';
+import { ethers, Transaction } from 'ethers';
 import { convertHexToUtf8, getTransactionToSign } from './helper';
 
 /**
@@ -196,24 +197,29 @@ export const signTypedDataHandler: ETHRequestHandler = async ({
  * If the signature is valid, it returns an object containing the signature.
  *
  * @param {ETHHandlerReq} { signer, payload } - The input object containing the signer and payload.
- * @returns {Promise<ETHHandlerRes>} A Promise that resolves to an object containing the signature.
+ * @returns {Promise<any>} A Promise that resolves to an object containing the signature.
  * @throws {Error} If the addresses do not match or if the signature is invalid.
  */
 export const sendTransactionHandler = async ({
   signer,
   payload,
-}: ETHHandlerReq): Promise<ETHHandlerRes> => {
-  const txParams = payload.params[0];
-  const addressRequested = txParams.from;
+}: ETHHandlerReq): Promise<ETHTxRes> => {
+  const unsignedTx = payload.params[0];
+  const addressRequested = unsignedTx.from;
 
-  validateAddressesMatch((signer as PKPEthersWallet).address, addressRequested);
+  const _signer = signer as PKPEthersWallet;
 
-  const tx = getTransactionToSign(txParams);
-  const signature = await (signer as PKPEthersWallet).signTransaction(tx);
+  validateAddressesMatch(_signer.address, addressRequested);
 
-  validateSignature(signature);
+  const unsignedTxFormatted = getTransactionToSign(unsignedTx);
 
-  return { signature };
+  const signedTxSignature = await _signer.signTransaction(unsignedTxFormatted);
+
+  validateSignature(signedTxSignature);
+
+  const txRes = await _signer.sendTransaction(signedTxSignature);
+
+  return txRes;
 };
 
 /**
@@ -318,19 +324,17 @@ export const methodHandlers: {
 };
 
 /**
- * Handles Ethereum JSON-RPC signing requests by dispatching them to the appropriate
- * signing function based on the provided method.
- *
- * @param {ETHHandlerReq} params - The request parameters, including the signer and the payload.
- * @param {LitTypeDataSigner} params.signer - The signer instance used for signing.
- * @param {ETHRequestSigningPayload} params.payload - The payload containing the method and necessary data.
- * @returns {Promise<ETHSignature>} A promise that resolves to the signature result.
- * @throws {Error} If the provided method is not supported or if an error occurs during signing.
+ * Handles Ethereum JSON-RPC requests for the given method and payload.
+ * Executes the appropriate signing function based on the method and
+ * returns the signature or transaction response.
+ * @param {ETHHandlerReq} { signer, payload } - Request object containing signer and payload data.
+ * @returns {Promise<T>} - A Promise that resolves to the requested data type (ETHSignature or ETHTxRes).
+ * @throws {Error} - Throws an error if the requested method is not supported or if there's an issue during execution.
  */
-export const requestHandler = async ({
+export const ethRequestHandler = async <T = ETHSignature>({
   signer,
   payload,
-}: ETHHandlerReq): Promise<ETHSignature> => {
+}: ETHHandlerReq): Promise<T> => {
   // -- validate if method exists
   if (!methodHandlers.hasOwnProperty(payload.method)) {
     throw new Error(
@@ -342,9 +346,17 @@ export const requestHandler = async ({
   const fn = methodHandlers[payload.method] as ETHRequestHandler;
 
   try {
-    const data: ETHHandlerRes = await fn({ signer, payload });
-    const sig: ETHSignature = data.signature;
-    return sig;
+    const data: any = await fn({ signer, payload });
+
+    if (data['signature']) {
+      return data.signature;
+    }
+
+    if (data['txRes']) {
+      return data.txRes;
+    }
+
+    return data;
   } catch (e: any) {
     throw new Error(e);
   }
