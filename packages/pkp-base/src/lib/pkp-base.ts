@@ -13,6 +13,7 @@ import {
   PKPBaseProp,
   JsonAuthSig,
   PKPBaseDefaultParams,
+  GetSessionSigsProps,
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
@@ -152,6 +153,28 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   */
   setLitActionJsParams<CustomType extends T = T>(params: CustomType): void {
     this.litActionJsParams = params;
+  }
+
+  /**
+   * Creates and sets the session sigs.
+   *
+   * @param {GetSessionSigsProps} sessionParams - The parameters for generating session sigs.
+   */
+  async createAndSetSessionSigs(
+    sessionParams: GetSessionSigsProps
+  ): Promise<void | never> {
+    try {
+      const expiration =
+        sessionParams.expiration || this.litNodeClient.getExpiration();
+      const sessionSigs = await this.litNodeClient.getSessionSigs(
+        sessionParams
+      );
+
+      this.pkpWalletProp.controllerSessionSigs = sessionSigs;
+      this.pkpWalletProp.sessionSigsExpiration = expiration;
+    } catch (e) {
+      return this.throwError('Failed to create and set session sigs');
+    }
   }
 
   /**
