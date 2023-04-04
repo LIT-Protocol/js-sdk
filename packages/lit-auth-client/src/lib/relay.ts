@@ -75,8 +75,8 @@ export class LitRelay implements IRelay {
    */
   public async pollRequestUntilTerminalState(
     requestId: string,
-    pollInterval = 15000,
-    maxPollCount = 20
+    pollInterval: number = 15000,
+    maxPollCount: number = 20
   ): Promise<IRelayPollStatusResponse> {
     for (let i = 0; i < maxPollCount; i++) {
       const response = await fetch(
