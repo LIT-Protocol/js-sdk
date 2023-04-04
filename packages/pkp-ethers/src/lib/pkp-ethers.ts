@@ -48,18 +48,22 @@ export class PKPEthersWallet
   readonly provider!: Provider;
   readonly _isSigner!: boolean;
 
-  rpcProvider: ethers.providers.JsonRpcProvider;
+  rpcProvider: ethers.providers.JsonRpcProvider | null;
 
   constructor(prop: PKPEthersWalletProp) {
     super(prop);
 
-    this.rpcProvider = new ethers.providers.JsonRpcProvider(prop.rpc);
+    if (prop.rpc) {
+      this.rpcProvider = new ethers.providers.JsonRpcProvider(prop.rpc);
 
-    defineReadOnly(
-      this,
-      '_isSigner',
-      this.rpcProvider._isProvider === true ? false : true
-    );
+      defineReadOnly(
+        this,
+        '_isSigner',
+        this.rpcProvider._isProvider === true ? false : true
+      );
+    } else {
+      this.rpcProvider = null;
+    }
 
     defineReadOnly(
       this,
@@ -82,28 +86,37 @@ export class PKPEthersWallet
     return new PKPEthersWallet(this.pkpWalletProp);
   }
 
+  connectJsonRpc(rpc: string): PKPEthersWallet {
+    return new PKPEthersWallet({
+      ...this.pkpWalletProp,
+      rpc,
+    });
+  }
+
   async signTransaction(transaction: TransactionRequest): Promise<string> {
     const addr = await this.getAddress();
     this.log('signTransaction => addr:', addr);
 
-    if (!transaction['nonce']) {
-      transaction.nonce = await this.rpcProvider.getTransactionCount(addr);
-      this.log('signTransaction => nonce:', transaction.nonce);
-    }
+    if (this.rpcProvider) {
+      if (!transaction['nonce']) {
+        transaction.nonce = await this.rpcProvider.getTransactionCount(addr);
+        this.log('signTransaction => nonce:', transaction.nonce);
+      }
 
-    if (!transaction['chainId']) {
-      transaction.chainId = (await this.rpcProvider.getNetwork()).chainId;
-      this.log('signTransaction => chainId:', transaction.chainId);
-    }
+      if (!transaction['chainId']) {
+        transaction.chainId = (await this.rpcProvider.getNetwork()).chainId;
+        this.log('signTransaction => chainId:', transaction.chainId);
+      }
 
-    if (!transaction['gasPrice']) {
-      transaction.gasPrice = await this.getGasPrice();
-      this.log('signTransaction => gasPrice:', transaction.gasPrice);
-    }
+      if (!transaction['gasPrice']) {
+        transaction.gasPrice = await this.getGasPrice();
+        this.log('signTransaction => gasPrice:', transaction.gasPrice);
+      }
 
-    if (!transaction['gasLimit']) {
-      transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
-      this.log('signTransaction => gasLimit:', transaction.gasLimit);
+      if (!transaction['gasLimit']) {
+        transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
+        this.log('signTransaction => gasLimit:', transaction.gasLimit);
+      }
     }
 
     return resolveProperties(transaction).then(async (tx) => {
@@ -216,6 +229,11 @@ export class PKPEthersWallet
   }
 
   async sendTransaction(transaction: TransactionRequest | any): Promise<any> {
+    if (!this.rpcProvider) {
+      throw new Error(
+        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
+      );
+    }
     return await this.rpcProvider.sendTransaction(transaction);
   }
 
@@ -273,46 +291,81 @@ export class PKPEthersWallet
   getBalance(
     blockTag?: ethers.providers.BlockTag | undefined
   ): Promise<ethers.BigNumber> {
+    if (!this.rpcProvider) {
+      throw new Error(
+        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
+      );
+    }
     return this.rpcProvider.getBalance(this.address, blockTag);
   }
+
   getTransactionCount(
     blockTag?: ethers.providers.BlockTag | undefined
   ): Promise<number> {
+    if (!this.rpcProvider) {
+      throw new Error(
+        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
+      );
+    }
     return this.rpcProvider.getTransactionCount(this.address, blockTag);
   }
+
   estimateGas(
     transaction: ethers.utils.Deferrable<TransactionRequest>
   ): Promise<ethers.BigNumber> {
+    if (!this.rpcProvider) {
+      throw new Error(
+        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
+      );
+    }
     return this.rpcProvider.estimateGas(transaction);
   }
+
   call(
     transaction: ethers.utils.Deferrable<TransactionRequest>,
     blockTag?: ethers.providers.BlockTag | undefined
   ): Promise<string> {
     return this.throwError(`Not implemented into PKPEthers`);
   }
+
   getChainId(): Promise<number> {
     return this.throwError(`Not implemented into PKPEthers`);
   }
+
   getGasPrice(): Promise<ethers.BigNumber> {
+    if (!this.rpcProvider) {
+      throw new Error(
+        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
+      );
+    }
     return this.rpcProvider.getGasPrice();
   }
+
   getFeeData(): Promise<ethers.providers.FeeData> {
+    if (!this.rpcProvider) {
+      throw new Error(
+        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
+      );
+    }
     return this.rpcProvider.getFeeData();
   }
+
   resolveName(name: string): Promise<string> {
     return this.throwError(`Not implemented into PKPEthers`);
   }
+
   checkTransaction(
     transaction: ethers.utils.Deferrable<TransactionRequest>
   ): ethers.utils.Deferrable<TransactionRequest> {
     return this.throwError(`Not implemented into PKPEthers`);
   }
+
   populateTransaction(
     transaction: ethers.utils.Deferrable<TransactionRequest>
   ): Promise<TransactionRequest> {
     return this.throwError(`Not implemented into PKPEthers`);
   }
+
   _checkProvider(operation?: string | undefined): void {
     return this.throwError(`Not implemented into PKPEthers`);
   }

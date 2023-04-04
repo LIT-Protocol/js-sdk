@@ -817,7 +817,7 @@ export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
 
 export interface PKPBaseProp {
   pkpPubKey: string;
-  rpc: string;
+  rpc?: string;
   controllerAuthSig?: JsonAuthSig;
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
