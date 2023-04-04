@@ -1,3 +1,9 @@
+/**
+ * Run this test with:
+ * yarn nx run pkp-ethers:test --testFile=handler.spec.ts
+ *
+ */
+
 import { PKPEthersWallet } from './pkp-ethers';
 
 import * as LITCONFIG from 'lit.config.json';
@@ -398,6 +404,50 @@ describe('pkp ethers JSON RPC handler', () => {
       });
 
       expect(txRes.hash).toBeDefined();
+    });
+  });
+
+  describe('signTransaction', () => {
+    const pkpEthersWallet = new PKPEthersWallet({
+      controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+      pkpPubKey: LITCONFIG.PKP_PUBKEY,
+      rpc: LITCONFIG.ETH_RPC_ENDPOINT,
+      debug: false,
+    });
+
+    // Transaction to sign and send
+    const from = LITCONFIG.PKP_ADDRESS;
+    const to = LITCONFIG.PKP_ADDRESS;
+    const gasLimit = BigNumber.from('21000');
+    const value = ethers.BigNumber.from('0');
+    const data = '0x';
+
+    // pkp-ethers signer will automatically add missing fields (nonce, chainId, gasPrice, gasLimit)
+    const tx = {
+      from: from,
+      to: to,
+      gasLimit,
+      value,
+      data,
+    };
+
+    // eth_signTransaction parameters
+    // Transaction - Object
+    // Reference: https://ethereum.github.io/execution-apis/api-documentation/#eth_signTransaction
+    const payload: ETHRequestSigningPayload = {
+      method: 'eth_signTransaction',
+      params: [tx],
+    };
+
+    it('should sign the transaction', async () => {
+      await pkpEthersWallet.init();
+
+      const signedTx = await ethRequestHandler<string>({
+        signer: pkpEthersWallet,
+        payload,
+      });
+
+      expect(signedTx).toBeDefined();
     });
   });
 });

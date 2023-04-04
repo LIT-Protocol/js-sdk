@@ -41,6 +41,7 @@ export interface EIP712TypedData {
 export type SupportedETHSigningMethods =
   | 'eth_sign'
   | 'personal_sign'
+  | 'eth_signTransaction'
   | 'eth_signTypedData'
   | 'eth_signTypedData_v1'
   | 'eth_signTypedData_v3'

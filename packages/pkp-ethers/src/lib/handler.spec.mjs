@@ -5,7 +5,11 @@ import {
   recoverTypedSignature,
 } from '@metamask/eth-sig-util';
 
-import { getTestConfig, log } from '../../../../tools/scripts/utils.mjs';
+import {
+  getTestConfig,
+  log,
+  testThese,
+} from '../../../../tools/scripts/utils.mjs';
 import { BigNumber } from 'ethers';
 
 const LITCONFIG = await getTestConfig();
@@ -18,39 +22,13 @@ const pkpEthersWallet = new PKPEthersWallet({
 
 await pkpEthersWallet.init();
 
-const tests = [
-  // { name: 'signTypedData', fn: shouldSignTypedData },
-  // { name: 'signTypedDataV1', fn: shouldSignTypedDataV1 },
-  // { name: 'signTypedDataV3', fn: shouldSignTypedDataV3 },
-  // { name: 'signTypedDataV4', fn: shouldSignTypedDataV4 },
+testThese([
+  { name: 'signTypedData', fn: shouldSignTypedData },
+  { name: 'signTypedDataV1', fn: shouldSignTypedDataV1 },
+  { name: 'signTypedDataV3', fn: shouldSignTypedDataV3 },
+  { name: 'signTypedDataV4', fn: shouldSignTypedDataV4 },
   { name: 'sendTransaction', fn: shouldSendTransaction },
-];
-
-console.log(`Running ${tests.length} tests...\n`);
-
-for (const t of tests) {
-  try {
-    console.log(`${t.name}`);
-
-    // calculate the time it takes to run the test
-    const start = Date.now();
-    const { status, message } = await t.fn();
-
-    const end = Date.now();
-
-    const time = end - start;
-
-    if (status === 200) {
-      log.green(`\t${message} (${time}ms)`);
-    } else {
-      log.red(`\t${message} (${time}ms)`);
-    }
-
-    console.log();
-  } catch (e) {
-    log.red(`\t${e.message}`);
-  }
-}
+]);
 
 process.exit();
 
@@ -355,6 +333,66 @@ async function shouldSignTypedDataV4() {
   };
 }
 
+async function shouldSignTransaction() {
+  const pkpEthersWallet = new PKPEthersWallet({
+    controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+    pkpPubKey: LITCONFIG.PKP_PUBKEY,
+    rpc: LITCONFIG.ETH_RPC_ENDPOINT,
+    debug: false,
+  });
+
+  await pkpEthersWallet.init();
+
+  // Transaction to sign and send
+  const from = LITCONFIG.PKP_ADDRESS;
+  const to = LITCONFIG.PKP_ADDRESS;
+  const gasLimit = BigNumber.from('21000');
+  const value = ethers.BigNumber.from('0');
+  const data = '0x';
+
+  // pkp-ethers signer will automatically add missing fields (nonce, chainId, gasPrice, gasLimit)
+  const tx = {
+    from: from,
+    to: to,
+    gasLimit,
+    value,
+    data,
+  };
+
+  // eth_sendTransaction parameters
+  // Transaction - Object
+  // Reference: https://ethereum.github.io/execution-apis/api-documentation/#eth_sendTransaction
+  const payload = {
+    method: 'eth_signTransaction',
+    params: [tx],
+  };
+
+  const signature = await ethRequestHandler({
+    signer: pkpEthersWallet,
+    payload,
+  });
+
+  log.blue('signature', signature);
+
+  // verify signature
+  const recoveredAddr = recoverTransaction(signature);
+
+  log.blue('recoveredAddr', recoveredAddr);
+
+  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ADDRESS.toLowerCase()) {
+    return {
+      status: 500,
+      message:
+        'failed to sign transaction - recovered address does not match PKP address',
+    };
+  }
+
+  return {
+    status: 200,
+    message: 'should sign transaction',
+  };
+}
+
 async function shouldSendTransaction() {
   const pkpEthersWallet = new PKPEthersWallet({
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
@@ -393,8 +431,6 @@ async function shouldSendTransaction() {
     signer: pkpEthersWallet,
     payload,
   });
-
-  log.blue('txRes', txRes);
 
   if (!txRes) {
     return {

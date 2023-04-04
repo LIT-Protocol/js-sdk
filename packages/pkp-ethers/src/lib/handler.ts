@@ -192,6 +192,36 @@ export const signTypedDataHandler: ETHRequestHandler = async ({
 };
 
 /**
+ * Handles signing a transaction using the provided signer and payload.
+ *
+ * @param {object} params - The input parameters.
+ * @param {Wallet} params.signer - The signer (PKPEthersWallet) to be used for signing the transaction.
+ * @param {object} params.payload - The payload containing the transaction information.
+ * @returns {Promise<ETHSignature>} - A promise that resolves to an ETHSignature object containing the signed transaction signature.
+ *
+ * @throws {Error} - If the address in the payload does not match the signer's address, or if the signature is invalid.
+ */
+export const signTransactionHandler = async ({
+  signer,
+  payload,
+}: ETHHandlerReq): Promise<ETHSignature> => {
+  const unsignedTx = payload.params[0];
+  const addressRequested = unsignedTx.from;
+
+  const _signer = signer as PKPEthersWallet;
+
+  validateAddressesMatch(_signer.address, addressRequested);
+
+  const unsignedTxFormatted = getTransactionToSign(unsignedTx);
+
+  const signedTxSignature = await _signer.signTransaction(unsignedTxFormatted);
+
+  validateSignature(signedTxSignature);
+
+  return signedTxSignature;
+};
+
+/**
  * Handle sending a transaction by signing it with the provided signer.
  * Validate the address of the signer and the address requested from the transaction parameters.
  * If the signature is valid, it returns an object containing the signature.
@@ -318,7 +348,10 @@ export const methodHandlers: {
   eth_signTypedData_v3: signTypedDataHandler,
   eth_signTypedData_v4: signTypedDataHandler,
 
-  // tx
+  // sign tx
+  eth_signTransaction: signTransactionHandler,
+
+  // send tx
   eth_sendTransaction: sendTransactionHandler,
   eth_sendRawTransaction: sendRawTransactionHandler,
 };
