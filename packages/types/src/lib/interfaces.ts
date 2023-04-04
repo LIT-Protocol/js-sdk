@@ -704,13 +704,13 @@ export interface AuthMethod {
 // }
 export interface SignSessionKeyProp {
   // The session key to sign
-  sessionKey: string;
+  sessionKey?: string;
 
   // The auth methods to use to sign the session key
   authMethods: AuthMethod[];
 
   // The public key of the PKP
-  pkpPublicKey: string;
+  pkpPublicKey?: string;
 
   // The auth sig of the user.  Returned via the checkAndSignAuthMessage function
   authSig?: JsonAuthSig;
@@ -724,6 +724,11 @@ export interface SignSessionKeyProp {
   resources: any;
 
   chainId?: number;
+}
+
+export interface SignSessionKeyResponse {
+  pkpPublicKey: string;
+  authSig: JsonAuthSig;
 }
 
 export interface GetSignSessionKeySharesProp {
@@ -761,7 +766,7 @@ export interface GetSessionSigsProps {
 export interface SessionRequestBody {
   sessionKey: string;
   authMethods: Array<AuthMethod>;
-  pkpPublicKey: string;
+  pkpPublicKey?: string;
   authSig?: JsonAuthSig;
   siweMessage: string;
 }
@@ -777,22 +782,6 @@ export interface SessionSigningTemplate {
   capabilities: any[];
   issuedAt: string;
   expiration: string;
-}
-
-export interface GetWebAuthnAuthenticationAuthSigProps {
-  verificationParams: WebAuthnAuthenticationVerificationParams;
-  username: string;
-  sessionKey?: any;
-  // The expiration of the auth sig that will be signed. This is a RFC3339 timestamp. The default is 24 hours from now.
-  expiration?: string;
-  resources?: any;
-}
-
-export interface GetVerifyWebAuthnAuthenticationKeyShareProps {
-  credential: WebAuthnAuthenticationVerificationParams;
-  sessionPubkey: string;
-  siweMessage: string;
-  username: string;
 }
 
 export interface WebAuthnAuthenticationVerificationParams {

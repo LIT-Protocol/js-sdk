@@ -523,3 +523,12 @@ export const LIT_NETWORKS = {
 
 // ========== Lit Sessions ==========
 export const LIT_SESSION_KEY_URI = 'lit:session:';
+
+// ========== Lit Auth Methods ==========
+
+export const AUTH_METHOD_TYPE_IDS = {
+  WEBAUTHN: 3,
+  DISCORD: 4,
+  GOOGLE: 5,
+  GOOGLE_JWT: 6,
+};

@@ -20,6 +20,7 @@ import {
   SIGTYPE,
   version,
   LIT_SESSION_KEY_URI,
+  AUTH_METHOD_TYPE_IDS,
 } from '@lit-protocol/constants';
 
 import {
@@ -30,7 +31,6 @@ import {
   FormattedMultipleAccs,
   GetSessionSigsProps,
   GetSignSessionKeySharesProp,
-  GetVerifyWebAuthnAuthenticationKeyShareProps,
   HandshakeWithSgx,
   JsonAuthSig,
   JsonEncryptionRetrieveRequest,
@@ -52,7 +52,6 @@ import {
   RejectedNodePromises,
   SendNodeCommand,
   SessionKeyPair,
-  SessionRequestBody,
   SessionSigningTemplate,
   SignedChainDataToken,
   SignedData,
@@ -62,8 +61,10 @@ import {
   SuccessNodePromises,
   SupportedJsonRequests,
   ValidateAndSignECDSA,
-  GetWebAuthnAuthenticationAuthSigProps,
   CheckAndSignAuthParams,
+  WebAuthnAuthenticationVerificationParams,
+  AuthMethod,
+  SignSessionKeyResponse,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -75,7 +76,6 @@ import { safeParams } from '@lit-protocol/encryption';
 import {
   convertLitActionsParams,
   isBrowser,
-  isNode,
   log,
   mostCommonString,
   throwError,
@@ -2310,11 +2310,13 @@ export class LitNodeClientNodeJs {
   /** ============================== SESSION ============================== */
 
   /**
-   * Sign a session key using a PKP
+   * Sign a session public key using a PKP, which generates an authSig.
    * @returns {Object} An object containing the resulting signature.
    */
 
-  signSessionKey = async (params: SignSessionKeyProp): Promise<JsonAuthSig> => {
+  signSessionKey = async (
+    params: SignSessionKeyProp
+  ): Promise<SignSessionKeyResponse> => {
     // ========== Validate Params ==========
     // -- validate: If it's NOT ready
     if (!this.ready) {
@@ -2327,17 +2329,29 @@ export class LitNodeClientNodeJs {
       });
     }
 
-    const pkpEthAddress = computeAddress(params.pkpPublicKey);
+    // -- construct SIWE message that will be signed by node to generate an authSig.
 
     const _expiration =
       params.expiration ||
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
+    // Try to get it from local storage, if not generates one~
+    let sessionKey = this.getSessionKey(params.sessionKey);
+    let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
+
+    // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
+    const pkpEthAddress = (function () {
+      if (params.pkpPublicKey) return computeAddress(params.pkpPublicKey);
+
+      // This will be populated by the node, using dummy value for now.
+      return '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+    })();
+
     let siweMessage: SiweMessage = new SiweMessage({
       domain: globalThis.location.host,
       address: pkpEthAddress,
       statement: 'Lit Protocol PKP session signature',
-      uri: params.sessionKey,
+      uri: sessionKeyUri,
       version: '1',
       chainId: params.chainId ?? 1,
       expirationTime: _expiration,
@@ -2346,21 +2360,20 @@ export class LitNodeClientNodeJs {
 
     let siweMessageStr: string = siweMessage.prepareMessage();
 
-    let reqBody: SessionRequestBody = {
-      sessionKey: params.sessionKey,
-      authMethods: params.authMethods,
-      pkpPublicKey: params.pkpPublicKey,
-      authSig: params.authSig,
-      siweMessage: siweMessageStr,
-    };
-
-    // ========== Node Promises ==========
+    // ========== Get Node Promises ==========
+    // -- fetch shares from nodes
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       return this.getSignSessionKeyShares(
         url,
         {
-          body: reqBody,
+          body: {
+            sessionKey: sessionKeyUri,
+            authMethods: params.authMethods,
+            pkpPublicKey: params.pkpPublicKey,
+            authSig: params.authSig,
+            siweMessage: siweMessageStr,
+          },
         },
         requestId
       );
@@ -2372,11 +2385,10 @@ export class LitNodeClientNodeJs {
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
       this.throwNodeError(res);
-      return {} as JsonAuthSig;
+      return {} as SignSessionKeyResponse;
     }
 
     const responseData = res.values;
-
     log('responseData', JSON.stringify(responseData, null, 2));
 
     // ========== Extract shares from response data ==========
@@ -2390,10 +2402,13 @@ export class LitNodeClientNodeJs {
     const { sessionSig } = signatures;
 
     return {
-      sig: sessionSig.signature,
-      derivedVia: 'web3.eth.personal.sign via Lit PKP',
-      signedMessage: sessionSig.siweMessage,
-      address: computeAddress('0x' + sessionSig.publicKey),
+      authSig: {
+        sig: sessionSig.signature,
+        derivedVia: 'web3.eth.personal.sign via Lit PKP',
+        signedMessage: sessionSig.siweMessage,
+        address: computeAddress('0x' + sessionSig.publicKey),
+      },
+      pkpPublicKey: sessionSig.publicKey,
     };
   };
 
@@ -2415,112 +2430,27 @@ export class LitNodeClientNodeJs {
     });
   };
 
-  getWebAuthnAuthenticationAuthSig = async (
-    params: GetWebAuthnAuthenticationAuthSigProps
-  ): Promise<JsonAuthSig> => {
-    // ========== Pre-Validations ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      return throwError({
-        message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
-      });
-    }
+  generateAuthMethodForWebAuthn = (
+    params: WebAuthnAuthenticationVerificationParams
+  ): AuthMethod => ({
+    authMethodType: AUTH_METHOD_TYPE_IDS.WEBAUTHN,
+    accessToken: JSON.stringify(params),
+  });
 
-    // -- validate if this.networkPubKeySet is null
-    if (this.networkPubKeySet === null) {
-      return throwError({
-        message: 'networkPubKeySet cannot be null',
-        error: LIT_ERROR.PARAM_NULL_ERROR,
-      });
-    }
+  generateAuthMethodForDiscord = (access_token: string): AuthMethod => ({
+    authMethodType: AUTH_METHOD_TYPE_IDS.DISCORD,
+    accessToken: access_token,
+  });
 
-    // -- construct SIWE message that will be signed by node to generate an authSig.
+  generateAuthMethodForGoogle = (access_token: string): AuthMethod => ({
+    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE,
+    accessToken: access_token,
+  });
 
-    const _expiration =
-      params.expiration ||
-      new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-    // Try to get it from local storage, if not generates one~
-    let sessionKey = this.getSessionKey(params.sessionKey);
-    let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
-
-    let siweMessage: SiweMessage = new SiweMessage({
-      domain: globalThis.location.host,
-      address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // This will be populated by the node.
-      statement: 'Lit Protocol PKP session signature',
-      uri: sessionKeyUri,
-      version: '1',
-      chainId: 1,
-      expirationTime: _expiration,
-      resources: params.resources,
-    });
-
-    let siweMessageStr: string = siweMessage.prepareMessage();
-
-    // ========== Get Node Promises ==========
-    // -- fetch shares from nodes
-    const requestId = this.getRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      return this.getVerifyWebAuthnAuthenticationKeyShare(
-        url,
-        {
-          username: params.username,
-          credential: params.verificationParams,
-          sessionPubkey: sessionKey.publicKey,
-          siweMessage: siweMessageStr,
-        },
-        requestId
-      );
-    });
-
-    // -- resolve promises
-    const res = await this.handleNodePromises(nodePromises);
-
-    // -- case: promises rejected
-    if (!this.#isSuccessNodePromises(res)) {
-      this.throwNodeError(res);
-      return {} as JsonAuthSig;
-    }
-
-    const responseData = res.values;
-    log('responseData', JSON.stringify(responseData, null, 2));
-
-    // ========== Extract shares from response data ==========
-    // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = responseData.map(
-      (r: any) => (r as SignedData).signedData
-    );
-
-    const signatures = this.getSessionSignatures(signedDataList);
-
-    console.log('signatures', signatures);
-
-    const { authSig } = signatures;
-
-    return {
-      sig: authSig.signature,
-      derivedVia: 'webauthn via Lit PKP',
-      signedMessage: authSig.siweMessage,
-      address: computeAddress('0x' + authSig.publicKey),
-    };
-  };
-
-  getVerifyWebAuthnAuthenticationKeyShare = async (
-    url: string,
-    body: GetVerifyWebAuthnAuthenticationKeyShareProps,
-    requestId: string
-  ) => {
-    log('getVerifyWebAuthnAuthenticationKeyShares');
-    const urlWithPath = `${url}/web/auth/webauthn`;
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: body,
-      requestId,
-    });
-  };
+  generateAuthMethodForGoogleJWT = (access_token: string): AuthMethod => ({
+    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE_JWT,
+    accessToken: access_token,
+  });
 
   parseResource = ({
     resource,
