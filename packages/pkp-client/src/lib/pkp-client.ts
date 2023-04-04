@@ -14,18 +14,24 @@ export class PKPClient {
 
   constructor(prop: PKPClientProp) {
     this.wallets = new Map<string, PKPBase>();
-    this.registerWallet('eth', new PKPEthersWallet(prop));
 
-    this.registerWallet(
+    // -- register eth wallet
+    this._registerWallet('eth', new PKPEthersWallet(prop));
+
+    // -- register cosmos wallet
+    this._registerWallet(
       'cosmos',
       new PKPCosmosWallet({
         ...prop,
         addressPrefix: prop.cosmosAddressPrefix ?? 'cosmos',
       })
     );
+
+    // -- register btc wallet
+    // this.registerWallet('btc', new PKPBtcWallet(prop));
   }
 
-  registerWallet(chain: string, wallet: PKPBase) {
+  private _registerWallet(chain: string, wallet: PKPBase) {
     this.wallets.set(chain, wallet);
   }
 
@@ -41,13 +47,13 @@ export class PKPClient {
     return wallet;
   }
 
-  getEtherWallet() {
-    return this.getWallet('eth');
-  }
+  getEthWallet = (): PKPEthersWallet => {
+    return this.getWallet('eth') as PKPEthersWallet;
+  };
 
-  getCosmosWallet() {
-    return this.getWallet('cosmos');
-  }
+  getCosmosWallet = (): PKPCosmosWallet => {
+    return this.getWallet('cosmos') as PKPCosmosWallet;
+  };
 
   public async init() {}
 }
