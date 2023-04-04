@@ -64,6 +64,7 @@ import {
   CheckAndSignAuthParams,
   WebAuthnAuthenticationVerificationParams,
   AuthMethod,
+  SignSessionKeyResponse,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -2313,7 +2314,9 @@ export class LitNodeClientNodeJs {
    * @returns {Object} An object containing the resulting signature.
    */
 
-  signSessionKey = async (params: SignSessionKeyProp): Promise<JsonAuthSig> => {
+  signSessionKey = async (
+    params: SignSessionKeyProp
+  ): Promise<SignSessionKeyResponse> => {
     // ========== Validate Params ==========
     // -- validate: If it's NOT ready
     if (!this.ready) {
@@ -2382,7 +2385,7 @@ export class LitNodeClientNodeJs {
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
       this.throwNodeError(res);
-      return {} as JsonAuthSig;
+      return {} as SignSessionKeyResponse;
     }
 
     const responseData = res.values;
@@ -2399,10 +2402,13 @@ export class LitNodeClientNodeJs {
     const { sessionSig } = signatures;
 
     return {
-      sig: sessionSig.signature,
-      derivedVia: 'web3.eth.personal.sign via Lit PKP',
-      signedMessage: sessionSig.siweMessage,
-      address: computeAddress('0x' + sessionSig.publicKey),
+      authSig: {
+        sig: sessionSig.signature,
+        derivedVia: 'web3.eth.personal.sign via Lit PKP',
+        signedMessage: sessionSig.siweMessage,
+        address: computeAddress('0x' + sessionSig.publicKey),
+      },
+      pkpPublicKey: sessionSig.publicKey,
     };
   };
 

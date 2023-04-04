@@ -726,6 +726,11 @@ export interface SignSessionKeyProp {
   chainId?: number;
 }
 
+export interface SignSessionKeyResponse {
+  pkpPublicKey: string;
+  authSig: JsonAuthSig;
+}
+
 export interface GetSignSessionKeySharesProp {
   body: SessionRequestBody;
 }
