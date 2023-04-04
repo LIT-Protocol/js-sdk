@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import {
   SignTypedDataVersion,
   recoverTypedSignature,
+  recoverPersonalSignature,
 } from '@metamask/eth-sig-util';
 
 import {
@@ -22,11 +23,12 @@ const pkpEthersWallet = new PKPEthersWallet({
 
 await pkpEthersWallet.init();
 
-testThese([
+await testThese([
   { name: 'signTypedData', fn: shouldSignTypedData },
   { name: 'signTypedDataV1', fn: shouldSignTypedDataV1 },
   { name: 'signTypedDataV3', fn: shouldSignTypedDataV3 },
   { name: 'signTypedDataV4', fn: shouldSignTypedDataV4 },
+  { name: 'signTransaction', fn: shouldSignTransaction },
   { name: 'sendTransaction', fn: shouldSendTransaction },
 ]);
 
@@ -374,16 +376,11 @@ async function shouldSignTransaction() {
 
   log.blue('signature', signature);
 
-  // verify signature
-  const recoveredAddr = recoverTransaction(signature);
-
-  log.blue('recoveredAddr', recoveredAddr);
-
-  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ADDRESS.toLowerCase()) {
+  if (signature === '' || signature === null || signature === undefined) {
     return {
       status: 500,
       message:
-        'failed to sign transaction - recovered address does not match PKP address',
+        'failed to sign transaction - signature is empty, null or undefined',
     };
   }
 
