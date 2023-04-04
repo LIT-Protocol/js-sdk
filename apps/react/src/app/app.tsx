@@ -9,6 +9,7 @@ import * as LitJsSdk_contractsSdk from 'dist/packages/contracts-sdk';
 import * as LitJsSdk_crypto from 'dist/packages/crypto';
 import * as LitJsSdk_ecdsaSdk from 'dist/packages/ecdsa-sdk';
 import * as LitJsSdk_encryption from 'dist/packages/encryption';
+import * as LitJsSdk_litAuthClient from 'dist/packages/lit-auth-client';
 import * as LitJsSdk_litNodeClient from 'dist/packages/lit-node-client';
 import * as LitJsSdk_litNodeClientNodejs from 'dist/packages/lit-node-client-nodejs';
 import * as LitJsSdk_litThirdPartyLibs from 'dist/packages/lit-third-party-libs';
@@ -32,6 +33,7 @@ declare global {
     LitJsSdk_crypto: any;
     LitJsSdk_ecdsaSdk: any;
     LitJsSdk_encryption: any;
+    LitJsSdk_litAuthClient: any;
     LitJsSdk_litNodeClient: any;
     LitJsSdk_litNodeClientNodejs: any;
     LitJsSdk_litThirdPartyLibs: any;
@@ -621,6 +623,78 @@ export function App() {
             var template = `
             <div class="cat">
                 <h1>LitJsSdk_encryption has ${entries.length} functions</h1>
+                    <ul>
+                        ${ lis }
+                    </ul>
+                </div>
+            `;
+            root.insertAdjacentHTML('beforeend', template);
+        });
+    
+    
+
+    
+    
+        if(typeof LitJsSdk_litAuthClient === 'undefined') {
+            console.error("LitJsSdk_litAuthClient:", LitJsSdk_litAuthClient);
+        }else{
+            console.warn("LitJsSdk_litAuthClient:", LitJsSdk_litAuthClient);
+            window.LitJsSdk_litAuthClient = LitJsSdk_litAuthClient;
+        }
+        window.addEventListener('load', function() {
+
+            var root = document.getElementById('root');
+            var result = document.getElementById('result');
+            var entries = Object.entries(LitJsSdk_litAuthClient);
+            var lis = entries.map(([key, value]) => `
+            <li>
+                <div id="LitJsSdk_litAuthClient_${key}" class="key" onClick="(async (e) => {
+                    var fn = LitJsSdk_litAuthClient['${key}'];
+                    var fnType = typeof fn;
+                    console.warn('[${key}] is type of [' + fnType + ']');
+
+                    if ( fnType === 'string' ) return;
+
+                    if( fnType === 'function' ){
+                        try{
+                            console.log('params:', globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
+                            res = JSON.stringify(res, null, 2);
+                            result.innerText = res;
+                            console.log(res);
+                        }catch(e){
+                            console.error('Please set the [params] variable in the console then click again');
+                            console.log(e);
+                        }
+                        return;
+                    }
+
+                    if( fnType === 'object' ){
+                        var res = await fn;
+                        window.output = res;
+                        res = JSON.stringify(res, null, 2);
+                        result.innerText = res;
+                        console.log(res);
+                        return;
+                    }
+                    
+                    
+                })();">${key}</div>
+                <pre class="code">
+<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                </pre>
+            </li>`);
+            lis = lis.join(' ');
+            var template = `
+            <div class="cat">
+                <h1>LitJsSdk_litAuthClient has ${entries.length} functions</h1>
                     <ul>
                         ${ lis }
                     </ul>
