@@ -21,6 +21,8 @@ export {
   checkAndSignAuthMessage,
   getSessionKeyUri,
   parseResource,
+  ethConnect,
+  disconnectWeb3,
 } from '@lit-protocol/auth-browser';
 
 export * from '@lit-protocol/lit-node-client-nodejs';
