@@ -60,7 +60,7 @@ function getLoginRoute(provider: string): string {
  *
  * @returns {string} - Query string
  */
-function createQueryParams(params: any) {
+function createQueryParams(params: any): string {
   // Strip undefined values from params
   const filteredParams = Object.keys(params)
     .filter((k) => typeof params[k] !== 'undefined')
