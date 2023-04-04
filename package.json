@@ -20,6 +20,8 @@
     "test:watch": "nx run-many --target=test --watch",
     "test:ci": "nx affected --target=test --all --code-coverage",
     "test:e2e": "yarn tools --test --e2e run-react-and-test",
+    "test:unit": "yarn test:packages",
+    "test:custom": "yarn tools --test --custom",
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:dev": "yarn node ./tools/scripts/pub.mjs --tag dev",
     "publish:test": "yarn node ./tools/scripts/pub.mjs --tag test",
@@ -46,7 +48,8 @@
     "v": "yarn tools --v",
     "bump": "yarn tools --v --patch",
     "bump:minor": "yarn tools --v --minor",
-    "bump:major": "yarn tools --v --major"
+    "bump:major": "yarn tools --v --major",
+    "b": "git branch --show"
   },
   "private": true,
   "dependencies": {
@@ -57,6 +60,7 @@
     "@cypress/webpack-dev-server": "^2.3.0",
     "@lit-protocol/pkp-ethers.js": "^5.7.48",
     "@lit-protocol/pkp-ethers.js-node": "^5.7.47",
+    "@metamask/eth-sig-util": "^5.0.2",
     "@playwright/test": "^1.25.2",
     "@synthetixio/js": "^2.41.0",
     "@testing-library/cypress": "^8.0.3",
@@ -72,6 +76,7 @@
     "commander": "^9.4.0",
     "concurrently": "^7.4.0",
     "core-js": "^3.6.5",
+    "crypto-browserify": "^3.12.0",
     "cypress-wait-until": "^1.7.2",
     "cypress-watch-and-reload": "^1.10.3",
     "date-and-time": "^2.4.1",
@@ -96,6 +101,7 @@
     "secp256k1": "^5.0.0",
     "serve": "^14.0.1",
     "start-server-and-test": "^1.14.0",
+    "stream-browserify": "^3.0.0",
     "synthetix-js": "^2.74.1",
     "tslib": "^2.3.0",
     "tweetnacl": "^1.0.3",

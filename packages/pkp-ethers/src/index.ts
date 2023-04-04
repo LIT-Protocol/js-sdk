@@ -4,4 +4,33 @@
 
 import { PKPEthersWallet } from './lib/pkp-ethers';
 
-export { PKPEthersWallet };
+import {
+  methodHandlers,
+  ethRequestHandler,
+  getTypedDataVersionInfo,
+  validateSignature,
+  validateAddressesMatch,
+  signHandler,
+  personalSignHandler,
+  signTypedDataHandler,
+  signTypedData,
+  signTypedDataLegacy,
+  sendTransactionHandler,
+  sendRawTransactionHandler,
+} from './lib/handler';
+
+export {
+  PKPEthersWallet,
+  methodHandlers,
+  ethRequestHandler,
+  getTypedDataVersionInfo,
+  validateSignature,
+  validateAddressesMatch,
+  signHandler,
+  personalSignHandler,
+  signTypedDataHandler,
+  signTypedData,
+  signTypedDataLegacy,
+  sendTransactionHandler,
+  sendRawTransactionHandler,
+};
