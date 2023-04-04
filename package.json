@@ -48,7 +48,8 @@
     "v": "yarn tools --v",
     "bump": "yarn tools --v --patch",
     "bump:minor": "yarn tools --v --minor",
-    "bump:major": "yarn tools --v --major"
+    "bump:major": "yarn tools --v --major",
+    "b": "git branch --show"
   },
   "private": true,
   "dependencies": {
