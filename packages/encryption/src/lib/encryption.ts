@@ -132,23 +132,23 @@ export const encryptToIpfs = async ({
   if (!paramsIsSafe)
     return throwError({
       message: `authSig, sessionSigs, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, litNodeClient, string or file must be provided`,
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
   if (string === undefined && file === undefined)
     return throwError({
       message: `Either string or file must be provided`,
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
   if (!infuraId || !infuraSecretKey) {
     return throwError({
       message:
         'Please provide your Infura Project Id and Infura API Key Secret to add the encrypted metadata on IPFS',
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
   }
 
@@ -157,8 +157,8 @@ export const encryptToIpfs = async ({
   if (string !== undefined && file !== undefined) {
     return throwError({
       message: 'Provide only either a string or file to encrypt',
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
   } else if (string !== undefined) {
     const encryptedString = await encryptString(string);
@@ -219,8 +219,8 @@ export const encryptToIpfs = async ({
     return throwError({
       message:
         "Provided INFURA_ID or INFURA_SECRET_KEY in invalid hence can't upload to IPFS",
-      error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-      error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+      errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
     });
   }
 };
@@ -254,8 +254,8 @@ export const decryptFromIpfs = async ({
   if (!paramsIsSafe)
     return throwError({
       message: `authSig, sessionSigs, ipfsCid, litNodeClient must be provided`,
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
   try {
@@ -288,8 +288,8 @@ export const decryptFromIpfs = async ({
   } catch (e) {
     return throwError({
       message: 'Invalid ipfsCid',
-      error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-      error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+      errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
     });
   }
 };
@@ -315,8 +315,8 @@ export const encryptString = async (str: string): Promise<EncryptedString> => {
   ) {
     return throwError({
       message: `{${str}} must be a string`,
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
   }
 
@@ -363,8 +363,8 @@ export const decryptString = async (
   if (!paramsIsSafe) {
     throwError({
       message: 'Invalid params',
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
   }
 
@@ -401,8 +401,8 @@ export const zipAndEncryptString = async (
   )
     throwError({
       message: 'Invalid string',
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
   let zip;
@@ -452,8 +452,8 @@ export const zipAndEncryptFiles = async (
     )
       throwError({
         message: 'Invalid file type',
-        error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
 
     const folder: JSZip | null = zip.folder('encryptedAssets');
@@ -462,8 +462,8 @@ export const zipAndEncryptFiles = async (
       log("Failed to get 'encryptedAssets' from zip.folder() ");
       return throwError({
         message: "Failed to get 'encryptedAssets' from zip.folder() ",
-        error_kind: LIT_ERROR.UNKNOWN_ERROR.kind,
-        error_code: LIT_ERROR.UNKNOWN_ERROR.name,
+        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
       });
     }
 
@@ -498,8 +498,8 @@ export const decryptZip = async (
   if (!paramsIsSafe) {
     throwError({
       message: `encryptedZipBlob must be a Blob or File. symmKey must be a Uint8Array`,
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
   }
 
@@ -606,8 +606,8 @@ export const encryptFileAndZipWithMetadata = async ({
   if (!paramsIsSafe)
     return throwError({
       message: `authSig, sessionSigs, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, file, litNodeClient, and readme must be provided`,
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
   // -- validate
@@ -667,8 +667,8 @@ export const encryptFileAndZipWithMetadata = async ({
     log("Failed to get 'encryptedAssets' from zip.folder() ");
     return throwError({
       message: `Failed to get 'encryptedAssets' from zip.folder()`,
-      error_kind: LIT_ERROR.UNKNOWN_ERROR.kind,
-      error_code: LIT_ERROR.UNKNOWN_ERROR.name,
+      errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+      errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
     });
   }
 
@@ -747,8 +747,8 @@ export const decryptZipFileWithMetadata = async ({
     });
   } catch (e: any) {
     if (
-      e.error_code === 'NodeNotAuthorized' ||
-      e.error_code === 'not_authorized'
+      e.errorCode === 'NodeNotAuthorized' ||
+      e.errorCode === 'not_authorized'
     ) {
       // try more additionalAccessControlConditions
       if (!additionalAccessControlConditions) {
@@ -781,8 +781,8 @@ export const decryptZipFileWithMetadata = async ({
         } catch (e: any) {
           // swallow not_authorized because we are gonna try some more accessControlConditions
           if (
-            e.error_code === 'NodeNotAuthorized' ||
-            e.error_code === 'not_authorized'
+            e.errorCode === 'NodeNotAuthorized' ||
+            e.errorCode === 'not_authorized'
           ) {
             throw e;
           }
@@ -856,8 +856,8 @@ export const encryptFile = async ({
   ) {
     return throwError({
       message: 'file must be a Blob or File',
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
   }
 
@@ -908,8 +908,8 @@ export const decryptFile = async ({
   if (!paramsIsSafe) {
     return throwError({
       message: `file type must be Blob or File, and symmetricKey type must be Uint8Array | string | CryptoKey | BufferSource`,
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
   }
 
@@ -950,8 +950,8 @@ export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT => {
   )
     return throwError({
       message: 'jwt must be a string',
-      error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
   log('verifyJwt', jwt);

@@ -134,7 +134,7 @@
             });
           } catch (e) {
             console.log("exception thrown when unlocking", e);
-            if (isNodeNotAuthorized(e.error_code)) {
+            if (isNodeNotAuthorized(e.errorCode)) {
               failed = true;
             }
           }

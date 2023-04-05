@@ -158,8 +158,8 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
   if (!chainHexId.startsWith('0x')) {
     throwError({
       message: `${chainHexId} should begin with "0x"`,
-      error_kind: LIT_ERROR.WRONG_PARAM_FORMAT.kind,
-      error_code: LIT_ERROR.WRONG_PARAM_FORMAT.name,
+      errorKind: LIT_ERROR.WRONG_PARAM_FORMAT.kind,
+      errorCode: LIT_ERROR.WRONG_PARAM_FORMAT.name,
     });
   }
 
@@ -167,8 +167,8 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
   if (!hexIds.includes(chainHexId)) {
     throwError({
       message: `${chainHexId} cannot be found in LIT_CHAINS`,
-      error_kind: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.kind,
-      error_code: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.name,
+      errorKind: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.kind,
+      errorCode: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.name,
     });
   }
 
@@ -186,8 +186,8 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
   // -- fail case
   throwError({
     message: `Failed to convert ${chainHexId}`,
-    error_kind: LIT_ERROR.UNKNOWN_ERROR.kind,
-    error_code: LIT_ERROR.UNKNOWN_ERROR.name,
+    errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+    errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
   });
 };
 
@@ -212,8 +212,8 @@ export const getChainId = async (
 
     resultOrError = ELeft({
       message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
-      error_kind: LIT_ERROR.WRONG_NETWORK_EXCEPTION.kind,
-      error_code: LIT_ERROR.WRONG_NETWORK_EXCEPTION.name,
+      errorKind: LIT_ERROR.WRONG_NETWORK_EXCEPTION.kind,
+      errorCode: LIT_ERROR.WRONG_NETWORK_EXCEPTION.name,
     });
   }
 
@@ -444,8 +444,8 @@ export const checkAndSignEVMAuthMessage = async ({
     if (error.code === WALLET_ERROR.NO_SUCH_METHOD) {
       throwError({
         message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
-        error_kind: LIT_ERROR.WRONG_NETWORK_EXCEPTION.kind,
-        error_code: LIT_ERROR.WRONG_NETWORK_EXCEPTION.name,
+        errorKind: LIT_ERROR.WRONG_NETWORK_EXCEPTION.kind,
+        errorCode: LIT_ERROR.WRONG_NETWORK_EXCEPTION.name,
       });
     } else {
       throw error;
@@ -476,8 +476,8 @@ export const checkAndSignEVMAuthMessage = async ({
     if (authSigOrError.type === 'ERROR') {
       throwError({
         message: 'Failed to get authSig from local storage',
-        error_kind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
-        error_code: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
+        errorKind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
+        errorCode: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
       });
     }
 
@@ -601,8 +601,8 @@ export const checkAndSignEVMAuthMessage = async ({
       log(e);
       return throwError({
         message: e.message,
-        error_kind: LIT_ERROR.UNKNOWN_ERROR.kind,
-        error_code: LIT_ERROR.UNKNOWN_ERROR.name,
+        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
       });
     }
     authSigOrError.type = EITHER_TYPE.SUCCESS;

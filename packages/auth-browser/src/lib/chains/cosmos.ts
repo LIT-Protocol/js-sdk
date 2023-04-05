@@ -75,8 +75,8 @@ const getProvider = (): any => {
 
   throwError({
     message,
-    error_kind: error.kind,
-    error_code: error.name,
+    errorKind: error.kind,
+    errorCode: error.name,
   });
 };
 

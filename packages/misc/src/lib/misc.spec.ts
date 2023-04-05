@@ -51,8 +51,8 @@ describe('utils', () => {
     try {
       err = utilsModule.throwError({
         message: 'Message!',
-        error_kind: 'hello',
-        error_code: 'world',
+        errorKind: 'hello',
+        errorCode: 'world',
       });
     } catch (e) {
       err = e as Error;
@@ -62,8 +62,8 @@ describe('utils', () => {
     const values = Object.values(err);
 
     expect(keys).toContain('message');
-    expect(keys).toContain('error_kind');
-    expect(keys).toContain('error_code');
+    expect(keys).toContain('errorKind');
+    expect(keys).toContain('errorCode');
     expect(values).toContain('Message!');
     expect(values).toContain('hello');
     expect(values).toContain('world');
@@ -75,8 +75,8 @@ describe('utils', () => {
     try {
       err = utilsModule.throwError({
         message: 'custom message',
-        error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     } catch (e) {
       err = e as Error;
@@ -86,8 +86,8 @@ describe('utils', () => {
     const values = Object.values(err);
 
     expect(keys).toContain('message');
-    expect(keys).toContain('error_kind');
-    expect(keys).toContain('error_code');
+    expect(keys).toContain('errorKind');
+    expect(keys).toContain('errorCode');
     expect(values).toContain('custom message');
     expect(values).toContain(LitErrorKind.Validation);
     expect(values).toContain(LIT_ERROR.INVALID_PARAM_TYPE.name);

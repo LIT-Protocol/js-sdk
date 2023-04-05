@@ -211,8 +211,8 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   if (validShares.length === 0) {
     return throwError({
       message: 'No valid shares to combine',
-      error_kind: LIT_ERROR.NO_VALID_SHARES.kind,
-      error_code: LIT_ERROR.NO_VALID_SHARES.name,
+      errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
+      errorCode: LIT_ERROR.NO_VALID_SHARES.name,
     });
   }
 

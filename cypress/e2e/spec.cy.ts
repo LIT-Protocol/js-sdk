@@ -570,7 +570,7 @@ describe('Lit Action', () => {
       savedParams.litNodeClient.throwNodeError(res);
     } catch (error) {
       console.log(error);
-      expect(error).to.have.property('error_code', 'NodeNotAuthorized');
+      expect(error).to.have.property('errorCode', 'NodeNotAuthorized');
       expect(error).to.have.property('name', 'NodeError');
     }
   });

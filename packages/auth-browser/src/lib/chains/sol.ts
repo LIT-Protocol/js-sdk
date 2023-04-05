@@ -37,8 +37,8 @@ const getProvider = (): IEither => {
 
     resultOrError = ELeft({
       message,
-      error_kind: LIT_ERROR.NO_WALLET_EXCEPTION.kind,
-      error_code: LIT_ERROR.NO_WALLET_EXCEPTION.name,
+      errorKind: LIT_ERROR.NO_WALLET_EXCEPTION.kind,
+      errorCode: LIT_ERROR.NO_WALLET_EXCEPTION.name,
     });
   }
 

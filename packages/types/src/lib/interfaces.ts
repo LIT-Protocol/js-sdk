@@ -459,11 +459,11 @@ export interface NodeErrorV0 {
 }
 
 export interface NodeErrorV1 {
-  error_kind: string;
+  errorKind: string;
   status: number;
   details: string[];
   message?: string;
-  error_code?: string;
+  errorCode?: string;
 }
 
 /**
@@ -480,8 +480,8 @@ export interface NodeClientErrorV0 {
 
 export interface NodeClientErrorV1 {
   message: string;
-  error_kind: string;
-  error_code: string;
+  errorKind: string;
+  errorCode: string;
   details?: string[];
   status?: number;
 }

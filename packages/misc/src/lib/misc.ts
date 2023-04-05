@@ -87,7 +87,7 @@ export const throwErrorV0 = ({
     this.name = name;
 
     // Map old error codes to new ones if possible.
-    this.error_code = oldErrorToNewErrorMap[errorCode] ?? errorCode;
+    this.errorCode = oldErrorToNewErrorMap[errorCode] ?? errorCode;
   };
 
   throw new (errConstructorFunc as any)(
@@ -109,41 +109,41 @@ const oldErrorToNewErrorMap: { [key: string]: string } = {
  *
  */
 export const throwErrorV1 = ({
-  error_kind,
+  errorKind,
   details,
   status,
   message,
-  error_code,
+  errorCode,
 }: NodeClientErrorV1): never => {
   const errConstructorFunc = function (
     this: any,
-    error_kind: string,
+    errorKind: string,
     status: number,
     details: string[],
     message?: string,
-    error_code?: string
+    errorCode?: string
   ) {
     this.message = message;
-    this.error_code = error_code;
-    this.error_kind = error_kind;
+    this.errorCode = errorCode;
+    this.errorKind = errorKind;
     this.status = status;
     this.details = details;
   };
 
   throw new (errConstructorFunc as any)(
-    error_kind,
+    errorKind,
     status,
     details,
     message,
-    error_code
+    errorCode
   );
 };
 
 export const throwGenericError = (e: any): never => {
   const errConstructorFunc = function (this: any, message: string) {
     this.message = message;
-    this.error_kind = LIT_ERROR.UNKNOWN_ERROR.name;
-    this.error_code = LIT_ERROR.UNKNOWN_ERROR.code;
+    this.errorKind = LIT_ERROR.UNKNOWN_ERROR.name;
+    this.errorCode = LIT_ERROR.UNKNOWN_ERROR.code;
   };
 
   throw new (errConstructorFunc as any)(e.message ?? 'Generic Error');
@@ -153,8 +153,8 @@ export const isNodeClientErrorV1 = (
   nodeError: NodeClientErrorV0 | NodeClientErrorV1
 ): nodeError is NodeClientErrorV1 => {
   return (
-    nodeError.hasOwnProperty('error_code') &&
-    nodeError.hasOwnProperty('error_kind')
+    nodeError.hasOwnProperty('errorCode') &&
+    nodeError.hasOwnProperty('errorKind')
   );
 };
 
@@ -168,8 +168,8 @@ export const isNodeErrorV1 = (
   nodeError: NodeErrorV0 | NodeErrorV1
 ): nodeError is NodeErrorV1 => {
   return (
-    nodeError.hasOwnProperty('error_code') &&
-    nodeError.hasOwnProperty('error_kind')
+    nodeError.hasOwnProperty('errorCode') &&
+    nodeError.hasOwnProperty('errorKind')
   );
 };
 
@@ -188,8 +188,8 @@ declare global {
 export const throwRemovedFunctionError = (functionName: string) => {
   throwError({
     message: `This function "${functionName}" has been removed. Please use the old SDK.`,
-    error_kind: LIT_ERROR.REMOVED_FUNCTION_ERROR.kind,
-    error_code: LIT_ERROR.REMOVED_FUNCTION_ERROR.name,
+    errorKind: LIT_ERROR.REMOVED_FUNCTION_ERROR.kind,
+    errorCode: LIT_ERROR.REMOVED_FUNCTION_ERROR.name,
   });
 };
 
@@ -285,8 +285,8 @@ export const checkType = ({
     if (throwOnError) {
       throwError({
         message,
-        error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
     return false;
@@ -394,8 +394,8 @@ export const is = (
     if (throwOnError) {
       throwError({
         message,
-        error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
     return false;

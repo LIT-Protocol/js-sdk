@@ -542,8 +542,8 @@ export const humanizeUnifiedAccessControlConditions = async ({
       } else {
         throwError({
           message: `Unrecognized condition type: ${acc.conditionType}`,
-          error_kind: LIT_ERROR.INVALID_UNIFIED_CONDITION_TYPE.kind,
-          error_code: LIT_ERROR.INVALID_UNIFIED_CONDITION_TYPE.name,
+          errorKind: LIT_ERROR.INVALID_UNIFIED_CONDITION_TYPE.kind,
+          errorCode: LIT_ERROR.INVALID_UNIFIED_CONDITION_TYPE.name,
         });
       }
     })
