@@ -24,7 +24,8 @@ export const getStorageItem = (key: string): IEither => {
   if (!item) {
     keyOrError = ELeft({
       message: `Failed to get ${key} from local storage`,
-      error: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION,
+      errorKind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
+      errorCode: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
     });
   } else {
     keyOrError = ERight(item);

@@ -439,7 +439,7 @@ export interface SuccessNodePromises {
 
 export interface RejectedNodePromises {
   success: boolean;
-  error: any;
+  error: NodeErrorV0 | NodeErrorV1;
 }
 
 export interface NodePromiseResponse {
@@ -448,10 +448,42 @@ export interface NodePromiseResponse {
   reason?: any;
 }
 
-export interface NodeError {
-  error: {
-    errorCode: string;
-  };
+/**
+ * The error object returned by the node.
+ *
+ * @deprecated - This is the old error object.  It will be removed in the future. Use NodeErrorV1 instead.
+ */
+export interface NodeErrorV0 {
+  errorCode: string;
+  message: string;
+}
+
+export interface NodeErrorV1 {
+  errorKind: string;
+  status: number;
+  details: string[];
+  message?: string;
+  errorCode?: string;
+}
+
+/**
+ *
+ * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
+ *
+ */
+export interface NodeClientErrorV0 {
+  errorCode?: string;
+  message: string;
+  error: any;
+  name?: string;
+}
+
+export interface NodeClientErrorV1 {
+  message: string;
+  errorKind: string;
+  errorCode: string;
+  details?: string[];
+  status?: number;
 }
 
 export interface SigShare {
