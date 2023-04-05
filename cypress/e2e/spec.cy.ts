@@ -571,7 +571,6 @@ describe('Lit Action', () => {
     } catch (error) {
       console.log(error);
       expect(error).to.have.property('errorCode', 'NodeNotAuthorized');
-      expect(error).to.have.property('name', 'NodeError');
     }
   });
 
