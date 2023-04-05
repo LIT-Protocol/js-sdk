@@ -4,6 +4,7 @@ import { PKPClientProp } from '@lit-protocol/types';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import { WalletFactory } from './wallet-factory';
 import { log } from '@lit-protocol/misc';
+import { PKP_CLIENT_SUPPORTED_CHAINS } from '@lit-protocol/constants';
 
 export class PKPClient {
   private _wallets: Map<string, PKPBase> = new Map();
@@ -25,7 +26,7 @@ export class PKPClient {
    * @private
    */
   private _registerSupportedWallets(prop: PKPClientProp): void {
-    const chains = ['eth', 'cosmos']; // Add other chains as needed
+    const chains = PKP_CLIENT_SUPPORTED_CHAINS; // Add other chains as needed
     for (const chain of chains) {
       this._wallets.set(chain, WalletFactory.createWallet(chain, prop));
     }
@@ -75,7 +76,16 @@ export class PKPClient {
   };
 
   /**
-   * Initializes all wallets and returns an object containing the overall readiness status
+   * Retrieves the Bitcoin wallet instance.
+   *
+   * @returns {never} Will throw an error as Bitcoin is not supported yet.
+   */
+  getBtcWallet = (): never => {
+    throw new Error('BTC wallet not supported yet');
+  };
+
+  /**
+   * Connects all wallets and returns an object containing the overall readiness status
    * and an array of the initialization status for each wallet.
    *
    * @returns {Promise<{
@@ -83,7 +93,7 @@ export class PKPClient {
    *  res: Array<{ chain: string; success: boolean }>;
    * }>} An object containing the overall readiness status (ready) and an array (res) with the initialization status for each wallet.
    */
-  public async init(): Promise<{
+  public async connect(): Promise<{
     ready: boolean;
     res: Array<{ chain: string; success: boolean }>;
   }> {

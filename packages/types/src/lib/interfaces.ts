@@ -15,7 +15,6 @@ import {
   UnifiedAccessControlConditions,
 } from './types';
 import { ILitNodeClient } from './ILitNodeClient';
-import { ETHRequestSigningPayload } from 'packages/pkp-ethers/src/lib/pkp-ethers-types';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -1079,5 +1078,7 @@ export interface DefaultAuthNeededCallbackParams {
 }
 
 export interface PKPClientHelpers {
-  handleRequest: (request: ETHRequestSigningPayload | any) => Promise<any>;
+  handleRequest: (request: any) => Promise<any>;
+  setRpc: (rpc: string) => void;
+  getRpc: () => string;
 }

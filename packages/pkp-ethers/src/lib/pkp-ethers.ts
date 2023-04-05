@@ -38,7 +38,12 @@ import { ethers, Wallet } from 'ethers';
 import { PKPClientHelpers, PKPEthersWalletProp } from '@lit-protocol/types';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import { ethRequestHandler } from './handler';
-import { ETHRequestSigningPayload } from './pkp-ethers-types';
+import {
+  ETHHandlerReq,
+  ETHRequestSigningPayload,
+  ETHSignature,
+  ETHTxRes,
+} from './pkp-ethers-types';
 
 const logger = new Logger(version);
 
@@ -74,8 +79,18 @@ export class PKPEthersWallet
     );
   }
 
-  handleRequest = async (payload: ETHRequestSigningPayload): Promise<any> => {
-    return await ethRequestHandler({
+  getRpc = (): string => {
+    return this.rpcProvider.connection.url;
+  };
+
+  setRpc = async (rpc: string): Promise<void> => {
+    this.rpcProvider = new ethers.providers.JsonRpcProvider(rpc);
+  };
+
+  handleRequest = async <T = ETHSignature | ETHTxRes>(
+    payload: ETHRequestSigningPayload
+  ): Promise<T> => {
+    return await ethRequestHandler<T>({
       signer: this,
       payload,
     });
@@ -96,6 +111,10 @@ export class PKPEthersWallet
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
+    if (!this.litNodeClientReady) {
+      await this.init();
+    }
+
     const addr = await this.getAddress();
     this.log('signTransaction => addr:', addr);
 
@@ -151,6 +170,10 @@ export class PKPEthersWallet
   }
 
   async signMessage(message: Bytes | string): Promise<string> {
+    if (!this.litNodeClientReady) {
+      await this.init();
+    }
+
     const toSign = arrayify(hashMessage(message));
 
     this.log('running lit action => sigName: pkp-eth-sign-message');

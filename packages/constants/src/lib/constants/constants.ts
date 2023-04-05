@@ -532,3 +532,6 @@ export const AUTH_METHOD_TYPE_IDS = {
   GOOGLE: 5,
   GOOGLE_JWT: 6,
 };
+
+// ========== PKP Client ==========
+export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
