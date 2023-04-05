@@ -725,6 +725,8 @@ export interface SignSessionKeyProp {
   resources: any;
 
   chainId?: number;
+
+  domain?: string;
 }
 
 export interface SignSessionKeyResponse {
