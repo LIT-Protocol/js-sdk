@@ -37,7 +37,8 @@ const getProvider = (): IEither => {
 
     resultOrError = ELeft({
       message,
-      error: LIT_ERROR.NO_WALLET_EXCEPTION,
+      error_kind: LIT_ERROR.NO_WALLET_EXCEPTION.kind,
+      error_code: LIT_ERROR.NO_WALLET_EXCEPTION.name,
     });
   }
 
@@ -138,7 +139,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<JsonAuthSig> => {
 export const signAndSaveAuthMessage = async ({
   provider,
 }: {
-  provider: any,
+  provider: any;
 }): Promise<JsonAuthSig | undefined> => {
   const now = new Date().toISOString();
   const body = AUTH_SIGNATURE_BODY.replace('{{timestamp}}', now);

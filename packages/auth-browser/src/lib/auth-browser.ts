@@ -30,7 +30,8 @@ export const checkAndSignAuthMessage = ({
       message: `Unsupported chain selected.  Please select one of: ${Object.keys(
         ALL_LIT_CHAINS
       )}`,
-      error: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION,
+      error_kind: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.kind,
+      error_code: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.name,
     });
   }
 
@@ -57,7 +58,8 @@ export const checkAndSignAuthMessage = ({
       message: `vmType not found for this chain: ${chain}.  This should not happen.  Unsupported chain selected.  Please select one of: ${Object.keys(
         ALL_LIT_CHAINS
       )}`,
-      error: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION,
+      error_kind: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.kind,
+      error_code: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.name,
     });
   }
 };

@@ -10,9 +10,7 @@ import {
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
 
-import { 
-  JsonAuthSig
-} from '@lit-protocol/types';
+import { JsonAuthSig } from '@lit-protocol/types';
 import { log, sortedObject, throwError } from '@lit-protocol/misc';
 
 /** ---------- Declaration ---------- */
@@ -77,7 +75,8 @@ const getProvider = (): any => {
 
   throwError({
     message,
-    error,
+    error_kind: error.kind,
+    error_code: error.name,
   });
 };
 

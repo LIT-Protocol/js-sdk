@@ -1,7 +1,4 @@
-import {
-  ILitError,
-  LIT_ERROR,
-} from '@lit-protocol/constants';
+import { ILitError, LIT_ERROR } from '@lit-protocol/constants';
 
 import {
   ABIParams,
@@ -90,14 +87,16 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
           message: `You passed an invalid access control condition that is missing or has a wrong "conditionType": ${JSON.stringify(
             cond
           )}`,
-          error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+          error_kind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
+          error_code: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
         });
     }
   }
 
   throwError({
     message: `You passed an invalid access control condition: ${cond}`,
-    error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+    error_kind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
+    error_code: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
   });
 };
 
@@ -178,7 +177,8 @@ export const canonicalSolRpcConditionFormatter = (
       ) {
         throwError({
           message: `Solana RPC Conditions have changed and there are some new fields you must include in your condition.  Check the docs here: https://developer.litprotocol.com/AccessControlConditions/solRpcConditions`,
-          error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+          error_kind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
+          error_code: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
         });
       }
 
@@ -220,7 +220,8 @@ export const canonicalSolRpcConditionFormatter = (
   // -- else
   throwError({
     message: `You passed an invalid access control condition: ${cond}`,
-    error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+    error_kind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
+    error_code: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
   });
 };
 
@@ -277,7 +278,8 @@ export const canonicalAccessControlConditionFormatter = (
 
   throwError({
     message: `You passed an invalid access control condition: ${cond}`,
-    error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+    error_kind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
+    error_code: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
   });
 };
 
@@ -371,7 +373,8 @@ export const canonicalEVMContractConditionFormatter = (
 
   throwError({
     message: `You passed an invalid access control condition: ${cond}`,
-    error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+    error_kind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
+    error_code: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
   });
 };
 
@@ -429,7 +432,8 @@ export const canonicalCosmosConditionFormatter = (
 
   throwError({
     message: `You passed an invalid access control condition: ${cond}`,
-    error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+    error_kind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
+    error_code: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
   });
 };
 

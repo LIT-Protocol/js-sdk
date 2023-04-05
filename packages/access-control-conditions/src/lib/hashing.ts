@@ -43,14 +43,16 @@ export const hashUnifiedAccessControlConditions = (
   if (hasUndefined) {
     throwError({
       message: 'Invalid access control conditions',
-      error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+      error_kind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
+      error_code: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
     });
   }
 
   if (conditions.length === 0) {
     throwError({
       message: 'No conditions provided',
-      error: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS,
+      error_kind: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.kind,
+      error_code: LIT_ERROR.INVALID_ACCESS_CONTROL_CONDITIONS.name,
     });
   }
   const toHash = JSON.stringify(conditions);

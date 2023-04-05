@@ -3,6 +3,7 @@
 import { wasmBlsSdkHelpers, initWasmBlsSdk } from '@lit-protocol/bls-sdk';
 
 import {
+  LIT_ERROR,
   SessionKeyPair,
   SigShare,
   SYMM_KEY_ALGO_PARAMS,
@@ -191,8 +192,7 @@ export const combineBlsShares = (
  *
  */
 export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
-
-  log("sigShares:", sigShares);
+  log('sigShares:', sigShares);
 
   // the public key can come from any node - it obviously will be identical from each node
   // const publicKey = sigShares[0].publicKey;
@@ -205,23 +205,24 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
     return acc;
   }, []);
 
-  log("Valid Shares:", validShares);
+  log('Valid Shares:', validShares);
 
   // if there are no valid shares, throw an error
   if (validShares.length === 0) {
     return throwError({
-      code: 'NO_VALID_SHARES',
       message: 'No valid shares to combine',
-    })
+      error_kind: LIT_ERROR.NO_VALID_SHARES.kind,
+      error_code: LIT_ERROR.NO_VALID_SHARES.name,
+    });
   }
 
   // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
   const R_x = validShares[0].localX;
   const R_y = validShares[0].localY;
 
-  log("R_x:", R_x);
-  log("R_y:", R_y);
-  
+  log('R_x:', R_x);
+  log('R_y:', R_y);
+
   const shareHexes = validShares.map((s: any) => s.shareHex);
   log('shareHexes:', shareHexes);
 
@@ -230,10 +231,10 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
 
   let sig: string = '';
 
-  try{
+  try {
     sig = JSON.parse(wasmECDSA.combine_signature(R_x, R_y, shares));
-  }catch(e){
-    log("Failed to combine signatures:", e);
+  } catch (e) {
+    log('Failed to combine signatures:', e);
   }
 
   log('signature', sig);

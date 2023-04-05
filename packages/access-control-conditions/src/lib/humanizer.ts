@@ -82,9 +82,9 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  accessControlConditions: Array<AccsRegularParams | AccsDefaultParams | any>,
-  tokenList?: Array<any | string>,
-  myWalletAddress?: string,
+  accessControlConditions: Array<AccsRegularParams | AccsDefaultParams | any>;
+  tokenList?: Array<any | string>;
+  myWalletAddress?: string;
 }): Promise<string> => {
   log('humanizing evm basic access control conditions');
   log('myWalletAddress', myWalletAddress);
@@ -278,9 +278,9 @@ export const humanizeEvmContractConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  evmContractConditions: Array<AccsEVMParams>,
-  tokenList?: Array<any | string>,
-  myWalletAddress?: string,
+  evmContractConditions: Array<AccsEVMParams>;
+  tokenList?: Array<any | string>;
+  myWalletAddress?: string;
 }): Promise<string> => {
   log('humanizing evm contract conditions');
   log('myWalletAddress', myWalletAddress);
@@ -339,9 +339,9 @@ export const humanizeSolRpcConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  solRpcConditions: Array<AccsSOLV2Params>,
-  tokenList?: Array<any | string>,
-  myWalletAddress?: string,
+  solRpcConditions: Array<AccsSOLV2Params>;
+  tokenList?: Array<any | string>;
+  myWalletAddress?: string;
 }): Promise<string> => {
   log('humanizing sol rpc conditions');
   log('myWalletAddress', myWalletAddress);
@@ -413,9 +413,9 @@ export const humanizeCosmosConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  cosmosConditions: Array<AccsCOSMOSParams | any>,
-  tokenList?: Array<any | string>,
-  myWalletAddress?: string,
+  cosmosConditions: Array<AccsCOSMOSParams | any>;
+  tokenList?: Array<any | string>;
+  myWalletAddress?: string;
 }): Promise<string> => {
   log('humanizing cosmos conditions');
   log('myWalletAddress', myWalletAddress);
@@ -491,9 +491,9 @@ export const humanizeUnifiedAccessControlConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  unifiedAccessControlConditions: UnifiedAccessControlConditions,
-  tokenList?: Array<any | string>,
-  myWalletAddress?: string,
+  unifiedAccessControlConditions: UnifiedAccessControlConditions;
+  tokenList?: Array<any | string>;
+  myWalletAddress?: string;
 }): Promise<string> => {
   const promises = await Promise.all(
     unifiedAccessControlConditions.map(async (acc: any): Promise<any> => {
@@ -542,7 +542,8 @@ export const humanizeUnifiedAccessControlConditions = async ({
       } else {
         throwError({
           message: `Unrecognized condition type: ${acc.conditionType}`,
-          error: LIT_ERROR.INVALID_UNIFIED_CONDITION_TYPE,
+          error_kind: LIT_ERROR.INVALID_UNIFIED_CONDITION_TYPE.kind,
+          error_code: LIT_ERROR.INVALID_UNIFIED_CONDITION_TYPE.name,
         });
       }
     })

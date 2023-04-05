@@ -21,6 +21,7 @@ import {
   version,
   LIT_SESSION_KEY_URI,
   AUTH_METHOD_TYPE_IDS,
+  LIT_ERROR_CODE,
 } from '@lit-protocol/constants';
 
 import {
@@ -65,6 +66,8 @@ import {
   WebAuthnAuthenticationVerificationParams,
   AuthMethod,
   SignSessionKeyResponse,
+  NodeErrorV0,
+  NodeErrorV1,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -76,9 +79,14 @@ import { safeParams } from '@lit-protocol/encryption';
 import {
   convertLitActionsParams,
   isBrowser,
+  isNodeErrorV0,
+  isNodeErrorV1,
   log,
   mostCommonString,
   throwError,
+  throwErrorV0,
+  throwErrorV1,
+  throwGenericError,
 } from '@lit-protocol/misc';
 import {
   uint8arrayFromString,
@@ -162,7 +170,8 @@ export class LitNodeClientNodeJs {
       throwError({
         message:
           'the litNetwork specified in the LitNodeClient config not found in LIT_NETWORKS',
-        error: LIT_ERROR.LIT_NODE_CLIENT_BAD_CONFIG_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_BAD_CONFIG_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_BAD_CONFIG_ERROR.name,
       });
       return;
     }
@@ -193,7 +202,8 @@ export class LitNodeClientNodeJs {
       if (!sigToPassToNode) {
         throwError({
           message: `You passed sessionSigs but we could not find session sig for node ${url}`,
-          error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+          error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
         });
       }
     }
@@ -400,7 +410,8 @@ export class LitNodeClientNodeJs {
         if (!this.defaultAuthCallback) {
           return throwError({
             message: 'No default auth callback provided',
-            error: LIT_ERROR.PARAMS_MISSING_ERROR,
+            error_kind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+            error_code: LIT_ERROR.PARAMS_MISSING_ERROR.name,
           });
         }
         walletSig = await this.defaultAuthCallback({
@@ -1047,7 +1058,8 @@ export class LitNodeClientNodeJs {
     if (!targetNodeRange) {
       return throwError({
         message: 'targetNodeRange is required',
-        error: LIT_ERROR.INVALID_PARAM_TYPE,
+        error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
 
@@ -1066,7 +1078,8 @@ export class LitNodeClientNodeJs {
         throwError({
           message:
             'Invalid code content type for single node execution.  Your code param must be a string',
-          error: LIT_ERROR.INVALID_PARAM_TYPE,
+          error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+          error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
         });
       }
 
@@ -1173,8 +1186,27 @@ export class LitNodeClientNodeJs {
    *
    */
   throwNodeError = (res: RejectedNodePromises): void => {
-    if (res.error && res.error.errorCode) {
+    if (isNodeErrorV1(res.error)) {
       if (
+        res.error.error_code &&
+        res.error.error_code === LIT_ERROR_CODE.NODE_NOT_AUTHORIZED &&
+        this.config.alertWhenUnauthorized
+      ) {
+        log(
+          '[Alert originally] You are not authorized to access to this content'
+        );
+
+        throwErrorV1({
+          ...res.error,
+          message:
+            res.error.message ||
+            'You are not authorized to access to this content',
+          error_code: res.error.error_code!,
+        });
+      }
+    } else if (isNodeErrorV0(res.error)) {
+      if (
+        res.error.errorCode &&
         res.error.errorCode === 'not_authorized' &&
         this.config.alertWhenUnauthorized
       ) {
@@ -1183,9 +1215,9 @@ export class LitNodeClientNodeJs {
         );
       }
 
-      throwError({ ...res.error, name: 'NodeError' });
+      throwErrorV0({ ...res.error, name: 'NodeError' });
     } else {
-      throwError({
+      throwGenericError({
         message: `There was an error getting the signing shares from the nodes`,
         error: LIT_ERROR.UNKNOWN_ERROR,
       });
@@ -1235,7 +1267,8 @@ export class LitNodeClientNodeJs {
       if (this.networkPubKeySet === null) {
         throwError({
           message: 'networkPubKeySet cannot be null',
-          error: LIT_ERROR.PARAM_NULL_ERROR,
+          error_kind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+          error_code: LIT_ERROR.PARAM_NULL_ERROR.name,
         });
         return;
       }
@@ -1244,7 +1277,8 @@ export class LitNodeClientNodeJs {
       if (sigType !== 'BLS' && sigType !== 'ECDSA') {
         throwError({
           message: 'signature type is not BLS or ECDSA',
-          error: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE,
+          error_kind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
+          error_code: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
         return;
       }
@@ -1314,7 +1348,8 @@ export class LitNodeClientNodeJs {
       if (this.networkPubKeySet === null) {
         throwError({
           message: 'networkPubKeySet cannot be null',
-          error: LIT_ERROR.PARAM_NULL_ERROR,
+          error_kind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+          error_code: LIT_ERROR.PARAM_NULL_ERROR.name,
         });
         return;
       }
@@ -1323,7 +1358,8 @@ export class LitNodeClientNodeJs {
       if (sigType !== 'BLS' && sigType !== 'ECDSA') {
         throwError({
           message: 'signature type is not BLS or ECDSA',
-          error: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE,
+          error_kind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
+          error_code: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
         return;
       }
@@ -1389,7 +1425,8 @@ export class LitNodeClientNodeJs {
       if (this.networkPubKeySet === null) {
         throwError({
           message: 'networkPubKeySet cannot be null',
-          error: LIT_ERROR.PARAM_NULL_ERROR,
+          error_kind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+          error_code: LIT_ERROR.PARAM_NULL_ERROR.name,
         });
         return;
       }
@@ -1404,7 +1441,8 @@ export class LitNodeClientNodeJs {
       } else {
         throwError({
           message: 'Unknown decryption algorithm type',
-          error: LIT_ERROR.UNKNOWN_DECRYPTION_ALGORITHM_TYPE_ERROR,
+          error_kind: LIT_ERROR.UNKNOWN_DECRYPTION_ALGORITHM_TYPE_ERROR.kind,
+          error_code: LIT_ERROR.UNKNOWN_DECRYPTION_ALGORITHM_TYPE_ERROR.name,
         });
       }
 
@@ -1475,7 +1513,8 @@ export class LitNodeClientNodeJs {
 
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1487,6 +1526,8 @@ export class LitNodeClientNodeJs {
     if (!paramsIsSafe) {
       return throwError({
         message: 'executeJs params are not valid',
+        error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
 
@@ -1599,7 +1640,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       return throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1607,7 +1649,8 @@ export class LitNodeClientNodeJs {
     if (this.networkPubKeySet === null) {
       return throwError({
         message: 'networkPubKeySet cannot be null',
-        error: LIT_ERROR.PARAM_NULL_ERROR,
+        error_kind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+        error_code: LIT_ERROR.PARAM_NULL_ERROR.name,
       });
     }
 
@@ -1659,7 +1702,8 @@ export class LitNodeClientNodeJs {
 
       throwError({
         message: `You are not authorized to recieve a signature on this item`,
-        error: LIT_ERROR.UNAUTHROZIED_EXCEPTION,
+        error_kind: LIT_ERROR.UNAUTHROZIED_EXCEPTION.kind,
+        error_code: LIT_ERROR.UNAUTHROZIED_EXCEPTION.name,
       });
     }
 
@@ -1703,7 +1747,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1711,7 +1756,8 @@ export class LitNodeClientNodeJs {
     if (this.networkPubKeySet === null) {
       return throwError({
         message: 'networkPubKeySet cannot be null',
-        error: LIT_ERROR.PARAM_NULL_ERROR,
+        error_kind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+        error_code: LIT_ERROR.PARAM_NULL_ERROR.name,
       });
     }
 
@@ -1733,14 +1779,16 @@ export class LitNodeClientNodeJs {
     if (error) {
       return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
     if (!resourceId) {
       return throwError({
         message: `You must provide a resourceId`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -1810,7 +1858,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1838,7 +1887,8 @@ export class LitNodeClientNodeJs {
     if (!resourceId) {
       return throwError({
         message: 'resourceId cannot be null',
-        error: LIT_ERROR.PARAM_NULL_ERROR,
+        error_kind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+        error_code: LIT_ERROR.PARAM_NULL_ERROR.name,
       });
     }
 
@@ -1857,7 +1907,8 @@ export class LitNodeClientNodeJs {
     if (!hashOfConditions) {
       return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -1910,7 +1961,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1919,7 +1971,8 @@ export class LitNodeClientNodeJs {
       const message = 'networkPubKeySet cannot be null';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1935,6 +1988,8 @@ export class LitNodeClientNodeJs {
     if (!paramsIsSafe) {
       throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -1950,7 +2005,8 @@ export class LitNodeClientNodeJs {
     if (error) {
       throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -1996,7 +2052,8 @@ export class LitNodeClientNodeJs {
     if (!this.networkPubKeySet) {
       return throwError({
         message: 'networkPubKeySet cannot be null',
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -2033,7 +2090,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -2042,7 +2100,8 @@ export class LitNodeClientNodeJs {
       const message = 'subnetPubKey cannot be null';
       return throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -2054,7 +2113,8 @@ export class LitNodeClientNodeJs {
     if (!paramsIsSafe) {
       return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -2090,7 +2150,8 @@ export class LitNodeClientNodeJs {
     if (!hashOfConditions) {
       return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -2152,7 +2213,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -2169,7 +2231,8 @@ export class LitNodeClientNodeJs {
     if (!accessControlConditions) {
       return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -2325,7 +2388,8 @@ export class LitNodeClientNodeJs {
 
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        error_kind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        error_code: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -2521,7 +2585,8 @@ export class LitNodeClientNodeJs {
         if (!this.defaultAuthCallback) {
           return throwError({
             message: 'No default auth callback provided',
-            error: LIT_ERROR.PARAMS_MISSING_ERROR,
+            error_kind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+            error_code: LIT_ERROR.PARAMS_MISSING_ERROR.name,
           });
         }
         walletSig = await this.defaultAuthCallback({
@@ -2542,7 +2607,8 @@ export class LitNodeClientNodeJs {
     ) {
       throwError({
         message: 'No wallet signature found',
-        error: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR,
+        error_kind: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.kind,
+        error_code: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.name,
       });
       return;
     }

@@ -148,8 +148,8 @@ describe('canonicalFormatter.ts', () => {
       console.log(e);
     }
 
-    expect((console.log as any).mock.calls[0][0].errorCode).toBe(
-      'invalid_access_control_conditions'
+    expect((console.log as any).mock.calls[0][0].error_code).toBe(
+      'InvalidAccessControlConditions'
     );
   });
 

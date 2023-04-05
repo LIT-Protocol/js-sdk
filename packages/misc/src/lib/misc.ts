@@ -6,7 +6,15 @@ import {
   LIT_ERROR,
 } from '@lit-protocol/constants';
 
-import { Chain, JsonAuthSig, KV } from '@lit-protocol/types';
+import {
+  Chain,
+  JsonAuthSig,
+  KV,
+  NodeClientErrorV0,
+  NodeClientErrorV1,
+  NodeErrorV0,
+  NodeErrorV1,
+} from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 
@@ -44,17 +52,26 @@ export const mostCommonString = (arr: Array<any>): any => {
     .pop();
 };
 
+export const throwError = (e: NodeClientErrorV0 | NodeClientErrorV1): never => {
+  if (isNodeClientErrorV1(e)) {
+    return throwErrorV1(e);
+  } else if (isNodeClientErrorV0(e)) {
+    return throwErrorV0(e);
+  }
+  return throwGenericError(e as any);
+};
+
 /**
  *
  * Standardized way to throw error in Lit Protocol projects
- * TODO: remove errorCode and use standardized ILitError type instead
  *
+ * @deprecated use throwErrorV1
  * @param { ILitError }
  * @property { string } message
  * @property { string } name
  * @property { string } errorCode
  */
-export const throwError = ({
+export const throwErrorV0 = ({
   message,
   name,
   errorCode,
@@ -68,7 +85,9 @@ export const throwError = ({
   ) {
     this.message = message;
     this.name = name;
-    this.errorCode = errorCode;
+
+    // Map old error codes to new ones if possible.
+    this.error_code = oldErrorToNewErrorMap[errorCode] ?? errorCode;
   };
 
   throw new (errConstructorFunc as any)(
@@ -76,6 +95,88 @@ export const throwError = ({
     (name = error?.name ?? name),
     (errorCode = error?.code ?? errorCode)
   );
+};
+
+// Map for old error codes to new ones
+const oldErrorToNewErrorMap: { [key: string]: string } = {
+  not_authorized: 'NodeNotAuthorized',
+  storage_error: 'NodeStorageError',
+};
+
+/**
+ *
+ * Standardized way to throw error in Lit Protocol projects
+ *
+ */
+export const throwErrorV1 = ({
+  error_kind,
+  details,
+  status,
+  message,
+  error_code,
+}: NodeClientErrorV1): never => {
+  const errConstructorFunc = function (
+    this: any,
+    error_kind: string,
+    status: number,
+    details: string[],
+    message?: string,
+    error_code?: string
+  ) {
+    this.message = message;
+    this.error_code = error_code;
+    this.error_kind = error_kind;
+    this.status = status;
+    this.details = details;
+  };
+
+  throw new (errConstructorFunc as any)(
+    error_kind,
+    status,
+    details,
+    message,
+    error_code
+  );
+};
+
+export const throwGenericError = (e: any): never => {
+  const errConstructorFunc = function (this: any, message: string) {
+    this.message = message;
+    this.error_kind = LIT_ERROR.UNKNOWN_ERROR.name;
+    this.error_code = LIT_ERROR.UNKNOWN_ERROR.code;
+  };
+
+  throw new (errConstructorFunc as any)(e.message ?? 'Generic Error');
+};
+
+export const isNodeClientErrorV1 = (
+  nodeError: NodeClientErrorV0 | NodeClientErrorV1
+): nodeError is NodeClientErrorV1 => {
+  return (
+    nodeError.hasOwnProperty('error_code') &&
+    nodeError.hasOwnProperty('error_kind')
+  );
+};
+
+export const isNodeClientErrorV0 = (
+  nodeError: NodeClientErrorV0 | NodeClientErrorV1
+): nodeError is NodeClientErrorV0 => {
+  return nodeError.hasOwnProperty('errorCode');
+};
+
+export const isNodeErrorV1 = (
+  nodeError: NodeErrorV0 | NodeErrorV1
+): nodeError is NodeErrorV1 => {
+  return (
+    nodeError.hasOwnProperty('error_code') &&
+    nodeError.hasOwnProperty('error_kind')
+  );
+};
+
+export const isNodeErrorV0 = (
+  nodeError: NodeErrorV0 | NodeErrorV1
+): nodeError is NodeErrorV0 => {
+  return nodeError.hasOwnProperty('errorCode');
 };
 
 declare global {
@@ -87,7 +188,8 @@ declare global {
 export const throwRemovedFunctionError = (functionName: string) => {
   throwError({
     message: `This function "${functionName}" has been removed. Please use the old SDK.`,
-    error: LIT_ERROR.REMOVED_FUNCTION_ERROR,
+    error_kind: LIT_ERROR.REMOVED_FUNCTION_ERROR.kind,
+    error_code: LIT_ERROR.REMOVED_FUNCTION_ERROR.name,
   });
 };
 
@@ -183,7 +285,8 @@ export const checkType = ({
     if (throwOnError) {
       throwError({
         message,
-        error: LIT_ERROR.INVALID_PARAM_TYPE,
+        error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
     return false;
@@ -291,8 +394,8 @@ export const is = (
     if (throwOnError) {
       throwError({
         message,
-        name: 'invalidParamType',
-        errorCode: 'invalid_param_type',
+        error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
     return false;

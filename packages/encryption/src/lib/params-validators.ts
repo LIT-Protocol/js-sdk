@@ -60,7 +60,11 @@ export const paramsValidators = {
     // -- validate: either 'code' or 'ipfsId' must exists
     if (!code && !ipfsId) {
       const message = 'You must pass either code or ipfsId';
-      throwError({ message, error: LIT_ERROR.PARAMS_MISSING_ERROR });
+      throwError({
+        message,
+        error_kind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+        error_code: LIT_ERROR.PARAMS_MISSING_ERROR.name,
+      });
       return false;
     }
 
@@ -68,7 +72,11 @@ export const paramsValidators = {
     if (code && ipfsId) {
       const message = "You cannot have both 'code' and 'ipfs' at the same time";
 
-      throwError({ message, error: LIT_ERROR.INVALID_PARAM_TYPE });
+      throwError({
+        message,
+        error_kind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        error_code: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
       return false;
     }
 
@@ -105,8 +113,8 @@ export const paramsValidators = {
     if (!sessionSigs && !authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -115,8 +123,8 @@ export const paramsValidators = {
     if (sessionSigs && authSig) {
       throwError({
         message: 'You must pass only one authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -194,8 +202,8 @@ export const paramsValidators = {
     if (!sessionSigs && !authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -245,8 +253,8 @@ export const paramsValidators = {
     if (sessionSigs && authSig) {
       throwError({
         message: 'You must pass only one authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -321,8 +329,8 @@ export const paramsValidators = {
     if (!sessionSigs && !authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -331,8 +339,8 @@ export const paramsValidators = {
     if (sessionSigs && authSig) {
       throwError({
         message: 'You must pass only one authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -342,7 +350,10 @@ export const paramsValidators = {
       return false;
     }
 
-    if (authSig && !checkIfAuthSigRequiresChainParam(authSig, chain, 'getEncryptionKey'))
+    if (
+      authSig &&
+      !checkIfAuthSigRequiresChainParam(authSig, chain, 'getEncryptionKey')
+    )
       return false;
 
     return true;
@@ -417,15 +428,23 @@ export const paramsValidators = {
       return false;
 
     // -- validate: sessionSigs and its type is correct
-    if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'decryptZipFileWithMetadata'))
+    if (
+      params.sessionSigs &&
+      !is(
+        params.sessionSigs,
+        'Object',
+        'sessionSigs',
+        'decryptZipFileWithMetadata'
+      )
+    )
       return false;
 
     // -- validate: if sessionSig or authSig exists
     if (!params.sessionSigs && !params.authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -434,8 +453,8 @@ export const paramsValidators = {
     if (params.sessionSigs && params.authSig) {
       throwError({
         message: 'You must pass only one authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -561,15 +580,18 @@ export const paramsValidators = {
       return false;
 
     // -- validate: sessionSigs and its type is correct
-    if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'encryptToIpfs'))
+    if (
+      params.sessionSigs &&
+      !is(params.sessionSigs, 'Object', 'sessionSigs', 'encryptToIpfs')
+    )
       return false;
 
     // -- validate: if sessionSig or authSig exists
     if (!params.sessionSigs && !params.authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -578,8 +600,8 @@ export const paramsValidators = {
     if (params.sessionSigs && params.authSig) {
       throwError({
         message: 'You must pass only one authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -629,15 +651,18 @@ export const paramsValidators = {
       return false;
 
     // -- validate: sessionSigs and its type is correct
-    if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'decryptFromIpfs'))
+    if (
+      params.sessionSigs &&
+      !is(params.sessionSigs, 'Object', 'sessionSigs', 'decryptFromIpfs')
+    )
       return false;
 
     // -- validate: if sessionSig or authSig exists
     if (!params.sessionSigs && !params.authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -646,8 +671,8 @@ export const paramsValidators = {
     if (params.sessionSigs && params.authSig) {
       throwError({
         message: 'You must pass only one authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -734,15 +759,23 @@ export const paramsValidators = {
       return false;
 
     // -- validate: sessionSigs and its type is correct
-    if (params.sessionSigs && !is(params.sessionSigs, 'Object', 'sessionSigs', 'encryptFileAndZipWithMetadata'))
+    if (
+      params.sessionSigs &&
+      !is(
+        params.sessionSigs,
+        'Object',
+        'sessionSigs',
+        'encryptFileAndZipWithMetadata'
+      )
+    )
       return false;
 
     // -- validate: if sessionSig or authSig exists
     if (!params.sessionSigs && !params.authSig) {
       throwError({
         message: 'You must pass either authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
@@ -751,8 +784,8 @@ export const paramsValidators = {
     if (params.sessionSigs && params.authSig) {
       throwError({
         message: 'You must pass only one authSig or sessionSigs',
-        name: 'InvalidArgumentException',
-        errorCode: 'invalid_argument',
+        error_kind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        error_code: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
       return false;
     }
