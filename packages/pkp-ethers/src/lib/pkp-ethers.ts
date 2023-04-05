@@ -81,16 +81,20 @@ export class PKPEthersWallet
     return Promise.resolve(addr);
   }
 
-  connect(): PKPEthersWallet {
-    // throw new Error("PKPWallet cannot be connected to a provider");
-    return new PKPEthersWallet(this.pkpWalletProp);
+  connect(): never {
+    throw new Error(
+      'Use connectJsonRpc to connect the PKPEthersWallet to a JSON RPC provider'
+    );
   }
 
-  connectJsonRpc(rpc: string): PKPEthersWallet {
-    return new PKPEthersWallet({
-      ...this.pkpWalletProp,
-      rpc,
-    });
+  connectJsonRpc(rpc: string): void {
+    this.rpcProvider = new ethers.providers.JsonRpcProvider(rpc);
+
+    defineReadOnly(
+      this,
+      '_isSigner',
+      this.rpcProvider._isProvider === true ? false : true
+    );
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
@@ -325,11 +329,11 @@ export class PKPEthersWallet
     transaction: ethers.utils.Deferrable<TransactionRequest>,
     blockTag?: ethers.providers.BlockTag | undefined
   ): Promise<string> {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
 
   getChainId(): Promise<number> {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
 
   getGasPrice(): Promise<ethers.BigNumber> {
@@ -351,27 +355,27 @@ export class PKPEthersWallet
   }
 
   resolveName(name: string): Promise<string> {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
 
   checkTransaction(
     transaction: ethers.utils.Deferrable<TransactionRequest>
   ): ethers.utils.Deferrable<TransactionRequest> {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
 
   populateTransaction(
     transaction: ethers.utils.Deferrable<TransactionRequest>
   ): Promise<TransactionRequest> {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
 
   _checkProvider(operation?: string | undefined): void {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
 
   get mnemonic() {
-    return this.throwError(`There's no mnemonic for a PKPWallet`);
+    return this.throwError(`There's no mnemonic for a PKP`);
   }
 
   get privateKey(): string {

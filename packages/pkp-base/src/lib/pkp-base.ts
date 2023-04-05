@@ -14,6 +14,7 @@ import {
   JsonAuthSig,
   PKPBaseDefaultParams,
   GetSessionSigsProps,
+  SessionSigs,
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
@@ -41,20 +42,26 @@ const compressPubKey = (pubKey: string): string => {
  * A base class that can be shared between Ethers and Cosmos signers.
  */
 export class PKPBase<T = PKPBaseDefaultParams> {
-  pkpWalletProp: PKPBaseProp;
+  pkpPubKey: string;
+  controllerAuthSig?: JsonAuthSig;
+  controllerSessionSigs?: SessionSigs;
+  sessionSigsExpiration?: string;
+
   uncompressedPubKey!: string;
   uncompressedPubKeyBuffer!: Uint8Array;
   compressedPubKey!: string;
   compressedPubKeyBuffer!: Uint8Array;
+
   litNodeClient!: LitNodeClient;
   litNodeClientReady: boolean = false;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams!: T;
   debug: boolean;
-  defaultLitActionCode: string = `
+
+  readonly defaultLitActionCode: string = `
   (async () => {
-      const sigShare = await LitActions.signEcdsa({ toSign, publicKey, sigName });
+    const sigShare = await LitActions.signEcdsa({ toSign, publicKey, sigName });
   })();`;
 
   // -- debug things
@@ -73,12 +80,17 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     if (prop.pkpPubKey.startsWith('0x')) {
       prop.pkpPubKey = prop.pkpPubKey.slice(2);
     }
+    this.pkpPubKey = prop.pkpPubKey;
+    this.log('this.pkpPubKey', this.pkpPubKey);
 
-    this.log('prop.pkpPubKey', prop.pkpPubKey);
-
-    this.pkpWalletProp = prop;
     this.setUncompressPubKeyAndBuffer(prop);
     this.setCompressedPubKeyAndBuffer(prop);
+
+    this.rpc = prop.rpc;
+    this.controllerAuthSig = prop.controllerAuthSig;
+    this.controllerSessionSigs = prop.controllerSessionSigs;
+    this.sessionSigsExpiration = prop.sessionSigsExpiration;
+
     this.debug = prop.debug || false;
     this.setLitAction(prop);
     this.setLitActionJsParams(prop.litActionJsParams || {});
@@ -156,7 +168,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   /**
-   * Creates and sets the session sigs.
+   * Creates and sets the session sigs and their expiration.
    *
    * @param {GetSessionSigsProps} sessionParams - The parameters for generating session sigs.
    */
@@ -170,8 +182,8 @@ export class PKPBase<T = PKPBaseDefaultParams> {
         sessionParams
       );
 
-      this.pkpWalletProp.controllerSessionSigs = sessionSigs;
-      this.pkpWalletProp.sessionSigsExpiration = expiration;
+      this.controllerSessionSigs = sessionSigs;
+      this.sessionSigsExpiration = expiration;
     } catch (e) {
       return this.throwError('Failed to create and set session sigs');
     }
@@ -203,35 +215,32 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
   async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
     // If no PKP public key is provided, throw error
-    if (!this.pkpWalletProp.pkpPubKey) {
+    if (!this.pkpPubKey) {
       throw new Error('pkpPubKey is required');
     }
 
     // If no authSig or sessionSigs are provided, throw error
-    if (
-      !this.pkpWalletProp.controllerAuthSig &&
-      !this.pkpWalletProp.controllerSessionSigs
-    ) {
+    if (!this.controllerAuthSig && !this.controllerSessionSigs) {
       throw new Error('controllerAuthSig or controllerSessionSigs is required');
     }
 
     // If session sigs are provided, they must be an object
     if (
-      this.pkpWalletProp.controllerSessionSigs &&
-      typeof this.pkpWalletProp.controllerSessionSigs !== 'object'
+      this.controllerSessionSigs &&
+      typeof this.controllerSessionSigs !== 'object'
     ) {
       throw new Error('controllerSessionSigs must be an object');
     }
 
     // If authSig is not provided but sessionSigs are, use the first sessionSig as authSig. In executeJs, the sessionSigs will take priority.
-    let authSig = this.pkpWalletProp.controllerAuthSig;
+    let authSig = this.controllerAuthSig;
     if (
       !authSig &&
-      this.pkpWalletProp.controllerSessionSigs &&
-      Object.values(this.pkpWalletProp.controllerSessionSigs).length > 0
+      this.controllerSessionSigs &&
+      Object.values(this.controllerSessionSigs).length > 0
     ) {
       authSig = Object.values(
-        this.pkpWalletProp.controllerSessionSigs
+        this.controllerSessionSigs
       )[0] as unknown as JsonAuthSig;
     }
 
@@ -243,11 +252,11 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       ...(this.litActionCode && { code: this.litActionCode }),
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
       authSig: authSig,
-      sessionSigs: this.pkpWalletProp.controllerSessionSigs,
+      sessionSigs: this.controllerSessionSigs,
       jsParams: {
         ...{
           toSign,
-          publicKey: this.pkpWalletProp.pkpPubKey,
+          publicKey: this.pkpPubKey,
           sigName,
         },
         ...{
