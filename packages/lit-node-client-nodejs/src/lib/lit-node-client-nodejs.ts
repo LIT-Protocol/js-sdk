@@ -1182,15 +1182,16 @@ export class LitNodeClientNodeJs {
    *
    */
   throwNodeError = (res: RejectedNodePromises): void => {
-    if (
-      res.error.errorCode &&
-      (res.error.errorCode === LIT_ERROR_CODE.NODE_NOT_AUTHORIZED ||
-        res.error.errorCode === 'not_authorized') &&
-      this.config.alertWhenUnauthorized
-    ) {
-      log(
-        '[Alert originally] You are not authorized to access to this content'
-      );
+    if (res.error && res.error.errorCode) {
+      if (
+        (res.error.errorCode === LIT_ERROR_CODE.NODE_NOT_AUTHORIZED ||
+          res.error.errorCode === 'not_authorized') &&
+        this.config.alertWhenUnauthorized
+      ) {
+        log(
+          '[Alert originally] You are not authorized to access to this content'
+        );
+      }
 
       throwError({
         ...res.error,
@@ -1203,7 +1204,7 @@ export class LitNodeClientNodeJs {
           : LitErrorKind.Validation,
       });
     } else {
-      throwGenericError({
+      throwError({
         message: `There was an error getting the signing shares from the nodes`,
         error: LIT_ERROR.UNKNOWN_ERROR,
       });
