@@ -17,7 +17,7 @@ import {
   ETHRequestSigningPayload,
   ETHTxRes,
 } from './pkp-ethers-types';
-import { ethers, Transaction } from 'ethers';
+import { ethers } from 'ethers';
 import { convertHexToUtf8, getTransactionToSign } from './helper';
 
 /**

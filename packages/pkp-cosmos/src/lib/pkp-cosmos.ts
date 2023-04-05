@@ -26,7 +26,7 @@ import {
 } from '@cosmjs/proto-signing';
 
 import { PKPBase } from '@lit-protocol/pkp-base';
-import { PKPCosmosWalletProp } from '@lit-protocol/types';
+import { PKPClientHelpers, PKPCosmosWalletProp } from '@lit-protocol/types';
 
 const DEFAULT_COSMOS_RPC_URL =
   'https://cosmos-mainnet-rpc.allthatnode.com:26657';
@@ -34,7 +34,10 @@ const DEFAULT_COSMOS_RPC_URL =
 /**
  * Similar to "DirectSecp256k1HdWallet", but uses PKP to sign
  */
-export class PKPCosmosWallet extends PKPBase implements OfflineDirectSigner {
+export class PKPCosmosWallet
+  extends PKPBase
+  implements OfflineDirectSigner, PKPClientHelpers
+{
   // Address prefix for Bech32 addresses
   addressPrefix: string;
 
@@ -53,6 +56,9 @@ export class PKPCosmosWallet extends PKPBase implements OfflineDirectSigner {
     // 2. Use a constant or configuration for the default RPC URL
     this.rpc = prop.rpc ?? DEFAULT_COSMOS_RPC_URL;
   }
+  handleRequest = async (payload: any): Promise<any> => {
+    throw new Error('Method not implemented.');
+  };
 
   /**
    * Returns the Bech32 address with the human-readable part (address prefix)

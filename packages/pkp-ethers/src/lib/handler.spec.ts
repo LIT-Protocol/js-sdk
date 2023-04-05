@@ -26,7 +26,7 @@ describe('pkp ethers JSON RPC handler', () => {
   const pkpEthersWallet = new PKPEthersWallet({
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
     pkpPubKey: LITCONFIG.PKP_PUBKEY,
-    rpc: LITCONFIG.ETH_RPC_ENDPOINT,
+    rpc: LITCONFIG.MUMBAI_RPC,
   });
 
   beforeAll(async () => {
@@ -367,7 +367,7 @@ describe('pkp ethers JSON RPC handler', () => {
     const pkpEthersWallet = new PKPEthersWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
-      rpc: LITCONFIG.ETH_RPC_ENDPOINT,
+      rpc: LITCONFIG.MUMBAI_RPC,
       debug: false,
     });
 
@@ -411,7 +411,7 @@ describe('pkp ethers JSON RPC handler', () => {
     const pkpEthersWallet = new PKPEthersWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
-      rpc: LITCONFIG.ETH_RPC_ENDPOINT,
+      rpc: LITCONFIG.MUMBAI_RPC,
       debug: false,
     });
 

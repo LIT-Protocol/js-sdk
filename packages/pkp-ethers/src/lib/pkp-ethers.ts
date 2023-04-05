@@ -35,14 +35,18 @@ import { Logger } from '@ethersproject/logger';
 import { version } from 'ethers';
 
 import { ethers, Wallet } from 'ethers';
-import { PKPEthersWalletProp } from '@lit-protocol/types';
+import { PKPClientHelpers, PKPEthersWalletProp } from '@lit-protocol/types';
 import { PKPBase } from '@lit-protocol/pkp-base';
+import { ethRequestHandler } from './handler';
+import { ETHRequestSigningPayload } from './pkp-ethers-types';
 
 const logger = new Logger(version);
 
+const DEFAULT_RPC_URL = 'https://rpc-mumbai.maticvigil.com';
+
 export class PKPEthersWallet
   extends PKPBase
-  implements Signer, ExternallyOwnedAccount, TypedDataSigner
+  implements Signer, ExternallyOwnedAccount, TypedDataSigner, PKPClientHelpers
 {
   readonly address!: string;
   readonly provider!: Provider;
@@ -53,7 +57,9 @@ export class PKPEthersWallet
   constructor(prop: PKPEthersWalletProp) {
     super(prop);
 
-    this.rpcProvider = new ethers.providers.JsonRpcProvider(prop.rpc);
+    this.rpcProvider = new ethers.providers.JsonRpcProvider(
+      prop.rpc ?? DEFAULT_RPC_URL
+    );
 
     defineReadOnly(
       this,
@@ -67,6 +73,13 @@ export class PKPEthersWallet
       computeAddress(this.uncompressedPubKeyBuffer)
     );
   }
+
+  handleRequest = async (payload: ETHRequestSigningPayload): Promise<any> => {
+    return await ethRequestHandler({
+      signer: this,
+      payload,
+    });
+  };
 
   get publicKey(): string {
     return this.uncompressedPubKey;

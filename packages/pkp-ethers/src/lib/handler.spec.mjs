@@ -18,7 +18,7 @@ const LITCONFIG = await getTestConfig();
 const pkpEthersWallet = new PKPEthersWallet({
   controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
   pkpPubKey: LITCONFIG.PKP_PUBKEY,
-  rpc: LITCONFIG.RPC_ENDPOINT,
+  rpc: LITCONFIG.COSMOS_RPC,
 });
 
 await pkpEthersWallet.init();
@@ -339,7 +339,7 @@ async function shouldSignTransaction() {
   const pkpEthersWallet = new PKPEthersWallet({
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
     pkpPubKey: LITCONFIG.PKP_PUBKEY,
-    rpc: LITCONFIG.ETH_RPC_ENDPOINT,
+    rpc: LITCONFIG.MUMBAI_RPC,
     debug: false,
   });
 
@@ -394,7 +394,7 @@ async function shouldSendTransaction() {
   const pkpEthersWallet = new PKPEthersWallet({
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
     pkpPubKey: LITCONFIG.PKP_PUBKEY,
-    rpc: LITCONFIG.ETH_RPC_ENDPOINT,
+    rpc: LITCONFIG.MUMBAI_RPC,
     debug: false,
   });
 

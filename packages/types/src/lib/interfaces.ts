@@ -15,6 +15,7 @@ import {
   UnifiedAccessControlConditions,
 } from './types';
 import { ILitNodeClient } from './ILitNodeClient';
+import { ETHRequestSigningPayload } from 'packages/pkp-ethers/src/lib/pkp-ethers-types';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -809,7 +810,12 @@ export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
 
 export interface PKPBaseProp {
   pkpPubKey: string;
-  rpc: string;
+  rpc?: string;
+  rpcs?: {
+    eth?: string;
+    cosmos?: string;
+    btc?: string;
+  };
   controllerAuthSig?: JsonAuthSig;
   controllerSessionSigs?: string;
   litNetwork?: any;
@@ -1070,4 +1076,8 @@ export interface DefaultAuthNeededCallbackParams {
    */
   // TODO: update type
   litNodeClient: any;
+}
+
+export interface PKPClientHelpers {
+  handleRequest: (request: ETHRequestSigningPayload | any) => Promise<any>;
 }
