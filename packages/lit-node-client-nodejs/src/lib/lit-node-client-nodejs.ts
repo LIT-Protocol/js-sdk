@@ -67,6 +67,8 @@ import {
   WebAuthnAuthenticationVerificationParams,
   AuthMethod,
   SignSessionKeyResponse,
+  NodeClientErrorV0,
+  NodeClientErrorV1,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -1199,10 +1201,7 @@ export class LitNodeClientNodeJs {
           res.error.message ||
           'You are not authorized to access to this content',
         errorCode: res.error.errorCode!,
-        errorKind: isNodeErrorV1(res.error)
-          ? res.error.errorKind
-          : LitErrorKind.Validation,
-      });
+      } as NodeClientErrorV0 | NodeClientErrorV1);
     } else {
       throwError({
         message: `There was an error getting the signing shares from the nodes`,
