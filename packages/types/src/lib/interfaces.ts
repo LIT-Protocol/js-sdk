@@ -724,6 +724,9 @@ export interface SignSessionKeyProp {
   resources: any;
 
   chainId?: number;
+  
+  //domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
+  domain?: string;
 }
 
 export interface SignSessionKeyResponse {
