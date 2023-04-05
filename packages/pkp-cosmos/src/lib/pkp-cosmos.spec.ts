@@ -1,5 +1,4 @@
 import {
-  assertIsDeliverTxSuccess,
   SigningStargateClient,
   StdFee,
   calculateFee,

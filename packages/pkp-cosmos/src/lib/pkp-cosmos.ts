@@ -203,7 +203,7 @@ export class PKPCosmosWallet
    * @param {string} memo - An optional memo string to be included in the transaction
    * @param {SignerData} [explicitSignerData] - Optional SignerData to be used during signing (e.g., account number, sequence, and chain ID)
    *
-   * @returns {Promise<{
+   * @returns {Promise<{ 
    *   bodyBytes: Uint8Array;
    *   authInfoBytes: Uint8Array;
    *   signatures: readonly Uint8Array[];

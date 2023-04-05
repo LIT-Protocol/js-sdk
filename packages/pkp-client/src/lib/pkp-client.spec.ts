@@ -15,6 +15,15 @@ import {
   ETHSignature,
   ETHTxRes,
 } from 'packages/pkp-ethers/src/lib/pkp-ethers-types';
+import {
+  calculateFee,
+  coins,
+  GasPrice,
+  SigningStargateClient,
+  StdFee,
+} from '@cosmjs/stargate';
+
+jest.setTimeout(10000);
 
 describe('WalletFactory', () => {
   it('should create an Ethereum wallet', () => {
@@ -351,6 +360,116 @@ describe('PKPClient', () => {
         expect(cosmosAddress[0].address).toEqual(
           'cosmos134y3t6v0cfftzk4zhtzynqyyzj7dwwcz9chs0q'
         );
+      });
+
+      describe('stargate client', () => {
+        let client: SigningStargateClient;
+
+        it('should get stargate client', async () => {
+          client = await pkpClient.getCosmosWallet().getClient();
+
+          expect(client).toBeDefined();
+        });
+
+        it('should get chainId', async () => {
+          const chainId = await client.getChainId();
+
+          expect(chainId).toEqual('cosmoshub-4');
+        });
+
+        it('should get height', async () => {
+          const height = await client.getHeight();
+
+          expect(height).toBeDefined();
+          expect(typeof height).toBe('number');
+        });
+
+        it('should be able to sendTokens', async () => {
+          const defaultGasPrice = GasPrice.fromString(
+            `${LITCONFIG.DEFAULT_GAS}${LITCONFIG.DENOM}`
+          );
+
+          const amount = coins(LITCONFIG.AMOUNT, LITCONFIG.DENOM);
+          const defaultSendFee: StdFee = calculateFee(80_000, defaultGasPrice);
+          const cosmosWallet = pkpClient.getCosmosWallet();
+
+          const [pkpAccount] = await cosmosWallet.getAccounts();
+
+          expect(pkpAccount.address).toBe(LITCONFIG.PKP_COSMOS_ADDRESS);
+
+          const tx = await client.sendTokens(
+            pkpAccount.address,
+            pkpAccount.address,
+            amount,
+            defaultSendFee,
+            'Transaction'
+          );
+
+          expect(tx.transactionHash).toBeDefined();
+          expect(tx.transactionHash.length).toEqual(64);
+        });
+      });
+
+      describe('update config', () => {
+        const NEW_RPC = 'rpc.sentry-01.theta-testnet.polypore.xyz:26657';
+
+        it('should be able to update rpc url', async () => {
+          const cosmosWallet = pkpClient.getCosmosWallet();
+
+          const oldRpc = cosmosWallet.getRpc();
+
+          expect(oldRpc).toEqual(LITCONFIG.COSMOS_RPC);
+
+          await cosmosWallet.setRpc(NEW_RPC);
+
+          expect(cosmosWallet.getRpc()).toEqual(NEW_RPC);
+        });
+
+        describe('stargate client', () => {
+          it('should be able to instantiate a new stargate client', async () => {
+            const cosmosWallet = pkpClient.getCosmosWallet();
+
+            await cosmosWallet.setRpc(NEW_RPC);
+
+            let client = await cosmosWallet.getClient();
+
+            expect(client).toBeDefined();
+          });
+
+          it('should be able to use updated rpc url to get chainId', async () => {
+            const cosmosWallet = pkpClient.getCosmosWallet();
+
+            await cosmosWallet.setRpc(NEW_RPC);
+
+            const client = await cosmosWallet.getClient();
+
+            const chainId = await client.getChainId();
+
+            expect(chainId).toEqual('theta-testnet-001');
+
+            // change it back
+            await cosmosWallet.setRpc(LITCONFIG.COSMOS_RPC);
+
+            const client2 = await cosmosWallet.getClient();
+
+            const chainId2 = await client2.getChainId();
+
+            expect(chainId2).toEqual('cosmoshub-4');
+          });
+
+          it('should be able to use updated rpc url to get height', async () => {
+            const cosmosWallet = pkpClient.getCosmosWallet();
+
+            await cosmosWallet.setRpc(NEW_RPC);
+
+            const client = await cosmosWallet.getClient();
+
+            const height = await client.getHeight();
+
+            expect(height).toBeDefined();
+            expect(typeof height).toBe('number');
+          });
+        });
       });
     });
 
