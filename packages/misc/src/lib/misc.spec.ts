@@ -4,7 +4,7 @@ global.TextEncoder = TextEncoder;
 // @ts-ignore
 global.TextDecoder = TextDecoder;
 
-import { LIT_ERROR } from '@lit-protocol/constants';
+import { LitErrorKind, LIT_ERROR } from '@lit-protocol/constants';
 import * as utilsModule from './misc';
 
 describe('utils', () => {
@@ -51,8 +51,8 @@ describe('utils', () => {
     try {
       err = utilsModule.throwError({
         message: 'Message!',
-        name: 'invalidParamType',
-        errorCode: 'invalid_param_type',
+        errorKind: 'hello',
+        errorCode: 'world',
       });
     } catch (e) {
       err = e as Error;
@@ -62,11 +62,11 @@ describe('utils', () => {
     const values = Object.values(err);
 
     expect(keys).toContain('message');
-    expect(keys).toContain('name');
+    expect(keys).toContain('errorKind');
     expect(keys).toContain('errorCode');
     expect(values).toContain('Message!');
-    expect(values).toContain('invalidParamType');
-    expect(values).toContain('invalid_param_type');
+    expect(values).toContain('hello');
+    expect(values).toContain('world');
   });
 
   it('should able to use the error type from constants', () => {
@@ -75,7 +75,8 @@ describe('utils', () => {
     try {
       err = utilsModule.throwError({
         message: 'custom message',
-        error: LIT_ERROR.INVALID_PARAM_TYPE,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     } catch (e) {
       err = e as Error;
@@ -85,11 +86,11 @@ describe('utils', () => {
     const values = Object.values(err);
 
     expect(keys).toContain('message');
-    expect(keys).toContain('name');
+    expect(keys).toContain('errorKind');
     expect(keys).toContain('errorCode');
     expect(values).toContain('custom message');
-    // expect(values).toContain('invalidParamType');
-    expect(values).toContain('invalid_param_type');
+    expect(values).toContain(LitErrorKind.Validation);
+    expect(values).toContain(LIT_ERROR.INVALID_PARAM_TYPE.name);
   });
 
   it('should prepend [Lit-JS-SDK] in the console.log', () => {
