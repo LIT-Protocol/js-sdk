@@ -27,7 +27,7 @@
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
       "options": {
-        "globalName": "LitJsSdk_nodeClient",
+        "globalName": "LitJsSdk_litNodeClientNodejs",
         "outfile": "dist/packages/lit-node-client-nodejs-vanilla/lit-node-client-nodejs.js",
         "entryPoints": [
           "./packages/lit-node-client-nodejs/src/index.ts"
