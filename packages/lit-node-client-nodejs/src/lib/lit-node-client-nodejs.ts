@@ -2348,7 +2348,7 @@ export class LitNodeClientNodeJs {
     })();
 
     let siweMessage: SiweMessage = new SiweMessage({
-      domain: globalThis.location.host,
+      domain: globalThis.location?.host || params.domain || 'litprotocol.com',
       address: pkpEthAddress,
       statement: 'Lit Protocol PKP session signature',
       uri: sessionKeyUri,
