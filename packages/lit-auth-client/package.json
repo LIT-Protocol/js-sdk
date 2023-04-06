@@ -1,0 +1,33 @@
+{
+  "name": "@lit-protocol/lit-auth-client",
+  "version": "2.1.110",
+  "type": "commonjs",
+  "license": "MIT",
+  "homepage": "https://github.com/Lit-Protocol/js-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LIT-Protocol/js-sdk"
+  },
+  "keywords": [
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/LIT-Protocol/js-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/lit-auth-client"
+  },
+  "browser": {
+    "crypto": false,
+    "stream": false
+  },
+  "tags": [
+    "vanilla"
+  ],
+  "peerDependencies": {
+    "nanoid": "3.3.4"
+  },
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
+}

@@ -7,6 +7,7 @@ import {
   ConditionType,
   EncryptedSymmetricKey,
   EvmContractConditions,
+  IRelayAuthStatus,
   JsonRequest,
   LIT_NETWORKS_KEYS,
   SolRpcConditions,
@@ -439,7 +440,7 @@ export interface SuccessNodePromises {
 
 export interface RejectedNodePromises {
   success: boolean;
-  error: any;
+  error: NodeErrorV0 | NodeErrorV1;
 }
 
 export interface NodePromiseResponse {
@@ -448,10 +449,42 @@ export interface NodePromiseResponse {
   reason?: any;
 }
 
-export interface NodeError {
-  error: {
-    errorCode: string;
-  };
+/**
+ * The error object returned by the node.
+ *
+ * @deprecated - This is the old error object.  It will be removed in the future. Use NodeErrorV1 instead.
+ */
+export interface NodeErrorV0 {
+  errorCode: string;
+  message: string;
+}
+
+export interface NodeErrorV1 {
+  errorKind: string;
+  status: number;
+  details: string[];
+  message?: string;
+  errorCode?: string;
+}
+
+/**
+ *
+ * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
+ *
+ */
+export interface NodeClientErrorV0 {
+  errorCode?: string;
+  message: string;
+  error: any;
+  name?: string;
+}
+
+export interface NodeClientErrorV1 {
+  message: string;
+  errorKind: string;
+  errorCode: string;
+  details?: string[];
+  status?: number;
 }
 
 export interface SigShare {
@@ -704,13 +737,13 @@ export interface AuthMethod {
 // }
 export interface SignSessionKeyProp {
   // The session key to sign
-  sessionKey: string;
+  sessionKey?: string;
 
   // The auth methods to use to sign the session key
   authMethods: AuthMethod[];
 
   // The public key of the PKP
-  pkpPublicKey: string;
+  pkpPublicKey?: string;
 
   // The auth sig of the user.  Returned via the checkAndSignAuthMessage function
   authSig?: JsonAuthSig;
@@ -724,6 +757,14 @@ export interface SignSessionKeyProp {
   resources: any;
 
   chainId?: number;
+
+  //domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
+  domain?: string;
+}
+
+export interface SignSessionKeyResponse {
+  pkpPublicKey: string;
+  authSig: JsonAuthSig;
 }
 
 export interface GetSignSessionKeySharesProp {
@@ -761,7 +802,7 @@ export interface GetSessionSigsProps {
 export interface SessionRequestBody {
   sessionKey: string;
   authMethods: Array<AuthMethod>;
-  pkpPublicKey: string;
+  pkpPublicKey?: string;
   authSig?: JsonAuthSig;
   siweMessage: string;
 }
@@ -777,22 +818,6 @@ export interface SessionSigningTemplate {
   capabilities: any[];
   issuedAt: string;
   expiration: string;
-}
-
-export interface GetWebAuthnAuthenticationAuthSigProps {
-  verificationParams: WebAuthnAuthenticationVerificationParams;
-  username: string;
-  sessionKey?: any;
-  // The expiration of the auth sig that will be signed. This is a RFC3339 timestamp. The default is 24 hours from now.
-  expiration?: string;
-  resources?: any;
-}
-
-export interface GetVerifyWebAuthnAuthenticationKeyShareProps {
-  credential: WebAuthnAuthenticationVerificationParams;
-  sessionPubkey: string;
-  siweMessage: string;
-  username: string;
 }
 
 export interface WebAuthnAuthenticationVerificationParams {
@@ -818,6 +843,7 @@ export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
 export interface PKPBaseProp {
   pkpPubKey: string;
   rpc?: string;
+  rpcs?: RPCUrls;
   controllerAuthSig?: JsonAuthSig;
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
@@ -826,6 +852,12 @@ export interface PKPBaseProp {
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
+}
+
+export interface RPCUrls {
+  eth?: string;
+  cosmos?: string;
+  btc?: string;
 }
 
 export interface PKPEthersWalletProp extends PKPBaseProp {}
@@ -845,6 +877,12 @@ export interface PKPBaseDefaultParams {
   sigName: string;
 }
 
+export interface PKPClientHelpers {
+  handleRequest: (request: any) => Promise<any>;
+  setRpc: (rpc: string) => void;
+  getRpc: () => string;
+}
+
 export interface SessionSigs {
   /**
    * Map of Lit node urls to session signatures
@@ -858,4 +896,243 @@ export interface SessionSig {
   signedMessage: string;
   address: string;
   algo: string;
+}
+
+/**
+ * ========== LitAuthClient ==========
+ */
+export interface LitAuthClientOptions {
+  /**
+   * Domain of the app using LitAuthClient
+   */
+  domain: string;
+  /**
+   * The redirect URI that Lit's login server should send the user back to
+   */
+  redirectUri: string;
+  /**
+   * API key for Lit's relay server
+   */
+  litRelayApiKey?: string;
+  /**
+   * Pass in a custom relay server
+   */
+  customRelay?: IRelay;
+}
+
+export interface SignInWithEthWalletParams {
+  /**
+   * Ethereum wallet address
+   */
+  address: string;
+  /**
+   * Function to sign message
+   *
+   * @param {string} message - Message to sign
+   *
+   * @returns {Promise<string>} - Raw signature of message
+   */
+  signMessage: (message: string) => Promise<string>;
+  /**
+   * Origin of signing request
+   */
+  origin?: string;
+  /**
+   * Name of chain to use for signature
+   */
+  chain?: string;
+  /**
+   * When the auth signature expires
+   */
+  expiration?: string;
+}
+
+export interface LoginUrlParams {
+  /**
+   * Auth method name
+   */
+  provider: string | null;
+  /**
+   * Access token
+   */
+  accessToken: string | null;
+  /**
+   * ID token
+   */
+  idToken: string | null;
+  /**
+   * OAuth state param
+   */
+  state: string | null;
+  /**
+   * Error codes from Lit's login server
+   */
+  error: string | null;
+}
+
+export interface IRelay {
+  /**
+   * Mint a new PKP for the given auth method
+   *
+   * @param {number} authMethodType - Auth method type
+   * @param {string} body - Body of the request
+   *
+   * @returns {Promise<IRelayMintResponse>} Response from the relay server
+   */
+  mintPKP(authMethodType: number, body: string): Promise<IRelayMintResponse>;
+  /**
+   * Poll the relay server for status of minting request
+   *
+   * @param {string} requestId - Request ID to poll, likely the minting transaction hash
+   *
+   * @returns {Promise<IRelayPollStatusResponse>} Response from the relay server
+   */
+  pollRequestUntilTerminalState(
+    requestId: string
+  ): Promise<IRelayPollStatusResponse>;
+  /**
+   * Fetch PKPs associated with the given auth method
+   *
+   * @param {number} authMethodType - Auth method type
+   * @param {string} body - Body of the request
+   *
+   * @returns {Promise<IRelayFetchResponse>} Response from the relay server
+   */
+  fetchPKPs(authMethodType: number, body: string): Promise<IRelayFetchResponse>;
+}
+
+export interface LitRelayConfig {
+  /**
+   * API key for Lit's relay server
+   */
+  relayApiKey: string;
+}
+
+export interface IRelayMintResponse {
+  /**
+   * Transaction hash of PKP being minted
+   */
+  requestId?: string;
+  /**
+   * Error from relay server
+   */
+  error?: string;
+}
+
+export interface IRelayFetchResponse {
+  /**
+   * Fetched PKPs
+   */
+  pkps?: IRelayPKP[];
+  /**
+   * Error from relay server
+   */
+  error?: string;
+}
+
+export interface IRelayPollingEvent {
+  /**
+   * Polling count
+   */
+  pollCount: number;
+  /**
+   * Transaction hash of PKP being minted
+   */
+  requestId: string;
+}
+
+export interface IRelayPollStatusResponse {
+  /**
+   * Polling status
+   */
+  status?: IRelayAuthStatus;
+  /**
+   * Token ID of PKP being minted
+   */
+  pkpTokenId?: string;
+  /**
+   * Eth address of new PKP
+   */
+  pkpEthAddress?: string;
+  /**
+   * Public key of new PKP
+   */
+  pkpPublicKey?: string;
+  /**
+   * Polling error
+   */
+  error?: string;
+}
+
+export interface IRelayPKP {
+  /**
+   * PKP token ID
+   */
+  tokenId: string;
+  /**
+   * PKP public key
+   */
+  publicKey: string;
+  /**
+   * PKP Eth address
+   */
+  ethAddress: string;
+}
+
+export interface SocialAuthNeededCallbackParams {
+  /**
+   * Auth methods to use
+   */
+  authMethods: AuthMethod[];
+  /**
+   * Public key of the PKP to use for signing
+   */
+  pkpPublicKey: string;
+}
+
+export interface EthWalletAuthNeededCallbackParams {
+  /**
+   * Domain that is requesting the signing
+   */
+  domain: string;
+  /**
+   * Ethereum address to sign with
+   */
+  address: string;
+  /**
+   * Function to sign message
+   *
+   * @param {string} message - Message to sign
+   *
+   * @returns {Promise<string>} - Raw signature of message
+   */
+  signMessage: (message: string) => Promise<string>;
+  /**
+   * Copy to show user before signing
+   */
+  statement?: string;
+}
+
+export interface DefaultAuthNeededCallbackParams {
+  /**
+   * Chain to use
+   */
+  chainId: number;
+  /**
+   * Resources that will be signed with session key
+   */
+  resources: string[];
+  /**
+   * Expiration date for when sigs will expire
+   */
+  expiration: string;
+  /**
+   * Session key to sign
+   */
+  uri: string;
+  /**
+   * Client to connect to Lit nodes
+   */
+  // TODO: update type
+  litNodeClient: any;
 }

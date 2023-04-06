@@ -19,14 +19,25 @@ import { toBech32, fromHex } from '@cosmjs/encoding';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 import {
+  assertIsDeliverTxSuccess,
+  SigningStargateClient,
+  StdFee,
+  calculateFee,
+  GasPrice,
+  coins,
+  SignerData,
+} from '@cosmjs/stargate';
+
+import {
   makeSignBytes,
   AccountData,
   DirectSignResponse,
   OfflineDirectSigner,
+  EncodeObject,
 } from '@cosmjs/proto-signing';
 
 import { PKPBase } from '@lit-protocol/pkp-base';
-import { PKPCosmosWalletProp } from '@lit-protocol/types';
+import { PKPClientHelpers, PKPCosmosWalletProp } from '@lit-protocol/types';
 
 const DEFAULT_COSMOS_RPC_URL =
   'https://cosmos-mainnet-rpc.allthatnode.com:26657';
@@ -34,7 +45,10 @@ const DEFAULT_COSMOS_RPC_URL =
 /**
  * Similar to "DirectSecp256k1HdWallet", but uses PKP to sign
  */
-export class PKPCosmosWallet extends PKPBase implements OfflineDirectSigner {
+export class PKPCosmosWallet
+  extends PKPBase
+  implements OfflineDirectSigner, PKPClientHelpers
+{
   // Address prefix for Bech32 addresses
   addressPrefix: string;
 
@@ -53,6 +67,18 @@ export class PKPCosmosWallet extends PKPBase implements OfflineDirectSigner {
     // 2. Use a constant or configuration for the default RPC URL
     this.rpc = prop.rpc ?? DEFAULT_COSMOS_RPC_URL;
   }
+
+  getRpc = () => {
+    return this.rpc;
+  };
+
+  setRpc = async (rpc: string) => {
+    this.rpc = rpc;
+  };
+
+  handleRequest = async (payload: any): Promise<any> => {
+    throw new Error('Method not implemented.');
+  };
 
   /**
    * Returns the Bech32 address with the human-readable part (address prefix)
@@ -140,4 +166,70 @@ export class PKPCosmosWallet extends PKPBase implements OfflineDirectSigner {
       signature: stdSignature,
     };
   }
+
+  /**
+   * The following methods do not exists in the original DirectSecp256k1HdWallet class, but are
+   * added to the PKPCosmosWallet class to enable it to be used as a PKPClient instance.
+   */
+
+  /**
+   * getClient is an asynchronous function that creates and returns a SigningStargateClient instance.
+   * The SigningStargateClient is connected to the provided rpcEndpoint, and the wallet instance itself
+   * acts as the signer.
+   *
+   * @returns {Promise<SigningStargateClient>} A promise that resolves to a SigningStargateClient instance
+   *                                          connected to the rpcEndpoint with the wallet as the signer.
+   */
+  getClient = async (): Promise<SigningStargateClient> => {
+    const rpcEndpoint = this.getRpc();
+    const client = await SigningStargateClient.connectWithSigner(
+      rpcEndpoint,
+      this
+    );
+    return client;
+  };
+
+  /**
+   * *** NOTE: This is a copy of the SigningStargateClient.sign method ***
+   *
+   * Gets account number and sequence from the API, creates a sign doc,
+   * creates a single signature and assembles the signed transaction.
+   *
+   * The sign mode (SIGN_MODE_DIRECT or SIGN_MODE_LEGACY_AMINO_JSON) is determined by this client's signer.
+   *
+   * You can pass signer data (account number, sequence and chain ID) explicitly instead of querying them
+   * from the chain. This is needed when signing for a multisig account, but it also allows for offline signing
+   * (See the SigningStargateClient.offline constructor).
+   *
+   * @param {readonly EncodeObject[]} messages - An array of messages to be signed, following the EncodeObject format
+   * @param {StdFee} fee - The transaction fee object, containing the gas limit and amount
+   * @param {string} memo - An optional memo string to be included in the transaction
+   * @param {SignerData} [explicitSignerData] - Optional SignerData to be used during signing (e.g., account number, sequence, and chain ID)
+   *
+   * @returns {Promise<{
+   *   bodyBytes: Uint8Array;
+   *   authInfoBytes: Uint8Array;
+   *   signatures: readonly Uint8Array[];
+   * }>} A promise that resolves to an object containing the signed transaction bytes and signature array
+   */
+  sign = async (
+    messages: readonly EncodeObject[],
+    fee: StdFee,
+    memo: string,
+    explicitSignerData?: SignerData
+  ): Promise<{
+    // These can be found in TxRaw in cosmosjs-types/cosmos/tx/v1beta1/tx.d.ts,
+    // but are not exported
+    bodyBytes: Uint8Array;
+    authInfoBytes: Uint8Array;
+    signatures: readonly Uint8Array[];
+  }> => {
+    return (await this.getClient()).sign(
+      this.address,
+      messages,
+      fee,
+      memo,
+      explicitSignerData
+    );
+  };
 }

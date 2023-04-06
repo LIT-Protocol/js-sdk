@@ -15,6 +15,7 @@ import {
   PKPBaseDefaultParams,
   GetSessionSigsProps,
   SessionSigs,
+  RPCUrls,
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
@@ -25,7 +26,7 @@ import { publicKeyConvert } from 'secp256k1';
  * @returns {string} - The compressed public key.
  */
 const compressPubKey = (pubKey: string): string => {
-  let testBuffer = Buffer.from(pubKey, 'hex');
+  const testBuffer = Buffer.from(pubKey, 'hex');
   if (testBuffer.length === 64) {
     pubKey = '04' + pubKey;
   }
@@ -43,6 +44,7 @@ const compressPubKey = (pubKey: string): string => {
  */
 export class PKPBase<T = PKPBaseDefaultParams> {
   pkpPubKey: string;
+  rpcs?: RPCUrls;
   controllerAuthSig?: JsonAuthSig;
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
@@ -86,7 +88,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.setUncompressPubKeyAndBuffer(prop);
     this.setCompressedPubKeyAndBuffer(prop);
 
-    this.rpc = prop.rpc;
+    this.rpcs = prop.rpcs;
     this.controllerAuthSig = prop.controllerAuthSig;
     this.controllerSessionSigs = prop.controllerSessionSigs;
     this.sessionSigsExpiration = prop.sessionSigsExpiration;
@@ -157,12 +159,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   /**
-  A function that sets the value of the litActionJsParams property to the given params object.
-  @template CustomType - A generic type that extends T, where T is the type of the litActionJsParams property.
-  @param { CustomType } params - An object of type CustomType that contains the parameters to be set as litActionJsParams.
-  @returns { void }
-  @memberOf SomeClass
-  */
+   * A function that sets the value of the litActionJsParams property to the given params object.
+   * @template CustomType - A generic type that extends T, where T is the type of the litActionJsParams property.
+   * @param { CustomType } params - An object of type CustomType that contains the parameters to be set as litActionJsParams.
+   * @returns { void }
+   * @memberOf SomeClass
+   */
   setLitActionJsParams<CustomType extends T = T>(params: CustomType): void {
     this.litActionJsParams = params;
   }
@@ -275,7 +277,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     try {
       const res = await this.litNodeClient.executeJs(executeJsArgs);
 
-      let sig = res.signatures[sigName];
+      const sig = res.signatures[sigName];
 
       this.log('res:', res);
       this.log('res.signatures[sigName]:', sig);

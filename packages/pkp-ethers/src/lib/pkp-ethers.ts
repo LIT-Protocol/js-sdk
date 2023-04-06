@@ -35,35 +35,42 @@ import { Logger } from '@ethersproject/logger';
 import { version } from 'ethers';
 
 import { ethers, Wallet } from 'ethers';
-import { PKPEthersWalletProp } from '@lit-protocol/types';
+import { PKPClientHelpers, PKPEthersWalletProp } from '@lit-protocol/types';
 import { PKPBase } from '@lit-protocol/pkp-base';
+import { ethRequestHandler } from './handler';
+import {
+  ETHHandlerReq,
+  ETHRequestSigningPayload,
+  ETHSignature,
+  ETHTxRes,
+} from './pkp-ethers-types';
 
 const logger = new Logger(version);
 
+const DEFAULT_RPC_URL = 'https://rpc-mumbai.maticvigil.com';
+
 export class PKPEthersWallet
   extends PKPBase
-  implements Signer, ExternallyOwnedAccount, TypedDataSigner
+  implements Signer, ExternallyOwnedAccount, TypedDataSigner, PKPClientHelpers
 {
   readonly address!: string;
   readonly provider!: Provider;
   readonly _isSigner!: boolean;
 
-  rpcProvider: ethers.providers.JsonRpcProvider | null;
+  rpcProvider: ethers.providers.JsonRpcProvider;
 
   constructor(prop: PKPEthersWalletProp) {
     super(prop);
 
-    if (prop.rpc) {
-      this.rpcProvider = new ethers.providers.JsonRpcProvider(prop.rpc);
+    this.rpcProvider = new ethers.providers.JsonRpcProvider(
+      prop.rpc ?? DEFAULT_RPC_URL
+    );
 
-      defineReadOnly(
-        this,
-        '_isSigner',
-        this.rpcProvider._isProvider === true ? false : true
-      );
-    } else {
-      this.rpcProvider = null;
-    }
+    defineReadOnly(
+      this,
+      '_isSigner',
+      this.rpcProvider._isProvider === true ? false : true
+    );
 
     defineReadOnly(
       this,
@@ -71,6 +78,23 @@ export class PKPEthersWallet
       computeAddress(this.uncompressedPubKeyBuffer)
     );
   }
+
+  getRpc = (): string => {
+    return this.rpcProvider.connection.url;
+  };
+
+  setRpc = async (rpc: string): Promise<void> => {
+    this.rpcProvider = new ethers.providers.JsonRpcProvider(rpc);
+  };
+
+  handleRequest = async <T = ETHSignature | ETHTxRes>(
+    payload: ETHRequestSigningPayload
+  ): Promise<T> => {
+    return await ethRequestHandler<T>({
+      signer: this,
+      payload,
+    });
+  };
 
   get publicKey(): string {
     return this.uncompressedPubKey;
@@ -82,26 +106,18 @@ export class PKPEthersWallet
   }
 
   connect(): never {
-    throw new Error(
-      'Use connectJsonRpc to connect the PKPEthersWallet to a JSON RPC provider'
-    );
-  }
-
-  connectJsonRpc(rpc: string): void {
-    this.rpcProvider = new ethers.providers.JsonRpcProvider(rpc);
-
-    defineReadOnly(
-      this,
-      '_isSigner',
-      this.rpcProvider._isProvider === true ? false : true
-    );
+    throw new Error('Use setRPC to set a new JSON RPC provider');
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
+    if (!this.litNodeClientReady) {
+      await this.init();
+    }
+
     const addr = await this.getAddress();
     this.log('signTransaction => addr:', addr);
 
-    if (this.rpcProvider) {
+    try {
       if (!transaction['nonce']) {
         transaction.nonce = await this.rpcProvider.getTransactionCount(addr);
         this.log('signTransaction => nonce:', transaction.nonce);
@@ -121,6 +137,11 @@ export class PKPEthersWallet
         transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
         this.log('signTransaction => gasLimit:', transaction.gasLimit);
       }
+    } catch (err) {
+      this.log(
+        'signTransaction => unable to populate transaction with details:',
+        err
+      );
     }
 
     return resolveProperties(transaction).then(async (tx) => {
@@ -155,6 +176,10 @@ export class PKPEthersWallet
   }
 
   async signMessage(message: Bytes | string): Promise<string> {
+    if (!this.litNodeClientReady) {
+      await this.init();
+    }
+
     const toSign = arrayify(hashMessage(message));
 
     this.log('running lit action => sigName: pkp-eth-sign-message');
@@ -233,11 +258,6 @@ export class PKPEthersWallet
   }
 
   async sendTransaction(transaction: TransactionRequest | any): Promise<any> {
-    if (!this.rpcProvider) {
-      throw new Error(
-        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
-      );
-    }
     return await this.rpcProvider.sendTransaction(transaction);
   }
 
@@ -295,33 +315,18 @@ export class PKPEthersWallet
   getBalance(
     blockTag?: ethers.providers.BlockTag | undefined
   ): Promise<ethers.BigNumber> {
-    if (!this.rpcProvider) {
-      throw new Error(
-        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
-      );
-    }
     return this.rpcProvider.getBalance(this.address, blockTag);
   }
 
   getTransactionCount(
     blockTag?: ethers.providers.BlockTag | undefined
   ): Promise<number> {
-    if (!this.rpcProvider) {
-      throw new Error(
-        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
-      );
-    }
     return this.rpcProvider.getTransactionCount(this.address, blockTag);
   }
 
   estimateGas(
     transaction: ethers.utils.Deferrable<TransactionRequest>
   ): Promise<ethers.BigNumber> {
-    if (!this.rpcProvider) {
-      throw new Error(
-        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
-      );
-    }
     return this.rpcProvider.estimateGas(transaction);
   }
 
@@ -337,20 +342,10 @@ export class PKPEthersWallet
   }
 
   getGasPrice(): Promise<ethers.BigNumber> {
-    if (!this.rpcProvider) {
-      throw new Error(
-        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
-      );
-    }
     return this.rpcProvider.getGasPrice();
   }
 
   getFeeData(): Promise<ethers.providers.FeeData> {
-    if (!this.rpcProvider) {
-      throw new Error(
-        'No RPC provider found. Please use the connectJsonRpc method to set an RPC provider.'
-      );
-    }
     return this.rpcProvider.getFeeData();
   }
 
@@ -375,7 +370,7 @@ export class PKPEthersWallet
   }
 
   get mnemonic() {
-    return this.throwError(`There's no mnemonic for a PKP`);
+    return this.throwError(`There's no mnemonic for a PKPWallet`);
   }
 
   get privateKey(): string {

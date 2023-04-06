@@ -310,7 +310,7 @@ async function testFunc() {
             const orange = '\x1b[38;5;208m';
             const reset = '\x1b[0m';
             
-            const formattedLine = `${orange} >  ${bold}${orangeBg} LIT ${reset}   ${orange}Running target ${bold}${path}${reset} `;
+            const formattedLine = `${orange} >  ${bold}${orangeBg} LIT ${reset}   ${orange}Running target ${bold}${path}${reset}\n`;
             return formattedLine;
         }
 

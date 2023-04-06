@@ -48,7 +48,8 @@
     "v": "yarn tools --v",
     "bump": "yarn tools --v --patch",
     "bump:minor": "yarn tools --v --minor",
-    "bump:major": "yarn tools --v --major"
+    "bump:major": "yarn tools --v --major",
+    "b": "git branch --show"
   },
   "private": true,
   "dependencies": {
@@ -92,6 +93,7 @@
     "lit-connect-modal": "^0.1.11",
     "lit-siwe": "^1.1.8",
     "multiformats": "^10.0.2",
+    "nanoid": "3.3.4",
     "next": "12.2.3",
     "node-fetch": "^2.6.1",
     "react": "18.0.0",

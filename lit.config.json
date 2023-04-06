@@ -3,7 +3,8 @@
     "sendRealTxThatCostsMoney": false
   },
   "MNEUMONIC": "island arrow object divide umbrella snap essay seminar top develop oyster success",
-  "RPC_ENDPOINT": "https://cosmos-mainnet-rpc.allthatnode.com:26657",
+  "COSMOS_RPC": "https://cosmos-mainnet-rpc.allthatnode.com:26657",
+  "MUMBAI_RPC": "https://rpc-mumbai.maticvigil.com",
   "RECIPIENT": "cosmos1jyz3m6gxuwceq63e44fqpgyw2504ux85ta8vma",
   "DENOM": "uatom",
   "AMOUNT": 1,
@@ -15,5 +16,6 @@
     "address": "0x18f987d15a973776f6a60652b838688a1833fe95"
   },
   "PKP_PUBKEY": "0x04cd5fc4b661a2ae2dc425aa42abbfeaa187c07063928322a8c748ebb7611868144c0ff28b1910faeafedea914ec8a23baa579b6ff7f03efa322e7eb098e62dd8f",
-  "PKP_ADDRESS": "0xf675E8Cdc5DbE5f78a47D23A3b1CCD07b986f17f"
+  "PKP_ADDRESS": "0xf675E8Cdc5DbE5f78a47D23A3b1CCD07b986f17f",
+  "PKP_COSMOS_ADDRESS": "cosmos134y3t6v0cfftzk4zhtzynqyyzj7dwwcz9chs0q"
 }

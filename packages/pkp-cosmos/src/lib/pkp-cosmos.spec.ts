@@ -1,5 +1,4 @@
 import {
-  assertIsDeliverTxSuccess,
   SigningStargateClient,
   StdFee,
   calculateFee,
@@ -17,7 +16,7 @@ describe('PKPCosmosWallet', () => {
     const wallet = new PKPCosmosWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
-      rpc: LITCONFIG.RPC_ENDPOINT,
+      rpc: LITCONFIG.COSMOS_RPC,
       debug: true,
       addressPrefix: 'cosmos',
     });
@@ -31,7 +30,7 @@ describe('PKPCosmosWallet', () => {
     const wallet = new PKPCosmosWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
-      rpc: LITCONFIG.RPC_ENDPOINT,
+      rpc: LITCONFIG.COSMOS_RPC,
       debug: true,
       addressPrefix: 'cosmos',
     });
@@ -43,12 +42,12 @@ describe('PKPCosmosWallet', () => {
     const wallet = new PKPCosmosWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
-      rpc: LITCONFIG.RPC_ENDPOINT,
+      rpc: LITCONFIG.COSMOS_RPC,
       debug: true,
       addressPrefix: 'cosmos',
     });
     const [pkpAccount] = await wallet.getAccounts();
-    const rpcEndpoint = LITCONFIG.RPC_ENDPOINT;
+    const rpcEndpoint = LITCONFIG.COSMOS_RPC;
     const client = await SigningStargateClient.connectWithSigner(
       rpcEndpoint,
       wallet
@@ -62,7 +61,7 @@ describe('PKPCosmosWallet', () => {
     const wallet = new PKPCosmosWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
-      rpc: LITCONFIG.RPC_ENDPOINT,
+      rpc: LITCONFIG.COSMOS_RPC,
       debug: true,
       addressPrefix: 'cosmos',
     });
@@ -76,7 +75,7 @@ describe('PKPCosmosWallet', () => {
     console.log('transactionFee', defaultSendFee);
     console.log('amount', amount);
     const client = await SigningStargateClient.connectWithSigner(
-      LITCONFIG.RPC_ENDPOINT,
+      LITCONFIG.COSMOS_RPC,
       wallet
     );
 

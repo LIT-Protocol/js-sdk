@@ -2,4 +2,6 @@
 //
 // ----- autogen:polyfills:end  -----
 
-export * from './lib/pkp-client';
+import ethers from 'ethers';
+export { PKPClient } from './lib/pkp-client';
+export { ethers };

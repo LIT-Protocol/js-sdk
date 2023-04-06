@@ -259,6 +259,52 @@
         });
       };
 
+      var CheqdEncryptDecrypt = async () => {
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'cheqd',
+        });
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: 'cosmos',
+            path: "/cosmos/tx/v1beta1/txs?events=transfer.recipient='cheqd19a26gff0gd4jlaupgp360ajte6mg907kjlqqky'&events=transfer.sender='cheqd1s5ct8eamdp7m7y3vllnj60frxxyypdr6zvpwvw'&events=transfer.amount='13000000000ncheq'&order_by=2",
+            chain: 'cheqd',
+            returnValueTest: {
+              key: '$.txs.*.body.memo',
+              comparator: 'contains',
+              value: 'test',
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          unifiedAccessControlConditions,
+          testName: 'CheqdEncryptDecrypt',
+          authSig: { cheqd: authSig },
+        });
+      };
+
+      var JunoSpecificWalletAddressSigning = async () => {
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'juno',
+        });
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: 'cosmos',
+            path: ':userAddress',
+            chain: 'juno',
+            returnValueTest: {
+              key: '',
+              comparator: '=',
+              value: 'juno1vn6zl0924yj86jrp330wcwjclzdharljkajxqt',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          unifiedAccessControlConditions,
+          testName: 'JunoSpecificWalletAddressSigning',
+          authSig: { juno: authSig },
+        });
+      };
+
       var CosmosBalancePlusKyveFundersEncryptDecrypt = async () => {
         var cosmosAuthSig = await LitJsSdk.checkAndSignAuthMessage({
           chain: "cosmos",
@@ -359,6 +405,18 @@
 
     <button onclick="CosmosBalancePlusKyveFundersEncryptDecrypt()">
       CosmosBalancePlusKyveFundersEncryptDecrypt
+    </button>
+    <br />
+    <br />
+
+    <button onclick="JunoSpecificWalletAddressSigning()">
+      JunoSpecificWalletAddressSigning
+    </button>
+    <br />
+    <br />
+
+    <button onclick="JunoSpecificWalletAddressSigning()">
+      JunoSpecificWalletAddressSigning
     </button>
     <br />
     <br />

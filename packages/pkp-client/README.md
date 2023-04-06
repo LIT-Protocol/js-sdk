@@ -1,11 +1,7 @@
-# pkp-client
+# PKP-Client
 
-This library was generated with [Nx](https://nx.dev).
+It provides a PKPClient class that manages multiple wallets for different blockchain networks (e.g., Ethereum and Cosmos) and offers a convenient way to create and interact with these wallets.
 
-## Building
+# Getting Started
 
-Run `nx build pkp-client` to build the library.
-
-## Running unit tests
-
-Run `nx test pkp-client` to execute the unit tests via [Jest](https://jestjs.io).
+Show docs link
