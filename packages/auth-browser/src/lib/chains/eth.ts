@@ -8,7 +8,7 @@ import {
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
 
-import { JsonAuthSig, CheckAndSignAuthParams } from '@lit-protocol/types';
+import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
 
 import { ethers } from 'ethers';
 // import WalletConnectProvider from '@walletconnect/ethereum-provider';
@@ -224,15 +224,12 @@ export const getChainId = async (
  *
  * Check if the message must resign
  *
- * @param { JsonAuthSig } authSig
+ * @param { AuthSig } authSig
  * @param { any } resources
  *
  * @returns { boolean }
  */
-export const getMustResign = (
-  authSig: JsonAuthSig,
-  resources: any
-): boolean => {
+export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
   let mustResign!: boolean;
 
   try {
@@ -425,7 +422,7 @@ export const checkAndSignEVMAuthMessage = async ({
   switchChain,
   expiration,
   uri,
-}: CheckAndSignAuthParams): Promise<JsonAuthSig> => {
+}: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
   if (isNode()) {
     log(
@@ -436,7 +433,7 @@ export const checkAndSignEVMAuthMessage = async ({
       derivedVia: '',
       signedMessage: '',
       address: '',
-    } as JsonAuthSig;
+    } as AuthSig;
   }
 
   // --- scoped methods ---
@@ -452,45 +449,9 @@ export const checkAndSignEVMAuthMessage = async ({
     }
   };
 
-  const _signAndGetAuth = async ({
-    web3,
-    account,
-    chainId,
-    resources,
-    expiration,
-    uri,
-  }: signAndSaveAuthParams): Promise<JsonAuthSig> => {
-    await signAndSaveAuthMessage({
-      web3,
-      account,
-      chainId,
-      resources,
-      expiration,
-      uri,
-    });
-
-    let authSigOrError: IEither = getStorageItem(
-      LOCAL_STORAGE_KEYS.AUTH_SIGNATURE
-    );
-
-    if (authSigOrError.type === 'ERROR') {
-      throwError({
-        message: 'Failed to get authSig from local storage',
-        errorKind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
-        errorCode: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
-      });
-    }
-
-    let authSig: JsonAuthSig =
-      typeof authSigOrError.result === 'string'
-        ? JSON.parse(authSigOrError.result)
-        : authSigOrError.result;
-
-    return authSig;
-  };
-
   // -- 1. prepare
   const selectedChain = LIT_CHAINS[chain];
+  const expirationString = getDefaultExpiration();
 
   const { web3, account } = await connectWeb3({
     chainId: selectedChain.chainId,
@@ -594,7 +555,7 @@ export const checkAndSignEVMAuthMessage = async ({
         account,
         chainId: selectedChain.chainId,
         resources,
-        expiration,
+        expiration: expirationString,
         uri,
       });
     } catch (e: any) {
@@ -610,7 +571,7 @@ export const checkAndSignEVMAuthMessage = async ({
   }
 
   // -- 6. case: Lit auth signature IS in the local storage
-  let authSig: JsonAuthSig = authSigOrError.result;
+  let authSig: AuthSig = authSigOrError.result;
   if (typeof authSig === 'string') {
     authSig = JSON.parse(authSig);
   }
@@ -626,7 +587,7 @@ export const checkAndSignEVMAuthMessage = async ({
       account,
       chainId: selectedChain.chainId,
       resources,
-      expiration,
+      expiration: expirationString,
       uri,
     });
     log('7. authSig:', authSig);
@@ -641,12 +602,53 @@ export const checkAndSignEVMAuthMessage = async ({
         account,
         chainId: selectedChain.chainId,
         resources,
-        expiration,
+        expiration: expirationString,
         uri,
       });
     }
     log('8. mustResign:', mustResign);
   }
+
+  return authSig;
+};
+
+const getDefaultExpiration = () => {
+  return new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+};
+
+const _signAndGetAuth = async ({
+  web3,
+  account,
+  chainId,
+  resources,
+  expiration,
+  uri,
+}: signAndSaveAuthParams): Promise<AuthSig> => {
+  await signAndSaveAuthMessage({
+    web3,
+    account,
+    chainId,
+    resources,
+    expiration,
+    uri,
+  });
+
+  let authSigOrError: IEither = getStorageItem(
+    LOCAL_STORAGE_KEYS.AUTH_SIGNATURE
+  );
+
+  if (authSigOrError.type === 'ERROR') {
+    throwError({
+      message: 'Failed to get authSig from local storage',
+      errorKind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
+      errorCode: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
+    });
+  }
+
+  let authSig: AuthSig =
+    typeof authSigOrError.result === 'string'
+      ? JSON.parse(authSigOrError.result)
+      : authSigOrError.result;
 
   return authSig;
 };
@@ -657,7 +659,7 @@ export const checkAndSignEVMAuthMessage = async ({
  * Called by checkAndSignAuthMessage if the user does not have a signature stored.
  *
  * @param { signAndSaveAuthParams }}
- * @returns { JsonAuthSig }
+ * @returns { AuthSig }
  */
 export const signAndSaveAuthMessage = async ({
   web3,
@@ -666,7 +668,7 @@ export const signAndSaveAuthMessage = async ({
   resources,
   expiration,
   uri,
-}: signAndSaveAuthParams): Promise<JsonAuthSig> => {
+}: signAndSaveAuthParams): Promise<AuthSig> => {
   // check if it's nodejs
   if (isNode()) {
     log('checkAndSignEVMAuthMessage is not supported in nodejs.');
@@ -708,7 +710,7 @@ export const signAndSaveAuthMessage = async ({
   });
 
   // -- 3. prepare auth message
-  let authSig: JsonAuthSig = {
+  let authSig: AuthSig = {
     sig: signedResult.signature,
     derivedVia: 'web3.eth.personal.sign',
     signedMessage: body,

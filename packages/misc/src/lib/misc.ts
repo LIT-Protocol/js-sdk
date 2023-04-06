@@ -8,7 +8,7 @@ import {
 
 import {
   Chain,
-  JsonAuthSig,
+  AuthSig,
   KV,
   NodeClientErrorV0,
   NodeClientErrorV1,
@@ -298,14 +298,14 @@ export const checkType = ({
 
 /**
  *
- * @param { JsonAuthSig } authSig
+ * @param { AuthSig } authSig
  * @param { string } chain
  * @param { string } functionName
  *
  * @returns { boolean }
  */
 export const checkIfAuthSigRequiresChainParam = (
-  authSig: JsonAuthSig,
+  authSig: AuthSig,
   chain: string,
   functionName: string
 ): boolean => {

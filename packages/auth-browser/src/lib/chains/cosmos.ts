@@ -10,7 +10,7 @@ import {
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
 
-import { JsonAuthSig } from '@lit-protocol/types';
+import { AuthSig } from '@lit-protocol/types';
 import { log, sortedObject, throwError } from '@lit-protocol/misc';
 
 /** ---------- Declaration ---------- */
@@ -26,14 +26,6 @@ interface CosmosProvider {
   provider: any;
   account: string;
   chainId: string | number;
-}
-
-// ['sig', 'derivedVia', 'signedMessage', 'address']
-interface AuthSig {
-  sig: string;
-  derivedVia: string;
-  signedMessage: string;
-  address: string;
 }
 
 interface CosmosSignDoc {
@@ -125,7 +117,7 @@ export const checkAndSignCosmosAuthMessage = async ({
   chain,
 }: {
   chain: string;
-}): Promise<JsonAuthSig> => {
+}): Promise<AuthSig> => {
   const connectedCosmosProvider = await connectCosmosProvider({ chain });
 
   const storageKey = LOCAL_STORAGE_KEYS.AUTH_COSMOS_SIGNATURE;

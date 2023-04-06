@@ -1,6 +1,6 @@
 import { ALL_LIT_CHAINS, LIT_ERROR, VMTYPE } from '@lit-protocol/constants';
 
-import { CheckAndSignAuthParams, JsonAuthSig } from '@lit-protocol/types';
+import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 
 import { throwError } from '@lit-protocol/misc';
 import { checkAndSignCosmosAuthMessage } from './chains/cosmos';
@@ -11,7 +11,7 @@ import { checkAndSignSolAuthMessage } from './chains/sol';
  *
  * Check for an existing cryptographic authentication signature and create one of it does not exist.  This is used to prove ownership of a given crypto wallet address to the Lit nodes.  The result is stored in LocalStorage so the user doesn't have to sign every time they perform an operation.
  *
- * @param { CheckAndSignAuthParams }
+ * @param { AuthCallbackParams }
  *
  *  @returns { AuthSig } The AuthSig created or retrieved
  */
@@ -21,7 +21,7 @@ export const checkAndSignAuthMessage = ({
   switchChain,
   expiration,
   uri,
-}: CheckAndSignAuthParams): Promise<JsonAuthSig> => {
+}: AuthCallbackParams): Promise<AuthSig> => {
   const chainInfo = ALL_LIT_CHAINS[chain];
 
   // -- validate: if chain info not found
