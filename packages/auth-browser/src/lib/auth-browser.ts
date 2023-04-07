@@ -21,6 +21,7 @@ export const checkAndSignAuthMessage = ({
   switchChain,
   expiration,
   uri,
+  cosmosWalletType,
 }: AuthCallbackParams): Promise<AuthSig> => {
   const chainInfo = ALL_LIT_CHAINS[chain];
 
@@ -52,7 +53,10 @@ export const checkAndSignAuthMessage = ({
   } else if (chainInfo.vmType === VMTYPE.SVM) {
     return checkAndSignSolAuthMessage();
   } else if (chainInfo.vmType === VMTYPE.CVM) {
-    return checkAndSignCosmosAuthMessage({ chain });
+    return checkAndSignCosmosAuthMessage({
+      chain,
+      walletType: cosmosWalletType || 'keplr',
+    }); // Keplr is defaulted here, being the Cosmos wallet with the highest market share
   } else {
     return throwError({
       message: `vmType not found for this chain: ${chain}.  This should not happen.  Unsupported chain selected.  Please select one of: ${Object.keys(

@@ -81,6 +81,8 @@ export interface AuthSig {
   address: string;
 }
 
+export type CosmosWalletType = 'keplr' | 'leap';
+
 export interface AuthCallbackParams {
   // The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
   chain: Chain;
@@ -95,6 +97,11 @@ export interface AuthCallbackParams {
   expiration?: string;
 
   uri?: string;
+
+  // Cosmos wallet type, to support mutliple popular cosmos wallets
+  // Keplr & Cypher -> window.keplr
+  // Leap -> window.leap
+  cosmosWalletType?: CosmosWalletType;
 }
 
 /** ---------- Web3 ---------- */
