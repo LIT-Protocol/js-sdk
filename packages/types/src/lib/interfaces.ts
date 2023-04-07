@@ -757,7 +757,7 @@ export interface SignSessionKeyProp {
   resources: any;
 
   chainId?: number;
-  
+
   //domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
   domain?: string;
 }
@@ -843,18 +843,21 @@ export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
 export interface PKPBaseProp {
   pkpPubKey: string;
   rpc?: string;
-  rpcs?: {
-    eth?: string;
-    cosmos?: string;
-    btc?: string;
-  };
+  rpcs?: RPCUrls;
   controllerAuthSig?: JsonAuthSig;
-  controllerSessionSigs?: string;
+  controllerSessionSigs?: SessionSigs;
+  sessionSigsExpiration?: string;
   litNetwork?: any;
   debug?: boolean;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
+}
+
+export interface RPCUrls {
+  eth?: string;
+  cosmos?: string;
+  btc?: string;
 }
 
 export interface PKPEthersWalletProp extends PKPBaseProp {}
@@ -874,6 +877,30 @@ export interface PKPBaseDefaultParams {
   sigName: string;
 }
 
+export interface PKPClientHelpers {
+  handleRequest: (request: any) => Promise<any>;
+  setRpc: (rpc: string) => void;
+  getRpc: () => string;
+}
+
+export interface SessionSigs {
+  /**
+   * Map of Lit node urls to session signatures
+   */
+  [key: string]: SessionSig;
+}
+
+export interface SessionSig {
+  sig: string;
+  derivedVia: string;
+  signedMessage: string;
+  address: string;
+  algo: string;
+}
+
+/**
+ * ========== LitAuthClient ==========
+ */
 export interface LitAuthClientOptions {
   /**
    * Domain of the app using LitAuthClient
@@ -1108,10 +1135,4 @@ export interface DefaultAuthNeededCallbackParams {
    */
   // TODO: update type
   litNodeClient: any;
-}
-
-export interface PKPClientHelpers {
-  handleRequest: (request: any) => Promise<any>;
-  setRpc: (rpc: string) => void;
-  getRpc: () => string;
 }

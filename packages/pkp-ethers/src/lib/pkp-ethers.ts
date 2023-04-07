@@ -105,9 +105,8 @@ export class PKPEthersWallet
     return Promise.resolve(addr);
   }
 
-  connect(): PKPEthersWallet {
-    // throw new Error("PKPWallet cannot be connected to a provider");
-    return new PKPEthersWallet(this.pkpWalletProp);
+  connect(): never {
+    throw new Error('Use setRPC to set a new JSON RPC provider');
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
@@ -118,24 +117,31 @@ export class PKPEthersWallet
     const addr = await this.getAddress();
     this.log('signTransaction => addr:', addr);
 
-    if (!transaction['nonce']) {
-      transaction.nonce = await this.rpcProvider.getTransactionCount(addr);
-      this.log('signTransaction => nonce:', transaction.nonce);
-    }
+    try {
+      if (!transaction['nonce']) {
+        transaction.nonce = await this.rpcProvider.getTransactionCount(addr);
+        this.log('signTransaction => nonce:', transaction.nonce);
+      }
 
-    if (!transaction['chainId']) {
-      transaction.chainId = (await this.rpcProvider.getNetwork()).chainId;
-      this.log('signTransaction => chainId:', transaction.chainId);
-    }
+      if (!transaction['chainId']) {
+        transaction.chainId = (await this.rpcProvider.getNetwork()).chainId;
+        this.log('signTransaction => chainId:', transaction.chainId);
+      }
 
-    if (!transaction['gasPrice']) {
-      transaction.gasPrice = await this.getGasPrice();
-      this.log('signTransaction => gasPrice:', transaction.gasPrice);
-    }
+      if (!transaction['gasPrice']) {
+        transaction.gasPrice = await this.getGasPrice();
+        this.log('signTransaction => gasPrice:', transaction.gasPrice);
+      }
 
-    if (!transaction['gasLimit']) {
-      transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
-      this.log('signTransaction => gasLimit:', transaction.gasLimit);
+      if (!transaction['gasLimit']) {
+        transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
+        this.log('signTransaction => gasLimit:', transaction.gasLimit);
+      }
+    } catch (err) {
+      this.log(
+        'signTransaction => unable to populate transaction with details:',
+        err
+      );
     }
 
     return resolveProperties(transaction).then(async (tx) => {
@@ -311,46 +317,56 @@ export class PKPEthersWallet
   ): Promise<ethers.BigNumber> {
     return this.rpcProvider.getBalance(this.address, blockTag);
   }
+
   getTransactionCount(
     blockTag?: ethers.providers.BlockTag | undefined
   ): Promise<number> {
     return this.rpcProvider.getTransactionCount(this.address, blockTag);
   }
+
   estimateGas(
     transaction: ethers.utils.Deferrable<TransactionRequest>
   ): Promise<ethers.BigNumber> {
     return this.rpcProvider.estimateGas(transaction);
   }
+
   call(
     transaction: ethers.utils.Deferrable<TransactionRequest>,
     blockTag?: ethers.providers.BlockTag | undefined
   ): Promise<string> {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
+
   getChainId(): Promise<number> {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
+
   getGasPrice(): Promise<ethers.BigNumber> {
     return this.rpcProvider.getGasPrice();
   }
+
   getFeeData(): Promise<ethers.providers.FeeData> {
     return this.rpcProvider.getFeeData();
   }
+
   resolveName(name: string): Promise<string> {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
+
   checkTransaction(
     transaction: ethers.utils.Deferrable<TransactionRequest>
   ): ethers.utils.Deferrable<TransactionRequest> {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
+
   populateTransaction(
     transaction: ethers.utils.Deferrable<TransactionRequest>
   ): Promise<TransactionRequest> {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
+
   _checkProvider(operation?: string | undefined): void {
-    return this.throwError(`Not implemented into PKPEthers`);
+    return this.throwError(`Not available in PKPEthersWallet`);
   }
 
   get mnemonic() {

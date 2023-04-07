@@ -67,12 +67,15 @@ export class PKPCosmosWallet
     // 2. Use a constant or configuration for the default RPC URL
     this.rpc = prop.rpc ?? DEFAULT_COSMOS_RPC_URL;
   }
+
   getRpc = () => {
     return this.rpc;
   };
+
   setRpc = async (rpc: string) => {
     this.rpc = rpc;
   };
+
   handleRequest = async (payload: any): Promise<any> => {
     throw new Error('Method not implemented.');
   };
@@ -203,7 +206,7 @@ export class PKPCosmosWallet
    * @param {string} memo - An optional memo string to be included in the transaction
    * @param {SignerData} [explicitSignerData] - Optional SignerData to be used during signing (e.g., account number, sequence, and chain ID)
    *
-   * @returns {Promise<{ 
+   * @returns {Promise<{
    *   bodyBytes: Uint8Array;
    *   authInfoBytes: Uint8Array;
    *   signatures: readonly Uint8Array[];

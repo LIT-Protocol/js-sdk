@@ -13,6 +13,9 @@ import {
   PKPBaseProp,
   JsonAuthSig,
   PKPBaseDefaultParams,
+  GetSessionSigsProps,
+  SessionSigs,
+  RPCUrls,
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
@@ -23,7 +26,7 @@ import { publicKeyConvert } from 'secp256k1';
  * @returns {string} - The compressed public key.
  */
 const compressPubKey = (pubKey: string): string => {
-  let testBuffer = Buffer.from(pubKey, 'hex');
+  const testBuffer = Buffer.from(pubKey, 'hex');
   if (testBuffer.length === 64) {
     pubKey = '04' + pubKey;
   }
@@ -40,20 +43,26 @@ const compressPubKey = (pubKey: string): string => {
  * A base class that can be shared between Ethers and Cosmos signers.
  */
 export class PKPBase<T = PKPBaseDefaultParams> {
-  pkpWalletProp: PKPBaseProp;
+  rpcs?: RPCUrls;
+  controllerAuthSig?: JsonAuthSig;
+  controllerSessionSigs?: SessionSigs;
+  sessionSigsExpiration?: string;
+
   uncompressedPubKey!: string;
   uncompressedPubKeyBuffer!: Uint8Array;
   compressedPubKey!: string;
   compressedPubKeyBuffer!: Uint8Array;
+
   litNodeClient!: LitNodeClient;
   litNodeClientReady: boolean = false;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams!: T;
   debug: boolean;
-  defaultLitActionCode: string = `
+
+  readonly defaultLitActionCode: string = `
   (async () => {
-      const sigShare = await LitActions.signEcdsa({ toSign, publicKey, sigName });
+    const sigShare = await LitActions.signEcdsa({ toSign, publicKey, sigName });
   })();`;
 
   // -- debug things
@@ -73,11 +82,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       prop.pkpPubKey = prop.pkpPubKey.slice(2);
     }
 
-    this.log('prop.pkpPubKey', prop.pkpPubKey);
-
-    this.pkpWalletProp = prop;
     this.setUncompressPubKeyAndBuffer(prop);
     this.setCompressedPubKeyAndBuffer(prop);
+
+    this.rpcs = prop.rpcs;
+    this.controllerAuthSig = prop.controllerAuthSig;
+    this.controllerSessionSigs = prop.controllerSessionSigs;
+    this.sessionSigsExpiration = prop.sessionSigsExpiration;
+
     this.debug = prop.debug || false;
     this.setLitAction(prop);
     this.setLitActionJsParams(prop.litActionJsParams || {});
@@ -144,14 +156,36 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   /**
-  A function that sets the value of the litActionJsParams property to the given params object.
-  @template CustomType - A generic type that extends T, where T is the type of the litActionJsParams property.
-  @param { CustomType } params - An object of type CustomType that contains the parameters to be set as litActionJsParams.
-  @returns { void }
-  @memberOf SomeClass
-  */
+   * A function that sets the value of the litActionJsParams property to the given params object.
+   * @template CustomType - A generic type that extends T, where T is the type of the litActionJsParams property.
+   * @param { CustomType } params - An object of type CustomType that contains the parameters to be set as litActionJsParams.
+   * @returns { void }
+   * @memberOf SomeClass
+   */
   setLitActionJsParams<CustomType extends T = T>(params: CustomType): void {
     this.litActionJsParams = params;
+  }
+
+  /**
+   * Creates and sets the session sigs and their expiration.
+   *
+   * @param {GetSessionSigsProps} sessionParams - The parameters for generating session sigs.
+   */
+  async createAndSetSessionSigs(
+    sessionParams: GetSessionSigsProps
+  ): Promise<void | never> {
+    try {
+      const expiration =
+        sessionParams.expiration || this.litNodeClient.getExpiration();
+      const sessionSigs = await this.litNodeClient.getSessionSigs(
+        sessionParams
+      );
+
+      this.controllerSessionSigs = sessionSigs;
+      this.sessionSigsExpiration = expiration;
+    } catch (e) {
+      return this.throwError('Failed to create and set session sigs');
+    }
   }
 
   /**
@@ -180,35 +214,32 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
   async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
     // If no PKP public key is provided, throw error
-    if (!this.pkpWalletProp.pkpPubKey) {
-      throw new Error('pkpPubKey is required');
+    if (!this.uncompressedPubKey) {
+      throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
     // If no authSig or sessionSigs are provided, throw error
-    if (
-      !this.pkpWalletProp.controllerAuthSig &&
-      !this.pkpWalletProp.controllerSessionSigs
-    ) {
+    if (!this.controllerAuthSig && !this.controllerSessionSigs) {
       throw new Error('controllerAuthSig or controllerSessionSigs is required');
     }
 
     // If session sigs are provided, they must be an object
     if (
-      this.pkpWalletProp.controllerSessionSigs &&
-      typeof this.pkpWalletProp.controllerSessionSigs !== 'object'
+      this.controllerSessionSigs &&
+      typeof this.controllerSessionSigs !== 'object'
     ) {
       throw new Error('controllerSessionSigs must be an object');
     }
 
     // If authSig is not provided but sessionSigs are, use the first sessionSig as authSig. In executeJs, the sessionSigs will take priority.
-    let authSig = this.pkpWalletProp.controllerAuthSig;
+    let authSig = this.controllerAuthSig;
     if (
       !authSig &&
-      this.pkpWalletProp.controllerSessionSigs &&
-      Object.values(this.pkpWalletProp.controllerSessionSigs).length > 0
+      this.controllerSessionSigs &&
+      Object.values(this.controllerSessionSigs).length > 0
     ) {
       authSig = Object.values(
-        this.pkpWalletProp.controllerSessionSigs
+        this.controllerSessionSigs
       )[0] as unknown as JsonAuthSig;
     }
 
@@ -220,11 +251,11 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       ...(this.litActionCode && { code: this.litActionCode }),
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
       authSig: authSig,
-      sessionSigs: this.pkpWalletProp.controllerSessionSigs,
+      sessionSigs: this.controllerSessionSigs,
       jsParams: {
         ...{
           toSign,
-          publicKey: this.pkpWalletProp.pkpPubKey,
+          publicKey: this.uncompressedPubKey,
           sigName,
         },
         ...{
@@ -243,7 +274,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     try {
       const res = await this.litNodeClient.executeJs(executeJsArgs);
 
-      let sig = res.signatures[sigName];
+      const sig = res.signatures[sigName];
 
       this.log('res:', res);
       this.log('res.signatures[sigName]:', sig);
