@@ -192,6 +192,15 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   /**
+   * Return account.
+   *
+   * @returns {string} - The account associated with the PKPBase instance.
+   */
+  getAccount(): string {
+    return '';
+  }
+
+  /**
    * Initializes the PKPBase instance by connecting to the LIT node.
    */
   async init(): Promise<void | never> {

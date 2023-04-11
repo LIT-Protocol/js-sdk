@@ -80,6 +80,10 @@ export class PKPCosmosWallet
     throw new Error('Method not implemented.');
   };
 
+  override getAccount(): string {
+    return this.address;
+  }
+
   /**
    * Returns the Bech32 address with the human-readable part (address prefix)
    */

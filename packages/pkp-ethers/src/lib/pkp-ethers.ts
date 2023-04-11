@@ -105,6 +105,10 @@ export class PKPEthersWallet
     return Promise.resolve(addr);
   }
 
+  override getAccount(): string {
+    return this.address;
+  }
+
   connect(): never {
     throw new Error('Use setRPC to set a new JSON RPC provider');
   }

@@ -19,6 +19,8 @@ import {
   sendRawTransactionHandler,
 } from './lib/handler';
 
+import { SupportedETHSigningMethods } from './lib/pkp-ethers-types';
+
 export {
   PKPEthersWallet,
   methodHandlers,
@@ -33,4 +35,5 @@ export {
   signTypedDataLegacy,
   sendTransactionHandler,
   sendRawTransactionHandler,
+  SupportedETHSigningMethods,
 };
