@@ -41,6 +41,10 @@ export class LitAuthClient {
    * Relay server to subsidize minting of PKPs
    */
   public relay: IRelay;
+  /**
+   * Client to connect to Lit nodes
+   */
+  public litNodeClient: LitNodeClient | undefined;
 
   /**
    * Create a LitAuthClient instance
@@ -364,57 +368,101 @@ export class LitAuthClient {
     return fetchRes.pkps;
   }
 
-  public async getSessionSigsForAuthMethod(
-    authMethod: AuthMethod,
-    sessionParams: GetSessionSigsProps,
-    litNodeClient?: any,
-    authCallbackParams?: {
-      pkpPublicKey?: string;
-      address?: string;
-      signMessage?: any;
-    }
-  ): Promise<SessionSigs> {
-    let authNeededCallback = sessionParams.authNeededCallback;
+  // public async testGetSessionSigs(params: any): Promise<any> {
+  //   const defaultCallback = async ({
+  //     chainId,
+  //     resources,
+  //     expiration,
+  //     uri,
+  //     litNodeClient,
+  //   }: any) => {
+  //     const sessionSig = await litNodeClient.signSessionKey({
+  //       sessionKey: uri,
+  //       authMethods: params.authMethods,
+  //       authSig: params.authSig,
+  //       pkpPublicKey: params.pkpPublicKey,
+  //       expiration,
+  //       resources,
+  //       chainId,
+  //     });
+  //     return sessionSig;
+  //   };
 
-    // If no authNeededCallback is provided, use the default one if authCallbackParams are provided
-    if (!authNeededCallback && authCallbackParams) {
-      // If auth method is EthWallet and authCallbackParams are provided, use the default callback for Eth Wallet auth
-      if (authMethod.authMethodType === AuthMethodType.EthWallet) {
-        if (authCallbackParams.address && authCallbackParams.signMessage) {
-          const signAuthSig = async (message: string) => {
-            const sig = await authCallbackParams.signMessage({
-              message: message,
-            });
-            return sig;
-          };
-          authNeededCallback = getEthWalletAuthNeededCallback({
-            domain: this.domain,
-            address: authCallbackParams.address || '',
-            signMessage: signAuthSig,
-          });
-        }
-      } else {
-        // Use the default callback for social auth methods
-        authNeededCallback = getSocialAuthNeededCallback({
-          authMethods: [authMethod],
-          pkpPublicKey: authCallbackParams.pkpPublicKey || '',
-        });
-      }
-    }
+  //   let nodeClient = params.litNodeClient;
+  //   if (!nodeClient) {
+  //     nodeClient = new LitNodeClient({
+  //       litNetwork: 'serrano',
+  //       debug: false,
+  //     });
+  //   }
+  //   if (!nodeClient.ready) {
+  //     await nodeClient.connect();
+  //   }
+  //   this.litNodeClient = nodeClient;
 
-    let nodeClient = litNodeClient;
-    if (!nodeClient) {
-      nodeClient = new LitNodeClient({
-        litNetwork: 'serrano',
-        debug: false,
-      });
-    }
+  //   const sessionSigs = await nodeClient.getSessionSigs({
+  //     ...params.sessionParams,
+  //     defaultCallback,
+  //   });
 
-    const sessionSigs = await nodeClient.getSessionSigs({
-      ...sessionParams,
-      authCallbackParams,
-    });
+  //   return sessionSigs;
+  // }
 
-    return sessionSigs;
-  }
+  // public async getSessionSigsForAuthMethod(
+  //   authMethod: AuthMethod,
+  //   sessionParams: GetSessionSigsProps,
+  //   litNodeClient?: any,
+  //   authCallbackParams?: {
+  //     pkpPublicKey?: string;
+  //     address?: string;
+  //     signMessage?: any;
+  //   }
+  // ): Promise<SessionSigs> {
+  //   let authNeededCallback = sessionParams.authNeededCallback;
+
+  //   // If no authNeededCallback is provided, use the helper one if authCallbackParams are provided
+  //   if (!authNeededCallback && authCallbackParams) {
+  //     // If auth method is EthWallet and authCallbackParams are provided, use the helper callback
+  //     if (authMethod.authMethodType === AuthMethodType.EthWallet) {
+  //       if (authCallbackParams.address && authCallbackParams.signMessage) {
+  //         const signAuthSig = async (message: string) => {
+  //           const sig = await authCallbackParams.signMessage({
+  //             message: message,
+  //           });
+  //           return sig;
+  //         };
+  //         authNeededCallback = getEthWalletAuthNeededCallback({
+  //           domain: this.domain,
+  //           address: authCallbackParams.address || '',
+  //           signMessage: signAuthSig,
+  //         });
+  //       }
+  //     } else {
+  //       // Use the default callback for social auth methods
+  //       authNeededCallback = getSocialAuthNeededCallback({
+  //         authMethods: [authMethod],
+  //         pkpPublicKey: authCallbackParams.pkpPublicKey || '',
+  //       });
+  //     }
+  //   }
+
+  //   let nodeClient = litNodeClient;
+  //   if (!nodeClient) {
+  //     nodeClient = new LitNodeClient({
+  //       litNetwork: 'serrano',
+  //       debug: false,
+  //     });
+  //   }
+  //   if (!nodeClient.ready) {
+  //     await nodeClient.connect();
+  //   }
+  //   this.litNodeClient = nodeClient;
+
+  //   const sessionSigs = await nodeClient.getSessionSigs({
+  //     ...sessionParams,
+  //     authNeededCallback,
+  //   });
+
+  //   return sessionSigs;
+  // }
 }

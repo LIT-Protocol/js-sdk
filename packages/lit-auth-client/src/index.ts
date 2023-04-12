@@ -10,8 +10,3 @@ if (!globalThis.LitAuthClient) {
 }
 
 export * from './lib/lit-auth-client';
-
-export {
-  getSocialAuthNeededCallback,
-  getEthWalletAuthNeededCallback,
-} from './lib/helpers';

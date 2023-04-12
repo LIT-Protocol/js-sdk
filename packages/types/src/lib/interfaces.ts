@@ -900,6 +900,44 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
+export interface GetSessionSigsForAuthMethodParams {
+  /**
+   * Auth method to getSessionSigs for
+   */
+  authMethod: AuthMethod;
+  /**
+   * Params for getSessionSigs
+   */
+  sessionParams: GetSessionSigsProps;
+  /**
+   * Client to connect to Lit nodes. If not passed in, LitAuthClient will initialize a LitNodeClient with default options.
+   *
+   * Learn more about initializing LitNodeClient [here](https://serrano-sdk-docs.litprotocol.com/)
+   */
+  litNodeClient?: any;
+  /**
+   * Optional params for auth callback helpers
+   */
+  authCallbackParams?: {
+    /**
+     * Public key of new PKP
+     */
+    pkpPublicKey?: string;
+    /**
+     * Ethereum wallet address
+     */
+    address?: string;
+    /**
+     * Function to sign message
+     *
+     * @param {string} message - Message to sign
+     *
+     * @returns {Promise<string>} - Raw signature of message
+     */
+    signMessage?: (message: string) => Promise<string>;
+  };
+}
+
 export interface IRelay {
   /**
    * Mint a new PKP for the given auth method
