@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.114] - 2023-04-08
+- [#77](https://github.com/LIT-Protocol/js-sdk/pull/77) Added support for Leap Cosmos wallet
+
 ## [2.1.100] - 2023-03-29
 
 - [#40](https://github.com/LIT-Protocol/js-sdk/pull/54) Added sessionSigs support to the remaining SDK functions. Now users have the option to use sessionSigs in place of authSigs.

@@ -279,6 +279,29 @@
         });
       };
 
+      var JunoSpecificWalletAddressSigning = async () => {
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'juno',
+        });
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: 'cosmos',
+            path: ':userAddress',
+            chain: 'juno',
+            returnValueTest: {
+              key: '',
+              comparator: '=',
+              value: 'juno1vn6zl0924yj86jrp330wcwjclzdharljkajxqt',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          unifiedAccessControlConditions,
+          testName: 'JunoSpecificWalletAddressSigning',
+          authSig: { juno: authSig },
+        });
+      };
+
       var CosmosBalancePlusKyveFundersEncryptDecrypt = async () => {
         var cosmosAuthSig = await LitJsSdk.checkAndSignAuthMessage({
           chain: 'cosmos',
@@ -383,6 +406,12 @@
 
     <button onclick="CosmosBalancePlusKyveFundersEncryptDecrypt()">
       CosmosBalancePlusKyveFundersEncryptDecrypt
+    </button>
+    <br />
+    <br />
+
+    <button onclick="JunoSpecificWalletAddressSigning()">
+      JunoSpecificWalletAddressSigning
     </button>
     <br />
     <br />

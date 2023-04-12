@@ -431,6 +431,15 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     blockExplorerUrls: ['https://explorer.cheqd.io'],
     vmType: 'CVM',
   },
+  juno: {
+    name: 'Juno',
+    symbol: 'JUNO',
+    decimals: 6,
+    chainId: 'juno-1',
+    rpcUrls: ['https://rest.cosmos.directory/juno'],
+    blockExplorerUrls: ['https://www.mintscan.io/juno'],
+    vmType: 'CVM',
+  },
 };
 
 /**
@@ -514,3 +523,12 @@ export const LIT_NETWORKS = {
 
 // ========== Lit Sessions ==========
 export const LIT_SESSION_KEY_URI = 'lit:session:';
+
+// ========== Lit Auth Methods ==========
+
+export const AUTH_METHOD_TYPE_IDS = {
+  WEBAUTHN: 3,
+  DISCORD: 4,
+  GOOGLE: 5,
+  GOOGLE_JWT: 6,
+};

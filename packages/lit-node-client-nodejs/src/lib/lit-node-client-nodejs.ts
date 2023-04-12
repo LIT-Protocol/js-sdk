@@ -20,6 +20,9 @@ import {
   SIGTYPE,
   version,
   LIT_SESSION_KEY_URI,
+  AUTH_METHOD_TYPE_IDS,
+  LIT_ERROR_CODE,
+  LitErrorKind,
 } from '@lit-protocol/constants';
 
 import {
@@ -30,9 +33,8 @@ import {
   FormattedMultipleAccs,
   GetSessionSigsProps,
   GetSignSessionKeySharesProp,
-  GetVerifyWebAuthnAuthenticationKeyShareProps,
   HandshakeWithSgx,
-  JsonAuthSig,
+  AuthSig,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonHandshakeResponse,
@@ -52,7 +54,6 @@ import {
   RejectedNodePromises,
   SendNodeCommand,
   SessionKeyPair,
-  SessionRequestBody,
   SessionSigningTemplate,
   SignedChainDataToken,
   SignedData,
@@ -62,8 +63,13 @@ import {
   SuccessNodePromises,
   SupportedJsonRequests,
   ValidateAndSignECDSA,
-  GetWebAuthnAuthenticationAuthSigProps,
-  CheckAndSignAuthParams,
+  AuthCallbackParams,
+  WebAuthnAuthenticationVerificationParams,
+  AuthMethod,
+  SignSessionKeyResponse,
+  NodeClientErrorV0,
+  NodeClientErrorV1,
+  GetWalletSigProps,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -75,10 +81,11 @@ import { safeParams } from '@lit-protocol/encryption';
 import {
   convertLitActionsParams,
   isBrowser,
-  isNode,
+  isNodeErrorV1,
   log,
   mostCommonString,
   throwError,
+  throwGenericError,
 } from '@lit-protocol/misc';
 import {
   uint8arrayFromString,
@@ -106,9 +113,7 @@ export class LitNodeClientNodeJs {
   subnetPubKey: string | null;
   networkPubKey: string | null;
   networkPubKeySet: string | null;
-  defaultAuthCallback?: (
-    authSigParams: CheckAndSignAuthParams
-  ) => Promise<JsonAuthSig>;
+  defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -162,7 +167,8 @@ export class LitNodeClientNodeJs {
       throwError({
         message:
           'the litNetwork specified in the LitNodeClient config not found in LIT_NETWORKS',
-        error: LIT_ERROR.LIT_NODE_CLIENT_BAD_CONFIG_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_BAD_CONFIG_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_BAD_CONFIG_ERROR.name,
       });
       return;
     }
@@ -180,7 +186,7 @@ export class LitNodeClientNodeJs {
     sessionSigs,
     url,
   }: {
-    authSig: JsonAuthSig | any;
+    authSig: AuthSig | any;
     sessionSigs: any;
     url: string;
   }) => {
@@ -193,7 +199,8 @@ export class LitNodeClientNodeJs {
       if (!sigToPassToNode) {
         throwError({
           message: `You passed sessionSigs but we could not find session sig for node ${url}`,
-          error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
         });
       }
     }
@@ -364,14 +371,7 @@ export class LitNodeClientNodeJs {
     switchChain,
     expiration,
     sessionKeyUri,
-  }: {
-    authNeededCallback: any;
-    chain: string;
-    capabilities: Array<any>;
-    switchChain: boolean;
-    expiration: string;
-    sessionKeyUri: string;
-  }): Promise<JsonAuthSig> => {
+  }: GetWalletSigProps): Promise<AuthSig> => {
     let walletSig;
 
     const storageKey = LOCAL_STORAGE_KEYS.WALLET_SIGNATURE;
@@ -400,7 +400,8 @@ export class LitNodeClientNodeJs {
         if (!this.defaultAuthCallback) {
           return throwError({
             message: 'No default auth callback provided',
-            error: LIT_ERROR.PARAMS_MISSING_ERROR,
+            errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+            errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
           });
         }
         walletSig = await this.defaultAuthCallback({
@@ -1047,7 +1048,8 @@ export class LitNodeClientNodeJs {
     if (!targetNodeRange) {
       return throwError({
         message: 'targetNodeRange is required',
-        error: LIT_ERROR.INVALID_PARAM_TYPE,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
 
@@ -1066,7 +1068,8 @@ export class LitNodeClientNodeJs {
         throwError({
           message:
             'Invalid code content type for single node execution.  Your code param must be a string',
-          error: LIT_ERROR.INVALID_PARAM_TYPE,
+          errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+          errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
         });
       }
 
@@ -1175,7 +1178,8 @@ export class LitNodeClientNodeJs {
   throwNodeError = (res: RejectedNodePromises): void => {
     if (res.error && res.error.errorCode) {
       if (
-        res.error.errorCode === 'not_authorized' &&
+        (res.error.errorCode === LIT_ERROR_CODE.NODE_NOT_AUTHORIZED ||
+          res.error.errorCode === 'not_authorized') &&
         this.config.alertWhenUnauthorized
       ) {
         log(
@@ -1183,7 +1187,13 @@ export class LitNodeClientNodeJs {
         );
       }
 
-      throwError({ ...res.error, name: 'NodeError' });
+      throwError({
+        ...res.error,
+        message:
+          res.error.message ||
+          'You are not authorized to access to this content',
+        errorCode: res.error.errorCode!,
+      } as NodeClientErrorV0 | NodeClientErrorV1);
     } else {
       throwError({
         message: `There was an error getting the signing shares from the nodes`,
@@ -1235,7 +1245,8 @@ export class LitNodeClientNodeJs {
       if (this.networkPubKeySet === null) {
         throwError({
           message: 'networkPubKeySet cannot be null',
-          error: LIT_ERROR.PARAM_NULL_ERROR,
+          errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+          errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
         });
         return;
       }
@@ -1244,7 +1255,8 @@ export class LitNodeClientNodeJs {
       if (sigType !== 'BLS' && sigType !== 'ECDSA') {
         throwError({
           message: 'signature type is not BLS or ECDSA',
-          error: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE,
+          errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
+          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
         return;
       }
@@ -1314,7 +1326,8 @@ export class LitNodeClientNodeJs {
       if (this.networkPubKeySet === null) {
         throwError({
           message: 'networkPubKeySet cannot be null',
-          error: LIT_ERROR.PARAM_NULL_ERROR,
+          errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+          errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
         });
         return;
       }
@@ -1323,7 +1336,8 @@ export class LitNodeClientNodeJs {
       if (sigType !== 'BLS' && sigType !== 'ECDSA') {
         throwError({
           message: 'signature type is not BLS or ECDSA',
-          error: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE,
+          errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
+          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
         return;
       }
@@ -1389,7 +1403,8 @@ export class LitNodeClientNodeJs {
       if (this.networkPubKeySet === null) {
         throwError({
           message: 'networkPubKeySet cannot be null',
-          error: LIT_ERROR.PARAM_NULL_ERROR,
+          errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+          errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
         });
         return;
       }
@@ -1404,7 +1419,8 @@ export class LitNodeClientNodeJs {
       } else {
         throwError({
           message: 'Unknown decryption algorithm type',
-          error: LIT_ERROR.UNKNOWN_DECRYPTION_ALGORITHM_TYPE_ERROR,
+          errorKind: LIT_ERROR.UNKNOWN_DECRYPTION_ALGORITHM_TYPE_ERROR.kind,
+          errorCode: LIT_ERROR.UNKNOWN_DECRYPTION_ALGORITHM_TYPE_ERROR.name,
         });
       }
 
@@ -1475,7 +1491,8 @@ export class LitNodeClientNodeJs {
 
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1487,6 +1504,8 @@ export class LitNodeClientNodeJs {
     if (!paramsIsSafe) {
       return throwError({
         message: 'executeJs params are not valid',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
 
@@ -1599,7 +1618,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       return throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1607,7 +1627,8 @@ export class LitNodeClientNodeJs {
     if (this.networkPubKeySet === null) {
       return throwError({
         message: 'networkPubKeySet cannot be null',
-        error: LIT_ERROR.PARAM_NULL_ERROR,
+        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
       });
     }
 
@@ -1659,7 +1680,8 @@ export class LitNodeClientNodeJs {
 
       throwError({
         message: `You are not authorized to recieve a signature on this item`,
-        error: LIT_ERROR.UNAUTHROZIED_EXCEPTION,
+        errorKind: LIT_ERROR.UNAUTHROZIED_EXCEPTION.kind,
+        errorCode: LIT_ERROR.UNAUTHROZIED_EXCEPTION.name,
       });
     }
 
@@ -1703,7 +1725,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1711,7 +1734,8 @@ export class LitNodeClientNodeJs {
     if (this.networkPubKeySet === null) {
       return throwError({
         message: 'networkPubKeySet cannot be null',
-        error: LIT_ERROR.PARAM_NULL_ERROR,
+        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
       });
     }
 
@@ -1733,14 +1757,16 @@ export class LitNodeClientNodeJs {
     if (error) {
       return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
     if (!resourceId) {
       return throwError({
         message: `You must provide a resourceId`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -1810,7 +1836,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1838,7 +1865,8 @@ export class LitNodeClientNodeJs {
     if (!resourceId) {
       return throwError({
         message: 'resourceId cannot be null',
-        error: LIT_ERROR.PARAM_NULL_ERROR,
+        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
       });
     }
 
@@ -1857,7 +1885,8 @@ export class LitNodeClientNodeJs {
     if (!hashOfConditions) {
       return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -1910,7 +1939,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1919,7 +1949,8 @@ export class LitNodeClientNodeJs {
       const message = 'networkPubKeySet cannot be null';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -1935,6 +1966,8 @@ export class LitNodeClientNodeJs {
     if (!paramsIsSafe) {
       throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -1950,7 +1983,8 @@ export class LitNodeClientNodeJs {
     if (error) {
       throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -1996,7 +2030,8 @@ export class LitNodeClientNodeJs {
     if (!this.networkPubKeySet) {
       return throwError({
         message: 'networkPubKeySet cannot be null',
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -2033,7 +2068,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -2042,7 +2078,8 @@ export class LitNodeClientNodeJs {
       const message = 'subnetPubKey cannot be null';
       return throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -2054,7 +2091,8 @@ export class LitNodeClientNodeJs {
     if (!paramsIsSafe) {
       return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -2090,7 +2128,8 @@ export class LitNodeClientNodeJs {
     if (!hashOfConditions) {
       return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -2152,7 +2191,8 @@ export class LitNodeClientNodeJs {
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
@@ -2169,7 +2209,8 @@ export class LitNodeClientNodeJs {
     if (!accessControlConditions) {
       return throwError({
         message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions`,
-        error: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -2310,11 +2351,13 @@ export class LitNodeClientNodeJs {
   /** ============================== SESSION ============================== */
 
   /**
-   * Sign a session key using a PKP
+   * Sign a session public key using a PKP, which generates an authSig.
    * @returns {Object} An object containing the resulting signature.
    */
 
-  signSessionKey = async (params: SignSessionKeyProp): Promise<JsonAuthSig> => {
+  signSessionKey = async (
+    params: SignSessionKeyProp
+  ): Promise<SignSessionKeyResponse> => {
     // ========== Validate Params ==========
     // -- validate: If it's NOT ready
     if (!this.ready) {
@@ -2323,21 +2366,34 @@ export class LitNodeClientNodeJs {
 
       throwError({
         message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
-    const pkpEthAddress = computeAddress(params.pkpPublicKey);
+    // -- construct SIWE message that will be signed by node to generate an authSig.
 
     const _expiration =
       params.expiration ||
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
+    // Try to get it from local storage, if not generates one~
+    let sessionKey = this.getSessionKey(params.sessionKey);
+    let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
+
+    // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
+    const pkpEthAddress = (function () {
+      if (params.pkpPublicKey) return computeAddress(params.pkpPublicKey);
+
+      // This will be populated by the node, using dummy value for now.
+      return '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+    })();
+
     let siweMessage: SiweMessage = new SiweMessage({
-      domain: globalThis.location.host,
+      domain: globalThis.location?.host || params.domain || 'litprotocol.com',
       address: pkpEthAddress,
       statement: 'Lit Protocol PKP session signature',
-      uri: params.sessionKey,
+      uri: sessionKeyUri,
       version: '1',
       chainId: params.chainId ?? 1,
       expirationTime: _expiration,
@@ -2346,21 +2402,20 @@ export class LitNodeClientNodeJs {
 
     let siweMessageStr: string = siweMessage.prepareMessage();
 
-    let reqBody: SessionRequestBody = {
-      sessionKey: params.sessionKey,
-      authMethods: params.authMethods,
-      pkpPublicKey: params.pkpPublicKey,
-      authSig: params.authSig,
-      siweMessage: siweMessageStr,
-    };
-
-    // ========== Node Promises ==========
+    // ========== Get Node Promises ==========
+    // -- fetch shares from nodes
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       return this.getSignSessionKeyShares(
         url,
         {
-          body: reqBody,
+          body: {
+            sessionKey: sessionKeyUri,
+            authMethods: params.authMethods,
+            pkpPublicKey: params.pkpPublicKey,
+            authSig: params.authSig,
+            siweMessage: siweMessageStr,
+          },
         },
         requestId
       );
@@ -2372,11 +2427,10 @@ export class LitNodeClientNodeJs {
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
       this.throwNodeError(res);
-      return {} as JsonAuthSig;
+      return {} as SignSessionKeyResponse;
     }
 
     const responseData = res.values;
-
     log('responseData', JSON.stringify(responseData, null, 2));
 
     // ========== Extract shares from response data ==========
@@ -2390,10 +2444,13 @@ export class LitNodeClientNodeJs {
     const { sessionSig } = signatures;
 
     return {
-      sig: sessionSig.signature,
-      derivedVia: 'web3.eth.personal.sign via Lit PKP',
-      signedMessage: sessionSig.siweMessage,
-      address: computeAddress('0x' + sessionSig.publicKey),
+      authSig: {
+        sig: sessionSig.signature,
+        derivedVia: 'web3.eth.personal.sign via Lit PKP',
+        signedMessage: sessionSig.siweMessage,
+        address: computeAddress('0x' + sessionSig.publicKey),
+      },
+      pkpPublicKey: sessionSig.publicKey,
     };
   };
 
@@ -2415,112 +2472,27 @@ export class LitNodeClientNodeJs {
     });
   };
 
-  getWebAuthnAuthenticationAuthSig = async (
-    params: GetWebAuthnAuthenticationAuthSigProps
-  ): Promise<JsonAuthSig> => {
-    // ========== Pre-Validations ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      return throwError({
-        message,
-        error: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR,
-      });
-    }
+  generateAuthMethodForWebAuthn = (
+    params: WebAuthnAuthenticationVerificationParams
+  ): AuthMethod => ({
+    authMethodType: AUTH_METHOD_TYPE_IDS.WEBAUTHN,
+    accessToken: JSON.stringify(params),
+  });
 
-    // -- validate if this.networkPubKeySet is null
-    if (this.networkPubKeySet === null) {
-      return throwError({
-        message: 'networkPubKeySet cannot be null',
-        error: LIT_ERROR.PARAM_NULL_ERROR,
-      });
-    }
+  generateAuthMethodForDiscord = (access_token: string): AuthMethod => ({
+    authMethodType: AUTH_METHOD_TYPE_IDS.DISCORD,
+    accessToken: access_token,
+  });
 
-    // -- construct SIWE message that will be signed by node to generate an authSig.
+  generateAuthMethodForGoogle = (access_token: string): AuthMethod => ({
+    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE,
+    accessToken: access_token,
+  });
 
-    const _expiration =
-      params.expiration ||
-      new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-    // Try to get it from local storage, if not generates one~
-    let sessionKey = this.getSessionKey(params.sessionKey);
-    let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
-
-    let siweMessage: SiweMessage = new SiweMessage({
-      domain: globalThis.location.host,
-      address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // This will be populated by the node.
-      statement: 'Lit Protocol PKP session signature',
-      uri: sessionKeyUri,
-      version: '1',
-      chainId: 1,
-      expirationTime: _expiration,
-      resources: params.resources,
-    });
-
-    let siweMessageStr: string = siweMessage.prepareMessage();
-
-    // ========== Get Node Promises ==========
-    // -- fetch shares from nodes
-    const requestId = this.getRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      return this.getVerifyWebAuthnAuthenticationKeyShare(
-        url,
-        {
-          username: params.username,
-          credential: params.verificationParams,
-          sessionPubkey: sessionKey.publicKey,
-          siweMessage: siweMessageStr,
-        },
-        requestId
-      );
-    });
-
-    // -- resolve promises
-    const res = await this.handleNodePromises(nodePromises);
-
-    // -- case: promises rejected
-    if (!this.#isSuccessNodePromises(res)) {
-      this.throwNodeError(res);
-      return {} as JsonAuthSig;
-    }
-
-    const responseData = res.values;
-    log('responseData', JSON.stringify(responseData, null, 2));
-
-    // ========== Extract shares from response data ==========
-    // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = responseData.map(
-      (r: any) => (r as SignedData).signedData
-    );
-
-    const signatures = this.getSessionSignatures(signedDataList);
-
-    console.log('signatures', signatures);
-
-    const { authSig } = signatures;
-
-    return {
-      sig: authSig.signature,
-      derivedVia: 'webauthn via Lit PKP',
-      signedMessage: authSig.siweMessage,
-      address: computeAddress('0x' + authSig.publicKey),
-    };
-  };
-
-  getVerifyWebAuthnAuthenticationKeyShare = async (
-    url: string,
-    body: GetVerifyWebAuthnAuthenticationKeyShareProps,
-    requestId: string
-  ) => {
-    log('getVerifyWebAuthnAuthenticationKeyShares');
-    const urlWithPath = `${url}/web/auth/webauthn`;
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: body,
-      requestId,
-    });
-  };
+  generateAuthMethodForGoogleJWT = (access_token: string): AuthMethod => ({
+    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE_JWT,
+    accessToken: access_token,
+  });
 
   parseResource = ({
     resource,
@@ -2585,13 +2557,13 @@ export class LitNodeClientNodeJs {
           resources: capabilities,
           expiration,
           uri: sessionKeyUri,
-          litNodeClient: this,
         });
       } else {
         if (!this.defaultAuthCallback) {
           return throwError({
             message: 'No default auth callback provided',
-            error: LIT_ERROR.PARAMS_MISSING_ERROR,
+            errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+            errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
           });
         }
         walletSig = await this.defaultAuthCallback({
@@ -2612,7 +2584,8 @@ export class LitNodeClientNodeJs {
     ) {
       throwError({
         message: 'No wallet signature found',
-        error: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR,
+        errorKind: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.kind,
+        errorCode: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.name,
       });
       return;
     }

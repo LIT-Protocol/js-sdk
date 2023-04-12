@@ -8,10 +8,7 @@ import {
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
 
-import{
-  JsonAuthSig,
-  CheckAndSignAuthParams,
-}from '@lit-protocol/types'
+import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
 
 import { ethers } from 'ethers';
 // import WalletConnectProvider from '@walletconnect/ethereum-provider';
@@ -161,7 +158,8 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
   if (!chainHexId.startsWith('0x')) {
     throwError({
       message: `${chainHexId} should begin with "0x"`,
-      error: LIT_ERROR.WRONG_PARAM_FORMAT,
+      errorKind: LIT_ERROR.WRONG_PARAM_FORMAT.kind,
+      errorCode: LIT_ERROR.WRONG_PARAM_FORMAT.name,
     });
   }
 
@@ -169,7 +167,8 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
   if (!hexIds.includes(chainHexId)) {
     throwError({
       message: `${chainHexId} cannot be found in LIT_CHAINS`,
-      error: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION,
+      errorKind: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.kind,
+      errorCode: LIT_ERROR.UNSUPPORTED_CHAIN_EXCEPTION.name,
     });
   }
 
@@ -187,7 +186,8 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
   // -- fail case
   throwError({
     message: `Failed to convert ${chainHexId}`,
-    error: LIT_ERROR.UNKNOWN_ERROR,
+    errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+    errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
   });
 };
 
@@ -212,7 +212,8 @@ export const getChainId = async (
 
     resultOrError = ELeft({
       message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
-      error: LIT_ERROR.WRONG_NETWORK_EXCEPTION,
+      errorKind: LIT_ERROR.WRONG_NETWORK_EXCEPTION.kind,
+      errorCode: LIT_ERROR.WRONG_NETWORK_EXCEPTION.name,
     });
   }
 
@@ -223,15 +224,12 @@ export const getChainId = async (
  *
  * Check if the message must resign
  *
- * @param { JsonAuthSig } authSig
+ * @param { AuthSig } authSig
  * @param { any } resources
  *
  * @returns { boolean }
  */
-export const getMustResign = (
-  authSig: JsonAuthSig,
-  resources: any
-): boolean => {
+export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
   let mustResign!: boolean;
 
   try {
@@ -368,7 +366,9 @@ export const connectWeb3 = async ({
 
   // trigger metamask popup
   try {
-    log("@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.");
+    log(
+      '@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.'
+    );
     await provider.enable();
   } catch (e) {
     log(
@@ -422,7 +422,7 @@ export const checkAndSignEVMAuthMessage = async ({
   switchChain,
   expiration,
   uri,
-}: CheckAndSignAuthParams): Promise<JsonAuthSig> => {
+}: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
   if (isNode()) {
     log(
@@ -433,7 +433,7 @@ export const checkAndSignEVMAuthMessage = async ({
       derivedVia: '',
       signedMessage: '',
       address: '',
-    } as JsonAuthSig;
+    } as AuthSig;
   }
 
   // --- scoped methods ---
@@ -441,51 +441,17 @@ export const checkAndSignEVMAuthMessage = async ({
     if (error.code === WALLET_ERROR.NO_SUCH_METHOD) {
       throwError({
         message: `Incorrect network selected.  Please switch to the ${chain} network in your wallet and try again.`,
-        error: LIT_ERROR.WRONG_NETWORK_EXCEPTION,
+        errorKind: LIT_ERROR.WRONG_NETWORK_EXCEPTION.kind,
+        errorCode: LIT_ERROR.WRONG_NETWORK_EXCEPTION.name,
       });
     } else {
       throw error;
     }
   };
 
-  const _signAndGetAuth = async ({
-    web3,
-    account,
-    chainId,
-    resources,
-    expiration,
-    uri,
-  }: signAndSaveAuthParams): Promise<JsonAuthSig> => {
-    await signAndSaveAuthMessage({
-      web3,
-      account,
-      chainId,
-      resources,
-      expiration,
-      uri,
-    });
-
-    let authSigOrError: IEither = getStorageItem(
-      LOCAL_STORAGE_KEYS.AUTH_SIGNATURE
-    );
-
-    if (authSigOrError.type === 'ERROR') {
-      throwError({
-        message: 'Failed to get authSig from local storage',
-        error: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION,
-      });
-    }
-
-    let authSig: JsonAuthSig =
-      typeof authSigOrError.result === 'string'
-        ? JSON.parse(authSigOrError.result)
-        : authSigOrError.result;
-
-    return authSig;
-  };
-
   // -- 1. prepare
   const selectedChain = LIT_CHAINS[chain];
+  const expirationString = getDefaultExpiration();
 
   const { web3, account } = await connectWeb3({
     chainId: selectedChain.chainId,
@@ -589,14 +555,15 @@ export const checkAndSignEVMAuthMessage = async ({
         account,
         chainId: selectedChain.chainId,
         resources,
-        expiration,
+        expiration: expirationString,
         uri,
       });
     } catch (e: any) {
       log(e);
       return throwError({
         message: e.message,
-        error: LIT_ERROR.UNKNOWN_ERROR,
+        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
       });
     }
     authSigOrError.type = EITHER_TYPE.SUCCESS;
@@ -604,7 +571,7 @@ export const checkAndSignEVMAuthMessage = async ({
   }
 
   // -- 6. case: Lit auth signature IS in the local storage
-  let authSig: JsonAuthSig = authSigOrError.result;
+  let authSig: AuthSig = authSigOrError.result;
   if (typeof authSig === 'string') {
     authSig = JSON.parse(authSig);
   }
@@ -620,7 +587,7 @@ export const checkAndSignEVMAuthMessage = async ({
       account,
       chainId: selectedChain.chainId,
       resources,
-      expiration,
+      expiration: expirationString,
       uri,
     });
     log('7. authSig:', authSig);
@@ -635,12 +602,53 @@ export const checkAndSignEVMAuthMessage = async ({
         account,
         chainId: selectedChain.chainId,
         resources,
-        expiration,
+        expiration: expirationString,
         uri,
       });
     }
     log('8. mustResign:', mustResign);
   }
+
+  return authSig;
+};
+
+const getDefaultExpiration = () => {
+  return new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+};
+
+const _signAndGetAuth = async ({
+  web3,
+  account,
+  chainId,
+  resources,
+  expiration,
+  uri,
+}: signAndSaveAuthParams): Promise<AuthSig> => {
+  await signAndSaveAuthMessage({
+    web3,
+    account,
+    chainId,
+    resources,
+    expiration,
+    uri,
+  });
+
+  let authSigOrError: IEither = getStorageItem(
+    LOCAL_STORAGE_KEYS.AUTH_SIGNATURE
+  );
+
+  if (authSigOrError.type === 'ERROR') {
+    throwError({
+      message: 'Failed to get authSig from local storage',
+      errorKind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
+      errorCode: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
+    });
+  }
+
+  let authSig: AuthSig =
+    typeof authSigOrError.result === 'string'
+      ? JSON.parse(authSigOrError.result)
+      : authSigOrError.result;
 
   return authSig;
 };
@@ -651,7 +659,7 @@ export const checkAndSignEVMAuthMessage = async ({
  * Called by checkAndSignAuthMessage if the user does not have a signature stored.
  *
  * @param { signAndSaveAuthParams }}
- * @returns { JsonAuthSig }
+ * @returns { AuthSig }
  */
 export const signAndSaveAuthMessage = async ({
   web3,
@@ -660,7 +668,7 @@ export const signAndSaveAuthMessage = async ({
   resources,
   expiration,
   uri,
-}: signAndSaveAuthParams): Promise<JsonAuthSig> => {
+}: signAndSaveAuthParams): Promise<AuthSig> => {
   // check if it's nodejs
   if (isNode()) {
     log('checkAndSignEVMAuthMessage is not supported in nodejs.');
@@ -702,7 +710,7 @@ export const signAndSaveAuthMessage = async ({
   });
 
   // -- 3. prepare auth message
-  let authSig: JsonAuthSig = {
+  let authSig: AuthSig = {
     sig: signedResult.signature,
     derivedVia: 'web3.eth.personal.sign',
     signedMessage: body,
