@@ -812,6 +812,21 @@ export interface WebAuthnAuthenticationVerificationParams {
 
 export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
 
+export interface SessionSigs {
+  /**
+   * Map of Lit node urls to session signatures
+   */
+  [key: string]: SessionSig;
+}
+
+export interface SessionSig {
+  sig: string;
+  derivedVia: string;
+  signedMessage: string;
+  address: string;
+  algo: string;
+}
+
 /**
  * ========== Lit Auth Client ==========
  */
@@ -826,9 +841,9 @@ export interface LitAuthClientOptions {
    */
   redirectUri: string;
   /**
-   * API key for Lit's relay server
+   * Options for Lit's relay server
    */
-  litRelayApiKey?: string;
+  litRelayConfig?: LitRelayConfig;
   /**
    * Pass in a custom relay server
    */
@@ -921,6 +936,10 @@ export interface LitRelayConfig {
    * API key for Lit's relay server
    */
   relayApiKey: string;
+  /**
+   * Lit's relay server URL
+   */
+  relayUrl?: string;
 }
 
 export interface IRelayMintResponse {

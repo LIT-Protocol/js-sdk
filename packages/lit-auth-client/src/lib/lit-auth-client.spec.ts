@@ -35,7 +35,7 @@ describe('LitAuthClient', () => {
     const validClient = new LitAuthClient({
       domain: 'localhost:3000',
       redirectUri: 'http://localhost:3000/redirect',
-      litRelayApiKey: 'test-api-key',
+      litRelayConfig: { relayApiKey: 'test-api-key' },
     });
     expect(validClient).toBeDefined();
   });
@@ -47,7 +47,7 @@ describe('LitAuthClient', () => {
       client = new LitAuthClient({
         domain: 'localhost:3000',
         redirectUri: 'http://localhost:3000/redirect',
-        litRelayApiKey: 'test-api-key',
+        litRelayConfig: { relayApiKey: 'test-api-key' },
       });
 
       // @ts-ignore
@@ -101,7 +101,7 @@ describe('LitAuthClient', () => {
       client = new LitAuthClient({
         domain: 'localhost:5173',
         redirectUri: 'http://localhost:5173/redirect',
-        litRelayApiKey: 'test-api-key',
+        litRelayConfig: { relayApiKey: 'test-api-key' },
       });
 
       // @ts-ignore

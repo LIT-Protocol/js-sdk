@@ -5,9 +5,12 @@ import {
   JsonAuthSig,
   AuthMethod,
   SignInWithEthWalletParams,
+  GetSessionSigsProps,
+  SessionSigs,
 } from '@lit-protocol/types';
-import { AuthMethodType } from '@lit-protocol/constants';
+import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { SiweMessage } from 'lit-siwe';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ethers } from 'ethers';
 import { LitRelay } from './relay';
 import {
@@ -17,7 +20,10 @@ import {
   parseLoginParams,
   prepareLoginUrl,
 } from './utils';
-import { LIT_CHAINS } from '@lit-protocol/constants';
+import {
+  getEthWalletAuthNeededCallback,
+  getSocialAuthNeededCallback,
+} from './helpers';
 
 /**
  * Class that handles authentication through Lit login
@@ -41,18 +47,20 @@ export class LitAuthClient {
    *
    * @param {LitAuthClientOptions} options
    * @param {string} options.redirectUri - The redirect URI that Lit's auth server should send the user back to
-   * @param {string} [options.litRelayApiKey] - API key for Lit's relay server
+   * @param {string} [options.litRelayConfig] - Options for Lit's relay server
    * @param {IRelay} [options.customRelay] - Custom relay server to subsidize minting of PKPs
    */
   constructor(options: LitAuthClientOptions) {
     this.domain = options.domain;
     this.redirectUri = options.redirectUri.replace(/\/+$/, ''); // Remove trailing slashes
 
+    // Check if custom relay object is provided
     if (options?.customRelay) {
       this.relay = options?.customRelay;
     } else {
-      if (options?.litRelayApiKey) {
-        this.relay = new LitRelay({ relayApiKey: options.litRelayApiKey });
+      // Check if configuration options for Lit Relay are provided
+      if (options?.litRelayConfig?.relayApiKey) {
+        this.relay = new LitRelay(options.litRelayConfig);
       } else {
         throw new Error(
           'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
@@ -354,5 +362,59 @@ export class LitAuthClient {
       throw new Error('Missing PKPs in fetch response from relay server');
     }
     return fetchRes.pkps;
+  }
+
+  public async getSessionSigsForAuthMethod(
+    authMethod: AuthMethod,
+    sessionParams: GetSessionSigsProps,
+    litNodeClient?: any,
+    authCallbackParams?: {
+      pkpPublicKey?: string;
+      address?: string;
+      signMessage?: any;
+    }
+  ): Promise<SessionSigs> {
+    let authNeededCallback = sessionParams.authNeededCallback;
+
+    // If no authNeededCallback is provided, use the default one if authCallbackParams are provided
+    if (!authNeededCallback && authCallbackParams) {
+      // If auth method is EthWallet and authCallbackParams are provided, use the default callback for Eth Wallet auth
+      if (authMethod.authMethodType === AuthMethodType.EthWallet) {
+        if (authCallbackParams.address && authCallbackParams.signMessage) {
+          const signAuthSig = async (message: string) => {
+            const sig = await authCallbackParams.signMessage({
+              message: message,
+            });
+            return sig;
+          };
+          authNeededCallback = getEthWalletAuthNeededCallback({
+            domain: this.domain,
+            address: authCallbackParams.address || '',
+            signMessage: signAuthSig,
+          });
+        }
+      } else {
+        // Use the default callback for social auth methods
+        authNeededCallback = getSocialAuthNeededCallback({
+          authMethods: [authMethod],
+          pkpPublicKey: authCallbackParams.pkpPublicKey || '',
+        });
+      }
+    }
+
+    let nodeClient = litNodeClient;
+    if (!nodeClient) {
+      nodeClient = new LitNodeClient({
+        litNetwork: 'serrano',
+        debug: false,
+      });
+    }
+
+    const sessionSigs = await nodeClient.getSessionSigs({
+      ...sessionParams,
+      authCallbackParams,
+    });
+
+    return sessionSigs;
   }
 }
