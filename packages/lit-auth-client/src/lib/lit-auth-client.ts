@@ -5,10 +5,16 @@ import {
   AuthSig,
   AuthMethod,
   SignInWithEthWalletParams,
-  GetSessionSigsProps,
   SessionSigs,
+  AuthCallbackParams,
+  SignSessionKeyResponse,
+  GetSessionSigsWithAuthParams,
 } from '@lit-protocol/types';
-import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
+import {
+  LIT_CHAINS,
+  AuthMethodType,
+  ALL_LIT_CHAINS,
+} from '@lit-protocol/constants';
 import { SiweMessage } from 'lit-siwe';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ethers } from 'ethers';
@@ -20,10 +26,6 @@ import {
   parseLoginParams,
   prepareLoginUrl,
 } from './utils';
-import {
-  getEthWalletAuthNeededCallback,
-  getSocialAuthNeededCallback,
-} from './helpers';
 
 /**
  * Class that handles authentication through Lit login
@@ -53,6 +55,7 @@ export class LitAuthClient {
    * @param {string} options.redirectUri - The redirect URI that Lit's auth server should send the user back to
    * @param {string} [options.litRelayConfig] - Options for Lit's relay server
    * @param {IRelay} [options.customRelay] - Custom relay server to subsidize minting of PKPs
+   * @param {LitNodeClient} [options.litNodeClient] - Client to connect to Lit nodes
    */
   constructor(options: LitAuthClientOptions) {
     this.domain = options.domain;
@@ -70,6 +73,14 @@ export class LitAuthClient {
           'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
         );
       }
+    }
+
+    // Check if Lit node client is provided
+    if (
+      options?.litNodeClient &&
+      options.litNodeClient instanceof LitNodeClient
+    ) {
+      this.litNodeClient = options?.litNodeClient;
     }
   }
 
@@ -368,101 +379,87 @@ export class LitAuthClient {
     return fetchRes.pkps;
   }
 
-  // public async testGetSessionSigs(params: any): Promise<any> {
-  //   const defaultCallback = async ({
-  //     chainId,
-  //     resources,
-  //     expiration,
-  //     uri,
-  //     litNodeClient,
-  //   }: any) => {
-  //     const sessionSig = await litNodeClient.signSessionKey({
-  //       sessionKey: uri,
-  //       authMethods: params.authMethods,
-  //       authSig: params.authSig,
-  //       pkpPublicKey: params.pkpPublicKey,
-  //       expiration,
-  //       resources,
-  //       chainId,
-  //     });
-  //     return sessionSig;
-  //   };
+  /**
+   * Generate session sigs for given auth method and PKP
+   *
+   * @param {GetSessionSigsForAuthMethodParams} params
+   * @param {string} params.pkpPublicKey - Public key of PKP to auth with
+   * @param {AuthMethod} params.authMethod - Auth method verifying ownership of PKP
+   * @param {GetSessionSigsProps} params.sessionSigsParams - Params for getSessionSigs function
+   * @param {LitNodeClient} params.litNodeClient - Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
+   *
+   * @returns {Promise<SessionSigs>} - Session sigs
+   */
+  public async getSessionSigsWithAuth(
+    params: GetSessionSigsWithAuthParams
+  ): Promise<SessionSigs> {
+    // Use provided LitNodeClient or create a new one
+    if (params.litNodeClient && params.litNodeClient instanceof LitNodeClient) {
+      this.litNodeClient = params.litNodeClient;
+    } else {
+      if (!this.litNodeClient) {
+        this.litNodeClient = new LitNodeClient({
+          litNetwork: 'serrano',
+          debug: false,
+        });
+      }
+    }
+    // Connect to LitNodeClient if not already connected
+    if (!this.litNodeClient.ready) {
+      await this.litNodeClient.connect();
+    }
 
-  //   let nodeClient = params.litNodeClient;
-  //   if (!nodeClient) {
-  //     nodeClient = new LitNodeClient({
-  //       litNetwork: 'serrano',
-  //       debug: false,
-  //     });
-  //   }
-  //   if (!nodeClient.ready) {
-  //     await nodeClient.connect();
-  //   }
-  //   this.litNodeClient = nodeClient;
+    let authNeededCallback = params.sessionSigsParams.authNeededCallback;
 
-  //   const sessionSigs = await nodeClient.getSessionSigs({
-  //     ...params.sessionParams,
-  //     defaultCallback,
-  //   });
+    // If no authNeededCallback is provided, create one that uses the provided PKP and auth method
+    // to sign a session key and return an auth sig
+    if (!authNeededCallback) {
+      const nodeClient = this.litNodeClient;
 
-  //   return sessionSigs;
-  // }
+      authNeededCallback = async (
+        authCallbackParams: AuthCallbackParams
+      ): Promise<AuthSig> => {
+        let chainId = 1;
+        try {
+          const chainInfo = ALL_LIT_CHAINS[authCallbackParams.chain];
+          // @ts-expect-error - chainId is not defined on the type
+          chainId = chainInfo.chainId;
+        } catch {
+          // Do nothing
+        }
 
-  // public async getSessionSigsForAuthMethod(
-  //   authMethod: AuthMethod,
-  //   sessionParams: GetSessionSigsProps,
-  //   litNodeClient?: any,
-  //   authCallbackParams?: {
-  //     pkpPublicKey?: string;
-  //     address?: string;
-  //     signMessage?: any;
-  //   }
-  // ): Promise<SessionSigs> {
-  //   let authNeededCallback = sessionParams.authNeededCallback;
+        let response: SignSessionKeyResponse;
 
-  //   // If no authNeededCallback is provided, use the helper one if authCallbackParams are provided
-  //   if (!authNeededCallback && authCallbackParams) {
-  //     // If auth method is EthWallet and authCallbackParams are provided, use the helper callback
-  //     if (authMethod.authMethodType === AuthMethodType.EthWallet) {
-  //       if (authCallbackParams.address && authCallbackParams.signMessage) {
-  //         const signAuthSig = async (message: string) => {
-  //           const sig = await authCallbackParams.signMessage({
-  //             message: message,
-  //           });
-  //           return sig;
-  //         };
-  //         authNeededCallback = getEthWalletAuthNeededCallback({
-  //           domain: this.domain,
-  //           address: authCallbackParams.address || '',
-  //           signMessage: signAuthSig,
-  //         });
-  //       }
-  //     } else {
-  //       // Use the default callback for social auth methods
-  //       authNeededCallback = getSocialAuthNeededCallback({
-  //         authMethods: [authMethod],
-  //         pkpPublicKey: authCallbackParams.pkpPublicKey || '',
-  //       });
-  //     }
-  //   }
+        if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
+          const authSig = JSON.parse(params.authMethod.accessToken);
+          response = await nodeClient.signSessionKey({
+            authMethods: [],
+            authSig: authSig,
+            pkpPublicKey: params.pkpPublicKey,
+            expiration: authCallbackParams.expiration,
+            resources: authCallbackParams.resources,
+            chainId,
+          });
+        } else {
+          response = await nodeClient.signSessionKey({
+            authMethods: [params.authMethod],
+            pkpPublicKey: params.pkpPublicKey,
+            expiration: authCallbackParams.expiration,
+            resources: authCallbackParams.resources,
+            chainId,
+          });
+        }
 
-  //   let nodeClient = litNodeClient;
-  //   if (!nodeClient) {
-  //     nodeClient = new LitNodeClient({
-  //       litNetwork: 'serrano',
-  //       debug: false,
-  //     });
-  //   }
-  //   if (!nodeClient.ready) {
-  //     await nodeClient.connect();
-  //   }
-  //   this.litNodeClient = nodeClient;
+        return response.authSig;
+      };
+    }
 
-  //   const sessionSigs = await nodeClient.getSessionSigs({
-  //     ...sessionParams,
-  //     authNeededCallback,
-  //   });
+    // Generate session sigs with the given session params
+    const sessionSigs = await this.litNodeClient.getSessionSigs({
+      ...params.sessionSigsParams,
+      authNeededCallback,
+    });
 
-  //   return sessionSigs;
-  // }
+    return sessionSigs;
+  }
 }

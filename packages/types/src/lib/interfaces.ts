@@ -746,7 +746,7 @@ export interface SignSessionKeyProp {
   // siweMessage: string;
 
   //   When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
-  expiration: string;
+  expiration?: string;
 
   resources: any;
 
@@ -869,6 +869,11 @@ export interface LitAuthClientOptions {
    * Pass in a custom relay server
    */
   customRelay?: IRelay;
+  /**
+   * Lit Node Client
+   */
+  // TODO: update type
+  litNodeClient?: any;
 }
 
 export interface SignInWithEthWalletParams {
@@ -919,44 +924,6 @@ export interface LoginUrlParams {
    * Error codes from Lit's login server
    */
   error: string | null;
-}
-
-export interface GetSessionSigsForAuthMethodParams {
-  /**
-   * Auth method to getSessionSigs for
-   */
-  authMethod: AuthMethod;
-  /**
-   * Params for getSessionSigs
-   */
-  sessionParams: GetSessionSigsProps;
-  /**
-   * Client to connect to Lit nodes. If not passed in, LitAuthClient will initialize a LitNodeClient with default options.
-   *
-   * Learn more about initializing LitNodeClient [here](https://serrano-sdk-docs.litprotocol.com/)
-   */
-  litNodeClient?: any;
-  /**
-   * Optional params for auth callback helpers
-   */
-  authCallbackParams?: {
-    /**
-     * Public key of new PKP
-     */
-    pkpPublicKey?: string;
-    /**
-     * Ethereum wallet address
-     */
-    address?: string;
-    /**
-     * Function to sign message
-     *
-     * @param {string} message - Message to sign
-     *
-     * @returns {Promise<string>} - Raw signature of message
-     */
-    signMessage?: (message: string) => Promise<string>;
-  };
 }
 
 export interface IRelay {
@@ -1072,60 +1039,21 @@ export interface IRelayPKP {
   ethAddress: string;
 }
 
-export interface SocialAuthNeededCallbackParams {
+export interface GetSessionSigsWithAuthParams {
   /**
-   * Auth methods to use
-   */
-  authMethods: AuthMethod[];
-  /**
-   * Public key of the PKP to use for signing
+   * Public key of PKP to auth with
    */
   pkpPublicKey: string;
-}
-
-export interface EthWalletAuthNeededCallbackParams {
   /**
-   * Domain that is requesting the signing
+   * Auth method verifying ownership of PKP
    */
-  domain: string;
+  authMethod: AuthMethod;
   /**
-   * Ethereum address to sign with
+   * Params for getSessionSigs function
    */
-  address: string;
+  sessionSigsParams: GetSessionSigsProps;
   /**
-   * Function to sign message
-   *
-   * @param {string} message - Message to sign
-   *
-   * @returns {Promise<string>} - Raw signature of message
+   * Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
    */
-  signMessage: (message: string) => Promise<string>;
-  /**
-   * Copy to show user before signing
-   */
-  statement?: string;
-}
-
-export interface DefaultAuthNeededCallbackParams {
-  /**
-   * Chain to use
-   */
-  chainId: number;
-  /**
-   * Resources that will be signed with session key
-   */
-  resources: string[];
-  /**
-   * Expiration date for when sigs will expire
-   */
-  expiration: string;
-  /**
-   * Session key to sign
-   */
-  uri: string;
-  /**
-   * Client to connect to Lit nodes
-   */
-  // TODO: update type
-  litNodeClient: any;
+  litNodeClient?: any;
 }
