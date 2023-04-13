@@ -281,52 +281,92 @@ export class LitNodeClientNodeJs {
 
   // ==================== SESSIONS ====================
   /**
-   *
    * Try to get the session key in the local storage,
    * if not, generates one.
-   * @param { string } supposedSessionKey
-   * @return { }
+   *
+   * @param {string} [serializedSessionKeyPair] - Serialized session key pair
+   * @return {SessionKeyPair} - Session key pair
    */
-  getSessionKey = (supposedSessionKey?: string): SessionKeyPair => {
-    let sessionKey: any = supposedSessionKey ?? '';
-
-    const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
-    const storedSessionKeyOrError = getStorageItem(storageKey);
-
-    if (sessionKey === '') {
-      // check if we already have a session key + signature for this chain
-      // let storedSessionKey;
-      let storedSessionKey: any;
-
-      // -- (TRY) to get it in the local storage
-      if (storedSessionKeyOrError.type === 'ERROR') {
-        console.warn(
-          `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
-        );
-      } else {
-        storedSessionKey = storedSessionKeyOrError.result;
-      }
-
-      // -- IF NOT: Generates one
-      if (!storedSessionKey || storedSessionKey == '') {
-        sessionKey = generateSessionKeyPair();
-
-        // (TRY) to set to local storage
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(sessionKey));
-        } catch (e) {
-          console.warn(
-            `Localstorage not available. Not a problem. Contiune...`
-          );
+  getSessionKey = (serializedSessionKeyPair?: string): SessionKeyPair => {
+    // If a session key pair is provided, parse it and return it
+    if (serializedSessionKeyPair) {
+      try {
+        const keyPair = JSON.parse(serializedSessionKeyPair);
+        if (this.isSessionKeyPair(keyPair)) {
+          return keyPair;
+        } else {
+          throw new Error('Invalid session key pair provided');
         }
-      } else {
-        log('storedSessionKeyOrError');
-        sessionKey = JSON.parse(storedSessionKeyOrError.result);
+      } catch (err) {
+        log(
+          `Error when parsing provided session keypair ${serializedSessionKeyPair}: ${err}`
+        );
+        throw err;
       }
     }
 
-    return sessionKey as SessionKeyPair;
+    // If no session key pair is provided, try to get it from the local storage
+    const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
+    const storedSessionKeyOrError = getStorageItem(storageKey);
+
+    // Check for errors
+    if (storedSessionKeyOrError.type === 'ERROR') {
+      console.warn(
+        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
+      );
+    } else {
+      // If no errors, get the stored session key
+      const storedSessionKey = storedSessionKeyOrError.result;
+      if (storedSessionKey) {
+        try {
+          const keyPair = JSON.parse(storedSessionKey);
+          if (this.isSessionKeyPair(keyPair)) {
+            return keyPair;
+          } else {
+            throw new Error('Invalid session key pair stored');
+          }
+        } catch (err) {
+          log(
+            `Error when parsing stored session keypair ${storedSessionKey}. Continuing to generate a new one...`
+          );
+        }
+      }
+    }
+
+    // If no session key is stored, generate one
+    let sessionKey: SessionKeyPair;
+    try {
+      sessionKey = generateSessionKeyPair();
+    } catch (err) {
+      log(`Error when generating session keypair: ${err}`);
+      throw err;
+    }
+
+    // Store session key in local storage
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(sessionKey));
+    } catch (e) {
+      console.warn(`Local storage not available. Not a problem. Continue...`);
+    }
+
+    return sessionKey;
   };
+
+  /**
+   * Check if a given object is of type SessionKeyPair.
+   *
+   * @param obj - The object to check.
+   * @returns True if the object is of type SessionKeyPair.
+   */
+  isSessionKeyPair(obj: any): obj is SessionKeyPair {
+    return (
+      typeof obj === 'object' &&
+      'publicKey' in obj &&
+      'privateKey' in obj &&
+      typeof obj.publicKey === 'string' &&
+      typeof obj.privateKey === 'string'
+    );
+  }
 
   /**
    *
