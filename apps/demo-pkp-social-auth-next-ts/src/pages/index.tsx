@@ -2,19 +2,19 @@ import Head from 'next/head';
 import { Inter } from 'next/font/google';
 import { useCallback, useEffect, useState } from 'react';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import {
-  LitAuthClient,
-  getSocialAuthNeededCallback,
-  getEthWalletAuthNeededCallback,
-} from '@lit-protocol/lit-auth-client';
-import { IRelayPKP, AuthMethod } from '@lit-protocol/types';
-import { AuthMethodType } from '@lit-protocol/constants';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
+import { IRelayPKP, AuthMethod, SessionSigs } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { useRouter } from 'next/router';
-import { useConnect, useAccount, useDisconnect } from 'wagmi';
-import { signMessage } from '@wagmi/core';
+import { useConnect, useAccount, useDisconnect, Connector } from 'wagmi';
 
 const inter = Inter({ subsets: ['latin'] });
+
+// Local dev only: When using npm link, need to update encryption pkg to handle possible ipfs client init error
+// let ipfsClient = null;
+// try {
+//   ipfsClient = require("ipfs-http-client");
+// } catch {}
 
 enum Views {
   SIGN_IN = 'sign_in',
@@ -27,21 +27,6 @@ enum Views {
   CREATING_SESSION = 'creating_session',
   SESSION_CREATED = 'session_created',
   ERROR = 'error',
-}
-
-interface SessionSigs {
-  /**
-   * Map of Lit node urls to session signatures
-   */
-  [key: string]: SessionSig;
-}
-
-interface SessionSig {
-  sig: string;
-  derivedVia: string;
-  signedMessage: string;
-  address: string;
-  algo: string;
 }
 
 export default function Dashboard() {
@@ -72,7 +57,9 @@ export default function Dashboard() {
   const { isConnected, connector, address } = useAccount();
   const { disconnectAsync } = useDisconnect();
 
-  /** Use wagmi to connect one's eth wallet and then request a signature from one's wallet */
+  /**
+   * Use wagmi to connect one's eth wallet and then request a signature from one's wallet
+   */
   async function handleConnectWallet(c) {
     const { account, chain, connector } = await connectAsync(c);
     try {
@@ -84,7 +71,10 @@ export default function Dashboard() {
     }
   }
 
-  async function authWithWallet(address, connector) {
+  /**
+   * Request a signature from one's wallet
+   */
+  async function authWithWallet(address: string, connector: Connector) {
     setView(Views.REQUEST_AUTHSIG);
 
     // Get auth sig
@@ -98,7 +88,6 @@ export default function Dashboard() {
       signMessage: signAuthSig,
     });
     setAuthMethod(authMethod);
-    console.log('authMethod', authMethod);
 
     // Fetch PKPs associated with eth wallet account
     setView(Views.FETCHING);
@@ -106,7 +95,6 @@ export default function Dashboard() {
       authMethod
     );
     if (pkps.length > 0) {
-      console.log(pkps);
       setPKPs(pkps);
     }
     setView(Views.FETCHED);
@@ -171,42 +159,24 @@ export default function Dashboard() {
   }
 
   /**
-   * Generate session sigs for current PKP
-   *
-   * @param {Object} pkp - PKP object
+   * Generate session sigs for current PKP and auth method
    */
   async function createSession(pkp: IRelayPKP) {
     setView(Views.CREATING_SESSION);
 
-    let authNeededCallback;
     try {
-      if (authMethod.authMethodType === AuthMethodType.EthWallet) {
-        const signAuthSig = async (message: string) => {
-          const sig = await signMessage({ message: message });
-          return sig;
-        };
-        console.log('litAuthClient.domain', litAuthClient.domain);
-        authNeededCallback = getEthWalletAuthNeededCallback({
-          domain: litAuthClient.domain,
-          address,
-          signMessage: signAuthSig,
-        });
-      } else {
-        authNeededCallback = getSocialAuthNeededCallback({
-          authMethods: [authMethod],
-          pkpPublicKey: pkp.publicKey,
-        });
-      }
-
       // Get session signatures
-      const sessionSigs = await litNodeClient.getSessionSigs({
-        chain: 'ethereum',
-        resources: [`litAction://*`],
-        authNeededCallback: authNeededCallback,
+      const sessionSigs = await litAuthClient.getSessionSigsWithAuth({
+        pkpPublicKey: pkp.publicKey,
+        authMethod,
+        sessionSigsParams: {
+          chain: 'ethereum',
+          resources: [`litAction://*`],
+        },
+        litNodeClient,
       });
       setCurrentPKP(pkp);
       setSessionSigs(sessionSigs);
-      console.log('sessionSigs', sessionSigs);
 
       setView(Views.SESSION_CREATED);
     } catch (err) {
@@ -275,7 +245,7 @@ export default function Dashboard() {
         // Set up LitNodeClient and connect to Lit nodes
         const litNodeClient = new LitNodeClient({
           litNetwork: 'serrano',
-          debug: false,
+          // debug: false,
         });
         await litNodeClient.connect();
         setLitNodeClient(litNodeClient);
@@ -284,7 +254,11 @@ export default function Dashboard() {
         const litAuthClient = new LitAuthClient({
           domain: process.env.NEXT_PUBLIC_VERCEL_URL || 'localhost:3000',
           redirectUri: window.location.href.replace(/\/+$/, ''),
-          litRelayApiKey: 'google-auth-next-example',
+          litRelayConfig: {
+            relayApiKey: 'test-api-key',
+            relayUrl: 'http://localhost:3001',
+            // relayUrl: 'https://relay-server-staging.herokuapp.com',
+          },
         });
         setLitAuthClient(litAuthClient);
       } catch (err) {

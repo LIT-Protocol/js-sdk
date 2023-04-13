@@ -9,14 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lit-protocol/constants": "2.1.103",
-    "@lit-protocol/lit-auth-client": "^2.1.103",
-    "@lit-protocol/lit-node-client": "^2.1.103",
-    "@lit-protocol/types": "2.1.103",
+    "@lit-protocol/constants": "file:../js-sdk/packages/constants",
+    "@lit-protocol/lit-auth-client": "file:../js-sdk/packages/lit-auth-client",
+    "@lit-protocol/lit-node-client": "file:../js-sdk/packages/lit-node-client",
+    "@lit-protocol/types": "file:../js-sdk/packages/types",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
     "eslint-config-prettier": "^8.8.0",
     "ethers": "^5",
+    "ipfs-http-client": "^56.0.0",
     "next": "13.2.4",
     "prettier": "^2.8.7",
     "react": "18.2.0",
@@ -25,7 +26,6 @@
   },
   "devDependencies": {
     "@types/node": "18.15.11",
-    "@types/react": "18.0.31",
-    "typescript": "5.0.3"
+    "@types/react": "18.0.31"
   }
 }
