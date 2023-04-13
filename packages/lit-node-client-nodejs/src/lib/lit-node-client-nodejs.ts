@@ -365,9 +365,9 @@ export class LitNodeClientNodeJs {
     return (
       typeof obj === 'object' &&
       'publicKey' in obj &&
-      'privateKey' in obj &&
+      'secretKey' in obj &&
       typeof obj.publicKey === 'string' &&
-      typeof obj.privateKey === 'string'
+      typeof obj.secretKey === 'string'
     );
   }
 
