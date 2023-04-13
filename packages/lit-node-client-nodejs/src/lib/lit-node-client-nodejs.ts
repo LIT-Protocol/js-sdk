@@ -295,7 +295,10 @@ export class LitNodeClientNodeJs {
         if (this.isSessionKeyPair(keyPair)) {
           return keyPair;
         } else {
-          throw new Error('Invalid session key pair provided');
+          return throwError({
+            message: 'Invalid session key pair provided',
+            error: LIT_ERROR.PARAMS_MISSING_ERROR,
+          });
         }
       } catch (err) {
         log(
@@ -1215,7 +1218,7 @@ export class LitNodeClientNodeJs {
    * @returns { void }
    *
    */
-  throwNodeError = (res: RejectedNodePromises): void => {
+  _throwNodeError = (res: RejectedNodePromises): void => {
     if (res.error && res.error.errorCode) {
       if (
         (res.error.errorCode === LIT_ERROR_CODE.NODE_NOT_AUTHORIZED ||
@@ -1580,7 +1583,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
-      this.throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises);
     }
 
     // -- case: promises success (TODO: check the keys of "values")
@@ -1841,7 +1844,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
-      this.throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises);
     }
 
     const signatureShares: Array<NodeShare> = (res as SuccessNodePromises)
@@ -1959,7 +1962,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
-      this.throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises);
     }
 
     return true;
@@ -2059,7 +2062,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
-      this.throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises);
     }
 
     const decryptionShares: Array<NodeShare> = (res as SuccessNodePromises)
@@ -2206,7 +2209,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
-      this.throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises);
     }
 
     return encryptedKey;
@@ -2466,7 +2469,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
-      this.throwNodeError(res);
+      this._throwNodeError(res);
       return {} as SignSessionKeyResponse;
     }
 
