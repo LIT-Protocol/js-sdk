@@ -798,6 +798,13 @@ export interface SessionSig {
   algo?: string;
 }
 
+export interface SessionSigs {
+  /**
+   * Map of Lit node urls to session signatures
+   */
+  [key: string]: SessionSig;
+}
+
 export interface SessionRequestBody {
   sessionKey: string;
   authMethods: Array<AuthMethod>;
@@ -838,21 +845,6 @@ export interface WebAuthnAuthenticationVerificationParams {
 }
 
 export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
-
-export interface SessionSigs {
-  /**
-   * Map of Lit node urls to session signatures
-   */
-  [key: string]: SessionSig;
-}
-
-export interface SessionSig {
-  sig: string;
-  derivedVia: string;
-  signedMessage: string;
-  address: string;
-  algo: string;
-}
 
 /**
  * ========== Lit Auth Client ==========

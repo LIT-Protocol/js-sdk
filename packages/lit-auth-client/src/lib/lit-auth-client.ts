@@ -2,7 +2,7 @@ import {
   IRelay,
   LitAuthClientOptions,
   IRelayPKP,
-  JsonAuthSig,
+  AuthSig,
   AuthMethod,
   SignInWithEthWalletParams,
   GetSessionSigsProps,
@@ -238,7 +238,7 @@ export class LitAuthClient {
     // Use provided function to sign message
     const signature = await params.signMessage(toSign);
 
-    const authSig: JsonAuthSig = {
+    const authSig: AuthSig = {
       sig: signature,
       derivedVia: 'web3.eth.personal.sign',
       signedMessage: toSign,
