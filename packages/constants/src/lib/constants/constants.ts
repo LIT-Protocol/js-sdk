@@ -342,6 +342,28 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  filecoin: {
+    contractAddress: null,
+    chainId: 314,
+    name: 'Filecoin',
+    symbol: 'FIL',
+    decimals: 18,
+    rpcUrls: ['https://api.node.glif.io/rpc/v1'],
+    blockExplorerUrls: ['https://filfox.info/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  hyperspace: {
+    contractAddress: null,
+    chainId: 3141,
+    name: 'Filecoin Hyperspace testnet',
+    symbol: 'tFIL',
+    decimals: 18,
+    rpcUrls: ['https://api.hyperspace.node.glif.io/rpc/v1'],
+    blockExplorerUrls: ['https://hyperspace.filscan.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
