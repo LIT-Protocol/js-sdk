@@ -292,7 +292,11 @@ export class LitNodeClientNodeJs {
     if (serializedSessionKeyPair) {
       try {
         const keyPair = JSON.parse(serializedSessionKeyPair);
-        return keyPair;
+        if (this.isSessionKeyPair(keyPair)) {
+          return keyPair;
+        } else {
+          throw new Error('Invalid session key pair provided');
+        }
       } catch (err) {
         log(
           `Error when parsing provided session keypair ${serializedSessionKeyPair}: ${err}`
@@ -316,7 +320,11 @@ export class LitNodeClientNodeJs {
       if (storedSessionKey) {
         try {
           const keyPair = JSON.parse(storedSessionKey);
-          return keyPair;
+          if (this.isSessionKeyPair(keyPair)) {
+            return keyPair;
+          } else {
+            throw new Error('Invalid session key pair stored');
+          }
         } catch (err) {
           log(
             `Error when parsing stored session keypair ${storedSessionKey}. Continuing to generate a new one...`
@@ -343,6 +351,22 @@ export class LitNodeClientNodeJs {
 
     return sessionKey;
   };
+
+  /**
+   * Check if a given object is of type SessionKeyPair.
+   *
+   * @param obj - The object to check.
+   * @returns True if the object is of type SessionKeyPair.
+   */
+  isSessionKeyPair(obj: any): obj is SessionKeyPair {
+    return (
+      typeof obj === 'object' &&
+      'publicKey' in obj &&
+      'privateKey' in obj &&
+      typeof obj.publicKey === 'string' &&
+      typeof obj.privateKey === 'string'
+    );
+  }
 
   /**
    *
