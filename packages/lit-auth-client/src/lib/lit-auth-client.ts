@@ -9,6 +9,7 @@ import {
   AuthCallbackParams,
   SignSessionKeyResponse,
   GetSessionSigsWithAuthParams,
+  LitRelayConfig,
 } from '@lit-protocol/types';
 import {
   LIT_CHAINS,
@@ -53,7 +54,7 @@ export class LitAuthClient {
    *
    * @param {LitAuthClientOptions} options
    * @param {string} options.redirectUri - The redirect URI that Lit's auth server should send the user back to
-   * @param {string} [options.litRelayConfig] - Options for Lit's relay server
+   * @param {LitRelayConfig} [options.litRelayConfig] - Options for Lit's relay server
    * @param {IRelay} [options.customRelay] - Custom relay server to subsidize minting of PKPs
    * @param {LitNodeClient} [options.litNodeClient] - Client to connect to Lit nodes
    */

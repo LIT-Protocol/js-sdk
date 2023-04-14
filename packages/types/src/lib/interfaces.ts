@@ -959,13 +959,13 @@ export interface IRelay {
 
 export interface LitRelayConfig {
   /**
-   * API key for Lit's relay server
-   */
-  relayApiKey: string;
-  /**
    * Lit's relay server URL
    */
   relayUrl?: string;
+  /**
+   * API key for Lit's relay server
+   */
+  relayApiKey?: string;
 }
 
 export interface IRelayMintResponse {

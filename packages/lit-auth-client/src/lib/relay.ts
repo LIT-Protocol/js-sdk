@@ -24,13 +24,13 @@ export class LitRelay implements IRelay {
    * Create a Relay instance
    *
    * @param {LitRelayConfig} config
-   * @param {string} config.relayApiKey - API key for Lit's relay server
+   * @param {string} [config.relayApiKey] - API key for Lit's relay server
    * @param {string} [config.relayUrl] - URL for Lit's relay server
    */
   constructor(config: LitRelayConfig) {
     this.relayUrl =
       config.relayUrl || 'https://relay-server-staging.herokuapp.com';
-    this.relayApiKey = config.relayApiKey;
+    this.relayApiKey = config.relayApiKey || '';
   }
 
   /**
