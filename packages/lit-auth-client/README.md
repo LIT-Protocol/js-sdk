@@ -140,86 +140,25 @@ const pkps = await litAuthClient.fetchPKPsByAuthMethod(authMethod);
 
 ### Generate session signatures for PKPs tied to auth methods
 
-**Session signatures** prove that the user has verified their ownership of a PKP and has granted permission to a specific set of resources that the PKP can be used to interact with. Refer to the Lit developer docs for the [resources you can request](https://developer.litprotocol.com/SDK/Explanation/WalletSigs/sessionSigs#resources-you-can-request).
+**Session signatures** prove that the user has verified their ownership of a PKP and has granted permission to a specific set of resources that the PKP can be used to interact with.
 
-You will need to generate a **session signature** for the PKP that you want to use for signing and more.
-
-<br>
-
-#### Setup: Initialize `LitNodeClient`
-
-Create an instance of `LitNodeClient` from the `@lit-protocol/lit-node-client` package to interact with the Lit nodes.
+`LitAuthClient` provides a convenient method that wraps [`getSessionSigs`](https://js-sdk.litprotocol.com/classes/lit_node_client_src.LitNodeClientNodeJs.html#getSessionSigs) to generate a **session signature** for a given PKP and auth method.
 
 ```js
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-
-const litNodeClient = new LitJsSdk.LitNodeClient({
-  litNetwork: 'serrano',
-  debug: false,
-});
-
-await this.litNodeClient.connect();
-```
-
-<br>
-
-`lit-auth-client` provides two helper functions `getSocialAuthNeededCallback` and `getEthWalletAuthNeededCallback` to help you generate session signatures for PKPs tied to social login and Ethereum accounts, respectively. Pass these functions to the [`getSessionSigs` method](https://js-sdk.litprotocol.com/classes/lit_node_client_src.LitNodeClientNodeJs.html#getSessionSigs).
-
-<br>
-
-#### Example: Create session signatures for social login
-
-```js
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { getSocialAuthNeededCallback } from '@lit-protocol/lit-auth-client';
-
-const authNeededCallback = getSocialAuthNeededCallback({
-  // Array of auth method objects
-  authMethods: [authMethod],
-  // Public key of the PKP to use for signing
-  pkpPublicKey: pkp.publicKey,
-});
-
-const sessionSigs = await litNodeClient.getSessionSigs({
-  chain: 'ethereum',
-  // The resources the user can access with this session
-  resources: ['litAction://*'],
-  authNeededCallback: authNeededCallback,
+const sessionSigs = await litAuthClient.getSessionSigsWithAuth({
+  // Public key of the PKP you want to auth with
+  pkpPublicKey: pkpPublicKey,
+  // Auth method verifying ownership of the given PKP
+  authMethod: authMethod,
+  // Parameters for getSessionSigs. Check the API reference for available options.
+  sessionSigsParams: {
+    chain: 'ethereum',
+    resources: [`litAction://*`],
+  },
 });
 ```
 
-<br>
-
-#### Example: Create session signatures for Ethereum account
-
-```js
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { getEthWalletAuthNeededCallback } from '@lit-protocol/lit-auth-client';
-
-// Create your own signMessage function
-const signMessage = async (message: string) => {
-  const signature = await signer.signMessage(message);
-  return signature;
-};
-
-const authNeededCallback = getEthWalletAuthNeededCallback({
-  // Domain of your web app
-  domain: litAuthClient.domain,
-  // The Ethereum address of the user's wallet
-  address: address,
-  // Your signMessage function
-  signMessage: signMessage,
-});
-
-const sessionSigs = await litNodeClient.getSessionSigs({
-  chain: 'ethereum',
-  // The resources the user can access with this session
-  resources: ['litAction://*'],
-  authNeededCallback: authNeededCallback,
-});
-```
-
-Learn more about the session resources you can request in the [developer docs](https://developer.litprotocol.com/SDK/Explanation/WalletSigs/sessionSigs#resources-you-can-request).
+Learn more about session sigs in the [developer docs](https://developer.litprotocol.com/SDK/Explanation/WalletSigs/sessionSigs#resources-you-can-request).
 
 <br>
 
