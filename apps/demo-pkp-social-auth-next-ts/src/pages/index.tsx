@@ -245,7 +245,7 @@ export default function Dashboard() {
         // Set up LitNodeClient and connect to Lit nodes
         const litNodeClient = new LitNodeClient({
           litNetwork: 'serrano',
-          // debug: false,
+          debug: false,
         });
         await litNodeClient.connect();
         setLitNodeClient(litNodeClient);
@@ -256,8 +256,6 @@ export default function Dashboard() {
           redirectUri: window.location.href.replace(/\/+$/, ''),
           litRelayConfig: {
             relayApiKey: 'test-api-key',
-            relayUrl: 'http://localhost:3001',
-            // relayUrl: 'https://relay-server-staging.herokuapp.com',
           },
         });
         setLitAuthClient(litAuthClient);
