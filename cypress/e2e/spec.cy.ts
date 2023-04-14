@@ -658,6 +658,7 @@ describe('Lit Action', () => {
     };
     const res = await savedParams.litNodeClient.handshakeWithSgx(params);
     expect(res).to.have.keys(
+      'clientSdkVersion',
       'networkPublicKey',
       'networkPublicKeySet',
       'serverPublicKey',

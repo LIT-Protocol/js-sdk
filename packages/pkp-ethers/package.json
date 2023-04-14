@@ -1,6 +1,5 @@
 {
   "name": "@lit-protocol/pkp-ethers",
-  "version": "2.1.114",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -21,6 +20,7 @@
   "tags": [
     "universal"
   ],
+  "version": "2.1.118",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
