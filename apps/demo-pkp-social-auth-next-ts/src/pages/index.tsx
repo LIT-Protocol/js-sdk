@@ -173,7 +173,6 @@ export default function Dashboard() {
           chain: 'ethereum',
           resources: [`litAction://*`],
         },
-        litNodeClient,
       });
       setCurrentPKP(pkp);
       setSessionSigs(sessionSigs);
@@ -257,6 +256,7 @@ export default function Dashboard() {
           litRelayConfig: {
             relayApiKey: 'test-api-key',
           },
+          litNodeClient,
         });
         setLitAuthClient(litAuthClient);
       } catch (err) {

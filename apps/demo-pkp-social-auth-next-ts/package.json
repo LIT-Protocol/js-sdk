@@ -9,15 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lit-protocol/constants": "file:../js-sdk/packages/constants",
-    "@lit-protocol/lit-auth-client": "file:../js-sdk/packages/lit-auth-client",
-    "@lit-protocol/lit-node-client": "file:../js-sdk/packages/lit-node-client",
-    "@lit-protocol/types": "file:../js-sdk/packages/types",
+    "@lit-protocol/lit-auth-client": "^2.1.120",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
     "eslint-config-prettier": "^8.8.0",
     "ethers": "^5",
-    "ipfs-http-client": "^56.0.0",
     "next": "13.2.4",
     "prettier": "^2.8.7",
     "react": "18.2.0",
