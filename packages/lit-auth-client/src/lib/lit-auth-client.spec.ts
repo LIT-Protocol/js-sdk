@@ -1,4 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+import { TextEncoder, TextDecoder } from 'util';
+global.TextEncoder = TextEncoder;
+// @ts-ignore
+global.TextDecoder = TextDecoder;
+global.jestTesting = true;
+
 import { AuthMethodType } from '@lit-protocol/constants';
 import { LitAuthClient } from './lit-auth-client';
 import {
