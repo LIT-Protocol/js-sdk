@@ -1,6 +1,5 @@
 {
   "name": "@lit-protocol/lit-third-party-libs",
-  "version": "2.1.116",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
@@ -22,6 +21,7 @@
     "universal"
   ],
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
+  "version": "2.1.118",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

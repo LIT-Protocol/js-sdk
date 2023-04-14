@@ -1,6 +1,5 @@
 {
   "name": "@lit-protocol/misc-browser",
-  "version": "2.1.116",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
@@ -22,6 +21,7 @@
   "tags": [
     "browser"
   ],
+  "version": "2.1.118",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

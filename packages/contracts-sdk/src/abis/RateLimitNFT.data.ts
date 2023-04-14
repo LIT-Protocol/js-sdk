@@ -1,5 +1,5 @@
 export const rateLimitNft = {
-  "address": "0xE094c76Ec6bad7CbA6181C8b34Bc41faC7EbdF43",
+  "address": "0x6378Bf57C2c75d9524FE2601275214C0EE3Cf1B8",
   "abi": [
     {
       "inputs": [],
@@ -12,11 +12,11 @@ export const rateLimitNft = {
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newAdditionalRequestsPerMillisecondCost",
+          "name": "newAdditionalRequestsPerKilosecondCost",
           "type": "uint256"
         }
       ],
-      "name": "AdditionalRequestsPerSecondCostSet",
+      "name": "AdditionalRequestsPerKilosecondCostSet",
       "type": "event"
     },
     {
@@ -120,11 +120,11 @@ export const rateLimitNft = {
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newRLIHolderRateLimitWindowMilliseconds",
+          "name": "newRLIHolderRateLimitWindowSeconds",
           "type": "uint256"
         }
       ],
-      "name": "RLIHolderRateLimitWindowMillisecondsSet",
+      "name": "RLIHolderRateLimitWindowSecondsSet",
       "type": "event"
     },
     {
@@ -133,11 +133,11 @@ export const rateLimitNft = {
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newRateLimitWindowMilliseconds",
+          "name": "newRateLimitWindowSeconds",
           "type": "uint256"
         }
       ],
-      "name": "RateLimitWindowMillisecondsSet",
+      "name": "RateLimitWindowSecondsSet",
       "type": "event"
     },
     {
@@ -180,7 +180,7 @@ export const rateLimitNft = {
     },
     {
       "inputs": [],
-      "name": "RLIHolderRateLimitWindowMilliseconds",
+      "name": "RLIHolderRateLimitWindowSeconds",
       "outputs": [
         {
           "internalType": "uint256",
@@ -193,7 +193,7 @@ export const rateLimitNft = {
     },
     {
       "inputs": [],
-      "name": "additionalRequestsPerMillisecondCost",
+      "name": "additionalRequestsPerKilosecondCost",
       "outputs": [
         {
           "internalType": "uint256",
@@ -258,7 +258,7 @@ export const rateLimitNft = {
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "requestsPerMillisecond",
+          "name": "requestsPerKilosecond",
           "type": "uint256"
         },
         {
@@ -291,7 +291,7 @@ export const rateLimitNft = {
           "type": "uint256"
         }
       ],
-      "name": "calculateRequestsPerSecond",
+      "name": "calculateRequestsPerKilosecond",
       "outputs": [
         {
           "internalType": "uint256",
@@ -314,7 +314,7 @@ export const rateLimitNft = {
       "outputs": [
         {
           "internalType": "uint256",
-          "name": "requestsPerMillisecond",
+          "name": "requestsPerKilosecond",
           "type": "uint256"
         },
         {
@@ -328,7 +328,7 @@ export const rateLimitNft = {
     },
     {
       "inputs": [],
-      "name": "defaultRateLimitWindowMilliseconds",
+      "name": "defaultRateLimitWindowSeconds",
       "outputs": [
         {
           "internalType": "uint256",
@@ -348,7 +348,7 @@ export const rateLimitNft = {
         },
         {
           "internalType": "uint256",
-          "name": "requestsPerMillisecond",
+          "name": "requestsPerKilosecond",
           "type": "uint256"
         },
         {
@@ -373,7 +373,13 @@ export const rateLimitNft = {
         }
       ],
       "name": "freeMint",
-      "outputs": [],
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -386,7 +392,7 @@ export const rateLimitNft = {
         },
         {
           "internalType": "uint256",
-          "name": "requestsPerMillisecond",
+          "name": "requestsPerKilosecond",
           "type": "uint256"
         },
         {
@@ -512,7 +518,13 @@ export const rateLimitNft = {
         }
       ],
       "name": "mint",
-      "outputs": [],
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
       "stateMutability": "payable",
       "type": "function"
     },
@@ -661,11 +673,11 @@ export const rateLimitNft = {
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "newAdditionalRequestsPerMillisecondCost",
+          "name": "newAdditionalRequestsPerKilosecondCost",
           "type": "uint256"
         }
       ],
-      "name": "setAdditionalRequestsPerSecondCost",
+      "name": "setAdditionalRequestsPerKilosecondCost",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -718,11 +730,11 @@ export const rateLimitNft = {
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "newRLIHolderRateLimitWindowMilliseconds",
+          "name": "newRLIHolderRateLimitWindowSeconds",
           "type": "uint256"
         }
       ],
-      "name": "setRLIHolderRateLimitWindowMilliseconds",
+      "name": "setRLIHolderRateLimitWindowSeconds",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -731,11 +743,11 @@ export const rateLimitNft = {
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "newRateLimitWindowMilliseconds",
+          "name": "newRateLimitWindowSeconds",
           "type": "uint256"
         }
       ],
-      "name": "setRateLimitWindowMilliseconds",
+      "name": "setRateLimitWindowSeconds",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

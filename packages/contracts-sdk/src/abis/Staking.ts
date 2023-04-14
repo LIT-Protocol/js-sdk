@@ -65,6 +65,7 @@ export interface ContractCallOverrides {
 }
 export type StakingEvents =
   | 'EpochLengthSet'
+  | 'EpochTimeoutSet'
   | 'KickPenaltyPercentSet'
   | 'MinimumStakeSet'
   | 'OwnershipTransferred'
@@ -86,6 +87,7 @@ export type StakingEvents =
   | 'Withdrawn';
 export interface StakingEventsContext {
   EpochLengthSet(...parameters: any): EventFilter;
+  EpochTimeoutSet(...parameters: any): EventFilter;
   KickPenaltyPercentSet(...parameters: any): EventFilter;
   MinimumStakeSet(...parameters: any): EventFilter;
   OwnershipTransferred(...parameters: any): EventFilter;
@@ -108,6 +110,8 @@ export interface StakingEventsContext {
 }
 export type StakingMethodNames =
   | 'new'
+  | 'adminKickValidatorInNextEpoch'
+  | 'adminSlashValidator'
   | 'advanceEpoch'
   | 'balanceOf'
   | 'epoch'
@@ -124,6 +128,7 @@ export type StakingMethodNames =
   | 'minimumStake'
   | 'nodeAddressToStakerAddress'
   | 'owner'
+  | 'pauseEpoch'
   | 'paused'
   | 'readyForNextEpoch'
   | 'renounceOwnership'
@@ -132,6 +137,8 @@ export type StakingMethodNames =
   | 'resolverContractAddress'
   | 'rewardOf'
   | 'setEpochLength'
+  | 'setEpochState'
+  | 'setEpochTimeout'
   | 'setIpPortNodeAddressAndCommunicationPubKeys'
   | 'setKickPenaltyPercent'
   | 'setMinimumStake'
@@ -157,6 +164,9 @@ export type StakingMethodNames =
   | 'withdraw';
 export interface EpochLengthSetEventEmittedResponse {
   newEpochLength: BigNumberish;
+}
+export interface EpochTimeoutSetEventEmittedResponse {
+  newEpochTimeout: BigNumberish;
 }
 export interface KickPenaltyPercentSetEventEmittedResponse {
   newKickPenaltyPercent: BigNumberish;
@@ -212,6 +222,7 @@ export interface UnpausedEventEmittedResponse {
 }
 export interface ValidatorKickedFromNextEpochEventEmittedResponse {
   staker: string;
+  amountBurned: BigNumberish;
 }
 export interface VotedToKickValidatorInNextEpochEventEmittedResponse {
   reporter: string;
@@ -232,7 +243,9 @@ export interface EpochResponse {
   2: BigNumber;
   retries: BigNumber;
   3: BigNumber;
-  length: 4;
+  timeout: BigNumber;
+  4: BigNumber;
+  length: 5;
 }
 export interface GetVotingStatusToKickValidatorResponse {
   result0: BigNumber;
@@ -270,6 +283,30 @@ export interface Staking {
    */
   'new'(
     _stakingToken: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param validatorStakerAddress Type: address, Indexed: false
+   */
+  adminKickValidatorInNextEpoch(
+    validatorStakerAddress: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param validatorStakerAddress Type: address, Indexed: false
+   * @param amountToBurn Type: uint256, Indexed: false
+   */
+  adminSlashValidator(
+    validatorStakerAddress: string,
+    amountToBurn: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -424,6 +461,15 @@ export interface Staking {
   owner(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   */
+  pauseEpoch(
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
    * Constant: true
    * StateMutability: view
    * Type: function
@@ -506,6 +552,28 @@ export interface Staking {
    */
   setEpochLength(
     newEpochLength: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param newState Type: uint8, Indexed: false
+   */
+  setEpochState(
+    newState: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param newEpochTimeout Type: uint256, Indexed: false
+   */
+  setEpochTimeout(
+    newEpochTimeout: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**

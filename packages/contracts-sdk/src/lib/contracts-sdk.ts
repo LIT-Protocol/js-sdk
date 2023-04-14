@@ -12,6 +12,7 @@ try {
 
 // ----- autogen:import-data:start  -----
 import { accessControlConditions } from '../abis/AccessControlConditions.data';
+import { allowlist } from '../abis/Allowlist.data';
 import { litToken } from '../abis/LITToken.data';
 import { multisender } from '../abis/Multisender.data';
 import { pkpHelper } from '../abis/PKPHelper.data';
@@ -24,6 +25,7 @@ import { staking } from '../abis/Staking.data';
 
 // ----- autogen:imports:start  -----
 import * as accessControlConditionsContract from '../abis/AccessControlConditions';
+import * as allowlistContract from '../abis/Allowlist';
 import * as litTokenContract from '../abis/LITToken';
 import * as multisenderContract from '../abis/Multisender';
 import * as pkpHelperContract from '../abis/PKPHelper';
@@ -33,6 +35,9 @@ import * as pubkeyRouterContract from '../abis/PubkeyRouter';
 import * as rateLimitNftContract from '../abis/RateLimitNFT';
 import * as stakingContract from '../abis/Staking';
 // ----- autogen:imports:end  -----
+
+const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/http';
+const BLOCK_EXPLORER = 'https://lit-protocol.calderaexplorer.xyz/';
 
 // This function asynchronously executes a provided callback function for each item in the given array.
 // The callback function is awaited before continuing to the next iteration.
@@ -91,6 +96,11 @@ export class LitContracts {
   accessControlConditionsContract: {
     read: accessControlConditionsContract.ContractContext;
     write: accessControlConditionsContract.ContractContext;
+  };
+
+  allowlistContract: {
+    read: allowlistContract.ContractContext;
+    write: allowlistContract.ContractContext;
   };
 
   litTokenContract: {
@@ -160,7 +170,7 @@ export class LitContracts {
 
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
-      this.rpc = 'https://matic-mumbai.chainstacklabs.com';
+      this.rpc = DEFAULT_RPC;
     }
 
     if (!this.rpcs) {
@@ -169,6 +179,7 @@ export class LitContracts {
 
     // ----- autogen:blank-init:start  -----
     this.accessControlConditionsContract = {} as any;
+    this.allowlistContract = {} as any;
     this.litTokenContract = {} as any;
     this.multisenderContract = {} as any;
     this.pkpHelperContract = {} as any;
@@ -216,11 +227,11 @@ export class LitContracts {
       }
 
       const chainInfo = {
-        chainId: '0x13881',
-        chainName: 'Mumbai',
-        nativeCurrency: { name: 'Matic', symbol: 'MATIC', decimals: 18 },
+        chainId: '0x2AC49',
+        chainName: 'Lit Protocol',
+        nativeCurrency: { name: 'LIT', symbol: 'LIT', decimals: 18 },
         rpcUrls: this.rpcs,
-        blockExplorerUrls: ['https://mumbai.polygonscan.com/'],
+        blockExplorerUrls: [BLOCK_EXPLORER],
         iconUrls: ['future'],
       };
 
@@ -358,6 +369,19 @@ export class LitContracts {
         accessControlConditions.abi as any,
         this.signer
       ) as unknown as accessControlConditionsContract.ContractContext,
+    };
+
+    this.allowlistContract = {
+      read: new ethers.Contract(
+        allowlist.address,
+        allowlist.abi as any,
+        this.provider
+      ) as unknown as allowlistContract.ContractContext,
+      write: new ethers.Contract(
+        allowlist.address,
+        allowlist.abi as any,
+        this.signer
+      ) as unknown as allowlistContract.ContractContext,
     };
 
     this.litTokenContract = {
