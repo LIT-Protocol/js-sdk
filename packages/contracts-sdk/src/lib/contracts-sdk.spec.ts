@@ -25,7 +25,7 @@ Object.defineProperty(global.self, 'crypto', {
 
 import { PKPWallet } from '@lit-protocol/pkp-ethers.js-node';
 import { hexlify } from 'ethers/lib/utils';
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 describe('contractsSdk', () => {
   let litContracts: LitContracts;
   let litContracts_NoArgs: LitContracts;
@@ -95,13 +95,14 @@ describe('contractsSdk', () => {
   it('should create an instance with PKP wallet', async () => {
     // -- prepare
     const PKP_PUBKEY =
-      '0x0439e24fbe3332dd2abe3073f663a58fc74674095e5834ebbe7a86fd52f1cbe54b8268d6426fbd66a6979d787b6848b750f3a64a6354da4616f93a3031f3d44e95';
+      '0x04a23bd3dad3bed2df665b036cc0c9bcb1796ee04d395084b88e38515814d1001420427b5f8e38568c948fe650d544f586112a0dbfc08de5233eb65b4de8959a59';
+
     const CONTROLLER_AUTHSIG = {
-      sig: '0x8c4b3b2a2f8f0b33ad8092719a604e94ffd2d938c115741e7155cdea3653fca75285ed2499ec1c6f60ab4b1e5e9fab2d4e6cf36abf32fe515d67de152736dfcd1b',
+      sig: '0x12977f8c7e726ee1c27c4f79de4277b43ab9c4aa15079728ed34ba44dc134eb42a9887fae591902788d94547084f3098aa4bc1cbf0e5d523bb92098fe42529b21b',
       derivedVia: 'web3.eth.personal.sign',
       signedMessage:
-        'localhost:3000 wants you to sign in with your Ethereum account:\n0x5B8A8d043f2235a29E4b063c20299050931832Dc\n\n\nURI: http://localhost:3000/\nVersion: 1\nChain ID: 80001\nNonce: McW3494o8EuALAzJn\nIssued At: 2022-12-06T18:09:09.646Z\nExpiration Time: 2022-12-13T18:09:09.644Z',
-      address: '0x5B8A8d043f2235a29E4b063c20299050931832Dc',
+        'demo-encrypt-decrypt-react.vercel.app wants you to sign in with your Ethereum account:\n0xDbfa48A182e0e080CFcB09E8CB38F0A089325727\n\n\nURI: https://demo-encrypt-decrypt-react.vercel.app/\nVersion: 1\nChain ID: 1\nNonce: xVM3lNqW0NSwoRzPl\nIssued At: 2023-04-15T06:46:35.117Z\nExpiration Time: 2023-04-22T06:46:35.093Z',
+      address: '0xdbfa48a182e0e080cfcb09e8cb38f0a089325727',
     };
 
     // -- init pkp wallet
@@ -122,11 +123,11 @@ describe('contractsSdk', () => {
     const mintCost =
       await litContracts_pkpWallet.pkpNftContract.read.mintCost();
 
-    expect(mintCost.toNumber()).toBe(100000000000000);
+    expect(mintCost.toNumber()).toBe(1);
 
     // -- check address (should stays the same)
     expect(await pkpWallet.getAddress()).toBe(
-      '0x014b9D4B8B369d85E75Ed9e2e6daF28C0d50c364'
+      '0x18f987D15a973776f6a60652B838688a1833fE95'
     );
 
     // -- check write
@@ -136,12 +137,11 @@ describe('contractsSdk', () => {
 
     expect(tx).toBeDefined();
   });
-
   it('creates an instance with custom private key signer', async () => {
     const privateKey =
       '0x4cc303e56f1ff14e762a33534d7fbaa8a76e52509fd96373f24045baae99cc38';
     const provider = new ethers.providers.JsonRpcProvider(
-      'https://matic-mumbai.chainstacklabs.com'
+      'https://lit-protocol.calderachain.xyz/http'
     );
     const signer = new ethers.Wallet(privateKey, provider);
     litContracts_privateKeySigner = new LitContracts({ signer });
@@ -158,13 +158,15 @@ describe('contractsSdk', () => {
 
   it('should create an instance with PKP', async () => {
     jest.setTimeout(100000);
+    // -- prepare
     const PKP_PUBKEY =
       '0x04a23bd3dad3bed2df665b036cc0c9bcb1796ee04d395084b88e38515814d1001420427b5f8e38568c948fe650d544f586112a0dbfc08de5233eb65b4de8959a59';
+
     const CONTROLLER_AUTHSIG = {
-      sig: '0x9fdfd14517e498093efc616f8a0ee7517325ed02b116c71089a9ffca8357613b12b20b06e48bd4f8be6036d9dd6daed1f4848f33ece0ffb971d3470cbee74e521c',
+      sig: '0x12977f8c7e726ee1c27c4f79de4277b43ab9c4aa15079728ed34ba44dc134eb42a9887fae591902788d94547084f3098aa4bc1cbf0e5d523bb92098fe42529b21b',
       derivedVia: 'web3.eth.personal.sign',
       signedMessage:
-        'demo-encrypt-decrypt-react.vercel.app wants you to sign in with your Ethereum account:\n0xDbfa48A182e0e080CFcB09E8CB38F0A089325727\n\n\nURI: https://demo-encrypt-decrypt-react.vercel.app/\nVersion: 1\nChain ID: 1\nNonce: xdaVJQ9dmowmNHbbc\nIssued At: 2023-04-14T07:37:00.272Z\nExpiration Time: 2023-04-21T07:36:57.155Z',
+        'demo-encrypt-decrypt-react.vercel.app wants you to sign in with your Ethereum account:\n0xDbfa48A182e0e080CFcB09E8CB38F0A089325727\n\n\nURI: https://demo-encrypt-decrypt-react.vercel.app/\nVersion: 1\nChain ID: 1\nNonce: xVM3lNqW0NSwoRzPl\nIssued At: 2023-04-15T06:46:35.117Z\nExpiration Time: 2023-04-22T06:46:35.093Z',
       address: '0xdbfa48a182e0e080cfcb09e8cb38f0a089325727',
     };
 
@@ -172,7 +174,7 @@ describe('contractsSdk', () => {
     const pkpWallet = new PKPWallet({
       pkpPubKey: PKP_PUBKEY,
       controllerAuthSig: CONTROLLER_AUTHSIG,
-      provider: 'https://rpc-mumbai.maticvigil.com',
+      provider: 'https://lit-protocol.calderachain.xyz/http',
     });
 
     await pkpWallet.init();
@@ -185,7 +187,7 @@ describe('contractsSdk', () => {
 
     const pkpAddress = await pkpWallet.getAddress();
 
-    expect(pkpAddress).toBe('0x014b9D4B8B369d85E75Ed9e2e6daF28C0d50c364');
+    expect(pkpAddress).toBe('0x18f987D15a973776f6a60652B838688a1833fE95');
 
     const mintCost = await litContracts.pkpNftContract.read.mintCost();
 
@@ -196,7 +198,6 @@ describe('contractsSdk', () => {
     console.log('mintTx:', mintTx);
 
     expect(mintTx).toBe(1);
-
   });
 
   // it('should create an instance without args', async () => {
