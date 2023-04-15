@@ -58,7 +58,7 @@
     "@testing-library/cypress": "^8.0.3",
     "@testing-library/react": "^13.4.0",
     "@types/testing-library__cypress": "^5.0.9",
-    "@walletconnect/ethereum-provider": "2.5.1",
+    "@walletconnect/ethereum-provider": "2.7.0",
     "@web3modal/standalone": "^2.2.1",
     "@websaam/nx-esbuild": "^0.0.1",
     "axios": "^0.27.2",
