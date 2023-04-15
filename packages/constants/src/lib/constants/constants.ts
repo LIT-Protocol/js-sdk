@@ -364,6 +364,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  scrollAlphaTestnet: {
+    contractAddress: null,
+    chainId: 534353,
+    name: 'Scroll Alpha Testnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://alpha-rpc.scroll.io/l2'],
+    blockExplorerUrls: ['https://blockscout.scroll.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
