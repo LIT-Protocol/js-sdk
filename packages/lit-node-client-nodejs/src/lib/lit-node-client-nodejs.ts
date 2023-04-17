@@ -70,6 +70,7 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   GetWalletSigProps,
+  ILitNodeClient,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -101,6 +102,7 @@ import { LitThirdPartyLibs } from '@lit-protocol/lit-third-party-libs';
 import { nacl } from '@lit-protocol/nacl';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 import { BigNumber } from 'ethers';
+
 // import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 
 /** ---------- Main Export Class ---------- */
@@ -395,6 +397,7 @@ export class LitNodeClientNodeJs {
           switchChain,
           expiration,
           uri: sessionKeyUri,
+          litNodeClient: this,
         });
       } else {
         if (!this.defaultAuthCallback) {
@@ -410,6 +413,7 @@ export class LitNodeClientNodeJs {
           switchChain,
           expiration,
           uri: sessionKeyUri,
+          litNodeClient: this,
         });
       }
     } else {

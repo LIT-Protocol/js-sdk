@@ -104,7 +104,7 @@ export interface AuthCallbackParams {
   cosmosWalletType?: CosmosWalletType;
 
   // pass the LitNodeClient in so that the auth callback can use it to do things like signSessionKey etc
-  litNodeClient: ILitNodeClient;
+  litNodeClient?: ILitNodeClient;
 }
 
 /** ---------- Web3 ---------- */
