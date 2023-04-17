@@ -102,6 +102,9 @@ export interface AuthCallbackParams {
   // Keplr & Cypher -> window.keplr
   // Leap -> window.leap
   cosmosWalletType?: CosmosWalletType;
+
+  // pass the LitNodeClient in so that the auth callback can use it to do things like signSessionKey etc
+  litNodeClient: ILitNodeClient;
 }
 
 /** ---------- Web3 ---------- */

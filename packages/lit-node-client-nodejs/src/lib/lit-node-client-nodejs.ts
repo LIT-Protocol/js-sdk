@@ -2557,6 +2557,7 @@ export class LitNodeClientNodeJs {
           resources: capabilities,
           expiration,
           uri: sessionKeyUri,
+          litNodeClient: this,
         });
       } else {
         if (!this.defaultAuthCallback) {
@@ -2572,6 +2573,7 @@ export class LitNodeClientNodeJs {
           switchChain: params.switchChain,
           expiration,
           uri: sessionKeyUri,
+          litNodeClient: this,
         });
       }
     }
