@@ -290,6 +290,7 @@ export class LitNodeClientNodeJs {
    * @return { }
    */
   getSessionKey = (supposedSessionKey?: string): SessionKeyPair => {
+    log('getSessionKey() called with supposedSessionKey: ', supposedSessionKey);
     let sessionKey: any = supposedSessionKey ?? '';
 
     const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
@@ -322,7 +323,6 @@ export class LitNodeClientNodeJs {
           );
         }
       } else {
-        log('storedSessionKeyOrError');
         sessionKey = JSON.parse(storedSessionKeyOrError.result);
       }
     }
