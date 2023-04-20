@@ -24,7 +24,7 @@ export class OtpSession {
       this._params.requestId ?? (Math.random() * 10000 + 1).toString(10);
     let body: any = {
       otp: this._params.userId,
-      requestId: this._requestId,
+      request_id: this._requestId,
     };
     body = JSON.stringify(body);
 
@@ -58,7 +58,7 @@ export class OtpSession {
     let body: any = {
       otp: this._params.userId,
       code,
-      requestId: this._requestId,
+      request_id: this._requestId,
     };
     body = JSON.stringify(body);
     const response = await fetch(url, {
