@@ -375,6 +375,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  zksync: {
+    contractAddress: null,
+    chainId: 324,
+    name: 'zkSync Era Mainnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://mainnet.era.zksync.io'],
+    blockExplorerUrls: ['https://explorer.zksync.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;

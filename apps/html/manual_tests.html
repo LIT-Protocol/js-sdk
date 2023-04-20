@@ -670,6 +670,26 @@
         });
       };
 
+      var ETHOnZksync = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'zksync',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnZksync',
+        });
+      };
+
       var ETHOnEluvioEmptyWallet = async () => {
         const accessControlConditions = [
           {
@@ -2470,6 +2490,9 @@
     <br />
     <br />
     <button onclick="ETHOnAurora()">ETHOnAurora</button>
+    <br />
+    <br />
+    <button onclick="ETHOnZksync()">ETHOnZksync</button>
     <br />
     <br />
     <button onclick="ETHOnEluvioEmptyWallet()">ETHOnEluvioEmptyWallet</button>
