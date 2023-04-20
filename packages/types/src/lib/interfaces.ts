@@ -1075,6 +1075,14 @@ export interface IRelayPKP {
   ethAddress: string;
 }
 
+
+export interface OtpServerConfig {
+  baseUrl: string,
+  port: string,
+  startRoute: string,
+  checkRoute: string,
+}
+
 export interface GetSessionSigsWithAuthParams {
   /**
    * Public key of PKP to auth with

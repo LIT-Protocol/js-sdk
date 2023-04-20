@@ -28,6 +28,7 @@ import {
   parseLoginParams,
   prepareLoginUrl,
 } from './utils';
+import { OtpSession } from '../otp';
 
 /**
  * Class that handles authentication through Lit login
@@ -265,8 +266,14 @@ export class LitAuthClient {
     return authMethod;
   }
 
-  public async signInWithOTP(params: SignInWithOTPParams): Promise<any> {
+  public async signInWithOTP(params: SignInWithOTPParams): Promise<OtpSession> {
+    // TODO: add OTP server config
+    let session = new OtpSession(params);
     
+    // Should we start the otp session for them? or make the caller explicitly invoke?
+    await session.sendOtpCode();
+    
+    return session;
   }
 
   /**

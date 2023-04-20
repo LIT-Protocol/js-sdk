@@ -1,14 +1,21 @@
-import { AuthMethod, SignInWithOTPParams } from '@lit-protocol/types';
+import { AuthMethodType } from '@lit-protocol/constants';
+import { AuthMethod, OtpServerConfig, SignInWithOTPParams } from '@lit-protocol/types';
 
 export class OtpSession {
   private _params: SignInWithOTPParams;
-  private _baseUrl = 'http://127.0.0.1';
-  private _port = '8080';
-  private _startRoute = '/api/otp/start';
-  private _checkRoute = '/api/otp/check';
+  private _baseUrl: string; // TODO: REMOVE THIS HARD CODED STRING 
+  private _port: string;
+  private _startRoute: string;
+  private _checkRoute: string;
   private _requestId: string = '';
-  constructor(params: SignInWithOTPParams) {
+
+  constructor(params: SignInWithOTPParams, config?: OtpServerConfig) {
     this._params = params;
+    this._baseUrl = config?.baseUrl || 'http://127.0.0.1'; // TODO: change default to real url 
+    this._port = config?.port || '8080';
+    this._startRoute = config?.startRoute || '/api/otp/start';
+    this._checkRoute = config?.checkRoute || '/api/otp/check';
+
   }
 
   public async sendOtpCode(): Promise<boolean> {
@@ -20,6 +27,7 @@ export class OtpSession {
       requestId: this._requestId,
     };
     body = JSON.stringify(body);
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -42,11 +50,11 @@ export class OtpSession {
     
     /**
         pub struct OtpCheckRequest {
-        pub otp: String,
-        pub code: String,
-        pub request_id: String,
+            pub otp: String,
+            pub code: String,
+            pub request_id: String,
         }
-     */
+    */
     let body: any = {
       otp: this._params.userId,
       code,
@@ -63,7 +71,7 @@ export class OtpSession {
 
     if (response.status < 200 || response.status >= 400) {
       console.warn('Something wrong with  OTP request', await response.json());
-      const err = new Error('Unable to start otp verification');
+      const err = new Error('unsucessful otp check');
       throw err;
     }
 
@@ -74,7 +82,7 @@ export class OtpSession {
     }
     
     return {
-        authMethodType: 7, // OTP
+        authMethodType: AuthMethodType.OTP,
         accessToken: respBody.token_jwt
     };
   }
