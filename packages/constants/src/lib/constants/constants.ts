@@ -375,7 +375,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-  zksyncEra: {
+  zksync: {
     contractAddress: null,
     chainId: 324,
     name: 'zkSync Era Mainnet',
