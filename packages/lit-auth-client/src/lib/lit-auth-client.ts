@@ -10,6 +10,7 @@ import {
   SignSessionKeyResponse,
   GetSessionSigsWithAuthParams,
   LitRelayConfig,
+  SignInWithOTPParams,
 } from '@lit-protocol/types';
 import {
   LIT_CHAINS,
@@ -262,6 +263,10 @@ export class LitAuthClient {
       accessToken: JSON.stringify(authSig),
     };
     return authMethod;
+  }
+
+  public async signInWithOTP(params: SignInWithOTPParams): Promise<any> {
+    
   }
 
   /**

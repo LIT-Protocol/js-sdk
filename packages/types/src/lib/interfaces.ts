@@ -903,6 +903,42 @@ export interface SignInWithEthWalletParams {
   expiration?: string;
 }
 
+export interface SignInWithOTPParams {
+  /**
+   * otp transport (email or phone #)
+   * used as the user ID for the auth method
+  */
+  userId: string;
+  /**
+   * Origin of the sign in request
+   */
+  origin?: string;
+  /**
+   * when the generated JWT expires
+   */
+  expiration?: string;
+  /**
+   * 
+   */
+  requestId?: string;
+}
+
+
+export interface OtpSessionResult {
+  /**
+   * Status message of the request
+   */
+  message?: string,
+  /**
+   * jwt from successful otp check
+   */
+  token_jwt?: string,
+  /**
+   * status of the otp check
+   */
+  status?: string,
+}
+
 export interface LoginUrlParams {
   /**
    * Auth method name
