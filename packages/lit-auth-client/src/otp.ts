@@ -90,9 +90,9 @@ export class OtpSession {
   private _buildUrl(route: string): string {
     switch (route) {
       case 'start':
-        return `${this._buildUrl}:${this._port}${this._startRoute}`;
+        return `${this._baseUrl}:${this._port}${this._startRoute}`;
       case 'check':
-        return `${this._buildUrl}:${this._port}${this._checkRoute}`;
+        return `${this._baseUrl}:${this._port}${this._checkRoute}`;
       default:
         return '';
     }
