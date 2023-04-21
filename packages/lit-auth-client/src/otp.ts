@@ -1,9 +1,13 @@
 import { AuthMethodType } from '@lit-protocol/constants';
-import { AuthMethod, OtpServerConfig, SignInWithOTPParams } from '@lit-protocol/types';
+import {
+  AuthMethod,
+  OtpServerConfig,
+  SignInWithOTPParams,
+} from '@lit-protocol/types';
 
 export class OtpSession {
   private _params: SignInWithOTPParams;
-  private _baseUrl: string; // TODO: REMOVE THIS HARD CODED STRING 
+  private _baseUrl: string; // TODO: REMOVE THIS HARD CODED STRING
   private _port: string;
   private _startRoute: string;
   private _checkRoute: string;
@@ -11,17 +15,18 @@ export class OtpSession {
 
   constructor(params: SignInWithOTPParams, config?: OtpServerConfig) {
     this._params = params;
-    this._baseUrl = config?.baseUrl || 'http://127.0.0.1'; // TODO: change default to real url 
+    this._baseUrl = config?.baseUrl || 'http://127.0.0.1'; // TODO: change default to real url
     this._port = config?.port || '8080';
     this._startRoute = config?.startRoute || '/api/otp/start';
     this._checkRoute = config?.checkRoute || '/api/otp/check';
-
   }
 
   public async sendOtpCode(): Promise<boolean> {
     const url = this._buildUrl('start');
     this._requestId =
-      this._params.requestId ?? (Math.random() * 10000 + 1).toString(10);
+      this._params.requestId ??
+      (Math.random() * 10000 + 1).toString(10).replace('.', '');
+
     let body: any = {
       otp: this._params.userId,
       request_id: this._requestId,
@@ -41,13 +46,13 @@ export class OtpSession {
       const err = new Error('Unable to start otp verification');
       throw err;
     }
-    
+
     return true;
   }
 
   public async checkOtpCode(code: string): Promise<AuthMethod> {
     const url = this._buildUrl('check');
-    
+
     /**
         pub struct OtpCheckRequest {
             pub otp: String,
@@ -78,12 +83,12 @@ export class OtpSession {
     const respBody: any = await response.json();
 
     if (!respBody.token_jwt) {
-        throw new Error("Invalid otp code, operation was aborted");
+      throw new Error('Invalid otp code, operation was aborted');
     }
-    
+
     return {
-        authMethodType: AuthMethodType.OTP,
-        accessToken: respBody.token_jwt
+      accessToken: respBody.token_jwt,
+      authMethodType: AuthMethodType.OTP,
     };
   }
 

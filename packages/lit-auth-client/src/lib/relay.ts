@@ -46,7 +46,7 @@ export class LitRelay implements IRelay {
     body: string
   ): Promise<IRelayMintResponse> {
     const route = this._getMintPKPRoute(authMethodType);
-    const response = await fetch(`${this.relayUrl}${route}`, {
+    const response = await fetch(`http://127.0.0.1:8081${route}`, {
       method: 'POST',
       headers: {
         'api-key': this.relayApiKey,
@@ -177,6 +177,8 @@ export class LitRelay implements IRelay {
         return '/auth/discord/userinfo';
       case AuthMethodType.GoogleJwt:
         return '/auth/google/userinfo';
+      case AuthMethodType.OTP:
+        return `/auth/otp/userinfo`;
       default:
         throw new Error(
           `Auth method type "${authMethodType}" is not supported. Please refer to the type AuthMethodType to see which enum values are available.`
@@ -199,6 +201,8 @@ export class LitRelay implements IRelay {
         return '/auth/discord';
       case AuthMethodType.GoogleJwt:
         return '/auth/google';
+      case AuthMethodType.OTP:
+        return `/auth/otp`;
       default:
         throw new Error(
           `Auth method type "${authMethodType}" is not supported`

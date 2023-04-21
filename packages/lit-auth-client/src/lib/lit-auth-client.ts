@@ -29,6 +29,7 @@ import {
   prepareLoginUrl,
 } from './utils';
 import { OtpSession } from '../otp';
+import { json } from 'stream/consumers';
 
 /**
  * Class that handles authentication through Lit login
@@ -72,6 +73,7 @@ export class LitAuthClient {
       if (options?.litRelayConfig?.relayApiKey) {
         this.relay = new LitRelay(options.litRelayConfig);
       } else {
+        console.log(options);
         throw new Error(
           'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
         );
@@ -269,10 +271,10 @@ export class LitAuthClient {
   public async signInWithOTP(params: SignInWithOTPParams): Promise<OtpSession> {
     // TODO: add OTP server config
     let session = new OtpSession(params);
-    
+
     // Should we start the otp session for them? or make the caller explicitly invoke?
     await session.sendOtpCode();
-    
+
     return session;
   }
 
@@ -312,6 +314,12 @@ export class LitAuthClient {
           AuthMethodType.EthWallet,
           // Auth sig is a JSON string
           authMethod.accessToken
+        );
+        break;
+      case AuthMethodType.OTP:
+        mintRes = await this.relay.mintPKP(
+          AuthMethodType.OTP,
+          JSON.stringify({ jwt: authMethod.accessToken })
         );
         break;
       default:
