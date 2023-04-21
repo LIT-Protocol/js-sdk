@@ -94,6 +94,30 @@ export function parseLoginParams(search: string): LoginUrlParams {
 }
 
 /**
+ * Check if current url is redirect uri to determine if app was redirected back from external login page
+ *
+ * @param {string} redirectUri - Redirect uri to check against
+ *
+ * @returns {boolean} - True if current url is redirect uri
+ */
+export function isSignInRedirect(redirectUri: string): boolean {
+  // Check if current url matches redirect uri
+  const isRedirectUri = window.location.href.startsWith(redirectUri);
+  if (!isRedirectUri) {
+    return false;
+  }
+  // Check url for redirect params
+  const { provider, accessToken, idToken, state, error } = parseLoginParams(
+    window.document.location.search
+  );
+  // Check if current url is redirect uri and has redirect params
+  if (isRedirectUri && (provider || accessToken || idToken || state || error)) {
+    return true;
+  }
+  return false;
+}
+
+/**
  * Create OAuth 2.0 state param and store it in session storage
  *
  * @returns {string} - State param
@@ -142,4 +166,18 @@ export function encode(value: string): string {
  */
 export function decode(value: string): string {
   return window.atob(value);
+}
+
+/**
+ * Get RP ID from origin for WebAuthn
+ *
+ * @param {string} origin - Origin to get RP ID from
+ *
+ * @returns {string} - RP ID
+ */
+export function getRPIdFromOrigin(origin: string) {
+  // remove protocol with regex
+  const newOrigin = origin.replace(/(^\w+:|^)\/\//, '');
+  // remove port with regex
+  return newOrigin.replace(/:\d+$/, '');
 }
