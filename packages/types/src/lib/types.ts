@@ -5,10 +5,14 @@ import {
   AccsOperatorParams,
   AccsRegularParams,
   AccsSOLV2Params,
+  EthereumAccountProviderOptions,
+  EthereumAuthenticateOptions,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
+  OAuthProviderOptions,
+  WebAuthnProviderOptions,
 } from './interfaces';
 
 export type AccessControlConditions = AccsRegularParams[] | AccsDefaultParams[];
@@ -42,8 +46,8 @@ export type LITChainRequiredProps = {
   name: string;
   symbol: string;
   decimals: number;
-  rpcUrls: Array<String>;
-  blockExplorerUrls: Array<String>;
+  rpcUrls: Array<string>;
+  blockExplorerUrls: Array<string>;
   vmType: string;
 };
 
@@ -96,4 +100,14 @@ export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
 export type EncryptedSymmetricKey = string | Uint8Array | any;
 export type AcceptedFileType = File | Blob;
 
+/**
+ * ========== Lit Auth Client ==========
+ */
 export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
+
+export type ProviderOptions =
+  | OAuthProviderOptions
+  | EthereumAccountProviderOptions
+  | WebAuthnProviderOptions;
+
+export type AuthenticateOptions = EthereumAuthenticateOptions;

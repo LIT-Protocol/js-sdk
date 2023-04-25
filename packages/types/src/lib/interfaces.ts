@@ -1007,21 +1007,22 @@ export interface BaseProviderOptions {
   litNodeClient: any;
 }
 
-export interface OAuthProviderOptions extends BaseProviderOptions {
+export interface OAuthProviderOptions {
+  /**
+   * Name of provider to initialize
+   */
+  type: 'google' | 'discord';
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   redirectUri: string;
 }
 
-export interface InitOAuthProviderOptions {
+export interface EthereumAccountProviderOptions {
   /**
-   * The redirect URI that Lit's login server should send the user back to
+   * Name of provider to initialize
    */
-  redirectUri: string;
-}
-
-export interface EthereumAccountProviderOptions extends BaseProviderOptions {
+  type: 'ethereum';
   /**
    * Ethereum wallet address
    */
@@ -1044,27 +1045,11 @@ export interface EthereumAccountProviderOptions extends BaseProviderOptions {
   origin?: string;
 }
 
-export interface InitEthereumAccountProviderOptions {
+export interface WebAuthnProviderOptions {
   /**
-   * Ethereum wallet address
+   * Name of provider to initialize
    */
-  address: string;
-  /**
-   * Function to sign message
-   *
-   * @param {string} message - Message to sign
-   *
-   * @returns {Promise<string>} - Raw signature of message
-   */
-  signMessage: (message: string) => Promise<string>;
-  /**
-   * The domain from which the signing request is made
-   */
-  domain?: string;
-  /**
-   * The origin from which the signing request is made
-   */
-  origin?: string;
+  type: 'webauthn';
 }
 
 export interface BaseProviderSessionSigsParams {
@@ -1084,17 +1069,6 @@ export interface BaseProviderSessionSigsParams {
    * Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
    */
   litNodeClient?: any;
-}
-
-export interface AuthWithEthereumParams {
-  /**
-   * Name of chain to use for signature
-   */
-  chain?: string;
-  /**
-   * When the auth signature expires
-   */
-  expiration?: string;
 }
 
 export interface LoginUrlParams {
@@ -1118,4 +1092,15 @@ export interface LoginUrlParams {
    * Error codes from Lit's login server
    */
   error: string | null;
+}
+
+export interface EthereumAuthenticateOptions {
+  /**
+   * Name of chain to use for signature
+   */
+  chain?: string;
+  /**
+   * When the auth signature expires
+   */
+  expiration?: string;
 }

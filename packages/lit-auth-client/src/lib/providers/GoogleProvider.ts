@@ -1,4 +1,8 @@
-import { AuthMethod, OAuthProviderOptions } from '@lit-protocol/types';
+import {
+  AuthMethod,
+  BaseProviderOptions,
+  OAuthProviderOptions,
+} from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
 import {
   prepareLoginUrl,
@@ -14,7 +18,7 @@ export default class GoogleProvider extends BaseProvider {
    */
   public redirectUri: string;
 
-  constructor(options: OAuthProviderOptions) {
+  constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
     this.redirectUri = options.redirectUri;
   }
@@ -24,7 +28,7 @@ export default class GoogleProvider extends BaseProvider {
    *
    * @returns {void} - Redirects user to Lit login page
    */
-  public signInWithLit(): void {
+  public signIn(): void {
     // Get login url
     const loginUrl = prepareLoginUrl('google', this.redirectUri);
     // Redirect to login url
@@ -32,11 +36,11 @@ export default class GoogleProvider extends BaseProvider {
   }
 
   /**
-   * Validate the URL parameters returned from Lit's login server and return the OAuth token
+   * Validate the URL parameters returned from Lit's login server and return the authentication data
    *
-   * @returns {AuthMethod} - Auth method object containing the OAuth token
+   * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
    */
-  public authenticateWithLit(): AuthMethod {
+  public async authenticate(): Promise<AuthMethod> {
     // Check if current url matches redirect uri
     if (!window.location.href.startsWith(this.redirectUri)) {
       throw new Error(

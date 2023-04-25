@@ -17,6 +17,10 @@ import {
   removeStateParam,
   encode,
 } from './utils';
+import GoogleProvider from './providers/GoogleProvider';
+import DiscordProvider from './providers/DiscordProvider';
+import WebAuthnProvider from './providers/WebAuthnProvider';
+import EthereumAccountProvider from './providers/EthereumAccountProvider';
 
 const isClass = (v: unknown) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
@@ -27,26 +31,76 @@ describe('LitAuthClient', () => {
     expect(isClass(LitAuthClient)).toBe(true);
   });
 
-  // TODO: Update tests
-//   it('should throw an error if no API key or custom relay server is provided', () => {
-//     expect(() => {
-//       new LitAuthClient({
-//         domain: 'localhost:3000',
-//         redirectUri: 'http://localhost:3000/redirect',
-//       });
-//     }).toThrow(
-//       'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
-//     );
-//   });
+  it('should throw an error if no API key or custom relay server is provided', () => {
+    expect(() => {
+      new LitAuthClient();
+    }).toThrow(
+      'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
+    );
+  });
 
-//   it('should create a LitAuthClient instance with valid options', () => {
-//     const validClient = new LitAuthClient({
-//       domain: 'localhost:3000',
-//       redirectUri: 'http://localhost:3000/redirect',
-//       litRelayConfig: { relayApiKey: 'test-api-key' },
-//     });
-//     expect(validClient).toBeDefined();
-//   });
+  it('should create a LitAuthClient instance with valid options', () => {
+    const validClient = new LitAuthClient({
+      litRelayConfig: { relayApiKey: 'test-api-key' },
+    });
+    expect(validClient).toBeDefined();
+  });
+});
+
+describe('initProvider', () => {
+  let client: LitAuthClient;
+
+  beforeEach(() => {
+    client = new LitAuthClient({
+      litRelayConfig: { relayApiKey: 'test-api-key' },
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should throw an error for an unsupported provider', () => {
+    const invalidProvider = { type: 'bookface' };
+    expect(() => {
+      client.initProvider(invalidProvider);
+    }).toThrowError(
+      "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn' are supported at the moment."
+    );
+  });
+
+  it('should return an instance of DiscordProvider', () => {
+    const provider = client.initProvider({
+      type: 'discord',
+      redirectUri: 'http://localhost:3000/redirect',
+    });
+    expect(provider).toBeInstanceOf(DiscordProvider);
+  });
+
+  it('should return an instance of GoogleProvider', () => {
+    const provider = client.initProvider({
+      type: 'google',
+      redirectUri: 'http://localhost:3000/redirect',
+    });
+    expect(provider).toBeInstanceOf(GoogleProvider);
+  });
+
+  it('should return an instance of EthereumAccountProvider', () => {
+    const provider = client.initProvider({
+      type: 'ethereum',
+      address: '0xbf90ce8Ab70eCd3a8776D18d9B7D679D64C6Dc97',
+      signmessage: async () => 'signed message',
+    });
+    expect(provider).toBeInstanceOf(EthereumAccountProvider);
+  });
+
+  it('should return an instance of WebAuthnProvider', () => {
+    const provider = client.initProvider({
+      type: 'webauthn',
+    });
+    expect(provider).toBeInstanceOf(WebAuthnProvider);
+  });
+});
 
 //   describe('signInWithSocial', () => {
 //     let client: LitAuthClient;

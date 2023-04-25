@@ -4,6 +4,7 @@ import {
   AuthCallbackParams,
   AuthMethod,
   AuthSig,
+  AuthenticateOptions,
   BaseProviderOptions,
   BaseProviderSessionSigsParams,
   IRelay,
@@ -31,6 +32,17 @@ export abstract class BaseProvider {
     this.relay = options.relay;
     this.litNodeClient = options.litNodeClient;
   }
+
+  /**
+   * Authenticate the user based on the provider-specific implementation and return the relevant authentication data
+   *
+   * @template T - Type representing the specific options for the authenticate method
+   * @param {T} [options] - Optional parameters that vary based on the provider
+   * @returns {Promise<AuthMethod>} - Auth method object that contains authentication data
+   */
+  abstract authenticate<T extends AuthenticateOptions>(
+    options?: T
+  ): Promise<AuthMethod>;
 
   /**
    * Mint a new PKP for the given auth method through the relay server

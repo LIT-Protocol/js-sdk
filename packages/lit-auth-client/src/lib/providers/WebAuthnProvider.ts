@@ -1,4 +1,4 @@
-import { AuthMethod, BaseProviderOptions, IRelay } from '@lit-protocol/types';
+import { AuthMethod, BaseProviderOptions } from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import {
@@ -63,20 +63,16 @@ export default class WebAuthnProvider extends BaseProvider {
    *
    * @throws {Error} - Throws an error when called for WebAuthnProvider.
    */
-  public override async mintPKPThroughRelayer(
-    authMethod: AuthMethod
-  ): Promise<string> {
+  public override async mintPKPThroughRelayer(): Promise<string> {
     throw new Error(
       'Use verifyAndMintPKPThroughRelayer for WebAuthnProvider instead.'
     );
   }
 
   /**
-   * Authenticate with WebAuthn
+   * Authenticate with a WebAuthn credential and return the relevant authentication data
    *
-   * @param {string} [rpcUrl] - RPC URL to use for getting latest block hash
-   *
-   * @returns {Promise<AuthMethod>} - Auth method object containing WebAuthn auth data
+   * @returns {Promise<AuthMethod>} - Auth method object containing WebAuthn authentication data
    */
   public async authenticate(): Promise<AuthMethod> {
     const provider = new ethers.providers.JsonRpcProvider(this.rpcUrl);
@@ -84,10 +80,10 @@ export default class WebAuthnProvider extends BaseProvider {
     const block = await provider.getBlock('latest');
     const blockHash = block.hash;
 
-    // Turn into byte array.
+    // Turn into byte array
     const blockHashBytes = ethers.utils.arrayify(blockHash);
 
-    // Construct authentication options.
+    // Construct authentication options
     const rpId = getRPIdFromOrigin(window.location.origin);
 
     const authenticationOptions = {
@@ -102,14 +98,16 @@ export default class WebAuthnProvider extends BaseProvider {
       authenticationOptions
     );
 
-    // BUG: We need to make sure userHandle is base64url encoded. Deep copy the authentication response.
     const actualAuthenticationResponse = JSON.parse(
       JSON.stringify(authenticationResponse)
     );
-    actualAuthenticationResponse.response.userHandle = base64url.encode(
-      // @ts-ignore
-      authenticationResponse.response.userHandle
-    );
+
+    // Make sure userHandle is base64url encoded if it exists
+    const userHandle = authenticationResponse.response?.userHandle;
+    if (userHandle) {
+      actualAuthenticationResponse.response.userHandle =
+        base64url.encode(userHandle);
+    }
 
     const authMethod = {
       authMethodType: AuthMethodType.WebAuthn,

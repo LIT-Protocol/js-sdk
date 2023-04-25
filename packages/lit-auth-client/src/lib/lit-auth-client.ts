@@ -3,6 +3,7 @@ import {
   InitEthereumAccountProviderOptions,
   InitOAuthProviderOptions,
   LitAuthClientOptions,
+  ProviderOptions,
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitRelay } from './relay';
@@ -77,79 +78,41 @@ export class LitAuthClient {
   }
 
   /**
-   * Initialize a Google OAuth provider
+   * Initialize a provider
    *
-   * @param {InitOAuthProviderOptions} params
-   * @param {string} params.redirectUri - Redirect URI that Lit's login server should send the user back to
+   * @param {ProviderOptions} params
    *
-   * @returns {GoogleProvider} - Google OAuth provider
+   * @returns {BaseProvider} - Provider
    */
-  initGoogleProvider(params: InitOAuthProviderOptions): GoogleProvider {
-    const provider = new GoogleProvider({
-      ...params,
+  initProvider<T extends ProviderOptions>(params: T): BaseProvider {
+    const baseParams = {
       rpcUrl: this.rpcUrl,
       relay: this.relay,
       litNodeClient: this.litNodeClient,
-    });
-    this.providers.set('google', provider);
-    return provider;
-  }
+    };
 
-  /**
-   * Initialize a Discord OAuth provider
-   *
-   * @param {InitOAuthProviderOptions} params
-   * @param {string} params.redirectUri - Redirect URI that Lit's login server should send the user back to
-   *
-   * @returns {DiscordProvider} - Discord OAuth provider
-   */
-  initDiscordProvider(params: InitOAuthProviderOptions): DiscordProvider {
-    const provider = new DiscordProvider({
-      ...params,
-      rpcUrl: this.rpcUrl,
-      relay: this.relay,
-      litNodeClient: this.litNodeClient,
-    });
-    this.providers.set('discord', provider);
-    return provider;
-  }
+    let provider: BaseProvider;
 
-  /**
-   * Initialize an Ethereum account provider
-   *
-   * @param {InitEthereumAccountProviderOptions} params - Options for initializing the provider
-   * @param {string} params.address - Ethereum address of the account
-   * @param {Function} params.signMessage - Function that signs a message
-   * @param {string} [params.domain] - The domain from which the signing request is made
-   * @param {string} [params.origin] - The origin from which the signing request is made
-   *
-   * @returns {EthereumAccountProvider} - Ethereum account provider
-   */
-  initEthereumAccountProvider(
-    params: InitEthereumAccountProviderOptions
-  ): EthereumAccountProvider {
-    const provider = new EthereumAccountProvider({
-      ...params,
-      rpcUrl: this.rpcUrl,
-      relay: this.relay,
-      litNodeClient: this.litNodeClient,
-    });
-    this.providers.set('ethereum', provider);
-    return provider;
-  }
+    switch (params.type) {
+      case 'google':
+        provider = new GoogleProvider({ ...baseParams, ...params });
+        break;
+      case 'discord':
+        provider = new DiscordProvider({ ...baseParams, ...params });
+        break;
+      case 'ethereum':
+        provider = new EthereumAccountProvider({ ...baseParams, ...params });
+        break;
+      case 'webauthn':
+        provider = new WebAuthnProvider({ ...baseParams, ...params });
+        break;
+      default:
+        throw new Error(
+          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn' are supported at the moment."
+        );
+    }
 
-  /**
-   * Initialize a WebAuthn provider
-   *
-   * @returns {WebAuthnProvider} - WebAuthn provider
-   */
-  initWebAuthnProvider(): WebAuthnProvider {
-    const provider = new WebAuthnProvider({
-      rpcUrl: this.rpcUrl,
-      relay: this.relay,
-      litNodeClient: this.litNodeClient,
-    });
-    this.providers.set('webauthn', provider);
+    this.providers.set(params.type, provider);
     return provider;
   }
 

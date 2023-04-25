@@ -1,8 +1,9 @@
 import {
   AuthMethod,
   AuthSig,
-  AuthWithEthereumParams,
+  BaseProviderOptions,
   EthereumAccountProviderOptions,
+  EthereumAuthenticateOptions,
 } from '@lit-protocol/types';
 import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { SiweMessage } from 'lit-siwe';
@@ -31,7 +32,7 @@ export default class EthereumAccountProvider extends BaseProvider {
    */
   public origin: string;
 
-  constructor(options: EthereumAccountProviderOptions) {
+  constructor(options: BaseProviderOptions & EthereumAccountProviderOptions) {
     super(options);
     this.address = ethers.utils.getAddress(options.address);
     this.signMessage = options.signMessage;
@@ -42,23 +43,23 @@ export default class EthereumAccountProvider extends BaseProvider {
   /**
    * Generate a wallet signature to use as an auth method
    *
-   * @param {AuthWithEthereumParams} params
-   * @param {string} [params.chain] - Name of chain to use for signature
-   * @param {number} [params.expiration] - When the auth signature expires
+   * @param {EthereumAuthenticateOptions} options
+   * @param {string} [options.chain] - Name of chain to use for signature
+   * @param {number} [options.expiration] - When the auth signature expires
    *
-   * @returns {AuthMethod} - Auth method object containing the auth signature
+   * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
    */
   public async authenticate(
-    params: AuthWithEthereumParams
+    options?: EthereumAuthenticateOptions
   ): Promise<AuthMethod> {
     // Get chain ID or default to Ethereum mainnet
-    const chain = params.chain || 'ethereum';
+    const chain = options?.chain || 'ethereum';
     const selectedChain = LIT_CHAINS[chain];
     const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
 
     // Get expiration or default to 24 hours
     const expiration =
-      params.expiration ||
+      options?.expiration ||
       new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
 
     // Prepare Sign in with Ethereum message
