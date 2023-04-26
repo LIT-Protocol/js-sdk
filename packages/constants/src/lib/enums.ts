@@ -29,3 +29,13 @@ export enum AuthMethodType {
   Google,
   GoogleJwt,
 }
+
+/**
+ * Supported provider types
+ */
+export enum ProviderType {
+  Discord = 'discord',
+  Google = 'google',
+  EthWallet = 'ethWallet',
+  WebAuthn = 'webAuthn',
+}

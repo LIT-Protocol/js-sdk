@@ -1,17 +1,25 @@
 import {
+  EthWalletProviderOptions,
   IRelay,
-  InitEthereumAccountProviderOptions,
-  InitOAuthProviderOptions,
   LitAuthClientOptions,
+  OAuthProviderOptions,
   ProviderOptions,
 } from '@lit-protocol/types';
+import { ProviderType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitRelay } from './relay';
 import { BaseProvider } from './providers/BaseProvider';
 import GoogleProvider from './providers/GoogleProvider';
 import DiscordProvider from './providers/DiscordProvider';
-import EthereumAccountProvider from './providers/EthereumAccountProvider';
+import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
+
+export type Providers = {
+  [ProviderType.Discord]: DiscordProvider;
+  [ProviderType.Google]: GoogleProvider;
+  [ProviderType.EthWallet]: EthWalletProvider;
+  [ProviderType.WebAuthn]: WebAuthnProvider;
+};
 
 /**
  * Class that handles authentication through Lit login
@@ -32,7 +40,7 @@ export class LitAuthClient {
   /**
    * Map of providers
    */
-  private providers: Map<string, BaseProvider>;
+  private providers: Map<ProviderType, BaseProvider>;
 
   /**
    * Create a LitAuthClient instance
@@ -80,31 +88,46 @@ export class LitAuthClient {
   /**
    * Initialize a provider
    *
-   * @param {ProviderOptions} params
+   * @param {T} type - Type of provider to initialize
+   * @param {ProviderOptions} [options] - Options for the provider
    *
    * @returns {BaseProvider} - Provider
    */
-  initProvider<T extends ProviderOptions>(params: T): BaseProvider {
+  public initProvider<T extends ProviderType>(
+    type: T,
+    options?: ProviderOptions
+  ): Providers[T] {
     const baseParams = {
       rpcUrl: this.rpcUrl,
       relay: this.relay,
       litNodeClient: this.litNodeClient,
     };
 
-    let provider: BaseProvider;
+    let provider: Providers[T];
 
-    switch (params.type) {
-      case 'google':
-        provider = new GoogleProvider({ ...baseParams, ...params });
+    switch (type) {
+      case ProviderType.Google:
+        provider = new GoogleProvider({
+          ...baseParams,
+          ...(options as OAuthProviderOptions),
+        }) as Providers[T];
         break;
-      case 'discord':
-        provider = new DiscordProvider({ ...baseParams, ...params });
+      case ProviderType.Discord:
+        provider = new DiscordProvider({
+          ...baseParams,
+          ...(options as OAuthProviderOptions),
+        }) as Providers[T];
         break;
-      case 'ethereum':
-        provider = new EthereumAccountProvider({ ...baseParams, ...params });
+      case ProviderType.EthWallet:
+        provider = new EthWalletProvider({
+          ...baseParams,
+          ...(options as EthWalletProviderOptions),
+        }) as Providers[T];
         break;
-      case 'webauthn':
-        provider = new WebAuthnProvider({ ...baseParams, ...params });
+      case ProviderType.WebAuthn:
+        provider = new WebAuthnProvider({
+          ...baseParams,
+        }) as Providers[T];
         break;
       default:
         throw new Error(
@@ -112,18 +135,18 @@ export class LitAuthClient {
         );
     }
 
-    this.providers.set(params.type, provider);
+    this.providers.set(type, provider);
     return provider;
   }
 
   /**
-   * Returns an initialized provider by name
+   * Returns an initialized provider by type
    *
-   * @param name {string} - Name of the provider
+   * @param {ProviderType} type - Type of provider to get
    *
    * @returns {BaseProvider | undefined} - Provider if found, undefined otherwise
    */
-  getProvider(name: string): BaseProvider | undefined {
-    return this.providers.get(name);
+  getProvider(type: ProviderType): BaseProvider | undefined {
+    return this.providers.get(type);
   }
 }

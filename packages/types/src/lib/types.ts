@@ -5,14 +5,13 @@ import {
   AccsOperatorParams,
   AccsRegularParams,
   AccsSOLV2Params,
-  EthereumAccountProviderOptions,
-  EthereumAuthenticateOptions,
+  EthWalletProviderOptions,
+  EthWalletAuthenticateOptions,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
   OAuthProviderOptions,
-  WebAuthnProviderOptions,
 } from './interfaces';
 
 export type AccessControlConditions = AccsRegularParams[] | AccsDefaultParams[];
@@ -105,9 +104,6 @@ export type AcceptedFileType = File | Blob;
  */
 export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
 
-export type ProviderOptions =
-  | OAuthProviderOptions
-  | EthereumAccountProviderOptions
-  | WebAuthnProviderOptions;
+export type ProviderOptions = OAuthProviderOptions | EthWalletProviderOptions;
 
-export type AuthenticateOptions = EthereumAuthenticateOptions;
+export type AuthenticateOptions = EthWalletAuthenticateOptions;

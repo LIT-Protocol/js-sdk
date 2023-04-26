@@ -2,8 +2,9 @@ import Head from 'next/head';
 import { Inter } from 'next/font/google';
 import { useCallback, useEffect, useState } from 'react';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { LitAuthClient } from '@lit-protocol/lit-auth-client';
+import { LitAuthClient, isSignInRedirect } from '@lit-protocol/lit-auth-client';
 import { IRelayPKP, AuthMethod, SessionSigs } from '@lit-protocol/types';
+import { ProviderType } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import { useRouter } from 'next/router';
 import { useConnect, useAccount, useDisconnect, Connector } from 'wagmi';
@@ -30,6 +31,8 @@ enum Views {
 }
 
 export default function Dashboard() {
+  const redirectUri = 'http://localhost:3000';
+
   const router = useRouter();
 
   const [view, setView] = useState<Views>(Views.SIGN_IN);
@@ -37,6 +40,8 @@ export default function Dashboard() {
 
   const [litAuthClient, setLitAuthClient] = useState<LitAuthClient>();
   const [litNodeClient, setLitNodeClient] = useState<LitNodeClient>();
+  const [currentProviderType, setCurrentProviderType] =
+    useState<ProviderType>();
   const [authMethod, setAuthMethod] = useState<AuthMethod>();
   const [pkps, setPKPs] = useState<IRelayPKP[]>([]);
   const [currentPKP, setCurrentPKP] = useState<IRelayPKP>();
@@ -72,63 +77,119 @@ export default function Dashboard() {
   }
 
   /**
+   * Begin auth flow with Google
+   */
+  function authWithGoogle() {
+    const provider = litAuthClient.initProvider<ProviderType.Google>(
+      ProviderType.Google,
+      {
+        redirectUri,
+      }
+    );
+    provider.signIn();
+    setCurrentProviderType(ProviderType.Google);
+  }
+
+  /**
+   * Begin auth flow with Discord
+   */
+  function authWithDiscord() {
+    const provider = litAuthClient.initProvider<ProviderType.Discord>(
+      ProviderType.Discord,
+      {
+        redirectUri,
+      }
+    );
+    provider.signIn();
+    setCurrentProviderType(ProviderType.Discord);
+  }
+
+  /**
    * Request a signature from one's wallet
    */
   async function authWithWallet(address: string, connector: Connector) {
     setView(Views.REQUEST_AUTHSIG);
 
-    // Get auth sig
+    // Create a function to handle signing messages
     const signer = await connector.getSigner();
     const signAuthSig = async (message: string) => {
       const sig = await signer.signMessage(message);
       return sig;
     };
-    const authMethod = await litAuthClient.signInWithEthWallet({
-      address,
-      signMessage: signAuthSig,
-    });
+
+    // Initialize EthWalletProvider
+    const provider = litAuthClient.initProvider<ProviderType.EthWallet>(
+      ProviderType.EthWallet,
+      {
+        address,
+        signMessage: signAuthSig,
+      }
+    );
+
+    const authMethod = await provider.authenticate();
     setAuthMethod(authMethod);
 
     // Fetch PKPs associated with eth wallet account
     setView(Views.FETCHING);
-    const pkps: IRelayPKP[] = await litAuthClient.fetchPKPsByAuthMethod(
+    const pkps: IRelayPKP[] = await provider.fetchPKPsThroughRelayer(
       authMethod
     );
     if (pkps.length > 0) {
       setPKPs(pkps);
     }
     setView(Views.FETCHED);
+    setCurrentProviderType(ProviderType.EthWallet);
   }
 
   /**
    * Handle redirect from Lit login server
    */
-  const handleRedirect = useCallback(async () => {
-    setView(Views.HANDLE_REDIRECT);
-    try {
-      // Get auth method object that has the OAuth token from redirect callback
-      const authMethod: AuthMethod = litAuthClient.handleSignInRedirect();
-      setAuthMethod(authMethod);
+  const handleRedirect = useCallback(
+    async (providerName: string) => {
+      setView(Views.HANDLE_REDIRECT);
+      try {
+        let provider;
+        if (providerName === ProviderType.Google) {
+          provider = litAuthClient.initProvider<ProviderType.Google>(
+            ProviderType.Google,
+            {
+              redirectUri,
+            }
+          );
+        } else if (providerName === ProviderType.Discord) {
+          provider = litAuthClient.initProvider<ProviderType.Discord>(
+            ProviderType.Discord,
+            {
+              redirectUri,
+            }
+          );
+        }
+        // Get auth method object that has the OAuth token from redirect callback
+        const authMethod: AuthMethod = await provider.authenticate();
+        setAuthMethod(authMethod);
 
-      // Fetch PKPs associated with social account
-      setView(Views.FETCHING);
-      const pkps: IRelayPKP[] = await litAuthClient.fetchPKPsByAuthMethod(
-        authMethod
-      );
-      if (pkps.length > 0) {
-        setPKPs(pkps);
+        // Fetch PKPs associated with social account
+        setView(Views.FETCHING);
+        const pkps: IRelayPKP[] = await provider.fetchPKPsThroughRelayer(
+          authMethod
+        );
+        if (pkps.length > 0) {
+          setPKPs(pkps);
+        }
+        setView(Views.FETCHED);
+        setCurrentProviderType(providerName as ProviderType);
+      } catch (err) {
+        console.error(err);
+        setError(err);
+        setView(Views.ERROR);
       }
-      setView(Views.FETCHED);
-    } catch (err) {
-      console.error(err);
-      setError(err);
-      setView(Views.ERROR);
-    }
 
-    // Clear url params once we have the OAuth token
-    // Be sure to use the redirect uri route
-    router.replace(window.location.pathname, undefined, { shallow: true });
-  }, [litAuthClient, router]);
+      // Clear url params once we have the OAuth token
+      // Be sure to use the redirect uri route
+      router.replace(window.location.pathname, undefined, { shallow: true });
+    },
+    [litAuthClient, router]
+  );
 
   /**
    * Mint a new PKP for current auth method
@@ -138,9 +199,16 @@ export default function Dashboard() {
 
     try {
       // Mint new PKP
-      const newPKP: IRelayPKP = await litAuthClient.mintPKPWithAuthMethod(
-        authMethod
+      const provider = litAuthClient.getProvider(currentProviderType);
+      const txHash: string = await provider.mintPKPThroughRelayer(authMethod);
+      const response = await provider.relay.pollRequestUntilTerminalState(
+        txHash
       );
+      const newPKP: IRelayPKP = {
+        tokenId: response.pkpTokenId,
+        publicKey: response.pkpPublicKey,
+        ethAddress: response.pkpEthAddress,
+      };
 
       // Add new PKP to list of PKPs
       const morePKPs: IRelayPKP[] = [...pkps, newPKP];
@@ -166,7 +234,8 @@ export default function Dashboard() {
 
     try {
       // Get session signatures
-      const sessionSigs = await litAuthClient.getSessionSigsWithAuth({
+      const provider = litAuthClient.getProvider(currentProviderType);
+      const sessionSigs = await provider.getSessionSigs({
         pkpPublicKey: pkp.publicKey,
         authMethod,
         sessionSigsParams: {
@@ -251,8 +320,6 @@ export default function Dashboard() {
 
         // Set up LitAuthClient
         const litAuthClient = new LitAuthClient({
-          domain: process.env.NEXT_PUBLIC_VERCEL_URL || 'localhost:3000',
-          redirectUri: window.location.href.replace(/\/+$/, ''),
           litRelayConfig: {
             relayApiKey: 'test-api-key',
           },
@@ -273,8 +340,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Check if app has been redirected from Lit login server
-    if (litAuthClient && litAuthClient.isSignInRedirect() && !authMethod) {
-      handleRedirect();
+    if (litAuthClient && !authMethod) {
+      const providerName = isSignInRedirect(redirectUri);
+      if (providerName) {
+        handleRedirect(providerName);
+      }
     }
   }, [litAuthClient, handleRedirect, authMethod]);
 
@@ -345,21 +415,8 @@ export default function Dashboard() {
               ) : (
                 <>
                   {/* If eth wallet is not connected, show all login options */}
-                  <button
-                    onClick={() => {
-                      litAuthClient.signInWithSocial('google');
-                    }}
-                  >
-                    Google
-                  </button>
-                  <button
-                    onClick={() => {
-                      litAuthClient.signInWithSocial('discord');
-                    }}
-                  >
-                    Discord
-                  </button>
-
+                  <button onClick={authWithGoogle}>Google</button>
+                  <button onClick={authWithDiscord}>Discord</button>
                   {connectors.map(connector => (
                     <button
                       disabled={!connector.ready}

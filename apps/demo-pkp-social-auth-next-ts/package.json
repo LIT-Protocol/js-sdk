@@ -9,7 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lit-protocol/lit-auth-client": "^2.1.120",
+    "@lit-protocol/constants": "file:../js-sdk/packages/constants",
+    "@lit-protocol/lit-auth-client": "file:../js-sdk/packages/lit-auth-client",
+    "@lit-protocol/lit-node-client": "file:../js-sdk/packages/lit-node-client",
+    "@lit-protocol/types": "file:../js-sdk/packages/types",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
     "eslint-config-prettier": "^8.8.0",

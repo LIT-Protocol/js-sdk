@@ -1009,20 +1009,12 @@ export interface BaseProviderOptions {
 
 export interface OAuthProviderOptions {
   /**
-   * Name of provider to initialize
-   */
-  type: 'google' | 'discord';
-  /**
    * The redirect URI that Lit's login server should send the user back to
    */
   redirectUri: string;
 }
 
-export interface EthereumAccountProviderOptions {
-  /**
-   * Name of provider to initialize
-   */
-  type: 'ethereum';
+export interface EthWalletProviderOptions {
   /**
    * Ethereum wallet address
    */
@@ -1043,13 +1035,6 @@ export interface EthereumAccountProviderOptions {
    * The origin from which the signing request is made
    */
   origin?: string;
-}
-
-export interface WebAuthnProviderOptions {
-  /**
-   * Name of provider to initialize
-   */
-  type: 'webauthn';
 }
 
 export interface BaseProviderSessionSigsParams {
@@ -1094,7 +1079,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface EthereumAuthenticateOptions {
+export interface EthWalletAuthenticateOptions {
   /**
    * Name of chain to use for signature
    */

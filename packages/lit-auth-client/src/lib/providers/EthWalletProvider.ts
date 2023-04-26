@@ -2,15 +2,15 @@ import {
   AuthMethod,
   AuthSig,
   BaseProviderOptions,
-  EthereumAccountProviderOptions,
-  EthereumAuthenticateOptions,
+  EthWalletProviderOptions,
+  EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
 import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { SiweMessage } from 'lit-siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 
-export default class EthereumAccountProvider extends BaseProvider {
+export default class EthWalletProvider extends BaseProvider {
   /**
    * Ethereum wallet address
    */
@@ -32,7 +32,7 @@ export default class EthereumAccountProvider extends BaseProvider {
    */
   public origin: string;
 
-  constructor(options: BaseProviderOptions & EthereumAccountProviderOptions) {
+  constructor(options: BaseProviderOptions & EthWalletProviderOptions) {
     super(options);
     this.address = ethers.utils.getAddress(options.address);
     this.signMessage = options.signMessage;
@@ -43,14 +43,16 @@ export default class EthereumAccountProvider extends BaseProvider {
   /**
    * Generate a wallet signature to use as an auth method
    *
-   * @param {EthereumAuthenticateOptions} options
+   * @param {EthWalletAuthenticateOptions} options
+   * @param {string} [options.address] - Ethereum wallet address to use for signature
+   * @param {string} [options.signMessage] - Function to sign message
    * @param {string} [options.chain] - Name of chain to use for signature
    * @param {number} [options.expiration] - When the auth signature expires
    *
    * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
    */
   public async authenticate(
-    options?: EthereumAuthenticateOptions
+    options?: EthWalletAuthenticateOptions
   ): Promise<AuthMethod> {
     // Get chain ID or default to Ethereum mainnet
     const chain = options?.chain || 'ethereum';

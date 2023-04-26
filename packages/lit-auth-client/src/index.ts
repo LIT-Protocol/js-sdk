@@ -1,4 +1,5 @@
 import * as _LitAuthClient from './lib/lit-auth-client';
+import { isSignInRedirect } from './lib/utils';
 
 declare global {
   var LitAuthClient: any; //eslint-disable-line no-var
@@ -10,3 +11,5 @@ if (!globalThis.LitAuthClient) {
 }
 
 export * from './lib/lit-auth-client';
+
+export { isSignInRedirect };

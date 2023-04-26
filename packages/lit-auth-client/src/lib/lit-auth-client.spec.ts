@@ -2,11 +2,12 @@
 // @ts-nocheck
 import { TextEncoder, TextDecoder } from 'util';
 global.TextEncoder = TextEncoder;
-// @ts-ignore
+// @ts-ignore - TextDecoder is not defined in Node
 global.TextDecoder = TextDecoder;
+// @ts-ignore - set global variable for testing
 global.jestTesting = true;
 
-import { AuthMethodType } from '@lit-protocol/constants';
+import { AuthMethodType, ProviderType } from '@lit-protocol/constants';
 import { LitAuthClient } from './lit-auth-client';
 import {
   isSocialLoginSupported,
@@ -20,7 +21,7 @@ import {
 import GoogleProvider from './providers/GoogleProvider';
 import DiscordProvider from './providers/DiscordProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
-import EthereumAccountProvider from './providers/EthereumAccountProvider';
+import EthereumAccountProvider from './providers/EthWalletProvider';
 
 const isClass = (v: unknown) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
@@ -61,221 +62,197 @@ describe('initProvider', () => {
   });
 
   it('should throw an error for an unsupported provider', () => {
-    const invalidProvider = { type: 'bookface' };
     expect(() => {
-      client.initProvider(invalidProvider);
+      // @ts-ignore - Testing invalid provider type
+      client.initProvider<ProviderType.BookFace>(ProviderType.BookFace);
     }).toThrowError(
       "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn' are supported at the moment."
     );
   });
 
   it('should return an instance of DiscordProvider', () => {
-    const provider = client.initProvider({
-      type: 'discord',
-      redirectUri: 'http://localhost:3000/redirect',
-    });
+    const provider = client.initProvider<ProviderType.Discord>(
+      ProviderType.Discord,
+      {
+        redirectUri: 'http://localhost:3000/redirect',
+      }
+    );
     expect(provider).toBeInstanceOf(DiscordProvider);
   });
 
   it('should return an instance of GoogleProvider', () => {
-    const provider = client.initProvider({
-      type: 'google',
-      redirectUri: 'http://localhost:3000/redirect',
-    });
+    const provider = client.initProvider<ProviderType.Google>(
+      ProviderType.Google,
+      {
+        redirectUri: 'http://localhost:3000/redirect',
+      }
+    );
     expect(provider).toBeInstanceOf(GoogleProvider);
   });
 
   it('should return an instance of EthereumAccountProvider', () => {
-    const provider = client.initProvider({
-      type: 'ethereum',
-      address: '0xbf90ce8Ab70eCd3a8776D18d9B7D679D64C6Dc97',
-      signmessage: async () => 'signed message',
-    });
+    const provider = client.initProvider<ProviderType.EthWallet>(
+      ProviderType.EthWallet,
+      {
+        address: '0xbf90ce8Ab70eCd3a8776D18d9B7D679D64C6Dc97',
+        signMessage: async (message: string) => message,
+      }
+    );
     expect(provider).toBeInstanceOf(EthereumAccountProvider);
   });
 
   it('should return an instance of WebAuthnProvider', () => {
-    const provider = client.initProvider({
-      type: 'webauthn',
-    });
+    const provider = client.initProvider<ProviderType.WebAuthn>(
+      ProviderType.WebAuthn
+    );
     expect(provider).toBeInstanceOf(WebAuthnProvider);
   });
 });
 
-//   describe('signInWithSocial', () => {
-//     let client: LitAuthClient;
+describe('getProvider', () => {
+  let client: LitAuthClient;
 
-//     beforeEach(() => {
-//       client = new LitAuthClient({
-//         domain: 'localhost:3000',
-//         redirectUri: 'http://localhost:3000/redirect',
-//         litRelayConfig: { relayApiKey: 'test-api-key' },
-//       });
+  beforeEach(() => {
+    client = new LitAuthClient({
+      litRelayConfig: { relayApiKey: 'test-api-key' },
+    });
+  });
 
-//       // @ts-ignore
-//       delete window.location;
-//       window.location = {
-//         ...window.location,
-//         assign: jest.fn(),
-//       };
-//     });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
-//     afterEach(() => {
-//       jest.restoreAllMocks();
-//     });
+  it('should return the correct provider for the given provider type', () => {
+    client.initProvider<ProviderType.Discord>(ProviderType.Discord, {
+      redirectUri: 'http://localhost:3000/redirect',
+    });
+    const savedProvider = client.getProvider(ProviderType.Discord);
+    expect(savedProvider).toBeInstanceOf(DiscordProvider);
+  });
 
-//     it('should throw an error for an unsupported provider', () => {
-//       const invalidProvider = 'bookface';
-//       expect(() => {
-//         client.signInWithSocial(invalidProvider);
-//       }).toThrowError(
-//         `Invalid OAuth provider: ${invalidProvider}. Please ensure that the given provider is either 'google' and 'discord'.`
-//       );
-//     });
+  it('should return undefined if the provider for the given provider type is not initialized', () => {
+    const savedProvider = client.getProvider(ProviderType.Google);
+    expect(savedProvider).toBeUndefined();
+  });
+});
 
-//     it('should generate a valid URL with the given provider, redirect uri, and state parameter', () => {
-//       const mockAssign = jest.fn();
-//       Object.defineProperty(window, 'location', {
-//         value: { assign: mockAssign },
-//         writable: true,
-//       });
+describe('GoogleProvider', () => {
+  let client: LitAuthClient;
+  let provider: GoogleProvider;
 
-//       const provider = 'google';
-//       client.signInWithSocial(provider);
+  beforeEach(() => {
+    client = new LitAuthClient({
+      litRelayConfig: { relayApiKey: 'test-api-key' },
+    });
+    provider = client.initProvider<ProviderType.Google>(ProviderType.Google, {
+      redirectUri: 'http://localhost:3000/redirect',
+    });
 
-//       expect(mockAssign).toHaveBeenCalled();
-//       const assignedUrl = mockAssign.mock.calls[0][0];
-//       expect(assignedUrl).toContain(provider);
+    // @ts-ignore
+    delete window.location;
+    window.location = {
+      ...window.location,
+      assign: jest.fn(),
+    };
+  });
 
-//       const searchParams = new URLSearchParams(new URL(assignedUrl).search);
-//       const redirectUri = searchParams.get('app_redirect');
-//       expect(redirectUri).toBe(client.redirectUri);
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
-//       const state = searchParams.get('state');
-//       expect(state).not.toBeNull();
-//     });
-//   });
+  it('should generate a valid URL with the given provider, redirect uri, and state parameter', () => {
+    const mockAssign = jest.fn();
+    Object.defineProperty(window, 'location', {
+      value: { assign: mockAssign },
+      writable: true,
+    });
 
-//   describe('handleSignInRedirect', () => {
-//     let client: LitAuthClient;
+    provider.signIn();
 
-//     beforeEach(() => {
-//       client = new LitAuthClient({
-//         domain: 'localhost:5173',
-//         redirectUri: 'http://localhost:5173/redirect',
-//         litRelayConfig: { relayApiKey: 'test-api-key' },
-//       });
+    expect(mockAssign).toHaveBeenCalled();
+    const assignedUrl = mockAssign.mock.calls[0][0];
+    expect(assignedUrl).toContain('google');
 
-//       // @ts-ignore
-//       delete window.location;
-//       // @ts-ignore
-//       window.location = {
-//         href: client.redirectUri,
-//         search: '',
-//       };
+    const searchParams = new URLSearchParams(new URL(assignedUrl).search);
+    const redirectUri = searchParams.get('app_redirect');
+    expect(redirectUri).toBe(provider.redirectUri);
 
-//       // Mock window.history
-//       window.history.replaceState = jest.fn();
-//     });
+    const state = searchParams.get('state');
+    expect(state).not.toBeNull();
+  });
 
-//     afterEach(() => {
-//       jest.restoreAllMocks();
-//     });
+  it('should throw an error if the current URL does not match the provided redirect URL', () => {
+    const wrongUrl = 'http://localhost:4444/incorrect';
+    window.location.href = wrongUrl;
+    expect(async () => {
+      await provider.authenticate();
+    }).toThrowError(
+      `Current url "${wrongUrl}" does not match provided redirect uri "${provider.redirectUri}"`
+    );
+  });
 
-//     it('should throw an error if the current URL does not match the provided redirect URL', () => {
-//       const wrongUrl = 'http://localhost:4444/incorrect';
-//       window.location.href = wrongUrl;
-//       expect(() => {
-//         client.handleSignInRedirect();
-//       }).toThrowError(
-//         `Current url "${wrongUrl}" does not match provided redirect uri "${client.redirectUri}"`
-//       );
-//     });
+  it('should throw an error if there is an error in the URL parameters', () => {
+    window.location.search = '?error=token_error';
+    expect(async () => {
+      await provider.authenticate();
+    }).toThrowError();
+  });
 
-//     it('should throw an error if there is an error in the URL parameters', () => {
-//       window.location.search = '?error=token_error';
-//       expect(() => {
-//         client.handleSignInRedirect();
-//       }).toThrowError();
-//     });
+  it('should throw an error if the provider is not Google', () => {
+    const invalidProvider = 'discord';
+    window.location.search = `?provider=${invalidProvider}&state=...`;
+    expect(async () => {
+      await provider.authenticate();
+    }).toThrowError(
+      `Invalid OAuth provider "${invalidProvider}" passed in redirect callback URL`
+    );
+  });
 
-//     it('should throw an error if the provider is not supported', () => {
-//       const invalidProvider = 'bookface';
-//       window.location.search = `?provider=${invalidProvider}&state=...`;
-//       expect(() => {
-//         client.handleSignInRedirect();
-//       }).toThrowError(
-//         `Invalid OAuth provider "${invalidProvider}" passed in redirect callback URL`
-//       );
-//     });
+  it('should throw an error if the state parameter is invalid', () => {
+    const invalidState = 'yolo';
+    window.location.search = `?provider=google&access_token=testToken&state=${invalidState}`;
+    expect(async () => {
+      await provider.authenticate();
+    }).toThrowError(
+      `Invalid state parameter "${invalidState}" passed in redirect callback URL`
+    );
+  });
 
-//     it('should throw an error if the state parameter is invalid', () => {
-//       const invalidState = 'yolo';
-//       window.location.search = `?provider=discord&access_token=testToken&state=${invalidState}`;
-//       expect(() => {
-//         client.handleSignInRedirect();
-//       }).toThrowError(
-//         `Invalid state parameter "${invalidState}" passed in redirect callback URL`
-//       );
-//     });
+  describe('set state param', () => {
+    let state: string;
 
-//     describe('set state param', () => {
-//       let state: string;
+    beforeEach(() => {
+      setStateParam();
+      // @ts-ignore
+      state = getStateParam();
+    });
 
-//       beforeEach(() => {
-//         setStateParam();
-//         // @ts-ignore
-//         state = getStateParam();
-//       });
+    afterEach(() => {
+      removeStateParam();
+    });
 
-//       afterEach(() => {
-//         removeStateParam();
-//       });
+    it('should throw an error if the ID token is missing for Google OAuth', () => {
+      window.location.search = `?provider=google&state=${encode(state)}`;
+      expect(async () => {
+        await provider.authenticate();
+      }).toThrowError(
+        'Missing ID token in redirect callback URL for Google OAuth"'
+      );
+    });
 
-//       it('should throw an error if the access token is missing for Discord OAuth', () => {
-//         window.location.search = `?provider=discord&state=${encode(state)}`;
-//         expect(() => {
-//           client.handleSignInRedirect();
-//         }).toThrowError(
-//           'Missing access token in redirect callback URL for Discord OAuth"'
-//         );
-//       });
-
-//       it('should throw an error if the ID token is missing for Google OAuth', () => {
-//         window.location.search = `?provider=google&state=${encode(state)}`;
-//         expect(() => {
-//           client.handleSignInRedirect();
-//         }).toThrowError(
-//           'Missing ID token in redirect callback URL for Google OAuth"'
-//         );
-//       });
-
-//       it('should return the correct AuthMethod object for Discord OAuth', () => {
-//         const accessToken = 'test123';
-//         window.location.search = `?provider=discord&access_token=${accessToken}&state=${encode(
-//           state
-//         )}`;
-//         const result = client.handleSignInRedirect();
-//         expect(result).toEqual({
-//           authMethodType: AuthMethodType.Discord,
-//           accessToken: accessToken,
-//         });
-//       });
-
-//       it('should return the correct AuthMethod object for Google OAuth', () => {
-//         const idToken = 'testxyz10';
-//         window.location.search = `?provider=google&id_token=${idToken}&state=${encode(
-//           state
-//         )}`;
-//         const result = client.handleSignInRedirect();
-//         expect(result).toEqual({
-//           authMethodType: AuthMethodType.GoogleJwt,
-//           accessToken: idToken,
-//         });
-//       });
-//     });
-//   });
-// });
+    it('should return the correct AuthMethod object for Google OAuth', async () => {
+      const idToken = 'testxyz10';
+      window.location.search = `?provider=google&id_token=${idToken}&state=${encode(
+        state
+      )}`;
+      const result = await provider.authenticate();
+      expect(result).toEqual({
+        authMethodType: AuthMethodType.GoogleJwt,
+        accessToken: idToken,
+      });
+    });
+  });
+});
 
 describe('LitAuthClient utility functions', () => {
   afterEach(() => {

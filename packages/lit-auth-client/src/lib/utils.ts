@@ -98,13 +98,13 @@ export function parseLoginParams(search: string): LoginUrlParams {
  *
  * @param {string} redirectUri - Redirect uri to check against
  *
- * @returns {boolean} - True if current url is redirect uri
+ * @returns {string | null} - If current url is redirect uri, returns provider name
  */
-export function isSignInRedirect(redirectUri: string): boolean {
+export function isSignInRedirect(redirectUri: string): string | null {
   // Check if current url matches redirect uri
   const isRedirectUri = window.location.href.startsWith(redirectUri);
   if (!isRedirectUri) {
-    return false;
+    return null;
   }
   // Check url for redirect params
   const { provider, accessToken, idToken, state, error } = parseLoginParams(
@@ -112,9 +112,9 @@ export function isSignInRedirect(redirectUri: string): boolean {
   );
   // Check if current url is redirect uri and has redirect params
   if (isRedirectUri && (provider || accessToken || idToken || state || error)) {
-    return true;
+    return provider;
   }
-  return false;
+  return null;
 }
 
 /**
