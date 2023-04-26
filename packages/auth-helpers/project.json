@@ -1,0 +1,68 @@
+{
+  "name": "auth-helpers",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/auth-helpers/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": "yarn build:target auth-helpers",
+        "parallel": false
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/auth-helpers",
+        "main": "packages/auth-helpers/src/index.ts",
+        "tsConfig": "packages/auth-helpers/tsconfig.lib.json",
+        "assets": ["packages/auth-helpers/*.md"]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_litNodeClient",
+        "outfile": "dist/packages/auth-helpers-vanilla/auth-helpers.js",
+        "entryPoints": ["./packages/auth-helpers/src/index.ts"],
+        "define": {
+          "process.env.NODE_DEBUG": "false",
+          "global": "window"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/auth-helpers/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/auth-helpers"],
+      "options": {
+        "jestConfig": "packages/auth-helpers/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "testWatch": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/auth-helpers"],
+      "options": {
+        "jestConfig": "packages/auth-helpers/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
+    }
+  },
+  "tags": []
+}
