@@ -192,13 +192,13 @@ describe('recapSessionCapabilityObject', () => {
       recapSessionCapabilityObject.addToSiweMessage(siweMessage);
     expect(newSiweMessage.statement).toEqual(
       `This is some existing statement. I further authorize the stated URI to perform the following actions on my behalf: (1) "${
-        LitNamespace.AccessControlCondition
+        LitNamespace.Threshold
       }": "${
         LitRecapAbility.Decryption
       }" for "${litResource.getResourceKey()}".`
     );
     expect(newSiweMessage.resources).toEqual([
-      'urn:recap:eyJhdHQiOnsibGl0OmFjYzpzb21lUmVzb3VyY2UiOnsiQWNjZXNzQ29udHJvbENvbmRpdGlvbi9kZWNyeXB0aW9uIjpbe31dfX0sInByZiI6W119',
+      'urn:recap:eyJhdHQiOnsibGl0OmFjYzpzb21lUmVzb3VyY2UiOnsiVGhyZXNob2xkL2RlY3J5cHRpb24iOlt7fV19fSwicHJmIjpbXX0',
     ]);
   });
 
@@ -212,7 +212,7 @@ describe('recapSessionCapabilityObject', () => {
 
     const siweResource = recapSessionCapabilityObject.encodeAsSiweResource();
     expect(siweResource).toEqual(
-      'urn:recap:eyJhdHQiOnsibGl0OmFjYzpzb21lUmVzb3VyY2UiOnsiQWNjZXNzQ29udHJvbENvbmRpdGlvbi9kZWNyeXB0aW9uIjpbe31dfX0sInByZiI6W119'
+      'urn:recap:eyJhdHQiOnsibGl0OmFjYzpzb21lUmVzb3VyY2UiOnsiVGhyZXNob2xkL2RlY3J5cHRpb24iOlt7fV19fSwicHJmIjpbXX0'
     );
   });
 
@@ -226,8 +226,7 @@ describe('recapSessionCapabilityObject', () => {
 
     expect(recapSessionCapabilityObject.attenuations).toEqual({
       [`${LitResourcePrefix.AccessControlCondition}:someResource`]: {
-        [`${LitNamespace.AccessControlCondition}/${LitRecapAbility.Decryption}`]:
-          [{}],
+        [`${LitNamespace.Threshold}/${LitRecapAbility.Decryption}`]: [{}],
       },
     });
   });
@@ -246,11 +245,8 @@ describe('recapSessionCapabilityObject', () => {
 
     expect(recapSessionCapabilityObject.attenuations).toEqual({
       [`${LitResourcePrefix.AccessControlCondition}:someResource`]: {
-        [`${LitNamespace.AccessControlCondition}/${LitRecapAbility.Decryption}`]:
-          [{}],
-        [`${LitNamespace.AccessControlCondition}/${LitRecapAbility.Signing}`]: [
-          {},
-        ],
+        [`${LitNamespace.Threshold}/${LitRecapAbility.Decryption}`]: [{}],
+        [`${LitNamespace.Threshold}/${LitRecapAbility.Signing}`]: [{}],
       },
     });
   });

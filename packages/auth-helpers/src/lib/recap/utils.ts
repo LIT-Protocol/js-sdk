@@ -11,27 +11,27 @@ export function getRecapNamespaceAndAbility(litAbility: LitAbility): {
   switch (litAbility) {
     case LitAbility.AccessControlConditionDecryption:
       return {
-        recapNamespace: LitNamespace.AccessControlCondition,
+        recapNamespace: LitNamespace.Threshold,
         recapAbility: LitRecapAbility.Decryption,
       };
     case LitAbility.AccessControlConditionSigning:
       return {
-        recapNamespace: LitNamespace.AccessControlCondition,
+        recapNamespace: LitNamespace.Threshold,
         recapAbility: LitRecapAbility.Signing,
       };
     case LitAbility.PKPSigning:
       return {
-        recapNamespace: LitNamespace.PKP,
+        recapNamespace: LitNamespace.Threshold,
         recapAbility: LitRecapAbility.Signing,
       };
     case LitAbility.RateLimitIncreaseAuth:
       return {
-        recapNamespace: LitNamespace.RLI,
+        recapNamespace: LitNamespace.Auth,
         recapAbility: LitRecapAbility.Auth,
       };
     case LitAbility.LitActionExecution:
       return {
-        recapNamespace: LitNamespace.LitAction,
+        recapNamespace: LitNamespace.Threshold,
         recapAbility: LitRecapAbility.Execution,
       };
 
@@ -52,8 +52,6 @@ export enum LitRecapAbility {
 }
 
 export enum LitNamespace {
-  AccessControlCondition = 'AccessControlCondition',
-  PKP = 'PKP',
-  RLI = 'RLI',
-  LitAction = 'LitAction',
+  Auth = 'Auth',
+  Threshold = 'Threshold',
 }
