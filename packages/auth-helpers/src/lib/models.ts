@@ -87,7 +87,8 @@ export interface ISessionCapabilityObject {
    * Add a LIT-specific capability to the session capability object for the
    * specified resource.
    *
-   * @param resource The resource for which the capability is being added.
+   * @param litResource The LIT-specific resource being added.
+   * @param ability The LIT-specific ability being added.
    * @example If the ability is `LitAbility.AccessControlConditionDecryption`,
    * then the resource should be the hashed key value of the access control
    * condition.
@@ -102,11 +103,40 @@ export interface ISessionCapabilityObject {
    * resource should be the Lit Action IPFS CID.
    * @throws If the ability is not a LIT-specific ability.
    */
-  addCapabilityForResource(resource: string, ability: LitAbility): void;
+  addCapabilityForResource(
+    litResource: LitResourceBase,
+    ability: LitAbility
+  ): void;
 
   /**
    * Verify that the session capability object has the specified LIT-specific
    * capability for the specified resource.
    */
-  verifyCapabilitiesForResource(resource: string, ability: LitAbility): boolean;
+  verifyCapabilitiesForResource(
+    litResource: LitResourceBase,
+    ability: LitAbility
+  ): boolean;
+}
+
+export abstract class LitResourceBase {
+  abstract resourcePrefix: LitResourcePrefix;
+  public readonly resource: string;
+
+  constructor(resource: string) {
+    this.resource = resource;
+  }
+
+  /**
+   * Gets the fully qualified resource key.
+   * @returns The fully qualified resource key.
+   */
+  getResourceKey(): string {
+    return `${this.resourcePrefix}:${this.resource}`;
+  }
+
+  /**
+   * Validates that the given LIT ability is valid for this resource.
+   * @param litAbility The LIT ability to validate.
+   */
+  abstract isValidLitAbility(litAbility: LitAbility): boolean;
 }
