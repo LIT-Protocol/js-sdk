@@ -7,7 +7,8 @@ import {
   PlainJSON,
   ISessionCapabilityObject,
 } from '../models';
-import { getRecapNamespaceAndAbility, getRecapResourceKey } from './utils';
+import { getRecapNamespaceAndAbility } from './utils';
+import { LitResourceBase } from '../models';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   #inner: Recap;
@@ -70,37 +71,53 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
 
   /** LIT specific methods */
 
-  addCapabilityForResource(resource: string, ability: LitAbility): void {
+  addCapabilityForResource(
+    litResource: LitResourceBase,
+    ability: LitAbility
+  ): void {
+    // Validate Lit resource.
+    if (!litResource.isValidLitAbility(ability)) {
+      throw new Error(
+        `The specified Lit resource does not support the specified ability.`
+      );
+    }
+
     const { recapNamespace, recapAbility } =
       getRecapNamespaceAndAbility(ability);
 
     return this.addAttenuation(
-      getRecapResourceKey(resource, ability),
+      litResource.getResourceKey(),
       recapNamespace,
       recapAbility
     );
   }
 
   verifyCapabilitiesForResource(
-    resource: string,
+    litResource: LitResourceBase,
     ability: LitAbility
   ): boolean {
+    // Validate Lit resource.
+    if (!litResource.isValidLitAbility(ability)) {
+      throw new Error(
+        `The specified Lit resource does not support the specified ability.`
+      );
+    }
+
     // Get the attenuations object.
     const attenuations = this.attenuations;
 
     const { recapNamespace, recapAbility } =
       getRecapNamespaceAndAbility(ability);
     const recapAbilityToCheckFor = `${recapNamespace}/${recapAbility}`;
-    const resourceKey = getRecapResourceKey(resource, ability);
 
-    if (!attenuations[resourceKey]) {
+    if (!attenuations[litResource.getResourceKey()]) {
       // No attenuations specified for this resource.
       return false;
     }
 
     // Check whether the exact Recap namespace/ability pair is present.
     const attenuatedRecapAbilities: string[] = Object.keys(
-      attenuations[resourceKey]
+      attenuations[litResource.getResourceKey()]
     );
 
     for (const attenuatedRecapAbility of attenuatedRecapAbilities) {

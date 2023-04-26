@@ -1,7 +1,8 @@
 import { SiweMessage } from 'siwe';
 import { LitAbility, LitResourcePrefix } from '../models';
 import { RecapSessionCapabilityObject } from './recap-session-capability-object';
-import { LitNamespace, LitRecapAbility, getRecapResourceKey } from './utils';
+import { LitNamespace, LitRecapAbility } from './utils';
+import { LitAccessControlConditionResource } from '../resources';
 
 import { TextDecoder, TextEncoder } from 'util';
 
@@ -52,8 +53,9 @@ describe('recapSessionCapabilityObject', () => {
 
   it('should be able to decode a RecapSessionCapabilityObject', async () => {
     const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
-      'someResource',
+      litResource,
       LitAbility.AccessControlConditionDecryption
     );
     const decodedRecapSessionCapabilityObject =
@@ -67,8 +69,9 @@ describe('recapSessionCapabilityObject', () => {
 
   it('should be able to extract a RecapSessionCapabilityObject', async () => {
     const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
-      'someResource',
+      litResource,
       LitAbility.AccessControlConditionDecryption
     );
     const siweMessage = new SiweMessage({
@@ -169,8 +172,9 @@ describe('recapSessionCapabilityObject', () => {
 
   it('should be able to add to siwe message', async () => {
     const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
-      'someResource',
+      litResource,
       LitAbility.AccessControlConditionDecryption
     );
     const siweMessage = new SiweMessage({
@@ -189,10 +193,9 @@ describe('recapSessionCapabilityObject', () => {
     expect(newSiweMessage.statement).toEqual(
       `This is some existing statement. I further authorize the stated URI to perform the following actions on my behalf: (1) "${
         LitNamespace.AccessControlCondition
-      }": "${LitRecapAbility.Decryption}" for "${getRecapResourceKey(
-        'someResource',
-        LitAbility.AccessControlConditionDecryption
-      )}".`
+      }": "${
+        LitRecapAbility.Decryption
+      }" for "${litResource.getResourceKey()}".`
     );
     expect(newSiweMessage.resources).toEqual([
       'urn:recap:eyJhdHQiOnsibGl0OmFjYzpzb21lUmVzb3VyY2UiOnsiQWNjZXNzQ29udHJvbENvbmRpdGlvbi9kZWNyeXB0aW9uIjpbe31dfX0sInByZiI6W119',
@@ -201,8 +204,9 @@ describe('recapSessionCapabilityObject', () => {
 
   it('should be able to encode as siwe resource', async () => {
     const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
-      'someResource',
+      litResource,
       LitAbility.AccessControlConditionDecryption
     );
 
@@ -214,8 +218,9 @@ describe('recapSessionCapabilityObject', () => {
 
   it('should be able to add capability for a resource', async () => {
     const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
-      'someResource',
+      litResource,
       LitAbility.AccessControlConditionDecryption
     );
 
@@ -229,12 +234,13 @@ describe('recapSessionCapabilityObject', () => {
 
   it('should be able to add multiple capabilities for a resource', async () => {
     const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
-      'someResource',
+      litResource,
       LitAbility.AccessControlConditionDecryption
     );
     recapSessionCapabilityObject.addCapabilityForResource(
-      'someResource',
+      litResource,
       LitAbility.AccessControlConditionSigning
     );
 
@@ -251,13 +257,14 @@ describe('recapSessionCapabilityObject', () => {
 
   it('should be able to verify capability for a resource', async () => {
     const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
-      'someResource',
+      litResource,
       LitAbility.AccessControlConditionDecryption
     );
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
-        'someResource',
+        litResource,
         LitAbility.AccessControlConditionDecryption
       )
     ).toBe(true);
@@ -265,24 +272,25 @@ describe('recapSessionCapabilityObject', () => {
 
   it('should be able to verify capability for a resource with multiple capabilities', async () => {
     const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
-      'someResource',
+      litResource,
       LitAbility.AccessControlConditionDecryption
     );
     recapSessionCapabilityObject.addCapabilityForResource(
-      'someResource',
+      litResource,
       LitAbility.AccessControlConditionSigning
     );
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
-        'someResource',
+        litResource,
         LitAbility.AccessControlConditionSigning
       )
     ).toBe(true);
 
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
-        'someResource',
+        litResource,
         LitAbility.AccessControlConditionDecryption
       )
     ).toBe(true);
@@ -290,13 +298,14 @@ describe('recapSessionCapabilityObject', () => {
 
   it('should be able to verify capability does not exist for a resource', async () => {
     const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('someResource');
     recapSessionCapabilityObject.addCapabilityForResource(
-      'someResource',
+      litResource,
       LitAbility.AccessControlConditionDecryption
     );
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
-        'someResource',
+        litResource,
         LitAbility.AccessControlConditionSigning
       )
     ).toBe(false);
@@ -304,9 +313,10 @@ describe('recapSessionCapabilityObject', () => {
 
   it('should be able to verify capability does not exist for a new RecapSessionCapabilityObject', async () => {
     const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('someResource');
     expect(
       recapSessionCapabilityObject.verifyCapabilitiesForResource(
-        'someResource',
+        litResource,
         LitAbility.AccessControlConditionSigning
       )
     ).toBe(false);

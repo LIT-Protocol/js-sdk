@@ -57,24 +57,3 @@ export enum LitNamespace {
   RLI = 'RLI',
   LitAction = 'LitAction',
 }
-
-export function getRecapResourceKey(
-  resource: string,
-  litAbility: LitAbility
-): string {
-  switch (litAbility) {
-    case LitAbility.AccessControlConditionDecryption:
-      return `${LitResourcePrefix.AccessControlCondition}:${resource}`;
-    case LitAbility.AccessControlConditionSigning:
-      return `${LitResourcePrefix.AccessControlCondition}:${resource}`;
-    case LitAbility.PKPSigning:
-      return `${LitResourcePrefix.PKP}:${resource}`;
-    case LitAbility.RateLimitIncreaseAuth:
-      return `${LitResourcePrefix.RLI}:${resource}`;
-    case LitAbility.LitActionExecution:
-      return `${LitResourcePrefix.LitAction}:${resource}`;
-
-    default:
-      throw new Error(`Unknown LitAbility: ${litAbility}`);
-  }
-}
