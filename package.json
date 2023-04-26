@@ -105,6 +105,8 @@
     "regenerator-runtime": "0.13.7",
     "secp256k1": "^5.0.0",
     "serve": "^14.0.1",
+    "siwe": "^2.0.5",
+    "siwe-recap": "0.0.1-alpha.0",
     "start-server-and-test": "^1.14.0",
     "stream-browserify": "^3.0.0",
     "synthetix-js": "^2.74.1",
