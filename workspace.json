@@ -4,6 +4,7 @@
   "projects": {
     "access-control-conditions": "packages/access-control-conditions",
     "auth-browser": "packages/auth-browser",
+    "auth-helpers": "packages/auth-helpers",
     "bls-sdk": "packages/bls-sdk",
     "constants": "packages/constants",
     "contracts-sdk": "packages/contracts-sdk",
