@@ -56,7 +56,7 @@ export enum LitResourcePrefix {
   LitAction = 'lit:la',
 }
 
-export interface SessionCapabilityObjectImpl {
+export interface ISessionCapabilityObject {
   get attenuations(): AttenuationsObject;
   get proofs(): Array<CID>;
   get statement(): string;

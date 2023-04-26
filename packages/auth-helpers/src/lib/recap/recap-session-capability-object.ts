@@ -5,13 +5,11 @@ import {
   CID,
   LitAbility,
   PlainJSON,
-  SessionCapabilityObjectImpl,
+  ISessionCapabilityObject,
 } from '../models';
 import { getRecapNamespaceAndAbility, getRecapResourceKey } from './utils';
 
-export class RecapSessionCapabilityObject
-  implements SessionCapabilityObjectImpl
-{
+export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   #inner: Recap;
 
   constructor(
