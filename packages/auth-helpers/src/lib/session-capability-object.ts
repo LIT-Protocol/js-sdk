@@ -1,5 +1,5 @@
 import { SiweMessage } from 'siwe';
-import { AttenuationsObject, CID, SessionCapabilityObjectImpl } from './models';
+import { AttenuationsObject, CID, ISessionCapabilityObject } from './models';
 import { RecapSessionCapabilityObject } from './recap/recap-session-capability-object';
 
 /**
@@ -10,23 +10,23 @@ import { RecapSessionCapabilityObject } from './recap/recap-session-capability-o
  * hidden from the user.
  *
  * This function serves as an abstraction and router to the
- * underlying implementation of the SessionCapabilityObjectImpl.
+ * underlying implementation of the ISessionCapabilityObject.
  *
  * @param att the attenuations you want to add to the capability object
  * @param prf the proofs you want to add to the capability object
- * @returns a SessionCapabilityObjectImpl
+ * @returns a ISessionCapabilityObject
  */
 export function newSessionCapabilityObject(
   att: AttenuationsObject = {},
   prf: Array<CID> = []
-): SessionCapabilityObjectImpl {
+): ISessionCapabilityObject {
   return new RecapSessionCapabilityObject(att, prf);
 }
 
-export function decode(encoded: string): SessionCapabilityObjectImpl {
+export function decode(encoded: string): ISessionCapabilityObject {
   return RecapSessionCapabilityObject.decode(encoded);
 }
 
-export function extract(siwe: SiweMessage): SessionCapabilityObjectImpl {
+export function extract(siwe: SiweMessage): ISessionCapabilityObject {
   return RecapSessionCapabilityObject.extract(siwe);
 }
