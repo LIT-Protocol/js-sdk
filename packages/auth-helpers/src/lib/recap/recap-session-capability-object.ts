@@ -8,7 +8,7 @@ import {
   ISessionCapabilityObject,
 } from '../models';
 import { getRecapNamespaceAndAbility } from './utils';
-import { LitResourceBase } from '../models';
+import { ILitResource } from '../models';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   #inner: Recap;
@@ -72,7 +72,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   /** LIT specific methods */
 
   addCapabilityForResource(
-    litResource: LitResourceBase,
+    litResource: ILitResource,
     ability: LitAbility
   ): void {
     // Validate Lit resource.
@@ -93,7 +93,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   }
 
   verifyCapabilitiesForResource(
-    litResource: LitResourceBase,
+    litResource: ILitResource,
     ability: LitAbility
   ): boolean {
     // Validate Lit resource.
