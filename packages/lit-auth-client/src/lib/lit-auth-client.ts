@@ -81,6 +81,7 @@ export class LitAuthClient {
   /**
    * Initialize a provider
    *
+   * @param {ProviderType} type - Type of provider to initialize
    * @param {ProviderOptions} options - Options for the provider
    *
    * @returns {T} - Provider

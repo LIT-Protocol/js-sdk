@@ -1,123 +1,115 @@
-// /* eslint-disable @typescript-eslint/ban-ts-comment */
-// import { TextEncoder, TextDecoder } from 'util';
-// global.TextEncoder = TextEncoder;
-// // @ts-ignore - TextDecoder is not defined in Node
-// global.TextDecoder = TextDecoder;
-// // @ts-ignore - set global variable for testing
-// global.jestTesting = true;
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+import { TextEncoder, TextDecoder } from 'util';
+global.TextEncoder = TextEncoder;
+// @ts-ignore - TextDecoder is not defined in Node
+global.TextDecoder = TextDecoder;
+// @ts-ignore - set global variable for testing
+global.jestTesting = true;
 
-// import { AuthMethodType, ProviderType } from '@lit-protocol/constants';
-// import { LitAuthClient } from './lit-auth-client';
-// import {
-//   isSocialLoginSupported,
-//   prepareLoginUrl,
-//   parseLoginParams,
-//   setStateParam,
-//   getStateParam,
-//   removeStateParam,
-//   encode,
-// } from './utils';
-// import GoogleProvider from './providers/GoogleProvider';
-// import DiscordProvider from './providers/DiscordProvider';
-// import WebAuthnProvider from './providers/WebAuthnProvider';
-// import EthWalletProvider from './providers/EthWalletProvider';
+import { ProviderType } from '@lit-protocol/constants';
+import { LitAuthClient } from './lit-auth-client';
+import GoogleProvider from './providers/GoogleProvider';
+import DiscordProvider from './providers/DiscordProvider';
+import WebAuthnProvider from './providers/WebAuthnProvider';
+import EthWalletProvider from './providers/EthWalletProvider';
 
-// const isClass = (v: unknown) => {
-//   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
-// };
+const isClass = (v: unknown) => {
+  return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
+};
 
-// describe('LitAuthClient', () => {
-//   it('is a class', async () => {
-//     expect(isClass(LitAuthClient)).toBe(true);
-//   });
+describe('LitAuthClient', () => {
+  it('is a class', async () => {
+    expect(isClass(LitAuthClient)).toBe(true);
+  });
 
-//   it('should throw an error if no API key or custom relay server is provided', () => {
-//     expect(() => {
-//       new LitAuthClient();
-//     }).toThrow(
-//       'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
-//     );
-//   });
+  it('should throw an error if no API key or custom relay server is provided', () => {
+    expect(() => {
+      new LitAuthClient();
+    }).toThrow(
+      'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
+    );
+  });
 
-//   it('should create a LitAuthClient instance with valid options', () => {
-//     const validClient = new LitAuthClient({
-//       litRelayConfig: { relayApiKey: 'test-api-key' },
-//     });
-//     expect(validClient).toBeDefined();
-//   });
-// });
+  it('should create a LitAuthClient instance with valid options', () => {
+    const validClient = new LitAuthClient({
+      litRelayConfig: { relayApiKey: 'test-api-key' },
+    });
+    expect(validClient).toBeDefined();
+  });
+});
 
-// describe('initProvider', () => {
-//   let client: LitAuthClient;
+describe('initProvider', () => {
+  let client: LitAuthClient;
 
-//   beforeEach(() => {
-//     client = new LitAuthClient({
-//       litRelayConfig: { relayApiKey: 'test-api-key' },
-//     });
-//   });
+  beforeEach(() => {
+    client = new LitAuthClient({
+      litRelayConfig: { relayApiKey: 'test-api-key' },
+    });
+  });
 
-//   afterEach(() => {
-//     jest.restoreAllMocks();
-//   });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
-//   it('should return an instance of DiscordProvider', () => {
-//     const provider = client.initProvider<DiscordProvider>(
-//       ProviderType.Discord,
-//       {
-//         redirectUri: 'http://localhost:3000/redirect',
-//       }
-//     );
-//     expect(provider).toBeInstanceOf(DiscordProvider);
-//   });
+  it('should return an instance of DiscordProvider', () => {
+    const provider = client.initProvider<DiscordProvider>(
+      ProviderType.Discord,
+      {
+        redirectUri: 'http://localhost:3000/redirect',
+      }
+    );
+    expect(provider).toBeInstanceOf(DiscordProvider);
+  });
 
-//   it('should return an instance of GoogleProvider', () => {
-//     const provider = client.initProvider<GoogleProvider>(ProviderType.Google, {
-//       redirectUri: 'http://localhost:3000/redirect',
-//     });
-//     expect(provider).toBeInstanceOf(GoogleProvider);
-//   });
+  it('should return an instance of GoogleProvider', () => {
+    const provider = client.initProvider<GoogleProvider>(ProviderType.Google, {
+      redirectUri: 'http://localhost:3000/redirect',
+    });
+    expect(provider).toBeInstanceOf(GoogleProvider);
+  });
 
-//   it('should return an instance of EthWalletProvider', () => {
-//     const provider = client.initProvider<EthWalletProvider>(
-//       ProviderType.EthWallet
-//     );
-//     expect(provider).toBeInstanceOf(EthWalletProvider);
-//   });
+  it('should return an instance of EthWalletProvider', () => {
+    const provider = client.initProvider<EthWalletProvider>(
+      ProviderType.EthWallet
+    );
+    expect(provider).toBeInstanceOf(EthWalletProvider);
+  });
 
-//   it('should return an instance of WebAuthnProvider', () => {
-//     const provider = client.initProvider<WebAuthnProvider>(
-//       ProviderType.WebAuthn
-//     );
-//     expect(provider).toBeInstanceOf(WebAuthnProvider);
-//   });
-// });
+  it('should return an instance of WebAuthnProvider', () => {
+    const provider = client.initProvider<WebAuthnProvider>(
+      ProviderType.WebAuthn
+    );
+    expect(provider).toBeInstanceOf(WebAuthnProvider);
+  });
+});
 
-// describe('getProvider', () => {
-//   let client: LitAuthClient;
+describe('getProvider', () => {
+  let client: LitAuthClient;
 
-//   beforeEach(() => {
-//     client = new LitAuthClient({
-//       litRelayConfig: { relayApiKey: 'test-api-key' },
-//     });
-//   });
+  beforeEach(() => {
+    client = new LitAuthClient({
+      litRelayConfig: { relayApiKey: 'test-api-key' },
+    });
+  });
 
-//   afterEach(() => {
-//     jest.restoreAllMocks();
-//   });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
-//   it('should return the correct provider for the given provider type', () => {
-//     client.initProvider<DiscordProvider>(ProviderType.Discord, {
-//       redirectUri: 'http://localhost:3000/redirect',
-//     });
-//     const savedProvider = client.getProvider(ProviderType.Discord);
-//     expect(savedProvider).toBeInstanceOf(DiscordProvider);
-//   });
+  it('should return the correct provider for the given provider type', () => {
+    client.initProvider<DiscordProvider>(ProviderType.Discord, {
+      redirectUri: 'http://localhost:3000/redirect',
+    });
+    const savedProvider = client.getProvider(ProviderType.Discord);
+    expect(savedProvider).toBeInstanceOf(DiscordProvider);
+  });
 
-//   it('should return undefined if the provider for the given provider type is not initialized', () => {
-//     const savedProvider = client.getProvider(ProviderType.Google);
-//     expect(savedProvider).toBeUndefined();
-//   });
-// });
+  it('should return undefined if the provider for the given provider type is not initialized', () => {
+    const savedProvider = client.getProvider(ProviderType.Google);
+    expect(savedProvider).toBeUndefined();
+  });
+});
 
 // describe('GoogleProvider', () => {
 //   let client: LitAuthClient;
