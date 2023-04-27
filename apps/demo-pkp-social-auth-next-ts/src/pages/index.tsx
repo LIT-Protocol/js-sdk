@@ -2,7 +2,16 @@ import Head from 'next/head';
 import { Inter } from 'next/font/google';
 import { useCallback, useEffect, useState } from 'react';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { LitAuthClient, isSignInRedirect } from '@lit-protocol/lit-auth-client';
+import {
+  LitAuthClient,
+  BaseProvider,
+  GoogleProvider,
+  DiscordProvider,
+  EthWalletProvider,
+  WebAuthnProvider,
+  isSignInRedirect,
+  getProviderFromUrl,
+} from '@lit-protocol/lit-auth-client';
 import { IRelayPKP, AuthMethod, SessionSigs } from '@lit-protocol/types';
 import { ProviderType } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
@@ -21,6 +30,9 @@ enum Views {
   SIGN_IN = 'sign_in',
   HANDLE_REDIRECT = 'handle_redirect',
   REQUEST_AUTHSIG = 'request_authsig',
+  REGISTERING = 'webauthn_registering',
+  REGISTERED = 'webauthn_registered',
+  AUTHENTICATING = 'webauthn_authenticating',
   FETCHING = 'fetching',
   FETCHED = 'fetched',
   MINTING = 'minting',
@@ -65,7 +77,7 @@ export default function Dashboard() {
   /**
    * Use wagmi to connect one's eth wallet and then request a signature from one's wallet
    */
-  async function handleConnectWallet(c) {
+  async function handleConnectWallet(c: any) {
     const { account, chain, connector } = await connectAsync(c);
     try {
       await authWithWallet(account, connector);
@@ -79,29 +91,23 @@ export default function Dashboard() {
   /**
    * Begin auth flow with Google
    */
-  function authWithGoogle() {
-    const provider = litAuthClient.initProvider<ProviderType.Google>(
-      ProviderType.Google,
-      {
-        redirectUri,
-      }
-    );
-    provider.signIn();
+  async function authWithGoogle() {
     setCurrentProviderType(ProviderType.Google);
+    const provider = litAuthClient.initProvider<GoogleProvider>(
+      ProviderType.Google
+    );
+    await provider.signIn();
   }
 
   /**
    * Begin auth flow with Discord
    */
-  function authWithDiscord() {
-    const provider = litAuthClient.initProvider<ProviderType.Discord>(
-      ProviderType.Discord,
-      {
-        redirectUri,
-      }
-    );
-    provider.signIn();
+  async function authWithDiscord() {
     setCurrentProviderType(ProviderType.Discord);
+    const provider = litAuthClient.initProvider<DiscordProvider>(
+      ProviderType.Discord
+    );
+    await provider.signIn();
   }
 
   /**
@@ -117,16 +123,13 @@ export default function Dashboard() {
       return sig;
     };
 
-    // Initialize EthWalletProvider
-    const provider = litAuthClient.initProvider<ProviderType.EthWallet>(
-      ProviderType.EthWallet,
-      {
-        address,
-        signMessage: signAuthSig,
-      }
-    );
-
-    const authMethod = await provider.authenticate();
+    // Get auth sig
+    const provider = litAuthClient.getProvider(ProviderType.EthWallet);
+    const authMethod = await provider.authenticate({
+      address,
+      signMessage: signAuthSig,
+    });
+    setCurrentProviderType(ProviderType.EthWallet);
     setAuthMethod(authMethod);
 
     // Fetch PKPs associated with eth wallet account
@@ -138,9 +141,78 @@ export default function Dashboard() {
       setPKPs(pkps);
     }
     setView(Views.FETCHED);
-    setCurrentProviderType(ProviderType.EthWallet);
   }
 
+  async function registerWithWebAuthn() {
+    setView(Views.REGISTERING);
+
+    try {
+      // Register new PKP
+      const provider = litAuthClient.getProvider(
+        ProviderType.WebAuthn
+      ) as WebAuthnProvider;
+      setCurrentProviderType(ProviderType.WebAuthn);
+      const options = await provider.register();
+
+      // Verify registration and mint PKP through relayer
+      const txHash = await provider.verifyAndMintPKPThroughRelayer(options);
+      setView(Views.MINTING);
+      const response = await provider.relay.pollRequestUntilTerminalState(
+        txHash
+      );
+      if (response.status !== 'Succeeded') {
+        throw new Error('Minting failed');
+      }
+      const newPKP: IRelayPKP = {
+        tokenId: response.pkpTokenId!,
+        publicKey: response.pkpPublicKey!,
+        ethAddress: response.pkpEthAddress!,
+      };
+
+      // Add new PKP to list of PKPs
+      const morePKPs: IRelayPKP[] = [...pkps, newPKP];
+      setCurrentPKP(newPKP);
+      setPKPs(morePKPs);
+
+      setView(Views.REGISTERED);
+    } catch (err) {
+      console.error(err);
+      setError(err);
+      setView(Views.ERROR);
+    }
+  }
+
+  async function authenticateWithWebAuthn() {
+    setView(Views.AUTHENTICATING);
+
+    try {
+      const provider = litAuthClient.getProvider(
+        ProviderType.WebAuthn
+      ) as WebAuthnProvider;
+      const authMethod = await provider.authenticate();
+      setAuthMethod(authMethod);
+
+      // Authenticate with a WebAuthn credential and create session sigs with authentication data
+      setView(Views.CREATING_SESSION);
+
+      const sessionSigs = await provider.getSessionSigs({
+        pkpPublicKey: currentPKP.publicKey,
+        authMethod,
+        sessionSigsParams: {
+          chain: 'ethereum',
+          resources: [`litAction://*`],
+        },
+      });
+      setSessionSigs(sessionSigs);
+
+      setView(Views.SESSION_CREATED);
+    } catch (err) {
+      console.error(err);
+      setAuthMethod(null);
+      setError(err);
+      setView(Views.ERROR);
+    }
+  }
   /**
    * Handle redirect from Lit login server
    */
@@ -148,22 +220,15 @@ export default function Dashboard() {
     async (providerName: string) => {
       setView(Views.HANDLE_REDIRECT);
       try {
-        let provider;
+        // Get relevant provider
+        let provider: BaseProvider;
         if (providerName === ProviderType.Google) {
-          provider = litAuthClient.initProvider<ProviderType.Google>(
-            ProviderType.Google,
-            {
-              redirectUri,
-            }
-          );
+          provider = litAuthClient.getProvider(ProviderType.Google);
         } else if (providerName === ProviderType.Discord) {
-          provider = litAuthClient.initProvider<ProviderType.Discord>(
-            ProviderType.Discord,
-            {
-              redirectUri,
-            }
-          );
+          provider = litAuthClient.getProvider(ProviderType.Discord);
         }
+        setCurrentProviderType(providerName as ProviderType);
+
         // Get auth method object that has the OAuth token from redirect callback
         const authMethod: AuthMethod = await provider.authenticate();
         setAuthMethod(authMethod);
@@ -177,7 +242,6 @@ export default function Dashboard() {
           setPKPs(pkps);
         }
         setView(Views.FETCHED);
-        setCurrentProviderType(providerName as ProviderType);
       } catch (err) {
         console.error(err);
         setError(err);
@@ -204,6 +268,9 @@ export default function Dashboard() {
       const response = await provider.relay.pollRequestUntilTerminalState(
         txHash
       );
+      if (response.status !== 'Succeeded') {
+        throw new Error('Minting failed');
+      }
       const newPKP: IRelayPKP = {
         tokenId: response.pkpTokenId,
         publicKey: response.pkpPublicKey,
@@ -325,6 +392,13 @@ export default function Dashboard() {
           },
           litNodeClient,
         });
+
+        // Initialize providers
+        litAuthClient.initProvider<GoogleProvider>(ProviderType.Google);
+        litAuthClient.initProvider<DiscordProvider>(ProviderType.Discord);
+        litAuthClient.initProvider<EthWalletProvider>(ProviderType.EthWallet);
+        litAuthClient.initProvider<WebAuthnProvider>(ProviderType.WebAuthn);
+
         setLitAuthClient(litAuthClient);
       } catch (err) {
         console.error(err);
@@ -340,11 +414,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Check if app has been redirected from Lit login server
-    if (litAuthClient && !authMethod) {
-      const providerName = isSignInRedirect(redirectUri);
-      if (providerName) {
-        handleRedirect(providerName);
-      }
+    if (litAuthClient && !authMethod && isSignInRedirect(redirectUri)) {
+      const providerName = getProviderFromUrl();
+      handleRedirect(providerName);
     }
   }, [litAuthClient, handleRedirect, authMethod]);
 
@@ -429,6 +501,9 @@ export default function Dashboard() {
                       {connector.name}
                     </button>
                   ))}
+                  <button onClick={registerWithWebAuthn}>
+                    Register with WebAuthn
+                  </button>
                 </>
               )}
             </>
@@ -442,6 +517,28 @@ export default function Dashboard() {
         {view === Views.REQUEST_AUTHSIG && (
           <>
             <h1>Check your wallet</h1>
+          </>
+        )}
+        {view === Views.REGISTERING && (
+          <>
+            <h1>Register your passkey</h1>
+            <p>Follow your browser&apos;s prompts to create a passkey.</p>
+          </>
+        )}
+        {view === Views.REGISTERED && (
+          <>
+            <h1>Minted!</h1>
+            <p>
+              Authenticate with your newly registered passkey. Continue when
+              you&apos;re ready.
+            </p>
+            <button onClick={authenticateWithWebAuthn}>Continue</button>
+          </>
+        )}
+        {view === Views.AUTHENTICATING && (
+          <>
+            <h1>Authenticate with your passkey</h1>
+            <p>Follow your browser&apos;s prompts to create a passkey.</p>
           </>
         )}
         {view === Views.FETCHING && (

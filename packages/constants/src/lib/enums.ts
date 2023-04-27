@@ -36,6 +36,6 @@ export enum AuthMethodType {
 export enum ProviderType {
   Discord = 'discord',
   Google = 'google',
-  EthWallet = 'ethWallet',
-  WebAuthn = 'webAuthn',
+  EthWallet = 'ethwallet',
+  WebAuthn = 'webauthn',
 }

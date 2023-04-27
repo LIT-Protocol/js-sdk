@@ -14,13 +14,6 @@ import DiscordProvider from './providers/DiscordProvider';
 import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 
-export type Providers = {
-  [ProviderType.Discord]: DiscordProvider;
-  [ProviderType.Google]: GoogleProvider;
-  [ProviderType.EthWallet]: EthWalletProvider;
-  [ProviderType.WebAuthn]: WebAuthnProvider;
-};
-
 /**
  * Class that handles authentication through Lit login
  */
@@ -40,7 +33,7 @@ export class LitAuthClient {
   /**
    * Map of providers
    */
-  private providers: Map<ProviderType, BaseProvider>;
+  private providers: Map<string, BaseProvider>;
 
   /**
    * Create a LitAuthClient instance
@@ -88,46 +81,45 @@ export class LitAuthClient {
   /**
    * Initialize a provider
    *
-   * @param {T} type - Type of provider to initialize
-   * @param {ProviderOptions} [options] - Options for the provider
+   * @param {ProviderOptions} options - Options for the provider
    *
-   * @returns {BaseProvider} - Provider
+   * @returns {T} - Provider
    */
-  public initProvider<T extends ProviderType>(
-    type: T,
+  public initProvider<T extends BaseProvider>(
+    type: ProviderType,
     options?: ProviderOptions
-  ): Providers[T] {
+  ): T {
     const baseParams = {
       rpcUrl: this.rpcUrl,
       relay: this.relay,
       litNodeClient: this.litNodeClient,
     };
 
-    let provider: Providers[T];
+    let provider: T;
 
     switch (type) {
-      case ProviderType.Google:
+      case 'google':
         provider = new GoogleProvider({
           ...baseParams,
           ...(options as OAuthProviderOptions),
-        }) as Providers[T];
+        }) as unknown as T;
         break;
-      case ProviderType.Discord:
+      case 'discord':
         provider = new DiscordProvider({
           ...baseParams,
           ...(options as OAuthProviderOptions),
-        }) as Providers[T];
+        }) as unknown as T;
         break;
-      case ProviderType.EthWallet:
+      case 'ethwallet':
         provider = new EthWalletProvider({
           ...baseParams,
           ...(options as EthWalletProviderOptions),
-        }) as Providers[T];
+        }) as unknown as T;
         break;
-      case ProviderType.WebAuthn:
+      case 'webauthn':
         provider = new WebAuthnProvider({
           ...baseParams,
-        }) as Providers[T];
+        }) as unknown as T;
         break;
       default:
         throw new Error(

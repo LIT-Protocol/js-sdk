@@ -1011,22 +1011,10 @@ export interface OAuthProviderOptions {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
-  redirectUri: string;
+  redirectUri?: string;
 }
 
 export interface EthWalletProviderOptions {
-  /**
-   * Ethereum wallet address
-   */
-  address: string;
-  /**
-   * Function to sign message
-   *
-   * @param {string} message - Message to sign
-   *
-   * @returns {Promise<string>} - Raw signature of message
-   */
-  signMessage: (message: string) => Promise<string>;
   /**
    * The domain from which the signing request is made
    */
@@ -1080,6 +1068,18 @@ export interface LoginUrlParams {
 }
 
 export interface EthWalletAuthenticateOptions {
+  /**
+   * Ethereum wallet address
+   */
+  address?: string;
+  /**
+   * Function to sign message
+   *
+   * @param {string} message - Message to sign
+   *
+   * @returns {Promise<string>} - Raw signature of message
+   */
+  signMessage?: (message: string) => Promise<string>;
   /**
    * Name of chain to use for signature
    */

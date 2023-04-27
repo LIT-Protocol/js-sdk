@@ -20,17 +20,17 @@ export default class GoogleProvider extends BaseProvider {
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
-    this.redirectUri = options.redirectUri;
+    this.redirectUri = options.redirectUri || window.location.origin;
   }
 
   /**
    * Redirect user to the Lit's Google login page
    *
-   * @returns {void} - Redirects user to Lit login page
+   * @returns {Promise<void>} - Redirects user to Lit login page
    */
-  public signIn(): void {
+  public async signIn(): Promise<void> {
     // Get login url
-    const loginUrl = prepareLoginUrl('google', this.redirectUri);
+    const loginUrl = await prepareLoginUrl('google', this.redirectUri);
     // Redirect to login url
     window.location.assign(loginUrl);
   }
@@ -73,7 +73,11 @@ export default class GoogleProvider extends BaseProvider {
     }
 
     // Clear params from url
-    window.history.replaceState({}, document.title, this.redirectUri);
+    window.history.replaceState(
+      null,
+      window.document.title,
+      window.location.pathname
+    );
 
     // Check if id token is present in url
     if (!idToken) {

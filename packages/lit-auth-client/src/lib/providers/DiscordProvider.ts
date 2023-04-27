@@ -20,17 +20,17 @@ export default class DiscordProvider extends BaseProvider {
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
-    this.redirectUri = options.redirectUri;
+    this.redirectUri = options.redirectUri || window.location.origin;
   }
 
   /**
    * Redirect user to the Lit's Discord login page
    *
-   * @returns {DiscordProvider} - Redirects user to Lit login page
+   * @returns {Promise<void>} - Redirects user to Lit login page
    */
-  public signIn(): void {
+  public async signIn(): Promise<void> {
     // Get login url
-    const loginUrl = prepareLoginUrl('discord', this.redirectUri);
+    const loginUrl = await prepareLoginUrl('discord', this.redirectUri);
     // Redirect to login url
     window.location.assign(loginUrl);
   }
@@ -59,9 +59,9 @@ export default class DiscordProvider extends BaseProvider {
     }
 
     // Check if provider is Discord
-    if (!provider || provider !== 'Discord') {
+    if (!provider || provider !== 'discord') {
       throw new Error(
-        `OAuth provider "${provider}" passed in redirect callback URL does not match "Discord"`
+        `OAuth provider "${provider}" passed in redirect callback URL does not match "discord"`
       );
     }
 
@@ -73,7 +73,11 @@ export default class DiscordProvider extends BaseProvider {
     }
 
     // Clear params from url
-    window.history.replaceState({}, document.title, this.redirectUri);
+    window.history.replaceState(
+      null,
+      window.document.title,
+      window.location.pathname
+    );
 
     // Check if access token is present in url
     if (!accessToken) {

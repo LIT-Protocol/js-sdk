@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { LoginUrlParams } from '@lit-protocol/types';
 
 export const STATE_PARAM_KEY = 'lit-state-param';
@@ -20,12 +19,15 @@ export function isSocialLoginSupported(provider: string): boolean {
  * @param {string} provider - Social login provider to use
  * @param {string} redirectUri - Redirect uri to use
  *
- * @returns {string} - Login url
+ * @returns {Promise<string>} - Login url
  */
-export function prepareLoginUrl(provider: string, redirectUri: string): string {
+export async function prepareLoginUrl(
+  provider: string,
+  redirectUri: string
+): Promise<string> {
   const baseUrl = 'https://login.litgateway.com';
   const loginUrl = `${baseUrl}${getLoginRoute(provider)}`;
-  const state = encode(setStateParam());
+  const state = encode(await setStateParam());
   const authParams = {
     app_redirect: redirectUri,
   };
@@ -98,13 +100,13 @@ export function parseLoginParams(search: string): LoginUrlParams {
  *
  * @param {string} redirectUri - Redirect uri to check against
  *
- * @returns {string | null} - If current url is redirect uri, returns provider name
+ * @returns {boolean} - If current url is redirect uri
  */
-export function isSignInRedirect(redirectUri: string): string | null {
+export function isSignInRedirect(redirectUri: string): boolean {
   // Check if current url matches redirect uri
   const isRedirectUri = window.location.href.startsWith(redirectUri);
   if (!isRedirectUri) {
-    return null;
+    return false;
   }
   // Check url for redirect params
   const { provider, accessToken, idToken, state, error } = parseLoginParams(
@@ -112,17 +114,28 @@ export function isSignInRedirect(redirectUri: string): string | null {
   );
   // Check if current url is redirect uri and has redirect params
   if (isRedirectUri && (provider || accessToken || idToken || state || error)) {
-    return provider;
+    return true;
   }
-  return null;
+  return false;
+}
+
+/**
+ * Get provider name from redirect uri if available
+ *
+ * @returns {string} - Provider name
+ */
+export function getProviderFromUrl(): string | null {
+  const { provider } = parseLoginParams(window.document.location.search);
+  return provider;
 }
 
 /**
  * Create OAuth 2.0 state param and store it in session storage
  *
- * @returns {string} - State param
+ * @returns {Promise<string>} - State param
  */
-export function setStateParam(): string {
+export async function setStateParam(): Promise<string> {
+  const { nanoid } = await import('nanoid');
   const state = nanoid(15);
   sessionStorage.setItem(STATE_PARAM_KEY, state);
   return state;

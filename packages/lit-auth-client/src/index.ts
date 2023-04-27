@@ -1,5 +1,10 @@
 import * as _LitAuthClient from './lib/lit-auth-client';
-import { isSignInRedirect } from './lib/utils';
+import { BaseProvider } from './lib/providers/BaseProvider';
+import DiscordProvider from './lib/providers/DiscordProvider';
+import EthWalletProvider from './lib/providers/EthWalletProvider';
+import GoogleProvider from './lib/providers/GoogleProvider';
+import WebAuthnProvider from './lib/providers/WebAuthnProvider';
+import { isSignInRedirect, getProviderFromUrl } from './lib/utils';
 
 declare global {
   var LitAuthClient: any; //eslint-disable-line no-var
@@ -12,4 +17,12 @@ if (!globalThis.LitAuthClient) {
 
 export * from './lib/lit-auth-client';
 
-export { isSignInRedirect };
+export {
+  BaseProvider,
+  DiscordProvider,
+  EthWalletProvider,
+  GoogleProvider,
+  WebAuthnProvider,
+  isSignInRedirect,
+  getProviderFromUrl,
+};

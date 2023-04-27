@@ -2,10 +2,6 @@ import { AuthMethod, BaseProviderOptions } from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import {
-  startRegistration,
-  startAuthentication,
-} from '@simplewebauthn/browser';
-import {
   PublicKeyCredentialCreationOptionsJSON,
   UserVerificationRequirement,
 } from '@simplewebauthn/typescript-types';
@@ -42,6 +38,7 @@ export default class WebAuthnProvider extends BaseProvider {
     options: PublicKeyCredentialCreationOptionsJSON
   ): Promise<string> {
     // Submit registration options to the authenticator
+    const { startRegistration } = await import('@simplewebauthn/browser');
     const attResp = await startRegistration(options);
 
     // Send the credential to the relying party for verification
@@ -94,6 +91,7 @@ export default class WebAuthnProvider extends BaseProvider {
     };
 
     // Authenticate with WebAuthn
+    const { startAuthentication } = await import('@simplewebauthn/browser');
     const authenticationResponse = await startAuthentication(
       authenticationOptions
     );
