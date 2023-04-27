@@ -260,44 +260,18 @@ export class PKPEthersWallet
   }
 
   async sendTransaction(transaction: TransactionRequest | any): Promise<any> {
-    // console.log('--- sendTransaction ---');
-
-    // if (!this.litNodeClientReady) {
-    //   await this.init();
-    // }
-
-    // const addr = await this.getAddress();
-    // this.log('sendTransaction => addr:', addr);
-
-    // try {
-    //   if (!transaction['nonce']) {
-    //     transaction.nonce = await this.rpcProvider.getTransactionCount(addr);
-    //     this.log('sendTransaction => nonce:', transaction.nonce);
-    //   }
-
-    //   if (!transaction['chainId']) {
-    //     transaction.chainId = (await this.rpcProvider.getNetwork()).chainId;
-    //     this.log('sendTransaction => chainId:', transaction.chainId);
-    //   }
-
-    //   if (!transaction['gasPrice']) {
-    //     transaction.gasPrice = await this.getGasPrice();
-    //     this.log('sendTransaction => gasPrice:', transaction.gasPrice);
-    //   }
-
-    //   if (!transaction['gasLimit']) {
-    //     transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
-    //     this.log('sendTransaction => gasLimit:', transaction.gasLimit);
-    //   }
-    // } catch (err) {
-    //   this.log(
-    //     'sendTransaction => unable to populate transaction with details:',
-    //     err
-    //   );
-    // }
-
     this.log('sendTransaction => transaction:', transaction);
-    return await this.rpcProvider.sendTransaction(transaction);
+
+    let res;
+
+    try {
+      res = await this.rpcProvider.sendTransaction(transaction);
+    } catch (e) {
+      this.log('sendTransaction => error:', e);
+      throw e;
+    }
+
+    return res;
   }
 
   /**
