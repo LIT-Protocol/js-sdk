@@ -847,7 +847,7 @@ export interface PKPBaseProp {
   pkpPubKey: string;
   rpc?: string;
   rpcs?: RPCUrls;
-  controllerAuthSig?: JsonAuthSig;
+  controllerAuthSig?: AuthSig;
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
   litNetwork?: any;
@@ -891,14 +891,6 @@ export interface SessionSigs {
    * Map of Lit node urls to session signatures
    */
   [key: string]: SessionSig;
-}
-
-export interface SessionSig {
-  sig: string;
-  derivedVia: string;
-  signedMessage: string;
-  address: string;
-  algo: string;
 }
 
 /**

@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/pkp-cosmos",
-  "version": "2.1.110",
+  "version": "2.1.135",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",

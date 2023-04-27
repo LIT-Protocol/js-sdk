@@ -11,7 +11,7 @@
 import {
   ExecuteJsProps,
   PKPBaseProp,
-  JsonAuthSig,
+  AuthSig,
   PKPBaseDefaultParams,
   GetSessionSigsProps,
   SessionSigs,
@@ -44,7 +44,7 @@ const compressPubKey = (pubKey: string): string => {
  */
 export class PKPBase<T = PKPBaseDefaultParams> {
   rpcs?: RPCUrls;
-  controllerAuthSig?: JsonAuthSig;
+  controllerAuthSig?: AuthSig;
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
 
@@ -240,7 +240,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     ) {
       authSig = Object.values(
         this.controllerSessionSigs
-      )[0] as unknown as JsonAuthSig;
+      )[0] as unknown as AuthSig;
     }
 
     if (!authSig) {
