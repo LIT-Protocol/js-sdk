@@ -45,10 +45,10 @@ export function getRecapNamespaceAndAbility(litAbility: LitAbility): {
  * of an 'ability'.
  */
 export enum LitRecapAbility {
-  Decryption = 'decryption',
-  Signing = 'signing',
-  Auth = 'auth',
-  Execution = 'execution',
+  Decryption = 'Decryption',
+  Signing = 'Signing',
+  Auth = 'Auth',
+  Execution = 'Execution',
 }
 
 export enum LitNamespace {

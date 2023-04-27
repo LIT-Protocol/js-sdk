@@ -3,12 +3,12 @@ import { Recap } from 'siwe-recap';
 import {
   AttenuationsObject,
   CID,
+  ILitResource,
+  ISessionCapabilityObject,
   LitAbility,
   PlainJSON,
-  ISessionCapabilityObject,
 } from '../models';
 import { getRecapNamespaceAndAbility } from './utils';
-import { ILitResource } from '../models';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   #inner: Recap;
@@ -75,7 +75,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     litResource: ILitResource,
     ability: LitAbility
   ): void {
-    // Validate Lit resource.
+    // Validate Lit ability is compatible with the Lit resource.
     if (!litResource.isValidLitAbility(ability)) {
       throw new Error(
         `The specified Lit resource does not support the specified ability.`
@@ -96,11 +96,13 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     litResource: ILitResource,
     ability: LitAbility
   ): boolean {
-    // Validate Lit resource.
-    if (!litResource.isValidLitAbility(ability)) {
-      throw new Error(
-        `The specified Lit resource does not support the specified ability.`
-      );
+    // Validate Lit ability is compatible with the Lit resource.
+    // The only exception is if there's a wildcard resource key in the session capability object.
+    if (
+      !litResource.isValidLitAbility(ability) &&
+      !this.attenuations['lit/*/*']
+    ) {
+      return false;
     }
 
     // Get the attenuations object.
@@ -110,22 +112,67 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
       getRecapNamespaceAndAbility(ability);
     const recapAbilityToCheckFor = `${recapNamespace}/${recapAbility}`;
 
-    if (!attenuations[litResource.getResourceKey()]) {
+    // Find an attenuated resource key to match against.
+    const attenuatedResourceKey =
+      this.#getResourceKeyToMatchAgainst(litResource);
+
+    if (!attenuations[attenuatedResourceKey]) {
       // No attenuations specified for this resource.
       return false;
     }
 
     // Check whether the exact Recap namespace/ability pair is present.
     const attenuatedRecapAbilities: string[] = Object.keys(
-      attenuations[litResource.getResourceKey()]
+      attenuations[attenuatedResourceKey]
     );
 
     for (const attenuatedRecapAbility of attenuatedRecapAbilities) {
+      // Return early if the attenuated recap ability is a wildcard.
+      if (attenuatedRecapAbility === '*/*') {
+        return true;
+      }
+
       if (attenuatedRecapAbility === recapAbilityToCheckFor) {
         return true;
       }
     }
 
     return false;
+  }
+
+  /**
+   * Returns the attenuated resource key to match against. This supports matching
+   * against a wildcard resource key too.
+   *
+   * @example If the attenuations object contains the following:
+   *
+   * ```
+   * {
+   *   'lit/acc/*': {
+   *    '*\/*': {}
+   *   }
+   * }
+   * ```
+   *
+   * Then, if the provided litResource is 'lit/acc/123', the method will return 'lit/acc/*'.
+   */
+  #getResourceKeyToMatchAgainst(litResource: ILitResource): string {
+    const attenuatedResourceKeysToMatchAgainst: string[] = [
+      'lit/*/*',
+      `${litResource.resourcePrefix}/*`,
+      litResource.getResourceKey(),
+    ];
+
+    for (const attenuatedResourceKeyToMatchAgainst of attenuatedResourceKeysToMatchAgainst) {
+      if (this.attenuations[attenuatedResourceKeyToMatchAgainst]) {
+        return attenuatedResourceKeyToMatchAgainst;
+      }
+    }
+
+    return '';
+  }
+
+  addAllCapabilitiesForResource(litResource: ILitResource): void {
+    return this.addAttenuation(litResource.getResourceKey(), '*', '*');
   }
 }
