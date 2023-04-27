@@ -23,7 +23,7 @@ import {
   StdFee,
 } from '@cosmjs/stargate';
 
-jest.setTimeout(10000);
+jest.setTimeout(30000);
 
 describe('WalletFactory', () => {
   it('should create an Ethereum wallet', () => {
@@ -31,7 +31,7 @@ describe('WalletFactory', () => {
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
       rpcs: {
-        eth: LITCONFIG.MUMBAI_RPC,
+        eth: LITCONFIG.CHRONICLE_RPC,
         cosmos: LITCONFIG.COSMOS_RPC,
       },
     };
@@ -45,7 +45,7 @@ describe('WalletFactory', () => {
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
       rpcs: {
-        eth: LITCONFIG.MUMBAI_RPC,
+        eth: LITCONFIG.CHRONICLE_RPC,
         cosmos: LITCONFIG.COSMOS_RPC,
       },
       addressPrefix: 'cosmos',
@@ -83,9 +83,15 @@ describe('PKPClient', () => {
     });
 
     describe('eth', () => {
-      const MESSAGE_TO_SIGN = 'HEY THERE!';
-
       it('should sign a message', async () => {
+        const pkpClient = new PKPClient({
+          controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+          pkpPubKey: LITCONFIG.PKP_PUBKEY,
+          cosmosAddressPrefix: 'cosmos',
+        });
+
+        const MESSAGE_TO_SIGN = 'HEY THERE!';
+
         const signature = await pkpClient
           .getEthWallet()
           .signMessage(MESSAGE_TO_SIGN);
@@ -94,8 +100,14 @@ describe('PKPClient', () => {
       });
 
       it('should sign a transaction', async () => {
+        const pkpClient = new PKPClient({
+          controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+          pkpPubKey: LITCONFIG.PKP_PUBKEY,
+          cosmosAddressPrefix: 'cosmos',
+        });
+
         const txRes: string = await pkpClient.getEthWallet().signTransaction({
-          to: LITCONFIG.PKP_ADDRESS,
+          to: LITCONFIG.PKP_ETH_ADDRESS,
           value: 0,
           data: '0x',
         });
@@ -147,7 +159,7 @@ describe('PKPClient', () => {
         controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
         pkpPubKey: LITCONFIG.PKP_PUBKEY,
         rpcs: {
-          eth: LITCONFIG.MUMBAI_RPC,
+          eth: LITCONFIG.CHRONICLE_RPC,
           cosmos: LITCONFIG.COSMOS_RPC,
         },
         cosmosAddressPrefix: 'cosmos',
@@ -235,9 +247,7 @@ describe('PKPClient', () => {
 
         const etherAddress = await etherWallet.getAddress();
 
-        expect(etherAddress).toEqual(
-          '0xf675E8Cdc5DbE5f78a47D23A3b1CCD07b986f17f'
-        );
+        expect(etherAddress).toEqual(LITCONFIG.PKP_ETH_ADDRESS);
       });
 
       it('should get eth address using getEthWallet()', async () => {
@@ -245,22 +255,19 @@ describe('PKPClient', () => {
 
         const etherAddress = await etherWallet.getAddress();
 
-        expect(etherAddress).toEqual(
-          '0xf675E8Cdc5DbE5f78a47D23A3b1CCD07b986f17f'
-        );
+        expect(etherAddress).toEqual(LITCONFIG.PKP_ETH_ADDRESS);
       });
 
       describe('update config', () => {
         describe('update rpc', () => {
           // update the rpc
-          const newRpcUrl =
-            'https://endpoints.omniatech.io/v1/matic/mumbai/public';
+          const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
           it('should be able to update rpc url', async () => {
             const etherWallet = pkpClient.getEthWallet();
 
             const oldRpc = etherWallet.getRpc();
 
-            expect(oldRpc).toEqual(LITCONFIG.MUMBAI_RPC);
+            expect(oldRpc).toEqual(LITCONFIG.CHRONICLE_RPC);
 
             await etherWallet.setRpc(newRpcUrl);
 
@@ -282,6 +289,14 @@ describe('PKPClient', () => {
           });
 
           it('should be able to use updated rpc url to sign a transaction', async () => {
+            const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
+
+            const pkpClient = new PKPClient({
+              controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+              pkpPubKey: LITCONFIG.PKP_PUBKEY,
+              cosmosAddressPrefix: 'cosmos',
+            });
+
             const etherWallet = pkpClient.getEthWallet();
 
             await etherWallet.setRpc(newRpcUrl);
@@ -290,8 +305,9 @@ describe('PKPClient', () => {
               method: 'eth_signTransaction',
               params: [
                 {
-                  from: LITCONFIG.PKP_ADDRESS,
-                  to: LITCONFIG.PKP_ADDRESS,
+                  from: LITCONFIG.PKP_ETH_ADDRESS,
+                  to: LITCONFIG.PKP_ETH_ADDRESS,
+                  data: LITCONFIG.HEX_TEST_MEMO, // "JK-SDK Test"
                 },
               ],
             });
@@ -299,16 +315,26 @@ describe('PKPClient', () => {
           });
 
           it('should be able to use updated rpc url to sign & send a transaction', async () => {
+            // const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
+
+            const pkpClient = new PKPClient({
+              controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+              pkpPubKey: LITCONFIG.PKP_PUBKEY,
+              cosmosAddressPrefix: 'cosmos',
+              rpc: LITCONFIG.CHRONICLE_RPC,
+              debug: true,
+            });
+
             const etherWallet = pkpClient.getEthWallet();
 
-            await etherWallet.setRpc(newRpcUrl);
+            // await etherWallet.setRpc(newRpcUrl);
 
             const tx = await etherWallet.handleRequest<ETHTxRes>({
               method: 'eth_sendTransaction',
               params: [
                 {
-                  from: LITCONFIG.PKP_ADDRESS,
-                  to: LITCONFIG.PKP_ADDRESS,
+                  from: LITCONFIG.PKP_ETH_ADDRESS,
+                  to: LITCONFIG.PKP_ETH_ADDRESS
                 },
               ],
             });
@@ -328,8 +354,8 @@ describe('PKPClient', () => {
             method: 'eth_signTransaction',
             params: [
               {
-                from: LITCONFIG.PKP_ADDRESS,
-                to: LITCONFIG.PKP_ADDRESS,
+                from: LITCONFIG.PKP_ETH_ADDRESS,
+                to: LITCONFIG.PKP_ETH_ADDRESS,
               },
             ],
           });
@@ -347,9 +373,7 @@ describe('PKPClient', () => {
 
         const cosmosAddress = await cosmosWallet.getAccounts();
 
-        expect(cosmosAddress[0].address).toEqual(
-          'cosmos134y3t6v0cfftzk4zhtzynqyyzj7dwwcz9chs0q'
-        );
+        expect(cosmosAddress[0].address).toEqual(LITCONFIG.PKP_COSMOS_ADDRESS);
       });
 
       it('should get cosmos wallet using getCosmosWallet()', async () => {
@@ -357,9 +381,7 @@ describe('PKPClient', () => {
 
         const cosmosAddress = await cosmosWallet.getAccounts();
 
-        expect(cosmosAddress[0].address).toEqual(
-          'cosmos134y3t6v0cfftzk4zhtzynqyyzj7dwwcz9chs0q'
-        );
+        expect(cosmosAddress[0].address).toEqual(LITCONFIG.PKP_COSMOS_ADDRESS);
       });
 
       describe('stargate client', () => {

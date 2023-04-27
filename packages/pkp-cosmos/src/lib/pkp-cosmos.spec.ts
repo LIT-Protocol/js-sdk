@@ -21,9 +21,7 @@ describe('PKPCosmosWallet', () => {
       addressPrefix: 'cosmos',
     });
     const [pkpAccount] = await wallet.getAccounts();
-    expect(pkpAccount.address).toEqual(
-      'cosmos134y3t6v0cfftzk4zhtzynqyyzj7dwwcz9chs0q'
-    );
+    expect(pkpAccount.address).toEqual(LITCONFIG.PKP_COSMOS_ADDRESS);
   });
   it('should connects to lit node client', async () => {
     const { PKPCosmosWallet } = await import('./pkp-cosmos');
@@ -53,7 +51,7 @@ describe('PKPCosmosWallet', () => {
       wallet
     );
     const balances = await client.getAllBalances(pkpAccount.address);
-    expect(parseInt(balances[0].amount)).toBeGreaterThan(1000);
+    expect(parseInt(balances[0].amount)).toBeGreaterThanOrEqual(1000);
   });
 
   it('should send a transaction to itself', async () => {

@@ -1494,7 +1494,7 @@ export class LitNodeClientNodeJs {
     // -- validate: If it's NOT ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '1 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
       throwError({
         message,
@@ -1622,7 +1622,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '2 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       return throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1729,7 +1729,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '3 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1840,7 +1840,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '4 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1943,7 +1943,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '5 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2072,7 +2072,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2195,7 +2195,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '7 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2369,7 +2369,7 @@ export class LitNodeClientNodeJs {
     // -- validate: If it's NOT ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '8 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
       throwError({
         message,

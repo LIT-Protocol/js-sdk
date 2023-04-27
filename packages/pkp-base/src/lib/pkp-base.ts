@@ -66,10 +66,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   })();`;
 
   // -- debug things
-  PREFIX = '[PKPBase]';
-  orange = '\x1b[33m';
-  reset = '\x1b[0m';
-  red = '\x1b[31m';
+  private PREFIX = '[PKPBase]';
+  private orange = '\x1b[33m';
+  private reset = '\x1b[0m';
+  private red = '\x1b[31m';
 
   /**
    * Constructor for the PKPBase class.
@@ -213,6 +213,11 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    */
 
   async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
+
+    if (!this.litNodeClientReady) {
+      await this.init();
+    }
+    
     // If no PKP public key is provided, throw error
     if (!this.uncompressedPubKey) {
       throw new Error('pkpPubKey (aka. uncompressPubKey) is required');

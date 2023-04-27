@@ -69,7 +69,8 @@ describe('Lit Actions', () => {
 
     expect(res.signatures['hello-world-sig']).toBeDefined();
     expect(res.signatures['hello-world-sig'].publicKey).toEqual(
-      '04cd5fc4b661a2ae2dc425aa42abbfeaa187c07063928322a8c748ebb7611868144c0ff28b1910faeafedea914ec8a23baa579b6ff7f03efa322e7eb098e62dd8f'
+      // remove 0x prefix
+      LITCONFIG.PKP_PUBKEY.slice(2)
     );
   });
 });

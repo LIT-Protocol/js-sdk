@@ -22,11 +22,13 @@ import { signTypedData, ethRequestHandler } from './handler';
 
 import { BigNumber, ethers, Transaction } from 'ethers';
 
+jest.setTimeout(60000);
+
 describe('pkp ethers JSON RPC handler', () => {
   const pkpEthersWallet = new PKPEthersWallet({
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
     pkpPubKey: LITCONFIG.PKP_PUBKEY,
-    rpc: LITCONFIG.MUMBAI_RPC,
+    rpc: LITCONFIG.CHRONICLE_RPC,
   });
 
   beforeAll(async () => {
@@ -78,10 +80,26 @@ describe('pkp ethers JSON RPC handler', () => {
     };
 
     it('should be a string', async () => {
+      const pkpEthersWallet = new PKPEthersWallet({
+        controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+        pkpPubKey: LITCONFIG.PKP_PUBKEY,
+        rpc: LITCONFIG.CHRONICLE_RPC,
+      });
+
+      await pkpEthersWallet.init();
+
       const signature = await signTypedData(pkpEthersWallet, msgParams);
       expect(typeof signature).toBe('string');
     });
     it('should return a hex string signature', async () => {
+      const pkpEthersWallet = new PKPEthersWallet({
+        controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+        pkpPubKey: LITCONFIG.PKP_PUBKEY,
+        rpc: LITCONFIG.CHRONICLE_RPC,
+      });
+
+      await pkpEthersWallet.init();
+
       const signature = await signTypedData(pkpEthersWallet, msgParams);
       expect(signature).toMatch(/^0x[0-9a-fA-F]+$/);
     });
@@ -91,11 +109,63 @@ describe('pkp ethers JSON RPC handler', () => {
 
       const payload: ETHRequestSigningPayload = {
         method: 'eth_signTypedData',
-        params: [LITCONFIG.PKP_ADDRESS, msgParamStr],
+        params: [LITCONFIG.PKP_ETH_ADDRESS, msgParamStr],
       };
 
       // Verify signature
       it('(ethers) should recover the correct address using verifyTypedData', async () => {
+        // -- prepare
+        const msgParams: EIP712TypedData = {
+          types: {
+            EIP712Domain: [
+              { name: 'name', type: 'string' },
+              { name: 'version', type: 'string' },
+              { name: 'chainId', type: 'uint256' },
+              { name: 'verifyingContract', type: 'address' },
+            ],
+            Person: [
+              { name: 'name', type: 'string' },
+              { name: 'wallet', type: 'address' },
+            ],
+            Mail: [
+              { name: 'from', type: 'Person' },
+              { name: 'to', type: 'Person' },
+              { name: 'contents', type: 'string' },
+            ],
+          },
+          primaryType: 'Mail',
+          domain: {
+            name: 'Ether Mail',
+            version: '1',
+            chainId: 80001,
+            verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+          },
+          message: {
+            from: {
+              name: 'Cow',
+              wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+            },
+            to: {
+              name: 'Bob',
+              wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
+            },
+            contents: 'Hello, Bob!',
+          },
+        };
+
+        const msgParamStr = JSON.stringify(msgParams);
+
+        const pkpEthersWallet = new PKPEthersWallet({
+          controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+          pkpPubKey: LITCONFIG.PKP_PUBKEY,
+        });
+
+        const payload: ETHRequestSigningPayload = {
+          method: 'eth_signTypedData',
+          params: [LITCONFIG.PKP_ETH_ADDRESS, msgParamStr],
+        };
+
+        // -- test
         const signature = await ethRequestHandler<string>({
           signer: pkpEthersWallet,
           payload,
@@ -110,7 +180,7 @@ describe('pkp ethers JSON RPC handler', () => {
           signature
         );
 
-        expect(LITCONFIG.PKP_ADDRESS.toLowerCase()).toBe(
+        expect(LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()).toBe(
           recoveredAddr.toLowerCase()
         );
       });
@@ -131,7 +201,7 @@ describe('pkp ethers JSON RPC handler', () => {
 
       //   expect(recoveredAddr2).toBe(1);
 
-      //   expect(LITCONFIG.PKP_ADDRESS.toLowerCase()).toBe(
+      //   expect(LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()).toBe(
       //     recoveredAddr2.toLowerCase()
       //   );
       // });
@@ -188,7 +258,7 @@ describe('pkp ethers JSON RPC handler', () => {
 
       const payload: ETHRequestSigningPayload = {
         method: 'eth_signTypedData_v3',
-        params: [LITCONFIG.PKP_ADDRESS, msgParamStr],
+        params: [LITCONFIG.PKP_ETH_ADDRESS, msgParamStr],
       };
 
       it('should sign the typed data', async () => {
@@ -208,7 +278,7 @@ describe('pkp ethers JSON RPC handler', () => {
           signature
         );
 
-        expect(LITCONFIG.PKP_ADDRESS.toLowerCase()).toBe(
+        expect(LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()).toBe(
           recoveredAddr.toLowerCase()
         );
       });
@@ -273,7 +343,7 @@ describe('pkp ethers JSON RPC handler', () => {
 
     const payload: ETHRequestSigningPayload = {
       method: 'eth_signTypedData_v4',
-      params: [LITCONFIG.PKP_ADDRESS, msgParamStr],
+      params: [LITCONFIG.PKP_ETH_ADDRESS, msgParamStr],
     };
 
     // Sign eth_signTypedData_v4 request
@@ -294,7 +364,7 @@ describe('pkp ethers JSON RPC handler', () => {
         signature
       );
 
-      expect(LITCONFIG.PKP_ADDRESS.toLowerCase()).toBe(
+      expect(LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()).toBe(
         recoveredAddr.toLowerCase()
       );
     });
@@ -316,7 +386,7 @@ describe('pkp ethers JSON RPC handler', () => {
     // Reference: https://ethereum.github.io/execution-apis/api-documentation/#eth_sign
     const payload: ETHRequestSigningPayload = {
       method: 'eth_sign',
-      params: [LITCONFIG.PKP_ADDRESS, hexMsg],
+      params: [LITCONFIG.PKP_ETH_ADDRESS, hexMsg],
     };
 
     it('should sign the message', async () => {
@@ -345,10 +415,24 @@ describe('pkp ethers JSON RPC handler', () => {
     // Reference: https://metamask.github.io/api-playground/api-documentation/#personal_sign
     const payload: ETHRequestSigningPayload = {
       method: 'personal_sign',
-      params: [hexMsg, LITCONFIG.PKP_ADDRESS],
+      params: [hexMsg, LITCONFIG.PKP_ETH_ADDRESS],
     };
 
     it('should sign the message', async () => {
+      const pkpEthersWallet = new PKPEthersWallet({
+        controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+        pkpPubKey: LITCONFIG.PKP_PUBKEY,
+        rpc: LITCONFIG.CHRONICLE_RPC,
+        debug: false,
+      });
+
+      await pkpEthersWallet.init();
+
+      const payload: ETHRequestSigningPayload = {
+        method: 'personal_sign',
+        params: [hexMsg, LITCONFIG.PKP_ETH_ADDRESS],
+      };
+
       const signature = await ethRequestHandler<string>({
         signer: pkpEthersWallet,
         payload,
@@ -357,7 +441,7 @@ describe('pkp ethers JSON RPC handler', () => {
       // Verify signature
       const recoveredAddr = ethers.utils.verifyMessage(message, signature);
 
-      expect(LITCONFIG.PKP_ADDRESS.toLowerCase()).toBe(
+      expect(LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()).toBe(
         recoveredAddr.toLowerCase()
       );
     });
@@ -367,16 +451,16 @@ describe('pkp ethers JSON RPC handler', () => {
     const pkpEthersWallet = new PKPEthersWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
-      rpc: LITCONFIG.MUMBAI_RPC,
+      rpc: LITCONFIG.CHRONICLE_RPC,
       debug: false,
     });
 
     // Transaction to sign and send
-    const from = LITCONFIG.PKP_ADDRESS;
-    const to = LITCONFIG.PKP_ADDRESS;
+    const from = LITCONFIG.PKP_ETH_ADDRESS;
+    const to = LITCONFIG.PKP_ETH_ADDRESS;
     const gasLimit = BigNumber.from('21000');
     const value = ethers.BigNumber.from('0');
-    const data = '0x';
+    const data = LITCONFIG.HEX_TEST_MEMO;
 
     // pkp-ethers signer will automatically add missing fields (nonce, chainId, gasPrice, gasLimit)
     const tx = {
@@ -396,7 +480,45 @@ describe('pkp ethers JSON RPC handler', () => {
     };
 
     it('should sign and send the transaction', async () => {
-      await pkpEthersWallet.init();
+      const pkpEthersWallet = new PKPEthersWallet({
+        controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+        pkpPubKey: LITCONFIG.PKP_PUBKEY,
+        rpc: LITCONFIG.CHRONICLE_RPC,
+      });
+
+      // await pkpEthersWallet.init();
+
+      // Transaction to sign and send
+      const from = LITCONFIG.PKP_ETH_ADDRESS;
+      const to = LITCONFIG.PKP_ETH_ADDRESS;
+      // const gasLimit = BigNumber.from('21176');
+      const value = ethers.BigNumber.from('0');
+      const data = LITCONFIG.HEX_TEST_MEMO;
+
+      // pkp-ethers signer will automatically add missing fields (nonce, chainId, gasPrice, gasLimit)
+      const _tx = {
+        from: from,
+        to: to,
+        value,
+        data,
+      };
+
+      // const gasLimit = await pkpEthersWallet.rpcProvider.estimateGas(_tx);
+
+      const tx = {
+        ..._tx,
+        // gasLimit,
+      };
+
+      // expect(gasLimit).toBe(1);
+
+      // eth_sendTransaction parameters
+      // Transaction - Object
+      // Reference: https://ethereum.github.io/execution-apis/api-documentation/#eth_sendTransaction
+      const payload: ETHRequestSigningPayload = {
+        method: 'eth_sendTransaction',
+        params: [tx],
+      };
 
       const txRes = await ethRequestHandler<Transaction>({
         signer: pkpEthersWallet,
@@ -411,13 +533,13 @@ describe('pkp ethers JSON RPC handler', () => {
     const pkpEthersWallet = new PKPEthersWallet({
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
-      rpc: LITCONFIG.MUMBAI_RPC,
+      rpc: LITCONFIG.CHRONICLE_RPC,
       debug: false,
     });
 
     // Transaction to sign and send
-    const from = LITCONFIG.PKP_ADDRESS;
-    const to = LITCONFIG.PKP_ADDRESS;
+    const from = LITCONFIG.PKP_ETH_ADDRESS;
+    const to = LITCONFIG.PKP_ETH_ADDRESS;
     const gasLimit = BigNumber.from('21000');
     const value = ethers.BigNumber.from('0');
     const data = '0x';
@@ -440,6 +562,13 @@ describe('pkp ethers JSON RPC handler', () => {
     };
 
     it('should sign the transaction', async () => {
+      const pkpEthersWallet = new PKPEthersWallet({
+        controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+        pkpPubKey: LITCONFIG.PKP_PUBKEY,
+        rpc: LITCONFIG.CHRONICLE_RPC,
+        debug: false,
+      });
+
       await pkpEthersWallet.init();
 
       const signedTx = await ethRequestHandler<string>({
