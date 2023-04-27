@@ -75,38 +75,34 @@ export interface AccsCOSMOSParams extends AccsRegularParams {
 
 /** ---------- Auth Sig ---------- */
 
-// TODO: This should ideally be generated from the rust side
-// pub struct JsonAuthSig {
-//     pub sig: String,
-//     pub derived_via: String,
-//     pub signed_message: String,
-//     pub address: String,
-//     pub capabilities: Option<Vec<JsonAuthSig>>,
-//     pub algo: Option<String>,
-// }
-export interface JsonAuthSig {
-  sig: string;
+export interface AuthSig {
+  sig: any;
   derivedVia: string;
   signedMessage: string;
   address: string;
-  capabilities?: [];
-  algo?: [];
 }
 
-export interface CheckAndSignAuthParams {
+export type CosmosWalletType = 'keplr' | 'leap';
+
+export interface AuthCallbackParams {
   // The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
   chain: Chain;
 
   // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
   resources?: any[];
 
-  // ptional and only used with EVM chains right now.  Set to true by default.  Whether or not to ask Metamask or the user's wallet to switch chains before signing.  This may be desired if you're going to have the user send a txn on that chain.  On the other hand, if all you care about is the user's wallet signature, then you probably don't want to make them switch chains for no reason.  Pass false here to disable this chain switching behavior.
+  // Optional and only used with EVM chains right now.  Set to true by default.  Whether or not to ask Metamask or the user's wallet to switch chains before signing.  This may be desired if you're going to have the user send a txn on that chain.  On the other hand, if all you care about is the user's wallet signature, then you probably don't want to make them switch chains for no reason.  Pass false here to disable this chain switching behavior.
   switchChain?: boolean;
 
   // --- Following for Session Auth ---
-  expiration?: any;
+  expiration?: string;
 
   uri?: string;
+
+  // Cosmos wallet type, to support mutliple popular cosmos wallets
+  // Keplr & Cypher -> window.keplr
+  // Leap -> window.leap
+  cosmosWalletType?: CosmosWalletType;
 }
 
 /** ---------- Web3 ---------- */
@@ -194,9 +190,7 @@ export interface LitNodeClientConfig {
   bootstrapUrls: Array<string>;
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
-  defaultAuthCallback?: (
-    authSigParams: CheckAndSignAuthParams
-  ) => Promise<JsonAuthSig>;
+  defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
 export interface CustomNetwork {
@@ -215,7 +209,7 @@ export interface CustomNetwork {
  */
 export interface JsonExecutionRequest {
   // the authSig to use to authorize the user with the nodes
-  authSig: JsonAuthSig;
+  authSig: AuthSig;
 
   // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
   jsParams: any;
@@ -292,7 +286,7 @@ export interface JsonAccsRequest {
   resourceId?: JsonSigningResourceId;
 
   // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
-  authSig?: JsonAuthSig;
+  authSig?: AuthSig;
 
   sessionSigs?: object;
 }
@@ -342,7 +336,7 @@ export interface JsonSigningStoreRequest {
   chain?: string;
   permanant?: number;
   permanent?: number;
-  authSig?: JsonAuthSig;
+  authSig?: AuthSig;
   sessionSigs?: object;
 }
 
@@ -374,7 +368,7 @@ export interface JsonSaveEncryptionKeyRequest {
   evmContractConditions?: EvmContractConditions;
   solRpcConditions?: SolRpcConditions;
   unifiedAccessControlConditions?: UnifiedAccessControlConditions;
-  authSig?: JsonAuthSig;
+  authSig?: AuthSig;
   chain: Chain;
 
   // The symmetric encryption key that was used to encrypt the locked content inside the LIT as a Uint8Array.  You should use zipAndEncryptString or zipAndEncryptFiles to get this encryption key.  This key will be hashed and the hash will be sent to the LIT nodes.  You must pass either symmetricKey or encryptedSymmetricKey.
@@ -393,7 +387,7 @@ export interface SignConditionECDSA {
   accessControlConditions: any;
   evmContractConditions: undefined;
   solRpcConditions: undefined;
-  auth_sig: JsonAuthSig;
+  auth_sig: AuthSig;
   chain: Chain;
   iat: number;
   exp: number;
@@ -567,7 +561,7 @@ export interface SignWithECDSA {
 export interface ValidateAndSignECDSA {
   accessControlConditions: AccessControlConditions;
   chain: Chain;
-  auth_sig: JsonAuthSig;
+  auth_sig: AuthSig;
 }
 
 export interface HandshakeWithSgx {
@@ -583,7 +577,7 @@ export interface JsonHandshakeResponse {
 
 export interface EncryptToIpfsProps {
   // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: JsonAuthSig;
+  authSig?: AuthSig;
 
   // the session signatures to use to authorize the user with the nodes
   sessionSigs?: any;
@@ -621,7 +615,7 @@ export interface EncryptToIpfsProps {
 
 export interface DecryptFromIpfsProps {
   // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: JsonAuthSig;
+  authSig?: AuthSig;
 
   // the session signatures to use to authorize the user with the nodes
   sessionSigs?: any;
@@ -635,7 +629,7 @@ export interface DecryptFromIpfsProps {
 
 export interface EncryptFileAndZipWithMetadataProps {
   // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: JsonAuthSig;
+  authSig?: AuthSig;
 
   // the session signatures to use to authorize the user with the nodes
   sessionSigs?: any;
@@ -667,7 +661,7 @@ export interface EncryptFileAndZipWithMetadataProps {
 
 export interface DecryptZipFileWithMetadataProps {
   // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: JsonAuthSig;
+  authSig?: AuthSig;
 
   // the session signatures to use to authorize the user with the nodes
   sessionSigs?: any;
@@ -746,7 +740,7 @@ export interface SignSessionKeyProp {
   pkpPublicKey?: string;
 
   // The auth sig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: JsonAuthSig;
+  authSig?: AuthSig;
 
   // The siwe message
   // siweMessage: string;
@@ -764,7 +758,7 @@ export interface SignSessionKeyProp {
 
 export interface SignSessionKeyResponse {
   pkpPublicKey: string;
-  authSig: JsonAuthSig;
+  authSig: AuthSig;
 }
 
 export interface GetSignSessionKeySharesProp {
@@ -788,28 +782,37 @@ export interface GetSessionSigsProps {
   switchChain?: any;
 
   //   This is a callback that will be called if the user needs to authenticate using a PKP.  For example, if the user has no wallet, but owns a Lit PKP though something like Google Oauth, then you can use this callback to prompt the user to authenticate with their PKP.  This callback should use the LitNodeClient.signSessionKey function to get a session signature for the user from their PKP.  If you don't pass this callback, then the user will be prompted to authenticate with their wallet, like metamask.
-  authNeededCallback?: any;
+  authNeededCallback?: AuthCallback;
   sessionKey?: any;
 }
 
-/* body must include:
-    pub session_key: String,
-    pub auth_methods: Vec<AuthMethod>,
-    pub pkp_public_key: String,
-    pub auth_sig: Option<AuthSigItem>,
-    pub siwe_message: String,
-*/
+export interface AuthCallback {
+  (params: AuthCallbackParams): Promise<AuthSig>;
+}
+
+export interface SessionSig {
+  sig: string;
+  derivedVia: string;
+  signedMessage: string;
+  address: string;
+  algo?: string;
+}
+
 export interface SessionRequestBody {
   sessionKey: string;
   authMethods: Array<AuthMethod>;
   pkpPublicKey?: string;
-  authSig?: JsonAuthSig;
+  authSig?: AuthSig;
   siweMessage: string;
 }
 
-export interface WalletSig {
-  signedMessage: string;
-  sig: any;
+export interface GetWalletSigProps {
+  authNeededCallback?: AuthCallback;
+  chain: string;
+  capabilities: Array<any>;
+  switchChain: boolean;
+  expiration: string;
+  sessionKeyUri: string;
 }
 
 export interface SessionSigningTemplate {

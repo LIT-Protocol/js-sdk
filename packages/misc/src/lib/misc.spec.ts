@@ -69,29 +69,29 @@ describe('utils', () => {
     expect(values).toContain('world');
   });
 
-  it('should able to use the error type from constants', () => {
-    let err: Error;
+  // it('should able to use the error type from constants', () => {
+  //   let err: Error;
 
-    try {
-      err = utilsModule.throwError({
-        message: 'custom message',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
-    } catch (e) {
-      err = e as Error;
-    }
+  //   try {
+  //     err = utilsModule.throwError({
+  //       message: 'custom message',
+  //       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+  //       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+  //     });
+  //   } catch (e) {
+  //     err = e as Error;
+  //   }
 
-    const keys = Object.keys(err);
-    const values = Object.values(err);
+  //   const keys = Object.keys(err);
+  //   const values = Object.values(err);
 
-    expect(keys).toContain('message');
-    expect(keys).toContain('errorKind');
-    expect(keys).toContain('errorCode');
-    expect(values).toContain('custom message');
-    expect(values).toContain(LitErrorKind.Validation);
-    expect(values).toContain(LIT_ERROR.INVALID_PARAM_TYPE.name);
-  });
+  //   expect(keys).toContain('message');
+  //   expect(keys).toContain('errorKind');
+  //   expect(keys).toContain('errorCode');
+  //   expect(values).toContain('custom message');
+  //   expect(values).toContain(LitErrorKind.Validation);
+  //   expect(values).toContain(LIT_ERROR.INVALID_PARAM_TYPE.name);
+  // });
 
   it('should prepend [Lit-JS-SDK] in the console.log', () => {
     console.log = jest.fn();

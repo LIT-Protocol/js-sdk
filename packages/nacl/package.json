@@ -1,6 +1,5 @@
 {
   "name": "@lit-protocol/nacl",
-  "version": "2.1.112",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
@@ -22,6 +21,7 @@
     "access": "public",
     "directory": "../../dist/packages/nacl"
   },
+  "version": "2.1.135",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

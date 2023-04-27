@@ -10,11 +10,11 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "newAdditionalRequestsPerMillisecondCost",
+        "name": "newAdditionalRequestsPerKilosecondCost",
         "type": "uint256"
       }
     ],
-    "name": "AdditionalRequestsPerSecondCostSet",
+    "name": "AdditionalRequestsPerKilosecondCostSet",
     "type": "event"
   },
   {
@@ -118,11 +118,11 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "newRLIHolderRateLimitWindowMilliseconds",
+        "name": "newRLIHolderRateLimitWindowSeconds",
         "type": "uint256"
       }
     ],
-    "name": "RLIHolderRateLimitWindowMillisecondsSet",
+    "name": "RLIHolderRateLimitWindowSecondsSet",
     "type": "event"
   },
   {
@@ -131,11 +131,11 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "newRateLimitWindowMilliseconds",
+        "name": "newRateLimitWindowSeconds",
         "type": "uint256"
       }
     ],
-    "name": "RateLimitWindowMillisecondsSet",
+    "name": "RateLimitWindowSecondsSet",
     "type": "event"
   },
   {
@@ -178,7 +178,7 @@
   },
   {
     "inputs": [],
-    "name": "RLIHolderRateLimitWindowMilliseconds",
+    "name": "RLIHolderRateLimitWindowSeconds",
     "outputs": [
       {
         "internalType": "uint256",
@@ -191,7 +191,7 @@
   },
   {
     "inputs": [],
-    "name": "additionalRequestsPerMillisecondCost",
+    "name": "additionalRequestsPerKilosecondCost",
     "outputs": [
       {
         "internalType": "uint256",
@@ -256,7 +256,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "requestsPerMillisecond",
+        "name": "requestsPerKilosecond",
         "type": "uint256"
       },
       {
@@ -289,7 +289,7 @@
         "type": "uint256"
       }
     ],
-    "name": "calculateRequestsPerSecond",
+    "name": "calculateRequestsPerKilosecond",
     "outputs": [
       {
         "internalType": "uint256",
@@ -312,7 +312,7 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "requestsPerMillisecond",
+        "name": "requestsPerKilosecond",
         "type": "uint256"
       },
       {
@@ -326,7 +326,7 @@
   },
   {
     "inputs": [],
-    "name": "defaultRateLimitWindowMilliseconds",
+    "name": "defaultRateLimitWindowSeconds",
     "outputs": [
       {
         "internalType": "uint256",
@@ -346,7 +346,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "requestsPerMillisecond",
+        "name": "requestsPerKilosecond",
         "type": "uint256"
       },
       {
@@ -371,7 +371,13 @@
       }
     ],
     "name": "freeMint",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -384,7 +390,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "requestsPerMillisecond",
+        "name": "requestsPerKilosecond",
         "type": "uint256"
       },
       {
@@ -510,7 +516,13 @@
       }
     ],
     "name": "mint",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "payable",
     "type": "function"
   },
@@ -659,11 +671,11 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "newAdditionalRequestsPerMillisecondCost",
+        "name": "newAdditionalRequestsPerKilosecondCost",
         "type": "uint256"
       }
     ],
-    "name": "setAdditionalRequestsPerSecondCost",
+    "name": "setAdditionalRequestsPerKilosecondCost",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -716,11 +728,11 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "newRLIHolderRateLimitWindowMilliseconds",
+        "name": "newRLIHolderRateLimitWindowSeconds",
         "type": "uint256"
       }
     ],
-    "name": "setRLIHolderRateLimitWindowMilliseconds",
+    "name": "setRLIHolderRateLimitWindowSeconds",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -729,11 +741,11 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "newRateLimitWindowMilliseconds",
+        "name": "newRateLimitWindowSeconds",
         "type": "uint256"
       }
     ],
-    "name": "setRateLimitWindowMilliseconds",
+    "name": "setRateLimitWindowSeconds",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

@@ -1,6 +1,5 @@
 {
   "name": "@lit-protocol/misc",
-  "version": "2.1.112",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
@@ -25,6 +24,7 @@
   "tags": [
     "universal"
   ],
+  "version": "2.1.135",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

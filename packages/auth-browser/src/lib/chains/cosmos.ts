@@ -10,13 +10,14 @@ import {
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
 
-import { JsonAuthSig } from '@lit-protocol/types';
+import { AuthSig, CosmosWalletType } from '@lit-protocol/types';
 import { log, sortedObject, throwError } from '@lit-protocol/misc';
 
 /** ---------- Declaration ---------- */
 declare global {
   interface Window {
     keplr?: any;
+    leap?: any;
     solana?: any;
   }
 }
@@ -26,14 +27,6 @@ interface CosmosProvider {
   provider: any;
   account: string;
   chainId: string | number;
-}
-
-// ['sig', 'derivedVia', 'signedMessage', 'address']
-interface AuthSig {
-  sig: string;
-  derivedVia: string;
-  signedMessage: string;
-  address: string;
 }
 
 interface CosmosSignDoc {
@@ -61,10 +54,18 @@ interface CosmosSignDoc {
  *
  * @returns { object || never }
  */
-const getProvider = (): any => {
+const getProvider = (walletType: CosmosWalletType): any => {
   // -- validate
-  if ('keplr' in window) {
-    return window?.keplr;
+  switch (walletType) {
+    case 'keplr':
+      if ('keplr' in window) {
+        return window?.keplr;
+      }
+      break;
+    case 'leap':
+      if ('leap' in window) {
+        return window?.leap;
+      }
   }
 
   // -- finally
@@ -89,28 +90,30 @@ const getProvider = (): any => {
  */
 export const connectCosmosProvider = async ({
   chain,
+  walletType,
 }: {
   chain: string;
+  walletType: CosmosWalletType;
 }): Promise<CosmosProvider> => {
   const chainId = LIT_COSMOS_CHAINS[chain].chainId;
 
-  const keplr = getProvider();
+  const wallet = getProvider(walletType);
 
-  // Enabling before using the Keplr is recommended.
+  // Enabling before using the Cosmos wallet is recommended.
   // This method will ask the user whether to allow access if they haven't visited this website.
   // Also, it will request that the user unlock the wallet if the wallet is locked.
-  await keplr.enable(chainId);
+  await wallet.enable(chainId);
 
-  const offlineSigner = keplr.getOfflineSigner(chainId);
+  const offlineSigner = wallet.getOfflineSigner(chainId);
 
   // You can get the address/public keys by `getAccounts` method.
   // It can return the array of address/public key.
-  // But, currently, Keplr extension manages only one address/public key pair.
+  // But, currently, Keplr/Leap extension manages only one address/public key pair.
   // TODO: (Check if this is still the case 7 Sep 2022)
   // This line is needed to set the sender address for SigningCosmosClient.
   const accounts = await offlineSigner.getAccounts();
 
-  return { provider: keplr, account: accounts[0].address, chainId };
+  return { provider: wallet, account: accounts[0].address, chainId };
 };
 
 /**
@@ -123,10 +126,15 @@ export const connectCosmosProvider = async ({
  */
 export const checkAndSignCosmosAuthMessage = async ({
   chain,
+  walletType,
 }: {
   chain: string;
-}): Promise<JsonAuthSig> => {
-  const connectedCosmosProvider = await connectCosmosProvider({ chain });
+  walletType: CosmosWalletType;
+}): Promise<AuthSig> => {
+  const connectedCosmosProvider = await connectCosmosProvider({
+    chain,
+    walletType,
+  });
 
   const storageKey = LOCAL_STORAGE_KEYS.AUTH_COSMOS_SIGNATURE;
 

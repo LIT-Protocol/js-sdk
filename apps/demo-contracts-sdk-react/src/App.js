@@ -211,7 +211,7 @@ function App() {
       <header className="App-header">
         <LitLogo />
         <h4>
-          React Demo for: {appName}: "2.0.40"<br />
+          React Demo for: {appName}: "2.1.118"<br />
           <span>
             <a target="_blank" href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/contracts-sdk">npm repo</a>&nbsp;|&nbsp;
             <a target="_blank" href="https://github.com/LIT-Protocol/js-sdk/blob/master/apps/demo-contracts-sdk-react">demo repo</a>
