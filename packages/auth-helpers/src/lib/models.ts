@@ -104,7 +104,7 @@ export interface ISessionCapabilityObject {
    * @throws If the ability is not a LIT-specific ability.
    */
   addCapabilityForResource(
-    litResource: LitResourceBase,
+    litResource: ILitResource,
     ability: LitAbility
   ): void;
 
@@ -113,30 +113,24 @@ export interface ISessionCapabilityObject {
    * capability for the specified resource.
    */
   verifyCapabilitiesForResource(
-    litResource: LitResourceBase,
+    litResource: ILitResource,
     ability: LitAbility
   ): boolean;
 }
 
-export abstract class LitResourceBase {
-  abstract resourcePrefix: LitResourcePrefix;
-  public readonly resource: string;
-
-  constructor(resource: string) {
-    this.resource = resource;
-  }
-
+export interface ILitResource {
   /**
    * Gets the fully qualified resource key.
    * @returns The fully qualified resource key.
    */
-  getResourceKey(): string {
-    return `${this.resourcePrefix}:${this.resource}`;
-  }
+  getResourceKey(): string;
 
   /**
    * Validates that the given LIT ability is valid for this resource.
    * @param litAbility The LIT ability to validate.
    */
-  abstract isValidLitAbility(litAbility: LitAbility): boolean;
+  isValidLitAbility(litAbility: LitAbility): boolean;
+
+  readonly resourcePrefix: LitResourcePrefix;
+  readonly resource: string;
 }

@@ -1,7 +1,27 @@
-import { LitAbility, LitResourceBase, LitResourcePrefix } from './models';
+import { ILitResource, LitAbility, LitResourcePrefix } from './models';
 
-export class LitAccessControlConditionResource extends LitResourceBase {
-  resourcePrefix = LitResourcePrefix.AccessControlCondition;
+abstract class LitResourceBase {
+  abstract resourcePrefix: LitResourcePrefix;
+  public readonly resource: string;
+
+  constructor(resource: string) {
+    this.resource = resource;
+  }
+
+  getResourceKey(): string {
+    return `${this.resourcePrefix}:${this.resource}`;
+  }
+
+  toString(): string {
+    return this.getResourceKey();
+  }
+}
+
+export class LitAccessControlConditionResource
+  extends LitResourceBase
+  implements ILitResource
+{
+  public readonly resourcePrefix = LitResourcePrefix.AccessControlCondition;
 
   /**
    * Creates a new LitAccessControlConditionResource.
@@ -20,8 +40,8 @@ export class LitAccessControlConditionResource extends LitResourceBase {
   }
 }
 
-export class LitPKPResource extends LitResourceBase {
-  resourcePrefix = LitResourcePrefix.PKP;
+export class LitPKPResource extends LitResourceBase implements ILitResource {
+  public readonly resourcePrefix = LitResourcePrefix.PKP;
 
   /**
    * Creates a new LitPKPResource.
@@ -37,8 +57,8 @@ export class LitPKPResource extends LitResourceBase {
   }
 }
 
-export class LitRLIResource extends LitResourceBase {
-  resourcePrefix = LitResourcePrefix.RLI;
+export class LitRLIResource extends LitResourceBase implements ILitResource {
+  public readonly resourcePrefix = LitResourcePrefix.RLI;
 
   /**
    * Creates a new LitRLIResource.
@@ -54,11 +74,11 @@ export class LitRLIResource extends LitResourceBase {
   }
 }
 
-export class LitLitActionResource extends LitResourceBase {
-  resourcePrefix = LitResourcePrefix.LitAction;
+export class LitActionResource extends LitResourceBase implements ILitResource {
+  public readonly resourcePrefix = LitResourcePrefix.LitAction;
 
   /**
-   * Creates a new LitLitActionResource.
+   * Creates a new LitActionResource.
    * @param resource The identifier for the resource. This should be the
    * Lit Action IPFS CID.
    */
@@ -69,4 +89,25 @@ export class LitLitActionResource extends LitResourceBase {
   isValidLitAbility(litAbility: LitAbility): boolean {
     return litAbility === LitAbility.LitActionExecution;
   }
+}
+
+export function parseLitResource(resourceKey: string): ILitResource {
+  if (resourceKey.startsWith(LitResourcePrefix.AccessControlCondition)) {
+    return new LitAccessControlConditionResource(
+      resourceKey.substring(LitResourcePrefix.AccessControlCondition.length + 1)
+    );
+  } else if (resourceKey.startsWith(LitResourcePrefix.PKP)) {
+    return new LitPKPResource(
+      resourceKey.substring(LitResourcePrefix.PKP.length + 1)
+    );
+  } else if (resourceKey.startsWith(LitResourcePrefix.RLI)) {
+    return new LitRLIResource(
+      resourceKey.substring(LitResourcePrefix.RLI.length + 1)
+    );
+  } else if (resourceKey.startsWith(LitResourcePrefix.LitAction)) {
+    return new LitActionResource(
+      resourceKey.substring(LitResourcePrefix.LitAction.length + 1)
+    );
+  }
+  throw new Error(`Invalid resource prefix: ${resourceKey}`);
 }
