@@ -125,6 +125,11 @@ export const getContractAddresses = async (LitConfig) => {
         correctedName = correctedName.replace('Pkp', 'PKP');
         correctedName = correctedName.replace('Nft', 'NFT');
         correctedName = correctedName.replace('Lit', 'LIT');
+        correctedName = correctedName.replace('Resolver', 'ContractResolver');
+
+        if(correctedName === 'ContractResolver'){
+            exportName = 'contractResolver';
+        }
 
         // append .json
         // correctedName = correctedName 
@@ -157,11 +162,10 @@ await asyncForEach(deployedContracts, async (contract) => {
 
     try {
         json = await fetch(contract.abiPath).then((res) => res.text())
+        json = JSON.parse(json);
     } catch (e) {
         redLog(`Failed to fetch ${contract.abiPath}`);
     }
-
-    json = JSON.parse(json);
 
     let abi = json.abi;
 
@@ -171,7 +175,11 @@ await asyncForEach(deployedContracts, async (contract) => {
     const abiPath = abisDir + contract.correctedName + '.json';
 
     // -- write abi to file
-    await writeJsonFile(abiPath, abi);
+    try{
+        await writeJsonFile(abiPath, abi);
+    }catch(e){
+        redLog(`Failed to write ${abiPath} => ${e.message}`);
+    }
 
     const dataPath = abisDir + contract.correctedName + '.data.ts';
 

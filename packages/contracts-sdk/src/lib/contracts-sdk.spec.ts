@@ -1,40 +1,17 @@
 import { BigNumber, ethers } from 'ethers';
 import { LitContracts } from './contracts-sdk';
-import { TextEncoder, TextDecoder } from 'util';
-global.TextEncoder = TextEncoder;
-// @ts-ignore
-global.TextDecoder = TextDecoder;
 
-import crypto, { createHash } from 'crypto';
-Object.defineProperty(global.self, 'crypto', {
-  value: {
-    getRandomValues: (arr: any) => crypto.randomBytes(arr.length),
-    subtle: {
-      digest: (algorithm: string, data: Uint8Array) => {
-        return new Promise((resolve, reject) =>
-          resolve(
-            createHash(algorithm.toLowerCase().replace('-', ''))
-              .update(data)
-              .digest()
-          )
-        );
-      },
-    },
-  },
-});
+import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 
-import { PKPWallet } from '@lit-protocol/pkp-ethers.js-node';
-import { hexlify } from 'ethers/lib/utils';
-jest.setTimeout(30000);
+import * as LITCONFIG from 'lit.config.json';
+
+jest.setTimeout(60000);
+
 describe('contractsSdk', () => {
   let litContracts: LitContracts;
   let litContracts_NoArgs: LitContracts;
   let litContracts_privateKeySigner: LitContracts;
   let litContracts_pkpWallet: LitContracts;
-
-  const TOKEN_ID =
-    '23933281609834613302513783695742993326101587503243653262183802787866132322861';
-  const PKP_ETH_ADDRESS = '0x3B5dD260598B7579A0b015A1F3BBF322aDC499A1';
 
   beforeEach(() => {
     // Create a new instance of the LitContracts class before each test
@@ -92,56 +69,55 @@ describe('contractsSdk', () => {
     expect(mintCost).toBe(1);
   });
 
-  // it('should create an instance with PKP wallet with pubkey and authsig', async () => {
-  //   // -- prepare
-  //   const PKP_PUBKEY =
-  //     '04a23bd3dad3bed2df665b036cc0c9bcb1796ee04d395084b88e38515814d1001420427b5f8e38568c948fe650d544f586112a0dbfc08de5233eb65b4de8959a59';
+  it('should create an instance with PKP wallet', async () => {
+    // -- prepare
+    const PKP_PUBKEY = LITCONFIG.PKP_PUBKEY;
 
-  //   const CONTROLLER_AUTHSIG = {
-  //     sig: '0x12977f8c7e726ee1c27c4f79de4277b43ab9c4aa15079728ed34ba44dc134eb42a9887fae591902788d94547084f3098aa4bc1cbf0e5d523bb92098fe42529b21b',
-  //     derivedVia: 'web3.eth.personal.sign',
-  //     signedMessage:
-  //       'demo-encrypt-decrypt-react.vercel.app wants you to sign in with your Ethereum account:\n0xDbfa48A182e0e080CFcB09E8CB38F0A089325727\n\n\nURI: https://demo-encrypt-decrypt-react.vercel.app/\nVersion: 1\nChain ID: 1\nNonce: xVM3lNqW0NSwoRzPl\nIssued At: 2023-04-15T06:46:35.117Z\nExpiration Time: 2023-04-22T06:46:35.093Z',
-  //     address: '0xdbfa48a182e0e080cfcb09e8cb38f0a089325727',
-  //   };
+    const CONTROLLER_AUTHSIG = LITCONFIG.CONTROLLER_AUTHSIG;
 
-  //   // -- init pkp wallet
-  //   const pkpWallet = new PKPWallet({
-  //     pkpPubKey: PKP_PUBKEY,
-  //     controllerAuthSig: CONTROLLER_AUTHSIG,
-  //     provider: 'https://chain-rpc.litprotocol.com/http',
-  //   });
+    expect(PKP_PUBKEY).toBeDefined();
+    expect(CONTROLLER_AUTHSIG).toBeDefined();
 
-  //   await pkpWallet.init();
+    // -- init pkp wallet
+    const pkpWallet = new PKPEthersWallet({
+      pkpPubKey: PKP_PUBKEY,
+      controllerAuthSig: CONTROLLER_AUTHSIG,
+      rpc: LITCONFIG.CHRONICLE_RPC
+    });
 
-  //   // -- init contracts
-  //   litContracts_pkpWallet = new LitContracts({ signer: pkpWallet });
+    await pkpWallet.init();
 
-  //   await litContracts_pkpWallet.connect();
+    // pkpWallet has to be a signer
+    expect(pkpWallet._isSigner).toBe(true);
 
-  //   // -- check read
-  //   const mintCost =
-  //     await litContracts_pkpWallet.pkpNftContract.read.mintCost();
+    // -- init contracts
+    litContracts_pkpWallet = new LitContracts({
+      signer: pkpWallet
+    });
 
-  //   expect(mintCost.toNumber()).toBe(1);
+    await litContracts_pkpWallet.connect();
 
-  //   // -- check address (should stays the same)
-  //   expect(await pkpWallet.getAddress()).toBe(
-  //     '0x18f987D15a973776f6a60652B838688a1833fE95'
-  //   );
+    // -- check read
+    const mintCost =
+      await litContracts_pkpWallet.pkpNftContract.read.mintCost();
 
-  //   // -- check write
-  //   // const tx = await litContracts_pkpWallet.pkpNftContract.read.mintNext(2, {
-  //   //   value: mintCost,
-  //   // });
+    expect(mintCost.toNumber()).toBe(1);
 
-  //   // expect(tx).toBeDefined();
-  // });
+    // -- check address (should stays the same)
+    expect(await pkpWallet.getAddress()).toBe(LITCONFIG.PKP_ETH_ADDRESS);
+
+    // -- check write
+    if (LITCONFIG.test.sendRealTxThatCostsMoney) {
+      const tx = await litContracts_pkpWallet.pkpNftContractUtil.write.mint();
+
+      expect(tx).toBeDefined();
+    }
+  });
   it('creates an instance with custom private key signer', async () => {
     const privateKey =
       '0x4cc303e56f1ff14e762a33534d7fbaa8a76e52509fd96373f24045baae99cc38';
     const provider = new ethers.providers.JsonRpcProvider(
-      'https://chain-rpc.litprotocol.com/http'
+      LITCONFIG.CHRONICLE_RPC
     );
     const signer = new ethers.Wallet(privateKey, provider);
     litContracts_privateKeySigner = new LitContracts({ signer });
@@ -156,49 +132,31 @@ describe('contractsSdk', () => {
     expect(mintCost).toBe(1);
   });
 
-  // it('should create an instance with PKP', async () => {
-  //   jest.setTimeout(100000);
-  //   // -- prepare
-  //   const PKP_PUBKEY =
-  //     '0x04a23bd3dad3bed2df665b036cc0c9bcb1796ee04d395084b88e38515814d1001420427b5f8e38568c948fe650d544f586112a0dbfc08de5233eb65b4de8959a59';
+  it('should create an instance with PKP', async () => {
+    jest.setTimeout(100000);
 
-  //   const CONTROLLER_AUTHSIG = {
-  //     sig: '0x12977f8c7e726ee1c27c4f79de4277b43ab9c4aa15079728ed34ba44dc134eb42a9887fae591902788d94547084f3098aa4bc1cbf0e5d523bb92098fe42529b21b',
-  //     derivedVia: 'web3.eth.personal.sign',
-  //     signedMessage:
-  //       'demo-encrypt-decrypt-react.vercel.app wants you to sign in with your Ethereum account:\n0xDbfa48A182e0e080CFcB09E8CB38F0A089325727\n\n\nURI: https://demo-encrypt-decrypt-react.vercel.app/\nVersion: 1\nChain ID: 1\nNonce: xVM3lNqW0NSwoRzPl\nIssued At: 2023-04-15T06:46:35.117Z\nExpiration Time: 2023-04-22T06:46:35.093Z',
-  //     address: '0xdbfa48a182e0e080cfcb09e8cb38f0a089325727',
-  //   };
+    const pkpWallet = new PKPEthersWallet({
+      pkpPubKey: LITCONFIG.PKP_PUBKEY,
+      controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+      rpc: LITCONFIG.CHRONICLE_RPC,
+    });
 
-  //   // const go = async () => {
-  //   const pkpWallet = new PKPWallet({
-  //     pkpPubKey: PKP_PUBKEY,
-  //     controllerAuthSig: CONTROLLER_AUTHSIG,
-  //     provider: 'https://chain-rpc.litprotocol.com/http',
-  //   });
+    await pkpWallet.init();
 
-  //   await pkpWallet.init();
+    const litContracts = new LitContracts({
+      signer: pkpWallet,
+    });
 
-  //   const litContracts = new LitContracts({
-  //     signer: pkpWallet,
-  //   });
+    await litContracts.connect();
 
-  //   await litContracts.connect();
+    const pkpAddress = await pkpWallet.getAddress();
 
-  //   const pkpAddress = await pkpWallet.getAddress();
+    expect(pkpAddress).toBe('0x665B08C53e81a83bFB985FBab89f389C4D17E5c7');
 
-  //   expect(pkpAddress).toBe('0x18f987D15a973776f6a60652B838688a1833fE95');
+    const mintCost = await litContracts.pkpNftContract.read.mintCost();
 
-  //   const mintCost = await litContracts.pkpNftContract.read.mintCost();
-
-  //   const mintTx = await litContracts.pkpNftContract.read.mintNext(2, {
-  //     value: mintCost,
-  //   });
-
-  //   console.log('mintTx:', mintTx);
-
-  //   expect(mintTx).toBe(1);
-  // });
+    expect(mintCost.toString()).toBe('1');
+  });
 
   // it('should create an instance without args', async () => {
   //   // Create a new instance of the LitContracts class
@@ -206,11 +164,13 @@ describe('contractsSdk', () => {
   //   await litContracts.connect();
   //   expect(litContracts).toBeDefined();
 
-  //   const mintCost = await litContracts.pkpNftContract?.mintCost();
+  //   const mintCost = await litContracts.pkpNftContract.read.mintCost();
   //   let res: any;
 
   //   try {
-  //     res = await litContracts.pkpNftContract?.mintNext(2, { value: mintCost });
+  //     res = await litContracts.pkpNftContract?.write.mintNext(2, {
+  //       value: mintCost,
+  //     });
   //   } catch (e) {
   //     res = e;
   //   }
@@ -221,44 +181,40 @@ describe('contractsSdk', () => {
   //   );
   // });
 
-  // it('should create an instance with custom signer', async () => {
-  //   const privateKey =
-  //     '0x4cc303e56f1ff14e762a33534d7fbaa8a76e52509fd96373f24045baae99cc38';
-  //   const provider = new ethers.providers.JsonRpcProvider(
-  //     'https://matic-mumbai.chainstacklabs.com'
-  //   );
-  //   const signer = new ethers.Wallet(privateKey, provider);
-  //   litContracts = new LitContracts({ signer });
-  //   await litContracts.connect();
+  it('should create an instance with custom signer', async () => {
+    const privateKey =
+      '0x4cc303e56f1ff14e762a33534d7fbaa8a76e52509fd96373f24045baae99cc38';
+    const provider = new ethers.providers.JsonRpcProvider(
+      'https://lit-protocol.calderachain.xyz/http'
+    );
+    const signer = new ethers.Wallet(privateKey, provider);
+    litContracts = new LitContracts({ signer });
+    await litContracts.connect();
 
-  //   const mintCost = await litContracts.pkpNftContract?.mintCost();
-  //   let res: any;
+    const mintCost = await litContracts.pkpNftContract?.read.mintCost();
+    let res: any;
 
-  //   try {
-  //     res = await litContracts.pkpNftContract?.mintNext(2, { value: mintCost });
-  //   } catch (e) {
-  //     res = e;
-  //   }
+    try {
+      res = await litContracts.pkpNftContract?.write.mintNext(2, {
+        value: mintCost,
+      });
+    } catch (e) {
+      res = e;
+    }
 
-  //   // expect res to contains insufficient funds for intrinsic transaction cost
-  //   expect(res.toString()).toContain(
-  //     'insufficient funds for intrinsic transaction cost'
-  //   );
-  // });
+    // expect res to contains insufficient funds for intrinsic transaction cost
+    expect(res.toString()).toContain('Error');
+  });
 
-  // it('uses default provider when no provider is specified', () => {
-  //   expect(litContracts.provider.connection.url).toBe(
-  //     'https://matic-mumbai.chainstacklabs.com'
-  //   );
-  // });
-
-  // // it('uses specified provider when provider is specified', () => {
-  // //   const provider = new ethers.providers.JsonRpcProvider(
-  // //     'https://example.com'
-  // //   );
-  // //   litContracts = new LitContracts({ provider });
-  // //   expect(litContracts.provider.connection.url).toBe('https://example.com');
-  // // });
+  it('uses specified provider when provider is specified', () => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'https://lit-protocol.calderachain.xyz/http'
+    );
+    litContracts = new LitContracts({ provider });
+    expect(litContracts.provider.connection.url).toBe(
+      'https://lit-protocol.calderachain.xyz/http'
+    );
+  });
 
   // it('initializes contract instances with the correct provider', () => {
   //   // Test that the contract instances have been correctly initialized
@@ -291,7 +247,7 @@ describe('contractsSdk', () => {
   });
 
   // it('litTokenContract should get the totalSupply()', async () => {
-  //   let output = await litContracts.litTokenContract.totalSupply();
+  //   let output = await litContracts.litTokenContract.read.totalSupply();
   //   let converted = BigNumber.from(output).toString();
   //   expect(converted).toBe('1000000000000000000000000000');
   // });

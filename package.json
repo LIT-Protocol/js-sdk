@@ -35,7 +35,7 @@
     "tool:genDoc": "node ./tools/scripts/gen-doc.mjs",
     "tool:genReadme": "yarn node ./tools/scripts/gen-readme.mjs",
     "tool:buildHtml": "yarn node ./tools/scripts/build-html.mjs && cd dist/apps/html && vercel --prod",
-    "tool:contractsSdk": "yarn node ./packages/contracts-sdk/tools.mjs",
+    "update:contracts-sdk": "yarn node ./packages/contracts-sdk/tools.mjs",
     "tools": "yarn node ./tools/scripts/tools.mjs",
     "graph": "nx graph",
     "npm:login": "npm login",

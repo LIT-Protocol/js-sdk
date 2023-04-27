@@ -78,9 +78,9 @@
   },
   {
     "name": "resolverContractAddress",
-    "correctedName": "Resolver",
-    "exportName": "resolver",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/Resolver.json",
+    "correctedName": "ContractResolver",
+    "exportName": "contractResolver",
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/ContractResolver.json",
     "address": "0x18C94A4D9f7Add1bB4333542807aD41a15390e2f"
   }
 ]
