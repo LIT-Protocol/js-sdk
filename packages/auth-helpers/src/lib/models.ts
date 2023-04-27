@@ -50,10 +50,11 @@ export enum LitAbility {
 }
 
 export enum LitResourcePrefix {
-  AccessControlCondition = 'lit:acc',
-  PKP = 'lit:pkp',
-  RLI = 'lit:rli',
-  LitAction = 'lit:la',
+  AccessControlCondition = 'lit/acc',
+  PKP = 'lit/pkp',
+  RLI = 'lit/rli',
+  LitAction = 'lit/la',
+  Wildcard = 'lit/*',
 }
 
 export interface ISessionCapabilityObject {
@@ -116,6 +117,12 @@ export interface ISessionCapabilityObject {
     litResource: ILitResource,
     ability: LitAbility
   ): boolean;
+
+  /**
+   * Add a wildcard ability to the session capability object for the specified
+   * resource.
+   */
+  addAllCapabilitiesForResource(litResource: ILitResource): void;
 }
 
 export interface ILitResource {

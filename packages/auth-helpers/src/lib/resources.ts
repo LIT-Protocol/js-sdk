@@ -9,7 +9,7 @@ abstract class LitResourceBase {
   }
 
   getResourceKey(): string {
-    return `${this.resourcePrefix}:${this.resource}`;
+    return `${this.resourcePrefix}/${this.resource}`;
   }
 
   toString(): string {
@@ -91,6 +91,24 @@ export class LitActionResource extends LitResourceBase implements ILitResource {
   }
 }
 
+export class LitWildcardResource
+  extends LitResourceBase
+  implements ILitResource
+{
+  public readonly resourcePrefix = LitResourcePrefix.Wildcard;
+
+  /**
+   * Creates a new LitWildcardResource.
+   */
+  constructor() {
+    super('*');
+  }
+
+  isValidLitAbility(_: LitAbility): boolean {
+    return true;
+  }
+}
+
 export function parseLitResource(resourceKey: string): ILitResource {
   if (resourceKey.startsWith(LitResourcePrefix.AccessControlCondition)) {
     return new LitAccessControlConditionResource(
@@ -108,6 +126,8 @@ export function parseLitResource(resourceKey: string): ILitResource {
     return new LitActionResource(
       resourceKey.substring(LitResourcePrefix.LitAction.length + 1)
     );
+  } else if (resourceKey.startsWith(LitResourcePrefix.Wildcard)) {
+    return new LitWildcardResource();
   }
   throw new Error(`Invalid resource prefix: ${resourceKey}`);
 }

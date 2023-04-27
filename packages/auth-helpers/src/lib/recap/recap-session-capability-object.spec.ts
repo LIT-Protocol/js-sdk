@@ -2,7 +2,10 @@ import { SiweMessage } from 'siwe';
 import { LitAbility, LitResourcePrefix } from '../models';
 import { RecapSessionCapabilityObject } from './recap-session-capability-object';
 import { LitNamespace, LitRecapAbility } from './utils';
-import { LitAccessControlConditionResource } from '../resources';
+import {
+  LitAccessControlConditionResource,
+  LitWildcardResource,
+} from '../resources';
 
 import { TextDecoder, TextEncoder } from 'util';
 
@@ -198,7 +201,7 @@ describe('recapSessionCapabilityObject', () => {
       }" for "${litResource.getResourceKey()}".`
     );
     expect(newSiweMessage.resources).toEqual([
-      'urn:recap:eyJhdHQiOnsibGl0OmFjYzpzb21lUmVzb3VyY2UiOnsiVGhyZXNob2xkL2RlY3J5cHRpb24iOlt7fV19fSwicHJmIjpbXX0',
+      'urn:recap:eyJhdHQiOnsibGl0L2FjYy9zb21lUmVzb3VyY2UiOnsiVGhyZXNob2xkL0RlY3J5cHRpb24iOlt7fV19fSwicHJmIjpbXX0',
     ]);
   });
 
@@ -212,7 +215,7 @@ describe('recapSessionCapabilityObject', () => {
 
     const siweResource = recapSessionCapabilityObject.encodeAsSiweResource();
     expect(siweResource).toEqual(
-      'urn:recap:eyJhdHQiOnsibGl0OmFjYzpzb21lUmVzb3VyY2UiOnsiVGhyZXNob2xkL2RlY3J5cHRpb24iOlt7fV19fSwicHJmIjpbXX0'
+      'urn:recap:eyJhdHQiOnsibGl0L2FjYy9zb21lUmVzb3VyY2UiOnsiVGhyZXNob2xkL0RlY3J5cHRpb24iOlt7fV19fSwicHJmIjpbXX0'
     );
   });
 
@@ -225,7 +228,7 @@ describe('recapSessionCapabilityObject', () => {
     );
 
     expect(recapSessionCapabilityObject.attenuations).toEqual({
-      [`${LitResourcePrefix.AccessControlCondition}:someResource`]: {
+      [`${LitResourcePrefix.AccessControlCondition}/someResource`]: {
         [`${LitNamespace.Threshold}/${LitRecapAbility.Decryption}`]: [{}],
       },
     });
@@ -244,7 +247,7 @@ describe('recapSessionCapabilityObject', () => {
     );
 
     expect(recapSessionCapabilityObject.attenuations).toEqual({
-      [`${LitResourcePrefix.AccessControlCondition}:someResource`]: {
+      [`${LitResourcePrefix.AccessControlCondition}/someResource`]: {
         [`${LitNamespace.Threshold}/${LitRecapAbility.Decryption}`]: [{}],
         [`${LitNamespace.Threshold}/${LitRecapAbility.Signing}`]: [{}],
       },
@@ -316,5 +319,146 @@ describe('recapSessionCapabilityObject', () => {
         LitAbility.AccessControlConditionSigning
       )
     ).toBe(false);
+  });
+
+  it('should be able to add all the valid capabilities for a resource', async () => {
+    const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('someResource');
+    recapSessionCapabilityObject.addAllCapabilitiesForResource(litResource);
+
+    expect(recapSessionCapabilityObject.attenuations).toEqual({
+      [`${LitResourcePrefix.AccessControlCondition}/someResource`]: {
+        [`*/*`]: [{}],
+      },
+    });
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.AccessControlConditionSigning
+      )
+    ).toBe(true);
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.AccessControlConditionDecryption
+      )
+    ).toBe(true);
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.PKPSigning
+      )
+    ).toBe(false);
+  });
+
+  it('should be able to add a capability for all resources with a resource prefix', async () => {
+    const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('*');
+    recapSessionCapabilityObject.addCapabilityForResource(
+      litResource,
+      LitAbility.AccessControlConditionDecryption
+    );
+
+    expect(recapSessionCapabilityObject.attenuations).toEqual({
+      [`${LitResourcePrefix.AccessControlCondition}/*`]: {
+        [`${LitNamespace.Threshold}/${LitRecapAbility.Decryption}`]: [{}],
+      },
+    });
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.AccessControlConditionSigning
+      )
+    ).toBe(false);
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.AccessControlConditionDecryption
+      )
+    ).toBe(true);
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        new LitAccessControlConditionResource('someResource'),
+        LitAbility.AccessControlConditionDecryption
+      )
+    ).toBe(true);
+  });
+
+  it('should be able to add all the valid capabilities for all resources with a resource prefix', async () => {
+    const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitAccessControlConditionResource('*');
+    recapSessionCapabilityObject.addAllCapabilitiesForResource(litResource);
+
+    expect(recapSessionCapabilityObject.attenuations).toEqual({
+      [`${LitResourcePrefix.AccessControlCondition}/*`]: {
+        [`*/*`]: [{}],
+      },
+    });
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.AccessControlConditionSigning
+      )
+    ).toBe(true);
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.AccessControlConditionDecryption
+      )
+    ).toBe(true);
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        new LitAccessControlConditionResource('someResource'),
+        LitAbility.AccessControlConditionDecryption
+      )
+    ).toBe(true);
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        new LitAccessControlConditionResource('someResource'),
+        LitAbility.PKPSigning
+      )
+    ).toBe(false);
+  });
+
+  it('should be able to add all the valid capabilities for the wildcard resource', async () => {
+    const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
+    const litResource = new LitWildcardResource();
+    recapSessionCapabilityObject.addAllCapabilitiesForResource(litResource);
+
+    expect(recapSessionCapabilityObject.attenuations).toEqual({
+      [`${LitResourcePrefix.Wildcard}/*`]: {
+        [`*/*`]: [{}],
+      },
+    });
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.AccessControlConditionSigning
+      )
+    ).toBe(true);
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.AccessControlConditionDecryption
+      )
+    ).toBe(true);
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        new LitAccessControlConditionResource('someResource'),
+        LitAbility.PKPSigning
+      )
+    ).toBe(true);
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        new LitAccessControlConditionResource('someResource'),
+        LitAbility.RateLimitIncreaseAuth
+      )
+    ).toBe(true);
+    expect(
+      recapSessionCapabilityObject.verifyCapabilitiesForResource(
+        new LitAccessControlConditionResource('someResource'),
+        LitAbility.LitActionExecution
+      )
+    ).toBe(true);
   });
 });
