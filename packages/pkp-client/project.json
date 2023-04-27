@@ -12,16 +12,12 @@
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/pkp-client",
         "main": "packages/pkp-client/src/index.ts",
         "tsConfig": "packages/pkp-client/tsconfig.lib.json",
-        "assets": [
-          "packages/pkp-client/*.md"
-        ]
+        "assets": ["packages/pkp-client/*.md"]
       }
     },
     "_buildWeb": {
@@ -29,9 +25,7 @@
       "options": {
         "globalName": "LitJsSdk_pkpClient",
         "outfile": "dist/packages/pkp-client-vanilla/pkp-client.js",
-        "entryPoints": [
-          "./packages/pkp-client/src/index.ts"
-        ],
+        "entryPoints": ["./packages/pkp-client/src/index.ts"],
         "define": {
           "process.env.NODE_DEBUG": "false",
           "global": "window"
@@ -46,20 +40,14 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/pkp-client/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/pkp-client/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/pkp-client"
-      ],
+      "outputs": ["coverage/packages/pkp-client"],
       "options": {
         "jestConfig": "packages/pkp-client/jest.config.ts",
         "passWithNoTests": true

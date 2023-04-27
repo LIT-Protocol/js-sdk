@@ -23,7 +23,7 @@ import {
   StdFee,
 } from '@cosmjs/stargate';
 
-jest.setTimeout(30000);
+jest.setTimeout(10000);
 
 describe('WalletFactory', () => {
   it('should create an Ethereum wallet', () => {
@@ -303,24 +303,26 @@ describe('PKPClient', () => {
           it('should be able to use updated rpc url to sign & send a transaction', async () => {
             const pkpClient = new PKPClient({
               controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-              pkpPubKey: LITCONFIG.PKP_PUBKEY,
+              pkpPubKey: LITCONFIG.PKP_PUBKEY_2,
               cosmosAddressPrefix: 'cosmos',
               rpc: LITCONFIG.CHRONICLE_RPC,
               // debug: true,
             });
 
             await pkpClient.connect();
-            // const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
+            const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
 
             const etherWallet = pkpClient.getEthWallet();
+
+            await etherWallet.setRpc(newRpcUrl);
 
             // str to hex
             let tx: ETHTxRes = await etherWallet.handleRequest<ETHTxRes>({
               method: 'eth_sendTransaction',
               params: [
                 {
-                  from: LITCONFIG.PKP_ETH_ADDRESS,
-                  to: LITCONFIG.PKP_ETH_ADDRESS,
+                  from: LITCONFIG.PKP_ETH_ADDRESS_2,
+                  to: LITCONFIG.PKP_ETH_ADDRESS_2,
                   data:
                     '0x' +
                     Buffer.from(
