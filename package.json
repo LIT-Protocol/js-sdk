@@ -69,7 +69,6 @@
     "@types/events": "^3.0.0",
     "@types/testing-library__cypress": "^5.0.9",
     "@walletconnect/core": "^2.6.2",
-    "@walletconnect/sign-client": "^2.6.2",
     "@walletconnect/types": "^2.6.2",
     "@walletconnect/utils": "^2.6.2",
     "@walletconnect/web3wallet": "^1.5.1",

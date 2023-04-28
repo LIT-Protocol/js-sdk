@@ -22,10 +22,11 @@
     "misc-browser": "packages/misc-browser",
     "nacl": "packages/nacl",
     "nodejs": "apps/nodejs",
-    "pkp-client": "packages/pkp-client",
     "pkp-base": "packages/pkp-base",
+    "pkp-client": "packages/pkp-client",
     "pkp-cosmos": "packages/pkp-cosmos",
     "pkp-ethers": "packages/pkp-ethers",
+    "pkp-walletconnect": "packages/pkp-walletconnect",
     "react": "apps/react",
     "types": "packages/types",
     "uint8arrays": "packages/uint8arrays"

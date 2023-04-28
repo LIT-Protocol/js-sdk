@@ -1,6 +1,6 @@
 {
-  "name": "@lit-protocol/pkp-client",
-  "version": "2.1.112",
+  "name": "@lit-protocol/pkp-walletconnect",
+  "version": "0.0.1",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -16,8 +16,10 @@
   },
   "publishConfig": {
     "access": "public",
-    "directory": "../../dist/packages/pkp-client"
+    "directory": "../../dist/packages/pkp-walletconnect"
   },
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts",
   "browser": {
     "crypto": false,
     "stream": false
@@ -25,6 +27,10 @@
   "tags": [
     "universal"
   ],
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  "peerDependencies": {
+    "@walletconnect/core": "^2.6.2",
+    "@walletconnect/types": "^2.6.2",
+    "@walletconnect/utils": "^2.6.2",
+    "@walletconnect/web3wallet": "^1.5.1"
+  }
 }

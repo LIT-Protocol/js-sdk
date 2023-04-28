@@ -6329,7 +6329,7 @@
   dependencies:
     tslib "1.14.1"
 
-"@walletconnect/sign-client@^2.6.1", "@walletconnect/sign-client@^2.6.2":
+"@walletconnect/sign-client@^2.6.1":
   version "2.6.2"
   resolved "https://registry.npmjs.org/@walletconnect/sign-client/-/sign-client-2.6.2.tgz#95a087446e0284139b043a3a35500d0525e5c7f2"
   integrity sha512-2/yXliVVRn27i4rCuIumBB361ZQtKCgAwm6OmPW8P2wJpmJ03K0FuLzuYbYy/WvweuFklQ92cQlg3V8Ez5M+vA==
