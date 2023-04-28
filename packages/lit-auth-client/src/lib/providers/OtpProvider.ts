@@ -1,11 +1,15 @@
 import { AuthMethodType } from '@lit-protocol/constants';
 import {
   AuthMethod,
-  OtpServerConfig,
+  AuthenticateOptions,
+  BaseProviderOptions,
+  OtpAuthenticateOptions,
   SignInWithOTPParams,
 } from '@lit-protocol/types';
+import { BaseProvider } from './BaseProvider';
+import { OtpProviderOptions } from '../../../../types/src/lib/interfaces';
 
-export class OtpSession {
+export class OtpProvider extends BaseProvider {
   private _params: SignInWithOTPParams;
   private _baseUrl: string; // TODO: REMOVE THIS HARD CODED STRING
   private _port: string;
@@ -13,12 +17,21 @@ export class OtpSession {
   private _checkRoute: string;
   private _requestId: string = '';
 
-  constructor(params: SignInWithOTPParams, config?: OtpServerConfig) {
+  constructor(params: BaseProviderOptions & SignInWithOTPParams, config?: OtpProviderOptions) {
+    super(params);
     this._params = params;
     this._baseUrl = config?.baseUrl || 'http://127.0.0.1'; // TODO: change default to real url
     this._port = config?.port || '8080';
     this._startRoute = config?.startRoute || '/api/otp/start';
     this._checkRoute = config?.checkRoute || '/api/otp/check';
+  }
+
+  public async authenticate<T extends AuthenticateOptions>(options?: T): Promise<AuthMethod> {
+    if (options){
+      return this.checkOtpCode((options as unknown as OtpAuthenticateOptions).code);
+    } else {
+      throw new Error(`Must provide authentication options for OTP check options given are: ${options}`);
+    }
   }
 
   public async sendOtpCode(): Promise<boolean> {
@@ -50,7 +63,7 @@ export class OtpSession {
     return true;
   }
 
-  public async checkOtpCode(code: string): Promise<AuthMethod> {
+  private async checkOtpCode(code: string): Promise<AuthMethod> {
     const url = this._buildUrl('check');
 
     /**

@@ -163,6 +163,34 @@ export class LitRelay implements IRelay {
   }
 
   /**
+   * Generate options for registering a new credential to pass to the authenticator
+   *
+   * @param {string} [username] - Optional username to associate with the credential
+   *
+   * @returns {Promise<any>} Registration options for the browser to pass to the authenticator
+   */
+  public async generateRegistrationOptions(username?: string): Promise<any> {
+    let url = `${this.relayUrl}/auth/webauthn/generate-registration-options`;
+    if (username && username !== '') {
+      url = `${url}?username=${encodeURIComponent(username)}`;
+    }
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'api-key': this.relayApiKey,
+      },
+    });
+    if (response.status < 200 || response.status >= 400) {
+      const err = new Error(
+        `Unable to generate registration options: ${response}`
+      );
+      throw err;
+    }
+    const registrationOptions = await response.json();
+    return registrationOptions;
+  }
+
+  /**
    * Get route for fetching PKPs
    *
    * @param {AuthMethodType} authMethodType - Auth method type
@@ -179,6 +207,8 @@ export class LitRelay implements IRelay {
         return '/auth/google/userinfo';
       case AuthMethodType.OTP:
         return `/auth/otp/userinfo`;
+      case AuthMethodType.WebAuthn:
+        return '/auth/webauthn/userinfo';
       default:
         throw new Error(
           `Auth method type "${authMethodType}" is not supported. Please refer to the type AuthMethodType to see which enum values are available.`
@@ -203,6 +233,8 @@ export class LitRelay implements IRelay {
         return '/auth/google';
       case AuthMethodType.OTP:
         return `/auth/otp`;
+      case AuthMethodType.WebAuthn:
+        return '/auth/webauthn/verify-registration';
       default:
         throw new Error(
           `Auth method type "${authMethodType}" is not supported`

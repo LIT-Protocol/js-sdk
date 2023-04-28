@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { LoginUrlParams } from '@lit-protocol/types';
 
 export const STATE_PARAM_KEY = 'lit-state-param';
@@ -20,12 +19,15 @@ export function isSocialLoginSupported(provider: string): boolean {
  * @param {string} provider - Social login provider to use
  * @param {string} redirectUri - Redirect uri to use
  *
- * @returns {string} - Login url
+ * @returns {Promise<string>} - Login url
  */
-export function prepareLoginUrl(provider: string, redirectUri: string): string {
+export async function prepareLoginUrl(
+  provider: string,
+  redirectUri: string
+): Promise<string> {
   const baseUrl = 'https://login.litgateway.com';
   const loginUrl = `${baseUrl}${getLoginRoute(provider)}`;
-  const state = encode(setStateParam());
+  const state = encode(await setStateParam());
   const authParams = {
     app_redirect: redirectUri,
   };
@@ -94,11 +96,46 @@ export function parseLoginParams(search: string): LoginUrlParams {
 }
 
 /**
+ * Check if current url is redirect uri to determine if app was redirected back from external login page
+ *
+ * @param {string} redirectUri - Redirect uri to check against
+ *
+ * @returns {boolean} - If current url is redirect uri
+ */
+export function isSignInRedirect(redirectUri: string): boolean {
+  // Check if current url matches redirect uri
+  const isRedirectUri = window.location.href.startsWith(redirectUri);
+  if (!isRedirectUri) {
+    return false;
+  }
+  // Check url for redirect params
+  const { provider, accessToken, idToken, state, error } = parseLoginParams(
+    window.document.location.search
+  );
+  // Check if current url is redirect uri and has redirect params
+  if (isRedirectUri && (provider || accessToken || idToken || state || error)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Get provider name from redirect uri if available
+ *
+ * @returns {string} - Provider name
+ */
+export function getProviderFromUrl(): string | null {
+  const { provider } = parseLoginParams(window.document.location.search);
+  return provider;
+}
+
+/**
  * Create OAuth 2.0 state param and store it in session storage
  *
- * @returns {string} - State param
+ * @returns {Promise<string>} - State param
  */
-export function setStateParam(): string {
+export async function setStateParam(): Promise<string> {
+  const { nanoid } = await import('nanoid');
   const state = nanoid(15);
   sessionStorage.setItem(STATE_PARAM_KEY, state);
   return state;
@@ -142,4 +179,18 @@ export function encode(value: string): string {
  */
 export function decode(value: string): string {
   return window.atob(value);
+}
+
+/**
+ * Get RP ID from origin for WebAuthn
+ *
+ * @param {string} origin - Origin to get RP ID from
+ *
+ * @returns {string} - RP ID
+ */
+export function getRPIdFromOrigin(origin: string) {
+  // remove protocol with regex
+  const newOrigin = origin.replace(/(^\w+:|^)\/\//, '');
+  // remove port with regex
+  return newOrigin.replace(/:\d+$/, '');
 }

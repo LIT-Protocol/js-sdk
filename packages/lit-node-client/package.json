@@ -1,6 +1,5 @@
 {
   "name": "@lit-protocol/lit-node-client",
-  "version": "2.1.120",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
@@ -26,6 +25,7 @@
     "crypto": false,
     "stream": false
   },
+  "version": "2.1.137",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

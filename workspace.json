@@ -25,6 +25,7 @@
     "pkp-ethers": "packages/pkp-ethers",
     "react": "apps/react",
     "types": "packages/types",
-    "uint8arrays": "packages/uint8arrays"
+    "uint8arrays": "packages/uint8arrays",
+    "demo-lit-auth-client-react": "apps/demo-lit-auth-client-react"
   }
 }
