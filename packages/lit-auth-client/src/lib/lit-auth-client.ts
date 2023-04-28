@@ -388,6 +388,12 @@ export class LitAuthClient {
           authMethod.accessToken
         );
         break;
+        case AuthMethodType.OTP:
+          fetchRes = await this.relay.fetchPKPs(
+            AuthMethodType.OTP,
+            JSON.stringify({ jwt: authMethod.accessToken })
+          );
+          break;  
       default:
         throw new Error(
           `Invalid auth method type "${authMethod.authMethodType}" passed`
