@@ -8,7 +8,7 @@ export default {
     },
   },
   transform: {
-    '^.+\\.[t]s$': 'ts-jest',
+    '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/types',

@@ -895,13 +895,6 @@ export interface PKPClientHelpers {
   getRpc: () => string;
 }
 
-export interface SessionSigs {
-  /**
-   * Map of Lit node urls to session signatures
-   */
-  [key: string]: SessionSig;
-}
-
 /**
  * ========== LitAuthClient ==========
  */

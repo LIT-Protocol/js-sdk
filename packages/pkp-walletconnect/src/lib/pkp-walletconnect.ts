@@ -8,7 +8,11 @@ import {
 } from '@walletconnect/web3wallet';
 import { getSdkError, parseChainId } from '@walletconnect/utils';
 import { formatJsonRpcError, formatJsonRpcResult } from '@json-rpc-tools/utils';
-import { SessionTypes, SignClientTypes } from '@walletconnect/types';
+import {
+  ISignClient,
+  SessionTypes,
+  SignClientTypes,
+} from '@walletconnect/types';
 import { PKPClient } from '@lit-protocol/pkp-client';
 import { PKPBase } from '@lit-protocol/pkp-base';
 
@@ -400,6 +404,17 @@ export class PKPWalletConnect {
       }
       return this.client.getPendingSessionRequests();
     };
+
+  // ----------------- WalletConnect clients -----------------
+
+  public getSignClient(): ISignClient {
+    if (!this.client) {
+      return this._throwError(
+        'WalletConnect client has not yet been initialized. Please call init().'
+      );
+    }
+    return this.client.engine.signClient;
+  }
 
   // ----------------- WalletConnect event handlers -----------------
 
