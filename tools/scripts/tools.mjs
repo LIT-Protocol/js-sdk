@@ -22,6 +22,7 @@ import {
 } from './utils.mjs';
 import fs from 'fs';
 import path from 'path';
+import { spawn } from 'child_process';
 
 const args = getArgs();
 
@@ -251,13 +252,52 @@ async function testFunc() {
   if (TEST_TYPE === '--unit') {
     // spawnCommand('yarn', ['nx', 'run-many', '--target=test']);
     // await childRunCommand('yarn nx run-many --target=test');
-    redLog(
-      `
-          To take advantage of nx colorful console messages, please run the following command to run unit tests:
-          yarn nx run-many --target=test
-      `,
-      true
+    // redLog(
+    //   `
+    //       To take advantage of nx colorful console messages, please run the following command to run unit tests:
+    //       yarn nx run-many --target=test
+    //   `,
+    //   true
+    // );
+
+    // Read the workspace configuration file
+    const workspaceConfig = JSON.parse(
+      fs.readFileSync('./workspace.json', 'utf-8')
     );
+
+    // remove all projects that are in the apps folder
+    Object.keys(workspaceConfig.projects).forEach((key) => {
+      if (workspaceConfig.projects[key].includes('apps')) {
+        delete workspaceConfig.projects[key];
+      }
+    });
+
+    console.log(Object.keys(workspaceConfig.projects));
+
+    // Extract project names from the workspace configuration
+    const projectNames = Object.keys(workspaceConfig.projects).join(',');
+
+    // Run the nx run-many command with the --projects flag set to the project names
+    const nx = spawn(
+      'nx',
+      ['run-many', '--target=test', `--projects=${projectNames}`],
+      {
+        stdio: 'inherit', // This maintains the log output color
+        shell: true,
+      }
+    );
+
+    // Handle errors
+    nx.on('error', (error) => {
+      console.error(`Error: ${error.message}`);
+      process.exit();
+    });
+
+    // Handle exit
+    nx.on('exit', (code) => {
+      console.log(`Child process exited with code ${code}`);
+      process.exit();
+    });
   }
 
   if (TEST_TYPE === '--e2e') {

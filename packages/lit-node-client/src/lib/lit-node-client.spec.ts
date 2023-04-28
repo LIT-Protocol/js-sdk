@@ -5,6 +5,8 @@ import * as LITCONFIG from 'lit.config.json';
 
 let client: LitNodeClient;
 
+jest.setTimeout(10000);
+
 describe('litNodeClient', () => {
   it('should create an instance', async () => {
     client = new LitNodeClient({

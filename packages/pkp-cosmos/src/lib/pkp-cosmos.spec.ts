@@ -17,7 +17,7 @@ describe('PKPCosmosWallet', () => {
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
       rpc: LITCONFIG.COSMOS_RPC,
-      debug: true,
+      // debug: true,
       addressPrefix: 'cosmos',
     });
     const [pkpAccount] = await wallet.getAccounts();
@@ -29,7 +29,7 @@ describe('PKPCosmosWallet', () => {
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
       rpc: LITCONFIG.COSMOS_RPC,
-      debug: true,
+      // debug: true,
       addressPrefix: 'cosmos',
     });
     await wallet.init();
@@ -41,7 +41,7 @@ describe('PKPCosmosWallet', () => {
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
       rpc: LITCONFIG.COSMOS_RPC,
-      debug: true,
+      // debug: true,
       addressPrefix: 'cosmos',
     });
     const [pkpAccount] = await wallet.getAccounts();
@@ -60,7 +60,7 @@ describe('PKPCosmosWallet', () => {
       controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
       rpc: LITCONFIG.COSMOS_RPC,
-      debug: true,
+      // debug: true,
       addressPrefix: 'cosmos',
     });
     const [pkpAccount] = await wallet.getAccounts();

@@ -16,7 +16,7 @@
     "build:target": "yarn node tools/scripts/build.mjs",
     "build:setupLocalDev": "yarn tools --setup-local-dev",
     "build:verify": "yarn tools --verify",
-    "test:packages": "nx run-many --target=test",
+    "test:packages": "yarn tools --test --unit",
     "test:watch": "nx run-many --target=test --watch",
     "test:ci": "nx affected --target=test --all --code-coverage",
     "test:e2e": "yarn tools --test --e2e run-react-and-test",

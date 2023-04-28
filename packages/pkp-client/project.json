@@ -50,7 +50,9 @@
       "outputs": ["coverage/packages/pkp-client"],
       "options": {
         "jestConfig": "packages/pkp-client/jest.config.ts",
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "maxWorkers": 1,
+        "runInBand": true
       }
     }
   },
