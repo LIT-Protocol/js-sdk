@@ -12,4 +12,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/lit-auth-client',
+  transformIgnorePatterns: ['/node_modules/(?!(@simplewebauthn|nanoid)/)'],
 };

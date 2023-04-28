@@ -9,10 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lit-protocol/constants": "2.1.103",
-    "@lit-protocol/lit-auth-client": "^2.1.103",
-    "@lit-protocol/lit-node-client": "^2.1.103",
-    "@lit-protocol/types": "2.1.103",
+    "@lit-protocol/lit-auth-client": "^2.1.137",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
     "eslint-config-prettier": "^8.8.0",
@@ -25,7 +22,6 @@
   },
   "devDependencies": {
     "@types/node": "18.15.11",
-    "@types/react": "18.0.31",
-    "typescript": "5.0.3"
+    "@types/react": "18.0.31"
   }
 }
