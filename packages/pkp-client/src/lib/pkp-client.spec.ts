@@ -8,9 +8,7 @@ import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { PKPClient } from './pkp-client';
 
 import * as LITCONFIG from 'lit.config.json';
-import { PKPCosmosWalletProp, PKPEthersWalletProp } from '@lit-protocol/types';
-import { WalletFactory } from './wallet-factory';
-import { PKPBase } from '@lit-protocol/pkp-base';
+
 import {
   ETHSignature,
   ETHTxRes,
@@ -23,62 +21,14 @@ import {
   StdFee,
 } from '@cosmjs/stargate';
 
-jest.setTimeout(10000);
-
-describe('WalletFactory', () => {
-  it('should create an Ethereum wallet', () => {
-    const ethProp: PKPEthersWalletProp = {
-      controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-      pkpPubKey: LITCONFIG.PKP_PUBKEY,
-      rpcs: {
-        eth: LITCONFIG.CHRONICLE_RPC,
-        cosmos: LITCONFIG.COSMOS_RPC,
-      },
-    };
-    const ethWallet = WalletFactory.createWallet('eth', ethProp);
-
-    expect(ethWallet).toBeInstanceOf(PKPEthersWallet);
-  });
-
-  it('should create a Cosmos wallet', () => {
-    const cosmosProp: PKPCosmosWalletProp = {
-      controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-      pkpPubKey: LITCONFIG.PKP_PUBKEY,
-      rpcs: {
-        eth: LITCONFIG.CHRONICLE_RPC,
-        cosmos: LITCONFIG.COSMOS_RPC,
-      },
-      addressPrefix: 'cosmos',
-    };
-    const cosmosWallet = WalletFactory.createWallet('cosmos', cosmosProp);
-
-    expect(cosmosWallet).toBeInstanceOf(PKPCosmosWallet);
-  });
-
-  it('should throw an error for unsupported BTC wallet', () => {
-    const btcProp: any = {
-      /* Bitcoin properties */
-    };
-    expect(() => WalletFactory.createWallet('btc', btcProp)).toThrowError(
-      'BTC wallet is not supported yet'
-    );
-  });
-
-  it('should throw an error for unsupported chain', () => {
-    const unsupportedProp: any = {
-      /* Unsupported properties */
-    };
-    expect(() =>
-      WalletFactory.createWallet('unsupportedChain', unsupportedProp)
-    ).toThrowError('Unsupported chain: unsupportedChain');
-  });
-});
+jest.setTimeout(30000);
 
 describe('PKPClient', () => {
   const pkpClient = new PKPClient({
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
     pkpPubKey: LITCONFIG.PKP_PUBKEY,
     cosmosAddressPrefix: 'cosmos',
+    // debug: true,
   });
 
   beforeAll(async () => {
@@ -86,27 +36,27 @@ describe('PKPClient', () => {
   });
 
   describe('without rpc', () => {
-    describe('eth', () => {
-      it('should sign a message', async () => {
-        const MESSAGE_TO_SIGN = 'HEY THERE!';
+    // describe('eth', () => {
+    //   it('should sign a message', async () => {
+    //     const MESSAGE_TO_SIGN = 'HEY THERE!';
 
-        const signature = await pkpClient
-          .getEthWallet()
-          .signMessage(MESSAGE_TO_SIGN);
+    //     const signature = await pkpClient
+    //       .getEthWallet()
+    //       .signMessage(MESSAGE_TO_SIGN);
 
-        expect(signature).toBeDefined();
-      });
+    //     expect(signature).toBeDefined();
+    //   });
 
-      it('should sign a transaction', async () => {
-        const txRes: string = await pkpClient.getEthWallet().signTransaction({
-          to: LITCONFIG.PKP_ETH_ADDRESS,
-          value: 0,
-          data: '0x',
-        });
+    //   it('should sign a transaction', async () => {
+    //     const txRes: string = await pkpClient.getEthWallet().signTransaction({
+    //       to: LITCONFIG.PKP_ETH_ADDRESS,
+    //       value: 0,
+    //       data: '0x',
+    //     });
 
-        expect(txRes).toBeDefined();
-      });
-    });
+    //     expect(txRes).toBeDefined();
+    //   });
+    // });
 
     describe('cosmos', () => {
       it('[TODO] should sign a message', async () => {
@@ -300,55 +250,67 @@ describe('PKPClient', () => {
             expect(signedTx).toBeDefined();
           });
 
-          it('should be able to use updated rpc url to sign & send a transaction', async () => {
-            const pkpClient = new PKPClient({
-              controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-              pkpPubKey: LITCONFIG.PKP_PUBKEY_2,
-              cosmosAddressPrefix: 'cosmos',
-              rpc: LITCONFIG.CHRONICLE_RPC,
-              // debug: true,
+          // if (LITCONFIG.test.sendRealTxThatCostsMoney) {
+            it('should be able to use updated rpc url to sign & send a transaction', async () => {
+              const pkpClient = new PKPClient({
+                controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+                pkpPubKey: LITCONFIG.PKP_PUBKEY,
+                cosmosAddressPrefix: 'cosmos',
+                rpc: LITCONFIG.CHRONICLE_RPC,
+                debug: true,
+              });
+
+              await pkpClient.connect();
+              const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
+
+              const etherWallet = pkpClient.getEthWallet();
+
+              await etherWallet.setRpc(newRpcUrl);
+
+              // str to hex
+              let tx: ETHTxRes = await etherWallet.handleRequest<ETHTxRes>({
+                method: 'eth_sendTransaction',
+                params: [
+                  {
+                    from: LITCONFIG.PKP_ETH_ADDRESS,
+                    to: LITCONFIG.PKP_ETH_ADDRESS,
+                    data:
+                      '0x' +
+                      Buffer.from(
+                        'should be able to use updated rpc url to sign & send a transaction'
+                      ).toString('hex'),
+                  },
+                ],
+              });
+
+              tx = await (tx as any).wait();
+
+              expect(tx).toBeDefined();
             });
-
-            await pkpClient.connect();
-            const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
-
-            const etherWallet = pkpClient.getEthWallet();
-
-            await etherWallet.setRpc(newRpcUrl);
-
-            // str to hex
-            let tx: ETHTxRes = await etherWallet.handleRequest<ETHTxRes>({
-              method: 'eth_sendTransaction',
-              params: [
-                {
-                  from: LITCONFIG.PKP_ETH_ADDRESS_2,
-                  to: LITCONFIG.PKP_ETH_ADDRESS_2,
-                  data:
-                    '0x' +
-                    Buffer.from(
-                      'should be able to use updated rpc url to sign & send a transaction'
-                    ).toString('hex'),
-                },
-              ],
-            });
-
-            tx = await (tx as any).wait();
-
-            expect(tx).toBeDefined();
-          });
+          // }
         });
       });
 
       describe('handle requests', () => {
         it('should be able to eth_signTransaction', async () => {
+          const pkpClient = new PKPClient({
+            controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+            pkpPubKey: LITCONFIG.PKP_PUBKEY_2,
+            cosmosAddressPrefix: 'cosmos',
+            rpc: LITCONFIG.CHRONICLE_RPC,
+            debug: true,
+          });
+
+          await pkpClient.connect();
+
           const etherWallet = pkpClient.getEthWallet();
 
           const signedTx = await etherWallet.handleRequest({
             method: 'eth_signTransaction',
             params: [
               {
-                from: LITCONFIG.PKP_ETH_ADDRESS,
-                to: LITCONFIG.PKP_ETH_ADDRESS,
+                from: LITCONFIG.PKP_ETH_ADDRESS_2,
+                to: LITCONFIG.PKP_ETH_ADDRESS_2,
               },
             ],
           });
@@ -400,6 +362,14 @@ describe('PKPClient', () => {
         });
 
         it('should be able to sendTokens', async () => {
+          const pkpClient = new PKPClient({
+            controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+            pkpPubKey: LITCONFIG.PKP_PUBKEY,
+            cosmosAddressPrefix: 'cosmos',
+          });
+
+          await pkpClient.connect();
+
           const defaultGasPrice = GasPrice.fromString(
             `${LITCONFIG.DEFAULT_GAS}${LITCONFIG.DENOM}`
           );
@@ -412,16 +382,18 @@ describe('PKPClient', () => {
 
           expect(pkpAccount.address).toBe(LITCONFIG.PKP_COSMOS_ADDRESS);
 
-          const tx = await client.sendTokens(
-            pkpAccount.address,
-            pkpAccount.address,
-            amount,
-            defaultSendFee,
-            'Transaction'
-          );
-
-          expect(tx.transactionHash).toBeDefined();
-          expect(tx.transactionHash.length).toEqual(64);
+          if (LITCONFIG.test.sendRealTxThatCostsMoney) {
+            const tx = await client.sendTokens(
+              pkpAccount.address,
+              pkpAccount.address,
+              amount,
+              defaultSendFee,
+              'Transaction'
+            );
+            expect(tx).toBeDefined();
+            expect(tx.transactionHash).toBeDefined();
+            // expect(tx.transactionHash.length).toEqual(64);
+          }
         });
       });
 

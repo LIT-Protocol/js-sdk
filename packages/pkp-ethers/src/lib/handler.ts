@@ -218,6 +218,8 @@ export const signTransactionHandler = async ({
 
   validateSignature(signedTxSignature);
 
+  console.log("Got this signature!");
+
   return signedTxSignature;
 };
 

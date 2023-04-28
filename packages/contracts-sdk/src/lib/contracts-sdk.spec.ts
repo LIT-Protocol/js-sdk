@@ -82,7 +82,7 @@ describe('contractsSdk', () => {
     const pkpWallet = new PKPEthersWallet({
       pkpPubKey: PKP_PUBKEY,
       controllerAuthSig: CONTROLLER_AUTHSIG,
-      rpc: LITCONFIG.CHRONICLE_RPC
+      rpc: LITCONFIG.CHRONICLE_RPC,
     });
 
     await pkpWallet.init();
@@ -92,7 +92,7 @@ describe('contractsSdk', () => {
 
     // -- init contracts
     litContracts_pkpWallet = new LitContracts({
-      signer: pkpWallet
+      signer: pkpWallet,
     });
 
     await litContracts_pkpWallet.connect();
@@ -151,7 +151,7 @@ describe('contractsSdk', () => {
 
     const pkpAddress = await pkpWallet.getAddress();
 
-    expect(pkpAddress).toBe('0x665B08C53e81a83bFB985FBab89f389C4D17E5c7');
+    expect(pkpAddress).toBe(LITCONFIG.PKP_ETH_ADDRESS);
 
     const mintCost = await litContracts.pkpNftContract.read.mintCost();
 

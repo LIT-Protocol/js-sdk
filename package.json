@@ -44,6 +44,7 @@
     "buildAndPublish": "yarn build:packages && yarn publish:packages",
     "dev": "nodemon --watch packages --ext js,ts --exec \"yarn build:packages && yarn tools --yalc --publish\"",
     "dev:target": "yarn tools --watch --target",
+    "apps":"yarn tools --dev --apps",
     "watch": "yarn tools --watch",
     "v": "yarn tools --v",
     "bump": "yarn tools --v --patch",

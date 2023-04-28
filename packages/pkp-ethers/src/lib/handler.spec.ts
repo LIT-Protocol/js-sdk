@@ -92,13 +92,13 @@ describe('pkp ethers JSON RPC handler', () => {
       expect(typeof signature).toBe('string');
     });
     it('should return a hex string signature', async () => {
-      const pkpEthersWallet = new PKPEthersWallet({
-        controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-        pkpPubKey: LITCONFIG.PKP_PUBKEY,
-        rpc: LITCONFIG.CHRONICLE_RPC,
-      });
+      // const pkpEthersWallet = new PKPEthersWallet({
+      //   controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+      //   pkpPubKey: LITCONFIG.PKP_PUBKEY,
+      //   rpc: LITCONFIG.CHRONICLE_RPC,
+      // });
 
-      await pkpEthersWallet.init();
+      // await pkpEthersWallet.init();
 
       const signature = await signTypedData(pkpEthersWallet, msgParams);
       expect(signature).toMatch(/^0x[0-9a-fA-F]+$/);
@@ -159,6 +159,8 @@ describe('pkp ethers JSON RPC handler', () => {
           controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
           pkpPubKey: LITCONFIG.PKP_PUBKEY,
         });
+
+        await pkpEthersWallet.init();
 
         const payload: ETHRequestSigningPayload = {
           method: 'eth_signTypedData',
@@ -261,7 +263,16 @@ describe('pkp ethers JSON RPC handler', () => {
         params: [LITCONFIG.PKP_ETH_ADDRESS, msgParamStr],
       };
 
-      it('should sign the typed data', async () => {
+      it('V3 should sign the typed data', async () => {
+        const pkpEthersWallet = new PKPEthersWallet({
+          controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+          pkpPubKey: LITCONFIG.PKP_PUBKEY,
+          rpc: LITCONFIG.CHRONICLE_RPC,
+          debug: false,
+        });
+
+        await pkpEthersWallet.init();
+
         const signature = await ethRequestHandler<string>({
           signer: pkpEthersWallet,
           payload,
@@ -347,7 +358,7 @@ describe('pkp ethers JSON RPC handler', () => {
     };
 
     // Sign eth_signTypedData_v4 request
-    it('should sign the typed data', async () => {
+    it('V4 should sign the typed data', async () => {
       const signature = await ethRequestHandler<string>({
         signer: pkpEthersWallet,
         payload,
@@ -530,17 +541,17 @@ describe('pkp ethers JSON RPC handler', () => {
   });
 
   describe('signTransaction', () => {
-    const pkpEthersWallet = new PKPEthersWallet({
-      controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-      pkpPubKey: LITCONFIG.PKP_PUBKEY,
-      rpc: LITCONFIG.CHRONICLE_RPC,
-      debug: false,
-    });
+    // const pkpEthersWallet = new PKPEthersWallet({
+    //   controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+    //   pkpPubKey: LITCONFIG.PKP_PUBKEY,
+    //   rpc: LITCONFIG.CHRONICLE_RPC,
+    //   debug: false,
+    // });
 
     // Transaction to sign and send
     const from = LITCONFIG.PKP_ETH_ADDRESS;
     const to = LITCONFIG.PKP_ETH_ADDRESS;
-    const gasLimit = BigNumber.from('21000');
+    // const gasLimit = BigNumber.from('21000');
     const value = ethers.BigNumber.from('0');
     const data = '0x';
 
@@ -548,7 +559,7 @@ describe('pkp ethers JSON RPC handler', () => {
     const tx = {
       from: from,
       to: to,
-      gasLimit,
+      // gasLimit,
       value,
       data,
     };
@@ -556,10 +567,6 @@ describe('pkp ethers JSON RPC handler', () => {
     // eth_signTransaction parameters
     // Transaction - Object
     // Reference: https://ethereum.github.io/execution-apis/api-documentation/#eth_signTransaction
-    const payload: ETHRequestSigningPayload = {
-      method: 'eth_signTransaction',
-      params: [tx],
-    };
 
     it('should sign the transaction', async () => {
       const pkpEthersWallet = new PKPEthersWallet({
@@ -570,6 +577,11 @@ describe('pkp ethers JSON RPC handler', () => {
       });
 
       await pkpEthersWallet.init();
+
+      const payload: ETHRequestSigningPayload = {
+        method: 'eth_signTransaction',
+        params: [tx],
+      };
 
       const signedTx = await ethRequestHandler<string>({
         signer: pkpEthersWallet,

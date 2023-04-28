@@ -1547,6 +1547,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
+      log('executeJs throwNodeError');
       this.throwNodeError(res as RejectedNodePromises);
     }
 
@@ -1808,6 +1809,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
+      log('getSignedToken throwNodeError');
       this.throwNodeError(res as RejectedNodePromises);
     }
 
@@ -1926,6 +1928,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
+      log('saveSigningCondition throwNodeError');
       this.throwNodeError(res as RejectedNodePromises);
     }
 
@@ -2026,6 +2029,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
+      log('getEncryptionKey throwNodeError');
       this.throwNodeError(res as RejectedNodePromises);
     }
 
@@ -2173,6 +2177,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
+      log('saveEncryptionKey throwNodeError');
       this.throwNodeError(res as RejectedNodePromises);
     }
 
@@ -2433,6 +2438,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
+      log('signSessionKey throwNodeError');
       this.throwNodeError(res);
       return {} as SignSessionKeyResponse;
     }

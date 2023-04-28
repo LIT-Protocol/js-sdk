@@ -14,3 +14,12 @@ yarn add @lit-protocol/auth-browser
   console.log(LitJsSdk_authBrowser);
 </script>
 ```
+
+## Generate an authSig with long expiration
+
+```
+const expiration = new Date(Date.now() + 1000 * 60 * 60 * 99999).toISOString();
+
+const authSig = LitJsSdk_authBrowser.checkAndSignAuthMessage({chain: 'ethereum', expiration: expiration});
+
+```

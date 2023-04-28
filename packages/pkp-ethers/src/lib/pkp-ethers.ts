@@ -47,7 +47,7 @@ import {
 
 const logger = new Logger(version);
 
-const DEFAULT_RPC_URL = 'https://lit-protocol.calderachain.xyz/http';
+const DEFAULT_RPC_URL = 'https://chain-rpc.litprotocol.com/http';
 
 export class PKPEthersWallet
   extends PKPBase

@@ -69,8 +69,7 @@ describe('Lit Actions', () => {
 
     expect(res.signatures['hello-world-sig']).toBeDefined();
     expect(res.signatures['hello-world-sig'].publicKey).toEqual(
-      // remove 0x prefix
-      LITCONFIG.PKP_PUBKEY.slice(2)
+      LITCONFIG.PKP_PUBKEY
     );
   });
 });
