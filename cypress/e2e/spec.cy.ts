@@ -1,5 +1,10 @@
 // @ts-nocheck
 
+import {
+  LitAbility,
+  LitAccessControlConditionResource,
+} from '@lit-protocol/auth-helpers';
+
 let window: any;
 let savedParams: any = {
   accs: [
@@ -727,13 +732,23 @@ describe('Session', () => {
         resourceId
       );
 
-    let resources = [`litSigningCondition://${hashedResourceId}`];
+    const litResource = new LitAccessControlConditionResource(hashedResourceId);
 
-    let capabilities = savedParams.litNodeClient.getSessionCapabilities(
-      [],
-      resources
+    let sessionCapabilityObject =
+      savedParams.litNodeClient.generateSessionCapabilityObjectWithWildcards([
+        litResource,
+      ]);
+    expect(sessionCapabilityObject.attenuations).to.be.eq({
+      'lit/acc/*': {
+        '*/*': [{}],
+      },
+    });
+    expect(
+      sessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.AccessControlConditionSigning
+      )
     );
-    expect(capabilities[0]).to.be.eq('litSigningConditionCapability://*');
   });
 
   it('gets expiration', () => {
@@ -759,10 +774,17 @@ describe('Session', () => {
         resourceId
       );
 
+    const litResource = new LitAccessControlConditionResource(hashedResourceId);
+
     // no await to simulate click event
     let sessionSigs = savedParams.litNodeClient.getSessionSigs({
       chain: 'ethereum',
-      resources: [`litSigningCondition://${hashedResourceId}`],
+      resourceAbilityRequests: [
+        {
+          resource: litResource,
+          ability: LitAbility.AccessControlConditionSigning,
+        },
+      ],
     });
 
     await cy.wait(500);
@@ -784,32 +806,4 @@ describe('Session', () => {
       expect(item[1]).to.have.property('algo');
     });
   });
-
-  // it('gets the session signatures', async () => {
-  //   window = await cy.window();
-
-  //   LitJsSdk = window.LitJsSdk_litNodeClient;
-
-  //   savedParams.litNodeClient = new LitJsSdk.LitNodeClient({
-  //     litNetwork: 'serrano',
-  //   });
-
-  //   await savedParams.litNodeClient.connect();
-
-  //   let sessionSigs = savedParams.litNodeClient.getSessionSigs({
-  //     chain: 'ethereum',
-  //     resources: [
-  //       `litSigningCondition://d3b7c933579ff8cce79a9db8f135cf93d8e4b1d206129cbe28405ed81dad7cb1`,
-  //     ],
-  //   }).then((res) => {
-  //     console.log("res:", res)
-  //     expect(res).to.be.an('1');
-  //   });
-
-  //   await cy.wait(1000);
-  //   console.log('Testing!');
-  //   await cy.wait(1000);
-  //   await cy.get('#metamask').click();
-  //   // expect(sessionSigs).to.be.eq(1);
-  // });
 });

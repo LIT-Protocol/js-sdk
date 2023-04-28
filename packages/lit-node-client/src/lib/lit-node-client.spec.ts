@@ -13,7 +13,7 @@ import { nacl } from '@lit-protocol/nacl';
 globalThis.nacl = nacl;
 
 import crypto, { createHash } from 'crypto';
-import { getSessionKeyUri } from '@lit-protocol/auth-browser';
+import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 Object.defineProperty(global.self, 'crypto', {
   value: {
     getRandomValues: (arr: any) => crypto.randomBytes(arr.length),
@@ -131,10 +131,21 @@ describe('litNodeClient', () => {
 
     let hashedResourceId = await hashResourceIdForSigning(resourceId);
 
-    let resources = [`litSigningCondition://${hashedResourceId}`];
+    const litResource = new LitAccessControlConditionResource(hashedResourceId);
 
-    let capabilities = litNodeClient.getSessionCapabilities([], resources);
-    expect(capabilities[0]).toBe('litSigningConditionCapability://*');
+    let sessionCapabilityObject =
+      itNodeClient.generateSessionCapabilityObjectWithWildcards([litResource]);
+    expect(sessionCapabilityObject.attenuations).to.be.eq({
+      'lit/acc/*': {
+        '*/*': [{}],
+      },
+    });
+    expect(
+      sessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.AccessControlConditionSigning
+      )
+    );
   });
 
   it('gets expiration', () => {
@@ -143,25 +154,4 @@ describe('litNodeClient', () => {
     // expect expiration to contains 'T'
     expect(expiration).toContain('T');
   });
-
-//   it('hashes a resource id', async () => {
-//     const path = '/bglyaysu8rvblxlk7x0ksn';
-
-//     let resourceId = {
-//       baseUrl: 'my-dynamic-content-server.com',
-//       path,
-//       orgId: '',
-//       role: '',
-//       extraData: '',
-//     };
-
-//     let hashedResourceId = await hashResourceIdForSigning(resourceId);
-
-//     let sessionSigs = await litNodeClient.getSessionSigs({
-//       chain: 'ethereum',
-//       resources: [`litSigningCondition://${hashedResourceId}`],
-//     });
-
-//     expect(sessionSigs).toBe(1);
-//   });
 });

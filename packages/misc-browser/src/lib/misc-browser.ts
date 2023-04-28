@@ -35,6 +35,25 @@ export const getStorageItem = (key: string): IEither => {
 };
 
 /**
+ *
+ * Set the local storage item by key
+ *
+ * @param { string } key is the key to set
+ * @param { string } value is the value to set
+ */
+export const setStorageItem = (key: string, value: string): IEither => {
+  try {
+    localStorage.setItem(key, value);
+    return ERight(value);
+  } catch (e) {
+    return ELeft({
+      message: `Failed to set ${key} in local storage`,
+      error: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_SET_EXCEPTION,
+    });
+  }
+};
+
+/**
  * Convert a Blob to a base64urlpad string.  Note: This function returns a promise.
  *
  * @param { Blob | File } blob The Blob or File to turn into a base64 string

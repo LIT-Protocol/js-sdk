@@ -138,6 +138,22 @@ export interface ILitResource {
    */
   isValidLitAbility(litAbility: LitAbility): boolean;
 
+  toString(): string;
+
   readonly resourcePrefix: LitResourcePrefix;
   readonly resource: string;
 }
+
+/**
+ * A LIT resource ability is a combination of a LIT resource and a LIT ability.
+ * It specifies which LIT specific ability is being requested to be performed
+ * on the specified LIT resource.
+ *
+ * @description This object does NOT guarantee compatibility between the
+ * specified LIT resource and the specified LIT ability, and will be validated by
+ * the LIT-internal systems.
+ */
+export type LitResourceAbilityRequest = {
+  resource: ILitResource;
+  ability: LitAbility;
+};

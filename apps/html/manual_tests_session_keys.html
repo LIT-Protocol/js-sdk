@@ -4,6 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
     <title>Session Keys</title>
 
+    <script src="dist/packages/auth-helpers-vanilla/auth-helpers.js"></script>
     <script
       src="/dist/packages/lit-node-client-vanilla/lit-node-client.js"
     ></script>
@@ -14,6 +15,7 @@
     <script>
 
       const LitJsSdk = LitJsSdk_litNodeClient;
+      const LitJsSdk_authHelpers = window.LitJsSdk_authHelpers;
 
       const litNodeClient = new LitNodeClient({litNetwork: 'serrano'});
       litNodeClient.connect();
@@ -47,9 +49,18 @@
         );
         console.log("hashedResourceId", hashedResourceId);
 
+        const litResource = new LitJsSdk_authHelpers.LitAccessControlConditionResource(
+          hashedResourceId
+        );
+
         var sessionSigs = await litNodeClient.getSessionSigs({
           chain: "ethereum",
-          resources: [`litSigningCondition://${hashedResourceId}`],
+          resourceAbilityRequests: [
+            {
+            resource: litResource,
+            ability: LitJsSdk_authHelpers.LitAbility.AccessControlConditionSigning,
+            },
+          ],
         });
 
         console.log("sessionSigs", sessionSigs);
@@ -90,9 +101,18 @@
       }) => {
         document.getElementById("status").innerText = `Testing ${testName}...`;
 
+        const litResource = new LitJsSdk_authHelpers.LitAccessControlConditionResource(
+          'somethingThatWillBeReplacedWithWildcard'
+        );
+
         var sessionSigs = await litNodeClient.getSessionSigs({
           chain: "ethereum",
-          resources: [`litEncryptionCondition://*`],
+          resourceAbilityRequests: [
+            {
+            resource: litResource,
+            ability: LitJsSdk_authHelpers.LitAbility.AccessControlConditionDecryption,
+            },
+          ],
         });
 
         document.getElementById(
@@ -114,9 +134,18 @@
           encryptedSymmetricKey,
         });
 
+        const litResource1 = new LitJsSdk_authHelpers.LitAccessControlConditionResource(
+          hashOfKey
+        );
+
         sessionSigs = await litNodeClient.getSessionSigs({
           chain: "ethereum",
-          resources: [`litEncryptionCondition://${hashOfKey}`],
+          resourceAbilityRequests: [
+            {
+            resource: litResource,
+            ability: LitJsSdk_authHelpers.LitAbility.AccessControlConditionDecryption,
+            },
+          ],
         });
 
         console.log("encrypted symmetric key", encryptedSymmetricKey);

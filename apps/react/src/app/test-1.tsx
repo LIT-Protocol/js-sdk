@@ -2,6 +2,10 @@ import * as LitJsSdk from 'dist/packages/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { PKPWallet } from '@lit-protocol/pkp-ethers.js';
 import { ethers } from 'ethers';
+import {
+  LitAbility,
+  LitAccessControlConditionResource,
+} from '@lit-protocol/auth-helpers';
 
 // ***********************************************
 //          Configuration for this test
@@ -28,10 +32,19 @@ const Test1 = () => {
     });
     await litNodeClient.connect();
 
+    const litResource = new LitAccessControlConditionResource(
+      'somethingThatWillBeReplacedWithWildcard'
+    );
+
     const sessionSigs = await litNodeClient.getSessionSigs({
       expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
       chain: 'ethereum',
-      resources: [`litEncryptionCondition://*`],
+      resourceAbilityRequests: [
+        {
+          resource: litResource,
+          ability: LitAbility.AccessControlConditionDecryption,
+        },
+      ],
       switchChain: false,
     });
     console.log('sessionSigs before saving encryption key: ', sessionSigs);
