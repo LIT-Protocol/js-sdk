@@ -192,10 +192,19 @@ describe('LitNodeClientNodeJs', () => {
 
     let hashedResourceId = await hashResourceIdForSigning(resourceId);
 
-    let resources = [`litSigningCondition://${hashedResourceId}`];
-
-    let capabilities = litNodeClient.getSessionCapabilities([], resources);
-    expect(capabilities[0]).toBe('litSigningConditionCapability://*');
+    let sessionCapabilityObject =
+      litNodeClient.generateSessionCapabilityObjectWithWildcards([litResource]);
+    expect(sessionCapabilityObject.attenuations).to.be.eq({
+      'lit/acc/*': {
+        '*/*': [{}],
+      },
+    });
+    expect(
+      sessionCapabilityObject.verifyCapabilitiesForResource(
+        litResource,
+        LitAbility.AccessControlConditionSigning
+      )
+    );
   });
 
   it('gets expiration', () => {
