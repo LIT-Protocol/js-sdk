@@ -35,7 +35,11 @@ import { Logger } from '@ethersproject/logger';
 import { version } from 'ethers';
 
 import { ethers, Wallet } from 'ethers';
-import { PKPClientHelpers, PKPEthersWalletProp } from '@lit-protocol/types';
+import {
+  LITChainRequiredProps,
+  PKPClientHelpers,
+  PKPEthersWalletProp,
+} from '@lit-protocol/types';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import { ethRequestHandler } from './handler';
 import {
@@ -44,10 +48,9 @@ import {
   ETHSignature,
   ETHTxRes,
 } from './pkp-ethers-types';
+import { LIT_CHAINS } from '@lit-protocol/constants';
 
 const logger = new Logger(version);
-
-const DEFAULT_RPC_URL = 'https://chain-rpc.litprotocol.com/http';
 
 export class PKPEthersWallet
   extends PKPBase
@@ -63,7 +66,7 @@ export class PKPEthersWallet
     super(prop);
 
     this.rpcProvider = new ethers.providers.JsonRpcProvider(
-      prop.rpc ?? DEFAULT_RPC_URL
+      prop.rpc ?? LIT_CHAINS['litprotocol'].rpcUrls[0]
     );
 
     defineReadOnly(this, '_isSigner', true);

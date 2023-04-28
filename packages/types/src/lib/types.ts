@@ -42,8 +42,8 @@ export type LITChainRequiredProps = {
   name: string;
   symbol: string;
   decimals: number;
-  rpcUrls: Array<String>;
-  blockExplorerUrls: Array<String>;
+  rpcUrls: Array<string>;
+  blockExplorerUrls: Array<string>;
   vmType: string;
 };
 
