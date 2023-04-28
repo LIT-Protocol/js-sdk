@@ -64,39 +64,39 @@ export interface ContractCallOverrides {
   gasLimit?: number;
 }
 export type RateLimitNFTEvents =
-  | 'AdditionalRequestsPerSecondCostSet'
+  | 'AdditionalRequestsPerKilosecondCostSet'
   | 'Approval'
   | 'ApprovalForAll'
   | 'FreeMintSignerSet'
   | 'FreeRequestsPerRateLimitWindowSet'
   | 'OwnershipTransferred'
-  | 'RLIHolderRateLimitWindowMillisecondsSet'
-  | 'RateLimitWindowMillisecondsSet'
+  | 'RLIHolderRateLimitWindowSecondsSet'
+  | 'RateLimitWindowSecondsSet'
   | 'Transfer'
   | 'Withdrew';
 export interface RateLimitNFTEventsContext {
-  AdditionalRequestsPerSecondCostSet(...parameters: any): EventFilter;
+  AdditionalRequestsPerKilosecondCostSet(...parameters: any): EventFilter;
   Approval(...parameters: any): EventFilter;
   ApprovalForAll(...parameters: any): EventFilter;
   FreeMintSignerSet(...parameters: any): EventFilter;
   FreeRequestsPerRateLimitWindowSet(...parameters: any): EventFilter;
   OwnershipTransferred(...parameters: any): EventFilter;
-  RLIHolderRateLimitWindowMillisecondsSet(...parameters: any): EventFilter;
-  RateLimitWindowMillisecondsSet(...parameters: any): EventFilter;
+  RLIHolderRateLimitWindowSecondsSet(...parameters: any): EventFilter;
+  RateLimitWindowSecondsSet(...parameters: any): EventFilter;
   Transfer(...parameters: any): EventFilter;
   Withdrew(...parameters: any): EventFilter;
 }
 export type RateLimitNFTMethodNames =
   | 'new'
-  | 'RLIHolderRateLimitWindowMilliseconds'
-  | 'additionalRequestsPerMillisecondCost'
+  | 'RLIHolderRateLimitWindowSeconds'
+  | 'additionalRequestsPerKilosecondCost'
   | 'approve'
   | 'balanceOf'
   | 'burn'
   | 'calculateCost'
-  | 'calculateRequestsPerSecond'
+  | 'calculateRequestsPerKilosecond'
   | 'capacity'
-  | 'defaultRateLimitWindowMilliseconds'
+  | 'defaultRateLimitWindowSeconds'
   | 'freeMint'
   | 'freeMintSigTest'
   | 'freeMintSigner'
@@ -113,12 +113,12 @@ export type RateLimitNFTMethodNames =
   | 'renounceOwnership'
   | 'safeTransferFrom'
   | 'safeTransferFrom'
-  | 'setAdditionalRequestsPerSecondCost'
+  | 'setAdditionalRequestsPerKilosecondCost'
   | 'setApprovalForAll'
   | 'setFreeMintSigner'
   | 'setFreeRequestsPerRateLimitWindow'
-  | 'setRLIHolderRateLimitWindowMilliseconds'
-  | 'setRateLimitWindowMilliseconds'
+  | 'setRLIHolderRateLimitWindowSeconds'
+  | 'setRateLimitWindowSeconds'
   | 'supportsInterface'
   | 'symbol'
   | 'tokenByIndex'
@@ -129,8 +129,8 @@ export type RateLimitNFTMethodNames =
   | 'transferFrom'
   | 'transferOwnership'
   | 'withdraw';
-export interface AdditionalRequestsPerSecondCostSetEventEmittedResponse {
-  newAdditionalRequestsPerMillisecondCost: BigNumberish;
+export interface AdditionalRequestsPerKilosecondCostSetEventEmittedResponse {
+  newAdditionalRequestsPerKilosecondCost: BigNumberish;
 }
 export interface ApprovalEventEmittedResponse {
   owner: string;
@@ -152,11 +152,11 @@ export interface OwnershipTransferredEventEmittedResponse {
   previousOwner: string;
   newOwner: string;
 }
-export interface RLIHolderRateLimitWindowMillisecondsSetEventEmittedResponse {
-  newRLIHolderRateLimitWindowMilliseconds: BigNumberish;
+export interface RLIHolderRateLimitWindowSecondsSetEventEmittedResponse {
+  newRLIHolderRateLimitWindowSeconds: BigNumberish;
 }
-export interface RateLimitWindowMillisecondsSetEventEmittedResponse {
-  newRateLimitWindowMilliseconds: BigNumberish;
+export interface RateLimitWindowSecondsSetEventEmittedResponse {
+  newRateLimitWindowSeconds: BigNumberish;
 }
 export interface TransferEventEmittedResponse {
   from: string;
@@ -167,7 +167,7 @@ export interface WithdrewEventEmittedResponse {
   amount: BigNumberish;
 }
 export interface CapacityResponse {
-  requestsPerMillisecond: BigNumber;
+  requestsPerKilosecond: BigNumber;
   0: BigNumber;
   expiresAt: BigNumber;
   1: BigNumber;
@@ -187,7 +187,7 @@ export interface RateLimitNFT {
    * StateMutability: view
    * Type: function
    */
-  RLIHolderRateLimitWindowMilliseconds(
+  RLIHolderRateLimitWindowSeconds(
     overrides?: ContractCallOverrides
   ): Promise<BigNumber>;
   /**
@@ -196,7 +196,7 @@ export interface RateLimitNFT {
    * StateMutability: view
    * Type: function
    */
-  additionalRequestsPerMillisecondCost(
+  additionalRequestsPerKilosecondCost(
     overrides?: ContractCallOverrides
   ): Promise<BigNumber>;
   /**
@@ -239,11 +239,11 @@ export interface RateLimitNFT {
    * Constant: true
    * StateMutability: view
    * Type: function
-   * @param requestsPerMillisecond Type: uint256, Indexed: false
+   * @param requestsPerKilosecond Type: uint256, Indexed: false
    * @param expiresAt Type: uint256, Indexed: false
    */
   calculateCost(
-    requestsPerMillisecond: BigNumberish,
+    requestsPerKilosecond: BigNumberish,
     expiresAt: BigNumberish,
     overrides?: ContractCallOverrides
   ): Promise<BigNumber>;
@@ -255,7 +255,7 @@ export interface RateLimitNFT {
    * @param payingAmount Type: uint256, Indexed: false
    * @param expiresAt Type: uint256, Indexed: false
    */
-  calculateRequestsPerSecond(
+  calculateRequestsPerKilosecond(
     payingAmount: BigNumberish,
     expiresAt: BigNumberish,
     overrides?: ContractCallOverrides
@@ -277,7 +277,7 @@ export interface RateLimitNFT {
    * StateMutability: view
    * Type: function
    */
-  defaultRateLimitWindowMilliseconds(
+  defaultRateLimitWindowSeconds(
     overrides?: ContractCallOverrides
   ): Promise<BigNumber>;
   /**
@@ -286,7 +286,7 @@ export interface RateLimitNFT {
    * StateMutability: nonpayable
    * Type: function
    * @param expiresAt Type: uint256, Indexed: false
-   * @param requestsPerMillisecond Type: uint256, Indexed: false
+   * @param requestsPerKilosecond Type: uint256, Indexed: false
    * @param msgHash Type: bytes32, Indexed: false
    * @param v Type: uint8, Indexed: false
    * @param r Type: bytes32, Indexed: false
@@ -294,7 +294,7 @@ export interface RateLimitNFT {
    */
   freeMint(
     expiresAt: BigNumberish,
-    requestsPerMillisecond: BigNumberish,
+    requestsPerKilosecond: BigNumberish,
     msgHash: Arrayish,
     v: BigNumberish,
     r: Arrayish,
@@ -307,7 +307,7 @@ export interface RateLimitNFT {
    * StateMutability: view
    * Type: function
    * @param expiresAt Type: uint256, Indexed: false
-   * @param requestsPerMillisecond Type: uint256, Indexed: false
+   * @param requestsPerKilosecond Type: uint256, Indexed: false
    * @param msgHash Type: bytes32, Indexed: false
    * @param v Type: uint8, Indexed: false
    * @param r Type: bytes32, Indexed: false
@@ -315,7 +315,7 @@ export interface RateLimitNFT {
    */
   freeMintSigTest(
     expiresAt: BigNumberish,
-    requestsPerMillisecond: BigNumberish,
+    requestsPerKilosecond: BigNumberish,
     msgHash: Arrayish,
     v: BigNumberish,
     r: Arrayish,
@@ -474,10 +474,10 @@ export interface RateLimitNFT {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
-   * @param newAdditionalRequestsPerMillisecondCost Type: uint256, Indexed: false
+   * @param newAdditionalRequestsPerKilosecondCost Type: uint256, Indexed: false
    */
-  setAdditionalRequestsPerSecondCost(
-    newAdditionalRequestsPerMillisecondCost: BigNumberish,
+  setAdditionalRequestsPerKilosecondCost(
+    newAdditionalRequestsPerKilosecondCost: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -520,10 +520,10 @@ export interface RateLimitNFT {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
-   * @param newRLIHolderRateLimitWindowMilliseconds Type: uint256, Indexed: false
+   * @param newRLIHolderRateLimitWindowSeconds Type: uint256, Indexed: false
    */
-  setRLIHolderRateLimitWindowMilliseconds(
-    newRLIHolderRateLimitWindowMilliseconds: BigNumberish,
+  setRLIHolderRateLimitWindowSeconds(
+    newRLIHolderRateLimitWindowSeconds: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -531,10 +531,10 @@ export interface RateLimitNFT {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
-   * @param newRateLimitWindowMilliseconds Type: uint256, Indexed: false
+   * @param newRateLimitWindowSeconds Type: uint256, Indexed: false
    */
-  setRateLimitWindowMilliseconds(
-    newRateLimitWindowMilliseconds: BigNumberish,
+  setRateLimitWindowSeconds(
+    newRateLimitWindowSeconds: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**

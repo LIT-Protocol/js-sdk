@@ -8,7 +8,7 @@ import {
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
 
-import { IProvider, JsonAuthSig } from '@lit-protocol/types';
+import { IProvider, AuthSig } from '@lit-protocol/types';
 import { log, throwError } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 // import { toString as uint8arrayToString } from 'uint8arrays';
@@ -71,9 +71,9 @@ export const connectSolProvider = async (): Promise<IProvider | undefined> => {
  *
  * Check and sign solana auth message
  *
- * @returns { JsonAuthSig }
+ * @returns { AuthSig }
  */
-export const checkAndSignSolAuthMessage = async (): Promise<JsonAuthSig> => {
+export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
   const res = await connectSolProvider();
 
   if (!res) {
@@ -87,7 +87,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<JsonAuthSig> => {
   let authSigOrError: IEither = getStorageItem(key);
 
   // let authSig = localStorage.getItem("lit-auth-sol-signature");
-  let authSig: JsonAuthSig;
+  let authSig: AuthSig;
 
   // -- case: if unable to get auth from local storage
   if (authSigOrError.type === EITHER_TYPE.ERROR) {
@@ -133,14 +133,14 @@ export const checkAndSignSolAuthMessage = async (): Promise<JsonAuthSig> => {
  * Sign and save auth signature locally (not saved to the nodes)
  *
  * @property { any } provider
- * @return { Promise<JsonAuthSig | undefined> }
+ * @return { Promise<AuthSig | undefined> }
  *
  */
 export const signAndSaveAuthMessage = async ({
   provider,
 }: {
   provider: any;
-}): Promise<JsonAuthSig | undefined> => {
+}): Promise<AuthSig | undefined> => {
   const now = new Date().toISOString();
   const body = AUTH_SIGNATURE_BODY.replace('{{timestamp}}', now);
 
@@ -152,7 +152,7 @@ export const signAndSaveAuthMessage = async ({
 
   const hexSig = uint8arrayToString(signed.signature, 'base16');
 
-  const authSig: JsonAuthSig = {
+  const authSig: AuthSig = {
     sig: hexSig,
     derivedVia: 'solana.signMessage',
     signedMessage: body,

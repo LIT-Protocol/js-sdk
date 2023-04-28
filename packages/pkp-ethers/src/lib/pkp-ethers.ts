@@ -47,7 +47,7 @@ import {
 
 const logger = new Logger(version);
 
-const DEFAULT_RPC_URL = 'https://rpc-mumbai.maticvigil.com';
+const DEFAULT_RPC_URL = 'https://lit-protocol.calderachain.xyz/http';
 
 export class PKPEthersWallet
   extends PKPBase
@@ -66,11 +66,7 @@ export class PKPEthersWallet
       prop.rpc ?? DEFAULT_RPC_URL
     );
 
-    defineReadOnly(
-      this,
-      '_isSigner',
-      this.rpcProvider._isProvider === true ? false : true
-    );
+    defineReadOnly(this, '_isSigner', true);
 
     defineReadOnly(
       this,
@@ -114,6 +110,8 @@ export class PKPEthersWallet
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
+    this.log('signTransaction => transaction:', transaction);
+
     if (!this.litNodeClientReady) {
       await this.init();
     }
@@ -122,6 +120,11 @@ export class PKPEthersWallet
     this.log('signTransaction => addr:', addr);
 
     try {
+      if (!transaction['gasLimit']) {
+        transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
+        this.log('signTransaction => gasLimit:', transaction.gasLimit);
+      }
+
       if (!transaction['nonce']) {
         transaction.nonce = await this.rpcProvider.getTransactionCount(addr);
         this.log('signTransaction => nonce:', transaction.nonce);
@@ -135,11 +138,6 @@ export class PKPEthersWallet
       if (!transaction['gasPrice']) {
         transaction.gasPrice = await this.getGasPrice();
         this.log('signTransaction => gasPrice:', transaction.gasPrice);
-      }
-
-      if (!transaction['gasLimit']) {
-        transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
-        this.log('signTransaction => gasLimit:', transaction.gasLimit);
       }
     } catch (err) {
       this.log(
@@ -201,6 +199,10 @@ export class PKPEthersWallet
     types: Record<string, Array<TypedDataField>>,
     value: Record<string, any>
   ): Promise<string> {
+    if (!this.litNodeClientReady) {
+      await this.init();
+    }
+
     // Populate any ENS names
     const populated = await _TypedDataEncoder.resolveNames(
       domain,
@@ -262,7 +264,18 @@ export class PKPEthersWallet
   }
 
   async sendTransaction(transaction: TransactionRequest | any): Promise<any> {
-    return await this.rpcProvider.sendTransaction(transaction);
+    this.log('sendTransaction => transaction:', transaction);
+
+    let res;
+
+    try {
+      res = await this.rpcProvider.sendTransaction(transaction);
+    } catch (e) {
+      this.log('sendTransaction => error:', e);
+      throw e;
+    }
+
+    return res;
   }
 
   /**

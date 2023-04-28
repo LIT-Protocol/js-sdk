@@ -77,7 +77,7 @@ async function shouldSignTypedData() {
 
   const payload = {
     method: 'eth_signTypedData',
-    params: [LITCONFIG.PKP_ADDRESS, msgParamStr],
+    params: [LITCONFIG.PKP_ETH_ADDRESS, msgParamStr],
   };
 
   const signature = await ethRequestHandler({
@@ -93,7 +93,7 @@ async function shouldSignTypedData() {
 
   log.blue('recoveredAddr', recoveredAddr);
 
-  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ADDRESS.toLowerCase()) {
+  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()) {
     log.red();
     return {
       status: 500,
@@ -125,7 +125,7 @@ async function shouldSignTypedDataV1() {
 
   const payload = {
     method: 'eth_signTypedData_v1',
-    params: [msgParams, LITCONFIG.PKP_ADDRESS],
+    params: [msgParams, LITCONFIG.PKP_ETH_ADDRESS],
   };
 
   const signature = await ethRequestHandler({
@@ -143,7 +143,7 @@ async function shouldSignTypedDataV1() {
 
   log.blue('recoveredAddr', recoveredAddr);
 
-  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ADDRESS.toLowerCase()) {
+  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()) {
     return {
       status: 500,
       message:
@@ -200,7 +200,7 @@ async function shouldSignTypedDataV3() {
 
   const payload = {
     method: 'eth_signTypedData_v3',
-    params: [LITCONFIG.PKP_ADDRESS, msgParamStr],
+    params: [LITCONFIG.PKP_ETH_ADDRESS, msgParamStr],
   };
 
   const signature = await ethRequestHandler({
@@ -225,7 +225,7 @@ async function shouldSignTypedDataV3() {
 
   log.blue('recoveredAddr', recoveredAddr);
 
-  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ADDRESS.toLowerCase()) {
+  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()) {
     return {
       status: 500,
       message:
@@ -297,7 +297,7 @@ async function shouldSignTypedDataV4() {
 
   const payload = {
     method: 'eth_signTypedData_v4',
-    params: [LITCONFIG.PKP_ADDRESS, msgParamStr],
+    params: [LITCONFIG.PKP_ETH_ADDRESS, msgParamStr],
   };
 
   // Sign eth_signTypedData_v4 request
@@ -321,7 +321,7 @@ async function shouldSignTypedDataV4() {
 
   log.blue('recoveredAddr', recoveredAddr);
 
-  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ADDRESS.toLowerCase()) {
+  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()) {
     return {
       status: 500,
       message:
@@ -339,15 +339,15 @@ async function shouldSignTransaction() {
   const pkpEthersWallet = new PKPEthersWallet({
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
     pkpPubKey: LITCONFIG.PKP_PUBKEY,
-    rpc: LITCONFIG.MUMBAI_RPC,
+    rpc: LITCONFIG.CHRONICLE_RPC,
     debug: false,
   });
 
   await pkpEthersWallet.init();
 
   // Transaction to sign and send
-  const from = LITCONFIG.PKP_ADDRESS;
-  const to = LITCONFIG.PKP_ADDRESS;
+  const from = LITCONFIG.PKP_ETH_ADDRESS;
+  const to = LITCONFIG.PKP_ETH_ADDRESS;
   const gasLimit = BigNumber.from('21000');
   const value = ethers.BigNumber.from('0');
   const data = '0x';
@@ -394,15 +394,15 @@ async function shouldSendTransaction() {
   const pkpEthersWallet = new PKPEthersWallet({
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
     pkpPubKey: LITCONFIG.PKP_PUBKEY,
-    rpc: LITCONFIG.MUMBAI_RPC,
+    rpc: LITCONFIG.CHRONICLE_RPC,
     debug: false,
   });
 
   await pkpEthersWallet.init();
 
   // Transaction to sign and send
-  const from = LITCONFIG.PKP_ADDRESS;
-  const to = LITCONFIG.PKP_ADDRESS;
+  const from = LITCONFIG.PKP_ETH_ADDRESS;
+  const to = LITCONFIG.PKP_ETH_ADDRESS;
   const gasLimit = BigNumber.from('21000');
   const value = ethers.BigNumber.from('0');
   const data = '0x';

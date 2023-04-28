@@ -34,7 +34,7 @@ import {
   GetSessionSigsProps,
   GetSignSessionKeySharesProp,
   HandshakeWithSgx,
-  JsonAuthSig,
+  AuthSig,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonHandshakeResponse,
@@ -63,12 +63,13 @@ import {
   SuccessNodePromises,
   SupportedJsonRequests,
   ValidateAndSignECDSA,
-  CheckAndSignAuthParams,
+  AuthCallbackParams,
   WebAuthnAuthenticationVerificationParams,
   AuthMethod,
   SignSessionKeyResponse,
   NodeClientErrorV0,
   NodeClientErrorV1,
+  GetWalletSigProps,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -112,9 +113,7 @@ export class LitNodeClientNodeJs {
   subnetPubKey: string | null;
   networkPubKey: string | null;
   networkPubKeySet: string | null;
-  defaultAuthCallback?: (
-    authSigParams: CheckAndSignAuthParams
-  ) => Promise<JsonAuthSig>;
+  defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -187,7 +186,7 @@ export class LitNodeClientNodeJs {
     sessionSigs,
     url,
   }: {
-    authSig: JsonAuthSig | any;
+    authSig: AuthSig | any;
     sessionSigs: any;
     url: string;
   }) => {
@@ -372,14 +371,7 @@ export class LitNodeClientNodeJs {
     switchChain,
     expiration,
     sessionKeyUri,
-  }: {
-    authNeededCallback: any;
-    chain: string;
-    capabilities: Array<any>;
-    switchChain: boolean;
-    expiration: string;
-    sessionKeyUri: string;
-  }): Promise<JsonAuthSig> => {
+  }: GetWalletSigProps): Promise<AuthSig> => {
     let walletSig;
 
     const storageKey = LOCAL_STORAGE_KEYS.WALLET_SIGNATURE;
@@ -1502,7 +1494,7 @@ export class LitNodeClientNodeJs {
     // -- validate: If it's NOT ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '1 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
       throwError({
         message,
@@ -1630,7 +1622,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '2 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       return throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1737,7 +1729,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '3 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1848,7 +1840,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '4 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1951,7 +1943,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '5 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2080,7 +2072,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2203,7 +2195,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '7 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2377,7 +2369,7 @@ export class LitNodeClientNodeJs {
     // -- validate: If it's NOT ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '8 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
       throwError({
         message,
@@ -2572,7 +2564,6 @@ export class LitNodeClientNodeJs {
           resources: capabilities,
           expiration,
           uri: sessionKeyUri,
-          litNodeClient: this,
         });
       } else {
         if (!this.defaultAuthCallback) {

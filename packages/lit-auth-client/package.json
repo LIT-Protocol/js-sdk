@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/lit-auth-client",
-  "version": "2.1.112",
+  "version": "2.1.135",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -27,7 +27,5 @@
   ],
   "peerDependencies": {
     "nanoid": "3.3.4"
-  },
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  }
 }

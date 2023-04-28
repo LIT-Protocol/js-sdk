@@ -11,7 +11,7 @@
 import {
   ExecuteJsProps,
   PKPBaseProp,
-  JsonAuthSig,
+  AuthSig,
   PKPBaseDefaultParams,
   GetSessionSigsProps,
   SessionSigs,
@@ -43,9 +43,8 @@ const compressPubKey = (pubKey: string): string => {
  * A base class that can be shared between Ethers and Cosmos signers.
  */
 export class PKPBase<T = PKPBaseDefaultParams> {
-  pkpPubKey: string;
   rpcs?: RPCUrls;
-  controllerAuthSig?: JsonAuthSig;
+  controllerAuthSig?: AuthSig;
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
 
@@ -67,10 +66,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   })();`;
 
   // -- debug things
-  PREFIX = '[PKPBase]';
-  orange = '\x1b[33m';
-  reset = '\x1b[0m';
-  red = '\x1b[31m';
+  private PREFIX = '[PKPBase]';
+  private orange = '\x1b[33m';
+  private reset = '\x1b[0m';
+  private red = '\x1b[31m';
 
   /**
    * Constructor for the PKPBase class.
@@ -82,8 +81,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     if (prop.pkpPubKey.startsWith('0x')) {
       prop.pkpPubKey = prop.pkpPubKey.slice(2);
     }
-    this.pkpPubKey = prop.pkpPubKey;
-    this.log('this.pkpPubKey', this.pkpPubKey);
 
     this.setUncompressPubKeyAndBuffer(prop);
     this.setCompressedPubKeyAndBuffer(prop);
@@ -225,9 +222,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    */
 
   async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
+
+    if (!this.litNodeClientReady) {
+      await this.init();
+    }
+    
     // If no PKP public key is provided, throw error
-    if (!this.pkpPubKey) {
-      throw new Error('pkpPubKey is required');
+    if (!this.uncompressedPubKey) {
+      throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
     // If no authSig or sessionSigs are provided, throw error
@@ -252,7 +254,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     ) {
       authSig = Object.values(
         this.controllerSessionSigs
-      )[0] as unknown as JsonAuthSig;
+      )[0] as unknown as AuthSig;
     }
 
     if (!authSig) {
@@ -267,7 +269,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       jsParams: {
         ...{
           toSign,
-          publicKey: this.pkpPubKey,
+          publicKey: this.uncompressedPubKey,
           sigName,
         },
         ...{

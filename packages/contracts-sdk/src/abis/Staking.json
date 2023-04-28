@@ -29,6 +29,19 @@
       {
         "indexed": false,
         "internalType": "uint256",
+        "name": "newEpochTimeout",
+        "type": "uint256"
+      }
+    ],
+    "name": "EpochTimeoutSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
         "name": "newKickPenaltyPercent",
         "type": "uint256"
       }
@@ -263,6 +276,12 @@
         "internalType": "address",
         "name": "staker",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountBurned",
+        "type": "uint256"
       }
     ],
     "name": "ValidatorKickedFromNextEpoch",
@@ -319,6 +338,37 @@
     "type": "event"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validatorStakerAddress",
+        "type": "address"
+      }
+    ],
+    "name": "adminKickValidatorInNextEpoch",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "validatorStakerAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountToBurn",
+        "type": "uint256"
+      }
+    ],
+    "name": "adminSlashValidator",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "advanceEpoch",
     "outputs": [],
@@ -366,6 +416,11 @@
       {
         "internalType": "uint256",
         "name": "retries",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timeout",
         "type": "uint256"
       }
     ],
@@ -568,6 +623,13 @@
   },
   {
     "inputs": [],
+    "name": "pauseEpoch",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "paused",
     "outputs": [
       {
@@ -691,6 +753,32 @@
       }
     ],
     "name": "setEpochLength",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum Staking.States",
+        "name": "newState",
+        "type": "uint8"
+      }
+    ],
+    "name": "setEpochState",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newEpochTimeout",
+        "type": "uint256"
+      }
+    ],
+    "name": "setEpochTimeout",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

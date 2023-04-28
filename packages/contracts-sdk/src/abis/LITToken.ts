@@ -65,46 +65,83 @@ export interface ContractCallOverrides {
 }
 export type LITTokenEvents =
   | 'Approval'
+  | 'DelegateChanged'
+  | 'DelegateVotesChanged'
+  | 'Paused'
   | 'RoleAdminChanged'
   | 'RoleGranted'
   | 'RoleRevoked'
-  | 'Transfer';
+  | 'Transfer'
+  | 'Unpaused';
 export interface LITTokenEventsContext {
   Approval(...parameters: any): EventFilter;
+  DelegateChanged(...parameters: any): EventFilter;
+  DelegateVotesChanged(...parameters: any): EventFilter;
+  Paused(...parameters: any): EventFilter;
   RoleAdminChanged(...parameters: any): EventFilter;
   RoleGranted(...parameters: any): EventFilter;
   RoleRevoked(...parameters: any): EventFilter;
   Transfer(...parameters: any): EventFilter;
+  Unpaused(...parameters: any): EventFilter;
 }
 export type LITTokenMethodNames =
   | 'new'
   | 'ADMIN_ROLE'
   | 'DEFAULT_ADMIN_ROLE'
+  | 'DOMAIN_SEPARATOR'
   | 'MINTER_ROLE'
+  | 'PAUSER_ROLE'
   | 'allowance'
   | 'approve'
   | 'balanceOf'
   | 'burn'
   | 'burnFrom'
+  | 'cap'
+  | 'checkpoints'
   | 'decimals'
   | 'decreaseAllowance'
+  | 'delegate'
+  | 'delegateBySig'
+  | 'delegates'
+  | 'getPastTotalSupply'
+  | 'getPastVotes'
   | 'getRoleAdmin'
+  | 'getVotes'
   | 'grantRole'
   | 'hasRole'
   | 'increaseAllowance'
   | 'mint'
   | 'name'
+  | 'nonces'
+  | 'numCheckpoints'
+  | 'pause'
+  | 'paused'
+  | 'permit'
   | 'renounceRole'
   | 'revokeRole'
   | 'supportsInterface'
   | 'symbol'
   | 'totalSupply'
   | 'transfer'
-  | 'transferFrom';
+  | 'transferFrom'
+  | 'unpause';
 export interface ApprovalEventEmittedResponse {
   owner: string;
   spender: string;
   value: BigNumberish;
+}
+export interface DelegateChangedEventEmittedResponse {
+  delegator: string;
+  fromDelegate: string;
+  toDelegate: string;
+}
+export interface DelegateVotesChangedEventEmittedResponse {
+  delegate: string;
+  previousBalance: BigNumberish;
+  newBalance: BigNumberish;
+}
+export interface PausedEventEmittedResponse {
+  account: string;
 }
 export interface RoleAdminChangedEventEmittedResponse {
   role: Arrayish;
@@ -126,14 +163,27 @@ export interface TransferEventEmittedResponse {
   to: string;
   value: BigNumberish;
 }
+export interface UnpausedEventEmittedResponse {
+  account: string;
+}
+export interface CheckpointResponse {
+  fromBlock: number;
+  0: number;
+  votes: BigNumber;
+  1: BigNumber;
+}
 export interface LITToken {
   /**
    * Payable: false
    * Constant: false
    * StateMutability: nonpayable
    * Type: constructor
+   * @param cap Type: uint256, Indexed: false
    */
-  'new'(overrides?: ContractTransactionOverrides): Promise<ContractTransaction & TransactionRequest>;
+  'new'(
+    cap: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: true
@@ -154,7 +204,21 @@ export interface LITToken {
    * StateMutability: view
    * Type: function
    */
+  DOMAIN_SEPARATOR(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
   MINTER_ROLE(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  PAUSER_ROLE(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: true
@@ -222,6 +286,26 @@ export interface LITToken {
    * StateMutability: view
    * Type: function
    */
+  cap(overrides?: ContractCallOverrides): Promise<BigNumber>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param account Type: address, Indexed: false
+   * @param pos Type: uint32, Indexed: false
+   */
+  checkpoints(
+    account: string,
+    pos: BigNumberish,
+    overrides?: ContractCallOverrides
+  ): Promise<CheckpointResponse>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
   decimals(overrides?: ContractCallOverrides): Promise<number>;
   /**
    * Payable: false
@@ -238,6 +322,73 @@ export interface LITToken {
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param delegatee Type: address, Indexed: false
+   */
+  delegate(
+    delegatee: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param delegatee Type: address, Indexed: false
+   * @param nonce Type: uint256, Indexed: false
+   * @param expiry Type: uint256, Indexed: false
+   * @param v Type: uint8, Indexed: false
+   * @param r Type: bytes32, Indexed: false
+   * @param s Type: bytes32, Indexed: false
+   */
+  delegateBySig(
+    delegatee: string,
+    nonce: BigNumberish,
+    expiry: BigNumberish,
+    v: BigNumberish,
+    r: Arrayish,
+    s: Arrayish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param account Type: address, Indexed: false
+   */
+  delegates(
+    account: string,
+    overrides?: ContractCallOverrides
+  ): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param blockNumber Type: uint256, Indexed: false
+   */
+  getPastTotalSupply(
+    blockNumber: BigNumberish,
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param account Type: address, Indexed: false
+   * @param blockNumber Type: uint256, Indexed: false
+   */
+  getPastVotes(
+    account: string,
+    blockNumber: BigNumberish,
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
+  /**
+   * Payable: false
    * Constant: true
    * StateMutability: view
    * Type: function
@@ -247,6 +398,17 @@ export interface LITToken {
     role: Arrayish,
     overrides?: ContractCallOverrides
   ): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param account Type: address, Indexed: false
+   */
+  getVotes(
+    account: string,
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
   /**
    * Payable: false
    * Constant: false
@@ -306,6 +468,62 @@ export interface LITToken {
    * Type: function
    */
   name(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param owner Type: address, Indexed: false
+   */
+  nonces(owner: string, overrides?: ContractCallOverrides): Promise<BigNumber>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param account Type: address, Indexed: false
+   */
+  numCheckpoints(
+    account: string,
+    overrides?: ContractCallOverrides
+  ): Promise<number>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   */
+  pause(overrides?: ContractTransactionOverrides): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  paused(overrides?: ContractCallOverrides): Promise<boolean>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param owner Type: address, Indexed: false
+   * @param spender Type: address, Indexed: false
+   * @param value Type: uint256, Indexed: false
+   * @param deadline Type: uint256, Indexed: false
+   * @param v Type: uint8, Indexed: false
+   * @param r Type: bytes32, Indexed: false
+   * @param s Type: bytes32, Indexed: false
+   */
+  permit(
+    owner: string,
+    spender: string,
+    value: BigNumberish,
+    deadline: BigNumberish,
+    v: BigNumberish,
+    r: Arrayish,
+    s: Arrayish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -383,6 +601,15 @@ export interface LITToken {
     from: string,
     to: string,
     amount: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   */
+  unpause(
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
 }

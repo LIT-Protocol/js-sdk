@@ -4,18 +4,20 @@
   },
   "MNEUMONIC": "island arrow object divide umbrella snap essay seminar top develop oyster success",
   "COSMOS_RPC": "https://cosmos-mainnet-rpc.allthatnode.com:26657",
-  "MUMBAI_RPC": "https://rpc-mumbai.maticvigil.com",
+  "CHRONICLE_RPC": "https://lit-protocol.calderachain.xyz/http",
+  "CHRONICLE_RPC_2": "https://chain-rpc.litprotocol.com/http",
   "RECIPIENT": "cosmos1jyz3m6gxuwceq63e44fqpgyw2504ux85ta8vma",
   "DENOM": "uatom",
   "AMOUNT": 1,
   "DEFAULT_GAS": 0.025,
   "CONTROLLER_AUTHSIG": {
-    "sig": "0x7dadeec2ed2db9b17e32c858724a9cf718470568f40035b6d72d15ddf99375f139aa67298dbc9f06c5aa2296d6db95b2e976b005fae463c7ee982e341bf0b1861c",
+    "sig": "0x39b1802058a64809c3aaa1f08c3bd7c92471e4009412aa820ee5bfa04ad383b17415c5ab9cb706002349e3294ea7326c2a298e8ea6d93724af065e22bb8b18e71c",
     "derivedVia": "web3.eth.personal.sign",
-    "signedMessage": "localhost:4003 wants you to sign in with your Ethereum account:\n0x18f987D15a973776f6a60652B838688a1833fE95\n\n\nURI: http://localhost:4003/\nVersion: 1\nChain ID: 1\nNonce: o0ihUgFpC5RaAFQGf\nIssued At: 2023-03-29T17:37:59.343Z\nExpiration Time: 2297-01-10T17:37:40.600Z",
+    "signedMessage": "localhost:4003 wants you to sign in with your Ethereum account:\n0x18f987D15a973776f6a60652B838688a1833fE95\n\n\nURI: http://localhost:4003/\nVersion: 1\nChain ID: 1\nNonce: kjxEJP3HOjOQGEbFh\nIssued At: 2023-04-24T15:57:10.501Z\nExpiration Time: 2050-09-08T15:57:03.843Z",
     "address": "0x18f987d15a973776f6a60652b838688a1833fe95"
   },
-  "PKP_PUBKEY": "0x04cd5fc4b661a2ae2dc425aa42abbfeaa187c07063928322a8c748ebb7611868144c0ff28b1910faeafedea914ec8a23baa579b6ff7f03efa322e7eb098e62dd8f",
-  "PKP_ADDRESS": "0xf675E8Cdc5DbE5f78a47D23A3b1CCD07b986f17f",
-  "PKP_COSMOS_ADDRESS": "cosmos134y3t6v0cfftzk4zhtzynqyyzj7dwwcz9chs0q"
+  "PKP_PUBKEY": "0x04b87bd8acec9ab9bfeae501326b65e6b29bb7958c269170194f7e4c1678370797a51478b13a67d7b55b073736c2902ac4c8b84c3e085b8a325c4c5758dd4d6190",
+  "PKP_ETH_ADDRESS": "0x665B08C53e81a83bFB985FBab89f389C4D17E5c7",
+  "PKP_COSMOS_ADDRESS": "cosmos1t8ulejfc4p5k493aslnplqvk665uldgnzls0s8",
+  "HEX_TEST_MEMO": "0x4a532d53444b2054657374"
 }
