@@ -1,12 +1,12 @@
 #!/bin/bash
 
-yarn build:packages
+# yarn build:packages
 
 packages=(
+  "constants"
   "lit-node-client"
+  "lit-auth-client"
   "types"
-  "pkp-cosmos"
-  "pkp-ethers"
 )
 
 # then in your project, do `npm link @lit-protocol/lit-node-client`
