@@ -1,3 +1,6 @@
+// This is not used anymore locally but still can be used if you want 
+// to run the tx-handler-server locally instead of using the one in the cloud
+// 'https://lit-general-worker.herokuapp.com/';
 import express from 'express';
 import bodyParser from 'body-parser';
 import request from 'supertest';
