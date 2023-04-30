@@ -304,7 +304,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     try {
       const res = await executeWithRetries(
         async () => await this.litNodeClient.executeJs(executeJsArgs),
-        3
+        5
       );
 
       const sig = res.signatures[sigName];
