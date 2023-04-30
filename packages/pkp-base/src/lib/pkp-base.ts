@@ -213,11 +213,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    */
 
   async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
-
     // if (!this.litNodeClientReady) {
     //   await this.init();
     // }
-    
+
     // If no PKP public key is provided, throw error
     if (!this.uncompressedPubKey) {
       throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
@@ -276,8 +275,37 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.log('executeJsArgs:', executeJsArgs);
 
+    async function executeWithRetries<T>(
+      operation: () => Promise<T>,
+      maxAttempts: number
+    ): Promise<T> {
+      let attempts = 0;
+
+      while (attempts < maxAttempts) {
+        try {
+          return await operation();
+        } catch (err: any) {
+          console.log(`Attempt ${attempts + 1} failed with error:`, err);
+          attempts++;
+          if (attempts === maxAttempts) {
+            throw new Error(
+              `Operation failed after ${maxAttempts} attempts: ${err.message}`
+            );
+          }
+        }
+      }
+
+      // Add this return statement with a never type
+      return (() => {
+        throw new Error('This code should never be reached');
+      })() as never;
+    }
+
     try {
-      const res = await this.litNodeClient.executeJs(executeJsArgs);
+      const res = await executeWithRetries(
+        async () => await this.litNodeClient.executeJs(executeJsArgs),
+        3
+      );
 
       const sig = res.signatures[sigName];
 

@@ -6,9 +6,8 @@
 import { PKPCosmosWallet } from '@lit-protocol/pkp-cosmos';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { PKPClient } from './pkp-client';
-
 import * as LITCONFIG from 'lit.config.json';
-
+import { processTx } from '../../../../tx-handler';
 import {
   ETHSignature,
   ETHTxRes,
@@ -21,14 +20,16 @@ import {
   StdFee,
 } from '@cosmjs/stargate';
 
-jest.setTimeout(60000);
+jest.setTimeout(120000);
+
+const PKP_PUBKEY = LITCONFIG.PKP_PUBKEY;
+const PKP_ETH_ADDRESS = LITCONFIG.PKP_ETH_ADDRESS;
 
 describe('PKPClient', () => {
   const pkpClient = new PKPClient({
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-    pkpPubKey: LITCONFIG.PKP_PUBKEY,
+    pkpPubKey: PKP_PUBKEY,
     cosmosAddressPrefix: 'cosmos',
-    // debug: true,
   });
 
   beforeAll(async () => {
@@ -36,27 +37,31 @@ describe('PKPClient', () => {
   });
 
   describe('without rpc', () => {
-    // describe('eth', () => {
-    //   it('should sign a message', async () => {
-    //     const MESSAGE_TO_SIGN = 'HEY THERE!';
+    describe('eth', () => {
+      it('should sign a message', async () => {
+        const MESSAGE_TO_SIGN = 'HEY THERE!';
 
-    //     const signature = await pkpClient
-    //       .getEthWallet()
-    //       .signMessage(MESSAGE_TO_SIGN);
+        const signature = processTx(
+          expect.getState().currentTestName,
+          await pkpClient.getEthWallet().signMessage(MESSAGE_TO_SIGN)
+        );
 
-    //     expect(signature).toBeDefined();
-    //   });
+        expect(signature).toBeDefined();
+      });
 
-    //   it('should sign a transaction', async () => {
-    //     const txRes: string = await pkpClient.getEthWallet().signTransaction({
-    //       to: LITCONFIG.PKP_ETH_ADDRESS,
-    //       value: 0,
-    //       data: '0x',
-    //     });
+      it('should sign a transaction', async () => {
+        const txRes: string = await processTx(
+          expect.getState().currentTestName,
+          await pkpClient.getEthWallet().signTransaction({
+            to: PKP_ETH_ADDRESS,
+            value: 0,
+            data: '0x',
+          })
+        );
 
-    //     expect(txRes).toBeDefined();
-    //   });
-    // });
+        expect(txRes).toBeDefined();
+      });
+    });
 
     describe('cosmos', () => {
       it('[TODO] should sign a message', async () => {
@@ -91,15 +96,12 @@ describe('PKPClient', () => {
 
   describe('with rpc', () => {
     let pkpClient: PKPClient;
+    let initResult: any;
 
-    it('should be defined', () => {
-      expect(PKPClient).toBeDefined();
-    });
-
-    it('should instantiate a pkp client', async () => {
+    beforeAll(async () => {
       pkpClient = new PKPClient({
         controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-        pkpPubKey: LITCONFIG.PKP_PUBKEY,
+        pkpPubKey: PKP_PUBKEY,
         rpcs: {
           eth: LITCONFIG.CHRONICLE_RPC,
           cosmos: LITCONFIG.COSMOS_RPC,
@@ -107,20 +109,26 @@ describe('PKPClient', () => {
         cosmosAddressPrefix: 'cosmos',
       });
 
+      initResult = await pkpClient.connect();
+    });
+
+    it('should be defined', () => {
+      expect(PKPClient).toBeDefined();
+    });
+
+    it('should instantiate a pkp client', async () => {
       expect(pkpClient).toBeDefined();
     });
 
     describe('init', () => {
       it('should return the overall readiness status and an array of the initialization status for each wallet', async () => {
-        const initResult = await pkpClient.connect();
-
         expect(initResult).toHaveProperty('ready');
         expect(typeof initResult.ready === 'boolean').toBeTruthy();
 
         expect(initResult).toHaveProperty('res');
         expect(Array.isArray(initResult.res)).toBeTruthy();
 
-        initResult.res.forEach((status) => {
+        initResult.res.forEach((status: any) => {
           expect(status).toHaveProperty('chain');
           expect(typeof status.chain === 'string').toBeTruthy();
 
@@ -130,8 +138,6 @@ describe('PKPClient', () => {
       });
 
       it('should be ready after init', async () => {
-        const initResult = await pkpClient.connect();
-
         expect(initResult.ready).toBe(true);
       });
 
@@ -184,24 +190,20 @@ describe('PKPClient', () => {
     });
 
     describe('[ETH] wallet', () => {
-      describe('', () => {
-        it('should get eth address using getWallet("eth")', async () => {
-          const etherWallet = pkpClient.getWallet<PKPEthersWallet>('eth');
+      it('should get eth address using getWallet("eth")', async () => {
+        const etherWallet = pkpClient.getWallet<PKPEthersWallet>('eth');
 
-          const etherAddress = await etherWallet.getAddress();
+        const etherAddress = await etherWallet.getAddress();
 
-          expect(etherAddress).toEqual(LITCONFIG.PKP_ETH_ADDRESS);
-        });
+        expect(etherAddress).toEqual(PKP_ETH_ADDRESS);
       });
 
-      describe('', () => {
-        it('should get eth address using getEthWallet()', async () => {
-          const etherWallet = pkpClient.getEthWallet();
+      it('should get eth address using getEthWallet()', async () => {
+        const etherWallet = pkpClient.getEthWallet();
 
-          const etherAddress = await etherWallet.getAddress();
+        const etherAddress = await etherWallet.getAddress();
 
-          expect(etherAddress).toEqual(LITCONFIG.PKP_ETH_ADDRESS);
-        });
+        expect(etherAddress).toEqual(PKP_ETH_ADDRESS);
       });
 
       describe('update config', () => {
@@ -209,102 +211,81 @@ describe('PKPClient', () => {
           // update the rpc
           const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
 
-          describe('', () => {
-            it('should be able to update rpc url', async () => {
-              const etherWallet = pkpClient.getEthWallet();
+          it('should be able to update rpc url', async () => {
+            const etherWallet = pkpClient.getEthWallet();
 
-              const oldRpc = etherWallet.getRpc();
+            const oldRpc = etherWallet.getRpc();
 
-              expect(oldRpc).toEqual(LITCONFIG.CHRONICLE_RPC);
+            expect(oldRpc).toEqual(LITCONFIG.CHRONICLE_RPC);
 
-              await etherWallet.setRpc(newRpcUrl);
+            await etherWallet.setRpc(newRpcUrl);
 
-              const newRpc = etherWallet.getRpc();
+            const newRpc = etherWallet.getRpc();
 
-              expect(newRpc).toEqual(newRpcUrl);
-            });
+            expect(newRpc).toEqual(newRpcUrl);
           });
 
-          describe('', () => {
-            it('should be able to use updated rpc url to sign a message', async () => {
-              const etherWallet = pkpClient.getEthWallet();
+          it('should be able to use updated rpc url to sign a message', async () => {
+            const etherWallet = pkpClient.getEthWallet();
 
-              await etherWallet.setRpc(newRpcUrl);
+            await etherWallet.setRpc(newRpcUrl);
 
-              const signedMessage = await etherWallet.signMessage(
-                'Hello world from litentry'
-              );
+            let signedMessage = await processTx(
+              expect.getState().currentTestName,
+              await etherWallet.signMessage('Hello world from litentry')
+            );
 
-              expect(signedMessage).toBeDefined();
-            });
+            expect(signedMessage).toBeDefined();
           });
-          describe('', () => {
-            it('should be able to use updated rpc url to sign a transaction', async () => {
-              const pkpClient = new PKPClient({
-                controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-                pkpPubKey: LITCONFIG.PKP_PUBKEY,
-                cosmosAddressPrefix: 'cosmos',
-              });
+          it('should be able to use updated rpc url to sign a transaction', async () => {
+            const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
 
-              await pkpClient.connect();
+            const etherWallet = pkpClient.getEthWallet();
 
-              const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
+            await etherWallet.setRpc(newRpcUrl);
 
-              const etherWallet = pkpClient.getEthWallet();
-
-              await etherWallet.setRpc(newRpcUrl);
-
-              const signedTx = await etherWallet.handleRequest<ETHSignature>({
+            const signedTx = await processTx(
+              expect.getState().currentTestName,
+              await etherWallet.handleRequest<ETHSignature>({
                 method: 'eth_signTransaction',
                 params: [
                   {
-                    from: LITCONFIG.PKP_ETH_ADDRESS,
-                    to: LITCONFIG.PKP_ETH_ADDRESS,
+                    from: PKP_ETH_ADDRESS,
+                    to: PKP_ETH_ADDRESS,
                     data: LITCONFIG.HEX_TEST_MEMO, // "JK-SDK Test"
                   },
                 ],
-              });
-              expect(signedTx).toBeDefined();
-            });
+              })
+            );
+            expect(signedTx).toBeDefined();
           });
 
-          describe('', () => {
-            it('should be able to use updated rpc url to sign & send a transaction', async () => {
-              const pkpClient = new PKPClient({
-                controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-                pkpPubKey: LITCONFIG.PKP_PUBKEY,
-                cosmosAddressPrefix: 'cosmos',
-                rpc: LITCONFIG.CHRONICLE_RPC,
-                // debug: true,
-              });
+          it('should be able to use updated rpc url to sign & send a transaction', async () => {
+            const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
 
-              await pkpClient.connect();
-              const newRpcUrl = LITCONFIG.CHRONICLE_RPC;
+            const etherWallet = pkpClient.getEthWallet();
 
-              const etherWallet = pkpClient.getEthWallet();
+            await etherWallet.setRpc(newRpcUrl);
 
-              await etherWallet.setRpc(newRpcUrl);
-
-              // str to hex
-              let tx: ETHTxRes = await etherWallet.handleRequest<ETHTxRes>({
-                method: 'eth_sendTransaction',
-                params: [
-                  {
-                    from: LITCONFIG.PKP_ETH_ADDRESS,
-                    to: LITCONFIG.PKP_ETH_ADDRESS,
-                    data:
-                      '0x' +
-                      Buffer.from(
-                        'should be able to use updated rpc url to sign & send a transaction'
-                      ).toString('hex'),
-                  },
-                ],
-              });
-
-              tx = await (tx as any).wait();
-
-              expect(tx).toBeDefined();
+            // str to hex
+            let tx: ETHTxRes = await etherWallet.handleRequest<ETHTxRes>({
+              method: 'eth_sendTransaction',
+              params: [
+                {
+                  from: PKP_ETH_ADDRESS,
+                  to: PKP_ETH_ADDRESS,
+                  data:
+                    '0x' +
+                    Buffer.from(
+                      'should be able to use updated rpc url to sign & send a transaction'
+                    ).toString('hex'),
+                },
+              ],
             });
+
+            tx = await (tx as any).wait();
+
+            expect(tx).toBeDefined();
           });
 
           // if (LITCONFIG.test.sendRealTxThatCostsMoney) {
@@ -314,27 +295,19 @@ describe('PKPClient', () => {
 
       describe('handle requests', () => {
         it('should be able to eth_signTransaction', async () => {
-          const pkpClient = new PKPClient({
-            controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-            pkpPubKey: LITCONFIG.PKP_PUBKEY,
-            cosmosAddressPrefix: 'cosmos',
-            rpc: LITCONFIG.CHRONICLE_RPC,
-            // debug: true,
-          });
-
-          await pkpClient.connect();
-
           const etherWallet = pkpClient.getEthWallet();
-
-          const signedTx = await etherWallet.handleRequest({
-            method: 'eth_signTransaction',
-            params: [
-              {
-                from: LITCONFIG.PKP_ETH_ADDRESS,
-                to: LITCONFIG.PKP_ETH_ADDRESS,
-              },
-            ],
-          });
+          const signedTx = await processTx(
+            expect.getState().currentTestName,
+            await etherWallet.handleRequest({
+              method: 'eth_signTransaction',
+              params: [
+                {
+                  from: PKP_ETH_ADDRESS,
+                  to: PKP_ETH_ADDRESS,
+                },
+              ],
+            })
+          );
 
           expect(signedTx).toBeDefined();
         });
@@ -383,14 +356,6 @@ describe('PKPClient', () => {
         });
 
         it('should be able to sendTokens', async () => {
-          const pkpClient = new PKPClient({
-            controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-            pkpPubKey: LITCONFIG.PKP_PUBKEY,
-            cosmosAddressPrefix: 'cosmos',
-          });
-
-          await pkpClient.connect();
-
           const defaultGasPrice = GasPrice.fromString(
             `${LITCONFIG.DEFAULT_GAS}${LITCONFIG.DENOM}`
           );

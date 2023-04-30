@@ -3,7 +3,7 @@
   "version": 2,
   "projects": {
     "pkp-ethers": "packages/pkp-ethers",
-    "pkp-client": "packages/pkp-client",
+
     "ecdsa-sdk": "packages/ecdsa-sdk",
 
     "pkp-base": "packages/pkp-base",
@@ -32,6 +32,7 @@
 
     "react": "apps/react",
     "types": "packages/types",
-    "uint8arrays": "packages/uint8arrays"
+    "uint8arrays": "packages/uint8arrays",
+    "pkp-client": "packages/pkp-client"
   }
 }
