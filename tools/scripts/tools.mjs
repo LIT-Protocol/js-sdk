@@ -250,15 +250,22 @@ async function testFunc() {
   }
 
   if (TEST_TYPE === '--unit') {
-    // spawnCommand('yarn', ['nx', 'run-many', '--target=test']);
-    // await childRunCommand('yarn nx run-many --target=test');
-    // redLog(
-    //   `
-    //       To take advantage of nx colorful console messages, please run the following command to run unit tests:
-    //       yarn nx run-many --target=test
-    //   `,
-    //   true
-    // );
+    // start the server if it's not running
+    const startServer = () => {
+      const serverProcess = spawn('yarn', ['txServer']);
+
+      serverProcess.on('close', (code) => {
+        console.log(`Server process exited with code ${code}`);
+      });
+
+      return serverProcess;
+    };
+
+    const serverProcess = startServer();
+
+    const stopServer = (serverProcess) => {
+      serverProcess.kill('SIGTERM');
+    };
 
     // Read the workspace configuration file
     const workspaceConfig = JSON.parse(
@@ -296,6 +303,7 @@ async function testFunc() {
     // Handle exit
     nx.on('exit', (code) => {
       console.log(`Child process exited with code ${code}`);
+      stopServer(serverProcess);
       process.exit();
     });
   }
