@@ -1,5 +1,4 @@
 import { LitNodeClient } from './lit-node-client';
-import { hashResourceIdForSigning } from '@lit-protocol/access-control-conditions';
 import * as LITCONFIG from 'lit.config.json';
 import { processTx } from '../../../../tx-handler';
 let client: LitNodeClient;
@@ -38,17 +37,20 @@ describe('Lit Actions', () => {
   });
 
   it('lit action response should return json {hello: "world"}', async () => {
-    const res = await client.executeJs({
-      authSig: LITCONFIG.CONTROLLER_AUTHSIG,
-      code: `(async () => {
-          LitActions.setResponse({
-            response: JSON.stringify({hello: 'world'})
-          });
-        })();`,
-      jsParams: {
-        publicKey: LITCONFIG.PKP_PUBKEY,
-      },
-    });
+    const res = await processTx(
+      expect.getState().currentTestName,
+      await client.executeJs({
+        authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+        code: `(async () => {
+            LitActions.setResponse({
+              response: JSON.stringify({hello: 'world'})
+            });
+          })();`,
+        jsParams: {
+          publicKey: LITCONFIG.PKP_PUBKEY,
+        },
+      })
+    );
 
     expect(res.response).toEqual({ hello: 'world' });
   });

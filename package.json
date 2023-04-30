@@ -51,7 +51,7 @@
     "bump:minor": "yarn tools --v --minor",
     "bump:major": "yarn tools --v --major",
     "b": "git branch --show",
-    "txServer": "node tx-handler-express-config.mjs"
+    "txServer": "node tx-handler-server.mjs"
   },
   "private": true,
   "dependencies": {

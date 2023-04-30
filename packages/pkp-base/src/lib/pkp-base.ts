@@ -213,9 +213,9 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    */
 
   async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
-    // if (!this.litNodeClientReady) {
-    //   await this.init();
-    // }
+    if (!this.litNodeClientReady) {
+      await this.init();
+    }
 
     // If no PKP public key is provided, throw error
     if (!this.uncompressedPubKey) {

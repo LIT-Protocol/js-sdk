@@ -34,7 +34,6 @@ async function processRequest(data) {
 
 // API endpoint
 txHandler.post('/process', (req, res) => {
-  console.log('Tasks queue: ' + queue.length);
   console.log('-----');
   console.log('Start: ' + req.body.data);
 
@@ -53,7 +52,7 @@ txHandler.get('/wait-until-empty', async (req, res) => {
         clearInterval(interval);
         resolve();
       }
-    }, 1000);
+    }, 2000);
   });
 
   console.log('queue is empty');
@@ -110,4 +109,4 @@ export {
 };
 
 // run the server at port 3031
-txHandler.listen(3031, () => console.log('Listening on port 3031'));
+txHandler.listen(3031, () => console.log('Tx handling server listening on port 3031'));
