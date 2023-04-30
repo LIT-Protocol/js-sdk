@@ -250,22 +250,23 @@ async function testFunc() {
   }
 
   if (TEST_TYPE === '--unit') {
+
     // start the server if it's not running
-    const startServer = () => {
-      const serverProcess = spawn('yarn', ['txServer']);
+    // const startServer = () => {
+    //   const serverProcess = spawn('yarn', ['txServer']);
 
-      serverProcess.on('close', (code) => {
-        console.log(`Server process exited with code ${code}`);
-      });
+    //   serverProcess.on('close', (code) => {
+    //     console.log(`Server process exited with code ${code}`);
+    //   });
 
-      return serverProcess;
-    };
+    //   return serverProcess;
+    // };
 
-    const serverProcess = startServer();
+    // const serverProcess = startServer();
 
-    const stopServer = (serverProcess) => {
-      serverProcess.kill('SIGTERM');
-    };
+    // const stopServer = (serverProcess) => {
+    //   serverProcess.kill('SIGTERM');
+    // };
 
     // Read the workspace configuration file
     const workspaceConfig = JSON.parse(
@@ -303,7 +304,7 @@ async function testFunc() {
     // Handle exit
     nx.on('exit', (code) => {
       console.log(`Child process exited with code ${code}`);
-      stopServer(serverProcess);
+      // stopServer(serverProcess);
       process.exit();
     });
   }

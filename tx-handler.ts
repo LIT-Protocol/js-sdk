@@ -1,4 +1,4 @@
-const ENDPOINT = 'http://localhost:3031/';
+const ENDPOINT = 'https://lit-general-worker.herokuapp.com/';
 
 // check if endpoint is up
 export const checkEndpoint = async () => {
