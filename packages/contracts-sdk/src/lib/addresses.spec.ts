@@ -14,5 +14,11 @@ describe('addresses', () => {
     expect(addresses[0].btcAddress).toEqual(
       '1AKxaxe5d1ANRV5h2nvTKzSPQTPftXXDqD'
     );
+    expect(addresses[0].ethAddress).toEqual(
+      '0x9C92d8d8A007289cf906A7945Fcf91c07f4680CB'
+    );
+    expect(addresses[0].cosmosAddress).toEqual(
+      'cosmos1rldaen0j5mde2v526sg8qeq4vgmj6k3ju2eq3y'
+    );
   });
 });

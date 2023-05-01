@@ -2,7 +2,10 @@ import * as bitcoinjs from 'bitcoinjs-lib';
 import { Contract, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
 import { pkpNft } from '../abis/PKPNFT.data';
+import { toBech32 } from '@cosmjs/encoding';
+import { Secp256k1 } from '@cosmjs/crypto';
 
+import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 export type TokenInfo = {
   tokenId: string;
   publicKey: string;
@@ -145,17 +148,10 @@ export const addresses = async ({
   // PubKeySecp256k1	tendermint/PubKeySecp256k1	0xEB5AE987	0x21
   // https://github.com/tendermint/tendermint/blob/d419fffe18531317c28c29a292ad7d253f6cafdf/docs/spec/blockchain/encoding.md#public-key-cryptography
   function getCosmosAddress(pubkeyBuffer: Buffer) {
-    const hash = bitcoinjs.crypto.sha256(pubkeyBuffer);
-    const ripemd160 = bitcoinjs.crypto.ripemd160(hash);
-
-    // first apply the Amino encoding process
-    const aminoPrefix = Buffer.from('eb5ae987', 'hex');
-    const aminoBuffer = Buffer.concat([aminoPrefix, ripemd160]);
-
-    // then bech32 encode the result
-    const cosmosAddress = bitcoinjs.address.toBech32(aminoBuffer, 0, 'cosmos');
-
-    return cosmosAddress;
+    return toBech32(
+      'cosmos',
+      rawSecp256k1PubkeyToRawAddress(Secp256k1.compressPubkey(pubkeyBuffer))
+    );
   }
 
   // get cosmos address from the public key
