@@ -383,7 +383,7 @@ export interface JsonSaveEncryptionKeyRequest {
   permanant?: number;
   permanent?: number;
 
-  sessionSigs?: object;
+  sessionSigs?: SessionSigsMap;
 }
 
 export interface SignConditionECDSA {
@@ -805,6 +805,14 @@ export interface AuthCallback {
   (params: AuthCallbackParams): Promise<AuthSig>;
 }
 
+/**
+ * A map of node addresses to the session signature payload
+ * for that node specifically.
+ */
+export interface SessionSigsMap {
+  [nodeAddress: string]: SessionSig;
+}
+
 export interface SessionSig {
   sig: string;
   derivedVia: string;
@@ -836,6 +844,7 @@ export interface SessionSigningTemplate {
   capabilities: any[];
   issuedAt: string;
   expiration: string;
+  nodeAddress: string;
 }
 
 export interface WebAuthnAuthenticationVerificationParams {
