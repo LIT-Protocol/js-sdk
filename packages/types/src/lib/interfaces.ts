@@ -734,7 +734,7 @@ export interface AuthMethod {
 // }
 export interface SignSessionKeyProp {
   // The session key to sign
-  sessionKey?: string;
+  sessionKey?: SessionKeyPair;
 
   // The auth methods to use to sign the session key
   authMethods: AuthMethod[];

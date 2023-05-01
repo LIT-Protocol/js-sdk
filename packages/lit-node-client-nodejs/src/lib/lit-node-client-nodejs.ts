@@ -23,6 +23,7 @@ import {
   AUTH_METHOD_TYPE_IDS,
   LIT_ERROR_CODE,
   LitErrorKind,
+  EITHER_TYPE,
 } from '@lit-protocol/constants';
 
 import {
@@ -292,48 +293,35 @@ export class LitNodeClientNodeJs {
    *
    * Try to get the session key in the local storage,
    * if not, generates one.
-   * @param { string } supposedSessionKey
-   * @return { }
+   * @return { SessionKeyPair } session key pair
    */
-  getSessionKey = (supposedSessionKey?: string): SessionKeyPair => {
-    let sessionKey: any = supposedSessionKey ?? '';
-
+  getSessionKey = (): SessionKeyPair => {
     const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
     const storedSessionKeyOrError = getStorageItem(storageKey);
 
-    if (sessionKey === '') {
-      // check if we already have a session key + signature for this chain
-      // let storedSessionKey;
-      let storedSessionKey: any;
+    if (
+      storedSessionKeyOrError.type === EITHER_TYPE.ERROR ||
+      !storedSessionKeyOrError.result ||
+      storedSessionKeyOrError.result === ''
+    ) {
+      console.warn(
+        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+      );
 
-      // -- (TRY) to get it in the local storage
-      if (storedSessionKeyOrError.type === 'ERROR') {
-        console.warn(
-          `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
-        );
-      } else {
-        storedSessionKey = storedSessionKeyOrError.result;
+      // Generate new one
+      const newSessionKey = generateSessionKeyPair();
+
+      // (TRY) to set to local storage
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
+      } catch (e) {
+        console.warn(`Localstorage not available. Not a problem. Contiune...`);
       }
 
-      // -- IF NOT: Generates one
-      if (!storedSessionKey || storedSessionKey == '') {
-        sessionKey = generateSessionKeyPair();
-
-        // (TRY) to set to local storage
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(sessionKey));
-        } catch (e) {
-          console.warn(
-            `Localstorage not available. Not a problem. Contiune...`
-          );
-        }
-      } else {
-        log('storedSessionKeyOrError');
-        sessionKey = JSON.parse(storedSessionKeyOrError.result);
-      }
+      return newSessionKey;
+    } else {
+      return JSON.parse(storedSessionKeyOrError.result);
     }
-
-    return sessionKey as SessionKeyPair;
   };
 
   /**
@@ -379,16 +367,15 @@ export class LitNodeClientNodeJs {
     const storedWalletSigOrError = getStorageItem(storageKey);
 
     // -- (TRY) to get it in the local storage
-    if (storedWalletSigOrError.type === 'ERROR') {
+    // -- IF NOT: Generates one
+    if (
+      storedWalletSigOrError.type === EITHER_TYPE.ERROR ||
+      !storedWalletSigOrError.result ||
+      storedWalletSigOrError.result == ''
+    ) {
       console.warn(
         `Storage key "${storageKey}" is missing. Not a problem. Continue...`
       );
-    } else {
-      walletSig = storedWalletSigOrError.result;
-    }
-
-    // -- IF NOT: Generates one
-    if (!storedWalletSigOrError.result || storedWalletSigOrError.result == '') {
       if (authNeededCallback) {
         walletSig = await authNeededCallback({
           chain,
@@ -2401,7 +2388,7 @@ export class LitNodeClientNodeJs {
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     // Try to get it from local storage, if not generates one~
-    let sessionKey = this.getSessionKey(params.sessionKey);
+    let sessionKey = params.sessionKey ?? this.getSessionKey();
     let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
@@ -2530,7 +2517,7 @@ export class LitNodeClientNodeJs {
   getSessionSigs = async (params: GetSessionSigsProps) => {
     // -- prepare
     // Try to get it from local storage, if not generates one~
-    let sessionKey = this.getSessionKey(params.sessionKey);
+    let sessionKey = params.sessionKey ?? this.getSessionKey();
 
     let sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
 
