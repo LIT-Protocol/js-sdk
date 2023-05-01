@@ -23,6 +23,7 @@ import {
   AUTH_METHOD_TYPE_IDS,
   LIT_ERROR_CODE,
   LitErrorKind,
+  EITHER_TYPE,
 } from '@lit-protocol/constants';
 
 import {
@@ -291,76 +292,35 @@ export class LitNodeClientNodeJs {
   /**
    * Try to get the session key in the local storage,
    * if not, generates one.
-   *
-   * @param {string} [serializedSessionKeyPair] - Serialized session key pair
-   * @return {SessionKeyPair} - Session key pair
+   * @return { SessionKeyPair } session key pair
    */
-  getSessionKey = (serializedSessionKeyPair?: string): SessionKeyPair => {
-    // If a session key pair is provided, parse it and return it
-    if (serializedSessionKeyPair) {
-      try {
-        const keyPair = JSON.parse(serializedSessionKeyPair);
-        if (this.isSessionKeyPair(keyPair)) {
-          return keyPair;
-        } else {
-          return throwError({
-            message: 'Invalid session key pair provided',
-            error: LIT_ERROR.PARAMS_MISSING_ERROR,
-          });
-        }
-      } catch (err) {
-        log(
-          `Error when parsing provided session keypair ${serializedSessionKeyPair}: ${err}`
-        );
-        throw err;
-      }
-    }
-
-    // If no session key pair is provided, try to get it from the local storage
+  getSessionKey = (): SessionKeyPair => {
     const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
     const storedSessionKeyOrError = getStorageItem(storageKey);
 
-    // Check for errors
-    if (storedSessionKeyOrError.type === 'ERROR') {
+    if (
+      storedSessionKeyOrError.type === EITHER_TYPE.ERROR ||
+      !storedSessionKeyOrError.result ||
+      storedSessionKeyOrError.result === ''
+    ) {
       console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
+        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
       );
-    } else {
-      // If no errors, get the stored session key
-      const storedSessionKey = storedSessionKeyOrError.result;
-      if (storedSessionKey) {
-        try {
-          const keyPair = JSON.parse(storedSessionKey);
-          if (this.isSessionKeyPair(keyPair)) {
-            return keyPair;
-          } else {
-            throw new Error('Invalid session key pair stored');
-          }
-        } catch (err) {
-          log(
-            `Error when parsing stored session keypair ${storedSessionKey}. Continuing to generate a new one...`
-          );
-        }
+
+      // Generate new one
+      const newSessionKey = generateSessionKeyPair();
+
+      // (TRY) to set to local storage
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
+      } catch (e) {
+        console.warn(`Localstorage not available. Not a problem. Contiune...`);
       }
-    }
 
-    // If no session key is stored, generate one
-    let sessionKey: SessionKeyPair;
-    try {
-      sessionKey = generateSessionKeyPair();
-    } catch (err) {
-      log(`Error when generating session keypair: ${err}`);
-      throw err;
+      return newSessionKey;
+    } else {
+      return JSON.parse(storedSessionKeyOrError.result);
     }
-
-    // Store session key in local storage
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(sessionKey));
-    } catch (e) {
-      console.warn(`Local storage not available. Not a problem. Continue...`);
-    }
-
-    return sessionKey;
   };
 
   /**
@@ -422,16 +382,15 @@ export class LitNodeClientNodeJs {
     const storedWalletSigOrError = getStorageItem(storageKey);
 
     // -- (TRY) to get it in the local storage
-    if (storedWalletSigOrError.type === 'ERROR') {
+    // -- IF NOT: Generates one
+    if (
+      storedWalletSigOrError.type === EITHER_TYPE.ERROR ||
+      !storedWalletSigOrError.result ||
+      storedWalletSigOrError.result == ''
+    ) {
       console.warn(
         `Storage key "${storageKey}" is missing. Not a problem. Continue...`
       );
-    } else {
-      walletSig = storedWalletSigOrError.result;
-    }
-
-    // -- IF NOT: Generates one
-    if (!storedWalletSigOrError.result || storedWalletSigOrError.result == '') {
       if (authNeededCallback) {
         walletSig = await authNeededCallback({
           chain,
@@ -2451,7 +2410,7 @@ export class LitNodeClientNodeJs {
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     // Try to get it from local storage, if not generates one~
-    let sessionKey = this.getSessionKey(params.sessionKey);
+    let sessionKey = params.sessionKey ?? this.getSessionKey();
     let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
@@ -2580,7 +2539,7 @@ export class LitNodeClientNodeJs {
   getSessionSigs = async (params: GetSessionSigsProps) => {
     // -- prepare
     // Try to get it from local storage, if not generates one~
-    let sessionKey = this.getSessionKey(params.sessionKey);
+    let sessionKey = params.sessionKey ?? this.getSessionKey();
 
     let sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
 

@@ -735,7 +735,7 @@ export interface AuthMethod {
 // }
 export interface SignSessionKeyProp {
   // The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
-  sessionKey?: string;
+  sessionKey?: SessionKeyPair;
 
   // The auth methods to use to sign the session key
   authMethods: AuthMethod[];
