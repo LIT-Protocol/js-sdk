@@ -919,53 +919,6 @@ export interface LitAuthClientOptions {
   litOtpConfig?: OtpProviderOptions
 }
 
-export interface SignInWithEthWalletParams {
-  /**
-   * Ethereum wallet address
-   */
-  address: string;
-  /**
-   * Function to sign message
-   *
-   * @param {string} message - Message to sign
-   *
-   * @returns {Promise<string>} - Raw signature of message
-   */
-  signMessage: (message: string) => Promise<string>;
-  /**
-   * Origin of signing request
-   */
-  origin?: string;
-  /**
-   * Name of chain to use for signature
-   */
-  chain?: string;
-  /**
-   * When the auth signature expires
-   */
-  expiration?: string;
-}
-
-export interface SignInWithOTPParams {
-  /**
-   * otp transport (email or phone #)
-   * used as the user ID for the auth method
-  */
-  userId: string;
-  /**
-   * Origin of the sign in request
-   */
-  origin?: string;
-  /**
-   * when the generated JWT expires
-   */
-  expiration?: string;
-  /**
-   * tracking for the session
-   */
-  requestId?: string;
-}
-
 
 export interface OtpSessionResult {
   /**
