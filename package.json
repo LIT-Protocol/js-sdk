@@ -75,6 +75,7 @@
     "@websaam/nx-esbuild": "^0.0.1",
     "axios": "^0.27.2",
     "base64url": "^3.0.1",
+    "bitcoinjs-lib": "^6.1.0",
     "blockstore-core": "^3.0.0",
     "bs58": "^5.0.0",
     "bytes32": "^0.0.3",
