@@ -3,7 +3,6 @@ import {
   IRelay,
   LitAuthClientOptions,
   OAuthProviderOptions,
-  OtpProviderOptions,
   ProviderOptions,
   SignInWithOTPParams,
 } from '@lit-protocol/types';

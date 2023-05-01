@@ -451,7 +451,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
   // -- 1. prepare
   const selectedChain = LIT_CHAINS[chain];
-  const expirationString = getDefaultExpiration();
+  const expirationString = expiration ?? getDefaultExpiration();
 
   const { web3, account } = await connectWeb3({
     chainId: selectedChain.chainId,

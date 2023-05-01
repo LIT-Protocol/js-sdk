@@ -386,6 +386,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  litprotocol: {
+    contractAddress: null,
+    chainId: 175177,
+    name: 'Chronicle - Lit Protocol Testnet',
+    symbol: 'LIT',
+    decimals: 18,
+    rpcUrls: ['https://chain-rpc.litprotocol.com/http'],
+    blockExplorerUrls: ['https://chain.litprotocol.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
@@ -576,3 +587,6 @@ export const AUTH_METHOD_TYPE_IDS = {
   GOOGLE: 5,
   GOOGLE_JWT: 6,
 };
+
+// ========== PKP Client ==========
+export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];

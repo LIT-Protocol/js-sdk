@@ -849,9 +849,55 @@ export interface WebAuthnAuthenticationVerificationParams {
 export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
 
 /**
- * ========== Lit Auth Client ==========
+ * ========== PKP ==========
  */
 
+export interface PKPBaseProp {
+  pkpPubKey: string;
+  rpc?: string;
+  rpcs?: RPCUrls;
+  controllerAuthSig?: AuthSig;
+  controllerSessionSigs?: SessionSigs;
+  sessionSigsExpiration?: string;
+  litNetwork?: any;
+  debug?: boolean;
+  litActionCode?: string;
+  litActionIPFS?: string;
+  litActionJsParams?: any;
+}
+
+export interface RPCUrls {
+  eth?: string;
+  cosmos?: string;
+  btc?: string;
+}
+
+export interface PKPEthersWalletProp extends PKPBaseProp {}
+
+export interface PKPCosmosWalletProp extends PKPBaseProp {
+  addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
+}
+
+// note: Omit removes the 'addressPrefix' from PKPCosmosWalletProp
+export interface PKPClientProp extends PKPBaseProp {
+  cosmosAddressPrefix?: string | 'cosmos';
+}
+
+export interface PKPBaseDefaultParams {
+  toSign: Uint8Array;
+  publicKey: Uint8Array;
+  sigName: string;
+}
+
+export interface PKPClientHelpers {
+  handleRequest: (request: any) => Promise<any>;
+  setRpc: (rpc: string) => void;
+  getRpc: () => string;
+}
+
+/**
+ * ========== LitAuthClient ==========
+ */
 export interface LitAuthClientOptions {
   /**
    * Endpoint to interact with a blockchain network. Defaults to the Lit Chronicle.
@@ -1109,6 +1155,26 @@ export interface EthWalletProviderOptions {
    * The origin from which the signing request is made
    */
   origin?: string;
+}
+
+export interface SignInWithOTPParams {
+  /**
+   * otp transport (email or phone #)
+   * used as the user ID for the auth method
+  */
+  userId: string;
+  /**
+   * Origin of the sign in request
+   */
+  origin?: string;
+  /**
+   * when the generated JWT expires
+   */
+  expiration?: string;
+  /**
+   * tracking for the session
+   */
+  requestId?: string;
 }
 
 export interface OtpProviderOptions {

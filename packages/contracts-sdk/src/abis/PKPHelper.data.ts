@@ -1,5 +1,5 @@
 export const pkpHelper = {
-  "address": "0x5a8e445BCFE85264566c32Be50A172F3d14F53Fc",
+  "address": "0x8bB62077437D918891F12c7F35d9e1B78468bF11",
   "abi": [
     {
       "inputs": [

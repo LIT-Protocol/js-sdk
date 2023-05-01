@@ -1,4 +1,7 @@
-import Uint8arrays from "./lib/uint8arrays";
+// ----- autogen:polyfills:start  -----
+//
+// ----- autogen:polyfills:end  -----
 
-export const uint8arrayFromString = Uint8arrays.fromString;
-export const uint8arrayToString = Uint8arrays.toString;
+import { uint8arrayFromString, uint8arrayToString } from './lib/uint8arrays';
+
+export { uint8arrayFromString, uint8arrayToString };

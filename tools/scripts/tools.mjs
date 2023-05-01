@@ -21,6 +21,8 @@ import {
   yellowLog,
 } from './utils.mjs';
 import fs from 'fs';
+import path from 'path';
+import { spawn } from 'child_process';
 
 const args = getArgs();
 
@@ -236,27 +238,75 @@ async function testFunc() {
   if (!TEST_TYPE || TEST_TYPE === '' || TEST_TYPE === '--help') {
     greenLog(
       `
-        Usage: node tools/scripts/tools.mjs --test [test-type]
-            [test-type]: the type of test to run
-                --unit: run unit tests
-                --e2e: run e2e tests
-    `,
+      Usage: node tools/scripts/tools.mjs --test [test-type]
+          [test-type]: the type of test to run
+              --unit: run unit tests
+              --e2e: run e2e tests
+              --custom: run custom tests
+  `,
       true
     );
     exit();
   }
 
   if (TEST_TYPE === '--unit') {
-    // spawnCommand('yarn', ['nx', 'run-many', '--target=test']);
-    // await childRunCommand('yarn nx run-many --target=test');
-    redLog(
-      `
-            To take advantage of nx colorful console messages, please run the following command to run unit tests:
 
-            yarn nx run-many --target=test
-        `,
-      true
+    // start the server if it's not running
+    // const startServer = () => {
+    //   const serverProcess = spawn('yarn', ['txServer']);
+
+    //   serverProcess.on('close', (code) => {
+    //     console.log(`Server process exited with code ${code}`);
+    //   });
+
+    //   return serverProcess;
+    // };
+
+    // const serverProcess = startServer();
+
+    // const stopServer = (serverProcess) => {
+    //   serverProcess.kill('SIGTERM');
+    // };
+
+    // Read the workspace configuration file
+    const workspaceConfig = JSON.parse(
+      fs.readFileSync('./workspace.json', 'utf-8')
     );
+
+    // remove all projects that are in the apps folder
+    Object.keys(workspaceConfig.projects).forEach((key) => {
+      if (workspaceConfig.projects[key].includes('apps')) {
+        delete workspaceConfig.projects[key];
+      }
+    });
+
+    console.log(Object.keys(workspaceConfig.projects));
+
+    // Extract project names from the workspace configuration
+    const projectNames = Object.keys(workspaceConfig.projects).join(',');
+
+    // Run the nx run-many command with the --projects flag set to the project names
+    const nx = spawn(
+      'nx',
+      ['run-many', '--target=test', `--projects=${projectNames}`],
+      {
+        stdio: 'inherit', // This maintains the log output color
+        shell: true,
+      }
+    );
+
+    // Handle errors
+    nx.on('error', (error) => {
+      console.error(`Error: ${error.message}`);
+      process.exit();
+    });
+
+    // Handle exit
+    nx.on('exit', (code) => {
+      console.log(`Child process exited with code ${code}`);
+      // stopServer(serverProcess);
+      process.exit();
+    });
   }
 
   if (TEST_TYPE === '--e2e') {
@@ -265,12 +315,12 @@ async function testFunc() {
     if (!ENV || ENV === '' || ENV === '--help') {
       greenLog(
         `
-            Usage: node tools/scripts/tools.mjs --test --e2e [env]
-                [env]: the environment to run the tests in
-                    react: run tests on react app on port 4003
-                    html: run tests on html app on port 4002
-                    run-react-and-test: run the react app and run e2e tests on it
-        `,
+          Usage: node tools/scripts/tools.mjs --test --e2e [env]
+              [env]: the environment to run the tests in
+                  react: run tests on react app on port 4003
+                  html: run tests on html app on port 4002
+                  run-react-and-test: run the react app and run e2e tests on it
+      `,
         true
       );
       exit();
@@ -289,7 +339,8 @@ async function testFunc() {
     }
 
     if (ENV === 'run-react-and-test') {
-      spawnListener('yarn tools --dev --apps');
+      // spawnListener('yarn tools --dev --apps');
+      spawnListener('yarn nx run react:serve');
 
       // wait 3 seconds for the apps to start
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -297,7 +348,48 @@ async function testFunc() {
       spawnListener('yarn tools --test --e2e react');
     }
   }
+
+  if (TEST_TYPE === '--custom') {
+    function formatNxLine(path) {
+      const bold = '\x1b[1m';
+      const orangeBg = '\x1b[48;5;208m';
+      const black = '\x1b[30m';
+      const orange = '\x1b[38;5;208m';
+      const reset = '\x1b[0m';
+
+      const formattedLine = `${orange} >  ${bold}${orangeBg} LIT ${reset}   ${orange}Running target ${bold}${path}${reset}\n`;
+      return formattedLine;
+    }
+
+    function findSpecFiles(directory, filePattern) {
+      const files = fs.readdirSync(directory, { withFileTypes: true });
+      let specFiles = [];
+
+      for (const file of files) {
+        const fullPath = path.join(directory, file.name);
+
+        if (file.isDirectory()) {
+          specFiles = specFiles.concat(findSpecFiles(fullPath, filePattern));
+        } else if (file.isFile() && file.name.match(filePattern)) {
+          specFiles.push(fullPath);
+        }
+      }
+
+      return specFiles;
+    }
+
+    const specFiles = findSpecFiles('./packages', /\.spec\.mjs$/);
+
+    await asyncForEach([...specFiles], async (specFile) => {
+      const output = formatNxLine(specFile);
+      console.log(output);
+      await childRunCommand(`node ${specFile}`);
+    });
+
+    process.exit();
+  }
 }
+
 async function findFunc() {
   const FIND_TYPE = args[1];
 
@@ -1167,7 +1259,7 @@ async function versionFunc() {
                     --major: increase major version
                     --minor: increase minor version
                     --patch: increase patch version
-                    --custom: custom version
+                    --custom: run custom tests
             `,
       true
     );

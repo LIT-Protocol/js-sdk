@@ -8,7 +8,7 @@ export default {
     },
   },
   transform: {
-    '^.+\\.[tj]s$': 'ts-jest',
+    '^.+\\.[t]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/lit-node-client',
@@ -17,4 +17,5 @@ export default {
       'node_modules/ipfs-unixfs-importer/dist/index.min.js',
     '^blockstore-core': 'node_modules/blockstore-core/dist/index.min.js',
   },
+  setupFilesAfterEnv: ['../../jest.setup.js'],
 };
