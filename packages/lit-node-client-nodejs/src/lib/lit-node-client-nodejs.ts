@@ -96,7 +96,7 @@ import { computeAddress } from '@ethersproject/transactions';
 import { SiweMessage } from 'lit-siwe';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
 
-import { LitThirdPartyLibs } from '@lit-protocol/lit-third-party-libs';
+import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 import { nacl } from '@lit-protocol/nacl';
 import { getStorageItem } from '@lit-protocol/misc-browser';
@@ -281,52 +281,95 @@ export class LitNodeClientNodeJs {
 
   // ==================== SESSIONS ====================
   /**
-   *
    * Try to get the session key in the local storage,
    * if not, generates one.
-   * @param { string } supposedSessionKey
-   * @return { }
+   *
+   * @param {string} [serializedSessionKeyPair] - Serialized session key pair
+   * @return {SessionKeyPair} - Session key pair
    */
-  getSessionKey = (supposedSessionKey?: string): SessionKeyPair => {
-    let sessionKey: any = supposedSessionKey ?? '';
-
-    const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
-    const storedSessionKeyOrError = getStorageItem(storageKey);
-
-    if (sessionKey === '') {
-      // check if we already have a session key + signature for this chain
-      // let storedSessionKey;
-      let storedSessionKey: any;
-
-      // -- (TRY) to get it in the local storage
-      if (storedSessionKeyOrError.type === 'ERROR') {
-        console.warn(
-          `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
-        );
-      } else {
-        storedSessionKey = storedSessionKeyOrError.result;
-      }
-
-      // -- IF NOT: Generates one
-      if (!storedSessionKey || storedSessionKey == '') {
-        sessionKey = generateSessionKeyPair();
-
-        // (TRY) to set to local storage
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(sessionKey));
-        } catch (e) {
-          console.warn(
-            `Localstorage not available. Not a problem. Contiune...`
-          );
+  getSessionKey = (serializedSessionKeyPair?: string): SessionKeyPair => {
+    // If a session key pair is provided, parse it and return it
+    if (serializedSessionKeyPair) {
+      try {
+        const keyPair = JSON.parse(serializedSessionKeyPair);
+        if (this.isSessionKeyPair(keyPair)) {
+          return keyPair;
+        } else {
+          return throwError({
+            message: 'Invalid session key pair provided',
+            error: LIT_ERROR.PARAMS_MISSING_ERROR,
+          });
         }
-      } else {
-        log('storedSessionKeyOrError');
-        sessionKey = JSON.parse(storedSessionKeyOrError.result);
+      } catch (err) {
+        log(
+          `Error when parsing provided session keypair ${serializedSessionKeyPair}: ${err}`
+        );
+        throw err;
       }
     }
 
-    return sessionKey as SessionKeyPair;
+    // If no session key pair is provided, try to get it from the local storage
+    const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
+    const storedSessionKeyOrError = getStorageItem(storageKey);
+
+    // Check for errors
+    if (storedSessionKeyOrError.type === 'ERROR') {
+      console.warn(
+        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
+      );
+    } else {
+      // If no errors, get the stored session key
+      const storedSessionKey = storedSessionKeyOrError.result;
+      if (storedSessionKey) {
+        try {
+          const keyPair = JSON.parse(storedSessionKey);
+          if (this.isSessionKeyPair(keyPair)) {
+            return keyPair;
+          } else {
+            throw new Error('Invalid session key pair stored');
+          }
+        } catch (err) {
+          log(
+            `Error when parsing stored session keypair ${storedSessionKey}. Continuing to generate a new one...`
+          );
+        }
+      }
+    }
+
+    // If no session key is stored, generate one
+    let sessionKey: SessionKeyPair;
+    try {
+      sessionKey = generateSessionKeyPair();
+    } catch (err) {
+      log(`Error when generating session keypair: ${err}`);
+      throw err;
+    }
+
+    // Store session key in local storage
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(sessionKey));
+    } catch (e) {
+      console.warn(`Local storage not available. Not a problem. Continue...`);
+    }
+
+    return sessionKey;
   };
+
+  /**
+   * Check if a given object is of type SessionKeyPair.
+   *
+   * @param obj - The object to check.
+   * @returns True if the object is of type SessionKeyPair.
+   */
+  isSessionKeyPair(obj: any): obj is SessionKeyPair {
+    return (
+      typeof obj === 'object' &&
+      'publicKey' in obj &&
+      'secretKey' in obj &&
+      typeof obj.publicKey === 'string' &&
+      typeof obj.secretKey === 'string'
+    );
+  }
 
   /**
    *
@@ -1058,7 +1101,7 @@ export class LitNodeClientNodeJs {
 
     if (params.code) {
       // hash the code to get IPFS id
-      const blockstore = new LitThirdPartyLibs.MemoryBlockstore();
+      const blockstore = new IPFSBundledSDK.MemoryBlockstore();
 
       let content: string | Uint8Array = params.code;
 
@@ -1074,7 +1117,7 @@ export class LitNodeClientNodeJs {
       }
 
       let lastCid;
-      for await (const { cid } of LitThirdPartyLibs.importer(
+      for await (const { cid } of IPFSBundledSDK.importer(
         [{ content }],
         blockstore,
         {
@@ -1087,6 +1130,13 @@ export class LitNodeClientNodeJs {
       ipfsId = lastCid;
     } else {
       ipfsId = params.ipfsId;
+    }
+
+    if(!ipfsId){
+      return throwError({
+        message: 'ipfsId is required',
+        error: LIT_ERROR.INVALID_PARAM_TYPE,
+      });
     }
 
     // select targetNodeRange number of random index of the bootstrapUrls.length
@@ -1175,7 +1225,7 @@ export class LitNodeClientNodeJs {
    * @returns { void }
    *
    */
-  throwNodeError = (res: RejectedNodePromises): void => {
+  _throwNodeError = (res: RejectedNodePromises): void => {
     if (res.error && res.error.errorCode) {
       if (
         (res.error.errorCode === LIT_ERROR_CODE.NODE_NOT_AUTHORIZED ||
@@ -1487,7 +1537,7 @@ export class LitNodeClientNodeJs {
     // -- validate: If it's NOT ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '1 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
       throwError({
         message,
@@ -1540,7 +1590,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
-      this.throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises);
     }
 
     // -- case: promises success (TODO: check the keys of "values")
@@ -1615,7 +1665,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '2 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       return throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1722,7 +1772,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '3 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1801,7 +1851,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
-      this.throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises);
     }
 
     const signatureShares: Array<NodeShare> = (res as SuccessNodePromises)
@@ -1833,7 +1883,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '4 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1919,7 +1969,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
-      this.throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises);
     }
 
     return true;
@@ -1936,7 +1986,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '5 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2019,7 +2069,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
-      this.throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises);
     }
 
     const decryptionShares: Array<NodeShare> = (res as SuccessNodePromises)
@@ -2065,7 +2115,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2166,7 +2216,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (res.success === false) {
-      this.throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises);
     }
 
     return encryptedKey;
@@ -2188,7 +2238,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '7 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2362,7 +2412,7 @@ export class LitNodeClientNodeJs {
     // -- validate: If it's NOT ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '8 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
       throwError({
         message,
@@ -2390,7 +2440,7 @@ export class LitNodeClientNodeJs {
     })();
 
     let siweMessage: SiweMessage = new SiweMessage({
-      domain: globalThis.location?.host || params.domain || 'litprotocol.com',
+      domain: params?.domain || globalThis.location?.host || 'litprotocol.com',
       address: pkpEthAddress,
       statement: 'Lit Protocol PKP session signature',
       uri: sessionKeyUri,
@@ -2426,7 +2476,7 @@ export class LitNodeClientNodeJs {
 
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
-      this.throwNodeError(res);
+      this._throwNodeError(res);
       return {} as SignSessionKeyResponse;
     }
 

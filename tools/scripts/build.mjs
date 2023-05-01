@@ -24,7 +24,7 @@ if (projectName === undefined) {
 }
 
 const build = async (name) => {
-  greenLog('Building project: ' + name);
+  greenLog('🏗 Building project: ' + name);
 
   const packageDistPath = `packages/${name}/dist`;
   if (fs.existsSync(packageDistPath)) {

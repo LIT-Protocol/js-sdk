@@ -10,32 +10,26 @@
     "importHelpers": true,
     "target": "ES2020",
     "module": "ES2020",
-    "lib": [
-      "ES2020",
-      "dom"
-    ],
+    "lib": ["ES2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
-      "@lit-protocol/*": [
-        "packages/*/src"
+      "@lit-protocol/*": ["packages/*/src"],
+      "@lit-protocol/pkp-client": ["packages/pkp-client/src/index.ts"],
+      "@lit-protocol/pkp-base": ["packages/pkp-base/src/index.ts"],
+      "@lit-protocol/pkp-cosmos": ["packages/pkp-cosmos/src/index.ts"],
+      "@lit-protocol/lit-auth-client": [
+        "packages/lit-auth-client/src/index.ts"
       ],
       "@lit-protocol/lit-node-client-nodejs": [
         "packages/lit-node-client-nodejs/src/index.ts"
       ],
-      "@lit-protocol/pkp-ethers": [
-        "packages/pkp-ethers/src/index.ts"
-      ],
-      "@lit-protocol/types": [
-        "packages/types/src/index.ts"
-      ]
+      "@lit-protocol/pkp-ethers": ["packages/pkp-ethers/src/index.ts"],
+      "@lit-protocol/types": ["packages/types/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }

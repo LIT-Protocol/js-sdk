@@ -1,5 +1,6 @@
 {
   "name": "contracts-sdk",
+  "implicitDependencies": ["!pkp-ethers"],
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/contracts-sdk/src",
   "projectType": "library",

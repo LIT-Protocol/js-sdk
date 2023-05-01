@@ -5,10 +5,13 @@ import {
   AccsOperatorParams,
   AccsRegularParams,
   AccsSOLV2Params,
+  EthWalletProviderOptions,
+  EthWalletAuthenticateOptions,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
+  OAuthProviderOptions,
 } from './interfaces';
 
 export type AccessControlConditions = AccsRegularParams[] | AccsDefaultParams[];
@@ -39,12 +42,12 @@ export type Chain = string;
  * @typedef { Object } LITChainRequiredProps
  */
 export type LITChainRequiredProps = {
-  name: string,
-  symbol: string,
-  decimals: number,
-  rpcUrls: Array<String>,
-  blockExplorerUrls: Array<String>,
-  vmType: string,
+  name: string;
+  symbol: string;
+  decimals: number;
+  rpcUrls: Array<string>;
+  blockExplorerUrls: Array<string>;
+  vmType: string;
 };
 
 /**
@@ -54,9 +57,9 @@ export type LITChainRequiredProps = {
  * @property { string } name - The human readable name of the chain
  */
 export type LITEVMChain = LITChainRequiredProps & {
-  contractAddress: string | null,
-  chainId: number,
-  type: string | null,
+  contractAddress: string | null;
+  chainId: number;
+  type: string | null;
 };
 
 /**
@@ -69,7 +72,7 @@ export type LITSVMChain = LITChainRequiredProps;
  * @property {string} chainId - The chain ID of the chain that this token contract is deployed on.  Used for Cosmos chains.
  */
 export type LITCosmosChain = LITChainRequiredProps & {
-  chainId: string,
+  chainId: string;
 };
 
 /**
@@ -78,7 +81,7 @@ export type LITCosmosChain = LITChainRequiredProps & {
  * @property {string} name - The human readable name of the chain
  */
 export type LITChain<T> = {
-  [chainName: string]: T,
+  [chainName: string]: T;
 };
 
 export type LIT_NETWORKS_KEYS = 'jalapeno' | 'serrano' | 'localhost' | 'custom';
@@ -95,3 +98,12 @@ export type ConditionItem =
 export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
 export type EncryptedSymmetricKey = string | Uint8Array | any;
 export type AcceptedFileType = File | Blob;
+
+/**
+ * ========== Lit Auth Client ==========
+ */
+export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
+
+export type ProviderOptions = OAuthProviderOptions | EthWalletProviderOptions;
+
+export type AuthenticateOptions = EthWalletAuthenticateOptions;
