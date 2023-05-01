@@ -16,10 +16,6 @@ import {
 import { PKPClient } from '@lit-protocol/pkp-client';
 import { PKPBase } from '@lit-protocol/pkp-base';
 
-export interface PKPWalletConnectOptions {
-  pkpClients: PKPClient[];
-}
-
 export interface InitWalletConnectParams {
   config: Web3WalletTypes.Options;
 }
@@ -38,15 +34,11 @@ export class PKPWalletConnect {
   private readonly reset = '\x1b[0m';
   private readonly red = '\x1b[31m';
 
-  constructor(options: PKPWalletConnectOptions) {
-    if (options.pkpClients.length === 0) {
-      throw new Error('Must provide at least one PKPClient instance.');
-    }
+  constructor() {
     this.pkpWallets = new Map();
     for (const chain of this.supportedChains) {
       this.pkpWallets.set(chain, []);
     }
-    this._setPKPWallets(options.pkpClients);
   }
 
   /**
@@ -114,7 +106,7 @@ export class PKPWalletConnect {
       if (!wallets || wallets.length === 0) {
         await this.client.rejectSession({
           id,
-          reason: getSdkError('UNSUPPORTED_CHAINS'),
+          reason: getSdkError('UNSUPPORTED_ACCOUNTS'),
         });
         rejected = true;
         break;
@@ -253,19 +245,29 @@ export class PKPWalletConnect {
       });
     }
 
-    // Process the request using the wallet
+    // Process the request using specified wallet and JSON RPC handlers
     try {
-      // TODO: revisit types
-      const result = await ethRequestHandler({
-        signer: wallet as PKPEthersWallet,
-        payload: {
-          method: request.method as SupportedETHSigningMethods,
-          params: request.params,
-        },
-      });
-      response = formatJsonRpcResult(id, result);
-    } catch (err: any) {
-      response = formatJsonRpcError(id, err.message);
+      // Handle Ethereum request
+      if (request.method.startsWith('eth_')) {
+        const result = await ethRequestHandler({
+          signer: wallet as PKPEthersWallet,
+          payload: {
+            method: request.method as SupportedETHSigningMethods,
+            params: request.params,
+          },
+        });
+        response = formatJsonRpcResult(id, result);
+      } else {
+        throw new Error(`Unsupported method: ${request.method}`);
+      }
+    } catch (err: unknown) {
+      let message: string;
+      if (err instanceof Error) {
+        message = err.message;
+      } else {
+        message = `Unable to approve session request ${id} due to an unknown error`;
+      }
+      response = formatJsonRpcError(id, message);
     }
 
     // Send a response with the result or an error
@@ -531,31 +533,6 @@ export class PKPWalletConnect {
   }
 
   // ----------------- Private methods -----------------
-
-  /**
-   * Update map of PKP wallets with given PKP clients
-   *
-   * @param {PKPClient[]} pkpClients - Array of PKP clients
-   */
-  private _setPKPWallets(pkpClients: PKPClient[]): void {
-    for (const chain of this.supportedChains) {
-      const wallets: PKPBase[] = [];
-      for (const pkpClient of pkpClients) {
-        let wallet: PKPBase | null = null;
-        switch (chain) {
-          case 'eip155':
-            wallet = pkpClient.getEthWallet();
-            break;
-          default:
-            break;
-        }
-        if (wallet) {
-          wallets.push(wallet);
-        }
-      }
-      this.pkpWallets.set(chain, wallets);
-    }
-  }
 
   /**
    * Logs an error message to the console and throws an Error with the same message.
