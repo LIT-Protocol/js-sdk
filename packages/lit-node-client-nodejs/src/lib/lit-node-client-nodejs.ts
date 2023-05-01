@@ -96,7 +96,7 @@ import { computeAddress } from '@ethersproject/transactions';
 import { SiweMessage } from 'lit-siwe';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
 
-import { LitThirdPartyLibs } from '@lit-protocol/lit-third-party-libs';
+import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 import { nacl } from '@lit-protocol/nacl';
 import { getStorageItem } from '@lit-protocol/misc-browser';
@@ -1101,7 +1101,7 @@ export class LitNodeClientNodeJs {
 
     if (params.code) {
       // hash the code to get IPFS id
-      const blockstore = new LitThirdPartyLibs.MemoryBlockstore();
+      const blockstore = new IPFSBundledSDK.MemoryBlockstore();
 
       let content: string | Uint8Array = params.code;
 
@@ -1117,7 +1117,7 @@ export class LitNodeClientNodeJs {
       }
 
       let lastCid;
-      for await (const { cid } of LitThirdPartyLibs.importer(
+      for await (const { cid } of IPFSBundledSDK.importer(
         [{ content }],
         blockstore,
         {
@@ -1130,6 +1130,13 @@ export class LitNodeClientNodeJs {
       ipfsId = lastCid;
     } else {
       ipfsId = params.ipfsId;
+    }
+
+    if(!ipfsId){
+      return throwError({
+        message: 'ipfsId is required',
+        error: LIT_ERROR.INVALID_PARAM_TYPE,
+      });
     }
 
     // select targetNodeRange number of random index of the bootstrapUrls.length
@@ -1530,7 +1537,7 @@ export class LitNodeClientNodeJs {
     // -- validate: If it's NOT ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '1 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
       throwError({
         message,
@@ -1658,7 +1665,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '2 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       return throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1765,7 +1772,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '3 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1876,7 +1883,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '4 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -1979,7 +1986,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '5 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2108,7 +2115,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2231,7 +2238,7 @@ export class LitNodeClientNodeJs {
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '7 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2405,7 +2412,7 @@ export class LitNodeClientNodeJs {
     // -- validate: If it's NOT ready
     if (!this.ready) {
       const message =
-        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '8 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
       throwError({
         message,
@@ -2433,7 +2440,7 @@ export class LitNodeClientNodeJs {
     })();
 
     let siweMessage: SiweMessage = new SiweMessage({
-      domain: globalThis.location?.host || params.domain || 'litprotocol.com',
+      domain: params?.domain || globalThis.location?.host || 'litprotocol.com',
       address: pkpEthAddress,
       statement: 'Lit Protocol PKP session signature',
       uri: sessionKeyUri,

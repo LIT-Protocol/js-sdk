@@ -3,10 +3,10 @@
 # yarn build:packages
 
 packages=(
+  "constants"
   "lit-node-client"
   "lit-auth-client"
   "types"
-  "pkp-ethers"
 )
 
 # then in your project, do `npm link @lit-protocol/lit-node-client`

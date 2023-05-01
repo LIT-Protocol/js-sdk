@@ -1,5 +1,5 @@
 export const staking = {
-  "address": "0x091e9b0a5A404A394377d08C0Fd8C3418075e1fe",
+  "address": "0x433357a14c35815E6A32758fe95c93380D194aaf",
   "abi": [
     {
       "inputs": [
@@ -23,6 +23,19 @@ export const staking = {
         }
       ],
       "name": "EpochLengthSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newEpochTimeout",
+          "type": "uint256"
+        }
+      ],
+      "name": "EpochTimeoutSet",
       "type": "event"
     },
     {
@@ -265,6 +278,12 @@ export const staking = {
           "internalType": "address",
           "name": "staker",
           "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountBurned",
+          "type": "uint256"
         }
       ],
       "name": "ValidatorKickedFromNextEpoch",
@@ -321,6 +340,37 @@ export const staking = {
       "type": "event"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "validatorStakerAddress",
+          "type": "address"
+        }
+      ],
+      "name": "adminKickValidatorInNextEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "validatorStakerAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amountToBurn",
+          "type": "uint256"
+        }
+      ],
+      "name": "adminSlashValidator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "advanceEpoch",
       "outputs": [],
@@ -368,6 +418,11 @@ export const staking = {
         {
           "internalType": "uint256",
           "name": "retries",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "timeout",
           "type": "uint256"
         }
       ],
@@ -570,6 +625,13 @@ export const staking = {
     },
     {
       "inputs": [],
+      "name": "pauseEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "paused",
       "outputs": [
         {
@@ -693,6 +755,32 @@ export const staking = {
         }
       ],
       "name": "setEpochLength",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum Staking.States",
+          "name": "newState",
+          "type": "uint8"
+        }
+      ],
+      "name": "setEpochState",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "newEpochTimeout",
+          "type": "uint256"
+        }
+      ],
+      "name": "setEpochTimeout",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

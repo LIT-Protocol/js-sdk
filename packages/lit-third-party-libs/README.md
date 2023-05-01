@@ -1,11 +1,19 @@
-# lit-third-party-libs
+# This repo re-exports funtionalities from
 
-This library was generated with [Nx](https://nx.dev).
+## IPFSBundledSDK
+```
+import { importer } from "ipfs-unixfs-importer";
+import { MemoryBlockstore } from "blockstore-core/memory";
+```
 
-## Building
+<!-- ## CosmosBundledSDK
+```
+import {
+  encodeSecp256k1Signature,
+  rawSecp256k1PubkeyToRawAddress,
+} from "@cosmjs/amino";
+import { Secp256k1, sha256, ExtendedSecp256k1Signature } from "@cosmjs/crypto";
+import { toBech32, fromHex } from "@cosmjs/encoding";
 
-Run `nx build lit-third-party-libs` to build the library.
-
-## Running unit tests
-
-Run `nx test lit-third-party-libs` to execute the unit tests via [Jest](https://jestjs.io).
+import { makeSignBytes } from "@cosmjs/proto-signing";
+``` -->

@@ -1,5 +1,14 @@
 // @ts-nocheck
-export const LitThirdPartyLibs = (() => {
+
+import { importer } from 'ipfs-unixfs-importer';
+import { MemoryBlockstore } from 'blockstore-core/memory';
+
+interface IPFSBundledSDKType {
+  importer: typeof importer;
+  MemoryBlockstore: typeof MemoryBlockstore;
+}
+
+export const IPFSBundledSDK : IPFSBundledSDKType  = (() => {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -936,11 +945,7 @@ export const LitThirdPartyLibs = (() => {
               if (sign) val = -val;
               if (val === 0)
                 writeUint(
-                  1 / val > 0
-                    ? /* positive */
-                      0
-                    : /* negative 0 */
-                      2147483648,
+                  1 / val > 0 ? /* positive */ 0 : /* negative 0 */ 2147483648,
                   buf,
                   pos
                 );
@@ -1053,11 +1058,7 @@ export const LitThirdPartyLibs = (() => {
               if (val === 0) {
                 writeUint(0, buf, pos + off0);
                 writeUint(
-                  1 / val > 0
-                    ? /* positive */
-                      0
-                    : /* negative 0 */
-                      2147483648,
+                  1 / val > 0 ? /* positive */ 0 : /* negative 0 */ 2147483648,
                   buf,
                   pos + off1
                 );
@@ -2128,10 +2129,7 @@ export const LitThirdPartyLibs = (() => {
         BufferReader = BufferReader_;
         Reader.create = create3();
         BufferReader._configure();
-        var fn = util.Long
-          ? 'toLong'
-          : /* istanbul ignore next */
-            'toNumber';
+        var fn = util.Long ? 'toLong' : /* istanbul ignore next */ 'toNumber';
         util.merge(Reader.prototype, {
           int64: function read_int64() {
             return readLongVarint.call(this)[fn](false);
@@ -4012,12 +4010,10 @@ export const LitThirdPartyLibs = (() => {
       /** @type {Decoders<L|R>} */
       {
         ...(left.decoders || {
-          [/** @type API.UnibaseDecoder<L> */
-          left.prefix]: left,
+          [/** @type API.UnibaseDecoder<L> */ left.prefix]: left,
         }),
         ...(right.decoders || {
-          [/** @type API.UnibaseDecoder<R> */
-          right.prefix]: right,
+          [/** @type API.UnibaseDecoder<R> */ right.prefix]: right,
         }),
       }
     );

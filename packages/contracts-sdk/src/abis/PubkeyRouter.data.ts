@@ -1,5 +1,5 @@
 export const pubkeyRouter = {
-  "address": "0xEA287AF8d8835eb20175875e89576bf583539B37",
+  "address": "0xB35cC6CaB1501d5F3b6b8fcF3215898C9d03E981",
   "abi": [
     {
       "inputs": [

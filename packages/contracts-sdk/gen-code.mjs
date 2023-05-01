@@ -91,7 +91,7 @@ const generatedStrs = {
     //   ) as unknown as accessControlConditionsContract.ContractContext;
     //   this.accessControlConditionsContract = this.accessControlConditionsContract.connect(this.provider);
     // --------------------------------------
-    init: abis.map(({ varNameCamel, varNameContractCamel }) => {
+    init: abis.map(({ fileName, varNameCamel, varNameContractCamel }) => {
 
         const importStr = `
     this.${varNameContractCamel} = {
@@ -99,12 +99,12 @@ const generatedStrs = {
             ${varNameCamel}.address,
             ${varNameCamel}.abi as any,
             this.provider
-        ) as unknown as ${varNameContractCamel}.ContractContext),
+        ) as unknown as ${varNameContractCamel}.ContractContext & ${varNameContractCamel}.${fileName.replace('.ts', '')}),
         write: (new ethers.Contract(
             ${varNameCamel}.address,
             ${varNameCamel}.abi as any,
             this.signer
-        ) as unknown as ${varNameContractCamel}.ContractContext)
+        ) as unknown as ${varNameContractCamel}.ContractContext & ${varNameContractCamel}.${fileName.replace('.ts', '')})
     };`;
         return importStr;
     }).join('\n\n'),

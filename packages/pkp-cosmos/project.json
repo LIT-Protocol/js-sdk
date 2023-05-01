@@ -1,0 +1,81 @@
+{
+  "name": "pkp-cosmos",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/pkp-cosmos/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target pkp-cosmos"
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/pkp-cosmos",
+        "main": "packages/pkp-cosmos/src/index.ts",
+        "tsConfig": "packages/pkp-cosmos/tsconfig.lib.json",
+        "assets": [
+          "packages/pkp-cosmos/*.md"
+        ]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_pkpCosmos",
+        "outfile": "dist/packages/pkp-cosmos-vanilla/pkp-cosmos.js",
+        "entryPoints": [
+          "./packages/pkp-cosmos/src/index.ts"
+        ],
+        "define": {
+          "process.env.NODE_DEBUG": "false",
+          "global": "window"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/pkp-cosmos/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/pkp-cosmos"
+      ],
+      "options": {
+        "jestConfig": "packages/pkp-cosmos/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "test:watch": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/pkp-cosmos"
+      ],
+      "options": {
+        "watch": true,
+        "jestConfig": "packages/pkp-cosmos/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

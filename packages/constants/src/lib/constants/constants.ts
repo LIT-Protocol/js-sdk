@@ -342,6 +342,61 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  filecoin: {
+    contractAddress: null,
+    chainId: 314,
+    name: 'Filecoin',
+    symbol: 'FIL',
+    decimals: 18,
+    rpcUrls: ['https://api.node.glif.io/rpc/v1'],
+    blockExplorerUrls: ['https://filfox.info/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  hyperspace: {
+    contractAddress: null,
+    chainId: 3141,
+    name: 'Filecoin Hyperspace testnet',
+    symbol: 'tFIL',
+    decimals: 18,
+    rpcUrls: ['https://api.hyperspace.node.glif.io/rpc/v1'],
+    blockExplorerUrls: ['https://hyperspace.filscan.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  scrollAlphaTestnet: {
+    contractAddress: null,
+    chainId: 534353,
+    name: 'Scroll Alpha Testnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://alpha-rpc.scroll.io/l2'],
+    blockExplorerUrls: ['https://blockscout.scroll.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  zksync: {
+    contractAddress: null,
+    chainId: 324,
+    name: 'zkSync Era Mainnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://mainnet.era.zksync.io'],
+    blockExplorerUrls: ['https://explorer.zksync.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  litprotocol: {
+    contractAddress: null,
+    chainId: 175177,
+    name: 'Chronicle - Lit Protocol Testnet',
+    symbol: 'LIT',
+    decimals: 18,
+    rpcUrls: ['https://chain-rpc.litprotocol.com/http'],
+    blockExplorerUrls: ['https://chain.litprotocol.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
@@ -532,3 +587,6 @@ export const AUTH_METHOD_TYPE_IDS = {
   GOOGLE: 5,
   GOOGLE_JWT: 6,
 };
+
+// ========== PKP Client ==========
+export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];

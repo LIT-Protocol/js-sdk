@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lit-protocol/lit-auth-client": "^2.1.120",
+    "@lit-protocol/lit-auth-client": "^2.1.137",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
     "eslint-config-prettier": "^8.8.0",

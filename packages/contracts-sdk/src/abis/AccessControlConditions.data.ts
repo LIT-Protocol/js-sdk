@@ -1,5 +1,5 @@
 export const accessControlConditions = {
-  "address": "0x6620A0e03Ca33a3818f1539DF94f9807b12B9Ec2",
+  "address": "0x8b353Bb9E26F2c2B8155f377982537C39AD01A1B",
   "abi": [
     {
       "inputs": [],

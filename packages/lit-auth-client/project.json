@@ -12,16 +12,12 @@
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/lit-auth-client",
         "main": "packages/lit-auth-client/src/index.ts",
         "tsConfig": "packages/lit-auth-client/tsconfig.lib.json",
-        "assets": [
-          "packages/lit-auth-client/*.md"
-        ]
+        "assets": ["packages/lit-auth-client/*.md"]
       }
     },
     "_buildWeb": {
@@ -29,9 +25,7 @@
       "options": {
         "globalName": "LitJsSdk_litAuthClient",
         "outfile": "dist/packages/lit-auth-client-vanilla/lit-auth-client.js",
-        "entryPoints": [
-          "./packages/lit-auth-client/src/index.ts"
-        ],
+        "entryPoints": ["./packages/lit-auth-client/src/index.ts"],
         "define": {
           "process.env.NODE_DEBUG": "false",
           "global": "window"
@@ -46,20 +40,14 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/lit-auth-client/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/lit-auth-client/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/lit-auth-client"
-      ],
+      "outputs": ["coverage/packages/lit-auth-client"],
       "options": {
         "jestConfig": "packages/lit-auth-client/jest.config.ts",
         "passWithNoTests": true

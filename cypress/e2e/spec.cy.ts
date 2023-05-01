@@ -567,7 +567,7 @@ describe('Lit Action', () => {
       },
     };
     try {
-      savedParams.litNodeClient.throwNodeError(res);
+      savedParams.litNodeClient._throwNodeError(res);
     } catch (error) {
       console.log(error);
       expect(error).to.have.property('errorCode', 'NodeNotAuthorized');
@@ -658,6 +658,7 @@ describe('Lit Action', () => {
     };
     const res = await savedParams.litNodeClient.handshakeWithSgx(params);
     expect(res).to.have.keys(
+      'clientSdkVersion',
       'networkPublicKey',
       'networkPublicKeySet',
       'serverPublicKey',

@@ -670,6 +670,26 @@
         });
       };
 
+      var ETHOnZksync = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'zksync',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnZksync',
+        });
+      };
+
       var ETHOnEluvioEmptyWallet = async () => {
         const accessControlConditions = [
           {
@@ -2319,6 +2339,58 @@
         ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
       };
 
+      var FilecoinHyperspace = async () => {
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'hyperspace',
+        });
+
+        var accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'hyperspace',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'FilecoinHyperspace',
+          authSig,
+        });
+      };
+
+      var Filecoin = async () => {
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'filecoin',
+        });
+
+        var accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'filecoin',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'Filecoin',
+          authSig,
+        });
+      };
+
       var logout = async () => {
         const testName = 'Logout';
         document.getElementById('status').innerText = `Testing ${testName}...`;
@@ -2341,7 +2413,9 @@
       );
 
       function isNodeStorageError(errorCode) {
-        return errorCode === 'storage_error' || errorCode === 'NodeStorageError';
+        return (
+          errorCode === 'storage_error' || errorCode === 'NodeStorageError'
+        );
       }
     </script>
   </head>
@@ -2416,6 +2490,9 @@
     <br />
     <br />
     <button onclick="ETHOnAurora()">ETHOnAurora</button>
+    <br />
+    <br />
+    <button onclick="ETHOnZksync()">ETHOnZksync</button>
     <br />
     <br />
     <button onclick="ETHOnEluvioEmptyWallet()">ETHOnEluvioEmptyWallet</button>
@@ -2545,6 +2622,14 @@
     <button onclick="TooManyConditionsEncryption()">
       TooManyConditionsEncryption
     </button>
+    <br />
+    <br />
+
+    <button onclick="FilecoinHyperspace()">FilecoinHyperspace</button>
+    <br />
+    <br />
+
+    <button onclick="Filecoin()">Filecoin</button>
     <br />
     <br />
 

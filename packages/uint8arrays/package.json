@@ -1,6 +1,5 @@
 {
   "name": "@lit-protocol/uint8arrays",
-  "version": "2.1.120",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
   "repository": {
@@ -22,6 +21,7 @@
   "tags": [
     "universal"
   ],
+  "version": "2.1.138",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

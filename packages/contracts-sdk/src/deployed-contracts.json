@@ -4,69 +4,83 @@
     "correctedName": "Staking",
     "exportName": "staking",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/Staking.json",
-    "address": "0x091e9b0a5A404A394377d08C0Fd8C3418075e1fe"
+    "address": "0x433357a14c35815E6A32758fe95c93380D194aaf"
   },
   {
     "name": "multisenderContractAddress",
     "correctedName": "Multisender",
     "exportName": "multisender",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/Multisender.json",
-    "address": "0x1D907ec0CE55E7E3164Da56e50D64DC2d8933142"
+    "address": "0x0EdD020f421adbB57D3efa5d2045a75E40385464"
   },
   {
     "name": "litTokenContractAddress",
     "correctedName": "LITToken",
     "exportName": "litToken",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/LITToken.json",
-    "address": "0x541C8a3D27643002fb8A37dCf42D22940B5b2F51"
+    "address": "0x53695556f8a1a064EdFf91767f15652BbfaFaD04"
   },
   {
     "name": "accessControlConditionsContractAddress",
     "correctedName": "AccessControlConditions",
     "exportName": "accessControlConditions",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/AccessControlConditions.json",
-    "address": "0x6620A0e03Ca33a3818f1539DF94f9807b12B9Ec2"
+    "address": "0x8b353Bb9E26F2c2B8155f377982537C39AD01A1B"
   },
   {
     "name": "pubkeyRouterContractAddress",
     "correctedName": "PubkeyRouter",
     "exportName": "pubkeyRouter",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PubkeyRouter.json",
-    "address": "0xEA287AF8d8835eb20175875e89576bf583539B37"
+    "address": "0xB35cC6CaB1501d5F3b6b8fcF3215898C9d03E981"
   },
   {
     "name": "pkpNftContractAddress",
     "correctedName": "PKPNFT",
     "exportName": "pkpNft",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPNFT.json",
-    "address": "0x86062B7a01B8b2e22619dBE0C15cbe3F7EBd0E92"
+    "address": "0x8F75a53F65e31DD0D2e40d0827becAaE2299D111"
   },
   {
     "name": "rateLimitNftContractAddress",
     "correctedName": "RateLimitNFT",
     "exportName": "rateLimitNft",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/RateLimitNFT.json",
-    "address": "0xE094c76Ec6bad7CbA6181C8b34Bc41faC7EbdF43"
+    "address": "0x2D0f767eff47b44626832EcD2fda705eB9797c38"
   },
   {
     "name": "pkpHelperContractAddress",
     "correctedName": "PKPHelper",
     "exportName": "pkpHelper",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPHelper.json",
-    "address": "0xffD53EeAD24a54CA7189596eF1aa3f1369753611"
+    "address": "0x8bB62077437D918891F12c7F35d9e1B78468bF11"
   },
   {
     "name": "pkpPermissionsContractAddress",
     "correctedName": "PKPPermissions",
     "exportName": "pkpPermissions",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPPermissions.json",
-    "address": "0x274d0C69fCfC40f71E57f81E8eA5Bd786a96B832"
+    "address": "0x4Aed2F242E806c58758677059340e29E6B5b7619"
   },
   {
     "name": "pkpNftMetadataContractAddress",
     "correctedName": "PKPNFTMetadata",
     "exportName": "pkpNftMetadata",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPNFTMetadata.json",
-    "address": "0x46c568B561Cde9ded66Be7d8044C141481c74d0f"
+    "address": "0x4f7dBAfD2D9fF2bD4b2B00D470eCbe673e49c4D3"
+  },
+  {
+    "name": "allowlistContractAddress",
+    "correctedName": "Allowlist",
+    "exportName": "allowlist",
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/Allowlist.json",
+    "address": "0x81FB8e997E0908AD5792e6F8737245A1D78706E6"
+  },
+  {
+    "name": "resolverContractAddress",
+    "correctedName": "ContractResolver",
+    "exportName": "contractResolver",
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/ContractResolver.json",
+"address": "0xFCB3d8a54680e9337e3c8E60adC02F2aE8455A71"
   }
 ]
