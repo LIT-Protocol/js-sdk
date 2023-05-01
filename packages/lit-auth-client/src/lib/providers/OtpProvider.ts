@@ -34,6 +34,10 @@ export class OtpProvider extends BaseProvider {
     }
   }
 
+  /**
+   * Starts an otp session for a given email or phone number from the {@link SignInWithOTPParams}
+   * @returns {Promise<boolean>} indicating if the otp code was sent sucessfully
+   */
   public async sendOtpCode(): Promise<boolean> {
     const url = this._buildUrl('start');
     this._requestId =
@@ -63,6 +67,12 @@ export class OtpProvider extends BaseProvider {
     return true;
   }
 
+  /**
+   * Validates otp code from {@link sendOtpCode}
+   * 
+   * @param code {string} - OTP code sent to the user, should be retrieved from user input.
+   * @returns {Promise<AuthMethod} - Auth method that contains Json Web Token
+   */
   private async checkOtpCode(code: string): Promise<AuthMethod> {
     const url = this._buildUrl('check');
 
