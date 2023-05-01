@@ -915,6 +915,8 @@ export interface LitAuthClientOptions {
    * Lit Node Client
    */
   litNodeClient?: any;
+
+  litOtpConfig?: OtpProviderOptions
 }
 
 export interface SignInWithEthWalletParams {

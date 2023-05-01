@@ -3,6 +3,7 @@ import {
   IRelay,
   LitAuthClientOptions,
   OAuthProviderOptions,
+  OtpProviderOptions,
   ProviderOptions,
   SignInWithOTPParams,
 } from '@lit-protocol/types';
@@ -37,6 +38,8 @@ export class LitAuthClient {
    */
   private providers: Map<string, BaseProvider>;
 
+  private litOtpOptions: OtpProviderOptions;
+
   /**
    * Create a LitAuthClient instance
    *
@@ -60,6 +63,10 @@ export class LitAuthClient {
         throw new Error(
           'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
         );
+      }
+
+      if(options?.litOtpConfig){
+        this.litOtpOptions = options?.litOtpConfig;
       }
     }
 
@@ -128,7 +135,9 @@ export class LitAuthClient {
         provider = new OtpProvider({
           ...baseParams,
           ...(options as SignInWithOTPParams),
-        }) as unknown as T;
+        },
+        this.litOtpOptions
+        ) as unknown as T;
         break;
       default:
         throw new Error(
