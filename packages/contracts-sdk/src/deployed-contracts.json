@@ -4,14 +4,14 @@
     "correctedName": "Staking",
     "exportName": "staking",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/Staking.json",
-    "address": "0x1D672d7188D970158554F5B0965480256585A071"
+    "address": "0x433357a14c35815E6A32758fe95c93380D194aaf"
   },
   {
     "name": "multisenderContractAddress",
     "correctedName": "Multisender",
     "exportName": "multisender",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/Multisender.json",
-    "address": "0x94Ac3Ee177D34E4DA9D46e90DfF1bAaCe474deEb"
+    "address": "0x0EdD020f421adbB57D3efa5d2045a75E40385464"
   },
   {
     "name": "litTokenContractAddress",
@@ -25,62 +25,62 @@
     "correctedName": "AccessControlConditions",
     "exportName": "accessControlConditions",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/AccessControlConditions.json",
-    "address": "0x54D9b06686e4d009E59B0271da4358FEE5500E26"
+    "address": "0x8b353Bb9E26F2c2B8155f377982537C39AD01A1B"
   },
   {
     "name": "pubkeyRouterContractAddress",
     "correctedName": "PubkeyRouter",
     "exportName": "pubkeyRouter",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PubkeyRouter.json",
-    "address": "0xB46EbbD0F543811fC97e979fbCa62FEAB6C7E6B4"
+    "address": "0xB35cC6CaB1501d5F3b6b8fcF3215898C9d03E981"
   },
   {
     "name": "pkpNftContractAddress",
     "correctedName": "PKPNFT",
     "exportName": "pkpNft",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPNFT.json",
-    "address": "0xF5cB699652cED3781Dd75575EDBe075d6212DF98"
+    "address": "0x8F75a53F65e31DD0D2e40d0827becAaE2299D111"
   },
   {
     "name": "rateLimitNftContractAddress",
     "correctedName": "RateLimitNFT",
     "exportName": "rateLimitNft",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/RateLimitNFT.json",
-    "address": "0x6378Bf57C2c75d9524FE2601275214C0EE3Cf1B8"
+    "address": "0x2D0f767eff47b44626832EcD2fda705eB9797c38"
   },
   {
     "name": "pkpHelperContractAddress",
     "correctedName": "PKPHelper",
     "exportName": "pkpHelper",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPHelper.json",
-    "address": "0x5a8e445BCFE85264566c32Be50A172F3d14F53Fc"
+    "address": "0x8bB62077437D918891F12c7F35d9e1B78468bF11"
   },
   {
     "name": "pkpPermissionsContractAddress",
     "correctedName": "PKPPermissions",
     "exportName": "pkpPermissions",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPPermissions.json",
-    "address": "0xE34eAB00607E6817327d575B26E8de29c320D6e9"
+    "address": "0x4Aed2F242E806c58758677059340e29E6B5b7619"
   },
   {
     "name": "pkpNftMetadataContractAddress",
     "correctedName": "PKPNFTMetadata",
     "exportName": "pkpNftMetadata",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPNFTMetadata.json",
-    "address": "0xfBdFFFeAd35A1A85086CfAfeF93Dd888E9527a52"
+    "address": "0x4f7dBAfD2D9fF2bD4b2B00D470eCbe673e49c4D3"
   },
   {
     "name": "allowlistContractAddress",
     "correctedName": "Allowlist",
     "exportName": "allowlist",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/Allowlist.json",
-    "address": "0xc45edF68A6d335c3DbC9BcdDD58baB4eC70B5a0a"
+    "address": "0x81FB8e997E0908AD5792e6F8737245A1D78706E6"
   },
   {
     "name": "resolverContractAddress",
     "correctedName": "ContractResolver",
     "exportName": "contractResolver",
     "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/ContractResolver.json",
-    "address": "0x18C94A4D9f7Add1bB4333542807aD41a15390e2f"
+    "address": "0xFCB3d8a54680e9337e3c8E60adC02F2aE8455A71"
   }
 ]
