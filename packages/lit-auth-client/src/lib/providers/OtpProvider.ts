@@ -7,7 +7,7 @@ import {
   SignInWithOTPParams,
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
-import { OtpProviderOptions } from '../../../../types/src/lib/interfaces';
+import { OtpProviderOptions } from '@lit-protocol/types';
 
 export class OtpProvider extends BaseProvider {
   private _params: SignInWithOTPParams;

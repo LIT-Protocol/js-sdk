@@ -46,7 +46,7 @@ export class LitRelay implements IRelay {
     body: string
   ): Promise<IRelayMintResponse> {
     const route = this._getMintPKPRoute(authMethodType);
-    const response = await fetch(`http://127.0.0.1:8081${route}`, {
+    const response = await fetch(`${this.relayUrl}${route}`, {
       method: 'POST',
       headers: {
         'api-key': this.relayApiKey,

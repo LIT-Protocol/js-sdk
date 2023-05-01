@@ -58,7 +58,6 @@ export class LitAuthClient {
       if (options?.litRelayConfig?.relayApiKey) {
         this.relay = new LitRelay(options.litRelayConfig);
       } else {
-        console.log(options);
         throw new Error(
           'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
         );
@@ -126,7 +125,7 @@ export class LitAuthClient {
           ...baseParams,
         }) as unknown as T;
         break;
-      case `OTP`:
+      case `otp`:
         provider = new OtpProvider({
           ...baseParams,
           ...(options as SignInWithOTPParams),

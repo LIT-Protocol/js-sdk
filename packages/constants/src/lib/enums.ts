@@ -39,5 +39,5 @@ export enum ProviderType {
   Google = 'google',
   EthWallet = 'ethwallet',
   WebAuthn = 'webauthn',
-  Otp = 'OTP'
+  Otp = 'otp'
 }
