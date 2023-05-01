@@ -39,15 +39,5 @@ export enum ProviderType {
   Google = 'google',
   EthWallet = 'ethwallet',
   WebAuthn = 'webauthn',
-  Otp = 'otp'
-}
-
-/**
- * Supported provider types
- */
-export enum ProviderType {
-  Discord = 'discord',
-  Google = 'google',
-  EthWallet = 'ethwallet',
-  WebAuthn = 'webauthn',
+  Otp = 'otp',
 }
