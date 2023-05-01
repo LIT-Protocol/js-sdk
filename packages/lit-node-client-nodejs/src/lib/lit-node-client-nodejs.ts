@@ -71,6 +71,7 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   GetWalletSigProps,
+  SessionSigsMap,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -2536,7 +2537,9 @@ export class LitNodeClientNodeJs {
    *
    * @param { GetSessionSigsProps } params
    */
-  getSessionSigs = async (params: GetSessionSigsProps) => {
+  getSessionSigs = async (
+    params: GetSessionSigsProps
+  ): Promise<SessionSigsMap> => {
     // -- prepare
     // Try to get it from local storage, if not generates one~
     let sessionKey = params.sessionKey ?? this.getSessionKey();
@@ -2606,6 +2609,7 @@ export class LitNodeClientNodeJs {
         errorKind: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.kind,
         errorCode: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.name,
       });
+      // @ts-ignore - we throw an error above, so below should never be reached
       return;
     }
 
@@ -2615,7 +2619,7 @@ export class LitNodeClientNodeJs {
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
     let sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
-    const signingTemplate: SessionSigningTemplate = {
+    const signingTemplate = {
       sessionKey: sessionKey.publicKey,
       resourceAbilityRequests: params.resourceAbilityRequests,
       capabilities: [authSig],
@@ -2623,10 +2627,10 @@ export class LitNodeClientNodeJs {
       expiration: sessionExpiration.toISOString(),
     };
 
-    const signatures: any = {};
+    const signatures: SessionSigsMap = {};
 
     this.connectedNodes.forEach((nodeAddress: string) => {
-      const toSign = {
+      const toSign: SessionSigningTemplate = {
         ...signingTemplate,
         nodeAddress,
       };
