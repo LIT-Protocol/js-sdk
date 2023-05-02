@@ -26,6 +26,11 @@ export class OtpProvider extends BaseProvider {
     this._checkRoute = config?.checkRoute || '/api/otp/check';
   }
 
+  /**
+   * Validates OTP code from {@link sendOtpCode}
+   * @param options {T extends AuthenticateOptions} options used in authentication
+   * @returns {Promise<AuthMethod>} Auth Method object containing Json Web Token
+   */
   public async authenticate<T extends AuthenticateOptions>(options?: T): Promise<AuthMethod> {
     if (options){
       return this.checkOtpCode((options as unknown as OtpAuthenticateOptions).code);
