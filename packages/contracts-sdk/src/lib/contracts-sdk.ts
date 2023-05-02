@@ -39,8 +39,8 @@ import * as stakingContract from '../abis/Staking';
 import { TokenInfo, addresses } from './addresses';
 // ----- autogen:imports:end  -----
 
-const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/http';
-const BLOCK_EXPLORER = 'https://lit-protocol.calderaexplorer.xyz/';
+const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
+const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
 
 // This function asynchronously executes a provided callback function for each item in the given array.
 // The callback function is awaited before continuing to the next iteration.
@@ -237,7 +237,7 @@ export class LitContracts {
 
       const chainInfo = {
         chainId: '0x2AC49',
-        chainName: 'Lit Protocol',
+        chainName: 'Chronicle - Lit Protocol Testnet',
         nativeCurrency: { name: 'LIT', symbol: 'LIT', decimals: 18 },
         rpcUrls: this.rpcs,
         blockExplorerUrls: [BLOCK_EXPLORER],
