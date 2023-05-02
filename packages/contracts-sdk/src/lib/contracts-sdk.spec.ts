@@ -185,7 +185,7 @@ describe('contractsSdk', () => {
     const privateKey =
       '0x4cc303e56f1ff14e762a33534d7fbaa8a76e52509fd96373f24045baae99cc38';
     const provider = new ethers.providers.JsonRpcProvider(
-      'https://lit-protocol.calderachain.xyz/http'
+      LITCONFIG.CHRONICLE_RPC
     );
     const signer = new ethers.Wallet(privateKey, provider);
     litContracts = new LitContracts({ signer });
@@ -208,12 +208,10 @@ describe('contractsSdk', () => {
 
   it('uses specified provider when provider is specified', () => {
     const provider = new ethers.providers.JsonRpcProvider(
-      'https://lit-protocol.calderachain.xyz/http'
+      LITCONFIG.CHRONICLE_RPC
     );
     litContracts = new LitContracts({ provider });
-    expect(litContracts.provider.connection.url).toBe(
-      'https://lit-protocol.calderachain.xyz/http'
-    );
+    expect(litContracts.provider.connection.url).toBe(LITCONFIG.CHRONICLE_RPC);
   });
 
   // it('initializes contract instances with the correct provider', () => {
