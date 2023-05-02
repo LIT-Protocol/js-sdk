@@ -2,6 +2,13 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
+    "pkp-ethers": "packages/pkp-ethers",
+
+    "ecdsa-sdk": "packages/ecdsa-sdk",
+
+    "pkp-base": "packages/pkp-base",
+    "pkp-cosmos": "packages/pkp-cosmos",
+
     "access-control-conditions": "packages/access-control-conditions",
     "auth-browser": "packages/auth-browser",
     "bls-sdk": "packages/bls-sdk",
@@ -11,7 +18,7 @@
     "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react",
     "demo-encrypt-decrypt-react": "apps/demo-encrypt-decrypt-react",
     "e2e": "apps/e2e",
-    "ecdsa-sdk": "packages/ecdsa-sdk",
+
     "encryption": "packages/encryption",
     "html": "apps/html",
     "lit-auth-client": "packages/lit-auth-client",
@@ -22,13 +29,10 @@
     "misc-browser": "packages/misc-browser",
     "nacl": "packages/nacl",
     "nodejs": "apps/nodejs",
-    "pkp-base": "packages/pkp-base",
-    "pkp-client": "packages/pkp-client",
-    "pkp-cosmos": "packages/pkp-cosmos",
-    "pkp-ethers": "packages/pkp-ethers",
-    "pkp-walletconnect": "packages/pkp-walletconnect",
     "react": "apps/react",
     "types": "packages/types",
-    "uint8arrays": "packages/uint8arrays"
+    "uint8arrays": "packages/uint8arrays",
+    "pkp-client": "packages/pkp-client",
+    "pkp-walletconnect": "packages/pkp-walletconnect"
   }
 }

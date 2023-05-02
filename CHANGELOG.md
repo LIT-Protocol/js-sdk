@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [x.x.x] - 2023-x-x
+
+- [#67](https://github.com/LIT-Protocol/js-sdk/pull/67) Introduced the `lit-auth-client` package, enabling social logins, Ethereum wallet signing, WebAuthn registration and authentication, and management of PKPs tied to auth methods
+
+- [#57](https://github.com/LIT-Protocol/js-sdk/pull/57) Introducing the pkp-client package, which serves as an abstraction of the pkp-ether, pkp-cosmos, and pkp-base packages. This enables the creation of Ether and Cosmos signers through PKPClient.
+
 ## [2.1.114] - 2023-04-08
+
 - [#77](https://github.com/LIT-Protocol/js-sdk/pull/77) Added support for Leap Cosmos wallet
 
 ## [2.1.100] - 2023-03-29
@@ -22,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.63] - 2023-03-13
 
-- [[#44](<https://github.com/LIT-Protocol/js-sdk/pull/44>)] Separated Node Code into its own repository `@lit-protocol/lit-node-client-nodejs`, from which `@lit-protocol/lit-node-client` will extend, so there are no breaking changes for existing customers.
+- [[#44](https://github.com/LIT-Protocol/js-sdk/pull/44)] Separated Node Code into its own repository `@lit-protocol/lit-node-client-nodejs`, from which `@lit-protocol/lit-node-client` will extend, so there are no breaking changes for existing customers.
 
 ### Added
 

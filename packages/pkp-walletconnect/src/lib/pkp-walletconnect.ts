@@ -119,7 +119,8 @@ export class PKPWalletConnect {
         for (const chain of chains) {
           if (this.checkIfChainIsSupported(chain)) {
             for (const wallet of wallets) {
-              accounts.push(`${chain}:${wallet.getAccount()}`);
+              const address = await wallet.getAddress();
+              accounts.push(`${chain}:${address}`);
             }
           } else {
             await this.client.rejectSession({
@@ -234,7 +235,7 @@ export class PKPWalletConnect {
 
     const { id, topic, params } = requestEvent;
     const { request } = params;
-    const wallet = this.findWalletByRequestParams(request);
+    const wallet = await this.findWalletByRequestParams(request);
 
     // Find the wallet corresponding to the account in the request
     if (!wallet) {
@@ -487,7 +488,7 @@ export class PKPWalletConnect {
    *
    * @param {any} params - Request event params.
    */
-  public findWalletByRequestParams(params: any): PKPBase | null {
+  public async findWalletByRequestParams(params: any): Promise<PKPBase | null> {
     const paramsString = JSON.stringify(params);
 
     // Loop through all wallets and find the one that has an address that can be found within the request params
@@ -497,7 +498,7 @@ export class PKPWalletConnect {
       }
       const wallets = value;
       for (const wallet of wallets) {
-        const acc = wallet.getAccount();
+        const acc = await wallet.getAddress();
         if (paramsString.toLowerCase().includes(acc.toLowerCase())) {
           return wallet;
         }

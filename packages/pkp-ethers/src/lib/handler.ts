@@ -378,14 +378,16 @@ export const ethRequestHandler = async <T = ETHSignature>({
   // -- run found function
   const fn = methodHandlers[payload.method] as ETHRequestHandler;
 
-  const data: any = await fn({ signer, payload });
-
   try {
+    const data: any = await fn({ signer, payload });
+
     if (data['signature']) {
       return data.signature;
     }
 
     if (data['txRes']) {
+      await data.txRes.wait();
+
       return data.txRes;
     }
 

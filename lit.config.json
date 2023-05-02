@@ -4,20 +4,23 @@
   },
   "MNEUMONIC": "island arrow object divide umbrella snap essay seminar top develop oyster success",
   "COSMOS_RPC": "https://cosmos-mainnet-rpc.allthatnode.com:26657",
-  "CHRONICLE_RPC": "https://lit-protocol.calderachain.xyz/http",
-  "CHRONICLE_RPC_2": "https://chain-rpc.litprotocol.com/http",
+  "CHRONICLE_RPC": "https://chain-rpc.litprotocol.com/http",
+  "CHRONICLE_RPC_2": "https://lit-protocol.calderachain.xyz/http",
   "RECIPIENT": "cosmos1jyz3m6gxuwceq63e44fqpgyw2504ux85ta8vma",
   "DENOM": "uatom",
   "AMOUNT": 1,
   "DEFAULT_GAS": 0.025,
   "CONTROLLER_AUTHSIG": {
-    "sig": "0x39b1802058a64809c3aaa1f08c3bd7c92471e4009412aa820ee5bfa04ad383b17415c5ab9cb706002349e3294ea7326c2a298e8ea6d93724af065e22bb8b18e71c",
+    "sig": "0x2b61d91d279bed9c1a161e27101698cdedd2c4c7a5cb7b60e3bd6fbcd6d1d305354918e1c01a8e61e1c7962b9cea213e3f17644957616dc160e49d945a864b4a1b",
     "derivedVia": "web3.eth.personal.sign",
-    "signedMessage": "localhost:4003 wants you to sign in with your Ethereum account:\n0x18f987D15a973776f6a60652B838688a1833fE95\n\n\nURI: http://localhost:4003/\nVersion: 1\nChain ID: 1\nNonce: kjxEJP3HOjOQGEbFh\nIssued At: 2023-04-24T15:57:10.501Z\nExpiration Time: 2050-09-08T15:57:03.843Z",
+    "signedMessage": "localhost:4003 wants you to sign in with your Ethereum account:\n0x18f987D15a973776f6a60652B838688a1833fE95\n\n\nURI: http://localhost:4003/\nVersion: 1\nChain ID: 1\nNonce: ThH1ex9yv1tKz4TiO\nIssued At: 2023-04-28T13:30:44.477Z\nExpiration Time: 2034-09-24T04:30:44.452Z",
     "address": "0x18f987d15a973776f6a60652b838688a1833fe95"
   },
-  "PKP_PUBKEY": "0x04b87bd8acec9ab9bfeae501326b65e6b29bb7958c269170194f7e4c1678370797a51478b13a67d7b55b073736c2902ac4c8b84c3e085b8a325c4c5758dd4d6190",
-  "PKP_ETH_ADDRESS": "0x665B08C53e81a83bFB985FBab89f389C4D17E5c7",
-  "PKP_COSMOS_ADDRESS": "cosmos1t8ulejfc4p5k493aslnplqvk665uldgnzls0s8",
-  "HEX_TEST_MEMO": "0x4a532d53444b2054657374"
+  "PKP_PUBKEY": "049bc4a7b33316170694f6ca6d5917af9c4a492f91636b71105059e244f558b5a99c395001390f50c82aa8b44448984218a306951a30b0e57f133062dc9ceacefc",
+  "PKP_ETH_ADDRESS": "0x016013f36abb93F6304eC0aBAbe5b0F3b6636579",
+  "PKP_COSMOS_ADDRESS": "cosmos15f53jgu645yngkkzf8q7qz9cl93exn67uatdkf",
+  "HEX_TEST_MEMO": "0x4a532d53444b2054657374",
+
+  "PKP_PUBKEY_2": "04a9c9a5db5472e6fac05ec001b804d3daa340a9b791e75dd52180312c7f0d4e806150473da6c785fadd8050ced5aada250146a97d928d0deb8b584bc7f169f10a",
+  "PKP_ETH_ADDRESS_2": "0xf26Bdd71BACf9D99F5739B4b1a2733E209248170"
 }

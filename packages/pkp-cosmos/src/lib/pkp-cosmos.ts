@@ -80,10 +80,6 @@ export class PKPCosmosWallet
     throw new Error('Method not implemented.');
   };
 
-  override getAccount(): string {
-    return this.address;
-  }
-
   /**
    * Returns the Bech32 address with the human-readable part (address prefix)
    */
@@ -94,6 +90,15 @@ export class PKPCosmosWallet
         Secp256k1.compressPubkey(this.uncompressedPubKeyBuffer)
       )
     );
+  }
+
+  /**
+   * Return address
+   *
+   * @returns {Promise<string>} - Cosmos address
+   */
+  override getAddress(): Promise<string> {
+    return Promise.resolve(this.address);
   }
 
   /**
