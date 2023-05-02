@@ -1,3 +1,4 @@
+import { SignInWithOTPParams } from './interfaces';
 import {
   AccsCOSMOSParams,
   AccsDefaultParams,
@@ -12,6 +13,7 @@ import {
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
   OAuthProviderOptions,
+  BaseAuthenticateOptions,
 } from './interfaces';
 
 export type AccessControlConditions = AccsRegularParams[] | AccsDefaultParams[];
@@ -104,6 +106,6 @@ export type AcceptedFileType = File | Blob;
  */
 export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
 
-export type ProviderOptions = OAuthProviderOptions | EthWalletProviderOptions;
+export type ProviderOptions = OAuthProviderOptions | EthWalletProviderOptions | SignInWithOTPParams;
 
-export type AuthenticateOptions = EthWalletAuthenticateOptions;
+export type AuthenticateOptions = BaseAuthenticateOptions;
