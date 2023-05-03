@@ -191,7 +191,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   /**
    * Return address
    *
-   * @returns {Promise<string>} - The address associated with the PKPBase instance
+   * @returns {Promise<string>} - Address associated with concrete type of PKPBase
    */
   getAddress(): Promise<string> {
     return Promise.resolve('');

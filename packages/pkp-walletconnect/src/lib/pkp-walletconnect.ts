@@ -1,6 +1,7 @@
 import { PKPEthersWallet, ethRequestHandler } from '@lit-protocol/pkp-ethers';
 import { LIT_CHAINS } from '@lit-protocol/constants';
 import { SupportedETHSigningMethods } from '@lit-protocol/pkp-ethers';
+import { Core } from '@walletconnect/core';
 import {
   IWeb3Wallet,
   Web3Wallet,
@@ -16,8 +17,10 @@ import {
 import { PKPClient } from '@lit-protocol/pkp-client';
 import { PKPBase } from '@lit-protocol/pkp-base';
 
-export interface InitWalletConnectParams {
-  config: Web3WalletTypes.Options;
+export interface InitWalletConnectParams
+  extends Omit<Web3WalletTypes.Options, 'core'> {
+  projectId: string;
+  relayUrl?: string;
 }
 
 export class PKPWalletConnect {
@@ -29,28 +32,40 @@ export class PKPWalletConnect {
   private supportedChains: string[] = ['eip155'];
 
   // For logging
+  private readonly debug: boolean = false;
   private readonly PREFIX = '[PKPWalletConnect]';
   private readonly orange = '\x1b[33m';
   private readonly reset = '\x1b[0m';
   private readonly red = '\x1b[31m';
 
-  constructor() {
+  constructor(debug?: boolean) {
     this.pkpWallets = new Map();
     for (const chain of this.supportedChains) {
       this.pkpWallets.set(chain, []);
     }
+
+    this.debug = debug || false;
   }
 
   /**
    * Initializes the WalletConnect client
    *
    * @param {InitWalletConnectParams} params
-   * @param {Web3WalletTypes.Options} params.config - The WalletConnect configuration
+   * @param {string} params.projectId - The WalletConnect configuration
    */
   public async initWalletConnect(
     params: InitWalletConnectParams
   ): Promise<void> {
-    this.client = await Web3Wallet.init(params.config);
+    const core = new Core({
+      logger: 'debug',
+      projectId: params.projectId,
+      relayUrl: params.relayUrl || 'wss://relay.walletconnect.com',
+    });
+    this.client = await Web3Wallet.init({
+      core,
+      metadata: params.metadata,
+      name: params.name,
+    } as Web3WalletTypes.Options);
   }
 
   /**
@@ -72,9 +87,7 @@ export class PKPWalletConnect {
    * @param {SignClientTypes.EventArguments['session_proposal']} proposal - The session proposal.
    * @returns {Promise<SessionTypes.Struct | void>} - The session data if approved.
    */
-  public async approveSessionProposal(
-    proposal: SignClientTypes.EventArguments['session_proposal']
-  ): Promise<SessionTypes.Struct | void> {
+  public async approveSessionProposal(proposal: any): Promise<any> {
     if (!this.client) {
       return this._throwError(
         'WalletConnect client has not yet been initialized. Please call init().'
@@ -187,7 +200,7 @@ export class PKPWalletConnect {
    * @returns {Promise<any>} - The session data.
    */
   public async rejectSessionProposal(
-    proposal: SignClientTypes.EventArguments['session_proposal'],
+    proposal: any,
     reason?: any
   ): Promise<void> {
     if (!this.client) {
@@ -221,9 +234,7 @@ export class PKPWalletConnect {
    *
    * @param {SignClientTypes.EventArguments['session_request']} requestEvent - The session request.
    */
-  public async approveSessionRequest(
-    requestEvent: SignClientTypes.EventArguments['session_request']
-  ): Promise<void> {
+  public async approveSessionRequest(requestEvent: any): Promise<void> {
     if (!this.client) {
       return this._throwError(
         'WalletConnect client has not yet been initialized. Please call init().'
@@ -249,18 +260,15 @@ export class PKPWalletConnect {
     // Process the request using specified wallet and JSON RPC handlers
     try {
       // Handle Ethereum request
-      if (request.method.startsWith('eth_')) {
-        const result = await ethRequestHandler({
-          signer: wallet as PKPEthersWallet,
-          payload: {
-            method: request.method as SupportedETHSigningMethods,
-            params: request.params,
-          },
-        });
-        response = formatJsonRpcResult(id, result);
-      } else {
-        throw new Error(`Unsupported method: ${request.method}`);
-      }
+      const result = await ethRequestHandler({
+        signer: wallet as PKPEthersWallet,
+        payload: {
+          method: request.method as SupportedETHSigningMethods,
+          params: request.params,
+        },
+      });
+      this._log(`request event ${id} - result`, result);
+      response = formatJsonRpcResult(id, result);
     } catch (err: unknown) {
       let message: string;
       if (err instanceof Error) {
@@ -273,6 +281,7 @@ export class PKPWalletConnect {
 
     // Send a response with the result or an error
     if (response) {
+      this._log(`request event ${id} - response`, response);
       return await this.respondSessionRequest({
         topic,
         response,
@@ -287,7 +296,7 @@ export class PKPWalletConnect {
    * @param {any} [reason] - The reason for rejecting the session request.
    */
   public async rejectSessionRequest(
-    requestEvent: SignClientTypes.EventArguments['session_request'],
+    requestEvent: any,
     reason?: any
   ): Promise<void> {
     if (!this.client) {
@@ -317,6 +326,7 @@ export class PKPWalletConnect {
         'WalletConnect client has not yet been initialized. Please call init().'
       );
     }
+    this._log('respondSessionRequest', params);
     return await this.client.respondSessionRequest(params);
   };
 
@@ -460,6 +470,25 @@ export class PKPWalletConnect {
   // ----------------- Helpers -----------------
 
   /**
+   * Get addresses by chain
+   *
+   * @param {string} chain - Chain in CAIP-2 format
+   *
+   * @returns {Promise<string[]>} - Array of addresses
+   */
+  public async getAddresses(chain: string): Promise<string[]> {
+    const addresses: string[] = [];
+    const wallets = this.pkpWallets.get(chain);
+    if (!wallets) {
+      return addresses;
+    }
+    for (const wallet of wallets) {
+      addresses.push(await wallet.getAddress());
+    }
+    return addresses;
+  }
+
+  /**
    * Check if chain is supported by Lit
    *
    * @param {string} chain - Chain in CAIP-2 format
@@ -534,6 +563,12 @@ export class PKPWalletConnect {
   }
 
   // ----------------- Private methods -----------------
+
+  private _log(...args: any[]): void {
+    if (this.debug) {
+      console.log(this.orange + this.PREFIX + this.reset, ...args);
+    }
+  }
 
   /**
    * Logs an error message to the console and throws an Error with the same message.
