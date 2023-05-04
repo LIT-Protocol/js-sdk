@@ -10,7 +10,6 @@
     "crypto": "packages/crypto",
     "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react",
     "demo-encrypt-decrypt-react": "apps/demo-encrypt-decrypt-react",
-    "e2e": "apps/e2e",
     "ecdsa-sdk": "packages/ecdsa-sdk",
     "encryption": "packages/encryption",
     "html": "apps/html",
