@@ -24,13 +24,12 @@ initWasmBlsSdk().then((exports) => {
 ```js
 // set decryption shares bytes in wasm
 decryptionShares.forEach((s: any, idx: any) => {
+  wasmExports.set_share_indexes(idx, s.shareIndex);
 
-    wasmExports.set_share_indexes(idx, s.shareIndex);
+  const shareAsBytes = uint8arrayFromString(s.decryptionShare, 'base16');
 
-    const shareAsBytes = uint8arrayFromString(s.decryptionShare, 'base16');
-
-    for (let i = 0; i < shareAsBytes.length; i++) {
-        wasmExports.set_decryption_shares_byte(i, idx, shareAsBytes[i]);
-    }
+  for (let i = 0; i < shareAsBytes.length; i++) {
+    wasmExports.set_decryption_shares_byte(i, idx, shareAsBytes[i]);
+  }
 });
 ```

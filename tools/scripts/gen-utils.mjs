@@ -85,11 +85,15 @@ export const GEN_FOOTER_SCRIPTS = `
 //     document.getElementById('root').insertAdjacentHTML('beforeend', template);
 // });
  */
-export const getConsoleTemplate = (name, i, globalVarPrefix, isReact = false) => {
+export const getConsoleTemplate = (
+  name,
+  i,
+  globalVarPrefix,
+  isReact = false
+) => {
+  const capitalisedName = name.split(globalVarPrefix)[1].toUpperCase();
 
-    const capitalisedName = name.split(globalVarPrefix)[1].toUpperCase();
-
-    return `
+  return `
     ${!isReact ? `<!-- (${i + 1}): ${capitalisedName} -->` : ''}
     ${!isReact ? `<script>` : ''}
         if(typeof ${name} === 'undefined') {
@@ -161,4 +165,4 @@ export const getConsoleTemplate = (name, i, globalVarPrefix, isReact = false) =>
         });
     ${!isReact ? `</script>` : ''}
     `;
-}
+};

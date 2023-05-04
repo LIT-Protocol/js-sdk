@@ -12,7 +12,7 @@
     "postBuild:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",
     "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist @lit-protocol",
     "build": "yarn build:packages",
-    "build:packages": "yarn reset && yarn tools --build --packages && yarn tools --setup-local-dev && yarn postBuild:mapDepsToDist && yarn tool:genReadme",
+    "build:packages": "yarn reset && yarn tools --build --packages && yarn tools --postBuild && yarn tools --setup-local-dev && yarn postBuild:mapDepsToDist && yarn tool:genReadme && yarn build:verify",
     "build:target": "yarn node tools/scripts/build.mjs",
     "build:setupLocalDev": "yarn tools --setup-local-dev",
     "build:verify": "yarn tools --verify",
@@ -22,6 +22,7 @@
     "test:e2e": "yarn tools --test --e2e run-react-and-test",
     "test:unit": "yarn test:packages",
     "test:custom": "yarn tools --test --custom",
+    "bbp": "yarn bump && yarn build && yarn publish:dev",
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:dev": "yarn node ./tools/scripts/pub.mjs --tag dev",
     "publish:test": "yarn node ./tools/scripts/pub.mjs --tag test",
@@ -51,7 +52,8 @@
     "bump:minor": "yarn tools --v --minor",
     "bump:major": "yarn tools --v --major",
     "b": "git branch --show",
-    "txServer": "node tx-handler-server.mjs"
+    "txServer": "node tx-handler-server.mjs",
+    "prettier": "nx format:write --all"
   },
   "private": true,
   "dependencies": {

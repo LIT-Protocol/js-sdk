@@ -11,7 +11,7 @@ import {
 
 import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
-import { log, throwError } from '@lit-protocol/misc';
+import { isBrowser, log, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
@@ -37,12 +37,23 @@ if (!globalThis.wasmExports) {
 }
 
 if (!globalThis.wasmECDSA) {
-  wasmECDSA.initWasmEcdsaSdk().then((sdk: any) => {
+  let init;
+  let env;
+
+  if (isBrowser()) {
+    init = wasmECDSA.initWasmEcdsaSdkBrowser;
+    env = 'Browser';
+  } else {
+    init = wasmECDSA.initWasmEcdsaSdkNodejs;
+    env = 'NodeJS';
+  }
+
+  init().then((sdk: any) => {
     globalThis.wasmECDSA = sdk;
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK] wasmECDSA loaded. ${
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
           Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );

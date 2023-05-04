@@ -6,12 +6,9 @@ import {
   asyncForEach,
   greenLog,
   listDirsRecursive,
-  runCommand,
   getArgs,
-  childRunCommand,
   spawnCommand,
   readJsonFile,
-  versionChecker,
   redLog,
   question,
   writeJsonFile,
@@ -124,6 +121,8 @@ await question('Are you sure you want to publish to? (y/n)', {
     // await 1 second
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
+    let counter = 0;
+
     await asyncForEach(dirs, async (dir) => {
       // read the package.json file
       const pkg = await readJsonFile(`${dir}/package.json`);
@@ -170,7 +169,13 @@ await question('Are you sure you want to publish to? (y/n)', {
           {
             cwd: dir,
           },
-          { logExit: false }
+          {
+            logExit: false,
+            exitCallback: () => {
+              counter++;
+              // console.log(`${dir} published with tag ${VALUE}`)
+            },
+          }
         );
       }
 
@@ -181,10 +186,25 @@ await question('Are you sure you want to publish to? (y/n)', {
           {
             cwd: dir,
           },
-          { logExit: false }
+          {
+            logExit: false,
+            exitCallback: () => {
+              counter++;
+              // console.log(`${dir} published with tag ${VALUE}`)
+            },
+          }
         );
       }
     });
+
+    while (true) {
+      // wait for 1 second
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (counter >= dirs.length) {
+        greenLog('🎉 Publish complete!', true);
+        exit(0);
+      }
+    }
   },
   no: () => {
     redLog('Publish cancelled', true);
