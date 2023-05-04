@@ -121,6 +121,7 @@ export async function childRunCommand(command) {
 
 export const spawnCommand = (command, args, options = {}, options2 = {
     logExit: true,
+    exitCallback: () => {}
 }) => {
 
     // Use the spawn() function to run the command in a child process
@@ -144,6 +145,7 @@ export const spawnCommand = (command, args, options = {}, options2 = {
         if (options2.logExit) {
             console.log(`child process exited with code ${code}`);
         }
+        options2.exitCallback(code);
     });
 }
 

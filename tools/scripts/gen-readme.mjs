@@ -5,7 +5,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { exit } from 'process';
-import { listDirsRecursive, redLog } from './utils.mjs';
+import { greenLog, listDirsRecursive, redLog } from './utils.mjs';
 
 const readmePath = join('README.md');
 const readme = readFileSync(readmePath, 'utf8');
@@ -108,7 +108,7 @@ const tables = {
     "rows": rows
 }
 
-console.log(rows);
+// console.log(rows);
 
 // make table to github markdown
 const table = (tables) => {
@@ -136,5 +136,6 @@ const newReadme = readme.replace(
 
 writeFileSync
     (readmePath, newReadme, 'utf8');
+    greenLog('🎉 New README.md Generated!', true)
 
     exit();
