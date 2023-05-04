@@ -304,7 +304,7 @@ async function initNodejs(input) {
     return ret;
   };
   imports.wbg.__wbg_require_edfaedd93e302925 = function () {
-    console.warn('[ECDSA-SDK NodeJS] __wbg_require_edfaedd93e302925');
+    // console.warn('[ECDSA-SDK NodeJS] __wbg_require_edfaedd93e302925');
     return handleError(function (arg0, arg1, arg2) {
       // const uint8Memory = getUint8Memory0().subarray(arg1, arg1 + arg2);
       // console.log("uint8Memory:", uint8Memory);
@@ -318,14 +318,13 @@ async function initNodejs(input) {
       let _crypto;
 
       try {
-          _crypto = require('crypto');
-          console.warn("ENV A X:", _crypto);
-      }catch (e) {
-          _crypto = globalThis.crypto;
-          console.warn("ENV B X:", globalThis.crypto);
+        _crypto = require('crypto');
+        // console.warn("ENV A X:", _crypto);
+      } catch (e) {
+        _crypto = globalThis.crypto;
+        // console.warn("ENV B X:", globalThis.crypto);
       }
       return addHeapObject(_crypto);
-      
     }, arguments);
   };
   imports.wbg.__wbg_crypto_2bc4d5b05161de5b = function (arg0) {

@@ -12,16 +12,12 @@
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/lit-node-client-nodejs",
         "main": "packages/lit-node-client-nodejs/src/index.ts",
         "tsConfig": "packages/lit-node-client-nodejs/tsconfig.lib.json",
-        "assets": [
-          "packages/lit-node-client-nodejs/*.md"
-        ]
+        "assets": ["packages/lit-node-client-nodejs/*.md"]
       }
     },
     "_buildWeb": {
@@ -29,9 +25,7 @@
       "options": {
         "globalName": "LitJsSdk_litNodeClientNodejs",
         "outfile": "dist/packages/lit-node-client-nodejs-vanilla/lit-node-client-nodejs.js",
-        "entryPoints": [
-          "./packages/lit-node-client-nodejs/src/index.ts"
-        ],
+        "entryPoints": ["./packages/lit-node-client-nodejs/src/index.ts"],
         "define": {
           "process.env.NODE_DEBUG": "false",
           "global": "window"
@@ -46,31 +40,22 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/lit-node-client-nodejs/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/lit-node-client-nodejs/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/lit-node-client-nodejs"
-      ],
+      "outputs": ["coverage/packages/lit-node-client-nodejs"],
       "options": {
         "jestConfig": "packages/lit-node-client-nodejs/jest.config.ts",
         "passWithNoTests": true
       }
     },
-    "testWatch":
-    {
+    "testWatch": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/lit-node-client-nodejs"
-      ],
+      "outputs": ["coverage/packages/lit-node-client-nodejs"],
       "options": {
         "jestConfig": "packages/lit-node-client-nodejs/jest.config.ts",
         "watch": true,

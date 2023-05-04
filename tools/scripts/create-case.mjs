@@ -10,8 +10,8 @@ const OUTPUT_FILE = './apps/example-nextjs-js/pages/test-cases.ts';
 const args = getArgs();
 
 if (args.length < 1) {
-    redLog('Usage: node tools/scripts/create-case.mjs <case-name> <flag>');
-    exit();
+  redLog('Usage: node tools/scripts/create-case.mjs <case-name> <flag>');
+  exit();
 }
 
 const flag = args[1];
@@ -21,26 +21,25 @@ const files = await getFiles(TARGET_DIR);
 let nextCase;
 
 files.forEach((file, i) => {
-    if ( file.includes('CASE') && ! file.includes('XXX') ) {
+  if (file.includes('CASE') && !file.includes('XXX')) {
+    const caseNumber = file.split('_');
+    const caseNumberInt = parseInt(caseNumber[1]);
 
-        const caseNumber = file.split('_');
-        const caseNumberInt = parseInt(caseNumber[1]);
-
-        if ( files.length >= i - 1 ) {
-            nextCase = caseNumberInt + 1;
-        }
+    if (files.length >= i - 1) {
+      nextCase = caseNumberInt + 1;
     }
-})
+  }
+});
 
 let nextCaseString;
 
 // prepend one zero to the case number if it's less than 100, or prepend two zeros to the case number if it's less than 10
-if ( nextCase < 10 ) {
-    nextCaseString = '00' + nextCase;
-} else if ( nextCase < 100 ) {
-    nextCaseString = '0' + nextCase;
+if (nextCase < 10) {
+  nextCaseString = '00' + nextCase;
+} else if (nextCase < 100) {
+  nextCaseString = '0' + nextCase;
 } else {
-    nextCaseString = nextCase;
+  nextCaseString = nextCase;
 }
 
 // prepend nextcase string with "CASE_"
@@ -59,10 +58,10 @@ const template = fs.readFileSync(TEMPLATE_FILE, 'utf8');
 const newCase = template.replace(/CASE_XXX_TEMPLATE/g, caseName);
 
 // write the new case file
-if ( flag === '--dry-run' ) {
-    console.log(newCase);
-}else{
-    fs.writeFileSync(TARGET_DIR + caseName + '.ts', newCase);
+if (flag === '--dry-run') {
+  console.log(newCase);
+} else {
+  fs.writeFileSync(TARGET_DIR + caseName + '.ts', newCase);
 }
 
 const newFiles = await getFiles(TARGET_DIR);
@@ -72,18 +71,20 @@ const newFiles = await getFiles(TARGET_DIR);
 const importTemplates = [];
 
 newFiles.forEach((file) => {
-    if ( file.includes('CASE') && ! file.includes('XXX') ) {
-        importTemplates.push(`import {\n ${file.split('.')[0] }\n} from './cases/${file.split('.')[0]}'`);
-    }
-})
+  if (file.includes('CASE') && !file.includes('XXX')) {
+    importTemplates.push(
+      `import {\n ${file.split('.')[0]}\n} from './cases/${file.split('.')[0]}'`
+    );
+  }
+});
 
 const exportTemplates = [];
 
 newFiles.forEach((file) => {
-    if ( file.includes('CASE') && ! file.includes('XXX') ) {
-        exportTemplates.push(`...${file.split('.')[0]}`);
-    }
-})
+  if (file.includes('CASE') && !file.includes('XXX')) {
+    exportTemplates.push(`...${file.split('.')[0]}`);
+  }
+});
 const exportTemplate = `\n\nexport const testCases = [
 ${exportTemplates.join(',\n')}
 ]`;
@@ -97,10 +98,10 @@ const importTemplate = importTemplates.join(';\n\n');
 const indexFile = importTemplate + '' + exportTemplate;
 
 // write the index file
-if( flag === '--dry-run' ) {
-    console.log(indexFile);
-}else{
-    fs.writeFileSync(OUTPUT_FILE, indexFile);
+if (flag === '--dry-run') {
+  console.log(indexFile);
+} else {
+  fs.writeFileSync(OUTPUT_FILE, indexFile);
 }
 
 exit();

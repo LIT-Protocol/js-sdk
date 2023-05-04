@@ -12,16 +12,12 @@
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/types",
         "main": "packages/types/src/index.ts",
         "tsConfig": "packages/types/tsconfig.lib.json",
-        "assets": [
-          "packages/types/*.md"
-        ]
+        "assets": ["packages/types/*.md"]
       }
     },
     "_buildWeb": {
@@ -29,9 +25,7 @@
       "options": {
         "globalName": "LitJsSdk_types",
         "outfile": "dist/packages/types-vanilla/types.js",
-        "entryPoints": [
-          "./packages/types/src/index.ts"
-        ],
+        "entryPoints": ["./packages/types/src/index.ts"],
         "define": {
           "process.env.NODE_DEBUG": "false",
           "global": "window"
@@ -46,20 +40,14 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/types/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/types/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/types"
-      ],
+      "outputs": ["coverage/packages/types"],
       "options": {
         "jestConfig": "packages/types/jest.config.ts",
         "passWithNoTests": true

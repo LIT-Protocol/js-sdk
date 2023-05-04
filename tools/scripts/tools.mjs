@@ -1381,7 +1381,9 @@ async function validateDependencyVersions() {
         `❌ ${pkg} has ${fails} dependencies with versions that do not match.`
       );
     } else {
-      greenLog(`✅ ${i + 1} ${pkg} contains all dependencies with matching versions.`);
+      greenLog(
+        `✅ ${i + 1} ${pkg} contains all dependencies with matching versions.`
+      );
     }
   });
 

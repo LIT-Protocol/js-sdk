@@ -14,15 +14,15 @@ import { greenLog, redLog } from '../../tools/scripts/utils.mjs';
  * @returns {Promise} A promise that resolves to the output of the command.
  */
 export async function runCommand(command) {
-    return new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-                return;
-            }
-            resolve(stdout.trim());
-        });
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(stdout.trim());
     });
+  });
 }
 
 /**
@@ -32,8 +32,8 @@ export async function runCommand(command) {
  * @param {string} content - The content to write to the file.
  */
 export async function writeFile(filename, content) {
-    const filePath = path.join(process.cwd(), filename);
-    fs.writeFileSync(filePath, content);
+  const filePath = path.join(process.cwd(), filename);
+  fs.writeFileSync(filePath, content);
 }
 
 /**
@@ -42,10 +42,10 @@ export async function writeFile(filename, content) {
  * @param {string} path - The path of the directory to create.
  */
 export const createDirs = (path) => {
-    if (!fs.existsSync(path)) {
-        fs.mkdirSync(path, { recursive: true });
-    }
-}
+  if (!fs.existsSync(path)) {
+    fs.mkdirSync(path, { recursive: true });
+  }
+};
 
 /**
  * readJsonFile - Reads a file and parses its content as JSON.
@@ -55,9 +55,9 @@ export const createDirs = (path) => {
  * @returns {object} The content of the file as a JSON object.
  */
 export async function readJsonFile(filename) {
-    const filePath = path.join(process.cwd(), filename);
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContents);
+  const filePath = path.join(process.cwd(), filename);
+  const fileContents = fs.readFileSync(filePath, 'utf8');
+  return JSON.parse(fileContents);
 }
 
 /**
@@ -67,8 +67,8 @@ export async function readJsonFile(filename) {
  * @param {object} content - The content to write to the file as JSON.
  */
 export async function writeJsonFile(filename, content) {
-    const filePath = path.join(process.cwd(), filename);
-    fs.writeFileSync(filePath, JSON.stringify(content, null, 2));
+  const filePath = path.join(process.cwd(), filename);
+  fs.writeFileSync(filePath, JSON.stringify(content, null, 2));
 }
 
 /**
@@ -77,9 +77,9 @@ export async function writeJsonFile(filename, content) {
  * @returns {Array} An array of strings containing the command line arguments.
  */
 export const getArgs = () => {
-    const args = process.argv.slice(2);
-    return args;
-}
+  const args = process.argv.slice(2);
+  return args;
+};
 
 /**
  * asyncForEach - Asynchronously iterates over an array and applies the specified callback to each element.
@@ -88,11 +88,10 @@ export const getArgs = () => {
  * @param {function} callback - The function to apply to each element of the array.
  */
 export const asyncForEach = async (array, callback) => {
-    for (let index = 0; index < array.length; index++) {
-        await callback(array[index], index, array);
-    }
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
 };
-
 
 /**
  * getContractAddresses - Returns the contract addresses of deployed contracts.
@@ -103,49 +102,50 @@ export const asyncForEach = async (array, callback) => {
  * ABI paths, and addresses of the deployed contracts.
  */
 export const getContractAddresses = async (LitConfig) => {
-    // get deployed contract addresses
-    const contractAddresses = JSON.parse(await fetch(LitConfig.root + LitConfig.contracts).then((res) => res.text()));
-    Object.entries(contractAddresses).forEach(([key, value]) => {
-        if (key.includes('ContractAddress')) return;
+  // get deployed contract addresses
+  const contractAddresses = JSON.parse(
+    await fetch(LitConfig.root + LitConfig.contracts).then((res) => res.text())
+  );
+  Object.entries(contractAddresses).forEach(([key, value]) => {
+    if (key.includes('ContractAddress')) return;
 
-        delete contractAddresses[key];
+    delete contractAddresses[key];
+  });
+
+  const contracts = [];
+  Object.entries(contractAddresses).forEach((item) => {
+    // remove 'ContractAddress' from string
+    let correctedName = item[0].replace('ContractAddress', '');
+    let exportName = correctedName;
+
+    // capitalize first letter
+    correctedName =
+      correctedName.charAt(0).toUpperCase() + correctedName.slice(1);
+
+    // replace Pkp with PKP
+    correctedName = correctedName.replace('Pkp', 'PKP');
+    correctedName = correctedName.replace('Nft', 'NFT');
+    correctedName = correctedName.replace('Lit', 'LIT');
+    correctedName = correctedName.replace('Resolver', 'ContractResolver');
+
+    if (correctedName === 'ContractResolver') {
+      exportName = 'contractResolver';
+    }
+
+    // append .json
+    // correctedName = correctedName
+    let abiPath = LitConfig.root + LitConfig.abis.dir + correctedName + '.json';
+
+    contracts.push({
+      name: item[0],
+      correctedName,
+      exportName: exportName,
+      abiPath,
+      address: item[1],
     });
-
-    const contracts = [];
-    Object.entries(contractAddresses).forEach((item) => {
-
-        // remove 'ContractAddress' from string
-        let correctedName = item[0].replace('ContractAddress', '');
-        let exportName = correctedName;
-
-        // capitalize first letter
-        correctedName = correctedName.charAt(0).toUpperCase() + correctedName.slice(1);
-
-        // replace Pkp with PKP
-        correctedName = correctedName.replace('Pkp', 'PKP');
-        correctedName = correctedName.replace('Nft', 'NFT');
-        correctedName = correctedName.replace('Lit', 'LIT');
-        correctedName = correctedName.replace('Resolver', 'ContractResolver');
-
-        if(correctedName === 'ContractResolver'){
-            exportName = 'contractResolver';
-        }
-
-        // append .json
-        // correctedName = correctedName 
-        let abiPath = LitConfig.root + LitConfig.abis.dir + correctedName + '.json';
-
-        contracts.push({
-            name: item[0],
-            correctedName,
-            exportName: exportName,
-            abiPath,
-            address: item[1],
-        });
-    });
-    return contracts;
-}
-
+  });
+  return contracts;
+};
 
 // ------ Run
 const root = './packages/contracts-sdk/';
@@ -158,40 +158,48 @@ const deployedContracts = await getContractAddresses(LitConfig);
 await writeJsonFile(src + 'deployed-contracts.json', deployedContracts);
 
 await asyncForEach(deployedContracts, async (contract) => {
-    let json;
+  let json;
 
-    try {
-        json = await fetch(contract.abiPath).then((res) => res.text())
-        json = JSON.parse(json);
-    } catch (e) {
-        redLog(`Failed to fetch ${contract.abiPath}`);
-    }
+  try {
+    json = await fetch(contract.abiPath).then((res) => res.text());
+    json = JSON.parse(json);
+  } catch (e) {
+    redLog(`Failed to fetch ${contract.abiPath}`);
+  }
 
-    let abi = json.abi;
+  let abi = json.abi;
 
-    // -- create dir if not exists
-    createDirs(abisDir);
+  // -- create dir if not exists
+  createDirs(abisDir);
 
-    const abiPath = abisDir + contract.correctedName + '.json';
+  const abiPath = abisDir + contract.correctedName + '.json';
 
-    // -- write abi to file
-    try{
-        await writeJsonFile(abiPath, abi);
-    }catch(e){
-        redLog(`Failed to write ${abiPath} => ${e.message}`);
-    }
+  // -- write abi to file
+  try {
+    await writeJsonFile(abiPath, abi);
+  } catch (e) {
+    redLog(`Failed to write ${abiPath} => ${e.message}`);
+  }
 
-    const dataPath = abisDir + contract.correctedName + '.data.ts';
+  const dataPath = abisDir + contract.correctedName + '.data.ts';
 
-    // -- write data (address, abi) to file
-    await writeFile(dataPath, `export const ${contract.exportName} = ` + JSON.stringify({
-        address: contract.address,
-        abi,
-    }, null, 2));
+  // -- write data (address, abi) to file
+  await writeFile(
+    dataPath,
+    `export const ${contract.exportName} = ` +
+      JSON.stringify(
+        {
+          address: contract.address,
+          abi,
+        },
+        null,
+        2
+      )
+  );
 
-    await runCommand(`yarn abi-types-generator ${abiPath} --provider=ethers`);
+  await runCommand(`yarn abi-types-generator ${abiPath} --provider=ethers`);
 
-    greenLog(`Wrote => ${abiPath}`);
+  greenLog(`Wrote => ${abiPath}`);
 });
 
 exit();

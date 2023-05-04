@@ -178,114 +178,114 @@ describe('humanizer.ts', () => {
   it('should humanizeUnifiedAccessControlConditions', async () => {
     const INPUT: UnifiedAccessControlConditions = [
       {
-        conditionType: "evmBasic",
-        contractAddress: "",
-        standardContractType: "",
-        chain: "ethereum",
-        method: "eth_getBalance",
-        parameters: [":userAddress", "latest"],
+        conditionType: 'evmBasic',
+        contractAddress: '',
+        standardContractType: '',
+        chain: 'ethereum',
+        method: 'eth_getBalance',
+        parameters: [':userAddress', 'latest'],
         returnValueTest: {
-          comparator: ">=",
-          value: "10000000000000",
+          comparator: '>=',
+          value: '10000000000000',
         },
       },
-      { operator: "or" },
+      { operator: 'or' },
       {
-        conditionType: "evmContract",
-        contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
-        functionName: "balanceOf",
-        functionParams: [":userAddress", "8"],
+        conditionType: 'evmContract',
+        contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
+        functionName: 'balanceOf',
+        functionParams: [':userAddress', '8'],
         functionAbi: {
-          type: "function",
-          stateMutability: "view",
+          type: 'function',
+          stateMutability: 'view',
           outputs: [
             {
-              type: "uint256",
-              name: "",
-              internalType: "uint256",
+              type: 'uint256',
+              name: '',
+              internalType: 'uint256',
             },
           ],
-          name: "balanceOf",
+          name: 'balanceOf',
           inputs: [
             {
-              type: "address",
-              name: "account",
-              internalType: "address",
+              type: 'address',
+              name: 'account',
+              internalType: 'address',
             },
             {
-              type: "uint256",
-              name: "id",
-              internalType: "uint256",
+              type: 'uint256',
+              name: 'id',
+              internalType: 'uint256',
             },
           ],
         },
-        chain: "polygon",
+        chain: 'polygon',
         returnValueTest: {
-          key: "",
-          comparator: ">",
-          value: "0",
+          key: '',
+          comparator: '>',
+          value: '0',
         },
       },
-    ]
+    ];
 
     const OUTPUT = await humanizer.humanizeUnifiedAccessControlConditions({
       unifiedAccessControlConditions: INPUT,
     });
 
-    expect(OUTPUT).toBe("Owns at least 0.00001 ETH or balanceOf(:userAddress, 8) on contract address 0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88 should have a result of more than 0");
-
+    expect(OUTPUT).toBe(
+      'Owns at least 0.00001 ETH or balanceOf(:userAddress, 8) on contract address 0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88 should have a result of more than 0'
+    );
   });
 
   it('should humanizeAccessControlConditions', async () => {
-    
-    const INPUT : UnifiedAccessControlConditions= [
+    const INPUT: UnifiedAccessControlConditions = [
       {
-        conditionType: "evmBasic",
-        contractAddress: "",
-        standardContractType: "",
-        chain: "ethereum",
-        method: "eth_getBalance",
-        parameters: [":userAddress", "latest"],
+        conditionType: 'evmBasic',
+        contractAddress: '',
+        standardContractType: '',
+        chain: 'ethereum',
+        method: 'eth_getBalance',
+        parameters: [':userAddress', 'latest'],
         returnValueTest: {
-          comparator: ">=",
-          value: "10000000000000",
+          comparator: '>=',
+          value: '10000000000000',
         },
       },
-      { operator: "or" },
+      { operator: 'or' },
       {
-        conditionType: "evmContract",
-        contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
-        functionName: "balanceOf",
-        functionParams: [":userAddress", "8"],
+        conditionType: 'evmContract',
+        contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
+        functionName: 'balanceOf',
+        functionParams: [':userAddress', '8'],
         functionAbi: {
-          type: "function",
-          stateMutability: "view",
+          type: 'function',
+          stateMutability: 'view',
           outputs: [
             {
-              type: "uint256",
-              name: "",
-              internalType: "uint256",
+              type: 'uint256',
+              name: '',
+              internalType: 'uint256',
             },
           ],
-          name: "balanceOf",
+          name: 'balanceOf',
           inputs: [
             {
-              type: "address",
-              name: "account",
-              internalType: "address",
+              type: 'address',
+              name: 'account',
+              internalType: 'address',
             },
             {
-              type: "uint256",
-              name: "id",
-              internalType: "uint256",
+              type: 'uint256',
+              name: 'id',
+              internalType: 'uint256',
             },
           ],
         },
-        chain: "polygon",
+        chain: 'polygon',
         returnValueTest: {
-          key: "",
-          comparator: ">",
-          value: "0",
+          key: '',
+          comparator: '>',
+          value: '0',
         },
       },
     ];
@@ -294,7 +294,8 @@ describe('humanizer.ts', () => {
       unifiedAccessControlConditions: INPUT,
     });
 
-    expect(OUTPUT).toBe("Owns at least 0.00001 ETH or balanceOf(:userAddress, 8) on contract address 0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88 should have a result of more than 0");
-
-  })
+    expect(OUTPUT).toBe(
+      'Owns at least 0.00001 ETH or balanceOf(:userAddress, 8) on contract address 0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88 should have a result of more than 0'
+    );
+  });
 });

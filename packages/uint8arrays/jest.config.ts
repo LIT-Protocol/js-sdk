@@ -12,5 +12,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/uint8arrays',
-  setupFilesAfterEnv: ['../../jest.setup.js']
+  setupFilesAfterEnv: ['../../jest.setup.js'],
 };
