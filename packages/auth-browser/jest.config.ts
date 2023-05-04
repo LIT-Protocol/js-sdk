@@ -9,4 +9,5 @@ export default {
   transformIgnorePatterns: ['node_modules/(?!(@walletconnect)/)'],
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/auth-browser',
+  setupFilesAfterEnv: ['../../jest.setup.js'],
 };

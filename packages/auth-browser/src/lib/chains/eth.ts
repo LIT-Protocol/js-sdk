@@ -221,6 +221,21 @@ export const getChainId = async (
 };
 
 /**
+ * Check if the Expiration Time in the signedMessage string is expired.
+ * @param { string } signedMessage - The signed message containing the Expiration Time.
+ * @returns true if expired, false otherwise.
+ */
+export function isSignedMessageExpired(signedMessage: string) {
+  // Extract the Expiration Time from the signed message.
+  const dateStr = signedMessage.split('\n')[9]?.replace('Expiration Time: ', '');
+  const expirationTime = new Date(dateStr);
+  const currentTime = new Date();
+  
+  // Compare the Expiration Time with the current time.
+  return currentTime > expirationTime;
+}
+
+/**
  *
  * Check if the message must resign
  *
@@ -231,6 +246,11 @@ export const getChainId = async (
  */
 export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
   let mustResign!: boolean;
+
+  // if it's not expired, then we don't need to resign
+  if (!isSignedMessageExpired(authSig.signedMessage)) {
+    return false;
+  }
 
   try {
     const parsedSiwe = new SiweMessage(authSig.signedMessage);
