@@ -1,165 +1,4 @@
 // @ts-nocheck
-// Contants
-const skLen = 32; // bytes
-const pkLen = 48; // bytes
-const sigLen = 96; // bytes
-const maxMsgLen = 1049600; // bytes
-const maxCtLen = 1049600; // bytes
-const decryptionShareLen = 48; // bytes
-
-// the number of bytes in a row derived from a BivarPoly
-// which varies depending on the threshold.
-const row_sizes_by_threshold = [
-  40, // threshold 0
-  72, // threshold 1
-  104, // threshold 2
-  136, // threshold 3
-  168, // threshold 4
-  200, // threshold 5
-  232, // threshold 6
-  264, // threshold 7
-  296, // threshold 8
-  328, // threshold 9
-  360, // threshold 10
-];
-
-// the number of bytes in a commitment derived from a BivarPoly
-// which varies depending on the threshold.
-const commitment_sizes_by_threshold = [
-  56, // threshold 0
-  104, // threshold 1
-  152, // threshold 2
-  200, // threshold 3
-  248, // threshold 4
-  296, // threshold 5
-  344, // threshold 6
-  392, // threshold 7
-  440, // threshold 8
-  488, // threshold 9
-  536, // threshold 10
-];
-
-// the number of bytes in the master secret key (Poly)
-// which varies depending on the threshold.
-const poly_sizes_by_threshold = [
-  40, // threshold 0
-  72, // threshold 1
-  104, // threshold 2
-  136, // threshold 3
-  168, // threshold 4
-  200, // threshold 5
-  232, // threshold 6
-  264, // threshold 7
-  296, // threshold 8
-  328, // threshold 9
-  360, // threshold 10
-];
-
-// Encoding conversions
-
-// modified from https://stackoverflow.com/a/11058858
-function asciiToUint8Array(a: any) {
-  let b = new Uint8Array(a.length);
-  for (let i = 0; i < a.length; i++) {
-    b[i] = a.charCodeAt(i);
-  }
-  return b;
-}
-
-// https://stackoverflow.com/a/19102224
-// TODO resolve RangeError possibility here, see SO comments
-const uint8ArrayToAscii = (a: any) => {
-  return String.fromCharCode.apply(null, a);
-};
-
-// https://stackoverflow.com/a/50868276
-const hexToUint8Array = (h: any) => {
-  if (h.length == 0) {
-    return new Uint8Array();
-  }
-  return new Uint8Array(
-    h.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16))
-  );
-};
-
-const uint8ArrayToHex = (a: any) => {
-  return a.reduce(
-    (str: string, byte: any) => str + byte.toString(16).padStart(2, '0'),
-    ''
-  );
-};
-
-const uint8ArrayToByteStr = (a: any) => {
-  return '[' + a.join(', ') + ']';
-};
-
-const base64abc = [
-  'A',
-  'B',
-  'C',
-  'D',
-  'E',
-  'F',
-  'G',
-  'H',
-  'I',
-  'J',
-  'K',
-  'L',
-  'M',
-  'N',
-  'O',
-  'P',
-  'Q',
-  'R',
-  'S',
-  'T',
-  'U',
-  'V',
-  'W',
-  'X',
-  'Y',
-  'Z',
-  'a',
-  'b',
-  'c',
-  'd',
-  'e',
-  'f',
-  'g',
-  'h',
-  'i',
-  'j',
-  'k',
-  'l',
-  'm',
-  'n',
-  'o',
-  'p',
-  'q',
-  'r',
-  's',
-  't',
-  'u',
-  'v',
-  'w',
-  'x',
-  'y',
-  'z',
-  '0',
-  '1',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-  '8',
-  '9',
-  '+',
-  '/',
-];
-
 const base64codes = [
   255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
   255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -212,39 +51,7 @@ const base64ToUint8Array = (str: string) => {
   return result.subarray(0, result.length - missingOctets);
 };
 
-const uint8ArrayToBase64 = (bytes: any) => {
-  let result = '',
-    i,
-    l = bytes.length;
-
-  for (i = 2; i < l; i += 3) {
-    result += base64abc[bytes[i - 2] >> 2];
-    result += base64abc[((bytes[i - 2] & 0x03) << 4) | (bytes[i - 1] >> 4)];
-    result += base64abc[((bytes[i - 1] & 0x0f) << 2) | (bytes[i] >> 6)];
-    result += base64abc[bytes[i] & 0x3f];
-  }
-
-  if (i === l + 1) {
-    // 1 octet yet to write
-    result += base64abc[bytes[i - 2] >> 2];
-    result += base64abc[(bytes[i - 2] & 0x03) << 4];
-    result += '==';
-  }
-
-  if (i === l) {
-    // 2 octets yet to write
-    result += base64abc[bytes[i - 2] >> 2];
-    result += base64abc[((bytes[i - 2] & 0x03) << 4) | (bytes[i - 1] >> 4)];
-    result += base64abc[(bytes[i - 1] & 0x0f) << 2];
-    result += '=';
-  }
-
-  return result;
-};
-
 import * as pako from 'pako';
-
-const util = import('util');
 
 //https://gist.github.com/enepomnyaschih/72c423f727d395eeaa09697058238727
 /*
@@ -497,10 +304,28 @@ async function initNodejs(input) {
     return ret;
   };
   imports.wbg.__wbg_require_edfaedd93e302925 = function () {
-    console.warn('[ECDSA-SDK] __wbg_require_edfaedd93e302925');
+    console.warn('[ECDSA-SDK NodeJS] __wbg_require_edfaedd93e302925');
     return handleError(function (arg0, arg1, arg2) {
-      var ret = require(getStringFromWasm0(arg1, arg2));
-      return addHeapObject(ret);
+      // const uint8Memory = getUint8Memory0().subarray(arg1, arg1 + arg2);
+      // console.log("uint8Memory:", uint8Memory);
+      // const decodedText = (new TextDecoder()).decode(uint8Memory);
+      // console.log("decodedText:", decodedText)
+      // the decoded string is "crypto"
+      // const moduleSpecifier = getStringFromWasm0(arg1, arg2);
+      // var ret = require(getStringFromWasm0(arg1, arg2));
+      // var ret = require('crypto');
+
+      let _crypto;
+
+      try {
+          _crypto = require('crypto');
+          console.warn("ENV A X:", _crypto);
+      }catch (e) {
+          _crypto = globalThis.crypto;
+          console.warn("ENV B X:", globalThis.crypto);
+      }
+      return addHeapObject(_crypto);
+      
     }, arguments);
   };
   imports.wbg.__wbg_crypto_2bc4d5b05161de5b = function (arg0) {
@@ -657,20 +482,22 @@ async function initBrowser(input) {
   };
   imports.wbg.__wbg_require_edfaedd93e302925 = function () {
     console.warn('[ECDSA-SDK Browser] __wbg_require_edfaedd93e302925');
-    return handleError(function (arg0, arg1, arg2) {
-      var ret = require(getStringFromWasm0(arg1, arg2));
+    // return handleError(function (arg0, arg1, arg2) {
+    //   var ret = require(getStringFromWasm0(arg1, arg2));
 
-      // Note: This function can probably be removed for browser
-      // try{
-      //     // this function probably not run on browser
-      //     console.warn("[ECDSA-SDK] REPORT THIS ERROR TO DEVELOPER");
-      //     ret = getStringFromWasm0(arg1, arg2);
-      // }catch(e){
-      //     ret = require(getStringFromWasm0(arg1, arg2));
-      // }
-      // console.warn("[ECDSA-SDK] ret:", ret);
-      return addHeapObject(ret);
-    }, arguments);
+    // Note: This function can probably be removed for browser
+    // try{
+    //     // this function probably not run on browser
+    //     console.warn("[ECDSA-SDK] REPORT THIS ERROR TO DEVELOPER");
+    //     ret = getStringFromWasm0(arg1, arg2);
+    // }catch(e){
+    //     ret = require(getStringFromWasm0(arg1, arg2));
+    // }
+    // console.warn("[ECDSA-SDK] ret:", ret);
+    //   return addHeapObject(ret);
+    // return null;
+    // }, arguments);
+    return null;
   };
   imports.wbg.__wbg_crypto_2bc4d5b05161de5b = function (arg0) {
     var ret = getObject(arg0).crypto;

@@ -47,6 +47,7 @@ if (!globalThis.wasmECDSA) {
     init = wasmECDSA.initWasmEcdsaSdkNodejs;
     env = 'NodeJS';
   }
+  
   init().then((sdk: any) => {
     globalThis.wasmECDSA = sdk;
 
