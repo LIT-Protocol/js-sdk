@@ -52,7 +52,8 @@
     "bump:minor": "yarn tools --v --minor",
     "bump:major": "yarn tools --v --major",
     "b": "git branch --show",
-    "txServer": "node tx-handler-server.mjs"
+    "txServer": "node tx-handler-server.mjs",
+    "prettier": "nx format:write --all"
   },
   "private": true,
   "dependencies": {
