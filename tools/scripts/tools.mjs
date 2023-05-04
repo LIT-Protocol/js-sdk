@@ -480,9 +480,9 @@ async function buildFunc() {
     spawnListener(`yarn nx run ${TARGET}:_buildWeb`);
     await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
     await childRunCommand(`yarn postBuild:mapDepsToDist`);
-    await childRunCommand(`yarn tool:genHtml`);
-    await childRunCommand(`yarn tool:genReact`);
-    await childRunCommand(`yarn tool:genNodejs`);
+    await childRunCommand(`yarn gen:html`);
+    await childRunCommand(`yarn gen:react`);
+    await childRunCommand(`yarn gen:nodejs`);
     await childRunCommand(`yarn tools --polyfills ${TARGET}`);
   }
 
@@ -531,7 +531,7 @@ async function buildFunc() {
       }
 
       await childRunCommand(`yarn postBuild:mapDepsToDist`);
-      await childRunCommand(`yarn tool:genReadme`);
+      await childRunCommand(`yarn gen:readme`);
       exit();
     } else {
       await childRunCommand(`yarn tools --match-versions`);
@@ -1346,7 +1346,7 @@ async function versionFunc() {
 
 async function validateDependencyVersions() {
   const PREFIX = '@lit-protocol';
-  const ignoreList = ['@lit-protocol/pkp-ethers.js-node'];
+  const ignoreList = [''];
 
   const packageList = (await listDirsRecursive('./packages', false)).map(
     (item) => {
@@ -1395,13 +1395,13 @@ async function postBuild() {
   // await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
 
   greenLog('...generating apps/html/index.html');
-  await runCommand('yarn tool:genHtml');
+  await runCommand('yarn gen:html');
 
   greenLog('...generating apps/react/src/app/app.tsx');
-  await runCommand('yarn tool:genReact');
+  await runCommand('yarn gen:react');
 
   greenLog('...generating apps/nodejs/main.ts');
-  await runCommand('yarn tool:genNodejs');
+  await runCommand('yarn gen:nodejs');
 
   exit();
 }

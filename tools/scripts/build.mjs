@@ -51,13 +51,13 @@ const build = async (name) => {
     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
 
     // greenLog('...generating apps/html/index.html');
-    // await runCommand('yarn tool:genHtml');
+    // await runCommand('yarn gen:html');
 
     // greenLog('...generating apps/react/src/app/app.tsx');
-    // await runCommand('yarn tool:genReact');
+    // await runCommand('yarn gen:react');
 
     // greenLog('...generating apps/nodejs/main.ts');
-    // await runCommand('yarn tool:genNodejs');
+    // await runCommand('yarn gen:nodejs');
   }
 };
 

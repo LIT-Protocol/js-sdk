@@ -276,9 +276,9 @@ There are currently three environments can be tested on, each of which can be ge
 
 | Environment | Generate Command      | Test Location              |
 | ----------- | --------------------- | -------------------------- |
-| HTML        | `yarn tool:genHtml`   | http://localhost:4002      |
-| React       | `yarn tool:genReact`  | http://localhost:4003      |
-| NodeJs      | `yarn tool:genNodejs` | `yarn nx run nodejs:serve` |
+| HTML        | `yarn gen:html`   | http://localhost:4002      |
+| React       | `yarn gen:react`  | http://localhost:4003      |
+| NodeJs      | `yarn gen:nodejs` | `yarn nx run nodejs:serve` |
 
 > Note: Personally I like to use the "Restore Terminal" VSCode plugin to automatically open all these environments. See [Video](https://streamable.com/e/5g52m4)
 

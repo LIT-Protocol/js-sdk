@@ -3204,29 +3204,6 @@
   resolved "https://registry.npmjs.org/@lit-labs/ssr-dom-shim/-/ssr-dom-shim-1.1.1.tgz#64df34e2f12e68e78ac57e571d25ec07fa460ca9"
   integrity sha512-kXOeFbfCm4fFf2A3WwVEeQj55tMZa8c8/f9AKHMobQMkzNUfUj+antR3fRPaZJawsa1aZiP/Da3ndpZrwEe4rQ==
 
-"@lit-protocol/pkp-ethers.js-node@^5.7.47":
-  version "5.7.48"
-  resolved "https://registry.npmjs.org/@lit-protocol/pkp-ethers.js-node/-/pkp-ethers.js-node-5.7.48.tgz#cfe88fbeff7e7419dee09f24d205ee735cedfe2f"
-  integrity sha512-66tT36GwDFqDWGiK46EyDRdPqxENSa5FNmTg3H7kFBOi8LoC3EpfNTY0q9LsqFEsjNSKTyxzTw8thBpSBacK7A==
-  dependencies:
-    "@ethersproject/abstract-provider" "^5.7.0"
-    "@ethersproject/abstract-signer" "^5.7.0"
-    "@ethersproject/address" "^5.7.0"
-    "@ethersproject/bignumber" "^5.7.0"
-    "@ethersproject/bytes" "^5.7.0"
-    "@ethersproject/hash" "^5.7.0"
-    "@ethersproject/hdnode" "^5.7.0"
-    "@ethersproject/json-wallets" "^5.7.0"
-    "@ethersproject/keccak256" "^5.7.0"
-    "@ethersproject/logger" "^5.7.0"
-    "@ethersproject/properties" "^5.7.0"
-    "@ethersproject/random" "^5.7.0"
-    "@ethersproject/signing-key" "^5.7.0"
-    "@ethersproject/transactions" "^5.7.0"
-    "@ethersproject/wordlists" "^5.7.0"
-    lit-js-sdk "1.2.24"
-    multiformats "10.0.2"
-
 "@lit-protocol/pkp-ethers.js@^5.7.48":
   version "5.7.48"
   resolved "https://registry.npmjs.org/@lit-protocol/pkp-ethers.js/-/pkp-ethers.js-5.7.48.tgz#bc5fe6f8f8ce0e148d8f4f164f8fb0e21cfc1676"
