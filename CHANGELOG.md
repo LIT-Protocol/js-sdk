@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#57](https://github.com/LIT-Protocol/js-sdk/pull/57) Introducing the pkp-client package, which serves as an abstraction of the pkp-ether, pkp-cosmos, and pkp-base packages. This enables the creation of Ether and Cosmos signers through PKPClient.
 
+- [#97](https://github.com/LIT-Protocol/js-sdk/pull/97) Fixed `warn  - ./node_modules/@lit-protocol/ecdsa-sdk/src/lib/ecdsa-sdk.js Critical dependency: the request of a dependency is an expression`
+
 ## [2.1.114] - 2023-04-08
 
 - [#77](https://github.com/LIT-Protocol/js-sdk/pull/77) Added support for Leap Cosmos wallet
