@@ -72,6 +72,7 @@ import {
   NodeClientErrorV1,
   GetWalletSigProps,
   SessionSigsMap,
+  SessionSig,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -196,15 +197,22 @@ export class LitNodeClientNodeJs {
     sessionSigs,
     url,
   }: {
-    authSig: AuthSig | any;
-    sessionSigs: any;
+    authSig?: AuthSig;
+    sessionSigs?: SessionSigsMap;
     url: string;
-  }) => {
-    // -- if there's session
-    let sigToPassToNode = authSig;
+  }): AuthSig | SessionSig => {
+    if (!authSig && !sessionSigs) {
+      throwError({
+        message: `You must pass either authSig or sessionSigs`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+      // @ts-ignore
+      return;
+    }
 
     if (sessionSigs) {
-      sigToPassToNode = sessionSigs[url];
+      const sigToPassToNode = sessionSigs[url];
 
       if (!sigToPassToNode) {
         throwError({
@@ -213,8 +221,11 @@ export class LitNodeClientNodeJs {
           errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
         });
       }
+
+      return sigToPassToNode;
     }
-    return sigToPassToNode;
+
+    return authSig!;
   };
 
   /**
