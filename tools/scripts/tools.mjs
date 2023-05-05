@@ -3,6 +3,7 @@ import {
   asyncForEach,
   childRunCommand,
   customSort,
+  findArg,
   findImportsFromDir,
   findStrFromDir,
   getArgs,
@@ -49,6 +50,7 @@ const optionMaps = new Map([
   ['--version', () => versionFunc()],
   ['--verify', () => validateDependencyVersions()],
   ['--postBuild', () => postBuild()],
+  ['postBuildIndividual', () => postBuildIndividualFunc()],
 ]);
 
 const setup = () => {
@@ -80,6 +82,7 @@ function helpFunc() {
             --version: show version
             --verify: validate dependency versions
             --postBuild: post build
+            postBuildIndividual: post build individual
     `,
     true
   );
@@ -1010,6 +1013,23 @@ async function watchFunc() {
       // spawnListener(`yarn tools --polyfills lit-node-client`);
     }
   }
+}
+
+async function postBuildIndividualFunc() {
+  const POSTBUILD_FILE = 'postbuild.mjs';
+
+  const TARGET = findArg(args, '--target');
+  const PROJECT_PATH = `packages/${TARGET}`;
+  const DIST_PATH = `dist/packages/${TARGET}`;
+  const POSTBUILD_PATH = `${PROJECT_PATH}/${POSTBUILD_FILE}`;
+
+  if (!fs.existsSync(POSTBUILD_PATH)) {
+    process.exit();
+  }
+
+  greenLog(`👷 ${POSTBUILD_PATH} file found! Running...`, true);
+  await childRunCommand(`node ${POSTBUILD_PATH}`);
+  process.exit();
 }
 
 async function polyfillsFunc() {
