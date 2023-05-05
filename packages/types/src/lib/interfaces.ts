@@ -850,7 +850,7 @@ export interface SessionRequestBody {
 export interface GetWalletSigProps {
   authNeededCallback?: AuthCallback;
   chain: string;
-  sessionCapabilityObject?: ISessionCapabilityObject;
+  sessionCapabilityObject: ISessionCapabilityObject;
   switchChain?: boolean;
   expiration: string;
   sessionKeyUri: string;
