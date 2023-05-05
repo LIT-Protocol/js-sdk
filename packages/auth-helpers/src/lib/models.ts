@@ -49,12 +49,16 @@ export enum LitAbility {
   LitActionExecution = 'lit-action-execution',
 }
 
+/**
+ * Prefixes used for identifying various LIT resources.
+ *
+ * @description These resource prefixes are also used as valid IRI schemes.
+ */
 export enum LitResourcePrefix {
-  AccessControlCondition = 'lit/acc',
-  PKP = 'lit/pkp',
-  RLI = 'lit/rli',
-  LitAction = 'lit/la',
-  Wildcard = 'lit/*',
+  AccessControlCondition = 'lit-acc',
+  PKP = 'lit-pkp',
+  RLI = 'lit-rli',
+  LitAction = 'lit-la',
 }
 
 export interface ISessionCapabilityObject {

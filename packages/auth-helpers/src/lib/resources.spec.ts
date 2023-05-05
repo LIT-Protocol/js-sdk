@@ -3,30 +3,25 @@ import {
   LitActionResource,
   LitPKPResource,
   LitRLIResource,
-  LitWildcardResource,
   parseLitResource,
 } from './resources';
 
 const testVectors = [
   {
-    resourceKey: 'lit/acc/someResource',
+    resourceKey: 'lit-acc://someResource',
     expectedLitResource: new LitAccessControlConditionResource('someResource'),
   },
   {
-    resourceKey: 'lit/pkp/someResource',
+    resourceKey: 'lit-pkp://someResource',
     expectedLitResource: new LitPKPResource('someResource'),
   },
   {
-    resourceKey: 'lit/rli/someResource',
+    resourceKey: 'lit-rli://someResource',
     expectedLitResource: new LitRLIResource('someResource'),
   },
   {
-    resourceKey: 'lit/la/someResource',
+    resourceKey: 'lit-la://someResource',
     expectedLitResource: new LitActionResource('someResource'),
-  },
-  {
-    resourceKey: 'lit/*/*',
-    expectedLitResource: new LitWildcardResource(),
   },
 ];
 
