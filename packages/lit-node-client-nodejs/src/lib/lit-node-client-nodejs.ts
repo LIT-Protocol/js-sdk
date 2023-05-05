@@ -111,6 +111,7 @@ import {
   decode,
   newSessionCapabilityObject,
   parseLitResource,
+  sanitizeSiweMessage,
 } from '@lit-protocol/auth-helpers';
 // import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 
@@ -406,6 +407,7 @@ export class LitNodeClientNodeJs {
       if (authNeededCallback) {
         walletSig = await authNeededCallback({
           chain,
+          statement: sessionCapabilityObject?.statement,
           resources: sessionCapabilityObject
             ? [sessionCapabilityObject.encodeAsSiweResource()]
             : undefined,
@@ -423,6 +425,7 @@ export class LitNodeClientNodeJs {
         }
         walletSig = await this.defaultAuthCallback({
           chain,
+          statement: sessionCapabilityObject.statement,
           resources: sessionCapabilityObject
             ? [sessionCapabilityObject.encodeAsSiweResource()]
             : undefined,
@@ -2433,10 +2436,15 @@ export class LitNodeClientNodeJs {
       return '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
     })();
 
+    let siwe_statement = 'Lit Protocol PKP session signature';
+    if (!!params.statement) {
+      siwe_statement += ' ' + params.statement;
+    }
+
     let siweMessage: SiweMessage = new SiweMessage({
       domain: params?.domain || globalThis.location?.host || 'litprotocol.com',
       address: pkpEthAddress,
-      statement: 'Lit Protocol PKP session signature',
+      statement: siwe_statement,
       uri: sessionKeyUri,
       version: '1',
       chainId: params.chainId ?? 1,
