@@ -146,13 +146,13 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
    *
    * ```
    * {
-   *   'lit/acc/*': {
+   *   'lit-acc://*': {
    *    '*\/*': {}
    *   }
    * }
    * ```
    *
-   * Then, if the provided litResource is 'lit/acc/123', the method will return 'lit/acc/*'.
+   * Then, if the provided litResource is 'lit-acc://123', the method will return 'lit-acc://*'.
    */
   #getResourceKeyToMatchAgainst(litResource: ILitResource): string {
     const attenuatedResourceKeysToMatchAgainst: string[] = [

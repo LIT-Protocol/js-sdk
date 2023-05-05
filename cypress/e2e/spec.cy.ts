@@ -739,7 +739,7 @@ describe('Session', () => {
         litResource,
       ]);
     expect(sessionCapabilityObject.attenuations).to.be.eq({
-      'lit/acc/*': {
+      'lit-acc://*': {
         '*/*': [{}],
       },
     });
