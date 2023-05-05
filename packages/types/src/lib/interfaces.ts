@@ -91,6 +91,11 @@ export interface AuthCallbackParams {
   // The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
   chain: Chain;
 
+  // The statement that describes what the user is signing. If the auth callback
+  // is for signing a SIWE message, you MUST add this statement to the end of the SIWE
+  // statement.
+  statement?: string;
+
   // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
   resources?: string[];
 
@@ -735,6 +740,9 @@ export interface AuthMethod {
 export interface SignSessionKeyProp {
   // The session key to sign
   sessionKey?: SessionKeyPair;
+
+  // The statement text to place at the end of the SIWE statement field.
+  statement?: string;
 
   // The auth methods to use to sign the session key
   authMethods: AuthMethod[];

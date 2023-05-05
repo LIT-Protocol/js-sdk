@@ -9,6 +9,7 @@ import {
   PlainJSON,
 } from '../models';
 import { getRecapNamespaceAndAbility } from './utils';
+import { sanitizeSiweMessage } from '../siwe';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   #inner: Recap;
@@ -45,7 +46,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   }
 
   get statement(): string {
-    return this.#inner.statement;
+    return sanitizeSiweMessage(this.#inner.statement);
   }
 
   addProof(proof: string): void {
