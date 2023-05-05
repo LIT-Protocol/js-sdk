@@ -43,6 +43,8 @@ const build = async (name) => {
   greenLog('Polyfilling...');
   await childRunCommand(`yarn tools --polyfills ${name}`);
 
+  await childRunCommand(`yarn tools postBuildIndividual --target=${name}`);
+
   // greenLog('Setting up local development tools...');
   // await childRunCommand(`yarn build:setupLocalDev ${name}`);
 

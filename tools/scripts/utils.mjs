@@ -595,3 +595,14 @@ export const testThese = async (tests) => {
 
   process.exit();
 };
+
+export function findArg(args, flag) {
+  const flagIndex = args.findIndex((arg) => arg.startsWith(flag));
+
+  try {
+    return args[flagIndex].split('=')[1];
+  } catch (e) {
+    redLog(`\nError: ${flag} flag must be followed by a value\n`, true);
+    process.exit();
+  }
+}
