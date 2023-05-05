@@ -79,6 +79,12 @@ export const LIT_ERROR = {
   LOCAL_STORAGE_ITEM_NOT_SET_EXCEPTION: {
     name: 'LocalStorageItemNotSetException',
     code: 'local_storage_item_not_set_exception',
+    kind: LitErrorKind.Unexpected,
+  },
+  LOCAL_STORAGE_ITEM_NOT_REMOVED_EXCEPTION: {
+    name: 'LocalStorageItemNotRemovedException',
+    code: 'local_storage_item_not_removed_exception',
+    kind: LitErrorKind.Unexpected,
   },
   REMOVED_FUNCTION_ERROR: {
     name: 'RemovedFunctionError',

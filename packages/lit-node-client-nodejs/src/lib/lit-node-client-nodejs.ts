@@ -73,6 +73,7 @@ import {
   GetWalletSigProps,
   SessionSigsMap,
   SessionSig,
+  AuthCallback,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -102,7 +103,11 @@ import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { LitThirdPartyLibs } from '@lit-protocol/lit-third-party-libs';
 
 import { nacl } from '@lit-protocol/nacl';
-import { getStorageItem, setStorageItem } from '@lit-protocol/misc-browser';
+import {
+  getStorageItem,
+  removeStorageItem,
+  setStorageItem,
+} from '@lit-protocol/misc-browser';
 import { BigNumber } from 'ethers';
 import {
   ILitResource,
@@ -374,7 +379,7 @@ export class LitNodeClientNodeJs {
     expiration,
     sessionKeyUri,
   }: GetWalletSigProps): Promise<AuthSig> => {
-    let walletSig;
+    let walletSig: AuthSig;
 
     const storageKey = LOCAL_STORAGE_KEYS.WALLET_SIGNATURE;
     const storedWalletSigOrError = getStorageItem(storageKey);
@@ -438,7 +443,54 @@ export class LitNodeClientNodeJs {
       }
     }
 
-    return walletSig;
+    return walletSig!;
+  };
+
+  #authCallbackAndUpdateStorageItem = async ({
+    authCallbackParams,
+    authCallback,
+  }: {
+    authCallbackParams: AuthCallbackParams;
+    authCallback?: AuthCallback;
+  }): Promise<AuthSig> => {
+    let authSig: AuthSig;
+
+    if (authCallback) {
+      authSig = await authCallback(authCallbackParams);
+    } else {
+      if (!this.defaultAuthCallback) {
+        return throwError({
+          message: 'No default auth callback provided',
+          errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+          errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
+        });
+      }
+      authSig = await this.defaultAuthCallback(authCallbackParams);
+    }
+
+    // (TRY) to set walletSig to local storage
+    const storeNewWalletSigOrError = setStorageItem(
+      LOCAL_STORAGE_KEYS.WALLET_SIGNATURE,
+      JSON.stringify(authSig)
+    );
+    if (storeNewWalletSigOrError.type === EITHER_TYPE.SUCCESS) {
+      return authSig;
+    }
+
+    // Setting local storage failed, try to remove the item key.
+    console.warn(
+      `Unable to store walletSig in local storage. Not a problem. Continuing to remove item key...`
+    );
+    const removeWalletSigOrError = removeStorageItem(
+      LOCAL_STORAGE_KEYS.WALLET_SIGNATURE
+    );
+    if (removeWalletSigOrError.type === EITHER_TYPE.ERROR) {
+      console.warn(
+        `Unable to remove walletSig in local storage. Not a problem. Continuing...`
+      );
+    }
+
+    return authSig;
   };
 
   /**
@@ -461,14 +513,15 @@ export class LitNodeClientNodeJs {
     const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
 
     try {
-      // @ts-ignore
-      await authSigSiweMessage.verify({ signature: authSig.sig });
+      await authSigSiweMessage.validate(authSig.sig);
     } catch (e) {
+      console.debug('Need retry because verify failed', e);
       return true;
     }
 
     // make sure the sig is for the correct session key
     if (authSigSiweMessage.uri !== sessionKeyUri) {
+      console.debug('Need retry because uri does not match');
       return true;
     }
 
@@ -477,6 +530,7 @@ export class LitNodeClientNodeJs {
       !authSigSiweMessage.resources ||
       authSigSiweMessage.resources.length === 0
     ) {
+      console.debug('Need retry because empty resources');
       return true;
     }
 
@@ -495,6 +549,10 @@ export class LitNodeClientNodeJs {
           resourceAbilityRequest.ability
         )
       ) {
+        console.debug('Need retry because capabilities do not match', {
+          authSigSessionCapabilityObject,
+          resourceAbilityRequest,
+        });
         return true;
       }
     }
@@ -2570,29 +2628,17 @@ export class LitNodeClientNodeJs {
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
       log('need to re-sign session key.  Signing...');
-      if (params.authNeededCallback) {
-        authSig = await params.authNeededCallback({
+      authSig = await this.#authCallbackAndUpdateStorageItem({
+        authCallback: params.authNeededCallback,
+        authCallbackParams: {
           chain: params.chain,
-          resources: [sessionCapabilityObject.encodeAsSiweResource()],
-          expiration,
-          uri: sessionKeyUri,
-        });
-      } else {
-        if (!this.defaultAuthCallback) {
-          return throwError({
-            message: 'No default auth callback provided',
-            errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
-            errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
-          });
-        }
-        authSig = await this.defaultAuthCallback({
-          chain: params.chain,
+          statement: sessionCapabilityObject.statement,
           resources: [sessionCapabilityObject.encodeAsSiweResource()],
           switchChain: params.switchChain,
           expiration,
           uri: sessionKeyUri,
-        });
-      }
+        },
+      });
     }
 
     if (

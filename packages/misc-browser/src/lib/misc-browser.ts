@@ -54,6 +54,25 @@ export const setStorageItem = (key: string, value: string): IEither => {
 };
 
 /**
+ *
+ * Remove the local storage item by key
+ *
+ * @param { string } key is the key to remove
+ * @returns { IEither } Either the key or an error
+ */
+export const removeStorageItem = (key: string): IEither => {
+  try {
+    localStorage.removeItem(key);
+    return ERight(key);
+  } catch (e) {
+    return ELeft({
+      message: `Failed to remove ${key} from local storage`,
+      error: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_REMOVED_EXCEPTION,
+    });
+  }
+};
+
+/**
  * Convert a Blob to a base64urlpad string.  Note: This function returns a promise.
  *
  * @param { Blob | File } blob The Blob or File to turn into a base64 string
