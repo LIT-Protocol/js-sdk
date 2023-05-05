@@ -292,7 +292,7 @@ export interface JsonAccsRequest {
   // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
   authSig?: AuthSig;
 
-  sessionSigs?: object;
+  sessionSigs?: SessionSigsMap;
 }
 
 /**
