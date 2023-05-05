@@ -98,10 +98,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   ): boolean {
     // Validate Lit ability is compatible with the Lit resource.
     // The only exception is if there's a wildcard resource key in the session capability object.
-    if (
-      !litResource.isValidLitAbility(ability) &&
-      !this.attenuations['lit/*/*']
-    ) {
+    if (!litResource.isValidLitAbility(ability)) {
       return false;
     }
 
@@ -158,8 +155,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
    */
   #getResourceKeyToMatchAgainst(litResource: ILitResource): string {
     const attenuatedResourceKeysToMatchAgainst: string[] = [
-      'lit/*/*',
-      `${litResource.resourcePrefix}/*`,
+      `${litResource.resourcePrefix}://*`,
       litResource.getResourceKey(),
     ];
 
