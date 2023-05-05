@@ -126,7 +126,7 @@ describe('recapSessionCapabilityObject', () => {
       []
     );
     expect(recapSessionCapabilityObject.statement).toEqual(
-      'I further authorize the stated URI to perform the following actions on my behalf: (1) "someNamespace": "someAbility" for "someResource".'
+      `I further authorize the stated URI to perform the following actions on my behalf: (1) 'someNamespace': 'someAbility' for 'someResource'.`
     );
   });
 
@@ -198,7 +198,7 @@ describe('recapSessionCapabilityObject', () => {
       }" for "${litResource.getResourceKey()}".`
     );
     expect(newSiweMessage.resources).toEqual([
-      'urn:recap:eyJhdHQiOnsibGl0L2FjYy9zb21lUmVzb3VyY2UiOnsiVGhyZXNob2xkL0RlY3J5cHRpb24iOlt7fV19fSwicHJmIjpbXX0',
+      'urn:recap:eyJhdHQiOnsibGl0LWFjYzovL3NvbWVSZXNvdXJjZSI6eyJUaHJlc2hvbGQvRGVjcnlwdGlvbiI6W3t9XX19LCJwcmYiOltdfQ',
     ]);
   });
 
@@ -212,7 +212,7 @@ describe('recapSessionCapabilityObject', () => {
 
     const siweResource = recapSessionCapabilityObject.encodeAsSiweResource();
     expect(siweResource).toEqual(
-      'urn:recap:eyJhdHQiOnsibGl0L2FjYy9zb21lUmVzb3VyY2UiOnsiVGhyZXNob2xkL0RlY3J5cHRpb24iOlt7fV19fSwicHJmIjpbXX0'
+      'urn:recap:eyJhdHQiOnsibGl0LWFjYzovL3NvbWVSZXNvdXJjZSI6eyJUaHJlc2hvbGQvRGVjcnlwdGlvbiI6W3t9XX19LCJwcmYiOltdfQ'
     );
   });
 
