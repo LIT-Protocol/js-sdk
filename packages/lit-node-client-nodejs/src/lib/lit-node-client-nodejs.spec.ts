@@ -14,6 +14,10 @@ globalThis.nacl = nacl;
 
 import crypto, { createHash } from 'crypto';
 import { ethers } from 'ethers';
+import {
+  LitAbility,
+  LitAccessControlConditionResource,
+} from '@lit-protocol/auth-helpers';
 
 Object.defineProperty(global.self, 'crypto', {
   value: {
@@ -192,10 +196,12 @@ describe('LitNodeClientNodeJs', () => {
 
     let hashedResourceId = await hashResourceIdForSigning(resourceId);
 
+    const litResource = new LitAccessControlConditionResource(hashedResourceId);
+
     let sessionCapabilityObject =
       litNodeClient.generateSessionCapabilityObjectWithWildcards([litResource]);
-    expect(sessionCapabilityObject.attenuations).to.be.eq({
-      'lit/acc/*': {
+    expect(sessionCapabilityObject.attenuations).toStrictEqual({
+      [`lit-acc://${hashedResourceId}`]: {
         '*/*': [{}],
       },
     });
@@ -204,7 +210,7 @@ describe('LitNodeClientNodeJs', () => {
         litResource,
         LitAbility.AccessControlConditionSigning
       )
-    );
+    ).toBe(true);
   });
 
   it('gets expiration', () => {
