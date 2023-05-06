@@ -280,15 +280,11 @@ There are currently three environments can be tested on, each of which can be ge
 | React       | `yarn gen:react`  | http://localhost:4003      |
 | NodeJs      | `yarn gen:nodejs` | `yarn nx run nodejs:serve` |
 
-> Note: Personally I like to use the "Restore Terminal" VSCode plugin to automatically open all these environments. See [Video](https://streamable.com/e/5g52m4)
 
 ### Unit Tests (for Node)
 
 ```jsx
-yarn test:packages
-
-// watch mode
-yarn test:watch
+yarn test:unit
 ```
 
 ### E2E Testing with Metamask using Cypress (for Browser)
