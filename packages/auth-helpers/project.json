@@ -23,7 +23,7 @@
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
       "options": {
-        "globalName": "LitJsSdk_litNodeClient",
+        "globalName": "LitJsSdk_authHelpers",
         "outfile": "dist/packages/auth-helpers-vanilla/auth-helpers.js",
         "entryPoints": ["./packages/auth-helpers/src/index.ts"],
         "define": {
