@@ -738,8 +738,8 @@ describe('Session', () => {
       savedParams.litNodeClient.generateSessionCapabilityObjectWithWildcards([
         litResource,
       ]);
-    expect(sessionCapabilityObject.attenuations).to.be.eq({
-      'lit-acc://*': {
+    expect(sessionCapabilityObject.attenuations).to.deep.equal({
+      [`lit-acc://${hashedResourceId}`]: {
         '*/*': [{}],
       },
     });
