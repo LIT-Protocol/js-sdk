@@ -9,14 +9,20 @@ import {
   wait,
   readJsonFile,
   redLog,
+  writeFile,
+  readFile,
 } from './utils.mjs';
 import { readCachedProjectGraph } from '@nrwl/devkit';
 import { exit } from 'process';
+import fs from 'fs';
+
 const args = getArgs();
 const PROJECT_NAME = args[0];
 const TAG = args[1];
 
 let alreadyExists = false;
+
+const REPO_URL = 'https://github.com/Lit-Protocol/js-sdk';
 
 if (!PROJECT_NAME) {
   redLog(
@@ -108,16 +114,47 @@ const createBuildWeb = (name, { globalPrefix = 'LitJsSdk' }) => {
   };
 };
 
+const getProject = () => {
+  const graph = readCachedProjectGraph();
+  const nodes = graph.nodes;
+
+  const project = nodes[PROJECT_NAME].data;
+
+  return project;
+};
+
+/**
+ * Modify the configuration file by adding a new line.
+ *
+ * Usage:
+ * node modify-config.mjs <path-to-config-file>
+ */
+async function modifyConfigFile(configFilePath, newLine) {
+  try {
+    const configFileContent = await readFile(configFilePath);
+    const lines = configFileContent.split('\n');
+
+    // const newLine = "  setupFilesAfterEnv: ['../../jest.setup.js'],";
+
+    const closingBracketIndex = lines.findIndex((line) => line === '};');
+    lines.splice(closingBracketIndex, 0, newLine);
+
+    const updatedConfigFileContent = lines.join('\n');
+    await writeFile(configFilePath, updatedConfigFileContent);
+
+    console.log('Configuration file updated successfully.');
+  } catch (error) {
+    console.error(`Failed to update configuration file: ${error.message}`);
+  }
+}
+
 /**
  *
  * Edit the project project.json file
  *
  */
 const editProjectJson = async () => {
-  const graph = readCachedProjectGraph();
-  const nodes = graph.nodes;
-
-  const project = nodes[PROJECT_NAME].data;
+  const project = getProject();
 
   delete project.files;
   delete project.root;
@@ -139,11 +176,7 @@ const editProjectJson = async () => {
 };
 
 const editPackageJson = async () => {
-  const graph = readCachedProjectGraph();
-  const nodes = graph.nodes;
-
-  const project = nodes[PROJECT_NAME].data;
-
+  const project = getProject();
   const packageJson = project.root + '/package.json';
 
   let packageJsonData = await readJsonFile(packageJson);
@@ -152,14 +185,14 @@ const editPackageJson = async () => {
     ...packageJsonData,
     ...{
       license: 'MIT',
-      homepage: 'https://github.com/Lit-Protocol/js-sdk',
+      homepage: REPO_URL,
       repository: {
         type: 'git',
-        url: 'https://github.com/LIT-Protocol/js-sdk',
+        url: REPO_URL,
       },
       keywords: ['library'],
       bugs: {
-        url: 'https://github.com/LIT-Protocol/js-sdk/issues',
+        url: `${REPO_URL}/issues`,
       },
       publishConfig: {
         access: 'public',
@@ -180,9 +213,17 @@ const editPackageJson = async () => {
   await writeJsonFile(writePath, packageJsonData);
 };
 
+const editJestConfig = async () => {
+  const projectRoot = getProject().root;
+  const jestConfigPath = projectRoot + '/jest.config.ts';
+  const newLine = "  setupFilesAfterEnv: ['../../jest.setup.js'],";
+  modifyConfigFile(jestConfigPath, newLine);
+};
+
 if (!alreadyExists) {
   await editProjectJson();
   await editPackageJson();
+  await editJestConfig();
   exit();
 }
 
@@ -192,6 +233,7 @@ await question(
     yes: async () => {
       await editProjectJson();
       await editPackageJson();
+      await editJestConfig();
       exit();
     },
     no: () => {

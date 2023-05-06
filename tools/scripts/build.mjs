@@ -43,6 +43,8 @@ const build = async (name) => {
   greenLog('Polyfilling...');
   await childRunCommand(`yarn tools --polyfills ${name}`);
 
+  await childRunCommand(`yarn tools postBuildIndividual --target=${name}`);
+
   // greenLog('Setting up local development tools...');
   // await childRunCommand(`yarn build:setupLocalDev ${name}`);
 
@@ -50,14 +52,14 @@ const build = async (name) => {
     greenLog('...mapping dist package name to package.json name');
     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
 
-    greenLog('...generating apps/html/index.html');
-    await runCommand('yarn tool:genHtml');
+    // greenLog('...generating apps/html/index.html');
+    // await runCommand('yarn gen:html');
 
-    greenLog('...generating apps/react/src/app/app.tsx');
-    await runCommand('yarn tool:genReact');
+    // greenLog('...generating apps/react/src/app/app.tsx');
+    // await runCommand('yarn gen:react');
 
-    greenLog('...generating apps/nodejs/main.ts');
-    await runCommand('yarn tool:genNodejs');
+    // greenLog('...generating apps/nodejs/main.ts');
+    // await runCommand('yarn gen:nodejs');
   }
 };
 

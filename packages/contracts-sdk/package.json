@@ -27,7 +27,7 @@
   "tags": [
     "universal"
   ],
-  "version": "2.1.138",
+  "version": "2.1.160",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

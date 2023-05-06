@@ -17,7 +17,7 @@
 
       const litNodeClient = new LitNodeClient({litNetwork: 'serrano'});
       litNodeClient.connect();
-      
+
       var chain = "cosmos";
 
       //var authSig = JSON.parse("{\"sig\":\"0x18a173d68d2f78cc5c13da0dfe36eec2a293285bee6d42547b9577bf26cdc985660ed3dddc4e75d422366cac07e8a9fc77669b10373bef9c7b8e4280252dfddf1b\",\"derivedVia\":\"web3.eth.personal.sign\",\"signedMessage\":\"I am creating an account to use LITs at 2021-08-04T20:14:04.918Z\",\"address\":\"0xdbd360f30097fb6d938dcc8b7b62854b36160b45\"}")
@@ -259,15 +259,15 @@
         });
       };
 
-      var CheqdEncryptDecrypt = async () => {
+      var CheqdMainnetEncryptDecrypt = async () => {
         var authSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain: 'cheqd',
+          chain: 'cheqdMainnet',
         });
         var unifiedAccessControlConditions = [
           {
             conditionType: 'cosmos',
             path: "/cosmos/tx/v1beta1/txs?events=transfer.recipient='cheqd19a26gff0gd4jlaupgp360ajte6mg907kjlqqky'&events=transfer.sender='cheqd1s5ct8eamdp7m7y3vllnj60frxxyypdr6zvpwvw'&events=transfer.amount='13000000000ncheq'&order_by=2",
-            chain: 'cheqd',
+            chain: 'cheqdMainnet',
             returnValueTest: {
               key: '$.txs.*.body.memo',
               comparator: 'contains',
@@ -277,8 +277,31 @@
         ];
         await testProvisoningEncryptingAndDecrypting({
           unifiedAccessControlConditions,
-          testName: 'CheqdEncryptDecrypt',
-          authSig: { cheqd: authSig },
+          testName: 'CheqdMainnetEncryptDecrypt',
+          authSig: { cheqdMainnet: authSig },
+        });
+      };
+
+      var CheqdTestnetEncryptDecrypt = async () => {
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'cheqdTestnet',
+        });
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: 'cosmos',
+            path: "/cosmos/tx/v1beta1/txs?events=transfer.recipient='cheqd19a26gff0gd4jlaupgp360ajte6mg907kjlqqky'&events=transfer.sender='cheqd1s5ct8eamdp7m7y3vllnj60frxxyypdr6zvpwvw'&events=transfer.amount='13000000000ncheq'&order_by=2",
+            chain: 'cheqdTestnet',
+            returnValueTest: {
+              key: '$.txs.*.body.memo',
+              comparator: 'contains',
+              value: 'test',
+            },
+          },
+        ];
+        await testProvisoningEncryptingAndDecrypting({
+          unifiedAccessControlConditions,
+          testName: 'CheqdTestnetEncryptDecrypt',
+          authSig: { cheqdTestnet: authSig },
         });
       };
 
@@ -409,8 +432,14 @@
     <br />
     <br />
 
-    <button onclick="JunoSpecificWalletAddressSigning()">
-      JunoSpecificWalletAddressSigning
+    <button onclick="CheqdMainnetEncryptDecrypt()">
+      CheqdMainnetEncryptDecrypt
+    </button>
+    <br />
+    <br />
+
+    <button onclick="CheqdTestnetEncryptDecrypt()">
+      CheqdTestnetEncryptDecrypt
     </button>
     <br />
     <br />
