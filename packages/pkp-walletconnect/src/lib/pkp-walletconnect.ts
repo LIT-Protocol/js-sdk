@@ -1,15 +1,27 @@
-import { PKPEthersWallet, ethRequestHandler } from '@lit-protocol/pkp-ethers';
+import {
+  SupportedETHSigningMethods,
+  ethRequestHandler,
+  isEthRequest,
+} from '@lit-protocol/pkp-ethers';
 import { LIT_CHAINS } from '@lit-protocol/constants';
-import { SupportedETHSigningMethods } from '@lit-protocol/pkp-ethers';
 import { Core } from '@walletconnect/core';
 import {
   IWeb3Wallet,
   Web3Wallet,
   Web3WalletTypes,
 } from '@walletconnect/web3wallet';
-import { getSdkError, parseChainId } from '@walletconnect/utils';
-import { formatJsonRpcError, formatJsonRpcResult } from '@json-rpc-tools/utils';
 import {
+  formatAccountWithChain,
+  getSdkError,
+  parseChainId,
+} from '@walletconnect/utils';
+import {
+  ErrorResponse,
+  formatJsonRpcError,
+  formatJsonRpcResult,
+} from '@json-rpc-tools/utils';
+import {
+  CoreTypes,
   ISignClient,
   SessionTypes,
   SignClientTypes,
@@ -26,8 +38,8 @@ export interface InitWalletConnectParams
 export class PKPWalletConnect {
   // WalletConnect client
   private client: IWeb3Wallet | undefined;
-  // Map of chains and PKPWallet instances
-  private pkpWallets: Map<string, PKPBase[]>;
+  // List of PKPClients
+  private pkpClients: PKPClient[] = [];
   // Supported chains
   private supportedChains: string[] = ['eip155'];
 
@@ -39,11 +51,6 @@ export class PKPWalletConnect {
   private readonly red = '\x1b[31m';
 
   constructor(debug?: boolean) {
-    this.pkpWallets = new Map();
-    for (const chain of this.supportedChains) {
-      this.pkpWallets.set(chain, []);
-    }
-
     this.debug = debug || false;
   }
 
@@ -51,16 +58,20 @@ export class PKPWalletConnect {
    * Initializes the WalletConnect client
    *
    * @param {InitWalletConnectParams} params
-   * @param {string} params.projectId - The WalletConnect configuration
+   * @param {string} params.projectId - The WalletConnect project ID
+   * @param {string} [params.relayUrl] - The WalletConnect relay URL
    */
   public async initWalletConnect(
     params: InitWalletConnectParams
   ): Promise<void> {
-    const core = new Core({
-      logger: 'debug',
+    let coreOpts: CoreTypes.Options = {
       projectId: params.projectId,
       relayUrl: params.relayUrl || 'wss://relay.walletconnect.com',
-    });
+    };
+    if (this.debug) {
+      coreOpts = { ...coreOpts, logger: 'debug' };
+    }
+    const core = new Core(coreOpts);
     this.client = await Web3Wallet.init({
       core,
       metadata: params.metadata,
@@ -72,11 +83,7 @@ export class PKPWalletConnect {
    * Pair with the given URI received from a dapp
    */
   public pair: IWeb3Wallet['pair'] = async (params) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+    this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.pair(params);
   };
 
@@ -84,15 +91,13 @@ export class PKPWalletConnect {
    * Parse the session proposal received from a dapp, construct the session namespace,
    * and approve the session proposal if the chain is supported.
    *
-   * @param {SignClientTypes.EventArguments['session_proposal']} proposal - The session proposal.
-   * @returns {Promise<SessionTypes.Struct | void>} - The session data if approved.
+   * @param {SignClientTypes.EventArguments['session_proposal']} proposal - The session proposal
+   * @returns {Promise<SessionTypes.Struct | void>} - The session data if approved
    */
-  public async approveSessionProposal(proposal: any): Promise<any> {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+  public async approveSessionProposal(
+    proposal: SignClientTypes.EventArguments['session_proposal']
+  ): Promise<SessionTypes.Struct | void> {
+    this.client = this._isWalletConnectInitialized(this.client);
 
     // Parse the session proposal
     const { id, params } = proposal;
@@ -105,35 +110,25 @@ export class PKPWalletConnect {
     for (const key of requiredNamespaceKeys) {
       if (!this.supportedChains.includes(key)) continue;
 
-      // Check if there are any wallets for the given chain
-      if (!this.pkpWallets.has(key) || this.pkpWallets.get(key)?.length === 0) {
-        await this.client.rejectSession({
-          id,
-          reason: getSdkError('UNSUPPORTED_CHAINS'),
-        });
-        rejected = true;
-        break;
-      }
-
-      const wallets = this.pkpWallets.get(key);
-      if (!wallets || wallets.length === 0) {
-        await this.client.rejectSession({
-          id,
-          reason: getSdkError('UNSUPPORTED_ACCOUNTS'),
-        });
-        rejected = true;
-        break;
-      }
-
       // Check if specified chain networks are supported by Lit. If so, get a list of accounts for the given chain
       const accounts: string[] = [];
       const chains = requiredNamespaces[key].chains;
       if (chains) {
         for (const chain of chains) {
+          let accountsByChain: string[] = [];
           if (this.checkIfChainIsSupported(chain)) {
-            for (const wallet of wallets) {
-              const address = await wallet.getAddress();
-              accounts.push(`${chain}:${address}`);
+            accountsByChain = await this.getAccountsWithPrefix(chain);
+            // If no accounts are found for the given chain, reject the session proposal
+            if (accountsByChain.length === 0) {
+              await this.client.rejectSession({
+                id,
+                reason: getSdkError('UNSUPPORTED_ACCOUNTS'),
+              });
+              rejected = true;
+              break;
+            } else {
+              // Add accounts with prefix to the list of accounts
+              accounts.push(...accountsByChain);
             }
           } else {
             await this.client.rejectSession({
@@ -183,31 +178,21 @@ export class PKPWalletConnect {
    * Approve a session proposal from a dapp
    */
   public approveSession: IWeb3Wallet['approveSession'] = async (params) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+    this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.approveSession(params);
   };
 
   /**
    * Parse and reject the session proposal
    *
-   * @param {SignClientTypes.EventArguments['session_proposal']} proposal - The session proposal.
-   * @param {any} [reason] - The reason for rejecting the session proposal.
-   *
-   * @returns {Promise<any>} - The session data.
+   * @param {SignClientTypes.EventArguments['session_proposal']} proposal - The session proposal
+   * @param {ErrorResponse} [reason] - The reason for rejecting the session proposal
    */
   public async rejectSessionProposal(
-    proposal: any,
-    reason?: any
+    proposal: SignClientTypes.EventArguments['session_proposal'],
+    reason?: ErrorResponse
   ): Promise<void> {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+    this.client = this._isWalletConnectInitialized(this.client);
 
     const { id } = proposal;
     return await this.rejectSession({
@@ -220,11 +205,7 @@ export class PKPWalletConnect {
    * Reject a session proposal from a dapp
    */
   public rejectSession: IWeb3Wallet['rejectSession'] = async (params) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+    this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.rejectSession(params);
   };
 
@@ -232,24 +213,22 @@ export class PKPWalletConnect {
    * Approves a session request received from a dapp, processes the request using the wallet
    * corresponding to the account in the request, and sends a response with the result or an error.
    *
-   * @param {SignClientTypes.EventArguments['session_request']} requestEvent - The session request.
+   * @param {SignClientTypes.EventArguments['session_request']} requestEvent - The session request
    */
-  public async approveSessionRequest(requestEvent: any): Promise<void> {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+  public async approveSessionRequest(
+    requestEvent: SignClientTypes.EventArguments['session_request']
+  ): Promise<void> {
+    this.client = this._isWalletConnectInitialized(this.client);
 
     // Parse the session request
     let response = null;
 
     const { id, topic, params } = requestEvent;
     const { request } = params;
-    const wallet = await this.findWalletByRequestParams(request);
+    const pkpClient = await this.findPKPClientByRequestParams(request);
 
-    // Find the wallet corresponding to the account in the request
-    if (!wallet) {
+    // Find the PKPClient corresponding to the account in the request
+    if (!pkpClient) {
       response = formatJsonRpcError(id, getSdkError('UNSUPPORTED_ACCOUNTS'));
       return await this.respondSessionRequest({
         topic,
@@ -260,15 +239,19 @@ export class PKPWalletConnect {
     // Process the request using specified wallet and JSON RPC handlers
     try {
       // Handle Ethereum request
-      const result = await ethRequestHandler({
-        signer: wallet as PKPEthersWallet,
-        payload: {
-          method: request.method as SupportedETHSigningMethods,
-          params: request.params,
-        },
-      });
-      this._log(`request event ${id} - result`, result);
-      response = formatJsonRpcResult(id, result);
+      if (isEthRequest(request.method)) {
+        const wallet = pkpClient.getEthWallet();
+        const result = await ethRequestHandler({
+          signer: wallet,
+          payload: {
+            method: request.method as SupportedETHSigningMethods,
+            params: request.params,
+          },
+        });
+        response = formatJsonRpcResult(id, result);
+      } else {
+        throw new Error(`Unsupported method: ${request.method}`);
+      }
     } catch (err: unknown) {
       let message: string;
       if (err instanceof Error) {
@@ -281,7 +264,6 @@ export class PKPWalletConnect {
 
     // Send a response with the result or an error
     if (response) {
-      this._log(`request event ${id} - response`, response);
       return await this.respondSessionRequest({
         topic,
         response,
@@ -292,18 +274,14 @@ export class PKPWalletConnect {
   /**
    * Reject a session request received from a dapp
    *
-   * @param {SignClientTypes.EventArguments['session_request']} requestEvent - The session request.
-   * @param {any} [reason] - The reason for rejecting the session request.
+   * @param {SignClientTypes.EventArguments['session_request']} requestEvent - The session request
+   * @param {ErrorResponse} [reason] - The reason for rejecting the session request
    */
   public async rejectSessionRequest(
-    requestEvent: any,
-    reason?: any
+    requestEvent: SignClientTypes.EventArguments['session_request'],
+    reason?: ErrorResponse
   ): Promise<void> {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+    this.client = this._isWalletConnectInitialized(this.client);
     const { id, topic } = requestEvent;
     const response = formatJsonRpcError(
       id,
@@ -321,12 +299,7 @@ export class PKPWalletConnect {
   public respondSessionRequest: IWeb3Wallet['respondSessionRequest'] = async (
     params
   ) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
-    this._log('respondSessionRequest', params);
+    this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.respondSessionRequest(params);
   };
 
@@ -334,11 +307,7 @@ export class PKPWalletConnect {
    * Update WalletConnect session namespaces
    */
   public updateSession: IWeb3Wallet['updateSession'] = async (params) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+    this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.updateSession(params);
   };
 
@@ -346,11 +315,7 @@ export class PKPWalletConnect {
    * Extend WalletConnect session by updating session expiry
    */
   public extendSession: IWeb3Wallet['extendSession'] = async (params) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+    this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.extendSession(params);
   };
 
@@ -360,11 +325,7 @@ export class PKPWalletConnect {
   public disconnectSession: IWeb3Wallet['disconnectSession'] = async (
     params
   ) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+    this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.disconnectSession(params);
   };
 
@@ -372,11 +333,7 @@ export class PKPWalletConnect {
    * Emit session events
    */
   public emitSessionEvent: IWeb3Wallet['emitSessionEvent'] = async (params) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+    this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.emitSessionEvent(params);
   };
 
@@ -384,11 +341,7 @@ export class PKPWalletConnect {
    * Get active sessions
    */
   public getActiveSessions: IWeb3Wallet['getActiveSessions'] = () => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+    this.client = this._isWalletConnectInitialized(this.client);
     return this.client.getActiveSessions();
   };
 
@@ -397,11 +350,7 @@ export class PKPWalletConnect {
    */
   public getPendingSessionProposals: IWeb3Wallet['getPendingSessionProposals'] =
     () => {
-      if (!this.client) {
-        return this._throwError(
-          'WalletConnect client has not yet been initialized. Please call init().'
-        );
-      }
+      this.client = this._isWalletConnectInitialized(this.client);
       return this.client.getPendingSessionProposals();
     };
 
@@ -410,80 +359,105 @@ export class PKPWalletConnect {
    */
   public getPendingSessionRequests: IWeb3Wallet['getPendingSessionRequests'] =
     () => {
-      if (!this.client) {
-        return this._throwError(
-          'WalletConnect client has not yet been initialized. Please call init().'
-        );
-      }
+      this.client = this._isWalletConnectInitialized(this.client);
       return this.client.getPendingSessionRequests();
     };
 
   // ----------------- WalletConnect clients -----------------
 
+  /**
+   * Get the Sign Client that is initialized on the WalletConnect client
+   *
+   * @returns {ISignClient} - SignClient instance
+   */
   public getSignClient(): ISignClient {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+    this.client = this._isWalletConnectInitialized(this.client);
     return this.client.engine.signClient;
   }
 
   // ----------------- WalletConnect event handlers -----------------
 
-  public on: IWeb3Wallet['on'] = (name, listener) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+  public on(name: Web3WalletTypes.Event, listener: (args: any) => void) {
+    this.client = this._isWalletConnectInitialized(this.client);
     return this.client.on(name, listener);
-  };
+  }
 
-  public once: IWeb3Wallet['once'] = (name, listener) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+  public once(name: Web3WalletTypes.Event, listener: (args: any) => void) {
+    this.client = this._isWalletConnectInitialized(this.client);
     return this.client.once(name, listener);
-  };
+  }
 
-  public off: IWeb3Wallet['off'] = (name, listener) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+  public off(name: Web3WalletTypes.Event, listener: (args: any) => void) {
+    this.client = this._isWalletConnectInitialized(this.client);
     return this.client.off(name, listener);
-  };
+  }
 
-  public removeListener: IWeb3Wallet['removeListener'] = (name, listener) => {
-    if (!this.client) {
-      return this._throwError(
-        'WalletConnect client has not yet been initialized. Please call init().'
-      );
-    }
+  public removeListener(
+    name: Web3WalletTypes.Event,
+    listener: (args: any) => void
+  ) {
+    this.client = this._isWalletConnectInitialized(this.client);
     return this.client.removeListener(name, listener);
-  };
+  }
 
   // ----------------- Helpers -----------------
 
   /**
-   * Get addresses by chain
+   * Get addresses by chain name
    *
-   * @param {string} chain - Chain in CAIP-2 format
+   * @param {string} chainName - Chain in CAIP-2 namespace
    *
    * @returns {Promise<string[]>} - Array of addresses
    */
-  public async getAddresses(chain: string): Promise<string[]> {
+  public async getAccounts(chainName: string): Promise<string[]> {
     const addresses: string[] = [];
-    const wallets = this.pkpWallets.get(chain);
-    if (!wallets) {
+    if (this.pkpClients.length === 0) {
       return addresses;
     }
-    for (const wallet of wallets) {
-      addresses.push(await wallet.getAddress());
+    // TODO: Update this once we support more JSON RPC handlers
+    for (const pkpClient of this.pkpClients) {
+      let wallet: PKPBase;
+      let address: string;
+      switch (chainName) {
+        case 'eip155':
+          wallet = pkpClient.getEthWallet();
+          address = await wallet.getAddress();
+          addresses.push(address);
+          break;
+        default:
+          break;
+      }
+    }
+    return addresses;
+  }
+
+  /**
+   * Return list of addresses with namespace prefix given a chain
+   *
+   * @param {string} chain - Chain in CAIP-2 format
+   *
+   * @returns {string[]} - List of addresses with namespace prefix
+   */
+  public async getAccountsWithPrefix(chain: string): Promise<string[]> {
+    const addresses: string[] = [];
+    if (this.pkpClients.length === 0) {
+      return addresses;
+    }
+    const parsedChain = parseChainId(chain);
+    const chainName = parsedChain.namespace;
+    // TODO: Update this once we support more JSON RPC handlers
+    for (const pkpClient of this.pkpClients) {
+      let wallet: PKPBase;
+      let address: string;
+      switch (chainName) {
+        case 'eip155':
+          wallet = pkpClient.getEthWallet();
+          address = await wallet.getAddress();
+          addresses.push(formatAccountWithChain(address, chain));
+          break;
+        default:
+          break;
+      }
     }
     return addresses;
   }
@@ -513,57 +487,78 @@ export class PKPWalletConnect {
   }
 
   /**
-   * Find a wallet by request event params.
+   * Find PKPClient by request event params
    *
-   * @param {any} params - Request event params.
+   * @param {any} params - Request event params
    */
-  public async findWalletByRequestParams(params: any): Promise<PKPBase | null> {
+  public async findPKPClientByRequestParams(
+    params: any
+  ): Promise<PKPClient | null> {
     const paramsString = JSON.stringify(params);
 
     // Loop through all wallets and find the one that has an address that can be found within the request params
-    for (const [key, value] of this.pkpWallets) {
-      if (!this.supportedChains.includes(key)) {
-        continue;
-      }
-      const wallets = value;
-      for (const wallet of wallets) {
-        const acc = await wallet.getAddress();
-        if (paramsString.toLowerCase().includes(acc.toLowerCase())) {
-          return wallet;
-        }
+    for (const pkpClient of this.pkpClients) {
+      // TODO: Update this once we support more JSON RPC handlers
+      const ethWallet = pkpClient.getEthWallet();
+      const ethAddress = await ethWallet.getAddress();
+      if (paramsString.toLowerCase().includes(ethAddress.toLowerCase())) {
+        return pkpClient;
       }
     }
     return null;
   }
 
   /**
-   * Add wallets from PKPClient to the map
+   * Add a PKPClient to list of PKPClients if not already added
    *
    * @param {PKPClient} pkpClient - The PKPClient instance
    */
   public addPKPClient(pkpClient: PKPClient): void {
-    for (const chain of this.supportedChains) {
-      const wallets = this.pkpWallets.get(chain);
-      if (!wallets) {
-        continue;
-      }
-      let wallet: PKPBase | null = null;
-      switch (chain) {
-        case 'eip155':
-          wallet = pkpClient.getEthWallet();
-          break;
-        default:
-          break;
-      }
-      if (wallet) {
-        wallets.push(wallet);
-      }
-      this.pkpWallets.set(chain, wallets);
+    const existingClient = this.pkpClients.find(
+      (client) => client.pkpPubKey === pkpClient.pkpPubKey
+    );
+    if (!existingClient) {
+      this.pkpClients.push(pkpClient);
     }
+  }
+
+  /**
+   * Get current list of PKPClients
+   *
+   * @returns {PKPClient[]} - List of PKPClients
+   */
+  public getPKPClients(): PKPClient[] {
+    return this.pkpClients;
   }
 
   // ----------------- Private methods -----------------
 
+  /**
+   * Checks if the given WalletConnect client is initialized and returns it. If it's not initialized, throws an error.
+   *
+   * @private
+   * @param {IWeb3Wallet | undefined} client - The WalletConnect client instance to check for initialization
+   * @returns {IWeb3Wallet} - The initialized WalletConnect client instance
+   * @throws {Error} - If the WalletConnect client instance is not initialized
+   */
+  private _isWalletConnectInitialized(
+    client: IWeb3Wallet | undefined
+  ): IWeb3Wallet {
+    if (!client) {
+      this._log('WalletConnect client has not yet been initialized.');
+      return this._throwError(
+        'WalletConnect client has not yet been initialized. Please call initWalletConnect().'
+      );
+    }
+    return client;
+  }
+
+  /**
+   * Logs the provided arguments to the console if the `debug` property is set to true.
+   *
+   * @private
+   * @param {...any[]} args - The arguments to log to the console.
+   */
   private _log(...args: any[]): void {
     if (this.debug) {
       console.log(this.orange + this.PREFIX + this.reset, ...args);

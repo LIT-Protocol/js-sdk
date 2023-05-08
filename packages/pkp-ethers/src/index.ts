@@ -17,6 +17,7 @@ import {
   signTypedDataLegacy,
   sendTransactionHandler,
   sendRawTransactionHandler,
+  isEthRequest,
 } from './lib/handler';
 
 import { SupportedETHSigningMethods } from './lib/pkp-ethers-types';
@@ -36,4 +37,5 @@ export {
   sendTransactionHandler,
   sendRawTransactionHandler,
   SupportedETHSigningMethods,
+  isEthRequest,
 };
