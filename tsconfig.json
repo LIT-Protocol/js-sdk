@@ -18,9 +18,6 @@
     "resolveJsonModule": true,
     "paths": {
       "@lit-protocol/*": ["packages/*/src"],
-      "@lit-protocol/pkp-client": ["packages/pkp-client/src/index.ts"],
-      "@lit-protocol/pkp-base": ["packages/pkp-base/src/index.ts"],
-      "@lit-protocol/pkp-cosmos": ["packages/pkp-cosmos/src/index.ts"],
       "@lit-protocol/lit-auth-client": [
         "packages/lit-auth-client/src/index.ts"
       ],

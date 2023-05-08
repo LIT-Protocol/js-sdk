@@ -380,9 +380,7 @@ export interface ILitNodeClient {
    * Retrieve the symmetric encryption key from the LIT nodes.  Note that this will only work if the current user meets the access control conditions specified when the data was encrypted.  That access control condition is typically that the user is a holder of the NFT that corresponds to this encrypted data.  This NFT token address and ID was specified when this LIT was created.
    *
    */
-  getEncryptionKey(
-    params: JsonEncryptionRetrieveRequest
-  ): Promise<Uint8Array>;
+  getEncryptionKey(params: JsonEncryptionRetrieveRequest): Promise<Uint8Array>;
 
   /**
    *
@@ -393,9 +391,7 @@ export interface ILitNodeClient {
    * @returns { Promise<Uint8Array | undefined }
    *
    */
-  saveEncryptionKey(
-    params: JsonSaveEncryptionKeyRequest
-  ): Promise<Uint8Array>;
+  saveEncryptionKey(params: JsonSaveEncryptionKeyRequest): Promise<Uint8Array>;
 
   /**
    *

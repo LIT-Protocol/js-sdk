@@ -1132,7 +1132,7 @@ export class LitNodeClientNodeJs {
       ipfsId = params.ipfsId;
     }
 
-    if(!ipfsId){
+    if (!ipfsId) {
       return throwError({
         message: 'ipfsId is required',
         error: LIT_ERROR.INVALID_PARAM_TYPE,

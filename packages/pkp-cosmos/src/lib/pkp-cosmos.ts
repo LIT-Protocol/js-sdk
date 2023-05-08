@@ -11,6 +11,7 @@
  */
 
 import {
+  Coin,
   encodeSecp256k1Signature,
   rawSecp256k1PubkeyToRawAddress,
 } from '@cosmjs/amino';
@@ -196,6 +197,42 @@ export class PKPCosmosWallet
       this
     );
     return client;
+  };
+
+  /**
+   * Prepares transaction data by calculating the amount and fee.
+   * Returns the amount and fee in the format required by the SigningStargateClient.sign method.
+   *
+   * @param {Object} options - Transaction configuration.
+   * @property {number} amount - The amount of tokens to send.
+   * @property {string} denom - The denomination of the tokens to send.
+   * @property {number} gasPrice - The gas price to use for the transaction.
+   * @property {number} fee - The fee to use for the transaction.
+   *
+   * @returns {object} An object containing the amount and fee in the format required by the SigningStargateClient.sign method.
+   */
+  formSendTx = ({
+    amount,
+    denom,
+    gasPrice = 0.025,
+    fee = 80_000,
+  }: {
+    amount: number;
+    denom: string;
+    gasPrice: number;
+    fee: number;
+  }): {
+    amount: Coin[];
+    fee: StdFee;
+  } => {
+    const _amount = coins(amount, denom);
+    const _gasPrice = GasPrice.fromString(`${gasPrice}${denom}`);
+    const _sendFee: StdFee = calculateFee(fee, _gasPrice);
+
+    return {
+      amount: _amount,
+      fee: _sendFee,
+    };
   };
 
   /**

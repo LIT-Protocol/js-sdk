@@ -3,6 +3,7 @@ import {
   asyncForEach,
   childRunCommand,
   customSort,
+  findArg,
   findImportsFromDir,
   findStrFromDir,
   getArgs,
@@ -14,6 +15,7 @@ import {
   redLog,
   replaceAutogen,
   replaceFileContent,
+  runCommand,
   spawnCommand,
   spawnListener,
   writeFile,
@@ -47,6 +49,8 @@ const optionMaps = new Map([
   ['--v', () => versionFunc()],
   ['--version', () => versionFunc()],
   ['--verify', () => validateDependencyVersions()],
+  ['--postBuild', () => postBuild()],
+  ['postBuildIndividual', () => postBuildIndividualFunc()],
 ]);
 
 const setup = () => {
@@ -77,6 +81,8 @@ function helpFunc() {
             --match-versions: match versions
             --version: show version
             --verify: validate dependency versions
+            --postBuild: post build
+            postBuildIndividual: post build individual
     `,
     true
   );
@@ -175,7 +181,7 @@ async function createFunc() {
 
     await writeFile(`workspace.json`, JSON.stringify(workspaceJson, null, 2));
 
-    greenLog('Done!');
+    greenLog('✅ NX Build Done! Post Build in progress...');
   }
 
   if (APP_TYPE == '--html') {
@@ -250,7 +256,6 @@ async function testFunc() {
   }
 
   if (TEST_TYPE === '--unit') {
-
     // start the server if it's not running
     // const startServer = () => {
     //   const serverProcess = spawn('yarn', ['txServer']);
@@ -478,15 +483,15 @@ async function buildFunc() {
     spawnListener(`yarn nx run ${TARGET}:_buildWeb`);
     await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
     await childRunCommand(`yarn postBuild:mapDepsToDist`);
-    await childRunCommand(`yarn tool:genHtml`);
-    await childRunCommand(`yarn tool:genReact`);
-    await childRunCommand(`yarn tool:genNodejs`);
+    await childRunCommand(`yarn gen:html`);
+    await childRunCommand(`yarn gen:react`);
+    await childRunCommand(`yarn gen:nodejs`);
     await childRunCommand(`yarn tools --polyfills ${TARGET}`);
   }
 
   if (BUILD_TYPE === '--packages') {
     const MODE = args[2];
-    console.log('MODE:', MODE);
+    // console.log('MODE:', MODE);
 
     if (!MODE || MODE === '' || MODE === '--help') {
       greenLog(
@@ -529,7 +534,7 @@ async function buildFunc() {
       }
 
       await childRunCommand(`yarn postBuild:mapDepsToDist`);
-      await childRunCommand(`yarn tool:genReadme`);
+      await childRunCommand(`yarn gen:readme`);
       exit();
     } else {
       await childRunCommand(`yarn tools --match-versions`);
@@ -1010,6 +1015,23 @@ async function watchFunc() {
   }
 }
 
+async function postBuildIndividualFunc() {
+  const POSTBUILD_FILE = 'postbuild.mjs';
+
+  const TARGET = findArg(args, '--target');
+  const PROJECT_PATH = `packages/${TARGET}`;
+  const DIST_PATH = `dist/packages/${TARGET}`;
+  const POSTBUILD_PATH = `${PROJECT_PATH}/${POSTBUILD_FILE}`;
+
+  if (!fs.existsSync(POSTBUILD_PATH)) {
+    process.exit();
+  }
+
+  greenLog(`👷 ${POSTBUILD_PATH} file found! Running...`, true);
+  await childRunCommand(`node ${POSTBUILD_PATH}`);
+  process.exit();
+}
+
 async function polyfillsFunc() {
   const PROJECT_NAME = args[1];
 
@@ -1040,7 +1062,7 @@ async function polyfillsFunc() {
 
     await writeFile(buildIndexJsPath, newBuiltIndexJs);
 
-    greenLog('Polyfills injected into index.js');
+    greenLog('✅ Polyfills injected into index.js');
   } catch (e) {
     yellowLog(
       `No packages/${PROJECT_NAME}/polyfills.js found for ` + PROJECT_NAME
@@ -1344,7 +1366,7 @@ async function versionFunc() {
 
 async function validateDependencyVersions() {
   const PREFIX = '@lit-protocol';
-  const ignoreList = ['@lit-protocol/pkp-ethers.js-node'];
+  const ignoreList = [''];
 
   const packageList = (await listDirsRecursive('./packages', false)).map(
     (item) => {
@@ -1352,7 +1374,7 @@ async function validateDependencyVersions() {
     }
   );
 
-  await asyncForEach(packageList, async (pkg) => {
+  await asyncForEach(packageList, async (pkg, i) => {
     const packageJson = await readJsonFile(pkg);
     const pkgVersion = packageJson.version;
 
@@ -1376,11 +1398,30 @@ async function validateDependencyVersions() {
 
     if (fails > 0) {
       redLog(
-        `❌ ${pkg} has ${fails} dependencies that do not match the version`
+        `❌ ${pkg} has ${fails} dependencies with versions that do not match.`
       );
     } else {
-      greenLog(`✅ ${pkg} has all dependencies that match the version`);
+      greenLog(
+        `✅ ${i + 1} ${pkg} contains all dependencies with matching versions.`
+      );
     }
   });
+
   process.exit();
+}
+
+async function postBuild() {
+  // greenLog('...mapping dist package name to package.json name');
+  // await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
+
+  greenLog('...generating apps/html/index.html');
+  await runCommand('yarn gen:html');
+
+  greenLog('...generating apps/react/src/app/app.tsx');
+  await runCommand('yarn gen:react');
+
+  greenLog('...generating apps/nodejs/main.ts');
+  await runCommand('yarn gen:nodejs');
+
+  exit();
 }

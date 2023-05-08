@@ -62,36 +62,6 @@ describe('PKPClient', () => {
         expect(txRes).toBeDefined();
       });
     });
-
-    describe('cosmos', () => {
-      it('[TODO] should sign a message', async () => {
-        // const cosmosAdress = (
-        //   await pkpClient.getCosmosWallet().getAccounts()
-        // )[0].address;
-        // expect(0).toBe(1);
-        // const cosmosWallet = pkpClient.getCosmosWallet();
-        // const signature = await cosmosWallet.sign(
-        //   [
-        //     {
-        //       typeUrl: 'cosmos-sdk/MsgSend',
-        //       value: [0, 1, 2, 3],
-        //     },
-        //   ],
-        //   {
-        //     amount: {
-        //       amount: '0',
-        //       denom: 'uatom',
-        //     },
-        //     denom: 'uatom',
-        //     gas: '200000',
-        //   },
-        //   '0x'
-        // );
-        // expect(signature).toBeDefined();
-      });
-
-      it('[TODO] should sign a transaction', async () => {});
-    });
   });
 
   describe('with rpc', () => {
