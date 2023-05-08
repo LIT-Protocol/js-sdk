@@ -135,7 +135,7 @@ export function uint8arrayFromString(str: string, encoding = 'utf8') {
       return new Uint8Array(arr);
     case 'base64':
       return base64ToUint8Array(str);
-    case 'base64urlpad':
+    case 'base64urlpad' || 'base64url':
       return base64ToUint8Array(base64UrlPadToBase64(str));
     default:
       throw new Error(`Unsupported encoding "${encoding}"`);
