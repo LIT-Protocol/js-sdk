@@ -200,7 +200,7 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   // filter out empty shares
   const validShares = sigShares.reduce((acc, val) => {
     if (val.shareHex !== '') {
-      acc.push(val);
+      acc.push(JSON.stringify(val));
     }
     return acc;
   }, []);
@@ -216,23 +216,10 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
     });
   }
 
-  // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
-  const R_x = validShares[0].localX;
-  const R_y = validShares[0].localY;
-
-  log('R_x:', R_x);
-  log('R_y:', R_y);
-
-  const shareHexes = validShares.map((s: any) => s.shareHex);
-  log('shareHexes:', shareHexes);
-
-  const shares = JSON.stringify(shareHexes);
-  log('shares is', shares);
-
   let sig: string = '';
 
   try {
-    sig = JSON.parse(wasmECDSA.combine_signature(R_x, R_y, shares));
+    sig = JSON.parse(wasmECDSA.combine_signature(validShares));
   } catch (e) {
     log('Failed to combine signatures:', e);
   }
