@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
+    "reset:hard": "yarn reset && sh ./tools/scripts/reset.sh",
     "reset:dev": "yarn tools --remove-local-dev",
     "reset": "rm -rf ./dist/packages && yarn reset:dev",
     "build": "yarn build:packages",
