@@ -30,11 +30,7 @@
   "tags": [
     "browser"
   ],
-<<<<<<< HEAD
-  "version": "2.1.143",
-=======
-  "version": "2.1.160",
->>>>>>> master
+  "version": "2.1.162",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
