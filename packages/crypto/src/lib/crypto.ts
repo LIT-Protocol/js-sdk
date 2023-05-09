@@ -37,7 +37,16 @@ if (!globalThis.wasmExports) {
 }
 
 if (!globalThis.wasmECDSA) {
-  wasmECDSA.initWasmEcdsaSdk().then((sdk: any) => {
+  let init = wasmECDSA.initWasmEcdsaSdk;
+  let env;
+
+  if (isBrowser()) { 
+    env = 'Browser';
+  } else {
+    env = 'NodeJS';
+  }
+
+  init().then((sdk: any) => {
     globalThis.wasmECDSA = sdk;
 
     if (!globalThis.jestTesting) {
@@ -193,12 +202,12 @@ export const combineBlsShares = (
  */
 export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   log('sigShares:', sigShares);
-
+  let type = sigShares[0].sigType;
   // the public key can come from any node - it obviously will be identical from each node
   // const publicKey = sigShares[0].publicKey;
   // const dataSigned = '0x' + sigShares[0].dataSigned;
   // filter out empty shares
-  const validShares = sigShares.reduce((acc, val) => {
+  let validShares = sigShares.reduce((acc, val) => {
     if (val.shareHex !== '') {
       acc.push(JSON.stringify(val));
     }
@@ -219,7 +228,21 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   let sig: string = '';
 
   try {
-    sig = JSON.parse(wasmECDSA.combine_signature(validShares));
+    let res: string = '';
+    validShares = _remapkeyShareForEcdsa(validShares);
+    switch(type) {
+      case 'EcdsaCaitSithK256':
+        res = wasmECDSA.combine_signature(validShares, 3);
+        sig = JSON.parse(res);
+      break;
+      case 'EcdsaCaitSithP256':
+        res = wasmECDSA.combine_signature(validShares, 4);
+        sig = JSON.parse(res);
+      break;
+      // if its another sig type, it shouldnt be resolving to this method
+      default:
+        throw new Error("Unsupported signature type present in signature shares. Please report this issue");        
+    }
   } catch (e) {
     log('Failed to combine signatures:', e);
   }
@@ -294,3 +317,15 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
 
   return sessionKeyPair;
 };
+
+
+const _remapkeyShareForEcdsa = (shares: SigShare[]): any[] => {
+  for (let share of shares) {
+    const keys = Object.keys(share);
+    for (key of keys) {
+      const new_key = key.replace(/[A-Z]/g, (letter) => `_${letter. toLowerCase()}`);
+      share = Object.defineProperty(share, new_key, Object.getOwnPropertyDescriptor(share, key));
+    }
+  }
+
+}
