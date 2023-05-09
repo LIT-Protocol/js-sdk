@@ -51,6 +51,7 @@ const optionMaps = new Map([
   ['--verify', () => validateDependencyVersions()],
   ['--postBuild', () => postBuild()],
   ['postBuildIndividual', () => postBuildIndividualFunc()],
+  ['fixTsConfig', () => fixTsConfigFunc()],
 ]);
 
 const setup = () => {
@@ -83,6 +84,7 @@ function helpFunc() {
             --verify: validate dependency versions
             --postBuild: post build
             postBuildIndividual: post build individual
+            fixTsConfig: fix tsconfig
     `,
     true
   );
@@ -1029,6 +1031,18 @@ async function postBuildIndividualFunc() {
 
   greenLog(`👷 ${POSTBUILD_PATH} file found! Running...`, true);
   await childRunCommand(`node ${POSTBUILD_PATH}`);
+  process.exit();
+}
+
+async function fixTsConfigFunc() {
+  const TSCONFIG = JSON.parse(await readFile('tsconfig.json'));
+
+  TSCONFIG.compilerOptions.paths = {
+    '@lit-protocol/*': ['packages/*/src'],
+  };
+
+  await writeFile('tsconfig.json', JSON.stringify(TSCONFIG, null, 2));
+
   process.exit();
 }
 
