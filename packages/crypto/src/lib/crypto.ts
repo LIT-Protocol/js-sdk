@@ -209,6 +209,7 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   // filter out empty shares
   let validShares = sigShares.reduce((acc, val) => {
     if (val.shareHex !== '') {
+      _remapkeyShareForEcdsa(val);
       acc.push(JSON.stringify(val));
     }
     return acc;
@@ -229,7 +230,6 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
 
   try {
     let res: string = '';
-    validShares = _remapkeyShareForEcdsa(validShares);
     switch(type) {
       case 'EcdsaCaitSithK256':
         res = wasmECDSA.combine_signature(validShares, 3);
@@ -319,13 +319,11 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
 };
 
 
-const _remapkeyShareForEcdsa = (shares: SigShare[]): any[] => {
-  for (let share of shares) {
+const _remapkeyShareForEcdsa = (share: SigShare): any[] => {
     const keys = Object.keys(share);
-    for (key of keys) {
-      const new_key = key.replace(/[A-Z]/g, (letter) => `_${letter. toLowerCase()}`);
+    for (const key of keys) {
+      const new_key = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
       share = Object.defineProperty(share, new_key, Object.getOwnPropertyDescriptor(share, key));
+      delete share[key];
     }
-  }
-
 }
