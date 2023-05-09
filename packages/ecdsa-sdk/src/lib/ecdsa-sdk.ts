@@ -471,7 +471,8 @@ function initSync(module) {
     return finalizeInit(instance, module);
 }
 
-async function init(input) {    const imports = getImports();
+async function init(input) {
+    const imports = getImports();
 
     initMemory(imports);
 
