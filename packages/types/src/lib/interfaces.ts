@@ -314,8 +314,8 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
 
 export interface JsonStoreSigningRequest extends JsonAccsRequest {
   // Whether or not the access control condition should be saved permanently.  If false, the access control conditions will be updateable by the creator.  If you don't pass this param, it's set to true by default.
-  permanant?: number;
-  permanent?: number;
+  permanant?: boolean | 0 | 1;
+  permanent?: boolean | 0 | 1;
   sessionSigs?: any;
 }
 
@@ -334,8 +334,8 @@ export interface JsonSigningStoreRequest {
   key: string;
   val: string;
   chain?: string;
-  permanant?: number;
-  permanent?: number;
+  permanant?: 0 | 1;
+  permanent?: 0 | 1;
   authSig?: AuthSig;
   sessionSigs?: object;
 }
@@ -377,8 +377,8 @@ export interface JsonSaveEncryptionKeyRequest {
   // The encrypted symmetric key of the item you with to update.  You must pass either symmetricKey or encryptedSymmetricKey.
   encryptedSymmetricKey?: EncryptedSymmetricKey;
 
-  permanant?: number;
-  permanent?: number;
+  permanant?: boolean | 0 | 1;
+  permanent?: boolean | 0 | 1;
 
   sessionSigs?: object;
 }

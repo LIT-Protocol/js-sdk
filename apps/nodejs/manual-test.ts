@@ -1,5 +1,4 @@
 import * as litNodeClient from '@lit-protocol/lit-node-client';
-// import { PKPWallet } from '@lit-protocol/pkp-ethers.js';
 // import { LitContracts } from '@lit-protocol/contracts-sdk';
 // import { ethers } from 'ethers';
 

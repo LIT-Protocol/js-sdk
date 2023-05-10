@@ -4,8 +4,7 @@
   "sourceRoot": "packages/constants/src",
   "projectType": "library",
   "targets": {
-
-    "build":{
+    "build": {
       "executor": "nx:run-commands",
       "options": {
         "command": "yarn build:target constants"
@@ -25,14 +24,14 @@
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
       "options": {
-        "bundle": true,        
+        "bundle": true,
         "sourcemap": true,
         "metafile": true,
         "globalName": "LitJsSdk_constants",
-        "outfile":"dist/packages/constants-vanilla/constants.js",
+        "outfile": "dist/packages/constants-vanilla/constants.js",
         "entryPoints": ["./packages/constants/src/index.ts"],
         "define": { "global": "window" },
-        "plugins":[
+        "plugins": [
           {
             "package": "esbuild-node-builtins",
             "function": "nodeBuiltIns"
@@ -48,11 +47,11 @@
       }
     },
 
-    "generateDoc":{
+    "generateDoc": {
       "executor": "nx:run-commands",
-        "options": {
-          "command": "yarn typedoc --entryPointStrategy expand packages/constants/src --exclude packages/constants/src/**/*.spec.** --tsconfig packages/constants/tsconfig.json"
-        }
+      "options": {
+        "command": "yarn typedoc --entryPointStrategy expand packages/constants/src --exclude packages/constants/src/**/*.spec.** --tsconfig packages/constants/tsconfig.json"
+      }
     },
 
     "lint": {

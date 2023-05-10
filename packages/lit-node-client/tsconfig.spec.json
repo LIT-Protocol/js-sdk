@@ -7,5 +7,11 @@
     "allowJs": true,
     "esModuleInterop": true
   },
-  "include": ["jest.config.ts", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts", "../auth-browser/src/lib/chains/lit-connect-modal.d.ts"]
+  "include": [
+    "jest.config.ts",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.d.ts",
+    "../auth-browser/src/lib/chains/lit-connect-modal.d.ts"
+  ]
 }

@@ -1,4 +1,4 @@
-// This is not used anymore locally but still can be used if you want 
+// This is not used anymore locally but still can be used if you want
 // to run the tx-handler-server locally instead of using the one in the cloud
 // 'https://lit-general-worker.herokuapp.com/';
 import express from 'express';
@@ -112,4 +112,6 @@ export {
 };
 
 // run the server at port 3031
-txHandler.listen(3031, () => console.log('Tx handling server listening on port 3031'));
+txHandler.listen(3031, () =>
+  console.log('Tx handling server listening on port 3031')
+);

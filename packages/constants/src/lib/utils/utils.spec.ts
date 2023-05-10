@@ -13,7 +13,6 @@ describe('error handling utils ELeft/Right works', () => {
     expect(res.type).toBe('ERROR');
   });
 
-
   it('returns result on ERight()', () => {
     expect(res2.result).toBe('ANSWER');
   });
