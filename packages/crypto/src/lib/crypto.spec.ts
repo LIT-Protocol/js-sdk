@@ -1,4 +1,7 @@
 import { initWasmEcdsaSdk } from '@lit-protocol/ecdsa-sdk';
+import { joinSignature } from 'ethers/lib/utils';
+import * as ethers from 'ethers';
+
 import {
   generateSymmetricKey,
   encryptWithSymmetricKey,
@@ -6,7 +9,6 @@ import {
   importSymmetricKey,
   combineEcdsaShares,
 } from './crypto';
-import { SigShare } from '@lit-protocol/types';
 
 describe('crypto', () => {
   it('should generateSymmetricKey', async () => {
@@ -101,7 +103,7 @@ describe('combine ECDSA Shares', () => {
     */
     const sigShares = [
       {
-        sigType:"EcdsaCaitSith",
+        sigType:"EcdsaCaitSithK256",
         dataSigned: "A591A6D40BF420404A011733CFB7B190D62C65BF0BCDA32B57B277D9AD9F146E",
         signatureShare:  "01C4E0EDD498B14DFE8D87163C39F738B8AC17172B55A6A9518E3704362B4FC1",
         shareIndex: 0,
@@ -111,7 +113,7 @@ describe('combine ECDSA Shares', () => {
         sigName: "sig1"
       },
       {
-        sigType:"EcdsaCaitSith",
+        sigType:"EcdsaCaitSithK256",
         dataSigned: "A591A6D40BF420404A011733CFB7B190D62C65BF0BCDA32B57B277D9AD9F146E",
         signatureShare: "FE3B1F122B674EB2017278E9C3C608C60202C5CF83F2F9926E4427889A0AF180",
         shareIndex: 0,
@@ -121,7 +123,7 @@ describe('combine ECDSA Shares', () => {
         sigName: "sig1",
       },
       {
-        sigType:"EcdsaCaitSith",
+        sigType:"EcdsaCaitSithK256",
         dataSigned: "A591A6D40BF420404A011733CFB7B190D62C65BF0BCDA32B57B277D9AD9F146E",
         signatureShare: "55EC4AF9F1883B19FF84825CBEBDFD127BC8FBFF48DF6CF705CADC85ACCB3056",
         shareIndex: 0,
@@ -137,5 +139,21 @@ describe('combine ECDSA Shares', () => {
     expect(sig.r).toBeDefined();
     expect(sig.s).toBeDefined();
     expect(sig.recid).toBeDefined();
+
+    sig = joinSignature({
+      r: '0x' + sig.r,
+      s: '0x' + sig.s,
+      v: sig.recid
+    });
+    let msg: any = ethers.utils.arrayify('0x' + sigShares[0].dataSigned)
+    const recoveredPk = ethers.utils.recoverPublicKey(msg, sig);
+    console.log(sig);
+    
+    // recovered keys in address format, currently unmatching.
+    const addr = ethers.utils.computeAddress(ethers.utils.arrayify('0x' + sigShares[0].publicKey));
+    const recoveredAddr = ethers.utils.computeAddress(ethers.utils.arrayify(recoveredPk)); 
+    expect(recoveredAddr).toEqual(addr);
+
+    expect(sigShares[0].publicKey).toEqual(recoveredPk);
   });
 });

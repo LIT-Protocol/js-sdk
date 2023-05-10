@@ -38,14 +38,7 @@ if (!globalThis.wasmExports) {
 
 if (!globalThis.wasmECDSA) {
   let init = wasmECDSA.initWasmEcdsaSdk;
-  let env;
-
-  if (isBrowser()) { 
-    env = 'Browser';
-  } else {
-    env = 'NodeJS';
-  }
-
+  let env = "NodeJS";
   init().then((sdk: any) => {
     globalThis.wasmECDSA = sdk;
 
@@ -209,8 +202,8 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   // filter out empty shares
   let validShares = sigShares.reduce((acc, val) => {
     if (val.shareHex !== '') {
-      _remapkeyShareForEcdsa(val);
-      acc.push(JSON.stringify(val));
+      let newVal = _remapkeyShareForEcdsa(val);
+      acc.push(JSON.stringify(newVal));
     }
     return acc;
   }, []);
@@ -243,6 +236,7 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
       default:
         throw new Error("Unsupported signature type present in signature shares. Please report this issue");        
     }
+    sig.r = sig.r.slice(2, sig.r.length);
   } catch (e) {
     log('Failed to combine signatures:', e);
   }
@@ -321,9 +315,11 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
 
 const _remapkeyShareForEcdsa = (share: SigShare): any[] => {
     const keys = Object.keys(share);
+    let newShare = {};
     for (const key of keys) {
       const new_key = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-      share = Object.defineProperty(share, new_key, Object.getOwnPropertyDescriptor(share, key));
-      delete share[key];
+      newShare = Object.defineProperty(newShare, new_key, Object.getOwnPropertyDescriptor(share, key));
     }
+
+    return newShare;
 }
