@@ -18,16 +18,19 @@
     "resolveJsonModule": true,
     "paths": {
       "@lit-protocol/*": ["packages/*/src"],
-      "@lit-protocol/pkp-client": ["packages/pkp-client/src/index.ts"],
-      "@lit-protocol/pkp-base": ["packages/pkp-base/src/index.ts"],
-      "@lit-protocol/pkp-cosmos": ["packages/pkp-cosmos/src/index.ts"],
       "@lit-protocol/lit-auth-client": [
         "packages/lit-auth-client/src/index.ts"
       ],
       "@lit-protocol/lit-node-client-nodejs": [
         "packages/lit-node-client-nodejs/src/index.ts"
       ],
+      "@lit-protocol/pkp-base": ["packages/pkp-base/src/index.ts"],
+      "@lit-protocol/pkp-client": ["packages/pkp-client/src/index.ts"],
+      "@lit-protocol/pkp-cosmos": ["packages/pkp-cosmos/src/index.ts"],
       "@lit-protocol/pkp-ethers": ["packages/pkp-ethers/src/index.ts"],
+      "@lit-protocol/pkp-walletconnect": [
+        "packages/pkp-walletconnect/src/index.ts"
+      ],
       "@lit-protocol/types": ["packages/types/src/index.ts"]
     }
   },

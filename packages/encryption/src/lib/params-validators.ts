@@ -120,14 +120,14 @@ export const paramsValidators = {
     }
 
     // -- validate: if sessionSig and authSig exists
-    if (sessionSigs && authSig) {
-      throwError({
-        message: 'You must pass only one authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      return false;
-    }
+    // if (sessionSigs && authSig) {
+    //   throwError({
+    //     message: 'You must pass only one authSig or sessionSigs',
+    //     errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+    //     errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+    //   });
+    //   return false;
+    // }
 
     return true;
   },

@@ -189,6 +189,15 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   /**
+   * Return address
+   *
+   * @returns {Promise<string>} - Address associated with concrete type of PKPBase
+   */
+  getAddress(): Promise<string> {
+    return Promise.resolve('');
+  }
+
+  /**
    * Initializes the PKPBase instance by connecting to the LIT node.
    */
   async init(): Promise<void | never> {
