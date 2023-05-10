@@ -10,7 +10,7 @@ import { LIT_SESSION_KEY_URI } from '@lit-protocol/constants';
 export const getSessionKeyUri = ({
   publicKey,
 }: {
-  publicKey: string,
+  publicKey: string;
 }): string => {
   return LIT_SESSION_KEY_URI + publicKey;
 };
@@ -27,10 +27,10 @@ export const getSessionKeyUri = ({
 export const parseResource = ({
   resource,
 }: {
-  resource: any,
+  resource: any;
 }): {
-  protocol: any,
-  resourceId: any,
+  protocol: any;
+  resourceId: any;
 } => {
   const [protocol, resourceId] = resource.split('://');
   return { protocol, resourceId };

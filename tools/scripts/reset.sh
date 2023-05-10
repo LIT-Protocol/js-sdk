@@ -1,24 +1,16 @@
 #!/bin/zsh
 
-rm -rf ./node_modules && 
-rm -rf ./dist &&
-rm -rf ./packages/constants/node_modules &&
-rm -rf ./packages/constants/docs &&
-rm -f ./packages/constants/yarn.lock &&
+paths_to_delete=(
+  "./node_modules"
+  "./dist"
+  "./doc"
+  "./tmp"
+  "./yarn-error.log"
+  "./yarn.lock"
+  "./package-lock.json"
+  "./lerna-debug.log"
+)
 
-rm -rf ./packages/utils/node_modules &&
-rm -rf ./packages/utils/dist &&
-rm -f ./packages/utils/yarn.lock &&
-
-rm -rf ./packages/core-browser/node_modules &&
-rm -rf ./packages/core-browser/dist &&
-rm -f ./packages/core-browser/yarn.lock &&
-
-rm -rf ./apps/e2e/node_modules &&
-
-rm -rf ./doc &&
-rm -rf ./tmp &&
-rm -f ./yarn-error.log &&
-rm -f ./yarn.lock &&
-rm -f ./package-lock.json &&
-rm -f ./lerna-debug.log
+for path in "${paths_to_delete[@]}"; do
+  rm -rf $path
+done

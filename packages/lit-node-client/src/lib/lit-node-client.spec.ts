@@ -5,20 +5,20 @@ let client: LitNodeClient;
 
 jest.setTimeout(60000);
 
-describe('litNodeClient', () => {
-  it('should create an instance', async () => {
-    client = new LitNodeClient({
-      litNetwork: 'serrano',
-      debug: false,
-    });
+describe('Lit Actions', () => {
+  client = new LitNodeClient({
+    litNetwork: 'serrano',
+    debug: false,
+  });
 
+  beforeAll(async () => {
     await client.connect();
+  });
 
+  it('should be connected', () => {
     expect(client.ready).toBe(true);
   });
-});
 
-describe('Lit Actions', () => {
   it('lit action log should return hello world', async () => {
     const res = await processTx(
       expect.getState().currentTestName,

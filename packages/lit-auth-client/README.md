@@ -4,7 +4,7 @@
 
 ## 📜 API Reference
 
-Check out the [API reference]().
+Check out the [API reference](https://docs.lit-js-sdk-v2.litprotocol.com/modules/lit_auth_client_src.html).
 
 ## 📦 Installation
 

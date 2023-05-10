@@ -4,7 +4,7 @@
   "sourceRoot": "packages/uint8arrays/src",
   "projectType": "library",
   "targets": {
-    "build":{
+    "build": {
       "executor": "nx:run-commands",
       "options": {
         "command": "yarn build:target uint8arrays"
