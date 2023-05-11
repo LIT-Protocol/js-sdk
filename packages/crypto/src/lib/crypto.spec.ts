@@ -6,7 +6,6 @@ import {
   importSymmetricKey,
   combineEcdsaShares,
 } from './crypto';
-import { SigShare } from '@lit-protocol/types';
 import * as ethers from 'ethers';
 import { joinSignature } from 'ethers/lib/utils';
 
