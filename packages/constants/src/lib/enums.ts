@@ -10,6 +10,11 @@ export enum SIGTYPE {
   ECDSA = 'ECDSA',
 }
 
+export enum ECDSASIGTYPE {
+  EcdsaCaitSithK256 = 'EcdsaCaitSithK256',
+  EcdsaCaitSithP256 = 'EcdsaCaitSithP256' 
+}
+
 /**
  * The only either possible error types
  */

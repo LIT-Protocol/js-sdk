@@ -20,6 +20,7 @@ import {
 
 // import nacl from 'tweetnacl';
 import { nacl } from '@lit-protocol/nacl';
+import { ECDSASIGTYPES } from '@lit-protocol/constants';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
@@ -209,8 +210,8 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   // filter out empty shares
   let validShares = sigShares.reduce((acc, val) => {
     if (val.shareHex !== '') {
-      _remapkeyShareForEcdsa(val);
-      acc.push(JSON.stringify(val));
+      const newVal = _remapKeyShareForEcdsa(val);
+      acc.push(JSON.stringify(newVal));
     }
     return acc;
   }, []);
@@ -231,11 +232,11 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   try {
     let res: string = '';
     switch(type) {
-      case 'EcdsaCaitSithK256':
+      case ECDSASIGTYPES.EcdsaCaitSithK256:
         res = wasmECDSA.combine_signature(validShares, 3);
         sig = JSON.parse(res);
       break;
-      case 'EcdsaCaitSithP256':
+      case ECDSASIGTYPES.EcdsaCaitSithP256:
         res = wasmECDSA.combine_signature(validShares, 4);
         sig = JSON.parse(res);
       break;
@@ -319,11 +320,13 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
 };
 
 
-const _remapkeyShareForEcdsa = (share: SigShare): any[] => {
+const _remapKeyShareForEcdsa = (share: SigShare): any[] => {
     const keys = Object.keys(share);
+    const newShare = {};
     for (const key of keys) {
       const new_key = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-      share = Object.defineProperty(share, new_key, Object.getOwnPropertyDescriptor(share, key));
-      delete share[key];
+      newShare = Object.defineProperty(newShare, new_key, Object.getOwnPropertyDescriptor(share, key));
     }
+
+    return newShare;
 }
