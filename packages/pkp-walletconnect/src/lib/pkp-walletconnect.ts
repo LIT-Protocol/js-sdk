@@ -19,6 +19,7 @@ import {
   ErrorResponse,
   formatJsonRpcError,
   formatJsonRpcResult,
+  JsonRpcResponse,
 } from '@json-rpc-tools/utils';
 import {
   CoreTypes,
@@ -28,6 +29,8 @@ import {
 } from '@walletconnect/types';
 import { PKPClient } from '@lit-protocol/pkp-client';
 import { PKPBase } from '@lit-protocol/pkp-base';
+
+const DEFAULT_RELAY_URL = 'wss://relay.walletconnect.com';
 
 export interface InitWalletConnectParams
   extends Omit<Web3WalletTypes.Options, 'core'> {
@@ -66,7 +69,7 @@ export class PKPWalletConnect {
   ): Promise<void> {
     let coreOpts: CoreTypes.Options = {
       projectId: params.projectId,
-      relayUrl: params.relayUrl || 'wss://relay.walletconnect.com',
+      relayUrl: params.relayUrl || DEFAULT_RELAY_URL,
     };
     if (this.debug) {
       coreOpts = { ...coreOpts, logger: 'debug' };
@@ -176,8 +179,17 @@ export class PKPWalletConnect {
 
   /**
    * Approve a session proposal from a dapp
+   * @property {number} params.id - The session ID
+   * @property {SessionTypes.Namespaces} params.namespaces - The session namespace
+   * @property {string} [params.relayProtocol] - The relay protocol
+   *
+   * @returns { Promise<SessionTypes.Struct> } - The session data
    */
-  public approveSession: IWeb3Wallet['approveSession'] = async (params) => {
+  public approveSession: IWeb3Wallet['approveSession'] = async (params: {
+    id: number;
+    namespaces: Record<string, SessionTypes.Namespace>;
+    relayProtocol?: string;
+  }) => {
     this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.approveSession(params);
   };
@@ -203,8 +215,15 @@ export class PKPWalletConnect {
 
   /**
    * Reject a session proposal from a dapp
+   * @property {number} params.id - The session ID
+   * @property {ErrorResponse} params.reason - The reason for rejecting the session proposal
+   *
+   * @returns { Promise<void> }
    */
-  public rejectSession: IWeb3Wallet['rejectSession'] = async (params) => {
+  public rejectSession: IWeb3Wallet['rejectSession'] = async (params: {
+    id: number;
+    reason: ErrorResponse;
+  }) => {
     this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.rejectSession(params);
   };
@@ -296,49 +315,82 @@ export class PKPWalletConnect {
   /**
    * Respond to a session request received from a dapp
    */
-  public respondSessionRequest: IWeb3Wallet['respondSessionRequest'] = async (
-    params
-  ) => {
-    this.client = this._isWalletConnectInitialized(this.client);
-    return await this.client.respondSessionRequest(params);
-  };
+  public respondSessionRequest: IWeb3Wallet['respondSessionRequest'] =
+    async (params: {
+      topic: string;
+      response: JsonRpcResponse;
+    }): Promise<void> => {
+      this.client = this._isWalletConnectInitialized(this.client);
+      return await this.client.respondSessionRequest(params);
+    };
 
   /**
    * Update WalletConnect session namespaces
+   *
+   * @property {string} params.topic - The session topic
+   * @property {SessionTypes.Namespaces} params.namespaces - The session namespace
+   *
+   * @returns { Promise<void> }
    */
-  public updateSession: IWeb3Wallet['updateSession'] = async (params) => {
+  public updateSession: IWeb3Wallet['updateSession'] = async (params: {
+    topic: string;
+    namespaces: SessionTypes.Namespaces;
+  }): Promise<void> => {
     this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.updateSession(params);
   };
 
   /**
    * Extend WalletConnect session by updating session expiry
+   *
+   * @property {string} params.topic - The session topic
+   *
+   * @returns { Promise<void> }
    */
-  public extendSession: IWeb3Wallet['extendSession'] = async (params) => {
+  public extendSession: IWeb3Wallet['extendSession'] = async (params: {
+    topic: string;
+  }): Promise<void> => {
     this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.extendSession(params);
   };
 
   /**
    * Disconnect a WalletConnect session
+   *
+   * @property {string} params.topic - The session topic
+   * @property {ErrorResponse} params.reason - The reason for disconnecting the session
+   *
+   * @returns { Promise<void> }
    */
-  public disconnectSession: IWeb3Wallet['disconnectSession'] = async (
-    params
-  ) => {
+  public disconnectSession: IWeb3Wallet['disconnectSession'] = async (params: {
+    topic: string;
+    reason: ErrorResponse;
+  }): Promise<void> => {
     this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.disconnectSession(params);
   };
 
   /**
    * Emit session events
+   *
+   * @property {string} params.topic - The session topic
+   * @property {any} params.event - The session event
+   *
+   * @returns { Promise<void> }
    */
-  public emitSessionEvent: IWeb3Wallet['emitSessionEvent'] = async (params) => {
+  public emitSessionEvent: IWeb3Wallet['emitSessionEvent'] = async (params: {
+    topic: string;
+    event: any;
+    chainId: string;
+  }): Promise<void> => {
     this.client = this._isWalletConnectInitialized(this.client);
     return await this.client.emitSessionEvent(params);
   };
 
   /**
    * Get active sessions
+   *
+   * @returns { Promise<Record<string, SessionTypes.Struct>> }
    */
   public getActiveSessions: IWeb3Wallet['getActiveSessions'] = () => {
     this.client = this._isWalletConnectInitialized(this.client);
@@ -347,6 +399,8 @@ export class PKPWalletConnect {
 
   /**
    * Get pending session proposals
+   *
+   * @returns { Record<number, ProposalTypes.Struct> }
    */
   public getPendingSessionProposals: IWeb3Wallet['getPendingSessionProposals'] =
     () => {
@@ -356,6 +410,8 @@ export class PKPWalletConnect {
 
   /**
    * Get pending session requests
+   *
+   * @returns { PendingRequestTypes.Struct[] }
    */
   public getPendingSessionRequests: IWeb3Wallet['getPendingSessionRequests'] =
     () => {
