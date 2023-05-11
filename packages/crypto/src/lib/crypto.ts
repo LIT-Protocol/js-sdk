@@ -20,7 +20,7 @@ import {
 
 // import nacl from 'tweetnacl';
 import { nacl } from '@lit-protocol/nacl';
-import { ECDSASIGTYPES } from '@lit-protocol/constants';
+import { SIGTYPE } from '@lit-protocol/constants';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
@@ -232,11 +232,11 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   try {
     let res: string = '';
     switch(type) {
-      case ECDSASIGTYPES.EcdsaCaitSithK256:
+      case SIGTYPE.EcdsaCAITSITHK256:
         res = wasmECDSA.combine_signature(validShares, 3);
         sig = JSON.parse(res);
       break;
-      case ECDSASIGTYPES.EcdsaCaitSithP256:
+      case SIGTYPE.ECDSCAITSITHP256:
         res = wasmECDSA.combine_signature(validShares, 4);
         sig = JSON.parse(res);
       break;

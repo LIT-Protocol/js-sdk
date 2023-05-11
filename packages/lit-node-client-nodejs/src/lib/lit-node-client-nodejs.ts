@@ -1315,7 +1315,10 @@ export class LitNodeClientNodeJs {
 
       if (sigType === SIGTYPE.BLS) {
         signature = combineBlsShares(sigShares, this.networkPubKeySet);
-      } else if (sigType === SIGTYPE.ECDSA) {
+      } else if (
+        sigType === SIGTYPE.EcdsaCAITSITHK256 ||
+        sigType === SIGTYPE.EcdsaCAITSITHP256
+      ) {
         signature = combineEcdsaShares(sigShares);
       }
 
@@ -1396,7 +1399,10 @@ export class LitNodeClientNodeJs {
 
       if (sigType === SIGTYPE.BLS) {
         signature = combineBlsShares(sigShares, this.networkPubKeySet);
-      } else if (sigType === SIGTYPE.ECDSA) {
+      } else if (
+        sigType === SIGTYPE.EcdsaCAITSITHK256 ||
+        sigType === SIGTYPE.EcdsaCAITSITHP256
+      ) {
         signature = combineEcdsaShares(sigShares);
       }
 
