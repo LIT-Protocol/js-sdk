@@ -7,6 +7,8 @@ import {
   combineEcdsaShares,
 } from './crypto';
 import { SigShare } from '@lit-protocol/types';
+import * as ethers from 'ethers';
+import { joinSignature } from 'ethers/lib/utils';
 
 describe('crypto', () => {
   it('should generateSymmetricKey', async () => {
@@ -133,9 +135,24 @@ describe('combine ECDSA Shares', () => {
     ];
 
     let sig = combineEcdsaShares(sigShares);
-    console.log(sig);
     expect(sig.r).toBeDefined();
     expect(sig.s).toBeDefined();
     expect(sig.recid).toBeDefined();
+
+    sig = joinSignature({
+      r: '0x' + sig.r,
+      s: '0x' + sig.s,
+      v: 0 
+    });
+    let msg: any = ethers.utils.arrayify('0x' + sigShares[0].dataSigned)
+    const recoveredPk = ethers.utils.recoverPublicKey(msg, sig);
+
+    
+    // recovered keys in address format, currently unmatching.
+    const addr = ethers.utils.computeAddress(ethers.utils.arrayify('0x' + sigShares[0].publicKey));
+    const recoveredAddr = ethers.utils.computeAddress(ethers.utils.arrayify(recoveredPk)); 
+    expect(recoveredAddr).toEqual(addr);
+
+
   });
 });
