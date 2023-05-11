@@ -141,13 +141,13 @@ describe('combine ECDSA Shares', () => {
     sig = joinSignature({
       r: '0x' + sig.r,
       s: '0x' + sig.s,
-      v: 0 
+      v: sig.recid 
     });
     let msg: any = ethers.utils.arrayify('0x' + sigShares[0].dataSigned)
     const recoveredPk = ethers.utils.recoverPublicKey(msg, sig);
 
     
-    // recovered keys in address format, currently unmatching.
+    // normalize the public keys to addresses and compare
     const addr = ethers.utils.computeAddress(ethers.utils.arrayify('0x' + sigShares[0].publicKey));
     const recoveredAddr = ethers.utils.computeAddress(ethers.utils.arrayify(recoveredPk)); 
     expect(recoveredAddr).toEqual(addr);
