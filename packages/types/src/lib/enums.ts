@@ -12,3 +12,9 @@ export enum AuthMethodType {
   Google,
   GoogleJwt,
 }
+
+
+export enum ECDSASigTypes {
+  EcdsaCaitSithK256 = 'EcdsaCaitSithK256',
+  EcdsaCaitSithP256 = 'EcdsaCaitSithP256' 
+}
