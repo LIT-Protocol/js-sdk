@@ -8,8 +8,9 @@ export default {
     },
   },
   transform: {
-    '^.+\\.[tj]s$': 'ts-jest',
+    '^.+\\.[t]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/pkp-walletconnect',
+  setupFilesAfterEnv: ['../../jest.setup.js'],
 };
