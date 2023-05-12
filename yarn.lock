@@ -22887,16 +22887,16 @@ sisteransi@^1.0.5:
   resolved "https://registry.npmjs.org/sisteransi/-/sisteransi-1.0.5.tgz#134d681297756437cc05ca01370d3a7a571075ed"
   integrity sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==
 
-siwe-recap@0.0.1-alpha.0:
-  version "0.0.1-alpha.0"
-  resolved "https://registry.yarnpkg.com/siwe-recap/-/siwe-recap-0.0.1-alpha.0.tgz#a9421e55c9bd4788d96b89a4e65aabb26515bf4c"
-  integrity sha512-dDOF3m/maLBVRlk3yj5P67ayO+/xup9vjXFIHrbZAQNZ8hrSpYMWg4pkUQx1D/EVSPvH4znfBZvRX27TERKwvQ==
+siwe-recap@0.0.2-alpha.0:
+  version "0.0.2-alpha.0"
+  resolved "https://registry.yarnpkg.com/siwe-recap/-/siwe-recap-0.0.2-alpha.0.tgz#75a0902c10a8ba5b4471f40e4eafb0afb2f8db59"
+  integrity sha512-xqFUnvrACWW/Q4s5HQ02avg8IyH2RcgkUzfvN4scYaaHErotLVtTGDZkSS0sn/oNK4MXRt83lTqredsvXgt8iA==
   dependencies:
     canonicalize "^2.0.0"
     multiformats "^11.0.2"
-    siwe "^2.0.5"
+    siwe "^2.1.4"
 
-siwe@^2.0.5:
+siwe@^2.0.5, siwe@^2.1.4:
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/siwe/-/siwe-2.1.4.tgz#005a8be3e61224a86bd3457f60fdaab626f2d1d4"
   integrity sha512-Dke1Qqa3mgiLm3vjqw/+SQ7dl8WV/Pfk3AlQBF94cBFydTYhztngqYrikzE3X5UTsJ6565dfVbQptszsuYZNYg==
