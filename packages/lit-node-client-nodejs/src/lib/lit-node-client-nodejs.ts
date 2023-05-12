@@ -22,7 +22,6 @@ import {
   LIT_SESSION_KEY_URI,
   AUTH_METHOD_TYPE_IDS,
   LIT_ERROR_CODE,
-  LitErrorKind,
   EITHER_TYPE,
 } from '@lit-protocol/constants';
 
@@ -85,11 +84,9 @@ import { safeParams } from '@lit-protocol/encryption';
 import {
   convertLitActionsParams,
   isBrowser,
-  isNodeErrorV1,
   log,
   mostCommonString,
   throwError,
-  throwGenericError,
 } from '@lit-protocol/misc';
 import {
   uint8arrayFromString,
@@ -115,8 +112,6 @@ import {
   LitResourceAbilityRequest,
   decode,
   newSessionCapabilityObject,
-  parseLitResource,
-  sanitizeSiweMessage,
 } from '@lit-protocol/auth-helpers';
 // import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 
