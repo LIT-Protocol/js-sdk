@@ -55,10 +55,10 @@ export enum LitAbility {
  * @description These resource prefixes are also used as valid IRI schemes.
  */
 export enum LitResourcePrefix {
-  AccessControlCondition = 'lit-acc',
+  AccessControlCondition = 'lit-accesscontrolcondition',
   PKP = 'lit-pkp',
-  RLI = 'lit-rli',
-  LitAction = 'lit-la',
+  RLI = 'lit-ratelimitincrease',
+  LitAction = 'lit-litaction',
 }
 
 export interface ISessionCapabilityObject {

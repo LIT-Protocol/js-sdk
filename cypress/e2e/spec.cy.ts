@@ -739,7 +739,7 @@ describe('Session', () => {
         litResource,
       ]);
     expect(sessionCapabilityObject.attenuations).to.deep.equal({
-      [`lit-acc://${hashedResourceId}`]: {
+      [`lit-accesscontrolcondition://${hashedResourceId}`]: {
         '*/*': [{}],
       },
     });

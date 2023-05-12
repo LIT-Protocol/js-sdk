@@ -201,7 +201,7 @@ describe('LitNodeClientNodeJs', () => {
     let sessionCapabilityObject =
       litNodeClient.generateSessionCapabilityObjectWithWildcards([litResource]);
     expect(sessionCapabilityObject.attenuations).toStrictEqual({
-      [`lit-acc://${hashedResourceId}`]: {
+      [`lit-accesscontrolcondition://${hashedResourceId}`]: {
         '*/*': [{}],
       },
     });

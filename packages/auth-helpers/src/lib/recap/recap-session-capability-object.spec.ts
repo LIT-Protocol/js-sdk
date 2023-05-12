@@ -55,7 +55,7 @@ describe('recapSessionCapabilityObject', () => {
     );
     const decodedRecapSessionCapabilityObject =
       RecapSessionCapabilityObject.decode(
-        'urn:recap:eyJhdHQiOnsibGl0OmFjYzpzb21lUmVzb3VyY2UiOnsiQWNjZXNzQ29udHJvbENvbmRpdGlvbi9kZWNyeXB0aW9uIjpbe31dfX0sInByZiI6W119'
+        'urn:recap:eyJhdHQiOnsibGl0LWFjY2Vzc2NvbnRyb2xjb25kaXRpb246Ly9zb21lUmVzb3VyY2UiOnsiVGhyZXNob2xkL0RlY3J5cHRpb24iOlt7fV19fSwicHJmIjpbXX0='
       );
     expect(decodedRecapSessionCapabilityObject).toEqual(
       recapSessionCapabilityObject
@@ -193,7 +193,7 @@ describe('recapSessionCapabilityObject', () => {
       }' for '${litResource.getResourceKey()}'.`
     );
     expect(newSiweMessage.resources).toEqual([
-      'urn:recap:eyJhdHQiOnsibGl0LWFjYzovL3NvbWVSZXNvdXJjZSI6eyJUaHJlc2hvbGQvRGVjcnlwdGlvbiI6W3t9XX19LCJwcmYiOltdfQ',
+      'urn:recap:eyJhdHQiOnsibGl0LWFjY2Vzc2NvbnRyb2xjb25kaXRpb246Ly9zb21lUmVzb3VyY2UiOnsiVGhyZXNob2xkL0RlY3J5cHRpb24iOlt7fV19fSwicHJmIjpbXX0',
     ]);
   });
 
@@ -207,7 +207,7 @@ describe('recapSessionCapabilityObject', () => {
 
     const siweResource = recapSessionCapabilityObject.encodeAsSiweResource();
     expect(siweResource).toEqual(
-      'urn:recap:eyJhdHQiOnsibGl0LWFjYzovL3NvbWVSZXNvdXJjZSI6eyJUaHJlc2hvbGQvRGVjcnlwdGlvbiI6W3t9XX19LCJwcmYiOltdfQ'
+      'urn:recap:eyJhdHQiOnsibGl0LWFjY2Vzc2NvbnRyb2xjb25kaXRpb246Ly9zb21lUmVzb3VyY2UiOnsiVGhyZXNob2xkL0RlY3J5cHRpb24iOlt7fV19fSwicHJmIjpbXX0'
     );
   });
 
