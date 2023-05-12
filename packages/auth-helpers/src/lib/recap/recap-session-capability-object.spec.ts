@@ -4,11 +4,6 @@ import { LitAccessControlConditionResource } from '../resources';
 import { RecapSessionCapabilityObject } from './recap-session-capability-object';
 import { LitNamespace, LitRecapAbility } from './utils';
 
-import { TextDecoder, TextEncoder } from 'util';
-
-// Polyfill. See https://stackoverflow.com/questions/68468203/why-am-i-getting-textencoder-is-not-defined-in-jest
-Object.assign(global, { TextDecoder, TextEncoder });
-
 const isClass = (v: any) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
 };

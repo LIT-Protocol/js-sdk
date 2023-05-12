@@ -5,8 +5,8 @@ import { LitAbility, LitResourcePrefix } from '../models';
  * @throws Error if the LitAbility is unknown
  */
 export function getRecapNamespaceAndAbility(litAbility: LitAbility): {
-  recapNamespace: string;
-  recapAbility: string;
+  recapNamespace: LitNamespace;
+  recapAbility: LitRecapAbility;
 } {
   switch (litAbility) {
     case LitAbility.AccessControlConditionDecryption:
