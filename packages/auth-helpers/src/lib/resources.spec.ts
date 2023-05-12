@@ -8,7 +8,7 @@ import {
 
 const testVectors = [
   {
-    resourceKey: 'lit-acc://someResource',
+    resourceKey: 'lit-accesscontrolcondition://someResource',
     expectedLitResource: new LitAccessControlConditionResource('someResource'),
   },
   {
@@ -16,11 +16,11 @@ const testVectors = [
     expectedLitResource: new LitPKPResource('someResource'),
   },
   {
-    resourceKey: 'lit-rli://someResource',
+    resourceKey: 'lit-ratelimitincrease://someResource',
     expectedLitResource: new LitRLIResource('someResource'),
   },
   {
-    resourceKey: 'lit-la://someResource',
+    resourceKey: 'lit-litaction://someResource',
     expectedLitResource: new LitActionResource('someResource'),
   },
 ];
