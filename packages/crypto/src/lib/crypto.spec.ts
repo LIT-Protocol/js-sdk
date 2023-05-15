@@ -142,7 +142,7 @@ describe('combine ECDSA Shares', () => {
     sig = joinSignature({
       r: '0x' + sig.r,
       s: '0x' + sig.s,
-      v: 0 
+      v: sig.recid 
     });
     let msg: any = ethers.utils.arrayify('0x' + sigShares[0].dataSigned)
     const recoveredPk = ethers.utils.recoverPublicKey(msg, sig);
