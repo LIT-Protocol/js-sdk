@@ -14,6 +14,10 @@ import {
 } from '@lit-protocol/lit-auth-client';
 import { IRelayPKP, AuthMethod, SessionSigs } from '@lit-protocol/types';
 import { ProviderType } from '@lit-protocol/constants';
+import {
+  LitAbility,
+  LitActionResource,
+} from '@lit-protocol/auth-helpers';
 import { ethers } from 'ethers';
 import { useRouter } from 'next/router';
 import { useConnect, useAccount, useDisconnect, Connector } from 'wagmi';
@@ -195,12 +199,19 @@ export default function Dashboard() {
       // Authenticate with a WebAuthn credential and create session sigs with authentication data
       setView(Views.CREATING_SESSION);
 
+      const litResource = new LitActionResource('*')
       const sessionSigs = await provider.getSessionSigs({
         pkpPublicKey: currentPKP.publicKey,
         authMethod,
         sessionSigsParams: {
           chain: 'ethereum',
-          resources: [`litAction://*`],
+          // resources: [`litAction://*`],
+          resourceAbilityRequests: [
+            {
+              resource: litResource,
+              ability: LitAbility.LitActionExecution,
+            },
+          ],
         },
       });
       setSessionSigs(sessionSigs);
