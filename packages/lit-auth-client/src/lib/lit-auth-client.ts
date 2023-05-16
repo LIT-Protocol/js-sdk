@@ -15,7 +15,6 @@ import GoogleProvider from './providers/GoogleProvider';
 import DiscordProvider from './providers/DiscordProvider';
 import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
-import { OtpProvider } from './providers/OtpProvider';
 
 /**
  * Class that handles authentication through Lit login
@@ -37,8 +36,6 @@ export class LitAuthClient {
    * Map of providers
    */
   private providers: Map<string, BaseProvider>;
-
-  private litOtpOptions: OtpProviderOptions | undefined;
 
   /**
    * Create a LitAuthClient instance

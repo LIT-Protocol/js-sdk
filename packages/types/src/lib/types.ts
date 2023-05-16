@@ -108,4 +108,4 @@ export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
 
 export type ProviderOptions = OAuthProviderOptions | EthWalletProviderOptions | SignInWithOTPParams;
 
-export type AuthenticateOptions = BaseAuthenticateOptions;
+export type AuthenticateOptions = EthWalletAuthenticateOptions;

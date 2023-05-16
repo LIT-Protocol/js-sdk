@@ -1,6 +1,6 @@
 export const allowlist = {
-  address: '0x81FB8e997E0908AD5792e6F8737245A1D78706E6',
-  abi: [
+  "address": "0x81FB8e997E0908AD5792e6F8737245A1D78706E6",
+  "abi": [
     {
       inputs: [],
       stateMutability: 'nonpayable',
