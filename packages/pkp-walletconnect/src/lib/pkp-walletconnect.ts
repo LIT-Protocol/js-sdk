@@ -147,7 +147,7 @@ export class PKPWalletConnect {
         }
       }
 
-      // Return if session proposal was rejected
+      // Break if session proposal was rejected
       if (rejected) break;
 
       // Construct the session namespace
