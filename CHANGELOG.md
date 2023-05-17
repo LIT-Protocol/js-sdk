@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2023-05-12
+
+- [#88](https://github.com/LIT-Protocol/js-sdk/pull/88) Breaking change introduced to `lit-node-client-nodejs` regarding session signature generation and usage. Introduced `auth-helpers` package, which contains objects for working with session capability objects for session signatures.
+
 ## [2.1.160] - 2023-05-05
 
 - [#90](https://github.com/LIT-Protocol/js-sdk/issues/90) Fixed the issue where it was unable to regenerate the authSig when it had expired.

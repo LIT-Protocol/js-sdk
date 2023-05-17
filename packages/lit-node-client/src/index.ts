@@ -19,8 +19,6 @@ export * from './lib/lit-node-client';
 
 export {
   checkAndSignAuthMessage,
-  getSessionKeyUri,
-  parseResource,
   ethConnect,
   disconnectWeb3,
 } from '@lit-protocol/auth-browser';

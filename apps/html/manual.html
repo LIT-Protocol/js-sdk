@@ -16,6 +16,7 @@
 
     <h1>(Manual) HTML Test</h1>
 
+    <script src="dist/packages/auth-helpers-vanilla/auth-helpers.js"></script>
     <script src="dist/packages/lit-node-client-vanilla/lit-node-client.js"></script>
     <script src="dist/packages/contracts-sdk-vanilla/contracts-sdk.js"></script>
 
@@ -39,10 +40,20 @@
         });
         await litNodeClient.connect();
 
+        const LitJsSdk_authHelpers = window.LitJsSdk_authHelpers;
+        const litResource = new LitJsSdk_authHelpers.LitAccessControlConditionResource(
+            'somethingThatWillBeReplacedWithWildcard'
+        );
+
         const sessionSigs = await litNodeClient.getSessionSigs({
             expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
             chain: 'ethereum',
-            resources: [`litEncryptionCondition://*`],
+            resourceAbilityRequests: [
+                {
+                resource: litResource,
+                ability: LitJsSdk_authHelpers.LitAbility.AccessControlConditionDecryption,
+                },
+            ],
             switchChain: false,
         });
         console.log('sessionSigs before saving encryption key: ', sessionSigs);
