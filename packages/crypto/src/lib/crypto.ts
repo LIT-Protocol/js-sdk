@@ -322,11 +322,13 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
 
 const _remapKeyShareForEcdsa = (share: SigShare): any[] => {
     const keys = Object.keys(share);
-    const newShare = {};
+    
+    let newShare = {}; // Initialize newShare as an empty object or with the initial value
+
     for (const key of keys) {
       const new_key = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
       newShare = Object.defineProperty(newShare, new_key, Object.getOwnPropertyDescriptor(share, key));
     }
-
+    
     return newShare;
 }
