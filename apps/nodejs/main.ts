@@ -5,6 +5,7 @@ import { manualTest } from './manual-test';
 
 import * as accessControlConditions from '@lit-protocol/access-control-conditions';
 import * as authBrowser from '@lit-protocol/auth-browser';
+import * as authHelpers from '@lit-protocol/auth-helpers';
 import * as blsSdk from '@lit-protocol/bls-sdk';
 import * as constants from '@lit-protocol/constants';
 import * as contractsSdk from '@lit-protocol/contracts-sdk';
@@ -27,6 +28,7 @@ import * as uint8arrays from '@lit-protocol/uint8arrays';
 
 console.log("accessControlConditions:", hasItems(accessControlConditions));
 console.log("authBrowser:", hasItems(authBrowser));
+console.log("authHelpers:", hasItems(authHelpers));
 console.log("blsSdk:", hasItems(blsSdk));
 console.log("constants:", hasItems(constants));
 console.log("contractsSdk:", hasItems(contractsSdk));
