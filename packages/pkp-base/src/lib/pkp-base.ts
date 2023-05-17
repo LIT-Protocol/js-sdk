@@ -189,12 +189,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   /**
-   * Return address
+   * Base method to be overridden by subclasses.
    *
    * @returns {Promise<string>} - Address associated with concrete type of PKPBase
    */
   getAddress(): Promise<string> {
-    return Promise.resolve('');
+    return Promise.reject(
+      new Error('getAddress not implemented. Please use a subclass of PKPBase.')
+    );
   }
 
   /**

@@ -587,6 +587,15 @@ export class PKPWalletConnect {
     return this.pkpClients;
   }
 
+  /**
+   * Replace list of PKPClients
+   *
+   * @param {PKPClient[]} clients - List of PKPClients
+   */
+  public setPKPClients(clients: PKPClient[]): void {
+    this.pkpClients = clients;
+  }
+
   // ----------------- Private methods -----------------
 
   /**

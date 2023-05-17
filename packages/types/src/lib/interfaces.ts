@@ -208,9 +208,6 @@ export interface CustomNetwork {
 }
  */
 export interface JsonExecutionRequest {
-  // the authSig to use to authorize the user with the nodes
-  authSig: AuthSig;
-
   // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
   jsParams: any;
 
@@ -219,6 +216,9 @@ export interface JsonExecutionRequest {
 
   // The IPFS ID of some JS code to run on the nodes
   ipfsId?: string;
+
+  // the authSig to use to authorize the user with the nodes
+  authSig?: AuthSig;
 
   // the session signatures to use to authorize the user with the nodes
   sessionSigs?: any;
