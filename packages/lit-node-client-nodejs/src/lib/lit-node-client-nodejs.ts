@@ -22,7 +22,7 @@ import {
   LIT_SESSION_KEY_URI,
   AUTH_METHOD_TYPE_IDS,
   LIT_ERROR_CODE,
-  LitErrorKind,
+  EITHER_TYPE,
 } from '@lit-protocol/constants';
 
 import {
@@ -70,6 +70,9 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   GetWalletSigProps,
+  SessionSigsMap,
+  SessionSig,
+  AuthCallback,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -81,11 +84,9 @@ import { safeParams } from '@lit-protocol/encryption';
 import {
   convertLitActionsParams,
   isBrowser,
-  isNodeErrorV1,
   log,
   mostCommonString,
   throwError,
-  throwGenericError,
 } from '@lit-protocol/misc';
 import {
   uint8arrayFromString,
@@ -99,8 +100,19 @@ import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 import { nacl } from '@lit-protocol/nacl';
-import { getStorageItem } from '@lit-protocol/misc-browser';
+import {
+  getStorageItem,
+  removeStorageItem,
+  setStorageItem,
+} from '@lit-protocol/misc-browser';
 import { BigNumber } from 'ethers';
+import {
+  ILitResource,
+  ISessionCapabilityObject,
+  LitResourceAbilityRequest,
+  decode,
+  newSessionCapabilityObject,
+} from '@lit-protocol/auth-helpers';
 // import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 
 /** ---------- Main Export Class ---------- */
@@ -186,15 +198,22 @@ export class LitNodeClientNodeJs {
     sessionSigs,
     url,
   }: {
-    authSig: AuthSig | any;
-    sessionSigs: any;
+    authSig?: AuthSig;
+    sessionSigs?: SessionSigsMap;
     url: string;
-  }) => {
-    // -- if there's session
-    let sigToPassToNode = authSig;
+  }): AuthSig | SessionSig => {
+    if (!authSig && !sessionSigs) {
+      throwError({
+        message: `You must pass either authSig or sessionSigs`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+      // @ts-ignore
+      return;
+    }
 
     if (sessionSigs) {
-      sigToPassToNode = sessionSigs[url];
+      const sigToPassToNode = sessionSigs[url];
 
       if (!sigToPassToNode) {
         throwError({
@@ -203,8 +222,11 @@ export class LitNodeClientNodeJs {
           errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
         });
       }
+
+      return sigToPassToNode;
     }
-    return sigToPassToNode;
+
+    return authSig!;
   };
 
   /**
@@ -283,76 +305,35 @@ export class LitNodeClientNodeJs {
   /**
    * Try to get the session key in the local storage,
    * if not, generates one.
-   *
-   * @param {string} [serializedSessionKeyPair] - Serialized session key pair
-   * @return {SessionKeyPair} - Session key pair
+   * @return { SessionKeyPair } session key pair
    */
-  getSessionKey = (serializedSessionKeyPair?: string): SessionKeyPair => {
-    // If a session key pair is provided, parse it and return it
-    if (serializedSessionKeyPair) {
-      try {
-        const keyPair = JSON.parse(serializedSessionKeyPair);
-        if (this.isSessionKeyPair(keyPair)) {
-          return keyPair;
-        } else {
-          return throwError({
-            message: 'Invalid session key pair provided',
-            error: LIT_ERROR.PARAMS_MISSING_ERROR,
-          });
-        }
-      } catch (err) {
-        log(
-          `Error when parsing provided session keypair ${serializedSessionKeyPair}: ${err}`
-        );
-        throw err;
-      }
-    }
-
-    // If no session key pair is provided, try to get it from the local storage
+  getSessionKey = (): SessionKeyPair => {
     const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
     const storedSessionKeyOrError = getStorageItem(storageKey);
 
-    // Check for errors
-    if (storedSessionKeyOrError.type === 'ERROR') {
+    if (
+      storedSessionKeyOrError.type === EITHER_TYPE.ERROR ||
+      !storedSessionKeyOrError.result ||
+      storedSessionKeyOrError.result === ''
+    ) {
       console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
+        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
       );
-    } else {
-      // If no errors, get the stored session key
-      const storedSessionKey = storedSessionKeyOrError.result;
-      if (storedSessionKey) {
-        try {
-          const keyPair = JSON.parse(storedSessionKey);
-          if (this.isSessionKeyPair(keyPair)) {
-            return keyPair;
-          } else {
-            throw new Error('Invalid session key pair stored');
-          }
-        } catch (err) {
-          log(
-            `Error when parsing stored session keypair ${storedSessionKey}. Continuing to generate a new one...`
-          );
-        }
+
+      // Generate new one
+      const newSessionKey = generateSessionKeyPair();
+
+      // (TRY) to set to local storage
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
+      } catch (e) {
+        console.warn(`Localstorage not available. Not a problem. Contiune...`);
       }
-    }
 
-    // If no session key is stored, generate one
-    let sessionKey: SessionKeyPair;
-    try {
-      sessionKey = generateSessionKeyPair();
-    } catch (err) {
-      log(`Error when generating session keypair: ${err}`);
-      throw err;
+      return newSessionKey;
+    } else {
+      return JSON.parse(storedSessionKeyOrError.result);
     }
-
-    // Store session key in local storage
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(sessionKey));
-    } catch (e) {
-      console.warn(`Local storage not available. Not a problem. Continue...`);
-    }
-
-    return sessionKey;
   };
 
   /**
@@ -372,25 +353,18 @@ export class LitNodeClientNodeJs {
   }
 
   /**
-   *
-   * Get session capabilities from user, it not, generates one
-   * @param { Array<any> } capabilities
-   * @param { Array<any> } resources
-   * @return { Array<any> }
+   * Generates wildcard capability for each of the LIT resources
+   * specified.
+   * @param litResources is an array of LIT resources
    */
-  getSessionCapabilities = (
-    capabilities: Array<any>,
-    resources: Array<any>
-  ): Array<any> => {
-    if (!capabilities || capabilities.length == 0) {
-      capabilities = resources.map((resource: any) => {
-        const { protocol, resourceId } = this.parseResource({ resource });
-
-        return `${protocol}Capability://*`;
-      });
+  generateSessionCapabilityObjectWithWildcards = (
+    litResources: Array<ILitResource>
+  ): ISessionCapabilityObject => {
+    const sessionCapabilityObject = newSessionCapabilityObject();
+    for (const litResource of litResources) {
+      sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
     }
-
-    return capabilities;
+    return sessionCapabilityObject;
   };
 
   /**
@@ -410,31 +384,33 @@ export class LitNodeClientNodeJs {
   getWalletSig = async ({
     authNeededCallback,
     chain,
-    capabilities,
+    sessionCapabilityObject,
     switchChain,
     expiration,
     sessionKeyUri,
   }: GetWalletSigProps): Promise<AuthSig> => {
-    let walletSig;
+    let walletSig: AuthSig;
 
     const storageKey = LOCAL_STORAGE_KEYS.WALLET_SIGNATURE;
     const storedWalletSigOrError = getStorageItem(storageKey);
 
     // -- (TRY) to get it in the local storage
-    if (storedWalletSigOrError.type === 'ERROR') {
-      console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
-      );
-    } else {
-      walletSig = storedWalletSigOrError.result;
-    }
-
     // -- IF NOT: Generates one
-    if (!storedWalletSigOrError.result || storedWalletSigOrError.result == '') {
+    if (
+      storedWalletSigOrError.type === EITHER_TYPE.ERROR ||
+      !storedWalletSigOrError.result ||
+      storedWalletSigOrError.result == ''
+    ) {
+      console.warn(
+        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
+      );
       if (authNeededCallback) {
         walletSig = await authNeededCallback({
           chain,
-          resources: capabilities,
+          statement: sessionCapabilityObject?.statement,
+          resources: sessionCapabilityObject
+            ? [sessionCapabilityObject.encodeAsSiweResource()]
+            : undefined,
           switchChain,
           expiration,
           uri: sessionKeyUri,
@@ -449,11 +425,25 @@ export class LitNodeClientNodeJs {
         }
         walletSig = await this.defaultAuthCallback({
           chain,
-          resources: capabilities,
+          statement: sessionCapabilityObject.statement,
+          resources: sessionCapabilityObject
+            ? [sessionCapabilityObject.encodeAsSiweResource()]
+            : undefined,
           switchChain,
           expiration,
           uri: sessionKeyUri,
         });
+      }
+
+      // (TRY) to set walletSig to local storage
+      const storeNewWalletSigOrError = setStorageItem(
+        storageKey,
+        JSON.stringify(walletSig)
+      );
+      if (storeNewWalletSigOrError.type === 'ERROR') {
+        console.warn(
+          `Unable to store walletSig in local storage. Not a problem. Continue...`
+        );
       }
     } else {
       try {
@@ -463,61 +453,121 @@ export class LitNodeClientNodeJs {
       }
     }
 
-    return walletSig;
+    return walletSig!;
+  };
+
+  #authCallbackAndUpdateStorageItem = async ({
+    authCallbackParams,
+    authCallback,
+  }: {
+    authCallbackParams: AuthCallbackParams;
+    authCallback?: AuthCallback;
+  }): Promise<AuthSig> => {
+    let authSig: AuthSig;
+
+    if (authCallback) {
+      authSig = await authCallback(authCallbackParams);
+    } else {
+      if (!this.defaultAuthCallback) {
+        return throwError({
+          message: 'No default auth callback provided',
+          errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+          errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
+        });
+      }
+      authSig = await this.defaultAuthCallback(authCallbackParams);
+    }
+
+    // (TRY) to set walletSig to local storage
+    const storeNewWalletSigOrError = setStorageItem(
+      LOCAL_STORAGE_KEYS.WALLET_SIGNATURE,
+      JSON.stringify(authSig)
+    );
+    if (storeNewWalletSigOrError.type === EITHER_TYPE.SUCCESS) {
+      return authSig;
+    }
+
+    // Setting local storage failed, try to remove the item key.
+    console.warn(
+      `Unable to store walletSig in local storage. Not a problem. Continuing to remove item key...`
+    );
+    const removeWalletSigOrError = removeStorageItem(
+      LOCAL_STORAGE_KEYS.WALLET_SIGNATURE
+    );
+    if (removeWalletSigOrError.type === EITHER_TYPE.ERROR) {
+      console.warn(
+        `Unable to remove walletSig in local storage. Not a problem. Continuing...`
+      );
+    }
+
+    return authSig;
   };
 
   /**
    *
-   * Check if a session key needs to be resigned
+   * Check if a session key needs to be resigned. These are the scenarios where a session key needs to be resigned:
+   * 1. The authSig.sig does not verify successfully against the authSig.signedMessage
+   * 2. The authSig.signedMessage.uri does not match the sessionKeyUri
+   * 3. The authSig.signedMessage does not contain at least one session capability object
    *
    */
   checkNeedToResignSessionKey = async ({
-    siweMessage,
-    walletSignature,
+    authSig,
     sessionKeyUri,
-    resources,
-    sessionCapabilities,
+    resourceAbilityRequests,
   }: {
-    siweMessage: SiweMessage;
-    walletSignature: any;
+    authSig: AuthSig;
     sessionKeyUri: any;
-    resources: any;
-    sessionCapabilities: Array<any>;
+    resourceAbilityRequests: Array<LitResourceAbilityRequest>;
   }): Promise<boolean> => {
-    let needToResign = false;
+    const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
 
     try {
-      // @ts-ignore
-      await siweMessage.verify({ signature: walletSignature });
+      await authSigSiweMessage.validate(authSig.sig);
     } catch (e) {
-      needToResign = true;
+      console.debug('Need retry because verify failed', e);
+      return true;
     }
 
     // make sure the sig is for the correct session key
-    if (siweMessage.uri !== sessionKeyUri) {
-      needToResign = true;
+    if (authSigSiweMessage.uri !== sessionKeyUri) {
+      console.debug('Need retry because uri does not match');
+      return true;
     }
 
-    // make sure the sig has the session capabilities required to fulfill the resources requested
-    for (let i = 0; i < resources.length; i++) {
-      const resource = resources[i];
-      const { protocol, resourceId } = this.parseResource({ resource });
+    // make sure the authSig contains at least one resource.
+    if (
+      !authSigSiweMessage.resources ||
+      authSigSiweMessage.resources.length === 0
+    ) {
+      console.debug('Need retry because empty resources');
+      return true;
+    }
 
-      // check if we have blanket permissions or if we authed the specific resource for the protocol
-      const permissionsFound = sessionCapabilities.some((capability: any) => {
-        const capabilityParts = this.parseResource({ resource: capability });
-        return (
-          capabilityParts.protocol === protocol &&
-          (capabilityParts.resourceId === '*' ||
-            capabilityParts.resourceId === resourceId)
-        );
-      });
-      if (!permissionsFound) {
-        needToResign = true;
+    // make sure the authSig contains session capabilities that can be parsed.
+    // TODO: we currently only support the first resource being a session capability object.
+    const authSigSessionCapabilityObject = decode(
+      authSigSiweMessage.resources[0]
+    );
+
+    // make sure the authSig session capability object describes capabilities that are equal or greater than
+    // the abilities requested against the resources in the resource ability requests.
+    for (const resourceAbilityRequest of resourceAbilityRequests) {
+      if (
+        !authSigSessionCapabilityObject.verifyCapabilitiesForResource(
+          resourceAbilityRequest.resource,
+          resourceAbilityRequest.ability
+        )
+      ) {
+        console.debug('Need retry because capabilities do not match', {
+          authSigSessionCapabilityObject,
+          resourceAbilityRequest,
+        });
+        return true;
       }
     }
 
-    return needToResign;
+    return false;
   };
 
   /**
@@ -1132,7 +1182,7 @@ export class LitNodeClientNodeJs {
       ipfsId = params.ipfsId;
     }
 
-    if(!ipfsId){
+    if (!ipfsId) {
       return throwError({
         message: 'ipfsId is required',
         error: LIT_ERROR.INVALID_PARAM_TYPE,
@@ -2428,7 +2478,7 @@ export class LitNodeClientNodeJs {
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     // Try to get it from local storage, if not generates one~
-    let sessionKey = this.getSessionKey(params.sessionKey);
+    let sessionKey = params.sessionKey ?? this.getSessionKey();
     let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
@@ -2439,10 +2489,15 @@ export class LitNodeClientNodeJs {
       return '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
     })();
 
+    let siwe_statement = 'Lit Protocol PKP session signature';
+    if (!!params.statement) {
+      siwe_statement += ' ' + params.statement;
+    }
+
     let siweMessage: SiweMessage = new SiweMessage({
       domain: params?.domain || globalThis.location?.host || 'litprotocol.com',
       address: pkpEthAddress,
-      statement: 'Lit Protocol PKP session signature',
+      statement: siwe_statement,
       uri: sessionKeyUri,
       version: '1',
       chainId: params.chainId ?? 1,
@@ -2544,18 +2599,6 @@ export class LitNodeClientNodeJs {
     accessToken: access_token,
   });
 
-  parseResource = ({
-    resource,
-  }: {
-    resource: any;
-  }): {
-    protocol: any;
-    resourceId: any;
-  } => {
-    const [protocol, resourceId] = resource.split('://');
-    return { protocol, resourceId };
-  };
-
   /**
    * Get session signatures for a set of resources
    *
@@ -2566,77 +2609,67 @@ export class LitNodeClientNodeJs {
    *
    * @param { GetSessionSigsProps } params
    */
-  getSessionSigs = async (params: GetSessionSigsProps) => {
+  getSessionSigs = async (
+    params: GetSessionSigsProps
+  ): Promise<SessionSigsMap> => {
     // -- prepare
     // Try to get it from local storage, if not generates one~
-    let sessionKey = this.getSessionKey(params.sessionKey);
+    let sessionKey = params.sessionKey ?? this.getSessionKey();
 
-    let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
-    let capabilities = this.getSessionCapabilities(
-      params.sessionCapabilities,
-      params.resources
-    );
+    let sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
+
+    // First get or generate the session capability object for the specified resources.
+    const sessionCapabilityObject = params.sessionCapabilityObject
+      ? params.sessionCapabilityObject
+      : this.generateSessionCapabilityObjectWithWildcards(
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     let expiration = params.expiration || this.getExpiration();
 
     // -- (TRY) to get the wallet signature
-    let walletSig = await this.getWalletSig({
+    let authSig = await this.getWalletSig({
       authNeededCallback: params.authNeededCallback,
       chain: params.chain,
-      capabilities: capabilities,
+      sessionCapabilityObject,
       switchChain: params.switchChain,
       expiration: expiration,
       sessionKeyUri: sessionKeyUri,
     });
 
-    let siweMessage = new SiweMessage(walletSig?.signedMessage);
-
     let needToResignSessionKey = await this.checkNeedToResignSessionKey({
-      siweMessage,
-      walletSignature: walletSig?.sig,
+      authSig,
       sessionKeyUri,
-      resources: params.resources,
-      sessionCapabilities: capabilities,
+      resourceAbilityRequests: params.resourceAbilityRequests,
     });
 
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
       log('need to re-sign session key.  Signing...');
-      if (params.authNeededCallback) {
-        walletSig = await params.authNeededCallback({
+      authSig = await this.#authCallbackAndUpdateStorageItem({
+        authCallback: params.authNeededCallback,
+        authCallbackParams: {
           chain: params.chain,
-          resources: capabilities,
-          expiration,
-          uri: sessionKeyUri,
-        });
-      } else {
-        if (!this.defaultAuthCallback) {
-          return throwError({
-            message: 'No default auth callback provided',
-            errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
-            errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
-          });
-        }
-        walletSig = await this.defaultAuthCallback({
-          chain: params.chain,
-          resources: capabilities,
+          statement: sessionCapabilityObject.statement,
+          resources: [sessionCapabilityObject.encodeAsSiweResource()],
           switchChain: params.switchChain,
           expiration,
           uri: sessionKeyUri,
-        });
-      }
+        },
+      });
     }
 
     if (
-      walletSig.address === '' ||
-      walletSig.derivedVia === '' ||
-      walletSig.sig === '' ||
-      walletSig.signedMessage === ''
+      authSig.address === '' ||
+      authSig.derivedVia === '' ||
+      authSig.sig === '' ||
+      authSig.signedMessage === ''
     ) {
       throwError({
         message: 'No wallet signature found',
         errorKind: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.kind,
         errorCode: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.name,
       });
+      // @ts-ignore - we throw an error above, so below should never be reached
       return;
     }
 
@@ -2646,18 +2679,18 @@ export class LitNodeClientNodeJs {
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
     let sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
-    const signingTemplate: SessionSigningTemplate = {
+    const signingTemplate = {
       sessionKey: sessionKey.publicKey,
-      resources: params.resources,
-      capabilities: [walletSig],
+      resourceAbilityRequests: params.resourceAbilityRequests,
+      capabilities: [authSig],
       issuedAt: new Date().toISOString(),
       expiration: sessionExpiration.toISOString(),
     };
 
-    const signatures: any = {};
+    const signatures: SessionSigsMap = {};
 
     this.connectedNodes.forEach((nodeAddress: string) => {
-      const toSign = {
+      const toSign: SessionSigningTemplate = {
         ...signingTemplate,
         nodeAddress,
       };
@@ -2684,5 +2717,16 @@ export class LitNodeClientNodeJs {
     log('signatures:', signatures);
 
     return signatures;
+  };
+
+  /**
+   *
+   * Get Session Key URI eg. lit:session:0x1234
+   *
+   * @param publicKey is the public key of the session key
+   * @returns { string } the session key uri
+   */
+  getSessionKeyUri = (publicKey: string): string => {
+    return LIT_SESSION_KEY_URI + publicKey;
   };
 }

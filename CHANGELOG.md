@@ -5,11 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.2.0] - 2023-05-01
+## [2.2.0] - 2023-05-12
+
+- [#88](https://github.com/LIT-Protocol/js-sdk/pull/88) Breaking change introduced to `lit-node-client-nodejs` regarding session signature generation and usage. Introduced `auth-helpers` package, which contains objects for working with session capability objects for session signatures.
+
+## [2.1.160] - 2023-05-05
+
+- [#90](https://github.com/LIT-Protocol/js-sdk/issues/90) Fixed the issue where it was unable to regenerate the authSig when it had expired.
+
+## [2.1.156] - 2023-05-04
 
 - [#67](https://github.com/LIT-Protocol/js-sdk/pull/67) Introduced the `lit-auth-client` package, enabling social logins, Ethereum wallet signing, WebAuthn registration and authentication, and management of PKPs tied to auth methods
 
 - [#57](https://github.com/LIT-Protocol/js-sdk/pull/57) Introducing the pkp-client package, which serves as an abstraction of the pkp-ether, pkp-cosmos, and pkp-base packages. This enables the creation of Ether and Cosmos signers through PKPClient.
+
+- [#97](https://github.com/LIT-Protocol/js-sdk/pull/97) Fixed `warn  - ./node_modules/@lit-protocol/ecdsa-sdk/src/lib/ecdsa-sdk.js Critical dependency: the request of a dependency is an expression`
 
 ## [2.1.114] - 2023-04-08
 

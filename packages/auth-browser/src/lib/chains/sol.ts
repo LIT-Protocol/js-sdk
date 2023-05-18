@@ -29,7 +29,8 @@ const getProvider = (): IEither => {
 
   // -- validate
   if ('solana' in window) {
-    resultOrError = ERight(window?.keplr ?? window?.solana);
+    // only check for the solana object on the window, as keplr does not have the same client interface injected into the window.
+    resultOrError = ERight(window?.solana);
   } else {
     // -- finally
     const message =
