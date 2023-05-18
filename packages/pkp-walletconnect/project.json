@@ -12,16 +12,12 @@
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/pkp-walletconnect",
         "main": "packages/pkp-walletconnect/src/index.ts",
         "tsConfig": "packages/pkp-walletconnect/tsconfig.lib.json",
-        "assets": [
-          "packages/pkp-walletconnect/*.md"
-        ]
+        "assets": ["packages/pkp-walletconnect/*.md"]
       }
     },
     "_buildWeb": {
@@ -29,9 +25,7 @@
       "options": {
         "globalName": "LitJsSdk_pkpWalletconnect",
         "outfile": "dist/packages/pkp-walletconnect-vanilla/pkp-walletconnect.js",
-        "entryPoints": [
-          "./packages/pkp-walletconnect/src/index.ts"
-        ],
+        "entryPoints": ["./packages/pkp-walletconnect/src/index.ts"],
         "define": {
           "process.env.NODE_DEBUG": "false",
           "global": "window"
@@ -46,20 +40,14 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/pkp-walletconnect/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/pkp-walletconnect/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/pkp-walletconnect"
-      ],
+      "outputs": ["coverage/packages/pkp-walletconnect"],
       "options": {
         "jestConfig": "packages/pkp-walletconnect/jest.config.ts",
         "passWithNoTests": true

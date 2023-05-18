@@ -101,4 +101,20 @@ describe('PKPWalletConnect', () => {
       });
     });
   });
+
+  describe('initWalletConnect', () => {
+    it('should initialize WalletConnect', async () => {
+      const config = {
+        projectId: 'fcd184b860ea5998892e079adfbaf92f',
+        metadata: {
+          name: 'Test Wallet',
+          description: 'Test Wallet',
+          url: '#',
+          icons: ['https://walletconnect.com/walletconnect-logo.png'],
+        },
+      };
+      await pkpWalletConnect.initWalletConnect(config);
+      expect(pkpWalletConnect.getSignClient()).toBeDefined();
+    });
+  });
 });
