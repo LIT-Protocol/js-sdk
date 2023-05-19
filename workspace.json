@@ -8,6 +8,7 @@
     "bls-sdk": "packages/bls-sdk",
     "constants": "packages/constants",
     "contracts-sdk": "packages/contracts-sdk",
+    "core": "packages/core",
     "crypto": "packages/crypto",
     "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react",
     "demo-encrypt-decrypt-react": "apps/demo-encrypt-decrypt-react",
