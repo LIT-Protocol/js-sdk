@@ -77,7 +77,7 @@ export class OtpProvider extends BaseProvider {
       const err = new Error('Unable to start otp verification');
       throw err;
     }
-    let respBody: any = await response.json();
+    let respBody: { status: string; callback: string } = await response.json();
 
     return respBody.callback;
   }
