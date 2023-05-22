@@ -1175,8 +1175,11 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-
 export interface BaseAuthenticateOptions {}
+
+export interface OtpAuthenticateOptions {
+  code: string; 
+}
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
