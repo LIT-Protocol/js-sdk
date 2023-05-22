@@ -11,16 +11,19 @@ import {
   decode,
 } from '../utils';
 import { BaseProvider } from './BaseProvider';
+import { OAuth2Client, TokenPayload } from "google-auth-library";
 
 export default class GoogleProvider extends BaseProvider {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
+  public oAuthClient: OAuth2Client;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
     this.redirectUri = options.redirectUri || window.location.origin;
+    this.oAuthClient = new OAuth2Client("355007986731-llbjq5kbsg8ieb705mo64nfnh88dhlmn.apps.googleusercontent.com");
   }
 
   /**
@@ -85,11 +88,23 @@ export default class GoogleProvider extends BaseProvider {
         `Missing ID token in redirect callback URL for Google OAuth"`
       );
     }
+    
+    let tokenPayload: TokenPayload = await this.#verifyIDToken(idToken).catch(e => {
+      throw new Error(`Error while verifying identifier token: ${e.message}`);
+    });
 
     const authMethod = {
       authMethodType: AuthMethodType.GoogleJwt,
-      accessToken: idToken,
+      accessToken: JSON.stringify(tokenPayload),
     };
     return authMethod;
+  }
+
+  // Validate given Google ID token
+  async #verifyIDToken(idToken: string): Promise<TokenPayload> {
+    const ticket = await this.oAuthClient.verifyIdToken({
+      idToken,
+    });
+    return ticket.getPayload()!;
   }
 }

@@ -86,10 +86,33 @@ export default class DiscordProvider extends BaseProvider {
       );
     }
 
+    const userToken: string = await this.#verifyAndFetchDiscordUserId(accessToken).catch(e => {
+      throw e;
+    });
+
     const authMethod = {
       authMethodType: AuthMethodType.Discord,
-      accessToken: accessToken,
+      accessToken: userToken,
     };
+
     return authMethod;
+  }
+
+
+  async #verifyAndFetchDiscordUserId(
+    accessToken: string,
+  ): Promise<string> {
+    const meResponse = await fetch("https://discord.com/api/users/@me", {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (meResponse.ok) {
+      const user = await meResponse.json();
+      return JSON.stringify(user);
+    } else {
+      throw new Error("Unable to verify Discord account");
+    }
   }
 }
