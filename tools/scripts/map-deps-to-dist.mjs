@@ -48,21 +48,23 @@ await asyncForEach(packagesDir, async (packageDir) => {
 
   const dependencies = [...new Set(imports.flat())];
 
-  if (dependencies.length) {
-    const packageJsonPath = DIST_DIR + '/' + packageDir + '/package.json';
+  // Add peerDependencies to dependencies
+  const packageJsonPath = DIST_DIR + '/' + packageDir + '/package.json';
 
-    const packageJson = await readJsonFile(packageJsonPath);
+  const packageJson = await readJsonFile(packageJsonPath);
 
-    // await asyncForEach((dependencies), async (dep) => {
-    //     packageJson.dependencies[dep] = packageJson.version;
-    // })
+  // await asyncForEach((dependencies), async (dep) => {
+  //     packageJson.dependencies[dep] = packageJson.version;
+  // })
 
-    packageJson.dependencies = packageJson.peerDependencies;
+  packageJson.dependencies = {
+    ...packageJson.dependencies,
+    ...packageJson.peerDependencies,
+  };
 
-    await writeJsonFile(packageJsonPath, packageJson);
+  await writeJsonFile(packageJsonPath, packageJson);
 
-    greenLog(`Added ${dependencies.length} dependencies to ${packageJsonPath}`);
-  }
+  greenLog(`Added ${dependencies.length} dependencies to ${packageJsonPath}`);
 });
 
 exit();

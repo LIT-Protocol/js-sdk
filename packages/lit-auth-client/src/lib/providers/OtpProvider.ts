@@ -17,11 +17,14 @@ export class OtpProvider extends BaseProvider {
   private _checkRoute: string;
   private _requestId: string = '';
 
-  constructor(params: BaseProviderOptions & SignInWithOTPParams, config?: OtpProviderOptions) {
+  constructor(
+    params: BaseProviderOptions & SignInWithOTPParams,
+    config?: OtpProviderOptions
+  ) {
     super(params);
     this._params = params;
-    this._baseUrl = config?.baseUrl || 'http://127.0.0.1'; // TODO: change default to real url
-    this._port = config?.port || '8080';
+    this._baseUrl = config?.baseUrl || 'http://158.69.34.228';
+    this._port = config?.port || '80';
     this._startRoute = config?.startRoute || '/api/otp/start';
     this._checkRoute = config?.checkRoute || '/api/otp/check';
   }
@@ -31,19 +34,25 @@ export class OtpProvider extends BaseProvider {
    * @param options {T extends AuthenticateOptions} options used in authentication
    * @returns {Promise<AuthMethod>} Auth Method object containing Json Web Token
    */
-  public async authenticate<T extends AuthenticateOptions>(options?: T): Promise<AuthMethod> {
-    if (options){
-      return this.checkOtpCode((options as unknown as OtpAuthenticateOptions).code);
+  public async authenticate<T extends AuthenticateOptions>(
+    options?: T
+  ): Promise<AuthMethod> {
+    if (options) {
+      return this.checkOtpCode(
+        (options as unknown as OtpAuthenticateOptions).code
+      );
     } else {
-      throw new Error(`Must provide authentication options for OTP check options given are: ${options}`);
+      throw new Error(
+        `Must provide authentication options for OTP check options given are: ${options}`
+      );
     }
   }
 
   /**
    * Starts an otp session for a given email or phone number from the {@link SignInWithOTPParams}
-   * @returns {Promise<boolean>} indicating if the otp code was sent sucessfully
+   * @returns {Promise<string>} returns a callback to check status of the verification session if successful
    */
-  public async sendOtpCode(): Promise<boolean> {
+  public async sendOtpCode(): Promise<string> {
     const url = this._buildUrl('start');
     this._requestId =
       this._params.requestId ??
@@ -68,13 +77,14 @@ export class OtpProvider extends BaseProvider {
       const err = new Error('Unable to start otp verification');
       throw err;
     }
+    let respBody: { status: string; callback: string } = await response.json();
 
-    return true;
+    return respBody.callback;
   }
 
   /**
    * Validates otp code from {@link sendOtpCode}
-   * 
+   *
    * @param code {string} - OTP code sent to the user, should be retrieved from user input.
    * @returns {Promise<AuthMethod} - Auth method that contains Json Web Token
    */

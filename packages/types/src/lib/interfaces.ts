@@ -15,6 +15,10 @@ import {
   UnifiedAccessControlConditions,
 } from './types';
 import { ILitNodeClient } from './ILitNodeClient';
+import {
+  ISessionCapabilityObject,
+  LitResourceAbilityRequest,
+} from '@lit-protocol/auth-helpers';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -88,8 +92,13 @@ export interface AuthCallbackParams {
   // The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
   chain: Chain;
 
+  // The statement that describes what the user is signing. If the auth callback
+  // is for signing a SIWE message, you MUST add this statement to the end of the SIWE
+  // statement.
+  statement?: string;
+
   // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
-  resources?: any[];
+  resources?: string[];
 
   // Optional and only used with EVM chains right now.  Set to true by default.  Whether or not to ask Metamask or the user's wallet to switch chains before signing.  This may be desired if you're going to have the user send a txn on that chain.  On the other hand, if all you care about is the user's wallet signature, then you probably don't want to make them switch chains for no reason.  Pass false here to disable this chain switching behavior.
   switchChain?: boolean;
@@ -288,7 +297,7 @@ export interface JsonAccsRequest {
   // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
   authSig?: AuthSig;
 
-  sessionSigs?: object;
+  sessionSigs?: SessionSigsMap;
 }
 
 /**
@@ -380,7 +389,7 @@ export interface JsonSaveEncryptionKeyRequest {
   permanant?: boolean | 0 | 1;
   permanent?: boolean | 0 | 1;
 
-  sessionSigs?: object;
+  sessionSigs?: SessionSigsMap;
 }
 
 export interface SignConditionECDSA {
@@ -731,7 +740,10 @@ export interface AuthMethod {
 // }
 export interface SignSessionKeyProp {
   // The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
-  sessionKey?: string;
+  sessionKey?: SessionKeyPair;
+
+  // The statement text to place at the end of the SIWE statement field.
+  statement?: string;
 
   // The auth methods to use to sign the session key
   authMethods: AuthMethod[];
@@ -770,16 +782,28 @@ export interface GetSessionSigsProps {
   expiration?: any;
 
   //   The chain to use for the session signature.  This is the chain that will be used to sign the session key.  If you're using EVM then this probably doesn't matter at all.
-  chain: any;
+  chain: Chain;
 
-  //   These are the resources that will be signed with the session key.  You may pass a wildcard that allows these session signatures to work with any resource on Lit.  To see a list of resources, check out the docs: https://developer.litprotocol.com/sdk/explanation/walletsigs/sessionsigs/#resources-you-can-request
-  resources: any;
+  /**
+   * An array of resource abilities that you want to request for this session. These will be signed with the session key.
+   *
+   * @example If you want to request the ability to decrypt an access control condition, then you would pass
+   * [{ resource: new LitAccessControlConditionResource('someResource), ability: LitAbility.AccessControlConditionDecryption }]
+   */
+  resourceAbilityRequests: LitResourceAbilityRequest[];
 
-  //   An optional list of capabilities that you want to request for this session.  If you pass nothing, then this will default to a wildcard for each type of resource you're accessing.  For example, if you passed ["litEncryptionCondition://123456"] then this would default to ["litEncryptionConditionCapability://*"], which would grant this session signature the ability to decrypt any resource.
-  sessionCapabilities?: any;
+  /**
+   * The session capability object that you want to request for this session.
+   * If you pass nothing, then this will default to a wildcard for each type of resource you're accessing.
+   *
+   * @example If you passed nothing, and you're requesting to perform a decryption operation for an access
+   * control condition, then the session capability object will be a wildcard for the access control condition,
+   * which grants this session signature the ability to decrypt this access control condition.
+   */
+  sessionCapabilityObject?: ISessionCapabilityObject;
 
   //   If you want to ask Metamask to try and switch the user's chain, you may pass true here.  This will only work if the user is using Metamask.  If the user is not using Metamask, then this will be ignored.
-  switchChain?: any;
+  switchChain?: boolean;
 
   //   This is a callback that will be called if the user needs to authenticate using a PKP.  For example, if the user has no wallet, but owns a Lit PKP though something like Google Oauth, then you can use this callback to prompt the user to authenticate with their PKP.  This callback should use the LitNodeClient.signSessionKey function to get a session signature for the user from their PKP.  If you don't pass this callback, then the user will be prompted to authenticate with their wallet, like metamask.
   authNeededCallback?: AuthCallback;
@@ -790,6 +814,14 @@ export interface GetSessionSigsProps {
 
 export interface AuthCallback {
   (params: AuthCallbackParams): Promise<AuthSig>;
+}
+
+/**
+ * A map of node addresses to the session signature payload
+ * for that node specifically.
+ */
+export interface SessionSigsMap {
+  [nodeAddress: string]: SessionSig;
 }
 
 export interface SessionSig {
@@ -818,18 +850,19 @@ export interface SessionRequestBody {
 export interface GetWalletSigProps {
   authNeededCallback?: AuthCallback;
   chain: string;
-  capabilities: Array<any>;
-  switchChain: boolean;
+  sessionCapabilityObject: ISessionCapabilityObject;
+  switchChain?: boolean;
   expiration: string;
   sessionKeyUri: string;
 }
 
 export interface SessionSigningTemplate {
   sessionKey: string;
-  resources: any[];
+  resourceAbilityRequests: LitResourceAbilityRequest[];
   capabilities: any[];
   issuedAt: string;
   expiration: string;
+  nodeAddress: string;
 }
 
 export interface WebAuthnAuthenticationVerificationParams {
