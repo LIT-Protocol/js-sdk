@@ -6,17 +6,11 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Card } from 'tiny-ui';
 import { ethers } from 'ethers';
 import { ProviderType } from '@lit-protocol/constants';
-
+import {newSessionCapabilityObject, LitAccessControlConditionResource, LitAbility} from '@lit-protocol/auth-helpers';
 export function Otp() {
     let [state, setState] = useState('start');
     const litNodeClient = new LitNodeClient({
-        minNodeCount: 2,
-        bootstrapUrls: [
-            "http://127.0.0.1:7470",
-            "http://127.0.0.1:7471",
-            "http://127.0.0.1:7472"
-        ],
-        litNetwork: "custom",
+        litNetwork: "serrano",
         debug: true
     });
     const authClient = new LitAuthClient({
@@ -77,7 +71,9 @@ export function Otp() {
         setAccessToken(authMethod.accessToken);
         const res = await otpSession.fetchPKPsThroughRelayer(authMethod);
         console.log(res);
-        res[0].tokenId = res[0].tokenId.hex;
+        if (res[0].tokenId.hex) {
+            res[0].tokenId = res[0].tokenId.hex;
+        }
         setPkpInfo(res[0]); // only give the first pkp in the list
 
         setState('display');
@@ -110,10 +106,17 @@ export function Otp() {
           
           try {
             await litNodeClient.connect();
+
+            // Create the Lit Resource keyed by `someResource`
+            const litResource = new LitAccessControlConditionResource('*');
+
             // Generate session sigs with the given session params
             const sessionSigs = await litNodeClient.getSessionSigs({
                 chain: 'ethereum',
-                resources: [`litAction://*`],
+                resourceAbilityRequests: [{
+                    resource: litResource,
+                    ability: LitAbility.PKPSigning
+                }],
                 authNeededCallback,
             });
             console.log(sessionSigs);
