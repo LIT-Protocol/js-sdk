@@ -1065,9 +1065,10 @@ async function checkFunc() {
       )}\n`,
       true
     );
+    process.exit(1);
   }
 
-  process.exit(1);
+  process.exit(0);
 }
 
 async function polyfillsFunc() {
