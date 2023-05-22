@@ -23,8 +23,8 @@ export class OtpProvider extends BaseProvider {
   ) {
     super(params);
     this._params = params;
-    this._baseUrl = config?.baseUrl || 'http://127.0.0.1'; // TODO: change default to real url
-    this._port = config?.port || '8080';
+    this._baseUrl = config?.baseUrl || 'http://158.69.34.228';
+    this._port = config?.port || '80';
     this._startRoute = config?.startRoute || '/api/otp/start';
     this._checkRoute = config?.checkRoute || '/api/otp/check';
   }
