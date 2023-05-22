@@ -7,7 +7,7 @@
     "reset:dev": "yarn tools --remove-local-dev",
     "reset": "rm -rf ./dist/packages && yarn reset:dev",
     "build": "yarn build:packages",
-    "build:packages": "yarn tools fixTsConfig && yarn reset && yarn tools --build --packages && yarn tools --postBuild && yarn tools --setup-local-dev && yarn postBuild:mapDepsToDist && yarn gen:readme && yarn build:verify",
+    "build:packages": "yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn reset && yarn tools --build --packages && yarn tools --postBuild && yarn tools --setup-local-dev && yarn postBuild:mapDepsToDist && yarn gen:readme && yarn build:verify",
     "build:target": "yarn node tools/scripts/build.mjs",
     "build:setupLocalDev": "yarn tools --setup-local-dev",
     "build:verify": "yarn tools --verify",
