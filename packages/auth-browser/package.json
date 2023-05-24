@@ -30,7 +30,7 @@
   "tags": [
     "browser"
   ],
-  "version": "2.2.7",
+  "version": "2.2.8",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
