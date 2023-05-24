@@ -353,7 +353,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-  linea: {
+  lineaGoerli: {
     contractAddress: null,
     chainId: 59140,
     name: 'Linea Testnet',
