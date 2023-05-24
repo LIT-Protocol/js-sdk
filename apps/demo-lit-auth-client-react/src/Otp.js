@@ -24,6 +24,8 @@ export function Otp() {
     let [otpSession, setOtpSession] = useState({});
     let [userId, setUserId] = useState('');
     let [pkpInfo, setPkpInfo] = useState({});
+    let [selectedPkp, setSelectedPkp] = useState({});
+    let [pkpList, setPkpList] = useState({});
     let [action, setAction] = useState({});
     let [accessToken, setAccessToken] = useState("");
     let [sessionSig, setSessionSig] = useState("");
@@ -55,7 +57,7 @@ export function Otp() {
 
     const onEnterCheckRegister = async (e) => {
         let code = e.target.defaultValue;
-        let authMethod = await otpSession.checkOtpCode(code);
+        let authMethod = await otpSession.authenticate({code});
         console.log(authMethod);
         const res = await otpSession.mintPKPThroughRelayer(authMethod);
         console.log(res);
@@ -74,7 +76,20 @@ export function Otp() {
         if (res[0].tokenId.hex) {
             res[0].tokenId = res[0].tokenId.hex;
         }
-        setPkpInfo(res[0]); // only give the first pkp in the list
+        const rows = [];
+        for (const pkp of res) {
+            rows.push(
+            <tr key={pkp.tokenId} onClick={(e) => {
+                setSelectedPkp(pkpInfo[0]);
+            }}>
+                <td>{pkp.tokenId}</td>
+                <td>{pkp.publicKey}</td>
+            </tr>
+            )
+        }
+
+        setPkpList(rows);
+        setPkpInfo(res);
 
         setState('display');
     };
@@ -95,7 +110,7 @@ export function Otp() {
                   accessToken: accessToken,
                 },
               ],
-              pkpPublicKey: pkpInfo.publicKey,
+              pkpPublicKey: selectedPkp.publicKey,
               expiration: authCallbackParams.expiration,
               resources: authCallbackParams.resources,
               chainId,
@@ -110,14 +125,20 @@ export function Otp() {
             // Create the Lit Resource keyed by `someResource`
             const litResource = new LitAccessControlConditionResource('*');
 
-            // Generate session sigs with the given session params
-            const sessionSigs = await litNodeClient.getSessionSigs({
-                chain: 'ethereum',
-                resourceAbilityRequests: [{
-                    resource: litResource,
-                    ability: LitAbility.PKPSigning
-                }],
-                authNeededCallback,
+            const sessionSigs = otpSession.getSessionSigs({
+                pkpPublicKey: pkpInfo.publicKey,
+                authMethod: {
+                    authMethodType: 7,
+                    accessToken: accessToken
+                },
+                sessionSigsParams: {
+                    chain: 'ethereum',
+                    resourceAbilityRequests: [{
+                        resource: litResource,
+                        ability: LitAbility.PKPSigning
+                    }], 
+                },
+                litNodeClient
             });
             console.log(sessionSigs);
             setSessionSig(sessionSigs);
@@ -209,14 +230,19 @@ export function Otp() {
                 <br/>
                 <br/>
                 <Card title="PKP information">
-                    {pkpInfo.tokenId && 
+                    {pkpInfo.length && 
                         <Card.Content>
                             <br/>
-                            <div>pkp eth public key: {pkpInfo.ethAddress}</div>
-                            <div>pkp tokenId: {pkpInfo.tokenId}</div>
+                            <table className='pkp-table'>
+                                <tr>
+                                    <th>Token ID</th>
+                                    <th>Public Key</th>
+                                </tr>
+                                {pkpList}
+                            </table>
                         </Card.Content>
                     }
-                    {pkpInfo && !pkpInfo.tokenId &&
+                    {!pkpInfo.length && !pkpInfo.tokenId &&
                         <Card.Content>
                             <br/>
                             <div> transaction: {pkpInfo} </div>
@@ -226,7 +252,7 @@ export function Otp() {
                 <br/>
                 <br/>
                 <div className='context-buttons'>
-                    <button onClick={pkpInfo.tokenId ? onSignSessionsig : onEnterCheckLogin}>Login</button>
+                    <button onClick={pkpInfo.length ? onSignSessionsig : onEnterCheckLogin}>Login</button>
                 </div>
             </div>
         );
