@@ -68,6 +68,7 @@ export class OtpProvider extends BaseProvider {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
+        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk'
       },
       body,
     });
@@ -108,6 +109,7 @@ export class OtpProvider extends BaseProvider {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
+        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk'
       },
       body,
     });
