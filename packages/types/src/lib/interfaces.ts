@@ -952,6 +952,45 @@ export interface LitAuthClientOptions {
   litOtpConfig?: OtpProviderOptions
 }
 
+
+export interface OtpSessionResult {
+  /**
+   * Status message of the request
+   */
+  message?: string,
+  /**
+   * jwt from successful otp check
+   */
+  token_jwt?: string,
+  /**
+   * status of the otp check
+   */
+  status?: string,
+}
+
+export interface LoginUrlParams {
+  /**
+   * Auth method name
+   */
+  provider: string | null;
+  /**
+   * Access token
+   */
+  accessToken: string | null;
+  /**
+   * ID token
+   */
+  idToken: string | null;
+  /**
+   * OAuth state param
+   */
+  state: string | null;
+  /**
+   * Error codes from Lit's login server
+   */
+  error: string | null;
+}
+
 export interface IRelay {
   /**
    * Mint a new PKP for the given auth method
@@ -1202,4 +1241,12 @@ export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
    * When the auth signature expires
    */
   expiration?: string;
+}
+
+
+export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
+  /**
+   * User provided authentication code
+   */
+  code: string;
 }

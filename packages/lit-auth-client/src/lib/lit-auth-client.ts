@@ -40,6 +40,8 @@ export class LitAuthClient {
   
   private litOtpOptions: OtpProviderOptions | undefined;
 
+  private litOtpOptions: OtpProviderOptions | undefined;
+
   /**
    * Create a LitAuthClient instance
    *

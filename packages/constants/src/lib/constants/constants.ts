@@ -353,6 +353,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  lineaGoerli: {
+    contractAddress: null,
+    chainId: 59140,
+    name: 'Linea Testnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.goerli.linea.build'],
+    blockExplorerUrls: ['https://explorer.goerli.linea.build'],
+    type: null,
+    vmType: 'EVM',
+  },
   litprotocol: {
     contractAddress: null,
     chainId: 175177,
