@@ -26,8 +26,7 @@
     "@walletconnect/core": "^2.7.3",
     "@walletconnect/types": "^2.7.3",
     "@walletconnect/utils": "^2.7.3",
-    "@walletconnect/web3wallet": "^1.7.1",
-    "lokijs": "^1"
+    "@walletconnect/web3wallet": "^1.7.1"
   },
   "tags": [
     "universal"
