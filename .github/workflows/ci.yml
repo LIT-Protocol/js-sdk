@@ -18,4 +18,4 @@ jobs:
           main-branch-name: 'master'
       - run: yarn install
 
-      - run: yarn test:unit
+      - run: npx nx run-many --all --target=test
