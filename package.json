@@ -50,7 +50,9 @@
     "bump:major": "yarn tools --v --major",
     "b": "git branch --show",
     "txServer": "node tx-handler-server.mjs",
-    "prettier": "nx format:write --all"
+    "prettier": "nx format:write --all",
+    "delete:merged-branches": "git branch --merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d",
+    "delete:no-merged-branches": "git branch --no-merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d"
   },
   "private": true,
   "dependencies": {
