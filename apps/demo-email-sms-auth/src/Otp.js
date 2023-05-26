@@ -16,8 +16,7 @@ export function Otp() {
     const authClient = new LitAuthClient({
         redirectUri: window.location.href.replace(/\/+$/, ''),
         litRelayConfig: {
-            relayApiKey: 'testing-key',
-            relayUrl: "http://127.0.0.1:8081"
+            relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
         }
     });
  
@@ -59,9 +58,10 @@ export function Otp() {
         let code = e.target.defaultValue;
         let authMethod = await otpSession.authenticate({code});
         console.log(authMethod);
-        const res = await otpSession.mintPKPThroughRelayer(authMethod);
-        console.log(res);
-        setPkpInfo(res);
+        let mintRes = await otpSession.mintPKPThroughRelayer(authMethod);
+        console.log(mintRes);
+        let fetchRes = await otpSession.fetchPKPsThroughRelayer(authMethod);
+        updatePkpState(fetchRes);
         setAccessToken(authMethod.accessToken);
         setState('display');
     };
@@ -73,26 +73,36 @@ export function Otp() {
         setAccessToken(authMethod.accessToken);
         const res = await otpSession.fetchPKPsThroughRelayer(authMethod);
         console.log(res);
-        if (res[0].tokenId.hex) {
-            res[0].tokenId = res[0].tokenId.hex;
+        updatePkpState(res);
+        setState('display');
+    };
+
+    const updatePkpState = (pkps) => {
+        if (pkps[0].tokenId.hex) {
+            pkps[0].tokenId = pkps[0].tokenId.hex;
         }
         const rows = [];
-        for (const pkp of res) {
+        let index = 0;
+        for (const pkp of pkps) {
+            if (pkp.tokenId.hex) {
+                pkp.tokenId = pkp.tokenId.hex;
+            }
             rows.push(
-            <tr key={pkp.tokenId} onClick={(e) => {
-                setSelectedPkp(pkpInfo[0]);
-            }}>
-                <td>{pkp.tokenId}</td>
-                <td>{pkp.publicKey}</td>
-            </tr>
+                <li key={pkp.tokenId} onClick={() => {
+                    const selected = pkp;
+                    console.log(selected);
+                    setSelectedPkp(selected);
+                }}>{pkp.publicKey}</li>
             )
+        
+            index++;
         }
 
         setPkpList(rows);
-        setPkpInfo(res);
-
-        setState('display');
+        setPkpInfo(pkps);
+        setSelectedPkp(pkps[0]);
     };
+
 
     const onSignSessionsig = async (e) => {
         const authNeededCallback = async authCallbackParams => {
@@ -125,8 +135,8 @@ export function Otp() {
             // Create the Lit Resource keyed by `someResource`
             const litResource = new LitAccessControlConditionResource('*');
 
-            const sessionSigs = otpSession.getSessionSigs({
-                pkpPublicKey: pkpInfo.publicKey,
+            const sessionSigs = await otpSession.getSessionSigs({
+                pkpPublicKey: selectedPkp.publicKey,
                 authMethod: {
                     authMethodType: 7,
                     accessToken: accessToken
@@ -172,7 +182,7 @@ export function Otp() {
             sessionSigs: sessionSig,
             jsParams: {
             toSign: toSign,
-            publicKey: pkpInfo.publicKey,
+            publicKey: selectedPkp.publicKey,
             sigName: 'sig1',
             },
         });
@@ -230,19 +240,15 @@ export function Otp() {
                 <br/>
                 <br/>
                 <Card title="PKP information">
-                    {pkpInfo.length && 
+                    {Array.isArray(pkpInfo) && 
                         <Card.Content>
                             <br/>
-                            <table className='pkp-table'>
-                                <tr>
-                                    <th>Token ID</th>
-                                    <th>Public Key</th>
-                                </tr>
+                            <ul>
                                 {pkpList}
-                            </table>
+                            </ul>
                         </Card.Content>
                     }
-                    {!pkpInfo.length && !pkpInfo.tokenId &&
+                    {!Array.isArray(pkpInfo) &&
                         <Card.Content>
                             <br/>
                             <div> transaction: {pkpInfo} </div>
@@ -259,6 +265,14 @@ export function Otp() {
     } else if (state == "execute") {
         return (
             <div>
+                {sessionSig &&
+                    <div>
+                        <h1>Session Signature Created</h1>
+                        {sessionSig[Object.keys(sessionSig)[0]]['signedMessage']}
+                    </div>
+                }
+                <br/>
+                <br/>
                 <span>Enter a message to sign</span>
                 <Input placeholder='message' onEnterPress={onExecute}/>
                 <br/>

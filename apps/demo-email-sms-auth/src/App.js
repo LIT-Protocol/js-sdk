@@ -6,7 +6,7 @@ import {Otp} from './Otp';
 function App() {
 
   // ----- autogen:app-name:start  -----
-const [appName, setAppName] = useState('SMS / Email authentication and Signup');
+const [appName, setAppName] = useState('SMS / Email Authentication and Registration');
 // ----- autogen:app-name:end  -----
 
   const [npmRepo, setNpmRepo] = useState('');
@@ -25,10 +25,6 @@ const [appName, setAppName] = useState('SMS / Email authentication and Signup');
         <LitLogo />
         <h4>
           React Demo for: {appName}<br/>
-          <span>
-            <a target="_blank" href={npmRepo}>npm repo</a>&nbsp;|&nbsp;
-            <a target="_blank" href={demoRepo}>demo repo</a>
-          </span>
         </h4>
       </header>
       <div className="Otp">
