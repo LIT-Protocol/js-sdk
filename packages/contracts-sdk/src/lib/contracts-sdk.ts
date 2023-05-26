@@ -808,10 +808,10 @@ export class LitContracts {
 
         let tokenIdFromEvent;
 
-        tokenIdFromEvent = events[1].topics[3];
+        tokenIdFromEvent = events[1].topics[1];
         console.warn('tokenIdFromEvent:', tokenIdFromEvent);
 
-        return { tx: sentTx, tokenId: tokenIdFromEvent };
+        return { tx: sentTx, tokenId: tokenIdFromEvent, res };
       },
     },
   };
