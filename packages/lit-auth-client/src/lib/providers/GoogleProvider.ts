@@ -2,6 +2,7 @@ import {
   AuthMethod,
   BaseProviderOptions,
   OAuthProviderOptions,
+  RegistrationMethod,
 } from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
 import {
@@ -11,19 +12,23 @@ import {
   decode,
 } from '../utils';
 import { BaseProvider } from './BaseProvider';
-import { OAuth2Client, TokenPayload } from "google-auth-library";
+import { OAuth2Client, TokenPayload } from 'google-auth-library';
 
 export default class GoogleProvider extends BaseProvider {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
-  public oAuthClient: OAuth2Client;
+  private _oAuthClient: OAuth2Client;
+  private _clientId: string;
+  private _accessToken: string | undefined;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
     this.redirectUri = options.redirectUri || window.location.origin;
-    this.oAuthClient = new OAuth2Client("355007986731-llbjq5kbsg8ieb705mo64nfnh88dhlmn.apps.googleusercontent.com");
+    this._clientId =
+      '355007986731-llbjq5kbsg8ieb705mo64nfnh88dhlmn.apps.googleusercontent.com';
+    this._oAuthClient = new OAuth2Client(this._clientId);
   }
 
   /**
@@ -88,23 +93,41 @@ export default class GoogleProvider extends BaseProvider {
         `Missing ID token in redirect callback URL for Google OAuth"`
       );
     }
-    
-    let tokenPayload: TokenPayload = await this.#verifyIDToken(idToken).catch(e => {
-      throw new Error(`Error while verifying identifier token: ${e.message}`);
-    });
 
     const authMethod = {
       authMethodType: AuthMethodType.GoogleJwt,
-      accessToken: JSON.stringify(tokenPayload),
+      accessToken: idToken,
     };
     return authMethod;
   }
 
+  public override async validate(): Promise<RegistrationMethod> {
+    if (!this._accessToken) {
+      throw new Error(
+        'Access token not defined, did you authenticate before calling validate?'
+      );
+    }
+
+    let tokenPayload: TokenPayload = await this.#verifyIDToken(
+      this._accessToken
+    ).catch((e) => {
+      throw new Error(`Error while verifying identifier token: ${e.message}`);
+    });
+    let userId: string = tokenPayload.sub;
+    let audience: string = tokenPayload.aud;
+
+    return {
+      authMethodType: 6,
+      authMethodId: `${userId}:${audience}`
+    };
+  }
+
   // Validate given Google ID token
   async #verifyIDToken(idToken: string): Promise<TokenPayload> {
-    const ticket = await this.oAuthClient.verifyIdToken({
+    const ticket = await this._oAuthClient.verifyIdToken({
       idToken,
     });
+
     return ticket.getPayload()!;
   }
 }

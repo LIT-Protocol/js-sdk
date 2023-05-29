@@ -9,6 +9,7 @@ import {
   BaseProviderSessionSigsParams,
   IRelay,
   IRelayPKP,
+  RegistrationMethod,
   SessionSigs,
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
@@ -44,6 +45,12 @@ export abstract class BaseProvider {
     options?: T
   ): Promise<AuthMethod>;
 
+  /**
+   * Validates a users authentication materials based on the provider-specifi implementation, returns the relevant validated authetnication data.
+   * @returns {Promise<RegistrationMethod>} Registraction Method object that contains metdata used for registering authentication methods.
+  */
+  abstract validate(): Promise<RegistrationMethod>;
+  
   /**
    * Mint a new PKP for the given auth method through the relay server
    *

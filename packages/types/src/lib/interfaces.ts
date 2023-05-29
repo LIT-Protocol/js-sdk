@@ -731,6 +731,11 @@ export interface AuthMethod {
   accessToken: string;
 }
 
+export interface RegistrationMethod {
+  authMethodType: number,
+  authMethodId: string,
+}
+
 // pub struct JsonSignSessionKeyRequest {
 //     pub session_key: String,
 //     pub auth_methods: Vec<AuthMethod>,

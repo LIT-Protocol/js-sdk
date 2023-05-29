@@ -2,6 +2,7 @@ import {
   AuthMethod,
   BaseProviderOptions,
   OAuthProviderOptions,
+  RegistrationMethod,
 } from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
 import { BaseProvider } from './BaseProvider';
@@ -17,6 +18,9 @@ export default class DiscordProvider extends BaseProvider {
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
+
+  private _accessToken: string | undefined;
+  private _clientId: string =  "105287423965869266";
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
@@ -86,24 +90,35 @@ export default class DiscordProvider extends BaseProvider {
       );
     }
 
-    const userToken: string = await this.#verifyAndFetchDiscordUserId(accessToken).catch(e => {
-      throw e;
-    });
-
     const authMethod = {
       authMethodType: AuthMethodType.Discord,
-      accessToken: userToken,
+      accessToken: accessToken,
     };
 
     return authMethod;
   }
 
+  public override async validate(): Promise<RegistrationMethod> {
+    if (!this._accessToken) {
+      throw new Error(
+        'Access token not defined, did you authenticate before calling validate?'
+      );
+    }
+    const userToken: string = await this.#verifyAndFetchDiscordUserId(
+      this._accessToken
+    ).catch((e) => {
+      throw e;
+    });
 
-  async #verifyAndFetchDiscordUserId(
-    accessToken: string,
-  ): Promise<string> {
-    const meResponse = await fetch("https://discord.com/api/users/@me", {
-      method: "GET",
+    return {
+      authMethodType: 4,
+      authMethodId: `${userToken}:${this._clientId}`
+    };
+  }
+
+  async #verifyAndFetchDiscordUserId(accessToken: string): Promise<string> {
+    const meResponse = await fetch('https://discord.com/api/users/@me', {
+      method: 'GET',
       headers: {
         authorization: `Bearer ${accessToken}`,
       },
@@ -112,7 +127,7 @@ export default class DiscordProvider extends BaseProvider {
       const user = await meResponse.json();
       return JSON.stringify(user);
     } else {
-      throw new Error("Unable to verify Discord account");
+      throw new Error('Unable to verify Discord account');
     }
   }
 }
