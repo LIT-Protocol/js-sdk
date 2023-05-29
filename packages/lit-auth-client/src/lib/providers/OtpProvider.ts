@@ -4,6 +4,8 @@ import {
   AuthenticateOptions,
   BaseProviderOptions,
   OtpAuthenticateOptions,
+  OtpVerificationPayload,
+  RegistrationMethod,
   SignInWithOTPParams,
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
@@ -16,6 +18,8 @@ export class OtpProvider extends BaseProvider {
   private _startRoute: string;
   private _checkRoute: string;
   private _requestId: string = '';
+
+  private _accessToken: string | undefined;
 
   constructor(
     params: BaseProviderOptions & SignInWithOTPParams,
@@ -45,6 +49,25 @@ export class OtpProvider extends BaseProvider {
       throw new Error(
         `Must provide authentication options for OTP check options given are: ${options}`
       );
+    }
+  }
+
+  public override async validate(): Promise<RegistrationMethod> {
+    if (!this._accessToken) {
+      throw new Error(
+        'Access token not defined, did you authenticate before calling validate?'
+      );
+    }
+
+    let resp = await this.#verifyOtpJWT(this._accessToken).catch(e => {
+      throw e;
+    });
+    let userId = resp.userId;
+    let payload = this.#parseJWT(this._accessToken);
+    let audience = payload['aud'];
+    return {
+      authMethodType: 7,
+      authMethodId: `${userId}:${audience}`
     }
   }
 
@@ -125,6 +148,7 @@ export class OtpProvider extends BaseProvider {
     if (!respBody.token_jwt) {
       throw new Error('Invalid otp code, operation was aborted');
     }
+    this._accessToken = respBody.token_jwt;
 
     return {
       accessToken: respBody.token_jwt,
@@ -141,5 +165,41 @@ export class OtpProvider extends BaseProvider {
       default:
         return '';
     }
+  }
+
+  async  #verifyOtpJWT(jwt: string): Promise<OtpVerificationPayload> {
+    const res = await fetch(this._baseUrl + '/api/otp/verify', {
+      redirect: "error",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer'
+      },
+      body: JSON.stringify({
+        token: jwt,
+      }),
+    });
+    if (res.status < 200 || res.status > 299) {
+      throw new Error("Error while verifying token on remote endpoint");
+    }
+    const respBody = await res.json();
+  
+    return respBody as OtpVerificationPayload;
+  }
+
+  /**
+ *
+ * @param jwt token to parse
+ * @returns {string}- userId contained within the token message
+ */
+  #parseJWT(jwt: string): Record<string, unknown> {
+    let parts = jwt.split(".");
+    if (parts.length !== 3) {
+      throw new Error("Invalid token length");
+    }
+    let body =  Buffer.from(parts[1], 'base64');
+    let parsedBody: Record<string, unknown> = JSON.parse(body.toString('ascii'));
+    console.log("JWT body: ", parsedBody);
+    return parsedBody;
   }
 }

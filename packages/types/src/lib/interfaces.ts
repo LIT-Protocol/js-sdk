@@ -973,6 +973,11 @@ export interface OtpSessionResult {
   status?: string,
 }
 
+export interface OtpVerificationPayload {
+	userId: string,
+	status: boolean,
+}
+
 export interface LoginUrlParams {
   /**
    * Auth method name
