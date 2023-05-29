@@ -187,6 +187,8 @@ export abstract class BaseProvider {
         return authMethod.accessToken; // Auth sig is a JSON string
       case AuthMethodType.WebAuthn:
         return authMethod.accessToken; // Auth data is a JSON string
+      case AuthMethodType.OTP:
+        return JSON.stringify(authMethod);
       default:
         throw new Error(
           `Invalid auth method type "${authMethod.authMethodType}" passed`

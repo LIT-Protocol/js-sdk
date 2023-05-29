@@ -953,6 +953,47 @@ export interface LitAuthClientOptions {
    * Lit Node Client
    */
   litNodeClient?: any;
+
+  litOtpConfig?: OtpProviderOptions
+}
+
+
+export interface OtpSessionResult {
+  /**
+   * Status message of the request
+   */
+  message?: string,
+  /**
+   * jwt from successful otp check
+   */
+  token_jwt?: string,
+  /**
+   * status of the otp check
+   */
+  status?: string,
+}
+
+export interface LoginUrlParams {
+  /**
+   * Auth method name
+   */
+  provider: string | null;
+  /**
+   * Access token
+   */
+  accessToken: string | null;
+  /**
+   * ID token
+   */
+  idToken: string | null;
+  /**
+   * OAuth state param
+   */
+  state: string | null;
+  /**
+   * Error codes from Lit's login server
+   */
+  error: string | null;
 }
 
 export interface IRelay {
@@ -1109,6 +1150,33 @@ export interface EthWalletProviderOptions {
   origin?: string;
 }
 
+export interface SignInWithOTPParams {
+  /**
+   * otp transport (email or phone #)
+   * used as the user ID for the auth method
+  */
+  userId: string;
+  /**
+   * Origin of the sign in request
+   */
+  origin?: string;
+  /**
+   * when the generated JWT expires
+   */
+  expiration?: string;
+  /**
+   * tracking for the session
+   */
+  requestId?: string;
+}
+
+export interface OtpProviderOptions {
+  baseUrl: string,
+  port: string,
+  startRoute: string,
+  checkRoute: string,
+}
+
 export interface BaseProviderSessionSigsParams {
   /**
    * Public key of PKP to auth with
@@ -1151,7 +1219,10 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface EthWalletAuthenticateOptions {
+
+export interface BaseAuthenticateOptions {}
+
+export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
    * Ethereum wallet address
    */
@@ -1172,4 +1243,12 @@ export interface EthWalletAuthenticateOptions {
    * When the auth signature expires
    */
   expiration?: string;
+}
+
+
+export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
+  /**
+   * User provided authentication code
+   */
+  code: string;
 }

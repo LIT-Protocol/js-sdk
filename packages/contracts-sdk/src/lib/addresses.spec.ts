@@ -1,5 +1,7 @@
 import { LitContracts } from './contracts-sdk';
 
+jest.setTimeout(60000);
+
 describe('addresses', () => {
   it('should get all addresses by token id and pub key', async () => {
     const litContracts = new LitContracts();

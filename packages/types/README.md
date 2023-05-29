@@ -1,11 +1,10 @@
-# types
+# Types
 
-This library was generated with [Nx](https://nx.dev).
+This submodule exports various interfaces & types related to Lit Protocol. eg. access control conditions, chain properties, JSON requests, auth statuses, wallet provider options, etc.
 
-## Building
 
-Run `nx build types` to build the library.
+# Getting Started
 
-## Running unit tests
-
-Run `nx test types` to execute the unit tests via [Jest](https://jestjs.io).
+```
+yarn add @lit-protocol/types
+```
