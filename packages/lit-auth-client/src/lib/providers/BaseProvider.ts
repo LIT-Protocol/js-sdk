@@ -60,10 +60,10 @@ export abstract class BaseProvider {
    *
    * @returns {Promise<string>} - Mint transaction hash
    */
-  public async mintPKPThroughRelayer(authMethod: AuthMethod): Promise<string> {
-    const mintParams = this.prepareRelayBody(authMethod);
+  public async mintPKPThroughRelayer(registrationMethod: RegistrationMethod): Promise<string> {
+    const mintParams = this.prepareRelayBody(registrationMethod);
     const mintRes = await this.relay.mintPKP(
-      authMethod.authMethodType,
+      registrationMethod.authMethodType,
       mintParams
     );
     if (!mintRes || !mintRes.requestId) {
@@ -80,11 +80,11 @@ export abstract class BaseProvider {
    * @returns {Promise<IRelayPKP[]>} - Array of PKPs
    */
   public async fetchPKPsThroughRelayer(
-    authMethod: AuthMethod
+    registrationMethod: RegistrationMethod
   ): Promise<IRelayPKP[]> {
-    const fetchParams = this.prepareRelayBody(authMethod);
+    const fetchParams = this.prepareRelayBody(registrationMethod);
     const fetchRes = await this.relay.fetchPKPs(
-      authMethod.authMethodType,
+      registrationMethod.authMethodType,
       fetchParams
     );
     if (!fetchRes || !fetchRes.pkps) {
@@ -177,22 +177,7 @@ export abstract class BaseProvider {
    *
    * @returns {string} - Auth method body for relay server
    */
-  protected prepareRelayBody(authMethod: AuthMethod): string {
-    switch (authMethod.authMethodType) {
-      case AuthMethodType.Discord:
-        return JSON.stringify({ accessToken: authMethod.accessToken });
-      case AuthMethodType.GoogleJwt:
-        return JSON.stringify({ idToken: authMethod.accessToken });
-      case AuthMethodType.EthWallet:
-        return authMethod.accessToken; // Auth sig is a JSON string
-      case AuthMethodType.WebAuthn:
-        return authMethod.accessToken; // Auth data is a JSON string
-      case AuthMethodType.OTP:
-        return JSON.stringify(authMethod);
-      default:
-        throw new Error(
-          `Invalid auth method type "${authMethod.authMethodType}" passed`
-        );
-    }
+  protected prepareRelayBody(authMethod: RegistrationMethod): string {
+      return JSON.stringify(authMethod);
   }
 }
