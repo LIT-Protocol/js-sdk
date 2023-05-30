@@ -183,7 +183,7 @@ export class OtpProvider extends BaseProvider {
         token: jwt,
       }),
     });
-    if (res.status < 200 || res.status > 299) {
+    if (res.status < 200 || res.status >= 400) {
       throw new Error("Error while verifying token on remote endpoint");
     }
     const respBody = await res.json();
@@ -194,7 +194,7 @@ export class OtpProvider extends BaseProvider {
   /**
  *
  * @param jwt token to parse
- * @returns {string}- userId contained within the token message
+ * @returns {Record<string, unknown>}- userId contained within the token message
  */
   #parseJWT(jwt: string): Record<string, unknown> {
     let parts = jwt.split(".");
@@ -203,7 +203,7 @@ export class OtpProvider extends BaseProvider {
     }
     let body =  Buffer.from(parts[1], 'base64');
     let parsedBody: Record<string, unknown> = JSON.parse(body.toString('ascii'));
-    console.log("JWT body: ", parsedBody);
+
     return parsedBody;
   }
 }
