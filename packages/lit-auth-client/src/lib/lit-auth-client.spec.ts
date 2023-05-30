@@ -13,6 +13,7 @@ import GoogleProvider from './providers/GoogleProvider';
 import DiscordProvider from './providers/DiscordProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 import EthWalletProvider from './providers/EthWalletProvider';
+import AppleProvider from './providers/AppleProvider';
 
 const isClass = (v: unknown) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
@@ -67,6 +68,13 @@ describe('initProvider', () => {
       redirectUri: 'http://localhost:3000/redirect',
     });
     expect(provider).toBeInstanceOf(GoogleProvider);
+  });
+
+  it('should return an instance of AppleProvider', () => {
+    const provider = client.initProvider<AppleProvider>(ProviderType.Apple, {
+      redirectUri: 'http://localhost:3000/redirect',
+    });
+    expect(provider).toBeInstanceOf(AppleProvider);
   });
 
   it('should return an instance of EthWalletProvider', () => {
