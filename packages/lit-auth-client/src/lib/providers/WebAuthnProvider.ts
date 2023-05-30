@@ -1,15 +1,23 @@
-import { AuthMethod, BaseProviderOptions } from '@lit-protocol/types';
+import {
+  AuthMethod,
+  BaseProviderOptions,
+  RelayerRequest,
+} from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
-import { ethers } from 'ethers';
+import { ethers, utils } from 'ethers';
 import {
   PublicKeyCredentialCreationOptionsJSON,
   UserVerificationRequirement,
 } from '@simplewebauthn/typescript-types';
 import base64url from 'base64url';
-import { getRPIdFromOrigin } from '../utils';
+import { getRPIdFromOrigin, parseAuthenticatorData } from '../utils';
 import { BaseProvider } from './BaseProvider';
+import { hexlify, toUtf8Bytes } from 'ethers/lib/utils';
+import { RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
 
 export default class WebAuthnProvider extends BaseProvider {
+  private _attestationResponse: any | undefined;
+
   constructor(options: BaseProviderOptions) {
     super(options);
   }
@@ -39,12 +47,32 @@ export default class WebAuthnProvider extends BaseProvider {
   ): Promise<string> {
     // Submit registration options to the authenticator
     const { startRegistration } = await import('@simplewebauthn/browser');
-    const attResp = await startRegistration(options);
+    const attResp: RegistrationResponseJSON = await startRegistration(options);
 
-    // Send the credential to the relying party for verification
+    const authMethodId: string = this.#generateAuthMethodId(attResp.rawId);
+
+    // create a buffer object from the base64 encoded content.
+    let attestationBuffer = Buffer.from(
+      attResp.response.attestationObject,
+      'base64'
+    );
+    // parse the buffer to reconstruct the object.
+    let authenticationResponse = parseAuthenticatorData(attestationBuffer);
+    // publickey in cose format to register the auth method
+    let publicKeyCoseBuffer: Buffer = authenticationResponse[
+      'credentialPublicKey'
+    ] as Buffer;
+    // Encode the publicKey for contract storage
+    let publicKey = hexlify(ethers.utils.arrayify(publicKeyCoseBuffer));
+
+    let req: RelayerRequest = {
+      authMethodType: AuthMethodType.WebAuthn,
+      authMethodId,
+      authMethodPubKey: publicKey,
+    };
     const mintRes = await this.relay.mintPKP(
       AuthMethodType.WebAuthn,
-      JSON.stringify({ credential: attResp })
+      JSON.stringify(req)
     );
     if (!mintRes || !mintRes.requestId) {
       throw new Error('Missing mint response or request ID from relay server');
@@ -107,11 +135,39 @@ export default class WebAuthnProvider extends BaseProvider {
         base64url.encode(userHandle);
     }
 
+    this._attestationResponse = actualAuthenticationResponse;
+
     const authMethod = {
       authMethodType: AuthMethodType.WebAuthn,
       accessToken: JSON.stringify(actualAuthenticationResponse),
     };
 
     return authMethod;
+  }
+
+  /**
+   * Constructs a {@link RelayerRequest} from the attestation response from authentication, {@link authenticate} must be called prior.
+   * Intended for fetching pkp information from relayers.
+   * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
+   */
+  protected override async getRelayerRequest(): Promise<RelayerRequest> {
+    if (!this._attestationResponse) {
+      throw new Error(
+        'Access token not defined, did you authenticate before calling validate?'
+      );
+    }
+
+    const authMethodId: string = this.#generateAuthMethodId(
+      this._attestationResponse.rawId
+    );
+
+    return {
+      authMethodType: AuthMethodType.WebAuthn,
+      authMethodId,
+    };
+  }
+
+  #generateAuthMethodId(credentialRawId: string): string {
+    return utils.keccak256(toUtf8Bytes(`${credentialRawId}:lit`));
   }
 }
