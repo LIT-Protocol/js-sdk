@@ -9,7 +9,7 @@ import {
   BaseProviderSessionSigsParams,
   IRelay,
   IRelayPKP,
-  RegistrationMethod,
+  RelayerRequest,
   SessionSigs,
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
@@ -46,10 +46,10 @@ export abstract class BaseProvider {
   ): Promise<AuthMethod>;
 
   /**
-   * Validates a users authentication materials based on the provider-specifi implementation, returns the relevant validated authetnication data.
+   * Constrcuts a request for interfacing with relayer minting servers, based on the provider-specific implementation.
    * @returns {Promise<RegistrationMethod>} Registraction Method object that contains metdata used for registering authentication methods.
   */
-  abstract validate(): Promise<RegistrationMethod>;
+  abstract getRelayerRequest(): Promise<RelayerRequest>;
   
   /**
    * Mint a new PKP for the given auth method through the relay server
@@ -60,7 +60,7 @@ export abstract class BaseProvider {
    *
    * @returns {Promise<string>} - Mint transaction hash
    */
-  public async mintPKPThroughRelayer(registrationMethod: RegistrationMethod): Promise<string> {
+  public async mintPKPThroughRelayer(registrationMethod: RelayerRequest): Promise<string> {
     const mintParams = this.prepareRelayBody(registrationMethod);
     const mintRes = await this.relay.mintPKP(
       registrationMethod.authMethodType,
@@ -80,7 +80,7 @@ export abstract class BaseProvider {
    * @returns {Promise<IRelayPKP[]>} - Array of PKPs
    */
   public async fetchPKPsThroughRelayer(
-    registrationMethod: RegistrationMethod
+    registrationMethod: RelayerRequest
   ): Promise<IRelayPKP[]> {
     const fetchParams = this.prepareRelayBody(registrationMethod);
     const fetchRes = await this.relay.fetchPKPs(
@@ -177,7 +177,7 @@ export abstract class BaseProvider {
    *
    * @returns {string} - Auth method body for relay server
    */
-  protected prepareRelayBody(authMethod: RegistrationMethod): string {
+  protected prepareRelayBody(authMethod: RelayerRequest): string {
       return JSON.stringify(authMethod);
   }
 }

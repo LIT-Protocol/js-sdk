@@ -4,10 +4,11 @@ import {
   BaseProviderOptions,
   EthWalletProviderOptions,
   EthWalletAuthenticateOptions,
+  RelayerRequest,
 } from '@lit-protocol/types';
 import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { SiweMessage } from 'lit-siwe';
-import { ethers } from 'ethers';
+import { ethers, utils } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
 
@@ -20,6 +21,8 @@ export default class EthWalletProvider extends BaseProvider {
    * The origin from which the signing request is made
    */
   public origin: string;
+
+  private _authSig: AuthSig | undefined;
 
   constructor(options: BaseProviderOptions & EthWalletProviderOptions) {
     super(options);
@@ -79,6 +82,8 @@ export default class EthWalletProvider extends BaseProvider {
         signedMessage: toSign,
         address: address,
       };
+
+      this._authSig = authSig;
     } else {
       authSig = await checkAndSignAuthMessage({
         chain,
@@ -91,4 +96,40 @@ export default class EthWalletProvider extends BaseProvider {
     };
     return authMethod;
   }
+  /**
+   * Constructs a {@link RelayerRequest} from the signature, {@link authenticate} must be called prior.
+   * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server 
+  */
+  public override async getRelayerRequest(): Promise<RelayerRequest> {
+    if (!this._authSig) {
+      throw new Error("AutHSig not defined, did you call authenticate first");
+    }
+
+   	// verify auth sig
+    const verified: boolean = this.#verifyAuthSig(this._authSig);
+    if (verified) {
+      console.info("Successfully verified authentication signature", {
+        address: this._authSig.address,
+      });
+    } else {
+      console.error("Unable to verify authentication signature", {
+        address: this._authSig.address,
+      });
+    }
+      
+      return {
+        authMethodType: AuthMethodType.EthWallet,
+        authMethodId: this._authSig.address
+      };
+  }
+
+  // Check that the message has been signed by the given address
+ #verifyAuthSig(authSig: AuthSig): boolean {
+	const recoveredAddr = utils.verifyMessage(
+		authSig.signedMessage,
+		authSig.sig,
+	);
+
+	return recoveredAddr.toLowerCase() === authSig.address.toLowerCase();
+}
 }

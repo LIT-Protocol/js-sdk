@@ -5,7 +5,7 @@ import {
   BaseProviderOptions,
   OtpAuthenticateOptions,
   OtpVerificationPayload,
-  RegistrationMethod,
+  RelayerRequest,
   SignInWithOTPParams,
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
@@ -52,7 +52,11 @@ export class OtpProvider extends BaseProvider {
     }
   }
 
-  public override async validate(): Promise<RegistrationMethod> {
+  /**
+   * Constructs a {@link RelayerRequest} from the access token, {@link authenticate} must be called prior.
+   * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server 
+  */
+  public override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this._accessToken) {
       throw new Error(
         'Access token not defined, did you authenticate before calling validate?'

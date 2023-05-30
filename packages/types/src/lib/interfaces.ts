@@ -731,7 +731,7 @@ export interface AuthMethod {
   accessToken: string;
 }
 
-export interface RegistrationMethod {
+export interface RelayerRequest {
   authMethodType: number,
   authMethodId: string,
 }

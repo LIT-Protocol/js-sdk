@@ -2,7 +2,7 @@ import {
   AuthMethod,
   BaseProviderOptions,
   OAuthProviderOptions,
-  RegistrationMethod,
+  RelayerRequest,
 } from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
 import { BaseProvider } from './BaseProvider';
@@ -98,7 +98,11 @@ export default class DiscordProvider extends BaseProvider {
     return authMethod;
   }
 
-  public override async validate(): Promise<RegistrationMethod> {
+  /**
+   * Constructs a {@link RelayerRequest} from the access token, {@link authenticate} must be called prior.
+   * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server 
+   */
+  public override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this._accessToken) {
       throw new Error(
         'Access token not defined, did you authenticate before calling validate?'
