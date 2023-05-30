@@ -2,6 +2,7 @@ import {
   AuthMethod,
   BaseProviderOptions,
   OAuthProviderOptions,
+  RelayerRequest,
 } from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
 import {
@@ -113,7 +114,7 @@ export default class AppleProvider extends BaseProvider {
       let authMethodId = `${payload['aud']}:${payload['sub']}`;
 
       return {
-        AuthMethodType: AuthMethodType.AppleJwt,
+        authMethodType: AuthMethodType.AppleJwt,
         authMethodId
       };
     }
