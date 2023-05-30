@@ -41,10 +41,10 @@ export function Otp() {
 
     const onEnterStart = async(e) => {
         let transport = e.target.defaultValue;
-        setUserId(`+1` + transport);
+        setUserId(transport);
 
         let session = authClient.initProvider(ProviderType.Otp,{
-            userId: '+1' + transport
+            userId: transport
         });
         let status = await session.sendOtpCode();
         if (status) {
