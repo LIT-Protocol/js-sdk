@@ -98,38 +98,38 @@ export default class EthWalletProvider extends BaseProvider {
   }
   /**
    * Constructs a {@link RelayerRequest} from the signature, {@link authenticate} must be called prior.
-   * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server 
-  */
+   * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
+   */
   public override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this._authSig) {
-      throw new Error("AutHSig not defined, did you call authenticate first");
+      throw new Error('AutHSig not defined, did you call authenticate first');
     }
 
-   	// verify auth sig
+    // verify auth sig
     const verified: boolean = this.#verifyAuthSig(this._authSig);
     if (verified) {
-      console.info("Successfully verified authentication signature", {
+      console.info('Successfully verified authentication signature', {
         address: this._authSig.address,
       });
     } else {
-      console.error("Unable to verify authentication signature", {
+      console.error('Unable to verify authentication signature', {
         address: this._authSig.address,
       });
     }
-      
-      return {
-        authMethodType: AuthMethodType.EthWallet,
-        authMethodId: this._authSig.address
-      };
+
+    return {
+      authMethodType: AuthMethodType.EthWallet,
+      authMethodId: this._authSig.address,
+    };
   }
 
   // Check that the message has been signed by the given address
- #verifyAuthSig(authSig: AuthSig): boolean {
-	const recoveredAddr = utils.verifyMessage(
-		authSig.signedMessage,
-		authSig.sig,
-	);
+  #verifyAuthSig(authSig: AuthSig): boolean {
+    const recoveredAddr = utils.verifyMessage(
+      authSig.signedMessage,
+      authSig.sig
+    );
 
-	return recoveredAddr.toLowerCase() === authSig.address.toLowerCase();
-}
+    return recoveredAddr.toLowerCase() === authSig.address.toLowerCase();
+  }
 }

@@ -48,9 +48,9 @@ export abstract class BaseProvider {
   /**
    * Constrcuts a request for interfacing with relayer minting servers, based on the provider-specific implementation.
    * @returns {Promise<RegistrationMethod>} Registraction Method object that contains metdata used for registering authentication methods.
-  */
+   */
   abstract getRelayerRequest(): Promise<RelayerRequest>;
-  
+
   /**
    * Mint a new PKP for the given auth method through the relay server
    *
@@ -60,7 +60,9 @@ export abstract class BaseProvider {
    *
    * @returns {Promise<string>} - Mint transaction hash
    */
-  public async mintPKPThroughRelayer(registrationMethod: RelayerRequest): Promise<string> {
+  public async mintPKPThroughRelayer(
+    registrationMethod: RelayerRequest
+  ): Promise<string> {
     const mintParams = this.prepareRelayBody(registrationMethod);
     const mintRes = await this.relay.mintPKP(
       registrationMethod.authMethodType,
@@ -178,6 +180,6 @@ export abstract class BaseProvider {
    * @returns {string} - Auth method body for relay server
    */
   protected prepareRelayBody(authMethod: RelayerRequest): string {
-      return JSON.stringify(authMethod);
+    return JSON.stringify(authMethod);
   }
 }

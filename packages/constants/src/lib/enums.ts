@@ -28,7 +28,7 @@ export enum AuthMethodType {
   Discord,
   Google,
   GoogleJwt,
-  OTP
+  OTP,
 }
 
 /**

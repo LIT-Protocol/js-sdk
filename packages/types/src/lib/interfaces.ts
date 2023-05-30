@@ -732,8 +732,8 @@ export interface AuthMethod {
 }
 
 export interface RelayerRequest {
-  authMethodType: number,
-  authMethodId: string,
+  authMethodType: number;
+  authMethodId: string;
 }
 
 // pub struct JsonSignSessionKeyRequest {
@@ -954,28 +954,27 @@ export interface LitAuthClientOptions {
    */
   litNodeClient?: any;
 
-  litOtpConfig?: OtpProviderOptions
+  litOtpConfig?: OtpProviderOptions;
 }
-
 
 export interface OtpSessionResult {
   /**
    * Status message of the request
    */
-  message?: string,
+  message?: string;
   /**
    * jwt from successful otp check
    */
-  token_jwt?: string,
+  token_jwt?: string;
   /**
    * status of the otp check
    */
-  status?: string,
+  status?: string;
 }
 
 export interface OtpVerificationPayload {
-	userId: string,
-	status: boolean,
+  userId: string;
+  status: boolean;
 }
 
 export interface LoginUrlParams {
@@ -1159,7 +1158,7 @@ export interface SignInWithOTPParams {
   /**
    * otp transport (email or phone #)
    * used as the user ID for the auth method
-  */
+   */
   userId: string;
   /**
    * Origin of the sign in request
@@ -1176,10 +1175,10 @@ export interface SignInWithOTPParams {
 }
 
 export interface OtpProviderOptions {
-  baseUrl: string,
-  port: string,
-  startRoute: string,
-  checkRoute: string,
+  baseUrl: string;
+  port: string;
+  startRoute: string;
+  checkRoute: string;
 }
 
 export interface BaseProviderSessionSigsParams {
@@ -1224,7 +1223,6 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-
 export interface BaseAuthenticateOptions {}
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
@@ -1249,7 +1247,6 @@ export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
    */
   expiration?: string;
 }
-
 
 export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
   /**

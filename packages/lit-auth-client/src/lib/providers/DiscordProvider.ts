@@ -20,7 +20,7 @@ export default class DiscordProvider extends BaseProvider {
   public redirectUri: string;
 
   private _accessToken: string | undefined;
-  private _clientId: string =  "105287423965869266";
+  private _clientId: string = '105287423965869266';
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
@@ -100,7 +100,7 @@ export default class DiscordProvider extends BaseProvider {
 
   /**
    * Constructs a {@link RelayerRequest} from the access token, {@link authenticate} must be called prior.
-   * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server 
+   * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
   public override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this._accessToken) {
@@ -116,7 +116,7 @@ export default class DiscordProvider extends BaseProvider {
 
     return {
       authMethodType: 4,
-      authMethodId: `${userToken}:${this._clientId}`
+      authMethodId: `${userToken}:${this._clientId}`,
     };
   }
 

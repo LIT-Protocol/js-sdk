@@ -54,8 +54,8 @@ export class OtpProvider extends BaseProvider {
 
   /**
    * Constructs a {@link RelayerRequest} from the access token, {@link authenticate} must be called prior.
-   * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server 
-  */
+   * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
+   */
   public override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this._accessToken) {
       throw new Error(
@@ -63,7 +63,7 @@ export class OtpProvider extends BaseProvider {
       );
     }
 
-    let resp = await this.#verifyOtpJWT(this._accessToken).catch(e => {
+    let resp = await this.#verifyOtpJWT(this._accessToken).catch((e) => {
       throw e;
     });
     let userId = resp.userId;
@@ -71,8 +71,8 @@ export class OtpProvider extends BaseProvider {
     let audience = payload['aud'];
     return {
       authMethodType: 7,
-      authMethodId: `${userId}:${audience}`
-    }
+      authMethodId: `${userId}:${audience}`,
+    };
   }
 
   /**
@@ -95,7 +95,7 @@ export class OtpProvider extends BaseProvider {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
-        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk'
+        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk',
       },
       body,
     });
@@ -136,7 +136,7 @@ export class OtpProvider extends BaseProvider {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
-        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk'
+        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk',
       },
       body,
     });
@@ -171,38 +171,40 @@ export class OtpProvider extends BaseProvider {
     }
   }
 
-  async  #verifyOtpJWT(jwt: string): Promise<OtpVerificationPayload> {
+  async #verifyOtpJWT(jwt: string): Promise<OtpVerificationPayload> {
     const res = await fetch(this._baseUrl + '/api/otp/verify', {
-      redirect: "error",
-      method: "POST",
+      redirect: 'error',
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer'
+        'Content-Type': 'application/json',
+        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
       },
       body: JSON.stringify({
         token: jwt,
       }),
     });
     if (res.status < 200 || res.status >= 400) {
-      throw new Error("Error while verifying token on remote endpoint");
+      throw new Error('Error while verifying token on remote endpoint');
     }
     const respBody = await res.json();
-  
+
     return respBody as OtpVerificationPayload;
   }
 
   /**
- *
- * @param jwt token to parse
- * @returns {Record<string, unknown>}- userId contained within the token message
- */
+   *
+   * @param jwt token to parse
+   * @returns {Record<string, unknown>}- userId contained within the token message
+   */
   #parseJWT(jwt: string): Record<string, unknown> {
-    let parts = jwt.split(".");
+    let parts = jwt.split('.');
     if (parts.length !== 3) {
-      throw new Error("Invalid token length");
+      throw new Error('Invalid token length');
     }
-    let body =  Buffer.from(parts[1], 'base64');
-    let parsedBody: Record<string, unknown> = JSON.parse(body.toString('ascii'));
+    let body = Buffer.from(parts[1], 'base64');
+    let parsedBody: Record<string, unknown> = JSON.parse(
+      body.toString('ascii')
+    );
 
     return parsedBody;
   }

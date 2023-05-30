@@ -65,7 +65,7 @@ export class LitAuthClient {
         );
       }
 
-      if(options?.litOtpConfig){
+      if (options?.litOtpConfig) {
         this.litOtpOptions = options?.litOtpConfig;
       }
     }
@@ -132,11 +132,12 @@ export class LitAuthClient {
         }) as unknown as T;
         break;
       case `otp`:
-        provider = new OtpProvider({
-          ...baseParams,
-          ...(options as SignInWithOTPParams),
-        },
-        this.litOtpOptions
+        provider = new OtpProvider(
+          {
+            ...baseParams,
+            ...(options as SignInWithOTPParams),
+          },
+          this.litOtpOptions
         ) as unknown as T;
         break;
       default:
