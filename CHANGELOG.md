@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [2.2.15] - 2023-05-30
 
+- [#122](https://github.com/LIT-Protocol/js-sdk/pull/122) Added demo for email/sms
 - [#123](https://github.com/LIT-Protocol/js-sdk/pull/123) Added Apple JWT Auth Provider
 
 ## [2.2.0] - 2023-05-12
