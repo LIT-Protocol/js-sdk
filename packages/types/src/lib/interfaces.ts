@@ -379,7 +379,7 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
   toDecrypt: string;
 }
 
-export type ExecuteJsProps = Partial<JsonExecutionRequest> & {
+export type ExecuteJsProps = JsonExecutionRequest & {
   // A boolean that defines if debug info will be returned or not.
   debug?: boolean;
 };
