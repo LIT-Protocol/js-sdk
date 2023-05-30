@@ -734,6 +734,8 @@ export interface AuthMethod {
 export interface RelayerRequest {
   authMethodType: number;
   authMethodId: string;
+  // used only in Webauthn credential registration
+  authMethodPubKey?: string;
 }
 
 // pub struct JsonSignSessionKeyRequest {
