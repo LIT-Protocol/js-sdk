@@ -1,0 +1,36 @@
+span {
+    font-size: 20px;
+}
+
+.context-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.pkp-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.pkp-table thead tr {
+    background-color: #440098;
+    color: #7e95c4;
+    text-align: left;
+}
+
+.pkp-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.pkp-table tbody tr:nth-of-type(even) {
+    background-color: #8f49e4;
+}
+
+.pkp-table tbody tr:last-of-type {
+    border-bottom: 2px solid #762deb;
+}
