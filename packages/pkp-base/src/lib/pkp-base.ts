@@ -268,6 +268,8 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           },
         },
       };
+    } else {
+      throw new Error("Must provide auth sigs or session sigs");
     }
 
     // check if executeJsArgs has either code or ipfsId
