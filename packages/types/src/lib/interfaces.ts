@@ -218,7 +218,7 @@ export interface CustomNetwork {
  */
 export interface JsonExecutionRequest {
   // the authSig to use to authorize the user with the nodes
-  authSig: AuthSig;
+  authSig?: AuthSig;
 
   // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
   jsParams: any;

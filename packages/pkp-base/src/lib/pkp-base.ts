@@ -235,38 +235,40 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('controllerSessionSigs must be an object');
     }
 
-    // If authSig is not provided but sessionSigs are, use the first sessionSig as authSig. In executeJs, the sessionSigs will take priority.
-    let authSig = this.controllerAuthSig;
-    if (
-      !authSig &&
-      this.controllerSessionSigs &&
-      Object.values(this.controllerSessionSigs).length > 0
-    ) {
-      authSig = Object.values(
-        this.controllerSessionSigs
-      )[0] as unknown as AuthSig;
-    }
-
-    if (!authSig) {
-      return this.throwError('authSig is required');
-    }
-
-    const executeJsArgs: ExecuteJsProps = {
-      ...(this.litActionCode && { code: this.litActionCode }),
-      ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
-      authSig: authSig,
-      sessionSigs: this.controllerSessionSigs,
-      jsParams: {
-        ...{
-          toSign,
-          publicKey: this.uncompressedPubKey,
-          sigName,
+    let executeJsArgs: ExecuteJsProps;
+    if (!this.controllerAuthSig && this.controllerSessionSigs) {
+      executeJsArgs = {
+        ...(this.litActionCode && { code: this.litActionCode }),
+        ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
+        sessionSigs: this.controllerSessionSigs,
+        jsParams: {
+          ...{
+            toSign,
+            publicKey: this.uncompressedPubKey,
+            sigName,
+          },
+          ...{
+            ...this.litActionJsParams,
+          },
         },
-        ...{
-          ...this.litActionJsParams,
+      };
+    } else if (this.controllerAuthSig && !this.controllerSessionSigs){
+      executeJsArgs = {
+        ...(this.litActionCode && { code: this.litActionCode }),
+        ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
+        authSig: this.controllerAuthSig,
+        jsParams: {
+          ...{
+            toSign,
+            publicKey: this.uncompressedPubKey,
+            sigName,
+          },
+          ...{
+            ...this.litActionJsParams,
+          },
         },
-      },
-    };
+      };
+    }
 
     // check if executeJsArgs has either code or ipfsId
     if (!executeJsArgs.code && !executeJsArgs.ipfsId) {
