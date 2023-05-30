@@ -1,6 +1,6 @@
 export const accessControlConditions = {
-  address: '0x8b353Bb9E26F2c2B8155f377982537C39AD01A1B',
-  abi: [
+  "address": "0x8b353Bb9E26F2c2B8155f377982537C39AD01A1B",
+  "abi": [
     {
       inputs: [],
       stateMutability: 'nonpayable',

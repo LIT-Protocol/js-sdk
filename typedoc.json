@@ -7,6 +7,7 @@
     "./packages/bls-sdk/src/index.ts",
     "./packages/constants/src/index.ts",
     "./packages/contracts-sdk/src/index.ts",
+    "./packages/core/src/index.ts",
     "./packages/crypto/src/index.ts",
     "./packages/ecdsa-sdk/src/index.ts",
     "./packages/encryption/src/index.ts",

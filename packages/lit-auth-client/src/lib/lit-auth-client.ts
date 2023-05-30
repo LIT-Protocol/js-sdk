@@ -16,6 +16,7 @@ import DiscordProvider from './providers/DiscordProvider';
 import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 import { OtpProvider } from './providers/OtpProvider';
+import AppleProvider from './providers/AppleProvider';
 
 /**
  * Class that handles authentication through Lit login
@@ -37,6 +38,8 @@ export class LitAuthClient {
    * Map of providers
    */
   private providers: Map<string, BaseProvider>;
+  
+  private litOtpOptions: OtpProviderOptions | undefined;
 
   private litOtpOptions: OtpProviderOptions | undefined;
 
@@ -65,7 +68,7 @@ export class LitAuthClient {
         );
       }
 
-      if(options?.litOtpConfig){
+      if (options?.litOtpConfig) {
         this.litOtpOptions = options?.litOtpConfig;
       }
     }
@@ -114,6 +117,12 @@ export class LitAuthClient {
           ...(options as OAuthProviderOptions),
         }) as unknown as T;
         break;
+      case 'apple':
+        provider = new AppleProvider({
+          ...baseParams,
+          ...(options as OAuthProviderOptions),
+        }) as unknown as T;
+        break;
       case 'discord':
         provider = new DiscordProvider({
           ...baseParams,
@@ -132,11 +141,12 @@ export class LitAuthClient {
         }) as unknown as T;
         break;
       case `otp`:
-        provider = new OtpProvider({
-          ...baseParams,
-          ...(options as SignInWithOTPParams),
-        },
-        this.litOtpOptions
+        provider = new OtpProvider(
+          {
+            ...baseParams,
+            ...(options as SignInWithOTPParams),
+          },
+          this.litOtpOptions
         ) as unknown as T;
         break;
       default:

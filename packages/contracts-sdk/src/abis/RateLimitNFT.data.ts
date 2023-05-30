@@ -1,6 +1,6 @@
 export const rateLimitNft = {
-  address: '0x2D0f767eff47b44626832EcD2fda705eB9797c38',
-  abi: [
+  "address": "0x2D0f767eff47b44626832EcD2fda705eB9797c38",
+  "abi": [
     {
       inputs: [],
       stateMutability: 'nonpayable',
