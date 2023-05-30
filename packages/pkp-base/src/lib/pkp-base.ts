@@ -227,6 +227,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('controllerAuthSig or controllerSessionSigs is required');
     }
 
+    if (this.controllerAuthSig && this.controllerSessionSigs) {
+      throw new Error(
+        'controllerAuthSig and controllerSessionSigs both defined, can only use one authorization type'
+      );
+    }
+
     // If session sigs are provided, they must be an object
     if (
       this.controllerSessionSigs &&
@@ -235,42 +241,22 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('controllerSessionSigs must be an object');
     }
 
-    let executeJsArgs: ExecuteJsProps;
-    if (!this.controllerAuthSig && this.controllerSessionSigs) {
-      executeJsArgs = {
-        ...(this.litActionCode && { code: this.litActionCode }),
-        ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
-        sessionSigs: this.controllerSessionSigs,
-        jsParams: {
-          ...{
-            toSign,
-            publicKey: this.uncompressedPubKey,
-            sigName,
-          },
-          ...{
-            ...this.litActionJsParams,
-          },
+    let executeJsArgs: ExecuteJsProps = {
+      ...(this.litActionCode && { code: this.litActionCode }),
+      ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
+      sessionSigs: this.controllerSessionSigs,
+      authSig: this.controllerAuthSig,
+      jsParams: {
+        ...{
+          toSign,
+          publicKey: this.uncompressedPubKey,
+          sigName,
         },
-      };
-    } else if (this.controllerAuthSig && !this.controllerSessionSigs){
-      executeJsArgs = {
-        ...(this.litActionCode && { code: this.litActionCode }),
-        ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
-        authSig: this.controllerAuthSig,
-        jsParams: {
-          ...{
-            toSign,
-            publicKey: this.uncompressedPubKey,
-            sigName,
-          },
-          ...{
-            ...this.litActionJsParams,
-          },
+        ...{
+          ...this.litActionJsParams,
         },
-      };
-    } else {
-      throw new Error("Must provide auth sigs or session sigs");
-    }
+      },
+    };
 
     // check if executeJsArgs has either code or ipfsId
     if (!executeJsArgs.code && !executeJsArgs.ipfsId) {
