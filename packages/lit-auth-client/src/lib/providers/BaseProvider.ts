@@ -49,20 +49,19 @@ export abstract class BaseProvider {
    * Constrcuts a request for interfacing with relayer minting servers, based on the provider-specific implementation.
    * @returns {Promise<RegistrationMethod>} Registraction Method object that contains metdata used for registering authentication methods.
    */
-  abstract getRelayerRequest(): Promise<RelayerRequest>;
+  protected abstract getRelayerRequest(): Promise<RelayerRequest>;
 
   /**
    * Mint a new PKP for the given auth method through the relay server
-   *
+   * Internally calls {@link getRelayerRequest} which requires {@link authenticate} to be called prior.
    * @param {AuthMethod} authMethod
    * @param {AuthMethodType} authMethod.authMethodType - Auth method type
    * @param {string} authMethod.accessToken - Auth method access token
    *
    * @returns {Promise<string>} - Mint transaction hash
    */
-  public async mintPKPThroughRelayer(
-    registrationMethod: RelayerRequest
-  ): Promise<string> {
+  public async mintPKPThroughRelayer(): Promise<string> {
+    let registrationMethod = await this.getRelayerRequest();
     const mintParams = this.prepareRelayBody(registrationMethod);
     const mintRes = await this.relay.mintPKP(
       registrationMethod.authMethodType,
@@ -76,14 +75,13 @@ export abstract class BaseProvider {
 
   /**
    * Fetch PKPs associated with given auth method from relay server
-   *
+   * Internally calls {@link getRelayerRequest} which requires {@link authenticate} to be called prior.
    * @param {AuthMethod} authMethod - Auth method object
    *
    * @returns {Promise<IRelayPKP[]>} - Array of PKPs
    */
-  public async fetchPKPsThroughRelayer(
-    registrationMethod: RelayerRequest
-  ): Promise<IRelayPKP[]> {
+  public async fetchPKPsThroughRelayer(): Promise<IRelayPKP[]> {
+    let registrationMethod = await this.getRelayerRequest();
     const fetchParams = this.prepareRelayBody(registrationMethod);
     const fetchRes = await this.relay.fetchPKPs(
       registrationMethod.authMethodType,
