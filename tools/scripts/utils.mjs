@@ -606,3 +606,62 @@ export function findArg(args, flag) {
     process.exit();
   }
 }
+
+export const getFlag = (flag = '--foo') => {
+  try {
+    const args = process.argv.slice(2);
+
+    const index = args.findIndex((arg) => arg.startsWith(flag));
+
+    const value = args[index].split('=')[1];
+
+    if (!value) {
+      redLog(`❌ ${flag} value cannot be empty.`);
+      process.exit();
+    }
+
+    return value;
+  } catch (e) {
+    redLog(`❌ either ${flag} or its value not found`);
+    // throw new Error(e);
+  }
+};
+
+/**
+ * Function to get all directories in a path and check if any directory is empty.
+ * @param {string} dirPath - The path to the directory.
+ * @returns {Array<string>} - List of empty directories.
+ *
+ * Usage:
+ * (async () => {
+ *   const dirPath = '/path/to/your/directory';
+ *   const emptyDirs = await checkEmptyDirectories(dirPath);
+ *
+ *   if (emptyDirs.length > 0) {
+ *     emptyDirs.forEach(dir => {
+ *       console.log(`Directory ${dir} is empty. Please delete before building.`);
+ *     });
+ *   } else {
+ *     console.log("No empty directories found.");
+ *   }
+ * })();
+ */
+export async function checkEmptyDirectories(dirPath) {
+  const isDirectory = (source) => fs.lstatSync(source).isDirectory();
+  const getDirectories = (source) =>
+    fs
+      .readdirSync(source)
+      .map((name) => path.join(source, name))
+      .filter(isDirectory);
+
+  const dirs = getDirectories(dirPath);
+
+  const emptyDirs = [];
+  for (const dir of dirs) {
+    if (fs.readdirSync(dir).length === 0) {
+      emptyDirs.push(dir);
+    }
+  }
+
+  return emptyDirs;
+}
