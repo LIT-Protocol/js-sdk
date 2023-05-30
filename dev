@@ -3,10 +3,10 @@
 # yarn build:packages
 
 packages=(
-  # "constants"
+  "constants"
   "lit-node-client"
-  # "lit-auth-client"
-  # "types"
+  "lit-auth-client"
+  "types"
 )
 
 # then in your project, do `npm link @lit-protocol/lit-node-client`
