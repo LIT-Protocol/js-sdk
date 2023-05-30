@@ -100,7 +100,7 @@ export default class EthWalletProvider extends BaseProvider {
    * Constructs a {@link RelayerRequest} from the signature, {@link authenticate} must be called prior.
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
-  public override async getRelayerRequest(): Promise<RelayerRequest> {
+  protected override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this._authSig) {
       throw new Error('AutHSig not defined, did you call authenticate first');
     }

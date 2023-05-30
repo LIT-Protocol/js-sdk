@@ -102,7 +102,7 @@ export default class DiscordProvider extends BaseProvider {
    * Constructs a {@link RelayerRequest} from the access token, {@link authenticate} must be called prior.
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
-  public override async getRelayerRequest(): Promise<RelayerRequest> {
+  protected override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this._accessToken) {
       throw new Error(
         'Access token not defined, did you authenticate before calling validate?'

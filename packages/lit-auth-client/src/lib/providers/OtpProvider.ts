@@ -10,6 +10,7 @@ import {
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
 import { OtpProviderOptions } from '@lit-protocol/types';
+import { parseJWT } from '../utils';
 
 export class OtpProvider extends BaseProvider {
   private _params: SignInWithOTPParams;
@@ -56,7 +57,7 @@ export class OtpProvider extends BaseProvider {
    * Constructs a {@link RelayerRequest} from the access token, {@link authenticate} must be called prior.
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
-  public override async getRelayerRequest(): Promise<RelayerRequest> {
+  protected override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this._accessToken) {
       throw new Error(
         'Access token not defined, did you authenticate before calling validate?'
@@ -67,7 +68,7 @@ export class OtpProvider extends BaseProvider {
       throw e;
     });
     let userId = resp.userId;
-    let payload = this.#parseJWT(this._accessToken);
+    let payload = parseJWT(this._accessToken);
     let audience = payload['aud'];
     return {
       authMethodType: 7,
@@ -189,23 +190,5 @@ export class OtpProvider extends BaseProvider {
     const respBody = await res.json();
 
     return respBody as OtpVerificationPayload;
-  }
-
-  /**
-   *
-   * @param jwt token to parse
-   * @returns {Record<string, unknown>}- userId contained within the token message
-   */
-  #parseJWT(jwt: string): Record<string, unknown> {
-    let parts = jwt.split('.');
-    if (parts.length !== 3) {
-      throw new Error('Invalid token length');
-    }
-    let body = Buffer.from(parts[1], 'base64');
-    let parsedBody: Record<string, unknown> = JSON.parse(
-      body.toString('ascii')
-    );
-
-    return parsedBody;
   }
 }
