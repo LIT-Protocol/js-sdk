@@ -3,6 +3,7 @@ import { BaseProvider } from './lib/providers/BaseProvider';
 import DiscordProvider from './lib/providers/DiscordProvider';
 import EthWalletProvider from './lib/providers/EthWalletProvider';
 import GoogleProvider from './lib/providers/GoogleProvider';
+import AppleProvider from './lib/providers/AppleProvider';
 import WebAuthnProvider from './lib/providers/WebAuthnProvider';
 import { isSignInRedirect, getProviderFromUrl } from './lib/utils';
 
@@ -22,6 +23,7 @@ export {
   DiscordProvider,
   EthWalletProvider,
   GoogleProvider,
+  AppleProvider,
   WebAuthnProvider,
   isSignInRedirect,
   getProviderFromUrl,

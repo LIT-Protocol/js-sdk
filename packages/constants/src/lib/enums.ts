@@ -29,6 +29,7 @@ export enum AuthMethodType {
   Google,
   GoogleJwt,
   OTP,
+  AppleJwt,
 }
 
 /**
@@ -40,4 +41,5 @@ export enum ProviderType {
   EthWallet = 'ethwallet',
   WebAuthn = 'webauthn',
   Otp = 'otp',
+  Apple = 'apple',
 }

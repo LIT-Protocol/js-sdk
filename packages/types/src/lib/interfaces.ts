@@ -1225,6 +1225,10 @@ export interface LoginUrlParams {
 
 export interface BaseAuthenticateOptions {}
 
+export interface OtpAuthenticateOptions {
+  code: string; 
+}
+
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
    * Ethereum wallet address

@@ -163,6 +163,8 @@ describe('Zip and encrypt string then decrypt zip', () => {
         chain: 'ethereum',
       });
 
+      console.log("savedParams.zip.symmetricKey:", savedParams.zip.symmetricKey)
+
     savedParams.encryptedSymmetricKey = encryptedSymmetricKey;
 
     expect(savedParams.encryptedSymmetricKey).to.be.an('Uint8Array');
