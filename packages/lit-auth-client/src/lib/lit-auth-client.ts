@@ -39,6 +39,8 @@ export class LitAuthClient {
    */
   private providers: Map<string, BaseProvider>;
 
+  private litOtpOptions: OtpProviderOptions | undefined;
+
 
   /**
    * Create a LitAuthClient instance
