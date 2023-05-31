@@ -94,6 +94,15 @@ export class PKPCosmosWallet
   }
 
   /**
+   * Return address
+   *
+   * @returns {Promise<string>} - Cosmos address
+   */
+  override getAddress(): Promise<string> {
+    return Promise.resolve(this.address);
+  }
+
+  /**
    * Returns account data, including the algorithm used, the address, and the compressed public key
    */
   public async getAccounts(): Promise<readonly AccountData[]> {

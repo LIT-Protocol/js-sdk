@@ -216,9 +216,9 @@ export interface CustomNetwork {
     pub js_params: Option<serde_json::Value>,
 }
  */
-export interface JsonExecutionRequest {
-  // the authSig to use to authorize the user with the nodes
-  authSig: AuthSig;
+export interface BaseJsonExecutionRequest {
+  // // the authSig to use to authorize the user with the nodes
+  // authSig?: AuthSig;
 
   // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
   jsParams: any;
@@ -229,8 +229,8 @@ export interface JsonExecutionRequest {
   // The IPFS ID of some JS code to run on the nodes
   ipfsId?: string;
 
-  // the session signatures to use to authorize the user with the nodes
-  sessionSigs?: any;
+  // // the session signatures to use to authorize the user with the nodes
+  // sessionSigs?: any;
 
   // whether to run this on a single node or many
   targetNodeRange?: number;
@@ -238,6 +238,18 @@ export interface JsonExecutionRequest {
   // auth methods to resolve
   authMethods?: Array<Object>;
 }
+
+export interface WithAuthSig extends BaseJsonExecutionRequest {
+  authSig: AuthSig;
+  sessionSigs?: any;
+}
+
+export interface WithSessionSigs extends BaseJsonExecutionRequest {
+  sessionSigs: any;
+  authSig?: AuthSig;
+}
+
+export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
 
 /**
  * Struct in rust
@@ -367,10 +379,10 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
   toDecrypt: string;
 }
 
-export interface ExecuteJsProps extends JsonExecutionRequest {
+export type ExecuteJsProps = JsonExecutionRequest & {
   // A boolean that defines if debug info will be returned or not.
   debug?: boolean;
-}
+};
 
 export interface JsonSaveEncryptionKeyRequest {
   accessControlConditions?: AccessControlConditions;
@@ -974,11 +986,6 @@ export interface OtpSessionResult {
   status?: string;
 }
 
-export interface OtpVerificationPayload {
-  userId: string;
-  status: boolean;
-}
-
 export interface LoginUrlParams {
   /**
    * Auth method name
@@ -1228,7 +1235,7 @@ export interface LoginUrlParams {
 export interface BaseAuthenticateOptions {}
 
 export interface OtpAuthenticateOptions {
-  code: string; 
+  code: string;
 }
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {

@@ -27,6 +27,7 @@
     "pkp-client": "packages/pkp-client",
     "pkp-cosmos": "packages/pkp-cosmos",
     "pkp-ethers": "packages/pkp-ethers",
+    "pkp-walletconnect": "packages/pkp-walletconnect",
     "react": "apps/react",
     "types": "packages/types",
     "uint8arrays": "packages/uint8arrays"

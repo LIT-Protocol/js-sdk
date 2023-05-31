@@ -99,7 +99,7 @@ export class PKPEthersWallet
     return this.uncompressedPubKey;
   }
 
-  getAddress(): Promise<string> {
+  override getAddress(): Promise<string> {
     const addr = computeAddress(this.uncompressedPubKeyBuffer);
     return Promise.resolve(addr);
   }
