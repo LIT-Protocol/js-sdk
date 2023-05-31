@@ -67,19 +67,26 @@ export class PKPWalletConnect {
   public async initWalletConnect(
     params: InitWalletConnectParams
   ): Promise<void> {
+    if (!params.projectId) {
+      throw new Error('WalletConnect project ID is required');
+    }
+
     let coreOpts: CoreTypes.Options = {
       projectId: params.projectId,
       relayUrl: params.relayUrl || DEFAULT_RELAY_URL,
+      ...(this.debug && { logger: 'debug' }),
     };
-    if (this.debug) {
-      coreOpts = { ...coreOpts, logger: 'debug' };
-    }
-    const core = new Core(coreOpts);
+
+    // we might have a version mismatch here due to multiple versions of WalletConnect
+    // libs `@walletconnect/types` hence temp fix with `any` for now. but above `coreOpts`
+    // type is enforced
+    const core = new Core(coreOpts as any);
+
     this.client = await Web3Wallet.init({
       core,
       metadata: params.metadata,
       name: params.name,
-    } as Web3WalletTypes.Options);
+    } as unknown as Web3WalletTypes.Options);
   }
 
   /**
