@@ -7,6 +7,7 @@ import { log } from '@lit-protocol/misc';
 import { PKP_CLIENT_SUPPORTED_CHAINS } from '@lit-protocol/constants';
 
 export class PKPClient {
+  public readonly pkpPubKey: string;
   private _wallets: Map<string, PKPBase> = new Map();
 
   /**
@@ -16,6 +17,7 @@ export class PKPClient {
    * @param {PKPClientProp} prop - The properties required for the PKPClient instance.
    */
   constructor(prop: PKPClientProp) {
+    this.pkpPubKey = prop.pkpPubKey;
     this._registerSupportedWallets(prop);
   }
 

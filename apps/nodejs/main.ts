@@ -24,6 +24,7 @@ import * as pkpBase from '@lit-protocol/pkp-base';
 import * as pkpClient from '@lit-protocol/pkp-client';
 import * as pkpCosmos from '@lit-protocol/pkp-cosmos';
 import * as pkpEthers from '@lit-protocol/pkp-ethers';
+import * as pkpWalletconnect from '@lit-protocol/pkp-walletconnect';
 import * as types from '@lit-protocol/types';
 import * as uint8arrays from '@lit-protocol/uint8arrays';
 
@@ -48,6 +49,7 @@ console.log("pkpBase:", hasItems(pkpBase));
 console.log("pkpClient:", hasItems(pkpClient));
 console.log("pkpCosmos:", hasItems(pkpCosmos));
 console.log("pkpEthers:", hasItems(pkpEthers));
+console.log("pkpWalletconnect:", hasItems(pkpWalletconnect));
 console.log("types:", hasItems(types));
 console.log("uint8arrays:", hasItems(uint8arrays));
 

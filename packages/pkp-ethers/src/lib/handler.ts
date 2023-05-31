@@ -396,3 +396,7 @@ export const ethRequestHandler = async <T = ETHSignature>({
     throw new Error(e);
   }
 };
+
+export const isEthRequest = (method: string): boolean => {
+  return methodHandlers.hasOwnProperty(method);
+};

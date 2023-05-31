@@ -1,11 +1,16 @@
 #!/bin/bash
 
-# yarn build:packages
+yarn build:packages
 
 packages=(
   "constants"
   "lit-node-client"
   "lit-auth-client"
+  "pkp-base"
+  "pkp-cosmos"
+  "pkp-ethers"
+  "pkp-client"
+  "pkp-walletconnect"
   "types"
 )
 
