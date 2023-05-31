@@ -116,6 +116,10 @@ export class LitNodeClientNodeJs extends LitCore {
    *
    */
   getLitActionRequestBody = (params: ExecuteJsProps): JsonExecutionRequest => {
+    if (!params.authSig) {
+      throw new Error('authSig is required');
+    }
+
     const reqBody: JsonExecutionRequest = {
       authSig: params.authSig,
       jsParams: convertLitActionsParams(params.jsParams),
@@ -467,6 +471,10 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- execute
     const urlWithPath = `${url}/web/execute`;
+
+    if (!authSig) {
+      throw new Error('authSig is required');
+    }
 
     const data: JsonExecutionRequest = {
       code,

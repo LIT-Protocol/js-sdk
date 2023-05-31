@@ -227,6 +227,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('controllerAuthSig or controllerSessionSigs is required');
     }
 
+    if (this.controllerAuthSig && this.controllerSessionSigs) {
+      throw new Error(
+        'controllerAuthSig and controllerSessionSigs both defined, can only use one authorization type'
+      );
+    }
+
     // If session sigs are provided, they must be an object
     if (
       this.controllerSessionSigs &&
@@ -235,27 +241,11 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('controllerSessionSigs must be an object');
     }
 
-    // If authSig is not provided but sessionSigs are, use the first sessionSig as authSig. In executeJs, the sessionSigs will take priority.
-    let authSig = this.controllerAuthSig;
-    if (
-      !authSig &&
-      this.controllerSessionSigs &&
-      Object.values(this.controllerSessionSigs).length > 0
-    ) {
-      authSig = Object.values(
-        this.controllerSessionSigs
-      )[0] as unknown as AuthSig;
-    }
-
-    if (!authSig) {
-      return this.throwError('authSig is required');
-    }
-
-    const executeJsArgs: ExecuteJsProps = {
+    let executeJsArgs: ExecuteJsProps = {
       ...(this.litActionCode && { code: this.litActionCode }),
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
-      authSig: authSig,
       sessionSigs: this.controllerSessionSigs,
+      authSig: this.controllerAuthSig,
       jsParams: {
         ...{
           toSign,
