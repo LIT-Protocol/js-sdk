@@ -92,7 +92,7 @@ describe('Tx Handling Wrapper', () => {
 
       it('should be a string', async () => {
         const signature = await processTx(
-          expect.getState().currentTestName,
+          expect.getState().currentTestName || 'Unknown Name',
           await signTypedData(pkpEthersWallet, msgParams)
         );
 
@@ -103,7 +103,7 @@ describe('Tx Handling Wrapper', () => {
       describe('[requestHandler] Signed typed data', () => {
         it('(ethers) should recover the correct address using verifyTypedData', async () => {
           const signature = await processTx(
-            expect.getState().currentTestName,
+            expect.getState().currentTestName || 'Unknown Name',
             await ethRequestHandler<string>({
               signer: pkpEthersWallet,
               payload: {
@@ -204,7 +204,7 @@ describe('Tx Handling Wrapper', () => {
 
         it('V3 should sign the typed data', async () => {
           const signature = await processTx(
-            expect.getState().currentTestName,
+            expect.getState().currentTestName || 'Unknown Name',
             await ethRequestHandler<string>({
               signer: pkpEthersWallet,
               payload,
@@ -291,7 +291,7 @@ describe('Tx Handling Wrapper', () => {
 
       it('V4 should sign the typed data', async () => {
         const signature = await processTx(
-          expect.getState().currentTestName,
+          expect.getState().currentTestName || 'Unknown Name',
           await ethRequestHandler<string>({
             signer: pkpEthersWallet,
             payload,
@@ -333,7 +333,7 @@ describe('Tx Handling Wrapper', () => {
 
       it('should sign the message', async () => {
         const signature = await processTx(
-          expect.getState().currentTestName,
+          expect.getState().currentTestName || 'Unknown Name',
           await ethRequestHandler<string>({
             signer: pkpEthersWallet,
             payload,
@@ -367,7 +367,7 @@ describe('Tx Handling Wrapper', () => {
 
       it('should sign the message', async () => {
         const signature = await processTx(
-          expect.getState().currentTestName,
+          expect.getState().currentTestName || 'Unknown Name',
           await ethRequestHandler<string>({
             signer: pkpEthersWallet,
             payload,
@@ -444,7 +444,7 @@ describe('Tx Handling Wrapper', () => {
         };
 
         const txRes = await processTx(
-          expect.getState().currentTestName,
+          expect.getState().currentTestName || 'Unknown Name',
           await ethRequestHandler<Transaction>({
             signer: pkpEthersWallet,
             payload,
@@ -483,7 +483,7 @@ describe('Tx Handling Wrapper', () => {
         };
 
         const signedTx = await processTx(
-          expect.getState().currentTestName,
+          expect.getState().currentTestName || 'Unknown Name',
           await ethRequestHandler<string>({
             signer: pkpEthersWallet,
             payload,

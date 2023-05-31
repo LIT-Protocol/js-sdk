@@ -21,7 +21,7 @@ describe('Lit Actions', () => {
 
   it('lit action log should return hello world', async () => {
     const res = await processTx(
-      expect.getState().currentTestName,
+      expect.getState().currentTestName || 'Unknown Name',
       await client.executeJs({
         authSig: LITCONFIG.CONTROLLER_AUTHSIG,
         code: `(async () => {
@@ -38,7 +38,7 @@ describe('Lit Actions', () => {
 
   it('lit action response should return json {hello: "world"}', async () => {
     const res = await processTx(
-      expect.getState().currentTestName,
+      expect.getState().currentTestName || 'Unknown Name',
       await client.executeJs({
         authSig: LITCONFIG.CONTROLLER_AUTHSIG,
         code: `(async () => {
@@ -57,7 +57,7 @@ describe('Lit Actions', () => {
 
   it('lit action should sign a message', async () => {
     const res = await processTx(
-      expect.getState().currentTestName,
+      expect.getState().currentTestName || 'Unknown Name',
       await client.executeJs({
         authSig: LITCONFIG.CONTROLLER_AUTHSIG,
         code: `(async () => {

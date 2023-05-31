@@ -1185,10 +1185,7 @@ async function setupLocalDevFunc() {
     }
 
     packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
-
-    const typings = distPackageJson.typings || distPackageJson.types;
-    
-    packageJson.typings = prefixPathWithDir(typings, 'dist');
+    // packageJson.typings = prefixPathWithDir(distPackageJson.types, 'dist');
 
     greenLog(`Updating ${packageJsonPath}...`);
     greenLog(`packageJson.main: ${packageJson.main}`);

@@ -121,10 +121,15 @@
     "@nrwl/js": "16.2.2",
     "@nx/cypress": "16.2.2",
     "@nx/eslint-plugin": "16.2.2",
+    "@nx/jest": "16.2.2",
     "@nx/js": "16.2.2",
     "@nx/linter": "16.2.2",
+    "@nx/next": "16.2.2",
+    "@nx/node": "16.2.2",
+    "@nx/plugin": "16.2.2",
     "@nx/react": "16.2.2",
     "@nx/web": "16.2.2",
+    "@nx/webpack": "^16.2.2",
     "@swc/core": "^1.2.241",
     "@synthetixio/synpress": "^2.3.3",
     "@types/jest": "29.4.4",
@@ -166,11 +171,7 @@
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",
     "typedoc": "^0.23.10",
-    "typescript": "~4.7.2",
-    "@nx/jest": "16.2.2",
-    "@nx/plugin": "16.2.2",
-    "@nx/node": "16.2.2",
-    "@nx/next": "16.2.2"
+    "typescript": "~4.7.2"
   },
   "workspaces": [
     "packages/*"
