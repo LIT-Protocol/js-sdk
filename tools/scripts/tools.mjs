@@ -180,11 +180,11 @@ async function createFunc() {
 
     greenLog('Adding project to nx workspace');
 
-    const workspaceJson = await readJsonFile(`workspace.json`);
+    const workspaceJson = await readJsonFile(`workspace_old.json`);
 
     workspaceJson.projects[APP_NAME] = INSTALL_PATH;
 
-    await writeFile(`workspace.json`, JSON.stringify(workspaceJson, null, 2));
+    await writeFile(`workspace_old.json`, JSON.stringify(workspaceJson, null, 2));
 
     greenLog('✅ NX Build Done! Post Build in progress...');
   }
@@ -280,7 +280,7 @@ async function testFunc() {
 
     // Read the workspace configuration file
     const workspaceConfig = JSON.parse(
-      fs.readFileSync('./workspace.json', 'utf-8')
+      fs.readFileSync('./workspace_old.json', 'utf-8')
     );
 
     // remove all projects that are in the apps folder

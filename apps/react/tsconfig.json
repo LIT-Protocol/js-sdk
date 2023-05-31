@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "inlineSourceMap": true,
     "jsx": "react-jsx",
     "allowJs": true,
     "esModuleInterop": true,
