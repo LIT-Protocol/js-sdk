@@ -1,16 +1,15 @@
 {
-    "name": "demo-email-sms-auth",
-    "$schema": "../../node_modules/nx/schemas/project-schema.json",
-    "sourceRoot": "apps/demo-email-sms-auth/src",
-    "projectType": "application",
-    "targets": {
-      "serve":{
-        "executor": "nx:run-commands",
-        "options": {
-          "command": "cd apps/demo-email-sms-auth && yarn start"
-        }
+  "name": "demo-email-sms-auth",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/demo-email-sms-auth/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd apps/demo-email-sms-auth && yarn start"
       }
-    },
-    "tags": []
-  }
-  
+    }
+  },
+  "tags": []
+}
