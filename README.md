@@ -167,7 +167,7 @@ yarn tools --watch --target <package-name>
 ## Creating a new library
 
 By default, NX provides a command to generate a library
-`nx generate @nrwl/js:library`. However, it doesn't have an esbuild built-in so that we've created a custom tool that modify the build commands.
+`nx generate @nx/js:library`. However, it doesn't have an esbuild built-in so that we've created a custom tool that modify the build commands.
 
 ```js
 yarn gen:lib <package-name> <tag>

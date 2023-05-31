@@ -11,7 +11,7 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/uint8arrays",
@@ -38,8 +38,8 @@
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/uint8arrays"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/uint8arrays"],
       "options": {
         "jestConfig": "packages/uint8arrays/jest.config.ts",
         "passWithNoTests": true

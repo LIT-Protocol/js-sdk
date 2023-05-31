@@ -2,13 +2,14 @@
 export default {
   displayName: 'lit-node-client-nodejs',
   preset: '../../jest.preset.js',
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.spec.json',
-    },
-  },
+  globals: {},
   transform: {
-    '^.+\\.[t]s$': 'ts-jest',
+    '^.+\\.[t]s$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+      },
+    ],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/lit-node-client-nodejs',

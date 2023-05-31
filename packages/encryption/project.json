@@ -1,6 +1,7 @@
 {
   "name": "encryption",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+
   "sourceRoot": "packages/encryption/src",
   "projectType": "library",
   "targets": {
@@ -11,7 +12,7 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/encryption",
@@ -38,23 +39,23 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/encryption/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/encryption"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/encryption"],
       "options": {
         "jestConfig": "packages/encryption/jest.config.ts",
         "passWithNoTests": true
       }
     },
     "testWatch": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/encryption"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/encryption"],
       "options": {
         "jestConfig": "packages/encryption/jest.config.ts",
         "passWithNoTests": true,
