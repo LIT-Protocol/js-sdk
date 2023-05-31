@@ -22,6 +22,7 @@ import * as LitJsSdk_pkpBase from 'dist/packages/pkp-base';
 import * as LitJsSdk_pkpClient from 'dist/packages/pkp-client';
 import * as LitJsSdk_pkpCosmos from 'dist/packages/pkp-cosmos';
 import * as LitJsSdk_pkpEthers from 'dist/packages/pkp-ethers';
+import * as LitJsSdk_pkpWalletconnect from 'dist/packages/pkp-walletconnect';
 import * as LitJsSdk_types from 'dist/packages/types';
 import * as LitJsSdk_uint8arrays from 'dist/packages/uint8arrays';
 
@@ -48,6 +49,7 @@ declare global {
     LitJsSdk_pkpClient: any;
     LitJsSdk_pkpCosmos: any;
     LitJsSdk_pkpEthers: any;
+    LitJsSdk_pkpWalletconnect: any;
     LitJsSdk_types: any;
     LitJsSdk_uint8arrays: any;
   }
@@ -1563,6 +1565,78 @@ export function App() {
             var template = `
             <div class="cat">
                 <h1>LitJsSdk_pkpEthers has ${entries.length} functions</h1>
+                    <ul>
+                        ${ lis }
+                    </ul>
+                </div>
+            `;
+            root.insertAdjacentHTML('beforeend', template);
+        });
+    
+    
+
+    
+    
+        if(typeof LitJsSdk_pkpWalletconnect === 'undefined') {
+            console.error("LitJsSdk_pkpWalletconnect:", LitJsSdk_pkpWalletconnect);
+        }else{
+            console.warn("LitJsSdk_pkpWalletconnect:", LitJsSdk_pkpWalletconnect);
+            window.LitJsSdk_pkpWalletconnect = LitJsSdk_pkpWalletconnect;
+        }
+        window.addEventListener('load', function() {
+
+            var root = document.getElementById('root');
+            var result = document.getElementById('result');
+            var entries = Object.entries(LitJsSdk_pkpWalletconnect);
+            var lis = entries.map(([key, value]) => `
+            <li>
+                <div id="LitJsSdk_pkpWalletconnect_${key}" class="key" onClick="(async (e) => {
+                    var fn = LitJsSdk_pkpWalletconnect['${key}'];
+                    var fnType = typeof fn;
+                    console.warn('[${key}] is type of [' + fnType + ']');
+
+                    if ( fnType === 'string' ) return;
+
+                    if( fnType === 'function' ){
+                        try{
+                            console.log('params:', globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
+                            res = JSON.stringify(res, null, 2);
+                            result.innerText = res;
+                            console.log(res);
+                        }catch(e){
+                            console.error('Please set the [params] variable in the console then click again');
+                            console.log(e);
+                        }
+                        return;
+                    }
+
+                    if( fnType === 'object' ){
+                        var res = await fn;
+                        window.output = res;
+                        res = JSON.stringify(res, null, 2);
+                        result.innerText = res;
+                        console.log(res);
+                        return;
+                    }
+                    
+                    
+                })();">${key}</div>
+                <pre class="code">
+<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                </pre>
+            </li>`);
+            lis = lis.join(' ');
+            var template = `
+            <div class="cat">
+                <h1>LitJsSdk_pkpWalletconnect has ${entries.length} functions</h1>
                     <ul>
                         ${ lis }
                     </ul>

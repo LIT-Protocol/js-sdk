@@ -1,0 +1,58 @@
+{
+  "name": "pkp-walletconnect",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/pkp-walletconnect/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target pkp-walletconnect"
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/pkp-walletconnect",
+        "main": "packages/pkp-walletconnect/src/index.ts",
+        "tsConfig": "packages/pkp-walletconnect/tsconfig.lib.json",
+        "assets": ["packages/pkp-walletconnect/*.md"]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_pkpWalletconnect",
+        "outfile": "dist/packages/pkp-walletconnect-vanilla/pkp-walletconnect.js",
+        "entryPoints": ["./packages/pkp-walletconnect/src/index.ts"],
+        "define": {
+          "process.env.NODE_DEBUG": "false",
+          "global": "window"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/pkp-walletconnect/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/pkp-walletconnect"],
+      "options": {
+        "jestConfig": "packages/pkp-walletconnect/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

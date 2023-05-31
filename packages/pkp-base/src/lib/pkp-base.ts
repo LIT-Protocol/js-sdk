@@ -189,6 +189,17 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   }
 
   /**
+   * Base method to be overridden by subclasses.
+   *
+   * @returns {Promise<string>} - Address associated with concrete type of PKPBase
+   */
+  getAddress(): Promise<string> {
+    return Promise.reject(
+      new Error('getAddress not implemented. Please use a subclass of PKPBase.')
+    );
+  }
+
+  /**
    * Initializes the PKPBase instance by connecting to the LIT node.
    */
   async init(): Promise<void | never> {

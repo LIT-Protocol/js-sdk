@@ -1,0 +1,17 @@
+{
+  "name": "demo-pkp-walletconnect-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@lit-protocol/pkp-client": "file:../../packages/pkp-client",
+    "@lit-protocol/pkp-walletconnect": "file:../../packages/pkp-walletconnect"
+  }
+}
