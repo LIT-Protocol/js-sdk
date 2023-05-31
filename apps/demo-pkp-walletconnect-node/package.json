@@ -11,7 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@lit-protocol/pkp-client": "file:../../packages/pkp-client",
-    "@lit-protocol/pkp-walletconnect": "file:../../packages/pkp-walletconnect"
+    "@lit-protocol/pkp-client": "^2.2.20",
+    "@lit-protocol/pkp-walletconnect": "^2.2.20",
+    "lokijs": "^1.5.12"
   }
 }
