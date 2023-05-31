@@ -238,6 +238,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('controllerAuthSig or controllerSessionSigs is required');
     }
 
+    if (this.controllerAuthSig && this.controllerSessionSigs) {
+      throw new Error(
+        'controllerAuthSig and controllerSessionSigs both defined, can only use one authorization type'
+      );
+    }
+
     // If session sigs are provided, they must be an object
     if (
       this.controllerSessionSigs &&
@@ -249,8 +255,8 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     const executeJsArgs: ExecuteJsProps = {
       ...(this.litActionCode && { code: this.litActionCode }),
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
-      authSig: this.controllerAuthSig,
       sessionSigs: this.controllerSessionSigs,
+      authSig: this.controllerAuthSig,
       jsParams: {
         ...{
           toSign,

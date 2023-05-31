@@ -504,77 +504,36 @@ async function buildFunc() {
             Usage: node tools/scripts/tools.mjs --build --packages [option]
 
                 [option]: the option to run
-                    --async: build packages in sequential
             `,
         true
       );
     }
 
-    if (MODE === '--async') {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    await childRunCommand(`yarn tools --match-versions`);
 
-      const packages = await listDirsRecursive('./packages', false);
-      let pkgNames = packages.map((item) => item.replace('packages/', ''));
+    const ignoreList = (await listDirsRecursive('./apps', false))
+      .map((item) => item.replace('apps/', ''))
+      .join(',');
 
-      const orderJson = {};
+    const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
 
-      (await readJsonFile('./lit-build.config.json')).build.order.forEach(
-        (item, i) => {
-          orderJson[item] = i;
-        }
-      );
+    spawnListener(command, {
+      onDone: () => {
+        console.log('Building UMD packages');
 
-      pkgNames = customSort(pkgNames, orderJson);
+        // then run vanilla build
+        const command = `yarn nx run-many --target=_buildWeb --exclude=${ignoreList}`;
 
-      console.log(pkgNames);
+        spawnListener(command, {
+          onDone: async () => {
+            console.log("Done!");
+            await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
+            exit();
+          }
+        })
+      },
+    });
 
-      for (let i = 0; i < pkgNames.length; i++) {
-        let name = pkgNames[i];
-
-        if (i < pkgNames.length - 1) {
-          name = name + ' --skip';
-        }
-
-        await childRunCommand(`yarn build:target ${name}`);
-      }
-
-      await childRunCommand(`yarn postBuild:mapDepsToDist`);
-      await childRunCommand(`yarn gen:readme`);
-      exit();
-    } else {
-      await childRunCommand(`yarn tools --match-versions`);
-
-      const ignoreList = (await listDirsRecursive('./apps', false))
-        .map((item) => item.replace('apps/', ''))
-        .join(',');
-
-      const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
-
-      spawnListener(command, {
-        onDone: () => {
-          console.log('Done!');
-          exit();
-        },
-      });
-    }
-
-    if (BUILD_TYPE === '--apps') {
-      redLog('not implemented yet');
-      // spawnListener('yarn build:apps', {
-      //     onDone: () => {
-      //         console.log("Done!");
-      //     }
-      // });
-    }
-
-    if (BUILD_TYPE === '--all') {
-      redLog('not implemented yet');
-      // spawnListener('yarn build:all', {
-      //     onDone: () => {
-      //         console.log("Done!");
-      //     }
-      // });
-    }
   }
 }
 
