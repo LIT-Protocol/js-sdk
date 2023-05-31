@@ -71,6 +71,7 @@ export async function runCommand(command) {
     exec(command, (error, stdout, stderr) => {
       if (error) {
         reject(error);
+        console.log("error:", error);
         return;
       }
       resolve(stdout.trim());
@@ -424,6 +425,7 @@ export const replaceFileContent = async (path, oldContent, newContent) => {
  * 2. prefixPathWithDir('src/index.js', 'components') => './components/src/index.js'
  */
 export const prefixPathWithDir = (path, dirName) => {
+
   if (path.slice(0, 2) === './') {
     return `./${dirName}/${path.slice(2)}`;
   } else {

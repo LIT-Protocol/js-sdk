@@ -37,6 +37,21 @@ const build = async (name) => {
   greenLog('Building Tsc...');
   await runCommand(`yarn nx run ${name}:_buildTsc`);
 
+
+  greenLog('Polyfilling...');
+  await childRunCommand(`yarn tools --polyfills ${name}`);
+
+  await childRunCommand(`yarn tools postBuildIndividual --target=${name}`);
+
+  // if (!skipGen) {
+  //   greenLog('...mapping dist package name to package.json name');
+  //   await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
+  // }
+};
+
+const buildVanilla = async (name) => {
+  greenLog('🏗 Building vanilla project: ' + name);
+
   greenLog('Building Vanilla...');
   try{
     await runCommand(`yarn nx run ${name}:_buildWeb`);
@@ -44,27 +59,10 @@ const build = async (name) => {
     redLog('❌ Vanilla build failed, skipping...');
   }
 
-  greenLog('Polyfilling...');
-  await childRunCommand(`yarn tools --polyfills ${name}`);
-
-  await childRunCommand(`yarn tools postBuildIndividual --target=${name}`);
-
-  // greenLog('Setting up local development tools...');
-  // await childRunCommand(`yarn build:setupLocalDev ${name}`);
-
-  if (!skipGen) {
-    greenLog('...mapping dist package name to package.json name');
-    await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
-
-    // greenLog('...generating apps/html/index.html');
-    // await runCommand('yarn gen:html');
-
-    // greenLog('...generating apps/react/src/app/app.tsx');
-    // await runCommand('yarn gen:react');
-
-    // greenLog('...generating apps/nodejs/main.ts');
-    // await runCommand('yarn gen:nodejs');
-  }
+  // if (!skipGen) {
+  //   greenLog('...mapping dist package name to package.json name');
+  //   await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
+  // }
 };
 
 await build(projectName);

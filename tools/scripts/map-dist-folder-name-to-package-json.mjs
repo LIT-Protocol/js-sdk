@@ -1,4 +1,4 @@
-import { readCachedProjectGraph } from '@nrwl/devkit';
+import nxDevkit from '@nrwl/devkit';
 import chalk from 'chalk';
 import { exit } from 'process';
 import {
@@ -8,6 +8,9 @@ import {
   redLog,
   writeJsonFile,
 } from './utils.mjs';
+
+const readCachedProjectGraph = nxDevkit.readCachedProjectGraph;
+
 const graph = readCachedProjectGraph();
 const nodes = graph.nodes;
 
