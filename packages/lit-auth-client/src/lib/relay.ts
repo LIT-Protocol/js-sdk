@@ -200,13 +200,10 @@ export class LitRelay implements IRelay {
   private _getFetchPKPsRoute(authMethodType: AuthMethodType): string {
     switch (authMethodType) {
       case AuthMethodType.EthWallet:
-        return '/auth/wallet/userinfo';
       case AuthMethodType.Discord:
-        return '/auth/discord/userinfo';
       case AuthMethodType.GoogleJwt:
-        return '/auth/google/userinfo';
       case AuthMethodType.OTP:
-        return `/auth/otp/userinfo`;
+        return `/auth/userinfo`;
       case AuthMethodType.WebAuthn:
         return '/auth/webauthn/userinfo';
       default:
@@ -226,13 +223,10 @@ export class LitRelay implements IRelay {
   private _getMintPKPRoute(authMethodType: AuthMethodType): string {
     switch (authMethodType) {
       case AuthMethodType.EthWallet:
-        return '/auth/wallet';
       case AuthMethodType.Discord:
-        return '/auth/discord';
       case AuthMethodType.GoogleJwt:
-        return '/auth/google';
       case AuthMethodType.OTP:
-        return `/auth/otp`;
+        return '/auth/wallet';
       case AuthMethodType.WebAuthn:
         return '/auth/webauthn/verify-registration';
       default:
