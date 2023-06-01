@@ -36,6 +36,13 @@ const build = async (name) => {
   greenLog('Building Tsc...');
   await runCommand(`yarn nx run ${name}:_buildTsc`);
 
+  // greenLog('Building Vanilla...');
+  // try{
+  //   await runCommand(`yarn nx run ${name}:_buildWeb`);
+  // }catch(e){
+  //   redLog('❌ Vanilla build failed, skipping...');
+  // }
+
   greenLog('Polyfilling...');
   await childRunCommand(`yarn tools --polyfills ${name}`);
 

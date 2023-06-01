@@ -534,8 +534,8 @@ async function buildFunc() {
         commandBuild,
         'Done building tsc! Building UMDs now...'
       );
-      // await runCommandWithListener(commandWeb, 'Done building UMDs!');
-      // await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
+      await runCommandWithListener(commandWeb, 'Done building UMDs!');
+      await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
       exit();
     }
 
