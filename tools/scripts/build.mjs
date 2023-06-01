@@ -31,7 +31,7 @@ const build = async (name) => {
     await runCommand(`rm ${packageDistPath}`);
   }
 
-  greenLog(`Matching packages/${name}/project.json versions to lerna.json...`);
+  // greenLog(`Matching packages/${name}/project.json versions to lerna.json...`);
 
   greenLog('Building Tsc...');
   await runCommand(`yarn nx run ${name}:_buildTsc`);

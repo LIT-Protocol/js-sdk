@@ -7,5 +7,6 @@
     "allowJs": true,
     "esModuleInterop": true
   },
-  "include": ["jest.config.ts", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts"]
+  "include": ["jest.config.ts", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts"],
+  "exclude": ["node_modules", "dist"]
 }

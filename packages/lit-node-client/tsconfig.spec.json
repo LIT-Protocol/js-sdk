@@ -13,5 +13,6 @@
     "**/*.spec.ts",
     "**/*.d.ts",
     "../auth-browser/src/lib/chains/lit-connect-modal.d.ts"
-  ]
+  ],
+  "exclude": ["node_modules", "dist"]
 }

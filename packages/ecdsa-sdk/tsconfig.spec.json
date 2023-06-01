@@ -11,5 +11,6 @@
     "**/*.spec.ts",
     "**/*.d.ts",
     "src/lib/ecdsa-sdk.spec.ts"
-  ]
+  ],
+  "exclude": ["node_modules", "dist"]
 }

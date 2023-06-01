@@ -515,7 +515,7 @@ async function buildFunc() {
       .map((item) => item.replace('apps/', ''))
       .join(',');
 
-    const commandBuild = `yarn nx run-many --target=build --exclude=${ignoreList}`;
+    const commandBuild = `yarn nx run-many --target=build --exclude=${ignoreList} --verbose`;
     const commandWeb = `yarn nx run-many --target=_buildWeb --exclude=${ignoreList}`;
 
     async function runCommandWithListener(command, message) {
@@ -534,8 +534,8 @@ async function buildFunc() {
         commandBuild,
         'Done building tsc! Building UMDs now...'
       );
-      await runCommandWithListener(commandWeb, 'Done building UMDs!');
-      await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
+      // await runCommandWithListener(commandWeb, 'Done building UMDs!');
+      // await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
       exit();
     }
 
