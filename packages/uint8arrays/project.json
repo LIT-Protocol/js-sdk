@@ -11,7 +11,7 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/uint8arrays",
@@ -22,6 +22,7 @@
     },
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
+      "singleZip": true,
       "options": {
         "globalName": "LitJsSdk_uint8arrays",
         "outfile": "dist/packages/uint8arrays-vanilla/uint8arrays.js",
@@ -38,8 +39,8 @@
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/uint8arrays"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/uint8arrays"],
       "options": {
         "jestConfig": "packages/uint8arrays/jest.config.ts",
         "passWithNoTests": true

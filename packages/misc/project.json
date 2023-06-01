@@ -11,7 +11,7 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/misc",
@@ -22,6 +22,7 @@
     },
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
+      "singleZip": true,
       "options": {
         "globalName": "LitJsSdk_misc",
         "outfile": "dist/packages/misc-vanilla/misc.js",
@@ -38,15 +39,15 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/misc/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/misc"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/misc"],
       "options": {
         "jestConfig": "packages/misc/jest.config.ts",
         "passWithNoTests": true

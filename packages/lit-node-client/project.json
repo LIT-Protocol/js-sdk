@@ -15,7 +15,7 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/lit-node-client",
@@ -26,6 +26,7 @@
     },
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
+      "singleZip": true,
       "options": {
         "globalName": "LitJsSdk_litNodeClient",
         "outfile": "dist/packages/lit-node-client-vanilla/lit-node-client.js",
@@ -44,15 +45,15 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/lit-node-client/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/lit-node-client"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/lit-node-client"],
       "options": {
         "jestConfig": "packages/lit-node-client/jest.config.ts",
         "passWithNoTests": true

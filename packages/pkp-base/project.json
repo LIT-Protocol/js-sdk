@@ -11,7 +11,7 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/pkp-base",
@@ -22,6 +22,7 @@
     },
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
+      "singleZip": true,
       "options": {
         "globalName": "LitJsSdk_pkpBase",
         "outfile": "dist/packages/pkp-base-vanilla/pkp-base.js",
@@ -39,15 +40,15 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/pkp-base/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/pkp-base"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/pkp-base"],
       "options": {
         "jestConfig": "packages/pkp-base/jest.config.ts",
         "passWithNoTests": true

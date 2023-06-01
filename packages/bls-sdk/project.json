@@ -11,7 +11,7 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/bls-sdk",
@@ -22,6 +22,7 @@
     },
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
+      "singleZip": true,
       "options": {
         "globalName": "LitJsSdk_blsSdk",
         "outfile": "dist/packages/bls-sdk-vanilla/bls-sdk.js",
@@ -38,8 +39,8 @@
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/bls-sdk"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/bls-sdk"],
       "options": {
         "jestConfig": "packages/bls-sdk/jest.config.ts",
         "passWithNoTests": true

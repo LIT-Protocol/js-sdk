@@ -11,7 +11,7 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/pkp-cosmos",
@@ -22,6 +22,7 @@
     },
     "_buildWeb": {
       "executor": "@websaam/nx-esbuild:package",
+      "singleZip": true,
       "options": {
         "globalName": "LitJsSdk_pkpCosmos",
         "outfile": "dist/packages/pkp-cosmos-vanilla/pkp-cosmos.js",
@@ -39,23 +40,23 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/pkp-cosmos/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/pkp-cosmos"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/pkp-cosmos"],
       "options": {
         "jestConfig": "packages/pkp-cosmos/jest.config.ts",
         "passWithNoTests": true
       }
     },
     "test:watch": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/pkp-cosmos"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/pkp-cosmos"],
       "options": {
         "watch": true,
         "jestConfig": "packages/pkp-cosmos/jest.config.ts",
