@@ -528,7 +528,7 @@ async function buildFunc() {
         //   onDone: async () => {
         //     console.log("Done!");
         //     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
-        //     exit();
+            exit();
         //   }
         // })
       },
