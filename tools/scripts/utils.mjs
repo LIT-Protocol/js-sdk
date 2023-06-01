@@ -157,13 +157,9 @@ export const spawnCommand = (
 
 export const spawnListener = (commands, callback, prefix = '', color = 31) => {
   let _commands = commands.split(' ');
-  // let eventName = _commands.join('-');
-
-  // make commands to pass to spawn
   const command = _commands[0];
   const args = _commands.slice(1);
 
-  // Use the spawn() function to run the command in a child process
   let bob = spawn(command, args, {
     env: {
       ...process.env,
@@ -173,26 +169,18 @@ export const spawnListener = (commands, callback, prefix = '', color = 31) => {
 
   bob.on('exit', (exitCode) => {
     if (parseInt(exitCode) !== 0) {
-      // handle non-exit code
       redLog(
         `child process exited with code ${exitCode} when running ${command}`
       );
-
       if (callback?.onExit) {
         callback?.onExit(exitCode);
       }
-      exit();
+      process.exit(exitCode); // If there's an error, exit with the error code
     }
-    // eventsEmitter.emit(eventName);
-
     if (callback?.onDone) {
       callback?.onDone(exitCode);
     }
   });
-
-  // Handle child process output
-  // bob.stdout.pipe(process.stdout);
-  // randomize the color
 
   if (!color) {
     color = Math.floor(Math.random() * 6) + 31;
@@ -206,7 +194,6 @@ export const spawnListener = (commands, callback, prefix = '', color = 31) => {
     );
   });
 
-  // foward the key to the child process
   process.stdin.on('data', (key) => {
     bob.stdin.write(key);
   });

@@ -515,25 +515,31 @@ async function buildFunc() {
       .map((item) => item.replace('apps/', ''))
       .join(',');
 
-    const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
+    const commandBuild = `yarn nx run-many --target=build --exclude=${ignoreList}`;
+    const commandWeb = `yarn nx run-many --target=_buildWeb --exclude=${ignoreList}`;
 
-    spawnListener(command, {
-      onDone: () => {
-        console.log('Building UMD packages');
-
-        // then run vanilla build
-        const command = `yarn nx run-many --target=_buildWeb --exclude=${ignoreList}`;
-
+    async function runCommandWithListener(command, message) {
+      return new Promise((resolve) => {
         spawnListener(command, {
-          onDone: async () => {
-            console.log("Done!");
-            await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
-            exit();
-          }
-        })
-      },
-    });
+          onDone: () => {
+            console.log(message);
+            resolve();
+          },
+        });
+      });
+    }
 
+    async function runSequence() {
+      await runCommandWithListener(
+        commandBuild,
+        'Done building tsc! Building UMDs now...'
+      );
+      await runCommandWithListener(commandWeb, 'Done building UMDs!');
+      await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
+      exit();
+    }
+
+    runSequence();
   }
 }
 
@@ -1217,10 +1223,14 @@ async function matchVersionsFunc() {
     const packageJson = await readJsonFile(`${pkg}/package.json`);
     packageJson.version = lernaJson.version;
 
-    greenLog(
-      `Updating ${pkg}/package.json version ${packageJson.version} => ${lernaJson.version}...`
-    );
-    await writeJsonFile(`${pkg}/package.json`, packageJson);
+    if (packageJson.version === lernaJson.version) {
+      greenLog(`No update needed - Version match for ${pkg}!`);
+    } else {
+      greenLog(
+        `Updating ${pkg}/package.json version ${packageJson.version} => ${lernaJson.version}...`
+      );
+      await writeJsonFile(`${pkg}/package.json`, packageJson);
+    }
   });
 
   exit();
