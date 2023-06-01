@@ -117,7 +117,6 @@ export class LitNodeClientNodeJs extends LitCore {
    */
   getLitActionRequestBody = (params: ExecuteJsProps): JsonExecutionRequest => {
     const reqBody: JsonExecutionRequest = {
-      authSig: params.authSig,
       ...(params.authSig && { authSig: params.authSig }),
       ...(params.sessionSigs && { sessionSigs: params.sessionSigs }),
       jsParams: convertLitActionsParams(params.jsParams),
