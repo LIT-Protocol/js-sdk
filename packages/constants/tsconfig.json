@@ -9,7 +9,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "files": ["src/lib/abis/ERC20.json", "src/lib/abis/LIT.json"],
   "include": [],
   "references": [
     {

@@ -7,8 +7,15 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target auth-browser"
+        "commands": [
+          "yarn build:target constants --skip",
+          "yarn build:target misc --skip",
+          "yarn build:target uint8arrays --skip",
+          "yarn build:target auth-browser"
+        ],
+        "parallel": false
       }
+      
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
