@@ -18,7 +18,7 @@ export * from './lib/errors';
 export * from './lib/utils/utils';
 
 // ----------- ABIs -----------
-const ABI_LIT = import('./lib/abis/LIT.json');
-const ABI_ERC20 = import('./lib/abis/ERC20.json');
+// const ABI_LIT = import('./lib/abis/LIT.json');
+// const ABI_ERC20 = import('./lib/abis/ERC20.json');
 
-export { ABI_LIT, ABI_ERC20 };
+// export { ABI_LIT, ABI_ERC20 };
