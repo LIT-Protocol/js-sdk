@@ -519,18 +519,18 @@ async function buildFunc() {
 
     spawnListener(command, {
       onDone: () => {
-        console.log('Building UMD packages');
+        console.log('Done!');
 
-        // then run vanilla build
-        const command = `yarn nx run-many --target=_buildWeb --exclude=${ignoreList}`;
+        // // then run vanilla build
+        // const command = `yarn nx run-many --target=_buildWeb --exclude=${ignoreList}`;
 
-        spawnListener(command, {
-          onDone: async () => {
-            console.log("Done!");
-            await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
-            exit();
-          }
-        })
+        // spawnListener(command, {
+        //   onDone: async () => {
+        //     console.log("Done!");
+        //     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
+        //     exit();
+        //   }
+        // })
       },
     });
 
