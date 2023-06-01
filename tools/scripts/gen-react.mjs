@@ -43,9 +43,15 @@ const modules = (await listDirsRecursive(DIST_DIR, false))
   });
 
 // -- import * as LitJsSdk_litNodeClient from 'dist/packages/lit-node-client';
-const importTags = modules.map(
-  (mod) => `import * as ${globalVarPrefix}${mod.moduleName} from '${mod.dir}';`
-);
+const importTags = modules.map((mod) => {
+  const modName = globalVarPrefix + mod.moduleName;
+
+  if (modName === 'LitJsSdk_litThirdPartyLibs') {
+    return `// import * as ${globalVarPrefix}${mod.moduleName} from '${mod.dir}';`;
+  } else {
+    return `import * as ${globalVarPrefix}${mod.moduleName} from '${mod.dir}';`;
+  }
+});
 // console.log("importTags:", importTags);
 
 // declare global {
@@ -103,6 +109,12 @@ const getBodyTemplate = (
 
 const consoleLogs = modules
   .map((mod, i) => {
+    const modName = globalVarPrefix + mod.moduleName;
+
+    if (modName === 'LitJsSdk_litThirdPartyLibs') {
+      return '';
+    }
+
     return getConsoleTemplate(
       globalVarPrefix + mod.moduleName,
       i,

@@ -74,7 +74,7 @@ describe('initProvider', () => {
     const provider = client.initProvider<AppleProvider>(ProviderType.Apple, {
       redirectUri: 'http://localhost:3000/redirect',
     });
-    expect(provider).toBeInstanceOf(AppleProvider);
+    expect(provider).toBe(1);
   });
 
   it('should return an instance of EthWalletProvider', () => {

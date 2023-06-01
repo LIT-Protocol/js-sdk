@@ -109,6 +109,8 @@ export class LitAuthClient {
 
     let provider: T;
 
+    console.log("Type:", type);
+
     switch (type) {
       case 'google':
         provider = new GoogleProvider({
@@ -150,7 +152,7 @@ export class LitAuthClient {
         break;
       default:
         throw new Error(
-          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn' are supported at the moment."
+          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', 'webauthn', and 'apple' are supported at the moment."
         );
     }
 

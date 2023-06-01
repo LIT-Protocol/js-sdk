@@ -42,7 +42,7 @@ describe('PKPClient', () => {
         const MESSAGE_TO_SIGN = 'HEY THERE!';
 
         const signature = processTx(
-          expect.getState().currentTestName,
+          expect.getState().currentTestName || 'Unknown name',
           await pkpClient.getEthWallet().signMessage(MESSAGE_TO_SIGN)
         );
 
@@ -51,7 +51,7 @@ describe('PKPClient', () => {
 
       it('should sign a transaction', async () => {
         const txRes: string = await processTx(
-          expect.getState().currentTestName,
+          expect.getState().currentTestName || 'Unknown name',
           await pkpClient.getEthWallet().signTransaction({
             to: PKP_ETH_ADDRESS,
             value: 0,
@@ -201,7 +201,7 @@ describe('PKPClient', () => {
             await etherWallet.setRpc(newRpcUrl);
 
             let signedMessage = await processTx(
-              expect.getState().currentTestName,
+              expect.getState().currentTestName || 'Unknown name',
               await etherWallet.signMessage('Hello world from litentry')
             );
 
@@ -215,7 +215,7 @@ describe('PKPClient', () => {
             await etherWallet.setRpc(newRpcUrl);
 
             const signedTx = await processTx(
-              expect.getState().currentTestName,
+              expect.getState().currentTestName || 'Unknown name',
               await etherWallet.handleRequest<ETHSignature>({
                 method: 'eth_signTransaction',
                 params: [
@@ -267,7 +267,7 @@ describe('PKPClient', () => {
         it('should be able to eth_signTransaction', async () => {
           const etherWallet = pkpClient.getEthWallet();
           const signedTx = await processTx(
-            expect.getState().currentTestName,
+            expect.getState().currentTestName || 'Unknown name',
             await etherWallet.handleRequest({
               method: 'eth_signTransaction',
               params: [
