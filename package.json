@@ -61,7 +61,6 @@
     "@cypress/code-coverage": "^3.10.0",
     "@cypress/react": "^6.2.0",
     "@cypress/webpack-dev-server": "^2.3.0",
-    "@lit-protocol/pkp-ethers.js": "^5.7.48",
     "@metamask/eth-sig-util": "5.0.2",
     "@playwright/test": "^1.25.2",
     "@simplewebauthn/browser": "^7.2.0",
