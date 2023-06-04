@@ -91,6 +91,8 @@ export default class GoogleProvider extends BaseProvider {
       );
     }
 
+    this._accessToken = idToken;
+
     const authMethod = {
       authMethodType: AuthMethodType.GoogleJwt,
       accessToken: idToken,
