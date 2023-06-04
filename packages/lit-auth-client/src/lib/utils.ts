@@ -1,5 +1,5 @@
 import { LoginUrlParams } from '@lit-protocol/types';
-import cbor from 'cbor-web';
+import * as cbor from 'cbor-web';
 
 export const STATE_PARAM_KEY = 'lit-state-param';
 
@@ -216,10 +216,11 @@ export function parseJWT(jwt: string): Record<string, unknown> {
 
 //Function logic copied from Microsoft demo implementation: https://github.com/MicrosoftEdge/webauthnsample/blob/master/fido.js
 //Decrypt the authData Buffer and split it in its single information pieces. Its structure is specified here: https://w3c.github.io/webauthn/#authenticator-data
-export function parseAuthenticatorData(authData: Buffer): Record<string, unknown> {
+export function parseAuthenticatorData(authDataBuffer: Buffer): Record<string, unknown> {
   try {
+    let authDataBufferDecoded: any = cbor.decode(authDataBuffer);
     const authenticatorData: any = {}
-
+    let authData = authDataBufferDecoded.authData;
     authenticatorData.rpIdHash = authData.slice(0, 32)
     authenticatorData.flags = authData[32]
     authenticatorData.signCount =

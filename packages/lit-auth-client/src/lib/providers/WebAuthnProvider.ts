@@ -56,12 +56,12 @@ export default class WebAuthnProvider extends BaseProvider {
       attResp.response.attestationObject,
       'base64'
     );
+
     // parse the buffer to reconstruct the object.
-    let authenticationResponse = parseAuthenticatorData(attestationBuffer);
+    let authenticationResponse: any = parseAuthenticatorData(attestationBuffer);
     // publickey in cose format to register the auth method
-    let publicKeyCoseBuffer: Buffer = authenticationResponse[
-      'credentialPublicKey'
-    ] as Buffer;
+    let publicKeyCoseBuffer: Buffer = authenticationResponse
+      .attestedCredentialData.credentialPublicKey as Buffer;
     // Encode the publicKey for contract storage
     let publicKey = hexlify(ethers.utils.arrayify(publicKeyCoseBuffer));
 
