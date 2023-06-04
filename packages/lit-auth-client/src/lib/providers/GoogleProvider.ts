@@ -12,14 +12,12 @@ import {
   decode,
 } from '../utils';
 import { BaseProvider } from './BaseProvider';
-import { OAuth2Client, TokenPayload } from 'google-auth-library';
 
 export default class GoogleProvider extends BaseProvider {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
-  private _oAuthClient: OAuth2Client;
   private _clientId: string;
   private _accessToken: string | undefined;
 
@@ -28,7 +26,6 @@ export default class GoogleProvider extends BaseProvider {
     this.redirectUri = options.redirectUri || window.location.origin;
     this._clientId =
       '355007986731-llbjq5kbsg8ieb705mo64nfnh88dhlmn.apps.googleusercontent.com';
-    this._oAuthClient = new OAuth2Client(this._clientId);
   }
 
   /**
@@ -112,13 +109,14 @@ export default class GoogleProvider extends BaseProvider {
       );
     }
 
-    let tokenPayload: TokenPayload = await this.#verifyIDToken(
+    let tokenPayload: Record<string, unknown> = await this.#verifyIDToken(
       this._accessToken
     ).catch((e) => {
       throw new Error(`Error while verifying identifier token: ${e.message}`);
     });
-    let userId: string = tokenPayload.sub;
-    let audience: string = tokenPayload.aud;
+
+    let userId: string = tokenPayload['user_id'] as string;
+    let audience: string = tokenPayload['audience'] as string;
 
     return {
       authMethodType: 6,
@@ -127,11 +125,18 @@ export default class GoogleProvider extends BaseProvider {
   }
 
   // Validate given Google ID token
-  async #verifyIDToken(idToken: string): Promise<TokenPayload> {
-    const ticket = await this._oAuthClient.verifyIdToken({
-      idToken,
-    });
-
-    return ticket.getPayload()!;
+  async #verifyIDToken(idToken: string): Promise<Record<string, unknown>> {
+    const meResponse = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`, {
+      method: 'GET',
+      headers: {
+        authorization: `Bearer ${idToken}`,
+      },
+      });
+      if (meResponse.ok) {
+        const user = await meResponse.json();
+        return user;
+      } else {
+        throw new Error('Unable to verify Google account');
+      }
   }
 }
