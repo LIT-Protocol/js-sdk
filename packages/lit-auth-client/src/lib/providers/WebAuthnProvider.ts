@@ -57,13 +57,22 @@ export default class WebAuthnProvider extends BaseProvider {
       'base64'
     );
 
-    // parse the buffer to reconstruct the object.
-    let authenticationResponse: any = parseAuthenticatorData(attestationBuffer);
-    // publickey in cose format to register the auth method
-    let publicKeyCoseBuffer: Buffer = authenticationResponse
-      .attestedCredentialData.credentialPublicKey as Buffer;
-    // Encode the publicKey for contract storage
-    let publicKey = hexlify(ethers.utils.arrayify(publicKeyCoseBuffer));
+    let publicKey: string;
+    try {
+      // parse the buffer to reconstruct the object.
+      // buffer is COSE formatted, utilities decode the buffer into json, and extract the public key information
+      let authenticationResponse: any =
+        parseAuthenticatorData(attestationBuffer);
+      // publickey in cose format to register the auth method
+      let publicKeyCoseBuffer: Buffer = authenticationResponse
+        .attestedCredentialData.credentialPublicKey as Buffer;
+      // Encode the publicKey for contract storage
+      publicKey = hexlify(ethers.utils.arrayify(publicKeyCoseBuffer));
+    } catch (e) {
+      throw new Error(
+        `Error while decoding credential create response for public key retrieval. attestation response not encoded as expected: ${e}`
+      );
+    }
 
     let req: RelayerRequest = {
       authMethodType: AuthMethodType.WebAuthn,
