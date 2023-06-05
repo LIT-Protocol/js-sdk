@@ -207,81 +207,86 @@ export function parseJWT(jwt: string): Record<string, unknown> {
     throw new Error('Invalid token length');
   }
   let body = Buffer.from(parts[1], 'base64');
-  let parsedBody: Record<string, unknown> = JSON.parse(
-    body.toString('ascii')
-  );
+  let parsedBody: Record<string, unknown> = JSON.parse(body.toString('ascii'));
 
   return parsedBody;
 }
 
 //Function logic copied from Microsoft demo implementation: https://github.com/MicrosoftEdge/webauthnsample/blob/master/fido.js
 //Decrypt the authData Buffer and split it in its single information pieces. Its structure is specified here: https://w3c.github.io/webauthn/#authenticator-data
-export function parseAuthenticatorData(authDataBuffer: Buffer): Record<string, unknown> {
+export function parseAuthenticatorData(
+  authDataBuffer: Buffer
+): Record<string, unknown> {
   try {
     // deocde the buffer from cbor, will return an object.
     let authDataBufferDecoded: any = cbor.decode(authDataBuffer);
-    const authenticatorData: any = {}
+    const authenticatorData: any = {};
     let authData = authDataBufferDecoded.authData;
-    
-    authenticatorData.rpIdHash = authData.slice(0, 32)
-    authenticatorData.flags = authData[32]
+
+    authenticatorData.rpIdHash = authData.slice(0, 32);
+    authenticatorData.flags = authData[32];
     authenticatorData.signCount =
-      (authData[33] << 24) | (authData[34] << 16) | (authData[35] << 8) | authData[36]
+      (authData[33] << 24) |
+      (authData[34] << 16) |
+      (authData[35] << 8) |
+      authData[36];
 
     //Check if the client sent attestedCredentialdata, which is necessary for every new public key scheduled. This is indicated by the 6th bit of the flag byte being 1 (See specification at function start for reference)
     if (authenticatorData.flags & 64) {
       //Extract the data from the Buffer. Reference of the structure can be found here: https://w3c.github.io/webauthn/#sctn-attested-credential-data
-      const attestedCredentialData: { [key: string]: any } = {}
-      attestedCredentialData['aaguid'] = unparse(authData.slice(37, 53)) ///.toUpperCase()
-      attestedCredentialData['credentialIdLength'] = (authData[53] << 8) | authData[54]
+      const attestedCredentialData: { [key: string]: any } = {};
+      attestedCredentialData['aaguid'] = unparse(authData.slice(37, 53)); ///.toUpperCase()
+      attestedCredentialData['credentialIdLength'] =
+        (authData[53] << 8) | authData[54];
       attestedCredentialData['credentialId'] = authData.slice(
         55,
         55 + attestedCredentialData['credentialIdLength']
-      )
+      );
       //Public key is the first CBOR element of the remaining buffer
       const publicKeyCoseBuffer = authData.slice(
         55 + attestedCredentialData['credentialIdLength'],
         authData.length
-      )
+      );
 
       //convert public key to JWK for storage
       //convert public key to JWK for storage
       attestedCredentialData['credentialPublicKey'] = publicKeyCoseBuffer;
 
-      authenticatorData.attestedCredentialData = attestedCredentialData
+      authenticatorData.attestedCredentialData = attestedCredentialData;
     }
 
     //Check for extension data in the authData, which is indicated by the 7th bit of the flag byte being 1 (See specification at function start for reference)
     if (authenticatorData.flags & 128) {
       //has extension data
 
-      let extensionDataCbor
+      let extensionDataCbor;
 
       if (authenticatorData.attestedCredentialData) {
         //if we have attesttestedCredentialData, then extension data is
         //the second element
-        extensionDataCbor = cbor.decode( //decodeAllSync(
+        extensionDataCbor = cbor.decode(
+          //decodeAllSync(
           authData.slice(
             55 + authenticatorData.attestedCredentialData.credentialIdLength,
             authData.length
           )
-        )
-        extensionDataCbor = extensionDataCbor[1]
+        );
+        extensionDataCbor = extensionDataCbor[1];
       } else {
         //Else it's the first element
-        extensionDataCbor = cbor.decode(authData.slice(37, authData.length))
+        extensionDataCbor = cbor.decode(authData.slice(37, authData.length));
       }
 
-      authenticatorData.extensionData = cbor.encode(extensionDataCbor).toString("base64")
+      authenticatorData.extensionData = cbor
+        .encode(extensionDataCbor)
+        .toString('base64');
     }
 
-    return authenticatorData
+    return authenticatorData;
   } catch (e) {
-    throw new Error("Authenticator Data could not be parsed")
+    throw new Error('Authenticator Data could not be parsed');
   }
 }
-
-
 
 // **`unparse()` - Convert UUID byte array (ala parse()) into a string**
 export function unparse(buf: any) {
@@ -294,12 +299,26 @@ export function unparse(buf: any) {
   }
   var i: number = 0;
   var bth = _byteToHex;
-  return  bth[buf[i++]] + bth[buf[i++]] +
-          bth[buf[i++]] + bth[buf[i++]] + '-' +
-          bth[buf[i++]] + bth[buf[i++]] + '-' +
-          bth[buf[i++]] + bth[buf[i++]] + '-' +
-          bth[buf[i++]] + bth[buf[i++]] + '-' +
-          bth[buf[i++]] + bth[buf[i++]] +
-          bth[buf[i++]] + bth[buf[i++]] +
-          bth[buf[i++]] + bth[buf[i++]];
+  return (
+    bth[buf[i++]] +
+    bth[buf[i++]] +
+    bth[buf[i++]] +
+    bth[buf[i++]] +
+    '-' +
+    bth[buf[i++]] +
+    bth[buf[i++]] +
+    '-' +
+    bth[buf[i++]] +
+    bth[buf[i++]] +
+    '-' +
+    bth[buf[i++]] +
+    bth[buf[i++]] +
+    '-' +
+    bth[buf[i++]] +
+    bth[buf[i++]] +
+    bth[buf[i++]] +
+    bth[buf[i++]] +
+    bth[buf[i++]] +
+    bth[buf[i++]]
+  );
 }

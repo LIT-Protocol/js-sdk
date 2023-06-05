@@ -98,24 +98,23 @@ export default class AppleProvider extends BaseProvider {
     return authMethod;
   }
 
-
-    /**
+  /**
    * Constructs a {@link RelayerRequest} from the access token, {@link authenticate} must be called prior.
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
-    protected override async getRelayerRequest(): Promise<RelayerRequest> {
-      if (!this._idToken) {
-        throw new Error(
-          'Access token not defined, did you authenticate before calling validate?'
-        );
-      }
-
-      let payload = parseJWT(this._idToken);
-      let authMethodId = `${payload['aud']}:${payload['sub']}`;
-
-      return {
-        authMethodType: AuthMethodType.AppleJwt,
-        authMethodId
-      };
+  protected override async getRelayerRequest(): Promise<RelayerRequest> {
+    if (!this._idToken) {
+      throw new Error(
+        'Access token not defined, did you authenticate before calling validate?'
+      );
     }
+
+    let payload = parseJWT(this._idToken);
+    let authMethodId = `${payload['aud']}:${payload['sub']}`;
+
+    return {
+      authMethodType: AuthMethodType.AppleJwt,
+      authMethodId,
+    };
+  }
 }
