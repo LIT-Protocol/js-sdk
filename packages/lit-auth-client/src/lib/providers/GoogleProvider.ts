@@ -117,8 +117,8 @@ export default class GoogleProvider extends BaseProvider {
       throw new Error(`Error while verifying identifier token: ${e.message}`);
     });
 
-    let userId: string = tokenPayload['user_id'] as string;
-    let audience: string = tokenPayload['audience'] as string;
+    let userId: string = tokenPayload['sub'] as string;
+    let audience: string = tokenPayload['aud'] as string;
 
     return {
       authMethodType: 6,
@@ -128,17 +128,23 @@ export default class GoogleProvider extends BaseProvider {
 
   // Validate given Google ID token
   async #verifyIDToken(idToken: string): Promise<Record<string, unknown>> {
-    const meResponse = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`, {
-      method: 'GET',
-      headers: {
-        authorization: `Bearer ${idToken}`,
-      },
-      });
-      if (meResponse.ok) {
-        const user = await meResponse.json();
-        return user;
-      } else {
-        throw new Error('Unable to verify Google account');
+    const meResponse = await fetch(
+      `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`,
+      {
+        method: 'GET',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          'user-agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+        },
       }
+    );
+
+    if (meResponse.ok) {
+      const user = await meResponse.json();
+      return user;
+    } else {
+      throw new Error('Unable to verify Google account');
+    }
   }
 }
