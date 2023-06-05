@@ -218,9 +218,11 @@ export function parseJWT(jwt: string): Record<string, unknown> {
 //Decrypt the authData Buffer and split it in its single information pieces. Its structure is specified here: https://w3c.github.io/webauthn/#authenticator-data
 export function parseAuthenticatorData(authDataBuffer: Buffer): Record<string, unknown> {
   try {
+    // deocde the buffer from cbor, will return an object.
     let authDataBufferDecoded: any = cbor.decode(authDataBuffer);
     const authenticatorData: any = {}
     let authData = authDataBufferDecoded.authData;
+    
     authenticatorData.rpIdHash = authData.slice(0, 32)
     authenticatorData.flags = authData[32]
     authenticatorData.signCount =
