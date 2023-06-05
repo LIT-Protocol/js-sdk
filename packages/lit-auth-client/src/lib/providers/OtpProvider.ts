@@ -24,7 +24,7 @@ export class OtpProvider extends BaseProvider {
     super(params);
     this._params = params;
     this._baseUrl = config?.baseUrl || 'https://auth-api.litgateway.com';
-    this._port = config?.port || '80';
+    this._port = config?.port || '443';
     this._startRoute = config?.startRoute || '/api/otp/start';
     this._checkRoute = config?.checkRoute || '/api/otp/check';
   }
@@ -68,7 +68,7 @@ export class OtpProvider extends BaseProvider {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
-        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk'
+        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk',
       },
       body,
     });
@@ -109,7 +109,7 @@ export class OtpProvider extends BaseProvider {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
-        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk'
+        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk',
       },
       body,
     });
