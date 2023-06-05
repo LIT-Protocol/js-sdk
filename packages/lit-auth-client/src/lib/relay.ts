@@ -226,9 +226,9 @@ export class LitRelay implements IRelay {
       case AuthMethodType.Discord:
       case AuthMethodType.GoogleJwt:
       case AuthMethodType.OTP:
-        return '/auth/wallet';
+        return '/auth';
       case AuthMethodType.WebAuthn:
-        return '/auth/webauthn/verify-registration';
+        return '/auth/webauthn/registration';
       default:
         throw new Error(
           `Auth method type "${authMethodType}" is not supported`
