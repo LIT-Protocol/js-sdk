@@ -5,6 +5,7 @@ import EthWalletProvider from './lib/providers/EthWalletProvider';
 import GoogleProvider from './lib/providers/GoogleProvider';
 import AppleProvider from './lib/providers/AppleProvider';
 import WebAuthnProvider from './lib/providers/WebAuthnProvider';
+import { OtpProvider } from './lib/providers/OtpProvider';
 import { isSignInRedirect, getProviderFromUrl } from './lib/utils';
 
 declare global {
@@ -25,6 +26,7 @@ export {
   GoogleProvider,
   AppleProvider,
   WebAuthnProvider,
+  OtpProvider,
   isSignInRedirect,
   getProviderFromUrl,
 };

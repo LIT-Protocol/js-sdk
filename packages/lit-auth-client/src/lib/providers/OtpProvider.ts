@@ -29,7 +29,7 @@ export class OtpProvider extends BaseProvider {
     super(params);
     this._params = params;
     this._baseUrl = config?.baseUrl || 'https://auth-api.litgateway.com';
-    this._port = config?.port || '80';
+    this._port = config?.port || '443';
     this._startRoute = config?.startRoute || '/api/otp/start';
     this._checkRoute = config?.checkRoute || '/api/otp/check';
   }

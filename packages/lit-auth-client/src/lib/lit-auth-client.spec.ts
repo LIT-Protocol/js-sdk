@@ -14,6 +14,7 @@ import DiscordProvider from './providers/DiscordProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 import EthWalletProvider from './providers/EthWalletProvider';
 import AppleProvider from './providers/AppleProvider';
+import { OtpProvider } from './providers/OtpProvider';
 
 const isClass = (v: unknown) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
@@ -89,6 +90,11 @@ describe('initProvider', () => {
       ProviderType.WebAuthn
     );
     expect(provider).toBeInstanceOf(WebAuthnProvider);
+  });
+
+  it('should return an instance of OtpProvider', () => {
+    const provider = client.initProvider<OtpProvider>(ProviderType.Otp);
+    expect(provider).toBeInstanceOf(OtpProvider);
   });
 });
 

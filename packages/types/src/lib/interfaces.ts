@@ -1184,10 +1184,10 @@ export interface SignInWithOTPParams {
 }
 
 export interface OtpProviderOptions {
-  baseUrl: string;
-  port: string;
-  startRoute: string;
-  checkRoute: string;
+  baseUrl?: string;
+  port?: string;
+  startRoute?: string;
+  checkRoute?: string;
 }
 
 export interface BaseProviderSessionSigsParams {
