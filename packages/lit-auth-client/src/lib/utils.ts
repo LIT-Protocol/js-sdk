@@ -248,8 +248,6 @@ export function parseAuthenticatorData(
         authData.length
       );
 
-      //convert public key to JWK for storage
-      //convert public key to JWK for storage
       attestedCredentialData['credentialPublicKey'] = publicKeyCoseBuffer;
 
       authenticatorData.attestedCredentialData = attestedCredentialData;
