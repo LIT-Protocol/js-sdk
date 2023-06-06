@@ -12,6 +12,8 @@ import {
   getStateParam,
   decode,
 } from '../utils';
+import { toUtf8Bytes } from 'ethers/lib/utils';
+import { utils } from 'ethers';
 
 export default class DiscordProvider extends BaseProvider {
   /**
@@ -90,6 +92,8 @@ export default class DiscordProvider extends BaseProvider {
       );
     }
 
+    this._accessToken = accessToken;
+
     const authMethod = {
       authMethodType: AuthMethodType.Discord,
       accessToken: accessToken,
@@ -108,15 +112,16 @@ export default class DiscordProvider extends BaseProvider {
         'Access token not defined, did you authenticate before calling validate?'
       );
     }
-    const userToken: string = await this.#verifyAndFetchDiscordUserId(
+    const userId: string = await this.#verifyAndFetchDiscordUserId(
       this._accessToken
     ).catch((e) => {
       throw e;
     });
-
+    
+    let authMethodId = utils.keccak256(toUtf8Bytes(`${userId}:${this._clientId}`));
     return {
-      authMethodType: 4,
-      authMethodId: `${userToken}:${this._clientId}`,
+      authMethodType: AuthMethodType.Discord,
+      authMethodId,
     };
   }
 
@@ -129,7 +134,7 @@ export default class DiscordProvider extends BaseProvider {
     });
     if (meResponse.ok) {
       const user = await meResponse.json();
-      return JSON.stringify(user);
+      return JSON.stringify(user.id);
     } else {
       throw new Error('Unable to verify Discord account');
     }
