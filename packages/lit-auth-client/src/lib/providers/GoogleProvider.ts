@@ -10,8 +10,11 @@ import {
   parseLoginParams,
   getStateParam,
   decode,
+  parseJWT,
 } from '../utils';
 import { BaseProvider } from './BaseProvider';
+import { utils } from 'ethers';
+import { toUtf8Bytes } from 'ethers/lib/utils';
 
 export default class GoogleProvider extends BaseProvider {
   /**
@@ -111,38 +114,21 @@ export default class GoogleProvider extends BaseProvider {
       );
     }
 
-    let tokenPayload: Record<string, unknown> = await this.#verifyIDToken(
+    let tokenPayload: Record<string, unknown> = this.#parseIDToken(
       this._accessToken
-    ).catch((e) => {
-      throw new Error(`Error while verifying identifier token: ${e.message}`);
-    });
+    );
 
     let userId: string = tokenPayload['sub'] as string;
     let audience: string = tokenPayload['aud'] as string;
-
+    let authMethodId = utils.keccak256(toUtf8Bytes(`${userId}:${audience}`));
     return {
       authMethodType: 6,
-      authMethodId: `${userId}:${audience}`,
+      authMethodId: authMethodId,
     };
   }
 
   // Validate given Google ID token
-  async #verifyIDToken(idToken: string): Promise<Record<string, unknown>> {
-    const meResponse = await fetch(
-      `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`,
-      {
-        method: 'GET',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
-
-    if (meResponse.ok) {
-      const user = await meResponse.json();
-      return user;
-    } else {
-      throw new Error('Unable to verify Google account');
-    }
+  #parseIDToken(idToken: string): Record<string, unknown> {
+    return parseJWT(idToken);
   }
 }
