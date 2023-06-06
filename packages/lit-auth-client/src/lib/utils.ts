@@ -221,7 +221,7 @@ export function parseAuthenticatorData(
     // deocde the buffer from cbor, will return an object.
     let authDataBufferDecoded: any = cbor.decode(authDataBuffer);
     const authenticatorData: any = {};
-    let authData = authDataBufferDecoded.authData;
+    let authData: Buffer = authDataBufferDecoded.authData;
 
     authenticatorData.rpIdHash = authData.slice(0, 32);
     authenticatorData.flags = authData[32];
@@ -243,12 +243,15 @@ export function parseAuthenticatorData(
         55 + attestedCredentialData['credentialIdLength']
       );
       //Public key is the first CBOR element of the remaining buffer
-      const publicKeyCoseBuffer = authData.slice(
+      let publicKeyCoseBufferCbor: Buffer = authData.slice(
         55 + attestedCredentialData['credentialIdLength'],
         authData.length
       );
 
-      attestedCredentialData['credentialPublicKey'] = publicKeyCoseBuffer;
+      let publicKey: any = cbor.decode(publicKeyCoseBufferCbor);
+      publicKeyCoseBufferCbor = cbor.encode(publicKey);
+
+      attestedCredentialData['credentialPublicKey'] = publicKeyCoseBufferCbor;
 
       authenticatorData.attestedCredentialData = attestedCredentialData;
     }
