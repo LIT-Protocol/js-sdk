@@ -15,6 +15,7 @@ import {
   UnifiedAccessControlConditions,
 } from './types';
 import { ILitNodeClient } from './ILitNodeClient';
+import { OtpVerificationPayload } from '../../../../dist/packages/types/src/lib/interfaces';
 import {
   ISessionCapabilityObject,
   LitResourceAbilityRequest,
@@ -984,6 +985,18 @@ export interface OtpSessionResult {
    * status of the otp check
    */
   status?: string;
+}
+
+export interface OtpVerificationPayload {
+  /*
+    user id parsed from the validated token 
+  */
+  userId: string;
+  
+  /*
+    status of the token verification
+  */
+  status: boolean;
 }
 
 export interface LoginUrlParams {
