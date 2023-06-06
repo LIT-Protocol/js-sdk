@@ -1201,6 +1201,7 @@ export interface OtpProviderOptions {
   port?: string;
   startRoute?: string;
   checkRoute?: string;
+  verifyRoute?: string;
 }
 
 export interface BaseProviderSessionSigsParams {
