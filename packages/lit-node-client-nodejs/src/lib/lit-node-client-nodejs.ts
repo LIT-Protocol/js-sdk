@@ -462,7 +462,8 @@ export class LitNodeClientNodeJs extends LitCore {
     params: JsonExecutionRequest,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    const { code, ipfsId, authSig, jsParams, sessionSigs } = params;
+    const { code, ipfsId, authSig, jsParams, sessionSigs, authMethods } =
+      params;
 
     log('getJsExecutionShares');
 
@@ -478,6 +479,7 @@ export class LitNodeClientNodeJs extends LitCore {
       ipfsId,
       authSig,
       jsParams,
+      authMethods,
     };
 
     return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
