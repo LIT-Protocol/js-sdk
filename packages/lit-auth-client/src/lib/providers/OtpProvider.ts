@@ -18,6 +18,7 @@ export class OtpProvider extends BaseProvider {
   private _port: string;
   private _startRoute: string;
   private _checkRoute: string;
+  private _verifyRoute: string;
   private _requestId: string = '';
 
   private _accessToken: string | undefined;
@@ -32,6 +33,7 @@ export class OtpProvider extends BaseProvider {
     this._port = config?.port || '443';
     this._startRoute = config?.startRoute || '/api/otp/start';
     this._checkRoute = config?.checkRoute || '/api/otp/check';
+    this._verifyRoute = config?.verifyRoute || '/api/otp/verify';
   }
 
   /**
@@ -69,7 +71,7 @@ export class OtpProvider extends BaseProvider {
     });
     let userId = resp.userId;
     let payload = parseJWT(this._accessToken);
-    let audience = payload['aud'];
+    let audience = (payload['orgId'] as string).toLowerCase() || 'lit';
     return {
       authMethodType: 7,
       authMethodId: `${userId}:${audience}`,
@@ -167,13 +169,16 @@ export class OtpProvider extends BaseProvider {
         return `${this._baseUrl}:${this._port}${this._startRoute}`;
       case 'check':
         return `${this._baseUrl}:${this._port}${this._checkRoute}`;
+
+      case `verify`:
+        return `${this._baseUrl}:${this._port}${this._verifyRoute}`;
       default:
         return '';
     }
   }
 
   async #verifyOtpJWT(jwt: string): Promise<OtpVerificationPayload> {
-    const res = await fetch(this._baseUrl + '/api/otp/verify', {
+    const res = await fetch(this._buildUrl('verify'), {
       redirect: 'error',
       method: 'POST',
       headers: {
