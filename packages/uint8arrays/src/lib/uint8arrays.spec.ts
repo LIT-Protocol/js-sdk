@@ -1,6 +1,5 @@
-import { base64ToUint8Array } from 'packages/uint8arrays/dist/src/lib/uint8arrays';
-import { uint8arrayFromString, uint8arrayToString } from './uint8arrays';
-import { base64StringToBlob } from '../../../misc-browser/src/lib/misc-browser';
+import { uint8arrayFromString, uint8arrayToString, base64ToUint8Array } from './uint8arrays';
+import { base64StringToBlob } from '@lit-protocol/misc-browser';
 
 describe('Encoding Functions', () => {
   const testCases = [
