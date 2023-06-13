@@ -1174,6 +1174,14 @@ export interface SignInWithOTPParams {
    * tracking for the session
    */
   requestId?: string;
+
+  /**
+   * Allows for specifying custom sender information
+   * Note: for most users the `from_name` is the configurable option and `from` should not be populated
+   */
+  emailCustomizationOptions: OtpEmailCustomizationOptions;
+
+  customName?: string;
 }
 
 export interface OtpProviderOptions {
@@ -1183,6 +1191,10 @@ export interface OtpProviderOptions {
   checkRoute?: string;
 }
 
+export interface OtpEmailCustomizationOptions {
+  from?: string;
+  fromName: string;
+}
 export interface BaseProviderSessionSigsParams {
   /**
    * Public key of PKP to auth with
