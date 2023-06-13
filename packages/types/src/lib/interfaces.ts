@@ -1162,14 +1162,7 @@ export interface SignInWithOTPParams {
    * used as the user ID for the auth method
    */
   userId: string;
-  /**
-   * Origin of the sign in request
-   */
-  origin?: string;
-  /**
-   * when the generated JWT expires
-   */
-  expiration?: string;
+
   /**
    * tracking for the session
    */
