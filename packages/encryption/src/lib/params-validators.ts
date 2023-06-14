@@ -3,18 +3,33 @@
  * returns a boolean value indicating whether the validation is passed or not.
  */
 
-import { LIT_ERROR } from '@lit-protocol/constants';
+import {
+  EITHER_TYPE,
+  ELeft,
+  ERight,
+  IEither,
+  LIT_ERROR,
+} from '@lit-protocol/constants';
 
 import {
+  AcceptedFileType,
+  AccessControlConditions,
+  AuthSig,
   DecryptFileProps,
-  JsonEncryptionRetrieveRequest,
-  JsonSaveEncryptionKeyRequest,
+  DecryptFromIpfsProps,
+  DecryptRequest,
   DecryptZipFileWithMetadataProps,
   EncryptFileAndZipWithMetadataProps,
+  EncryptFileRequest,
+  EncryptRequest,
+  EncryptStringRequest,
   EncryptToIpfsProps,
-  DecryptFromIpfsProps,
-  KV,
+  EncryptZipRequest,
+  EvmContractConditions,
   ExecuteJsProps,
+  SessionSigs,
+  SolRpcConditions,
+  UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
 import {
@@ -22,8 +37,8 @@ import {
   checkType,
   is,
   log,
-  throwError,
 } from '@lit-protocol/misc';
+import { isHexString } from 'ethers/lib/utils';
 
 export const safeParams = ({
   functionName,
@@ -31,72 +46,233 @@ export const safeParams = ({
 }: {
   functionName: string;
   params: any[] | any;
-}) => {
-  const validators = paramsValidators as KV;
-
-  const validator = validators[functionName](params);
-
-  if (!validator) {
+}): IEither<void> => {
+  if (!paramsValidators[functionName]) {
     log(`This function ${functionName} is skipping params safe guarding.`);
-    return true;
+    return ERight(undefined);
   }
 
-  return validator;
+  const paramValidators = paramsValidators[functionName](params);
+
+  for (const validator of paramValidators) {
+    const validationResponse = validator.validate();
+    if (validationResponse.type === EITHER_TYPE.ERROR) {
+      return validationResponse;
+    }
+  }
+
+  return ERight(undefined);
 };
 
-export const paramsValidators = {
-  executeJs: (params: ExecuteJsProps) => {
-    // -- prepare params
-    const {
-      code,
-      ipfsId,
-      authSig,
-      jsParams,
-      debug,
-      sessionSigs,
-      authMethods = [],
-    } = params;
+export const paramsValidators: {
+  [key: string]: (params: any) => ParamsValidator[];
+} = {
+  executeJs: (params: ExecuteJsProps) => [
+    new AuthMaterialValidator('executeJs', params),
+    new ExecuteJsValidator('executeJs', params),
+    new AuthMethodValidator('executeJs', params.authMethods),
+  ],
 
-    // -- validate: either 'code' or 'ipfsId' must exists
-    if (!code && !ipfsId) {
-      const message = 'You must pass either code or ipfsId';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
-        errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
-      });
-      return false;
+  encrypt: (params: EncryptRequest) => [
+    new AccessControlConditionsValidator('encrypt', params),
+    new AuthMaterialValidator('encrypt', params, true),
+  ],
+
+  encryptFile: (params: EncryptFileRequest) => [
+    new AccessControlConditionsValidator('encryptFile', params),
+    new AuthMaterialValidator('encryptFile', params),
+    new FileValidator('encryptFile', params.file),
+  ],
+
+  encryptString: (params: EncryptStringRequest) => [
+    new AccessControlConditionsValidator('encryptString', params),
+    new AuthMaterialValidator('encryptString', params, true),
+    new StringValidator(
+      'encryptString',
+      params.dataToEncrypt,
+      'dataToEncrypt',
+      true
+    ),
+  ],
+
+  encryptZip: (params: EncryptZipRequest) => [
+    new AccessControlConditionsValidator('encryptZip', params),
+    new AuthMaterialValidator('encryptZip', params),
+  ],
+
+  zipAndEncryptString: (params: EncryptStringRequest) => [
+    new StringValidator('zipAndEncryptString', params.dataToEncrypt),
+  ],
+
+  decrypt: (params: DecryptRequest) => [
+    new AccessControlConditionsValidator('decrypt', params),
+    new AuthMaterialValidator('decrypt', params, true),
+    new StringValidator('decrypt', params.ciphertext, 'ciphertext', true),
+  ],
+
+  decryptFile: (params: DecryptFileProps) => [
+    new FileValidator('decryptFile', params.file),
+  ],
+
+  decryptZipFileWithMetadata: (params: DecryptZipFileWithMetadataProps) => [
+    new AuthMaterialValidator('decryptZipFileWithMetadata', params),
+    new FileValidator('decryptZipFileWithMetadata', params.file),
+  ],
+
+  decryptZip: (params: any) => [
+    new FileValidator('decryptZip', params.encryptedZipBlob),
+  ],
+
+  encryptToIpfs: (params: EncryptToIpfsProps) => [
+    new AccessControlConditionsValidator('encryptToIpfs', params),
+    new AuthMaterialValidator('encryptToIpfs', params, true),
+    new IpfsValidator('encryptToIpfs', params),
+  ],
+
+  decryptFromIpfs: (params: DecryptFromIpfsProps) => [
+    new AuthMaterialValidator('decryptFromIpfs', params),
+  ],
+
+  encryptFileAndZipWithMetadata: (
+    params: EncryptFileAndZipWithMetadataProps
+  ) => [
+    new AuthMaterialValidator('encryptFileAndZipWithMetadata', params, true),
+    new AccessControlConditionsValidator(
+      'encryptFileAndZipWithMetadata',
+      params
+    ),
+    new FileValidator('encryptFileAndZipWithMetadata', params.file),
+    new StringValidator(
+      'encryptFileAndZipWithMetadata',
+      params.readme,
+      'readme'
+    ),
+  ],
+};
+
+export type ParamsValidatorsType = typeof paramsValidators;
+
+//////////////////////// VALIDATORS ////////////////////////
+
+interface ParamsValidator {
+  validate: () => IEither<void>;
+}
+
+class IpfsValidator implements ParamsValidator {
+  private fnName: string;
+  private params: EncryptToIpfsProps;
+
+  constructor(fnName: string, params: EncryptToIpfsProps) {
+    this.fnName = fnName;
+    this.params = params;
+  }
+
+  validate(): IEither<void> {
+    const validators = [
+      new FileValidator(this.fnName, this.params.file),
+      new StringValidator(this.fnName, this.params.string),
+    ];
+
+    for (const validator of validators) {
+      const validationResponse = validator.validate();
+      if (validationResponse.type === EITHER_TYPE.ERROR) {
+        return validationResponse;
+      }
     }
 
-    // -- validate: 'code' and 'ipfsId' can't exists at the same time
-    if (code && ipfsId) {
-      const message = "You cannot have both 'code' and 'ipfs' at the same time";
+    const { file, string, infuraId, infuraSecretKey } = this.params;
 
-      throwError({
-        message,
+    if (string === undefined && file === undefined)
+      return ELeft({
+        message: `Either string or file must be provided`,
         errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
         errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
-      return false;
+
+    if (!infuraId || !infuraSecretKey)
+      return ELeft({
+        message:
+          'Please provide your Infura Project Id and Infura API Key Secret to add the encrypted metadata on IPFS',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
+
+    if (string !== undefined && file !== undefined)
+      return ELeft({
+        message: 'Provide only either a string or file to encrypt',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
+
+    return ERight(undefined);
+  }
+}
+
+class StringValidator implements ParamsValidator {
+  private fnName: string;
+  private paramName: string;
+  private checkIsHex: boolean;
+  private str?: string;
+
+  constructor(
+    fnName: string,
+    str?: string,
+    paramName: string = 'string',
+    checkIsHex: boolean = false
+  ) {
+    this.fnName = fnName;
+    this.paramName = paramName;
+    this.checkIsHex = checkIsHex;
+    this.str = str;
+  }
+
+  validate(): IEither<void> {
+    if (!this.str) {
+      return ELeft({
+        message: 'string is undefined',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
     }
 
-    // -- validate: authSig and its type is correct
     if (
-      authSig &&
       !checkType({
-        value: authSig,
-        allowedTypes: ['Object'],
-        paramName: 'authSig',
-        functionName: 'executeJs',
+        value: this.str,
+        allowedTypes: ['String'],
+        paramName: this.paramName,
+        functionName: this.fnName,
       })
     )
-      return false;
+      return ELeft({
+        message: `${this.paramName} is not a string`,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
 
-    // -- validate: sessionSigs and its type is correct
-    if (sessionSigs && !is(sessionSigs, 'Object', 'sessionSigs', 'executeJs'))
-      return false;
+    if (this.checkIsHex && !isHexString(this.str)) {
+      return ELeft({
+        message: `${this.paramName} is not a valid hex string`,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
+    }
 
-    // -- validate: authMethods and its type is correct
+    return ERight(undefined);
+  }
+}
+
+class AuthMethodValidator implements ParamsValidator {
+  private fnName: string;
+  private authMethods?: Object[];
+
+  constructor(fnName: string, authMethods?: Object[]) {
+    this.fnName = fnName;
+    this.authMethods = authMethods;
+  }
+
+  validate(): IEither<void> {
+    const { fnName, authMethods } = this;
+
     if (
       authMethods &&
       authMethods.length > 0 &&
@@ -104,49 +280,197 @@ export const paramsValidators = {
         value: authMethods,
         allowedTypes: ['Array'],
         paramName: 'authMethods',
-        functionName: 'executeJs',
+        functionName: this.fnName,
       })
     )
-      return false;
+      return ELeft({
+        message: `authMethods is not an array`,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
 
-    // -- validate: if sessionSig or authSig exists
-    if (!sessionSigs && !authSig) {
-      throwError({
+    return ERight(undefined);
+  }
+}
+
+interface ExecuteJsValidatorProps {
+  code?: string;
+  ipfsId?: string;
+}
+
+class ExecuteJsValidator implements ParamsValidator {
+  private fnName: string;
+  private params: ExecuteJsValidatorProps;
+
+  constructor(fnName: string, params: ExecuteJsValidatorProps) {
+    this.fnName = fnName;
+    this.params = params;
+  }
+
+  validate(): IEither<void> {
+    const { code, ipfsId } = this.params;
+
+    // -- validate: either 'code' or 'ipfsId' must exists
+    if (!code && !ipfsId) {
+      return ELeft({
+        message: 'You must pass either code or ipfsId',
+        errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+        errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
+      });
+    }
+
+    // -- validate: 'code' and 'ipfsId' can't exists at the same time
+    if (code && ipfsId) {
+      return ELeft({
+        message: "You cannot have both 'code' and 'ipfs' at the same time",
+        errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+        errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
+      });
+    }
+
+    return ERight(undefined);
+  }
+}
+
+class FileValidator implements ParamsValidator {
+  private fnName: string;
+  private file?: AcceptedFileType;
+
+  constructor(fnName: string, file?: AcceptedFileType) {
+    this.fnName = fnName;
+    this.file = file;
+  }
+
+  validate(): IEither<void> {
+    if (!this.file) {
+      return ELeft({
+        message: 'You must pass file param',
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    if (
+      !checkType({
+        value: this.file,
+        allowedTypes: ['Blob', 'File'],
+        paramName: 'file',
+        functionName: this.fnName,
+      })
+    )
+      return ELeft({
+        message: 'File param is not a valid Blob or File object',
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+
+    return ERight(undefined);
+  }
+}
+
+export interface AuthMaterialValidatorProps {
+  authSig?: AuthSig;
+  sessionSigs?: SessionSigs;
+  chain?: string;
+}
+
+class AuthMaterialValidator implements ParamsValidator {
+  private fnName: string;
+  private authMaterial: AuthMaterialValidatorProps;
+  private checkIfAuthSigRequiresChainParam: boolean;
+
+  constructor(
+    fnName: string,
+    params: AuthMaterialValidatorProps,
+    checkIfAuthSigRequiresChainParam: boolean = false
+  ) {
+    this.fnName = fnName;
+    this.authMaterial = params;
+    this.checkIfAuthSigRequiresChainParam = checkIfAuthSigRequiresChainParam;
+  }
+
+  validate(): IEither<void> {
+    const { authSig, sessionSigs } = this.authMaterial;
+
+    if (authSig && !is(authSig, 'Object', 'authSig', this.fnName))
+      return ELeft({
+        message: 'authSig is not an object',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
+
+    if (this.checkIfAuthSigRequiresChainParam) {
+      if (!this.authMaterial.chain)
+        return ELeft({
+          message: 'You must pass chain param',
+          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        });
+
+      if (
+        authSig &&
+        !checkIfAuthSigRequiresChainParam(
+          authSig,
+          this.authMaterial.chain,
+          this.fnName
+        )
+      )
+        return ELeft({
+          message: 'authSig is not valid',
+          errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+          errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+        });
+    }
+
+    if (sessionSigs && !is(sessionSigs, 'Object', 'sessionSigs', this.fnName))
+      return ELeft({
+        message: 'sessionSigs is not an object',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
+
+    if (!sessionSigs && !authSig)
+      return ELeft({
         message: 'You must pass either authSig or sessionSigs',
         errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
-      return false;
-    }
 
     // -- validate: if sessionSig and authSig exists
-    if (sessionSigs && authSig) {
-      throwError({
-        message: 'You must pass only one authSig or sessionSigs',
+    if (sessionSigs && authSig)
+      return ELeft({
+        message: 'You cannot have both authSig and sessionSigs',
         errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
-      return false;
-    }
 
-    return true;
-  },
+    return ERight(undefined);
+  }
+}
 
-  saveEncryptionKey: (params: JsonSaveEncryptionKeyRequest) => {
-    // -- prepare params
+export interface AccessControlConditionsValidatorProps {
+  accessControlConditions?: AccessControlConditions;
+  evmContractConditions?: EvmContractConditions;
+  solRpcConditions?: SolRpcConditions;
+  unifiedAccessControlConditions?: UnifiedAccessControlConditions;
+}
+
+class AccessControlConditionsValidator implements ParamsValidator {
+  private fnName: string;
+  private conditions: AccessControlConditionsValidatorProps;
+
+  constructor(fnName: string, params: AccessControlConditionsValidatorProps) {
+    this.fnName = fnName;
+    this.conditions = params;
+  }
+
+  validate(): IEither<void> {
     const {
       accessControlConditions,
       evmContractConditions,
       solRpcConditions,
       unifiedAccessControlConditions,
-      authSig,
-      chain,
-      symmetricKey,
-      encryptedSymmetricKey,
-      permanant,
-      permanent,
-      sessionSigs,
-    } = params;
+    } = this.conditions;
 
     if (
       accessControlConditions &&
@@ -154,668 +478,62 @@ export const paramsValidators = {
         accessControlConditions,
         'Array',
         'accessControlConditions',
-        'saveEncryptionKey'
+        this.fnName
       )
     )
-      return false;
+      return ELeft({
+        message: 'accessControlConditions is not an array',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
     if (
       evmContractConditions &&
-      !is(
-        evmContractConditions,
-        'Array',
-        'evmContractConditions',
-        'saveEncryptionKey'
-      )
+      !is(evmContractConditions, 'Array', 'evmContractConditions', this.fnName)
     )
-      return false;
+      return ELeft({
+        message: 'evmContractConditions is not an array',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
+
     if (
       solRpcConditions &&
-      !is(solRpcConditions, 'Array', 'solRpcConditions', 'saveEncryptionKey')
+      !is(solRpcConditions, 'Array', 'solRpcConditions', this.fnName)
     )
-      return false;
+      return ELeft({
+        message: 'solRpcConditions is not an array',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
+
     if (
       unifiedAccessControlConditions &&
       !is(
         unifiedAccessControlConditions,
         'Array',
         'unifiedAccessControlConditions',
-        'saveEncryptionKey'
+        this.fnName
       )
     )
-      return false;
-
-    // log('authSig:', authSig);
-    if (authSig && !is(authSig, 'Object', 'authSig', 'saveEncryptionKey'))
-      return false;
-    if (
-      authSig &&
-      !checkIfAuthSigRequiresChainParam(authSig, chain, 'saveEncryptionKey')
-    )
-      return false;
-
-    if (
-      sessionSigs &&
-      !is(sessionSigs, 'Object', 'sessionSigs', 'saveEncryptionKey')
-    )
-      return false;
-
-    if (!sessionSigs && !authSig) {
-      throwError({
-        message: 'You must pass either authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      return ELeft({
+        message: 'unifiedAccessControlConditions is not an array',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
-      return false;
-    }
-
-    if (
-      symmetricKey &&
-      !is(symmetricKey, 'Uint8Array', 'symmetricKey', 'saveEncryptionKey')
-    )
-      return false;
-    if (
-      encryptedSymmetricKey &&
-      !is(
-        encryptedSymmetricKey,
-        'Uint8Array',
-        'encryptedSymmetricKey',
-        'saveEncryptionKey'
-      )
-    )
-      return false;
-
-    // to fix spelling mistake
-    if (typeof params.permanant !== 'undefined') {
-      params.permanent = params.permanant;
-    }
-
-    if (
-      (!symmetricKey || symmetricKey == '') &&
-      (!encryptedSymmetricKey || encryptedSymmetricKey == '')
-    ) {
-      throw new Error(
-        'symmetricKey and encryptedSymmetricKey are blank.  You must pass one or the other'
-      );
-    }
 
     if (
       !accessControlConditions &&
       !evmContractConditions &&
       !solRpcConditions &&
       !unifiedAccessControlConditions
-    ) {
-      throw new Error(
-        'accessControlConditions and evmContractConditions and solRpcConditions and unifiedAccessControlConditions are blank'
-      );
-    }
-
-    // -- validate: if sessionSig and authSig exists
-    if (sessionSigs && authSig) {
-      throwError({
-        message: 'You must pass only one authSig or sessionSigs',
+    )
+      return ELeft({
+        message:
+          'You must pass either accessControlConditions, evmContractConditions, solRpcConditions or unifiedAccessControlConditions',
         errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
-      return false;
-    }
 
-    //   -- case: success
-    return true;
-  },
-
-  getEncryptionKey: (params: JsonEncryptionRetrieveRequest) => {
-    const {
-      accessControlConditions,
-      evmContractConditions,
-      solRpcConditions,
-      unifiedAccessControlConditions,
-      toDecrypt,
-      authSig,
-      chain,
-      sessionSigs,
-    } = params;
-
-    // -- validate
-    if (
-      accessControlConditions &&
-      !is(
-        accessControlConditions,
-        'Array',
-        'accessControlConditions',
-        'getEncryptionKey'
-      )
-    )
-      return false;
-
-    if (
-      evmContractConditions &&
-      !is(
-        evmContractConditions,
-        'Array',
-        'evmContractConditions',
-        'getEncryptionKey'
-      )
-    )
-      return false;
-
-    if (
-      solRpcConditions &&
-      !is(solRpcConditions, 'Array', 'solRpcConditions', 'getEncryptionKey')
-    )
-      return false;
-
-    if (
-      unifiedAccessControlConditions &&
-      !is(
-        unifiedAccessControlConditions,
-        'Array',
-        'unifiedAccessControlConditions',
-        'getEncryptionKey'
-      )
-    )
-      return false;
-
-    log('TYPEOF toDecrypt in getEncryptionKey():', typeof toDecrypt);
-    if (!is(toDecrypt, 'String', 'toDecrypt', 'getEncryptionKey')) return false;
-    if (authSig && !is(authSig, 'Object', 'authSig', 'getEncryptionKey'))
-      return false;
-    if (
-      sessionSigs &&
-      !is(sessionSigs, 'Object', 'sessionSigs', 'getEncryptionKey')
-    )
-      return false;
-
-    // -- validate: if sessionSig or authSig exists
-    if (!sessionSigs && !authSig) {
-      throwError({
-        message: 'You must pass either authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      return false;
-    }
-
-    // -- validate: if sessionSig and authSig exists
-    if (sessionSigs && authSig) {
-      throwError({
-        message: 'You must pass only one authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      return false;
-    }
-
-    // -- validate if 'chain' is null
-    if (!chain) {
-      return false;
-    }
-
-    if (
-      authSig &&
-      !checkIfAuthSigRequiresChainParam(authSig, chain, 'getEncryptionKey')
-    )
-      return false;
-
-    return true;
-  },
-
-  decryptString: (params: any) => {
-    const encryptedStringBlob: Blob = params[0];
-    const symmKey: Uint8Array = params[1];
-
-    // -- validate
-    if (
-      !checkType({
-        value: encryptedStringBlob,
-        allowedTypes: ['Blob', 'File'],
-        paramName: 'encryptedStringBlob',
-        functionName: 'decryptString',
-      })
-    )
-      return false;
-
-    if (
-      !checkType({
-        value: symmKey,
-        allowedTypes: ['Uint8Array'],
-        paramName: 'symmKey',
-        functionName: 'decryptString',
-      })
-    )
-      return false;
-
-    // -- success
-    return true;
-  },
-
-  decryptFile: (params: DecryptFileProps) => {
-    // -- validate
-    if (
-      !checkType({
-        value: params.file,
-        allowedTypes: ['Blob', 'File'],
-        paramName: 'file',
-        functionName: 'decryptFile',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      !checkType({
-        value: params.symmetricKey,
-        allowedTypes: ['Uint8Array'],
-        paramName: 'symmetricKey',
-        functionName: 'decryptFile',
-      })
-    )
-      return false;
-
-    return true;
-  },
-
-  decryptZipFileWithMetadata: (params: DecryptZipFileWithMetadataProps) => {
-    // -- validate
-    if (
-      params.authSig &&
-      !checkType({
-        value: params.authSig,
-        allowedTypes: ['Object'],
-        paramName: 'authSig',
-        functionName: 'decryptZipFileWithMetadata',
-      })
-    )
-      return false;
-
-    // -- validate: sessionSigs and its type is correct
-    if (
-      params.sessionSigs &&
-      !is(
-        params.sessionSigs,
-        'Object',
-        'sessionSigs',
-        'decryptZipFileWithMetadata'
-      )
-    )
-      return false;
-
-    // -- validate: if sessionSig or authSig exists
-    if (!params.sessionSigs && !params.authSig) {
-      throwError({
-        message: 'You must pass either authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      return false;
-    }
-
-    // -- validate: if sessionSig and authSig exists
-    if (params.sessionSigs && params.authSig) {
-      throwError({
-        message: 'You must pass only one authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      return false;
-    }
-
-    // -- validate
-    if (
-      !checkType({
-        value: params.file,
-        allowedTypes: ['Blob', 'File'],
-        paramName: 'file',
-        functionName: 'decryptZipFileWithMetadata',
-      })
-    )
-      return false;
-
-    // -- success case
-    return true;
-  },
-
-  decryptZip: (params: any) => {
-    const { encryptedZipBlob, symmKey } = params;
-
-    log('encryptedZipBlob:', encryptedZipBlob);
-
-    // -- validate
-    if (
-      !checkType({
-        value: encryptedZipBlob,
-        allowedTypes: ['Blob', 'File'],
-        paramName: 'encryptedZipBlob',
-        functionName: 'decryptZip',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      !checkType({
-        value: symmKey,
-        allowedTypes: ['Uint8Array'],
-        paramName: 'symmKey',
-        functionName: 'decryptZip',
-      })
-    )
-      return false;
-
-    return true;
-  },
-
-  encryptToIpfs: (params: EncryptToIpfsProps) => {
-    // -- validate
-
-    log('params:', params);
-
-    if (
-      params.authSig &&
-      !checkType({
-        value: params.authSig,
-        allowedTypes: ['Object'],
-        paramName: 'authSig',
-        functionName: 'encryptToIpfs',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.accessControlConditions &&
-      !checkType({
-        value: params.accessControlConditions,
-        allowedTypes: ['Array'],
-        paramName: 'accessControlConditions',
-        functionName: 'encryptToIpfs',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.evmContractConditions &&
-      !checkType({
-        value: params.evmContractConditions,
-        allowedTypes: ['Array'],
-        paramName: 'evmContractConditions',
-        functionName: 'encryptToIpfs',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.solRpcConditions &&
-      !checkType({
-        value: params.solRpcConditions,
-        allowedTypes: ['Array'],
-        paramName: 'solRpcConditions',
-        functionName: 'encryptToIpfs',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.unifiedAccessControlConditions &&
-      !checkType({
-        value: params.unifiedAccessControlConditions,
-        allowedTypes: ['Array'],
-        paramName: 'unifiedAccessControlConditions',
-        functionName: 'encryptToIpfs',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.authSig &&
-      !checkIfAuthSigRequiresChainParam(
-        params.authSig,
-        params.chain,
-        'encryptToIpfs'
-      )
-    )
-      return false;
-
-    // -- validate: sessionSigs and its type is correct
-    if (
-      params.sessionSigs &&
-      !is(params.sessionSigs, 'Object', 'sessionSigs', 'encryptToIpfs')
-    )
-      return false;
-
-    // -- validate: if sessionSig or authSig exists
-    if (!params.sessionSigs && !params.authSig) {
-      throwError({
-        message: 'You must pass either authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      return false;
-    }
-
-    // -- validate: if sessionSig and authSig exists
-    if (params.sessionSigs && params.authSig) {
-      throwError({
-        message: 'You must pass only one authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      return false;
-    }
-
-    // -- validate
-    if (
-      params.string !== undefined &&
-      !checkType({
-        value: params.string,
-        allowedTypes: ['String'],
-        paramName: 'string',
-        functionName: 'encryptToIpfs',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.file !== undefined &&
-      !checkType({
-        value: params.file,
-        allowedTypes: ['Blob', 'File'],
-        paramName: 'file',
-        functionName: 'encryptToIpfs',
-      })
-    )
-      return false;
-
-    // -- success case
-    return true;
-  },
-
-  decryptFromIpfs: (params: DecryptFromIpfsProps) => {
-    // -- validate
-
-    log('params:', params);
-
-    if (
-      params.authSig &&
-      !checkType({
-        value: params.authSig,
-        allowedTypes: ['Object'],
-        paramName: 'authSig',
-        functionName: 'decryptFromIpfs',
-      })
-    )
-      return false;
-
-    // -- validate: sessionSigs and its type is correct
-    if (
-      params.sessionSigs &&
-      !is(params.sessionSigs, 'Object', 'sessionSigs', 'decryptFromIpfs')
-    )
-      return false;
-
-    // -- validate: if sessionSig or authSig exists
-    if (!params.sessionSigs && !params.authSig) {
-      throwError({
-        message: 'You must pass either authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      return false;
-    }
-
-    // -- validate: if sessionSig and authSig exists
-    if (params.sessionSigs && params.authSig) {
-      throwError({
-        message: 'You must pass only one authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      return false;
-    }
-
-    // -- success case
-    return true;
-  },
-
-  encryptFileAndZipWithMetadata: (
-    params: EncryptFileAndZipWithMetadataProps
-  ) => {
-    // -- validate
-
-    log('params:', params);
-
-    if (
-      params.authSig &&
-      !checkType({
-        value: params.authSig,
-        allowedTypes: ['Object'],
-        paramName: 'authSig',
-        functionName: 'encryptFileAndZipWithMetadata',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.accessControlConditions &&
-      !checkType({
-        value: params.accessControlConditions,
-        allowedTypes: ['Array'],
-        paramName: 'accessControlConditions',
-        functionName: 'encryptFileAndZipWithMetadata',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.evmContractConditions &&
-      !checkType({
-        value: params.evmContractConditions,
-        allowedTypes: ['Array'],
-        paramName: 'evmContractConditions',
-        functionName: 'encryptFileAndZipWithMetadata',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.solRpcConditions &&
-      !checkType({
-        value: params.solRpcConditions,
-        allowedTypes: ['Array'],
-        paramName: 'solRpcConditions',
-        functionName: 'encryptFileAndZipWithMetadata',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.unifiedAccessControlConditions &&
-      !checkType({
-        value: params.unifiedAccessControlConditions,
-        allowedTypes: ['Array'],
-        paramName: 'unifiedAccessControlConditions',
-        functionName: 'encryptFileAndZipWithMetadata',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.authSig &&
-      !checkIfAuthSigRequiresChainParam(
-        params.authSig,
-        params.chain,
-        'encryptFileAndZipWithMetadata'
-      )
-    )
-      return false;
-
-    // -- validate: sessionSigs and its type is correct
-    if (
-      params.sessionSigs &&
-      !is(
-        params.sessionSigs,
-        'Object',
-        'sessionSigs',
-        'encryptFileAndZipWithMetadata'
-      )
-    )
-      return false;
-
-    // -- validate: if sessionSig or authSig exists
-    if (!params.sessionSigs && !params.authSig) {
-      throwError({
-        message: 'You must pass either authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      return false;
-    }
-
-    // -- validate: if sessionSig and authSig exists
-    if (params.sessionSigs && params.authSig) {
-      throwError({
-        message: 'You must pass only one authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      return false;
-    }
-
-    // -- validate
-    if (
-      !checkType({
-        value: params.file,
-        allowedTypes: ['File'],
-        paramName: 'file',
-        functionName: 'encryptFileAndZipWithMetadata',
-      })
-    )
-      return false;
-
-    // -- validate
-    if (
-      params.readme &&
-      !checkType({
-        value: params.readme,
-        allowedTypes: ['String'],
-        paramName: 'readme',
-        functionName: 'encryptFileAndZipWithMetadata',
-      })
-    )
-      return false;
-
-    // -- success case
-    return true;
-  },
-};
-
-export type ParamsValidatorsType = typeof paramsValidators;
+    return ERight(undefined);
+  }
+}
