@@ -140,12 +140,12 @@ describe('LitNodeClientNodeJs', () => {
     expect(litNodeClient.config.litNetwork).toBe('serrano');
   });
 
-  it('should be able to instantiate a new LitNodeClientNodeJs to jalapeno', async () => {
+  it('should be able to instantiate a new LitNodeClientNodeJs to serrano', async () => {
     const litNodeClient = new LitNodeClientNodeJs({
-      litNetwork: 'jalapeno',
+      litNetwork: 'serrano',
     });
     await litNodeClient.connect();
-    expect(litNodeClient.config.litNetwork).toBe('jalapeno');
+    expect(litNodeClient.config.litNetwork).toBe('serrano');
   });
 
   it('should be able to instantiate a new LitNodeClientNodeJs to localhost', async () => {

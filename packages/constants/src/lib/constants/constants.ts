@@ -568,18 +568,6 @@ export const SYMM_KEY_ALGO_PARAMS = {
  *
  */
 export const LIT_NETWORKS = {
-  jalapeno: [
-    'https://node2.litgateway.com:7370',
-    'https://node2.litgateway.com:7371',
-    'https://node2.litgateway.com:7372',
-    'https://node2.litgateway.com:7373',
-    'https://node2.litgateway.com:7374',
-    'https://node2.litgateway.com:7375',
-    'https://node2.litgateway.com:7376',
-    'https://node2.litgateway.com:7377',
-    'https://node2.litgateway.com:7378',
-    'https://node2.litgateway.com:7379',
-  ],
   serrano: [
     'https://serrano.litgateway.com:7370',
     'https://serrano.litgateway.com:7371',
