@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { wasmBlsSdkHelpers, initWasmBlsSdk } from '@lit-protocol/bls-sdk';
+import * as blsSdk from '@lit-protocol/bls-sdk';
 
 import {
   LIT_ERROR,
@@ -18,12 +18,11 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-// import nacl from 'tweetnacl';
 import { nacl } from '@lit-protocol/nacl';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
-  initWasmBlsSdk().then((exports) => {
+  blsSdk.initWasmBlsSdk().then((exports) => {
     globalThis.wasmExports = exports;
 
     if (!globalThis.jestTesting) {
@@ -63,134 +62,108 @@ if (!globalThis.wasmECDSA) {
 /** ---------- Exports ---------- */
 
 /**
+ * Encrypt data with a BLS public key.
  *
- * Generate a new random symmetric key using WebCrypto subtle API.  You should only use this if you're handling your own key generation and management with Lit.  Typically, Lit handles this internally for you.
- *
- * @returns { Promise<CryptoKey> } A promise that resolves to the generated key
+ * @param publicKey hex-encoded string of the BLS public key to encrypt with
+ * @param data Uint8Array of the data to encrypt
+ * @param identity Uint8Array of the identity parameter used during encryption
+ * @returns base64 encoded string of the ciphertext
  */
-export const generateSymmetricKey = async (): Promise<CryptoKey> => {
-  const symmKey = await crypto.subtle.generateKey(SYMM_KEY_ALGO_PARAMS, true, [
-    'encrypt',
-    'decrypt',
-  ]);
-
-  return symmKey;
+export const encrypt = (
+  publicKey: string,
+  data: Uint8Array,
+  identity: Uint8Array
+): string => {
+  return blsSdk.encrypt(
+    publicKey,
+    uint8arrayToString(data, 'base16'),
+    uint8arrayToString(identity, 'base16')
+  );
 };
 
 /**
+ * Decrypt ciphertext using BLS signature shares.
  *
- * Encrypt a blob with a symmetric key
- *
- * @param { CryptoKey } symmKey The symmetric key
- * @param { BufferSource | Uint8Array } data The blob to encrypt
- *
- * @returns { Promise<Blob> } The encrypted blob
+ * @param ciphertext base64-encoded string of the ciphertext to decrypt
+ * @param shares hex-encoded array of the BLS signature shares
+ * @returns Uint8Array of the decrypted data
  */
-export const encryptWithSymmetricKey = async (
-  symmKey: CryptoKey,
-  data: BufferSource | Uint8Array
-): Promise<Blob> => {
-  // encrypt the zip with symmetric key
-  const iv = crypto.getRandomValues(new Uint8Array(16));
-
-  const encryptedZipData = await crypto.subtle.encrypt(
-    {
-      name: 'AES-CBC',
-      iv,
-    },
-    symmKey,
-    data
+export const decryptWithSignatureShares = (
+  ciphertext: string,
+  shares: string[]
+): Uint8Array => {
+  // Format the signature shares
+  const sigShares = shares.map((s) =>
+    shares.map((s) => {
+      JSON.stringify({
+        ProofOfPossession: s,
+      });
+    })
   );
 
-  const encryptedZipBlob = new Blob([iv, new Uint8Array(encryptedZipData)], {
-    type: 'application/octet-stream',
-  });
-
-  return encryptedZipBlob;
-};
-
-/**
- *
- * Import a symmetric key from a Uint8Array to a webcrypto key.  You should only use this if you're handling your own key generation and management with Lit.  Typically, Lit handles this internally for you.
- *
- * @param { Uint8Array } symmKey The symmetric key to import
- *
- * @returns { Promise<CryptoKey> } A promise that resolves to the imported key
- */
-export const importSymmetricKey = async (
-  symmKey: SymmetricKey
-): Promise<CryptoKey> => {
-  const importedSymmKey = await crypto.subtle.importKey(
-    'raw',
-    symmKey,
-    SYMM_KEY_ALGO_PARAMS,
-    true,
-    ['encrypt', 'decrypt']
-  );
-
-  return importedSymmKey;
-};
-
-/**
- *
- * Decrypt an encrypted blob with a symmetric key.  Uses AES-CBC via SubtleCrypto
- *
- * @param { Blob } encryptedBlob The encrypted blob that should be decrypted
- * @param { CryptoKey } symmKey The symmetric key
- *
- * @returns { Uint8Array } The decrypted blob
- */
-export const decryptWithSymmetricKey = async (
-  encryptedBlob: Blob,
-  symmKey: CryptoKey
-): Promise<Uint8Array> => {
-  const recoveredIv = await encryptedBlob.slice(0, 16).arrayBuffer();
-  const encryptedZipArrayBuffer = await encryptedBlob.slice(16).arrayBuffer();
-  const decryptedZip = await crypto.subtle.decrypt(
-    {
-      name: 'AES-CBC',
-      iv: recoveredIv,
-    },
-    symmKey,
-    encryptedZipArrayBuffer
-  );
-
-  return decryptedZip as Uint8Array;
-};
-
-/**
- *
- * Combine BLS Shares
- *
- * @param { Array<SigShare> } sigSharesWithEverything
- * @param { string } networkPubKeySet
- *
- * @returns { any }
- *
- */
-export const combineBlsShares = (
-  sigSharesWithEverything: Array<SigShare>,
-  networkPubKeySet: string
-): any => {
-  const pkSetAsBytes = uint8arrayFromString(networkPubKeySet, 'base16');
-
-  log('pkSetAsBytes', pkSetAsBytes);
-
-  const sigShares = sigSharesWithEverything.map((s: any) => ({
-    shareHex: s.shareHex,
-    shareIndex: s.shareIndex,
-  }));
-
-  const combinedSignatures = wasmBlsSdkHelpers.combine_signatures(
-    pkSetAsBytes,
+  // Decrypt
+  const privateData = blsSdk.decrypt_with_signature_shares(
+    ciphertext,
     sigShares
   );
 
-  const signature = uint8arrayToString(combinedSignatures, 'base16');
+  // Format
+  return uint8arrayFromString(privateData, 'base64');
+};
 
-  log('signature is ', signature);
+/**
+ * Verify and decrypt ciphertext using BLS signature shares.
+ *
+ * @param publicKey hex-encoded string of the BLS public key to verify with
+ * @param identity Uint8Array of the identity parameter used during encryption
+ * @param ciphertext base64-encoded string of the ciphertext to decrypt
+ * @param shares hex-encoded array of the BLS signature shares
+ * @returns base64-encoded string of the decrypted data
+ */
+export const verifyAndDecryptWithSignatureShares = (
+  publicKey: string,
+  identity: Uint8Array,
+  ciphertext: string,
+  shares: string[]
+): Uint8Array => {
+  // Format the signature shares
+  const sigShares = shares.map((s) =>
+    shares.map((s) => {
+      JSON.stringify({
+        ProofOfPossession: s,
+      });
+    })
+  );
 
-  return { signature };
+  // Decrypt
+  const privateData = blsSdk.verify_and_decrypt_with_signature_shares(
+    publicKey,
+    identity,
+    ciphertext,
+    sigShares
+  );
+
+  // Format
+  return uint8arrayFromString(privateData, 'base64');
+};
+
+/**
+ * Combine BLS signature shares.
+ *
+ * @param shares hex-encoded array of the BLS signature shares
+ * @returns hex-encoded string of the combined signature
+ */
+export const combineSignatureShares = (shares: string[]): string => {
+  // Format the signature shares
+  const sigShares = shares.map((s) =>
+    shares.map((s) => {
+      JSON.stringify({
+        ProofOfPossession: s,
+      });
+    })
+  );
+
+  return blsSdk.combine_signature_shares(sigShares);
 };
 
 /**
@@ -251,55 +224,6 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   log('signature', sig);
 
   return sig;
-};
-
-/**
- * //TODO: Fix 'any' types
- * Combine BLS Decryption Shares
- *
- * @param { Array<any> } decryptionShares
- * @param { string } networkPubKeySet
- * @param { string } toDecrypt
- * @param { any } provider
- *
- * @returns { any }
- *
- */
-export const combineBlsDecryptionShares = (
-  decryptionShares: Array<any>,
-  networkPubKeySet: string,
-  toDecrypt: string
-): any => {
-  // -- sort the decryption shares by share index.  this is important when combining the shares.
-  decryptionShares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
-
-  // set decryption shares bytes in wasm
-  decryptionShares.forEach((s: any, idx: any) => {
-    wasmExports.set_share_indexes(idx, s.shareIndex);
-    const shareAsBytes = uint8arrayFromString(s.decryptionShare, 'base16');
-    for (let i = 0; i < shareAsBytes.length; i++) {
-      wasmExports.set_decryption_shares_byte(i, idx, shareAsBytes[i]);
-    }
-  });
-
-  // -- set the public key set bytes in wasm
-  const pkSetAsBytes = uint8arrayFromString(networkPubKeySet, 'base16');
-  wasmBlsSdkHelpers.set_mc_bytes(pkSetAsBytes);
-
-  // -- set the ciphertext bytes
-  const ciphertextAsBytes = uint8arrayFromString(toDecrypt, 'base16');
-  for (let i = 0; i < ciphertextAsBytes.length; i++) {
-    wasmExports.set_ct_byte(i, ciphertextAsBytes[i]);
-  }
-
-  // ========== Result ==========
-  const decrypted = wasmBlsSdkHelpers.combine_decryption_shares(
-    decryptionShares.length,
-    pkSetAsBytes.length,
-    ciphertextAsBytes.length
-  );
-
-  return decrypted;
 };
 
 /**
