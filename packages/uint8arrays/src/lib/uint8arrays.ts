@@ -123,7 +123,10 @@ function base64ToBase64UrlPad(base64Str: string): string {
   return base64Str.replace('+', '-').replace('/', '_').replace(/=+$/, '');
 }
 
-export function uint8arrayFromString(str: string, encoding = 'utf8') {
+export function uint8arrayFromString(
+  str: string,
+  encoding = 'utf8'
+): Uint8Array {
   switch (encoding) {
     case 'utf8':
       return utf8Encode(str);
@@ -142,7 +145,10 @@ export function uint8arrayFromString(str: string, encoding = 'utf8') {
   }
 }
 
-export function uint8arrayToString(uint8array: Uint8Array, encoding = 'utf8') {
+export function uint8arrayToString(
+  uint8array: Uint8Array,
+  encoding = 'utf8'
+): string {
   let _uint8array = new Uint8Array(uint8array);
 
   switch (encoding) {
