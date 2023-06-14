@@ -19,6 +19,7 @@ import {
 } from '@lit-protocol/uint8arrays';
 
 import { nacl } from '@lit-protocol/nacl';
+import { uint8ArrayToBase64 } from 'packages/uint8arrays/src/lib/uint8arrays';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
@@ -134,7 +135,7 @@ export const verifyAndDecryptWithSignatureShares = (
   // Decrypt
   const privateData = blsSdk.verify_and_decrypt_with_signature_shares(
     publicKey,
-    identity,
+    uint8ArrayToBase64(identity),
     ciphertext,
     sigShares
   );
