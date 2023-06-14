@@ -10,75 +10,25 @@ import {
   hashSolRpcConditions,
   hashUnifiedAccessControlConditions,
 } from '@lit-protocol/access-control-conditions';
-import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 
 import {
-  defaultLitnodeClientConfig,
-  LIT_ERROR,
-  LIT_NETWORKS,
-  LOCAL_STORAGE_KEYS,
-  SIGTYPE,
-  version,
-  LIT_SESSION_KEY_URI,
   AUTH_METHOD_TYPE_IDS,
-  LIT_ERROR_CODE,
   EITHER_TYPE,
+  LIT_ERROR,
+  LIT_ERROR_CODE,
+  LIT_NETWORKS,
+  LIT_SESSION_KEY_URI,
+  LOCAL_STORAGE_KEYS,
+  defaultLitnodeClientConfig,
+  version,
 } from '@lit-protocol/constants';
 
 import {
-  CustomNetwork,
-  DecryptedData,
-  ExecuteJsProps,
-  ExecuteJsResponse,
-  FormattedMultipleAccs,
-  GetSessionSigsProps,
-  GetSignSessionKeySharesProp,
-  HandshakeWithSgx,
-  AuthSig,
-  JsonEncryptionRetrieveRequest,
-  JsonExecutionRequest,
-  JsonHandshakeResponse,
-  JsonSaveEncryptionKeyRequest,
-  JsonSignChainDataRequest,
-  JsonSigningRetrieveRequest,
-  JsonSigningStoreRequest,
-  JsonStoreSigningRequest,
-  KV,
-  LitNodeClientConfig,
-  NodeCommandResponse,
-  NodeCommandServerKeysResponse,
-  NodeLog,
-  NodePromiseResponse,
-  NodeResponse,
-  NodeShare,
-  RejectedNodePromises,
-  SendNodeCommand,
-  SessionKeyPair,
-  SessionSigningTemplate,
-  SignedChainDataToken,
-  SignedData,
-  SignSessionKeyProp,
-  SigShare,
-  SignConditionECDSA,
-  SuccessNodePromises,
-  SupportedJsonRequests,
-  ValidateAndSignECDSA,
-  AuthCallbackParams,
-  WebAuthnAuthenticationVerificationParams,
-  AuthMethod,
-  SignSessionKeyResponse,
-  NodeClientErrorV0,
-  NodeClientErrorV1,
-  GetWalletSigProps,
-  SessionSigsMap,
-  SessionSig,
-  AuthCallback,
-} from '@lit-protocol/types';
-import {
-  combineBlsDecryptionShares,
-  combineBlsShares,
   combineEcdsaShares,
+  combineSignatureShares,
+  encrypt,
   generateSessionKeyPair,
+  verifyAndDecryptWithSignatureShares,
 } from '@lit-protocol/crypto';
 import { safeParams } from '@lit-protocol/encryption';
 import {
@@ -89,31 +39,82 @@ import {
   throwError,
 } from '@lit-protocol/misc';
 import {
+  AuthCallback,
+  AuthCallbackParams,
+  AuthMethod,
+  AuthSig,
+  CustomNetwork,
+  DecryptRequest,
+  DecryptResponse,
+  EncryptRequest,
+  EncryptResponse,
+  ExecuteJsProps,
+  ExecuteJsResponse,
+  FormattedMultipleAccs,
+  GetSessionSigsProps,
+  GetSignSessionKeySharesProp,
+  GetSigningShareForDecryptionRequest,
+  GetWalletSigProps,
+  HandshakeWithSgx,
+  JsonExecutionRequest,
+  JsonHandshakeResponse,
+  JsonSignChainDataRequest,
+  JsonSigningRetrieveRequest,
+  JsonSigningStoreRequest,
+  JsonStoreSigningRequest,
+  KV,
+  LitNodeClientConfig,
+  NodeClientErrorV0,
+  NodeClientErrorV1,
+  NodeCommandResponse,
+  NodeCommandServerKeysResponse,
+  NodeLog,
+  NodePromiseResponse,
+  NodeResponse,
+  NodeShare,
+  RejectedNodePromises,
+  SendNodeCommand,
+  SessionKeyPair,
+  SessionSig,
+  SessionSigningTemplate,
+  SessionSigsMap,
+  SigShare,
+  SignConditionECDSA,
+  SignSessionKeyProp,
+  SignSessionKeyResponse,
+  SignedChainDataToken,
+  SignedData,
+  SuccessNodePromises,
+  SupportedJsonRequests,
+  ValidateAndSignECDSA,
+  WebAuthnAuthenticationVerificationParams,
+} from '@lit-protocol/types';
+import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
 import { computeAddress } from '@ethersproject/transactions';
-import { SiweMessage } from 'lit-siwe';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
+import { SiweMessage } from 'lit-siwe';
 
 import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
-import { nacl } from '@lit-protocol/nacl';
+import {
+  ILitResource,
+  ISessionCapabilityObject,
+  LitAccessControlConditionResource,
+  LitResourceAbilityRequest,
+  decode,
+  newSessionCapabilityObject,
+} from '@lit-protocol/auth-helpers';
 import {
   getStorageItem,
   removeStorageItem,
   setStorageItem,
 } from '@lit-protocol/misc-browser';
+import { nacl } from '@lit-protocol/nacl';
 import { BigNumber } from 'ethers';
-import {
-  ILitResource,
-  ISessionCapabilityObject,
-  LitResourceAbilityRequest,
-  decode,
-  newSessionCapabilityObject,
-} from '@lit-protocol/auth-helpers';
-// import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 
 /** ---------- Main Export Class ---------- */
 
@@ -332,7 +333,7 @@ export class LitNodeClientNodeJs {
 
       return newSessionKey;
     } else {
-      return JSON.parse(storedSessionKeyOrError.result);
+      return JSON.parse(storedSessionKeyOrError.result as string);
     }
   };
 
@@ -447,7 +448,7 @@ export class LitNodeClientNodeJs {
       }
     } else {
       try {
-        walletSig = JSON.parse(storedWalletSigOrError.result);
+        walletSig = JSON.parse(storedWalletSigOrError.result as string);
       } catch (e) {
         console.warn('Error parsing walletSig', e);
       }
@@ -719,21 +720,20 @@ export class LitNodeClientNodeJs {
 
   /**
    *
-   * Ger Decryption Shares from Nodes
+   * Get signature shares for decryption.
    *
-   * @param { string } url
-   * @param { JsonEncryptionRetrieveRequest } params
-   *
-   * @returns { Promise<any> }
-   *
+   * @param url
+   * @param params
+   * @param requestId
+   * @returns
    */
-  getDecryptionShare = async (
+  getSigningShareForDecryption = async (
     url: string,
-    params: JsonEncryptionRetrieveRequest,
+    params: GetSigningShareForDecryptionRequest,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    log('getDecryptionShare');
-    const urlWithPath = `${url}/web/encryption/retrieve`;
+    log('getSigningShareForDecryption');
+    const urlWithPath = `${url}/web/encryption/sign`;
 
     return await this.sendCommandToNode({
       url: urlWithPath,
@@ -772,34 +772,6 @@ export class LitNodeClientNodeJs {
       },
       requestId,
     });
-  };
-
-  /**
-   *
-   * Store encryption conditions to nodes
-   *
-   * @param { string } urk
-   * @param { JsonEncryptionStoreRequest } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  storeEncryptionConditionWithNode = async (
-    url: string,
-    params: JsonSigningStoreRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    log('storeEncryptionConditionWithNode');
-    const urlWithPath = `${url}/web/encryption/store`;
-    const data = {
-      key: params.key,
-      val: params.val,
-      authSig: params.authSig,
-      chain: params.chain,
-      permanant: params.permanent,
-    };
-
-    return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
   };
 
   /**
@@ -879,10 +851,7 @@ export class LitNodeClientNodeJs {
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  combineSharesAndGetJWT = (
-    networkPubKeySet: string,
-    signatureShares: Array<NodeShare>
-  ): string => {
+  combineSharesAndGetJWT = (signatureShares: Array<NodeShare>): string => {
     // ========== Shares Validations ==========
     // -- sanity check
     if (
@@ -900,24 +869,11 @@ export class LitNodeClientNodeJs {
     signatureShares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
     // ========== Combine Shares ==========
-    const pkSetAsBytes: Uint8Array = uint8arrayFromString(
-      networkPubKeySet,
-      'base16'
-    );
-    log('pkSetAsBytes', pkSetAsBytes);
-
-    const sigShares = signatureShares.map((s: any) => ({
-      shareHex: s.signatureShare,
-      shareIndex: s.shareIndex,
-    }));
-
-    const signature = wasmBlsSdkHelpers.combine_signatures(
-      pkSetAsBytes,
-      sigShares
+    const signature = combineSignatureShares(
+      signatureShares.map((s: any) => s.signatureShare)
     );
 
-    log('raw sig', signature);
-    log('signature is ', uint8arrayToString(signature, 'base16'));
+    log('signature is', signature);
 
     const unsignedJwt = mostCommonString(
       signatureShares.map((s: any) => s.unsignedJwt)
@@ -926,11 +882,27 @@ export class LitNodeClientNodeJs {
     // ========== Result ==========
     // convert the sig to base64 and append to the jwt
     const finalJwt: string = `${unsignedJwt}.${uint8arrayToString(
-      signature,
+      uint8arrayFromString(signature, 'base16'),
       'base64url'
     )}`;
 
     return finalJwt;
+  };
+
+  #decryptWithSignatureShares = (
+    networkPubKey: string,
+    identityParam: Uint8Array,
+    ciphertext: string,
+    signatureShares: Array<NodeShare>
+  ): Uint8Array => {
+    const sigShares = signatureShares.map((s: any) => s.signatureShare);
+
+    return verifyAndDecryptWithSignatureShares(
+      networkPubKey,
+      identityParam,
+      ciphertext,
+      sigShares
+    );
   };
 
   /**
@@ -1351,23 +1323,17 @@ export class LitNodeClientNodeJs {
         return;
       }
 
-      // -- validate if signature type is BLS or ECDSA
-      if (sigType !== 'BLS' && sigType !== 'ECDSA') {
+      // -- validate if signature type is ECDSA
+      if (sigType !== 'ECDSA') {
         throwError({
-          message: 'signature type is not BLS or ECDSA',
+          message: 'signature type is not ECDSA',
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
         return;
       }
 
-      let signature: any;
-
-      if (sigType === SIGTYPE.BLS) {
-        signature = combineBlsShares(sigShares, this.networkPubKeySet);
-      } else if (sigType === SIGTYPE.ECDSA) {
-        signature = combineEcdsaShares(sigShares);
-      }
+      const signature = combineEcdsaShares(sigShares);
 
       const encodedSig = joinSignature({
         r: '0x' + signature.r,
@@ -1432,23 +1398,17 @@ export class LitNodeClientNodeJs {
         return;
       }
 
-      // -- validate if signature type is BLS or ECDSA
-      if (sigType !== 'BLS' && sigType !== 'ECDSA') {
+      // -- validate if signature type is ECDSA
+      if (sigType !== 'ECDSA') {
         throwError({
-          message: 'signature type is not BLS or ECDSA',
+          message: 'signature type is not ECDSA',
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
         return;
       }
 
-      let signature: any;
-
-      if (sigType === SIGTYPE.BLS) {
-        signature = combineBlsShares(sigShares, this.networkPubKeySet);
-      } else if (sigType === SIGTYPE.ECDSA) {
-        signature = combineEcdsaShares(sigShares);
-      }
+      const signature = combineEcdsaShares(sigShares);
 
       const encodedSig = joinSignature({
         r: '0x' + signature.r,
@@ -1465,73 +1425,6 @@ export class LitNodeClientNodeJs {
     });
 
     return signatures;
-  };
-
-  /**
-   *
-   * Get the decryptions from the decrypted data list
-   *
-   * @param { Array<any> } decryptedData
-   *
-   * @returns { Promise<Array<any>> }
-   *
-   */
-  getDecryptions = async (decryptedData: Array<any>): Promise<Array<any>> => {
-    // -- prepare params
-    let decryptions: any;
-
-    Object.keys(decryptedData[0]).forEach(async (key: any) => {
-      // -- prepare
-      const shares = decryptedData.map((r: any) => r[key]);
-
-      const decShares = shares.map((s: any) => ({
-        algorithmType: s.algorithmType,
-        decryptionShare: s.decryptionShare,
-        shareIndex: s.shareIndex,
-        publicKey: s.publicKey,
-        ciphertext: s.ciphertext,
-      }));
-
-      const algorithmType = mostCommonString(
-        decShares.map((s: any) => s.algorithmType)
-      );
-      const ciphertext = mostCommonString(
-        decShares.map((s: any) => s.ciphertext)
-      );
-
-      // -- validate if this.networkPubKeySet is null
-      if (this.networkPubKeySet === null) {
-        throwError({
-          message: 'networkPubKeySet cannot be null',
-          errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-          errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-        });
-        return;
-      }
-
-      let decrypted;
-      if (algorithmType === 'BLS') {
-        decrypted = await combineBlsDecryptionShares(
-          decShares,
-          this.networkPubKeySet,
-          ciphertext
-        );
-      } else {
-        throwError({
-          message: 'Unknown decryption algorithm type',
-          errorKind: LIT_ERROR.UNKNOWN_DECRYPTION_ALGORITHM_TYPE_ERROR.kind,
-          errorCode: LIT_ERROR.UNKNOWN_DECRYPTION_ALGORITHM_TYPE_ERROR.name,
-        });
-      }
-
-      decryptions[key] = {
-        decrypted: uint8arrayToString(decrypted, 'base16'),
-        publicKey: mostCommonString(decShares.map((s: any) => s.publicKey)),
-        ciphertext: mostCommonString(decShares.map((s: any) => s.ciphertext)),
-      };
-    });
-
-    return decryptions;
   };
 
   /**
@@ -1654,20 +1547,14 @@ export class LitNodeClientNodeJs {
     );
     const signatures = this.getSignatures(signedDataList);
 
-    // -- 2. combine decrypted data a list, and get the decryptions from it
-    const decryptedDataList: any[] = responseData.map(
-      (r: DecryptedData) => r.decryptedData
-    );
-    const decryptions = await this.getDecryptions(decryptedDataList);
-
-    // -- 3. combine responses as a string, and get parse it as JSON
+    // -- 2. combine responses as a string, and get parse it as JSON
     let response: string = mostCommonString(
       responseData.map((r: NodeResponse) => r.response)
     );
 
     response = this.parseResponses(response);
 
-    // -- 4. combine logs
+    // -- 3. combine logs
     const mostCommonLogs: string = mostCommonString(
       responseData.map((r: NodeLog) => r.logs)
     );
@@ -1675,7 +1562,7 @@ export class LitNodeClientNodeJs {
     // ========== Result ==========
     let returnVal: ExecuteJsResponse = {
       signatures,
-      decryptions,
+      decryptions: [], // FIXME: Fix if and when we enable decryptions from within a Lit Action.
       response,
       logs: mostCommonLogs,
     };
@@ -1786,10 +1673,7 @@ export class LitNodeClientNodeJs {
     }
 
     // ========== Result ==========
-    const finalJwt: string = this.combineSharesAndGetJWT(
-      this.networkPubKeySet,
-      signatureShares
-    );
+    const finalJwt: string = this.combineSharesAndGetJWT(signatureShares);
 
     return finalJwt;
   };
@@ -1910,10 +1794,7 @@ export class LitNodeClientNodeJs {
     log('signatureShares', signatureShares);
 
     // ========== Result ==========
-    const finalJwt: string = this.combineSharesAndGetJWT(
-      this.networkPubKeySet,
-      signatureShares
-    );
+    const finalJwt: string = this.combineSharesAndGetJWT(signatureShares);
 
     return finalJwt;
   };
@@ -2025,18 +1906,12 @@ export class LitNodeClientNodeJs {
     return true;
   };
 
-  /**
-   *
-   * Retrieve the symmetric encryption key from the LIT nodes.  Note that this will only work if the current user meets the access control conditions specified when the data was encrypted.  That access control condition is typically that the user is a holder of the NFT that corresponds to this encrypted data.  This NFT token address and ID was specified when this LIT was created.
-   *
-   */
-  getEncryptionKey = async (
-    params: JsonEncryptionRetrieveRequest
-  ): Promise<Uint8Array> => {
+  encrypt = async (params: EncryptRequest): Promise<EncryptResponse> => {
+    // ========== Validate Params ==========
     // -- validate if it's ready
     if (!this.ready) {
       const message =
-        '5 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2044,121 +1919,76 @@ export class LitNodeClientNodeJs {
       });
     }
 
-    // -- validate if this.networkPubKeySet is null
-    if (!this.networkPubKeySet) {
-      const message = 'networkPubKeySet cannot be null';
-      throwError({
+    // -- validate if this.subnetPubKey is null
+    if (!this.subnetPubKey) {
+      const message = 'subnetPubKey cannot be null';
+      return throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
 
-    // ========== Prepare Params ==========
-    const { chain, authSig, resourceId, toDecrypt } = params;
-
-    // ========== Validate Params ==========
     const paramsIsSafe = safeParams({
-      functionName: 'getEncryptionKey',
-      params: params,
+      functionName: 'encrypt',
+      params,
     });
 
     if (!paramsIsSafe) {
-      throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    // ========== Formatting Access Control Conditions =========
-    const {
-      error,
-      formattedAccessControlConditions,
-      formattedEVMContractConditions,
-      formattedSolRpcConditions,
-      formattedUnifiedAccessControlConditions,
-    }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
-
-    if (error) {
-      throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    // ========== Node Promises ==========
-    const requestId = this.getRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      // -- choose the right signature
-      let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
-        authSig: params.authSig,
-        sessionSigs: params.sessionSigs,
-        url,
-      });
-
-      return this.getDecryptionShare(
-        url,
-        {
-          accessControlConditions: formattedAccessControlConditions,
-          evmContractConditions: formattedEVMContractConditions,
-          solRpcConditions: formattedSolRpcConditions,
-          unifiedAccessControlConditions:
-            formattedUnifiedAccessControlConditions,
-          toDecrypt,
-          authSig: sigToPassToNode,
-          chain,
-        },
-        requestId
-      );
-    });
-
-    // -- resolve promises
-    const res = await this.handleNodePromises(nodePromises);
-
-    // -- case: promises rejected
-    if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises);
-    }
-
-    const decryptionShares: Array<NodeShare> = (res as SuccessNodePromises)
-      .values;
-
-    log('decryptionShares', decryptionShares);
-
-    if (!this.networkPubKeySet) {
       return throwError({
-        message: 'networkPubKeySet cannot be null',
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
+        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
-    // ========== Combine Shares ==========
-    const decrypted = combineBlsDecryptionShares(
-      decryptionShares,
-      this.networkPubKeySet,
-      toDecrypt
+    // ========== Hashing Access Control Conditions =========
+    // hash the access control conditions
+    let hashOfConditions: ArrayBuffer | undefined =
+      await this.getHashedAccessControlConditions(params);
+
+    if (!hashOfConditions) {
+      return throwError({
+        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    const hashOfConditionsStr = uint8arrayToString(
+      new Uint8Array(hashOfConditions),
+      'base16'
     );
 
-    return decrypted;
+    // ========== Hashing Private Data ==========
+    // hash the private data
+    const hashOfPrivateData = await crypto.subtle.digest(
+      'SHA-256',
+      params.dataToEncrypt
+    );
+    const hashOfPrivateDataStr = uint8arrayToString(
+      new Uint8Array(hashOfPrivateData),
+      'base16'
+    );
+
+    // ========== Assemble identity parameter ==========
+    const identityParam = this.#getIdentityParamForEncryption(
+      hashOfConditionsStr,
+      hashOfPrivateDataStr
+    );
+
+    // ========== Encrypt ==========
+    const ciphertext = encrypt(
+      this.subnetPubKey,
+      params.dataToEncrypt,
+      uint8arrayFromString(identityParam, 'base16')
+    );
+
+    return { ciphertext, dataToEncryptHash: hashOfPrivateDataStr };
   };
 
-  /**
-   *
-   * Securely save the association between access control conditions and something that you wish to decrypt
-   *
-   * @param { JsonSaveEncryptionKeyRequest } params
-   *
-   * @returns { Promise<Uint8Array> }
-   *
-   */
-  saveEncryptionKey = async (
-    params: JsonSaveEncryptionKeyRequest
-  ): Promise<Uint8Array> => {
-    // ========= Prepare Params ==========
-    const { encryptedSymmetricKey, symmetricKey, authSig, chain, permanent } =
+  decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
+    const { authSig, sessionSigs, chain, ciphertext, dataToEncryptHash } =
       params;
 
     // ========== Validate Params ==========
@@ -2184,43 +2014,19 @@ export class LitNodeClientNodeJs {
     }
 
     const paramsIsSafe = safeParams({
-      functionName: 'saveEncryptionKey',
+      functionName: 'decrypt',
       params,
     });
 
     if (!paramsIsSafe) {
       return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+        message: `Parameter validation failed.`,
         errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
-    // ========== Encryption ==========
-    // -- encrypt with network pubkey
-    let encryptedKey;
-
-    if (encryptedSymmetricKey) {
-      encryptedKey = encryptedSymmetricKey;
-    } else {
-      encryptedKey = wasmBlsSdkHelpers.encrypt(
-        uint8arrayFromString(this.subnetPubKey, 'base16'),
-        symmetricKey
-      );
-      log(
-        'symmetric key encrypted with LIT network key: ',
-        uint8arrayToString(encryptedKey, 'base16')
-      );
-    }
-
-    // ========== Hashing ==========
-    // -- hash the encrypted pubkey
-    const hashOfKey = await crypto.subtle.digest('SHA-256', encryptedKey);
-    const hashOfKeyStr = uint8arrayToString(
-      new Uint8Array(hashOfKey),
-      'base16'
-    );
-
+    // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
     let hashOfConditions: ArrayBuffer | undefined =
       await this.getHashedAccessControlConditions(params);
@@ -2238,24 +2044,48 @@ export class LitNodeClientNodeJs {
       'base16'
     );
 
-    // ========== Node Promises ==========
+    // ========== Formatting Access Control Conditions =========
+    const {
+      error,
+      formattedAccessControlConditions,
+      formattedEVMContractConditions,
+      formattedSolRpcConditions,
+      formattedUnifiedAccessControlConditions,
+    }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
+
+    if (error) {
+      throwError({
+        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    // ========== Assemble identity parameter ==========
+    const identityParam = this.#getIdentityParamForEncryption(
+      hashOfConditionsStr,
+      dataToEncryptHash
+    );
+
+    // ========== Get Network Signature ==========
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
-      // -- choose the right signature
-      let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
-        authSig: params.authSig,
-        sessionSigs: params.sessionSigs,
-        url,
-      });
+      // -- if session key is available, use it
+      let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
-      return this.storeEncryptionConditionWithNode(
+      return this.getSigningShareForDecryption(
         url,
         {
-          key: hashOfKeyStr,
-          val: hashOfConditionsStr,
-          authSig: sigToPassToNode,
+          accessControlConditions: formattedAccessControlConditions,
+          evmContractConditions: formattedEVMContractConditions,
+          solRpcConditions: formattedSolRpcConditions,
+          unifiedAccessControlConditions:
+            formattedUnifiedAccessControlConditions,
+          ciphertext,
+          dataToEncryptHash,
           chain,
-          permanent: permanent ? 1 : 0,
+          authSig: sessionSigs ? undefined : params.authSig,
+          sessionSigs: sessionSigs ? sessionSigs[url] : undefined,
         },
         requestId
       );
@@ -2269,7 +2099,29 @@ export class LitNodeClientNodeJs {
       this._throwNodeError(res as RejectedNodePromises);
     }
 
-    return encryptedKey;
+    const signatureShares: Array<NodeShare> = (res as SuccessNodePromises)
+      .values;
+
+    log('signatureShares', signatureShares);
+
+    // ========== Result ==========
+    const decryptedData = this.#decryptWithSignatureShares(
+      this.networkPubKeySet!,
+      uint8arrayFromString(identityParam, 'base16'),
+      ciphertext,
+      signatureShares
+    );
+
+    return { decryptedData };
+  };
+
+  #getIdentityParamForEncryption = (
+    hashOfConditionsStr: string,
+    hashOfPrivateDataStr: string
+  ): string => {
+    return new LitAccessControlConditionResource(
+      `${hashOfConditionsStr}${hashOfPrivateDataStr}`
+    ).getResourceKey();
   };
 
   /**
