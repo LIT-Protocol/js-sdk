@@ -331,6 +331,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  sepolia: {
+    contractAddress: null,
+    chainId: 11155111,
+    name: 'Sepolia Testnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://eth-sepolia.g.alchemy.com/v2/demo'],
+    blockExplorerUrls: ['https://sepolia.etherscan.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
   scrollAlphaTestnet: {
     contractAddress: null,
     chainId: 534353,
