@@ -94,10 +94,8 @@ export const decryptWithSignatureShares = (
 ): Uint8Array => {
   // Format the signature shares
   const sigShares = shares.map((s) =>
-    shares.map((s) => {
-      JSON.stringify({
-        ProofOfPossession: s,
-      });
+    JSON.stringify({
+      ProofOfPossession: s,
     })
   );
 
@@ -128,10 +126,8 @@ export const verifyAndDecryptWithSignatureShares = (
 ): Uint8Array => {
   // Format the signature shares
   const sigShares = shares.map((s) =>
-    shares.map((s) => {
-      JSON.stringify({
-        ProofOfPossession: s,
-      });
+    JSON.stringify({
+      ProofOfPossession: s,
     })
   );
 
@@ -156,10 +152,8 @@ export const verifyAndDecryptWithSignatureShares = (
 export const combineSignatureShares = (shares: string[]): string => {
   // Format the signature shares
   const sigShares = shares.map((s) =>
-    shares.map((s) => {
-      JSON.stringify({
-        ProofOfPossession: s,
-      });
+    JSON.stringify({
+      ProofOfPossession: s,
     })
   );
 
