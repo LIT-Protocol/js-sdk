@@ -162,7 +162,7 @@ export function uint8arrayToString(
       return utf8Decode(_uint8array);
     case 'base16':
       return Array.from(_uint8array)
-        .map((byte) => byte.toString(16).padStart(2, '0'))
+        .map((byte: number) => byte.toString(16).padStart(2, '0'))
         .join('');
     case 'base64':
       return uint8ArrayToBase64(_uint8array);

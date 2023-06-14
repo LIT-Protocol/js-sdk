@@ -26,10 +26,11 @@ describe('imported functions', () => {
 });
 
 describe('blsSdk', () => {
-  it('should encrypt a message', async () => {
-    // prepare
+  beforeAll(async () => {
     await blsSdk.initWasmBlsSdk();
+  });
 
+  it('should encrypt a message', async () => {
     // execute
     const ciphertext = blsSdk.encrypt(
       publicKey,
@@ -40,12 +41,9 @@ describe('blsSdk', () => {
     // assert
     expect(ciphertext.length).toBeGreaterThan(0);
   });
-});
 
-describe('decrypt', () => {
-  it('should work', async () => {
+  it('should decrypt', async () => {
     // prepare
-    await blsSdk.initWasmBlsSdk();
     const ciphertext =
       'l9a/01WDJB/euKxtbWcuQ8ez/c9eZ+jQryTHZVLN0kfd7XHoLs6FeWUVmk89ovQGkQJnnFDKjq6kgJxvIIrxXd9DaGuRBozLdA1G9Nk413YhTEqsENuHU0nSa4i6F912KltE15sbWKpDfPnZF6CA2UKBAw==';
     const signatureShares = [
@@ -69,12 +67,9 @@ describe('decrypt', () => {
       secretMessage
     );
   });
-});
 
-describe('verify + decrypt', () => {
-  it('should work', async () => {
+  it('should verify + decrypt', async () => {
     // prepare
-    await blsSdk.initWasmBlsSdk();
     const ciphertext =
       'l9a/01WDJB/euKxtbWcuQ8ez/c9eZ+jQryTHZVLN0kfd7XHoLs6FeWUVmk89ovQGkQJnnFDKjq6kgJxvIIrxXd9DaGuRBozLdA1G9Nk413YhTEqsENuHU0nSa4i6F912KltE15sbWKpDfPnZF6CA2UKBAw==';
     const signatureShares = [
