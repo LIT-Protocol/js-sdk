@@ -86,7 +86,7 @@ export type LITChain<T> = {
   [chainName: string]: T;
 };
 
-export type LIT_NETWORKS_KEYS = 'jalapeno' | 'serrano' | 'localhost' | 'custom';
+export type LIT_NETWORKS_KEYS = 'serrano' | 'localhost' | 'custom';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
@@ -106,6 +106,9 @@ export type AcceptedFileType = File | Blob;
  */
 export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
 
-export type ProviderOptions = OAuthProviderOptions | EthWalletProviderOptions | SignInWithOTPParams;
+export type ProviderOptions =
+  | OAuthProviderOptions
+  | EthWalletProviderOptions
+  | SignInWithOTPParams;
 
 export type AuthenticateOptions = BaseAuthenticateOptions;
