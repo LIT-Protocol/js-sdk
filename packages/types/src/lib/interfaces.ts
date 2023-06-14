@@ -20,6 +20,9 @@ import {
   LitResourceAbilityRequest,
 } from '@lit-protocol/auth-helpers';
 
+// @ts-ignore
+import * as JSZip from 'jszip/dist/jszip.js';
+
 export interface AccsOperatorParams {
   operator: string;
 }
@@ -147,7 +150,19 @@ export interface ThreeKeys {
 
 export interface DecryptZipFileWithMetadata {
   decryptedFile: Uint8Array;
-  metadata: string;
+  metadata: MetadataForFile;
+}
+
+export interface MetadataForFile {
+  name: string | any;
+  type: string | any;
+  size: string | number | any;
+  accessControlConditions: any[] | any;
+  evmContractConditions: any[] | any;
+  solRpcConditions: any[] | any;
+  unifiedAccessControlConditions: any[] | any;
+  chain: string;
+  dataToEncryptHash: string;
 }
 
 export interface EncryptedFile {
@@ -311,7 +326,7 @@ export interface JsonAccsRequest {
   // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
   authSig?: AuthSig;
 
-  sessionSigs?: SessionSigsMap;
+  sessionSigs?: SessionSig;
 }
 
 /**
@@ -385,6 +400,54 @@ export type ExecuteJsProps = JsonExecutionRequest & {
   // A boolean that defines if debug info will be returned or not.
   debug?: boolean;
 };
+
+export interface EncryptRequestBase {
+  accessControlConditions?: AccessControlConditions;
+  evmContractConditions?: EvmContractConditions;
+  solRpcConditions?: SolRpcConditions;
+  unifiedAccessControlConditions?: UnifiedAccessControlConditions;
+
+  chain: Chain;
+
+  authSig?: AuthSig;
+  sessionSigs?: SessionSigsMap;
+}
+
+export interface EncryptRequest extends EncryptRequestBase {
+  dataToEncrypt: Uint8Array;
+}
+
+export interface EncryptResponse {
+  ciphertext: string;
+  dataToEncryptHash: string;
+}
+
+export interface EncryptStringRequest extends EncryptRequestBase {
+  // Hex-encoded string that you wish to encrypt
+  dataToEncrypt: string;
+}
+
+export interface EncryptZipRequest extends EncryptRequestBase {
+  zip: JSZip;
+}
+
+export interface EncryptFileRequest extends EncryptRequestBase {
+  file: AcceptedFileType;
+}
+
+export interface DecryptRequest extends EncryptRequestBase {
+  ciphertext: string;
+  dataToEncryptHash: string;
+}
+
+export interface DecryptResponse {
+  decryptedData: Uint8Array;
+}
+
+export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {
+  ciphertext: string;
+  dataToEncryptHash: string;
+}
 
 export interface JsonSaveEncryptionKeyRequest {
   accessControlConditions?: AccessControlConditions;
@@ -636,6 +699,29 @@ export interface EncryptToIpfsProps {
   infuraSecretKey: string;
 }
 
+export type EncryptToIpfsDataType = 'string' | 'file';
+
+export interface EncryptToIpfsPayload {
+  // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  accessControlConditions?: AccessControlConditions;
+
+  // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  evmContractConditions?: EvmContractConditions;
+
+  // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.
+  solRpcConditions?: SolRpcConditions;
+
+  // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  unifiedAccessControlConditions?: UnifiedAccessControlConditions;
+
+  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
+  chain: Chain;
+
+  ciphertext: string;
+  dataToEncryptHash: string;
+  dataType: EncryptToIpfsDataType;
+}
+
 export interface DecryptFromIpfsProps {
   // The authSig of the user.  Returned via the checkAndSignAuthMessage function
   authSig?: AuthSig;
@@ -694,9 +780,6 @@ export interface DecryptZipFileWithMetadataProps {
 
   // An instance of LitNodeClient that is already connected
   litNodeClient: ILitNodeClient;
-
-  // Addtional access control conditions
-  additionalAccessControlConditions?: any[];
 }
 
 /**

@@ -1,7 +1,11 @@
 import { SupportedJsonRequests } from './types';
 import {
+  EncryptRequest,
+  EncryptResponse,
   ExecuteJsProps,
   ExecuteJsResponse,
+  DecryptRequest,
+  DecryptResponse,
   FormattedMultipleAccs,
   HandshakeWithSgx,
   JsonEncryptionRetrieveRequest,
@@ -167,17 +171,6 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Get the decryptions from the decrypted data list
-   *
-   * @param { Array<any> } decryptedData
-   *
-   * @returns { Promise<Array<any> }
-   *
-   */
-  getDecryptions(decryptedData: Array<any>): Promise<Array<any>>;
-
-  /**
-   *
    * Parse the response string to JSON
    *
    * @param { string } responseString
@@ -249,22 +242,6 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Ger Decryption Shares from Nodes
-   *
-   * @param { string } url
-   * @param { JsonEncryptionRetrieveRequest } params
-   *
-   * @returns { Promise<any> }
-   *
-   */
-  getDecryptionShare(
-    url: string,
-    params: JsonEncryptionRetrieveRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
-   *
    * Store signing conditions to nodes
    *
    * @param { string } url
@@ -274,22 +251,6 @@ export interface ILitNodeClient {
    *
    */
   storeSigningConditionWithNode(
-    url: string,
-    params: JsonSigningStoreRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
-   *
-   * Store encryption conditions to nodes
-   *
-   * @param { string } urk
-   * @param { JsonEncryptionStoreRequest } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  storeEncryptionConditionWithNode(
     url: string,
     params: JsonSigningStoreRequest,
     requestId: string
@@ -376,22 +337,18 @@ export interface ILitNodeClient {
   ): Promise<boolean | undefined>;
 
   /**
+   * Encrypt data with Lit identity-based Timelock Encryption.
    *
-   * Retrieve the symmetric encryption key from the LIT nodes.  Note that this will only work if the current user meets the access control conditions specified when the data was encrypted.  That access control condition is typically that the user is a holder of the NFT that corresponds to this encrypted data.  This NFT token address and ID was specified when this LIT was created.
-   *
+   * @param params
    */
-  getEncryptionKey(params: JsonEncryptionRetrieveRequest): Promise<Uint8Array>;
+  encrypt(params: EncryptRequest): Promise<EncryptResponse>;
 
   /**
+   * Decrypt data with Lit identity-based Timelock Encryption.
    *
-   * Securely save the association between access control conditions and something that you wish to decrypt
-   *
-   * @param { JsonSaveEncryptionKeyRequest } params
-   *
-   * @returns { Promise<Uint8Array | undefined }
-   *
+   * @param params
    */
-  saveEncryptionKey(params: JsonSaveEncryptionKeyRequest): Promise<Uint8Array>;
+  decrypt(params: DecryptRequest): Promise<DecryptResponse>;
 
   /**
    *
