@@ -1162,18 +1162,19 @@ export interface SignInWithOTPParams {
    * used as the user ID for the auth method
    */
   userId: string;
-  /**
-   * Origin of the sign in request
-   */
-  origin?: string;
-  /**
-   * when the generated JWT expires
-   */
-  expiration?: string;
+
   /**
    * tracking for the session
    */
   requestId?: string;
+
+  /**
+   * Allows for specifying custom sender information
+   * Note: for most users the `from_name` is the configurable option and `from` should not be populated
+   */
+  emailCustomizationOptions: OtpEmailCustomizationOptions;
+
+  customName?: string;
 }
 
 export interface OtpProviderOptions {
@@ -1183,6 +1184,10 @@ export interface OtpProviderOptions {
   checkRoute?: string;
 }
 
+export interface OtpEmailCustomizationOptions {
+  from?: string;
+  fromName: string;
+}
 export interface BaseProviderSessionSigsParams {
   /**
    * Public key of PKP to auth with

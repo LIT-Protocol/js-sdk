@@ -62,6 +62,18 @@ export class OtpProvider extends BaseProvider {
       otp: this._params.userId,
       request_id: this._requestId,
     };
+
+    if (this._params.emailCustomizationOptions) {
+      body.email_configuration = {};
+      body.email_configuration.from_name =
+        this._params.emailCustomizationOptions.fromName;
+      if (this._params.emailCustomizationOptions.from)
+        body.email_configuration.from =
+          this._params.emailCustomizationOptions.from;
+    }
+
+    if (this._params.customName) body.custom_name = this._params.customName;
+
     body = JSON.stringify(body);
 
     const response = await fetch(url, {
