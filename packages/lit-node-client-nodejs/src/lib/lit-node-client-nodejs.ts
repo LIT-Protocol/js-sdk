@@ -1682,7 +1682,7 @@ export class LitNodeClientNodeJs extends LitCore {
     const ciphertext = encrypt(
       this.subnetPubKey,
       params.dataToEncrypt,
-      uint8arrayFromString(identityParam, 'base16')
+      uint8arrayFromString(identityParam, 'utf8')
     );
 
     return { ciphertext, dataToEncryptHash: hashOfPrivateDataStr };
@@ -1771,9 +1771,6 @@ export class LitNodeClientNodeJs extends LitCore {
     // ========== Get Network Signature ==========
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
-      // -- if session key is available, use it
-      let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
-
       return this.getSigningShareForDecryption(
         url,
         {

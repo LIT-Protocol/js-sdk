@@ -16,10 +16,10 @@ import { isBrowser, log, throwError } from '@lit-protocol/misc';
 import {
   uint8arrayFromString,
   uint8arrayToString,
+  uint8ArrayToBase64,
 } from '@lit-protocol/uint8arrays';
 
 import { nacl } from '@lit-protocol/nacl';
-import { uint8ArrayToBase64 } from 'packages/uint8arrays/src/lib/uint8arrays';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {

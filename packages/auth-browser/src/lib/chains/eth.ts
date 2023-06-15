@@ -200,8 +200,8 @@ export const chainHexIdToChainName = (chainHexId: string): void | string => {
 export const getChainId = async (
   chain: string,
   web3: Web3Provider
-): Promise<IEither> => {
-  let resultOrError: IEither;
+): Promise<IEither<number>> => {
+  let resultOrError: IEither<number>;
 
   try {
     const resp = await web3.getNetwork();
@@ -481,12 +481,10 @@ export const checkAndSignEVMAuthMessage = async ({
   log(`got web3 and account: ${account}`);
 
   // -- 2. prepare all required variables
-  const currentChainIdOrError: IEither = await getChainId(chain, web3);
+  const currentChainIdOrError = await getChainId(chain, web3);
   const selectedChainId: number = selectedChain.chainId;
   const selectedChainIdHex: string = numberToHex(selectedChainId);
-  const authSigOrError: IEither = getStorageItem(
-    LOCAL_STORAGE_KEYS.AUTH_SIGNATURE
-  );
+  const authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
 
   log('currentChainIdOrError:', currentChainIdOrError);
   log('selectedChainId:', selectedChainId);
@@ -495,7 +493,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
   // -- 3. check all variables before executing business logic
   if (currentChainIdOrError.type === EITHER_TYPE.ERROR) {
-    return throwError(currentChainIdOrError.result);
+    return throwError(currentChainIdOrError.result as any);
   }
 
   log('chainId from web3', currentChainIdOrError);
@@ -571,6 +569,7 @@ export const checkAndSignEVMAuthMessage = async ({
     log('signing auth message because sig is not in local storage');
 
     try {
+      // @ts-ignore
       authSigOrError.result = await _signAndGetAuth({
         web3,
         account,
@@ -592,6 +591,7 @@ export const checkAndSignEVMAuthMessage = async ({
   }
 
   // -- 6. case: Lit auth signature IS in the local storage
+  // @ts-ignore
   let authSig: AuthSig = authSigOrError.result;
   if (typeof authSig === 'string') {
     authSig = JSON.parse(authSig);
@@ -654,9 +654,7 @@ const _signAndGetAuth = async ({
     uri,
   });
 
-  let authSigOrError: IEither = getStorageItem(
-    LOCAL_STORAGE_KEYS.AUTH_SIGNATURE
-  );
+  let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
 
   if (authSigOrError.type === 'ERROR') {
     throwError({

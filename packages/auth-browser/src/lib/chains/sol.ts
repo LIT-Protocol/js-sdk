@@ -24,8 +24,8 @@ import {
  *
  * @returns { object || never }
  */
-const getProvider = (): IEither => {
-  let resultOrError: IEither;
+const getProvider = (): IEither<any> => {
+  let resultOrError: IEither<any>;
 
   // -- validate
   if ('solana' in window) {
@@ -53,7 +53,7 @@ const getProvider = (): IEither => {
  * @returns { Promise<IProvider | undefined }
  */
 export const connectSolProvider = async (): Promise<IProvider | undefined> => {
-  const providerOrError: IEither = getProvider();
+  const providerOrError = getProvider();
 
   if (providerOrError.type === 'ERROR') {
     throwError(providerOrError.result);
@@ -85,7 +85,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
   const account = res?.account;
   const key = LOCAL_STORAGE_KEYS.AUTH_SOL_SIGNATURE;
 
-  let authSigOrError: IEither = getStorageItem(key);
+  let authSigOrError = getStorageItem(key);
 
   // let authSig = localStorage.getItem("lit-auth-sol-signature");
   let authSig: AuthSig;
@@ -97,6 +97,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
     await signAndSaveAuthMessage({ provider });
 
     authSigOrError.type = EITHER_TYPE.SUCCESS;
+    // @ts-ignore
     authSigOrError.result = getStorageItem(key);
   }
 
@@ -105,9 +106,11 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
 
   try {
     // when it's not in local storage, it's a string
+    // @ts-ignore
     authSig = JSON.parse(authSigOrError.result.result);
   } catch (e) {
     // when it's in local storage, it's an object
+    // @ts-ignore
     authSig = JSON.parse(authSigOrError.result);
   }
 
@@ -120,7 +123,9 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
     await signAndSaveAuthMessage({ provider });
 
     authSigOrError.type = EITHER_TYPE.SUCCESS;
+    // @ts-ignore
     authSigOrError.result = getStorageItem(key);
+    // @ts-ignore
     authSig = JSON.parse(authSigOrError.result);
   }
 
