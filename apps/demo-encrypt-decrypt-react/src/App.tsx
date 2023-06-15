@@ -4,6 +4,7 @@ import LitLogo from './LitLogo';
 import Editor from '@monaco-editor/react';
 import { benchmark } from './utils';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
+import { AuthSig } from '@lit-protocol/types';
 
 function App() {
 
@@ -14,7 +15,7 @@ function App() {
   const [npmRepo, setNpmRepo] = useState('https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client');
   const [demoRepo, setDemoRepo] = useState('https://github.com/LIT-Protocol/js-sdk/tree/master/apps/demo-encrypt-decrypt-react');
   const [lang, setLang] = useState('json');
-  const [data, setData] = useState({
+  const [data, setData] = useState<object | string>({
     data: {
       name: 'Lit Protocol',
       description: 'Threadshold cryptography for the win!',
@@ -116,7 +117,7 @@ console.log("decryptedString:", "Loading...");
 
 
     // --------- NEXT STEP ---------
-    let authSig;
+    let authSig: AuthSig
 
     await benchmark(async () => {
       authSig = await LitJsSdk.checkAndSignAuthMessage({
@@ -146,7 +147,9 @@ console.log("decryptedString:", "Loading...");
 
     // --------- NEXT STEP ---------
     let res;
+    // @ts-ignore FIXME:
     let encryptedString;
+    // @ts-ignore FIXME:
     let symmetricKey;
 
     await benchmark(async () => {
@@ -165,9 +168,10 @@ console.log("decryptedString:", "Loading...");
 
 
     // --------- NEXT STEP ---------
-    let base64EncryptedString;
+    let base64EncryptedString: string;
     await benchmark(async () => {
       base64EncryptedString = await LitJsSdk.blobToBase64String(
+        // @ts-ignore FIXME:
         encryptedString
       );
       return base64EncryptedString
@@ -181,12 +185,13 @@ console.log("decryptedString:", "Loading...");
 
 
     // --------- NEXT STEP ---------
-    let encryptedSymmetricKey;
+    let encryptedSymmetricKey: Uint8Array;
     await benchmark(async () => {
       encryptedSymmetricKey =
         await litNodeClient.saveEncryptionKey({
           accessControlConditions: accs,
-          symmetricKey: symmetricKey,
+          // @ts-ignore FIXME:
+          symmetricKey,
           authSig: authSig,
           chain: 'ethereum',
         });
@@ -202,10 +207,9 @@ console.log("decryptedString:", "Loading...");
 
 
     // --------- NEXT STEP ---------
-    let toDecrypt;
-
+    let toDecrypt: string;
     await benchmark(async () => {
-      toDecrypt = await LitJsSdk.uint8arrayToString(
+      toDecrypt = LitJsSdk.uint8arrayToString(
         encryptedSymmetricKey,
         'base16'
       );
@@ -221,12 +225,12 @@ console.log("decryptedString:", "Loading...");
 
 
     // --------- NEXT STEP ---------
-    let encryptionKey;
+    let encryptionKey: Uint8Array;
 
     await benchmark(async () => {
       encryptionKey = await litNodeClient.getEncryptionKey({
         accessControlConditions: accs,
-        toDecrypt: toDecrypt,
+        toDecrypt,
         authSig: authSig,
         chain: 'ethereum',
       });
@@ -242,8 +246,7 @@ console.log("decryptedString:", "Loading...");
 
 
     // --------- NEXT STEP ---------
-    let blob;
-
+    let blob: Blob;
     await benchmark(async () => {
       blob = LitJsSdk.base64StringToBlob(base64EncryptedString);
       return blob
@@ -316,8 +319,7 @@ console.log("decryptedString:", "Loading...");
           theme="vs-dark"
           height="100vh"
           language={lang}
-          value={lang === 'json' ? JSON.stringify(data, null, 2) : data}
-
+          value={lang === 'json' ? JSON.stringify(data, null, 2) : `${data}`}
           options={{
             wordWrap: 'on',
           }}
