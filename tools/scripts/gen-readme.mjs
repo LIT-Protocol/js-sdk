@@ -92,9 +92,25 @@ libs.map((lib) => {
 });
 
 let rows = [...bundled, ...universals, ...browsers, ...nodejs];
+let mainModules = [
+  '@lit-protocol/lit-node-client',
+  '@lit-protocol/lit-node-client-nodejs',
+];
+let mainRows = [];
+let otherRows = [];
 
-// sort rows always to have @lit-protocol/lit-node-client at the top
-rows = rows.sort((a, b) => {
+// separate the rows into main and others
+rows.forEach((row) => {
+  const name = row.split('|')[1].trim();
+  if (mainModules.some((module) => name.includes(module))) {
+    mainRows.push(row);
+  } else {
+    otherRows.push(row);
+  }
+});
+
+// sort main rows to have @lit-protocol/lit-node-client at the top
+mainRows = mainRows.sort((a, b) => {
   const aName = a.split('|')[1].trim();
   const bName = b.split('|')[1].trim();
   if (aName.includes('@lit-protocol/lit-node-client')) {
@@ -108,14 +124,12 @@ rows = rows.sort((a, b) => {
 
 const tables = {
   headers: ['Package', 'Category', 'Version', 'Download'],
-  rows: rows,
+  mainRows: mainRows,
+  otherRows: otherRows,
 };
 
-// console.log(rows);
-
 // make table to github markdown
-const table = (tables) => {
-  const { headers, rows } = tables;
+const table = (headers, rows) => {
   const header = headers.join(' | ');
   const divider = headers.map(() => '---').join(' | ');
   const body = rows.join('\n');
@@ -126,12 +140,15 @@ ${body}
 `;
 };
 
-let content = table(tables);
+let mainContent = table(tables.headers, tables.mainRows);
+let otherContent =
+  "If you're a tech-savvy user and wish to utilize only specific submodules that our main module relies upon, you can find individual packages listed below. This way, you can import only the necessary packages that cater to your specific use case::\n\n" +
+  table(tables.headers, tables.otherRows);
 
 // use regex to replace the content between the comments <!-- autogen:package:start --> and <!-- autogen:package:end -->
 const newReadme = readme.replace(
   /<!-- autogen:package:start -->[\s\S]*<!-- autogen:package:end -->/m,
-  `<!-- autogen:package:start -->\n${content}\n<!-- autogen:package:end -->`
+  `<!-- autogen:package:start -->\n${mainContent}\n\n${otherContent}\n<!-- autogen:package:end -->`
 );
 
 // console.log(newReadme);
