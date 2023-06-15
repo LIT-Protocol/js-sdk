@@ -3,7 +3,6 @@ import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
-// import { log } from '@lit-protocol/misc';
 
 /**
  *
