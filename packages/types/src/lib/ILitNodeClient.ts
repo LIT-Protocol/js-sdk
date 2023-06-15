@@ -1,16 +1,13 @@
-import { SupportedJsonRequests } from './types';
 import {
+  DecryptRequest,
+  DecryptResponse,
   EncryptRequest,
   EncryptResponse,
   ExecuteJsProps,
   ExecuteJsResponse,
-  DecryptRequest,
-  DecryptResponse,
   FormattedMultipleAccs,
   HandshakeWithSgx,
-  JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
-  JsonSaveEncryptionKeyRequest,
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
   JsonSigningStoreRequest,
@@ -22,12 +19,12 @@ import {
   NodeShare,
   RejectedNodePromises,
   SendNodeCommand,
-  SignedChainDataToken,
-  // SignWithECDSA,
   SignConditionECDSA,
+  SignedChainDataToken,
   SuccessNodePromises,
   ValidateAndSignECDSA,
 } from './interfaces';
+import { SupportedJsonRequests } from './types';
 
 export interface ILitNodeClient {
   config: LitNodeClientConfig;
@@ -82,18 +79,14 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Combine Shares from network public key set and signature shares
+   * Combine Shares from signature shares
    *
-   * @param { string } networkPubKeySet
    * @param { any } signatureShares
    *
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  combineSharesAndGetJWT(
-    networkPubKeySet: string,
-    signatureShares: Array<NodeShare>
-  ): string;
+  combineSharesAndGetJWT(signatureShares: Array<NodeShare>): string;
 
   /**
    *
@@ -155,7 +148,7 @@ export interface ILitNodeClient {
    * @returns { void }
    *
    */
-  throwNodeError(res: RejectedNodePromises): void;
+  _throwNodeError(res: RejectedNodePromises): void;
 
   // ========== Shares Resolvers ==========
   /**

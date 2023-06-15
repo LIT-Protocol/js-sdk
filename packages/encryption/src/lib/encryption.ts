@@ -184,7 +184,7 @@ export const decryptFromIpfs = async (
       await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`)
     ).json();
     if (metadata.dataType === 'string') {
-      return decryptString(
+      return decryptToString(
         {
           accessControlConditions: metadata.accessControlConditions,
           evmContractConditions: metadata.evmContractConditions,
@@ -200,7 +200,7 @@ export const decryptFromIpfs = async (
         litNodeClient
       );
     } else {
-      return decryptFile(
+      return decryptToFile(
         {
           accessControlConditions: metadata.accessControlConditions,
           evmContractConditions: metadata.evmContractConditions,
@@ -266,7 +266,7 @@ export const encryptString = async (
  *
  * @returns { Promise<string> } A promise containing the decrypted string
  */
-export const decryptString = async (
+export const decryptToString = async (
   params: DecryptRequest,
   litNodeClient: ILitNodeClient
 ): Promise<string> => {
@@ -392,7 +392,7 @@ export const zipAndEncryptFiles = async (
  *
  * @returns { Promise<Object> } A promise containing a JSZip object indexed by the filenames of the zipped files.  For example, if you have a file called "meow.jpg" in the root of your zip, you could get it from the JSZip object by doing this: const imageBlob = await decryptedZip['meow.jpg'].async('blob')
  */
-export const decryptZip = async (
+export const decryptToZip = async (
   params: DecryptRequest,
   litNodeClient: ILitNodeClient
 ): Promise<{ [key: string]: JSZip.JSZipObject }> => {
@@ -630,7 +630,7 @@ export const decryptZipFileWithMetadata = async (
 
   const encryptedFile = await _file.async('blob');
 
-  const decryptedFile = await decryptFile(
+  const decryptedFile = await decryptToFile(
     {
       ...params,
       accessControlConditions: metadata.accessControlConditions,
@@ -694,7 +694,7 @@ export const encryptFile = async (
  *
  * @returns { Promise<Object> } A promise containing the decrypted file.  The file is an ArrayBuffer.
  */
-export const decryptFile = async (
+export const decryptToFile = async (
   params: DecryptRequest,
   litNodeClient: ILitNodeClient
 ): Promise<Uint8Array> => {
