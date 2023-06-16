@@ -1,5 +1,6 @@
 import {
   EITHER_TYPE,
+  ILitError,
   LIT_ERROR,
   NETWORK_PUB_KEY,
 } from '@lit-protocol/constants';
@@ -84,7 +85,7 @@ export const encryptToIpfs = async (
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `Invalid params: ${paramsIsSafe.result}`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
@@ -174,7 +175,7 @@ export const decryptFromIpfs = async (
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `Invalid params: ${paramsIsSafe.result}`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
@@ -246,7 +247,7 @@ export const encryptString = async (
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `Invalid params: ${paramsIsSafe.result}`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
@@ -278,7 +279,7 @@ export const decryptToString = async (
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `Invalid params: ${paramsIsSafe.result}`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
@@ -308,7 +309,7 @@ export const zipAndEncryptString = async (
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `Invalid params: ${paramsIsSafe.result}`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
@@ -404,7 +405,7 @@ export const decryptToZip = async (
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `Invalid params: ${paramsIsSafe.result}`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
@@ -444,7 +445,7 @@ export const encryptZip = async (
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `Invalid params: ${paramsIsSafe.result}`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
@@ -513,7 +514,7 @@ export const encryptFileAndZipWithMetadata = async (
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `Invalid params: ${paramsIsSafe.result}`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
@@ -593,7 +594,7 @@ export const decryptZipFileWithMetadata = async (
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `Invalid params: ${paramsIsSafe.result}`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
@@ -670,7 +671,7 @@ export const encryptFile = async (
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `Invalid params: ${paramsIsSafe.result}`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
@@ -706,7 +707,7 @@ export const decryptToFile = async (
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `Invalid params: ${paramsIsSafe.result}`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
