@@ -353,6 +353,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  zksyncTestnet: {
+    contractAddress: null,
+    chainId: 280,
+    name: 'zkSync Era Testnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://testnet.era.zksync.dev'],
+    blockExplorerUrls: ['https://goerli.explorer.zksync.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
   lineaGoerli: {
     contractAddress: null,
     chainId: 59140,
