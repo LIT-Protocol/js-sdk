@@ -1,9 +1,9 @@
-import './App.css';
-import { useState } from 'react';
-import LitLogo from './LitLogo';
-import Editor from '@monaco-editor/react';
-import { benchmark } from './utils';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
+import Editor from '@monaco-editor/react';
+import { useState } from 'react';
+import './App.css';
+import LitLogo from './LitLogo';
+import { benchmark } from './utils';
 
 function App() {
 
@@ -20,7 +20,7 @@ function App() {
       description: 'Threadshold cryptography for the win!',
     }
   });
-  const [str, setStr] = useState(toHexString('This test is working! Omg!'));
+  const [str, setStr] = useState('This test is working! Omg!');
 
   const go = async () => {
     let code = `import * as LitJsSdk from '@lit-protocol/lit-node-client';
@@ -55,7 +55,7 @@ const res = await LitJsSdk.encryptString({
   accessControlConditions: accs,
   authSig,
   chain: 'ethereum',
-  dataToEncrypt: '${str}',
+  dataToEncrypt: 'toHexString(${str})',
 }, litNodeClient);
 
 // { Loading... } 
@@ -68,12 +68,13 @@ const dataToEncryptHash = res.dataToEncryptHash;
 // { Loading... }
 const decryptedString = await litNodeClient.decryptToString({
   accessControlConditions: accs,
-  toDecrypt: toDecrypt,
+  ciphertext,
+  dataToEncryptHash,
   authSig: authSig,
   chain: 'ethereum',
 });
 
-console.log("decryptedString:", "Loading...");
+console.log("hexToString(decryptedString):", "Loading...");
 
 `;
 
@@ -114,13 +115,12 @@ console.log("decryptedString:", "Loading...");
 
 
     // --------- NEXT STEP ---------
-    console.log("str:", str)
     const encryptRes = await benchmark(async () => {
       return LitJsSdk.encryptString({
         accessControlConditions: accs,
         authSig: authRes.result,
         chain: 'ethereum',
-        dataToEncrypt: str,
+        dataToEncrypt: toHexString(str),
       }, litNodeClient);
     });
 
@@ -142,7 +142,7 @@ console.log("decryptedString:", "Loading...");
 
     code = code.replace('// { ms }', `// { ${decryptRes.duration} }`);
     code = code.replace('// { Loading... }', `// [string] ${decryptRes.result}`);
-    code = code.replace('"Loading..."', `"${decryptRes.result}"`);
+    code = code.replace('"Loading..."', `"${hexToString(trimLeadingZeros(decryptRes.result))}"`);
     setData(code);
   }
 
@@ -202,4 +202,24 @@ function toHexString(str: string) {
     hex += '' + str.charCodeAt(i).toString(16);
   }
   return '0x' + hex;
+}
+
+// Function to convert hex string into utf-8 string.
+function hexToString(hex: string) {
+  var hex = hex.toString();//force conversion
+  var str = '';
+  for (var i = 0; i < hex.length; i += 2)
+    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  return str;
+}
+
+// Function to trim leading padded zero bytes from a hex string.
+function trimLeadingZeros(hex: string) {
+  var hex = hex.toString();//force conversion
+  var str = '';
+  var i = 0;
+  while (hex.substr(i, 2) == '00') {
+    i += 2;
+  }
+  return hex.substr(i);
 }
