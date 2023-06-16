@@ -1785,8 +1785,7 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
-    const { authSig, sessionSigs, chain, ciphertext, dataToEncryptHash } =
-      params;
+    const { sessionSigs, chain, ciphertext, dataToEncryptHash } = params;
 
     // ========== Validate Params ==========
     // -- validate if it's ready
@@ -1863,6 +1862,7 @@ export class LitNodeClientNodeJs extends LitCore {
       hashOfConditionsStr,
       dataToEncryptHash
     );
+    log('identityParam', identityParam);
 
     // ========== Get Network Signature ==========
     const requestId = this.getRequestId();
@@ -1875,7 +1875,6 @@ export class LitNodeClientNodeJs extends LitCore {
           solRpcConditions: formattedSolRpcConditions,
           unifiedAccessControlConditions:
             formattedUnifiedAccessControlConditions,
-          ciphertext,
           dataToEncryptHash,
           chain,
           authSig: sessionSigs ? undefined : params.authSig,

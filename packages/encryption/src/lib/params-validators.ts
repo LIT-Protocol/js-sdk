@@ -107,7 +107,7 @@ export const paramsValidators: {
   decrypt: (params: DecryptRequest) => [
     new AccessControlConditionsValidator('decrypt', params),
     new AuthMaterialValidator('decrypt', params, true),
-    new StringValidator('decrypt', params.ciphertext, 'ciphertext', true),
+    new StringValidator('decrypt', params.ciphertext, 'ciphertext'),
   ],
 
   decryptFile: (params: DecryptFileProps) => [
