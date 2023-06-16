@@ -47,7 +47,12 @@ describe('crypto', () => {
     ];
 
     // execute
-    const plaintext = decryptWithSignatureShares(ciphertext, signatureShares);
+    const plaintext = decryptWithSignatureShares(
+      ciphertext,
+      signatureShares.map((s) => ({
+        ProofOfPossession: s,
+      }))
+    );
 
     // assert
     expect(plaintext).toEqual(secretMessage);
@@ -67,7 +72,9 @@ describe('crypto', () => {
       publicKey,
       identityParam,
       ciphertext,
-      signatureShares
+      signatureShares.map((s) => ({
+        ProofOfPossession: s,
+      }))
     );
 
     // assert

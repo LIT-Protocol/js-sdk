@@ -1899,8 +1899,8 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // ========== Result ==========
     const decryptedData = this.#decryptWithSignatureShares(
-      this.networkPubKeySet!,
-      uint8arrayFromString(identityParam, 'base16'),
+      this.subnetPubKey,
+      uint8arrayFromString(identityParam, 'utf8'),
       ciphertext,
       signatureShares
     );
@@ -1913,7 +1913,7 @@ export class LitNodeClientNodeJs extends LitCore {
     hashOfPrivateDataStr: string
   ): string => {
     return new LitAccessControlConditionResource(
-      `${hashOfConditionsStr}${hashOfPrivateDataStr}`
+      `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
     ).getResourceKey();
   };
 
