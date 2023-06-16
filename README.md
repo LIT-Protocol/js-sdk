@@ -63,7 +63,7 @@ For usage directly in the browser with a script tag
 
 # Packages
 
-📝 If you're looking to use the Lit SDK, you're probably all set with just the lit-node-client <link>. It's got everything most folks need. 
+📝 If you're looking to use the Lit SDK, you're probably all set with just the lit-node-client <link>. <br/>Get started with interacting with Lit network!
 
 <!-- autogen:package:start -->
 
@@ -73,7 +73,7 @@ Package | Category | Version | Download
 | [@lit-protocol/lit-node-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client) | ![lit-node-client](https://img.shields.io/badge/-universal-8A6496 "lit-node-client") | 2.2.25 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.min.js">Vanilla JS (UMD)</a>
 
 
-However, if you're the type who likes to keep things super lean and mean, and you need to keep an eagle eye on your bundle size, we've got individual packages too. This way, you can import only the necessary packages that cater to your specific use case:
+Lit provides additional packages tailored for your specific use cases.
 
 
 Package | Category | Version | Download
