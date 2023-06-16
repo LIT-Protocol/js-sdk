@@ -2,12 +2,7 @@
 
 import * as blsSdk from '@lit-protocol/bls-sdk';
 
-import {
-  LIT_ERROR,
-  SessionKeyPair,
-  SigShare,
-  SYMM_KEY_ALGO_PARAMS,
-} from '@lit-protocol/constants';
+import { LIT_ERROR, SessionKeyPair, SigShare } from '@lit-protocol/constants';
 
 import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
@@ -15,8 +10,8 @@ import { isBrowser, log, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
-  uint8arrayToString,
   uint8ArrayToBase64,
+  uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
 import { nacl } from '@lit-protocol/nacl';
@@ -62,6 +57,10 @@ if (!globalThis.wasmECDSA) {
 }
 /** ---------- Exports ---------- */
 
+export interface BlsSignatureShare {
+  ProofOfPossession: string;
+}
+
 /**
  * Encrypt data with a BLS public key.
  *
@@ -77,8 +76,8 @@ export const encrypt = (
 ): string => {
   return blsSdk.encrypt(
     publicKey,
-    uint8arrayToString(data, 'base16'),
-    uint8arrayToString(identity, 'base16')
+    uint8arrayToString(data, 'base64'),
+    uint8arrayToString(identity, 'base64')
   );
 };
 
@@ -91,14 +90,10 @@ export const encrypt = (
  */
 export const decryptWithSignatureShares = (
   ciphertext: string,
-  shares: string[]
+  shares: BlsSignatureShare[]
 ): Uint8Array => {
   // Format the signature shares
-  const sigShares = shares.map((s) =>
-    JSON.stringify({
-      ProofOfPossession: s,
-    })
-  );
+  const sigShares = shares.map((s) => JSON.stringify(s));
 
   // Decrypt
   const privateData = blsSdk.decrypt_with_signature_shares(
@@ -123,14 +118,10 @@ export const verifyAndDecryptWithSignatureShares = (
   publicKey: string,
   identity: Uint8Array,
   ciphertext: string,
-  shares: string[]
+  shares: BlsSignatureShare[]
 ): Uint8Array => {
   // Format the signature shares
-  const sigShares = shares.map((s) =>
-    JSON.stringify({
-      ProofOfPossession: s,
-    })
-  );
+  const sigShares = shares.map((s) => JSON.stringify(s));
 
   // Decrypt
   const privateData = blsSdk.verify_and_decrypt_with_signature_shares(
@@ -150,13 +141,9 @@ export const verifyAndDecryptWithSignatureShares = (
  * @param shares hex-encoded array of the BLS signature shares
  * @returns hex-encoded string of the combined signature
  */
-export const combineSignatureShares = (shares: string[]): string => {
+export const combineSignatureShares = (shares: BlsSignatureShare[]): string => {
   // Format the signature shares
-  const sigShares = shares.map((s) =>
-    JSON.stringify({
-      ProofOfPossession: s,
-    })
-  );
+  const sigShares = shares.map((s) => JSON.stringify(s));
 
   return blsSdk.combine_signature_shares(sigShares);
 };
