@@ -4,7 +4,6 @@ import LitLogo from './LitLogo';
 import Editor from '@monaco-editor/react';
 import { benchmark } from './utils';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
-import { AuthSig } from '@lit-protocol/types';
 
 function App() {
 
@@ -21,7 +20,7 @@ function App() {
       description: 'Threadshold cryptography for the win!',
     }
   });
-  const [str, setStr] = useState('This test is working! Omg!');
+  const [str, setStr] = useState(toHexString('This test is working! Omg!'));
 
   const go = async () => {
     let code = `import * as LitJsSdk from '@lit-protocol/lit-node-client';
@@ -52,56 +51,27 @@ const accs = [
 ];
 
 // { ms }
-const res = await LitJsSdk.encryptString('${str}');
+const res = await LitJsSdk.encryptString({
+  accessControlConditions: accs,
+  authSig,
+  chain: 'ethereum',
+  dataToEncrypt: '${str}',
+}, litNodeClient);
 
 // { Loading... } 
-const encryptedString = res.encryptedString;
+const ciphertext = res.ciphertext;
 
 // { Loading... } 
-const symmetricKey = res.symmetricKey;
-
-// { ms } 
-// { Loading... } 
-const base64EncryptedString = await LitJsSdk.blobToBase64String(
-  encryptedString
-);
+const dataToEncryptHash = res.dataToEncryptHash;
 
 // { ms } 
 // { Loading... }
-const encryptedSymmetricKey =
-  await litNodeClient.saveEncryptionKey({
-    accessControlConditions: accs,
-    symmetricKey: symmetricKey,
-    authSig: authSig,
-    chain: 'ethereum',
-  });
-
-// { ms } 
-// { Loading... }
-const toDecrypt = await LitJsSdk.uint8arrayToString(
-  encryptedSymmetricKey,
-  'base16'
-);
-
-// { ms } 
-// { Loading... }
-const encryptionKey = await litNodeClient.getEncryptionKey({
+const decryptedString = await litNodeClient.decryptToString({
   accessControlConditions: accs,
   toDecrypt: toDecrypt,
   authSig: authSig,
   chain: 'ethereum',
 });
-
-// { ms } 
-// { Loading... }
-const blob = LitJsSdk.base64StringToBlob(base64EncryptedString);
-
-// { ms } 
-// { Loading... }
-const decryptedString = await LitJsSdk.decryptString(
-  blob,
-  encryptionKey
-);
 
 console.log("decryptedString:", "Loading...");
 
@@ -117,18 +87,14 @@ console.log("decryptedString:", "Loading...");
 
 
     // --------- NEXT STEP ---------
-    let authSig: AuthSig
-
-    await benchmark(async () => {
-      authSig = await LitJsSdk.checkAndSignAuthMessage({
+    const authRes = await benchmark(async () => {
+      return LitJsSdk.checkAndSignAuthMessage({
         chain: 'ethereum'
       });
-      return authSig
-    }, (ms, res) => {
-      code = code.replace('// { ms }', `// { ${ms} }`);
-      code = code.replace('// { Loading... }', `// { ${JSON.stringify(res)} }`);
-      setData(code);
     });
+    code = code.replace('// { ms }', `// { ${authRes.duration} }`);
+    code = code.replace('// { Loading... }', `// { ${JSON.stringify(authRes.result)} }`);
+    setData(code);
 
     const accs = [
       {
@@ -144,143 +110,40 @@ console.log("decryptedString:", "Loading...");
       },
     ];
 
-
-    // --------- NEXT STEP ---------
-    let res;
-    // @ts-ignore FIXME:
-    let encryptedString;
-    // @ts-ignore FIXME:
-    let symmetricKey;
-
-    await benchmark(async () => {
-      res = await LitJsSdk.encryptString(str);
-      return res
-    }, (ms, res) => {
-      encryptedString = res.encryptedString;
-      symmetricKey = res.symmetricKey;
-
-
-      code = code.replace('// { ms }', `// { ${ms} }`);
-      code = code.replace('// { Loading... }', `// [Blob] { ${JSON.stringify(encryptedString)} }`);
-      code = code.replace('// { Loading... }', `// [Uint8Array] { ${JSON.stringify(symmetricKey)} }`);
-      setData(code);
-    });
+    console.log("NETWORK PUB KEY:", litNodeClient.networkPubKey);
 
 
     // --------- NEXT STEP ---------
-    let base64EncryptedString: string;
-    await benchmark(async () => {
-      base64EncryptedString = await LitJsSdk.blobToBase64String(
-        // @ts-ignore FIXME:
-        encryptedString
-      );
-      return base64EncryptedString
-    }, (ms, base64EncryptedString) => {
-
-      code = code.replace('// { ms }', `// { ${ms} }`);
-      code = code.replace('// { Loading... }', `// [string] ${base64EncryptedString}`);
-      // code = code.replace('// { Loading... }', `// [Uint8Array] { ${JSON.stringify(symmetricKey)} }`);
-      setData(code);
-    });
-
-
-    // --------- NEXT STEP ---------
-    let encryptedSymmetricKey: Uint8Array;
-    await benchmark(async () => {
-      encryptedSymmetricKey =
-        await litNodeClient.saveEncryptionKey({
-          accessControlConditions: accs,
-          // @ts-ignore FIXME:
-          symmetricKey,
-          authSig: authSig,
-          chain: 'ethereum',
-        });
-      return encryptedSymmetricKey
-    }, (ms, encryptedSymmetricKey) => {
-
-      console.log("encryptedSymmetricKey:", encryptedSymmetricKey)
-
-      code = code.replace('// { ms }', `// { ${ms} }`);
-      code = code.replace('// { Loading... }', `// [Uint8Array] ${encryptedSymmetricKey}`);
-      setData(code);
-    });
-
-
-    // --------- NEXT STEP ---------
-    let toDecrypt: string;
-    await benchmark(async () => {
-      toDecrypt = LitJsSdk.uint8arrayToString(
-        encryptedSymmetricKey,
-        'base16'
-      );
-      return toDecrypt
-    }, (ms, toDecrypt) => {
-
-      console.log("toDecrypt:", toDecrypt)
-
-      code = code.replace('// { ms }', `// { ${ms} }`);
-      code = code.replace('// { Loading... }', `// [string] ${toDecrypt}`);
-      setData(code);
-    });
-
-
-    // --------- NEXT STEP ---------
-    let encryptionKey: Uint8Array;
-
-    await benchmark(async () => {
-      encryptionKey = await litNodeClient.getEncryptionKey({
+    console.log("str:", str)
+    const encryptRes = await benchmark(async () => {
+      return LitJsSdk.encryptString({
         accessControlConditions: accs,
-        toDecrypt,
-        authSig: authSig,
+        authSig: authRes.result,
         chain: 'ethereum',
-      });
-      return encryptionKey
-    }, (ms, encryptionKey) => {
-
-      console.log("encryptionKey:", encryptionKey)
-
-      code = code.replace('// { ms }', `// { ${ms} }`);
-      code = code.replace('// { Loading... }', `// [Uint8Array(32)] ${encryptionKey}`);
-      setData(code);
+        dataToEncrypt: str,
+      }, litNodeClient);
     });
 
+    code = code.replace('// { ms }', `// { ${encryptRes.duration} }`);
+    code = code.replace('// { Loading... }', `// [string] { ${encryptRes.result.ciphertext} }`);
+    code = code.replace('// { Loading... }', `// [Uint8Array] { ${JSON.stringify(encryptRes.result.dataToEncryptHash)} }`);
+    setData(code);
 
     // --------- NEXT STEP ---------
-    let blob: Blob;
-    await benchmark(async () => {
-      blob = LitJsSdk.base64StringToBlob(base64EncryptedString);
-      return blob
-    }, (ms, blob) => {
+    const decryptRes = await benchmark(async () => {
+      return LitJsSdk.decryptToString({
+        accessControlConditions: accs,
+        ciphertext: encryptRes.result.ciphertext,
+        dataToEncryptHash: encryptRes.result.dataToEncryptHash,
+        authSig: authRes.result,
+        chain: 'ethereum',
+      }, litNodeClient);
+    })
 
-      console.log("blob:", blob)
-
-      code = code.replace('// { ms }', `// { ${ms} }`);
-      code = code.replace('// { Loading... }', `// ${blob}`);
-      setData(code);
-    });
-
-
-    // --------- NEXT STEP ---------
-    let decryptedString;
-
-    await benchmark(async () => {
-      decryptedString = await LitJsSdk.decryptString(
-        blob,
-        encryptionKey
-      );
-      return decryptedString;
-    }, (ms, decryptedString) => {
-
-      console.log("decryptedString:", decryptedString)
-
-      code = code.replace('// { ms }', `// { ${ms} }`);
-      code = code.replace('// { Loading... }', `// [string] ${decryptedString}`);
-      code = code.replace('"Loading..."', `"${decryptedString}"`);
-      setData(code);
-    });
-
-
-
+    code = code.replace('// { ms }', `// { ${decryptRes.duration} }`);
+    code = code.replace('// { Loading... }', `// [string] ${decryptRes.result}`);
+    code = code.replace('"Loading..."', `"${decryptRes.result}"`);
+    setData(code);
   }
 
   return (
@@ -331,3 +194,12 @@ console.log("decryptedString:", "Loading...");
 
 
 export default App;
+
+// Function to convert utf-8 string into hex string.
+function toHexString(str: string) {
+  var hex = '';
+  for (var i = 0; i < str.length; i++) {
+    hex += '' + str.charCodeAt(i).toString(16);
+  }
+  return '0x' + hex;
+}
