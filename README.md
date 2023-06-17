@@ -26,21 +26,29 @@ This new V2 SDK is written in Typescript and is a complete rewrite of the old SD
 
 # Quick Start
 
-### NodeJS Only
+### NodeJS Exclusive
 
-Removed browser related methods eg. checkAndSignAuthSig
+Removed browser-specific methods, e.g., checkAndSignAuthSig
 
 ```
 yarn add @lit-protocol/lit-node-client-nodejs
 ```
 
-### (Isomorphic) works on Node.js/browser
+or..
+
+### Isomorphic Implementation
+
+Operable in both Node.js and the browser
 
 ```
 yarn add @lit-protocol/lit-node-client
 ```
 
-### Vanilla JS (UMD)
+or..
+
+### Vanilla JavaScript (UMD)
+
+For usage directly in the browser with a script tag
 
 ```js
 <script src="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.js"></script>
@@ -55,9 +63,7 @@ yarn add @lit-protocol/lit-node-client
 
 # Packages
 
-> 📝 If you're looking to use the Lit SDK, you're probably all set with just the lit-node-client <link>. It's got everything most folks need. However, if you're the type who likes to keep things super lean and mean, and you need to keep an eagle eye on your bundle size, we've got individual packages too.
-
-Individual packages are below so that you can import the minimum required packages for your use case.
+📝 If you're looking to use the Lit SDK, you're probably all set with just the lit-node-client <link>. <br/>Get started with interacting with Lit network!
 
 <!-- autogen:package:start -->
 
@@ -65,6 +71,13 @@ Package | Category | Version | Download
 --- | --- | --- | ---
 | [@lit-protocol/lit-node-client-nodejs](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client-nodejs) | ![lit-node-client-nodejs](https://img.shields.io/badge/-nodejs-2E8B57 "lit-node-client-nodejs") | 2.2.25 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client-nodejs">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-nodejs-vanilla/lit-node-client-nodejs.min.js">Vanilla JS (UMD)</a>
 | [@lit-protocol/lit-node-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client) | ![lit-node-client](https://img.shields.io/badge/-universal-8A6496 "lit-node-client") | 2.2.25 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.min.js">Vanilla JS (UMD)</a>
+
+
+Lit provides additional packages tailored for your specific use cases.
+
+
+Package | Category | Version | Download
+--- | --- | --- | ---
 | [@lit-protocol/access-control-conditions](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/access-control-conditions) | ![access-control-conditions](https://img.shields.io/badge/-universal-8A6496 "access-control-conditions") | 2.2.25 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/access-control-conditions">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/access-control-conditions-vanilla/access-control-conditions.min.js">Vanilla JS (UMD)</a>
 | [@lit-protocol/auth-helpers](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-helpers) | ![auth-helpers](https://img.shields.io/badge/-universal-8A6496 "auth-helpers") | 2.2.25 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-helpers">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/auth-helpers-vanilla/auth-helpers.min.js">Vanilla JS (UMD)</a>
 | [@lit-protocol/bls-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/bls-sdk) | ![bls-sdk](https://img.shields.io/badge/-universal-8A6496 "bls-sdk") | 2.2.25 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/bls-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/bls-sdk-vanilla/bls-sdk.min.js">Vanilla JS (UMD)</a>
@@ -108,70 +121,70 @@ http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
 
 # Contributing and developing to this SDK
 
-## Recommended VSCode Extensions
+## Prerequisite
 
-<details>
-<summary>Nx Console</summary>
-Download: <a href="https://nx.dev/core-features/integrate-with-editors">https://nx.dev/core-features/integrate-with-editors</a>
-</details>
-<details>
-<summary>Restore Terminal</summary>
+- node (v18.0.0)
 
-Download: <a href="https://marketplace.visualstudio.com/items?itemName=EthanSK.restore-terminals">https://marketplace.visualstudio.com/items?itemName=EthanSK.restore-terminals</a>
-See [Video](https://streamable.com/e/5g52m4)
+## Recommended
 
-```js
-  "restoreTerminals.terminals": [
-    {See [Video](https://streamable.com/e/5g52m4)
-      "splitTerminals": [
-        // {
-        //   "name": "nx graph",
-        //   "commands": ["yarn graph"]
-        // },
-        {
-          "name": "nodejs",
-          "commands": ["yarn nx run nodejs:serve"]
-        },
-        {
-          "name": "html",
-          "commands": ["yarn nx run html:serve"]
-        },
-        {
-          "name": "react",
-          "commands": ["yarn nx run react:serve"]
-        },
-        {
-          "name": "custom",
-          "commands": ["clear"]
-        }
-      ]
-    }
-  ]
-```
+- NX Console: https://nx.dev/core-features/integrate-with-editors
 
-</details>
+# Quick Start 
 
-# Workflow
+The following commands will help you start developing with this repository.
 
-## CLI (WIP)
+First, install the dependencies via yarn:
 
 ```
-yarn tools
+yarn
 ```
 
-## Dev
+## Building
+
+You can build the project with the following command:
+
+```
+yarn build
+```
+
+## Running Test Apps
+
+The test apps are configured to automatically import all modules and expose all module functions. For browsers, you can access these functions using `window.LitJsSdk_<package_name>.<function_name>`
 
 ```jsx
-// this will open
+// Running apps...
 // html: http://localhost:4002
 // react: http://localhost:4003
-// nodejs: in this terminal
-yarn tools --dev --apps
-
-// usually i will open another temrinal to watch the package
-// i'm developing
-yarn tools --watch --target <package-name>
+// nodejs: in the terminal
+yarn apps
 ```
+
+or runniny individually
+
+```
+// html
+yarn nx run html:serve
+
+// react
+yarn nx run react:serve
+
+// nodejs
+yarn nx run nodejs:serve
+```
+
+## Run unit tests
+
+```
+yarn test:unit
+```
+
+## Run E2E tests
+
+```
+yarn test:e2e
+```
+
+# (WIP) Advanced
 
 ## Creating a new library
 
@@ -188,45 +201,27 @@ yarn gen:lib <package-name> <tag>
 yarn tools --create --react contracts-sdk --demo
 ```
 
-## Deleting a library
+## Deleting a package or app
 
 ```
-yarn tool:delete (--package OR --app) <project-name>
+// delete an app from ./app/<app-name>
+yarn delete:app <app-name>
+
+// delete a package from ./packages/<package-name>
+yarn delete:package <package-name>
 ```
+
 
 ## Building
 
 ```jsx
 yarn build
-
-// or
-yarn tools --build
 ```
 
 ### Building target package
 
 ```jsx
 yarn nx run <project-name>:build
-
-// or
-yarn tools --build --target <project-name>
-
-// or targeted env
-yarn nx run <project-name>:_buildTsc
-yarn nx run <project-name>:_buildWeb
-```
-
-## Watching
-
-```jsx
-// watch all packages change
-yarn tools --watch
-
-// watch a target package
-yarn tools --watch <package-name>
-
-// watch a target package with all its monorepo dependencies
-yarn tools --watch <package-name>--deps
 ```
 
 ## Building Local Changes
@@ -262,12 +257,6 @@ yarn tools --clone <project-name> <clone-project-name> <(?) --publish> <(?) --re
 
 // eg
 yarn tools --clone lit-node-client @litprotocol/dev --publish --remove-after
-```
-
-### HTML Test app to Vercel
-
-```
-yarn tool:buildHtml
 ```
 
 ## Testing
@@ -399,6 +388,6 @@ Object.defineProperty(globalThis, 'crypto', {
 <details>
 <summary>error Command failed with exit code 13.</summary>
 
-Make sure your node version is above v16.16.0
+Make sure your node version is above v18.0.0
 
 </details>
