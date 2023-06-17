@@ -434,11 +434,14 @@ export interface EncryptRequestBase {
 }
 
 export interface EncryptRequest extends EncryptRequestBase {
+  // The data that you wish to encrypt as a Uint8Array
   dataToEncrypt: Uint8Array;
 }
 
 export interface EncryptResponse {
+  // The base64-encoded ciphertext
   ciphertext: string;
+  // The hash of the data that was encrypted
   dataToEncryptHash: string;
 }
 
@@ -456,11 +459,14 @@ export interface EncryptFileRequest extends EncryptRequestBase {
 }
 
 export interface DecryptRequest extends EncryptRequestBase {
+  // The base64-encoded ciphertext
   ciphertext: string;
+  // The hash of the data that was encrypted
   dataToEncryptHash: string;
 }
 
 export interface DecryptResponse {
+  // The decrypted data as a Uint8Array
   decryptedData: Uint8Array;
 }
 

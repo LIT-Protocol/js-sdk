@@ -41,11 +41,11 @@ import * as ipfsClient from 'ipfs-http-client';
 
 /**
  *
- * Encrypt a string or file, save the key to the Lit network, and upload all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS using the ipfs-client-http SDK & returns the IPFS CID.
+ * Encrypt a string or file using the LIT network public key and upload all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS using the ipfs-client-http SDK & returns the IPFS CID.
  *
- * @param { EncryptToIpfsProps }
+ * @param { EncryptToIpfsProps } - The params required to encrypt & upload to IPFS
  *
- * @returns { Promise<string> }
+ * @returns { Promise<string> } - IPFS CID
  *
  */
 export const encryptToIpfs = async (
@@ -152,9 +152,9 @@ export const encryptToIpfs = async (
  *
  * Decrypt & return the string or file (in Uint8Array format) using its metadata stored on IPFS with the given ipfsCid.
  *
- * @param { DecryptFromIpfsProps }
+ * @param { DecryptFromIpfsProps } - The params required to decrypt from IPFS
  *
- * @returns { Promise<string | Uint8Array> }
+ * @returns { Promise<string | Uint8Array> } - The decrypted string or file (in Uint8Array format)
  *
  */
 export const decryptFromIpfs = async (
@@ -232,8 +232,10 @@ export const decryptFromIpfs = async (
  *
  * Encrypt a string.  This is used to encrypt any string that is to be locked via the Lit Protocol.
  *
- * @param params
- * @returns Promise<EncryptResponse> A promise containing the ciphertext and the hash of the data that was encrypted.
+ * @param { EncryptStringRequest } params - The params required to encrypt a string
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
+ *
+ * @returns { Promise<EncryptResponse> } - The encrypted string and the hash of the string
  */
 export const encryptString = async (
   params: EncryptStringRequest,
@@ -260,12 +262,12 @@ export const encryptString = async (
 
 /**
  *
- * Decrypt a string that was encrypted with the encryptString function.
+ * Decrypt ciphertext into a string that was encrypted with the encryptString function.
  *
- * @param { AcceptedFileType } encryptedStringBlob The encrypted string as a Blob
- * @param { Uint8Array } symmKey The symmetric key used that will be used to decrypt this.
- *
- * @returns { Promise<string> } A promise containing the decrypted string
+ * @param { DecryptRequest } params - The params required to decrypt a string
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
+
+ * @returns { Promise<string> } - The decrypted string
  */
 export const decryptToString = async (
   params: DecryptRequest,
@@ -293,9 +295,10 @@ export const decryptToString = async (
  *
  * Zip and encrypt a string.  This is used to encrypt any string that is to be locked via the Lit Protocol.
  *
- * @param { string } string The string to zip and encrypt
+ * @param { EncryptStringRequest } params - The params required to encrypt a string
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
- * @returns { Promise<Object> } A promise containing the encryptedZip as a Blob and the symmetricKey used to encrypt it, as a Uint8Array.  The encrypted zip will contain a single file called "string.txt"
+ * @returns { Promise<EncryptResponse> } - The encrypted string and the hash of the string
  */
 export const zipAndEncryptString = async (
   params: EncryptStringRequest,
@@ -331,9 +334,11 @@ export const zipAndEncryptString = async (
  * 
  * Zip and encrypt multiple files.
  * 
- * @param { Array<File> } files An array of the files you wish to zip and encrypt
+ * @param { Array<File> } files - The files to encrypt
+ * @param { EncryptRequestBase } paramsBase - The params required to encrypt a file
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  * 
- * @returns {Promise<Object>} A promise containing the encryptedZip as a Blob and the symmetricKey used to encrypt it, as a Uint8Array.  The encrypted zip will contain a folder "encryptedAssets" and all of the files will be inside it.
+ * @returns { Promise<EncryptResponse> } - The encrypted file and the hash of the file
  
 */
 export const zipAndEncryptFiles = async (
@@ -388,10 +393,10 @@ export const zipAndEncryptFiles = async (
  *
  * Decrypt and unzip a zip that was created using encryptZip, zipAndEncryptString, or zipAndEncryptFiles.
  *
- * @param { AcceptedFileType } encryptedZipBlob The encrypted zip as a Blob
- * @param { SymmetricKey } symmKey The symmetric key used that will be used to decrypt this zip.
+ * @param { DecryptRequest } params - The params required to decrypt a string
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
- * @returns { Promise<Object> } A promise containing a JSZip object indexed by the filenames of the zipped files.  For example, if you have a file called "meow.jpg" in the root of your zip, you could get it from the JSZip object by doing this: const imageBlob = await decryptedZip['meow.jpg'].async('blob')
+ * @returns { Promise<{ [key: string]: JSZip.JSZipObject }>} - The decrypted zip file
  */
 export const decryptToZip = async (
   params: DecryptRequest,
@@ -427,11 +432,12 @@ export const decryptToZip = async (
 
 /**
  *
- * Encrypt a zip file created with JSZip using a new random symmetric key via WebCrypto.
+ * Encrypt a zip file created with JSZip.
  *
- * @param { JSZip } zip The JSZip instance to encrypt
+ * @param { EncryptZipRequest } params - The params required to encrypt a zip
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
- * @returns { Promise<Object> } A promise containing the encryptedZip as a Blob and the symmetricKey used to encrypt it, as a Uint8Array string.
+ * @returns { Promise<EncryptResponse> } - The encrypted zip file and the hash of the zip file
  */
 export const encryptZip = async (
   params: EncryptZipRequest,
@@ -472,11 +478,11 @@ export const encryptZip = async (
 
 /**
  *
- * Encrypt a single file, save the key to the Lit network, and then zip it up with the metadata.
+ * Encrypt a single file and then zip it up with the metadata.
  *
- * @param { EncryptFileAndZipWithMetadataProps }
+ * @param { EncryptFileAndZipWithMetadataProps } params - The params required to encrypt a file and zip it up with the metadata
  *
- * @returns { Promise<ThreeKeys> }
+ * @returns { Promise<any> } - The encrypted zip file and the hash of the zip file
  *
  */
 export const encryptFileAndZipWithMetadata = async (
@@ -572,7 +578,7 @@ export const encryptFileAndZipWithMetadata = async (
  *
  * Given a zip file with metadata inside it, unzip, load the metadata, and return the decrypted file and the metadata.  This zip file would have been created with the encryptFileAndZipWithMetadata function.
  *
- * @param { DecryptZipFileWithMetadataProps }
+ * @param { DecryptZipFileWithMetadataProps } params - The params required to decrypt a zip file with metadata
  *
  * @returns { Promise<DecryptZipFileWithMetadata> } A promise containing an object that contains decryptedFile and metadata properties.  The decryptedFile is an ArrayBuffer that is ready to use, and metadata is an object that contains all the properties of the file like it's name and size and type.
  */
@@ -652,12 +658,12 @@ export const decryptZipFileWithMetadata = async (
 
 /**
  *
- * Encrypt a file without doing any zipping or packing.  This is useful for large files.  A 1gb file can be encrypted in only 2 seconds, for example.  A new random symmetric key will be created and returned along with the encrypted file.
+ * Encrypt a file without doing any zipping or packing.  This is useful for large files.  A 1gb file can be encrypted in only 2 seconds, for example.
  *
- * @param { Object } params
- * @param { AcceptedFileType } params.file The file you wish to encrypt
+ * @param { EncryptFileRequest } params - The params required to encrypt a file
+ * @param { ILitNodeClient } litNodeClient - The lit node client to use to encrypt the file
  *
- * @returns { Promise<Object> } A promise containing an object with keys encryptedFile and symmetricKey.  encryptedFile is a Blob, and symmetricKey is a Uint8Array that can be used to decrypt the file.
+ * @returns { Promise<EncryptResponse> } - The encrypted file and the hash of the file
  */
 export const encryptFile = async (
   params: EncryptFileRequest,
@@ -689,11 +695,10 @@ export const encryptFile = async (
  *
  * Decrypt a file that was encrypted with the encryptFile function, without doing any unzipping or unpacking.  This is useful for large files.  A 1gb file can be decrypted in only 1 second, for example.
  *
- * @property { Object } params
- * @property { AcceptedFileType } params.file The file you wish to decrypt
- * @property { Uint8Array } params.symmetricKey The symmetric key used that will be used to decrypt this.
+ * @param { DecryptRequest } params - The params required to decrypt a file
+ * @param { ILitNodeClient } litNodeClient - The lit node client to use to decrypt the file
  *
- * @returns { Promise<Object> } A promise containing the decrypted file.  The file is an ArrayBuffer.
+ * @returns { Promise<Uint8Array> } - The decrypted file
  */
 export const decryptToFile = async (
   params: DecryptRequest,

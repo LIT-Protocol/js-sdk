@@ -1703,6 +1703,11 @@ export class LitNodeClientNodeJs extends LitCore {
     return true;
   };
 
+  /**
+   *
+   * Encrypt data using the LIT network public key.
+   *
+   */
   encrypt = async (params: EncryptRequest): Promise<EncryptResponse> => {
     // ========== Validate Params ==========
     // -- validate if it's ready
@@ -1784,6 +1789,11 @@ export class LitNodeClientNodeJs extends LitCore {
     return { ciphertext, dataToEncryptHash: hashOfPrivateDataStr };
   };
 
+  /**
+   *
+   * Decrypt ciphertext with the LIT network.
+   *
+   */
   decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
     const { sessionSigs, chain, ciphertext, dataToEncryptHash } = params;
 
