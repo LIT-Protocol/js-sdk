@@ -90,9 +90,9 @@ export abstract class BaseProvider {
    * Generate session sigs for given auth method and PKP
    *
    * @param {BaseProviderSessionSigsParams} params
+   * @param {string} params.pkpPublicKey - Public key of PKP to auth with
    * @param {AuthMethod} params.authMethod - Auth method verifying ownership of PKP
    * @param {GetSessionSigsProps} params.sessionSigsParams - Params for getSessionSigs function
-   * @param {string} [params.pkpPublicKey] - Public key of PKP to auth with. If not provided, Lit nodes will fetch PKPs associated with the given auth method and use the first one returned
    * @param {LitNodeClient} [params.litNodeClient] - Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
    *
    * @returns {Promise<SessionSigs>} - Session sigs
