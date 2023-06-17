@@ -1185,10 +1185,6 @@ export interface OtpProviderOptions {
 
 export interface BaseProviderSessionSigsParams {
   /**
-   * Public key of PKP to auth with
-   */
-  pkpPublicKey: string;
-  /**
    * Auth method verifying ownership of PKP
    */
   authMethod: AuthMethod;
@@ -1196,6 +1192,10 @@ export interface BaseProviderSessionSigsParams {
    * Params for getSessionSigs function
    */
   sessionSigsParams: GetSessionSigsProps;
+  /**
+   * Public key of PKP to auth with. If not provided, Lit nodes will fetch PKPs associated with the given auth method and use the first one returned
+   */
+  pkpPublicKey?: string;
   /**
    * Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
    */

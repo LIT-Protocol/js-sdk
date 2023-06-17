@@ -37,3 +37,12 @@ export const getTransactionToSign = (txParams: any): any => {
 
   return formattedTx;
 };
+
+export function isSignedTransaction(tx: any): boolean {
+  try {
+    const parsedTx = ethers.utils.parseTransaction(tx);
+    return !!parsedTx.v && !!parsedTx.r && !!parsedTx.s;
+  } catch (err) {
+    return false;
+  }
+}

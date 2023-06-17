@@ -49,6 +49,7 @@ import {
   ETHTxRes,
 } from './pkp-ethers-types';
 import { LIT_CHAINS } from '@lit-protocol/constants';
+import { getTransactionToSign, isSignedTransaction } from './helper';
 
 const logger = new Logger(version);
 
@@ -266,9 +267,17 @@ export class PKPEthersWallet
     this.log('sendTransaction => transaction:', transaction);
 
     let res;
+    let signedTxn;
 
     try {
-      res = await this.rpcProvider.sendTransaction(transaction);
+      if (!isSignedTransaction(transaction)) {
+        const unsignedTxFormatted = getTransactionToSign(transaction);
+        signedTxn = await this.signTransaction(unsignedTxFormatted);
+      } else {
+        signedTxn = transaction;
+      }
+
+      res = await this.rpcProvider.sendTransaction(signedTxn);
     } catch (e) {
       this.log('sendTransaction => error:', e);
       throw e;
