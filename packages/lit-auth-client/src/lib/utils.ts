@@ -1,4 +1,7 @@
-import { LoginUrlParams } from '@lit-protocol/types';
+import { AuthMethodType } from '@lit-protocol/constants';
+import { AuthMethod, LoginUrlParams } from '@lit-protocol/types';
+import { utils } from 'ethers';
+import * as jose from 'jose';
 
 export const STATE_PARAM_KEY = 'lit-state-param';
 
@@ -193,4 +196,132 @@ export function getRPIdFromOrigin(origin: string) {
   const newOrigin = origin.replace(/(^\w+:|^)\/\//, '');
   // remove port with regex
   return newOrigin.replace(/:\d+$/, '');
+}
+
+/**
+ * Derive unique identifier from authentication material produced by auth providers
+ *
+ * @param {AuthMethod} authMethod - Auth method object from provider
+ *
+ * @returns {Promise<string>} - Auth method id
+ */
+export async function getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+  switch (authMethod.authMethodType) {
+    case AuthMethodType.GoogleJwt:
+      return await getGoogleAuthMethodId(authMethod);
+    case AuthMethodType.Discord:
+      return await getDiscordAuthMethodId(authMethod);
+    case AuthMethodType.EthWallet:
+      return await getEthWalletAuthMethodId(authMethod);
+    case AuthMethodType.WebAuthn:
+      return await getWebAuthnAuthMethodId(authMethod);
+    case AuthMethodType.OTP:
+      return await getOTPMethodId(authMethod);
+    default:
+      throw new Error(
+        `Invalid auth method type "${authMethod.authMethodType}" passed`
+      );
+  }
+}
+
+/**
+ * Fetch Discord user info
+ *
+ * https://discord.com/developers/docs/resources/user
+ */
+async function getDiscordUserInfo(accessToken: string): Promise<any> {
+  const meResponse = await fetch('https://discord.com/api/users/@me', {
+    method: 'GET',
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+    },
+  });
+  if (meResponse.ok) {
+    const user = await meResponse.json();
+    return user;
+  } else {
+    throw new Error('Unable to fetch Discord user info');
+  }
+}
+
+/**
+ * Get ID for given Discord access token
+ */
+async function getDiscordAuthMethodId(authMethod: AuthMethod): Promise<string> {
+  const user = await getDiscordUserInfo(authMethod.accessToken);
+  const authMethodId = utils.keccak256(
+    utils.toUtf8Bytes(`${user.id}:1052874239658692668`)
+  );
+  return authMethodId;
+}
+
+/**
+ * Parse Google ID token
+ *
+ * https://developers.google.com/identity/openid-connect/openid-connect
+ */
+async function getGoogleUserInfo(idToken: string): Promise<any> {
+  const claims = jose.decodeJwt(idToken);
+  return Promise.resolve(claims);
+}
+
+/**
+ * Get ID for given Google ID token
+ */
+async function getGoogleAuthMethodId(authMethod: AuthMethod): Promise<string> {
+  const payload = await getGoogleUserInfo(authMethod.accessToken);
+  const authMethodId = utils.keccak256(
+    utils.toUtf8Bytes(`${payload.sub}:${payload.aud}`)
+  );
+  return authMethodId;
+}
+
+/**
+ * Get ID for given Ethereum wallet signature
+ */
+async function getEthWalletAuthMethodId(
+  authMethod: AuthMethod
+): Promise<string> {
+  const authSig = JSON.parse(authMethod.accessToken);
+  return Promise.resolve(authSig.address);
+}
+
+/**
+ * Get ID for given WebAuthn credential
+ */
+async function getWebAuthnAuthMethodId(
+  authMethod: AuthMethod
+): Promise<string> {
+  const data = JSON.parse(authMethod.accessToken);
+  const authMethodId = utils.keccak256(utils.toUtf8Bytes(`${data.rawId}:lit`));
+  return Promise.resolve(authMethodId);
+}
+
+/**
+ * Get ID for given email / SMS OTP
+ */
+async function getOTPMethodId(authMethod: AuthMethod): Promise<string> {
+  const tokenBody = parseOTPJWT(authMethod.accessToken);
+  const orgId = (tokenBody['orgId'] as string).toLowerCase();
+  const message: string = tokenBody['extraData'] as string;
+  const contents = message.split('|');
+  const userId = contents[0];
+
+  const authMethodId = utils.keccak256(utils.toUtf8Bytes(`${userId}:${orgId}`));
+  return Promise.resolve(authMethodId);
+}
+
+/**
+ * Parse JWT token for email / SMS OTP
+ */
+function parseOTPJWT(jwt: string): Record<string, unknown> {
+  const parts = jwt.split('.');
+  if (parts.length !== 3) {
+    throw new Error('Invalid token length');
+  }
+  const body = Buffer.from(parts[1], 'base64');
+  const parsedBody: Record<string, unknown> = JSON.parse(
+    body.toString('ascii')
+  );
+  return parsedBody;
 }
