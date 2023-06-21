@@ -4,6 +4,7 @@ import {
   LitAbility,
   LitAccessControlConditionResource,
 } from '@lit-protocol/auth-helpers';
+import { uint8arrayFromString, uint8arrayToString } from '@lit-protocol/uint8arrays';
 
 let window: any;
 let savedParams: any = {
@@ -24,7 +25,7 @@ let savedParams: any = {
 };
 let LitJsSdk: any;
 
-describe('Encrypt and Decrypt String', () => {
+describe('Auth + Setup', () => {
   // -- before
   before(() => {
     cy.visit('/', {
@@ -62,257 +63,185 @@ describe('Encrypt and Decrypt String', () => {
   });
 
   it('authSig is saved', () => {
-    // window = await cy.window();
     // expect saveParams not empty
     expect(savedParams.authSig).to.be.an('object');
   });
 
   it('connect lit node client', () => {
-    cy.window().then(async (window) => {
+    cy.window().then(async () => {
       const client = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' });
       await client.connect();
       savedParams.litNodeClient = client;
       expect(client.config.litNetwork).to.be.eq('serrano');
     });
   });
+});
 
-  it('encrypts string', async () => {
-    const res = await LitJsSdk.encryptString('This test is working! Omg!');
-    savedParams.encryptedString = res.encryptedString;
-    savedParams.symmetricKey = res.symmetricKey;
-    expect(savedParams.encryptedString).to.be.a('Blob');
-    expect(savedParams.symmetricKey).to.be.a('Uint8Array');
-  });
-
-  it('turns blob to base64 string', async () => {
-    const base64 = await LitJsSdk.blobToBase64String(
-      savedParams.encryptedString
-    );
-    savedParams.encryptedString = base64;
-    expect(savedParams.encryptedString).to.be.a('string');
-  });
-
-  it('saves encryption key', async () => {
-    // const { encryptedString, symmetricKey } = savedParams;
-
-    const encryptedSymmetricKey =
-      await savedParams.litNodeClient.saveEncryptionKey({
+describe('Encrypt and Decrypt', () => {
+  it('encrypts', async () => {
+    cy.window().then(async () => {
+      const encryptResponse = await savedParams.litNodeClient.encrypt({
         accessControlConditions: savedParams.accs,
-        symmetricKey: savedParams.symmetricKey,
         authSig: savedParams.authSig,
         chain: 'ethereum',
+        dataToEncrypt: uint8arrayFromString('This test is working! Omg!', 'base16'),
+      })
+      savedParams.encryptResponse = encryptResponse;
+      
+      const { ciphertext, dataToEncryptHash } = encryptResponse;
+      expect(ciphertext).to.be.an('string');
+      expect(dataToEncryptHash).to.be.an('string');
+    })
+  });
+
+  it('decrypts', async () => {
+    cy.window().then(async () => {
+      const decryptResponse = await savedParams.litNodeClient.decrypt({
+        accessControlConditions: savedParams.accs,
+        authSig: savedParams.authSig,
+        chain: 'ethereum',
+        ciphertext: savedParams.encryptResponse.ciphertext,
+        dataToEncryptHash: savedParams.encryptResponse.dataToEncryptHash,
       });
-
-    savedParams.encryptedSymmetricKey = encryptedSymmetricKey;
-
-    expect(savedParams.encryptedSymmetricKey).to.be.an('Uint8Array');
-  });
-
-  it('gets toDecrypt by turning encryptedSymmetricKey(uint8array) to string', async () => {
-    savedParams.toDecrypt = await LitJsSdk.uint8arrayToString(
-      savedParams.encryptedSymmetricKey,
-      'base16'
-    );
-    expect(savedParams.toDecrypt).to.be.a('string');
-  });
-
-  it('gets encryption key', async () => {
-    const encryptionKey = await savedParams.litNodeClient.getEncryptionKey({
-      accessControlConditions: savedParams.accs,
-      toDecrypt: savedParams.toDecrypt,
-      authSig: savedParams.authSig,
-      chain: 'ethereum',
+      savedParams.decryptResponse = decryptResponse;
+  
+      expect(savedParams.decryptResponse.decryptedData).to.be.a('Uint8Array');
+      expect(uint8arrayToString(savedParams.decryptResponse.decryptedData, 'base16')).to.be.eq('This test is working! Omg!');
     });
-
-    savedParams.encryptionKey = encryptionKey;
-
-    expect(savedParams.encryptionKey).to.be.a('Uint8Array');
   });
+})
 
-  it('turns base64 to Blob', async () => {
-    const blob = await LitJsSdk.base64StringToBlob(savedParams.encryptedString);
-    savedParams.encryptedStringBlob = blob;
-    expect(savedParams.encryptedStringBlob).to.be.a('Blob');
+describe('Encrypt and Decrypt String', () => {
+  it('encrypts string', async () => {
+    cy.window().then(async () => {
+      const encryptResponse = await LitJsSdk.encryptString(
+        {
+          dataToEncrypt: 'this is a secret message',
+          accessControlConditions: savedParams.accs,
+          chain: 'ethereum',
+          authSig: savedParams.authSig,
+        },
+        savedParams.litNodeClient,
+      );
+      savedParams.encryptResponse = encryptResponse;
+  
+      const { ciphertext, dataToEncryptHash } = encryptResponse;
+      expect(ciphertext).to.be.an('string');
+      expect(dataToEncryptHash).to.be.an('string');
+    });
   });
 
   it('decrypts string', async () => {
-    const decryptedString = await LitJsSdk.decryptString(
-      savedParams.encryptedStringBlob,
-      savedParams.encryptionKey
-    );
-    expect(decryptedString).to.eq('This test is working! Omg!');
+    cy.window().then(async () => {
+      const decryptedString = await LitJsSdk.decryptToString(
+        {
+          accessControlConditions: savedParams.accs,
+          chain: 'ethereum',
+          authSig: savedParams.authSig,
+          ciphertext: savedParams.encryptResponse.ciphertext,
+          dataToEncryptHash: savedParams.encryptResponse.dataToEncryptHash,
+        },
+        savedParams.litNodeClient,
+      );
+  
+      expect(decryptedString).to.be.eq('this is a secret message');
+    });
   });
 });
 
 describe('Zip and encrypt string then decrypt zip', () => {
-  it('zips string', async () => {
-    const zip = await LitJsSdk.zipAndEncryptString(
-      'This test is working! Omg!'
-    );
-    savedParams.zip = zip;
-    expect(savedParams.zip.symmetricKey).to.be.a('Uint8Array');
-    expect(savedParams.zip.encryptedZip).to.be.a('Blob');
-  });
-
-  it('saves encryption key', async () => {
-    const encryptedSymmetricKey =
-      await savedParams.litNodeClient.saveEncryptionKey({
-        accessControlConditions: savedParams.accs,
-        symmetricKey: savedParams.zip.symmetricKey,
-        authSig: savedParams.authSig,
-        chain: 'ethereum',
-      });
-
-      console.log("savedParams.zip.symmetricKey:", savedParams.zip.symmetricKey)
-
-    savedParams.encryptedSymmetricKey = encryptedSymmetricKey;
-
-    expect(savedParams.encryptedSymmetricKey).to.be.an('Uint8Array');
-  });
-
-  it('gets encryption key', async () => {
-    const toDecrypt = await LitJsSdk.uint8arrayToString(
-      savedParams.encryptedSymmetricKey,
-      'base16'
-    );
-
-    const encryptionKey = await savedParams.litNodeClient.getEncryptionKey({
-      accessControlConditions: savedParams.accs,
-      toDecrypt,
-      authSig: savedParams.authSig,
-      chain: 'ethereum',
+  it('zips and encrypt string', async () => {
+    cy.window().then(async () => {
+      const encryptResponse = await LitJsSdk.zipAndEncryptString(
+        {
+          dataToEncrypt: 'this is a secret message',
+          accessControlConditions: savedParams.accs,
+          chain: 'ethereum',
+          authSig: savedParams.authSig,
+        },
+        savedParams.litNodeClient,
+      );
+      const { ciphertext, dataToEncryptHash } = encryptResponse;
+      savedParams.encryptResponse = encryptResponse;
+  
+      expect(ciphertext).to.be.an('string');
+      expect(dataToEncryptHash).to.be.an('string');
     });
-
-    savedParams.encryptionKey = encryptionKey;
-
-    expect(savedParams.encryptionKey).to.be.a('Uint8Array');
   });
 
-  it('decrypt zip', async () => {
-    const decryptedZip = await LitJsSdk.decryptZip(
-      savedParams.zip.encryptedZip,
-      savedParams.encryptionKey
-    );
-
-    savedParams.decryptZip = decryptedZip;
-    expect(savedParams.decryptZip).to.be.an('Object');
-  });
-
-  it('gets the decrypted zip content', async () => {
-    const decryptedString = await savedParams.decryptZip['string.txt'].async(
-      'text'
-    );
-    expect(decryptedString).to.eq('This test is working! Omg!');
+  it('decrypts into zip', async () => {
+    cy.window().then(async () => {
+      const decryptedFiles = await LitJsSdk.decryptToZip(
+        {
+          accessControlConditions: savedParams.accs,
+          chain: 'ethereum',
+          authSig: savedParams.authSig,
+          ciphertext: savedParams.encryptResponse.ciphertext,
+          dataToEncryptHash: savedParams.encryptResponse.dataToEncryptHash,
+        },
+        savedParams.litNodeClient,
+      );
+  
+      expect(decryptedFiles).to.be.an('array');
+      const decryptedString = await decryptedFiles['string.txt'].async(
+        'text'
+      );
+      expect(decryptedString).to.eq('this is a secret message');
+    });
   });
 });
 
 describe('Encrypt and decrypt file', () => {
   it('zip and encrypt files', async () => {
-    // create a new file
-    const file = new File(['Hello, world!'], 'hello.txt', {
-      type: 'text/plain',
-    });
-
-    savedParams.zipFiles = await LitJsSdk.zipAndEncryptFiles([file]);
-
-    expect(savedParams.zipFiles.symmetricKey).to.be.a('Uint8Array');
-  });
-
-  it('turns blob to base 64 string', async () => {
-    const base64 = await LitJsSdk.blobToBase64String(
-      savedParams.zipFiles.encryptedZip
-    );
-    savedParams.encryptedZipBase64 = base64;
-    expect(savedParams.encryptedZipBase64).to.be.a('string');
-  });
-
-  it('saves encryption key', async () => {
-    const encryptedSymmetricKey =
-      await savedParams.litNodeClient.saveEncryptionKey({
-        accessControlConditions: savedParams.accs,
-        symmetricKey: savedParams.zipFiles.symmetricKey,
-        authSig: savedParams.authSig,
-        chain: 'ethereum',
+    cy.window().then(async () => {
+      // create a new file
+      const file = new File(['Hello, world!'], 'hello.txt', {
+        type: 'text/plain',
       });
-
-    savedParams.encryptedSymmetricKey = encryptedSymmetricKey;
-
-    expect(savedParams.encryptedSymmetricKey).to.be.an('Uint8Array');
+  
+      const encryptResponse = await LitJsSdk.zipAndEncryptFiles(
+        [file],
+        {
+          accessControlConditions: savedParams.accs,
+          authSig: {
+            ethereum: ethAuthSig,
+          },
+        },
+        savedParams.litNodeClient,
+      );
+      savedParams.encryptResponse = encryptResponse;
+  
+      const { ciphertext, dataToEncryptHash } = encryptResponse;
+      expect(ciphertext).to.be.an('string');
+      expect(dataToEncryptHash).to.be.an('string');
+    });
   });
 
-  it('gets encryption key', async () => {
-    const toDecrypt = await LitJsSdk.uint8arrayToString(
-      savedParams.encryptedSymmetricKey,
-      'base16'
-    );
-
-    const encryptionKey = await savedParams.litNodeClient.getEncryptionKey({
-      accessControlConditions: savedParams.accs,
-      toDecrypt,
-      authSig: savedParams.authSig,
-      chain: 'ethereum',
+  it('decrypts into zip', async () => {
+    cy.window().then(async () => {
+      const decryptedFiles = await LitJsSdk.decryptToZip(
+        {
+          accessControlConditions: savedParams.accs,
+          authSig: {
+            ethereum: ethAuthSig,
+          },
+          ciphertext,
+          dataToEncryptHash,
+        },
+        savedParams.litNodeClient,
+      );
+  
+      expect(decryptedFiles).to.be.an('array');
+      const decryptedFile = await decryptedFiles['hello.txt'].async(
+        'text'
+      );
+  
+      const decryptedFileContents = await LitJsSdk.uint8arrayToString(
+        decryptedFile
+      );
+  
+      expect(decryptedFileContents).to.eq('Hello, world!');
     });
-
-    savedParams.encryptionKey = encryptionKey;
-
-    expect(savedParams.encryptionKey).to.be.a('Uint8Array');
-  });
-
-  it('decrypt file', async () => {
-    const blob = LitJsSdk.base64StringToBlob(savedParams.encryptedZipBase64);
-
-    const decryptedZip = await LitJsSdk.decryptFile({
-      file: blob,
-      symmetricKey: savedParams.encryptionKey,
-    });
-
-    savedParams.decryptZip = decryptedZip;
-
-    // turn uint8array into string
-    const decryptedFile = await LitJsSdk.uint8arrayToString(decryptedZip);
-
-    expect(decryptedFile).to.contains('Hello, world!');
-  });
-});
-
-describe('Encrypt and zip metadata', () => {
-  it('encrypts file and zips with metadata', async () => {
-    const file = new File(['Hello, world!'], 'hello.txt', {
-      type: 'text/plain',
-    });
-    const { zipBlob } = await LitJsSdk.encryptFileAndZipWithMetadata({
-      file,
-      accessControlConditions: savedParams.accs,
-      authSig: savedParams.authSig,
-      chain: 'ethereum',
-      litNodeClient: savedParams.litNodeClient,
-      readme: 'this is a test',
-    });
-
-    savedParams.zipBlob = zipBlob;
-    expect(savedParams.zipBlob).to.be.a('Blob');
-  });
-
-  it('turns blob to base64 string', async () => {
-    const base64 = await LitJsSdk.blobToBase64String(savedParams.zipBlob);
-    savedParams.zipBlobBase64 = base64;
-    expect(savedParams.zipBlobBase64).to.be.a('string');
-  });
-
-  it('decrypts zip file with metadata', async () => {
-    const file = LitJsSdk.base64StringToBlob(savedParams.zipBlobBase64);
-
-    const { decryptedFile } = await LitJsSdk.decryptZipFileWithMetadata({
-      authSig: savedParams.authSig,
-      litNodeClient: savedParams.litNodeClient,
-      file,
-    });
-
-    const decryptedFileString = await LitJsSdk.uint8arrayToString(
-      decryptedFile
-    );
-
-    expect(decryptedFileString).to.contains('Hello, world!');
   });
 });
 
@@ -605,60 +534,6 @@ describe('Lit Action', () => {
     expect(res).to.have.property('success', true);
   });
 
-  // // Error: bad request
-  // it('Get signing share',async () => {
-  //   const { iat, exp } = savedParams.litNodeClient.getJWTParams();
-  //   let randomPath: string =
-  //     '/' +
-  //     Math.random().toString(36).substring(2, 15) +
-  //     Math.random().toString(36).substring(2, 15);
-  //   const resourceId = {
-  //       baseUrl: 'my-dynamic-content-server.com',
-  //       path: randomPath,
-  //       orgId: '',
-  //       role: '',
-  //       extraData: '',
-  //   };
-  //   const params: JsonSigningRetrieveRequest = {
-  //       accessControlConditions: savedParams.accs,
-  //       chain: 'ethereum',
-  //       authSig: savedParams.authSig,
-  //       resourceId,
-  //       iat,
-  //       exp,
-  //   };
-
-  //   // Error: bad request
-  //   const url = 'https://serrano.litgateway.com:7379';
-  //   const res = await savedParams.litNodeClient.getSigningShare(url, params);
-  // });
-
-  // // Error: bad request
-  // it('Get Decryption Share', async () => {
-  //   const params: JsonEncryptionRetrieveRequest = {
-  //       accessControlConditions: savedParams.accs,
-  //       chain: 'ethereum',
-  //       authSig: savedParams.authSig,
-  //       toDecrypt: savedParams.toDecrypt,
-  //   };
-  //   const url = 'https://serrano.litgateway.com:7379';
-  //   // Error
-  //   const res = await savedParams.litNodeClient.getDecryptionShare(url, params);
-  // });
-
-  // // Error: 404 Not found
-  // it('Sign ECDSA', async () => {
-  //     const { iat, exp } = savedParams.litNodeClient.getJWTParams();
-  //     const params: SignWithECDSA = {
-  //         message: 'msg',
-  //         chain: 'ethereum',
-  //         iat,
-  //         exp,
-  //     }
-  //     const res = await savedParams.litNodeClient.signECDSA('https://serrano.litgateway.com:7370', params);
-  //     console.log(res);
-  // });
-
   it('Handshake with Sgx', async () => {
     const params: HandshakeWithSgx = {
       url: 'https://serrano.litgateway.com:7371',
@@ -672,19 +547,6 @@ describe('Lit Action', () => {
       'subnetPublicKey'
     );
   });
-
-  // // Error: 404
-  // it('Execute JS', async () => {
-  //   const data: ExecuteJsProps = {
-  //     authSig: savedParams.authSig,
-  //     jsParams: {},
-  //     code: "LitActions.setResponse({response: JSON.stringify({hello: 'world'})})",
-  //     debug: true,
-  //   }
-
-  //   // Error: 404
-  //   const res = await savedParams.litNodeClient.executeJs(data);
-  // });
 });
 
 describe('Session', () => {

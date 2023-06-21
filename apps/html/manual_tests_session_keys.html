@@ -15,8 +15,7 @@
     <script>
 
       const LitJsSdk = LitJsSdk_litNodeClient;
-      const LitJsSdk_authHelpers = window.LitJsSdk_authHelpers;
-
+  
       const litNodeClient = new LitNodeClient({litNetwork: 'serrano'});
       litNodeClient.connect();
       
@@ -96,6 +95,7 @@
 
       var testProvisoningEncryptingAndDecrypting = async ({
         unifiedAccessControlConditions,
+        chain,
         sleepTime,
         testName,
       }) => {
@@ -105,8 +105,8 @@
           'somethingThatWillBeReplacedWithWildcard'
         );
 
-        var sessionSigs = await litNodeClient.getSessionSigs({
-          chain: "ethereum",
+        const sessionSigs = await litNodeClient.getSessionSigs({
+          chain,
           resourceAbilityRequests: [
             {
             resource: litResource,
@@ -121,46 +121,29 @@
           { unifiedAccessControlConditions }
         )}`;
 
-        const { encryptedZip, symmetricKey } =
-          await LitJsSdk.zipAndEncryptString("this is a secret message");
-
-        const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-          unifiedAccessControlConditions,
-          symmetricKey,
-          sessionSigs,
-        });
-
-        const hashOfKey = await LitJsSdk.hashEncryptionKey({
-          encryptedSymmetricKey,
-        });
-
-        const litResource1 = new LitJsSdk_authHelpers.LitAccessControlConditionResource(
-          hashOfKey
+        const { ciphertext, dataToEncryptHash } = await LitJsSdk.zipAndEncryptString(
+          {
+            dataToEncrypt: 'this is a secret message',
+            unifiedAccessControlConditions,
+            chain,
+            sessionSigs,
+          },
+          litNodeClient,
         );
-
-        sessionSigs = await litNodeClient.getSessionSigs({
-          chain: "ethereum",
-          resourceAbilityRequests: [
-            {
-            resource: litResource,
-            ability: LitJsSdk_authHelpers.LitAbility.AccessControlConditionDecryption,
-            },
-          ],
-        });
-
-        console.log("encrypted symmetric key", encryptedSymmetricKey);
 
         if (sleepTime) {
           let failed = false;
           try {
-            const retrievedSymmKey = await litNodeClient.getEncryptionKey({
-              unifiedAccessControlConditions,
-              toDecrypt: LitJsSdk.uint8arrayToString(
-                encryptedSymmetricKey,
-                "base16"
-              ),
-              sessionSigs,
-            });
+            const decryptedFiles = await LitJsSdk.decryptToZip(
+              {
+                unifiedAccessControlConditions,
+                chain,
+                sessionSigs,
+                ciphertext,
+                dataToEncryptHash,
+              },
+              litNodeClient,
+            );
           } catch (e) {
             console.log("exception thrown when unlocking", e);
             if (isNodeNotAuthorized(e.errorCode)) {
@@ -181,18 +164,15 @@
           await new Promise((resolve) => setTimeout(resolve, sleepTime));
         }
 
-        const retrievedSymmKey = await litNodeClient.getEncryptionKey({
-          unifiedAccessControlConditions,
-          toDecrypt: LitJsSdk.uint8arrayToString(
-            encryptedSymmetricKey,
-            "base16"
-          ),
-          sessionSigs,
-        });
-
-        const decryptedFiles = await LitJsSdk.decryptZip(
-          encryptedZip,
-          retrievedSymmKey
+        const decryptedFiles = await LitJsSdk.decryptToZip(
+          {
+            unifiedAccessControlConditions,
+            chain,
+            sessionSigs,
+            ciphertext,
+            dataToEncryptHash,
+          },
+          litNodeClient,
         );
         const decryptedString = await decryptedFiles["string.txt"].async(
           "text"
@@ -243,6 +223,7 @@
         ];
         await testProvisoningEncryptingAndDecrypting({
           unifiedAccessControlConditions,
+          chain: "ethereum",
           testName: "BalanceEncrypt",
         });
       };
@@ -268,6 +249,7 @@
         ];
         await testProvisoningEncryptingAndDecrypting({
           unifiedAccessControlConditions,
+          chain: "ethereum",
           sleepTime: 45000,
           testName: "TimeLockEncryptDecrypt",
         });
@@ -295,7 +277,7 @@
       );
 
       function isNodeNotAuthorized(errorCode) {
-        return errorCode === 'not_authorized' || errorCode === 'NodeNotAuthorized';
+        return errorCode === 'not_authorized' || errorCode === 'NodeNotAuthorized' || errorCode === 'NodeAccessControlConditionsReturnedNotAuthorized';
       }
     </script>
   </head>

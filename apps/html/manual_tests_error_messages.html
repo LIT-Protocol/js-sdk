@@ -80,6 +80,7 @@
 
       var testProvisoningEncryptingAndDecrypting = async ({
         evmContractConditions,
+        chain,
         doNotStoreCondition = false,
         testName,
       }) => {
@@ -94,37 +95,27 @@
         //   { accessControlConditions }
         // )}`;
 
-        const { encryptedZip, symmetricKey } =
-          await LitJsSdk.zipAndEncryptString("this is a secret message");
-
-        let encryptedSymmetricKey = new Uint8Array([
-          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-        ]); // random data
-        if (!doNotStoreCondition) {
-          encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
+        const { ciphertext, dataToEncryptHash } = await LitJsSdk.zipAndEncryptString(
+          {
+            dataToEncrypt: 'this is a secret message',
             evmContractConditions,
-            symmetricKey,
-            authSig,
             chain,
-          });
-        }
-
-        console.log("encrypted symmetric key", encryptedSymmetricKey);
-
-        const retrievedSymmKey = await litNodeClient.getEncryptionKey({
-          evmContractConditions,
-          toDecrypt: LitJsSdk.uint8arrayToString(
-            encryptedSymmetricKey,
-            "base16"
-          ),
-          chain,
-          authSig,
-        });
-
-        const decryptedFiles = await LitJsSdk.decryptZip(
-          encryptedZip,
-          retrievedSymmKey
+            authSig,
+          },
+          litNodeClient,
         );
+
+        const decryptedFiles = await LitJsSdk.decryptToZip(
+          {
+            evmContractConditions,
+            chain,
+            authSig,
+            ciphertext,
+            dataToEncryptHash,
+          },
+          litNodeClient,
+        );
+
         const decryptedString = await decryptedFiles["string.txt"].async(
           "text"
         );
@@ -469,66 +460,6 @@
         }
       };
 
-      var UnstoredEncSymmKeyEncryptDecrypt = async () => {
-        var evmContractConditions = [
-          {
-            contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
-            functionName: "balanceOf",
-            functionParams: [":userAddress", "8"],
-            functionAbi: {
-              type: "function",
-              stateMutability: "view",
-              outputs: [
-                {
-                  type: "uint256",
-                  name: "",
-                  internalType: "uint256",
-                },
-              ],
-              name: "balanceOf",
-              inputs: [
-                {
-                  type: "address",
-                  name: "account",
-                  internalType: "address",
-                },
-                {
-                  type: "uint256",
-                  name: "id",
-                  internalType: "uint256",
-                },
-              ],
-            },
-            chain,
-            returnValueTest: {
-              key: "",
-              comparator: ">",
-              value: "0",
-            },
-          },
-        ];
-
-        try {
-          await testProvisoningEncryptingAndDecrypting({
-            evmContractConditions,
-            doNotStoreCondition: true,
-            testName: "UnstoredEncSymmKeyEncryptDecrypt",
-          });
-          document.getElementById(
-            "status"
-          ).innerText = `UnstoredEncSymmKeyEncryptDecrypt: Failed.  It should have thrown an exception but it didn't.`;
-        } catch (e) {
-          console.log("Error on UnstoredEncSymmKeyEncryptDecrypt", e);
-          document.getElementById(
-            "status"
-          ).innerText = `UnstoredEncSymmKeyEncryptDecrypt: Success.  Failed with error ${JSON.stringify(
-            e,
-            null,
-            2
-          )}`;
-        }
-      };
-
       var UnauthorizedEncryptDecrypt = async () => {
         var evmContractConditions = [
           {
@@ -559,7 +490,7 @@
                 },
               ],
             },
-            chain,
+            chain: "polygon",
             returnValueTest: {
               key: "",
               comparator: ">",
@@ -571,6 +502,7 @@
         try {
           await testProvisoningEncryptingAndDecrypting({
             evmContractConditions,
+            chain: "polygon",
             testName: "UnauthorizedEncryptDecrypt",
           });
           document.getElementById(
@@ -586,99 +518,6 @@
             2
           )}`;
         }
-      };
-
-      var EncryptDecryptWithAnUnauthorizedUpdate = async () => {
-        const testName = "EncryptDecryptWithAnUnauthorizedUpdate";
-        document.getElementById("status").innerText = `Testing ${testName}...`;
-        const authSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain,
-        });
-        const accessControlConditions = [
-          {
-            contractAddress: "",
-            standardContractType: "",
-            chain,
-            method: "eth_getBalance",
-            parameters: [":userAddress", "latest"],
-            returnValueTest: {
-              comparator: ">=",
-              value: "100000000000000000000000", // 100000 eth (or matic, really)
-            },
-          },
-        ];
-
-        document.getElementById(
-          "humanized"
-        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
-          { accessControlConditions }
-        )}`;
-
-        const { encryptedZip, symmetricKey } =
-          await LitJsSdk.zipAndEncryptString("this is a secret message");
-
-        const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-          accessControlConditions,
-          symmetricKey,
-          authSig,
-          chain,
-          permanant: false,
-        });
-
-        console.log("encrypted symmetric key", encryptedSymmetricKey);
-
-        try {
-          console.log(
-            "trying to update the condition with an unauthorized address"
-          );
-          const newAccessControlConditions = [
-            {
-              contractAddress: "",
-              standardContractType: "",
-              chain,
-              method: "eth_getBalance",
-              parameters: [":userAddress", "latest"],
-              returnValueTest: {
-                comparator: ">=",
-                value: "10000000000000",
-              },
-            },
-          ];
-
-          let unauthorizedAuthSig = {
-            sig: "0x2229236873d413f301c1afb7650959dee9f9a984c7421c9a44e41009940a5e410925d03374ddaf51590c7899253f30d589f1d7fec694f15829c8157c24f999f81c",
-            derivedVia: "web3.eth.personal.sign",
-            signedMessage:
-              "I am creating an account to use Lit Protocol at 2022-01-27T02:07:14.289Z",
-            address: "0xb962537314b11c6bcd6d9ff63feb048a9e91e7ae",
-          };
-
-          const newEncryptedSymmetricKey =
-            await litNodeClient.saveEncryptionKey({
-              accessControlConditions: newAccessControlConditions,
-              encryptedSymmetricKey,
-              authSig: unauthorizedAuthSig,
-              chain,
-              permanant: false,
-            });
-          console.log("updated the condition");
-        } catch (e) {
-          console.log("error getting symmetric key - this is expected", e);
-          if (isNodeStorageError(e.errorCode)) {
-            document.getElementById(
-              "status"
-            ).innerText = `${testName}: Success.  We were unable to update.`;
-          } else {
-            document.getElementById(
-              "status"
-            ).innerText = `${testName}: Failure.  When we tried to update with an unauthorized acct, we got an error that isn't a storage error`;
-          }
-          return;
-        }
-
-        document.getElementById(
-          "status"
-        ).innerText = `${testName}: Failure.  We updated a condition we shouldn't been able to!  OMG FIX THIS`;
       };
 
       var logout = async () => {
@@ -736,19 +575,8 @@
     </button>
     <br />
     <br />
-    <button onclick="UnstoredEncSymmKeyEncryptDecrypt()">
-      UnstoredEncSymmKeyEncryptDecrypt
-    </button>
-    <br />
-    <br />
     <button onclick="UnauthorizedEncryptDecrypt()">
       UnauthorizedEncryptDecrypt
-    </button>
-    <br />
-    <br />
-    <button onclick="EncryptDecryptWithAnUnauthorizedUpdate()">
-      Encrypt, set the conditions, then try to update the conditions with an
-      unauthorized account
     </button>
     <br />
     <br />

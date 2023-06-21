@@ -87,12 +87,7 @@ export const paramsValidators: {
   encryptString: (params: EncryptStringRequest) => [
     new AccessControlConditionsValidator('encryptString', params),
     new AuthMaterialValidator('encryptString', params, true),
-    new StringValidator(
-      'encryptString',
-      params.dataToEncrypt,
-      'dataToEncrypt',
-      true
-    ),
+    new StringValidator('encryptString', params.dataToEncrypt, 'dataToEncrypt'),
   ],
 
   encryptZip: (params: EncryptZipRequest) => [
@@ -110,17 +105,13 @@ export const paramsValidators: {
     new StringValidator('decrypt', params.ciphertext, 'ciphertext'),
   ],
 
-  decryptFile: (params: DecryptFileProps) => [
-    new FileValidator('decryptFile', params.file),
-  ],
-
   decryptZipFileWithMetadata: (params: DecryptZipFileWithMetadataProps) => [
     new AuthMaterialValidator('decryptZipFileWithMetadata', params),
     new FileValidator('decryptZipFileWithMetadata', params.file),
   ],
 
-  decryptZip: (params: any) => [
-    new FileValidator('decryptZip', params.encryptedZipBlob),
+  decryptToZip: (params: any) => [
+    new FileValidator('decryptToZip', params.encryptedZipBlob),
   ],
 
   encryptToIpfs: (params: EncryptToIpfsProps) => [

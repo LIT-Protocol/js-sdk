@@ -256,7 +256,7 @@ export const encryptString = async (
 
   return litNodeClient.encrypt({
     ...params,
-    dataToEncrypt: uint8arrayFromString(params.dataToEncrypt, 'base16'),
+    dataToEncrypt: uint8arrayFromString(params.dataToEncrypt, 'utf8'),
   });
 };
 
@@ -288,7 +288,7 @@ export const decryptToString = async (
 
   const { decryptedData } = await litNodeClient.decrypt(params);
 
-  return uint8arrayToString(decryptedData, 'base16');
+  return uint8arrayToString(decryptedData, 'utf8');
 };
 
 /**
@@ -645,7 +645,10 @@ export const decryptZipFileWithMetadata = async (
       solRpcConditions: metadata.solRpcConditions,
       unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
       chain: metadata.chain,
-      ciphertext: uint8arrayToString(encryptedFile, 'base64'),
+      ciphertext: uint8arrayToString(
+        new Uint8Array(await encryptedFile.arrayBuffer()),
+        'base64'
+      ),
       dataToEncryptHash: metadata.dataToEncryptHash,
     },
     litNodeClient

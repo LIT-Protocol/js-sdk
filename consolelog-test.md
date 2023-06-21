@@ -1,4 +1,8 @@
-# This file contains test cases that can be tested in the browser's console
+# Browser Console Test
+
+This file contains test cases that can be tested in the browser's console.
+
+To start, run `node apps/html/server.js` and head over to http://127.0.0.1:4002/.
 
 ## Encrypt and decrypt file
 
@@ -32,41 +36,25 @@ state.accs = [
   },
 ];
 
-state.zipFiles = await LitJsSdk_encryption.zipAndEncryptFiles([state.file]);
-state.encryptedZipBase64 = await LitJsSdk_miscBrowser.blobToBase64String(
-  state.zipFiles.encryptedZip
+state.encryptResponse = await LitJsSdk_encryption.zipAndEncryptFiles(
+  [state.file],
+  {
+    accessControlConditions: state.accs,
+    authSig: state.authSig,
+    chain: state.chain,
+  },
+  state.litNodeClient,
 );
 
-state.encryptedSymmetricKey = await state.litNodeClient.saveEncryptionKey({
-  accessControlConditions: state.accs,
-  symmetricKey: state.zipFiles.symmetricKey,
-  authSig: state.authSig,
-  chain: state.chain,
-});
-
-state.toDecrypt = await LitJsSdk_uint8arrays.uint8arrayToString(
-  state.encryptedSymmetricKey,
-  'base16'
-);
-
-state.encryptionKey = await state.litNodeClient.getEncryptionKey({
-  accessControlConditions: state.accs,
-  toDecrypt: state.toDecrypt,
-  authSig: state.authSig,
-  chain: 'etheruem',
-});
-
-state.decryptFileBlob = LitJsSdk_miscBrowser.base64StringToBlob(
-  state.encryptedZipBase64
-);
-
-state.decryptedZip = await LitJsSdk_encryption.decryptFile({
-  file: state.decryptFileBlob,
-  symmetricKey: state.encryptionKey,
-});
-
-state.decryptedFile = await LitJsSdk_uint8arrays.uint8arrayToString(
-  state.decryptedZip
+state.decryptedFiles = await LitJsSdk_encryption.decryptToZip(
+  {
+    accessControlConditions: state.accs,
+    authSig: state.authSig,
+    chain: state.chain,
+    ciphertext: state.encryptResponse.ciphertext,
+    dataToEncryptHash: state.encryptResponse.dataToEncryptHash
+  },
+  state.litNodeClient,
 );
 
 console.warn('⬇️⬇️⬇️⬇️');
