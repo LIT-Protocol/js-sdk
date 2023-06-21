@@ -34,68 +34,71 @@
           chain: "ethereum",
         });
 
-        let encryptedFile, symmetricKey, before, after;
+        let before, after;
         if (zip) {
           before = new Date();
-          const res = await LitJsSdk.zipAndEncryptFiles([file]);
+          const { ciphertext, dataToEncryptHash } = await LitJsSdk.zipAndEncryptFiles(
+            [file],
+            {
+              unifiedAccessControlConditions,
+              authSig: {
+                ethereum: ethAuthSig,
+              },
+            },
+            litNodeClient,
+          );
           after = new Date();
           log += `zipAndEncryptFiles took ${after - before}ms\n`;
           totalTimeElapsed += after - before;
-          encryptedFile = res.encryptedZip;
-          symmetricKey = res.symmetricKey;
+
+          before = new Date();
+          const decryptedFiles = await LitJsSdk.decryptToZip(
+            {
+              unifiedAccessControlConditions,
+              authSig: {
+                ethereum: ethAuthSig,
+              },
+              chain: "ethereum",
+              ciphertext,
+              dataToEncryptHash,
+            },
+            litNodeClient,
+          );
+          after = new Date();
+          log += `decryptToZip took ${after - before}ms\n`;
+          totalTimeElapsed += after - before;
         } else {
           before = new Date();
-          const res = await LitJsSdk.encryptFile({
-            file,
-          });
+          const { ciphertext, dataToEncryptHash } = await LitJsSdk.encryptFile(
+            {
+              file,
+              unifiedAccessControlConditions,
+              authSig: {
+                ethereum: ethAuthSig,
+              },
+            },
+            litNodeClient,
+          );
           after = new Date();
           log += `encryptFile took ${after - before}ms\n`;
           totalTimeElapsed += after - before;
-          encryptedFile = res.encryptedFile;
-          symmetricKey = res.symmetricKey;
-        }
 
-        const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-          unifiedAccessControlConditions,
-          symmetricKey,
-          authSig: {
-            ethereum: ethAuthSig,
-          },
-        });
-
-        console.log("encrypted symmetric key", encryptedSymmetricKey);
-
-        const retrievedSymmKey = await litNodeClient.getEncryptionKey({
-          unifiedAccessControlConditions,
-          toDecrypt: LitJsSdk.uint8arrayToString(
-            encryptedSymmetricKey,
-            "base16"
-          ),
-          authSig: {
-            ethereum: ethAuthSig,
-          },
-        });
-
-        if (zip) {
           before = new Date();
-          const decryptedFiles = await LitJsSdk.decryptZip(
-            encryptedFile,
-            retrievedSymmKey
+          const decryptedFile = await LitJsSdk.decryptToFile(
+            {
+              unifiedAccessControlConditions,
+              authSig: {
+                ethereum: ethAuthSig,
+              },
+              chain: "ethereum",
+              ciphertext,
+              dataToEncryptHash,
+            },
+            litNodeClient,
           );
-          after = new Date();
-          log += `decryptZip took ${after - before}ms\n`;
-          totalTimeElapsed += after - before;
-          console.log("decrypted files", decryptedFiles);
-        } else {
-          before = new Date();
-          const decryptedFile = await LitJsSdk.decryptFile({
-            file: encryptedFile,
-            symmetricKey: retrievedSymmKey,
-          });
           after = new Date();
           log += `decryptFile took ${after - before}ms\n`;
           totalTimeElapsed += after - before;
-          console.log("decrypted file", decryptedFile);
         }
 
         log += `total time to encrypt then decrypt was ${totalTimeElapsed}ms\n`;
@@ -154,7 +157,7 @@
           file: selectedFile,
           zip: true,
           unifiedAccessControlConditions,
-          testName: "BasicEncrypt",
+          testName: "ZipAndEncrypt",
         });
       };
 

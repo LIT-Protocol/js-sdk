@@ -45,9 +45,10 @@
             'somethingThatWillBeReplacedWithWildcard'
         );
 
+        const chain = 'ethereum';
         const sessionSigs = await litNodeClient.getSessionSigs({
             expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
-            chain: 'ethereum',
+            chain,
             resourceAbilityRequests: [
                 {
                 resource: litResource,
@@ -56,14 +57,34 @@
             ],
             switchChain: false,
         });
-        console.log('sessionSigs before saving encryption key: ', sessionSigs);
+        console.log('sessionSigs before zip and encrypt string:', sessionSigs);
 
-        const { encryptedZip, symmetricKey } = await LitJsSdk.zipAndEncryptString(
-            'this is a secret message'
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain,
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+
+        const { ciphertext, dataToEncryptHash } = await LitJsSdk.zipAndEncryptString(
+          {
+            dataToEncrypt: 'this is a secret message',
+            accessControlConditions,
+            chain,
+            sessionSigs,
+          },
+          litNodeClient,
         );
 
-        console.log('encryptedZip:', encryptedZip);
-        console.log('symmetricKey:', symmetricKey);
+        console.log('ciphertext:', ciphertext);
+        console.log('dataToEncryptHash:', dataToEncryptHash);
     })()">zipAndEncryptString</button><!-- ========== zipAndEncryptString Ends ==========  -->
 
 </body>

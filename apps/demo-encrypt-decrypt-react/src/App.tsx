@@ -55,7 +55,7 @@ const res = await LitJsSdk.encryptString({
   accessControlConditions: accs,
   authSig,
   chain: 'ethereum',
-  dataToEncrypt: 'toHexString(${str})',
+  dataToEncrypt: '${str}',
 }, litNodeClient);
 
 // { Loading... } 
@@ -74,7 +74,7 @@ const decryptedString = await litNodeClient.decryptToString({
   chain: 'ethereum',
 });
 
-console.log("hexToString(decryptedString):", "Loading...");
+console.log("decryptedString:", "Loading...");
 
 `;
 
@@ -120,7 +120,7 @@ console.log("hexToString(decryptedString):", "Loading...");
         accessControlConditions: accs,
         authSig: authRes.result,
         chain: 'ethereum',
-        dataToEncrypt: toHexString(str),
+        dataToEncrypt: str,
       }, litNodeClient);
     });
 
@@ -142,7 +142,7 @@ console.log("hexToString(decryptedString):", "Loading...");
 
     code = code.replace('// { ms }', `// { ${decryptRes.duration} }`);
     code = code.replace('// { Loading... }', `// [string] ${decryptRes.result}`);
-    code = code.replace('"Loading..."', `"${hexToString(trimLeadingZeros(decryptRes.result))}"`);
+    code = code.replace('"Loading..."', `"${decryptRes.result}"`);
     setData(code);
   }
 
@@ -194,32 +194,3 @@ console.log("hexToString(decryptedString):", "Loading...");
 
 
 export default App;
-
-// Function to convert utf-8 string into hex string.
-function toHexString(str: string) {
-  var hex = '';
-  for (var i = 0; i < str.length; i++) {
-    hex += '' + str.charCodeAt(i).toString(16);
-  }
-  return '0x' + hex;
-}
-
-// Function to convert hex string into utf-8 string.
-function hexToString(hex: string) {
-  var hex = hex.toString();//force conversion
-  var str = '';
-  for (var i = 0; i < hex.length; i += 2)
-    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-  return str;
-}
-
-// Function to trim leading padded zero bytes from a hex string.
-function trimLeadingZeros(hex: string) {
-  var hex = hex.toString();//force conversion
-  var str = '';
-  var i = 0;
-  while (hex.substr(i, 2) == '00') {
-    i += 2;
-  }
-  return hex.substr(i);
-}
