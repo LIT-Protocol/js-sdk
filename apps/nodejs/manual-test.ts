@@ -232,15 +232,4 @@ export const manualTest = async () => {
   });
 
   console.log('res:', res);
-
-  // const test = await litNodeClient.zipAndEncryptString(
-  //   'this is a secret message'
-  // );
-  // useRandomPrivateKey();
-  // useCustomPrivateKey();
-  // mintWithPKPWallet();
-  // mintWithPKPWalletUtil();
-  // useCustomSigner();
-  // getUtilStuff();
-  // console.log('test:', test);
 };

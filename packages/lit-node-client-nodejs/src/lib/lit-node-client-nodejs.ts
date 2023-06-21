@@ -39,6 +39,7 @@ import {
   DecryptRequest,
   DecryptResponse,
   EncryptRequest,
+  EncryptRequestBase,
   EncryptResponse,
   ExecuteJsProps,
   ExecuteJsResponse,
@@ -1699,7 +1700,8 @@ export class LitNodeClientNodeJs extends LitCore {
    *
    */
   decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
-    const { sessionSigs, chain, ciphertext, dataToEncryptHash } = params;
+    const { authSig, sessionSigs, chain, ciphertext, dataToEncryptHash } =
+      params;
 
     // ========== Validate Params ==========
     // -- validate if it's ready
@@ -1781,6 +1783,9 @@ export class LitNodeClientNodeJs extends LitCore {
     // ========== Get Network Signature ==========
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
+      // -- if session key is available, use it
+      let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+
       return this.getSigningShareForDecryption(
         url,
         {
@@ -1791,8 +1796,7 @@ export class LitNodeClientNodeJs extends LitCore {
             formattedUnifiedAccessControlConditions,
           dataToEncryptHash,
           chain,
-          authSig: sessionSigs ? undefined : params.authSig,
-          sessionSigs: sessionSigs ? sessionSigs[url] : undefined,
+          authSig: authSigToSend,
         },
         requestId
       );
@@ -1820,6 +1824,43 @@ export class LitNodeClientNodeJs extends LitCore {
     );
 
     return { decryptedData };
+  };
+
+  getLitResourceForEncryption = async (
+    params: EncryptRequest
+  ): Promise<LitAccessControlConditionResource> => {
+    // ========== Hashing Access Control Conditions =========
+    // hash the access control conditions
+    let hashOfConditions: ArrayBuffer | undefined =
+      await this.getHashedAccessControlConditions(params);
+
+    if (!hashOfConditions) {
+      return throwError({
+        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    const hashOfConditionsStr = uint8arrayToString(
+      new Uint8Array(hashOfConditions),
+      'base16'
+    );
+
+    // ========== Hashing Private Data ==========
+    // hash the private data
+    const hashOfPrivateData = await crypto.subtle.digest(
+      'SHA-256',
+      params.dataToEncrypt
+    );
+    const hashOfPrivateDataStr = uint8arrayToString(
+      new Uint8Array(hashOfPrivateData),
+      'base16'
+    );
+
+    return new LitAccessControlConditionResource(
+      `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
+    );
   };
 
   #getIdentityParamForEncryption = (

@@ -94,32 +94,27 @@
           { solRpcConditions }
         )}`;
 
-        const { encryptedZip, symmetricKey } =
-          await LitJsSdk.zipAndEncryptString("this is a secret message");
-
-        const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-          solRpcConditions,
-          symmetricKey,
-          authSig,
-          chain,
-        });
-
-        console.log("encrypted symmetric key", encryptedSymmetricKey);
-
-        const retrievedSymmKey = await litNodeClient.getEncryptionKey({
-          solRpcConditions,
-          toDecrypt: LitJsSdk.uint8arrayToString(
-            encryptedSymmetricKey,
-            "base16"
-          ),
-          chain,
-          authSig,
-        });
-
-        const decryptedFiles = await LitJsSdk.decryptZip(
-          encryptedZip,
-          retrievedSymmKey
+        const { ciphertext, dataToEncryptHash } = await LitJsSdk.zipAndEncryptString(
+          {
+            dataToEncrypt: 'this is a secret message',
+            solRpcConditions,
+            chain,
+            authSig,
+          },
+          litNodeClient,
         );
+
+        const decryptedFiles = await LitJsSdk.decryptToZip(
+          {
+            solRpcConditions,
+            chain,
+            authSig,
+            ciphertext,
+            dataToEncryptHash,
+          },
+          litNodeClient,
+        );
+
         const decryptedString = await decryptedFiles["string.txt"].async(
           "text"
         );

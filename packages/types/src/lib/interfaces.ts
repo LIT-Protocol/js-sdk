@@ -426,7 +426,7 @@ export interface EncryptResponse {
 }
 
 export interface EncryptStringRequest extends EncryptRequestBase {
-  // Hex-encoded string that you wish to encrypt
+  // String that you wish to encrypt
   dataToEncrypt: string;
 }
 
