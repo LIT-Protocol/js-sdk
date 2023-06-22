@@ -41,6 +41,8 @@ export class LitAuthClient {
 
   private litOtpOptions: OtpProviderOptions | undefined;
 
+  private captcha_client_id: string =
+  '6Leij74mAAAAACKVnvdxENwTxZguNhcHMqzeNLXY';
 
   /**
    * Create a LitAuthClient instance
@@ -168,4 +170,42 @@ export class LitAuthClient {
   getProvider(type: ProviderType): BaseProvider | undefined {
     return this.providers.get(type);
   }
+
+  /**
+   * 
+    */
+  embeddCaptchaInElement(elementId: string, headTag: HTMLHeadElement) {
+    const captchaLoader = document.createElement("script");
+    captchaLoader.src = "https://www.google.com/recaptcha/api.js?onload=litReCaptchaOnLoad&render=explicit";
+    captchaLoader.async = true;
+    captchaLoader.defer = true;
+
+    headTag.appendChild(captchaLoader);
+
+    const loadedScript = document.createElement("script");
+    loadedScript.type = "text/javascript";
+    const textNode = document.createTextNode(`
+        console.log("[LitJsSdk] captcha script loaded rendering component");
+        var litReCaptchaOnLoad = function() {
+          grecaptcha.render('${elementId}', {
+            'sitekey': '${this.captcha_client_id}',
+            'callback': (response) => {
+                window.LIT_AUTH_CLIENT_CAPTCHA_RES = response;
+            }
+          });
+        };
+    `);
+    loadedScript.appendChild(textNode);
+
+    headTag.appendChild(loadedScript);
+  }
+
+  /**
+   * 
+   * @returns the clientId of the reCaptcha required for
+   */
+  getCaptchaClientId(): string {
+    return this.captcha_client_id;
+  }
+
 }

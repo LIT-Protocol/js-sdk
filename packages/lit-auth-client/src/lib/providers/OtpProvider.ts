@@ -16,6 +16,8 @@ export class OtpProvider extends BaseProvider {
   private _startRoute: string;
   private _checkRoute: string;
   private _requestId: string = '';
+  private _captchaRoute: string = "/api/captcha/siteverify";
+  private _captchaResponse: string | undefined;
 
   constructor(
     params: BaseProviderOptions & SignInWithOTPParams,
@@ -27,6 +29,21 @@ export class OtpProvider extends BaseProvider {
     this._port = config?.port || '443';
     this._startRoute = config?.startRoute || '/api/otp/start';
     this._checkRoute = config?.checkRoute || '/api/otp/check';
+    this._captchaRoute = "/api/captcha/siteverify";
+    this._captchaResponse = config?.captchaResponse;
+
+    if (
+      !config?.captchaResponse &&
+      window &&
+      (window as any).LIT_AUTH_CLIENT_CAPTCHA_RES
+    ) {
+      console.info('[LitJsSdk] Found captcha challenge');
+      this._captchaResponse = (window as any).LIT_AUTH_CLIENT_CAPTCHA_RES;
+    } else {
+      console.warn(
+        '[LitJsSdk] Could not find captcha challenge. use the SetCaptchaResponse function to include a response'
+      );
+    }
   }
 
   /**
@@ -61,6 +78,7 @@ export class OtpProvider extends BaseProvider {
     let body: any = {
       otp: this._params.userId,
       request_id: this._requestId,
+      captcha_response: this._captchaResponse 
     };
 
     if (this._params.emailCustomizationOptions) {
@@ -95,13 +113,19 @@ export class OtpProvider extends BaseProvider {
     return respBody.callback;
   }
 
+  public setCaptchaResponse(response: string): void {
+    this._captchaResponse = response;
+  }
+  
   /**
    * Validates otp code from {@link sendOtpCode}
    *
    * @param code {string} - OTP code sent to the user, should be retrieved from user input.
-   * @returns {Promise<AuthMethod} - Auth method that contains Json Web Token
+   * @returns {Promise<AuthMethod>} - Auth method that contains Json Web Token
    */
-  private async checkOtpCode(code: string): Promise<AuthMethod> {
+  private async checkOtpCode(
+    code: string,
+  ): Promise<AuthMethod> {
     const url = this._buildUrl('check');
 
     /**
@@ -115,7 +139,9 @@ export class OtpProvider extends BaseProvider {
       otp: this._params.userId,
       code,
       request_id: this._requestId,
+      captchaResponse: this._captchaResponse,
     };
+
     body = JSON.stringify(body);
     const response = await fetch(url, {
       method: 'POST',
@@ -150,6 +176,8 @@ export class OtpProvider extends BaseProvider {
         return `${this._baseUrl}:${this._port}${this._startRoute}`;
       case 'check':
         return `${this._baseUrl}:${this._port}${this._checkRoute}`;
+      case 'captcha':
+          return `${this._baseUrl}:${this._port}${this._captchaRoute}`;
       default:
         return '';
     }
