@@ -6,7 +6,8 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Card } from 'tiny-ui';
 import { ethers } from 'ethers';
 import { ProviderType } from '@lit-protocol/constants';
-import {newSessionCapabilityObject, LitAccessControlConditionResource, LitAbility} from '@lit-protocol/auth-helpers';
+import { LitAccessControlConditionResource, LitAbility} from '@lit-protocol/auth-helpers';
+
 export function Otp() {
     let [state, setState] = useState('start');
     const litNodeClient = new LitNodeClient({
@@ -17,9 +18,13 @@ export function Otp() {
         redirectUri: window.location.href.replace(/\/+$/, ''),
         litRelayConfig: {
             relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
+        },
+        litOtpConfig: {
+            baseUrl: "http://127.0.0.1",
+            port: "8080",
         }
     });
- 
+
     let [otpSession, setOtpSession] = useState({});
     let [userId, setUserId] = useState('');
     let [pkpInfo, setPkpInfo] = useState({});
@@ -30,12 +35,17 @@ export function Otp() {
     let [sessionSig, setSessionSig] = useState("");
     let [err, setErr] = useState("");
     let [signature, setSignature] = useState("");
+    let [image, setImage] = useState("");
+    let [captcha, setCaptcha] = useState("");
+
 
     const onRegister = (e) => {
+        authClient.embeddCaptchaInElement("captcha", document.head);
         setAction("register");
     }
 
     const onLogin = (e) => {
+        authClient.embeddCaptchaInElement("captcha", document.head);
         setAction("login");
     }
 
@@ -43,15 +53,17 @@ export function Otp() {
         let transport = e.target.defaultValue;
         setUserId(transport);
 
-        let session = authClient.initProvider(ProviderType.Otp,{
+        let session = authClient.initProvider(ProviderType.Otp, {
             userId: transport
-        });
-        let status = await session.sendOtpCode();
-        if (status) {
-            setOtpSession(session);
-            e.target.defaultValue = '';
-            setState('check');
-        }
+        }); 
+
+        session.setCaptchaResponse(window.LIT_AUTH_CLIENT_CAPTCHA_RES);
+
+        session.sendOtpCode();
+        setOtpSession(session);
+
+        e.target.defaultValue = '';
+        setState('check');
     };
 
     const onEnterCheckRegister = async (e) => {
@@ -94,7 +106,7 @@ export function Otp() {
                     setSelectedPkp(selected);
                 }}>{pkp.publicKey}</li>
             )
-        
+
             index++;
         }
 
@@ -108,7 +120,7 @@ export function Otp() {
         const authNeededCallback = async authCallbackParams => {
             let chainId = 1;
             try {
-                
+
             } catch {
               // Do nothing
             }
@@ -125,10 +137,10 @@ export function Otp() {
               resources: authCallbackParams.resources,
               chainId,
             });
-    
+
             return response.authSig;
           };
-          
+
           try {
             await litNodeClient.connect();
 
@@ -146,7 +158,7 @@ export function Otp() {
                     resourceAbilityRequests: [{
                         resource: litResource,
                         ability: LitAbility.PKPSigning
-                    }], 
+                    }],
                 },
                 litNodeClient
             });
@@ -205,7 +217,11 @@ export function Otp() {
                 </div>
                 <br/>
                 <br/>
+                <div className="captcha" id="captcha"></div>
+                <br/>
+                <br/>
                 {action === 'register' &&
+
                     <div>
                         <span>Sign up with your Email or Phone #</span>
                         <Input placeholder='Email / Phone Number' onEnterPress={onEnterStart}/>
@@ -223,6 +239,7 @@ export function Otp() {
     } else if (state === 'check') {
         return (
             <div>
+
                 <span>enter code</span>
                 <br/>
                 <Input placeholder='Code' onEnterPress={action === 'register' ? onEnterCheckRegister : onEnterCheckLogin}/>
@@ -240,7 +257,7 @@ export function Otp() {
                 <br/>
                 <br/>
                 <Card title="PKP information">
-                    {Array.isArray(pkpInfo) && 
+                    {Array.isArray(pkpInfo) &&
                         <Card.Content>
                             <br/>
                             <ul>
@@ -277,7 +294,7 @@ export function Otp() {
                 <Input placeholder='message' onEnterPress={onExecute}/>
                 <br/>
                 <br/>
-                {signature && 
+                {signature &&
                     <div>
                         <Card.Content>
                             <div>Signature</div>
