@@ -172,8 +172,14 @@ export class LitAuthClient {
   }
 
   /**
+   * Embedds a ReCaptcha instance within the specified tag.
    * 
-    */
+   * **note** ReCaptcha is required for Email/SMS authentication only
+   * If injection is not compatible the ReCaptcha client Id is available through {@link getSiteKey}
+   * The response from your ReCaptcha can be passed through with {@link OtpProvider#setCaptchaResponse}
+   * @param elementId {string} id of the html element to inject the captcha view into
+   * @param headTag {HTMLHeadElement} head element of DOM for injecting ReCaptcha.
+   */
   embeddCaptchaInElement(elementId: string, headTag: HTMLHeadElement) {
     const captchaLoader = document.createElement("script");
     captchaLoader.src = "https://www.google.com/recaptcha/api.js?onload=litReCaptchaOnLoad&render=explicit";
@@ -202,9 +208,10 @@ export class LitAuthClient {
 
   /**
    * 
-   * @returns the clientId of the reCaptcha required for
+   * @returns {string} Client identifier of the ReCaptcha required for sending OTP codes for email / sms authentication
+   * Should be used in ReCaptcha implementations not included in this package.
    */
-  getCaptchaClientId(): string {
+  getSiteKey(): string {
     return this.captcha_client_id;
   }
 
