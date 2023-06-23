@@ -38,6 +38,8 @@ async function checkAndDelete(group) {
   } catch (err) {
     redLog(`Failed to delete packages in group '${group}':`, err);
   }
+
+  process.exit();
 }
 
 // Run the function with the specified group to delete

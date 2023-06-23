@@ -20,6 +20,7 @@ import { exit } from 'process';
 
 const args = getArgs();
 const group = getFlag('--group');
+const packageName = getFlag('--packageName');
 
 validateGroupIsInConfig(group);
 
@@ -33,13 +34,21 @@ const REPO_URL = 'https://github.com/Lit-Protocol/js-sdk';
 if (!PROJECT_NAME) {
   redLog(
     CLIHeader(
-      'Please provide a project name: yarn gen:lib <project-name> <tag>',
-      'yarn gen:lib my-lib <universal | vanilla | nodejs> [--group your-group-name]',
+      'Please provide a project folder name: yarn gen:lib <folder-name> <tag>',
+      'yarn gen:lib <folder-name> <universal | vanilla | nodejs> [--group your-group-name] [--packageName package-json-name]',
       [
-        { name: 'my-lib', description: 'your project name' },
+        { name: '<folder-name>', description: 'your folder name' },
         {
           name: '<universal | vanilla | nodejs>',
           description: 'your project type',
+        },
+        {
+          name: '--group',
+          description: 'specify a group name for your project (optional)',
+        },
+        {
+          name: '--packageName',
+          description: 'specify a package name for your project (optional)',
         },
       ],
       [
@@ -226,6 +235,9 @@ const editPackageJson = async () => {
 
       // If "group" is provided in the command line, add it to the package.json
       ...(group && { group }),
+      ...(group && { version: '0.0.1' }),
+      // add this if --packageName is provided
+      ...(packageName && { name: packageName }),
     },
   };
 

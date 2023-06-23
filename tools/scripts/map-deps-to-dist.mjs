@@ -17,7 +17,7 @@ const args = getArgs();
 
 if (args[0] === '--help') {
   redLog(
-    '# Usage: node tools/scripts/map-deps-to-dist <path-to-packages-dir> <path-to-dist-dir>'
+    '# Usage: node tools/scripts/map-deps-to-dist <path-to-packages-dir> <path-to-dist-dir> <filter>'
   );
   exit();
 }
@@ -41,6 +41,7 @@ await asyncForEach(packagesDir, async (packageDir) => {
 
   await asyncForEach(packageInsideDirs, async (insideDir) => {
     let imported = await findImportsFromDir(insideDir);
+    console.log(imported);
     imported = imported.filter((item) => item.includes(FILTER));
 
     imports.push(imported);

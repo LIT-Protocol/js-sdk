@@ -1,10 +1,10 @@
 [
   {
     "group": "core",
-    "version": "0.0.0"
+    "version": "0.0.1"
   },
   {
     "group": "revamp",
-    "version": "0.0.0"
+    "version": "0.0.1"
   }
 ]

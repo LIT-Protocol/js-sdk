@@ -684,15 +684,20 @@ export async function checkEmptyDirectories(dirPath) {
 export function CLIHeader(instruction, usage, args, flags) {
   let message = `${instruction}\n\nUsage:\n${usage}\n\nArguments:\n`;
 
+  const maxLength =
+    Math.max(
+      ...args.map((arg) => arg.name.length),
+      ...flags.map((flag) => flag.name.length)
+    ) + 2;
+
   args.forEach((arg) => {
-    message += `${arg.name} - ${arg.description}\n`;
+    message += `  ${arg.name.padEnd(maxLength)} - ${arg.description}\n`;
   });
 
   if (flags.length > 0) {
     message += '\nOptional Flags:\n';
-
     flags.forEach((flag) => {
-      message += `--${flag.name} - ${flag.description}\n`;
+      message += `  --${flag.name.padEnd(maxLength)} - ${flag.description}\n`;
     });
   }
 
@@ -722,4 +727,31 @@ export function validateGroupIsInConfig(group) {
       process.exit();
     }
   }
+}
+
+export async function getGroupPackageNames(groupName, allPackages) {
+  if (!allPackages) {
+    allPackages = (await listDirsRecursive('./packages', false)).map((item) =>
+      item.replace('packages/', '')
+    );
+  }
+
+  let groupList = [];
+
+  greenLog(`🔎 Looking for packages in "${groupName}" group...`, true);
+  for (let i = 0; i < allPackages.length; i++) {
+    const pkgName = allPackages[i];
+
+    try {
+      const pkgJson = await readJsonFile(`packages/${pkgName}/package.json`);
+
+      if (pkgJson?.group === groupName) {
+        groupList.push(pkgName);
+      }
+    } catch (e) {
+      redLog(`${pkgName} does not have a package.json file.`);
+    }
+  }
+
+  return groupList;
 }
