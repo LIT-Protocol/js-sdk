@@ -11,12 +11,18 @@ import {
   redLog,
   writeFile,
   readFile,
+  getFlag,
+  CLIHeader,
+  validateGroupIsInConfig,
 } from './utils.mjs';
 import { readCachedProjectGraph } from '@nrwl/devkit';
 import { exit } from 'process';
-import fs from 'fs';
 
 const args = getArgs();
+const group = getFlag('--group');
+
+validateGroupIsInConfig(group);
+
 const PROJECT_NAME = args[0];
 const TAG = args[1];
 
@@ -26,11 +32,23 @@ const REPO_URL = 'https://github.com/Lit-Protocol/js-sdk';
 
 if (!PROJECT_NAME) {
   redLog(
-    `
-  Please provide a project name:
-
-  yarn gen:lib my-lib <universal | vanilla | nodejs>
-  `,
+    CLIHeader(
+      'Please provide a project name: yarn gen:lib <project-name> <tag>',
+      'yarn gen:lib my-lib <universal | vanilla | nodejs> [--group your-group-name]',
+      [
+        { name: 'my-lib', description: 'your project name' },
+        {
+          name: '<universal | vanilla | nodejs>',
+          description: 'your project type',
+        },
+      ],
+      [
+        {
+          name: 'group',
+          description: 'specify a group name for your project (optional)',
+        },
+      ]
+    ),
     true
   );
   exit();
@@ -205,6 +223,9 @@ const editPackageJson = async () => {
         stream: false,
       },
       tags: [TAG],
+
+      // If "group" is provided in the command line, add it to the package.json
+      ...(group && { group }),
     },
   };
 
@@ -220,10 +241,22 @@ const editJestConfig = async () => {
   modifyConfigFile(jestConfigPath, newLine);
 };
 
+const editTsConfig = async () => {
+  const tsConfigPath = 'tsconfig.base.json';
+
+  let jsonData = await readJsonFile(tsConfigPath);
+  jsonData.compilerOptions.paths = {
+    '@lit-protocol/*': ['packages/*/src'],
+  };
+
+  writeJsonFile(tsConfigPath, jsonData);
+};
+
 if (!alreadyExists) {
   await editProjectJson();
   await editPackageJson();
   await editJestConfig();
+  await editTsConfig();
   exit();
 }
 
@@ -234,6 +267,7 @@ await question(
       await editProjectJson();
       await editPackageJson();
       await editJestConfig();
+      await editTsConfig();
       exit();
     },
     no: () => {

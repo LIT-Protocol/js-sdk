@@ -1,0 +1,70 @@
+{
+  "name": "getlit-sdk",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/getlit-sdk/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target getlit-sdk"
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/getlit-sdk",
+        "main": "packages/getlit-sdk/src/index.ts",
+        "tsConfig": "packages/getlit-sdk/tsconfig.lib.json",
+        "assets": [
+          "packages/getlit-sdk/*.md"
+        ]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_getlitSdk",
+        "outfile": "dist/packages/getlit-sdk-vanilla/getlit-sdk.js",
+        "entryPoints": [
+          "./packages/getlit-sdk/src/index.ts"
+        ],
+        "define": {
+          "process.env.NODE_DEBUG": "false",
+          "global": "window"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/getlit-sdk/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/getlit-sdk"
+      ],
+      "options": {
+        "jestConfig": "packages/getlit-sdk/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

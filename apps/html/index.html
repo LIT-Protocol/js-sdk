@@ -75,6 +75,7 @@ pre {
     <script src="dist/packages/crypto-vanilla/crypto.js"></script>
     <script src="dist/packages/ecdsa-sdk-vanilla/ecdsa-sdk.js"></script>
     <script src="dist/packages/encryption-vanilla/encryption.js"></script>
+    <script src="dist/packages/getlit-sdk-vanilla/getlit-sdk.js"></script>
     <script src="dist/packages/lit-auth-client-vanilla/lit-auth-client.js"></script>
     <script src="dist/packages/lit-node-client-nodejs-vanilla/lit-node-client-nodejs.js"></script>
     <script src="dist/packages/lit-node-client-vanilla/lit-node-client.js"></script>
@@ -812,7 +813,79 @@ pre {
     </script>
     
 
-    <!-- (11): LITAUTHCLIENT -->
+    <!-- (11): GETLITSDK -->
+    <script>
+        if(typeof LitJsSdk_getlitSdk === 'undefined') {
+            console.error("LitJsSdk_getlitSdk:", LitJsSdk_getlitSdk);
+        }else{
+            console.warn("LitJsSdk_getlitSdk:", LitJsSdk_getlitSdk);
+            window.LitJsSdk_getlitSdk = LitJsSdk_getlitSdk;
+        }
+        window.addEventListener('load', function() {
+
+            var root = document.getElementById('root');
+            var result = document.getElementById('result');
+            var entries = Object.entries(LitJsSdk_getlitSdk);
+            var lis = entries.map(([key, value]) => `
+            <li>
+                <div id="LitJsSdk_getlitSdk_${key}" class="key" onClick="(async (e) => {
+                    var fn = LitJsSdk_getlitSdk['${key}'];
+                    var fnType = typeof fn;
+                    console.warn('[${key}] is type of [' + fnType + ']');
+
+                    if ( fnType === 'string' ) return;
+
+                    if( fnType === 'function' ){
+                        try{
+                            console.log('params:', globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
+                            res = JSON.stringify(res, null, 2);
+                            result.innerText = res;
+                            console.log(res);
+                        }catch(e){
+                            console.error('Please set the [params] variable in the console then click again');
+                            console.log(e);
+                        }
+                        return;
+                    }
+
+                    if( fnType === 'object' ){
+                        var res = await fn;
+                        window.output = res;
+                        res = JSON.stringify(res, null, 2);
+                        result.innerText = res;
+                        console.log(res);
+                        return;
+                    }
+                    
+                    
+                })();">${key}</div>
+                <pre class="code">
+<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                </pre>
+            </li>`);
+            lis = lis.join(' ');
+            var template = `
+            <div class="cat">
+                <h1>LitJsSdk_getlitSdk has ${entries.length} functions</h1>
+                    <ul>
+                        ${ lis }
+                    </ul>
+                </div>
+            `;
+            root.insertAdjacentHTML('beforeend', template);
+        });
+    </script>
+    
+
+    <!-- (12): LITAUTHCLIENT -->
     <script>
         if(typeof LitJsSdk_litAuthClient === 'undefined') {
             console.error("LitJsSdk_litAuthClient:", LitJsSdk_litAuthClient);
@@ -884,7 +957,7 @@ pre {
     </script>
     
 
-    <!-- (12): LITNODECLIENTNODEJS -->
+    <!-- (13): LITNODECLIENTNODEJS -->
     <script>
         if(typeof LitJsSdk_litNodeClientNodejs === 'undefined') {
             console.error("LitJsSdk_litNodeClientNodejs:", LitJsSdk_litNodeClientNodejs);
@@ -956,7 +1029,7 @@ pre {
     </script>
     
 
-    <!-- (13): LITNODECLIENT -->
+    <!-- (14): LITNODECLIENT -->
     <script>
         if(typeof LitJsSdk_litNodeClient === 'undefined') {
             console.error("LitJsSdk_litNodeClient:", LitJsSdk_litNodeClient);
@@ -1028,7 +1101,7 @@ pre {
     </script>
     
 
-    <!-- (14): LITTHIRDPARTYLIBS -->
+    <!-- (15): LITTHIRDPARTYLIBS -->
     <script>
         if(typeof LitJsSdk_litThirdPartyLibs === 'undefined') {
             console.error("LitJsSdk_litThirdPartyLibs:", LitJsSdk_litThirdPartyLibs);
@@ -1100,7 +1173,7 @@ pre {
     </script>
     
 
-    <!-- (15): MISCBROWSER -->
+    <!-- (16): MISCBROWSER -->
     <script>
         if(typeof LitJsSdk_miscBrowser === 'undefined') {
             console.error("LitJsSdk_miscBrowser:", LitJsSdk_miscBrowser);
@@ -1172,7 +1245,7 @@ pre {
     </script>
     
 
-    <!-- (16): MISC -->
+    <!-- (17): MISC -->
     <script>
         if(typeof LitJsSdk_misc === 'undefined') {
             console.error("LitJsSdk_misc:", LitJsSdk_misc);
@@ -1244,7 +1317,7 @@ pre {
     </script>
     
 
-    <!-- (17): NACL -->
+    <!-- (18): NACL -->
     <script>
         if(typeof LitJsSdk_nacl === 'undefined') {
             console.error("LitJsSdk_nacl:", LitJsSdk_nacl);
@@ -1316,7 +1389,7 @@ pre {
     </script>
     
 
-    <!-- (18): PKPBASE -->
+    <!-- (19): PKPBASE -->
     <script>
         if(typeof LitJsSdk_pkpBase === 'undefined') {
             console.error("LitJsSdk_pkpBase:", LitJsSdk_pkpBase);
@@ -1388,7 +1461,7 @@ pre {
     </script>
     
 
-    <!-- (19): PKPCLIENT -->
+    <!-- (20): PKPCLIENT -->
     <script>
         if(typeof LitJsSdk_pkpClient === 'undefined') {
             console.error("LitJsSdk_pkpClient:", LitJsSdk_pkpClient);
@@ -1460,7 +1533,7 @@ pre {
     </script>
     
 
-    <!-- (20): PKPCOSMOS -->
+    <!-- (21): PKPCOSMOS -->
     <script>
         if(typeof LitJsSdk_pkpCosmos === 'undefined') {
             console.error("LitJsSdk_pkpCosmos:", LitJsSdk_pkpCosmos);
@@ -1532,7 +1605,7 @@ pre {
     </script>
     
 
-    <!-- (21): PKPETHERS -->
+    <!-- (22): PKPETHERS -->
     <script>
         if(typeof LitJsSdk_pkpEthers === 'undefined') {
             console.error("LitJsSdk_pkpEthers:", LitJsSdk_pkpEthers);
@@ -1604,7 +1677,7 @@ pre {
     </script>
     
 
-    <!-- (22): PKPWALLETCONNECT -->
+    <!-- (23): PKPWALLETCONNECT -->
     <script>
         if(typeof LitJsSdk_pkpWalletconnect === 'undefined') {
             console.error("LitJsSdk_pkpWalletconnect:", LitJsSdk_pkpWalletconnect);
@@ -1676,7 +1749,7 @@ pre {
     </script>
     
 
-    <!-- (23): TYPES -->
+    <!-- (24): TYPES -->
     <script>
         if(typeof LitJsSdk_types === 'undefined') {
             console.error("LitJsSdk_types:", LitJsSdk_types);
@@ -1748,7 +1821,7 @@ pre {
     </script>
     
 
-    <!-- (24): UINT8ARRAYS -->
+    <!-- (25): UINT8ARRAYS -->
     <script>
         if(typeof LitJsSdk_uint8arrays === 'undefined') {
             console.error("LitJsSdk_uint8arrays:", LitJsSdk_uint8arrays);

@@ -616,13 +616,13 @@ export const getFlag = (flag = '--foo') => {
     const value = args[index].split('=')[1];
 
     if (!value) {
-      redLog(`❌ ${flag} value cannot be empty.`);
+      redLog(`❌ "${flag}" value cannot be empty. eg. ${flag}=bar`);
       process.exit();
     }
 
     return value;
   } catch (e) {
-    redLog(`❌ either ${flag} or its value not found`);
+    yellowLog(`"${flag}" value not found`, true);
     // throw new Error(e);
   }
 };
@@ -664,4 +664,62 @@ export async function checkEmptyDirectories(dirPath) {
   }
 
   return emptyDirs;
+}
+// ('Please provide a project name: yarn gen:lib <project-name> <tag>',
+//       'yarn gen:lib my-lib <universal | vanilla | nodejs> [--group your-group-name]',
+//       [
+//         { name: 'my-lib', description: 'your project name' },
+//         {
+//           name: '<universal | vanilla | nodejs>',
+//           description: 'your project type',
+//         },
+//       ],
+//       [
+//         {
+//           name: 'group',
+//           description: 'specify a group name for your project (optional)',
+//         },
+//       ]
+//     ),)
+export function CLIHeader(instruction, usage, args, flags) {
+  let message = `${instruction}\n\nUsage:\n${usage}\n\nArguments:\n`;
+
+  args.forEach((arg) => {
+    message += `${arg.name} - ${arg.description}\n`;
+  });
+
+  if (flags.length > 0) {
+    message += '\nOptional Flags:\n';
+
+    flags.forEach((flag) => {
+      message += `--${flag.name} - ${flag.description}\n`;
+    });
+  }
+
+  return message;
+}
+
+export function fileExists(path) {
+  return fs.existsSync(path);
+}
+
+export function getGroupConfig() {
+  const groupConfig = fs.readFileSync('lit.group.json', 'utf8');
+
+  const config = JSON.parse(groupConfig);
+
+  const names = config.map((g) => g.group);
+
+  return { config, names };
+}
+
+export function validateGroupIsInConfig(group) {
+  if (group) {
+    const groupConfig = getGroupConfig();
+
+    if (!groupConfig.names.includes(group)) {
+      redLog(`lit.group.json does not contain ${group} group name.`);
+      process.exit();
+    }
+  }
 }
