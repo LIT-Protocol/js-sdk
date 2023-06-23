@@ -13,11 +13,19 @@ import {
   question,
   writeJsonFile,
   yellowLog,
+  getFlag,
+  getGroupConfig,
+  getGroupPackageNames,
 } from './utils.mjs';
 
 const args = getArgs();
 const OPTION = args[0];
 const VALUE = args[1];
+
+console.log(args);
+
+const groupFlag = getFlag('--group');
+console.log('groupFlag:', groupFlag);
 
 if (!OPTION || OPTION === '' || OPTION === '--help') {
   greenLog(
@@ -45,16 +53,40 @@ if (OPTION) {
   }
 }
 
-// read lerna.json version
-const lerna = await readJsonFile('lerna.json');
-const lernaVersion = lerna.version;
+let version;
+
+if (groupFlag) {
+  const groupConfig = getGroupConfig();
+  version = groupConfig.config.find((item) => item.group === groupFlag).version;
+} else {
+  // read lerna.json version
+  version = (await readJsonFile('lerna.json')).version;
+}
+
+console.log('version:', version);
 
 let dirs = await listDirsRecursive('dist/packages', false);
+let newDirs = [];
+
+if (groupFlag) {
+  const groupPackages = await getGroupPackageNames(groupFlag);
+
+  groupPackages.forEach((groupPkgName) => {
+    dirs.forEach((dir) => {
+      if (dir.includes(groupPkgName)) {
+        newDirs.push(dir);
+      }
+    });
+  });
+}
+
+if (newDirs.length > 0) {
+  dirs = newDirs;
+}
 
 console.log('Ready to publish the following packages:');
 
 await asyncForEach(dirs, async (dir) => {
-  // read the package.json file
   const pkg = await readJsonFile(`${dir}/package.json`);
 
   greenLog(`${pkg.name} => ${pkg.version}`);
@@ -64,16 +96,6 @@ await asyncForEach(dirs, async (dir) => {
 
   // write the package.json file
   await writeJsonFile(`${dir}/package.json`, pkg);
-  // // check version
-  // const res = versionChecker(pkg, lernaVersion);
-
-  // if (res.status === 500) {
-  //   redLog(res.message);
-  // }
-
-  // if (res.status === 200) {
-  //   greenLog(res.message);
-  // }
 });
 
 // prompt user to confirm publish
@@ -94,25 +116,27 @@ greenLog(
 // get latest version
 let publishVersion;
 
-try {
-  let res = await fetch(
-    'https://registry.npmjs.org/@lit-protocol/lit-node-client'
-  );
+if (!groupFlag) {
+  try {
+    let res = await fetch(
+      'https://registry.npmjs.org/@lit-protocol/lit-node-client'
+    );
 
-  res = await res.json();
+    res = await res.json();
 
-  // get the last one
-  const modified = Object.keys(res.time).pop();
+    // get the last one
+    const modified = Object.keys(res.time).pop();
 
-  // increase x from 0.0.x to 0.0.x+1
-  const version = modified.split('.');
-  version[2] = parseInt(version[2]) + 1;
-  publishVersion = version.join('.');
-  console.log('publishVersion', publishVersion);
-} catch (e) {
-  yellowLog(
-    "Couldn't get latest version from npm, will use lerna.json version"
-  );
+    // increase x from 0.0.x to 0.0.x+1
+    const version = modified.split('.');
+    version[2] = parseInt(version[2]) + 1;
+    publishVersion = version.join('.');
+    console.log('publishVersion', publishVersion);
+  } catch (e) {
+    yellowLog(
+      "Couldn't get latest version from npm, will use lerna.json version"
+    );
+  }
 }
 
 await question('Are you sure you want to publish to? (y/n)', {
@@ -136,7 +160,7 @@ await question('Are you sure you want to publish to? (y/n)', {
         if (OPTION === '--tag' && (VALUE === 'dev' || VALUE === 'test')) {
           pkg2.version = publishVersion;
         } else {
-          pkg2.version = lernaVersion;
+          pkg2.version = version;
         }
 
         // write the package.json file
@@ -154,7 +178,7 @@ await question('Are you sure you want to publish to? (y/n)', {
       if (OPTION === '--tag' && (VALUE === 'dev' || VALUE === 'test')) {
         pkg.version = publishVersion;
       } else {
-        pkg.version = lernaVersion;
+        pkg.version = version;
       }
 
       // write the package.json file

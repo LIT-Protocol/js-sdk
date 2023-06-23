@@ -23,6 +23,9 @@ import {
   writeJsonFile,
   yellowLog,
   checkEmptyDirectories,
+  getGroupConfig,
+  getGroupPackageNames,
+  validateGroupIsInConfig,
 } from './utils.mjs';
 import fs from 'fs';
 import path from 'path';
@@ -51,7 +54,8 @@ const optionMaps = new Map([
   ['--v', () => versionFunc()],
   ['--version', () => versionFunc()],
   ['--verify', () => validateDependencyVersions()],
-  ['--postBuild', () => postBuild()],
+  ['--postBuild', () => buildTestApps()],
+  ['--buildTestApps', () => buildTestApps()],
   ['postBuildIndividual', () => postBuildIndividualFunc()],
   ['fixTsConfig', () => fixTsConfigFunc()],
   ['check', () => checkFunc()],
@@ -509,31 +513,51 @@ async function buildFunc() {
       );
     }
 
-    await childRunCommand(`yarn tools --match-versions`);
+    const groupFlag = getFlag('--group');
 
-    const ignoreList = (await listDirsRecursive('./apps', false))
+    if (groupFlag) {
+      await childRunCommand(`yarn tools --match-versions --group=${groupFlag}`);
+    } else {
+      await childRunCommand(`yarn tools --match-versions`);
+    }
+
+    let ignoreList = (await listDirsRecursive('./apps', false))
       .map((item) => item.replace('apps/', ''))
       .join(',');
+
+    console.log('groupFlag:', groupFlag);
+
+    let groupPackageNames;
+    let additionalIgnoreList;
+
+    if (groupFlag) {
+      additionalIgnoreList = (await listDirsRecursive('./packages', false)).map(
+        (item) => item.replace('packages/', '')
+      );
+
+      groupPackageNames = await getGroupPackageNames(
+        groupFlag,
+        additionalIgnoreList
+      );
+
+      // remove any item in the additionalIgnoreList that is in the groupPackageNames
+      additionalIgnoreList = additionalIgnoreList.filter(
+        (item) => !groupPackageNames.includes(item)
+      );
+    }
+
+    if (groupPackageNames.length > 0) {
+      ignoreList = ignoreList + ',' + additionalIgnoreList.join(',');
+    }
 
     const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
 
     spawnListener(command, {
       onDone: () => {
         console.log('Done!');
-
-        // // then run vanilla build
-        // const command = `yarn nx run-many --target=_buildWeb --exclude=${ignoreList}`;
-
-        // spawnListener(command, {
-        //   onDone: async () => {
-        //     console.log("Done!");
-        //     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
-            exit();
-        //   }
-        // })
+        exit();
       },
     });
-
   }
 }
 
@@ -1110,11 +1134,18 @@ async function commentFunc() {
 
 async function removeLocalDevFunc() {
   // First, remove existing dist symlink if exists.
-  const removeList = (await listDirsRecursive('./packages', false)).map(
-    (item) => item.replace('packages/', '')
+  let removeList = (await listDirsRecursive('./packages', false)).map((item) =>
+    item.replace('packages/', '')
   );
 
-  console.log('removeList', removeList);
+  const group = args[1];
+  console.log('group', group);
+
+  const groupList = await getGroupPackageNames(group, removeList);
+
+  if (groupList.length > 0) {
+    removeList = groupList;
+  }
 
   await asyncForEach(removeList, async (item) => {
     greenLog(
@@ -1195,9 +1226,17 @@ async function setupLocalDevFunc() {
 
     await setupSymlink(TARGET);
   } else {
-    const packageList = (await listDirsRecursive('./packages', false)).map(
+    let packageList = (await listDirsRecursive('./packages', false)).map(
       (item) => item.replace('packages/', '')
     );
+
+    const groupFlag = getFlag('--group');
+
+    if (groupFlag) {
+      greenLog(`Group flag detected: ${groupFlag}`);
+      packageList = await getGroupPackageNames(groupFlag);
+    }
+
     await asyncForEach(packageList, async (item) => {
       await setupSymlink(item);
     });
@@ -1207,22 +1246,43 @@ async function setupLocalDevFunc() {
 }
 
 async function matchVersionsFunc() {
-  // async foreach packages
-  const packageList = await listDirsRecursive('./packages', false);
+  const group = getFlag('--group');
 
-  // get lerna version
-  const lernaJson = await readJsonFile(`lerna.json`);
+  let packageList;
+  let version;
+
+  if (group) {
+    validateGroupIsInConfig(group);
+
+    // match group version
+    greenLog(`Group flag detected: ${group}`);
+
+    packageList = (await getGroupPackageNames(group)).map((item) => {
+      return `packages/${item}`;
+    });
+
+    // get group version
+    version = getGroupConfig().config.find(
+      (item) => item.group === group
+    ).version;
+  } else {
+    // async foreach packages
+    packageList = await listDirsRecursive('./packages', false);
+
+    // get lerna version
+    version = await readJsonFile(`lerna.json`);
+  }
 
   await asyncForEach(packageList, async (pkg) => {
     const packageJson = await readJsonFile(`${pkg}/package.json`);
-    packageJson.version = lernaJson.version;
+
+    packageJson.version = version;
 
     greenLog(
-      `Updating ${pkg}/package.json version ${packageJson.version} => ${lernaJson.version}...`
+      `Updating ${pkg}/package.json version ${packageJson.version} => ${version}...`
     );
     await writeJsonFile(`${pkg}/package.json`, packageJson);
   });
-
   exit();
 }
 
@@ -1408,7 +1468,7 @@ async function validateDependencyVersions() {
   process.exit();
 }
 
-async function postBuild() {
+async function buildTestApps() {
   // greenLog('...mapping dist package name to package.json name');
   // await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
 

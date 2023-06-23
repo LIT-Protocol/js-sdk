@@ -1,7 +1,6 @@
 import {
   childRunCommand,
   getArgs,
-  getFlag,
   greenLog,
   redLog,
   validateGroupIsInConfig,
@@ -31,5 +30,25 @@ await childRunCommand(`yarn tools fixTsConfig`);
 await childRunCommand(
   `yarn node ./tools/scripts/remove-group-packages.mjs ${group}`
 );
+// remove symlink from the group packages
+await childRunCommand(`yarn tools --remove-local-dev ${group}`);
+
+// yarn tools --build --packages
+await childRunCommand(`yarn tools --build --packages --group=${group}`);
+
+// yarn tools --buildTestApps
+await childRunCommand(`yarn tools --buildTestApps`);
+
+// yarn tools --setup-local-dev
+await childRunCommand(`yarn tools --setup-local-dev --group=${group}`);
+
+// yarn postBuild:mapDepsToDist
+// await childRunCommand(`yarn postBuild:mapDepsToDist`);
+
+// yarn gen:readme
+// await childRunCommand(`yarn gen:readme`);
+
+// yarn build:verify
+// await childRunCommand(`yarn build:verify`);
 
 process.exit();
