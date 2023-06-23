@@ -14,6 +14,7 @@
     "demo-encrypt-decrypt-react": "apps/demo-encrypt-decrypt-react",
     "ecdsa-sdk": "packages/ecdsa-sdk",
     "encryption": "packages/encryption",
+    "getlit-sdk": "packages/getlit-sdk",
     "html": "apps/html",
     "lit-auth-client": "packages/lit-auth-client",
     "lit-node-client": "packages/lit-node-client",
