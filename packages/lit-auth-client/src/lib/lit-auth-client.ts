@@ -174,7 +174,8 @@ export class LitAuthClient {
   /**
    * Embedds a ReCaptcha instance within the specified tag.
    * 
-   * **note** ReCaptcha is required for Email/SMS authentication only
+   * **note** ReCaptcha is required for Email/SMS authentication only.
+   * 
    * If injection is not compatible the ReCaptcha client Id is available through {@link getSiteKey}
    * The response from your ReCaptcha can be passed through with {@link OtpProvider#setCaptchaResponse}
    * @param elementId {string} id of the html element to inject the captcha view into
