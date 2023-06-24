@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+    <title>LIT Protocol Minimal JWT Example</title>
+    <script src="packages/lit-node-client-vanilla/lit-node-client.js"></script>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <script>
+      const LitJsSdk = LitJsSdk_litNodeClient;
+
+      const litNodeClient = new LitNodeClient({
+        litNetwork: 'serrano',
+      });
+      litNodeClient.connect();
+
+      var chain = 'polygon';
+      const MY_OWN_WALLET_ADDRESS = "0x4259E44670053491E7b4FE4A120C70be1eAD646b";
+      const accessControlConditions = [{
+        chain,
+        contractAddress: '',
+        method: '',
+        parameters: [':userAddress'],
+        returnValueTest: {
+          comparator: '=',
+          value: MY_OWN_WALLET_ADDRESS,
+        },
+        standardContractType: '',
+      }];
+
+      async function getSignedJWTToken() {
+        document.getElementById("requestingStatus").innerText =
+          "Requesting JWT, please wait...";
+
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain,
+        });
+        console.log("Auth Sig: ", authSig);
+
+        const jwtToken = await litNodeClient.getSignedToken({
+          accessControlConditions,
+          chain: 'ethereum',
+          authSig,
+        });
+        window.jwt = jwtToken;
+
+        console.log("JWT Token: ", jwtToken);
+
+        document.getElementById("requestingStatus").innerText =
+          "JWT Obtained!  It is  " + jwtToken + " and if you wish to manually attach it to the url, copy this instead " + encodeURIComponent(window.jwt);
+      }
+
+      async function visitProtectedServer() {
+        document.getElementById("verificationStatus").innerText =
+          "Redirecting, please wait...";
+        window.location = "/protected-path-1?jwt=" + encodeURIComponent(window.jwt);
+      }
+    </script>
+  </head>
+
+  <body>
+    <h1>LIT Protocol Minimal JWT Example</h1>
+
+    <h2>Step 1: Request a JWT to authenticate the user</h2>
+    <button onclick="getSignedJWTToken()">Request JWT</button>
+    <br />
+    <br />
+    <div id="requestingStatus"></div>
+
+    <h2>
+      Step 2: Visit the protected server and include the JWT as a url parameter
+    </h2>
+    <button onclick="visitProtectedServer()">Visit the protected server</button>
+    <br />
+    <br />
+    <pre id="verificationStatus"></pre>
+    <br />
+  </body>
+</html>

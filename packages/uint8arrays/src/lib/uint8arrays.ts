@@ -143,8 +143,8 @@ export function uint8arrayFromString(
       return new Uint8Array(arr);
     case 'base64':
       return base64ToUint8Array(str);
-    case 'base64urlpad':
     case 'base64url':
+    case 'base64urlpad':
       return base64ToUint8Array(base64UrlPadToBase64(str));
     default:
       throw new Error(`Unsupported encoding "${encoding}"`);
@@ -166,8 +166,8 @@ export function uint8arrayToString(
         .join('');
     case 'base64':
       return uint8ArrayToBase64(_uint8array);
-    case 'base64urlpad':
     case 'base64url':
+    case 'base64urlpad':
       return base64ToBase64UrlPad(uint8ArrayToBase64(_uint8array));
     default:
       throw new Error(`Unsupported encoding "${encoding}"`);

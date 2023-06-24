@@ -149,6 +149,25 @@ export const combineSignatureShares = (shares: BlsSignatureShare[]): string => {
 };
 
 /**
+ * Verify the BLS network signature.
+ *
+ * @param publicKey hex-encoded string of the BLS public key to verify with.
+ * @param message Uint8Array of the message to verify.
+ * @param signature Uint8Array of the signature to verify.
+ */
+export const verifySignature = (
+  publicKey: string,
+  message: Uint8Array,
+  signature: Uint8Array
+): void => {
+  blsSdk.verify_signature(
+    publicKey,
+    uint8arrayToString(message, 'base64'),
+    uint8arrayToString(signature, 'base64')
+  );
+};
+
+/**
  *
  * Combine ECDSA Shares
  *
