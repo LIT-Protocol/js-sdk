@@ -34,7 +34,7 @@ app.get('/', function(req, res) {
 app.get('/protected-path-1', async function(req: Request, res: Response) {
   const jwt = req.query?.jwt || req.cookies?.jwt;
 
-  console.log("JWT is ", jwt, jwt == "eyJhbGciOiJCTFMxMi0zODEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJMSVQiLCJzdWIiOiIweDQyNTllNDQ2NzAwNTM0OTFlN2I0ZmU0YTEyMGM3MGJlMWVhZDY0NmIiLCJjaGFpbiI6ImV0aGVyZXVtIiwiaWF0IjoxNjg3NTg0MTY0LCJleHAiOjE2ODc2MjczNjQsImFjY2Vzc0NvbnRyb2xDb25kaXRpb25zIjpbeyJjb250cmFjdEFkZHJlc3MiOiIiLCJjaGFpbiI6ImV0aGVyZXVtIiwic3RhbmRhcmRDb250cmFjdFR5cGUiOiIiLCJtZXRob2QiOiIiLCJwYXJhbWV0ZXJzIjpbIjp1c2VyQWRkcmVzcyJdLCJyZXR1cm5WYWx1ZVRlc3QiOnsiY29tcGFyYXRvciI6Ij0iLCJ2YWx1ZSI6IjB4NDI1OUU0NDY3MDA1MzQ5MUU3YjRGRTRBMTIwQzcwYmUxZUFENjQ2YiJ9fV0sImV2bUNvbnRyYWN0Q29uZGl0aW9ucyI6bnVsbCwic29sUnBjQ29uZGl0aW9ucyI6bnVsbCwidW5pZmllZEFjY2Vzc0NvbnRyb2xDb25kaXRpb25zIjpudWxsfQ.oymXPMn_DDRl/s50GBFfFVpLzZ6EurN/kGVvlrHIYNU599EInb7MmW-pXzo0loF1BnTp81wGxIzu20KGe7Kw7Xh7a/Oha+fGVTlDySOUv8uSoAoOEVGwnlRgePllWhEK");
+  console.log("JWT is", jwt);
 
   if (!jwt) {
     res.status(401).send("Unauthorized");

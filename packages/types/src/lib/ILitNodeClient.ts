@@ -9,19 +9,16 @@ import {
   GetSignedTokenRequest,
   HandshakeWithSgx,
   JsonExecutionRequest,
-  JsonSignChainDataRequest,
-  JsonSigningRetrieveRequest,
-  JsonSigningStoreRequest,
   KV,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
+  NodeBlsSigningShare,
   NodeCommandResponse,
   NodeCommandServerKeysResponse,
   NodeShare,
   RejectedNodePromises,
   SendNodeCommand,
   SignConditionECDSA,
-  SignedChainDataToken,
   SigningAccessControlConditionRequest,
   SuccessNodePromises,
   ValidateAndSignECDSA,
@@ -83,12 +80,12 @@ export interface ILitNodeClient {
    *
    * Combine Shares from signature shares
    *
-   * @param { any } signatureShares
+   * @param { NodeBlsSigningShare } signatureShares
    *
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  combineSharesAndGetJWT(signatureShares: Array<NodeShare>): string;
+  combineSharesAndGetJWT(signatureShares: Array<NodeBlsSigningShare>): string;
 
   /**
    *
@@ -204,22 +201,6 @@ export interface ILitNodeClient {
   ): Promise<NodeCommandResponse>;
 
   /**
-   *
-   * Get Chain Data Signing Shares
-   *
-   * @param { string } url
-   * @param { JsonSignChainDataRequest } params
-   *
-   * @returns { Promise<any> }
-   *
-   */
-  getChainDataSigningShare(
-    url: string,
-    params: JsonSignChainDataRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
    * Get Signing Shares for Token containing Access Control Condition
    *
    * @param { string } url
@@ -231,22 +212,6 @@ export interface ILitNodeClient {
   getSigningShareForToken(
     url: string,
     params: SigningAccessControlConditionRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
-   *
-   * Store signing conditions to nodes
-   *
-   * @param { string } url
-   * @param { JsonSigningStoreRequest } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  storeSigningConditionWithNode(
-    url: string,
-    params: JsonSigningStoreRequest,
     requestId: string
   ): Promise<NodeCommandResponse>;
 
@@ -291,18 +256,6 @@ export interface ILitNodeClient {
    *
    */
   executeJs(params: ExecuteJsProps): Promise<ExecuteJsResponse | undefined>;
-
-  /**
-   *
-   * Request a signed JWT of any solidity function call from the LIT network.  There are no prerequisites for this function.  You should use this function if you need to transmit information across chains, or from a blockchain to a centralized DB or server.  The signature of the returned JWT verifies that the response is genuine.
-   *
-   * @param { SignedChainDataToken } params
-   *
-   * @returns { Promise<string | undefined>}
-   */
-  getSignedChainDataToken(
-    params: SignedChainDataToken
-  ): Promise<string | undefined>;
 
   /**
    *
