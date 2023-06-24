@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/pkp-walletconnect",
-  "version": "2.2.28",
+  "version": "2.2.29",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
