@@ -737,7 +737,7 @@ declare global {
 /**
  * // TODO check for expiration
  *
- * Verify a JWT from the LIT network.  Use this for auth on your server.  For some background, users can define resources (URLs) for authorization via on-chain conditions using the saveSigningCondition function.  Other users can then request a signed JWT proving that their ETH account meets those on-chain conditions using the getSignedToken function.  Then, servers can verify that JWT using this function.  A successful verification proves that the user meets the on-chain conditions defined in the saveSigningCondition step.  For example, the on-chain condition could be posession of a specific NFT.
+ * Verify a JWT from the LIT network.  Use this for auth on your server.  For some background, users can specify access control condiitons for various URLs, and then other users can then request a signed JWT proving that their ETH account meets those on-chain conditions using the getSignedToken function.  Then, servers can verify that JWT using this function.  A successful verification proves that the user meets the access control conditions defined earlier.  For example, the on-chain condition could be posession of a specific NFT.
  *
  * @param { VerifyJWTProps } jwt
  *
