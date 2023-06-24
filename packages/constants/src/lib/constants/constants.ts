@@ -408,6 +408,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  zkEvm: {
+    contractAddress: null,
+    chainId: 1101,
+    name: 'zkEvm',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://zkevm-rpc.com'],
+    blockExplorerUrls: ['https://zkevm.polygonscan.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
