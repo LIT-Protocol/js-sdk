@@ -245,6 +245,29 @@ describe('Encrypt and decrypt file', () => {
   });
 });
 
+describe('Signed JWTs', () => {
+  it('get and verify signed JWT', async () => {
+    cy.window().then(async () => {
+      const jwtToken = await savedParams.litNodeClient.getSignedToken({
+        accessControlConditions: savedParams.accs,
+        chain: 'ethereum',
+        authSig: savedParams.authSig,
+      });
+  
+      expect(jwtToken).to.be.a('string');
+  
+      const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt, publicKey: savedParams.litNodeClient.networkPubKey! }); 
+      expect(verified).to.be.true;
+      expect(header).to.be.an('object');
+      expect(payload).to.be.an('object');
+  
+      const expectedAccessControlConditionsHash = (await savedParams.litNodeClient.getHashedAccessControlConditions(savedParams.accs))!.toString();
+      const actualAccessControlConditionsHash = (await savedParams.litNodeClient.getHashedAccessControlConditions(payload))!.toString();
+      expect(actualAccessControlConditionsHash).to.eq(expectedAccessControlConditionsHash);
+    });
+  })
+});
+
 describe('Lit Action', () => {
   it('Gets JS execution shares', async () => {
     const litActionCode = `
@@ -489,10 +512,6 @@ describe('Lit Action', () => {
     );
 
     expect(nodePromises.length).to.equal(10);
-
-    // should be serrano.litgateway
-    // const resolvedPromises = savedParams.litNodeClient.handleNodePromises(nodePromises);
-    // console.log(resolvedPromises);
   });
 
   it('Throw Node Error', () => {
