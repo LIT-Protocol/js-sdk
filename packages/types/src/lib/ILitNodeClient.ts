@@ -11,9 +11,9 @@ import {
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
   JsonSigningStoreRequest,
-  JsonStoreSigningRequest,
   KV,
   LitNodeClientConfig,
+  MultipleAccessControlConditions,
   NodeCommandResponse,
   NodeCommandServerKeysResponse,
   NodeShare,
@@ -21,6 +21,7 @@ import {
   SendNodeCommand,
   SignConditionECDSA,
   SignedChainDataToken,
+  SigningAccessControlConditionRequest,
   SuccessNodePromises,
   ValidateAndSignECDSA,
 } from './interfaces';
@@ -105,13 +106,13 @@ export interface ILitNodeClient {
    *
    * Get hash of access control conditions
    *
-   * @param { JsonStoreSigningRequest } params
+   * @param { MultipleAccessControlConditions } params
    *
    * @returns { Promise<ArrayBuffer | undefined> }
    *
    */
   getHashedAccessControlConditions(
-    params: JsonStoreSigningRequest
+    params: MultipleAccessControlConditions
   ): Promise<ArrayBuffer | undefined>;
 
   // ========== Promise Handlers ==========
@@ -130,14 +131,14 @@ export interface ILitNodeClient {
   /**
    * Handle node promises
    *
-   * @param { Array<Promise<any>> } nodePromises
+   * @param { Array<Promise<T>> } nodePromises
    *
-   * @returns { Promise<SuccessNodePromises | RejectedNodePromises> }
+   * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    *
    */
-  handleNodePromises(
-    nodePromises: Array<Promise<any>>
-  ): Promise<SuccessNodePromises | RejectedNodePromises>;
+  handleNodePromises<T>(
+    nodePromises: Array<Promise<T>>
+  ): Promise<SuccessNodePromises<T> | RejectedNodePromises>;
 
   /**
    *
@@ -218,18 +219,17 @@ export interface ILitNodeClient {
   ): Promise<NodeCommandResponse>;
 
   /**
-   *
-   * Get Signing Shares from Nodes
+   * Get Signing Shares for Token containing Access Control Condition
    *
    * @param { string } url
-   * @param { JsonSigningRetrieveRequest } params
+   * @param { SigningAccessControlConditionRequest } params
    *
-   * @returns { Promise<any>}
+   * @returns { Promise<NodeCommandResponse> }
    *
    */
-  getSigningShare(
+  getSigningShareForToken(
     url: string,
-    params: JsonSigningRetrieveRequest,
+    params: SigningAccessControlConditionRequest,
     requestId: string
   ): Promise<NodeCommandResponse>;
 
@@ -305,7 +305,7 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Request a signed JWT from the LIT network. Before calling this function, you must either create or know of a resource id and access control conditions for the item you wish to gain authorization for. You can create an access control condition using the saveSigningCondition function.
+   * Request a signed JWT from the LIT network. Before calling this function, you must know the access control conditions for the item you wish to gain authorization for.
    *
    * @param { JsonSigningRetrieveRequest } params
    *
@@ -315,19 +315,6 @@ export interface ILitNodeClient {
   getSignedToken(
     params: JsonSigningRetrieveRequest
   ): Promise<string | undefined>;
-
-  /**
-   *
-   * Associated access control conditions with a resource on the web.  After calling this function, users may use the getSignedToken function to request a signed JWT from the LIT network.  This JWT proves that the user meets the access control conditions, and is authorized to access the resource you specified in the resourceId parameter of the saveSigningCondition function.
-   *
-   * @param { JsonStoreSigningRequest } params
-   *
-   * @returns { Promise<boolean | undefined }
-   *
-   */
-  saveSigningCondition(
-    params: JsonStoreSigningRequest
-  ): Promise<boolean | undefined>;
 
   /**
    * Encrypt data with Lit identity-based Timelock Encryption.

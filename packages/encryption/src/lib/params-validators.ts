@@ -27,6 +27,7 @@ import {
   EncryptZipRequest,
   EvmContractConditions,
   ExecuteJsProps,
+  GetSignedTokenRequest,
   SessionSigs,
   SolRpcConditions,
   UnifiedAccessControlConditions,
@@ -138,6 +139,11 @@ export const paramsValidators: {
       params.readme,
       'readme'
     ),
+  ],
+
+  getSignedToken: (params: GetSignedTokenRequest) => [
+    new AccessControlConditionsValidator('decrypt', params),
+    new AuthMaterialValidator('decrypt', params, true),
   ],
 };
 
