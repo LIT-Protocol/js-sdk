@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/pkp-client",
-  "version": "2.2.29",
+  "version": "2.2.30",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
