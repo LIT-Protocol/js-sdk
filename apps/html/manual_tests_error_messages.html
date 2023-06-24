@@ -26,7 +26,6 @@
         Math.random().toString(36).substring(2, 15);
       var testProvisoningAndSigning = async ({
         evmContractConditions,
-        doNotStoreResourceId = false,
         testName,
       }) => {
         document.getElementById("status").innerText = `Testing ${testName}...`;
@@ -38,35 +37,17 @@
 
         var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
 
-        let resourceId = {
-          baseUrl: "my-dynamic-content-server.com",
-          path: randomPath(),
-          orgId: "",
-          role: "",
-          extraData: "",
-        };
-
-        if (!doNotStoreResourceId) {
-          await litNodeClient.saveSigningCondition({
-            evmContractConditions,
-            chain,
-            authSig,
-            resourceId,
-          });
-        }
-
         let jwt = await litNodeClient.getSignedToken({
           evmContractConditions,
           chain,
           authSig,
-          resourceId,
         });
         console.log("jwt", jwt);
 
         // uncomment this to break the jwt, to test an invalid jwt
         // jwt = jwt.replace(/.$/, "3");
 
-        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
+        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt, publicKey: litNodeClient.networkPubKey });
         console.log("verified", verified);
         console.log("header", header);
         console.log("payload", payload);
@@ -185,66 +166,6 @@
         }
       };
 
-      var UnstoredResourceId = async () => {
-        var evmContractConditions = [
-          {
-            contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
-            functionName: "balanceOf",
-            functionParams: [":userAddress", "8"],
-            functionAbi: {
-              type: "function",
-              stateMutability: "view",
-              outputs: [
-                {
-                  type: "uint256",
-                  name: "",
-                  internalType: "uint256",
-                },
-              ],
-              name: "balanceOf",
-              inputs: [
-                {
-                  type: "address",
-                  name: "account",
-                  internalType: "address",
-                },
-                {
-                  type: "uint256",
-                  name: "id",
-                  internalType: "uint256",
-                },
-              ],
-            },
-            chain,
-            returnValueTest: {
-              key: "",
-              comparator: ">",
-              value: "0",
-            },
-          },
-        ];
-
-        try {
-          await testProvisoningAndSigning({
-            evmContractConditions,
-            doNotStoreResourceId: true,
-            testName: "UnstoredResourceId",
-          });
-          document.getElementById(
-            "status"
-          ).innerText = `UnstoredResourceId: Failed.  It should have thrown an exception but it didn't.`;
-        } catch (e) {
-          console.log("Error on UnstoredResourceId", e);
-          document.getElementById(
-            "status"
-          ).innerText = `UnstoredResourceId: Success.  Failed with error ${JSON.stringify(
-            e,
-            null,
-            2
-          )}`;
-        }
-      };
-
       var Unauthorized = async () => {
         var evmContractConditions = [
           {
@@ -302,104 +223,6 @@
             2
           )}`;
         }
-      };
-
-      var EthSignWithAnUnauthorizedUpdate = async () => {
-        const testName = "EthSignWithAnUnauthorizedUpdate";
-        document.getElementById("status").innerText = `Testing ${testName}...`;
-        const authSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain,
-        });
-        const accessControlConditions = [
-          {
-            contractAddress: "",
-            standardContractType: "",
-            chain,
-            method: "eth_getBalance",
-            parameters: [":userAddress", "latest"],
-            returnValueTest: {
-              comparator: ">=",
-              value: "100000000000000000000000", // 100000 eth (or matic, really)
-            },
-          },
-        ];
-
-        document.getElementById(
-          "humanized"
-        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
-          { accessControlConditions }
-        )}`;
-
-        let resourceId = {
-          baseUrl: "my-dynamic-content-server.com",
-          path: randomPath(),
-          orgId: "",
-          role: "",
-          extraData: "",
-        };
-
-        await litNodeClient.saveSigningCondition({
-          accessControlConditions,
-          chain,
-          authSig,
-          resourceId,
-          permanant: false,
-        });
-
-        // uncomment this to break the jwt, to test an invalid jwt
-        // jwt = jwt.replace(/.$/, "3");
-
-        const newAccessControlConditions = [
-          {
-            contractAddress: "",
-            standardContractType: "",
-            chain,
-            method: "eth_getBalance",
-            parameters: [":userAddress", "latest"],
-            returnValueTest: {
-              comparator: ">=",
-              value: "10000000000000",
-            },
-          },
-        ];
-
-        let jwt;
-        try {
-          let unauthorizedAuthSig = {
-            sig: "0x2229236873d413f301c1afb7650959dee9f9a984c7421c9a44e41009940a5e410925d03374ddaf51590c7899253f30d589f1d7fec694f15829c8157c24f999f81c",
-            derivedVia: "web3.eth.personal.sign",
-            signedMessage:
-              "I am creating an account to use Lit Protocol at 2022-01-27T02:07:14.289Z",
-            address: "0xb962537314b11c6bcd6d9ff63feb048a9e91e7ae",
-          };
-
-          console.log("trying to update the condition");
-
-          const newEncryptedSymmetricKey =
-            await litNodeClient.saveSigningCondition({
-              accessControlConditions: newAccessControlConditions,
-              chain,
-              authSig: unauthorizedAuthSig,
-              resourceId,
-            });
-          console.log("updated the condition");
-        } catch (e) {
-          console.log("error updating the condition - this is expected", e);
-          if (isNodeStorageError(e.errorCode)) {
-            document.getElementById(
-              "status"
-            ).innerText = `${testName}: Success.  We were unable to update.`;
-          } else {
-            document.getElementById(
-              "status"
-            ).innerText = `${testName}: Failure.  When we tried to update with an unauthorized acct, we got an error that isn't a storage error`;
-          }
-          return;
-        }
-
-        document.getElementById(
-          "status"
-        ).innerText = `${testName}: Failure.  We updated a condition we shouldn't been able to!  OMG FIX THIS`;
       };
 
       var MissingChainEncryptDecrypt = async () => {
@@ -557,16 +380,7 @@
     <button onclick="MissingChain()">MissingChain</button>
     <br />
     <br />
-    <button onclick="UnstoredResourceId()">UnstoredResourceId</button>
-    <br />
-    <br />
     <button onclick="Unauthorized()">Unauthorized</button>
-    <br />
-    <br />
-    <button onclick="EthSignWithAnUnauthorizedUpdate()">
-      JWT request - Set the conditions, then try to update the conditions with
-      an unauthorized account
-    </button>
     <br />
     <br />
 

@@ -6,6 +6,7 @@ import {
   ExecuteJsProps,
   ExecuteJsResponse,
   FormattedMultipleAccs,
+  GetSignedTokenRequest,
   HandshakeWithSgx,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
@@ -307,14 +308,12 @@ export interface ILitNodeClient {
    *
    * Request a signed JWT from the LIT network. Before calling this function, you must know the access control conditions for the item you wish to gain authorization for.
    *
-   * @param { JsonSigningRetrieveRequest } params
+   * @param { GetSignedTokenRequest } params
    *
    * @returns { Promise<string> } final JWT
    *
    */
-  getSignedToken(
-    params: JsonSigningRetrieveRequest
-  ): Promise<string | undefined>;
+  getSignedToken(params: GetSignedTokenRequest): Promise<string | undefined>;
 
   /**
    * Encrypt data with Lit identity-based Timelock Encryption.
