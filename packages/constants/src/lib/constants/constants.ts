@@ -397,6 +397,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  chiado: {
+    contractAddress: null,
+    chainId: 10200,
+    name: 'Chiado',
+    symbol: 'XDAI',
+    decimals: 18,
+    rpcUrls: ['https://rpc.chiadochain.net'],
+    blockExplorerUrls: ['https://blockscout.chiadochain.net'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
