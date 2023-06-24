@@ -93,33 +93,17 @@
           });
         }
 
-        let resourceId = {
-          baseUrl: 'my-dynamic-content-server.com',
-          path: randomPath(),
-          orgId: '',
-          role: '',
-          extraData: '',
-        };
-
-        await litNodeClient.saveSigningCondition({
-          accessControlConditions,
-          chain,
-          authSig,
-          resourceId,
-        });
-
         let jwt = await litNodeClient.getSignedToken({
           accessControlConditions,
           chain,
           authSig,
-          resourceId,
         });
         console.log('jwt', jwt);
 
         // uncomment this to break the jwt, to test an invalid jwt
         // jwt = jwt.replace(/.$/, "3");
 
-        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
+        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt, publicKey: litNodeClient.networkPubKey });
         console.log('verified', verified);
         console.log('header', header);
         console.log('payload', payload);
@@ -997,7 +981,7 @@
             method: 'balanceOf',
             parameters: [':userAddress', '8'],
             returnValueTest: {
-              comparator: '>',
+              comparator: '<',
               value: '0',
             },
           },
@@ -1005,20 +989,11 @@
 
         var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
 
-        let resourceId = {
-          baseUrl: 'my-dynamic-content-server.com',
-          path: randomPath(),
-          orgId: '',
-          role: '',
-          extraData: '',
-        };
-
         try {
-          await litNodeClient.saveSigningCondition({
+          await litNodeClient.getSignedToken({
             accessControlConditions,
             //chain, // intentionally exclude this to cause an error parsing the JSON
             authSig,
-            resourceId,
           });
         } catch (e) {
           console.log('error', e);
@@ -1227,205 +1202,6 @@
         ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
       };
 
-      var EthSignWithAnUpdate = async () => {
-        const testName = 'EthSignWithAnUpdate';
-        document.getElementById('status').innerText = `Testing ${testName}...`;
-        const authSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain,
-        });
-        const accessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain,
-            method: 'eth_getBalance',
-            parameters: [':userAddress', 'latest'],
-            returnValueTest: {
-              comparator: '>=',
-              value: '100000000000000000000000', // 100000 eth (or matic, really)
-            },
-          },
-        ];
-
-        document.getElementById(
-          'humanized'
-        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
-          { accessControlConditions }
-        )}`;
-
-        let resourceId = {
-          baseUrl: 'my-dynamic-content-server.com',
-          path: randomPath(),
-          orgId: '',
-          role: '',
-          extraData: '',
-        };
-
-        await litNodeClient.saveSigningCondition({
-          accessControlConditions,
-          chain,
-          authSig,
-          resourceId,
-          permanant: false,
-        });
-
-        // uncomment this to break the jwt, to test an invalid jwt
-        // jwt = jwt.replace(/.$/, "3");
-
-        const newAccessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain,
-            method: 'eth_getBalance',
-            parameters: [':userAddress', 'latest'],
-            returnValueTest: {
-              comparator: '>=',
-              value: '10000000000000',
-            },
-          },
-        ];
-
-        let jwt;
-        try {
-          jwt = await litNodeClient.getSignedToken({
-            accessControlConditions,
-            chain,
-            authSig,
-            resourceId,
-            permanant: false,
-          });
-          console.log('jwt', jwt);
-        } catch (e) {
-          console.log('error getting symmetric key - this is expected', e);
-          console.log('trying to update the condition');
-
-          const saved = await litNodeClient.saveSigningCondition({
-            accessControlConditions: newAccessControlConditions,
-            chain,
-            authSig,
-            resourceId,
-          });
-          console.log('updated the condition');
-        }
-
-        jwt = await litNodeClient.getSignedToken({
-          accessControlConditions: newAccessControlConditions,
-          chain,
-          authSig,
-          resourceId,
-        });
-
-        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
-        console.log('verified', verified);
-        console.log('header', header);
-        console.log('payload', payload);
-
-        if (jwt && verified) {
-          document.getElementById('status').innerText = `${testName}: Success`;
-        } else {
-          document.getElementById('status').innerText = `${testName}: Failure`;
-        }
-      };
-
-      var EthSignWithAnUnauthorizedUpdate = async () => {
-        const testName = 'EthSignWithAnUnauthorizedUpdate';
-        document.getElementById('status').innerText = `Testing ${testName}...`;
-        const authSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain,
-        });
-        const accessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain,
-            method: 'eth_getBalance',
-            parameters: [':userAddress', 'latest'],
-            returnValueTest: {
-              comparator: '>=',
-              value: '100000000000000000000000', // 100000 eth (or matic, really)
-            },
-          },
-        ];
-
-        document.getElementById(
-          'humanized'
-        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
-          { accessControlConditions }
-        )}`;
-
-        let resourceId = {
-          baseUrl: 'my-dynamic-content-server.com',
-          path: randomPath(),
-          orgId: '',
-          role: '',
-          extraData: '',
-        };
-
-        await litNodeClient.saveSigningCondition({
-          accessControlConditions,
-          chain,
-          authSig,
-          resourceId,
-          permanant: false,
-        });
-
-        // uncomment this to break the jwt, to test an invalid jwt
-        // jwt = jwt.replace(/.$/, "3");
-
-        const newAccessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain,
-            method: 'eth_getBalance',
-            parameters: [':userAddress', 'latest'],
-            returnValueTest: {
-              comparator: '>=',
-              value: '10000000000000',
-            },
-          },
-        ];
-
-        let jwt;
-        try {
-          let unauthorizedAuthSig = {
-            sig: '0x2229236873d413f301c1afb7650959dee9f9a984c7421c9a44e41009940a5e410925d03374ddaf51590c7899253f30d589f1d7fec694f15829c8157c24f999f81c',
-            derivedVia: 'web3.eth.personal.sign',
-            signedMessage:
-              'I am creating an account to use Lit Protocol at 2022-01-27T02:07:14.289Z',
-            address: '0xb962537314b11c6bcd6d9ff63feb048a9e91e7ae',
-          };
-
-          console.log('trying to update the condition');
-
-          const newEncryptedSymmetricKey =
-            await litNodeClient.saveSigningCondition({
-              accessControlConditions: newAccessControlConditions,
-              chain,
-              authSig: unauthorizedAuthSig,
-              resourceId,
-            });
-          console.log('updated the condition');
-        } catch (e) {
-          console.log('error updating the condition - this is expected', e);
-          if (isNodeStorageError(e.errorCode)) {
-            document.getElementById(
-              'status'
-            ).innerText = `${testName}: Success.  We were unable to update.`;
-          } else {
-            document.getElementById(
-              'status'
-            ).innerText = `${testName}: Failure.  When we tried to update with an unauthorized acct, we got an error that isn't a storage error`;
-          }
-          return;
-        }
-
-        document.getElementById(
-          'status'
-        ).innerText = `${testName}: Failure.  We updated a condition we shouldn't been able to!  OMG FIX THIS`;
-      };
-
       ///  ECDSA Test function
       var EcdsaSignMessage = async () => {
         const testName = 'EcdsaSignMessage';
@@ -1494,186 +1270,6 @@
           ).innerText = `${testName}: Failure.  `;
           return;
         }
-      };
-
-      var EthSignPermanantCondition = async () => {
-        const testName = 'EthSignPermanantCondition';
-        document.getElementById('status').innerText = `Testing ${testName}...`;
-        const authSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain,
-        });
-        const accessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain,
-            method: 'eth_getBalance',
-            parameters: [':userAddress', 'latest'],
-            returnValueTest: {
-              comparator: '>=',
-              value: '100000000000000000000000', // 100000 eth (or matic, really)
-            },
-          },
-        ];
-
-        document.getElementById(
-          'humanized'
-        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
-          { accessControlConditions }
-        )}`;
-
-        let resourceId = {
-          baseUrl: 'my-dynamic-content-server.com',
-          path: randomPath(),
-          orgId: '',
-          role: '',
-          extraData: '',
-        };
-
-        await litNodeClient.saveSigningCondition({
-          accessControlConditions,
-          chain,
-          authSig,
-          resourceId,
-          permanant: true,
-        });
-
-        // uncomment this to break the jwt, to test an invalid jwt
-        // jwt = jwt.replace(/.$/, "3");
-
-        const newAccessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain,
-            method: 'eth_getBalance',
-            parameters: [':userAddress', 'latest'],
-            returnValueTest: {
-              comparator: '>=',
-              value: '10000000000000',
-            },
-          },
-        ];
-
-        let jwt;
-        try {
-          console.log('trying to update the permanant condition');
-
-          const newEncryptedSymmetricKey =
-            await litNodeClient.saveSigningCondition({
-              accessControlConditions: newAccessControlConditions,
-              chain,
-              authSig,
-              resourceId,
-            });
-          console.log('updated the condition');
-        } catch (e) {
-          console.log('error updating the condition - this is expected', e);
-          if (isNodeStorageError(e.errorCode)) {
-            document.getElementById(
-              'status'
-            ).innerText = `${testName}: Success.  We were unable to update.`;
-          } else {
-            document.getElementById(
-              'status'
-            ).innerText = `${testName}: Failure.  When we tried to update with an unauthorized acct, we got an error that isn't a storage error`;
-          }
-          return;
-        }
-
-        document.getElementById(
-          'status'
-        ).innerText = `${testName}: Failure.  We updated a condition we shouldn't been able to!  OMG FIX THIS`;
-      };
-
-      var EthSignPermanentCondition = async () => {
-        const testName = 'EthSignPermanentCondition';
-        document.getElementById('status').innerText = `Testing ${testName}...`;
-        const authSig = await LitJsSdk.checkAndSignAuthMessage({
-          chain,
-        });
-        const accessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain,
-            method: 'eth_getBalance',
-            parameters: [':userAddress', 'latest'],
-            returnValueTest: {
-              comparator: '>=',
-              value: '100000000000000000000000', // 100000 eth (or matic, really)
-            },
-          },
-        ];
-
-        document.getElementById(
-          'humanized'
-        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
-          { accessControlConditions }
-        )}`;
-
-        let resourceId = {
-          baseUrl: 'my-dynamic-content-server.com',
-          path: randomPath(),
-          orgId: '',
-          role: '',
-          extraData: '',
-        };
-
-        await litNodeClient.saveSigningCondition({
-          accessControlConditions,
-          chain,
-          authSig,
-          resourceId,
-          permanent: true,
-        });
-
-        // uncomment this to break the jwt, to test an invalid jwt
-        // jwt = jwt.replace(/.$/, "3");
-
-        const newAccessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain,
-            method: 'eth_getBalance',
-            parameters: [':userAddress', 'latest'],
-            returnValueTest: {
-              comparator: '>=',
-              value: '10000000000000',
-            },
-          },
-        ];
-
-        let jwt;
-        try {
-          console.log('trying to update the permanent condition');
-
-          const newEncryptedSymmetricKey =
-            await litNodeClient.saveSigningCondition({
-              accessControlConditions: newAccessControlConditions,
-              chain,
-              authSig,
-              resourceId,
-            });
-          console.log('updated the condition');
-        } catch (e) {
-          console.log('error updating the condition - this is expected', e);
-          if (isNodeStorageError(e.errorCode)) {
-            document.getElementById(
-              'status'
-            ).innerText = `${testName}: Success.  We were unable to update.`;
-          } else {
-            document.getElementById(
-              'status'
-            ).innerText = `${testName}: Failure.  When we tried to update with an unauthorized acct, we got an error that isn't a storage error`;
-          }
-          return;
-        }
-
-        document.getElementById(
-          'status'
-        ).innerText = `${testName}: Failure.  We updated a condition we shouldn't been able to!  OMG FIX THIS`;
       };
 
       var EncryptFileAndZipWithMetadata = async () => {
@@ -2195,29 +1791,6 @@
     </button>
     <br />
     <br />
-    <button onclick="EthSignWithAnUpdate()">
-      JWT request - Set the conditions, update the conditions, then get JWT
-    </button>
-    <br />
-    <br />
-    <button onclick="EthSignWithAnUnauthorizedUpdate()">
-      JWT request - Set the conditions, then try to update the conditions with
-      an unauthorized account
-    </button>
-    <br />
-    <br />
-    <button onclick="EthSignPermanantCondition()">
-      JWT request - Set the conditions as permanant, then try to update the
-      conditions
-    </button>
-    <br />
-    <br />
-    <button onclick="EthSignPermanentCondition()">
-      JWT request - Set the conditions as permanent (but with the correct
-      spelling), then try to update the conditions
-    </button>
-    <br />
-    <br />
 
     <button onclick="EcdsaSignMessage()">
       Nodes sign the message "LitProtocol Rocks!" using ECDSA with default key.
@@ -2227,12 +1800,6 @@
     <button onclick="ecdsa_validate_ERC721()">
       Cross chain validation of NFT (ERC721) /w ECDSA signature result.
     </button>
-    <br />
-    <br /><button onclick="EthSignPermanentCondition()">
-      >>>>>>> Stashed changes JWT request - Set the conditions as permanent (but
-      with the correct spelling), then try to update the conditions
-    </button>
-    <br />
     <br />
 
     <button onclick="NestedGrouping()">NestedGrouping</button>

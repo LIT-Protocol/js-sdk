@@ -42,37 +42,19 @@
           chain: "ethereum",
         });
 
-        let resourceId = {
-          baseUrl: "my-dynamic-content-server.com",
-          path: randomPath(),
-          orgId: "",
-          role: "",
-          extraData: "",
-        };
-
-        await litNodeClient.saveSigningCondition({
-          unifiedAccessControlConditions,
-          authSig: {
-            solana: solAuthSig,
-            ethereum: ethAuthSig,
-          },
-          resourceId,
-        });
-
         let jwt = await litNodeClient.getSignedToken({
           unifiedAccessControlConditions,
           authSig: {
             solana: solAuthSig,
             ethereum: ethAuthSig,
           },
-          resourceId,
         });
         console.log("jwt", jwt);
 
         // uncomment this to break the jwt, to test an invalid jwt
         // jwt = jwt.replace(/.$/, "3");
 
-        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
+        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt, publicKey: litNodeClient.networkPubKey });
         console.log("verified", verified);
         console.log("header", header);
         console.log("payload", payload);

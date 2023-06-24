@@ -35,25 +35,16 @@
           { unifiedAccessControlConditions }
         )}`;
 
-        let resourceId = {
-          baseUrl: "my-dynamic-content-server.com",
-          path: randomPath(),
-          orgId: "",
-          role: "",
-          extraData: "",
-        };
-
-        let hashedResourceId = await LitJsSdk.hashResourceIdForSigning(
-          resourceId
-        );
-        console.log("hashedResourceId", hashedResourceId);
+        let hashedAccessControlConditions = await LitJsSdk.uint8arrayToString(new Uint8Array(await litNodeClient.getHashedAccessControlConditions({
+          unifiedAccessControlConditions,
+        })), 'base16');
 
         const litResource = new LitJsSdk_authHelpers.LitAccessControlConditionResource(
-          hashedResourceId
+          hashedAccessControlConditions
         );
 
         var sessionSigs = await litNodeClient.getSessionSigs({
-          chain: "ethereum",
+          chain: "polygon",
           resourceAbilityRequests: [
             {
             resource: litResource,
@@ -64,24 +55,16 @@
 
         console.log("sessionSigs", sessionSigs);
 
-        await litNodeClient.saveSigningCondition({
-          unifiedAccessControlConditions,
-          sessionSigs,
-          resourceId,
-          chain: "litSessionSign",
-        });
-
         let jwt = await litNodeClient.getSignedToken({
           unifiedAccessControlConditions,
           sessionSigs,
-          resourceId,
         });
         console.log("jwt", jwt);
 
         // uncomment this to break the jwt, to test an invalid jwt
         // jwt = jwt.replace(/.$/, "3");
 
-        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
+        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt, publicKey: litNodeClient.networkPubKey });
         console.log("verified", verified);
         console.log("header", header);
         console.log("payload", payload);
@@ -191,7 +174,7 @@
             conditionType: "evmBasic",
             contractAddress: "",
             standardContractType: "",
-            chain: "ethereum",
+            chain: "polygon",
             method: "eth_getBalance",
             parameters: [":userAddress", "latest"],
             returnValueTest: {
