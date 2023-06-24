@@ -1,7 +1,12 @@
 import {
   canonicalAccessControlConditionFormatter,
   canonicalResourceIdFormatter,
-  hashResourceId,
+  canonicalSolRpcConditionFormatter,
+  canonicalUnifiedAccessControlConditionFormatter,
+  hashAccessControlConditions,
+  hashEVMContractConditions,
+  hashSolRpcConditions,
+  hashUnifiedAccessControlConditions,
 } from '@lit-protocol/access-control-conditions';
 
 import {
@@ -39,13 +44,13 @@ import {
   DecryptRequest,
   DecryptResponse,
   EncryptRequest,
-  EncryptRequestBase,
   EncryptResponse,
   ExecuteJsProps,
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetSessionSigsProps,
   GetSignSessionKeySharesProp,
+  GetSignedTokenRequest,
   GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
   HandshakeWithSgx,
@@ -54,9 +59,10 @@ import {
   JsonSignChainDataRequest,
   JsonSigningRetrieveRequest,
   JsonSigningStoreRequest,
-  JsonStoreSigningRequest,
   KV,
   LitNodeClientConfig,
+  MultipleAccessControlConditions,
+  NodeBlsSigningShare,
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandResponse,
@@ -77,6 +83,7 @@ import {
   SignSessionKeyResponse,
   SignedChainDataToken,
   SignedData,
+  SigningAccessControlConditionRequest,
   SuccessNodePromises,
   SupportedJsonRequests,
   ValidateAndSignECDSA,
@@ -535,24 +542,23 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   /**
-   *
-   * Get Signing Shares from Nodes
+   * Get Signing Shares for Token containing Access Control Condition
    *
    * @param { string } url
-   * @param { JsonSigningRetrieveRequest } params
+   * @param { SigningAccessControlConditionRequest } params
    *
-   * @returns { Promise<any>}
+   * @returns { Promise<NodeCommandResponse> }
    *
    */
-  getSigningShare = async (
+  getSigningShareForToken = async (
     url: string,
-    params: JsonSigningRetrieveRequest,
+    params: SigningAccessControlConditionRequest,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    log('getSigningShare');
-    const urlWithPath = `${url}/web/signing/retrieve`;
+    log('getSigningShareForToken');
+    const urlWithPath = `${url}/web/signing/access_control_condition`;
 
-    return await this.sendCommandToNode({
+    return this.sendCommandToNode({
       url: urlWithPath,
       data: params,
       requestId,
@@ -579,38 +585,6 @@ export class LitNodeClientNodeJs extends LitCore {
     return await this.sendCommandToNode({
       url: urlWithPath,
       data: params,
-      requestId,
-    });
-  };
-
-  /**
-   *
-   * Store signing conditions to nodes
-   *
-   * @param { string } url
-   * @param { JsonSigningStoreRequest } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  storeSigningConditionWithNode = async (
-    url: string,
-    params: JsonSigningStoreRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    log('storeSigningConditionWithNode');
-
-    const urlWithPath = `${url}/web/signing/store`;
-
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: {
-        key: params.key,
-        val: params.val,
-        authSig: params.authSig,
-        chain: params.chain,
-        permanant: params.permanent,
-      },
       requestId,
     });
   };
@@ -660,7 +634,9 @@ export class LitNodeClientNodeJs extends LitCore {
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  combineSharesAndGetJWT = (signatureShares: Array<NodeShare>): string => {
+  combineSharesAndGetJWT = (
+    signatureShares: Array<NodeBlsSigningShare>
+  ): string => {
     // ========== Shares Validations ==========
     // -- sanity check
     if (
@@ -679,7 +655,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // ========== Combine Shares ==========
     const signature = combineSignatureShares(
-      signatureShares.map((s: any) => s.signatureShare)
+      signatureShares.map((s) => s.signatureShare)
     );
 
     log('signature is', signature);
@@ -692,7 +668,7 @@ export class LitNodeClientNodeJs extends LitCore {
     // convert the sig to base64 and append to the jwt
     const finalJwt: string = `${unsignedJwt}.${uint8arrayToString(
       uint8arrayFromString(signature, 'base16'),
-      'base64url'
+      'base64urlpad'
     )}`;
 
     return finalJwt;
@@ -702,7 +678,7 @@ export class LitNodeClientNodeJs extends LitCore {
     networkPubKey: string,
     identityParam: Uint8Array,
     ciphertext: string,
-    signatureShares: Array<NodeShare>
+    signatureShares: Array<NodeBlsSigningShare>
   ): Uint8Array => {
     const sigShares = signatureShares.map((s: any) => s.signatureShare);
 
@@ -791,13 +767,13 @@ export class LitNodeClientNodeJs extends LitCore {
    *
    * Get hash of access control conditions
    *
-   * @param { JsonStoreSigningRequest } params
+   * @param { MultipleAccessControlConditions } params
    *
    * @returns { Promise<ArrayBuffer | undefined> }
    *
    */
   getHashedAccessControlConditions = async (
-    params: JsonStoreSigningRequest
+    params: MultipleAccessControlConditions
   ): Promise<ArrayBuffer | undefined> => {
     let hashOfConditions: ArrayBuffer;
 
@@ -833,16 +809,89 @@ export class LitNodeClientNodeJs extends LitCore {
   // ========== Promise Handlers ==========
 
   /**
+   *
+   * Get and gather node promises
+   *
+   * @param { any } callback
+   *
+   * @returns { Array<Promise<any>> }
+   *
+   */
+  getNodePromises = (callback: Function): Array<Promise<any>> => {
+    const nodePromises = [];
+
+    for (const url of this.connectedNodes) {
+      nodePromises.push(callback(url));
+    }
+
+    return nodePromises;
+  };
+
+  /**
+   * Handle node promises
+   *
+   * @param { Array<Promise<any>> } nodePromises
+   *
+   * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
+   *
+   */
+  handleNodePromises = async <T>(
+    nodePromises: Array<Promise<T>>,
+    minNodeCount?: number
+  ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
+    // -- prepare
+    const responses = await Promise.allSettled(nodePromises);
+    const minNodes = minNodeCount ?? this.config.minNodeCount;
+
+    // -- get fulfilled responses
+    const successes: Array<NodePromiseResponse> = responses.filter(
+      (r: any) => r.status === 'fulfilled'
+    );
+
+    // -- case: success (when success responses are more than minNodeCount)
+    if (successes.length >= minNodes) {
+      const successPromises: SuccessNodePromises<T> = {
+        success: true,
+        values: successes.map((r: any) => r.value),
+      };
+
+      return successPromises;
+    }
+
+    // -- case: if we're here, then we did not succeed.  time to handle and report errors.
+
+    // -- get "rejected" responses
+    const rejected = responses.filter((r: any) => r.status === 'rejected');
+
+    const mostCommonError = JSON.parse(
+      mostCommonString(
+        rejected.map((r: NodePromiseResponse) => JSON.stringify(r.reason))
+      )
+    );
+
+    log(`most common error: ${JSON.stringify(mostCommonError)}`);
+
+    const rejectedPromises: RejectedNodePromises = {
+      success: false,
+      error: mostCommonError,
+    };
+
+    return rejectedPromises;
+  };
+
+  /**
    * Run lit action on a single deterministicly selected node. It's important that the nodes use the same deterministic selection algorithm.
    *
    * @param { ExecuteJsProps } params
    *
-   * @returns { Promise<SuccessNodePromises | RejectedNodePromises> }
+   * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    *
    */
   runOnTargetedNodes = async (
     params: ExecuteJsProps
-  ): Promise<SuccessNodePromises | RejectedNodePromises> => {
+  ): Promise<
+    SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises
+  > => {
     const { code, authSig, jsParams, debug, sessionSigs, targetNodeRange } =
       params;
 
@@ -1239,7 +1288,7 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises).values;
+    const responseData = (res as SuccessNodePromises<NodeShare>).values;
     log('responseData', JSON.stringify(responseData, null, 2));
 
     // ========== Extract shares from response data ==========
@@ -1288,123 +1337,18 @@ export class LitNodeClientNodeJs extends LitCore {
 
   /**
    *
-   * Request a signed JWT of any solidity function call from the LIT network.  There are no prerequisites for this function.  You should use this function if you need to transmit information across chains, or from a blockchain to a centralized DB or server.  The signature of the returned JWT verifies that the response is genuine.
+   * Request a signed JWT from the LIT network. Before calling this function, you must know the access control conditions for the item you wish to gain authorization for.
    *
-   * @param { SignedChainDataToken } params
-   *
-   * @returns { Promise<string>}
-   */
-  getSignedChainDataToken = async (
-    params: SignedChainDataToken
-  ): Promise<string> => {
-    // ========== Prepare Params ==========
-    const { callRequests, chain } = params;
-
-    // ========== Pre-Validations ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      const message =
-        '2 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      return throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
-
-    // -- validate if this.networkPubKeySet is null
-    if (this.networkPubKeySet === null) {
-      return throwError({
-        message: 'networkPubKeySet cannot be null',
-        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-      });
-    }
-
-    // ========== Prepare ==========
-    // we need to send jwt params iat (issued at) and exp (expiration)
-    // because the nodes may have different wall clock times
-    // the nodes will verify that these params are withing a grace period
-    const { iat, exp } = this.getJWTParams();
-
-    // ========== Get Node Promises ==========
-    // -- fetch shares from nodes
-    const requestId = this.getRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      return this.getChainDataSigningShare(
-        url,
-        {
-          callRequests,
-          chain,
-          iat,
-          exp,
-        },
-        requestId
-      );
-    });
-
-    // -- resolve promises
-    const signatureShares = await Promise.all(nodePromises);
-    log('signatureShares', signatureShares);
-
-    // -- total of good shares
-    const goodShares = signatureShares.filter(
-      (d: any) => d.signatureShare !== ''
-    );
-
-    // ========== Shares Validations ==========
-    // -- validate if we have enough good shares
-    if (goodShares.length < this.config.minNodeCount) {
-      log(
-        `majority of shares are bad. goodShares is ${JSON.stringify(
-          goodShares
-        )}`
-      );
-
-      if (this.config.alertWhenUnauthorized) {
-        alert(
-          'You are not authorized to receive a signature to grant access to this content'
-        );
-      }
-
-      throwError({
-        message: `You are not authorized to recieve a signature on this item`,
-        errorKind: LIT_ERROR.UNAUTHROZIED_EXCEPTION.kind,
-        errorCode: LIT_ERROR.UNAUTHROZIED_EXCEPTION.name,
-      });
-    }
-
-    // ========== Result ==========
-    const finalJwt: string = this.combineSharesAndGetJWT(signatureShares);
-
-    return finalJwt;
-  };
-
-  /**
-   *
-   * Request a signed JWT from the LIT network. Before calling this function, you must either create or know of a resource id and access control conditions for the item you wish to gain authorization for. You can create an access control condition using the saveSigningCondition function.
-   *
-   * @param { JsonSigningRetrieveRequest } params
+   * @param { GetSignedTokenRequest } params
    *
    * @returns { Promise<string> } final JWT
    *
    */
-  getSignedToken = async (
-    params: JsonSigningRetrieveRequest
-  ): Promise<string> => {
+  getSignedToken = async (params: GetSignedTokenRequest): Promise<string> => {
     // ========== Prepare Params ==========
-    const {
-      // accessControlConditions,
-      // evmContractConditions,
-      // solRpcConditions,
-      // unifiedAccessControlConditions,
-      chain,
-      authSig,
-      resourceId,
-      sessionSigs,
-    } = params;
+    const { chain, authSig, sessionSigs } = params;
 
-    // ========== Pre-Validations ==========
+    // ========== Validation ==========
     // -- validate if it's ready
     if (!this.ready) {
       const message =
@@ -1422,6 +1366,19 @@ export class LitNodeClientNodeJs extends LitCore {
         message: 'networkPubKeySet cannot be null',
         errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
         errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
+      });
+    }
+
+    const paramsIsSafe = safeParams({
+      functionName: 'getSignedToken',
+      params,
+    });
+
+    if (!paramsIsSafe) {
+      return throwError({
+        message: `Parameter validation failed.`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
     }
 
@@ -1448,23 +1405,13 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
-    if (!resourceId) {
-      return throwError({
-        message: `You must provide a resourceId`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    const formattedResourceId = canonicalResourceIdFormatter(resourceId);
-
     // ========== Get Node Promises ==========
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
       let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
-      return this.getSigningShare(
+      return this.getSigningShareForToken(
         url,
         {
           accessControlConditions: formattedAccessControlConditions,
@@ -1474,7 +1421,6 @@ export class LitNodeClientNodeJs extends LitCore {
             formattedUnifiedAccessControlConditions,
           chain,
           authSig: authSigToSend,
-          resourceId: formattedResourceId,
           iat,
           exp,
         },
@@ -1490,8 +1436,9 @@ export class LitNodeClientNodeJs extends LitCore {
       this._throwNodeError(res as RejectedNodePromises);
     }
 
-    const signatureShares: Array<NodeShare> = (res as SuccessNodePromises)
-      .values;
+    const signatureShares: Array<NodeBlsSigningShare> = (
+      res as SuccessNodePromises<NodeBlsSigningShare>
+    ).values;
 
     log('signatureShares', signatureShares);
 
@@ -1499,113 +1446,6 @@ export class LitNodeClientNodeJs extends LitCore {
     const finalJwt: string = this.combineSharesAndGetJWT(signatureShares);
 
     return finalJwt;
-  };
-
-  /**
-   *
-   * Associated access control conditions with a resource on the web.  After calling this function, users may use the getSignedToken function to request a signed JWT from the LIT network.  This JWT proves that the user meets the access control conditions, and is authorized to access the resource you specified in the resourceId parameter of the saveSigningCondition function.
-   *
-   * @param { JsonStoreSigningRequest } params
-   *
-   * @returns { Promise<boolean> }
-   *
-   */
-  saveSigningCondition = async (
-    params: JsonStoreSigningRequest
-  ): Promise<boolean> => {
-    // -- validate if it's ready
-    if (!this.ready) {
-      const message =
-        '4 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
-
-    // this is to fix my spelling mistake that we must now maintain forever lol
-    if (typeof params.permanant !== 'undefined') {
-      params.permanent = params.permanant;
-    }
-
-    // ========== Prepare Params ==========
-    const {
-      // accessControlConditions,
-      // evmContractConditions,
-      // solRpcConditions,
-      // unifiedAccessControlConditions,
-      chain,
-      authSig,
-      resourceId,
-      // permanant,
-      permanent,
-      sessionSigs,
-    } = params;
-
-    // ----- validate params -----
-    // validate if resourceId is null
-    if (!resourceId) {
-      return throwError({
-        message: 'resourceId cannot be null',
-        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-      });
-    }
-
-    // ========== Hashing Resource ID & Conditions ==========
-    // hash the resource id
-    const hashOfResourceId = await hashResourceId(resourceId);
-
-    const hashOfResourceIdStr = uint8arrayToString(
-      new Uint8Array(hashOfResourceId),
-      'base16'
-    );
-
-    let hashOfConditions: ArrayBuffer | undefined =
-      await this.getHashedAccessControlConditions(params);
-
-    if (!hashOfConditions) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    const hashOfConditionsStr = uint8arrayToString(
-      new Uint8Array(hashOfConditions),
-      'base16'
-    );
-
-    // ========== Get Node Promises ==========
-    const requestId = this.getRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      // -- if session key is available, use it
-      let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
-
-      return this.storeSigningConditionWithNode(
-        url,
-        {
-          key: hashOfResourceIdStr,
-          val: hashOfConditionsStr,
-          authSig: authSigToSend,
-          chain,
-          permanent: permanent ? 1 : 0,
-        },
-        requestId
-      );
-    });
-
-    // -- resolve promises
-    const res = await this.handleNodePromises(nodePromises);
-
-    // -- case: promises rejected
-    if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises);
-    }
-
-    return true;
   };
 
   /**
@@ -1810,8 +1650,9 @@ export class LitNodeClientNodeJs extends LitCore {
       this._throwNodeError(res as RejectedNodePromises);
     }
 
-    const signatureShares: Array<NodeShare> = (res as SuccessNodePromises)
-      .values;
+    const signatureShares: Array<NodeBlsSigningShare> = (
+      res as SuccessNodePromises<NodeBlsSigningShare>
+    ).values;
 
     log('signatureShares', signatureShares);
 
@@ -2042,7 +1883,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
-      this._throwNodeError(res);
+      this._throwNodeError(res as RejectedNodePromises);
       return {} as SignSessionKeyResponse;
     }
 
@@ -2070,7 +1911,7 @@ export class LitNodeClientNodeJs extends LitCore {
     };
   };
 
-  #isSuccessNodePromises = (res: any): res is SuccessNodePromises => {
+  #isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
     return res.success === true;
   };
 

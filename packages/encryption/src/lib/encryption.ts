@@ -4,6 +4,7 @@ import {
   LIT_ERROR,
   NETWORK_PUB_KEY,
 } from '@lit-protocol/constants';
+import { verifySignature } from '@lit-protocol/crypto';
 
 import {
   DecryptFromIpfsProps,
@@ -22,6 +23,7 @@ import {
   IJWT,
   ILitNodeClient,
   MetadataForFile,
+  SigningAccessControlConditionJWTPayload,
   VerifyJWTProps,
 } from '@lit-protocol/types';
 
@@ -739,9 +741,12 @@ declare global {
  *
  * @param { VerifyJWTProps } jwt
  *
- * @returns { IJWT } An object with 4 keys: "verified": A boolean that represents whether or not the token verifies successfully.  A true result indicates that the token was successfully verified.  "header": the JWT header.  "payload": the JWT payload which includes the resource being authorized, etc.  "signature": A uint8array that represents the raw  signature of the JWT.
+ * @returns { IJWT<T> } An object with 4 keys: "verified": A boolean that represents whether or not the token verifies successfully.  A true result indicates that the token was successfully verified.  "header": the JWT header.  "payload": the JWT payload which includes the resource being authorized, etc.  "signature": A uint8array that represents the raw  signature of the JWT.
  */
-export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT => {
+export const verifyJwt = ({
+  publicKey,
+  jwt,
+}: VerifyJWTProps): IJWT<SigningAccessControlConditionJWTPayload> => {
   // -- validate
   if (
     !checkType({
@@ -764,34 +769,24 @@ export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT => {
     log('wasmExports is not loaded.');
   }
 
-  const pubKey = uint8arrayFromString(NETWORK_PUB_KEY, 'base16');
-  // log("pubkey is ", pubKey);
-
   const jwtParts = jwt.split('.');
-  const sig = uint8arrayFromString(jwtParts[2], 'base64url');
-  // log("sig is ", uint8arrayToString(sig, "base16"));
+  const signature = uint8arrayFromString(jwtParts[2], 'base64url');
 
   const unsignedJwt = `${jwtParts[0]}.${jwtParts[1]}`;
-  // log("unsignedJwt is ", unsignedJwt);
 
   const message = uint8arrayFromString(unsignedJwt);
-  // log("message is ", message);
 
-  // p is public key uint8array
-  // s is signature uint8array
-  // m is message uint8array
-  // function is: function (p, s, m)
-  const verified = Boolean(wasmBlsSdkHelpers.verify(pubKey, sig, message));
+  verifySignature(publicKey, message, signature);
 
-  const _jwt: IJWT = {
-    verified,
+  const _jwt: IJWT<SigningAccessControlConditionJWTPayload> = {
+    verified: true,
     header: JSON.parse(
       uint8arrayToString(uint8arrayFromString(jwtParts[0], 'base64url'))
     ),
     payload: JSON.parse(
       uint8arrayToString(uint8arrayFromString(jwtParts[1], 'base64url'))
     ),
-    signature: sig,
+    signature,
   };
 
   return _jwt;

@@ -45,3 +45,11 @@ export function decrypt_with_signature_shares(
  * @returns {string}
  */
 export function combine_signature_shares(shares: any): string;
+
+/**
+ *Verifies the signature.
+ * @param {string} public_key
+ * @param {string} message
+ * @param {string} signature
+ */
+export function verify_signature(public_key, message, signature): void;
