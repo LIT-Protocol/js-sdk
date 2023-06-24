@@ -850,122 +850,6 @@
         });
       };
 
-      var SignChainData = async () => {
-        const testName = 'SignChainData';
-        document.getElementById('status').innerText = `Testing ${testName}...`;
-        document.getElementById('humanized').innerText = '';
-
-        const aggregatorV3InterfaceABI = [
-          {
-            inputs: [],
-            name: 'decimals',
-            outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
-            stateMutability: 'view',
-            type: 'function',
-          },
-          {
-            inputs: [],
-            name: 'description',
-            outputs: [{ internalType: 'string', name: '', type: 'string' }],
-            stateMutability: 'view',
-            type: 'function',
-          },
-          {
-            inputs: [
-              { internalType: 'uint80', name: '_roundId', type: 'uint80' },
-            ],
-            name: 'getRoundData',
-            outputs: [
-              { internalType: 'uint80', name: 'roundId', type: 'uint80' },
-              { internalType: 'int256', name: 'answer', type: 'int256' },
-              { internalType: 'uint256', name: 'startedAt', type: 'uint256' },
-              { internalType: 'uint256', name: 'updatedAt', type: 'uint256' },
-              {
-                internalType: 'uint80',
-                name: 'answeredInRound',
-                type: 'uint80',
-              },
-            ],
-            stateMutability: 'view',
-            type: 'function',
-          },
-          {
-            inputs: [],
-            name: 'latestRoundData',
-            outputs: [
-              { internalType: 'uint80', name: 'roundId', type: 'uint80' },
-              { internalType: 'int256', name: 'answer', type: 'int256' },
-              { internalType: 'uint256', name: 'startedAt', type: 'uint256' },
-              { internalType: 'uint256', name: 'updatedAt', type: 'uint256' },
-              {
-                internalType: 'uint80',
-                name: 'answeredInRound',
-                type: 'uint80',
-              },
-            ],
-            stateMutability: 'view',
-            type: 'function',
-          },
-          {
-            inputs: [],
-            name: 'version',
-            outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-            stateMutability: 'view',
-            type: 'function',
-          },
-        ];
-        // this is the address for the chainlink eth/usd price oracle
-        const addr = '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419';
-
-        const callData = LitJsSdk.encodeCallData({
-          abi: aggregatorV3InterfaceABI,
-          functionName: 'latestRoundData',
-          functionParams: [],
-        });
-
-        const callRequests = [{ to: addr, data: callData }];
-        console.log('callRequests', callRequests);
-
-        const chain = 'ethereum';
-
-        const jwt = await litNodeClient.getSignedChainDataToken({
-          callRequests,
-          chain,
-        });
-
-        console.log('jwt', jwt);
-
-        const { verified, header, payload, signature } = LitJsSdk.verifyJwt({
-          jwt,
-        });
-
-        console.log('jwt payload: ', payload);
-
-        // const decoded = iface.decodeFunctionResult(
-        //   "latestRoundData",
-        //   payload.callResponses[0]
-        // );
-        const decoded = LitJsSdk.decodeCallResult({
-          abi: aggregatorV3InterfaceABI,
-          functionName: 'latestRoundData',
-          data: payload.callResponses[0],
-        });
-
-        console.log('decoded', decoded);
-        const answer = decoded.answer
-          .div(ethers.BigNumber.from('10').pow(ethers.BigNumber.from('8')))
-          .toString();
-        console.log('answer: ', answer);
-
-        if (jwt && verified) {
-          document.getElementById(
-            'status'
-          ).innerText = `${testName}: Success - ETH Price is $${answer}`;
-        } else {
-          document.getElementById('status').innerText = `${testName}: Failure`;
-        }
-      };
-
       var SendBadRequestToNodes = async () => {
         const testName = 'SendBadRequestToNodes';
         document.getElementById('status').innerText = `Testing ${testName}...`;
@@ -1768,9 +1652,6 @@
     <button onclick="ETHPlusERC721()">
       ETH + ERC721 (boolean group signing)
     </button>
-    <br />
-    <br />
-    <button onclick="SignChainData()">Sign Chain Data</button>
     <br />
     <br />
     <button onclick="SendBadRequestToNodes()">

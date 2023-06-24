@@ -1,24 +1,11 @@
-import {
-  canonicalAccessControlConditionFormatter,
-  canonicalResourceIdFormatter,
-  canonicalSolRpcConditionFormatter,
-  canonicalUnifiedAccessControlConditionFormatter,
-  hashAccessControlConditions,
-  hashEVMContractConditions,
-  hashSolRpcConditions,
-  hashUnifiedAccessControlConditions,
-} from '@lit-protocol/access-control-conditions';
+import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-control-conditions';
 
 import {
   AUTH_METHOD_TYPE_IDS,
   EITHER_TYPE,
   LIT_ERROR,
-  LIT_ERROR_CODE,
-  LIT_NETWORKS,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
-  defaultLitnodeClientConfig,
-  version,
 } from '@lit-protocol/constants';
 
 import {
@@ -53,39 +40,25 @@ import {
   GetSignedTokenRequest,
   GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
-  HandshakeWithSgx,
   JsonExecutionRequest,
-  JsonHandshakeResponse,
   JsonSignChainDataRequest,
-  JsonSigningRetrieveRequest,
-  JsonSigningStoreRequest,
-  KV,
   LitNodeClientConfig,
-  MultipleAccessControlConditions,
   NodeBlsSigningShare,
-  NodeClientErrorV0,
-  NodeClientErrorV1,
   NodeCommandResponse,
-  NodeCommandServerKeysResponse,
   NodeLog,
-  NodePromiseResponse,
   NodeResponse,
   NodeShare,
   RejectedNodePromises,
-  SendNodeCommand,
   SessionKeyPair,
-  SessionSig,
   SessionSigningTemplate,
   SessionSigsMap,
   SigShare,
   SignConditionECDSA,
   SignSessionKeyProp,
   SignSessionKeyResponse,
-  SignedChainDataToken,
   SignedData,
   SigningAccessControlConditionRequest,
   SuccessNodePromises,
-  SupportedJsonRequests,
   ValidateAndSignECDSA,
   WebAuthnAuthenticationVerificationParams,
 } from '@lit-protocol/types';
@@ -98,6 +71,7 @@ import { computeAddress } from '@ethersproject/transactions';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'lit-siwe';
 
+import { LitCore } from '@lit-protocol/core';
 import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 import {
@@ -511,37 +485,6 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   /**
-   *
-   * Get Chain Data Signing Shares
-   *
-   * @param { string } url
-   * @param { JsonSignChainDataRequest } params
-   *
-   * @returns { Promise<any> }
-   *
-   */
-  getChainDataSigningShare = async (
-    url: string,
-    params: JsonSignChainDataRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    const { callRequests, chain, iat, exp } = params;
-
-    log('getChainDataSigningShare');
-
-    const urlWithPath = `${url}/web/signing/sign_chain_data`;
-
-    const data: JsonSignChainDataRequest = {
-      callRequests,
-      chain,
-      iat,
-      exp,
-    };
-
-    return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
-  };
-
-  /**
    * Get Signing Shares for Token containing Access Control Condition
    *
    * @param { string } url
@@ -628,8 +571,7 @@ export class LitNodeClientNodeJs extends LitCore {
    *
    * Combine Shares from network public key set and signature shares
    *
-   * @param { string } networkPubKeySet
-   * @param { any } signatureShares
+   * @param { NodeBlsSigningShare } signatureShares
    *
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
@@ -690,194 +632,7 @@ export class LitNodeClientNodeJs extends LitCore {
     );
   };
 
-  /**
-   *
-   * Get different formats of access control conditions, eg. evm, sol, unified etc.
-   *
-   * @param { SupportedJsonRequests } params
-   *
-   * @returns { FormattedMultipleAccs }
-   *
-   */
-  getFormattedAccessControlConditions = (
-    params: SupportedJsonRequests
-  ): FormattedMultipleAccs => {
-    // -- prepare params
-    const {
-      accessControlConditions,
-      evmContractConditions,
-      solRpcConditions,
-      unifiedAccessControlConditions,
-    } = params;
-
-    // -- execute
-    let formattedAccessControlConditions;
-    let formattedEVMContractConditions;
-    let formattedSolRpcConditions;
-    let formattedUnifiedAccessControlConditions;
-    let error = false;
-
-    if (accessControlConditions) {
-      formattedAccessControlConditions = accessControlConditions.map((c: any) =>
-        canonicalAccessControlConditionFormatter(c)
-      );
-      log(
-        'formattedAccessControlConditions',
-        JSON.stringify(formattedAccessControlConditions)
-      );
-    } else if (evmContractConditions) {
-      formattedEVMContractConditions = evmContractConditions.map((c: any) =>
-        canonicalEVMContractConditionFormatter(c)
-      );
-      log(
-        'formattedEVMContractConditions',
-        JSON.stringify(formattedEVMContractConditions)
-      );
-    } else if (solRpcConditions) {
-      formattedSolRpcConditions = solRpcConditions.map((c: any) =>
-        canonicalSolRpcConditionFormatter(c)
-      );
-      log(
-        'formattedSolRpcConditions',
-        JSON.stringify(formattedSolRpcConditions)
-      );
-    } else if (unifiedAccessControlConditions) {
-      formattedUnifiedAccessControlConditions =
-        unifiedAccessControlConditions.map((c: any) =>
-          canonicalUnifiedAccessControlConditionFormatter(c)
-        );
-      log(
-        'formattedUnifiedAccessControlConditions',
-        JSON.stringify(formattedUnifiedAccessControlConditions)
-      );
-    } else {
-      error = true;
-    }
-
-    return {
-      error,
-      formattedAccessControlConditions,
-      formattedEVMContractConditions,
-      formattedSolRpcConditions,
-      formattedUnifiedAccessControlConditions,
-    };
-  };
-
-  /**
-   *
-   * Get hash of access control conditions
-   *
-   * @param { MultipleAccessControlConditions } params
-   *
-   * @returns { Promise<ArrayBuffer | undefined> }
-   *
-   */
-  getHashedAccessControlConditions = async (
-    params: MultipleAccessControlConditions
-  ): Promise<ArrayBuffer | undefined> => {
-    let hashOfConditions: ArrayBuffer;
-
-    // ========== Prepare Params ==========
-    const {
-      accessControlConditions,
-      evmContractConditions,
-      solRpcConditions,
-      unifiedAccessControlConditions,
-    } = params;
-
-    // ========== Hash ==========
-    if (accessControlConditions) {
-      hashOfConditions = await hashAccessControlConditions(
-        accessControlConditions
-      );
-    } else if (evmContractConditions) {
-      hashOfConditions = await hashEVMContractConditions(evmContractConditions);
-    } else if (solRpcConditions) {
-      hashOfConditions = await hashSolRpcConditions(solRpcConditions);
-    } else if (unifiedAccessControlConditions) {
-      hashOfConditions = await hashUnifiedAccessControlConditions(
-        unifiedAccessControlConditions
-      );
-    } else {
-      return;
-    }
-
-    // ========== Result ==========
-    return hashOfConditions;
-  };
-
   // ========== Promise Handlers ==========
-
-  /**
-   *
-   * Get and gather node promises
-   *
-   * @param { any } callback
-   *
-   * @returns { Array<Promise<any>> }
-   *
-   */
-  getNodePromises = (callback: Function): Array<Promise<any>> => {
-    const nodePromises = [];
-
-    for (const url of this.connectedNodes) {
-      nodePromises.push(callback(url));
-    }
-
-    return nodePromises;
-  };
-
-  /**
-   * Handle node promises
-   *
-   * @param { Array<Promise<any>> } nodePromises
-   *
-   * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
-   *
-   */
-  handleNodePromises = async <T>(
-    nodePromises: Array<Promise<T>>,
-    minNodeCount?: number
-  ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
-    // -- prepare
-    const responses = await Promise.allSettled(nodePromises);
-    const minNodes = minNodeCount ?? this.config.minNodeCount;
-
-    // -- get fulfilled responses
-    const successes: Array<NodePromiseResponse> = responses.filter(
-      (r: any) => r.status === 'fulfilled'
-    );
-
-    // -- case: success (when success responses are more than minNodeCount)
-    if (successes.length >= minNodes) {
-      const successPromises: SuccessNodePromises<T> = {
-        success: true,
-        values: successes.map((r: any) => r.value),
-      };
-
-      return successPromises;
-    }
-
-    // -- case: if we're here, then we did not succeed.  time to handle and report errors.
-
-    // -- get "rejected" responses
-    const rejected = responses.filter((r: any) => r.status === 'rejected');
-
-    const mostCommonError = JSON.parse(
-      mostCommonString(
-        rejected.map((r: NodePromiseResponse) => JSON.stringify(r.reason))
-      )
-    );
-
-    log(`most common error: ${JSON.stringify(mostCommonError)}`);
-
-    const rejectedPromises: RejectedNodePromises = {
-      success: false,
-      error: mostCommonError,
-    };
-
-    return rejectedPromises;
-  };
 
   /**
    * Run lit action on a single deterministicly selected node. It's important that the nodes use the same deterministic selection algorithm.

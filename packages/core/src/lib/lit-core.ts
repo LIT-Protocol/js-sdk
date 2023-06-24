@@ -8,54 +8,41 @@ import {
   hashSolRpcConditions,
   hashUnifiedAccessControlConditions,
 } from '@lit-protocol/access-control-conditions';
-import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 
 import {
-  defaultLitnodeClientConfig,
   LIT_ERROR,
-  LIT_NETWORKS,
-  version,
   LIT_ERROR_CODE,
+  LIT_NETWORKS,
+  defaultLitnodeClientConfig,
+  version,
 } from '@lit-protocol/constants';
 
-import {
-  CustomNetwork,
-  FormattedMultipleAccs,
-  HandshakeWithSgx,
-  AuthSig,
-  JsonEncryptionRetrieveRequest,
-  JsonHandshakeResponse,
-  JsonSaveEncryptionKeyRequest,
-  JsonSigningStoreRequest,
-  JsonStoreSigningRequest,
-  KV,
-  LitNodeClientConfig,
-  NodeCommandResponse,
-  NodeCommandServerKeysResponse,
-  NodePromiseResponse,
-  NodeShare,
-  RejectedNodePromises,
-  SendNodeCommand,
-  SuccessNodePromises,
-  SupportedJsonRequests,
-  NodeClientErrorV0,
-  NodeClientErrorV1,
-  SessionSigsMap,
-  SessionSig,
-} from '@lit-protocol/types';
-import { combineBlsDecryptionShares } from '@lit-protocol/crypto';
 import {
   isBrowser,
   log,
   mostCommonString,
   throwError,
-  is,
-  checkIfAuthSigRequiresChainParam,
 } from '@lit-protocol/misc';
 import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
+  AuthSig,
+  CustomNetwork,
+  FormattedMultipleAccs,
+  HandshakeWithSgx,
+  JsonHandshakeResponse,
+  KV,
+  LitNodeClientConfig,
+  MultipleAccessControlConditions,
+  NodeClientErrorV0,
+  NodeClientErrorV1,
+  NodeCommandServerKeysResponse,
+  NodePromiseResponse,
+  RejectedNodePromises,
+  SendNodeCommand,
+  SessionSig,
+  SessionSigsMap,
+  SuccessNodePromises,
+  SupportedJsonRequests,
+} from '@lit-protocol/types';
 
 export class LitCore {
   config: LitNodeClientConfig;
@@ -310,248 +297,6 @@ export class LitCore {
 
   /**
    *
-   * Securely save the association between access control conditions and something that you wish to decrypt
-   *
-   * @param { JsonSaveEncryptionKeyRequest } params
-   *
-   * @returns { Promise<Uint8Array> }
-   *
-   */
-  saveEncryptionKey = async (
-    params: JsonSaveEncryptionKeyRequest
-  ): Promise<Uint8Array> => {
-    // ========= Prepare Params ==========
-    const { encryptedSymmetricKey, symmetricKey, authSig, chain, permanent } =
-      params;
-
-    // ========== Validate Params ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      const message =
-        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
-
-    // -- validate if this.subnetPubKey is null
-    if (!this.subnetPubKey) {
-      const message = 'subnetPubKey cannot be null';
-      return throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
-
-    const paramsIsSafe = saveEncryptionKeyParamsIsSafe(params);
-
-    if (!paramsIsSafe) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    // ========== Encryption ==========
-    // -- encrypt with network pubkey
-    let encryptedKey;
-
-    if (encryptedSymmetricKey) {
-      encryptedKey = encryptedSymmetricKey;
-    } else {
-      encryptedKey = wasmBlsSdkHelpers.encrypt(
-        uint8arrayFromString(this.subnetPubKey, 'base16'),
-        symmetricKey
-      );
-      log(
-        'symmetric key encrypted with LIT network key: ',
-        uint8arrayToString(encryptedKey, 'base16')
-      );
-    }
-
-    // ========== Hashing ==========
-    // -- hash the encrypted pubkey
-    const hashOfKey = await crypto.subtle.digest('SHA-256', encryptedKey);
-    const hashOfKeyStr = uint8arrayToString(
-      new Uint8Array(hashOfKey),
-      'base16'
-    );
-
-    // hash the access control conditions
-    let hashOfConditions: ArrayBuffer | undefined =
-      await this.getHashedAccessControlConditions(params);
-
-    if (!hashOfConditions) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    const hashOfConditionsStr = uint8arrayToString(
-      new Uint8Array(hashOfConditions),
-      'base16'
-    );
-
-    // ========== Node Promises ==========
-    const requestId = this.getRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      // -- choose the right signature
-      let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
-        authSig: params.authSig,
-        sessionSigs: params.sessionSigs,
-        url,
-      });
-
-      return this.storeEncryptionConditionWithNode(
-        url,
-        {
-          key: hashOfKeyStr,
-          val: hashOfConditionsStr,
-          authSig: sigToPassToNode,
-          chain,
-          permanent: permanent ? 1 : 0,
-        },
-        requestId
-      );
-    });
-
-    // -- resolve promises
-    const res = await this.handleNodePromises(nodePromises);
-
-    // -- case: promises rejected
-    if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises);
-    }
-
-    return encryptedKey;
-  };
-
-  /**
-   *
-   * Retrieve the symmetric encryption key from the LIT nodes.  Note that this will only work if the current user meets the access control conditions specified when the data was encrypted.  That access control condition is typically that the user is a holder of the NFT that corresponds to this encrypted data.  This NFT token address and ID was specified when this LIT was created.
-   *
-   */
-  getEncryptionKey = async (
-    params: JsonEncryptionRetrieveRequest
-  ): Promise<Uint8Array> => {
-    // -- validate if it's ready
-    if (!this.ready) {
-      const message =
-        '5 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
-
-    // -- validate if this.networkPubKeySet is null
-    if (!this.networkPubKeySet) {
-      const message = 'networkPubKeySet cannot be null';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
-
-    // ========== Prepare Params ==========
-    const { chain, authSig, resourceId, toDecrypt } = params;
-
-    // ========== Validate Params ==========
-
-    const paramsIsSafe = getEncryptionKeyParamsIsSafe(params);
-
-    if (!paramsIsSafe) {
-      throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    // ========== Formatting Access Control Conditions =========
-    const {
-      error,
-      formattedAccessControlConditions,
-      formattedEVMContractConditions,
-      formattedSolRpcConditions,
-      formattedUnifiedAccessControlConditions,
-    }: FormattedMultipleAccs = this.getFormattedAccessControlConditions(params);
-
-    if (error) {
-      throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    // ========== Node Promises ==========
-    const requestId = this.getRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      // -- choose the right signature
-      let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
-        authSig: params.authSig,
-        sessionSigs: params.sessionSigs,
-        url,
-      });
-
-      return this.getDecryptionShare(
-        url,
-        {
-          accessControlConditions: formattedAccessControlConditions,
-          evmContractConditions: formattedEVMContractConditions,
-          solRpcConditions: formattedSolRpcConditions,
-          unifiedAccessControlConditions:
-            formattedUnifiedAccessControlConditions,
-          toDecrypt,
-          authSig: sigToPassToNode,
-          chain,
-        },
-        requestId
-      );
-    });
-
-    // -- resolve promises
-    const res = await this.handleNodePromises(nodePromises);
-
-    // -- case: promises rejected
-    if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises);
-    }
-
-    const decryptionShares: Array<NodeShare> = (res as SuccessNodePromises)
-      .values;
-
-    log('decryptionShares', decryptionShares);
-
-    if (!this.networkPubKeySet) {
-      return throwError({
-        message: 'networkPubKeySet cannot be null',
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
-
-    // ========== Combine Shares ==========
-    const decrypted = combineBlsDecryptionShares(
-      decryptionShares,
-      this.networkPubKeySet,
-      toDecrypt
-    );
-
-    return decrypted;
-  };
-
-  /**
-   *
    * Get and gather node promises
    *
    * @param { any } callback
@@ -614,13 +359,13 @@ export class LitCore {
    *
    * Get hash of access control conditions
    *
-   * @param { JsonStoreSigningRequest } params
+   * @param { MultipleAccessControlConditions } params
    *
    * @returns { Promise<ArrayBuffer | undefined> }
    *
    */
   getHashedAccessControlConditions = async (
-    params: JsonStoreSigningRequest
+    params: MultipleAccessControlConditions
   ): Promise<ArrayBuffer | undefined> => {
     let hashOfConditions: ArrayBuffer;
 
@@ -654,45 +399,17 @@ export class LitCore {
   };
 
   /**
-   *
-   * Store encryption conditions to nodes
-   *
-   * @param { string } urk
-   * @param { JsonEncryptionStoreRequest } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  storeEncryptionConditionWithNode = async (
-    url: string,
-    params: JsonSigningStoreRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    log('storeEncryptionConditionWithNode');
-    const urlWithPath = `${url}/web/encryption/store`;
-    const data = {
-      key: params.key,
-      val: params.val,
-      authSig: params.authSig,
-      chain: params.chain,
-      permanant: params.permanent,
-    };
-
-    return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
-  };
-
-  /**
    * Handle node promises
    *
    * @param { Array<Promise<any>> } nodePromises
    *
-   * @returns { Promise<SuccessNodePromises | RejectedNodePromises> }
+   * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    *
    */
-  handleNodePromises = async (
-    nodePromises: Array<Promise<any>>,
+  handleNodePromises = async <T>(
+    nodePromises: Array<Promise<T>>,
     minNodeCount?: number
-  ): Promise<SuccessNodePromises | RejectedNodePromises> => {
+  ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
     // -- prepare
     const responses = await Promise.allSettled(nodePromises);
     const minNodes = minNodeCount ?? this.config.minNodeCount;
@@ -704,7 +421,7 @@ export class LitCore {
 
     // -- case: success (when success responses are more than minNodeCount)
     if (successes.length >= minNodes) {
-      const successPromises: SuccessNodePromises = {
+      const successPromises: SuccessNodePromises<T> = {
         success: true,
         values: successes.map((r: any) => r.value),
       };
@@ -841,256 +558,4 @@ export class LitCore {
       formattedUnifiedAccessControlConditions,
     };
   };
-
-  /**
-   *
-   * Ger Decryption Shares from Nodes
-   *
-   * @param { string } url
-   * @param { JsonEncryptionRetrieveRequest } params
-   *
-   * @returns { Promise<any> }
-   *
-   */
-  getDecryptionShare = async (
-    url: string,
-    params: JsonEncryptionRetrieveRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    log('getDecryptionShare');
-    const urlWithPath = `${url}/web/encryption/retrieve`;
-
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: params,
-      requestId,
-    });
-  };
-}
-
-function saveEncryptionKeyParamsIsSafe(params: JsonSaveEncryptionKeyRequest) {
-  // -- prepare params
-  const {
-    accessControlConditions,
-    evmContractConditions,
-    solRpcConditions,
-    unifiedAccessControlConditions,
-    authSig,
-    chain,
-    symmetricKey,
-    encryptedSymmetricKey,
-    permanant,
-    permanent,
-    sessionSigs,
-  } = params;
-
-  if (
-    accessControlConditions &&
-    !is(
-      accessControlConditions,
-      'Array',
-      'accessControlConditions',
-      'saveEncryptionKey'
-    )
-  )
-    return false;
-  if (
-    evmContractConditions &&
-    !is(
-      evmContractConditions,
-      'Array',
-      'evmContractConditions',
-      'saveEncryptionKey'
-    )
-  )
-    return false;
-  if (
-    solRpcConditions &&
-    !is(solRpcConditions, 'Array', 'solRpcConditions', 'saveEncryptionKey')
-  )
-    return false;
-  if (
-    unifiedAccessControlConditions &&
-    !is(
-      unifiedAccessControlConditions,
-      'Array',
-      'unifiedAccessControlConditions',
-      'saveEncryptionKey'
-    )
-  )
-    return false;
-
-  // log('authSig:', authSig);
-  if (authSig && !is(authSig, 'Object', 'authSig', 'saveEncryptionKey'))
-    return false;
-  if (
-    authSig &&
-    !checkIfAuthSigRequiresChainParam(authSig, chain, 'saveEncryptionKey')
-  )
-    return false;
-
-  if (
-    sessionSigs &&
-    !is(sessionSigs, 'Object', 'sessionSigs', 'saveEncryptionKey')
-  )
-    return false;
-
-  if (!sessionSigs && !authSig) {
-    throwError({
-      message: 'You must pass either authSig or sessionSigs',
-      errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-      errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-    });
-    return false;
-  }
-
-  if (
-    symmetricKey &&
-    !is(symmetricKey, 'Uint8Array', 'symmetricKey', 'saveEncryptionKey')
-  )
-    return false;
-  if (
-    encryptedSymmetricKey &&
-    !is(
-      encryptedSymmetricKey,
-      'Uint8Array',
-      'encryptedSymmetricKey',
-      'saveEncryptionKey'
-    )
-  )
-    return false;
-
-  // to fix spelling mistake
-  if (typeof params.permanant !== 'undefined') {
-    params.permanent = params.permanant;
-  }
-
-  if (
-    (!symmetricKey || symmetricKey == '') &&
-    (!encryptedSymmetricKey || encryptedSymmetricKey == '')
-  ) {
-    throw new Error(
-      'symmetricKey and encryptedSymmetricKey are blank.  You must pass one or the other'
-    );
-  }
-
-  if (
-    !accessControlConditions &&
-    !evmContractConditions &&
-    !solRpcConditions &&
-    !unifiedAccessControlConditions
-  ) {
-    throw new Error(
-      'accessControlConditions and evmContractConditions and solRpcConditions and unifiedAccessControlConditions are blank'
-    );
-  }
-
-  // -- validate: if sessionSig and authSig exists
-  if (sessionSigs && authSig) {
-    throwError({
-      message: 'You must pass only one authSig or sessionSigs',
-      errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-      errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-    });
-    return false;
-  }
-
-  //   -- case: success
-  return true;
-}
-
-function getEncryptionKeyParamsIsSafe(params: JsonEncryptionRetrieveRequest) {
-  const {
-    accessControlConditions,
-    evmContractConditions,
-    solRpcConditions,
-    unifiedAccessControlConditions,
-    toDecrypt,
-    authSig,
-    chain,
-    sessionSigs,
-  } = params;
-
-  // -- validate
-  if (
-    accessControlConditions &&
-    !is(
-      accessControlConditions,
-      'Array',
-      'accessControlConditions',
-      'getEncryptionKey'
-    )
-  )
-    return false;
-
-  if (
-    evmContractConditions &&
-    !is(
-      evmContractConditions,
-      'Array',
-      'evmContractConditions',
-      'getEncryptionKey'
-    )
-  )
-    return false;
-
-  if (
-    solRpcConditions &&
-    !is(solRpcConditions, 'Array', 'solRpcConditions', 'getEncryptionKey')
-  )
-    return false;
-
-  if (
-    unifiedAccessControlConditions &&
-    !is(
-      unifiedAccessControlConditions,
-      'Array',
-      'unifiedAccessControlConditions',
-      'getEncryptionKey'
-    )
-  )
-    return false;
-
-  log('TYPEOF toDecrypt in getEncryptionKey():', typeof toDecrypt);
-  if (!is(toDecrypt, 'String', 'toDecrypt', 'getEncryptionKey')) return false;
-  if (authSig && !is(authSig, 'Object', 'authSig', 'getEncryptionKey'))
-    return false;
-  if (
-    sessionSigs &&
-    !is(sessionSigs, 'Object', 'sessionSigs', 'getEncryptionKey')
-  )
-    return false;
-
-  // -- validate: if sessionSig or authSig exists
-  if (!sessionSigs && !authSig) {
-    throwError({
-      message: 'You must pass either authSig or sessionSigs',
-      errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-      errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-    });
-    return false;
-  }
-
-  // -- validate: if sessionSig and authSig exists
-  if (sessionSigs && authSig) {
-    throwError({
-      message: 'You must pass only one authSig or sessionSigs',
-      errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-      errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-    });
-    return false;
-  }
-
-  // -- validate if 'chain' is null
-  if (!chain) {
-    return false;
-  }
-
-  if (
-    authSig &&
-    !checkIfAuthSigRequiresChainParam(authSig, chain, 'getEncryptionKey')
-  )
-    return false;
-
-  return true;
 }
