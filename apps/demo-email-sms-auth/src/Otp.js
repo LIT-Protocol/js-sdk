@@ -18,10 +18,6 @@ export function Otp() {
         redirectUri: window.location.href.replace(/\/+$/, ''),
         litRelayConfig: {
             relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
-        },
-        litOtpConfig: {
-            baseUrl: "http://127.0.0.1",
-            port: "8080",
         }
     });
 
