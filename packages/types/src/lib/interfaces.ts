@@ -962,6 +962,13 @@ export interface LitAuthClientOptions {
   litNodeClient?: any;
 
   litOtpConfig?: OtpProviderOptions;
+
+  /**
+   * ReCaptcha reponse from external catpcha response for use with
+   * {@link OtpProvider} if not provided will look at the global var
+   * LIT_AUTH_CLIENT_CAPTCHA_RES object for challenege response from injected captcha view
+   */
+  captchaResponse?: string;
 }
 
 export interface OtpSessionResult {
@@ -1173,7 +1180,12 @@ export interface SignInWithOTPParams {
    * Note: for most users the `from_name` is the configurable option and `from` should not be populated
    */
   emailCustomizationOptions: OtpEmailCustomizationOptions;
-
+  
+  /**
+   * ReCaptcha reponse from external catpcha response for use with
+   * {@link OtpProvider} if not provided will look at the global var
+   * LIT_AUTH_CLIENT_CAPTCHA_RES object for challenege response from injected captcha view
+   */
   customName?: string;
 }
 
@@ -1182,6 +1194,8 @@ export interface OtpProviderOptions {
   port?: string;
   startRoute?: string;
   checkRoute?: string;
+
+  captchaResponse?: string;
 }
 
 export interface OtpEmailCustomizationOptions {
@@ -1233,6 +1247,7 @@ export interface LoginUrlParams {
 export interface BaseAuthenticateOptions {}
 
 export interface OtpAuthenticateOptions {
+  captchaResponse: string;
   code: string;
 }
 
