@@ -227,10 +227,12 @@ export const getChainId = async (
  */
 export function isSignedMessageExpired(signedMessage: string) {
   // Extract the Expiration Time from the signed message.
-  const dateStr = signedMessage.split('\n')[9]?.replace('Expiration Time: ', '');
+  const dateStr = signedMessage
+    .split('\n')[9]
+    ?.replace('Expiration Time: ', '');
   const expirationTime = new Date(dateStr);
   const currentTime = new Date();
-  
+
   // Compare the Expiration Time with the current time.
   return currentTime > expirationTime;
 }
@@ -427,6 +429,7 @@ export const disconnectWeb3 = (): void => {
   localStorage.removeItem(storage.AUTH_SOL_SIGNATURE);
   localStorage.removeItem(storage.AUTH_COSMOS_SIGNATURE);
   localStorage.removeItem(storage.WEB3_PROVIDER);
+  localStorage.removeItem(storage.WALLET_SIGNATURE);
 };
 
 /**

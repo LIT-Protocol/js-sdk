@@ -133,6 +133,7 @@ export abstract class BaseProvider {
         if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
           const authSig = JSON.parse(params.authMethod.accessToken);
           response = await nodeClient.signSessionKey({
+            sessionKey: params.sessionSigsParams.sessionKey,
             authMethods: [],
             authSig: authSig,
             pkpPublicKey: params.pkpPublicKey,
@@ -142,6 +143,7 @@ export abstract class BaseProvider {
           });
         } else {
           response = await nodeClient.signSessionKey({
+            sessionKey: params.sessionSigsParams.sessionKey,
             authMethods: [params.authMethod],
             pkpPublicKey: params.pkpPublicKey,
             expiration: authCallbackParams.expiration,
