@@ -970,6 +970,13 @@ export interface LitAuthClientOptions {
   litNodeClient?: any;
 
   litOtpConfig?: OtpProviderOptions;
+
+  /**
+   * ReCaptcha reponse from external catpcha response for use with
+   * {@link OtpProvider} if not provided will look at the global var
+   * LIT_AUTH_CLIENT_CAPTCHA_RES object for challenege response from injected captcha view
+   */
+  captchaResponse?: string;
 }
 
 export interface OtpSessionResult {
@@ -992,7 +999,7 @@ export interface OtpVerificationPayload {
     user id parsed from the validated token 
   */
   userId: string;
-  
+
   /*
     status of the token verification
   */
@@ -1182,18 +1189,24 @@ export interface SignInWithOTPParams {
    * used as the user ID for the auth method
    */
   userId: string;
-  /**
-   * Origin of the sign in request
-   */
-  origin?: string;
-  /**
-   * when the generated JWT expires
-   */
-  expiration?: string;
+
   /**
    * tracking for the session
    */
   requestId?: string;
+
+  /**
+   * Allows for specifying custom sender information
+   * Note: for most users the `from_name` is the configurable option and `from` should not be populated
+   */
+  emailCustomizationOptions: OtpEmailCustomizationOptions;
+
+  /**
+   * ReCaptcha reponse from external catpcha response for use with
+   * {@link OtpProvider} if not provided will look at the global var
+   * LIT_AUTH_CLIENT_CAPTCHA_RES object for challenege response from injected captcha view
+   */
+  customName?: string;
 }
 
 export interface OtpProviderOptions {
@@ -1202,8 +1215,13 @@ export interface OtpProviderOptions {
   startRoute?: string;
   checkRoute?: string;
   verifyRoute?: string;
+  captchaResponse?: string;
 }
 
+export interface OtpEmailCustomizationOptions {
+  from?: string;
+  fromName: string;
+}
 export interface BaseProviderSessionSigsParams {
   /**
    * Public key of PKP to auth with
@@ -1249,6 +1267,7 @@ export interface LoginUrlParams {
 export interface BaseAuthenticateOptions {}
 
 export interface OtpAuthenticateOptions {
+  captchaResponse: string;
   code: string;
 }
 

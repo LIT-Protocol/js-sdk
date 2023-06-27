@@ -17,6 +17,7 @@ import { ProviderType } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import { useRouter } from 'next/router';
 import { useConnect, useAccount, useDisconnect, Connector } from 'wagmi';
+import {newSessionCapabilityObject, LitAccessControlConditionResource, LitAbility} from '@lit-protocol/auth-helpers';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -194,13 +195,17 @@ export default function Dashboard() {
 
       // Authenticate with a WebAuthn credential and create session sigs with authentication data
       setView(Views.CREATING_SESSION);
-
+      
+      const litResource = new LitAccessControlConditionResource('*');
       const sessionSigs = await provider.getSessionSigs({
         pkpPublicKey: currentPKP.publicKey,
         authMethod,
         sessionSigsParams: {
           chain: 'ethereum',
-          resources: [`litAction://*`],
+          resourceAbilityRequests: [{
+              resource: litResource,
+              ability: LitAbility.PKPSigning
+          }], 
         },
       });
       setSessionSigs(sessionSigs);
@@ -300,6 +305,7 @@ export default function Dashboard() {
     setView(Views.CREATING_SESSION);
 
     try {
+      const litResource = new LitAccessControlConditionResource('*');
       // Get session signatures
       const provider = litAuthClient.getProvider(currentProviderType);
       const sessionSigs = await provider.getSessionSigs({
@@ -307,7 +313,10 @@ export default function Dashboard() {
         authMethod,
         sessionSigsParams: {
           chain: 'ethereum',
-          resources: [`litAction://*`],
+          resourceAbilityRequests: [{
+              resource: litResource,
+              ability: LitAbility.PKPSigning
+          }], 
         },
       });
       setCurrentPKP(pkp);

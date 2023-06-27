@@ -41,6 +41,9 @@ export class LitAuthClient {
 
   private litOtpOptions: OtpProviderOptions | undefined;
 
+  private captcha_client_id: string =
+    '6Leij74mAAAAACKVnvdxENwTxZguNhcHMqzeNLXY';
+
   /**
    * Create a LitAuthClient instance
    *
@@ -166,5 +169,51 @@ export class LitAuthClient {
    */
   getProvider(type: ProviderType): BaseProvider | undefined {
     return this.providers.get(type);
+  }
+
+  /**
+   * Embedds a ReCaptcha instance within the specified tag.
+   *
+   * **note** ReCaptcha is required for Email/SMS authentication only.
+   *
+   * If injection is not compatible the ReCaptcha client Id is available through {@link getSiteKey}
+   * The response from your ReCaptcha can be passed through with {@link OtpProvider#setCaptchaResponse}
+   * @param elementId {string} id of the html element to inject the captcha view into
+   * @param headTag {HTMLHeadElement} head element of DOM for injecting ReCaptcha.
+   */
+  embeddCaptchaInElement(elementId: string, headTag: HTMLHeadElement) {
+    const captchaLoader = document.createElement('script');
+    captchaLoader.src =
+      'https://www.google.com/recaptcha/api.js?onload=litReCaptchaOnLoad&render=explicit';
+    captchaLoader.async = true;
+    captchaLoader.defer = true;
+
+    headTag.appendChild(captchaLoader);
+
+    const loadedScript = document.createElement('script');
+    loadedScript.type = 'text/javascript';
+    const textNode = document.createTextNode(`
+        console.log("[LitJsSdk] captcha script loaded rendering component");
+        var litReCaptchaOnLoad = function() {
+          grecaptcha.render('${elementId}', {
+            'sitekey': '${this.captcha_client_id}',
+            'callback': (response) => {
+                window.LIT_AUTH_CLIENT_CAPTCHA_RES = response;
+            }
+          });
+        };
+    `);
+    loadedScript.appendChild(textNode);
+
+    headTag.appendChild(loadedScript);
+  }
+
+  /**
+   *
+   * @returns {string} Client identifier of the ReCaptcha required for sending OTP codes for email / sms authentication
+   * Should be used in ReCaptcha implementations not included in this package.
+   */
+  getSiteKey(): string {
+    return this.captcha_client_id;
   }
 }

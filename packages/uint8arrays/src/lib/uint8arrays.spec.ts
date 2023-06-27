@@ -1,4 +1,5 @@
-import { uint8arrayFromString, uint8arrayToString } from './uint8arrays';
+import { uint8arrayFromString, uint8arrayToString, base64ToUint8Array } from './uint8arrays';
+import { base64StringToBlob } from '@lit-protocol/misc-browser';
 
 describe('Encoding Functions', () => {
   const testCases = [
@@ -123,6 +124,39 @@ describe('conversion', () => {
 
       expect(result).toEqual(expectedResult);
     });
+
+    describe('base64 ', () => {
+      it('encode to base64urlpad should decde', () => {
+        // generate a random base64urlpad string of length 1333 (which is equivalent to 1000 bytes when decoded)
+        // generate a random Uint8Array of length 1000
+        const randomBytes = new Uint8Array(1000);
+        for (let i = 0; i < randomBytes.length; i++) {
+          randomBytes[i] = Math.floor(Math.random() * 256);
+        }
+
+        // Convert the Uint8Array to a base64urlpad string
+        const str = uint8arrayToString(randomBytes, 'base64urlpad');
+        const blob = new Blob([uint8arrayFromString(str, 'base64urlpad')]);
+
+        expect(blob.size).toBe(1000);
+      });
+
+      it('base64 large encoding should decode', () => {
+        // generate a random base64urlpad string of length 1333 (which is equivalent to 1000 bytes when decoded)
+        // generate a random Uint8Array of length 1000 * 20000
+        const randomBytes = new Uint8Array(1000 * 20000);
+        for (let i = 0; i < randomBytes.length; i++) {
+          randomBytes[i] = Math.floor(Math.random() * 256);
+        }
+
+        // Convert the Uint8Array to a base64urlpad string
+        const str = uint8arrayToString(randomBytes, 'base64');
+        const urlStr = base64StringToBlob(str);
+
+        expect(urlStr.size).toBe(1000 * 20000);
+      });
+    });
+
     describe('base64 ', () => {
       // generate a random base64urlpad string of length 1333 (which is equivalent to 1000 bytes when decoded)
       // generate a random Uint8Array of length 1000

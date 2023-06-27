@@ -26,21 +26,29 @@ This new V2 SDK is written in Typescript and is a complete rewrite of the old SD
 
 # Quick Start
 
-### NodeJS Only
+### NodeJS Exclusive
 
-Removed browser related methods eg. checkAndSignAuthSig
+Removed browser-specific methods, e.g., checkAndSignAuthSig
 
 ```
 yarn add @lit-protocol/lit-node-client-nodejs
 ```
 
-### (Isomorphic) works on Node.js/browser
+or..
+
+### Isomorphic Implementation
+
+Operable in both Node.js and the browser
 
 ```
 yarn add @lit-protocol/lit-node-client
 ```
 
-### Vanilla JS (UMD)
+or..
+
+### Vanilla JavaScript (UMD)
+
+For usage directly in the browser with a script tag
 
 ```js
 <script src="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.js"></script>
@@ -55,37 +63,42 @@ yarn add @lit-protocol/lit-node-client
 
 # Packages
 
-> 📝 If you're looking to use the Lit SDK, you're probably all set with just the lit-node-client <link>. It's got everything most folks need. However, if you're the type who likes to keep things super lean and mean, and you need to keep an eagle eye on your bundle size, we've got individual packages too.
-
-Individual packages are below so that you can import the minimum required packages for your use case.
+📝 If you're looking to use the Lit SDK, you're probably all set with just the lit-node-client <link>. <br/>Get started with interacting with Lit network!
 
 <!-- autogen:package:start -->
 
 Package | Category | Version | Download
 --- | --- | --- | ---
-| [@lit-protocol/lit-node-client-nodejs](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client-nodejs) | ![lit-node-client-nodejs](https://img.shields.io/badge/-nodejs-2E8B57 "lit-node-client-nodejs") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client-nodejs">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-nodejs-vanilla/lit-node-client-nodejs.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/lit-node-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client) | ![lit-node-client](https://img.shields.io/badge/-universal-8A6496 "lit-node-client") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/access-control-conditions](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/access-control-conditions) | ![access-control-conditions](https://img.shields.io/badge/-universal-8A6496 "access-control-conditions") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/access-control-conditions">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/access-control-conditions-vanilla/access-control-conditions.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/auth-helpers](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-helpers) | ![auth-helpers](https://img.shields.io/badge/-universal-8A6496 "auth-helpers") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-helpers">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/auth-helpers-vanilla/auth-helpers.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/bls-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/bls-sdk) | ![bls-sdk](https://img.shields.io/badge/-universal-8A6496 "bls-sdk") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/bls-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/bls-sdk-vanilla/bls-sdk.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/constants](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/constants) | ![constants](https://img.shields.io/badge/-universal-8A6496 "constants") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/constants">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/constants-vanilla/constants.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/contracts-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/contracts-sdk) | ![contracts-sdk](https://img.shields.io/badge/-universal-8A6496 "contracts-sdk") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/contracts-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/contracts-sdk-vanilla/contracts-sdk.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/core](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/core) | ![core](https://img.shields.io/badge/-universal-8A6496 "core") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/core">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/core-vanilla/core.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/crypto](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/crypto) | ![crypto](https://img.shields.io/badge/-universal-8A6496 "crypto") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/crypto">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/crypto-vanilla/crypto.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/ecdsa-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/ecdsa-sdk) | ![ecdsa-sdk](https://img.shields.io/badge/-universal-8A6496 "ecdsa-sdk") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/ecdsa-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/ecdsa-sdk-vanilla/ecdsa-sdk.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/encryption](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/encryption) | ![encryption](https://img.shields.io/badge/-universal-8A6496 "encryption") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/encryption">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/encryption-vanilla/encryption.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/lit-third-party-libs](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-third-party-libs) | ![lit-third-party-libs](https://img.shields.io/badge/-universal-8A6496 "lit-third-party-libs") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-third-party-libs">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-third-party-libs-vanilla/lit-third-party-libs.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/misc](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc) | ![misc](https://img.shields.io/badge/-universal-8A6496 "misc") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/misc-vanilla/misc.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/nacl](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/nacl) | ![nacl](https://img.shields.io/badge/-universal-8A6496 "nacl") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/nacl">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/nacl-vanilla/nacl.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/pkp-base](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-base) | ![pkp-base](https://img.shields.io/badge/-universal-8A6496 "pkp-base") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-base">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-base-vanilla/pkp-base.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/pkp-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-client) | ![pkp-client](https://img.shields.io/badge/-universal-8A6496 "pkp-client") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-client">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-client-vanilla/pkp-client.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/pkp-cosmos](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-cosmos) | ![pkp-cosmos](https://img.shields.io/badge/-universal-8A6496 "pkp-cosmos") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-cosmos">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-cosmos-vanilla/pkp-cosmos.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/pkp-ethers](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-ethers) | ![pkp-ethers](https://img.shields.io/badge/-universal-8A6496 "pkp-ethers") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-ethers">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-ethers-vanilla/pkp-ethers.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/pkp-walletconnect](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-walletconnect) | ![pkp-walletconnect](https://img.shields.io/badge/-universal-8A6496 "pkp-walletconnect") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-walletconnect">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-walletconnect-vanilla/pkp-walletconnect.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/types](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/types) | ![types](https://img.shields.io/badge/-universal-8A6496 "types") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/types">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/types-vanilla/types.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/uint8arrays](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/uint8arrays) | ![uint8arrays](https://img.shields.io/badge/-universal-8A6496 "uint8arrays") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/uint8arrays">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/uint8arrays-vanilla/uint8arrays.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/auth-browser](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-browser) | ![auth-browser](https://img.shields.io/badge/-browser-E98869 "auth-browser") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-browser">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/auth-browser-vanilla/auth-browser.min.js">Vanilla JS (UMD)</a>
-| [@lit-protocol/misc-browser](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc-browser) | ![misc-browser](https://img.shields.io/badge/-browser-E98869 "misc-browser") | 2.2.23 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc-browser">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/misc-browser-vanilla/misc-browser.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/lit-node-client-nodejs](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client-nodejs) | ![lit-node-client-nodejs](https://img.shields.io/badge/-nodejs-2E8B57 "lit-node-client-nodejs") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client-nodejs">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-nodejs-vanilla/lit-node-client-nodejs.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/lit-node-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client) | ![lit-node-client](https://img.shields.io/badge/-universal-8A6496 "lit-node-client") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.min.js">Vanilla JS (UMD)</a>
+
+
+If you're a tech-savvy user and wish to utilize only specific submodules that our main module relies upon, you can find individual packages listed below. This way, you can import only the necessary packages that cater to your specific use case::
+
+
+Package | Category | Version | Download
+--- | --- | --- | ---
+| [@lit-protocol/access-control-conditions](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/access-control-conditions) | ![access-control-conditions](https://img.shields.io/badge/-universal-8A6496 "access-control-conditions") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/access-control-conditions">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/access-control-conditions-vanilla/access-control-conditions.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/auth-helpers](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-helpers) | ![auth-helpers](https://img.shields.io/badge/-universal-8A6496 "auth-helpers") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-helpers">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/auth-helpers-vanilla/auth-helpers.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/bls-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/bls-sdk) | ![bls-sdk](https://img.shields.io/badge/-universal-8A6496 "bls-sdk") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/bls-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/bls-sdk-vanilla/bls-sdk.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/constants](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/constants) | ![constants](https://img.shields.io/badge/-universal-8A6496 "constants") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/constants">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/constants-vanilla/constants.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/contracts-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/contracts-sdk) | ![contracts-sdk](https://img.shields.io/badge/-universal-8A6496 "contracts-sdk") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/contracts-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/contracts-sdk-vanilla/contracts-sdk.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/core](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/core) | ![core](https://img.shields.io/badge/-universal-8A6496 "core") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/core">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/core-vanilla/core.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/crypto](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/crypto) | ![crypto](https://img.shields.io/badge/-universal-8A6496 "crypto") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/crypto">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/crypto-vanilla/crypto.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/ecdsa-sdk](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/ecdsa-sdk) | ![ecdsa-sdk](https://img.shields.io/badge/-universal-8A6496 "ecdsa-sdk") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/ecdsa-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/ecdsa-sdk-vanilla/ecdsa-sdk.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/encryption](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/encryption) | ![encryption](https://img.shields.io/badge/-universal-8A6496 "encryption") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/encryption">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/encryption-vanilla/encryption.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/lit-third-party-libs](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-third-party-libs) | ![lit-third-party-libs](https://img.shields.io/badge/-universal-8A6496 "lit-third-party-libs") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-third-party-libs">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-third-party-libs-vanilla/lit-third-party-libs.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/misc](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc) | ![misc](https://img.shields.io/badge/-universal-8A6496 "misc") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/misc-vanilla/misc.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/nacl](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/nacl) | ![nacl](https://img.shields.io/badge/-universal-8A6496 "nacl") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/nacl">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/nacl-vanilla/nacl.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/pkp-base](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-base) | ![pkp-base](https://img.shields.io/badge/-universal-8A6496 "pkp-base") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-base">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-base-vanilla/pkp-base.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/pkp-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-client) | ![pkp-client](https://img.shields.io/badge/-universal-8A6496 "pkp-client") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-client">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-client-vanilla/pkp-client.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/pkp-cosmos](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-cosmos) | ![pkp-cosmos](https://img.shields.io/badge/-universal-8A6496 "pkp-cosmos") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-cosmos">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-cosmos-vanilla/pkp-cosmos.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/pkp-ethers](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-ethers) | ![pkp-ethers](https://img.shields.io/badge/-universal-8A6496 "pkp-ethers") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-ethers">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-ethers-vanilla/pkp-ethers.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/pkp-walletconnect](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-walletconnect) | ![pkp-walletconnect](https://img.shields.io/badge/-universal-8A6496 "pkp-walletconnect") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-walletconnect">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-walletconnect-vanilla/pkp-walletconnect.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/types](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/types) | ![types](https://img.shields.io/badge/-universal-8A6496 "types") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/types">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/types-vanilla/types.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/uint8arrays](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/uint8arrays) | ![uint8arrays](https://img.shields.io/badge/-universal-8A6496 "uint8arrays") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/uint8arrays">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/uint8arrays-vanilla/uint8arrays.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/auth-browser](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-browser) | ![auth-browser](https://img.shields.io/badge/-browser-E98869 "auth-browser") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-browser">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/auth-browser-vanilla/auth-browser.min.js">Vanilla JS (UMD)</a>
+| [@lit-protocol/misc-browser](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc-browser) | ![misc-browser](https://img.shields.io/badge/-browser-E98869 "misc-browser") | 2.2.30 | <a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc-browser">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/misc-browser-vanilla/misc-browser.min.js">Vanilla JS (UMD)</a>
 
 <!-- autogen:package:end -->
 
@@ -108,70 +121,70 @@ http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
 
 # Contributing and developing to this SDK
 
-## Recommended VSCode Extensions
+## Prerequisite
 
-<details>
-<summary>Nx Console</summary>
-Download: <a href="https://nx.dev/core-features/integrate-with-editors">https://nx.dev/core-features/integrate-with-editors</a>
-</details>
-<details>
-<summary>Restore Terminal</summary>
+- node (v18.0.0)
 
-Download: <a href="https://marketplace.visualstudio.com/items?itemName=EthanSK.restore-terminals">https://marketplace.visualstudio.com/items?itemName=EthanSK.restore-terminals</a>
-See [Video](https://streamable.com/e/5g52m4)
+## Recommended
 
-```js
-  "restoreTerminals.terminals": [
-    {See [Video](https://streamable.com/e/5g52m4)
-      "splitTerminals": [
-        // {
-        //   "name": "nx graph",
-        //   "commands": ["yarn graph"]
-        // },
-        {
-          "name": "nodejs",
-          "commands": ["yarn nx run nodejs:serve"]
-        },
-        {
-          "name": "html",
-          "commands": ["yarn nx run html:serve"]
-        },
-        {
-          "name": "react",
-          "commands": ["yarn nx run react:serve"]
-        },
-        {
-          "name": "custom",
-          "commands": ["clear"]
-        }
-      ]
-    }
-  ]
-```
+- NX Console: https://nx.dev/core-features/integrate-with-editors
 
-</details>
+# Quick Start 
 
-# Workflow
+The following commands will help you start developing with this repository.
 
-## CLI (WIP)
+First, install the dependencies via yarn:
 
 ```
-yarn tools
+yarn
 ```
 
-## Dev
+## Building
+
+You can build the project with the following command:
+
+```
+yarn build
+```
+
+## Running Test Apps
+
+The test apps are configured to automatically import all modules and expose all module functions. For browsers, you can access these functions using `window.LitJsSdk_<package_name>.<function_name>`
 
 ```jsx
-// this will open
+// Running apps...
 // html: http://localhost:4002
 // react: http://localhost:4003
-// nodejs: in this terminal
-yarn tools --dev --apps
-
-// usually i will open another temrinal to watch the package
-// i'm developing
-yarn tools --watch --target <package-name>
+// nodejs: in the terminal
+yarn apps
 ```
+
+or runniny individually
+
+```
+// html
+yarn nx run html:serve
+
+// react
+yarn nx run react:serve
+
+// nodejs
+yarn nx run nodejs:serve
+```
+
+## Run unit tests
+
+```
+yarn test:unit
+```
+
+## Run E2E tests
+
+```
+yarn test:e2e
+```
+
+# (WIP) Advanced
 
 ## Creating a new library
 
@@ -188,45 +201,27 @@ yarn gen:lib <package-name> <tag>
 yarn tools --create --react contracts-sdk --demo
 ```
 
-## Deleting a library
+## Deleting a package or app
 
 ```
-yarn tool:delete (--package OR --app) <project-name>
+// delete an app from ./app/<app-name>
+yarn delete:app <app-name>
+
+// delete a package from ./packages/<package-name>
+yarn delete:package <package-name>
 ```
+
 
 ## Building
 
 ```jsx
 yarn build
-
-// or
-yarn tools --build
 ```
 
 ### Building target package
 
 ```jsx
 yarn nx run <project-name>:build
-
-// or
-yarn tools --build --target <project-name>
-
-// or targeted env
-yarn nx run <project-name>:_buildTsc
-yarn nx run <project-name>:_buildWeb
-```
-
-## Watching
-
-```jsx
-// watch all packages change
-yarn tools --watch
-
-// watch a target package
-yarn tools --watch <package-name>
-
-// watch a target package with all its monorepo dependencies
-yarn tools --watch <package-name>--deps
 ```
 
 ## Building Local Changes
@@ -262,12 +257,6 @@ yarn tools --clone <project-name> <clone-project-name> <(?) --publish> <(?) --re
 
 // eg
 yarn tools --clone lit-node-client @litprotocol/dev --publish --remove-after
-```
-
-### HTML Test app to Vercel
-
-```
-yarn tool:buildHtml
 ```
 
 ## Testing
@@ -399,6 +388,6 @@ Object.defineProperty(globalThis, 'crypto', {
 <details>
 <summary>error Command failed with exit code 13.</summary>
 
-Make sure your node version is above v16.16.0
+Make sure your node version is above v18.0.0
 
 </details>

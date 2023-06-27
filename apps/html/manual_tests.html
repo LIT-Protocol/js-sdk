@@ -690,6 +690,26 @@
         });
       };
 
+      var ETHOnZksyncTestnet = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'zksyncTestnet',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnZksyncTestnet',
+        });
+      };
+
       var ETHOnEluvioEmptyWallet = async () => {
         const accessControlConditions = [
           {
@@ -2365,6 +2385,26 @@
         });
       };
 
+      var ETHOnSepolia = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'sepolia',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnSepolia',
+        });
+      }
+
       var Filecoin = async () => {
         const authSig = await LitJsSdk.checkAndSignAuthMessage({
           chain: 'filecoin',
@@ -2489,10 +2529,16 @@
     <button onclick="ETHOnXdai()">ETHOnXdai</button>
     <br />
     <br />
+    <button onclick="ETHOnSepolia()">ETHOnSepolia</button>
+    <br />
+    <br />
     <button onclick="ETHOnAurora()">ETHOnAurora</button>
     <br />
     <br />
     <button onclick="ETHOnZksync()">ETHOnZksync</button>
+    <br />
+    <br />
+    <button onclick="ETHOnZksyncTestnet()">ETHOnZksyncTestnet</button>
     <br />
     <br />
     <button onclick="ETHOnEluvioEmptyWallet()">ETHOnEluvioEmptyWallet</button>

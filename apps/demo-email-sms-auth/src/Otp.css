@@ -9,6 +9,13 @@ span {
     justify-content: center;
 }
 
+.captcha {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
 .pkp-table {
     border-collapse: collapse;
     margin: 25px 0;
