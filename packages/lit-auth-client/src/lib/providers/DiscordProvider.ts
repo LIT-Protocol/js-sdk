@@ -20,9 +20,14 @@ export default class DiscordProvider extends BaseProvider {
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
-
-  private _accessToken: string | undefined;
-  private _clientId: string = '105287423965869266';
+  /**
+   * Discord client ID
+   */
+  #clientId: string = '105287423965869266';
+  /**
+   * Discord access token
+   */
+  #accessToken: string | undefined;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
@@ -92,7 +97,7 @@ export default class DiscordProvider extends BaseProvider {
       );
     }
 
-    this._accessToken = accessToken;
+    this.#accessToken = accessToken;
 
     const authMethod = {
       authMethodType: AuthMethodType.Discord,
@@ -107,24 +112,32 @@ export default class DiscordProvider extends BaseProvider {
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
   protected override async getRelayerRequest(): Promise<RelayerRequest> {
-    if (!this._accessToken) {
+    if (!this.#accessToken) {
       throw new Error(
         'Access token not defined, did you authenticate before calling validate?'
       );
     }
     const userId: string = await this.#verifyAndFetchDiscordUserId(
-      this._accessToken
+      this.#accessToken
     ).catch((e) => {
       throw e;
     });
-    
-    let authMethodId = utils.keccak256(toUtf8Bytes(`${userId}:${this._clientId}`));
+    const authMethodId = utils.keccak256(
+      toUtf8Bytes(`${userId}:${this.#clientId}`)
+    );
     return {
       authMethodType: AuthMethodType.Discord,
       authMethodId,
     };
   }
 
+  /**
+   * Verify Discord access token and fetch Discord user ID
+   *
+   * @param {string} accessToken - Discord access token
+   *
+   * @returns {Promise<string>} - Discord user ID
+   */
   async #verifyAndFetchDiscordUserId(accessToken: string): Promise<string> {
     const meResponse = await fetch('https://discord.com/api/users/@me', {
       method: 'GET',
@@ -134,7 +147,7 @@ export default class DiscordProvider extends BaseProvider {
     });
     if (meResponse.ok) {
       const user = await meResponse.json();
-      return JSON.stringify(user.id);
+      return user.id;
     } else {
       throw new Error('Unable to verify Discord account');
     }

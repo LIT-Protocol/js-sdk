@@ -23,7 +23,7 @@ export class OtpProvider extends BaseProvider {
   private _captchaRoute: string = '/api/captcha/siteverify';
   private _captchaResponse: string | undefined;
 
-  private _accessToken: string | undefined;
+  #accessToken: string | undefined;
 
   constructor(
     params: BaseProviderOptions & SignInWithOTPParams,
@@ -77,18 +77,18 @@ export class OtpProvider extends BaseProvider {
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
   protected override async getRelayerRequest(): Promise<RelayerRequest> {
-    if (!this._accessToken) {
+    if (!this.#accessToken) {
       throw new Error(
         'Access token not defined, did you authenticate before calling validate?'
       );
     }
 
-    let resp = await this.#verifyOtpJWT(this._accessToken).catch((e) => {
+    const resp = await this.#verifyOtpJWT(this.#accessToken).catch((e) => {
       throw e;
     });
-    let userId = resp.userId;
-    let payload = parseJWT(this._accessToken);
-    let audience = (payload['orgId'] as string).toLowerCase() || 'lit';
+    const userId = resp.userId;
+    const payload = parseJWT(this.#accessToken);
+    const audience = (payload['orgId'] as string).toLowerCase() || 'lit';
     return {
       authMethodType: 7,
       authMethodId: `${userId}:${audience}`,
@@ -143,7 +143,8 @@ export class OtpProvider extends BaseProvider {
       const err = new Error('Unable to start otp verification');
       throw err;
     }
-    let respBody: { status: string; callback: string } = await response.json();
+    const respBody: { status: string; callback: string } =
+      await response.json();
 
     return respBody.callback;
   }
@@ -196,7 +197,7 @@ export class OtpProvider extends BaseProvider {
     if (!respBody.token_jwt) {
       throw new Error('Invalid otp code, operation was aborted');
     }
-    this._accessToken = respBody.token_jwt;
+    this.#accessToken = respBody.token_jwt;
 
     return {
       accessToken: respBody.token_jwt,
@@ -219,6 +220,13 @@ export class OtpProvider extends BaseProvider {
     }
   }
 
+  /**
+   * Parse OTP token
+   *
+   * @param {string} jwt - JWT
+   *
+   * @returns {Promise<OtpVerificationPayload>} - OTP verification payload
+   */
   async #verifyOtpJWT(jwt: string): Promise<OtpVerificationPayload> {
     const res = await fetch(this._buildUrl('verify'), {
       redirect: 'error',

@@ -21,8 +21,10 @@ export default class EthWalletProvider extends BaseProvider {
    * The origin from which the signing request is made
    */
   public origin: string;
-
-  private _authSig: AuthSig | undefined;
+  /**
+   * Wallet signature
+   */
+  #authSig: AuthSig | undefined;
 
   constructor(options: BaseProviderOptions & EthWalletProviderOptions) {
     super(options);
@@ -83,7 +85,7 @@ export default class EthWalletProvider extends BaseProvider {
         address: address,
       };
 
-      this._authSig = authSig;
+      this.#authSig = authSig;
     } else {
       authSig = await checkAndSignAuthMessage({
         chain,
@@ -101,29 +103,26 @@ export default class EthWalletProvider extends BaseProvider {
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
   protected override async getRelayerRequest(): Promise<RelayerRequest> {
-    if (!this._authSig) {
-      throw new Error('AutHSig not defined, did you call authenticate first');
+    if (!this.#authSig) {
+      throw new Error('AuthSig not defined, did you call authenticate first');
     }
-
-    // verify auth sig
-    const verified: boolean = this.#verifyAuthSig(this._authSig);
-    if (verified) {
-      console.info('Successfully verified authentication signature', {
-        address: this._authSig.address,
-      });
-    } else {
-      console.error('Unable to verify authentication signature', {
-        address: this._authSig.address,
-      });
+    const verified: boolean = this.#verifyAuthSig(this.#authSig);
+    if (!verified) {
+      throw new Error('Unable to verify auth signature');
     }
-
     return {
       authMethodType: AuthMethodType.EthWallet,
-      authMethodId: this._authSig.address,
+      authMethodId: this.#authSig.address,
     };
   }
 
-  // Check that the message has been signed by the given address
+  /**
+   * Check that the message has been signed by the given address
+   *
+   * @param {AuthSig} authSig - Auth signature
+   *
+   * @returns {boolean} - True if message has been signed by given address
+   */
   #verifyAuthSig(authSig: AuthSig): boolean {
     const recoveredAddr = utils.verifyMessage(
       authSig.signedMessage,

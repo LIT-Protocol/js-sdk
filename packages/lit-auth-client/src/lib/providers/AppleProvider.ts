@@ -19,8 +19,10 @@ export default class AppleProvider extends BaseProvider {
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
-
-  private _idToken: string | undefined;
+  /**
+   * Apple JWT
+   */
+  #idToken: string | undefined;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
@@ -89,7 +91,7 @@ export default class AppleProvider extends BaseProvider {
         `Missing ID token in redirect callback URL for Apple OAuth"`
       );
     }
-    this._idToken = idToken;
+    this.#idToken = idToken;
 
     const authMethod = {
       authMethodType: AuthMethodType.AppleJwt,
@@ -103,14 +105,14 @@ export default class AppleProvider extends BaseProvider {
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
   protected override async getRelayerRequest(): Promise<RelayerRequest> {
-    if (!this._idToken) {
+    if (!this.#idToken) {
       throw new Error(
         'Access token not defined, did you authenticate before calling validate?'
       );
     }
 
-    let payload = parseJWT(this._idToken);
-    let authMethodId = `${payload['aud']}:${payload['sub']}`;
+    const payload = parseJWT(this.#idToken);
+    const authMethodId = `${payload['aud']}:${payload['sub']}`;
 
     return {
       authMethodType: AuthMethodType.AppleJwt,

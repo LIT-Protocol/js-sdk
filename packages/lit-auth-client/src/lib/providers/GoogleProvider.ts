@@ -21,14 +21,19 @@ export default class GoogleProvider extends BaseProvider {
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
-  private _clientId: string;
-  private _accessToken: string | undefined;
+  /**
+   * Google client ID
+   */
+  #clientId: string =
+    '355007986731-llbjq5kbsg8ieb705mo64nfnh88dhlmn.apps.googleusercontent.com';
+  /**
+   * Google ID token
+   */
+  #accessToken: string | undefined;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
     this.redirectUri = options.redirectUri || window.location.origin;
-    this._clientId =
-      '355007986731-llbjq5kbsg8ieb705mo64nfnh88dhlmn.apps.googleusercontent.com';
   }
 
   /**
@@ -57,7 +62,7 @@ export default class GoogleProvider extends BaseProvider {
     }
 
     // Check url for params
-    const { provider, idToken, state, error } = parseLoginParams(
+    const { provider, accessToken, state, error } = parseLoginParams(
       window.location.search
     );
 
@@ -88,17 +93,17 @@ export default class GoogleProvider extends BaseProvider {
     );
 
     // Check if id token is present in url
-    if (!idToken) {
+    if (!accessToken) {
       throw new Error(
         `Missing ID token in redirect callback URL for Google OAuth"`
       );
     }
 
-    this._accessToken = idToken;
+    this.#accessToken = accessToken;
 
     const authMethod = {
       authMethodType: AuthMethodType.GoogleJwt,
-      accessToken: idToken,
+      accessToken: accessToken,
     };
     return authMethod;
   }
@@ -108,27 +113,33 @@ export default class GoogleProvider extends BaseProvider {
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
   protected override async getRelayerRequest(): Promise<RelayerRequest> {
-    if (!this._accessToken) {
+    if (!this.#accessToken) {
       throw new Error(
         'Access token not defined, did you authenticate before calling validate?'
       );
     }
 
-    let tokenPayload: Record<string, unknown> = this.#parseIDToken(
-      this._accessToken
+    const tokenPayload: Record<string, unknown> = this.#parseIDToken(
+      this.#accessToken
     );
 
-    let userId: string = tokenPayload['sub'] as string;
-    let audience: string = tokenPayload['aud'] as string;
-    let authMethodId = utils.keccak256(toUtf8Bytes(`${userId}:${audience}`));
+    const userId: string = tokenPayload['sub'] as string;
+    const audience: string = tokenPayload['aud'] as string;
+    const authMethodId = utils.keccak256(toUtf8Bytes(`${userId}:${audience}`));
     return {
       authMethodType: 6,
       authMethodId: authMethodId,
     };
   }
 
-  // Validate given Google ID token
-  #parseIDToken(idToken: string): Record<string, unknown> {
-    return parseJWT(idToken);
+  /**
+   * Parse Google ID token
+   *
+   * @param {string} accessToken - Google ID token
+   *
+   * @returns {Record<string, unknown>} - Google information
+   */
+  #parseIDToken(accessToken: string): Record<string, unknown> {
+    return parseJWT(accessToken);
   }
 }

@@ -16,7 +16,10 @@ import { hexlify, toUtf8Bytes } from 'ethers/lib/utils';
 import { RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
 
 export default class WebAuthnProvider extends BaseProvider {
-  private _attestationResponse: any | undefined;
+  /**
+   * WebAuthn attestation data
+   */
+  #attestationResponse: any | undefined;
 
   constructor(options: BaseProviderOptions) {
     super(options);
@@ -52,7 +55,7 @@ export default class WebAuthnProvider extends BaseProvider {
     const authMethodId: string = this.#generateAuthMethodId(attResp.rawId);
 
     // create a buffer object from the base64 encoded content.
-    let attestationBuffer = Buffer.from(
+    const attestationBuffer = Buffer.from(
       attResp.response.attestationObject,
       'base64'
     );
@@ -61,10 +64,10 @@ export default class WebAuthnProvider extends BaseProvider {
     try {
       // parse the buffer to reconstruct the object.
       // buffer is COSE formatted, utilities decode the buffer into json, and extract the public key information
-      let authenticationResponse: any =
+      const authenticationResponse: any =
         parseAuthenticatorData(attestationBuffer);
       // publickey in cose format to register the auth method
-      let publicKeyCoseBuffer: Buffer = authenticationResponse
+      const publicKeyCoseBuffer: Buffer = authenticationResponse
         .attestedCredentialData.credentialPublicKey as Buffer;
       // Encode the publicKey for contract storage
       publicKey = hexlify(ethers.utils.arrayify(publicKeyCoseBuffer));
@@ -74,7 +77,7 @@ export default class WebAuthnProvider extends BaseProvider {
       );
     }
 
-    let req: RelayerRequest = {
+    const req: RelayerRequest = {
       authMethodType: AuthMethodType.WebAuthn,
       authMethodId,
       authMethodPubKey: publicKey,
@@ -144,7 +147,7 @@ export default class WebAuthnProvider extends BaseProvider {
         base64url.encode(userHandle);
     }
 
-    this._attestationResponse = actualAuthenticationResponse;
+    this.#attestationResponse = actualAuthenticationResponse;
 
     const authMethod = {
       authMethodType: AuthMethodType.WebAuthn,
@@ -160,14 +163,14 @@ export default class WebAuthnProvider extends BaseProvider {
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
   protected override async getRelayerRequest(): Promise<RelayerRequest> {
-    if (!this._attestationResponse) {
+    if (!this.#attestationResponse) {
       throw new Error(
         'Access token not defined, did you authenticate before calling validate?'
       );
     }
 
     const authMethodId: string = this.#generateAuthMethodId(
-      this._attestationResponse.rawId
+      this.#attestationResponse.rawId
     );
 
     return {
@@ -176,6 +179,12 @@ export default class WebAuthnProvider extends BaseProvider {
     };
   }
 
+  /**
+   * Derive auth method id from WebAuthn credential
+   *
+   * @param {string} credentialRawId - WebAuthn credential
+   * @returns
+   */
   #generateAuthMethodId(credentialRawId: string): string {
     return utils.keccak256(toUtf8Bytes(`${credentialRawId}:lit`));
   }
