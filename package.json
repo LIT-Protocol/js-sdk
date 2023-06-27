@@ -99,7 +99,7 @@
     "ipfs-http-client": "56.0.0",
     "ipfs-unixfs-importer": "^12.0.0",
     "jszip": "^3.10.1",
-    "lit-connect-modal": "^0.1.11",
+    "lit-connect-modal-to-be-deprecated": "^0.0.1",
     "lit-siwe": "^1.1.8",
     "multiformats": "^10.0.2",
     "nanoid": "3.3.4",
