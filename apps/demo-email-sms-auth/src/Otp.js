@@ -36,12 +36,12 @@ export function Otp() {
 
 
     const onRegister = (e) => {
-        authClient.embeddCaptchaInElement("captcha", document.head);
+        authClient.embedCaptchaInElement("captcha", document.head);
         setAction("register");
     }
 
     const onLogin = (e) => {
-        authClient.embeddCaptchaInElement("captcha", document.head);
+        authClient.embedCaptchaInElement("captcha", document.head);
         setAction("login");
     }
 
