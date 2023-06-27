@@ -15,7 +15,6 @@ import {
   UnifiedAccessControlConditions,
 } from './types';
 import { ILitNodeClient } from './ILitNodeClient';
-import { OtpVerificationPayload } from '../../../../dist/packages/types/src/lib/interfaces';
 import {
   ISessionCapabilityObject,
   LitResourceAbilityRequest,
