@@ -1179,8 +1179,8 @@ export interface SignInWithOTPParams {
    * Allows for specifying custom sender information
    * Note: for most users the `from_name` is the configurable option and `from` should not be populated
    */
-  emailCustomizationOptions: OtpEmailCustomizationOptions;
-  
+  emailCustomizationOptions?: OtpEmailCustomizationOptions;
+
   /**
    * ReCaptcha reponse from external catpcha response for use with
    * {@link OtpProvider} if not provided will look at the global var

@@ -72,7 +72,7 @@ export class OtpProvider extends BaseProvider {
   public async sendOtpCode(): Promise<string> {
     if (!this._captchaResponse) {
       throw new Error(
-        'Could not find ReCaptcha response, please use the embeddCaptchaInElement or use the site key through getSiteKey() to use your own ReCaptcha Library'
+        'Could not find ReCaptcha response, please use the embedCaptchaInElement or use the site key through getSiteKey() to use your own ReCaptcha Library'
       );
     }
     const url = this._buildUrl('start');
