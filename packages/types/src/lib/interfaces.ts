@@ -908,6 +908,8 @@ export interface PKPBaseProp {
   sessionSigsExpiration?: string;
   litNetwork?: any;
   debug?: boolean;
+  bootstrapUrls?: string[],
+  minNodeCount?: number,
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
