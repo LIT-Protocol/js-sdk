@@ -75,6 +75,8 @@ export interface AccsEVMParams extends AccsRegularParams {
 
 export interface AccsCOSMOSParams extends AccsRegularParams {
   path: string;
+  method?: string;
+  parameters?: string[];
 }
 
 /** ---------- Auth Sig ---------- */
