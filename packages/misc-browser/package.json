@@ -21,7 +21,7 @@
   "tags": [
     "browser"
   ],
-  "version": "2.2.33",
+  "version": "2.2.34",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
