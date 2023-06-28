@@ -1,6 +1,6 @@
 {
   "name": "@getlit/sdk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -25,7 +25,5 @@
   "tags": [
     "universal"
   ],
-  "group": "revamp",
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  "group": "revamp"
 }

@@ -55,12 +55,11 @@ if (OPTION) {
 
 let version;
 
+const groupConfig = getGroupConfig();
 if (groupFlag) {
-  const groupConfig = getGroupConfig();
   version = groupConfig.config.find((item) => item.group === groupFlag).version;
 } else {
-  // read lerna.json version
-  version = (await readJsonFile('lerna.json')).version;
+  version = groupConfig.config.find((item) => item.group === 'core').version;
 }
 
 console.log('version:', version);
@@ -134,7 +133,7 @@ if (!groupFlag) {
     console.log('publishVersion', publishVersion);
   } catch (e) {
     yellowLog(
-      "Couldn't get latest version from npm, will use lerna.json version"
+      "Couldn't get latest version from npm, will use the config version"
     );
   }
 }

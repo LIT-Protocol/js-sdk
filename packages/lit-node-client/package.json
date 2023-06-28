@@ -25,7 +25,5 @@
     "crypto": false,
     "stream": false
   },
-  "version": "2.2.26",
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  "version": "2.2.35"
 }

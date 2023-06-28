@@ -431,19 +431,19 @@ export const prefixPathWithDir = (path, dirName) => {
   }
 };
 
-// lerna.json version x.x.x must be greater than each individual package.json version x.x.x
+// config version x.x.x must be greater than each individual package.json version x.x.x
 export const versionChecker = (pkg, lernaVersion) => {
   const version = pkg.version;
 
-  // version cannot be the same as lerna.json version
+  // version cannot be the same as config version
   if (version === lernaVersion) {
     return {
       status: 500,
-      message: `Skipping ${pkg.name} as version is the same as lerna.json version`,
+      message: `Skipping ${pkg.name} as version is the same as config version`,
     };
   }
 
-  // lerna.json version x.x.x must be greater than package.json version x.x.x
+  // config version x.x.x must be greater than package.json version x.x.x
   const lernaVersionArr = lernaVersion.split('.');
   const versionArr = version.split('.');
   const lernaVersionMajor = parseInt(lernaVersionArr[0]);
@@ -456,14 +456,14 @@ export const versionChecker = (pkg, lernaVersion) => {
   if (lernaVersionMajor < versionMajor) {
     return {
       status: 500,
-      message: `Skipping ${pkg.name} as lerna.json version is less than package.json version`,
+      message: `Skipping ${pkg.name} as config version is less than package.json version`,
     };
   }
 
   if (lernaVersionMajor === versionMajor && lernaVersionMinor < versionMinor) {
     return {
       status: 500,
-      message: `Skipping ${pkg.name} as lerna.json version is less than package.json version`,
+      message: `Skipping ${pkg.name} as config version is less than package.json version`,
     };
   }
 
@@ -474,7 +474,7 @@ export const versionChecker = (pkg, lernaVersion) => {
   ) {
     return {
       status: 500,
-      message: `Skipping ${pkg.name} as lerna.json version is less than package.json version`,
+      message: `Skipping ${pkg.name} as config version is less than package.json version`,
     };
   }
 
@@ -718,6 +718,10 @@ export function getGroupConfig() {
   return { config, names };
 }
 
+export function writeGroupConfig(config) {
+  fs.writeFileSync('lit.group.json', JSON.stringify(config, null, 2));
+}
+
 export function validateGroupIsInConfig(group) {
   if (group) {
     const groupConfig = getGroupConfig();
@@ -755,3 +759,11 @@ export async function getGroupPackageNames(groupName, allPackages) {
 
   return groupList;
 }
+
+export const getDefaultGroupVersion = () => {
+  const version = getGroupConfig().config.find(
+    (item) => item.group === 'core'
+  ).version;
+
+  return version;
+};
