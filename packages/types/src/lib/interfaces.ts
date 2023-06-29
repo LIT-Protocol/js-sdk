@@ -75,6 +75,8 @@ export interface AccsEVMParams extends AccsRegularParams {
 
 export interface AccsCOSMOSParams extends AccsRegularParams {
   path: string;
+  method?: string;
+  parameters?: string[];
 }
 
 /** ---------- Auth Sig ---------- */
@@ -913,6 +915,8 @@ export interface PKPBaseProp {
   sessionSigsExpiration?: string;
   litNetwork?: any;
   debug?: boolean;
+  bootstrapUrls?: string[];
+  minNodeCount?: number;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
@@ -969,13 +973,6 @@ export interface LitAuthClientOptions {
   litNodeClient?: any;
 
   litOtpConfig?: OtpProviderOptions;
-
-  /**
-   * ReCaptcha reponse from external catpcha response for use with
-   * {@link OtpProvider} if not provided will look at the global var
-   * LIT_AUTH_CLIENT_CAPTCHA_RES object for challenege response from injected captcha view
-   */
-  captchaResponse?: string;
 }
 
 export interface OtpSessionResult {
@@ -1200,11 +1197,6 @@ export interface SignInWithOTPParams {
    */
   emailCustomizationOptions: OtpEmailCustomizationOptions;
 
-  /**
-   * ReCaptcha reponse from external catpcha response for use with
-   * {@link OtpProvider} if not provided will look at the global var
-   * LIT_AUTH_CLIENT_CAPTCHA_RES object for challenege response from injected captcha view
-   */
   customName?: string;
 }
 
@@ -1213,8 +1205,6 @@ export interface OtpProviderOptions {
   port?: string;
   startRoute?: string;
   checkRoute?: string;
-  verifyRoute?: string;
-  captchaResponse?: string;
 }
 
 export interface OtpEmailCustomizationOptions {
@@ -1266,7 +1256,6 @@ export interface LoginUrlParams {
 export interface BaseAuthenticateOptions {}
 
 export interface OtpAuthenticateOptions {
-  captchaResponse: string;
   code: string;
 }
 

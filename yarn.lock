@@ -17833,10 +17833,10 @@ listr2@^3.8.3:
     through "^2.3.8"
     wrap-ansi "^7.0.0"
 
-lit-connect-modal@^0.1.11:
-  version "0.1.11"
-  resolved "https://registry.npmjs.org/lit-connect-modal/-/lit-connect-modal-0.1.11.tgz#688fa9601b920c917856a5dbe8491a4fbaf1d6ab"
-  integrity sha512-EG6pcCqdxZQJt3MPDq3gJ5Sz4E5sJdydtAF7VFJu6z6GDHO1Ybp8WrTx8CUnHiF54/MQBRi6Nb7cbTvv+BKWvQ==
+lit-connect-modal-to-be-deprecated@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/lit-connect-modal-to-be-deprecated/-/lit-connect-modal-to-be-deprecated-0.0.1.tgz#abab199c7f282c03e07858030c9a435edc9b05ed"
+  integrity sha512-RYTlRVnhLENzGG98HhAlb5wPqK+drouio3i9ty+j5FmEBhljZ+PqOsnIFG7SqH6NhbfGF+VGcl/YSwE9rd43MQ==
   dependencies:
     micromodal "^0.4.10"
 

@@ -19,7 +19,7 @@ import { verifyMessage } from '@ethersproject/wallet';
 import WalletConnectProviderPkg from '@walletconnect/ethereum-provider';
 
 // @ts-ignore
-import LitConnectModal from 'lit-connect-modal';
+import LitConnectModal from 'lit-connect-modal-to-be-deprecated';
 
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
 
@@ -364,9 +364,9 @@ export const connectWeb3 = async ({
 
   const rpcUrls: RPCUrls = getRPCUrls();
 
-  const providerOptions: Web3ProviderOptions = {
+  const providerOptions = {
     walletconnect: {
-      package: WalletConnectProviderPkg, // required
+      // package: WalletConnectProviderPkg, // required
       options: {
         // infuraId: "cd614bfa5c2f4703b7ab0ec0547d9f81",
         rpc: rpcUrls,
@@ -377,9 +377,7 @@ export const connectWeb3 = async ({
 
   log('getting provider via lit connect modal');
 
-  const dialog = new LitConnectModal({
-    providerOptions,
-  });
+  const dialog = new LitConnectModal({ providerOptions });
 
   const provider = await dialog.getWalletProvider();
 
@@ -429,6 +427,7 @@ export const disconnectWeb3 = (): void => {
   localStorage.removeItem(storage.AUTH_SOL_SIGNATURE);
   localStorage.removeItem(storage.AUTH_COSMOS_SIGNATURE);
   localStorage.removeItem(storage.WEB3_PROVIDER);
+  localStorage.removeItem(storage.WALLET_SIGNATURE);
 };
 
 /**
