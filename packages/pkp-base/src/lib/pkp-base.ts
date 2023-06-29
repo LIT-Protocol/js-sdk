@@ -95,15 +95,11 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.setLitActionJsParams(prop.litActionJsParams || {});
     this.litNodeClient = new LitNodeClient({
       litNetwork: prop.litNetwork ?? 'serrano',
-      bootstrapUrls:
-        prop.bootstrapUrls && prop.litNetwork === 'custom'
-          ? prop.bootstrapUrls
-          : undefined,
+      ...(prop.bootstrapUrls &&
+        prop.litNetwork === 'custom' && { bootstrapUrls: prop.bootstrapUrls }),
+      ...(prop.bootstrapUrls &&
+        prop.litNetwork == 'custom' && { minNodeCount: prop.minNodeCount }),
       debug: this.debug,
-      minNodeCount:
-        prop.bootstrapUrls && prop.litNetwork == 'custom'
-          ? prop.minNodeCount
-          : undefined,
     });
   }
 
