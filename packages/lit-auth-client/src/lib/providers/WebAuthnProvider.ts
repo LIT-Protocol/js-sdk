@@ -12,7 +12,6 @@ import {
 import base64url from 'base64url';
 import { getRPIdFromOrigin, parseAuthenticatorData } from '../utils';
 import { BaseProvider } from './BaseProvider';
-import { hexlify, toUtf8Bytes } from 'ethers/lib/utils';
 import { RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
 
 export default class WebAuthnProvider extends BaseProvider {
@@ -52,7 +51,7 @@ export default class WebAuthnProvider extends BaseProvider {
     const { startRegistration } = await import('@simplewebauthn/browser');
     const attResp: RegistrationResponseJSON = await startRegistration(options);
 
-    const authMethodId: string = this.#generateAuthMethodId(attResp.rawId);
+    const authMethodId: string = await this.getAuthMethodId();
 
     // create a buffer object from the base64 encoded content.
     const attestationBuffer = Buffer.from(
@@ -70,7 +69,7 @@ export default class WebAuthnProvider extends BaseProvider {
       const publicKeyCoseBuffer: Buffer = authenticationResponse
         .attestedCredentialData.credentialPublicKey as Buffer;
       // Encode the publicKey for contract storage
-      publicKey = hexlify(ethers.utils.arrayify(publicKeyCoseBuffer));
+      publicKey = utils.hexlify(utils.arrayify(publicKeyCoseBuffer));
     } catch (e) {
       throw new Error(
         `Error while decoding credential create response for public key retrieval. attestation response not encoded as expected: ${e}`
@@ -118,7 +117,7 @@ export default class WebAuthnProvider extends BaseProvider {
     const blockHash = block.hash;
 
     // Turn into byte array
-    const blockHashBytes = ethers.utils.arrayify(blockHash);
+    const blockHashBytes = utils.arrayify(blockHash);
 
     // Construct authentication options
     const rpId = getRPIdFromOrigin(window.location.origin);
@@ -158,34 +157,48 @@ export default class WebAuthnProvider extends BaseProvider {
   }
 
   /**
+   * Check whether the authentication data is valid. For WebAuthn,
+   *
+   * @returns {Promise<boolean>} - True if authentication data is valid
+   */
+  public async verify(): Promise<boolean> {
+    throw new Error(
+      'Call useSessionSigs as the Lit nodes will verify the WebAuthn credential when generating session sigs.'
+    );
+  }
+
+  /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  public async getAuthMethodId(): Promise<string> {
+    if (!this.#attestationResponse) {
+      throw new Error(
+        'Authentication data is not defined. Call authenticate first.'
+      );
+    }
+    const credentialRawId = this.#attestationResponse.rawId;
+    const authMethodId: string = utils.keccak256(
+      utils.toUtf8Bytes(`${credentialRawId}:lit`)
+    );
+    return authMethodId;
+  }
+
+  /**
    * Constructs a {@link RelayerRequest} from the attestation response from authentication, {@link authenticate} must be called prior.
    * Intended for fetching pkp information from relayers.
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
   protected override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this.#attestationResponse) {
-      throw new Error(
-        'Access token not defined, did you authenticate before calling validate?'
-      );
+      throw new Error('Access token is not defined. Call authenticate first.');
     }
-
-    const authMethodId: string = this.#generateAuthMethodId(
-      this.#attestationResponse.rawId
-    );
-
+    const authMethodId = await this.getAuthMethodId();
     return {
       authMethodType: AuthMethodType.WebAuthn,
       authMethodId,
     };
-  }
-
-  /**
-   * Derive auth method id from WebAuthn credential
-   *
-   * @param {string} credentialRawId - WebAuthn credential
-   * @returns
-   */
-  #generateAuthMethodId(credentialRawId: string): string {
-    return utils.keccak256(toUtf8Bytes(`${credentialRawId}:lit`));
   }
 }

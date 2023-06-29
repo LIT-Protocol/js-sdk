@@ -1,5 +1,6 @@
 import { LoginUrlParams } from '@lit-protocol/types';
 import * as cbor from 'cbor-web';
+import * as jose from 'jose';
 
 export const STATE_PARAM_KEY = 'lit-state-param';
 
@@ -197,19 +198,13 @@ export function getRPIdFromOrigin(origin: string) {
 }
 
 /**
+ * Decode a signed JWT payload
  *
- * @param jwt token to parse
- * @returns {Record<string, unknown>}- userId contained within the token message
+ * @param {string} jwt - JWT token to parse
+ * @returns {Record<string, unknown>} - Decoded signed JWT payload
  */
 export function parseJWT(jwt: string): Record<string, unknown> {
-  let parts = jwt.split('.');
-  if (parts.length !== 3) {
-    throw new Error('Invalid token length');
-  }
-  let body = Buffer.from(parts[1], 'base64');
-  let parsedBody: Record<string, unknown> = JSON.parse(body.toString('ascii'));
-
-  return parsedBody;
+  return jose.decodeJwt(jwt);
 }
 
 //Function logic copied from Microsoft demo implementation: https://github.com/MicrosoftEdge/webauthnsample/blob/master/fido.js

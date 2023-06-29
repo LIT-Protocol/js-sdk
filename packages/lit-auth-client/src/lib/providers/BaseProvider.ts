@@ -46,6 +46,21 @@ export abstract class BaseProvider {
   ): Promise<AuthMethod>;
 
   /**
+   * Check whether the authentication data is valid
+   *
+   * @returns {Promise<boolean>} - True if authentication data is valid
+   */
+  abstract verify(): Promise<boolean>;
+
+  /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  abstract getAuthMethodId(): Promise<string>;
+
+  /**
    * Constrcuts a request for interfacing with relayer minting servers, based on the provider-specific implementation.
    * @returns {Promise<RegistrationMethod>} Registraction Method object that contains metdata used for registering authentication methods.
    */
@@ -61,7 +76,7 @@ export abstract class BaseProvider {
    * @returns {Promise<string>} - Mint transaction hash
    */
   public async mintPKPThroughRelayer(): Promise<string> {
-    let registrationMethod = await this.getRelayerRequest();
+    const registrationMethod = await this.getRelayerRequest();
     const mintParams = this.prepareRelayBody(registrationMethod);
     const mintRes = await this.relay.mintPKP(
       registrationMethod.authMethodType,
@@ -81,7 +96,7 @@ export abstract class BaseProvider {
    * @returns {Promise<IRelayPKP[]>} - Array of PKPs
    */
   public async fetchPKPsThroughRelayer(): Promise<IRelayPKP[]> {
-    let registrationMethod = await this.getRelayerRequest();
+    const registrationMethod = await this.getRelayerRequest();
     const fetchParams = this.prepareRelayBody(registrationMethod);
     const fetchRes = await this.relay.fetchPKPs(
       registrationMethod.authMethodType,

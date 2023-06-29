@@ -98,37 +98,59 @@ export default class EthWalletProvider extends BaseProvider {
     };
     return authMethod;
   }
+
+  /**
+   * Check whether the authentication data is valid
+   *
+   * @returns {Promise<boolean>} - True if authentication data is valid
+   */
+  public async verify(): Promise<boolean> {
+    if (!this.#authSig) {
+      throw new Error(
+        'Auth signature is not defined. Call authenticate first.'
+      );
+    }
+    const recoveredAddr = utils.verifyMessage(
+      this.#authSig.signedMessage,
+      this.#authSig.sig
+    );
+    return recoveredAddr.toLowerCase() === this.#authSig.address.toLowerCase();
+  }
+
+  /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  public async getAuthMethodId(): Promise<string> {
+    if (!this.#authSig) {
+      throw new Error(
+        'Auth signature is not defined. Call authenticate first.'
+      );
+    }
+    const authMethodId = this.#authSig.address;
+    return authMethodId;
+  }
+
   /**
    * Constructs a {@link RelayerRequest} from the signature, {@link authenticate} must be called prior.
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
   protected override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this.#authSig) {
-      throw new Error('AuthSig not defined, did you call authenticate first');
+      throw new Error(
+        'Auth signature is not defined. Call authenticate first.'
+      );
     }
-    const verified: boolean = this.#verifyAuthSig(this.#authSig);
+    const verified: boolean = await this.verify();
     if (!verified) {
-      throw new Error('Unable to verify auth signature');
+      throw new Error('Auth signature is not valid');
     }
+    const authMethodId = await this.getAuthMethodId();
     return {
       authMethodType: AuthMethodType.EthWallet,
-      authMethodId: this.#authSig.address,
+      authMethodId: authMethodId,
     };
-  }
-
-  /**
-   * Check that the message has been signed by the given address
-   *
-   * @param {AuthSig} authSig - Auth signature
-   *
-   * @returns {boolean} - True if message has been signed by given address
-   */
-  #verifyAuthSig(authSig: AuthSig): boolean {
-    const recoveredAddr = utils.verifyMessage(
-      authSig.signedMessage,
-      authSig.sig
-    );
-
-    return recoveredAddr.toLowerCase() === authSig.address.toLowerCase();
   }
 }

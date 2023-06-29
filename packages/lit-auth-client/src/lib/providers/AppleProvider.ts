@@ -13,12 +13,17 @@ import {
   parseJWT,
 } from '../utils';
 import { BaseProvider } from './BaseProvider';
+import { utils } from 'ethers';
 
 export default class AppleProvider extends BaseProvider {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
+  /**
+   * Apple client ID
+   */
+  #clientId: string = '...';
   /**
    * Apple JWT
    */
@@ -101,14 +106,65 @@ export default class AppleProvider extends BaseProvider {
   }
 
   /**
+   * Check whether the authentication data is valid
+   *
+   * @returns {Promise<boolean>} - True if authentication data is valid
+   */
+  public async verify(): Promise<boolean> {
+    if (!this.#idToken) {
+      throw new Error('Id token is not defined. Call authenticate first.');
+    }
+    const tokenPayload = this.#parseIdToken(this.#idToken);
+    // Verify the JWS E256 signature using the server’s public key
+    // Verify the nonce for the authentication
+
+    // Verify that the iss field contains https://appleid.apple.com
+    const iss = tokenPayload['iss'];
+    if (iss !== 'https://appleid.apple.com') {
+      return false;
+    }
+    // Verify that the aud field is the developer’s client_id
+    const aud = tokenPayload['aud'];
+    if (aud !== this.#clientId) {
+      return false;
+    }
+    // Verify that the time is earlier than the exp value of the token
+    // Exp is the number of seconds since the Unix epoch in UTC
+    const exp = tokenPayload['exp'] as number;
+    const current = Math.floor(Date.now() / 1000);
+    if (current > exp) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  public async getAuthMethodId(): Promise<string> {
+    if (!this.#idToken) {
+      throw new Error('Id token is not defined. Call authenticate first.');
+    }
+    const tokenPayload = this.#parseIdToken(this.#idToken);
+    const userId: string = tokenPayload['sub'] as string;
+    const audience: string = tokenPayload['aud'] as string;
+    const authMethodId = utils.keccak256(
+      utils.toUtf8Bytes(`${userId}:${audience}`)
+    );
+    return authMethodId;
+  }
+
+  /**
    * Constructs a {@link RelayerRequest} from the access token, {@link authenticate} must be called prior.
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
   protected override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this.#idToken) {
-      throw new Error(
-        'Access token not defined, did you authenticate before calling validate?'
-      );
+      throw new Error('Access token is not defined. Call authenticate first.');
     }
 
     const payload = parseJWT(this.#idToken);
@@ -118,5 +174,16 @@ export default class AppleProvider extends BaseProvider {
       authMethodType: AuthMethodType.AppleJwt,
       authMethodId,
     };
+  }
+
+  /**
+   * Parse Apple ID token
+   *
+   * @param {string} idToken - Apple ID token
+   *
+   * @returns {Record<string, unknown>} - Apple information
+   */
+  #parseIdToken(idToken: string): Record<string, unknown> {
+    return parseJWT(idToken);
   }
 }

@@ -108,23 +108,48 @@ export default class DiscordProvider extends BaseProvider {
   }
 
   /**
+   * Check whether the authentication data is valid
+   *
+   * @returns {Promise<boolean>} - True if authentication data is valid
+   */
+  public async verify(): Promise<boolean> {
+    if (!this.#accessToken) {
+      throw new Error('Access token is not defined. Call authenticate first.');
+    }
+    try {
+      const userId = await this.#fetchDiscordUser(this.#accessToken);
+      return !!userId;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  public async getAuthMethodId(): Promise<string> {
+    if (!this.#accessToken) {
+      throw new Error('Access token is not defined. Call authenticate first.');
+    }
+    const userId = await this.#fetchDiscordUser(this.#accessToken);
+    const authMethodId = utils.keccak256(
+      toUtf8Bytes(`${userId}:${this.#clientId}`)
+    );
+    return authMethodId;
+  }
+
+  /**
    * Constructs a {@link RelayerRequest} from the access token, {@link authenticate} must be called prior.
    * @returns {Promise<RelayerRequest>} Formed request for sending to Relayer Server
    */
   protected override async getRelayerRequest(): Promise<RelayerRequest> {
     if (!this.#accessToken) {
-      throw new Error(
-        'Access token not defined, did you authenticate before calling validate?'
-      );
+      throw new Error('Access token is not defined. Call authenticate first.');
     }
-    const userId: string = await this.#verifyAndFetchDiscordUserId(
-      this.#accessToken
-    ).catch((e) => {
-      throw e;
-    });
-    const authMethodId = utils.keccak256(
-      toUtf8Bytes(`${userId}:${this.#clientId}`)
-    );
+    const authMethodId = await this.getAuthMethodId();
     return {
       authMethodType: AuthMethodType.Discord,
       authMethodId,
@@ -132,13 +157,13 @@ export default class DiscordProvider extends BaseProvider {
   }
 
   /**
-   * Verify Discord access token and fetch Discord user ID
+   * Fetch Discord user ID
    *
    * @param {string} accessToken - Discord access token
    *
    * @returns {Promise<string>} - Discord user ID
    */
-  async #verifyAndFetchDiscordUserId(accessToken: string): Promise<string> {
+  async #fetchDiscordUser(accessToken: string): Promise<string> {
     const meResponse = await fetch('https://discord.com/api/users/@me', {
       method: 'GET',
       headers: {
