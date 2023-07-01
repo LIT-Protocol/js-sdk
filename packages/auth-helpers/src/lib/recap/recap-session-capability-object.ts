@@ -25,7 +25,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     const recap = Recap.decode_urn(encoded);
     return new this(
       recap.attenuations,
-      recap.proofs.map((cid) => cid.toString())
+      recap.proofs.map((cid: any) => cid.toString())
     );
   }
 
@@ -33,7 +33,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     const recap = Recap.extract_and_verify(siwe);
     return new this(
       recap.attenuations,
-      recap.proofs.map((cid) => cid.toString())
+      recap.proofs.map((cid: any) => cid.toString())
     );
   }
 
@@ -42,7 +42,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   }
 
   get proofs(): Array<CID> {
-    return this.#inner.proofs.map((cid) => cid.toString());
+    return this.#inner.proofs.map((cid: any) => cid.toString());
   }
 
   get statement(): string {
