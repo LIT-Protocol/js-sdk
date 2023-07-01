@@ -46,7 +46,7 @@ export abstract class BaseProvider {
   ): Promise<AuthMethod>;
 
   /**
-   * Constrcuts a request for interfacing with relayer minting servers, based on the provider-specific implementation.
+   * Constructs a request for interfacing with relayer minting servers, based on the provider-specific implementation.
    * @returns {Promise<RegistrationMethod>} Registraction Method object that contains metdata used for registering authentication methods.
    */
   protected abstract getRelayerRequest(): Promise<RelayerRequest>;
