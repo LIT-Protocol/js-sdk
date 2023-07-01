@@ -386,7 +386,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
-  litprotocol: {
+  chronicleTestnet: {
     contractAddress: null,
     chainId: 175177,
     name: 'Chronicle - Lit Protocol Testnet',
