@@ -28,9 +28,11 @@ const getProvider = (): IEither => {
   let resultOrError: IEither;
 
   // -- validate
-  if ('solana' in window) {
+  // The Backpack wallet does not inject a solana object into the window, so we need to check for the backpack object as well.
+  if ('solana' in window || 'backpack' in window) {
     // only check for the solana object on the window, as keplr does not have the same client interface injected into the window.
-    resultOrError = ERight(window?.solana);
+    // @ts-ignore
+    resultOrError = ERight(window?.solana ?? window?.backpack);
   } else {
     // -- finally
     const message =
