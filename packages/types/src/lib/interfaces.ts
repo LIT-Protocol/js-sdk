@@ -253,6 +253,25 @@ export interface WithSessionSigs extends BaseJsonExecutionRequest {
 
 export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
 
+export interface BaseJsonPkpSignRequest {
+  toSign: ArrayBufferLike;
+  pubKey: string;
+  // auth methods to resolve
+  authMethods?: Array<Object>;
+}
+
+export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
+  sessionSigs: any;
+  authSig?: AuthSig;
+}
+
+export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
+  authSig: AuthSig;
+  sessionSigs?: any;
+}
+
+export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning;
+
 /**
  * Struct in rust
  * -----
@@ -908,8 +927,8 @@ export interface PKPBaseProp {
   sessionSigsExpiration?: string;
   litNetwork?: any;
   debug?: boolean;
-  bootstrapUrls?: string[],
-  minNodeCount?: number,
+  bootstrapUrls?: string[];
+  minNodeCount?: number;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;

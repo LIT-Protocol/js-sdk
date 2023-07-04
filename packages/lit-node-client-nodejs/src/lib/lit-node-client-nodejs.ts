@@ -50,6 +50,7 @@ import {
   GetWalletSigProps,
   SessionSigsMap,
   AuthCallback,
+  JsonPkpSignRequest,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -483,6 +484,16 @@ export class LitNodeClientNodeJs extends LitCore {
     };
 
     return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
+  };
+
+  getPkpSignExecutionShares = async (url: string, params: any, requestId: string) => {
+    log('getPkpSigningShares');
+    const urlWithPath = `${url}/web/pkp/sign`;
+    if (!params.authSig) {
+      throw new Error('authSig is required');
+    }
+    
+    return await this.sendCommandToNode({url: urlWithPath, data: params, requestId });
   };
 
   /**
@@ -1211,6 +1222,53 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     return returnVal;
+  };
+
+  pkpSign = async (params: JsonPkpSignRequest) => {
+    const { authSig, sessionSigs, toSign, pubKey, authMethods } = params;
+
+    const requestId = this.getRequestId();
+    const nodePromises = this.getNodePromises((url: string) => {
+      // -- choose the right signature
+      let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
+        authSig,
+        sessionSigs,
+        url,
+      });
+
+      let reqBody = {
+        toSign,
+        pubKey,
+        authSig: sigToPassToNode,
+        authMethods
+      };
+
+      return this.getPkpSignExecutionShares(url, reqBody, requestId);
+    });
+
+    const res = await this.handleNodePromises(nodePromises);
+
+    // -- case: promises success (TODO: check the keys of "values")
+    const responseData = (res as SuccessNodePromises).values;
+    log('responseData', JSON.stringify(responseData, null, 2));
+
+    // ========== Extract shares from response data ==========
+    // -- 1. combine signed data as a list, and get the signatures from it
+    const signedDataList = responseData.map(
+      (r: any) => (r as SignedData).signedData
+    );
+
+    const signatures = this.getSignatures(signedDataList);
+    log(`signature combination`, signatures);
+    
+    // -- 3. combine responses as a string, and get parse it as JSON
+    let response: string = mostCommonString(
+      responseData.map((r: NodeResponse) => r.response)
+    );
+
+    response = this.parseResponses(response);
+
+    return signatures;
   };
 
   /**

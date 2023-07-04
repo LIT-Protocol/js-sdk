@@ -59,6 +59,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   litActionIPFS?: string;
   litActionJsParams!: T;
   debug: boolean;
+  useAction: boolean | undefined;
 
   readonly defaultLitActionCode: string = `
   (async () => {
@@ -160,6 +161,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
         'No lit action code or IPFS hash provided. Using default action.'
       );
       this.litActionCode = this.defaultLitActionCode;
+      this.useAction = false;
     }
   }
 
