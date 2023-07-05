@@ -6,24 +6,14 @@ global.TextDecoder = TextDecoder;
 
 import * as blsSdk from './bls-sdk';
 
-const publicKey =
-  '8e29447d7b0666fe41c357dbbdbdac0ac8ac973f88439a07f85fa31fa6fa3cea87c2eaa8b367e1c97764800fb5636892';
-const secretMessage = new Uint8Array([
-  240, 23, 185, 6, 87, 33, 173, 216, 53, 84, 80, 135, 190, 16, 58, 85, 97, 75,
-  3, 192, 215, 82, 217, 5, 40, 65, 2, 214, 40, 177, 53, 150,
-]);
-const identityParam = new Uint8Array([
-  101, 110, 99, 114, 121, 112, 116, 95, 100, 101, 99, 114, 121, 112, 116, 95,
-  119, 111, 114, 107, 115,
-]);
-
-describe('imported functions', () => {
-  it('should be non-zero', () => {
+describe('blsSdk', () => {
+  it('should work', () => {
     const OUTPUT = Object.keys(blsSdk).length;
 
     expect(OUTPUT).toBeGreaterThan(0);
   });
 });
+<<<<<<< HEAD
 
 describe('blsSdk', () => {
   beforeAll(async () => {
@@ -151,3 +141,5 @@ function byteArrayToHex(byteArray: Uint8Array) {
     return ('0' + (byte & 0xff).toString(16)).slice(-2);
   }).join('');
 }
+=======
+>>>>>>> parent of 6814b041 (Integrate new BLS WASM)
