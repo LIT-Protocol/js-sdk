@@ -65,7 +65,7 @@ export class LitOptionsBuilder {
     LitOptionsBuilder._nodeClient = client;
   }
 
-  public async build(): void {
+  public async build(): Promise<void> {
     console.log('HEY IT BUILDS!');
 
     if (globalThis.Lit) {
