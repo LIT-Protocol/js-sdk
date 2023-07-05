@@ -7,7 +7,10 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target getlit-sdk"
+        "commands": [
+          "yarn build:target lit-node-client --skip",
+          "yarn build:target getlit-sdk"
+        ]
       }
     },
     "_buildTsc": {
