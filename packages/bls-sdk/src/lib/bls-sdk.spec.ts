@@ -13,6 +13,7 @@ describe('blsSdk', () => {
     expect(OUTPUT).toBeGreaterThan(0);
   });
 });
+<<<<<<< HEAD
 
 describe('blsSdk', () => {
   beforeAll(async () => {
@@ -140,3 +141,5 @@ function byteArrayToHex(byteArray: Uint8Array) {
     return ('0' + (byte & 0xff).toString(16)).slice(-2);
   }).join('');
 }
+=======
+>>>>>>> parent of 6814b041 (Integrate new BLS WASM)
