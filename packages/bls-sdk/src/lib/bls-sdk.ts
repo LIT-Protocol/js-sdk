@@ -1,5 +1,165 @@
 // @ts-nocheck
-import * as pako from 'pako';
+
+// Contants
+const skLen = 32; // bytes
+const pkLen = 48; // bytes
+const sigLen = 96; // bytes
+const maxMsgLen = 1049600; // bytes
+const maxCtLen = 1049600; // bytes
+const decryptionShareLen = 48; // bytes
+
+// the number of bytes in a row derived from a BivarPoly
+// which varies depending on the threshold.
+const row_sizes_by_threshold = [
+  40, // threshold 0
+  72, // threshold 1
+  104, // threshold 2
+  136, // threshold 3
+  168, // threshold 4
+  200, // threshold 5
+  232, // threshold 6
+  264, // threshold 7
+  296, // threshold 8
+  328, // threshold 9
+  360, // threshold 10
+];
+
+// the number of bytes in a commitment derived from a BivarPoly
+// which varies depending on the threshold.
+const commitment_sizes_by_threshold = [
+  56, // threshold 0
+  104, // threshold 1
+  152, // threshold 2
+  200, // threshold 3
+  248, // threshold 4
+  296, // threshold 5
+  344, // threshold 6
+  392, // threshold 7
+  440, // threshold 8
+  488, // threshold 9
+  536, // threshold 10
+];
+
+// the number of bytes in the master secret key (Poly)
+// which varies depending on the threshold.
+const poly_sizes_by_threshold = [
+  40, // threshold 0
+  72, // threshold 1
+  104, // threshold 2
+  136, // threshold 3
+  168, // threshold 4
+  200, // threshold 5
+  232, // threshold 6
+  264, // threshold 7
+  296, // threshold 8
+  328, // threshold 9
+  360, // threshold 10
+];
+
+// Encoding conversions
+
+// modified from https://stackoverflow.com/a/11058858
+function asciiToUint8Array(a: any) {
+  let b = new Uint8Array(a.length);
+  for (let i = 0; i < a.length; i++) {
+    b[i] = a.charCodeAt(i);
+  }
+  return b;
+}
+
+// https://stackoverflow.com/a/19102224
+// TODO resolve RangeError possibility here, see SO comments
+const uint8ArrayToAscii = (a: any) => {
+  return String.fromCharCode.apply(null, a);
+};
+
+// https://stackoverflow.com/a/50868276
+const hexToUint8Array = (h: any) => {
+  if (h.length == 0) {
+    return new Uint8Array();
+  }
+  return new Uint8Array(
+    h.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16))
+  );
+};
+
+const uint8ArrayToHex = (a: any) => {
+  return a.reduce(
+    (str: string, byte: any) => str + byte.toString(16).padStart(2, '0'),
+    ''
+  );
+};
+
+const uint8ArrayToByteStr = (a: any) => {
+  return '[' + a.join(', ') + ']';
+};
+
+const base64abc = [
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F',
+  'G',
+  'H',
+  'I',
+  'J',
+  'K',
+  'L',
+  'M',
+  'N',
+  'O',
+  'P',
+  'Q',
+  'R',
+  'S',
+  'T',
+  'U',
+  'V',
+  'W',
+  'X',
+  'Y',
+  'Z',
+  'a',
+  'b',
+  'c',
+  'd',
+  'e',
+  'f',
+  'g',
+  'h',
+  'i',
+  'j',
+  'k',
+  'l',
+  'm',
+  'n',
+  'o',
+  'p',
+  'q',
+  'r',
+  's',
+  't',
+  'u',
+  'v',
+  'w',
+  'x',
+  'y',
+  'z',
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '+',
+  '/',
+];
 
 const base64codes = [
   255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -11,29 +171,34 @@ const base64codes = [
   33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
 ];
 
-function getBase64Code(charCode) {
+const getBase64Code = (charCode: any) => {
   if (charCode >= base64codes.length) {
     throw new Error('Unable to parse base64 string.');
   }
   const code = base64codes[charCode];
+
   if (code === 255) {
     throw new Error('Unable to parse base64 string.');
   }
-  return code;
-}
 
-export function base64ToUint8Array(str) {
+  return code;
+};
+
+const base64ToUint8Array = (str: string) => {
   if (str.length % 4 !== 0) {
     throw new Error('Unable to parse base64 string.');
   }
   const index = str.indexOf('=');
+
   if (index !== -1 && index < str.length - 2) {
     throw new Error('Unable to parse base64 string.');
   }
+
   let missingOctets = str.endsWith('==') ? 2 : str.endsWith('=') ? 1 : 0,
     n = str.length,
     result = new Uint8Array(3 * (n / 4)),
     buffer;
+
   for (let i = 0, j = 0; i < n; i += 4, j += 3) {
     buffer =
       (getBase64Code(str.charCodeAt(i)) << 18) |
@@ -44,420 +209,651 @@ export function base64ToUint8Array(str) {
     result[j + 1] = (buffer >> 8) & 0xff;
     result[j + 2] = buffer & 0xff;
   }
+
   return result.subarray(0, result.length - missingOctets);
-}
+};
+
+const uint8ArrayToBase64 = (bytes: any) => {
+  let result = '',
+    i,
+    l = bytes.length;
+
+  for (i = 2; i < l; i += 3) {
+    result += base64abc[bytes[i - 2] >> 2];
+    result += base64abc[((bytes[i - 2] & 0x03) << 4) | (bytes[i - 1] >> 4)];
+    result += base64abc[((bytes[i - 1] & 0x0f) << 2) | (bytes[i] >> 6)];
+    result += base64abc[bytes[i] & 0x3f];
+  }
+
+  if (i === l + 1) {
+    // 1 octet yet to write
+    result += base64abc[bytes[i - 2] >> 2];
+    result += base64abc[(bytes[i - 2] & 0x03) << 4];
+    result += '==';
+  }
+
+  if (i === l) {
+    // 2 octets yet to write
+    result += base64abc[bytes[i - 2] >> 2];
+    result += base64abc[((bytes[i - 2] & 0x03) << 4) | (bytes[i - 1] >> 4)];
+    result += base64abc[(bytes[i - 1] & 0x0f) << 2];
+    result += '=';
+  }
+
+  return result;
+};
+
+import * as pako from 'pako';
+
+const util = import('util');
+
+//https://gist.github.com/enepomnyaschih/72c423f727d395eeaa09697058238727
+/*
+MIT License
+Copyright (c) 2020 Egor Nepomnyaschih
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+// threshold_crypto wasm calls. Since they operate on single bytes at a time
+// it's handy to have helpers to do the required looping.
+
+let isWasming = false;
+export const wasmBlsSdkHelpers = new (function () {
+  // s is secret key unit8array
+  this.sk_bytes_to_pk_bytes = function (s) {
+    isWasming = true;
+    const pkBytes = [];
+    try {
+      // set sk bytes
+      for (let i = 0; i < s.length; i++) {
+        globalThis.wasmExports.set_sk_byte(i, s[i]);
+      }
+      // convert into pk bytes
+      globalThis.wasmExports.derive_pk_from_sk();
+      // read pk bytes
+      for (let i = 0; i < pkLen; i++) {
+        const pkByte = globalThis.wasmExports.get_pk_byte(i);
+        pkBytes.push(pkByte);
+      }
+    } catch (e) {
+      isWasming = false;
+      throw 'Failed to generate';
+    }
+    isWasming = false;
+    return pkBytes;
+  };
+
+  // s is secret key uint8array
+  // m is message uint8array
+  this.sign_msg = function (s, m) {
+    isWasming = true;
+    const sigBytes = [];
+    try {
+      // set secret key bytes
+      for (let i = 0; i < s.length; i++) {
+        globalThis.wasmExports.set_sk_byte(i, s[i]);
+      }
+      // set message bytes
+      for (let i = 0; i < m.length; i++) {
+        globalThis.wasmExports.set_msg_byte(i, m[i]);
+      }
+      // sign message
+      globalThis.wasmExports.sign_msg(m.length);
+      // get signature bytes
+      for (let i = 0; i < sigLen; i++) {
+        const sigByte = globalThis.wasmExports.get_sig_byte(i);
+        sigBytes.push(sigByte);
+      }
+    } catch (e) {
+      console.log('error signing in bls-sdk.js:');
+      console.log(e);
+      isWasming = false;
+    }
+    isWasming = false;
+    return Uint8Array.from(sigBytes);
+  };
+
+  // p is public key uint8array
+  // s is signature uint8array
+  // m is message uint8array
+  this.verify = function (p, s, m) {
+    isWasming = true;
+    let verified = false;
+    try {
+      // set public key bytes
+      for (let i = 0; i < p.length; i++) {
+        globalThis.wasmExports.set_pk_byte(i, p[i]);
+      }
+      // set signature bytes
+      for (let i = 0; i < s.length; i++) {
+        globalThis.wasmExports.set_sig_byte(i, s[i]);
+      }
+      // set message bytes
+      for (let i = 0; i < m.length; i++) {
+        globalThis.wasmExports.set_msg_byte(i, m[i]);
+      }
+      verified = globalThis.wasmExports.verify(m.length);
+    } catch (e) {
+      console.log('error verifying sig in bls-sdk.js:');
+      console.log(e);
+      isWasming = false;
+    }
+    isWasming = false;
+    return verified;
+  };
+
+  this.set_rng_values = function () {
+    // Warning if no globalThis.crypto available
+    if (!globalThis.crypto) {
+      const msg =
+        'Secure randomness not available in this browser, output is insecure.';
+      alert(msg);
+      console.log(msg);
+      return;
+    }
+    const RNG_VALUES_SIZE = globalThis.wasmExports.get_rng_values_size();
+    const rngValues = new Uint32Array(RNG_VALUES_SIZE);
+    globalThis.crypto.getRandomValues(rngValues);
+    for (let i = 0; i < rngValues.length; i++) {
+      globalThis.wasmExports.set_rng_value(i, rngValues[i]);
+    }
+  };
+
+  // p is public key uint8array
+  // m is message uint8array
+  this.encrypt = function (p, m) {
+    isWasming = true;
+    const ctBytes = [];
+    try {
+      wasmBlsSdkHelpers.set_rng_values();
+      // set public key bytes
+      for (let i = 0; i < p.length; i++) {
+        globalThis.wasmExports.set_pk_byte(i, p[i]);
+      }
+      // set message bytes
+      for (let i = 0; i < m.length; i++) {
+        globalThis.wasmExports.set_msg_byte(i, m[i]);
+      }
+      // generate strong random u64 used by encrypt
+      // encrypt the message
+      const ctSize = globalThis.wasmExports.encrypt(m.length);
+      // get ciphertext bytes
+      for (let i = 0; i < ctSize; i++) {
+        const ctByte = globalThis.wasmExports.get_ct_byte(i);
+        ctBytes.push(ctByte);
+      }
+    } catch (e) {
+      console.log('error encrypting in bls-sdk.js:');
+      console.log(e);
+      isWasming = false;
+    }
+    isWasming = false;
+    return Uint8Array.from(ctBytes);
+  };
+
+  // s is secret key uint8array
+  // c is message uint8array
+  this.decrypt = function (s, c) {
+    isWasming = true;
+    const msgBytes = [];
+    try {
+      // set secret key bytes
+      for (let i = 0; i < s.length; i++) {
+        globalThis.wasmExports.set_sk_byte(i, s[i]);
+      }
+      // set ciphertext bytes
+      for (let i = 0; i < c.length; i++) {
+        globalThis.wasmExports.set_ct_byte(i, c[i]);
+      }
+      const msgSize = globalThis.wasmExports.decrypt(c.length);
+      // get message bytes
+      for (let i = 0; i < msgSize; i++) {
+        const msgByte = globalThis.wasmExports.get_msg_byte(i);
+        msgBytes.push(msgByte);
+      }
+    } catch (e) {
+      console.log('error decrypting in bls-sdk.js:');
+      console.log(e);
+      isWasming = false;
+    }
+    isWasming = false;
+    return Uint8Array.from(msgBytes);
+  };
+
+  this.generate_poly = function (threshold) {
+    wasmBlsSdkHelpers.set_rng_values();
+    const polySize = poly_sizes_by_threshold[threshold];
+    globalThis.wasmExports.generate_poly(threshold);
+    const polyBytes = [];
+    for (let i = 0; i < polySize; i++) {
+      const polyByte = globalThis.wasmExports.get_poly_byte(i);
+      polyBytes.push(polyByte);
+    }
+    return polyBytes;
+  };
+
+  this.get_msk_bytes = function () {
+    const mskBytes = [];
+    for (let i = 0; i < skLen; i++) {
+      const mskByte = globalThis.wasmExports.get_msk_byte(i);
+      mskBytes.push(mskByte);
+    }
+    return mskBytes;
+  };
+
+  this.get_mpk_bytes = function () {
+    const mpkBytes = [];
+    for (let i = 0; i < pkLen; i++) {
+      const mpkByte = globalThis.wasmExports.get_mpk_byte(i);
+      mpkBytes.push(mpkByte);
+    }
+    return mpkBytes;
+  };
+
+  this.get_mc_bytes = function (threshold) {
+    const mcBytes = [];
+    const mcSize = commitment_sizes_by_threshold[threshold];
+    for (let i = 0; i < mcSize; i++) {
+      const mcByte = globalThis.wasmExports.get_mc_byte(i);
+      mcBytes.push(mcByte);
+    }
+    return mcBytes;
+  };
+
+  this.set_mc_bytes = function (mcBytes) {
+    // set master commitment in wasm
+    for (let i = 0; i < mcBytes.length; i++) {
+      const v = mcBytes[i];
+      globalThis.wasmExports.set_mc_byte(i, v);
+    }
+  };
+
+  this.get_skshare = function () {
+    const skshareBytes = [];
+    for (let i = 0; i < skLen; i++) {
+      const skshareByte = globalThis.wasmExports.get_skshare_byte(i);
+      skshareBytes.push(skshareByte);
+    }
+    return skshareBytes;
+  };
+
+  this.get_pkshare = function () {
+    const pkshareBytes = [];
+    for (let i = 0; i < pkLen; i++) {
+      const pkshareByte = globalThis.wasmExports.get_pkshare_byte(i);
+      pkshareBytes.push(pkshareByte);
+    }
+    return pkshareBytes;
+  };
+
+  this.combine_signatures = function (mcBytes, sigshares) {
+    // set master commitment in wasm
+    wasmBlsSdkHelpers.set_mc_bytes(mcBytes);
+    // set the signature shares
+    for (let shareIndex = 0; shareIndex < sigshares.length; shareIndex++) {
+      const share = sigshares[shareIndex];
+      const sigHex = share.shareHex;
+      const sigBytes = hexToUint8Array(sigHex);
+      const sigIndex = share.shareIndex;
+      for (let byteIndex = 0; byteIndex < sigBytes.length; byteIndex++) {
+        const sigByte = sigBytes[byteIndex];
+        // NB shareIndex is used instead of sigIndex so we can interate
+        // over both
+        // SHARE_INDEXES[i]
+        // and
+        // SIGNATURE_SHARE_BYTES[i*96:(i+1)*96]
+        globalThis.wasmExports.set_signature_share_byte(
+          byteIndex,
+          shareIndex,
+          sigByte
+        );
+        globalThis.wasmExports.set_share_indexes(shareIndex, sigIndex);
+      }
+    }
+    // combine the signatures
+    globalThis.wasmExports.combine_signature_shares(
+      sigshares.length,
+      mcBytes.length
+    );
+    // read the combined signature
+    const sigBytes = [];
+    for (let i = 0; i < sigLen; i++) {
+      const sigByte = globalThis.wasmExports.get_sig_byte(i);
+      sigBytes.push(sigByte);
+    }
+    return Uint8Array.from(sigBytes);
+  };
+
+  // s is secret key share bytes
+  // ct is ciphertext bytes
+  // uiShareIndex is the index of the share as it appears in the UI
+  // derivedShareIndex is the index of the share when derived from the poly
+  this.create_decryption_share = function (
+    s,
+    uiShareIndex,
+    derivedShareIndex,
+    ct
+  ) {
+    // set ct bytes
+    for (let i = 0; i < ct.length; i++) {
+      globalThis.wasmExports.set_ct_byte(i, ct[i]);
+    }
+    // set secret key share
+    for (let i = 0; i < s.length; i++) {
+      globalThis.wasmExports.set_sk_byte(i, s[i]);
+    }
+    // create decryption share
+    const dshareSize = globalThis.wasmExports.create_decryption_share(
+      uiShareIndex,
+      ct.length
+    );
+    // set derivedShareIndex
+    globalThis.wasmExports.set_share_indexes(uiShareIndex, derivedShareIndex);
+    // read decryption share
+    const dshareBytes = [];
+    for (let i = 0; i < decryptionShareLen; i++) {
+      const dshareByte = globalThis.wasmExports.get_decryption_shares_byte(
+        i,
+        uiShareIndex
+      );
+      dshareBytes.push(dshareByte);
+    }
+    return Uint8Array.from(dshareBytes);
+  };
+
+  // Assumes master commitment is already set.
+  // Assumes create_decryption_share is already called for all shares,
+  // Which means ciphertext is already set
+  // and decryption shares are already set
+  // and share_indexes is already set
+  this.combine_decryption_shares = function (totalShares, mcSize, ctSize) {
+    // combine decryption shares
+    const msgSize = globalThis.wasmExports.combine_decryption_shares(
+      totalShares,
+      mcSize,
+      ctSize
+    );
+    // read msg
+    const msgBytes = [];
+    for (let i = 0; i < msgSize; i++) {
+      const msgByte = globalThis.wasmExports.get_msg_byte(i);
+      msgBytes.push(msgByte);
+    }
+    return Uint8Array.from(msgBytes);
+  };
+})();
 
 let wasm;
 
-const heap = new Array(128).fill(undefined);
+let cachedTextDecoder = new TextDecoder('utf-8', {
+  ignoreBOM: true,
+  fatal: true,
+});
 
-heap.push(undefined, null, true, false);
+cachedTextDecoder.decode();
 
-function getObject(idx) {
-  return heap[idx];
-}
-
-let heap_next = heap.length;
-
-function dropObject(idx) {
-  if (idx < 132) return;
-  heap[idx] = heap_next;
-  heap_next = idx;
-}
-
-function takeObject(idx) {
-  const ret = getObject(idx);
-  dropObject(idx);
-  return ret;
-}
-
-const cachedTextDecoder =
-  typeof TextDecoder !== 'undefined'
-    ? new TextDecoder('utf-8', { ignoreBOM: true, fatal: true })
-    : {
-        decode: () => {
-          throw Error('TextDecoder not available');
-        },
-      };
-
-if (typeof TextDecoder !== 'undefined') {
-  cachedTextDecoder.decode();
-}
-
-let cachedUint8Memory0 = null;
-
+let cachegetUint8Memory0 = null;
 function getUint8Memory0() {
-  if (cachedUint8Memory0 === null || cachedUint8Memory0.byteLength === 0) {
-    cachedUint8Memory0 = new Uint8Array(wasm.memory.buffer);
+  if (
+    cachegetUint8Memory0 === null ||
+    cachegetUint8Memory0.buffer !== wasm.memory.buffer
+  ) {
+    cachegetUint8Memory0 = new Uint8Array(wasm.memory.buffer);
   }
-  return cachedUint8Memory0;
+  return cachegetUint8Memory0;
 }
 
 function getStringFromWasm0(ptr, len) {
-  ptr = ptr >>> 0;
   return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
-
-function addHeapObject(obj) {
-  if (heap_next === heap.length) heap.push(heap.length + 1);
-  const idx = heap_next;
-  heap_next = heap[idx];
-
-  heap[idx] = obj;
-  return idx;
-}
-
-let WASM_VECTOR_LEN = 0;
-
-const cachedTextEncoder =
-  typeof TextEncoder !== 'undefined'
-    ? new TextEncoder('utf-8')
-    : {
-        encode: () => {
-          throw Error('TextEncoder not available');
-        },
-      };
-
-const encodeString =
-  typeof cachedTextEncoder.encodeInto === 'function'
-    ? function (arg, view) {
-        return cachedTextEncoder.encodeInto(arg, view);
-      }
-    : function (arg, view) {
-        const buf = cachedTextEncoder.encode(arg);
-        view.set(buf);
-        return {
-          read: arg.length,
-          written: buf.length,
-        };
-      };
-
-function passStringToWasm0(arg, malloc, realloc) {
-  if (realloc === undefined) {
-    const buf = cachedTextEncoder.encode(arg);
-    const ptr = malloc(buf.length) >>> 0;
-    getUint8Memory0()
-      .subarray(ptr, ptr + buf.length)
-      .set(buf);
-    WASM_VECTOR_LEN = buf.length;
-    return ptr;
-  }
-
-  let len = arg.length;
-  let ptr = malloc(len) >>> 0;
-
-  const mem = getUint8Memory0();
-
-  let offset = 0;
-
-  for (; offset < len; offset++) {
-    const code = arg.charCodeAt(offset);
-    if (code > 0x7f) break;
-    mem[ptr + offset] = code;
-  }
-
-  if (offset !== len) {
-    if (offset !== 0) {
-      arg = arg.slice(offset);
-    }
-    ptr = realloc(ptr, len, (len = offset + arg.length * 3)) >>> 0;
-    const view = getUint8Memory0().subarray(ptr + offset, ptr + len);
-    const ret = encodeString(arg, view);
-
-    offset += ret.written;
-  }
-
-  WASM_VECTOR_LEN = offset;
-  return ptr;
-}
-
-function isLikeNone(x) {
-  return x === undefined || x === null;
-}
-
-let cachedInt32Memory0 = null;
-
-function getInt32Memory0() {
-  if (cachedInt32Memory0 === null || cachedInt32Memory0.byteLength === 0) {
-    cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
-  }
-  return cachedInt32Memory0;
-}
-
-let cachedFloat64Memory0 = null;
-
-function getFloat64Memory0() {
-  if (cachedFloat64Memory0 === null || cachedFloat64Memory0.byteLength === 0) {
-    cachedFloat64Memory0 = new Float64Array(wasm.memory.buffer);
-  }
-  return cachedFloat64Memory0;
-}
-
-function debugString(val) {
-  // primitive types
-  const type = typeof val;
-  if (type == 'number' || type == 'boolean' || val == null) {
-    return `${val}`;
-  }
-  if (type == 'string') {
-    return `"${val}"`;
-  }
-  if (type == 'symbol') {
-    const description = val.description;
-    if (description == null) {
-      return 'Symbol';
-    } else {
-      return `Symbol(${description})`;
-    }
-  }
-  if (type == 'function') {
-    const name = val.name;
-    if (typeof name == 'string' && name.length > 0) {
-      return `Function(${name})`;
-    } else {
-      return 'Function';
-    }
-  }
-  // objects
-  if (Array.isArray(val)) {
-    const length = val.length;
-    let debug = '[';
-    if (length > 0) {
-      debug += debugString(val[0]);
-    }
-    for (let i = 1; i < length; i++) {
-      debug += ', ' + debugString(val[i]);
-    }
-    debug += ']';
-    return debug;
-  }
-  // Test for built-in
-  const builtInMatches = /\[object ([^\]]+)\]/.exec(toString.call(val));
-  let className;
-  if (builtInMatches.length > 1) {
-    className = builtInMatches[1];
-  } else {
-    // Failed to match the standard '[object ClassName]'
-    return toString.call(val);
-  }
-  if (className == 'Object') {
-    // we're a user defined class or Object
-    // JSON.stringify avoids problems with cycles, and is generally much
-    // easier than looping through ownProperties of `val`.
-    try {
-      return 'Object(' + JSON.stringify(val) + ')';
-    } catch (_) {
-      return 'Object';
-    }
-  }
-  // errors
-  if (val instanceof Error) {
-    return `${val.name}: ${val.message}\n${val.stack}`;
-  }
-  // TODO we could test for more things here, like `Set`s and `Map`s.
-  return className;
-}
 /**
  * @private
- *Initialize function for the wasm library
+ * @returns {number}
  */
-export function initialize() {
-  wasm.initialize();
+export function get_rng_values_size() {
+  var ret = wasm.get_rng_values_size();
+  return ret >>> 0;
 }
 
 /**
  * @private
- *Encrypts the data to the public key and identity. All inputs are hex encoded strings.
- * @param {string} public_key
- * @param {string} message
- * @param {string} identity
- * @returns {string}
+ * @param {number} i
+ * @param {number} v
  */
-export function encrypt(public_key, message, identity) {
-  let deferred5_0;
-  let deferred5_1;
-  try {
-    const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-    const ptr0 = passStringToWasm0(
-      public_key,
-      wasm.__wbindgen_malloc,
-      wasm.__wbindgen_realloc
-    );
-    const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passStringToWasm0(
-      message,
-      wasm.__wbindgen_malloc,
-      wasm.__wbindgen_realloc
-    );
-    const len1 = WASM_VECTOR_LEN;
-    const ptr2 = passStringToWasm0(
-      identity,
-      wasm.__wbindgen_malloc,
-      wasm.__wbindgen_realloc
-    );
-    const len2 = WASM_VECTOR_LEN;
-    wasm.encrypt(retptr, ptr0, len0, ptr1, len1, ptr2, len2);
-    var r0 = getInt32Memory0()[retptr / 4 + 0];
-    var r1 = getInt32Memory0()[retptr / 4 + 1];
-    var r2 = getInt32Memory0()[retptr / 4 + 2];
-    var r3 = getInt32Memory0()[retptr / 4 + 3];
-    var ptr4 = r0;
-    var len4 = r1;
-    if (r3) {
-      ptr4 = 0;
-      len4 = 0;
-      throw takeObject(r2);
-    }
-    deferred5_0 = ptr4;
-    deferred5_1 = len4;
-    return getStringFromWasm0(ptr4, len4);
-  } finally {
-    wasm.__wbindgen_add_to_stack_pointer(16);
-    wasm.__wbindgen_free(deferred5_0, deferred5_1);
-  }
+export function set_rng_value(i, v) {
+  wasm.set_rng_value(i, v);
 }
 
 /**
  * @private
- *Verifies the decryption shares are valid and decrypts the data.
- * @param {string} public_key
- * @param {string} identity
- * @param {string} ciphertext
- * @param {any} shares
- * @returns {string}
+ * @param {number} i
+ * @param {number} v
  */
-export function verify_and_decrypt_with_signature_shares(
-  public_key,
-  identity,
-  ciphertext,
-  shares
-) {
-  let deferred5_0;
-  let deferred5_1;
-  try {
-    const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-    const ptr0 = passStringToWasm0(
-      public_key,
-      wasm.__wbindgen_malloc,
-      wasm.__wbindgen_realloc
-    );
-    const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passStringToWasm0(
-      identity,
-      wasm.__wbindgen_malloc,
-      wasm.__wbindgen_realloc
-    );
-    const len1 = WASM_VECTOR_LEN;
-    const ptr2 = passStringToWasm0(
-      ciphertext,
-      wasm.__wbindgen_malloc,
-      wasm.__wbindgen_realloc
-    );
-    const len2 = WASM_VECTOR_LEN;
-    wasm.verify_and_decrypt_with_signature_shares(
-      retptr,
-      ptr0,
-      len0,
-      ptr1,
-      len1,
-      ptr2,
-      len2,
-      addHeapObject(shares)
-    );
-    var r0 = getInt32Memory0()[retptr / 4 + 0];
-    var r1 = getInt32Memory0()[retptr / 4 + 1];
-    var r2 = getInt32Memory0()[retptr / 4 + 2];
-    var r3 = getInt32Memory0()[retptr / 4 + 3];
-    var ptr4 = r0;
-    var len4 = r1;
-    if (r3) {
-      ptr4 = 0;
-      len4 = 0;
-      throw takeObject(r2);
-    }
-    deferred5_0 = ptr4;
-    deferred5_1 = len4;
-    return getStringFromWasm0(ptr4, len4);
-  } finally {
-    wasm.__wbindgen_add_to_stack_pointer(16);
-    wasm.__wbindgen_free(deferred5_0, deferred5_1);
-  }
+export function set_sk_byte(i, v) {
+  wasm.set_sk_byte(i, v);
 }
 
 /**
  * @private
- *Decrypts the data with signature shares.
- * @param {string} ciphertext
- * @param {any} shares
- * @returns {string}
+ * @param {number} i
+ * @returns {number}
  */
-export function decrypt_with_signature_shares(ciphertext, shares) {
-  let deferred3_0;
-  let deferred3_1;
-  try {
-    const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-    const ptr0 = passStringToWasm0(
-      ciphertext,
-      wasm.__wbindgen_malloc,
-      wasm.__wbindgen_realloc
-    );
-    const len0 = WASM_VECTOR_LEN;
-    wasm.decrypt_with_signature_shares(
-      retptr,
-      ptr0,
-      len0,
-      addHeapObject(shares)
-    );
-    var r0 = getInt32Memory0()[retptr / 4 + 0];
-    var r1 = getInt32Memory0()[retptr / 4 + 1];
-    var r2 = getInt32Memory0()[retptr / 4 + 2];
-    var r3 = getInt32Memory0()[retptr / 4 + 3];
-    var ptr2 = r0;
-    var len2 = r1;
-    if (r3) {
-      ptr2 = 0;
-      len2 = 0;
-      throw takeObject(r2);
-    }
-    deferred3_0 = ptr2;
-    deferred3_1 = len2;
-    return getStringFromWasm0(ptr2, len2);
-  } finally {
-    wasm.__wbindgen_add_to_stack_pointer(16);
-    wasm.__wbindgen_free(deferred3_0, deferred3_1);
-  }
+export function get_sk_byte(i) {
+  var ret = wasm.get_sk_byte(i);
+  return ret;
 }
 
 /**
  * @private
- *Combines the signature shares into a single signature.
- * @param {any} shares
- * @returns {string}
+ * @param {number} i
+ * @param {number} v
  */
-export function combine_signature_shares(shares) {
-  let deferred2_0;
-  let deferred2_1;
-  try {
-    const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-    wasm.combine_signature_shares(retptr, addHeapObject(shares));
-    var r0 = getInt32Memory0()[retptr / 4 + 0];
-    var r1 = getInt32Memory0()[retptr / 4 + 1];
-    var r2 = getInt32Memory0()[retptr / 4 + 2];
-    var r3 = getInt32Memory0()[retptr / 4 + 3];
-    var ptr1 = r0;
-    var len1 = r1;
-    if (r3) {
-      ptr1 = 0;
-      len1 = 0;
-      throw takeObject(r2);
-    }
-    deferred2_0 = ptr1;
-    deferred2_1 = len1;
-    return getStringFromWasm0(ptr1, len1);
-  } finally {
-    wasm.__wbindgen_add_to_stack_pointer(16);
-    wasm.__wbindgen_free(deferred2_0, deferred2_1);
-  }
+export function set_pk_byte(i, v) {
+  wasm.set_pk_byte(i, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @returns {number}
+ */
+export function get_pk_byte(i) {
+  var ret = wasm.get_pk_byte(i);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} v
+ */
+export function set_sig_byte(i, v) {
+  wasm.set_sig_byte(i, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @returns {number}
+ */
+export function get_sig_byte(i) {
+  var ret = wasm.get_sig_byte(i);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} v
+ */
+export function set_msg_byte(i, v) {
+  wasm.set_msg_byte(i, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @returns {number}
+ */
+export function get_msg_byte(i) {
+  var ret = wasm.get_msg_byte(i);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} v
+ */
+export function set_ct_byte(i, v) {
+  wasm.set_ct_byte(i, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @returns {number}
+ */
+export function get_ct_byte(i) {
+  var ret = wasm.get_ct_byte(i);
+  return ret;
+}
+
+/**
+ * @private
+ * @returns {number}
+ */
+export function get_rng_next_count() {
+  var ret = wasm.get_rng_next_count();
+  return ret >>> 0;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} v
+ */
+export function set_poly_byte(i, v) {
+  wasm.set_poly_byte(i, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @returns {number}
+ */
+export function get_poly_byte(i) {
+  var ret = wasm.get_poly_byte(i);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} v
+ */
+export function set_msk_byte(i, v) {
+  wasm.set_msk_byte(i, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @returns {number}
+ */
+export function get_msk_byte(i) {
+  var ret = wasm.get_msk_byte(i);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} v
+ */
+export function set_mpk_byte(i, v) {
+  wasm.set_mpk_byte(i, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @returns {number}
+ */
+export function get_mpk_byte(i) {
+  var ret = wasm.get_mpk_byte(i);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} v
+ */
+export function set_mc_byte(i, v) {
+  wasm.set_mc_byte(i, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @returns {number}
+ */
+export function get_mc_byte(i) {
+  var ret = wasm.get_mc_byte(i);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} v
+ */
+export function set_skshare_byte(i, v) {
+  wasm.set_skshare_byte(i, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @returns {number}
+ */
+export function get_skshare_byte(i) {
+  var ret = wasm.get_skshare_byte(i);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} v
+ */
+export function set_pkshare_byte(i, v) {
+  wasm.set_pkshare_byte(i, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @returns {number}
+ */
+export function get_pkshare_byte(i) {
+  var ret = wasm.get_pkshare_byte(i);
+  return ret;
 }
 
 /**
@@ -507,7 +903,282 @@ function handleError(f, args) {
   }
 }
 
-async function __wbg_load(module, imports) {
+/**
+ * @private
+ * @param {number} i
+ * @param {number} from_node
+ * @param {number} to_node
+ * @returns {number}
+ */
+export function get_bivar_row_byte(i, from_node, to_node) {
+  var ret = wasm.get_bivar_row_byte(i, from_node, to_node);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} from_node
+ * @param {number} v
+ */
+export function set_bivar_commitments_byte(i, from_node, v) {
+  wasm.set_bivar_commitments_byte(i, from_node, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} from_node
+ * @returns {number}
+ */
+export function get_bivar_commitments_byte(i, from_node) {
+  var ret = wasm.get_bivar_commitments_byte(i, from_node);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} node_index
+ * @param {number} v
+ */
+export function set_bivar_sks_byte(i, node_index, v) {
+  wasm.set_bivar_sks_byte(i, node_index, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} node_index
+ * @returns {number}
+ */
+export function get_bivar_sks_byte(i, node_index) {
+  var ret = wasm.get_bivar_sks_byte(i, node_index);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} node_index
+ * @param {number} v
+ */
+export function set_bivar_pks_byte(i, node_index, v) {
+  wasm.set_bivar_pks_byte(i, node_index, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} node_index
+ * @returns {number}
+ */
+export function get_bivar_pks_byte(i, node_index) {
+  var ret = wasm.get_bivar_pks_byte(i, node_index);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} sig_index
+ * @param {number} v
+ */
+export function set_signature_share_byte(i, sig_index, v) {
+  wasm.set_signature_share_byte(i, sig_index, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} sig_index
+ * @returns {number}
+ */
+export function get_signature_share_byte(i, sig_index) {
+  var ret = wasm.get_signature_share_byte(i, sig_index);
+  return ret;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} v
+ */
+export function set_share_indexes(i, v) {
+  wasm.set_share_indexes(i, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @returns {number}
+ */
+export function get_share_indexes(i) {
+  var ret = wasm.get_share_indexes(i);
+  return ret >>> 0;
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} share_index
+ * @param {number} v
+ */
+export function set_decryption_shares_byte(i, share_index, v) {
+  wasm.set_decryption_shares_byte(i, share_index, v);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} share_index
+ * @returns {number}
+ */
+export function get_decryption_shares_byte(i, share_index) {
+  var ret = wasm.get_decryption_shares_byte(i, share_index);
+  return ret;
+}
+
+/**
+ * @private
+ */
+export function derive_pk_from_sk() {
+  wasm.derive_pk_from_sk();
+}
+
+/**
+ * @private
+ * @param {number} msg_size
+ */
+export function sign_msg(msg_size) {
+  wasm.sign_msg(msg_size);
+}
+
+/**
+ * @private
+ * @param {number} msg_size
+ * @returns {boolean}
+ */
+export function verify(msg_size) {
+  var ret = wasm.verify(msg_size);
+  return ret !== 0;
+}
+
+/**
+ * @private
+ * @param {number} msg_size
+ * @returns {number}
+ */
+export function encrypt(msg_size) {
+  var ret = wasm.encrypt(msg_size);
+  return ret >>> 0;
+}
+
+/**
+ * @private
+ * @param {number} ct_size
+ * @returns {number}
+ */
+export function decrypt(ct_size) {
+  var ret = wasm.decrypt(ct_size);
+  return ret >>> 0;
+}
+
+/**
+ * @private
+ * @param {number} threshold
+ */
+export function generate_poly(threshold) {
+  wasm.generate_poly(threshold);
+}
+
+/**
+ * @private
+ * @param {number} poly_size
+ * @returns {number}
+ */
+export function get_poly_degree(poly_size) {
+  var ret = wasm.get_poly_degree(poly_size);
+  return ret >>> 0;
+}
+
+/**
+ * @private
+ * @param {number} mc_size
+ * @returns {number}
+ */
+export function get_mc_degree(mc_size) {
+  var ret = wasm.get_mc_degree(mc_size);
+  return ret >>> 0;
+}
+
+/**
+ * @private
+ * @param {number} poly_size
+ */
+export function derive_master_key(poly_size) {
+  wasm.derive_master_key(poly_size);
+}
+
+/**
+ * @private
+ * @param {number} i
+ * @param {number} poly_size
+ */
+export function derive_key_share(i, poly_size) {
+  wasm.derive_key_share(i, poly_size);
+}
+
+/**
+ * @private
+ * @param {number} threshold
+ * @param {number} total_nodes
+ */
+export function generate_bivars(threshold, total_nodes) {
+  wasm.generate_bivars(threshold, total_nodes);
+}
+
+/**
+ * @private
+ * @param {number} total_signatures
+ * @param {number} commitment_size
+ */
+export function combine_signature_shares(total_signatures, commitment_size) {
+  wasm.combine_signature_shares(total_signatures, commitment_size);
+}
+
+/**
+ * @private
+ * @param {number} share_index
+ * @param {number} ct_size
+ * @returns {number}
+ */
+export function create_decryption_share(share_index, ct_size) {
+  var ret = wasm.create_decryption_share(share_index, ct_size);
+  return ret >>> 0;
+}
+
+/**
+ * @private
+ * @param {number} total_decryption_shares
+ * @param {number} commitment_size
+ * @param {number} ct_size
+ * @returns {number}
+ */
+export function combine_decryption_shares(
+  total_decryption_shares,
+  commitment_size,
+  ct_size
+) {
+  var ret = wasm.combine_decryption_shares(
+    total_decryption_shares,
+    commitment_size,
+    ct_size
+  );
+  return ret >>> 0;
+}
+
+async function load(module, imports) {
   if (typeof Response === 'function' && module instanceof Response) {
     if (typeof WebAssembly.instantiateStreaming === 'function') {
       try {
@@ -537,284 +1208,15 @@ async function __wbg_load(module, imports) {
   }
 }
 
-function __wbg_get_imports() {
+async function init(input) {
   const imports = {};
   imports.wbg = {};
-  imports.wbg.__wbindgen_object_drop_ref = function (arg0) {
-    takeObject(arg0);
-  };
-  imports.wbg.__wbindgen_string_new = function (arg0, arg1) {
-    const ret = getStringFromWasm0(arg0, arg1);
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbindgen_string_get = function (arg0, arg1) {
-    const obj = getObject(arg1);
-    const ret = typeof obj === 'string' ? obj : undefined;
-    var ptr1 = isLikeNone(ret)
-      ? 0
-      : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    var len1 = WASM_VECTOR_LEN;
-    getInt32Memory0()[arg0 / 4 + 1] = len1;
-    getInt32Memory0()[arg0 / 4 + 0] = ptr1;
-  };
-  imports.wbg.__wbindgen_number_get = function (arg0, arg1) {
-    const obj = getObject(arg1);
-    const ret = typeof obj === 'number' ? obj : undefined;
-    getFloat64Memory0()[arg0 / 8 + 1] = isLikeNone(ret) ? 0 : ret;
-    getInt32Memory0()[arg0 / 4 + 0] = !isLikeNone(ret);
-  };
-  imports.wbg.__wbindgen_is_object = function (arg0) {
-    const val = getObject(arg0);
-    const ret = typeof val === 'object' && val !== null;
-    return ret;
-  };
-  imports.wbg.__wbindgen_jsval_loose_eq = function (arg0, arg1) {
-    const ret = getObject(arg0) == getObject(arg1);
-    return ret;
-  };
-  imports.wbg.__wbindgen_boolean_get = function (arg0) {
-    const v = getObject(arg0);
-    const ret = typeof v === 'boolean' ? (v ? 1 : 0) : 2;
-    return ret;
-  };
-  imports.wbg.__wbindgen_error_new = function (arg0, arg1) {
-    const ret = new Error(getStringFromWasm0(arg0, arg1));
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_new_abda76e883ba8a5f = function () {
-    const ret = new Error();
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_stack_658279fe44541cf6 = function (arg0, arg1) {
-    const ret = getObject(arg1).stack;
-    const ptr1 = passStringToWasm0(
-      ret,
-      wasm.__wbindgen_malloc,
-      wasm.__wbindgen_realloc
-    );
-    const len1 = WASM_VECTOR_LEN;
-    getInt32Memory0()[arg0 / 4 + 1] = len1;
-    getInt32Memory0()[arg0 / 4 + 0] = ptr1;
-  };
-  imports.wbg.__wbg_error_f851667af71bcfc6 = function (arg0, arg1) {
-    let deferred0_0;
-    let deferred0_1;
-    try {
-      deferred0_0 = arg0;
-      deferred0_1 = arg1;
-      console.error(getStringFromWasm0(arg0, arg1));
-    } finally {
-      wasm.__wbindgen_free(deferred0_0, deferred0_1);
-    }
-  };
-  imports.wbg.__wbg_crypto_c48a774b022d20ac = function (arg0) {
-    const ret = getObject(arg0).crypto;
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_process_298734cf255a885d = function (arg0) {
-    const ret = getObject(arg0).process;
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_versions_e2e78e134e3e5d01 = function (arg0) {
-    const ret = getObject(arg0).versions;
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_node_1cd7a5d853dbea79 = function (arg0) {
-    const ret = getObject(arg0).node;
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbindgen_is_string = function (arg0) {
-    const ret = typeof getObject(arg0) === 'string';
-    return ret;
-  };
-  imports.wbg.__wbg_require_8f08ceecec0f4fee = function () {
-    return handleError(function () {
-      const ret = module.require;
-      return addHeapObject(ret);
-    }, arguments);
-  };
-  imports.wbg.__wbg_msCrypto_bcb970640f50a1e8 = function (arg0) {
-    const ret = getObject(arg0).msCrypto;
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_getRandomValues_37fa2ca9e4e07fab = function () {
-    return handleError(function (arg0, arg1) {
-      getObject(arg0).getRandomValues(getObject(arg1));
-    }, arguments);
-  };
-  imports.wbg.__wbg_randomFillSync_dc1e9a60c158336d = function () {
-    return handleError(function (arg0, arg1) {
-      getObject(arg0).randomFillSync(takeObject(arg1));
-    }, arguments);
-  };
-  imports.wbg.__wbg_newnoargs_c9e6043b8ad84109 = function (arg0, arg1) {
-    const ret = new Function(getStringFromWasm0(arg0, arg1));
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_next_f4bc0e96ea67da68 = function (arg0) {
-    const ret = getObject(arg0).next;
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbindgen_is_function = function (arg0) {
-    const ret = typeof getObject(arg0) === 'function';
-    return ret;
-  };
-  imports.wbg.__wbg_value_2f4ef2036bfad28e = function (arg0) {
-    const ret = getObject(arg0).value;
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_iterator_7c7e58f62eb84700 = function () {
-    const ret = Symbol.iterator;
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_self_742dd6eab3e9211e = function () {
-    return handleError(function () {
-      const ret = self.self;
-      return addHeapObject(ret);
-    }, arguments);
-  };
-  imports.wbg.__wbg_window_c409e731db53a0e2 = function () {
-    return handleError(function () {
-      const ret = window.window;
-      return addHeapObject(ret);
-    }, arguments);
-  };
-  imports.wbg.__wbg_globalThis_b70c095388441f2d = function () {
-    return handleError(function () {
-      const ret = globalThis.globalThis;
-      return addHeapObject(ret);
-    }, arguments);
-  };
-  imports.wbg.__wbg_global_1c72617491ed7194 = function () {
-    return handleError(function () {
-      const ret = global.global;
-      return addHeapObject(ret);
-    }, arguments);
-  };
-  imports.wbg.__wbindgen_is_undefined = function (arg0) {
-    const ret = getObject(arg0) === undefined;
-    return ret;
-  };
-  imports.wbg.__wbg_get_7303ed2ef026b2f5 = function (arg0, arg1) {
-    const ret = getObject(arg0)[arg1 >>> 0];
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_isArray_04e59fb73f78ab5b = function (arg0) {
-    const ret = Array.isArray(getObject(arg0));
-    return ret;
-  };
-  imports.wbg.__wbg_length_820c786973abdd8a = function (arg0) {
-    const ret = getObject(arg0).length;
-    return ret;
-  };
-  imports.wbg.__wbg_instanceof_ArrayBuffer_ef2632aa0d4bfff8 = function (arg0) {
-    let result;
-    try {
-      result = getObject(arg0) instanceof ArrayBuffer;
-    } catch {
-      result = false;
-    }
-    const ret = result;
-    return ret;
-  };
-  imports.wbg.__wbg_call_557a2f2deacc4912 = function () {
-    return handleError(function (arg0, arg1) {
-      const ret = getObject(arg0).call(getObject(arg1));
-      return addHeapObject(ret);
-    }, arguments);
-  };
-  imports.wbg.__wbg_call_587b30eea3e09332 = function () {
-    return handleError(function (arg0, arg1, arg2) {
-      const ret = getObject(arg0).call(getObject(arg1), getObject(arg2));
-      return addHeapObject(ret);
-    }, arguments);
-  };
-  imports.wbg.__wbg_next_ec061e48a0e72a96 = function () {
-    return handleError(function (arg0) {
-      const ret = getObject(arg0).next();
-      return addHeapObject(ret);
-    }, arguments);
-  };
-  imports.wbg.__wbg_done_b6abb27d42b63867 = function (arg0) {
-    const ret = getObject(arg0).done;
-    return ret;
-  };
-  imports.wbg.__wbg_buffer_55ba7a6b1b92e2ac = function (arg0) {
-    const ret = getObject(arg0).buffer;
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_newwithbyteoffsetandlength_88d1d8be5df94b9b = function (
-    arg0,
-    arg1,
-    arg2
-  ) {
-    const ret = new Uint8Array(getObject(arg0), arg1 >>> 0, arg2 >>> 0);
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_new_09938a7d020f049b = function (arg0) {
-    const ret = new Uint8Array(getObject(arg0));
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_instanceof_Uint8Array_1349640af2da2e88 = function (arg0) {
-    let result;
-    try {
-      result = getObject(arg0) instanceof Uint8Array;
-    } catch {
-      result = false;
-    }
-    const ret = result;
-    return ret;
-  };
-  imports.wbg.__wbg_newwithlength_89eeca401d8918c2 = function (arg0) {
-    const ret = new Uint8Array(arg0 >>> 0);
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_subarray_d82be056deb4ad27 = function (arg0, arg1, arg2) {
-    const ret = getObject(arg0).subarray(arg1 >>> 0, arg2 >>> 0);
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_length_0aab7ffd65ad19ed = function (arg0) {
-    const ret = getObject(arg0).length;
-    return ret;
-  };
-  imports.wbg.__wbg_set_3698e3ca519b3c3c = function (arg0, arg1, arg2) {
-    getObject(arg0).set(getObject(arg1), arg2 >>> 0);
-  };
-  imports.wbg.__wbindgen_object_clone_ref = function (arg0) {
-    const ret = getObject(arg0);
-    return addHeapObject(ret);
-  };
-  imports.wbg.__wbg_get_f53c921291c381bd = function () {
-    return handleError(function (arg0, arg1) {
-      const ret = Reflect.get(getObject(arg0), getObject(arg1));
-      return addHeapObject(ret);
-    }, arguments);
-  };
-  imports.wbg.__wbindgen_debug_string = function (arg0, arg1) {
-    const ret = debugString(getObject(arg1));
-    const ptr1 = passStringToWasm0(
-      ret,
-      wasm.__wbindgen_malloc,
-      wasm.__wbindgen_realloc
-    );
-    const len1 = WASM_VECTOR_LEN;
-    getInt32Memory0()[arg0 / 4 + 1] = len1;
-    getInt32Memory0()[arg0 / 4 + 0] = ptr1;
-  };
   imports.wbg.__wbindgen_throw = function (arg0, arg1) {
     throw new Error(getStringFromWasm0(arg0, arg1));
   };
-  imports.wbg.__wbindgen_memory = function () {
-    const ret = wasm.memory;
-    return addHeapObject(ret);
-  };
 
-  return imports;
-}
+  const { instance, module } = await load(await input, imports);
 
-function __wbg_init_memory(imports, maybe_memory) {}
-
-function __wbg_finalize_init(instance, module) {
   wasm = instance.exports;
   __wbg_init.__wbindgen_wasm_module = module;
   cachedFloat64Memory0 = null;
