@@ -8,12 +8,12 @@ const lernaJson = JSON.parse(fs.readFileSync('lerna.json', 'utf-8'));
 const version = lernaJson.version;
 
 const commands = [
-  // ['yarn', 'bump'],
-  // ['yarn', 'build:packages'],
-  // ['yarn', 'test:unit'],
-  // ['yarn', 'test:e2e'],
-  // ['yarn', 'gen:docs', '--push'],
-  // ['yarn', 'publish:packages'],
+  ['yarn', 'bump'],
+  ['yarn', 'build:packages'],
+  ['yarn', 'test:unit'],
+  ['yarn', 'test:e2e'],
+  ['yarn', 'gen:docs', '--push'],
+  ['yarn', 'publish:packages'],
   ['git', 'add', '*'],
   ['git', 'commit', '-m', `Published version ${version}`],
   ['git', 'push']
