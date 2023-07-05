@@ -1787,6 +1787,9 @@ export class LitNodeClientNodeJs extends LitCore {
    * 2. Generate or retrieve the wallet signature of the session key
    * 3. Sign the specific resources with the session key
    *
+   * Note: When generating session signatures for different PKPs or auth methods,
+   * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
+   *
    * @param { GetSessionSigsProps } params
    */
   getSessionSigs = async (

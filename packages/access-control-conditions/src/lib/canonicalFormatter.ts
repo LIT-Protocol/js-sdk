@@ -101,9 +101,9 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
 };
 
 /**
-* 
+*
 * (SOLANA) Canonical Solana RPC Condition Formatter
-* 
+*
 * need to return in the exact format below:
 * but make sure we don't include the optional fields:
  ---
@@ -125,10 +125,10 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
       pub fields: serde_json::Value,
   }
   ---
-* 
-* @param { object } cond 
+*
+* @param { object } cond
 * @param { boolean } requireV2Conditions
-*  
+*
 * @returns { any[] | AccsOperatorParams | AccsRegularParams | AccsSOLV2Params | ILitError | any }
 */
 export const canonicalSolRpcConditionFormatter = (
@@ -226,9 +226,9 @@ export const canonicalSolRpcConditionFormatter = (
 };
 
 /**
-* 
+*
 * (DEFAULT) Canonical Access Control Condition Formatter
-* 
+*
 * need to return in the exact format below:
  ---
   pub struct JsonAccessControlCondition {
@@ -240,9 +240,9 @@ export const canonicalSolRpcConditionFormatter = (
     pub return_value_test: JsonReturnValueTest,
   }
   ---
-* 
-* @param { object } cond 
-*  
+*
+* @param { object } cond
+*
 * @returns { any[] | AccsOperatorParams | AccsDefaultParams | any }
 */
 export const canonicalAccessControlConditionFormatter = (
@@ -284,9 +284,9 @@ export const canonicalAccessControlConditionFormatter = (
 };
 
 /**
-* 
+*
 * (EVM) Canonical EVM Contract Condition Formatter
-* 
+*
 *  need to return in the exact format below:
   ---
   pub struct JsonAccessControlCondition {
@@ -298,10 +298,10 @@ export const canonicalAccessControlConditionFormatter = (
       pub return_value_test: JsonReturnValueTest,
   }
   ---
-* 
+*
 * @param { ConditionItem } cond
-*  
-* @returns 
+*
+* @returns
 */
 export const canonicalEVMContractConditionFormatter = (
   cond: ConditionItem
@@ -379,9 +379,9 @@ export const canonicalEVMContractConditionFormatter = (
 };
 
 /**
-* 
+*
 * (COSMOS) Canonical Condition Formmater for Cosmos
-* 
+*
 * need to return in the exact format below:
  ---
   pub struct CosmosCondition {
@@ -390,10 +390,10 @@ export const canonicalEVMContractConditionFormatter = (
       pub return_value_test: JsonReturnValueTestV2,
   }
  ---
-* 
-* 
-* @param { ConditionItem } cond 
-* @returns 
+*
+*
+* @param { ConditionItem } cond
+* @returns
 */
 export const canonicalCosmosConditionFormatter = (
   cond: ConditionItem
@@ -426,6 +426,8 @@ export const canonicalCosmosConditionFormatter = (
     return {
       path: _cosmosCond.path,
       chain: _cosmosCond.chain,
+      method: _cosmosCond?.method,
+      parameters: _cosmosCond?.parameters,
       returnValueTest: canonicalReturnValueTest,
     };
   }

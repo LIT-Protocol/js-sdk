@@ -75,6 +75,8 @@ export interface AccsEVMParams extends AccsRegularParams {
 
 export interface AccsCOSMOSParams extends AccsRegularParams {
   path: string;
+  method?: string;
+  parameters?: string[];
 }
 
 /** ---------- Auth Sig ---------- */
@@ -906,6 +908,8 @@ export interface PKPBaseProp {
   sessionSigsExpiration?: string;
   litNetwork?: any;
   debug?: boolean;
+  bootstrapUrls?: string[],
+  minNodeCount?: number,
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;

@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [2.2.33] - 2023-06-27
+
+- [95c7258](https://github.com/LIT-Protocol/js-sdk/commit/95c725850de44e17f70a9365dc13e46f6bd841de) Removed wallet connect from lit-connect-modal temporarily 
+
 # [2.2.20] - 2023-05-31
 
 - [#106](https://github.com/LIT-Protocol/js-sdk/pull/106) New `pkp-walletconnect` package to connect PKPs and dApps using WalletConnect V2

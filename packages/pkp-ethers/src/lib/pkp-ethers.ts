@@ -67,7 +67,7 @@ export class PKPEthersWallet
     super(prop);
 
     this.rpcProvider = new ethers.providers.JsonRpcProvider(
-      prop.rpc ?? LIT_CHAINS['litprotocol'].rpcUrls[0]
+      prop.rpc ?? LIT_CHAINS['chronicleTestnet'].rpcUrls[0]
     );
 
     defineReadOnly(this, '_isSigner', true);
