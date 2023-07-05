@@ -8,6 +8,9 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
+          "yarn build:target constants --skip",
+          "yarn build:target misc --skip",
+          "yarn build:target uint8arrays --skip",
           "yarn build:target crypto --skip",
           "yarn build:target lit-node-client"
         ],
