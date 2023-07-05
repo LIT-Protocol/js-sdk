@@ -8,20 +8,20 @@ const lernaJson = JSON.parse(fs.readFileSync('lerna.json', 'utf-8'));
 const version = lernaJson.version;
 
 const commands = [
-  // 'yarn bump',
-  // 'yarn build',
-  // 'yarn test:unit',
-  // 'yarn test:e2e',
-  // 'yarn gen:docs --push',
-  // 'yarn publish:packages',
-  `git add *`,
-  `git commit -m "Published version ${version}"`,
-  'git push',
+  // ['yarn', 'bump'],
+  // ['yarn', 'build:packages'],
+  // ['yarn', 'test:unit'],
+  // ['yarn', 'test:e2e'],
+  // ['yarn', 'gen:docs', '--push'],
+  // ['yarn', 'publish:packages'],
+  ['git', 'add', '*'],
+  ['git', 'commit', '-m', `Published version ${version}`],
+  ['git', 'push']
 ];
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout,
+  output: process.stdout
 });
 
 function runCommand(index = 0) {
@@ -30,10 +30,10 @@ function runCommand(index = 0) {
     return;
   }
 
-  rl.question(`Press Enter to execute: ${commands[index]}\n`, () => {
-    const [command, ...args] = commands[index].split(' ');
+  const command = commands[index];
 
-    const childProcess = spawn(command, args, { stdio: 'inherit' });
+  rl.question(`Press Enter to execute: ${command.join(' ')}\n`, () => {
+    const childProcess = spawn(command[0], command.slice(1), { stdio: 'inherit' });
 
     childProcess.on('error', (error) => {
       console.error(`Execution error: ${error}`);
