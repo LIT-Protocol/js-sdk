@@ -28,9 +28,11 @@ const getProvider = (): IEither => {
   let resultOrError: IEither;
 
   // -- validate
-  if ('solana' in window) {
+  // The Backpack wallet does not inject a solana object into the window, so we need to check for the backpack object as well.
+  if ('solana' in window || 'backpack' in window) {
     // only check for the solana object on the window, as keplr does not have the same client interface injected into the window.
-    resultOrError = ERight(window?.solana);
+    // @ts-ignore
+    resultOrError = ERight(window?.solana ?? window?.backpack);
   } else {
     // -- finally
     const message =
@@ -62,7 +64,11 @@ export const connectSolProvider = async (): Promise<IProvider | undefined> => {
 
   let provider: any = providerOrError.result;
 
-  await provider.connect();
+  // No need to reconnect if already connected, some wallets such as Backpack throws an error when doing so.
+  if (!provider.isConnected) {
+    await provider.connect();
+  }
+
   const account = provider.publicKey.toBase58();
 
   return { provider, account };
@@ -149,13 +155,23 @@ export const signAndSaveAuthMessage = async ({
   const data = uint8arrayFromString(body, 'utf8');
 
   //   const data = naclUtil.encode(body);
-  const signed = await provider.signMessage(data, 'utf8');
+  let payload: { signature: Uint8Array };
+  let derivedVia = 'solana.signMessage';
 
-  const hexSig = uint8arrayToString(signed.signature, 'base16');
+  // Backpack wallet expects and returns a different payload from signMessage()
+  if (provider?.isBackpack) {
+    const result = await provider.signMessage(data);
+    payload = { signature: result };
+    derivedVia = 'backpack.signMessage';
+  } else {
+    payload = await provider.signMessage(data, 'utf8');
+  }
+
+  const hexSig = uint8arrayToString(payload.signature, 'base16');
 
   const authSig: AuthSig = {
     sig: hexSig,
-    derivedVia: 'solana.signMessage',
+    derivedVia,
     signedMessage: body,
     address: provider.publicKey.toBase58(),
   };
