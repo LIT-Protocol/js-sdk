@@ -5,7 +5,7 @@ import {
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs';
-
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 declare global {
   var Lit: Lit;
   var LitBuilder: LitOptionsBuilder;
@@ -21,8 +21,16 @@ export namespace Types {
   }
   export type NodeOptions = LitNodeClientConfig;
 
-  export type LitOptions = ContractOptions & AuthOptions & NodeOptions;
+  export type LitOptions = ContractOptions & AuthOptions & NodeOptions & ;
+  export type NodeClient = LitNodeClientNodeJs | LitNodeClient;  
 }
+
+// const LitNodeClient = _LitNodeClient.LitNodeClient;
+// if (!globalThis.LitNodeClient) {
+//   globalThis.LitNodeClient = LitNodeClient;
+// LitNodeClient.connect();
+// }
+
 
 export class Lit {
   private _options: Types.LitOptions | undefined;
@@ -42,7 +50,8 @@ export class LitOptionsBuilder {
   private static _contractOptions: Types.ContractOptions;
   private static _authOptions: Types.AuthOptions;
   private static _nodeOptions: LitNodeClientConfig;
-  
+  private static _nodeClient: Types.NodeClient;
+
   public static withContractOptions(options: Types.ContractOptions) {
     LitOptionsBuilder._contractOptions = options;
   }
@@ -50,6 +59,9 @@ export class LitOptionsBuilder {
     LitOptionsBuilder._authOptions;
   }
 
+  public static withNodeClient(client: Types.NodeClient) {
+    LitOptionsBuilder._nodeClient = client;
+  }
 
   public build(): void {
 
@@ -60,7 +72,10 @@ export class LitOptionsBuilder {
     }
     
     globalThis.Lit = new Lit();
-    globalThis.Lit.Configure = ({... LitOptionsBuilder._authOptions, ...LitOptionsBuilder._contractOptions, ...LitOptionsBuilder._nodeOptions});   
+    if (!LitOptionsBuilder._nodeClient) {
+      // define client and connect;
+    }
+    globalThis.Lit.Configure = ({...LitOptionsBuilder._authOptions, ...LitOptionsBuilder._contractOptions, ...LitOptionsBuilder._nodeOptions});
   }
 }
 
