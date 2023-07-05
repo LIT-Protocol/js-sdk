@@ -57,6 +57,8 @@ export const safeParams = ({
 
   for (const validator of paramValidators) {
     const validationResponse = validator.validate();
+
+    // @ts-ignore
     if (validationResponse.type === EITHER_TYPE.ERROR) {
       return validationResponse;
     }
