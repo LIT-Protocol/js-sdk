@@ -6,10 +6,7 @@ import {
 import { ethers } from 'ethers';
 import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-declare global {
-  var Lit: Lit;
-  var LitBuilder: LitOptionsBuilder;
-}
+import * as litNodeClientNodejs from '@lit-protocol/lit-node-client-nodejs';
 
 export namespace Types {
   export interface ContractOptions {
@@ -19,10 +16,16 @@ export namespace Types {
     litRelayConfig?: LitRelayConfig;
     litOtpConfig?: OtpProviderOptions;
   }
-  export type NodeOptions = LitNodeClientConfig;
+  export type NodeOptions = { nodeOptions?: LitNodeClientConfig };
 
-  export type LitOptions = ContractOptions & AuthOptions & NodeOptions & ;
-  export type NodeClient = LitNodeClientNodeJs | LitNodeClient;  
+  export type NodeClient<T = LitNodeClient | LitNodeClientNodeJs> = T;
+  export type LitOptions = ContractOptions & AuthOptions & NodeOptions;
+}
+
+declare global {
+  var Lit: Lit;
+  var litNodeClient: Types.NodeClient;
+  var LitBuilder: LitOptionsBuilder;
 }
 
 // const LitNodeClient = _LitNodeClient.LitNodeClient;
@@ -31,20 +34,19 @@ export namespace Types {
 // LitNodeClient.connect();
 // }
 
-
 export class Lit {
   private _options: Types.LitOptions | undefined;
-  private _litNodeClient: LitNodeClientNodeJs | undefined;
+  private _litNodeClient: Types.NodeClient | undefined;
 
   public set Configure(value: Types.LitOptions) {
     this._options = value;
+    this._litNodeClient = globalThis.litNodeClient;
   }
-  
+
   // static ContractOptions(options: Types.ContractOptions){
   //   return new Lit(options);
   // }
 }
-
 
 export class LitOptionsBuilder {
   private static _contractOptions: Types.ContractOptions;
@@ -63,30 +65,51 @@ export class LitOptionsBuilder {
     LitOptionsBuilder._nodeClient = client;
   }
 
-  public build(): void {
+  public async build(): void {
+    console.log('HEY IT BUILDS!');
 
-    console.log("HEY IT BUILDS!")
-
-    if(globalThis.Lit) {
-      console.warn("GetLit has already be initalized, do you want to reinitalize the global instance?");  
+    if (globalThis.Lit) {
+      console.warn(
+        'GetLit has already be initalized, do you want to reinitalize the global instance?'
+      );
     }
-    
-    globalThis.Lit = new Lit();
+
     if (!LitOptionsBuilder._nodeClient) {
-      // define client and connect;
+      LitOptionsBuilder._nodeClient = new LitNodeClient(
+        LitOptionsBuilder._nodeOptions ?? { litNetwork: 'serrano' }
+      );
+    } else {
+      LitOptionsBuilder._nodeClient = new LitNodeClientNodeJs(
+        LitOptionsBuilder._nodeOptions ?? { litNetwork: 'serrano' }
+      );
     }
-    globalThis.Lit.Configure = ({...LitOptionsBuilder._authOptions, ...LitOptionsBuilder._contractOptions, ...LitOptionsBuilder._nodeOptions});
+
+    await LitOptionsBuilder._nodeClient.connect();
+
+    globalThis.litNodeClient = LitOptionsBuilder._nodeClient;
+
+    globalThis.Lit.Configure = {
+      ...LitOptionsBuilder._authOptions,
+      ...LitOptionsBuilder._contractOptions,
+      ...LitOptionsBuilder._nodeOptions,
+    };
   }
 }
 
 // -- we do this for users
 // initialize globally
 (async () => {
-  if(globalThis.LitBuilder) {
-    console.warn("GetLit builder has already be initalized, do you want to reinitalize the global instance?");  
+  try {
+    if (globalThis.LitBuilder) {
+      console.warn(
+        'GetLit builder has already be initalized, do you want to reinitalize the global instance?'
+      );
+    }
+    globalThis.LitBuilder = new LitOptionsBuilder();
+    globalThis.LitBuilder.build();
+  } catch (e) {
+    console.error(`Error while attempting to configure GetLit instance ${e}`);
   }
-  globalThis.LitBuilder = new LitOptionsBuilder();
-  globalThis.LitBuilder.build();
 })();
 
 // -- user usage
