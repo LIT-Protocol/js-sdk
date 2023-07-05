@@ -4,7 +4,6 @@ export interface ILitError {
   message?: string;
   name?: string;
   errorCode?: string;
-  errorKind?: string;
   error?: ILitErrorTypeParams;
 }
 
@@ -16,7 +15,7 @@ export interface ILitErrorTypeParams {
 /**
  * A standardized way to return either error or success
  */
-export interface IEither<T> {
+export interface IEither {
   type: EITHER_TYPE.SUCCESS | EITHER_TYPE.ERROR;
-  result: T | ILitError;
+  result: any | ILitError;
 }

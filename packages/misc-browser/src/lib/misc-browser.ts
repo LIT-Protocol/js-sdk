@@ -10,7 +10,7 @@ import {
  *
  * @param { string } key
  */
-export const getStorageItem = (key: string): IEither<string> => {
+export const getStorageItem = (key: string): IEither => {
   let item;
   try {
     item = localStorage.getItem(key);
@@ -18,15 +18,19 @@ export const getStorageItem = (key: string): IEither<string> => {
     // swallowing
   }
 
+  let keyOrError: IEither;
+
   if (!item) {
-    return ELeft({
+    keyOrError = ELeft({
       message: `Failed to get ${key} from local storage`,
       errorKind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
       errorCode: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
     });
+  } else {
+    keyOrError = ERight(item);
   }
 
-  return ERight(item);
+  return keyOrError;
 };
 
 /**
@@ -36,7 +40,7 @@ export const getStorageItem = (key: string): IEither<string> => {
  * @param { string } key is the key to set
  * @param { string } value is the value to set
  */
-export const setStorageItem = (key: string, value: string): IEither<string> => {
+export const setStorageItem = (key: string, value: string): IEither => {
   try {
     localStorage.setItem(key, value);
     return ERight(value);
@@ -55,7 +59,7 @@ export const setStorageItem = (key: string, value: string): IEither<string> => {
  * @param { string } key is the key to remove
  * @returns { IEither } Either the key or an error
  */
-export const removeStorageItem = (key: string): IEither<string> => {
+export const removeStorageItem = (key: string): IEither => {
   try {
     localStorage.removeItem(key);
     return ERight(key);
