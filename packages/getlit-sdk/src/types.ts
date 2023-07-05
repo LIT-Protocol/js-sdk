@@ -85,7 +85,6 @@ export class LitOptionsBuilder {
     }
 
     await LitOptionsBuilder._nodeClient.connect();
-
     globalThis.litNodeClient = LitOptionsBuilder._nodeClient;
 
     globalThis.Lit.Configure = {
@@ -106,7 +105,7 @@ export class LitOptionsBuilder {
       );
     }
     globalThis.LitBuilder = new LitOptionsBuilder();
-    globalThis.LitBuilder.build();
+    await globalThis.LitBuilder.build();
   } catch (e) {
     console.error(`Error while attempting to configure GetLit instance ${e}`);
   }
