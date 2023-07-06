@@ -1,19 +1,19 @@
 import { ContractTransaction } from 'ethers';
 
 // --- Replaced Content ---
-import { TransactionRequest } from '@ethersproject/abstract-provider';
+import { TransactionRequest } from "@ethersproject/abstract-provider";
 import { BigNumber, BigNumberish } from 'ethers';
 
 export interface Arrayish {
-  toHexString(): string;
-  slice(start?: number, end?: number): Arrayish;
-  length: number;
-  [index: number]: number;
+    toHexString(): string;
+    slice(start?: number, end?: number): Arrayish;
+    length: number;
+    [index: number]: number;
 }
 
 export type ContractContext = ContractContextLegacy & {
-  populateTransaction: ContractContextLegacy;
-};
+    populateTransaction: ContractContextLegacy
+}
 // --- Replaced Content ---
 import { EthersContractContext } from 'ethereum-abi-types-generator';
 
@@ -124,9 +124,7 @@ export interface AccessControlConditions {
    * StateMutability: nonpayable
    * Type: constructor
    */
-  'new'(
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  'new'(overrides?: ContractTransactionOverrides): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: true
