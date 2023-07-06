@@ -1273,7 +1273,7 @@ export class LitNodeClientNodeJs extends LitCore {
       const snakeToCamel = (s: string) =>
         s.replace(/(_\w)/g, (k) => k[1].toUpperCase());
       //@ts-ignore
-      const convertShare: any = (share: any): SigShare => {
+      const convertShare: any = (share: any) => {
         const keys = Object.keys(share);
         let convertedShare = {};
         for (const key of keys) {
@@ -1284,27 +1284,20 @@ export class LitNodeClientNodeJs extends LitCore {
           );
         }
 
-        return convertShare;
+        return convertedShare;
       };
       const convertedShare: SigShare = convertShare(r.signatureShare);
 
       convertedShare.dataSigned = r.signedData;
       return {
-        sig: r.signatureShare,
+        signature: convertedShare,
       };
     });
 
-    const signatures = this.getSignatures(signedDataList);
+    const signatures =  this.getSignatures(signedDataList);
     log(`signature combination`, signatures);
 
-    // -- 3. combine responses as a string, and get parse it as JSON
-    let response: string = mostCommonString(
-      responseData.map((r: NodeResponse) => r.response)
-    );
-
-    response = this.parseResponses(response);
-
-    return signatures;
+    return signatures.signature; // only a single signature is ever present, so we just return it.
   };
 
   /**

@@ -2,6 +2,7 @@ import { LitNodeClient } from './lit-node-client';
 import * as LITCONFIG from 'lit.config.json';
 import { processTx } from '../../../../tx-handler';
 import { AuthSig } from '@lit-protocol/types';
+import { ethers } from 'ethers';
 let client: LitNodeClient;
 
 jest.setTimeout(60000);
@@ -91,12 +92,14 @@ describe('Lit Actions', () => {
       sigName: 'hello-world-sig',
     };
 
-    let res = await client.pkpSign({
+    let sig = await client.pkpSign({
       toSign: data.toSign as unknown as ArrayBufferLike,
       pubKey: data.publicKey,
       authMethods: [],
       authSig: LITCONFIG.CONTROLLER_AUTHSIG
     });
-    console.log(res);
+    
+    // add padding 
+    expect(LITCONFIG.PKP_PUBKEY).toEqual('0' + sig.publicKey);
   });
 });
