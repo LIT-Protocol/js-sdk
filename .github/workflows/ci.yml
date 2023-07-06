@@ -24,4 +24,4 @@ jobs:
         with:
           main-branch-name: 'master'
       - name: Run tests
-        run: npx nx test
+        run: npx nx affected --target=test --parallel=3 --ci --code-coverage -- --runInBand
