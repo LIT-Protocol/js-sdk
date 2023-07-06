@@ -7,7 +7,11 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target lit-node-client-nodejs"
+        "commands": [
+          "yarn build:target constants --skip",
+          "yarn build:target encryption --skip",
+          "yarn build:target lit-node-client-nodejs"
+        ]
       }
     },
     "_buildTsc": {
