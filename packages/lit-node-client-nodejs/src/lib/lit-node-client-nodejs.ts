@@ -486,14 +486,22 @@ export class LitNodeClientNodeJs extends LitCore {
     return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
   };
 
-  getPkpSignExecutionShares = async (url: string, params: any, requestId: string) => {
+  getPkpSignExecutionShares = async (
+    url: string,
+    params: any,
+    requestId: string
+  ) => {
     log('getPkpSigningShares');
     const urlWithPath = `${url}/web/pkp/sign`;
     if (!params.authSig) {
       throw new Error('authSig is required');
     }
-    
-    return await this.sendCommandToNode({url: urlWithPath, data: params, requestId });
+
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data: params,
+      requestId,
+    });
   };
 
   /**
@@ -1238,9 +1246,9 @@ export class LitNodeClientNodeJs extends LitCore {
 
       let reqBody = {
         toSign,
-        pubKey,
+        pubkey: pubKey,
         authSig: sigToPassToNode,
-        authMethods
+        authMethods,
       };
 
       return this.getPkpSignExecutionShares(url, reqBody, requestId);
@@ -1248,19 +1256,47 @@ export class LitNodeClientNodeJs extends LitCore {
 
     const res = await this.handleNodePromises(nodePromises);
 
+    // -- case: promises rejected
+    if (res.success === false) {
+      this._throwNodeError(res as RejectedNodePromises);
+    }
+
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises).values;
     log('responseData', JSON.stringify(responseData, null, 2));
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = responseData.map(
-      (r: any) => (r as SignedData).signedData
-    );
+    const signedDataList = responseData.map((r: any) => {
+      // add the signed data to the signature share
+      delete r.signatureShare.result;
+      const snakeToCamel = (s: string) =>
+        s.replace(/(_\w)/g, (k) => k[1].toUpperCase());
+      //@ts-ignore
+      const convertShare: any = (share: any): SigShare => {
+        const keys = Object.keys(share);
+        let convertedShare = {};
+        for (const key of keys) {
+          convertedShare = Object.defineProperty(
+            convertedShare,
+            snakeToCamel(key),
+            Object.getOwnPropertyDescriptor(share, key) as PropertyDecorator
+          );
+        }
+
+        return convertShare;
+      };
+      const convertedShare: SigShare = convertShare(r.signatureShare);
+
+      convertedShare.dataSigned = r.signedData;
+      return {
+        sig: r.signatureShare,
+      };
+    });
 
     const signatures = this.getSignatures(signedDataList);
     log(`signature combination`, signatures);
-    
+
     // -- 3. combine responses as a string, and get parse it as JSON
     let response: string = mostCommonString(
       responseData.map((r: NodeResponse) => r.response)
