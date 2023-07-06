@@ -96,10 +96,11 @@ describe('Lit Actions', () => {
       toSign: data.toSign as unknown as ArrayBufferLike,
       pubKey: data.publicKey,
       authMethods: [],
-      authSig: LITCONFIG.CONTROLLER_AUTHSIG
+      authSig: LITCONFIG.CONTROLLER_AUTHSIG,
     });
-    
-    // add padding 
-    expect(LITCONFIG.PKP_PUBKEY).toEqual('0' + sig.publicKey);
+
+    // add padding
+    sig.publicKey = sig.publicKey.length % 2 == 0 ? sig.publicKey : '0' + sig.publicKey;
+    expect(LITCONFIG.PKP_PUBKEY).toEqual(sig.publicKey);
   });
 });
