@@ -1,555 +1,555 @@
 export const contractResolver = {
- "address": "0xFCB3d8a54680e9337e3c8E60adC02F2aE8455A71",
+  "address": "0xFCB3d8a54680e9337e3c8E60adC02F2aE8455A71",
   "abi": [
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'enum ContractResolver.Env',
-          name: 'env',
-          type: 'uint8',
-        },
+          "internalType": "enum ContractResolver.Env",
+          "name": "env",
+          "type": "uint8"
+        }
       ],
-      stateMutability: 'nonpayable',
-      type: 'constructor',
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
     {
-      inputs: [],
-      name: 'AdminRoleRequired',
-      type: 'error',
+      "inputs": [],
+      "name": "AdminRoleRequired",
+      "type": "error"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'enum ContractResolver.Env',
-          name: 'env',
-          type: 'uint8',
-        },
+          "indexed": false,
+          "internalType": "enum ContractResolver.Env",
+          "name": "env",
+          "type": "uint8"
+        }
       ],
-      name: 'AllowedEnvAdded',
-      type: 'event',
+      "name": "AllowedEnvAdded",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'enum ContractResolver.Env',
-          name: 'env',
-          type: 'uint8',
-        },
+          "indexed": false,
+          "internalType": "enum ContractResolver.Env",
+          "name": "env",
+          "type": "uint8"
+        }
       ],
-      name: 'AllowedEnvRemoved',
-      type: 'event',
+      "name": "AllowedEnvRemoved",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'bytes32',
-          name: 'role',
-          type: 'bytes32',
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
         },
         {
-          indexed: true,
-          internalType: 'bytes32',
-          name: 'previousAdminRole',
-          type: 'bytes32',
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
         },
         {
-          indexed: true,
-          internalType: 'bytes32',
-          name: 'newAdminRole',
-          type: 'bytes32',
-        },
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
       ],
-      name: 'RoleAdminChanged',
-      type: 'event',
+      "name": "RoleAdminChanged",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'bytes32',
-          name: 'role',
-          type: 'bytes32',
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
         },
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
         },
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'sender',
-          type: 'address',
-        },
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
       ],
-      name: 'RoleGranted',
-      type: 'event',
+      "name": "RoleGranted",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'bytes32',
-          name: 'role',
-          type: 'bytes32',
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
         },
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
         },
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'sender',
-          type: 'address',
-        },
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
       ],
-      name: 'RoleRevoked',
-      type: 'event',
+      "name": "RoleRevoked",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'bytes32',
-          name: 'typ',
-          type: 'bytes32',
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "typ",
+          "type": "bytes32"
         },
         {
-          indexed: false,
-          internalType: 'enum ContractResolver.Env',
-          name: 'env',
-          type: 'uint8',
+          "indexed": false,
+          "internalType": "enum ContractResolver.Env",
+          "name": "env",
+          "type": "uint8"
         },
         {
-          indexed: false,
-          internalType: 'address',
-          name: 'addr',
-          type: 'address',
-        },
+          "indexed": false,
+          "internalType": "address",
+          "name": "addr",
+          "type": "address"
+        }
       ],
-      name: 'SetContract',
-      type: 'event',
+      "name": "SetContract",
+      "type": "event"
     },
     {
-      inputs: [],
-      name: 'ACCESS_CONTROL_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "ACCESS_CONTROL_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'ADMIN_ROLE',
-      outputs: [
+      "inputs": [],
+      "name": "ADMIN_ROLE",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'ALLOWLIST_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "ALLOWLIST_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'DEFAULT_ADMIN_ROLE',
-      outputs: [
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'LIT_TOKEN_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "LIT_TOKEN_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'MULTI_SENDER_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "MULTI_SENDER_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'PKP_HELPER_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "PKP_HELPER_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'PKP_NFT_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "PKP_NFT_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'PKP_NFT_METADATA_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "PKP_NFT_METADATA_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'PKP_PERMISSIONS_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "PKP_PERMISSIONS_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'PUB_KEY_ROUTER_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "PUB_KEY_ROUTER_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'RATE_LIMIT_NFT_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "RATE_LIMIT_NFT_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'RELEASE_REGISTER_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "RELEASE_REGISTER_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'STAKING_CONTRACT',
-      outputs: [
+      "inputs": [],
+      "name": "STAKING_CONTRACT",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'enum ContractResolver.Env',
-          name: 'env',
-          type: 'uint8',
-        },
+          "internalType": "enum ContractResolver.Env",
+          "name": "env",
+          "type": "uint8"
+        }
       ],
-      name: 'addAllowedEnv',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "addAllowedEnv",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'bytes32',
-          name: 'typ',
-          type: 'bytes32',
+          "internalType": "bytes32",
+          "name": "typ",
+          "type": "bytes32"
         },
         {
-          internalType: 'enum ContractResolver.Env',
-          name: 'env',
-          type: 'uint8',
-        },
+          "internalType": "enum ContractResolver.Env",
+          "name": "env",
+          "type": "uint8"
+        }
       ],
-      name: 'getContract',
-      outputs: [
+      "name": "getContract",
+      "outputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'bytes32',
-          name: 'role',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
       ],
-      name: 'getRoleAdmin',
-      outputs: [
+      "name": "getRoleAdmin",
+      "outputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'bytes32',
-          name: 'role',
-          type: 'bytes32',
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
         },
         {
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
       ],
-      name: 'grantRole',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'bytes32',
-          name: 'role',
-          type: 'bytes32',
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
         },
         {
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
       ],
-      name: 'hasRole',
-      outputs: [
+      "name": "hasRole",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'enum ContractResolver.Env',
-          name: 'env',
-          type: 'uint8',
-        },
+          "internalType": "enum ContractResolver.Env",
+          "name": "env",
+          "type": "uint8"
+        }
       ],
-      name: 'removeAllowedEnv',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "removeAllowedEnv",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'bytes32',
-          name: 'role',
-          type: 'bytes32',
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
         },
         {
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
       ],
-      name: 'renounceRole',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'bytes32',
-          name: 'role',
-          type: 'bytes32',
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
         },
         {
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
       ],
-      name: 'revokeRole',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'newAdmin',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
       ],
-      name: 'setAdmin',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setAdmin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'bytes32',
-          name: 'typ',
-          type: 'bytes32',
+          "internalType": "bytes32",
+          "name": "typ",
+          "type": "bytes32"
         },
         {
-          internalType: 'enum ContractResolver.Env',
-          name: 'env',
-          type: 'uint8',
+          "internalType": "enum ContractResolver.Env",
+          "name": "env",
+          "type": "uint8"
         },
         {
-          internalType: 'address',
-          name: 'addr',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "addr",
+          "type": "address"
+        }
       ],
-      name: 'setContract',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setContract",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'bytes4',
-          name: 'interfaceId',
-          type: 'bytes4',
-        },
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
       ],
-      name: 'supportsInterface',
-      outputs: [
+      "name": "supportsInterface",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
         },
         {
-          internalType: 'enum ContractResolver.Env',
-          name: '',
-          type: 'uint8',
-        },
+          "internalType": "enum ContractResolver.Env",
+          "name": "",
+          "type": "uint8"
+        }
       ],
-      name: 'typeAddresses',
-      outputs: [
+      "name": "typeAddresses",
+      "outputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-  ],
-};
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}
