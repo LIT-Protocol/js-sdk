@@ -166,10 +166,15 @@ export class PKPEthersWallet
 
       // -- lit action --
       const toSign = arrayify(unsignedTxn);
-
-      this.log('running lit action => sigName: pkp-eth-sign-tx');
-      const signature = (await this.runLitAction(toSign, 'pkp-eth-sign-tx'))
-        .signature;
+      let signature;
+      if (this.useAction) {
+        this.log('running lit action => sigName: pkp-eth-sign-tx');
+        signature = (await this.runLitAction(toSign, 'pkp-eth-sign-tx'))
+          .signature;
+      } else {
+        this.log("requesting signature from nodes");
+        signature = this.sign(toSign);
+      }
 
       this.log('signature', signature);
 
@@ -183,9 +188,14 @@ export class PKPEthersWallet
     }
 
     const toSign = arrayify(hashMessage(message));
-
-    this.log('running lit action => sigName: pkp-eth-sign-message');
-    const signature = await this.runLitAction(toSign, 'pkp-eth-sign-message');
+    let signature;
+    if (this.useAction) {
+      this.log('running lit action => sigName: pkp-eth-sign-message');
+      signature = await this.runLitAction(toSign, 'pkp-eth-sign-message');      
+    } else { 
+      this.log("requesting signature from nodes");
+      signature = await this.sign(toSign);
+    }
 
     return joinSignature({
       r: '0x' + signature.r,
@@ -231,10 +241,16 @@ export class PKPEthersWallet
       types,
       populated.value
     );
-    const signature = await this.runLitAction(
-      arrayify(toSign),
-      'pkp-eth-sign-typed-data'
-    );
+    const toSignBuffer = arrayify(toSign);
+    let signature;
+    if (this.useAction) {
+      this.log('running lit action => sigName: pkp-eth-sign-message');
+      signature = await this.runLitAction(toSignBuffer, 'pkp-eth-sign-message');      
+    } else { 
+      this.log("requesting signature from nodes");
+      signature = await this.sign(toSignBuffer);
+    }
+
     return joinSignature({
       r: '0x' + signature.r,
       s: '0x' + signature.s,
