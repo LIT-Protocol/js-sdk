@@ -50,6 +50,7 @@ import {
   GetWalletSigProps,
   SessionSigsMap,
   AuthCallback,
+  JsonPkpSignRequest,
 } from '@lit-protocol/types';
 import {
   combineBlsDecryptionShares,
@@ -483,6 +484,24 @@ export class LitNodeClientNodeJs extends LitCore {
     };
 
     return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
+  };
+
+  getPkpSignExecutionShares = async (
+    url: string,
+    params: any,
+    requestId: string
+  ) => {
+    log('getPkpSigningShares');
+    const urlWithPath = `${url}/web/pkp/sign`;
+    if (!params.authSig) {
+      throw new Error('authSig is required');
+    }
+
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data: params,
+      requestId,
+    });
   };
 
   /**
@@ -1211,6 +1230,84 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     return returnVal;
+  };
+
+  pkpSign = async (params: JsonPkpSignRequest) => {
+    let { authSig, sessionSigs, toSign, pubKey, authMethods } = params;
+
+    // the nodes will only accept a normal array type as a paramater due to serizalization issues with Uint8Array type.
+    // this loop below is to normalize the message to a basic array.
+    let arr = [];
+    for (let i = 0; i < toSign.length; i++) {
+      arr.push((toSign as Buffer)[i]);
+    }
+    toSign = arr;
+
+    const requestId = this.getRequestId();
+    const nodePromises = this.getNodePromises((url: string) => {
+      // -- choose the right signature
+      let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
+        authSig,
+        sessionSigs,
+        url,
+      });
+
+      let reqBody = {
+        toSign,
+        pubkey: pubKey,
+        authSig: sigToPassToNode,
+        authMethods,
+      };
+
+      return this.getPkpSignExecutionShares(url, reqBody, requestId);
+    });
+
+    const res = await this.handleNodePromises(nodePromises);
+
+    // -- case: promises rejected
+    if (res.success === false) {
+      this._throwNodeError(res as RejectedNodePromises);
+    }
+
+    // -- case: promises success (TODO: check the keys of "values")
+    const responseData = (res as SuccessNodePromises).values;
+    log('responseData', JSON.stringify(responseData, null, 2));
+
+    // ========== Extract shares from response data ==========
+    // -- 1. combine signed data as a list, and get the signatures from it
+    const signedDataList = responseData.map((r: any) => {
+      // add the signed data to the signature share
+      delete r.signatureShare.result;
+
+      // nodes do not camel case the response from /web/pkp/sign.
+      const snakeToCamel = (s: string) =>
+        s.replace(/(_\w)/g, (k) => k[1].toUpperCase());
+      //@ts-ignore
+      const convertShare: any = (share: any) => {
+        const keys = Object.keys(share);
+        let convertedShare = {};
+        for (const key of keys) {
+          convertedShare = Object.defineProperty(
+            convertedShare,
+            snakeToCamel(key),
+            Object.getOwnPropertyDescriptor(share, key) as PropertyDecorator
+          );
+        }
+
+        return convertedShare;
+      };
+      const convertedShare: SigShare = convertShare(r.signatureShare);
+
+      convertedShare.dataSigned = Buffer.from(r.signedData).toString('hex');
+      return {
+        signature: convertedShare,
+      };
+    });
+
+    const signatures = this.getSignatures(signedDataList);
+    log(`signature combination`, signatures);
+
+    return signatures.signature; // only a single signature is ever present, so we just return it.
   };
 
   /**
