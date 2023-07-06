@@ -1233,7 +1233,15 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   pkpSign = async (params: JsonPkpSignRequest) => {
-    const { authSig, sessionSigs, toSign, pubKey, authMethods } = params;
+    let { authSig, sessionSigs, toSign, pubKey, authMethods } = params;
+
+    // the nodes will only accept a normal array type as a paramater due to serizalization issues with Uint8Array type.
+    // this loop below is to normalize the message to a basic array.
+    let arr = [];
+    for (let i = 0; i < toSign.length; i++) {
+      arr.push((toSign as Buffer)[i]);
+    }
+    toSign = arr;
 
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
@@ -1270,6 +1278,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const signedDataList = responseData.map((r: any) => {
       // add the signed data to the signature share
       delete r.signatureShare.result;
+
+      // nodes do not camel case the response from /web/pkp/sign.
       const snakeToCamel = (s: string) =>
         s.replace(/(_\w)/g, (k) => k[1].toUpperCase());
       //@ts-ignore
@@ -1288,13 +1298,13 @@ export class LitNodeClientNodeJs extends LitCore {
       };
       const convertedShare: SigShare = convertShare(r.signatureShare);
 
-      convertedShare.dataSigned = r.signedData;
+      convertedShare.dataSigned = Buffer.from(r.signedData).toString('hex');
       return {
         signature: convertedShare,
       };
     });
 
-    const signatures =  this.getSignatures(signedDataList);
+    const signatures = this.getSignatures(signedDataList);
     log(`signature combination`, signatures);
 
     return signatures.signature; // only a single signature is ever present, so we just return it.

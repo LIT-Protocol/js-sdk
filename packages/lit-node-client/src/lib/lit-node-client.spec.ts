@@ -93,7 +93,7 @@ describe('Lit Actions', () => {
     };
 
     let sig = await client.pkpSign({
-      toSign: data.toSign as unknown as ArrayBufferLike,
+      toSign: data.toSign,
       pubKey: data.publicKey,
       authMethods: [],
       authSig: LITCONFIG.CONTROLLER_AUTHSIG,

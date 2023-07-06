@@ -19,6 +19,7 @@ import {
   ISessionCapabilityObject,
   LitResourceAbilityRequest,
 } from '@lit-protocol/auth-helpers';
+import { BytesLike } from 'ethers';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -254,7 +255,7 @@ export interface WithSessionSigs extends BaseJsonExecutionRequest {
 export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
 
 export interface BaseJsonPkpSignRequest {
-  toSign: ArrayBufferLike;
+  toSign: ArrayLike<number>;
   pubKey: string;
   // auth methods to resolve
   authMethods?: Array<Object>;
@@ -923,6 +924,7 @@ export interface PKPBaseProp {
   rpc?: string;
   rpcs?: RPCUrls;
   controllerAuthSig?: AuthSig;
+  controllerAuthMethods?: AuthMethod[];
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
   litNetwork?: any;

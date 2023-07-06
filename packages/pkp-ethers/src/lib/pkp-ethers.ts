@@ -167,16 +167,15 @@ export class PKPEthersWallet
       // -- lit action --
       const toSign = arrayify(unsignedTxn);
       let signature;
+
       if (this.useAction) {
         this.log('running lit action => sigName: pkp-eth-sign-tx');
         signature = (await this.runLitAction(toSign, 'pkp-eth-sign-tx'))
           .signature;
       } else {
         this.log("requesting signature from nodes");
-        signature = this.sign(toSign);
+        signature = (await this.runSign(toSign)).signature;
       }
-
-      this.log('signature', signature);
 
       return serialize(<UnsignedTransaction>tx, signature);
     });
@@ -192,9 +191,9 @@ export class PKPEthersWallet
     if (this.useAction) {
       this.log('running lit action => sigName: pkp-eth-sign-message');
       signature = await this.runLitAction(toSign, 'pkp-eth-sign-message');      
-    } else { 
+    } else {
       this.log("requesting signature from nodes");
-      signature = await this.sign(toSign);
+      signature = await this.runSign(toSign);
     }
 
     return joinSignature({
@@ -248,7 +247,7 @@ export class PKPEthersWallet
       signature = await this.runLitAction(toSignBuffer, 'pkp-eth-sign-message');      
     } else { 
       this.log("requesting signature from nodes");
-      signature = await this.sign(toSignBuffer);
+      signature = await this.runSign(toSignBuffer);
     }
 
     return joinSignature({

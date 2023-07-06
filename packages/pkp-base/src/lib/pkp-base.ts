@@ -16,9 +16,11 @@ import {
   GetSessionSigsProps,
   SessionSigs,
   RPCUrls,
+  AuthMethod,
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
+import { toString as uint8arrayToString } from 'uint8arrays';
 
 /**
  * Compresses a given public key.
@@ -45,6 +47,7 @@ const compressPubKey = (pubKey: string): string => {
 export class PKPBase<T = PKPBaseDefaultParams> {
   rpcs?: RPCUrls;
   controllerAuthSig?: AuthSig;
+  controllerAuthMethods?: AuthMethod[];
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
 
@@ -83,6 +86,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.rpcs = prop.rpcs;
     this.controllerAuthSig = prop.controllerAuthSig;
+    this.controllerAuthMethods = prop.controllerAuthMethods;
     this.controllerSessionSigs = prop.controllerSessionSigs;
     this.sessionSigsExpiration = prop.sessionSigsExpiration;
 
@@ -99,7 +103,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       minNodeCount:
         prop.bootstrapUrls && prop.litNetwork == 'custom'
           ? prop.minNodeCount
-          : undefined,
+          : 6,
     });
   }
 
@@ -328,7 +332,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
   }
 
-  async sign(toSign: Uint8Array): Promise<any> {
+  async runSign(toSign: Uint8Array): Promise<any> {
     if (!this.litNodeClientReady) {
       await this.init();
     }
@@ -348,20 +352,31 @@ export class PKPBase<T = PKPBaseDefaultParams> {
         'controllerAuthSig and controllerSessionSigs both defined, can only use one authorization type'
       );
     }
+
     try {
-      const sig = await this.litNodeClient.pkpSign({
-        toSign,
-        pubKey: this.uncompressedPubKey,
-        authSig: this.controllerAuthSig as AuthSig,
-        sessionSigs: this.controllerSessionSigs
-      });
-  
+      let sig;
+      if (this.controllerAuthSig) {
+        sig = await this.litNodeClient.pkpSign({
+          toSign: toSign,
+          pubKey: this.uncompressedPubKey,
+          authSig: this.controllerAuthSig as AuthSig,
+          authMethods: [],
+        });
+      } else if (this.controllerSessionSigs) {
+        sig = await this.litNodeClient.pkpSign({
+          toSign,
+          pubKey: this.uncompressedPubKey,
+          authMethods: this.controllerAuthMethods ?? [],
+          sessionSigs: this.controllerSessionSigs,
+        });
+      }
+
       // pad sigs with 0 if length is odd
       sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
       sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
 
       return sig;
-    } catch(e) {
+    } catch (e) {
       console.log('err: ', e);
     }
   }
