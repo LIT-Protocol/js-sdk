@@ -61,11 +61,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   debug: boolean;
   useAction: boolean | undefined;
 
-  readonly defaultLitActionCode: string = `
-  (async () => {
-    const sigShare = await LitActions.signEcdsa({ toSign, publicKey, sigName });
-  })();`;
-
   // -- debug things
   private PREFIX = '[PKPBase]';
   private orange = '\x1b[33m';
@@ -160,7 +155,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       this.log(
         'No lit action code or IPFS hash provided. Using default action.'
       );
-      this.litActionCode = this.defaultLitActionCode;
       this.useAction = false;
     }
   }
@@ -331,6 +325,44 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     } catch (err) {
       console.log('err:', err);
       throw err;
+    }
+  }
+
+  async sign(toSign: Uint8Array): Promise<any> {
+    if (!this.litNodeClientReady) {
+      await this.init();
+    }
+
+    // If no PKP public key is provided, throw error
+    if (!this.uncompressedPubKey) {
+      throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
+    }
+
+    // If no authSig or sessionSigs are provided, throw error
+    if (!this.controllerAuthSig && !this.controllerSessionSigs) {
+      throw new Error('controllerAuthSig or controllerSessionSigs is required');
+    }
+
+    if (this.controllerAuthSig && this.controllerSessionSigs) {
+      throw new Error(
+        'controllerAuthSig and controllerSessionSigs both defined, can only use one authorization type'
+      );
+    }
+    try {
+      const sig = await this.litNodeClient.pkpSign({
+        toSign,
+        pubKey: this.uncompressedPubKey,
+        authSig: this.controllerAuthSig as AuthSig,
+        sessionSigs: this.controllerSessionSigs
+      });
+  
+      // pad sigs with 0 if length is odd
+      sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
+      sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
+
+      return sig;
+    } catch(e) {
+      console.log('err: ', e);
     }
   }
 
