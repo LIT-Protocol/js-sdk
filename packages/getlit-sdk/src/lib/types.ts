@@ -9,7 +9,7 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 export namespace Types {
   export interface ContractOptions {
-    signer: ethers.Wallet | ethers.Signer; // No provider! ?window.ethereum
+    signer: ethers.Wallet | ethers.Signer; // No provider! ?default: PKP || window.web3
   }
   export interface AuthOptions {
     litRelayConfig?: LitRelayConfig;
@@ -29,3 +29,20 @@ export interface DecryptProps {}
 export interface CreateAccountProps {}
 
 export interface SignProps {}
+
+// understand what's possible and reasonable to set expectations with him
+
+// what's possible
+// - [x] createAccount
+// - [x] sign
+// - [] encrypt (ask questions @howard etc. for accs)
+// - [] decrypt
+// - [x] utility for auto-type conversion for createAccount, sign
+// - tested on nodejs, spa, and vanilla-js for implicit loading (script tag)
+
+// BUT
+// - if they want to initialize other options, they have to re-run the builder
+
+// expectation
+// - earliest end of week, latest wednesday week after depending on collabland
+// - 

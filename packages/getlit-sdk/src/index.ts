@@ -37,7 +37,7 @@ getlitEvent.on('ready', async () => {
   log.h1('User Usage');
   log.info('globalThis.LitIsReady:', globalThis.LitIsReady);
 
-  globalThis.LitBuilder.withContractOptions();
+  // globalThis.LitBuilder.withContractOptions();
 
   // log('globalThis.Lit:', globalThis.Lit);
 });
