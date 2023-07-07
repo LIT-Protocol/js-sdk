@@ -1473,7 +1473,7 @@ async function buildTestApps() {
   await runCommand('yarn gen:react');
 
   greenLog('...generating apps/nodejs/main.ts');
-  await runCommand('yarn gen:nodejs');
+  await runCommand('yarn gen:nodejs --modules=getlit-sdk');
 
   exit();
 }

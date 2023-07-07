@@ -35,7 +35,7 @@ import { manualTest } from './manual-test';
   BODY: ``,
   FOOTER: `
 
-manualTest();`,
+// manualTest();`,
 };
 
 let files = await getFiles(DIST_DIR);
