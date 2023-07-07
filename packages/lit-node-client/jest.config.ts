@@ -1,7 +1,7 @@
 /* eslint-disable */
 export default {
   displayName: 'lit-node-client',
-  preset: '../../jest.preset.js',
+  preset: 'ts-jest',
   globals: {
     'ts-jest': {
       tsconfig: '<rootDir>/tsconfig.spec.json',

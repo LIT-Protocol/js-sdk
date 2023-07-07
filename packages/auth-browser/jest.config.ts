@@ -5,6 +5,7 @@ export default {
   globals: {
     'ts-jest': {
       tsconfig: '<rootDir>/tsconfig.spec.json',
+      isolatedModules: true,
     },
   },
   transform: {
