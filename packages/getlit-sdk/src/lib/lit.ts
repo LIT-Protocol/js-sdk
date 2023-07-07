@@ -12,7 +12,9 @@ export class Lit {
   // ========== Encryption ==========
 
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#33d88ea255ff4866bc28724249a71a7e
-  public encrypt() {}
+  public encrypt() {
+    
+  }
 
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#2465ff247cd24e71b01a3257319b84b8
   public decrypt() {}
