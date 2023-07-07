@@ -551,6 +551,12 @@ export interface NodeShare {
   logs: any;
 }
 
+export interface PKPSignShare {
+  success: boolean;
+  signedData: any;
+  signatureShare: any;
+}
+
 export interface NodeBlsSigningShare {
   shareIndex: any;
   unsignedJwt?: any;

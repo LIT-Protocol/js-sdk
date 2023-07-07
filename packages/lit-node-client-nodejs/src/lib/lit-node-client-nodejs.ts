@@ -41,6 +41,7 @@ import {
   GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
   JsonExecutionRequest,
+  JsonPkpSignRequest,
   JsonSignChainDataRequest,
   LitNodeClientConfig,
   NodeBlsSigningShare,
@@ -48,6 +49,7 @@ import {
   NodeLog,
   NodeResponse,
   NodeShare,
+  PKPSignShare,
   RejectedNodePromises,
   SessionKeyPair,
   SessionSigningTemplate,
@@ -1146,12 +1148,12 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // -- case: promises success (TODO: check the keys of "values")
-    const responseData = (res as SuccessNodePromises).values;
+    const responseData = (res as SuccessNodePromises<PKPSignShare>).values;
     log('responseData', JSON.stringify(responseData, null, 2));
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = responseData.map((r: any) => {
+    const signedDataList = responseData.map((r) => {
       // add the signed data to the signature share
       delete r.signatureShare.result;
 
