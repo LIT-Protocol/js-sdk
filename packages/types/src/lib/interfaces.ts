@@ -1161,31 +1161,19 @@ export interface EthWalletProviderOptions {
 }
 
 export interface SignInWithOTPParams {
-  /**
-   * otp transport (email or phone #)
-   * used as the user ID for the auth method
-   */
+  // JWT from an authenticated session
+  // see stych docs for more info: https://stytch.com/docs/api/session-get
+  accessToken?: string;
+  // username or phone number where OTP was delivered
   userId: string;
-
-  /**
-   * tracking for the session
-   */
-  requestId?: string;
-
-  /**
-   * Allows for specifying custom sender information
-   * Note: for most users the `from_name` is the configurable option and `from` should not be populated
-   */
-  emailCustomizationOptions: OtpEmailCustomizationOptions;
-
-  customName?: string;
 }
 
 export interface OtpProviderOptions {
-  baseUrl?: string;
-  port?: string;
-  startRoute?: string;
-  checkRoute?: string;
+    // JWT from an authenticated session
+  // see stych docs for more info: https://stytch.com/docs/api/session-get
+  accessToken?: string;
+  // username or phone number where OTP was delivered
+  userId: string;
 }
 
 export interface OtpEmailCustomizationOptions {
