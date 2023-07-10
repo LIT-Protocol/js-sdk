@@ -1169,16 +1169,14 @@ export interface SignInWithOTPParams {
 }
 
 export interface OtpProviderOptions {
-    // JWT from an authenticated session
-  // see stych docs for more info: https://stytch.com/docs/api/session-get
-  accessToken?: string;
-  // username or phone number where OTP was delivered
-  userId: string;
-}
-
-export interface OtpEmailCustomizationOptions {
-  from?: string;
-  fromName: string;
+  /*
+    Stytch application identifier
+  */
+  appId: string;
+  /* 
+   Stytch user identifier for a project
+  */
+  userId?: string;
 }
 
 export interface StychToken {
@@ -1229,10 +1227,6 @@ export interface LoginUrlParams {
 
 export interface BaseAuthenticateOptions {}
 
-export interface OtpAuthenticateOptions {
-  code: string;
-}
-
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
    * Ethereum wallet address
@@ -1257,8 +1251,13 @@ export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
 }
 
 export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
-  /**
-   * User provided authentication code
-   */
-  code: string;
+  /* 
+  * JWT from an authenticated session
+  * see stych docs for more info: https://stytch.com/docs/api/session-get
+  */
+  accessToken: string;
+  /* 
+   Stytch user identifier for a project
+  */
+  userId?: string;
 }
