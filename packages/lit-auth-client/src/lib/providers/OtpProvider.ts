@@ -4,7 +4,7 @@ import {
   BaseAuthenticateOptions,
   BaseProviderOptions,
   OtpAuthenticateOptions,
-  StychToken,
+  StytchToken,
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
 import { OtpProviderOptions } from '@lit-protocol/types';
@@ -91,7 +91,7 @@ export class OtpProvider extends BaseProvider {
    * @param jwt token to parse
    * @returns {string}- userId contained within the token message
    */
-  private _parseJWT(jwt: string): StychToken {
+  private _parseJWT(jwt: string): StytchToken {
     const parts = jwt.split('.');
     if (parts.length !== 3) {
       throw new Error('Invalid token length');

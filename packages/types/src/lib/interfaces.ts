@@ -1200,7 +1200,7 @@ export interface OtpProviderOptions {
   userId?: string;
 }
 
-export interface StychToken {
+export interface StytchToken {
   [key: string]: any;
 }
 
