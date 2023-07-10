@@ -4,8 +4,7 @@ import {
   LitAuthClientOptions,
   OAuthProviderOptions,
   OtpProviderOptions,
-  ProviderOptions,
-  SignInWithOTPParams,
+  ProviderOptions
 } from '@lit-protocol/types';
 import { ProviderType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -39,8 +38,6 @@ export class LitAuthClient {
    */
   private providers: Map<string, BaseProvider>;
 
-  private litOtpOptions: OtpProviderOptions | undefined;
-
 
   /**
    * Create a LitAuthClient instance
@@ -67,9 +64,6 @@ export class LitAuthClient {
         );
       }
 
-      if (options?.litOtpConfig) {
-        this.litOtpOptions = options?.litOtpConfig;
-      }
     }
 
     // Check if Lit node client is provided
@@ -143,9 +137,8 @@ export class LitAuthClient {
         provider = new OtpProvider(
           {
             ...baseParams,
-            ...(options as SignInWithOTPParams),
           },
-          this.litOtpOptions
+          (options as OtpProviderOptions)
         ) as unknown as T;
         break;
       default:
