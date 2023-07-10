@@ -6,7 +6,7 @@ export class Lit {
 
   public set Configure(value: Types.LitOptions) {
     this._options = value;
-    this._litNodeClient = globalThis.Lit.nodeClient as Types.NodeClient;
+    this._litNodeClient = globalThis.Lit.nodeClient ?? undefined;
   }
 
   // ========== Encryption ==========
