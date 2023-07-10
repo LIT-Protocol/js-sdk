@@ -125,13 +125,13 @@ describe('getProvider', () => {
   });
 });
 
-describe("OtpProvider", async () => {
+describe("OtpProvider", () => {
   let client: LitAuthClient;
   let provider: OtpProvider;
 
   beforeEach(() => {
     client = new LitAuthClient({ litRelayConfig: { relayApiKey: "test-api-key" }});
-    provider = client.initProvider<OtpProvider>();
+    provider = client.initProvider<OtpProvider>(ProviderType.Otp);
   });
 
   it("should parse jwt and resolve session", async () => {
@@ -139,6 +139,8 @@ describe("OtpProvider", async () => {
     const  userId: string = "josh@litprotocol.com";
     const authMethod  = await provider.authenticate<OtpProviderOptions>({accessToken: token, userId: userId });
     expect(authMethod).toBeDefined();
+
+    expect(authMethod.accessToken).toEqual(token);
   });
 });
 

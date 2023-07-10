@@ -1,18 +1,16 @@
 import { AuthMethodType } from '@lit-protocol/constants';
 import {
   AuthMethod,
-  AuthenticateOptions,
   BaseAuthenticateOptions,
   BaseProviderOptions,
-  OtpAuthenticateOptions,
-  SignInWithOTPParams,
+  StychToken
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
 import { OtpProviderOptions } from '@lit-protocol/types';
 
 export class OtpProvider extends BaseProvider {
   private _params: OtpProviderOptions | undefined;
-  private _provider: string = "https://stych.com/session";
+  private _provider: string = "https://stytch.com/session";
   private _authFactors: string[] = ['email_factor', 'sms_factor'];
 
   constructor(
@@ -30,17 +28,21 @@ export class OtpProvider extends BaseProvider {
       }
       const userId: string = (options as unknown as OtpProviderOptions)?.userId ?? this?._params?.userId;
       if (!userId) {
-        throw new Error("user id must be provided");
+        throw new Error("User id must be provided");
+      }
+      const accessToken: string | undefined = (options as unknown as OtpProviderOptions)?.accessToken ?? this._params?.accessToken;
+      if (!accessToken) {
+        throw new Error("No access token provided, please provide a stych auth jwt");
       }
 
-      const parsedToken: Record<string, unknown> = this._parseJWT(((options as unknown as OtpProviderOptions)?.accessToken ?? this?._params?.accessToken) as string);
+      const parsedToken: StychToken = this._parseJWT(accessToken);
       console.log(`otpProvider: parsed token body`, parsedToken);
       const audience = (parsedToken['aud'] as string[])[0];
       if (!audience) { throw new Error("could not find project id in token body, is this a stych token?"); }
-      const session = (parsedToken[this._provider] as unknown[])[0]; // always take the first authenticated session
-      const authFactor = (session['authentication_factors'] as Record<string, string | Object>)[0];
+      const session = parsedToken[this._provider];
+      const authFactor = session['authentication_factors'][0];
       for (const factor in this._authFactors) {
-        const authInfo = authFactor[factor] as Object;
+        const authInfo = authFactor[factor];
         if (authInfo) {
           if (authInfo["email_address"] == userId) {
             throw new Error("userId and session authentication do not match");
@@ -48,10 +50,10 @@ export class OtpProvider extends BaseProvider {
         }
       }
 
-      return {
+      resolve({
         authMethodType: AuthMethodType.OTP,
-        accessToken: (options as unknown as OtpProviderOptions)?.accessToken ?? this._params?.accessToken
-      };
+        accessToken: accessToken
+      });
     });
   }
 
@@ -60,13 +62,13 @@ export class OtpProvider extends BaseProvider {
  * @param jwt token to parse
  * @returns {string}- userId contained within the token message
  */
- private _parseJWT(jwt: string): Record<string, unknown> {
+ private _parseJWT(jwt: string): StychToken {
 	const parts = jwt.split(".");
 	if (parts.length !== 3) {
 		throw new Error("Invalid token length");
 	}
 	const body =  Buffer.from(parts[1], 'base64');
-	const parsedBody: Record<string, unknown> = JSON.parse(body.toString('ascii'));
+	const parsedBody: StychToken = JSON.parse(body.toString('ascii'));
 	console.log("JWT body: ", parsedBody);
 	return parsedBody;
 }

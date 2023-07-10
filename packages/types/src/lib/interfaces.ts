@@ -1180,6 +1180,11 @@ export interface OtpEmailCustomizationOptions {
   from?: string;
   fromName: string;
 }
+
+export interface StychToken {
+  [key: string]: any;
+}
+
 export interface BaseProviderSessionSigsParams {
   /**
    * Public key of PKP to auth with
