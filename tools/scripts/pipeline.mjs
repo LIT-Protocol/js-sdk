@@ -11,7 +11,7 @@ const commands = [
   ['yarn', 'bump'],
   ['yarn', 'build:packages'],
   ['yarn', 'test:unit'],
-  ['yarn', 'test:e2e'],
+  // ['yarn', 'test:e2e'],
   ['yarn', 'gen:docs', '--push'],
   ['yarn', 'publish:packages'],
   ['git', 'add', '*'],

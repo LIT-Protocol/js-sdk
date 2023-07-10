@@ -2,280 +2,280 @@ export const accessControlConditions = {
   "address": "0x8b353Bb9E26F2c2B8155f377982537C39AD01A1B",
   "abi": [
     {
-      inputs: [],
-      stateMutability: 'nonpayable',
-      type: 'constructor',
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'uint256',
-          name: 'key',
-          type: 'uint256',
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "key",
+          "type": "uint256"
         },
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'value',
-          type: 'uint256',
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
         },
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'chainId',
-          type: 'uint256',
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "chainId",
+          "type": "uint256"
         },
         {
-          indexed: false,
-          internalType: 'bool',
-          name: 'permanent',
-          type: 'bool',
+          "indexed": false,
+          "internalType": "bool",
+          "name": "permanent",
+          "type": "bool"
         },
         {
-          indexed: false,
-          internalType: 'address',
-          name: 'creator',
-          type: 'address',
-        },
+          "indexed": false,
+          "internalType": "address",
+          "name": "creator",
+          "type": "address"
+        }
       ],
-      name: 'ConditionStored',
-      type: 'event',
+      "name": "ConditionStored",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'previousOwner',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
         },
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'newOwner',
-          type: 'address',
-        },
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
       ],
-      name: 'OwnershipTransferred',
-      type: 'event',
+      "name": "OwnershipTransferred",
+      "type": "event"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'key',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "key",
+          "type": "uint256"
+        }
       ],
-      name: 'getCondition',
-      outputs: [
+      "name": "getCondition",
+      "outputs": [
         {
-          components: [
+          "components": [
             {
-              internalType: 'uint256',
-              name: 'value',
-              type: 'uint256',
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
             },
             {
-              internalType: 'uint256',
-              name: 'securityHash',
-              type: 'uint256',
+              "internalType": "uint256",
+              "name": "securityHash",
+              "type": "uint256"
             },
             {
-              internalType: 'uint256',
-              name: 'chainId',
-              type: 'uint256',
+              "internalType": "uint256",
+              "name": "chainId",
+              "type": "uint256"
             },
             {
-              internalType: 'bool',
-              name: 'permanent',
-              type: 'bool',
+              "internalType": "bool",
+              "name": "permanent",
+              "type": "bool"
             },
             {
-              internalType: 'address',
-              name: 'creator',
-              type: 'address',
-            },
+              "internalType": "address",
+              "name": "creator",
+              "type": "address"
+            }
           ],
-          internalType: 'struct AccessControlConditions.StoredCondition',
-          name: '',
-          type: 'tuple',
-        },
+          "internalType": "struct AccessControlConditions.StoredCondition",
+          "name": "",
+          "type": "tuple"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'owner',
-      outputs: [
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'renounceOwnership',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'newSigner',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "newSigner",
+          "type": "address"
+        }
       ],
-      name: 'setSigner',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setSigner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'signer',
-      outputs: [
+      "inputs": [],
+      "name": "signer",
+      "outputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'key',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "key",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'value',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'securityHash',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "securityHash",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'chainId',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "chainId",
+          "type": "uint256"
         },
         {
-          internalType: 'bool',
-          name: 'permanent',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "permanent",
+          "type": "bool"
+        }
       ],
-      name: 'storeCondition',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "storeCondition",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'key',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "key",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'value',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'securityHash',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "securityHash",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'chainId',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "chainId",
+          "type": "uint256"
         },
         {
-          internalType: 'bool',
-          name: 'permanent',
-          type: 'bool',
+          "internalType": "bool",
+          "name": "permanent",
+          "type": "bool"
         },
         {
-          internalType: 'address',
-          name: 'creatorAddress',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "creatorAddress",
+          "type": "address"
+        }
       ],
-      name: 'storeConditionWithSigner',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "storeConditionWithSigner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      name: 'storedConditions',
-      outputs: [
+      "name": "storedConditions",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: 'value',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'securityHash',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "securityHash",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'chainId',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "chainId",
+          "type": "uint256"
         },
         {
-          internalType: 'bool',
-          name: 'permanent',
-          type: 'bool',
+          "internalType": "bool",
+          "name": "permanent",
+          "type": "bool"
         },
         {
-          internalType: 'address',
-          name: 'creator',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "creator",
+          "type": "address"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'newOwner',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
       ],
-      name: 'transferOwnership',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
-    },
-  ],
-};
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+}

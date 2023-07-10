@@ -19,6 +19,7 @@ import {
   ISessionCapabilityObject,
   LitResourceAbilityRequest,
 } from '@lit-protocol/auth-helpers';
+import { BytesLike } from 'ethers';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -252,6 +253,25 @@ export interface WithSessionSigs extends BaseJsonExecutionRequest {
 }
 
 export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
+
+export interface BaseJsonPkpSignRequest {
+  toSign: ArrayLike<number>;
+  pubKey: string;
+  // auth methods to resolve
+  authMethods?: Array<Object>;
+}
+
+export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
+  sessionSigs: any;
+  authSig?: AuthSig;
+}
+
+export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
+  authSig: AuthSig;
+  sessionSigs?: any;
+}
+
+export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning;
 
 /**
  * Struct in rust
@@ -904,12 +924,13 @@ export interface PKPBaseProp {
   rpc?: string;
   rpcs?: RPCUrls;
   controllerAuthSig?: AuthSig;
+  controllerAuthMethods?: AuthMethod[];
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
   litNetwork?: any;
   debug?: boolean;
-  bootstrapUrls?: string[],
-  minNodeCount?: number,
+  bootstrapUrls?: string[];
+  minNodeCount?: number;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
