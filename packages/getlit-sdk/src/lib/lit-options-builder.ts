@@ -1,26 +1,25 @@
 import { LitNodeClientConfig } from '@lit-protocol/types';
-import { Types } from './types';
+import { OrUndefined, Types } from './types';
 import { log } from './utils';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Lit } from './lit';
-import { EventEmitter } from 'events';
 
 const DEFAULT_NETWORK = 'serrano'; // changing to "cayenne" soon
 
 export class LitOptionsBuilder {
-  private static _contractOptions: Types.ContractOptions;
-  private static _authOptions: Types.AuthOptions;
-  private static _nodeClientOptions: LitNodeClientConfig;
-  private static _nodeClient: Types.NodeClient;
+  private  _contractOptions: OrUndefined<Types.ContractOptions>;
+  private  _authOptions: OrUndefined<Types.AuthOptions>;
+  private  _nodeClientOptions: OrUndefined<LitNodeClientConfig>;
+  private  _nodeClient: OrUndefined<Types.NodeClient>;
 
-  public static withContractOptions(options: Types.ContractOptions) {
-    LitOptionsBuilder._contractOptions = options;
+  public withContractOptions(options: Types.ContractOptions) {
+    this._contractOptions = options;
   }
-  public static withAuthOptions(options: Types.AuthOptions) {
-    LitOptionsBuilder._authOptions;
+  public withAuthOptions(options: Types.AuthOptions) {
+    this._authOptions = options;
   }
-  public static withNodeClient(client: Types.NodeClient) {
-    LitOptionsBuilder._nodeClient = client;
+  public withNodeClient(client: Types.NodeClient) {
+    this._nodeClient = client;
   }
 
   public async build(): Promise<void> {
@@ -36,47 +35,44 @@ export class LitOptionsBuilder {
     }
 
     log('setting "LitNodeClient" options...');
-    const nodeClientOpts = LitOptionsBuilder._nodeClientOptions ?? {
+    const nodeClientOpts = this._nodeClientOptions ?? {
       litNetwork: DEFAULT_NETWORK,
       debug: false,
     };
     log('nodeClientOpts', nodeClientOpts);
 
-    if (!LitOptionsBuilder._nodeClient) {
+    if (!this._nodeClient) {
       log('using class "LitNodeClient"');
-      LitOptionsBuilder._nodeClient = new LitNodeClient(nodeClientOpts);
-    } else {
-      log('using class "LitNodeClientNodeJs"');
-      LitOptionsBuilder._nodeClient = new LitNodeClientNodeJs(nodeClientOpts);
+      this._nodeClient = new LitNodeClient(nodeClientOpts);
     }
 
     log('connecting to LitNodeClient...');
     try {
-      await LitOptionsBuilder._nodeClient.connect();
+      await this._nodeClient?.connect();
       log.success(
         '🎉 connected to LitNodeClient! ready:',
-        LitOptionsBuilder._nodeClient.ready
+        this._nodeClient?.ready
       );
     } catch (e) {
       log.error(`Error while attempting to connect to LitNodeClient ${e}`);
     }
 
     log('setting "globalThis.litNodeClient"');
-    globalThis.LitNodeClient = LitOptionsBuilder._nodeClient;
+    globalThis.Lit.nodeClient = this._nodeClient as Types.NodeClient;
     log.success('"globalThis.litNodeClient" has been set!');
 
     log('setting "globalThis.Lit"');
     globalThis.Lit.instance.Configure = {
-      ...LitOptionsBuilder._authOptions,
-      ...LitOptionsBuilder._contractOptions,
-      ...LitOptionsBuilder._nodeClientOptions,
+      ...this._authOptions,
+      ...this._contractOptions,
+      ...this._nodeClientOptions,
     };
+
     console.log(globalThis.Lit.instance.Configure);
     log.success('"globalThis.Lit" has been set!');
     log.h1('Build Completed');
 
-    globalThis.Lit.events = new EventEmitter();
-    globalThis.Lit.events.emit('ready');
+    globalThis.Lit.events?.emit('ready');
     globalThis.Lit.ready = true;
   }
 }
