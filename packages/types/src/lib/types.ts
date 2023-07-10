@@ -86,7 +86,7 @@ export type LITChain<T> = {
   [chainName: string]: T;
 };
 
-export type LIT_NETWORKS_KEYS = 'serrano' | 'localhost' | 'custom';
+export type LIT_NETWORKS_KEYS = 'cayenne' | 'localhost' | 'custom';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 

@@ -26,7 +26,7 @@ function App() {
     let code = `import * as LitJsSdk from '@lit-protocol/lit-node-client';
 
 const litNodeClient = new LitJsSdk.LitNodeClient({
-  litNetwork: 'serrano',
+  litNetwork: 'cayenne',
 });
 await litNodeClient.connect();
 
@@ -82,7 +82,7 @@ console.log("decryptedString:", "Loading...");
     setData(code);
 
     const litNodeClient = new LitJsSdk.LitNodeClient({
-      litNetwork: 'serrano',
+      litNetwork: 'cayenne',
     });
     await litNodeClient.connect();
 

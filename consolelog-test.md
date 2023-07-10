@@ -10,7 +10,7 @@ To start, run `node apps/html/server.js` and head over to http://127.0.0.1:4002/
 const state = {};
 state.chain = 'ethereum';
 state.litNodeClient = new LitJsSdk_litNodeClient.LitNodeClient({
-  litNetwork: 'serrano',
+  litNetwork: 'cayenne',
 });
 
 await state.litNodeClient.connect();

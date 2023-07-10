@@ -84,9 +84,9 @@ describe('LitNodeClientNodeJs', () => {
   // --global
   let litNodeClient: LitNodeClientNodeJs;
 
-  it('should connect to serrano network and return true after connected', async () => {
+  it('should connect to cayenne network and return true after connected', async () => {
     litNodeClient = new LitNodeClientNodeJs({
-      litNetwork: 'serrano',
+      litNetwork: 'cayenne',
       debug: false,
     });
 
@@ -132,20 +132,20 @@ describe('LitNodeClientNodeJs', () => {
     expect(litNodeClient).toBeDefined();
   });
 
-  it('should be able to instantiate a new LitNodeClientNodeJs to serrano', async () => {
+  it('should be able to instantiate a new LitNodeClientNodeJs to cayenne', async () => {
     const litNodeClient = new LitNodeClientNodeJs({
-      litNetwork: 'serrano',
+      litNetwork: 'cayenne',
     });
     await litNodeClient.connect();
-    expect(litNodeClient.config.litNetwork).toBe('serrano');
+    expect(litNodeClient.config.litNetwork).toBe('cayenne');
   });
 
-  it('should be able to instantiate a new LitNodeClientNodeJs to serrano', async () => {
+  it('should be able to instantiate a new LitNodeClientNodeJs to cayenne', async () => {
     const litNodeClient = new LitNodeClientNodeJs({
-      litNetwork: 'serrano',
+      litNetwork: 'cayenne',
     });
     await litNodeClient.connect();
-    expect(litNodeClient.config.litNetwork).toBe('serrano');
+    expect(litNodeClient.config.litNetwork).toBe('cayenne');
   });
 
   it('should be able to instantiate a new LitNodeClientNodeJs to localhost', async () => {
@@ -157,7 +157,7 @@ describe('LitNodeClientNodeJs', () => {
 
   it('should connect to lit nodes', async () => {
     litNodeClient = new LitNodeClientNodeJs({
-      litNetwork: 'serrano',
+      litNetwork: 'cayenne',
     });
 
     await litNodeClient.connect();

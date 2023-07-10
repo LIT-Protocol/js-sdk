@@ -209,7 +209,7 @@ import * as litNodeClient from '@lit-protocol/lit-node-client';
 export const manualTest = async () => {
   console.log('Manual Test Here!');
   const client = new litNodeClient.LitNodeClient({
-    litNetwork: 'serrano',
+    litNetwork: 'cayenne',
   });
 
   await client.connect();

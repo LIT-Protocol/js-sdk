@@ -601,17 +601,17 @@ export const SYMM_KEY_ALGO_PARAMS = {
  *
  */
 export const LIT_NETWORKS = {
-  serrano: [
-    'https://serrano.litgateway.com:7370',
-    'https://serrano.litgateway.com:7371',
-    'https://serrano.litgateway.com:7372',
-    'https://serrano.litgateway.com:7373',
-    'https://serrano.litgateway.com:7374',
-    'https://serrano.litgateway.com:7375',
-    'https://serrano.litgateway.com:7376',
-    'https://serrano.litgateway.com:7377',
-    'https://serrano.litgateway.com:7378',
-    'https://serrano.litgateway.com:7379',
+  cayenne: [
+    'https://cayenne.litgateway.com:7370',
+    'https://cayenne.litgateway.com:7371',
+    'https://cayenne.litgateway.com:7372',
+    'https://cayenne.litgateway.com:7373',
+    'https://cayenne.litgateway.com:7374',
+    'https://cayenne.litgateway.com:7375',
+    'https://cayenne.litgateway.com:7376',
+    'https://cayenne.litgateway.com:7377',
+    'https://cayenne.litgateway.com:7378',
+    'https://cayenne.litgateway.com:7379',
   ],
   localhost: [
     'http://localhost:7470',

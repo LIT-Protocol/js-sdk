@@ -4,7 +4,7 @@ import * as authBrowser from '@lit-protocol/auth-browser';
 const LitNodeClientPage = () => {
   async function go() {
     const client = new LitJsSdk.LitNodeClient({
-      litNetwork: 'serrano',
+      litNetwork: 'cayenne',
       debug: true,
     });
 

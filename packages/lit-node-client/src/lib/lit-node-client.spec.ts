@@ -9,7 +9,7 @@ jest.setTimeout(60000);
 
 describe('Lit Actions', () => {
   client = new LitNodeClient({
-    litNetwork: 'serrano',
+    litNetwork: 'cayenne',
     debug: false,
   });
 
@@ -100,7 +100,8 @@ describe('Lit Actions', () => {
     });
 
     // add padding
-    sig.publicKey = sig.publicKey.length % 2 == 0 ? sig.publicKey : '0' + sig.publicKey;
+    sig.publicKey =
+      sig.publicKey.length % 2 == 0 ? sig.publicKey : '0' + sig.publicKey;
     expect(LITCONFIG.PKP_PUBKEY).toEqual(sig.publicKey);
   });
 });

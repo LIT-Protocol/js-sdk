@@ -388,7 +388,7 @@ export default function Dashboard() {
       try {
         // Set up LitNodeClient and connect to Lit nodes
         const litNodeClient = new LitNodeClient({
-          litNetwork: 'serrano',
+          litNetwork: 'cayenne',
           debug: false,
         });
         await litNodeClient.connect();

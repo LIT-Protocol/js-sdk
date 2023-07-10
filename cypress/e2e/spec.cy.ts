@@ -69,10 +69,10 @@ describe('Auth + Setup', () => {
 
   it('connect lit node client', () => {
     cy.window().then(async () => {
-      const client = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' });
+      const client = new LitJsSdk.LitNodeClient({ litNetwork: 'cayenne' });
       await client.connect();
       savedParams.litNodeClient = client;
-      expect(client.config.litNetwork).to.be.eq('serrano');
+      expect(client.config.litNetwork).to.be.eq('cayenne');
     });
   });
 });
@@ -287,7 +287,7 @@ describe('Lit Action', () => {
     );
 
     const res = await savedParams.litNodeClient.getJsExecutionShares(
-      'https://serrano.litgateway.com:7379',
+      'https://cayenne.litgateway.com:7379',
       reqBody
     );
 
@@ -307,7 +307,7 @@ describe('Lit Action', () => {
       params
     );
     const res = await savedParams.litNodeClient.getJsExecutionShares(
-      'https://serrano.litgateway.com:7379',
+      'https://cayenne.litgateway.com:7379',
       reqBody
     );
 
@@ -546,7 +546,7 @@ describe('Lit Action', () => {
     const data: JsonExecutionRequest =
       savedParams.litNodeClient.getLitActionRequestBody(params);
     const reqBody: SendNodeCommand = {
-      url: 'https://serrano.litgateway.com:7371/web/execute',
+      url: 'https://cayenne.litgateway.com:7371/web/execute',
       data,
     };
     const res = await savedParams.litNodeClient.sendCommandToNode(reqBody);
@@ -555,7 +555,7 @@ describe('Lit Action', () => {
 
   it('Handshake with Sgx', async () => {
     const params: HandshakeWithSgx = {
-      url: 'https://serrano.litgateway.com:7371',
+      url: 'https://cayenne.litgateway.com:7371',
     };
     const res = await savedParams.litNodeClient.handshakeWithSgx(params);
     expect(res).to.have.keys(

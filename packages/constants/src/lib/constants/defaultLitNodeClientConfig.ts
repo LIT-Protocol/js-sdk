@@ -16,6 +16,6 @@ export const defaultLitnodeClientConfig: LitNodeClientConfig = {
     'https://node2.litgateway.com:7378',
     'https://node2.litgateway.com:7379',
   ],
-  litNetwork: 'serrano',
+  litNetwork: 'cayenne',
   connectTimeout: 20000,
 };

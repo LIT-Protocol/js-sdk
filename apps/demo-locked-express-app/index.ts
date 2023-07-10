@@ -42,7 +42,7 @@ app.get('/protected-path-1', async function(req: Request, res: Response) {
   }
 
   const litNodeClient = new LitJsSdk.LitNodeClientNodeJs({
-    litNetwork: "serrano",
+    litNetwork: "cayenne",
   });
   await litNodeClient.connect();
 
