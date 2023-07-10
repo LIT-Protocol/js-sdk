@@ -8,14 +8,14 @@ jest.setTimeout(60000);
 describe('Lit Actions', () => {
   client = new LitNodeClient({
     litNetwork: 'serrano',
-    debug: false,
+    debug: true,
   });
 
   beforeAll(async () => {
     await client.connect();
   });
 
-  it('should be connected', () => {
+  it('should be connected', async () => {
     expect(client.ready).toBe(true);
   });
 

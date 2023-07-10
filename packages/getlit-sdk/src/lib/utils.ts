@@ -25,8 +25,8 @@ log.success = (...args: any[]): void => {
 };
 
 log.h1 = (...args: any[]): void => {
-  args.unshift(`\x1b[35m[${PREFIX} v${version}] ----------`);
-  args = [...args, '----------\x1b[39m']
+  args.unshift(`\x1b[35m[${PREFIX} v${version}] ## STEP:`);
+  args = [...args];
   printLog(args);
 };
 
@@ -38,13 +38,13 @@ const printLog = (args: any[]): void => {
   }
 
   // check if config is loaded yet
-  if (!globalThis?.LitDebug) {
+  if (!globalThis?.Lit.debug) {
     // config isn't loaded yet, push into buffer
     logBuffer.push(args);
     return;
   }
 
-  if (globalThis?.LitDebug !== true) {
+  if (globalThis?.Lit.debug !== true) {
     return;
   }
   // config is loaded, and debug is true

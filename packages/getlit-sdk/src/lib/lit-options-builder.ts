@@ -4,7 +4,6 @@ import { log } from './utils';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Lit } from './lit';
 import { EventEmitter } from 'events';
-export const getlitEvent = new EventEmitter();
 
 const DEFAULT_NETWORK = 'serrano'; // changing to "cayenne" soon
 
@@ -28,9 +27,9 @@ export class LitOptionsBuilder {
     log.h1('Build Started');
 
     // Check if the Lit instance exists in globalThis, if not, create it
-    if (!globalThis.Lit) {
-      log('creating globalThis.Lit...');
-      globalThis.Lit = new Lit();
+    if (!globalThis.Lit.instance) {
+      log('creating globalThis.Lit.instance...');
+      globalThis.Lit.instance = new Lit();
       log.success('globalThis.Lit has been created!');
     } else {
       log.success('globalThis.Lit has already been initialized!');
@@ -67,16 +66,17 @@ export class LitOptionsBuilder {
     log.success('"globalThis.litNodeClient" has been set!');
 
     log('setting "globalThis.Lit"');
-    globalThis.Lit.Configure = {
+    globalThis.Lit.instance.Configure = {
       ...LitOptionsBuilder._authOptions,
       ...LitOptionsBuilder._contractOptions,
       ...LitOptionsBuilder._nodeClientOptions,
     };
-    console.log(globalThis.Lit.Configure)
+    console.log(globalThis.Lit.instance.Configure);
     log.success('"globalThis.Lit" has been set!');
     log.h1('Build Completed');
 
-    getlitEvent.emit('ready');
-    globalThis.LitIsReady = true;
+    globalThis.Lit.events = new EventEmitter();
+    globalThis.Lit.events.emit('ready');
+    globalThis.Lit.ready = true;
   }
 }
