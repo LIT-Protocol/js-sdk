@@ -127,19 +127,27 @@ describe('getProvider', () => {
   });
 });
 
-describe("OtpProvider", () => {
+describe('OtpProvider', () => {
   let client: LitAuthClient;
   let provider: OtpProvider;
 
   beforeEach(() => {
-    client = new LitAuthClient({ litRelayConfig: { relayApiKey: "test-api-key" }});
-    provider = client.initProvider<OtpProvider>(ProviderType.Otp, {appId: LITCONFIG.STYTCH_APP_ID, userId: LITCONFIG.STYTCH_USER_ID });
+    client = new LitAuthClient({
+      litRelayConfig: { relayApiKey: 'test-api-key' },
+    });
+    provider = client.initProvider<OtpProvider>(ProviderType.Otp, {
+      appId: LITCONFIG.STYTCH_APP_ID,
+      userId: LITCONFIG.STYTCH_USER_ID,
+    });
   });
 
-  it("should parse jwt and resolve session", async () => {
+  it('should parse jwt and resolve session', async () => {
     const token: string = LITCONFIG.STYTCH_TEST_TOKEN;
     const userId: string = LITCONFIG.STYTCH_USER_ID;
-    const authMethod  = await provider.authenticate<OtpProviderOptions>({accessToken: token, userId: userId });
+    const authMethod = await provider.authenticate<OtpProviderOptions>({
+      accessToken: token,
+      userId: userId,
+    });
     expect(authMethod).toBeDefined();
 
     expect(authMethod.accessToken).toEqual(token);
