@@ -51,7 +51,7 @@ export class OtpProvider extends BaseProvider {
         );
       }
 
-      const parsedToken: StychToken = this._parseJWT(accessToken);
+      const parsedToken: StytchToken = this._parseJWT(accessToken);
       console.log(`otpProvider: parsed token body`, parsedToken);
       const audience = (parsedToken['aud'] as string[])[0];
       if (audience != this._params.appId) {
@@ -97,7 +97,7 @@ export class OtpProvider extends BaseProvider {
       throw new Error('Invalid token length');
     }
     const body = Buffer.from(parts[1], 'base64');
-    const parsedBody: StychToken = JSON.parse(body.toString('ascii'));
+    const parsedBody: StytchToken = JSON.parse(body.toString('ascii'));
     console.log('JWT body: ', parsedBody);
     return parsedBody;
   }
