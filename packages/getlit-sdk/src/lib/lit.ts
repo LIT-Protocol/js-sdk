@@ -1,12 +1,12 @@
-import { LitCredentials, Types } from './types';
+import { LitCredentials, OrUndefined, Types } from './types';
 
 export class Lit {
-  private _options: Types.LitOptions | undefined;
-  private _litNodeClient: Types.NodeClient | undefined;
+  private _options: OrUndefined<Types.LitOptions>;
+  private _litNodeClient: OrUndefined<Types.NodeClient>;
 
   public set Configure(value: Types.LitOptions) {
     this._options = value;
-    this._litNodeClient = globalThis.LitNodeClient;
+    this._litNodeClient = globalThis.Lit.nodeClient as Types.NodeClient;
   }
 
   // ========== Encryption ==========

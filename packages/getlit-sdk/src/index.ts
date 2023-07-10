@@ -1,5 +1,6 @@
 import { LitOptionsBuilder } from './lib/lit-options-builder';
 import { log } from './lib/utils';
+import { EventEmitter } from 'events';
 import './global';
 
 // -- global config / APIs
@@ -21,6 +22,8 @@ globalThis.Lit = {
         'GetLit builder has already be initalized, do you want to reinitalize the global instance?'
       );
     }
+    
+    globalThis.Lit.events = new EventEmitter();
     log('setting globalThis.Lit.builder...');
     globalThis.Lit.builder = new LitOptionsBuilder();
     log.success('globalThis.Lit.builder has been set!');
@@ -30,22 +33,6 @@ globalThis.Lit = {
     log.error(`Error while attempting to configure GetLit instance ${e}`);
   }
 })();
-
-// -- user usage
-
-if (globalThis.Lit.events) {
-  globalThis.Lit.events.on('ready', async () => {
-    // await 1 second
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    log.h1('User Usage');
-    log.info('globalThis.Lit.ready:', globalThis.Lit.ready);
-
-    // globalThis.Lit.builder.withContractOptions();
-
-    // log('globalThis.Lit:', globalThis.Lit);
-  });
-}
 
 // this is for browser
 // window.Lit
