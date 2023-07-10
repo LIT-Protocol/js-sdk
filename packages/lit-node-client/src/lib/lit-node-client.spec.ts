@@ -17,7 +17,7 @@ describe('Lit Actions', () => {
     await client.connect();
   });
 
-  it('should be connected', () => {
+  it('should be connected', async () => {
     expect(client.ready).toBe(true);
   });
 
