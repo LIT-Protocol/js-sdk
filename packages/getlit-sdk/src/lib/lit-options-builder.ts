@@ -3,14 +3,22 @@ import { OrUndefined, Types } from './types';
 import { log } from './utils';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Lit } from './lit';
+import EventEmitter from 'events';
 
 const DEFAULT_NETWORK = 'serrano'; // changing to "cayenne" soon
 
 export class LitOptionsBuilder {
-  private  _contractOptions: OrUndefined<Types.ContractOptions>;
-  private  _authOptions: OrUndefined<Types.AuthOptions>;
-  private  _nodeClientOptions: OrUndefined<LitNodeClientConfig>;
-  private  _nodeClient: OrUndefined<Types.NodeClient>;
+  private _contractOptions: OrUndefined<Types.ContractOptions>;
+  private _authOptions: OrUndefined<Types.AuthOptions>;
+  private _nodeClientOptions: OrUndefined<LitNodeClientConfig>;
+  private _nodeClient: OrUndefined<Types.NodeClient>;
+  private _emitter: OrUndefined<EventEmitter>;
+
+  constructor(opts?: { emitter: EventEmitter }) {
+    log('setting "globalThis.Lit.events"...');
+    this._emitter = opts?.emitter;
+    log.success('setting "globalThis.Lit.events" has been set!');
+  }
 
   public withContractOptions(options: Types.ContractOptions) {
     this._contractOptions = options;
@@ -72,7 +80,7 @@ export class LitOptionsBuilder {
     log.success('"globalThis.Lit" has been set!');
     log.h1('Build Completed');
 
-    globalThis.Lit.events?.emit('ready');
+    this._emitter?.emit('ready');
     globalThis.Lit.ready = true;
   }
 }

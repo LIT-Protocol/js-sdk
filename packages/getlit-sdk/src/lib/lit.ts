@@ -1,6 +1,5 @@
 import { LitCredentials, OrUndefined, Types } from './types';
 import { isBrowser, isNode, log } from './utils';
-import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -34,8 +33,20 @@ export class Lit {
     { credentials }: { credentials: LitCredentials } = { credentials: null }
   ) {
     log('creating account...');
+
+    // private key -> mint pkp
+    // private key -> pkp signer -> mint pkp
+
     // if credentials (authSig) and there are no session sigs, throw an error which includes
     // a callback function, where they can use the Lit Auth SDK to obtain
+
+    // using relay supports both browser and nodejs
+
+    // -- browser
+    // (higher abstraction) if relayer fails, then use default LitContracts SDK
+    // 
+
+    // -- nodejs
 
     if (isBrowser()) {
       log("[Browser] We're in the browser!");
@@ -56,28 +67,28 @@ export class Lit {
         }
         console.log(window.ethereum);
 
-        const litContracts = new LitContracts({
-          signer: window.ethereum,
-          debug: globalThis.Lit.debug,
-        });
+        // const litContracts = new LitContracts({
+        //   signer: window.ethereum,
+        //   debug: globalThis.Lit.debug,
+        // });
 
-        await litContracts.connect();
-        const mintCost = await litContracts.pkpNftContract.read.mintCost();
-        const tx = await litContracts.pkpNftContract.write.mintNext(2, {
-          value: mintCost,
-        });
+        // await litContracts.connect();
+        // const mintCost = await litContracts.pkpNftContract.read.mintCost();
+        // const tx = await litContracts.pkpNftContract.write.mintNext(2, {
+        //   value: mintCost,
+        // });
 
-        const res = await tx.wait();
+        // const res = await tx.wait();
 
-        let events = 'events' in res ? res.events : res.logs;
+        // let events = 'events' in res ? res.events : res.logs;
 
-        // @ts-ignore
-        const tokenId = events[1].topics[1];
+        // // @ts-ignore
+        // const tokenId = events[1].topics[1];
 
-        log('tx:', tx);
-        log('res:', res);
-        log('events:', events);
-        log('tokenId:', tokenId);
+        // log('tx:', tx);
+        // log('res:', res);
+        // log('events:', events);
+        // log('tokenId:', tokenId);
       }
     }
 
