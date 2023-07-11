@@ -9,22 +9,19 @@
       "options": {
         "commands": [
           "yarn build:target lit-node-client --skip",
+          "yarn build:target contracts-sdk --skip",
           "yarn build:target getlit-sdk"
         ]
       }
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/getlit-sdk",
         "main": "packages/getlit-sdk/src/index.ts",
         "tsConfig": "packages/getlit-sdk/tsconfig.lib.json",
-        "assets": [
-          "packages/getlit-sdk/*.md"
-        ]
+        "assets": ["packages/getlit-sdk/*.md"]
       }
     },
     "_buildWeb": {
@@ -32,9 +29,7 @@
       "options": {
         "globalName": "LitJsSdk_getlitSdk",
         "outfile": "dist/packages/getlit-sdk-vanilla/getlit-sdk.js",
-        "entryPoints": [
-          "./packages/getlit-sdk/src/index.ts"
-        ],
+        "entryPoints": ["./packages/getlit-sdk/src/index.ts"],
         "define": {
           "process.env.NODE_DEBUG": "false",
           "global": "window"
@@ -49,20 +44,14 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/getlit-sdk/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/getlit-sdk/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/getlit-sdk"
-      ],
+      "outputs": ["coverage/packages/getlit-sdk"],
       "options": {
         "jestConfig": "packages/getlit-sdk/jest.config.ts",
         "passWithNoTests": true
