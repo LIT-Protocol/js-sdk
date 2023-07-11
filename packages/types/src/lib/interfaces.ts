@@ -1182,6 +1182,50 @@ export interface EthWalletProviderOptions {
 }
 
 export interface SignInWithOTPParams {
+  /**
+   * otp transport (email or phone #)
+   * used as the user ID for the auth method
+   */
+  userId: string;
+
+  /**
+   * tracking for the session
+   */
+  requestId?: string;
+
+  /**
+   * Allows for specifying custom sender information
+   * Note: for most users the `from_name` is the configurable option and `from` should not be populated
+   */
+  emailCustomizationOptions: OtpEmailCustomizationOptions;
+
+  customName?: string;
+}
+
+export interface EthWalletProviderOptions {
+  /**
+   * The domain from which the signing request is made
+   */
+  domain?: string;
+  /**
+   * The origin from which the signing request is made
+   */
+  origin?: string;
+}
+
+export interface OtpProviderOptions {
+  baseUrl?: string;
+  port?: string;
+  startRoute?: string;
+  checkRoute?: string;
+}
+
+export interface OtpEmailCustomizationOptions {
+  from?: string;
+  fromName: string;
+}
+
+export interface SignInWithStytchOTPParams {
   // JWT from an authenticated session
   // see stych docs for more info: https://stytch.com/docs/api/session-get
   accessToken?: string;
@@ -1189,7 +1233,7 @@ export interface SignInWithOTPParams {
   userId: string;
 }
 
-export interface OtpProviderOptions {
+export interface StytchOtpProviderOptions {
   /*
     Stytch application identifier
   */
@@ -1272,6 +1316,13 @@ export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
 }
 
 export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
+  /**
+   * User provided authentication code
+   */
+  code: string;
+}
+
+export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
   /* 
   * JWT from an authenticated session
   * see stych docs for more info: https://stytch.com/docs/api/session-get

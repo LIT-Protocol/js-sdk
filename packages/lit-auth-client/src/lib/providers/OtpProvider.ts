@@ -1,104 +1,157 @@
 import { AuthMethodType } from '@lit-protocol/constants';
 import {
   AuthMethod,
-  BaseAuthenticateOptions,
+  AuthenticateOptions,
   BaseProviderOptions,
   OtpAuthenticateOptions,
-  StytchToken,
+  SignInWithOTPParams,
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
 import { OtpProviderOptions } from '@lit-protocol/types';
 
 export class OtpProvider extends BaseProvider {
-  private _params: OtpProviderOptions;
-  private _provider: string = 'https://stytch.com/session';
+  private _params: SignInWithOTPParams;
+  private _baseUrl: string; // TODO: REMOVE THIS HARD CODED STRING
+  private _port: string;
+  private _startRoute: string;
+  private _checkRoute: string;
+  private _requestId: string = '';
 
-  constructor(params: BaseProviderOptions, config: OtpProviderOptions) {
+  constructor(
+    params: BaseProviderOptions & SignInWithOTPParams,
+    config?: OtpProviderOptions
+  ) {
     super(params);
-    this._params = config;
+    this._params = params;
+    this._baseUrl = config?.baseUrl || 'https://auth-api.litgateway.com';
+    this._port = config?.port || '443';
+    this._startRoute = config?.startRoute || '/api/otp/start';
+    this._checkRoute = config?.checkRoute || '/api/otp/check';
   }
 
   /**
-   * Validates claims within a stytch authenticated JSON Web Token
-   * @param options authentication option containing the authenticated token
-   * @returns {AuthMethod} Authentication Method for auth method type OTP
-   * */
-  override authenticate<T extends BaseAuthenticateOptions>(
-    options?: T | undefined
-  ): Promise<AuthMethod> {
-    return new Promise<AuthMethod>((resolve, reject) => {
-      if (!options) {
-        reject(
-          new Error(
-            'No Authentication options provided, please supply an authenticated JWT'
-          )
-        );
-      }
-
-      const userId: string | undefined =
-        this._params.userId ??
-        (options as unknown as OtpAuthenticateOptions).userId;
-
-      if (!userId) {
-        reject(new Error('User id must be provided'));
-      }
-      const accessToken: string | undefined = (
-        options as unknown as OtpAuthenticateOptions
-      )?.accessToken;
-      if (!accessToken) {
-        reject(
-          new Error('No access token provided, please provide a stych auth jwt')
-        );
-      }
-
-      const parsedToken: StytchToken = this._parseJWT(accessToken);
-      console.log(`otpProvider: parsed token body`, parsedToken);
-      const audience = (parsedToken['aud'] as string[])[0];
-      if (audience != this._params.appId) {
-        reject(new Error('Parsed application id does not match parameters'));
-      }
-
-      if (!audience) {
-        reject(
-          new Error(
-            'could not find project id in token body, is this a stych token?'
-          )
-        );
-      }
-      const session = parsedToken[this._provider];
-      const authFactor = session['authentication_factors'][0];
-      if (!authFactor) {
-        reject(new Error('Could not find authentication info in session'));
-      }
-
-      if (userId != parsedToken['sub']) {
-        reject(
-          new Error(
-            'AppId does not match token contents. is this the right token for your application?'
-          )
-        );
-      }
-
-      resolve({
-        authMethodType: AuthMethodType.OTP,
-        accessToken: accessToken,
-      });
-    });
-  }
-
-  /**
-   *
-   * @param jwt token to parse
-   * @returns {string}- userId contained within the token message
+   * Validates OTP code from {@link sendOtpCode}
+   * @param options {T extends AuthenticateOptions} options used in authentication
+   * @returns {Promise<AuthMethod>} Auth Method object containing Json Web Token
    */
-  private _parseJWT(jwt: string): StytchToken {
-    const parts = jwt.split('.');
-    if (parts.length !== 3) {
-      throw new Error('Invalid token length');
+  public async authenticate<T extends AuthenticateOptions>(
+    options?: T
+  ): Promise<AuthMethod> {
+    if (options) {
+      return this.checkOtpCode(
+        (options as unknown as OtpAuthenticateOptions).code
+      );
+    } else {
+      throw new Error(
+        `Must provide authentication options for OTP check options given are: ${options}`
+      );
     }
-    const body = Buffer.from(parts[1], 'base64');
-    const parsedBody: StytchToken = JSON.parse(body.toString('ascii'));
-    console.log('JWT body: ', parsedBody);
-    return parsedBody;
+  }
+
+  /**
+   * Starts an otp session for a given email or phone number from the {@link SignInWithOTPParams}
+   * @returns {Promise<string>} returns a callback to check status of the verification session if successful
+   */
+  public async sendOtpCode(): Promise<string> {
+    const url = this._buildUrl('start');
+    this._requestId =
+      this._params.requestId ??
+      (Math.random() * 10000 + 1).toString(10).replace('.', '');
+
+    let body: any = {
+      otp: this._params.userId,
+      request_id: this._requestId,
+    };
+
+    if (this._params.emailCustomizationOptions) {
+      body.email_configuration = {};
+      body.email_configuration.from_name =
+        this._params.emailCustomizationOptions.fromName;
+      if (this._params.emailCustomizationOptions.from)
+        body.email_configuration.from =
+          this._params.emailCustomizationOptions.from;
+    }
+
+    if (this._params.customName) body.custom_name = this._params.customName;
+
+    body = JSON.stringify(body);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk',
+      },
+      body,
+    });
+
+    if (response.status < 200 || response.status >= 400) {
+      console.warn('Something wrong with  OTP request', await response.json());
+      const err = new Error('Unable to start otp verification');
+      throw err;
+    }
+    let respBody: { status: string; callback: string } = await response.json();
+
+    return respBody.callback;
+  }
+
+  /**
+   * Validates otp code from {@link sendOtpCode}
+   *
+   * @param code {string} - OTP code sent to the user, should be retrieved from user input.
+   * @returns {Promise<AuthMethod} - Auth method that contains Json Web Token
+   */
+  private async checkOtpCode(code: string): Promise<AuthMethod> {
+    const url = this._buildUrl('check');
+
+    /**
+        pub struct OtpCheckRequest {
+            pub otp: String,
+            pub code: String,
+            pub request_id: String,
+        }
+    */
+    let body: any = {
+      otp: this._params.userId,
+      code,
+      request_id: this._requestId,
+    };
+    body = JSON.stringify(body);
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_JsSdk',
+      },
+      body,
+    });
+
+    if (response.status < 200 || response.status >= 400) {
+      console.warn('Something wrong with  OTP request', await response.json());
+      const err = new Error('unsucessful otp check');
+      throw err;
+    }
+
+    const respBody: any = await response.json();
+
+    if (!respBody.token_jwt) {
+      throw new Error('Invalid otp code, operation was aborted');
+    }
+
+    return {
+      accessToken: respBody.token_jwt,
+      authMethodType: AuthMethodType.OTP,
+    };
+  }
+
+  private _buildUrl(route: string): string {
+    switch (route) {
+      case 'start':
+        return `${this._baseUrl}:${this._port}${this._startRoute}`;
+      case 'check':
+        return `${this._baseUrl}:${this._port}${this._checkRoute}`;
+      default:
+        return '';
+    }
   }
 }

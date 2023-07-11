@@ -17,6 +17,7 @@ import WebAuthnProvider from './providers/WebAuthnProvider';
 import EthWalletProvider from './providers/EthWalletProvider';
 import AppleProvider from './providers/AppleProvider';
 import { OtpProvider } from './providers/OtpProvider';
+import { StytchOtpAuthenticateOptions } from '@lit-protocol/types';
 
 const isClass = (v: unknown) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
@@ -127,7 +128,7 @@ describe('getProvider', () => {
   });
 });
 
-describe('OtpProvider', () => {
+describe('StytchOtpProvider', () => {
   let client: LitAuthClient;
   let provider: OtpProvider;
 
@@ -135,7 +136,8 @@ describe('OtpProvider', () => {
     client = new LitAuthClient({
       litRelayConfig: { relayApiKey: 'test-api-key' },
     });
-    provider = client.initProvider<OtpProvider>(ProviderType.Otp, {
+
+    provider = client.initProvider<StytchOtpAuthenticateOptions>(ProviderType.StytchOtp, {
       appId: LITCONFIG.STYTCH_APP_ID,
       userId: LITCONFIG.STYTCH_USER_ID,
     });
