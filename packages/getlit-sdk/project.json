@@ -9,7 +9,6 @@
       "options": {
         "commands": [
           "yarn build:target lit-node-client --skip",
-          "yarn build:target contracts-sdk --skip",
           "yarn build:target getlit-sdk"
         ]
       }
