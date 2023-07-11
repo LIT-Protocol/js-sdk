@@ -1,4 +1,4 @@
-const version = '0.0.1';
+const version = '0.0.14';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -59,3 +59,21 @@ const printLog = (args: any[]): void => {
 };
 
 export { log };
+
+export const isNode = () => {
+  var isNode = false;
+  // @ts-ignore
+  if (typeof process === 'object') {
+    // @ts-ignore
+    if (typeof process.versions === 'object') {
+      // @ts-ignore
+      if (typeof process.versions.node !== 'undefined') {
+        isNode = true;
+      }
+    }
+  }
+  return isNode;
+};
+export const isBrowser = () => {
+  return isNode() === false;
+};

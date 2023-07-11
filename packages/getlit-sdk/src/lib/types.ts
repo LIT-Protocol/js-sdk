@@ -9,6 +9,7 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 export type OrNull<T> = T | null;
 export type OrUndefined<T> = T | undefined;
+
 export namespace Types {
   export interface ContractOptions {
     signer?: ethers.Wallet | ethers.Signer; // No provider! ?default: PKP || window.web3
@@ -49,6 +50,6 @@ export interface SignProps {}
 // - earliest end of week, latest wednesday week after depending on collabland
 // -
 
-export interface LitCredentials {
+export type LitCredentials = OrNull<{
   authSig?: AuthSig;
-}
+}>;
