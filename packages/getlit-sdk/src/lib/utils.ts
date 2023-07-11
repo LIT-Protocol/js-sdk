@@ -1,4 +1,4 @@
-const version = '0.0.14';
+const version = '0.0.15';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 

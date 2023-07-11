@@ -15,7 +15,7 @@
     "default": {
       "runner": "@nrwl/workspace/tasks-runners/default",
       "options": {
-        "cacheableOperations": [""],
+        "cacheableOperations": ["build"],
         "cacheableDirectories": ["node_modules"]
       }
     }

@@ -30,5 +30,7 @@
   },
   "tags": [
     "universal"
-  ]
+  ],
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }
