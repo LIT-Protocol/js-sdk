@@ -1,3 +1,5 @@
+import { LitSerializable } from "./types";
+
 const version = '0.0.21';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
@@ -77,3 +79,21 @@ export const isNode = () => {
 export const isBrowser = () => {
   return isNode() === false;
 };
+
+
+export const convertSigningMaterial = (material: LitSerializable): number[] => {
+  let toSign: number[] = [];
+  if (typeof material != "string") {
+    for (let i = 0; i < material.length; i++) {
+        toSign.push(material[i] as number);
+    }
+  } else {
+    const encoder = new TextEncoder();
+    const uint8Buffer = encoder.encode(material);
+    for (let i = 0; i < uint8Buffer.length; i++) {
+      toSign.push(uint8Buffer[i]);
+    }
+  }
+
+  return toSign;
+}

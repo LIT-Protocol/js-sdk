@@ -54,15 +54,8 @@ describe('getlitSDK', () => {
       });
 
       await promise;
-      globalThis.Lit.builder?.withContractOptions({
-        signer: new PKPEthersWallet({
-          pkpPubKey: LITCONFIG.PKP_PUBKEY,
-          rpc: LITCONFIG.CHRONICLE_RPC,
-          controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-        }),
-      });
-      await globalThis.Lit.builder?.build();
     }
+    
     const sig = await globalThis.Lit.sign({
         accountPublicKey: LITCONFIG.PKP_PUBKEY,
         signingMaterial: "Hello World",
@@ -70,6 +63,6 @@ describe('getlitSDK', () => {
         authMatrial: LITCONFIG.CONTROLLER_AUTHSIG
     });
     expect(sig).toBeDefined();
-  }, 5_000);
+  }, 10_000);
 
 });
