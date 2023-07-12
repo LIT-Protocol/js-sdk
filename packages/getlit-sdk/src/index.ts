@@ -8,10 +8,14 @@ import { EventEmitter } from 'events';
   log.h1('Intializing GetLit SDK');
 
   try {
+    globalThis.Lit.events = new EventEmitter();
+    
     log('setting "globalThis.Lit.builder"...');
     globalThis.Lit.builder = new LitOptionsBuilder({
-      emitter: new EventEmitter(),
+      emitter: globalThis.Lit.events,
     });
+    
+    
     log.success('globalThis.Lit.builder has been set!');
 
     log('building "globalThis.Lit.builder"...');

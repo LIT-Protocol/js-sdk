@@ -47,6 +47,7 @@ export class LitOptionsBuilder {
       litNetwork: DEFAULT_NETWORK,
       debug: false,
     };
+    
     log('nodeClientOpts', nodeClientOpts);
 
     if (!this._nodeClient) {

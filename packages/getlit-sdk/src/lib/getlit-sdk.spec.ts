@@ -37,4 +37,39 @@ describe('getlitSDK', () => {
       expect((globalThis.Lit.events as any)['_eventsCount']).toBe(1);
     }
   }, 10_000);
+
+  it('Should sign message', async () => {
+    let res: (value: void | PromiseLike<void>) => void;
+    let rej: (reason?: any) => void;
+    const promise = new Promise<void>((resolve, reject) => {
+      res = resolve;
+      rej = reject;
+    });
+    await import('./../index');
+    if (globalThis.Lit.events) {
+      globalThis.Lit.events.on('ready', async () => {
+        // await 1 second
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        res();
+      });
+
+      await promise;
+      globalThis.Lit.builder?.withContractOptions({
+        signer: new PKPEthersWallet({
+          pkpPubKey: LITCONFIG.PKP_PUBKEY,
+          rpc: LITCONFIG.CHRONICLE_RPC,
+          controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+        }),
+      });
+      await globalThis.Lit.builder?.build();
+    }
+    const sig = await globalThis.Lit.sign({
+        accountPublicKey: LITCONFIG.PKP_PUBKEY,
+        signingMaterial: "Hello World",
+        credentials: [],
+        authMatrial: LITCONFIG.CONTROLLER_AUTHSIG
+    });
+    expect(sig).toBeDefined();
+  }, 5_000);
+
 });

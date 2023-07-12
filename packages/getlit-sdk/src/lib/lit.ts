@@ -1,4 +1,5 @@
-import { LitCredentials, OrUndefined, Types } from './types';
+import { AuthSig } from '@lit-protocol/types';
+import { LitCredentials, OrUndefined, Types, SignProps } from './types';
 import { isBrowser, isNode, log } from './utils';
 
 export class Lit {
@@ -98,5 +99,28 @@ export class Lit {
   }
 
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#9b2b39cd96db42daae6a2b3a6cb3c69a
-  public sign() {}
+  public async sign(options: SignProps) {
+    let toSign: number[] = [];
+    if (typeof options.signingMaterial != "string") {
+      for (let i = 0; i < options.signingMaterial.length; i++) {
+          toSign.push(options.signingMaterial[i] as number);
+      }
+    } else {
+      const encoder = new TextEncoder();
+      const uint8Buffer = encoder.encode();
+      for (let i = 0; i < uint8Buffer.length; i++) {
+        toSign.push(uint8Buffer[i]);
+      }
+    }
+
+    const sig = await this._litNodeClient?.pkpSign({
+      pubKey: options.accountPublicKey,
+      toSign,
+      authMethods: options.credentials,
+      authSig: options.authMatrial as AuthSig
+    });
+
+
+    return sig;
+  }
 }
