@@ -16,10 +16,6 @@ describe('getlitSDK', () => {
       globalThis.Lit.events.on('ready', async () => {
         // await 1 second
         await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        log.h1('User Usage');
-        log.info('globalThis.Lit.ready:', globalThis.Lit.ready);
-
         res();
       });
 
@@ -32,7 +28,6 @@ describe('getlitSDK', () => {
         }),
       });
       await globalThis.Lit.builder?.build();
-      log('globalThis.Lit:', globalThis.Lit);
 
       expect(globalThis.Lit).toBeDefined();
       expect(globalThis.Lit.instance).toBeDefined();
