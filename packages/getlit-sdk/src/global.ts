@@ -1,7 +1,7 @@
 import { EventEmitter } from 'stream';
 import { Lit } from './lib/lit';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
-import { OrNull, Types } from './lib/types';
+import { OrNull, SignProps, Types } from './lib/types';
 import {
   GoogleProvider,
   AppleProvider,
@@ -85,7 +85,7 @@ globalThis.Lit = {
   createAccount: () => {
     console.log('not initialized');
   },
-  sign: () => {
+  sign: (options: SignProps) => {
     console.log('not initialized');
   },
 

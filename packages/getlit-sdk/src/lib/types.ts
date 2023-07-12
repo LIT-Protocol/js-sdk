@@ -1,11 +1,14 @@
 import {
+  AuthMethod,
   AuthSig,
   LitNodeClientConfig,
   LitRelayConfig,
   OtpProviderOptions,
+  SessionSig,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import * as uint8arrays from '@lit-protocol/uint8arrays';
 
 export type OrNull<T> = T | null;
 export type OrUndefined<T> = T | undefined;
@@ -18,12 +21,29 @@ export namespace Types {
     litRelayConfig?: LitRelayConfig;
     litOtpConfig?: OtpProviderOptions;
   }
+
   export type NodeOptions = { nodeOptions?: LitNodeClientConfig };
 
   export type NodeClient<T = LitNodeClient> = T;
 
   export type LitOptions = ContractOptions & AuthOptions & NodeOptions;
+
+  export type Credential = AuthSig | SessionSig;
 }
+
+export type Credential = AuthSig | SessionSig;
+/*
+  Lit Serializable expresses any type that is indexable numerically, an array of numbers, 
+  also indexable numerically, or a string which has numeric indexing
+*/
+export type LitSerializable = ArrayLike<number> | string | [index: number];
+
+export type Account = {
+  publicKey: string;
+  ethAddress: string;
+  tokenId: string;
+};
+export type Wallet = Account;
 
 export interface EncryptProps {}
 
@@ -31,7 +51,12 @@ export interface DecryptProps {}
 
 export interface CreateAccountProps {}
 
-export interface SignProps {}
+export interface SignProps {
+  accountPublicKey: string;
+  signingMaterial: LitSerializable;
+  credentials: Credential[],
+  authMatrial: Credential,
+}
 
 // understand what's possible and reasonable to set expectations with him
 
