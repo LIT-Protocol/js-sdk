@@ -143,10 +143,15 @@ export class PKPCosmosWallet
     const hashedMessage = sha256(signBytes);
 
     // Run the LIT action to obtain the signature.
-    const signature = await this.runLitAction(
-      hashedMessage,
-      this.defaultSigName
-    );
+    let signature;
+    if (this.useAction) {
+      signature = await this.runLitAction(
+        hashedMessage,
+        this.defaultSigName
+      );
+    } else {
+      signature = await this.runSign(hashedMessage);
+    }
 
     // Create an ExtendedSecp256k1Signature from the signature components.
     const extendedSig = new ExtendedSecp256k1Signature(

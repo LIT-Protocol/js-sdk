@@ -2,1188 +2,1188 @@ export const staking = {
   "address": "0x433357a14c35815E6A32758fe95c93380D194aaf",
   "abi": [
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: '_stakingToken',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "_stakingToken",
+          "type": "address"
+        }
       ],
-      stateMutability: 'nonpayable',
-      type: 'constructor',
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'newEpochLength',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newEpochLength",
+          "type": "uint256"
+        }
       ],
-      name: 'EpochLengthSet',
-      type: 'event',
+      "name": "EpochLengthSet",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'newEpochTimeout',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newEpochTimeout",
+          "type": "uint256"
+        }
       ],
-      name: 'EpochTimeoutSet',
-      type: 'event',
+      "name": "EpochTimeoutSet",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'newKickPenaltyPercent',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newKickPenaltyPercent",
+          "type": "uint256"
+        }
       ],
-      name: 'KickPenaltyPercentSet',
-      type: 'event',
+      "name": "KickPenaltyPercentSet",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'newMinimumStake',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newMinimumStake",
+          "type": "uint256"
+        }
       ],
-      name: 'MinimumStakeSet',
-      type: 'event',
+      "name": "MinimumStakeSet",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'previousOwner',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
         },
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'newOwner',
-          type: 'address',
-        },
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
       ],
-      name: 'OwnershipTransferred',
-      type: 'event',
+      "name": "OwnershipTransferred",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
       ],
-      name: 'Paused',
-      type: 'event',
+      "name": "Paused",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'staker',
-          type: 'address',
-        },
+          "indexed": true,
+          "internalType": "address",
+          "name": "staker",
+          "type": "address"
+        }
       ],
-      name: 'ReadyForNextEpoch',
-      type: 'event',
+      "name": "ReadyForNextEpoch",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'address',
-          name: 'token',
-          type: 'address',
+          "indexed": false,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
         },
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'amount',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
       ],
-      name: 'Recovered',
-      type: 'event',
+      "name": "Recovered",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'staker',
-          type: 'address',
-        },
+          "indexed": true,
+          "internalType": "address",
+          "name": "staker",
+          "type": "address"
+        }
       ],
-      name: 'RequestToJoin',
-      type: 'event',
+      "name": "RequestToJoin",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'staker',
-          type: 'address',
-        },
+          "indexed": true,
+          "internalType": "address",
+          "name": "staker",
+          "type": "address"
+        }
       ],
-      name: 'RequestToLeave',
-      type: 'event',
+      "name": "RequestToLeave",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'address',
-          name: 'newResolverContractAddress',
-          type: 'address',
-        },
+          "indexed": false,
+          "internalType": "address",
+          "name": "newResolverContractAddress",
+          "type": "address"
+        }
       ],
-      name: 'ResolverContractAddressSet',
-      type: 'event',
+      "name": "ResolverContractAddressSet",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'staker',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "staker",
+          "type": "address"
         },
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'reward',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
+        }
       ],
-      name: 'RewardPaid',
-      type: 'event',
+      "name": "RewardPaid",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'newDuration',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newDuration",
+          "type": "uint256"
+        }
       ],
-      name: 'RewardsDurationUpdated',
-      type: 'event',
+      "name": "RewardsDurationUpdated",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'staker',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "staker",
+          "type": "address"
         },
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'amount',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
       ],
-      name: 'Staked',
-      type: 'event',
+      "name": "Staked",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'address',
-          name: 'newStakingTokenAddress',
-          type: 'address',
-        },
+          "indexed": false,
+          "internalType": "address",
+          "name": "newStakingTokenAddress",
+          "type": "address"
+        }
       ],
-      name: 'StakingTokenSet',
-      type: 'event',
+      "name": "StakingTokenSet",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'enum Staking.States',
-          name: 'newState',
-          type: 'uint8',
-        },
+          "indexed": false,
+          "internalType": "enum Staking.States",
+          "name": "newState",
+          "type": "uint8"
+        }
       ],
-      name: 'StateChanged',
-      type: 'event',
+      "name": "StateChanged",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'newTokenRewardPerTokenPerEpoch',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newTokenRewardPerTokenPerEpoch",
+          "type": "uint256"
+        }
       ],
-      name: 'TokenRewardPerTokenPerEpochSet',
-      type: 'event',
+      "name": "TokenRewardPerTokenPerEpochSet",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: false,
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
       ],
-      name: 'Unpaused',
-      type: 'event',
+      "name": "Unpaused",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'staker',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "staker",
+          "type": "address"
         },
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'amountBurned',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountBurned",
+          "type": "uint256"
+        }
       ],
-      name: 'ValidatorKickedFromNextEpoch',
-      type: 'event',
+      "name": "ValidatorKickedFromNextEpoch",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'reporter',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "reporter",
+          "type": "address"
         },
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'validatorStakerAddress',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "validatorStakerAddress",
+          "type": "address"
         },
         {
-          indexed: true,
-          internalType: 'uint256',
-          name: 'reason',
-          type: 'uint256',
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "reason",
+          "type": "uint256"
         },
         {
-          indexed: false,
-          internalType: 'bytes',
-          name: 'data',
-          type: 'bytes',
-        },
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
       ],
-      name: 'VotedToKickValidatorInNextEpoch',
-      type: 'event',
+      "name": "VotedToKickValidatorInNextEpoch",
+      "type": "event"
     },
     {
-      anonymous: false,
-      inputs: [
+      "anonymous": false,
+      "inputs": [
         {
-          indexed: true,
-          internalType: 'address',
-          name: 'staker',
-          type: 'address',
+          "indexed": true,
+          "internalType": "address",
+          "name": "staker",
+          "type": "address"
         },
         {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'amount',
-          type: 'uint256',
-        },
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
       ],
-      name: 'Withdrawn',
-      type: 'event',
+      "name": "Withdrawn",
+      "type": "event"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'validatorStakerAddress',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "validatorStakerAddress",
+          "type": "address"
+        }
       ],
-      name: 'adminKickValidatorInNextEpoch',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "adminKickValidatorInNextEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'validatorStakerAddress',
-          type: 'address',
+          "internalType": "address",
+          "name": "validatorStakerAddress",
+          "type": "address"
         },
         {
-          internalType: 'uint256',
-          name: 'amountToBurn',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "amountToBurn",
+          "type": "uint256"
+        }
       ],
-      name: 'adminSlashValidator',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "adminSlashValidator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'advanceEpoch',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "advanceEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
       ],
-      name: 'balanceOf',
-      outputs: [
+      "name": "balanceOf",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'epoch',
-      outputs: [
+      "inputs": [],
+      "name": "epoch",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: 'epochLength',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "epochLength",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'number',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "number",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'endBlock',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "endBlock",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'retries',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "retries",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'timeout',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "timeout",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'exit',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "exit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'getReward',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "getReward",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'getValidatorsInCurrentEpoch',
-      outputs: [
+      "inputs": [],
+      "name": "getValidatorsInCurrentEpoch",
+      "outputs": [
         {
-          internalType: 'address[]',
-          name: '',
-          type: 'address[]',
-        },
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'getValidatorsInNextEpoch',
-      outputs: [
+      "inputs": [],
+      "name": "getValidatorsInNextEpoch",
+      "outputs": [
         {
-          internalType: 'address[]',
-          name: '',
-          type: 'address[]',
-        },
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'epochNumber',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "epochNumber",
+          "type": "uint256"
         },
         {
-          internalType: 'address',
-          name: 'validatorStakerAddress',
-          type: 'address',
+          "internalType": "address",
+          "name": "validatorStakerAddress",
+          "type": "address"
         },
         {
-          internalType: 'address',
-          name: 'voterStakerAddress',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "voterStakerAddress",
+          "type": "address"
+        }
       ],
-      name: 'getVotingStatusToKickValidator',
-      outputs: [
+      "name": "getVotingStatusToKickValidator",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         },
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
       ],
-      name: 'isActiveValidator',
-      outputs: [
+      "name": "isActiveValidator",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'isReadyForNextEpoch',
-      outputs: [
+      "inputs": [],
+      "name": "isReadyForNextEpoch",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'kickPenaltyPercent',
-      outputs: [
+      "inputs": [],
+      "name": "kickPenaltyPercent",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'validatorStakerAddress',
-          type: 'address',
+          "internalType": "address",
+          "name": "validatorStakerAddress",
+          "type": "address"
         },
         {
-          internalType: 'uint256',
-          name: 'reason',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "reason",
+          "type": "uint256"
         },
         {
-          internalType: 'bytes',
-          name: 'data',
-          type: 'bytes',
-        },
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
       ],
-      name: 'kickValidatorInNextEpoch',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "kickValidatorInNextEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'lockValidatorsForNextEpoch',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "lockValidatorsForNextEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'minimumStake',
-      outputs: [
+      "inputs": [],
+      "name": "minimumStake",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      name: 'nodeAddressToStakerAddress',
-      outputs: [
+      "name": "nodeAddressToStakerAddress",
+      "outputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'owner',
-      outputs: [
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'pauseEpoch',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "pauseEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'paused',
-      outputs: [
+      "inputs": [],
+      "name": "paused",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      name: 'readyForNextEpoch',
-      outputs: [
+      "name": "readyForNextEpoch",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'renounceOwnership',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint32',
-          name: 'ip',
-          type: 'uint32',
+          "internalType": "uint32",
+          "name": "ip",
+          "type": "uint32"
         },
         {
-          internalType: 'uint128',
-          name: 'ipv6',
-          type: 'uint128',
+          "internalType": "uint128",
+          "name": "ipv6",
+          "type": "uint128"
         },
         {
-          internalType: 'uint32',
-          name: 'port',
-          type: 'uint32',
+          "internalType": "uint32",
+          "name": "port",
+          "type": "uint32"
         },
         {
-          internalType: 'address',
-          name: 'nodeAddress',
-          type: 'address',
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
         },
         {
-          internalType: 'uint256',
-          name: 'senderPubKey',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "senderPubKey",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'receiverPubKey',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "receiverPubKey",
+          "type": "uint256"
+        }
       ],
-      name: 'requestToJoin',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "requestToJoin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'requestToLeave',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "requestToLeave",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'resolverContractAddress',
-      outputs: [
+      "inputs": [],
+      "name": "resolverContractAddress",
+      "outputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
       ],
-      name: 'rewardOf',
-      outputs: [
+      "name": "rewardOf",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'newEpochLength',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "newEpochLength",
+          "type": "uint256"
+        }
       ],
-      name: 'setEpochLength',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setEpochLength",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'enum Staking.States',
-          name: 'newState',
-          type: 'uint8',
-        },
+          "internalType": "enum Staking.States",
+          "name": "newState",
+          "type": "uint8"
+        }
       ],
-      name: 'setEpochState',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setEpochState",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'newEpochTimeout',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "newEpochTimeout",
+          "type": "uint256"
+        }
       ],
-      name: 'setEpochTimeout',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setEpochTimeout",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint32',
-          name: 'ip',
-          type: 'uint32',
+          "internalType": "uint32",
+          "name": "ip",
+          "type": "uint32"
         },
         {
-          internalType: 'uint128',
-          name: 'ipv6',
-          type: 'uint128',
+          "internalType": "uint128",
+          "name": "ipv6",
+          "type": "uint128"
         },
         {
-          internalType: 'uint32',
-          name: 'port',
-          type: 'uint32',
+          "internalType": "uint32",
+          "name": "port",
+          "type": "uint32"
         },
         {
-          internalType: 'address',
-          name: 'nodeAddress',
-          type: 'address',
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
         },
         {
-          internalType: 'uint256',
-          name: 'senderPubKey',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "senderPubKey",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'receiverPubKey',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "receiverPubKey",
+          "type": "uint256"
+        }
       ],
-      name: 'setIpPortNodeAddressAndCommunicationPubKeys',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setIpPortNodeAddressAndCommunicationPubKeys",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'newKickPenaltyPercent',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "newKickPenaltyPercent",
+          "type": "uint256"
+        }
       ],
-      name: 'setKickPenaltyPercent',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setKickPenaltyPercent",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'newMinimumStake',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "newMinimumStake",
+          "type": "uint256"
+        }
       ],
-      name: 'setMinimumStake',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setMinimumStake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'newResolverContractAddress',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "newResolverContractAddress",
+          "type": "address"
+        }
       ],
-      name: 'setResolverContractAddress',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setResolverContractAddress",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'newStakingTokenAddress',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "newStakingTokenAddress",
+          "type": "address"
+        }
       ],
-      name: 'setStakingToken',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setStakingToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'newTokenRewardPerTokenPerEpoch',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "newTokenRewardPerTokenPerEpoch",
+          "type": "uint256"
+        }
       ],
-      name: 'setTokenRewardPerTokenPerEpoch',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "setTokenRewardPerTokenPerEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'stakerAddress',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "stakerAddress",
+          "type": "address"
+        }
       ],
-      name: 'shouldKickValidator',
-      outputs: [
+      "name": "shouldKickValidator",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'signalReadyForNextEpoch',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "signalReadyForNextEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'amount',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
       ],
-      name: 'stake',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "stake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'amount',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
         },
         {
-          internalType: 'uint32',
-          name: 'ip',
-          type: 'uint32',
+          "internalType": "uint32",
+          "name": "ip",
+          "type": "uint32"
         },
         {
-          internalType: 'uint128',
-          name: 'ipv6',
-          type: 'uint128',
+          "internalType": "uint128",
+          "name": "ipv6",
+          "type": "uint128"
         },
         {
-          internalType: 'uint32',
-          name: 'port',
-          type: 'uint32',
+          "internalType": "uint32",
+          "name": "port",
+          "type": "uint32"
         },
         {
-          internalType: 'address',
-          name: 'nodeAddress',
-          type: 'address',
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
         },
         {
-          internalType: 'uint256',
-          name: 'senderPubKey',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "senderPubKey",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'receiverPubKey',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "receiverPubKey",
+          "type": "uint256"
+        }
       ],
-      name: 'stakeAndJoin',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "stakeAndJoin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'stakingToken',
-      outputs: [
+      "inputs": [],
+      "name": "stakingToken",
+      "outputs": [
         {
-          internalType: 'contract LITToken',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "contract LITToken",
+          "name": "",
+          "type": "address"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'state',
-      outputs: [
+      "inputs": [],
+      "name": "state",
+      "outputs": [
         {
-          internalType: 'enum Staking.States',
-          name: '',
-          type: 'uint8',
-        },
+          "internalType": "enum Staking.States",
+          "name": "",
+          "type": "uint8"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'tokenRewardPerTokenPerEpoch',
-      outputs: [
+      "inputs": [],
+      "name": "tokenRewardPerTokenPerEpoch",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'totalStaked',
-      outputs: [
+      "inputs": [],
+      "name": "totalStaked",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: 'newOwner',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
       ],
-      name: 'transferOwnership',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'unlockValidatorsForNextEpoch',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
+      "inputs": [],
+      "name": "unlockValidatorsForNextEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'validatorCountForConsensus',
-      outputs: [
+      "inputs": [],
+      "name": "validatorCountForConsensus",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'validatorStateIsActive',
-      outputs: [
+      "inputs": [],
+      "name": "validatorStateIsActive",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'validatorStateIsUnlocked',
-      outputs: [
+      "inputs": [],
+      "name": "validatorStateIsUnlocked",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      name: 'validators',
-      outputs: [
+      "name": "validators",
+      "outputs": [
         {
-          internalType: 'uint32',
-          name: 'ip',
-          type: 'uint32',
+          "internalType": "uint32",
+          "name": "ip",
+          "type": "uint32"
         },
         {
-          internalType: 'uint128',
-          name: 'ipv6',
-          type: 'uint128',
+          "internalType": "uint128",
+          "name": "ipv6",
+          "type": "uint128"
         },
         {
-          internalType: 'uint32',
-          name: 'port',
-          type: 'uint32',
+          "internalType": "uint32",
+          "name": "port",
+          "type": "uint32"
         },
         {
-          internalType: 'address',
-          name: 'nodeAddress',
-          type: 'address',
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
         },
         {
-          internalType: 'uint256',
-          name: 'balance',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'reward',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "reward",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'senderPubKey',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "senderPubKey",
+          "type": "uint256"
         },
         {
-          internalType: 'uint256',
-          name: 'receiverPubKey',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "receiverPubKey",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [],
-      name: 'validatorsInNextEpochAreLocked',
-      outputs: [
+      "inputs": [],
+      "name": "validatorsInNextEpochAreLocked",
+      "outputs": [
         {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         },
         {
-          internalType: 'address',
-          name: '',
-          type: 'address',
-        },
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
       ],
-      name: 'votesToKickValidatorsInNextEpoch',
-      outputs: [
+      "name": "votesToKickValidatorsInNextEpoch",
+      "outputs": [
         {
-          internalType: 'uint256',
-          name: 'votes',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "votes",
+          "type": "uint256"
+        }
       ],
-      stateMutability: 'view',
-      type: 'function',
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      inputs: [
+      "inputs": [
         {
-          internalType: 'uint256',
-          name: 'amount',
-          type: 'uint256',
-        },
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
       ],
-      name: 'withdraw',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
-    },
-  ],
-};
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+}
