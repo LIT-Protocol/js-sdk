@@ -1,7 +1,13 @@
 import { EventEmitter } from 'stream';
 import { Lit } from './lib/lit';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
-import { OrNull, SignProps, Types } from './lib/types';
+import {
+  LitCredentialOptions,
+  OrNull,
+  PKPInfo,
+  SignProps,
+  Types,
+} from './lib/types';
 import {
   GoogleProvider,
   AppleProvider,
@@ -32,7 +38,11 @@ declare global {
     // Lit class methods
     encrypt: Function;
     decrypt: Function;
-    createAccount: Function;
+    createAccount: (
+      opts: LitCredentialOptions
+    ) => Promise<void | PKPInfo | Array<PKPInfo> | any>;
+    createAccountWithGoogle: Function;
+    createAccountWithDiscord: Function;
     sign: Function;
 
     // auths
@@ -77,7 +87,13 @@ globalThis.Lit = {
   decrypt: () => {
     console.log('not initialized');
   },
-  createAccount: () => {
+  createAccount: async () => {
+    console.log('not initialized');
+  },
+  createAccountWithGoogle: () => {
+    console.log('not initialized');
+  },
+  createAccountWithDiscord: () => {
     console.log('not initialized');
   },
   sign: (options: SignProps) => {
