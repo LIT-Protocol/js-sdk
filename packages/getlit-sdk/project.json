@@ -34,6 +34,10 @@
           {
             "package": "esbuild-node-builtins",
             "function": "nodeBuiltIns"
+          },
+          {
+            "package": "esbuild-plugin-polyfill-node",
+            "function": "polyfillNode"
           }
         ]
       }
