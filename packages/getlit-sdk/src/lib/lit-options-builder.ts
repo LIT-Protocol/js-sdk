@@ -1,9 +1,17 @@
 import { LitNodeClientConfig } from '@lit-protocol/types';
 import { OrUndefined, Types } from './types';
-import { log } from './utils';
+import { getProviderMap, isBrowser, log } from './utils';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Lit } from './lit';
 import EventEmitter from 'events';
+import {
+  DiscordProvider,
+  EthWalletProvider,
+  GoogleProvider,
+  WebAuthnProvider,
+} from '@lit-protocol/lit-auth-client';
+import { ProviderType } from '@lit-protocol/constants';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 const DEFAULT_NETWORK = 'serrano'; // changing to "cayenne" soon
 
@@ -31,7 +39,7 @@ export class LitOptionsBuilder {
   }
 
   public async build(): Promise<void> {
-    log.h1('Build Started');
+    log.start('build', 'starting...');
 
     // Check if the Lit instance exists in globalThis, if not, create it
     if (!globalThis.Lit.instance) {
@@ -47,7 +55,7 @@ export class LitOptionsBuilder {
       litNetwork: DEFAULT_NETWORK,
       debug: false,
     };
-    
+
     log('nodeClientOpts', nodeClientOpts);
 
     if (!this._nodeClient) {
@@ -79,9 +87,62 @@ export class LitOptionsBuilder {
 
     console.log(globalThis.Lit.instance.Configure);
     log.success('"globalThis.Lit" has been set!');
-    log.h1('Build Completed');
+    log.end('build', 'done!');
 
     this._emitter?.emit('ready');
     globalThis.Lit.ready = true;
+
+    await this.startAuthClient();
+  }
+
+  public async startAuthClient(): Promise<void> {
+    log.start('startAuthClient', 'starting...');
+
+    globalThis.Lit.authClient = new LitAuthClient({
+      // redirectUri: window.location.href.replace(/\/+$/, ''),
+      litRelayConfig: {
+        relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
+      },
+      litNodeClient: globalThis.Lit.nodeClient,
+    });
+
+    if (!globalThis.Lit.authClient) {
+      return log.throw('"globalThis.Lit.authClient" failed to initialize');
+    }
+    log.success('"globalThis.Lit.authClient" has been set!');
+
+    log('setting "globalThis.Lit.auth"');
+
+    if (isBrowser()) {
+      globalThis.Lit.auth.google =
+        globalThis.Lit.authClient.initProvider<GoogleProvider>(
+          ProviderType.Google
+        );
+      globalThis.Lit.auth.discord =
+        globalThis.Lit.authClient.initProvider<DiscordProvider>(
+          ProviderType.Discord
+        );
+      globalThis.Lit.auth.ethWallet =
+        globalThis.Lit.authClient.initProvider<EthWalletProvider>(
+          ProviderType.EthWallet
+        );
+      globalThis.Lit.auth.webauthn =
+        globalThis.Lit.authClient.initProvider<WebAuthnProvider>(
+          ProviderType.WebAuthn
+        );
+
+      let authStatus = Object.entries(globalThis.Lit.auth)
+        .map(([key, value]) => {
+          return `authMethodType: ${getProviderMap()[key]} | ${
+            value ? '✅' : '❌'
+          } ${key}`;
+        })
+        .join('\n');
+
+      log.success('"globalThis.Lit.auth" has been set!');
+      log.info('globalThis.Lit.auth', '\n' + authStatus);
+    }
+
+    log.end('startAuthClient', 'done!');
   }
 }

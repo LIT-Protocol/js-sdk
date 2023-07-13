@@ -15,7 +15,7 @@
     "pipe": "node ./tools/scripts/pipeline.mjs",
     "postBuild:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",
     "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist @lit-protocol",
-    "dev:revamp":"node ./tools/scripts/bump-getlit-sdk.mjs && yarn build: revamp && yarn nx run nodejs:serve",
+    "dev:revamp": "node ./tools/scripts/bump-getlit-sdk.mjs && yarn build && yarn nx run nodejs:serve",
     "test:packages": "yarn tools --test --unit",
     "test:watch": "nx run-many --target=test --watch",
     "test:ci": "nx affected --target=test --all --code-coverage",

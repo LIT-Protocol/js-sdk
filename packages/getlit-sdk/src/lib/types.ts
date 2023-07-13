@@ -9,9 +9,12 @@ import {
 import { ethers } from 'ethers';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import * as uint8arrays from '@lit-protocol/uint8arrays';
+import { AuthMethodType } from '@lit-protocol/constants';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 export type OrNull<T> = T | null;
 export type OrUndefined<T> = T | undefined;
+export type OrNever<T> = T | never;
 
 export namespace Types {
   export interface ContractOptions {
@@ -25,6 +28,8 @@ export namespace Types {
   export type NodeOptions = { nodeOptions?: LitNodeClientConfig };
 
   export type NodeClient<T = LitNodeClient> = T;
+
+  export type AuthClient<T = LitAuthClient> = T;
 
   export type LitOptions = ContractOptions & AuthOptions & NodeOptions;
 
@@ -54,8 +59,8 @@ export interface CreateAccountProps {}
 export interface SignProps {
   accountPublicKey: string;
   signingMaterial: LitSerializable;
-  credentials: Credential[],
-  authMatrial: Credential,
+  credentials: Credential[];
+  authMatrial: Credential;
 }
 
 // understand what's possible and reasonable to set expectations with him
@@ -75,6 +80,15 @@ export interface SignProps {
 // - earliest end of week, latest wednesday week after depending on collabland
 // -
 
-export type LitCredentials = OrNull<{
-  authSig?: AuthSig;
-}>;
+export type LitCredential = {
+  accessToken: string;
+  authMethodType: AuthMethodType;
+};
+
+export type PKPInfo = {
+  tokenId: string;
+  publicKey: string;
+  ethAddress: string;
+  btcAddress: string;
+  cosmosAddress: string;
+};

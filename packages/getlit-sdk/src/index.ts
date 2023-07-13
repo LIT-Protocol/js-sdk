@@ -5,22 +5,21 @@ import { EventEmitter } from 'events';
 
 // initialize globally
 (async () => {
-  log.h1('Intializing GetLit SDK');
+  log.start('global', 'initializing...');
 
   try {
     globalThis.Lit.events = new EventEmitter();
-    
+
     log('setting "globalThis.Lit.builder"...');
     globalThis.Lit.builder = new LitOptionsBuilder({
       emitter: globalThis.Lit.events,
     });
-    
-    
+
     log.success('globalThis.Lit.builder has been set!');
 
     log('building "globalThis.Lit.builder"...');
     await globalThis.Lit.builder.build();
-    log.h1('GetLit SDK Initialized');
+    log.end('global', 'done!');
   } catch (e) {
     log.error(`Error while attempting to configure GetLit instance ${e}`);
   }
