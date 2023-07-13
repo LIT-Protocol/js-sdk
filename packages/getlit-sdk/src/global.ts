@@ -16,8 +16,12 @@ import { ProviderType } from '@lit-protocol/constants';
 
 declare global {
   var Lit: {
-    builder: OrNull<LitOptionsBuilder>;
+    // clients
     nodeClient: OrNull<Types.NodeClient>;
+    authClient: OrNull<Types.AuthClient>;
+
+    // getlit sdk
+    builder: OrNull<LitOptionsBuilder>;
     debug: boolean;
     ready: boolean;
     events: OrNull<EventEmitter>;
@@ -45,19 +49,6 @@ declare global {
   var ethereum: any;
 }
 
-let authClient: LitAuthClient = new LitAuthClient({
-  // redirectUri: window.location.href.replace(/\/+$/, ''),
-  litRelayConfig: {
-    relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
-  },
-});
-
-const googleProvider = (
-  authClient as LitAuthClient
-).initProvider<GoogleProvider>(ProviderType.Google, {
-  redirectUri: 'http://localhost:3000/redirect',
-});
-
 // const appleProvider = authClient.getProvider('apple');
 // const discordProvider = authClient.getProvider('discord');
 // const ethWalletProvider = authClient.getProvider('ethwallet');
@@ -66,8 +57,12 @@ const googleProvider = (
 
 // -- global "constructor" | APIs
 globalThis.Lit = {
-  builder: null,
+  // clients
   nodeClient: null,
+  authClient: null,
+
+  // getlit sdk
+  builder: null,
   debug: true,
   ready: false,
   events: null,
@@ -91,7 +86,7 @@ globalThis.Lit = {
 
   // auths
   auth: {
-    google: googleProvider,
+    google: null,
     apple: null,
     discord: null,
     ethWallet: null,

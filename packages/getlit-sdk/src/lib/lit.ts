@@ -1,6 +1,14 @@
 import { AuthSig } from '@lit-protocol/types';
-import { LitCredentials, OrUndefined, Types, SignProps } from './types';
-import { convertSigningMaterial, isBrowser, isNode, log } from './utils';
+import { LitCredential, OrUndefined, Types, SignProps, PKPInfo } from './types';
+import {
+  convertSigningMaterial,
+  isBrowser,
+  isNode,
+  log,
+  getProviderMap,
+  getDerivedAddresses,
+} from './utils';
+import { AuthMethodType, ProviderType } from '@lit-protocol/constants';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -31,9 +39,118 @@ export class Lit {
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#f4f4d44e2a1340ebb08517dfd2c16265
   // aka. mintWallet
   public async createAccount(
-    { credentials }: { credentials: LitCredentials } = { credentials: null }
+    { credentials }: { credentials: Array<LitCredential> } = { credentials: [] }
   ) {
     log('creating account...');
+
+    if (credentials.length <= 0) {
+      return log.throw(`credentials are required to create an account. here's an example of how to create an account:
+
+      // this will redirect the user to a google sign in page
+      await Lit.auth.google.signIn();
+
+      // once the user has signed in and returned to your app, you can authenticate with the obtained credentials
+      const googleAuthData = await Lit.auth.google.authenticate();
+
+      Lit.createAccount({
+        credentials: [
+          googleAuthData
+        ]
+      });
+      `);
+    }
+
+    log.info(
+      `credential found! [${credentials.map(
+        (c) => getProviderMap()[c.authMethodType]
+      )}]`
+    );
+
+    // // in numbers
+    // const supportedAuthMethods = Object.keys(AuthMethodType);
+
+    // const authMethodMap: {
+    //   [key in AuthMethodType]?: (credential: LitCredential) => Promise<PKPInfo>;
+    // } = {
+    //   [AuthMethodType.GoogleJwt]: handleAuth,
+    //   [AuthMethodType.Discord]: handleAuth,
+    // };
+
+    // const results = [];
+
+    // for (const credential of credentials) {
+    //   const authMethod = authMethodMap[credential.authMethodType];
+
+    //   if (!authMethod) {
+    //     return log.throw(
+    //       `authMethod ${credential.authMethodType} is not supported`
+    //     );
+    //   }
+
+    //   const res = await authMethod(credential);
+
+    //   results.push(res);
+    // }
+
+    // log.info('results', results);
+
+    // log.info('accounts created!');
+
+    // // -- inner methods
+    // async function handleAuth(credential: LitCredential): Promise<PKPInfo> {
+    //   const providerMap = getProviderMap();
+
+    //   const authMethodType: ProviderType =
+    //     providerMap[credential.authMethodType];
+
+    //   if (!authMethodType) {
+    //     log.throw(
+    //       `authMethod ${credential.authMethodType} | ${
+    //         providerMap[credential.authMethodType]
+    //       } is not supported`
+    //     );
+    //   }
+
+    //   const provider = globalThis.Lit.authClient?.getProvider(authMethodType);
+
+    //   if (!provider) {
+    //     return log.throw(`provider ${authMethodType} is not supported`);
+    //   }
+
+    //   const txHash = await provider.mintPKPThroughRelayer(credential);
+
+    //   const response = await provider.relay.pollRequestUntilTerminalState(
+    //     txHash
+    //   );
+
+    //   log.info('response', response);
+
+    //   if (
+    //     response.status !== 'Succeeded' ||
+    //     !response.pkpPublicKey ||
+    //     !response.pkpTokenId ||
+    //     !response.pkpEthAddress
+    //   ) {
+    //     return log.throw('failed to mint PKP');
+    //   }
+
+    //   const derivedAddresses = getDerivedAddresses(response.pkpPublicKey);
+
+    //   if (!derivedAddresses.btcAddress || !derivedAddresses.cosmosAddress) {
+    //     return log.throw('failed to derive addresses');
+    //   }
+
+    //   const _PKPInfo: PKPInfo = {
+    //     tokenId: response.pkpTokenId,
+    //     publicKey: response.pkpPublicKey,
+    //     ethAddress: response.pkpEthAddress,
+    //     ...derivedAddresses,
+    //   };
+
+    //   return _PKPInfo;
+    // }
+
+    return;
 
     // private key -> mint pkp
     // private key -> pkp signer -> mint pkp
@@ -45,7 +162,7 @@ export class Lit {
 
     // -- browser
     // (higher abstraction) if relayer fails, then use default LitContracts SDK
-    // 
+    //
 
     // -- nodejs
 
@@ -101,12 +218,12 @@ export class Lit {
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#9b2b39cd96db42daae6a2b3a6cb3c69a
   public async sign(options: SignProps) {
     const toSign: number[] = convertSigningMaterial(options.signingMaterial);
-    
+
     const sig = await this._litNodeClient?.pkpSign({
       pubKey: options.accountPublicKey,
       toSign,
       authMethods: options.credentials,
-      authSig: options.authMatrial as AuthSig
+      authSig: options.authMatrial as AuthSig,
     });
 
     return sig;
