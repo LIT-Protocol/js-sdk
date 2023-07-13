@@ -5,7 +5,7 @@ import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 
-const version = '0.0.49';
+const version = '0.0.82';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -73,7 +73,7 @@ const printLog = (args: any[]): void => {
   }
 
   // check if config is loaded yet
-  if (!globalThis?.Lit.debug) {
+  if (!globalThis?.Lit?.debug) {
     // config isn't loaded yet, push into buffer
     logBuffer.push(args);
     return;
@@ -205,4 +205,50 @@ export const getDerivedAddresses = (
     btcAddress,
     cosmosAddress,
   };
+};
+
+export const isGoogleAuth = () => {
+  if (isNode()) {
+    log.error('isGoogleAuth() is not supported in NodeJS');
+    return;
+  }
+
+  const url = window.location.href; // gets the current URL
+  const parsedURL = new URL(url);
+
+  const params = parsedURL.searchParams;
+
+  // check if all required query parameters are present
+  const requiredParams = ['provider', 'id_token', 'state'];
+  for (const param of requiredParams) {
+    if (!params.has(param)) {
+      return false;
+    }
+  }
+
+  // if we reach here, the url is valid
+  return true;
+};
+
+export const isDiscordAuth = () => {
+  if (isNode()) {
+    log.error('isDiscordAuth() is not supported in NodeJS');
+    return;
+  }
+
+  const url = window.location.href; // gets the current URL
+  const parsedURL = new URL(url);
+
+  const params = parsedURL.searchParams;
+
+  // check if all required query parameters are present
+  const requiredParams = ['provider', 'access_token', 'state'];
+  for (const param of requiredParams) {
+    if (!params.has(param)) {
+      return false;
+    }
+  }
+
+  // if we reach here, the url is valid
+  return true;
 };

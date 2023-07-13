@@ -42,6 +42,7 @@ export class LitOptionsBuilder {
     log.start('build', 'starting...');
 
     // Check if the Lit instance exists in globalThis, if not, create it
+
     if (!globalThis.Lit.instance) {
       log('creating globalThis.Lit.instance...');
       globalThis.Lit.instance = new Lit();
@@ -79,6 +80,7 @@ export class LitOptionsBuilder {
     log.success('"globalThis.litNodeClient" has been set!');
 
     log('setting "globalThis.Lit"');
+
     globalThis.Lit.instance.Configure = {
       ...this._authOptions,
       ...this._contractOptions,
@@ -93,6 +95,10 @@ export class LitOptionsBuilder {
     globalThis.Lit.ready = true;
 
     await this.startAuthClient();
+  }
+
+  public emit(event: string, ...args: any[]) {
+    this._emitter?.emit(event, ...args);
   }
 
   public async startAuthClient(): Promise<void> {

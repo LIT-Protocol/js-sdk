@@ -8,7 +8,6 @@ import {
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import * as uint8arrays from '@lit-protocol/uint8arrays';
 import { AuthMethodType } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
@@ -92,3 +91,23 @@ export type PKPInfo = {
   btcAddress: string;
   cosmosAddress: string;
 };
+
+export type LitCredentialManual = {
+  credentials: Array<LitCredential>;
+};
+
+export type LitCredentialAutomatic = {
+  provider?: 'google' | 'discord' | 'apple' | 'webauthn' | 'otp' | null;
+};
+
+export type LitCredentialOptions = LitCredentialManual | LitCredentialAutomatic;
+
+// public async createAccount(
+//   options: LitCredentialOptions = {
+//     manual: false,
+//     provider: 'google',
+//     credentials: []
+//   }
+// ): Promise<Array<PKPInfo>> {
+//   // Your function implementation goes here
+// }
