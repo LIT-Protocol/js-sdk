@@ -1,11 +1,11 @@
 import { ProviderType } from '@lit-protocol/constants';
 import { LitSerializable } from './types';
-import * as bitcoinjs from 'bitcoinjs-lib';
+import { p2pkh } from 'bitcoinjs-lib/src/payments/p2pkh';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 
-const version = '0.0.82';
+const version = '0.0.85';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -184,7 +184,7 @@ export const getDerivedAddresses = (
 
   pkBuffer = Buffer.from(pkppk, 'hex');
 
-  const btcAddress = bitcoinjs.payments.p2pkh({
+  const btcAddress = p2pkh({
     pubkey: pkBuffer,
   }).address;
 

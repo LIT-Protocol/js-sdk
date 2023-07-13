@@ -96,6 +96,7 @@
     "dotenv": "^16.0.2",
     "dotenv-parse-variables": "^2.0.0",
     "download": "^8.0.0",
+    "esbuild-plugin-polyfill-node": "^0.3.0",
     "ethers": "^5.7.1",
     "etherscan-api": "^10.2.0",
     "find-config": "^1.0.0",
