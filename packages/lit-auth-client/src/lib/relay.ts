@@ -207,6 +207,8 @@ export class LitRelay implements IRelay {
         return '/auth/google/userinfo';
       case AuthMethodType.OTP:
         return `/auth/otp/userinfo`;
+      case AuthMethodType.StytchOtp:
+        return 'auth/stytch-otp/userinfo';
       case AuthMethodType.WebAuthn:
         return '/auth/webauthn/userinfo';
       default:
@@ -233,6 +235,8 @@ export class LitRelay implements IRelay {
         return '/auth/google';
       case AuthMethodType.OTP:
         return `/auth/otp`;
+      case AuthMethodType.StytchOtp:
+        return '/auth/stytch-otp';
       case AuthMethodType.WebAuthn:
         return '/auth/webauthn/verify-registration';
       default:
