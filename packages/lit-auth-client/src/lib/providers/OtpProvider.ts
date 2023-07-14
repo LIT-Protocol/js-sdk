@@ -5,11 +5,15 @@ import {
   BaseProviderOptions,
   OtpAuthenticateOptions,
   SignInWithOTPParams,
+  OtpVerificationPayload
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
 import { OtpProviderOptions } from '@lit-protocol/types';
+import { parseJWT } from '../utils';
 
 export class OtpProvider extends BaseProvider {
+  #accessToken: string | undefined;
+
   private _params: SignInWithOTPParams;
   private _baseUrl: string; // TODO: REMOVE THIS HARD CODED STRING
   private _port: string;
@@ -138,6 +142,8 @@ export class OtpProvider extends BaseProvider {
       throw new Error('Invalid otp code, operation was aborted');
     }
 
+    this.#accessToken = respBody.token_jwt;
+
     return {
       accessToken: respBody.token_jwt,
       authMethodType: AuthMethodType.OTP,
@@ -153,5 +159,50 @@ export class OtpProvider extends BaseProvider {
       default:
         return '';
     }
+  }
+
+  /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  public async getAuthMethodId(): Promise<string> {
+    if (!this.#accessToken) {
+      throw new Error('Access token is not defined. Call authenticate first.');
+    }
+    const resp = await this.#verifyOtpJWT(this.#accessToken);
+    const userId = resp.userId;
+    const payload = parseJWT(this.#accessToken);
+    const audience = (payload['orgId'] as string).toLowerCase() || 'lit';
+    const authMethodId = `${userId}:${audience}`;
+    return authMethodId;
+  }
+
+  /**
+   * Parse OTP token
+   *
+   * @param {string} jwt - JWT
+   *
+   * @returns {Promise<OtpVerificationPayload>} - OTP verification payload
+   */
+  async #verifyOtpJWT(jwt: string): Promise<OtpVerificationPayload> {
+    const res = await fetch(this._buildUrl('verify'), {
+      redirect: 'error',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
+      },
+      body: JSON.stringify({
+        token: jwt,
+      }),
+    });
+    if (res.status < 200 || res.status >= 400) {
+      throw new Error('Error while verifying token on remote endpoint');
+    }
+    const respBody = await res.json();
+
+    return respBody as OtpVerificationPayload;
   }
 }

@@ -1004,6 +1004,18 @@ export interface OtpSessionResult {
   status?: string;
 }
 
+export interface OtpVerificationPayload {
+  /*
+    user id parsed from the validated token 
+  */
+  userId: string;
+
+  /*
+    status of the token verification
+  */
+  status: boolean;
+}
+
 export interface LoginUrlParams {
   /**
    * Auth method name

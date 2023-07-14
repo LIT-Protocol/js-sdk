@@ -9,7 +9,10 @@ import {
   parseLoginParams,
   getStateParam,
   decode,
+  parseJWT,
 } from '../utils';
+import { utils } from 'ethers';
+
 import { BaseProvider } from './BaseProvider';
 
 export default class GoogleProvider extends BaseProvider {
@@ -17,6 +20,11 @@ export default class GoogleProvider extends BaseProvider {
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
+
+  /**
+   * Google ID token
+   */
+  #idToken: string | undefined;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
@@ -86,10 +94,42 @@ export default class GoogleProvider extends BaseProvider {
       );
     }
 
+    this.#idToken = idToken;
+
     const authMethod = {
       authMethodType: AuthMethodType.GoogleJwt,
       accessToken: idToken,
     };
     return authMethod;
+  }
+
+  /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  public async getAuthMethodId(): Promise<string> {
+    if (!this.#idToken) {
+      throw new Error('Id token is not defined. Call authenticate first.');
+    }
+    const tokenPayload = this.#parseIdToken(this.#idToken);
+    const userId: string = tokenPayload['sub'] as string;
+    const audience: string = tokenPayload['aud'] as string;
+    const authMethodId = utils.keccak256(
+      utils.toUtf8Bytes(`${userId}:${audience}`)
+    );
+    return authMethodId;
+  }
+
+  /**
+   * Parse Google ID token
+   *
+   * @param {string} idToken - Google ID token
+   *
+   * @returns {Record<string, unknown>} - Google information
+   */
+  #parseIdToken(idToken: string): Record<string, unknown> {
+    return parseJWT(idToken);
   }
 }

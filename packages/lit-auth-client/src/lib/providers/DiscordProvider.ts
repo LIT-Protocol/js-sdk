@@ -11,12 +11,23 @@ import {
   getStateParam,
   decode,
 } from '../utils';
+import { utils } from 'ethers';
+import { toUtf8Bytes } from 'ethers/lib/utils';
 
 export default class DiscordProvider extends BaseProvider {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
+
+  /**
+   * Discord client ID
+   */
+  #clientId: string = '105287423965869266';
+  /**
+   * Discord access token
+   */
+  #accessToken: string | undefined;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
@@ -86,10 +97,51 @@ export default class DiscordProvider extends BaseProvider {
       );
     }
 
+    this.#accessToken = accessToken;
+
     const authMethod = {
       authMethodType: AuthMethodType.Discord,
       accessToken: accessToken,
     };
     return authMethod;
+  }
+
+  /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  public async getAuthMethodId(): Promise<string> {
+    if (!this.#accessToken) {
+      throw new Error('Access token is not defined. Call authenticate first.');
+    }
+    const userId = await this.#fetchDiscordUser(this.#accessToken);
+    const authMethodId = utils.keccak256(
+      toUtf8Bytes(`${userId}:${this.#clientId}`)
+    );
+    return authMethodId;
+  }
+
+  /**
+   * Fetch Discord user ID
+   *
+   * @param {string} accessToken - Discord access token
+   *
+   * @returns {Promise<string>} - Discord user ID
+   */
+  async #fetchDiscordUser(accessToken: string): Promise<string> {
+    const meResponse = await fetch('https://discord.com/api/users/@me', {
+      method: 'GET',
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (meResponse.ok) {
+      const user = await meResponse.json();
+      return user.id;
+    } else {
+      throw new Error('Unable to verify Discord account');
+    }
   }
 }

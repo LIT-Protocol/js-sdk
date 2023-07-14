@@ -34,6 +34,14 @@ export abstract class BaseProvider {
   }
 
   /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  abstract getAuthMethodId(): Promise<string>;
+
+  /**
    * Authenticate the user based on the provider-specific implementation and return the relevant authentication data
    *
    * @template T - Type representing the specific options for the authenticate method

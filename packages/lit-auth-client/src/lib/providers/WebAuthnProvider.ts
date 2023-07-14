@@ -1,15 +1,21 @@
 import { AuthMethod, BaseProviderOptions } from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
-import { ethers } from 'ethers';
+import { ethers, utils } from 'ethers';
 import {
   PublicKeyCredentialCreationOptionsJSON,
+  RegistrationResponseJSON,
   UserVerificationRequirement,
 } from '@simplewebauthn/typescript-types';
 import base64url from 'base64url';
-import { getRPIdFromOrigin } from '../utils';
+import { getRPIdFromOrigin, parseAuthenticatorData } from '../utils';
 import { BaseProvider } from './BaseProvider';
 
 export default class WebAuthnProvider extends BaseProvider {
+  /**
+   * WebAuthn attestation data
+   */
+  #attestationResponse: any | undefined;
+
   constructor(options: BaseProviderOptions) {
     super(options);
   }
@@ -52,6 +58,37 @@ export default class WebAuthnProvider extends BaseProvider {
     // If the credential was verified and registration successful, minting has kicked off
     return mintRes.requestId;
   }
+
+  // public async getPublicKey(options: PublicKeyCredentialCreationOptionsJSON) {
+  //   // Submit registration options to the authenticator
+  //   const { startRegistration } = await import('@simplewebauthn/browser');
+  //   const attResp: RegistrationResponseJSON = await startRegistration(options);
+
+  //   // create a buffer object from the base64 encoded content.
+  //   const attestationBuffer = Buffer.from(
+  //     attResp.response.attestationObject,
+  //     'base64'
+  //   );
+
+  //   let publicKey: string;
+  //   try {
+  //     // parse the buffer to reconstruct the object.
+  //     // buffer is COSE formatted, utilities decode the buffer into json, and extract the public key information
+  //     const authenticationResponse: any =
+  //       parseAuthenticatorData(attestationBuffer);
+  //     // publickey in cose format to register the auth method
+  //     const publicKeyCoseBuffer: Buffer = authenticationResponse
+  //       .attestedCredentialData.credentialPublicKey as Buffer;
+  //     // Encode the publicKey for contract storage
+  //     publicKey = utils.hexlify(utils.arrayify(publicKeyCoseBuffer));
+  //   } catch (e) {
+  //     throw new Error(
+  //       `Error while decoding credential create response for public key retrieval. attestation response not encoded as expected: ${e}`
+  //     );
+  //   }
+
+  //   return publicKey;
+  // }
 
   /**
    * @override
@@ -107,11 +144,32 @@ export default class WebAuthnProvider extends BaseProvider {
         base64url.encode(userHandle);
     }
 
+    this.#attestationResponse = actualAuthenticationResponse;
+
     const authMethod = {
       authMethodType: AuthMethodType.WebAuthn,
       accessToken: JSON.stringify(actualAuthenticationResponse),
     };
 
     return authMethod;
+  }
+
+  /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  public async getAuthMethodId(): Promise<string> {
+    if (!this.#attestationResponse) {
+      throw new Error(
+        'Authentication data is not defined. Call authenticate first.'
+      );
+    }
+    const credentialRawId = this.#attestationResponse.rawId;
+    const authMethodId: string = utils.keccak256(
+      utils.toUtf8Bytes(`${credentialRawId}:lit`)
+    );
+    return authMethodId;
   }
 }

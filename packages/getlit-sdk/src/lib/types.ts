@@ -71,37 +71,37 @@ export type PKPInfo = {
   cosmosAddress: string;
 };
 
-export type LitCredential = {
+export type LitAuthMethod = {
   accessToken: string;
   authMethodType: AuthMethodType;
 };
 
-export type LitCredentialManual = {
-  credentials: Array<LitCredential>;
+export type LitAuthMethodWithAuthData = {
+  authData: Array<LitAuthMethod>;
 };
 
-export type LitCredentialOTP = {
+export type LitAuthMethodOTP = {
   provider: 'otp';
   phoneNumber: string;
 };
 
-export type LitCredentialEthWallet = {
+export type LitAuthMethodEthWallet = {
   provider: 'ethwallet';
   opts?: EthWalletAuthenticateOptions;
 };
 
-export type LitCredentialWithProvider = {
+export type LitAuthMethodWithProvider = {
   provider: 'ethwallet' | 'google' | 'discord' | 'apple' | 'webauthn';
 };
 
-export type LitCredentialNull = {
+export type LitAuthMethodNull = {
   provider: null;
-  credentials: Array<LitCredential>;
+  authData: Array<LitAuthMethod>;
 };
 
-export type LitCredentialOptions =
-  | LitCredentialManual
-  | LitCredentialWithProvider
-  | LitCredentialOTP
-  | LitCredentialEthWallet
-  | LitCredentialNull;
+export type LitAuthMethodOptions =
+  | LitAuthMethodWithAuthData
+  | LitAuthMethodWithProvider
+  | LitAuthMethodOTP
+  | LitAuthMethodEthWallet
+  | LitAuthMethodNull;
