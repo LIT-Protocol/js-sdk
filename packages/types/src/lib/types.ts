@@ -1,4 +1,4 @@
-import { SignInWithOTPParams } from './interfaces';
+import { SignInWithOTPParams, StytchOtpProviderOptions } from './interfaces';
 import {
   AccsCOSMOSParams,
   AccsDefaultParams,
@@ -106,6 +106,6 @@ export type AcceptedFileType = File | Blob;
  */
 export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
 
-export type ProviderOptions = OAuthProviderOptions | EthWalletProviderOptions | SignInWithOTPParams;
+export type ProviderOptions = OAuthProviderOptions | EthWalletProviderOptions | SignInWithOTPParams | StytchOtpProviderOptions;
 
 export type AuthenticateOptions = BaseAuthenticateOptions;
