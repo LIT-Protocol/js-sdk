@@ -184,6 +184,8 @@ export abstract class BaseProvider {
         return authMethod.accessToken; // Auth data is a JSON string
       case AuthMethodType.OTP:
         return JSON.stringify(authMethod);
+      case AuthMethodType.StytchOtp:
+        return JSON.stringify(authMethod);
       default:
         throw new Error(
           `Invalid auth method type "${authMethod.authMethodType}" passed`
