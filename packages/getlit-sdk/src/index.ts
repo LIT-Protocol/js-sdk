@@ -1,17 +1,7 @@
-import {
-  BaseProvider,
-  DiscordProvider,
-  GoogleProvider,
-} from '@lit-protocol/lit-auth-client';
+import { DiscordProvider, GoogleProvider } from '@lit-protocol/lit-auth-client';
 import './global';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
-import {
-  isBrowser,
-  isDiscordAuth,
-  isGoogleAuth,
-  isNode,
-  log,
-} from './lib/utils';
+import { isBrowser, isDiscordAuth, isGoogleAuth, log } from './lib/utils';
 import { EventEmitter } from 'events';
 import { LitDispatch } from './lib/events';
 
@@ -21,22 +11,22 @@ import { LitDispatch } from './lib/events';
 
   try {
     globalThis.Lit.events = new EventEmitter();
-
-    log('setting "globalThis.Lit.builder"...');
     globalThis.Lit.builder = new LitOptionsBuilder({
       emitter: globalThis.Lit.events,
     });
-    log.success('globalThis.Lit.builder has been set!');
 
-    log('building "globalThis.Lit.builder"...');
+    log.start('building');
     await globalThis.Lit.builder.build();
-    log.end('global', 'done!');
+    log.end('building');
 
     // ---------- auto auth ----------
     handleAutoAuth();
   } catch (e) {
     log.error(`Error while attempting to configure GetLit instance ${e}`);
   }
+
+  log.end('global', 'done!');
+  log.info('globalThis.Lit', globalThis.Lit);
 })();
 
 async function handleAutoAuth() {

@@ -1,6 +1,7 @@
 import {
   AuthMethod,
   AuthSig,
+  EthWalletAuthenticateOptions,
   LitNodeClientConfig,
   LitRelayConfig,
   OtpProviderOptions,
@@ -62,28 +63,6 @@ export interface SignProps {
   authMatrial: Credential;
 }
 
-// understand what's possible and reasonable to set expectations with him
-
-// what's possible
-// - [x] createAccount
-// - [x] sign
-// - [x] utility for auto-type conversion for createAccount, sign
-// - [] encrypt (ask questions @howard etc. for accs)
-// - [] decrypt
-// - tested on nodejs, spa, and vanilla-js for implicit loading (script tag)
-
-// BUT
-// - if they want to initialize other options, they have to re-run the builder
-
-// expectation
-// - earliest end of week, latest wednesday week after depending on collabland
-// -
-
-export type LitCredential = {
-  accessToken: string;
-  authMethodType: AuthMethodType;
-};
-
 export type PKPInfo = {
   tokenId: string;
   publicKey: string;
@@ -92,26 +71,37 @@ export type PKPInfo = {
   cosmosAddress: string;
 };
 
+export type LitCredential = {
+  accessToken: string;
+  authMethodType: AuthMethodType;
+};
+
 export type LitCredentialManual = {
   credentials: Array<LitCredential>;
 };
 
-export type LitCredentialAutomatic = {
-  provider?: 'ethwallet' | 'google' | 'discord' | 'apple' | 'webauthn' | 'otp' | null;
+export type LitCredentialOTP = {
+  provider: 'otp';
+  phoneNumber: string;
 };
 
-// export type LitCredentialDefault = undefined;
+export type LitCredentialEthWallet = {
+  provider: 'ethwallet';
+  opts?: EthWalletAuthenticateOptions;
+};
+
+export type LitCredentialWithProvider = {
+  provider: 'ethwallet' | 'google' | 'discord' | 'apple' | 'webauthn';
+};
+
+export type LitCredentialNull = {
+  provider: null;
+  credentials: Array<LitCredential>;
+};
 
 export type LitCredentialOptions =
-  // | LitCredentialDefault
-  LitCredentialManual | LitCredentialAutomatic;
-
-// public async createAccount(
-//   options: LitCredentialOptions = {
-//     manual: false,
-//     provider: 'google',
-//     credentials: []
-//   }
-// ): Promise<Array<PKPInfo>> {
-//   // Your function implementation goes here
-// }
+  | LitCredentialManual
+  | LitCredentialWithProvider
+  | LitCredentialOTP
+  | LitCredentialEthWallet
+  | LitCredentialNull;
