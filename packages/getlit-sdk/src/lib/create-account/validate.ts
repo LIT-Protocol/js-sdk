@@ -1,9 +1,7 @@
 import { LitCredential } from '../types';
 import { log } from '../utils';
 
-export const handleCreateAccountValidation = (
-  credentials: Array<LitCredential>
-) => {
+export const validateCreateAccount = (credentials: Array<LitCredential>) => {
   if (credentials.length <= 0) {
     log.throw(`credentials are required to create an account. here's an example of how to create an account:
 

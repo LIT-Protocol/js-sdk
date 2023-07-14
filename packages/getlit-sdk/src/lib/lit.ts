@@ -1,25 +1,16 @@
 import { AuthSig } from '@lit-protocol/types';
 import {
-  LitCredential,
   OrUndefined,
   Types,
   SignProps,
   PKPInfo,
   LitCredentialOptions,
-  LitCredentialAutomatic,
+  LitCredentialWithProvider,
   LitCredentialManual,
 } from './types';
-import {
-  convertSigningMaterial,
-  isNode,
-  log,
-  getProviderMap,
-  enableAutoAuth,
-} from './utils';
-import { ProviderType } from '@lit-protocol/constants';
-import { handleSingleAuthToAccount } from './create-account/handle-single-auth';
-import { handleCreateAccountValidation } from './create-account/handle-validation';
-import { LitDispatch } from './events';
+import { convertSigningMaterial, log, getProviderMap } from './utils';
+import { handleCredentials } from './create-account/handle-credentials';
+import { handleProvider } from './create-account/handle-provider';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -59,90 +50,15 @@ export class Lit {
     }
   ): Promise<void | PKPInfo[]> {
     log('creating account...');
+    log('opts', opts);
 
-    // const provider = (opts as LitCredentialAutomatic).provider;
-    // const credentials = (opts as LitCredentialManual).credentials;
-
-    // a. Manually obtain credentials - passing in authData (eg. googleAuthData)
-    if (!(opts as LitCredentialAutomatic).provider) {
-      return await handleManualCreation(opts as LitCredentialManual);
-    }
-    // b. Automatically create account by passing in provider (eg. google)
-    else {
-      return await handleAutomaticCreation(opts as LitCredentialAutomatic);
+    // If dev provides a "provider" eg. google, discord, ethwallet, etc.
+    if ((opts as LitCredentialWithProvider).provider) {
+      return await handleProvider(opts as LitCredentialWithProvider);
     }
 
-    // -- helper functions --
-    async function handleManualCreation(opts: LitCredentialManual) {
-      const { credentials = [] } = opts;
-      log.start('handleManualCreation', 'creating account manually...');
-
-      handleCreateAccountValidation(credentials);
-
-      log.info(
-        `credentials found! [${credentials.map(
-          (c) => `(${c.authMethodType}|${getProviderMap()[c.authMethodType]})`
-        )}]`
-      );
-
-      if (credentials.length === 1) {
-        const PKPInfo = await handleSingleAuthToAccount(credentials[0]);
-        log.end('handleManualCreation', 'account created successfully!');
-        return [PKPInfo];
-      }
-
-      if (credentials.length > 1) {
-        log.error(`multiple credentials are not supported yet!`);
-        log.end('handleManualCreation', 'failed to create account!');
-      }
-
-      log.throw(`Failed to create account!`);
-    }
-
-    async function handleAutomaticCreation(opts: LitCredentialAutomatic) {
-      const provider = (opts as LitCredentialAutomatic).provider?.toLowerCase();
-
-      log.start(
-        'handleAutomaticCreation',
-        `creating account automatically with provider "${provider}"`
-      );
-
-      if (!provider) {
-        log.throw(
-          `"provider" is required to create an account automatically! eg. google, discord`
-        );
-      }
-
-      // -- handle wallet auths
-      if (provider === ProviderType.EthWallet.toLowerCase()) {
-        const ethWalletAuthData =
-          await globalThis.Lit.auth.ethWallet?.authenticate();
-        log('ethWalletAuthData', ethWalletAuthData);
-        LitDispatch.createAccountStatus('in_progress');
-        try {
-          const PKPInfo = await handleSingleAuthToAccount(
-            ethWalletAuthData as LitCredential
-          );
-          LitDispatch.createAccountStatus('completed', [PKPInfo]);
-
-          return [PKPInfo];
-        } catch (e) {
-          LitDispatch.createAccountStatus('failed');
-          log.throw(`Failed to create account!`);
-        }
-      }
-
-      // -- handle social auths
-      if (
-        provider === ProviderType.Google ||
-        provider === ProviderType.Discord
-      ) {
-        enableAutoAuth();
-        globalThis.Lit.auth[provider]?.signIn();
-      }
-
-      log.throw(`provider "${provider}" is not supported yet!`);
-    }
+    // If dev provides a "credentials" array where they obtain the auth data manually themselves eg. credentials: [googleAuthData, discordAuthData, etc.]
+    return await handleCredentials(opts as LitCredentialManual);
   }
 
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#9b2b39cd96db42daae6a2b3a6cb3c69a

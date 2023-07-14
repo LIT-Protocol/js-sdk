@@ -15,10 +15,7 @@ import {
   EthWalletProvider,
   WebAuthnProvider,
   OtpProvider,
-  LitAuthClient,
 } from '@lit-protocol/lit-auth-client';
-import { ProviderType } from '@lit-protocol/constants';
-// import { ProviderType } from '@lit-protocol/constants';
 
 declare global {
   var Lit: {
@@ -46,23 +43,17 @@ declare global {
 
     // auths
     auth: {
-      google: OrNull<GoogleProvider>;
-      apple: OrNull<AppleProvider>;
-      discord: OrNull<DiscordProvider>;
       ethWallet: OrNull<EthWalletProvider>;
       webauthn: OrNull<WebAuthnProvider>;
+      discord: OrNull<DiscordProvider>;
+      google: OrNull<GoogleProvider>;
       otp: OrNull<OtpProvider>;
+      apple: OrNull<AppleProvider>;
     };
   };
 
   var ethereum: any;
 }
-
-// const appleProvider = authClient.getProvider('apple');
-// const discordProvider = authClient.getProvider('discord');
-// const ethWalletProvider = authClient.getProvider('ethwallet');
-// const webauthnProvider = authClient.getProvider('webauthn');
-// const otpProvider = authClient.getProvider('otp');
 
 // -- global "constructor" | APIs
 globalThis.Lit = {
@@ -95,11 +86,11 @@ globalThis.Lit = {
 
   // auths
   auth: {
-    google: null,
-    apple: null,
-    discord: null,
     ethWallet: null,
     webauthn: null,
+    discord: null,
+    google: null,
     otp: null,
+    apple: null,
   },
 };

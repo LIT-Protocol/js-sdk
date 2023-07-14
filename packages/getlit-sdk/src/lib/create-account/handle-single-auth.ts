@@ -1,9 +1,11 @@
 import { ProviderType } from '@lit-protocol/constants';
 import { LitCredential, PKPInfo } from '../types';
-import { getDerivedAddresses, getProviderMap, log } from '../utils';
+import { getProviderMap, log, relayResToPKPInfo } from '../utils';
+import { WebAuthnProvider } from '@lit-protocol/lit-auth-client';
+import { LitDispatch } from '../events';
 
-export async function handleSingleAuthToAccount(credential: LitCredential) {
-  log.start('handleSingleAuthToAccount', 'handle-single-auth.ts');
+export async function handleSingleAuth(credential: LitCredential) {
+  log.start('handleSingleAuth', 'handle-single-auth.ts');
   const providerMap = getProviderMap();
   const authMethodType: ProviderType = providerMap[credential.authMethodType];
 
@@ -15,33 +17,55 @@ export async function handleSingleAuthToAccount(credential: LitCredential) {
     return log.throw(`provider "${authMethodType}" is not supported`);
   }
 
-  const txHash = await provider.mintPKPThroughRelayer(credential);
+  log.info(`authMethodType is webauthn`);
 
-  const response = await provider.relay.pollRequestUntilTerminalState(txHash);
+  let txHash;
+  let res;
 
-  log.info('response', response);
+  // -- cases
+  LitDispatch.createAccountStatus('in_progress');
+  if (authMethodType === 'webauthn') {
+    const _provider = provider as WebAuthnProvider;
 
-  if (
-    response.status !== 'Succeeded' ||
-    !response.pkpPublicKey ||
-    !response.pkpTokenId ||
-    !response.pkpEthAddress
-  ) {
-    return log.throw('failed to mint PKP');
+    let opts;
+
+    // -- register
+    try {
+      opts = await _provider.register();
+      log('opts', opts);
+    } catch (e) {
+      LitDispatch.createAccountStatus('failed');
+      log.throw(`Failed to create account with webauthn!`);
+    }
+
+    log.info('minting through verifyAndMintPKPThroughRelayer');
+    try {
+      txHash = await _provider.verifyAndMintPKPThroughRelayer(opts);
+    } catch (e) {
+      LitDispatch.createAccountStatus('failed');
+      log.throw(`Failed to create account with webauthn!`);
+    }
+  } else {
+    log.info('minting through mintPKPThroughRelayer');
+    txHash = await provider.mintPKPThroughRelayer(credential);
   }
 
-  const derivedAddresses = getDerivedAddresses(response.pkpPublicKey);
-
-  if (!derivedAddresses.btcAddress || !derivedAddresses.cosmosAddress) {
-    return log.throw('failed to derive addresses');
+  // -- wait for response
+  try {
+    res =
+      await globalThis.Lit.auth.webauthn?.relay.pollRequestUntilTerminalState(
+        txHash
+      );
+  } catch (e) {
+    LitDispatch.createAccountStatus('failed');
+    log.throw(`Failed to create account with webauthn!`);
   }
 
-  const _PKPInfo: PKPInfo = {
-    tokenId: response.pkpTokenId,
-    publicKey: response.pkpPublicKey,
-    ethAddress: response.pkpEthAddress,
-    ...derivedAddresses,
-  };
+  log.info('res', res);
+
+  const _PKPInfo: PKPInfo = relayResToPKPInfo(res);
+
+  log.end('handleSingleAuth', 'handle-single-auth.ts');
 
   return _PKPInfo;
 }

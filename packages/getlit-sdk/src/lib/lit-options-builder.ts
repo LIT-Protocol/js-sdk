@@ -5,9 +5,11 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Lit } from './lit';
 import EventEmitter from 'events';
 import {
+  AppleProvider,
   DiscordProvider,
   EthWalletProvider,
   GoogleProvider,
+  OtpProvider,
   WebAuthnProvider,
 } from '@lit-protocol/lit-auth-client';
 import { ProviderType } from '@lit-protocol/constants';
@@ -137,17 +139,34 @@ export class LitOptionsBuilder {
           ProviderType.WebAuthn
         );
 
+      // globalThis.Lit.auth.apple =
+      //   globalThis.Lit.authClient.initProvider<AppleProvider>(
+      //     ProviderType.Apple
+      //   );
+
+      // globalThis.Lit.auth.otp =
+      //   globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);
+
       let authStatus = Object.entries(globalThis.Lit.auth)
         .map(([key, value]) => {
-          return `authMethodType: ${getProviderMap()[key]} | ${
-            value ? '✅' : '❌'
-          } ${key}`;
+          if (key === 'otp') {
+            return `${value ? '✅' : '❌'} authMethodType: ${
+              getProviderMap()[key.toLowerCase()]
+            } |  ${key} | (You will need to manually "initProvider<OtpProvider>(ProviderType.Otp)")`;
+          }
+
+          return `${value ? '✅' : '❌'} authMethodType: ${
+            getProviderMap()[key.toLowerCase()]
+          } |  ${key}`;
         })
         .join('\n');
 
       log.success('"globalThis.Lit.auth" has been set!');
       log.info('globalThis.Lit.auth', '\n' + authStatus);
     }
+    log.info(
+      `(UPDATED AT: 14/07/2023) A list of available auth methods can be found in PKPPermissions.sol https://bit.ly/44HHa5n (private, to be public soon)`
+    );
 
     log.end('startAuthClient', 'done!');
   }
