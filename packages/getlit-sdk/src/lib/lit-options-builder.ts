@@ -139,10 +139,10 @@ export class LitOptionsBuilder {
           ProviderType.WebAuthn
         );
 
-      // globalThis.Lit.auth.apple =
-      //   globalThis.Lit.authClient.initProvider<AppleProvider>(
-      //     ProviderType.Apple
-      //   );
+      globalThis.Lit.auth.apple =
+        globalThis.Lit.authClient.initProvider<AppleProvider>(
+          ProviderType.Apple
+        );
 
       // globalThis.Lit.auth.otp =
       //   globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);

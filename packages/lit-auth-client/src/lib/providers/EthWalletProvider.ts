@@ -21,6 +21,11 @@ export default class EthWalletProvider extends BaseProvider {
    */
   public origin: string;
 
+  /**
+   * Wallet signature
+   */
+  #authSig: AuthSig | undefined;
+
   constructor(options: BaseProviderOptions & EthWalletProviderOptions) {
     super(options);
     this.domain = options.domain || window.location.hostname;
@@ -79,6 +84,8 @@ export default class EthWalletProvider extends BaseProvider {
         signedMessage: toSign,
         address: address,
       };
+
+      this.#authSig = authSig;
     } else {
       authSig = await checkAndSignAuthMessage({
         chain,
@@ -90,5 +97,21 @@ export default class EthWalletProvider extends BaseProvider {
       accessToken: JSON.stringify(authSig),
     };
     return authMethod;
+  }
+
+  /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  public async getAuthMethodId(): Promise<string> {
+    if (!this.#authSig) {
+      throw new Error(
+        'Auth signature is not defined. Call authenticate first.'
+      );
+    }
+    const authMethodId = this.#authSig.address;
+    return authMethodId;
   }
 }

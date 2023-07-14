@@ -1,13 +1,13 @@
 import { ProviderType } from '@lit-protocol/constants';
-import { LitCredential, PKPInfo } from '../types';
+import { LitAuthMethod, PKPInfo } from '../types';
 import { getProviderMap, log, relayResToPKPInfo } from '../utils';
 import { WebAuthnProvider } from '@lit-protocol/lit-auth-client';
 import { LitDispatch } from '../events';
 
-export async function handleSingleAuth(credential: LitCredential) {
+export async function handleSingleAuth(authData: LitAuthMethod) {
   log.start('handleSingleAuth', 'handle-single-auth.ts');
   const providerMap = getProviderMap();
-  const authMethodType: ProviderType = providerMap[credential.authMethodType];
+  const authMethodType: ProviderType = providerMap[authData.authMethodType];
 
   const provider = globalThis.Lit.authClient?.getProvider(authMethodType);
 
@@ -47,7 +47,7 @@ export async function handleSingleAuth(credential: LitCredential) {
     }
   } else {
     log.info('minting through mintPKPThroughRelayer');
-    txHash = await provider.mintPKPThroughRelayer(credential);
+    txHash = await provider.mintPKPThroughRelayer(authData);
   }
 
   // -- wait for response

@@ -1,7 +1,7 @@
 import { ProviderType } from '@lit-protocol/constants';
 import {
-  LitCredentialEthWallet,
-  LitCredentialWithProvider,
+  LitAuthMethodEthWallet,
+  LitAuthMethodWithProvider,
   PKPInfo,
 } from '../types';
 import { log } from '../utils';
@@ -12,10 +12,10 @@ import { handleWebAuthn } from './single-auth/handle-webauthn';
 // -- provider handlers
 const PROVIDER_HANDLERS: {
   [key in ProviderType]?: (
-    opts?: LitCredentialWithProvider
+    opts?: LitAuthMethodWithProvider
   ) => Promise<Array<PKPInfo> | void>;
 } = {
-  [ProviderType.EthWallet.toLowerCase()]: (opts: LitCredentialEthWallet) =>
+  [ProviderType.EthWallet.toLowerCase()]: (opts: LitAuthMethodEthWallet) =>
     handleEthWallet(opts),
   [ProviderType.Google]: () => handleRedirect(ProviderType.Google),
   [ProviderType.Discord]: () => handleRedirect(ProviderType.Discord),
@@ -23,8 +23,8 @@ const PROVIDER_HANDLERS: {
   [ProviderType.Apple]: () => handleRedirect(ProviderType.Apple),
 };
 
-export async function handleProvider(opts: LitCredentialWithProvider) {
-  const provider = (opts as LitCredentialWithProvider).provider?.toLowerCase();
+export async function handleProvider(opts: LitAuthMethodWithProvider) {
+  const provider = (opts as LitAuthMethodWithProvider).provider?.toLowerCase();
 
   log.start('handleProvider', `creating account with provider "${provider}"`);
 

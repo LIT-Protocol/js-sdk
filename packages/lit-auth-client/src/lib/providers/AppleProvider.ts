@@ -9,14 +9,25 @@ import {
   parseLoginParams,
   getStateParam,
   decode,
+  parseJWT,
 } from '../utils';
 import { BaseProvider } from './BaseProvider';
+import { utils } from 'ethers';
 
 export default class AppleProvider extends BaseProvider {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
+
+  /**
+   * Apple client ID
+   */
+  #clientId: string = '...';
+  /**
+   * Apple JWT
+   */
+  #idToken: string | undefined;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
@@ -85,11 +96,31 @@ export default class AppleProvider extends BaseProvider {
         `Missing ID token in redirect callback URL for Apple OAuth"`
       );
     }
+    this.#idToken = idToken;
 
     const authMethod = {
       authMethodType: AuthMethodType.AppleJwt,
       accessToken: idToken,
     };
     return authMethod;
+  }
+
+  /**
+   * Derive unique identifier from authentication material produced by auth providers
+   *
+   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
+   * interacting directly with Lit contracts
+   */
+  public async getAuthMethodId(): Promise<string> {
+    if (!this.#idToken) {
+      throw new Error('Id token is not defined. Call authenticate first.');
+    }
+    const tokenPayload = parseJWT(this.#idToken);
+    const userId: string = tokenPayload['sub'] as string;
+    const audience: string = tokenPayload['aud'] as string;
+    const authMethodId = utils.keccak256(
+      utils.toUtf8Bytes(`${userId}:${audience}`)
+    );
+    return authMethodId;
   }
 }

@@ -2,7 +2,7 @@ import { EventEmitter } from 'stream';
 import { Lit } from './lib/lit';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
 import {
-  LitCredentialOptions,
+  LitAuthMethodOptions,
   OrNull,
   PKPInfo,
   SignProps,
@@ -33,13 +33,10 @@ declare global {
     instance: OrNull<Lit>;
 
     // Lit class methods
-    encrypt: Function;
-    decrypt: Function;
-    createAccount: (
-      opts: LitCredentialOptions
-    ) => Promise<void | PKPInfo | Array<PKPInfo> | any>;
-
-    sign: Function;
+    encrypt: Lit['encrypt'];
+    decrypt: Lit['decrypt'];
+    createAccount: Lit['createAccount'];
+    sign: Lit['sign'] | Function;
 
     // auths
     auth: {
@@ -80,7 +77,7 @@ globalThis.Lit = {
   createAccount: async () => {
     console.log('not initialized');
   },
-  sign: (options: SignProps) => {
+  sign: () => {
     console.log('not initialized');
   },
 

@@ -5,7 +5,7 @@ import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 
-const version = '0.0.116';
+const version = '0.0.130';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 

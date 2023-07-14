@@ -1,5 +1,5 @@
 import { LitDispatch } from '../../events';
-import { LitCredential, LitCredentialEthWallet, PKPInfo } from '../../types';
+import { LitAuthMethod, LitAuthMethodEthWallet, PKPInfo } from '../../types';
 import { log } from '../../utils';
 import { handleSingleAuth } from '../handle-single-auth';
 
@@ -7,17 +7,17 @@ import { handleSingleAuth } from '../handle-single-auth';
  * 1 ETH Auth Method <> 1 PKP
  */
 export const handleEthWallet = async (
-  credential: LitCredentialEthWallet
+  authData: LitAuthMethodEthWallet
 ): Promise<PKPInfo> => {
   LitDispatch.createAccountStatus('in_progress');
 
   let ethWalletAuthData;
 
-  log.info(`credentials found! ${JSON.stringify(credential, null, 2)})}`);
+  log.info(`authData found! ${JSON.stringify(authData, null, 2)})}`);
 
   try {
     ethWalletAuthData = await globalThis.Lit.auth.ethWallet?.authenticate(
-      credential.opts || undefined
+      authData.opts || undefined
     );
   } catch (e) {
     LitDispatch.createAccountStatus('failed');
@@ -27,7 +27,7 @@ export const handleEthWallet = async (
   log('ethWalletAuthData', ethWalletAuthData);
 
   try {
-    const PKPInfo = await handleSingleAuth(ethWalletAuthData as LitCredential);
+    const PKPInfo = await handleSingleAuth(ethWalletAuthData as LitAuthMethod);
     LitDispatch.createAccountStatus('completed', [PKPInfo]);
 
     return PKPInfo;

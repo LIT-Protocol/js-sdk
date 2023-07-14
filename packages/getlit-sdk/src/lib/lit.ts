@@ -4,12 +4,12 @@ import {
   Types,
   SignProps,
   PKPInfo,
-  LitCredentialOptions,
-  LitCredentialWithProvider,
-  LitCredentialManual,
+  LitAuthMethodOptions,
+  LitAuthMethodWithProvider,
+  LitAuthMethodWithAuthData,
 } from './types';
 import { convertSigningMaterial, log, getProviderMap } from './utils';
-import { handleCredentials } from './create-account/handle-credentials';
+import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
 
 export class Lit {
@@ -44,21 +44,21 @@ export class Lit {
   // simple first, advanced later
   // https://bit.ly/3DetZ0o
   public async createAccount(
-    opts: LitCredentialOptions = {
+    opts: LitAuthMethodOptions = {
       provider: null,
-      credentials: [],
+      authData: [],
     }
   ): Promise<void | PKPInfo[]> {
     log('creating account...');
     log('opts', opts);
 
     // If dev provides a "provider" eg. google, discord, ethwallet, etc.
-    if ((opts as LitCredentialWithProvider).provider) {
-      return await handleProvider(opts as LitCredentialWithProvider);
+    if ((opts as LitAuthMethodWithProvider).provider) {
+      return await handleProvider(opts as LitAuthMethodWithProvider);
     }
 
-    // If dev provides a "credentials" array where they obtain the auth data manually themselves eg. credentials: [googleAuthData, discordAuthData, etc.]
-    return await handleCredentials(opts as LitCredentialManual);
+    // If dev provides a "authData" array where they obtain the auth data manually themselves eg. handleAuthData: [googleAuthData, discordAuthData, etc.]
+    return await handleAuthData(opts as LitAuthMethodWithAuthData);
   }
 
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#9b2b39cd96db42daae6a2b3a6cb3c69a
