@@ -11,15 +11,15 @@ import {
 } from './types';
 import {
   convertSigningMaterial,
-  isBrowser,
   isNode,
   log,
   getProviderMap,
-  getDerivedAddresses,
+  enableAutoAuth,
 } from './utils';
 import { ProviderType } from '@lit-protocol/constants';
-import { handleOneToOneCreation } from './create-account/handle-one-to-one-creation';
+import { handleSingleAuthToAccount } from './create-account/handle-single-auth';
 import { handleCreateAccountValidation } from './create-account/handle-validation';
+import { LitDispatch } from './events';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -34,15 +34,7 @@ export class Lit {
     globalThis.Lit.encrypt = this.encrypt.bind(this);
     globalThis.Lit.decrypt = this.decrypt.bind(this);
     globalThis.Lit.sign = this.sign.bind(this);
-
-    // multiple auth methods to 1 PKP
     globalThis.Lit.createAccount = this.createAccount.bind(this);
-
-    // 1 auth method to 1 PKP
-    globalThis.Lit.createAccountWithGoogle =
-      this.createAccountWithGoogle.bind(this);
-    globalThis.Lit.createAccountWithDiscord =
-      this.createAccountWithDiscord.bind(this);
   }
 
   // ========== Encryption ==========
@@ -59,6 +51,7 @@ export class Lit {
   // aka. mintWallet
 
   // simple first, advanced later
+  // https://bit.ly/3DetZ0o
   public async createAccount(
     opts: LitCredentialOptions = {
       provider: null,
@@ -67,11 +60,14 @@ export class Lit {
   ): Promise<void | PKPInfo[]> {
     log('creating account...');
 
-    // create account manually by passing in credentials (eg. googleAuthData)
+    // const provider = (opts as LitCredentialAutomatic).provider;
+    // const credentials = (opts as LitCredentialManual).credentials;
+
+    // a. Manually obtain credentials - passing in authData (eg. googleAuthData)
     if (!(opts as LitCredentialAutomatic).provider) {
       return await handleManualCreation(opts as LitCredentialManual);
     }
-    // create account automatically by passing in provider (eg. google)
+    // b. Automatically create account by passing in provider (eg. google)
     else {
       return await handleAutomaticCreation(opts as LitCredentialAutomatic);
     }
@@ -90,7 +86,7 @@ export class Lit {
       );
 
       if (credentials.length === 1) {
-        const PKPInfo = await handleOneToOneCreation(credentials[0]);
+        const PKPInfo = await handleSingleAuthToAccount(credentials[0]);
         log.end('handleManualCreation', 'account created successfully!');
         return [PKPInfo];
       }
@@ -104,55 +100,49 @@ export class Lit {
     }
 
     async function handleAutomaticCreation(opts: LitCredentialAutomatic) {
-      if (!opts.provider) {
+      const provider = (opts as LitCredentialAutomatic).provider?.toLowerCase();
+
+      log.start(
+        'handleAutomaticCreation',
+        `creating account automatically with provider "${provider}"`
+      );
+
+      if (!provider) {
         log.throw(
           `"provider" is required to create an account automatically! eg. google, discord`
         );
       }
 
-      log.start('handleAutomaticCreation', 'creating account automatically...');
-      localStorage.setItem('lit-auto-auth', 'true');
+      // -- handle wallet auths
+      if (provider === ProviderType.EthWallet.toLowerCase()) {
+        const ethWalletAuthData =
+          await globalThis.Lit.auth.ethWallet?.authenticate();
+        log('ethWalletAuthData', ethWalletAuthData);
+        LitDispatch.createAccountStatus('in_progress');
+        try {
+          const PKPInfo = await handleSingleAuthToAccount(
+            ethWalletAuthData as LitCredential
+          );
+          LitDispatch.createAccountStatus('completed', [PKPInfo]);
 
-      if (
-        opts.provider === ProviderType.Google ||
-        opts.provider === ProviderType.Discord
-      ) {
-        globalThis.Lit.auth[opts.provider]?.signIn();
-      } else {
-        log.throw(`provider ${opts.provider} is not supported yet!`);
+          return [PKPInfo];
+        } catch (e) {
+          LitDispatch.createAccountStatus('failed');
+          log.throw(`Failed to create account!`);
+        }
       }
+
+      // -- handle social auths
+      if (
+        provider === ProviderType.Google ||
+        provider === ProviderType.Discord
+      ) {
+        enableAutoAuth();
+        globalThis.Lit.auth[provider]?.signIn();
+      }
+
+      log.throw(`provider "${provider}" is not supported yet!`);
     }
-  }
-
-  public createAccountWithGoogle() {
-    log.start('createAccountWithGoogle', 'creating google account...');
-
-    if (isNode()) {
-      log.throw(
-        `createAccountWithGoogle is not supported in node at the moment!`
-      );
-    }
-
-    localStorage.setItem('lit-auto-auth', 'true');
-    globalThis.Lit.auth.google?.signIn();
-
-    // when the user return to the app, we will check it in index.ts to global initialize & auto authenticate
-  }
-
-  public async createAccountWithDiscord() {
-    log.start('createAccountWithDiscord', 'creating discord account...');
-
-    if (isNode()) {
-      log.throw(
-        `createAccountWithDiscord is not supported in node at the moment!`
-      );
-    }
-
-    localStorage.setItem('lit-auto-auth', 'true');
-
-    globalThis.Lit.auth.discord?.signIn();
-
-    // when the user return to the app, we will check it in index.ts to global initialize & auto authenticate
   }
 
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#9b2b39cd96db42daae6a2b3a6cb3c69a

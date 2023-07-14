@@ -2,14 +2,17 @@ import { ProviderType } from '@lit-protocol/constants';
 import { LitCredential, PKPInfo } from '../types';
 import { getDerivedAddresses, getProviderMap, log } from '../utils';
 
-export async function handleOneToOneCreation(credential: LitCredential) {
+export async function handleSingleAuthToAccount(credential: LitCredential) {
+  log.start('handleSingleAuthToAccount', 'handle-single-auth.ts');
   const providerMap = getProviderMap();
   const authMethodType: ProviderType = providerMap[credential.authMethodType];
 
   const provider = globalThis.Lit.authClient?.getProvider(authMethodType);
 
+  log('provider', provider);
+
   if (!provider) {
-    return log.throw(`provider ${authMethodType} is not supported`);
+    return log.throw(`provider "${authMethodType}" is not supported`);
   }
 
   const txHash = await provider.mintPKPThroughRelayer(credential);
