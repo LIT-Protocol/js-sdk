@@ -3,9 +3,10 @@ import {
   IRelay,
   LitAuthClientOptions,
   OAuthProviderOptions,
-  OtpProviderOptions,
+  StytchOtpProviderOptions,
   ProviderOptions,
   SignInWithOTPParams,
+  OtpProviderOptions
 } from '@lit-protocol/types';
 import { ProviderType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -15,8 +16,9 @@ import GoogleProvider from './providers/GoogleProvider';
 import DiscordProvider from './providers/DiscordProvider';
 import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
-import { OtpProvider } from './providers/OtpProvider';
+import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
+import { OtpProvider } from './providers/OtpProvider';
 
 /**
  * Class that handles authentication through Lit login
@@ -38,9 +40,8 @@ export class LitAuthClient {
    * Map of providers
    */
   private providers: Map<string, BaseProvider>;
-
+  
   private litOtpOptions: OtpProviderOptions | undefined;
-
 
   /**
    * Create a LitAuthClient instance
@@ -66,7 +67,6 @@ export class LitAuthClient {
           'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
         );
       }
-
       if (options?.litOtpConfig) {
         this.litOtpOptions = options?.litOtpConfig;
       }
@@ -139,15 +139,23 @@ export class LitAuthClient {
           ...baseParams,
         }) as unknown as T;
         break;
-      case `otp`:
-        provider = new OtpProvider(
+      case `stytchOtp`:
+        provider = new StytchOtpProvider(
           {
             ...baseParams,
-            ...(options as SignInWithOTPParams),
           },
-          this.litOtpOptions
+          (options as StytchOtpProviderOptions)
         ) as unknown as T;
         break;
+        case `otp`:
+          provider = new OtpProvider(
+            {
+              ...baseParams,
+              ...(options as SignInWithOTPParams),
+            },
+            this.litOtpOptions
+          ) as unknown as T;
+          break;
       default:
         throw new Error(
           "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn' are supported at the moment."

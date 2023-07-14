@@ -16,9 +16,11 @@ import {
   GetSessionSigsProps,
   SessionSigs,
   RPCUrls,
+  AuthMethod,
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
+import { toString as uint8arrayToString } from 'uint8arrays';
 
 /**
  * Compresses a given public key.
@@ -45,6 +47,7 @@ const compressPubKey = (pubKey: string): string => {
 export class PKPBase<T = PKPBaseDefaultParams> {
   rpcs?: RPCUrls;
   controllerAuthSig?: AuthSig;
+  controllerAuthMethods?: AuthMethod[];
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
 
@@ -59,11 +62,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   litActionIPFS?: string;
   litActionJsParams!: T;
   debug: boolean;
-
-  readonly defaultLitActionCode: string = `
-  (async () => {
-    const sigShare = await LitActions.signEcdsa({ toSign, publicKey, sigName });
-  })();`;
+  useAction: boolean | undefined;
 
   // -- debug things
   private PREFIX = '[PKPBase]';
@@ -87,6 +86,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.rpcs = prop.rpcs;
     this.controllerAuthSig = prop.controllerAuthSig;
+    this.controllerAuthMethods = prop.controllerAuthMethods;
     this.controllerSessionSigs = prop.controllerSessionSigs;
     this.sessionSigsExpiration = prop.sessionSigsExpiration;
 
@@ -100,6 +100,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       ...(prop.bootstrapUrls &&
         prop.litNetwork == 'custom' && { minNodeCount: prop.minNodeCount }),
       debug: this.debug,
+      minNodeCount:
+        prop.bootstrapUrls && prop.litNetwork == 'custom'
+          ? prop.minNodeCount
+          : 6,
     });
   }
 
@@ -155,7 +159,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       this.log(
         'No lit action code or IPFS hash provided. Using default action.'
       );
-      this.litActionCode = this.defaultLitActionCode;
+      this.useAction = false;
     }
   }
 
@@ -325,6 +329,55 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     } catch (err) {
       console.log('err:', err);
       throw err;
+    }
+  }
+
+  async runSign(toSign: Uint8Array): Promise<any> {
+    if (!this.litNodeClientReady) {
+      await this.init();
+    }
+
+    // If no PKP public key is provided, throw error
+    if (!this.uncompressedPubKey) {
+      throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
+    }
+
+    // If no authSig or sessionSigs are provided, throw error
+    if (!this.controllerAuthSig && !this.controllerSessionSigs) {
+      throw new Error('controllerAuthSig or controllerSessionSigs is required');
+    }
+
+    if (this.controllerAuthSig && this.controllerSessionSigs) {
+      throw new Error(
+        'controllerAuthSig and controllerSessionSigs both defined, can only use one authorization type'
+      );
+    }
+
+    try {
+      let sig;
+      if (this.controllerAuthSig) {
+        sig = await this.litNodeClient.pkpSign({
+          toSign: toSign,
+          pubKey: this.uncompressedPubKey,
+          authSig: this.controllerAuthSig as AuthSig,
+          authMethods: [],
+        });
+      } else if (this.controllerSessionSigs) {
+        sig = await this.litNodeClient.pkpSign({
+          toSign,
+          pubKey: this.uncompressedPubKey,
+          authMethods: this.controllerAuthMethods ?? [],
+          sessionSigs: this.controllerSessionSigs,
+        });
+      }
+
+      // pad sigs with 0 if length is odd
+      sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;
+      sig.s = sig.s.length % 2 === 0 ? sig.s : '0' + sig.s;
+
+      return sig;
+    } catch (e) {
+      console.log('err: ', e);
     }
   }
 

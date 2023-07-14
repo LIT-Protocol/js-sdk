@@ -19,6 +19,7 @@ import {
   ISessionCapabilityObject,
   LitResourceAbilityRequest,
 } from '@lit-protocol/auth-helpers';
+import { BytesLike } from 'ethers';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -252,6 +253,25 @@ export interface WithSessionSigs extends BaseJsonExecutionRequest {
 }
 
 export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
+
+export interface BaseJsonPkpSignRequest {
+  toSign: ArrayLike<number>;
+  pubKey: string;
+  // auth methods to resolve
+  authMethods?: Array<Object>;
+}
+
+export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
+  sessionSigs: any;
+  authSig?: AuthSig;
+}
+
+export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
+  authSig: AuthSig;
+  sessionSigs?: any;
+}
+
+export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning;
 
 /**
  * Struct in rust
@@ -904,12 +924,13 @@ export interface PKPBaseProp {
   rpc?: string;
   rpcs?: RPCUrls;
   controllerAuthSig?: AuthSig;
+  controllerAuthMethods?: AuthMethod[];
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
   litNetwork?: any;
   debug?: boolean;
-  bootstrapUrls?: string[],
-  minNodeCount?: number,
+  bootstrapUrls?: string[];
+  minNodeCount?: number;
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
@@ -1181,6 +1202,17 @@ export interface SignInWithOTPParams {
   customName?: string;
 }
 
+export interface EthWalletProviderOptions {
+  /**
+   * The domain from which the signing request is made
+   */
+  domain?: string;
+  /**
+   * The origin from which the signing request is made
+   */
+  origin?: string;
+}
+
 export interface OtpProviderOptions {
   baseUrl?: string;
   port?: string;
@@ -1192,6 +1224,30 @@ export interface OtpEmailCustomizationOptions {
   from?: string;
   fromName: string;
 }
+
+export interface SignInWithStytchOTPParams {
+  // JWT from an authenticated session
+  // see stych docs for more info: https://stytch.com/docs/api/session-get
+  accessToken?: string;
+  // username or phone number where OTP was delivered
+  userId: string;
+}
+
+export interface StytchOtpProviderOptions {
+  /*
+    Stytch application identifier
+  */
+  appId: string;
+  /* 
+   Stytch user identifier for a project
+  */
+  userId?: string;
+}
+
+export interface StytchToken {
+  [key: string]: any;
+}
+
 export interface BaseProviderSessionSigsParams {
   /**
    * Public key of PKP to auth with
@@ -1236,10 +1292,6 @@ export interface LoginUrlParams {
 
 export interface BaseAuthenticateOptions {}
 
-export interface OtpAuthenticateOptions {
-  code: string;
-}
-
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
    * Ethereum wallet address
@@ -1268,4 +1320,16 @@ export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
    * User provided authentication code
    */
   code: string;
+}
+
+export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
+  /* 
+  * JWT from an authenticated session
+  * see stych docs for more info: https://stytch.com/docs/api/session-get
+  */
+  accessToken: string;
+  /* 
+   Stytch user identifier for a project
+  */
+  userId?: string;
 }
