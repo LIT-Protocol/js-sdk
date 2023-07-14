@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { LitDispatch } from '../events';
 import { LitAuthMethod, LitAuthMethodWithProvider, PKPInfo } from '../types';
 import { getProviderMap, log } from '../utils';
@@ -22,7 +22,6 @@ const PKEY = '46c45b45cb6a913e104c298bda4bdaaea860aa1349208e9efbb2bb505e5fd0ee';
 const getLitContracts = async () => {
   const litContracts = new LitContracts({
     privateKey: PKEY,
-    debug: true,
   });
 
   await litContracts.connect();
@@ -86,7 +85,7 @@ export const handleMultiAuths = async (
       throw new Error(`Unsupported auth method: ${authMethodName}`);
     }
 
-    return null;
+    return BigNumber.from(0);
   });
 
   const scopes = authData.map((_) => [ethers.BigNumber.from('0')]);
@@ -107,8 +106,9 @@ export const handleMultiAuths = async (
     tx = await litContracts.pkpHelperContract.write.mintNextAndAddAuthMethods(
       2,
       authMethodTypes,
-      authMethodIdsArrayish,
+      authMethodIds as any,
       authMethodPubKeys as any,
+      // [],
       scopes,
       true,
       true,
