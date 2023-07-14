@@ -16,7 +16,7 @@ export const handleEthWallet = async (
   log.info(`authData found! ${JSON.stringify(authData, null, 2)})}`);
 
   try {
-    ethWalletAuthData = await globalThis.Lit.auth.ethWallet?.authenticate(
+    ethWalletAuthData = await globalThis.Lit.auth.ethwallet?.authenticate(
       authData.opts || undefined
     );
   } catch (e) {

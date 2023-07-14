@@ -84,13 +84,14 @@ export default class EthWalletProvider extends BaseProvider {
         signedMessage: toSign,
         address: address,
       };
-
-      this.#authSig = authSig;
+      console.log('this.#authSig', this.#authSig);
     } else {
       authSig = await checkAndSignAuthMessage({
         chain,
       });
     }
+
+    this.#authSig = authSig;
 
     const authMethod = {
       authMethodType: AuthMethodType.EthWallet,
