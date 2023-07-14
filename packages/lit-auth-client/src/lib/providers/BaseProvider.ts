@@ -183,6 +183,7 @@ export abstract class BaseProvider {
       case AuthMethodType.WebAuthn:
         return authMethod.accessToken; // Auth data is a JSON string
       case AuthMethodType.OTP:
+      case AuthMethodType.StytchOtp:
         return JSON.stringify(authMethod);
       default:
         throw new Error(
