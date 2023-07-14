@@ -15,9 +15,9 @@ describe('WalletFactory', () => {
         cosmos: LITCONFIG.COSMOS_RPC,
       },
     };
-    const ethWallet = WalletFactory.createWallet('eth', ethProp);
+    const ethwallet = WalletFactory.createWallet('eth', ethProp);
 
-    expect(ethWallet).toBeInstanceOf(PKPEthersWallet);
+    expect(ethwallet).toBeInstanceOf(PKPEthersWallet);
   });
 
   it('should create a Cosmos wallet', () => {

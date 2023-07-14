@@ -130,7 +130,7 @@ export class LitOptionsBuilder {
         globalThis.Lit.authClient.initProvider<DiscordProvider>(
           ProviderType.Discord
         );
-      globalThis.Lit.auth.ethWallet =
+      globalThis.Lit.auth.ethwallet =
         globalThis.Lit.authClient.initProvider<EthWalletProvider>(
           ProviderType.EthWallet
         );

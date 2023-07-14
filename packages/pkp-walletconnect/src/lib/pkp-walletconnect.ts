@@ -562,8 +562,8 @@ export class PKPWalletConnect {
     // Loop through all wallets and find the one that has an address that can be found within the request params
     for (const pkpClient of this.pkpClients) {
       // TODO: Update this once we support more JSON RPC handlers
-      const ethWallet = pkpClient.getEthWallet();
-      const ethAddress = await ethWallet.getAddress();
+      const ethwallet = pkpClient.getEthWallet();
+      const ethAddress = await ethwallet.getAddress();
       if (paramsString.toLowerCase().includes(ethAddress.toLowerCase())) {
         return pkpClient;
       }

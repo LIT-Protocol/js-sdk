@@ -40,7 +40,7 @@ declare global {
 
     // auths
     auth: {
-      ethWallet: OrNull<EthWalletProvider>;
+      ethwallet: OrNull<EthWalletProvider>;
       webauthn: OrNull<WebAuthnProvider>;
       discord: OrNull<DiscordProvider>;
       google: OrNull<GoogleProvider>;
@@ -83,7 +83,7 @@ globalThis.Lit = {
 
   // auths
   auth: {
-    ethWallet: null,
+    ethwallet: null,
     webauthn: null,
     discord: null,
     google: null,

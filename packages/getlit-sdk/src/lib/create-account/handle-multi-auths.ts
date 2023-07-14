@@ -20,11 +20,9 @@ const PKEY = '46c45b45cb6a913e104c298bda4bdaaea860aa1349208e9efbb2bb505e5fd0ee';
 // );
 
 const getLitContracts = async () => {
-  // create a ethers signer from the private key
-  const signer = new ethers.Wallet(PKEY);
-
   const litContracts = new LitContracts({
-    signer,
+    privateKey: PKEY,
+    debug: true,
   });
 
   await litContracts.connect();
@@ -37,11 +35,13 @@ const getLitContracts = async () => {
     throw new Error('Could not get mint cost');
   }
 
+  log('mintCost', mintCost.toString());
+
   return { litContracts, mintCost };
 };
 
 type AuthKeys =
-  | 'ethWallet'
+  | 'ethwallet'
   | 'webauthn'
   | 'discord'
   | 'google'
@@ -101,8 +101,10 @@ export const handleMultiAuths = async (
 
   const { litContracts, mintCost } = await getLitContracts();
 
-  const tx =
-    await litContracts.pkpHelperContract.write.mintNextAndAddAuthMethods(
+  let tx;
+
+  try {
+    tx = await litContracts.pkpHelperContract.write.mintNextAndAddAuthMethods(
       2,
       authMethodTypes,
       authMethodIdsArrayish,
@@ -112,6 +114,9 @@ export const handleMultiAuths = async (
       true,
       { value: mintCost }
     );
+  } catch (e) {
+    log.throw(`Failed to create account! ${e}`);
+  }
 
   const res = await tx.wait();
 

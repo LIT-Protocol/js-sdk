@@ -361,8 +361,8 @@ export class LitContracts {
     this.log('Your Provider:', this.provider);
 
     if (!this.provider) {
-      this.log('No provide found. Will try to use the one from the signer.');
-      this.provider = this.signer.provider;
+      this.log('No provider found. Will try to use the one from the signer.');
+      this.provider = this.signer.provider || this.signer;
       this.log('Your Provider(from signer):', this.provider);
     }
 

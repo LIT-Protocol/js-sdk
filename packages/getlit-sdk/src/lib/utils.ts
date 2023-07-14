@@ -5,7 +5,7 @@ import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 
-const version = '0.0.130';
+const version = '0.0.138';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -130,8 +130,8 @@ export const convertSigningMaterial = (material: LitSerializable): number[] => {
   return toSign;
 };
 
-// console.log(getProviderMap()[1]); // Outputs: 'ethWallet'
-// console.log(getProviderMap()['ethWallet']); // Outputs: 1
+// console.log(getProviderMap()[1]); // Outputs: 'ethwallet'
+// console.log(getProviderMap()['ethwallet']); // Outputs: 1
 export const getProviderMap = () => {
   enum ProviderType {
     EthWallet = 'ethwallet',
