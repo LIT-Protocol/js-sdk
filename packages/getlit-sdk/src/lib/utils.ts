@@ -5,7 +5,7 @@ import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 
-const version = '0.0.85';
+const version = '0.0.97';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -134,7 +134,7 @@ export const convertSigningMaterial = (material: LitSerializable): number[] => {
 // console.log(getProviderMap()['ethWallet']); // Outputs: 1
 export const getProviderMap = () => {
   enum ProviderType {
-    EthWallet = 'ethWallet',
+    EthWallet = 'ethwallet',
     WebAuthn = 'webauthn',
     Discord = 'discord',
     Google = 'google',
@@ -251,4 +251,8 @@ export const isDiscordAuth = () => {
 
   // if we reach here, the url is valid
   return true;
+};
+
+export const enableAutoAuth = () => {
+  localStorage.setItem('lit-auto-auth', 'true');
 };

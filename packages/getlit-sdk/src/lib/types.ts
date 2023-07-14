@@ -97,10 +97,14 @@ export type LitCredentialManual = {
 };
 
 export type LitCredentialAutomatic = {
-  provider?: 'google' | 'discord' | 'apple' | 'webauthn' | 'otp' | null;
+  provider?: 'ethwallet' | 'google' | 'discord' | 'apple' | 'webauthn' | 'otp' | null;
 };
 
-export type LitCredentialOptions = LitCredentialManual | LitCredentialAutomatic;
+// export type LitCredentialDefault = undefined;
+
+export type LitCredentialOptions =
+  // | LitCredentialDefault
+  LitCredentialManual | LitCredentialAutomatic;
 
 // public async createAccount(
 //   options: LitCredentialOptions = {

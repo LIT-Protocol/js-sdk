@@ -41,8 +41,7 @@ declare global {
     createAccount: (
       opts: LitCredentialOptions
     ) => Promise<void | PKPInfo | Array<PKPInfo> | any>;
-    createAccountWithGoogle: Function;
-    createAccountWithDiscord: Function;
+
     sign: Function;
 
     // auths
@@ -88,12 +87,6 @@ globalThis.Lit = {
     console.log('not initialized');
   },
   createAccount: async () => {
-    console.log('not initialized');
-  },
-  createAccountWithGoogle: () => {
-    console.log('not initialized');
-  },
-  createAccountWithDiscord: () => {
     console.log('not initialized');
   },
   sign: (options: SignProps) => {
