@@ -67,14 +67,14 @@ describe('getlitSDK', () => {
     expect(sig).toBeDefined();
   }, 10_000);
 
-  it("Should encrypt message", async () => {
+  it('Should encrypt message', async () => {
     let res: (value: void | PromiseLike<void>) => void;
     let rej: (reason?: any) => void;
     const promise = new Promise<void>((resolve, reject) => {
       res = resolve;
       rej = reject;
     });
-    await import('./../../dist/src/index.js'); 
+    await import('./../../dist/src/index.js');
     if (globalThis.Lit.events) {
       globalThis.Lit.events.on('ready', async () => {
         // await 1 second
@@ -85,25 +85,26 @@ describe('getlitSDK', () => {
       await promise;
     }
 
-    const enctyptedContent = await globalThis.Lit.encrypt({ 
-      accessControlConditions: [     {
-        conditionType: 'evmBasic',
-        contractAddress: '',
-        standardContractType: '',
-        chain: 'ethereum',
-        method: 'eth_getBalance',
-        parameters: [':userAddress', 'latest'],
-        returnValueTest: {
-          comparator: '>=',
-          value: '0',
+    const enctyptedContent = await globalThis.Lit.encrypt({
+      accessControlConditions: [
+        {
+          conditionType: 'evmBasic',
+          contractAddress: '',
+          standardContractType: '',
+          chain: 'ethereum',
+          method: 'eth_getBalance',
+          parameters: [':userAddress', 'latest'],
+          returnValueTest: {
+            comparator: '>=',
+            value: '0',
+          },
         },
-      }],
-      chain: "ethereum",
-      encryptMaterial: "Hello World",
-      authMaterial: LITCONFIG.CONTROLLER_AUTHSIG
+      ],
+      chain: 'ethereum',
+      encryptMaterial: 'Hello World',
+      authMaterial: LITCONFIG.CONTROLLER_AUTHSIG,
     });
 
     expect(enctyptedContent).toBeDefined();
   }, 100_000);
-
 });

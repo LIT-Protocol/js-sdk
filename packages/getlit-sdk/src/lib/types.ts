@@ -91,7 +91,7 @@ export type LitAuthMethodWithAuthData = {
 };
 
 export type LitAuthMethodManual = {
-  credentials: Array<LitAuthMethod>;
+  authData: Array<LitAuthMethod>;
 };
 
 export type LitAuthMethodOTP = {
