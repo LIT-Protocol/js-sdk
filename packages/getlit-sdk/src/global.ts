@@ -1,5 +1,5 @@
 import { EventEmitter } from 'stream';
-import { Lit } from './lib/lit';
+import { Lit as LitInstance } from './lib/lit';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
 import {
   LitAuthMethodOptions,
@@ -18,6 +18,7 @@ import {
 } from '@lit-protocol/lit-auth-client';
 
 declare global {
+  //@ts-ignore
   var Lit: {
     // clients
     nodeClient: OrNull<Types.NodeClient>;
@@ -30,13 +31,13 @@ declare global {
     events: OrNull<EventEmitter>;
 
     // Lit class instance
-    instance: OrNull<Lit>;
+    instance: OrNull<LitInstance>;
 
     // Lit class methods
-    encrypt: Lit['encrypt'];
-    decrypt: Lit['decrypt'];
-    createAccount: Lit['createAccount'];
-    sign: Lit['sign'] | Function;
+    encrypt: LitInstance['encrypt'] | Function;
+    decrypt: LitInstance['decrypt'] | Function;
+    createAccount: LitInstance['createAccount'] | Function;
+    sign: LitInstance['sign'] | Function;
 
     // auths
     auth: {
@@ -74,7 +75,7 @@ globalThis.Lit = {
   decrypt: () => {
     console.log('not initialized');
   },
-  createAccount: async () => {
+  createAccount: () => {
     console.log('not initialized');
   },
   sign: () => {

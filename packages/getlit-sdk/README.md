@@ -6,6 +6,7 @@ This library was generated with [Nx](https://nx.dev).
 
 Run `nx build getlit-sdk` to build the library.
 
+Or run `yarn build` at the repository root to build all packages
 ## Running unit tests
 
 Run `nx test getlit-sdk` to execute the unit tests via [Jest](https://jestjs.io).

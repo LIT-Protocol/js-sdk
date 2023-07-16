@@ -1,4 +1,5 @@
 import {
+  AccessControlConditions,
   AuthMethod,
   AuthSig,
   EthWalletAuthenticateOptions,
@@ -32,16 +33,19 @@ export namespace Types {
   export type AuthClient<T = LitAuthClient> = T;
 
   export type LitOptions = ContractOptions & AuthOptions & NodeOptions;
-
-  export type Credential = AuthSig | SessionSig;
 }
 
 export type Credential = AuthSig | SessionSig;
+
 /*
   Lit Serializable expresses any type that is indexable numerically, an array of numbers, 
   also indexable numerically, or a string which has numeric indexing
 */
 export type LitSerializable = ArrayLike<number> | string | [index: number];
+export type LitSerialized<T = LitSerializable> = {
+  data: T;
+  type: string;
+};
 
 export type Account = {
   publicKey: string;
@@ -50,7 +54,13 @@ export type Account = {
 };
 export type Wallet = Account;
 
-export interface EncryptProps {}
+export interface EncryptProps {
+  encryptMaterial: LitSerializable;
+  accessControlConditions: AccessControlConditions;
+  chain: string;
+  authMaterial?: Credential;
+  provider?: LitAuthMethodWithProvider
+}
 
 export interface DecryptProps {}
 
@@ -80,6 +90,10 @@ export type LitAuthMethodWithAuthData = {
   authData: Array<LitAuthMethod>;
 };
 
+export type LitAuthMethodManual = {
+  credentials: Array<LitAuthMethod>;
+};
+
 export type LitAuthMethodOTP = {
   provider: 'otp';
   phoneNumber: string;
@@ -96,7 +110,7 @@ export type LitAuthMethodWithProvider = {
 
 export type LitAuthMethodNull = {
   provider: null;
-  authData: Array<LitAuthMethod>;
+  credentials: Array<LitAuthMethod>;
 };
 
 export type LitAuthMethodOptions =

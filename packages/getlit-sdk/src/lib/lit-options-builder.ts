@@ -15,7 +15,7 @@ import {
 import { ProviderType } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
-const DEFAULT_NETWORK = 'serrano'; // changing to "cayenne" soon
+const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
 
 export class LitOptionsBuilder {
   private _contractOptions: OrUndefined<Types.ContractOptions>;
