@@ -11,6 +11,7 @@
     "build:target": "yarn node tools/scripts/build.mjs",
     "build:setupLocalDev": "yarn tools --setup-local-dev",
     "build:verify": "yarn tools --verify",
+    "build:": "yarn node ./tools/scripts/build-group.mjs",
     "pipe": "node ./tools/scripts/pipeline.mjs",
     "build:": "yarn node ./tools/scripts/build-group.mjs",
     "postBuild:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",

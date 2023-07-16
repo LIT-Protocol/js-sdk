@@ -36,7 +36,6 @@ describe('getlitSDK', () => {
       expect(
         (globalThis.Lit.instance as any)['_options']?.signer
       ).toBeDefined();
-
       expect((globalThis.Lit.events as any)['_eventsCount']).toBe(1);
     }
   }, 10_000);

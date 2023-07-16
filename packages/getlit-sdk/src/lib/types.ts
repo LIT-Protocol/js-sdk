@@ -110,7 +110,7 @@ export type LitAuthMethodWithProvider = {
 
 export type LitAuthMethodNull = {
   provider: null;
-  credentials: Array<LitAuthMethod>;
+  authData: Array<LitAuthMethod>;
 };
 
 export type LitAuthMethodOptions =
