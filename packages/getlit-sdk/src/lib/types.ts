@@ -59,7 +59,7 @@ export interface EncryptProps {
   accessControlConditions: AccessControlConditions;
   chain: string;
   authMaterial?: Credential;
-  provider?: LitAuthMethodWithProvider
+  provider?: LitAuthMethodWithProvider;
 }
 
 export interface DecryptProps {}
@@ -105,8 +105,12 @@ export type LitAuthMethodEthWallet = {
 };
 
 export type LitAuthMethodWithProvider = {
-  provider: 'ethwallet' | 'google' | 'discord' | 'apple' | 'webauthn';
+  provider: 'ethwallet' | 'google' | 'discord' | 'apple' | 'webauthn' | 'otp';
 };
+
+export type AuthKeys = LitAuthMethodWithProvider['provider'] extends infer T
+  ? T
+  : never;
 
 export type LitAuthMethodNull = {
   provider: null;

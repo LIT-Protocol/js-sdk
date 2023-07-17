@@ -10,21 +10,19 @@ import {
   EncryptProps,
   LitAuthMethodManual,
   LitSerialized,
+  LitAuthMethodWithAuthData,
 } from './types';
 import {
   convertSigningMaterial,
   log,
-  getProviderMap,
   convertEncryptionMaterial,
   prepareEncryptionMetadata,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
-import { handleCredentials } from './create-account/handle-credentials';
 import { isBrowser } from '@lit-protocol/misc';
-import { uint8arrayToString } from '@lit-protocol/uint8arrays';
-import { encryptString } from '@lit-protocol/encryption';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
+import { handleGetAccounts } from './get-accounts/handle-get-accounts';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -41,6 +39,7 @@ export class Lit {
     globalThis.Lit.decrypt = this.decrypt.bind(this);
     globalThis.Lit.sign = this.sign.bind(this);
     globalThis.Lit.createAccount = this.createAccount.bind(this);
+    globalThis.Lit.getAccounts = this.getAccounts.bind(this);
 
     // util bindings
   }
@@ -76,24 +75,26 @@ export class Lit {
         opts.accessControlConditions
       );
 
-      let encryptionKey = await this._litNodeClient?.encrypt({
-        dataToEncrypt: serializedEncryptionMaterial.data,
-        chain: opts.chain,
-        accessControlConditions: opts.accessControlConditions,
-        authSig: opts.authMaterial,
-      }).catch(e => {
-        log.error("Unable to encrypt content ", opts.encryptMaterial, e);
-        throw e;
-      });
+      let encryptionKey = await this._litNodeClient
+        ?.encrypt({
+          dataToEncrypt: serializedEncryptionMaterial.data,
+          chain: opts.chain,
+          accessControlConditions: opts.accessControlConditions,
+          authSig: opts.authMaterial,
+        })
+        .catch((e) => {
+          log.error('Unable to encrypt content ', opts.encryptMaterial, e);
+          throw e;
+        });
 
       let serializedEncryptionKey = JSON.stringify(encryptionKey);
       let serializedMetadata = JSON.stringify(encryptionMaterialWithMetadata);
-      
-      const decryptionContext =  `${serializedEncryptionKey}:${serializedMetadata}`;
+
+      const decryptionContext = `${serializedEncryptionKey}:${serializedMetadata}`;
       let storageKey: string = `${encryptionKey?.ciphertext}:${encryptionKey?.dataToEncryptHash}`;
 
       localStorage.setItem(storageKey, decryptionContext);
-      log("Set ", storageKey, "to decrypytion resource: ", decryptionContext);
+      log('Set ', storageKey, 'to decrypytion resource: ', decryptionContext);
     } catch (e) {
       log.error(`Error while attempting to encrypt and save ${e}`);
     }
@@ -109,8 +110,16 @@ export class Lit {
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#f4f4d44e2a1340ebb08517dfd2c16265
   // aka. mintWallet
 
-  // simple first, advanced later
-  // https://bit.ly/3DetZ0o
+  /**
+   * Create a new PKP account with the given auth method(s).
+   *
+   * @diagrams
+   * - createAccoutn function  https://bit.ly/3DetZ0o
+   * - create account with social auth (eg. google, discord) https://bit.ly/3DkC9UV
+   *
+   * @param {LitAuthMethodOptions} opts
+   * @returns {Promise<void | PKPInfo[]>}
+   */
   public async createAccount(
     opts: LitAuthMethodOptions
   ): Promise<void | PKPInfo[]> {
@@ -123,7 +132,25 @@ export class Lit {
     }
 
     // If dev provides a "credentials" array where they obtain the auth data manually themselves eg. credentials: [googleAuthData, discordAuthData, etc.]
-    return await handleCredentials(opts as LitAuthMethodManual);
+    return await handleAuthData(opts as LitAuthMethodWithAuthData);
+  }
+
+  public async getAccounts(
+    opts: LitAuthMethodWithAuthData
+  ): Promise<PKPInfo[]> {
+    log('getting accounts...');
+
+    // If dev provides a "provider" eg. google, discord, ethwallet, etc.
+    if (opts) {
+      return await handleGetAccounts(opts.authData);
+    }
+
+    // If dev provides a "credentials" array where they obtain the auth data manually themselves eg. credentials: [googleAuthData, discordAuthData, etc.]
+    //  return await handleAuthData(opts as LitAuthMethodWithAuthData);
+
+    throw new Error('Not implemented');
+
+    return [];
   }
 
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#9b2b39cd96db42daae6a2b3a6cb3c69a

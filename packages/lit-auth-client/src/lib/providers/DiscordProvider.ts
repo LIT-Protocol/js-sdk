@@ -72,7 +72,7 @@ export default class DiscordProvider extends BaseProvider {
     // Check if provider is Discord
     if (!provider || provider !== 'discord') {
       throw new Error(
-        `OAuth provider "${provider}" passed in redirect callback URL does not match "discord"`
+        `OAuth provider "${provider}" passed in redirect callback URL does not match "discord". This usually means that you have not signed in with Discord yet. If you have signed in with Discord and was redirected back to your app, your URL should look something like this: "${this.redirectUri}?provider=discord&access_token=abc123&state=xyz123"`
       );
     }
 

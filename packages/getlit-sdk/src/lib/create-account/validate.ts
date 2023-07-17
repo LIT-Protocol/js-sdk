@@ -18,9 +18,6 @@ export const validateCreateAccount = (credentials: Array<LitAuthMethod>) => {
         googleAuthData
       ]
     });
-
-    // your pkp is now available and can be accessed via google auth. You can add multiple 
-
     `);
   }
 };

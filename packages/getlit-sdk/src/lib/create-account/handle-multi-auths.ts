@@ -1,7 +1,12 @@
 import { BigNumber, ethers } from 'ethers';
 import { LitDispatch } from '../events';
-import { LitAuthMethod, LitAuthMethodWithProvider, PKPInfo } from '../types';
-import { getProviderMap, log } from '../utils';
+import {
+  AuthKeys,
+  LitAuthMethod,
+  LitAuthMethodWithProvider,
+  PKPInfo,
+} from '../types';
+import { getProviderMap, log, mapAuthMethodTypeToString } from '../utils';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { BaseProvider } from '@lit-protocol/lit-auth-client';
 
@@ -39,14 +44,6 @@ const getLitContracts = async () => {
   return { litContracts, mintCost };
 };
 
-type AuthKeys =
-  | 'ethwallet'
-  | 'webauthn'
-  | 'discord'
-  | 'google'
-  | 'otp'
-  | 'apple';
-
 export const handleMultiAuths = async (
   authData: LitAuthMethod[]
 ): Promise<PKPInfo> => {
@@ -58,9 +55,7 @@ export const handleMultiAuths = async (
 
   const authMethodIds = await Promise.all(
     authData.map(async (auth) => {
-      const authMethodName = getProviderMap()[
-        auth.authMethodType
-      ].toLowerCase() as AuthKeys;
+      const authMethodName = mapAuthMethodTypeToString(auth.authMethodType);
 
       if (authMethodName in globalThis.Lit.auth) {
         const id = await (

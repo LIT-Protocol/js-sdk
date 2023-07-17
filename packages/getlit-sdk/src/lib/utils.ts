@@ -1,12 +1,12 @@
 import { ProviderType, version as SDKVersion } from '@lit-protocol/constants';
-import { LitSerializable, LitSerialized, PKPInfo } from './types';
+import { AuthKeys, LitSerializable, LitSerialized, PKPInfo } from './types';
 import { p2pkh } from 'bitcoinjs-lib/src/payments/p2pkh';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
-import { AccessControlConditions } from '@lit-protocol/types';
+import { AccessControlConditions, IRelayPKP } from '@lit-protocol/types';
 
-const version = '0.0.138';
+const version = '0.0.142';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -198,6 +198,14 @@ export const getProviderMap = () => {
   };
 };
 
+export const mapAuthMethodTypeToString = (authMethodType: number) => {
+  const authMethodName = getProviderMap()[
+    authMethodType
+  ].toLowerCase() as AuthKeys;
+
+  return authMethodName;
+};
+
 export const getDerivedAddresses = (
   pkppk: string
 ): {
@@ -285,6 +293,24 @@ export const enableAutoAuth = () => {
   localStorage.setItem('lit-auto-auth', 'true');
 };
 
+export const iRelayPKPToPKPInfo = (ipkp: IRelayPKP): PKPInfo => {
+  const derivedAddresses = getDerivedAddresses(ipkp.publicKey);
+
+  if (!derivedAddresses.btcAddress || !derivedAddresses.cosmosAddress) {
+    return log.throw('failed to derive addresses');
+  }
+
+  const _PKPInfo: PKPInfo = {
+    tokenId: ipkp.tokenId,
+    publicKey: ipkp.publicKey,
+    ethAddress: ipkp.ethAddress,
+    btcAddress: derivedAddresses.btcAddress,
+    cosmosAddress: derivedAddresses.cosmosAddress,
+  };
+
+  return _PKPInfo;
+};
+
 export const relayResToPKPInfo = (response: any): PKPInfo => {
   log.info('response', response);
 
@@ -327,7 +353,7 @@ export const prepareEncryptionMetadata = (
     sdkVersion,
     nodeVersion: '1.0.0', // TODO: network request for node version, or parse header from hand shake requests.,
     chain,
-    accessControlConditions: acc
+    accessControlConditions: acc,
   };
 
   log('constructed metadata: ', metadata);

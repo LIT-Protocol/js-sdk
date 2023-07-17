@@ -6,7 +6,7 @@ import { validateCreateAccount } from './validate';
 
 export async function handleAuthData(opts: LitAuthMethodWithAuthData) {
   const { authData = [] } = opts;
-  log.start('handleAuthData', 'creating account manually...');
+  log.start('handleAuthData', 'creating account with provided multiple authData...');
 
   validateCreateAccount(authData);
 

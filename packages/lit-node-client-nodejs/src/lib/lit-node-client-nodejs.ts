@@ -791,7 +791,7 @@ export class LitNodeClientNodeJs extends LitCore {
       nodePromises.push(singleNodePromise);
     }
 
-    const handledPromise = await this.handleNodePromises(
+    const handledPromise = await this.handleNodePromises<NodeCommandResponse>(
       nodePromises,
       targetNodeRange
     );

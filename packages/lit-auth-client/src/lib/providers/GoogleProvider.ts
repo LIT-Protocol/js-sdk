@@ -69,7 +69,7 @@ export default class GoogleProvider extends BaseProvider {
     // Check if provider is Google
     if (!provider || provider !== 'google') {
       throw new Error(
-        `OAuth provider "${provider}" passed in redirect callback URL does not match "google"`
+        `OAuth provider "${provider}" passed in redirect callback URL does not match "google". This usually means that you have not signed in with Google yet. If you have signed in with Google and was redirected to your app, your URL should look something like this: "${this.redirectUri}?provider=google&id_token=abc123&state=xyz123"`
       );
     }
 

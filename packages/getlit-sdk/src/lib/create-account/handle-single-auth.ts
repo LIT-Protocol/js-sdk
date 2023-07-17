@@ -67,5 +67,7 @@ export async function handleSingleAuth(authData: LitAuthMethod) {
 
   log.end('handleSingleAuth', 'handle-single-auth.ts');
 
+  LitDispatch.createAccountStatus('completed', [_PKPInfo]);
+
   return _PKPInfo;
 }
