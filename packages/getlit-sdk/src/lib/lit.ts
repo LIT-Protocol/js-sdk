@@ -81,11 +81,18 @@ export class Lit {
         chain: opts.chain,
         accessControlConditions: opts.accessControlConditions,
         authSig: opts.authMaterial,
+      }).catch(e => {
+        log.error("Unable to encrypt content ", opts.encryptMaterial, e);
+        throw e;
       });
 
       let serializedEncryptionKey = JSON.stringify(encryptionKey);
       let serializedMetadata = JSON.stringify(encryptionMaterialWithMetadata);
-      return `${serializedEncryptionKey}:${serializedMetadata}`;
+      
+      const decryptionContext =  `${serializedEncryptionKey}:${serializedMetadata}`;
+      let storageKey: string = `${encryptionKey?.ciphertext}:${encryptionKey?.dataToEncryptHash}`;
+
+      localStorage.setItem(storageKey, decryptionContext);
     } catch (e) {
       log.error(`Error while attempting to encrypt and save ${e}`);
     }
