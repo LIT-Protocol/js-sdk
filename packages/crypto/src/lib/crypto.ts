@@ -16,6 +16,7 @@ import {
 
 import { nacl } from '@lit-protocol/nacl';
 import { SIGTYPE } from '@lit-protocol/constants';
+import { CombinedECDSASignature } from '@lit-protocol/types';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
@@ -175,7 +176,7 @@ export const verifySignature = (
  * @returns { any }
  *
  */
-export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
+export const combineEcdsaShares = (sigShares: Array<SigShare>): CombinedECDSASignature => {
   log('sigShares:', sigShares);
   let type = sigShares[0].sigType;
   // the public key can come from any node - it obviously will be identical from each node
@@ -201,14 +202,24 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
     });
   }
 
-  let sig: string = '';
+  let sig: CombinedECDSASignature | undefined;
 
   try {
     let res: string = '';
     switch(type) {
       case SIGTYPE.EcdsaCAITSITHK256:
         res = wasmECDSA.combine_signature(validShares, 3);
-        sig = JSON.parse(res);
+        sig = JSON.parse(res) as CombinedECDSASignature;
+        /*
+          r and s values of the signature should be maximum of 64 bytes
+          r and s values can have polarity as the first two bits, here we remove 
+        */
+        if (sig.r && sig.r.length == 66) {
+          sig.r = sig.r.slice(2);
+        }
+        if (sig.s && sig.s.length == 66) {
+          sig.s = sig.s.slice(2);
+        }
       break;
       case SIGTYPE.ECDSCAITSITHP256:
         res = wasmECDSA.combine_signature(validShares, 4);
