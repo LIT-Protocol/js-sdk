@@ -106,5 +106,6 @@ describe('getlitSDK', () => {
     });
 
     expect(enctyptedContent).toBeDefined();
+    expect(localStorage.getItem(enctyptedContent.storageKey)).toBeDefined();
   }, 100_000);
 });
