@@ -6,6 +6,7 @@ import {
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
+  SIGTYPE,
 } from '@lit-protocol/constants';
 
 import {
@@ -859,7 +860,14 @@ export class LitNodeClientNodeJs extends LitCore {
         return;
       }
 
-      const signature = combineEcdsaShares(sigShares);
+      let signature: any;
+
+      if (
+        sigType === SIGTYPE.EcdsaCAITSITHK256 ||
+        sigType === SIGTYPE.EcdsaCAITSITHP256
+      ) {
+        signature = combineEcdsaShares(sigShares);
+      }
 
       const encodedSig = joinSignature({
         r: '0x' + signature.r,
@@ -934,7 +942,14 @@ export class LitNodeClientNodeJs extends LitCore {
         return;
       }
 
-      const signature = combineEcdsaShares(sigShares);
+      let signature: any;
+
+      if (
+        sigType === SIGTYPE.EcdsaCAITSITHK256 ||
+        sigType === SIGTYPE.EcdsaCAITSITHP256
+      ) {
+        signature = combineEcdsaShares(sigShares);
+      }
 
       const encodedSig = joinSignature({
         r: '0x' + signature.r,
