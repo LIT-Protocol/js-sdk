@@ -93,6 +93,7 @@ export class Lit {
       let storageKey: string = `${encryptionKey?.ciphertext}:${encryptionKey?.dataToEncryptHash}`;
 
       localStorage.setItem(storageKey, decryptionContext);
+      log("Set ", storageKey, "to decrypytion resource: ", decryptionContext);
     } catch (e) {
       log.error(`Error while attempting to encrypt and save ${e}`);
     }
