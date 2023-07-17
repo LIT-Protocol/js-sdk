@@ -1,5 +1,5 @@
 import { ProviderType, version as SDKVersion } from '@lit-protocol/constants';
-import { LitSerializable, LitSerialized, PKPInfo } from './types';
+import { EncryptProps, LitSerializable, LitSerialized, PKPInfo } from './types';
 import { p2pkh } from 'bitcoinjs-lib/src/payments/p2pkh';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
@@ -314,9 +314,7 @@ export const relayResToPKPInfo = (response: any): PKPInfo => {
 };
 
 export const prepareEncryptionMetadata = (
-  message: LitSerialized<Uint8Array>,
-  chain: string,
-  acc: AccessControlConditions
+  opts: EncryptProps
 ) => {
   let netwokrInfo = globalThis.Lit.nodeClient?.config.litNetwork;
   globalThis.Lit.nodeClient?.connectedNodes;
@@ -326,10 +324,20 @@ export const prepareEncryptionMetadata = (
     network: netwokrInfo,
     sdkVersion,
     nodeVersion: '1.0.0', // TODO: network request for node version, or parse header from hand shake requests.,
-    chain,
-    accessControlConditions: acc
+    chain: opts.chain,
+    accessControlConditions: opts.accessControlConditions,
+    authMaterial: JSON.stringify(opts.authMaterial),
   };
 
   log('constructed metadata: ', metadata);
   return metadata;
 };
+
+export const resolveACC = (opts: EncryptProps): any => {
+  switch(typeof opts.accessControlConditions) {
+    default:
+      console.log(typeof opts.accessControlConditions);
+  }
+
+  return;
+}

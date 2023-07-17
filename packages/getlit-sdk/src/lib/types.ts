@@ -3,10 +3,13 @@ import {
   AuthMethod,
   AuthSig,
   EthWalletAuthenticateOptions,
+  EvmContractConditions,
   LitNodeClientConfig,
   LitRelayConfig,
   OtpProviderOptions,
   SessionSig,
+  SolRpcConditions,
+  UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -56,10 +59,14 @@ export type Wallet = Account;
 
 export interface EncryptProps {
   encryptMaterial: LitSerializable;
-  accessControlConditions: AccessControlConditions;
+  accessControlConditions?:
+    | AccessControlConditions
+    | EvmContractConditions
+    | SolRpcConditions
+    | UnifiedAccessControlConditions;
   chain: string;
   authMaterial?: Credential;
-  provider?: LitAuthMethodWithProvider
+  provider?: LitAuthMethodWithProvider;
 }
 
 export interface DecryptProps {}

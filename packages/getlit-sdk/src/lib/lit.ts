@@ -1,4 +1,8 @@
-import { AuthSig } from '@lit-protocol/types';
+import {
+  AccessControlConditions,
+  AuthSig,
+  EncryptResponse,
+} from '@lit-protocol/types';
 import {
   OrUndefined,
   Types,
@@ -49,10 +53,15 @@ export class Lit {
 
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#33d88ea255ff4866bc28724249a71a7e
   public async encrypt(opts: EncryptProps) {
-    if (opts.accessControlConditions.length < 1) {
-      log.error('Access Control Conditions must be defined.');
-      return;
+    if (
+      opts?.accessControlConditions &&
+      opts.accessControlConditions.length < 1
+    ) {
+      log.error(
+        'Access Control Conditions are undefined, no conditions will be defined'
+      );
     }
+
     try {
       let authMaterial: Credential | undefined = opts?.authMaterial;
       let authMethodProvider: LitAuthMethodWithProvider | undefined =
@@ -70,30 +79,34 @@ export class Lit {
       let serializedEncryptionMaterial = convertEncryptionMaterial(
         opts.encryptMaterial
       );
-      let encryptionMaterialWithMetadata = prepareEncryptionMetadata(
-        serializedEncryptionMaterial,
-        opts.chain,
-        opts.accessControlConditions
-      );
+      let encryptionMaterialWithMetadata = prepareEncryptionMetadata(opts);
 
-      let encryptionKey = await this._litNodeClient?.encrypt({
-        dataToEncrypt: serializedEncryptionMaterial.data,
-        chain: opts.chain,
-        accessControlConditions: opts.accessControlConditions,
-        authSig: opts.authMaterial,
-      }).catch(e => {
-        log.error("Unable to encrypt content ", opts.encryptMaterial, e);
-        throw e;
-      });
+      let encryptionKey = await this._litNodeClient
+        ?.encrypt({
+          dataToEncrypt: serializedEncryptionMaterial.data,
+          chain: opts.chain,
+          accessControlConditions:
+            opts.accessControlConditions as AccessControlConditions,
+          authSig: opts.authMaterial,
+        })
+        .catch((e) => {
+          log.error('Unable to encrypt content ', opts.encryptMaterial, e);
+          throw e;
+        });
 
       let serializedEncryptionKey = JSON.stringify(encryptionKey);
       let serializedMetadata = JSON.stringify(encryptionMaterialWithMetadata);
-      
-      const decryptionContext =  `${serializedEncryptionKey}:${serializedMetadata}`;
+
+      const decryptionContext = `${serializedEncryptionKey}:${serializedMetadata}`;
       let storageKey: string = `${encryptionKey?.ciphertext}:${encryptionKey?.dataToEncryptHash}`;
 
       localStorage.setItem(storageKey, decryptionContext);
-      log("Set ", storageKey, "to decrypytion resource: ", decryptionContext);
+      log('Set ', storageKey, 'to decrypytion resource: ', decryptionContext);
+
+      return {
+        storageKey,
+        encryption: encryptionKey,
+      };
     } catch (e) {
       log.error(`Error while attempting to encrypt and save ${e}`);
     }
@@ -102,7 +115,19 @@ export class Lit {
   }
 
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#2465ff247cd24e71b01a3257319b84b8
-  public decrypt() {}
+  public decrypt(opts: {
+    storageKey?: string;
+    encryptionMetadata?: EncryptResponse;
+    authMaterial?: Credential;
+    chain?: string;
+  }) {
+    if (!opts.storageKey && opts.encryptionMetadata) {
+      log.error("Must provide either storage key or encryptionMetadata");
+      return;
+    }
+
+    
+  }
 
   // ========== Signing ==========
 
