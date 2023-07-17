@@ -3,7 +3,7 @@ import { OrUndefined, Types } from './types';
 import { getProviderMap, isBrowser, log } from './utils';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Lit } from './lit';
-import EventEmitter from 'events';
+
 import {
   AppleProvider,
   DiscordProvider,
@@ -14,6 +14,8 @@ import {
 } from '@lit-protocol/lit-auth-client';
 import { ProviderType } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
+import { LitStorage } from './storage/lit-storage';
+import { LitEmitter } from './events/lit-emitter';
 
 const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
 
@@ -22,12 +24,26 @@ export class LitOptionsBuilder {
   private _authOptions: OrUndefined<Types.AuthOptions>;
   private _nodeClientOptions: OrUndefined<LitNodeClientConfig>;
   private _nodeClient: OrUndefined<Types.NodeClient>;
-  private _emitter: OrUndefined<EventEmitter>;
 
-  constructor(opts?: { emitter: EventEmitter }) {
-    log('setting "globalThis.Lit.events"...');
-    this._emitter = opts?.emitter;
-    log.success('setting "globalThis.Lit.events" has been set!');
+  private _emitter: OrUndefined<LitEmitter>;
+  private _storage: OrUndefined<LitStorage>;
+
+  constructor(opts?: { emitter?: LitEmitter; storage?: LitStorage }) {
+    log.start('LitOptionsBuilder', 'starting LitOptionsBuilder...');
+
+    // -- set globalThis.Lit.emitter
+    if (opts?.emitter) {
+      this._emitter = opts.emitter;
+      globalThis.Lit.eventEmitter = this._emitter;
+    }
+
+    // -- set globalThis.Lit.storage
+    if (opts?.storage) {
+      this._storage = opts.storage;
+      globalThis.Lit.storage = this._storage;
+    }
+
+    log.end('LitOptionsBuilder', 'done!');
   }
 
   public withContractOptions(options: Types.ContractOptions) {
@@ -43,30 +59,22 @@ export class LitOptionsBuilder {
   public async build(): Promise<void> {
     log.start('build', 'starting...');
 
-    // Check if the Lit instance exists in globalThis, if not, create it
-
     if (!globalThis.Lit.instance) {
-      log('creating globalThis.Lit.instance...');
       globalThis.Lit.instance = new Lit();
-      log.success('globalThis.Lit has been created!');
     } else {
-      log.success('globalThis.Lit has already been initialized!');
+      log.info('"globalThis.Lit" has already been initialized!');
     }
 
-    log('setting "LitNodeClient" options...');
     const nodeClientOpts = this._nodeClientOptions ?? {
       litNetwork: DEFAULT_NETWORK,
       debug: false,
     };
-
-    log('nodeClientOpts', nodeClientOpts);
 
     if (!this._nodeClient) {
       log('using class "LitNodeClient"');
       this._nodeClient = new LitNodeClient(nodeClientOpts);
     }
 
-    log('connecting to LitNodeClient...');
     try {
       await this._nodeClient?.connect();
       log.success(
@@ -74,14 +82,10 @@ export class LitOptionsBuilder {
         this._nodeClient?.ready
       );
     } catch (e) {
-      log.error(`Error while attempting to connect to LitNodeClient ${e}`);
+      log.throw(`Error while attempting to connect to LitNodeClient ${e}`);
     }
 
-    log('setting "globalThis.litNodeClient"');
     globalThis.Lit.nodeClient = this._nodeClient as Types.NodeClient;
-    log.success('"globalThis.litNodeClient" has been set!');
-
-    log('setting "globalThis.Lit"');
 
     globalThis.Lit.instance.Configure = {
       ...this._authOptions,
@@ -89,8 +93,6 @@ export class LitOptionsBuilder {
       ...this._nodeClientOptions,
     };
 
-    console.log(globalThis.Lit.instance.Configure);
-    log.success('"globalThis.Lit" has been set!');
     log.end('build', 'done!');
 
     this._emitter?.emit('ready');
@@ -146,24 +148,24 @@ export class LitOptionsBuilder {
 
       // globalThis.Lit.auth.otp =
       //   globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);
+    }
 
-      let authStatus = Object.entries(globalThis.Lit.auth)
-        .map(([key, value]) => {
-          if (key === 'otp') {
-            return `${value ? '✅' : '❌'} authMethodType: ${
-              getProviderMap()[key.toLowerCase()]
-            } |  ${key} | (You will need to manually "initProvider<OtpProvider>(ProviderType.Otp)")`;
-          }
-
+    let authStatus = Object.entries(globalThis.Lit.auth)
+      .map(([key, value]) => {
+        if (key === 'otp') {
           return `${value ? '✅' : '❌'} authMethodType: ${
             getProviderMap()[key.toLowerCase()]
-          } |  ${key}`;
-        })
-        .join('\n');
+          } |  ${key} | (You will need to manually "initProvider<OtpProvider>(ProviderType.Otp)")`;
+        }
 
-      log.success('"globalThis.Lit.auth" has been set!');
-      log.info('globalThis.Lit.auth', '\n' + authStatus);
-    }
+        return `${value ? '✅' : '❌'} authMethodType: ${
+          getProviderMap()[key.toLowerCase()]
+        } |  ${key}`;
+      })
+      .join('\n');
+
+    log.success('"globalThis.Lit.auth" has been set!');
+    log.info('globalThis.Lit.auth', '\n' + authStatus);
     log.info(
       `(UPDATED AT: 14/07/2023) A list of available auth methods can be found in PKPPermissions.sol https://bit.ly/44HHa5n (private, to be public soon)`
     );

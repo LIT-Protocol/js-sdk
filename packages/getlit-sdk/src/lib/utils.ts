@@ -1,12 +1,18 @@
 import { version as SDKVersion } from '@lit-protocol/constants';
-import { AuthKeys, EncryptProps, LitSerializable, LitSerialized, PKPInfo } from './types';
+import {
+  AuthKeys,
+  EncryptProps,
+  LitSerializable,
+  LitSerialized,
+  PKPInfo,
+} from './types';
 import { p2pkh } from 'bitcoinjs-lib/src/payments/p2pkh';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 import { IRelayPKP } from '@lit-protocol/types';
 
-const version = '0.0.142';
+const version = '0.0.157';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -290,7 +296,7 @@ export const isDiscordAuth = () => {
 };
 
 export const enableAutoAuth = () => {
-  localStorage.setItem('lit-auto-auth', 'true');
+  globalThis.Lit.storage?.setItem('lit-auto-auth', 'true');
 };
 
 export const iRelayPKPToPKPInfo = (ipkp: IRelayPKP): PKPInfo => {
@@ -339,9 +345,7 @@ export const relayResToPKPInfo = (response: any): PKPInfo => {
   return _PKPInfo;
 };
 
-export const prepareEncryptionMetadata = (
-  opts: EncryptProps
-) => {
+export const prepareEncryptionMetadata = (opts: EncryptProps) => {
   let netwokrInfo = globalThis.Lit.nodeClient?.config.litNetwork;
   globalThis.Lit.nodeClient?.connectedNodes;
   let sdkVersion = SDKVersion;
@@ -360,10 +364,10 @@ export const prepareEncryptionMetadata = (
 };
 
 export const resolveACC = (opts: EncryptProps): any => {
-  switch(typeof opts.accessControlConditions) {
+  switch (typeof opts.accessControlConditions) {
     default:
       console.log(typeof opts.accessControlConditions);
   }
 
   return;
-}
+};

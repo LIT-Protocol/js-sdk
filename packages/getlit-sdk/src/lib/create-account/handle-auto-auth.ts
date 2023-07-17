@@ -1,6 +1,5 @@
 import { DiscordProvider, GoogleProvider } from '@lit-protocol/lit-auth-client';
 import { isBrowser, isDiscordAuth, isGoogleAuth, log } from '../utils';
-import { LitDispatch } from '../events';
 
 export async function handleAutoAuth() {
   // -- logic
@@ -19,7 +18,7 @@ export async function handleAutoAuth() {
   ) {
     // check if local storage has 'lit-auto-auth' set to 'true'
     if (isBrowser()) {
-      const autoAuth = localStorage.getItem('lit-auto-auth');
+      const autoAuth = globalThis.Lit.storage?.getItem('lit-auto-auth');
       if (autoAuth !== 'true') {
         log.info(
           `Auto-authentication with ${providerName} is disabled. To enable, set 'lit-auto-auth' to 'true' in local storage.`
@@ -34,7 +33,7 @@ export async function handleAutoAuth() {
       const authData = await provider?.authenticate();
       log.success(`${providerName} auto-authentication successful!`);
 
-      LitDispatch.createAccountStatus('in_progress');
+      globalThis.Lit.eventEmitter?.createAccountStatus('in_progress');
 
       log.info('Creating Lit account...');
       try {
@@ -45,11 +44,14 @@ export async function handleAutoAuth() {
         log.info(`PKPInfo: ${JSON.stringify(PKPInfoArr)}`);
 
         if (Array.isArray(PKPInfoArr)) {
-          LitDispatch.createAccountStatus('completed', PKPInfoArr);
+          globalThis.Lit.eventEmitter?.createAccountStatus(
+            'completed',
+            PKPInfoArr
+          );
         }
       } catch (e) {
         log.error(`Error while attempting to create Lit account ${e}`);
-        LitDispatch.createAccountStatus('failed');
+        globalThis.Lit.eventEmitter?.createAccountStatus('failed');
       }
     } catch (e) {
       log.error(
@@ -63,7 +65,7 @@ export async function handleAutoAuth() {
   function clearBrowserState() {
     log.start('clearBrowserState', 'clearing...');
     // remove 'lit-auto-auth' from local storage
-    localStorage.removeItem('lit-auto-auth');
+    globalThis.Lit.storage?.removeItem('lit-auto-auth');
 
     // clear url params
     window.history.replaceState(

@@ -1,13 +1,7 @@
 import { EventEmitter } from 'stream';
 import { Lit as LitInstance } from './lib/lit';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
-import {
-  LitAuthMethodOptions,
-  OrNull,
-  PKPInfo,
-  SignProps,
-  Types,
-} from './lib/types';
+import { OrNull, Types } from './lib/types';
 import {
   GoogleProvider,
   AppleProvider,
@@ -17,6 +11,9 @@ import {
   OtpProvider,
 } from '@lit-protocol/lit-auth-client';
 
+import { LitStorage } from './lib/storage/lit-storage';
+import { LitEmitter } from './lib/events/lit-emitter';
+
 declare global {
   //@ts-ignore
   var Lit: {
@@ -24,11 +21,14 @@ declare global {
     nodeClient: OrNull<Types.NodeClient>;
     authClient: OrNull<Types.AuthClient>;
 
+    // storage
+    storage: OrNull<LitStorage>;
+
     // getlit sdk
     builder: OrNull<LitOptionsBuilder>;
     debug: boolean;
     ready: boolean;
-    events: OrNull<EventEmitter>;
+    eventEmitter: OrNull<LitEmitter>;
 
     // Lit class instance
     instance: OrNull<LitInstance>;
@@ -60,11 +60,14 @@ globalThis.Lit = {
   nodeClient: null,
   authClient: null,
 
+  // storage
+  storage: null,
+
   // getlit sdk
   builder: null,
   debug: true,
   ready: false,
-  events: null,
+  eventEmitter: null,
 
   // Lit class instance
   instance: null,

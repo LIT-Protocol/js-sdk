@@ -1,5 +1,4 @@
 import { BigNumber, ethers } from 'ethers';
-import { LitDispatch } from '../events';
 import {
   AuthKeys,
   LitAuthMethod,
@@ -91,7 +90,7 @@ export const handleMultiAuths = async (
   log('authMethodPubKeys', authMethodPubKeys);
   log('scopes', scopes);
 
-  LitDispatch.createAccountStatus('in_progress');
+  globalThis.Lit.eventEmitter?.createAccountStatus('in_progress');
 
   const { litContracts, mintCost } = await getLitContracts();
 

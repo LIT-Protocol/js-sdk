@@ -2,7 +2,6 @@ import { ProviderType } from '@lit-protocol/constants';
 import { LitAuthMethod, PKPInfo } from '../types';
 import { getProviderMap, log, relayResToPKPInfo } from '../utils';
 import { WebAuthnProvider } from '@lit-protocol/lit-auth-client';
-import { LitDispatch } from '../events';
 
 export async function handleSingleAuth(authData: LitAuthMethod) {
   log.start('handleSingleAuth', 'handle-single-auth.ts');
@@ -23,7 +22,7 @@ export async function handleSingleAuth(authData: LitAuthMethod) {
   let res;
 
   // -- cases
-  LitDispatch.createAccountStatus('in_progress');
+  globalThis.Lit.eventEmitter?.createAccountStatus('in_progress');
   if (authMethodType === 'webauthn') {
     const _provider = provider as WebAuthnProvider;
 
@@ -34,7 +33,7 @@ export async function handleSingleAuth(authData: LitAuthMethod) {
       opts = await _provider.register();
       log('opts', opts);
     } catch (e) {
-      LitDispatch.createAccountStatus('failed');
+      globalThis.Lit.eventEmitter?.createAccountStatus('failed');
       log.throw(`Failed to create account with webauthn!`);
     }
 
@@ -42,7 +41,7 @@ export async function handleSingleAuth(authData: LitAuthMethod) {
     try {
       txHash = await _provider.verifyAndMintPKPThroughRelayer(opts);
     } catch (e) {
-      LitDispatch.createAccountStatus('failed');
+      globalThis.Lit.eventEmitter?.createAccountStatus('failed');
       log.throw(`Failed to create account with webauthn!`);
     }
   } else {
@@ -57,7 +56,7 @@ export async function handleSingleAuth(authData: LitAuthMethod) {
         txHash
       );
   } catch (e) {
-    LitDispatch.createAccountStatus('failed');
+    globalThis.Lit.eventEmitter?.createAccountStatus('failed');
     log.throw(`Failed to create account with webauthn!`);
   }
 
@@ -67,7 +66,7 @@ export async function handleSingleAuth(authData: LitAuthMethod) {
 
   log.end('handleSingleAuth', 'handle-single-auth.ts');
 
-  LitDispatch.createAccountStatus('completed', [_PKPInfo]);
+  globalThis.Lit.eventEmitter?.createAccountStatus('completed', [_PKPInfo]);
 
   return _PKPInfo;
 }

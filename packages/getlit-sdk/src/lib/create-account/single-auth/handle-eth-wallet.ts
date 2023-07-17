@@ -1,4 +1,3 @@
-import { LitDispatch } from '../../events';
 import { LitAuthMethod, LitAuthMethodEthWallet, PKPInfo } from '../../types';
 import { log } from '../../utils';
 import { handleSingleAuth } from '../handle-single-auth';
@@ -9,7 +8,7 @@ import { handleSingleAuth } from '../handle-single-auth';
 export const handleEthWallet = async (
   authData: LitAuthMethodEthWallet
 ): Promise<PKPInfo> => {
-  LitDispatch.createAccountStatus('in_progress');
+  globalThis.Lit.eventEmitter?.createAccountStatus('in_progress');
 
   let ethWalletAuthData;
 
@@ -20,7 +19,7 @@ export const handleEthWallet = async (
       authData.opts || undefined
     );
   } catch (e) {
-    LitDispatch.createAccountStatus('failed');
+    globalThis.Lit.eventEmitter?.createAccountStatus('failed');
     log.throw(`Failed to create account with eth wallet!`);
   }
 
@@ -28,11 +27,11 @@ export const handleEthWallet = async (
 
   try {
     const PKPInfo = await handleSingleAuth(ethWalletAuthData as LitAuthMethod);
-    LitDispatch.createAccountStatus('completed', [PKPInfo]);
+    globalThis.Lit.eventEmitter?.createAccountStatus('completed', [PKPInfo]);
 
     return PKPInfo;
   } catch (e) {
-    LitDispatch.createAccountStatus('failed');
+    globalThis.Lit.eventEmitter?.createAccountStatus('failed');
     log.throw(`Failed to create account!`);
   }
 };

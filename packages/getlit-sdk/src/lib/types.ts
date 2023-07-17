@@ -97,10 +97,6 @@ export type LitAuthMethodWithAuthData = {
   authData: Array<LitAuthMethod>;
 };
 
-export type LitAuthMethodManual = {
-  credentials: Array<LitAuthMethod>;
-};
-
 export type LitAuthMethodOTP = {
   provider: 'otp';
   phoneNumber: string;
@@ -129,5 +125,13 @@ export type LitAuthMethodOptions =
   | LitAuthMethodWithProvider
   | LitAuthMethodOTP
   | LitAuthMethodEthWallet
-  | LitAuthMethodManual
   | LitAuthMethodNull;
+
+export interface IStorage {
+  length: number;
+  clear(): void;
+  getItem(key: string): string | null;
+  key(index: number): string | null;
+  removeItem(key: string): void;
+  setItem(key: string, value: string): void;
+}

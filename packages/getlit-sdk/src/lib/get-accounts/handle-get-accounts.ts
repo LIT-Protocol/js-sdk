@@ -11,6 +11,7 @@ export const handleGetAccounts = async (
   authDataArray: Array<LitAuthMethod>
 ): Promise<Array<PKPInfo>> => {
   log.start('handleGetAccounts', `getting accounts by provider...`);
+  globalThis.Lit.eventEmitter?.getAccountsStatus('in_progress');
 
   // for each auth data in the array, get the provider in the provider map
   // and call the provider's fetchPKPsThroughRelayer method

@@ -13,7 +13,6 @@
     "build:verify": "yarn tools --verify",
     "build:": "yarn node ./tools/scripts/build-group.mjs",
     "pipe": "node ./tools/scripts/pipeline.mjs",
-    "build:": "yarn node ./tools/scripts/build-group.mjs",
     "postBuild:mapDistFolderNameToPackageJson": "node ./tools/scripts/map-dist-folder-name-to-package-json.mjs",
     "postBuild:mapDepsToDist": "node tools/scripts/map-deps-to-dist.mjs packages dist @lit-protocol",
     "dev:revamp": "node ./tools/scripts/bump-getlit-sdk.mjs && yarn build && yarn nx run nodejs:serve",

@@ -12,7 +12,6 @@ import {
   LitAuthMethodWithProvider,
   Credential,
   EncryptProps,
-  LitAuthMethodManual,
   LitSerialized,
   LitAuthMethodWithAuthData,
 } from './types';
@@ -99,7 +98,7 @@ export class Lit {
       const decryptionContext = `${serializedEncryptionKey}:${serializedMetadata}`;
       let storageKey: string = `${encryptionKey?.ciphertext}:${encryptionKey?.dataToEncryptHash}`;
 
-      localStorage.setItem(storageKey, decryptionContext);
+      globalThis.Lit.storage?.setItem(storageKey, decryptionContext);
       log('Set ', storageKey, 'to decrypytion resource: ', decryptionContext);
 
       return {
@@ -121,11 +120,9 @@ export class Lit {
     chain?: string;
   }) {
     if (!opts.storageKey && opts.encryptionMetadata) {
-      log.error("Must provide either storage key or encryptionMetadata");
+      log.error('Must provide either storage key or encryptionMetadata');
       return;
     }
-
-    
   }
 
   // ========== Signing ==========
@@ -154,7 +151,7 @@ export class Lit {
       return await handleProvider(opts as LitAuthMethodWithProvider);
     }
 
-    // If dev provides a "credentials" array where they obtain the auth data manually themselves eg. credentials: [googleAuthData, discordAuthData, etc.]
+    // If dev provides a "authData" array where they obtain the auth data manually themselves eg. credentials: [googleAuthData, discordAuthData, etc.]
     return await handleAuthData(opts as LitAuthMethodWithAuthData);
   }
 
@@ -163,17 +160,12 @@ export class Lit {
   ): Promise<PKPInfo[]> {
     log('getting accounts...');
 
-    // If dev provides a "provider" eg. google, discord, ethwallet, etc.
+    // If dev provides a "authData" array
     if (opts) {
       return await handleGetAccounts(opts.authData);
     }
 
-    // If dev provides a "credentials" array where they obtain the auth data manually themselves eg. credentials: [googleAuthData, discordAuthData, etc.]
-    //  return await handleAuthData(opts as LitAuthMethodWithAuthData);
-
     throw new Error('Not implemented');
-
-    return [];
   }
 
   // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#9b2b39cd96db42daae6a2b3a6cb3c69a
