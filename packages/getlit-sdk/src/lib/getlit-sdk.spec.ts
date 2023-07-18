@@ -2,8 +2,79 @@ import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import * as LITCONFIG from '../../../../lit.config.json';
 
 describe('getlitSDK', () => {
-  it('should', () => {
-    expect(true).toBe(true);
+  beforeAll(async () => {
+    try {
+      await import('../../../../dist/packages/getlit-sdk');
+    } catch (e) {
+      console.log(
+        "You probably will need to run 'yarn build' before running this test.'"
+      );
+    }
+  });
+
+  describe('build', () => {
+    describe('default options', () => {
+      it('should build', async () => {
+        await globalThis.Lit.builder?.build();
+
+        // -- verify lit is ready
+        expect(globalThis.Lit.ready).toBe(true);
+      });
+
+      it('should emit "foo" event and return "bar"', async () => {
+        const mockFn = jest.fn();
+
+        if (!globalThis.Lit.eventEmitter) {
+          throw new Error('globalThis.Lit.eventEmitter is undefined!');
+        }
+
+        // -- start listening for "foo" event
+        globalThis.Lit.eventEmitter.on('foo', mockFn);
+
+        // -- now emit "foo" event, the mockFn should be called with "bar"
+        globalThis.Lit.eventEmitter.emit('foo', 'bar');
+
+        // -- verify mockFn was called with "bar"
+        expect(mockFn).toHaveBeenCalledWith('bar');
+      });
+    });
+
+    describe('with contract options', () => {
+      it('should build', async () => {
+        // -- config
+        globalThis.Lit.builder?.withContractOptions({
+          signer: new PKPEthersWallet({
+            pkpPubKey: LITCONFIG.PKP_PUBKEY,
+            rpc: LITCONFIG.CHRONICLE_RPC,
+            controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+          }),
+        });
+
+        // -- build
+        await globalThis.Lit.builder?.build();
+
+        // -- verify option is set
+        // @ts-ignore
+        expect(globalThis.Lit.instance['_options'].signer._isSigner).toBe(true);
+      });
+
+      it('should emit "foo" event and return "bar"', async () => {
+        const mockFn = jest.fn();
+
+        if (!globalThis.Lit.eventEmitter) {
+          throw new Error('globalThis.Lit.eventEmitter is undefined!');
+        }
+
+        // -- start listening for "foo" event
+        globalThis.Lit.eventEmitter.on('foo', mockFn);
+
+        // -- now emit "foo" event, the mockFn should be called with "bar"
+        globalThis.Lit.eventEmitter.emit('foo', 'bar');
+
+        // -- verify mockFn was called with "bar"
+        expect(mockFn).toHaveBeenCalledWith('bar');
+      });
+    });
   });
 
   it('should emit ready event and configure custom option', async () => {
@@ -13,7 +84,7 @@ describe('getlitSDK', () => {
       res = resolve;
       rej = reject;
     });
-    await import('./../../dist/src/index.js');
+
     if (globalThis.Lit.eventEmitter) {
       globalThis.Lit.eventEmitter.on('ready', async () => {
         // await 1 second
@@ -47,7 +118,7 @@ describe('getlitSDK', () => {
       res = resolve;
       rej = reject;
     });
-    await import('./../../dist/src/index.js');
+
     if (globalThis.Lit.eventEmitter) {
       globalThis.Lit.eventEmitter.on('ready', async () => {
         // await 1 second
@@ -74,7 +145,7 @@ describe('getlitSDK', () => {
       res = resolve;
       rej = reject;
     });
-    await import('./../../dist/src/index.js');
+
     if (globalThis.Lit.eventEmitter) {
       globalThis.Lit.eventEmitter.on('ready', async () => {
         // await 1 second

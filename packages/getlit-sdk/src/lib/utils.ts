@@ -56,7 +56,10 @@ log.start = (operationId: string, ...args: any[]): void => {
 log.end = (operationId: string, ...args: any[]): void => {
   // Check if the operation ID is valid
   if (!operationTimes.hasOwnProperty(operationId)) {
-    throw new Error(`Invalid operation ID: ${operationId}`);
+    log.error(
+      `Invalid operation ID: ${operationId}. Did you call log.start('${operationId}')?`
+    );
+    console.log('operationTimes:', operationTimes);
   }
 
   // Calculate the elapsed time

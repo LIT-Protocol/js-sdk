@@ -41,9 +41,8 @@ await asyncForEach(packagesDir, async (packageDir) => {
 
   await asyncForEach(packageInsideDirs, async (insideDir) => {
     let imported = await findImportsFromDir(insideDir);
-    console.log(imported);
-    imported = imported.filter((item) => item.includes(FILTER));
 
+    imported = imported.filter((item) => item.includes(FILTER));
     imports.push(imported);
   });
 

@@ -20,13 +20,13 @@ import { LitEmitter } from './events/lit-emitter';
 const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
 
 export class LitOptionsBuilder {
-  private _contractOptions: OrUndefined<Types.ContractOptions>;
-  private _authOptions: OrUndefined<Types.AuthOptions>;
-  private _nodeClientOptions: OrUndefined<LitNodeClientConfig>;
-  private _nodeClient: OrUndefined<Types.NodeClient>;
+  private _contractOptions: OrUndefined<Types.ContractOptions> = undefined;
+  private _authOptions: OrUndefined<Types.AuthOptions> = undefined;
+  private _nodeClientOptions: OrUndefined<LitNodeClientConfig> = undefined;
+  private _nodeClient: OrUndefined<Types.NodeClient> = undefined;
 
-  private _emitter: OrUndefined<LitEmitter>;
-  private _storage: OrUndefined<LitStorage>;
+  private _emitter: OrUndefined<LitEmitter> = undefined;
+  private _storage: OrUndefined<LitStorage> = undefined;
 
   constructor(opts?: { emitter?: LitEmitter; storage?: LitStorage }) {
     log.start('LitOptionsBuilder', 'starting LitOptionsBuilder...');

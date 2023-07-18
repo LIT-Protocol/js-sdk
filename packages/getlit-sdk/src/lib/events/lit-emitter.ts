@@ -31,8 +31,7 @@ export class LitEmitter {
     }
 
     if (isNode()) {
-      const eventEmitter = new EventEmitter();
-      eventEmitter.emit(eventName, args);
+      this.eventEmitter.emit(eventName, ...args);
     }
   }
 

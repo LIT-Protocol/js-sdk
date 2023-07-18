@@ -1,4 +1,3 @@
-import { EventEmitter } from 'stream';
 import { Lit as LitInstance } from './lib/lit';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
 import { OrNull, Types } from './lib/types';
