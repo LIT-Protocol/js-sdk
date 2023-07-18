@@ -119,6 +119,7 @@ export class LitOptionsBuilder {
     if (!globalThis.Lit.authClient) {
       return log.throw('"globalThis.Lit.authClient" failed to initialize');
     }
+
     log.success('"globalThis.Lit.authClient" has been set!');
 
     log('setting "globalThis.Lit.auth"');
@@ -141,10 +142,10 @@ export class LitOptionsBuilder {
           ProviderType.WebAuthn
         );
 
-      globalThis.Lit.auth.apple =
-        globalThis.Lit.authClient.initProvider<AppleProvider>(
-          ProviderType.Apple
-        );
+      // globalThis.Lit.auth.apple =
+      //   globalThis.Lit.authClient.initProvider<AppleProvider>(
+      //     ProviderType.Apple
+      //   );
     }
 
     globalThis.Lit.auth.otp =

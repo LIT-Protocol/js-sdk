@@ -134,8 +134,11 @@ export class Lit {
    * Create a new PKP account with the given auth method(s).
    *
    * @diagrams
-   * - createAccoutn function  https://bit.ly/3DetZ0o
+   * - createAccoutn function https://bit.ly/3NZw4SA
    * - create account with social auth (eg. google, discord) https://bit.ly/3DkC9UV
+   * - create account with webauthn https://bit.ly/44J4rUw
+   * - create account with ethwallet https://bit.ly/3OiIVRa
+   * - create account with OTP https://bit.ly/3rFbLSQ
    *
    * @param {LitAuthMethodOptions} opts
    * @returns {Promise<void | PKPInfo[]>}
