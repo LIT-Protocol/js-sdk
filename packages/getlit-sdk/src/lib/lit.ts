@@ -14,18 +14,23 @@ import {
   EncryptProps,
   LitSerialized,
   LitAuthMethodWithAuthData,
+  AccessControlType,
+  DecryptProps,
 } from './types';
 import {
   convertSigningMaterial,
   log,
   convertEncryptionMaterial,
   prepareEncryptionMetadata,
+  parseDecryptionMaterialFromCache,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
 import { isBrowser } from '@lit-protocol/misc';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 import { handleGetAccounts } from './get-accounts/handle-get-accounts';
+import { decryptToString } from '@lit-protocol/encryption';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -60,11 +65,11 @@ export class Lit {
       );
     }
 
-    try {
-      let authMaterial: Credential | undefined = opts?.authMaterial;
-      let authMethodProvider: LitAuthMethodWithProvider | undefined =
-        opts?.provider;
+    let authMaterial: Credential | undefined = opts?.authMaterial;
+    let authMethodProvider: LitAuthMethodWithProvider | undefined =
+      opts?.provider;
 
+    try {
       // -- when auth method provider ('google', 'discord', etc.) is provided
       if (!authMaterial && authMethodProvider) {
         // todo: authenticate with the given provider type.
@@ -73,11 +78,14 @@ export class Lit {
           authMaterial = await checkAndSignAuthMessage({ chain: opts.chain });
         }
       }
-
+      opts.authMaterial = authMaterial;
       let serializedEncryptionMaterial = convertEncryptionMaterial(
         opts.encryptMaterial
       );
-      let encryptionMaterialWithMetadata = prepareEncryptionMetadata(opts);
+      let encryptionMaterialWithMetadata = prepareEncryptionMetadata(
+        opts,
+        serializedEncryptionMaterial
+      );
 
       let encryptionKey = await this._litNodeClient
         ?.encrypt({
@@ -95,7 +103,7 @@ export class Lit {
       let serializedEncryptionKey = JSON.stringify(encryptionKey);
       let serializedMetadata = JSON.stringify(encryptionMaterialWithMetadata);
 
-      const decryptionContext = `${serializedEncryptionKey}:${serializedMetadata}`;
+      const decryptionContext = `${serializedEncryptionKey}|${serializedMetadata}`;
       let storageKey: string = `${encryptionKey?.ciphertext}:${encryptionKey?.dataToEncryptHash}`;
 
       globalThis.Lit.storage?.setItem(storageKey, decryptionContext);
@@ -103,24 +111,52 @@ export class Lit {
 
       return {
         storageKey,
-        encryption: encryptionKey,
+        encryptionResponse: encryptionKey,
+        decryptionContext,
       };
     } catch (e) {
-      log.error(`Error while attempting to encrypt and save ${e}`);
+      log.error('Error while performing decryption operations', e);
+      return;
     }
-
-    return;
   }
 
-  // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#2465ff247cd24e71b01a3257319b84b8
-  public decrypt(opts: {
-    storageKey?: string;
-    encryptionMetadata?: EncryptResponse;
-    authMaterial?: Credential;
-    chain?: string;
-  }) {
-    if (!opts.storageKey && opts.encryptionMetadata) {
+  /**
+   *
+   * @param opts
+   * @returns
+   */
+  public async decrypt(opts: DecryptProps) {
+    if (
+      !opts?.storageContext?.storageKey &&
+      !opts?.decryptionContext &&
+      !opts?.decryptResponse
+    ) {
       log.error('Must provide either storage key or encryptionMetadata');
+      return;
+    }
+    try {
+      let material: any;
+      if (opts?.storageContext && globalThis.Lit.storage) {
+        let decryptionMaterial = globalThis.Lit.storage?.getItem(
+          opts?.storageContext.storageKey
+        );
+        material = parseDecryptionMaterialFromCache(decryptionMaterial as string);
+      } else {
+        log.error(
+          'Storage provider not set, cannot read from storage for decryption material'
+        );
+      }
+      log('resolved metadata for material: ', material.metadata);
+      let res = await this._litNodeClient?.decrypt({
+        accessControlConditions: material.metadata.accessControlConditions,
+        ciphertext: material.cipherAndHash.ciphertext,
+        dataToEncryptHash: material.cipherAndHash.dataToEncryptHash,
+        chain: material.metadata.chain,
+        authSig: material.metadata.authMaterial,
+      });
+      return res;
+    }catch(e) {
+      log.error("Could not perform decryption operations ", e);
       return;
     }
   }
@@ -171,12 +207,16 @@ export class Lit {
     throw new Error('Not implemented');
   }
 
-  // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#9b2b39cd96db42daae6a2b3a6cb3c69a
+  /**
+   *
+   * @param options
+   * @returns
+   */
   public async sign(options: SignProps) {
     const toSign: LitSerialized<number[]> = convertSigningMaterial(
       options.signingMaterial
     );
-    if (options.authMaterial == undefined) {
+    if (options.authMatrial == undefined) {
       throw new Error('Credentials must be provided, aborting');
     }
 
@@ -184,7 +224,7 @@ export class Lit {
       pubKey: options.accountPublicKey,
       toSign: toSign.data,
       authMethods: options.credentials,
-      authSig: options.authMaterial as AuthSig,
+      authSig: options.authMatrial as AuthSig,
     });
 
     return sig;

@@ -12,7 +12,7 @@ import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 import { IRelayPKP } from '@lit-protocol/types';
 
-const version = '0.0.176';
+const version = '0.0.175';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -56,10 +56,7 @@ log.start = (operationId: string, ...args: any[]): void => {
 log.end = (operationId: string, ...args: any[]): void => {
   // Check if the operation ID is valid
   if (!operationTimes.hasOwnProperty(operationId)) {
-    log.error(
-      `Invalid operation ID: ${operationId}. Did you call log.start('${operationId}')?`
-    );
-    console.log('operationTimes:', operationTimes);
+    throw new Error(`Invalid operation ID: ${operationId}`);
   }
 
   // Calculate the elapsed time
@@ -348,7 +345,10 @@ export const relayResToPKPInfo = (response: any): PKPInfo => {
   return _PKPInfo;
 };
 
-export const prepareEncryptionMetadata = (opts: EncryptProps) => {
+export const prepareEncryptionMetadata = (
+  opts: EncryptProps,
+  serializedMessage: LitSerialized<Uint8Array>
+) => {
   let netwokrInfo = globalThis.Lit.nodeClient?.config.litNetwork;
   globalThis.Lit.nodeClient?.connectedNodes;
   let sdkVersion = SDKVersion;
@@ -359,11 +359,32 @@ export const prepareEncryptionMetadata = (opts: EncryptProps) => {
     nodeVersion: '1.0.0', // TODO: network request for node version, or parse header from hand shake requests.,
     chain: opts.chain,
     accessControlConditions: opts.accessControlConditions,
-    authMaterial: JSON.stringify(opts.authMaterial),
+    authMaterial: opts.authMaterial,
+    messageType: serializedMessage.type,
   };
 
   log('constructed metadata: ', metadata);
   return metadata;
+};
+
+export const parseDecryptionMaterialFromCache = (cachedMaterial: string) => {
+  cachedMaterial = cachedMaterial.replace(/\\/g, '');
+  const cipherAndMetadata = cachedMaterial.split('|');
+  if (cipherAndMetadata.length !== 2) {
+    throw new Error(
+      'Could not parse encryption material, was this encrypted with the GetLit SDK?'
+    );
+  }
+  let cipherAndHash = cipherAndMetadata[0];
+  let metadata = cipherAndMetadata[1];
+
+  cipherAndHash = JSON.parse(cipherAndHash);
+  metadata = JSON.parse(metadata);
+
+  return {
+    cipherAndHash: cipherAndHash,
+    metadata,
+  };
 };
 
 export const resolveACC = (opts: EncryptProps): any => {
@@ -371,6 +392,5 @@ export const resolveACC = (opts: EncryptProps): any => {
     default:
       console.log(typeof opts.accessControlConditions);
   }
-
   return;
 };

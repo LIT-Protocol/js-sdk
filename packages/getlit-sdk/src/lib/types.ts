@@ -2,6 +2,8 @@ import {
   AccessControlConditions,
   AuthMethod,
   AuthSig,
+  DecryptRequest,
+  EncryptResponse,
   EthWalletAuthenticateOptions,
   EvmContractConditions,
   LitNodeClientConfig,
@@ -57,27 +59,32 @@ export type Account = {
 };
 export type Wallet = Account;
 
+export type AccessControlType = AccessControlConditions
+| EvmContractConditions
+| SolRpcConditions
+| UnifiedAccessControlConditions;
+
 export interface EncryptProps {
   encryptMaterial: LitSerializable;
-  accessControlConditions?:
-    | AccessControlConditions
-    | EvmContractConditions
-    | SolRpcConditions
-    | UnifiedAccessControlConditions;
+  accessControlConditions?: AccessControlType
   chain: string;
   authMaterial?: Credential;
   provider?: LitAuthMethodWithProvider;
 }
 
-export interface DecryptProps {}
+export interface DecryptProps {
+  storageContext?: {storageKey: string};
+  decryptionContext?: {decryptionMaterial: string};
+  decryptResponse?: DecryptRequest;
+}
 
 export interface CreateAccountProps {}
 
 export interface SignProps {
   accountPublicKey: string;
   signingMaterial: LitSerializable;
-  credentials: LitAuthMethod[];
-  authMaterial: Credential;
+  credentials: Credential[];
+  authMatrial: Credential;
 }
 
 export type PKPInfo = {
@@ -88,11 +95,10 @@ export type PKPInfo = {
   cosmosAddress: string;
 };
 
-export type LitCredentials = LitAuthMethod | Credential;
-
 export type LitAuthMethod = {
   accessToken: string;
   authMethodType: AuthMethodType;
+  otpType?: 'email' | 'phone';
 };
 
 export type LitAuthMethodWithAuthData = {
