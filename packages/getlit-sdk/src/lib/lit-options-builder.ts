@@ -1,5 +1,5 @@
 import { LitNodeClientConfig } from '@lit-protocol/types';
-import { OrUndefined, Types } from './types';
+import { IStorage, OrUndefined, Types } from './types';
 import { getProviderMap, isBrowser, log } from './utils';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Lit } from './lit';
@@ -49,6 +49,7 @@ export class LitOptionsBuilder {
   public withContractOptions(options: Types.ContractOptions) {
     this._contractOptions = options;
   }
+
   public withAuthOptions(options: Types.AuthOptions) {
     this._authOptions = options;
   }
@@ -56,24 +57,21 @@ export class LitOptionsBuilder {
     this._nodeClient = client;
   }
 
+  public withStorageProvider(provider: IStorage) {
+    this._storage = new LitStorage(provider);
+  }
+
   public async build(): Promise<void> {
     log.start('build', 'starting...');
-
-    if (!globalThis.Lit.instance) {
-      globalThis.Lit.instance = new Lit();
-    } else {
-      log.info('"globalThis.Lit" has already been initialized!');
-    }
 
     const nodeClientOpts = this._nodeClientOptions ?? {
       litNetwork: DEFAULT_NETWORK,
       debug: false,
     };
 
-    if (!this._nodeClient) {
-      log('using class "LitNodeClient"');
-      this._nodeClient = new LitNodeClient(nodeClientOpts);
-    }
+    log('using class "LitNodeClient"');
+    this._nodeClient = new LitNodeClient(nodeClientOpts);
+    
 
     try {
       await this._nodeClient?.connect();
@@ -86,6 +84,8 @@ export class LitOptionsBuilder {
     }
 
     globalThis.Lit.nodeClient = this._nodeClient as Types.NodeClient;
+    globalThis.Lit.instance = new Lit();
+    log.info('"globalThis.Lit" has already been initialized!');
 
     globalThis.Lit.instance.Configure = {
       ...this._authOptions,
