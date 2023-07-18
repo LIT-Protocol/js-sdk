@@ -56,6 +56,15 @@ export const handleMultiAuths = async (
     authData.map(async (auth) => {
       const authMethodName = mapAuthMethodTypeToString(auth.authMethodType);
 
+      /**
+       * TODO: support webauthn and otp
+       */
+      if (authMethodName === 'webauthn' || authMethodName === 'otp') {
+        throw new Error(
+          `Sorry, "${authMethodName}" is not supported for multi-auths yet!`
+        );
+      }
+
       if (authMethodName in globalThis.Lit.auth) {
         const id = await (
           globalThis.Lit.auth[authMethodName] as BaseProvider
