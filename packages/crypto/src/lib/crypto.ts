@@ -214,11 +214,11 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): CombinedECDSASig
           r and s values of the signature should be maximum of 64 bytes
           r and s values can have polarity as the first two bits, here we remove 
         */
-        if (sig.r && sig.r.length == 66) {
-          sig.r = sig.r.slice(2);
+        if (sig.r && sig.r.length > 64) {
+          while(sig.r.length > 64) { sig.r = sig.r.slice(1); }
         }
-        if (sig.s && sig.s.length == 66) {
-          sig.s = sig.s.slice(2);
+        if (sig.s && sig.s.length > 64) {
+          while(sig.s.length > 64) { sig.s = sig.s.slice(1); }
         }
       break;
       case SIGTYPE.ECDSCAITSITHP256:
