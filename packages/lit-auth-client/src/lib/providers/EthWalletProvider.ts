@@ -97,6 +97,14 @@ export default class EthWalletProvider extends BaseProvider {
       authMethodType: AuthMethodType.EthWallet,
       accessToken: JSON.stringify(authSig),
     };
+
+    if (options?.cache) {
+      this.storageProvider.setItem(
+        'eth-auth-method',
+        JSON.stringify(authMethod)
+      );
+    }
+
     return authMethod;
   }
 

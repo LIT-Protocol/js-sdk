@@ -114,6 +114,7 @@ export class LitOptionsBuilder {
         relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
       },
       litNodeClient: globalThis.Lit.nodeClient,
+      storageProvider: globalThis.Lit.storage,
     });
 
     if (!globalThis.Lit.authClient) {

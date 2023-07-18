@@ -27,10 +27,13 @@ export abstract class BaseProvider {
    */
   public litNodeClient: LitNodeClient;
 
+  public storageProvider: any;
+
   constructor(options: BaseProviderOptions) {
     this.rpcUrl = options.rpcUrl;
     this.relay = options.relay;
     this.litNodeClient = options.litNodeClient;
+    this.storageProvider = options.storageProvider;
   }
 
   /**

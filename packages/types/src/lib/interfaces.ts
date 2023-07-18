@@ -1110,6 +1110,8 @@ export interface LitAuthClientOptions {
   litNodeClient?: any;
 
   litOtpConfig?: OtpProviderOptions;
+
+  storageProvider?: any;
 }
 
 export interface OtpSessionResult {
@@ -1296,6 +1298,8 @@ export interface BaseProviderOptions {
    * Lit Node Client to use
    */
   litNodeClient: any;
+
+  storageProvider?: any;
 }
 
 export interface OAuthProviderOptions {
@@ -1417,6 +1421,8 @@ export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
    * When the auth signature expires
    */
   expiration?: string;
+
+  cache?: boolean;
 }
 
 export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {

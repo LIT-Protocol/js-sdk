@@ -41,6 +41,8 @@ export class LitAuthClient {
 
   private litOtpOptions: OtpProviderOptions | undefined;
 
+  private storageProvider: any;
+
   /**
    * Create a LitAuthClient instance
    *
@@ -68,6 +70,11 @@ export class LitAuthClient {
 
       if (options?.litOtpConfig) {
         this.litOtpOptions = options?.litOtpConfig;
+      }
+
+      if (options?.storageProvider) {
+        this.storageProvider = options?.storageProvider;
+        console.log('options?.storageProvider', options?.storageProvider);
       }
     }
 
@@ -104,6 +111,7 @@ export class LitAuthClient {
       rpcUrl: this.rpcUrl,
       relay: this.relay,
       litNodeClient: this.litNodeClient,
+      storageProvider: this.storageProvider,
     };
 
     let provider: T;
