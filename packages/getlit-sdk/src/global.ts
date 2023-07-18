@@ -48,10 +48,6 @@ declare global {
       google: OrNull<GoogleProvider>;
       otp: OrNull<OtpProvider>;
       apple: OrNull<AppleProvider>;
-
-      // otps
-      email: OrNull<OtpProvider>;
-      phone: OrNull<OtpProvider>;
     };
   };
 
@@ -101,7 +97,5 @@ globalThis.Lit = {
     google: null,
     otp: null,
     apple: null,
-    email: null,
-    phone: null,
   },
 };

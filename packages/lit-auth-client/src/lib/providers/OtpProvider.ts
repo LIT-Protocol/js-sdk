@@ -52,25 +52,7 @@ export class OtpProvider extends BaseProvider {
       );
     }
   }
-
-  public async verifyEmail<T extends AuthenticateOptions>(
-    options?: T
-  ): Promise<AuthMethodWithOTPType> {
-    return {
-      ...(await this.authenticate(options)),
-      otpType: 'email',
-    };
-  }
-
-  public async verifyPhone<T extends AuthenticateOptions>(
-    options?: T
-  ): Promise<AuthMethodWithOTPType> {
-    return {
-      ...(await this.authenticate(options)),
-      otpType: 'phone',
-    };
-  }
-
+  
   /**
    * Starts an otp session for a given email or phone number from the {@link SignInWithOTPParams}
    * @returns {Promise<string>} returns a callback to check status of the verification session if successful

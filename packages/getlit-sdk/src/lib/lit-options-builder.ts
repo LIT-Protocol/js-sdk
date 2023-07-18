@@ -147,13 +147,7 @@ export class LitOptionsBuilder {
         );
     }
 
-    // globalThis.Lit.auth.otp =
-    //   globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);
-
-    globalThis.Lit.auth.email =
-      globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);
-
-    globalThis.Lit.auth.phone =
+    globalThis.Lit.auth.otp =
       globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);
 
     let authStatus = Object.entries(globalThis.Lit.auth)
