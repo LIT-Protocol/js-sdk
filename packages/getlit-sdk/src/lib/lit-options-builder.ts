@@ -145,17 +145,23 @@ export class LitOptionsBuilder {
         globalThis.Lit.authClient.initProvider<AppleProvider>(
           ProviderType.Apple
         );
-
-      // globalThis.Lit.auth.otp =
-      //   globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);
     }
+
+    // globalThis.Lit.auth.otp =
+    //   globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);
+
+    globalThis.Lit.auth.email =
+      globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);
+
+    globalThis.Lit.auth.phone =
+      globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);
 
     let authStatus = Object.entries(globalThis.Lit.auth)
       .map(([key, value]) => {
         if (key === 'otp') {
           return `${value ? '✅' : '❌'} authMethodType: ${
             getProviderMap()[key.toLowerCase()]
-          } |  ${key} | (You will need to manually "initProvider<OtpProvider>(ProviderType.Otp)")`;
+          } |  ${key} | (You will need to manually "initProvider<OtpProvider>(ProviderType.Otp, { userId: 'email_or_phone_number' })")`;
         }
 
         return `${value ? '✅' : '❌'} authMethodType: ${

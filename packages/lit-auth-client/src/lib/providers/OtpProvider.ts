@@ -5,7 +5,8 @@ import {
   BaseProviderOptions,
   OtpAuthenticateOptions,
   SignInWithOTPParams,
-  OtpVerificationPayload
+  OtpVerificationPayload,
+  AuthMethodWithOTPType,
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
 import { OtpProviderOptions } from '@lit-protocol/types';
@@ -50,6 +51,24 @@ export class OtpProvider extends BaseProvider {
         `Must provide authentication options for OTP check options given are: ${options}`
       );
     }
+  }
+
+  public async verifyEmail<T extends AuthenticateOptions>(
+    options?: T
+  ): Promise<AuthMethodWithOTPType> {
+    return {
+      ...(await this.authenticate(options)),
+      otpType: 'email',
+    };
+  }
+
+  public async verifyPhone<T extends AuthenticateOptions>(
+    options?: T
+  ): Promise<AuthMethodWithOTPType> {
+    return {
+      ...(await this.authenticate(options)),
+      otpType: 'phone',
+    };
   }
 
   /**
@@ -100,10 +119,18 @@ export class OtpProvider extends BaseProvider {
   }
 
   /**
+   * Sets the user id & send otp code to the user
+   */
+  public async send(userId: string): Promise<void> {
+    this._params.userId = userId;
+    this.sendOtpCode();
+  }
+
+  /**
    * Validates otp code from {@link sendOtpCode}
    *
    * @param code {string} - OTP code sent to the user, should be retrieved from user input.
-   * @returns {Promise<AuthMethod} - Auth method that contains Json Web Token
+   * @returns {Promise<AuthMethod>} - Auth method that contains Json Web Token
    */
   private async checkOtpCode(code: string): Promise<AuthMethod> {
     const url = this._buildUrl('check');

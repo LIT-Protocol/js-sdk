@@ -12,7 +12,7 @@ import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 import { IRelayPKP } from '@lit-protocol/types';
 
-const version = '0.0.157';
+const version = '0.0.171';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 

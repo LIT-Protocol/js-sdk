@@ -91,6 +91,7 @@ export type PKPInfo = {
 export type LitAuthMethod = {
   accessToken: string;
   authMethodType: AuthMethodType;
+  otpType?: 'email' | 'phone';
 };
 
 export type LitAuthMethodWithAuthData = {

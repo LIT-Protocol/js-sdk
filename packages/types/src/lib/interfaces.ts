@@ -884,6 +884,10 @@ export interface AuthMethod {
   accessToken: string;
 }
 
+export interface AuthMethodWithOTPType extends AuthMethod {
+  otpType: 'email' | 'phone';
+}
+
 // pub struct JsonSignSessionKeyRequest {
 //     pub session_key: String,
 //     pub auth_methods: Vec<AuthMethod>,
@@ -1328,7 +1332,7 @@ export interface SignInWithOTPParams {
    * Allows for specifying custom sender information
    * Note: for most users the `from_name` is the configurable option and `from` should not be populated
    */
-  emailCustomizationOptions: OtpEmailCustomizationOptions;
+  emailCustomizationOptions?: OtpEmailCustomizationOptions;
 
   customName?: string;
 }

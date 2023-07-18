@@ -1,11 +1,7 @@
 import { IRelayPKP } from '@lit-protocol/types';
 import { LitAuthMethod, PKPInfo } from '../types';
-import {
-  iRelayPKPToPKPInfo,
-  log,
-  mapAuthMethodTypeToString,
-  relayResToPKPInfo,
-} from '../utils';
+import { iRelayPKPToPKPInfo, log, mapAuthMethodTypeToString } from '../utils';
+import { AuthMethodType } from '@lit-protocol/constants';
 
 export const handleGetAccounts = async (
   authDataArray: Array<LitAuthMethod>
@@ -23,12 +19,33 @@ export const handleGetAccounts = async (
     // -- prepare
     // convert authMethodType (eg. 6) to authMethodName (eg. 'google')
     const authMethodName = mapAuthMethodTypeToString(authData.authMethodType);
-    const authProvider = globalThis.Lit.auth[authMethodName];
+
+    let authProvider;
+
+    authProvider = globalThis.Lit.auth[authMethodName];
+
+    if (!authProvider) {
+      log.info("Special case: we'll try email or phone");
+
+      if (authData.authMethodType === AuthMethodType.OTP) {
+        if (authData?.otpType === 'email') {
+          authProvider = globalThis.Lit.auth['email'];
+        }
+
+        if (authData?.otpType === 'phone') {
+          authProvider = globalThis.Lit.auth['phone'];
+        }
+      }
+    }
+
+    if (!authProvider) {
+      log.error("otp is not initialised. We'll try email or phone");
+    }
 
     // -- validate auth provider
     if (!authProvider?.fetchPKPsThroughRelayer) {
       log.error(
-        `No fetchPKPsThroughRelayer method found for ${authMethodName} auth method. Continuing...`
+        `No fetchPKPsThroughRelayer method found for "${authMethodName}" auth method. Continuing...`
       );
       continue;
     }
