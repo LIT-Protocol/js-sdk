@@ -14,8 +14,8 @@ describe('getlitSDK', () => {
       rej = reject;
     });
     await import('./../../dist/src/index.js');
-    if (globalThis.Lit.events) {
-      globalThis.Lit.events.on('ready', async () => {
+    if (globalThis.Lit.eventEmitter) {
+      globalThis.Lit.eventEmitter.on('ready', async () => {
         // await 1 second
         await new Promise((resolve) => setTimeout(resolve, 1000));
         res();
@@ -36,7 +36,7 @@ describe('getlitSDK', () => {
       expect(
         (globalThis.Lit.instance as any)['_options']?.signer
       ).toBeDefined();
-      expect((globalThis.Lit.events as any)['_eventsCount']).toBe(1);
+      expect((globalThis.Lit.eventEmitter as any)['_eventsCount']).toBe(1);
     }
   }, 10_000);
 
@@ -48,8 +48,8 @@ describe('getlitSDK', () => {
       rej = reject;
     });
     await import('./../../dist/src/index.js');
-    if (globalThis.Lit.events) {
-      globalThis.Lit.events.on('ready', async () => {
+    if (globalThis.Lit.eventEmitter) {
+      globalThis.Lit.eventEmitter.on('ready', async () => {
         // await 1 second
         await new Promise((resolve) => setTimeout(resolve, 1000));
         res();
@@ -62,7 +62,7 @@ describe('getlitSDK', () => {
       accountPublicKey: LITCONFIG.PKP_PUBKEY,
       signingMaterial: 'Hello World',
       credentials: [],
-      authMatrial: LITCONFIG.CONTROLLER_AUTHSIG,
+      authMaterial: LITCONFIG.CONTROLLER_AUTHSIG,
     });
     expect(sig).toBeDefined();
   }, 10_000);
@@ -75,8 +75,8 @@ describe('getlitSDK', () => {
       rej = reject;
     });
     await import('./../../dist/src/index.js');
-    if (globalThis.Lit.events) {
-      globalThis.Lit.events.on('ready', async () => {
+    if (globalThis.Lit.eventEmitter) {
+      globalThis.Lit.eventEmitter.on('ready', async () => {
         // await 1 second
         await new Promise((resolve) => setTimeout(resolve, 1000));
         res();

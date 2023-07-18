@@ -176,7 +176,7 @@ export class Lit {
     const toSign: LitSerialized<number[]> = convertSigningMaterial(
       options.signingMaterial
     );
-    if (options.authMatrial == undefined) {
+    if (options.authMaterial == undefined) {
       throw new Error('Credentials must be provided, aborting');
     }
 
@@ -184,7 +184,7 @@ export class Lit {
       pubKey: options.accountPublicKey,
       toSign: toSign.data,
       authMethods: options.credentials,
-      authSig: options.authMatrial as AuthSig,
+      authSig: options.authMaterial as AuthSig,
     });
 
     return sig;

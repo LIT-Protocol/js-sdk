@@ -76,8 +76,8 @@ export interface CreateAccountProps {}
 export interface SignProps {
   accountPublicKey: string;
   signingMaterial: LitSerializable;
-  credentials: Credential[];
-  authMatrial: Credential;
+  credentials: LitAuthMethod[];
+  authMaterial: Credential;
 }
 
 export type PKPInfo = {
@@ -88,10 +88,11 @@ export type PKPInfo = {
   cosmosAddress: string;
 };
 
+export type LitCredentials = LitAuthMethod | Credential;
+
 export type LitAuthMethod = {
   accessToken: string;
   authMethodType: AuthMethodType;
-  otpType?: 'email' | 'phone';
 };
 
 export type LitAuthMethodWithAuthData = {

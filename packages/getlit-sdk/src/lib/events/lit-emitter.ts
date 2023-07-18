@@ -10,8 +10,14 @@ export class LitEmitter {
     getAccountsStatus: 'lit_get_account_status',
   };
 
+  private eventEmitter: EventEmitter = new EventEmitter();
+
   constructor() {
     log.start('LitEmitter', 'initializing...');
+
+    if (isNode()) {
+      this.eventEmitter = new EventEmitter();
+    }
   }
 
   emit(eventName: string, ...args: any[]) {
@@ -27,6 +33,19 @@ export class LitEmitter {
     if (isNode()) {
       const eventEmitter = new EventEmitter();
       eventEmitter.emit(eventName, args);
+    }
+  }
+
+  on(eventName: string, listener: (...args: any[]) => void) {
+    if (isBrowser()) {
+      window.addEventListener(eventName, (event: Event) => {
+        // Assuming that the detail field will always be an array
+        listener(...(event as CustomEvent).detail);
+      });
+    }
+
+    if (isNode()) {
+      this.eventEmitter.on(eventName, listener);
     }
   }
 
