@@ -14,6 +14,11 @@ export function withAuthData(fn: Function) {
         log.info('getting auth data from browser');
         const authData = getStoredAuthData();
         log.info('auth data from browser', authData);
+
+        if (authData.length <= 0) {
+          throw new Error('no auth data provided in browser');
+        }
+
         return await fn(authData);
       } else {
         throw new Error('no auth data provided in nodejs');

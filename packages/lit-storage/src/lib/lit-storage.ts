@@ -105,4 +105,31 @@ export class LitStorage implements ILitStorage {
     }
     return false;
   }
+
+  // -- convert expirable to ISO string
+  convertToISOString(
+    expirationLength: number,
+    expirationUnit: 'seconds' | 'minutes' | 'hours' | 'days'
+  ) {
+    let multiplier;
+
+    switch (expirationUnit) {
+      case 'seconds':
+        multiplier = 1000;
+        break;
+      case 'minutes':
+        multiplier = 1000 * 60;
+        break;
+      case 'hours':
+        multiplier = 1000 * 60 * 60;
+        break;
+      case 'days':
+        multiplier = 1000 * 60 * 60 * 24;
+        break;
+      default:
+        throw new Error(`Invalid unit of time: ${expirationUnit}`);
+    }
+
+    return new Date(Date.now() + multiplier * expirationLength).toISOString();
+  }
 }

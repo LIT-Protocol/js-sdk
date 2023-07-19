@@ -3,7 +3,6 @@ import {
   AuthKeys,
   EncryptProps,
   LitAuthMethod,
-  LitAuthMethodWithAuthData,
   LitSerializable,
   LitSerialized,
   PKPInfo,
@@ -12,10 +11,14 @@ import { p2pkh } from 'bitcoinjs-lib/src/payments/p2pkh';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
+<<<<<<< HEAD
+import { IRelayPKP } from '@lit-protocol/types';
+=======
 import { AuthMethod, IRelayPKP } from '@lit-protocol/types';
 import { AuthSig } from '../../../../dist/packages/types/src/lib/interfaces';
+>>>>>>> c1ef95e4d745d7d671990d14daef4739daaecbcc
 
-const version = '0.0.184';
+const version = '0.0.190';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -435,6 +438,16 @@ export const getStoredAuthData = (): Array<LitAuthMethod> => {
       }
     })
     .filter(Boolean);
+
+  // -- handling special case for eth wallet
+  if (globalThis.Lit.storage?.getItem('lit-auth-signature')) {
+    const authData = {
+      authMethodType: 1,
+      accessToken: globalThis.Lit.storage?.getItem('lit-auth-signature'),
+    };
+
+    storedAuthData.push(authData);
+  }
 
   return storedAuthData;
 };

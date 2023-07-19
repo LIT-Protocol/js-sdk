@@ -52,57 +52,73 @@ export default class EthWalletProvider extends BaseProvider {
 
     let authSig: AuthSig;
 
-    // since we are already using cache by default in checkAndSignAuthMessage, options?.cache is explicitly checked
-    // so that we can bypass the cache if options?.cache is false
-    if ((address && signMessage) || options?.cache === false) {
-      if (!address) {
-        throw new Error('Address is required when using signMessage');
-      }
-
-      if (!signMessage) {
-        throw new Error('signMessage is required when using address');
-      }
-
-      // Get chain ID or default to Ethereum mainnet
-      const selectedChain = LIT_CHAINS[chain];
-      const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
-
-      // Get expiration or default to 24 hours
-      const expiration =
-        options?.expiration ||
-        new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
-
-      // Prepare Sign in with Ethereum message
-      const preparedMessage: Partial<SiweMessage> = {
-        domain: this.domain,
-        uri: this.origin,
-        address: ethers.utils.getAddress(address), // convert to EIP-55 format or else SIWE complains
-        version: '1',
-        chainId,
-        expirationTime: expiration,
-      };
-
-      const message: SiweMessage = new SiweMessage(preparedMessage);
-      const toSign: string = message.prepareMessage();
-
-      // Use provided function to sign message
-      const signature = await signMessage(toSign);
-
-      authSig = {
-        sig: signature,
-        derivedVia: 'web3.eth.personal.sign',
-        signedMessage: toSign,
-        address: address,
-      };
-    } else {
+    if (options?.cache) {
       authSig = await checkAndSignAuthMessage({
         chain,
+        ...(options?.expirationUnit &&
+          options?.expirationLength && {
+            expiration: this.storageProvider.convertToISOString(
+              options.expirationLength,
+              options.expirationUnit
+            ),
+          }),
       });
+
+      // -- If you are looking for the cache implementation, ETH works differently cus we uses `lit-auth-signature`, so it handles it in the `getStoredAuthData` in the utils.ts. Otherwise, the following code is how it would look like
+      // this.storageProvider.setExpirableItem(
+      //   'lit-ethwallet-token',
+      //   JSON.stringify({
+      //     authMethodType: AuthMethodType.EthWallet,
+      //     accessToken: JSON.stringify(authSig),
+      //   }),
+      //   options?.expirationLength ?? 24,
+      //   options?.expirationUnit ?? 'hours'
+      // );
+    } else {
+      if (address && signMessage) {
+        // Get chain ID or default to Ethereum mainnet
+        const selectedChain = LIT_CHAINS[chain];
+        const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
+
+        // Get expiration or default to 24 hours
+        const expiration =
+          options?.expiration ||
+          new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+
+        // Prepare Sign in with Ethereum message
+        const preparedMessage: Partial<SiweMessage> = {
+          domain: this.domain,
+          uri: this.origin,
+          address: ethers.utils.getAddress(address), // convert to EIP-55 format or else SIWE complains
+          version: '1',
+          chainId,
+          expirationTime: expiration,
+        };
+
+        const message: SiweMessage = new SiweMessage(preparedMessage);
+        const toSign: string = message.prepareMessage();
+
+        // Use provided function to sign message
+        const signature = await signMessage(toSign);
+
+        authSig = {
+          sig: signature,
+          derivedVia: 'web3.eth.personal.sign',
+          signedMessage: toSign,
+          address: address,
+        };
+      } else {
+        authSig = await checkAndSignAuthMessage({
+          chain,
+        });
+      }
     }
 
-    console.log('this.#authSig', this.#authSig);
+    if (!authSig) throw new Error('Auth signature is undefined');
 
     this.#authSig = authSig;
+
+    console.log('this.#authSig', this.#authSig);
 
     const authMethod = {
       authMethodType: AuthMethodType.EthWallet,

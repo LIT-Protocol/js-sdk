@@ -55,10 +55,8 @@ export class OtpProvider extends BaseProvider {
         this.storageProvider.setExpirableItem(
           'lit-opt-token',
           item,
-          // TODO: provide a way for user to customize the expiration time
-          // TODO: Add this logic to other providers
-          7,
-          'days'
+          _options.expirationLength ?? 24,
+          _options.expirationUnit ?? 'hours'
         );
       }
 
