@@ -1,8 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import { toB58 } from '@mysten/bcs';
 import { hashTypedData } from './hash';
+import bs58 from 'bs58';
 
 
   /**
@@ -13,5 +13,5 @@ import { hashTypedData } from './hash';
    */
   export function getDigestFromBytes(bytes: Uint8Array) {
     const hash = hashTypedData('TransactionData', bytes);
-    return toB58(hash);
+    return bs58.encode(hash);
   }
