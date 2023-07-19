@@ -1,8 +1,4 @@
-import {
-  AccessControlConditions,
-  AuthSig,
-  EncryptResponse,
-} from '@lit-protocol/types';
+import { AccessControlConditions, AuthSig } from '@lit-protocol/types';
 import {
   OrUndefined,
   Types,
@@ -14,8 +10,8 @@ import {
   EncryptProps,
   LitSerialized,
   LitAuthMethodWithAuthData,
-  AccessControlType,
   DecryptProps,
+  LitAuthMethod,
 } from './types';
 import {
   convertSigningMaterial,
@@ -31,6 +27,7 @@ import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 import { handleGetAccounts } from './get-accounts/handle-get-accounts';
 import { decryptToString } from '@lit-protocol/encryption';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { withAuthData } from './middleware/with-auth-data';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -140,7 +137,9 @@ export class Lit {
         let decryptionMaterial = globalThis.Lit.storage?.getItem(
           opts?.storageContext.storageKey
         );
-        material = parseDecryptionMaterialFromCache(decryptionMaterial as string);
+        material = parseDecryptionMaterialFromCache(
+          decryptionMaterial as string
+        );
       } else {
         log.error(
           'Storage provider not set, cannot read from storage for decryption material'
@@ -155,8 +154,8 @@ export class Lit {
         authSig: material.metadata.authMaterial,
       });
       return res;
-    }catch(e) {
-      log.error("Could not perform decryption operations ", e);
+    } catch (e) {
+      log.error('Could not perform decryption operations ', e);
       return;
     }
   }
@@ -194,18 +193,20 @@ export class Lit {
     return await handleAuthData(opts as LitAuthMethodWithAuthData);
   }
 
-  public async getAccounts(
-    opts: LitAuthMethodWithAuthData
-  ): Promise<PKPInfo[]> {
+  /**
+   * Get all accounts associated with the given auth method(s).
+   * @param {LitAuthMethod[]} authData
+   */
+  public getAccounts = withAuthData(async (authData: Array<LitAuthMethod>) => {
     log('getting accounts...');
 
-    // If dev provides a "authData" array
-    if (opts) {
-      return await handleGetAccounts(opts.authData);
+    try {
+      return await handleGetAccounts(authData);
+    } catch (e) {
+      log.error('Error while getting accounts', e);
+      throw e;
     }
-
-    throw new Error('Not implemented');
-  }
+  });
 
   /**
    *

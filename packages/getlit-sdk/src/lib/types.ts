@@ -59,22 +59,23 @@ export type Account = {
 };
 export type Wallet = Account;
 
-export type AccessControlType = AccessControlConditions
-| EvmContractConditions
-| SolRpcConditions
-| UnifiedAccessControlConditions;
+export type AccessControlType =
+  | AccessControlConditions
+  | EvmContractConditions
+  | SolRpcConditions
+  | UnifiedAccessControlConditions;
 
 export interface EncryptProps {
   encryptMaterial: LitSerializable;
-  accessControlConditions?: AccessControlType
+  accessControlConditions?: AccessControlType;
   chain: string;
   authMaterial?: Credential;
   provider?: LitAuthMethodWithProvider;
 }
 
 export interface DecryptProps {
-  storageContext?: {storageKey: string};
-  decryptionContext?: {decryptionMaterial: string};
+  storageContext?: { storageKey: string };
+  decryptionContext?: { decryptionMaterial: string };
   decryptResponse?: DecryptRequest;
 }
 
@@ -134,12 +135,3 @@ export type LitAuthMethodOptions =
   | LitAuthMethodOTP
   | LitAuthMethodEthWallet
   | LitAuthMethodNull;
-
-export interface IStorage {
-  length: number;
-  clear(): void;
-  getItem(key: string): string | null;
-  key(index: number): string | null;
-  removeItem(key: string): void;
-  setItem(key: string, value: string): void;
-}

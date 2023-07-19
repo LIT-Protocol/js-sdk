@@ -9,6 +9,7 @@ import {
 } from '@lit-protocol/types';
 import { ProviderType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { LitStorage } from '@lit-protocol/lit-storage';
 import { LitRelay } from './relay';
 import { BaseProvider } from './providers/BaseProvider';
 import GoogleProvider from './providers/GoogleProvider';
@@ -41,7 +42,7 @@ export class LitAuthClient {
 
   private litOtpOptions: OtpProviderOptions | undefined;
 
-  private storageProvider: any;
+  private storageProvider: LitStorage | undefined;
 
   /**
    * Create a LitAuthClient instance

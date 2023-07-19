@@ -1430,4 +1430,6 @@ export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
    * User provided authentication code
    */
   code: string;
+
+  cache?: boolean;
 }

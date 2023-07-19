@@ -1,8 +1,9 @@
 import { LitNodeClientConfig } from '@lit-protocol/types';
-import { IStorage, OrUndefined, Types } from './types';
+import { OrUndefined, Types } from './types';
 import { getProviderMap, isBrowser, log } from './utils';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Lit } from './lit';
+import { ILitStorage, LitStorage } from '@lit-protocol/lit-storage';
 
 import {
   AppleProvider,
@@ -14,7 +15,6 @@ import {
 } from '@lit-protocol/lit-auth-client';
 import { ProviderType } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
-import { LitStorage } from './storage/lit-storage';
 import { LitEmitter } from './events/lit-emitter';
 
 const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
@@ -57,7 +57,7 @@ export class LitOptionsBuilder {
     this._nodeClient = client;
   }
 
-  public withStorageProvider(provider: IStorage) {
+  public withStorageProvider(provider: ILitStorage) {
     this._storage = new LitStorage(provider);
   }
 
@@ -71,7 +71,6 @@ export class LitOptionsBuilder {
 
     log('using class "LitNodeClient"');
     this._nodeClient = new LitNodeClient(nodeClientOpts);
-    
 
     try {
       await this._nodeClient?.connect();
@@ -154,12 +153,6 @@ export class LitOptionsBuilder {
 
     let authStatus = Object.entries(globalThis.Lit.auth)
       .map(([key, value]) => {
-        if (key === 'otp') {
-          return `${value ? '✅' : '❌'} authMethodType: ${
-            getProviderMap()[key.toLowerCase()]
-          } |  ${key} | (You will need to manually "initProvider<OtpProvider>(ProviderType.Otp, { userId: 'email_or_phone_number' })")`;
-        }
-
         return `${value ? '✅' : '❌'} authMethodType: ${
           getProviderMap()[key.toLowerCase()]
         } |  ${key}`;

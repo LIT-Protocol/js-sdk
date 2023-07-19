@@ -1,0 +1,70 @@
+{
+  "name": "lit-storage",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/lit-storage/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target lit-storage"
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/lit-storage",
+        "main": "packages/lit-storage/src/index.ts",
+        "tsConfig": "packages/lit-storage/tsconfig.lib.json",
+        "assets": [
+          "packages/lit-storage/*.md"
+        ]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_litStorage",
+        "outfile": "dist/packages/lit-storage-vanilla/lit-storage.js",
+        "entryPoints": [
+          "./packages/lit-storage/src/index.ts"
+        ],
+        "define": {
+          "process.env.NODE_DEBUG": "false",
+          "global": "window"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/lit-storage/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/lit-storage"
+      ],
+      "options": {
+        "jestConfig": "packages/lit-storage/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
