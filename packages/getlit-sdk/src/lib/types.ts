@@ -71,9 +71,16 @@ export interface EncryptProps {
   chain: string;
 }
 
+export interface DecryptionContext {
+  decryptionMaterial: string;
+}
+
+export interface StorageContext {
+  storageKey: string;
+}
 export interface DecryptProps {
-  storageContext?: { storageKey: string };
-  decryptionContext?: { decryptionMaterial: string };
+  storageContext?: StorageContext;
+  decryptionContext?: DecryptionContext;
   decryptResponse?: DecryptRequest;
   authMaterial?: Credential;
   provider?: LitAuthMethodWithProvider;
