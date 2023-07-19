@@ -3,7 +3,6 @@ import {
   AuthKeys,
   EncryptProps,
   LitAuthMethod,
-  LitAuthMethodWithAuthData,
   LitSerializable,
   LitSerialized,
   PKPInfo,
@@ -12,7 +11,7 @@ import { p2pkh } from 'bitcoinjs-lib/src/payments/p2pkh';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
-import { AuthMethod, IRelayPKP } from '@lit-protocol/types';
+import { IRelayPKP } from '@lit-protocol/types';
 
 const version = '0.0.184';
 const PREFIX = 'GetLit SDK';
