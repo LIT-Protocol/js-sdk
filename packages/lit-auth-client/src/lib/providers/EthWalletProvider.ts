@@ -64,7 +64,7 @@ export default class EthWalletProvider extends BaseProvider {
           }),
       });
 
-      // -- If you are looking for the cache implementation, ETH works differently cus we uses `lit-auth-signature`, so it handles it in the `getStoredAuthData` in the utils.ts. Otherwise, the following code is how it would look like
+      // -- If you are looking for the cache implementation, ETH wallet works differently cus we use `lit-auth-signature`, so it handles it in the `getStoredAuthData` in the utils.ts. Otherwise, the following code is how it would look like
       // this.storageProvider.setExpirableItem(
       //   'lit-ethwallet-token',
       //   JSON.stringify({

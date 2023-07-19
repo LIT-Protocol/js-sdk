@@ -1434,6 +1434,8 @@ export interface OtpAuthenticateOptions
   code: string;
 }
 
+export interface GoogleAuthenticateOptions extends ExpirableOptions {}
+
 export interface ExpirableOptions {
   cache?: boolean;
 

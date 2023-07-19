@@ -27,10 +27,7 @@ import { handleProvider } from './create-account/handle-provider';
 import { isBrowser } from '@lit-protocol/misc';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 import { handleGetAccounts } from './get-accounts/handle-get-accounts';
-import { decryptToString } from '@lit-protocol/encryption';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { withAuthData } from './middleware/with-auth-data';
-import { accessControlConditions } from '../../../contracts-sdk/src/abis/AccessControlConditions.data';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -113,7 +110,7 @@ export class Lit {
 
   /**
    * Decrypts a given resource based on the {@link DecryptProps}
-   * supports resolving from cache with {@link StorageContext} 
+   * supports resolving from cache with {@link StorageContext}
    * by providing the {@link DecryptionRequest}
    * Authentication context must be provided or cache will be checked for {@link Credential}
    * @param {DecryptProps} opts

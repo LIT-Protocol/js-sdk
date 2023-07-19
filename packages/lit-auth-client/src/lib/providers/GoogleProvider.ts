@@ -1,6 +1,8 @@
 import {
   AuthMethod,
+  AuthenticateOptions,
   BaseProviderOptions,
+  GoogleAuthenticateOptions,
   OAuthProviderOptions,
 } from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
@@ -48,7 +50,9 @@ export default class GoogleProvider extends BaseProvider {
    *
    * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
    */
-  public async authenticate(): Promise<AuthMethod> {
+  public async authenticate<T extends GoogleAuthenticateOptions>(
+    options?: T
+  ): Promise<AuthMethod> {
     // Check if current url matches redirect uri
     if (!window.location.href.startsWith(this.redirectUri)) {
       throw new Error(
@@ -100,6 +104,16 @@ export default class GoogleProvider extends BaseProvider {
       authMethodType: AuthMethodType.GoogleJwt,
       accessToken: idToken,
     };
+
+    if (options?.cache) {
+      this.storageProvider.setExpirableItem(
+        'lit-opt-token',
+        JSON.stringify(authMethod),
+        options.expirationLength ?? 24,
+        options.expirationUnit ?? 'hours'
+      );
+    }
+
     return authMethod;
   }
 

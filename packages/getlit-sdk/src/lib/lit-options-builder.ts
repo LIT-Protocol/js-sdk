@@ -94,7 +94,7 @@ export class LitOptionsBuilder {
 
     log.end('build', 'done!');
 
-    this._emitter?.emit('ready');
+    this._emitter?.emit('ready', true);
     globalThis.Lit.ready = true;
 
     await this.startAuthClient();
