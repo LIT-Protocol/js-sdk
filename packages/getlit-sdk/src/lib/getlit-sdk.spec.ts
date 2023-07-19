@@ -5,11 +5,11 @@ describe('getlitSDK', () => {
   beforeAll(async () => {
     try {
       await import('../../../../dist/packages/getlit-sdk');
-      await new Promise<void>(((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         setTimeout(() => {
           resolve();
         }, 1000);
-      }));
+      });
     } catch (e) {
       console.log(
         "You probably will need to run 'yarn build' before running this test.'"
@@ -19,12 +19,6 @@ describe('getlitSDK', () => {
 
   describe('build', () => {
     describe('default options', () => {
-      it('should build', async () => {
-        await globalThis.Lit.builder?.build();
-
-        // -- verify lit is ready
-        expect(globalThis.Lit.ready).toBe(true);
-      });
       it('should build', async () => {
         await globalThis.Lit.builder?.build();
 
@@ -81,7 +75,7 @@ describe('getlitSDK', () => {
         }),
       });
       await globalThis.Lit.builder?.build();
-  
+
       expect(globalThis.Lit).toBeDefined();
       expect(globalThis.Lit.instance).toBeDefined();
       expect(
@@ -92,7 +86,6 @@ describe('getlitSDK', () => {
   }, 10_000);
 
   it('Should sign message', async () => {
-
     const sig = await globalThis.Lit.sign({
       accountPublicKey: LITCONFIG.PKP_PUBKEY,
       signingMaterial: 'Hello World',
@@ -125,9 +118,13 @@ describe('getlitSDK', () => {
 
     expect(enctyptedContent).toBeDefined();
     expect(globalThis.Lit?.storage?.getItem(enctyptedContent.storageKey)).toBeDefined();
+    expect(
+      globalThis.Lit?.storage?.getItem(enctyptedContent.storageKey)
+    ).toBeDefined();
+
     const res = await globalThis.Lit.decrypt({
       storageContext: {storageKey: enctyptedContent.storageKey}
     })
+    expect(typeof res).toBe("string");
   }, 100_000);
-  
 });

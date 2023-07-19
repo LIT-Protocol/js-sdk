@@ -3,7 +3,7 @@ import { LitOptionsBuilder } from './lib/lit-options-builder';
 import { isBrowser, log } from './lib/utils';
 import { handleAutoAuth } from './lib/create-account/handle-auto-auth';
 import { LitEmitter } from './lib/events/lit-emitter';
-import { LitStorage } from './lib/storage/lit-storage';
+import { LitStorage } from '@lit-protocol/lit-storage';
 
 // initialize globally
 (async () => {

@@ -1,6 +1,6 @@
-import { IStorage } from '../types';
+import { ILitStorage } from './types';
 
-export class LitNodejsStorage implements IStorage {
+export class LitNodejsStorage implements ILitStorage {
   private storage: Record<string, string>;
 
   constructor() {

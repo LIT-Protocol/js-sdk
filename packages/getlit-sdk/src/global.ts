@@ -10,7 +10,7 @@ import {
   OtpProvider,
 } from '@lit-protocol/lit-auth-client';
 
-import { LitStorage } from './lib/storage/lit-storage';
+import { LitStorage } from '@lit-protocol/lit-storage';
 import { LitEmitter } from './lib/events/lit-emitter';
 
 declare global {

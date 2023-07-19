@@ -43,16 +43,33 @@ export class OtpProvider extends BaseProvider {
     options?: T
   ): Promise<AuthMethod> {
     if (options) {
-      return this.checkOtpCode(
+      const _options = options as unknown as OtpAuthenticateOptions;
+
+      const authData = this.checkOtpCode(
         (options as unknown as OtpAuthenticateOptions).code
       );
+
+      if (_options.cache) {
+        const item = JSON.stringify(await authData);
+
+        this.storageProvider.setExpirableItem(
+          'lit-opt-token',
+          item,
+          // TODO: provide a way for user to customize the expiration time
+          // TODO: Add this logic to other providers
+          7,
+          'days'
+        );
+      }
+
+      return authData;
     } else {
       throw new Error(
         `Must provide authentication options for OTP check options given are: ${options}`
       );
     }
   }
-  
+
   /**
    * Starts an otp session for a given email or phone number from the {@link SignInWithOTPParams}
    * @returns {Promise<string>} returns a callback to check status of the verification session if successful

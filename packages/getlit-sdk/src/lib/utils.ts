@@ -2,6 +2,8 @@ import { version as SDKVersion } from '@lit-protocol/constants';
 import {
   AuthKeys,
   EncryptProps,
+  LitAuthMethod,
+  LitAuthMethodWithAuthData,
   LitSerializable,
   LitSerialized,
   PKPInfo,
@@ -10,9 +12,9 @@ import { p2pkh } from 'bitcoinjs-lib/src/payments/p2pkh';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
-import { IRelayPKP } from '@lit-protocol/types';
+import { AuthMethod, IRelayPKP } from '@lit-protocol/types';
 
-const version = '0.0.175';
+const version = '0.0.184';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -395,4 +397,40 @@ export const parseDecryptionMaterialFromCache = (cachedMaterial: string) => {
     cipherAndHash: cipherAndHash,
     metadata,
   };
+};
+
+export const resolveACC = (opts: EncryptProps): any => {
+  switch (typeof opts.accessControlConditions) {
+    default:
+      console.log(typeof opts.accessControlConditions);
+  }
+  return;
+};
+
+export const getStoredAuthData = (): Array<LitAuthMethod> => {
+  const tokenKeys = [
+    'lit-opt-token',
+    'lit-discord-token',
+    'lit-google-token',
+    'lit-webauthn-token',
+    'lit-ethwallet-token',
+  ];
+
+  const storedAuthData = tokenKeys
+    .map((key) => {
+      const str = globalThis.Lit.storage?.getExpirableItem(key);
+
+      if (!str) {
+        return undefined;
+      }
+
+      try {
+        return JSON.parse(str);
+      } catch (e) {
+        return undefined;
+      }
+    })
+    .filter(Boolean);
+
+  return storedAuthData;
 };

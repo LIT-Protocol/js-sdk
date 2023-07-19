@@ -1,0 +1,30 @@
+{
+  "name": "@lit-protocol/lit-storage",
+  "version": "2.2.35",
+  "type": "commonjs",
+  "license": "MIT",
+  "homepage": "https://github.com/Lit-Protocol/js-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Lit-Protocol/js-sdk"
+  },
+  "keywords": [
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/Lit-Protocol/js-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/lit-storage"
+  },
+  "browser": {
+    "crypto": false,
+    "stream": false
+  },
+  "tags": [
+    "universal"
+  ],
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
+}

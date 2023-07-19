@@ -1,5 +1,6 @@
 import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { LitStorage } from '@lit-protocol/lit-storage';
 import {
   AuthCallbackParams,
   AuthMethod,
@@ -27,7 +28,7 @@ export abstract class BaseProvider {
    */
   public litNodeClient: LitNodeClient;
 
-  public storageProvider: any;
+  public storageProvider: LitStorage;
 
   constructor(options: BaseProviderOptions) {
     this.rpcUrl = options.rpcUrl;

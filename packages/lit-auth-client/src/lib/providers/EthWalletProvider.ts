@@ -52,7 +52,17 @@ export default class EthWalletProvider extends BaseProvider {
 
     let authSig: AuthSig;
 
-    if (address && signMessage) {
+    // since we are already using cache by default in checkAndSignAuthMessage, options?.cache is explicitly checked
+    // so that we can bypass the cache if options?.cache is false
+    if ((address && signMessage) || options?.cache === false) {
+      if (!address) {
+        throw new Error('Address is required when using signMessage');
+      }
+
+      if (!signMessage) {
+        throw new Error('signMessage is required when using address');
+      }
+
       // Get chain ID or default to Ethereum mainnet
       const selectedChain = LIT_CHAINS[chain];
       const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
@@ -84,12 +94,13 @@ export default class EthWalletProvider extends BaseProvider {
         signedMessage: toSign,
         address: address,
       };
-      console.log('this.#authSig', this.#authSig);
     } else {
       authSig = await checkAndSignAuthMessage({
         chain,
       });
     }
+
+    console.log('this.#authSig', this.#authSig);
 
     this.#authSig = authSig;
 
@@ -97,13 +108,6 @@ export default class EthWalletProvider extends BaseProvider {
       authMethodType: AuthMethodType.EthWallet,
       accessToken: JSON.stringify(authSig),
     };
-
-    if (options?.cache) {
-      this.storageProvider.setItem(
-        'eth-auth-method',
-        JSON.stringify(authMethod)
-      );
-    }
 
     return authMethod;
   }
