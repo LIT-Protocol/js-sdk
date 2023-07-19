@@ -23,6 +23,7 @@ import {
   convertEncryptionMaterial,
   prepareEncryptionMetadata,
   parseDecryptionMaterialFromCache,
+  deserializeFromType,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
@@ -140,7 +141,9 @@ export class Lit {
         let decryptionMaterial = globalThis.Lit.storage?.getItem(
           opts?.storageContext.storageKey
         );
-        material = parseDecryptionMaterialFromCache(decryptionMaterial as string);
+        material = parseDecryptionMaterialFromCache(
+          decryptionMaterial as string
+        );
       } else {
         log.error(
           'Storage provider not set, cannot read from storage for decryption material'
@@ -154,9 +157,12 @@ export class Lit {
         chain: material.metadata.chain,
         authSig: material.metadata.authMaterial,
       });
-      return res;
-    }catch(e) {
-      log.error("Could not perform decryption operations ", e);
+      return deserializeFromType(
+        material.metadata.type,
+        res?.decryptedData as Uint8Array
+      );
+    } catch (e) {
+      log.error('Could not perform decryption operations ', e);
       return;
     }
   }
