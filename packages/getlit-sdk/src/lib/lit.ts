@@ -63,20 +63,7 @@ export class Lit {
       );
     }
 
-    let authMaterial: Credential | undefined = opts?.authMaterial;
-    let authMethodProvider: LitAuthMethodWithProvider | undefined =
-      opts?.provider;
-
     try {
-      // -- when auth method provider ('google', 'discord', etc.) is provided
-      if (!authMaterial && authMethodProvider) {
-        // todo: authenticate with the given provider type.
-      } else if (!authMaterial && !authMethodProvider) {
-        if (isBrowser()) {
-          authMaterial = await checkAndSignAuthMessage({ chain: opts.chain });
-        }
-      }
-      opts.authMaterial = authMaterial;
       let serializedEncryptionMaterial = convertEncryptionMaterial(
         opts.encryptMaterial
       );
@@ -91,7 +78,6 @@ export class Lit {
           chain: opts.chain,
           accessControlConditions:
             opts.accessControlConditions as AccessControlConditions,
-          authSig: opts.authMaterial,
         })
         .catch((e) => {
           log.error('Unable to encrypt content ', opts.encryptMaterial, e);
@@ -146,16 +132,33 @@ export class Lit {
           'Storage provider not set, cannot read from storage for decryption material'
         );
       }
+      let authMaterial = opts?.authMaterial;
+      let authMethodProvider = opts?.authMaterial;
+
+      // -- when auth method provider ('google', 'discord', etc.) is provided
+      if (!authMaterial && authMethodProvider) {
+        // todo: authenticate with the given provider type.
+      } else if (!authMaterial && !authMethodProvider) {
+        if (isBrowser()) {
+          authMaterial = await checkAndSignAuthMessage({
+            chain: material.metadata.chain,
+          });
+        }
+      }
+      opts.authMaterial = authMaterial;
       log('resolved metadata for material: ', material.metadata);
+      log("typeof authMateiral ", typeof opts.authMaterial);
+
       let res = await this._litNodeClient?.decrypt({
         accessControlConditions: material.metadata.accessControlConditions,
         ciphertext: material.cipherAndHash.ciphertext,
         dataToEncryptHash: material.cipherAndHash.dataToEncryptHash,
         chain: material.metadata.chain,
-        authSig: material.metadata.authMaterial,
+        authSig: opts.authMaterial,
       });
+      
       return deserializeFromType(
-        material.metadata.type,
+        material.metadata.messageType,
         res?.decryptedData as Uint8Array
       );
     } catch (e) {

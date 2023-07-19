@@ -39,7 +39,7 @@ export class LitStorage implements ILitStorage {
   }
 
   setItem(key: string, value: string): void {
-    return this.storage.setItem(key, JSON.stringify({ value }));
+    return this.storage.setItem(key, value);
   }
 
   // -- extra functions

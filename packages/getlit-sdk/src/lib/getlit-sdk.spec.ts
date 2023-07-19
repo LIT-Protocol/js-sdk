@@ -112,8 +112,7 @@ describe('getlitSDK', () => {
         },
       ],
       chain: 'ethereum',
-      encryptMaterial: 'Hello World',
-      authMaterial: LITCONFIG.CONTROLLER_AUTHSIG,
+      encryptMaterial: 'Hello World'
     });
 
     expect(enctyptedContent).toBeDefined();
@@ -123,7 +122,8 @@ describe('getlitSDK', () => {
     ).toBeDefined();
 
     const res = await globalThis.Lit.decrypt({
-      storageContext: {storageKey: enctyptedContent.storageKey}
+      storageContext: {storageKey: enctyptedContent.storageKey},
+      authMaterial: LITCONFIG.CONTROLLER_AUTHSIG,
     })
     expect(typeof res).toBe("string");
   }, 100_000);
