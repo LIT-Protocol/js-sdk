@@ -19,6 +19,7 @@ import {
   convertEncryptionMaterial,
   prepareEncryptionMetadata,
   parseDecryptionMaterialFromCache,
+  deserializeFromType,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
@@ -153,7 +154,10 @@ export class Lit {
         chain: material.metadata.chain,
         authSig: material.metadata.authMaterial,
       });
-      return res;
+      return deserializeFromType(
+        material.metadata.type,
+        res?.decryptedData as Uint8Array
+      );
     } catch (e) {
       log.error('Could not perform decryption operations ', e);
       return;

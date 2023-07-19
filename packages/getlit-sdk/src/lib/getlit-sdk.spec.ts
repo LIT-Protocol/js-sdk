@@ -90,7 +90,7 @@ describe('getlitSDK', () => {
       accountPublicKey: LITCONFIG.PKP_PUBKEY,
       signingMaterial: 'Hello World',
       credentials: [],
-      authMaterial: LITCONFIG.CONTROLLER_AUTHSIG,
+      authMatrial: LITCONFIG.CONTROLLER_AUTHSIG,
     });
     expect(sig).toBeDefined();
   }, 10_000);
@@ -117,8 +117,14 @@ describe('getlitSDK', () => {
     });
 
     expect(enctyptedContent).toBeDefined();
+    expect(globalThis.Lit?.storage?.getItem(enctyptedContent.storageKey)).toBeDefined();
     expect(
       globalThis.Lit?.storage?.getItem(enctyptedContent.storageKey)
     ).toBeDefined();
+
+    const res = await globalThis.Lit.decrypt({
+      storageContext: {storageKey: enctyptedContent.storageKey}
+    })
+    expect(typeof res).toBe("string");
   }, 100_000);
 });

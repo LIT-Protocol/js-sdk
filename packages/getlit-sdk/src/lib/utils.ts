@@ -165,6 +165,16 @@ export function convertEncryptionMaterial(
   }
 }
 
+export function deserializeFromType(type: string, message: Uint8Array): LitSerializable {
+  switch(type) {
+    case 'string':
+      log.info('message resolved to typeof string');
+      return Buffer.from(message).toString('utf8');
+  }
+
+  return message;
+}
+
 // console.log(getProviderMap()[1]); // Outputs: 'ethwallet'
 // console.log(getProviderMap()['ethwallet']); // Outputs: 1
 export const getProviderMap = () => {
@@ -369,7 +379,7 @@ export const prepareEncryptionMetadata = (
 };
 
 export const parseDecryptionMaterialFromCache = (cachedMaterial: string) => {
-  cachedMaterial = cachedMaterial.replace(/\\/g, '');
+  //cachedMaterial = cachedMaterial.replace(/\\/g, '');
   const cipherAndMetadata = cachedMaterial.split('|');
   if (cipherAndMetadata.length !== 2) {
     throw new Error(
