@@ -20,6 +20,7 @@ import {
   prepareEncryptionMetadata,
   parseDecryptionMaterialFromCache,
   deserializeFromType,
+  getStoredAuthData,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
@@ -29,6 +30,7 @@ import { handleGetAccounts } from './get-accounts/handle-get-accounts';
 import { decryptToString } from '@lit-protocol/encryption';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { withAuthData } from './middleware/with-auth-data';
+import { accessControlConditions } from '../../../contracts-sdk/src/abis/AccessControlConditions.data';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -95,8 +97,13 @@ export class Lit {
 
       return {
         storageKey,
-        encryptionResponse: encryptionKey,
         decryptionContext,
+        encryptionResponse: {
+          cipher: encryptionKey?.ciphertext,
+          dataToEncryptHash: encryptionKey?.dataToEncryptHash,
+          accessControlConditions: opts.accessControlConditions,
+          chain: opts.chain,
+        },
       };
     } catch (e) {
       log.error('Error while performing decryption operations', e);
@@ -127,6 +134,10 @@ export class Lit {
         material = parseDecryptionMaterialFromCache(
           decryptionMaterial as string
         );
+      } else if (opts.decryptionContext) {
+        material = parseDecryptionMaterialFromCache(
+          opts.decryptionContext.decryptionMaterial as string
+        );
       } else {
         log.error(
           'Storage provider not set, cannot read from storage for decryption material'
@@ -134,10 +145,17 @@ export class Lit {
       }
       let authMaterial = opts?.authMaterial;
       let authMethodProvider = opts?.authMaterial;
-
+      let authMethods: Array<LitAuthMethod> = [];
       // -- when auth method provider ('google', 'discord', etc.) is provided
       if (!authMaterial && authMethodProvider) {
-        // todo: authenticate with the given provider type.
+        authMethods = getStoredAuthData();
+        if (authMethods.length < 1) {
+          log.info(
+            'No Authentication methods found in cache, need to reauthenticate'
+          );
+          return;
+        }
+        // todo: auth the material found in cache if session isnt already cached.
       } else if (!authMaterial && !authMethodProvider) {
         if (isBrowser()) {
           authMaterial = await checkAndSignAuthMessage({
@@ -147,7 +165,7 @@ export class Lit {
       }
       opts.authMaterial = authMaterial;
       log('resolved metadata for material: ', material.metadata);
-      log("typeof authMateiral ", typeof opts.authMaterial);
+      log('typeof authMateiral ', typeof opts.authMaterial);
 
       let res = await this._litNodeClient?.decrypt({
         accessControlConditions: material.metadata.accessControlConditions,
@@ -156,7 +174,7 @@ export class Lit {
         chain: material.metadata.chain,
         authSig: opts.authMaterial,
       });
-      
+
       return deserializeFromType(
         material.metadata.messageType,
         res?.decryptedData as Uint8Array
