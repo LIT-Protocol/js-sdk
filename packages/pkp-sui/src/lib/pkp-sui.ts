@@ -196,7 +196,7 @@ export class PKPSuiWallet extends PKPBase implements Signer {
   }
 
   /**
-   * Runs the transaction in dev-inpsect mode. Which allows for nearly any
+   * Runs the transaction in dev-inspect mode. Which allows for nearly any
    * transaction (or Move call) with any arguments. Detailed results are
    * provided, including both the transaction effects and any return values.
    */

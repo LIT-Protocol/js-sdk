@@ -17,8 +17,7 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
-      "@lit-protocol/*": ["packages/*/src"],
-      "@lit-protocol/pkp-sui": ["packages/pkp-sui/src/index.ts"]
+      "@lit-protocol/*": ["packages/*/src"]
     }
   },
   "exclude": ["node_modules", "tmp"]
