@@ -1,9 +1,12 @@
-import { AuthMethod, BaseProviderOptions } from '@lit-protocol/types';
+import {
+  AuthMethod,
+  BaseProviderOptions,
+  WebAuthnAuthenticateOptions,
+} from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
 import { ethers, utils } from 'ethers';
 import {
   PublicKeyCredentialCreationOptionsJSON,
-  RegistrationResponseJSON,
   UserVerificationRequirement,
 } from '@simplewebauthn/typescript-types';
 import base64url from 'base64url';
@@ -108,7 +111,17 @@ export default class WebAuthnProvider extends BaseProvider {
    *
    * @returns {Promise<AuthMethod>} - Auth method object containing WebAuthn authentication data
    */
-  public async authenticate(): Promise<AuthMethod> {
+  public async authenticate(
+    options?: WebAuthnAuthenticateOptions
+  ): Promise<AuthMethod> {
+    // Check if it exists in cache
+    let storageItem =
+      this.storageProvider.getExpirableItem('lit-webauthn-token');
+
+    if (storageItem) {
+      return JSON.parse(storageItem);
+    }
+
     const provider = new ethers.providers.JsonRpcProvider(this.rpcUrl);
 
     const block = await provider.getBlock('latest');
@@ -150,6 +163,15 @@ export default class WebAuthnProvider extends BaseProvider {
       authMethodType: AuthMethodType.WebAuthn,
       accessToken: JSON.stringify(actualAuthenticationResponse),
     };
+
+    if (options?.cache) {
+      this.storageProvider.setExpirableItem(
+        'lit-webauthn-token',
+        JSON.stringify(authMethod),
+        options.expirationLength ?? 24,
+        options.expirationUnit ?? 'hours'
+      );
+    }
 
     return authMethod;
   }

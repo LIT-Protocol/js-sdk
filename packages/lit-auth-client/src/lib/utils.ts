@@ -316,3 +316,15 @@ export function unparse(buf: any) {
     bth[buf[i++]]
   );
 }
+
+export const clearParamsFromURL = () => {
+  if (!window.history.replaceState) {
+    return;
+  }
+
+  window.history.replaceState(
+    null,
+    window.document.title,
+    window.location.pathname
+  );
+};

@@ -1435,6 +1435,8 @@ export interface OtpAuthenticateOptions
 }
 
 export interface GoogleAuthenticateOptions extends ExpirableOptions {}
+export interface DiscordAuthenticateOptions extends ExpirableOptions {}
+export interface WebAuthnAuthenticateOptions extends ExpirableOptions {}
 
 export interface ExpirableOptions {
   cache?: boolean;

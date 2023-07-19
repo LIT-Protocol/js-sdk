@@ -1,6 +1,7 @@
 import {
   AuthMethod,
   BaseProviderOptions,
+  DiscordAuthenticateOptions,
   OAuthProviderOptions,
 } from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
@@ -10,6 +11,7 @@ import {
   parseLoginParams,
   getStateParam,
   decode,
+  clearParamsFromURL,
 } from '../utils';
 import { utils } from 'ethers';
 import { toUtf8Bytes } from 'ethers/lib/utils';
@@ -51,7 +53,18 @@ export default class DiscordProvider extends BaseProvider {
    *
    * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
    */
-  public async authenticate(): Promise<AuthMethod> {
+  public async authenticate(
+    options?: DiscordAuthenticateOptions
+  ): Promise<AuthMethod> {
+    // Check if it exists in cache
+    let storageItem =
+      this.storageProvider.getExpirableItem('lit-discord-token');
+
+    if (storageItem) {
+      clearParamsFromURL();
+      return JSON.parse(storageItem);
+    }
+
     // Check if current url matches redirect uri
     if (!window.location.href.startsWith(this.redirectUri)) {
       throw new Error(
@@ -78,17 +91,15 @@ export default class DiscordProvider extends BaseProvider {
 
     // Check if state param matches
     if (!state || decode(decodeURIComponent(state)) !== getStateParam()) {
+      clearParamsFromURL();
+
       throw new Error(
         `Invalid state parameter "${state}" passed in redirect callback URL`
       );
     }
 
     // Clear params from url
-    window.history.replaceState(
-      null,
-      window.document.title,
-      window.location.pathname
-    );
+    clearParamsFromURL();
 
     // Check if access token is present in url
     if (!accessToken) {
@@ -103,6 +114,16 @@ export default class DiscordProvider extends BaseProvider {
       authMethodType: AuthMethodType.Discord,
       accessToken: accessToken,
     };
+
+    if (options?.cache) {
+      this.storageProvider.setExpirableItem(
+        'lit-discord-token',
+        JSON.stringify(authMethod),
+        options.expirationLength ?? 24,
+        options.expirationUnit ?? 'hours'
+      );
+    }
+
     return authMethod;
   }
 

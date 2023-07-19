@@ -1,7 +1,6 @@
 import { IRelayPKP } from '@lit-protocol/types';
 import { LitAuthMethod, PKPInfo } from '../types';
 import { iRelayPKPToPKPInfo, log, mapAuthMethodTypeToString } from '../utils';
-import { AuthMethodType } from '@lit-protocol/constants';
 
 export const handleGetAccounts = async (
   authDataArray: Array<LitAuthMethod>
@@ -52,6 +51,7 @@ export const handleGetAccounts = async (
   }
 
   log.end('handleGetAccounts', `got accounts by provider!`);
+  globalThis.Lit.eventEmitter?.getAccountsStatus('completed', results);
 
   return results;
 };

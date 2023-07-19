@@ -42,6 +42,13 @@ export class OtpProvider extends BaseProvider {
   public async authenticate<T extends AuthenticateOptions>(
     options?: T
   ): Promise<AuthMethod> {
+    // Check if it exists in cache
+    let storageItem = this.storageProvider.getExpirableItem('lit-otp-token');
+
+    if (storageItem) {
+      return JSON.parse(storageItem);
+    }
+
     if (options) {
       const _options = options as unknown as OtpAuthenticateOptions;
 

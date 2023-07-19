@@ -118,8 +118,6 @@ export default class EthWalletProvider extends BaseProvider {
 
     this.#authSig = authSig;
 
-    console.log('this.#authSig', this.#authSig);
-
     const authMethod = {
       authMethodType: AuthMethodType.EthWallet,
       accessToken: JSON.stringify(authSig),

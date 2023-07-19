@@ -12,6 +12,7 @@ import {
   getStateParam,
   decode,
   parseJWT,
+  clearParamsFromURL,
 } from '../utils';
 import { utils } from 'ethers';
 
@@ -53,6 +54,15 @@ export default class GoogleProvider extends BaseProvider {
   public async authenticate<T extends GoogleAuthenticateOptions>(
     options?: T
   ): Promise<AuthMethod> {
+    // Check if it exists in cache
+    let storageItem =
+      this.storageProvider.getExpirableItem('lit-google-token');
+
+    if (storageItem) {
+      clearParamsFromURL();
+      return JSON.parse(storageItem);
+    }
+
     // Check if current url matches redirect uri
     if (!window.location.href.startsWith(this.redirectUri)) {
       throw new Error(
@@ -79,17 +89,15 @@ export default class GoogleProvider extends BaseProvider {
 
     // Check if state param matches
     if (!state || decode(decodeURIComponent(state)) !== getStateParam()) {
+      clearParamsFromURL();
+
       throw new Error(
         `Invalid state parameter "${state}" passed in redirect callback URL`
       );
     }
 
     // Clear params from url
-    window.history.replaceState(
-      null,
-      window.document.title,
-      window.location.pathname
-    );
+    clearParamsFromURL();
 
     // Check if id token is present in url
     if (!idToken) {
@@ -107,7 +115,7 @@ export default class GoogleProvider extends BaseProvider {
 
     if (options?.cache) {
       this.storageProvider.setExpirableItem(
-        'lit-opt-token',
+        'lit-google-token',
         JSON.stringify(authMethod),
         options.expirationLength ?? 24,
         options.expirationUnit ?? 'hours'

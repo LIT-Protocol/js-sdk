@@ -81,15 +81,19 @@ export class LitStorage implements ILitStorage {
     if (!itemStr) return null;
 
     const item = JSON.parse(itemStr);
+
     if (item && item.expirationDate) {
       const expirationDate = new Date(item.expirationDate);
+
       if (new Date() > expirationDate) {
         // The item is expired, remove it from the storage
         this.storage.removeItem(key);
         return null;
       }
+
       return item.value;
     }
+
     return null;
   }
 
