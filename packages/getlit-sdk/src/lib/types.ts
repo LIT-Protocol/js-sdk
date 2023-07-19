@@ -69,14 +69,14 @@ export interface EncryptProps {
   encryptMaterial: LitSerializable;
   accessControlConditions?: AccessControlType;
   chain: string;
-  authMaterial?: Credential;
-  provider?: LitAuthMethodWithProvider;
 }
 
 export interface DecryptProps {
   storageContext?: { storageKey: string };
   decryptionContext?: { decryptionMaterial: string };
   decryptResponse?: DecryptRequest;
+  authMaterial?: Credential;
+  provider?: LitAuthMethodWithProvider;
 }
 
 export interface CreateAccountProps {}

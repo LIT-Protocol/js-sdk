@@ -11,7 +11,12 @@ import { p2pkh } from 'bitcoinjs-lib/src/payments/p2pkh';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
+<<<<<<< HEAD
 import { IRelayPKP } from '@lit-protocol/types';
+=======
+import { AuthMethod, IRelayPKP } from '@lit-protocol/types';
+import { AuthSig } from '../../../../dist/packages/types/src/lib/interfaces';
+>>>>>>> c1ef95e4d745d7d671990d14daef4739daaecbcc
 
 const version = '0.0.190';
 const PREFIX = 'GetLit SDK';
@@ -373,8 +378,7 @@ export const prepareEncryptionMetadata = (
     nodeVersion: '1.0.0', // TODO: network request for node version, or parse header from hand shake requests.,
     chain: opts.chain,
     accessControlConditions: opts.accessControlConditions,
-    authMaterial: opts.authMaterial,
-    messageType: serializedMessage.type,
+    messageType: serializedMessage.type
   };
 
   log('constructed metadata: ', metadata);
@@ -389,8 +393,9 @@ export const parseDecryptionMaterialFromCache = (cachedMaterial: string) => {
       'Could not parse encryption material, was this encrypted with the GetLit SDK?'
     );
   }
-  let cipherAndHash = cipherAndMetadata[0];
-  let metadata = cipherAndMetadata[1];
+  
+  let cipherAndHash = cipherAndMetadata[0].replace(/\\/g, '');
+  let metadata = cipherAndMetadata[1].replace(/\\/g, '');
 
   cipherAndHash = JSON.parse(cipherAndHash);
   metadata = JSON.parse(metadata);
