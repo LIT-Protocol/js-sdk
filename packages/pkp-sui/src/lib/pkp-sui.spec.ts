@@ -1,6 +1,6 @@
 import {
   JsonRpcProvider,
-  devnetConnection,
+  testnetConnection,
   TransactionBlock,
 } from '@mysten/sui.js';
 
@@ -8,7 +8,7 @@ import * as LITCONFIG from 'lit.config.json';
 
 jest.useRealTimers();
 
-describe('PKPCosmosWallet', () => {
+describe('PKPSuiWallet', () => {
   it('should create a wallet', async () => {
     const { PKPSuiWallet } = await import('./pkp-sui');
     const wallet = new PKPSuiWallet(
@@ -16,7 +16,7 @@ describe('PKPCosmosWallet', () => {
         controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
         pkpPubKey: LITCONFIG.PKP_PUBKEY,
       },
-      new JsonRpcProvider(devnetConnection)
+      new JsonRpcProvider(testnetConnection)
     );
     const address = await wallet.getAddress();
     expect(address).toEqual(LITCONFIG.PKP_SUI_ADDRESS);
@@ -28,14 +28,14 @@ describe('PKPCosmosWallet', () => {
         controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
         pkpPubKey: LITCONFIG.PKP_PUBKEY,
       },
-      new JsonRpcProvider(devnetConnection)
+      new JsonRpcProvider(testnetConnection)
     );
     await wallet.init();
     expect(wallet.litNodeClientReady).toEqual(true);
   });
   it('should retrieve account balance', async () => {
     const { PKPSuiWallet } = await import('./pkp-sui');
-    const provider = new JsonRpcProvider(devnetConnection);
+    const provider = new JsonRpcProvider(testnetConnection);
     const wallet = new PKPSuiWallet(
       {
         controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
@@ -57,7 +57,7 @@ describe('PKPCosmosWallet', () => {
         controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
         pkpPubKey: LITCONFIG.PKP_PUBKEY,
       },
-      new JsonRpcProvider(devnetConnection)
+      new JsonRpcProvider(testnetConnection)
     );
     const address = await wallet.getAddress();
     const tx = new TransactionBlock();
