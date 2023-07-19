@@ -112,9 +112,12 @@ export class Lit {
   }
 
   /**
-   *
-   * @param opts
-   * @returns
+   * Decrypts a given resource based on the {@link DecryptProps}
+   * supports resolving from cache with {@link StorageContext} 
+   * by providing the {@link DecryptionRequest}
+   * Authentication context must be provided or cache will be checked for {@link Credential}
+   * @param {DecryptProps} opts
+   * @returns decrypted content as its {@link LitSerializable} compatible type
    */
   public async decrypt(opts: DecryptProps) {
     if (
