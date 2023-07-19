@@ -55,11 +55,8 @@ export class OtpProvider extends BaseProvider {
         this.storageProvider.setExpirableItem(
           'lit-opt-token',
           item,
-          // TODO: provide a way for user to customize the expiration time
-          // TODO: Add this logic to other providers
-          // For ETH wallet provider, actually we can create a wrapper for that, because we need it to be in the correct format { accessToken: etc...}
-          7,
-          'days'
+          _options.expirationLength ?? 24,
+          _options.expirationUnit ?? 'hours'
         );
       }
 

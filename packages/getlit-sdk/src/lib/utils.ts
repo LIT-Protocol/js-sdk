@@ -13,7 +13,7 @@ import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
 import { IRelayPKP } from '@lit-protocol/types';
 
-const version = '0.0.184';
+const version = '0.0.190';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -165,8 +165,11 @@ export function convertEncryptionMaterial(
   }
 }
 
-export function deserializeFromType(type: string, message: Uint8Array): LitSerializable {
-  switch(type) {
+export function deserializeFromType(
+  type: string,
+  message: Uint8Array
+): LitSerializable {
+  switch (type) {
     case 'string':
       log.info('message resolved to typeof string');
       return Buffer.from(message).toString('utf8');
@@ -430,6 +433,16 @@ export const getStoredAuthData = (): Array<LitAuthMethod> => {
       }
     })
     .filter(Boolean);
+
+  // -- handling special case for eth wallet
+  if (globalThis.Lit.storage?.getItem('lit-auth-signature')) {
+    const authData = {
+      authMethodType: 1,
+      accessToken: globalThis.Lit.storage?.getItem('lit-auth-signature'),
+    };
+
+    storedAuthData.push(authData);
+  }
 
   return storedAuthData;
 };

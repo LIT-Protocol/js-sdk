@@ -1400,7 +1400,9 @@ export interface OtpAuthenticateOptions {
   code: string;
 }
 
-export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
+export interface EthWalletAuthenticateOptions
+  extends BaseAuthenticateOptions,
+    ExpirableOptions {
   /**
    * Ethereum wallet address
    */
@@ -1421,15 +1423,21 @@ export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
    * When the auth signature expires
    */
   expiration?: string;
-
-  cache?: boolean;
 }
 
-export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
+export interface OtpAuthenticateOptions
+  extends BaseAuthenticateOptions,
+    ExpirableOptions {
   /**
    * User provided authentication code
    */
   code: string;
+}
 
+export interface ExpirableOptions {
   cache?: boolean;
+
+  expirationUnit?: 'seconds' | 'minutes' | 'hours' | 'days';
+
+  expirationLength?: number;
 }
