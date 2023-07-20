@@ -89,8 +89,8 @@ describe('getlitSDK', () => {
     const sig = await globalThis.Lit.sign({
       accountPublicKey: LITCONFIG.PKP_PUBKEY,
       signingMaterial: 'Hello World',
-      credentials: [],
-      authMatrial: LITCONFIG.CONTROLLER_AUTHSIG,
+      authData: [],
+      authMaterial: LITCONFIG.CONTROLLER_AUTHSIG,
     });
     expect(sig).toBeDefined();
   }, 10_000);
