@@ -1,4 +1,8 @@
-import { AccessControlConditions, AuthSig } from '@lit-protocol/types';
+import {
+  AccessControlConditions,
+  AuthMethod,
+  AuthSig,
+} from '@lit-protocol/types';
 import {
   OrUndefined,
   Types,
@@ -12,6 +16,7 @@ import {
   LitAuthMethodWithAuthData,
   DecryptProps,
   LitAuthMethod,
+  AuthKeys,
 } from './types';
 import {
   convertSigningMaterial,
@@ -21,6 +26,7 @@ import {
   parseDecryptionMaterialFromCache,
   deserializeFromType,
   getStoredAuthData,
+  getProviderMap,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
@@ -28,6 +34,11 @@ import { isBrowser } from '@lit-protocol/misc';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 import { handleGetAccounts } from './get-accounts/handle-get-accounts';
 import { withAuthData } from './middleware/with-auth-data';
+import {
+  LitAbility,
+  LitAccessControlConditionResource,
+} from '@lit-protocol/auth-helpers';
+import { BaseProvider } from '@lit-protocol/lit-auth-client';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -151,7 +162,7 @@ export class Lit {
         authMethods = getStoredAuthData();
         if (authMethods.length < 1) {
           log.info(
-            'No Authentication methods found in cache, need to reauthenticate'
+            'No Authentication methods found in cache, need to re-authenticate'
           );
           return;
         }
@@ -242,15 +253,56 @@ export class Lit {
     const toSign: LitSerialized<number[]> = convertSigningMaterial(
       options.signingMaterial
     );
-    if (options.authMatrial == undefined) {
-      throw new Error('Credentials must be provided, aborting');
+    if (options.authData == undefined) {
+      throw new Error('Auth data must be provided, aborting');
     }
+
+    // -- session sig
+    const resource = new LitAccessControlConditionResource('*');
+    const ability = LitAbility.PKPSigning;
+
+    const sessionSigsFromAuthData = await Promise.all(
+      options.authData.map(async (authData: AuthMethod) => {
+        const authProviderMap = getProviderMap();
+        const authMethodName = authProviderMap[authData.authMethodType];
+
+        // -- validate existence of auth provider
+        if (!authMethodName) {
+          throw new Error(
+            `Auth provider "${authData.authMethodType}" not found, aborting`
+          );
+        }
+
+        // --
+        const authProvider: BaseProvider = (
+          globalThis.Lit.auth as { [key: string]: any }
+        )[authMethodName];
+
+        const sessionSigs = authProvider.getSessionSigs({
+          pkpPublicKey: options.accountPublicKey,
+          authMethod: authData,
+          sessionSigsParams: {
+            chain: 'ethereum',
+            resourceAbilityRequests: [
+              {
+                resource,
+                ability,
+              },
+            ],
+          },
+        });
+
+        return sessionSigs;
+      })
+    );
+
+    console.log('sessionSigsFromAuthData:', sessionSigsFromAuthData);
 
     const sig = await this._litNodeClient?.pkpSign({
       pubKey: options.accountPublicKey,
       toSign: toSign.data,
-      authMethods: options.credentials,
-      authSig: options.authMatrial as AuthSig,
+      authMethods: options.authData,
+      authSig: options.authMaterial as AuthSig,
     });
 
     return sig;

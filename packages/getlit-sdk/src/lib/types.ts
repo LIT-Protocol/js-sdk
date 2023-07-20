@@ -91,8 +91,8 @@ export interface CreateAccountProps {}
 export interface SignProps {
   accountPublicKey: string;
   signingMaterial: LitSerializable;
-  credentials: Credential[];
-  authMatrial: Credential;
+  authData: Array<AuthMethod>;
+  authMaterial: Credential;
 }
 
 export type PKPInfo = {

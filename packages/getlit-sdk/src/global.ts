@@ -1,6 +1,6 @@
 import { Lit as LitInstance } from './lib/lit';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
-import { OrNull, Types } from './lib/types';
+import { LitAuthMethod, OrNull, Types } from './lib/types';
 import {
   GoogleProvider,
   AppleProvider,
@@ -48,6 +48,9 @@ declare global {
       otp: OrNull<OtpProvider>;
       apple: OrNull<AppleProvider>;
     };
+
+    // utils
+    getStoredAuthData: OrNull<Function>;
   };
 
   var ethereum: any;
@@ -97,4 +100,7 @@ globalThis.Lit = {
     otp: null,
     apple: null,
   },
+
+  // utils
+  getStoredAuthData: null,
 };

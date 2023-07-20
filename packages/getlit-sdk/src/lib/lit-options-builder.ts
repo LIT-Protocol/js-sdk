@@ -1,6 +1,6 @@
 import { LitNodeClientConfig } from '@lit-protocol/types';
 import { OrUndefined, Types } from './types';
-import { getProviderMap, isBrowser, log } from './utils';
+import { getProviderMap, getStoredAuthData, isBrowser, log } from './utils';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Lit } from './lit';
 import { ILitStorage, LitStorage } from '@lit-protocol/lit-storage';
@@ -98,6 +98,8 @@ export class LitOptionsBuilder {
     globalThis.Lit.ready = true;
 
     await this.startAuthClient();
+
+    this.createUtils();
   }
 
   public emit(event: string, ...args: any[]) {
@@ -166,5 +168,13 @@ export class LitOptionsBuilder {
     );
 
     log.end('startAuthClient', 'done!');
+  }
+
+  public createUtils() {
+    log.start('createUtils', 'starting...');
+
+    globalThis.Lit.getStoredAuthData = getStoredAuthData;
+
+    log.end('createUtils', 'done!');
   }
 }
