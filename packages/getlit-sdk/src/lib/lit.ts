@@ -298,6 +298,7 @@ export class Lit {
 
     console.log('sessionSigsFromAuthData:', sessionSigsFromAuthData);
 
+    // -- ok, but which session sig do we use?
     const sig = await this._litNodeClient?.pkpSign({
       pubKey: options.accountPublicKey,
       toSign: toSign.data,
