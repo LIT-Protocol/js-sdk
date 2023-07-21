@@ -1,5 +1,5 @@
 import { LitNodeClientConfig } from '@lit-protocol/types';
-import { OrUndefined, Types } from './types';
+import { OrNull, OrUndefined, Types } from './types';
 import { getProviderMap, getStoredAuthData, isBrowser, log } from './utils';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Lit } from './lit';
@@ -25,7 +25,7 @@ export class LitOptionsBuilder {
   private _nodeClientOptions: OrUndefined<LitNodeClientConfig> = undefined;
   private _nodeClient: OrUndefined<Types.NodeClient> = undefined;
 
-  private _emitter: OrUndefined<LitEmitter> = undefined;
+  private _emitter: OrNull<LitEmitter> = null;
   private _storage: OrUndefined<LitStorage> = undefined;
 
   constructor(opts?: { emitter?: LitEmitter; storage?: LitStorage }) {
@@ -34,9 +34,9 @@ export class LitOptionsBuilder {
     // -- set globalThis.Lit.emitter
     if (opts?.emitter) {
       this._emitter = opts.emitter;
-      globalThis.Lit.eventEmitter = this._emitter;
+      // todo: figure out why there is type incompatibility 
+      globalThis.Lit.eventEmitter = this._emitter as any;
     }
-
     // -- set globalThis.Lit.storage
     if (opts?.storage) {
       this._storage = opts.storage;
@@ -83,8 +83,13 @@ export class LitOptionsBuilder {
     }
 
     globalThis.Lit.nodeClient = this._nodeClient as Types.NodeClient;
-    globalThis.Lit.instance = new Lit();
+    // todo: figure out why there is type incompatibility 
+    globalThis.Lit.instance = new Lit() as any;
     log.info('"globalThis.Lit" has already been initialized!');
+    
+    if (!globalThis.Lit.instance) {
+      return;
+    }
 
     globalThis.Lit.instance.Configure = {
       ...this._authOptions,
