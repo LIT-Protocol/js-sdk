@@ -7,7 +7,8 @@ export enum VMTYPE {
 
 export enum SIGTYPE {
   BLS = 'BLS',
-  ECDSA = 'ECDSA',
+  EcdsaCAITSITHK256 = 'EcdsaCaitSithK256',
+  EcdsaCAITSITHP256 = 'EcdsaCaitSithP256'
 }
 
 /**

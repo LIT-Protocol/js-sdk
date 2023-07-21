@@ -12,3 +12,4 @@ export enum AuthMethodType {
   Google,
   GoogleJwt,
 }
+

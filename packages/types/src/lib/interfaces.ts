@@ -700,6 +700,11 @@ export interface SignWithECDSA {
   exp: number;
 }
 
+export interface CombinedECDSASignature {
+  r: string;
+  s: string;
+  recid: number;
+}
 export interface ValidateAndSignECDSA {
   accessControlConditions: AccessControlConditions;
   chain: Chain;

@@ -15,6 +15,8 @@ import {
 } from '@lit-protocol/uint8arrays';
 
 import { nacl } from '@lit-protocol/nacl';
+import { SIGTYPE } from '@lit-protocol/constants';
+import { CombinedECDSASignature } from '@lit-protocol/types';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
@@ -32,14 +34,12 @@ if (!globalThis.wasmExports) {
 }
 
 if (!globalThis.wasmECDSA) {
-  let init;
+  let init = wasmECDSA.initWasmEcdsaSdk;
   let env;
 
-  if (isBrowser()) {
-    init = wasmECDSA.initWasmEcdsaSdkBrowser;
+  if (isBrowser()) { 
     env = 'Browser';
   } else {
-    init = wasmECDSA.initWasmEcdsaSdkNodejs;
     env = 'NodeJS';
   }
 
@@ -176,16 +176,17 @@ export const verifySignature = (
  * @returns { any }
  *
  */
-export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
+export const combineEcdsaShares = (sigShares: Array<SigShare>): CombinedECDSASignature => {
   log('sigShares:', sigShares);
-
+  let type = sigShares[0].sigType;
   // the public key can come from any node - it obviously will be identical from each node
   // const publicKey = sigShares[0].publicKey;
   // const dataSigned = '0x' + sigShares[0].dataSigned;
   // filter out empty shares
-  const validShares = sigShares.reduce((acc, val) => {
+  let validShares = sigShares.reduce((acc, val) => {
     if (val.shareHex !== '') {
-      acc.push(val);
+      const newVal = _remapKeyShareForEcdsa(val);
+      acc.push(JSON.stringify(newVal));
     }
     return acc;
   }, []);
@@ -201,23 +202,33 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
     });
   }
 
-  // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
-  const R_x = validShares[0].localX;
-  const R_y = validShares[0].localY;
-
-  log('R_x:', R_x);
-  log('R_y:', R_y);
-
-  const shareHexes = validShares.map((s: any) => s.shareHex);
-  log('shareHexes:', shareHexes);
-
-  const shares = JSON.stringify(shareHexes);
-  log('shares is', shares);
-
-  let sig: string = '';
+  let sig: CombinedECDSASignature | undefined;
 
   try {
-    sig = JSON.parse(wasmECDSA.combine_signature(R_x, R_y, shares));
+    let res: string = '';
+    switch(type) {
+      case SIGTYPE.EcdsaCAITSITHK256:
+        res = wasmECDSA.combine_signature(validShares, 3);
+        sig = JSON.parse(res) as CombinedECDSASignature;
+        /*
+          r and s values of the signature should be maximum of 64 bytes
+          r and s values can have polarity as the first two bits, here we remove 
+        */
+        if (sig.r && sig.r.length > 64) {
+          while(sig.r.length > 64) { sig.r = sig.r.slice(1); }
+        }
+        if (sig.s && sig.s.length > 64) {
+          while(sig.s.length > 64) { sig.s = sig.s.slice(1); }
+        }
+      break;
+      case SIGTYPE.ECDSCAITSITHP256:
+        res = wasmECDSA.combine_signature(validShares, 4);
+        sig = JSON.parse(res);
+      break;
+      // if its another sig type, it shouldnt be resolving to this method
+      default:
+        throw new Error("Unsupported signature type present in signature shares. Please report this issue");        
+    }
   } catch (e) {
     log('Failed to combine signatures:', e);
   }
@@ -243,3 +254,15 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
 
   return sessionKeyPair;
 };
+
+
+const _remapKeyShareForEcdsa = (share: SigShare): any[] => {
+    const keys = Object.keys(share);
+    let newShare = {};
+    for (const key of keys) {
+      const new_key = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+      newShare = Object.defineProperty(newShare, new_key, Object.getOwnPropertyDescriptor(share, key));
+    }
+
+    return newShare;
+}
