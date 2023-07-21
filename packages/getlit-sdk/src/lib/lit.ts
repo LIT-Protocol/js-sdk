@@ -17,6 +17,7 @@ import {
   DecryptProps,
   LitAuthMethod,
   AuthKeys,
+  EncryptResult,
 } from './types';
 import {
   convertSigningMaterial,
@@ -34,11 +35,6 @@ import { isBrowser } from '@lit-protocol/misc';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 import { handleGetAccounts } from './get-accounts/handle-get-accounts';
 import { withAuthData } from './middleware/with-auth-data';
-import {
-  LitAbility,
-  LitAccessControlConditionResource,
-} from '@lit-protocol/auth-helpers';
-import { BaseProvider } from '@lit-protocol/lit-auth-client';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -62,8 +58,12 @@ export class Lit {
 
   // ========== Encryption ==========
 
-  // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#33d88ea255ff4866bc28724249a71a7e
-  public async encrypt(opts: EncryptProps) {
+  /**
+   * Encrypt a given content thats {@link LitSerializable} with provided access control conditions
+   * @param {EncryptProps} opts
+   * @returns {Promise<void | EncryptResult>}
+   */
+  public async encrypt(opts: EncryptProps): Promise<void | EncryptResult> {
     if (
       opts?.accessControlConditions &&
       opts.accessControlConditions.length < 1
@@ -104,12 +104,12 @@ export class Lit {
       log('Set ', storageKey, 'to decrypytion resource: ', decryptionContext);
 
       return {
-        storageKey,
-        decryptionContext,
-        encryptionResponse: {
-          cipher: encryptionKey?.ciphertext,
-          dataToEncryptHash: encryptionKey?.dataToEncryptHash,
-          accessControlConditions: opts.accessControlConditions,
+        storageContext: { storageKey },
+        decryptionContext: { decryptionMaterial: decryptionContext },
+        encryptResponse: {
+          ciphertext: encryptionKey?.ciphertext as string,
+          dataToEncryptHash: encryptionKey?.dataToEncryptHash as string,
+          accessControlConditions: opts.accessControlConditions as AccessControlConditions,
           chain: opts.chain,
         },
       };
@@ -245,64 +245,38 @@ export class Lit {
   });
 
   /**
-   *
-   * @param options
+   * Sign a message with a given pkp specified by the public key
+   * Signature responses are valid ECDSA sigatures
+   * **Note** at this time signatures are NOT deterministic
+   * @param {SignProps} options
    * @returns
    */
   public async sign(options: SignProps) {
     const toSign: LitSerialized<number[]> = convertSigningMaterial(
       options.signingMaterial
     );
-    if (options.authData == undefined) {
-      throw new Error('Auth data must be provided, aborting');
+    let authMethods: Array<AuthMethod>;
+    if (options.authData) {
+      authMethods = options.authData;
+    } else {
+      // collect cached auth methods and attempt to auth with them
+      authMethods = getStoredAuthData();
     }
 
-    // -- session sig
-    const resource = new LitAccessControlConditionResource('*');
-    const ability = LitAbility.PKPSigning;
-
-    const sessionSigsFromAuthData = await Promise.all(
-      options.authData.map(async (authData: AuthMethod) => {
-        const authProviderMap = getProviderMap();
-        const authMethodName = authProviderMap[authData.authMethodType];
-
-        // -- validate existence of auth provider
-        if (!authMethodName) {
-          throw new Error(
-            `Auth provider "${authData.authMethodType}" not found, aborting`
-          );
-        }
-
-        // --
-        const authProvider: BaseProvider = (
-          globalThis.Lit.auth as { [key: string]: any }
-        )[authMethodName];
-
-        const sessionSigs = authProvider.getSessionSigs({
-          pkpPublicKey: options.accountPublicKey,
-          authMethod: authData,
-          sessionSigsParams: {
-            chain: 'ethereum',
-            resourceAbilityRequests: [
-              {
-                resource,
-                ability,
-              },
-            ],
-          },
-        });
-
-        return sessionSigs;
-      })
-    );
-
-    console.log('sessionSigsFromAuthData:', sessionSigsFromAuthData);
-
-    // -- ok, but which session sig do we use?
+    if (!options.authMaterial && !authMethods) {
+      if (isBrowser()) {
+        let authSig = await checkAndSignAuthMessage({ chain: 'ethereum' });
+        options.authMaterial = authSig;
+      } else {
+        throw new Error(
+          'Must provide either auth methods or auth signature, aborting ...'
+        );
+      }
+    }
     const sig = await this._litNodeClient?.pkpSign({
       pubKey: options.accountPublicKey,
       toSign: toSign.data,
-      authMethods: options.authData,
+      authMethods: authMethods,
       authSig: options.authMaterial as AuthSig,
     });
 

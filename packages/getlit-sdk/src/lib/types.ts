@@ -71,6 +71,15 @@ export interface EncryptProps {
   chain: string;
 }
 
+export interface EncryptResult {
+  storageContext: StorageContext;
+  decryptionContext: DecryptionContext;
+  encryptResponse: EncryptResponse & {
+    accessControlConditions: AccessControlType;
+    chain: string;
+  };
+}
+
 export interface DecryptionContext {
   decryptionMaterial: string;
 }
