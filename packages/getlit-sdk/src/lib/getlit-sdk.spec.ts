@@ -5,11 +5,7 @@ describe('getlitSDK', () => {
   beforeAll(async () => {
     try {
       await import('../../../../dist/packages/getlit-sdk');
-      await new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          resolve();
-        }, 1000);
-      });
+
     } catch (e) {
       console.log(
         "You probably will need to run 'yarn build' before running this test.'"
