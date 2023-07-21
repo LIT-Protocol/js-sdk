@@ -77,10 +77,4 @@ import { AuthMethod } from '@lit-protocol/types';
       }
     });
   }
-
-  await new Promise<void>((resolve, reject) => {
-    globalThis?.Lit?.eventEmitter?.on('ready', () => {
-      resolve();
-    });
-  })
 })();
