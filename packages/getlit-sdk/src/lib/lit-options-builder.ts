@@ -179,7 +179,7 @@ export class LitOptionsBuilder {
     log.start('createUtils', 'starting...');
 
     globalThis.Lit.getStoredAuthData = getStoredAuthData;
-
+    
     log.end('createUtils', 'done!');
   }
 }

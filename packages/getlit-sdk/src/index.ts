@@ -7,7 +7,7 @@ import { LitStorage } from '@lit-protocol/lit-storage';
 import { AuthMethod } from '@lit-protocol/types';
 
 // initialize globally
-(async () => {
+(async (): Promise<void> => {
   log.start('global', 'initializing...');
 
   let storage;
@@ -30,10 +30,11 @@ import { AuthMethod } from '@lit-protocol/types';
 
   // -- initialize LitOptionsBuilder
   try {
+    // todo: figure out why there is type incompatibility 
     globalThis.Lit.builder = new LitOptionsBuilder({
       emitter,
       storage,
-    });
+    }) as any;
   } catch (e) {
     log.throw(`Error while attempting to initialize LitOptionsBuilder\n${e}`);
   }
@@ -76,4 +77,10 @@ import { AuthMethod } from '@lit-protocol/types';
       }
     });
   }
+
+  await new Promise<void>((resolve, reject) => {
+    globalThis?.Lit?.eventEmitter?.on('ready', () => {
+      resolve();
+    });
+  })
 })();
