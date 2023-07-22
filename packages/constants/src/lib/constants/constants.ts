@@ -570,6 +570,15 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     blockExplorerUrls: ['https://www.mintscan.io/juno'],
     vmType: 'CVM',
   },
+  optimismGoerli: {
+    name: 'Optimism Goerli',
+    symbol: 'ETH',
+    decimals: 18,
+    chainId: '420',
+    rpcUrls: ['https://optimism-goerli.publicnode.com	'],
+    blockExplorerUrls: ['https://goerli-optimism.etherscan.io/'],
+    vmType: 'EVM',
+  },
 };
 
 /**
