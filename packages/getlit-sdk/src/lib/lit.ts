@@ -198,7 +198,7 @@ export class Lit {
         ciphertext: material.cipherAndHash.ciphertext,
         dataToEncryptHash: material.cipherAndHash.dataToEncryptHash,
         chain: material.metadata.chain,
-        sessionSigs: opts.authMaterial as SessionSigs
+        authSig: opts.authMaterial as AuthSig
       });
 
       return deserializeFromType(
