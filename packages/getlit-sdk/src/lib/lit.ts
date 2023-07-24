@@ -2,6 +2,9 @@ import {
   AccessControlConditions,
   AuthMethod,
   AuthSig,
+  EncryptRequestBase,
+  SessionSig,
+  SessionSigs,
 } from '@lit-protocol/types';
 import {
   OrUndefined,
@@ -18,6 +21,7 @@ import {
   LitAuthMethod,
   AuthKeys,
   EncryptResult,
+  AccessControlType,
 } from './types';
 import {
   convertSigningMaterial,
@@ -28,6 +32,8 @@ import {
   deserializeFromType,
   getStoredAuthData,
   getProviderMap,
+  resolveACCType,
+  resolveACC,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
@@ -35,6 +41,12 @@ import { isBrowser } from '@lit-protocol/misc';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 import { handleGetAccounts } from './get-accounts/handle-get-accounts';
 import { withAuthData } from './middleware/with-auth-data';
+import {
+  LitAbility,
+  LitAccessControlConditionResource,
+} from '@lit-protocol/auth-helpers';
+import { BaseProvider } from '@lit-protocol/lit-auth-client';
+import { AuthMethod } from '../../../../dist/packages/types/src/lib/interfaces';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -72,6 +84,9 @@ export class Lit {
         'Access Control Conditions are undefined, no conditions will be defined'
       );
     }
+    let conditions = resolveACCType(
+      opts?.accessControlConditions as AccessControlType
+    );
 
     try {
       let serializedEncryptionMaterial = convertEncryptionMaterial(
@@ -79,15 +94,15 @@ export class Lit {
       );
       let encryptionMaterialWithMetadata = prepareEncryptionMetadata(
         opts,
-        serializedEncryptionMaterial
+        serializedEncryptionMaterial,
+        conditions as Partial<EncryptRequestBase>
       );
 
       let encryptionKey = await this._litNodeClient
         ?.encrypt({
           dataToEncrypt: serializedEncryptionMaterial.data,
           chain: opts.chain,
-          accessControlConditions:
-            opts.accessControlConditions as AccessControlConditions,
+          ...conditions,
         })
         .catch((e) => {
           log.error('Unable to encrypt content ', opts.encryptMaterial, e);
@@ -109,7 +124,8 @@ export class Lit {
         encryptResponse: {
           ciphertext: encryptionKey?.ciphertext as string,
           dataToEncryptHash: encryptionKey?.dataToEncryptHash as string,
-          accessControlConditions: opts.accessControlConditions as AccessControlConditions,
+          accessControlConditions:
+            opts.accessControlConditions as AccessControlConditions,
           chain: opts.chain,
         },
       };
@@ -155,10 +171,10 @@ export class Lit {
         );
       }
       let authMaterial = opts?.authMaterial;
-      let authMethodProvider = opts?.authMaterial;
+      let authMethodProvider = opts?.provider;
       let authMethods: Array<LitAuthMethod> = [];
       // -- when auth method provider ('google', 'discord', etc.) is provided
-      if (!authMaterial && authMethodProvider) {
+      if (!authMaterial && authMethodProvider?.provider === "ethwallet") {
         authMethods = getStoredAuthData();
         if (authMethods.length < 1) {
           log.info(
@@ -166,7 +182,7 @@ export class Lit {
           );
           return;
         }
-        // todo: auth the material found in cache if session isnt already cached.
+        // todo; resolve pkp info and generate session signatures for access control
       } else if (!authMaterial && !authMethodProvider) {
         if (isBrowser()) {
           authMaterial = await checkAndSignAuthMessage({
@@ -177,13 +193,13 @@ export class Lit {
       opts.authMaterial = authMaterial;
       log('resolved metadata for material: ', material.metadata);
       log('typeof authMateiral ', typeof opts.authMaterial);
-
+      let acc = resolveACCType(material.metadata.accessControlConditions);
       let res = await this._litNodeClient?.decrypt({
-        accessControlConditions: material.metadata.accessControlConditions,
+        ...acc,
         ciphertext: material.cipherAndHash.ciphertext,
         dataToEncryptHash: material.cipherAndHash.dataToEncryptHash,
         chain: material.metadata.chain,
-        authSig: opts.authMaterial,
+        sessionSigs: opts.authMaterial as SessionSigs
       });
 
       return deserializeFromType(
@@ -255,15 +271,20 @@ export class Lit {
     const toSign: LitSerialized<number[]> = convertSigningMaterial(
       options.signingMaterial
     );
-    let authMethods: Array<AuthMethod>;
-    if (options.authData) {
-      authMethods = options.authData;
-    } else {
+    let authMethods: Array<AuthMethod> = [];
+    if (options.provider) {
       // collect cached auth methods and attempt to auth with them
       authMethods = getStoredAuthData();
+      const providerMap = getProviderMap();
+      for (const authMethod of authMethods) {
+        if (providerMap[authMethod.authMethodType] === options.provider.provider) {
+          authMethods = [authMethod];
+          break;
+        }
+      }
     }
 
-    if (!options.authMaterial && !authMethods) {
+    if (!options.authMaterial && !options.provider) {
       if (isBrowser()) {
         let authSig = await checkAndSignAuthMessage({ chain: 'ethereum' });
         options.authMaterial = authSig;

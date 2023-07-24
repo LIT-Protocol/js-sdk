@@ -1,6 +1,5 @@
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import * as LITCONFIG from '../../../../lit.config.json';
-import { StorageContext } from '../../../../dist/packages/getlit-sdk/src/lib/types';
 
 describe('getlitSDK', () => {
   beforeAll(async () => {

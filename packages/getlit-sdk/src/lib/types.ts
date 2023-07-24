@@ -9,7 +9,7 @@ import {
   LitNodeClientConfig,
   LitRelayConfig,
   OtpProviderOptions,
-  SessionSig,
+  SessionSigs,
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
@@ -40,7 +40,7 @@ export namespace Types {
   export type LitOptions = ContractOptions & AuthOptions & NodeOptions;
 }
 
-export type Credential = AuthSig | SessionSig;
+export type Credential = AuthSig | SessionSigs;
 
 /*
   Lit Serializable expresses any type that is indexable numerically, an array of numbers, 
@@ -100,7 +100,7 @@ export interface CreateAccountProps {}
 export interface SignProps {
   accountPublicKey: string;
   signingMaterial: LitSerializable;
-  authData: Array<AuthMethod>;
+  provider?: LitAuthMethodWithProvider;
   authMaterial: Credential;
 }
 

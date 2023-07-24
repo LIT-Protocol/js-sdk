@@ -1,5 +1,6 @@
 import { version as SDKVersion } from '@lit-protocol/constants';
 import {
+  AccessControlType,
   AuthKeys,
   EncryptProps,
   LitAuthMethod,
@@ -11,7 +12,13 @@ import { p2pkh } from 'bitcoinjs-lib/src/payments/p2pkh';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
-import { IRelayPKP } from '@lit-protocol/types';
+import {
+  EncryptRequestBase,
+  IRelayPKP,
+  SolRpcConditions,
+  EvmContractConditions,
+  AccessControlConditions,
+} from '@lit-protocol/types';
 
 const version = '0.0.224';
 const PREFIX = 'GetLit SDK';
@@ -361,7 +368,8 @@ export const relayResToPKPInfo = (response: any): PKPInfo => {
 
 export const prepareEncryptionMetadata = (
   opts: EncryptProps,
-  serializedMessage: LitSerialized<Uint8Array>
+  serializedMessage: LitSerialized<Uint8Array>,
+  acc: Partial<EncryptRequestBase>
 ) => {
   let netwokrInfo = globalThis.Lit.nodeClient?.config.litNetwork;
   globalThis.Lit.nodeClient?.connectedNodes;
@@ -370,9 +378,9 @@ export const prepareEncryptionMetadata = (
   let metadata = {
     network: netwokrInfo,
     sdkVersion,
-    nodeVersion: '1.0.0', // TODO: network request for node version, or parse header from hand shake requests.,
+    nodeVersion: '1.0.0', // TODO: network request for node version, or parse header from handshake
     chain: opts.chain,
-    accessControlConditions: opts.accessControlConditions,
+    ...acc,
     messageType: serializedMessage.type,
   };
 
@@ -380,8 +388,25 @@ export const prepareEncryptionMetadata = (
   return metadata;
 };
 
+export const resolveACCType = (
+  acc: AccessControlType
+): Partial<EncryptRequestBase> | undefined => {
+  let condition = acc[0];
+  let keys = Object.keys(condition);
+  if (keys.includes('pdaKey')) {
+    return { solRpcConditions: acc as SolRpcConditions };
+  } else if (keys.includes('functionAbi')) {
+    return { evmContractConditions: acc as EvmContractConditions };
+  } else if (keys.includes('path')) {
+    return { unifiedAccessControlConditions: acc };
+  } else if (keys.includes('standardContractType')) {
+    return { accessControlConditions: acc as AccessControlConditions };
+  }
+
+  return;
+};
+
 export const parseDecryptionMaterialFromCache = (cachedMaterial: string) => {
-  //cachedMaterial = cachedMaterial.replace(/\\/g, '');
   const cipherAndMetadata = cachedMaterial.split('|');
   if (cipherAndMetadata.length !== 2) {
     throw new Error(
