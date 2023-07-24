@@ -1,6 +1,5 @@
 import {
   AccessControlConditions,
-  AuthMethod,
   AuthSig,
   EncryptRequestBase,
   SessionSig,
