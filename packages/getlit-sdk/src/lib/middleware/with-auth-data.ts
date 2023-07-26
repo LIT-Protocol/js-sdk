@@ -1,5 +1,10 @@
-import { LitAuthMethodWithAuthData } from '../types';
+import { LitAuthMethod, LitAuthMethodWithAuthData } from '../types';
 import { getStoredAuthData, isBrowser, log } from '../utils';
+
+export interface MiddlewareOptions {
+  authData?: Array<LitAuthMethod>;
+  cache?: boolean;
+}
 
 /**
  * Middleware that provides the auth data to the function it wraps.
@@ -8,25 +13,29 @@ import { getStoredAuthData, isBrowser, log } from '../utils';
  * @param fn
  */
 export function withAuthData(fn: Function) {
-  return async function (opts?: LitAuthMethodWithAuthData): Promise<any> {
-    if (!opts) {
+  return async function (opts?: MiddlewareOptions): Promise<any> {
+    let authData: Array<LitAuthMethod> | undefined;
+    let cache: boolean = false; // Set cache to false by default
+
+    if (opts) {
+      cache = opts.cache || false; // extract cache from options if present
+      authData = opts.authData;
+    }
+
+    if (!authData) {
       if (isBrowser()) {
         log.info('getting auth data from browser');
-        const authData = getStoredAuthData();
+        authData = getStoredAuthData();
         log.info('auth data from browser', authData);
 
         if (authData.length <= 0) {
           throw new Error('no auth data provided in browser');
         }
-
-        return await fn(authData);
       } else {
         throw new Error('no auth data provided in nodejs');
       }
-    } else if (!opts.authData) {
-      throw new Error('no auth data provided');
-    } else {
-      return await fn(opts.authData);
     }
+
+    return await fn(authData, cache);
   };
 }

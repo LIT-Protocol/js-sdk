@@ -1,6 +1,5 @@
 import {
   AuthMethod,
-  AuthenticateOptions,
   BaseProviderOptions,
   GoogleAuthenticateOptions,
   OAuthProviderOptions,
@@ -17,7 +16,10 @@ import {
 import { utils } from 'ethers';
 
 import { BaseProvider } from './BaseProvider';
-
+// import {
+//   LitAbility,
+//   LitAccessControlConditionResource,
+// } from '@lit-protocol/auth-helpers';
 export default class GoogleProvider extends BaseProvider {
   /**
    * The redirect URI that Lit's login server should send the user back to
@@ -55,8 +57,7 @@ export default class GoogleProvider extends BaseProvider {
     options?: T
   ): Promise<AuthMethod> {
     // Check if it exists in cache
-    let storageItem =
-      this.storageProvider.getExpirableItem('lit-google-token');
+    let storageItem = this.storageProvider.getExpirableItem('lit-google-token');
 
     if (storageItem) {
       clearParamsFromURL();
@@ -120,6 +121,28 @@ export default class GoogleProvider extends BaseProvider {
         options.expirationLength ?? 24,
         options.expirationUnit ?? 'hours'
       );
+
+      // const litResource = new LitAccessControlConditionResource('*');
+      // const litAbility = LitAbility.PKPSigning;
+
+      // const pkps = await this.fetchPKPsThroughRelayer(authMethod);
+
+      // console.log('Getting session sigs');
+      // const sessionSigs = await this.getSessionSigs({
+      //   pkpPublicKey: pkps[0].publicKey,
+      //   authMethod,
+      //   sessionSigsParams: {
+      //     chain: 'ethereum',
+      //     resourceAbilityRequests: [
+      //       {
+      //         resource: litResource,
+      //         ability: litAbility,
+      //       },
+      //     ],
+      //   },
+      // });
+
+      // console.log('sessionSigs:', sessionSigs);
     }
 
     return authMethod;

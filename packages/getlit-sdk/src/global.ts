@@ -37,6 +37,7 @@ declare global {
     decrypt: LitInstance['decrypt'] | Function;
     createAccount: LitInstance['createAccount'] | Function;
     getAccounts: LitInstance['getAccounts'] | Function;
+    getAccountSession: LitInstance['getAccountSession'] | Function;
     sign: LitInstance['sign'] | Function;
 
     // auths
@@ -85,6 +86,9 @@ globalThis.Lit = {
     console.log('not initialized');
   },
   getAccounts: () => {
+    console.log('not initialized');
+  },
+  getAccountSession: () => {
     console.log('not initialized');
   },
   sign: () => {

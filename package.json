@@ -100,6 +100,7 @@
     "esbuild-plugin-polyfill-node": "^0.3.0",
     "ethers": "^5.7.1",
     "etherscan-api": "^10.2.0",
+    "fetch-blob": "^4.0.0",
     "find-config": "^1.0.0",
     "g": "^2.0.1",
     "ink": "^4.2.0",

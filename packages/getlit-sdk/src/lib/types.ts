@@ -66,9 +66,9 @@ export type AccessControlType =
   | UnifiedAccessControlConditions;
 
 export interface EncryptProps {
-  encryptMaterial: LitSerializable;
+  content: LitSerializable;
   accessControlConditions?: AccessControlType;
-  chain: string;
+  chain?: string;
 }
 
 export interface EncryptResult {
@@ -99,7 +99,7 @@ export interface CreateAccountProps {}
 
 export interface SignProps {
   accountPublicKey: string;
-  signingMaterial: LitSerializable;
+  content: LitSerializable;
   provider?: LitAuthMethodWithProvider;
   authMaterial: Credential;
 }

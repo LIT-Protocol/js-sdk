@@ -33,6 +33,9 @@ import {
   getProviderMap,
   resolveACCType,
   resolveACC,
+  isNode,
+  getSingleAuthDataByType,
+  getContentMaterial,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
@@ -63,6 +66,7 @@ export class Lit {
     globalThis.Lit.sign = this.sign.bind(this);
     globalThis.Lit.createAccount = this.createAccount.bind(this);
     globalThis.Lit.getAccounts = this.getAccounts.bind(this);
+    globalThis.Lit.getAccountSession = this.getAccountSession.bind(this);
 
     // util bindings
   }
@@ -74,64 +78,83 @@ export class Lit {
    * @param {EncryptProps} opts
    * @returns {Promise<void | EncryptResult>}
    */
-  public async encrypt(opts: EncryptProps): Promise<void | EncryptResult> {
+  public async encrypt(opts: EncryptProps): Promise<EncryptResult> {
     if (
-      opts?.accessControlConditions &&
+      !opts.accessControlConditions ||
       opts.accessControlConditions.length < 1
     ) {
-      log.error(
-        'Access Control Conditions are undefined, no conditions will be defined'
+      throw new Error(
+        'Access Control Conditions are undefined or empty, at least one condition should be defined'
       );
     }
-    let conditions = resolveACCType(
-      opts?.accessControlConditions as AccessControlType
-    );
+
+    let conditions: Partial<EncryptRequestBase>;
 
     try {
-      let serializedEncryptionMaterial = convertEncryptionMaterial(
-        opts.encryptMaterial
-      );
-      let encryptionMaterialWithMetadata = prepareEncryptionMetadata(
+      const result = resolveACCType(opts.accessControlConditions);
+
+      if (!result) {
+        throw new Error('Invalid Access Control Conditions');
+      }
+
+      conditions = result;
+    } catch (e) {
+      throw new Error('Invalid Access Control Conditions: ' + e);
+    }
+
+    if (!this._litNodeClient) {
+      throw new Error('_litNodeClient is undefined');
+    }
+
+    let encryptionMaterial;
+    let encryptionMaterialWithMetadata;
+
+    try {
+      encryptionMaterial = await getContentMaterial(opts.content);
+
+      console.log('encryptionMaterial:', encryptionMaterial);
+
+      encryptionMaterialWithMetadata = prepareEncryptionMetadata(
         opts,
-        serializedEncryptionMaterial,
+        encryptionMaterial,
         conditions as Partial<EncryptRequestBase>
       );
-
-      let encryptionKey = await this._litNodeClient
-        ?.encrypt({
-          dataToEncrypt: serializedEncryptionMaterial.data,
-          chain: opts.chain,
-          ...conditions,
-        })
-        .catch((e) => {
-          log.error('Unable to encrypt content ', opts.encryptMaterial, e);
-          throw e;
-        });
-
-      let serializedEncryptionKey = JSON.stringify(encryptionKey);
-      let serializedMetadata = JSON.stringify(encryptionMaterialWithMetadata);
-
-      const decryptionContext = `${serializedEncryptionKey}|${serializedMetadata}`;
-      let storageKey: string = `${encryptionKey?.ciphertext}:${encryptionKey?.dataToEncryptHash}`;
-
-      globalThis.Lit.storage?.setItem(storageKey, decryptionContext);
-      log('Set ', storageKey, 'to decrypytion resource: ', decryptionContext);
-
-      return {
-        storageContext: { storageKey },
-        decryptionContext: { decryptionMaterial: decryptionContext },
-        encryptResponse: {
-          ciphertext: encryptionKey?.ciphertext as string,
-          dataToEncryptHash: encryptionKey?.dataToEncryptHash as string,
-          accessControlConditions:
-            opts.accessControlConditions as AccessControlConditions,
-          chain: opts.chain,
-        },
-      };
     } catch (e) {
-      log.error('Error while performing decryption operations', e);
-      return;
+      throw new Error(
+        'Error during serialization or metadata preparation: ' + e
+      );
     }
+
+    let encryptionKey;
+    try {
+      encryptionKey = await this._litNodeClient.encrypt({
+        dataToEncrypt: encryptionMaterial.data,
+        chain: opts.chain ?? '1',
+        ...conditions,
+      });
+    } catch (e) {
+      throw new Error('Unable to encrypt content: ' + e);
+    }
+
+    let serializedEncryptionKey = JSON.stringify(encryptionKey);
+    let serializedMetadata = JSON.stringify(encryptionMaterialWithMetadata);
+
+    const decryptionContext = `${serializedEncryptionKey}|${serializedMetadata}`;
+    let storageKey: string = `${encryptionKey?.ciphertext}:${encryptionKey?.dataToEncryptHash}`;
+
+    globalThis.Lit.storage?.setItem(storageKey, decryptionContext);
+    log('Set ', storageKey, 'to decryption resource: ', decryptionContext);
+
+    return {
+      storageContext: { storageKey },
+      decryptionContext: { decryptionMaterial: decryptionContext },
+      encryptResponse: {
+        ciphertext: encryptionKey?.ciphertext as string,
+        dataToEncryptHash: encryptionKey?.dataToEncryptHash as string,
+        accessControlConditions: opts.accessControlConditions,
+        chain: opts.chain ?? '1',
+      },
+    };
   }
 
   /**
@@ -173,7 +196,7 @@ export class Lit {
       let authMethodProvider = opts?.provider;
       let authMethods: Array<LitAuthMethod> = [];
       // -- when auth method provider ('google', 'discord', etc.) is provided
-      if (!authMaterial && authMethodProvider?.provider === "ethwallet") {
+      if (!authMaterial && authMethodProvider?.provider === 'ethwallet') {
         authMethods = getStoredAuthData();
         if (authMethods.length < 1) {
           log.info(
@@ -198,7 +221,7 @@ export class Lit {
         ciphertext: material.cipherAndHash.ciphertext,
         dataToEncryptHash: material.cipherAndHash.dataToEncryptHash,
         chain: material.metadata.chain,
-        authSig: opts.authMaterial as AuthSig
+        authSig: opts.authMaterial as AuthSig,
       });
 
       return deserializeFromType(
@@ -248,16 +271,135 @@ export class Lit {
    * Get all accounts associated with the given auth method(s).
    * @param {LitAuthMethod[]} authData
    */
-  public getAccounts = withAuthData(async (authData: Array<LitAuthMethod>) => {
-    log('getting accounts...');
+  public getAccounts = withAuthData(
+    async (authDataArray: Array<LitAuthMethod>, cache: boolean = false) => {
+      log.start('getAccounts');
 
-    try {
-      return await handleGetAccounts(authData);
-    } catch (e) {
-      log.error('Error while getting accounts', e);
-      throw e;
+      // forming a string of all the auth method types eg. '1-6'
+      const authMethodTypes = authDataArray
+        .map((authData) => {
+          return authData.authMethodType;
+        })
+        .join('-');
+
+      log('authMethodTypes', authMethodTypes);
+
+      const storageKey = `lit-authed-${authMethodTypes}-accounts`;
+      log('storageKey', storageKey);
+
+      try {
+        let accounts;
+
+        // -- get accounts from cache
+        try {
+          accounts = JSON.parse(
+            globalThis.Lit.storage?.getExpirableItem(storageKey) as string
+          );
+        } catch (e) {
+          log('error parsing cached accounts', e);
+        }
+
+        log('accounts:', accounts);
+
+        if (!accounts) {
+          log('no cached accounts found, fetching from server');
+          accounts = await handleGetAccounts(authDataArray);
+        }
+
+        // -- save to cache
+        if (cache) {
+          log('caching accounts');
+          // -- save to cache
+          // cache it to local storage
+          globalThis.Lit.storage?.setExpirableItem(
+            storageKey,
+            JSON.stringify(accounts),
+            5,
+            'minutes'
+          );
+        }
+
+        log.end('getAccounts');
+        return accounts;
+      } catch (e) {
+        log.error('Error while getting accounts', e);
+        log.end('getAccounts');
+        throw e;
+      }
     }
-  });
+  );
+
+  /**
+   * Get the session sigs for the given account
+   * NOTE: this function can only be called if user cached their auth data
+   */
+  public async getAccountSession(
+    accountPublicKey: string,
+    opts?: {
+      authData?: LitAuthMethod;
+      chain?: string;
+    }
+  ) {
+    log.start('getAccountSession');
+
+    // we should be able to look up which auth method provider was used to authenticate the user by public key
+    const authMethodProvider = 'google';
+
+    console.log('accountPublicKey', accountPublicKey);
+
+    // if accountPublicKey doesn't start with '0x' add it
+    if (!accountPublicKey.startsWith('0x')) {
+      accountPublicKey = '0x' + accountPublicKey;
+    }
+
+    let authData: LitAuthMethod | undefined;
+
+    // -- validate
+    if (!opts?.authData) {
+      log.info('No auth data provided, checking cache for auth data');
+
+      try {
+        authData = getSingleAuthDataByType(authMethodProvider);
+      } catch (e) {
+        log.error('No auth data found in cache, please re-authenticate');
+        throw e;
+      }
+    }
+
+    if (!authData) {
+      log.error('No auth data found in cache, please re-authenticate');
+      throw new Error('No auth data found in cache, please re-authenticate');
+    }
+
+    console.log('authData', authData);
+
+    // -- execute
+    const resource = new LitAccessControlConditionResource('*');
+    const ability = LitAbility.PKPSigning;
+    const provider = globalThis.Lit.auth[authMethodProvider];
+
+    log.info(`Getting session sigs for "${accountPublicKey}"...`);
+
+    const sessionSigs = await provider?.getSessionSigs({
+      pkpPublicKey: accountPublicKey,
+      authMethod: authData,
+      sessionSigsParams: {
+        chain: 'ethereum', // default EVM chain unless other chain
+        resourceAbilityRequests: [
+          {
+            resource,
+            ability,
+          },
+        ],
+      },
+    });
+
+    console.log('sessionSigs: ', sessionSigs);
+
+    log.end('getAccountSession');
+
+    return sessionSigs;
+  }
 
   /**
    * Sign a message with a given pkp specified by the public key
@@ -267,32 +409,37 @@ export class Lit {
    * @returns
    */
   public async sign(options: SignProps) {
-    const toSign: LitSerialized<number[]> = convertSigningMaterial(
-      options.signingMaterial
-    );
+    // -- validate
+    if (!options.authMaterial && !options.provider) {
+      if (isNode()) {
+        throw new Error(
+          'Must provide either auth methods or auth signature, aborting ...'
+        );
+      }
+      let authSig = await checkAndSignAuthMessage({ chain: 'ethereum' });
+      options.authMaterial = authSig;
+    }
+
     let authMethods: Array<AuthMethod> = [];
+
     if (options.provider) {
       // collect cached auth methods and attempt to auth with them
       authMethods = getStoredAuthData();
       const providerMap = getProviderMap();
       for (const authMethod of authMethods) {
-        if (providerMap[authMethod.authMethodType] === options.provider.provider) {
+        if (
+          providerMap[authMethod.authMethodType] === options.provider.provider
+        ) {
           authMethods = [authMethod];
           break;
         }
       }
     }
 
-    if (!options.authMaterial && !options.provider) {
-      if (isBrowser()) {
-        let authSig = await checkAndSignAuthMessage({ chain: 'ethereum' });
-        options.authMaterial = authSig;
-      } else {
-        throw new Error(
-          'Must provide either auth methods or auth signature, aborting ...'
-        );
-      }
-    }
+    const toSign: LitSerialized<number[]> = convertSigningMaterial(
+      options.content
+    );
+
     const sig = await this._litNodeClient?.pkpSign({
       pubKey: options.accountPublicKey,
       toSign: toSign.data,

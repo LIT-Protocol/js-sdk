@@ -20,7 +20,7 @@ import {
   AccessControlConditions,
 } from '@lit-protocol/types';
 
-const version = '0.0.224';
+const version = '0.0.254';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -170,6 +170,40 @@ export function convertEncryptionMaterial(
       type: typeof material,
     };
   }
+}
+
+export async function getContentMaterial(input: any) {
+  let result: Uint8Array | null = null;
+
+  if (typeof input === 'string') {
+    result = new TextEncoder().encode(input);
+  } else if (input instanceof ArrayBuffer) {
+    result = new Uint8Array(input);
+  } else if (input instanceof Blob) {
+    const arrayBuffer = await input.arrayBuffer();
+    result = new Uint8Array(arrayBuffer);
+  } else if (
+    input instanceof Int8Array ||
+    input instanceof Uint8Array ||
+    input instanceof Uint8ClampedArray ||
+    input instanceof Int16Array ||
+    input instanceof Uint16Array ||
+    input instanceof Int32Array ||
+    input instanceof Uint32Array ||
+    input instanceof Float32Array ||
+    input instanceof Float64Array
+  ) {
+    result = new Uint8Array(input.buffer);
+  }
+
+  if (result === null) {
+    throw new Error(`Unsupported data type: ${typeof input}`);
+  }
+
+  return {
+    data: result,
+    type: input.constructor.name,
+  };
 }
 
 export function deserializeFromType(
@@ -470,4 +504,32 @@ export const getStoredAuthData = (): Array<LitAuthMethod> => {
   }
 
   return storedAuthData;
+};
+
+// "authType" => google, discord, opt, webauthn, ethwallet
+export const getSingleAuthDataByType = (authType: AuthKeys): LitAuthMethod => {
+  console.log('authType:', authType);
+
+  const storageKey =
+    authType === 'ethwallet' ? 'lit-auth-signature' : `lit-${authType}-token`;
+
+  console.log('storageKey:', storageKey);
+
+  let singleAuthData = globalThis.Lit.storage?.getExpirableItem(storageKey);
+  console.log('singleAuthData:', singleAuthData);
+
+  if (!singleAuthData) {
+    throw new Error(`No auth data found for "${authType}"`);
+  }
+
+  try {
+    singleAuthData = JSON.parse(singleAuthData);
+    console.log('singleAuthData:', singleAuthData);
+  } catch (e) {
+    throw new Error(`Failed to parse auth data for "${authType}"`);
+  }
+
+  console.log('singleAuthData:', singleAuthData);
+
+  return singleAuthData as unknown as LitAuthMethod;
 };

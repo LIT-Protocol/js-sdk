@@ -86,7 +86,7 @@ describe('getlitSDK', () => {
   it('Should sign message', async () => {
     const sig = await globalThis.Lit.sign({
       accountPublicKey: LITCONFIG.PKP_PUBKEY,
-      signingMaterial: 'Hello World',
+      content: 'Hello World',
       authMaterial: LITCONFIG.CONTROLLER_AUTHSIG,
     });
     expect(sig).toBeDefined();
@@ -110,21 +110,27 @@ describe('getlitSDK', () => {
         },
       ],
       chain: 'ethereum',
-      encryptMaterial: message
+      content: message,
     });
 
     expect(enctyptedContent).toBeDefined();
-    expect(globalThis.Lit?.storage?.getItem(enctyptedContent.storageKey)).toBeDefined();
     expect(
-      globalThis.Lit?.storage?.getItem(enctyptedContent.storageContext.storageKey)
+      globalThis.Lit?.storage?.getItem(enctyptedContent.storageKey)
+    ).toBeDefined();
+    expect(
+      globalThis.Lit?.storage?.getItem(
+        enctyptedContent.storageContext.storageKey
+      )
     ).toBeDefined();
 
     const res = await globalThis.Lit.decrypt({
-      storageContext: {storageKey: enctyptedContent.storageContext.storageKey},
+      storageContext: {
+        storageKey: enctyptedContent.storageContext.storageKey,
+      },
       authMaterial: LITCONFIG.CONTROLLER_AUTHSIG,
     });
 
-    expect(typeof res).toBe("string");
+    expect(typeof res).toBe('string');
     expect(res).toEqual(message);
   }, 100_000);
 });
