@@ -463,6 +463,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  optimismGoerli: {
+    contractAddress: null,
+    chainId: 420,
+    name: 'Optimism Goerli',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://optimism-goerli.publicnode.com'],
+    blockExplorerUrls: ['https://goerli-optimism.etherscan.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
@@ -569,15 +580,6 @@ export const LIT_COSMOS_CHAINS: LITChain<LITCosmosChain> = {
     rpcUrls: ['https://rest.cosmos.directory/juno'],
     blockExplorerUrls: ['https://www.mintscan.io/juno'],
     vmType: 'CVM',
-  },
-  optimismGoerli: {
-    name: 'Optimism Goerli',
-    symbol: 'ETH',
-    decimals: 18,
-    chainId: '420',
-    rpcUrls: ['https://optimism-goerli.publicnode.com	'],
-    blockExplorerUrls: ['https://goerli-optimism.etherscan.io/'],
-    vmType: 'EVM',
   },
 };
 
