@@ -361,6 +361,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           pubKey: this.uncompressedPubKey,
           authSig: this.controllerAuthSig as AuthSig,
           authMethods: [],
+          hdKeyRequest: {keyId: ""}
         });
       } else if (this.controllerSessionSigs) {
         sig = await this.litNodeClient.pkpSign({
@@ -368,6 +369,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           pubKey: this.uncompressedPubKey,
           authMethods: this.controllerAuthMethods ?? [],
           sessionSigs: this.controllerSessionSigs,
+          hdKeyRequest: {keyId: ""}
         });
       }
 

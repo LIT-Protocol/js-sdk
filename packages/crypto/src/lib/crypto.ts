@@ -207,7 +207,7 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): CombinedECDSASig
   try {
     let res: string = '';
     switch(type) {
-      case SIGTYPE.EcdsaCAITSITHK256:
+      case SIGTYPE.EcdsaCaitSith:
         res = wasmECDSA.combine_signature(validShares, 3);
         sig = JSON.parse(res) as CombinedECDSASignature;
         /*

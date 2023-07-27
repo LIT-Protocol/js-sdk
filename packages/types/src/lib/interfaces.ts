@@ -272,6 +272,7 @@ export interface BaseJsonPkpSignRequest {
   pubKey: string;
   // auth methods to resolve
   authMethods?: Array<Object>;
+  hdKeyRequest: { keyId: string };
 }
 
 export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
@@ -625,10 +626,9 @@ export interface NodeClientErrorV1 {
 
 export interface SigShare {
   sigType: any;
-  shareHex: any;
+  signatureShare: any;
   shareIndex: any;
-  localX: any;
-  localY: any;
+  bigR: string;
   publicKey: any;
   dataSigned: any;
   siweMessage?: string;
@@ -1413,4 +1413,22 @@ export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
    * User provided authentication code
    */
   code: string;
+}
+
+export interface Signature {
+  r: string;
+
+  s: string;
+  _vs: string,
+
+  recoveryParam: number;
+  v: number;
+
+  yParityAndS: string
+  compact: string;
+}
+
+export interface ClaimKeyResponse {
+  signatures: Signature[],
+  derivedKeyId: string
 }
