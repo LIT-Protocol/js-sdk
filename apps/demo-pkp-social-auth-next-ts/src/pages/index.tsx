@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { Inter } from 'next/font/google';
 import { useCallback, useEffect, useState } from 'react';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { LitNodeClient, disconnectWeb3 } from '@lit-protocol/lit-node-client';
 import {
   LitAuthClient,
   BaseProvider,
@@ -17,15 +17,11 @@ import { ProviderType } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import { useRouter } from 'next/router';
 import { useConnect, useAccount, useDisconnect, Connector } from 'wagmi';
-import {newSessionCapabilityObject, LitAccessControlConditionResource, LitAbility} from '@lit-protocol/auth-helpers';
+import { LitAccessControlConditionResource, LitActionResource, LitAbility} from '@lit-protocol/auth-helpers';
+import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// Local dev only: When using npm link, need to update encryption pkg to handle possible ipfs client init error
-// let ipfsClient = null;
-// try {
-//   ipfsClient = require("ipfs-http-client");
-// } catch {}
 
 enum Views {
   SIGN_IN = 'sign_in',
@@ -196,7 +192,7 @@ export default function Dashboard() {
       // Authenticate with a WebAuthn credential and create session sigs with authentication data
       setView(Views.CREATING_SESSION);
       
-      const litResource = new LitAccessControlConditionResource('*');
+      const litResource = new LitActionResource('*');
       const sessionSigs = await provider.getSessionSigs({
         pkpPublicKey: currentPKP.publicKey,
         authMethod,
@@ -305,7 +301,7 @@ export default function Dashboard() {
     setView(Views.CREATING_SESSION);
 
     try {
-      const litResource = new LitAccessControlConditionResource('*');
+      const litResource = new LitActionResource('*');
       // Get session signatures
       const provider = litAuthClient.getProvider(currentProviderType);
       const sessionSigs = await provider.getSessionSigs({
@@ -314,13 +310,15 @@ export default function Dashboard() {
         sessionSigsParams: {
           chain: 'ethereum',
           resourceAbilityRequests: [{
-              resource: litResource,
-              ability: LitAbility.PKPSigning
+            resource: litResource,
+            ability: LitAbility.PKPSigning
           }], 
         },
       });
       setCurrentPKP(pkp);
       setSessionSigs(sessionSigs);
+      console.log('authMethod', authMethod);
+      console.log('sessionSigs', sessionSigs);
 
       setView(Views.SESSION_CREATED);
     } catch (err) {
@@ -335,35 +333,31 @@ export default function Dashboard() {
    */
   async function signMessageWithPKP() {
     try {
-      const toSign = ethers.utils.arrayify(ethers.utils.hashMessage(message));
-      const litActionCode = `
-        const go = async () => {
-          // this requests a signature share from the Lit Node
-          // the signature share will be automatically returned in the response from the node
-          // and combined into a full signature by the LitJsSdk for you to use on the client
-          // all the params (toSign, publicKey, sigName) are passed in from the LitJsSdk.executeJs() function
-          const sigShare = await LitActions.signEcdsa({ toSign, publicKey, sigName });
-        };
-        go();
-      `;
-      // Sign message
-      // @ts-ignore - complains about no authSig, but we don't need one for this action
-      const results = await litNodeClient.executeJs({
-        code: litActionCode,
-        sessionSigs: sessionSigs,
-        jsParams: {
-          toSign: toSign,
-          publicKey: currentPKP.publicKey,
-          sigName: 'sig1',
-        },
+      // TEST: Pass in auth sig
+      // const pkpWallet = new PKPEthersWallet({
+      //   pkpPubKey: currentPKP.publicKey,
+      //   controllerAuthSig: JSON.parse(localStorage.getItem('lit-wallet-sig')),
+      //   sessionSigsExpiration: litNodeClient.getExpiration(),
+      //   litNetwork: 'serrano'
+      // });
+
+      // TEST: Pass in auth method
+      // const pkpWallet = new PKPEthersWallet({
+      //   pkpPubKey: currentPKP.publicKey,
+      //   controllerAuthMethods: [authMethod],
+      //   sessionSigsExpiration: litNodeClient.getExpiration(),
+      //   litNetwork: 'serrano'
+      // });
+
+      // TEST: Pass in session sigs
+      const pkpWallet = new PKPEthersWallet({
+        pkpPubKey: currentPKP.publicKey,
+        controllerSessionSigs: sessionSigs,
+        sessionSigsExpiration: litNodeClient.getExpiration(),
+        litNetwork: 'serrano'
       });
-      // Get signature
-      const result = results.signatures['sig1'];
-      const signature = ethers.utils.joinSignature({
-        r: '0x' + result.r,
-        s: '0x' + result.s,
-        v: result.recid,
-      });
+      await pkpWallet.init();
+      const signature = await pkpWallet.signMessage(message);
       setSignature(signature);
 
       // Get the address associated with the signature created by signing the message
@@ -378,6 +372,22 @@ export default function Dashboard() {
       setError(err);
       setView(Views.ERROR);
     }
+  }
+
+  async function handleLogout() {
+    await disconnectAsync();
+    await disconnectWeb3();
+
+    setCurrentProviderType(undefined);
+    setAuthMethod(undefined);
+    setPKPs([]);
+    setCurrentPKP(undefined);
+    setSessionSigs(undefined);
+
+    setSignature(undefined);
+    setRecoveredAddress(undefined);
+    setVerified(false);
+    setView(Views.SIGN_IN);
   }
 
   useEffect(() => {
@@ -601,6 +611,7 @@ export default function Dashboard() {
         )}
         {view === Views.SESSION_CREATED && (
           <>
+            <button onClick={handleLogout}>Log out</button>
             <h1>Ready for the open web</h1>
             <div>
               <p>Check out your PKP:</p>
