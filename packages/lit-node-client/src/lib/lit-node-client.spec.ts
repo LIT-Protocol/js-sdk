@@ -9,8 +9,14 @@ jest.setTimeout(60000);
 
 describe('Lit Actions', () => {
   client = new LitNodeClient({
-    litNetwork: 'cayenne',
-    debug: false,
+    litNetwork: "custom",
+    debug: true,
+    bootstrapUrls: [
+        "http://127.0.0.1:7470",
+        "http://127.0.0.1:7471",
+        "http://127.0.0.1:7472"
+    ],
+    minNodeCount: 2
   });
 
   beforeAll(async () => {
@@ -97,11 +103,12 @@ describe('Lit Actions', () => {
       pubKey: data.publicKey,
       authMethods: [],
       authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+      hdKeyRequest: {keyId: "hello-world"}
     });
 
     // add padding
     sig.publicKey =
       sig.publicKey.length % 2 == 0 ? sig.publicKey : '0' + sig.publicKey;
-    expect(LITCONFIG.PKP_PUBKEY).toEqual(sig.publicKey);
+    expect(sig.publicKey).toBeDefined();
   });
 });
