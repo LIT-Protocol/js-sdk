@@ -238,6 +238,19 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): CombinedECDSASig
   return sig;
 };
 
+export const computeHDPubKey = (keyId: string, pubkeys: string[], sigType: SIGTYPE): string => {
+  try {
+    switch(sigType) {
+      case SIGTYPE.EcdsaCaitSith:
+        return wasmECDSA.compute_public_key(keyId, pubkeys, 3);
+      defualt:
+        throw new Error("Non supported signature type");
+    }
+  } catch(e) {
+    log('Failed to derive public key', e);
+  }
+}
+
 /**
  *
  * Generate a session key pair
