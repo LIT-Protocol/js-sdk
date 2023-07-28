@@ -474,6 +474,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  waevEclipseTestnet: {
+    contractAddress: null,
+    chainId: 91006,
+    name: 'Waev Eclipse Testnet',
+    symbol: 'ecWAEV',
+    decimals: 18,
+    rpcUrls: ['https://api.evm.waev.eclipsenetwork.xyz/solana'],
+    blockExplorerUrls: ['http://waev.explorer.modular.cloud/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
