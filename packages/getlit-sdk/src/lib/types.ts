@@ -6,6 +6,7 @@ import {
   EncryptResponse,
   EthWalletAuthenticateOptions,
   EvmContractConditions,
+  LIT_NETWORKS_KEYS,
   LitNodeClientConfig,
   LitRelayConfig,
   OtpProviderOptions,
@@ -52,6 +53,15 @@ export type LitSerialized<T = LitSerializable> = {
   type: string;
 };
 
+export type EncryptionMetadata = {
+  network: LIT_NETWORKS_KEYS | any;
+  sdkVersion: string;
+  nodeVersion: string;
+  chain: string;
+  messageType: any;
+  [key: string]: any; // For the spread properties from 'acc'
+};
+
 export type Account = {
   publicKey: string;
   ethAddress: string;
@@ -69,10 +79,11 @@ export interface EncryptProps {
   content: LitSerializable;
   accessControlConditions?: AccessControlType;
   chain?: string;
+  cache?: boolean;
 }
 
 export interface EncryptResult {
-  storageContext: StorageContext;
+  storageContext?: StorageContext;
   decryptionContext: DecryptionContext;
   encryptResponse: EncryptResponse & {
     accessControlConditions: AccessControlType;

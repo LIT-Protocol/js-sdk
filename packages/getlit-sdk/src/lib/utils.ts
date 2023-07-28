@@ -3,6 +3,7 @@ import {
   AccessControlType,
   AuthKeys,
   EncryptProps,
+  EncryptionMetadata,
   LitAuthMethod,
   LitSerializable,
   LitSerialized,
@@ -20,7 +21,7 @@ import {
   AccessControlConditions,
 } from '@lit-protocol/types';
 
-const version = '0.0.254';
+const version = '0.0.272';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -172,7 +173,9 @@ export function convertEncryptionMaterial(
   }
 }
 
-export async function getContentMaterial(input: any) {
+export async function convertContentMaterial(
+  input: any
+): Promise<LitSerialized<Uint8Array>> {
   let result: Uint8Array | null = null;
 
   if (typeof input === 'string') {
@@ -404,7 +407,7 @@ export const prepareEncryptionMetadata = (
   opts: EncryptProps,
   serializedMessage: LitSerialized<Uint8Array>,
   acc: Partial<EncryptRequestBase>
-) => {
+): EncryptionMetadata => {
   let netwokrInfo = globalThis.Lit.nodeClient?.config.litNetwork;
   globalThis.Lit.nodeClient?.connectedNodes;
   let sdkVersion = SDKVersion;
@@ -413,7 +416,7 @@ export const prepareEncryptionMetadata = (
     network: netwokrInfo,
     sdkVersion,
     nodeVersion: '1.0.0', // TODO: network request for node version, or parse header from handshake
-    chain: opts.chain,
+    chain: opts.chain ?? '1',
     ...acc,
     messageType: serializedMessage.type,
   };
@@ -424,7 +427,7 @@ export const prepareEncryptionMetadata = (
 
 export const resolveACCType = (
   acc: AccessControlType
-): Partial<EncryptRequestBase> | undefined => {
+): Partial<EncryptRequestBase> => {
   let condition = acc[0];
   let keys = Object.keys(condition);
   if (keys.includes('pdaKey')) {
@@ -437,7 +440,7 @@ export const resolveACCType = (
     return { accessControlConditions: acc as AccessControlConditions };
   }
 
-  return;
+  throw new Error('Could not resolve access control conditions');
 };
 
 export const parseDecryptionMaterialFromCache = (cachedMaterial: string) => {

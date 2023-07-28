@@ -125,9 +125,9 @@ export class OtpProvider extends BaseProvider {
   /**
    * Sets the user id & send otp code to the user
    */
-  public async send(userId: string): Promise<void> {
+  public send(userId: string) {
     this._params.userId = userId;
-    this.sendOtpCode();
+    return this.sendOtpCode();
   }
 
   /**

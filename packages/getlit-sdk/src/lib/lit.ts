@@ -2,6 +2,7 @@ import {
   AccessControlConditions,
   AuthSig,
   EncryptRequestBase,
+  EncryptResponse,
   SessionSig,
   SessionSigs,
 } from '@lit-protocol/types';
@@ -21,6 +22,7 @@ import {
   AuthKeys,
   EncryptResult,
   AccessControlType,
+  EncryptionMetadata,
 } from './types';
 import {
   convertSigningMaterial,
@@ -35,7 +37,7 @@ import {
   resolveACC,
   isNode,
   getSingleAuthDataByType,
-  getContentMaterial,
+  convertContentMaterial,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
@@ -77,8 +79,34 @@ export class Lit {
    * Encrypt a given content thats {@link LitSerializable} with provided access control conditions
    * @param {EncryptProps} opts
    * @returns {Promise<void | EncryptResult>}
+   *
+   * Formula:
+   * A = base16(Accs)
+   * ID = base16(sha256(dataToEncrypt))
+   * Message = `lit_encryption_v2://${ID}/${A}`
+   * BLS_KEY = BLS Network Key
+   * CipherText = BLS.encrypt(BLS_KEY, dataToEncrypt, Message)
+   *
+   * Then, user stores the A, ID, CipherText themselves
+   *
    */
   public async encrypt(opts: EncryptProps): Promise<EncryptResult> {
+    // -- vars
+    let accs: Partial<EncryptRequestBase>;
+    let encryptRes: EncryptResponse;
+    let encryptionMaterial: LitSerialized<Uint8Array>;
+    let encryptionMaterialWithMetadata: EncryptionMetadata;
+    let chain = opts.chain ?? '1'; // default EVM chain
+    let cache = opts.cache ?? false;
+
+    // -- validate
+
+    // -- node must be defined
+    if (!this._litNodeClient) {
+      throw new Error('_litNodeClient is undefined');
+    }
+
+    // -- access control conditions must be defined
     if (
       !opts.accessControlConditions ||
       opts.accessControlConditions.length < 1
@@ -88,72 +116,55 @@ export class Lit {
       );
     }
 
-    let conditions: Partial<EncryptRequestBase>;
+    // -- set access control conditions
+    accs = resolveACCType(opts.accessControlConditions);
 
+    // -- get encryption content
+    encryptionMaterial = await convertContentMaterial(opts.content);
+
+    // -- get additional encryption metadata
+    encryptionMaterialWithMetadata = prepareEncryptionMetadata(
+      opts,
+      encryptionMaterial,
+      accs
+    );
+
+    // -- ask nodes to use BLS key to encrypt
     try {
-      const result = resolveACCType(opts.accessControlConditions);
-
-      if (!result) {
-        throw new Error('Invalid Access Control Conditions');
-      }
-
-      conditions = result;
-    } catch (e) {
-      throw new Error('Invalid Access Control Conditions: ' + e);
-    }
-
-    if (!this._litNodeClient) {
-      throw new Error('_litNodeClient is undefined');
-    }
-
-    let encryptionMaterial;
-    let encryptionMaterialWithMetadata;
-
-    try {
-      encryptionMaterial = await getContentMaterial(opts.content);
-
-      console.log('encryptionMaterial:', encryptionMaterial);
-
-      encryptionMaterialWithMetadata = prepareEncryptionMetadata(
-        opts,
-        encryptionMaterial,
-        conditions as Partial<EncryptRequestBase>
-      );
-    } catch (e) {
-      throw new Error(
-        'Error during serialization or metadata preparation: ' + e
-      );
-    }
-
-    let encryptionKey;
-    try {
-      encryptionKey = await this._litNodeClient.encrypt({
+      encryptRes = await this._litNodeClient.encrypt({
         dataToEncrypt: encryptionMaterial.data,
-        chain: opts.chain ?? '1',
-        ...conditions,
+        chain,
+        ...accs,
       });
     } catch (e) {
       throw new Error('Unable to encrypt content: ' + e);
     }
 
-    let serializedEncryptionKey = JSON.stringify(encryptionKey);
+    let serializedEncryptResponse = JSON.stringify(encryptRes);
     let serializedMetadata = JSON.stringify(encryptionMaterialWithMetadata);
 
-    const decryptionContext = `${serializedEncryptionKey}|${serializedMetadata}`;
-    let storageKey: string = `${encryptionKey?.ciphertext}:${encryptionKey?.dataToEncryptHash}`;
+    const decryptionContext = `${serializedEncryptResponse}|${serializedMetadata}`;
+    let storageKey = null;
 
-    globalThis.Lit.storage?.setItem(storageKey, decryptionContext);
-    log('Set ', storageKey, 'to decryption resource: ', decryptionContext);
+    if (cache) {
+      storageKey = `lit-encrypted-${encryptRes?.ciphertext}:${encryptRes?.dataToEncryptHash}`;
+
+      globalThis.Lit.storage?.setItem(storageKey, decryptionContext);
+      log(`Set "${storageKey}" to decryption resource: `, decryptionContext);
+    }
 
     return {
-      storageContext: { storageKey },
-      decryptionContext: { decryptionMaterial: decryptionContext },
+      // -- must be provided to decrypt
       encryptResponse: {
-        ciphertext: encryptionKey?.ciphertext as string,
-        dataToEncryptHash: encryptionKey?.dataToEncryptHash as string,
+        ...encryptRes,
         accessControlConditions: opts.accessControlConditions,
-        chain: opts.chain ?? '1',
+        chain,
       },
+      // -- additionally
+      decryptionContext: { decryptionMaterial: decryptionContext },
+
+      // -- optional
+      ...(cache && { storageKey }),
     };
   }
 
@@ -164,6 +175,7 @@ export class Lit {
    * Authentication context must be provided or cache will be checked for {@link Credential}
    * @param {DecryptProps} opts
    * @returns decrypted content as its {@link LitSerializable} compatible type
+   *
    */
   public async decrypt(opts: DecryptProps) {
     if (
@@ -272,11 +284,11 @@ export class Lit {
    * @param {LitAuthMethod[]} authData
    */
   public getAccounts = withAuthData(
-    async (authDataArray: Array<LitAuthMethod>, cache: boolean = false) => {
+    async (authData: Array<LitAuthMethod>, cache: boolean = false) => {
       log.start('getAccounts');
 
       // forming a string of all the auth method types eg. '1-6'
-      const authMethodTypes = authDataArray
+      const authMethodTypes = authData
         .map((authData) => {
           return authData.authMethodType;
         })
@@ -303,7 +315,19 @@ export class Lit {
 
         if (!accounts) {
           log('no cached accounts found, fetching from server');
-          accounts = await handleGetAccounts(authDataArray);
+          try {
+            accounts = await handleGetAccounts(authData);
+          } catch (e) {
+            log.error('Error while getting accounts', e);
+            log.end('getAccounts');
+            throw e;
+          }
+        }
+
+        if (accounts.length <= 0) {
+          log('no accounts found');
+          log.end('getAccounts');
+          return [];
         }
 
         // -- save to cache
