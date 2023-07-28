@@ -3,6 +3,7 @@ import * as LITCONFIG from 'lit.config.json';
 import { processTx } from '../../../../tx-handler';
 import { AuthSig } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+import { SIGTYPE } from '@lit-protocol/constants';
 let client: LitNodeClient;
 
 jest.setTimeout(60000);
@@ -110,5 +111,9 @@ describe('Lit Actions', () => {
     sig.publicKey =
       sig.publicKey.length % 2 == 0 ? sig.publicKey : '0' + sig.publicKey;
     expect(sig.publicKey).toBeDefined();
+    let pubkeys = ["049552b1bec13fb7903b052d5ea7cbe0227f3b2d01e131aa04caaab61cddc9e53840e4959ec2388e6f332e089399ccbe515464034ed999ada56a6a449822ce8285", "046b47116d2edea42e526274a468fc80f94f509ab9797763bd80d879a048ab4cb4348cca96489ddabdb978ddb06487897d9f983d047e23788153f7a535d8d7d7ff"];
+    let keyId = "hello-world";
+    let pubkey = client.computeHDPubKey(keyId, pubkeys, SIGTYPE.EcdsaCaitSith);
+    expect(pubkey.toLowerCase()).toEqual(sig.publicKey.toLowerCase());
   });
 });

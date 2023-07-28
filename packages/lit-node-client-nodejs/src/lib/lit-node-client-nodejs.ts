@@ -15,6 +15,7 @@ import {
   encrypt,
   generateSessionKeyPair,
   verifyAndDecryptWithSignatureShares,
+  computeHDPubKey
 } from '@lit-protocol/crypto';
 import { safeParams } from '@lit-protocol/encryption';
 import {
@@ -2018,6 +2019,15 @@ export class LitNodeClientNodeJs extends LitCore {
   getSessionKeyUri = (publicKey: string): string => {
     return LIT_SESSION_KEY_URI + publicKey;
   };
+
+  /**
+   * 
+   * @param keyId 
+   * @param pubkeys 
+   */
+  computeHDPubKey(keyId: string, pubkeys: string[], keyType: SIGTYPE): String {
+    return computeHDPubKey(keyId, pubkeys, keyType);
+  }
 
   /**
    *
