@@ -208,7 +208,7 @@ export class Lit {
       let authMethodProvider = opts?.provider;
       let authMethods: Array<LitAuthMethod> = [];
       // -- when auth method provider ('google', 'discord', etc.) is provided
-      if (!authMaterial && authMethodProvider?.provider === 'ethwallet') {
+      if (!authMaterial && authMethodProvider?.provider) {
         authMethods = getStoredAuthData();
         if (authMethods.length < 1) {
           log.info(
@@ -216,7 +216,14 @@ export class Lit {
           );
           return;
         }
-        // todo; resolve pkp info and generate session signatures for access control
+        for (const authMethod of authMethods) {
+          if (
+            getProviderMap()[authMethod.authMethodType] ===
+            opts.provider?.provider
+          ) {
+            // todo; resolve pkp info and generate session signatures for access control
+          }
+        }
       } else if (!authMaterial && !authMethodProvider) {
         if (isBrowser()) {
           authMaterial = await checkAndSignAuthMessage({
