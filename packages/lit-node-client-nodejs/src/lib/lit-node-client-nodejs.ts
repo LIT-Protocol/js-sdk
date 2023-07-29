@@ -2025,8 +2025,8 @@ export class LitNodeClientNodeJs extends LitCore {
    * @param keyId 
    * @param pubkeys 
    */
-  computeHDPubKey(keyId: string, pubkeys: string[], keyType: SIGTYPE): String {
-    return computeHDPubKey(keyId, pubkeys, keyType);
+  computeHDPubKey(keyId: string, keyType: SIGTYPE): String {
+    return computeHDPubKey(keyId, keyType);
   }
 
   /**
@@ -2046,7 +2046,7 @@ export class LitNodeClientNodeJs extends LitCore {
     let nodePromises = await this.getNodePromises((url: string) => {
       const requestId = this.getRequestId();
       let params = {
-        ...authMethod,
+       authMethod: authMethod,
       };
       return this.getClaimKeyExecutionShares(url, params, requestId);
     });

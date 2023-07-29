@@ -37,7 +37,7 @@ if (!globalThis.wasmECDSA) {
   let init = wasmECDSA.initWasmEcdsaSdk;
   let env;
 
-  if (isBrowser()) { 
+  if (isBrowser()) {
     env = 'Browser';
   } else {
     env = 'NodeJS';
@@ -176,7 +176,9 @@ export const verifySignature = (
  * @returns { any }
  *
  */
-export const combineEcdsaShares = (sigShares: Array<SigShare>): CombinedECDSASignature => {
+export const combineEcdsaShares = (
+  sigShares: Array<SigShare>
+): CombinedECDSASignature => {
   log('sigShares:', sigShares);
   let type = sigShares[0].sigType;
   // the public key can come from any node - it obviously will be identical from each node
@@ -206,7 +208,7 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): CombinedECDSASig
 
   try {
     let res: string = '';
-    switch(type) {
+    switch (type) {
       case SIGTYPE.EcdsaCaitSith:
         res = wasmECDSA.combine_signature(validShares, 3);
         sig = JSON.parse(res) as CombinedECDSASignature;
@@ -215,19 +217,25 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): CombinedECDSASig
           r and s values can have polarity as the first two bits, here we remove 
         */
         if (sig.r && sig.r.length > 64) {
-          while(sig.r.length > 64) { sig.r = sig.r.slice(1); }
+          while (sig.r.length > 64) {
+            sig.r = sig.r.slice(1);
+          }
         }
         if (sig.s && sig.s.length > 64) {
-          while(sig.s.length > 64) { sig.s = sig.s.slice(1); }
+          while (sig.s.length > 64) {
+            sig.s = sig.s.slice(1);
+          }
         }
-      break;
+        break;
       case SIGTYPE.ECDSCAITSITHP256:
         res = wasmECDSA.combine_signature(validShares, 4);
         sig = JSON.parse(res);
-      break;
+        break;
       // if its another sig type, it shouldnt be resolving to this method
       default:
-        throw new Error("Unsupported signature type present in signature shares. Please report this issue");        
+        throw new Error(
+          'Unsupported signature type present in signature shares. Please report this issue'
+        );
     }
   } catch (e) {
     log('Failed to combine signatures:', e);
@@ -238,18 +246,22 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): CombinedECDSASig
   return sig;
 };
 
-export const computeHDPubKey = (keyId: string, pubkeys: string[], sigType: SIGTYPE): string => {
+export const computeHDPubKey = (keyId: string, sigType: SIGTYPE): string => {
+  // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
+  const pubkeys = [
+    '043e48c285a96bfc1a5ca51991122911ac3ff3deef655fe3a08321b239d0ac61225ca07606294878a62617c99cbb2d7a7343e6254db6209d3aed627dd0799c43af',
+    '043196df6bc82ed492dc5047ccc4a7f60e9a847525dab3094f424c1a04debc2a166bb6f1177877a14fd3b0d298dff74451e40de363198d16a78fc238697ed293b5',
+  ];
   try {
-    switch(sigType) {
+    switch (sigType) {
       case SIGTYPE.EcdsaCaitSith:
         return wasmECDSA.compute_public_key(keyId, pubkeys, 3);
-      defualt:
-        throw new Error("Non supported signature type");
+        defualt: throw new Error('Non supported signature type');
     }
-  } catch(e) {
+  } catch (e) {
     log('Failed to derive public key', e);
   }
-}
+};
 
 /**
  *
@@ -268,14 +280,20 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
   return sessionKeyPair;
 };
 
-
 const _remapKeyShareForEcdsa = (share: SigShare): any[] => {
-    const keys = Object.keys(share);
-    let newShare = {};
-    for (const key of keys) {
-      const new_key = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-      newShare = Object.defineProperty(newShare, new_key, Object.getOwnPropertyDescriptor(share, key));
-    }
+  const keys = Object.keys(share);
+  let newShare = {};
+  for (const key of keys) {
+    const new_key = key.replace(
+      /[A-Z]/g,
+      (letter) => `_${letter.toLowerCase()}`
+    );
+    newShare = Object.defineProperty(
+      newShare,
+      new_key,
+      Object.getOwnPropertyDescriptor(share, key)
+    );
+  }
 
-    return newShare;
-}
+  return newShare;
+};

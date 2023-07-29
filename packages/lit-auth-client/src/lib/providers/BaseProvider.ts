@@ -7,6 +7,7 @@ import {
   AuthenticateOptions,
   BaseProviderOptions,
   BaseProviderSessionSigsParams,
+  ClaimKeyResponse,
   IRelay,
   IRelayPKP,
   SessionSigs,
@@ -163,6 +164,11 @@ export abstract class BaseProvider {
     });
 
     return sessionSigs;
+  }
+
+  public async ClaimKeyId(authMethod: AuthMethod): Promise<ClaimKeyResponse> {
+    const res = await this.litNodeClient.claimKeyId(authMethod);
+    return res;
   }
 
   /**
