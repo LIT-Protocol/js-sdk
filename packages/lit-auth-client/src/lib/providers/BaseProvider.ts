@@ -134,6 +134,7 @@ export abstract class BaseProvider {
           const authSig = JSON.parse(params.authMethod.accessToken);
           response = await nodeClient.signSessionKey({
             sessionKey: params.sessionSigsParams.sessionKey,
+            statement: authCallbackParams.statement,
             authMethods: [],
             authSig: authSig,
             pkpPublicKey: params.pkpPublicKey,
@@ -144,6 +145,7 @@ export abstract class BaseProvider {
         } else {
           response = await nodeClient.signSessionKey({
             sessionKey: params.sessionSigsParams.sessionKey,
+            statement: authCallbackParams.statement,
             authMethods: [params.authMethod],
             pkpPublicKey: params.pkpPublicKey,
             expiration: authCallbackParams.expiration,
