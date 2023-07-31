@@ -1,5 +1,6 @@
 import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { AuthCallback } from '../../../../../dist/packages/types/src/lib/interfaces';
 import {
   AuthCallbackParams,
   AuthMethod,
@@ -134,6 +135,7 @@ export abstract class BaseProvider {
         if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
           const authSig = JSON.parse(params.authMethod.accessToken);
           response = await nodeClient.signSessionKey({
+            statement: authCallbackParams.statement,
             sessionKey: params.sessionSigsParams.sessionKey,
             authMethods: [],
             authSig: authSig,
@@ -144,6 +146,7 @@ export abstract class BaseProvider {
           });
         } else {
           response = await nodeClient.signSessionKey({
+            statement: authCallbackParams.statement,
             sessionKey: params.sessionSigsParams.sessionKey,
             authMethods: [params.authMethod],
             pkpPublicKey: params.pkpPublicKey,
