@@ -30,7 +30,7 @@ import { AuthMethod } from '@lit-protocol/types';
 
   // -- initialize LitOptionsBuilder
   try {
-    // todo: figure out why there is type incompatibility 
+    // todo: figure out why there is type incompatibility
     globalThis.Lit.builder = new LitOptionsBuilder({
       emitter,
       storage,

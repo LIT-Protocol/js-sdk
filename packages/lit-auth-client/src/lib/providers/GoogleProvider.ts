@@ -59,6 +59,11 @@ export default class GoogleProvider extends BaseProvider {
     // Check if it exists in cache
     let storageItem = this.storageProvider.getExpirableItem('lit-google-token');
 
+    // default to caching
+    if (options && !options.cache) {
+      options.cache = true;
+    }
+
     if (storageItem) {
       clearParamsFromURL();
       return JSON.parse(storageItem);

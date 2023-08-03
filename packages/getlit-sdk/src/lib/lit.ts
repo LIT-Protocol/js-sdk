@@ -96,7 +96,7 @@ export class Lit {
     let encryptRes: EncryptResponse;
     let encryptionMaterial: LitSerialized<Uint8Array>;
     let encryptionMaterialWithMetadata: EncryptionMetadata;
-    let chain = opts.chain ?? '1'; // default EVM chain
+    let chain = opts.chain ?? 'ethereum'; // default EVM chain
     let cache = opts.cache ?? false;
 
     // -- validate
@@ -140,10 +140,11 @@ export class Lit {
       throw new Error('Unable to encrypt content: ' + e);
     }
 
-    let serializedEncryptResponse = JSON.stringify(encryptRes);
-    let serializedMetadata = JSON.stringify(encryptionMaterialWithMetadata);
+    let decryptionContext = JSON.stringify({
+      encryptResponse: encryptRes,
+      metadata: encryptionMaterialWithMetadata,
+    });
 
-    const decryptionContext = `${serializedEncryptResponse}|${serializedMetadata}`;
     let storageKey = null;
 
     if (cache) {
@@ -178,35 +179,68 @@ export class Lit {
    *
    */
   public async decrypt(opts: DecryptProps) {
-    if (
-      !opts?.storageContext?.storageKey &&
-      !opts?.decryptionContext &&
-      !opts?.decryptResponse
-    ) {
-      log.error('Must provide either storage key or encryptionMetadata');
-      return;
+    // -- validation
+    if (!opts?.storageContext && !opts?.decryptionContext) {
+      log.error(
+        'Storage provider not set, cannot read from storage for decryption material'
+      );
     }
-    try {
-      let material: any;
-      if (opts?.storageContext && globalThis.Lit.storage) {
-        let decryptionMaterial = globalThis.Lit.storage?.getItem(
-          opts?.storageContext.storageKey
-        );
-        material = parseDecryptionMaterialFromCache(
-          decryptionMaterial as string
-        );
-      } else if (opts.decryptionContext) {
-        material = parseDecryptionMaterialFromCache(
-          opts.decryptionContext.decryptionMaterial as string
-        );
-      } else {
-        log.error(
-          'Storage provider not set, cannot read from storage for decryption material'
-        );
+
+    if (opts.storageContext && !opts.storageContext.storageKey) {
+      log.throw('Storage context is provided, but storage key is missing');
+    }
+
+    if (!opts?.decryptionContext && !opts?.decryptResponse) {
+      log.throw('Must provide encryptionMetadata');
+    }
+
+    interface Material {
+      encryptResponse: EncryptResponse;
+      metadata: EncryptionMetadata;
+    }
+
+    let material: Material | undefined;
+
+    // -- using storage context
+    if (opts?.storageContext && globalThis.Lit.storage) {
+      let decryptionMaterial = globalThis.Lit.storage?.getItem(
+        opts?.storageContext.storageKey
+      );
+
+      // -- check if storage key exists
+      if (!decryptionMaterial) {
+        log.throw(`Unable to find key "${opts?.storageContext.storageKey}"`);
       }
-      let authMaterial = opts?.authMaterial;
-      let authMethodProvider = opts?.provider;
-      let authMethods: Array<LitAuthMethod> = [];
+
+      // -- try to parse
+      try {
+        material = JSON.parse(decryptionMaterial) as Material;
+      } catch (e) {
+        log.throw('Unable to parse decryption material from cache: ', e);
+      }
+    }
+
+    // -- using decryption context
+    if (opts.decryptionContext) {
+      material = opts.decryptionContext as unknown as Material;
+    }
+
+    if (!material?.encryptResponse) {
+      log.throw(`Unable to find encryption response in decryption material`);
+    }
+
+    if (!material?.metadata) {
+      log.throw(`Unable to find encryption metadata in decryption material`);
+    }
+
+    log.info('Material:', material);
+
+    // -- auths
+    let authMaterial = opts?.authMaterial;
+    let authMethodProvider = opts?.provider;
+    let authMethods: Array<LitAuthMethod> = [];
+
+    try {
       // -- when auth method provider ('google', 'discord', etc.) is provided
       if (!authMaterial && authMethodProvider?.provider) {
         authMethods = getStoredAuthData();
@@ -221,7 +255,7 @@ export class Lit {
             getProviderMap()[authMethod.authMethodType] ===
             opts.provider?.provider
           ) {
-            // todo; resolve pkp info and generate session signatures for access control
+            // TODO: resolve pkp info and generate session signatures for access control
           }
         }
       } else if (!authMaterial && !authMethodProvider) {
@@ -234,11 +268,16 @@ export class Lit {
       opts.authMaterial = authMaterial;
       log('resolved metadata for material: ', material.metadata);
       log('typeof authMateiral ', typeof opts.authMaterial);
+
+      if (!material.metadata.accessControlConditions) {
+        log.throw('Access control conditions are undefined');
+      }
+
       let acc = resolveACCType(material.metadata.accessControlConditions);
       let res = await this._litNodeClient?.decrypt({
         ...acc,
-        ciphertext: material.cipherAndHash.ciphertext,
-        dataToEncryptHash: material.cipherAndHash.dataToEncryptHash,
+        ciphertext: material.encryptResponse.ciphertext,
+        dataToEncryptHash: material.encryptResponse.dataToEncryptHash,
         chain: material.metadata.chain,
         authSig: opts.authMaterial as AuthSig,
       });

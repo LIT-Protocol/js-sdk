@@ -52,6 +52,8 @@ declare global {
 
     // utils
     getStoredAuthData: OrNull<Function>;
+    getStoredEncryptedData: OrNull<Function>;
+    clearSessions: OrNull<Function>;
   };
 
   var ethereum: any;
@@ -106,5 +108,13 @@ globalThis.Lit = {
   },
 
   // utils
-  getStoredAuthData: null,
+  getStoredAuthData: () => {
+    console.log('not initialized');
+  },
+  getStoredEncryptedData: () => {
+    console.log('not initialized');
+  },
+  clearSessions: () => {
+    console.log('not initialized');
+  },
 };

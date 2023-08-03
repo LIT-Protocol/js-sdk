@@ -19,9 +19,10 @@ import {
   SolRpcConditions,
   EvmContractConditions,
   AccessControlConditions,
+  EncryptResponse,
 } from '@lit-protocol/types';
 
-const version = '0.0.272';
+const version = '0.0.297';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -182,7 +183,7 @@ export async function convertContentMaterial(
     result = new TextEncoder().encode(input);
   } else if (input instanceof ArrayBuffer) {
     result = new Uint8Array(input);
-  } else if (input instanceof Blob) {
+  } else if (input instanceof Object) {
     const arrayBuffer = await input.arrayBuffer();
     result = new Uint8Array(arrayBuffer);
   } else if (
@@ -208,15 +209,28 @@ export async function convertContentMaterial(
     type: input.constructor.name,
   };
 }
-
 export function deserializeFromType(
-  type: string,
+  type: 'string' | 'file' | 'blob' | 'arraybuffer' | 'uint8array',
   message: Uint8Array
-): LitSerializable {
-  switch (type) {
+): LitSerializable | string | Blob | File | ArrayBuffer | Uint8Array {
+  const buffer = Buffer.from(message);
+
+  switch (type.toLowerCase()) {
     case 'string':
       log.info('message resolved to typeof string');
-      return Buffer.from(message).toString('utf8');
+      return buffer.toString('utf8');
+    case 'blob':
+      log.info('message resolved to typeof blob');
+      return new Blob([buffer]);
+    case 'file':
+      log.info('message resolved to typeof file');
+      return new File([buffer], 'filename');
+    case 'arraybuffer':
+      log.info('message resolved to typeof arraybuffer');
+      return buffer.buffer;
+    case 'uint8array':
+      log.info('message resolved to typeof uint8array');
+      return new Uint8Array(buffer);
   }
 
   return message;
@@ -416,9 +430,14 @@ export const prepareEncryptionMetadata = (
     network: netwokrInfo,
     sdkVersion,
     nodeVersion: '1.0.0', // TODO: network request for node version, or parse header from handshake
-    chain: opts.chain ?? '1',
+    chain: opts.chain ?? 'ethereum',
     ...acc,
     messageType: serializedMessage.type,
+
+    // add extra data to metadata
+    ...(opts?.extraData ?? {
+      extraData: opts.extraData,
+    }),
   };
 
   log('constructed metadata: ', metadata);
@@ -535,4 +554,42 @@ export const getSingleAuthDataByType = (authType: AuthKeys): LitAuthMethod => {
   console.log('singleAuthData:', singleAuthData);
 
   return singleAuthData as unknown as LitAuthMethod;
+};
+
+export const getStoredEncryptedData = (): Array<EncryptResponse> => {
+  log.start('getStoredEncryptedData');
+
+  // get all storage items that start with "lit-encrypted-"
+  const encryptedDataKeys = Object.keys(
+    globalThis.Lit.storage?.getAllItems() || {}
+  ).filter((key) => {
+    return key.startsWith('lit-encrypted-');
+  });
+
+  const encryptedData = encryptedDataKeys.map((key) => {
+    const str = globalThis.Lit.storage?.getItem(key);
+    console.log('str:', str);
+
+    if (!str) {
+      console.log("str doesn't exist");
+      return undefined;
+    }
+
+    try {
+      console.log('str:', str);
+      return JSON.parse(str);
+    } catch (e) {
+      console.log('error parsing str:', e);
+      return undefined;
+    }
+  });
+
+  log.end('getStoredEncryptedData', encryptedData);
+  return encryptedData;
+};
+
+export const clearSessions = () => {
+  log.start('clearSessions');
+
+  log.end('clearSessions');
 };

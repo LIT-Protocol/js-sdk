@@ -54,6 +54,7 @@ export type LitSerialized<T = LitSerializable> = {
 };
 
 export type EncryptionMetadata = {
+  accessControlConditions?: AccessControlType;
   network: LIT_NETWORKS_KEYS | any;
   sdkVersion: string;
   nodeVersion: string;
@@ -80,6 +81,7 @@ export interface EncryptProps {
   accessControlConditions?: AccessControlType;
   chain?: string;
   cache?: boolean;
+  extraData?: any; // extra metadata to be added to the encryption metadata
 }
 
 export interface EncryptResult {
@@ -98,13 +100,30 @@ export interface DecryptionContext {
 export interface StorageContext {
   storageKey: string;
 }
-export interface DecryptProps {
-  storageContext?: StorageContext;
-  decryptionContext?: DecryptionContext;
-  decryptResponse?: DecryptRequest;
-  authMaterial?: Credential;
-  provider?: LitAuthMethodWithProvider;
-}
+// export interface DecryptProps {
+//   storageContext?: StorageContext;
+//   decryptionContext?: DecryptionContext;
+//   decryptResponse?: DecryptRequest;
+//   authMaterial?: Credential;
+//   provider?: LitAuthMethodWithProvider;
+// }
+
+//  ensure that at least one of the context is present
+export type DecryptProps =
+  | {
+      storageContext: StorageContext;
+      decryptionContext?: DecryptionContext;
+      decryptResponse?: DecryptRequest;
+      authMaterial?: Credential;
+      provider?: LitAuthMethodWithProvider;
+    }
+  | {
+      decryptionContext: DecryptionContext;
+      storageContext?: StorageContext;
+      decryptResponse?: DecryptRequest;
+      authMaterial?: Credential;
+      provider?: LitAuthMethodWithProvider;
+    };
 
 export interface CreateAccountProps {}
 

@@ -30,6 +30,20 @@ export class LitStorage implements ILitStorage {
     return this.storage.getItem(key);
   }
 
+  getAllItems(): Record<string, string> {
+    const items: Record<string, string> = {};
+    for (let i = 0; i < this.storage.length; i++) {
+      const key = this.storage.key(i);
+      if (key) {
+        const item = this.storage.getItem(key);
+        if (item) {
+          items[key] = item;
+        }
+      }
+    }
+    return items;
+  }
+
   key(index: number): string | null {
     return this.storage.key(index);
   }

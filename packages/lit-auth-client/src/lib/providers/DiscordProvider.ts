@@ -56,6 +56,11 @@ export default class DiscordProvider extends BaseProvider {
   public async authenticate(
     options?: DiscordAuthenticateOptions
   ): Promise<AuthMethod> {
+    // default to caching
+    if (options && !options.cache) {
+      options.cache = true;
+    }
+
     // Check if it exists in cache
     let storageItem =
       this.storageProvider.getExpirableItem('lit-discord-token');

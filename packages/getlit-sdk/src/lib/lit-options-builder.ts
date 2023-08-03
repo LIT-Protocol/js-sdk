@@ -1,6 +1,13 @@
 import { LitNodeClientConfig } from '@lit-protocol/types';
 import { OrNull, OrUndefined, Types } from './types';
-import { getProviderMap, getStoredAuthData, isBrowser, log } from './utils';
+import {
+  clearSessions,
+  getProviderMap,
+  getStoredAuthData,
+  getStoredEncryptedData,
+  isBrowser,
+  log,
+} from './utils';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { Lit } from './lit';
 import { ILitStorage, LitStorage } from '@lit-protocol/lit-storage';
@@ -34,7 +41,7 @@ export class LitOptionsBuilder {
     // -- set globalThis.Lit.emitter
     if (opts?.emitter) {
       this._emitter = opts.emitter;
-      // todo: figure out why there is type incompatibility 
+      // todo: figure out why there is type incompatibility
       globalThis.Lit.eventEmitter = this._emitter as any;
     }
     // -- set globalThis.Lit.storage
@@ -83,10 +90,10 @@ export class LitOptionsBuilder {
     }
 
     globalThis.Lit.nodeClient = this._nodeClient as Types.NodeClient;
-    // todo: figure out why there is type incompatibility 
+    // todo: figure out why there is type incompatibility
     globalThis.Lit.instance = new Lit() as any;
     log.info('"globalThis.Lit" has already been initialized!');
-    
+
     if (!globalThis.Lit.instance) {
       return;
     }
@@ -179,6 +186,8 @@ export class LitOptionsBuilder {
     log.start('createUtils', 'starting...');
 
     globalThis.Lit.getStoredAuthData = getStoredAuthData;
+    globalThis.Lit.getStoredEncryptedData = getStoredEncryptedData;
+    globalThis.Lit.clearSessions = clearSessions;
 
     log.end('createUtils', 'done!');
   }
