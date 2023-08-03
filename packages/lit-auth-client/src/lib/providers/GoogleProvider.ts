@@ -60,7 +60,7 @@ export default class GoogleProvider extends BaseProvider {
     let storageItem = this.storageProvider.getExpirableItem('lit-google-token');
 
     // default to caching
-    if (options && !options.cache) {
+    if (options && options.cache === null) {
       options.cache = true;
     }
 

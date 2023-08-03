@@ -115,7 +115,7 @@ export default class WebAuthnProvider extends BaseProvider {
     options?: WebAuthnAuthenticateOptions
   ): Promise<AuthMethod> {
     // default to caching
-    if (options && !options.cache) {
+    if (options && options.cache === null) {
       options.cache = true;
     }
 

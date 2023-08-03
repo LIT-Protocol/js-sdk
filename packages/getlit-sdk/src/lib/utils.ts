@@ -2,6 +2,7 @@ import { version as SDKVersion } from '@lit-protocol/constants';
 import {
   AccessControlType,
   AuthKeys,
+  DeserialisedMessage,
   EncryptProps,
   EncryptionMetadata,
   LitAuthMethod,
@@ -22,7 +23,7 @@ import {
   EncryptResponse,
 } from '@lit-protocol/types';
 
-const version = '0.0.297';
+const version = '0.0.320';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -212,7 +213,7 @@ export async function convertContentMaterial(
 export function deserializeFromType(
   type: 'string' | 'file' | 'blob' | 'arraybuffer' | 'uint8array',
   message: Uint8Array
-): LitSerializable | string | Blob | File | ArrayBuffer | Uint8Array {
+): DeserialisedMessage {
   const buffer = Buffer.from(message);
 
   switch (type.toLowerCase()) {
@@ -568,7 +569,6 @@ export const getStoredEncryptedData = (): Array<EncryptResponse> => {
 
   const encryptedData = encryptedDataKeys.map((key) => {
     const str = globalThis.Lit.storage?.getItem(key);
-    console.log('str:', str);
 
     if (!str) {
       console.log("str doesn't exist");
@@ -576,7 +576,6 @@ export const getStoredEncryptedData = (): Array<EncryptResponse> => {
     }
 
     try {
-      console.log('str:', str);
       return JSON.parse(str);
     } catch (e) {
       console.log('error parsing str:', e);
@@ -586,6 +585,35 @@ export const getStoredEncryptedData = (): Array<EncryptResponse> => {
 
   log.end('getStoredEncryptedData', encryptedData);
   return encryptedData;
+};
+
+export const prepareExportableEncryptedData = () => {
+  log.start('prepareExportableEncryptedData');
+
+  const encryptedDataKeys = Object.keys(
+    globalThis.Lit.storage?.getAllItems() || {}
+  ).filter((key) => {
+    return key.startsWith('lit-encrypted-');
+  });
+
+  const result: { key: string; data: string }[] = [];
+
+  encryptedDataKeys.forEach((key) => {
+    const str = globalThis.Lit.storage?.getItem(key);
+
+    if (!str) {
+      console.log(`str ${str} doesn't exist`);
+      return;
+    }
+
+    // turn data to buffer string
+    const data = Buffer.from(str).toString('base64');
+
+    result.push({ key, data });
+  });
+
+  log.end('prepareExportableEncryptedData', result);
+  return result;
 };
 
 export const clearSessions = () => {

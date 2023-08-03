@@ -45,7 +45,7 @@ export class OtpProvider extends BaseProvider {
     const _options = options as unknown as OtpAuthenticateOptions;
 
     // default to caching
-    if (_options && !_options.cache) {
+    if (_options && _options.cache === null) {
       _options.cache = true;
     }
 

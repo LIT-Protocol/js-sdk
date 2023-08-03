@@ -56,8 +56,9 @@ export default class DiscordProvider extends BaseProvider {
   public async authenticate(
     options?: DiscordAuthenticateOptions
   ): Promise<AuthMethod> {
+    
     // default to caching
-    if (options && !options.cache) {
+    if (options && options.cache === null) {
       options.cache = true;
     }
 

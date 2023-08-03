@@ -53,7 +53,7 @@ export default class EthWalletProvider extends BaseProvider {
     let authSig: AuthSig;
 
     // default to caching
-    if (options && !options.cache) {
+    if (options && options.cache === null) {
       options.cache = true;
     }
 

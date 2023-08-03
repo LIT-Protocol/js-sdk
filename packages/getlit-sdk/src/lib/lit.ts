@@ -23,6 +23,8 @@ import {
   EncryptResult,
   AccessControlType,
   EncryptionMetadata,
+  DeserialisedMessage,
+  DecryptRes,
 } from './types';
 import {
   convertSigningMaterial,
@@ -97,7 +99,7 @@ export class Lit {
     let encryptionMaterial: LitSerialized<Uint8Array>;
     let encryptionMaterialWithMetadata: EncryptionMetadata;
     let chain = opts.chain ?? 'ethereum'; // default EVM chain
-    let cache = opts.cache ?? false;
+    let cache = opts.cache ?? true;
 
     // -- validate
 
@@ -178,7 +180,7 @@ export class Lit {
    * @returns decrypted content as its {@link LitSerializable} compatible type
    *
    */
-  public async decrypt(opts: DecryptProps) {
+  public async decrypt(opts: DecryptProps): Promise<DecryptRes> {
     // -- validation
     if (!opts?.storageContext && !opts?.decryptionContext) {
       log.error(
@@ -245,10 +247,9 @@ export class Lit {
       if (!authMaterial && authMethodProvider?.provider) {
         authMethods = getStoredAuthData();
         if (authMethods.length < 1) {
-          log.info(
+          log.throw(
             'No Authentication methods found in cache, need to re-authenticate'
           );
-          return;
         }
         for (const authMethod of authMethods) {
           if (
@@ -265,6 +266,7 @@ export class Lit {
           });
         }
       }
+
       opts.authMaterial = authMaterial;
       log('resolved metadata for material: ', material.metadata);
       log('typeof authMateiral ', typeof opts.authMaterial);
@@ -282,13 +284,21 @@ export class Lit {
         authSig: opts.authMaterial as AuthSig,
       });
 
-      return deserializeFromType(
+      const msg = deserializeFromType(
         material.metadata.messageType,
         res?.decryptedData as Uint8Array
       );
+
+      if (!res?.decryptedData) {
+        log.throw('Could not decrypt data');
+      }
+
+      return {
+        data: msg,
+        rawData: res.decryptedData,
+      };
     } catch (e) {
-      log.error('Could not perform decryption operations ', e);
-      return;
+      log.throw('Could not perform decryption operations ', e);
     }
   }
 

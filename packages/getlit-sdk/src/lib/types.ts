@@ -53,6 +53,14 @@ export type LitSerialized<T = LitSerializable> = {
   type: string;
 };
 
+export type DeserialisedMessage =
+  | LitSerializable
+  | string
+  | Blob
+  | File
+  | ArrayBuffer
+  | Uint8Array;
+
 export type EncryptionMetadata = {
   accessControlConditions?: AccessControlType;
   network: LIT_NETWORKS_KEYS | any;
@@ -181,3 +189,8 @@ export type LitAuthMethodOptions =
   | LitAuthMethodOTP
   | LitAuthMethodEthWallet
   | LitAuthMethodNull;
+
+export type DecryptRes = {
+  rawData: Uint8Array;
+  data: DeserialisedMessage;
+};

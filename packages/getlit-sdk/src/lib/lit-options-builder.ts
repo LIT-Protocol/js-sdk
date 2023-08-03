@@ -6,6 +6,7 @@ import {
   getStoredAuthData,
   getStoredEncryptedData,
   isBrowser,
+  isNode,
   log,
 } from './utils';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -23,6 +24,7 @@ import {
 import { ProviderType } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 import { LitEmitter } from './events/lit-emitter';
+import { BrowserHelper } from './browser-helper';
 
 const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
 
@@ -112,6 +114,7 @@ export class LitOptionsBuilder {
     await this.startAuthClient();
 
     this.createUtils();
+    this.createBrowserUtils();
   }
 
   public emit(event: string, ...args: any[]) {
@@ -190,5 +193,18 @@ export class LitOptionsBuilder {
     globalThis.Lit.clearSessions = clearSessions;
 
     log.end('createUtils', 'done!');
+  }
+
+  public createBrowserUtils() {
+    // -- validate
+    if (isNode()) {
+      log.info(
+        'skipping "createBrowserUtils" as we are not in a browser environment'
+      );
+      return;
+    }
+
+    // -- create
+    globalThis.Lit.browserHelper = new BrowserHelper();
   }
 }

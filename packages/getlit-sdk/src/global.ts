@@ -12,6 +12,7 @@ import {
 
 import { LitStorage } from '@lit-protocol/lit-storage';
 import { LitEmitter } from './lib/events/lit-emitter';
+import { BrowserHelper } from './lib/browser-helper';
 
 declare global {
   //@ts-ignore
@@ -54,6 +55,9 @@ declare global {
     getStoredAuthData: OrNull<Function>;
     getStoredEncryptedData: OrNull<Function>;
     clearSessions: OrNull<Function>;
+
+    // browser only
+    browserHelper: BrowserHelper | null;
   };
 
   var ethereum: any;
@@ -117,4 +121,7 @@ globalThis.Lit = {
   clearSessions: () => {
     console.log('not initialized');
   },
+
+  // browser only
+  browserHelper: null,
 };
