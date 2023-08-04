@@ -7,12 +7,13 @@ import { LitStorage } from '@lit-protocol/lit-storage';
 import { AuthMethod } from '@lit-protocol/types';
 
 // initialize globally
-export const loadLit = async () => {
-  log.start('global', 'initializing...');
-
+export const loadLit = async ({ debug = true }: { debug?: boolean }) => {
   let storage;
   let emitter;
+  globalThis.Lit.debug = debug; // switch this to false for production
   globalThis.Lit.builder = null;
+
+  log.start('global', 'initializing...');
 
   // -- initialize LitStorage
   try {

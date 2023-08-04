@@ -23,7 +23,7 @@ import {
   EncryptResponse,
 } from '@lit-protocol/types';
 
-const version = '0.0.328';
+const version = '0.0.335';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -84,6 +84,10 @@ log.end = (operationId: string, ...args: any[]): void => {
 };
 
 const printLog = (args: any[]): void => {
+  if (globalThis?.Lit.debug === false) {
+    return;
+  }
+
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);
@@ -97,9 +101,6 @@ const printLog = (args: any[]): void => {
     return;
   }
 
-  if (globalThis?.Lit.debug !== true) {
-    return;
-  }
   // config is loaded, and debug is true
 
   // if there are logs in buffer, print them first and empty the buffer.
@@ -486,7 +487,7 @@ export const parseDecryptionMaterialFromCache = (cachedMaterial: string) => {
 export const resolveACC = (opts: EncryptProps): any => {
   switch (typeof opts.accessControlConditions) {
     default:
-      console.log(typeof opts.accessControlConditions);
+      log.info(typeof opts.accessControlConditions);
   }
   return;
 };
@@ -531,15 +532,15 @@ export const getStoredAuthData = (): Array<LitAuthMethod> => {
 
 // "authType" => google, discord, opt, webauthn, ethwallet
 export const getSingleAuthDataByType = (authType: AuthKeys): LitAuthMethod => {
-  console.log('authType:', authType);
+  log.info('authType:', authType);
 
   const storageKey =
     authType === 'ethwallet' ? 'lit-auth-signature' : `lit-${authType}-token`;
 
-  console.log('storageKey:', storageKey);
+  log.info('storageKey:', storageKey);
 
   let singleAuthData = globalThis.Lit.storage?.getExpirableItem(storageKey);
-  console.log('singleAuthData:', singleAuthData);
+  log.info('singleAuthData:', singleAuthData);
 
   if (!singleAuthData) {
     throw new Error(`No auth data found for "${authType}"`);
@@ -547,12 +548,12 @@ export const getSingleAuthDataByType = (authType: AuthKeys): LitAuthMethod => {
 
   try {
     singleAuthData = JSON.parse(singleAuthData);
-    console.log('singleAuthData:', singleAuthData);
+    log.info('singleAuthData:', singleAuthData);
   } catch (e) {
     throw new Error(`Failed to parse auth data for "${authType}"`);
   }
 
-  console.log('singleAuthData:', singleAuthData);
+  log.info('singleAuthData:', singleAuthData);
 
   return singleAuthData as unknown as LitAuthMethod;
 };
@@ -571,14 +572,14 @@ export const getStoredEncryptedData = (): Array<EncryptResponse> => {
     const str = globalThis.Lit.storage?.getItem(key);
 
     if (!str) {
-      console.log("str doesn't exist");
+      log.info("str doesn't exist");
       return undefined;
     }
 
     try {
       return JSON.parse(str);
     } catch (e) {
-      console.log('error parsing str:', e);
+      log.info('error parsing str:', e);
       return undefined;
     }
   });
@@ -602,7 +603,7 @@ export const prepareExportableEncryptedData = () => {
     const str = globalThis.Lit.storage?.getItem(key);
 
     if (!str) {
-      console.log(`str ${str} doesn't exist`);
+      log.info(`str ${str} doesn't exist`);
       return;
     }
 

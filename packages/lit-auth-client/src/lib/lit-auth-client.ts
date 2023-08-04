@@ -75,7 +75,6 @@ export class LitAuthClient {
 
       if (options?.storageProvider) {
         this.storageProvider = options?.storageProvider;
-        console.log('options?.storageProvider', options?.storageProvider);
       }
     }
 
