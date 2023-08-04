@@ -39,7 +39,7 @@ export class BrowserHelper {
   // // Usage example with a string:
   // const data3 = 'This is a sample text file content.';
   // BrowserHelper.downloadAsFile(data3, 'sample.txt', 'text/plain');
-  downloadAsFile(data: any, filename: string, type = 'text/csv') {
+  downloadAsFile(data: any, filename: string = 'download', type = 'text/csv') {
     let content;
 
     if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
@@ -60,6 +60,7 @@ export class BrowserHelper {
       // Use the string data directly
       content = data;
     } else {
+      alert('Unsupported data type.');
       throw new Error('Unsupported data type.');
     }
 
@@ -72,7 +73,7 @@ export class BrowserHelper {
     // Create a link
     const a = document.createElement('a');
     a.href = url;
-    a.download = filename ?? 'download'; // File name provided as a parameter
+    a.download = filename; // File name provided as a parameter
 
     // Trigger the download by simulating a click
     document.body.appendChild(a);

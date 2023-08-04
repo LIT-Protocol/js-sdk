@@ -23,7 +23,7 @@ import {
   EncryptResponse,
 } from '@lit-protocol/types';
 
-const version = '0.0.320';
+const version = '0.0.328';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -491,16 +491,16 @@ export const resolveACC = (opts: EncryptProps): any => {
   return;
 };
 
-export const getStoredAuthData = (): Array<LitAuthMethod> => {
-  const tokenKeys = [
-    'lit-opt-token',
-    'lit-discord-token',
-    'lit-google-token',
-    'lit-webauthn-token',
-    // 'lit-ethwallet-token', // handled separately
-  ];
+export const authKeys = [
+  'lit-opt-token',
+  'lit-discord-token',
+  'lit-google-token',
+  'lit-webauthn-token',
+  // 'lit-ethwallet-token', // handled separately
+];
 
-  const storedAuthData = tokenKeys
+export const getStoredAuthData = (): Array<LitAuthMethod> => {
+  const storedAuthData = authKeys
     .map((key) => {
       const str = globalThis.Lit.storage?.getExpirableItem(key);
 
@@ -618,6 +618,13 @@ export const prepareExportableEncryptedData = () => {
 
 export const clearSessions = () => {
   log.start('clearSessions');
+
+  // remove lit-auth-signature from storage
+  globalThis.Lit.storage?.removeItem('lit-auth-signature');
+
+  authKeys.forEach((key) => {
+    globalThis.Lit.storage?.removeItem(key);
+  });
 
   log.end('clearSessions');
 };

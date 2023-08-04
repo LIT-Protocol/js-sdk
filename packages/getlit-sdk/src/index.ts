@@ -7,7 +7,7 @@ import { LitStorage } from '@lit-protocol/lit-storage';
 import { AuthMethod } from '@lit-protocol/types';
 
 // initialize globally
-(async (): Promise<void> => {
+export const loadLit = async () => {
   log.start('global', 'initializing...');
 
   let storage;
@@ -77,4 +77,4 @@ import { AuthMethod } from '@lit-protocol/types';
       }
     });
   }
-})();
+};
