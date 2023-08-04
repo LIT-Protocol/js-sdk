@@ -210,7 +210,7 @@ export const combineEcdsaShares = (
     let res: string = '';
     switch (type) {
       case SIGTYPE.EcdsaCaitSith:
-        res = wasmECDSA.combine_signature(validShares, 3);
+        res = wasmECDSA.combine_signature(validShares, 2);
         sig = JSON.parse(res) as CombinedECDSASignature;
         /*
           r and s values of the signature should be maximum of 64 bytes
@@ -228,7 +228,7 @@ export const combineEcdsaShares = (
         }
         break;
       case SIGTYPE.ECDSCAITSITHP256:
-        res = wasmECDSA.combine_signature(validShares, 4);
+        res = wasmECDSA.combine_signature(validShares, 3);
         sig = JSON.parse(res);
         break;
       // if its another sig type, it shouldnt be resolving to this method
