@@ -150,10 +150,6 @@ export class LitOptionsBuilder {
         globalThis.Lit.authClient.initProvider<DiscordProvider>(
           ProviderType.Discord
         );
-      globalThis.Lit.auth.ethwallet =
-        globalThis.Lit.authClient.initProvider<EthWalletProvider>(
-          ProviderType.EthWallet
-        );
       globalThis.Lit.auth.webauthn =
         globalThis.Lit.authClient.initProvider<WebAuthnProvider>(
           ProviderType.WebAuthn
@@ -164,6 +160,10 @@ export class LitOptionsBuilder {
       //     ProviderType.Apple
       //   );
     }
+    globalThis.Lit.auth.ethwallet =
+      globalThis.Lit.authClient.initProvider<EthWalletProvider>(
+        ProviderType.EthWallet
+      );
 
     globalThis.Lit.auth.otp =
       globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);

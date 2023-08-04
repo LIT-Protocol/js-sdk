@@ -18,9 +18,9 @@ export const handleGetAccounts = async (
     // -- prepare
     // convert authMethodType (eg. 6) to authMethodName (eg. 'google')
     const authMethodName = mapAuthMethodTypeToString(authData.authMethodType);
-
+    log.info('authMethodName:', authMethodName);
     const authProvider = globalThis.Lit.auth[authMethodName];
-
+    log.info('authProvider:', authProvider);
     if (!authProvider) {
       log.error("otp is not initialised. We'll try email or phone");
     }

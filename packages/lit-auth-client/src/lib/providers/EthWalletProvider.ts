@@ -10,6 +10,7 @@ import { SiweMessage } from 'lit-siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
+import { isBrowser } from '@lit-protocol/misc';
 
 export default class EthWalletProvider extends BaseProvider {
   /**
@@ -28,8 +29,14 @@ export default class EthWalletProvider extends BaseProvider {
 
   constructor(options: BaseProviderOptions & EthWalletProviderOptions) {
     super(options);
-    this.domain = options.domain || window.location.hostname;
-    this.origin = options.origin || window.location.origin;
+
+    if (isBrowser()) {
+      this.domain = options.domain || window.location.hostname;
+      this.origin = options.origin || window.location.origin;
+    }
+
+    this.domain = options.domain || '';
+    this.origin = options.origin || '';
   }
 
   /**
