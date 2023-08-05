@@ -23,7 +23,7 @@ import {
   EncryptResponse,
 } from '@lit-protocol/types';
 
-const version = '0.0.342';
+const version = '0.0.380';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -492,39 +492,39 @@ export const resolveACC = (opts: EncryptProps): any => {
   return;
 };
 
-export const authKeys = [
+export const authKeysPrefixes = [
   'lit-opt-token',
   'lit-discord-token',
   'lit-google-token',
   'lit-webauthn-token',
-  // 'lit-ethwallet-token', // handled separately
+  'lit-ethwallet-token',
 ];
 
 export const getStoredAuthData = (): Array<LitAuthMethod> => {
-  const storedAuthData = authKeys
-    .map((key) => {
+  const storedAuthData: Array<LitAuthMethod> = [];
+
+  // Iterate through all the keys in storage
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+
+    // Check if the key starts with any of the authKeys
+    if (
+      key &&
+      authKeysPrefixes.some((authKeysPrefixes) =>
+        key.startsWith(authKeysPrefixes)
+      )
+    ) {
       const str = globalThis.Lit.storage?.getExpirableItem(key);
 
-      if (!str) {
-        return undefined;
+      if (str) {
+        try {
+          const authMethod = JSON.parse(str) as LitAuthMethod;
+          storedAuthData.push(authMethod);
+        } catch (e) {
+          // Handle the error if needed
+        }
       }
-
-      try {
-        return JSON.parse(str);
-      } catch (e) {
-        return undefined;
-      }
-    })
-    .filter(Boolean);
-
-  // -- handling special case for eth wallet
-  if (globalThis.Lit.storage?.getItem('lit-auth-signature')) {
-    const authData = {
-      authMethodType: 1,
-      accessToken: globalThis.Lit.storage?.getItem('lit-auth-signature'),
-    };
-
-    storedAuthData.push(authData);
+    }
   }
 
   return storedAuthData;
@@ -620,12 +620,15 @@ export const prepareExportableEncryptedData = () => {
 export const clearSessions = () => {
   log.start('clearSessions');
 
-  // remove lit-auth-signature from storage
-  globalThis.Lit.storage?.removeItem('lit-auth-signature');
+  // Iterate through all the keys in storage
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
 
-  authKeys.forEach((key) => {
-    globalThis.Lit.storage?.removeItem(key);
-  });
+    // If the key starts with any of the authKeys, remove it
+    if (key && authKeysPrefixes.some((authKeysPrefixes) => key.startsWith(authKeysPrefixes))) {
+      globalThis.Lit.storage?.removeItem(key);
+    }
+  }
 
   log.end('clearSessions');
 };

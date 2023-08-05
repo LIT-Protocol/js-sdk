@@ -67,7 +67,7 @@ export class LitOptionsBuilder {
   }
 
   public withStorageProvider(provider: ILitStorage) {
-    this._storage = new LitStorage(provider);
+    this._storage = new LitStorage({ storageProvider: provider });
   }
 
   public async build(): Promise<void> {

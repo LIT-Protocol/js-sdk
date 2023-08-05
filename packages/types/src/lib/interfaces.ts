@@ -19,7 +19,7 @@ import {
   ISessionCapabilityObject,
   LitResourceAbilityRequest,
 } from '@lit-protocol/auth-helpers';
-import { BytesLike } from 'ethers';
+import { BytesLike, Signer } from 'ethers';
 
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
@@ -118,6 +118,8 @@ export interface AuthCallbackParams {
   // Keplr & Cypher -> window.keplr
   // Leap -> window.leap
   cosmosWalletType?: CosmosWalletType;
+
+  cache?: boolean;
 }
 
 /** ---------- Web3 ---------- */
@@ -1428,6 +1430,11 @@ export interface EthWalletAuthenticateOptions
    * When the auth signature expires
    */
   expiration?: string;
+
+  /**
+   * eth wallet signer
+   */
+  signer?: Signer;
 }
 
 export interface OtpAuthenticateOptions

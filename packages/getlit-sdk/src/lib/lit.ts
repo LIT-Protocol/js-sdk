@@ -340,7 +340,7 @@ export class Lit {
    * @param {LitAuthMethod[]} authData
    */
   public getAccounts = withAuthData(
-    async (authData: Array<LitAuthMethod>, cache: boolean = false) => {
+    async (authData: Array<LitAuthMethod>, cache: boolean = true) => {
       log.start('getAccounts');
 
       // forming a string of all the auth method types eg. '1-6'

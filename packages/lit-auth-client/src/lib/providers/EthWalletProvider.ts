@@ -10,7 +10,7 @@ import { SiweMessage } from 'lit-siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
-import { isBrowser } from '@lit-protocol/misc';
+import { isBrowser, isNode } from '@lit-protocol/misc';
 
 export default class EthWalletProvider extends BaseProvider {
   /**
@@ -30,13 +30,16 @@ export default class EthWalletProvider extends BaseProvider {
   constructor(options: BaseProviderOptions & EthWalletProviderOptions) {
     super(options);
 
-    if (isBrowser()) {
+    try {
       this.domain = options.domain || window.location.hostname;
       this.origin = options.origin || window.location.origin;
+    } catch (e) {
+      console.log(
+        '⚠️ Error getting "domain" and "origin" from window object, defaulting to "My DApp Name" and "MyEthereumApp-development"'
+      );
+      this.domain = options.domain || 'My DApp Name';
+      this.origin = options.origin || 'MyEthereumApp-development';
     }
-
-    this.domain = options.domain || '';
-    this.origin = options.origin || '';
   }
 
   /**
@@ -53,8 +56,8 @@ export default class EthWalletProvider extends BaseProvider {
   public async authenticate(
     options?: EthWalletAuthenticateOptions
   ): Promise<AuthMethod> {
-    const address = options?.address;
-    const signMessage = options?.signMessage;
+    let address = options?.address;
+    let signMessage = options?.signMessage;
     const chain = options?.chain || 'ethereum';
 
     let authSig: AuthSig;
@@ -65,6 +68,8 @@ export default class EthWalletProvider extends BaseProvider {
     }
 
     if (options?.cache) {
+      // -- we do not want to use the default lit-auth-signature when cache is enabled,
+      // instead we want to use the lit-ethwallet-token
       authSig = await checkAndSignAuthMessage({
         chain,
         ...(options?.expirationUnit &&
@@ -74,20 +79,51 @@ export default class EthWalletProvider extends BaseProvider {
               options.expirationUnit
             ),
           }),
+        cache: false,
       });
 
-      // -- If you are looking for the cache implementation, ETH wallet works differently cus we use `lit-auth-signature`, so it handles it in the `getStoredAuthData` in the utils.ts. Otherwise, the following code is how it would look like
-      // this.storageProvider.setExpirableItem(
-      //   'lit-ethwallet-token',
-      //   JSON.stringify({
-      //     authMethodType: AuthMethodType.EthWallet,
-      //     accessToken: JSON.stringify(authSig),
-      //   }),
-      //   options?.expirationLength ?? 24,
-      //   options?.expirationUnit ?? 'hours'
-      // );
+      this.storageProvider.setExpirableItem(
+        `lit-ethwallet-token-${authSig.address}`,
+        JSON.stringify({
+          authMethodType: AuthMethodType.EthWallet,
+          accessToken: JSON.stringify(authSig),
+        }),
+        options?.expirationLength ?? 24,
+        options?.expirationUnit ?? 'hours'
+      );
     } else {
-      if (address && signMessage) {
+      /**
+       * If signMessage is provided like "ethSigner.signMessage", then we need to
+       * bind the signer to the signMessage function. This is because the signer
+       * is not available until the user has connected their wallet.
+       *
+       * eg. const signer = new ethers.Wallet(privateKey);
+       *     const signMessage = signer.signMessage.bind(signer);
+       *
+       * So if you only pass in signer.signMessage, you will get "Cannot read properties
+       * of undefined (reading '_signingKey')".
+       */
+      if ((address && signMessage) || options?.signer) {
+        if (options?.signer) {
+          if (!address) {
+            address = await options?.signer.getAddress();
+          }
+
+          if (!signMessage) {
+            signMessage = options.signer.signMessage.bind(options.signer);
+          }
+        }
+        if (!address) {
+          throw new Error('address is required');
+        }
+
+        if (!signMessage) {
+          throw new Error('signMessage is required');
+        }
+
+        // convert to EIP-55 format or else SIWE complains
+        address = ethers.utils.getAddress(address);
+
         // Get chain ID or default to Ethereum mainnet
         const selectedChain = LIT_CHAINS[chain];
         const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
@@ -101,7 +137,7 @@ export default class EthWalletProvider extends BaseProvider {
         const preparedMessage: Partial<SiweMessage> = {
           domain: this.domain,
           uri: this.origin,
-          address: ethers.utils.getAddress(address), // convert to EIP-55 format or else SIWE complains
+          address,
           version: '1',
           chainId,
           expirationTime: expiration,

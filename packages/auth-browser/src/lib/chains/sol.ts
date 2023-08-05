@@ -80,7 +80,11 @@ export const connectSolProvider = async (): Promise<IProvider | undefined> => {
  *
  * @returns { AuthSig }
  */
-export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
+export const checkAndSignSolAuthMessage = async ({
+  cache = true,
+}: {
+  cache: boolean;
+}): Promise<AuthSig> => {
   const res = await connectSolProvider();
 
   if (!res) {
@@ -126,7 +130,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
       'signing auth message because account is not the same as the address in the auth sig'
     );
 
-    await signAndSaveAuthMessage({ provider });
+    await signAndSaveAuthMessage({ provider, cache });
 
     authSigOrError.type = EITHER_TYPE.SUCCESS;
     // @ts-ignore
@@ -150,8 +154,10 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
  */
 export const signAndSaveAuthMessage = async ({
   provider,
+  cache = true,
 }: {
   provider: any;
+  cache?: boolean;
 }): Promise<AuthSig | undefined> => {
   const now = new Date().toISOString();
   const body = AUTH_SIGNATURE_BODY.replace('{{timestamp}}', now);
@@ -181,10 +187,12 @@ export const signAndSaveAuthMessage = async ({
     address: provider.publicKey.toBase58(),
   };
 
-  localStorage.setItem(
-    LOCAL_STORAGE_KEYS.AUTH_SOL_SIGNATURE,
-    JSON.stringify(authSig)
-  );
+  if (cache) {
+    localStorage.setItem(
+      LOCAL_STORAGE_KEYS.AUTH_SOL_SIGNATURE,
+      JSON.stringify(authSig)
+    );
+  }
 
   return authSig;
 };

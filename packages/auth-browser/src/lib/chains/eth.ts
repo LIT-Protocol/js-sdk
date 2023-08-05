@@ -95,6 +95,7 @@ interface signAndSaveAuthParams {
   resources: any;
   expiration: string;
   uri?: string;
+  cache?: boolean;
 }
 
 interface IABI {
@@ -443,6 +444,7 @@ export const checkAndSignEVMAuthMessage = async ({
   switchChain,
   expiration,
   uri,
+  cache = true,
 }: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
   if (isNode()) {
@@ -659,6 +661,7 @@ const _signAndGetAuth = async ({
   resources,
   expiration,
   uri,
+  cache,
 }: signAndSaveAuthParams): Promise<AuthSig> => {
   await signAndSaveAuthMessage({
     web3,
@@ -667,6 +670,7 @@ const _signAndGetAuth = async ({
     resources,
     expiration,
     uri,
+    cache,
   });
 
   let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
@@ -702,6 +706,7 @@ export const signAndSaveAuthMessage = async ({
   resources,
   expiration,
   uri,
+  cache = true,
 }: signAndSaveAuthParams): Promise<AuthSig> => {
   // check if it's nodejs
   if (isNode()) {
@@ -752,7 +757,7 @@ export const signAndSaveAuthMessage = async ({
   };
 
   // -- 4. store auth and a keypair in localstorage for communication with sgx
-  if (isBrowser()) {
+  if (isBrowser() && cache) {
     localStorage.setItem(
       LOCAL_STORAGE_KEYS.AUTH_SIGNATURE,
       JSON.stringify(authSig)

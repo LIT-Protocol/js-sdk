@@ -8,8 +8,8 @@ export class LitStorage implements ILitStorage {
 
   private storage: ILitStorage;
 
-  constructor(storageProvider?: ILitStorage) {
-    if (storageProvider) {
+  constructor({ storageProvider }: { storageProvider?: ILitStorage } = {}) {
+    if (storageProvider && Object.keys(storageProvider).length > 0) {
       this.storage = storageProvider;
     } else if (typeof window !== 'undefined') {
       this.storage = window.localStorage;

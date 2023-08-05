@@ -127,9 +127,11 @@ export const connectCosmosProvider = async ({
 export const checkAndSignCosmosAuthMessage = async ({
   chain,
   walletType,
+  cache = true,
 }: {
   chain: string;
   walletType: CosmosWalletType;
+  cache?: boolean;
 }): Promise<AuthSig> => {
   const connectedCosmosProvider = await connectCosmosProvider({
     chain,
@@ -157,7 +159,7 @@ export const checkAndSignCosmosAuthMessage = async ({
     log(
       'signing auth message because account is not the same as the address in the auth sig'
     );
-    await signAndSaveAuthMessage(connectedCosmosProvider);
+    await signAndSaveAuthMessage(connectedCosmosProvider, cache);
     authSig = localStorage.getItem(storageKey);
     authSig = JSON.parse(authSig);
   }
@@ -175,7 +177,8 @@ export const checkAndSignCosmosAuthMessage = async ({
  * @returns { void }
  */
 export const signAndSaveAuthMessage = async (
-  connectedCosmosProvider: CosmosProvider
+  connectedCosmosProvider: CosmosProvider,
+  cache: boolean = true
 ) => {
   const { provider, account, chainId } = connectedCosmosProvider;
 
@@ -221,10 +224,12 @@ export const signAndSaveAuthMessage = async (
     address: account,
   };
 
-  localStorage.setItem(
-    LOCAL_STORAGE_KEYS.AUTH_COSMOS_SIGNATURE,
-    JSON.stringify(authSig)
-  );
+  if (cache) {
+    localStorage.setItem(
+      LOCAL_STORAGE_KEYS.AUTH_COSMOS_SIGNATURE,
+      JSON.stringify(authSig)
+    );
+  }
 };
 
 /**
