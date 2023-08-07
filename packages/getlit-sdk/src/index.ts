@@ -5,15 +5,26 @@ import { handleAutoAuth } from './lib/auth/handle-auto-auth';
 import { LitEmitter } from './lib/events/lit-emitter';
 import { LitStorage } from '@lit-protocol/lit-storage';
 import { AuthMethod } from '@lit-protocol/types';
+import { HeliaProvider } from './lib/ipfs-provider-sdk/helia-provider';
+import { IPFSProvider } from './lib/ipfs-provider-sdk/IPFSProvider';
 
 // initialize globally
 export const loadLit = async ({ debug = true }: { debug?: boolean }) => {
+  let IPFSProvider: IPFSProvider;
+
   let storage;
   let emitter;
   globalThis.Lit.debug = debug; // switch this to false for production
   globalThis.Lit.builder = null;
 
   log.start('global', 'initializing...');
+
+  // -- initialize IPFSProvider
+  try {
+    IPFSProvider = new HeliaProvider();
+  } catch (e) {
+    log.throw(`Error while attempting to initialize IPFSProvider\n${e}`);
+  }
 
   // -- initialize LitStorage
   try {
@@ -34,6 +45,7 @@ export const loadLit = async ({ debug = true }: { debug?: boolean }) => {
     // todo: figure out why there is type incompatibility
     globalThis.Lit.builder = new LitOptionsBuilder({
       emitter,
+      persistentStorage: IPFSProvider,
       storage,
     }) as any;
   } catch (e) {

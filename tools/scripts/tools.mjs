@@ -1292,17 +1292,20 @@ async function versionFunc() {
   greenLog('Getting latest version from npm...');
 
   let res;
-  const group = getFlag('--group');
+  let group = getFlag('--group');
   let url;
 
   const groupConfig = getGroupConfig();
 
+  console.log("group:", group)
+
   if (group) {
     validateGroupIsInConfig(group);
-    url = groupConfig.config.find((item) => item.group === group).npm;
   } else {
-    url = 'https://registry.npmjs.org/@lit-protocol/lit-node-client';
+    group = 'core';
+    // url = 'https://registry.npmjs.org/@lit-protocol/lit-node-client';
   }
+  url = groupConfig.config.find((item) => item.group === group).npm;
 
   res = await fetch(url);
   res = await res.json();
@@ -1311,7 +1314,6 @@ async function versionFunc() {
   const remoteVersion = Object.keys(res.time)
     .filter((item) => item !== 'created' && item !== 'modified')
     .pop();
-
   const configVersion =
     groupConfig.config.find((item) => item.group === group).version ||
     getDefaultGroupVersion();

@@ -1,6 +1,6 @@
 {
   "name": "@getlit/sdk",
-  "version": "2.2.35",
+  "version": "2.2.49",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -25,6 +25,9 @@
   "tags": [
     "universal"
   ],
+  "peerDependencies": {
+    "helia": "^1.3.12"
+  },
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

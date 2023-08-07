@@ -1,10 +1,8 @@
 import {
-  AccessControlConditions,
+  AuthMethod,
   AuthSig,
   EncryptRequestBase,
   EncryptResponse,
-  SessionSig,
-  SessionSigs,
 } from '@lit-protocol/types';
 import {
   OrUndefined,
@@ -19,24 +17,18 @@ import {
   LitAuthMethodWithAuthData,
   DecryptProps,
   LitAuthMethod,
-  AuthKeys,
   EncryptResult,
-  AccessControlType,
   EncryptionMetadata,
-  DeserialisedMessage,
   DecryptRes,
 } from './types';
 import {
   convertSigningMaterial,
   log,
-  convertEncryptionMaterial,
   prepareEncryptionMetadata,
-  parseDecryptionMaterialFromCache,
   deserializeFromType,
   getStoredAuthData,
   getProviderMap,
   resolveACCType,
-  resolveACC,
   isNode,
   getSingleAuthDataByType,
   convertContentMaterial,
@@ -51,8 +43,6 @@ import {
   LitAbility,
   LitAccessControlConditionResource,
 } from '@lit-protocol/auth-helpers';
-import { BaseProvider } from '@lit-protocol/lit-auth-client';
-import { AuthMethod } from '../../../../dist/packages/types/src/lib/interfaces';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -101,6 +91,13 @@ export class Lit {
     let chain = opts.chain ?? 'ethereum'; // default EVM chain
     let cache = opts.cache ?? true;
 
+    let persistentStorageProvider =
+      opts.persistentStorageProvider ??
+      // @ts-ignore
+      globalThis.Lit.persistentStorageProvider;
+
+    // persistentStorageProvider(interface)
+
     // -- validate
 
     // -- node must be defined
@@ -108,7 +105,7 @@ export class Lit {
       throw new Error('_litNodeClient is undefined');
     }
 
-    // -- access control conditions must be defined
+    // -- access control conditions must be definedc
     if (
       !opts.accessControlConditions ||
       opts.accessControlConditions.length < 1
@@ -150,10 +147,18 @@ export class Lit {
     let storageKey = null;
 
     if (cache) {
+      log.info('Storing decryption context in cache...');
       storageKey = `lit-encrypted-${encryptRes?.ciphertext}:${encryptRes?.dataToEncryptHash}`;
 
       globalThis.Lit.storage?.setItem(storageKey, decryptionContext);
       log(`Set "${storageKey}" to decryption resource: `, decryptionContext);
+    }
+
+    let ipfsHash = null;
+
+    if (opts?.uploadToIPFS) {
+      console.log('✅ UPLOADING!!');
+      ipfsHash = globalThis.Lit.persistentStorage?.store(decryptionContext);
     }
 
     return {
@@ -168,6 +173,9 @@ export class Lit {
 
       // -- optional
       ...(cache && { storageKey }),
+
+      // -- if `uploadToIPFS` is true
+      ...(ipfsHash && { ipfsHash }),
     };
   }
 

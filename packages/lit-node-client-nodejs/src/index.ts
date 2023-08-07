@@ -25,7 +25,7 @@ export {
   decryptToString,
   decryptToZip,
   decryptZipFileWithMetadata,
-  decryptFromIpfs,
+  // decryptFromIpfs,
   encryptFile,
   encryptFileAndZipWithMetadata,
   encryptString,

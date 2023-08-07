@@ -90,6 +90,9 @@ export interface EncryptProps {
   chain?: string;
   cache?: boolean;
   extraData?: any; // extra metadata to be added to the encryption metadata
+  uploadToIPFS?: boolean;
+
+  persistentStorageProvider?: any;
 }
 
 export interface EncryptResult {

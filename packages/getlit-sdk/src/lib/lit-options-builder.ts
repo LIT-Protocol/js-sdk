@@ -25,6 +25,7 @@ import { ProviderType } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 import { LitEmitter } from './events/lit-emitter';
 import { BrowserHelper } from './browser-helper';
+import { IPFSProvider } from './ipfs-provider-sdk/IPFSProvider';
 
 const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
 
@@ -34,15 +35,30 @@ export class LitOptionsBuilder {
   private _nodeClientOptions: OrUndefined<LitNodeClientConfig> = undefined;
   private _nodeClient: OrUndefined<Types.NodeClient> = undefined;
 
-  private _emitter: OrNull<LitEmitter> = null;
+  private _persistentStorage: OrNull<IPFSProvider> = null;
+  private _emitter: OrUndefined<LitEmitter> = undefined;
   private _storage: OrUndefined<LitStorage> = undefined;
 
-  constructor(opts?: { emitter?: LitEmitter; storage?: LitStorage }) {
+  constructor(opts?: {
+    persistentStorage?: IPFSProvider;
+    emitter?: LitEmitter;
+    storage?: LitStorage;
+  }) {
     log.start('LitOptionsBuilder', 'starting LitOptionsBuilder...');
+
+    // -- set globalThis.Lit.persistentStorage
+    if (opts?.persistentStorage) {
+      this._persistentStorage = opts.persistentStorage;
+
+      if (this._persistentStorage) {
+        globalThis.Lit.persistentStorage = this._persistentStorage as any;
+      }
+    }
 
     // -- set globalThis.Lit.emitter
     if (opts?.emitter) {
       this._emitter = opts.emitter;
+
       // todo: figure out why there is type incompatibility
       globalThis.Lit.eventEmitter = this._emitter as any;
     }
