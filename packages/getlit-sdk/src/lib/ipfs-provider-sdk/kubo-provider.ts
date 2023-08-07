@@ -10,11 +10,10 @@ export class KuboProvider extends IPFSProvider {
     throw new Error('Method not implemented.');
   }
 
-  override retrieve(immutableAddress: CID): Promise<any> {
+  override get(immutableAddress: CID): Promise<any> {
     throw new Error('Method not implemented.');
   }
 }
-
 
 // const ipfsHash = await Lit.persistentStorage.store('HELLO MOTO');
 // console.log("IPFSHash:", ipfsHash.toString());

@@ -36,7 +36,7 @@ export class HeliaProvider extends IPFSProvider {
           log.info('🚀 Helia injected!');
           clearInterval(poll);
 
-          this.getHeliaNode().then((heliaNode) => {
+          this.createHeliaNode().then((heliaNode) => {
             log.info(`🚀 HeliaProvider: Helia Node created!
     peerId: ${heliaNode.libp2p.peerId.toString()}
     isStarted: ${heliaNode.libp2p.isStarted()}
@@ -71,7 +71,7 @@ export class HeliaProvider extends IPFSProvider {
     }
   }
 
-  getHeliaNode = async () => {
+  createHeliaNode = async () => {
     let heliaNode;
 
     try {
@@ -127,7 +127,7 @@ export class HeliaProvider extends IPFSProvider {
     return immutableAddress;
   }
 
-  override async retrieve(immutableAddress: CID): Promise<any> {
+  override async get(immutableAddress: CID): Promise<any> {
     log.start('HeliaProvider - retrieve', 'downloading data from IPFS...');
 
     let data;
