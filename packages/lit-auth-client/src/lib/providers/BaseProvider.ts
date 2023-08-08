@@ -12,6 +12,7 @@ import {
   SessionSigs,
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
+import { ethers } from 'ethers';
 
 export abstract class BaseProvider {
   /**
@@ -45,20 +46,29 @@ export abstract class BaseProvider {
   ): Promise<AuthMethod>;
 
   /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   * @param {any} [options] - Optional parameters that vary based on the provider
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  abstract getAuthMethodId(
+    authMethod: AuthMethod,
+    options?: any
+  ): Promise<string>;
+
+  /**
    * Mint a new PKP for the given auth method through the relay server
    *
-   * @param {AuthMethod} authMethod
-   * @param {AuthMethodType} authMethod.authMethodType - Auth method type
-   * @param {string} authMethod.accessToken - Auth method access token
+   * @param {AuthMethod} authMethod - Auth method object
    *
    * @returns {Promise<string>} - Mint transaction hash
    */
   public async mintPKPThroughRelayer(authMethod: AuthMethod): Promise<string> {
-    const mintParams = this.prepareRelayBody(authMethod);
-    const mintRes = await this.relay.mintPKP(
-      authMethod.authMethodType,
-      mintParams
-    );
+    const body = await this.prepareMintBody(authMethod);
+    const mintRes = await this.relay.mintPKP(body);
     if (!mintRes || !mintRes.requestId) {
       throw new Error('Missing mint response or request ID from relay server');
     }
@@ -75,11 +85,8 @@ export abstract class BaseProvider {
   public async fetchPKPsThroughRelayer(
     authMethod: AuthMethod
   ): Promise<IRelayPKP[]> {
-    const fetchParams = this.prepareRelayBody(authMethod);
-    const fetchRes = await this.relay.fetchPKPs(
-      authMethod.authMethodType,
-      fetchParams
-    );
+    const body = await this.prepareFetchBody(authMethod);
+    const fetchRes = await this.relay.fetchPKPs(body);
     if (!fetchRes || !fetchRes.pkps) {
       throw new Error('Missing PKPs in fetch response from relay server');
     }
@@ -168,30 +175,40 @@ export abstract class BaseProvider {
   }
 
   /**
-   * Prepare auth method body for relay server
+   * Generate body for minting PKP through relay server
    *
-   * @param {AuthMethod} authMethod - Auth method object
-   *
-   * @returns {string} - Auth method body for relay server
+   * @returns {Promise<string>} - Request body for minting PKP
    */
-  protected prepareRelayBody(authMethod: AuthMethod): string {
-    switch (authMethod.authMethodType) {
-      case AuthMethodType.Discord:
-        return JSON.stringify({ accessToken: authMethod.accessToken });
-      case AuthMethodType.GoogleJwt:
-        return JSON.stringify({ idToken: authMethod.accessToken });
-      case AuthMethodType.EthWallet:
-        return authMethod.accessToken; // Auth sig is a JSON string
-      case AuthMethodType.WebAuthn:
-        return authMethod.accessToken; // Auth data is a JSON string
-      case AuthMethodType.OTP:
-        return JSON.stringify(authMethod);
-      case AuthMethodType.StytchOtp:
-        return JSON.stringify(authMethod);
-      default:
-        throw new Error(
-          `Invalid auth method type "${authMethod.authMethodType}" passed`
-        );
-    }
+  protected async prepareMintBody(authMethod: AuthMethod): Promise<string> {
+    const authMethodId = await this.getAuthMethodId(authMethod);
+    const args = {
+      keyType: 2,
+      permittedAuthMethodTypes: [authMethod.authMethodType],
+      permittedAuthMethodIds: [authMethodId],
+      permittedAuthMethodPubkeys: authMethod?.pubkey
+        ? [authMethod?.pubkey]
+        : ['0x'],
+      permittedAuthMethodScopes: [[ethers.BigNumber.from('0')]],
+      addPkpEthAddressAsPermittedAddress: true,
+      sendPkpToItself: true,
+    };
+    const body = JSON.stringify(args);
+    return body;
+  }
+
+  /**
+   * Generate body for fetching PKPs by auth method through relay server
+   *
+   * @returns {Promise<string>} - Request body for fetching PKPs by auth method
+   */
+  protected async prepareFetchBody(authMethod: AuthMethod): Promise<string> {
+    const authMethodId = await this.getAuthMethodId(authMethod);
+    const args = {
+      authMethodId,
+      authMethodType: authMethod.authMethodType,
+      authMethodPubKey: authMethod?.pubkey,
+    };
+    const body = JSON.stringify(args);
+    return body;
   }
 }

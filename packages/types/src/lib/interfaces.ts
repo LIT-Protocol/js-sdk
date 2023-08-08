@@ -763,6 +763,7 @@ export interface SessionKeyPair {
 export interface AuthMethod {
   authMethodType: number;
   accessToken: string;
+  pubkey?: string;
 }
 
 // pub struct JsonSignSessionKeyRequest {
@@ -1031,12 +1032,11 @@ export interface IRelay {
   /**
    * Mint a new PKP for the given auth method
    *
-   * @param {number} authMethodType - Auth method type
    * @param {string} body - Body of the request
    *
    * @returns {Promise<IRelayMintResponse>} Response from the relay server
    */
-  mintPKP(authMethodType: number, body: string): Promise<IRelayMintResponse>;
+  mintPKP(body: string): Promise<IRelayMintResponse>;
   /**
    * Poll the relay server for status of minting request
    *
@@ -1050,12 +1050,11 @@ export interface IRelay {
   /**
    * Fetch PKPs associated with the given auth method
    *
-   * @param {number} authMethodType - Auth method type
    * @param {string} body - Body of the request
    *
    * @returns {Promise<IRelayFetchResponse>} Response from the relay server
    */
-  fetchPKPs(authMethodType: number, body: string): Promise<IRelayFetchResponse>;
+  fetchPKPs(body: string): Promise<IRelayFetchResponse>;
   /**
    * Generate options for registering a new credential to pass to the authenticator
    *
@@ -1323,10 +1322,10 @@ export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
 }
 
 export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
-  /* 
-  * JWT from an authenticated session
-  * see stych docs for more info: https://stytch.com/docs/api/session-get
-  */
+  /*
+   * JWT from an authenticated session
+   * see stych docs for more info: https://stytch.com/docs/api/session-get
+   */
   accessToken: string;
   /* 
    Stytch user identifier for a project

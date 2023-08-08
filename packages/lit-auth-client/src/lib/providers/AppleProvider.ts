@@ -11,6 +11,8 @@ import {
   decode,
 } from '../utils';
 import { BaseProvider } from './BaseProvider';
+import { ethers } from 'ethers';
+import * as jose from 'jose';
 
 export default class AppleProvider extends BaseProvider {
   /**
@@ -91,5 +93,23 @@ export default class AppleProvider extends BaseProvider {
       accessToken: idToken,
     };
     return authMethod;
+  }
+
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    const tokenPayload = jose.decodeJwt(authMethod.accessToken);
+    const userId: string = tokenPayload['sub'] as string;
+    const audience: string = tokenPayload['aud'] as string;
+    const authMethodId = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
+    );
+    return Promise.resolve(authMethodId);
   }
 }

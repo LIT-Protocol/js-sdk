@@ -91,4 +91,19 @@ export default class EthWalletProvider extends BaseProvider {
     };
     return authMethod;
   }
+
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    const authMethodId = JSON.parse(
+      authMethod.accessToken
+    ).address.toLowerCase();
+    return Promise.resolve(authMethodId);
+  }
 }
