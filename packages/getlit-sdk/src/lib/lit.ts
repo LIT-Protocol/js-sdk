@@ -154,7 +154,7 @@ export class Lit {
       log(`Set "${storageKey}" to decryption resource: `, decryptionContext);
     }
 
-    let ipfsHash = null;
+    let IPFSHash = null;
 
     if (opts?.uploadToIPFS) {
       if (!globalThis.Lit.persistentStorage) {
@@ -191,8 +191,8 @@ loadLit({
       }
 
       log.info('Uploading decryption context to IPFS...');
-      ipfsHash = await globalThis.Lit.persistentStorage?.set(decryptionContext);
-      log.info(`Uploaded to IPFS: ${JSON.stringify(ipfsHash)}`);
+      IPFSHash = await globalThis.Lit.persistentStorage?.set(decryptionContext);
+      log.info(`Uploaded to IPFS: ${JSON.stringify(IPFSHash)}`);
     }
 
     return {
@@ -209,7 +209,7 @@ loadLit({
       ...(cache && { storageKey }),
 
       // -- if `uploadToIPFS` is true
-      ...(ipfsHash && { ipfsHash }),
+      ...(IPFSHash && { IPFSHash }),
     };
   }
 
