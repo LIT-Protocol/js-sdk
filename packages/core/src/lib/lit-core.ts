@@ -52,6 +52,7 @@ export class LitCore {
   subnetPubKey: string | null;
   networkPubKey: string | null;
   networkPubKeySet: string | null;
+  hdRootPubkeys: string[] | null;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -76,7 +77,7 @@ export class LitCore {
     this.subnetPubKey = null;
     this.networkPubKey = null;
     this.networkPubKeySet = null;
-
+    this.hdRootPubkeys = null;
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
@@ -134,8 +135,8 @@ export class LitCore {
             subnetPubKey: resp.subnetPublicKey,
             networkPubKey: resp.networkPublicKey,
             networkPubKeySet: resp.networkPublicKeySet,
+            hdRootPubkeys: resp.hdRootPubkeys,
           };
-
           this.serverKeys[url] = keys;
         })
         .catch((e: any) => {
@@ -164,6 +165,11 @@ export class LitCore {
           this.networkPubKeySet = mostCommonString(
             Object.values(this.serverKeys).map(
               (keysFromSingleNode: any) => keysFromSingleNode.networkPubKeySet
+            )
+          );
+          this.hdRootPubkeys = mostCommonString(
+            Object.values(this.serverKeys).map(
+              (keysFromSingleNode: any) => keysFromSingleNode.hdRootPubkeys
             )
           );
           this.ready = true;
