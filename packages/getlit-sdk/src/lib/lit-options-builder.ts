@@ -25,7 +25,7 @@ import { ProviderType } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 import { LitEmitter } from './events/lit-emitter';
 import { BrowserHelper } from './browser-helper';
-import { IPFSProvider } from './ipfs-provider-sdk/IPFSProvider';
+import { BaseIPFSProvider } from './ipfs-provider-sdk/providers/BaseIPFSProvider';
 
 const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
 
@@ -35,12 +35,12 @@ export class LitOptionsBuilder {
   private _nodeClientOptions: OrUndefined<LitNodeClientConfig> = undefined;
   private _nodeClient: OrUndefined<Types.NodeClient> = undefined;
 
-  private _persistentStorage: OrNull<IPFSProvider> = null;
+  private _persistentStorage: OrNull<BaseIPFSProvider> = null;
   private _emitter: OrUndefined<LitEmitter> = undefined;
   private _storage: OrUndefined<LitStorage> = undefined;
 
   constructor(opts?: {
-    persistentStorage?: IPFSProvider;
+    persistentStorage?: BaseIPFSProvider;
     emitter?: LitEmitter;
     storage?: LitStorage;
   }) {

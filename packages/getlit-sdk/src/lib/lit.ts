@@ -157,8 +157,42 @@ export class Lit {
     let ipfsHash = null;
 
     if (opts?.uploadToIPFS) {
-      console.log('✅ UPLOADING!!');
-      ipfsHash = globalThis.Lit.persistentStorage?.store(decryptionContext);
+      if (!globalThis.Lit.persistentStorage) {
+        log.throw(
+          `IPFS upload requested but no persistent storage provider is defined
+          
+Please define a persistent storage provider using when instantiating the Lit SDK
+
+Examples:
+
+// -- Pinata
+loadLit({
+  persistentStorage: {
+    provider: 'pinata',
+    options: {
+      JWT: 'your-jwt-token',
+    },
+  },
+});
+
+// -- Infura
+loadLit({
+  persistentStorage: {
+    provider: 'infura',
+    options: {
+      API_KEY: 'your-api-key',
+      API_KEY_SECRET: 'your-api-key-secret',
+    },
+  },
+});
+
+          `
+        );
+      }
+
+      log.info('Uploading decryption context to IPFS...');
+      ipfsHash = await globalThis.Lit.persistentStorage?.set(decryptionContext);
+      log.info(`Uploaded to IPFS: ${JSON.stringify(ipfsHash)}`);
     }
 
     return {

@@ -197,3 +197,19 @@ export type DecryptRes = {
   rawData: Uint8Array;
   data: DeserialisedMessage;
 };
+
+export type pinataConfig = {
+  JWT?: string;
+};
+
+export type infuraConfig = {
+  API_KEY: string;
+  API_KEY_SECRET: string;
+};
+
+export type PersistentStorageConfigOptions = pinataConfig | infuraConfig;
+
+export type PersistentStorageConfig = {
+  provider: 'pinata' | 'helia' | 'infura';
+  options: PersistentStorageConfigOptions;
+};

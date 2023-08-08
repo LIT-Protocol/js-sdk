@@ -1,6 +1,6 @@
 import { CID } from 'blockstore-core/dist/src/base';
-import { isBrowser, isNode, log } from '../utils';
-import { IPFSProvider } from './IPFSProvider';
+import { isBrowser, isNode, log } from '../../utils';
+import { BaseIPFSProvider } from './BaseIPFSProvider';
 
 // These will be automatically injected if it is a browser environment
 declare global {
@@ -13,7 +13,7 @@ const SCRIPTS = [
   'https://unpkg.com/@helia/strings@1.0.0/dist/index.min.js',
 ];
 
-export class HeliaProvider extends IPFSProvider {
+export class HeliaProvider extends BaseIPFSProvider {
   public heliaNode: any;
 
   constructor() {
@@ -99,7 +99,10 @@ export class HeliaProvider extends IPFSProvider {
     return await this.heliaStrings(this.heliaNode);
   };
 
-  override async store(serialisedData: string): Promise<CID> {
+  override async set(serialisedData: string): Promise<{
+    IPFSHash: string;
+    raw: any;
+  }> {
     log.start('HeliaProvider - store', 'uploading data to IPFS...');
     log.info('serialisedData:', serialisedData);
     let immutableAddress;
@@ -124,7 +127,10 @@ export class HeliaProvider extends IPFSProvider {
       throw new Error('HeliaProvider is not supported in NodeJS environments');
     }
 
-    return immutableAddress;
+    return {
+      IPFSHash: immutableAddress.toString(),
+      raw: immutableAddress,
+    };
   }
 
   override async get(immutableAddress: CID): Promise<any> {

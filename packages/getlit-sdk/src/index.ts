@@ -5,13 +5,31 @@ import { handleAutoAuth } from './lib/auth/handle-auto-auth';
 import { LitEmitter } from './lib/events/lit-emitter';
 import { LitStorage } from '@lit-protocol/lit-storage';
 import { AuthMethod } from '@lit-protocol/types';
-import { HeliaProvider } from './lib/ipfs-provider-sdk/helia-provider';
-import { IPFSProvider } from './lib/ipfs-provider-sdk/IPFSProvider';
+import { HeliaProvider } from './lib/ipfs-provider-sdk/providers/helia-provider';
+import { BaseIPFSProvider } from './lib/ipfs-provider-sdk/providers/BaseIPFSProvider';
+import { PinataProvider } from './lib/ipfs-provider-sdk/providers/pinata-provider';
+import {
+  PersistentStorageConfig,
+  PersistentStorageConfigOptions,
+  infuraConfig,
+  pinataConfig,
+} from './lib/types';
+import { infuraProvider } from './lib/ipfs-provider-sdk/providers/infura-provider';
 
 // initialize globally
-export const loadLit = async ({ debug = true }: { debug?: boolean }) => {
-  let IPFSProvider: IPFSProvider;
-
+export const loadLit = async ({
+  debug = true,
+  persistentStorage = {
+    provider: 'pinata',
+    options: {
+      JWT: '',
+    },
+  },
+}: {
+  debug?: boolean;
+  persistentStorage?: PersistentStorageConfig;
+}) => {
+  let IPFSProvider;
   let storage;
   let emitter;
   globalThis.Lit.debug = debug; // switch this to false for production
@@ -21,9 +39,44 @@ export const loadLit = async ({ debug = true }: { debug?: boolean }) => {
 
   // -- initialize IPFSProvider
   try {
-    IPFSProvider = new HeliaProvider();
+    // -- options for persistent storage
+    const providerOptions = {
+      pinata: (options: pinataConfig) =>
+        new PinataProvider({
+          JWT: options.JWT ?? '',
+        }),
+      helia: () => new HeliaProvider(),
+      infura: (options: infuraConfig) =>
+        new infuraProvider({
+          API_KEY: options.API_KEY ?? '',
+          API_KEY_SECRET: options.API_KEY_SECRET ?? '',
+        }),
+
+      // .. add more providers here
+    };
+
+    // -- select persistent storage provider
+    if (providerOptions[persistentStorage.provider]) {
+      IPFSProvider = providerOptions[persistentStorage.provider](
+        persistentStorage.options as any
+      );
+    } else {
+      log.throw(`Invalid persistentStorage option: ${persistentStorage}`);
+    }
   } catch (e) {
-    log.throw(`Error while attempting to initialize IPFSProvider\n${e}`);
+    log.error(`
+    Error while attempting to initialize IPFSProvider, please check your persistentStorage config\n
+
+    loadLit({
+      persistentStorage: {
+        provider: 'pinata',
+        options: {
+          JWT: 'your-jwt-token',
+        },
+      },
+    })
+    
+    \n${e}`);
   }
 
   // -- initialize LitStorage
@@ -45,7 +98,7 @@ export const loadLit = async ({ debug = true }: { debug?: boolean }) => {
     // todo: figure out why there is type incompatibility
     globalThis.Lit.builder = new LitOptionsBuilder({
       emitter,
-      persistentStorage: IPFSProvider,
+      ...(persistentStorage && { persistentStorage: IPFSProvider }),
       storage,
     }) as any;
   } catch (e) {

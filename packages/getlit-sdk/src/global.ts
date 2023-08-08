@@ -13,7 +13,7 @@ import {
 import { LitStorage } from '@lit-protocol/lit-storage';
 import { LitEmitter } from './lib/events/lit-emitter';
 import { BrowserHelper } from './lib/browser-helper';
-import { IPFSProvider } from './lib/ipfs-provider-sdk/IPFSProvider';
+import { BaseIPFSProvider } from './lib/ipfs-provider-sdk/providers/BaseIPFSProvider';
 
 declare global {
   //@ts-ignore
@@ -23,7 +23,7 @@ declare global {
     authClient: OrNull<Types.AuthClient>;
 
     // persistent storage
-    persistentStorage: OrNull<IPFSProvider>;
+    persistentStorage: OrNull<BaseIPFSProvider>;
 
     // storage
     storage: OrNull<LitStorage>;
