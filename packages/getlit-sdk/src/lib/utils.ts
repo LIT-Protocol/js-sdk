@@ -23,7 +23,7 @@ import {
   EncryptResponse,
 } from '@lit-protocol/types';
 
-const version = '0.0.487';
+const version = '0.0.491';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -625,10 +625,45 @@ export const clearSessions = () => {
     const key = localStorage.key(i);
 
     // If the key starts with any of the authKeys, remove it
-    if (key && authKeysPrefixes.some((authKeysPrefixes) => key.startsWith(authKeysPrefixes))) {
+    if (
+      key &&
+      authKeysPrefixes.some((authKeysPrefixes) =>
+        key.startsWith(authKeysPrefixes)
+      )
+    ) {
       globalThis.Lit.storage?.removeItem(key);
     }
   }
 
   log.end('clearSessions');
+};
+
+export const LitMessages = {
+  persistentStorageWarning: `❗️❗️❗️ IMPORTANT ❗️❗️ ❗️
+  
+Please note that we DO NOT pin your data on IPFS using the Helia client. If you want to pin your data, you can either pin the IPFS hash yourself or use a different persistent storage provider.\n`,
+  persistentStorageExample: `Please define a persistent storage provider using when instantiating the Lit SDK
+
+Examples:
+
+// -- Pinata
+loadLit({
+  persistentStorage: {
+    provider: 'pinata',
+    options: {
+      JWT: 'your-jwt-token',
+    },
+  },
+});
+
+// -- Infura
+loadLit({
+  persistentStorage: {
+    provider: 'infura',
+    options: {
+      API_KEY: 'your-api-key',
+      API_KEY_SECRET: 'your-api-key-secret',
+    },
+  },
+});`,
 };

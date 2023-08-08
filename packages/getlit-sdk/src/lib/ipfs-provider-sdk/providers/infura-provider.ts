@@ -15,7 +15,7 @@ export class infuraProvider extends BaseIPFSProvider {
     API_KEY: string;
     API_KEY_SECRET: string;
   }) {
-    super();
+    super('infura');
     this._API_KEY = API_KEY;
     this._API_KEY_SECRET = API_KEY_SECRET;
 

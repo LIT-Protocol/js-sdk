@@ -9,7 +9,7 @@ export class PinataProvider extends BaseIPFSProvider {
   private _JWT: string;
 
   constructor({ JWT }: { JWT: string }) {
-    super();
+    super('pinata');
 
     // -- validate
     if (!JWT) throw new Error('JWT is required');

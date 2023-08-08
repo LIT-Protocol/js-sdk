@@ -32,6 +32,7 @@ import {
   isNode,
   getSingleAuthDataByType,
   convertContentMaterial,
+  LitMessages,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
@@ -160,39 +161,23 @@ export class Lit {
       if (!globalThis.Lit.persistentStorage) {
         log.throw(
           `IPFS upload requested but no persistent storage provider is defined
-          
-Please define a persistent storage provider using when instantiating the Lit SDK
 
-Examples:
-
-// -- Pinata
-loadLit({
-  persistentStorage: {
-    provider: 'pinata',
-    options: {
-      JWT: 'your-jwt-token',
-    },
-  },
-});
-
-// -- Infura
-loadLit({
-  persistentStorage: {
-    provider: 'infura',
-    options: {
-      API_KEY: 'your-api-key',
-      API_KEY_SECRET: 'your-api-key-secret',
-    },
-  },
-});
-
-          `
+${LitMessages.persistentStorageExample}
+`
         );
       }
 
       log.info('Uploading decryption context to IPFS...');
       IPFSHash = await globalThis.Lit.persistentStorage?.set(decryptionContext);
       log.info(`Uploaded to IPFS: ${JSON.stringify(IPFSHash)}`);
+    }
+
+    const isHelia = globalThis.Lit.persistentStorage?.name === 'helia';
+    const isHeliaMessage = `${LitMessages.persistentStorageWarning}
+${LitMessages.persistentStorageExample}`;
+
+    if (isHelia) {
+      console.warn(isHeliaMessage);
     }
 
     return {
@@ -209,7 +194,14 @@ loadLit({
       ...(cache && { storageKey }),
 
       // -- if `uploadToIPFS` is true
-      ...(IPFSHash && { IPFSHash }),
+      ...(IPFSHash && {
+        IPFSHash: {
+          ...IPFSHash,
+          ...(isHelia && {
+            WARNING: isHeliaMessage,
+          }),
+        },
+      }),
     };
   }
 

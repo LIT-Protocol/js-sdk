@@ -20,7 +20,7 @@ import { infuraProvider } from './lib/ipfs-provider-sdk/providers/infura-provide
 export const loadLit = async ({
   debug = true,
   persistentStorage = {
-    provider: 'pinata',
+    provider: 'helia',
     options: {
       JWT: '',
     },
@@ -41,17 +41,16 @@ export const loadLit = async ({
   try {
     // -- options for persistent storage
     const providerOptions = {
+      helia: () => new HeliaProvider(),
       pinata: (options: pinataConfig) =>
         new PinataProvider({
           JWT: options.JWT ?? '',
         }),
-      helia: () => new HeliaProvider(),
       infura: (options: infuraConfig) =>
         new infuraProvider({
           API_KEY: options.API_KEY ?? '',
           API_KEY_SECRET: options.API_KEY_SECRET ?? '',
         }),
-
       // .. add more providers here
     };
 

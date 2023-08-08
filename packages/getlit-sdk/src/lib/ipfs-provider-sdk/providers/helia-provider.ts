@@ -17,7 +17,7 @@ export class HeliaProvider extends BaseIPFSProvider {
   public heliaNode: any;
 
   constructor() {
-    super();
+    super('helia');
 
     if (isBrowser()) {
       this.injectScripts();
