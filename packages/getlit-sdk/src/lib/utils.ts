@@ -647,8 +647,7 @@ Please note that we DO NOT pin your data on IPFS using the Helia client. If you 
 Examples:
 
 // -- Pinata
-loadLit({
-  persistentStorage: {
+loadLit.withPersistentStorage({
     provider: 'pinata',
     options: {
       JWT: 'your-jwt-token',
@@ -657,14 +656,13 @@ loadLit({
 });
 
 // -- Infura
-loadLit({
-  persistentStorage: {
-    provider: 'infura',
-    options: {
-      API_KEY: 'your-api-key',
-      API_KEY_SECRET: 'your-api-key-secret',
-    },
+loadLit.withPersistentStorage({
+  provider: 'infura',
+  options: {
+    API_KEY: 'your-api-key',
+    API_KEY_SECRET: 'your-api-key-secret',
   },
+},
 });`,
 };
 
