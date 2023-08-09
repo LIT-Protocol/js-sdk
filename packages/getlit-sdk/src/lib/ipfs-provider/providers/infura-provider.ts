@@ -46,15 +46,16 @@ export class infuraProvider extends BaseIPFSProvider {
     const infuraURL =
       opts?.infuraURL ?? 'https://ipfs.infura.io:5001/api/v0/add';
     const CIDVersion = opts?.CIDVersion ?? 1;
-    const pin = opts?.pin ?? true;
+    const pin = opts?.pin ? 'true' : 'false';
     const hash = opts?.hash ?? 'sha2-256';
 
     const { payload, boundary } = createPayload(serialisedData);
 
     let data: any;
 
+    // 'https://ipfs.infura.io:5001/api/v0/add?pin=true&cid-version=0&hash=sha2-256';
     try {
-      const url = `${infuraURL}?pin=${pin}&cid-version=${CIDVersion}&hash=${hash}}`;
+      const url = `${infuraURL}?pin=${pin}&cid-version=${CIDVersion}&hash=${hash}`;
 
       const options = {
         method: 'POST',
