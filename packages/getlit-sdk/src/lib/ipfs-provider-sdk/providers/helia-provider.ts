@@ -124,7 +124,7 @@ export class HeliaProvider extends BaseIPFSProvider {
     }
 
     if (isNode()) {
-      throw new Error('HeliaProvider is not supported in NodeJS environments');
+      log.info('HeliaProvider is not supported in NodeJS environments');
     }
 
     return {
@@ -147,7 +147,7 @@ export class HeliaProvider extends BaseIPFSProvider {
     }
 
     if (isNode()) {
-      throw new Error('HeliaProvider is not supported in NodeJS environments');
+      log.info('HeliaProvider is not supported in NodeJS environments');
     }
 
     log.end('HeliaProvider - retrieve', 'downloaded data from IPFS!');
