@@ -3,7 +3,10 @@ import { BaseIPFSProvider } from './BaseIPFSProvider';
 import { isBrowser, isNode, log } from '../../utils';
 import { EncryptResponse } from '@lit-protocol/types';
 import { EncryptionMetadata } from '../../types';
-import { createPayload } from '../utils/ipfs-provider-sdk-helper';
+import {
+  createPayload,
+  fetchIPFSContent,
+} from '../utils/ipfs-provider-sdk-helper';
 
 export class PinataProvider extends BaseIPFSProvider {
   private _JWT: string;
@@ -64,32 +67,7 @@ export class PinataProvider extends BaseIPFSProvider {
         metaData: EncryptionMetadata;
       }
   > {
-    // fetch the content from https://ipfs.io/ipfs/${immutableAddress}
-
-    let res;
-
-    try {
-      res = await fetch(`https://ipfs.io/ipfs/${immutableAddress}`);
-    } catch (e) {
-      log.throw('PinataProvider - get', e);
-    }
-
-    // -- check status
-    if (res.status !== 200) {
-      log.throw(
-        `PinataProvider - get - status: ${res.status} - ${res.statusText}`
-      );
-    }
-
-    let data;
-
-    try {
-      data = await res.json();
-    } catch (e) {
-      data = await res.text();
-    }
-
-    return data;
+    return await fetchIPFSContent(immutableAddress);
   }
 }
 

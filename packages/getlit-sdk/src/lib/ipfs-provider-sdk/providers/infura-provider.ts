@@ -2,7 +2,10 @@ import { EncryptResponse } from '@lit-protocol/types';
 import { log } from '../../utils';
 import { BaseIPFSProvider } from './BaseIPFSProvider';
 import { EncryptionMetadata } from '../../types';
-import { createPayload } from '../utils/ipfs-provider-sdk-helper';
+import {
+  createPayload,
+  fetchIPFSContent,
+} from '../utils/ipfs-provider-sdk-helper';
 
 export class infuraProvider extends BaseIPFSProvider {
   private _API_KEY: string;
@@ -92,24 +95,6 @@ export class infuraProvider extends BaseIPFSProvider {
         metaData: EncryptionMetadata;
       }
   > {
-    // fetch the content from https://ipfs.io/ipfs/${immutableAddress}
-
-    let res;
-
-    try {
-      res = await fetch(`https://ipfs.io/ipfs/${immutableAddress}`);
-    } catch (e) {
-      log.throw('InfuraProvider - get', e);
-    }
-
-    let data;
-
-    try {
-      data = await res.json();
-    } catch (e) {
-      data = await res.text();
-    }
-
-    return data;
+    return await fetchIPFSContent(immutableAddress);
   }
 }

@@ -1,4 +1,4 @@
-import { isBrowser, isNode } from '../../utils';
+import { isBrowser, isNode, log } from '../../utils';
 
 export const createPayload = (serialisedData: string) => {
   let payload;
@@ -26,4 +26,33 @@ export const createPayload = (serialisedData: string) => {
   }
 
   return { payload, boundary };
+};
+
+export const fetchIPFSContent = async (immutableAddress: string) => {
+  // fetch the content from https://ipfs.io/ipfs/${immutableAddress}
+  let res;
+
+  try {
+    res = await fetch(`https://ipfs.io/ipfs/${immutableAddress}`);
+  } catch (e) {
+    log.throw('fetchIPFSContent - get', e);
+  }
+
+  // -- check status
+  if (res.status !== 200) {
+    log.throw(
+      `fetchIPFSContent - get - status: ${res.status} - ${res.statusText}`
+    );
+  }
+
+  const contentType = res.headers.get('content-type');
+  let data;
+
+  if (contentType && contentType.includes('application/json')) {
+    data = await res.json();
+  } else {
+    data = await res.text();
+  }
+
+  return data;
 };
