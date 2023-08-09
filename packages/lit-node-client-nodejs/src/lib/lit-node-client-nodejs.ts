@@ -15,7 +15,7 @@ import {
   encrypt,
   generateSessionKeyPair,
   verifyAndDecryptWithSignatureShares,
-  computeHDPubKey
+  computeHDPubKey,
 } from '@lit-protocol/crypto';
 import { safeParams } from '@lit-protocol/encryption';
 import {
@@ -2021,18 +2021,20 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   /**
-   * 
-   * @param keyId 
-   * @param pubkeys 
+   *
+   * @param keyId
+   * @param pubkeys
    */
-  computeHDPubKey(keyId: string, keyType: SIGTYPE): String {
-    return computeHDPubKey(keyId, keyType);
+  computeHDPubKey(keyId: string, keyType: SIGTYPE): string {
+    return computeHDPubKey(this?.hdRootPubkeys as string[], keyId, keyType);
   }
 
   /**
    *
    */
-  async claimKeyId(authMethod: AuthMethod): Promise<ClaimKeyResponse> {
+  async claimKeyId(
+    authMethod: AuthMethod
+  ): Promise<ClaimKeyResponse & { pubkey: string }> {
     if (!this.ready) {
       const message =
         '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
@@ -2046,7 +2048,7 @@ export class LitNodeClientNodeJs extends LitCore {
     let nodePromises = await this.getNodePromises((url: string) => {
       const requestId = this.getRequestId();
       let params = {
-       authMethod: authMethod,
+        authMethod: authMethod,
       };
       return this.getClaimKeyExecutionShares(url, params, requestId);
     });
@@ -2060,14 +2062,18 @@ export class LitNodeClientNodeJs extends LitCore {
         return ethers.utils.splitSignature(`0x${r.signature}`);
       });
 
+      const derivedKeyId: string = (responseData as SuccessNodePromises<any>).values[0]
+      .derivedKeyId;
+      const pubkey: string = this.computeHDPubKey(derivedKeyId, SIGTYPE.EcdsaCaitSith);
+      
       return {
         signatures: nodeSignatures,
-        derivedKeyId: (responseData as SuccessNodePromises<any>).values[0]
-          .derivedKeyId,
+        derivedKeyId,
+        pubkey
       };
     } else {
       return throwError({
-        message: "claim request has failed",
+        message: 'claim request has failed',
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
         errorCode: LIT_ERROR.UNKNOWN_ERROR.code,
       });
