@@ -720,6 +720,7 @@ export interface JsonHandshakeResponse {
   subnetPubKey: string;
   networkPubKey: string;
   networkPubKeySet: string;
+  hdRootPubkeys: string[];
 }
 
 export interface EncryptToIpfsProps {
