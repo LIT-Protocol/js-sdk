@@ -13,7 +13,7 @@ import {
 import { LitStorage } from '@lit-protocol/lit-storage';
 import { LitEmitter } from './lib/events/lit-emitter';
 import { BrowserHelper } from './lib/browser-helper';
-import { BaseIPFSProvider } from './lib/ipfs-provider-sdk/providers/BaseIPFSProvider';
+import { BaseIPFSProvider } from './lib/ipfs-provider/providers/BaseIPFSProvider';
 
 declare global {
   //@ts-ignore
@@ -38,7 +38,7 @@ declare global {
     instance: OrNull<LitInstance>;
 
     // Lit class methods
-    encrypt: Function;
+    encrypt: LitInstance['encrypt'] | Function;
     decrypt: LitInstance['decrypt'] | Function;
     createAccount: LitInstance['createAccount'] | Function;
     getAccounts: LitInstance['getAccounts'] | Function;
@@ -89,7 +89,10 @@ globalThis.Lit = {
   instance: null,
 
   // Lit class methods
-  encrypt: Lit.encrypt,
+  // encrypt: Lit.encrypt,
+  encrypt: () => {
+    console.log('not initialized');
+  },
   decrypt: () => {
     console.log('not initialized');
   },

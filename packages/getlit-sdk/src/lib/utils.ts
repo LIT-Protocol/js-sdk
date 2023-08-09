@@ -23,7 +23,7 @@ import {
   EncryptResponse,
 } from '@lit-protocol/types';
 
-const version = '0.0.544';
+const version = '0.0.550';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 

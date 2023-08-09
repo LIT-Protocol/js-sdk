@@ -155,74 +155,75 @@ export const encryptToIpfs = async (
  * @returns { Promise<string | Uint8Array> } - The decrypted string or file (in Uint8Array format)
  *
  */
-// export const decryptFromIpfs = async (
-//   params: DecryptFromIpfsProps
-// ): Promise<string | Uint8Array> => {
-//   const { authSig, sessionSigs, ipfsCid, litNodeClient } = params;
+export const decryptFromIpfs = async (
+  params: DecryptFromIpfsProps
+): Promise<string | Uint8Array> => {
+  throw new Error('Please use @getlit/sdk for this function');
+  // const { authSig, sessionSigs, ipfsCid, litNodeClient } = params;
 
-//   // -- validate
-//   const paramsIsSafe = safeParams({
-//     functionName: 'decryptFromIpfs',
-//     params: {
-//       authSig,
-//       sessionSigs,
-//       ipfsCid,
-//       litNodeClient,
-//     },
-//   });
+  // // -- validate
+  // const paramsIsSafe = safeParams({
+  //   functionName: 'decryptFromIpfs',
+  //   params: {
+  //     authSig,
+  //     sessionSigs,
+  //     ipfsCid,
+  //     litNodeClient,
+  //   },
+  // });
 
-//   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
-//     return throwError({
-//       message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
-//       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-//       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-//     });
+  // if (paramsIsSafe.type === EITHER_TYPE.ERROR)
+  //   return throwError({
+  //     message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
+  //     errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+  //     errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+  //   });
 
-//   try {
-//     const metadata: EncryptToIpfsPayload = await (
-//       await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`)
-//     ).json();
-//     if (metadata.dataType === 'string') {
-//       return decryptToString(
-//         {
-//           accessControlConditions: metadata.accessControlConditions,
-//           evmContractConditions: metadata.evmContractConditions,
-//           solRpcConditions: metadata.solRpcConditions,
-//           unifiedAccessControlConditions:
-//             metadata.unifiedAccessControlConditions,
-//           ciphertext: metadata.ciphertext,
-//           dataToEncryptHash: metadata.dataToEncryptHash,
-//           chain: metadata.chain,
-//           authSig,
-//           sessionSigs,
-//         },
-//         litNodeClient
-//       );
-//     } else {
-//       return decryptToFile(
-//         {
-//           accessControlConditions: metadata.accessControlConditions,
-//           evmContractConditions: metadata.evmContractConditions,
-//           solRpcConditions: metadata.solRpcConditions,
-//           unifiedAccessControlConditions:
-//             metadata.unifiedAccessControlConditions,
-//           ciphertext: metadata.ciphertext,
-//           dataToEncryptHash: metadata.dataToEncryptHash,
-//           chain: metadata.chain,
-//           authSig,
-//           sessionSigs,
-//         },
-//         litNodeClient
-//       );
-//     }
-//   } catch (e) {
-//     return throwError({
-//       message: 'Unable to fetch or decrypt from IPFS',
-//       errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-//       errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-//     });
-//   }
-// };
+  // try {
+  //   const metadata: EncryptToIpfsPayload = await (
+  //     await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`)
+  //   ).json();
+  //   if (metadata.dataType === 'string') {
+  //     return decryptToString(
+  //       {
+  //         accessControlConditions: metadata.accessControlConditions,
+  //         evmContractConditions: metadata.evmContractConditions,
+  //         solRpcConditions: metadata.solRpcConditions,
+  //         unifiedAccessControlConditions:
+  //           metadata.unifiedAccessControlConditions,
+  //         ciphertext: metadata.ciphertext,
+  //         dataToEncryptHash: metadata.dataToEncryptHash,
+  //         chain: metadata.chain,
+  //         authSig,
+  //         sessionSigs,
+  //       },
+  //       litNodeClient
+  //     );
+  //   } else {
+  //     return decryptToFile(
+  //       {
+  //         accessControlConditions: metadata.accessControlConditions,
+  //         evmContractConditions: metadata.evmContractConditions,
+  //         solRpcConditions: metadata.solRpcConditions,
+  //         unifiedAccessControlConditions:
+  //           metadata.unifiedAccessControlConditions,
+  //         ciphertext: metadata.ciphertext,
+  //         dataToEncryptHash: metadata.dataToEncryptHash,
+  //         chain: metadata.chain,
+  //         authSig,
+  //         sessionSigs,
+  //       },
+  //       litNodeClient
+  //     );
+  //   }
+  // } catch (e) {
+  //   return throwError({
+  //     message: 'Unable to fetch or decrypt from IPFS',
+  //     errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+  //     errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+  //   });
+  // }
+};
 
 // ---------- Local Helpers ----------
 

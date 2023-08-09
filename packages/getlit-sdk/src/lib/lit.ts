@@ -57,7 +57,7 @@ export class Lit {
 
   constructor() {
     //instance method bindings
-    // globalThis.Lit.encrypt = this.encrypt.bind(this);
+    globalThis.Lit.encrypt = this.encrypt.bind(this);
     globalThis.Lit.decrypt = this.decrypt.bind(this);
     globalThis.Lit.sign = this.sign.bind(this);
     globalThis.Lit.createAccount = this.createAccount.bind(this);
@@ -84,7 +84,8 @@ export class Lit {
    * Then, user stores the A, ID, CipherText themselves
    *
    */
-  static async encrypt(opts: EncryptProps): Promise<EncryptResult> {
+  // static async encrypt(opts: EncryptProps): Promise<EncryptResult> {
+  async encrypt(opts: EncryptProps): Promise<EncryptResult> {
     // -- vars
     let accs: Partial<EncryptRequestBase>;
     let encryptRes: EncryptResponse;
@@ -95,9 +96,10 @@ export class Lit {
     let persistentStorage =
       opts.persistentStorage ?? globalThis.Lit.persistentStorage;
 
-    await waitForReadyEvent();
-
-    const litNodeClient = globalThis.Lit.nodeClient;
+    // // -- flag to this function has been triggered
+    // await waitForReadyEvent();
+    // const litNodeClient = globalThis.Lit.nodeClient; // instead of this._litNodeClient
+    const litNodeClient = this._litNodeClient;
 
     // -- node must be defined
     if (!litNodeClient) {

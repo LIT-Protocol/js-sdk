@@ -32,10 +32,10 @@ import { ProviderType } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 import { LitEmitter } from './events/lit-emitter';
 import { BrowserHelper } from './browser-helper';
-import { BaseIPFSProvider } from './ipfs-provider-sdk/providers/BaseIPFSProvider';
-import { HeliaProvider } from './ipfs-provider-sdk/providers/helia-provider';
-import { PinataProvider } from './ipfs-provider-sdk/providers/pinata-provider';
-import { infuraProvider } from './ipfs-provider-sdk/providers/infura-provider';
+import { BaseIPFSProvider } from './ipfs-provider/providers/BaseIPFSProvider';
+import { HeliaProvider } from './ipfs-provider/providers/helia-provider';
+import { PinataProvider } from './ipfs-provider/providers/pinata-provider';
+import { infuraProvider } from './ipfs-provider/providers/infura-provider';
 import { handleAutoAuth } from './auth/handle-auto-auth';
 
 const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
@@ -164,7 +164,7 @@ export class LitOptionsBuilder {
 
   // ========== Build ==========
   public async build(): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 30000));
+    // await new Promise((resolve) => setTimeout(resolve, 10000));
 
     log.start('build', 'starting...');
 

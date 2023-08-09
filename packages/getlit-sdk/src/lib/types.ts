@@ -18,7 +18,7 @@ import { ethers } from 'ethers';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { AuthMethodType } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
-import { BaseIPFSProvider } from './ipfs-provider-sdk/providers/BaseIPFSProvider';
+import { BaseIPFSProvider } from './ipfs-provider/providers/BaseIPFSProvider';
 
 export type OrNull<T> = T | null;
 export type OrUndefined<T> = T | undefined;
