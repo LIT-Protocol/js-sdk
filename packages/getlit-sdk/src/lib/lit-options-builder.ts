@@ -52,6 +52,16 @@ export class LitOptionsBuilder {
 
   private isExecuted: boolean = false;
 
+  constructor() {
+    this.initialiseEventEmitter();
+    this.initialiseIPFSProvider({
+      provider: 'helia',
+    });
+    this.initialiseStorageProvider();
+    this.createUtils();
+    this.createBrowserUtils();
+  }
+
   // ========== Default ==========ƒ
   // Converts the instance back to a function-like behavior.
   // When it is invoked directly, it should default to the normal execution behavior.
@@ -144,10 +154,7 @@ export class LitOptionsBuilder {
     return this;
   }
 
-  public withPersistentStorageProvider({
-    provider,
-    options,
-  }: PersistentStorageConfig) {
+  public withPersistentStorage({ provider, options }: PersistentStorageConfig) {
     this.initialiseIPFSProvider({
       provider,
       options,
@@ -157,14 +164,9 @@ export class LitOptionsBuilder {
 
   // ========== Build ==========
   public async build(): Promise<void> {
-    log.start('build', 'starting...');
+    await new Promise((resolve) => setTimeout(resolve, 30000));
 
-    // -- buider's "dependencies"
-    this.initialiseIPFSProvider({
-      provider: 'helia',
-    });
-    this.initialiseStorageProvider();
-    this.initialiseEventEmitter();
+    log.start('build', 'starting...');
 
     // -- start
     const nodeClientOpts = this._nodeClientOptions ?? {
@@ -205,8 +207,6 @@ export class LitOptionsBuilder {
     globalThis.Lit.ready = true;
 
     await this.initialiseAuthClient();
-    this.createUtils();
-    this.createBrowserUtils();
   }
 
   // ========== Initialise ==========

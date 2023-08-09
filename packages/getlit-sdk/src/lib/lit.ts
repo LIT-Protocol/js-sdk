@@ -33,6 +33,7 @@ import {
   getSingleAuthDataByType,
   convertContentMaterial,
   LitMessages,
+  waitForReadyEvent,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
@@ -56,7 +57,7 @@ export class Lit {
 
   constructor() {
     //instance method bindings
-    globalThis.Lit.encrypt = this.encrypt.bind(this);
+    // globalThis.Lit.encrypt = this.encrypt.bind(this);
     globalThis.Lit.decrypt = this.decrypt.bind(this);
     globalThis.Lit.sign = this.sign.bind(this);
     globalThis.Lit.createAccount = this.createAccount.bind(this);
@@ -83,7 +84,7 @@ export class Lit {
    * Then, user stores the A, ID, CipherText themselves
    *
    */
-  public async encrypt(opts: EncryptProps): Promise<EncryptResult> {
+  static async encrypt(opts: EncryptProps): Promise<EncryptResult> {
     // -- vars
     let accs: Partial<EncryptRequestBase>;
     let encryptRes: EncryptResponse;
@@ -94,12 +95,12 @@ export class Lit {
     let persistentStorage =
       opts.persistentStorage ?? globalThis.Lit.persistentStorage;
 
-    // persistentStorageProvider(interface)
+    await waitForReadyEvent();
 
-    // -- validate
+    const litNodeClient = globalThis.Lit.nodeClient;
 
     // -- node must be defined
-    if (!this._litNodeClient) {
+    if (!litNodeClient) {
       throw new Error('_litNodeClient is undefined');
     }
 
@@ -128,7 +129,7 @@ export class Lit {
 
     // -- ask nodes to use BLS key to encrypt
     try {
-      encryptRes = await this._litNodeClient.encrypt({
+      encryptRes = await litNodeClient.encrypt({
         dataToEncrypt: encryptionMaterial.data,
         chain,
         ...accs,

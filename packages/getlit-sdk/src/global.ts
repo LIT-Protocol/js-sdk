@@ -1,4 +1,4 @@
-import { Lit as LitInstance } from './lib/lit';
+import { Lit, Lit as LitInstance } from './lib/lit';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
 import { LitAuthMethod, OrNull, Types } from './lib/types';
 import {
@@ -38,7 +38,7 @@ declare global {
     instance: OrNull<LitInstance>;
 
     // Lit class methods
-    encrypt: LitInstance['encrypt'] | Function;
+    encrypt: Function;
     decrypt: LitInstance['decrypt'] | Function;
     createAccount: LitInstance['createAccount'] | Function;
     getAccounts: LitInstance['getAccounts'] | Function;
@@ -89,9 +89,7 @@ globalThis.Lit = {
   instance: null,
 
   // Lit class methods
-  encrypt: () => {
-    console.log('not initialized');
-  },
+  encrypt: Lit.encrypt,
   decrypt: () => {
     console.log('not initialized');
   },

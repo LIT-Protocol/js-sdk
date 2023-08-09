@@ -23,7 +23,7 @@ import {
   EncryptResponse,
 } from '@lit-protocol/types';
 
-const version = '0.0.525';
+const version = '0.0.544';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -667,3 +667,30 @@ loadLit({
   },
 });`,
 };
+
+/**
+ * Waits for the 'ready' event to be emitted before resolving.
+ *
+ * @returns {Promise<void>}
+ */
+export async function waitForReadyEvent(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!globalThis.Lit.eventEmitter) {
+      return reject(new Error('Emitter is not initialized.'));
+    }
+
+    // If already ready, resolve immediately
+    if (globalThis.Lit && globalThis.Lit.ready) {
+      return resolve();
+    }
+
+    const handleReady = (isReady: boolean) => {
+      if (isReady) {
+        resolve();
+      }
+    };
+
+    // Listen for 'ready' event
+    globalThis.Lit.eventEmitter.on('ready', handleReady);
+  });
+}

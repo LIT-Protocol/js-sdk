@@ -1,6 +1,7 @@
 import { CID } from 'blockstore-core/dist/src/base';
 import { isBrowser, isNode, log } from '../../utils';
 import { BaseIPFSProvider } from './BaseIPFSProvider';
+import { fetchIPFSContent } from '../utils/ipfs-provider-sdk-helper';
 
 // These will be automatically injected if it is a browser environment
 declare global {
@@ -133,10 +134,15 @@ export class HeliaProvider extends BaseIPFSProvider {
     };
   }
 
-  override async get(immutableAddress: CID): Promise<any> {
+  override async get(immutableAddress: CID | string): Promise<any> {
     log.start('HeliaProvider - retrieve', 'downloading data from IPFS...');
 
-    let data;
+    let data = await fetchIPFSContent(immutableAddress.toString());
+
+    // -- try to fetch it from IPFS first
+    if (data) {
+      return data;
+    }
 
     if (isBrowser()) {
       this.validateInjectedScripts();
