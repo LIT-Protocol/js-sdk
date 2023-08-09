@@ -31,15 +31,27 @@ export class infuraProvider extends BaseIPFSProvider {
   }
 
   override async set(
-    serialisedData: string
+    serialisedData: string,
+    opts?: {
+      infuraURL?: string;
+      CIDVersion?: number;
+      pin?: boolean;
+      hash?: string;
+    }
   ): Promise<{ IPFSHash: string; raw: any }> {
+    // -- params
+    const infuraURL =
+      opts?.infuraURL ?? 'https://ipfs.infura.io:5001/api/v0/add';
+    const CIDVersion = opts?.CIDVersion ?? 1;
+    const pin = opts?.pin ?? true;
+    const hash = opts?.hash ?? 'sha2-256';
+
     const { payload, boundary } = createPayload(serialisedData);
 
     let data: any;
 
     try {
-      const url =
-        'https://ipfs.infura.io:5001/api/v0/add?pin=true&cid-version=0&hash=sha2-256';
+      const url = `${infuraURL}?pin=${pin}&cid-version=${CIDVersion}&hash=${hash}}`;
 
       const options = {
         method: 'POST',
@@ -54,6 +66,13 @@ export class infuraProvider extends BaseIPFSProvider {
       };
 
       const res = await fetch(url, options);
+
+      // -- check status
+      if (res.status !== 200) {
+        log.throw(
+          `InfuraProvider - store - status: ${res.status} - ${res.statusText}`
+        );
+      }
 
       data = await res.json();
     } catch (error) {

@@ -1,5 +1,12 @@
-import { LitNodeClientConfig } from '@lit-protocol/types';
-import { OrNull, OrUndefined, Types } from './types';
+import { AuthMethod, LitNodeClientConfig } from '@lit-protocol/types';
+import {
+  OrNull,
+  OrUndefined,
+  PersistentStorageConfig,
+  Types,
+  infuraConfig,
+  pinataConfig,
+} from './types';
 import {
   clearSessions,
   getProviderMap,
@@ -26,6 +33,10 @@ import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 import { LitEmitter } from './events/lit-emitter';
 import { BrowserHelper } from './browser-helper';
 import { BaseIPFSProvider } from './ipfs-provider-sdk/providers/BaseIPFSProvider';
+import { HeliaProvider } from './ipfs-provider-sdk/providers/helia-provider';
+import { PinataProvider } from './ipfs-provider-sdk/providers/pinata-provider';
+import { infuraProvider } from './ipfs-provider-sdk/providers/infura-provider';
+import { handleAutoAuth } from './auth/handle-auto-auth';
 
 const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
 
@@ -39,56 +50,123 @@ export class LitOptionsBuilder {
   private _emitter: OrUndefined<LitEmitter> = undefined;
   private _storage: OrUndefined<LitStorage> = undefined;
 
-  constructor(opts?: {
-    persistentStorage?: BaseIPFSProvider;
-    emitter?: LitEmitter;
-    storage?: LitStorage;
-  }) {
-    log.start('LitOptionsBuilder', 'starting LitOptionsBuilder...');
+  private isExecuted: boolean = false;
 
-    // -- set globalThis.Lit.persistentStorage
-    if (opts?.persistentStorage) {
-      this._persistentStorage = opts.persistentStorage;
-
-      if (this._persistentStorage) {
-        globalThis.Lit.persistentStorage = this._persistentStorage as any;
-      }
-    }
-
-    // -- set globalThis.Lit.emitter
-    if (opts?.emitter) {
-      this._emitter = opts.emitter;
-
-      // todo: figure out why there is type incompatibility
-      globalThis.Lit.eventEmitter = this._emitter as any;
-    }
-    // -- set globalThis.Lit.storage
-    if (opts?.storage) {
-      this._storage = opts.storage;
-      globalThis.Lit.storage = this._storage;
-    }
-
-    log.end('LitOptionsBuilder', 'done!');
+  // ========== Default ==========ƒ
+  // Converts the instance back to a function-like behavior.
+  // When it is invoked directly, it should default to the normal execution behavior.
+  async invoke({
+    debug = true,
+  }: {
+    debug?: boolean;
+  }): Promise<LitOptionsBuilder> {
+    await this.execute({ debug });
+    return this;
   }
 
+  private async execute({ debug = true }: { debug?: boolean }): Promise<void> {
+    if (this.isExecuted) {
+      return;
+    }
+
+    this.isExecuted = true;
+
+    globalThis.Lit.debug = debug; // switch this to false for production
+    globalThis.Lit.builder = null;
+
+    log.start('global', 'initializing...');
+
+    // -- initialize LitOptionsBuilder
+    try {
+      globalThis.Lit.builder = new LitOptionsBuilder() as any;
+    } catch (e) {
+      log.throw(`Error while attempting to initialize LitOptionsBuilder\n${e}`);
+    }
+
+    if (!globalThis.Lit.builder) {
+      log.throw(`globalThis.Lit.builder is undefined!`);
+    }
+
+    // -- build LitOptionsBuilder
+    try {
+      await globalThis.Lit.builder.build();
+    } catch (e) {
+      log.throw(`Error while attempting to build LitOptionsBuilder\n${e}`);
+    }
+
+    log.end('global', 'done!');
+
+    // ---------- Enable auto auth for browser ----------
+    if (isBrowser()) {
+      handleAutoAuth(async (authData: AuthMethod) => {
+        globalThis.Lit.eventEmitter?.createAccountStatus('in_progress');
+        log.info('Creating Lit account...');
+
+        try {
+          const PKPInfoArr = await globalThis.Lit.createAccount({
+            authData: [authData],
+          });
+          log.success('Lit account created!');
+          log.info(`PKPInfo: ${JSON.stringify(PKPInfoArr)}`);
+
+          if (Array.isArray(PKPInfoArr)) {
+            globalThis.Lit.eventEmitter?.createAccountStatus(
+              'completed',
+              PKPInfoArr
+            );
+          }
+        } catch (e) {
+          log.error(`Error while attempting to create Lit account ${e}`);
+          globalThis.Lit.eventEmitter?.createAccountStatus('failed');
+        }
+      });
+    }
+  }
+
+  // ========== With Methods ==========
   public withContractOptions(options: Types.ContractOptions) {
     this._contractOptions = options;
+    return this;
   }
 
   public withAuthOptions(options: Types.AuthOptions) {
     this._authOptions = options;
+    return this;
   }
+
   public withNodeClient(client: Types.NodeClient) {
     this._nodeClient = client;
+    return this;
   }
 
   public withStorageProvider(provider: ILitStorage) {
     this._storage = new LitStorage({ storageProvider: provider });
+    return this;
   }
 
+  public withPersistentStorageProvider({
+    provider,
+    options,
+  }: PersistentStorageConfig) {
+    this.initialiseIPFSProvider({
+      provider,
+      options,
+    });
+    return this;
+  }
+
+  // ========== Build ==========
   public async build(): Promise<void> {
     log.start('build', 'starting...');
 
+    // -- buider's "dependencies"
+    this.initialiseIPFSProvider({
+      provider: 'helia',
+    });
+    this.initialiseStorageProvider();
+    this.initialiseEventEmitter();
+
+    // -- start
     const nodeClientOpts = this._nodeClientOptions ?? {
       litNetwork: DEFAULT_NETWORK,
       debug: false,
@@ -108,8 +186,7 @@ export class LitOptionsBuilder {
     }
 
     globalThis.Lit.nodeClient = this._nodeClient as Types.NodeClient;
-    // todo: figure out why there is type incompatibility
-    globalThis.Lit.instance = new Lit() as any;
+    globalThis.Lit.instance = new Lit();
     log.info('"globalThis.Lit" has already been initialized!');
 
     if (!globalThis.Lit.instance) {
@@ -127,18 +204,14 @@ export class LitOptionsBuilder {
     this._emitter?.emit('ready', true);
     globalThis.Lit.ready = true;
 
-    await this.startAuthClient();
-
+    await this.initialiseAuthClient();
     this.createUtils();
     this.createBrowserUtils();
   }
 
-  public emit(event: string, ...args: any[]) {
-    this._emitter?.emit(event, ...args);
-  }
-
-  public async startAuthClient(): Promise<void> {
-    log.start('startAuthClient', 'starting...');
+  // ========== Initialise ==========
+  public async initialiseAuthClient(): Promise<void> {
+    log.start('initialiseAuthClient', 'starting...');
 
     globalThis.Lit.authClient = new LitAuthClient({
       // redirectUri: window.location.href.replace(/\/+$/, ''),
@@ -198,9 +271,102 @@ export class LitOptionsBuilder {
       `(UPDATED AT: 14/07/2023) A list of available auth methods can be found in PKPPermissions.sol https://bit.ly/44HHa5n (private, to be public soon)`
     );
 
-    log.end('startAuthClient', 'done!');
+    log.end('initialiseAuthClient', 'done!');
   }
 
+  public initialiseIPFSProvider({
+    provider,
+    options,
+  }: PersistentStorageConfig): BaseIPFSProvider {
+    try {
+      // -- options for persistent storage
+      const providerOptions = {
+        helia: () => new HeliaProvider(),
+        pinata: (options: pinataConfig) =>
+          new PinataProvider({
+            JWT: options.JWT ?? '',
+          }),
+        infura: (options: infuraConfig) =>
+          new infuraProvider({
+            API_KEY: options.API_KEY ?? '',
+            API_KEY_SECRET: options.API_KEY_SECRET ?? '',
+          }),
+        // .. add more providers here
+      };
+
+      // -- select persistent storage provider
+      if (providerOptions[provider]) {
+        log.info('Provider selected: ', provider);
+        const IPFSProvider = providerOptions[provider](options as any);
+
+        // -- set globalThis.Lit.persistentStorage
+        this._persistentStorage = IPFSProvider;
+        globalThis.Lit.persistentStorage = IPFSProvider;
+        return IPFSProvider;
+      } else {
+        log.throw(`Invalid persistentStorage option: ${options}`);
+      }
+    } catch (e) {
+      log.error(`
+      Error while attempting to initialize IPFSProvider, please check your persistentStorage config\n
+  
+      loadLit({
+        persistentStorage: {
+          provider: 'pinata',
+          options: {
+            JWT: 'your-jwt-token',
+          },
+        },
+      })
+      
+      \n${e}`);
+    }
+    log.throw(`Error while attempting to initialize IPFSProvider`);
+  }
+
+  public initialiseStorageProvider(): LitStorage {
+    let storage;
+
+    // -- initialize LitStorage
+    try {
+      storage = new LitStorage();
+    } catch (e) {
+      log.throw(`Error while attempting to initialize LitStorage\n${e}`);
+    }
+
+    if (!storage) {
+      return log.throw(`Error while attempting to initialize LitStorage`);
+    }
+
+    // -- set globalThis.Lit.storage
+    this._storage = storage;
+    globalThis.Lit.storage = storage;
+
+    return storage;
+  }
+
+  public initialiseEventEmitter() {
+    let emitter;
+
+    // -- initialize LitEmitter
+    try {
+      emitter = new LitEmitter();
+    } catch (e) {
+      log.throw(`Error while attempting to initialize LitEmitter\n${e}`);
+    }
+
+    if (!emitter) {
+      return log.throw(`Error while attempting to initialize LitEmitter`);
+    }
+
+    // -- set globalThis.Lit.emitter
+    this._emitter = emitter;
+    globalThis.Lit.eventEmitter = emitter;
+
+    return emitter;
+  }
+
+  // ========== Create Utils ==========
   public createUtils() {
     log.start('createUtils', 'starting...');
 

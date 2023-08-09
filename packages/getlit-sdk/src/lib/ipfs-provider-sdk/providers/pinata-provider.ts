@@ -74,6 +74,13 @@ export class PinataProvider extends BaseIPFSProvider {
       log.throw('PinataProvider - get', e);
     }
 
+    // -- check status
+    if (res.status !== 200) {
+      log.throw(
+        `PinataProvider - get - status: ${res.status} - ${res.statusText}`
+      );
+    }
+
     let data;
 
     try {

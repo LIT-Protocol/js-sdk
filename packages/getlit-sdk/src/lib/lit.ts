@@ -91,11 +91,8 @@ export class Lit {
     let encryptionMaterialWithMetadata: EncryptionMetadata;
     let chain = opts.chain ?? 'ethereum'; // default EVM chain
     let cache = opts.cache ?? true;
-
-    let persistentStorageProvider =
-      opts.persistentStorageProvider ??
-      // @ts-ignore
-      globalThis.Lit.persistentStorageProvider;
+    let persistentStorage =
+      opts.persistentStorage ?? globalThis.Lit.persistentStorage;
 
     // persistentStorageProvider(interface)
 
@@ -158,7 +155,7 @@ export class Lit {
     let IPFSHash = null;
 
     if (opts?.uploadToIPFS) {
-      if (!globalThis.Lit.persistentStorage) {
+      if (!persistentStorage) {
         log.throw(
           `IPFS upload requested but no persistent storage provider is defined
 
@@ -168,11 +165,11 @@ ${LitMessages.persistentStorageExample}
       }
 
       log.info('Uploading decryption context to IPFS...');
-      IPFSHash = await globalThis.Lit.persistentStorage?.set(decryptionContext);
+      IPFSHash = await persistentStorage.set(decryptionContext);
       log.info(`Uploaded to IPFS: ${JSON.stringify(IPFSHash)}`);
     }
 
-    const isHelia = globalThis.Lit.persistentStorage?.name === 'helia';
+    const isHelia = persistentStorage?.name === 'helia';
     const isHeliaMessage = `${LitMessages.persistentStorageWarning}
 ${LitMessages.persistentStorageExample}`;
 

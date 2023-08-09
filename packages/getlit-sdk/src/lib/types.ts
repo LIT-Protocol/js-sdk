@@ -18,6 +18,7 @@ import { ethers } from 'ethers';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { AuthMethodType } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
+import { BaseIPFSProvider } from './ipfs-provider-sdk/providers/BaseIPFSProvider';
 
 export type OrNull<T> = T | null;
 export type OrUndefined<T> = T | undefined;
@@ -91,8 +92,7 @@ export interface EncryptProps {
   cache?: boolean;
   extraData?: any; // extra metadata to be added to the encryption metadata
   uploadToIPFS?: boolean;
-
-  persistentStorageProvider?: any;
+  persistentStorage?: BaseIPFSProvider;
 }
 
 export interface EncryptResult {
@@ -211,5 +211,5 @@ export type PersistentStorageConfigOptions = pinataConfig | infuraConfig;
 
 export type PersistentStorageConfig = {
   provider: 'pinata' | 'helia' | 'infura';
-  options: PersistentStorageConfigOptions;
+  options?: PersistentStorageConfigOptions;
 };
