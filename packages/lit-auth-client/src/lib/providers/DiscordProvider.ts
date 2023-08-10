@@ -18,10 +18,15 @@ export default class DiscordProvider extends BaseProvider {
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
+  /**
+   * OAuth client ID. Defaults to one used by Lit
+   */
+  private clientId?: string;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
     this.redirectUri = options.redirectUri || window.location.origin;
+    this.clientId = options.clientId || '1052874239658692668';
   }
 
   /**
@@ -99,21 +104,13 @@ export default class DiscordProvider extends BaseProvider {
    * PKPs associated with the given auth method
    *
    * @param {AuthMethod} authMethod - Auth method object
-   * @param {any} [options] - Optional parameters that vary based on the provider
-   * @param {string} [options.clientId] - Discord client ID. Defaults to a client ID used by Lit
    *
    * @returns {Promise<string>} - Auth method id
    */
-  public async getAuthMethodId(
-    authMethod: AuthMethod,
-    options?: {
-      clientId?: string;
-    }
-  ): Promise<string> {
-    const clientId = options?.clientId || '105287423965869266';
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
     const userId = await this.#fetchDiscordUser(authMethod.accessToken);
     const authMethodId = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(`${userId}:${clientId}`)
+      ethers.utils.toUtf8Bytes(`${userId}:${this.clientId}`)
     );
     return authMethodId;
   }

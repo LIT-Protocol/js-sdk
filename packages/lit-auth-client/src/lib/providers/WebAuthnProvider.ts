@@ -1,4 +1,8 @@
-import { AuthMethod, BaseProviderOptions } from '@lit-protocol/types';
+import {
+  AuthMethod,
+  BaseProviderOptions,
+  WebAuthnProviderOptions,
+} from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import {
@@ -11,8 +15,14 @@ import { BaseProvider } from './BaseProvider';
 import { RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
 
 export default class WebAuthnProvider extends BaseProvider {
-  constructor(options: BaseProviderOptions) {
+  /**
+   * Name of relying party. Defaults to "lit"
+   */
+  private rpName?: string;
+
+  constructor(options: BaseProviderOptions & WebAuthnProviderOptions) {
     super(options);
+    this.rpName = options.rpName || 'lit';
   }
 
   /**
@@ -159,21 +169,13 @@ export default class WebAuthnProvider extends BaseProvider {
    * PKPs associated with the given auth method
    *
    * @param {AuthMethod} authMethod - Auth method object
-   * @param {any} [options] - Optional parameters that vary based on the provider
-   * @param {string} [options.rpId] - RP ID. Defaults to "lit"
    *
    * @returns {Promise<string>} - Auth method id
    */
-  public async getAuthMethodId(
-    authMethod: AuthMethod,
-    options?: {
-      rpId?: string;
-    }
-  ): Promise<string> {
-    const rpId = options?.rpId || 'lit';
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
     const credentialId = JSON.parse(authMethod.accessToken).rawId;
     const authMethodId = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(`${credentialId}:${rpId}`)
+      ethers.utils.toUtf8Bytes(`${credentialId}:${this.rpName}`)
     );
     return authMethodId;
   }

@@ -1167,6 +1167,10 @@ export interface OAuthProviderOptions {
    * The redirect URI that Lit's login server should send the user back to
    */
   redirectUri?: string;
+  /**
+   * OAuth client ID
+   */
+  clientId?: string;
 }
 
 export interface EthWalletProviderOptions {
@@ -1178,6 +1182,13 @@ export interface EthWalletProviderOptions {
    * The origin from which the signing request is made
    */
   origin?: string;
+}
+
+export interface WebAuthnProviderOptions {
+  /**
+   * Name of relying party. Defaults to "lit"
+   */
+  rpName?: string;
 }
 
 export interface SignInWithOTPParams {
@@ -1199,17 +1210,6 @@ export interface SignInWithOTPParams {
   emailCustomizationOptions: OtpEmailCustomizationOptions;
 
   customName?: string;
-}
-
-export interface EthWalletProviderOptions {
-  /**
-   * The domain from which the signing request is made
-   */
-  domain?: string;
-  /**
-   * The origin from which the signing request is made
-   */
-  origin?: string;
 }
 
 export interface OtpProviderOptions {
