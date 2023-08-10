@@ -43,6 +43,7 @@ export class HeliaProvider extends BaseIPFSProvider {
     isStarted: ${heliaNode.libp2p.isStarted()}
             `);
             this.heliaNode = heliaNode;
+            this.heliaNode.libp2p.stop();
           });
         }
 

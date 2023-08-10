@@ -14,10 +14,13 @@ import { LitStorage } from '@lit-protocol/lit-storage';
 import { LitEmitter } from './lib/events/lit-emitter';
 import { BrowserHelper } from './lib/browser-helper';
 import { BaseIPFSProvider } from './lib/ipfs-provider/providers/BaseIPFSProvider';
+import { waitForLit } from './lib/utils';
 
 declare global {
   //@ts-ignore
   var Lit: {
+    wait: any;
+
     // clients
     nodeClient: OrNull<Types.NodeClient>;
     authClient: OrNull<Types.AuthClient>;
@@ -69,6 +72,8 @@ declare global {
 
 // -- global "constructor" | APIs
 globalThis.Lit = {
+  wait: waitForLit,
+
   // clients
   nodeClient: null,
   authClient: null,

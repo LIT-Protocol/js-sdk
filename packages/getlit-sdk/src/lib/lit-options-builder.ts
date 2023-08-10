@@ -139,21 +139,26 @@ export class LitOptionsBuilder {
     return this;
   }
 
+  // -- if you want to customize the relay & OTP configurations
   public withAuthOptions(options: Types.AuthOptions) {
     this._authOptions = options;
     return this;
   }
 
+  // -- if you want to customize the LitNodeClient configurations
   public withNodeClient(client: Types.NodeClient) {
     this._nodeClient = client;
     return this;
   }
 
-  public withStorageProvider(provider: ILitStorage) {
+  // -- If you want to specify where to store your cache data, by default it will be stored in localStorage,
+  // or memory if you are using NodeJS
+  public withCacheProvider(provider: ILitStorage) {
     this._storage = new LitStorage({ storageProvider: provider });
     return this;
   }
 
+  // -- If you want to specify which IPFS provider to use, by default it will be using Helia
   public withPersistentStorage({ provider, options }: PersistentStorageConfig) {
     this.initialiseIPFSProvider({
       provider,

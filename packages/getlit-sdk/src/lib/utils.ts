@@ -23,7 +23,7 @@ import {
   EncryptResponse,
 } from '@lit-protocol/types';
 
-const version = '0.0.552';
+const version = '0.0.575';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -671,7 +671,7 @@ loadLit.withPersistentStorage({
  *
  * @returns {Promise<void>}
  */
-export async function waitForReadyEvent(): Promise<void> {
+export async function waitForLit(): Promise<void> {
   return new Promise((resolve, reject) => {
     if (!globalThis.Lit.eventEmitter) {
       return reject(new Error('Emitter is not initialized.'));

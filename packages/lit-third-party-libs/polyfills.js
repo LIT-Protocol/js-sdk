@@ -2,7 +2,11 @@
 // between the autogen:polyfills:start/end comments
 
 try {
-  global.WebSocket = require('ws');
+
+  // For some reason this breaks Next.js page.tsx, but works on all other pages
+  if(!globalThis.__next_f){
+    global.WebSocket = require('ws');
+  }
 } catch (e) {
   // swallow
 }

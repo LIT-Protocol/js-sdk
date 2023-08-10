@@ -33,7 +33,7 @@ import {
   getSingleAuthDataByType,
   convertContentMaterial,
   LitMessages,
-  waitForReadyEvent,
+  waitForLit,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
@@ -97,7 +97,7 @@ export class Lit {
       opts.persistentStorage ?? globalThis.Lit.persistentStorage;
 
     // // -- flag to this function has been triggered
-    // await waitForReadyEvent();
+    // await waitForLit();
     // const litNodeClient = globalThis.Lit.nodeClient; // instead of this._litNodeClient
     const litNodeClient = this._litNodeClient;
 
