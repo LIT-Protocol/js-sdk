@@ -31,7 +31,7 @@ export const litNodeClient: LitNodeClient = new LitNodeClient({
 
 export const litAuthClient: LitAuthClient = new LitAuthClient({
   litRelayConfig: {
-    relayUrl: 'http://localhost:3001',
+    // relayUrl: 'http://localhost:3001',
     relayApiKey: 'test-api-key',
   },
   litOtpConfig: {

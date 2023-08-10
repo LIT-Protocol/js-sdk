@@ -25,7 +25,6 @@ const StytchOTP = ({ authWithStytch, setView }: StytchOTPProps) => {
     event.preventDefault();
     setLoading(true);
     setError(undefined);
-    console.log('phoneNumber', phoneNumber);
     try {
       const response = await stytchClient.otps.sms.loginOrCreate(phoneNumber);
       setMethodId(response.method_id);
