@@ -60,6 +60,7 @@ declare global {
 
     // utils
     getStoredAuthData: OrNull<Function>;
+    getStoredAuthDataWithKeys: OrNull<Function>;
     getStoredEncryptedData: OrNull<Function>;
     clearSessions: OrNull<Function>;
 
@@ -126,6 +127,9 @@ globalThis.Lit = {
 
   // utils
   getStoredAuthData: () => {
+    console.log('not initialized');
+  },
+  getStoredAuthDataWithKeys: () => {
     console.log('not initialized');
   },
   getStoredEncryptedData: () => {

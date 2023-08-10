@@ -123,6 +123,11 @@ export class HeliaProvider extends BaseIPFSProvider {
       log.info('immutableAddress:', immutableAddress);
 
       log.end('HeliaProvider - store', 'uploaded data to IPFS!');
+
+      return {
+        IPFSHash: immutableAddress.toString(),
+        raw: immutableAddress,
+      };
     }
 
     if (isNode()) {
@@ -130,8 +135,8 @@ export class HeliaProvider extends BaseIPFSProvider {
     }
 
     return {
-      IPFSHash: immutableAddress.toString(),
-      raw: immutableAddress,
+      IPFSHash: '',
+      raw: null,
     };
   }
 

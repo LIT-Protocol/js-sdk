@@ -1,6 +1,6 @@
 import './global';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
-import { isBrowser, waitForLit } from './lib/utils';
+import { waitForLit } from './lib/utils';
 
 /**
  * This is a trick to make the instance behave like a function where you can async/await, but still be an instance where you can chain methods like .withPersistentStorage() .withAuthOptions() etc.
@@ -35,4 +35,8 @@ const loadLit = async (
   return new LitOptionsBuilder().invoke({ debug });
 };
 
-export { loadLit, waitForLit };
+// main export
+export { loadLit };
+
+// types
+export * from './lib/types';

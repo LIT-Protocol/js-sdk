@@ -23,7 +23,7 @@ import {
   EncryptResponse,
 } from '@lit-protocol/types';
 
-const version = '0.0.575';
+const version = '0.0.581';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -530,6 +530,36 @@ export const getStoredAuthData = (): Array<LitAuthMethod> => {
   return storedAuthData;
 };
 
+export const getStoredAuthDataWithKeys = (): {
+  [key: string]: LitAuthMethod;
+} => {
+  const storedAuthData: { [key: string]: LitAuthMethod } = {};
+
+  // Iterate through all the keys in storage
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+
+    // Check if the key starts with any of the authKeys
+    if (
+      key &&
+      authKeysPrefixes.some((authKeysPrefix) => key.startsWith(authKeysPrefix))
+    ) {
+      const str = globalThis.Lit.storage?.getExpirableItem(key);
+
+      if (str) {
+        try {
+          const authMethod = JSON.parse(str) as LitAuthMethod;
+          storedAuthData[key] = authMethod; // Use the storage key as the key of the object
+        } catch (e) {
+          // Handle the error if needed
+        }
+      }
+    }
+  }
+
+  return storedAuthData;
+};
+
 // "authType" => google, discord, opt, webauthn, ethwallet
 export const getSingleAuthDataByType = (authType: AuthKeys): LitAuthMethod => {
   log.info('authType:', authType);
@@ -634,6 +664,9 @@ export const clearSessions = () => {
       globalThis.Lit.storage?.removeItem(key);
     }
   }
+
+  // also remove lit-auth-signature
+  globalThis.Lit.storage?.removeItem('lit-auth-signature');
 
   log.end('clearSessions');
 };

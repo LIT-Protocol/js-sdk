@@ -8,9 +8,11 @@ import {
   pinataConfig,
 } from './types';
 import {
+  LitMessages,
   clearSessions,
   getProviderMap,
   getStoredAuthData,
+  getStoredAuthDataWithKeys,
   getStoredEncryptedData,
   isBrowser,
   isNode,
@@ -315,14 +317,7 @@ export class LitOptionsBuilder {
       log.error(`
       Error while attempting to initialize IPFSProvider, please check your persistentStorage config\n
   
-      loadLit({
-        persistentStorage: {
-          provider: 'pinata',
-          options: {
-            JWT: 'your-jwt-token',
-          },
-        },
-      })
+      ${LitMessages.persistentStorageExample}
       
       \n${e}`);
     }
@@ -376,6 +371,7 @@ export class LitOptionsBuilder {
     log.start('createUtils', 'starting...');
 
     globalThis.Lit.getStoredAuthData = getStoredAuthData;
+    globalThis.Lit.getStoredAuthDataWithKeys = getStoredAuthDataWithKeys;
     globalThis.Lit.getStoredEncryptedData = getStoredEncryptedData;
     globalThis.Lit.clearSessions = clearSessions;
 

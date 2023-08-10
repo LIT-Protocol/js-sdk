@@ -154,6 +154,7 @@ export type PKPInfo = {
 };
 
 export type LitAuthMethod = {
+  storageKey?: string;
   accessToken: string;
   authMethodType: AuthMethodType;
   otpType?: 'email' | 'phone';
