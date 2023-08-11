@@ -49,12 +49,13 @@ export default class GoogleProvider extends BaseProvider {
   }
 
   public getAuthMethodStorageUID(token: any): string {
-
     if (!token) {
       throw new Error('Token is required to generate auth method storage UID');
     }
 
-    const UID = JSON.parse(atob(token.split('.')[1])).email;
+    const UID = JSON.parse(
+      Buffer.from(token.split('.')[1], 'base64').toString('utf-8')
+    ).email;
 
     return `lit-google-token-${UID}`;
   }
@@ -68,17 +69,17 @@ export default class GoogleProvider extends BaseProvider {
     options?: T
   ): Promise<AuthMethod> {
     // Check if it exists in cache
-    let storageItem = this.storageProvider.getExpirableItem('lit-google-token');
+    // let storageItem = this.storageProvider.getExpirableItem('lit-google-token');
 
     // default to caching
     if (options && options.cache === null) {
       options.cache = true;
     }
 
-    if (storageItem) {
-      clearParamsFromURL();
-      return JSON.parse(storageItem);
-    }
+    // if (storageItem) {
+    //   clearParamsFromURL();
+    //   return JSON.parse(storageItem);
+    // }
 
     // Check if current url matches redirect uri
     if (!window.location.href.startsWith(this.redirectUri)) {
@@ -172,11 +173,19 @@ export default class GoogleProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
    * interacting directly with Lit contracts
    */
-  public async getAuthMethodId(): Promise<string> {
-    if (!this.#idToken) {
+  public async getAuthMethodId(accessToken: string): Promise<string> {
+    let idToken;
+
+    if (accessToken) {
+      idToken = accessToken;
+    } else {
+      idToken = this.#idToken;
+    }
+
+    if (!idToken) {
       throw new Error('Id token is not defined. Call authenticate first.');
     }
-    const tokenPayload = this.#parseIdToken(this.#idToken);
+    const tokenPayload = this.#parseIdToken(idToken);
     const userId: string = tokenPayload['sub'] as string;
     const audience: string = tokenPayload['aud'] as string;
     const authMethodId = utils.keccak256(

@@ -42,10 +42,14 @@ export default class EthWalletProvider extends BaseProvider {
     }
   }
 
-  public getAuthMethodStorageUID(): string {
-    const UID = this.getAuthMethodId();
+  public getAuthMethodStorageUID(authSig: AuthSig): string {
+    if (!authSig.address) {
+      throw new Error(
+        'Address is required to generate auth method storage UID'
+      );
+    }
 
-    return `lit-ethwallet-token-${UID}`;
+    return `lit-ethwallet-token-${authSig.address}`;
   }
 
   /**
@@ -88,7 +92,7 @@ export default class EthWalletProvider extends BaseProvider {
         cache: false,
       });
 
-      const storageUID = this.getAuthMethodStorageUID();
+      const storageUID = this.getAuthMethodStorageUID(authSig);
 
       this.storageProvider.setExpirableItem(
         storageUID,
@@ -188,13 +192,26 @@ export default class EthWalletProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
    * interacting directly with Lit contracts
    */
-  public async getAuthMethodId(): Promise<string> {
-    if (!this.#authSig) {
+  public async getAuthMethodId(accessToken?: string): Promise<string> {
+    let authSig;
+
+    if (accessToken) {
+      try {
+        authSig = JSON.parse(accessToken);
+      } catch (e) {
+        throw new Error('Invalid access token');
+      }
+    } else {
+      authSig = this.#authSig;
+    }
+
+    if (!authSig) {
       throw new Error(
         'Auth signature is not defined. Call authenticate first.'
       );
     }
-    const authMethodId = this.#authSig.address;
+
+    const authMethodId = authSig.address;
     return authMethodId;
   }
 }

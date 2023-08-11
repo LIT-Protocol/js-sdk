@@ -14,7 +14,7 @@ import {
   clearParamsFromURL,
 } from '../utils';
 import { utils } from 'ethers';
-import { toUtf8Bytes } from 'ethers/lib/utils';
+import { sha256, toUtf8Bytes } from 'ethers/lib/utils';
 
 export default class DiscordProvider extends BaseProvider {
   /**
@@ -48,6 +48,13 @@ export default class DiscordProvider extends BaseProvider {
     window.location.assign(loginUrl);
   }
 
+  public getAuthMethodStorageUID(accessToken: string): string {
+    // shortern authMethodId to 16 characters
+    const authMethodId = sha256(Buffer.from(accessToken)).slice(0, 16);
+
+    return `lit-discord-token-${authMethodId}`;
+  }
+
   /**
    * Validate the URL parameters returned from Lit's login server and return the authentication data
    *
@@ -56,20 +63,19 @@ export default class DiscordProvider extends BaseProvider {
   public async authenticate(
     options?: DiscordAuthenticateOptions
   ): Promise<AuthMethod> {
-    
     // default to caching
     if (options && options.cache === null) {
       options.cache = true;
     }
 
     // Check if it exists in cache
-    let storageItem =
-      this.storageProvider.getExpirableItem('lit-discord-token');
+    // let storageItem =
+    //   this.storageProvider.getExpirableItem('lit-discord-token');
 
-    if (storageItem) {
-      clearParamsFromURL();
-      return JSON.parse(storageItem);
-    }
+    // if (storageItem) {
+    //   clearParamsFromURL();
+    //   return JSON.parse(storageItem);
+    // }
 
     // Check if current url matches redirect uri
     if (!window.location.href.startsWith(this.redirectUri)) {
@@ -122,8 +128,10 @@ export default class DiscordProvider extends BaseProvider {
     };
 
     if (options?.cache) {
+      const storageUID = this.getAuthMethodStorageUID(accessToken);
+
       this.storageProvider.setExpirableItem(
-        'lit-discord-token',
+        storageUID,
         JSON.stringify(authMethod),
         options.expirationLength ?? 24,
         options.expirationUnit ?? 'hours'
@@ -139,11 +147,13 @@ export default class DiscordProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
    * interacting directly with Lit contracts
    */
-  public async getAuthMethodId(): Promise<string> {
-    if (!this.#accessToken) {
+  public async getAuthMethodId(accessToken?: string): Promise<string> {
+    const _accessToken = accessToken || this.#accessToken;
+
+    if (!_accessToken) {
       throw new Error('Access token is not defined. Call authenticate first.');
     }
-    const userId = await this.#fetchDiscordUser(this.#accessToken);
+    const userId = await this.#fetchDiscordUser(_accessToken);
     const authMethodId = utils.keccak256(
       toUtf8Bytes(`${userId}:${this.#clientId}`)
     );

@@ -3,7 +3,10 @@ import { LitAuthMethod, PKPInfo } from '../types';
 import { iRelayPKPToPKPInfo, log, mapAuthMethodTypeToString } from '../utils';
 
 export const handleGetAccounts = async (
-  authDataArray: Array<LitAuthMethod>
+  authDataArray: Array<LitAuthMethod>,
+  { cache }: { cache?: boolean } = {
+    cache: true,
+  }
 ): Promise<Array<PKPInfo>> => {
   log.start('handleGetAccounts', `getting accounts by provider...`);
   globalThis.Lit.eventEmitter?.getAccountsStatus('in_progress');
@@ -33,20 +36,57 @@ export const handleGetAccounts = async (
       continue;
     }
 
-    // -- execute
-    try {
-      const pkps: Array<IRelayPKP> =
-        await authProvider?.fetchPKPsThroughRelayer(authData);
+    // -- cache
+    const authMethodId = await authProvider.getAuthMethodId(
+      authData.accessToken
+    );
+    const storageKey = `lit-accounts-${authMethodId}`;
 
-      const formattedPKPs: Array<PKPInfo> = pkps.map((pkp) => {
-        return iRelayPKPToPKPInfo(pkp);
-      });
+    console.log('storageKey:', storageKey);
 
-      results.push(...formattedPKPs);
-    } catch (e) {
-      log.error(
-        `Error fetching PKPs for ${authMethodName} auth method: ${e}. Continuing...`
+    let cachedAccounts;
+
+    // -- fetch from cache
+    if (cache && globalThis.Lit.storage) {
+      cachedAccounts = globalThis.Lit.storage.getExpirableItem(storageKey);
+      if (cachedAccounts) {
+        log.info(
+          `Found cached accounts for ${authMethodName} auth method. Returning cached accounts...`
+        );
+        results.push(...JSON.parse(cachedAccounts));
+        continue;
+      }
+    }
+    // -- OR: fetch manually
+
+    if (!cachedAccounts) {
+      log.info(
+        `No cached accounts found for ${authMethodName} auth method. Fetching accounts manually...`
       );
+      try {
+        const pkps: Array<IRelayPKP> =
+          await authProvider?.fetchPKPsThroughRelayer(authData);
+
+        const formattedPKPs: Array<PKPInfo> = pkps.map((pkp) => {
+          return iRelayPKPToPKPInfo(pkp);
+        });
+
+        // -- cache
+        if (cache && globalThis.Lit.storage) {
+          globalThis.Lit.storage.setExpirableItem(
+            storageKey,
+            JSON.stringify(formattedPKPs),
+            24,
+            'hours'
+          );
+        }
+
+        results.push(...formattedPKPs);
+      } catch (e) {
+        log.error(
+          `Error fetching PKPs for ${authMethodName} auth method: ${e}. Continuing...`
+        );
+      }
     }
   }
 

@@ -202,13 +202,23 @@ export default class WebAuthnProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
    * interacting directly with Lit contracts
    */
-  public async getAuthMethodId(): Promise<string> {
-    if (!this.#attestationResponse) {
+  public async getAuthMethodId(accessToken?: string): Promise<string> {
+    let rawId;
+
+    if (accessToken) {
+      const token = JSON.parse(accessToken);
+      rawId = token.rawId;
+    } else {
+      rawId = this.#attestationResponse?.rawId;
+    }
+
+    if (!rawId) {
       throw new Error(
         'Authentication data is not defined. Call authenticate first.'
       );
     }
-    const credentialRawId = this.#attestationResponse.rawId;
+
+    const credentialRawId = rawId;
     const authMethodId: string = utils.keccak256(
       utils.toUtf8Bytes(`${credentialRawId}:lit`)
     );

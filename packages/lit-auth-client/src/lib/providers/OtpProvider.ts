@@ -34,6 +34,10 @@ export class OtpProvider extends BaseProvider {
     this._checkRoute = config?.checkRoute || '/api/otp/check';
   }
 
+  public getAuthMethodStorageUID(accessToken: any): string {
+    return `lit-otp-token-${this.getAuthMethodId(accessToken)}`;
+  }
+
   /**
    * Validates OTP code from {@link sendOtpCode}
    * @param options {T extends AuthenticateOptions} options used in authentication
@@ -50,22 +54,26 @@ export class OtpProvider extends BaseProvider {
     }
 
     // Check if it exists in cache
-    let storageItem = this.storageProvider.getExpirableItem('lit-otp-token');
+    // let storageItem = this.storageProvider.getExpirableItem('lit-otp-token');
 
-    if (storageItem) {
-      return JSON.parse(storageItem);
-    }
+    // if (storageItem) {
+    //   return JSON.parse(storageItem);
+    // }
 
     if (options) {
       const authData = this.checkOtpCode(
         (options as unknown as OtpAuthenticateOptions).code
       );
 
+      const accessToken = (await authData).accessToken;
+
       if (_options.cache) {
         const item = JSON.stringify(await authData);
 
+        const storageUID = this.getAuthMethodStorageUID(accessToken);
+
         this.storageProvider.setExpirableItem(
-          'lit-opt-token',
+          storageUID,
           item,
           _options.expirationLength ?? 24,
           _options.expirationUnit ?? 'hours'
@@ -203,13 +211,15 @@ export class OtpProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
    * interacting directly with Lit contracts
    */
-  public async getAuthMethodId(): Promise<string> {
-    if (!this.#accessToken) {
+  public async getAuthMethodId(accessToken?: string): Promise<string> {
+    const _accessToken = accessToken || this.#accessToken;
+
+    if (!_accessToken) {
       throw new Error('Access token is not defined. Call authenticate first.');
     }
-    const resp = await this.#verifyOtpJWT(this.#accessToken);
+    const resp = await this.#verifyOtpJWT(_accessToken);
     const userId = resp.userId;
-    const payload = parseJWT(this.#accessToken);
+    const payload = parseJWT(_accessToken);
     const audience = (payload['orgId'] as string).toLowerCase() || 'lit';
     const authMethodId = `${userId}:${audience}`;
     return authMethodId;
