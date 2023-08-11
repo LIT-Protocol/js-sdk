@@ -1,4 +1,4 @@
-import { SignInWithOTPParams } from './interfaces';
+import { ClaimKeyResponse, SignInWithOTPParams } from './interfaces';
 import {
   AccsCOSMOSParams,
   AccsDefaultParams,
@@ -112,3 +112,4 @@ export type ProviderOptions =
   | SignInWithOTPParams;
 
 export type AuthenticateOptions = BaseAuthenticateOptions;
+export type MintCallback = (response: ClaimKeyResponse) => void;

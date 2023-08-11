@@ -14,6 +14,8 @@ import {
   NodeClientErrorV1,
   NodeErrorV0,
   NodeErrorV1,
+  ClaimRequest,
+  ClaimKeyResponse,
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
@@ -494,3 +496,20 @@ export const genRandomPath = (): string => {
     Math.random().toString(36).substring(2, 15)
   );
 };
+
+
+export const defaultMintClaimCallback = async (params: ClaimKeyResponse): Promise<void> => {
+  try {
+    const relayUrl = "https://relay-server-staging.herokuapp.com/pkp/claim";
+    await fetch(relayUrl, {
+      method: "POST",
+      body: JSON.stringify(params),
+      headers: {
+        'api-key': "",
+        'Content-Type': 'application/json',
+      }
+    });
+  } catch(e) {
+    console.error(`Error while fetching pkp`, (e as Error).message); 
+  }
+} 

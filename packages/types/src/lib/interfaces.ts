@@ -10,6 +10,7 @@ import {
   IRelayAuthStatus,
   JsonRequest,
   LIT_NETWORKS_KEYS,
+  MintCallback,
   SolRpcConditions,
   SymmetricKey,
   UnifiedAccessControlConditions,
@@ -890,6 +891,11 @@ export interface AuthMethod {
   accessToken: string;
 }
 
+export interface ClaimRequest {
+  authMethod: AuthMethod;
+  mintCallback?: MintCallback
+}
+
 // pub struct JsonSignSessionKeyRequest {
 //     pub session_key: String,
 //     pub auth_methods: Vec<AuthMethod>,
@@ -1431,5 +1437,6 @@ export interface Signature {
 
 export interface ClaimKeyResponse {
   signatures: Signature[],
-  derivedKeyId: string
+  derivedKeyId: string,
+  pubkey: string
 }

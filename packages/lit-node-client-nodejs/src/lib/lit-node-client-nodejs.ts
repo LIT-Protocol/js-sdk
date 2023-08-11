@@ -20,6 +20,7 @@ import {
 import { safeParams } from '@lit-protocol/encryption';
 import {
   convertLitActionsParams,
+  defaultMintClaimCallback,
   log,
   mostCommonString,
   throwError,
@@ -30,6 +31,7 @@ import {
   AuthMethod,
   AuthSig,
   ClaimKeyResponse,
+  ClaimRequest,
   CustomNetwork,
   DecryptRequest,
   DecryptResponse,
@@ -2030,11 +2032,13 @@ export class LitNodeClientNodeJs extends LitCore {
   }
 
   /**
-   *
+   * Authenticates an Auth Method for claiming a Programmable Key Pair (PKP).
+   * A {@link MintCallback} can be defined for custom on chain interactions
+   * by default the callback will forward to a relay server for minting on chain.
+   * @param {ClaimKeyRequest} params an Auth Method and {@link MintCallback}
+   * @returns {Promise<ClaimKeyResponse>}
    */
-  async claimKeyId(
-    authMethod: AuthMethod
-  ): Promise<ClaimKeyResponse & { pubkey: string }> {
+  async claimKeyId(params: ClaimRequest): Promise<ClaimKeyResponse> {
     if (!this.ready) {
       const message =
         '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
@@ -2047,10 +2051,10 @@ export class LitNodeClientNodeJs extends LitCore {
 
     let nodePromises = await this.getNodePromises((url: string) => {
       const requestId = this.getRequestId();
-      let params = {
-        authMethod: authMethod,
+      let nodeRequestParams = {
+        authMethod: params.authMethod,
       };
-      return this.getClaimKeyExecutionShares(url, params, requestId);
+      return this.getClaimKeyExecutionShares(url, nodeRequestParams, requestId);
     });
 
     let responseData = await this.handleNodePromises(nodePromises);
@@ -2062,15 +2066,27 @@ export class LitNodeClientNodeJs extends LitCore {
         return ethers.utils.splitSignature(`0x${r.signature}`);
       });
 
-      const derivedKeyId: string = (responseData as SuccessNodePromises<any>).values[0]
-      .derivedKeyId;
-      const pubkey: string = this.computeHDPubKey(derivedKeyId, SIGTYPE.EcdsaCaitSith);
-      
-      return {
+      const derivedKeyId: string = (responseData as SuccessNodePromises<any>)
+        .values[0].derivedKeyId;
+      const pubkey: string = this.computeHDPubKey(
+        derivedKeyId,
+        SIGTYPE.EcdsaCaitSith
+      );
+
+      const resp: ClaimKeyResponse = {
         signatures: nodeSignatures,
         derivedKeyId,
-        pubkey
+        pubkey,
       };
+
+      if (params.mintCallback) {
+        params.mintCallback(resp);
+        return resp;
+      }
+
+      await defaultMintClaimCallback(resp);
+
+      return resp;
     } else {
       return throwError({
         message: 'claim request has failed',
