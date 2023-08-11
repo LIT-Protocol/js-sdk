@@ -58,8 +58,8 @@ export default function WebAuthn({
       )}
       {step === 'register' && (
         <>
-          <h1>Register with a passkey</h1>
-          <p>Passkeys enable simple and secure passwordless authentication.</p>
+          <h1>Register with an authenticator</h1>
+          <p>WebAuthn credentials enable simple and secure passwordless authentication.</p>
           <div className="buttons-container">
             <button
               type="button"
@@ -67,7 +67,7 @@ export default function WebAuthn({
               onClick={handleRegister}
               disabled={loading}
             >
-              Register a passkey
+              Create a credential
             </button>
             <button
               onClick={() => setView('default')}
@@ -80,8 +80,8 @@ export default function WebAuthn({
       )}
       {step === 'authenticate' && (
         <>
-          <h1>Authenticate with your passkey</h1>
-          <p>Sign in using your saved passkey.</p>
+          <h1>Authenticate with your authenticator</h1>
+          <p>Sign in using your authenticator.</p>
           <div className="buttons-container">
             <button
               type="button"
@@ -89,7 +89,7 @@ export default function WebAuthn({
               onClick={authWithWebAuthn}
               disabled={loading}
             >
-              Sign in with passkey
+              Sign in with authenticator
             </button>
             <button
               onClick={() => setView('default')}

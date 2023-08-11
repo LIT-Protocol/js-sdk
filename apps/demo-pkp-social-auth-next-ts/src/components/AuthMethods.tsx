@@ -128,7 +128,7 @@ const AuthMethods = ({
               />
             </svg>
           </div>
-          <span className="btn__label">Use a passkey</span>
+          <span className="btn__label">Use an authenticator</span>
         </button>
       </div>
     </>

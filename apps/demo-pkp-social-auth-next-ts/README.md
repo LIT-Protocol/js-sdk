@@ -1,6 +1,6 @@
 # lit-auth-client Web Example 🪢
 
-This is an example web app that shows how you can mint and use programmable key pairs (PKPs) with social accounts, passkeys, and one-time passwords using the [@lit-protocol/lit-auth-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-auth-client) library.
+This is an example web app that shows how you can mint and use programmable key pairs (PKPs) with social accounts, one-time passwords, and authenticators using the [@lit-protocol/lit-auth-client](https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-auth-client) library.
 
 ## 💻 Getting Started
 
