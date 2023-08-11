@@ -317,6 +317,8 @@ describe('humanizer.ts', () => {
         }
       ]
     });
-    console.log(result);
+    expect(result).toContain("0x5b8B8C9aD976aFCAd24fd6CF424294d372c190Ac");
+    expect(result).toContain("100.0");
+    expect(result).toContain("at least");
   });
 });
