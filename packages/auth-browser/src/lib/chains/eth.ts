@@ -579,6 +579,7 @@ export const checkAndSignEVMAuthMessage = async ({
         resources,
         expiration: expirationString,
         uri,
+        cache,
       });
     } catch (e: any) {
       log(e);
@@ -612,6 +613,7 @@ export const checkAndSignEVMAuthMessage = async ({
       resources,
       expiration: expirationString,
       uri,
+      cache,
     });
     log('7. authSig:', authSig);
 
@@ -627,6 +629,7 @@ export const checkAndSignEVMAuthMessage = async ({
         resources,
         expiration: expirationString,
         uri,
+        cache,
       });
     }
     log('8. mustResign:', mustResign);
@@ -661,9 +664,9 @@ const _signAndGetAuth = async ({
   resources,
   expiration,
   uri,
-  cache,
+  cache = true,
 }: signAndSaveAuthParams): Promise<AuthSig> => {
-  await signAndSaveAuthMessage({
+  const supposedStorageAuthSig = await signAndSaveAuthMessage({
     web3,
     account,
     chainId,
@@ -673,20 +676,27 @@ const _signAndGetAuth = async ({
     cache,
   });
 
-  let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
+  let authSigOrError;
+  let authSig: AuthSig;
 
-  if (authSigOrError.type === 'ERROR') {
-    throwError({
-      message: 'Failed to get authSig from local storage',
-      errorKind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
-      errorCode: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
-    });
+  // if cache is enabled, get them from local storage
+  if (cache) {
+    authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
+    if (authSigOrError.type === 'ERROR') {
+      throwError({
+        message: 'Failed to get authSig from local storage',
+        errorKind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
+        errorCode: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
+      });
+    }
+
+    authSig =
+      typeof authSigOrError.result === 'string'
+        ? JSON.parse(authSigOrError.result)
+        : authSigOrError.result;
+  } else {
+    authSig = supposedStorageAuthSig;
   }
-
-  let authSig: AuthSig =
-    typeof authSigOrError.result === 'string'
-      ? JSON.parse(authSigOrError.result)
-      : authSigOrError.result;
 
   return authSig;
 };
