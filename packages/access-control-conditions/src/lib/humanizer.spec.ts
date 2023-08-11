@@ -22,6 +22,7 @@ Object.defineProperty(global.self, 'crypto', {
 });
 
 import * as humanizer from './humanizer';
+import { humanizeAccessControlConditions } from './humanizer';
 import {
   AccsCOSMOSParams,
   AccsEVMParams,
@@ -297,5 +298,25 @@ describe('humanizer.ts', () => {
     expect(OUTPUT).toBe(
       'Owns at least 0.00001 ETH or balanceOf(:userAddress, 8) on contract address 0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88 should have a result of more than 0'
     );
+  });
+
+  it('should humanize acc', async () => {
+    const result = await humanizeAccessControlConditions({
+      unifiedAccessControlConditions: [
+        {
+          chain: 'goerli',
+          method: 'balanceOf',
+          parameters: [':userAddress'],
+          conditionType: 'evmBasic',
+          contractAddress: '0x5b8B8C9aD976aFCAd24fd6CF424294d372c190Ac',
+          returnValueTest: {
+            value: '100000000000000000000',
+            comparator: '>='
+          },
+          standardContractType: 'ERC20'
+        }
+      ]
+    });
+    console.log(result);
   });
 });
