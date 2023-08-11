@@ -21,9 +21,10 @@ import {
   EvmContractConditions,
   AccessControlConditions,
   EncryptResponse,
+  BaseAuthenticateOptions,
 } from '@lit-protocol/types';
 
-const version = '0.0.581';
+const version = '0.0.597';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -67,7 +68,9 @@ log.start = (operationId: string, ...args: any[]): void => {
 log.end = (operationId: string, ...args: any[]): void => {
   // Check if the operation ID is valid
   if (!operationTimes.hasOwnProperty(operationId)) {
-    throw new Error(`Invalid operation ID: ${operationId}`);
+    throw new Error(
+      `Invalid operation ID: ${operationId}. That means "${operationId}" was never started.`
+    );
   }
 
   // Calculate the elapsed time

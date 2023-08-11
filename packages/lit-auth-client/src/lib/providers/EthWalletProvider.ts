@@ -42,6 +42,12 @@ export default class EthWalletProvider extends BaseProvider {
     }
   }
 
+  public getAuthMethodStorageUID(): string {
+    const UID = this.getAuthMethodId();
+
+    return `lit-ethwallet-token-${UID}`;
+  }
+
   /**
    * Generate a wallet signature to use as an auth method
    *
@@ -82,8 +88,10 @@ export default class EthWalletProvider extends BaseProvider {
         cache: false,
       });
 
+      const storageUID = this.getAuthMethodStorageUID();
+
       this.storageProvider.setExpirableItem(
-        `lit-ethwallet-token-${authSig.address}`,
+        storageUID,
         JSON.stringify({
           authMethodType: AuthMethodType.EthWallet,
           accessToken: JSON.stringify(authSig),

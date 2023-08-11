@@ -375,6 +375,9 @@ ${LitMessages.persistentStorageExample}`;
    */
   public getAccounts = withAuthData(
     async (authData: Array<LitAuthMethod>, cache: boolean = true) => {
+      //  * NOTE: Problem with caching is that the response we received from the relayer does not specify what accounts are associated with what auth methods, it just returns all the accounts associated with the given auth methods.
+      cache = false;
+
       log.start('getAccounts');
 
       // forming a string of all the auth method types eg. '1-6'

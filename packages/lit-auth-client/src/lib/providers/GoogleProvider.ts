@@ -48,6 +48,17 @@ export default class GoogleProvider extends BaseProvider {
     window.location.assign(loginUrl);
   }
 
+  public getAuthMethodStorageUID(token: any): string {
+
+    if (!token) {
+      throw new Error('Token is required to generate auth method storage UID');
+    }
+
+    const UID = JSON.parse(atob(token.split('.')[1])).email;
+
+    return `lit-google-token-${UID}`;
+  }
+
   /**
    * Validate the URL parameters returned from Lit's login server and return the authentication data
    *
@@ -120,8 +131,10 @@ export default class GoogleProvider extends BaseProvider {
     };
 
     if (options?.cache) {
+      const storageUID = this.getAuthMethodStorageUID(idToken);
+
       this.storageProvider.setExpirableItem(
-        'lit-google-token',
+        storageUID,
         JSON.stringify(authMethod),
         options.expirationLength ?? 24,
         options.expirationUnit ?? 'hours'

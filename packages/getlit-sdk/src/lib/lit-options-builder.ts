@@ -208,12 +208,11 @@ export class LitOptionsBuilder {
       ...this._nodeClientOptions,
     };
 
-    log.end('build', 'done!');
-
     this._emitter?.emit('ready', true);
     globalThis.Lit.ready = true;
 
     await this.initialiseAuthClient();
+    log.end('build', 'done!');
   }
 
   // ========== Initialise ==========

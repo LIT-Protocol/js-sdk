@@ -105,6 +105,19 @@ export default class WebAuthnProvider extends BaseProvider {
       'Use verifyAndMintPKPThroughRelayer for WebAuthnProvider instead.'
     );
   }
+  public getAuthMethodStorageUID(accessToken: string): string {
+    let token;
+
+    try {
+      token = JSON.parse(accessToken);
+    } catch (e) {
+      throw new Error('Invalid access token');
+    }
+
+    const UID = token.id;
+
+    return `lit-webauthn-token-${UID}`;
+  }
 
   /**
    * Authenticate with a WebAuthn credential and return the relevant authentication data
@@ -120,12 +133,12 @@ export default class WebAuthnProvider extends BaseProvider {
     }
 
     // Check if it exists in cache
-    let storageItem =
-      this.storageProvider.getExpirableItem('lit-webauthn-token');
+    // let storageItem =
+    //   this.storageProvider.getExpirableItem('lit-webauthn-token');
 
-    if (storageItem) {
-      return JSON.parse(storageItem);
-    }
+    // if (storageItem) {
+    //   return JSON.parse(storageItem);
+    // }
 
     const provider = new ethers.providers.JsonRpcProvider(this.rpcUrl);
 
@@ -170,8 +183,10 @@ export default class WebAuthnProvider extends BaseProvider {
     };
 
     if (options?.cache) {
+      const storageUID = this.getAuthMethodStorageUID(authMethod.accessToken);
+
       this.storageProvider.setExpirableItem(
-        'lit-webauthn-token',
+        storageUID,
         JSON.stringify(authMethod),
         options.expirationLength ?? 24,
         options.expirationUnit ?? 'hours'

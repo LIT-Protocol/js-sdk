@@ -24,6 +24,7 @@ export const checkAndSignAuthMessage = ({
   cosmosWalletType,
   cache = true,
 }: AuthCallbackParams): Promise<AuthSig> => {
+
   const chainInfo = ALL_LIT_CHAINS[chain];
 
   // -- validate: if chain info not found

@@ -1,4 +1,4 @@
-import { LoginUrlParams } from '@lit-protocol/types';
+import { BaseAuthenticateOptions, LoginUrlParams } from '@lit-protocol/types';
 import * as jose from 'jose';
 import * as cbor from 'cbor-web';
 
