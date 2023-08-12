@@ -18,6 +18,14 @@ export class LitRelay implements IRelay {
    * API key for Lit's relay server
    */
   private readonly relayApiKey: string;
+  /**
+   * Route for minting PKP
+   */
+  private readonly mintRoute = '/mint-next-and-add-auth-methods';
+  /**
+   * Route for fetching PKPs
+   */
+  private readonly fetchRoute = '/fetch-pkps-by-auth-method';
 
   /**
    * Create a Relay instance
@@ -40,17 +48,14 @@ export class LitRelay implements IRelay {
    * @returns {Promise<IRelayMintResponse>} Response from the relay server
    */
   public async mintPKP(body: string): Promise<IRelayMintResponse> {
-    const response = await fetch(
-      `${this.relayUrl}/mint-next-and-add-auth-methods`,
-      {
-        method: 'POST',
-        headers: {
-          'api-key': this.relayApiKey,
-          'Content-Type': 'application/json',
-        },
-        body: body,
-      }
-    );
+    const response = await fetch(`${this.relayUrl}${this.mintRoute}`, {
+      method: 'POST',
+      headers: {
+        'api-key': this.relayApiKey,
+        'Content-Type': 'application/json',
+      },
+      body: body,
+    });
 
     if (response.status < 200 || response.status >= 400) {
       console.warn('Something wrong with the API call', await response.json());
@@ -133,7 +138,7 @@ export class LitRelay implements IRelay {
    * @returns {Promise<IRelayFetchResponse>} Response from the relay server
    */
   public async fetchPKPs(body: string): Promise<IRelayFetchResponse> {
-    const response = await fetch(`${this.relayUrl}/fetch-pkps-by-auth-method`, {
+    const response = await fetch(`${this.relayUrl}${this.fetchRoute}`, {
       method: 'POST',
       headers: {
         'api-key': this.relayApiKey,
