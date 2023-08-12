@@ -9,6 +9,7 @@ import {
   BaseProviderSessionSigsParams,
   IRelay,
   IRelayPKP,
+  IRelayRequestData,
   SessionSigs,
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
@@ -67,7 +68,8 @@ export abstract class BaseProvider {
    * @returns {Promise<string>} - Mint transaction hash
    */
   public async mintPKPThroughRelayer(authMethod: AuthMethod): Promise<string> {
-    const body = await this.prepareMintBody(authMethod);
+    const data = await this.prepareRelayRequestData(authMethod);
+    const body = this.prepareMintBody(data);
     const mintRes = await this.relay.mintPKP(body);
     if (!mintRes || !mintRes.requestId) {
       throw new Error('Missing mint response or request ID from relay server');
@@ -85,7 +87,8 @@ export abstract class BaseProvider {
   public async fetchPKPsThroughRelayer(
     authMethod: AuthMethod
   ): Promise<IRelayPKP[]> {
-    const body = await this.prepareFetchBody(authMethod);
+    const data = await this.prepareRelayRequestData(authMethod);
+    const body = this.prepareFetchBody(data);
     const fetchRes = await this.relay.fetchPKPs(body);
     if (!fetchRes || !fetchRes.pkps) {
       throw new Error('Missing PKPs in fetch response from relay server');
@@ -175,19 +178,41 @@ export abstract class BaseProvider {
   }
 
   /**
-   * Generate body for minting PKP through relay server
+   * Generate request data for minting and fetching PKPs via relay server
    *
-   * @returns {Promise<string>} - Request body for minting PKP
+   * @param {AuthMethod} authMethod - Auth method obejct
+   *
+   * @returns {Promise<IRelayRequestData>} - Relay request data
    */
-  protected async prepareMintBody(authMethod: AuthMethod): Promise<string> {
+  protected async prepareRelayRequestData(
+    authMethod: AuthMethod
+  ): Promise<IRelayRequestData> {
+    const authMethodType = authMethod.authMethodType;
     const authMethodId = await this.getAuthMethodId(authMethod);
+    const data = {
+      authMethodType,
+      authMethodId,
+    };
+    return data;
+  }
+
+  /**
+   * Generate request body for minting PKP using auth methods via relay server
+   *
+   * @param {IRelayRequestData} data - Data for minting PKP
+   * @param {number} data.authMethodType - Type of auth method
+   * @param {string} data.authMethodId - ID of auth method
+   * @param {string} [data.authMethodPubKey] - Public key associated with the auth method (used only in WebAuthn)
+   *
+   * @returns {string} - Relay request body for minting PKP
+   */
+  protected prepareMintBody(data: IRelayRequestData): string {
+    const pubkey = data.authMethodPubKey || '0x';
     const args = {
       keyType: 2,
-      permittedAuthMethodTypes: [authMethod.authMethodType],
-      permittedAuthMethodIds: [authMethodId],
-      permittedAuthMethodPubkeys: authMethod?.pubkey
-        ? [authMethod?.pubkey]
-        : ['0x'],
+      permittedAuthMethodTypes: [data.authMethodType],
+      permittedAuthMethodIds: [data.authMethodId],
+      permittedAuthMethodPubkeys: [pubkey],
       permittedAuthMethodScopes: [[ethers.BigNumber.from('0')]],
       addPkpEthAddressAsPermittedAddress: true,
       sendPkpToItself: true,
@@ -197,16 +222,20 @@ export abstract class BaseProvider {
   }
 
   /**
-   * Generate body for fetching PKPs by auth method through relay server
+   * Generate request body to fetch PKPs using auth method info via relay server
    *
-   * @returns {Promise<string>} - Request body for fetching PKPs by auth method
+   * @param {IRelayRequestData} data - Data for fetching PKP
+   * @param {string} data.authMethodType - Type of auth method
+   * @param {string} data.authMethodId - ID of auth method
+   * @param {string} [data.authMethodPubKey] - Public key associated with the auth method (used only in WebAuthn)
+   *
+   * @returns {string} - Relay request body to fetch PKPs
    */
-  protected async prepareFetchBody(authMethod: AuthMethod): Promise<string> {
-    const authMethodId = await this.getAuthMethodId(authMethod);
+  protected prepareFetchBody(data: IRelayRequestData): string {
     const args = {
-      authMethodId,
-      authMethodType: authMethod.authMethodType,
-      authMethodPubKey: authMethod?.pubkey,
+      authMethodId: data.authMethodId,
+      authMethodType: data.authMethodType,
+      authMethodPubKey: data.authMethodPubKey,
     };
     const body = JSON.stringify(args);
     return body;

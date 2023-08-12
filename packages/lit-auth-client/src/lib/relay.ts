@@ -5,7 +5,6 @@ import {
   IRelayPollStatusResponse,
   LitRelayConfig,
 } from '@lit-protocol/types';
-import { AuthMethodType } from '@lit-protocol/constants';
 
 /**
  * Class that communicates with Lit relay server

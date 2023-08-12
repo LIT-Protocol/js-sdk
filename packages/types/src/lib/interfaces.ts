@@ -763,7 +763,6 @@ export interface SessionKeyPair {
 export interface AuthMethod {
   authMethodType: number;
   accessToken: string;
-  pubkey?: string;
 }
 
 // pub struct JsonSignSessionKeyRequest {
@@ -1074,6 +1073,21 @@ export interface LitRelayConfig {
    * API key for Lit's relay server
    */
   relayApiKey?: string;
+}
+
+export interface IRelayRequestData {
+  /**
+   * Type of auth method
+   */
+  authMethodType: number;
+  /**
+   * ID of auth method
+   */
+  authMethodId: string;
+  /**
+   * Public key associated with the auth method (used only in WebAuthn)
+   */
+  authMethodPubKey?: string;
 }
 
 export interface IRelayMintResponse {

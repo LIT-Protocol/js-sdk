@@ -59,34 +59,14 @@ export default class WebAuthnProvider extends BaseProvider {
     });
 
     // Get auth method pub key
-    let publicKey: string;
-    try {
-      // Create a buffer object from the base64 encoded content
-      let attestationBuffer = Buffer.from(
-        attResp.response.attestationObject,
-        'base64'
-      );
-      // Parse the buffer to reconstruct the object
-      // Buffer is COSE formatted, utilities decode the buffer into json, and extract the public key information
-      let authenticationResponse: any =
-        parseAuthenticatorData(attestationBuffer);
-      // Public key in cose format to register the auth method
-      let publicKeyCoseBuffer: Buffer = authenticationResponse
-        .attestedCredentialData.credentialPublicKey as Buffer;
-      // Encode the public key for contract storage
-      publicKey = ethers.utils.hexlify(
-        ethers.utils.arrayify(publicKeyCoseBuffer)
-      );
-    } catch (e) {
-      throw new Error(
-        `Error while decoding credential create response for public key retrieval. Attestation response not encoded as expected: ${e}`
-      );
-    }
+    const authMethodPubkey = this.getPublicKeyFromRegistration(attResp);
+
+    // Format args for relay server
     const args = {
       keyType: 2,
       permittedAuthMethodTypes: [AuthMethodType.WebAuthn],
       permittedAuthMethodIds: [authMethodId],
-      permittedAuthMethodPubkeys: [publicKey],
+      permittedAuthMethodPubkeys: [authMethodPubkey],
       permittedAuthMethodScopes: [[ethers.BigNumber.from('0')]],
       addPkpEthAddressAsPermittedAddress: true,
       sendPkpToItself: true,
@@ -98,7 +78,7 @@ export default class WebAuthnProvider extends BaseProvider {
     if (!mintRes || !mintRes.requestId) {
       throw new Error('Missing mint response or request ID from relay server');
     }
-    // If the credential was verified and registration successful, minting has kicked off
+
     return mintRes.requestId;
   }
 
@@ -178,5 +158,46 @@ export default class WebAuthnProvider extends BaseProvider {
       ethers.utils.toUtf8Bytes(`${credentialId}:${this.rpName}`)
     );
     return authMethodId;
+  }
+
+  /**
+   * Parse the WebAuthn registration response to get the WebAuthn credential public key
+   *
+   * @param {RegistrationResponseJSON} attResp - WebAuthn registration response
+   *
+   * @returns {string} - WebAuthn credential public key in hex format
+   */
+  public getPublicKeyFromRegistration(
+    attResp: RegistrationResponseJSON
+  ): string {
+    let publicKey: string;
+
+    try {
+      // Create a buffer object from the base64 encoded content
+      const attestationBuffer = Buffer.from(
+        attResp.response.attestationObject,
+        'base64'
+      );
+
+      // Parse the buffer to reconstruct the object
+      // Buffer is COSE formatted, utilities decode the buffer into json, and extract the public key information
+      const authenticationResponse: any =
+        parseAuthenticatorData(attestationBuffer);
+
+      // Public key in cose format to register the auth method
+      const publicKeyCoseBuffer: Buffer = authenticationResponse
+        .attestedCredentialData.credentialPublicKey as Buffer;
+
+      // Encode the public key for contract storage
+      publicKey = ethers.utils.hexlify(
+        ethers.utils.arrayify(publicKeyCoseBuffer)
+      );
+    } catch (e) {
+      throw new Error(
+        `Error while decoding WebAuthn registration response for public key retrieval. Attestation response not encoded as expected: ${e}`
+      );
+    }
+
+    return publicKey;
   }
 }
