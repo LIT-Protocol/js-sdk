@@ -173,7 +173,7 @@ export class OtpProvider extends BaseProvider {
     const authMethodId = ethers.utils.keccak256(
       ethers.utils.toUtf8Bytes(`${userId}:${orgId}`)
     );
-    return Promise.resolve(authMethodId);
+    return authMethodId;
   }
 
   /**

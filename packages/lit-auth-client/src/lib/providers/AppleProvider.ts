@@ -110,6 +110,6 @@ export default class AppleProvider extends BaseProvider {
     const authMethodId = ethers.utils.keccak256(
       ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
     );
-    return Promise.resolve(authMethodId);
+    return authMethodId;
   }
 }

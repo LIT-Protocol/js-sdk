@@ -153,7 +153,16 @@ export default class WebAuthnProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    const credentialId = JSON.parse(authMethod.accessToken).rawId;
+    let credentialId: string;
+
+    try {
+      credentialId = JSON.parse(authMethod.accessToken).rawId;
+    } catch (err) {
+      throw new Error(
+        `Error when parsing auth method to generate auth method ID for WebAuthn: ${err}`
+      );
+    }
+
     const authMethodId = ethers.utils.keccak256(
       ethers.utils.toUtf8Bytes(`${credentialId}:${this.rpName}`)
     );

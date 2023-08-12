@@ -101,9 +101,16 @@ export default class EthWalletProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    const authMethodId = JSON.parse(
-      authMethod.accessToken
-    ).address.toLowerCase();
-    return Promise.resolve(authMethodId);
+    let address: string;
+
+    try {
+      address = JSON.parse(authMethod.accessToken).address;
+    } catch (err) {
+      throw new Error(
+        `Error when parsing auth method to generate auth method ID for Eth wallet: ${err}`
+      );
+    }
+
+    return address.toLowerCase();
   }
 }
