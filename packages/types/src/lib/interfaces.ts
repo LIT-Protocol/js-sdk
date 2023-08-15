@@ -1031,12 +1031,11 @@ export interface IRelay {
   /**
    * Mint a new PKP for the given auth method
    *
-   * @param {number} authMethodType - Auth method type
    * @param {string} body - Body of the request
    *
    * @returns {Promise<IRelayMintResponse>} Response from the relay server
    */
-  mintPKP(authMethodType: number, body: string): Promise<IRelayMintResponse>;
+  mintPKP(body: string): Promise<IRelayMintResponse>;
   /**
    * Poll the relay server for status of minting request
    *
@@ -1050,12 +1049,11 @@ export interface IRelay {
   /**
    * Fetch PKPs associated with the given auth method
    *
-   * @param {number} authMethodType - Auth method type
    * @param {string} body - Body of the request
    *
    * @returns {Promise<IRelayFetchResponse>} Response from the relay server
    */
-  fetchPKPs(authMethodType: number, body: string): Promise<IRelayFetchResponse>;
+  fetchPKPs(body: string): Promise<IRelayFetchResponse>;
   /**
    * Generate options for registering a new credential to pass to the authenticator
    *
@@ -1075,6 +1073,21 @@ export interface LitRelayConfig {
    * API key for Lit's relay server
    */
   relayApiKey?: string;
+}
+
+export interface IRelayRequestData {
+  /**
+   * Type of auth method
+   */
+  authMethodType: number;
+  /**
+   * ID of auth method
+   */
+  authMethodId: string;
+  /**
+   * Public key associated with the auth method (used only in WebAuthn)
+   */
+  authMethodPubKey?: string;
 }
 
 export interface IRelayMintResponse {
@@ -1168,6 +1181,10 @@ export interface OAuthProviderOptions {
    * The redirect URI that Lit's login server should send the user back to
    */
   redirectUri?: string;
+  /**
+   * OAuth client ID
+   */
+  clientId?: string;
 }
 
 export interface EthWalletProviderOptions {
@@ -1179,6 +1196,13 @@ export interface EthWalletProviderOptions {
    * The origin from which the signing request is made
    */
   origin?: string;
+}
+
+export interface WebAuthnProviderOptions {
+  /**
+   * Name of relying party. Defaults to "lit"
+   */
+  rpName?: string;
 }
 
 export interface SignInWithOTPParams {
@@ -1200,17 +1224,6 @@ export interface SignInWithOTPParams {
   emailCustomizationOptions: OtpEmailCustomizationOptions;
 
   customName?: string;
-}
-
-export interface EthWalletProviderOptions {
-  /**
-   * The domain from which the signing request is made
-   */
-  domain?: string;
-  /**
-   * The origin from which the signing request is made
-   */
-  origin?: string;
 }
 
 export interface OtpProviderOptions {
@@ -1323,10 +1336,10 @@ export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
 }
 
 export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
-  /* 
-  * JWT from an authenticated session
-  * see stych docs for more info: https://stytch.com/docs/api/session-get
-  */
+  /*
+   * JWT from an authenticated session
+   * see stych docs for more info: https://stytch.com/docs/api/session-get
+   */
   accessToken: string;
   /* 
    Stytch user identifier for a project

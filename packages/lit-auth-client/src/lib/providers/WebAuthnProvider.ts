@@ -1,4 +1,8 @@
-import { AuthMethod, BaseProviderOptions } from '@lit-protocol/types';
+import {
+  AuthMethod,
+  BaseProviderOptions,
+  WebAuthnProviderOptions,
+} from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import {
@@ -6,12 +10,19 @@ import {
   UserVerificationRequirement,
 } from '@simplewebauthn/typescript-types';
 import base64url from 'base64url';
-import { getRPIdFromOrigin } from '../utils';
+import { getRPIdFromOrigin, parseAuthenticatorData } from '../utils';
 import { BaseProvider } from './BaseProvider';
+import { RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
 
 export default class WebAuthnProvider extends BaseProvider {
-  constructor(options: BaseProviderOptions) {
+  /**
+   * Name of relying party. Defaults to "lit"
+   */
+  private rpName?: string;
+
+  constructor(options: BaseProviderOptions & WebAuthnProviderOptions) {
     super(options);
+    this.rpName = options.rpName || 'lit';
   }
 
   /**
@@ -39,17 +50,35 @@ export default class WebAuthnProvider extends BaseProvider {
   ): Promise<string> {
     // Submit registration options to the authenticator
     const { startRegistration } = await import('@simplewebauthn/browser');
-    const attResp = await startRegistration(options);
+    const attResp: RegistrationResponseJSON = await startRegistration(options);
 
-    // Send the credential to the relying party for verification
-    const mintRes = await this.relay.mintPKP(
-      AuthMethodType.WebAuthn,
-      JSON.stringify({ credential: attResp })
-    );
+    // Get auth method id
+    const authMethodId = await this.getAuthMethodId({
+      authMethodType: AuthMethodType.WebAuthn,
+      accessToken: JSON.stringify(attResp),
+    });
+
+    // Get auth method pub key
+    const authMethodPubkey = this.getPublicKeyFromRegistration(attResp);
+
+    // Format args for relay server
+    const args = {
+      keyType: 2,
+      permittedAuthMethodTypes: [AuthMethodType.WebAuthn],
+      permittedAuthMethodIds: [authMethodId],
+      permittedAuthMethodPubkeys: [authMethodPubkey],
+      permittedAuthMethodScopes: [[ethers.BigNumber.from('0')]],
+      addPkpEthAddressAsPermittedAddress: true,
+      sendPkpToItself: true,
+    };
+    const body = JSON.stringify(args);
+
+    // Mint PKP
+    const mintRes = await this.relay.mintPKP(body);
     if (!mintRes || !mintRes.requestId) {
       throw new Error('Missing mint response or request ID from relay server');
     }
-    // If the credential was verified and registration successful, minting has kicked off
+
     return mintRes.requestId;
   }
 
@@ -113,5 +142,71 @@ export default class WebAuthnProvider extends BaseProvider {
     };
 
     return authMethod;
+  }
+
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    let credentialId: string;
+
+    try {
+      credentialId = JSON.parse(authMethod.accessToken).rawId;
+    } catch (err) {
+      throw new Error(
+        `Error when parsing auth method to generate auth method ID for WebAuthn: ${err}`
+      );
+    }
+
+    const authMethodId = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${credentialId}:${this.rpName}`)
+    );
+    return authMethodId;
+  }
+
+  /**
+   * Parse the WebAuthn registration response to get the WebAuthn credential public key
+   *
+   * @param {RegistrationResponseJSON} attResp - WebAuthn registration response
+   *
+   * @returns {string} - WebAuthn credential public key in hex format
+   */
+  public getPublicKeyFromRegistration(
+    attResp: RegistrationResponseJSON
+  ): string {
+    let publicKey: string;
+
+    try {
+      // Create a buffer object from the base64 encoded content
+      const attestationBuffer = Buffer.from(
+        attResp.response.attestationObject,
+        'base64'
+      );
+
+      // Parse the buffer to reconstruct the object
+      // Buffer is COSE formatted, utilities decode the buffer into json, and extract the public key information
+      const authenticationResponse: any =
+        parseAuthenticatorData(attestationBuffer);
+
+      // Public key in cose format to register the auth method
+      const publicKeyCoseBuffer: Buffer = authenticationResponse
+        .attestedCredentialData.credentialPublicKey as Buffer;
+
+      // Encode the public key for contract storage
+      publicKey = ethers.utils.hexlify(
+        ethers.utils.arrayify(publicKeyCoseBuffer)
+      );
+    } catch (e) {
+      throw new Error(
+        `Error while decoding WebAuthn registration response for public key retrieval. Attestation response not encoded as expected: ${e}`
+      );
+    }
+
+    return publicKey;
   }
 }

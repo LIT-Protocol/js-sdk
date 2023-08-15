@@ -5,7 +5,6 @@ import {
   IRelayPollStatusResponse,
   LitRelayConfig,
 } from '@lit-protocol/types';
-import { AuthMethodType } from '@lit-protocol/constants';
 
 /**
  * Class that communicates with Lit relay server
@@ -19,6 +18,14 @@ export class LitRelay implements IRelay {
    * API key for Lit's relay server
    */
   private readonly relayApiKey: string;
+  /**
+   * Route for minting PKP
+   */
+  private readonly mintRoute = '/mint-next-and-add-auth-methods';
+  /**
+   * Route for fetching PKPs
+   */
+  private readonly fetchRoute = '/fetch-pkps-by-auth-method';
 
   /**
    * Create a Relay instance
@@ -36,17 +43,12 @@ export class LitRelay implements IRelay {
   /**
    * Mint a new PKP for the given auth method
    *
-   * @param {AuthMethodType} authMethodType - Auth method type
    * @param {string} body - Body of the request
    *
    * @returns {Promise<IRelayMintResponse>} Response from the relay server
    */
-  public async mintPKP(
-    authMethodType: AuthMethodType,
-    body: string
-  ): Promise<IRelayMintResponse> {
-    const route = this._getMintPKPRoute(authMethodType);
-    const response = await fetch(`${this.relayUrl}${route}`, {
+  public async mintPKP(body: string): Promise<IRelayMintResponse> {
+    const response = await fetch(`${this.relayUrl}${this.mintRoute}`, {
       method: 'POST',
       headers: {
         'api-key': this.relayApiKey,
@@ -131,17 +133,12 @@ export class LitRelay implements IRelay {
   /**
    * Fetch PKPs associated with the given auth method
    *
-   * @param {AuthMethodType} authMethodType - Auth method type
    * @param {string} body - Body of the request
    *
    * @returns {Promise<IRelayFetchResponse>} Response from the relay server
    */
-  public async fetchPKPs(
-    authMethodType: AuthMethodType,
-    body: string
-  ): Promise<IRelayFetchResponse> {
-    const route = this._getFetchPKPsRoute(authMethodType);
-    const response = await fetch(`${this.relayUrl}${route}`, {
+  public async fetchPKPs(body: string): Promise<IRelayFetchResponse> {
+    const response = await fetch(`${this.relayUrl}${this.fetchRoute}`, {
       method: 'POST',
       headers: {
         'api-key': this.relayApiKey,
@@ -188,61 +185,5 @@ export class LitRelay implements IRelay {
     }
     const registrationOptions = await response.json();
     return registrationOptions;
-  }
-
-  /**
-   * Get route for fetching PKPs
-   *
-   * @param {AuthMethodType} authMethodType - Auth method type
-   *
-   * @returns {string} Fetching route
-   */
-  private _getFetchPKPsRoute(authMethodType: AuthMethodType): string {
-    switch (authMethodType) {
-      case AuthMethodType.EthWallet:
-        return '/auth/wallet/userinfo';
-      case AuthMethodType.Discord:
-        return '/auth/discord/userinfo';
-      case AuthMethodType.GoogleJwt:
-        return '/auth/google/userinfo';
-      case AuthMethodType.OTP:
-        return `/auth/otp/userinfo`;
-      case AuthMethodType.StytchOtp:
-        return '/auth/stytch-otp/userinfo';
-      case AuthMethodType.WebAuthn:
-        return '/auth/webauthn/userinfo';
-      default:
-        throw new Error(
-          `Auth method type "${authMethodType}" is not supported. Please refer to the type AuthMethodType to see which enum values are available.`
-        );
-    }
-  }
-
-  /**
-   * Get route for minting PKPs
-   *
-   * @param {AuthMethodType} authMethodType - Auth method type
-   *
-   * @returns {string} Minting route
-   */
-  private _getMintPKPRoute(authMethodType: AuthMethodType): string {
-    switch (authMethodType) {
-      case AuthMethodType.EthWallet:
-        return '/auth/wallet';
-      case AuthMethodType.Discord:
-        return '/auth/discord';
-      case AuthMethodType.GoogleJwt:
-        return '/auth/google';
-      case AuthMethodType.OTP:
-        return `/auth/otp`;
-      case AuthMethodType.StytchOtp:
-        return '/auth/stytch-otp';
-      case AuthMethodType.WebAuthn:
-        return '/auth/webauthn/verify-registration';
-      default:
-        throw new Error(
-          `Auth method type "${authMethodType}" is not supported`
-        );
-    }
   }
 }

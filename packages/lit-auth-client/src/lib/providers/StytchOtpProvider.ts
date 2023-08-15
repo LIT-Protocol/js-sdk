@@ -8,6 +8,7 @@ import {
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
 import { StytchOtpProviderOptions } from '@lit-protocol/types';
+import { ethers } from 'ethers';
 
 export class StytchOtpProvider extends BaseProvider {
   private _params: StytchOtpProviderOptions;
@@ -84,6 +85,24 @@ export class StytchOtpProvider extends BaseProvider {
         accessToken: accessToken,
       });
     });
+  }
+
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    const tokenBody = this._parseJWT(authMethod.accessToken);
+    const userId = tokenBody['sub'] as string;
+    const orgId = (tokenBody['aud'] as string[])[0];
+    const authMethodId = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${userId.toLowerCase()}:${orgId.toLowerCase()}`)
+    );
+    return authMethodId;
   }
 
   /**

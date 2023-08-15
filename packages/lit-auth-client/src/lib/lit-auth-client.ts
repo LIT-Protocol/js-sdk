@@ -6,7 +6,8 @@ import {
   StytchOtpProviderOptions,
   ProviderOptions,
   SignInWithOTPParams,
-  OtpProviderOptions
+  OtpProviderOptions,
+  WebAuthnProviderOptions,
 } from '@lit-protocol/types';
 import { ProviderType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -40,7 +41,7 @@ export class LitAuthClient {
    * Map of providers
    */
   private providers: Map<string, BaseProvider>;
-  
+
   private litOtpOptions: OtpProviderOptions | undefined;
 
   /**
@@ -137,6 +138,7 @@ export class LitAuthClient {
       case 'webauthn':
         provider = new WebAuthnProvider({
           ...baseParams,
+          ...(options as WebAuthnProviderOptions),
         }) as unknown as T;
         break;
       case `stytchOtp`:
@@ -144,18 +146,18 @@ export class LitAuthClient {
           {
             ...baseParams,
           },
-          (options as StytchOtpProviderOptions)
+          options as StytchOtpProviderOptions
         ) as unknown as T;
         break;
-        case `otp`:
-          provider = new OtpProvider(
-            {
-              ...baseParams,
-              ...(options as SignInWithOTPParams),
-            },
-            this.litOtpOptions
-          ) as unknown as T;
-          break;
+      case `otp`:
+        provider = new OtpProvider(
+          {
+            ...baseParams,
+            ...(options as SignInWithOTPParams),
+          },
+          this.litOtpOptions
+        ) as unknown as T;
+        break;
       default:
         throw new Error(
           "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn' are supported at the moment."
