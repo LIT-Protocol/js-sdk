@@ -6,6 +6,7 @@ import GoogleProvider from './lib/providers/GoogleProvider';
 import AppleProvider from './lib/providers/AppleProvider';
 import WebAuthnProvider from './lib/providers/WebAuthnProvider';
 import { OtpProvider } from './lib/providers/OtpProvider';
+import { StytchOtpProvider } from './lib/providers/StytchOtpProvider';
 import { isSignInRedirect, getProviderFromUrl } from './lib/utils';
 
 declare global {
@@ -27,6 +28,7 @@ export {
   AppleProvider,
   WebAuthnProvider,
   OtpProvider,
+  StytchOtpProvider,
   isSignInRedirect,
   getProviderFromUrl,
 };

@@ -8,6 +8,7 @@ import {
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
 import { OtpProviderOptions } from '@lit-protocol/types';
+import { ethers } from 'ethers';
 
 export class OtpProvider extends BaseProvider {
   private _params: SignInWithOTPParams;
@@ -153,5 +154,43 @@ export class OtpProvider extends BaseProvider {
       default:
         return '';
     }
+  }
+
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    const tokenBody = this.#parseJWT(authMethod.accessToken);
+    const message: string = tokenBody['extraData'] as string;
+    const contents = message.split('|');
+    const userId = contents[0];
+    const orgId = (tokenBody['orgId'] as string).toLowerCase();
+    const authMethodId = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${userId}:${orgId}`)
+    );
+    return authMethodId;
+  }
+
+  /**
+   * Parse OTP token
+   *
+   * @param {string} jwt - Token to parse
+   * @returns {Record<string, unknown>} - Parsed body
+   */
+  #parseJWT(jwt: string): Record<string, unknown> {
+    let parts = jwt.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid token length');
+    }
+    let body = Buffer.from(parts[1], 'base64');
+    let parsedBody: Record<string, unknown> = JSON.parse(
+      body.toString('ascii')
+    );
+    return parsedBody;
   }
 }

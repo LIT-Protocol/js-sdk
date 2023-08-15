@@ -1,4 +1,10 @@
-import { ClaimKeyResponse, SignInWithOTPParams } from './interfaces';
+
+import {
+  ClaimKeyResponse,
+  SignInWithOTPParams,
+  StytchOtpProviderOptions,
+  WebAuthnProviderOptions,
+} from './interfaces';
 import {
   AccsCOSMOSParams,
   AccsDefaultParams,
@@ -7,7 +13,6 @@ import {
   AccsRegularParams,
   AccsSOLV2Params,
   EthWalletProviderOptions,
-  EthWalletAuthenticateOptions,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
@@ -109,7 +114,9 @@ export type IRelayAuthStatus = 'InProgress' | 'Succeeded' | 'Failed';
 export type ProviderOptions =
   | OAuthProviderOptions
   | EthWalletProviderOptions
-  | SignInWithOTPParams;
+  | SignInWithOTPParams
+  | StytchOtpProviderOptions
+  | WebAuthnProviderOptions;
 
 export type AuthenticateOptions = BaseAuthenticateOptions;
 export type MintCallback = (response: ClaimKeyResponse) => void;

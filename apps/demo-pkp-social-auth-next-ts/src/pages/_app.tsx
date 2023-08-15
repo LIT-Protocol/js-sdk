@@ -1,84 +1,52 @@
 import { AppProps } from 'next/app';
 import '../styles/globals.css';
-import { WagmiConfig, createClient, configureChains, mainnet } from 'wagmi';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
+import { WagmiConfig, createClient, configureChains } from 'wagmi';
+import { goerli, mainnet, optimism } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
-import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { Chain } from 'wagmi/chains';
-
-const chronicleChain: Chain = {
-  id: 175177,
-  name: 'Chronicle',
-  network: 'chronicle',
-  // iconUrl: 'https://example.com/icon.svg',
-  // iconBackground: '#fff',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Chronicle - Lit Protocol Testnet',
-    symbol: 'LIT',
-  },
-  rpcUrls: {
-    default: {
-      http: ['https://chain-rpc.litprotocol.com/http'],
-    },
-    public: {
-      http: ['https://chain-rpc.litprotocol.com/http'],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Chronicle - Lit Protocol Testnet',
-      url: 'https://chain.litprotocol.com',
-    },
-  },
-  testnet: true,
-};
+import { StytchProvider } from '@stytch/nextjs';
+import { createStytchUIClient } from '@stytch/nextjs/ui';
+import { Albert_Sans } from 'next/font/google';
 
 const { provider, chains } = configureChains(
-  [chronicleChain],
-  [
-    jsonRpcProvider({
-      rpc: chain => ({ http: chain.rpcUrls.default.http[0] }),
-    }),
-  ]
+  [mainnet, goerli, optimism],
+  [publicProvider()]
 );
 
-// const { chains, provider, webSocketProvider } = configureChains(
-//   [mainnet],
-//   [
-//     alchemyProvider({ apiKey: 'onvoLvV97DDoLkAmdi0Cj7sxvfglKqDh' }),
-//     publicProvider(),
-//   ]
-// );
-
 const client = createClient({
-  autoConnect: true,
+  autoConnect: false,
   connectors: [
-    new MetaMaskConnector({ chains }),
+    new MetaMaskConnector({
+      chains,
+      options: {
+        UNSTABLE_shimOnConnectSelectAccount: true,
+      },
+    }),
     new CoinbaseWalletConnector({
       chains,
       options: {
         appName: 'wagmi',
       },
     }),
-    // new WalletConnectConnector({
-    //   chains,
-    //   options: {
-    //     projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
-    //   },
-    // }),
   ],
   provider,
-  // webSocketProvider,
 });
+
+const stytch = createStytchUIClient(
+  process.env.NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN || ''
+);
+
+const font = Albert_Sans({ subsets: ['latin'] });
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <WagmiConfig client={client}>
-      <Component {...pageProps} />
-    </WagmiConfig>
+    <StytchProvider stytch={stytch}>
+      <WagmiConfig client={client}>
+        <main className={font.className}>
+          <Component {...pageProps} />
+        </main>
+      </WagmiConfig>
+    </StytchProvider>
   );
 }

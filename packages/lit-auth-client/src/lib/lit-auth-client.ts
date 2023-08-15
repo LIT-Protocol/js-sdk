@@ -3,9 +3,10 @@ import {
   IRelay,
   LitAuthClientOptions,
   OAuthProviderOptions,
-  OtpProviderOptions,
   ProviderOptions,
   SignInWithOTPParams,
+  OtpProviderOptions,
+  WebAuthnProviderOptions,
 } from '@lit-protocol/types';
 import { ProviderType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -17,6 +18,8 @@ import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 import { OtpProvider } from './providers/OtpProvider';
 import AppleProvider from './providers/AppleProvider';
+import { StytchOtpProvider } from '..';
+import { StytchOtpProviderOptions } from 'dist/packages/types/src/lib/interfaces';
 
 /**
  * Class that handles authentication through Lit login
@@ -136,20 +139,21 @@ export class LitAuthClient {
       case 'webauthn':
         provider = new WebAuthnProvider({
           ...baseParams,
+          ...(options as WebAuthnProviderOptions),
         }) as unknown as T;
         break;
       case `otp`:
-        provider = new OtpProvider(
+        provider = new StytchOtpProvider(
           {
             ...baseParams,
             ...(options as SignInWithOTPParams),
           },
-          this.litOtpOptions
+          options as StytchOtpProviderOptions
         ) as unknown as T;
         break;
       default:
         throw new Error(
-          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn' are supported at the moment."
+          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', `otp` and 'webauthn' are supported at the moment."
         );
     }
 

@@ -11,16 +11,22 @@ import {
   getStateParam,
   decode,
 } from '../utils';
+import { ethers } from 'ethers';
 
 export default class DiscordProvider extends BaseProvider {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
+  /**
+   * OAuth client ID. Defaults to one used by Lit
+   */
+  private clientId?: string;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
     this.redirectUri = options.redirectUri || window.location.origin;
+    this.clientId = options.clientId || '1052874239658692668';
   }
 
   /**
@@ -91,5 +97,43 @@ export default class DiscordProvider extends BaseProvider {
       accessToken: accessToken,
     };
     return authMethod;
+  }
+
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    const userId = await this.#fetchDiscordUser(authMethod.accessToken);
+    const authMethodId = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${userId}:${this.clientId}`)
+    );
+    return authMethodId;
+  }
+
+  /**
+   * Fetch Discord user ID
+   *
+   * @param {string} accessToken - Discord access token
+   *
+   * @returns {Promise<string>} - Discord user ID
+   */
+  async #fetchDiscordUser(accessToken: string): Promise<string> {
+    const meResponse = await fetch('https://discord.com/api/users/@me', {
+      method: 'GET',
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (meResponse.ok) {
+      const user = await meResponse.json();
+      return user.id;
+    } else {
+      throw new Error('Unable to verify Discord account');
+    }
   }
 }
