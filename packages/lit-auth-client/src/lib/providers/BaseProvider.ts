@@ -46,6 +46,14 @@ export abstract class BaseProvider {
   abstract getAuthMethodId(accessToken?: string): Promise<string>;
 
   /**
+   * (Sync Operation) Derive UID for storage from authentication material produced by auth providers
+   *
+   * @returns { string } - storage UID
+   * @param accessToken
+   */
+  abstract getAuthMethodStorageUID(accessToken?: string | AuthSig): string;
+
+  /**
    * Authenticate the user based on the provider-specific implementation and return the relevant authentication data
    *
    * @template T - Type representing the specific options for the authenticate method

@@ -48,7 +48,7 @@ export default class GoogleProvider extends BaseProvider {
     window.location.assign(loginUrl);
   }
 
-  public getAuthMethodStorageUID(token: any): string {
+  public getAuthMethodStorageUID(token: string): string {
     if (!token) {
       throw new Error('Token is required to generate auth method storage UID');
     }
@@ -72,7 +72,7 @@ export default class GoogleProvider extends BaseProvider {
     // let storageItem = this.storageProvider.getExpirableItem('lit-google-token');
 
     // default to caching
-    if (options && options.cache === null) {
+    if (options && options.cache === undefined) {
       options.cache = true;
     }
 

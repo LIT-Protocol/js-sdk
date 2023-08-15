@@ -35,7 +35,11 @@ export class OtpProvider extends BaseProvider {
   }
 
   public getAuthMethodStorageUID(accessToken: any): string {
-    return `lit-otp-token-${this.getAuthMethodId(accessToken)}`;
+    const UID = JSON.parse(
+      Buffer.from(accessToken.split('.')[1], 'base64').toString('utf-8')
+    ).extraData.split('|')[0];
+
+    return `lit-otp-token-${UID}`;
   }
 
   /**
@@ -49,7 +53,7 @@ export class OtpProvider extends BaseProvider {
     const _options = options as unknown as OtpAuthenticateOptions;
 
     // default to caching
-    if (_options && _options.cache === null) {
+    if (_options && _options.cache === undefined) {
       _options.cache = true;
     }
 

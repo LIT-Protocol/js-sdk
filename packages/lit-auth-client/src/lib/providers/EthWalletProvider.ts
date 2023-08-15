@@ -42,14 +42,22 @@ export default class EthWalletProvider extends BaseProvider {
     }
   }
 
-  public getAuthMethodStorageUID(authSig: AuthSig): string {
-    if (!authSig.address) {
+  public getAuthMethodStorageUID(authSig: AuthSig | string): string {
+    let _authSig: AuthSig;
+
+    try {
+      _authSig = JSON.parse(authSig as string) as AuthSig;
+    } catch (e) {
+      _authSig = authSig as AuthSig;
+    }
+
+    if (!_authSig.address) {
       throw new Error(
         'Address is required to generate auth method storage UID'
       );
     }
 
-    return `lit-ethwallet-token-${authSig.address}`;
+    return `lit-ethwallet-token-${_authSig.address}`;
   }
 
   /**
@@ -73,7 +81,7 @@ export default class EthWalletProvider extends BaseProvider {
     let authSig: AuthSig;
 
     // default to caching
-    if (options && options.cache === null) {
+    if (options && options.cache === undefined) {
       options.cache = true;
     }
 

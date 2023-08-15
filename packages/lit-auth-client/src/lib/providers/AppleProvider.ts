@@ -47,6 +47,14 @@ export default class AppleProvider extends BaseProvider {
   }
 
   /**
+   * Get the unique identifier for the auth method storage
+   * @param {string} accessToken - Access token
+   */
+  override getAuthMethodStorageUID(accessToken?: string | undefined): string {
+    throw new Error('Method not implemented.');
+  }
+
+  /**
    * Validate the URL parameters returned from Lit's login server and return the authentication data
    *
    * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
