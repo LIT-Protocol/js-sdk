@@ -7,9 +7,17 @@ export class BrowserHelper {
   // Usage:
   // const file = new Blob(['Hello, world!'], { type: 'text/plain' });
   // BrowserHelper.downloadFile(file);
-  downloadFile(file: File | Blob, filename?: string) {
+  downloadFile(file: File | Blob | string, filename?: string) {
+    let blob: Blob;
+
+    if (typeof file === 'string') {
+      blob = new Blob([file], { type: 'text/plain' });
+    } else {
+      blob = file;
+    }
+
     // Create a URL for the file
-    const url = URL.createObjectURL(file);
+    const url = URL.createObjectURL(blob);
 
     // Create a link
     const a = document.createElement('a');
