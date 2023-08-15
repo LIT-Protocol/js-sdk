@@ -181,15 +181,6 @@ ${LitMessages.persistentStorageExample}`;
     }
 
     return {
-      // -- must be provided to decrypt
-      encryptResponse: {
-        ...encryptRes,
-        accessControlConditions: opts.accessControlConditions,
-        chain,
-      },
-      // -- additionally
-      decryptionContext: { decryptionMaterial: decryptionContext },
-
       // -- optional
       ...(cache && { storageKey }),
 
@@ -202,6 +193,14 @@ ${LitMessages.persistentStorageExample}`;
           }),
         },
       }),
+      // -- must be provided to decrypt
+      encryptResponse: {
+        ...encryptRes,
+        accessControlConditions: opts.accessControlConditions,
+        chain,
+      },
+      // -- additionally
+      decryptionContext: { decryptionMaterial: decryptionContext },
     };
   }
 
@@ -374,74 +373,24 @@ ${LitMessages.persistentStorageExample}`;
    * @param {LitAuthMethod[]} authData
    */
   public getAccounts = withAuthData(
-    async (authData: Array<LitAuthMethod>, cache: boolean = true) => {
+    async (authData: Array<LitAuthMethod>, cache: boolean) => {
       log.start('getAccounts');
 
-      // forming a string of all the auth method types eg. '1-6'
-      const authMethodTypes = authData
-        .map((authData) => {
-          return authData.authMethodType;
-        })
-        .join('-');
+      console.log('XXX cache:', cache);
 
-      log('authMethodTypes', authMethodTypes);
-
-      const storageKey = `lit-authed-${authMethodTypes}-accounts`;
-      log('storageKey', storageKey);
+      let accounts;
 
       try {
-        let accounts;
-
-        // -- get accounts from cache
-        try {
-          accounts = JSON.parse(
-            globalThis.Lit.storage?.getExpirableItem(storageKey) as string
-          );
-        } catch (e) {
-          log('error parsing cached accounts', e);
-        }
-
-        log('accounts:', accounts);
-
-        if (!accounts) {
-          log('no cached accounts found, fetching from server');
-          try {
-            accounts = await handleGetAccounts(authData, {
-              cache,
-            });
-          } catch (e) {
-            log.error('Error while getting accounts', e);
-            log.end('getAccounts');
-            throw e;
-          }
-        }
-
-        if (accounts.length <= 0) {
-          log('no accounts found');
-          log.end('getAccounts');
-          return [];
-        }
-
-        // -- save to cache
-        // if (cache) {
-        //   log('caching accounts');
-        //   // -- save to cache
-        //   // cache it to local storage
-        //   globalThis.Lit.storage?.setExpirableItem(
-        //     storageKey,
-        //     JSON.stringify(accounts),
-        //     5,
-        //     'minutes'
-        //   );
-        // }
-
-        log.end('getAccounts');
-        return accounts;
+        accounts = await handleGetAccounts(authData, {
+          cache,
+        });
       } catch (e) {
         log.error('Error while getting accounts', e);
         log.end('getAccounts');
         throw e;
       }
+
+      return accounts;
     }
   );
 
