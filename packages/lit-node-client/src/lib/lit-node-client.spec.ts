@@ -104,7 +104,6 @@ describe('Lit Actions', () => {
       pubKey: data.publicKey,
       authMethods: [],
       authSig: LITCONFIG.CONTROLLER_AUTHSIG,
-      hdKeyRequest: { keyId: 'hello-world' },
     });
 
     // add padding
@@ -121,30 +120,21 @@ describe('Lit Actions', () => {
           'eyJhbGciOiJSUzI1NiIsImtpZCI6IjkxMWUzOWUyNzkyOGFlOWYxZTlkMWUyMTY0NmRlOTJkMTkzNTFiNDQiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIzNTUwMDc5ODY3MzEtbGxianE1a2JzZzhpZWI3MDVtbzY0bmZuaDg4ZGhsbW4uYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiIzNTUwMDc5ODY3MzEtbGxianE1a2JzZzhpZWI3MDVtbzY0bmZuaDg4ZGhsbW4uYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDY4MjU2NjQ1MjI4NTg3MzIzODEiLCJoZCI6ImxpdHByb3RvY29sLmNvbSIsImVtYWlsIjoiam9zaEBsaXRwcm90b2NvbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6Imk3Vm5JRzFTME91cy1WQVhybzAtVnciLCJpYXQiOjE2OTE0MzA5NDQsImV4cCI6MTY5MTQzNDU0NH0.q80G4c64N8kBYE-6BZBTdjw0rrMiLVng-SOVgCx_XoRmOWzMT5L_BHdMoweO7ozNEIDWMhHFfI0Mz9v0g2FFz3I3MVKmZju900tjXrPXhYAILIk5SMPcIkvB7owqGs4rPJmZ8RbtxAGpqv5GMcK-FOoC3Ct0doMJzP-QNP2k9vixwU9_n2pWYOTJoDrkaPIXO86ZnVzg-VASP60tzVO0nv991tHTSneg6V_K8n27FxkZD30rOQ8gOuexEr7x5V-tKqTECvBOZy1FWf9snm8UHdOsKp2DEbkJslJVOez3qeczIOX12z-vhjP8m27qs7HXHQ8hCNxPtx-9-Fsf5krhsA',
       },
     });
-    let pubkey = client.computeHDPubKey(
-      res.derivedKeyId,
-      SIGTYPE.EcdsaCaitSith
-    );
-    console.log(pubkey);
+
     const data = {
       // hello world in Uint8Array
       toSign: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
       publicKey: LITCONFIG.PKP_PUBKEY,
       sigName: 'hello-world-sig',
     };
-    await new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        resolve();
-      }, 5000);
-    });
+
     let sig = await client.pkpSign({
       toSign: data.toSign,
-      pubKey: data.publicKey,
+      pubKey: res.pubkey,
       authMethods: [],
       authSig: LITCONFIG.CONTROLLER_AUTHSIG,
-      hdKeyRequest: { keyId: res.derivedKeyId },
     });
 
-    expect(sig.publicKey.toLowerCase()).toEqual(pubkey.toLowerCase());
+    expect(sig.publicKey.toLowerCase()).toEqual(res.pubkey.toLowerCase());
   }, 20_0000);
 });

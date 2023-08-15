@@ -1183,8 +1183,7 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   pkpSign = async (params: JsonPkpSignRequest) => {
-    let { authSig, sessionSigs, toSign, pubKey, authMethods, hdKeyRequest } =
-      params;
+    let { authSig, sessionSigs, toSign, pubKey, authMethods } = params;
 
     // the nodes will only accept a normal array type as a paramater due to serizalization issues with Uint8Array type.
     // this loop below is to normalize the message to a basic array.
@@ -1208,7 +1207,6 @@ export class LitNodeClientNodeJs extends LitCore {
         pubkey: pubKey,
         authSig: sigToPassToNode,
         authMethods,
-        hdKeyRequest,
       };
 
       return this.getPkpSignExecutionShares(url, reqBody, requestId);
@@ -2041,7 +2039,7 @@ export class LitNodeClientNodeJs extends LitCore {
   async claimKeyId(params: ClaimRequest): Promise<ClaimKeyResponse> {
     if (!this.ready) {
       const message =
-        '6 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
       throwError({
         message,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
@@ -2068,6 +2066,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const derivedKeyId: string = (responseData as SuccessNodePromises<any>)
         .values[0].derivedKeyId;
+
       const pubkey: string = this.computeHDPubKey(
         derivedKeyId,
         SIGTYPE.EcdsaCaitSith
