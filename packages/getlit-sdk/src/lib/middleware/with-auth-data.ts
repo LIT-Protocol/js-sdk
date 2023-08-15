@@ -14,13 +14,8 @@ export interface MiddlewareOptions {
  */
 export function withAuthData(fn: Function) {
   return async function (opts?: MiddlewareOptions): Promise<any> {
-    let authData: Array<LitAuthMethod> | undefined;
-    let cache: boolean = false; // Set cache to false by default
-
-    if (opts) {
-      cache = opts.cache || false; // extract cache from options if present
-      authData = opts.authData;
-    }
+    let authData: Array<LitAuthMethod> | undefined = opts?.authData;
+    let cache: boolean = opts?.cache ?? true; // Set cache to true by default if undefined
 
     if (!authData) {
       if (isBrowser()) {
