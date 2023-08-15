@@ -128,9 +128,10 @@ export default class WebAuthnProvider extends BaseProvider {
     options?: WebAuthnAuthenticateOptions
   ): Promise<AuthMethod> {
     // default to caching
-    if (options && options.cache === undefined) {
-      options.cache = true;
-    }
+    const _options = {
+      cache: true,
+      ...options,
+    };
 
     // Check if it exists in cache
     // let storageItem =
@@ -182,14 +183,14 @@ export default class WebAuthnProvider extends BaseProvider {
       accessToken: JSON.stringify(actualAuthenticationResponse),
     };
 
-    if (options?.cache) {
+    if (_options?.cache) {
       const storageUID = this.getAuthMethodStorageUID(authMethod.accessToken);
 
       this.storageProvider.setExpirableItem(
         storageUID,
         JSON.stringify(authMethod),
-        options.expirationLength ?? 24,
-        options.expirationUnit ?? 'hours'
+        _options.expirationLength ?? 24,
+        _options.expirationUnit ?? 'hours'
       );
     }
 

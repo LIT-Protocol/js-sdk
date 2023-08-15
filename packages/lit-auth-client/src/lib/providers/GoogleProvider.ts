@@ -68,13 +68,10 @@ export default class GoogleProvider extends BaseProvider {
   public async authenticate<T extends GoogleAuthenticateOptions>(
     options?: T
   ): Promise<AuthMethod> {
-    // Check if it exists in cache
-    // let storageItem = this.storageProvider.getExpirableItem('lit-google-token');
-
-    // default to caching
-    if (options && options.cache === undefined) {
-      options.cache = true;
-    }
+    const _options = {
+      cache: true,
+      ...options,
+    };
 
     // if (storageItem) {
     //   clearParamsFromURL();
@@ -131,37 +128,15 @@ export default class GoogleProvider extends BaseProvider {
       accessToken: idToken,
     };
 
-    if (options?.cache) {
+    if (_options?.cache) {
       const storageUID = this.getAuthMethodStorageUID(idToken);
 
       this.storageProvider.setExpirableItem(
         storageUID,
         JSON.stringify(authMethod),
-        options.expirationLength ?? 24,
-        options.expirationUnit ?? 'hours'
+        _options.expirationLength ?? 24,
+        _options.expirationUnit ?? 'hours'
       );
-
-      // const litResource = new LitAccessControlConditionResource('*');
-      // const litAbility = LitAbility.PKPSigning;
-
-      // const pkps = await this.fetchPKPsThroughRelayer(authMethod);
-
-      // console.log('Getting session sigs');
-      // const sessionSigs = await this.getSessionSigs({
-      //   pkpPublicKey: pkps[0].publicKey,
-      //   authMethod,
-      //   sessionSigsParams: {
-      //     chain: 'ethereum',
-      //     resourceAbilityRequests: [
-      //       {
-      //         resource: litResource,
-      //         ability: litAbility,
-      //       },
-      //     ],
-      //   },
-      // });
-
-      // console.log('sessionSigs:', sessionSigs);
     }
 
     return authMethod;

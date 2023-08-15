@@ -63,10 +63,10 @@ export default class DiscordProvider extends BaseProvider {
   public async authenticate(
     options?: DiscordAuthenticateOptions
   ): Promise<AuthMethod> {
-    // default to caching
-    if (options && options.cache === undefined) {
-      options.cache = true;
-    }
+    const _options = {
+      cache: true,
+      ...options,
+    };
 
     // Check if it exists in cache
     // let storageItem =
@@ -127,14 +127,14 @@ export default class DiscordProvider extends BaseProvider {
       accessToken: accessToken,
     };
 
-    if (options?.cache) {
+    if (_options?.cache) {
       const storageUID = this.getAuthMethodStorageUID(accessToken);
 
       this.storageProvider.setExpirableItem(
         storageUID,
         JSON.stringify(authMethod),
-        options.expirationLength ?? 24,
-        options.expirationUnit ?? 'hours'
+        _options.expirationLength ?? 24,
+        _options.expirationUnit ?? 'hours'
       );
     }
 

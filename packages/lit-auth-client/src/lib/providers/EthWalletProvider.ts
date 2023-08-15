@@ -80,21 +80,21 @@ export default class EthWalletProvider extends BaseProvider {
 
     let authSig: AuthSig;
 
-    // default to caching
-    if (options && options.cache === undefined) {
-      options.cache = true;
-    }
+    const _options = {
+      cache: true,
+      ...options,
+    };
 
-    if (options?.cache) {
+    if (_options?.cache) {
       // -- we do not want to use the default lit-auth-signature when cache is enabled,
       // instead we want to use the lit-ethwallet-token
       authSig = await checkAndSignAuthMessage({
         chain,
-        ...(options?.expirationUnit &&
-          options?.expirationLength && {
+        ...(_options?.expirationUnit &&
+          _options?.expirationLength && {
             expiration: this.storageProvider.convertToISOString(
-              options.expirationLength,
-              options.expirationUnit
+              _options.expirationLength,
+              _options.expirationUnit
             ),
           }),
         cache: false,
@@ -108,8 +108,8 @@ export default class EthWalletProvider extends BaseProvider {
           authMethodType: AuthMethodType.EthWallet,
           accessToken: JSON.stringify(authSig),
         }),
-        options?.expirationLength ?? 24,
-        options?.expirationUnit ?? 'hours'
+        _options?.expirationLength ?? 24,
+        _options?.expirationUnit ?? 'hours'
       );
     } else {
       /**
@@ -123,14 +123,14 @@ export default class EthWalletProvider extends BaseProvider {
        * So if you only pass in signer.signMessage, you will get "Cannot read properties
        * of undefined (reading '_signingKey')".
        */
-      if ((address && signMessage) || options?.signer) {
-        if (options?.signer) {
+      if ((address && signMessage) || _options?.signer) {
+        if (_options?.signer) {
           if (!address) {
-            address = await options?.signer.getAddress();
+            address = await _options?.signer.getAddress();
           }
 
           if (!signMessage) {
-            signMessage = options.signer.signMessage.bind(options.signer);
+            signMessage = _options.signer.signMessage.bind(_options.signer);
           }
         }
         if (!address) {
@@ -150,7 +150,7 @@ export default class EthWalletProvider extends BaseProvider {
 
         // Get expiration or default to 24 hours
         const expiration =
-          options?.expiration ||
+          _options?.expiration ||
           new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
 
         // Prepare Sign in with Ethereum message

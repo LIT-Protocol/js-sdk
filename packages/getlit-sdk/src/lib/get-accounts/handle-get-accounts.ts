@@ -24,6 +24,7 @@ export const handleGetAccounts = async (
     log.info('authMethodName:', authMethodName);
     const authProvider = globalThis.Lit.auth[authMethodName];
     log.info('authProvider:', authProvider);
+
     if (!authProvider) {
       log.error("otp is not initialised. We'll try email or phone");
     }
@@ -37,12 +38,11 @@ export const handleGetAccounts = async (
     }
 
     // -- cache
-    const authMethodId = await authProvider.getAuthMethodId(
-      authData.accessToken
-    );
-    const storageKey = `lit-accounts-${authMethodId}`;
+    const storageUID = authProvider
+      .getAuthMethodStorageUID(authData.accessToken)
+      .split('-')[3];
 
-    console.log('storageKey:', storageKey);
+    const storageKey = `lit-accounts-${storageUID}`;
 
     let cachedAccounts;
 
@@ -73,6 +73,7 @@ export const handleGetAccounts = async (
 
         // -- cache
         if (cache && globalThis.Lit.storage) {
+          log.info('Caching accounts...');
           globalThis.Lit.storage.setExpirableItem(
             storageKey,
             JSON.stringify(formattedPKPs),
