@@ -281,77 +281,6 @@ export function App() {
     
     
 
-    
-    
-        if(typeof LitJsSdk_blsSdk === 'undefined') {
-            console.error("LitJsSdk_blsSdk:", LitJsSdk_blsSdk);
-        }else{
-            console.warn("LitJsSdk_blsSdk:", LitJsSdk_blsSdk);
-            window.LitJsSdk_blsSdk = LitJsSdk_blsSdk;
-        }
-        window.addEventListener('load', function() {
-
-            var root = document.getElementById('root');
-            var result = document.getElementById('result');
-            var entries = Object.entries(LitJsSdk_blsSdk);
-            var lis = entries.map(([key, value]) => `
-            <li>
-                <div id="LitJsSdk_blsSdk_${key}" class="key" onClick="(async (e) => {
-                    var fn = LitJsSdk_blsSdk['${key}'];
-                    var fnType = typeof fn;
-                    console.warn('[${key}] is type of [' + fnType + ']');
-
-                    if ( fnType === 'string' ) return;
-
-                    if( fnType === 'function' ){
-                        try{
-                            console.log('params:', globalThis.params);
-
-                            var res;
-                            try{
-                                res = new fn(globalThis.params);
-                            }catch{
-                                res = await fn(globalThis.params);
-                            }
-                            window.output = res;
-                            res = JSON.stringify(res, null, 2);
-                            result.innerText = res;
-                            console.log(res);
-                        }catch(e){
-                            console.error('Please set the [params] variable in the console then click again');
-                            console.log(e);
-                        }
-                        return;
-                    }
-
-                    if( fnType === 'object' ){
-                        var res = await fn;
-                        window.output = res;
-                        res = JSON.stringify(res, null, 2);
-                        result.innerText = res;
-                        console.log(res);
-                        return;
-                    }
-                    
-                    
-                })();">${key}</div>
-                <pre class="code">
-<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
-                </pre>
-            </li>`);
-            lis = lis.join(' ');
-            var template = `
-            <div class="cat">
-                <h1>LitJsSdk_blsSdk has ${entries.length} functions</h1>
-                    <ul>
-                        ${ lis }
-                    </ul>
-                </div>
-            `;
-            root.insertAdjacentHTML('beforeend', template);
-        });
-    
-    
 
     
     
@@ -1721,77 +1650,6 @@ export function App() {
     
     
 
-    
-    
-        if(typeof LitJsSdk_types === 'undefined') {
-            console.error("LitJsSdk_types:", LitJsSdk_types);
-        }else{
-            console.warn("LitJsSdk_types:", LitJsSdk_types);
-            window.LitJsSdk_types = LitJsSdk_types;
-        }
-        window.addEventListener('load', function() {
-
-            var root = document.getElementById('root');
-            var result = document.getElementById('result');
-            var entries = Object.entries(LitJsSdk_types);
-            var lis = entries.map(([key, value]) => `
-            <li>
-                <div id="LitJsSdk_types_${key}" class="key" onClick="(async (e) => {
-                    var fn = LitJsSdk_types['${key}'];
-                    var fnType = typeof fn;
-                    console.warn('[${key}] is type of [' + fnType + ']');
-
-                    if ( fnType === 'string' ) return;
-
-                    if( fnType === 'function' ){
-                        try{
-                            console.log('params:', globalThis.params);
-
-                            var res;
-                            try{
-                                res = new fn(globalThis.params);
-                            }catch{
-                                res = await fn(globalThis.params);
-                            }
-                            window.output = res;
-                            res = JSON.stringify(res, null, 2);
-                            result.innerText = res;
-                            console.log(res);
-                        }catch(e){
-                            console.error('Please set the [params] variable in the console then click again');
-                            console.log(e);
-                        }
-                        return;
-                    }
-
-                    if( fnType === 'object' ){
-                        var res = await fn;
-                        window.output = res;
-                        res = JSON.stringify(res, null, 2);
-                        result.innerText = res;
-                        console.log(res);
-                        return;
-                    }
-                    
-                    
-                })();">${key}</div>
-                <pre class="code">
-<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
-                </pre>
-            </li>`);
-            lis = lis.join(' ');
-            var template = `
-            <div class="cat">
-                <h1>LitJsSdk_types has ${entries.length} functions</h1>
-                    <ul>
-                        ${ lis }
-                    </ul>
-                </div>
-            `;
-            root.insertAdjacentHTML('beforeend', template);
-        });
-    
-    
 
     
     
@@ -1944,7 +1802,7 @@ pre {
                     `,
                 }}
             />
-            (REACT) THIS FILE IS AUTOMATICALLY GENERATED FROM tools/scripts/gen-react.mjs Wed, 26 Jul 2023 11:52:01 GMT
+            (REACT) THIS FILE IS AUTOMATICALLY GENERATED FROM tools/scripts/gen-react.mjs Wed, 16 Aug 2023 14:03:13 GMT
             <div id="root"></div>
              <pre><code id="result"></code></pre>
         </>

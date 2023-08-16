@@ -20,7 +20,10 @@
   "tags": [
     "universal"
   ],
-  "version": "2.2.47",
+  "buildOptions": {
+    "genReact": false
+  },
+  "version": "2.2.49",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
