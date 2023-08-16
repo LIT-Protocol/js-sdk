@@ -223,6 +223,26 @@ export interface CustomNetwork {
   litNetwork: LIT_NETWORKS_KEYS;
 }
 
+export interface Signature {
+  r: string;
+
+  s: string;
+  _vs: string,
+
+  recoveryParam: number;
+  v: number;
+
+  yParityAndS: string
+  compact: string;
+}
+
+export interface ClaimKeyResponse {
+  signatures: Signature[],
+  derivedKeyId: string,
+  pubkey: string
+
+}
+
 /**
  * Struct in rust
  * -----
@@ -1333,6 +1353,11 @@ export interface WebAuthnProviderOptions {
    * Name of relying party. Defaults to "lit"
    */
   rpName?: string;
+}
+
+export interface StytchOtpProviderOptions {
+  appId: string;
+  userId?: string;
 }
 
 export interface SignInWithOTPParams {
