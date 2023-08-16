@@ -115,6 +115,11 @@ export interface AuthCallbackParams {
   // Keplr & Cypher -> window.keplr
   // Leap -> window.leap
   cosmosWalletType?: CosmosWalletType;
+
+  /**
+   * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
+   */
+  walletConnectProjectId?: string;
 }
 
 /** ---------- Web3 ---------- */
@@ -1323,10 +1328,10 @@ export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
 }
 
 export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
-  /* 
-  * JWT from an authenticated session
-  * see stych docs for more info: https://stytch.com/docs/api/session-get
-  */
+  /*
+   * JWT from an authenticated session
+   * see stych docs for more info: https://stytch.com/docs/api/session-get
+   */
   accessToken: string;
   /* 
    Stytch user identifier for a project
