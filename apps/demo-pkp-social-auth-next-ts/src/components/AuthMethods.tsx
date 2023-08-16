@@ -86,7 +86,7 @@ const AuthMethods = ({
           </div>
           <span className="btn__label">Continue with phone</span>
         </button>
-        <button
+        {/* <button
           type="button"
           className="btn btn--outline"
           onClick={() => setView('wallet')}
@@ -107,7 +107,7 @@ const AuthMethods = ({
             </svg>
           </div>
           <span className="btn__label">Connect your web3 wallet</span>
-        </button>
+        </button> */}
         <button
           type="button"
           className="btn btn--outline"

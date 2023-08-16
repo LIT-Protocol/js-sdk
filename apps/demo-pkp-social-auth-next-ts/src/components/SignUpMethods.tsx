@@ -72,22 +72,22 @@ export default function SignUpMethods({
             authWithOTP={authWithOTP}
           />
         )}
-        {/* {view === 'phone' && (
+        {view === 'phone' && (
           <EmailSMSAuth
             method={'phone'}
             setView={setView}
             authWithOTP={authWithOTP}
           />
-        )} */}
-        {view === 'phone' && (
-          <StytchOTP authWithStytch={authWithStytch} setView={setView} />
         )}
-        {view === 'wallet' && (
+        {/* {view === 'phone' && (
+          <StytchOTP authWithStytch={authWithStytch} setView={setView} />
+        )} */}
+        {/* {view === 'wallet' && (
           <WalletMethods
             authWithEthWallet={authWithEthWallet}
             setView={setView}
           />
-        )}
+        )} */}
         {view === 'webauthn' && (
           <WebAuthn
             start={'register'}
