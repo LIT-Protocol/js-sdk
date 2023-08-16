@@ -9,10 +9,11 @@ import {
   parseLoginParams,
   getStateParam,
   decode,
-  parseJWT,
 } from '../utils';
 import { BaseProvider } from './BaseProvider';
 import { utils } from 'ethers';
+import { ethers } from 'ethers';
+import * as jose from 'jose';
 
 export default class AppleProvider extends BaseProvider {
   /**
@@ -114,20 +115,19 @@ export default class AppleProvider extends BaseProvider {
   }
 
   /**
-   * Derive unique identifier from authentication material produced by auth providers
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
    *
-   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
-   * interacting directly with Lit contracts
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
    */
-  public async getAuthMethodId(): Promise<string> {
-    if (!this.#idToken) {
-      throw new Error('Id token is not defined. Call authenticate first.');
-    }
-    const tokenPayload = parseJWT(this.#idToken);
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    const tokenPayload = jose.decodeJwt(authMethod.accessToken);
     const userId: string = tokenPayload['sub'] as string;
     const audience: string = tokenPayload['aud'] as string;
-    const authMethodId = utils.keccak256(
-      utils.toUtf8Bytes(`${userId}:${audience}`)
+    const authMethodId = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
     );
     return authMethodId;
   }

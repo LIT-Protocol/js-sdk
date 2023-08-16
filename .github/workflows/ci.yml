@@ -10,12 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repo
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+      - name: Install project dependencies
+        run: yarn install
       - uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'master'
-      - run: yarn install
-
-      - run: npx nx test
+      - name: Run tests
+        run: npx nx test

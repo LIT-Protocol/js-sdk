@@ -7,6 +7,8 @@ global.TextDecoder = TextDecoder;
 // @ts-ignore - set global variable for testing
 global.jestTesting = true;
 
+import * as LITCONFIG from './../../../../lit.config.json';
+
 import { ProviderType } from '@lit-protocol/constants';
 import { LitAuthClient } from './lit-auth-client';
 import GoogleProvider from './providers/GoogleProvider';
@@ -15,6 +17,7 @@ import WebAuthnProvider from './providers/WebAuthnProvider';
 import EthWalletProvider from './providers/EthWalletProvider';
 import AppleProvider from './providers/AppleProvider';
 import { OtpProvider } from './providers/OtpProvider';
+import { StytchOtpAuthenticateOptions } from '@lit-protocol/types';
 
 const isClass = (v: unknown) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
@@ -122,6 +125,34 @@ describe('getProvider', () => {
   it('should return undefined if the provider for the given provider type is not initialized', () => {
     const savedProvider = client.getProvider(ProviderType.Google);
     expect(savedProvider).toBeUndefined();
+  });
+});
+
+describe('StytchOtpProvider', () => {
+  let client: LitAuthClient;
+  let provider: OtpProvider;
+
+  beforeEach(() => {
+    client = new LitAuthClient({
+      litRelayConfig: { relayApiKey: 'test-api-key' },
+    });
+
+    provider = client.initProvider<StytchOtpAuthenticateOptions>(ProviderType.StytchOtp, {
+      appId: LITCONFIG.STYTCH_APP_ID,
+      userId: LITCONFIG.STYTCH_USER_ID,
+    });
+  });
+
+  it('should parse jwt and resolve session', async () => {
+    const token: string = LITCONFIG.STYTCH_TEST_TOKEN;
+    const userId: string = LITCONFIG.STYTCH_USER_ID;
+    const authMethod = await provider.authenticate<OtpProviderOptions>({
+      accessToken: token,
+      userId: userId,
+    });
+    expect(authMethod).toBeDefined();
+
+    expect(authMethod.accessToken).toEqual(token);
   });
 });
 

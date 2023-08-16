@@ -13,14 +13,18 @@ import {
   decode,
   clearParamsFromURL,
 } from '../utils';
-import { utils } from 'ethers';
-import { sha256, toUtf8Bytes } from 'ethers/lib/utils';
+import { ethers } from 'ethers';
+import { sha256 } from 'ethers/lib/utils';
 
 export default class DiscordProvider extends BaseProvider {
   /**
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
+  /**
+   * OAuth client ID. Defaults to one used by Lit
+   */
+  private clientId?: string;
 
   /**
    * Discord client ID
@@ -34,6 +38,7 @@ export default class DiscordProvider extends BaseProvider {
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
     this.redirectUri = options.redirectUri || window.location.origin;
+    this.clientId = options.clientId || '1052874239658692668';
   }
 
   /**
@@ -142,20 +147,17 @@ export default class DiscordProvider extends BaseProvider {
   }
 
   /**
-   * Derive unique identifier from authentication material produced by auth providers
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
    *
-   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
-   * interacting directly with Lit contracts
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
    */
-  public async getAuthMethodId(accessToken?: string): Promise<string> {
-    const _accessToken = accessToken || this.#accessToken;
-
-    if (!_accessToken) {
-      throw new Error('Access token is not defined. Call authenticate first.');
-    }
-    const userId = await this.#fetchDiscordUser(_accessToken);
-    const authMethodId = utils.keccak256(
-      toUtf8Bytes(`${userId}:${this.#clientId}`)
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    const userId = await this.#fetchDiscordUser(authMethod.accessToken);
+    const authMethodId = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${userId}:${this.clientId}`)
     );
     return authMethodId;
   }

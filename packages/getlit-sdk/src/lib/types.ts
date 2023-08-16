@@ -17,7 +17,16 @@ import {
 import { ethers } from 'ethers';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { AuthMethodType } from '@lit-protocol/constants';
-import { LitAuthClient } from '@lit-protocol/lit-auth-client';
+import {
+  AppleProvider,
+  DiscordProvider,
+  EthWalletProvider,
+  GoogleProvider,
+  LitAuthClient,
+  OtpProvider,
+  StytchOtpProvider,
+  WebAuthnProvider,
+} from '@lit-protocol/lit-auth-client';
 import { BaseIPFSProvider } from './ipfs-provider/providers/BaseIPFSProvider';
 
 export type OrNull<T> = T | null;
@@ -214,3 +223,12 @@ export type PersistentStorageConfig = {
   provider: 'pinata' | 'helia' | 'infura';
   options?: PersistentStorageConfigOptions;
 };
+
+// export type LitAuthMethodTypes =
+//   | GoogleProvider
+//   | DiscordProvider
+//   | EthWalletProvider
+//   | OtpProvider
+//   | AppleProvider
+//   | WebAuthnProvider
+//   | StytchOtpProvider;

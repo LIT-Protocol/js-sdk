@@ -1,5 +1,4 @@
-import { BaseAuthenticateOptions, LoginUrlParams } from '@lit-protocol/types';
-import * as jose from 'jose';
+import { LoginUrlParams } from '@lit-protocol/types';
 import * as cbor from 'cbor-web';
 
 export const STATE_PARAM_KEY = 'lit-state-param';
@@ -197,17 +196,8 @@ export function getRPIdFromOrigin(origin: string) {
   return newOrigin.replace(/:\d+$/, '');
 }
 
-/**
- * Decode a signed JWT payload
- *
- * @param {string} jwt - JWT token to parse
- * @returns {Record<string, unknown>} - Decoded signed JWT payload
- */
-export function parseJWT(jwt: string): Record<string, unknown> {
-  return jose.decodeJwt(jwt);
-}
-//Function logic copied from Microsoft demo implementation: https://github.com/MicrosoftEdge/webauthnsample/blob/master/fido.js
-//Decrypt the authData Buffer and split it in its single information pieces. Its structure is specified here: https://w3c.github.io/webauthn/#authenticator-data
+// Function logic copied from Microsoft demo implementation: https://github.com/MicrosoftEdge/webauthnsample/blob/master/fido.js
+// Decrypt the authData Buffer and split it in its single information pieces. Its structure is specified here: https://w3c.github.io/webauthn/#authenticator-data
 export function parseAuthenticatorData(
   authDataBuffer: Buffer
 ): Record<string, unknown> {
@@ -225,9 +215,9 @@ export function parseAuthenticatorData(
       (authData[35] << 8) |
       authData[36];
 
-    //Check if the client sent attestedCredentialdata, which is necessary for every new public key scheduled. This is indicated by the 6th bit of the flag byte being 1 (See specification at function start for reference)
+    // Check if the client sent attestedCredentialdata, which is necessary for every new public key scheduled. This is indicated by the 6th bit of the flag byte being 1 (See specification at function start for reference)
     if (authenticatorData.flags & 64) {
-      //Extract the data from the Buffer. Reference of the structure can be found here: https://w3c.github.io/webauthn/#sctn-attested-credential-data
+      // Extract the data from the Buffer. Reference of the structure can be found here: https://w3c.github.io/webauthn/#sctn-attested-credential-data
       const attestedCredentialData: { [key: string]: any } = {};
       attestedCredentialData['aaguid'] = unparse(authData.slice(37, 53)); ///.toUpperCase()
       attestedCredentialData['credentialIdLength'] =
@@ -236,7 +226,7 @@ export function parseAuthenticatorData(
         55,
         55 + attestedCredentialData['credentialIdLength']
       );
-      //Public key is the first CBOR element of the remaining buffer
+      // Public key is the first CBOR element of the remaining buffer
       let publicKeyCoseBufferCbor: Buffer = authData.slice(
         55 + attestedCredentialData['credentialIdLength'],
         authData.length
@@ -250,17 +240,17 @@ export function parseAuthenticatorData(
       authenticatorData.attestedCredentialData = attestedCredentialData;
     }
 
-    //Check for extension data in the authData, which is indicated by the 7th bit of the flag byte being 1 (See specification at function start for reference)
+    // Check for extension data in the authData, which is indicated by the 7th bit of the flag byte being 1 (See specification at function start for reference)
     if (authenticatorData.flags & 128) {
-      //has extension data
+      // has extension data
 
       let extensionDataCbor;
 
       if (authenticatorData.attestedCredentialData) {
-        //if we have attesttestedCredentialData, then extension data is
-        //the second element
+        // if we have attesttestedCredentialData, then extension data is
+        // the second element
         extensionDataCbor = cbor.decode(
-          //decodeAllSync(
+          // decodeAllSync(
           authData.slice(
             55 + authenticatorData.attestedCredentialData.credentialIdLength,
             authData.length
@@ -268,7 +258,7 @@ export function parseAuthenticatorData(
         );
         extensionDataCbor = extensionDataCbor[1];
       } else {
-        //Else it's the first element
+        // Else it's the first element
         extensionDataCbor = cbor.decode(authData.slice(37, authData.length));
       }
 
@@ -283,6 +273,7 @@ export function parseAuthenticatorData(
   }
 }
 
+// **`unparse()` - Convert UUID byte array (ala parse()) into a string**
 export function unparse(buf: any) {
   // Maps for number <-> hex string conversion
   var _byteToHex = [];

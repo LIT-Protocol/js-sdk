@@ -9,7 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lit-protocol/lit-auth-client": "^2.1.137",
+    "@lit-protocol/auth-helpers": "file:../../packages/auth-helpers",
+    "@lit-protocol/constants": "file:../../packages/constants",
+    "@lit-protocol/lit-auth-client": "file:../../packages/lit-auth-client",
+    "@lit-protocol/pkp-ethers": "file:../../packages/pkp-ethers",
+    "@lit-protocol/types": "file:../../packages/types",
+    "@radix-ui/react-radio-group": "^1.1.3",
+    "@stytch/nextjs": "^9.0.0",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
     "eslint-config-prettier": "^8.8.0",
@@ -22,6 +28,7 @@
   },
   "devDependencies": {
     "@types/node": "18.15.11",
-    "@types/react": "18.0.31"
+    "@types/react": "18.0.31",
+    "sass": "^1.64.2"
   }
 }

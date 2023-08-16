@@ -10,7 +10,7 @@ import {
 } from '@lit-protocol/types';
 import { BaseProvider } from './BaseProvider';
 import { OtpProviderOptions } from '@lit-protocol/types';
-import { parseJWT } from '../utils';
+import { ethers } from 'ethers';
 
 export class OtpProvider extends BaseProvider {
   #accessToken: string | undefined;
@@ -210,49 +210,40 @@ export class OtpProvider extends BaseProvider {
   }
 
   /**
-   * Derive unique identifier from authentication material produced by auth providers
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
    *
-   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
-   * interacting directly with Lit contracts
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
    */
-  public async getAuthMethodId(accessToken?: string): Promise<string> {
-    const _accessToken = accessToken || this.#accessToken;
-
-    if (!_accessToken) {
-      throw new Error('Access token is not defined. Call authenticate first.');
-    }
-    const resp = await this.#verifyOtpJWT(_accessToken);
-    const userId = resp.userId;
-    const payload = parseJWT(_accessToken);
-    const audience = (payload['orgId'] as string).toLowerCase() || 'lit';
-    const authMethodId = `${userId}:${audience}`;
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    const tokenBody = this.#parseJWT(authMethod.accessToken);
+    const message: string = tokenBody['extraData'] as string;
+    const contents = message.split('|');
+    const userId = contents[0];
+    const orgId = (tokenBody['orgId'] as string).toLowerCase();
+    const authMethodId = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${userId}:${orgId}`)
+    );
     return authMethodId;
   }
 
   /**
    * Parse OTP token
    *
-   * @param {string} jwt - JWT
-   *
-   * @returns {Promise<OtpVerificationPayload>} - OTP verification payload
+   * @param {string} jwt - Token to parse
+   * @returns {Record<string, unknown>} - Parsed body
    */
-  async #verifyOtpJWT(jwt: string): Promise<OtpVerificationPayload> {
-    const res = await fetch(this._buildUrl('verify'), {
-      redirect: 'error',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
-      },
-      body: JSON.stringify({
-        token: jwt,
-      }),
-    });
-    if (res.status < 200 || res.status >= 400) {
-      throw new Error('Error while verifying token on remote endpoint');
+  #parseJWT(jwt: string): Record<string, unknown> {
+    let parts = jwt.split('.');
+    if (parts.length !== 3) {
+      throw new Error('Invalid token length');
     }
-    const respBody = await res.json();
-
-    return respBody as OtpVerificationPayload;
+    let body = Buffer.from(parts[1], 'base64');
+    let parsedBody: Record<string, unknown> = JSON.parse(
+      body.toString('ascii')
+    );
+    return parsedBody;
   }
 }

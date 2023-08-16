@@ -195,31 +195,24 @@ export default class EthWalletProvider extends BaseProvider {
   }
 
   /**
-   * Derive unique identifier from authentication material produced by auth providers
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
    *
-   * @returns {Promise<string>} - Auth method id that can be used for look-up and as an argument when
-   * interacting directly with Lit contracts
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
    */
-  public async getAuthMethodId(accessToken?: string): Promise<string> {
-    let authSig;
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    let address: string;
 
-    if (accessToken) {
-      try {
-        authSig = JSON.parse(accessToken);
-      } catch (e) {
-        throw new Error('Invalid access token');
-      }
-    } else {
-      authSig = this.#authSig;
-    }
-
-    if (!authSig) {
+    try {
+      address = JSON.parse(authMethod.accessToken).address;
+    } catch (err) {
       throw new Error(
-        'Auth signature is not defined. Call authenticate first.'
+        `Error when parsing auth method to generate auth method ID for Eth wallet: ${err}`
       );
     }
 
-    const authMethodId = authSig.address;
-    return authMethodId;
+    return address.toLowerCase();
   }
 }
