@@ -273,7 +273,6 @@ export interface BaseJsonPkpSignRequest {
   pubKey: string;
   // auth methods to resolve
   authMethods?: Array<Object>;
-  hdKeyRequest: { keyId: string };
 }
 
 export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
