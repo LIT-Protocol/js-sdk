@@ -16,16 +16,7 @@ cd pkp-social-auth-example
 yarn install
 ```
 
-2. Add your Stytch project's `project_id` and `public_token` to `.env.local`:
-
-```bash
-NEXT_PUBLIC_STYTCH_PROJECT_ID="<Your Stytch Project ID>"
-NEXT_PUBLIC_STYTCH_PUBLIC_TOKEN="<Your Stytch Public Token>"
-```
-
-If you're not using Stytch, feel free to comment out the Stytch provider `StytchProvider` and Stytch component `StytchOTP`.
-
-3. Start your development server:
+2. Start your development server:
 
 ```bash
 yarn dev
