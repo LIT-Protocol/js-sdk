@@ -500,8 +500,8 @@ export const genRandomPath = (): string => {
 
 export const defaultMintClaimCallback = async (params: ClaimKeyResponse): Promise<void> => {
   try {
-    const relayUrl = "https://relay-server-staging.herokuapp.com/pkp/claim";
-    await fetch(relayUrl, {
+    const relayUrl = "https://relay-server-staging.herokuapp.com/auth/claim";
+    const response = await fetch(relayUrl, {
       method: "POST",
       body: JSON.stringify(params),
       headers: {
@@ -509,7 +509,15 @@ export const defaultMintClaimCallback = async (params: ClaimKeyResponse): Promis
         'Content-Type': 'application/json',
       }
     });
+
+    if (response.status < 200 || response.status >= 400) {
+      let errResp = await response.json();
+      let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(errResp)}`;
+      console.warn(errStmt);
+      throw new Error(errStmt);
+    }
   } catch(e) {
-    console.error(`Error while fetching pkp`, (e as Error).message); 
+    console.error((e as Error).message); 
+    throw e;
   }
 } 

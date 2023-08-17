@@ -9,6 +9,7 @@ import {
   BaseProviderOptions,
   BaseProviderSessionSigsParams,
   ClaimKeyResponse,
+  ClaimRequest,
   IRelay,
   IRelayPKP,
   IRelayRequestData,
@@ -179,9 +180,15 @@ export abstract class BaseProvider {
     return sessionSigs;
   }
 
-  public async ClaimKeyId(authMethod: AuthMethod): Promise<ClaimKeyResponse> {
-    const res = await this.litNodeClient.claimKeyId({ authMethod });
-    return res;
+  /**
+   * Authenticates an auth Method for claiming a Programmable Key Pair (PKP).
+   * Uses the underyling {@link litNodeClient} instance to authenticate a given auth method
+   * @param claimRequest 
+   * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
+   */
+  public async ClaimKeyId(claimRequest: ClaimRequest): Promise<ClaimKeyResponse> {
+      const res = await this.litNodeClient.claimKeyId(claimRequest);
+      return res;
   }
 
   /**
