@@ -127,22 +127,50 @@ export class LitStorage implements ILitStorage {
   // -- convert expirable to ISO string
   convertToISOString(
     expirationLength: number,
-    expirationUnit: 'seconds' | 'minutes' | 'hours' | 'days'
-  ) {
+    expirationUnit:
+      | 'second'
+      | 'seconds'
+      | 'minute'
+      | 'minutes'
+      | 'hour'
+      | 'hours'
+      | 'day'
+      | 'days'
+      | 'week'
+      | 'weeks'
+      | 'month'
+      | 'months'
+      | 'year'
+      | 'years'
+  ): string {
     let multiplier;
 
-    switch (expirationUnit) {
-      case 'seconds':
+    // handle singular & plural
+    const unit = expirationUnit.endsWith('s')
+      ? expirationUnit.slice(0, -1)
+      : expirationUnit;
+
+    switch (unit) {
+      case 'second':
         multiplier = 1000;
         break;
-      case 'minutes':
+      case 'minute':
         multiplier = 1000 * 60;
         break;
-      case 'hours':
+      case 'hour':
         multiplier = 1000 * 60 * 60;
         break;
-      case 'days':
+      case 'day':
         multiplier = 1000 * 60 * 60 * 24;
+        break;
+      case 'week':
+        multiplier = 1000 * 60 * 60 * 24 * 7;
+        break;
+      case 'month':
+        multiplier = 1000 * 60 * 60 * 24 * 30; // Assuming an average of 30 days in a month
+        break;
+      case 'year':
+        multiplier = 1000 * 60 * 60 * 24 * 365; // Assuming a non-leap year
         break;
       default:
         throw new Error(`Invalid unit of time: ${expirationUnit}`);

@@ -10,7 +10,8 @@ import { SiweMessage } from 'lit-siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
-import { isBrowser, isNode } from '@lit-protocol/misc';
+import { isBrowser, isNode, log } from '@lit-protocol/misc';
+import { isSignedMessageExpired } from '../utils';
 
 export default class EthWalletProvider extends BaseProvider {
   /**
@@ -34,7 +35,7 @@ export default class EthWalletProvider extends BaseProvider {
       this.domain = options.domain || window.location.hostname;
       this.origin = options.origin || window.location.origin;
     } catch (e) {
-      console.log(
+      log(
         '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "https://localhost/login"'
       );
       this.domain = options.domain || 'localhost';
@@ -78,7 +79,7 @@ export default class EthWalletProvider extends BaseProvider {
     let signMessage = options?.signMessage;
     const chain = options?.chain || 'ethereum';
 
-    let authSig: AuthSig;
+    let authSig: AuthSig | undefined = undefined;
 
     const _options = {
       cache: true,
@@ -86,23 +87,114 @@ export default class EthWalletProvider extends BaseProvider {
       ...options,
     };
 
-    if (_options.version === 'V3') {
-      // -- we do not want to use the default lit-auth-signature when cache is enabled,
-      // instead we want to use the lit-ethwallet-token
-      authSig = await checkAndSignAuthMessage({
-        chain,
-        ...(_options?.expirationUnit &&
-          _options?.expirationLength && {
-            expiration: this.storageProvider.convertToISOString(
-              _options.expirationLength,
-              _options.expirationUnit
-            ),
-          }),
-        cache: false,
-      });
+    let setNewExpiration = false;
 
+    // Please refer to this document for the expected behaviour
+    // https://www.notion.so/litprotocol/ETH-Wallet-Expected-Behaviour-1194ddeae22d4ff6a1a7bacf17ba5885?pvs=4
+    if (_options.version === 'V3') {
+      // -- we do not want to use the default `lit-auth-signature` when cache is enabled,
+      // instead we want to use the `lit-ethwallet-token-<address>` cache key
+
+      if (isBrowser()) {
+        setNewExpiration = false;
+
+        // check if there are web wallet connected
+        // @ts-ignore
+        if (globalThis?.ethereum) {
+          log('Trying to get it from web wallet');
+
+          // @ts-ignore
+          const address = globalThis?.ethereum?.selectedAddress;
+
+          // -- If there's a selected address
+          if (address) {
+            log('Found address!:', address);
+            const storageKey = `lit-ethwallet-token-${address}`;
+            log('storageKey:', storageKey);
+
+            let itemString = this.storageProvider.getItem(storageKey);
+            log('itemString:', itemString);
+
+            // -- if there's a storage item for the address
+            if (itemString) {
+              try {
+                const item: {
+                  expirationDate: string;
+                  value: string;
+                } = JSON.parse(itemString);
+                log('item:', item);
+
+                const expiration = new Date(item.expirationDate);
+                log('expiration:', expiration);
+                log('new Date():', new Date());
+                log('expiration > new Date():', expiration > new Date());
+
+                // -- if it's not expired
+                if (expiration > new Date()) {
+                  let authMethodString = item.value;
+                  log('authMethodString:', authMethodString);
+
+                  // -- if there's an item
+                  if (authMethodString && authMethodString !== undefined) {
+                    log('Trying to parse auth method string...');
+
+                    // -- try to parse the auth method string
+                    try {
+                      const authMethod = JSON.parse(authMethodString);
+                      log('authMethod:', authMethod);
+
+                      // -- if it's not expired
+                      if (!isSignedMessageExpired(authMethod.accessToken)) {
+                        // -- try to parse the auth method's access token
+
+                        log("Trying to parse auth method's access token...");
+                        try {
+                          // ==================== !!!!! SUCCESS CASE HERE !!!!! ====================
+                          authSig = JSON.parse(authMethod.accessToken);
+                          // ==================== !!!!! SUCCESS CASE HERE !!!!! ====================
+                        } catch (e) {
+                          log('Error parsing auth method access token', e);
+                        }
+                      } else {
+                        log('Auth method access token is expired, continue...');
+                      }
+                    } catch (e) {
+                      // continue...
+                      log('Error parsing auth method string', e);
+                    }
+                  } else {
+                    log('No auth method string found, continue...');
+                  }
+                } else {
+                  log('Item is expired, continue...');
+                }
+              } catch (e) {
+                log('Error parsing item string, continue...', e);
+              }
+            }
+
+            log('AuthSig:', authSig);
+          }
+        }
+      }
+
+      if (!authSig || authSig === undefined) {
+        setNewExpiration = true;
+        authSig = await checkAndSignAuthMessage({
+          chain,
+          ...(_options?.expirationUnit &&
+            _options?.expirationLength && {
+              expiration: this.storageProvider.convertToISOString(
+                _options.expirationLength,
+                _options.expirationUnit
+              ),
+            }),
+          cache: false,
+        });
+      }
 
       if (authSig?.sig === '' || authSig === undefined) {
+        setNewExpiration = true;
         if ((address && signMessage) || _options?.signer) {
           if (_options?.signer) {
             if (!address) {
@@ -134,17 +226,19 @@ export default class EthWalletProvider extends BaseProvider {
         throw new Error('Unable to get auth sig');
       }
 
-      const storageUID = this.getAuthMethodStorageUID(authSig);
+      if (setNewExpiration) {
+        const storageUID = this.getAuthMethodStorageUID(authSig);
 
-      this.storageProvider.setExpirableItem(
-        storageUID,
-        JSON.stringify({
-          authMethodType: AuthMethodType.EthWallet,
-          accessToken: JSON.stringify(authSig),
-        }),
-        _options?.expirationLength ?? 24,
-        _options?.expirationUnit ?? 'hours'
-      );
+        this.storageProvider.setExpirableItem(
+          storageUID,
+          JSON.stringify({
+            authMethodType: AuthMethodType.EthWallet,
+            accessToken: JSON.stringify(authSig),
+          }),
+          _options?.expirationLength ?? 24,
+          _options?.expirationUnit ?? 'hours'
+        );
+      }
     } else {
       if ((address && signMessage) || _options?.signer) {
         if (_options?.signer) {
@@ -181,9 +275,12 @@ export default class EthWalletProvider extends BaseProvider {
 
     this.#authSig = authSig;
 
+    const authSigString =
+      typeof authSig === 'string' ? authSig : JSON.stringify(authSig);
+
     const authMethod = {
       authMethodType: AuthMethodType.EthWallet,
-      accessToken: JSON.stringify(authSig),
+      accessToken: authSigString,
     };
 
     return authMethod;

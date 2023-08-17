@@ -319,3 +319,20 @@ export const clearParamsFromURL = () => {
     window.location.pathname
   );
 };
+
+/**
+ * Check if the Expiration Time in the signedMessage string is expired.
+ * @param { string } signedMessage - The signed message containing the Expiration Time.
+ * @returns true if expired, false otherwise.
+ */
+export function isSignedMessageExpired(signedMessage: string) {
+  // Extract the Expiration Time from the signed message.
+  const dateStr = signedMessage
+    .split('\n')[9]
+    ?.replace('Expiration Time: ', '');
+  const expirationTime = new Date(dateStr);
+  const currentTime = new Date();
+
+  // Compare the Expiration Time with the current time.
+  return currentTime > expirationTime;
+}
