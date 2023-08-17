@@ -21,34 +21,48 @@ export class HeliaProvider extends BaseIPFSProvider {
     super('helia');
 
     if (isBrowser()) {
-      this.injectScripts();
+      // ==================== !!!! NOTE !!!! ====================
+      // This is a sync call and may not be available immediately
+      // It will try to "wait" to see if "withPersistentStorage()"
+      // is called after "await loadLit()". If it is, then it will
+      // not inject the scripts.
+      setTimeout(() => {
+        console.log(
+          'globalThis.Lit.builder?.custom.persistentStorage:',
+          globalThis.Lit.builder?.custom.persistentStorage
+        );
+        if (globalThis.Lit.builder?.custom.persistentStorage === false) {
+          console.log('No custom persistent storage found');
+          this.injectScripts();
 
-      log.info('Creating Helia instance');
+          log.info('Creating Helia instance');
 
-      // poll 10 times, every 200ms to check if Helia is injected
-      let pollCount = 0;
-      const poll = setInterval(() => {
-        if (pollCount > 10) {
-          clearInterval(poll);
-          throw new Error('Helia not injected after 10 attempts');
+          // poll 10 times, every 200ms to check if Helia is injected
+          let pollCount = 0;
+          const poll = setInterval(() => {
+            if (pollCount > 10) {
+              clearInterval(poll);
+              throw new Error('Helia not injected after 10 attempts');
+            }
+
+            if (globalThis.Helia && globalThis.HeliaStrings) {
+              log.info('🚀 Helia injected!');
+              clearInterval(poll);
+
+              this.createHeliaNode().then((heliaNode) => {
+                log.info(`🚀 HeliaProvider: Helia Node created!
+        peerId: ${heliaNode.libp2p.peerId.toString()}
+        isStarted: ${heliaNode.libp2p.isStarted()}
+                `);
+                this.heliaNode = heliaNode;
+                this.heliaNode.libp2p.stop();
+              });
+            }
+
+            log.info('Polling for Helia instance...');
+          }, 200);
         }
-
-        if (globalThis.Helia && globalThis.HeliaStrings) {
-          log.info('🚀 Helia injected!');
-          clearInterval(poll);
-
-          this.createHeliaNode().then((heliaNode) => {
-            log.info(`🚀 HeliaProvider: Helia Node created!
-    peerId: ${heliaNode.libp2p.peerId.toString()}
-    isStarted: ${heliaNode.libp2p.isStarted()}
-            `);
-            this.heliaNode = heliaNode;
-            this.heliaNode.libp2p.stop();
-          });
-        }
-
-        log.info('Polling for Helia instance...');
-      }, 200);
+      }, 800);
     }
   }
 
