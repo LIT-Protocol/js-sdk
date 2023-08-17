@@ -94,6 +94,8 @@ export class LitRelay implements IRelay {
       );
 
       if (response.status < 200 || response.status >= 400) {
+        console.log('GOT TRIGGERED!?');
+
         console.warn(
           'Something wrong with the API call',
           await response.json()

@@ -51,16 +51,19 @@ export async function handleSingleAuth(authData: LitAuthMethod) {
 
   // -- wait for response
   try {
-    res =
-      await globalThis.Lit.auth.webauthn?.relay.pollRequestUntilTerminalState(
-        txHash
-      );
+    res = await globalThis.Lit.authClient?.relay.pollRequestUntilTerminalState(
+      txHash
+    );
   } catch (e) {
     globalThis.Lit.eventEmitter?.createAccountStatus('failed');
-    log.throw(`Failed to create account with webauthn!`);
+    log.throw(`Failed to create account! (inside polling)`, e);
   }
 
   log.info('res', res);
+
+  if (res === undefined) {
+    log.throw(`Failed to create account! (res is undefined)`);
+  }
 
   const _PKPInfo: PKPInfo = relayResToPKPInfo(res);
 

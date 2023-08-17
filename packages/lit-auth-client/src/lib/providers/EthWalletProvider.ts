@@ -35,10 +35,10 @@ export default class EthWalletProvider extends BaseProvider {
       this.origin = options.origin || window.location.origin;
     } catch (e) {
       console.log(
-        '⚠️ Error getting "domain" and "origin" from window object, defaulting to "My DApp Name" and "MyEthereumApp-development"'
+        '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "https://localhost/login"'
       );
-      this.domain = options.domain || 'My DApp Name';
-      this.origin = options.origin || 'MyEthereumApp-development';
+      this.domain = options.domain || 'localhost';
+      this.origin = options.origin || 'https://localhost/login';
     }
   }
 
@@ -82,10 +82,11 @@ export default class EthWalletProvider extends BaseProvider {
 
     const _options = {
       cache: true,
+      version: 'V3',
       ...options,
     };
 
-    if (_options?.cache) {
+    if (_options.version === 'V3') {
       // -- we do not want to use the default lit-auth-signature when cache is enabled,
       // instead we want to use the lit-ethwallet-token
       authSig = await checkAndSignAuthMessage({
@@ -100,6 +101,39 @@ export default class EthWalletProvider extends BaseProvider {
         cache: false,
       });
 
+
+      if (authSig?.sig === '' || authSig === undefined) {
+        if ((address && signMessage) || _options?.signer) {
+          if (_options?.signer) {
+            if (!address) {
+              address = await _options?.signer.getAddress();
+            }
+
+            if (!signMessage) {
+              signMessage = _options.signer.signMessage.bind(_options.signer);
+            }
+          }
+          if (!address) {
+            throw new Error('address is required');
+          }
+
+          if (!signMessage) {
+            throw new Error('signMessage is required');
+          }
+
+          authSig = await this.prepareAuthSig({
+            address,
+            chain,
+            expiration: _options?.expiration,
+            signMessage,
+          });
+        }
+      }
+
+      if (!authSig || authSig === undefined) {
+        throw new Error('Unable to get auth sig');
+      }
+
       const storageUID = this.getAuthMethodStorageUID(authSig);
 
       this.storageProvider.setExpirableItem(
@@ -112,17 +146,6 @@ export default class EthWalletProvider extends BaseProvider {
         _options?.expirationUnit ?? 'hours'
       );
     } else {
-      /**
-       * If signMessage is provided like "ethSigner.signMessage", then we need to
-       * bind the signer to the signMessage function. This is because the signer
-       * is not available until the user has connected their wallet.
-       *
-       * eg. const signer = new ethers.Wallet(privateKey);
-       *     const signMessage = signer.signMessage.bind(signer);
-       *
-       * So if you only pass in signer.signMessage, you will get "Cannot read properties
-       * of undefined (reading '_signingKey')".
-       */
       if ((address && signMessage) || _options?.signer) {
         if (_options?.signer) {
           if (!address) {
@@ -141,40 +164,12 @@ export default class EthWalletProvider extends BaseProvider {
           throw new Error('signMessage is required');
         }
 
-        // convert to EIP-55 format or else SIWE complains
-        address = ethers.utils.getAddress(address);
-
-        // Get chain ID or default to Ethereum mainnet
-        const selectedChain = LIT_CHAINS[chain];
-        const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
-
-        // Get expiration or default to 24 hours
-        const expiration =
-          _options?.expiration ||
-          new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
-
-        // Prepare Sign in with Ethereum message
-        const preparedMessage: Partial<SiweMessage> = {
-          domain: this.domain,
-          uri: this.origin,
+        authSig = await this.prepareAuthSig({
           address,
-          version: '1',
-          chainId,
-          expirationTime: expiration,
-        };
-
-        const message: SiweMessage = new SiweMessage(preparedMessage);
-        const toSign: string = message.prepareMessage();
-
-        // Use provided function to sign message
-        const signature = await signMessage(toSign);
-
-        authSig = {
-          sig: signature,
-          derivedVia: 'web3.eth.personal.sign',
-          signedMessage: toSign,
-          address: address,
-        };
+          chain,
+          expiration: _options?.expiration,
+          signMessage,
+        });
       } else {
         authSig = await checkAndSignAuthMessage({
           chain,
@@ -192,6 +187,63 @@ export default class EthWalletProvider extends BaseProvider {
     };
 
     return authMethod;
+  }
+
+  /**
+   * If signMessage is provided like "ethSigner.signMessage", then we need to
+   * bind the signer to the signMessage function. This is because the signer
+   * is not available until the user has connected their wallet.
+   *
+   * eg. const signer = new ethers.Wallet(privateKey);
+   *     const signMessage = signer.signMessage.bind(signer);
+   *
+   * So if you only pass in signer.signMessage, you will get "Cannot read properties
+   * of undefined (reading '_signingKey')".
+   */
+  public async prepareAuthSig({
+    address,
+    chain,
+    expiration,
+    signMessage,
+  }: {
+    address: string;
+    chain: string;
+    expiration: any;
+    signMessage: any;
+  }) {
+    // convert to EIP-55 format or else SIWE complains
+    address = ethers.utils.getAddress(address);
+
+    // Get chain ID or default to Ethereum mainnet
+    const selectedChain = LIT_CHAINS[chain];
+    const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
+
+    // Get expiration or default to 24 hours
+    expiration =
+      expiration || new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+
+    // Prepare Sign in with Ethereum message
+    const preparedMessage: Partial<SiweMessage> = {
+      domain: this.domain,
+      uri: this.origin,
+      address,
+      version: '1',
+      chainId,
+      expirationTime: expiration,
+    };
+
+    const message: SiweMessage = new SiweMessage(preparedMessage);
+    const toSign: string = message.prepareMessage();
+
+    // Use provided function to sign message
+    const signature = await signMessage(toSign);
+
+    return {
+      sig: signature,
+      derivedVia: 'web3.eth.personal.sign',
+      signedMessage: toSign,
+      address: address,
+    };
   }
 
   /**

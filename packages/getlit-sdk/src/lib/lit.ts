@@ -376,8 +376,6 @@ ${LitMessages.persistentStorageExample}`;
     async (authData: Array<LitAuthMethod>, cache: boolean) => {
       log.start('getAccounts');
 
-      console.log('XXX cache:', cache);
-
       let accounts;
 
       try {

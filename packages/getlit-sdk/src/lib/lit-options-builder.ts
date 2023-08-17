@@ -84,7 +84,7 @@ export class LitOptionsBuilder {
     this.isExecuted = true;
 
     globalThis.Lit.debug = debug; // switch this to false for production
-    globalThis.Lit.builder = null;
+    // globalThis.Lit.builder = null;
 
     log.start('global', 'initializing...');
 
