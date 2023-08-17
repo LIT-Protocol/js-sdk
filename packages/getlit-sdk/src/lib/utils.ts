@@ -24,7 +24,7 @@ import {
   BaseAuthenticateOptions,
 } from '@lit-protocol/types';
 
-const version = '0.0.638';
+const version = '0.0.642';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 

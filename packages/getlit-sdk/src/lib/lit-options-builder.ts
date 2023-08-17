@@ -144,12 +144,14 @@ export class LitOptionsBuilder {
   // -- if you want to customize the relay & OTP configurations
   public withAuthOptions(options: Types.AuthOptions) {
     this._authOptions = options;
+    this.initialiseAuthClient();
     return this;
   }
 
   // -- if you want to customize the LitNodeClient configurations
-  public withNodeClient(client: Types.NodeClient) {
+  public async withNodeClient(client: Types.NodeClient) {
     this._nodeClient = client;
+    await this.build();
     return this;
   }
 
@@ -208,15 +210,15 @@ export class LitOptionsBuilder {
       ...this._nodeClientOptions,
     };
 
+    this.initialiseAuthClient();
+
     this._emitter?.emit('ready', true);
     globalThis.Lit.ready = true;
-
-    await this.initialiseAuthClient();
     log.end('build', 'done!');
   }
 
   // ========== Initialise ==========
-  public async initialiseAuthClient(): Promise<void> {
+  public initialiseAuthClient(): void {
     log.start('initialiseAuthClient', 'starting...');
 
     globalThis.Lit.authClient = new LitAuthClient({
@@ -224,6 +226,8 @@ export class LitOptionsBuilder {
       litRelayConfig: {
         relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
       },
+
+      ...(this._authOptions && { ...this._authOptions }),
       litNodeClient: globalThis.Lit.nodeClient,
       storageProvider: globalThis.Lit.storage,
     });
@@ -308,6 +312,9 @@ export class LitOptionsBuilder {
         // -- set globalThis.Lit.persistentStorage
         this._persistentStorage = IPFSProvider;
         globalThis.Lit.persistentStorage = IPFSProvider;
+        if (globalThis.Lit.builder) {
+          globalThis.Lit.builder._persistentStorage = IPFSProvider;
+        }
         return IPFSProvider;
       } else {
         log.throw(`Invalid persistentStorage option: ${options}`);
