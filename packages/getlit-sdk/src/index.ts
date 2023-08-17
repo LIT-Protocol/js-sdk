@@ -1,4 +1,5 @@
 import './global';
+import { LitAnalytics } from './lib/analytics';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
 import { log, waitForLit } from './lib/utils';
 
@@ -26,12 +27,43 @@ import { log, waitForLit } from './lib/utils';
 const loadLit = async (
   {
     debug,
+    collectAnalytics,
   }: {
     debug?: boolean;
+    collectAnalytics?: boolean;
   } = {
     debug: true,
+    collectAnalytics: true,
   }
 ): Promise<LitOptionsBuilder> => {
+  globalThis.Lit.collectAnalytics = collectAnalytics ?? true;
+
+  if (globalThis.Lit.collectAnalytics) {
+    console.log(
+      '========================================================================'
+    );
+    console.log(
+      "NOTICE: We're collecting anonymous usage data to help improve our product."
+    );
+    console.log(
+      'Your privacy is important to us. We only collect data that helps us understand how our product is being used.'
+    );
+    console.log(
+      'None of the collected data can be used to identify you, and we do not share the data with any third parties.'
+    );
+    console.log(
+      "If you'd like to opt out of data collection, you can do so by setting the 'collectAnalytics' parameter to 'false' when calling the 'loadLit' function."
+    );
+    console.log(
+      'For example: loadLit({ debug: true, collectAnalytics: false })'
+    );
+    console.log('Thank you for helping us improve our product!');
+    console.log(
+      '========================================================================'
+    );
+    LitAnalytics.collect('loadLit');
+  }
+
   globalThis.Lit.builder = await new LitOptionsBuilder().invoke({ debug });
 
   if (!globalThis.Lit.builder) {

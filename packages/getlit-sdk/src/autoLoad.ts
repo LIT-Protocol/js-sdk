@@ -1,5 +1,5 @@
 import { loadLit } from '.';
 
-loadLit();
+loadLit({ collectAnalytics: false });
 
 export { loadLit };

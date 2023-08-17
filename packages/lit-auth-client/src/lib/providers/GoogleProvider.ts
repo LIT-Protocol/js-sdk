@@ -131,12 +131,14 @@ export default class GoogleProvider extends BaseProvider {
     if (_options?.cache) {
       const storageUID = this.getAuthMethodStorageUID(idToken);
 
-      this.storageProvider.setExpirableItem(
-        storageUID,
-        JSON.stringify(authMethod),
-        _options.expirationLength ?? 24,
-        _options.expirationUnit ?? 'hours'
-      );
+      if (this.storageProvider.isExpired(storageUID)) {
+        this.storageProvider.setExpirableItem(
+          storageUID,
+          JSON.stringify(authMethod),
+          _options.expirationLength ?? 24,
+          _options.expirationUnit ?? 'hours'
+        );
+      }
     }
 
     return authMethod;

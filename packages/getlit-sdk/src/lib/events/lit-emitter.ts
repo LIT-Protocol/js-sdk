@@ -13,7 +13,7 @@ export class LitEmitter {
   private eventEmitter: EventEmitter = new EventEmitter();
 
   constructor() {
-    log.start('LitEmitter', 'initializing...');
+    log.start('LitEmitter', 'LitEmitter initializing...');
 
     if (isNode()) {
       this.eventEmitter = new EventEmitter();

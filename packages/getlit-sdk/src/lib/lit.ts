@@ -45,6 +45,7 @@ import {
   LitAbility,
   LitAccessControlConditionResource,
 } from '@lit-protocol/auth-helpers';
+import { LitAnalytics } from './analytics';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -86,6 +87,8 @@ export class Lit {
    */
   // static async encrypt(opts: EncryptProps): Promise<EncryptResult> {
   async encrypt(opts: EncryptProps): Promise<EncryptResult> {
+    LitAnalytics.collect('encrypt');
+
     // -- vars
     let accs: Partial<EncryptRequestBase>;
     let encryptRes: EncryptResponse;
@@ -214,6 +217,8 @@ ${LitMessages.persistentStorageExample}`;
    *
    */
   public async decrypt(opts: DecryptProps): Promise<DecryptRes> {
+    LitAnalytics.collect('decrypt');
+
     // -- validation
     if (!opts?.storageContext && !opts?.decryptionContext) {
       log.error(

@@ -75,12 +75,14 @@ export class OtpProvider extends BaseProvider {
 
         const storageUID = this.getAuthMethodStorageUID(accessToken);
 
-        this.storageProvider.setExpirableItem(
-          storageUID,
-          item,
-          _options.expirationLength ?? 24,
-          _options.expirationUnit ?? 'hours'
-        );
+        if (this.storageProvider.isExpired(storageUID)) {
+          this.storageProvider.setExpirableItem(
+            storageUID,
+            item,
+            _options.expirationLength ?? 24,
+            _options.expirationUnit ?? 'hours'
+          );
+        }
       }
 
       return authData;

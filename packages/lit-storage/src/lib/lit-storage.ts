@@ -56,6 +56,20 @@ export class LitStorage implements ILitStorage {
     return this.storage.setItem(key, value);
   }
 
+  isExpired(key: string): boolean {
+    const itemStr = this.storage.getItem(key);
+
+    if (!itemStr) return true;
+
+    const item = JSON.parse(itemStr);
+    if (item && item.expirationDate) {
+      const expirationDate = new Date(item.expirationDate);
+      return new Date() > expirationDate;
+    }
+
+    return false;
+  }
+
   // -- extra functions
   setExpirableItem(
     key: string,
@@ -86,6 +100,7 @@ export class LitStorage implements ILitStorage {
       value: value,
       expirationDate: expirationDate.toJSON(),
     };
+
     return this.storage.setItem(key, JSON.stringify(item));
   }
 

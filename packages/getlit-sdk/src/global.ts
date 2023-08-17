@@ -66,6 +66,8 @@ declare global {
 
     // browser only
     browserHelper: BrowserHelper | null;
+
+    collectAnalytics: boolean;
   };
 
   var ethereum: any;
@@ -141,4 +143,6 @@ globalThis.Lit = {
 
   // browser only
   browserHelper: null,
+
+  collectAnalytics: true,
 };
