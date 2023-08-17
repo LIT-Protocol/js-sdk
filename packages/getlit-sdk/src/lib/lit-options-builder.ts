@@ -52,7 +52,11 @@ export class LitOptionsBuilder {
   private _emitter: OrUndefined<LitEmitter> = undefined;
   private _storage: OrUndefined<LitStorage> = undefined;
 
-  private isExecuted: boolean = false;
+  custom: {
+    persistentStorage: boolean;
+  } = {
+    persistentStorage: false,
+  };
 
   constructor() {
     this.initialiseEventEmitter();
@@ -72,77 +76,21 @@ export class LitOptionsBuilder {
   }: {
     debug?: boolean;
   }): Promise<LitOptionsBuilder> {
-    await this.execute({ debug });
+    globalThis.Lit.debug = debug;
+
     return this;
-  }
-
-  private async execute({ debug = true }: { debug?: boolean }): Promise<void> {
-    if (this.isExecuted) {
-      return;
-    }
-
-    this.isExecuted = true;
-
-    globalThis.Lit.debug = debug; // switch this to false for production
-    // globalThis.Lit.builder = null;
-
-    log.start('global', 'initializing...');
-
-    // -- initialize LitOptionsBuilder
-    try {
-      globalThis.Lit.builder = new LitOptionsBuilder() as any;
-    } catch (e) {
-      log.throw(`Error while attempting to initialize LitOptionsBuilder\n${e}`);
-    }
-
-    if (!globalThis.Lit.builder) {
-      log.throw(`globalThis.Lit.builder is undefined!`);
-    }
-
-    // -- build LitOptionsBuilder
-    try {
-      await globalThis.Lit.builder.build();
-    } catch (e) {
-      log.throw(`Error while attempting to build LitOptionsBuilder\n${e}`);
-    }
-
-    log.end('global', 'done!');
-
-    // ---------- Enable auto auth for browser ----------
-    if (isBrowser()) {
-      handleAutoAuth(async (authData: AuthMethod) => {
-        globalThis.Lit.eventEmitter?.createAccountStatus('in_progress');
-        log.info('Creating Lit account...');
-
-        try {
-          const PKPInfoArr = await globalThis.Lit.createAccount({
-            authData: [authData],
-          });
-          log.success('Lit account created!');
-          log.info(`PKPInfo: ${JSON.stringify(PKPInfoArr)}`);
-
-          if (Array.isArray(PKPInfoArr)) {
-            globalThis.Lit.eventEmitter?.createAccountStatus(
-              'completed',
-              PKPInfoArr
-            );
-          }
-        } catch (e) {
-          log.error(`Error while attempting to create Lit account ${e}`);
-          globalThis.Lit.eventEmitter?.createAccountStatus('failed');
-        }
-      });
-    }
   }
 
   // ========== With Methods ==========
   public withContractOptions(options: Types.ContractOptions) {
+    log.info('------ withContractOptions ------');
     this._contractOptions = options;
     return this;
   }
 
   // -- if you want to customize the relay & OTP configurations
   public withAuthOptions(options: Types.AuthOptions) {
+    log.info('------ withAuthOptions ------');
     this._authOptions = options;
     this.initialiseAuthClient();
     return this;
@@ -150,6 +98,7 @@ export class LitOptionsBuilder {
 
   // -- if you want to customize the LitNodeClient configurations
   public async withNodeClient(client: Types.NodeClient) {
+    log.info('------ withNodeClient ------');
     this._nodeClient = client;
     await this.build();
     return this;
@@ -158,12 +107,18 @@ export class LitOptionsBuilder {
   // -- If you want to specify where to store your cache data, by default it will be stored in localStorage,
   // or memory if you are using NodeJS
   public withCacheProvider(provider: ILitStorage) {
+    log.info('------ withCacheProvider ------');
     this._storage = new LitStorage({ storageProvider: provider });
     return this;
   }
 
   // -- If you want to specify which IPFS provider to use, by default it will be using Helia
   public withPersistentStorage({ provider, options }: PersistentStorageConfig) {
+    log.info('------ withPersistentStorage ------');
+    this.custom.persistentStorage = true;
+    console.log("this.custom.persistentStorage:", this.custom.persistentStorage)
+    console.log("globalThis.Lit.builder?.custom.persistentStorage:", globalThis.Lit.builder?.custom.persistentStorage)
+
     this.initialiseIPFSProvider({
       provider,
       options,
@@ -288,6 +243,7 @@ export class LitOptionsBuilder {
     provider,
     options,
   }: PersistentStorageConfig): BaseIPFSProvider {
+    log.start('initialiseIPFSProvider', 'starting...');
     try {
       // -- options for persistent storage
       const providerOptions = {
@@ -317,9 +273,11 @@ export class LitOptionsBuilder {
         }
         return IPFSProvider;
       } else {
+        log.end('initialiseIPFSProvider', '1 ERROR!');
         log.throw(`Invalid persistentStorage option: ${options}`);
       }
     } catch (e) {
+      log.end('initialiseIPFSProvider', '2 ERROR!');
       log.error(`
       Error while attempting to initialize IPFSProvider, please check your persistentStorage config\n
   
@@ -327,6 +285,7 @@ export class LitOptionsBuilder {
       
       \n${e}`);
     }
+    log.end('initialiseIPFSProvider', '3 ERROR!');
     log.throw(`Error while attempting to initialize IPFSProvider`);
   }
 
@@ -397,3 +356,29 @@ export class LitOptionsBuilder {
     globalThis.Lit.browserHelper = new BrowserHelper();
   }
 }
+
+// ---------- (to be added/deleted) Enable auto auth for browser ----------
+// if (isBrowser()) {
+//   handleAutoAuth(async (authData: AuthMethod) => {
+//     globalThis.Lit.eventEmitter?.createAccountStatus('in_progress');
+//     log.info('Creating Lit account...');
+
+//     try {
+//       const PKPInfoArr = await globalThis.Lit.createAccount({
+//         authData: [authData],
+//       });
+//       log.success('Lit account created!');
+//       log.info(`PKPInfo: ${JSON.stringify(PKPInfoArr)}`);
+
+//       if (Array.isArray(PKPInfoArr)) {
+//         globalThis.Lit.eventEmitter?.createAccountStatus(
+//           'completed',
+//           PKPInfoArr
+//         );
+//       }
+//     } catch (e) {
+//       log.error(`Error while attempting to create Lit account ${e}`);
+//       globalThis.Lit.eventEmitter?.createAccountStatus('failed');
+//     }
+//   });
+// }

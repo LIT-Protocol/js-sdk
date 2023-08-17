@@ -1,6 +1,6 @@
 import './global';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
-import { waitForLit } from './lib/utils';
+import { log, waitForLit } from './lib/utils';
 
 /**
  * This is a trick to make the instance behave like a function where you can async/await, but still be an instance where you can chain methods like .withPersistentStorage() .withAuthOptions() etc.
@@ -32,7 +32,20 @@ const loadLit = async (
     debug: true,
   }
 ): Promise<LitOptionsBuilder> => {
-  return new LitOptionsBuilder().invoke({ debug });
+  globalThis.Lit.builder = await new LitOptionsBuilder().invoke({ debug });
+
+  if (!globalThis.Lit.builder) {
+    log.throw(`globalThis.Lit.builder is undefined!`);
+  }
+
+  // -- build LitOptionsBuilder
+  try {
+    await globalThis.Lit.builder.build();
+  } catch (e) {
+    log.throw(`Error while attempting to build LitOptionsBuilder\n${e}`);
+  }
+
+  return globalThis.Lit.builder;
 };
 
 // main export
