@@ -10,15 +10,23 @@
     "importHelpers": true,
     "target": "ES2020",
     "module": "ES2020",
-    "lib": ["ES2020", "dom"],
+    "lib": [
+      "ES2020",
+      "dom"
+    ],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
-      "@lit-protocol/*": ["packages/*/src"]
+      "@lit-protocol/*": [
+        "packages/*/src"
+      ]
     }
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": [
+    "node_modules",
+    "tmp"
+  ]
 }
