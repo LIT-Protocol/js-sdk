@@ -70,10 +70,10 @@ describe('Lit Actions', () => {
       await client.executeJs({
         authSig: LITCONFIG.CONTROLLER_AUTHSIG,
         code: `(async () => {
-            const sigShare = await LitActions.signEcdsa({ 
-              toSign, 
-              publicKey, 
-              sigName 
+            const sigShare = await LitActions.signEcdsa({
+              toSign,
+              publicKey,
+              sigName
             });
           })();`,
         jsParams: {

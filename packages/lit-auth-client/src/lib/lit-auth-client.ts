@@ -142,18 +142,26 @@ export class LitAuthClient {
           ...(options as WebAuthnProviderOptions),
         }) as unknown as T;
         break;
-      case `otp`:
+      case `stytchOtp`:
         provider = new StytchOtpProvider(
           {
             ...baseParams,
-            ...(options as SignInWithOTPParams),
           },
           options as StytchOtpProviderOptions
         ) as unknown as T;
         break;
+      case `otp`:
+        provider = new OtpProvider(
+          {
+            ...baseParams,
+            ...(options as SignInWithOTPParams),
+          },
+          this.litOtpOptions
+        ) as unknown as T;
+        break;
       default:
         throw new Error(
-          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', `otp` and 'webauthn' are supported at the moment."
+          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn' are supported at the moment."
         );
     }
 

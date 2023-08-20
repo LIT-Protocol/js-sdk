@@ -1476,8 +1476,12 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    * see stych docs for more info: https://stytch.com/docs/api/session-get
    */
   accessToken: string;
-  /* 
+  /*
    Stytch user identifier for a project
   */
   userId?: string;
+}
+
+export interface StytchToken {
+  [key: string]: any;
 }

@@ -2047,15 +2047,15 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
-    let nodePromises = await this.getNodePromises((url: string) => {
+    const nodePromises = await this.getNodePromises((url: string) => {
       const requestId = this.getRequestId();
-      let nodeRequestParams = {
+      const nodeRequestParams = {
         authMethod: params.authMethod,
       };
       return this.getClaimKeyExecutionShares(url, nodeRequestParams, requestId);
     });
 
-    let responseData = await this.handleNodePromises(nodePromises);
+    const responseData = await this.handleNodePromises(nodePromises);
 
     if (responseData.success === true) {
       const nodeSignatures = (
