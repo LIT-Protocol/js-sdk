@@ -15,6 +15,7 @@ import {
   LIT_NETWORKS,
   defaultLitnodeClientConfig,
   version,
+  TELEM_API_URL,
 } from '@lit-protocol/constants';
 
 import {
@@ -564,4 +565,18 @@ export class LitCore {
       formattedUnifiedAccessControlConditions,
     };
   };
+
+  collectData(
+    date: string,
+    functionName: string,
+    executionTime: number
+  ): void {
+    fetch(TELEM_API_URL + '/collect', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ date, functionName, executionTime }),
+    });
+  }
 }
