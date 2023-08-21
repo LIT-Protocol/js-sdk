@@ -115,11 +115,6 @@ export interface AuthCallbackParams {
   // Keplr & Cypher -> window.keplr
   // Leap -> window.leap
   cosmosWalletType?: CosmosWalletType;
-
-  /**
-   * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
-   */
-  walletConnectProjectId?: string;
 }
 
 /** ---------- Web3 ---------- */

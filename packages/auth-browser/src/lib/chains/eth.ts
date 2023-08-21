@@ -16,10 +16,10 @@ import { toUtf8Bytes } from '@ethersproject/strings';
 import { hexlify } from '@ethersproject/bytes';
 import { verifyMessage } from '@ethersproject/wallet';
 
-import { EthereumProvider } from '@walletconnect/ethereum-provider';
+import WalletConnectProviderPkg from '@walletconnect/ethereum-provider';
 
 // @ts-ignore
-import LitConnectModal from '@lit-protocol/connect-modal';
+import LitConnectModal from 'lit-connect-modal-to-be-deprecated';
 
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
 
@@ -47,6 +47,12 @@ if (typeof global.Buffer === 'undefined') {
   global.Buffer = BufferPolyfill;
 }
 
+if (isBrowser()) {
+  // @ts-ignore
+  globalThis.WalletConnectProviderPkg = WalletConnectProviderPkg;
+  log('WalletConnectProviderPkg:', WalletConnectProviderPkg);
+}
+
 // log("naclUtil:", naclUtil);
 // log("nacl:", nacl);
 
@@ -60,7 +66,6 @@ if (typeof global.Buffer === 'undefined') {
 /** ---------- Local Interfaces ---------- */
 interface ConnectWeb3 {
   chainId: number;
-  walletConnectProjectId?: string;
 }
 
 interface ConnectWeb3Result {
@@ -69,7 +74,7 @@ interface ConnectWeb3Result {
 }
 
 interface RPCUrls {
-  [chainId: string]: string;
+  [chainId: number]: string | String;
 }
 
 interface Web3ProviderOptions {
@@ -290,7 +295,7 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
  * @returns
  */
 export const getRPCUrls = (): RPCUrls => {
-  const rpcUrls: RPCUrls = {};
+  let rpcUrls: RPCUrls = {};
 
   const keys: Array<string> = Object.keys(LIT_CHAINS);
 
@@ -298,7 +303,7 @@ export const getRPCUrls = (): RPCUrls => {
     const chainName = keys[i];
     const chainId = LIT_CHAINS[chainName].chainId;
     const rpcUrl = LIT_CHAINS[chainName].rpcUrls[0];
-    rpcUrls[chainId.toString()] = rpcUrl;
+    rpcUrls[chainId] = rpcUrl;
   }
 
   return rpcUrls;
@@ -350,7 +355,6 @@ export const decodeCallResult = ({
  */
 export const connectWeb3 = async ({
   chainId = 1,
-  walletConnectProjectId,
 }: ConnectWeb3): Promise<ConnectWeb3Result> => {
   // -- check if it's nodejs
   if (isNode()) {
@@ -360,28 +364,16 @@ export const connectWeb3 = async ({
 
   const rpcUrls: RPCUrls = getRPCUrls();
 
-  let providerOptions = {};
-
-  if (walletConnectProjectId) {
-    const wcProvider = await EthereumProvider.init({
-      projectId: walletConnectProjectId,
-      chains: [chainId],
-      showQrModal: true,
-      optionalMethods: ['eth_sign'],
-      rpcMap: rpcUrls,
-    });
-
-    providerOptions = {
-      walletconnect: {
-        provider: wcProvider,
+  const providerOptions = {
+    walletconnect: {
+      // package: WalletConnectProviderPkg, // required
+      options: {
+        // infuraId: "cd614bfa5c2f4703b7ab0ec0547d9f81",
+        rpc: rpcUrls,
+        chainId: chainId,
       },
-    };
-
-    if (isBrowser()) {
-      // @ts-ignore
-      globalThis.litWCProvider = wcProvider;
-    }
-  }
+    },
+  };
 
   log('getting provider via lit connect modal');
 
@@ -428,21 +420,9 @@ export const disconnectWeb3 = (): void => {
     return;
   }
 
-  // @ts-ignore
-  if (isBrowser() && globalThis.litWCProvider) {
-    try {
-      // @ts-ignore
-      globalThis.litWCProvider.disconnect();
-    } catch (err) {
-      log(
-        'Attempted to disconnect global WalletConnectProvider for lit-connect-modal',
-        err
-      );
-    }
-  }
-
   const storage = LOCAL_STORAGE_KEYS;
 
+  localStorage.removeItem(storage.WALLET_CONNECT);
   localStorage.removeItem(storage.AUTH_SIGNATURE);
   localStorage.removeItem(storage.AUTH_SOL_SIGNATURE);
   localStorage.removeItem(storage.AUTH_COSMOS_SIGNATURE);
@@ -463,7 +443,6 @@ export const checkAndSignEVMAuthMessage = async ({
   switchChain,
   expiration,
   uri,
-  walletConnectProjectId,
 }: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
   if (isNode()) {
@@ -497,7 +476,6 @@ export const checkAndSignEVMAuthMessage = async ({
 
   const { web3, account } = await connectWeb3({
     chainId: selectedChain.chainId,
-    walletConnectProjectId,
   });
 
   log(`got web3 and account: ${account}`);

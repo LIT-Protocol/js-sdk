@@ -19,14 +19,13 @@
   },
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
   "peerDependencies": {
-    "@lit-protocol/connect-modal": "^1.0.1",
-    "@walletconnect/ethereum-provider": "2.9.2",
-    "@walletconnect/modal": "2.6.1",
+    "@walletconnect/ethereum-provider": "2.7.0",
     "lit-siwe": "^1.1.8",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.13.3",
     "util": "^0.12.4",
-    "web-vitals": "^3.0.4"
+    "web-vitals": "^3.0.4",
+    "@web3modal/standalone": "2.2.1"
   },
   "tags": [
     "browser"
