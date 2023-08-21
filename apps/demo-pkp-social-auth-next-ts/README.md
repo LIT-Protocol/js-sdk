@@ -12,7 +12,7 @@ cd apps/demo-pkp-social-auth-next-ts
 yarn install
 ```
 
-2. Add your Stytch project's `project_id` and `public_token` to `.env.local`:
+1. Add your Stytch project's `project_id` and `public_token` to `.env.local`:
 
 ```bash
 NEXT_PUBLIC_STYTCH_PROJECT_ID="<Your Stytch Project ID>"
