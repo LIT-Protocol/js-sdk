@@ -31,6 +31,7 @@ export enum AuthMethodType {
   GoogleJwt,
   OTP,
   AppleJwt,
+  StytchOtp,
 }
 
 /**
@@ -43,4 +44,5 @@ export enum ProviderType {
   WebAuthn = 'webauthn',
   Otp = 'otp',
   Apple = 'apple',
+  StytchOtp = 'stytchOtp'
 }
