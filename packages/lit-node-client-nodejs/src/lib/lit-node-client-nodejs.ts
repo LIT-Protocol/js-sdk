@@ -2021,15 +2021,6 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   /**
-   *
-   * @param keyId
-   * @param pubkeys
-   */
-  computeHDPubKey(keyId: string, keyType: SIGTYPE): string {
-    return computeHDPubKey(this?.hdRootPubkeys as string[], keyId, keyType);
-  }
-
-  /**
    * Authenticates an Auth Method for claiming a Programmable Key Pair (PKP).
    * A {@link MintCallback} can be defined for custom on chain interactions
    * by default the callback will forward to a relay server for minting on chain.
@@ -2067,10 +2058,7 @@ export class LitNodeClientNodeJs extends LitCore {
       const derivedKeyId: string = (responseData as SuccessNodePromises<any>)
         .values[0].derivedKeyId;
 
-      const pubkey: string = this.computeHDPubKey(
-        derivedKeyId,
-        SIGTYPE.EcdsaCaitSith
-      );
+      const pubkey: string = this.computePubKey(derivedKeyId);
 
       const resp: ClaimKeyResponse = {
         signatures: nodeSignatures,
