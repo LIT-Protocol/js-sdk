@@ -18,8 +18,10 @@ import { verifyMessage } from '@ethersproject/wallet';
 
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 
+import LitConnectModal from '../connect-modal/modal';
+
 // @ts-ignore
-import LitConnectModal from '@lit-protocol/connect-modal';
+// import LitConnectModal from 'lit-connect-modal-test';
 
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
 
@@ -390,6 +392,8 @@ export const connectWeb3 = async ({
   const provider = await dialog.getWalletProvider();
 
   log('got provider', provider);
+
+  // @ts-ignore
   const web3 = new Web3Provider(provider);
 
   // trigger metamask popup
@@ -397,6 +401,7 @@ export const connectWeb3 = async ({
     log(
       '@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.'
     );
+    // @ts-ignore
     await provider.enable();
   } catch (e) {
     log(

@@ -19,7 +19,6 @@
   },
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
   "peerDependencies": {
-    "@lit-protocol/connect-modal": "^1.0.1",
     "@walletconnect/ethereum-provider": "2.9.2",
     "@walletconnect/modal": "2.6.1",
     "lit-siwe": "^1.1.8",

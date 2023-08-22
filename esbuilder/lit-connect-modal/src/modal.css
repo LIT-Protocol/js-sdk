@@ -1,0 +1,122 @@
+.modal {
+  font-family: -apple-system,BlinkMacSystemFont,avenir next,avenir,helvetica neue,helvetica,ubuntu,roboto,noto,segoe ui,arial,sans-serif;
+}
+
+.lcm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 12;
+}
+
+.lcm-modal-container {
+  border: 1px solid rgba(129, 89, 217, 1);
+  background-color: #fff;
+  padding: 0 1.5rem;
+  max-width: 500px;
+  max-height: 100vh;
+  border-radius: 0.25rem;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.lcm-modal-content {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+  color: rgba(0,0,0,.8);
+}
+
+.lcm-wallet-container {
+  display: flex;
+  align-items: center;
+  margin: 2rem 0.5rem;
+  transition-duration: 0.2s;
+  border-radius: 0.25rem;
+  padding: 2rem;
+  cursor: pointer;
+}
+
+.lcm-wallet-container:hover {
+  background-color: #d4d4d4;
+}
+
+.lcm-wallet-logo {
+  height: 2.5rem;
+  width: 3.75rem;
+  margin-right: 1.5rem;
+}
+
+.lcm-text-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.lcm-wallet-name {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.lcm-wallet-synopsis {
+  color: #777;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+
+@keyframes mmfadeIn {
+    from { opacity: 0; }
+      to { opacity: 1; }
+}
+
+@keyframes mmfadeOut {
+    from { opacity: 1; }
+      to { opacity: 0; }
+}
+
+@keyframes mmslideIn {
+  from { transform: translateY(15%); }
+    to { transform: translateY(0); }
+}
+
+@keyframes mmslideOut {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10%); }
+}
+
+.micromodal-slide {
+  display: none;
+}
+
+.micromodal-slide.is-open {
+  display: block;
+}
+
+.micromodal-slide[aria-hidden="false"] .lcm-modal-overlay {
+  animation: mmfadeIn .3s cubic-bezier(0.0, 0.0, 0.2, 1);
+}
+
+.micromodal-slide[aria-hidden="false"] .lcm-modal-container {
+  animation: mmslideIn .3s cubic-bezier(0, 0, .2, 1);
+}
+
+.micromodal-slide[aria-hidden="true"] .lcm-modal-overlay {
+  animation: mmfadeOut .3s cubic-bezier(0.0, 0.0, 0.2, 1);
+}
+
+.micromodal-slide[aria-hidden="true"] .lcm-modal-container {
+  animation: mmslideOut .3s cubic-bezier(0, 0, .2, 1);
+}
+
+.micromodal-slide .lcm-modal-container,
+.micromodal-slide .lcm-modal-overlay {
+  will-change: transform;
+}
