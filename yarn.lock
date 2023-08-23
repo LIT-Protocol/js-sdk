@@ -3180,13 +3180,6 @@
   resolved "https://registry.npmjs.org/@lit-labs/ssr-dom-shim/-/ssr-dom-shim-1.1.1.tgz#64df34e2f12e68e78ac57e571d25ec07fa460ca9"
   integrity sha512-kXOeFbfCm4fFf2A3WwVEeQj55tMZa8c8/f9AKHMobQMkzNUfUj+antR3fRPaZJawsa1aZiP/Da3ndpZrwEe4rQ==
 
-"@lit-protocol/connect-modal@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@lit-protocol/connect-modal/-/connect-modal-1.0.1.tgz#a042c9e1e1d82d40d777469d03eb6f6b701725d1"
-  integrity sha512-RTQIC2hvG8iM0z3lKGpJo/aE1QtxrHQceMyqU8TVoL/vJYhus1wdh7ZF9hYOXrBWbisqfZMRsa5NL0MsIKgilQ==
-  dependencies:
-    micromodal "^0.4.10"
-
 "@lit/reactive-element@^1.3.0", "@lit/reactive-element@^1.6.0":
   version "1.6.3"
   resolved "https://registry.npmjs.org/@lit/reactive-element/-/reactive-element-1.6.3.tgz#25b4eece2592132845d303e091bad9b04cdcfe03"
