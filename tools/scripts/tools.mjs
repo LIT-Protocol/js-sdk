@@ -1473,8 +1473,15 @@ async function validateDependencyVersions() {
         packageList.push(pkg);
       }
     });
+    const maxLength = Math.max(...packageList.map((pkg) => pkg.length));
 
-    console.log(`==================== ${groupName} ====================`);
+    const maxIndexLength = packageList.length < 10 ? 1 : 2;
+    const maxLineLength = maxIndexLength + 2 + maxLength + 45;
+    const separatorLength = maxLineLength - groupName.length - 2; // subtract 2 for the spaces on either side of the groupName
+    const separator = '='.repeat(separatorLength / 2);
+
+    console.log(`\n${separator} ${groupName} packages ${separator}`);
+
     await asyncForEach(packageList, async (pkg, i) => {
       const packageJson = await readJsonFile(pkg);
       const pkgVersion = packageJson.version;
@@ -1496,13 +1503,16 @@ async function validateDependencyVersions() {
         }
       }
 
+      const paddedPkg = pkg.padEnd(maxLength, ' ');
+      const paddedIndex = (i + 1).toString().padStart(maxIndexLength, ' ');
+
       if (fails > 0) {
         redLog(
-          `❌ ${pkg} has ${fails} dependencies with versions that do not match.`
+          `❌ ${paddedIndex} ${paddedPkg} has ${fails} dependencies with versions that do not match.`
         );
       } else {
         greenLog(
-          `✅ ${i + 1} ${pkg} contains all dependencies with matching versions.`
+          `✅ ${paddedIndex} ${paddedPkg} contains all dependencies with matching versions.`
         );
       }
     });
