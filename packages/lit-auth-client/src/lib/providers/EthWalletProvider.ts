@@ -83,18 +83,18 @@ export default class EthWalletProvider extends BaseProvider {
 
     const _options = {
       cache: true,
-      version: 'V3',
+      version: this?.version ?? 'V2',
       ...options,
     };
 
     let setNewExpiration = false;
 
+    // ==================== VERSION 3 ====================
     // Please refer to this document for the expected behaviour
     // https://www.notion.so/litprotocol/ETH-Wallet-Expected-Behaviour-1194ddeae22d4ff6a1a7bacf17ba5885?pvs=4
+    // NOTE: we do not want to use the default `lit-auth-signature` when cache is enabled,
+    // instead we want to use the `lit-ethwallet-token-<address>` cache key
     if (_options.version === 'V3') {
-      // -- we do not want to use the default `lit-auth-signature` when cache is enabled,
-      // instead we want to use the `lit-ethwallet-token-<address>` cache key
-
       if (isBrowser()) {
         setNewExpiration = false;
 
@@ -239,7 +239,10 @@ export default class EthWalletProvider extends BaseProvider {
           _options?.expirationUnit ?? 'hours'
         );
       }
-    } else {
+    }
+    // ==================== VERSION 2 ====================
+    // Use `lit-auth-signature` as the cache key
+    else {
       if ((address && signMessage) || _options?.signer) {
         if (_options?.signer) {
           if (!address) {

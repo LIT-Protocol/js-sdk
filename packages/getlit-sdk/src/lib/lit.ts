@@ -327,6 +327,8 @@ ${LitMessages.persistentStorageExample}`;
         res?.decryptedData as Uint8Array
       );
 
+      log.info('msg:', msg);
+
       if (!res?.decryptedData) {
         log.throw('Could not decrypt data');
       }

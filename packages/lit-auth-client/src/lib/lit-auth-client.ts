@@ -48,6 +48,15 @@ export class LitAuthClient {
   private storageProvider: LitStorage | undefined;
 
   /**
+   * Handle both V2 and V3 versions of the access token, using different storage keys for each:
+   * - V2: `lit-auth-signature`
+   * - V3: `lit-ethwallet-token-<address>`
+   *
+   * By default, @getlit/sdk would go for V3, but the primitive would stay with V2.
+   */
+  private version: 'V2' | 'V3' = 'V2';
+
+  /**
    * Create a LitAuthClient instance
    *
    * @param {LitAuthClientOptions} options
@@ -77,6 +86,10 @@ export class LitAuthClient {
 
       if (options?.storageProvider) {
         this.storageProvider = options?.storageProvider;
+      }
+
+      if (options?.version) {
+        this.version = options.version;
       }
     }
 
@@ -114,6 +127,7 @@ export class LitAuthClient {
       relay: this.relay,
       litNodeClient: this.litNodeClient,
       storageProvider: this.storageProvider,
+      version: this.version,
     };
 
     let provider: T;

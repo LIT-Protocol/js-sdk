@@ -1,7 +1,7 @@
 import './global';
 import { LitAnalytics } from './lib/analytics';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
-import { log, waitForLit } from './lib/utils';
+import { LitMessages, log, waitForLit } from './lib/utils';
 
 /**
  * This is a trick to make the instance behave like a function where you can async/await, but still be an instance where you can chain methods like .withPersistentStorage() .withAuthOptions() etc.
@@ -39,28 +39,7 @@ const loadLit = async (
   globalThis.Lit.collectAnalytics = collectAnalytics ?? true;
 
   if (globalThis.Lit.collectAnalytics) {
-    console.log(
-      '========================================================================'
-    );
-    console.log(
-      "NOTICE: We're collecting anonymous usage data to help improve our product."
-    );
-    console.log(
-      'Your privacy is important to us. We only collect data that helps us understand how our product is being used.'
-    );
-    console.log(
-      'None of the collected data can be used to identify you, and we do not share the data with any third parties.'
-    );
-    console.log(
-      "If you'd like to opt out of data collection, you can do so by setting the 'collectAnalytics' parameter to 'false' when calling the 'loadLit' function."
-    );
-    console.log(
-      'For example: loadLit({ debug: true, collectAnalytics: false })'
-    );
-    console.log('Thank you for helping us improve our product!');
-    console.log(
-      '========================================================================'
-    );
+    console.log(LitMessages.usageAnalyticsNotice);
     LitAnalytics.collect('loadLit');
   }
 

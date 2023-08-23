@@ -24,7 +24,7 @@ import {
   BaseAuthenticateOptions,
 } from '@lit-protocol/types';
 
-const version = '0.0.706';
+const version = '0.0.714';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -700,6 +700,15 @@ loadLit.withPersistentStorage({
   },
 },
 });`,
+usageAnalyticsNotice: `
+========================================================================\n
+NOTICE: We're collecting anonymous usage data to help improve our product.\n
+Your privacy is important to us. We only collect data that helps us understand how our product is being used.\n
+None of the collected data can be used to identify you, and we do not share the data with any third parties.\n
+If you'd like to opt out of data collection, you can do so by setting the 'collectAnalytics' parameter to 'false' when calling the 'loadLit' function.\n
+For example: loadLit({ debug: true, collectAnalytics: false })\n
+Thank you for helping us improve our product!\n
+========================================================================`,
 };
 
 /**
