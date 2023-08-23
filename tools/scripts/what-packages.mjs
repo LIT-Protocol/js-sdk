@@ -53,8 +53,9 @@ const searchPath = args[1] || './src';
 
 const results = await findImports(searchString, searchPath);
 
-console.log('Results:', results);
+console.log('\n========== Results ==========\n', results);
 
+console.log("\n========== Copy/Paste into package.json's peerDependencies ==========\n");
 console.log(`"peerDependencies": {`);
 results.forEach((dep, index) => {
   console.log(
