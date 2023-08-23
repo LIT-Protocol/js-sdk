@@ -28,6 +28,9 @@ import {
   validateGroupIsInConfig,
   writeGroupConfig,
   getDefaultGroupVersion,
+  groupNames,
+  compareVersions,
+  greyLog,
 } from './utils.mjs';
 import fs from 'fs';
 import path from 'path';
@@ -520,6 +523,7 @@ async function buildFunc() {
     if (groupFlag) {
       await childRunCommand(`yarn tools --match-versions --group=${groupFlag}`);
     } else {
+      yellowLog('No groupFlag is provided, not a problem. Continuing...');
       await childRunCommand(`yarn tools --match-versions`);
     }
 
@@ -1140,10 +1144,27 @@ async function removeLocalDevFunc() {
     item.replace('packages/', '')
   );
 
-  const group = args[1];
+  // -- use group flag by default
+  let group = args[1];
   console.log('group', group);
 
-  const groupList = await getGroupPackageNames(group, removeList);
+  let groupList = [];
+
+  // -- use all packages if no group flag is provided
+  if (!group) {
+    yellowLog(
+      `group flag not provided, not a problem, will use all packages...`
+    );
+
+    // for each group, get the package names
+    for (const name of groupNames) {
+      groupList.push(...(await getGroupPackageNames(name)));
+    }
+  } else {
+    groupList = await getGroupPackageNames(group, removeList);
+  }
+
+  greenLog('groupList', groupList);
 
   if (groupList.length > 0) {
     removeList = groupList;
@@ -1248,44 +1269,58 @@ async function setupLocalDevFunc() {
 }
 
 async function matchVersionsFunc() {
-  const group = getFlag('--group');
+  const allPackages = (await listDirsRecursive('./packages', false)).map(
+    (item) => item.replace('packages/', '')
+  );
 
-  let packageList;
-  let version;
+  const maxLength = Math.max(...allPackages.map((pkg) => pkg.length));
 
-  if (group) {
-    validateGroupIsInConfig(group);
+  await asyncForEach(allPackages, async (pkg) => {
+    const packageJson = await readJsonFile(`packages/${pkg}/package.json`);
 
-    // match group version
-    greenLog(`Group flag detected: ${group}`);
+    // -- get the version to be updated to
+    const group = packageJson.group;
 
-    packageList = (await getGroupPackageNames(group)).map((item) => {
-      return `packages/${item}`;
-    });
+    const groupConfig = getGroupConfig();
 
-    // get group version
-    version = getGroupConfig().config.find(
+    const groupName = groupConfig.config.find(
+      (item) => item.group === group
+    ).group;
+
+    const groupVersion = groupConfig.config.find(
       (item) => item.group === group
     ).version;
-  } else {
-    // async foreach packages
-    packageList = await listDirsRecursive('./packages', false);
 
-    // get lerna version
-    version = getDefaultGroupVersion();
-  }
+    // -- update the version in package.json
+    let direction = compareVersions(packageJson.version, groupVersion);
 
-  await asyncForEach(packageList, async (pkg) => {
-    const packageJson = await readJsonFile(`${pkg}/package.json`);
+    if (direction === '<') {
+      direction = '⬆';
+    } else if (direction === '>') {
+      direction = '⬇';
+    } else {
+      direction = '⬌';
+    }
 
-    packageJson.version = version;
+    // Pad the package name to align version numbers
+    const paddedPkg = pkg.padEnd(maxLength, ' ');
 
-    greenLog(
-      `Updating ${pkg}/package.json version ${packageJson.version} => ${version}...`
-    );
-    await writeJsonFile(`${pkg}/package.json`, packageJson);
+    if (direction === '⬆') {
+      greenLog(
+        `${direction} Updating ${paddedPkg}/package.json version ${packageJson.version} => ${groupVersion}`
+      );
+    } else {
+      greyLog(
+        `${direction} Updating ${paddedPkg}/package.json version ${packageJson.version} => ${groupVersion}`
+      );
+    }
+
+    // write
+    packageJson.version = groupVersion;
+    await writeJsonFile(`packages/${pkg}/package.json`, packageJson);
   });
-  exit();
+
+  exit(0);
 }
 
 async function versionFunc() {
@@ -1297,7 +1332,11 @@ async function versionFunc() {
 
   const groupConfig = getGroupConfig();
 
-  console.log("group:", group)
+  if (!group) {
+    redLog(`"group" is undefined when being called in "versionFunc"`);
+  }
+
+  console.log('group:', group);
 
   if (group) {
     validateGroupIsInConfig(group);
@@ -1419,46 +1458,62 @@ async function versionFunc() {
 }
 
 async function validateDependencyVersions() {
-  const PREFIX = '@lit-protocol';
-  const ignoreList = [''];
+  const PREFIXES = {
+    core: '@lit-protocol',
+    revamp: '@getlit',
+  };
 
-  const packageList = (await listDirsRecursive('./packages', false)).map(
-    (item) => {
-      return `dist/${item}/package.json`;
-    }
-  );
+  await asyncForEach(groupNames, async (groupName) => {
+    const PREFIX = PREFIXES[groupName];
 
-  await asyncForEach(packageList, async (pkg, i) => {
-    const packageJson = await readJsonFile(pkg);
-    const pkgVersion = packageJson.version;
+    const allPackages = (await listDirsRecursive('./packages', false)).map(
+      (item) => {
+        return `dist/${item}/package.json`;
+      }
+    );
 
-    const dependencies = packageJson.dependencies;
+    let packageList = [];
 
-    let total = 0;
-    let passes = 0;
-    let fails = 0;
+    await asyncForEach(allPackages, async (pkg, i) => {
+      const pkgJson = await readJsonFile(pkg);
 
-    // search for dependencies that start with @lit-protocol
-    for (const [key, value] of Object.entries(dependencies)) {
-      if (key.includes(PREFIX) && !ignoreList.includes(key)) {
-        total++;
-        if (value !== pkgVersion) {
-          fails++;
-        } else {
-          passes++;
+      if (pkgJson.name.includes(PREFIX)) {
+        packageList.push(pkg);
+      }
+    });
+
+    console.log(`==================== ${groupName} ====================`);
+    await asyncForEach(packageList, async (pkg, i) => {
+      const packageJson = await readJsonFile(pkg);
+      const pkgVersion = packageJson.version;
+      const dependencies = packageJson.dependencies;
+
+      let total = 0;
+      let passes = 0;
+      let fails = 0;
+
+      // search for dependencies that start with @lit-protocol
+      for (const [key, value] of Object.entries(dependencies)) {
+        if (key.includes(PREFIX)) {
+          total++;
+          if (value !== pkgVersion) {
+            fails++;
+          } else {
+            passes++;
+          }
         }
       }
-    }
 
-    if (fails > 0) {
-      redLog(
-        `❌ ${pkg} has ${fails} dependencies with versions that do not match.`
-      );
-    } else {
-      greenLog(
-        `✅ ${i + 1} ${pkg} contains all dependencies with matching versions.`
-      );
-    }
+      if (fails > 0) {
+        redLog(
+          `❌ ${pkg} has ${fails} dependencies with versions that do not match.`
+        );
+      } else {
+        greenLog(
+          `✅ ${i + 1} ${pkg} contains all dependencies with matching versions.`
+        );
+      }
+    });
   });
 
   process.exit();
