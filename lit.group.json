@@ -1,12 +1,12 @@
 [
   {
     "group": "core",
-    "version": "2.2.49",
+    "version": "2.2.51",
     "npm": "https://registry.npmjs.org/@lit-protocol/lit-node-client"
   },
   {
     "group": "revamp",
-    "version": "0.0.4",
+    "version": "0.0.7",
     "npm": "https://registry.npmjs.org/@getlit/sdk"
   }
 ]
