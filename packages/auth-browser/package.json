@@ -31,6 +31,7 @@
     "browser"
   ],
   "version": "2.2.49",
+  "group": "core",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

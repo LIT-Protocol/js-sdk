@@ -30,6 +30,7 @@
     "@simplewebauthn/typescript-types": "^7.0.0",
     "nanoid": "3.3.4"
   },
+  "group": "core",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
