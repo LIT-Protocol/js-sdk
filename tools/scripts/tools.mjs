@@ -56,7 +56,6 @@ const optionMaps = new Map([
   ['--setup-local-dev', () => setupLocalDevFunc()],
   ['--match-versions', () => matchVersionsFunc()],
   ['default', () => helpFunc()],
-  ['v', () => versionFunc()],
   ['--version', () => versionFunc()],
   ['--verify', () => validateDependencyVersions()],
   ['--postBuild', () => buildTestApps()],
@@ -1334,16 +1333,9 @@ async function versionFunc() {
 
   if (!group) {
     redLog(`"group" is undefined when being called in "versionFunc"`);
+    process.exit(1);
   }
 
-  console.log('group:', group);
-
-  if (group) {
-    validateGroupIsInConfig(group);
-  } else {
-    group = 'core';
-    // url = 'https://registry.npmjs.org/@lit-protocol/lit-node-client';
-  }
   url = groupConfig.config.find((item) => item.group === group).npm;
 
   res = await fetch(url);
