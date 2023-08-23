@@ -57,7 +57,8 @@
     "txServer": "node tx-handler-server.mjs",
     "prettier": "nx format:write --all",
     "delete:merged-branches": "git branch --merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d",
-    "delete:no-merged-branches": "git branch --no-merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d"
+    "delete:no-merged-branches": "git branch --no-merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d",
+    "what:packages": "node ./tools/scripts/what-packages.mjs @lit-protocol ./packages/getlit-sdk"
   },
   "private": true,
   "dependencies": {
