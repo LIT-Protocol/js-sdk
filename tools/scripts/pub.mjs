@@ -22,10 +22,11 @@ const args = getArgs();
 const OPTION = args[0];
 const VALUE = args[1];
 
+console.log('⏰ ========== Getting Ready ========== ⏰');
 console.log(args);
 
 const groupFlag = getFlag('--group');
-console.log('groupFlag:', groupFlag);
+greenLog(`⛳️ groupFlag: ${groupFlag}`);
 
 if (!OPTION || OPTION === '' || OPTION === '--help') {
   greenLog(
@@ -56,13 +57,14 @@ if (OPTION) {
 let version;
 
 const groupConfig = getGroupConfig();
+
 if (groupFlag) {
   version = groupConfig.config.find((item) => item.group === groupFlag).version;
 } else {
   version = groupConfig.config.find((item) => item.group === 'core').version;
 }
 
-console.log('version:', version);
+greenLog(`🔥 version: ${version}`);
 
 let dirs = await listDirsRecursive('dist/packages', false);
 let newDirs = [];
@@ -77,13 +79,21 @@ if (groupFlag) {
       }
     });
   });
+} else {
+  redLog(
+    `🚨 No group flag is provided! Please provide a group flag eg. "yarn node ./tools/scripts/pub.mjs --tag revamp --group=revamp"`
+  );
 }
 
 if (newDirs.length > 0) {
   dirs = newDirs;
 }
 
-console.log('Ready to publish the following packages:');
+console.log(
+  '\n\n========== Ready to publish the following packages ========== \n'
+);
+
+let namespace = await readJsonFile(`${dirs[0]}/package.json`);
 
 await asyncForEach(dirs, async (dir) => {
   const pkg = await readJsonFile(`${dir}/package.json`);
@@ -102,8 +112,8 @@ const type =
   OPTION === '--tag'
     ? `TAG => ${VALUE}
 
-  You will need to install like this: yarn add @lit-protocol/lit-node-client@${VALUE}`
-    : 'PRODUCTION';
+  You will need to install like this: yarn add ${namespace.name}@${VALUE}`
+    : '🚨 PRODUCTION 🚨';
 
 greenLog(
   `
@@ -115,27 +125,29 @@ greenLog(
 // get latest version
 let publishVersion;
 
-if (!groupFlag) {
-  try {
-    let res = await fetch(
-      'https://registry.npmjs.org/@lit-protocol/lit-node-client'
-    );
+const TAG = getFlag('--tag') ?? 'latest';
 
-    res = await res.json();
+try {
+  const groupNpm = getGroupConfig().config.find(
+    (item) => item.group === groupFlag
+  ).npm;
+  greenLog(`...getting latest version from npm: ${groupNpm}`);
+  let res = await fetch(groupNpm);
 
-    // get the last one
-    const modified = Object.keys(res.time).pop();
+  res = await res.json();
 
-    // increase x from 0.0.x to 0.0.x+1
-    const version = modified.split('.');
-    version[2] = parseInt(version[2]) + 1;
-    publishVersion = version.join('.');
-    console.log('publishVersion', publishVersion);
-  } catch (e) {
-    yellowLog(
-      "Couldn't get latest version from npm, will use the config version"
-    );
-  }
+  // get the last one
+  const foundVersion = res['dist-tags'][TAG ?? 'latest'];
+
+  // increase x from 0.0.x to 0.0.x+1
+  const version = foundVersion.split('.');
+  version[2] = parseInt(version[2]) + 1;
+  publishVersion = version.join('.');
+  greenLog(`ℹ️  Version "${publishVersion}" found on NPM\n`);
+} catch (e) {
+  yellowLog(
+    "Couldn't get latest version from npm, will use the config version"
+  );
 }
 
 await question('Are you sure you want to publish to? (y/n)', {

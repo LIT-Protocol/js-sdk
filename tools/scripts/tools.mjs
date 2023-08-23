@@ -531,7 +531,7 @@ async function buildFunc() {
       .map((item) => item.replace('apps/', ''))
       .join(',');
 
-    console.log('groupFlag:', groupFlag);
+    console.log("🚀 Versions checked! Let's build some packages!");
 
     let groupPackageNames;
     let additionalIgnoreList;
