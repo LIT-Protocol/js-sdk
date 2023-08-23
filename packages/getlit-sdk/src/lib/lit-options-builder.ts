@@ -116,8 +116,14 @@ export class LitOptionsBuilder {
   public withPersistentStorage({ provider, options }: PersistentStorageConfig) {
     log.info('------ withPersistentStorage ------');
     this.custom.persistentStorage = true;
-    console.log("this.custom.persistentStorage:", this.custom.persistentStorage)
-    console.log("globalThis.Lit.builder?.custom.persistentStorage:", globalThis.Lit.builder?.custom.persistentStorage)
+    console.log(
+      'this.custom.persistentStorage:',
+      this.custom.persistentStorage
+    );
+    console.log(
+      'globalThis.Lit.builder?.custom.persistentStorage:',
+      globalThis.Lit.builder?.custom.persistentStorage
+    );
 
     this.initialiseIPFSProvider({
       provider,
@@ -185,6 +191,7 @@ export class LitOptionsBuilder {
       ...(this._authOptions && { ...this._authOptions }),
       litNodeClient: globalThis.Lit.nodeClient,
       storageProvider: globalThis.Lit.storage,
+      version: 'V3',
     });
 
     if (!globalThis.Lit.authClient) {
