@@ -3,14 +3,14 @@ const path = require('path');
 const fs = require('fs');
 
 const entryPoint = path.resolve(__dirname, 'src/modal.js');
-const outputDir = 'packages/auth-browser/src/lib/connect-modal/modal.ts';
+const OUTPUT_DIR = 'packages/auth-browser/src/lib/connect-modal/modal.ts';
 
 build({
   entryPoints: [entryPoint],
   bundle: true,
   // minify: true,
   sourcemap: false,
-  outfile: outputDir,
+  outfile: OUTPUT_DIR,
   globalName: 'LitConnectModal',
   loader: {
     '.svg': 'dataurl',
@@ -20,7 +20,7 @@ build({
   format: 'esm',
 }).then(() => {
   // append @ts-nocheck to the top of the file
-  const file = fs.readFileSync(outputDir, 'utf8');
+  const file = fs.readFileSync(OUTPUT_DIR, 'utf8');
   const newFileContent = `// @ts-nocheck\n${file}`;
-  fs.writeFileSync(outputDir, newFileContent, 'utf8');
+  fs.writeFileSync(OUTPUT_DIR, newFileContent, 'utf8');
 });

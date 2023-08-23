@@ -20,9 +20,6 @@ import { EthereumProvider } from '@walletconnect/ethereum-provider';
 
 import LitConnectModal from '../connect-modal/modal';
 
-// @ts-ignore
-// import LitConnectModal from 'lit-connect-modal-test';
-
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
 
 import { SiweMessage } from 'lit-siwe';
