@@ -2,13 +2,13 @@
   {
     "namespace": "@lit-protocol",
     "group": "core",
-    "version": "2.2.50",
+    "version": "2.2.51",
     "npm": "https://registry.npmjs.org/@lit-protocol/lit-node-client"
   },
   {
-    "namespace":"@getlit",
+    "namespace": "@getlit",
     "group": "revamp",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "npm": "https://registry.npmjs.org/@getlit/sdk"
   }
 ]

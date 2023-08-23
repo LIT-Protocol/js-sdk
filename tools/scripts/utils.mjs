@@ -630,7 +630,7 @@ export function findArg(args, flag) {
   }
 }
 
-export const getFlag = (flag = '--foo') => {
+export const getFlag = (flag = '--foo', exit = true) => {
   try {
     const args = process.argv.slice(2);
 
@@ -639,8 +639,11 @@ export const getFlag = (flag = '--foo') => {
     const value = args[index].split('=')[1];
 
     if (!value) {
-      redLog(`❌ "${flag}" value cannot be empty. eg. ${flag}=bar`);
-      process.exit();
+      yellowLog(`👀 "${flag}" value is empty. eg. ${flag}=bar`);
+
+      if(exit){
+        process.exit();
+      }
     }
 
     return value;

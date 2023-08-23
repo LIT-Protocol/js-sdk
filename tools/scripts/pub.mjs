@@ -83,7 +83,17 @@ if (groupFlag) {
   redLog(
     `🚨 No group flag is provided! Please provide a group flag eg. "yarn node ./tools/scripts/pub.mjs --tag revamp --group=revamp"`
   );
+  process.exit(1);
 }
+
+const groupNPM = groupConfig.config.find(
+  (item) => item.group === groupFlag
+).npm;
+
+const npmVersionRes = await fetch(groupNPM);
+let npmVersion = await npmVersionRes.json();
+
+npmVersion = Object.keys(npmVersion.time).pop();
 
 if (newDirs.length > 0) {
   dirs = newDirs;
@@ -95,16 +105,20 @@ console.log(
 
 let namespace = await readJsonFile(`${dirs[0]}/package.json`);
 
-await asyncForEach(dirs, async (dir) => {
-  const pkg = await readJsonFile(`${dir}/package.json`);
+const maxNameLength = Math.max(...dirs.map((dir) => dir.length));
 
-  greenLog(`${pkg.name} => ${pkg.version}`);
+await asyncForEach(dirs, async (dir) => {
+  const distPkg = await readJsonFile(`${dir}/package.json`);
+
+  const paddedName = distPkg.name.padEnd(maxNameLength, ' ');
+
+  greenLog(`${paddedName} ${npmVersion} => ${distPkg.version}`);
 
   // remove peer dependencies
-  delete pkg.peerDependencies;
+  delete distPkg.peerDependencies;
 
   // write the package.json file
-  await writeJsonFile(`${dir}/package.json`, pkg);
+  await writeJsonFile(`${dir}/package.json`, distPkg);
 });
 
 // prompt user to confirm publish
@@ -117,7 +131,7 @@ const type =
 
 greenLog(
   `
-  Publishing: ${type}
+  🚨 Publishing: ${type}
 `,
   true
 );
@@ -125,13 +139,19 @@ greenLog(
 // get latest version
 let publishVersion;
 
-const TAG = getFlag('--tag') ?? 'latest';
+let TAG;
+
+try {
+  TAG = getFlag('--tag', false);
+} catch (e) {
+  TAG = 'latest';
+}
 
 try {
   const groupNpm = getGroupConfig().config.find(
     (item) => item.group === groupFlag
   ).npm;
-  greenLog(`...getting latest version from npm: ${groupNpm}`);
+  // greenLog(`...getting latest version from npm: ${groupNpm}`);
   let res = await fetch(groupNpm);
 
   res = await res.json();
@@ -143,7 +163,7 @@ try {
   const version = foundVersion.split('.');
   version[2] = parseInt(version[2]) + 1;
   publishVersion = version.join('.');
-  greenLog(`ℹ️  Version "${publishVersion}" found on NPM\n`);
+  // greenLog(`ℹ️  Version "${publishVersion}" found on NPM\n`);
 } catch (e) {
   yellowLog(
     "Couldn't get latest version from npm, will use the config version"
