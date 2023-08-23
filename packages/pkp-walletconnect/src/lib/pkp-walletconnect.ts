@@ -20,7 +20,7 @@ import {
   formatJsonRpcError,
   formatJsonRpcResult,
   JsonRpcResponse,
-} from '@json-rpc-tools/utils';
+} from '@walletconnect/jsonrpc-utils';
 import {
   CoreTypes,
   ISignClient,
@@ -71,7 +71,7 @@ export class PKPWalletConnect {
       throw new Error('WalletConnect project ID is required');
     }
 
-    let coreOpts: CoreTypes.Options = {
+    const coreOpts: CoreTypes.Options = {
       projectId: params.projectId,
       relayUrl: params.relayUrl || DEFAULT_RELAY_URL,
       ...(this.debug && { logger: 'debug' }),
