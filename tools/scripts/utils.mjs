@@ -249,6 +249,14 @@ export const yellowLog = (msg, noDash = false) => {
   }
 };
 
+export const greyLog = (msg, noDash = false) => {
+  if (noDash) {
+    console.log('\x1b[90m%s\x1b[0m', msg);
+  } else {
+    console.log('\x1b[90m%s\x1b[0m', `- ${msg}`);
+  }
+};
+
 export const question = (str, { yes, no }) => {
   return new Promise((resolve) => {
     return rl.question(`- ${str} [yes]/no:`, async (answer) => {
@@ -481,6 +489,21 @@ export const versionChecker = (pkg, lernaVersion) => {
   return { status: 200, message: `${pkg.name}@${version} => @${lernaVersion}` };
 };
 
+export function compareVersions(version1, version2) {
+  const v1 = version1.split('.').map(Number);
+  const v2 = version2.split('.').map(Number);
+
+  for (let i = 0; i < 3; i++) {
+    if (v1[i] > v2[i]) {
+      return '>';
+    } else if (v1[i] < v2[i]) {
+      return '<';
+    }
+  }
+
+  return '==';
+}
+
 // mini custom test framework
 
 // Describe function
@@ -607,7 +630,7 @@ export function findArg(args, flag) {
   }
 }
 
-export const getFlag = (flag = '--foo') => {
+export const getFlag = (flag = '--foo', exit = true) => {
   try {
     const args = process.argv.slice(2);
 
@@ -616,8 +639,11 @@ export const getFlag = (flag = '--foo') => {
     const value = args[index].split('=')[1];
 
     if (!value) {
-      redLog(`❌ "${flag}" value cannot be empty. eg. ${flag}=bar`);
-      process.exit();
+      yellowLog(`👀 "${flag}" value is empty. eg. ${flag}=bar`);
+
+      if(exit){
+        process.exit();
+      }
     }
 
     return value;
@@ -734,7 +760,15 @@ export function validateGroupIsInConfig(group) {
 }
 
 export async function getGroupPackageNames(groupName, allPackages) {
+  if (!groupName) {
+    redLog(`❌ No group name provided.`);
+    process.exit(1);
+  }
+
+  greenLog(`...trying to find "${groupName}"`);
+
   if (!allPackages) {
+    yellowLog(`🚨 "allPackages" is not provided, getting all packages...`);
     allPackages = (await listDirsRecursive('./packages', false)).map((item) =>
       item.replace('packages/', '')
     );
@@ -742,7 +776,7 @@ export async function getGroupPackageNames(groupName, allPackages) {
 
   let groupList = [];
 
-  greenLog(`🔎 Looking for packages in "${groupName}" group...`, true);
+  greenLog(`🔎 Looking for packages in "${groupName}" group...`);
   for (let i = 0; i < allPackages.length; i++) {
     const pkgName = allPackages[i];
 
@@ -757,6 +791,13 @@ export async function getGroupPackageNames(groupName, allPackages) {
     }
   }
 
+  if (groupList.length === 0) {
+    redLog(`❌ No packages found in "${groupName}" group.`);
+    process.exit();
+  }
+
+  greenLog(`🔎 Found ${groupList.length} packages in "${groupName}" group.`);
+
   return groupList;
 }
 
@@ -767,3 +808,5 @@ export const getDefaultGroupVersion = () => {
 
   return version;
 };
+
+export const groupNames = getGroupConfig().config.map((item) => item.group);
