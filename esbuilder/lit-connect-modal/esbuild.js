@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 const entryPoint = path.resolve(__dirname, 'src/modal.js');
-const outputDir = 'packages/auth-browser/src/lib/connect-modal/modal.ts';
+const OUTPUT_DIR = 'packages/auth-browser/src/lib/connect-modal/modal.ts';
 
 build({
   entryPoints: [entryPoint],
