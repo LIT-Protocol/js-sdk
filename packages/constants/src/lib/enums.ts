@@ -45,5 +45,4 @@ export enum ProviderType {
   Otp = 'otp',
   StytchOtp = 'stytchOtp',
   Apple = 'apple',
-  StytchOtp = 'stytchOtp'
 }
