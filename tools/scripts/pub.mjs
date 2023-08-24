@@ -179,42 +179,6 @@ await question('Are you sure you want to publish to? (y/n)', {
     let counter = 0;
 
     await asyncForEach(dirs, async (dir) => {
-      // read the package.json file
-      const pkg = await readJsonFile(`${dir}/package.json`);
-
-      // also read the individual package.json and update the version
-      try {
-        const pkg2 = await readJsonFile(
-          `${dir.replace('dist/', '')}/package.json`
-        );
-
-        if (OPTION === '--tag' && (VALUE === 'dev' || VALUE === 'test')) {
-          pkg2.version = publishVersion;
-        } else {
-          pkg2.version = version;
-        }
-
-        // write the package.json file
-        await writeJsonFile(`${dir.replace('dist/', '')}/package.json`, pkg2);
-      } catch (e) {
-        const path = `${dir.replace('dist/', '')}/package.json`;
-
-        // swallow error if it's not a vanilla package
-        if (!path.includes('vanilla')) {
-          yellowLog(`No such file or directory: ${path}`);
-        }
-      }
-
-      // update version
-      if (OPTION === '--tag' && (VALUE === 'dev' || VALUE === 'test')) {
-        pkg.version = publishVersion;
-      } else {
-        pkg.version = version;
-      }
-
-      // write the package.json file
-      await writeJsonFile(`${dir}/package.json`, pkg);
-
       if (OPTION === '--tag') {
         greenLog(`Publishing ${dir} with tag ${VALUE}`);
 
