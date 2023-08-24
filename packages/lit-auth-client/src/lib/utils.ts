@@ -33,7 +33,9 @@ export async function prepareLoginUrl(
     app_redirect: redirectUri,
   };
   const queryAuthParams = createQueryParams(authParams);
-  return `${loginUrl}?${queryAuthParams}&state=${state}`;
+  const url = `${loginUrl}?${queryAuthParams}&state=${state}`;
+  console.log('Prepared URL:', url);
+  return url;
 }
 
 /**
@@ -49,6 +51,8 @@ function getLoginRoute(provider: string): string {
       return '/auth/google';
     case 'discord':
       return '/auth/discord';
+    case 'apple':
+      return '/auth/apple';
     default:
       throw new Error(
         `No login route available for the given provider "${provider}".`

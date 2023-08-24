@@ -1539,6 +1539,7 @@ export interface OtpAuthenticateOptions
   code: string;
 }
 
+export interface AppleAuthenticateOptions extends ExpirableOptions {}
 export interface GoogleAuthenticateOptions extends ExpirableOptions {}
 export interface DiscordAuthenticateOptions extends ExpirableOptions {}
 export interface WebAuthnAuthenticateOptions extends ExpirableOptions {}

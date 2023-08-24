@@ -216,10 +216,10 @@ export class LitOptionsBuilder {
           ProviderType.WebAuthn
         );
 
-      // globalThis.Lit.auth.apple =
-      //   globalThis.Lit.authClient.initProvider<AppleProvider>(
-      //     ProviderType.Apple
-      //   );
+      globalThis.Lit.auth.apple =
+        globalThis.Lit.authClient.initProvider<AppleProvider>(
+          ProviderType.Apple
+        );
     }
     globalThis.Lit.auth.ethwallet =
       globalThis.Lit.authClient.initProvider<EthWalletProvider>(

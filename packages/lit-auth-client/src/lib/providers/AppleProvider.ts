@@ -1,4 +1,5 @@
 import {
+  AppleAuthenticateOptions,
   AuthMethod,
   BaseProviderOptions,
   OAuthProviderOptions,
@@ -48,10 +49,18 @@ export default class AppleProvider extends BaseProvider {
 
   /**
    * Get the unique identifier for the auth method storage
-   * @param {string} accessToken - Access token
+   * @param {string} token - Access token
    */
-  override getAuthMethodStorageUID(accessToken?: string | undefined): string {
-    throw new Error('Method not implemented.');
+  public getAuthMethodStorageUID(token: string): string {
+    if (!token) {
+      throw new Error('Token is required to generate auth method storage UID');
+    }
+
+    const UID = JSON.parse(
+      Buffer.from(token.split('.')[1], 'base64').toString('utf-8')
+    ).email;
+
+    return `lit-apple-token-${UID}`;
   }
 
   /**
@@ -59,7 +68,14 @@ export default class AppleProvider extends BaseProvider {
    *
    * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
    */
-  public async authenticate(): Promise<AuthMethod> {
+  public async authenticate<T extends AppleAuthenticateOptions>(
+    options?: T
+  ): Promise<AuthMethod> {
+    const _options = {
+      cache: true,
+      ...options,
+    };
+
     // Check if current url matches redirect uri
     if (!window.location.href.startsWith(this.redirectUri)) {
       throw new Error(
@@ -110,6 +126,20 @@ export default class AppleProvider extends BaseProvider {
       authMethodType: AuthMethodType.AppleJwt,
       accessToken: idToken,
     };
+
+    if (_options?.cache) {
+      const storageUID = this.getAuthMethodStorageUID(idToken);
+
+      if (this.storageProvider.isExpired(storageUID)) {
+        this.storageProvider.setExpirableItem(
+          storageUID,
+          JSON.stringify(authMethod),
+          _options.expirationLength ?? 24,
+          _options.expirationUnit ?? 'hours'
+        );
+      }
+    }
+
     return authMethod;
   }
 
