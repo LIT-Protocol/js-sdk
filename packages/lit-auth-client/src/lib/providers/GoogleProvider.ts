@@ -48,6 +48,10 @@ export default class GoogleProvider extends BaseProvider {
     window.location.assign(loginUrl);
   }
 
+  /**
+   * Get the unique identifier for the auth method storage
+   * @param {string} token - Access token
+   */
   public getAuthMethodStorageUID(token: string): string {
     if (!token) {
       throw new Error('Token is required to generate auth method storage UID');
@@ -72,11 +76,6 @@ export default class GoogleProvider extends BaseProvider {
       cache: true,
       ...options,
     };
-
-    // if (storageItem) {
-    //   clearParamsFromURL();
-    //   return JSON.parse(storageItem);
-    // }
 
     // Check if current url matches redirect uri
     if (!window.location.href.startsWith(this.redirectUri)) {

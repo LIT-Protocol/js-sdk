@@ -53,6 +53,10 @@ export default class DiscordProvider extends BaseProvider {
     window.location.assign(loginUrl);
   }
 
+  /**
+   * Get the unique identifier for the auth method storage
+   * @param {string} token - Access token
+   */
   public getAuthMethodStorageUID(accessToken: string): string {
     // shortern authMethodId to 16 characters
     const authMethodId = sha256(Buffer.from(accessToken)).slice(0, 16);

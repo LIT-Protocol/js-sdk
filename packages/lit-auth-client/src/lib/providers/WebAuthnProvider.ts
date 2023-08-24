@@ -83,37 +83,6 @@ export default class WebAuthnProvider extends BaseProvider {
     return mintRes.requestId;
   }
 
-  // public async getPublicKey(options: PublicKeyCredentialCreationOptionsJSON) {
-  //   // Submit registration options to the authenticator
-  //   const { startRegistration } = await import('@simplewebauthn/browser');
-  //   const attResp: RegistrationResponseJSON = await startRegistration(options);
-
-  //   // create a buffer object from the base64 encoded content.
-  //   const attestationBuffer = Buffer.from(
-  //     attResp.response.attestationObject,
-  //     'base64'
-  //   );
-
-  //   let publicKey: string;
-  //   try {
-  //     // parse the buffer to reconstruct the object.
-  //     // buffer is COSE formatted, utilities decode the buffer into json, and extract the public key information
-  //     const authenticationResponse: any =
-  //       parseAuthenticatorData(attestationBuffer);
-  //     // publickey in cose format to register the auth method
-  //     const publicKeyCoseBuffer: Buffer = authenticationResponse
-  //       .attestedCredentialData.credentialPublicKey as Buffer;
-  //     // Encode the publicKey for contract storage
-  //     publicKey = utils.hexlify(utils.arrayify(publicKeyCoseBuffer));
-  //   } catch (e) {
-  //     throw new Error(
-  //       `Error while decoding credential create response for public key retrieval. attestation response not encoded as expected: ${e}`
-  //     );
-  //   }
-
-  //   return publicKey;
-  // }
-
   /**
    * @override
    * This method is not applicable for WebAuthnProvider and should not be used.
@@ -126,6 +95,11 @@ export default class WebAuthnProvider extends BaseProvider {
       'Use verifyAndMintPKPThroughRelayer for WebAuthnProvider instead.'
     );
   }
+
+  /**
+   * Get the unique identifier for the auth method storage
+   * @param {string} accessToken - Access token
+   */
   public getAuthMethodStorageUID(accessToken: string): string {
     let token;
 
@@ -153,14 +127,6 @@ export default class WebAuthnProvider extends BaseProvider {
       cache: true,
       ...options,
     };
-
-    // Check if it exists in cache
-    // let storageItem =
-    //   this.storageProvider.getExpirableItem('lit-webauthn-token');
-
-    // if (storageItem) {
-    //   return JSON.parse(storageItem);
-    // }
 
     const provider = new ethers.providers.JsonRpcProvider(this.rpcUrl);
 

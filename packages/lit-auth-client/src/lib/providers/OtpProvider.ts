@@ -34,6 +34,10 @@ export class OtpProvider extends BaseProvider {
     this._checkRoute = config?.checkRoute || '/api/otp/check';
   }
 
+  /**
+   * Get the unique identifier for the auth method storage
+   * @param {string} token - Access token
+   */
   public getAuthMethodStorageUID(accessToken: any): string {
     const UID = JSON.parse(
       Buffer.from(accessToken.split('.')[1], 'base64').toString('utf-8')
