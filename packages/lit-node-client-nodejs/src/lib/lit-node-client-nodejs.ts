@@ -15,10 +15,12 @@ import {
   encrypt,
   generateSessionKeyPair,
   verifyAndDecryptWithSignatureShares,
+  computeHDPubKey,
 } from '@lit-protocol/crypto';
 import { safeParams } from '@lit-protocol/encryption';
 import {
   convertLitActionsParams,
+  defaultMintClaimCallback,
   log,
   mostCommonString,
   throwError,
@@ -28,6 +30,8 @@ import {
   AuthCallbackParams,
   AuthMethod,
   AuthSig,
+  ClaimKeyResponse,
+  ClaimRequest,
   CustomNetwork,
   DecryptRequest,
   DecryptResponse,
@@ -91,7 +95,7 @@ import {
   setStorageItem,
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
-import { BigNumber } from 'ethers';
+import { BigNumber, ethers, utils } from 'ethers';
 
 /** ---------- Main Export Class ---------- */
 
@@ -505,6 +509,24 @@ export class LitNodeClientNodeJs extends LitCore {
     });
   };
 
+  getClaimKeyExecutionShares = async (
+    url: string,
+    params: any,
+    requestId: string
+  ) => {
+    log('getPkpSigningShares');
+    const urlWithPath = `${url}/web/pkp/claim`;
+    if (!params.authMethod) {
+      throw new Error('authMethod is required');
+    }
+
+    return await this.sendCommandToNode({
+      url: urlWithPath,
+      data: params,
+      requestId,
+    });
+  };
+
   /**
    * Get Signing Shares for Token containing Access Control Condition
    *
@@ -827,12 +849,11 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const sigShares: Array<SigShare> = shares.map((s: any) => ({
         sigType: s.sigType,
-        shareHex: s.signatureShare,
+        signatureShare: s.signatureShare.replace('"', ''),
         shareIndex: s.shareIndex,
-        localX: s.localX,
-        localY: s.localY,
-        publicKey: s.publicKey,
-        dataSigned: s.dataSigned,
+        bigR: s.bigR.replace('"', ''),
+        publicKey: s.publicKey.replace('"', ''),
+        dataSigned: s.dataSigned.replace('"', ''),
         siweMessage: s.siweMessage,
       }));
 
@@ -863,7 +884,7 @@ export class LitNodeClientNodeJs extends LitCore {
       let signature: any;
 
       if (
-        sigType === SIGTYPE.EcdsaCAITSITHK256 ||
+        sigType === SIGTYPE.EcdsaCaitSith ||
         sigType === SIGTYPE.EcdsaCAITSITHP256
       ) {
         signature = combineEcdsaShares(sigShares);
@@ -910,12 +931,12 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const sigShares: Array<SigShare> = shares.map((s: any) => ({
         sigType: s.sigType,
-        shareHex: s.signatureShare,
+        signatureShare: s.signatureShare as string,
         shareIndex: s.shareIndex,
-        localX: s.localX,
-        localY: s.localY,
+        bigR: s.bigR,
         publicKey: s.publicKey,
         dataSigned: s.dataSigned,
+        sigName: s.sigName ? s.sigName : 'sig',
       }));
 
       log('sigShares', sigShares);
@@ -933,7 +954,7 @@ export class LitNodeClientNodeJs extends LitCore {
       }
 
       // -- validate if signature type is ECDSA
-      if (sigType !== 'ECDSA') {
+      if (sigType !== 'EcdsaCaitSith') {
         throwError({
           message: 'signature type is not ECDSA',
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
@@ -945,7 +966,7 @@ export class LitNodeClientNodeJs extends LitCore {
       let signature: any;
 
       if (
-        sigType === SIGTYPE.EcdsaCAITSITHK256 ||
+        sigType === SIGTYPE.EcdsaCaitSith ||
         sigType === SIGTYPE.EcdsaCAITSITHP256
       ) {
         signature = combineEcdsaShares(sigShares);
@@ -1083,9 +1104,45 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = responseData.map(
-      (r: any) => (r as SignedData).signedData
-    );
+    const signedDataList = responseData.map((r) => {
+      // add the signed data to the signature share
+      delete r.signedData.result;
+
+      // nodes do not camel case the response from /web/pkp/sign.
+      const snakeToCamel = (s: string) =>
+        s.replace(/(_\w)/g, (k) => k[1].toUpperCase());
+      //@ts-ignore
+      const convertShare: any = (share: any) => {
+        const keys = Object.keys(share);
+        let convertedShare = {};
+        for (const key of keys) {
+          convertedShare = Object.defineProperty(
+            convertedShare,
+            snakeToCamel(key),
+            Object.getOwnPropertyDescriptor(share, key) as PropertyDecorator
+          );
+        }
+
+        return convertedShare;
+      };
+      const convertedShare: SigShare = convertShare(r.signedData);
+      const keys = Object.keys(convertedShare);
+      for (const key of keys) {
+        //@ts-ignore
+        if (typeof convertedShare[key] === 'string') {
+          //@ts-ignore
+          convertedShare[key] = convertedShare[key]
+            .replace('"', '')
+            .replace('"', '');
+        }
+      }
+      //@ts-ignore
+      convertedShare.dataSigned = convertedShare.digest;
+      return {
+        signature: convertedShare,
+      };
+    });
+
     const signatures = this.getSignatures(signedDataList);
 
     // -- 2. combine responses as a string, and get parse it as JSON
@@ -1190,8 +1247,18 @@ export class LitNodeClientNodeJs extends LitCore {
         return convertedShare;
       };
       const convertedShare: SigShare = convertShare(r.signatureShare);
-
-      convertedShare.dataSigned = Buffer.from(r.signedData).toString('hex');
+      const keys = Object.keys(convertedShare);
+      for (const key of keys) {
+        //@ts-ignore
+        if (typeof convertedShare[key] === 'string') {
+          //@ts-ignore
+          convertedShare[key] = convertedShare[key]
+            .replace('"', '')
+            .replace('"', '');
+        }
+      }
+      //@ts-ignore
+      convertedShare.dataSigned = convertedShare.digest;
       return {
         signature: convertedShare,
       };
@@ -1952,4 +2019,67 @@ export class LitNodeClientNodeJs extends LitCore {
   getSessionKeyUri = (publicKey: string): string => {
     return LIT_SESSION_KEY_URI + publicKey;
   };
+
+  /**
+   * Authenticates an Auth Method for claiming a Programmable Key Pair (PKP).
+   * A {@link MintCallback} can be defined for custom on chain interactions
+   * by default the callback will forward to a relay server for minting on chain.
+   * @param {ClaimKeyRequest} params an Auth Method and {@link MintCallback}
+   * @returns {Promise<ClaimKeyResponse>}
+   */
+  async claimKeyId(params: ClaimRequest): Promise<ClaimKeyResponse> {
+    if (!this.ready) {
+      const message =
+        'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+      throwError({
+        message,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
+      });
+    }
+
+    const nodePromises = await this.getNodePromises((url: string) => {
+      const requestId = this.getRequestId();
+      const nodeRequestParams = {
+        authMethod: params.authMethod,
+      };
+      return this.getClaimKeyExecutionShares(url, nodeRequestParams, requestId);
+    });
+
+    const responseData = await this.handleNodePromises(nodePromises);
+
+    if (responseData.success === true) {
+      const nodeSignatures = (
+        responseData as SuccessNodePromises<any>
+      ).values.map((r: any) => {
+        return ethers.utils.splitSignature(`0x${r.signature}`);
+      });
+
+      const derivedKeyId: string = (responseData as SuccessNodePromises<any>)
+        .values[0].derivedKeyId;
+
+      const pubkey: string = this.computePubKey(derivedKeyId);
+
+      const resp: ClaimKeyResponse = {
+        signatures: nodeSignatures,
+        derivedKeyId,
+        pubkey,
+      };
+
+      if (params.mintCallback) {
+        params.mintCallback(resp);
+        return resp;
+      }
+
+      await defaultMintClaimCallback(resp);
+
+      return resp;
+    } else {
+      return throwError({
+        message: 'claim request has failed',
+        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+        errorCode: LIT_ERROR.UNKNOWN_ERROR.code,
+      });
+    }
+  }
 }

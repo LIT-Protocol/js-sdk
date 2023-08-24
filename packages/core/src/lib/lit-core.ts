@@ -1,3 +1,4 @@
+import { computeHDPubKey } from '@lit-protocol/crypto';
 import {
   canonicalAccessControlConditionFormatter,
   canonicalEVMContractConditionFormatter,
@@ -15,6 +16,8 @@ import {
   LIT_NETWORKS,
   defaultLitnodeClientConfig,
   version,
+  TELEM_API_URL,
+  SIGTYPE,
 } from '@lit-protocol/constants';
 
 import {
@@ -52,6 +55,7 @@ export class LitCore {
   subnetPubKey: string | null;
   networkPubKey: string | null;
   networkPubKeySet: string | null;
+  hdRootPubkeys: string[] | null;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -76,7 +80,7 @@ export class LitCore {
     this.subnetPubKey = null;
     this.networkPubKey = null;
     this.networkPubKeySet = null;
-
+    this.hdRootPubkeys = null;
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
@@ -134,8 +138,8 @@ export class LitCore {
             subnetPubKey: resp.subnetPublicKey,
             networkPubKey: resp.networkPublicKey,
             networkPubKeySet: resp.networkPublicKeySet,
+            hdRootPubkeys: resp.hdRootPubkeys,
           };
-
           this.serverKeys[url] = keys;
         })
         .catch((e: any) => {
@@ -164,6 +168,11 @@ export class LitCore {
           this.networkPubKeySet = mostCommonString(
             Object.values(this.serverKeys).map(
               (keysFromSingleNode: any) => keysFromSingleNode.networkPubKeySet
+            )
+          );
+          this.hdRootPubkeys = mostCommonString(
+            Object.values(this.serverKeys).map(
+              (keysFromSingleNode: any) => keysFromSingleNode.hdRootPubkeys
             )
           );
           this.ready = true;
@@ -558,4 +567,35 @@ export class LitCore {
       formattedUnifiedAccessControlConditions,
     };
   };
+
+  /**
+   * Calculates an HD public key from a given {@link keyId} the curve type or signature type will assumed to be k256 unless given
+   * @param keyId 
+   * @param sigType 
+   * @returns {string} public key
+   */
+  computePubKey = (keyId: string, sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith) => {
+    if(!this.hdRootPubkeys) {
+      throwError({
+        message: `root public keys not found, have you connected to the nodes?`,
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
+      }); 
+    }
+    return computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
+  }
+
+  collectData = (
+    date: string,
+    functionName: string,
+    executionTime: number
+  ) => {
+    fetch(TELEM_API_URL + '/collect', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ date, functionName, executionTime }),
+    });
+  }
 }

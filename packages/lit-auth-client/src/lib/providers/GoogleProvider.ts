@@ -12,10 +12,10 @@ import {
   decode,
   clearParamsFromURL,
 } from '../utils';
+import { BaseProvider } from './BaseProvider';
 import { ethers } from 'ethers';
 import * as jose from 'jose';
 
-import { BaseProvider } from './BaseProvider';
 // import {
 //   LitAbility,
 //   LitAccessControlConditionResource,

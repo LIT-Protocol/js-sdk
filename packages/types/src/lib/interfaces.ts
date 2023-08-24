@@ -10,6 +10,7 @@ import {
   IRelayAuthStatus,
   JsonRequest,
   LIT_NETWORKS_KEYS,
+  MintCallback,
   SolRpcConditions,
   SymmetricKey,
   UnifiedAccessControlConditions,
@@ -222,6 +223,25 @@ export interface LitNodeClientConfig {
 
 export interface CustomNetwork {
   litNetwork: LIT_NETWORKS_KEYS;
+}
+
+export interface Signature {
+  r: string;
+
+  s: string;
+  _vs: string;
+
+  recoveryParam: number;
+  v: number;
+
+  yParityAndS: string;
+  compact: string;
+}
+
+export interface ClaimKeyResponse {
+  signatures: Signature[];
+  derivedKeyId: string;
+  pubkey: string;
 }
 
 /**
@@ -627,10 +647,9 @@ export interface NodeClientErrorV1 {
 
 export interface SigShare {
   sigType: any;
-  shareHex: any;
+  signatureShare: any;
   shareIndex: any;
-  localX: any;
-  localY: any;
+  bigR: string;
   publicKey: any;
   dataSigned: any;
   siweMessage?: string;
@@ -722,6 +741,7 @@ export interface JsonHandshakeResponse {
   subnetPubKey: string;
   networkPubKey: string;
   networkPubKeySet: string;
+  hdRootPubkeys: string[];
 }
 
 export interface EncryptToIpfsProps {
@@ -893,6 +913,10 @@ export interface AuthMethod {
 
 export interface AuthMethodWithOTPType extends AuthMethod {
   otpType: 'email' | 'phone';
+}
+export interface ClaimRequest {
+  authMethod: AuthMethod;
+  mintCallback?: MintCallback;
 }
 
 // pub struct JsonSignSessionKeyRequest {
@@ -1367,6 +1391,11 @@ export interface WebAuthnProviderOptions {
   rpName?: string;
 }
 
+export interface StytchOtpProviderOptions {
+  appId: string;
+  userId?: string;
+}
+
 export interface SignInWithOTPParams {
   /**
    * otp transport (email or phone #)
@@ -1528,6 +1557,7 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    */
   accessToken: string;
   /* 
+  /*
    Stytch user identifier for a project
   */
   userId?: string;
