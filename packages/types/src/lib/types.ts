@@ -1,6 +1,6 @@
 
 import {
-  ClaimKeyResponse,
+  ClaimResult,
   SignInWithOTPParams,
   StytchOtpProviderOptions,
   WebAuthnProviderOptions,
@@ -119,4 +119,4 @@ export type ProviderOptions =
   | WebAuthnProviderOptions;
 
 export type AuthenticateOptions = BaseAuthenticateOptions;
-export type MintCallback = (response: ClaimKeyResponse) => void;
+export type MintCallback = (response: ClaimResult) => Promise<string>;

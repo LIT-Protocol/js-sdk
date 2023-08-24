@@ -186,7 +186,7 @@ export abstract class BaseProvider {
    * @param claimRequest 
    * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
    */
-  public async ClaimKeyId(claimRequest: ClaimRequest): Promise<ClaimKeyResponse> {
+  public async claimKeyId(claimRequest: ClaimRequest): Promise<ClaimKeyResponse> {
       const res = await this.litNodeClient.claimKeyId(claimRequest);
       return res;
   }
@@ -198,7 +198,7 @@ export abstract class BaseProvider {
    *
    * @returns {Promise<IRelayRequestData>} - Relay request data
    */
-  protected async prepareRelayRequestData(
+  public async prepareRelayRequestData(
     authMethod: AuthMethod
   ): Promise<IRelayRequestData> {
     const authMethodType = authMethod.authMethodType;

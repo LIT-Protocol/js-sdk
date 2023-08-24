@@ -238,9 +238,15 @@ export interface Signature {
 
 export interface ClaimKeyResponse {
   signatures: Signature[],
-  derivedKeyId: string,
-  pubkey: string
+  claimedKeyId: string,
+  pubkey: string,
+  mintTx: string,
+}
 
+export interface ClaimResult {
+  signatures: Signature[],
+  derivedKeyId: string,
+  pubkey: string, 
 }
 
 /**

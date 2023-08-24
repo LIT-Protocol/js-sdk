@@ -2060,20 +2060,28 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const pubkey: string = this.computePubKey(derivedKeyId);
 
-      const resp: ClaimKeyResponse = {
-        signatures: nodeSignatures,
-        derivedKeyId,
-        pubkey,
-      };
-
+      let mintTx = "";
       if (params.mintCallback) {
-        params.mintCallback(resp);
-        return resp;
+        mintTx = await params.mintCallback({
+          derivedKeyId,
+          signatures: nodeSignatures,
+          pubkey
+        });
+        
       }
 
-      await defaultMintClaimCallback(resp);
+      mintTx = await defaultMintClaimCallback({
+        derivedKeyId,
+        signatures: nodeSignatures,
+        pubkey
+      });
 
-      return resp;
+      return {
+        signatures: nodeSignatures,
+        claimedKeyId: derivedKeyId,
+        pubkey,
+        mintTx
+      };
     } else {
       return throwError({
         message: 'claim request has failed',

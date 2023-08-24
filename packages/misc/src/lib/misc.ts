@@ -16,6 +16,7 @@ import {
   NodeErrorV1,
   ClaimRequest,
   ClaimKeyResponse,
+  ClaimResult,
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
@@ -498,7 +499,7 @@ export const genRandomPath = (): string => {
 };
 
 
-export const defaultMintClaimCallback = async (params: ClaimKeyResponse): Promise<void> => {
+export const defaultMintClaimCallback = async (params: ClaimResult): Promise<string> => {
   try {
     const relayUrl = "https://relay-server-staging.herokuapp.com/auth/claim";
     const response = await fetch(relayUrl, {
@@ -516,6 +517,9 @@ export const defaultMintClaimCallback = async (params: ClaimKeyResponse): Promis
       console.warn(errStmt);
       throw new Error(errStmt);
     }
+
+    let body: any = await response.json();
+    return body.mintTx;
   } catch(e) {
     console.error((e as Error).message); 
     throw e;
