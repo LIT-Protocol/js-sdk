@@ -403,45 +403,25 @@ ${LitMessages.persistentStorageExample}`;
    * Get the session sigs for the given account
    * NOTE: this function can only be called if user cached their auth data
    */
-  public async getAccountSession(
-    accountPublicKey: string,
-    opts?: {
-      authData?: LitAuthMethod;
-      chain?: string;
-    }
-  ) {
+  public async getAccountSession({
+    accountPublicKey,
+    authData,
+  }: {
+    accountPublicKey: string;
+    authData: LitAuthMethod[];
+  }) {
     log.start('getAccountSession');
 
     // we should be able to look up which auth method provider was used to authenticate the user by public key
-    const authMethodProvider = 'google';
+    // PKPPermissions -> getPermittedAuthMethods(tokenId);
+    const authMethodProvider = 'ethwallet';
 
-    console.log('accountPublicKey', accountPublicKey);
+    log.info('accountPublicKey', accountPublicKey);
 
     // if accountPublicKey doesn't start with '0x' add it
     if (!accountPublicKey.startsWith('0x')) {
       accountPublicKey = '0x' + accountPublicKey;
     }
-
-    let authData: LitAuthMethod | undefined;
-
-    // -- validate
-    if (!opts?.authData) {
-      log.info('No auth data provided, checking cache for auth data');
-
-      try {
-        authData = getSingleAuthDataByType(authMethodProvider);
-      } catch (e) {
-        log.error('No auth data found in cache, please re-authenticate');
-        throw e;
-      }
-    }
-
-    if (!authData) {
-      log.error('No auth data found in cache, please re-authenticate');
-      throw new Error('No auth data found in cache, please re-authenticate');
-    }
-
-    console.log('authData', authData);
 
     // -- execute
     const resource = new LitAccessControlConditionResource('*');
@@ -450,25 +430,35 @@ ${LitMessages.persistentStorageExample}`;
 
     log.info(`Getting session sigs for "${accountPublicKey}"...`);
 
-    const sessionSigs = await provider?.getSessionSigs({
-      pkpPublicKey: accountPublicKey,
-      authMethod: authData,
-      sessionSigsParams: {
-        chain: 'ethereum', // default EVM chain unless other chain
-        resourceAbilityRequests: [
-          {
-            resource,
-            ability,
-          },
-        ],
-      },
-    });
+    // Use Promise.all to handle multiple async tasks concurrently
+    try {
+      const allSessionSigs = await Promise.all(
+        authData.map(async (authMethodItem) => {
+          return await provider?.getSessionSigs({
+            pkpPublicKey: accountPublicKey,
+            authMethod: authMethodItem,
+            sessionSigsParams: {
+              chain: 'ethereum', // default EVM chain unless other chain
+              resourceAbilityRequests: [
+                {
+                  resource,
+                  ability,
+                },
+              ],
+            },
+          });
+        })
+      );
 
-    console.log('sessionSigs: ', sessionSigs);
+      console.log('allSessionSigs: ', allSessionSigs);
 
-    log.end('getAccountSession');
+      log.end('getAccountSession');
 
-    return sessionSigs;
+      return allSessionSigs;
+    } catch (e) {
+      log.end('getAccountSession');
+      log.throw('Error while getting account session', e);
+    }
   }
 
   /**
