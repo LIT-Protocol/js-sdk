@@ -14,6 +14,8 @@ import {
   NodeClientErrorV1,
   NodeErrorV0,
   NodeErrorV1,
+  ClaimRequest,
+  ClaimKeyResponse,
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
@@ -494,3 +496,28 @@ export const genRandomPath = (): string => {
     Math.random().toString(36).substring(2, 15)
   );
 };
+
+
+export const defaultMintClaimCallback = async (params: ClaimKeyResponse): Promise<void> => {
+  try {
+    const relayUrl = "https://relay-server-staging.herokuapp.com/auth/claim";
+    const response = await fetch(relayUrl, {
+      method: "POST",
+      body: JSON.stringify(params),
+      headers: {
+        'api-key': "",
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (response.status < 200 || response.status >= 400) {
+      let errResp = await response.json();
+      let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(errResp)}`;
+      console.warn(errStmt);
+      throw new Error(errStmt);
+    }
+  } catch(e) {
+    console.error((e as Error).message); 
+    throw e;
+  }
+} 

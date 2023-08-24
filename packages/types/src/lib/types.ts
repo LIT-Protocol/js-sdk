@@ -1,4 +1,6 @@
+
 import {
+  ClaimKeyResponse,
   SignInWithOTPParams,
   StytchOtpProviderOptions,
   WebAuthnProviderOptions,
@@ -11,7 +13,6 @@ import {
   AccsRegularParams,
   AccsSOLV2Params,
   EthWalletProviderOptions,
-  EthWalletAuthenticateOptions,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
@@ -118,3 +119,4 @@ export type ProviderOptions =
   | WebAuthnProviderOptions;
 
 export type AuthenticateOptions = BaseAuthenticateOptions;
+export type MintCallback = (response: ClaimKeyResponse) => void;

@@ -18,6 +18,7 @@ import {
   LitAbility,
   LitAccessControlConditionResource,
 } from '@lit-protocol/auth-helpers';
+import * as LITCONFIG from 'lit.config.json';
 
 Object.defineProperty(global.self, 'crypto', {
   value: {

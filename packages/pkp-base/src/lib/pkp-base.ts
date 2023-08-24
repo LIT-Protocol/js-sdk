@@ -360,14 +360,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           toSign: toSign,
           pubKey: this.uncompressedPubKey,
           authSig: this.controllerAuthSig as AuthSig,
-          authMethods: [],
+          authMethods: []
         });
       } else if (this.controllerSessionSigs) {
         sig = await this.litNodeClient.pkpSign({
           toSign,
           pubKey: this.uncompressedPubKey,
           authMethods: this.controllerAuthMethods ?? [],
-          sessionSigs: this.controllerSessionSigs,
+          sessionSigs: this.controllerSessionSigs
         });
       }
 

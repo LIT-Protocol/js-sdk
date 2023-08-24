@@ -11,7 +11,6 @@ import {
   decode,
 } from '../utils';
 import { BaseProvider } from './BaseProvider';
-import { utils } from 'ethers';
 import { ethers } from 'ethers';
 import * as jose from 'jose';
 
