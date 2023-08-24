@@ -2,7 +2,7 @@
 
 This is an example web app that shows how you can easily obtain an `AuthSig` using the `checkAndSignAuthMessage` function.
 
-When the function is called, it prompts a wallet selection pop-up in the user's browser. Once the user's wallet is connected, the user is asked to sign a message, thereby confirming the ownership of their crypto address. The `AuthSig`` is then generated, which includes the signature of the user's signed message.
+When the function is called, it prompts a wallet selection pop-up in the user's browser. Once the user's wallet is connected, the user is asked to sign a message, thereby confirming the ownership of their crypto address. The `AuthSig` is then generated, which includes the signature of the user's signed message.
 
 ## 💻 Getting Started
 
