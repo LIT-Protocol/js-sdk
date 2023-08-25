@@ -1,13 +1,11 @@
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import * as LITCONFIG from '../../../../lit.config.json';
-
+import { loadLit } from '../../../../dist/packages/getlit-sdk/src/index';
+import { ILitStorage, LitStorage } from '@lit-protocol/lit-storage';
 describe('getlitSDK', () => {
   beforeAll(async () => {
     try {
-      await import('../../../../dist/packages/getlit-sdk');
-      await new Promise<void>((res, rej) => {
-        setTimeout(() => res(), 1_000);
-      });
+      await loadLit();
     } catch (e) {
       console.log(
         "You probably will need to run 'yarn build' before running this test.'"
@@ -93,6 +91,8 @@ describe('getlitSDK', () => {
   }, 10_000);
 
   it('Should encrypt message and decrypt message as string', async () => {
+  globalThis.Lit.builder?.withCacheProvider(new LitStorage());
+    await globalThis.Lit.builder?.build();
     const message: string = 'Hello World';
     const enctyptedContent = await globalThis.Lit.encrypt({
       accessControlConditions: [
@@ -115,17 +115,20 @@ describe('getlitSDK', () => {
 
     expect(enctyptedContent).toBeDefined();
     expect(
-      globalThis.Lit?.storage?.getItem(enctyptedContent.storageKey)
+      globalThis.Lit.storage?.getItem(enctyptedContent.storageKey)
     ).toBeDefined();
     expect(
       globalThis.Lit?.storage?.getItem(
-        enctyptedContent.storageContext.storageKey
+        enctyptedContent.storageKey
       )
     ).toBeDefined();
 
     const res = await globalThis.Lit.decrypt({
       storageContext: {
-        storageKey: enctyptedContent.storageContext.storageKey,
+        storageKey: enctyptedContent.storageKey,
+      },
+      decryptionContext: {
+        decryptionMaterial: enctyptedContent.decryptionContext.decryptionMaterial
       },
       authMaterial: LITCONFIG.CONTROLLER_AUTHSIG,
     });

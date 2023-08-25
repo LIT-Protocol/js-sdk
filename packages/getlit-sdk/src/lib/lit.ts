@@ -261,7 +261,7 @@ ${LitMessages.persistentStorageExample}`;
     }
 
     // -- using decryption context
-    if (opts.decryptionContext) {
+    if (opts.decryptionContext && !material) {
       material = opts.decryptionContext as unknown as Material;
     }
 
