@@ -501,12 +501,12 @@ export const genRandomPath = (): string => {
 
 export const defaultMintClaimCallback = async (params: ClaimResult): Promise<string> => {
   try {
-    const relayUrl = "https://relay-server-staging.herokuapp.com/auth/claim";
+    const relayUrl = "http://127.0.0.1:8081/auth/claim";
     const response = await fetch(relayUrl, {
       method: "POST",
       body: JSON.stringify(params),
       headers: {
-        'api-key': "",
+        'api-key': "67e55044-10b1-426f-9247-bb680e5fe0c8_relayer",
         'Content-Type': 'application/json',
       }
     });

@@ -2060,27 +2060,28 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const pubkey: string = this.computePubKey(derivedKeyId);
 
-      let mintTx = "";
+      let mintTx = '';
       if (params.mintCallback) {
         mintTx = await params.mintCallback({
           derivedKeyId,
+          authMethodType: params.authMethod.authMethodType,
           signatures: nodeSignatures,
-          pubkey
+          pubkey,
         });
-        
       }
 
       mintTx = await defaultMintClaimCallback({
         derivedKeyId,
+        authMethodType: params.authMethod.authMethodType,
         signatures: nodeSignatures,
-        pubkey
+        pubkey,
       });
 
       return {
         signatures: nodeSignatures,
         claimedKeyId: derivedKeyId,
         pubkey,
-        mintTx
+        mintTx,
       };
     } else {
       return throwError({

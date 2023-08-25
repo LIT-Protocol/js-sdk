@@ -24,6 +24,7 @@ import { BytesLike } from 'ethers';
 
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
+import { AuthMethodType } from './enums';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -246,6 +247,7 @@ export interface ClaimKeyResponse {
 export interface ClaimResult {
   signatures: Signature[],
   derivedKeyId: string,
+  authMethodType: AuthMethodType
   pubkey: string, 
 }
 
