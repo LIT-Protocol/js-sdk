@@ -104,7 +104,13 @@ export const asyncForEach = async (array, callback) => {
 export const getContractAddresses = async (LitConfig) => {
   // get deployed contract addresses
   const contractAddresses = JSON.parse(
-    await fetch(LitConfig.root + LitConfig.contracts).then((res) => res.text())
+    await fetch(LitConfig.contracts, {
+      headers: LitConfig.abis.isPrivate
+        ? {
+            Authorization: `token ${LitConfig.abis.token}`,
+          }
+        : {},
+    }).then((res) => res.text())
   );
   Object.entries(contractAddresses).forEach(([key, value]) => {
     if (key.includes('ContractAddress')) return;
@@ -161,7 +167,13 @@ await asyncForEach(deployedContracts, async (contract) => {
   let json;
 
   try {
-    json = await fetch(contract.abiPath).then((res) => res.text());
+    json = await fetch(contract.abiPath, {
+      headers: LitConfig.abis.isPrivate
+        ? {
+            Authorization: `token ${LitConfig.abis.token}`,
+          }
+        : {},
+    }).then((res) => res.text());
     json = JSON.parse(json);
   } catch (e) {
     redLog(`Failed to fetch ${contract.abiPath}`);

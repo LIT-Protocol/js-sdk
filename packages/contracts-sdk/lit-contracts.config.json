@@ -1,8 +1,10 @@
 {
-  "root": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/",
-  "contracts": "deployed_contracts_serrano.json",
+  "root": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/",
+  "contracts": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/blockchain/contracts/deployed_contracts_serrano.json",
   "abis": {
-    "dir": "deployments/mumbai_80001/",
-    "ignoreProperties": ["metadata", "bytecode", "deployedBytecode"]
+    "dir": "abis/",
+    "ignoreProperties": ["metadata", "bytecode", "deployedBytecode"],
+    "token": "",
+    "isPrivate": true
   }
 }
