@@ -1,21 +1,34 @@
 export const pkpHelper = {
-  "address": "0x85E8860FB3Ad3517151C8da5E5F4Bcd626CCbfD6",
+  "address": "0x8bB62077437D918891F12c7F35d9e1B78468bF11",
   "abi": [
     {
       "inputs": [
         {
           "internalType": "address",
-          "name": "_pkpNft",
+          "name": "_resolver",
           "type": "address"
         },
         {
-          "internalType": "address",
-          "name": "_pkpPermissions",
-          "type": "address"
+          "internalType": "enum ContractResolver.Env",
+          "name": "_env",
+          "type": "uint8"
         }
       ],
       "stateMutability": "nonpayable",
       "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newResolverAddress",
+          "type": "address"
+        }
+      ],
+      "name": "ContractResolverAddressSet",
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -35,6 +48,395 @@ export const pkpHelper = {
       ],
       "name": "OwnershipTransferred",
       "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "keyType",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "derivedKeyId",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "r",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "s",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "v",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct IPubkeyRouter.Signature[]",
+          "name": "signatures",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "permittedAuthMethodTypes",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "permittedAuthMethodIds",
+          "type": "bytes[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "permittedAuthMethodPubkeys",
+          "type": "bytes[]"
+        },
+        {
+          "internalType": "uint256[][]",
+          "name": "permittedAuthMethodScopes",
+          "type": "uint256[][]"
+        },
+        {
+          "internalType": "bool",
+          "name": "addPkpEthAddressAsPermittedAddress",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "sendPkpToItself",
+          "type": "bool"
+        }
+      ],
+      "name": "claimAndMintNextAndAddAuthMethods",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "keyType",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "derivedKeyId",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "r",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "s",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "v",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct IPubkeyRouter.Signature[]",
+          "name": "signatures",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "permittedAddresses",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[][]",
+          "name": "permittedAddressScopes",
+          "type": "uint256[][]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "permittedAuthMethodTypes",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "permittedAuthMethodIds",
+          "type": "bytes[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "permittedAuthMethodPubkeys",
+          "type": "bytes[]"
+        },
+        {
+          "internalType": "uint256[][]",
+          "name": "permittedAuthMethodScopes",
+          "type": "uint256[][]"
+        },
+        {
+          "internalType": "bool",
+          "name": "addPkpEthAddressAsPermittedAddress",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "sendPkpToItself",
+          "type": "bool"
+        }
+      ],
+      "name": "claimAndMintNextAndAddAuthMethodsWithTypes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "contractResolver",
+      "outputs": [
+        {
+          "internalType": "contract ContractResolver",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "env",
+      "outputs": [
+        {
+          "internalType": "enum ContractResolver.Env",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getDomainWalletRegistry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPKPNftMetdataAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPkpNftAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPkpPermissionsAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "inputs": [
@@ -157,6 +559,60 @@ export const pkpHelper = {
     {
       "inputs": [
         {
+          "internalType": "uint256",
+          "name": "keyType",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "permittedAuthMethodTypes",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "permittedAuthMethodIds",
+          "type": "bytes[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "permittedAuthMethodPubkeys",
+          "type": "bytes[]"
+        },
+        {
+          "internalType": "uint256[][]",
+          "name": "permittedAuthMethodScopes",
+          "type": "uint256[][]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "nftMetadata",
+          "type": "string[]"
+        },
+        {
+          "internalType": "bool",
+          "name": "addPkpEthAddressAsPermittedAddress",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "sendPkpToItself",
+          "type": "bool"
+        }
+      ],
+      "name": "mintNextAndAddDomainWalletMetadata",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "",
           "type": "address"
@@ -202,29 +658,16 @@ export const pkpHelper = {
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "pkpNFT",
-      "outputs": [
+      "inputs": [
         {
-          "internalType": "contract PKPNFT",
-          "name": "",
-          "type": "address"
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
         }
       ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "pkpPermissions",
-      "outputs": [
-        {
-          "internalType": "contract PKPPermissions",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
+      "name": "removePkpMetadata",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -237,12 +680,35 @@ export const pkpHelper = {
     {
       "inputs": [
         {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
           "internalType": "address",
-          "name": "newPkpNftAddress",
+          "name": "account",
           "type": "address"
         }
       ],
-      "name": "setPkpNftAddress",
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -251,13 +717,50 @@ export const pkpHelper = {
       "inputs": [
         {
           "internalType": "address",
-          "name": "newPkpPermissionsAddress",
+          "name": "newResolverAddress",
           "type": "address"
         }
       ],
-      "name": "setPkpPermissionsAddress",
+      "name": "setContractResolver",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string[]",
+          "name": "nftMetadata",
+          "type": "string[]"
+        }
+      ],
+      "name": "setPkpMetadata",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {

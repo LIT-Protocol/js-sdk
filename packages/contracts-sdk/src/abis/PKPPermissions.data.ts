@@ -1,16 +1,34 @@
 export const pkpPermissions = {
-  "address": "0x35daf1e7FDf12417aFa8d8deC1fAA874ef4492d9",
+  "address": "0x4Aed2F242E806c58758677059340e29E6B5b7619",
   "abi": [
     {
       "inputs": [
         {
           "internalType": "address",
-          "name": "_pkpNft",
+          "name": "_resolver",
           "type": "address"
+        },
+        {
+          "internalType": "enum ContractResolver.Env",
+          "name": "_env",
+          "type": "uint8"
         }
       ],
       "stateMutability": "nonpayable",
       "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newResolverAddress",
+          "type": "address"
+        }
+      ],
+      "name": "ContractResolverAddressSet",
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -321,6 +339,75 @@ export const pkpPermissions = {
       "inputs": [
         {
           "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "permittedAuthMethodTypesToAdd",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "permittedAuthMethodIdsToAdd",
+          "type": "bytes[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "permittedAuthMethodPubkeysToAdd",
+          "type": "bytes[]"
+        },
+        {
+          "internalType": "uint256[][]",
+          "name": "permittedAuthMethodScopesToAdd",
+          "type": "uint256[][]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "permittedAuthMethodTypesToRemove",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "permittedAuthMethodIdsToRemove",
+          "type": "bytes[]"
+        }
+      ],
+      "name": "batchAddRemoveAuthMethods",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "contractResolver",
+      "outputs": [
+        {
+          "internalType": "contract ContractResolver",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "env",
+      "outputs": [
+        {
+          "internalType": "enum ContractResolver.Env",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
           "name": "authMethodType",
           "type": "uint256"
         },
@@ -469,6 +556,19 @@ export const pkpPermissions = {
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "getPkpNftAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -482,6 +582,19 @@ export const pkpPermissions = {
           "internalType": "bytes",
           "name": "",
           "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getRouterAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -660,19 +773,6 @@ export const pkpPermissions = {
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "pkpNFT",
-      "outputs": [
-        {
-          "internalType": "contract PKPNFT",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -770,11 +870,11 @@ export const pkpPermissions = {
       "inputs": [
         {
           "internalType": "address",
-          "name": "newPkpNftAddress",
+          "name": "newResolverAddress",
           "type": "address"
         }
       ],
-      "name": "setPkpNftAddress",
+      "name": "setContractResolver",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

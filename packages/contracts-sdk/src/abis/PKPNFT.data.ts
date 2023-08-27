@@ -1,8 +1,19 @@
 export const pkpNft = {
-  "address": "0xa4bbAAf3aD9Db1B3f1f6fe38af60AE228f6DF153",
+  "address": "0x8F75a53F65e31DD0D2e40d0827becAaE2299D111",
   "abi": [
     {
-      "inputs": [],
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "resolverAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "enum ContractResolver.Env",
+          "name": "_env",
+          "type": "uint8"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "constructor"
     },
@@ -60,6 +71,19 @@ export const pkpNft = {
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newResolverAddress",
+          "type": "address"
+        }
+      ],
+      "name": "ContractResolverAddressSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "address",
           "name": "newFreeMintSigner",
@@ -106,57 +130,18 @@ export const pkpNft = {
       "inputs": [
         {
           "indexed": true,
-          "internalType": "address",
-          "name": "pkpNftMetadataAddress",
-          "type": "address"
-        }
-      ],
-      "name": "PkpNftMetadataAddressSet",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "pkpPermissionsAddress",
-          "type": "address"
-        }
-      ],
-      "name": "PkpPermissionsAddressSet",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
           "internalType": "uint256",
           "name": "tokenId",
           "type": "uint256"
         },
         {
-          "indexed": true,
-          "internalType": "uint256",
-          "name": "keyType",
-          "type": "uint256"
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "pubkey",
+          "type": "bytes"
         }
       ],
-      "name": "PkpRouted",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "routerAddress",
-          "type": "address"
-        }
-      ],
-      "name": "RouterAddressSet",
+      "name": "PKPMinted",
       "type": "event"
     },
     {
@@ -251,6 +236,78 @@ export const pkpNft = {
       "inputs": [
         {
           "internalType": "uint256",
+          "name": "keyType",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "derivedKeyId",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "r",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "s",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "v",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct IPubkeyRouter.Signature[]",
+          "name": "signatures",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "claimAndMint",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "contractResolver",
+      "outputs": [
+        {
+          "internalType": "contract ContractResolver",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "env",
+      "outputs": [
+        {
+          "internalType": "enum ContractResolver.Env",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
           "name": "tokenId",
           "type": "uint256"
         }
@@ -263,132 +320,6 @@ export const pkpNft = {
           "type": "bool"
         }
       ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "keyType",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "freeMintId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes",
-          "name": "ipfsCID",
-          "type": "bytes"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "msgHash",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint8",
-          "name": "v",
-          "type": "uint8"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "r",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "s",
-          "type": "bytes32"
-        }
-      ],
-      "name": "freeMintGrantAndBurnNext",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "keyType",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "freeMintId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "msgHash",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint8",
-          "name": "v",
-          "type": "uint8"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "r",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "s",
-          "type": "bytes32"
-        }
-      ],
-      "name": "freeMintNext",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "freeMintId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "msgHash",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "uint8",
-          "name": "v",
-          "type": "uint8"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "r",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "s",
-          "type": "bytes32"
-        }
-      ],
-      "name": "freeMintSigTest",
-      "outputs": [],
       "stateMutability": "view",
       "type": "function"
     },
@@ -444,6 +375,45 @@ export const pkpNft = {
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "getNextDerivedKeyId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPkpNftMetadataAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPkpPermissionsAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -463,19 +433,26 @@ export const pkpNft = {
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "keyType",
-          "type": "uint256"
-        }
-      ],
-      "name": "getUnmintedRoutedTokenIdCount",
+      "inputs": [],
+      "name": "getRouterAddress",
       "outputs": [
         {
-          "internalType": "uint256",
+          "internalType": "address",
           "name": "",
-          "type": "uint256"
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getStakingAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -546,24 +523,6 @@ export const pkpNft = {
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes",
-          "name": "ipfsCID",
-          "type": "bytes"
-        }
-      ],
-      "name": "mintGrantAndBurnSpecific",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
           "name": "keyType",
           "type": "uint256"
         }
@@ -577,19 +536,6 @@ export const pkpNft = {
         }
       ],
       "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        }
-      ],
-      "name": "mintSpecific",
-      "outputs": [],
-      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -638,50 +584,6 @@ export const pkpNft = {
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "pkpNftMetadata",
-      "outputs": [
-        {
-          "internalType": "contract PKPNFTMetadata",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "pkpPermissions",
-      "outputs": [
-        {
-          "internalType": "contract PKPPermissions",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "keyType",
-          "type": "uint256"
-        }
-      ],
-      "name": "pkpRouted",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "bytes32",
@@ -724,19 +626,6 @@ export const pkpNft = {
       "name": "renounceOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "router",
-      "outputs": [
-        {
-          "internalType": "contract PubkeyRouter",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -812,6 +701,19 @@ export const pkpNft = {
       "inputs": [
         {
           "internalType": "address",
+          "name": "newResolverAddress",
+          "type": "address"
+        }
+      ],
+      "name": "setContractResolver",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
           "name": "newFreeMintSigner",
           "type": "address"
         }
@@ -830,45 +732,6 @@ export const pkpNft = {
         }
       ],
       "name": "setMintCost",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "pkpNftMetadataAddress",
-          "type": "address"
-        }
-      ],
-      "name": "setPkpNftMetadataAddress",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "pkpPermissionsAddress",
-          "type": "address"
-        }
-      ],
-      "name": "setPkpPermissionsAddress",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "routerAddress",
-          "type": "address"
-        }
-      ],
-      "name": "setRouterAddress",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1014,30 +877,6 @@ export const pkpNft = {
       "name": "transferOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "unmintedRoutedTokenIds",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
       "type": "function"
     },
     {

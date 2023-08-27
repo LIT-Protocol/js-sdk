@@ -1,5 +1,5 @@
 export const contractResolver = {
-  "address": "0x1B3674612dD473Fa03598bC9F9497F4670F70e4F",
+  "address": "0xFCB3d8a54680e9337e3c8E60adC02F2aE8455A71",
   "abi": [
     {
       "inputs": [
@@ -145,19 +145,6 @@ export const contractResolver = {
     },
     {
       "inputs": [],
-      "name": "ACCESS_CONTROL_CONTRACT",
-      "outputs": [
-        {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "ADMIN_ROLE",
       "outputs": [
         {
@@ -185,6 +172,45 @@ export const contractResolver = {
     {
       "inputs": [],
       "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DOMAIN_WALLET_ORACLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DOMAIN_WALLET_REGISTRY",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "HD_KEY_DERIVER_CONTRACT",
       "outputs": [
         {
           "internalType": "bytes32",
@@ -302,6 +328,19 @@ export const contractResolver = {
     {
       "inputs": [],
       "name": "RELEASE_REGISTER_CONTRACT",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "STAKING_BALANCES_CONTRACT",
       "outputs": [
         {
           "internalType": "bytes32",

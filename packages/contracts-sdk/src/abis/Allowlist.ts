@@ -79,11 +79,13 @@ export interface AllowlistEventsContext {
 export type AllowlistMethodNames =
   | 'new'
   | 'addAdmin'
+  | 'allowAll'
   | 'allowedItems'
   | 'isAllowed'
   | 'owner'
   | 'removeAdmin'
   | 'renounceOwnership'
+  | 'setAllowAll'
   | 'setAllowed'
   | 'setNotAllowed'
   | 'transferOwnership';
@@ -122,6 +124,13 @@ export interface Allowlist {
     newAdmin: string,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  allowAll(overrides?: ContractCallOverrides): Promise<boolean>;
   /**
    * Payable: false
    * Constant: true
@@ -166,6 +175,17 @@ export interface Allowlist {
    * Type: function
    */
   renounceOwnership(
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param _allowAll Type: bool, Indexed: false
+   */
+  setAllowAll(
+    _allowAll: boolean,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**

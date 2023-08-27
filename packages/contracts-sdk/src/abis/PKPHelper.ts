@@ -63,25 +63,77 @@ export interface ContractCallOverrides {
    */
   gasLimit?: number;
 }
-export type PKPHelperEvents = 'OwnershipTransferred';
+export type PKPHelperEvents =
+  | 'ContractResolverAddressSet'
+  | 'OwnershipTransferred'
+  | 'RoleAdminChanged'
+  | 'RoleGranted'
+  | 'RoleRevoked';
 export interface PKPHelperEventsContext {
+  ContractResolverAddressSet(...parameters: any): EventFilter;
   OwnershipTransferred(...parameters: any): EventFilter;
+  RoleAdminChanged(...parameters: any): EventFilter;
+  RoleGranted(...parameters: any): EventFilter;
+  RoleRevoked(...parameters: any): EventFilter;
 }
 export type PKPHelperMethodNames =
   | 'new'
+  | 'DEFAULT_ADMIN_ROLE'
+  | 'claimAndMintNextAndAddAuthMethods'
+  | 'claimAndMintNextAndAddAuthMethodsWithTypes'
+  | 'contractResolver'
+  | 'env'
+  | 'getDomainWalletRegistry'
+  | 'getPKPNftMetdataAddress'
+  | 'getPkpNftAddress'
+  | 'getPkpPermissionsAddress'
+  | 'getRoleAdmin'
+  | 'grantRole'
+  | 'hasRole'
   | 'mintNextAndAddAuthMethods'
   | 'mintNextAndAddAuthMethodsWithTypes'
+  | 'mintNextAndAddDomainWalletMetadata'
   | 'onERC721Received'
   | 'owner'
-  | 'pkpNFT'
-  | 'pkpPermissions'
+  | 'removePkpMetadata'
   | 'renounceOwnership'
-  | 'setPkpNftAddress'
-  | 'setPkpPermissionsAddress'
+  | 'renounceRole'
+  | 'revokeRole'
+  | 'setContractResolver'
+  | 'setPkpMetadata'
+  | 'supportsInterface'
   | 'transferOwnership';
+export interface ContractResolverAddressSetEventEmittedResponse {
+  newResolverAddress: string;
+}
 export interface OwnershipTransferredEventEmittedResponse {
   previousOwner: string;
   newOwner: string;
+}
+export interface RoleAdminChangedEventEmittedResponse {
+  role: Arrayish;
+  previousAdminRole: Arrayish;
+  newAdminRole: Arrayish;
+}
+export interface RoleGrantedEventEmittedResponse {
+  role: Arrayish;
+  account: string;
+  sender: string;
+}
+export interface RoleRevokedEventEmittedResponse {
+  role: Arrayish;
+  account: string;
+  sender: string;
+}
+export interface ClaimAndMintNextAndAddAuthMethodsRequest {
+  r: Arrayish;
+  s: Arrayish;
+  v: BigNumberish;
+}
+export interface ClaimAndMintNextAndAddAuthMethodsWithTypesRequest {
+  r: Arrayish;
+  s: Arrayish;
+  v: BigNumberish;
 }
 export interface PKPHelper {
   /**
@@ -89,14 +141,158 @@ export interface PKPHelper {
    * Constant: false
    * StateMutability: nonpayable
    * Type: constructor
-   * @param _pkpNft Type: address, Indexed: false
-   * @param _pkpPermissions Type: address, Indexed: false
+   * @param _resolver Type: address, Indexed: false
+   * @param _env Type: uint8, Indexed: false
    */
   'new'(
-    _pkpNft: string,
-    _pkpPermissions: string,
+    _resolver: string,
+    _env: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  DEFAULT_ADMIN_ROLE(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: true
+   * Constant: false
+   * StateMutability: payable
+   * Type: function
+   * @param keyType Type: uint256, Indexed: false
+   * @param derivedKeyId Type: bytes32, Indexed: false
+   * @param signatures Type: tuple[], Indexed: false
+   * @param permittedAuthMethodTypes Type: uint256[], Indexed: false
+   * @param permittedAuthMethodIds Type: bytes[], Indexed: false
+   * @param permittedAuthMethodPubkeys Type: bytes[], Indexed: false
+   * @param permittedAuthMethodScopes Type: uint256[][], Indexed: false
+   * @param addPkpEthAddressAsPermittedAddress Type: bool, Indexed: false
+   * @param sendPkpToItself Type: bool, Indexed: false
+   */
+  claimAndMintNextAndAddAuthMethods(
+    keyType: BigNumberish,
+    derivedKeyId: Arrayish,
+    signatures: ClaimAndMintNextAndAddAuthMethodsRequest[],
+    permittedAuthMethodTypes: BigNumberish[],
+    permittedAuthMethodIds: Arrayish[],
+    permittedAuthMethodPubkeys: Arrayish[],
+    permittedAuthMethodScopes: BigNumberish[][],
+    addPkpEthAddressAsPermittedAddress: boolean,
+    sendPkpToItself: boolean,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: true
+   * Constant: false
+   * StateMutability: payable
+   * Type: function
+   * @param keyType Type: uint256, Indexed: false
+   * @param derivedKeyId Type: bytes32, Indexed: false
+   * @param signatures Type: tuple[], Indexed: false
+   * @param permittedAddresses Type: address[], Indexed: false
+   * @param permittedAddressScopes Type: uint256[][], Indexed: false
+   * @param permittedAuthMethodTypes Type: uint256[], Indexed: false
+   * @param permittedAuthMethodIds Type: bytes[], Indexed: false
+   * @param permittedAuthMethodPubkeys Type: bytes[], Indexed: false
+   * @param permittedAuthMethodScopes Type: uint256[][], Indexed: false
+   * @param addPkpEthAddressAsPermittedAddress Type: bool, Indexed: false
+   * @param sendPkpToItself Type: bool, Indexed: false
+   */
+  claimAndMintNextAndAddAuthMethodsWithTypes(
+    keyType: BigNumberish,
+    derivedKeyId: Arrayish,
+    signatures: ClaimAndMintNextAndAddAuthMethodsWithTypesRequest[],
+    permittedAddresses: string[],
+    permittedAddressScopes: BigNumberish[][],
+    permittedAuthMethodTypes: BigNumberish[],
+    permittedAuthMethodIds: Arrayish[],
+    permittedAuthMethodPubkeys: Arrayish[],
+    permittedAuthMethodScopes: BigNumberish[][],
+    addPkpEthAddressAsPermittedAddress: boolean,
+    sendPkpToItself: boolean,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  contractResolver(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  env(overrides?: ContractCallOverrides): Promise<number>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getDomainWalletRegistry(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getPKPNftMetdataAddress(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getPkpNftAddress(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getPkpPermissionsAddress(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param role Type: bytes32, Indexed: false
+   */
+  getRoleAdmin(
+    role: Arrayish,
+    overrides?: ContractCallOverrides
+  ): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
+   */
+  grantRole(
+    role: Arrayish,
+    account: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
+   */
+  hasRole(
+    role: Arrayish,
+    account: string,
+    overrides?: ContractCallOverrides
+  ): Promise<boolean>;
   /**
    * Payable: true
    * Constant: false
@@ -152,6 +348,31 @@ export interface PKPHelper {
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
+   * Payable: true
+   * Constant: false
+   * StateMutability: payable
+   * Type: function
+   * @param keyType Type: uint256, Indexed: false
+   * @param permittedAuthMethodTypes Type: uint256[], Indexed: false
+   * @param permittedAuthMethodIds Type: bytes[], Indexed: false
+   * @param permittedAuthMethodPubkeys Type: bytes[], Indexed: false
+   * @param permittedAuthMethodScopes Type: uint256[][], Indexed: false
+   * @param nftMetadata Type: string[], Indexed: false
+   * @param addPkpEthAddressAsPermittedAddress Type: bool, Indexed: false
+   * @param sendPkpToItself Type: bool, Indexed: false
+   */
+  mintNextAndAddDomainWalletMetadata(
+    keyType: BigNumberish,
+    permittedAuthMethodTypes: BigNumberish[],
+    permittedAuthMethodIds: Arrayish[],
+    permittedAuthMethodPubkeys: Arrayish[],
+    permittedAuthMethodScopes: BigNumberish[][],
+    nftMetadata: string[],
+    addPkpEthAddressAsPermittedAddress: boolean,
+    sendPkpToItself: boolean,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
    * Payable: false
    * Constant: true
    * StateMutability: view
@@ -177,18 +398,15 @@ export interface PKPHelper {
   owner(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
-   * Constant: true
-   * StateMutability: view
+   * Constant: false
+   * StateMutability: nonpayable
    * Type: function
+   * @param tokenId Type: uint256, Indexed: false
    */
-  pkpNFT(overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  pkpPermissions(overrides?: ContractCallOverrides): Promise<string>;
+  removePkpMetadata(
+    tokenId: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -203,10 +421,12 @@ export interface PKPHelper {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
-   * @param newPkpNftAddress Type: address, Indexed: false
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
    */
-  setPkpNftAddress(
-    newPkpNftAddress: string,
+  renounceRole(
+    role: Arrayish,
+    account: string,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -214,12 +434,49 @@ export interface PKPHelper {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
-   * @param newPkpPermissionsAddress Type: address, Indexed: false
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
    */
-  setPkpPermissionsAddress(
-    newPkpPermissionsAddress: string,
+  revokeRole(
+    role: Arrayish,
+    account: string,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param newResolverAddress Type: address, Indexed: false
+   */
+  setContractResolver(
+    newResolverAddress: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   * @param nftMetadata Type: string[], Indexed: false
+   */
+  setPkpMetadata(
+    tokenId: BigNumberish,
+    nftMetadata: string[],
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param interfaceId Type: bytes4, Indexed: false
+   */
+  supportsInterface(
+    interfaceId: Arrayish,
+    overrides?: ContractCallOverrides
+  ): Promise<boolean>;
   /**
    * Payable: false
    * Constant: false

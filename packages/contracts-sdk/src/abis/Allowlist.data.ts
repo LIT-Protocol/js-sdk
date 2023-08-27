@@ -1,5 +1,5 @@
 export const allowlist = {
-  "address": "0x741EfB8E9ddb8A0653D01CE737eABc148b676036",
+  "address": "0x81FB8e997E0908AD5792e6F8737245A1D78706E6",
   "abi": [
     {
       "inputs": [],
@@ -91,6 +91,19 @@ export const allowlist = {
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "allowAll",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "bytes32",
@@ -157,6 +170,19 @@ export const allowlist = {
     {
       "inputs": [],
       "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "_allowAll",
+          "type": "bool"
+        }
+      ],
+      "name": "setAllowAll",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

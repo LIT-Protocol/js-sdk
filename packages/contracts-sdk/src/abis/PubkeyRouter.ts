@@ -64,85 +64,116 @@ export interface ContractCallOverrides {
   gasLimit?: number;
 }
 export type PubkeyRouterEvents =
-  | 'OwnershipTransferred'
-  | 'PkpNftAddressSet'
+  | 'ContractResolverAddressSet'
   | 'PubkeyRoutingDataSet'
-  | 'PubkeyRoutingDataVote';
+  | 'RoleAdminChanged'
+  | 'RoleGranted'
+  | 'RoleRevoked'
+  | 'RootKeySet';
 export interface PubkeyRouterEventsContext {
-  OwnershipTransferred(...parameters: any): EventFilter;
-  PkpNftAddressSet(...parameters: any): EventFilter;
+  ContractResolverAddressSet(...parameters: any): EventFilter;
   PubkeyRoutingDataSet(...parameters: any): EventFilter;
-  PubkeyRoutingDataVote(...parameters: any): EventFilter;
+  RoleAdminChanged(...parameters: any): EventFilter;
+  RoleGranted(...parameters: any): EventFilter;
+  RoleRevoked(...parameters: any): EventFilter;
+  RootKeySet(...parameters: any): EventFilter;
 }
 export type PubkeyRouterMethodNames =
   | 'new'
+  | 'ADMIN_ROLE'
+  | 'DEFAULT_ADMIN_ROLE'
+  | 'checkNodeSignatures'
+  | 'contractResolver'
+  | 'deriveEthAddressFromPubkey'
+  | 'env'
   | 'ethAddressToPkpId'
+  | 'getDerivedPubkey'
   | 'getEthAddress'
+  | 'getPkpNftAddress'
   | 'getPubkey'
+  | 'getRoleAdmin'
+  | 'getRootKeys'
   | 'getRoutingData'
+  | 'grantRole'
+  | 'hasRole'
   | 'isRouted'
-  | 'owner'
-  | 'pkpNFT'
-  | 'pubkeyRegistrations'
   | 'pubkeys'
-  | 'renounceOwnership'
-  | 'setPkpNftAddress'
+  | 'renounceRole'
+  | 'revokeRole'
+  | 'rootKeys'
+  | 'setContractResolver'
   | 'setRoutingData'
-  | 'transferOwnership'
-  | 'voteForRoutingData';
-export interface OwnershipTransferredEventEmittedResponse {
-  previousOwner: string;
-  newOwner: string;
-}
-export interface PkpNftAddressSetEventEmittedResponse {
-  newPkpNftAddress: string;
+  | 'setRoutingDataAsAdmin'
+  | 'supportsInterface'
+  | 'voteForRootKeys'
+  | 'votesToRegisterRootKeys';
+export interface ContractResolverAddressSetEventEmittedResponse {
+  newResolverAddress: string;
 }
 export interface PubkeyRoutingDataSetEventEmittedResponse {
   tokenId: BigNumberish;
   pubkey: Arrayish;
   stakingContract: string;
   keyType: BigNumberish;
+  derivedKeyId: Arrayish;
 }
-export interface PubkeyRoutingDataVoteEventEmittedResponse {
-  tokenId: BigNumberish;
-  nodeAddress: string;
-  pubkey: Arrayish;
+export interface RoleAdminChangedEventEmittedResponse {
+  role: Arrayish;
+  previousAdminRole: Arrayish;
+  newAdminRole: Arrayish;
+}
+export interface RoleGrantedEventEmittedResponse {
+  role: Arrayish;
+  account: string;
+  sender: string;
+}
+export interface RoleRevokedEventEmittedResponse {
+  role: Arrayish;
+  account: string;
+  sender: string;
+}
+export interface RootKeySetEventEmittedResponse {
   stakingContract: string;
-  keyType: BigNumberish;
+  rootKey: RootKeyRequest;
+}
+export interface CheckNodeSignaturesRequest {
+  r: Arrayish;
+  s: Arrayish;
+  v: BigNumberish;
+}
+export interface RootkeyResponse {
+  pubkey: string;
+  0: string;
+  keyType: BigNumber;
+  1: BigNumber;
 }
 export interface PubkeyroutingdataResponse {
   pubkey: string;
   0: string;
-  stakingContract: string;
-  1: string;
   keyType: BigNumber;
-  2: BigNumber;
-}
-export interface RoutingDataResponse {
-  pubkey: string;
-  0: string;
-  stakingContract: string;
-  1: string;
-  keyType: BigNumber;
-  2: BigNumber;
-}
-export interface PubkeyRegistrationsResponse {
-  routingData: RoutingDataResponse;
-  0: RoutingDataResponse;
-  nodeVoteCount: BigNumber;
   1: BigNumber;
-  nodeVoteThreshold: BigNumber;
-  2: BigNumber;
-  length: 3;
+  derivedKeyId: string;
+  2: string;
 }
 export interface PubkeysResponse {
   pubkey: string;
   0: string;
-  stakingContract: string;
-  1: string;
   keyType: BigNumber;
-  2: BigNumber;
+  1: BigNumber;
+  derivedKeyId: string;
+  2: string;
   length: 3;
+}
+export interface RootKeysResponse {
+  pubkey: string;
+  0: string;
+  keyType: BigNumber;
+  1: BigNumber;
+  length: 2;
+}
+export interface VoteForRootKeysRequest {
+  pubkey: Arrayish;
+  keyType: BigNumberish;
 }
 export interface PubkeyRouter {
   /**
@@ -150,12 +181,68 @@ export interface PubkeyRouter {
    * Constant: false
    * StateMutability: nonpayable
    * Type: constructor
-   * @param _pkpNft Type: address, Indexed: false
+   * @param _resolver Type: address, Indexed: false
+   * @param _env Type: uint8, Indexed: false
    */
   'new'(
-    _pkpNft: string,
+    _resolver: string,
+    _env: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  ADMIN_ROLE(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  DEFAULT_ADMIN_ROLE(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param signatures Type: tuple[], Indexed: false
+   * @param signedMessage Type: bytes, Indexed: false
+   * @param stakingContractAddress Type: address, Indexed: false
+   */
+  checkNodeSignatures(
+    signatures: CheckNodeSignaturesRequest[],
+    signedMessage: Arrayish,
+    stakingContractAddress: string,
+    overrides?: ContractCallOverrides
+  ): Promise<boolean>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  contractResolver(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: pure
+   * Type: function
+   * @param pubkey Type: bytes, Indexed: false
+   */
+  deriveEthAddressFromPubkey(
+    pubkey: Arrayish,
+    overrides?: ContractCallOverrides
+  ): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  env(overrides?: ContractCallOverrides): Promise<number>;
   /**
    * Payable: false
    * Constant: true
@@ -172,12 +259,32 @@ export interface PubkeyRouter {
    * Constant: true
    * StateMutability: view
    * Type: function
+   * @param stakingContract Type: address, Indexed: false
+   * @param derivedKeyId Type: bytes32, Indexed: false
+   */
+  getDerivedPubkey(
+    stakingContract: string,
+    derivedKeyId: Arrayish,
+    overrides?: ContractCallOverrides
+  ): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
    * @param tokenId Type: uint256, Indexed: false
    */
   getEthAddress(
     tokenId: BigNumberish,
     overrides?: ContractCallOverrides
   ): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getPkpNftAddress(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: true
@@ -194,12 +301,60 @@ export interface PubkeyRouter {
    * Constant: true
    * StateMutability: view
    * Type: function
+   * @param role Type: bytes32, Indexed: false
+   */
+  getRoleAdmin(
+    role: Arrayish,
+    overrides?: ContractCallOverrides
+  ): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param stakingContract Type: address, Indexed: false
+   */
+  getRootKeys(
+    stakingContract: string,
+    overrides?: ContractCallOverrides
+  ): Promise<RootkeyResponse[]>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
    * @param tokenId Type: uint256, Indexed: false
    */
   getRoutingData(
     tokenId: BigNumberish,
     overrides?: ContractCallOverrides
   ): Promise<PubkeyroutingdataResponse>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
+   */
+  grantRole(
+    role: Arrayish,
+    account: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
+   */
+  hasRole(
+    role: Arrayish,
+    account: string,
+    overrides?: ContractCallOverrides
+  ): Promise<boolean>;
   /**
    * Payable: false
    * Constant: true
@@ -216,31 +371,6 @@ export interface PubkeyRouter {
    * Constant: true
    * StateMutability: view
    * Type: function
-   */
-  owner(overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  pkpNFT(overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   * @param parameter0 Type: uint256, Indexed: false
-   */
-  pubkeyRegistrations(
-    parameter0: BigNumberish,
-    overrides?: ContractCallOverrides
-  ): Promise<PubkeyRegistrationsResponse>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
    * @param parameter0 Type: uint256, Indexed: false
    */
   pubkeys(
@@ -252,8 +382,12 @@ export interface PubkeyRouter {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
    */
-  renounceOwnership(
+  renounceRole(
+    role: Arrayish,
+    account: string,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -261,10 +395,36 @@ export interface PubkeyRouter {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
-   * @param newPkpNftAddress Type: address, Indexed: false
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
    */
-  setPkpNftAddress(
-    newPkpNftAddress: string,
+  revokeRole(
+    role: Arrayish,
+    account: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param parameter0 Type: address, Indexed: false
+   * @param parameter1 Type: uint256, Indexed: false
+   */
+  rootKeys(
+    parameter0: string,
+    parameter1: BigNumberish,
+    overrides?: ContractCallOverrides
+  ): Promise<RootKeysResponse>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param newResolverAddress Type: address, Indexed: false
+   */
+  setContractResolver(
+    newResolverAddress: string,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -274,25 +434,16 @@ export interface PubkeyRouter {
    * Type: function
    * @param tokenId Type: uint256, Indexed: false
    * @param pubkey Type: bytes, Indexed: false
-   * @param stakingContract Type: address, Indexed: false
+   * @param stakingContractAddress Type: address, Indexed: false
    * @param keyType Type: uint256, Indexed: false
+   * @param derivedKeyId Type: bytes32, Indexed: false
    */
   setRoutingData(
     tokenId: BigNumberish,
     pubkey: Arrayish,
-    stakingContract: string,
+    stakingContractAddress: string,
     keyType: BigNumberish,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param newOwner Type: address, Indexed: false
-   */
-  transferOwnership(
-    newOwner: string,
+    derivedKeyId: Arrayish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -304,12 +455,51 @@ export interface PubkeyRouter {
    * @param pubkey Type: bytes, Indexed: false
    * @param stakingContract Type: address, Indexed: false
    * @param keyType Type: uint256, Indexed: false
+   * @param derivedKeyId Type: bytes32, Indexed: false
    */
-  voteForRoutingData(
+  setRoutingDataAsAdmin(
     tokenId: BigNumberish,
     pubkey: Arrayish,
     stakingContract: string,
     keyType: BigNumberish,
+    derivedKeyId: Arrayish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param interfaceId Type: bytes4, Indexed: false
+   */
+  supportsInterface(
+    interfaceId: Arrayish,
+    overrides?: ContractCallOverrides
+  ): Promise<boolean>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param stakingContractAddress Type: address, Indexed: false
+   * @param newRootKeys Type: tuple[], Indexed: false
+   */
+  voteForRootKeys(
+    stakingContractAddress: string,
+    newRootKeys: VoteForRootKeysRequest[],
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param parameter0 Type: address, Indexed: false
+   * @param parameter1 Type: bytes, Indexed: false
+   */
+  votesToRegisterRootKeys(
+    parameter0: string,
+    parameter1: Arrayish,
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
 }
