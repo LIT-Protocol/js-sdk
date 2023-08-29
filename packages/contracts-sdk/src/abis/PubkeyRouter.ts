@@ -134,7 +134,7 @@ export interface RoleRevokedEventEmittedResponse {
 }
 export interface RootKeySetEventEmittedResponse {
   stakingContract: string;
-  rootKey: RootKeyRequest;
+  rootKey: any;
 }
 export interface CheckNodeSignaturesRequest {
   r: Arrayish;
