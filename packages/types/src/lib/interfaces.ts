@@ -226,15 +226,8 @@ export interface CustomNetwork {
 
 export interface Signature {
   r: string;
-
   s: string;
-  _vs: string,
-
-  recoveryParam: number;
-  v: number;
-
-  yParityAndS: string
-  compact: string;
+  v: number,
 }
 
 export interface ClaimKeyResponse {

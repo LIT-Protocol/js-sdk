@@ -63,6 +63,7 @@ import {
   SignConditionECDSA,
   SignSessionKeyProp,
   SignSessionKeyResponse,
+  Signature,
   SignedData,
   SigningAccessControlConditionRequest,
   SuccessNodePromises,
@@ -2049,14 +2050,20 @@ export class LitNodeClientNodeJs extends LitCore {
     const responseData = await this.handleNodePromises(nodePromises);
 
     if (responseData.success === true) {
-      const nodeSignatures = (
+      const nodeSignatures: Signature[] = (
         responseData as SuccessNodePromises<any>
       ).values.map((r: any) => {
-        return ethers.utils.splitSignature(`0x${r.signature}`);
+        let sig = ethers.utils.splitSignature(`0x${r.signature}`);
+        return {
+          r: sig.r,
+          s: sig.s,
+          v: sig.v
+        }
       });
 
-      const derivedKeyId: string = (responseData as SuccessNodePromises<any>)
+      const derivedKeyId = (responseData as SuccessNodePromises<any>)
         .values[0].derivedKeyId;
+      
 
       const pubkey: string = this.computePubKey(derivedKeyId);
 
