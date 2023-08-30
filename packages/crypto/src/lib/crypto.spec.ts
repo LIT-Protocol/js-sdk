@@ -169,7 +169,7 @@ describe('combine ECDSA Shares', () => {
 
     const sigShares = [
       {
-          "sigType": "EcdsaCaitSith",
+          "sigType": "ECDSA_CAIT_SITH",
           "signatureShare": "BC8108AD9CAE8358942BB4B27632B87FFA705CCB675F85A59847CC1B84845A38",
           "shareIndex": 0,
           "bigR": "03E6D15C805443F57F57E180C730C2FCA5297F7671E8148A669410808AB4D70122",
@@ -178,7 +178,7 @@ describe('combine ECDSA Shares', () => {
           "sigName": "sig"
       },
       {
-          "sigType": "EcdsaCaitSith",
+          "sigType": "ECDSA_CAIT_SITH",
           "signatureShare": "BA77EB500884A60583DEA49578D4BB64BB55EF497F37C88DF935D739CE8E0A9F",
           "shareIndex": 0,
           "bigR": "03E6D15C805443F57F57E180C730C2FCA5297F7671E8148A669410808AB4D70122",
@@ -187,7 +187,7 @@ describe('combine ECDSA Shares', () => {
           "sigName": "sig"
       },
       {
-          "sigType": "EcdsaCaitSith",
+          "sigType": "ECDSA_CAIT_SITH",
           "signatureShare": "EF850AE61B6D658976B2560B880BF03ABC1A070BACDEAE2311781F65A524F245",
           "shareIndex": 0,
           "bigR": "03E6D15C805443F57F57E180C730C2FCA5297F7671E8148A669410808AB4D70122",
