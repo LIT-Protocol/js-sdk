@@ -10,14 +10,8 @@ jest.setTimeout(60000);
 
 describe('Lit Actions', () => {
   client = new LitNodeClient({
-    litNetwork: 'custom',
-    debug: true,
-    bootstrapUrls: [
-      "http://127.0.0.1:7470",
-      "http://127.0.0.1:7471",
-      "http://127.0.0.1:7472"  
-    ],
-    minNodeCount: 3
+    litNetwork: 'cayenne',
+    debug: true
   });
 
   beforeAll(async () => {

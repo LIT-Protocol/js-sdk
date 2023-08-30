@@ -98,61 +98,61 @@ export class LitContracts {
 
   // ----- autogen:declares:start  -----
   accessControlConditionsContract: {
-    read: accessControlConditionsContract.ContractContext;
-    write: accessControlConditionsContract.ContractContext;
-  };
-
+    read: accessControlConditionsContract.ContractContext,
+    write: accessControlConditionsContract.ContractContext,
+  }
+            
   allowlistContract: {
-    read: allowlistContract.ContractContext;
-    write: allowlistContract.ContractContext;
-  };
-
+    read: allowlistContract.ContractContext,
+    write: allowlistContract.ContractContext,
+  }
+            
   contractResolverContract: {
-    read: contractResolverContract.ContractContext;
-    write: contractResolverContract.ContractContext;
-  };
-
+    read: contractResolverContract.ContractContext,
+    write: contractResolverContract.ContractContext,
+  }
+            
   litTokenContract: {
-    read: litTokenContract.ContractContext;
-    write: litTokenContract.ContractContext;
-  };
-
+    read: litTokenContract.ContractContext,
+    write: litTokenContract.ContractContext,
+  }
+            
   multisenderContract: {
-    read: multisenderContract.ContractContext;
-    write: multisenderContract.ContractContext;
-  };
-
+    read: multisenderContract.ContractContext,
+    write: multisenderContract.ContractContext,
+  }
+            
   pkpHelperContract: {
-    read: pkpHelperContract.ContractContext;
-    write: pkpHelperContract.ContractContext;
-  };
-
+    read: pkpHelperContract.ContractContext,
+    write: pkpHelperContract.ContractContext,
+  }
+            
   pkpNftContract: {
-    read: pkpNftContract.ContractContext;
-    write: pkpNftContract.ContractContext;
-  };
-
+    read: pkpNftContract.ContractContext,
+    write: pkpNftContract.ContractContext,
+  }
+            
   pkpPermissionsContract: {
-    read: pkpPermissionsContract.ContractContext;
-    write: pkpPermissionsContract.ContractContext;
-  };
-
+    read: pkpPermissionsContract.ContractContext,
+    write: pkpPermissionsContract.ContractContext,
+  }
+            
   pubkeyRouterContract: {
-    read: pubkeyRouterContract.ContractContext;
-    write: pubkeyRouterContract.ContractContext;
-  };
-
+    read: pubkeyRouterContract.ContractContext,
+    write: pubkeyRouterContract.ContractContext,
+  }
+            
   rateLimitNftContract: {
-    read: rateLimitNftContract.ContractContext;
-    write: rateLimitNftContract.ContractContext;
-  };
-
+    read: rateLimitNftContract.ContractContext,
+    write: rateLimitNftContract.ContractContext,
+  }
+            
   stakingContract: {
-    read: stakingContract.ContractContext;
-    write: stakingContract.ContractContext;
-  };
-
-  // ----- autogen:declares:end  -----
+    read: stakingContract.ContractContext,
+    write: stakingContract.ContractContext,
+  }
+            
+// ----- autogen:declares:end  -----
 
   // make the constructor args optional
   constructor(args?: {
@@ -187,18 +187,18 @@ export class LitContracts {
     }
 
     // ----- autogen:blank-init:start  -----
-    this.accessControlConditionsContract = {} as any;
-    this.allowlistContract = {} as any;
-    this.contractResolverContract = {} as any;
-    this.litTokenContract = {} as any;
-    this.multisenderContract = {} as any;
-    this.pkpHelperContract = {} as any;
-    this.pkpNftContract = {} as any;
-    this.pkpPermissionsContract = {} as any;
-    this.pubkeyRouterContract = {} as any;
-    this.rateLimitNftContract = {} as any;
-    this.stakingContract = {} as any;
-    // ----- autogen:blank-init:end  -----
+    this.accessControlConditionsContract = {} as any
+    this.allowlistContract = {} as any
+    this.contractResolverContract = {} as any
+    this.litTokenContract = {} as any
+    this.multisenderContract = {} as any
+    this.pkpHelperContract = {} as any
+    this.pkpNftContract = {} as any
+    this.pkpPermissionsContract = {} as any
+    this.pubkeyRouterContract = {} as any
+    this.rateLimitNftContract = {} as any
+    this.stakingContract = {} as any
+// ----- autogen:blank-init:end  -----
   }
 
   /**
@@ -369,166 +369,158 @@ export class LitContracts {
     // ----- autogen:init:start  -----
 
     this.accessControlConditionsContract = {
-      read: new ethers.Contract(
-        accessControlConditions.address,
-        accessControlConditions.abi as any,
-        this.provider
-      ) as unknown as accessControlConditionsContract.ContractContext &
-        accessControlConditionsContract.AccessControlConditions,
-      write: new ethers.Contract(
-        accessControlConditions.address,
-        accessControlConditions.abi as any,
-        this.signer
-      ) as unknown as accessControlConditionsContract.ContractContext &
-        accessControlConditionsContract.AccessControlConditions,
+        read: (new ethers.Contract(
+            accessControlConditions.address,
+            accessControlConditions.abi as any,
+            this.provider
+        ) as unknown as accessControlConditionsContract.ContractContext & accessControlConditionsContract.AccessControlConditions),
+        write: (new ethers.Contract(
+            accessControlConditions.address,
+            accessControlConditions.abi as any,
+            this.signer
+        ) as unknown as accessControlConditionsContract.ContractContext & accessControlConditionsContract.AccessControlConditions)
     };
+
 
     this.allowlistContract = {
-      read: new ethers.Contract(
-        allowlist.address,
-        allowlist.abi as any,
-        this.provider
-      ) as unknown as allowlistContract.ContractContext &
-        allowlistContract.Allowlist,
-      write: new ethers.Contract(
-        allowlist.address,
-        allowlist.abi as any,
-        this.signer
-      ) as unknown as allowlistContract.ContractContext &
-        allowlistContract.Allowlist,
+        read: (new ethers.Contract(
+            allowlist.address,
+            allowlist.abi as any,
+            this.provider
+        ) as unknown as allowlistContract.ContractContext & allowlistContract.Allowlist),
+        write: (new ethers.Contract(
+            allowlist.address,
+            allowlist.abi as any,
+            this.signer
+        ) as unknown as allowlistContract.ContractContext & allowlistContract.Allowlist)
     };
+
 
     this.contractResolverContract = {
-      read: new ethers.Contract(
-        contractResolver.address,
-        contractResolver.abi as any,
-        this.provider
-      ) as unknown as contractResolverContract.ContractContext &
-        contractResolverContract.ContractResolver,
-      write: new ethers.Contract(
-        contractResolver.address,
-        contractResolver.abi as any,
-        this.signer
-      ) as unknown as contractResolverContract.ContractContext &
-        contractResolverContract.ContractResolver,
+        read: (new ethers.Contract(
+            contractResolver.address,
+            contractResolver.abi as any,
+            this.provider
+        ) as unknown as contractResolverContract.ContractContext & contractResolverContract.ContractResolver),
+        write: (new ethers.Contract(
+            contractResolver.address,
+            contractResolver.abi as any,
+            this.signer
+        ) as unknown as contractResolverContract.ContractContext & contractResolverContract.ContractResolver)
     };
+
 
     this.litTokenContract = {
-      read: new ethers.Contract(
-        litToken.address,
-        litToken.abi as any,
-        this.provider
-      ) as unknown as litTokenContract.ContractContext &
-        litTokenContract.LITToken,
-      write: new ethers.Contract(
-        litToken.address,
-        litToken.abi as any,
-        this.signer
-      ) as unknown as litTokenContract.ContractContext &
-        litTokenContract.LITToken,
+        read: (new ethers.Contract(
+            litToken.address,
+            litToken.abi as any,
+            this.provider
+        ) as unknown as litTokenContract.ContractContext & litTokenContract.LITToken),
+        write: (new ethers.Contract(
+            litToken.address,
+            litToken.abi as any,
+            this.signer
+        ) as unknown as litTokenContract.ContractContext & litTokenContract.LITToken)
     };
+
 
     this.multisenderContract = {
-      read: new ethers.Contract(
-        multisender.address,
-        multisender.abi as any,
-        this.provider
-      ) as unknown as multisenderContract.ContractContext &
-        multisenderContract.Multisender,
-      write: new ethers.Contract(
-        multisender.address,
-        multisender.abi as any,
-        this.signer
-      ) as unknown as multisenderContract.ContractContext &
-        multisenderContract.Multisender,
+        read: (new ethers.Contract(
+            multisender.address,
+            multisender.abi as any,
+            this.provider
+        ) as unknown as multisenderContract.ContractContext & multisenderContract.Multisender),
+        write: (new ethers.Contract(
+            multisender.address,
+            multisender.abi as any,
+            this.signer
+        ) as unknown as multisenderContract.ContractContext & multisenderContract.Multisender)
     };
+
 
     this.pkpHelperContract = {
-      read: new ethers.Contract(
-        pkpHelper.address,
-        pkpHelper.abi as any,
-        this.provider
-      ) as unknown as pkpHelperContract.ContractContext &
-        pkpHelperContract.PKPHelper,
-      write: new ethers.Contract(
-        pkpHelper.address,
-        pkpHelper.abi as any,
-        this.signer
-      ) as unknown as pkpHelperContract.ContractContext &
-        pkpHelperContract.PKPHelper,
+        read: (new ethers.Contract(
+            pkpHelper.address,
+            pkpHelper.abi as any,
+            this.provider
+        ) as unknown as pkpHelperContract.ContractContext & pkpHelperContract.PKPHelper),
+        write: (new ethers.Contract(
+            pkpHelper.address,
+            pkpHelper.abi as any,
+            this.signer
+        ) as unknown as pkpHelperContract.ContractContext & pkpHelperContract.PKPHelper)
     };
+
 
     this.pkpNftContract = {
-      read: new ethers.Contract(
-        pkpNft.address,
-        pkpNft.abi as any,
-        this.provider
-      ) as unknown as pkpNftContract.ContractContext & pkpNftContract.PKPNFT,
-      write: new ethers.Contract(
-        pkpNft.address,
-        pkpNft.abi as any,
-        this.signer
-      ) as unknown as pkpNftContract.ContractContext & pkpNftContract.PKPNFT,
+        read: (new ethers.Contract(
+            pkpNft.address,
+            pkpNft.abi as any,
+            this.provider
+        ) as unknown as pkpNftContract.ContractContext & pkpNftContract.PKPNFT),
+        write: (new ethers.Contract(
+            pkpNft.address,
+            pkpNft.abi as any,
+            this.signer
+        ) as unknown as pkpNftContract.ContractContext & pkpNftContract.PKPNFT)
     };
+
 
     this.pkpPermissionsContract = {
-      read: new ethers.Contract(
-        pkpPermissions.address,
-        pkpPermissions.abi as any,
-        this.provider
-      ) as unknown as pkpPermissionsContract.ContractContext &
-        pkpPermissionsContract.PKPPermissions,
-      write: new ethers.Contract(
-        pkpPermissions.address,
-        pkpPermissions.abi as any,
-        this.signer
-      ) as unknown as pkpPermissionsContract.ContractContext &
-        pkpPermissionsContract.PKPPermissions,
+        read: (new ethers.Contract(
+            pkpPermissions.address,
+            pkpPermissions.abi as any,
+            this.provider
+        ) as unknown as pkpPermissionsContract.ContractContext & pkpPermissionsContract.PKPPermissions),
+        write: (new ethers.Contract(
+            pkpPermissions.address,
+            pkpPermissions.abi as any,
+            this.signer
+        ) as unknown as pkpPermissionsContract.ContractContext & pkpPermissionsContract.PKPPermissions)
     };
+
 
     this.pubkeyRouterContract = {
-      read: new ethers.Contract(
-        pubkeyRouter.address,
-        pubkeyRouter.abi as any,
-        this.provider
-      ) as unknown as pubkeyRouterContract.ContractContext &
-        pubkeyRouterContract.PubkeyRouter,
-      write: new ethers.Contract(
-        pubkeyRouter.address,
-        pubkeyRouter.abi as any,
-        this.signer
-      ) as unknown as pubkeyRouterContract.ContractContext &
-        pubkeyRouterContract.PubkeyRouter,
+        read: (new ethers.Contract(
+            pubkeyRouter.address,
+            pubkeyRouter.abi as any,
+            this.provider
+        ) as unknown as pubkeyRouterContract.ContractContext & pubkeyRouterContract.PubkeyRouter),
+        write: (new ethers.Contract(
+            pubkeyRouter.address,
+            pubkeyRouter.abi as any,
+            this.signer
+        ) as unknown as pubkeyRouterContract.ContractContext & pubkeyRouterContract.PubkeyRouter)
     };
+
 
     this.rateLimitNftContract = {
-      read: new ethers.Contract(
-        rateLimitNft.address,
-        rateLimitNft.abi as any,
-        this.provider
-      ) as unknown as rateLimitNftContract.ContractContext &
-        rateLimitNftContract.RateLimitNFT,
-      write: new ethers.Contract(
-        rateLimitNft.address,
-        rateLimitNft.abi as any,
-        this.signer
-      ) as unknown as rateLimitNftContract.ContractContext &
-        rateLimitNftContract.RateLimitNFT,
+        read: (new ethers.Contract(
+            rateLimitNft.address,
+            rateLimitNft.abi as any,
+            this.provider
+        ) as unknown as rateLimitNftContract.ContractContext & rateLimitNftContract.RateLimitNFT),
+        write: (new ethers.Contract(
+            rateLimitNft.address,
+            rateLimitNft.abi as any,
+            this.signer
+        ) as unknown as rateLimitNftContract.ContractContext & rateLimitNftContract.RateLimitNFT)
     };
 
+
     this.stakingContract = {
-      read: new ethers.Contract(
-        staking.address,
-        staking.abi as any,
-        this.provider
-      ) as unknown as stakingContract.ContractContext & stakingContract.Staking,
-      write: new ethers.Contract(
-        staking.address,
-        staking.abi as any,
-        this.signer
-      ) as unknown as stakingContract.ContractContext & stakingContract.Staking,
+        read: (new ethers.Contract(
+            staking.address,
+            staking.abi as any,
+            this.provider
+        ) as unknown as stakingContract.ContractContext & stakingContract.Staking),
+        write: (new ethers.Contract(
+            staking.address,
+            staking.abi as any,
+            this.signer
+        ) as unknown as stakingContract.ContractContext & stakingContract.Staking)
     };
-    // ----- autogen:init:end  -----
+// ----- autogen:init:end  -----
 
     this.connected = true;
   };
@@ -821,7 +813,7 @@ export class LitContracts {
       ) => {
         let cost = await this.pkpNftContract.read.mintCost();
         const tx =
-          await this.pkpNftContract.write.populateTransaction.claimAndMint(
+          await this.pkpNftContract.write.claimAndMint(
             2,
             keyId,
             signatures,
