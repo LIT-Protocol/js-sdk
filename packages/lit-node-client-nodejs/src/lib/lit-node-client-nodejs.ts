@@ -955,7 +955,7 @@ export class LitNodeClientNodeJs extends LitCore {
       }
 
       // -- validate if signature type is ECDSA
-      if (sigType !== 'EcdsaCaitSith') {
+      if (sigType !== SIGTYPE.EcdsaCaitSith) {
         throwError({
           message: 'signature type is not ECDSA',
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
