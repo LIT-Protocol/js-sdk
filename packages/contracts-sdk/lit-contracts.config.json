@@ -1,6 +1,6 @@
 {
   "root": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/",
-  "contracts": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/blockchain/contracts/deployed_contracts_serrano.json",
+  "contracts": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/blockchain/contracts/deployed_contracts_cayenne.json",
   "abis": {
     "dir": "abis/",
     "ignoreProperties": ["metadata", "bytecode", "deployedBytecode"],
