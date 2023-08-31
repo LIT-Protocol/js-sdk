@@ -1,5 +1,5 @@
 export const contractResolver = {
-  "address": "0xFCB3d8a54680e9337e3c8E60adC02F2aE8455A71",
+  "address": "0x886a8B9Ff6422eC0e05d96226ccD5970B886F8aD",
   "abi": [
     {
       "inputs": [

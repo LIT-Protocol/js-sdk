@@ -1,5 +1,5 @@
 export const staking = {
-  "address": "0x433357a14c35815E6A32758fe95c93380D194aaf",
+  "address": "0x9E12B1E2F223845c4C9975bbc22eb65f5F776ec7",
   "abi": [
     {
       "inputs": [
