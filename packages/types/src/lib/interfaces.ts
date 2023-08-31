@@ -4,6 +4,7 @@ import {
   AcceptedFileType,
   AccessControlConditions,
   Chain,
+  ClaimProcessor,
   ConditionType,
   EncryptedSymmetricKey,
   EvmContractConditions,
@@ -235,13 +236,6 @@ export interface ClaimKeyResponse {
   claimedKeyId: string,
   pubkey: string,
   mintTx: string,
-}
-
-export interface ClaimResult {
-  signatures: Signature[],
-  derivedKeyId: string,
-  authMethodType: AuthMethodType
-  pubkey: string, 
 }
 
 /**
@@ -909,11 +903,6 @@ export interface SessionKeyPair {
 export interface AuthMethod {
   authMethodType: number;
   accessToken: string;
-}
-
-export interface ClaimRequest {
-  authMethod: AuthMethod;
-  mintCallback?: MintCallback
 }
 
 // pub struct JsonSignSessionKeyRequest {

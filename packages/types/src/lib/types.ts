@@ -1,7 +1,10 @@
-
+import { AuthMethodType } from './enums';
+import * as ethers from 'ethers';
 import {
-  ClaimResult,
+  AuthMethod,
+  LitRelayConfig,
   SignInWithOTPParams,
+  Signature,
   StytchOtpProviderOptions,
   WebAuthnProviderOptions,
 } from './interfaces';
@@ -119,4 +122,50 @@ export type ProviderOptions =
   | WebAuthnProviderOptions;
 
 export type AuthenticateOptions = BaseAuthenticateOptions;
-export type MintCallback = (response: ClaimResult) => Promise<string>;
+
+/**
+ * Type for expressing claim results being processed by a relay server
+ */
+export type RelayClaimProcessor = 'relay';
+
+/**
+ * Type for expressing claim results being processed by a local contract client
+ * the `contract-sdk` is the intended use of this type
+ */
+export type ClientClaimProcessor = 'client';
+
+/**
+ * Type aggregate for Claim proccessor types
+ */
+export type ClaimProcessor = RelayClaimProcessor | ClientClaimProcessor;
+
+/**
+ * Callback for processing claim requests.
+ * Processing can be done either by a relay server or a contract client
+ * for a drop in client the `contract-sdk` or  your own contract client with correct ABI's and contract addresses.
+ */
+export type MintCallback<T = ClaimProcessor> = (
+  response: ClaimResult<T>
+) => Promise<string>;
+
+/**
+ * Model for requesting a PKP to be claimed based on an {@link AuthMethod} identifier
+ * the {@link MintCallback} may be defined for custom processing of the {@link ClaimResult}
+ * which requires registering on chain, by default chain registering will be done by an external relay.
+ * @property {AuthMethod} authMethod to derive the key id from for claiming
+ * @property {MintCallback} mintCallback optional callback for custom on chain registration behavior
+ */
+export type ClaimRequest<T = ClaimProcessor> = {
+  authMethod: AuthMethod;
+  mintCallback?: MintCallback<T>, 
+} & (T extends 'relay' ? LitRelayConfig : {signer: ethers.Signer});
+
+/**
+ * Result from network claim proccessing, used in {@link MintCallback}
+ */
+export type ClaimResult<T = ClaimProcessor> = {
+  signatures: Signature[],
+  derivedKeyId: string,
+  authMethodType: AuthMethodType
+  pubkey: string, 
+} & (T extends 'relay' ? LitRelayConfig : {signer: ethers.Signer});

@@ -2,6 +2,7 @@ import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-c
 
 import {
   AUTH_METHOD_TYPE_IDS,
+  AuthMethodType,
   EITHER_TYPE,
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
@@ -31,6 +32,7 @@ import {
   AuthMethod,
   AuthSig,
   ClaimKeyResponse,
+  ClaimProcessor,
   ClaimRequest,
   CustomNetwork,
   DecryptRequest,
@@ -2028,7 +2030,7 @@ export class LitNodeClientNodeJs extends LitCore {
    * @param {ClaimKeyRequest} params an Auth Method and {@link MintCallback}
    * @returns {Promise<ClaimKeyResponse>}
    */
-  async claimKeyId(params: ClaimRequest): Promise<ClaimKeyResponse> {
+  async claimKeyId<T = ClaimProcessor>(params: ClaimRequest): Promise<ClaimKeyResponse> {
     if (!this.ready) {
       const message =
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
@@ -2039,6 +2041,17 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
+    if (
+      params.authMethod.authMethodType === AuthMethodType.WebAuthn ||
+      params.authMethod.authMethodType === AuthMethodType.LitAction
+    ) {
+      throwError({
+        message:
+          'Unsupported auth method type. Webauthn, and Lit Actions are not supported for claiming',
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
+      });
+    }
     const nodePromises = await this.getNodePromises((url: string) => {
       const requestId = this.getRequestId();
       const nodeRequestParams = {
@@ -2057,13 +2070,12 @@ export class LitNodeClientNodeJs extends LitCore {
         return {
           r: sig.r,
           s: sig.s,
-          v: sig.v
-        }
+          v: sig.v,
+        };
       });
 
-      const derivedKeyId = (responseData as SuccessNodePromises<any>)
-        .values[0].derivedKeyId;
-      
+      const derivedKeyId = (responseData as SuccessNodePromises<any>).values[0]
+        .derivedKeyId;
 
       const pubkey: string = this.computePubKey(derivedKeyId);
 
