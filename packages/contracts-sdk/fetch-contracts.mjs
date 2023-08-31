@@ -133,7 +133,9 @@ export const getContractAddresses = async (LitConfig) => {
     correctedName = correctedName.replace('Nft', 'NFT');
     correctedName = correctedName.replace('Lit', 'LIT');
     correctedName = correctedName.replace('Resolver', 'ContractResolver');
-
+    if (correctedName == "HdKeyDeriver"){ // dont process the contract with name as it is internally used wihtin `PubkeyRouter`
+      return;
+    }
     if (correctedName === 'ContractResolver') {
       exportName = 'contractResolver';
     }
