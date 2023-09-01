@@ -630,6 +630,21 @@ export const checkAndSignEVMAuthMessage = async ({
     log('8. mustResign:', mustResign);
   }
 
+  // -- 9. finally, if the authSig is expired, re-sign
+  // if it's not expired, then we don't need to resign
+  if (isSignedMessageExpired(authSig.signedMessage)) {
+    log('9. authSig expired!, resigning..');
+
+    authSig = await _signAndGetAuth({
+      web3,
+      account,
+      chainId: selectedChain.chainId,
+      resources,
+      expiration: expirationString,
+      uri,
+    });
+  }
+
   return authSig;
 };
 
