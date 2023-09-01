@@ -140,9 +140,14 @@ export type ClientClaimProcessor = 'client';
 export type ClaimProcessor = RelayClaimProcessor | ClientClaimProcessor;
 
 /**
- * Callback for processing claim requests.
- * Processing can be done either by a relay server or a contract client
- * for a drop in client the `contract-sdk` or  your own contract client with correct ABI's and contract addresses.
+ * Callback function for processing claim requests.
+ * 
+ * This function can be used in two scenarios:
+ * 1. When the claim is processed by a relay server.
+ * 2. When the claim is processed by a contract client.
+ * 
+ * For contract clients, you can use the `contract-sdk` or implement your own client.
+ * Ensure that your client has the correct ABI and contract addresses for successful processing.
  */
 export type MintCallback<T = ClaimProcessor> = (
   response: ClaimResult<T>
