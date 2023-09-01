@@ -58,6 +58,7 @@ import {
   NodeShare,
   PKPSignShare,
   RejectedNodePromises,
+  RelayClaimProcessor,
   SessionKeyPair,
   SessionSigningTemplate,
   SessionSigsMap,
@@ -2030,7 +2031,7 @@ export class LitNodeClientNodeJs extends LitCore {
    * @param {ClaimKeyRequest} params an Auth Method and {@link MintCallback}
    * @returns {Promise<ClaimKeyResponse>}
    */
-  async claimKeyId<T = ClaimProcessor>(params: ClaimRequest): Promise<ClaimKeyResponse> {
+  async claimKeyId<T = ClaimProcessor>(params: ClaimRequest<T>): Promise<ClaimKeyResponse> {
     if (!this.ready) {
       const message =
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
@@ -2086,6 +2087,9 @@ export class LitNodeClientNodeJs extends LitCore {
           authMethodType: params.authMethod.authMethodType,
           signatures: nodeSignatures,
           pubkey,
+          signer: (params as ClaimRequest<"client">).signer,
+          relayUrl: (params as ClaimRequest<"relay">).relayUrl,
+          relayApiKey: (params as ClaimRequest<"relay">).relayApiKey
         });
       }
 
