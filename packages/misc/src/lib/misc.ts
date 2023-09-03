@@ -507,7 +507,7 @@ export const defaultMintClaimCallback: MintCallback<
   try {
     const relayUrl = params.relayUrl
       ? params.relayUrl
-      : 'http://127.0.0.1:8081/auth/claim';
+      : 'https://relayer-server-staging-cayenne-6baea4620360.herokuapp.com/auth/claim';
     const response = await fetch(relayUrl, {
       method: 'POST',
       body: JSON.stringify(params),
@@ -529,7 +529,7 @@ export const defaultMintClaimCallback: MintCallback<
     }
 
     let body: any = await response.json();
-    return body.mintTx;
+    return body.requestId;
   } catch (e) {
     console.error((e as Error).message);
     throw e;
