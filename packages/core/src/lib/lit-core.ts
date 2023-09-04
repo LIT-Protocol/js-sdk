@@ -149,6 +149,21 @@ export class LitCore {
             networkPubKeySet: resp.networkPublicKeySet,
           };
 
+          // -- validate returned keys
+          if (
+            keys.serverPubKey === 'ERR' ||
+            keys.subnetPubKey === 'ERR' ||
+            keys.networkPubKey === 'ERR' ||
+            keys.networkPubKeySet === 'ERR'
+          ) {
+            log('Error connecting to node ', url, keys);
+            throwError({
+              message: `Error connecting to node ${url}`,
+              errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+              errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+            });
+          }
+
           this.serverKeys[url] = keys;
         })
         .catch((e: any) => {
