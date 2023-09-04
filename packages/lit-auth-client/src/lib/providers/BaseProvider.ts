@@ -148,7 +148,6 @@ export abstract class BaseProvider {
           response = await nodeClient.signSessionKey({
             statement: authCallbackParams.statement,
             sessionKey: params.sessionSigsParams.sessionKey,
-            statement: authCallbackParams.statement,
             authMethods: [],
             authSig: authSig,
             pkpPublicKey: params.pkpPublicKey,
@@ -158,7 +157,6 @@ export abstract class BaseProvider {
           });
         } else {
           response = await nodeClient.signSessionKey({
-            statement: authCallbackParams.statement,
             sessionKey: params.sessionSigsParams.sessionKey,
             statement: authCallbackParams.statement,
             authMethods: [params.authMethod],
@@ -185,12 +183,14 @@ export abstract class BaseProvider {
   /**
    * Authenticates an auth Method for claiming a Programmable Key Pair (PKP).
    * Uses the underyling {@link litNodeClient} instance to authenticate a given auth method
-   * @param claimRequest 
+   * @param claimRequest
    * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
    */
-  public async claimKeyId(claimRequest: ClaimRequest): Promise<ClaimKeyResponse> {
-      const res = await this.litNodeClient.claimKeyId(claimRequest);
-      return res;
+  public async claimKeyId(
+    claimRequest: ClaimRequest
+  ): Promise<ClaimKeyResponse> {
+    const res = await this.litNodeClient.claimKeyId(claimRequest);
+    return res;
   }
 
   /**
