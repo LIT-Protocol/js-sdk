@@ -156,12 +156,7 @@ export class LitCore {
             keys.networkPubKey === 'ERR' ||
             keys.networkPubKeySet === 'ERR'
           ) {
-            log('Error connecting to node ', url, keys);
-            throwError({
-              message: `Error connecting to node ${url}`,
-              errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-              errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-            });
+            log('Error connecting to node. Detected "ERR" in keys', url, keys);
           }
 
           this.serverKeys[url] = keys;
