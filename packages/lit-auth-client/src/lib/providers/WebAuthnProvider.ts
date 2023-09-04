@@ -15,6 +15,9 @@ import { getRPIdFromOrigin, parseAuthenticatorData } from '../utils';
 import { BaseProvider } from './BaseProvider';
 import { RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
 
+const MAX_EXPIRATION_LENGTH = 3;
+const MAX_EXPIRATION_UNIT = 'minutes';
+
 export default class WebAuthnProvider extends BaseProvider {
   /**
    * Name of relying party. Defaults to "lit"
@@ -208,11 +211,34 @@ export default class WebAuthnProvider extends BaseProvider {
       const storageUID = this.getAuthMethodStorageUID(authMethod.accessToken);
 
       if (this.storageProvider.isExpired(storageUID)) {
+        const expirationLength =
+          _options.expirationLength ?? MAX_EXPIRATION_LENGTH;
+        const expirationUnit = _options.expirationUnit ?? MAX_EXPIRATION_UNIT;
+
+        const userExpirationISOString = this.storageProvider.convertToISOString(
+          expirationLength,
+          expirationUnit
+        );
+
+        const maxExpirationISOString = this.storageProvider.convertToISOString(
+          MAX_EXPIRATION_LENGTH,
+          MAX_EXPIRATION_UNIT
+        );
+
+        const userExpirationDate = new Date(userExpirationISOString);
+        const maxExpirationDate = new Date(maxExpirationISOString); // Just convert the ISO string to a Date
+
+        if (userExpirationDate > maxExpirationDate) {
+          throw new Error(
+            `The expiration date for this auth method cannot be more than ${MAX_EXPIRATION_LENGTH} ${MAX_EXPIRATION_UNIT} from now. Please provide a valid expiration length and unit.}`
+          );
+        }
+
         this.storageProvider.setExpirableItem(
           storageUID,
           JSON.stringify(authMethod),
-          _options.expirationLength ?? 24,
-          _options.expirationUnit ?? 'hours'
+          expirationLength,
+          expirationUnit
         );
       }
     }
