@@ -149,6 +149,16 @@ export class LitCore {
             networkPubKeySet: resp.networkPublicKeySet,
           };
 
+          // -- validate returned keys
+          if (
+            keys.serverPubKey === 'ERR' ||
+            keys.subnetPubKey === 'ERR' ||
+            keys.networkPubKey === 'ERR' ||
+            keys.networkPubKeySet === 'ERR'
+          ) {
+            log('Error connecting to node. Detected "ERR" in keys', url, keys);
+          }
+
           this.serverKeys[url] = keys;
         })
         .catch((e: any) => {
