@@ -64,104 +64,112 @@ export interface ContractCallOverrides {
   gasLimit?: number;
 }
 export type StakingEvents =
+  | 'ConfigSet'
+  | 'EpochEndTimeSet'
   | 'EpochLengthSet'
   | 'EpochTimeoutSet'
   | 'KickPenaltyPercentSet'
-  | 'MinimumStakeSet'
   | 'OwnershipTransferred'
-  | 'Paused'
   | 'ReadyForNextEpoch'
   | 'Recovered'
   | 'RequestToJoin'
   | 'RequestToLeave'
   | 'ResolverContractAddressSet'
-  | 'RewardPaid'
   | 'RewardsDurationUpdated'
-  | 'Staked'
   | 'StakingTokenSet'
   | 'StateChanged'
-  | 'TokenRewardPerTokenPerEpochSet'
-  | 'Unpaused'
   | 'ValidatorKickedFromNextEpoch'
-  | 'VotedToKickValidatorInNextEpoch'
-  | 'Withdrawn';
+  | 'ValidatorRejoinedNextEpoch'
+  | 'VotedToKickValidatorInNextEpoch';
 export interface StakingEventsContext {
+  ConfigSet(...parameters: any): EventFilter;
+  EpochEndTimeSet(...parameters: any): EventFilter;
   EpochLengthSet(...parameters: any): EventFilter;
   EpochTimeoutSet(...parameters: any): EventFilter;
   KickPenaltyPercentSet(...parameters: any): EventFilter;
-  MinimumStakeSet(...parameters: any): EventFilter;
   OwnershipTransferred(...parameters: any): EventFilter;
-  Paused(...parameters: any): EventFilter;
   ReadyForNextEpoch(...parameters: any): EventFilter;
   Recovered(...parameters: any): EventFilter;
   RequestToJoin(...parameters: any): EventFilter;
   RequestToLeave(...parameters: any): EventFilter;
   ResolverContractAddressSet(...parameters: any): EventFilter;
-  RewardPaid(...parameters: any): EventFilter;
   RewardsDurationUpdated(...parameters: any): EventFilter;
-  Staked(...parameters: any): EventFilter;
   StakingTokenSet(...parameters: any): EventFilter;
   StateChanged(...parameters: any): EventFilter;
-  TokenRewardPerTokenPerEpochSet(...parameters: any): EventFilter;
-  Unpaused(...parameters: any): EventFilter;
   ValidatorKickedFromNextEpoch(...parameters: any): EventFilter;
+  ValidatorRejoinedNextEpoch(...parameters: any): EventFilter;
   VotedToKickValidatorInNextEpoch(...parameters: any): EventFilter;
-  Withdrawn(...parameters: any): EventFilter;
 }
 export type StakingMethodNames =
   | 'new'
   | 'adminKickValidatorInNextEpoch'
+  | 'adminRejoinValidator'
   | 'adminSlashValidator'
   | 'advanceEpoch'
-  | 'balanceOf'
+  | 'config'
+  | 'contractResolver'
+  | 'countOfCurrentValidatorsReadyForNextEpoch'
+  | 'countOfNextValidatorsReadyForNextEpoch'
+  | 'currentValidatorCountForConsensus'
+  | 'env'
   | 'epoch'
   | 'exit'
+  | 'getKeyTypes'
+  | 'getKickedValidators'
   | 'getReward'
+  | 'getStakingBalancesAddress'
+  | 'getTokenAddress'
   | 'getValidatorsInCurrentEpoch'
+  | 'getValidatorsInCurrentEpochLength'
   | 'getValidatorsInNextEpoch'
+  | 'getValidatorsStructs'
+  | 'getValidatorsStructsInCurrentEpoch'
+  | 'getValidatorsStructsInNextEpoch'
   | 'getVotingStatusToKickValidator'
   | 'isActiveValidator'
+  | 'isActiveValidatorByNodeAddress'
   | 'isReadyForNextEpoch'
-  | 'kickPenaltyPercent'
+  | 'kickPenaltyPercentByReason'
   | 'kickValidatorInNextEpoch'
   | 'lockValidatorsForNextEpoch'
-  | 'minimumStake'
+  | 'nextValidatorCountForConsensus'
   | 'nodeAddressToStakerAddress'
   | 'owner'
   | 'pauseEpoch'
-  | 'paused'
   | 'readyForNextEpoch'
   | 'renounceOwnership'
   | 'requestToJoin'
   | 'requestToLeave'
-  | 'resolverContractAddress'
-  | 'rewardOf'
+  | 'setConfig'
+  | 'setContractResolver'
+  | 'setEpochEndTime'
   | 'setEpochLength'
   | 'setEpochState'
   | 'setEpochTimeout'
   | 'setIpPortNodeAddressAndCommunicationPubKeys'
   | 'setKickPenaltyPercent'
-  | 'setMinimumStake'
-  | 'setResolverContractAddress'
-  | 'setStakingToken'
-  | 'setTokenRewardPerTokenPerEpoch'
   | 'shouldKickValidator'
   | 'signalReadyForNextEpoch'
   | 'stake'
   | 'stakeAndJoin'
-  | 'stakingToken'
   | 'state'
-  | 'tokenRewardPerTokenPerEpoch'
   | 'totalStaked'
   | 'transferOwnership'
   | 'unlockValidatorsForNextEpoch'
-  | 'validatorCountForConsensus'
-  | 'validatorStateIsActive'
-  | 'validatorStateIsUnlocked'
+  | 'usedCommsKeys'
   | 'validators'
-  | 'validatorsInNextEpochAreLocked'
   | 'votesToKickValidatorsInNextEpoch'
   | 'withdraw';
+export interface ConfigSetEventEmittedResponse {
+  newTokenRewardPerTokenPerEpoch: BigNumberish;
+  newComplaintTolerance: BigNumberish;
+  newComplaintIntervalSecs: BigNumberish;
+  newKeyTypes: BigNumberish[];
+  newMinimumValidatorCount: BigNumberish;
+}
+export interface EpochEndTimeSetEventEmittedResponse {
+  newEpochEndTime: BigNumberish;
+}
 export interface EpochLengthSetEventEmittedResponse {
   newEpochLength: BigNumberish;
 }
@@ -169,20 +177,16 @@ export interface EpochTimeoutSetEventEmittedResponse {
   newEpochTimeout: BigNumberish;
 }
 export interface KickPenaltyPercentSetEventEmittedResponse {
+  reason: BigNumberish;
   newKickPenaltyPercent: BigNumberish;
-}
-export interface MinimumStakeSetEventEmittedResponse {
-  newMinimumStake: BigNumberish;
 }
 export interface OwnershipTransferredEventEmittedResponse {
   previousOwner: string;
   newOwner: string;
 }
-export interface PausedEventEmittedResponse {
-  account: string;
-}
 export interface ReadyForNextEpochEventEmittedResponse {
   staker: string;
+  epochNumber: BigNumberish;
 }
 export interface RecoveredEventEmittedResponse {
   token: string;
@@ -197,16 +201,8 @@ export interface RequestToLeaveEventEmittedResponse {
 export interface ResolverContractAddressSetEventEmittedResponse {
   newResolverContractAddress: string;
 }
-export interface RewardPaidEventEmittedResponse {
-  staker: string;
-  reward: BigNumberish;
-}
 export interface RewardsDurationUpdatedEventEmittedResponse {
   newDuration: BigNumberish;
-}
-export interface StakedEventEmittedResponse {
-  staker: string;
-  amount: BigNumberish;
 }
 export interface StakingTokenSetEventEmittedResponse {
   newStakingTokenAddress: string;
@@ -214,15 +210,12 @@ export interface StakingTokenSetEventEmittedResponse {
 export interface StateChangedEventEmittedResponse {
   newState: BigNumberish;
 }
-export interface TokenRewardPerTokenPerEpochSetEventEmittedResponse {
-  newTokenRewardPerTokenPerEpoch: BigNumberish;
-}
-export interface UnpausedEventEmittedResponse {
-  account: string;
-}
 export interface ValidatorKickedFromNextEpochEventEmittedResponse {
   staker: string;
   amountBurned: BigNumberish;
+}
+export interface ValidatorRejoinedNextEpochEventEmittedResponse {
+  staker: string;
 }
 export interface VotedToKickValidatorInNextEpochEventEmittedResponse {
   reporter: string;
@@ -230,22 +223,45 @@ export interface VotedToKickValidatorInNextEpochEventEmittedResponse {
   reason: BigNumberish;
   data: Arrayish;
 }
-export interface WithdrawnEventEmittedResponse {
-  staker: string;
-  amount: BigNumberish;
+export interface ConfigResponse {
+  tokenRewardPerTokenPerEpoch: BigNumber;
+  0: BigNumber;
+  complaintTolerance: BigNumber;
+  1: BigNumber;
+  complaintIntervalSecs: BigNumber;
+  2: BigNumber;
+  minimumValidatorCount: BigNumber;
+  3: BigNumber;
+  length: 4;
 }
 export interface EpochResponse {
   epochLength: BigNumber;
   0: BigNumber;
   number: BigNumber;
   1: BigNumber;
-  endBlock: BigNumber;
+  endTime: BigNumber;
   2: BigNumber;
   retries: BigNumber;
   3: BigNumber;
   timeout: BigNumber;
   4: BigNumber;
   length: 5;
+}
+export interface ValidatorResponse {
+  ip: number;
+  0: number;
+  ipv6: BigNumber;
+  1: BigNumber;
+  port: number;
+  2: number;
+  nodeAddress: string;
+  3: string;
+  reward: BigNumber;
+  4: BigNumber;
+  senderPubKey: BigNumber;
+  5: BigNumber;
+  receiverPubKey: BigNumber;
+  6: BigNumber;
 }
 export interface GetVotingStatusToKickValidatorResponse {
   result0: BigNumber;
@@ -263,15 +279,13 @@ export interface ValidatorsResponse {
   2: number;
   nodeAddress: string;
   3: string;
-  balance: BigNumber;
-  4: BigNumber;
   reward: BigNumber;
-  5: BigNumber;
+  4: BigNumber;
   senderPubKey: BigNumber;
-  6: BigNumber;
+  5: BigNumber;
   receiverPubKey: BigNumber;
-  7: BigNumber;
-  length: 8;
+  6: BigNumber;
+  length: 7;
 }
 export interface Staking {
   /**
@@ -279,10 +293,14 @@ export interface Staking {
    * Constant: false
    * StateMutability: nonpayable
    * Type: constructor
-   * @param _stakingToken Type: address, Indexed: false
+   * @param _resolver Type: address, Indexed: false
+   * @param _keyTypes Type: uint256[], Indexed: false
+   * @param _env Type: uint8, Indexed: false
    */
   'new'(
-    _stakingToken: string,
+    _resolver: string,
+    _keyTypes: BigNumberish[],
+    _env: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -301,12 +319,23 @@ export interface Staking {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
+   * @param staker Type: address, Indexed: false
+   */
+  adminRejoinValidator(
+    staker: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
    * @param validatorStakerAddress Type: address, Indexed: false
-   * @param amountToBurn Type: uint256, Indexed: false
+   * @param amountToPenalize Type: uint256, Indexed: false
    */
   adminSlashValidator(
     validatorStakerAddress: string,
-    amountToBurn: BigNumberish,
+    amountToPenalize: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -323,12 +352,49 @@ export interface Staking {
    * Constant: true
    * StateMutability: view
    * Type: function
-   * @param account Type: address, Indexed: false
    */
-  balanceOf(
-    account: string,
+  config(overrides?: ContractCallOverrides): Promise<ConfigResponse>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  contractResolver(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  countOfCurrentValidatorsReadyForNextEpoch(
     overrides?: ContractCallOverrides
   ): Promise<BigNumber>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  countOfNextValidatorsReadyForNextEpoch(
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  currentValidatorCountForConsensus(
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  env(overrides?: ContractCallOverrides): Promise<number>;
   /**
    * Payable: false
    * Constant: true
@@ -345,6 +411,20 @@ export interface Staking {
   exit(overrides?: ContractTransactionOverrides): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getKeyTypes(overrides?: ContractCallOverrides): Promise<BigNumber[]>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getKickedValidators(overrides?: ContractCallOverrides): Promise<string[]>;
+  /**
+   * Payable: false
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
@@ -352,6 +432,20 @@ export interface Staking {
   getReward(
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getStakingBalancesAddress(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getTokenAddress(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: true
@@ -367,9 +461,47 @@ export interface Staking {
    * StateMutability: view
    * Type: function
    */
+  getValidatorsInCurrentEpochLength(
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
   getValidatorsInNextEpoch(
     overrides?: ContractCallOverrides
   ): Promise<string[]>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param addresses Type: address[], Indexed: false
+   */
+  getValidatorsStructs(
+    addresses: string[],
+    overrides?: ContractCallOverrides
+  ): Promise<ValidatorResponse[]>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getValidatorsStructsInCurrentEpoch(
+    overrides?: ContractCallOverrides
+  ): Promise<ValidatorResponse[]>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getValidatorsStructsInNextEpoch(
+    overrides?: ContractCallOverrides
+  ): Promise<ValidatorResponse[]>;
   /**
    * Payable: false
    * Constant: true
@@ -401,6 +533,17 @@ export interface Staking {
    * Constant: true
    * StateMutability: view
    * Type: function
+   * @param account Type: address, Indexed: false
+   */
+  isActiveValidatorByNodeAddress(
+    account: string,
+    overrides?: ContractCallOverrides
+  ): Promise<boolean>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
    */
   isReadyForNextEpoch(overrides?: ContractCallOverrides): Promise<boolean>;
   /**
@@ -408,8 +551,12 @@ export interface Staking {
    * Constant: true
    * StateMutability: view
    * Type: function
+   * @param parameter0 Type: uint256, Indexed: false
    */
-  kickPenaltyPercent(overrides?: ContractCallOverrides): Promise<BigNumber>;
+  kickPenaltyPercentByReason(
+    parameter0: BigNumberish,
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
   /**
    * Payable: false
    * Constant: false
@@ -440,7 +587,9 @@ export interface Staking {
    * StateMutability: view
    * Type: function
    */
-  minimumStake(overrides?: ContractCallOverrides): Promise<BigNumber>;
+  nextValidatorCountForConsensus(
+    overrides?: ContractCallOverrides
+  ): Promise<BigNumber>;
   /**
    * Payable: false
    * Constant: true
@@ -468,13 +617,6 @@ export interface Staking {
   pauseEpoch(
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  paused(overrides?: ContractCallOverrides): Promise<boolean>;
   /**
    * Payable: false
    * Constant: true
@@ -527,22 +669,45 @@ export interface Staking {
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
-   * Constant: true
-   * StateMutability: view
+   * Constant: false
+   * StateMutability: nonpayable
    * Type: function
+   * @param newTokenRewardPerTokenPerEpoch Type: uint256, Indexed: false
+   * @param newComplaintTolerance Type: uint256, Indexed: false
+   * @param newComplaintIntervalSecs Type: uint256, Indexed: false
+   * @param newKeyTypes Type: uint256[], Indexed: false
+   * @param newMinimumValidatorCount Type: uint256, Indexed: false
    */
-  resolverContractAddress(overrides?: ContractCallOverrides): Promise<string>;
+  setConfig(
+    newTokenRewardPerTokenPerEpoch: BigNumberish,
+    newComplaintTolerance: BigNumberish,
+    newComplaintIntervalSecs: BigNumberish,
+    newKeyTypes: BigNumberish[],
+    newMinimumValidatorCount: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
-   * Constant: true
-   * StateMutability: view
+   * Constant: false
+   * StateMutability: nonpayable
    * Type: function
-   * @param account Type: address, Indexed: false
+   * @param newResolverAddress Type: address, Indexed: false
    */
-  rewardOf(
-    account: string,
-    overrides?: ContractCallOverrides
-  ): Promise<BigNumber>;
+  setContractResolver(
+    newResolverAddress: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param newEpochEndTime Type: uint256, Indexed: false
+   */
+  setEpochEndTime(
+    newEpochEndTime: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -602,54 +767,12 @@ export interface Staking {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
+   * @param reason Type: uint256, Indexed: false
    * @param newKickPenaltyPercent Type: uint256, Indexed: false
    */
   setKickPenaltyPercent(
+    reason: BigNumberish,
     newKickPenaltyPercent: BigNumberish,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param newMinimumStake Type: uint256, Indexed: false
-   */
-  setMinimumStake(
-    newMinimumStake: BigNumberish,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param newResolverContractAddress Type: address, Indexed: false
-   */
-  setResolverContractAddress(
-    newResolverContractAddress: string,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param newStakingTokenAddress Type: address, Indexed: false
-   */
-  setStakingToken(
-    newStakingTokenAddress: string,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param newTokenRewardPerTokenPerEpoch Type: uint256, Indexed: false
-   */
-  setTokenRewardPerTokenPerEpoch(
-    newTokenRewardPerTokenPerEpoch: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -668,8 +791,10 @@ export interface Staking {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
+   * @param epochNumber Type: uint256, Indexed: false
    */
   signalReadyForNextEpoch(
+    epochNumber: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -712,23 +837,7 @@ export interface Staking {
    * StateMutability: view
    * Type: function
    */
-  stakingToken(overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
   state(overrides?: ContractCallOverrides): Promise<number>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  tokenRewardPerTokenPerEpoch(
-    overrides?: ContractCallOverrides
-  ): Promise<BigNumber>;
   /**
    * Payable: false
    * Constant: true
@@ -761,24 +870,12 @@ export interface Staking {
    * Constant: true
    * StateMutability: view
    * Type: function
+   * @param parameter0 Type: bytes32, Indexed: false
    */
-  validatorCountForConsensus(
+  usedCommsKeys(
+    parameter0: Arrayish,
     overrides?: ContractCallOverrides
-  ): Promise<BigNumber>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  validatorStateIsActive(overrides?: ContractCallOverrides): Promise<boolean>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  validatorStateIsUnlocked(overrides?: ContractCallOverrides): Promise<boolean>;
+  ): Promise<boolean>;
   /**
    * Payable: false
    * Constant: true
@@ -790,15 +887,6 @@ export interface Staking {
     parameter0: string,
     overrides?: ContractCallOverrides
   ): Promise<ValidatorsResponse>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  validatorsInNextEpochAreLocked(
-    overrides?: ContractCallOverrides
-  ): Promise<boolean>;
   /**
    * Payable: false
    * Constant: true

@@ -67,6 +67,7 @@ export type LITTokenEvents =
   | 'Approval'
   | 'DelegateChanged'
   | 'DelegateVotesChanged'
+  | 'EIP712DomainChanged'
   | 'Paused'
   | 'RoleAdminChanged'
   | 'RoleGranted'
@@ -77,6 +78,7 @@ export interface LITTokenEventsContext {
   Approval(...parameters: any): EventFilter;
   DelegateChanged(...parameters: any): EventFilter;
   DelegateVotesChanged(...parameters: any): EventFilter;
+  EIP712DomainChanged(...parameters: any): EventFilter;
   Paused(...parameters: any): EventFilter;
   RoleAdminChanged(...parameters: any): EventFilter;
   RoleGranted(...parameters: any): EventFilter;
@@ -87,6 +89,7 @@ export interface LITTokenEventsContext {
 export type LITTokenMethodNames =
   | 'new'
   | 'ADMIN_ROLE'
+  | 'CLOCK_MODE'
   | 'DEFAULT_ADMIN_ROLE'
   | 'DOMAIN_SEPARATOR'
   | 'MINTER_ROLE'
@@ -98,11 +101,13 @@ export type LITTokenMethodNames =
   | 'burnFrom'
   | 'cap'
   | 'checkpoints'
+  | 'clock'
   | 'decimals'
   | 'decreaseAllowance'
   | 'delegate'
   | 'delegateBySig'
   | 'delegates'
+  | 'eip712Domain'
   | 'getPastTotalSupply'
   | 'getPastVotes'
   | 'getRoleAdmin'
@@ -172,6 +177,23 @@ export interface CheckpointResponse {
   votes: BigNumber;
   1: BigNumber;
 }
+export interface Eip712DomainResponse {
+  fields: string;
+  0: string;
+  name: string;
+  1: string;
+  version: string;
+  2: string;
+  chainId: BigNumber;
+  3: BigNumber;
+  verifyingContract: string;
+  4: string;
+  salt: string;
+  5: string;
+  extensions: BigNumber[];
+  6: BigNumber[];
+  length: 7;
+}
 export interface LITToken {
   /**
    * Payable: false
@@ -191,6 +213,13 @@ export interface LITToken {
    * Type: function
    */
   ADMIN_ROLE(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  CLOCK_MODE(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: true
@@ -306,6 +335,13 @@ export interface LITToken {
    * StateMutability: view
    * Type: function
    */
+  clock(overrides?: ContractCallOverrides): Promise<number>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
   decimals(overrides?: ContractCallOverrides): Promise<number>;
   /**
    * Payable: false
@@ -368,10 +404,19 @@ export interface LITToken {
    * Constant: true
    * StateMutability: view
    * Type: function
-   * @param blockNumber Type: uint256, Indexed: false
+   */
+  eip712Domain(
+    overrides?: ContractCallOverrides
+  ): Promise<Eip712DomainResponse>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param timepoint Type: uint256, Indexed: false
    */
   getPastTotalSupply(
-    blockNumber: BigNumberish,
+    timepoint: BigNumberish,
     overrides?: ContractCallOverrides
   ): Promise<BigNumber>;
   /**
@@ -380,11 +425,11 @@ export interface LITToken {
    * StateMutability: view
    * Type: function
    * @param account Type: address, Indexed: false
-   * @param blockNumber Type: uint256, Indexed: false
+   * @param timepoint Type: uint256, Indexed: false
    */
   getPastVotes(
     account: string,
-    blockNumber: BigNumberish,
+    timepoint: BigNumberish,
     overrides?: ContractCallOverrides
   ): Promise<BigNumber>;
   /**

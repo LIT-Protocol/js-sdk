@@ -7,7 +7,8 @@ export enum VMTYPE {
 
 export enum SIGTYPE {
   BLS = 'BLS',
-  ECDSA = 'ECDSA',
+  EcdsaCaitSith = 'ECDSA_CAIT_SITH',
+  EcdsaCAITSITHP256 = 'EcdsaCaitSithP256'
 }
 
 /**
@@ -44,4 +45,5 @@ export enum ProviderType {
   Otp = 'otp',
   StytchOtp = 'stytchOtp',
   Apple = 'apple',
+  StytchOtp = 'stytchOtp'
 }

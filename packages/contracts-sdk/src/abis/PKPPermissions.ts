@@ -64,6 +64,7 @@ export interface ContractCallOverrides {
   gasLimit?: number;
 }
 export type PKPPermissionsEvents =
+  | 'ContractResolverAddressSet'
   | 'OwnershipTransferred'
   | 'PermittedAuthMethodAdded'
   | 'PermittedAuthMethodRemoved'
@@ -71,6 +72,7 @@ export type PKPPermissionsEvents =
   | 'PermittedAuthMethodScopeRemoved'
   | 'RootHashUpdated';
 export interface PKPPermissionsEventsContext {
+  ContractResolverAddressSet(...parameters: any): EventFilter;
   OwnershipTransferred(...parameters: any): EventFilter;
   PermittedAuthMethodAdded(...parameters: any): EventFilter;
   PermittedAuthMethodRemoved(...parameters: any): EventFilter;
@@ -85,13 +87,18 @@ export type PKPPermissionsMethodNames =
   | 'addPermittedAuthMethod'
   | 'addPermittedAuthMethodScope'
   | 'authMethods'
+  | 'batchAddRemoveAuthMethods'
+  | 'contractResolver'
+  | 'env'
   | 'getAuthMethodId'
   | 'getEthAddress'
   | 'getPermittedActions'
   | 'getPermittedAddresses'
   | 'getPermittedAuthMethodScopes'
   | 'getPermittedAuthMethods'
+  | 'getPkpNftAddress'
   | 'getPubkey'
+  | 'getRouterAddress'
   | 'getTokenIdsForAuthMethod'
   | 'getUserPubkeyForAuthMethod'
   | 'isPermittedAction'
@@ -99,17 +106,19 @@ export type PKPPermissionsMethodNames =
   | 'isPermittedAuthMethod'
   | 'isPermittedAuthMethodScopePresent'
   | 'owner'
-  | 'pkpNFT'
   | 'removePermittedAction'
   | 'removePermittedAddress'
   | 'removePermittedAuthMethod'
   | 'removePermittedAuthMethodScope'
   | 'renounceOwnership'
-  | 'setPkpNftAddress'
+  | 'setContractResolver'
   | 'setRootHash'
   | 'transferOwnership'
   | 'verifyState'
   | 'verifyStates';
+export interface ContractResolverAddressSetEventEmittedResponse {
+  newResolverAddress: string;
+}
 export interface OwnershipTransferredEventEmittedResponse {
   previousOwner: string;
   newOwner: string;
@@ -170,10 +179,12 @@ export interface PKPPermissions {
    * Constant: false
    * StateMutability: nonpayable
    * Type: constructor
-   * @param _pkpNft Type: address, Indexed: false
+   * @param _resolver Type: address, Indexed: false
+   * @param _env Type: uint8, Indexed: false
    */
   'new'(
-    _pkpNft: string,
+    _resolver: string,
+    _env: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -249,6 +260,43 @@ export interface PKPPermissions {
     parameter0: BigNumberish,
     overrides?: ContractCallOverrides
   ): Promise<AuthMethodsResponse>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   * @param permittedAuthMethodTypesToAdd Type: uint256[], Indexed: false
+   * @param permittedAuthMethodIdsToAdd Type: bytes[], Indexed: false
+   * @param permittedAuthMethodPubkeysToAdd Type: bytes[], Indexed: false
+   * @param permittedAuthMethodScopesToAdd Type: uint256[][], Indexed: false
+   * @param permittedAuthMethodTypesToRemove Type: uint256[], Indexed: false
+   * @param permittedAuthMethodIdsToRemove Type: bytes[], Indexed: false
+   */
+  batchAddRemoveAuthMethods(
+    tokenId: BigNumberish,
+    permittedAuthMethodTypesToAdd: BigNumberish[],
+    permittedAuthMethodIdsToAdd: Arrayish[],
+    permittedAuthMethodPubkeysToAdd: Arrayish[],
+    permittedAuthMethodScopesToAdd: BigNumberish[][],
+    permittedAuthMethodTypesToRemove: BigNumberish[],
+    permittedAuthMethodIdsToRemove: Arrayish[],
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  contractResolver(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  env(overrides?: ContractCallOverrides): Promise<number>;
   /**
    * Payable: false
    * Constant: true
@@ -328,12 +376,26 @@ export interface PKPPermissions {
    * Constant: true
    * StateMutability: view
    * Type: function
+   */
+  getPkpNftAddress(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
    * @param tokenId Type: uint256, Indexed: false
    */
   getPubkey(
     tokenId: BigNumberish,
     overrides?: ContractCallOverrides
   ): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getRouterAddress(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: true
@@ -427,13 +489,6 @@ export interface PKPPermissions {
   owner(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  pkpNFT(overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
@@ -504,10 +559,10 @@ export interface PKPPermissions {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
-   * @param newPkpNftAddress Type: address, Indexed: false
+   * @param newResolverAddress Type: address, Indexed: false
    */
-  setPkpNftAddress(
-    newPkpNftAddress: string,
+  setContractResolver(
+    newResolverAddress: string,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**

@@ -81,7 +81,7 @@ export class LitAuthClient {
       this.litNodeClient = options?.litNodeClient;
     } else {
       this.litNodeClient = new LitNodeClient({
-        litNetwork: 'serrano',
+        litNetwork: 'cayenne',
         debug: false,
       });
     }

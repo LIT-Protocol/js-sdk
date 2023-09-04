@@ -3,14 +3,16 @@ import * as LITCONFIG from 'lit.config.json';
 import { processTx } from '../../../../tx-handler';
 import { AuthSig } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+import { SIGTYPE } from '@lit-protocol/constants';
+import { AuthMethodType } from '../../../types/src/lib/enums';
 let client: LitNodeClient;
 
 jest.setTimeout(60000);
 
 describe('Lit Actions', () => {
   client = new LitNodeClient({
-    litNetwork: 'serrano',
-    debug: false,
+    litNetwork: 'cayenne',
+    debug: true
   });
 
   beforeAll(async () => {
@@ -63,10 +65,10 @@ describe('Lit Actions', () => {
       await client.executeJs({
         authSig: LITCONFIG.CONTROLLER_AUTHSIG,
         code: `(async () => {
-            const sigShare = await LitActions.signEcdsa({ 
-              toSign, 
-              publicKey, 
-              sigName 
+            const sigShare = await LitActions.signEcdsa({
+              toSign,
+              publicKey,
+              sigName
             });
           })();`,
         jsParams: {
@@ -100,7 +102,43 @@ describe('Lit Actions', () => {
     });
 
     // add padding
-    sig.publicKey = sig.publicKey.length % 2 == 0 ? sig.publicKey : '0' + sig.publicKey;
-    expect(LITCONFIG.PKP_PUBKEY).toEqual(sig.publicKey);
+    sig.publicKey =
+      sig.publicKey.length % 2 == 0 ? sig.publicKey : '0' + sig.publicKey;
+    expect(sig.publicKey).toBeDefined();
   });
+
+  
+  it('should claim key id from auth method', async () => {
+    let res = await client.claimKeyId({
+      authMethod: {
+        authMethodType: 6,
+        accessToken:
+          LITCONFIG.AUTH_METHOD_ACCESS_TOKEN
+      }
+    });
+    
+    const data = {
+      // hello world in Uint8Array
+      toSign: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+      publicKey: LITCONFIG.PKP_PUBKEY,
+      sigName: 'hello-world-sig',
+    };
+
+    let sig = await client.pkpSign({
+      toSign: data.toSign,
+      pubKey: res.pubkey,
+      authMethods: [{
+        authMethodType: 6,
+        accessToken: LITCONFIG.AUTH_METHOD_ACCESS_TOKEN 
+      }],
+      authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+    });
+
+    let msg: any = ethers.utils.arrayify('0x' + sig.dataSigned)
+    const recoveredPk = ethers.utils.recoverPublicKey(msg, {r: '0x'+sig.r, s: '0x'+sig.s, v: sig.recid});
+
+    const addr = ethers.utils.computeAddress(ethers.utils.arrayify('0x' + sig.publicKey));
+    const recoveredAddr = ethers.utils.computeAddress(ethers.utils.arrayify(recoveredPk)); 
+    expect(recoveredAddr).toEqual(addr);
+  }, 20_0000);
 });

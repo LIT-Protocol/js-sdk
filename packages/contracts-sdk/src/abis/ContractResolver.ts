@@ -80,10 +80,12 @@ export interface ContractResolverEventsContext {
 }
 export type ContractResolverMethodNames =
   | 'new'
-  | 'ACCESS_CONTROL_CONTRACT'
   | 'ADMIN_ROLE'
   | 'ALLOWLIST_CONTRACT'
   | 'DEFAULT_ADMIN_ROLE'
+  | 'DOMAIN_WALLET_ORACLE'
+  | 'DOMAIN_WALLET_REGISTRY'
+  | 'HD_KEY_DERIVER_CONTRACT'
   | 'LIT_TOKEN_CONTRACT'
   | 'MULTI_SENDER_CONTRACT'
   | 'PKP_HELPER_CONTRACT'
@@ -93,6 +95,7 @@ export type ContractResolverMethodNames =
   | 'PUB_KEY_ROUTER_CONTRACT'
   | 'RATE_LIMIT_NFT_CONTRACT'
   | 'RELEASE_REGISTER_CONTRACT'
+  | 'STAKING_BALANCES_CONTRACT'
   | 'STAKING_CONTRACT'
   | 'addAllowedEnv'
   | 'getContract'
@@ -150,13 +153,6 @@ export interface ContractResolver {
    * StateMutability: view
    * Type: function
    */
-  ACCESS_CONTROL_CONTRACT(overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
   ADMIN_ROLE(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
@@ -172,6 +168,27 @@ export interface ContractResolver {
    * Type: function
    */
   DEFAULT_ADMIN_ROLE(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  DOMAIN_WALLET_ORACLE(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  DOMAIN_WALLET_REGISTRY(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  HD_KEY_DERIVER_CONTRACT(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: true
@@ -235,6 +252,13 @@ export interface ContractResolver {
    * Type: function
    */
   RELEASE_REGISTER_CONTRACT(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  STAKING_BALANCES_CONTRACT(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: true

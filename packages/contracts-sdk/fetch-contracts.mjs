@@ -104,7 +104,13 @@ export const asyncForEach = async (array, callback) => {
 export const getContractAddresses = async (LitConfig) => {
   // get deployed contract addresses
   const contractAddresses = JSON.parse(
-    await fetch(LitConfig.root + LitConfig.contracts).then((res) => res.text())
+    await fetch(LitConfig.contracts, {
+      headers: LitConfig.abis.isPrivate
+        ? {
+            Authorization: `token ${LitConfig.abis.token}`,
+          }
+        : {},
+    }).then((res) => res.text())
   );
   Object.entries(contractAddresses).forEach(([key, value]) => {
     if (key.includes('ContractAddress')) return;
@@ -127,7 +133,9 @@ export const getContractAddresses = async (LitConfig) => {
     correctedName = correctedName.replace('Nft', 'NFT');
     correctedName = correctedName.replace('Lit', 'LIT');
     correctedName = correctedName.replace('Resolver', 'ContractResolver');
-
+    if (correctedName == "HdKeyDeriver"){ // dont process the contract with name as it is internally used wihtin `PubkeyRouter`
+      return;
+    }
     if (correctedName === 'ContractResolver') {
       exportName = 'contractResolver';
     }
@@ -161,7 +169,13 @@ await asyncForEach(deployedContracts, async (contract) => {
   let json;
 
   try {
-    json = await fetch(contract.abiPath).then((res) => res.text());
+    json = await fetch(contract.abiPath, {
+      headers: LitConfig.abis.isPrivate
+        ? {
+            Authorization: `token ${LitConfig.abis.token}`,
+          }
+        : {},
+    }).then((res) => res.text());
     json = JSON.parse(json);
   } catch (e) {
     redLog(`Failed to fetch ${contract.abiPath}`);

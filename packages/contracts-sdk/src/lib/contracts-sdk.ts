@@ -22,6 +22,7 @@ import { pkpPermissions } from '../abis/PKPPermissions.data';
 import { pubkeyRouter } from '../abis/PubkeyRouter.data';
 import { rateLimitNft } from '../abis/RateLimitNFT.data';
 import { staking } from '../abis/Staking.data';
+import { stakingBalances } from '../abis/StakingBalances.data';
 // ----- autogen:import-data:end  -----
 
 // ----- autogen:imports:start  -----
@@ -36,6 +37,7 @@ import * as pkpPermissionsContract from '../abis/PKPPermissions';
 import * as pubkeyRouterContract from '../abis/PubkeyRouter';
 import * as rateLimitNftContract from '../abis/RateLimitNFT';
 import * as stakingContract from '../abis/Staking';
+import * as stakingBalancesContract from '../abis/StakingBalances';
 // ----- autogen:imports:end  -----
 
 import { TokenInfo, addresses } from './addresses';
@@ -152,6 +154,11 @@ export class LitContracts {
     write: stakingContract.ContractContext,
   }
             
+  stakingBalancesContract: {
+    read: stakingBalancesContract.ContractContext,
+    write: stakingBalancesContract.ContractContext,
+  }
+            
 // ----- autogen:declares:end  -----
 
   // make the constructor args optional
@@ -198,6 +205,7 @@ export class LitContracts {
     this.pubkeyRouterContract = {} as any
     this.rateLimitNftContract = {} as any
     this.stakingContract = {} as any
+    this.stakingBalancesContract = {} as any
 // ----- autogen:blank-init:end  -----
   }
 
@@ -520,6 +528,20 @@ export class LitContracts {
             this.signer
         ) as unknown as stakingContract.ContractContext & stakingContract.Staking)
     };
+
+
+    this.stakingBalancesContract = {
+        read: (new ethers.Contract(
+            stakingBalances.address,
+            stakingBalances.abi as any,
+            this.provider
+        ) as unknown as stakingBalancesContract.ContractContext & stakingBalancesContract.StakingBalances),
+        write: (new ethers.Contract(
+            stakingBalances.address,
+            stakingBalances.abi as any,
+            this.signer
+        ) as unknown as stakingBalancesContract.ContractContext & stakingBalancesContract.StakingBalances)
+    };
 // ----- autogen:init:end  -----
 
     this.connected = true;
@@ -805,6 +827,24 @@ export class LitContracts {
         console.warn('tokenIdFromEvent:', tokenIdFromEvent);
 
         return { tx: sentTx, tokenId: tokenIdFromEvent, res };
+      },
+
+      claimAndMint: async (
+        keyId: pkpNftContract.Arrayish,
+        signatures: pkpNftContract.ClaimAndMintRequest[]
+      ) => {
+        let cost = await this.pkpNftContract.read.mintCost();
+        const tx =
+          await this.pkpNftContract.write.claimAndMint(
+            2,
+            keyId,
+            signatures,
+            { value: cost }
+          );
+        let txRec = await tx.wait();
+        let events: any = 'events' in txRec ? txRec.events : txRec.logs;
+        let tokenId = events[1].topics[1];
+        return { tx, res: txRec, tokenId };
       },
     },
   };

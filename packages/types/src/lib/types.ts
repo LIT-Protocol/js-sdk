@@ -1,5 +1,10 @@
+import { AuthMethodType } from './enums';
+import * as ethers from 'ethers';
 import {
+  AuthMethod,
+  LitRelayConfig,
   SignInWithOTPParams,
+  Signature,
   StytchOtpProviderOptions,
   WebAuthnProviderOptions,
 } from './interfaces';
@@ -11,7 +16,6 @@ import {
   AccsRegularParams,
   AccsSOLV2Params,
   EthWalletProviderOptions,
-  EthWalletAuthenticateOptions,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
   JsonSignChainDataRequest,
@@ -90,7 +94,7 @@ export type LITChain<T> = {
   [chainName: string]: T;
 };
 
-export type LIT_NETWORKS_KEYS = 'jalapeno' | 'serrano' | 'localhost' | 'custom';
+export type LIT_NETWORKS_KEYS = 'cayenne' | 'localhost' | 'custom';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
@@ -118,3 +122,55 @@ export type ProviderOptions =
   | WebAuthnProviderOptions;
 
 export type AuthenticateOptions = BaseAuthenticateOptions;
+
+/**
+ * Type for expressing claim results being processed by a relay server
+ */
+export type RelayClaimProcessor = 'relay';
+
+/**
+ * Type for expressing claim results being processed by a local contract client
+ * the `contract-sdk` is the intended use of this type
+ */
+export type ClientClaimProcessor = 'client';
+
+/**
+ * Type aggregate for Claim proccessor types
+ */
+export type ClaimProcessor = RelayClaimProcessor | ClientClaimProcessor;
+
+/**
+ * Callback function for processing claim requests.
+ * 
+ * This function can be used in two scenarios:
+ * 1. When the claim is processed by a relay server.
+ * 2. When the claim is processed by a contract client.
+ * 
+ * For contract clients, you can use the `contract-sdk` or implement your own client.
+ * Ensure that your client has the correct ABI and contract addresses for successful processing.
+ */
+export type MintCallback<T = ClaimProcessor> = (
+  response: ClaimResult<T>
+) => Promise<string>;
+
+/**
+ * Model for requesting a PKP to be claimed based on an {@link AuthMethod} identifier
+ * the {@link MintCallback} may be defined for custom processing of the {@link ClaimResult}
+ * which requires registering on chain, by default chain registering will be done by an external relay.
+ * @property {AuthMethod} authMethod to derive the key id from for claiming
+ * @property {MintCallback} mintCallback optional callback for custom on chain registration behavior
+ */
+export type ClaimRequest<T = ClaimProcessor> = {
+  authMethod: AuthMethod;
+  mintCallback?: MintCallback<T>, 
+} & (T extends 'relay' ? LitRelayConfig : {signer: ethers.Signer});
+
+/**
+ * Result from network claim proccessing, used in {@link MintCallback}
+ */
+export type ClaimResult<T = ClaimProcessor> = {
+  signatures: Signature[],
+  derivedKeyId: string,
+  authMethodType: AuthMethodType
+  pubkey: string, 
+} & (T extends 'relay' ? LitRelayConfig : {signer: ethers.Signer});

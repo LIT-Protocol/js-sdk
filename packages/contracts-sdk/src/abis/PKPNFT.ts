@@ -66,25 +66,21 @@ export interface ContractCallOverrides {
 export type PKPNFTEvents =
   | 'Approval'
   | 'ApprovalForAll'
+  | 'ContractResolverAddressSet'
   | 'FreeMintSignerSet'
   | 'MintCostSet'
   | 'OwnershipTransferred'
-  | 'PkpNftMetadataAddressSet'
-  | 'PkpPermissionsAddressSet'
-  | 'PkpRouted'
-  | 'RouterAddressSet'
+  | 'PKPMinted'
   | 'Transfer'
   | 'Withdrew';
 export interface PKPNFTEventsContext {
   Approval(...parameters: any): EventFilter;
   ApprovalForAll(...parameters: any): EventFilter;
+  ContractResolverAddressSet(...parameters: any): EventFilter;
   FreeMintSignerSet(...parameters: any): EventFilter;
   MintCostSet(...parameters: any): EventFilter;
   OwnershipTransferred(...parameters: any): EventFilter;
-  PkpNftMetadataAddressSet(...parameters: any): EventFilter;
-  PkpPermissionsAddressSet(...parameters: any): EventFilter;
-  PkpRouted(...parameters: any): EventFilter;
-  RouterAddressSet(...parameters: any): EventFilter;
+  PKPMinted(...parameters: any): EventFilter;
   Transfer(...parameters: any): EventFilter;
   Withdrew(...parameters: any): EventFilter;
 }
@@ -93,39 +89,35 @@ export type PKPNFTMethodNames =
   | 'approve'
   | 'balanceOf'
   | 'burn'
+  | 'claimAndMint'
+  | 'contractResolver'
+  | 'env'
   | 'exists'
-  | 'freeMintGrantAndBurnNext'
-  | 'freeMintNext'
-  | 'freeMintSigTest'
   | 'freeMintSigner'
   | 'getApproved'
   | 'getEthAddress'
+  | 'getNextDerivedKeyId'
+  | 'getPkpNftMetadataAddress'
+  | 'getPkpPermissionsAddress'
   | 'getPubkey'
-  | 'getUnmintedRoutedTokenIdCount'
+  | 'getRouterAddress'
+  | 'getStakingAddress'
   | 'isApprovedForAll'
   | 'mintCost'
   | 'mintGrantAndBurnNext'
-  | 'mintGrantAndBurnSpecific'
   | 'mintNext'
-  | 'mintSpecific'
   | 'name'
   | 'owner'
   | 'ownerOf'
-  | 'pkpNftMetadata'
-  | 'pkpPermissions'
-  | 'pkpRouted'
   | 'prefixed'
   | 'redeemedFreeMintIds'
   | 'renounceOwnership'
-  | 'router'
   | 'safeTransferFrom'
   | 'safeTransferFrom'
   | 'setApprovalForAll'
+  | 'setContractResolver'
   | 'setFreeMintSigner'
   | 'setMintCost'
-  | 'setPkpNftMetadataAddress'
-  | 'setPkpPermissionsAddress'
-  | 'setRouterAddress'
   | 'supportsInterface'
   | 'symbol'
   | 'tokenByIndex'
@@ -134,7 +126,6 @@ export type PKPNFTMethodNames =
   | 'totalSupply'
   | 'transferFrom'
   | 'transferOwnership'
-  | 'unmintedRoutedTokenIds'
   | 'withdraw';
 export interface ApprovalEventEmittedResponse {
   owner: string;
@@ -146,6 +137,9 @@ export interface ApprovalForAllEventEmittedResponse {
   operator: string;
   approved: boolean;
 }
+export interface ContractResolverAddressSetEventEmittedResponse {
+  newResolverAddress: string;
+}
 export interface FreeMintSignerSetEventEmittedResponse {
   newFreeMintSigner: string;
 }
@@ -156,18 +150,9 @@ export interface OwnershipTransferredEventEmittedResponse {
   previousOwner: string;
   newOwner: string;
 }
-export interface PkpNftMetadataAddressSetEventEmittedResponse {
-  pkpNftMetadataAddress: string;
-}
-export interface PkpPermissionsAddressSetEventEmittedResponse {
-  pkpPermissionsAddress: string;
-}
-export interface PkpRoutedEventEmittedResponse {
+export interface PKPMintedEventEmittedResponse {
   tokenId: BigNumberish;
-  keyType: BigNumberish;
-}
-export interface RouterAddressSetEventEmittedResponse {
-  routerAddress: string;
+  pubkey: Arrayish;
 }
 export interface TransferEventEmittedResponse {
   from: string;
@@ -177,14 +162,25 @@ export interface TransferEventEmittedResponse {
 export interface WithdrewEventEmittedResponse {
   amount: BigNumberish;
 }
+export interface ClaimAndMintRequest {
+  r: Arrayish;
+  s: Arrayish;
+  v: BigNumberish;
+}
 export interface PKPNFT {
   /**
    * Payable: false
    * Constant: false
    * StateMutability: nonpayable
    * Type: constructor
+   * @param resolverAddress Type: address, Indexed: false
+   * @param _env Type: uint8, Indexed: false
    */
-  'new'(overrides?: ContractTransactionOverrides): Promise<ContractTransaction & TransactionRequest>;
+  'new'(
+    resolverAddress: string,
+    _env: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -221,6 +217,35 @@ export interface PKPNFT {
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
+   * Payable: true
+   * Constant: false
+   * StateMutability: payable
+   * Type: function
+   * @param keyType Type: uint256, Indexed: false
+   * @param derivedKeyId Type: bytes32, Indexed: false
+   * @param signatures Type: tuple[], Indexed: false
+   */
+  claimAndMint(
+    keyType: BigNumberish,
+    derivedKeyId: Arrayish,
+    signatures: ClaimAndMintRequest[],
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  contractResolver(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  env(overrides?: ContractCallOverrides): Promise<number>;
+  /**
    * Payable: false
    * Constant: true
    * StateMutability: view
@@ -231,69 +256,6 @@ export interface PKPNFT {
     tokenId: BigNumberish,
     overrides?: ContractCallOverrides
   ): Promise<boolean>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param keyType Type: uint256, Indexed: false
-   * @param freeMintId Type: uint256, Indexed: false
-   * @param ipfsCID Type: bytes, Indexed: false
-   * @param msgHash Type: bytes32, Indexed: false
-   * @param v Type: uint8, Indexed: false
-   * @param r Type: bytes32, Indexed: false
-   * @param s Type: bytes32, Indexed: false
-   */
-  freeMintGrantAndBurnNext(
-    keyType: BigNumberish,
-    freeMintId: BigNumberish,
-    ipfsCID: Arrayish,
-    msgHash: Arrayish,
-    v: BigNumberish,
-    r: Arrayish,
-    s: Arrayish,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param keyType Type: uint256, Indexed: false
-   * @param freeMintId Type: uint256, Indexed: false
-   * @param msgHash Type: bytes32, Indexed: false
-   * @param v Type: uint8, Indexed: false
-   * @param r Type: bytes32, Indexed: false
-   * @param s Type: bytes32, Indexed: false
-   */
-  freeMintNext(
-    keyType: BigNumberish,
-    freeMintId: BigNumberish,
-    msgHash: Arrayish,
-    v: BigNumberish,
-    r: Arrayish,
-    s: Arrayish,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   * @param freeMintId Type: uint256, Indexed: false
-   * @param msgHash Type: bytes32, Indexed: false
-   * @param v Type: uint8, Indexed: false
-   * @param r Type: bytes32, Indexed: false
-   * @param s Type: bytes32, Indexed: false
-   */
-  freeMintSigTest(
-    freeMintId: BigNumberish,
-    msgHash: Arrayish,
-    v: BigNumberish,
-    r: Arrayish,
-    s: Arrayish,
-    overrides?: ContractCallOverrides
-  ): Promise<void>;
   /**
    * Payable: false
    * Constant: true
@@ -328,6 +290,27 @@ export interface PKPNFT {
    * Constant: true
    * StateMutability: view
    * Type: function
+   */
+  getNextDerivedKeyId(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getPkpNftMetadataAddress(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getPkpPermissionsAddress(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
    * @param tokenId Type: uint256, Indexed: false
    */
   getPubkey(
@@ -339,12 +322,15 @@ export interface PKPNFT {
    * Constant: true
    * StateMutability: view
    * Type: function
-   * @param keyType Type: uint256, Indexed: false
    */
-  getUnmintedRoutedTokenIdCount(
-    keyType: BigNumberish,
-    overrides?: ContractCallOverrides
-  ): Promise<BigNumber>;
+  getRouterAddress(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getStakingAddress(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: true
@@ -379,19 +365,6 @@ export interface PKPNFT {
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param tokenId Type: uint256, Indexed: false
-   * @param ipfsCID Type: bytes, Indexed: false
-   */
-  mintGrantAndBurnSpecific(
-    tokenId: BigNumberish,
-    ipfsCID: Arrayish,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
    * Payable: true
    * Constant: false
    * StateMutability: payable
@@ -400,17 +373,6 @@ export interface PKPNFT {
    */
   mintNext(
     keyType: BigNumberish,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param tokenId Type: uint256, Indexed: false
-   */
-  mintSpecific(
-    tokenId: BigNumberish,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -441,33 +403,6 @@ export interface PKPNFT {
   /**
    * Payable: false
    * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  pkpNftMetadata(overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  pkpPermissions(overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param tokenId Type: uint256, Indexed: false
-   * @param keyType Type: uint256, Indexed: false
-   */
-  pkpRouted(
-    tokenId: BigNumberish,
-    keyType: BigNumberish,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: true
    * StateMutability: pure
    * Type: function
    * @param hash Type: bytes32, Indexed: false
@@ -493,13 +428,6 @@ export interface PKPNFT {
   renounceOwnership(
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   */
-  router(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: false
@@ -550,6 +478,17 @@ export interface PKPNFT {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
+   * @param newResolverAddress Type: address, Indexed: false
+   */
+  setContractResolver(
+    newResolverAddress: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
    * @param newFreeMintSigner Type: address, Indexed: false
    */
   setFreeMintSigner(
@@ -565,39 +504,6 @@ export interface PKPNFT {
    */
   setMintCost(
     newMintCost: BigNumberish,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param pkpNftMetadataAddress Type: address, Indexed: false
-   */
-  setPkpNftMetadataAddress(
-    pkpNftMetadataAddress: string,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param pkpPermissionsAddress Type: address, Indexed: false
-   */
-  setPkpPermissionsAddress(
-    pkpPermissionsAddress: string,
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   * @param routerAddress Type: address, Indexed: false
-   */
-  setRouterAddress(
-    routerAddress: string,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
   /**
@@ -686,19 +592,6 @@ export interface PKPNFT {
     newOwner: string,
     overrides?: ContractTransactionOverrides
   ): Promise<ContractTransaction & TransactionRequest>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   * @param parameter0 Type: uint256, Indexed: false
-   * @param parameter1 Type: uint256, Indexed: false
-   */
-  unmintedRoutedTokenIds(
-    parameter0: BigNumberish,
-    parameter1: BigNumberish,
-    overrides?: ContractCallOverrides
-  ): Promise<BigNumber>;
   /**
    * Payable: false
    * Constant: false

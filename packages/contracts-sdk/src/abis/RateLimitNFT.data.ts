@@ -1,5 +1,5 @@
 export const rateLimitNft = {
-  "address": "0x2D0f767eff47b44626832EcD2fda705eB9797c38",
+  "address": "0x429279F48df23A412b131A08cc592475f9e8C9AE",
   "abi": [
     {
       "inputs": [],

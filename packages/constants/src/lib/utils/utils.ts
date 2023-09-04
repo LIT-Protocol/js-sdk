@@ -1,30 +1,30 @@
 import { EITHER_TYPE } from '../enums';
-import { IEither } from '../interfaces/i-errors';
+import { IEither, ILitError } from '../interfaces/i-errors';
 
 /**
  *
  * This method should be used when there's an expected error
  *
- * @param { any } result
+ * @param errorMsg is the error message
  * @returns { IEither }
  */
-export const ELeft = (result: any): IEither => {
+export function ELeft<T>(errorMsg: ILitError): IEither<T> {
   return {
     type: EITHER_TYPE.ERROR,
-    result: result,
+    result: errorMsg,
   };
-};
+}
 
 /**
  *
  * This method should be used when there's an expected success outcome
  *
- * @param result
+ * @param result is the successful return value
  * @returns
  */
-export const ERight = (result: any): IEither => {
+export function ERight<T>(result: T): IEither<T> {
   return {
     type: EITHER_TYPE.SUCCESS,
-    result: result,
+    result,
   };
-};
+}
