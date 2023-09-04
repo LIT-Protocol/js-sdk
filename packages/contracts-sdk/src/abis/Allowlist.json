@@ -89,6 +89,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "allowAll",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -155,6 +168,19 @@
   {
     "inputs": [],
     "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "_allowAll",
+        "type": "bool"
+      }
+    ],
+    "name": "setAllowAll",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

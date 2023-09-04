@@ -7,7 +7,13 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target encryption"
+        "commands": [
+          "yarn build:target constants --skip",
+          "yarn build:target misc --skip",
+          "yarn build:target uint8arrays --skip",
+          "yarn build:target encryption"
+        ],
+        "parallel": false
       }
     },
     "_buildTsc": {

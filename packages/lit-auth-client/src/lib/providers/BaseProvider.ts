@@ -1,5 +1,6 @@
 import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { AuthCallback } from '../../../../../dist/packages/types/src/lib/interfaces';
 import {
   AuthCallbackParams,
   AuthMethod,
@@ -7,6 +8,8 @@ import {
   AuthenticateOptions,
   BaseProviderOptions,
   BaseProviderSessionSigsParams,
+  ClaimKeyResponse,
+  ClaimRequest,
   IRelay,
   IRelayPKP,
   IRelayRequestData,
@@ -143,8 +146,8 @@ export abstract class BaseProvider {
         if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
           const authSig = JSON.parse(params.authMethod.accessToken);
           response = await nodeClient.signSessionKey({
-            sessionKey: params.sessionSigsParams.sessionKey,
             statement: authCallbackParams.statement,
+            sessionKey: params.sessionSigsParams.sessionKey,
             authMethods: [],
             authSig: authSig,
             pkpPublicKey: params.pkpPublicKey,
@@ -178,13 +181,26 @@ export abstract class BaseProvider {
   }
 
   /**
+   * Authenticates an auth Method for claiming a Programmable Key Pair (PKP).
+   * Uses the underyling {@link litNodeClient} instance to authenticate a given auth method
+   * @param claimRequest
+   * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
+   */
+  public async claimKeyId(
+    claimRequest: ClaimRequest
+  ): Promise<ClaimKeyResponse> {
+    const res = await this.litNodeClient.claimKeyId(claimRequest);
+    return res;
+  }
+
+  /**
    * Generate request data for minting and fetching PKPs via relay server
    *
    * @param {AuthMethod} authMethod - Auth method obejct
    *
    * @returns {Promise<IRelayRequestData>} - Relay request data
    */
-  protected async prepareRelayRequestData(
+  public async prepareRelayRequestData(
     authMethod: AuthMethod
   ): Promise<IRelayRequestData> {
     const authMethodType = authMethod.authMethodType;

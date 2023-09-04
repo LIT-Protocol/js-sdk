@@ -4,12 +4,14 @@ import {
   AcceptedFileType,
   AccessControlConditions,
   Chain,
+  ClaimProcessor,
   ConditionType,
   EncryptedSymmetricKey,
   EvmContractConditions,
   IRelayAuthStatus,
   JsonRequest,
   LIT_NETWORKS_KEYS,
+  MintCallback,
   SolRpcConditions,
   SymmetricKey,
   UnifiedAccessControlConditions,
@@ -20,6 +22,10 @@ import {
   LitResourceAbilityRequest,
 } from '@lit-protocol/auth-helpers';
 import { BytesLike } from 'ethers';
+
+// @ts-ignore
+import * as JSZip from 'jszip/dist/jszip.js';
+import { AuthMethodType } from './enums';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -129,31 +135,26 @@ export interface IProvider {
 }
 
 /** ---------- Crypto ---------- */
-export interface EncryptedString {
-  symmetricKey: SymmetricKey;
-  encryptedString: Blob;
-  encryptedData?: Blob;
-}
-
 export interface EncryptedZip {
   symmetricKey: SymmetricKey;
   encryptedZip: Blob;
 }
 
-export interface ThreeKeys {
-  // zipBlob is a zip file that contains an encrypted file and the metadata needed to decrypt it via the Lit network.
-  zipBlob: any;
-
-  // encryptedSymmetricKey is the symmetric key needed to decrypt the content, encrypted with the Lit network public key.  You may wish to store encryptedSymmetricKey in your own database to support quicker re-encryption operations when adding additional access control conditions in the future, but this is entirely optional, and this key is already stored inside the zipBlob.
-  encryptedSymmetricKey: EncryptedSymmetricKey;
-
-  // symmetricKey is the raw symmetric key used to encrypt the files.  DO NOT STORE IT.  It is provided in case you wish to create additional "OR" access control conditions for the same file.
-  symmetricKey: SymmetricKey;
-}
-
 export interface DecryptZipFileWithMetadata {
   decryptedFile: Uint8Array;
-  metadata: string;
+  metadata: MetadataForFile;
+}
+
+export interface MetadataForFile {
+  name: string | any;
+  type: string | any;
+  size: string | number | any;
+  accessControlConditions: any[] | any;
+  evmContractConditions: any[] | any;
+  solRpcConditions: any[] | any;
+  unifiedAccessControlConditions: any[] | any;
+  chain: string;
+  dataToEncryptHash: string;
 }
 
 export interface EncryptedFile {
@@ -167,15 +168,30 @@ export interface DecryptFileProps {
 }
 
 export interface VerifyJWTProps {
+  publicKey: string;
   // A JWT signed by the LIT network using the BLS12-381 algorithm
   jwt: string;
 }
 
-export interface IJWT {
+export interface IJWT<T> {
   verified: boolean;
-  header: object;
-  payload: object;
+  header: JWTHeader;
+  payload: T;
   signature: Uint8Array;
+}
+
+export interface JWTHeader {
+  alg: string;
+  typ: string;
+}
+
+export interface SigningAccessControlConditionJWTPayload
+  extends MultipleAccessControlConditions {
+  iss: string;
+  sub: string;
+  chain?: string;
+  iat: number;
+  exp: number;
 }
 
 export interface HumanizedAccsProps {
@@ -212,6 +228,19 @@ export interface LitNodeClientConfig {
 
 export interface CustomNetwork {
   litNetwork: LIT_NETWORKS_KEYS;
+}
+
+export interface Signature {
+  r: string;
+  s: string;
+  v: number;
+}
+
+export interface ClaimKeyResponse {
+  signatures: Signature[];
+  claimedKeyId: string;
+  pubkey: string;
+  mintTx: string;
 }
 
 /**
@@ -314,6 +343,20 @@ export interface JsonSigningResourceId {
   extraData: string;
 }
 
+export interface MultipleAccessControlConditions {
+  // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  accessControlConditions?: AccessControlConditions;
+
+  // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  evmContractConditions?: EvmContractConditions;
+
+  // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.
+  solRpcConditions?: SolRpcConditions;
+
+  // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  unifiedAccessControlConditions?: UnifiedAccessControlConditions;
+}
+
 export interface JsonAccsRequest {
   // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
   accessControlConditions?: AccessControlConditions;
@@ -336,7 +379,7 @@ export interface JsonAccsRequest {
   // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
   authSig?: AuthSig;
 
-  sessionSigs?: SessionSigsMap;
+  sessionSigs?: SessionSig;
 }
 
 /**
@@ -360,11 +403,32 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
   sessionSigs?: any;
 }
 
-export interface JsonStoreSigningRequest extends JsonAccsRequest {
-  // Whether or not the access control condition should be saved permanently.  If false, the access control conditions will be updateable by the creator.  If you don't pass this param, it's set to true by default.
-  permanant?: boolean | 0 | 1;
-  permanent?: boolean | 0 | 1;
-  sessionSigs?: any;
+export interface GetSignedTokenRequest
+  extends SigningAccessControlConditionRequest {
+  sessionSigs?: SessionSigsMap;
+}
+
+export interface SigningAccessControlConditionRequest {
+  // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  accessControlConditions?: AccessControlConditions;
+
+  // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  evmContractConditions?: EvmContractConditions;
+
+  // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.
+  solRpcConditions?: SolRpcConditions;
+
+  // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  unifiedAccessControlConditions?: UnifiedAccessControlConditions;
+
+  // The chain name of the chain that you are querying.  See ALL_LIT_CHAINS for currently supported chains.
+  chain?: string;
+
+  // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
+  authSig?: SessionSig;
+
+  iat?: number;
+  exp?: number;
 }
 
 /**
@@ -411,24 +475,57 @@ export type ExecuteJsProps = JsonExecutionRequest & {
   debug?: boolean;
 };
 
-export interface JsonSaveEncryptionKeyRequest {
+export interface EncryptRequestBase {
   accessControlConditions?: AccessControlConditions;
   evmContractConditions?: EvmContractConditions;
   solRpcConditions?: SolRpcConditions;
   unifiedAccessControlConditions?: UnifiedAccessControlConditions;
-  authSig?: AuthSig;
+
   chain: Chain;
 
-  // The symmetric encryption key that was used to encrypt the locked content inside the LIT as a Uint8Array.  You should use zipAndEncryptString or zipAndEncryptFiles to get this encryption key.  This key will be hashed and the hash will be sent to the LIT nodes.  You must pass either symmetricKey or encryptedSymmetricKey.
-  symmetricKey: SymmetricKey;
-
-  // The encrypted symmetric key of the item you with to update.  You must pass either symmetricKey or encryptedSymmetricKey.
-  encryptedSymmetricKey?: EncryptedSymmetricKey;
-
-  permanant?: boolean | 0 | 1;
-  permanent?: boolean | 0 | 1;
-
+  authSig?: AuthSig;
   sessionSigs?: SessionSigsMap;
+}
+
+export interface EncryptRequest extends EncryptRequestBase {
+  // The data that you wish to encrypt as a Uint8Array
+  dataToEncrypt: Uint8Array;
+}
+
+export interface EncryptResponse {
+  // The base64-encoded ciphertext
+  ciphertext: string;
+  // The hash of the data that was encrypted
+  dataToEncryptHash: string;
+}
+
+export interface EncryptStringRequest extends EncryptRequestBase {
+  // String that you wish to encrypt
+  dataToEncrypt: string;
+}
+
+export interface EncryptZipRequest extends EncryptRequestBase {
+  zip: JSZip;
+}
+
+export interface EncryptFileRequest extends EncryptRequestBase {
+  file: AcceptedFileType;
+}
+
+export interface DecryptRequest extends EncryptRequestBase {
+  // The base64-encoded ciphertext
+  ciphertext: string;
+  // The hash of the data that was encrypted
+  dataToEncryptHash: string;
+}
+
+export interface DecryptResponse {
+  // The decrypted data as a Uint8Array
+  decryptedData: Uint8Array;
+}
+
+export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {
+  dataToEncryptHash: string;
 }
 
 export interface SignConditionECDSA {
@@ -475,9 +572,27 @@ export interface NodeShare {
   logs: any;
 }
 
-export interface SuccessNodePromises {
+export interface PKPSignShare {
   success: boolean;
-  values: Array<NodeShare>;
+  signedData: any;
+  signatureShare: any;
+}
+
+export interface NodeBlsSigningShare {
+  shareIndex: any;
+  unsignedJwt?: any;
+  signatureShare: BlsSignatureShare;
+  response?: any;
+  logs?: any;
+}
+
+export interface BlsSignatureShare {
+  ProofOfPossession: string;
+}
+
+export interface SuccessNodePromises<T> {
+  success: boolean;
+  values: Array<T>;
 }
 
 export interface RejectedNodePromises {
@@ -531,10 +646,9 @@ export interface NodeClientErrorV1 {
 
 export interface SigShare {
   sigType: any;
-  shareHex: any;
+  signatureShare: any;
   shareIndex: any;
-  localX: any;
-  localY: any;
+  bigR: string;
   publicKey: any;
   dataSigned: any;
   siweMessage?: string;
@@ -606,6 +720,11 @@ export interface SignWithECDSA {
   exp: number;
 }
 
+export interface CombinedECDSASignature {
+  r: string;
+  s: string;
+  recid: number;
+}
 export interface ValidateAndSignECDSA {
   accessControlConditions: AccessControlConditions;
   chain: Chain;
@@ -621,6 +740,7 @@ export interface JsonHandshakeResponse {
   subnetPubKey: string;
   networkPubKey: string;
   networkPubKeySet: string;
+  hdRootPubkeys: string[];
 }
 
 export interface EncryptToIpfsProps {
@@ -659,6 +779,29 @@ export interface EncryptToIpfsProps {
 
   // Your Infura API Key Secret
   infuraSecretKey: string;
+}
+
+export type EncryptToIpfsDataType = 'string' | 'file';
+
+export interface EncryptToIpfsPayload {
+  // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  accessControlConditions?: AccessControlConditions;
+
+  // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  evmContractConditions?: EvmContractConditions;
+
+  // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.
+  solRpcConditions?: SolRpcConditions;
+
+  // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  unifiedAccessControlConditions?: UnifiedAccessControlConditions;
+
+  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
+  chain: Chain;
+
+  ciphertext: string;
+  dataToEncryptHash: string;
+  dataType: EncryptToIpfsDataType;
 }
 
 export interface DecryptFromIpfsProps {
@@ -719,9 +862,6 @@ export interface DecryptZipFileWithMetadataProps {
 
   // An instance of LitNodeClient that is already connected
   litNodeClient: ILitNodeClient;
-
-  // Addtional access control conditions
-  additionalAccessControlConditions?: any[];
 }
 
 /**
@@ -1347,6 +1487,7 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    */
   accessToken: string;
   /* 
+  /*
    Stytch user identifier for a project
   */
   userId?: string;

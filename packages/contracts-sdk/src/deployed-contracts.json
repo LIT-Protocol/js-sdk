@@ -1,86 +1,86 @@
 [
   {
+    "name": "stakingBalancesContractAddress",
+    "correctedName": "StakingBalances",
+    "exportName": "stakingBalances",
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/StakingBalances.json",
+    "address": "0x7572015F5DC8BA3Eb52994D8F0fd64b3430c66ac"
+  },
+  {
     "name": "stakingContractAddress",
     "correctedName": "Staking",
     "exportName": "staking",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/Staking.json",
-    "address": "0x433357a14c35815E6A32758fe95c93380D194aaf"
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/Staking.json",
+    "address": "0x9E12B1E2F223845c4C9975bbc22eb65f5F776ec7"
   },
   {
     "name": "multisenderContractAddress",
     "correctedName": "Multisender",
     "exportName": "multisender",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/Multisender.json",
-    "address": "0x0EdD020f421adbB57D3efa5d2045a75E40385464"
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/Multisender.json",
+    "address": "0x56FFD19Ab3aF8F08c04c10CaCEca1aB3bA57E816"
   },
   {
     "name": "litTokenContractAddress",
     "correctedName": "LITToken",
     "exportName": "litToken",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/LITToken.json",
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/LITToken.json",
     "address": "0x53695556f8a1a064EdFf91767f15652BbfaFaD04"
-  },
-  {
-    "name": "accessControlConditionsContractAddress",
-    "correctedName": "AccessControlConditions",
-    "exportName": "accessControlConditions",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/AccessControlConditions.json",
-    "address": "0x8b353Bb9E26F2c2B8155f377982537C39AD01A1B"
   },
   {
     "name": "pubkeyRouterContractAddress",
     "correctedName": "PubkeyRouter",
     "exportName": "pubkeyRouter",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PubkeyRouter.json",
-    "address": "0xB35cC6CaB1501d5F3b6b8fcF3215898C9d03E981"
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/PubkeyRouter.json",
+    "address": "0x2D939F286Df45538e4c8DF38054090D3BE7fb736"
   },
   {
     "name": "pkpNftContractAddress",
     "correctedName": "PKPNFT",
     "exportName": "pkpNft",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPNFT.json",
-    "address": "0x8F75a53F65e31DD0D2e40d0827becAaE2299D111"
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/PKPNFT.json",
+    "address": "0xAC2159fA4DC095cA76E035415699446386229562"
   },
   {
     "name": "rateLimitNftContractAddress",
     "correctedName": "RateLimitNFT",
     "exportName": "rateLimitNft",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/RateLimitNFT.json",
-    "address": "0x2D0f767eff47b44626832EcD2fda705eB9797c38"
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/RateLimitNFT.json",
+    "address": "0x429279F48df23A412b131A08cc592475f9e8C9AE"
   },
   {
     "name": "pkpHelperContractAddress",
     "correctedName": "PKPHelper",
     "exportName": "pkpHelper",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPHelper.json",
-    "address": "0x8bB62077437D918891F12c7F35d9e1B78468bF11"
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/PKPHelper.json",
+    "address": "0x43db60069D175F4D77e49b46B99073d8297f00a3"
   },
   {
     "name": "pkpPermissionsContractAddress",
     "correctedName": "PKPPermissions",
     "exportName": "pkpPermissions",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPPermissions.json",
-    "address": "0x4Aed2F242E806c58758677059340e29E6B5b7619"
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/PKPPermissions.json",
+    "address": "0xA7DB2Bf287a728E0cD22806325a247997f978446"
   },
   {
     "name": "pkpNftMetadataContractAddress",
     "correctedName": "PKPNFTMetadata",
     "exportName": "pkpNftMetadata",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/PKPNFTMetadata.json",
-    "address": "0x4f7dBAfD2D9fF2bD4b2B00D470eCbe673e49c4D3"
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/PKPNFTMetadata.json",
+    "address": "0x7B56e2e5959525EAe4ba29973B51bCE97AAcDaf0"
   },
   {
     "name": "allowlistContractAddress",
     "correctedName": "Allowlist",
     "exportName": "allowlist",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/Allowlist.json",
-    "address": "0x81FB8e997E0908AD5792e6F8737245A1D78706E6"
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/Allowlist.json",
+    "address": "0x93C3309131A1bDa1fc7Fff5E744EAa7669C63A1F"
   },
   {
     "name": "resolverContractAddress",
     "correctedName": "ContractResolver",
     "exportName": "contractResolver",
-    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/LitNodeContracts/main/deployments/mumbai_80001/ContractResolver.json",
-    "address": "0xFCB3d8a54680e9337e3c8E60adC02F2aE8455A71"
+    "abiPath": "https://raw.githubusercontent.com/LIT-Protocol/lit-assets/develop/rust/lit-core/lit-blockchain/abis/ContractResolver.json",
+    "address": "0x886a8B9Ff6422eC0e05d96226ccD5970B886F8aD"
   }
 ]

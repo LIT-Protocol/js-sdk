@@ -15,7 +15,7 @@
 
       const LitJsSdk = LitJsSdk_litNodeClient;
 
-      const litNodeClient = new LitNodeClient({litNetwork: 'serrano'});
+      const litNodeClient = new LitNodeClient({litNetwork: 'cayenne'});
       litNodeClient.connect();
       
       var chain = "solana";
@@ -40,33 +40,17 @@
 
         var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
 
-        let resourceId = {
-          baseUrl: "my-dynamic-content-server.com",
-          path: randomPath(),
-          orgId: "",
-          role: "",
-          extraData: "",
-        };
-
-        await litNodeClient.saveSigningCondition({
-          solRpcConditions,
-          chain,
-          authSig,
-          resourceId,
-        });
-
         let jwt = await litNodeClient.getSignedToken({
           solRpcConditions,
           chain,
           authSig,
-          resourceId,
         });
         console.log("jwt", jwt);
 
         // uncomment this to break the jwt, to test an invalid jwt
         // jwt = jwt.replace(/.$/, "3");
 
-        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
+        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt, publicKey: litNodeClient.networkPubKey });
         console.log("verified", verified);
         console.log("header", header);
         console.log("payload", payload);
@@ -94,32 +78,27 @@
           { solRpcConditions }
         )}`;
 
-        const { encryptedZip, symmetricKey } =
-          await LitJsSdk.zipAndEncryptString("this is a secret message");
-
-        const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-          solRpcConditions,
-          symmetricKey,
-          authSig,
-          chain,
-        });
-
-        console.log("encrypted symmetric key", encryptedSymmetricKey);
-
-        const retrievedSymmKey = await litNodeClient.getEncryptionKey({
-          solRpcConditions,
-          toDecrypt: LitJsSdk.uint8arrayToString(
-            encryptedSymmetricKey,
-            "base16"
-          ),
-          chain,
-          authSig,
-        });
-
-        const decryptedFiles = await LitJsSdk.decryptZip(
-          encryptedZip,
-          retrievedSymmKey
+        const { ciphertext, dataToEncryptHash } = await LitJsSdk.zipAndEncryptString(
+          {
+            dataToEncrypt: 'this is a secret message',
+            solRpcConditions,
+            chain,
+            authSig,
+          },
+          litNodeClient,
         );
+
+        const decryptedFiles = await LitJsSdk.decryptToZip(
+          {
+            solRpcConditions,
+            chain,
+            authSig,
+            ciphertext,
+            dataToEncryptHash,
+          },
+          litNodeClient,
+        );
+
         const decryptedString = await decryptedFiles["string.txt"].async(
           "text"
         );

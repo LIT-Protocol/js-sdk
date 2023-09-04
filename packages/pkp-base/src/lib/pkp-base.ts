@@ -94,7 +94,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.setLitAction(prop);
     this.setLitActionJsParams(prop.litActionJsParams || {});
     this.litNodeClient = new LitNodeClient({
-      litNetwork: prop.litNetwork ?? 'serrano',
+      litNetwork: prop.litNetwork ?? 'cayenne',
       ...(prop.bootstrapUrls &&
         prop.litNetwork === 'custom' && { bootstrapUrls: prop.bootstrapUrls }),
       ...(prop.bootstrapUrls &&
@@ -360,14 +360,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           toSign: toSign,
           pubKey: this.uncompressedPubKey,
           authSig: this.controllerAuthSig as AuthSig,
-          authMethods: [],
+          authMethods: []
         });
       } else if (this.controllerSessionSigs) {
         sig = await this.litNodeClient.pkpSign({
           toSign,
           pubKey: this.uncompressedPubKey,
           authMethods: this.controllerAuthMethods ?? [],
-          sessionSigs: this.controllerSessionSigs,
+          sessionSigs: this.controllerSessionSigs
         });
       }
 

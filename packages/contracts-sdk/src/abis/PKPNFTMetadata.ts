@@ -63,17 +63,85 @@ export interface ContractCallOverrides {
    */
   gasLimit?: number;
 }
-export type PKPNFTMetadataEvents = undefined;
-export interface PKPNFTMetadataEventsContext {}
-export type PKPNFTMetadataMethodNames = 'new' | 'bytesToHex' | 'tokenURI';
+export type PKPNFTMetadataEvents =
+  | 'RoleAdminChanged'
+  | 'RoleGranted'
+  | 'RoleRevoked';
+export interface PKPNFTMetadataEventsContext {
+  RoleAdminChanged(...parameters: any): EventFilter;
+  RoleGranted(...parameters: any): EventFilter;
+  RoleRevoked(...parameters: any): EventFilter;
+}
+export type PKPNFTMetadataMethodNames =
+  | 'new'
+  | 'ADMIN_ROLE'
+  | 'DEFAULT_ADMIN_ROLE'
+  | 'WRITER_ROLE'
+  | 'bytesToHex'
+  | 'contractResolver'
+  | 'env'
+  | 'getRoleAdmin'
+  | 'grantRole'
+  | 'hasRole'
+  | 'removeProfileForPkp'
+  | 'removeUrlForPKP'
+  | 'renounceRole'
+  | 'revokeRole'
+  | 'setPKPHelperWriterAddress'
+  | 'setProfileForPKP'
+  | 'setUrlForPKP'
+  | 'supportsInterface'
+  | 'tokenURI';
+export interface RoleAdminChangedEventEmittedResponse {
+  role: Arrayish;
+  previousAdminRole: Arrayish;
+  newAdminRole: Arrayish;
+}
+export interface RoleGrantedEventEmittedResponse {
+  role: Arrayish;
+  account: string;
+  sender: string;
+}
+export interface RoleRevokedEventEmittedResponse {
+  role: Arrayish;
+  account: string;
+  sender: string;
+}
 export interface PKPNFTMetadata {
   /**
    * Payable: false
    * Constant: false
    * StateMutability: nonpayable
    * Type: constructor
+   * @param _resolver Type: address, Indexed: false
+   * @param _env Type: uint8, Indexed: false
    */
-  'new'(overrides?: ContractTransactionOverrides): Promise<ContractTransaction & TransactionRequest>;
+  'new'(
+    _resolver: string,
+    _env: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  ADMIN_ROLE(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  DEFAULT_ADMIN_ROLE(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  WRITER_ROLE(overrides?: ContractCallOverrides): Promise<string>;
   /**
    * Payable: false
    * Constant: true
@@ -88,7 +156,154 @@ export interface PKPNFTMetadata {
   /**
    * Payable: false
    * Constant: true
-   * StateMutability: pure
+   * StateMutability: view
+   * Type: function
+   */
+  contractResolver(overrides?: ContractCallOverrides): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  env(overrides?: ContractCallOverrides): Promise<number>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param role Type: bytes32, Indexed: false
+   */
+  getRoleAdmin(
+    role: Arrayish,
+    overrides?: ContractCallOverrides
+  ): Promise<string>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
+   */
+  grantRole(
+    role: Arrayish,
+    account: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
+   */
+  hasRole(
+    role: Arrayish,
+    account: string,
+    overrides?: ContractCallOverrides
+  ): Promise<boolean>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   */
+  removeProfileForPkp(
+    tokenId: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   */
+  removeUrlForPKP(
+    tokenId: BigNumberish,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
+   */
+  renounceRole(
+    role: Arrayish,
+    account: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param role Type: bytes32, Indexed: false
+   * @param account Type: address, Indexed: false
+   */
+  revokeRole(
+    role: Arrayish,
+    account: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param pkpHelperWriterAddress Type: address, Indexed: false
+   */
+  setPKPHelperWriterAddress(
+    pkpHelperWriterAddress: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   * @param imgUrl Type: string, Indexed: false
+   */
+  setProfileForPKP(
+    tokenId: BigNumberish,
+    imgUrl: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: false
+   * StateMutability: nonpayable
+   * Type: function
+   * @param tokenId Type: uint256, Indexed: false
+   * @param url Type: string, Indexed: false
+   */
+  setUrlForPKP(
+    tokenId: BigNumberish,
+    url: string,
+    overrides?: ContractTransactionOverrides
+  ): Promise<ContractTransaction & TransactionRequest>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param interfaceId Type: bytes4, Indexed: false
+   */
+  supportsInterface(
+    interfaceId: Arrayish,
+    overrides?: ContractCallOverrides
+  ): Promise<boolean>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
    * Type: function
    * @param tokenId Type: uint256, Indexed: false
    * @param pubKey Type: bytes, Indexed: false

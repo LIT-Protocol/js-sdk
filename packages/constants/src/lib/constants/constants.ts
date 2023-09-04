@@ -633,29 +633,17 @@ export const SYMM_KEY_ALGO_PARAMS = {
  *
  */
 export const LIT_NETWORKS = {
-  jalapeno: [
-    'https://node2.litgateway.com:7370',
-    'https://node2.litgateway.com:7371',
-    'https://node2.litgateway.com:7372',
-    'https://node2.litgateway.com:7373',
-    'https://node2.litgateway.com:7374',
-    'https://node2.litgateway.com:7375',
-    'https://node2.litgateway.com:7376',
-    'https://node2.litgateway.com:7377',
-    'https://node2.litgateway.com:7378',
-    'https://node2.litgateway.com:7379',
-  ],
-  serrano: [
-    'https://serrano.litgateway.com:7370',
-    'https://serrano.litgateway.com:7371',
-    'https://serrano.litgateway.com:7372',
-    'https://serrano.litgateway.com:7373',
-    'https://serrano.litgateway.com:7374',
-    'https://serrano.litgateway.com:7375',
-    'https://serrano.litgateway.com:7376',
-    'https://serrano.litgateway.com:7377',
-    'https://serrano.litgateway.com:7378',
-    'https://serrano.litgateway.com:7379',
+  cayenne: [
+    'https://cayenne.litgateway.com:7370',
+    'https://cayenne.litgateway.com:7371',
+    'https://cayenne.litgateway.com:7372',
+    'https://cayenne.litgateway.com:7373',
+    'https://cayenne.litgateway.com:7374',
+    'https://cayenne.litgateway.com:7375',
+    'https://cayenne.litgateway.com:7376',
+    'https://cayenne.litgateway.com:7377',
+    'https://cayenne.litgateway.com:7378',
+    'https://cayenne.litgateway.com:7379',
   ],
   localhost: [
     'http://localhost:7470',
@@ -686,3 +674,4 @@ export const AUTH_METHOD_TYPE_IDS = {
 
 // ========== PKP Client ==========
 export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
+export const TELEM_API_URL = 'https://lit-general-worker.getlit.dev';

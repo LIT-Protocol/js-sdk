@@ -3,8 +3,13 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_pkpNft",
+        "name": "_resolver",
         "type": "address"
+      },
+      {
+        "internalType": "enum ContractResolver.Env",
+        "name": "_env",
+        "type": "uint8"
       }
     ],
     "stateMutability": "nonpayable",
@@ -14,32 +19,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": false,
         "internalType": "address",
-        "name": "newPkpNftAddress",
+        "name": "newResolverAddress",
         "type": "address"
       }
     ],
-    "name": "PkpNftAddressSet",
+    "name": "ContractResolverAddressSet",
     "type": "event"
   },
   {
@@ -68,6 +54,12 @@
         "internalType": "uint256",
         "name": "keyType",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "derivedKeyId",
+        "type": "bytes32"
       }
     ],
     "name": "PubkeyRoutingDataSet",
@@ -78,22 +70,79 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "previousAdminRole",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "newAdminRole",
+        "type": "bytes32"
+      }
+    ],
+    "name": "RoleAdminChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "nodeAddress",
+        "name": "account",
         "type": "address"
       },
       {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "pubkey",
-        "type": "bytes"
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
       },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleRevoked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
       {
         "indexed": false,
         "internalType": "address",
@@ -101,14 +150,143 @@
         "type": "address"
       },
       {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "pubkey",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "keyType",
+            "type": "uint256"
+          }
+        ],
         "indexed": false,
-        "internalType": "uint256",
-        "name": "keyType",
-        "type": "uint256"
+        "internalType": "struct IPubkeyRouter.RootKey",
+        "name": "rootKey",
+        "type": "tuple"
       }
     ],
-    "name": "PubkeyRoutingDataVote",
+    "name": "RootKeySet",
     "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "ADMIN_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DEFAULT_ADMIN_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "r",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "s",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "v",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct IPubkeyRouter.Signature[]",
+        "name": "signatures",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signedMessage",
+        "type": "bytes"
+      },
+      {
+        "internalType": "address",
+        "name": "stakingContractAddress",
+        "type": "address"
+      }
+    ],
+    "name": "checkNodeSignatures",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "contractResolver",
+    "outputs": [
+      {
+        "internalType": "contract ContractResolver",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "pubkey",
+        "type": "bytes"
+      }
+    ],
+    "name": "deriveEthAddressFromPubkey",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "env",
+    "outputs": [
+      {
+        "internalType": "enum ContractResolver.Env",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [
@@ -132,12 +310,49 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "stakingContract",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "derivedKeyId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getDerivedPubkey",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
       }
     ],
     "name": "getEthAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPkpNftAddress",
     "outputs": [
       {
         "internalType": "address",
@@ -170,6 +385,56 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getRoleAdmin",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "stakingContract",
+        "type": "address"
+      }
+    ],
+    "name": "getRootKeys",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "pubkey",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "keyType",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IPubkeyRouter.RootKey[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
@@ -185,19 +450,61 @@
             "type": "bytes"
           },
           {
-            "internalType": "address",
-            "name": "stakingContract",
-            "type": "address"
-          },
-          {
             "internalType": "uint256",
             "name": "keyType",
             "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "derivedKeyId",
+            "type": "bytes32"
           }
         ],
         "internalType": "struct PubkeyRouter.PubkeyRoutingData",
         "name": "",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "grantRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "hasRole",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -223,78 +530,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "pkpNFT",
-    "outputs": [
-      {
-        "internalType": "contract PKPNFT",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "pubkeyRegistrations",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "pubkey",
-            "type": "bytes"
-          },
-          {
-            "internalType": "address",
-            "name": "stakingContract",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "keyType",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct PubkeyRouter.PubkeyRoutingData",
-        "name": "routingData",
-        "type": "tuple"
-      },
-      {
-        "internalType": "uint256",
-        "name": "nodeVoteCount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "nodeVoteThreshold",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -310,9 +545,74 @@
         "type": "bytes"
       },
       {
+        "internalType": "uint256",
+        "name": "keyType",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "derivedKeyId",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
         "internalType": "address",
-        "name": "stakingContract",
+        "name": "account",
         "type": "address"
+      }
+    ],
+    "name": "renounceRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "revokeRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "rootKeys",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "pubkey",
+        "type": "bytes"
       },
       {
         "internalType": "uint256",
@@ -324,21 +624,14 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
-        "name": "newPkpNftAddress",
+        "name": "newResolverAddress",
         "type": "address"
       }
     ],
-    "name": "setPkpNftAddress",
+    "name": "setContractResolver",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -357,13 +650,18 @@
       },
       {
         "internalType": "address",
-        "name": "stakingContract",
+        "name": "stakingContractAddress",
         "type": "address"
       },
       {
         "internalType": "uint256",
         "name": "keyType",
         "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "derivedKeyId",
+        "type": "bytes32"
       }
     ],
     "name": "setRoutingData",
@@ -374,19 +672,6 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
@@ -405,11 +690,89 @@
         "internalType": "uint256",
         "name": "keyType",
         "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "derivedKeyId",
+        "type": "bytes32"
       }
     ],
-    "name": "voteForRoutingData",
+    "name": "setRoutingDataAsAdmin",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "interfaceId",
+        "type": "bytes4"
+      }
+    ],
+    "name": "supportsInterface",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "stakingContractAddress",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "pubkey",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "keyType",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IPubkeyRouter.RootKey[]",
+        "name": "newRootKeys",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "voteForRootKeys",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "name": "votesToRegisterRootKeys",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "votes",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ]
