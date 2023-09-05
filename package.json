@@ -103,7 +103,6 @@
     "find-config": "^1.0.0",
     "g": "^2.0.1",
     "https-browserify": "^1.0.0",
-    "ipfs-http-client": "56.0.0",
     "ipfs-unixfs-importer": "^12.0.0",
     "jose": "^4.14.4",
     "jszip": "^3.10.1",
@@ -182,7 +181,9 @@
     "ts-jest": "27.1.4",
     "ts-node": "10.9.1",
     "typedoc": "^0.23.10",
-    "typescript": "~4.7.2"
+    "typescript": "~4.7.2",
+    "webpack-bundle-analyzer": "^4.9.1",
+    "webpack-cli": "^5.1.4"
   },
   "workspaces": [
     "packages/*"

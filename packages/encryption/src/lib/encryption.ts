@@ -35,11 +35,15 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
+import {
+  checkType,
+  isBrowser,
+  isNode,
+  log,
+  throwError,
+} from '@lit-protocol/misc';
 
 import { safeParams } from './params-validators';
-
-import * as ipfsClient from 'ipfs-http-client';
 
 /**
  *
@@ -117,30 +121,53 @@ export const encryptToIpfs = async (
     dataType = 'file';
   }
 
-  const authorization =
-    'Basic ' + Buffer.from(`${infuraId}:${infuraSecretKey}`).toString('base64');
-  const ipfs = ipfsClient.create({
-    url: 'https://ipfs.infura.io:5001/api/v0',
-    headers: {
-      authorization,
-    },
-  });
+  // -- params
+  const { payload, boundary } = createPayload(
+    JSON.stringify({
+      ciphertext,
+      dataToEncryptHash,
+      accessControlConditions,
+      evmContractConditions,
+      solRpcConditions,
+      unifiedAccessControlConditions,
+      chain,
+      dataType,
+    } as EncryptToIpfsPayload)
+  );
+
+  let data: any;
 
   try {
-    const res = await ipfs.add(
-      JSON.stringify({
-        ciphertext,
-        dataToEncryptHash,
-        accessControlConditions,
-        evmContractConditions,
-        solRpcConditions,
-        unifiedAccessControlConditions,
-        chain,
-        dataType,
-      } as EncryptToIpfsPayload)
+    const res = await fetch(
+      `https://ipfs.infura.io:5001/api/v0/add?pin=true&cid-version=1&hash=sha2-256`,
+      {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'Content-Type': `multipart/form-data; boundary=${boundary}`,
+          authorization: `Basic ${Buffer.from(
+            `${infuraId}:${infuraSecretKey}`
+          ).toString('base64')}`,
+        },
+        body: payload,
+      }
     );
 
-    return res.path;
+    // -- check status
+    if (res.status !== 200) {
+      return throwError({
+        message: `InfuraProvider - store - status: ${res.status} - ${res.statusText}`,
+        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
+      });
+    }
+
+    data = await res.json();
+
+    data = {
+      IPFSHash: data.Hash,
+      raw: data,
+    };
   } catch (e) {
     return throwError({
       message: 'Unable to upload to IPFS',
@@ -148,6 +175,8 @@ export const encryptToIpfs = async (
       errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
     });
   }
+
+  return data.Hash;
 };
 
 /**
@@ -790,4 +819,32 @@ export const verifyJwt = ({
   };
 
   return _jwt;
+};
+
+export const createPayload = (serialisedData: string) => {
+  let payload;
+  const boundary = '---------------------------' + Date.now().toString(16); // Generate a unique boundary
+
+  if (isNode()) {
+    const { Readable } = require('stream');
+    const buffer = Buffer.from(serialisedData, 'utf8');
+    const stream = Readable.from(buffer);
+    stream.path = 'string.txt';
+
+    payload = `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="string.txt"\r\nContent-Type: text/plain\r\n\r\n${buffer.toString()}\r\n--${boundary}--\r\n`;
+  }
+
+  if (isBrowser()) {
+    const buffer = new TextEncoder().encode(serialisedData);
+
+    payload = `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="string.txt"\r\nContent-Type: text/plain\r\n\r\n${new TextDecoder().decode(
+      buffer
+    )}\r\n--${boundary}--\r\n`;
+  }
+
+  if (!payload) {
+    throw new Error('Payload is undefined');
+  }
+
+  return { payload, boundary };
 };
