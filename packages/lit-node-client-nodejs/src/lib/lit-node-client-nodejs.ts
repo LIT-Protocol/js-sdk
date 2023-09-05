@@ -79,7 +79,6 @@ import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'lit-siwe';
 
 import { LitCore } from '@lit-protocol/core';
-import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 import {
   ILitResource,
@@ -704,12 +703,9 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // determine which node to run on
-    let ipfsId;
+    let hashId;
 
     if (params.code) {
-      // hash the code to get IPFS id
-      const blockstore = new IPFSBundledSDK.MemoryBlockstore();
-
       let content: string | Uint8Array = params.code;
 
       if (typeof content === 'string') {
@@ -723,25 +719,14 @@ export class LitNodeClientNodeJs extends LitCore {
         });
       }
 
-      let lastCid;
-      for await (const { cid } of IPFSBundledSDK.importer(
-        [{ content }],
-        blockstore,
-        {
-          onlyHash: true,
-        }
-      )) {
-        lastCid = cid;
-      }
-
-      ipfsId = lastCid;
+      hashId = sha256(content);
     } else {
-      ipfsId = params.ipfsId;
+      hashId = params.ipfsId;
     }
 
-    if (!ipfsId) {
+    if (!hashId) {
       return throwError({
-        message: 'ipfsId is required',
+        message: 'hashId is required',
         error: LIT_ERROR.INVALID_PARAM_TYPE,
       });
     }
@@ -752,7 +737,7 @@ export class LitNodeClientNodeJs extends LitCore {
     let nodeCounter = 0;
 
     while (randomSelectedNodeIndexes.length < targetNodeRange) {
-      const str = `${nodeCounter}:${ipfsId.toString()}`;
+      const str = `${nodeCounter}:${hashId.toString()}`;
       const cidBuffer = Buffer.from(str);
       const hash = sha256(cidBuffer);
       const hashAsNumber = BigNumber.from(hash);
