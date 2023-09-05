@@ -24,7 +24,10 @@ import {
   BaseAuthenticateOptions,
 } from '@lit-protocol/types';
 
-const version = '0.0.726';
+// @ts-ignore
+import * as JSZip from 'jszip/dist/jszip.js';
+
+const version = '0.0.753';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -184,7 +187,25 @@ export async function convertContentMaterial(
 ): Promise<LitSerialized<Uint8Array>> {
   let result: Uint8Array | null = null;
 
-  if (typeof input === 'string') {
+  // (Browser only)
+  if (typeof FileList !== 'undefined' && input instanceof FileList) {
+    let zip;
+
+    try {
+      zip = new JSZip.default();
+    } catch (e) {
+      zip = new JSZip();
+    }
+
+    for (let i = 0; i < input.length; i++) {
+      const file = input.item(i);
+      if (file) {
+        const fileContent = await file.arrayBuffer();
+        zip.file(file.name, fileContent);
+      }
+    }
+    result = await zip.generateAsync({ type: 'uint8array' });
+  } else if (typeof input === 'string') {
     result = new TextEncoder().encode(input);
   } else if (input instanceof ArrayBuffer) {
     result = new Uint8Array(input);
@@ -700,7 +721,7 @@ loadLit.withPersistentStorage({
   },
 },
 });`,
-usageAnalyticsNotice: `
+  usageAnalyticsNotice: `
 ========================================================================\n
 NOTICE: We're collecting anonymous usage data to help improve our product.\n
 Your privacy is important to us. We only collect data that helps us understand how our product is being used.\n
