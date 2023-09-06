@@ -22,9 +22,11 @@ export default class WebAuthnProvider extends BaseProvider {
 
   constructor(options: BaseProviderOptions & WebAuthnProviderOptions) {
     super(options);
-    this.rpName = options.rpName || 'lit';
+    // the caller should just pass this in or things will get weird on the node side.
+    // We might want to remove configuring this property and just use the `rpId` as the `app_id`
+    this.rpName = options.rpName || getRPIdFromOrigin(window.location.origin);
   }
-
+  
   /**
    * Generate registration options for the browser to pass to a supported authenticator
    *
