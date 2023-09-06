@@ -1,7 +1,7 @@
 import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { AuthCallback } from '../../../../../dist/packages/types/src/lib/interfaces';
 import {
+  AuthCallback,
   AuthCallbackParams,
   AuthMethod,
   AuthSig,
