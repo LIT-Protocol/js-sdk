@@ -2075,7 +2075,7 @@ export class LitNodeClientNodeJs extends LitCore {
       const derivedKeyId = (responseData as SuccessNodePromises<any>).values[0]
         .derivedKeyId;
 
-      const pubkey: string = this.computePubKey(derivedKeyId);
+      const pubkey: string = this.computeHDPubKey(derivedKeyId);
 
       let mintTx = '';
       if (params.mintCallback) {

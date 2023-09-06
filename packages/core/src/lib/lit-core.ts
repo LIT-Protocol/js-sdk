@@ -579,7 +579,7 @@ export class LitCore {
    * @param sigType
    * @returns {string} public key
    */
-  computePubKey = (keyId: string, sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith) => {
+  computeHDPubKey = (keyId: string, sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith) => {
     if (!this.hdRootPubkeys) {
       throwError({
         message: `root public keys not found, have you connected to the nodes?`,
@@ -590,6 +590,13 @@ export class LitCore {
     return computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
   };
 
+
+  /**
+   * Telem collector for function invokation counts
+   * @param date 
+   * @param functionName 
+   * @param executionTime 
+   */
   collectData = (date: string, functionName: string, executionTime: number) => {
     fetch(TELEM_API_URL + '/collect', {
       method: 'POST',
