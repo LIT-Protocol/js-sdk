@@ -58,13 +58,11 @@ export const GEN_FOOTER_SCRIPTS = `
     window.onload = function() {
         [...document.getElementsByClassName('key')].forEach((e) => {
             e.addEventListener('mouseover', (ele) => {
-                var code = ele.target.nextElementSibling.innerText;
-                document.getElementById('result').innerText = code;
-            });
+                var code = ele?.target?.nextElementSibling?.innerText;
 
-            // e.addEventListener('click', (ele) => {
-            //     ele.target.classList.add('active')
-            // });
+                if(code === undefined) return;
+                document.getElementById('result').innerText = \`\${code}\`;
+            });
         });
     };
 </script>`;
@@ -94,75 +92,122 @@ export const getConsoleTemplate = (
   const capitalisedName = name.split(globalVarPrefix)[1].toUpperCase();
 
   return `
-    ${!isReact ? `<!-- (${i + 1}): ${capitalisedName} -->` : ''}
-    ${!isReact ? `<script>` : ''}
-        if(typeof ${name} === 'undefined') {
-            console.error("${name}:", ${name});
-        }else{
-            console.warn("${name}:", ${name});
-            window.${name} = ${name};
-        }
-        window.addEventListener('load', function() {
+      ${!isReact ? `<!-- (${i + 1}): ${capitalisedName} -->` : ''}
+      ${!isReact ? `<script>` : ''}
+          if(typeof ${name} === 'undefined') {
+              console.error("${name}:", ${name});
+          }else{
+              console.warn("${name}:", ${name});
+              window.${name} = ${name};
+          }
+          window.addEventListener('load', function() {
+  
+              var root = document.getElementById('root');
+              var result = document.getElementById('result');
+              var entries = Object.entries(${name});
+              var lis = entries.map(([key, value]) => {
+                  let nestedFunctions = '';
+                  if (typeof value === 'object') {
+                      nestedFunctions = Object.entries(value)
+                          .filter(([k, v]) => typeof v === 'function')
+                          .map(([k, v]) => \`<li class='key' onClick="(async(e) => {
 
-            var root = document.getElementById('root');
-            var result = document.getElementById('result');
-            var entries = Object.entries(${name});
-            var lis = entries.map(([key, value]) => \`
-            <li>
-                <div id="${name}_\${key}" class="key" onClick="(async (e) => {
-                    var fn = ${name}['\${key}'];
-                    var fnType = typeof fn;
-                    console.warn('[\${key}] is type of [' + fnType + ']');
-
-                    if ( fnType === 'string' ) return;
-
-                    if( fnType === 'function' ){
-                        try{
-                            console.log('params:', globalThis.params);
-
-                            var res;
-                            try{
-                                res = new fn(globalThis.params);
-                            }catch{
-                                res = await fn(globalThis.params);
+                            var fn = ${name}['\${key}']['\${k}'];
+                            var fnType = typeof fn;
+                            console.warn('[\${key}] is type of [' + fnType + ']');
+    
+                            if ( fnType === 'string' ) return;
+    
+                            if( fnType === 'function' ){
+                                try{
+                                    console.log('params:', globalThis.params);
+    
+                                    var res;
+                                    try{
+                                        res = new fn(globalThis.params);
+                                    }catch{
+                                        res = await fn(globalThis.params);
+                                    }
+                                    window.output = res;
+                                    res = JSON.stringify(res, null, 2);
+                                    result.innerText = res;
+                                    console.log(res);
+                                }catch(e){
+                                    console.error('Please set the [params] variable in the console then click again');
+                                    console.log(e);
+                                }
+                                return;
                             }
-                            window.output = res;
-                            res = JSON.stringify(res, null, 2);
-                            result.innerText = res;
-                            console.log(res);
-                        }catch(e){
-                            console.error('Please set the [params] variable in the console then click again');
-                            console.log(e);
-                        }
-                        return;
-                    }
-
-                    if( fnType === 'object' ){
-                        var res = await fn;
-                        window.output = res;
-                        res = JSON.stringify(res, null, 2);
-                        result.innerText = res;
-                        console.log(res);
-                        return;
-                    }
-                    
-                    
-                })();">\${key}</div>
-                <pre class="code">
-<code>\${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
-                </pre>
-            </li>\`);
-            lis = lis.join(' ');
-            var template = \`
-            <div class="cat">
-                <h1>${name} has \${entries.length} functions</h1>
-                    <ul>
-                        \${ lis }
-                    </ul>
-                </div>
-            \`;
-            root.insertAdjacentHTML('beforeend', template);
-        });
-    ${!isReact ? `</script>` : ''}
-    `;
+    
+                            if( fnType === 'object' ){
+                                var res = await fn;
+                                window.output = res;
+                                res = JSON.stringify(res, null, 2);
+                                result.innerText = res;
+                                console.log(res);
+                                return;
+                            }
+                          })();">\${k}</li>\`)
+                          .join('');
+                      nestedFunctions = nestedFunctions ? \`<ul>\${nestedFunctions}</ul>\` : '';
+                  }
+                  return \`
+                  <li>
+                      <div id="${name}_\${key}" class="key" onClick="(async (e) => {
+                          var fn = ${name}['\${key}'];
+                          var fnType = typeof fn;
+                          console.warn('[\${key}] is type of [' + fnType + ']');
+  
+                          if ( fnType === 'string' ) return;
+  
+                          if( fnType === 'function' ){
+                              try{
+                                  console.log('params:', globalThis.params);
+  
+                                  var res;
+                                  try{
+                                      res = new fn(globalThis.params);
+                                  }catch{
+                                      res = await fn(globalThis.params);
+                                  }
+                                  window.output = res;
+                                  res = JSON.stringify(res, null, 2);
+                                  result.innerText = res;
+                                  console.log(res);
+                              }catch(e){
+                                  console.error('Please set the [params] variable in the console then click again');
+                                  console.log(e);
+                              }
+                              return;
+                          }
+  
+                          if( fnType === 'object' ){
+                              var res = await fn;
+                              window.output = res;
+                              res = JSON.stringify(res, null, 2);
+                              result.innerText = res;
+                              console.log(res);
+                              return;
+                          }
+                          
+                      })();">\${key}</div>
+                      <pre class="code">
+                          <code>\${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                      </pre>
+                      \${nestedFunctions}
+                  </li>\`;
+              });
+              lis = lis.join(' ');
+              var template = \`
+              <div class="cat">
+                  <h1>${name} has \${entries.length} functions</h1>
+                  <ul>
+                      \${ lis }
+                  </ul>
+              </div>
+              \`;
+              root.insertAdjacentHTML('beforeend', template);
+          });
+      ${!isReact ? `</script>` : ''}
+      `;
 };
