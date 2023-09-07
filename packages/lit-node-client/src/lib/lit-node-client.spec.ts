@@ -1,7 +1,7 @@
 import { LitNodeClient } from './lit-node-client';
 import * as LITCONFIG from 'lit.config.json';
 import { processTx } from '../../../../tx-handler';
-import { AuthSig } from '@lit-protocol/types';
+import { AuthSig, RelayClaimProcessor } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { SIGTYPE } from '@lit-protocol/constants';
 import { AuthMethodType } from '../../../types/src/lib/enums';
@@ -109,7 +109,7 @@ describe('Lit Actions', () => {
 
   
   it('should claim key id from auth method', async () => {
-    let res = await client.claimKeyId({
+    let res = await client.claimKeyId<RelayClaimProcessor>({
       authMethod: {
         authMethodType: 6,
         accessToken:
