@@ -246,14 +246,17 @@ export const combineEcdsaShares = (
   return sig;
 };
 
-export const computeHDPubKey = (pubkeys: string[], keyId: string, sigType: SIGTYPE): string => {
+export const computeHDPubKey = (
+  pubkeys: string[],
+  keyId: string,
+  sigType: SIGTYPE
+): string => {
   // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
-
   try {
     switch (sigType) {
       case SIGTYPE.EcdsaCaitSith:
         return wasmECDSA.compute_public_key(keyId, pubkeys, 2);
-      defualt: throw new Error('Non supported signature type');
+        defualt: throw new Error('Non supported signature type');
     }
   } catch (e) {
     log('Failed to derive public key', e);
