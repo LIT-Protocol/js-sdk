@@ -9,10 +9,12 @@ import {
   BaseProviderOptions,
   BaseProviderSessionSigsParams,
   ClaimKeyResponse,
+  ClaimProcessor,
   ClaimRequest,
   IRelay,
   IRelayPKP,
   IRelayRequestData,
+  RelayClaimProcessor,
   SessionSigs,
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
@@ -186,8 +188,8 @@ export abstract class BaseProvider {
    * @param claimRequest 
    * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
    */
-  public async claimKeyId(claimRequest: ClaimRequest): Promise<ClaimKeyResponse> {
-      const res = await this.litNodeClient.claimKeyId(claimRequest);
+  public async claimKeyId<T=ClaimProcessor>(claimRequest: ClaimRequest<T>): Promise<ClaimKeyResponse> {
+      const res = await this.litNodeClient.claimKeyId<T>(claimRequest);
       return res;
   }
 
