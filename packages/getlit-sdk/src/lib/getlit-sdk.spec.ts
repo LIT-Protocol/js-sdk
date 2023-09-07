@@ -133,7 +133,7 @@ describe('getlitSDK', () => {
       authMaterial: LITCONFIG.CONTROLLER_AUTHSIG,
     });
 
-    expect(typeof res).toBe('string');
-    expect(res).toEqual(message);
+    expect(typeof res.data).toBe('string');
+    expect(res.data).toEqual(message);
   }, 100_000);
 });
