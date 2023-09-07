@@ -27,7 +27,7 @@
   "buildOptions": {
     "genReact": false
   },
-  "version": "2.2.50",
+  "version": "2.2.54",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
