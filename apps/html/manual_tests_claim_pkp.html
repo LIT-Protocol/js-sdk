@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+    <title>Manual Tests</title>
+
+    <script src="/dist/packages/lit-node-client-vanilla/lit-node-client.js" type="application/javascript"></script>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <script>
+      window.exports = {};
+    </script>
+    <script src="/dist/packages/lit-auth-client-vanilla/lit-auth-client.js"> </script>
+    <script type="module">
+      import { StytchUIClient } from "https://cdn.jsdelivr.net/npm/@stytch/vanilla-js/dist/index.esm.js";
+
+      const LitJsSdk = LitJsSdk_litNodeClient;
+
+      const litNodeClient = new LitNodeClient({
+        litNetwork: 'cayenne',
+      });
+      litNodeClient.connect();
+
+      
+
+      const client = new StytchUIClient('public-token-test-8e477945-fabe-40be-97a8-39bec393a9e9');
+
+      var sendStytchOTP = async () => {
+        const testName = 'Claim Stytch PKP';
+        document.getElementById('status').innerText = `${testName}: Testing...`;
+
+        
+
+        const email = "chris@litprotocol.com"; // email address
+
+        window.stytchResponse = await client.otps.email.loginOrCreate(email, {
+          expiration_minutes: 5,
+        });
+
+        
+
+        document.getElementById('status').innerText = `${testName}: OTP Sent`;
+      };
+
+      const verifyAndClaimPKP = async (otp) => {
+        console.log(`verifying otp: ${otp} with method id ${stytchResponse.method_id}`);
+        const authResponse = await client.otps.authenticate(otp, stytchResponse.method_id, {
+          session_duration_minutes: 60,
+          method_id: stytchResponse.method_id
+        });
+
+        let sessionResp = client.session.getSync();
+        // let sessionResp = await client.sessions.get({
+        //   user_id: authResponse.user_id
+        // });
+
+        const authClient = new LitAuthClient({
+          litRelayConfig: {
+              relayApiKey: "test_chris",
+          }
+        });
+
+        console.log('sessionResp: ', sessionResp);
+        const session = authClient.initProvider('stytchOtp', {
+          userId: sessionResp.user_id,
+          appId: "project-test-9a8fd689-f273-49f1-8a16-1a30f42f4cfb"
+        })
+
+        console.log('session: ', session);
+
+        const authMethod = await session.authenticate({ 
+          accessToken: sessionStatus.session_jwt 
+        });
+
+        const claimResp = session.claimKeyId({
+          authMethod
+        });
+
+        console.log("mint tx hash: ", res.mintTx);
+        console.log("pkp public key: ", res.pubkey);
+      }
+
+      
+
+      var logout = async () => {
+        const testName = 'Logout';
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+
+        LitJsSdk.disconnectWeb3();
+
+        document.getElementById(
+          'status'
+        ).innerText = `${testName}: Success - Logged out`;
+      };
+
+      document.addEventListener(
+        'lit-ready',
+        function (e) {
+          console.log('LIT network is ready');
+          document.getElementById('networkStatus').innerText =
+            'Success!  Connected to Lit Protocol Network';
+        },
+        false
+      );
+
+      function isNodeStorageError(errorCode) {
+        return (
+          errorCode === 'storage_error' || errorCode === 'NodeStorageError'
+        );
+      }
+
+      window.sendStytchOTP = sendStytchOTP;
+      window.verifyAndClaimPKP = verifyAndClaimPKP;
+      window.logout = logout;
+    </script>
+  </head>
+
+  <body>
+    <h1>Manual tests</h1>
+    <br />
+    <br />
+    <div id="networkStatus">Connecting to Lit Protocol Network...</div>
+    <br />
+    <br />
+    <button onclick="sendStytchOTP()">Send Stytch OTP</button>
+    <br />
+    <br />
+    <input id="otp" type="text" placeholder="OTP" />
+    <button onclick="verifyAndClaimPKP(document.getElementById('otp').value)">Verify and Claim PKP</button>
+    
+
+    <button onclick="logout()">Logout</button>
+    <br />
+    <br />
+    <h2 id="status"></h2>
+    <br />
+    <p id="humanized"></p>
+  </body>
+</html>
