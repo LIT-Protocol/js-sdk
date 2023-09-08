@@ -311,6 +311,11 @@ export class LitCore {
         return data;
       })
       .catch((error) => {
+        console.error(
+          'Something went wrong, internal id for request: ',
+          'lit_' + requestId,
+          'Please provide this identifier with any support requests'
+        );
         return Promise.reject(error);
       });
   };
@@ -581,26 +586,29 @@ export class LitCore {
 
   /**
    * Calculates an HD public key from a given {@link keyId} the curve type or signature type will assumed to be k256 unless given
-   * @param keyId 
-   * @param sigType 
+   * @param keyId
+   * @param sigType
    * @returns {string} public key
    */
-  computePubKey = (keyId: string, sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith) => {
-    if(!this.hdRootPubkeys) {
+  computeHDPubKey = (keyId: string, sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith) => {
+    if (!this.hdRootPubkeys) {
       throwError({
         message: `root public keys not found, have you connected to the nodes?`,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
-      }); 
+      });
     }
     return computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
-  }
+  };
 
-  collectData = (
-    date: string,
-    functionName: string,
-    executionTime: number
-  ) => {
+
+  /**
+   * Telem collector for function invokation counts
+   * @param date 
+   * @param functionName 
+   * @param executionTime 
+   */
+  collectData = (date: string, functionName: string, executionTime: number) => {
     fetch(TELEM_API_URL + '/collect', {
       method: 'POST',
       headers: {
@@ -608,5 +616,5 @@ export class LitCore {
       },
       body: JSON.stringify({ date, functionName, executionTime }),
     });
-  }
+  };
 }

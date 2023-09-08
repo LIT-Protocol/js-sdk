@@ -16,7 +16,6 @@ import {
   encrypt,
   generateSessionKeyPair,
   verifyAndDecryptWithSignatureShares,
-  computeHDPubKey,
 } from '@lit-protocol/crypto';
 import { safeParams } from '@lit-protocol/encryption';
 import {
@@ -49,7 +48,6 @@ import {
   GetWalletSigProps,
   JsonExecutionRequest,
   JsonPkpSignRequest,
-  JsonSignChainDataRequest,
   LitNodeClientConfig,
   NodeBlsSigningShare,
   NodeCommandResponse,
@@ -2031,7 +2029,9 @@ export class LitNodeClientNodeJs extends LitCore {
    * @param {ClaimKeyRequest} params an Auth Method and {@link MintCallback}
    * @returns {Promise<ClaimKeyResponse>}
    */
-  async claimKeyId<T = ClaimProcessor>(params: ClaimRequest<T>): Promise<ClaimKeyResponse> {
+  async claimKeyId<T = ClaimProcessor>(
+    params: ClaimRequest<T>
+  ): Promise<ClaimKeyResponse> {
     if (!this.ready) {
       const message =
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
@@ -2042,10 +2042,7 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
-    if (
-      params.authMethod.authMethodType === AuthMethodType.WebAuthn ||
-      params.authMethod.authMethodType === AuthMethodType.LitAction
-    ) {
+    if (params.authMethod.authMethodType === AuthMethodType.LitAction) {
       throwError({
         message:
           'Unsupported auth method type. Webauthn, and Lit Actions are not supported for claiming',
@@ -2078,7 +2075,7 @@ export class LitNodeClientNodeJs extends LitCore {
       const derivedKeyId = (responseData as SuccessNodePromises<any>).values[0]
         .derivedKeyId;
 
-      const pubkey: string = this.computePubKey(derivedKeyId);
+      const pubkey: string = this.computeHDPubKey(derivedKeyId);
 
       let mintTx = '';
       if (params.mintCallback) {
@@ -2087,9 +2084,9 @@ export class LitNodeClientNodeJs extends LitCore {
           authMethodType: params.authMethod.authMethodType,
           signatures: nodeSignatures,
           pubkey,
-          signer: (params as ClaimRequest<"client">).signer,
-          relayUrl: (params as ClaimRequest<"relay">).relayUrl,
-          relayApiKey: (params as ClaimRequest<"relay">).relayApiKey
+          signer: (params as ClaimRequest<'client'>).signer,
+          relayUrl: (params as ClaimRequest<'relay'>).relayUrl,
+          relayApiKey: (params as ClaimRequest<'relay'>).relayApiKey,
         });
       }
 

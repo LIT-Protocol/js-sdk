@@ -1,7 +1,7 @@
 import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { AuthCallback } from '../../../../../dist/packages/types/src/lib/interfaces';
 import {
+  AuthCallback,
   AuthCallbackParams,
   AuthMethod,
   AuthSig,
@@ -9,10 +9,12 @@ import {
   BaseProviderOptions,
   BaseProviderSessionSigsParams,
   ClaimKeyResponse,
+  ClaimProcessor,
   ClaimRequest,
   IRelay,
   IRelayPKP,
   IRelayRequestData,
+  RelayClaimProcessor,
   SessionSigs,
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
@@ -186,11 +188,9 @@ export abstract class BaseProvider {
    * @param claimRequest
    * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
    */
-  public async claimKeyId(
-    claimRequest: ClaimRequest
-  ): Promise<ClaimKeyResponse> {
-    const res = await this.litNodeClient.claimKeyId(claimRequest);
-    return res;
+  public async claimKeyId<T=ClaimProcessor>(claimRequest: ClaimRequest<T>): Promise<ClaimKeyResponse> {
+      const res = await this.litNodeClient.claimKeyId<T>(claimRequest);
+      return res;
   }
 
   /**

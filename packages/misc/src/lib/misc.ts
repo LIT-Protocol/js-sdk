@@ -507,7 +507,7 @@ export const defaultMintClaimCallback: MintCallback<
   try {
     const relayUrl = params.relayUrl
       ? params.relayUrl
-      : 'https://relayer-server-staging-cayenne-6baea4620360.herokuapp.com/auth/claim';
+      : 'https://relayer-server-staging-cayenne.getlit.dev/auth/claim';
     const response = await fetch(relayUrl, {
       method: 'POST',
       body: JSON.stringify(params),
@@ -520,7 +520,7 @@ export const defaultMintClaimCallback: MintCallback<
     });
 
     if (response.status < 200 || response.status >= 400) {
-      let errResp = await response.json();
+      let errResp = await response.json() ?? "";
       let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
         errResp
       )}`;
