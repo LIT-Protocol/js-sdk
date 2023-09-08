@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/pkp-walletconnect",
-  "version": "2.2.41",
+  "version": "2.2.54",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -23,10 +23,11 @@
     "stream": false
   },
   "peerDependencies": {
-    "@walletconnect/core": "2.7.5",
-    "@walletconnect/types": "2.7.5",
-    "@walletconnect/utils": "2.7.5",
-    "@walletconnect/web3wallet": "1.7.3"
+    "@walletconnect/core": "2.9.2",
+    "@walletconnect/jsonrpc-utils": "1.0.8",
+    "@walletconnect/types": "2.9.2",
+    "@walletconnect/utils": "2.9.2",
+    "@walletconnect/web3wallet": "1.8.8"
   },
   "tags": [
     "universal"

@@ -22,6 +22,7 @@
     "./packages/pkp-client/src/index.ts",
     "./packages/pkp-cosmos/src/index.ts",
     "./packages/pkp-ethers/src/index.ts",
+    "./packages/pkp-sui/src/index.ts",
     "./packages/pkp-walletconnect/src/index.ts",
     "./packages/types/src/index.ts",
     "./packages/uint8arrays/src/index.ts"

@@ -452,6 +452,39 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  publicGoodsNetwork: {
+    contractAddress: null,
+    chainId: 424,
+    name: 'Public Goods Network',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.publicgoods.network'],
+    blockExplorerUrls: ['https://explorer.publicgoods.network/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  optimismGoerli: {
+    contractAddress: null,
+    chainId: 420,
+    name: 'Optimism Goerli',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://optimism-goerli.publicnode.com'],
+    blockExplorerUrls: ['https://goerli-optimism.etherscan.io/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  waevEclipseTestnet: {
+    contractAddress: null,
+    chainId: 91006,
+    name: 'Waev Eclipse Testnet',
+    symbol: 'ecWAEV',
+    decimals: 18,
+    rpcUrls: ['https://api.evm.waev.eclipsenetwork.xyz/solana'],
+    blockExplorerUrls: ['http://waev.explorer.modular.cloud/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
@@ -578,7 +611,6 @@ export const ALL_LIT_CHAINS: LITChain<
  */
 export const LOCAL_STORAGE_KEYS = {
   AUTH_COSMOS_SIGNATURE: 'lit-auth-cosmos-signature',
-  WALLET_CONNECT: 'walletconnect',
   AUTH_SIGNATURE: 'lit-auth-signature',
   AUTH_SOL_SIGNATURE: 'lit-auth-sol-signature',
   WEB3_PROVIDER: 'lit-web3-provider',

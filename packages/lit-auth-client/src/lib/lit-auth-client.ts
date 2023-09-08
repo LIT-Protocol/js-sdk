@@ -3,6 +3,7 @@ import {
   IRelay,
   LitAuthClientOptions,
   OAuthProviderOptions,
+  StytchOtpProviderOptions,
   ProviderOptions,
   SignInWithOTPParams,
   OtpProviderOptions,
@@ -16,10 +17,9 @@ import GoogleProvider from './providers/GoogleProvider';
 import DiscordProvider from './providers/DiscordProvider';
 import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
-import { OtpProvider } from './providers/OtpProvider';
+import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
-import { StytchOtpProvider } from '..';
-import { StytchOtpProviderOptions } from 'dist/packages/types/src/lib/interfaces';
+import { OtpProvider } from './providers/OtpProvider';
 
 /**
  * Class that handles authentication through Lit login
@@ -68,7 +68,6 @@ export class LitAuthClient {
           'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
         );
       }
-
       if (options?.litOtpConfig) {
         this.litOtpOptions = options?.litOtpConfig;
       }

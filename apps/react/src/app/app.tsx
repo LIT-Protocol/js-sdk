@@ -22,6 +22,7 @@ import * as LitJsSdk_pkpBase from 'dist/packages/pkp-base';
 import * as LitJsSdk_pkpClient from 'dist/packages/pkp-client';
 import * as LitJsSdk_pkpCosmos from 'dist/packages/pkp-cosmos';
 import * as LitJsSdk_pkpEthers from 'dist/packages/pkp-ethers';
+import * as LitJsSdk_pkpSui from 'dist/packages/pkp-sui';
 import * as LitJsSdk_pkpWalletconnect from 'dist/packages/pkp-walletconnect';
 import * as LitJsSdk_types from 'dist/packages/types';
 import * as LitJsSdk_uint8arrays from 'dist/packages/uint8arrays';
@@ -49,6 +50,7 @@ declare global {
     LitJsSdk_pkpClient: any;
     LitJsSdk_pkpCosmos: any;
     LitJsSdk_pkpEthers: any;
+    LitJsSdk_pkpSui: any;
     LitJsSdk_pkpWalletconnect: any;
     LitJsSdk_types: any;
     LitJsSdk_uint8arrays: any;
@@ -279,77 +281,6 @@ export function App() {
     
     
 
-    
-    
-        if(typeof LitJsSdk_blsSdk === 'undefined') {
-            console.error("LitJsSdk_blsSdk:", LitJsSdk_blsSdk);
-        }else{
-            console.warn("LitJsSdk_blsSdk:", LitJsSdk_blsSdk);
-            window.LitJsSdk_blsSdk = LitJsSdk_blsSdk;
-        }
-        window.addEventListener('load', function() {
-
-            var root = document.getElementById('root');
-            var result = document.getElementById('result');
-            var entries = Object.entries(LitJsSdk_blsSdk);
-            var lis = entries.map(([key, value]) => `
-            <li>
-                <div id="LitJsSdk_blsSdk_${key}" class="key" onClick="(async (e) => {
-                    var fn = LitJsSdk_blsSdk['${key}'];
-                    var fnType = typeof fn;
-                    console.warn('[${key}] is type of [' + fnType + ']');
-
-                    if ( fnType === 'string' ) return;
-
-                    if( fnType === 'function' ){
-                        try{
-                            console.log('params:', globalThis.params);
-
-                            var res;
-                            try{
-                                res = new fn(globalThis.params);
-                            }catch{
-                                res = await fn(globalThis.params);
-                            }
-                            window.output = res;
-                            res = JSON.stringify(res, null, 2);
-                            result.innerText = res;
-                            console.log(res);
-                        }catch(e){
-                            console.error('Please set the [params] variable in the console then click again');
-                            console.log(e);
-                        }
-                        return;
-                    }
-
-                    if( fnType === 'object' ){
-                        var res = await fn;
-                        window.output = res;
-                        res = JSON.stringify(res, null, 2);
-                        result.innerText = res;
-                        console.log(res);
-                        return;
-                    }
-                    
-                    
-                })();">${key}</div>
-                <pre class="code">
-<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
-                </pre>
-            </li>`);
-            lis = lis.join(' ');
-            var template = `
-            <div class="cat">
-                <h1>LitJsSdk_blsSdk has ${entries.length} functions</h1>
-                    <ul>
-                        ${ lis }
-                    </ul>
-                </div>
-            `;
-            root.insertAdjacentHTML('beforeend', template);
-        });
-    
-    
 
     
     
@@ -1577,6 +1508,78 @@ export function App() {
 
     
     
+        if(typeof LitJsSdk_pkpSui === 'undefined') {
+            console.error("LitJsSdk_pkpSui:", LitJsSdk_pkpSui);
+        }else{
+            console.warn("LitJsSdk_pkpSui:", LitJsSdk_pkpSui);
+            window.LitJsSdk_pkpSui = LitJsSdk_pkpSui;
+        }
+        window.addEventListener('load', function() {
+
+            var root = document.getElementById('root');
+            var result = document.getElementById('result');
+            var entries = Object.entries(LitJsSdk_pkpSui);
+            var lis = entries.map(([key, value]) => `
+            <li>
+                <div id="LitJsSdk_pkpSui_${key}" class="key" onClick="(async (e) => {
+                    var fn = LitJsSdk_pkpSui['${key}'];
+                    var fnType = typeof fn;
+                    console.warn('[${key}] is type of [' + fnType + ']');
+
+                    if ( fnType === 'string' ) return;
+
+                    if( fnType === 'function' ){
+                        try{
+                            console.log('params:', globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
+                            res = JSON.stringify(res, null, 2);
+                            result.innerText = res;
+                            console.log(res);
+                        }catch(e){
+                            console.error('Please set the [params] variable in the console then click again');
+                            console.log(e);
+                        }
+                        return;
+                    }
+
+                    if( fnType === 'object' ){
+                        var res = await fn;
+                        window.output = res;
+                        res = JSON.stringify(res, null, 2);
+                        result.innerText = res;
+                        console.log(res);
+                        return;
+                    }
+                    
+                    
+                })();">${key}</div>
+                <pre class="code">
+<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                </pre>
+            </li>`);
+            lis = lis.join(' ');
+            var template = `
+            <div class="cat">
+                <h1>LitJsSdk_pkpSui has ${entries.length} functions</h1>
+                    <ul>
+                        ${ lis }
+                    </ul>
+                </div>
+            `;
+            root.insertAdjacentHTML('beforeend', template);
+        });
+    
+    
+
+    
+    
         if(typeof LitJsSdk_pkpWalletconnect === 'undefined') {
             console.error("LitJsSdk_pkpWalletconnect:", LitJsSdk_pkpWalletconnect);
         }else{
@@ -1647,77 +1650,6 @@ export function App() {
     
     
 
-    
-    
-        if(typeof LitJsSdk_types === 'undefined') {
-            console.error("LitJsSdk_types:", LitJsSdk_types);
-        }else{
-            console.warn("LitJsSdk_types:", LitJsSdk_types);
-            window.LitJsSdk_types = LitJsSdk_types;
-        }
-        window.addEventListener('load', function() {
-
-            var root = document.getElementById('root');
-            var result = document.getElementById('result');
-            var entries = Object.entries(LitJsSdk_types);
-            var lis = entries.map(([key, value]) => `
-            <li>
-                <div id="LitJsSdk_types_${key}" class="key" onClick="(async (e) => {
-                    var fn = LitJsSdk_types['${key}'];
-                    var fnType = typeof fn;
-                    console.warn('[${key}] is type of [' + fnType + ']');
-
-                    if ( fnType === 'string' ) return;
-
-                    if( fnType === 'function' ){
-                        try{
-                            console.log('params:', globalThis.params);
-
-                            var res;
-                            try{
-                                res = new fn(globalThis.params);
-                            }catch{
-                                res = await fn(globalThis.params);
-                            }
-                            window.output = res;
-                            res = JSON.stringify(res, null, 2);
-                            result.innerText = res;
-                            console.log(res);
-                        }catch(e){
-                            console.error('Please set the [params] variable in the console then click again');
-                            console.log(e);
-                        }
-                        return;
-                    }
-
-                    if( fnType === 'object' ){
-                        var res = await fn;
-                        window.output = res;
-                        res = JSON.stringify(res, null, 2);
-                        result.innerText = res;
-                        console.log(res);
-                        return;
-                    }
-                    
-                    
-                })();">${key}</div>
-                <pre class="code">
-<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
-                </pre>
-            </li>`);
-            lis = lis.join(' ');
-            var template = `
-            <div class="cat">
-                <h1>LitJsSdk_types has ${entries.length} functions</h1>
-                    <ul>
-                        ${ lis }
-                    </ul>
-                </div>
-            `;
-            root.insertAdjacentHTML('beforeend', template);
-        });
-    
-    
 
     
     
@@ -1870,7 +1802,7 @@ pre {
                     `,
                 }}
             />
-            (REACT) THIS FILE IS AUTOMATICALLY GENERATED FROM tools/scripts/gen-react.mjs Mon, 10 Jul 2023 15:10:33 GMT
+            (REACT) THIS FILE IS AUTOMATICALLY GENERATED FROM tools/scripts/gen-react.mjs Thu, 07 Sep 2023 15:57:01 GMT
             <div id="root"></div>
              <pre><code id="result"></code></pre>
         </>

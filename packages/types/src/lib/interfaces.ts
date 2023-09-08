@@ -121,6 +121,11 @@ export interface AuthCallbackParams {
   // Keplr & Cypher -> window.keplr
   // Leap -> window.leap
   cosmosWalletType?: CosmosWalletType;
+
+  /**
+   * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
+   */
+  walletConnectProjectId?: string;
 }
 
 /** ---------- Web3 ---------- */
@@ -228,14 +233,14 @@ export interface CustomNetwork {
 export interface Signature {
   r: string;
   s: string;
-  v: number,
+  v: number;
 }
 
 export interface ClaimKeyResponse {
-  signatures: Signature[],
-  claimedKeyId: string,
-  pubkey: string,
-  mintTx: string,
+  signatures: Signature[];
+  claimedKeyId: string;
+  pubkey: string;
+  mintTx: string;
 }
 
 /**
@@ -1345,11 +1350,6 @@ export interface WebAuthnProviderOptions {
   rpName?: string;
 }
 
-export interface StytchOtpProviderOptions {
-  appId: string;
-  userId?: string;
-}
-
 export interface SignInWithOTPParams {
   /**
    * otp transport (email or phone #)
@@ -1382,6 +1382,30 @@ export interface OtpEmailCustomizationOptions {
   from?: string;
   fromName: string;
 }
+
+export interface SignInWithStytchOTPParams {
+  // JWT from an authenticated session
+  // see stych docs for more info: https://stytch.com/docs/api/session-get
+  accessToken?: string;
+  // username or phone number where OTP was delivered
+  userId: string;
+}
+
+export interface StytchOtpProviderOptions {
+  /*
+    Stytch application identifier
+  */
+  appId: string;
+  /* 
+   Stytch user identifier for a project
+  */
+  userId?: string;
+}
+
+export interface StytchToken {
+  [key: string]: any;
+}
+
 export interface BaseProviderSessionSigsParams {
   /**
    * Public key of PKP to auth with
@@ -1426,10 +1450,6 @@ export interface LoginUrlParams {
 
 export interface BaseAuthenticateOptions {}
 
-export interface OtpAuthenticateOptions {
-  code: string;
-}
-
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
    * Ethereum wallet address
@@ -1470,8 +1490,4 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    Stytch user identifier for a project
   */
   userId?: string;
-}
-
-export interface StytchToken {
-  [key: string]: any;
 }
