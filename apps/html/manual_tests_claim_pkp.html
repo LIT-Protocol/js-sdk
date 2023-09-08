@@ -23,6 +23,7 @@
       });
       litNodeClient.connect();
 
+
       
 
       const client = new StytchUIClient('public-token-test-8e477945-fabe-40be-97a8-39bec393a9e9');
@@ -30,6 +31,7 @@
       var sendStytchOTP = async () => {
         const testName = 'Claim Stytch PKP';
         document.getElementById('status').innerText = `${testName}: Testing...`;
+
 
         
 
@@ -50,6 +52,7 @@
           session_duration_minutes: 60,
           method_id: stytchResponse.method_id
         });
+        console.log('authResponse: ', authResponse);
 
         let sessionResp = client.session.getSync();
         // let sessionResp = await client.sessions.get({
@@ -68,18 +71,23 @@
           appId: "project-test-9a8fd689-f273-49f1-8a16-1a30f42f4cfb"
         })
 
+        console.log('sessionResp.session_jwt: ', sessionResp.session_jwt);
         console.log('session: ', session);
 
         const authMethod = await session.authenticate({ 
-          accessToken: sessionStatus.session_jwt 
+          accessToken:  authResponse.session_jwt
         });
+        console.log('authMethod: ', authMethod);
 
-        const claimResp = session.claimKeyId({
+
+        const claimResp = await session.claimKeyId({
           authMethod
         });
 
-        console.log("mint tx hash: ", res.mintTx);
-        console.log("pkp public key: ", res.pubkey);
+        console.log('claimResp: ', claimResp)
+
+        console.log("mint tx hash: ", claimResp.mintTx);
+        console.log("pkp public key: ", claimResp.pubkey);
       }
 
       
