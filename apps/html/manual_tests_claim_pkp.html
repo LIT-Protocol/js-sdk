@@ -26,7 +26,7 @@
 
       
 
-      const client = new StytchUIClient('public-token-test-8e477945-fabe-40be-97a8-39bec393a9e9');
+      const client = new StytchUIClient('public-token-live-8b3531cd-fd4b-4400-ae15-310fa8b659e2');
 
       var sendStytchOTP = async () => {
         const testName = 'Claim Stytch PKP';
@@ -62,13 +62,14 @@
         const authClient = new LitAuthClient({
           litRelayConfig: {
               relayApiKey: "test_chris",
+              relayUrl: "http://127.0.0.1:3001"
           }
         });
 
         console.log('sessionResp: ', sessionResp);
         const session = authClient.initProvider('stytchOtp', {
           userId: sessionResp.user_id,
-          appId: "project-test-9a8fd689-f273-49f1-8a16-1a30f42f4cfb"
+          appId: "project-live-4b70071a-da9c-46fb-8321-e29ab8cdc726"
         })
 
         console.log('sessionResp.session_jwt: ', sessionResp.session_jwt);
@@ -81,7 +82,8 @@
 
 
         const claimResp = await session.claimKeyId({
-          authMethod
+          authMethod,
+          relayUrl: "http://127.0.0.1:3001/auth/claim"
         });
 
         console.log('claimResp: ', claimResp)

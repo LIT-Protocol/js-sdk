@@ -2088,14 +2088,16 @@ export class LitNodeClientNodeJs extends LitCore {
           relayUrl: (params as ClaimRequest<'relay'>).relayUrl,
           relayApiKey: (params as ClaimRequest<'relay'>).relayApiKey,
         });
+      } else {
+        mintTx = await defaultMintClaimCallback({
+          derivedKeyId,
+          authMethodType: params.authMethod.authMethodType,
+          signatures: nodeSignatures,
+          pubkey,
+          relayUrl: (params as ClaimRequest<'relay'>).relayUrl,
+          relayApiKey: (params as ClaimRequest<'relay'>).relayApiKey,
+        });
       }
-
-      mintTx = await defaultMintClaimCallback({
-        derivedKeyId,
-        authMethodType: params.authMethod.authMethodType,
-        signatures: nodeSignatures,
-        pubkey,
-      });
 
       return {
         signatures: nodeSignatures,
