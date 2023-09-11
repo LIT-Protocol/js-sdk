@@ -11,20 +11,26 @@
     ></script>
     <script>
       window.exports = {};
+      window.randomString = () =>
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+
+        window.onload = () => {
+          // set the email to something random so we can test over and over
+          document.getElementById('email').value = `chris+${randomString()}@litprotocol.com`;
+        }
     </script>
     <script src="/dist/packages/lit-auth-client-vanilla/lit-auth-client.js"> </script>
     <script type="module">
       import { StytchUIClient } from "https://cdn.jsdelivr.net/npm/@stytch/vanilla-js/dist/index.esm.js";
 
-      const LitJsSdk = LitJsSdk_litNodeClient;
+      window.LitJsSdk = LitJsSdk_litNodeClient;
 
       const litNodeClient = new LitNodeClient({
         litNetwork: 'cayenne',
+        debug: true
       });
       litNodeClient.connect();
-
-
-      
 
       const client = new StytchUIClient('public-token-live-8b3531cd-fd4b-4400-ae15-310fa8b659e2');
 
@@ -60,15 +66,15 @@
         const authClient = new LitAuthClient({
           litRelayConfig: {
               relayApiKey: "test_chris",
-              // relayUrl: "http://127.0.0.1:3001"
-          }
+              relayUrl: "http://127.0.0.1:3001"
+          },
+          litNodeClient,
         });
 
         console.log('sessionResp: ', sessionResp);
         const session = authClient.initProvider('stytchOtp', {
           userId: sessionResp.user_id,
           appId: "project-live-4b70071a-da9c-46fb-8321-e29ab8cdc726",
-          litNodeClient,
         })
 
         console.log('authResponse.session_jwt: ', authResponse.session_jwt);
@@ -82,7 +88,7 @@
 
         const claimResp = await session.claimKeyId({
           authMethod,
-          // relayUrl: "http://127.0.0.1:3001/auth/claim"
+          relayUrl: "http://127.0.0.1:3001/auth/claim"
         });
 
         console.log('claimResp: ', claimResp)

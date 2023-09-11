@@ -2058,13 +2058,16 @@ export class LitNodeClientNodeJs extends LitCore {
       return this.getClaimKeyExecutionShares(url, nodeRequestParams, requestId);
     });
 
-    const responseData = await this.handleNodePromises(nodePromises);
+    const responseData = await this.handleNodePromises(
+      nodePromises,
+      this.connectedNodes.size // require from all connected nodes
+    );
 
     if (responseData.success === true) {
       const nodeSignatures: Signature[] = (
         responseData as SuccessNodePromises<any>
       ).values.map((r: any) => {
-        let sig = ethers.utils.splitSignature(`0x${r.signature}`);
+        const sig = ethers.utils.splitSignature(`0x${r.signature}`);
         return {
           r: sig.r,
           s: sig.s,
@@ -2072,10 +2075,13 @@ export class LitNodeClientNodeJs extends LitCore {
         };
       });
 
+      log(`responseData: ${JSON.stringify(responseData, null, 2)}`);
+
       const derivedKeyId = (responseData as SuccessNodePromises<any>).values[0]
         .derivedKeyId;
 
       const pubkey: string = this.computeHDPubKey(derivedKeyId);
+      log(`pubkey ${pubkey} derived from key id ${derivedKeyId}`);
 
       let mintTx = '';
       if (params.mintCallback) {
