@@ -28,26 +28,24 @@
 
       const client = new StytchUIClient('public-token-live-8b3531cd-fd4b-4400-ae15-310fa8b659e2');
 
-      var sendStytchOTP = async () => {
+      var sendStytchOTP = async (email) => {
         const testName = 'Claim Stytch PKP';
         document.getElementById('status').innerText = `${testName}: Testing...`;
-
-
-        
-
-        const email = "chris@litprotocol.com"; // email address
 
         window.stytchResponse = await client.otps.email.loginOrCreate(email, {
           expiration_minutes: 5,
         });
-
-        
 
         document.getElementById('status').innerText = `${testName}: OTP Sent`;
       };
 
       const verifyAndClaimPKP = async (otp) => {
         console.log(`verifying otp: ${otp} with method id ${stytchResponse.method_id}`);
+
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: "ethereum",
+        });
+
         const authResponse = await client.otps.authenticate(otp, stytchResponse.method_id, {
           session_duration_minutes: 60,
           method_id: stytchResponse.method_id
@@ -69,10 +67,11 @@
         console.log('sessionResp: ', sessionResp);
         const session = authClient.initProvider('stytchOtp', {
           userId: sessionResp.user_id,
-          appId: "project-live-4b70071a-da9c-46fb-8321-e29ab8cdc726"
+          appId: "project-live-4b70071a-da9c-46fb-8321-e29ab8cdc726",
+          litNodeClient,
         })
 
-        console.log('sessionResp.session_jwt: ', sessionResp.session_jwt);
+        console.log('authResponse.session_jwt: ', authResponse.session_jwt);
         console.log('session: ', session);
 
         const authMethod = await session.authenticate({ 
@@ -88,8 +87,35 @@
 
         console.log('claimResp: ', claimResp)
 
-        console.log("mint tx hash: ", claimResp.mintTx);
         console.log("pkp public key: ", claimResp.pubkey);
+
+        const data = {
+          // hello world in Uint8Array
+          toSign: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+          publicKey: claimResp.pubkey,
+          sigName: 'hello-world-sig',
+        };
+
+        let sig = await litNodeClient.pkpSign({
+          toSign: data.toSign,
+          pubKey: claimResp.pubkey,
+          authMethods: [authMethod],
+          authSig,
+        });
+
+        console.log("sig: ", sig);
+
+        let msg = ethers.utils.arrayify('0x' + sig.dataSigned)
+        const recoveredPk = ethers.utils.recoverPublicKey(msg, {r: '0x'+sig.r, s: '0x'+sig.s, v: sig.recid});
+        console.log('recoveredPk: ', recoveredPk);
+
+        const addr = ethers.utils.computeAddress('0x' + sig.publicKey);
+        const recoveredAddr = ethers.utils.computeAddress(recoveredPk);
+        const claimedAddr = ethers.utils.computeAddress("0x" + claimResp.pubkey);
+
+        console.log('addr from sig public key: ', addr);
+        console.log('recovered addr from sig: ', recoveredAddr);
+        console.log('addr from claimed public key: ', claimedAddr);
       }
 
       
@@ -134,7 +160,8 @@
     <div id="networkStatus">Connecting to Lit Protocol Network...</div>
     <br />
     <br />
-    <button onclick="sendStytchOTP()">Send Stytch OTP</button>
+    <input id="email" type="text" value="chris@litprotocol.com" />
+    <button onclick="sendStytchOTP(document.getElementById('email').value)">Send Stytch OTP</button>
     <br />
     <br />
     <input id="otp" type="text" placeholder="OTP" />
