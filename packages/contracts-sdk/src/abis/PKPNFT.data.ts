@@ -1,5 +1,5 @@
 export const pkpNft = {
-  "address": "0xAC2159fA4DC095cA76E035415699446386229562",
+  "address": "0xBBaa35e9b4a38c8f639d25f49c529967Ffeb0C06",
   "abi": [
     {
       "inputs": [
