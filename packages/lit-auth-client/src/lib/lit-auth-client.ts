@@ -19,7 +19,6 @@ import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
-import { OtpProvider } from './providers/OtpProvider';
 
 /**
  * Class that handles authentication through Lit login
@@ -41,8 +40,6 @@ export class LitAuthClient {
    * Map of providers
    */
   private providers: Map<string, BaseProvider>;
-
-  private litOtpOptions: OtpProviderOptions | undefined;
 
   /**
    * Create a LitAuthClient instance
@@ -67,9 +64,6 @@ export class LitAuthClient {
         throw new Error(
           'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
         );
-      }
-      if (options?.litOtpConfig) {
-        this.litOtpOptions = options?.litOtpConfig;
       }
     }
 
@@ -147,15 +141,6 @@ export class LitAuthClient {
             ...baseParams,
           },
           options as StytchOtpProviderOptions
-        ) as unknown as T;
-        break;
-      case `otp`:
-        provider = new OtpProvider(
-          {
-            ...baseParams,
-            ...(options as SignInWithOTPParams),
-          },
-          this.litOtpOptions
         ) as unknown as T;
         break;
       default:

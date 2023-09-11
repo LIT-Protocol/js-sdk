@@ -1,10 +1,11 @@
 import { LitNodeClient } from './lit-node-client';
 import * as LITCONFIG from 'lit.config.json';
 import { processTx } from '../../../../tx-handler';
-import { AuthSig, RelayClaimProcessor } from '@lit-protocol/types';
+import { AuthCallbackParams, AuthSig, RelayClaimProcessor } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { SIGTYPE } from '@lit-protocol/constants';
 import { AuthMethodType } from '../../../types/src/lib/enums';
+import { LitAbility, LitActionResource } from '@lit-protocol/auth-helpers';
 let client: LitNodeClient;
 
 jest.setTimeout(60000);
@@ -109,11 +110,11 @@ describe('Lit Actions', () => {
 
   
   it('should claim key id from auth method', async () => {
+    
     let res = await client.claimKeyId<RelayClaimProcessor>({
       authMethod: {
-        authMethodType: 6,
-        accessToken:
-          LITCONFIG.AUTH_METHOD_ACCESS_TOKEN
+        authMethodType: 4,
+        accessToken: "RTPcbUUguY7YtOjZhKeXtEPTYkXfgX"
       }
     });
     
@@ -123,14 +124,16 @@ describe('Lit Actions', () => {
       publicKey: LITCONFIG.PKP_PUBKEY,
       sigName: 'hello-world-sig',
     };
+    
+    let authMethod = {
+      authMethodType: 4,
+      accessToken: "RTPcbUUguY7YtOjZhKeXtEPTYkXfgX"
+    }
 
     let sig = await client.pkpSign({
       toSign: data.toSign,
-      pubKey: res.pubkey,
-      authMethods: [{
-        authMethodType: 6,
-        accessToken: LITCONFIG.AUTH_METHOD_ACCESS_TOKEN 
-      }],
+      pubKey: "0x044ec325db817193c3a01088d082ded81dc0a29ad615a67b87b9e295d9a1c91d955f8aeeec551d5d4930795f5c390e369f745e36e97893ead710354ee882ed60c0",
+      authMethods: [authMethod],
       authSig: LITCONFIG.CONTROLLER_AUTHSIG,
     });
 
