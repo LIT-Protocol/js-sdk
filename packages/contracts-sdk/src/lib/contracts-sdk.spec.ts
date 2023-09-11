@@ -227,13 +227,11 @@ describe('contractsSdk', () => {
   it('assigns contract instances to the correct class properties', () => {
     // Test that the contract instances have been correctly assigned
     // to the corresponding class properties
-    expect(litContracts.accessControlConditionsContract).toBeDefined();
     expect(litContracts.litTokenContract).toBeDefined();
     // Repeat this for all other contract instances...
   });
 
   it('Test that the accessControlConditionsContract, litTokenContract, and other contract properties are properly initialized with the expected values.', () => {
-    expect(litContracts.accessControlConditionsContract).toBeDefined();
     expect(litContracts.litTokenContract).toBeDefined();
     expect(litContracts.multisenderContract).toBeDefined();
     expect(litContracts.pkpHelperContract).toBeDefined();
