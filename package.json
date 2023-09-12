@@ -120,7 +120,6 @@
     "serve": "^14.0.1",
     "siwe": "^2.0.5",
     "siwe-recap": "0.0.2-alpha.0",
-    "start-server-and-test": "^1.14.0",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "synthetix-js": "^2.74.1",
