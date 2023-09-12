@@ -826,7 +826,7 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   // ========== Shares Resolvers ==========
-  _getFlattenShare = (share: any) => {
+  _getFlattenShare = (share: any): SigShare => {
 
     // flatten the signature object so that the properties of the signature are top level
     const flattenObj = Object.entries(share).map(([key, item]) => {
@@ -836,9 +836,17 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const typedItem = item as SigShare;
 
-      const requiredProperties = ['sigType', 'dataSigned', 'signatureShare', 'shareIndex', 'bigR', 'publicKey', 'sigName'] as const;
+      const requiredShareProps = ['sigType', 'dataSigned', 'signatureShare', 'shareIndex', 'bigR', 'publicKey']
 
-      if (requiredProperties.every(prop => typedItem[prop as keyof SigShare] !== undefined && typedItem[prop as keyof SigShare] !== null)) {
+      const requiredSessionSigsShareProps = [...requiredShareProps, 'siweMessage'] as const;
+
+      const requiredSignatureShareProps = [...requiredShareProps, 'sigName'] as const;
+
+      const hasProps = (props: any) => {
+        return [...props].every(prop => typedItem[prop as keyof SigShare] !== undefined && typedItem[prop as keyof SigShare] !== null)
+      }
+
+      if (hasProps(requiredSessionSigsShareProps) || hasProps(requiredSignatureShareProps)) {
         return item;
       }
     });
@@ -879,8 +887,6 @@ export class LitNodeClientNodeJs extends LitCore {
           sigType: share.sigType,
           signatureShare: share.signatureShare.replaceAll('"', ''),
           shareIndex: share.shareIndex,
-
-          // @ts-ignore
           bigR: share.bigR.replaceAll('"', ''),
           publicKey: share.publicKey.replaceAll('"', ''),
           dataSigned: share.dataSigned.replaceAll('"', ''),
@@ -969,8 +975,6 @@ export class LitNodeClientNodeJs extends LitCore {
           sigType: share.sigType,
           signatureShare: share.signatureShare.replaceAll('"', ''),
           shareIndex: share.shareIndex,
-
-          // @ts-ignore
           bigR: share.bigR.replaceAll('"', ''),
           publicKey: share.publicKey.replaceAll('"', ''),
           dataSigned: share.dataSigned.replaceAll('"', ''),
