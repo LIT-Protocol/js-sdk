@@ -33,6 +33,8 @@
     "gen:lib": "yarn node ./tools/scripts/gen-lib.mjs",
     "gen:docs": "node ./tools/scripts/gen-doc.mjs",
     "gen:readme": "yarn node ./tools/scripts/gen-readme.mjs",
+    "gen:contracts": "node node_modules/@getlit/contracts",
+    "gen:config": "node node_modules/@getlit/contracts --outdir ./tools/scripts/lit-contracts && node ./tools/scripts/gen-lit-config.mjs",
     "delete": "yarn node ./tools/scripts/delete.mjs",
     "delete:package": "yarn delete --package",
     "delete:app": "yarn delete --app",
@@ -129,6 +131,7 @@
     "uint8arrays": "^4.0.3"
   },
   "devDependencies": {
+    "@getlit/contracts": "^0.1.14",
     "@nrwl/cypress": "14.5.10",
     "@nrwl/eslint-plugin-nx": "14.5.10",
     "@nrwl/jest": "14.5.10",
