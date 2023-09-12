@@ -1405,7 +1405,7 @@ async function validateDependencyVersions() {
     }
   });
 
-  process.exit();
+  process.exit(0);
 }
 
 async function postBuild() {
