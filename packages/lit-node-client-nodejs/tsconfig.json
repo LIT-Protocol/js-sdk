@@ -9,7 +9,8 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "lib": [
-      "ES2021"
+      "ES2021",
+      "DOM"
     ]
   },
   "files": [],
