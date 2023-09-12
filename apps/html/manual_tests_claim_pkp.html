@@ -66,7 +66,7 @@
         const authClient = new LitAuthClient({
           litRelayConfig: {
               relayApiKey: "test_chris",
-              relayUrl: "http://127.0.0.1:3001"
+              // relayUrl: "http://127.0.0.1:3001"
           },
           litNodeClient,
         });
@@ -88,7 +88,7 @@
 
         const claimResp = await session.claimKeyId({
           authMethod,
-          relayUrl: "http://127.0.0.1:3001/auth/claim"
+          // relayUrl: "http://127.0.0.1:3001/auth/claim"
         });
 
         console.log('claimResp: ', claimResp)
