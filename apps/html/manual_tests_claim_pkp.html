@@ -111,8 +111,16 @@
 
         console.log("sig: ", sig);
 
-        let msg = ethers.utils.arrayify('0x' + sig.dataSigned)
-        const recoveredPk = ethers.utils.recoverPublicKey(msg, {r: '0x'+sig.r, s: '0x'+sig.s, v: sig.recid});
+        const encodedSig = ethers.utils.joinSignature({
+          r: '0x' + sig.r,
+          s: '0x' + sig.s,
+          v: sig.recid,
+        });
+
+        console.log('encodedSig: ', encodedSig);
+        console.log('encoded sig recovered pubkey', ethers.utils.recoverPublicKey("0x" + sig.dataSigned, encodedSig));
+
+        const recoveredPk = ethers.utils.recoverPublicKey("0x" + sig.dataSigned, sig.signature);
         console.log('recoveredPk: ', recoveredPk);
 
         const addr = ethers.utils.computeAddress('0x' + sig.publicKey);
