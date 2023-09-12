@@ -179,14 +179,13 @@ export const verifySignature = (
 export const combineEcdsaShares = (
   sigShares: Array<SigShare>
 ): CombinedECDSASignature => {
-  log('sigShares:', sigShares);
-  let type = sigShares[0].sigType;
+  const type = sigShares[0].sigType;
   // the public key can come from any node - it obviously will be identical from each node
   // const publicKey = sigShares[0].publicKey;
   // const dataSigned = '0x' + sigShares[0].dataSigned;
   // filter out empty shares
-  let validShares = sigShares.reduce((acc, val) => {
-    if (val.shareHex !== '') {
+  const validShares = sigShares.reduce((acc, val) => {
+    if (val.signatureShare !== '') {
       const newVal = _remapKeyShareForEcdsa(val);
       acc.push(JSON.stringify(newVal));
     }
@@ -211,6 +210,7 @@ export const combineEcdsaShares = (
     switch (type) {
       case SIGTYPE.EcdsaCaitSith:
         res = wasmECDSA.combine_signature(validShares, 2);
+        log('response from combine_signature', res);
         sig = JSON.parse(res) as CombinedECDSASignature;
         /*
           r and s values of the signature should be maximum of 64 bytes
@@ -229,6 +229,7 @@ export const combineEcdsaShares = (
         break;
       case SIGTYPE.ECDSCAITSITHP256:
         res = wasmECDSA.combine_signature(validShares, 3);
+        log('response from combine_signature', res);
         sig = JSON.parse(res);
         break;
       // if its another sig type, it shouldnt be resolving to this method

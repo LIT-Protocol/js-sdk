@@ -874,23 +874,19 @@ export class LitNodeClientNodeJs extends LitCore {
       }
 
       // -- validate if signature type is ECDSA
-      if (sigType !== 'ECDSA') {
+      if (
+        sigType !== SIGTYPE.EcdsaCaitSith &&
+        sigType !== SIGTYPE.EcdsaCAITSITHP256
+      ) {
         throwError({
-          message: 'signature type is not ECDSA',
+          message: `signature type is ${sigType} which is not ECDSA_CAIT_SITH`,
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
         return;
       }
 
-      let signature: any;
-
-      if (
-        sigType === SIGTYPE.EcdsaCaitSith ||
-        sigType === SIGTYPE.EcdsaCAITSITHP256
-      ) {
-        signature = combineEcdsaShares(sigShares);
-      }
+      const signature: any = combineEcdsaShares(sigShares);
 
       const encodedSig = joinSignature({
         r: '0x' + signature.r,
@@ -919,8 +915,9 @@ export class LitNodeClientNodeJs extends LitCore {
    *
    */
   getSignatures = (signedData: Array<any>): any => {
+    log(`getSignatures(): ${JSON.stringify(signedData, null, 2)}`);
     // -- prepare
-    let signatures: any = {};
+    const signatures: any = {};
 
     // TOOD: get keys of signedData
     const keys = Object.keys(signedData[0]);
@@ -956,23 +953,19 @@ export class LitNodeClientNodeJs extends LitCore {
       }
 
       // -- validate if signature type is ECDSA
-      if (sigType !== SIGTYPE.EcdsaCaitSith) {
+      if (
+        sigType !== SIGTYPE.EcdsaCaitSith &&
+        sigType !== SIGTYPE.EcdsaCAITSITHP256
+      ) {
         throwError({
-          message: 'signature type is not ECDSA',
+          message: `signature type is ${sigType} which is not ECDSA_CAIT_SITH`,
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
         return;
       }
 
-      let signature: any;
-
-      if (
-        sigType === SIGTYPE.EcdsaCaitSith ||
-        sigType === SIGTYPE.EcdsaCAITSITHP256
-      ) {
-        signature = combineEcdsaShares(sigShares);
-      }
+      const signature: any = combineEcdsaShares(sigShares);
 
       const encodedSig = joinSignature({
         r: '0x' + signature.r,
@@ -1107,42 +1100,20 @@ export class LitNodeClientNodeJs extends LitCore {
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
     const signedDataList = responseData.map((r) => {
-      // add the signed data to the signature share
-      delete r.signedData.result;
-
-      // nodes do not camel case the response from /web/pkp/sign.
-      const snakeToCamel = (s: string) =>
-        s.replace(/(_\w)/g, (k) => k[1].toUpperCase());
-      //@ts-ignore
-      const convertShare: any = (share: any) => {
-        const keys = Object.keys(share);
-        let convertedShare = {};
-        for (const key of keys) {
-          convertedShare = Object.defineProperty(
-            convertedShare,
-            snakeToCamel(key),
-            Object.getOwnPropertyDescriptor(share, key) as PropertyDecorator
-          );
-        }
-
-        return convertedShare;
-      };
-      const convertedShare: SigShare = convertShare(r.signedData);
-      const keys = Object.keys(convertedShare);
-      for (const key of keys) {
-        //@ts-ignore
-        if (typeof convertedShare[key] === 'string') {
+      const { signedData } = r;
+      for (const key of Object.keys(signedData)) {
+        for (const subkey of Object.keys(signedData[key])) {
           //@ts-ignore
-          convertedShare[key] = convertedShare[key]
-            .replace('"', '')
-            .replace('"', '');
+          if (typeof signedData[key][subkey] === 'string') {
+            //@ts-ignore
+            signedData[key][subkey] = signedData[key][subkey].replaceAll(
+              '"',
+              ''
+            );
+          }
         }
       }
-      //@ts-ignore
-      convertedShare.dataSigned = convertedShare.digest;
-      return {
-        signature: convertedShare,
-      };
+      return signedData;
     });
 
     const signatures = this.getSignatures(signedDataList);

@@ -66,7 +66,7 @@
         const authClient = new LitAuthClient({
           litRelayConfig: {
               relayApiKey: "test_chris",
-              // relayUrl: "http://127.0.0.1:3001"
+              relayUrl: "http://127.0.0.1:3001"
           },
           litNodeClient,
         });
@@ -88,12 +88,14 @@
 
         const claimResp = await session.claimKeyId({
           authMethod,
-          // relayUrl: "http://127.0.0.1:3001/auth/claim"
+          relayUrl: "http://127.0.0.1:3001/auth/claim"
         });
 
         console.log('claimResp: ', claimResp)
 
         console.log("pkp public key: ", claimResp.pubkey);
+
+        console.log('testing signing with pkpSign()...')
 
         const data = {
           // hello world in Uint8Array
@@ -130,6 +132,41 @@
         console.log('addr from sig public key: ', addr);
         console.log('recovered addr from sig: ', recoveredAddr);
         console.log('addr from claimed public key: ', claimedAddr);
+
+        console.log('testing sig with lit actions...')
+        // this code will be run on the node
+        const litActionCode = `
+        const go = async () => {  
+          // this requests a signature share from the Lit Node
+          // the signature share will be automatically returned in the HTTP response from the node
+          // all the params (toSign, publicKey, sigName) are passed in from the LitJsSdk.executeJs() function
+          const sigShare = await Lit.Actions.signEcdsa({ toSign, publicKey , sigName });
+        };
+
+        go();
+        `;
+
+        const signatures = await litNodeClient.executeJs({
+          authMethods: [authMethod],
+          code: litActionCode,
+          authSig,
+          // all jsParams can be used anywhere in your litActionCode
+          jsParams: {
+            // this is the string "Hello World" for testing
+            toSign: [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100],
+            publicKey: "0x" + claimResp.pubkey,
+            sigName: "sig1",
+          },
+        });
+        console.log("signatures: ", signatures);
+        const { sig1 } = signatures.signatures
+        const recoveredPkFromLitActions = ethers.utils.recoverPublicKey("0x" + sig1.dataSigned, sig1.signature);
+        const addrFromLitActions = ethers.utils.computeAddress('0x' + sig1.publicKey);
+        const recoveredAddrFromLitActions = ethers.utils.computeAddress(recoveredPkFromLitActions);
+        console.log('addr from sig public key from lit actions: ', addrFromLitActions);
+        console.log('recovered addr from sig from lit actions: ', recoveredAddrFromLitActions);
+        console.log('addr from claimed public key: ', claimedAddr);
+
       }
 
       
