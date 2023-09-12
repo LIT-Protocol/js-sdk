@@ -2,19 +2,19 @@
 
 # Usage:
 # -- Dry run mode
-# ./link-packages.sh --dry-run
+# ./npm-link.sh --dry-run
 
 # -- Link all packages (except those ending with "-vanilla") or specific packages
-# ./link-packages.sh --link
-# ./link-packages.sh --link <project-directory-name1> <project-directory-name2> ...
-# eg. ./link-packages.sh --link lit-node-client another-project
+# ./npm-link.sh --link
+# ./npm-link.sh --link <project-directory-name1> <project-directory-name2> ...
+# eg. ./npm-link.sh --link lit-node-client another-project
 
 # -- Unlink all packages (except those ending with "-vanilla") or specific packages
-# ./link-packages.sh --unlink
-# ./link-packages.sh --unlink <project-directory-name1> <project-directory-name2> ...
+# ./npm-link.sh --unlink
+# ./npm-link.sh --unlink <project-directory-name1> <project-directory-name2> ...
 
 # -- Specify base directory
-# ./link-packages.sh --dir <base-directory-path>
+# ./npm-link.sh --dir <base-directory-path>
 
 # Define the base directory
 BASE_DIR="./dist/packages"
