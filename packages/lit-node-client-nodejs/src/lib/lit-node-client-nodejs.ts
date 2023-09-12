@@ -826,6 +826,28 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   // ========== Shares Resolvers ==========
+  _getFlattenShare = (share: any) => {
+
+    // flatten the signature object so that the properties of the signature are top level
+    const flattenObj = Object.entries(share).map(([key, item]) => {
+      if (item === null || item === undefined) {
+        return item;
+      }
+
+      const typedItem = item as SigShare;
+
+      const requiredProperties = ['sigType', 'dataSigned', 'signatureShare', 'shareIndex', 'bigR', 'publicKey', 'sigName'] as const;
+
+      if (requiredProperties.every(prop => typedItem[prop as keyof SigShare] !== undefined && typedItem[prop as keyof SigShare] !== null)) {
+        return item;
+      }
+    });
+
+    // removed all null values and should only have one item
+    const flattenShare = (flattenObj.filter(item => item !== null))[0] as SigShare;
+
+    return flattenShare;
+  }
 
   /**
    *
@@ -849,17 +871,24 @@ export class LitNodeClientNodeJs extends LitCore {
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      const sigShares: Array<SigShare> = shares.map((s: any) => ({
-        sigType: s.sigType,
-        signatureShare: s.signatureShare.replace('"', ''),
-        shareIndex: s.shareIndex,
-        bigR: s.bigR.replace('"', ''),
-        publicKey: s.publicKey.replace('"', ''),
-        dataSigned: s.dataSigned.replace('"', ''),
-        siweMessage: s.siweMessage,
-      }));
+      const sigShares: Array<SigShare> = shares.map((s: any) => {
 
-      log('sigShares', sigShares);
+        const share = this._getFlattenShare(s);
+
+        return {
+          sigType: share.sigType,
+          signatureShare: share.signatureShare.replaceAll('"', ''),
+          shareIndex: share.shareIndex,
+
+          // @ts-ignore
+          bigR: share.bigR.replaceAll('"', ''),
+          publicKey: share.publicKey.replaceAll('"', ''),
+          dataSigned: share.dataSigned.replaceAll('"', ''),
+          siweMessage: share.siweMessage,
+        }
+      });
+
+      log('getSessionSignatures - sigShares', sigShares);
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
@@ -909,6 +938,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     return signatures;
   };
+
   /**
    *
    * Get signatures from signed data
@@ -931,17 +961,24 @@ export class LitNodeClientNodeJs extends LitCore {
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      const sigShares: Array<SigShare> = shares.map((s: any) => ({
-        sigType: s.sigType,
-        signatureShare: s.signatureShare as string,
-        shareIndex: s.shareIndex,
-        bigR: s.bigR,
-        publicKey: s.publicKey,
-        dataSigned: s.dataSigned,
-        sigName: s.sigName ? s.sigName : 'sig',
-      }));
+      const sigShares: Array<SigShare> = shares.map((s: any) => {
 
-      log('sigShares', sigShares);
+        const share = this._getFlattenShare(s);
+
+        return ({
+          sigType: share.sigType,
+          signatureShare: share.signatureShare.replaceAll('"', ''),
+          shareIndex: share.shareIndex,
+
+          // @ts-ignore
+          bigR: share.bigR.replaceAll('"', ''),
+          publicKey: share.publicKey.replaceAll('"', ''),
+          dataSigned: share.dataSigned.replaceAll('"', ''),
+          sigName: share.sigName ? share.sigName : 'sig',
+        })
+      });
+
+      log('getSignatures - sigShares', sigShares);
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
@@ -1914,8 +1951,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     let expiration = params.expiration || this.getExpiration();
 
     // -- (TRY) to get the wallet signature

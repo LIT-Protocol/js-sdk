@@ -25,8 +25,7 @@ if (!globalThis.wasmExports) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [BLS SDK] wasmExports loaded. ${
-          Object.keys(exports).length
+        `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
       );
     }
@@ -48,8 +47,7 @@ if (!globalThis.wasmECDSA) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-          Object.keys(wasmECDSA).length
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );
     }
@@ -211,7 +209,14 @@ export const combineEcdsaShares = (
     switch (type) {
       case SIGTYPE.EcdsaCaitSith:
         res = wasmECDSA.combine_signature(validShares, 2);
-        sig = JSON.parse(res) as CombinedECDSASignature;
+
+        try {
+          sig = JSON.parse(res) as CombinedECDSASignature;
+        } catch (e) {
+          console.log("xx res:", res); // ERROR: Could not deserialize value
+          throw new Error(`Failed to parse signature: ${e}`);
+        }
+
         /*
           r and s values of the signature should be maximum of 64 bytes
           r and s values can have polarity as the first two bits, here we remove 

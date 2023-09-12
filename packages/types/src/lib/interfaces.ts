@@ -659,6 +659,7 @@ export interface SigShare {
   publicKey: any;
   dataSigned: any;
   siweMessage?: string;
+  sigName?:string;
 }
 
 export interface SignedData {

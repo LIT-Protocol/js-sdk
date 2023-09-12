@@ -1,11 +1,9 @@
 import { LitNodeClient } from './lit-node-client';
 import * as LITCONFIG from 'lit.config.json';
 import { processTx } from '../../../../tx-handler';
-import { AuthCallbackParams, AuthSig, RelayClaimProcessor } from '@lit-protocol/types';
+import { RelayClaimProcessor } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { SIGTYPE } from '@lit-protocol/constants';
-import { AuthMethodType } from '../../../types/src/lib/enums';
-import { LitAbility, LitActionResource } from '@lit-protocol/auth-helpers';
+
 let client: LitNodeClient;
 
 jest.setTimeout(60000);
@@ -108,23 +106,23 @@ describe('Lit Actions', () => {
     expect(sig.publicKey).toBeDefined();
   });
 
-  
+
   it('should claim key id from auth method', async () => {
-    
+
     let res = await client.claimKeyId<RelayClaimProcessor>({
       authMethod: {
         authMethodType: 4,
         accessToken: "RTPcbUUguY7YtOjZhKeXtEPTYkXfgX"
       }
     });
-    
+
     const data = {
       // hello world in Uint8Array
       toSign: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
       publicKey: LITCONFIG.PKP_PUBKEY,
       sigName: 'hello-world-sig',
     };
-    
+
     let authMethod = {
       authMethodType: 4,
       accessToken: "RTPcbUUguY7YtOjZhKeXtEPTYkXfgX"
@@ -138,10 +136,10 @@ describe('Lit Actions', () => {
     });
 
     let msg: any = ethers.utils.arrayify('0x' + sig.dataSigned)
-    const recoveredPk = ethers.utils.recoverPublicKey(msg, {r: '0x'+sig.r, s: '0x'+sig.s, v: sig.recid});
+    const recoveredPk = ethers.utils.recoverPublicKey(msg, { r: '0x' + sig.r, s: '0x' + sig.s, v: sig.recid });
 
     const addr = ethers.utils.computeAddress(ethers.utils.arrayify('0x' + sig.publicKey));
-    const recoveredAddr = ethers.utils.computeAddress(ethers.utils.arrayify(recoveredPk)); 
+    const recoveredAddr = ethers.utils.computeAddress(ethers.utils.arrayify(recoveredPk));
     expect(recoveredAddr).toEqual(addr);
   }, 20_0000);
 });
