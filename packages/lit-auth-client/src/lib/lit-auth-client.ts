@@ -19,6 +19,7 @@ import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
+import { OtpProvider } from './providers/OtpProvider';
 
 /**
  * Class that handles authentication through Lit login
