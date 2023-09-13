@@ -11,7 +11,6 @@ try {
 }
 
 // ----- autogen:import-data:start  -----
-import { accessControlConditions } from '../abis/AccessControlConditions.data';
 import { allowlist } from '../abis/Allowlist.data';
 import { contractResolver } from '../abis/ContractResolver.data';
 import { litToken } from '../abis/LITToken.data';
@@ -26,7 +25,6 @@ import { stakingBalances } from '../abis/StakingBalances.data';
 // ----- autogen:import-data:end  -----
 
 // ----- autogen:imports:start  -----
-import * as accessControlConditionsContract from '../abis/AccessControlConditions';
 import * as allowlistContract from '../abis/Allowlist';
 import * as contractResolverContract from '../abis/ContractResolver';
 import * as litTokenContract from '../abis/LITToken';
@@ -99,11 +97,6 @@ export class LitContracts {
   debug: boolean = false;
 
   // ----- autogen:declares:start  -----
-  accessControlConditionsContract: {
-    read: accessControlConditionsContract.ContractContext,
-    write: accessControlConditionsContract.ContractContext,
-  }
-            
   allowlistContract: {
     read: allowlistContract.ContractContext,
     write: allowlistContract.ContractContext,
@@ -194,7 +187,6 @@ export class LitContracts {
     }
 
     // ----- autogen:blank-init:start  -----
-    this.accessControlConditionsContract = {} as any
     this.allowlistContract = {} as any
     this.contractResolverContract = {} as any
     this.litTokenContract = {} as any
@@ -375,20 +367,6 @@ export class LitContracts {
     }
 
     // ----- autogen:init:start  -----
-
-    this.accessControlConditionsContract = {
-        read: (new ethers.Contract(
-            accessControlConditions.address,
-            accessControlConditions.abi as any,
-            this.provider
-        ) as unknown as accessControlConditionsContract.ContractContext & accessControlConditionsContract.AccessControlConditions),
-        write: (new ethers.Contract(
-            accessControlConditions.address,
-            accessControlConditions.abi as any,
-            this.signer
-        ) as unknown as accessControlConditionsContract.ContractContext & accessControlConditionsContract.AccessControlConditions)
-    };
-
 
     this.allowlistContract = {
         read: (new ethers.Contract(

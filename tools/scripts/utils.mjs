@@ -6,6 +6,13 @@ import readline from 'readline';
 import { join } from 'path';
 import events from 'events';
 import util from 'util';
+
+import { toBech32 } from '@cosmjs/encoding';
+import { Secp256k1 } from '@cosmjs/crypto';
+import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
+import siwe from 'lit-siwe';
+import { ethers } from 'ethers';
+
 const eventsEmitter = new events.EventEmitter();
 
 const rl = readline.createInterface(process.stdin, process.stdout);
@@ -664,4 +671,73 @@ export async function checkEmptyDirectories(dirPath) {
   }
 
   return emptyDirs;
+}
+
+export function getCosmosAddress(pubkeyBuffer) {
+  return toBech32(
+    'cosmos',
+    rawSecp256k1PubkeyToRawAddress(Secp256k1.compressPubkey(pubkeyBuffer))
+  );
+}
+
+export function getPubKeyBuffer(pubKey) {
+  if (pubKey.startsWith('0x')) {
+    pubKey = pubKey.slice(2);
+  }
+  return Buffer.from(pubKey, 'hex');
+}
+
+export async function signAuthMessage(
+  privateKey,
+  statement = 'TESTING TESTING 123'
+) {
+  const wallet = new ethers.Wallet(privateKey);
+
+  // expirtaion time in ISO 8601 format
+  const expirationTime = new Date(
+    Date.now() + 1000 * 60 * 60 * 24 * 7
+  ).toISOString();
+
+  const domain = 'localhost';
+  const origin = 'https://localhost/login';
+
+  const siweMessage = new siwe.SiweMessage({
+    domain,
+    address: wallet.address,
+    statement,
+    uri: origin,
+    version: '1',
+    chainId: '1',
+    expirationTime,
+  });
+
+  let messageToSign = siweMessage.prepareMessage();
+
+  const signature = await wallet.signMessage(messageToSign);
+
+  console.log('signature', signature);
+
+  const recoveredAddress = ethers.utils.verifyMessage(messageToSign, signature);
+
+  const authSig = {
+    sig: signature,
+    derivedVia: 'web3.eth.personal.sign',
+    signedMessage: messageToSign,
+    address: recoveredAddress,
+  };
+
+  return authSig;
+}
+
+/**
+ * Gets the value of the flag from the command line arguments.
+ * @param {string} flag The name of the flag without the '--' prefix.
+ * @returns {string | null} The value of the flag or null if not found.
+ */
+export function getFlagValue(flag) {
+  const index = process.argv.indexOf(`--${flag}`);
+  if (index !== -1 && index + 1 < process.argv.length) {
+    return process.argv[index + 1];
+  }
+  return null;
 }

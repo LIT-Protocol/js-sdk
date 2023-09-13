@@ -53,11 +53,15 @@ let dirs = await listDirsRecursive('dist/packages', false);
 
 console.log('Ready to publish the following packages:');
 
+let publishVersion = null;
+
 await asyncForEach(dirs, async (dir) => {
   // read the package.json file
   const pkg = await readJsonFile(`${dir}/package.json`);
 
   greenLog(`${pkg.name} => ${pkg.version}`);
+
+  publishVersion = pkg.version;
 
   // remove peer dependencies
   delete pkg.peerDependencies;
@@ -91,29 +95,6 @@ greenLog(
   true
 );
 
-// get latest version
-let publishVersion;
-
-try {
-  let res = await fetch(
-    'https://registry.npmjs.org/@lit-protocol/lit-node-client'
-  );
-
-  res = await res.json();
-
-  // get the last one
-  const modified = Object.keys(res.time).pop();
-
-  // increase x from 0.0.x to 0.0.x+1
-  const version = modified.split('.');
-  version[2] = parseInt(version[2]) + 1;
-  publishVersion = version.join('.');
-  console.log('publishVersion', publishVersion);
-} catch (e) {
-  yellowLog(
-    "Couldn't get latest version from npm, will use lerna.json version"
-  );
-}
 
 await question('Are you sure you want to publish to? (y/n)', {
   yes: async () => {

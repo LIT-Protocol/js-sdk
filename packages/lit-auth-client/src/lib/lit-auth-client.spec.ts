@@ -94,11 +94,6 @@ describe('initProvider', () => {
     );
     expect(provider).toBeInstanceOf(WebAuthnProvider);
   });
-
-  it('should return an instance of OtpProvider', () => {
-    const provider = client.initProvider<OtpProvider>(ProviderType.Otp);
-    expect(provider).toBeInstanceOf(OtpProvider);
-  });
 });
 
 describe('getProvider', () => {

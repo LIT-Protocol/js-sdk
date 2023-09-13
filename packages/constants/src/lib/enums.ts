@@ -24,14 +24,13 @@ export const enum EITHER_TYPE {
  */
 export enum AuthMethodType {
   EthWallet = 1,
-  LitAction,
-  WebAuthn,
-  Discord,
-  Google,
-  GoogleJwt,
-  OTP,
-  AppleJwt,
-  StytchOtp,
+  LitAction = 2,
+  WebAuthn = 3,
+  Discord = 4,
+  Google = 5,
+  GoogleJwt = 6,
+  AppleJwt = 8,
+  StytchOtp = 9,
 }
 
 /**
@@ -42,7 +41,6 @@ export enum ProviderType {
   Google = 'google',
   EthWallet = 'ethwallet',
   WebAuthn = 'webauthn',
-  Otp = 'otp',
   Apple = 'apple',
   StytchOtp = 'stytchOtp'
 }

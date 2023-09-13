@@ -826,6 +826,49 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   // ========== Shares Resolvers ==========
+  _getFlattenShare = (share: any): SigShare => {
+
+    // flatten the signature object so that the properties of the signature are top level
+    const flattenObj = Object.entries(share).map(([key, item]) => {
+
+      if (item === null || item === undefined) {
+        return null;
+      }
+
+      const typedItem = item as SigShare;
+
+      const requiredShareProps = ['sigType', 'dataSigned', 'signatureShare', 'shareIndex', 'bigR', 'publicKey']
+
+      const requiredSessionSigsShareProps = [...requiredShareProps, 'siweMessage'] as const;
+
+      const requiredSignatureShareProps = [...requiredShareProps, 'sigName'] as const;
+
+      const hasProps = (props: any) => {
+        return [...props].every(prop => typedItem[prop as keyof SigShare] !== undefined && typedItem[prop as keyof SigShare] !== null)
+      }
+
+      if (hasProps(requiredSessionSigsShareProps) || hasProps(requiredSignatureShareProps)) {
+
+        typedItem.signatureShare = typedItem.signatureShare.replaceAll('"', '');
+        typedItem.bigR = typedItem.bigR.replaceAll('"', '');
+        typedItem.publicKey = typedItem.publicKey.replaceAll('"', '');
+        typedItem.dataSigned = typedItem.dataSigned.replaceAll('"', '');
+
+        return typedItem;
+      }
+
+      return null;
+    });
+
+    // removed all null values and should only have one item
+    const flattenShare = (flattenObj.filter(item => item !== null))[0] as SigShare;
+
+
+    if (flattenShare === null || flattenShare === undefined) {
+      return share
+    }
+    return flattenShare;
+  }
 
   /**
    *
@@ -849,17 +892,23 @@ export class LitNodeClientNodeJs extends LitCore {
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      const sigShares: Array<SigShare> = shares.map((s: any) => ({
-        sigType: s.sigType,
-        signatureShare: s.signatureShare.replace('"', ''),
-        shareIndex: s.shareIndex,
-        bigR: s.bigR.replace('"', ''),
-        publicKey: s.publicKey.replace('"', ''),
-        dataSigned: s.dataSigned.replace('"', ''),
-        siweMessage: s.siweMessage,
-      }));
+      const sigShares: Array<SigShare> = shares.map((s: any) => {
 
-      log('sigShares', sigShares);
+        const share = this._getFlattenShare(s);
+        console.log("XX share", share)
+
+        return {
+          sigType: share.sigType,
+          signatureShare: share.signatureShare,
+          shareIndex: share.shareIndex,
+          bigR: share.bigR,
+          publicKey: share.publicKey,
+          dataSigned: share.dataSigned,
+          siweMessage: share.siweMessage,
+        }
+      });
+
+      log('getSessionSignatures - sigShares', sigShares);
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
@@ -905,6 +954,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     return signatures;
   };
+
   /**
    *
    * Get signatures from signed data
@@ -928,17 +978,23 @@ export class LitNodeClientNodeJs extends LitCore {
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      const sigShares: Array<SigShare> = shares.map((s: any) => ({
-        sigType: s.sigType,
-        signatureShare: s.signatureShare as string,
-        shareIndex: s.shareIndex,
-        bigR: s.bigR,
-        publicKey: s.publicKey,
-        dataSigned: s.dataSigned,
-        sigName: s.sigName ? s.sigName : 'sig',
-      }));
+      const sigShares: Array<SigShare> = shares.map((s: any) => {
 
-      log('sigShares', sigShares);
+        const share = this._getFlattenShare(s);
+        console.log("YY share", share)
+
+        return ({
+          sigType: share.sigType,
+          signatureShare: share.signatureShare,
+          shareIndex: share.shareIndex,
+          bigR: share.bigR,
+          publicKey: share.publicKey,
+          dataSigned: share.dataSigned,
+          sigName: share.sigName ? share.sigName : 'sig',
+        })
+      });
+
+      log('getSignatures - sigShares', sigShares);
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
@@ -1096,6 +1152,16 @@ export class LitNodeClientNodeJs extends LitCore {
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<NodeShare>).values;
     log('responseData', JSON.stringify(responseData, null, 2));
+
+    // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
+    if (Object.keys(responseData[0].signedData).length <= 0) {
+      return {
+        signatures: null,
+        decryptions: [],
+        response: responseData[0].response,
+        logs: responseData[0].logs,
+      };
+    }
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
@@ -1885,8 +1951,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     let expiration = params.expiration || this.getExpiration();
 
     // -- (TRY) to get the wallet signature

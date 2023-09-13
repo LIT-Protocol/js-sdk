@@ -291,21 +291,28 @@ export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
 export interface BaseJsonPkpSignRequest {
   toSign: ArrayLike<number>;
   pubKey: string;
-  // auth methods to resolve
-  authMethods?: Array<Object>;
 }
 
+
+export interface WithAuthMethodSigning extends BaseJsonPkpSignRequest {
+    // auth methods to resolve
+    authMethods: Array<AuthMethod>;
+    sessionSigs?: any;
+    authSig?: AuthSig; 
+}
 export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
   sessionSigs: any;
   authSig?: AuthSig;
+  authMethods?: Array<AuthMethod>;
 }
 
 export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
   authSig: AuthSig;
   sessionSigs?: any;
+  authMethods?: Array<AuthMethod>;
 }
 
-export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning;
+export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning | WithAuthMethodSigning;
 
 /**
  * Struct in rust
@@ -652,6 +659,7 @@ export interface SigShare {
   publicKey: any;
   dataSigned: any;
   siweMessage?: string;
+  sigName?:string;
 }
 
 export interface SignedData {

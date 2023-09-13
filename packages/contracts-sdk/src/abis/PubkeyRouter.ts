@@ -132,9 +132,13 @@ export interface RoleRevokedEventEmittedResponse {
   account: string;
   sender: string;
 }
+export interface RootKeyEventEmittedResponse {
+  pubkey: Arrayish;
+  keyType: BigNumberish;
+}
 export interface RootKeySetEventEmittedResponse {
   stakingContract: string;
-  rootKey: any;
+  rootKey: RootKeyEventEmittedResponse;
 }
 export interface CheckNodeSignaturesRequest {
   r: Arrayish;
