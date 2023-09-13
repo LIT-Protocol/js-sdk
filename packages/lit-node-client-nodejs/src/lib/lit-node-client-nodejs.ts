@@ -1160,7 +1160,7 @@ export class LitNodeClientNodeJs extends LitCore {
     const responseData = (res as SuccessNodePromises<NodeShare>).values;
     log('responseData', JSON.stringify(responseData, null, 2));
 
-    // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
+    // -- case: when we are not signing anything on Lit action and using it as pure serverless function
     if (Object.keys(responseData[0].signedData).length <= 0) {
       return {
         signatures: null,
@@ -1247,7 +1247,12 @@ export class LitNodeClientNodeJs extends LitCore {
       };
     }
 
-    return returnVal;
+    return {
+      signatures: returnVal.signatures,
+      decryptions: returnVal.decryptions,
+      response: returnVal.response,
+      logs: returnVal.logs,
+    };
   };
 
   pkpSign = async (params: JsonPkpSignRequest) => {
