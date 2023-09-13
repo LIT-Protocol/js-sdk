@@ -2101,8 +2101,8 @@ export class LitNodeClientNodeJs extends LitCore {
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
+    const requestId = this.getRequestId();
     const nodePromises = await this.getNodePromises((url: string) => {
-      const requestId = this.getRequestId();
       const nodeRequestParams = {
         authMethod: params.authMethod,
       };
@@ -2163,8 +2163,9 @@ export class LitNodeClientNodeJs extends LitCore {
         mintTx,
       };
     } else {
+
       return throwError({
-        message: 'claim request has failed',
+        message: `Claim request has failed. Request trace id: lit_${requestId} `,
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
         errorCode: LIT_ERROR.UNKNOWN_ERROR.code,
       });
