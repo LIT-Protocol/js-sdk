@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+    <title>Manual Tests</title>
+
+    <script src="/dist/packages/lit-node-client-vanilla/lit-node-client.js" type="application/javascript"></script>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <script>
+      window.exports = {};
+      window.randomString = () =>
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+
+        window.onload = () => {
+          // set the email to something random so we can test over and over
+          document.getElementById('email').value = `chris+${randomString()}@litprotocol.com`;
+        }
+    </script>
+    <script src="/dist/packages/lit-auth-client-vanilla/lit-auth-client.js"> </script>
+    <script type="module">
+      import { StytchUIClient } from "https://cdn.jsdelivr.net/npm/@stytch/vanilla-js/dist/index.esm.js";
+
+      window.LitJsSdk = LitJsSdk_litNodeClient;
+
+      const litNodeClient = new LitNodeClient({
+        litNetwork: 'cayenne',
+        debug: true
+      });
+      litNodeClient.connect();
+
+      const client = new StytchUIClient('public-token-live-8b3531cd-fd4b-4400-ae15-310fa8b659e2');
+
+      var testSigningWithPkpSign = async () => {
+        console.log('testing sig with pkpSign...');
+        let sig = await litNodeClient.pkpSign({
+          toSign: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100], // hello world in Uint8Array
+          pubKey: claimResp.pubkey,
+          authMethods: [authMethod],
+          authSig,
+        });
+
+        console.log("sig: ", sig);
+
+        const encodedSig = ethers.utils.joinSignature({
+          r: '0x' + sig.r,
+          s: '0x' + sig.s,
+          v: sig.recid,
+        });
+
+        console.log('encodedSig: ', encodedSig);
+        console.log('encoded sig recovered pubkey', ethers.utils.recoverPublicKey("0x" + sig.dataSigned, encodedSig));
+
+        const encodedSig2 = ethers.utils.joinSignature({
+          r: '0x' + sig.r,
+          s: '0x' + sig.s,
+          v: sig.recid == 1 ? 0 : 1, // invert it
+        });
+
+        // console.log('encodedSig: ', encodedSig);
+        console.log('encoded sig recovered pubkey', ethers.utils.recoverPublicKey("0x" + sig.dataSigned, encodedSig));
+        console.log('encoded sig2 inverted recovered pubkey', ethers.utils.recoverPublicKey("0x" + sig.dataSigned, encodedSig2));
+
+        const recoveredPk = ethers.utils.recoverPublicKey("0x" + sig.dataSigned, sig.signature);
+        console.log('recoveredPk: ', recoveredPk);
+
+        const addr = ethers.utils.computeAddress('0x' + sig.publicKey);
+        const recoveredAddr = ethers.utils.computeAddress(recoveredPk);
+        const claimedAddr = ethers.utils.computeAddress("0x" + claimResp.pubkey);
+
+        console.log('addr from sig public key: ', addr);
+        console.log('recovered addr from sig: ', recoveredAddr);
+        console.log('addr from claimed public key: ', claimedAddr);
+
+        if (claimedAddr === recoveredAddr) {
+          document.getElementById('status').innerText = `Success!`;
+          return true
+        } else {
+          document.getElementById('status').innerText = `Failed!`;
+          return false;
+        }
+      }
+
+      var testSigningWithLitActions = async () => {
+        console.log('testing sig with lit actions...');
+        // this code will be run on the node
+        const litActionCode = `
+        const go = async () => {  
+          // this requests a signature share from the Lit Node
+          // the signature share will be automatically returned in the HTTP response from the node
+          // all the params (toSign, publicKey, sigName) are passed in from the LitJsSdk.executeJs() function
+          await Lit.Actions.signEcdsa({ toSign, publicKey , sigName });
+          await Lit.Actions.signEcdsa({ toSign, publicKey , sigName: 'sig2' });
+        };
+
+        go();
+        `;
+
+        const signatures = await litNodeClient.executeJs({
+          authMethods: [authMethod],
+          code: litActionCode,
+          authSig,
+          // all jsParams can be used anywhere in your litActionCode
+          jsParams: {
+            // this is the string "Hello World" for testing
+            toSign: [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100],
+            publicKey: "0x" + claimResp.pubkey,
+            sigName: "sig1",
+          },
+        });
+        console.log("signatures: ", signatures);
+        const { sig1 } = signatures.signatures
+        const recoveredPkFromLitActions = ethers.utils.recoverPublicKey("0x" + sig1.dataSigned, sig1.signature);
+        const claimedAddr = ethers.utils.computeAddress("0x" + claimResp.pubkey);
+        const addrFromLitActions = ethers.utils.computeAddress('0x' + sig1.publicKey);
+        const recoveredAddrFromLitActions = ethers.utils.computeAddress(recoveredPkFromLitActions);
+        console.log('addr from sig public key from lit actions: ', addrFromLitActions);
+        console.log('recovered addr from sig from lit actions: ', recoveredAddrFromLitActions);
+        console.log('addr from claimed public key: ', claimedAddr);
+
+        if (claimedAddr === recoveredAddrFromLitActions) {
+          document.getElementById('status').innerText = `Success!`;
+          return true
+        } else {
+          document.getElementById('status').innerText = `Failed!`;
+          return false;
+        }
+      }
+
+      var sendStytchOTP = async (email) => {
+        const testName = 'Claim Stytch PKP';
+        document.getElementById('status').innerText = `${testName}: Testing...`;
+
+        window.stytchResponse = await client.otps.email.loginOrCreate(email, {
+          expiration_minutes: 5,
+        });
+
+        document.getElementById('status').innerText = `${testName}: OTP Sent`;
+      };
+
+      const verifyAndClaimPKP = async (otp) => {
+        console.log(`verifying otp: ${otp} with method id ${stytchResponse.method_id}`);
+
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: "ethereum",
+        });
+
+        const authResponse = await client.otps.authenticate(otp, stytchResponse.method_id, {
+          session_duration_minutes: 60,
+          method_id: stytchResponse.method_id
+        });
+        console.log('authResponse: ', authResponse);
+
+        let sessionResp = client.session.getSync();
+        // let sessionResp = await client.sessions.get({
+        //   user_id: authResponse.user_id
+        // });
+
+        const authClient = new LitAuthClient({
+          litRelayConfig: {
+              relayApiKey: "test_chris",
+              // relayUrl: "http://127.0.0.1:3001"
+          },
+          litNodeClient,
+        });
+
+        console.log('sessionResp: ', sessionResp);
+        const session = authClient.initProvider('stytchOtp', {
+          userId: sessionResp.user_id,
+          appId: "project-live-4b70071a-da9c-46fb-8321-e29ab8cdc726",
+        })
+
+        console.log('authResponse.session_jwt: ', authResponse.session_jwt);
+        console.log('session: ', session);
+
+        const authMethod = await session.authenticate({
+          accessToken:  authResponse.session_jwt
+        });
+        console.log('authMethod: ', authMethod);
+
+
+        const claimResp = await session.claimKeyId({
+          authMethod,
+          // relayUrl: "http://127.0.0.1:3001/auth/claim"
+        });
+
+        console.log('claimResp: ', claimResp)
+
+        console.log("pkp public key: ", claimResp.pubkey);
+        window.claimResp = claimResp;
+        window.authMethod = authMethod;
+        window.authSig = authSig;
+        // let allPassed = true
+        // for(let i = 0; i < 4; i++){
+        //   let result = await testSigningWithPkpSign();
+        //   console.log(`test passed: `, result);
+        //   if (!result) {
+        //     allPassed = false;
+        //   }
+        // }
+
+        // for(let i = 0; i < 4; i++){
+        //   let result = await testSigningWithLitActions();
+        //   console.log(`test passed: `, result);
+        //   if (!result) {
+        //     allPassed = false;
+        //   }
+        // }
+
+        // document.getElementById('status').innerText = `All passed: ${allPassed}`;
+
+        let allPassed = true
+        let result = await testSigningWithPkpSign();
+        console.log(`test passed: `, result);
+        if (!result) {
+          allPassed = false;
+        }
+
+        result = await testSigningWithLitActions();
+        console.log(`test passed: `, result);
+        if (!result) {
+          allPassed = false;
+        }
+
+        document.getElementById('status').innerText = `All passed: ${allPassed}`;
+      }
+
+      
+
+      var logout = async () => {
+        const testName = 'Logout';
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+
+        LitJsSdk.disconnectWeb3();
+
+        document.getElementById(
+          'status'
+        ).innerText = `${testName}: Success - Logged out`;
+      };
+
+      document.addEventListener(
+        'lit-ready',
+        function (e) {
+          console.log('LIT network is ready');
+          document.getElementById('networkStatus').innerText =
+            'Success!  Connected to Lit Protocol Network';
+        },
+        false
+      );
+
+      function isNodeStorageError(errorCode) {
+        return (
+          errorCode === 'storage_error' || errorCode === 'NodeStorageError'
+        );
+      }
+
+      window.sendStytchOTP = sendStytchOTP;
+      window.verifyAndClaimPKP = verifyAndClaimPKP;
+      window.testSigningWithPkpSign = testSigningWithPkpSign;
+      window.testSigningWithLitActions = testSigningWithLitActions;
+      window.logout = logout;
+    </script>
+  </head>
+
+  <body>
+    <h1>Manual tests</h1>
+    <br />
+    <br />
+    <div id="networkStatus">Connecting to Lit Protocol Network...</div>
+    <br />
+    <br />
+    <input id="email" type="text" value="chris@litprotocol.com" />
+    <button onclick="sendStytchOTP(document.getElementById('email').value)">Send Stytch OTP</button>
+    <br />
+    <br />
+    <input id="otp" type="text" placeholder="OTP" />
+    <button onclick="verifyAndClaimPKP(document.getElementById('otp').value)">Verify and Claim PKP</button>
+    <br/>
+    <br/>
+    <button onclick="testSigningWithPkpSign()">Test Signing with PKPSign</button>
+    <br/>
+    <br/>
+    <button onclick="testSigningWithLitActions()">Test Signing with Lit Actions</button>
+    
+    <br/>
+    <br/>
+    <button onclick="logout()">Logout</button>
+    <br />
+    <br />
+    <h2 id="status"></h2>
+    <br />
+    <p id="humanized"></p>
+  </body>
+</html>

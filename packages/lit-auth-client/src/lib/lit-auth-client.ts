@@ -68,10 +68,7 @@ export class LitAuthClient {
     }
 
     // Check if Lit node client is provided
-    if (
-      options?.litNodeClient &&
-      options.litNodeClient instanceof LitNodeClient
-    ) {
+    if (options?.litNodeClient) {
       this.litNodeClient = options?.litNodeClient;
     } else {
       this.litNodeClient = new LitNodeClient({

@@ -923,23 +923,19 @@ export class LitNodeClientNodeJs extends LitCore {
       }
 
       // -- validate if signature type is ECDSA
-      if (sigType !== 'ECDSA') {
+      if (
+        sigType !== SIGTYPE.EcdsaCaitSith &&
+        sigType !== SIGTYPE.EcdsaCAITSITHP256
+      ) {
         throwError({
-          message: 'signature type is not ECDSA',
+          message: `signature type is ${sigType} which is not ECDSA_CAIT_SITH`,
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
         return;
       }
 
-      let signature: any;
-
-      if (
-        sigType === SIGTYPE.EcdsaCaitSith ||
-        sigType === SIGTYPE.EcdsaCAITSITHP256
-      ) {
-        signature = combineEcdsaShares(sigShares);
-      }
+      const signature: any = combineEcdsaShares(sigShares);
 
       const encodedSig = joinSignature({
         r: '0x' + signature.r,
@@ -969,8 +965,9 @@ export class LitNodeClientNodeJs extends LitCore {
    *
    */
   getSignatures = (signedData: Array<any>): any => {
+    log(`getSignatures(): ${JSON.stringify(signedData, null, 2)}`);
     // -- prepare
-    let signatures: any = {};
+    const signatures: any = {};
 
     // TOOD: get keys of signedData
     const keys = Object.keys(signedData[0]);
@@ -1012,23 +1009,19 @@ export class LitNodeClientNodeJs extends LitCore {
       }
 
       // -- validate if signature type is ECDSA
-      if (sigType !== SIGTYPE.EcdsaCaitSith) {
+      if (
+        sigType !== SIGTYPE.EcdsaCaitSith &&
+        sigType !== SIGTYPE.EcdsaCAITSITHP256
+      ) {
         throwError({
-          message: 'signature type is not ECDSA',
+          message: `signature type is ${sigType} which is not ECDSA_CAIT_SITH`,
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
         return;
       }
 
-      let signature: any;
-
-      if (
-        sigType === SIGTYPE.EcdsaCaitSith ||
-        sigType === SIGTYPE.EcdsaCAITSITHP256
-      ) {
-        signature = combineEcdsaShares(sigShares);
-      }
+      const signature: any = combineEcdsaShares(sigShares);
 
       const encodedSig = joinSignature({
         r: '0x' + signature.r,
@@ -1173,42 +1166,20 @@ export class LitNodeClientNodeJs extends LitCore {
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
     const signedDataList = responseData.map((r) => {
-      // add the signed data to the signature share
-      delete r.signedData.result;
-
-      // nodes do not camel case the response from /web/pkp/sign.
-      const snakeToCamel = (s: string) =>
-        s.replace(/(_\w)/g, (k) => k[1].toUpperCase());
-      //@ts-ignore
-      const convertShare: any = (share: any) => {
-        const keys = Object.keys(share);
-        let convertedShare = {};
-        for (const key of keys) {
-          convertedShare = Object.defineProperty(
-            convertedShare,
-            snakeToCamel(key),
-            Object.getOwnPropertyDescriptor(share, key) as PropertyDecorator
-          );
-        }
-
-        return convertedShare;
-      };
-      const convertedShare: SigShare = convertShare(r.signedData);
-      const keys = Object.keys(convertedShare);
-      for (const key of keys) {
-        //@ts-ignore
-        if (typeof convertedShare[key] === 'string') {
+      const { signedData } = r;
+      for (const key of Object.keys(signedData)) {
+        for (const subkey of Object.keys(signedData[key])) {
           //@ts-ignore
-          convertedShare[key] = convertedShare[key]
-            .replace('"', '')
-            .replace('"', '');
+          if (typeof signedData[key][subkey] === 'string') {
+            //@ts-ignore
+            signedData[key][subkey] = signedData[key][subkey].replaceAll(
+              '"',
+              ''
+            );
+          }
         }
       }
-      //@ts-ignore
-      convertedShare.dataSigned = convertedShare.digest;
-      return {
-        signature: convertedShare,
-      };
+      return signedData;
     });
 
     const signatures = this.getSignatures(signedDataList);
@@ -2124,13 +2095,16 @@ export class LitNodeClientNodeJs extends LitCore {
       return this.getClaimKeyExecutionShares(url, nodeRequestParams, requestId);
     });
 
-    const responseData = await this.handleNodePromises(nodePromises);
+    const responseData = await this.handleNodePromises(
+      nodePromises,
+      this.connectedNodes.size // require from all connected nodes
+    );
 
     if (responseData.success === true) {
       const nodeSignatures: Signature[] = (
         responseData as SuccessNodePromises<any>
       ).values.map((r: any) => {
-        let sig = ethers.utils.splitSignature(`0x${r.signature}`);
+        const sig = ethers.utils.splitSignature(`0x${r.signature}`);
         return {
           r: sig.r,
           s: sig.s,
@@ -2138,10 +2112,13 @@ export class LitNodeClientNodeJs extends LitCore {
         };
       });
 
+      log(`responseData: ${JSON.stringify(responseData, null, 2)}`);
+
       const derivedKeyId = (responseData as SuccessNodePromises<any>).values[0]
         .derivedKeyId;
 
       const pubkey: string = this.computeHDPubKey(derivedKeyId);
+      log(`pubkey ${pubkey} derived from key id ${derivedKeyId}`);
 
       let mintTx = '';
       if (params.mintCallback) {
@@ -2154,14 +2131,16 @@ export class LitNodeClientNodeJs extends LitCore {
           relayUrl: (params as ClaimRequest<'relay'>).relayUrl,
           relayApiKey: (params as ClaimRequest<'relay'>).relayApiKey,
         });
+      } else {
+        mintTx = await defaultMintClaimCallback({
+          derivedKeyId,
+          authMethodType: params.authMethod.authMethodType,
+          signatures: nodeSignatures,
+          pubkey,
+          relayUrl: (params as ClaimRequest<'relay'>).relayUrl,
+          relayApiKey: (params as ClaimRequest<'relay'>).relayApiKey,
+        });
       }
-
-      mintTx = await defaultMintClaimCallback({
-        derivedKeyId,
-        authMethodType: params.authMethod.authMethodType,
-        signatures: nodeSignatures,
-        pubkey,
-      });
 
       return {
         signatures: nodeSignatures,
