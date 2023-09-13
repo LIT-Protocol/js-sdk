@@ -13,22 +13,12 @@
   },
   "tasksRunnerOptions": {
     "default": {
-      "runner": "@nrwl/workspace/tasks-runners/default",
-      "options": {
-        "cacheableOperations": [
-          "build"
-        ],
-        "cacheableDirectories": [
-          "node_modules"
-        ]
-      }
+      "runner": "@nrwl/workspace/tasks-runners/default"
     }
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     }
   },
   "workspaceLayout": {
