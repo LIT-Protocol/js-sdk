@@ -150,7 +150,6 @@ export abstract class BaseProvider {
           response = await nodeClient.signSessionKey({
             statement: authCallbackParams.statement,
             sessionKey: params.sessionSigsParams.sessionKey,
-            statement: authCallbackParams.statement,
             authMethods: [],
             authSig: authSig,
             pkpPublicKey: params.pkpPublicKey,
