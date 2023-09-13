@@ -38,6 +38,7 @@ export class LitRelay implements IRelay {
     this.relayUrl =
       config.relayUrl || 'https://relayer-server-staging-cayenne.getlit.dev';
     this.relayApiKey = config.relayApiKey || '';
+    console.log("Lit's relay server URL:", this.relayUrl);
   }
 
   /**
