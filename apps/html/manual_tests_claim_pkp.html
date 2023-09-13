@@ -92,7 +92,8 @@
           // this requests a signature share from the Lit Node
           // the signature share will be automatically returned in the HTTP response from the node
           // all the params (toSign, publicKey, sigName) are passed in from the LitJsSdk.executeJs() function
-          const sigShare = await Lit.Actions.signEcdsa({ toSign, publicKey , sigName });
+          await Lit.Actions.signEcdsa({ toSign, publicKey , sigName });
+          await Lit.Actions.signEcdsa({ toSign, publicKey , sigName: 'sig2' });
         };
 
         go();
@@ -192,21 +193,36 @@
         window.claimResp = claimResp;
         window.authMethod = authMethod;
         window.authSig = authSig;
+        // let allPassed = true
+        // for(let i = 0; i < 4; i++){
+        //   let result = await testSigningWithPkpSign();
+        //   console.log(`test passed: `, result);
+        //   if (!result) {
+        //     allPassed = false;
+        //   }
+        // }
+
+        // for(let i = 0; i < 4; i++){
+        //   let result = await testSigningWithLitActions();
+        //   console.log(`test passed: `, result);
+        //   if (!result) {
+        //     allPassed = false;
+        //   }
+        // }
+
+        // document.getElementById('status').innerText = `All passed: ${allPassed}`;
+
         let allPassed = true
-        for(let i = 0; i < 4; i++){
-          let result = await testSigningWithPkpSign();
-          console.log(`test passed: `, result);
-          if (!result) {
-            allPassed = false;
-          }
+        let result = await testSigningWithPkpSign();
+        console.log(`test passed: `, result);
+        if (!result) {
+          allPassed = false;
         }
 
-        for(let i = 0; i < 4; i++){
-          let result = await testSigningWithLitActions();
-          console.log(`test passed: `, result);
-          if (!result) {
-            allPassed = false;
-          }
+        result = await testSigningWithLitActions();
+        console.log(`test passed: `, result);
+        if (!result) {
+          allPassed = false;
         }
 
         document.getElementById('status').innerText = `All passed: ${allPassed}`;
