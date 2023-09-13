@@ -936,7 +936,14 @@ export class LitNodeClientNodeJs extends LitCore {
       }
 
       const signature: any = combineEcdsaShares(sigShares);
-
+      if (!signature.r) {
+        throwError({
+          message: 'siganture could not be combined',
+          errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.kind,
+          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name
+        });
+      }
+      
       const encodedSig = joinSignature({
         r: '0x' + signature.r,
         s: '0x' + signature.s,
@@ -1022,6 +1029,13 @@ export class LitNodeClientNodeJs extends LitCore {
       }
 
       const signature: any = combineEcdsaShares(sigShares);
+      if (!signature.r) {
+        throwError({
+          message: 'siganture could not be combined',
+          errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.kind,
+          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name
+        });
+      }
 
       const encodedSig = joinSignature({
         r: '0x' + signature.r,
