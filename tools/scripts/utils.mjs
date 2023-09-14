@@ -162,6 +162,17 @@ export const spawnCommand = (
   });
 };
 
+export const bunSpawn = (commands, options = {}) => {
+  const defaultOptions = { stdout: 'inherit' };
+
+  let _commands = commands.split(' ');
+
+  Bun.spawn(_commands, {
+    ...defaultOptions,
+    ...options,
+  });
+};
+
 export const spawnListener = (commands, callback, prefix = '', color = 31) => {
   let _commands = commands.split(' ');
   // let eventName = _commands.join('-');
