@@ -1196,13 +1196,6 @@ export const staking = {
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "pauseEpoch",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "address",

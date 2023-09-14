@@ -5,6 +5,8 @@
     "dir": "abis/",
     "ignoreProperties": ["metadata", "bytecode", "deployedBytecode"],
     "token": "",
-    "isPrivate": true
-  }
+    "isPrivate": true,
+    "dirLocal": "../lit-assets/rust/lit-core/lit-blockchain/abis/"
+  },
+  "contractsLocal": "../lit-assets/blockchain/contracts/deployed-lit-node-contracts-temp.json"
 }
