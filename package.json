@@ -56,7 +56,9 @@
     "txServer": "node tx-handler-server.mjs",
     "prettier": "nx format:write --all",
     "delete:merged-branches": "git branch --merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d",
-    "delete:no-merged-branches": "git branch --no-merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d"
+    "delete:no-merged-branches": "git branch --no-merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d",
+    "cache:enable": "node ./tools/scripts/endisable-cache.mjs --enable=true",
+    "cache:disable": "node ./tools/scripts/endisable-cache.mjs --enable=false"
   },
   "private": true,
   "dependencies": {
