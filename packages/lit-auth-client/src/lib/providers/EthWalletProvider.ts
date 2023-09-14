@@ -23,8 +23,14 @@ export default class EthWalletProvider extends BaseProvider {
 
   constructor(options: BaseProviderOptions & EthWalletProviderOptions) {
     super(options);
-    this.domain = options.domain || window.location.hostname;
-    this.origin = options.origin || window.location.origin;
+
+    if (globalThis?.window) {
+      this.domain = options.domain || window.location.hostname;
+      this.origin = options.origin || window.location.origin;
+    } else {
+      this.domain = options.domain || 'localhost';
+      this.origin = options.origin || 'http://localhost:3000';
+    }
   }
 
   /**

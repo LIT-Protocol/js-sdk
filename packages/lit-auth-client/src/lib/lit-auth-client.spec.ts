@@ -1,9 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import { TextEncoder, TextDecoder } from 'util';
-global.TextEncoder = TextEncoder;
-// @ts-ignore - TextDecoder is not defined in Node
-global.TextDecoder = TextDecoder;
 // @ts-ignore - set global variable for testing
 global.jestTesting = true;
 

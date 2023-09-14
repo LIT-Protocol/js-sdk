@@ -158,18 +158,20 @@ describe('conversion', () => {
     });
 
     describe('base64 ', () => {
-      // generate a random base64urlpad string of length 1333 (which is equivalent to 1000 bytes when decoded)
-      // generate a random Uint8Array of length 1000
-      const randomBytes = new Uint8Array(1000);
-      for (let i = 0; i < randomBytes.length; i++) {
-        randomBytes[i] = Math.floor(Math.random() * 256);
-      }
+      it('Convert the Uint8Array to a base64urlpad string', () => {
+        // generate a random base64urlpad string of length 1333 (which is equivalent to 1000 bytes when decoded)
+        // generate a random Uint8Array of length 1000
+        const randomBytes = new Uint8Array(1000);
+        for (let i = 0; i < randomBytes.length; i++) {
+          randomBytes[i] = Math.floor(Math.random() * 256);
+        }
 
-      // Convert the Uint8Array to a base64urlpad string
-      const str = uint8arrayToString(randomBytes, 'base64urlpad');
-      const blob = new Blob([uint8arrayFromString(str, 'base64urlpad')]);
+        // Convert the Uint8Array to a base64urlpad string
+        const str = uint8arrayToString(randomBytes, 'base64urlpad');
+        const blob = new Blob([uint8arrayFromString(str, 'base64urlpad')]);
 
-      expect(blob.size).toBe(1000);
+        expect(blob.size).toBe(1000);
+      });
     });
   });
 });

@@ -17,7 +17,7 @@ const nxConfig = JSON.parse(fs.readFileSync(nxConfigPath, 'utf-8'));
 
 if (enableCache) {
   nxConfig.tasksRunnerOptions.default.options = {
-    cacheableOperations: ['build'],
+    cacheableOperations: ['build', "test"],
     // cacheableDirectories: ['node_modules'],
   };
 } else {

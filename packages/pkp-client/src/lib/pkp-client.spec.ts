@@ -20,7 +20,11 @@ import {
   StdFee,
 } from '@cosmjs/stargate';
 
-jest.setTimeout(120000);
+try {
+  jest.setTimeout(120000);
+} catch (e) {
+  // ... you are running in Bun
+}
 
 const PKP_PUBKEY = LITCONFIG.PKP_PUBKEY;
 const PKP_ETH_ADDRESS = LITCONFIG.PKP_ETH_ADDRESS;

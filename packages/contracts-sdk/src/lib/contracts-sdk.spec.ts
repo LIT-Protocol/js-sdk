@@ -5,7 +5,11 @@ import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 
 import * as LITCONFIG from 'lit.config.json';
 
-jest.setTimeout(60000);
+try{
+  jest.setTimeout(60000);
+}catch(e){
+  // 
+}
 
 describe('contractsSdk', () => {
   let litContracts: LitContracts;

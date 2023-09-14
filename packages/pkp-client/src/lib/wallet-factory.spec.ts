@@ -39,17 +39,29 @@ describe('WalletFactory', () => {
     const btcProp: any = {
       /* Bitcoin properties */
     };
-    expect(() => WalletFactory.createWallet('btc', btcProp)).toThrowError(
-      'BTC wallet is not supported yet'
-    );
+    let result;
+
+    try {
+      result = WalletFactory.createWallet('btc', btcProp)
+    } catch (e: any) {
+      result = e.message
+    }
+    expect(result).toBe("BTC wallet is not supported yet");
   });
 
   it('should throw an error for unsupported chain', () => {
     const unsupportedProp: any = {
       /* Unsupported properties */
     };
-    expect(() =>
-      WalletFactory.createWallet('unsupportedChain', unsupportedProp)
-    ).toThrowError('Unsupported chain: unsupportedChain');
+
+    let result;
+
+    try {
+      result = WalletFactory.createWallet('unsupportedChain', unsupportedProp)
+    } catch (e: any) {
+      result = e.message
+    }
+
+    expect(result).toBe('Unsupported chain: unsupportedChain');
   });
 });

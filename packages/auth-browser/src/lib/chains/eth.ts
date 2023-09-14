@@ -259,7 +259,7 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
       mustResign = true;
     }
 
-    if (parsedSiwe.address !== ethers.getAddress(parsedSiwe.address)) {
+    if (parsedSiwe.address !== getAddress(parsedSiwe.address)) {
       log(
         'signing auth message because parsedSig.address is not equal to the same address but checksummed.  This usually means the user had a non-checksummed address saved and so they need to re-sign.'
       );

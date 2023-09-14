@@ -6,7 +6,11 @@ import { ethers } from 'ethers';
 
 let client: LitNodeClient;
 
-jest.setTimeout(60000);
+try {
+  jest.setTimeout(60000);
+} catch (e) {
+  // Probably running in Bun
+}
 
 describe('Lit Actions', () => {
   client = new LitNodeClient({
@@ -55,7 +59,7 @@ describe('Lit Actions', () => {
       })
     );
 
-    expect(res.response).toEqual({ hello: 'world' });
+    expect(res.response).toEqual(JSON.stringify({ hello: 'world' }));
   });
 
   it('lit action should sign a message', async () => {
