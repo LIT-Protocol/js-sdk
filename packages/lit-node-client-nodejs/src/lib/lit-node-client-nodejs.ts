@@ -1004,7 +1004,6 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const sigShares: Array<SigShare> = shares.map((s: any) => {
         const share = this._getFlattenShare(s);
-        console.log('YY share', share);
 
         return {
           sigType: share.sigType,

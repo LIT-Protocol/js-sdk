@@ -213,7 +213,7 @@ const pkpSign = async (client, pkpPubkey, authSig) => {
       authSig,
     });
 
-    console.log("sig: ", sig);
+    // console.log("sig: ", sig);
 
     const recoveredPk = ethers.utils.recoverPublicKey("0x" + sig.dataSigned, sig.signature);
     const addr = ethers.utils.computeAddress('0x' + sig.publicKey);
@@ -252,7 +252,7 @@ const litActionSign = async(client, pkpPubkey, authSig) => {
         sigName: "sig1",
       },
     });
-    console.log("signatures: ", signatures);
+    // console.log("signatures: ", signatures);
     const { sig1, sig2 } = signatures.signatures
     const sigKeys = {
       sig1: {
@@ -265,10 +265,10 @@ const litActionSign = async(client, pkpPubkey, authSig) => {
       },
     }
 
-    console.log(`sigKeys: ${JSON.stringify(sigKeys, null, 2)}`)
+    // console.log(`sigKeys: ${JSON.stringify(sigKeys, null, 2)}`)
 
     const pkpAddr = ethers.utils.computeAddress(pkpPubkey);
-    console.log('pkpAddr:', pkpAddr)
+    // console.log('pkpAddr:', pkpAddr)
 
 
     let allGood = sigKeys.sig1.recovered == sigKeys.sig1.reported && sigKeys.sig2.recovered == sigKeys.sig2.reported && sigKeys.sig1.recovered == sigKeys.sig2.recovered && sigKeys.sig1.recovered == pkpAddr;
@@ -288,13 +288,13 @@ const mintPkpAndSign = async () => {
         "http://localhost:7471",
         "http://localhost:7472",
       ],
-      debug: true
+      debug: false
     });
   } else {
     // use cayenne
     client = new LitJsSdk.LitNodeClient({
       litNetwork: 'cayenne',
-      debug: true
+      debug: false
     });
   }
 
@@ -312,12 +312,19 @@ const mintPkpAndSign = async () => {
     );
     const wallet = new ethers.Wallet(privateKey, provider);
     const authSig = await getAuthSig(wallet);
-    
-    for(let i = 0; i < 100; i++){
-      console.log(`testing ${i}`)
-      await pkpSign(client, pkpPubkey, authSig);
+
+    let startTime = Date.now();
+    let allGood = true;
+    const testCount = 100;
+    for(let i = 0; i < testCount; i++){
+      console.log(`testing ${i + 1} of ${testCount}`);
+      let result = await pkpSign(client, pkpPubkey, authSig);
+      if (!result) {
+        allGood = false;
+      }
     }
-    
+    console.log(`it took ${(Date.now() - startTime) / 1000}s to run ${testCount} tests`)
+    console.log('all tests were good', allGood);
     // await litActionSign(client, pkpPubkey, authSig);
 }
 
