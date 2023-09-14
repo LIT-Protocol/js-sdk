@@ -51,10 +51,10 @@ function findTestFiles(dir, exts) {
  * Run the test command for the given test file
  * @param {string} testFile - The path of the test file
  */
-function runTest(testFile) {
+async function runTest(testFile) {
   const command = `bun test ${testFile}`;
   console.log('Running command: ', command);
-  bunSpawn(command, { stdout: 'inherit' });
+  await bunSpawn(command, { stdout: 'inherit' });
 }
 
 const testFiles = findTestFiles(TEST_DIR, TEST_FILE_EXTENSIONS);
@@ -74,9 +74,11 @@ if (testName) {
   }
 
   for (const filePath of matchingTestFiles) {
-    runTest(filePath);
+    await runTest(filePath);
   }
 } else {
   redLog('Please provide a test name. eg. bun test:file lit-node-client');
   process.exit(1);
 }
+
+process.exit(0);
