@@ -253,16 +253,25 @@ const litActionSign = async(client, pkpPubkey, authSig) => {
       },
     });
     console.log("signatures: ", signatures);
-    const { sig1 } = signatures.signatures
-    const recoveredPkFromLitActions = ethers.utils.recoverPublicKey("0x" + sig1.dataSigned, sig1.signature);
-    const claimedAddr = ethers.utils.computeAddress(pkpPubkey);
-    const addrFromLitActions = ethers.utils.computeAddress('0x' + sig1.publicKey);
-    const recoveredAddrFromLitActions = ethers.utils.computeAddress(recoveredPkFromLitActions);
-    // console.log('addr from sig public key from lit actions: ', addrFromLitActions);
-    // console.log('recovered addr from sig from lit actions: ', recoveredAddrFromLitActions);
-    // console.log('addr from claimed public key: ', claimedAddr);
+    const { sig1, sig2 } = signatures.signatures
+    const sigKeys = {
+      sig1: {
+        recovered: ethers.utils.computeAddress(ethers.utils.recoverPublicKey("0x" + sig1.dataSigned, sig1.signature)),
+        reported: ethers.utils.computeAddress('0x' + sig1.publicKey)
+      },
+      sig2: {
+        recovered: ethers.utils.computeAddress(ethers.utils.recoverPublicKey("0x" + sig2.dataSigned, sig2.signature)),
+        reported: ethers.utils.computeAddress('0x' + sig2.publicKey)
+      },
+    }
 
-    let allGood = addrFromLitActions === recoveredAddrFromLitActions && addrFromLitActions === claimedAddr;
+    console.log(`sigKeys: ${JSON.stringify(sigKeys, null, 2)}`)
+
+    const pkpAddr = ethers.utils.computeAddress(pkpPubkey);
+    console.log('pkpAddr:', pkpAddr)
+
+
+    let allGood = sigKeys.sig1.recovered == sigKeys.sig1.reported && sigKeys.sig2.recovered == sigKeys.sig2.reported && sigKeys.sig1.recovered == sigKeys.sig2.recovered && sigKeys.sig1.recovered == pkpAddr;
     console.log('all addresses match: ', allGood);
     return allGood;
   }
@@ -276,8 +285,8 @@ const mintPkpAndSign = async () => {
       "minNodeCount": 2,
       "bootstrapUrls": [
         "http://localhost:7470",
-      "http://localhost:7471",
-      "http://localhost:7472",
+        "http://localhost:7471",
+        "http://localhost:7472",
       ],
       debug: true
     });
@@ -303,9 +312,13 @@ const mintPkpAndSign = async () => {
     );
     const wallet = new ethers.Wallet(privateKey, provider);
     const authSig = await getAuthSig(wallet);
-
-    // await pkpSign(client, pkpPubkey, authSig);
-    await litActionSign(client, pkpPubkey, authSig);
+    
+    for(let i = 0; i < 100; i++){
+      console.log(`testing ${i}`)
+      await pkpSign(client, pkpPubkey, authSig);
+    }
+    
+    // await litActionSign(client, pkpPubkey, authSig);
 }
 
 const getAuthSig = async (wallet) => {

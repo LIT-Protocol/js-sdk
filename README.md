@@ -317,6 +317,8 @@ yarn tools --test --e2e react
 
 ## Testing with a Local Lit Node
 
+First, deploy your Lit Node Contracts, since the correct addresses will be pulled from the `../lit-assets/blockchain/contracts/deployed-lit-node-contracts-temp.json` file.
+
 Set these two env vars:
 
 ```sh
@@ -329,6 +331,7 @@ Run:
 ```sh
 yarn update:contracts-sdk --fetch
 yarn update:contracts-sdk --gen
+yarn build:packages
 ```
 
 To run manual tests:

@@ -110,13 +110,7 @@ export const getContractAddresses = async (LitConfig) => {
   } else {
     // get contracts from remote
     contractAddresses = JSON.parse(
-      await fetch(LitConfig.contracts, {
-        headers: LitConfig.abis.isPrivate
-          ? {
-              Authorization: `token ${LitConfig.abis.token}`,
-            }
-          : {},
-      }).then((res) => res.text())
+      await fetch(LitConfig.contracts).then((res) => res.text())
     );
   }
   Object.entries(contractAddresses).forEach(([key, value]) => {

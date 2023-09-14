@@ -1,23 +1,8 @@
 import { ContractTransaction } from 'ethers';
-
-// --- Replaced Content ---
-import { TransactionRequest } from "@ethersproject/abstract-provider";
-import { BigNumber, BigNumberish } from 'ethers';
-
-export interface Arrayish {
-    toHexString(): string;
-    slice(start?: number, end?: number): Arrayish;
-    length: number;
-    [index: number]: number;
-}
-
-export type ContractContext = ContractContextLegacy & {
-    populateTransaction: ContractContextLegacy
-}
-// --- Replaced Content ---
+import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils';
 import { EthersContractContext } from 'ethereum-abi-types-generator';
 
-export type ContractContextLegacy = EthersContractContext<
+export type ContractContext = EthersContractContext<
   PubkeyRouter,
   PubkeyRouterEventsContext,
   PubkeyRouterEvents
@@ -192,7 +177,7 @@ export interface PubkeyRouter {
     _resolver: string,
     _env: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -345,7 +330,7 @@ export interface PubkeyRouter {
     role: Arrayish,
     account: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -393,7 +378,7 @@ export interface PubkeyRouter {
     role: Arrayish,
     account: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -406,7 +391,7 @@ export interface PubkeyRouter {
     role: Arrayish,
     account: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -430,7 +415,7 @@ export interface PubkeyRouter {
   setContractResolver(
     newResolverAddress: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -449,7 +434,7 @@ export interface PubkeyRouter {
     keyType: BigNumberish,
     derivedKeyId: Arrayish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -468,7 +453,7 @@ export interface PubkeyRouter {
     keyType: BigNumberish,
     derivedKeyId: Arrayish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -492,7 +477,7 @@ export interface PubkeyRouter {
     stakingContractAddress: string,
     newRootKeys: VoteForRootKeysRequest[],
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true

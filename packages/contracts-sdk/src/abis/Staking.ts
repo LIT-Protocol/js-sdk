@@ -1,23 +1,8 @@
 import { ContractTransaction } from 'ethers';
-
-// --- Replaced Content ---
-import { TransactionRequest } from "@ethersproject/abstract-provider";
-import { BigNumber, BigNumberish } from 'ethers';
-
-export interface Arrayish {
-    toHexString(): string;
-    slice(start?: number, end?: number): Arrayish;
-    length: number;
-    [index: number]: number;
-}
-
-export type ContractContext = ContractContextLegacy & {
-    populateTransaction: ContractContextLegacy
-}
-// --- Replaced Content ---
+import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils';
 import { EthersContractContext } from 'ethereum-abi-types-generator';
 
-export type ContractContextLegacy = EthersContractContext<
+export type ContractContext = EthersContractContext<
   Staking,
   StakingEventsContext,
   StakingEvents
@@ -301,7 +286,7 @@ export interface Staking {
     _keyTypes: BigNumberish[],
     _env: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -312,7 +297,7 @@ export interface Staking {
   adminKickValidatorInNextEpoch(
     validatorStakerAddress: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -323,7 +308,7 @@ export interface Staking {
   adminRejoinValidator(
     staker: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -336,7 +321,7 @@ export interface Staking {
     validatorStakerAddress: string,
     amountToPenalize: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -345,7 +330,7 @@ export interface Staking {
    */
   advanceEpoch(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -407,7 +392,7 @@ export interface Staking {
    * StateMutability: nonpayable
    * Type: function
    */
-  exit(overrides?: ContractTransactionOverrides): Promise<ContractTransaction & TransactionRequest>;
+  exit(overrides?: ContractTransactionOverrides): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -430,7 +415,7 @@ export interface Staking {
    */
   getReward(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -570,7 +555,7 @@ export interface Staking {
     reason: BigNumberish,
     data: Arrayish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -579,7 +564,7 @@ export interface Staking {
    */
   lockValidatorsForNextEpoch(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -626,7 +611,7 @@ export interface Staking {
    */
   renounceOwnership(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -647,7 +632,7 @@ export interface Staking {
     senderPubKey: BigNumberish,
     receiverPubKey: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -656,7 +641,7 @@ export interface Staking {
    */
   requestToLeave(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -675,7 +660,7 @@ export interface Staking {
     newKeyTypes: BigNumberish[],
     newMinimumValidatorCount: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -686,7 +671,7 @@ export interface Staking {
   setContractResolver(
     newResolverAddress: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -697,7 +682,7 @@ export interface Staking {
   setEpochEndTime(
     newEpochEndTime: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -708,7 +693,7 @@ export interface Staking {
   setEpochLength(
     newEpochLength: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -719,7 +704,7 @@ export interface Staking {
   setEpochState(
     newState: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -730,7 +715,7 @@ export interface Staking {
   setEpochTimeout(
     newEpochTimeout: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -751,7 +736,7 @@ export interface Staking {
     senderPubKey: BigNumberish,
     receiverPubKey: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -764,7 +749,7 @@ export interface Staking {
     reason: BigNumberish,
     newKickPenaltyPercent: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -786,7 +771,7 @@ export interface Staking {
   signalReadyForNextEpoch(
     epochNumber: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -797,7 +782,7 @@ export interface Staking {
   stake(
     amount: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -820,7 +805,7 @@ export interface Staking {
     senderPubKey: BigNumberish,
     receiverPubKey: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -845,7 +830,7 @@ export interface Staking {
   transferOwnership(
     newOwner: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -854,7 +839,7 @@ export interface Staking {
    */
   unlockValidatorsForNextEpoch(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -900,5 +885,5 @@ export interface Staking {
   withdraw(
     amount: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
 }

@@ -1,23 +1,8 @@
 import { ContractTransaction } from 'ethers';
-
-// --- Replaced Content ---
-import { TransactionRequest } from "@ethersproject/abstract-provider";
-import { BigNumber, BigNumberish } from 'ethers';
-
-export interface Arrayish {
-    toHexString(): string;
-    slice(start?: number, end?: number): Arrayish;
-    length: number;
-    [index: number]: number;
-}
-
-export type ContractContext = ContractContextLegacy & {
-    populateTransaction: ContractContextLegacy
-}
-// --- Replaced Content ---
+import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils';
 import { EthersContractContext } from 'ethereum-abi-types-generator';
 
-export type ContractContextLegacy = EthersContractContext<
+export type ContractContext = EthersContractContext<
   PKPNFT,
   PKPNFTEventsContext,
   PKPNFTEvents
@@ -180,7 +165,7 @@ export interface PKPNFT {
     resolverAddress: string,
     _env: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -193,7 +178,7 @@ export interface PKPNFT {
     to: string,
     tokenId: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -215,7 +200,7 @@ export interface PKPNFT {
   burn(
     tokenId: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: true
    * Constant: false
@@ -230,7 +215,7 @@ export interface PKPNFT {
     derivedKeyId: Arrayish,
     signatures: ClaimAndMintRequest[],
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -363,7 +348,7 @@ export interface PKPNFT {
     keyType: BigNumberish,
     ipfsCID: Arrayish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: true
    * Constant: false
@@ -374,7 +359,7 @@ export interface PKPNFT {
   mintNext(
     keyType: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -427,7 +412,7 @@ export interface PKPNFT {
    */
   renounceOwnership(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -442,7 +427,7 @@ export interface PKPNFT {
     to: string,
     tokenId: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -459,7 +444,7 @@ export interface PKPNFT {
     tokenId: BigNumberish,
     data: Arrayish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -472,7 +457,7 @@ export interface PKPNFT {
     operator: string,
     approved: boolean,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -483,7 +468,7 @@ export interface PKPNFT {
   setContractResolver(
     newResolverAddress: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -494,7 +479,7 @@ export interface PKPNFT {
   setFreeMintSigner(
     newFreeMintSigner: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -505,7 +490,7 @@ export interface PKPNFT {
   setMintCost(
     newMintCost: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: true
@@ -580,7 +565,7 @@ export interface PKPNFT {
     to: string,
     tokenId: BigNumberish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -591,7 +576,7 @@ export interface PKPNFT {
   transferOwnership(
     newOwner: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
   /**
    * Payable: false
    * Constant: false
@@ -600,5 +585,5 @@ export interface PKPNFT {
    */
   withdraw(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
+  ): Promise<ContractTransaction>;
 }

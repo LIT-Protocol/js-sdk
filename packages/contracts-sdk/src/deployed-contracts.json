@@ -4,21 +4,21 @@
     "correctedName": "StakingBalances",
     "exportName": "stakingBalances",
     "abiPath": "../lit-assets/rust/lit-core/lit-blockchain/abis/StakingBalances.json",
-    "address": "0xAB783F4B8ceD3f98Adc169d50F1063dD0517EEA8"
+    "address": "0x23Ab8F5cD37be7B6036a17fD75A842533d2D39d0"
   },
   {
     "name": "stakingContractAddress",
     "correctedName": "Staking",
     "exportName": "staking",
     "abiPath": "../lit-assets/rust/lit-core/lit-blockchain/abis/Staking.json",
-    "address": "0x07A5bE9e0Aa724563e904B5e7AF37921e193f801"
+    "address": "0x187e8770A9ad58a83b3A619ba9bb3629dA6E25B1"
   },
   {
     "name": "multisenderContractAddress",
     "correctedName": "Multisender",
     "exportName": "multisender",
     "abiPath": "../lit-assets/rust/lit-core/lit-blockchain/abis/Multisender.json",
-    "address": "0x373195723448308d43a43989790C0b768Ef14853"
+    "address": "0xacAe3822240234d8Ebbb591787a2E2b6247Ce63e"
   },
   {
     "name": "litTokenContractAddress",
@@ -32,55 +32,55 @@
     "correctedName": "PubkeyRouter",
     "exportName": "pubkeyRouter",
     "abiPath": "../lit-assets/rust/lit-core/lit-blockchain/abis/PubkeyRouter.json",
-    "address": "0xb26b4DC365843cDaE996F526913D3D4F45343aE8"
+    "address": "0x9da98532bd3b7cDDA18ae34DFeCdeBBb75AC3F7D"
   },
   {
     "name": "pkpNftContractAddress",
     "correctedName": "PKPNFT",
     "exportName": "pkpNft",
     "abiPath": "../lit-assets/rust/lit-core/lit-blockchain/abis/PKPNFT.json",
-    "address": "0xBBaa35e9b4a38c8f639d25f49c529967Ffeb0C06"
+    "address": "0x0122829576DDd317c44364238f5DDe205d6da25F"
   },
   {
     "name": "rateLimitNftContractAddress",
     "correctedName": "RateLimitNFT",
     "exportName": "rateLimitNft",
     "abiPath": "../lit-assets/rust/lit-core/lit-blockchain/abis/RateLimitNFT.json",
-    "address": "0x8624EE1100B45DD3e55B7399446CbF01ab5Db333"
+    "address": "0x4B15DAC8f60fC2B5A691A13bD5eC26aaa0f50a0b"
   },
   {
     "name": "pkpHelperContractAddress",
     "correctedName": "PKPHelper",
     "exportName": "pkpHelper",
     "abiPath": "../lit-assets/rust/lit-core/lit-blockchain/abis/PKPHelper.json",
-    "address": "0xA8C519a051b85A2010C498145C698074782AB6DF"
+    "address": "0x0600cBB5dc983A970b165390Da00e699E5baeDD1"
   },
   {
     "name": "pkpPermissionsContractAddress",
     "correctedName": "PKPPermissions",
     "exportName": "pkpPermissions",
     "abiPath": "../lit-assets/rust/lit-core/lit-blockchain/abis/PKPPermissions.json",
-    "address": "0x61Dc305F03cFF5Ba8f39D5F8F9BE2D3298e8aE38"
+    "address": "0x05A6d463c73adA7A0D3Af317Cd68271e5E34bCd4"
   },
   {
     "name": "pkpNftMetadataContractAddress",
     "correctedName": "PKPNFTMetadata",
     "exportName": "pkpNftMetadata",
     "abiPath": "../lit-assets/rust/lit-core/lit-blockchain/abis/PKPNFTMetadata.json",
-    "address": "0xa7F9bDf4fF1aEb9C1AB41E965610Df5699b09D68"
+    "address": "0xFB7eeE9859eA34D06962f4362FA7B4E294039B05"
   },
   {
     "name": "allowlistContractAddress",
     "correctedName": "Allowlist",
     "exportName": "allowlist",
     "abiPath": "../lit-assets/rust/lit-core/lit-blockchain/abis/Allowlist.json",
-    "address": "0x01385531dF2397425acb2Dffd3fA5Fd76729504a"
+    "address": "0x9fb501502402Fe4A8CE44c8C39a5d63787ED653c"
   },
   {
     "name": "resolverContractAddress",
     "correctedName": "ContractResolver",
     "exportName": "contractResolver",
     "abiPath": "../lit-assets/rust/lit-core/lit-blockchain/abis/ContractResolver.json",
-    "address": "0x0bca885Cf322D0E478DC48Fb84b4f522144db9D7"
+    "address": "0x53Df74f2Ca020ab439002158e6De0A32b1AA66D1"
   }
 ]
