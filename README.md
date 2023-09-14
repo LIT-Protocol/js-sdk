@@ -340,6 +340,12 @@ To run manual tests:
  yarn nx run nodejs:serve
 ```
 
+## ENV Vars
+
+- LIT_JS_SDK_GITHUB_ACCESS_TOKEN - a github access token to get the contract ABIs from a private repo
+- LIT_JS_SDK_LOCAL_NODE_DEV - set to true to use a local node
+- LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY - set to a funded wallet on Chronicle Testnet
+
 ## Other Commands
 
 ### Interactive graph dependencies using NX
