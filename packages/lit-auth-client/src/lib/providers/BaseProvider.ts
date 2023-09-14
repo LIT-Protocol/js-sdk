@@ -188,8 +188,8 @@ export abstract class BaseProvider {
    * @param claimRequest
    * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
    */
-  public async claimKeyId<T = ClaimProcessor>(
-    claimRequest: ClaimRequest<T>
+  public async claimKeyId(
+    claimRequest: ClaimRequest<ClaimProcessor>
   ): Promise<ClaimKeyResponse> {
     if (!this.litNodeClient.ready) {
       await this.litNodeClient.connect().catch((err) => {
@@ -197,7 +197,7 @@ export abstract class BaseProvider {
       });
     }
 
-    const res = await this.litNodeClient.claimKeyId<T>(claimRequest);
+    const res = await this.litNodeClient.claimKeyId(claimRequest);
     return res;
   }
 

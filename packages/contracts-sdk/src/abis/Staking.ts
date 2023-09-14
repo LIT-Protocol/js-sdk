@@ -135,7 +135,6 @@ export type StakingMethodNames =
   | 'nextValidatorCountForConsensus'
   | 'nodeAddressToStakerAddress'
   | 'owner'
-  | 'pauseEpoch'
   | 'readyForNextEpoch'
   | 'renounceOwnership'
   | 'requestToJoin'
@@ -608,15 +607,6 @@ export interface Staking {
    * Type: function
    */
   owner(overrides?: ContractCallOverrides): Promise<string>;
-  /**
-   * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
-   * Type: function
-   */
-  pauseEpoch(
-    overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: true
