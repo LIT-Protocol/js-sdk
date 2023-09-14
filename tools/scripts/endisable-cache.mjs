@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { greenLog } from './utils.mjs';
 
 /**
  * This script enables or disables the cache in the nx.json file.
@@ -17,7 +18,7 @@ const nxConfig = JSON.parse(fs.readFileSync(nxConfigPath, 'utf-8'));
 if (enableCache) {
   nxConfig.tasksRunnerOptions.default.options = {
     cacheableOperations: ['build'],
-    cacheableDirectories: ['node_modules'],
+    // cacheableDirectories: ['node_modules'],
   };
 } else {
   delete nxConfig.tasksRunnerOptions.default.options;
@@ -25,7 +26,7 @@ if (enableCache) {
 
 fs.writeFileSync(nxConfigPath, JSON.stringify(nxConfig, null, 2));
 
-console.log('\n📝 Available commands:');
-console.log('--enable=true: Enable the cache');
-console.log('--enable=false: Disable the cache');
-console.log('\n');
+greenLog('\n📝 This script enables or disables the cache in the nx.json file.\n', true);
+greenLog('--enable=true: Enable the cache', true);
+greenLog('--enable=false: Disable the cache', true);
+
