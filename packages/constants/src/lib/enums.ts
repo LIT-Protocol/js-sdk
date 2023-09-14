@@ -14,7 +14,7 @@ export enum SIGTYPE {
 /**
  * The only either possible error types
  */
-export const enum EITHER_TYPE {
+export enum EITHER_TYPE {
   ERROR = 'ERROR',
   SUCCESS = 'SUCCESS',
 }

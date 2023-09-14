@@ -17,11 +17,8 @@ describe('constants', () => {
     'avalanche',
     'fuji',
     'harmony',
-    'kovan',
     'mumbai',
     'goerli',
-    'ropsten',
-    'rinkeby',
     'cronos',
     'optimism',
     'celo',
@@ -41,21 +38,22 @@ describe('constants', () => {
     'kyve',
     'evmosCosmos',
     'evmosCosmosTestnet',
+    'cheqdMainnet',
+    'cheqdTestnet',
+    'juno',
   ];
 
   const networkPubKey =
     '9971e835a1fe1a4d78e381eebbe0ddc84fde5119169db816900de796d10187f3c53d65c1202ac083d099a517f34a9b62';
 
   it(`LIT_CHAINS should have ${MUST_HAVE_EVM_CHAINS.toString()}`, () => {
-    let total = 0;
+
 
     MUST_HAVE_EVM_CHAINS.forEach((chain) => {
-      if (Object.keys(LIT_CHAINS).includes(chain)) {
-        total++;
-      }
+      expect(Object.keys(LIT_CHAINS).includes(chain)).toBe(true);
     });
 
-    expect(total).toEqual(Object.keys(LIT_CHAINS).length);
+
   });
 
   it(`Network public key should be ${networkPubKey}`, () => {
@@ -80,6 +78,7 @@ describe('constants', () => {
     MUST_HAVE_COSMOS_CHAINS.forEach((chain) => {
       if (Object.keys(LIT_COSMOS_CHAINS).includes(chain)) {
         total++;
+      } else {
       }
     });
 

@@ -5,7 +5,11 @@ import * as LITCONFIG from 'lit.config.json';
 import { PKPWalletConnect } from './pkp-walletconnect';
 import { PKPClient } from '@lit-protocol/pkp-client';
 
-jest.setTimeout(120000);
+try{
+  jest.setTimeout(120000);
+}catch(e){
+  // ... you are running in Bun
+}
 
 const PKP_PUBKEY = LITCONFIG.PKP_PUBKEY;
 const PKP_ETH_ADDRESS = LITCONFIG.PKP_ETH_ADDRESS;

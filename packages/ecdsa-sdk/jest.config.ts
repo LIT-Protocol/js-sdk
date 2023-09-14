@@ -12,4 +12,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/ecdsa-sdk',
+  setupFilesAfterEnv: ['../../jest.setup.js'],
 };

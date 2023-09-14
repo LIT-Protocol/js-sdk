@@ -20,6 +20,10 @@ const TEST_FILE_EXTENSIONS = args
   ?.split('=')[1]
   ?.split(',') || ['.spec.ts', '.test.ts'];
 
+const VERBOSE =
+  args.find((arg) => arg.startsWith('--verbose'))?.split('=')[1] === 'true' ||
+  false;
+
 /**
  * Recursively find test files in the given directory
  * @param {string} dir - The directory to search in

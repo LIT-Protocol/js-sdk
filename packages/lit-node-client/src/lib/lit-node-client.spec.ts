@@ -109,7 +109,7 @@ describe('Lit Actions', () => {
 
   it('should claim key id from auth method', async () => {
 
-    let res = await client.claimKeyId<RelayClaimProcessor>({
+    let res = await client.claimKeyId({
       authMethod: {
         authMethodType: 4,
         accessToken: "RTPcbUUguY7YtOjZhKeXtEPTYkXfgX"

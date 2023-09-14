@@ -6,7 +6,7 @@ let client: LitNodeClient;
 describe('Lit Actions', async () => {
   client = new LitNodeClient({
     litNetwork: 'cayenne',
-    debug: true
+    debug: false
   });
 
   await client.connect();
@@ -64,7 +64,9 @@ describe('Lit Actions', async () => {
       },
     });
 
-    expect(res).toBe(1);
-
+    expect(res.signatures['hello-world-sig']).toBeDefined();
+    expect(res.signatures['hello-world-sig'].publicKey.toLowercase()).toEqual(
+      LITCONFIG.PKP_PUBKEY
+    );
   });
 });

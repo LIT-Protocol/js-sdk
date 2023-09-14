@@ -1,6 +1,10 @@
 import { LitContracts } from './contracts-sdk';
 
-jest.setTimeout(60000);
+try{
+  jest.setTimeout(60000);
+}catch(e){
+  // you probably running in Bun
+}
 
 /**
  * If this fails, it's likely because the network has been updated and all the PKP NFTs have been removed
@@ -14,7 +18,7 @@ describe('addresses', () => {
 
     const addresses =
       await litContracts.pkpNftContractUtil.read.getTokensInfoByAddress(
-        '0x18f987d15a973776f6a60652b838688a1833fe95'
+        '0xA5d8d25A4eDf2e6392F8435b82354929Ffd45407'
       );
 
     expect(addresses[0].btcAddress).toEqual(
