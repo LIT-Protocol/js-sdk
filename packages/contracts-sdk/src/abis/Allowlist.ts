@@ -1,8 +1,23 @@
 import { ContractTransaction } from 'ethers';
-import { Arrayish, BigNumber, BigNumberish, Interface } from 'ethers/utils';
+
+// --- Replaced Content ---
+import { TransactionRequest } from "@ethersproject/abstract-provider";
+import { BigNumber, BigNumberish } from 'ethers';
+
+export interface Arrayish {
+    toHexString(): string;
+    slice(start?: number, end?: number): Arrayish;
+    length: number;
+    [index: number]: number;
+}
+
+export type ContractContext = ContractContextLegacy & {
+    populateTransaction: ContractContextLegacy
+}
+// --- Replaced Content ---
 import { EthersContractContext } from 'ethereum-abi-types-generator';
 
-export type ContractContext = EthersContractContext<
+export type ContractContextLegacy = EthersContractContext<
   Allowlist,
   AllowlistEventsContext,
   AllowlistEvents
@@ -97,7 +112,7 @@ export interface Allowlist {
    * StateMutability: nonpayable
    * Type: constructor
    */
-  'new'(overrides?: ContractTransactionOverrides): Promise<ContractTransaction>;
+  'new'(overrides?: ContractTransactionOverrides): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -108,7 +123,7 @@ export interface Allowlist {
   addAdmin(
     newAdmin: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: true
@@ -152,7 +167,7 @@ export interface Allowlist {
   removeAdmin(
     newAdmin: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -161,7 +176,7 @@ export interface Allowlist {
    */
   renounceOwnership(
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -172,7 +187,7 @@ export interface Allowlist {
   setAllowAll(
     _allowAll: boolean,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -183,7 +198,7 @@ export interface Allowlist {
   setAllowed(
     key: Arrayish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -194,7 +209,7 @@ export interface Allowlist {
   setNotAllowed(
     key: Arrayish,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
   /**
    * Payable: false
    * Constant: false
@@ -205,5 +220,5 @@ export interface Allowlist {
   transferOwnership(
     newOwner: string,
     overrides?: ContractTransactionOverrides
-  ): Promise<ContractTransaction>;
+  ): Promise<ContractTransaction & TransactionRequest>;
 }

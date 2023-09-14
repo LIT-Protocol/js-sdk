@@ -4,7 +4,6 @@
   "abis": {
     "dir": "abis/",
     "ignoreProperties": ["metadata", "bytecode", "deployedBytecode"],
-    "token": "",
     "isPrivate": true,
     "dirLocal": "../lit-assets/rust/lit-core/lit-blockchain/abis/"
   },

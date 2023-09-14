@@ -184,7 +184,7 @@ await asyncForEach(deployedContracts, async (contract) => {
       json = await fetch(contract.abiPath, {
         headers: LitConfig.abis.isPrivate
           ? {
-              Authorization: `token ${LitConfig.abis.token}`,
+              Authorization: `token ${process.env.LIT_JS_SDK_GITHUB_ACCESS_TOKEN}`,
             }
           : {},
       }).then((res) => res.text());
