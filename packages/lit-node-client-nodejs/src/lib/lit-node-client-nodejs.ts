@@ -798,7 +798,7 @@ export class LitNodeClientNodeJs extends LitCore {
         this.getLitActionRequestBody(params);
 
       // -- choose the right signature
-      let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
+      const sigToPassToNode = this.getAuthSigOrSessionAuthSig({
         authSig,
         sessionSigs,
         url,
@@ -807,7 +807,7 @@ export class LitNodeClientNodeJs extends LitCore {
       reqBody.authSig = sigToPassToNode;
 
       // this return { url: string, data: JsonRequest }
-      let singleNodePromise = this.getJsExecutionShares(
+      const singleNodePromise = this.getJsExecutionShares(
         url,
         reqBody,
         requestId
@@ -816,10 +816,10 @@ export class LitNodeClientNodeJs extends LitCore {
       nodePromises.push(singleNodePromise);
     }
 
-    const handledPromise = await this.handleNodePromises(
+    const handledPromise = (await this.handleNodePromises(
       nodePromises,
       targetNodeRange
-    );
+    )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
 
     // -- handle response
     return handledPromise;
@@ -1004,7 +1004,6 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const sigShares: Array<SigShare> = shares.map((s: any) => {
         const share = this._getFlattenShare(s);
-        console.log('YY share', share);
 
         return {
           sigType: share.sigType,
@@ -2139,8 +2138,8 @@ export class LitNodeClientNodeJs extends LitCore {
    * @param {ClaimKeyRequest} params an Auth Method and {@link MintCallback}
    * @returns {Promise<ClaimKeyResponse>}
    */
-  async claimKeyId<T = ClaimProcessor>(
-    params: ClaimRequest<T>
+  async claimKeyId(
+    params: ClaimRequest<ClaimProcessor>
   ): Promise<ClaimKeyResponse> {
     if (!this.ready) {
       const message =
@@ -2193,16 +2192,18 @@ export class LitNodeClientNodeJs extends LitCore {
       const pubkey: string = this.computeHDPubKey(derivedKeyId);
       log(`pubkey ${pubkey} derived from key id ${derivedKeyId}`);
 
+      const relayParams: ClaimRequest<'relay'> =
+        params as ClaimRequest<'relay'>;
+
       let mintTx = '';
-      if (params.mintCallback) {
+      if (params.mintCallback && 'signer' in params) {
         mintTx = await params.mintCallback({
           derivedKeyId,
           authMethodType: params.authMethod.authMethodType,
           signatures: nodeSignatures,
           pubkey,
           signer: (params as ClaimRequest<'client'>).signer,
-          relayUrl: (params as ClaimRequest<'relay'>).relayUrl,
-          relayApiKey: (params as ClaimRequest<'relay'>).relayApiKey,
+          ...relayParams,
         });
       } else {
         mintTx = await defaultMintClaimCallback({
@@ -2210,8 +2211,7 @@ export class LitNodeClientNodeJs extends LitCore {
           authMethodType: params.authMethod.authMethodType,
           signatures: nodeSignatures,
           pubkey,
-          relayUrl: (params as ClaimRequest<'relay'>).relayUrl,
-          relayApiKey: (params as ClaimRequest<'relay'>).relayApiKey,
+          ...relayParams,
         });
       }
 

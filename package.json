@@ -21,6 +21,7 @@
     "test:e2e": "yarn tools --test --e2e run-react-and-test",
     "test:unit": "yarn test:packages",
     "test:custom": "yarn tools --test --custom",
+    "test:file": "bun ./tools/scripts/test-script.mjs",
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:dev": "yarn node ./tools/scripts/pub.mjs --tag dev",
     "publish:test": "yarn node ./tools/scripts/pub.mjs --tag test",
@@ -56,7 +57,9 @@
     "txServer": "node tx-handler-server.mjs",
     "prettier": "nx format:write --all",
     "delete:merged-branches": "git branch --merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d",
-    "delete:no-merged-branches": "git branch --no-merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d"
+    "delete:no-merged-branches": "git branch --no-merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d",
+    "cache:enable": "node ./tools/scripts/endisable-cache.mjs --enable=true",
+    "cache:disable": "node ./tools/scripts/endisable-cache.mjs --enable=false"
   },
   "private": true,
   "dependencies": {

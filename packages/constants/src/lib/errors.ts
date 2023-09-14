@@ -107,9 +107,9 @@ export const LIT_ERROR = {
     kind: LitErrorKind.Validation,
   },
   UNKNOWN_SIGNATURE_ERROR: {
-    name: "UnknownSignatureError",
+    name: 'UnknownSignatureError',
     code: 'unknown_signature_error',
-    kind: LitErrorKind.Unknown,
+    kind: LitErrorKind.Validation,
   },
   PARAM_NULL_ERROR: {
     name: 'ParamNullError',
