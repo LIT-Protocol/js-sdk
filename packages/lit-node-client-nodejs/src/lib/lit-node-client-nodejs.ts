@@ -827,28 +827,45 @@ export class LitNodeClientNodeJs extends LitCore {
 
   // ========== Shares Resolvers ==========
   _getFlattenShare = (share: any): SigShare => {
-
     // flatten the signature object so that the properties of the signature are top level
     const flattenObj = Object.entries(share).map(([key, item]) => {
-
       if (item === null || item === undefined) {
         return null;
       }
 
       const typedItem = item as SigShare;
 
-      const requiredShareProps = ['sigType', 'dataSigned', 'signatureShare', 'shareIndex', 'bigR', 'publicKey']
+      const requiredShareProps = [
+        'sigType',
+        'dataSigned',
+        'signatureShare',
+        'shareIndex',
+        'bigR',
+        'publicKey',
+      ];
 
-      const requiredSessionSigsShareProps = [...requiredShareProps, 'siweMessage'] as const;
+      const requiredSessionSigsShareProps = [
+        ...requiredShareProps,
+        'siweMessage',
+      ] as const;
 
-      const requiredSignatureShareProps = [...requiredShareProps, 'sigName'] as const;
+      const requiredSignatureShareProps = [
+        ...requiredShareProps,
+        'sigName',
+      ] as const;
 
       const hasProps = (props: any) => {
-        return [...props].every(prop => typedItem[prop as keyof SigShare] !== undefined && typedItem[prop as keyof SigShare] !== null)
-      }
+        return [...props].every(
+          (prop) =>
+            typedItem[prop as keyof SigShare] !== undefined &&
+            typedItem[prop as keyof SigShare] !== null
+        );
+      };
 
-      if (hasProps(requiredSessionSigsShareProps) || hasProps(requiredSignatureShareProps)) {
-
+      if (
+        hasProps(requiredSessionSigsShareProps) ||
+        hasProps(requiredSignatureShareProps)
+      ) {
         typedItem.signatureShare = typedItem.signatureShare.replaceAll('"', '');
         typedItem.bigR = typedItem.bigR.replaceAll('"', '');
         typedItem.publicKey = typedItem.publicKey.replaceAll('"', '');
@@ -861,14 +878,15 @@ export class LitNodeClientNodeJs extends LitCore {
     });
 
     // removed all null values and should only have one item
-    const flattenShare = (flattenObj.filter(item => item !== null))[0] as SigShare;
-
+    const flattenShare = flattenObj.filter(
+      (item) => item !== null
+    )[0] as SigShare;
 
     if (flattenShare === null || flattenShare === undefined) {
-      return share
+      return share;
     }
     return flattenShare;
-  }
+  };
 
   /**
    *
@@ -893,9 +911,8 @@ export class LitNodeClientNodeJs extends LitCore {
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
       const sigShares: Array<SigShare> = shares.map((s: any) => {
-
         const share = this._getFlattenShare(s);
-        console.log("XX share", share)
+        console.log('XX share', share);
 
         return {
           sigType: share.sigType,
@@ -905,7 +922,7 @@ export class LitNodeClientNodeJs extends LitCore {
           publicKey: share.publicKey,
           dataSigned: share.dataSigned,
           siweMessage: share.siweMessage,
-        }
+        };
       });
 
       log('getSessionSignatures - sigShares', sigShares);
@@ -940,10 +957,10 @@ export class LitNodeClientNodeJs extends LitCore {
         throwError({
           message: 'siganture could not be combined',
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.kind,
-          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name
+          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name,
         });
       }
-      
+
       const encodedSig = joinSignature({
         r: '0x' + signature.r,
         s: '0x' + signature.s,
@@ -986,11 +1003,10 @@ export class LitNodeClientNodeJs extends LitCore {
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
       const sigShares: Array<SigShare> = shares.map((s: any) => {
-
         const share = this._getFlattenShare(s);
-        console.log("YY share", share)
+        console.log('YY share', share);
 
-        return ({
+        return {
           sigType: share.sigType,
           signatureShare: share.signatureShare,
           shareIndex: share.shareIndex,
@@ -998,7 +1014,7 @@ export class LitNodeClientNodeJs extends LitCore {
           publicKey: share.publicKey,
           dataSigned: share.dataSigned,
           sigName: share.sigName ? share.sigName : 'sig',
-        })
+        };
       });
 
       log('getSignatures - sigShares', sigShares);
@@ -1033,7 +1049,7 @@ export class LitNodeClientNodeJs extends LitCore {
         throwError({
           message: 'siganture could not be combined',
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.kind,
-          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name
+          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name,
         });
       }
 
@@ -1053,6 +1069,31 @@ export class LitNodeClientNodeJs extends LitCore {
 
     return signatures;
   };
+
+  getClaims = (claims: any[]): Record<string, {signatures: Signature[], keyId: string}> => {
+      let keys: string[] = Object.keys(claims[0]);
+      let signatures: Record<string, Signature[]> = {};
+      let claimRes: Record<string, {signatures: Signature[], keyId: string}>  = {};
+      for (let i = 0; i < keys.length; i++) {
+        let claimSet: {signature: string, keyId: string}[] = claims.map(c => c[keys[i]]);
+        signatures[keys[i]] = [];
+        for (let j = 0; i < claimSet.length; i++) {
+          let sig = ethers.utils.splitSignature(`0x${claimSet[j].signature}`);
+          let convertedSig = {
+            r: sig.r,
+            s: sig.s,
+            v: sig.v,
+          };
+          signatures[keys[i]].push(convertedSig);
+        }
+        claimRes[keys[i]] = {
+          signatures: signatures[keys[i]],
+          keyId: claimSet[0].keyId
+        };
+      }
+
+      return claimRes;
+  }
 
   /**
    *
@@ -1168,8 +1209,12 @@ export class LitNodeClientNodeJs extends LitCore {
     log('responseData', JSON.stringify(responseData, null, 2));
 
     // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
-    if (Object.keys(responseData[0].signedData).length <= 0) {
+    if (
+      Object.keys(responseData[0].signedData).length <= 0 &&
+      Object.keys(responseData[0].claimData).length <= 0
+    ) {
       return {
+        claims: {},
         signatures: null,
         decryptions: [],
         response: responseData[0].response,
@@ -1210,8 +1255,22 @@ export class LitNodeClientNodeJs extends LitCore {
       responseData.map((r: NodeLog) => r.logs)
     );
 
+    // -- 4. combine claims
+    const claimsList = responseData.map((r) => {
+      const { claimData } = r;
+      for (const key of Object.keys(claimData)) {
+        for (const subkey of Object.keys(claimData[key])) {
+          if (typeof claimData[key][subkey] == 'string') {
+            claimData[key][subkey] = claimData[key][subkey].replaceAll('"', '');
+          }
+
+        }
+      }
+    });
+    const claims = this.getClaims(claimsList);
     // ========== Result ==========
     let returnVal: ExecuteJsResponse = {
+      claims,
       signatures,
       decryptions: [], // FIXME: Fix if and when we enable decryptions from within a Lit Action.
       response,
@@ -1965,8 +2024,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     let expiration = params.expiration || this.getExpiration();
 
     // -- (TRY) to get the wallet signature
@@ -2163,7 +2222,6 @@ export class LitNodeClientNodeJs extends LitCore {
         mintTx,
       };
     } else {
-
       return throwError({
         message: `Claim request has failed. Request trace id: lit_${requestId} `,
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
