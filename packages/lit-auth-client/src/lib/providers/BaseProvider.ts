@@ -210,6 +210,7 @@ export abstract class BaseProvider {
    * | Google OAuth | token `sub` | token `aud` |
    * | Discord OAuth | user id | client app identifier |
    * | Stytch OTP |token `sub` | token `aud`|
+   * | Lit Actions | user defined | ipfs cid |
    * @param userId
    * @param appId
    * @returns
