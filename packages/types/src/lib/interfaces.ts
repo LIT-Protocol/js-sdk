@@ -5,6 +5,7 @@ import {
   AccessControlConditions,
   Chain,
   ClaimProcessor,
+  ClaimResult,
   ConditionType,
   EncryptedSymmetricKey,
   EvmContractConditions,
@@ -555,6 +556,7 @@ export interface ExecuteJsResponse {
   decryptions: any[];
   response: string;
   logs: string;
+  claims: Record<string, {signatures: Signature[], keyId: string}>;
   debug?: {
     allNodeResponses: NodeResponse[];
     allNodeLogs: NodeLog[];
@@ -571,6 +573,7 @@ export interface SendNodeCommand {
 }
 
 export interface NodeShare {
+  claimData: any;
   shareIndex: any;
   unsignedJwt: any;
   signedData: any;

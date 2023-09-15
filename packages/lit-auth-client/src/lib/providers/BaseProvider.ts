@@ -200,6 +200,29 @@ export abstract class BaseProvider {
     const res = await this.litNodeClient.claimKeyId(claimRequest);
     return res;
   }
+  /**
+   * Calculates a public key for a given `key identifier` which is an `Auth Method Identifier`
+   * the Auth Method Identifier is a hash of a user identifier and app idendtifer.
+   * These identifiers are specific to each auth method and will derive the public key protion of a pkp which will be persited
+   * when a key is claimed.
+   * | Auth Method | User ID | App ID |
+   * |:------------|:-------|:-------|
+   * | Google OAuth | token `sub` | token `aud` |
+   * | Discord OAuth | user id | client app identifier |
+   * | Stytch OTP |token `sub` | token `aud`|
+   * @param userId
+   * @param appId
+   * @returns
+   */
+  computPublicKeyFromAuthMethod = async (
+    authMethod: AuthMethod
+  ): Promise<String> => {
+    const authMethodId = await this.getAuthMethodId(authMethod);
+    if (!this.litNodeClient) {
+      throw new Error('Lit Node Client is configured');
+    }
+    return this.litNodeClient.computeHDPubKey(authMethodId);
+  };
 
   /**
    * Generate request data for minting and fetching PKPs via relay server

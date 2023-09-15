@@ -1,5 +1,5 @@
 export const stakingBalances = {
-  "address": "0xAB783F4B8ceD3f98Adc169d50F1063dD0517EEA8",
+  "address": "0x23Ab8F5cD37be7B6036a17fD75A842533d2D39d0",
   "abi": [
     {
       "inputs": [

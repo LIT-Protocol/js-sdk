@@ -162,6 +162,19 @@ export const spawnCommand = (
   });
 };
 
+export const bunSpawn = async (commands, options = {}) => {
+  const defaultOptions = { stdout: 'inherit' };
+
+  let _commands = commands.split(' ');
+
+  const proc = Bun.spawn(_commands, {
+    ...defaultOptions,
+    ...options,
+  });
+
+  await proc.exited;
+};
+
 export const spawnListener = (commands, callback, prefix = '', color = 31) => {
   let _commands = commands.split(' ');
   // let eventName = _commands.join('-');

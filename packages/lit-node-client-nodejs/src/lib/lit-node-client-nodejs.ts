@@ -1004,7 +1004,6 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const sigShares: Array<SigShare> = shares.map((s: any) => {
         const share = this._getFlattenShare(s);
-        console.log('YY share', share);
 
         return {
           sigType: share.sigType,
@@ -1069,6 +1068,31 @@ export class LitNodeClientNodeJs extends LitCore {
 
     return signatures;
   };
+
+  getClaims = (claims: any[]): Record<string, {signatures: Signature[], keyId: string}> => {
+      let keys: string[] = Object.keys(claims[0]);
+      let signatures: Record<string, Signature[]> = {};
+      let claimRes: Record<string, {signatures: Signature[], keyId: string}>  = {};
+      for (let i = 0; i < keys.length; i++) {
+        let claimSet: {signature: string, keyId: string}[] = claims.map(c => c[keys[i]]);
+        signatures[keys[i]] = [];
+        for (let j = 0; i < claimSet.length; i++) {
+          let sig = ethers.utils.splitSignature(`0x${claimSet[j].signature}`);
+          let convertedSig = {
+            r: sig.r,
+            s: sig.s,
+            v: sig.v,
+          };
+          signatures[keys[i]].push(convertedSig);
+        }
+        claimRes[keys[i]] = {
+          signatures: signatures[keys[i]],
+          keyId: claimSet[0].keyId
+        };
+      }
+
+      return claimRes;
+  }
 
   /**
    *
@@ -1184,8 +1208,12 @@ export class LitNodeClientNodeJs extends LitCore {
     log('responseData', JSON.stringify(responseData, null, 2));
 
     // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
-    if (Object.keys(responseData[0].signedData).length <= 0) {
+    if (
+      Object.keys(responseData[0].signedData).length <= 0 &&
+      Object.keys(responseData[0].claimData).length <= 0
+    ) {
       return {
+        claims: {},
         signatures: null,
         decryptions: [],
         response: responseData[0].response,
@@ -1226,8 +1254,22 @@ export class LitNodeClientNodeJs extends LitCore {
       responseData.map((r: NodeLog) => r.logs)
     );
 
+    // -- 4. combine claims
+    const claimsList = responseData.map((r) => {
+      const { claimData } = r;
+      for (const key of Object.keys(claimData)) {
+        for (const subkey of Object.keys(claimData[key])) {
+          if (typeof claimData[key][subkey] == 'string') {
+            claimData[key][subkey] = claimData[key][subkey].replaceAll('"', '');
+          }
+
+        }
+      }
+    });
+    const claims = this.getClaims(claimsList);
     // ========== Result ==========
     let returnVal: ExecuteJsResponse = {
+      claims,
       signatures,
       decryptions: [], // FIXME: Fix if and when we enable decryptions from within a Lit Action.
       response,
@@ -2117,8 +2159,8 @@ export class LitNodeClientNodeJs extends LitCore {
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
+    const requestId = this.getRequestId();
     const nodePromises = await this.getNodePromises((url: string) => {
-      const requestId = this.getRequestId();
       const nodeRequestParams = {
         authMethod: params.authMethod,
       };
@@ -2181,7 +2223,7 @@ export class LitNodeClientNodeJs extends LitCore {
       };
     } else {
       return throwError({
-        message: 'claim request has failed',
+        message: `Claim request has failed. Request trace id: lit_${requestId} `,
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
         errorCode: LIT_ERROR.UNKNOWN_ERROR.code,
       });

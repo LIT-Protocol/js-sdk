@@ -108,14 +108,14 @@ describe('Lit Actions', () => {
 
 
   it('should claim key id from auth method', async () => {
-
+    const authMethod = {
+      authMethodType: 4,
+      accessToken: LITCONFIG.AUTH_METHOD_ACCESS_TOKEN
+    };
     let res = await client.claimKeyId<RelayClaimProcessor>({
-      authMethod: {
-        authMethodType: 4,
-        accessToken: "RTPcbUUguY7YtOjZhKeXtEPTYkXfgX"
-      }
+      authMethod
     });
-
+    
     const data = {
       // hello world in Uint8Array
       toSign: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
@@ -123,14 +123,10 @@ describe('Lit Actions', () => {
       sigName: 'hello-world-sig',
     };
 
-    let authMethod = {
-      authMethodType: 4,
-      accessToken: "RTPcbUUguY7YtOjZhKeXtEPTYkXfgX"
-    }
 
     let sig = await client.pkpSign({
       toSign: data.toSign,
-      pubKey: "0x044ec325db817193c3a01088d082ded81dc0a29ad615a67b87b9e295d9a1c91d955f8aeeec551d5d4930795f5c390e369f745e36e97893ead710354ee882ed60c0",
+      pubKey: res.pubkey,
       authMethods: [authMethod],
       authSig: LITCONFIG.CONTROLLER_AUTHSIG,
     });

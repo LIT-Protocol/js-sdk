@@ -1,4 +1,6 @@
 import { computeHDPubKey } from '@lit-protocol/crypto';
+import { keccak256 } from '@ethersproject/keccak256';
+import { toUtf8Bytes } from '@ethersproject/strings';
 import {
   canonicalAccessControlConditionFormatter,
   canonicalEVMContractConditionFormatter,
@@ -46,6 +48,7 @@ import {
   SuccessNodePromises,
   SupportedJsonRequests,
 } from '@lit-protocol/types';
+import { ethers } from 'ethers';
 
 export class LitCore {
   config: LitNodeClientConfig;
@@ -590,7 +593,10 @@ export class LitCore {
    * @param sigType
    * @returns {string} public key
    */
-  computeHDPubKey = (keyId: string, sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith) => {
+  computeHDPubKey = (
+    keyId: string,
+    sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith
+  ) => {
     if (!this.hdRootPubkeys) {
       throwError({
         message: `root public keys not found, have you connected to the nodes?`,
@@ -601,20 +607,23 @@ export class LitCore {
     return computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
   };
 
-
   /**
-   * Telem collector for function invokation counts
-   * @param date 
-   * @param functionName 
-   * @param executionTime 
+   * Calculates a Key Id for claiming a pkp based on a user identifier and an app identifier.
+   * The key Identifier is an Auth Method Id which scopes the key uniquely to a specific application context.
+   * These identifiers are specific to each auth method and will derive the public key protion of a pkp which will be persited
+   * when a key is claimed.
+   * | Auth Method | User ID | App ID |
+   * |:------------|:-------|:-------|
+   * | Google OAuth | token `sub` | token `aud` |
+   * | Discord OAuth | user id | client app identifier |
+   * | Stytch OTP |token `sub` | token `aud`|
+   * @param userId {string} user identifier for the Key Identifier
+   * @param appId {string} app identifier for the Key Identifier
+   * @returns {String} public key of pkp when claimed
    */
-  collectData = (date: string, functionName: string, executionTime: number) => {
-    fetch(TELEM_API_URL + '/collect', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ date, functionName, executionTime }),
-    });
-  };
+  computeHDKeyId(userId: string, appId: string): String {
+    return ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${userId}:${appId}`)
+    );
+  }
 }
