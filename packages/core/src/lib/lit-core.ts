@@ -596,7 +596,7 @@ export class LitCore {
   computeHDPubKey = (
     keyId: string,
     sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith
-  ) => {
+  ): string => {
     if (!this.hdRootPubkeys) {
       throwError({
         message: `root public keys not found, have you connected to the nodes?`,
@@ -622,7 +622,7 @@ export class LitCore {
    * @param appId {string} app identifier for the Key Identifier
    * @returns {String} public key of pkp when claimed
    */
-  computeHDKeyId(userId: string, appId: string): String {
+  computeHDKeyId(userId: string, appId: string): string {
     return ethers.utils.keccak256(
       ethers.utils.toUtf8Bytes(`${userId}:${appId}`)
     );
