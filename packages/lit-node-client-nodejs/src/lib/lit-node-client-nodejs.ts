@@ -1076,15 +1076,16 @@ export class LitNodeClientNodeJs extends LitCore {
       for (let i = 0; i < keys.length; i++) {
         let claimSet: {signature: string, keyId: string}[] = claims.map(c => c[keys[i]]);
         signatures[keys[i]] = [];
-        for (let j = 0; i < claimSet.length; i++) {
-          let sig = ethers.utils.splitSignature(`0x${claimSet[j].signature}`);
+        claimSet.map(c => {
+          let sig = ethers.utils.splitSignature(`0x${c.signature}`);
           let convertedSig = {
             r: sig.r,
             s: sig.s,
             v: sig.v,
           };
-          signatures[keys[i]].push(convertedSig);
-        }
+          signatures[keys[i]].push(convertedSig); 
+        });
+        
         claimRes[keys[i]] = {
           signatures: signatures[keys[i]],
           keyId: claimSet[0].keyId
