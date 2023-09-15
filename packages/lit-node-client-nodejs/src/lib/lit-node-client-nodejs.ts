@@ -2152,7 +2152,7 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
-    if (params.authMethod.authMethodType === AuthMethodType.LitAction) {
+    if (params.authMethod.authMethodType == AuthMethodType.WebAuthn) {
       throwError({
         message:
           'Unsupported auth method type. Webauthn, and Lit Actions are not supported for claiming',
