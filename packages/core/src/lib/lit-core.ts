@@ -613,10 +613,11 @@ export class LitCore {
    * These identifiers are specific to each auth method and will derive the public key protion of a pkp which will be persited
    * when a key is claimed.
    * | Auth Method | User ID | App ID |
-   * |:------------|:-------|:-------|
+   * |:------------|:--------|:-------|
    * | Google OAuth | token `sub` | token `aud` |
    * | Discord OAuth | user id | client app identifier |
    * | Stytch OTP |token `sub` | token `aud`|
+   * | Lit Actions | user defined | ipfs cid |
    * @param userId {string} user identifier for the Key Identifier
    * @param appId {string} app identifier for the Key Identifier
    * @returns {String} public key of pkp when claimed
