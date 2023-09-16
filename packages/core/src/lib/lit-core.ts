@@ -62,7 +62,7 @@ export class LitCore {
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
-    let customConfig = args;
+    const customConfig = args;
 
     // -- initialize default config
     this.config = defaultLitnodeClientConfig;
