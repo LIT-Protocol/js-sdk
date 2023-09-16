@@ -637,13 +637,6 @@ export const LIT_NETWORKS = {
     'https://cayenne.litgateway.com:7370',
     'https://cayenne.litgateway.com:7371',
     'https://cayenne.litgateway.com:7372',
-    'https://cayenne.litgateway.com:7373',
-    'https://cayenne.litgateway.com:7374',
-    'https://cayenne.litgateway.com:7375',
-    'https://cayenne.litgateway.com:7376',
-    'https://cayenne.litgateway.com:7377',
-    'https://cayenne.litgateway.com:7378',
-    'https://cayenne.litgateway.com:7379',
   ],
   localhost: [
     'http://localhost:7470',
