@@ -1069,12 +1069,12 @@ export class LitNodeClientNodeJs extends LitCore {
     return signatures;
   };
 
-  getClaims = (claims: any[]): Record<string, {signatures: Signature[], keyId: string}> => {
+  getClaims = (claims: any[]): Record<string, {signatures: Signature[], derivedKeyId: string}> => {
       let keys: string[] = Object.keys(claims[0]);
       let signatures: Record<string, Signature[]> = {};
-      let claimRes: Record<string, {signatures: Signature[], keyId: string}>  = {};
+      let claimRes: Record<string, {signatures: Signature[], derivedKeyId: string}>  = {};
       for (let i = 0; i < keys.length; i++) {
-        let claimSet: {signature: string, keyId: string}[] = claims.map(c => c[keys[i]]);
+        let claimSet: {signature: string, derivedKeyId: string}[] = claims.map(c => c[keys[i]]);
         signatures[keys[i]] = [];
         claimSet.map(c => {
           let sig = ethers.utils.splitSignature(`0x${c.signature}`);
@@ -1088,7 +1088,7 @@ export class LitNodeClientNodeJs extends LitCore {
         
         claimRes[keys[i]] = {
           signatures: signatures[keys[i]],
-          keyId: claimSet[0].keyId
+          derivedKeyId: claimSet[0].derivedKeyId
         };
       }
 
@@ -1262,10 +1262,10 @@ export class LitNodeClientNodeJs extends LitCore {
         for (const subkey of Object.keys(claimData[key])) {
           if (typeof claimData[key][subkey] == 'string') {
             claimData[key][subkey] = claimData[key][subkey].replaceAll('"', '');
-          }
-
+          }   
         }
       }
+      return claimData;
     });
     const claims = this.getClaims(claimsList);
     // ========== Result ==========

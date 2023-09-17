@@ -3,6 +3,7 @@ import * as LITCONFIG from 'lit.config.json';
 import { processTx } from '../../../../tx-handler';
 import { RelayClaimProcessor } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+import { CustomNetwork } from '../../../../dist/packages/types/src/lib/interfaces';
 
 let client: LitNodeClient;
 
@@ -10,7 +11,13 @@ jest.setTimeout(60000);
 
 describe('Lit Actions', () => {
   client = new LitNodeClient({
-    litNetwork: 'cayenne',
+    litNetwork: 'custom',
+    bootstrapUrls: [
+      "http://127.0.0.1:7470",
+      "http://127.0.0.1:7471",
+      "http://127.0.0.1:7472"
+    ],
+    minNodeCount: 2,
     debug: true
   });
 
@@ -38,6 +45,41 @@ describe('Lit Actions', () => {
 
     expect(res.logs).toContain('hello world');
   });
+
+  it('lit action claim should return claim', async () => {
+
+      let res = await client.executeJs({
+        authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+        code: `(async () => {
+          Lit.Actions.claimKey({keyId: "foo"});
+        })();`,
+        jsParams: {
+          //publicKey: LITCONFIG.PKP_PUBKEY,
+        },
+      });
+
+    expect(Object.keys(res.claims).length).toEqual(1);
+    expect(res.claims['foo'].signatures.length).toEqual(3);
+  });
+
+
+  it('lit action claim should return grouped claims', async () => {
+
+    let res = await client.executeJs({
+      authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+      code: `(async () => {
+        Lit.Actions.claimKey({keyId: "foo"});
+        Lit.Actions.claimKey({keyId: "bar"});
+      })();`,
+      jsParams: {
+        //publicKey: LITCONFIG.PKP_PUBKEY,
+      },
+    });
+
+  expect(Object.keys(res.claims).length).toEqual(2);
+  expect(res.claims['foo'].signatures.length).toEqual(3);
+  expect(res.claims['bar'].signatures.length).toEqual(3);
+});
 
   it('lit action response should return json {hello: "world"}', async () => {
     const res = await processTx(

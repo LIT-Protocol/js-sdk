@@ -556,7 +556,7 @@ export interface ExecuteJsResponse {
   decryptions: any[];
   response: string;
   logs: string;
-  claims: Record<string, {signatures: Signature[], keyId: string}>;
+  claims: Record<string, {signatures: Signature[], derivedKeyId: string}>;
   debug?: {
     allNodeResponses: NodeResponse[];
     allNodeLogs: NodeLog[];
