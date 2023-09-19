@@ -772,7 +772,7 @@ export const signAndSaveAuthMessage = async ({
     sig: signedResult.signature,
     derivedVia: 'web3.eth.personal.sign',
     signedMessage: body,
-    address: signedResult.address,
+    address: getAddress(signedResult.address),
   };
 
   // -- 4. store auth and a keypair in localstorage for communication with sgx
