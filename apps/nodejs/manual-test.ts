@@ -313,9 +313,14 @@ const mintPkpAndSign = async () => {
     const wallet = new ethers.Wallet(privateKey, provider);
     const authSig = await getAuthSig(wallet);
 
+    console.log('Sleeping for 30 seconds so that the chronicle node replica can sync up');
+    // Sleep for 30 seconds
+    await new Promise(resolve => setTimeout(resolve, 30000));
+
+
     let startTime = Date.now();
     let allGood = true;
-    const testCount = 100;
+    const testCount = 50;
     for(let i = 0; i < testCount; i++){
       console.log(`testing ${i + 1} of ${testCount}`);
       let result = await pkpSign(client, pkpPubkey, authSig);

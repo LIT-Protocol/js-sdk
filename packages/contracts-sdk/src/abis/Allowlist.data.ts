@@ -1,5 +1,5 @@
 export const allowlist = {
-  "address": "0x9fb501502402Fe4A8CE44c8C39a5d63787ED653c",
+  "address": "0xdC64eb11db44cc82f8d83Dce298392C6cB33Ee9A",
   "abi": [
     {
       "inputs": [],

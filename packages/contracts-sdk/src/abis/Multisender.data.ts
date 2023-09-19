@@ -1,5 +1,5 @@
 export const multisender = {
-  "address": "0xacAe3822240234d8Ebbb591787a2E2b6247Ce63e",
+  "address": "0xC79aC01f32C78c27dbF5aD4651758A7E897A078d",
   "abi": [
     {
       "anonymous": false,

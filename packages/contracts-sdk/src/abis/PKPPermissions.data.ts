@@ -1,5 +1,5 @@
 export const pkpPermissions = {
-  "address": "0x05A6d463c73adA7A0D3Af317Cd68271e5E34bCd4",
+  "address": "0x6F67eE92Abb6b7DD0DF551F6e5A2435D02F49e96",
   "abi": [
     {
       "inputs": [
