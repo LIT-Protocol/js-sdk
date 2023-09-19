@@ -294,7 +294,7 @@ const mintPkpAndSign = async () => {
     // use cayenne
     client = new LitJsSdk.LitNodeClient({
       litNetwork: 'cayenne',
-      debug: true
+      debug: false
     });
   }
 
