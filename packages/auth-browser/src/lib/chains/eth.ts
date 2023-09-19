@@ -759,12 +759,12 @@ export const signAndSaveAuthMessage = async ({
 
   const message: SiweMessage = new SiweMessage(preparedMessage);
   const body: string = message.prepareMessage();
-
+  const formattedAccount = getAddress(account);
   // -- 2. sign the message
   let signedResult: SignedMessage = await signMessage({
     body,
     web3,
-    account,
+    account: formattedAccount,
   });
 
   // -- 3. prepare auth message
@@ -772,7 +772,7 @@ export const signAndSaveAuthMessage = async ({
     sig: signedResult.signature,
     derivedVia: 'web3.eth.personal.sign',
     signedMessage: body,
-    address: getAddress(signedResult.address),
+    address: signedResult.address,
   };
 
   // -- 4. store auth and a keypair in localstorage for communication with sgx
