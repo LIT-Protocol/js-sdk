@@ -1,5 +1,5 @@
 export const pkpNftMetadata = {
-  "address": "0xFB7eeE9859eA34D06962f4362FA7B4E294039B05",
+  "address": "0x849f0f42613b0f94a4dF391EF94909bAD0Ac3013",
   "abi": [
     {
       "inputs": [
