@@ -839,7 +839,7 @@ export const signMessage = async ({
   log('Signature: ', signature);
   log('recovered address: ', address);
 
-  if (address !== account) {
+  if (address.toLowerCase() !== account.toLowerCase()) {
     const msg = `ruh roh, the user signed with a different address (${address}) then they\'re using with web3 (${account}).  this will lead to confusion.`;
     log(msg);
     alert(
