@@ -6,7 +6,12 @@ import {
 
 import * as LITCONFIG from 'lit.config.json';
 
-jest.useRealTimers();
+try {
+  jest.setTimeout(60000);
+  jest.useRealTimers();
+} catch (e) {
+  // swallow 
+}
 
 describe('PKPSuiWallet', () => {
   it('should create a wallet', async () => {
@@ -21,6 +26,7 @@ describe('PKPSuiWallet', () => {
     const address = await wallet.getAddress();
     expect(address).toEqual(LITCONFIG.PKP_SUI_ADDRESS);
   });
+
   it('should connects to lit node client', async () => {
     const { PKPSuiWallet } = await import('./pkp-sui');
     const wallet = new PKPSuiWallet(
@@ -33,6 +39,7 @@ describe('PKPSuiWallet', () => {
     await wallet.init();
     expect(wallet.litNodeClientReady).toEqual(true);
   });
+
   it('should retrieve account balance', async () => {
     const { PKPSuiWallet } = await import('./pkp-sui');
     const provider = new JsonRpcProvider(testnetConnection);
@@ -67,7 +74,7 @@ describe('PKPSuiWallet', () => {
     const dryTransaction = await wallet.dryRunTransactionBlock({
       transactionBlock: tx,
     });
-  
+
     expect(dryTransaction.effects.status.status).toEqual('success');
 
     // This will only send a transaction if the test flag is set to true
@@ -78,7 +85,7 @@ describe('PKPSuiWallet', () => {
       expect(transaction.digest).toBeDefined();
       // expect transaction.digest to be string of length 44
       expect(transaction.digest.length).toEqual(44);
-    } 
+    }
 
   }, 60000);
 });

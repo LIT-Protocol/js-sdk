@@ -110,42 +110,6 @@ describe('PKPClient', () => {
       it('should be ready after init', async () => {
         expect(initResult.ready).toBe(true);
       });
-
-      // it('should handle wallet init failures and return the correct readiness status and details', async () => {
-      //   jest.spyOn(PKPBase.prototype, 'init').mockImplementation(async () => {
-      //     throw new Error('Wallet initialization failed');
-      //   });
-
-      //   const initResult = await pkpClient.connect();
-
-      //   expect(initResult.ready).toBe(false);
-
-      //   initResult.res.forEach((status) => {
-      //     expect(status.success).toBe(false);
-      //   });
-      // });
-
-      // it('should handle partial wallet init failures and return the correct readiness status and details', async () => {
-      //   const mockInit = jest.spyOn(PKPBase.prototype, 'init');
-
-      //   // Fail the first wallet's initialization
-      //   mockInit.mockImplementationOnce(async () => {
-      //     throw new Error('Wallet initialization failed');
-      //   });
-
-      //   // Succeed the second wallet's initialization
-      //   mockInit.mockImplementationOnce(async () => {});
-
-      //   const initResult = await pkpClient.connect();
-
-      //   expect(initResult.ready).toBe(false);
-
-      //   expect(initResult.res[0].chain).toBeDefined();
-      //   expect(initResult.res[0].success).toBe(false);
-
-      //   expect(initResult.res[1].chain).toBeDefined();
-      //   expect(initResult.res[1].success).toBe(true);
-      // });
     });
 
     it('should get supported chains', async () => {

@@ -1,6 +1,6 @@
 export const DomainWalletOracleData = {
-  "date": "2023-09-10T22:33:16.000Z",
-  "address": "0x9BBDBD163C117fb4e1F9b4F4002bCF53915Dfc40",
+  "date": "2023-09-15T22:19:43.000Z",
+  "address": "0xA91887db0Ffd723F5D89C0a7839CEe024103143e",
   "contractName": "DomainWalletOracle",
   "abi": [
     {

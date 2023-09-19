@@ -1202,13 +1202,6 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "pauseEpoch",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "address",

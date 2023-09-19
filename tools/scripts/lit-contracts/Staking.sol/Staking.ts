@@ -91,7 +91,6 @@ export interface StakingInterface extends utils.Interface {
     "nextValidatorCountForConsensus()": FunctionFragment;
     "nodeAddressToStakerAddress(address)": FunctionFragment;
     "owner()": FunctionFragment;
-    "pauseEpoch()": FunctionFragment;
     "readyForNextEpoch(address)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requestToJoin(uint32,uint128,uint32,address,uint256,uint256)": FunctionFragment;
@@ -153,7 +152,6 @@ export interface StakingInterface extends utils.Interface {
       | "nextValidatorCountForConsensus"
       | "nodeAddressToStakerAddress"
       | "owner"
-      | "pauseEpoch"
       | "readyForNextEpoch"
       | "renounceOwnership"
       | "requestToJoin"
@@ -294,10 +292,6 @@ export interface StakingInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "pauseEpoch",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "readyForNextEpoch",
     values: [string]
@@ -528,7 +522,6 @@ export interface StakingInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "pauseEpoch", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "readyForNextEpoch",
     data: BytesLike
@@ -1007,10 +1000,6 @@ export interface Staking extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
-    pauseEpoch(
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
     readyForNextEpoch(
       arg0: string,
       overrides?: CallOverrides
@@ -1293,10 +1282,6 @@ export interface Staking extends BaseContract {
 
   owner(overrides?: CallOverrides): Promise<string>;
 
-  pauseEpoch(
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
   readyForNextEpoch(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
   renounceOwnership(
@@ -1568,8 +1553,6 @@ export interface Staking extends BaseContract {
     ): Promise<string>;
 
     owner(overrides?: CallOverrides): Promise<string>;
-
-    pauseEpoch(overrides?: CallOverrides): Promise<void>;
 
     readyForNextEpoch(
       arg0: string,
@@ -1940,8 +1923,6 @@ export interface Staking extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
-    pauseEpoch(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
-
     readyForNextEpoch(
       arg0: string,
       overrides?: CallOverrides
@@ -2206,10 +2187,6 @@ export interface Staking extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    pauseEpoch(
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
 
     readyForNextEpoch(
       arg0: string,

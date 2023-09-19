@@ -17,6 +17,19 @@ const eventsEmitter = new events.EventEmitter();
 
 const rl = readline.createInterface(process.stdin, process.stdout);
 
+export const success = (message) => {
+  return {
+    status: 200,
+    message,
+  };
+};
+
+export const fail = (message) => {
+  return {
+    status: 500,
+    message,
+  };
+};
 /**
  * replaceAutogen - Replaces the content between the specified start and end delimiters
  * with new content.
@@ -522,8 +535,6 @@ export function it(testDescription, testFunction) {
 
 // Expect function
 export function expect(value) {
-  console.log('value:', value);
-
   return {
     toBe(expectedValue) {
       if (value !== expectedValue) {
@@ -585,6 +596,30 @@ export const log = Object.assign(
     },
   }
 );
+
+export const testThis = async (test) => {
+  greenLog(`💨 Running "./e2e-nodejs/${test.name}"`);
+
+  try {
+    console.log(`${test.name}`);
+    // calculate the time it takes to run the test
+    const start = Date.now();
+    const { status, message } = await test.fn();
+
+    const end = Date.now();
+
+    const time = end - start;
+
+    if (status === 200) {
+      log.green(`\t${message} (${time}ms)`);
+    } else {
+      log.red(`\t${message} (${time}ms)`);
+    }
+  } catch (e) {
+    log.red(`\t${e.message}`);
+  }
+  process.exit();
+};
 
 export const testThese = async (tests) => {
   console.log(`Running ${tests.length} tests...\n`);

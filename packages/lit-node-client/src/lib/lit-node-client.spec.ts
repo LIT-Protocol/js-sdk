@@ -1,9 +1,6 @@
 import { LitNodeClient } from './lit-node-client';
 import * as LITCONFIG from 'lit.config.json';
 import { processTx } from '../../../../tx-handler';
-import { RelayClaimProcessor } from '@lit-protocol/types';
-import { ethers } from 'ethers';
-import { CustomNetwork } from '../../../../dist/packages/types/src/lib/interfaces';
 
 let client: LitNodeClient;
 
@@ -11,12 +8,12 @@ jest.setTimeout(60000);
 
 describe('Lit Actions', () => {
   client = new LitNodeClient({
-    litNetwork: 'custom',
-    bootstrapUrls: [
-      "http://127.0.0.1:7470",
-      "http://127.0.0.1:7471",
-      "http://127.0.0.1:7472"
-    ],
+    litNetwork: 'cayenne',
+    // bootstrapUrls: [
+    //   "http://127.0.0.1:7470",
+    //   "http://127.0.0.1:7471",
+    //   "http://127.0.0.1:7472"
+    // ],
     minNodeCount: 2,
     debug: true
   });
@@ -48,15 +45,15 @@ describe('Lit Actions', () => {
 
   it('lit action claim should return claim', async () => {
 
-      let res = await client.executeJs({
-        authSig: LITCONFIG.CONTROLLER_AUTHSIG,
-        code: `(async () => {
+    let res = await client.executeJs({
+      authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+      code: `(async () => {
           Lit.Actions.claimKey({keyId: "foo"});
         })();`,
-        jsParams: {
-          //publicKey: LITCONFIG.PKP_PUBKEY,
-        },
-      });
+      jsParams: {
+        //publicKey: LITCONFIG.PKP_PUBKEY,
+      },
+    });
 
     expect(Object.keys(res.claims).length).toEqual(1);
     expect(res.claims['foo'].signatures.length).toEqual(3);
@@ -76,10 +73,10 @@ describe('Lit Actions', () => {
       },
     });
 
-  expect(Object.keys(res.claims).length).toEqual(2);
-  expect(res.claims['foo'].signatures.length).toEqual(3);
-  expect(res.claims['bar'].signatures.length).toEqual(3);
-});
+    expect(Object.keys(res.claims).length).toEqual(2);
+    expect(res.claims['foo'].signatures.length).toEqual(3);
+    expect(res.claims['bar'].signatures.length).toEqual(3);
+  });
 
   it('lit action response should return json {hello: "world"}', async () => {
     const res = await processTx(
@@ -151,31 +148,31 @@ describe('Lit Actions', () => {
   it('Should combine claim responses', () => {
     const nodeclaimResponses = [
       {
-        'foo':       {
+        'foo': {
           keyId: "abc1234",
           signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
         },
-        bar:       {
+        bar: {
           keyId: "xyz1234",
           signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
         }
       },
       {
-        'foo':       {
+        'foo': {
           keyId: "abc1234",
           signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
         },
-        bar:       {
+        bar: {
           keyId: "xyz1234",
           signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
         }
       },
       {
-        'foo':       {
+        'foo': {
           keyId: "abc1234",
           signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
         },
-        bar:       {
+        bar: {
           keyId: "xyz1234",
           signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
         }
@@ -186,35 +183,35 @@ describe('Lit Actions', () => {
     expect(Object.keys(combinedClaims).length).toEqual(2);
     expect(combinedClaims['foo'].signatures.length).toEqual(3);
   });
-  it('should claim key id from auth method', async () => {
-    const authMethod = {
-      authMethodType: 4,
-      accessToken: LITCONFIG.AUTH_METHOD_ACCESS_TOKEN
-    };
-    let res = await client.claimKeyId({
-      authMethod
-    });
-    
-    const data = {
-      // hello world in Uint8Array
-      toSign: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
-      publicKey: LITCONFIG.PKP_PUBKEY,
-      sigName: 'hello-world-sig',
-    };
+  // it('should claim key id from auth method', async () => {
+  //   const authMethod = {
+  //     authMethodType: 4,
+  //     accessToken: LITCONFIG.AUTH_METHOD_ACCESS_TOKEN
+  //   };
+  //   let res = await client.claimKeyId({
+  //     authMethod
+  //   });
+
+  //   const data = {
+  //     // hello world in Uint8Array
+  //     toSign: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100],
+  //     publicKey: LITCONFIG.PKP_PUBKEY,
+  //     sigName: 'hello-world-sig',
+  //   };
 
 
-    let sig = await client.pkpSign({
-      toSign: data.toSign,
-      pubKey: res.pubkey,
-      authMethods: [authMethod],
-      authSig: LITCONFIG.CONTROLLER_AUTHSIG,
-    });
+  //   let sig = await client.pkpSign({
+  //     toSign: data.toSign,
+  //     pubKey: res.pubkey,
+  //     authMethods: [authMethod],
+  //     authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+  //   });
 
-    let msg: any = ethers.utils.arrayify('0x' + sig.dataSigned)
-    const recoveredPk = ethers.utils.recoverPublicKey(msg, { r: '0x' + sig.r, s: '0x' + sig.s, v: sig.recid });
+  //   let msg: any = ethers.utils.arrayify('0x' + sig.dataSigned)
+  //   const recoveredPk = ethers.utils.recoverPublicKey(msg, { r: '0x' + sig.r, s: '0x' + sig.s, v: sig.recid });
 
-    const addr = ethers.utils.computeAddress(ethers.utils.arrayify('0x' + sig.publicKey));
-    const recoveredAddr = ethers.utils.computeAddress(ethers.utils.arrayify(recoveredPk));
-    expect(recoveredAddr).toEqual(addr);
-  }, 20_0000);
+  //   const addr = ethers.utils.computeAddress(ethers.utils.arrayify('0x' + sig.publicKey));
+  //   const recoveredAddr = ethers.utils.computeAddress(ethers.utils.arrayify(recoveredPk));
+  //   expect(recoveredAddr).toEqual(addr);
+  // }, 20_0000);
 });

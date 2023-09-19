@@ -296,10 +296,10 @@ export interface BaseJsonPkpSignRequest {
 
 
 export interface WithAuthMethodSigning extends BaseJsonPkpSignRequest {
-    // auth methods to resolve
-    authMethods: Array<AuthMethod>;
-    sessionSigs?: any;
-    authSig?: AuthSig; 
+  // auth methods to resolve
+  authMethods: Array<AuthMethod>;
+  sessionSigs?: any;
+  authSig?: AuthSig;
 }
 export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
   sessionSigs: any;
@@ -556,7 +556,7 @@ export interface ExecuteJsResponse {
   decryptions: any[];
   response: string;
   logs: string;
-  claims: Record<string, {signatures: Signature[], derivedKeyId: string}>;
+  claims?: Record<string, { signatures: Signature[], derivedKeyId: string }>;
   debug?: {
     allNodeResponses: NodeResponse[];
     allNodeLogs: NodeLog[];
@@ -564,7 +564,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise {}
+export interface LitNodePromise { }
 
 export interface SendNodeCommand {
   url: string;
@@ -580,6 +580,7 @@ export interface NodeShare {
   decryptedData: any;
   response: any;
   logs: any;
+  success?: any;
 }
 
 export interface PKPSignShare {
@@ -662,7 +663,7 @@ export interface SigShare {
   publicKey: any;
   dataSigned: any;
   siweMessage?: string;
-  sigName?:string;
+  sigName?: string;
 }
 
 export interface SignedData {
@@ -1098,7 +1099,7 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export interface PKPEthersWalletProp extends PKPBaseProp {}
+export interface PKPEthersWalletProp extends PKPBaseProp { }
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
@@ -1459,7 +1460,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions {}
+export interface BaseAuthenticateOptions { }
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**

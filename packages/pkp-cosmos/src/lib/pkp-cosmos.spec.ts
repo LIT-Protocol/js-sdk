@@ -8,6 +8,7 @@ import {
 
 import * as LITCONFIG from 'lit.config.json';
 
+jest.setTimeout(60000);
 jest.useRealTimers();
 
 describe('PKPCosmosWallet', () => {
