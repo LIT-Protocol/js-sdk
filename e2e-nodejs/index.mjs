@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 
 const ROOT_DIR = path.resolve(__dirname, '../');
 const DIR = ROOT_DIR + '/e2e-nodejs/';
-const IGNORE_LIST = ['index.mjs'];
+const IGNORE_LIST = ['index.mjs', 'template.mjs'];
 
 /**
  * Function to get all files from the directory excluding 'index'
@@ -17,14 +17,29 @@ const IGNORE_LIST = ['index.mjs'];
  * @returns {Array} - An array of file names
  */
 const getFilesFromDir = (dir) => {
-  return fs.readdirSync(dir).filter((file) => !IGNORE_LIST.includes(file));
+  let results = [];
+  const list = fs.readdirSync(dir);
+  list.forEach((file) => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+    if (stat && stat.isDirectory()) {
+      /* Recurse into a subdirectory */
+      results = results.concat(getFilesFromDir(filePath));
+    } else {
+      /* Is a file */
+      results.push(filePath);
+    }
+  });
+  return results.filter((file) => !IGNORE_LIST.includes(file));
 };
 
 async function main() {
   const mode = process.argv.includes('--parallel') ? 'parallel' : 'async';
   const args = process.argv.slice(2);
   const filesArg = args.find((arg) => arg.startsWith('--filter'));
+  const groupArg = args.find((arg) => arg.startsWith('--group'));
   let filesValue = filesArg ? filesArg.split('=')[1] : null;
+  let groupValue = groupArg ? groupArg.split('=')[1] : null;
   filesValue = filesValue ? filesValue.split(',') : null;
 
   // console.log(`\nRunning tests in "${mode}" mode...`);
@@ -33,6 +48,10 @@ async function main() {
     return filesValue ? filesValue.some((value) => file.includes(value)) : true;
   });
 
+  if (groupValue) {
+    files = files.filter((file) => file.includes(`group-${groupValue}`));
+  }
+
   if (files.length <= 0) {
     console.log('❌ No files to run');
     return;
@@ -40,22 +59,24 @@ async function main() {
   console.log();
   console.log(`${formatNxLikeLine('test:e2e:nodejs', files.length)}`);
   files.forEach((file) => {
-    greenLog(`  - ${path.join(DIR, file)}`, true);
+    greenLog(`  - ${file}`, true);
   });
-  console.log();
-  console.log();
+
+  if (groupValue) {
+    console.log(`\n🚀 Running tests in group: ${groupValue}`);
+  }
 
   // -- async mode
   if (mode === 'async') {
     for (const file of files) {
       // console.log(`\n🚀 Running test: ${file}`);
-      await import(path.join(DIR, file));
+      await import(file);
     }
   }
 
   if (mode === 'parallel') {
     const promises = files.map((file) => {
-      return import(path.join(DIR, file));
+      return import(file);
     });
     await Promise.all(promises);
   }

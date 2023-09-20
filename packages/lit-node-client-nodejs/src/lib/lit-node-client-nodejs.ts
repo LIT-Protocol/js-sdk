@@ -1069,7 +1069,7 @@ export class LitNodeClientNodeJs extends LitCore {
     return signatures;
   };
 
-  getClaims = (claims: any[]): Record<string, { signatures: Signature[], derivedKeyId: string }> => {
+  static getClaims = (claims: any[]): Record<string, { signatures: Signature[], derivedKeyId: string }> => {
     let keys: string[] = Object.keys(claims[0]);
     let signatures: Record<string, Signature[]> = {};
     let claimRes: Record<string, { signatures: Signature[], derivedKeyId: string }> = {};
@@ -1266,7 +1266,7 @@ export class LitNodeClientNodeJs extends LitCore {
     let claims = undefined;
 
     if (claimsList.length > 0) {
-      claims = this.getClaims(claimsList);
+      claims = LitNodeClientNodeJs.getClaims(claimsList);
     }
 
     // ========== Result ==========

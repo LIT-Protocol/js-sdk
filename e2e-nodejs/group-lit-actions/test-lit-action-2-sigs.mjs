@@ -1,22 +1,9 @@
 import path from 'path';
-import { success, fail, testThis } from '../tools/scripts/utils.mjs';
-import LITCONFIG from '../lit.config.json' assert { type: 'json' };
-import { client } from './00-setup.mjs';
+import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
+import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
+import { client } from '../00-setup.mjs';
 
 export async function main() {
-  // ==================== Pre-Validation ====================
-  if (client.ready !== true) {
-    return fail('client not ready');
-  }
-
-  if (LITCONFIG.CONTROLLER_AUTHSIG === undefined) {
-    return fail('Controller authSig cannot be empty');
-  }
-
-  if (LITCONFIG.PKP_PUBKEY === undefined) {
-    return fail('PKP pubkey cannot be empty');
-  }
-
   // ==================== Test Logic ====================
   const res = await client.executeJs({
     authSig: LITCONFIG.CONTROLLER_AUTHSIG,
@@ -98,7 +85,7 @@ export async function main() {
   });
 
   // ==================== Success ====================
-  return success('Lit Action should be able to sign data');
+  return success('Lit Action should be able to sign data x2 sigs');
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });

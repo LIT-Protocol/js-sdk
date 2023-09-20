@@ -599,7 +599,6 @@ export const log = Object.assign(
 
 export const testThis = async (test) => {
   try {
-    console.log(`${test.name}`);
     // calculate the time it takes to run the test
     const start = Date.now();
     const { status, message } = await test.fn();
@@ -611,7 +610,7 @@ export const testThis = async (test) => {
     if (status === 200) {
       log.green(`\t${message} (${time}ms)`);
     } else {
-      log.red(`\t${message} (${time}ms)`);
+      log.red(`\t(FAILED) ${message} (${time}ms) | ${test.name}`);
     }
   } catch (e) {
     log.red(`\t${e.message}`);
@@ -795,6 +794,6 @@ export function formatNxLikeLine(path, number) {
   const orange = '\x1b[38;5;208m';
   const reset = '\x1b[0m';
 
-  const formattedLine = `${orange} >  ${bold}${orangeBg} LIT ${reset}   ${orange}Running target ${bold}${path} ${regular}for ${number} project(s) ${reset}\n`;
+  const formattedLine = `${orange} >  ${bold}${orangeBg} LIT ${reset}   ${orange}Running target ${bold}${path} ${regular}for ${number} file(s) ${reset}\n`;
   return formattedLine;
 }
