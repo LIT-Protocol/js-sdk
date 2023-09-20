@@ -1038,7 +1038,7 @@ export class LitContracts {
         const tx = await this.pkpPermissionsContract.write.addPermittedAction(
           tokenId,
           ipfsIdBytes as any,
-          []
+          [1]
         );
         this.log('[addPermittedAction] output<tx>:', tx);
 
@@ -1076,7 +1076,7 @@ export class LitContracts {
         const tx = await this.pkpPermissionsContract.write.addPermittedAddress(
           pkpId,
           ownerAddress,
-          []
+          [1]
         );
 
         this.log('[addPermittedAddress] output<tx>:', tx);
@@ -1482,5 +1482,43 @@ export class LitContracts {
       // },
     },
     write: {},
+  };
+
+  pkpHelperContractUtil = {
+    read: {},
+    write: {
+      mintNextAndAddAuthMethods: async ({
+        keyType,
+        permittedAuthMethodTypes,
+        permittedAuthMethodIds,
+        permittedAuthMethodPubkeys,
+        permittedAuthMethodScopes,
+        addPkpEthAddressAsPermittedAddress,
+        sendPkpToItself,
+      }: {
+        keyType: string;
+        permittedAuthMethodTypes: string[];
+        permittedAuthMethodIds: string[];
+        permittedAuthMethodPubkeys: string[];
+        permittedAuthMethodScopes: string[][];
+        addPkpEthAddressAsPermittedAddress: boolean;
+        sendPkpToItself: boolean;
+      }): Promise<any> => {
+        // first get mint cost
+        const mintCost = await this.pkpNftContract.read.mintCost();
+        const tx = await this.pkpHelperContract.write.mintNextAndAddAuthMethods(
+          keyType,
+          permittedAuthMethodTypes,
+          permittedAuthMethodIds as unknown as pkpHelperContract.Arrayish[],
+          permittedAuthMethodPubkeys as unknown as pkpHelperContract.Arrayish[],
+          permittedAuthMethodScopes,
+          addPkpEthAddressAsPermittedAddress,
+          sendPkpToItself,
+          { value: mintCost },
+        );
+        console.log("tx", tx);
+        return tx;
+      }
+    }
   };
 }
