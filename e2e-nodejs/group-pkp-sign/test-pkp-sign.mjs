@@ -16,6 +16,13 @@ export async function main() {
     authSig: LITCONFIG.CONTROLLER_AUTHSIG,
   });
 
+  const recoveredPk = ethers.utils.recoverPublicKey(
+    '0x' + sig.dataSigned,
+    sig.signature
+  );
+
+  const recoveredAddr = ethers.utils.computeAddress(recoveredPk);
+
   // ==================== Post-Validation ====================
   if (sig.r === undefined || sig.r === '' || sig.r === null) {
     return fail('sig.r should not be empty');
@@ -55,19 +62,11 @@ export async function main() {
     return fail('sig.recid should not be empty');
   }
 
-  console.log('sig', sig);
-
-  const recoveredAddress = ethers.utils.verifyMessage(
-    DATA_TO_SIGN,
-    sig.signature
-  );
-
-  const recoveredAddr = ethers.utils.verifyMessage(
-    '0x' + sig.dataSigned,
-    sig.signature
-  );
-
-  console.log('recoveredAddr', recoveredAddr);
+  if (recoveredAddr !== LITCONFIG.PKP_ETH_ADDRESS) {
+    return fail(
+      `recovered address ${recoveredAddr} should be ${LITCONFIG.PKP_ETH_ADDRESS}`
+    );
+  }
 
   // ==================== Success ====================
   return success('PKP sign endppint should sign message');
