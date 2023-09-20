@@ -598,8 +598,6 @@ export const log = Object.assign(
 );
 
 export const testThis = async (test) => {
-  greenLog(`💨 Running "./e2e-nodejs/${test.name}"`);
-
   try {
     console.log(`${test.name}`);
     // calculate the time it takes to run the test
@@ -618,7 +616,6 @@ export const testThis = async (test) => {
   } catch (e) {
     log.red(`\t${e.message}`);
   }
-  process.exit();
 };
 
 export const testThese = async (tests) => {
@@ -788,4 +785,16 @@ export function getFlagValue(flag) {
     return process.argv[index + 1];
   }
   return null;
+}
+
+export function formatNxLikeLine(path, number) {
+  const bold = '\x1b[1m';
+  const regular = '\x1b[22m';
+  const orangeBg = '\x1b[48;5;208m';
+  const black = '\x1b[30m';
+  const orange = '\x1b[38;5;208m';
+  const reset = '\x1b[0m';
+
+  const formattedLine = `${orange} >  ${bold}${orangeBg} LIT ${reset}   ${orange}Running target ${bold}${path} ${regular}for ${number} project(s) ${reset}\n`;
+  return formattedLine;
 }

@@ -1,18 +1,10 @@
 import path from 'path';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { success, fail, testThis } from '../tools/scripts/utils.mjs';
 import LITCONFIG from '../lit.config.json' assert { type: 'json' };
+import { client } from './00-setup.mjs';
 
-// -- setup
-const client = new LitNodeClient({
-  litNetwork: LITCONFIG.TEST_ENV.litNetwork,
-  debug: LITCONFIG.TEST_ENV.debug,
-  minNodeCount: LITCONFIG.TEST_ENV.minNodeCount,
-});
-await client.connect();
-
-// -- test
 export async function main() {
+  // ==================== Pre-Validation ====================
   if (client.ready !== true) {
     return fail('client not ready');
   }
@@ -25,6 +17,7 @@ export async function main() {
     return fail('PKP pubkey cannot be empty');
   }
 
+  // ==================== Test Logic ====================
   const res = await client.executeJs({
     authSig: LITCONFIG.CONTROLLER_AUTHSIG,
     code: `(async () => {
@@ -41,9 +34,7 @@ export async function main() {
     },
   });
 
-  console.log('res:', res);
-
-  // ----- validate response
+  // ==================== Post-Validation ====================
   if (res.signatures.fooSig === undefined) {
     return fail(`cannot find "fooSig" signature`);
   } else {
@@ -74,8 +65,8 @@ export async function main() {
     }
   }
 
-  // -- all good
-  return success('Lit Action should log "hello world"');
+  // ==================== Success ====================
+  return success('Lit Action should be able to sign data');
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });

@@ -1,7 +1,7 @@
 {
   "TEST_ENV": {
     "litNetwork": "cayenne",
-    "debug": true,
+    "debug": false,
     "minNodeCount": 2
   },
   "PKP_SUI_ADDRESS": "0x04b264694e280dcf036014819c3edd4f8ad8a91068b0bc2d886118404a567251",

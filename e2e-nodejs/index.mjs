@@ -2,7 +2,7 @@
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { spawn } from 'child_process';
+import { formatNxLikeLine, greenLog } from '../tools/scripts/utils.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,7 +27,7 @@ async function main() {
   let filesValue = filesArg ? filesArg.split('=')[1] : null;
   filesValue = filesValue ? filesValue.split(',') : null;
 
-  console.log(`🚀 Running tests in "${mode}" mode...`);
+  // console.log(`\nRunning tests in "${mode}" mode...`);
 
   let files = getFilesFromDir(DIR).filter((file) => {
     return filesValue ? filesValue.some((value) => file.includes(value)) : true;
@@ -37,14 +37,27 @@ async function main() {
     console.log('❌ No files to run');
     return;
   }
+  console.log();
+  console.log(`${formatNxLikeLine('test:e2e:nodejs', files.length)}`);
+  files.forEach((file) => {
+    greenLog(`  - ${path.join(DIR, file)}`, true);
+  });
+  console.log();
+  console.log();
 
   // -- async mode
   if (mode === 'async') {
     for (const file of files) {
+      // console.log(`\n🚀 Running test: ${file}`);
       await import(path.join(DIR, file));
     }
-  } else {
-    // -- parallel mode
+  }
+
+  if (mode === 'parallel') {
+    const promises = files.map((file) => {
+      return import(path.join(DIR, file));
+    });
+    await Promise.all(promises);
   }
 
   process.exit(0);

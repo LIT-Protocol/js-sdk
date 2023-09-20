@@ -44,7 +44,6 @@ describe('Lit Actions', () => {
   });
 
   it('lit action claim should return claim', async () => {
-
     let res = await client.executeJs({
       authSig: LITCONFIG.CONTROLLER_AUTHSIG,
       code: `(async () => {
