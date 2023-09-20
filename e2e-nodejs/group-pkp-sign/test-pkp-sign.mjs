@@ -62,7 +62,12 @@ export async function main() {
     sig.signature
   );
 
-  console.log('recoveredAddress', recoveredAddress);
+  const recoveredAddr = ethers.utils.verifyMessage(
+    '0x' + sig.dataSigned,
+    sig.signature
+  );
+
+  console.log('recoveredAddr', recoveredAddr);
 
   // ==================== Success ====================
   return success('PKP sign endppint should sign message');

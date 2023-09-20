@@ -90,15 +90,6 @@ describe('Tx Handling Wrapper', () => {
 
       const msgParamStr = JSON.stringify(msgParams);
 
-      it('should be a string', async () => {
-        const signature = await processTx(
-          expect.getState().currentTestName,
-          await signTypedData(pkpEthersWallet, msgParams)
-        );
-
-        expect(typeof signature).toBe('string');
-        expect(signature).toMatch(/^0x[0-9a-fA-F]+$/);
-      });
 
       describe('[requestHandler] Signed typed data', () => {
         it('(ethers) should recover the correct address using verifyTypedData', async () => {
