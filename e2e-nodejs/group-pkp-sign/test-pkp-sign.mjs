@@ -16,6 +16,13 @@ export async function main() {
     authSig: LITCONFIG.CONTROLLER_AUTHSIG,
   });
 
+  // keccak256 it
+  const uint8ArrayToSign = new Uint8Array(DATA_TO_SIGN);
+  const hashedString = ethers.utils.keccak256(uint8ArrayToSign);
+
+  console.log('hashedString:', hashedString);
+  console.log("'0x' + sig.dataSigned:", '0x' + sig.dataSigned);
+
   const recoveredPk = ethers.utils.recoverPublicKey(
     '0x' + sig.dataSigned,
     sig.signature
@@ -69,7 +76,7 @@ export async function main() {
   }
 
   // ==================== Success ====================
-  return success('PKP sign endppint should sign message');
+  return success('PKP sign endpoint should sign message');
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });
