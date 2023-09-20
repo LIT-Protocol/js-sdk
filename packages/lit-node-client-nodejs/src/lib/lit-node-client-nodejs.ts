@@ -112,6 +112,32 @@ export class LitNodeClientNodeJs extends LitCore {
     this.defaultAuthCallback = args?.defaultAuthCallback;
   }
 
+  // ========== STATIC METHODS ==========
+  static getClaims = (claims: any[]): Record<string, { signatures: Signature[], derivedKeyId: string }> => {
+    let keys: string[] = Object.keys(claims[0]);
+    let signatures: Record<string, Signature[]> = {};
+    let claimRes: Record<string, { signatures: Signature[], derivedKeyId: string }> = {};
+    for (let i = 0; i < keys.length; i++) {
+      let claimSet: { signature: string, derivedKeyId: string }[] = claims.map(c => c[keys[i]]);
+      signatures[keys[i]] = [];
+      claimSet.map(c => {
+        let sig = ethers.utils.splitSignature(`0x${c.signature}`);
+        let convertedSig = {
+          r: sig.r,
+          s: sig.s,
+          v: sig.v,
+        };
+        signatures[keys[i]].push(convertedSig);
+      });
+
+      claimRes[keys[i]] = {
+        signatures: signatures[keys[i]],
+        derivedKeyId: claimSet[0].derivedKeyId
+      };
+    }
+    return claimRes;
+  }
+
   // ========== Scoped Class Helpers ==========
 
   /**
@@ -243,7 +269,7 @@ export class LitNodeClientNodeJs extends LitCore {
    * specified.
    * @param litResources is an array of LIT resources
    */
-  generateSessionCapabilityObjectWithWildcards = (
+  static generateSessionCapabilityObjectWithWildcards = (
     litResources: Array<ILitResource>
   ): ISessionCapabilityObject => {
     const sessionCapabilityObject = newSessionCapabilityObject();
@@ -253,14 +279,26 @@ export class LitNodeClientNodeJs extends LitCore {
     return sessionCapabilityObject;
   };
 
+  // backward compatibility
+  generateSessionCapabilityObjectWithWildcards = (
+    litResources: Array<ILitResource>
+  ): ISessionCapabilityObject => {
+    return LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(litResources);
+  };
+
   /**
    *
    * Get expiration for session
    *
    */
-  getExpiration = () => {
+  static getExpiration = () => {
     return new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
   };
+
+  // backward compatibility
+  getExpiration = () => {
+    return LitNodeClientNodeJs.getExpiration();
+  }
 
   /**
    *
@@ -1068,32 +1106,6 @@ export class LitNodeClientNodeJs extends LitCore {
 
     return signatures;
   };
-
-  static getClaims = (claims: any[]): Record<string, { signatures: Signature[], derivedKeyId: string }> => {
-    let keys: string[] = Object.keys(claims[0]);
-    let signatures: Record<string, Signature[]> = {};
-    let claimRes: Record<string, { signatures: Signature[], derivedKeyId: string }> = {};
-    for (let i = 0; i < keys.length; i++) {
-      let claimSet: { signature: string, derivedKeyId: string }[] = claims.map(c => c[keys[i]]);
-      signatures[keys[i]] = [];
-      claimSet.map(c => {
-        let sig = ethers.utils.splitSignature(`0x${c.signature}`);
-        let convertedSig = {
-          r: sig.r,
-          s: sig.s,
-          v: sig.v,
-        };
-        signatures[keys[i]].push(convertedSig);
-      });
-
-      claimRes[keys[i]] = {
-        signatures: signatures[keys[i]],
-        derivedKeyId: claimSet[0].derivedKeyId
-      };
-    }
-
-    return claimRes;
-  }
 
   /**
    *
@@ -2027,7 +2039,7 @@ export class LitNodeClientNodeJs extends LitCore {
       : this.generateSessionCapabilityObjectWithWildcards(
         params.resourceAbilityRequests.map((r) => r.resource)
       );
-    let expiration = params.expiration || this.getExpiration();
+    let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({

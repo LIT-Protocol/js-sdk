@@ -33,6 +33,25 @@ import {
 
 // ---------- Test Cases ----------
 describe('hashing.ts', () => {
+
+  it('hashes a resource id', async () => {
+    const path = '/bglyaysu8rvblxlk7x0ksn';
+
+    let resourceId = {
+      baseUrl: 'my-dynamic-content-server.com',
+      path,
+      orgId: '',
+      role: '',
+      extraData: '',
+    };
+
+    let hashedResourceId = await hashResourceIdForSigning(resourceId);
+
+    expect(hashedResourceId).toBe(
+      'd3b7c933579ff8cce79a9db8f135cf93d8e4b1d206129cbe28405ed81dad7cb1'
+    );
+  });
+
   it('should call hashUnifiedAccessControlConditions in node.js', async () => {
     const OUTPUT = await hashUnifiedAccessControlConditions([
       {
