@@ -146,6 +146,9 @@ You can build the project with the following command:
 
 ```
 yarn build
+
+// for single package without dependencies
+yarn nx run lit-node-client-nodejs:build --with-deps=false
 ```
 
 ## Running Test Apps
