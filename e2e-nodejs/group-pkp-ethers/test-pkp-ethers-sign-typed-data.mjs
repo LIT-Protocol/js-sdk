@@ -82,7 +82,7 @@ export async function main() {
     version: SignTypedDataVersion.V3,
   });
 
-  console.log('recoveredAddress:', recoveredAddress);
+  // console.log('recoveredAddress:', recoveredAddress);
 
   // ==================== Post-Validation ====================
   if (signature.length !== 132) {
