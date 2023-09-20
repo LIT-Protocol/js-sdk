@@ -61,6 +61,20 @@ export const replaceAutogen = ({
   return newStr;
 };
 
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+export function replaceContent(options) {
+  const { startsWith, endsWith, newContent } = options;
+  const pattern = new RegExp(
+    `${escapeRegExp(startsWith)}[\\s\\S]*?${escapeRegExp(endsWith)}`,
+    'g'
+  );
+  const replacement = `${startsWith}\n${newContent}\n${endsWith}`;
+  return (input) => input.replace(pattern, replacement);
+}
+
 // read the file and return as json
 export async function readJsonFile(filename) {
   const filePath = path.join(process.cwd(), filename);

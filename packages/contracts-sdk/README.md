@@ -104,18 +104,8 @@ If the directory structures have been changed on the [LitNodeContracts](https://
 
 ## Quick start
 
-The `gen-code` and `fetch-contracts` actions are executed together in this action.
-
 ```js
 node ./packages/contracts-sdk/tools.mjs --update
-```
-
-## fetch-contracts.mjs
-
-This script fetches and processes ABI files for a set of deployed contracts. It writes the ABI files and contract data to the file system and runs a command to generate additional files based on the ABIs.
-
-```js
-node ./packages/contracts-sdk/tools.mjs --fetch
 ```
 
 ## gen-code.mjs
