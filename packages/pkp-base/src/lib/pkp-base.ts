@@ -103,7 +103,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       minNodeCount:
         prop.bootstrapUrls && prop.litNetwork == 'custom'
           ? prop.minNodeCount
-          : 6,
+          : 2,
     });
   }
 
