@@ -2,12 +2,15 @@ import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { client } from '../00-setup.mjs';
+import { ethers } from 'ethers';
+
+const DATA_TO_SIGN = [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100]; // hello world
 
 export async function main() {
   // ==================== Test Logic ====================
 
   const sig = await client.pkpSign({
-    toSign: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100], // hello world
+    toSign: DATA_TO_SIGN,
     pubKey: LITCONFIG.PKP_PUBKEY,
     authMethod: [],
     authSig: LITCONFIG.CONTROLLER_AUTHSIG,
@@ -51,6 +54,15 @@ export async function main() {
   ) {
     return fail('sig.recid should not be empty');
   }
+
+  console.log('sig', sig);
+
+  const recoveredAddress = ethers.utils.verifyMessage(
+    DATA_TO_SIGN,
+    sig.signature
+  );
+
+  console.log('recoveredAddress', recoveredAddress);
 
   // ==================== Success ====================
   return success('PKP sign endppint should sign message');

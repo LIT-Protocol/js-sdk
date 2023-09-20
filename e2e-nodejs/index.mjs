@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 
 const ROOT_DIR = path.resolve(__dirname, '../');
 const DIR = ROOT_DIR + '/e2e-nodejs/';
-const IGNORE_LIST = ['index.mjs', 'template.mjs'];
+const IGNORE_LIST = ['index.mjs', 'template.mjs', '00-setup.mjs'];
 
 /**
  * Function to get all files from the directory excluding 'index'
@@ -30,7 +30,13 @@ const getFilesFromDir = (dir) => {
       results.push(filePath);
     }
   });
-  return results.filter((file) => !IGNORE_LIST.includes(file));
+
+  return results.filter((file) => {
+    if (IGNORE_LIST.includes(path.basename(file))) {
+      return false;
+    }
+    return true;
+  });
 };
 
 async function main() {
@@ -48,6 +54,10 @@ async function main() {
     return filesValue ? filesValue.some((value) => file.includes(value)) : true;
   });
 
+  // console.log(files);
+
+  // process.exit();
+
   if (groupValue) {
     files = files.filter((file) => file.includes(`group-${groupValue}`));
   }
@@ -61,6 +71,8 @@ async function main() {
   files.forEach((file) => {
     greenLog(`  - ${file}`, true);
   });
+
+  console.log();
 
   if (groupValue) {
     console.log(`\n🚀 Running tests in group: ${groupValue}`);
