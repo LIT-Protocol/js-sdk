@@ -102,6 +102,7 @@ async function main() {
         await import(file);
       } catch (e) {
         errorCounter += 1;
+        console.log(e);
       }
     }
   }

@@ -35,7 +35,8 @@ export async function main() {
   // eth_sendTransaction parameters
   // Transaction - Object
   // Reference: https://ethereum.github.io/execution-apis/api-documentation/#eth_sendTransaction
-  const signature = await ethRequestHandler({
+  // A serialized form of the whole transaction
+  const rawSignedTx = await ethRequestHandler({
     signer: pkpEthersWallet,
     payload: {
       method: 'eth_signTransaction',
@@ -43,9 +44,47 @@ export async function main() {
     },
   });
 
+  const parsedTransaction = ethers.utils.parseTransaction(rawSignedTx);
+
+  const signature = ethers.utils.joinSignature({
+    r: parsedTransaction.r,
+    s: parsedTransaction.s,
+    v: parsedTransaction.v,
+  });
+
+  const rawTx = {
+    nonce: parsedTransaction.nonce,
+    gasPrice: parsedTransaction.gasPrice,
+    gasLimit: parsedTransaction.gasLimit,
+    to: parsedTransaction.to,
+    value: parsedTransaction.value,
+    data: parsedTransaction.data,
+    chainId: parsedTransaction.chainId, // Include chainId if the transaction is EIP-155
+  };
+
+  const txHash = ethers.utils.keccak256(
+    ethers.utils.serializeTransaction(rawTx)
+  );
+
+  const { v, r, s } = parsedTransaction;
+
+  const recoveredAddress = ethers.utils.recoverAddress(txHash, { r, s, v });
+
   // ==================== Post-Validation ====================
+  if (!parsedTransaction) {
+    return fail('parsedTransaction should not be null');
+  }
+
   if (signature.length !== 132) {
-    return fail('signature should be 132 characters long');
+    return fail(
+      `signature should be 132 characters long, got ${signature.length}`
+    );
+  }
+
+  if (recoveredAddress !== LITCONFIG.PKP_ETH_ADDRESS) {
+    return fail(
+      `recoveredAddres should be ${LITCONFIG.PKP_ETH_ADDRESS}, got ${recoveredAddress}`
+    );
   }
 
   // ==================== Success ====================

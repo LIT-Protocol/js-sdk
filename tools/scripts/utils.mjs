@@ -615,26 +615,32 @@ export const testThis = async (test) => {
   // calculate the time it takes to run the test
   const start = Date.now();
 
-  try {
-    const { status, message } = await test.fn();
+  const { status, message } = await test.fn();
 
+  let errorIsThrown = false;
+
+  try {
     const end = Date.now();
 
     const time = end - start;
 
     if (status === 200) {
       log.green(`\t${message} (${time}ms)`);
+      return true;
     } else {
       const _errorMsg = `\t(FAILED 200) ${message} (${time}ms) | ${test.name}`;
+      errorIsThrown = true;
       log.red(_errorMsg);
       throw new Error(_errorMsg);
     }
   } catch (e) {
-    const end = Date.now();
-    const time = end - start;
-    const _errorMsg = `\t(FAILED 500) ${message} (${time}ms) | ${test.name}`;
-    log.red(_errorMsg);
+    if (!errorIsThrown) {
+      const end = Date.now();
+      const time = end - start;
+      const _errorMsg = `\t(FAILED 500) ${message} (${time}ms) | ${test.name}`;
+      log.red(_errorMsg);
       throw new Error(_errorMsg);
+    }
   }
 };
 

@@ -36,13 +36,26 @@ export async function main() {
   // eth_sendTransaction parameters
   // Transaction - Object
   // Reference: https://ethereum.github.io/execution-apis/api-documentation/#eth_sendTransaction
-  const txRes = await ethRequestHandler({
-    signer: pkpEthersWallet,
-    payload: {
-      method: 'eth_sendTransaction',
-      params: [tx],
-    },
-  });
+  let txRes;
+
+  try {
+    txRes = await ethRequestHandler({
+      signer: pkpEthersWallet,
+      payload: {
+        method: 'eth_sendTransaction',
+        params: [tx],
+      },
+    });
+  } catch (e) {
+    if (e.toString().includes('insufficient FPE funds')) {
+      return success(
+        `PKPEthersWallet should be able to send tx (insufficient FPE funds ❗️)`
+      );
+    }
+    return fail(
+      `PKPEthersWallet should be able to send tx unexpected error: ${e.toString()}`
+    );
+  }
 
   // ==================== Post-Validation ====================
   if (!txRes) {
