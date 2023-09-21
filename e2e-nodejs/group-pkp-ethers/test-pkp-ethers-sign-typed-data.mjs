@@ -4,11 +4,6 @@ import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { signTypedData } from '@lit-protocol/pkp-ethers';
 import { ethers } from 'ethers';
-import {
-  SignTypedDataVersion,
-  recoverTypedSignature,
-  recoverPersonalSignature,
-} from '@metamask/eth-sig-util';
 
 export async function main() {
   // ==================== Setup ====================
@@ -60,40 +55,23 @@ export async function main() {
     },
   };
 
-  const sig = await signTypedData(pkpEthersWallet, msgParams);
+  const signature = await signTypedData(pkpEthersWallet, msgParams);
 
-  // const recoveredPk = ethers.utils.recoverPublicKey(
-  //   '0x' + sig.dataSigned,
-  //   sig.signature
-  // );
-
-  // console.log('recoveredPk', recoveredPk);
-
-  delete msgParams.types.EIP712Domain;
-
-  const recoveredAddress = recoverTypedSignature({
-    data: {
-      types: msgParams.types,
-      domain: msgParams.domain,
-      primaryType: msgParams.primaryType,
-      message: msgParams.message,
-    },
-    signature: sig,
-    version: SignTypedDataVersion.V3,
-  });
-
-  // console.log('recoveredAddress:', recoveredAddress);
+  const recoveredAddr = ethers.utils.verifyTypedData(
+    msgParams.domain,
+    { Person: msgParams.types.Person, Mail: msgParams.types.Mail },
+    msgParams.message,
+    signature
+  );
 
   // ==================== Post-Validation ====================
   if (signature.length !== 132) {
     return fail('signature should be 132 characters long');
   }
 
-  if (
-    recoveredAddress.toLowerCase() !== LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()
-  ) {
+  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()) {
     return fail(
-      `recoveredAddress "${recoveredAddress}" should be ${LITCONFIG.PKP_ETH_ADDRESS}`
+      `recoveredAddr "${recoveredAddr}" should be ${LITCONFIG.PKP_ETH_ADDRESS}`
     );
   }
 

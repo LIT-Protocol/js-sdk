@@ -612,9 +612,10 @@ export const log = Object.assign(
 );
 
 export const testThis = async (test) => {
+  // calculate the time it takes to run the test
+  const start = Date.now();
+
   try {
-    // calculate the time it takes to run the test
-    const start = Date.now();
     const { status, message } = await test.fn();
 
     const end = Date.now();
@@ -624,10 +625,12 @@ export const testThis = async (test) => {
     if (status === 200) {
       log.green(`\t${message} (${time}ms)`);
     } else {
-      log.red(`\t(FAILED) ${message} (${time}ms) | ${test.name}`);
+      log.red(`\t(FAILED 200) ${message} (${time}ms) | ${test.name}`);
     }
   } catch (e) {
-    log.red(`\t${e.message}`);
+    const end = Date.now();
+    const time = end - start;
+    log.red(`\t(FAILED 500) ${e.message} (${time}ms) | ${test.name}`);
   }
 };
 

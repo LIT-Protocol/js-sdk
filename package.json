@@ -20,7 +20,7 @@
     "test:ci": "nx affected --target=test --all --code-coverage",
     "test:e2e": "yarn tools --test --e2e run-react-and-test",
     "test:e2e:web": "yarn test:e2e",
-    "test:e2e:nodejs": "node ./e2e-nodejs/index.mjs",
+    "test:e2e:node": "node --no-warnings ./e2e-nodejs/index.mjs",
     "test:unit": "yarn test:packages",
     "test:custom": "yarn tools --test --custom",
     "test:bun": "bun ./tools/scripts/test-script.mjs",

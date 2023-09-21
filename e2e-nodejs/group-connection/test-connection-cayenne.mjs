@@ -9,7 +9,8 @@ export async function main() {
   // ==================== Test Logic ====================
   const client = new LitNodeClient({
     litNetwork: LIT_NETWORK,
-    debug: process.env.DEBUG ?? LITCONFIG.TEST_ENV.debug,
+    debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
+
     minNodeCount: LITCONFIG.TEST_ENV.minNodeCount,
   });
   await client.connect();

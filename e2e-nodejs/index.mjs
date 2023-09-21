@@ -40,6 +40,17 @@ const getFilesFromDir = (dir) => {
 };
 
 async function main() {
+  console.log(`  
+  💡 Usage: yarn test:e2e:node
+  
+  🌍 ENVs:
+      DEBUG=true yarn test:e2e:node (Enables debug mode)
+      REAL_TX=true yarn test:e2e:node (Enables real tx that costs gas)
+
+  🚩 Flags:
+      --filter=<keyword> (Filters files by keyword)
+      --group=<group> (Group is directory prefix, e.g., --group=pkp-ethers uses group-pkp-ethers)`);
+
   const mode = process.argv.includes('--parallel') ? 'parallel' : 'async';
   const args = process.argv.slice(2);
   const filesArg = args.find((arg) => arg.startsWith('--filter'));
@@ -48,15 +59,9 @@ async function main() {
   let groupValue = groupArg ? groupArg.split('=')[1] : null;
   filesValue = filesValue ? filesValue.split(',') : null;
 
-  // console.log(`\nRunning tests in "${mode}" mode...`);
-
   let files = getFilesFromDir(DIR).filter((file) => {
     return filesValue ? filesValue.some((value) => file.includes(value)) : true;
   });
-
-  // console.log(files);
-
-  // process.exit();
 
   if (groupValue) {
     files = files.filter((file) => file.includes(`group-${groupValue}`));
@@ -67,12 +72,14 @@ async function main() {
     return;
   }
   console.log();
-  console.log(`${formatNxLikeLine('test:e2e:nodejs', files.length)}`);
+  console.log(`${formatNxLikeLine('test:e2e:node', files.length)}`);
   files.forEach((file) => {
     greenLog(`  - ${file}`, true);
   });
 
-  console.log();
+  console.log(
+    '\n  --------------------------------------------------------------------------------'
+  );
 
   if (groupValue) {
     console.log(`\n🚀 Running tests in group: ${groupValue}`);
@@ -93,6 +100,7 @@ async function main() {
     await Promise.all(promises);
   }
 
+  console.log();
   process.exit(0);
 }
 

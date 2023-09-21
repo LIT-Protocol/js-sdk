@@ -4,7 +4,9 @@ import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { client } from '../00-setup.mjs';
 import { ethers } from 'ethers';
 
-const DATA_TO_SIGN = [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100]; // hello world
+const DATA_TO_SIGN = ethers.utils.arrayify(
+  ethers.utils.keccak256([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])
+);
 
 export async function main() {
   // ==================== Test Logic ====================
@@ -16,54 +18,20 @@ export async function main() {
     authSig: LITCONFIG.CONTROLLER_AUTHSIG,
   });
 
-  // sha256
-  const hashedString = ethers.utils.sha256(new Uint8Array(DATA_TO_SIGN));
-
   const recoveredPk = ethers.utils.recoverPublicKey(
-    hashedString,
+    DATA_TO_SIGN,
     sig.signature
   );
 
   const recoveredAddr = ethers.utils.computeAddress(recoveredPk);
 
   // ==================== Post-Validation ====================
-  if (sig.r === undefined || sig.r === '' || sig.r === null) {
-    return fail('sig.r should not be empty');
-  }
 
-  if (sig.s === undefined || sig.s === '' || sig.s === null) {
-    return fail('sig.s should not be empty');
-  }
-  if (
-    sig.signature === undefined ||
-    sig.signature === '' ||
-    sig.signature === null
-  ) {
-    return fail('sig.signature should not be empty');
-  }
-  if (
-    sig.publicKey === undefined ||
-    sig.publicKey === '' ||
-    sig.publicKey === null
-  ) {
-    return fail('sig.publicKey should not be empty');
-  }
-  if (
-    sig.dataSigned === undefined ||
-    sig.dataSigned === '' ||
-    sig.dataSigned === null
-  ) {
-    return fail('sig.dataSigned should not be empty');
-  }
-
-  if (
-    sig.recid === undefined ||
-    sig.recid === '' ||
-    sig.recid === null ||
-    typeof sig.recid !== 'number'
-  ) {
-    return fail('sig.recid should not be empty');
-  }
+  ['r', 's', 'signature', 'publicKey', 'dataSigned', 'recid'].forEach((key) => {
+    if (!sig[key]) {
+      return fail(`sig.${key} is undefined, empty, or null`);
+    }
+  });
 
   if (recoveredAddr !== LITCONFIG.PKP_ETH_ADDRESS) {
     return fail(
@@ -72,7 +40,9 @@ export async function main() {
   }
 
   // ==================== Success ====================
-  return success('PKP sign endpoint should sign message');
+  return success(
+    `PKP sign endpoint should sign message. recoveredAddr: ${recoveredAddr}`
+  );
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });

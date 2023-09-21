@@ -4,7 +4,7 @@ import { fail } from '../tools/scripts/utils.mjs';
 
 const client = new LitNodeClient({
   litNetwork: LITCONFIG.TEST_ENV.litNetwork,
-  debug: process.env.DEBUG ?? LITCONFIG.TEST_ENV.debug,
+  debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
   minNodeCount: LITCONFIG.TEST_ENV.minNodeCount,
 });
 await client.connect();

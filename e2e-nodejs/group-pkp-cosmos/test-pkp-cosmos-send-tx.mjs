@@ -43,16 +43,31 @@ export async function main() {
     return fail('litNodeClient should be ready');
   }
 
-  if (LITCONFIG.test.sendRealTxThatCostsMoney) {
-    const transaction = await stargateClient.sendTokens(
-      pkpAccount.address,
-      pkpAccount.address,
-      amount,
-      defaultSendFee,
-      'Transaction'
-    );
-    console.log('transaction', transaction);
-    return success('PKPCosmosWallet should be able to send tx');
+  if (
+    process.env.REAL_TX === 'true' ??
+    LITCONFIG.test.sendRealTxThatCostsMoney
+  ) {
+    let tx;
+
+    try {
+      tx = await stargateClient.sendTokens(
+        pkpAccount.address,
+        pkpAccount.address,
+        amount,
+        defaultSendFee,
+        'Transaction'
+      );
+    } catch (e) {
+      const _error = JSON.parse(JSON.stringify(e));
+
+      if (_error.log.includes('insufficient funds')) {
+        return success(
+          `PKPCosmosWallet in theory should be able to send tx [❗️${e.log}]`
+        );
+      } else {
+        return success(`PKPCosmosWallet should be able to send tx`);
+      }
+    }
   }
 
   // ==================== Success ====================

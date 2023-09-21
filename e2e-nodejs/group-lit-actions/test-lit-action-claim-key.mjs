@@ -41,21 +41,11 @@ export async function main() {
     return fail(`claimData should have "foo" key`);
   }
 
-  if (
-    res.claimData.foo.signature === undefined ||
-    res.claimData.foo.signature === null ||
-    res.claimData.foo.signature === ''
-  ) {
-    return fail(`claimData.foo should have signature`);
-  }
-
-  if (
-    res.claimData.foo.derivedKeyId === undefined ||
-    res.claimData.foo.derivedKeyId === null ||
-    res.claimData.foo.derivedKeyId === ''
-  ) {
-    return fail(`claimData.foo should have derivedKeyId`);
-  }
+  ['signature', 'derivedKeyId'].forEach((key) => {
+    if (!res.claimData.foo[key]) {
+      return fail(`claimData.foo should have ${key}`);
+    }
+  });
 
   // ==================== Success ====================
   return success('Lit Action should return claim');

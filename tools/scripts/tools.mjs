@@ -1415,7 +1415,7 @@ async function validateDependencyVersions() {
     ❗️ Before publishing, make sure you have tested the build!
       - yarn test:unit       | run unit tests
       - yarn test:e2e        | run e2e tests on browser
-      - yarn test:e2e:nodejs | run e2e tests on nodejs
+      - yarn test:e2e:node | run e2e tests on nodejs
       `,
       true
     );
@@ -1423,8 +1423,8 @@ async function validateDependencyVersions() {
     console.log(`
     Note: for e2e nodejs test, you can use the following options:
     -------------------------------------------------------------
-    --filter flag to filter tests (eg. yarn test:e2e:nodejs --filter=1-sig)
-    --group flag to test a specific group (yarn test:e2e:nodejs --group=lit-actions)
+    --filter flag to filter tests (eg. yarn test:e2e:node --filter=1-sig)
+    --group flag to test a specific group (yarn test:e2e:node --group=lit-actions)
     `);
   }
   process.exit(0);

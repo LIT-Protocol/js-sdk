@@ -2,6 +2,11 @@ import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { client } from '../00-setup.mjs';
+import { ethers } from 'ethers';
+
+// NOTE: you need to hash data before you send it in.
+// If you send something that isn't 32 bytes, the nodes will return an error.
+const TO_SIGN = ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5]));
 
 export async function main() {
   // ==================== Test Logic ====================
@@ -23,12 +28,12 @@ export async function main() {
         return sigShares;
       }
 
-      const sigShares = await signMultipleSigs(numberOfSigs, [1,2,3,4,5], publicKey);
+      const sigShares = await signMultipleSigs(numberOfSigs, toSign, publicKey);
 
     })();`,
     jsParams: {
       numberOfSigs: 2,
-      toSign: [1, 2, 3, 4, 5],
+      toSign: TO_SIGN,
       publicKey: LITCONFIG.PKP_PUBKEY,
       sigName: 'fooSig',
     },
@@ -43,45 +48,19 @@ export async function main() {
     );
   }
 
+  // Checking each sig in the signatures array
   Object.entries(res.signatures).forEach(([key, sig]) => {
     if (key !== 'sig0' && key !== 'sig1') {
       return fail(`sig name ${key} is not expected`);
     }
 
-    // sig should have r, s, recid, signature, publicKey, dataSigned
-    // *** sig.r cannot be undefined or an empty string
-    if (sig.r === undefined || sig.r === '') {
-      return fail(`sig.r is undefined or an empty string`);
-    }
-
-    // *** sig.s cannot be undefined or an empty string
-    if (sig.s === undefined || sig.s === '') {
-      return fail(`sig.s is undefined or an empty string`);
-    }
-
-    // *** sig.recid cannot be undefined, an empty string, or a non-number
-    if (
-      sig.recid === undefined ||
-      sig.recid === '' ||
-      typeof sig.recid !== 'number'
-    ) {
-      return fail(`sig.recid is undefined, an empty string, or not a number`);
-    }
-
-    // *** sig.signature cannot be undefined or an empty string
-    if (sig.signature === undefined || sig.signature === '') {
-      return fail(`sig.signature is undefined or an empty string`);
-    }
-
-    // *** sig.publicKey cannot be undefined or an empty string
-    if (sig.publicKey === undefined || sig.publicKey === '') {
-      return fail(`sig.publicKey is undefined or an empty string`);
-    }
-
-    // *** sig.dataSigned cannot be undefined or an empty string
-    if (sig.dataSigned === undefined || sig.dataSigned === '') {
-      return fail(`sig.dataSigned is undefined or an empty string`);
-    }
+    ['r', 's', 'recid', 'signature', 'publicKey', 'dataSigned'].forEach(
+      (key) => {
+        if (!sig[key]) {
+          return fail(`sig.${key} is undefined, empty, or null`);
+        }
+      }
+    );
   });
 
   // ==================== Success ====================

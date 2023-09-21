@@ -40,6 +40,7 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
+  NodeErrorV3,
   NodePromiseResponse,
   RejectedNodePromises,
   SendNodeCommand,
@@ -209,13 +210,10 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${
-              this.config.connectTimeout
-            }ms.  Could only connect to ${
-              Object.keys(this.serverKeys).length
-            } of ${
-              this.config.minNodeCount
-            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
+              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
+              } of ${this.config.minNodeCount
+              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             log(msg);
             reject(msg);
           }
@@ -313,12 +311,8 @@ export class LitCore {
 
         return data;
       })
-      .catch((error) => {
-        console.error(
-          'Something went wrong, internal id for request: ',
-          'lit_' + requestId,
-          'Please provide this identifier with any support requests'
-        );
+      .catch((error: NodeErrorV3) => {
+        console.error(`Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error ? `Error is ${error.message} - ${error.details}` : ''}`);
         return Promise.reject(error);
       });
   };
