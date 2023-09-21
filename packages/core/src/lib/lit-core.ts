@@ -312,7 +312,7 @@ export class LitCore {
         return data;
       })
       .catch((error: NodeErrorV3) => {
-        console.error(`Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error ? `Error is ${error.message} - ${error.details}` : ''}`);
+        console.error(`Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${(error?.message || error?.details) ? `Error is ${error.message} - ${error.details}` : ''}`);
         return Promise.reject(error);
       });
   };
