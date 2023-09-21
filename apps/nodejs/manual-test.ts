@@ -208,7 +208,7 @@ const runLogic = async (contract: LitContracts) => {
 const pkpSign = async (client, pkpPubkey, authSig) => {
      // try and sign something
      let sig = await client.pkpSign({
-      toSign: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100], // hello world in Uint8Array
+      toSign:  ethers.utils.arrayify(ethers.utils.keccak256([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])), // hello world in Uint8Array
       pubKey: pkpPubkey,
       authSig,
     });
@@ -247,7 +247,7 @@ const litActionSign = async(client, pkpPubkey, authSig) => {
       // all jsParams can be used anywhere in your litActionCode
       jsParams: {
         // this is the string "Hello World" for testing
-        toSign: [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100],
+        toSign: ethers.utils.arrayify(ethers.utils.keccak256([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])),
         publicKey: pkpPubkey,
         sigName: "sig1",
       },
@@ -288,13 +288,13 @@ const mintPkpAndSign = async () => {
         "http://localhost:7471",
         "http://localhost:7472",
       ],
-      debug: false
+      debug: true
     });
   } else {
     // use cayenne
     client = new LitJsSdk.LitNodeClient({
       litNetwork: 'cayenne',
-      debug: false
+      debug: true
     });
   }
 
@@ -320,7 +320,7 @@ const mintPkpAndSign = async () => {
 
     let startTime = Date.now();
     let allGood = true;
-    const testCount = 50;
+    const testCount = 1;
     for(let i = 0; i < testCount; i++){
       console.log(`testing ${i + 1} of ${testCount}`);
       let result = await pkpSign(client, pkpPubkey, authSig);
