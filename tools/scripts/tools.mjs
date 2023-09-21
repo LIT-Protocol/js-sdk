@@ -330,6 +330,7 @@ async function testFunc() {
                   react: run tests on react app on port 4003
                   html: run tests on html app on port 4002
                   run-react-and-test: run the react app and run e2e tests on it
+                  run-html-and-test: run the html app and run e2e tests on it
       `,
         true
       );
@@ -356,6 +357,16 @@ async function testFunc() {
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       spawnListener('yarn tools --test --e2e react');
+    }
+
+    if (ENV === 'run-html-and-test') {
+      // spawnListener('yarn tools --dev --apps');
+      spawnListener('yarn nx run html:serve');
+
+      // wait 3 seconds for the apps to start
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      spawnListener('yarn tools --test --e2e html');
     }
   }
 
