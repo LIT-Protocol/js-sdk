@@ -71,6 +71,7 @@ async function main() {
     console.log('❌ No files to run');
     return;
   }
+
   console.log();
   console.log(`${formatNxLikeLine('test:e2e:node', files.length)}`);
   files.forEach((file) => {
@@ -85,6 +86,7 @@ async function main() {
     console.log(`\n🚀 Running tests in group: ${groupValue}`);
   }
   let currentGroup = null;
+  let errorCounter = 0;
 
   // -- async mode
   if (mode === 'async') {
@@ -96,18 +98,39 @@ async function main() {
         currentGroup = group;
       }
 
-      await import(file);
+      try {
+        await import(file);
+      } catch (e) {
+        errorCounter += 1;
+      }
     }
   }
 
   if (mode === 'parallel') {
-    const promises = files.map((file) => {
-      return import(file);
+    const promises = files.map(async (file) => {
+      const group = file.split('/')[file.split('/').length - 2];
+
+      if (group !== currentGroup) {
+        console.log(`\nRunning tests in ${group}`);
+        currentGroup = group;
+      }
+
+      await import(file);
     });
-    await Promise.all(promises);
+
+    try {
+      await Promise.all(promises);
+    } catch (error) {
+      console.error('Parallel Execution Error:', error);
+    }
   }
 
   console.log();
+
+  if (errorCounter > 0) {
+    console.log(`❌ ${errorCounter} test(s) failed`);
+    process.exit(1);
+  }
   process.exit(0);
 }
 

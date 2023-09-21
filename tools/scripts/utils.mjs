@@ -625,12 +625,16 @@ export const testThis = async (test) => {
     if (status === 200) {
       log.green(`\t${message} (${time}ms)`);
     } else {
-      log.red(`\t(FAILED 200) ${message} (${time}ms) | ${test.name}`);
+      const _errorMsg = `\t(FAILED 200) ${message} (${time}ms) | ${test.name}`;
+      log.red(_errorMsg);
+      throw new Error(_errorMsg);
     }
   } catch (e) {
     const end = Date.now();
     const time = end - start;
-    log.red(`\t(FAILED 500) ${e.message} (${time}ms) | ${test.name}`);
+    const _errorMsg = `\t(FAILED 500) ${message} (${time}ms) | ${test.name}`;
+    log.red(_errorMsg);
+      throw new Error(_errorMsg);
   }
 };
 

@@ -16,7 +16,8 @@
       "runner": "@nrwl/workspace/tasks-runners/default",
       "options": {
         "cacheableOperations": [
-          "build"
+          "build",
+          "test"
         ]
       }
     }
