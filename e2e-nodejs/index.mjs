@@ -84,11 +84,18 @@ async function main() {
   if (groupValue) {
     console.log(`\n🚀 Running tests in group: ${groupValue}`);
   }
+  let currentGroup = null;
 
   // -- async mode
   if (mode === 'async') {
     for (const file of files) {
-      // console.log(`\n🚀 Running test: ${file}`);
+      const group = file.split('/')[file.split('/').length - 2]; // Assuming group is the second last part of the file path
+
+      if (group !== currentGroup) {
+        console.log(`\nRunning tests in ${group}`);
+        currentGroup = group;
+      }
+
       await import(file);
     }
   }

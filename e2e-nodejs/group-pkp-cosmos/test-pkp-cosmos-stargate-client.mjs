@@ -11,6 +11,9 @@ import {
   // coins,
 } from '@cosmjs/stargate';
 
+const TX_HASH =
+  '0D37992882EAF76E0C914B55CFACFDDDA17C9D8B698A6FDB171038AE05B91AB5';
+
 // Note: You can check your TX using https://www.mintscan.io/
 export async function main() {
   // ==================== Setup ====================
@@ -24,30 +27,21 @@ export async function main() {
 
   await cosmosWallet.init();
 
-  const [pkpAccount] = await cosmosWallet.getAccounts();
-
   // ==================== Test Logic ====================
-
   const stargateClient = await SigningStargateClient.connectWithSigner(
     LITCONFIG.COSMOS_RPC,
     cosmosWallet
   );
 
-  const balances = await stargateClient.getAllBalances(pkpAccount.address);
+  const tx = await stargateClient.getTx(TX_HASH);
 
   // ==================== Post-Validation ====================
   if (cosmosWallet.litNodeClientReady !== true) {
     return fail('litNodeClient should be ready');
   }
 
-  if (
-    balances.length <= 0 ||
-    balances[0].denom !== 'uatom' ||
-    balances[0].amount <= 0
-  ) {
-    return fail(
-      `Cosmos account should have balance. You might need to top up this account: ${pkpAccount.address}`
-    );
+  if (tx.hash !== TX_HASH) {
+    return fail('tx hash should be', TX_HASH);
   }
 
   // ==================== Success ====================
