@@ -25,4 +25,4 @@ jobs:
         with:
           main-branch-name: 'master'
       - name: Run tests
-        run: yarn nx run-many --target=test
+        run: npx nx test
