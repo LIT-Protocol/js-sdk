@@ -1,6 +1,6 @@
 export const StakingData = {
-  "date": "2023-09-12T16:59:07.000Z",
-  "address": "0x07A5bE9e0Aa724563e904B5e7AF37921e193f801",
+  "date": "2023-09-19T16:08:42.000Z",
+  "address": "0x1259026e2fE6d6b0fFb09d0a7c0d1c53CFA645c1",
   "contractName": "Staking",
   "abi": [
     {
@@ -1195,13 +1195,6 @@ export const StakingData = {
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "pauseEpoch",
-      "outputs": [],
-      "stateMutability": "nonpayable",
       "type": "function"
     },
     {

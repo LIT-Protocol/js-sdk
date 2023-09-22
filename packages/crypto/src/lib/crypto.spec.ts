@@ -10,12 +10,6 @@ import {
 import * as ethers from 'ethers';
 import { joinSignature } from 'ethers/lib/utils';
 
-// @ts-nocheck
-import { TextEncoder, TextDecoder } from 'util';
-global.TextEncoder = TextEncoder;
-// @ts-ignore
-global.TextDecoder = TextDecoder;
-
 import * as blsSdk from '@lit-protocol/bls-sdk';
 
 const publicKey =
@@ -169,31 +163,31 @@ describe('combine ECDSA Shares', () => {
 
     const sigShares = [
       {
-          "sigType": "ECDSA_CAIT_SITH",
-          "signatureShare": "BC8108AD9CAE8358942BB4B27632B87FFA705CCB675F85A59847CC1B84845A38",
-          "shareIndex": 0,
-          "bigR": "03E6D15C805443F57F57E180C730C2FCA5297F7671E8148A669410808AB4D70122",
-          "publicKey": "03AECABDF2EDC1194BED6FE9650F08D109C77D2526236EA3F6C20F88E0675643BC",
-          "dataSigned": "90AB86E6389AA65B56D701E36EEECD786242405C792ED863C395FA7C55E517A4",
-          "sigName": "sig"
+        "sigType": "ECDSA_CAIT_SITH",
+        "signatureShare": "BC8108AD9CAE8358942BB4B27632B87FFA705CCB675F85A59847CC1B84845A38",
+        "shareIndex": 0,
+        "bigR": "03E6D15C805443F57F57E180C730C2FCA5297F7671E8148A669410808AB4D70122",
+        "publicKey": "03AECABDF2EDC1194BED6FE9650F08D109C77D2526236EA3F6C20F88E0675643BC",
+        "dataSigned": "90AB86E6389AA65B56D701E36EEECD786242405C792ED863C395FA7C55E517A4",
+        "sigName": "sig"
       },
       {
-          "sigType": "ECDSA_CAIT_SITH",
-          "signatureShare": "BA77EB500884A60583DEA49578D4BB64BB55EF497F37C88DF935D739CE8E0A9F",
-          "shareIndex": 0,
-          "bigR": "03E6D15C805443F57F57E180C730C2FCA5297F7671E8148A669410808AB4D70122",
-          "publicKey": "03AECABDF2EDC1194BED6FE9650F08D109C77D2526236EA3F6C20F88E0675643BC",
-          "dataSigned": "90AB86E6389AA65B56D701E36EEECD786242405C792ED863C395FA7C55E517A4",
-          "sigName": "sig"
+        "sigType": "ECDSA_CAIT_SITH",
+        "signatureShare": "BA77EB500884A60583DEA49578D4BB64BB55EF497F37C88DF935D739CE8E0A9F",
+        "shareIndex": 0,
+        "bigR": "03E6D15C805443F57F57E180C730C2FCA5297F7671E8148A669410808AB4D70122",
+        "publicKey": "03AECABDF2EDC1194BED6FE9650F08D109C77D2526236EA3F6C20F88E0675643BC",
+        "dataSigned": "90AB86E6389AA65B56D701E36EEECD786242405C792ED863C395FA7C55E517A4",
+        "sigName": "sig"
       },
       {
-          "sigType": "ECDSA_CAIT_SITH",
-          "signatureShare": "EF850AE61B6D658976B2560B880BF03ABC1A070BACDEAE2311781F65A524F245",
-          "shareIndex": 0,
-          "bigR": "03E6D15C805443F57F57E180C730C2FCA5297F7671E8148A669410808AB4D70122",
-          "publicKey": "03AECABDF2EDC1194BED6FE9650F08D109C77D2526236EA3F6C20F88E0675643BC",
-          "dataSigned": "90AB86E6389AA65B56D701E36EEECD786242405C792ED863C395FA7C55E517A4",
-          "sigName": "sig"
+        "sigType": "ECDSA_CAIT_SITH",
+        "signatureShare": "EF850AE61B6D658976B2560B880BF03ABC1A070BACDEAE2311781F65A524F245",
+        "shareIndex": 0,
+        "bigR": "03E6D15C805443F57F57E180C730C2FCA5297F7671E8148A669410808AB4D70122",
+        "publicKey": "03AECABDF2EDC1194BED6FE9650F08D109C77D2526236EA3F6C20F88E0675643BC",
+        "dataSigned": "90AB86E6389AA65B56D701E36EEECD786242405C792ED863C395FA7C55E517A4",
+        "sigName": "sig"
       }
     ];
 
@@ -205,16 +199,16 @@ describe('combine ECDSA Shares', () => {
     const sigRes = joinSignature({
       r: '0x' + sig.r,
       s: '0x' + sig.s,
-      v: sig.recid 
+      v: sig.recid
     });
 
     let msg: any = ethers.utils.arrayify('0x' + sigShares[0].dataSigned)
     const recoveredPk = ethers.utils.recoverPublicKey(msg, sigRes);
 
-    
+
     // normalize the public keys to addresses and compare
     const addr = ethers.utils.computeAddress(ethers.utils.arrayify('0x' + sigShares[0].publicKey));
-    const recoveredAddr = ethers.utils.computeAddress(ethers.utils.arrayify(recoveredPk)); 
+    const recoveredAddr = ethers.utils.computeAddress(ethers.utils.arrayify(recoveredPk));
     expect(recoveredAddr).toEqual(addr);
 
 

@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V2</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V3</h1>
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
 <a href="https://twitter.com/LitProtocol"><img src="https://img.shields.io/twitter/follow/litprotocol?label=Follow&style=social"/></a>
@@ -146,6 +146,9 @@ You can build the project with the following command:
 
 ```
 yarn build
+
+// for single package without dependencies
+yarn nx run lit-node-client-nodejs:build --with-deps=false
 ```
 
 ## Running Test Apps

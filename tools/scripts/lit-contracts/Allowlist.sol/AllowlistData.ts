@@ -1,6 +1,6 @@
 export const AllowlistData = {
-  "date": "2023-09-10T22:33:10.000Z",
-  "address": "0x01385531dF2397425acb2Dffd3fA5Fd76729504a",
+  "date": "2023-09-15T22:19:04.000Z",
+  "address": "0xdC64eb11db44cc82f8d83Dce298392C6cB33Ee9A",
   "contractName": "Allowlist",
   "abi": [
     {

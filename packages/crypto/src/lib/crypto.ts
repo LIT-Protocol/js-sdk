@@ -121,10 +121,13 @@ export const verifyAndDecryptWithSignatureShares = (
   // Format the signature shares
   const sigShares = shares.map((s) => JSON.stringify(s));
 
+  const base64Identity = uint8ArrayToBase64(identity);
+  console.log("XXX base64Identity:", base64Identity);
+
   // Decrypt
   const privateData = blsSdk.verify_and_decrypt_with_signature_shares(
     publicKey,
-    uint8ArrayToBase64(identity),
+    base64Identity,
     ciphertext,
     sigShares
   );
