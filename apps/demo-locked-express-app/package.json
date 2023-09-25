@@ -1,0 +1,28 @@
+{
+  "name": "y",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@lit-protocol/lit-node-client-nodejs": "file:../../packages/lit-node-client-nodejs",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.18.2"
+  },
+  "scripts": {
+    "build": "yarn clean && npx tsc && yarn copy-files",
+    "start:local": "node dist/index.js",
+    "start": "npm-run-all build start:local",
+    "clean": "rimraf dist/",
+    "copy-files": "copyfiles **/*.html dist/ && copyfiles -u 3 ../../dist/packages/lit-node-client-vanilla/lit-node-client.js dist/"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.3",
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.3.1",
+    "copyfiles": "^2.4.1",
+    "nodemon": "^2.0.22",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^5.0.1",
+    "typescript": "^5.1.3"
+  }
+}

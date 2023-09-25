@@ -21,9 +21,9 @@ if (!globalThis.LitNodeClientNodeJs) {
 export * from './lib/lit-node-client-nodejs';
 
 export {
-  decryptFile,
-  decryptString,
-  decryptZip,
+  decryptToFile,
+  decryptToString,
+  decryptToZip,
   decryptZipFileWithMetadata,
   decryptFromIpfs,
   encryptFile,

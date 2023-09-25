@@ -36,8 +36,9 @@ export class LitRelay implements IRelay {
    */
   constructor(config: LitRelayConfig) {
     this.relayUrl =
-      config.relayUrl || 'https://relay-server-staging.herokuapp.com';
+      config.relayUrl || 'https://relayer-server-staging-cayenne.getlit.dev';
     this.relayApiKey = config.relayApiKey || '';
+    console.log("Lit's relay server URL:", this.relayUrl);
   }
 
   /**
@@ -167,7 +168,7 @@ export class LitRelay implements IRelay {
    * @returns {Promise<any>} Registration options for the browser to pass to the authenticator
    */
   public async generateRegistrationOptions(username?: string): Promise<any> {
-    let url = `${this.relayUrl}/generate-registration-options`;
+    let url = `${this.relayUrl}/auth/webauthn/generate-registration-options`;
     if (username && username !== '') {
       url = `${url}?username=${encodeURIComponent(username)}`;
     }

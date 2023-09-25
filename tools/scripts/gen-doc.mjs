@@ -16,7 +16,7 @@ import * as liveServer from 'live-server';
 const args = getArgs();
 
 const FLAG = args[0];
-const VERCEL_PROJECT_ID = 'prj_Itr1bdQXxXdn1x8zKOy35HmUxtLR';
+const VERCEL_PROJECT_ID = 'prj_Xq6tl0JfFOmWlCLlMkh0B5rzFHoK';
 const VERCEL_ORG_ID = 'team_BYVnuWp5MA5ra1UCzHa2XsCD';
 
 if (!FLAG) {

@@ -3,7 +3,6 @@ import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
-// import { log } from '@lit-protocol/misc';
 
 /**
  *
@@ -11,7 +10,7 @@ import {
  *
  * @param { string } key
  */
-export const getStorageItem = (key: string): IEither => {
+export const getStorageItem = (key: string): IEither<string> => {
   let item;
   try {
     item = localStorage.getItem(key);
@@ -19,19 +18,15 @@ export const getStorageItem = (key: string): IEither => {
     // swallowing
   }
 
-  let keyOrError: IEither;
-
   if (!item) {
-    keyOrError = ELeft({
+    return ELeft({
       message: `Failed to get ${key} from local storage`,
       errorKind: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.kind,
       errorCode: LIT_ERROR.LOCAL_STORAGE_ITEM_NOT_FOUND_EXCEPTION.name,
     });
-  } else {
-    keyOrError = ERight(item);
   }
 
-  return keyOrError;
+  return ERight(item);
 };
 
 /**
@@ -41,7 +36,7 @@ export const getStorageItem = (key: string): IEither => {
  * @param { string } key is the key to set
  * @param { string } value is the value to set
  */
-export const setStorageItem = (key: string, value: string): IEither => {
+export const setStorageItem = (key: string, value: string): IEither<string> => {
   try {
     localStorage.setItem(key, value);
     return ERight(value);
@@ -60,7 +55,7 @@ export const setStorageItem = (key: string, value: string): IEither => {
  * @param { string } key is the key to remove
  * @returns { IEither } Either the key or an error
  */
-export const removeStorageItem = (key: string): IEither => {
+export const removeStorageItem = (key: string): IEither<string> => {
   try {
     localStorage.removeItem(key);
     return ERight(key);

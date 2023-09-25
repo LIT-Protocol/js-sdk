@@ -21,6 +21,7 @@ import {
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
 import { toString as uint8arrayToString } from 'uint8arrays';
+import { defaultLitnodeClientConfig } from '@lit-protocol/constants';
 
 /**
  * Compresses a given public key.
@@ -94,7 +95,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.setLitAction(prop);
     this.setLitActionJsParams(prop.litActionJsParams || {});
     this.litNodeClient = new LitNodeClient({
-      litNetwork: prop.litNetwork ?? 'serrano',
+      litNetwork: prop.litNetwork ?? 'cayenne',
       ...(prop.bootstrapUrls &&
         prop.litNetwork === 'custom' && { bootstrapUrls: prop.bootstrapUrls }),
       ...(prop.bootstrapUrls &&
@@ -103,7 +104,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       minNodeCount:
         prop.bootstrapUrls && prop.litNetwork == 'custom'
           ? prop.minNodeCount
-          : 6,
+          : defaultLitnodeClientConfig.minNodeCount,
     });
   }
 
@@ -360,14 +361,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           toSign: toSign,
           pubKey: this.uncompressedPubKey,
           authSig: this.controllerAuthSig as AuthSig,
-          authMethods: [],
+          authMethods: []
         });
       } else if (this.controllerSessionSigs) {
         sig = await this.litNodeClient.pkpSign({
           toSign,
           pubKey: this.uncompressedPubKey,
           authMethods: this.controllerAuthMethods ?? [],
-          sessionSigs: this.controllerSessionSigs,
+          sessionSigs: this.controllerSessionSigs
         });
       }
 

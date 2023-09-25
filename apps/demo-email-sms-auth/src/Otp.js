@@ -10,7 +10,7 @@ import {newSessionCapabilityObject, LitAccessControlConditionResource, LitAbilit
 export function Otp() {
     let [state, setState] = useState('start');
     const litNodeClient = new LitNodeClient({
-        litNetwork: "serrano",
+        litNetwork: "cayenne",
         debug: true
     });
     const authClient = new LitAuthClient({

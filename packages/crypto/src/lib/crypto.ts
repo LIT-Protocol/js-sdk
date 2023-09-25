@@ -1,13 +1,8 @@
 // @ts-nocheck
 
-import { wasmBlsSdkHelpers, initWasmBlsSdk } from '@lit-protocol/bls-sdk';
+import * as blsSdk from '@lit-protocol/bls-sdk';
 
-import {
-  LIT_ERROR,
-  SessionKeyPair,
-  SigShare,
-  SYMM_KEY_ALGO_PARAMS,
-} from '@lit-protocol/constants';
+import { LIT_ERROR, SessionKeyPair, SigShare } from '@lit-protocol/constants';
 
 import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
@@ -15,21 +10,22 @@ import { isBrowser, log, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
+  uint8ArrayToBase64,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-// import nacl from 'tweetnacl';
 import { nacl } from '@lit-protocol/nacl';
+import { SIGTYPE } from '@lit-protocol/constants';
+import { CombinedECDSASignature } from '@lit-protocol/types';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
-  initWasmBlsSdk().then((exports) => {
+  blsSdk.initWasmBlsSdk().then((exports) => {
     globalThis.wasmExports = exports;
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [BLS SDK] wasmExports loaded. ${
-          Object.keys(exports).length
+        `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
       );
     }
@@ -37,14 +33,12 @@ if (!globalThis.wasmExports) {
 }
 
 if (!globalThis.wasmECDSA) {
-  let init;
+  let init = wasmECDSA.initWasmEcdsaSdk;
   let env;
 
   if (isBrowser()) {
-    init = wasmECDSA.initWasmEcdsaSdkBrowser;
     env = 'Browser';
   } else {
-    init = wasmECDSA.initWasmEcdsaSdkNodejs;
     env = 'NodeJS';
   }
 
@@ -53,8 +47,7 @@ if (!globalThis.wasmECDSA) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-          Object.keys(wasmECDSA).length
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );
     }
@@ -62,135 +55,117 @@ if (!globalThis.wasmECDSA) {
 }
 /** ---------- Exports ---------- */
 
-/**
- *
- * Generate a new random symmetric key using WebCrypto subtle API.  You should only use this if you're handling your own key generation and management with Lit.  Typically, Lit handles this internally for you.
- *
- * @returns { Promise<CryptoKey> } A promise that resolves to the generated key
- */
-export const generateSymmetricKey = async (): Promise<CryptoKey> => {
-  const symmKey = await crypto.subtle.generateKey(SYMM_KEY_ALGO_PARAMS, true, [
-    'encrypt',
-    'decrypt',
-  ]);
-
-  return symmKey;
-};
+export interface BlsSignatureShare {
+  ProofOfPossession: string;
+}
 
 /**
+ * Encrypt data with a BLS public key.
  *
- * Encrypt a blob with a symmetric key
- *
- * @param { CryptoKey } symmKey The symmetric key
- * @param { BufferSource | Uint8Array } data The blob to encrypt
- *
- * @returns { Promise<Blob> } The encrypted blob
+ * @param publicKey hex-encoded string of the BLS public key to encrypt with
+ * @param data Uint8Array of the data to encrypt
+ * @param identity Uint8Array of the identity parameter used during encryption
+ * @returns base64 encoded string of the ciphertext
  */
-export const encryptWithSymmetricKey = async (
-  symmKey: CryptoKey,
-  data: BufferSource | Uint8Array
-): Promise<Blob> => {
-  // encrypt the zip with symmetric key
-  const iv = crypto.getRandomValues(new Uint8Array(16));
-
-  const encryptedZipData = await crypto.subtle.encrypt(
-    {
-      name: 'AES-CBC',
-      iv,
-    },
-    symmKey,
-    data
+export const encrypt = (
+  publicKey: string,
+  data: Uint8Array,
+  identity: Uint8Array
+): string => {
+  return blsSdk.encrypt(
+    publicKey,
+    uint8arrayToString(data, 'base64'),
+    uint8arrayToString(identity, 'base64')
   );
-
-  const encryptedZipBlob = new Blob([iv, new Uint8Array(encryptedZipData)], {
-    type: 'application/octet-stream',
-  });
-
-  return encryptedZipBlob;
 };
 
 /**
+ * Decrypt ciphertext using BLS signature shares.
  *
- * Import a symmetric key from a Uint8Array to a webcrypto key.  You should only use this if you're handling your own key generation and management with Lit.  Typically, Lit handles this internally for you.
- *
- * @param { Uint8Array } symmKey The symmetric key to import
- *
- * @returns { Promise<CryptoKey> } A promise that resolves to the imported key
+ * @param ciphertext base64-encoded string of the ciphertext to decrypt
+ * @param shares hex-encoded array of the BLS signature shares
+ * @returns Uint8Array of the decrypted data
  */
-export const importSymmetricKey = async (
-  symmKey: SymmetricKey
-): Promise<CryptoKey> => {
-  const importedSymmKey = await crypto.subtle.importKey(
-    'raw',
-    symmKey,
-    SYMM_KEY_ALGO_PARAMS,
-    true,
-    ['encrypt', 'decrypt']
-  );
+export const decryptWithSignatureShares = (
+  ciphertext: string,
+  shares: BlsSignatureShare[]
+): Uint8Array => {
+  // Format the signature shares
+  const sigShares = shares.map((s) => JSON.stringify(s));
 
-  return importedSymmKey;
-};
-
-/**
- *
- * Decrypt an encrypted blob with a symmetric key.  Uses AES-CBC via SubtleCrypto
- *
- * @param { Blob } encryptedBlob The encrypted blob that should be decrypted
- * @param { CryptoKey } symmKey The symmetric key
- *
- * @returns { Uint8Array } The decrypted blob
- */
-export const decryptWithSymmetricKey = async (
-  encryptedBlob: Blob,
-  symmKey: CryptoKey
-): Promise<Uint8Array> => {
-  const recoveredIv = await encryptedBlob.slice(0, 16).arrayBuffer();
-  const encryptedZipArrayBuffer = await encryptedBlob.slice(16).arrayBuffer();
-  const decryptedZip = await crypto.subtle.decrypt(
-    {
-      name: 'AES-CBC',
-      iv: recoveredIv,
-    },
-    symmKey,
-    encryptedZipArrayBuffer
-  );
-
-  return decryptedZip as Uint8Array;
-};
-
-/**
- *
- * Combine BLS Shares
- *
- * @param { Array<SigShare> } sigSharesWithEverything
- * @param { string } networkPubKeySet
- *
- * @returns { any }
- *
- */
-export const combineBlsShares = (
-  sigSharesWithEverything: Array<SigShare>,
-  networkPubKeySet: string
-): any => {
-  const pkSetAsBytes = uint8arrayFromString(networkPubKeySet, 'base16');
-
-  log('pkSetAsBytes', pkSetAsBytes);
-
-  const sigShares = sigSharesWithEverything.map((s: any) => ({
-    shareHex: s.shareHex,
-    shareIndex: s.shareIndex,
-  }));
-
-  const combinedSignatures = wasmBlsSdkHelpers.combine_signatures(
-    pkSetAsBytes,
+  // Decrypt
+  const privateData = blsSdk.decrypt_with_signature_shares(
+    ciphertext,
     sigShares
   );
 
-  const signature = uint8arrayToString(combinedSignatures, 'base16');
+  // Format
+  return uint8arrayFromString(privateData, 'base64');
+};
 
-  log('signature is ', signature);
+/**
+ * Verify and decrypt ciphertext using BLS signature shares.
+ *
+ * @param publicKey hex-encoded string of the BLS public key to verify with
+ * @param identity Uint8Array of the identity parameter used during encryption
+ * @param ciphertext base64-encoded string of the ciphertext to decrypt
+ * @param shares hex-encoded array of the BLS signature shares
+ * @returns base64-encoded string of the decrypted data
+ */
+export const verifyAndDecryptWithSignatureShares = (
+  publicKey: string,
+  identity: Uint8Array,
+  ciphertext: string,
+  shares: BlsSignatureShare[]
+): Uint8Array => {
+  // Format the signature shares
+  const sigShares = shares.map((s) => JSON.stringify(s));
 
-  return { signature };
+  const base64Identity = uint8ArrayToBase64(identity);
+  console.log("XXX base64Identity:", base64Identity);
+
+  // Decrypt
+  const privateData = blsSdk.verify_and_decrypt_with_signature_shares(
+    publicKey,
+    base64Identity,
+    ciphertext,
+    sigShares
+  );
+
+  // Format
+  return uint8arrayFromString(privateData, 'base64');
+};
+
+/**
+ * Combine BLS signature shares.
+ *
+ * @param shares hex-encoded array of the BLS signature shares
+ * @returns hex-encoded string of the combined signature
+ */
+export const combineSignatureShares = (shares: BlsSignatureShare[]): string => {
+  // Format the signature shares
+  const sigShares = shares.map((s) => JSON.stringify(s));
+
+  return blsSdk.combine_signature_shares(sigShares);
+};
+
+/**
+ * Verify the BLS network signature.
+ *
+ * @param publicKey hex-encoded string of the BLS public key to verify with.
+ * @param message Uint8Array of the message to verify.
+ * @param signature Uint8Array of the signature to verify.
+ */
+export const verifySignature = (
+  publicKey: string,
+  message: Uint8Array,
+  signature: Uint8Array
+): void => {
+  blsSdk.verify_signature(
+    publicKey,
+    uint8arrayToString(message, 'base64'),
+    uint8arrayToString(signature, 'base64')
+  );
 };
 
 /**
@@ -202,16 +177,18 @@ export const combineBlsShares = (
  * @returns { any }
  *
  */
-export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
-  log('sigShares:', sigShares);
-
+export const combineEcdsaShares = (
+  sigShares: Array<SigShare>
+): CombinedECDSASignature => {
+  const type = sigShares[0].sigType;
   // the public key can come from any node - it obviously will be identical from each node
   // const publicKey = sigShares[0].publicKey;
   // const dataSigned = '0x' + sigShares[0].dataSigned;
   // filter out empty shares
   const validShares = sigShares.reduce((acc, val) => {
-    if (val.shareHex !== '') {
-      acc.push(val);
+    if (val.signatureShare !== '') {
+      const newVal = _remapKeyShareForEcdsa(val);
+      acc.push(JSON.stringify(newVal));
     }
     return acc;
   }, []);
@@ -227,23 +204,47 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
     });
   }
 
-  // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
-  const R_x = validShares[0].localX;
-  const R_y = validShares[0].localY;
-
-  log('R_x:', R_x);
-  log('R_y:', R_y);
-
-  const shareHexes = validShares.map((s: any) => s.shareHex);
-  log('shareHexes:', shareHexes);
-
-  const shares = JSON.stringify(shareHexes);
-  log('shares is', shares);
-
-  let sig: string = '';
+  let sig: CombinedECDSASignature | undefined;
 
   try {
-    sig = JSON.parse(wasmECDSA.combine_signature(R_x, R_y, shares));
+    let res: string = '';
+    switch (type) {
+      case SIGTYPE.EcdsaCaitSith:
+        res = wasmECDSA.combine_signature(validShares, 2);
+
+        try {
+          sig = JSON.parse(res) as CombinedECDSASignature;
+        } catch (e) {
+          console.log("xx res:", res); // ERROR: Could not deserialize value
+          throw new Error(`Failed to parse signature: ${e}`);
+        }
+
+        /*
+          r and s values of the signature should be maximum of 64 bytes
+          r and s values can have polarity as the first two bits, here we remove 
+        */
+        if (sig.r && sig.r.length > 64) {
+          while (sig.r.length > 64) {
+            sig.r = sig.r.slice(1);
+          }
+        }
+        if (sig.s && sig.s.length > 64) {
+          while (sig.s.length > 64) {
+            sig.s = sig.s.slice(1);
+          }
+        }
+        break;
+      case SIGTYPE.ECDSCAITSITHP256:
+        res = wasmECDSA.combine_signature(validShares, 3);
+        log('response from combine_signature', res);
+        sig = JSON.parse(res);
+        break;
+      // if its another sig type, it shouldnt be resolving to this method
+      default:
+        throw new Error(
+          'Unsupported signature type present in signature shares. Please report this issue'
+        );
+    }
   } catch (e) {
     log('Failed to combine signatures:', e);
   }
@@ -253,53 +254,21 @@ export const combineEcdsaShares = (sigShares: Array<SigShare>): any => {
   return sig;
 };
 
-/**
- * //TODO: Fix 'any' types
- * Combine BLS Decryption Shares
- *
- * @param { Array<any> } decryptionShares
- * @param { string } networkPubKeySet
- * @param { string } toDecrypt
- * @param { any } provider
- *
- * @returns { any }
- *
- */
-export const combineBlsDecryptionShares = (
-  decryptionShares: Array<any>,
-  networkPubKeySet: string,
-  toDecrypt: string
-): any => {
-  // -- sort the decryption shares by share index.  this is important when combining the shares.
-  decryptionShares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
-
-  // set decryption shares bytes in wasm
-  decryptionShares.forEach((s: any, idx: any) => {
-    wasmExports.set_share_indexes(idx, s.shareIndex);
-    const shareAsBytes = uint8arrayFromString(s.decryptionShare, 'base16');
-    for (let i = 0; i < shareAsBytes.length; i++) {
-      wasmExports.set_decryption_shares_byte(i, idx, shareAsBytes[i]);
+export const computeHDPubKey = (
+  pubkeys: string[],
+  keyId: string,
+  sigType: SIGTYPE
+): string => {
+  // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
+  try {
+    switch (sigType) {
+      case SIGTYPE.EcdsaCaitSith:
+        return wasmECDSA.compute_public_key(keyId, pubkeys, 2);
+        defualt: throw new Error('Non supported signature type');
     }
-  });
-
-  // -- set the public key set bytes in wasm
-  const pkSetAsBytes = uint8arrayFromString(networkPubKeySet, 'base16');
-  wasmBlsSdkHelpers.set_mc_bytes(pkSetAsBytes);
-
-  // -- set the ciphertext bytes
-  const ciphertextAsBytes = uint8arrayFromString(toDecrypt, 'base16');
-  for (let i = 0; i < ciphertextAsBytes.length; i++) {
-    wasmExports.set_ct_byte(i, ciphertextAsBytes[i]);
+  } catch (e) {
+    log('Failed to derive public key', e);
   }
-
-  // ========== Result ==========
-  const decrypted = wasmBlsSdkHelpers.combine_decryption_shares(
-    decryptionShares.length,
-    pkSetAsBytes.length,
-    ciphertextAsBytes.length
-  );
-
-  return decrypted;
 };
 
 /**
@@ -317,4 +286,22 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
   };
 
   return sessionKeyPair;
+};
+
+const _remapKeyShareForEcdsa = (share: SigShare): any[] => {
+  const keys = Object.keys(share);
+  let newShare = {};
+  for (const key of keys) {
+    const new_key = key.replace(
+      /[A-Z]/g,
+      (letter) => `_${letter.toLowerCase()}`
+    );
+    newShare = Object.defineProperty(
+      newShare,
+      new_key,
+      Object.getOwnPropertyDescriptor(share, key)
+    );
+  }
+
+  return newShare;
 };

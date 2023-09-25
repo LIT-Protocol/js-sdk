@@ -1,96 +1,98 @@
-import * as litNodeClient from '@lit-protocol/lit-node-client';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
+import * as LitJsSdk from '@lit-protocol/lit-node-client';
 // import { LitContracts } from '@lit-protocol/contracts-sdk';
-// import { ethers } from 'ethers';
+import { ethers } from 'ethers';
+import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
+import { SiweMessage } from 'lit-siwe';
+import { LIT_EVM_CHAINS } from '@lit-protocol/constants';
 
-// // ***********************************************
-// //          Configuration for this test
-// // ***********************************************
-// const TEST_FUNDED_PRIVATE_KEY =
-//   '3dfb4f70b15b6fccc786347aaea445f439a7f10fd10c55dd50cafc3d5a0abac1';
-// const PKP_PUBKEY =
-//   '0x0447972cdf33b1b0329c3ddeea661c023e6b251d8b1aeaa92da881cc6d0d1eff22c2cbd6a5fead8ba860064881cdaabd7176ca2cade0d50829460d729bd13514f3';
-// const CONTROLLER_AUTHSIG = {
-//   sig: '0x694a3ff6e16ab7d7189b7507df9b73ec118d1966abad7f0e3984df19991ddc2d558abca2fcc5b4acfb710d455c63ca2ad538f4d603d64bd93a1f124b119eac031b',
-//   derivedVia: 'web3.eth.personal.sign',
-//   signedMessage:
-//     'demo-encrypt-decrypt-react.vercel.app wants you to sign in with your Ethereum account:\n0x1cD4147AF045AdCADe6eAC4883b9310FD286d95a\n\n\nURI: https://demo-encrypt-decrypt-react.vercel.app/\nVersion: 1\nChain ID: 1\nNonce: MrgYgnIW5yHCTKetV\nIssued At: 2022-12-14T02:29:48.420Z\nExpiration Time: 2022-12-21T02:29:48.401Z',
-//   address: '0x1cd4147af045adcade6eac4883b9310fd286d95a',
-// };
 
-// console.log(
-//   '------------------------------ litNodeClientTest ------------------------------'
-// );
-// // globalThis.crypto = require('crypto').webcrypto;
-// // globalThis.Blob = require('node:buffer').Blob;
 
-// // ==================================
-// //          Business Logic
-// // ==================================
-// const runLogic = async (contract: LitContracts) => {
-//   let mintCost;
-//   let tx;
+// ***********************************************
+//          Configuration for this test
+// ***********************************************
+const TEST_FUNDED_PRIVATE_KEY =
+  process.env.LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY;
 
-//   await contract.connect();
+console.log(
+  '------------------------------ litNodeClientTest ------------------------------'
+);
+// globalThis.crypto = require('crypto').webcrypto;
+// globalThis.Blob = require('node:buffer').Blob;
 
-//   // ------------------------------------------------------
-//   //          only run this if it's a pkp wallet
-//   // ------------------------------------------------------
-//   if ('rpcProvider' in contract.signer) {
-//     console.log("It's a PKP Wallet");
-//     const pkpWallet = await setupPKP();
+// ==================================
+//          Business Logic
+// ==================================
+const runLogic = async (contract: LitContracts) => {
+  let mintCost;
+  let tx;
 
-//     mintCost = await contract.pkpNftContract.read.mintCost();
-//     console.log('mintCost:', mintCost.toString());
+  await contract.connect();
 
-//     tx = await contract.pkpNftContract.write.populateTransaction.mintNext(2, {
-//       value: mintCost,
-//     });
-//     console.log('tx:', tx);
+  // ------------------------------------------------------
+  //          only run this if it's a pkp wallet
+  // ------------------------------------------------------
+  // if ('rpcProvider' in contract.signer) {
+  //   console.log("It's a PKP Wallet");
+  //   const pkpWallet = await setupPKP();
 
-//     const signedTx = await pkpWallet.signTransaction(tx);
-//     console.log('signedTx:', signedTx);
+  //   mintCost = await contract.pkpNftContract.read.mintCost();
+  //   console.log('mintCost:', mintCost.toString());
 
-//     const sentTx = await pkpWallet.sendTransaction(signedTx as any);
-//     console.log('sentTx:', sentTx);
+  //   tx = await contract.pkpNftContract.write.mintNext(2, {
+  //     value: mintCost,
+  //   });
+  //   console.log('tx:', tx);
 
-//     const res = await sentTx.wait();
-//     console.log('res:', res);
-//     return;
-//   }
+  //   const signedTx = await pkpWallet.signTransaction(tx);
+  //   console.log('signedTx:', signedTx);
 
-//   // -------------------------------------------
-//   //          regular minting process
-//   // -------------------------------------------
-//   try {
-//     mintCost = await contract.pkpNftContract.read.mintCost();
-//     console.log('mintCost:', mintCost.toString());
-//   } catch (e) {
-//     console.error('Failed to get mint cost');
-//     console.log(e);
-//   }
-//   try {
-//     tx = await contract.pkpNftContract.write.mintNext(2, {
-//       value: mintCost,
-//     });
-//     console.log('tx:', tx);
+  //   const sentTx = await pkpWallet.sendTransaction(signedTx as any);
+  //   console.log('sentTx:', sentTx);
 
-//     const res = await tx.wait();
-//     console.log('res:', res);
-//   } catch (e: any) {
-//     console.error('Failed to mintNext:', e.message);
-//   }
-//   // wait 1 second
-//   await new Promise((resolve) => setTimeout(resolve, 1000));
-// };
+  //   const res = await sentTx.wait();
+  //   console.log('res:', res);
+  //   return;
+  // }
 
-// // =============================
-// //          PKP Setup
-// // =============================
+  // -------------------------------------------
+  //          regular minting process
+  // -------------------------------------------
+  try {
+    mintCost = await contract.pkpNftContract.read.mintCost();
+    console.log('mintCost:', mintCost.toString());
+  } catch (e) {
+    console.error('Failed to get mint cost');
+    console.log(e);
+  }
+
+  let pkpPubkey;
+  try {
+    tx = await contract.pkpNftContract.write.mintNext(2, {
+      value: mintCost,
+    });
+    console.log('tx:', tx);
+
+    const res = await tx.wait();
+    console.log('res:', res);
+    let pkpMintedEvent = res.events.find(event => event.event === "PKPMinted");
+    console.log('pkpMintedEvent:', pkpMintedEvent);
+    pkpPubkey = pkpMintedEvent.args.pubkey;
+  } catch (e: any) {
+    console.error('Failed to mintNext:', e.message);
+  }
+  // wait 1 second
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  return pkpPubkey;
+};
+
+// =============================
+//          PKP Setup
+// =============================
 // const setupPKP = async () => {
-//   const pkpWallet = new PKPWallet({
+//   const pkpWallet = new PKPEthersWallet({
 //     pkpPubKey: PKP_PUBKEY,
 //     controllerAuthSig: CONTROLLER_AUTHSIG,
-//     provider: 'https://rpc-mumbai.maticvigil.com',
 //   });
 
 //   await pkpWallet.init();
@@ -101,9 +103,9 @@ import * as litNodeClient from '@lit-protocol/lit-node-client';
 //   return pkpSigner;
 // };
 
-// // ===========================================
-// //          random private key test
-// // ===========================================
+// ===========================================
+//          random private key test
+// ===========================================
 // const useRandomPrivateKey = async () => {
 //   console.warn('\n\n1. Testing random private key\n\n\n');
 //   const litContracts = new LitContracts({ randomPrivatekey: true });
@@ -195,7 +197,7 @@ import * as litNodeClient from '@lit-protocol/lit-node-client';
 
 //   const privateKey = TEST_FUNDED_PRIVATE_KEY;
 //   const provider = new ethers.providers.JsonRpcProvider(
-//     'https://matic-mumbai.chainstacklabs.com'
+//     LIT_EVM_CHAINS['chronicleTestnet'].rpcUrls[0]
 //   );
 //   const signer = new ethers.Wallet(privateKey, provider);
 
@@ -203,27 +205,180 @@ import * as litNodeClient from '@lit-protocol/lit-node-client';
 //   await runLogic(litContracts);
 // };
 
-// // =========================================================================
-// //          Enable/Disable the function you want to test manually
-// // =========================================================================
-export const manualTest = async () => {
-  console.log('Manual Test Here!');
-  const client = new litNodeClient.LitNodeClient({
-    litNetwork: 'serrano',
+const pkpSign = async (client, pkpPubkey, authSig) => {
+     // try and sign something
+     let sig = await client.pkpSign({
+      toSign:  ethers.utils.arrayify(ethers.utils.keccak256([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])), // hello world in Uint8Array
+      pubKey: pkpPubkey,
+      authSig,
+    });
+
+    // console.log("sig: ", sig);
+
+    const recoveredPk = ethers.utils.recoverPublicKey("0x" + sig.dataSigned, sig.signature);
+    const addr = ethers.utils.computeAddress('0x' + sig.publicKey);
+    const recoveredAddr = ethers.utils.computeAddress(recoveredPk);
+    const claimedAddr = ethers.utils.computeAddress(pkpPubkey);
+
+    const allGood = addr === recoveredAddr && addr === claimedAddr;
+
+    console.log('all addresses match: ', allGood);
+    return allGood;
+}
+
+const litActionSign = async(client, pkpPubkey, authSig) => {
+    console.log('testing sig with lit actions...');
+    // this code will be run on the node
+    const litActionCode = `
+    const go = async () => {  
+      // this requests a signature share from the Lit Node
+      // the signature share will be automatically returned in the HTTP response from the node
+      // all the params (toSign, publicKey, sigName) are passed in from the LitJsSdk.executeJs() function
+      await Lit.Actions.signEcdsa({ toSign, publicKey , sigName });
+      await Lit.Actions.signEcdsa({ toSign, publicKey , sigName: 'sig2' });
+    };
+
+    go();
+    `;
+
+    const signatures = await client.executeJs({
+      code: litActionCode,
+      authSig,
+      // all jsParams can be used anywhere in your litActionCode
+      jsParams: {
+        // this is the string "Hello World" for testing
+        toSign: ethers.utils.arrayify(ethers.utils.keccak256([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])),
+        publicKey: pkpPubkey,
+        sigName: "sig1",
+      },
+    });
+    // console.log("signatures: ", signatures);
+    const { sig1, sig2 } = signatures.signatures
+    const sigKeys = {
+      sig1: {
+        recovered: ethers.utils.computeAddress(ethers.utils.recoverPublicKey("0x" + sig1.dataSigned, sig1.signature)),
+        reported: ethers.utils.computeAddress('0x' + sig1.publicKey)
+      },
+      sig2: {
+        recovered: ethers.utils.computeAddress(ethers.utils.recoverPublicKey("0x" + sig2.dataSigned, sig2.signature)),
+        reported: ethers.utils.computeAddress('0x' + sig2.publicKey)
+      },
+    }
+
+    // console.log(`sigKeys: ${JSON.stringify(sigKeys, null, 2)}`)
+
+    const pkpAddr = ethers.utils.computeAddress(pkpPubkey);
+    // console.log('pkpAddr:', pkpAddr)
+
+
+    let allGood = sigKeys.sig1.recovered == sigKeys.sig1.reported && sigKeys.sig2.recovered == sigKeys.sig2.reported && sigKeys.sig1.recovered == sigKeys.sig2.recovered && sigKeys.sig1.recovered == pkpAddr;
+    console.log('all addresses match: ', allGood);
+    return allGood;
+  }
+
+const mintPkpAndSign = async () => {
+  let client;
+  if (process.env.LIT_JS_SDK_LOCAL_NODE_DEV === "true") {
+    // use local node
+    client = new LitJsSdk.LitNodeClient({
+      litNetwork: 'custom',
+      "minNodeCount": 2,
+      "bootstrapUrls": [
+        "http://localhost:7470",
+        "http://localhost:7471",
+        "http://localhost:7472",
+      ],
+      debug: true
+    });
+  } else {
+    // use cayenne
+    client = new LitJsSdk.LitNodeClient({
+      litNetwork: 'cayenne',
+      debug: true
+    });
+  }
+
+  await client.connect();
+
+    const litContracts = new LitContracts({
+      privateKey: TEST_FUNDED_PRIVATE_KEY,
+    });
+    const pkpPubkey = await runLogic(litContracts);
+    console.log('pkpPubkey:', pkpPubkey);
+
+    const privateKey = TEST_FUNDED_PRIVATE_KEY;
+    const provider = new ethers.providers.JsonRpcProvider(
+      LIT_EVM_CHAINS['chronicleTestnet'].rpcUrls[0]
+    );
+    const wallet = new ethers.Wallet(privateKey, provider);
+    const authSig = await getAuthSig(wallet);
+
+    console.log('Sleeping for 30 seconds so that the chronicle node replica can sync up');
+    // Sleep for 30 seconds
+    await new Promise(resolve => setTimeout(resolve, 30000));
+
+
+    let startTime = Date.now();
+    let allGood = true;
+    const testCount = 1;
+    for(let i = 0; i < testCount; i++){
+      console.log(`testing ${i + 1} of ${testCount}`);
+      let result = await pkpSign(client, pkpPubkey, authSig);
+      if (!result) {
+        allGood = false;
+      }
+    }
+    console.log(`it took ${(Date.now() - startTime) / 1000}s to run ${testCount} tests`)
+    console.log('all tests were good', allGood);
+    // await litActionSign(client, pkpPubkey, authSig);
+}
+
+const getAuthSig = async (wallet) => {
+  const address = wallet.address;
+
+  // Craft the SIWE message
+  const domain = 'localhost';
+  const origin = 'https://localhost/login';
+  const statement =
+    'This is a test statement.  You can put anything you want here.';
+  const siweMessage = new SiweMessage({
+    domain,
+    address,
+    statement,
+    uri: origin,
+    version: '1',
+    chainId: 1,
+  });
+  const messageToSign = siweMessage.prepareMessage();
+
+  // Sign the message and format the authSig
+  const signature = await wallet.signMessage(messageToSign);
+
+  const authSig = {
+    sig: signature,
+    derivedVia: 'web3.eth.personal.sign',
+    signedMessage: messageToSign,
+    address: address,
+  };
+  return authSig
+}
+
+const testLitActionJsExecution = async () => {
+  const client = new LitJsSdk.LitNodeClient({
+    litNetwork: 'cayenne',
   });
 
   await client.connect();
 
+  // generate a random wallet using ethers
+  let wallet = ethers.Wallet.createRandom();
+  console.log('Wallet Address:', wallet.address);
+  const address = wallet.address;
+  const authSig = await getAuthSig(wallet);
+
   const res = await client.executeJs({
     targetNodeRange: 1,
-    authSig: {
-      sig: '0x721a354498677a1024fb48a78e56c68fd11ad705565933dd9ac770501cecad8811e8591453e21ab50d2579c3d2fe7b0dcbcb1b6436c67e9c6263169c182f50bd1b',
-      derivedVia: 'web3.eth.personal.sign',
-      signedMessage:
-        'demo-encrypt-decrypt-react.vercel.app wants you to sign in with your Ethereum account:\n0xEDA4f4A8AbCecB28bf1663df9257Ec6F188B8107\n\n\nURI: https://demo-encrypt-decrypt-react.vercel.app/\nVersion: 1\nChain ID: 1\nNonce: hwrDnUCFsiR10S2lX\nIssued At: 2023-01-25T14:26:44.497Z\nExpiration Time: 2023-02-01T14:26:44.480Z',
-      address: '0xeda4f4a8abcecb28bf1663df9257ec6f188b8107',
-    },
-
+    authSig,
     jsParams: {},
     code: `(async() => {
               console.log("RUN TEST BABY!");
@@ -232,15 +387,12 @@ export const manualTest = async () => {
   });
 
   console.log('res:', res);
+}
 
-  // const test = await litNodeClient.zipAndEncryptString(
-  //   'this is a secret message'
-  // );
-  // useRandomPrivateKey();
-  // useCustomPrivateKey();
-  // mintWithPKPWallet();
-  // mintWithPKPWalletUtil();
-  // useCustomSigner();
-  // getUtilStuff();
-  // console.log('test:', test);
+// // =========================================================================
+// //          Enable/Disable the function you want to test manually
+// // =========================================================================
+export const manualTest = async () => {
+  console.log('Manual Test Here!');
+  await mintPkpAndSign();
 };
