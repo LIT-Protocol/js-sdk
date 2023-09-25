@@ -17,6 +17,19 @@ const eventsEmitter = new events.EventEmitter();
 
 const rl = readline.createInterface(process.stdin, process.stdout);
 
+export const success = (message) => {
+  return {
+    status: 200,
+    message,
+  };
+};
+
+export const fail = (message) => {
+  return {
+    status: 500,
+    message,
+  };
+};
 /**
  * replaceAutogen - Replaces the content between the specified start and end delimiters
  * with new content.
@@ -47,6 +60,20 @@ export const replaceAutogen = ({
 
   return newStr;
 };
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+export function replaceContent(options) {
+  const { startsWith, endsWith, newContent } = options;
+  const pattern = new RegExp(
+    `${escapeRegExp(startsWith)}[\\s\\S]*?${escapeRegExp(endsWith)}`,
+    'g'
+  );
+  const replacement = `${startsWith}\n${newContent}\n${endsWith}`;
+  return (input) => input.replace(pattern, replacement);
+}
 
 // read the file and return as json
 export async function readJsonFile(filename) {
@@ -522,8 +549,6 @@ export function it(testDescription, testFunction) {
 
 // Expect function
 export function expect(value) {
-  console.log('value:', value);
-
   return {
     toBe(expectedValue) {
       if (value !== expectedValue) {
@@ -585,6 +610,58 @@ export const log = Object.assign(
     },
   }
 );
+/**
+ * testThis - Runs a test and logs the result
+ * 
+ * This test relies on the `success` and `fail` functions to either return
+ * 200 or 500 status code. If neither is returned, the test it not correctly implemented.
+ * 
+ * It DOES not process.exit() on failure, this event is handled by the caller, in this case
+ * in the test runner script at ./e2e-nodejs/index.mjs
+ * 
+ * if (errorCounter > 0) {
+    console.log(`❌ ${errorCounter} test(s) failed`);
+    process.exit(1);
+  }
+  process.exit(0);
+ * 
+* This ensures that all tests are run and the user is notified of all failures, and could be integrated
+* with a CI/CD pipeline.
+ * @param {*} test 
+ * @returns 
+ */
+export const testThis = async (test) => {
+  // calculate the time it takes to run the test
+  const start = Date.now();
+
+  const { status, message } = await test.fn();
+
+  let errorIsThrown = false;
+
+  try {
+    const end = Date.now();
+
+    const time = end - start;
+
+    if (status === 200) {
+      log.green(`\t${message} (${time}ms)`);
+      return true;
+    } else {
+      const _errorMsg = `\t(FAILED 200) ${message} (${time}ms) | ${test.name}`;
+      errorIsThrown = true;
+      log.red(_errorMsg);
+      throw new Error(_errorMsg);
+    }
+  } catch (e) {
+    if (!errorIsThrown) {
+      const end = Date.now();
+      const time = end - start;
+      const _errorMsg = `\t(FAILED 500) ${message} (${time}ms) | ${test.name}`;
+      log.red(_errorMsg);
+      throw new Error(_errorMsg);
+    }
+  }
+};
 
 export const testThese = async (tests) => {
   console.log(`Running ${tests.length} tests...\n`);
@@ -702,7 +779,9 @@ export function getPubKeyBuffer(pubKey) {
 
 export async function signAuthMessage(
   privateKey,
-  statement = 'TESTING TESTING 123'
+  statement = 'TESTING TESTING 123',
+  domain = 'localhost',
+  origin = 'https://localhost/login'
 ) {
   const wallet = new ethers.Wallet(privateKey);
 
@@ -710,9 +789,6 @@ export async function signAuthMessage(
   const expirationTime = new Date(
     Date.now() + 1000 * 60 * 60 * 24 * 7
   ).toISOString();
-
-  const domain = 'localhost';
-  const origin = 'https://localhost/login';
 
   const siweMessage = new siwe.SiweMessage({
     domain,
@@ -753,4 +829,16 @@ export function getFlagValue(flag) {
     return process.argv[index + 1];
   }
   return null;
+}
+
+export function formatNxLikeLine(path, number) {
+  const bold = '\x1b[1m';
+  const regular = '\x1b[22m';
+  const orangeBg = '\x1b[48;5;208m';
+  const black = '\x1b[30m';
+  const orange = '\x1b[38;5;208m';
+  const reset = '\x1b[0m';
+
+  const formattedLine = `${orange} >  ${bold}${orangeBg} LIT ${reset}   ${orange}Running target ${bold}${path} ${regular}for ${number} file(s) ${reset}\n`;
+  return formattedLine;
 }

@@ -1,5 +1,8 @@
+// 20230925170654
+// https://raw.githubusercontent.com/LIT-Protocol/js-sdk/feat/sdk-v3/packages/contracts-sdk/src/abis/LITToken.sol/LITToken.json
+
 {
-  "date": "2023-09-12T02:27:59.000Z",
+  "date": "2023-09-15T22:20:44.000Z",
   "address": "0x53695556f8a1a064EdFf91767f15652BbfaFaD04",
   "contractName": "LITToken",
   "abi": [
@@ -176,12 +179,16 @@
         }
       ],
       "name": "burnFrom",
-      "outputs": [],
+      "outputs": [
+        
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
-      "inputs": [],
+      "inputs": [
+        
+      ],
       "name": "decimals",
       "outputs": [
         {
@@ -194,14 +201,20 @@
       "type": "function"
     },
     {
-      "inputs": [],
+      "inputs": [
+        
+      ],
       "name": "deposit",
-      "outputs": [],
+      "outputs": [
+        
+      ],
       "stateMutability": "payable",
       "type": "function"
     },
     {
-      "inputs": [],
+      "inputs": [
+        
+      ],
       "name": "name",
       "outputs": [
         {
@@ -214,7 +227,9 @@
       "type": "function"
     },
     {
-      "inputs": [],
+      "inputs": [
+        
+      ],
       "name": "symbol",
       "outputs": [
         {
@@ -227,7 +242,9 @@
       "type": "function"
     },
     {
-      "inputs": [],
+      "inputs": [
+        
+      ],
       "name": "totalSupply",
       "outputs": [
         {
@@ -301,7 +318,9 @@
         }
       ],
       "name": "withdraw",
-      "outputs": [],
+      "outputs": [
+        
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     },

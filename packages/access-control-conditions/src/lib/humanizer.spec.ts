@@ -1,26 +1,3 @@
-import { TextEncoder, TextDecoder } from 'util';
-global.TextEncoder = TextEncoder;
-// @ts-ignore
-global.TextDecoder = TextDecoder;
-
-import crypto, { createHash } from 'crypto';
-Object.defineProperty(global.self, 'crypto', {
-  value: {
-    getRandomValues: (arr: any) => crypto.randomBytes(arr.length),
-    subtle: {
-      digest: (algorithm: string, data: Uint8Array) => {
-        return new Promise((resolve, reject) =>
-          resolve(
-            createHash(algorithm.toLowerCase().replace('-', ''))
-              .update(data)
-              .digest()
-          )
-        );
-      },
-    },
-  },
-});
-
 import * as humanizer from './humanizer';
 import { humanizeAccessControlConditions } from './humanizer';
 import {

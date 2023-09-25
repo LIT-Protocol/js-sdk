@@ -1,10 +1,4 @@
-// @ts-nocheck
-import { TextEncoder, TextDecoder } from 'util';
-global.TextEncoder = TextEncoder;
-// @ts-ignore
-global.TextDecoder = TextDecoder;
-
-import { ConditionItem } from '@lit-protocol/constants';
+import { ConditionItem } from '@lit-protocol/types';
 import {
   canonicalUnifiedAccessControlConditionFormatter,
   canonicalSolRpcConditionFormatter,
@@ -13,11 +7,6 @@ import {
   canonicalCosmosConditionFormatter,
   canonicalResourceIdFormatter,
 } from './canonicalFormatter';
-
-// import {
-// hashUnifiedAccessControlConditions,
-// TEST: hashUnifiedAccessControlConditions
-// } from './access_control_conditions/hashing'
 
 // ---------- Test Cases ----------
 describe('canonicalFormatter.ts', () => {

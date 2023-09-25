@@ -26,12 +26,17 @@ fs.writeFileSync(
   'lit.config.json',
   JSON.stringify(
     {
+      TEST_ENV: {
+        litNetwork: 'cayenne',
+        debug: false,
+        minNodeCount: 2,
+      },
       test: {
         sendRealTxThatCostsMoney: false,
       },
       MNEUMONIC:
         'island arrow object divide umbrella snap essay seminar top develop oyster success',
-      COSMOS_RPC: 'https://rpc.cosmoshub.strange.love',
+      COSMOS_RPC: 'https://cosmos-rpc.publicnode.com',
       CHRONICLE_RPC: 'https://chain-rpc.litprotocol.com/http',
       CHRONICLE_RPC_2: 'https://lit-protocol.calderachain.xyz/http',
       RECIPIENT: 'cosmos1jyz3m6gxuwceq63e44fqpgyw2504ux85ta8vma',

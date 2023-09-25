@@ -330,6 +330,7 @@ async function testFunc() {
                   react: run tests on react app on port 4003
                   html: run tests on html app on port 4002
                   run-react-and-test: run the react app and run e2e tests on it
+                  run-html-and-test: run the html app and run e2e tests on it
       `,
         true
       );
@@ -356,6 +357,16 @@ async function testFunc() {
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       spawnListener('yarn tools --test --e2e react');
+    }
+
+    if (ENV === 'run-html-and-test') {
+      // spawnListener('yarn tools --dev --apps');
+      spawnListener('yarn nx run html:serve');
+
+      // wait 3 seconds for the apps to start
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      spawnListener('yarn tools --test --e2e html');
     }
   }
 
@@ -528,12 +539,11 @@ async function buildFunc() {
         //   onDone: async () => {
         //     console.log("Done!");
         //     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
-            exit();
+        exit();
         //   }
         // })
       },
     });
-
   }
 }
 
@@ -1372,6 +1382,9 @@ async function validateDependencyVersions() {
     }
   );
 
+  const packageTotal = packageList.length;
+  let packagePasses = 0;
+
   await asyncForEach(packageList, async (pkg, i) => {
     const packageJson = await readJsonFile(pkg);
     const pkgVersion = packageJson.version;
@@ -1402,9 +1415,29 @@ async function validateDependencyVersions() {
       greenLog(
         `✅ ${i + 1} ${pkg} contains all dependencies with matching versions.`
       );
+      packagePasses++;
     }
   });
 
+  // log that to make sure the builds works, make sure we have tested it
+  if (packagePasses >= packageTotal) {
+    greenLog(
+      `
+    ❗️ Before publishing, make sure you have tested the build!
+      - yarn test:unit     | run unit tests
+      - yarn test:e2e      | run e2e tests on browser
+      - yarn test:e2e:node | run e2e tests on nodejs
+      `,
+      true
+    );
+
+    console.log(`
+    Note: for e2e nodejs test, you can use the following options:
+    -------------------------------------------------------------
+    --filter flag to filter tests (eg. yarn test:e2e:node --filter=1-sig)
+    --group flag to test a specific group (yarn test:e2e:node --group=lit-actions)
+    `);
+  }
   process.exit(0);
 }
 
