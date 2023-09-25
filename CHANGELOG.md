@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+# [3.0.0] - 2023-09-25
+
+- [https://github.com/LIT-Protocol/js-sdk/pull/199](https://github.com/LIT-Protocol/js-sdk/pull/199)
+
 # [2.2.39] - 2023-07-06
 
 - [a0d88bc](https://github.com/LIT-Protocol/js-sdk/pull/167) Add [Backpack wallet 🎒](https://www.backpack.app/) support
