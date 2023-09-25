@@ -610,7 +610,26 @@ export const log = Object.assign(
     },
   }
 );
-
+/**
+ * testThis - Runs a test and logs the result
+ * 
+ * This test relies on the `success` and `fail` functions to either return
+ * 200 or 500 status code. If neither is returned, the test it not correctly implemented.
+ * 
+ * It DOES not process.exit() on failure, this event is handled by the caller, in this case
+ * in the test runner script at ./e2e-nodejs/index.mjs
+ * 
+ * if (errorCounter > 0) {
+    console.log(`❌ ${errorCounter} test(s) failed`);
+    process.exit(1);
+  }
+  process.exit(0);
+ * 
+* This ensures that all tests are run and the user is notified of all failures, and could be integrated
+* with a CI/CD pipeline.
+ * @param {*} test 
+ * @returns 
+ */
 export const testThis = async (test) => {
   // calculate the time it takes to run the test
   const start = Date.now();
@@ -760,7 +779,9 @@ export function getPubKeyBuffer(pubKey) {
 
 export async function signAuthMessage(
   privateKey,
-  statement = 'TESTING TESTING 123'
+  statement = 'TESTING TESTING 123',
+  domain = 'localhost',
+  origin = 'https://localhost/login'
 ) {
   const wallet = new ethers.Wallet(privateKey);
 
@@ -768,9 +789,6 @@ export async function signAuthMessage(
   const expirationTime = new Date(
     Date.now() + 1000 * 60 * 60 * 24 * 7
   ).toISOString();
-
-  const domain = 'localhost';
-  const origin = 'https://localhost/login';
 
   const siweMessage = new siwe.SiweMessage({
     domain,
