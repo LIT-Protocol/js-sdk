@@ -1,7 +1,7 @@
 import * as bitcoinjs from 'bitcoinjs-lib';
 import { Contract, ethers } from 'ethers';
 import { computeAddress } from 'ethers/lib/utils';
-import { pkpNft } from '../abis/PKPNFT.data';
+import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 
@@ -16,7 +16,7 @@ export type TokenInfo = {
   isNewPKP: boolean;
 };
 
-export const addresses = async ({
+export const derivedAddresses = async ({
   publicKey,
   pkpTokenId,
   pkpContractAddress,
@@ -42,7 +42,7 @@ export const addresses = async ({
 
   // if pkp contract address is not provided, use the default one 0xF5cB699652cED3781Dd75575EDBe075d6212DF98
   if (!pkpContractAddress) {
-    pkpContractAddress = pkpNft.address;
+    pkpContractAddress = PKPNFTData.address;
   }
 
   // if default RPC url is not provided, use the default one https://endpoints.omniatech.io/v1/matic/mumbai/public

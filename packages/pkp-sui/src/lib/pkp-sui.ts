@@ -58,7 +58,7 @@ export class PKPSuiWallet extends PKPBase implements Signer {
 
     const digest = blake2b(data, { dkLen: 32 });
     const msgHash = sha256(digest);
-    const signature = await this.runLitAction(msgHash, this.defaultSigName);
+    const signature = await this.runSign(msgHash);
     const numToNByteStr = (num: bigint): string =>
       bytesToHex(numberToBytesBE(num, secp256k1.CURVE.nByteLength));
 

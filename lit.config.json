@@ -1,9 +1,16 @@
 {
+  "TEST_ENV": {
+    "litNetwork": "cayenne",
+    "debug": false,
+    "minNodeCount": 2
+  },
+  "PKP_SUI_ADDRESS": "0x04b264694e280dcf036014819c3edd4f8ad8a91068b0bc2d886118404a567251",
   "test": {
     "sendRealTxThatCostsMoney": false
   },
+  "HEX_TEST_MEMO": "0x4a532d53444b2054657374",
   "MNEUMONIC": "island arrow object divide umbrella snap essay seminar top develop oyster success",
-  "COSMOS_RPC": "https://rpc.cosmoshub.strange.love",
+  "COSMOS_RPC": "https://cosmos-rpc.publicnode.com/",
   "CHRONICLE_RPC": "https://chain-rpc.litprotocol.com/http",
   "CHRONICLE_RPC_2": "https://lit-protocol.calderachain.xyz/http",
   "RECIPIENT": "cosmos1jyz3m6gxuwceq63e44fqpgyw2504ux85ta8vma",
@@ -11,28 +18,27 @@
   "AMOUNT": 1,
   "DEFAULT_GAS": 0.025,
   "AUTH_METHOD_ACCESS_TOKEN": "<your access token here>",
-  "HEX_TEST_MEMO": "0x4a532d53444b2054657374",
   "CONTROLLER_PRIVATE_KEY": "f21d3fafe29fa10d26092ce4e91cd7108b734b98393f79b3c2cd04de24ca6817",
   "CONTROLLER_ADDRESS": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37",
-  "PKP_TOKENID": "4817247653356976697974290636295717432755904941615400157762061752316489997932",
-  "PKP_PUBKEY": "040926f545f13245d3ceb36fe00bb1ebbc3e3cebb4c4c737e5bde68fce8e9056b2df598dad99ad55de46689f383ef07cd07077fb6d29261fec14ad990cabce50f6",
-  "PKP_ETH_ADDRESS": "0xaD690823D1E5ed90cBaAC551dAa610F498AbAfC3",
-  "PKP_COSMOS_ADDRESS": "cosmos1jys64cc7ethk7eycarexkgmckjk6x0vawrk0dn",
+  "PKP_TOKENID": "98902215852648560607609722987817679306765841841919707057202869083470160450479",
+  "PKP_PUBKEY": "04c0933386083884efa083bd33847ac89160136d3ec71fe9dd15ce0749bc9b3fc52300fdce7abac2206a2cfc37dd74eac452717bb137f21257acdb600d89012df5",
+  "PKP_ETH_ADDRESS": "0xE36d8Cff454c2FCB91B8e1c139a9e840cC452d30",
+  "PKP_COSMOS_ADDRESS": "cosmos1dwywes9e9p08plnf8dv59vp2v0m2t8t72ssswd",
   "CONTROLLER_AUTHSIG": {
-    "sig": "0xf84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b",
+    "sig": "0x41a807f60e7d52739f0b0357590b30f51d1fc1d5864bc3130ccc85b546dbb6ed2fbe0701401cb1a3cdf0622d01f82473f10ddbd129ca95bc40cf5621fbbd6e211c",
     "derivedVia": "web3.eth.personal.sign",
-    "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nTESTING TESTING 123\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: lB8fEJ0f1lRIhXcEl\nIssued At: 2023-09-13T15:11:37.387Z\nExpiration Time: 2023-09-20T15:11:37.387Z",
+    "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nTESTING TESTING 123\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: RxFK00n6sd64OrkPx\nIssued At: 2023-09-19T16:13:43.961Z\nExpiration Time: 2023-09-26T16:13:43.961Z",
     "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37"
   },
   "CONTROLLER_ADDRESS_2": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37",
-  "PKP_TOKENID_2": "89667777952586633309603568722064635097225550400851111260038665193968462222244",
-  "PKP_PUBKEY_2": "0443ca6128c4e38b2f3c57bf6acb2d9cc09700d10761188926eddf48a4efb4fa4cdd288c773ae7978f07b57c77fd37da3a1718483441b4b5cb1705fc4b6f75f53b",
-  "PKP_ETH_ADDRESS_2": "0xA5d8d25A4eDf2e6392F8435b82354929Ffd45407",
-  "PKP_COSMOS_ADDRESS_2": "cosmos1r2uwzl75jvaafn9jg5yjds39f8wgd8rmtjtz2l",
+  "PKP_TOKENID_2": "105193744264415124014002537552975621758306612627943052801020682778039613949579",
+  "PKP_PUBKEY_2": "04ab53e588e6ed58eb84b9f9a6e95085a7631b652ac95af4b34fc2e53b5b596a604177c47d666dadfac18dbfd21ebbf4f2fe30de03785a3e5e395477e7f9221a5d",
+  "PKP_ETH_ADDRESS_2": "0xaf70f341742927338068276F1B8fb77694C2855B",
+  "PKP_COSMOS_ADDRESS_2": "cosmos1rgt4x43w9n4fwp7th2vlp3xdq7l2sklujgcvhz",
   "CONTROLLER_AUTHSIG_2": {
-    "sig": "0xcbccc0a5cd0ce70453041af59e69a291996bc6ecab17a59a7c015fc619d9c3a04dc529232a1e46eac571610d2db5e101e688ce62debd21b0d7ebac91c747bc131c",
+    "sig": "0x1c64009017681ca6c5789fdd81484172085d2c9c75236cdd9d0d6ee819bb5dec59c9927b0a1046c8a994f345bc5969bdb1e479d3d972774a31726313c08208d71c",
     "derivedVia": "web3.eth.personal.sign",
-    "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nTESTING TESTING 123\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: QpsgqataXyKS1qGxk\nIssued At: 2023-09-13T15:11:44.041Z\nExpiration Time: 2023-09-20T15:11:44.041Z",
+    "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nTESTING TESTING 123\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: eJ4vTmRUshtppqBRd\nIssued At: 2023-09-19T16:13:54.717Z\nExpiration Time: 2023-09-26T16:13:54.717Z",
     "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37"
   }
 }
