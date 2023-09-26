@@ -1,5 +1,5 @@
 export const LITTokenData = {
-  "date": "2023-09-15T22:20:44.000Z",
+  "date": "2023-09-26T11:50:18.000Z",
   "address": "0x53695556f8a1a064EdFf91767f15652BbfaFaD04",
   "contractName": "LITToken",
   "abi": [

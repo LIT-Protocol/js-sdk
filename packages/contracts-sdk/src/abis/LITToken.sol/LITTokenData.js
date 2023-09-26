@@ -1,5 +1,5 @@
 export const LITTokenData = {
-  "date": "2023-09-15T22:20:44.000Z",
+  "date": "2023-09-26T11:50:18.000Z",
   "address": "0x53695556f8a1a064EdFf91767f15652BbfaFaD04",
   "contractName": "LITToken",
   "abi": [
@@ -67,12 +67,6 @@ export const LITTokenData = {
           "internalType": "uint256",
           "name": "wad",
           "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "bytes32",
-          "name": "derivedKeyId",
-          "type": "bytes32"
         }
       ],
       "name": "Transfer",
@@ -88,18 +82,6 @@ export const LITTokenData = {
           "type": "address"
         },
         {
-          "components": [
-            {
-              "internalType": "bytes",
-              "name": "pubkey",
-              "type": "bytes"
-            },
-            {
-              "internalType": "uint256",
-              "name": "keyType",
-              "type": "uint256"
-            }
-          ],
           "indexed": false,
           "internalType": "uint256",
           "name": "wad",
@@ -116,35 +98,8 @@ export const LITTokenData = {
     {
       "inputs": [
         {
-          "components": [
-            {
-              "internalType": "bytes32",
-              "name": "r",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "s",
-              "type": "bytes32"
-            },
-            {
-              "internalType": "uint8",
-              "name": "v",
-              "type": "uint8"
-            }
-          ],
-          "internalType": "struct IPubkeyRouter.Signature[]",
-          "name": "signatures",
-          "type": "tuple[]"
-        },
-        {
-          "internalType": "bytes",
-          "name": "signedMessage",
-          "type": "bytes"
-        },
-        {
           "internalType": "address",
-          "name": "stakingContractAddress",
+          "name": "",
           "type": "address"
         },
         {
@@ -156,22 +111,9 @@ export const LITTokenData = {
       "name": "allowance",
       "outputs": [
         {
-          "internalType": "bool",
+          "internalType": "uint256",
           "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "contractResolver",
-      "outputs": [
-        {
-          "internalType": "contract ContractResolver",
-          "name": "",
-          "type": "address"
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -184,14 +126,6 @@ export const LITTokenData = {
           "name": "guy",
           "type": "address"
         },
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "ethAddressToPkpId",
-      "outputs": [
         {
           "internalType": "uint256",
           "name": "wad",
@@ -302,14 +236,6 @@ export const LITTokenData = {
           "type": "uint256"
         }
       ],
-      "name": "isRouted",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
       "stateMutability": "view",
       "type": "function"
     },
@@ -324,11 +250,6 @@ export const LITTokenData = {
           "internalType": "uint256",
           "name": "wad",
           "type": "uint256"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "derivedKeyId",
-          "type": "bytes32"
         }
       ],
       "name": "transfer",
@@ -377,24 +298,6 @@ export const LITTokenData = {
           "internalType": "uint256",
           "name": "wad",
           "type": "uint256"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "derivedKeyId",
-          "type": "bytes32"
-        }
-      ],
-      "name": "setRoutingDataAsAdmin",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes4",
-          "name": "interfaceId",
-          "type": "bytes4"
         }
       ],
       "name": "withdraw",
