@@ -210,10 +210,13 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
-              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
-              } of ${this.config.minNodeCount
-              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${
+              this.config.connectTimeout
+            }ms.  Could only connect to ${
+              Object.keys(this.serverKeys).length
+            } of ${
+              this.config.minNodeCount
+            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             log(msg);
             reject(msg);
           }
@@ -312,7 +315,13 @@ export class LitCore {
         return data;
       })
       .catch((error: NodeErrorV3) => {
-        console.error(`Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${(error?.message || error?.details) ? `Error is ${error.message} - ${error.details}` : ''}`);
+        console.error(
+          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
+            error?.message || error?.details
+              ? `Error is ${error.message} - ${error.details}`
+              : ''
+          }`
+        );
         return Promise.reject(error);
       });
   };
@@ -612,13 +621,25 @@ export class LitCore {
    * | Discord OAuth | user id | client app identifier |
    * | Stytch OTP |token `sub` | token `aud`|
    * | Lit Actions | user defined | ipfs cid |
+   * *Note* Lit Action claiming uses a different schema than oter auth methods
+   * isForActionContext should be set for true if using claiming through actions
    * @param userId {string} user identifier for the Key Identifier
    * @param appId {string} app identifier for the Key Identifier
    * @returns {String} public key of pkp when claimed
    */
-  computeHDKeyId(userId: string, appId: string): string {
-    return ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(`${userId}:${appId}`)
-    );
+  computeHDKeyId(
+    userId: string,
+    appId: string,
+    isForActionContext: boolean = false
+  ): string {
+    if (!isForActionContext) {
+      return ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(`${userId}:${appId}`)
+      );
+    } else {
+      return ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(`${appId}:${userId}`)
+      );
+    }
   }
 }
