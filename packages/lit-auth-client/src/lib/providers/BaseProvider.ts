@@ -210,7 +210,6 @@ export abstract class BaseProvider {
    * | Google OAuth | token `sub` | token `aud` |
    * | Discord OAuth | user id | client app identifier |
    * | Stytch OTP |token `sub` | token `aud`|
-   * | Lit Actions | user defined | ipfs cid |
    * @param userId
    * @param appId
    * @returns
@@ -218,7 +217,8 @@ export abstract class BaseProvider {
   computPublicKeyFromAuthMethod = async (
     authMethod: AuthMethod
   ): Promise<String> => {
-    const authMethodId = await this.getAuthMethodId(authMethod);
+    let authMethodId = await this.getAuthMethodId(authMethod);
+    authMethodId = authMethodId.slice(2);
     if (!this.litNodeClient) {
       throw new Error('Lit Node Client is configured');
     }
