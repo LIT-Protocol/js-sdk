@@ -53,7 +53,6 @@ export class StytchOtpProvider extends BaseProvider {
       }
 
       const parsedToken: StytchToken = this._parseJWT(accessToken);
-      console.log(`otpProvider: parsed token body`, parsedToken);
       const audience = (parsedToken['aud'] as string[])[0];
       if (audience != this._params.appId) {
         reject(new Error('Parsed application id does not match parameters'));
@@ -68,14 +67,15 @@ export class StytchOtpProvider extends BaseProvider {
       }
       const session = parsedToken[this._provider];
       const authFactor = session['authentication_factors'][0];
+
       if (!authFactor) {
         reject(new Error('Could not find authentication info in session'));
       }
 
-      if (userId != parsedToken['sub']) {
+      if (userId && userId != parsedToken['sub']) {
         reject(
           new Error(
-            'AppId does not match token contents. is this the right token for your application?'
+            'UserId does not match token contents. is this the right token for your application?'
           )
         );
       }
