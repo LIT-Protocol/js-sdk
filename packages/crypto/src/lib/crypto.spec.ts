@@ -67,8 +67,9 @@ describe('encryptWithSymmetricKey', () => {
     symmetricKey = await generateSymmetricKey();
   });
 
-  testData.forEach((data, index) => {
+  testData.forEach(async (data, index) => {
     it(`should encrypt data (test case ${index + 1})`, async () => {
+      const { Blob } = await import("node:buffer");
       const encryptedBlob = await encryptWithSymmetricKey(symmetricKey, data);
 
       expect(encryptedBlob).toBeDefined();

@@ -11,7 +11,7 @@ import {
 
 import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
-import { isBrowser, log, throwError } from '@lit-protocol/misc';
+import { isBrowser, isNode, log, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
@@ -101,12 +101,20 @@ export const encryptWithSymmetricKey = async (
     symmKey,
     data
   );
-
-  const encryptedZipBlob = new Blob([iv, new Uint8Array(encryptedZipData)], {
-    type: 'application/octet-stream',
-  });
-
-  return encryptedZipBlob;
+  if (isNode()) {
+    let { Blob } = await import("node:buffer");
+    const encryptedZipBlob = new Blob([iv, new Uint8Array(encryptedZipData)], {
+      type: 'application/octet-stream',
+    });
+  
+    return encryptedZipBlob; 
+  } else {
+    const encryptedZipBlob = new Blob([iv, new Uint8Array(encryptedZipData)], {
+      type: 'application/octet-stream',
+    });
+  
+    return encryptedZipBlob;
+  }
 };
 
 /**
