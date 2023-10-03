@@ -61,17 +61,7 @@ if (!globalThis.wasmECDSA) {
   });
 }
 
-if (isNode()) {
-  try {
-    let { Blob } = import('node:buffer').then((module) => {
-      globalThis.Blob = module.Blob;
-    });
-  } catch (e) {
-    log(
-      'Warn: could not resolve Blob from node api set, perhaps polyfil a Blob implementation of your choice'
-    );
-  }
-}
+
 /** ---------- Exports ---------- */
 
 /**
@@ -113,8 +103,7 @@ export const encryptWithSymmetricKey = async (
     symmKey,
     data
   );
-
-  let { Blob } = await import('node:buffer');
+  
   const encryptedZipBlob = new Blob([iv, new Uint8Array(encryptedZipData)], {
     type: 'application/octet-stream',
   });

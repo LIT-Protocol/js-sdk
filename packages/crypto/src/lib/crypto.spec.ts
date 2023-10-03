@@ -64,6 +64,17 @@ describe('encryptWithSymmetricKey', () => {
   let symmetricKey: CryptoKey;
 
   beforeAll(async () => {
+      try {
+        //@ts-ignore
+        import('node:buffer').then((module) => {
+          //@ts-ignore
+          globalThis.Blob = module.Blob;
+        });
+      } catch (e) {
+        console.log(
+          'Warn: could not resolve Blob from node api set, perhaps polyfil a Blob implementation of your choice'
+        );
+      }
     symmetricKey = await generateSymmetricKey();
   });
 
