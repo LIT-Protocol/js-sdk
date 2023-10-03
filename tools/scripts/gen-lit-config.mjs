@@ -8,6 +8,7 @@ import {
 } from './utils.mjs';
 
 import { getPKPNFTContract } from './lit-contracts/PKPNFT.sol/index.mjs';
+import { PKPSuiWallet } from '@lit-protocol/pkp-sui';
 
 // ----- Default values
 const defaultPrivateKey =
@@ -51,6 +52,7 @@ fs.writeFileSync(
       PKP_PUBKEY: PKP1.PKP_PUBKEY,
       PKP_ETH_ADDRESS: PKP1.PKP_ETH_ADDRESS,
       PKP_COSMOS_ADDRESS: PKP1.PKP_COSMOS_ADDRESS,
+      PKP_SUI_ADDRESS: PKP1.PKP_SUI_ADDRESS,
       CONTROLLER_AUTHSIG: PKP1.CONTROLLER_AUTHSIG,
 
       CONTROLLER_ADDRESS_2: PKP2.CONTROLLER_ADDRESS,
@@ -58,12 +60,15 @@ fs.writeFileSync(
       PKP_PUBKEY_2: PKP2.PKP_PUBKEY,
       PKP_ETH_ADDRESS_2: PKP2.PKP_ETH_ADDRESS,
       PKP_COSMOS_ADDRESS_2: PKP2.PKP_COSMOS_ADDRESS,
+      PKP_SUI_ADDRESS_2: PKP2.PKP_SUI_ADDRESS,
       CONTROLLER_AUTHSIG_2: PKP2.CONTROLLER_AUTHSIG,
     },
     null,
     2
   )
 );
+
+process.exit(0);
 
 // Get a new PKP
 async function getNewPKP(privateKey) {
@@ -112,6 +117,14 @@ async function getNewPKP(privateKey) {
   const PKP_COSMOS_ADDRESS = getCosmosAddress(pubKeyBuffer);
   console.log('✅ PKP_COSMOS_ADDRESS:', PKP_COSMOS_ADDRESS);
 
+  const suiWallet = new PKPSuiWallet({
+    pkpPubKey: PKP_PUBKEY,
+  });
+
+  const PKP_SUI_ADDRESS = await suiWallet.getAddress();
+
+  console.log('✅ PKP_SUI_ADDRESS:', PKP_SUI_ADDRESS);
+
   if (PKP_PUBKEY.startsWith('0x')) {
     PKP_PUBKEY = PKP_PUBKEY.slice(2);
   }
@@ -123,5 +136,6 @@ async function getNewPKP(privateKey) {
     PKP_PUBKEY,
     PKP_ETH_ADDRESS,
     PKP_COSMOS_ADDRESS,
+    PKP_SUI_ADDRESS,
   };
 }

@@ -27,6 +27,32 @@ import type {
   OnEvent,
 } from "./common";
 
+export declare namespace IDiamond {
+  export type FacetCutStruct = {
+    facetAddress: string;
+    action: BigNumberish;
+    functionSelectors: BytesLike[];
+  };
+
+  export type FacetCutStructOutput = [string, number, string[]] & {
+    facetAddress: string;
+    action: number;
+    functionSelectors: string[];
+  };
+}
+
+export declare namespace IDiamondLoupe {
+  export type FacetStruct = {
+    facetAddress: string;
+    functionSelectors: BytesLike[];
+  };
+
+  export type FacetStructOutput = [string, string[]] & {
+    facetAddress: string;
+    functionSelectors: string[];
+  };
+}
+
 export declare namespace IPubkeyRouter {
   export type SignatureStruct = { r: BytesLike; s: BytesLike; v: BigNumberish };
 
@@ -39,12 +65,17 @@ export declare namespace IPubkeyRouter {
 
 export interface PKPNFTInterface extends utils.Interface {
   functions: {
+    "diamondCut((address,uint8,bytes4[])[],address,bytes)": FunctionFragment;
+    "facetAddress(bytes4)": FunctionFragment;
+    "facetAddresses()": FunctionFragment;
+    "facetFunctionSelectors(address)": FunctionFragment;
+    "facets()": FunctionFragment;
+    "owner()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "burn(uint256)": FunctionFragment;
     "claimAndMint(uint256,bytes32,(bytes32,bytes32,uint8)[])": FunctionFragment;
-    "contractResolver()": FunctionFragment;
-    "env()": FunctionFragment;
     "exists(uint256)": FunctionFragment;
     "freeMintSigner()": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
@@ -55,16 +86,15 @@ export interface PKPNFTInterface extends utils.Interface {
     "getPubkey(uint256)": FunctionFragment;
     "getRouterAddress()": FunctionFragment;
     "getStakingAddress()": FunctionFragment;
+    "initialize()": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "mintCost()": FunctionFragment;
     "mintGrantAndBurnNext(uint256,bytes)": FunctionFragment;
     "mintNext(uint256)": FunctionFragment;
     "name()": FunctionFragment;
-    "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
     "prefixed(bytes32)": FunctionFragment;
     "redeemedFreeMintIds(uint256)": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
@@ -78,18 +108,22 @@ export interface PKPNFTInterface extends utils.Interface {
     "tokenURI(uint256)": FunctionFragment;
     "totalSupply()": FunctionFragment;
     "transferFrom(address,address,uint256)": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
     "withdraw()": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "diamondCut"
+      | "facetAddress"
+      | "facetAddresses"
+      | "facetFunctionSelectors"
+      | "facets"
+      | "owner"
+      | "transferOwnership"
       | "approve"
       | "balanceOf"
       | "burn"
       | "claimAndMint"
-      | "contractResolver"
-      | "env"
       | "exists"
       | "freeMintSigner"
       | "getApproved"
@@ -100,16 +134,15 @@ export interface PKPNFTInterface extends utils.Interface {
       | "getPubkey"
       | "getRouterAddress"
       | "getStakingAddress"
+      | "initialize"
       | "isApprovedForAll"
       | "mintCost"
       | "mintGrantAndBurnNext"
       | "mintNext"
       | "name"
-      | "owner"
       | "ownerOf"
       | "prefixed"
       | "redeemedFreeMintIds"
-      | "renounceOwnership"
       | "safeTransferFrom(address,address,uint256)"
       | "safeTransferFrom(address,address,uint256,bytes)"
       | "setApprovalForAll"
@@ -123,10 +156,31 @@ export interface PKPNFTInterface extends utils.Interface {
       | "tokenURI"
       | "totalSupply"
       | "transferFrom"
-      | "transferOwnership"
       | "withdraw"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "diamondCut",
+    values: [IDiamond.FacetCutStruct[], string, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddress",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddresses",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetFunctionSelectors",
+    values: [string]
+  ): string;
+  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [string]
+  ): string;
   encodeFunctionData(
     functionFragment: "approve",
     values: [string, BigNumberish]
@@ -137,11 +191,6 @@ export interface PKPNFTInterface extends utils.Interface {
     functionFragment: "claimAndMint",
     values: [BigNumberish, BytesLike, IPubkeyRouter.SignatureStruct[]]
   ): string;
-  encodeFunctionData(
-    functionFragment: "contractResolver",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "env", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "exists",
     values: [BigNumberish]
@@ -183,6 +232,10 @@ export interface PKPNFTInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "initialize",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "isApprovedForAll",
     values: [string, string]
   ): string;
@@ -196,7 +249,6 @@ export interface PKPNFTInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "ownerOf",
     values: [BigNumberish]
@@ -205,10 +257,6 @@ export interface PKPNFTInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "redeemedFreeMintIds",
     values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "renounceOwnership",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "safeTransferFrom(address,address,uint256)",
@@ -259,12 +307,27 @@ export interface PKPNFTInterface extends utils.Interface {
     functionFragment: "transferFrom",
     values: [string, string, BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "transferOwnership",
-    values: [string]
-  ): string;
   encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
 
+  decodeFunctionResult(functionFragment: "diamondCut", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "facetAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetAddresses",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetFunctionSelectors",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
@@ -272,11 +335,6 @@ export interface PKPNFTInterface extends utils.Interface {
     functionFragment: "claimAndMint",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "contractResolver",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "env", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "exists", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "freeMintSigner",
@@ -311,6 +369,7 @@ export interface PKPNFTInterface extends utils.Interface {
     functionFragment: "getStakingAddress",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isApprovedForAll",
     data: BytesLike
@@ -322,15 +381,10 @@ export interface PKPNFTInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "mintNext", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "prefixed", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "redeemedFreeMintIds",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -379,34 +433,58 @@ export interface PKPNFTInterface extends utils.Interface {
     functionFragment: "transferFrom",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "ContractResolverAddressSet(address)": EventFragment;
     "FreeMintSignerSet(address)": EventFragment;
+    "Initialized(uint8)": EventFragment;
     "MintCostSet(uint256)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
     "PKPMinted(uint256,bytes)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
     "Withdrew(uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ContractResolverAddressSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "FreeMintSignerSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MintCostSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "PKPMinted"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdrew"): EventFragment;
 }
+
+export interface DiamondCutEventObject {
+  _diamondCut: IDiamond.FacetCutStructOutput[];
+  _init: string;
+  _calldata: string;
+}
+export type DiamondCutEvent = TypedEvent<
+  [IDiamond.FacetCutStructOutput[], string, string],
+  DiamondCutEventObject
+>;
+
+export type DiamondCutEventFilter = TypedEventFilter<DiamondCutEvent>;
+
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface ApprovalEventObject {
   owner: string;
@@ -454,24 +532,19 @@ export type FreeMintSignerSetEvent = TypedEvent<
 export type FreeMintSignerSetEventFilter =
   TypedEventFilter<FreeMintSignerSetEvent>;
 
+export interface InitializedEventObject {
+  version: number;
+}
+export type InitializedEvent = TypedEvent<[number], InitializedEventObject>;
+
+export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
+
 export interface MintCostSetEventObject {
   newMintCost: BigNumber;
 }
 export type MintCostSetEvent = TypedEvent<[BigNumber], MintCostSetEventObject>;
 
 export type MintCostSetEventFilter = TypedEventFilter<MintCostSetEvent>;
-
-export interface OwnershipTransferredEventObject {
-  previousOwner: string;
-  newOwner: string;
-}
-export type OwnershipTransferredEvent = TypedEvent<
-  [string, string],
-  OwnershipTransferredEventObject
->;
-
-export type OwnershipTransferredEventFilter =
-  TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface PKPMintedEventObject {
   tokenId: BigNumber;
@@ -530,6 +603,42 @@ export interface PKPNFT extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[string] & { facetAddress_: string }>;
+
+    facetAddresses(
+      overrides?: CallOverrides
+    ): Promise<[string[]] & { facetAddresses_: string[] }>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<[string[]] & { _facetFunctionSelectors: string[] }>;
+
+    facets(
+      overrides?: CallOverrides
+    ): Promise<
+      [IDiamondLoupe.FacetStructOutput[]] & {
+        facets_: IDiamondLoupe.FacetStructOutput[];
+      }
+    >;
+
+    owner(overrides?: CallOverrides): Promise<[string] & { owner_: string }>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -549,10 +658,6 @@ export interface PKPNFT extends BaseContract {
       signatures: IPubkeyRouter.SignatureStruct[],
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
-
-    contractResolver(overrides?: CallOverrides): Promise<[string]>;
-
-    env(overrides?: CallOverrides): Promise<[number]>;
 
     exists(
       tokenId: BigNumberish,
@@ -586,6 +691,10 @@ export interface PKPNFT extends BaseContract {
 
     getStakingAddress(overrides?: CallOverrides): Promise<[string]>;
 
+    initialize(
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     isApprovedForAll(
       owner: string,
       operator: string,
@@ -607,8 +716,6 @@ export interface PKPNFT extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<[string]>;
 
-    owner(overrides?: CallOverrides): Promise<[string]>;
-
     ownerOf(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -617,13 +724,9 @@ export interface PKPNFT extends BaseContract {
     prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<[string]>;
 
     redeemedFreeMintIds(
-      arg0: BigNumberish,
+      tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
 
     "safeTransferFrom(address,address,uint256)"(
       from: string,
@@ -693,15 +796,38 @@ export interface PKPNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
     withdraw(
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
   };
+
+  diamondCut(
+    _diamondCut: IDiamond.FacetCutStruct[],
+    _init: string,
+    _calldata: BytesLike,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  facetAddress(
+    _functionSelector: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+  facetFunctionSelectors(
+    _facet: string,
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
+  facets(overrides?: CallOverrides): Promise<IDiamondLoupe.FacetStructOutput[]>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  transferOwnership(
+    _newOwner: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
   approve(
     to: string,
@@ -722,10 +848,6 @@ export interface PKPNFT extends BaseContract {
     signatures: IPubkeyRouter.SignatureStruct[],
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
-
-  contractResolver(overrides?: CallOverrides): Promise<string>;
-
-  env(overrides?: CallOverrides): Promise<number>;
 
   exists(tokenId: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
@@ -753,6 +875,10 @@ export interface PKPNFT extends BaseContract {
 
   getStakingAddress(overrides?: CallOverrides): Promise<string>;
 
+  initialize(
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
   isApprovedForAll(
     owner: string,
     operator: string,
@@ -774,20 +900,14 @@ export interface PKPNFT extends BaseContract {
 
   name(overrides?: CallOverrides): Promise<string>;
 
-  owner(overrides?: CallOverrides): Promise<string>;
-
   ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
   prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<string>;
 
   redeemedFreeMintIds(
-    arg0: BigNumberish,
+    tokenId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<boolean>;
-
-  renounceOwnership(
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
 
   "safeTransferFrom(address,address,uint256)"(
     from: string,
@@ -854,16 +974,41 @@ export interface PKPNFT extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  transferOwnership(
-    newOwner: string,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
   withdraw(
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    facets(
+      overrides?: CallOverrides
+    ): Promise<IDiamondLoupe.FacetStructOutput[]>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -880,10 +1025,6 @@ export interface PKPNFT extends BaseContract {
       signatures: IPubkeyRouter.SignatureStruct[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    contractResolver(overrides?: CallOverrides): Promise<string>;
-
-    env(overrides?: CallOverrides): Promise<number>;
 
     exists(tokenId: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
@@ -914,6 +1055,8 @@ export interface PKPNFT extends BaseContract {
 
     getStakingAddress(overrides?: CallOverrides): Promise<string>;
 
+    initialize(overrides?: CallOverrides): Promise<void>;
+
     isApprovedForAll(
       owner: string,
       operator: string,
@@ -935,18 +1078,14 @@ export interface PKPNFT extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<string>;
 
-    owner(overrides?: CallOverrides): Promise<string>;
-
     ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<string>;
 
     redeemedFreeMintIds(
-      arg0: BigNumberish,
+      tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<boolean>;
-
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
     "safeTransferFrom(address,address,uint256)"(
       from: string,
@@ -1013,15 +1152,30 @@ export interface PKPNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    transferOwnership(
-      newOwner: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     withdraw(overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)"(
+      _diamondCut?: null,
+      _init?: null,
+      _calldata?: null
+    ): DiamondCutEventFilter;
+    DiamondCut(
+      _diamondCut?: null,
+      _init?: null,
+      _calldata?: null
+    ): DiamondCutEventFilter;
+
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+
     "Approval(address,address,uint256)"(
       owner?: string | null,
       approved?: string | null,
@@ -1058,17 +1212,11 @@ export interface PKPNFT extends BaseContract {
       newFreeMintSigner?: string | null
     ): FreeMintSignerSetEventFilter;
 
+    "Initialized(uint8)"(version?: null): InitializedEventFilter;
+    Initialized(version?: null): InitializedEventFilter;
+
     "MintCostSet(uint256)"(newMintCost?: null): MintCostSetEventFilter;
     MintCostSet(newMintCost?: null): MintCostSetEventFilter;
-
-    "OwnershipTransferred(address,address)"(
-      previousOwner?: string | null,
-      newOwner?: string | null
-    ): OwnershipTransferredEventFilter;
-    OwnershipTransferred(
-      previousOwner?: string | null,
-      newOwner?: string | null
-    ): OwnershipTransferredEventFilter;
 
     "PKPMinted(uint256,bytes)"(
       tokenId?: BigNumberish | null,
@@ -1095,6 +1243,34 @@ export interface PKPNFT extends BaseContract {
   };
 
   estimateGas: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<BigNumber>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facets(overrides?: CallOverrides): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -1114,10 +1290,6 @@ export interface PKPNFT extends BaseContract {
       signatures: IPubkeyRouter.SignatureStruct[],
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
-
-    contractResolver(overrides?: CallOverrides): Promise<BigNumber>;
-
-    env(overrides?: CallOverrides): Promise<BigNumber>;
 
     exists(
       tokenId: BigNumberish,
@@ -1151,6 +1323,8 @@ export interface PKPNFT extends BaseContract {
 
     getStakingAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
+    initialize(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
+
     isApprovedForAll(
       owner: string,
       operator: string,
@@ -1172,8 +1346,6 @@ export interface PKPNFT extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
-
     ownerOf(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -1182,12 +1354,8 @@ export interface PKPNFT extends BaseContract {
     prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
     redeemedFreeMintIds(
-      arg0: BigNumberish,
+      tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "safeTransferFrom(address,address,uint256)"(
@@ -1258,15 +1426,38 @@ export interface PKPNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
     withdraw(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facets(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -1289,10 +1480,6 @@ export interface PKPNFT extends BaseContract {
       signatures: IPubkeyRouter.SignatureStruct[],
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
-
-    contractResolver(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    env(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     exists(
       tokenId: BigNumberish,
@@ -1332,6 +1519,10 @@ export interface PKPNFT extends BaseContract {
 
     getStakingAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    initialize(
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
     isApprovedForAll(
       owner: string,
       operator: string,
@@ -1353,8 +1544,6 @@ export interface PKPNFT extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     ownerOf(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -1366,12 +1555,8 @@ export interface PKPNFT extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     redeemedFreeMintIds(
-      arg0: BigNumberish,
+      tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "safeTransferFrom(address,address,uint256)"(
@@ -1439,11 +1624,6 @@ export interface PKPNFT extends BaseContract {
       from: string,
       to: string,
       tokenId: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    transferOwnership(
-      newOwner: string,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

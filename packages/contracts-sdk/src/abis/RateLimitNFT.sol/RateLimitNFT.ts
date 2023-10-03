@@ -27,8 +27,53 @@ import type {
   OnEvent,
 } from "./common";
 
+export declare namespace IDiamond {
+  export type FacetCutStruct = {
+    facetAddress: string;
+    action: BigNumberish;
+    functionSelectors: BytesLike[];
+  };
+
+  export type FacetCutStructOutput = [string, number, string[]] & {
+    facetAddress: string;
+    action: number;
+    functionSelectors: string[];
+  };
+}
+
+export declare namespace IDiamondLoupe {
+  export type FacetStruct = {
+    facetAddress: string;
+    functionSelectors: BytesLike[];
+  };
+
+  export type FacetStructOutput = [string, string[]] & {
+    facetAddress: string;
+    functionSelectors: string[];
+  };
+}
+
+export declare namespace LibRateLimitNFTStorage {
+  export type RateLimitStruct = {
+    requestsPerKilosecond: BigNumberish;
+    expiresAt: BigNumberish;
+  };
+
+  export type RateLimitStructOutput = [BigNumber, BigNumber] & {
+    requestsPerKilosecond: BigNumber;
+    expiresAt: BigNumber;
+  };
+}
+
 export interface RateLimitNFTInterface extends utils.Interface {
   functions: {
+    "diamondCut((address,uint8,bytes4[])[],address,bytes)": FunctionFragment;
+    "facetAddress(bytes4)": FunctionFragment;
+    "facetAddresses()": FunctionFragment;
+    "facetFunctionSelectors(address)": FunctionFragment;
+    "facets()": FunctionFragment;
+    "owner()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
     "RLIHolderRateLimitWindowSeconds()": FunctionFragment;
     "additionalRequestsPerKilosecondCost()": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
@@ -43,15 +88,14 @@ export interface RateLimitNFTInterface extends utils.Interface {
     "freeMintSigner()": FunctionFragment;
     "freeRequestsPerRateLimitWindow()": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
+    "initialize()": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "isExpired(uint256)": FunctionFragment;
     "mint(uint256)": FunctionFragment;
     "name()": FunctionFragment;
-    "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
     "prefixed(bytes32)": FunctionFragment;
     "redeemedFreeMints(bytes32)": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
     "setAdditionalRequestsPerKilosecondCost(uint256)": FunctionFragment;
@@ -68,12 +112,18 @@ export interface RateLimitNFTInterface extends utils.Interface {
     "tokenURI(uint256)": FunctionFragment;
     "totalSupply()": FunctionFragment;
     "transferFrom(address,address,uint256)": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
     "withdraw()": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "diamondCut"
+      | "facetAddress"
+      | "facetAddresses"
+      | "facetFunctionSelectors"
+      | "facets"
+      | "owner"
+      | "transferOwnership"
       | "RLIHolderRateLimitWindowSeconds"
       | "additionalRequestsPerKilosecondCost"
       | "approve"
@@ -88,15 +138,14 @@ export interface RateLimitNFTInterface extends utils.Interface {
       | "freeMintSigner"
       | "freeRequestsPerRateLimitWindow"
       | "getApproved"
+      | "initialize"
       | "isApprovedForAll"
       | "isExpired"
       | "mint"
       | "name"
-      | "owner"
       | "ownerOf"
       | "prefixed"
       | "redeemedFreeMints"
-      | "renounceOwnership"
       | "safeTransferFrom(address,address,uint256)"
       | "safeTransferFrom(address,address,uint256,bytes)"
       | "setAdditionalRequestsPerKilosecondCost"
@@ -113,10 +162,31 @@ export interface RateLimitNFTInterface extends utils.Interface {
       | "tokenURI"
       | "totalSupply"
       | "transferFrom"
-      | "transferOwnership"
       | "withdraw"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "diamondCut",
+    values: [IDiamond.FacetCutStruct[], string, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddress",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddresses",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetFunctionSelectors",
+    values: [string]
+  ): string;
+  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [string]
+  ): string;
   encodeFunctionData(
     functionFragment: "RLIHolderRateLimitWindowSeconds",
     values?: undefined
@@ -182,6 +252,10 @@ export interface RateLimitNFTInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "initialize",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "isApprovedForAll",
     values: [string, string]
   ): string;
@@ -191,7 +265,6 @@ export interface RateLimitNFTInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "mint", values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "ownerOf",
     values: [BigNumberish]
@@ -200,10 +273,6 @@ export interface RateLimitNFTInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "redeemedFreeMints",
     values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "renounceOwnership",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "safeTransferFrom(address,address,uint256)",
@@ -266,12 +335,27 @@ export interface RateLimitNFTInterface extends utils.Interface {
     functionFragment: "transferFrom",
     values: [string, string, BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "transferOwnership",
-    values: [string]
-  ): string;
   encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
 
+  decodeFunctionResult(functionFragment: "diamondCut", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "facetAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetAddresses",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetFunctionSelectors",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "RLIHolderRateLimitWindowSeconds",
     data: BytesLike
@@ -313,6 +397,7 @@ export interface RateLimitNFTInterface extends utils.Interface {
     functionFragment: "getApproved",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isApprovedForAll",
     data: BytesLike
@@ -320,15 +405,10 @@ export interface RateLimitNFTInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "isExpired", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "prefixed", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "redeemedFreeMints",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -389,25 +469,25 @@ export interface RateLimitNFTInterface extends utils.Interface {
     functionFragment: "transferFrom",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
     "AdditionalRequestsPerKilosecondCostSet(uint256)": EventFragment;
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "FreeMintSignerSet(address)": EventFragment;
     "FreeRequestsPerRateLimitWindowSet(uint256)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
+    "Initialized(uint8)": EventFragment;
     "RLIHolderRateLimitWindowSecondsSet(uint256)": EventFragment;
     "RateLimitWindowSecondsSet(uint256)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
     "Withdrew(uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "AdditionalRequestsPerKilosecondCostSet"
   ): EventFragment;
@@ -417,7 +497,7 @@ export interface RateLimitNFTInterface extends utils.Interface {
   getEvent(
     nameOrSignatureOrTopic: "FreeRequestsPerRateLimitWindowSet"
   ): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "RLIHolderRateLimitWindowSecondsSet"
   ): EventFragment;
@@ -425,6 +505,30 @@ export interface RateLimitNFTInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdrew"): EventFragment;
 }
+
+export interface DiamondCutEventObject {
+  _diamondCut: IDiamond.FacetCutStructOutput[];
+  _init: string;
+  _calldata: string;
+}
+export type DiamondCutEvent = TypedEvent<
+  [IDiamond.FacetCutStructOutput[], string, string],
+  DiamondCutEventObject
+>;
+
+export type DiamondCutEventFilter = TypedEventFilter<DiamondCutEvent>;
+
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface AdditionalRequestsPerKilosecondCostSetEventObject {
   newAdditionalRequestsPerKilosecondCost: BigNumber;
@@ -483,17 +587,12 @@ export type FreeRequestsPerRateLimitWindowSetEvent = TypedEvent<
 export type FreeRequestsPerRateLimitWindowSetEventFilter =
   TypedEventFilter<FreeRequestsPerRateLimitWindowSetEvent>;
 
-export interface OwnershipTransferredEventObject {
-  previousOwner: string;
-  newOwner: string;
+export interface InitializedEventObject {
+  version: number;
 }
-export type OwnershipTransferredEvent = TypedEvent<
-  [string, string],
-  OwnershipTransferredEventObject
->;
+export type InitializedEvent = TypedEvent<[number], InitializedEventObject>;
 
-export type OwnershipTransferredEventFilter =
-  TypedEventFilter<OwnershipTransferredEvent>;
+export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
 
 export interface RLIHolderRateLimitWindowSecondsSetEventObject {
   newRLIHolderRateLimitWindowSeconds: BigNumber;
@@ -563,6 +662,42 @@ export interface RateLimitNFT extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[string] & { facetAddress_: string }>;
+
+    facetAddresses(
+      overrides?: CallOverrides
+    ): Promise<[string[]] & { facetAddresses_: string[] }>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<[string[]] & { _facetFunctionSelectors: string[] }>;
+
+    facets(
+      overrides?: CallOverrides
+    ): Promise<
+      [IDiamondLoupe.FacetStructOutput[]] & {
+        facets_: IDiamondLoupe.FacetStructOutput[];
+      }
+    >;
+
+    owner(overrides?: CallOverrides): Promise<[string] & { owner_: string }>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     RLIHolderRateLimitWindowSeconds(
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
@@ -597,14 +732,9 @@ export interface RateLimitNFT extends BaseContract {
     ): Promise<[BigNumber]>;
 
     capacity(
-      arg0: BigNumberish,
+      tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber] & {
-        requestsPerKilosecond: BigNumber;
-        expiresAt: BigNumber;
-      }
-    >;
+    ): Promise<[LibRateLimitNFTStorage.RateLimitStructOutput]>;
 
     defaultRateLimitWindowSeconds(
       overrides?: CallOverrides
@@ -616,7 +746,7 @@ export interface RateLimitNFT extends BaseContract {
       msgHash: BytesLike,
       v: BigNumberish,
       r: BytesLike,
-      s: BytesLike,
+      sVal: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -626,7 +756,7 @@ export interface RateLimitNFT extends BaseContract {
       msgHash: BytesLike,
       v: BigNumberish,
       r: BytesLike,
-      s: BytesLike,
+      sVal: BytesLike,
       overrides?: CallOverrides
     ): Promise<[void]>;
 
@@ -640,6 +770,10 @@ export interface RateLimitNFT extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string]>;
+
+    initialize(
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
     isApprovedForAll(
       owner: string,
@@ -659,8 +793,6 @@ export interface RateLimitNFT extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<[string]>;
 
-    owner(overrides?: CallOverrides): Promise<[string]>;
-
     ownerOf(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -669,13 +801,9 @@ export interface RateLimitNFT extends BaseContract {
     prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<[string]>;
 
     redeemedFreeMints(
-      arg0: BytesLike,
+      msgHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
 
     "safeTransferFrom(address,address,uint256)"(
       from: string,
@@ -757,15 +885,38 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
     withdraw(
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
   };
+
+  diamondCut(
+    _diamondCut: IDiamond.FacetCutStruct[],
+    _init: string,
+    _calldata: BytesLike,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  facetAddress(
+    _functionSelector: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+  facetFunctionSelectors(
+    _facet: string,
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
+  facets(overrides?: CallOverrides): Promise<IDiamondLoupe.FacetStructOutput[]>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  transferOwnership(
+    _newOwner: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
   RLIHolderRateLimitWindowSeconds(
     overrides?: CallOverrides
@@ -801,14 +952,9 @@ export interface RateLimitNFT extends BaseContract {
   ): Promise<BigNumber>;
 
   capacity(
-    arg0: BigNumberish,
+    tokenId: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, BigNumber] & {
-      requestsPerKilosecond: BigNumber;
-      expiresAt: BigNumber;
-    }
-  >;
+  ): Promise<LibRateLimitNFTStorage.RateLimitStructOutput>;
 
   defaultRateLimitWindowSeconds(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -818,7 +964,7 @@ export interface RateLimitNFT extends BaseContract {
     msgHash: BytesLike,
     v: BigNumberish,
     r: BytesLike,
-    s: BytesLike,
+    sVal: BytesLike,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -828,7 +974,7 @@ export interface RateLimitNFT extends BaseContract {
     msgHash: BytesLike,
     v: BigNumberish,
     r: BytesLike,
-    s: BytesLike,
+    sVal: BytesLike,
     overrides?: CallOverrides
   ): Promise<void>;
 
@@ -840,6 +986,10 @@ export interface RateLimitNFT extends BaseContract {
     tokenId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
+
+  initialize(
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
   isApprovedForAll(
     owner: string,
@@ -856,20 +1006,14 @@ export interface RateLimitNFT extends BaseContract {
 
   name(overrides?: CallOverrides): Promise<string>;
 
-  owner(overrides?: CallOverrides): Promise<string>;
-
   ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
   prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<string>;
 
   redeemedFreeMints(
-    arg0: BytesLike,
+    msgHash: BytesLike,
     overrides?: CallOverrides
   ): Promise<boolean>;
-
-  renounceOwnership(
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
 
   "safeTransferFrom(address,address,uint256)"(
     from: string,
@@ -948,16 +1092,41 @@ export interface RateLimitNFT extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  transferOwnership(
-    newOwner: string,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
   withdraw(
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    facets(
+      overrides?: CallOverrides
+    ): Promise<IDiamondLoupe.FacetStructOutput[]>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     RLIHolderRateLimitWindowSeconds(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -989,14 +1158,9 @@ export interface RateLimitNFT extends BaseContract {
     ): Promise<BigNumber>;
 
     capacity(
-      arg0: BigNumberish,
+      tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber] & {
-        requestsPerKilosecond: BigNumber;
-        expiresAt: BigNumber;
-      }
-    >;
+    ): Promise<LibRateLimitNFTStorage.RateLimitStructOutput>;
 
     defaultRateLimitWindowSeconds(
       overrides?: CallOverrides
@@ -1008,7 +1172,7 @@ export interface RateLimitNFT extends BaseContract {
       msgHash: BytesLike,
       v: BigNumberish,
       r: BytesLike,
-      s: BytesLike,
+      sVal: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1018,7 +1182,7 @@ export interface RateLimitNFT extends BaseContract {
       msgHash: BytesLike,
       v: BigNumberish,
       r: BytesLike,
-      s: BytesLike,
+      sVal: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1032,6 +1196,8 @@ export interface RateLimitNFT extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    initialize(overrides?: CallOverrides): Promise<void>;
 
     isApprovedForAll(
       owner: string,
@@ -1051,18 +1217,14 @@ export interface RateLimitNFT extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<string>;
 
-    owner(overrides?: CallOverrides): Promise<string>;
-
     ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<string>;
 
     redeemedFreeMints(
-      arg0: BytesLike,
+      msgHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<boolean>;
-
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
     "safeTransferFrom(address,address,uint256)"(
       from: string,
@@ -1141,15 +1303,30 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    transferOwnership(
-      newOwner: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     withdraw(overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)"(
+      _diamondCut?: null,
+      _init?: null,
+      _calldata?: null
+    ): DiamondCutEventFilter;
+    DiamondCut(
+      _diamondCut?: null,
+      _init?: null,
+      _calldata?: null
+    ): DiamondCutEventFilter;
+
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+
     "AdditionalRequestsPerKilosecondCostSet(uint256)"(
       newAdditionalRequestsPerKilosecondCost?: null
     ): AdditionalRequestsPerKilosecondCostSetEventFilter;
@@ -1193,14 +1370,8 @@ export interface RateLimitNFT extends BaseContract {
       newFreeRequestsPerRateLimitWindow?: null
     ): FreeRequestsPerRateLimitWindowSetEventFilter;
 
-    "OwnershipTransferred(address,address)"(
-      previousOwner?: string | null,
-      newOwner?: string | null
-    ): OwnershipTransferredEventFilter;
-    OwnershipTransferred(
-      previousOwner?: string | null,
-      newOwner?: string | null
-    ): OwnershipTransferredEventFilter;
+    "Initialized(uint8)"(version?: null): InitializedEventFilter;
+    Initialized(version?: null): InitializedEventFilter;
 
     "RLIHolderRateLimitWindowSecondsSet(uint256)"(
       newRLIHolderRateLimitWindowSeconds?: null
@@ -1232,6 +1403,34 @@ export interface RateLimitNFT extends BaseContract {
   };
 
   estimateGas: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<BigNumber>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facets(overrides?: CallOverrides): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
     RLIHolderRateLimitWindowSeconds(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1265,7 +1464,10 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    capacity(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    capacity(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     defaultRateLimitWindowSeconds(
       overrides?: CallOverrides
@@ -1277,7 +1479,7 @@ export interface RateLimitNFT extends BaseContract {
       msgHash: BytesLike,
       v: BigNumberish,
       r: BytesLike,
-      s: BytesLike,
+      sVal: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1287,7 +1489,7 @@ export interface RateLimitNFT extends BaseContract {
       msgHash: BytesLike,
       v: BigNumberish,
       r: BytesLike,
-      s: BytesLike,
+      sVal: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1301,6 +1503,8 @@ export interface RateLimitNFT extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    initialize(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
 
     isApprovedForAll(
       owner: string,
@@ -1320,8 +1524,6 @@ export interface RateLimitNFT extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
-
     ownerOf(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -1330,12 +1532,8 @@ export interface RateLimitNFT extends BaseContract {
     prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
     redeemedFreeMints(
-      arg0: BytesLike,
+      msgHash: BytesLike,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
     "safeTransferFrom(address,address,uint256)"(
@@ -1418,15 +1616,38 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
     withdraw(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facets(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
     RLIHolderRateLimitWindowSeconds(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1464,7 +1685,7 @@ export interface RateLimitNFT extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     capacity(
-      arg0: BigNumberish,
+      tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1478,7 +1699,7 @@ export interface RateLimitNFT extends BaseContract {
       msgHash: BytesLike,
       v: BigNumberish,
       r: BytesLike,
-      s: BytesLike,
+      sVal: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -1488,7 +1709,7 @@ export interface RateLimitNFT extends BaseContract {
       msgHash: BytesLike,
       v: BigNumberish,
       r: BytesLike,
-      s: BytesLike,
+      sVal: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1501,6 +1722,10 @@ export interface RateLimitNFT extends BaseContract {
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    initialize(
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     isApprovedForAll(
@@ -1521,8 +1746,6 @@ export interface RateLimitNFT extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     ownerOf(
       tokenId: BigNumberish,
       overrides?: CallOverrides
@@ -1534,12 +1757,8 @@ export interface RateLimitNFT extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     redeemedFreeMints(
-      arg0: BytesLike,
+      msgHash: BytesLike,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     "safeTransferFrom(address,address,uint256)"(
@@ -1619,11 +1838,6 @@ export interface RateLimitNFT extends BaseContract {
       from: string,
       to: string,
       tokenId: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    transferOwnership(
-      newOwner: string,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

@@ -26,7 +26,89 @@ import type {
   OnEvent,
 } from "./common";
 
-export declare namespace Staking {
+export declare namespace IDiamond {
+  export type FacetCutStruct = {
+    facetAddress: string;
+    action: BigNumberish;
+    functionSelectors: BytesLike[];
+  };
+
+  export type FacetCutStructOutput = [string, number, string[]] & {
+    facetAddress: string;
+    action: number;
+    functionSelectors: string[];
+  };
+}
+
+export declare namespace IDiamondLoupe {
+  export type FacetStruct = {
+    facetAddress: string;
+    functionSelectors: BytesLike[];
+  };
+
+  export type FacetStructOutput = [string, string[]] & {
+    facetAddress: string;
+    functionSelectors: string[];
+  };
+}
+
+export declare namespace LibStakingStorage {
+  export type VersionStruct = {
+    major: BigNumberish;
+    minor: BigNumberish;
+    patch: BigNumberish;
+  };
+
+  export type VersionStructOutput = [BigNumber, BigNumber, BigNumber] & {
+    major: BigNumber;
+    minor: BigNumber;
+    patch: BigNumber;
+  };
+
+  export type ConfigStruct = {
+    tokenRewardPerTokenPerEpoch: BigNumberish;
+    complaintTolerance: BigNumberish;
+    complaintIntervalSecs: BigNumberish;
+    keyTypes: BigNumberish[];
+    minimumValidatorCount: BigNumberish;
+  };
+
+  export type ConfigStructOutput = [
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    BigNumber[],
+    BigNumber
+  ] & {
+    tokenRewardPerTokenPerEpoch: BigNumber;
+    complaintTolerance: BigNumber;
+    complaintIntervalSecs: BigNumber;
+    keyTypes: BigNumber[];
+    minimumValidatorCount: BigNumber;
+  };
+
+  export type EpochStruct = {
+    epochLength: BigNumberish;
+    number: BigNumberish;
+    endTime: BigNumberish;
+    retries: BigNumberish;
+    timeout: BigNumberish;
+  };
+
+  export type EpochStructOutput = [
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    BigNumber
+  ] & {
+    epochLength: BigNumber;
+    number: BigNumber;
+    endTime: BigNumber;
+    retries: BigNumber;
+    timeout: BigNumber;
+  };
+
   export type ValidatorStruct = {
     ip: BigNumberish;
     ipv6: BigNumberish;
@@ -58,21 +140,52 @@ export declare namespace Staking {
 
 export interface StakingInterface extends utils.Interface {
   functions: {
+    "diamondCut((address,uint8,bytes4[])[],address,bytes)": FunctionFragment;
+    "facetAddress(bytes4)": FunctionFragment;
+    "facetAddresses()": FunctionFragment;
+    "facetFunctionSelectors(address)": FunctionFragment;
+    "facets()": FunctionFragment;
+    "supportsInterface(bytes4)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
     "adminKickValidatorInNextEpoch(address)": FunctionFragment;
     "adminRejoinValidator(address)": FunctionFragment;
     "adminSlashValidator(address,uint256)": FunctionFragment;
     "advanceEpoch()": FunctionFragment;
+    "exit()": FunctionFragment;
+    "getReward()": FunctionFragment;
+    "kickValidatorInNextEpoch(address,uint256,bytes)": FunctionFragment;
+    "lockValidatorsForNextEpoch()": FunctionFragment;
+    "requestToJoin(uint32,uint128,uint32,address,uint256,uint256)": FunctionFragment;
+    "requestToLeave()": FunctionFragment;
+    "setConfig(uint256,uint256,uint256,uint256[],uint256)": FunctionFragment;
+    "setContractResolver(address)": FunctionFragment;
+    "setEpochEndTime(uint256)": FunctionFragment;
+    "setEpochLength(uint256)": FunctionFragment;
+    "setEpochState(uint8)": FunctionFragment;
+    "setEpochTimeout(uint256)": FunctionFragment;
+    "setIpPortNodeAddressAndCommunicationPubKeys(uint32,uint128,uint32,address,uint256,uint256)": FunctionFragment;
+    "setKickPenaltyPercent(uint256,uint256)": FunctionFragment;
+    "signalReadyForNextEpoch(uint256)": FunctionFragment;
+    "stake(uint256)": FunctionFragment;
+    "stakeAndJoin(uint256,uint32,uint128,uint32,address,uint256,uint256)": FunctionFragment;
+    "unlockValidatorsForNextEpoch()": FunctionFragment;
+    "withdraw(uint256)": FunctionFragment;
+    "checkVersion((uint256,uint256,uint256))": FunctionFragment;
+    "getMaxVersion()": FunctionFragment;
+    "getMaxVersionString()": FunctionFragment;
+    "getMinVersion()": FunctionFragment;
+    "getMinVersionString()": FunctionFragment;
+    "setMaxVersion((uint256,uint256,uint256))": FunctionFragment;
+    "setMinVersion((uint256,uint256,uint256))": FunctionFragment;
     "config()": FunctionFragment;
     "contractResolver()": FunctionFragment;
     "countOfCurrentValidatorsReadyForNextEpoch()": FunctionFragment;
     "countOfNextValidatorsReadyForNextEpoch()": FunctionFragment;
     "currentValidatorCountForConsensus()": FunctionFragment;
-    "env()": FunctionFragment;
     "epoch()": FunctionFragment;
-    "exit()": FunctionFragment;
     "getKeyTypes()": FunctionFragment;
     "getKickedValidators()": FunctionFragment;
-    "getReward()": FunctionFragment;
     "getStakingBalancesAddress()": FunctionFragment;
     "getTokenAddress()": FunctionFragment;
     "getValidatorsInCurrentEpoch()": FunctionFragment;
@@ -86,54 +199,62 @@ export interface StakingInterface extends utils.Interface {
     "isActiveValidatorByNodeAddress(address)": FunctionFragment;
     "isReadyForNextEpoch()": FunctionFragment;
     "kickPenaltyPercentByReason(uint256)": FunctionFragment;
-    "kickValidatorInNextEpoch(address,uint256,bytes)": FunctionFragment;
-    "lockValidatorsForNextEpoch()": FunctionFragment;
     "nextValidatorCountForConsensus()": FunctionFragment;
     "nodeAddressToStakerAddress(address)": FunctionFragment;
-    "owner()": FunctionFragment;
     "readyForNextEpoch(address)": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
-    "requestToJoin(uint32,uint128,uint32,address,uint256,uint256)": FunctionFragment;
-    "requestToLeave()": FunctionFragment;
-    "setConfig(uint256,uint256,uint256,uint256[],uint256)": FunctionFragment;
-    "setContractResolver(address)": FunctionFragment;
-    "setEpochEndTime(uint256)": FunctionFragment;
-    "setEpochLength(uint256)": FunctionFragment;
-    "setEpochState(uint8)": FunctionFragment;
-    "setEpochTimeout(uint256)": FunctionFragment;
-    "setIpPortNodeAddressAndCommunicationPubKeys(uint32,uint128,uint32,address,uint256,uint256)": FunctionFragment;
-    "setKickPenaltyPercent(uint256,uint256)": FunctionFragment;
     "shouldKickValidator(address)": FunctionFragment;
-    "signalReadyForNextEpoch(uint256)": FunctionFragment;
-    "stake(uint256)": FunctionFragment;
-    "stakeAndJoin(uint256,uint32,uint128,uint32,address,uint256,uint256)": FunctionFragment;
     "state()": FunctionFragment;
-    "totalStaked()": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
-    "unlockValidatorsForNextEpoch()": FunctionFragment;
-    "usedCommsKeys(bytes32)": FunctionFragment;
     "validators(address)": FunctionFragment;
-    "votesToKickValidatorsInNextEpoch(uint256,address)": FunctionFragment;
-    "withdraw(uint256)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "diamondCut"
+      | "facetAddress"
+      | "facetAddresses"
+      | "facetFunctionSelectors"
+      | "facets"
+      | "supportsInterface"
+      | "owner"
+      | "transferOwnership"
       | "adminKickValidatorInNextEpoch"
       | "adminRejoinValidator"
       | "adminSlashValidator"
       | "advanceEpoch"
+      | "exit"
+      | "getReward"
+      | "kickValidatorInNextEpoch"
+      | "lockValidatorsForNextEpoch"
+      | "requestToJoin"
+      | "requestToLeave"
+      | "setConfig"
+      | "setContractResolver"
+      | "setEpochEndTime"
+      | "setEpochLength"
+      | "setEpochState"
+      | "setEpochTimeout"
+      | "setIpPortNodeAddressAndCommunicationPubKeys"
+      | "setKickPenaltyPercent"
+      | "signalReadyForNextEpoch"
+      | "stake"
+      | "stakeAndJoin"
+      | "unlockValidatorsForNextEpoch"
+      | "withdraw"
+      | "checkVersion"
+      | "getMaxVersion"
+      | "getMaxVersionString"
+      | "getMinVersion"
+      | "getMinVersionString"
+      | "setMaxVersion"
+      | "setMinVersion"
       | "config"
       | "contractResolver"
       | "countOfCurrentValidatorsReadyForNextEpoch"
       | "countOfNextValidatorsReadyForNextEpoch"
       | "currentValidatorCountForConsensus"
-      | "env"
       | "epoch"
-      | "exit"
       | "getKeyTypes"
       | "getKickedValidators"
-      | "getReward"
       | "getStakingBalancesAddress"
       | "getTokenAddress"
       | "getValidatorsInCurrentEpoch"
@@ -147,37 +268,40 @@ export interface StakingInterface extends utils.Interface {
       | "isActiveValidatorByNodeAddress"
       | "isReadyForNextEpoch"
       | "kickPenaltyPercentByReason"
-      | "kickValidatorInNextEpoch"
-      | "lockValidatorsForNextEpoch"
       | "nextValidatorCountForConsensus"
       | "nodeAddressToStakerAddress"
-      | "owner"
       | "readyForNextEpoch"
-      | "renounceOwnership"
-      | "requestToJoin"
-      | "requestToLeave"
-      | "setConfig"
-      | "setContractResolver"
-      | "setEpochEndTime"
-      | "setEpochLength"
-      | "setEpochState"
-      | "setEpochTimeout"
-      | "setIpPortNodeAddressAndCommunicationPubKeys"
-      | "setKickPenaltyPercent"
       | "shouldKickValidator"
-      | "signalReadyForNextEpoch"
-      | "stake"
-      | "stakeAndJoin"
       | "state"
-      | "totalStaked"
-      | "transferOwnership"
-      | "unlockValidatorsForNextEpoch"
-      | "usedCommsKeys"
       | "validators"
-      | "votesToKickValidatorsInNextEpoch"
-      | "withdraw"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "diamondCut",
+    values: [IDiamond.FacetCutStruct[], string, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddress",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddresses",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetFunctionSelectors",
+    values: [string]
+  ): string;
+  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "supportsInterface",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [string]
+  ): string;
   encodeFunctionData(
     functionFragment: "adminKickValidatorInNextEpoch",
     values: [string]
@@ -194,110 +318,14 @@ export interface StakingInterface extends utils.Interface {
     functionFragment: "advanceEpoch",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "config", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "contractResolver",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "countOfCurrentValidatorsReadyForNextEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "countOfNextValidatorsReadyForNextEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "currentValidatorCountForConsensus",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "env", values?: undefined): string;
-  encodeFunctionData(functionFragment: "epoch", values?: undefined): string;
   encodeFunctionData(functionFragment: "exit", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "getKeyTypes",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getKickedValidators",
-    values?: undefined
-  ): string;
   encodeFunctionData(functionFragment: "getReward", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "getStakingBalancesAddress",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getTokenAddress",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getValidatorsInCurrentEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getValidatorsInCurrentEpochLength",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getValidatorsInNextEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getValidatorsStructs",
-    values: [string[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getValidatorsStructsInCurrentEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getValidatorsStructsInNextEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getVotingStatusToKickValidator",
-    values: [BigNumberish, string, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "isActiveValidator",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "isActiveValidatorByNodeAddress",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "isReadyForNextEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "kickPenaltyPercentByReason",
-    values: [BigNumberish]
-  ): string;
   encodeFunctionData(
     functionFragment: "kickValidatorInNextEpoch",
     values: [string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "lockValidatorsForNextEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "nextValidatorCountForConsensus",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "nodeAddressToStakerAddress",
-    values: [string]
-  ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "readyForNextEpoch",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -361,10 +389,6 @@ export interface StakingInterface extends utils.Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "shouldKickValidator",
-    values: [string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "signalReadyForNextEpoch",
     values: [BigNumberish]
   ): string;
@@ -381,33 +405,162 @@ export interface StakingInterface extends utils.Interface {
       BigNumberish
     ]
   ): string;
-  encodeFunctionData(functionFragment: "state", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "totalStaked",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "transferOwnership",
-    values: [string]
-  ): string;
   encodeFunctionData(
     functionFragment: "unlockValidatorsForNextEpoch",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "usedCommsKeys",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(functionFragment: "validators", values: [string]): string;
-  encodeFunctionData(
-    functionFragment: "votesToKickValidatorsInNextEpoch",
-    values: [BigNumberish, string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "withdraw",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "checkVersion",
+    values: [LibStakingStorage.VersionStruct]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getMaxVersion",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getMaxVersionString",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getMinVersion",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getMinVersionString",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setMaxVersion",
+    values: [LibStakingStorage.VersionStruct]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setMinVersion",
+    values: [LibStakingStorage.VersionStruct]
+  ): string;
+  encodeFunctionData(functionFragment: "config", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "contractResolver",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "countOfCurrentValidatorsReadyForNextEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "countOfNextValidatorsReadyForNextEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "currentValidatorCountForConsensus",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "epoch", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "getKeyTypes",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getKickedValidators",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getStakingBalancesAddress",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTokenAddress",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getValidatorsInCurrentEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getValidatorsInCurrentEpochLength",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getValidatorsInNextEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getValidatorsStructs",
+    values: [string[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getValidatorsStructsInCurrentEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getValidatorsStructsInNextEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getVotingStatusToKickValidator",
+    values: [BigNumberish, string, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isActiveValidator",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isActiveValidatorByNodeAddress",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isReadyForNextEpoch",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "kickPenaltyPercentByReason",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "nextValidatorCountForConsensus",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "nodeAddressToStakerAddress",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "readyForNextEpoch",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "shouldKickValidator",
+    values: [string]
+  ): string;
+  encodeFunctionData(functionFragment: "state", values?: undefined): string;
+  encodeFunctionData(functionFragment: "validators", values: [string]): string;
 
+  decodeFunctionResult(functionFragment: "diamondCut", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "facetAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetAddresses",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetFunctionSelectors",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "supportsInterface",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "adminKickValidatorInNextEpoch",
     data: BytesLike
@@ -422,6 +575,95 @@ export interface StakingInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "advanceEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "exit", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getReward", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "kickValidatorInNextEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "lockValidatorsForNextEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "requestToJoin",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "requestToLeave",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "setConfig", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setContractResolver",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setEpochEndTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setEpochLength",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setEpochState",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setEpochTimeout",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setIpPortNodeAddressAndCommunicationPubKeys",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setKickPenaltyPercent",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "signalReadyForNextEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "stakeAndJoin",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "unlockValidatorsForNextEpoch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "checkVersion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getMaxVersion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getMaxVersionString",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getMinVersion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getMinVersionString",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setMaxVersion",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setMinVersion",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "config", data: BytesLike): Result;
@@ -441,9 +683,7 @@ export interface StakingInterface extends utils.Interface {
     functionFragment: "currentValidatorCountForConsensus",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "env", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "epoch", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "exit", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getKeyTypes",
     data: BytesLike
@@ -452,7 +692,6 @@ export interface StakingInterface extends utils.Interface {
     functionFragment: "getKickedValidators",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "getReward", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getStakingBalancesAddress",
     data: BytesLike
@@ -506,14 +745,6 @@ export interface StakingInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "kickValidatorInNextEpoch",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "lockValidatorsForNextEpoch",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "nextValidatorCountForConsensus",
     data: BytesLike
   ): Result;
@@ -521,96 +752,25 @@ export interface StakingInterface extends utils.Interface {
     functionFragment: "nodeAddressToStakerAddress",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "readyForNextEpoch",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "requestToJoin",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "requestToLeave",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "setConfig", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "setContractResolver",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setEpochEndTime",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setEpochLength",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setEpochState",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setEpochTimeout",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setIpPortNodeAddressAndCommunicationPubKeys",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setKickPenaltyPercent",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "shouldKickValidator",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "signalReadyForNextEpoch",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "stakeAndJoin",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "state", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "totalStaked",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "unlockValidatorsForNextEpoch",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "usedCommsKeys",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "validators", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "votesToKickValidatorsInNextEpoch",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
     "ConfigSet(uint256,uint256,uint256,uint256[],uint256)": EventFragment;
     "EpochEndTimeSet(uint256)": EventFragment;
     "EpochLengthSet(uint256)": EventFragment;
     "EpochTimeoutSet(uint256)": EventFragment;
     "KickPenaltyPercentSet(uint256,uint256)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
     "ReadyForNextEpoch(address,uint256)": EventFragment;
     "Recovered(address,uint256)": EventFragment;
     "RequestToJoin(address)": EventFragment;
@@ -624,12 +784,13 @@ export interface StakingInterface extends utils.Interface {
     "VotedToKickValidatorInNextEpoch(address,address,uint256,bytes)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ConfigSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "EpochEndTimeSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "EpochLengthSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "EpochTimeoutSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "KickPenaltyPercentSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ReadyForNextEpoch"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Recovered"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RequestToJoin"): EventFragment;
@@ -646,6 +807,30 @@ export interface StakingInterface extends utils.Interface {
     nameOrSignatureOrTopic: "VotedToKickValidatorInNextEpoch"
   ): EventFragment;
 }
+
+export interface DiamondCutEventObject {
+  _diamondCut: IDiamond.FacetCutStructOutput[];
+  _init: string;
+  _calldata: string;
+}
+export type DiamondCutEvent = TypedEvent<
+  [IDiamond.FacetCutStructOutput[], string, string],
+  DiamondCutEventObject
+>;
+
+export type DiamondCutEventFilter = TypedEventFilter<DiamondCutEvent>;
+
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface ConfigSetEventObject {
   newTokenRewardPerTokenPerEpoch: BigNumber;
@@ -702,18 +887,6 @@ export type KickPenaltyPercentSetEvent = TypedEvent<
 
 export type KickPenaltyPercentSetEventFilter =
   TypedEventFilter<KickPenaltyPercentSetEvent>;
-
-export interface OwnershipTransferredEventObject {
-  previousOwner: string;
-  newOwner: string;
-}
-export type OwnershipTransferredEvent = TypedEvent<
-  [string, string],
-  OwnershipTransferredEventObject
->;
-
-export type OwnershipTransferredEventFilter =
-  TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface ReadyForNextEpochEventObject {
   staker: string;
@@ -858,6 +1031,47 @@ export interface Staking extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[string] & { facetAddress_: string }>;
+
+    facetAddresses(
+      overrides?: CallOverrides
+    ): Promise<[string[]] & { facetAddresses_: string[] }>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<[string[]] & { _facetFunctionSelectors: string[] }>;
+
+    facets(
+      overrides?: CallOverrides
+    ): Promise<
+      [IDiamondLoupe.FacetStructOutput[]] & {
+        facets_: IDiamondLoupe.FacetStructOutput[];
+      }
+    >;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    owner(overrides?: CallOverrides): Promise<[string] & { owner_: string }>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     adminKickValidatorInNextEpoch(
       validatorStakerAddress: string,
       overrides?: Overrides & { from?: string }
@@ -878,105 +1092,13 @@ export interface Staking extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    config(
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber, BigNumber, BigNumber] & {
-        tokenRewardPerTokenPerEpoch: BigNumber;
-        complaintTolerance: BigNumber;
-        complaintIntervalSecs: BigNumber;
-        minimumValidatorCount: BigNumber;
-      }
-    >;
-
-    contractResolver(overrides?: CallOverrides): Promise<[string]>;
-
-    countOfCurrentValidatorsReadyForNextEpoch(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    countOfNextValidatorsReadyForNextEpoch(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    currentValidatorCountForConsensus(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    env(overrides?: CallOverrides): Promise<[number]>;
-
-    epoch(
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
-        epochLength: BigNumber;
-        number: BigNumber;
-        endTime: BigNumber;
-        retries: BigNumber;
-        timeout: BigNumber;
-      }
-    >;
-
     exit(
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    getKeyTypes(overrides?: CallOverrides): Promise<[BigNumber[]]>;
-
-    getKickedValidators(overrides?: CallOverrides): Promise<[string[]]>;
-
     getReward(
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
-
-    getStakingBalancesAddress(overrides?: CallOverrides): Promise<[string]>;
-
-    getTokenAddress(overrides?: CallOverrides): Promise<[string]>;
-
-    getValidatorsInCurrentEpoch(overrides?: CallOverrides): Promise<[string[]]>;
-
-    getValidatorsInCurrentEpochLength(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    getValidatorsInNextEpoch(overrides?: CallOverrides): Promise<[string[]]>;
-
-    getValidatorsStructs(
-      addresses: string[],
-      overrides?: CallOverrides
-    ): Promise<[Staking.ValidatorStructOutput[]]>;
-
-    getValidatorsStructsInCurrentEpoch(
-      overrides?: CallOverrides
-    ): Promise<[Staking.ValidatorStructOutput[]]>;
-
-    getValidatorsStructsInNextEpoch(
-      overrides?: CallOverrides
-    ): Promise<[Staking.ValidatorStructOutput[]]>;
-
-    getVotingStatusToKickValidator(
-      epochNumber: BigNumberish,
-      validatorStakerAddress: string,
-      voterStakerAddress: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber, boolean]>;
-
-    isActiveValidator(
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    isActiveValidatorByNodeAddress(
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    isReadyForNextEpoch(overrides?: CallOverrides): Promise<[boolean]>;
-
-    kickPenaltyPercentByReason(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     kickValidatorInNextEpoch(
       validatorStakerAddress: string,
@@ -986,26 +1108,6 @@ export interface Staking extends BaseContract {
     ): Promise<ContractTransaction>;
 
     lockValidatorsForNextEpoch(
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    nextValidatorCountForConsensus(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    nodeAddressToStakerAddress(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    owner(overrides?: CallOverrides): Promise<[string]>;
-
-    readyForNextEpoch(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    renounceOwnership(
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -1073,11 +1175,6 @@ export interface Staking extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    shouldKickValidator(
-      stakerAddress: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
     signalReadyForNextEpoch(
       epochNumber: BigNumberish,
       overrides?: Overrides & { from?: string }
@@ -1099,50 +1196,176 @@ export interface Staking extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    state(overrides?: CallOverrides): Promise<[number]>;
-
-    totalStaked(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
     unlockValidatorsForNextEpoch(
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
-
-    usedCommsKeys(
-      arg0: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    validators(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [number, BigNumber, number, string, BigNumber, BigNumber, BigNumber] & {
-        ip: number;
-        ipv6: BigNumber;
-        port: number;
-        nodeAddress: string;
-        reward: BigNumber;
-        senderPubKey: BigNumber;
-        receiverPubKey: BigNumber;
-      }
-    >;
-
-    votesToKickValidatorsInNextEpoch(
-      arg0: BigNumberish,
-      arg1: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber] & { votes: BigNumber }>;
 
     withdraw(
       amount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
+
+    checkVersion(
+      version: LibStakingStorage.VersionStruct,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    getMaxVersion(
+      overrides?: CallOverrides
+    ): Promise<[LibStakingStorage.VersionStructOutput]>;
+
+    getMaxVersionString(overrides?: CallOverrides): Promise<[string]>;
+
+    getMinVersion(
+      overrides?: CallOverrides
+    ): Promise<[LibStakingStorage.VersionStructOutput]>;
+
+    getMinVersionString(overrides?: CallOverrides): Promise<[string]>;
+
+    setMaxVersion(
+      version: LibStakingStorage.VersionStruct,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    setMinVersion(
+      version: LibStakingStorage.VersionStruct,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    config(
+      overrides?: CallOverrides
+    ): Promise<[LibStakingStorage.ConfigStructOutput]>;
+
+    contractResolver(overrides?: CallOverrides): Promise<[string]>;
+
+    countOfCurrentValidatorsReadyForNextEpoch(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    countOfNextValidatorsReadyForNextEpoch(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    currentValidatorCountForConsensus(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    epoch(
+      overrides?: CallOverrides
+    ): Promise<[LibStakingStorage.EpochStructOutput]>;
+
+    getKeyTypes(overrides?: CallOverrides): Promise<[BigNumber[]]>;
+
+    getKickedValidators(overrides?: CallOverrides): Promise<[string[]]>;
+
+    getStakingBalancesAddress(overrides?: CallOverrides): Promise<[string]>;
+
+    getTokenAddress(overrides?: CallOverrides): Promise<[string]>;
+
+    getValidatorsInCurrentEpoch(overrides?: CallOverrides): Promise<[string[]]>;
+
+    getValidatorsInCurrentEpochLength(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    getValidatorsInNextEpoch(overrides?: CallOverrides): Promise<[string[]]>;
+
+    getValidatorsStructs(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<[LibStakingStorage.ValidatorStructOutput[]]>;
+
+    getValidatorsStructsInCurrentEpoch(
+      overrides?: CallOverrides
+    ): Promise<[LibStakingStorage.ValidatorStructOutput[]]>;
+
+    getValidatorsStructsInNextEpoch(
+      overrides?: CallOverrides
+    ): Promise<[LibStakingStorage.ValidatorStructOutput[]]>;
+
+    getVotingStatusToKickValidator(
+      epochNumber: BigNumberish,
+      validatorStakerAddress: string,
+      voterStakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber, boolean]>;
+
+    isActiveValidator(
+      account: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    isActiveValidatorByNodeAddress(
+      account: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    isReadyForNextEpoch(overrides?: CallOverrides): Promise<[boolean]>;
+
+    kickPenaltyPercentByReason(
+      reason: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    nextValidatorCountForConsensus(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    nodeAddressToStakerAddress(
+      nodeAddress: string,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    readyForNextEpoch(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    shouldKickValidator(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    state(overrides?: CallOverrides): Promise<[number]>;
+
+    validators(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<[LibStakingStorage.ValidatorStructOutput]>;
   };
+
+  diamondCut(
+    _diamondCut: IDiamond.FacetCutStruct[],
+    _init: string,
+    _calldata: BytesLike,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  facetAddress(
+    _functionSelector: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+  facetFunctionSelectors(
+    _facet: string,
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
+  facets(overrides?: CallOverrides): Promise<IDiamondLoupe.FacetStructOutput[]>;
+
+  supportsInterface(
+    _interfaceId: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  transferOwnership(
+    _newOwner: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
   adminKickValidatorInNextEpoch(
     validatorStakerAddress: string,
@@ -1164,103 +1387,11 @@ export interface Staking extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  config(
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, BigNumber, BigNumber, BigNumber] & {
-      tokenRewardPerTokenPerEpoch: BigNumber;
-      complaintTolerance: BigNumber;
-      complaintIntervalSecs: BigNumber;
-      minimumValidatorCount: BigNumber;
-    }
-  >;
-
-  contractResolver(overrides?: CallOverrides): Promise<string>;
-
-  countOfCurrentValidatorsReadyForNextEpoch(
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  countOfNextValidatorsReadyForNextEpoch(
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  currentValidatorCountForConsensus(
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  env(overrides?: CallOverrides): Promise<number>;
-
-  epoch(
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
-      epochLength: BigNumber;
-      number: BigNumber;
-      endTime: BigNumber;
-      retries: BigNumber;
-      timeout: BigNumber;
-    }
-  >;
-
   exit(overrides?: Overrides & { from?: string }): Promise<ContractTransaction>;
-
-  getKeyTypes(overrides?: CallOverrides): Promise<BigNumber[]>;
-
-  getKickedValidators(overrides?: CallOverrides): Promise<string[]>;
 
   getReward(
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
-
-  getStakingBalancesAddress(overrides?: CallOverrides): Promise<string>;
-
-  getTokenAddress(overrides?: CallOverrides): Promise<string>;
-
-  getValidatorsInCurrentEpoch(overrides?: CallOverrides): Promise<string[]>;
-
-  getValidatorsInCurrentEpochLength(
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  getValidatorsInNextEpoch(overrides?: CallOverrides): Promise<string[]>;
-
-  getValidatorsStructs(
-    addresses: string[],
-    overrides?: CallOverrides
-  ): Promise<Staking.ValidatorStructOutput[]>;
-
-  getValidatorsStructsInCurrentEpoch(
-    overrides?: CallOverrides
-  ): Promise<Staking.ValidatorStructOutput[]>;
-
-  getValidatorsStructsInNextEpoch(
-    overrides?: CallOverrides
-  ): Promise<Staking.ValidatorStructOutput[]>;
-
-  getVotingStatusToKickValidator(
-    epochNumber: BigNumberish,
-    validatorStakerAddress: string,
-    voterStakerAddress: string,
-    overrides?: CallOverrides
-  ): Promise<[BigNumber, boolean]>;
-
-  isActiveValidator(
-    account: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  isActiveValidatorByNodeAddress(
-    account: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  isReadyForNextEpoch(overrides?: CallOverrides): Promise<boolean>;
-
-  kickPenaltyPercentByReason(
-    arg0: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
 
   kickValidatorInNextEpoch(
     validatorStakerAddress: string,
@@ -1270,21 +1401,6 @@ export interface Staking extends BaseContract {
   ): Promise<ContractTransaction>;
 
   lockValidatorsForNextEpoch(
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  nextValidatorCountForConsensus(overrides?: CallOverrides): Promise<BigNumber>;
-
-  nodeAddressToStakerAddress(
-    arg0: string,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  owner(overrides?: CallOverrides): Promise<string>;
-
-  readyForNextEpoch(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
-  renounceOwnership(
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1352,11 +1468,6 @@ export interface Staking extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  shouldKickValidator(
-    stakerAddress: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
   signalReadyForNextEpoch(
     epochNumber: BigNumberish,
     overrides?: Overrides & { from?: string }
@@ -1378,48 +1489,177 @@ export interface Staking extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  state(overrides?: CallOverrides): Promise<number>;
-
-  totalStaked(overrides?: CallOverrides): Promise<BigNumber>;
-
-  transferOwnership(
-    newOwner: string,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
   unlockValidatorsForNextEpoch(
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
-
-  usedCommsKeys(arg0: BytesLike, overrides?: CallOverrides): Promise<boolean>;
-
-  validators(
-    arg0: string,
-    overrides?: CallOverrides
-  ): Promise<
-    [number, BigNumber, number, string, BigNumber, BigNumber, BigNumber] & {
-      ip: number;
-      ipv6: BigNumber;
-      port: number;
-      nodeAddress: string;
-      reward: BigNumber;
-      senderPubKey: BigNumber;
-      receiverPubKey: BigNumber;
-    }
-  >;
-
-  votesToKickValidatorsInNextEpoch(
-    arg0: BigNumberish,
-    arg1: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
 
   withdraw(
     amount: BigNumberish,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
+  checkVersion(
+    version: LibStakingStorage.VersionStruct,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  getMaxVersion(
+    overrides?: CallOverrides
+  ): Promise<LibStakingStorage.VersionStructOutput>;
+
+  getMaxVersionString(overrides?: CallOverrides): Promise<string>;
+
+  getMinVersion(
+    overrides?: CallOverrides
+  ): Promise<LibStakingStorage.VersionStructOutput>;
+
+  getMinVersionString(overrides?: CallOverrides): Promise<string>;
+
+  setMaxVersion(
+    version: LibStakingStorage.VersionStruct,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  setMinVersion(
+    version: LibStakingStorage.VersionStruct,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  config(
+    overrides?: CallOverrides
+  ): Promise<LibStakingStorage.ConfigStructOutput>;
+
+  contractResolver(overrides?: CallOverrides): Promise<string>;
+
+  countOfCurrentValidatorsReadyForNextEpoch(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  countOfNextValidatorsReadyForNextEpoch(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  currentValidatorCountForConsensus(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  epoch(
+    overrides?: CallOverrides
+  ): Promise<LibStakingStorage.EpochStructOutput>;
+
+  getKeyTypes(overrides?: CallOverrides): Promise<BigNumber[]>;
+
+  getKickedValidators(overrides?: CallOverrides): Promise<string[]>;
+
+  getStakingBalancesAddress(overrides?: CallOverrides): Promise<string>;
+
+  getTokenAddress(overrides?: CallOverrides): Promise<string>;
+
+  getValidatorsInCurrentEpoch(overrides?: CallOverrides): Promise<string[]>;
+
+  getValidatorsInCurrentEpochLength(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getValidatorsInNextEpoch(overrides?: CallOverrides): Promise<string[]>;
+
+  getValidatorsStructs(
+    addresses: string[],
+    overrides?: CallOverrides
+  ): Promise<LibStakingStorage.ValidatorStructOutput[]>;
+
+  getValidatorsStructsInCurrentEpoch(
+    overrides?: CallOverrides
+  ): Promise<LibStakingStorage.ValidatorStructOutput[]>;
+
+  getValidatorsStructsInNextEpoch(
+    overrides?: CallOverrides
+  ): Promise<LibStakingStorage.ValidatorStructOutput[]>;
+
+  getVotingStatusToKickValidator(
+    epochNumber: BigNumberish,
+    validatorStakerAddress: string,
+    voterStakerAddress: string,
+    overrides?: CallOverrides
+  ): Promise<[BigNumber, boolean]>;
+
+  isActiveValidator(
+    account: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  isActiveValidatorByNodeAddress(
+    account: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  isReadyForNextEpoch(overrides?: CallOverrides): Promise<boolean>;
+
+  kickPenaltyPercentByReason(
+    reason: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  nextValidatorCountForConsensus(overrides?: CallOverrides): Promise<BigNumber>;
+
+  nodeAddressToStakerAddress(
+    nodeAddress: string,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  readyForNextEpoch(
+    stakerAddress: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  shouldKickValidator(
+    stakerAddress: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  state(overrides?: CallOverrides): Promise<number>;
+
+  validators(
+    stakerAddress: string,
+    overrides?: CallOverrides
+  ): Promise<LibStakingStorage.ValidatorStructOutput>;
+
   callStatic: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    facets(
+      overrides?: CallOverrides
+    ): Promise<IDiamondLoupe.FacetStructOutput[]>;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     adminKickValidatorInNextEpoch(
       validatorStakerAddress: string,
       overrides?: CallOverrides
@@ -1438,101 +1678,9 @@ export interface Staking extends BaseContract {
 
     advanceEpoch(overrides?: CallOverrides): Promise<void>;
 
-    config(
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber, BigNumber, BigNumber] & {
-        tokenRewardPerTokenPerEpoch: BigNumber;
-        complaintTolerance: BigNumber;
-        complaintIntervalSecs: BigNumber;
-        minimumValidatorCount: BigNumber;
-      }
-    >;
-
-    contractResolver(overrides?: CallOverrides): Promise<string>;
-
-    countOfCurrentValidatorsReadyForNextEpoch(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    countOfNextValidatorsReadyForNextEpoch(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    currentValidatorCountForConsensus(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    env(overrides?: CallOverrides): Promise<number>;
-
-    epoch(
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber] & {
-        epochLength: BigNumber;
-        number: BigNumber;
-        endTime: BigNumber;
-        retries: BigNumber;
-        timeout: BigNumber;
-      }
-    >;
-
     exit(overrides?: CallOverrides): Promise<void>;
 
-    getKeyTypes(overrides?: CallOverrides): Promise<BigNumber[]>;
-
-    getKickedValidators(overrides?: CallOverrides): Promise<string[]>;
-
     getReward(overrides?: CallOverrides): Promise<void>;
-
-    getStakingBalancesAddress(overrides?: CallOverrides): Promise<string>;
-
-    getTokenAddress(overrides?: CallOverrides): Promise<string>;
-
-    getValidatorsInCurrentEpoch(overrides?: CallOverrides): Promise<string[]>;
-
-    getValidatorsInCurrentEpochLength(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getValidatorsInNextEpoch(overrides?: CallOverrides): Promise<string[]>;
-
-    getValidatorsStructs(
-      addresses: string[],
-      overrides?: CallOverrides
-    ): Promise<Staking.ValidatorStructOutput[]>;
-
-    getValidatorsStructsInCurrentEpoch(
-      overrides?: CallOverrides
-    ): Promise<Staking.ValidatorStructOutput[]>;
-
-    getValidatorsStructsInNextEpoch(
-      overrides?: CallOverrides
-    ): Promise<Staking.ValidatorStructOutput[]>;
-
-    getVotingStatusToKickValidator(
-      epochNumber: BigNumberish,
-      validatorStakerAddress: string,
-      voterStakerAddress: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber, boolean]>;
-
-    isActiveValidator(
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    isActiveValidatorByNodeAddress(
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    isReadyForNextEpoch(overrides?: CallOverrides): Promise<boolean>;
-
-    kickPenaltyPercentByReason(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     kickValidatorInNextEpoch(
       validatorStakerAddress: string,
@@ -1542,24 +1690,6 @@ export interface Staking extends BaseContract {
     ): Promise<void>;
 
     lockValidatorsForNextEpoch(overrides?: CallOverrides): Promise<void>;
-
-    nextValidatorCountForConsensus(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    nodeAddressToStakerAddress(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    owner(overrides?: CallOverrides): Promise<string>;
-
-    readyForNextEpoch(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
     requestToJoin(
       ip: BigNumberish,
@@ -1623,11 +1753,6 @@ export interface Staking extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    shouldKickValidator(
-      stakerAddress: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
     signalReadyForNextEpoch(
       epochNumber: BigNumberish,
       overrides?: CallOverrides
@@ -1646,44 +1771,160 @@ export interface Staking extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    state(overrides?: CallOverrides): Promise<number>;
+    unlockValidatorsForNextEpoch(overrides?: CallOverrides): Promise<void>;
 
-    totalStaked(overrides?: CallOverrides): Promise<BigNumber>;
+    withdraw(amount: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-    transferOwnership(
-      newOwner: string,
+    checkVersion(
+      version: LibStakingStorage.VersionStruct,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    getMaxVersion(
+      overrides?: CallOverrides
+    ): Promise<LibStakingStorage.VersionStructOutput>;
+
+    getMaxVersionString(overrides?: CallOverrides): Promise<string>;
+
+    getMinVersion(
+      overrides?: CallOverrides
+    ): Promise<LibStakingStorage.VersionStructOutput>;
+
+    getMinVersionString(overrides?: CallOverrides): Promise<string>;
+
+    setMaxVersion(
+      version: LibStakingStorage.VersionStruct,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    unlockValidatorsForNextEpoch(overrides?: CallOverrides): Promise<void>;
-
-    usedCommsKeys(arg0: BytesLike, overrides?: CallOverrides): Promise<boolean>;
-
-    validators(
-      arg0: string,
+    setMinVersion(
+      version: LibStakingStorage.VersionStruct,
       overrides?: CallOverrides
-    ): Promise<
-      [number, BigNumber, number, string, BigNumber, BigNumber, BigNumber] & {
-        ip: number;
-        ipv6: BigNumber;
-        port: number;
-        nodeAddress: string;
-        reward: BigNumber;
-        senderPubKey: BigNumber;
-        receiverPubKey: BigNumber;
-      }
-    >;
+    ): Promise<void>;
 
-    votesToKickValidatorsInNextEpoch(
-      arg0: BigNumberish,
-      arg1: string,
+    config(
+      overrides?: CallOverrides
+    ): Promise<LibStakingStorage.ConfigStructOutput>;
+
+    contractResolver(overrides?: CallOverrides): Promise<string>;
+
+    countOfCurrentValidatorsReadyForNextEpoch(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    withdraw(amount: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    countOfNextValidatorsReadyForNextEpoch(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    currentValidatorCountForConsensus(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    epoch(
+      overrides?: CallOverrides
+    ): Promise<LibStakingStorage.EpochStructOutput>;
+
+    getKeyTypes(overrides?: CallOverrides): Promise<BigNumber[]>;
+
+    getKickedValidators(overrides?: CallOverrides): Promise<string[]>;
+
+    getStakingBalancesAddress(overrides?: CallOverrides): Promise<string>;
+
+    getTokenAddress(overrides?: CallOverrides): Promise<string>;
+
+    getValidatorsInCurrentEpoch(overrides?: CallOverrides): Promise<string[]>;
+
+    getValidatorsInCurrentEpochLength(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getValidatorsInNextEpoch(overrides?: CallOverrides): Promise<string[]>;
+
+    getValidatorsStructs(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<LibStakingStorage.ValidatorStructOutput[]>;
+
+    getValidatorsStructsInCurrentEpoch(
+      overrides?: CallOverrides
+    ): Promise<LibStakingStorage.ValidatorStructOutput[]>;
+
+    getValidatorsStructsInNextEpoch(
+      overrides?: CallOverrides
+    ): Promise<LibStakingStorage.ValidatorStructOutput[]>;
+
+    getVotingStatusToKickValidator(
+      epochNumber: BigNumberish,
+      validatorStakerAddress: string,
+      voterStakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber, boolean]>;
+
+    isActiveValidator(
+      account: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    isActiveValidatorByNodeAddress(
+      account: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    isReadyForNextEpoch(overrides?: CallOverrides): Promise<boolean>;
+
+    kickPenaltyPercentByReason(
+      reason: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    nextValidatorCountForConsensus(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    nodeAddressToStakerAddress(
+      nodeAddress: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    readyForNextEpoch(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    shouldKickValidator(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    state(overrides?: CallOverrides): Promise<number>;
+
+    validators(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<LibStakingStorage.ValidatorStructOutput>;
   };
 
   filters: {
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)"(
+      _diamondCut?: null,
+      _init?: null,
+      _calldata?: null
+    ): DiamondCutEventFilter;
+    DiamondCut(
+      _diamondCut?: null,
+      _init?: null,
+      _calldata?: null
+    ): DiamondCutEventFilter;
+
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+
     "ConfigSet(uint256,uint256,uint256,uint256[],uint256)"(
       newTokenRewardPerTokenPerEpoch?: null,
       newComplaintTolerance?: null,
@@ -1720,15 +1961,6 @@ export interface Staking extends BaseContract {
       reason?: null,
       newKickPenaltyPercent?: null
     ): KickPenaltyPercentSetEventFilter;
-
-    "OwnershipTransferred(address,address)"(
-      previousOwner?: string | null,
-      newOwner?: string | null
-    ): OwnershipTransferredEventFilter;
-    OwnershipTransferred(
-      previousOwner?: string | null,
-      newOwner?: string | null
-    ): OwnershipTransferredEventFilter;
 
     "ReadyForNextEpoch(address,uint256)"(
       staker?: string | null,
@@ -1806,6 +2038,39 @@ export interface Staking extends BaseContract {
   };
 
   estimateGas: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<BigNumber>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facets(overrides?: CallOverrides): Promise<BigNumber>;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
     adminKickValidatorInNextEpoch(
       validatorStakerAddress: string,
       overrides?: Overrides & { from?: string }
@@ -1824,82 +2089,9 @@ export interface Staking extends BaseContract {
 
     advanceEpoch(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
 
-    config(overrides?: CallOverrides): Promise<BigNumber>;
-
-    contractResolver(overrides?: CallOverrides): Promise<BigNumber>;
-
-    countOfCurrentValidatorsReadyForNextEpoch(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    countOfNextValidatorsReadyForNextEpoch(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    currentValidatorCountForConsensus(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    env(overrides?: CallOverrides): Promise<BigNumber>;
-
-    epoch(overrides?: CallOverrides): Promise<BigNumber>;
-
     exit(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
 
-    getKeyTypes(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getKickedValidators(overrides?: CallOverrides): Promise<BigNumber>;
-
     getReward(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
-
-    getStakingBalancesAddress(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getTokenAddress(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getValidatorsInCurrentEpoch(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getValidatorsInCurrentEpochLength(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getValidatorsInNextEpoch(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getValidatorsStructs(
-      addresses: string[],
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getValidatorsStructsInCurrentEpoch(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getValidatorsStructsInNextEpoch(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getVotingStatusToKickValidator(
-      epochNumber: BigNumberish,
-      validatorStakerAddress: string,
-      voterStakerAddress: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    isActiveValidator(
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    isActiveValidatorByNodeAddress(
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    isReadyForNextEpoch(overrides?: CallOverrides): Promise<BigNumber>;
-
-    kickPenaltyPercentByReason(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     kickValidatorInNextEpoch(
       validatorStakerAddress: string,
@@ -1909,26 +2101,6 @@ export interface Staking extends BaseContract {
     ): Promise<BigNumber>;
 
     lockValidatorsForNextEpoch(
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    nextValidatorCountForConsensus(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    nodeAddressToStakerAddress(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    readyForNextEpoch(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    renounceOwnership(
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1996,11 +2168,6 @@ export interface Staking extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    shouldKickValidator(
-      stakerAddress: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     signalReadyForNextEpoch(
       epochNumber: BigNumberish,
       overrides?: Overrides & { from?: string }
@@ -2022,39 +2189,170 @@ export interface Staking extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    state(overrides?: CallOverrides): Promise<BigNumber>;
-
-    totalStaked(overrides?: CallOverrides): Promise<BigNumber>;
-
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
     unlockValidatorsForNextEpoch(
       overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    usedCommsKeys(
-      arg0: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    validators(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    votesToKickValidatorsInNextEpoch(
-      arg0: BigNumberish,
-      arg1: string,
-      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     withdraw(
       amount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
+
+    checkVersion(
+      version: LibStakingStorage.VersionStruct,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getMaxVersion(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getMaxVersionString(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getMinVersion(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getMinVersionString(overrides?: CallOverrides): Promise<BigNumber>;
+
+    setMaxVersion(
+      version: LibStakingStorage.VersionStruct,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    setMinVersion(
+      version: LibStakingStorage.VersionStruct,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    config(overrides?: CallOverrides): Promise<BigNumber>;
+
+    contractResolver(overrides?: CallOverrides): Promise<BigNumber>;
+
+    countOfCurrentValidatorsReadyForNextEpoch(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    countOfNextValidatorsReadyForNextEpoch(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    currentValidatorCountForConsensus(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    epoch(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getKeyTypes(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getKickedValidators(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getStakingBalancesAddress(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTokenAddress(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getValidatorsInCurrentEpoch(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getValidatorsInCurrentEpochLength(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getValidatorsInNextEpoch(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getValidatorsStructs(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getValidatorsStructsInCurrentEpoch(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getValidatorsStructsInNextEpoch(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getVotingStatusToKickValidator(
+      epochNumber: BigNumberish,
+      validatorStakerAddress: string,
+      voterStakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    isActiveValidator(
+      account: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    isActiveValidatorByNodeAddress(
+      account: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    isReadyForNextEpoch(overrides?: CallOverrides): Promise<BigNumber>;
+
+    kickPenaltyPercentByReason(
+      reason: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    nextValidatorCountForConsensus(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    nodeAddressToStakerAddress(
+      nodeAddress: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    readyForNextEpoch(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    shouldKickValidator(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    state(overrides?: CallOverrides): Promise<BigNumber>;
+
+    validators(
+      stakerAddress: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facets(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
     adminKickValidatorInNextEpoch(
       validatorStakerAddress: string,
       overrides?: Overrides & { from?: string }
@@ -2075,6 +2373,146 @@ export interface Staking extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
+    exit(
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    getReward(
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    kickValidatorInNextEpoch(
+      validatorStakerAddress: string,
+      reason: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    lockValidatorsForNextEpoch(
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    requestToJoin(
+      ip: BigNumberish,
+      ipv6: BigNumberish,
+      port: BigNumberish,
+      nodeAddress: string,
+      senderPubKey: BigNumberish,
+      receiverPubKey: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    requestToLeave(
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    setConfig(
+      newTokenRewardPerTokenPerEpoch: BigNumberish,
+      newComplaintTolerance: BigNumberish,
+      newComplaintIntervalSecs: BigNumberish,
+      newKeyTypes: BigNumberish[],
+      newMinimumValidatorCount: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    setContractResolver(
+      newResolverAddress: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    setEpochEndTime(
+      newEpochEndTime: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    setEpochLength(
+      newEpochLength: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    setEpochState(
+      newState: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    setEpochTimeout(
+      newEpochTimeout: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    setIpPortNodeAddressAndCommunicationPubKeys(
+      ip: BigNumberish,
+      ipv6: BigNumberish,
+      port: BigNumberish,
+      nodeAddress: string,
+      senderPubKey: BigNumberish,
+      receiverPubKey: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    setKickPenaltyPercent(
+      reason: BigNumberish,
+      newKickPenaltyPercent: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    signalReadyForNextEpoch(
+      epochNumber: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    stake(
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    stakeAndJoin(
+      amount: BigNumberish,
+      ip: BigNumberish,
+      ipv6: BigNumberish,
+      port: BigNumberish,
+      nodeAddress: string,
+      senderPubKey: BigNumberish,
+      receiverPubKey: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    unlockValidatorsForNextEpoch(
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    withdraw(
+      amount: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    checkVersion(
+      version: LibStakingStorage.VersionStruct,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getMaxVersion(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getMaxVersionString(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getMinVersion(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getMinVersionString(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    setMaxVersion(
+      version: LibStakingStorage.VersionStruct,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    setMinVersion(
+      version: LibStakingStorage.VersionStruct,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
     config(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     contractResolver(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -2091,22 +2529,12 @@ export interface Staking extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    env(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     epoch(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    exit(
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
 
     getKeyTypes(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getKickedValidators(
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getReward(
-      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     getStakingBalancesAddress(
@@ -2162,19 +2590,8 @@ export interface Staking extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     kickPenaltyPercentByReason(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    kickValidatorInNextEpoch(
-      validatorStakerAddress: string,
       reason: BigNumberish,
-      data: BytesLike,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    lockValidatorsForNextEpoch(
-      overrides?: Overrides & { from?: string }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     nextValidatorCountForConsensus(
@@ -2182,83 +2599,13 @@ export interface Staking extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     nodeAddressToStakerAddress(
-      arg0: string,
+      nodeAddress: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     readyForNextEpoch(
-      arg0: string,
+      stakerAddress: string,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    requestToJoin(
-      ip: BigNumberish,
-      ipv6: BigNumberish,
-      port: BigNumberish,
-      nodeAddress: string,
-      senderPubKey: BigNumberish,
-      receiverPubKey: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    requestToLeave(
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    setConfig(
-      newTokenRewardPerTokenPerEpoch: BigNumberish,
-      newComplaintTolerance: BigNumberish,
-      newComplaintIntervalSecs: BigNumberish,
-      newKeyTypes: BigNumberish[],
-      newMinimumValidatorCount: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    setContractResolver(
-      newResolverAddress: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    setEpochEndTime(
-      newEpochEndTime: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    setEpochLength(
-      newEpochLength: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    setEpochState(
-      newState: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    setEpochTimeout(
-      newEpochTimeout: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    setIpPortNodeAddressAndCommunicationPubKeys(
-      ip: BigNumberish,
-      ipv6: BigNumberish,
-      port: BigNumberish,
-      nodeAddress: string,
-      senderPubKey: BigNumberish,
-      receiverPubKey: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    setKickPenaltyPercent(
-      reason: BigNumberish,
-      newKickPenaltyPercent: BigNumberish,
-      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     shouldKickValidator(
@@ -2266,59 +2613,11 @@ export interface Staking extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    signalReadyForNextEpoch(
-      epochNumber: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    stake(
-      amount: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    stakeAndJoin(
-      amount: BigNumberish,
-      ip: BigNumberish,
-      ipv6: BigNumberish,
-      port: BigNumberish,
-      nodeAddress: string,
-      senderPubKey: BigNumberish,
-      receiverPubKey: BigNumberish,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
     state(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    totalStaked(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    unlockValidatorsForNextEpoch(
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    usedCommsKeys(
-      arg0: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     validators(
-      arg0: string,
+      stakerAddress: string,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    votesToKickValidatorsInNextEpoch(
-      arg0: BigNumberish,
-      arg1: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    withdraw(
-      amount: BigNumberish,
-      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
   };
 }

@@ -27,6 +27,7 @@
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:dev": "yarn node ./tools/scripts/pub.mjs --tag dev",
     "publish:test": "yarn node ./tools/scripts/pub.mjs --tag test",
+    "publish:cayenne": "yarn node ./tools/scripts/pub.mjs --tag cayenne",
     "publish:app:html": "yarn node ./tools/scripts/build-html.mjs && cd dist/apps/html && vercel --prod",
     "buildAndPublish": "yarn build:packages && yarn publish:packages",
     "bbp": "yarn bump && yarn build && yarn publish:dev",
@@ -38,7 +39,7 @@
     "gen:readme": "yarn node ./tools/scripts/gen-readme.mjs",
     "gen:contracts": "node node_modules/@getlit/contracts",
     "update:contracts": "yarn gen:contracts --update --outdir ./packages/contracts-sdk/src/abis",
-    "gen:config": "node node_modules/@getlit/contracts --update --outdir ./tools/scripts/lit-contracts && node ./tools/scripts/gen-lit-config.mjs",
+    "gen:config": "yarn gen:contracts --update --outdir ./tools/scripts/lit-contracts && node ./tools/scripts/gen-lit-config.mjs",
     "delete": "yarn node ./tools/scripts/delete.mjs",
     "delete:package": "yarn delete --package",
     "delete:app": "yarn delete --app",
@@ -137,7 +138,7 @@
     "uint8arrays": "^4.0.3"
   },
   "devDependencies": {
-    "@getlit/contracts": "^0.1.17",
+    "@getlit/contracts": "^0.2.0",
     "@nrwl/cypress": "14.5.10",
     "@nrwl/eslint-plugin-nx": "14.5.10",
     "@nrwl/jest": "14.5.10",

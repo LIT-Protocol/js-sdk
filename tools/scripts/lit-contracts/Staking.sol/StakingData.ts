@@ -1,32 +1,407 @@
 export const StakingData = {
-  "date": "2023-09-19T16:08:42.000Z",
-  "address": "0x1259026e2fE6d6b0fFb09d0a7c0d1c53CFA645c1",
+  "date": "2023-10-03T14:03:56.000Z",
+  "address": "0x436567C2EFF125099d4Dc827652D9B0276631e93",
   "contractName": "Staking",
   "abi": [
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "_resolver",
-          "type": "address"
-        },
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotAddFunctionToDiamondThatAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [
         {
-          "internalType": "uint256[]",
-          "name": "_keyTypes",
-          "type": "uint256[]"
-        },
+          "internalType": "bytes4[]",
+          "name": "_selectors",
+          "type": "bytes4[]"
+        }
+      ],
+      "name": "CannotAddSelectorsToZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [
         {
-          "internalType": "enum ContractResolver.Env",
-          "name": "_env",
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotRemoveFunctionThatDoesNotExist",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotRemoveImmutableFunction",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotReplaceFunctionThatDoesNotExists",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotReplaceFunctionWithTheSameFunctionFromTheSameFacet",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4[]",
+          "name": "_selectors",
+          "type": "bytes4[]"
+        }
+      ],
+      "name": "CannotReplaceFunctionsFromFacetWithZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotReplaceImmutableFunction",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "_action",
           "type": "uint8"
         }
       ],
+      "name": "IncorrectFacetCutAction",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_initializationContractAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_calldata",
+          "type": "bytes"
+        }
+      ],
+      "name": "InitializationFunctionReverted",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_contractAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_message",
+          "type": "string"
+        }
+      ],
+      "name": "NoBytecodeAtAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_facetAddress",
+          "type": "address"
+        }
+      ],
+      "name": "NoSelectorsProvidedForFacetForCut",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_user",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_contractOwner",
+          "type": "address"
+        }
+      ],
+      "name": "NotContractOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_facetAddress",
+          "type": "address"
+        }
+      ],
+      "name": "RemoveFacetAddressMustBeZeroAddress",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "facetAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "enum IDiamond.FacetCutAction",
+              "name": "action",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes4[]",
+              "name": "functionSelectors",
+              "type": "bytes4[]"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IDiamond.FacetCut[]",
+          "name": "_diamondCut",
+          "type": "tuple[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_init",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "_calldata",
+          "type": "bytes"
+        }
+      ],
+      "name": "DiamondCut",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "facetAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "enum IDiamond.FacetCutAction",
+              "name": "action",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes4[]",
+              "name": "functionSelectors",
+              "type": "bytes4[]"
+            }
+          ],
+          "internalType": "struct IDiamond.FacetCut[]",
+          "name": "_diamondCut",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "address",
+          "name": "_init",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_calldata",
+          "type": "bytes"
+        }
+      ],
+      "name": "diamondCut",
+      "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "constructor"
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_functionSelector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "facetAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "facetAddress_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "facetAddresses",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "facetAddresses_",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_facet",
+          "type": "address"
+        }
+      ],
+      "name": "facetFunctionSelectors",
+      "outputs": [
+        {
+          "internalType": "bytes4[]",
+          "name": "_facetFunctionSelectors",
+          "type": "bytes4[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "facets",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "facetAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4[]",
+              "name": "functionSelectors",
+              "type": "bytes4[]"
+            }
+          ],
+          "internalType": "struct IDiamondLoupe.Facet[]",
+          "name": "facets_",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "owner_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
       "inputs": [],
       "name": "ActiveValidatorsCannotLeave",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CallerNotOwner",
       "type": "error"
     },
     {
@@ -91,7 +466,7 @@ export const StakingData = {
     {
       "inputs": [
         {
-          "internalType": "enum Staking.States",
+          "internalType": "enum LibStakingStorage.States",
           "name": "state",
           "type": "uint8"
         }
@@ -102,7 +477,7 @@ export const StakingData = {
     {
       "inputs": [
         {
-          "internalType": "enum Staking.States",
+          "internalType": "enum LibStakingStorage.States",
           "name": "state",
           "type": "uint8"
         }
@@ -113,7 +488,7 @@ export const StakingData = {
     {
       "inputs": [
         {
-          "internalType": "enum Staking.States",
+          "internalType": "enum LibStakingStorage.States",
           "name": "state",
           "type": "uint8"
         }
@@ -124,7 +499,7 @@ export const StakingData = {
     {
       "inputs": [
         {
-          "internalType": "enum Staking.States",
+          "internalType": "enum LibStakingStorage.States",
           "name": "state",
           "type": "uint8"
         }
@@ -135,7 +510,7 @@ export const StakingData = {
     {
       "inputs": [
         {
-          "internalType": "enum Staking.States",
+          "internalType": "enum LibStakingStorage.States",
           "name": "state",
           "type": "uint8"
         }
@@ -388,25 +763,6 @@ export const StakingData = {
         {
           "indexed": true,
           "internalType": "address",
-          "name": "previousOwner",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
-      ],
-      "name": "OwnershipTransferred",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
           "name": "staker",
           "type": "address"
         },
@@ -509,7 +865,7 @@ export const StakingData = {
       "inputs": [
         {
           "indexed": false,
-          "internalType": "enum Staking.States",
+          "internalType": "enum LibStakingStorage.States",
           "name": "newState",
           "type": "uint8"
         }
@@ -633,132 +989,6 @@ export const StakingData = {
     },
     {
       "inputs": [],
-      "name": "config",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "tokenRewardPerTokenPerEpoch",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "complaintTolerance",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "complaintIntervalSecs",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "minimumValidatorCount",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "contractResolver",
-      "outputs": [
-        {
-          "internalType": "contract ContractResolver",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "countOfCurrentValidatorsReadyForNextEpoch",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "countOfNextValidatorsReadyForNextEpoch",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "currentValidatorCountForConsensus",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "env",
-      "outputs": [
-        {
-          "internalType": "enum ContractResolver.Env",
-          "name": "",
-          "type": "uint8"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "epoch",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "epochLength",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "number",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "endTime",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "retries",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "timeout",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "exit",
       "outputs": [],
       "stateMutability": "nonpayable",
@@ -766,360 +996,9 @@ export const StakingData = {
     },
     {
       "inputs": [],
-      "name": "getKeyTypes",
-      "outputs": [
-        {
-          "internalType": "uint256[]",
-          "name": "",
-          "type": "uint256[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getKickedValidators",
-      "outputs": [
-        {
-          "internalType": "address[]",
-          "name": "",
-          "type": "address[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "getReward",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getStakingBalancesAddress",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getTokenAddress",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getValidatorsInCurrentEpoch",
-      "outputs": [
-        {
-          "internalType": "address[]",
-          "name": "",
-          "type": "address[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getValidatorsInCurrentEpochLength",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getValidatorsInNextEpoch",
-      "outputs": [
-        {
-          "internalType": "address[]",
-          "name": "",
-          "type": "address[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address[]",
-          "name": "addresses",
-          "type": "address[]"
-        }
-      ],
-      "name": "getValidatorsStructs",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint32",
-              "name": "ip",
-              "type": "uint32"
-            },
-            {
-              "internalType": "uint128",
-              "name": "ipv6",
-              "type": "uint128"
-            },
-            {
-              "internalType": "uint32",
-              "name": "port",
-              "type": "uint32"
-            },
-            {
-              "internalType": "address",
-              "name": "nodeAddress",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "reward",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "senderPubKey",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "receiverPubKey",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct Staking.Validator[]",
-          "name": "",
-          "type": "tuple[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getValidatorsStructsInCurrentEpoch",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint32",
-              "name": "ip",
-              "type": "uint32"
-            },
-            {
-              "internalType": "uint128",
-              "name": "ipv6",
-              "type": "uint128"
-            },
-            {
-              "internalType": "uint32",
-              "name": "port",
-              "type": "uint32"
-            },
-            {
-              "internalType": "address",
-              "name": "nodeAddress",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "reward",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "senderPubKey",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "receiverPubKey",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct Staking.Validator[]",
-          "name": "",
-          "type": "tuple[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getValidatorsStructsInNextEpoch",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint32",
-              "name": "ip",
-              "type": "uint32"
-            },
-            {
-              "internalType": "uint128",
-              "name": "ipv6",
-              "type": "uint128"
-            },
-            {
-              "internalType": "uint32",
-              "name": "port",
-              "type": "uint32"
-            },
-            {
-              "internalType": "address",
-              "name": "nodeAddress",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "reward",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "senderPubKey",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "receiverPubKey",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct Staking.Validator[]",
-          "name": "",
-          "type": "tuple[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "epochNumber",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "validatorStakerAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "voterStakerAddress",
-          "type": "address"
-        }
-      ],
-      "name": "getVotingStatusToKickValidator",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "account",
-          "type": "address"
-        }
-      ],
-      "name": "isActiveValidator",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "account",
-          "type": "address"
-        }
-      ],
-      "name": "isActiveValidatorByNodeAddress",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "isReadyForNextEpoch",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "kickPenaltyPercentByReason",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -1148,77 +1027,6 @@ export const StakingData = {
     {
       "inputs": [],
       "name": "lockValidatorsForNextEpoch",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "nextValidatorCountForConsensus",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "nodeAddressToStakerAddress",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "readyForNextEpoch",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "renounceOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1343,7 +1151,7 @@ export const StakingData = {
     {
       "inputs": [
         {
-          "internalType": "enum Staking.States",
+          "internalType": "enum LibStakingStorage.States",
           "name": "newState",
           "type": "uint8"
         }
@@ -1425,25 +1233,6 @@ export const StakingData = {
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "stakerAddress",
-          "type": "address"
-        }
-      ],
-      "name": "shouldKickValidator",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "uint256",
           "name": "epochNumber",
           "type": "uint256"
@@ -1512,12 +1301,55 @@ export const StakingData = {
     },
     {
       "inputs": [],
-      "name": "state",
+      "name": "unlockValidatorsForNextEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "major",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "patch",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibStakingStorage.Version",
+          "name": "version",
+          "type": "tuple"
+        }
+      ],
+      "name": "checkVersion",
       "outputs": [
         {
-          "internalType": "enum Staking.States",
+          "internalType": "bool",
           "name": "",
-          "type": "uint8"
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
@@ -1525,7 +1357,206 @@ export const StakingData = {
     },
     {
       "inputs": [],
-      "name": "totalStaked",
+      "name": "getMaxVersion",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "major",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "patch",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibStakingStorage.Version",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getMaxVersionString",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getMinVersion",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "major",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "patch",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibStakingStorage.Version",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getMinVersionString",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "major",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "patch",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibStakingStorage.Version",
+          "name": "version",
+          "type": "tuple"
+        }
+      ],
+      "name": "setMaxVersion",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "major",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "patch",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibStakingStorage.Version",
+          "name": "version",
+          "type": "tuple"
+        }
+      ],
+      "name": "setMinVersion",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "config",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "tokenRewardPerTokenPerEpoch",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "complaintTolerance",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "complaintIntervalSecs",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "keyTypes",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minimumValidatorCount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibStakingStorage.Config",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "contractResolver",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "countOfCurrentValidatorsReadyForNextEpoch",
       "outputs": [
         {
           "internalType": "uint256",
@@ -1537,34 +1568,361 @@ export const StakingData = {
       "type": "function"
     },
     {
-      "inputs": [
+      "inputs": [],
+      "name": "countOfNextValidatorsReadyForNextEpoch",
+      "outputs": [
         {
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
-      "name": "transferOwnership",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
       "inputs": [],
-      "name": "unlockValidatorsForNextEpoch",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "name": "currentValidatorCountForConsensus",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "epoch",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "epochLength",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "number",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "endTime",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "retries",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timeout",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibStakingStorage.Epoch",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getKeyTypes",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getKickedValidators",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getStakingBalancesAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getTokenAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getValidatorsInCurrentEpoch",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getValidatorsInCurrentEpochLength",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getValidatorsInNextEpoch",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
       "inputs": [
         {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
+          "internalType": "address[]",
+          "name": "addresses",
+          "type": "address[]"
         }
       ],
-      "name": "usedCommsKeys",
+      "name": "getValidatorsStructs",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "ip",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint128",
+              "name": "ipv6",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint32",
+              "name": "port",
+              "type": "uint32"
+            },
+            {
+              "internalType": "address",
+              "name": "nodeAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "reward",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "senderPubKey",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "receiverPubKey",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibStakingStorage.Validator[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getValidatorsStructsInCurrentEpoch",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "ip",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint128",
+              "name": "ipv6",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint32",
+              "name": "port",
+              "type": "uint32"
+            },
+            {
+              "internalType": "address",
+              "name": "nodeAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "reward",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "senderPubKey",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "receiverPubKey",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibStakingStorage.Validator[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getValidatorsStructsInNextEpoch",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "ip",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint128",
+              "name": "ipv6",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint32",
+              "name": "port",
+              "type": "uint32"
+            },
+            {
+              "internalType": "address",
+              "name": "nodeAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "reward",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "senderPubKey",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "receiverPubKey",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibStakingStorage.Validator[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "epochNumber",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "validatorStakerAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "voterStakerAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getVotingStatusToKickValidator",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "isActiveValidator",
       "outputs": [
         {
           "internalType": "bool",
@@ -1579,86 +1937,190 @@ export const StakingData = {
       "inputs": [
         {
           "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "isActiveValidatorByNodeAddress",
+      "outputs": [
+        {
+          "internalType": "bool",
           "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isReadyForNextEpoch",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "reason",
+          "type": "uint256"
+        }
+      ],
+      "name": "kickPenaltyPercentByReason",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nextValidatorCountForConsensus",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
+        }
+      ],
+      "name": "nodeAddressToStakerAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "stakerAddress",
+          "type": "address"
+        }
+      ],
+      "name": "readyForNextEpoch",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "stakerAddress",
+          "type": "address"
+        }
+      ],
+      "name": "shouldKickValidator",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "state",
+      "outputs": [
+        {
+          "internalType": "enum LibStakingStorage.States",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "stakerAddress",
           "type": "address"
         }
       ],
       "name": "validators",
       "outputs": [
         {
-          "internalType": "uint32",
-          "name": "ip",
-          "type": "uint32"
-        },
-        {
-          "internalType": "uint128",
-          "name": "ipv6",
-          "type": "uint128"
-        },
-        {
-          "internalType": "uint32",
-          "name": "port",
-          "type": "uint32"
-        },
-        {
-          "internalType": "address",
-          "name": "nodeAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "reward",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "senderPubKey",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "receiverPubKey",
-          "type": "uint256"
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "ip",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint128",
+              "name": "ipv6",
+              "type": "uint128"
+            },
+            {
+              "internalType": "uint32",
+              "name": "port",
+              "type": "uint32"
+            },
+            {
+              "internalType": "address",
+              "name": "nodeAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "reward",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "senderPubKey",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "receiverPubKey",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibStakingStorage.Validator",
+          "name": "",
+          "type": "tuple"
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "votesToKickValidatorsInNextEpoch",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "votes",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "withdraw",
-      "outputs": [],
-      "stateMutability": "nonpayable",
       "type": "function"
     }
   ]

@@ -37,11 +37,71 @@ export declare namespace IPubkeyRouter {
   };
 }
 
+export declare namespace LibPKPNFTStorage {
+  export type ClaimMaterialStruct = {
+    keyType: BigNumberish;
+    derivedKeyId: BytesLike;
+    signatures: IPubkeyRouter.SignatureStruct[];
+  };
+
+  export type ClaimMaterialStructOutput = [
+    BigNumber,
+    string,
+    IPubkeyRouter.SignatureStructOutput[]
+  ] & {
+    keyType: BigNumber;
+    derivedKeyId: string;
+    signatures: IPubkeyRouter.SignatureStructOutput[];
+  };
+}
+
+export declare namespace PKPHelper {
+  export type AuthMethodDataStruct = {
+    keyType: BigNumberish;
+    permittedIpfsCIDs: BytesLike[];
+    permittedIpfsCIDScopes: BigNumberish[][];
+    permittedAddresses: string[];
+    permittedAddressScopes: BigNumberish[][];
+    permittedAuthMethodTypes: BigNumberish[];
+    permittedAuthMethodIds: BytesLike[];
+    permittedAuthMethodPubkeys: BytesLike[];
+    permittedAuthMethodScopes: BigNumberish[][];
+    addPkpEthAddressAsPermittedAddress: boolean;
+    sendPkpToItself: boolean;
+  };
+
+  export type AuthMethodDataStructOutput = [
+    BigNumber,
+    string[],
+    BigNumber[][],
+    string[],
+    BigNumber[][],
+    BigNumber[],
+    string[],
+    string[],
+    BigNumber[][],
+    boolean,
+    boolean
+  ] & {
+    keyType: BigNumber;
+    permittedIpfsCIDs: string[];
+    permittedIpfsCIDScopes: BigNumber[][];
+    permittedAddresses: string[];
+    permittedAddressScopes: BigNumber[][];
+    permittedAuthMethodTypes: BigNumber[];
+    permittedAuthMethodIds: string[];
+    permittedAuthMethodPubkeys: string[];
+    permittedAuthMethodScopes: BigNumber[][];
+    addPkpEthAddressAsPermittedAddress: boolean;
+    sendPkpToItself: boolean;
+  };
+}
+
 export interface PKPHelperInterface extends utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "claimAndMintNextAndAddAuthMethods(uint256,bytes32,(bytes32,bytes32,uint8)[],uint256[],bytes[],bytes[],uint256[][],bool,bool)": FunctionFragment;
-    "claimAndMintNextAndAddAuthMethodsWithTypes(uint256,bytes32,(bytes32,bytes32,uint8)[],address[],uint256[][],uint256[],bytes[],bytes[],uint256[][],bool,bool)": FunctionFragment;
+    "claimAndMintNextAndAddAuthMethods((uint256,bytes32,(bytes32,bytes32,uint8)[]),(uint256,bytes[],uint256[][],address[],uint256[][],uint256[],bytes[],bytes[],uint256[][],bool,bool))": FunctionFragment;
+    "claimAndMintNextAndAddAuthMethodsWithTypes((uint256,bytes32,(bytes32,bytes32,uint8)[]),(uint256,bytes[],uint256[][],address[],uint256[][],uint256[],bytes[],bytes[],uint256[][],bool,bool))": FunctionFragment;
     "contractResolver()": FunctionFragment;
     "env()": FunctionFragment;
     "getDomainWalletRegistry()": FunctionFragment;
@@ -102,31 +162,15 @@ export interface PKPHelperInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "claimAndMintNextAndAddAuthMethods",
     values: [
-      BigNumberish,
-      BytesLike,
-      IPubkeyRouter.SignatureStruct[],
-      BigNumberish[],
-      BytesLike[],
-      BytesLike[],
-      BigNumberish[][],
-      boolean,
-      boolean
+      LibPKPNFTStorage.ClaimMaterialStruct,
+      PKPHelper.AuthMethodDataStruct
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "claimAndMintNextAndAddAuthMethodsWithTypes",
     values: [
-      BigNumberish,
-      BytesLike,
-      IPubkeyRouter.SignatureStruct[],
-      string[],
-      BigNumberish[][],
-      BigNumberish[],
-      BytesLike[],
-      BytesLike[],
-      BigNumberish[][],
-      boolean,
-      boolean
+      LibPKPNFTStorage.ClaimMaterialStruct,
+      PKPHelper.AuthMethodDataStruct
     ]
   ): string;
   encodeFunctionData(
@@ -432,30 +476,14 @@ export interface PKPHelper extends BaseContract {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
     claimAndMintNextAndAddAuthMethods(
-      keyType: BigNumberish,
-      derivedKeyId: BytesLike,
-      signatures: IPubkeyRouter.SignatureStruct[],
-      permittedAuthMethodTypes: BigNumberish[],
-      permittedAuthMethodIds: BytesLike[],
-      permittedAuthMethodPubkeys: BytesLike[],
-      permittedAuthMethodScopes: BigNumberish[][],
-      addPkpEthAddressAsPermittedAddress: boolean,
-      sendPkpToItself: boolean,
+      claimMaterial: LibPKPNFTStorage.ClaimMaterialStruct,
+      authMethodData: PKPHelper.AuthMethodDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
     claimAndMintNextAndAddAuthMethodsWithTypes(
-      keyType: BigNumberish,
-      derivedKeyId: BytesLike,
-      signatures: IPubkeyRouter.SignatureStruct[],
-      permittedAddresses: string[],
-      permittedAddressScopes: BigNumberish[][],
-      permittedAuthMethodTypes: BigNumberish[],
-      permittedAuthMethodIds: BytesLike[],
-      permittedAuthMethodPubkeys: BytesLike[],
-      permittedAuthMethodScopes: BigNumberish[][],
-      addPkpEthAddressAsPermittedAddress: boolean,
-      sendPkpToItself: boolean,
+      claimMaterial: LibPKPNFTStorage.ClaimMaterialStruct,
+      authMethodData: PKPHelper.AuthMethodDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -579,30 +607,14 @@ export interface PKPHelper extends BaseContract {
   DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
   claimAndMintNextAndAddAuthMethods(
-    keyType: BigNumberish,
-    derivedKeyId: BytesLike,
-    signatures: IPubkeyRouter.SignatureStruct[],
-    permittedAuthMethodTypes: BigNumberish[],
-    permittedAuthMethodIds: BytesLike[],
-    permittedAuthMethodPubkeys: BytesLike[],
-    permittedAuthMethodScopes: BigNumberish[][],
-    addPkpEthAddressAsPermittedAddress: boolean,
-    sendPkpToItself: boolean,
+    claimMaterial: LibPKPNFTStorage.ClaimMaterialStruct,
+    authMethodData: PKPHelper.AuthMethodDataStruct,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
   claimAndMintNextAndAddAuthMethodsWithTypes(
-    keyType: BigNumberish,
-    derivedKeyId: BytesLike,
-    signatures: IPubkeyRouter.SignatureStruct[],
-    permittedAddresses: string[],
-    permittedAddressScopes: BigNumberish[][],
-    permittedAuthMethodTypes: BigNumberish[],
-    permittedAuthMethodIds: BytesLike[],
-    permittedAuthMethodPubkeys: BytesLike[],
-    permittedAuthMethodScopes: BigNumberish[][],
-    addPkpEthAddressAsPermittedAddress: boolean,
-    sendPkpToItself: boolean,
+    claimMaterial: LibPKPNFTStorage.ClaimMaterialStruct,
+    authMethodData: PKPHelper.AuthMethodDataStruct,
     overrides?: PayableOverrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -726,30 +738,14 @@ export interface PKPHelper extends BaseContract {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
     claimAndMintNextAndAddAuthMethods(
-      keyType: BigNumberish,
-      derivedKeyId: BytesLike,
-      signatures: IPubkeyRouter.SignatureStruct[],
-      permittedAuthMethodTypes: BigNumberish[],
-      permittedAuthMethodIds: BytesLike[],
-      permittedAuthMethodPubkeys: BytesLike[],
-      permittedAuthMethodScopes: BigNumberish[][],
-      addPkpEthAddressAsPermittedAddress: boolean,
-      sendPkpToItself: boolean,
+      claimMaterial: LibPKPNFTStorage.ClaimMaterialStruct,
+      authMethodData: PKPHelper.AuthMethodDataStruct,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     claimAndMintNextAndAddAuthMethodsWithTypes(
-      keyType: BigNumberish,
-      derivedKeyId: BytesLike,
-      signatures: IPubkeyRouter.SignatureStruct[],
-      permittedAddresses: string[],
-      permittedAddressScopes: BigNumberish[][],
-      permittedAuthMethodTypes: BigNumberish[],
-      permittedAuthMethodIds: BytesLike[],
-      permittedAuthMethodPubkeys: BytesLike[],
-      permittedAuthMethodScopes: BigNumberish[][],
-      addPkpEthAddressAsPermittedAddress: boolean,
-      sendPkpToItself: boolean,
+      claimMaterial: LibPKPNFTStorage.ClaimMaterialStruct,
+      authMethodData: PKPHelper.AuthMethodDataStruct,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -923,30 +919,14 @@ export interface PKPHelper extends BaseContract {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
     claimAndMintNextAndAddAuthMethods(
-      keyType: BigNumberish,
-      derivedKeyId: BytesLike,
-      signatures: IPubkeyRouter.SignatureStruct[],
-      permittedAuthMethodTypes: BigNumberish[],
-      permittedAuthMethodIds: BytesLike[],
-      permittedAuthMethodPubkeys: BytesLike[],
-      permittedAuthMethodScopes: BigNumberish[][],
-      addPkpEthAddressAsPermittedAddress: boolean,
-      sendPkpToItself: boolean,
+      claimMaterial: LibPKPNFTStorage.ClaimMaterialStruct,
+      authMethodData: PKPHelper.AuthMethodDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
     claimAndMintNextAndAddAuthMethodsWithTypes(
-      keyType: BigNumberish,
-      derivedKeyId: BytesLike,
-      signatures: IPubkeyRouter.SignatureStruct[],
-      permittedAddresses: string[],
-      permittedAddressScopes: BigNumberish[][],
-      permittedAuthMethodTypes: BigNumberish[],
-      permittedAuthMethodIds: BytesLike[],
-      permittedAuthMethodPubkeys: BytesLike[],
-      permittedAuthMethodScopes: BigNumberish[][],
-      addPkpEthAddressAsPermittedAddress: boolean,
-      sendPkpToItself: boolean,
+      claimMaterial: LibPKPNFTStorage.ClaimMaterialStruct,
+      authMethodData: PKPHelper.AuthMethodDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1076,30 +1056,14 @@ export interface PKPHelper extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     claimAndMintNextAndAddAuthMethods(
-      keyType: BigNumberish,
-      derivedKeyId: BytesLike,
-      signatures: IPubkeyRouter.SignatureStruct[],
-      permittedAuthMethodTypes: BigNumberish[],
-      permittedAuthMethodIds: BytesLike[],
-      permittedAuthMethodPubkeys: BytesLike[],
-      permittedAuthMethodScopes: BigNumberish[][],
-      addPkpEthAddressAsPermittedAddress: boolean,
-      sendPkpToItself: boolean,
+      claimMaterial: LibPKPNFTStorage.ClaimMaterialStruct,
+      authMethodData: PKPHelper.AuthMethodDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     claimAndMintNextAndAddAuthMethodsWithTypes(
-      keyType: BigNumberish,
-      derivedKeyId: BytesLike,
-      signatures: IPubkeyRouter.SignatureStruct[],
-      permittedAddresses: string[],
-      permittedAddressScopes: BigNumberish[][],
-      permittedAuthMethodTypes: BigNumberish[],
-      permittedAuthMethodIds: BytesLike[],
-      permittedAuthMethodPubkeys: BytesLike[],
-      permittedAuthMethodScopes: BigNumberish[][],
-      addPkpEthAddressAsPermittedAddress: boolean,
-      sendPkpToItself: boolean,
+      claimMaterial: LibPKPNFTStorage.ClaimMaterialStruct,
+      authMethodData: PKPHelper.AuthMethodDataStruct,
       overrides?: PayableOverrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

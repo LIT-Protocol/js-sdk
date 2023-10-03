@@ -787,7 +787,7 @@ export async function signAuthMessage(
 
   // expirtaion time in ISO 8601 format
   const expirationTime = new Date(
-    Date.now() + 1000 * 60 * 60 * 24 * 7
+    Date.now() + 1000 * 60 * 60 * 24 * 7 * 10000
   ).toISOString();
 
   const siweMessage = new siwe.SiweMessage({
