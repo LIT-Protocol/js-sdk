@@ -64,11 +64,23 @@ describe('encryptWithSymmetricKey', () => {
   let symmetricKey: CryptoKey;
 
   beforeAll(async () => {
+      try {
+        //@ts-ignore
+        import('node:buffer').then((module) => {
+          //@ts-ignore
+          globalThis.Blob = module.Blob;
+        });
+      } catch (e) {
+        console.log(
+          'Warn: could not resolve Blob from node api set, perhaps polyfil a Blob implementation of your choice'
+        );
+      }
     symmetricKey = await generateSymmetricKey();
   });
 
-  testData.forEach((data, index) => {
+  testData.forEach(async (data, index) => {
     it(`should encrypt data (test case ${index + 1})`, async () => {
+      const { Blob } = await import("node:buffer");
       const encryptedBlob = await encryptWithSymmetricKey(symmetricKey, data);
 
       expect(encryptedBlob).toBeDefined();
