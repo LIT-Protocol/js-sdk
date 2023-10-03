@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@ethersproject/providers": "^5.7.2",
-    "@lit-protocol/auth-browser": "^2.2.50",
-    "@lit-protocol/constants": "^2.2.50",
+    "@lit-protocol/auth-browser": "^3.0.5",
+    "@lit-protocol/constants": "^3.0.5",
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.13",
     "ethers": "^5.7.2",
