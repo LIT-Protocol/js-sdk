@@ -214,7 +214,7 @@ export abstract class BaseProvider {
    * @param appId
    * @returns
    */
-  computPublicKeyFromAuthMethod = async (
+  computePublicKeyFromAuthMethod = async (
     authMethod: AuthMethod
   ): Promise<String> => {
     let authMethodId = await this.getAuthMethodId(authMethod);
