@@ -24,7 +24,7 @@
   "tags": [
     "nodejs"
   ],
-  "version": "3.0.22",
+  "version": "2.2.59",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }
