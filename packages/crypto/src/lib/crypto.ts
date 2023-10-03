@@ -6,7 +6,7 @@ import { LIT_ERROR, SessionKeyPair, SigShare } from '@lit-protocol/constants';
 
 import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
-import { isBrowser, log, throwError } from '@lit-protocol/misc';
+import { isBrowser, isNode, log, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
@@ -53,6 +53,8 @@ if (!globalThis.wasmECDSA) {
     }
   });
 }
+
+
 /** ---------- Exports ---------- */
 
 export interface BlsSignatureShare {

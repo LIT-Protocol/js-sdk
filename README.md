@@ -151,7 +151,7 @@ The test apps are configured to automatically import all modules and expose all 
 yarn apps
 ```
 
-or runniny individually
+or running individually
 
 ```
 // html

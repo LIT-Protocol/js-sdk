@@ -210,7 +210,5 @@ describe('combine ECDSA Shares', () => {
     const addr = ethers.utils.computeAddress(ethers.utils.arrayify('0x' + sigShares[0].publicKey));
     const recoveredAddr = ethers.utils.computeAddress(ethers.utils.arrayify(recoveredPk));
     expect(recoveredAddr).toEqual(addr);
-
-
   });
 });
