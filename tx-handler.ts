@@ -1,4 +1,4 @@
-const ENDPOINT = 'https://lit-general-worker.herokuapp.com/';
+const ENDPOINT = 'https://lit-general-worker.getlit.dev/';
 
 // check if endpoint is up
 export const checkEndpoint = async () => {

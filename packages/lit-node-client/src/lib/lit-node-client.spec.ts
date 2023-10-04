@@ -1,13 +1,17 @@
 import { LitNodeClient } from './lit-node-client';
+<<<<<<< HEAD
 import * as LITCONFIG from 'lit.config.json';
 import { processTx } from '../../../../tx-handler';
 import { AuthSig } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { SIGTYPE } from '@lit-protocol/constants';
+=======
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 let client: LitNodeClient;
 
 jest.setTimeout(60000);
 
+<<<<<<< HEAD
 describe('Lit Actions', () => {
   client = new LitNodeClient({
     litNetwork: 'custom',
@@ -27,37 +31,28 @@ describe('Lit Actions', () => {
   it('should be connected', async () => {
     expect(client.ready).toBe(true);
   });
+=======
+describe('LitNodeClient static methods', () => {
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 
-  it('lit action log should return hello world', async () => {
-    const res = await processTx(
-      expect.getState().currentTestName,
-      await client.executeJs({
-        authSig: LITCONFIG.CONTROLLER_AUTHSIG,
-        code: `(async () => {
-          console.log('hello world')
-        })();`,
-        jsParams: {
-          publicKey: LITCONFIG.PKP_PUBKEY,
+  it('Should combine claim responses', () => {
+    const nodeclaimResponses = [
+      {
+        'foo': {
+          keyId: "abc1234",
+          signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
         },
-      })
-    );
-
-    expect(res.logs).toContain('hello world');
-  });
-
-  it('lit action response should return json {hello: "world"}', async () => {
-    const res = await processTx(
-      expect.getState().currentTestName,
-      await client.executeJs({
-        authSig: LITCONFIG.CONTROLLER_AUTHSIG,
-        code: `(async () => {
-            LitActions.setResponse({
-              response: JSON.stringify({hello: 'world'})
-            });
-          })();`,
-        jsParams: {
-          publicKey: LITCONFIG.PKP_PUBKEY,
+        bar: {
+          keyId: "xyz1234",
+          signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
+        }
+      },
+      {
+        'foo': {
+          keyId: "abc1234",
+          signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
         },
+<<<<<<< HEAD
       })
     );
 
@@ -138,3 +133,27 @@ describe('Lit Actions', () => {
     expect(sig.publicKey.toLowerCase()).toEqual(res.pubkey.toLowerCase());
   }, 20_0000);
 });
+=======
+        bar: {
+          keyId: "xyz1234",
+          signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
+        }
+      },
+      {
+        'foo': {
+          keyId: "abc1234",
+          signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
+        },
+        bar: {
+          keyId: "xyz1234",
+          signature: "f84ad3d3efa42abcae2b3567c836f1342552a75ed038e9403b77a7c47e3500242572c86ddee7f9af4994793a741111553ac7652897ee5447b143b8067557a3511b"
+        }
+      }
+    ];
+
+    const combinedClaims = LitNodeClient.getClaims(nodeclaimResponses);
+    expect(Object.keys(combinedClaims).length).toEqual(2);
+    expect(combinedClaims['foo'].signatures.length).toEqual(3);
+  });
+});
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2

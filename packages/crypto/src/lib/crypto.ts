@@ -25,8 +25,7 @@ if (!globalThis.wasmExports) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [BLS SDK] wasmExports loaded. ${
-          Object.keys(exports).length
+        `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
       );
     }
@@ -48,8 +47,7 @@ if (!globalThis.wasmECDSA) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-          Object.keys(wasmECDSA).length
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );
     }
@@ -123,10 +121,12 @@ export const verifyAndDecryptWithSignatureShares = (
   // Format the signature shares
   const sigShares = shares.map((s) => JSON.stringify(s));
 
+  const base64Identity = uint8ArrayToBase64(identity);
+
   // Decrypt
   const privateData = blsSdk.verify_and_decrypt_with_signature_shares(
     publicKey,
-    uint8ArrayToBase64(identity),
+    base64Identity,
     ciphertext,
     sigShares
   );
@@ -179,14 +179,18 @@ export const verifySignature = (
 export const combineEcdsaShares = (
   sigShares: Array<SigShare>
 ): CombinedECDSASignature => {
+<<<<<<< HEAD
   log('sigShares:', sigShares);
   let type = sigShares[0].sigType;
+=======
+  const type = sigShares[0].sigType;
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   // the public key can come from any node - it obviously will be identical from each node
   // const publicKey = sigShares[0].publicKey;
   // const dataSigned = '0x' + sigShares[0].dataSigned;
   // filter out empty shares
-  let validShares = sigShares.reduce((acc, val) => {
-    if (val.shareHex !== '') {
+  const validShares = sigShares.reduce((acc, val) => {
+    if (val.signatureShare !== '') {
       const newVal = _remapKeyShareForEcdsa(val);
       acc.push(JSON.stringify(newVal));
     }
@@ -211,7 +215,18 @@ export const combineEcdsaShares = (
     switch (type) {
       case SIGTYPE.EcdsaCaitSith:
         res = wasmECDSA.combine_signature(validShares, 2);
+<<<<<<< HEAD
         sig = JSON.parse(res) as CombinedECDSASignature;
+=======
+
+        try {
+          sig = JSON.parse(res) as CombinedECDSASignature;
+        } catch (e) {
+          console.log("xx res:", res); // ERROR: Could not deserialize value
+          throw new Error(`Failed to parse signature: ${e}`);
+        }
+
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
         /*
           r and s values of the signature should be maximum of 64 bytes
           r and s values can have polarity as the first two bits, here we remove 
@@ -229,6 +244,10 @@ export const combineEcdsaShares = (
         break;
       case SIGTYPE.ECDSCAITSITHP256:
         res = wasmECDSA.combine_signature(validShares, 3);
+<<<<<<< HEAD
+=======
+        log('response from combine_signature', res);
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
         sig = JSON.parse(res);
         break;
       // if its another sig type, it shouldnt be resolving to this method
@@ -246,14 +265,27 @@ export const combineEcdsaShares = (
   return sig;
 };
 
+<<<<<<< HEAD
 export const computeHDPubKey = (pubkeys: string[], keyId: string, sigType: SIGTYPE): string => {
   // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
 
+=======
+export const computeHDPubKey = (
+  pubkeys: string[],
+  keyId: string,
+  sigType: SIGTYPE
+): string => {
+  // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   try {
     switch (sigType) {
       case SIGTYPE.EcdsaCaitSith:
         return wasmECDSA.compute_public_key(keyId, pubkeys, 2);
+<<<<<<< HEAD
       defualt: throw new Error('Non supported signature type');
+=======
+        defualt: throw new Error('Non supported signature type');
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
     }
   } catch (e) {
     log('Failed to derive public key', e);

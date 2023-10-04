@@ -1,6 +1,10 @@
 {
   "name": "@lit-protocol/pkp-walletconnect",
+<<<<<<< HEAD
   "version": "2.2.52",
+=======
+  "version": "3.0.3",
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -23,10 +27,11 @@
     "stream": false
   },
   "peerDependencies": {
-    "@walletconnect/core": "2.7.5",
-    "@walletconnect/types": "2.7.5",
-    "@walletconnect/utils": "2.7.5",
-    "@walletconnect/web3wallet": "1.7.3"
+    "@walletconnect/core": "2.9.2",
+    "@walletconnect/jsonrpc-utils": "1.0.8",
+    "@walletconnect/types": "2.9.2",
+    "@walletconnect/utils": "2.9.2",
+    "@walletconnect/web3wallet": "1.8.8"
   },
   "tags": [
     "universal"

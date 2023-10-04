@@ -1,6 +1,10 @@
 {
   "name": "@lit-protocol/lit-auth-client",
+<<<<<<< HEAD
   "version": "2.2.52",
+=======
+  "version": "3.0.3",
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",

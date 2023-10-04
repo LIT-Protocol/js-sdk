@@ -7,7 +7,11 @@ export enum VMTYPE {
 
 export enum SIGTYPE {
   BLS = 'BLS',
+<<<<<<< HEAD
   EcdsaCaitSith = 'EcdsaCaitSith',
+=======
+  EcdsaCaitSith = 'ECDSA_CAIT_SITH',
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   EcdsaCAITSITHP256 = 'EcdsaCaitSithP256'
 }
 
@@ -24,14 +28,13 @@ export const enum EITHER_TYPE {
  */
 export enum AuthMethodType {
   EthWallet = 1,
-  LitAction,
-  WebAuthn,
-  Discord,
-  Google,
-  GoogleJwt,
-  OTP,
-  AppleJwt,
-  StytchOtp,
+  LitAction = 2,
+  WebAuthn = 3,
+  Discord = 4,
+  Google = 5,
+  GoogleJwt = 6,
+  AppleJwt = 8,
+  StytchOtp = 9,
 }
 
 /**
@@ -42,7 +45,6 @@ export enum ProviderType {
   Google = 'google',
   EthWallet = 'ethwallet',
   WebAuthn = 'webauthn',
-  Otp = 'otp',
-  StytchOtp = 'stytchOtp',
   Apple = 'apple',
+  StytchOtp = 'stytchOtp'
 }

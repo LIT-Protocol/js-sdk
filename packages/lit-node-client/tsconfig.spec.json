@@ -2,8 +2,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "module": "commonjs",
-    "types": ["jest", "node"],
+    "module": "ES2022",
+    "types": [
+      "jest",
+      "node"
+    ],
     "allowJs": true,
     "esModuleInterop": true
   },

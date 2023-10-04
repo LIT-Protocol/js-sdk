@@ -10,10 +10,14 @@
     "importHelpers": true,
     "target": "ES2020",
     "module": "ES2020",
+<<<<<<< HEAD
     "lib": [
       "ES2020",
       "dom"
     ],
+=======
+    "lib": ["ES2020", "dom", "ES2021.String"],
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",

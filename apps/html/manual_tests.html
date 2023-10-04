@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+    <title>Manual Tests</title>
 
+<<<<<<< HEAD
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
   <title>Manual Tests</title>
@@ -31,22 +35,87 @@
       document.getElementById('status').innerText = `Testing ${testName}...`;
       var file = new File(['meow meow this is a test'], 'testFilename.txt', {
         type: 'text/plain',
-      });
+=======
+    <script src="/dist/packages/lit-node-client-vanilla/lit-node-client.js"></script>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <script>
+      const LitJsSdk = LitJsSdk_litNodeClient;
 
-      const { zipBlob } = await LitJsSdk.encryptFileAndZipWithMetadata({
-        file,
+      const litNodeClient = new LitNodeClient({
+        litNetwork: 'cayenne',
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
+      });
+      litNodeClient.connect();
+
+      var chain = 'polygon';
+
+      //var authSig = JSON.parse("{\"sig\":\"0x18a173d68d2f78cc5c13da0dfe36eec2a293285bee6d42547b9577bf26cdc985660ed3dddc4e75d422366cac07e8a9fc77669b10373bef9c7b8e4280252dfddf1b\",\"derivedVia\":\"web3.eth.personal.sign\",\"signedMessage\":\"I am creating an account to use LITs at 2021-08-04T20:14:04.918Z\",\"address\":\"0xdbd360f30097fb6d938dcc8b7b62854b36160b45\"}")
+
+      var testEncryptingFileAndZipWithMetadata = async ({
         accessControlConditions,
         evmContractConditions,
         solRpcConditions,
         unifiedAccessControlConditions,
+        testName,
         authSig,
         chain,
+<<<<<<< HEAD
         litNodeClient,
         readme: 'this is a test',
       });
+=======
+      }) => {
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+        var file = new File(['meow meow this is a test'], 'testFilename.txt', {
+          type: 'text/plain',
+        });
 
-      const { decryptedFile } = await LitJsSdk.decryptZipFileWithMetadata({
+        const zipBlob = await LitJsSdk.encryptFileAndZipWithMetadata({
+          file,
+          accessControlConditions,
+          evmContractConditions,
+          solRpcConditions,
+          unifiedAccessControlConditions,
+          authSig,
+          chain,
+          litNodeClient,
+          readme: 'this is a test',
+        });
+
+        const { decryptedFile } = await LitJsSdk.decryptZipFileWithMetadata({
+          authSig,
+          litNodeClient,
+          file: zipBlob,
+        });
+
+        var enc = new TextDecoder('utf-8');
+        const decoded = enc.decode(decryptedFile);
+
+        if (decoded && decoded === 'meow meow this is a test') {
+          document.getElementById(
+            'status'
+          ).innerText = `${testName} passed!  Decrypted string is "${decoded}"`;
+          return true;
+        } else {
+          document.getElementById('status').innerText = `${testName} failed!`;
+          return false;
+        }
+      };
+
+      var randomPath = () =>
+        '/' +
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
+
+      var testProvisoningAndSigning = async ({
+        accessControlConditions,
+        testName,
         authSig,
+<<<<<<< HEAD
         litNodeClient,
         file: zipBlob,
       });
@@ -97,89 +166,242 @@
         orgId: '',
         role: '',
         extraData: '',
+=======
+        chain = 'polygon',
+        switchChain = true,
+      }) => {
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+        document.getElementById(
+          'humanized'
+        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
+          { accessControlConditions }
+        )}`;
+
+        if (!authSig) {
+          authSig = await LitJsSdk.checkAndSignAuthMessage({
+            chain,
+            switchChain,
+          });
+        }
+
+        let jwt = await litNodeClient.getSignedToken({
+          accessControlConditions,
+          chain,
+          authSig,
+        });
+        console.log('jwt', jwt);
+
+        // uncomment this to break the jwt, to test an invalid jwt
+        // jwt = jwt.replace(/.$/, "3");
+
+        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt, publicKey: litNodeClient.networkPubKey });
+        console.log('verified', verified);
+        console.log('header', header);
+        console.log('payload', payload);
+
+        if (jwt && verified) {
+          document.getElementById('status').innerText = `${testName}: Success`;
+        } else {
+          document.getElementById('status').innerText = `${testName}: Failure`;
+        }
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
       };
 
-      await litNodeClient.saveSigningCondition({
-        accessControlConditions,
-        chain,
-        authSig,
-        resourceId,
-      });
+      var NestedGrouping = async () => {
+        // var accessControlConditions = [
+        //   [
+        //     {
+        //       contractAddress: "0x22C1f6050E56d2876009903609a2cC3fEf83B415",
+        //       standardContractType: "ERC721",
+        //       chain: "xdai",
+        //       method: "balanceOf",
+        //       parameters: [":userAddress"],
+        //       returnValueTest: {
+        //         comparator: ">",
+        //         value: "0",
+        //       },
+        //     },
+        //     {
+        //       operator: "and",
+        //     },
+        //     {
+        //       contractAddress: "0x22C1f6050E56d2876009903609a2cC3fEf83B415",
+        //       standardContractType: "POAP",
+        //       chain: "xdai",
+        //       method: "tokenURI",
+        //       parameters: [],
+        //       returnValueTest: {
+        //         comparator: "contains",
+        //         value: "test nested poap",
+        //       },
+        //     },
+        //   ],
+        //   {
+        //     operator: "and",
+        //   },
+        //   {
+        //     contractAddress: "",
+        //     standardContractType: "",
+        //     chain: "ethereum",
+        //     method: "",
+        //     parameters: [":userAddress"],
+        //     returnValueTest: {
+        //       comparator: "=",
+        //       value: "0x50e2dac5e78B5905CB09495547452cEE64426db2",
+        //     },
+        //   },
+        // ];
 
-      let jwt = await litNodeClient.getSignedToken({
-        accessControlConditions,
-        chain,
-        authSig,
-        resourceId,
-      });
-      console.log('jwt', jwt);
+        var accessControlConditions = [
+          [
+            {
+              contractAddress: '0x22C1f6050E56d2876009903609a2cC3fEf83B415',
+              standardContractType: 'ERC721',
+              chain: 'xdai',
+              method: 'balanceOf',
+              parameters: [':userAddress'],
+              returnValueTest: {
+                comparator: '>',
+                value: '0',
+              },
+            },
+            {
+              operator: 'and',
+            },
+            {
+              contractAddress: '0x22C1f6050E56d2876009903609a2cC3fEf83B415',
+              standardContractType: 'POAP',
+              chain: 'xdai',
+              method: 'tokenURI',
+              parameters: [],
+              returnValueTest: {
+                comparator: 'contains',
+                value: 'test poap',
+              },
+            },
+          ],
+        ];
 
-      // uncomment this to break the jwt, to test an invalid jwt
-      // jwt = jwt.replace(/.$/, "3");
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'NestedGrouping',
+        });
+      };
 
-      const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
-      console.log('verified', verified);
-      console.log('header', header);
-      console.log('payload', payload);
+      var ERC1155WithMinting = async () => {
+        const chain = 'ropsten';
+        const { txHash, tokenId, tokenAddress, mintingAddress, authSig } =
+          await LitJsSdk.mintLIT({ chain, quantity: 1 });
 
-      if (jwt && verified) {
-        document.getElementById('status').innerText = `${testName}: Success`;
-      } else {
-        document.getElementById('status').innerText = `${testName}: Failure`;
-      }
-    };
-
-    var NestedGrouping = async () => {
-      // var accessControlConditions = [
-      //   [
-      //     {
-      //       contractAddress: "0x22C1f6050E56d2876009903609a2cC3fEf83B415",
-      //       standardContractType: "ERC721",
-      //       chain: "xdai",
-      //       method: "balanceOf",
-      //       parameters: [":userAddress"],
-      //       returnValueTest: {
-      //         comparator: ">",
-      //         value: "0",
-      //       },
-      //     },
-      //     {
-      //       operator: "and",
-      //     },
-      //     {
-      //       contractAddress: "0x22C1f6050E56d2876009903609a2cC3fEf83B415",
-      //       standardContractType: "POAP",
-      //       chain: "xdai",
-      //       method: "tokenURI",
-      //       parameters: [],
-      //       returnValueTest: {
-      //         comparator: "contains",
-      //         value: "test nested poap",
-      //       },
-      //     },
-      //   ],
-      //   {
-      //     operator: "and",
-      //   },
-      //   {
-      //     contractAddress: "",
-      //     standardContractType: "",
-      //     chain: "ethereum",
-      //     method: "",
-      //     parameters: [":userAddress"],
-      //     returnValueTest: {
-      //       comparator: "=",
-      //       value: "0x50e2dac5e78B5905CB09495547452cEE64426db2",
-      //     },
-      //   },
-      // ];
-
-      var accessControlConditions = [
-        [
+        var accessControlConditions = [
           {
-            contractAddress: '0x22C1f6050E56d2876009903609a2cC3fEf83B415',
+            contractAddress: LitJsSdk.LIT_CHAINS[chain].contractAddress,
+            standardContractType: 'ERC1155',
+            chain,
+            method: 'balanceOf',
+            parameters: [':userAddress', tokenId.toString()],
+            returnValueTest: {
+              comparator: '>',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ERC1155',
+          authSig,
+        });
+      };
+
+      var ERC1155 = async () => {
+        var accessControlConditions = [
+          {
+            contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
+            standardContractType: 'ERC1155',
+            chain,
+            method: 'balanceOf',
+            parameters: [':userAddress', '8'],
+            returnValueTest: {
+              comparator: '>',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ERC1155',
+        });
+      };
+
+      var ERC1155WithHexTokenIdOnHarmony = async () => {
+        var accessControlConditions = [
+          {
+            contractAddress: '0x08680d4b01b201ad3de4ab8d074597bc93e55391',
+            standardContractType: 'ERC1155',
+            chain: 'harmony',
+            method: 'balanceOf',
+            parameters: [
+              ':userAddress',
+              '0xdbad33654bda2e12fac56805060289efd2f5f02d',
+            ],
+            returnValueTest: {
+              comparator: '>',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ERC1155',
+        });
+      };
+
+      var ERC1155Batch = async () => {
+        var accessControlConditions = [
+          {
+            contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
+            standardContractType: 'ERC1155',
+            chain,
+            method: 'balanceOfBatch',
+            parameters: [':userAddress,:userAddress,:userAddress', '8,9,34'],
+            returnValueTest: {
+              comparator: '>',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ERC1155Batch',
+        });
+      };
+
+      var ERC721NFT = async () => {
+        var accessControlConditions = [
+          {
+            contractAddress: '0x319ba3aab86e04a37053e984bd411b2c63bf229e',
             standardContractType: 'ERC721',
-            chain: 'xdai',
+            chain,
+            method: 'ownerOf',
+            parameters: ['5954'],
+            returnValueTest: {
+              comparator: '=',
+              value: ':userAddress',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ERC721NFT',
+        });
+      };
+
+      var ERC721Collection = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '0x319ba3aab86e04a37053e984bd411b2c63bf229e',
+            standardContractType: 'ERC721',
+            chain,
             method: 'balanceOf',
             parameters: [':userAddress'],
             returnValueTest: {
@@ -187,244 +409,140 @@
               value: '0',
             },
           },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ERC721Collection',
+        });
+      };
+
+      var SIWEDomainParam = async () => {
+        const accessControlConditions = [
           {
-            operator: 'and',
-          },
-          {
-            contractAddress: '0x22C1f6050E56d2876009903609a2cC3fEf83B415',
-            standardContractType: 'POAP',
-            chain: 'xdai',
-            method: 'tokenURI',
-            parameters: [],
+            contractAddress: '',
+            standardContractType: 'SIWE',
+            chain,
+            method: '',
+            parameters: [':domain'],
             returnValueTest: {
-              comparator: 'contains',
-              value: 'test poap',
+              comparator: '=',
+              value: 'localhost:3050',
             },
           },
-        ],
-      ];
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'SIWEDomainParam',
+        });
+      };
 
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'NestedGrouping',
-      });
-    };
-
-    var ERC1155WithMinting = async () => {
-      const chain = 'ropsten';
-      const { txHash, tokenId, tokenAddress, mintingAddress, authSig } =
-        await LitJsSdk.mintLIT({ chain, quantity: 1 });
-
-      var accessControlConditions = [
-        {
-          contractAddress: LitJsSdk.LIT_CHAINS[chain].contractAddress,
-          standardContractType: 'ERC1155',
-          chain,
-          method: 'balanceOf',
-          parameters: [':userAddress', tokenId.toString()],
-          returnValueTest: {
-            comparator: '>',
-            value: '0',
+      var SIWEResourceParam = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: 'SIWE',
+            chain,
+            method: '',
+            parameters: [':resources'],
+            returnValueTest: {
+              comparator: 'contains',
+              value: 'ipfs://someTestId',
+            },
           },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ERC1155',
-        authSig,
-      });
-    };
+        ];
 
-    var ERC1155 = async () => {
-      var accessControlConditions = [
-        {
-          contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
-          standardContractType: 'ERC1155',
+        let authSig = await LitJsSdk.checkAndSignAuthMessage({
           chain,
-          method: 'balanceOf',
-          parameters: [':userAddress', '8'],
-          returnValueTest: {
-            comparator: '>',
-            value: '0',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ERC1155',
-      });
-    };
+          resources: ['ipfs://someTestId', 'ipfs://anotherTestId'],
+        });
 
-    var ERC1155WithHexTokenIdOnHarmony = async () => {
-      var accessControlConditions = [
-        {
-          contractAddress: '0x08680d4b01b201ad3de4ab8d074597bc93e55391',
-          standardContractType: 'ERC1155',
-          chain: 'harmony',
-          method: 'balanceOf',
-          parameters: [
-            ':userAddress',
-            '0xdbad33654bda2e12fac56805060289efd2f5f02d',
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'SIWEResourceParam',
+          authSig,
+        });
+      };
+
+      var POAP = async () => {
+        console.log(
+          '!!! This test only works from address 0xdbd360F30097fB6d938dcc8B7b62854B36160B45'
+        );
+        const chain = 'xdai';
+        // var accessControlConditions = [
+        //   // {
+        //   //   contractAddress: "0x22C1f6050E56d2876009903609a2cC3fEf83B415",
+        //   //   standardContractType: "ERC721",
+        //   //   chain,
+        //   //   method: "balanceOf",
+        //   //   parameters: [":userAddress"],
+        //   //   returnValueTest: {
+        //   //     comparator: ">",
+        //   //     value: "0",
+        //   //   },
+        //   // },
+        //   {
+        //     contractAddress: "0x22C1f6050E56d2876009903609a2cC3fEf83B415",
+        //     standardContractType: "POAP",
+        //     chain,
+        //     method: "tokenURI",
+        //     parameters: [],
+        //     returnValueTest: {
+        //       comparator: "contains",
+        //       value: "Burning Man 2021",
+        //     },
+        //   },
+        // ];
+        var accessControlConditions = [
+          [
+            {
+              contractAddress: '0x22C1f6050E56d2876009903609a2cC3fEf83B415',
+              standardContractType: 'POAP',
+              chain: 'xdai',
+              method: 'tokenURI',
+              parameters: [],
+              returnValueTest: {
+                comparator: 'contains',
+                value: 'Lit Protocol Test',
+              },
+            },
+            {
+              operator: 'or',
+            },
+            {
+              contractAddress: '0x22C1f6050E56d2876009903609a2cC3fEf83B415',
+              standardContractType: 'POAP',
+              chain: 'ethereum',
+              method: 'tokenURI',
+              parameters: [],
+              returnValueTest: {
+                comparator: 'contains',
+                value: 'Lit Protocol Test',
+              },
+            },
           ],
-          returnValueTest: {
-            comparator: '>',
-            value: '0',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ERC1155',
-      });
-    };
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'POAP',
+        });
+      };
 
-    var ERC1155Batch = async () => {
-      var accessControlConditions = [
-        {
-          contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
-          standardContractType: 'ERC1155',
-          chain,
-          method: 'balanceOfBatch',
-          parameters: [':userAddress,:userAddress,:userAddress', '8,9,34'],
-          returnValueTest: {
-            comparator: '>',
-            value: '0',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ERC1155Batch',
-      });
-    };
+      var POAPEventId = async () => {
+        console.log(
+          '!!! This test only works from address 0xdbd360F30097fB6d938dcc8B7b62854B36160B45'
+        );
+        const chain = 'xdai';
 
-    var ERC721NFT = async () => {
-      var accessControlConditions = [
-        {
-          contractAddress: '0x319ba3aab86e04a37053e984bd411b2c63bf229e',
-          standardContractType: 'ERC721',
-          chain,
-          method: 'ownerOf',
-          parameters: ['5954'],
-          returnValueTest: {
-            comparator: '=',
-            value: ':userAddress',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ERC721NFT',
-      });
-    };
-
-    var ERC721Collection = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '0x319ba3aab86e04a37053e984bd411b2c63bf229e',
-          standardContractType: 'ERC721',
-          chain,
-          method: 'balanceOf',
-          parameters: [':userAddress'],
-          returnValueTest: {
-            comparator: '>',
-            value: '0',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ERC721Collection',
-      });
-    };
-
-    var SIWEDomainParam = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: 'SIWE',
-          chain,
-          method: '',
-          parameters: [':domain'],
-          returnValueTest: {
-            comparator: '=',
-            value: 'localhost:3050',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'SIWEDomainParam',
-      });
-    };
-
-    var SIWEResourceParam = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: 'SIWE',
-          chain,
-          method: '',
-          parameters: [':resources'],
-          returnValueTest: {
-            comparator: 'contains',
-            value: 'ipfs://someTestId',
-          },
-        },
-      ];
-
-      let authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain,
-        resources: ['ipfs://someTestId', 'ipfs://anotherTestId'],
-      });
-
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'SIWEResourceParam',
-        authSig,
-      });
-    };
-
-    var POAP = async () => {
-      console.log(
-        '!!! This test only works from address 0xdbd360F30097fB6d938dcc8B7b62854B36160B45'
-      );
-      const chain = 'xdai';
-      // var accessControlConditions = [
-      //   // {
-      //   //   contractAddress: "0x22C1f6050E56d2876009903609a2cC3fEf83B415",
-      //   //   standardContractType: "ERC721",
-      //   //   chain,
-      //   //   method: "balanceOf",
-      //   //   parameters: [":userAddress"],
-      //   //   returnValueTest: {
-      //   //     comparator: ">",
-      //   //     value: "0",
-      //   //   },
-      //   // },
-      //   {
-      //     contractAddress: "0x22C1f6050E56d2876009903609a2cC3fEf83B415",
-      //     standardContractType: "POAP",
-      //     chain,
-      //     method: "tokenURI",
-      //     parameters: [],
-      //     returnValueTest: {
-      //       comparator: "contains",
-      //       value: "Burning Man 2021",
-      //     },
-      //   },
-      // ];
-      var accessControlConditions = [
-        [
+        var accessControlConditions = [
           {
             contractAddress: '0x22C1f6050E56d2876009903609a2cC3fEf83B415',
             standardContractType: 'POAP',
             chain: 'xdai',
-            method: 'tokenURI',
+            method: 'eventId',
             parameters: [],
             returnValueTest: {
-              comparator: 'contains',
-              value: 'Lit Protocol Test',
+              comparator: '=',
+              value: '37582',
             },
           },
           {
@@ -434,252 +552,34 @@
             contractAddress: '0x22C1f6050E56d2876009903609a2cC3fEf83B415',
             standardContractType: 'POAP',
             chain: 'ethereum',
-            method: 'tokenURI',
+            method: 'eventId',
             parameters: [],
             returnValueTest: {
-              comparator: 'contains',
-              value: 'Lit Protocol Test',
+              comparator: '=',
+              value: '37582',
             },
           },
-        ],
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'POAP',
-      });
-    };
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'POAPEventId',
+        });
+      };
 
-    var POAPEventId = async () => {
-      console.log(
-        '!!! This test only works from address 0xdbd360F30097fB6d938dcc8B7b62854B36160B45'
-      );
-      const chain = 'xdai';
-
-      var accessControlConditions = [
-        {
-          contractAddress: '0x22C1f6050E56d2876009903609a2cC3fEf83B415',
-          standardContractType: 'POAP',
-          chain: 'xdai',
-          method: 'eventId',
-          parameters: [],
-          returnValueTest: {
-            comparator: '=',
-            value: '37582',
+      var ERC20 = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '0xc0ad7861fe8848002a3d9530999dd29f6b6cae75',
+            standardContractType: 'ERC20',
+            chain,
+            method: 'balanceOf',
+            parameters: [':userAddress'],
+            returnValueTest: {
+              comparator: '>',
+              value: '0',
+            },
           },
-        },
-        {
-          operator: 'or',
-        },
-        {
-          contractAddress: '0x22C1f6050E56d2876009903609a2cC3fEf83B415',
-          standardContractType: 'POAP',
-          chain: 'ethereum',
-          method: 'eventId',
-          parameters: [],
-          returnValueTest: {
-            comparator: '=',
-            value: '37582',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'POAPEventId',
-      });
-    };
-
-    var ERC20 = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '0xc0ad7861fe8848002a3d9530999dd29f6b6cae75',
-          standardContractType: 'ERC20',
-          chain,
-          method: 'balanceOf',
-          parameters: [':userAddress'],
-          returnValueTest: {
-            comparator: '>',
-            value: '0',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ERC20',
-      });
-    };
-
-    var ETH = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain,
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ETH',
-      });
-    };
-
-    var ETHOnArbitrum = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'arbitrum',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ETHOnArbitrum',
-      });
-    };
-
-    var ETHOnAvax = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'avalanche',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ETHOnAvax',
-      });
-    };
-
-    var ETHOnFuji = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'fuji',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ETHOnFuji',
-      });
-    };
-
-    var ETHOnCelo = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'celo',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ETHOnCelo',
-      });
-    };
-
-    var ETHOnEth = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'ethereum',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ETHOnEth',
-      });
-    };
-
-    var ETHOnXdai = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'xdai',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'EthOnXdai',
-      });
-    };
-
-    var ETHOnAurora = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'aurora',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'EthOnAurora',
-      });
-    };
-
-    var ETHOnZksync = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'zksync',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '0',
-          },
+<<<<<<< HEAD
         },
       ];
       await testProvisoningAndSigning({
@@ -727,19 +627,428 @@
         testName: 'ETHOnOptimismGoerli',
       });
     };
+=======
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ERC20',
+        });
+      };
 
-    var ETHOnEluvioEmptyWallet = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'eluvio',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '0',
+      var ETH = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain,
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
           },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETH',
+        });
+      };
+
+      var ETHOnArbitrum = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'arbitrum',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnArbitrum',
+        });
+      };
+
+      var ETHOnAvax = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'avalanche',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnAvax',
+        });
+      };
+
+      var ETHOnFuji = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'fuji',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnFuji',
+        });
+      };
+
+      var ETHOnCelo = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'celo',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnCelo',
+        });
+      };
+
+      var ETHOnEth = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'ethereum',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnEth',
+        });
+      };
+
+      var ETHOnXdai = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'xdai',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'EthOnXdai',
+        });
+      };
+
+      var ETHOnAurora = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'aurora',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'EthOnAurora',
+        });
+      };
+
+      var ETHOnZksync = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'zksync',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnZksync',
+        });
+      };
+
+      var ETHOnZksyncTestnet = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'zksyncTestnet',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnZksyncTestnet',
+        });
+      };
+
+      var ETHOnEluvioEmptyWallet = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'eluvio',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnEluvioEmptyWallet',
+        });
+      };
+
+      var ETHOnAlfajoresEmptyWallet = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'alfajores',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnAlfajoresEmptyWallet',
+        });
+      };
+
+      var CASK = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '0x921ec72BEf414D75F0C6fFee37975BB3ae80d41C',
+            standardContractType: 'CASK',
+            chain: 'fuji',
+            method: 'getActiveSubscriptionCount',
+            parameters: [
+              ':userAddress',
+              '0x50e2dac5e78B5905CB09495547452cEE64426db2',
+              '100',
+            ],
+            returnValueTest: {
+              comparator: '>',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'CASK',
+        });
+      };
+
+      var ETHPlusERC721 = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain,
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+          { operator: 'and' },
+          {
+            contractAddress: '0x319ba3aab86e04a37053e984bd411b2c63bf229e',
+            standardContractType: 'ERC721',
+            chain,
+            method: 'ownerOf',
+            parameters: ['5954'],
+            returnValueTest: {
+              comparator: '=',
+              value: ':userAddress',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHPlusERC721',
+        });
+      };
+
+      var ETHEmptyWallet = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain,
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETH (Empty Wallet)',
+        });
+      };
+
+      var RandomTestFromUser = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '0x588da869464f8c8eafa264f5b446e6c9bd4543ac',
+            standardContractType: 'ERC1155',
+            chain: 'ethereum',
+            method: 'balanceOf',
+            parameters: [
+              ':userAddress',
+              '95268251546285662909660874610252721742451934934531784487819138932576410927105',
+            ],
+            returnValueTest: { comparator: '>=', value: '1' },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'RandomTestFromUser',
+        });
+      };
+
+      var ProofOfHumanity = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '0xC5E9dDebb09Cd64DfaCab4011A0D5cEDaf7c9BDb',
+            standardContractType: 'ProofOfHumanity',
+            chain: 'ethereum',
+            method: 'isRegistered',
+            parameters: [':userAddress'],
+            returnValueTest: {
+              comparator: '=',
+              value: 'true',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'Proof of Humanity',
+        });
+      };
+
+      var SendBadRequestToNodes = async () => {
+        const testName = 'SendBadRequestToNodes';
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+        document.getElementById('humanized').innerText = '';
+
+        const chain = 'ethereum';
+
+        var accessControlConditions = [
+          {
+            contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
+            standardContractType: 'ERC1155',
+            chain,
+            method: 'balanceOf',
+            parameters: [':userAddress', '8'],
+            returnValueTest: {
+              comparator: '<',
+              value: '0',
+            },
+          },
+        ];
+
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
+
+        try {
+          await litNodeClient.getSignedToken({
+            accessControlConditions,
+            //chain, // intentionally exclude this to cause an error parsing the JSON
+            authSig,
+          });
+        } catch (e) {
+          console.log('error', e);
+          document.getElementById(
+            'status'
+          ).innerText = `${testName}: Success (an error occured).  Check the Network tab of the inspector for more details.`;
+          return;
+        }
+      };
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
+
+      var EncryptDecrypt = async () => {
+        const testName = 'EncryptDecrypt';
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain,
+        });
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain,
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+<<<<<<< HEAD
         },
       ];
       await testProvisoningAndSigning({
@@ -747,19 +1056,66 @@
         testName: 'ETHOnEluvioEmptyWallet',
       });
     };
+=======
+        ];
 
-    var ETHOnAlfajoresEmptyWallet = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'alfajores',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '0',
+        document.getElementById(
+          'humanized'
+        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
+          { accessControlConditions }
+        )}`;
+
+        const { ciphertext, dataToEncryptHash } = await LitJsSdk.zipAndEncryptString(
+          {
+            dataToEncrypt: 'this is a secret message',
+            accessControlConditions,
+            chain,
+            authSig,
           },
+          litNodeClient,
+        );
+
+        const decryptedFiles = await LitJsSdk.decryptToZip(
+          {
+            accessControlConditions,
+            chain,
+            authSig,
+            ciphertext,
+            dataToEncryptHash,
+          },
+          litNodeClient,
+        );
+
+        const decryptedString = await decryptedFiles['string.txt'].async(
+          'text'
+        );
+        console.log('decrypted string', decryptedString);
+
+        document.getElementById(
+          'status'
+        ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
+      };
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
+
+      var EncryptDecryptString = async () => {
+        const testName = 'EncryptDecryptString';
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain,
+        });
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain,
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+<<<<<<< HEAD
         },
       ];
       await testProvisoningAndSigning({
@@ -956,10 +1312,101 @@
         functionName: 'latestRoundData',
         functionParams: [],
       });
+=======
+        ];
 
-      const callRequests = [{ to: addr, data: callData }];
-      console.log('callRequests', callRequests);
+        document.getElementById(
+          'humanized'
+        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
+          { accessControlConditions }
+        )}`;
 
+        const { ciphertext, dataToEncryptHash } = await LitJsSdk.encryptString(
+          {
+            dataToEncrypt: 'this is a secret message',
+            accessControlConditions,
+            chain,
+            authSig,
+          },
+          litNodeClient,
+        );
+
+        const decryptedString = await LitJsSdk.decryptToString(
+          {
+            accessControlConditions,
+            chain,
+            authSig,
+            ciphertext,
+            dataToEncryptHash,
+          },
+          litNodeClient,
+        );
+
+        console.log('decrypted string', decryptedString);
+
+        document.getElementById(
+          'status'
+        ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
+      };
+
+      var EncryptDecryptAGroup = async () => {
+        const testName = 'EncryptDecryptAGroup';
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain,
+        });
+        const accessControlConditions = [
+          // holds some eth
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain,
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+          { operator: 'and' },
+          [
+            // erc 1155 possession
+            {
+              contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
+              standardContractType: 'ERC1155',
+              chain,
+              method: 'balanceOf',
+              parameters: [':userAddress', '8'],
+              returnValueTest: {
+                comparator: '>',
+                value: '0',
+              },
+            },
+            { operator: 'or' },
+            // erc721 posession
+            {
+              contractAddress: '0x319ba3aab86e04a37053e984bd411b2c63bf229e',
+              standardContractType: 'ERC721',
+              chain,
+              method: 'ownerOf',
+              parameters: ['5954'],
+              returnValueTest: {
+                comparator: '=',
+                value: ':userAddress',
+              },
+            },
+          ],
+        ];
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
+
+        document.getElementById(
+          'humanized'
+        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
+          { accessControlConditions }
+        )}`;
+
+<<<<<<< HEAD
       const chain = 'ethereum';
 
       const jwt = await litNodeClient.getSignedChainDataToken({
@@ -992,21 +1439,40 @@
       console.log('answer: ', answer);
 
       if (jwt && verified) {
+=======
+        const { ciphertext, dataToEncryptHash } = await LitJsSdk.zipAndEncryptString(
+          {
+            dataToEncrypt: 'this is a secret message',
+            accessControlConditions,
+            chain,
+            authSig,
+          },
+          litNodeClient,
+        );
+
+        const decryptedFiles = await LitJsSdk.decryptToZip(
+          {
+            accessControlConditions,
+            chain,
+            authSig,
+            ciphertext,
+            dataToEncryptHash,
+          },
+          litNodeClient,
+        );
+
+        const decryptedString = await decryptedFiles['string.txt'].async(
+          'text'
+        );
+        console.log('decrypted string', decryptedString);
+
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
         document.getElementById(
           'status'
-        ).innerText = `${testName}: Success - ETH Price is $${answer}`;
-      } else {
-        document.getElementById('status').innerText = `${testName}: Failure`;
-      }
-    };
+        ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
+      };
 
-    var SendBadRequestToNodes = async () => {
-      const testName = 'SendBadRequestToNodes';
-      document.getElementById('status').innerText = `Testing ${testName}...`;
-      document.getElementById('humanized').innerText = '';
-
-      const chain = 'ethereum';
-
+<<<<<<< HEAD
       var accessControlConditions = [
         {
           contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
@@ -1017,10 +1483,51 @@
           returnValueTest: {
             comparator: '>',
             value: '0',
-          },
-        },
-      ];
+=======
+      ///  ECDSA Test function
+      var EcdsaSignMessage = async () => {
+        const testName = 'EcdsaSignMessage';
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+        try {
+          console.log('start signing message with ECDSA');
+          const nodeResponse = await litNodeClient.signWithEcdsa({
+            message: 'LitProtocol rocks!',
+            chain,
+          });
 
+          console.log('signed message with ECDSA');
+          const vals = JSON.stringify(nodeResponse);
+          document.getElementById(
+            'status'
+          ).innerText = `${testName}: Success. Response:  ${vals}`;
+        } catch (e) {
+          console.log('error signing with ECDSA', e);
+          document.getElementById(
+            'status'
+          ).innerText = `${testName}: Failure.  `;
+          return;
+        }
+      };
+
+      var ecdsa_validate_ERC721 = async () => {
+        const chain = 'ethereum';
+
+        var accessControlConditions = [
+          {
+            contractAddress: '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85',
+            standardContractType: 'ERC721',
+            chain,
+            method: 'balanceOf',
+            parameters: [':userAddress'],
+            returnValueTest: {
+              comparator: '>',
+              value: '0',
+            },
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
+          },
+        ];
+
+<<<<<<< HEAD
       var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain });
 
       let resourceId = {
@@ -1224,98 +1731,43 @@
         console.log('error getting symmetric key - this is expected', e);
         console.log('trying to update the condition');
         const newAccessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain,
-            method: 'eth_getBalance',
-            parameters: [':userAddress', 'latest'],
-            returnValueTest: {
-              comparator: '>=',
-              value: '10000000000000',
-            },
-          },
-        ];
+=======
+        const testName = 'ecdsa_validate_condition';
 
-        const newEncryptedSymmetricKey =
-          await litNodeClient.saveEncryptionKey({
-            accessControlConditions: newAccessControlConditions,
-            encryptedSymmetricKey,
-            authSig,
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+        try {
+          console.log('validating condition and ecdsa signing ');
+
+          var auth_sig = await LitJsSdk.checkAndSignAuthMessage({ chain });
+
+          const nodeResponse = await litNodeClient.validate_and_sign_ecdsa({
+            accessControlConditions,
             chain,
-            permanant: false,
+            auth_sig,
           });
-        console.log('updated the condition');
+          //          let jwt = await litNodeClient.getSignedToken({
+          console.log('validated & signed message with ECDSA');
+          const vals = JSON.stringify(nodeResponse);
+          document.getElementById(
+            'status'
+          ).innerText = `${testName}: Success. Response:  ${vals}`;
+        } catch (e) {
+          console.log('error validating & signing with ECDSA', e);
+          document.getElementById(
+            'status'
+          ).innerText = `${testName}: Failure.  `;
+          return;
+        }
+      };
 
-        retrievedSymmKey = await litNodeClient.getEncryptionKey({
-          accessControlConditions: newAccessControlConditions,
-          toDecrypt: LitJsSdk.uint8arrayToString(
-            encryptedSymmetricKey,
-            'base16'
-          ),
+      var EncryptFileAndZipWithMetadata = async () => {
+        const testResults = {};
+        const testName = 'EncryptFileAndZipWithMetadata';
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
           chain,
-          authSig,
         });
-      }
-
-      const decryptedFiles = await LitJsSdk.decryptZip(
-        encryptedZip,
-        retrievedSymmKey
-      );
-      const decryptedString = await decryptedFiles['string.txt'].async(
-        'text'
-      );
-      console.log('decrypted string', decryptedString);
-
-      document.getElementById(
-        'status'
-      ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
-    };
-
-    var EncryptDecryptWithAnUnauthorizedUpdate = async () => {
-      const testName = 'EncryptDecryptWithAnUnauthorizedUpdate';
-      document.getElementById('status').innerText = `Testing ${testName}...`;
-      const authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain,
-      });
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain,
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '100000000000000000000000', // 100000 eth (or matic, really)
-          },
-        },
-      ];
-
-      document.getElementById(
-        'humanized'
-      ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
-        { accessControlConditions }
-      )}`;
-
-      const { encryptedZip, symmetricKey } =
-        await LitJsSdk.zipAndEncryptString('this is a secret message');
-
-      const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-        accessControlConditions,
-        symmetricKey,
-        authSig,
-        chain,
-        permanant: false,
-      });
-
-      console.log('encrypted symmetric key', encryptedSymmetricKey);
-
-      try {
-        console.log(
-          'trying to update the condition with an unauthorized address'
-        );
-        const newAccessControlConditions = [
+        const accessControlConditions = [
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
           {
             contractAddress: '',
             standardContractType: '',
@@ -1329,240 +1781,149 @@
           },
         ];
 
-        let unauthorizedAuthSig = {
-          sig: '0x2229236873d413f301c1afb7650959dee9f9a984c7421c9a44e41009940a5e410925d03374ddaf51590c7899253f30d589f1d7fec694f15829c8157c24f999f81c',
-          derivedVia: 'web3.eth.personal.sign',
-          signedMessage:
-            'I am creating an account to use Lit Protocol at 2022-01-27T02:07:14.289Z',
-          address: '0xb962537314b11c6bcd6d9ff63feb048a9e91e7ae',
-        };
+        let res = await testEncryptingFileAndZipWithMetadata({
+          accessControlConditions,
+          testName,
+          authSig,
+          chain: 'polygon',
+        });
+        testResults.accessControlConditions = res;
 
-        const newEncryptedSymmetricKey =
-          await litNodeClient.saveEncryptionKey({
-            accessControlConditions: newAccessControlConditions,
-            encryptedSymmetricKey,
-            authSig: unauthorizedAuthSig,
-            chain,
-            permanant: false,
-          });
-        console.log('updated the condition');
-      } catch (e) {
-        console.log('error getting symmetric key - this is expected', e);
-        if (isNodeStorageError(e.errorCode)) {
-          document.getElementById(
-            'status'
-          ).innerText = `${testName}: Success.  We were unable to update.`;
-        } else {
-          document.getElementById(
-            'status'
-          ).innerText = `${testName}: Failure.  When we tried to update with an unauthorized acct, we got an error that isn't a storage error`;
-        }
-        return;
-      }
-
-      document.getElementById(
-        'status'
-      ).innerText = `${testName}: Failure.  We updated a condition we shouldn't been able to!  OMG FIX THIS`;
-    };
-
-    var EncryptDecryptPermanantCondition = async () => {
-      const testName = 'EncryptDecryptPermanantCondition';
-      document.getElementById('status').innerText = `Testing ${testName}...`;
-      const authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain,
-      });
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain,
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '100000000000000000000000', // 100000 eth (or matic, really)
-          },
-        },
-      ];
-
-      document.getElementById(
-        'humanized'
-      ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
-        { accessControlConditions }
-      )}`;
-
-      const { encryptedZip, symmetricKey } =
-        await LitJsSdk.zipAndEncryptString('this is a secret message');
-
-      const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-        accessControlConditions,
-        symmetricKey,
-        authSig,
-        chain,
-        permanant: true,
-      });
-
-      console.log('encrypted symmetric key', encryptedSymmetricKey);
-
-      try {
-        console.log('trying to update the permanant condition');
-        const newAccessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain,
-            method: 'eth_getBalance',
-            parameters: [':userAddress', 'latest'],
-            returnValueTest: {
-              comparator: '>=',
-              value: '10000000000000',
-            },
-          },
-        ];
-
-        const newEncryptedSymmetricKey =
-          await litNodeClient.saveEncryptionKey({
-            accessControlConditions: newAccessControlConditions,
-            encryptedSymmetricKey,
-            authSig,
-            chain,
-          });
-        console.log('updated the condition');
-      } catch (e) {
-        console.log('error getting symmetric key - this is expected', e);
-        if (isNodeStorageError(e.errorCode)) {
-          document.getElementById(
-            'status'
-          ).innerText = `${testName}: Success.  We were unable to update.`;
-        } else {
-          document.getElementById(
-            'status'
-          ).innerText = `${testName}: Failure.  When we tried to update with an unauthorized acct, we got an error that isn't a storage error`;
-        }
-        return;
-      }
-
-      document.getElementById(
-        'status'
-      ).innerText = `${testName}: Failure.  We updated a condition we shouldn't been able to!  OMG FIX THIS`;
-    };
-
-    var EncryptDecryptPermanentCondition = async () => {
-      const testName = 'EncryptDecryptPermanentCondition';
-      document.getElementById('status').innerText = `Testing ${testName}...`;
-      const authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain,
-      });
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain,
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '100000000000000000000000', // 100000 eth (or matic, really)
-          },
-        },
-      ];
-
-      document.getElementById(
-        'humanized'
-      ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
-        { accessControlConditions }
-      )}`;
-
-      const { encryptedZip, symmetricKey } =
-        await LitJsSdk.zipAndEncryptString('this is a secret message');
-
-      const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-        accessControlConditions,
-        symmetricKey,
-        authSig,
-        chain,
-        permanent: true,
-      });
-
-      console.log('encrypted symmetric key', encryptedSymmetricKey);
-
-      try {
-        console.log('trying to update the permanent condition');
-        const newAccessControlConditions = [
-          {
-            contractAddress: '',
-            standardContractType: '',
-            chain,
-            method: 'eth_getBalance',
-            parameters: [':userAddress', 'latest'],
-            returnValueTest: {
-              comparator: '>=',
-              value: '10000000000000',
-            },
-          },
-        ];
-
-        const newEncryptedSymmetricKey =
-          await litNodeClient.saveEncryptionKey({
-            accessControlConditions: newAccessControlConditions,
-            encryptedSymmetricKey,
-            authSig,
-            chain,
-          });
-        console.log('updated the condition');
-      } catch (e) {
-        console.log('error getting symmetric key - this is expected', e);
-        if (isNodeStorageError(e.errorCode)) {
-          document.getElementById(
-            'status'
-          ).innerText = `${testName}: Success.  We were unable to update.`;
-        } else {
-          document.getElementById(
-            'status'
-          ).innerText = `${testName}: Failure.  When we tried to update with an unauthorized acct, we got an error that isn't a storage error`;
-        }
-        return;
-      }
-
-      document.getElementById(
-        'status'
-      ).innerText = `${testName}: Failure.  We updated a condition we shouldn't been able to!  OMG FIX THIS`;
-    };
-
-    var EncryptDecryptAGroup = async () => {
-      const testName = 'EncryptDecryptAGroup';
-      document.getElementById('status').innerText = `Testing ${testName}...`;
-
-      const authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain,
-      });
-      const accessControlConditions = [
-        // holds some eth
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain,
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-        { operator: 'and' },
-        [
-          // erc 1155 possession
+        var evmContractConditions = [
           {
             contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
-            standardContractType: 'ERC1155',
+            functionName: 'balanceOf',
+            functionParams: [':userAddress', '8'],
+            functionAbi: {
+              type: 'function',
+              stateMutability: 'view',
+              outputs: [
+                {
+                  type: 'uint256',
+                  name: '',
+                  internalType: 'uint256',
+                },
+              ],
+              name: 'balanceOf',
+              inputs: [
+                {
+                  type: 'address',
+                  name: 'account',
+                  internalType: 'address',
+                },
+                {
+                  type: 'uint256',
+                  name: 'id',
+                  internalType: 'uint256',
+                },
+              ],
+            },
             chain,
-            method: 'balanceOf',
-            parameters: [':userAddress', '8'],
             returnValueTest: {
+              key: '',
               comparator: '>',
               value: '0',
             },
           },
+        ];
+
+        res = await testEncryptingFileAndZipWithMetadata({
+          evmContractConditions,
+          testName,
+          authSig,
+          chain: 'polygon',
+        });
+
+        testResults.evmContractConditions = res;
+
+        var solAuthSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'solana',
+        });
+
+        var solRpcConditions = [
+          {
+            method: 'getBalance',
+            params: [':userAddress'],
+            chain: 'solana',
+            returnValueTest: {
+              key: '',
+              comparator: '>=',
+              value: '100000000', // equals 0.1 SOL
+            },
+          },
+        ];
+
+        res = await testEncryptingFileAndZipWithMetadata({
+          solRpcConditions,
+          testName,
+          authSig: solAuthSig,
+          chain: 'solana',
+        });
+        testResults.solRpcConditions = res;
+
+        var unifiedAccessControlConditions = [
+          {
+            conditionType: 'solRpc',
+            method: 'getBalance',
+            params: [':userAddress'],
+            chain: 'solana',
+            returnValueTest: {
+              key: '',
+              comparator: '>=',
+              value: '100000000', // equals 0.1 SOL
+            },
+          },
+          { operator: 'or' },
+          {
+            conditionType: 'evmBasic',
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'ethereum',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+          { operator: 'or' },
+          {
+            conditionType: 'evmContract',
+            contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
+            functionName: 'balanceOf',
+            functionParams: [':userAddress', '8'],
+            functionAbi: {
+              type: 'function',
+              stateMutability: 'view',
+              outputs: [
+                {
+                  type: 'uint256',
+                  name: '',
+                  internalType: 'uint256',
+                },
+              ],
+              name: 'balanceOf',
+              inputs: [
+                {
+                  type: 'address',
+                  name: 'account',
+                  internalType: 'address',
+                },
+                {
+                  type: 'uint256',
+                  name: 'id',
+                  internalType: 'uint256',
+                },
+              ],
+            },
+            chain: 'polygon',
+            returnValueTest: {
+              key: '',
+              comparator: '>',
+              value: '0',
+            },
+          },
+<<<<<<< HEAD
           { operator: 'or' },
           // erc721 posession
           {
@@ -2024,284 +2385,113 @@
 
       // uncomment this to break the jwt, to test an invalid jwt
       // jwt = jwt.replace(/.$/, "3");
+=======
+        ];
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 
-      const newAccessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain,
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
+        res = await testEncryptingFileAndZipWithMetadata({
+          unifiedAccessControlConditions,
+          testName,
+          authSig: {
+            ethereum: authSig,
+            solana: solAuthSig,
           },
-        },
-      ];
+        });
+        testResults.unifiedAccessControlConditions = res;
 
-      let jwt;
-      try {
-        console.log('trying to update the permanent condition');
+        console.log('testResults', testResults);
 
-        const newEncryptedSymmetricKey =
-          await litNodeClient.saveSigningCondition({
-            accessControlConditions: newAccessControlConditions,
-            chain,
-            authSig,
-            resourceId,
-          });
-        console.log('updated the condition');
-      } catch (e) {
-        console.log('error updating the condition - this is expected', e);
-        if (isNodeStorageError(e.errorCode)) {
+        if (Object.values(testResults).every((res) => res === true)) {
           document.getElementById(
             'status'
-          ).innerText = `${testName}: Success.  We were unable to update.`;
+          ).innerText = `${testName}: Success.  All tests passed.`;
         } else {
           document.getElementById(
             'status'
-          ).innerText = `${testName}: Failure.  When we tried to update with an unauthorized acct, we got an error that isn't a storage error`;
+          ).innerText = `${testName}: Failure.  One or more tests failed.  Check the console for the testResults object to see which one.`;
         }
-        return;
-      }
-
-      document.getElementById(
-        'status'
-      ).innerText = `${testName}: Failure.  We updated a condition we shouldn't been able to!  OMG FIX THIS`;
-    };
-
-    var EncryptFileAndZipWithMetadata = async () => {
-      const testResults = {};
-      const testName = 'EncryptFileAndZipWithMetadata';
-      const authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain,
-      });
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain,
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-
-      let res = await testEncryptingFileAndZipWithMetadata({
-        accessControlConditions,
-        testName,
-        authSig,
-        chain: 'polygon',
-      });
-      testResults.accessControlConditions = res;
-
-      var evmContractConditions = [
-        {
-          contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
-          functionName: 'balanceOf',
-          functionParams: [':userAddress', '8'],
-          functionAbi: {
-            type: 'function',
-            stateMutability: 'view',
-            outputs: [
-              {
-                type: 'uint256',
-                name: '',
-                internalType: 'uint256',
-              },
-            ],
-            name: 'balanceOf',
-            inputs: [
-              {
-                type: 'address',
-                name: 'account',
-                internalType: 'address',
-              },
-              {
-                type: 'uint256',
-                name: 'id',
-                internalType: 'uint256',
-              },
-            ],
-          },
-          chain,
-          returnValueTest: {
-            key: '',
-            comparator: '>',
-            value: '0',
-          },
-        },
-      ];
-
-      res = await testEncryptingFileAndZipWithMetadata({
-        evmContractConditions,
-        testName,
-        authSig,
-        chain: 'polygon',
-      });
-
-      testResults.evmContractConditions = res;
-
-      var solAuthSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain: 'solana',
-      });
-
-      var solRpcConditions = [
-        {
-          method: 'getBalance',
-          params: [':userAddress'],
-          chain: 'solana',
-          returnValueTest: {
-            key: '',
-            comparator: '>=',
-            value: '100000000', // equals 0.1 SOL
-          },
-        },
-      ];
-
-      res = await testEncryptingFileAndZipWithMetadata({
-        solRpcConditions,
-        testName,
-        authSig: solAuthSig,
-        chain: 'solana',
-      });
-      testResults.solRpcConditions = res;
-
-      var unifiedAccessControlConditions = [
-        {
-          conditionType: 'solRpc',
-          method: 'getBalance',
-          params: [':userAddress'],
-          chain: 'solana',
-          returnValueTest: {
-            key: '',
-            comparator: '>=',
-            value: '100000000', // equals 0.1 SOL
-          },
-        },
-        { operator: 'or' },
-        {
-          conditionType: 'evmBasic',
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'ethereum',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-        { operator: 'or' },
-        {
-          conditionType: 'evmContract',
-          contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
-          functionName: 'balanceOf',
-          functionParams: [':userAddress', '8'],
-          functionAbi: {
-            type: 'function',
-            stateMutability: 'view',
-            outputs: [
-              {
-                type: 'uint256',
-                name: '',
-                internalType: 'uint256',
-              },
-            ],
-            name: 'balanceOf',
-            inputs: [
-              {
-                type: 'address',
-                name: 'account',
-                internalType: 'address',
-              },
-              {
-                type: 'uint256',
-                name: 'id',
-                internalType: 'uint256',
-              },
-            ],
-          },
-          chain: 'polygon',
-          returnValueTest: {
-            key: '',
-            comparator: '>',
-            value: '0',
-          },
-        },
-      ];
-
-      res = await testEncryptingFileAndZipWithMetadata({
-        unifiedAccessControlConditions,
-        testName,
-        authSig: {
-          ethereum: authSig,
-          solana: solAuthSig,
-        },
-      });
-      testResults.unifiedAccessControlConditions = res;
-
-      console.log('testResults', testResults);
-
-      if (Object.values(testResults).every((res) => res === true)) {
-        document.getElementById(
-          'status'
-        ).innerText = `${testName}: Success.  All tests passed.`;
-      } else {
-        document.getElementById(
-          'status'
-        ).innerText = `${testName}: Failure.  One or more tests failed.  Check the console for the testResults object to see which one.`;
-      }
-    };
-
-    var GetSigWithChainSwitchingDisabled = async () => {
-      console.log(
-        "make sure you're not on fuji chain, before starting this test.  because it will request a sig on fuji wihtout switching you"
-      );
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain,
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '0',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'GetSigWithChainSwitchingDisabled',
-        chain: 'fuji',
-        switchChain: false,
-      });
-    };
-
-    var TooManyConditions = async () => {
-      const oneCondition = {
-        contractAddress: '',
-        standardContractType: '',
-        chain,
-        method: 'eth_getBalance',
-        parameters: [':userAddress', 'latest'],
-        returnValueTest: {
-          comparator: '>=',
-          value: '0',
-        },
       };
-      let accessControlConditions = [];
-      for (let i = 0; i < 31; i++) {
-        accessControlConditions.push(oneCondition);
-        if (i < 30) {
-          accessControlConditions.push({ operator: 'or' });
-        }
-      }
 
+      var GetSigWithChainSwitchingDisabled = async () => {
+        console.log(
+          "make sure you're not on fuji chain, before starting this test.  because it will request a sig on fuji wihtout switching you"
+        );
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain,
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'GetSigWithChainSwitchingDisabled',
+          chain: 'fuji',
+          switchChain: false,
+        });
+      };
+
+      var TooManyConditions = async () => {
+        const oneCondition = {
+          contractAddress: '',
+          standardContractType: '',
+          chain,
+          method: 'eth_getBalance',
+          parameters: [':userAddress', 'latest'],
+          returnValueTest: {
+            comparator: '>=',
+            value: '0',
+          },
+        };
+        let accessControlConditions = [];
+        for (let i = 0; i < 31; i++) {
+          accessControlConditions.push(oneCondition);
+          if (i < 30) {
+            accessControlConditions.push({ operator: 'or' });
+          }
+        }
+
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'TooManyConditions',
+          chain: 'polygon',
+          switchChain: true,
+        });
+      };
+
+      var TooManyConditionsEncryption = async () => {
+        const testName = 'TooManyConditionsEncryption';
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain,
+        });
+
+        const oneCondition = {
+          contractAddress: '',
+          standardContractType: '',
+          chain,
+          method: 'eth_getBalance',
+          parameters: [':userAddress', 'latest'],
+          returnValueTest: {
+            comparator: '>=',
+            value: '0',
+          },
+        };
+        let accessControlConditions = [];
+        for (let i = 0; i < 31; i++) {
+          accessControlConditions.push(oneCondition);
+          if (i < 30) {
+            accessControlConditions.push({ operator: 'or' });
+          }
+        }
+
+<<<<<<< HEAD
       await testProvisoningAndSigning({
         accessControlConditions,
         testName: 'TooManyConditions',
@@ -2309,25 +2499,42 @@
         switchChain: true,
       });
     };
+=======
+        document.getElementById(
+          'humanized'
+        ).innerText = `Humanized: ${await LitJsSdk.humanizeAccessControlConditions(
+          { accessControlConditions }
+        )}`;
 
-    var TooManyConditionsEncryption = async () => {
-      const testName = 'TooManyConditionsEncryption';
-      document.getElementById('status').innerText = `Testing ${testName}...`;
-      const authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain,
-      });
+        const { ciphertext, dataToEncryptHash } = await LitJsSdk.encryptString(
+          {
+            dataToEncrypt: 'this is a secret message',
+            accessControlConditions,
+            chain,
+            authSig,
+          },
+          litNodeClient,
+        );
 
-      const oneCondition = {
-        contractAddress: '',
-        standardContractType: '',
-        chain,
-        method: 'eth_getBalance',
-        parameters: [':userAddress', 'latest'],
-        returnValueTest: {
-          comparator: '>=',
-          value: '0',
-        },
+        const decryptedString = await LitJsSdk.decryptToString(
+          {
+            accessControlConditions,
+            chain,
+            authSig,
+            ciphertext,
+            dataToEncryptHash,
+          },
+          litNodeClient,
+        );
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
+
+        console.log('decrypted string', decryptedString);
+
+        document.getElementById(
+          'status'
+        ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
       };
+<<<<<<< HEAD
       let accessControlConditions = [];
       for (let i = 0; i < 31; i++) {
         accessControlConditions.push(oneCondition);
@@ -2352,96 +2559,103 @@
         authSig,
         chain,
       });
+=======
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 
-      console.log('encrypted symmetric key', encryptedSymmetricKey);
+      var FilecoinHyperspace = async () => {
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'hyperspace',
+        });
 
-      const retrievedSymmKey = await litNodeClient.getEncryptionKey({
-        accessControlConditions,
-        toDecrypt: LitJsSdk.uint8arrayToString(
-          encryptedSymmetricKey,
-          'base16'
-        ),
-        chain,
-        authSig,
-      });
+        var accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'hyperspace',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
 
-      const decryptedString = await LitJsSdk.decryptString(
-        encryptedString,
-        retrievedSymmKey
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'FilecoinHyperspace',
+          authSig,
+        });
+      };
+
+      var ETHOnSepolia = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'sepolia',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnSepolia',
+        });
+      }
+
+      var Filecoin = async () => {
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+          chain: 'filecoin',
+        });
+
+        var accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'filecoin',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '10000000000000',
+            },
+          },
+        ];
+
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'Filecoin',
+          authSig,
+        });
+      };
+
+      var logout = async () => {
+        const testName = 'Logout';
+        document.getElementById('status').innerText = `Testing ${testName}...`;
+
+        LitJsSdk.disconnectWeb3();
+
+        document.getElementById(
+          'status'
+        ).innerText = `${testName}: Success - Logged out`;
+      };
+
+      document.addEventListener(
+        'lit-ready',
+        function (e) {
+          console.log('LIT network is ready');
+          document.getElementById('networkStatus').innerText =
+            'Success!  Connected to Lit Protocol Network';
+        },
+        false
       );
 
-      console.log('decrypted string', decryptedString);
-
-      document.getElementById(
-        'status'
-      ).innerText = `${testName}: Success.  Decrypted string is: ${decryptedString}`;
-    };
-
-    var FilecoinHyperspace = async () => {
-      const authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain: 'hyperspace',
-      });
-
-      var accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'hyperspace',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'FilecoinHyperspace',
-        authSig,
-      });
-    };
-
-    var ETHOnSepolia = async () => {
-      const accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'sepolia',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-      await testProvisoningAndSigning({
-        accessControlConditions,
-        testName: 'ETHOnSepolia',
-      });
-    }
-
-    var Filecoin = async () => {
-      const authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain: 'filecoin',
-      });
-
-      var accessControlConditions = [
-        {
-          contractAddress: '',
-          standardContractType: '',
-          chain: 'filecoin',
-          method: 'eth_getBalance',
-          parameters: [':userAddress', 'latest'],
-          returnValueTest: {
-            comparator: '>=',
-            value: '10000000000000',
-          },
-        },
-      ];
-
+<<<<<<< HEAD
       await testProvisoningAndSigning({
         accessControlConditions,
         testName: 'Filecoin',
@@ -2709,3 +2923,185 @@
 </body>
 
 </html>
+=======
+      function isNodeStorageError(errorCode) {
+        return (
+          errorCode === 'storage_error' || errorCode === 'NodeStorageError'
+        );
+      }
+    </script>
+  </head>
+
+  <body>
+    <h1>Manual tests</h1>
+    <br />
+    <br />
+    <div id="networkStatus">Connecting to Lit Protocol Network...</div>
+    <br />
+    <br />
+    <button onclick="ETHEmptyWallet()">ETH (Empty Wallet)</button>
+    <br />
+    <br />
+    <button onclick="ERC1155WithMinting()">ERC1155WithMinting</button>
+    <br />
+    <br />
+    <button onclick="ERC1155()">ERC1155</button>
+    <br />
+    <br />
+    <button onclick="ERC1155WithHexTokenIdOnHarmony()">
+      ERC1155WithHexTokenIdOnHarmony
+    </button>
+    <br />
+    <br />
+    <button onclick="ERC1155Batch()">ERC1155Batch</button>
+    <br />
+    <br />
+    <button onclick="ERC721NFT()">ERC721NFT</button>
+    <br />
+    <br />
+    <button onclick="ERC721Collection()">ERC721Collection</button>
+    <br />
+    <br />
+    <button onclick="SIWEDomainParam()">SIWEDomainParam</button>
+    <br />
+    <br />
+    <button onclick="SIWEResourceParam()">SIWEResourceParam</button>
+    <br />
+    <br />
+    <button onclick="POAP()">POAP</button>
+    <br />
+    <br />
+    <button onclick="POAPEventId()">POAPEventId</button>
+    <br />
+    <br />
+    <button onclick="ERC20()">ERC20</button>
+    <br />
+    <br />
+    <button onclick="ProofOfHumanity()">Proof of humanity</button>
+    <br />
+    <br />
+    <button onclick="ETH()">ETH</button>
+    <br />
+    <br />
+    <button onclick="ETHOnArbitrum()">ETHOnArbitrum</button>
+    <br />
+    <br />
+    <button onclick="ETHOnAvax()">ETHOnAvax</button>
+    <br />
+    <br />
+    <button onclick="ETHOnFuji()">ETHOnFuji</button>
+    <br />
+    <br />
+    <button onclick="ETHOnCelo()">ETHOnCelo</button>
+    <br />
+    <br />
+    <button onclick="ETHOnEth()">ETHOnEth</button>
+    <br />
+    <br />
+    <button onclick="ETHOnXdai()">ETHOnXdai</button>
+    <br />
+    <br />
+    <button onclick="ETHOnSepolia()">ETHOnSepolia</button>
+    <br />
+    <br />
+    <button onclick="ETHOnAurora()">ETHOnAurora</button>
+    <br />
+    <br />
+    <button onclick="ETHOnZksync()">ETHOnZksync</button>
+    <br />
+    <br />
+    <button onclick="ETHOnZksyncTestnet()">ETHOnZksyncTestnet</button>
+    <br />
+    <br />
+    <button onclick="ETHOnEluvioEmptyWallet()">ETHOnEluvioEmptyWallet</button>
+    <br />
+    <br />
+    <button onclick="ETHOnAlfajoresEmptyWallet()">
+      ETHOnAlfajoresEmptyWallet
+    </button>
+    <br />
+    <br />
+    <button onclick="CASK()">CASK</button>
+    <br />
+    <br />
+    <button onclick="ETHPlusERC721()">
+      ETH + ERC721 (boolean group signing)
+    </button>
+    <br />
+    <br />
+    <button onclick="SendBadRequestToNodes()">
+      Send a bad request to the nodes
+    </button>
+    <br />
+    <br />
+    <button onclick="EncryptDecrypt()">Encrypt then Decrypt</button>
+    <br />
+    <br />
+    <button onclick="EncryptDecryptString()">
+      Encrypt then Decrypt A String
+    </button>
+    <br />
+    <br />
+    <button onclick="EncryptDecryptAGroup()">
+      Encrypt then Decrypt a boolean group of conditions
+    </button>
+    <br />
+    <br />
+
+    <button onclick="EcdsaSignMessage()">
+      Nodes sign the message "LitProtocol Rocks!" using ECDSA with default key.
+    </button>
+    <br />
+    <br />
+    <button onclick="ecdsa_validate_ERC721()">
+      Cross chain validation of NFT (ERC721) /w ECDSA signature result.
+    </button>
+    <br />
+
+    <button onclick="NestedGrouping()">NestedGrouping</button>
+    <br />
+    <br />
+
+    <button onclick="RandomTestFromUser()">RandomTestFromUser</button>
+    <br />
+    <br />
+
+    <button onclick="EncryptFileAndZipWithMetadata()">
+      EncryptFileAndZipWithMetadata
+    </button>
+    <br />
+    <br />
+
+    <button onclick="GetSigWithChainSwitchingDisabled()">
+      GetSigWithChainSwitchingDisabled
+    </button>
+    <br />
+    <br />
+
+    <button onclick="TooManyConditions()">TooManyConditions</button>
+    <br />
+    <br />
+
+    <button onclick="TooManyConditionsEncryption()">
+      TooManyConditionsEncryption
+    </button>
+    <br />
+    <br />
+
+    <button onclick="FilecoinHyperspace()">FilecoinHyperspace</button>
+    <br />
+    <br />
+
+    <button onclick="Filecoin()">Filecoin</button>
+    <br />
+    <br />
+
+    <button onclick="logout()">Logout</button>
+    <br />
+    <br />
+    <h2 id="status"></h2>
+    <br />
+    <p id="humanized"></p>
+  </body>
+</html>
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2

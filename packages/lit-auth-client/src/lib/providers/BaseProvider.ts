@@ -3,6 +3,7 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitStorage } from '@lit-protocol/lit-storage';
 import { AuthCallback } from '@lit-protocol/types';
 import {
+  AuthCallback,
   AuthCallbackParams,
   AuthMethod,
   AuthSig,
@@ -10,10 +11,15 @@ import {
   BaseProviderOptions,
   BaseProviderSessionSigsParams,
   ClaimKeyResponse,
+<<<<<<< HEAD
+=======
+  ClaimProcessor,
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   ClaimRequest,
   IRelay,
   IRelayPKP,
   IRelayRequestData,
+  RelayClaimProcessor,
   SessionSigs,
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
@@ -204,6 +210,7 @@ export abstract class BaseProvider {
   /**
    * Authenticates an auth Method for claiming a Programmable Key Pair (PKP).
    * Uses the underyling {@link litNodeClient} instance to authenticate a given auth method
+<<<<<<< HEAD
    * @param claimRequest 
    * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
    */
@@ -213,6 +220,47 @@ export abstract class BaseProvider {
     const res = await this.litNodeClient.claimKeyId(claimRequest);
     return res;
   }
+=======
+   * @param claimRequest
+   * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
+   */
+  public async claimKeyId(
+    claimRequest: ClaimRequest<ClaimProcessor>
+  ): Promise<ClaimKeyResponse> {
+    if (!this.litNodeClient.ready) {
+      await this.litNodeClient.connect().catch((err) => {
+        throw err; // throw error up to caller
+      });
+    }
+
+    const res = await this.litNodeClient.claimKeyId(claimRequest);
+    return res;
+  }
+  /**
+   * Calculates a public key for a given `key identifier` which is an `Auth Method Identifier`
+   * the Auth Method Identifier is a hash of a user identifier and app idendtifer.
+   * These identifiers are specific to each auth method and will derive the public key protion of a pkp which will be persited
+   * when a key is claimed.
+   * | Auth Method | User ID | App ID |
+   * |:------------|:-------|:-------|
+   * | Google OAuth | token `sub` | token `aud` |
+   * | Discord OAuth | user id | client app identifier |
+   * | Stytch OTP |token `sub` | token `aud`|
+   * | Lit Actions | user defined | ipfs cid |
+   * @param userId
+   * @param appId
+   * @returns
+   */
+  computPublicKeyFromAuthMethod = async (
+    authMethod: AuthMethod
+  ): Promise<String> => {
+    const authMethodId = await this.getAuthMethodId(authMethod);
+    if (!this.litNodeClient) {
+      throw new Error('Lit Node Client is configured');
+    }
+    return this.litNodeClient.computeHDPubKey(authMethodId);
+  };
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 
   /**
    * Generate request data for minting and fetching PKPs via relay server
@@ -221,7 +269,7 @@ export abstract class BaseProvider {
    *
    * @returns {Promise<IRelayRequestData>} - Relay request data
    */
-  protected async prepareRelayRequestData(
+  public async prepareRelayRequestData(
     authMethod: AuthMethod
   ): Promise<IRelayRequestData> {
     const authMethodType = authMethod.authMethodType;

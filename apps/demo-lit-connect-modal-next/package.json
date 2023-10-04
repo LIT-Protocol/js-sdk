@@ -1,0 +1,22 @@
+{
+  "name": "demo-lit-connect-modal-next",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ethersproject/providers": "^5.7.2",
+    "@lit-protocol/auth-browser": "^2.2.50",
+    "@lit-protocol/constants": "^2.2.50",
+    "eslint": "8.47.0",
+    "eslint-config-next": "13.4.13",
+    "ethers": "^5.7.2",
+    "next": "13.4.13",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
+}

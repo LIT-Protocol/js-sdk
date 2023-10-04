@@ -16,6 +16,13 @@ import {
   NodeErrorV1,
   ClaimRequest,
   ClaimKeyResponse,
+<<<<<<< HEAD
+=======
+  ClaimResult,
+  ClaimProcessor,
+  MintCallback,
+  RelayClaimProcessor,
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
@@ -497,6 +504,7 @@ export const genRandomPath = (): string => {
   );
 };
 
+<<<<<<< HEAD
 
 export const defaultMintClaimCallback = async (params: ClaimKeyResponse): Promise<void> => {
   try {
@@ -521,3 +529,39 @@ export const defaultMintClaimCallback = async (params: ClaimKeyResponse): Promis
     throw e;
   }
 } 
+=======
+export const defaultMintClaimCallback: MintCallback<
+  RelayClaimProcessor
+> = async (params: ClaimResult<RelayClaimProcessor>): Promise<string> => {
+  try {
+    const relayUrl = params.relayUrl
+      ? params.relayUrl
+      : 'https://relayer-server-staging-cayenne.getlit.dev/auth/claim';
+    const response = await fetch(relayUrl, {
+      method: 'POST',
+      body: JSON.stringify(params),
+      headers: {
+        'api-key': params.relayApiKey
+          ? params.relayApiKey
+          : '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status < 200 || response.status >= 400) {
+      let errResp = await response.json() ?? "";
+      let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
+        errResp
+      )}`;
+      console.warn(errStmt);
+      throw new Error(errStmt);
+    }
+
+    let body: any = await response.json();
+    return body.requestId;
+  } catch (e) {
+    console.error((e as Error).message);
+    throw e;
+  }
+};
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2

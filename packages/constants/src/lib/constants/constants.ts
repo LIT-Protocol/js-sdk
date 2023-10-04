@@ -611,7 +611,6 @@ export const ALL_LIT_CHAINS: LITChain<
  */
 export const LOCAL_STORAGE_KEYS = {
   AUTH_COSMOS_SIGNATURE: 'lit-auth-cosmos-signature',
-  WALLET_CONNECT: 'walletconnect',
   AUTH_SIGNATURE: 'lit-auth-signature',
   AUTH_SOL_SIGNATURE: 'lit-auth-sol-signature',
   WEB3_PROVIDER: 'lit-web3-provider',
@@ -638,13 +637,6 @@ export const LIT_NETWORKS = {
     'https://cayenne.litgateway.com:7370',
     'https://cayenne.litgateway.com:7371',
     'https://cayenne.litgateway.com:7372',
-    'https://cayenne.litgateway.com:7373',
-    'https://cayenne.litgateway.com:7374',
-    'https://cayenne.litgateway.com:7375',
-    'https://cayenne.litgateway.com:7376',
-    'https://cayenne.litgateway.com:7377',
-    'https://cayenne.litgateway.com:7378',
-    'https://cayenne.litgateway.com:7379',
   ],
   localhost: [
     'http://localhost:7470',

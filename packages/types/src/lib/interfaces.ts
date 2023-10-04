@@ -4,6 +4,8 @@ import {
   AcceptedFileType,
   AccessControlConditions,
   Chain,
+  ClaimProcessor,
+  ClaimResult,
   ConditionType,
   EncryptedSymmetricKey,
   EvmContractConditions,
@@ -24,6 +26,7 @@ import { BytesLike, Signer } from 'ethers';
 
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
+import { AuthMethodType } from './enums';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -120,7 +123,14 @@ export interface AuthCallbackParams {
   // Leap -> window.leap
   cosmosWalletType?: CosmosWalletType;
 
+<<<<<<< HEAD
   cache?: boolean;
+=======
+  /**
+   * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
+   */
+  walletConnectProjectId?: string;
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 }
 
 /** ---------- Web3 ---------- */
@@ -227,6 +237,7 @@ export interface CustomNetwork {
 
 export interface Signature {
   r: string;
+<<<<<<< HEAD
 
   s: string;
   _vs: string;
@@ -236,12 +247,22 @@ export interface Signature {
 
   yParityAndS: string;
   compact: string;
+=======
+  s: string;
+  v: number;
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 }
 
 export interface ClaimKeyResponse {
   signatures: Signature[];
+<<<<<<< HEAD
   derivedKeyId: string;
   pubkey: string;
+=======
+  claimedKeyId: string;
+  pubkey: string;
+  mintTx: string;
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 }
 
 /**
@@ -292,21 +313,28 @@ export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
 export interface BaseJsonPkpSignRequest {
   toSign: ArrayLike<number>;
   pubKey: string;
-  // auth methods to resolve
-  authMethods?: Array<Object>;
 }
 
+
+export interface WithAuthMethodSigning extends BaseJsonPkpSignRequest {
+  // auth methods to resolve
+  authMethods: Array<AuthMethod>;
+  sessionSigs?: any;
+  authSig?: AuthSig;
+}
 export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
   sessionSigs: any;
   authSig?: AuthSig;
+  authMethods?: Array<AuthMethod>;
 }
 
 export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
   authSig: AuthSig;
   sessionSigs?: any;
+  authMethods?: Array<AuthMethod>;
 }
 
-export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning;
+export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning | WithAuthMethodSigning;
 
 /**
  * Struct in rust
@@ -549,6 +577,7 @@ export interface ExecuteJsResponse {
   decryptions: any[];
   response: string;
   logs: string;
+  claims?: Record<string, { signatures: Signature[], derivedKeyId: string }>;
   debug?: {
     allNodeResponses: NodeResponse[];
     allNodeLogs: NodeLog[];
@@ -556,7 +585,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise {}
+export interface LitNodePromise { }
 
 export interface SendNodeCommand {
   url: string;
@@ -565,12 +594,14 @@ export interface SendNodeCommand {
 }
 
 export interface NodeShare {
+  claimData: any;
   shareIndex: any;
   unsignedJwt: any;
   signedData: any;
   decryptedData: any;
   response: any;
   logs: any;
+  success?: any;
 }
 
 export interface PKPSignShare {
@@ -625,6 +656,26 @@ export interface NodeErrorV1 {
   errorCode?: string;
 }
 
+// V3 - Cayenne
+// {
+//   errorKind: 'Unexpected',
+//   errorCode: 'NodeUnknownError',
+//   status: 400,
+//   message: 'Unknown error occured',
+//   correlationId: 'lit_ef00fbaebb614',
+//   details: [
+//     'unexpected error: ECDSA signing failed: unexpected error: unexpected error: Message length to be signed is not 32 bytes.  Please hash it before sending it to the node to sign.  You can use SHA256 or Keccak256 for example'
+//   ]
+// }
+export interface NodeErrorV3 {
+  errorKind: string;
+  errorCode: string;
+  status: number;
+  message: string;
+  correlationId: string;
+  details: string[];
+}
+
 /**
  *
  * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
@@ -653,6 +704,7 @@ export interface SigShare {
   publicKey: any;
   dataSigned: any;
   siweMessage?: string;
+  sigName?: string;
 }
 
 export interface SignedData {
@@ -1096,7 +1148,7 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export interface PKPEthersWalletProp extends PKPBaseProp {}
+export interface PKPEthersWalletProp extends PKPBaseProp { }
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
@@ -1494,7 +1546,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions {}
+export interface BaseAuthenticateOptions { }
 
 export interface OtpAuthenticateOptions {
   code: string;
@@ -1556,7 +1608,10 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    * see stych docs for more info: https://stytch.com/docs/api/session-get
    */
   accessToken: string;
+<<<<<<< HEAD
   /* 
+=======
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   /*
    Stytch user identifier for a project
   */

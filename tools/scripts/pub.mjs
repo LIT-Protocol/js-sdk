@@ -107,12 +107,16 @@ let namespace = await readJsonFile(`${dirs[0]}/package.json`);
 
 const maxNameLength = Math.max(...dirs.map((dir) => dir.length));
 
+let publishVersion = null;
+
 await asyncForEach(dirs, async (dir) => {
   const distPkg = await readJsonFile(`${dir}/package.json`);
 
   const paddedName = distPkg.name.padEnd(maxNameLength, ' ');
 
   greenLog(`${paddedName} ${npmVersion} => ${distPkg.version}`);
+
+  publishVersion = pkg.version;
 
   // remove peer dependencies
   delete distPkg.peerDependencies;
@@ -136,6 +140,7 @@ greenLog(
   true
 );
 
+<<<<<<< HEAD
 // get latest version
 let publishVersion;
 
@@ -169,6 +174,8 @@ try {
     "Couldn't get latest version from npm, will use the config version"
   );
 }
+=======
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 
 await question('Are you sure you want to publish to? (y/n)', {
   yes: async () => {

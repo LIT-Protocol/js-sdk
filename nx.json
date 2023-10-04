@@ -15,14 +15,23 @@
     "default": {
       "runner": "@nrwl/workspace/tasks-runners/default",
       "options": {
+<<<<<<< HEAD
         "cacheableOperations": ["build"],
         "cacheableDirectories": ["node_modules"]
+=======
+        "cacheableOperations": [
+          "build",
+          "test"
+        ]
+>>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
       }
     }
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     }
   },
   "workspaceLayout": {
