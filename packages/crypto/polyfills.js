@@ -9,7 +9,7 @@ try {
         globalThis.Blob = module.Blob;
       });
     } catch (e) {
-      log(
+      console.log(
         'Warn: could not resolve Blob from node api set, perhaps polyfil a Blob implementation of your choice'
       );
     }
