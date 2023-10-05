@@ -571,21 +571,7 @@ async function buildFunc() {
     spawnListener(command, {
       onDone: () => {
         console.log('Done!');
-<<<<<<< HEAD
         exit();
-=======
-
-        // // then run vanilla build
-        // const command = `yarn nx run-many --target=_buildWeb --exclude=${ignoreList}`;
-
-        // spawnListener(command, {
-        //   onDone: async () => {
-        //     console.log("Done!");
-        //     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
-        exit();
-        //   }
-        // })
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
       },
     });
   }
@@ -1480,23 +1466,17 @@ async function validateDependencyVersions() {
     revamp: '@getlit',
   };
 
+  let packageTotal = 0;
+  let packagePasses = 0;
+
   await asyncForEach(groupNames, async (groupName) => {
     const PREFIX = PREFIXES[groupName];
 
-<<<<<<< HEAD
     const allPackages = (await listDirsRecursive('./packages', false)).map(
       (item) => {
         return `dist/${item}/package.json`;
       }
     );
-=======
-  const packageTotal = packageList.length;
-  let packagePasses = 0;
-
-  await asyncForEach(packageList, async (pkg, i) => {
-    const packageJson = await readJsonFile(pkg);
-    const pkgVersion = packageJson.version;
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 
     let packageList = [];
 
@@ -1507,6 +1487,9 @@ async function validateDependencyVersions() {
         packageList.push(pkg);
       }
     });
+
+    packageTotal = packageList.length;
+
     const maxLength = Math.max(...packageList.map((pkg) => pkg.length));
 
     const maxIndexLength = packageList.length < 10 ? 1 : 2;
@@ -1537,7 +1520,6 @@ async function validateDependencyVersions() {
         }
       }
 
-<<<<<<< HEAD
       const paddedPkg = pkg.padEnd(maxLength, ' ');
       const paddedIndex = (i + 1).toString().padStart(maxIndexLength, ' ');
 
@@ -1549,20 +1531,9 @@ async function validateDependencyVersions() {
         greenLog(
           `✅ ${paddedIndex} ${paddedPkg} contains all dependencies with matching versions.`
         );
+        packagePasses++;
       }
     });
-=======
-    if (fails > 0) {
-      redLog(
-        `❌ ${pkg} has ${fails} dependencies with versions that do not match.`
-      );
-    } else {
-      greenLog(
-        `✅ ${i + 1} ${pkg} contains all dependencies with matching versions.`
-      );
-      packagePasses++;
-    }
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   });
 
   // log that to make sure the builds works, make sure we have tested it

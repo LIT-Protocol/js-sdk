@@ -7,7 +7,7 @@ import {
   DiscordProvider,
   EthWalletProvider,
   WebAuthnProvider,
-  OtpProvider,
+  StytchOtpProvider,
 } from '@lit-protocol/lit-auth-client';
 
 import { LitStorage } from '@lit-protocol/lit-storage';
@@ -54,7 +54,7 @@ declare global {
       webauthn: OrNull<WebAuthnProvider>;
       discord: OrNull<DiscordProvider>;
       google: OrNull<GoogleProvider>;
-      otp: OrNull<OtpProvider>;
+      otp: OrNull<StytchOtpProvider>;
       apple: OrNull<AppleProvider>;
     };
 

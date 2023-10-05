@@ -7,11 +7,7 @@ export enum VMTYPE {
 
 export enum SIGTYPE {
   BLS = 'BLS',
-<<<<<<< HEAD
-  EcdsaCaitSith = 'EcdsaCaitSith',
-=======
   EcdsaCaitSith = 'ECDSA_CAIT_SITH',
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   EcdsaCAITSITHP256 = 'EcdsaCaitSithP256'
 }
 

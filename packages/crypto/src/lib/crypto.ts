@@ -6,7 +6,7 @@ import { LIT_ERROR, SessionKeyPair, SigShare } from '@lit-protocol/constants';
 
 import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
-import { isBrowser, log, throwError } from '@lit-protocol/misc';
+import { isBrowser, isNode, log, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
@@ -53,6 +53,8 @@ if (!globalThis.wasmECDSA) {
     }
   });
 }
+
+
 /** ---------- Exports ---------- */
 
 export interface BlsSignatureShare {
@@ -179,12 +181,7 @@ export const verifySignature = (
 export const combineEcdsaShares = (
   sigShares: Array<SigShare>
 ): CombinedECDSASignature => {
-<<<<<<< HEAD
-  log('sigShares:', sigShares);
-  let type = sigShares[0].sigType;
-=======
   const type = sigShares[0].sigType;
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   // the public key can come from any node - it obviously will be identical from each node
   // const publicKey = sigShares[0].publicKey;
   // const dataSigned = '0x' + sigShares[0].dataSigned;
@@ -215,9 +212,6 @@ export const combineEcdsaShares = (
     switch (type) {
       case SIGTYPE.EcdsaCaitSith:
         res = wasmECDSA.combine_signature(validShares, 2);
-<<<<<<< HEAD
-        sig = JSON.parse(res) as CombinedECDSASignature;
-=======
 
         try {
           sig = JSON.parse(res) as CombinedECDSASignature;
@@ -226,7 +220,6 @@ export const combineEcdsaShares = (
           throw new Error(`Failed to parse signature: ${e}`);
         }
 
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
         /*
           r and s values of the signature should be maximum of 64 bytes
           r and s values can have polarity as the first two bits, here we remove 
@@ -244,10 +237,7 @@ export const combineEcdsaShares = (
         break;
       case SIGTYPE.ECDSCAITSITHP256:
         res = wasmECDSA.combine_signature(validShares, 3);
-<<<<<<< HEAD
-=======
         log('response from combine_signature', res);
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
         sig = JSON.parse(res);
         break;
       // if its another sig type, it shouldnt be resolving to this method
@@ -265,27 +255,17 @@ export const combineEcdsaShares = (
   return sig;
 };
 
-<<<<<<< HEAD
-export const computeHDPubKey = (pubkeys: string[], keyId: string, sigType: SIGTYPE): string => {
-  // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
-
-=======
 export const computeHDPubKey = (
   pubkeys: string[],
   keyId: string,
   sigType: SIGTYPE
 ): string => {
   // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   try {
     switch (sigType) {
       case SIGTYPE.EcdsaCaitSith:
         return wasmECDSA.compute_public_key(keyId, pubkeys, 2);
-<<<<<<< HEAD
-      defualt: throw new Error('Non supported signature type');
-=======
         defualt: throw new Error('Non supported signature type');
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
     }
   } catch (e) {
     log('Failed to derive public key', e);

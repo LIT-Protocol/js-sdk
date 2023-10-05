@@ -1,9 +1,6 @@
 import { computeHDPubKey } from '@lit-protocol/crypto';
-<<<<<<< HEAD
-=======
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 import {
   canonicalAccessControlConditionFormatter,
   canonicalEVMContractConditionFormatter,
@@ -35,7 +32,7 @@ import {
   AuthSig,
   CustomNetwork,
   FormattedMultipleAccs,
-  HandshakeWithSgx,
+  HandshakeWithNodes,
   JsonHandshakeResponse,
   KV,
   LitNodeClientConfig,
@@ -136,7 +133,7 @@ export class LitCore {
     // -- handshake with each node
     const requestId = this.getRequestId();
     for (const url of this.config.bootstrapUrls) {
-      this.handshakeWithSgx({ url }, requestId)
+      this.handshakeWithNodes({ url }, requestId)
         .then((resp: any) => {
           this.connectedNodes.add(url);
 
@@ -147,8 +144,6 @@ export class LitCore {
             networkPubKeySet: resp.networkPublicKeySet,
             hdRootPubkeys: resp.hdRootPubkeys,
           };
-<<<<<<< HEAD
-=======
 
           // -- validate returned keys
           if (
@@ -160,7 +155,6 @@ export class LitCore {
             log('Error connecting to node. Detected "ERR" in keys', url, keys);
           }
 
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
           this.serverKeys[url] = keys;
         })
         .catch((e: any) => {
@@ -243,15 +237,15 @@ export class LitCore {
 
   /**
    *
-   * Handshake with SGX
+   * Handshake with Nodes
    *
-   * @param { HandshakeWithSgx } params
+   * @param { HandshakeWithNodes } params
    *
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  handshakeWithSgx = async (
-    params: HandshakeWithSgx,
+  handshakeWithNodes = async (
+    params: HandshakeWithNodes,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
     // -- get properties from params
@@ -260,7 +254,7 @@ export class LitCore {
     // -- create url with path
     const urlWithPath = `${url}/web/handshake`;
 
-    log(`handshakeWithSgx ${urlWithPath}`);
+    log(`handshakeWithNodes ${urlWithPath}`);
 
     const data = {
       clientPublicKey: 'test',
@@ -318,7 +312,12 @@ export class LitCore {
         return data;
       })
       .catch((error: NodeErrorV3) => {
-        console.error(`Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${(error?.message || error?.details) ? `Error is ${error.message} - ${error.details}` : ''}`);
+        console.error(
+          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error?.message || error?.details
+            ? `Error is ${error.message} - ${error.details}`
+            : ''
+          }`
+        );
         return Promise.reject(error);
       });
   };
@@ -589,14 +588,6 @@ export class LitCore {
 
   /**
    * Calculates an HD public key from a given {@link keyId} the curve type or signature type will assumed to be k256 unless given
-<<<<<<< HEAD
-   * @param keyId 
-   * @param sigType 
-   * @returns {string} public key
-   */
-  computePubKey = (keyId: string, sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith) => {
-    if(!this.hdRootPubkeys) {
-=======
    * @param keyId
    * @param sigType
    * @returns {string} public key
@@ -606,30 +597,10 @@ export class LitCore {
     sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith
   ): string => {
     if (!this.hdRootPubkeys) {
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
       throwError({
         message: `root public keys not found, have you connected to the nodes?`,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
-<<<<<<< HEAD
-      }); 
-    }
-    return computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
-  }
-
-  collectData = (
-    date: string,
-    functionName: string,
-    executionTime: number
-  ) => {
-    fetch(TELEM_API_URL + '/collect', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ date, functionName, executionTime }),
-    });
-=======
       });
     }
     return computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
@@ -646,14 +617,25 @@ export class LitCore {
    * | Discord OAuth | user id | client app identifier |
    * | Stytch OTP |token `sub` | token `aud`|
    * | Lit Actions | user defined | ipfs cid |
+   * *Note* Lit Action claiming uses a different schema than oter auth methods
+   * isForActionContext should be set for true if using claiming through actions
    * @param userId {string} user identifier for the Key Identifier
    * @param appId {string} app identifier for the Key Identifier
    * @returns {String} public key of pkp when claimed
    */
-  computeHDKeyId(userId: string, appId: string): string {
-    return ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(`${userId}:${appId}`)
-    );
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
+  computeHDKeyId(
+    userId: string,
+    appId: string,
+    isForActionContext: boolean = false
+  ): string {
+    if (!isForActionContext) {
+      return ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(`${userId}:${appId}`)
+      );
+    } else {
+      return ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(`${appId}:${userId}`)
+      );
+    }
   }
 }

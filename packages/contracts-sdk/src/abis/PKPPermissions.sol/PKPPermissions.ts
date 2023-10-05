@@ -26,7 +26,33 @@ import type {
   OnEvent,
 } from "./common";
 
-export declare namespace PKPPermissions {
+export declare namespace IDiamond {
+  export type FacetCutStruct = {
+    facetAddress: string;
+    action: BigNumberish;
+    functionSelectors: BytesLike[];
+  };
+
+  export type FacetCutStructOutput = [string, number, string[]] & {
+    facetAddress: string;
+    action: number;
+    functionSelectors: string[];
+  };
+}
+
+export declare namespace IDiamondLoupe {
+  export type FacetStruct = {
+    facetAddress: string;
+    functionSelectors: BytesLike[];
+  };
+
+  export type FacetStructOutput = [string, string[]] & {
+    facetAddress: string;
+    functionSelectors: string[];
+  };
+}
+
+export declare namespace LibPKPPermissionsStorage {
   export type AuthMethodStruct = {
     authMethodType: BigNumberish;
     id: BytesLike;
@@ -42,14 +68,19 @@ export declare namespace PKPPermissions {
 
 export interface PKPPermissionsInterface extends utils.Interface {
   functions: {
+    "diamondCut((address,uint8,bytes4[])[],address,bytes)": FunctionFragment;
+    "facetAddress(bytes4)": FunctionFragment;
+    "facetAddresses()": FunctionFragment;
+    "facetFunctionSelectors(address)": FunctionFragment;
+    "facets()": FunctionFragment;
+    "supportsInterface(bytes4)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
     "addPermittedAction(uint256,bytes,uint256[])": FunctionFragment;
     "addPermittedAddress(uint256,address,uint256[])": FunctionFragment;
     "addPermittedAuthMethod(uint256,(uint256,bytes,bytes),uint256[])": FunctionFragment;
     "addPermittedAuthMethodScope(uint256,uint256,bytes,uint256)": FunctionFragment;
-    "authMethods(uint256)": FunctionFragment;
     "batchAddRemoveAuthMethods(uint256,uint256[],bytes[],bytes[],uint256[][],uint256[],bytes[])": FunctionFragment;
-    "contractResolver()": FunctionFragment;
-    "env()": FunctionFragment;
     "getAuthMethodId(uint256,bytes)": FunctionFragment;
     "getEthAddress(uint256)": FunctionFragment;
     "getPermittedActions(uint256)": FunctionFragment;
@@ -65,29 +96,31 @@ export interface PKPPermissionsInterface extends utils.Interface {
     "isPermittedAddress(uint256,address)": FunctionFragment;
     "isPermittedAuthMethod(uint256,uint256,bytes)": FunctionFragment;
     "isPermittedAuthMethodScopePresent(uint256,uint256,bytes,uint256)": FunctionFragment;
-    "owner()": FunctionFragment;
     "removePermittedAction(uint256,bytes)": FunctionFragment;
     "removePermittedAddress(uint256,address)": FunctionFragment;
     "removePermittedAuthMethod(uint256,uint256,bytes)": FunctionFragment;
     "removePermittedAuthMethodScope(uint256,uint256,bytes,uint256)": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
     "setContractResolver(address)": FunctionFragment;
     "setRootHash(uint256,uint256,bytes32)": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
     "verifyState(uint256,uint256,bytes32[],bytes32)": FunctionFragment;
     "verifyStates(uint256,uint256,bytes32[],bool[],bytes32[])": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "diamondCut"
+      | "facetAddress"
+      | "facetAddresses"
+      | "facetFunctionSelectors"
+      | "facets"
+      | "supportsInterface"
+      | "owner"
+      | "transferOwnership"
       | "addPermittedAction"
       | "addPermittedAddress"
       | "addPermittedAuthMethod"
       | "addPermittedAuthMethodScope"
-      | "authMethods"
       | "batchAddRemoveAuthMethods"
-      | "contractResolver"
-      | "env"
       | "getAuthMethodId"
       | "getEthAddress"
       | "getPermittedActions"
@@ -103,19 +136,42 @@ export interface PKPPermissionsInterface extends utils.Interface {
       | "isPermittedAddress"
       | "isPermittedAuthMethod"
       | "isPermittedAuthMethodScopePresent"
-      | "owner"
       | "removePermittedAction"
       | "removePermittedAddress"
       | "removePermittedAuthMethod"
       | "removePermittedAuthMethodScope"
-      | "renounceOwnership"
       | "setContractResolver"
       | "setRootHash"
-      | "transferOwnership"
       | "verifyState"
       | "verifyStates"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "diamondCut",
+    values: [IDiamond.FacetCutStruct[], string, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddress",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddresses",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetFunctionSelectors",
+    values: [string]
+  ): string;
+  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "supportsInterface",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [string]
+  ): string;
   encodeFunctionData(
     functionFragment: "addPermittedAction",
     values: [BigNumberish, BytesLike, BigNumberish[]]
@@ -126,15 +182,15 @@ export interface PKPPermissionsInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "addPermittedAuthMethod",
-    values: [BigNumberish, PKPPermissions.AuthMethodStruct, BigNumberish[]]
+    values: [
+      BigNumberish,
+      LibPKPPermissionsStorage.AuthMethodStruct,
+      BigNumberish[]
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "addPermittedAuthMethodScope",
     values: [BigNumberish, BigNumberish, BytesLike, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "authMethods",
-    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "batchAddRemoveAuthMethods",
@@ -148,11 +204,6 @@ export interface PKPPermissionsInterface extends utils.Interface {
       BytesLike[]
     ]
   ): string;
-  encodeFunctionData(
-    functionFragment: "contractResolver",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "env", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getAuthMethodId",
     values: [BigNumberish, BytesLike]
@@ -213,7 +264,6 @@ export interface PKPPermissionsInterface extends utils.Interface {
     functionFragment: "isPermittedAuthMethodScopePresent",
     values: [BigNumberish, BigNumberish, BytesLike, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "removePermittedAction",
     values: [BigNumberish, BytesLike]
@@ -231,20 +281,12 @@ export interface PKPPermissionsInterface extends utils.Interface {
     values: [BigNumberish, BigNumberish, BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "renounceOwnership",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "setContractResolver",
     values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "setRootHash",
     values: [BigNumberish, BigNumberish, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "transferOwnership",
-    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "verifyState",
@@ -255,6 +297,29 @@ export interface PKPPermissionsInterface extends utils.Interface {
     values: [BigNumberish, BigNumberish, BytesLike[], boolean[], BytesLike[]]
   ): string;
 
+  decodeFunctionResult(functionFragment: "diamondCut", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "facetAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetAddresses",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetFunctionSelectors",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "supportsInterface",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "addPermittedAction",
     data: BytesLike
@@ -272,18 +337,9 @@ export interface PKPPermissionsInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "authMethods",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "batchAddRemoveAuthMethods",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "contractResolver",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "env", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getAuthMethodId",
     data: BytesLike
@@ -341,7 +397,6 @@ export interface PKPPermissionsInterface extends utils.Interface {
     functionFragment: "isPermittedAuthMethodScopePresent",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "removePermittedAction",
     data: BytesLike
@@ -359,19 +414,11 @@ export interface PKPPermissionsInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "renounceOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "setContractResolver",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "setRootHash",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -384,8 +431,9 @@ export interface PKPPermissionsInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "ContractResolverAddressSet(address)": EventFragment;
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "ContractResolverAddressSet(address)": EventFragment;
     "PermittedAuthMethodAdded(uint256,uint256,bytes,bytes)": EventFragment;
     "PermittedAuthMethodRemoved(uint256,uint256,bytes)": EventFragment;
     "PermittedAuthMethodScopeAdded(uint256,uint256,bytes,uint256)": EventFragment;
@@ -393,8 +441,9 @@ export interface PKPPermissionsInterface extends utils.Interface {
     "RootHashUpdated(uint256,uint256,bytes32)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "ContractResolverAddressSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ContractResolverAddressSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "PermittedAuthMethodAdded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "PermittedAuthMethodRemoved"): EventFragment;
   getEvent(
@@ -406,16 +455,17 @@ export interface PKPPermissionsInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "RootHashUpdated"): EventFragment;
 }
 
-export interface ContractResolverAddressSetEventObject {
-  newResolverAddress: string;
+export interface DiamondCutEventObject {
+  _diamondCut: IDiamond.FacetCutStructOutput[];
+  _init: string;
+  _calldata: string;
 }
-export type ContractResolverAddressSetEvent = TypedEvent<
-  [string],
-  ContractResolverAddressSetEventObject
+export type DiamondCutEvent = TypedEvent<
+  [IDiamond.FacetCutStructOutput[], string, string],
+  DiamondCutEventObject
 >;
 
-export type ContractResolverAddressSetEventFilter =
-  TypedEventFilter<ContractResolverAddressSetEvent>;
+export type DiamondCutEventFilter = TypedEventFilter<DiamondCutEvent>;
 
 export interface OwnershipTransferredEventObject {
   previousOwner: string;
@@ -428,6 +478,17 @@ export type OwnershipTransferredEvent = TypedEvent<
 
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
+
+export interface ContractResolverAddressSetEventObject {
+  newResolverAddress: string;
+}
+export type ContractResolverAddressSetEvent = TypedEvent<
+  [string],
+  ContractResolverAddressSetEventObject
+>;
+
+export type ContractResolverAddressSetEventFilter =
+  TypedEventFilter<ContractResolverAddressSetEvent>;
 
 export interface PermittedAuthMethodAddedEventObject {
   tokenId: BigNumber;
@@ -523,6 +584,47 @@ export interface PKPPermissions extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[string] & { facetAddress_: string }>;
+
+    facetAddresses(
+      overrides?: CallOverrides
+    ): Promise<[string[]] & { facetAddresses_: string[] }>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<[string[]] & { _facetFunctionSelectors: string[] }>;
+
+    facets(
+      overrides?: CallOverrides
+    ): Promise<
+      [IDiamondLoupe.FacetStructOutput[]] & {
+        facets_: IDiamondLoupe.FacetStructOutput[];
+      }
+    >;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    owner(overrides?: CallOverrides): Promise<[string] & { owner_: string }>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     addPermittedAction(
       tokenId: BigNumberish,
       ipfsCID: BytesLike,
@@ -539,7 +641,7 @@ export interface PKPPermissions extends BaseContract {
 
     addPermittedAuthMethod(
       tokenId: BigNumberish,
-      authMethod: PKPPermissions.AuthMethodStruct,
+      authMethod: LibPKPPermissionsStorage.AuthMethodStruct,
       scopes: BigNumberish[],
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
@@ -552,17 +654,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    authMethods(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, string, string] & {
-        authMethodType: BigNumber;
-        id: string;
-        userPubkey: string;
-      }
-    >;
-
     batchAddRemoveAuthMethods(
       tokenId: BigNumberish,
       permittedAuthMethodTypesToAdd: BigNumberish[],
@@ -573,10 +664,6 @@ export interface PKPPermissions extends BaseContract {
       permittedAuthMethodIdsToRemove: BytesLike[],
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
-
-    contractResolver(overrides?: CallOverrides): Promise<[string]>;
-
-    env(overrides?: CallOverrides): Promise<[number]>;
 
     getAuthMethodId(
       authMethodType: BigNumberish,
@@ -610,7 +697,7 @@ export interface PKPPermissions extends BaseContract {
     getPermittedAuthMethods(
       tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[PKPPermissions.AuthMethodStructOutput[]]>;
+    ): Promise<[LibPKPPermissionsStorage.AuthMethodStructOutput[]]>;
 
     getPkpNftAddress(overrides?: CallOverrides): Promise<[string]>;
 
@@ -660,8 +747,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    owner(overrides?: CallOverrides): Promise<[string]>;
-
     removePermittedAction(
       tokenId: BigNumberish,
       ipfsCID: BytesLike,
@@ -689,10 +774,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    renounceOwnership(
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
     setContractResolver(
       newResolverAddress: string,
       overrides?: Overrides & { from?: string }
@@ -702,11 +783,6 @@ export interface PKPPermissions extends BaseContract {
       tokenId: BigNumberish,
       group: BigNumberish,
       root: BytesLike,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    transferOwnership(
-      newOwner: string,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -728,6 +804,39 @@ export interface PKPPermissions extends BaseContract {
     ): Promise<[boolean]>;
   };
 
+  diamondCut(
+    _diamondCut: IDiamond.FacetCutStruct[],
+    _init: string,
+    _calldata: BytesLike,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  facetAddress(
+    _functionSelector: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+  facetFunctionSelectors(
+    _facet: string,
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
+  facets(overrides?: CallOverrides): Promise<IDiamondLoupe.FacetStructOutput[]>;
+
+  supportsInterface(
+    _interfaceId: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  transferOwnership(
+    _newOwner: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
   addPermittedAction(
     tokenId: BigNumberish,
     ipfsCID: BytesLike,
@@ -744,7 +853,7 @@ export interface PKPPermissions extends BaseContract {
 
   addPermittedAuthMethod(
     tokenId: BigNumberish,
-    authMethod: PKPPermissions.AuthMethodStruct,
+    authMethod: LibPKPPermissionsStorage.AuthMethodStruct,
     scopes: BigNumberish[],
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
@@ -757,17 +866,6 @@ export interface PKPPermissions extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  authMethods(
-    arg0: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, string, string] & {
-      authMethodType: BigNumber;
-      id: string;
-      userPubkey: string;
-    }
-  >;
-
   batchAddRemoveAuthMethods(
     tokenId: BigNumberish,
     permittedAuthMethodTypesToAdd: BigNumberish[],
@@ -778,10 +876,6 @@ export interface PKPPermissions extends BaseContract {
     permittedAuthMethodIdsToRemove: BytesLike[],
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
-
-  contractResolver(overrides?: CallOverrides): Promise<string>;
-
-  env(overrides?: CallOverrides): Promise<number>;
 
   getAuthMethodId(
     authMethodType: BigNumberish,
@@ -815,7 +909,7 @@ export interface PKPPermissions extends BaseContract {
   getPermittedAuthMethods(
     tokenId: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<PKPPermissions.AuthMethodStructOutput[]>;
+  ): Promise<LibPKPPermissionsStorage.AuthMethodStructOutput[]>;
 
   getPkpNftAddress(overrides?: CallOverrides): Promise<string>;
 
@@ -862,8 +956,6 @@ export interface PKPPermissions extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  owner(overrides?: CallOverrides): Promise<string>;
-
   removePermittedAction(
     tokenId: BigNumberish,
     ipfsCID: BytesLike,
@@ -891,10 +983,6 @@ export interface PKPPermissions extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  renounceOwnership(
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
   setContractResolver(
     newResolverAddress: string,
     overrides?: Overrides & { from?: string }
@@ -904,11 +992,6 @@ export interface PKPPermissions extends BaseContract {
     tokenId: BigNumberish,
     group: BigNumberish,
     root: BytesLike,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  transferOwnership(
-    newOwner: string,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -930,6 +1013,41 @@ export interface PKPPermissions extends BaseContract {
   ): Promise<boolean>;
 
   callStatic: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    facets(
+      overrides?: CallOverrides
+    ): Promise<IDiamondLoupe.FacetStructOutput[]>;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     addPermittedAction(
       tokenId: BigNumberish,
       ipfsCID: BytesLike,
@@ -946,7 +1064,7 @@ export interface PKPPermissions extends BaseContract {
 
     addPermittedAuthMethod(
       tokenId: BigNumberish,
-      authMethod: PKPPermissions.AuthMethodStruct,
+      authMethod: LibPKPPermissionsStorage.AuthMethodStruct,
       scopes: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -959,17 +1077,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    authMethods(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, string, string] & {
-        authMethodType: BigNumber;
-        id: string;
-        userPubkey: string;
-      }
-    >;
-
     batchAddRemoveAuthMethods(
       tokenId: BigNumberish,
       permittedAuthMethodTypesToAdd: BigNumberish[],
@@ -980,10 +1087,6 @@ export interface PKPPermissions extends BaseContract {
       permittedAuthMethodIdsToRemove: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
-
-    contractResolver(overrides?: CallOverrides): Promise<string>;
-
-    env(overrides?: CallOverrides): Promise<number>;
 
     getAuthMethodId(
       authMethodType: BigNumberish,
@@ -1017,7 +1120,7 @@ export interface PKPPermissions extends BaseContract {
     getPermittedAuthMethods(
       tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<PKPPermissions.AuthMethodStructOutput[]>;
+    ): Promise<LibPKPPermissionsStorage.AuthMethodStructOutput[]>;
 
     getPkpNftAddress(overrides?: CallOverrides): Promise<string>;
 
@@ -1067,8 +1170,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    owner(overrides?: CallOverrides): Promise<string>;
-
     removePermittedAction(
       tokenId: BigNumberish,
       ipfsCID: BytesLike,
@@ -1096,8 +1197,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
-
     setContractResolver(
       newResolverAddress: string,
       overrides?: CallOverrides
@@ -1107,11 +1206,6 @@ export interface PKPPermissions extends BaseContract {
       tokenId: BigNumberish,
       group: BigNumberish,
       root: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    transferOwnership(
-      newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1134,12 +1228,16 @@ export interface PKPPermissions extends BaseContract {
   };
 
   filters: {
-    "ContractResolverAddressSet(address)"(
-      newResolverAddress?: null
-    ): ContractResolverAddressSetEventFilter;
-    ContractResolverAddressSet(
-      newResolverAddress?: null
-    ): ContractResolverAddressSetEventFilter;
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)"(
+      _diamondCut?: null,
+      _init?: null,
+      _calldata?: null
+    ): DiamondCutEventFilter;
+    DiamondCut(
+      _diamondCut?: null,
+      _init?: null,
+      _calldata?: null
+    ): DiamondCutEventFilter;
 
     "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
@@ -1149,6 +1247,13 @@ export interface PKPPermissions extends BaseContract {
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
+
+    "ContractResolverAddressSet(address)"(
+      newResolverAddress?: null
+    ): ContractResolverAddressSetEventFilter;
+    ContractResolverAddressSet(
+      newResolverAddress?: null
+    ): ContractResolverAddressSetEventFilter;
 
     "PermittedAuthMethodAdded(uint256,uint256,bytes,bytes)"(
       tokenId?: BigNumberish | null,
@@ -1213,6 +1318,39 @@ export interface PKPPermissions extends BaseContract {
   };
 
   estimateGas: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<BigNumber>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facets(overrides?: CallOverrides): Promise<BigNumber>;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
     addPermittedAction(
       tokenId: BigNumberish,
       ipfsCID: BytesLike,
@@ -1229,7 +1367,7 @@ export interface PKPPermissions extends BaseContract {
 
     addPermittedAuthMethod(
       tokenId: BigNumberish,
-      authMethod: PKPPermissions.AuthMethodStruct,
+      authMethod: LibPKPPermissionsStorage.AuthMethodStruct,
       scopes: BigNumberish[],
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
@@ -1242,11 +1380,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    authMethods(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     batchAddRemoveAuthMethods(
       tokenId: BigNumberish,
       permittedAuthMethodTypesToAdd: BigNumberish[],
@@ -1257,10 +1390,6 @@ export interface PKPPermissions extends BaseContract {
       permittedAuthMethodIdsToRemove: BytesLike[],
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
-
-    contractResolver(overrides?: CallOverrides): Promise<BigNumber>;
-
-    env(overrides?: CallOverrides): Promise<BigNumber>;
 
     getAuthMethodId(
       authMethodType: BigNumberish,
@@ -1344,8 +1473,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
-
     removePermittedAction(
       tokenId: BigNumberish,
       ipfsCID: BytesLike,
@@ -1373,10 +1500,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    renounceOwnership(
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
     setContractResolver(
       newResolverAddress: string,
       overrides?: Overrides & { from?: string }
@@ -1386,11 +1509,6 @@ export interface PKPPermissions extends BaseContract {
       tokenId: BigNumberish,
       group: BigNumberish,
       root: BytesLike,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    transferOwnership(
-      newOwner: string,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -1413,6 +1531,39 @@ export interface PKPPermissions extends BaseContract {
   };
 
   populateTransaction: {
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facets(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
     addPermittedAction(
       tokenId: BigNumberish,
       ipfsCID: BytesLike,
@@ -1429,7 +1580,7 @@ export interface PKPPermissions extends BaseContract {
 
     addPermittedAuthMethod(
       tokenId: BigNumberish,
-      authMethod: PKPPermissions.AuthMethodStruct,
+      authMethod: LibPKPPermissionsStorage.AuthMethodStruct,
       scopes: BigNumberish[],
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
@@ -1442,11 +1593,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    authMethods(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     batchAddRemoveAuthMethods(
       tokenId: BigNumberish,
       permittedAuthMethodTypesToAdd: BigNumberish[],
@@ -1457,10 +1603,6 @@ export interface PKPPermissions extends BaseContract {
       permittedAuthMethodIdsToRemove: BytesLike[],
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
-
-    contractResolver(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    env(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getAuthMethodId(
       authMethodType: BigNumberish,
@@ -1544,8 +1686,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     removePermittedAction(
       tokenId: BigNumberish,
       ipfsCID: BytesLike,
@@ -1573,10 +1713,6 @@ export interface PKPPermissions extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    renounceOwnership(
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
     setContractResolver(
       newResolverAddress: string,
       overrides?: Overrides & { from?: string }
@@ -1586,11 +1722,6 @@ export interface PKPPermissions extends BaseContract {
       tokenId: BigNumberish,
       group: BigNumberish,
       root: BytesLike,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    transferOwnership(
-      newOwner: string,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

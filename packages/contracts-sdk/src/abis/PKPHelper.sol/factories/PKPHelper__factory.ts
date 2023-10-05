@@ -146,66 +146,105 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint256",
-        name: "keyType",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes32",
-        name: "derivedKeyId",
-        type: "bytes32",
+        components: [
+          {
+            internalType: "uint256",
+            name: "keyType",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "derivedKeyId",
+            type: "bytes32",
+          },
+          {
+            components: [
+              {
+                internalType: "bytes32",
+                name: "r",
+                type: "bytes32",
+              },
+              {
+                internalType: "bytes32",
+                name: "s",
+                type: "bytes32",
+              },
+              {
+                internalType: "uint8",
+                name: "v",
+                type: "uint8",
+              },
+            ],
+            internalType: "struct IPubkeyRouter.Signature[]",
+            name: "signatures",
+            type: "tuple[]",
+          },
+        ],
+        internalType: "struct LibPKPNFTStorage.ClaimMaterial",
+        name: "claimMaterial",
+        type: "tuple",
       },
       {
         components: [
           {
-            internalType: "bytes32",
-            name: "r",
-            type: "bytes32",
+            internalType: "uint256",
+            name: "keyType",
+            type: "uint256",
           },
           {
-            internalType: "bytes32",
-            name: "s",
-            type: "bytes32",
+            internalType: "bytes[]",
+            name: "permittedIpfsCIDs",
+            type: "bytes[]",
           },
           {
-            internalType: "uint8",
-            name: "v",
-            type: "uint8",
+            internalType: "uint256[][]",
+            name: "permittedIpfsCIDScopes",
+            type: "uint256[][]",
+          },
+          {
+            internalType: "address[]",
+            name: "permittedAddresses",
+            type: "address[]",
+          },
+          {
+            internalType: "uint256[][]",
+            name: "permittedAddressScopes",
+            type: "uint256[][]",
+          },
+          {
+            internalType: "uint256[]",
+            name: "permittedAuthMethodTypes",
+            type: "uint256[]",
+          },
+          {
+            internalType: "bytes[]",
+            name: "permittedAuthMethodIds",
+            type: "bytes[]",
+          },
+          {
+            internalType: "bytes[]",
+            name: "permittedAuthMethodPubkeys",
+            type: "bytes[]",
+          },
+          {
+            internalType: "uint256[][]",
+            name: "permittedAuthMethodScopes",
+            type: "uint256[][]",
+          },
+          {
+            internalType: "bool",
+            name: "addPkpEthAddressAsPermittedAddress",
+            type: "bool",
+          },
+          {
+            internalType: "bool",
+            name: "sendPkpToItself",
+            type: "bool",
           },
         ],
-        internalType: "struct IPubkeyRouter.Signature[]",
-        name: "signatures",
-        type: "tuple[]",
-      },
-      {
-        internalType: "uint256[]",
-        name: "permittedAuthMethodTypes",
-        type: "uint256[]",
-      },
-      {
-        internalType: "bytes[]",
-        name: "permittedAuthMethodIds",
-        type: "bytes[]",
-      },
-      {
-        internalType: "bytes[]",
-        name: "permittedAuthMethodPubkeys",
-        type: "bytes[]",
-      },
-      {
-        internalType: "uint256[][]",
-        name: "permittedAuthMethodScopes",
-        type: "uint256[][]",
-      },
-      {
-        internalType: "bool",
-        name: "addPkpEthAddressAsPermittedAddress",
-        type: "bool",
-      },
-      {
-        internalType: "bool",
-        name: "sendPkpToItself",
-        type: "bool",
+        internalType: "struct PKPHelper.AuthMethodData",
+        name: "authMethodData",
+        type: "tuple",
       },
     ],
     name: "claimAndMintNextAndAddAuthMethods",
@@ -222,76 +261,105 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint256",
-        name: "keyType",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes32",
-        name: "derivedKeyId",
-        type: "bytes32",
+        components: [
+          {
+            internalType: "uint256",
+            name: "keyType",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "derivedKeyId",
+            type: "bytes32",
+          },
+          {
+            components: [
+              {
+                internalType: "bytes32",
+                name: "r",
+                type: "bytes32",
+              },
+              {
+                internalType: "bytes32",
+                name: "s",
+                type: "bytes32",
+              },
+              {
+                internalType: "uint8",
+                name: "v",
+                type: "uint8",
+              },
+            ],
+            internalType: "struct IPubkeyRouter.Signature[]",
+            name: "signatures",
+            type: "tuple[]",
+          },
+        ],
+        internalType: "struct LibPKPNFTStorage.ClaimMaterial",
+        name: "claimMaterial",
+        type: "tuple",
       },
       {
         components: [
           {
-            internalType: "bytes32",
-            name: "r",
-            type: "bytes32",
+            internalType: "uint256",
+            name: "keyType",
+            type: "uint256",
           },
           {
-            internalType: "bytes32",
-            name: "s",
-            type: "bytes32",
+            internalType: "bytes[]",
+            name: "permittedIpfsCIDs",
+            type: "bytes[]",
           },
           {
-            internalType: "uint8",
-            name: "v",
-            type: "uint8",
+            internalType: "uint256[][]",
+            name: "permittedIpfsCIDScopes",
+            type: "uint256[][]",
+          },
+          {
+            internalType: "address[]",
+            name: "permittedAddresses",
+            type: "address[]",
+          },
+          {
+            internalType: "uint256[][]",
+            name: "permittedAddressScopes",
+            type: "uint256[][]",
+          },
+          {
+            internalType: "uint256[]",
+            name: "permittedAuthMethodTypes",
+            type: "uint256[]",
+          },
+          {
+            internalType: "bytes[]",
+            name: "permittedAuthMethodIds",
+            type: "bytes[]",
+          },
+          {
+            internalType: "bytes[]",
+            name: "permittedAuthMethodPubkeys",
+            type: "bytes[]",
+          },
+          {
+            internalType: "uint256[][]",
+            name: "permittedAuthMethodScopes",
+            type: "uint256[][]",
+          },
+          {
+            internalType: "bool",
+            name: "addPkpEthAddressAsPermittedAddress",
+            type: "bool",
+          },
+          {
+            internalType: "bool",
+            name: "sendPkpToItself",
+            type: "bool",
           },
         ],
-        internalType: "struct IPubkeyRouter.Signature[]",
-        name: "signatures",
-        type: "tuple[]",
-      },
-      {
-        internalType: "address[]",
-        name: "permittedAddresses",
-        type: "address[]",
-      },
-      {
-        internalType: "uint256[][]",
-        name: "permittedAddressScopes",
-        type: "uint256[][]",
-      },
-      {
-        internalType: "uint256[]",
-        name: "permittedAuthMethodTypes",
-        type: "uint256[]",
-      },
-      {
-        internalType: "bytes[]",
-        name: "permittedAuthMethodIds",
-        type: "bytes[]",
-      },
-      {
-        internalType: "bytes[]",
-        name: "permittedAuthMethodPubkeys",
-        type: "bytes[]",
-      },
-      {
-        internalType: "uint256[][]",
-        name: "permittedAuthMethodScopes",
-        type: "uint256[][]",
-      },
-      {
-        internalType: "bool",
-        name: "addPkpEthAddressAsPermittedAddress",
-        type: "bool",
-      },
-      {
-        internalType: "bool",
-        name: "sendPkpToItself",
-        type: "bool",
+        internalType: "struct PKPHelper.AuthMethodData",
+        name: "authMethodData",
+        type: "tuple",
       },
     ],
     name: "claimAndMintNextAndAddAuthMethodsWithTypes",

@@ -123,14 +123,14 @@ export interface AuthCallbackParams {
   // Leap -> window.leap
   cosmosWalletType?: CosmosWalletType;
 
-<<<<<<< HEAD
+
   cache?: boolean;
-=======
+
   /**
    * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
    */
   walletConnectProjectId?: string;
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
+
 }
 
 /** ---------- Web3 ---------- */
@@ -237,32 +237,16 @@ export interface CustomNetwork {
 
 export interface Signature {
   r: string;
-<<<<<<< HEAD
-
-  s: string;
-  _vs: string;
-
-  recoveryParam: number;
-  v: number;
-
-  yParityAndS: string;
-  compact: string;
-=======
   s: string;
   v: number;
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 }
 
 export interface ClaimKeyResponse {
   signatures: Signature[];
-<<<<<<< HEAD
-  derivedKeyId: string;
-  pubkey: string;
-=======
+
   claimedKeyId: string;
   pubkey: string;
   mintTx: string;
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 }
 
 /**
@@ -784,7 +768,7 @@ export interface ValidateAndSignECDSA {
   auth_sig: AuthSig;
 }
 
-export interface HandshakeWithSgx {
+export interface HandshakeWithNodes {
   url: string;
 }
 
@@ -966,11 +950,6 @@ export interface AuthMethod {
 export interface AuthMethodWithOTPType extends AuthMethod {
   otpType: 'email' | 'phone';
 }
-export interface ClaimRequest {
-  authMethod: AuthMethod;
-  mintCallback?: MintCallback;
-}
-
 // pub struct JsonSignSessionKeyRequest {
 //     pub session_key: String,
 //     pub auth_methods: Vec<AuthMethod>,
@@ -1192,7 +1171,7 @@ export interface LitAuthClientOptions {
    */
   litNodeClient?: any;
 
-  litOtpConfig?: OtpProviderOptions;
+  litOtpConfig?: StytchOtpProviderOptions;
 
   storageProvider?: any;
 
@@ -1554,7 +1533,7 @@ export interface OtpAuthenticateOptions {
 
 export interface EthWalletAuthenticateOptions
   extends BaseAuthenticateOptions,
-    ExpirableOptions {
+  ExpirableOptions {
   /**
    * Ethereum wallet address
    */
@@ -1584,16 +1563,16 @@ export interface EthWalletAuthenticateOptions
 
 export interface OtpAuthenticateOptions
   extends BaseAuthenticateOptions,
-    ExpirableOptions {
+  ExpirableOptions {
   /**
    * User provided authentication code
    */
   code: string;
 }
 
-export interface GoogleAuthenticateOptions extends ExpirableOptions {}
-export interface DiscordAuthenticateOptions extends ExpirableOptions {}
-export interface WebAuthnAuthenticateOptions extends ExpirableOptions {}
+export interface GoogleAuthenticateOptions extends ExpirableOptions { }
+export interface DiscordAuthenticateOptions extends ExpirableOptions { }
+export interface WebAuthnAuthenticateOptions extends ExpirableOptions { }
 
 export interface ExpirableOptions {
   cache?: boolean;
@@ -1608,10 +1587,8 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    * see stych docs for more info: https://stytch.com/docs/api/session-get
    */
   accessToken: string;
-<<<<<<< HEAD
+
   /* 
-=======
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   /*
    Stytch user identifier for a project
   */

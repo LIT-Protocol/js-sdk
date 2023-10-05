@@ -10,18 +10,398 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "_resolver",
-        type: "address",
+        internalType: "bytes4",
+        name: "_selector",
+        type: "bytes4",
       },
+    ],
+    name: "CannotAddFunctionToDiamondThatAlreadyExists",
+    type: "error",
+  },
+  {
+    inputs: [
       {
-        internalType: "enum ContractResolver.Env",
-        name: "_env",
+        internalType: "bytes4[]",
+        name: "_selectors",
+        type: "bytes4[]",
+      },
+    ],
+    name: "CannotAddSelectorsToZeroAddress",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes4",
+        name: "_selector",
+        type: "bytes4",
+      },
+    ],
+    name: "CannotRemoveFunctionThatDoesNotExist",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes4",
+        name: "_selector",
+        type: "bytes4",
+      },
+    ],
+    name: "CannotRemoveImmutableFunction",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes4",
+        name: "_selector",
+        type: "bytes4",
+      },
+    ],
+    name: "CannotReplaceFunctionThatDoesNotExists",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes4",
+        name: "_selector",
+        type: "bytes4",
+      },
+    ],
+    name: "CannotReplaceFunctionWithTheSameFunctionFromTheSameFacet",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes4[]",
+        name: "_selectors",
+        type: "bytes4[]",
+      },
+    ],
+    name: "CannotReplaceFunctionsFromFacetWithZeroAddress",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes4",
+        name: "_selector",
+        type: "bytes4",
+      },
+    ],
+    name: "CannotReplaceImmutableFunction",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint8",
+        name: "_action",
         type: "uint8",
       },
     ],
+    name: "IncorrectFacetCutAction",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_initializationContractAddress",
+        type: "address",
+      },
+      {
+        internalType: "bytes",
+        name: "_calldata",
+        type: "bytes",
+      },
+    ],
+    name: "InitializationFunctionReverted",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_contractAddress",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "_message",
+        type: "string",
+      },
+    ],
+    name: "NoBytecodeAtAddress",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_facetAddress",
+        type: "address",
+      },
+    ],
+    name: "NoSelectorsProvidedForFacetForCut",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_user",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_contractOwner",
+        type: "address",
+      },
+    ],
+    name: "NotContractOwner",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_facetAddress",
+        type: "address",
+      },
+    ],
+    name: "RemoveFacetAddressMustBeZeroAddress",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "facetAddress",
+            type: "address",
+          },
+          {
+            internalType: "enum IDiamond.FacetCutAction",
+            name: "action",
+            type: "uint8",
+          },
+          {
+            internalType: "bytes4[]",
+            name: "functionSelectors",
+            type: "bytes4[]",
+          },
+        ],
+        indexed: false,
+        internalType: "struct IDiamond.FacetCut[]",
+        name: "_diamondCut",
+        type: "tuple[]",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "_init",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bytes",
+        name: "_calldata",
+        type: "bytes",
+      },
+    ],
+    name: "DiamondCut",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "facetAddress",
+            type: "address",
+          },
+          {
+            internalType: "enum IDiamond.FacetCutAction",
+            name: "action",
+            type: "uint8",
+          },
+          {
+            internalType: "bytes4[]",
+            name: "functionSelectors",
+            type: "bytes4[]",
+          },
+        ],
+        internalType: "struct IDiamond.FacetCut[]",
+        name: "_diamondCut",
+        type: "tuple[]",
+      },
+      {
+        internalType: "address",
+        name: "_init",
+        type: "address",
+      },
+      {
+        internalType: "bytes",
+        name: "_calldata",
+        type: "bytes",
+      },
+    ],
+    name: "diamondCut",
+    outputs: [],
     stateMutability: "nonpayable",
-    type: "constructor",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes4",
+        name: "_functionSelector",
+        type: "bytes4",
+      },
+    ],
+    name: "facetAddress",
+    outputs: [
+      {
+        internalType: "address",
+        name: "facetAddress_",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "facetAddresses",
+    outputs: [
+      {
+        internalType: "address[]",
+        name: "facetAddresses_",
+        type: "address[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_facet",
+        type: "address",
+      },
+    ],
+    name: "facetFunctionSelectors",
+    outputs: [
+      {
+        internalType: "bytes4[]",
+        name: "_facetFunctionSelectors",
+        type: "bytes4[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "facets",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "facetAddress",
+            type: "address",
+          },
+          {
+            internalType: "bytes4[]",
+            name: "functionSelectors",
+            type: "bytes4[]",
+          },
+        ],
+        internalType: "struct IDiamondLoupe.Facet[]",
+        name: "facets_",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes4",
+        name: "_interfaceId",
+        type: "bytes4",
+      },
+    ],
+    name: "supportsInterface",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "owner_",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_newOwner",
+        type: "address",
+      },
+    ],
+    name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "CallerNotOwner",
+    type: "error",
   },
   {
     anonymous: false,
@@ -77,81 +457,6 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
-        indexed: true,
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "previousAdminRole",
-        type: "bytes32",
-      },
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "newAdminRole",
-        type: "bytes32",
-      },
-    ],
-    name: "RoleAdminChanged",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "sender",
-        type: "address",
-      },
-    ],
-    name: "RoleGranted",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "sender",
-        type: "address",
-      },
-    ],
-    name: "RoleRevoked",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
         indexed: false,
         internalType: "address",
         name: "stakingContract",
@@ -178,32 +483,6 @@ const _abi = [
     ],
     name: "RootKeySet",
     type: "event",
-  },
-  {
-    inputs: [],
-    name: "ADMIN_ROLE",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "DEFAULT_ADMIN_ROLE",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
   },
   {
     inputs: [
@@ -252,19 +531,6 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "contractResolver",
-    outputs: [
-      {
-        internalType: "contract ContractResolver",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "bytes",
@@ -284,23 +550,10 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "env",
-    outputs: [
-      {
-        internalType: "enum ContractResolver.Env",
-        name: "",
-        type: "uint8",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
     inputs: [
       {
         internalType: "address",
-        name: "",
+        name: "ethAddress",
         type: "address",
       },
     ],
@@ -393,25 +646,6 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-    ],
-    name: "getRoleAdmin",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "",
-        type: "bytes32",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "address",
         name: "stakingContract",
         type: "address",
@@ -468,51 +702,9 @@ const _abi = [
             type: "bytes32",
           },
         ],
-        internalType: "struct PubkeyRouter.PubkeyRoutingData",
+        internalType: "struct LibPubkeyRouterStorage.PubkeyRoutingData",
         name: "",
         type: "tuple",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "grantRole",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "hasRole",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
       },
     ],
     stateMutability: "view",
@@ -541,91 +733,33 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "",
+        name: "tokenId",
         type: "uint256",
       },
     ],
     name: "pubkeys",
     outputs: [
       {
-        internalType: "bytes",
-        name: "pubkey",
-        type: "bytes",
-      },
-      {
-        internalType: "uint256",
-        name: "keyType",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes32",
-        name: "derivedKeyId",
-        type: "bytes32",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "renounceRole",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "role",
-        type: "bytes32",
-      },
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "revokeRole",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
+        components: [
+          {
+            internalType: "bytes",
+            name: "pubkey",
+            type: "bytes",
+          },
+          {
+            internalType: "uint256",
+            name: "keyType",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes32",
+            name: "derivedKeyId",
+            type: "bytes32",
+          },
+        ],
+        internalType: "struct LibPubkeyRouterStorage.PubkeyRoutingData",
         name: "",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "rootKeys",
-    outputs: [
-      {
-        internalType: "bytes",
-        name: "pubkey",
-        type: "bytes",
-      },
-      {
-        internalType: "uint256",
-        name: "keyType",
-        type: "uint256",
+        type: "tuple",
       },
     ],
     stateMutability: "view",
@@ -713,25 +847,6 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "bytes4",
-        name: "interfaceId",
-        type: "bytes4",
-      },
-    ],
-    name: "supportsInterface",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "address",
         name: "stakingContractAddress",
         type: "address",
@@ -757,30 +872,6 @@ const _abi = [
     name: "voteForRootKeys",
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-      {
-        internalType: "bytes",
-        name: "",
-        type: "bytes",
-      },
-    ],
-    name: "votesToRegisterRootKeys",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "votes",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
     type: "function",
   },
 ] as const;

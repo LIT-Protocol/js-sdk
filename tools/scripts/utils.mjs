@@ -738,7 +738,7 @@ export const getFlag = (flag = '--foo', exit = true) => {
     if (!value) {
       yellowLog(`👀 "${flag}" value is empty. eg. ${flag}=bar`);
 
-      if(exit){
+      if (exit) {
         process.exit();
       }
     }
@@ -788,7 +788,6 @@ export async function checkEmptyDirectories(dirPath) {
 
   return emptyDirs;
 }
-<<<<<<< HEAD
 // ('Please provide a project name: yarn gen:lib <project-name> <tag>',
 //       'yarn gen:lib my-lib <universal | vanilla | nodejs> [--group your-group-name]',
 //       [
@@ -908,7 +907,6 @@ export const getDefaultGroupVersion = () => {
 };
 
 export const groupNames = getGroupConfig().config.map((item) => item.group);
-=======
 
 export function getCosmosAddress(pubkeyBuffer) {
   return toBech32(
@@ -928,14 +926,13 @@ export async function signAuthMessage(
   privateKey,
   statement = 'TESTING TESTING 123',
   domain = 'localhost',
-  origin = 'https://localhost/login'
+  origin = 'https://localhost/login',
+  expirationInMs = 1000 * 60 * 60 * 24 * 7
 ) {
   const wallet = new ethers.Wallet(privateKey);
 
   // expirtaion time in ISO 8601 format
-  const expirationTime = new Date(
-    Date.now() + 1000 * 60 * 60 * 24 * 7
-  ).toISOString();
+  const expirationTime = new Date(Date.now() + expirationInMs).toISOString();
 
   const siweMessage = new siwe.SiweMessage({
     domain,
@@ -989,4 +986,3 @@ export function formatNxLikeLine(path, number) {
   const formattedLine = `${orange} >  ${bold}${orangeBg} LIT ${reset}   ${orange}Running target ${bold}${path} ${regular}for ${number} file(s) ${reset}\n`;
   return formattedLine;
 }
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2

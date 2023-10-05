@@ -26,6 +26,32 @@ import type {
   OnEvent,
 } from "./common";
 
+export declare namespace IDiamond {
+  export type FacetCutStruct = {
+    facetAddress: string;
+    action: BigNumberish;
+    functionSelectors: BytesLike[];
+  };
+
+  export type FacetCutStructOutput = [string, number, string[]] & {
+    facetAddress: string;
+    action: number;
+    functionSelectors: string[];
+  };
+}
+
+export declare namespace IDiamondLoupe {
+  export type FacetStruct = {
+    facetAddress: string;
+    functionSelectors: BytesLike[];
+  };
+
+  export type FacetStructOutput = [string, string[]] & {
+    facetAddress: string;
+    functionSelectors: string[];
+  };
+}
+
 export declare namespace IPubkeyRouter {
   export type RootKeyStruct = { pubkey: BytesLike; keyType: BigNumberish };
 
@@ -43,7 +69,7 @@ export declare namespace IPubkeyRouter {
   };
 }
 
-export declare namespace PubkeyRouter {
+export declare namespace LibPubkeyRouterStorage {
   export type PubkeyRoutingDataStruct = {
     pubkey: BytesLike;
     keyType: BigNumberish;
@@ -59,87 +85,92 @@ export declare namespace PubkeyRouter {
 
 export interface PubkeyRouterInterface extends utils.Interface {
   functions: {
-    "ADMIN_ROLE()": FunctionFragment;
-    "DEFAULT_ADMIN_ROLE()": FunctionFragment;
+    "diamondCut((address,uint8,bytes4[])[],address,bytes)": FunctionFragment;
+    "facetAddress(bytes4)": FunctionFragment;
+    "facetAddresses()": FunctionFragment;
+    "facetFunctionSelectors(address)": FunctionFragment;
+    "facets()": FunctionFragment;
+    "supportsInterface(bytes4)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
     "checkNodeSignatures((bytes32,bytes32,uint8)[],bytes,address)": FunctionFragment;
-    "contractResolver()": FunctionFragment;
     "deriveEthAddressFromPubkey(bytes)": FunctionFragment;
-    "env()": FunctionFragment;
     "ethAddressToPkpId(address)": FunctionFragment;
     "getDerivedPubkey(address,bytes32)": FunctionFragment;
     "getEthAddress(uint256)": FunctionFragment;
     "getPkpNftAddress()": FunctionFragment;
     "getPubkey(uint256)": FunctionFragment;
-    "getRoleAdmin(bytes32)": FunctionFragment;
     "getRootKeys(address)": FunctionFragment;
     "getRoutingData(uint256)": FunctionFragment;
-    "grantRole(bytes32,address)": FunctionFragment;
-    "hasRole(bytes32,address)": FunctionFragment;
     "isRouted(uint256)": FunctionFragment;
     "pubkeys(uint256)": FunctionFragment;
-    "renounceRole(bytes32,address)": FunctionFragment;
-    "revokeRole(bytes32,address)": FunctionFragment;
-    "rootKeys(address,uint256)": FunctionFragment;
     "setContractResolver(address)": FunctionFragment;
     "setRoutingData(uint256,bytes,address,uint256,bytes32)": FunctionFragment;
     "setRoutingDataAsAdmin(uint256,bytes,address,uint256,bytes32)": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
     "voteForRootKeys(address,(bytes,uint256)[])": FunctionFragment;
-    "votesToRegisterRootKeys(address,bytes)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "ADMIN_ROLE"
-      | "DEFAULT_ADMIN_ROLE"
+      | "diamondCut"
+      | "facetAddress"
+      | "facetAddresses"
+      | "facetFunctionSelectors"
+      | "facets"
+      | "supportsInterface"
+      | "owner"
+      | "transferOwnership"
       | "checkNodeSignatures"
-      | "contractResolver"
       | "deriveEthAddressFromPubkey"
-      | "env"
       | "ethAddressToPkpId"
       | "getDerivedPubkey"
       | "getEthAddress"
       | "getPkpNftAddress"
       | "getPubkey"
-      | "getRoleAdmin"
       | "getRootKeys"
       | "getRoutingData"
-      | "grantRole"
-      | "hasRole"
       | "isRouted"
       | "pubkeys"
-      | "renounceRole"
-      | "revokeRole"
-      | "rootKeys"
       | "setContractResolver"
       | "setRoutingData"
       | "setRoutingDataAsAdmin"
-      | "supportsInterface"
       | "voteForRootKeys"
-      | "votesToRegisterRootKeys"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "ADMIN_ROLE",
+    functionFragment: "diamondCut",
+    values: [IDiamond.FacetCutStruct[], string, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddress",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "facetAddresses",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
-    values?: undefined
+    functionFragment: "facetFunctionSelectors",
+    values: [string]
+  ): string;
+  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "supportsInterface",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "checkNodeSignatures",
     values: [IPubkeyRouter.SignatureStruct[], BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "contractResolver",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "deriveEthAddressFromPubkey",
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "env", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "ethAddressToPkpId",
     values: [string]
@@ -160,22 +191,10 @@ export interface PubkeyRouterInterface extends utils.Interface {
     functionFragment: "getPubkey",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "getRoleAdmin",
-    values: [BytesLike]
-  ): string;
   encodeFunctionData(functionFragment: "getRootKeys", values: [string]): string;
   encodeFunctionData(
     functionFragment: "getRoutingData",
     values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "grantRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "hasRole",
-    values: [BytesLike, string]
   ): string;
   encodeFunctionData(
     functionFragment: "isRouted",
@@ -184,18 +203,6 @@ export interface PubkeyRouterInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "pubkeys",
     values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "renounceRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "revokeRole",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "rootKeys",
-    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setContractResolver",
@@ -210,21 +217,31 @@ export interface PubkeyRouterInterface extends utils.Interface {
     values: [BigNumberish, BytesLike, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "supportsInterface",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
     functionFragment: "voteForRootKeys",
     values: [string, IPubkeyRouter.RootKeyStruct[]]
   ): string;
-  encodeFunctionData(
-    functionFragment: "votesToRegisterRootKeys",
-    values: [string, BytesLike]
-  ): string;
 
-  decodeFunctionResult(functionFragment: "ADMIN_ROLE", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "diamondCut", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
+    functionFragment: "facetAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetAddresses",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "facetFunctionSelectors",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "supportsInterface",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -232,14 +249,9 @@ export interface PubkeyRouterInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "contractResolver",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "deriveEthAddressFromPubkey",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "env", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "ethAddressToPkpId",
     data: BytesLike
@@ -258,10 +270,6 @@ export interface PubkeyRouterInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "getPubkey", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "getRoleAdmin",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "getRootKeys",
     data: BytesLike
   ): Result;
@@ -269,16 +277,8 @@ export interface PubkeyRouterInterface extends utils.Interface {
     functionFragment: "getRoutingData",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "isRouted", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "pubkeys", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceRole",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "rootKeys", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setContractResolver",
     data: BytesLike
@@ -292,34 +292,48 @@ export interface PubkeyRouterInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "supportsInterface",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "voteForRootKeys",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "votesToRegisterRootKeys",
     data: BytesLike
   ): Result;
 
   events: {
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
     "ContractResolverAddressSet(address)": EventFragment;
     "PubkeyRoutingDataSet(uint256,bytes,address,uint256,bytes32)": EventFragment;
-    "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
-    "RoleGranted(bytes32,address,address)": EventFragment;
-    "RoleRevoked(bytes32,address,address)": EventFragment;
     "RootKeySet(address,(bytes,uint256))": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ContractResolverAddressSet"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "PubkeyRoutingDataSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RootKeySet"): EventFragment;
 }
+
+export interface DiamondCutEventObject {
+  _diamondCut: IDiamond.FacetCutStructOutput[];
+  _init: string;
+  _calldata: string;
+}
+export type DiamondCutEvent = TypedEvent<
+  [IDiamond.FacetCutStructOutput[], string, string],
+  DiamondCutEventObject
+>;
+
+export type DiamondCutEventFilter = TypedEventFilter<DiamondCutEvent>;
+
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface ContractResolverAddressSetEventObject {
   newResolverAddress: string;
@@ -346,43 +360,6 @@ export type PubkeyRoutingDataSetEvent = TypedEvent<
 
 export type PubkeyRoutingDataSetEventFilter =
   TypedEventFilter<PubkeyRoutingDataSetEvent>;
-
-export interface RoleAdminChangedEventObject {
-  role: string;
-  previousAdminRole: string;
-  newAdminRole: string;
-}
-export type RoleAdminChangedEvent = TypedEvent<
-  [string, string, string],
-  RoleAdminChangedEventObject
->;
-
-export type RoleAdminChangedEventFilter =
-  TypedEventFilter<RoleAdminChangedEvent>;
-
-export interface RoleGrantedEventObject {
-  role: string;
-  account: string;
-  sender: string;
-}
-export type RoleGrantedEvent = TypedEvent<
-  [string, string, string],
-  RoleGrantedEventObject
->;
-
-export type RoleGrantedEventFilter = TypedEventFilter<RoleGrantedEvent>;
-
-export interface RoleRevokedEventObject {
-  role: string;
-  account: string;
-  sender: string;
-}
-export type RoleRevokedEvent = TypedEvent<
-  [string, string, string],
-  RoleRevokedEventObject
->;
-
-export type RoleRevokedEventFilter = TypedEventFilter<RoleRevokedEvent>;
 
 export interface RootKeySetEventObject {
   stakingContract: string;
@@ -422,9 +399,46 @@ export interface PubkeyRouter extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[string] & { facetAddress_: string }>;
+
+    facetAddresses(
+      overrides?: CallOverrides
+    ): Promise<[string[]] & { facetAddresses_: string[] }>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<[string[]] & { _facetFunctionSelectors: string[] }>;
+
+    facets(
+      overrides?: CallOverrides
+    ): Promise<
+      [IDiamondLoupe.FacetStructOutput[]] & {
+        facets_: IDiamondLoupe.FacetStructOutput[];
+      }
+    >;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    owner(overrides?: CallOverrides): Promise<[string] & { owner_: string }>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
 
     checkNodeSignatures(
       signatures: IPubkeyRouter.SignatureStruct[],
@@ -433,17 +447,13 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    contractResolver(overrides?: CallOverrides): Promise<[string]>;
-
     deriveEthAddressFromPubkey(
       pubkey: BytesLike,
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    env(overrides?: CallOverrides): Promise<[number]>;
-
     ethAddressToPkpId(
-      arg0: string,
+      ethAddress: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -465,8 +475,6 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<[string]>;
-
     getRootKeys(
       stakingContract: string,
       overrides?: CallOverrides
@@ -475,19 +483,7 @@ export interface PubkeyRouter extends BaseContract {
     getRoutingData(
       tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[PubkeyRouter.PubkeyRoutingDataStructOutput]>;
-
-    grantRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    hasRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    ): Promise<[LibPubkeyRouterStorage.PubkeyRoutingDataStructOutput]>;
 
     isRouted(
       tokenId: BigNumberish,
@@ -495,33 +491,9 @@ export interface PubkeyRouter extends BaseContract {
     ): Promise<[boolean]>;
 
     pubkeys(
-      arg0: BigNumberish,
+      tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<
-      [string, BigNumber, string] & {
-        pubkey: string;
-        keyType: BigNumber;
-        derivedKeyId: string;
-      }
-    >;
-
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<ContractTransaction>;
-
-    rootKeys(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string, BigNumber] & { pubkey: string; keyType: BigNumber }>;
+    ): Promise<[LibPubkeyRouterStorage.PubkeyRoutingDataStructOutput]>;
 
     setContractResolver(
       newResolverAddress: string,
@@ -546,27 +518,45 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
     voteForRootKeys(
       stakingContractAddress: string,
       newRootKeys: IPubkeyRouter.RootKeyStruct[],
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
-
-    votesToRegisterRootKeys(
-      arg0: string,
-      arg1: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber] & { votes: BigNumber }>;
   };
 
-  ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
+  diamondCut(
+    _diamondCut: IDiamond.FacetCutStruct[],
+    _init: string,
+    _calldata: BytesLike,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
-  DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
+  facetAddress(
+    _functionSelector: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+  facetFunctionSelectors(
+    _facet: string,
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
+  facets(overrides?: CallOverrides): Promise<IDiamondLoupe.FacetStructOutput[]>;
+
+  supportsInterface(
+    _interfaceId: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  transferOwnership(
+    _newOwner: string,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
 
   checkNodeSignatures(
     signatures: IPubkeyRouter.SignatureStruct[],
@@ -575,17 +565,13 @@ export interface PubkeyRouter extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  contractResolver(overrides?: CallOverrides): Promise<string>;
-
   deriveEthAddressFromPubkey(
     pubkey: BytesLike,
     overrides?: CallOverrides
   ): Promise<string>;
 
-  env(overrides?: CallOverrides): Promise<number>;
-
   ethAddressToPkpId(
-    arg0: string,
+    ethAddress: string,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -604,8 +590,6 @@ export interface PubkeyRouter extends BaseContract {
 
   getPubkey(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-  getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<string>;
-
   getRootKeys(
     stakingContract: string,
     overrides?: CallOverrides
@@ -614,50 +598,14 @@ export interface PubkeyRouter extends BaseContract {
   getRoutingData(
     tokenId: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<PubkeyRouter.PubkeyRoutingDataStructOutput>;
-
-  grantRole(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  hasRole(
-    role: BytesLike,
-    account: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  ): Promise<LibPubkeyRouterStorage.PubkeyRoutingDataStructOutput>;
 
   isRouted(tokenId: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
   pubkeys(
-    arg0: BigNumberish,
+    tokenId: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<
-    [string, BigNumber, string] & {
-      pubkey: string;
-      keyType: BigNumber;
-      derivedKeyId: string;
-    }
-  >;
-
-  renounceRole(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  revokeRole(
-    role: BytesLike,
-    account: string,
-    overrides?: Overrides & { from?: string }
-  ): Promise<ContractTransaction>;
-
-  rootKeys(
-    arg0: string,
-    arg1: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<[string, BigNumber] & { pubkey: string; keyType: BigNumber }>;
+  ): Promise<LibPubkeyRouterStorage.PubkeyRoutingDataStructOutput>;
 
   setContractResolver(
     newResolverAddress: string,
@@ -682,27 +630,47 @@ export interface PubkeyRouter extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  supportsInterface(
-    interfaceId: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
   voteForRootKeys(
     stakingContractAddress: string,
     newRootKeys: IPubkeyRouter.RootKeyStruct[],
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  votesToRegisterRootKeys(
-    arg0: string,
-    arg1: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   callStatic: {
-    ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<string[]>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    facets(
+      overrides?: CallOverrides
+    ): Promise<IDiamondLoupe.FacetStructOutput[]>;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     checkNodeSignatures(
       signatures: IPubkeyRouter.SignatureStruct[],
@@ -711,17 +679,13 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    contractResolver(overrides?: CallOverrides): Promise<string>;
-
     deriveEthAddressFromPubkey(
       pubkey: BytesLike,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    env(overrides?: CallOverrides): Promise<number>;
-
     ethAddressToPkpId(
-      arg0: string,
+      ethAddress: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -743,8 +707,6 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    getRoleAdmin(role: BytesLike, overrides?: CallOverrides): Promise<string>;
-
     getRootKeys(
       stakingContract: string,
       overrides?: CallOverrides
@@ -753,19 +715,7 @@ export interface PubkeyRouter extends BaseContract {
     getRoutingData(
       tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<PubkeyRouter.PubkeyRoutingDataStructOutput>;
-
-    grantRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    hasRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    ): Promise<LibPubkeyRouterStorage.PubkeyRoutingDataStructOutput>;
 
     isRouted(
       tokenId: BigNumberish,
@@ -773,33 +723,9 @@ export interface PubkeyRouter extends BaseContract {
     ): Promise<boolean>;
 
     pubkeys(
-      arg0: BigNumberish,
+      tokenId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<
-      [string, BigNumber, string] & {
-        pubkey: string;
-        keyType: BigNumber;
-        derivedKeyId: string;
-      }
-    >;
-
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    rootKeys(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string, BigNumber] & { pubkey: string; keyType: BigNumber }>;
+    ): Promise<LibPubkeyRouterStorage.PubkeyRoutingDataStructOutput>;
 
     setContractResolver(
       newResolverAddress: string,
@@ -824,25 +750,34 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
     voteForRootKeys(
       stakingContractAddress: string,
       newRootKeys: IPubkeyRouter.RootKeyStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
-
-    votesToRegisterRootKeys(
-      arg0: string,
-      arg1: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
   };
 
   filters: {
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)"(
+      _diamondCut?: null,
+      _init?: null,
+      _calldata?: null
+    ): DiamondCutEventFilter;
+    DiamondCut(
+      _diamondCut?: null,
+      _init?: null,
+      _calldata?: null
+    ): DiamondCutEventFilter;
+
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+
     "ContractResolverAddressSet(address)"(
       newResolverAddress?: null
     ): ContractResolverAddressSetEventFilter;
@@ -865,39 +800,6 @@ export interface PubkeyRouter extends BaseContract {
       derivedKeyId?: null
     ): PubkeyRoutingDataSetEventFilter;
 
-    "RoleAdminChanged(bytes32,bytes32,bytes32)"(
-      role?: BytesLike | null,
-      previousAdminRole?: BytesLike | null,
-      newAdminRole?: BytesLike | null
-    ): RoleAdminChangedEventFilter;
-    RoleAdminChanged(
-      role?: BytesLike | null,
-      previousAdminRole?: BytesLike | null,
-      newAdminRole?: BytesLike | null
-    ): RoleAdminChangedEventFilter;
-
-    "RoleGranted(bytes32,address,address)"(
-      role?: BytesLike | null,
-      account?: string | null,
-      sender?: string | null
-    ): RoleGrantedEventFilter;
-    RoleGranted(
-      role?: BytesLike | null,
-      account?: string | null,
-      sender?: string | null
-    ): RoleGrantedEventFilter;
-
-    "RoleRevoked(bytes32,address,address)"(
-      role?: BytesLike | null,
-      account?: string | null,
-      sender?: string | null
-    ): RoleRevokedEventFilter;
-    RoleRevoked(
-      role?: BytesLike | null,
-      account?: string | null,
-      sender?: string | null
-    ): RoleRevokedEventFilter;
-
     "RootKeySet(address,(bytes,uint256))"(
       stakingContract?: null,
       rootKey?: null
@@ -906,9 +808,38 @@ export interface PubkeyRouter extends BaseContract {
   };
 
   estimateGas: {
-    ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
 
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+    facetAddress(
+      _functionSelector: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<BigNumber>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    facets(overrides?: CallOverrides): Promise<BigNumber>;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
 
     checkNodeSignatures(
       signatures: IPubkeyRouter.SignatureStruct[],
@@ -917,17 +848,13 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    contractResolver(overrides?: CallOverrides): Promise<BigNumber>;
-
     deriveEthAddressFromPubkey(
       pubkey: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    env(overrides?: CallOverrides): Promise<BigNumber>;
-
     ethAddressToPkpId(
-      arg0: string,
+      ethAddress: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -949,11 +876,6 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getRoleAdmin(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     getRootKeys(
       stakingContract: string,
       overrides?: CallOverrides
@@ -964,40 +886,13 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    grantRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    hasRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     isRouted(
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    pubkeys(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    rootKeys(
-      arg0: string,
-      arg1: BigNumberish,
+    pubkeys(
+      tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1024,29 +919,45 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     voteForRootKeys(
       stakingContractAddress: string,
       newRootKeys: IPubkeyRouter.RootKeyStruct[],
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
-
-    votesToRegisterRootKeys(
-      arg0: string,
-      arg1: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    ADMIN_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    diamondCut(
+      _diamondCut: IDiamond.FacetCutStruct[],
+      _init: string,
+      _calldata: BytesLike,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
 
-    DEFAULT_ADMIN_ROLE(
+    facetAddress(
+      _functionSelector: BytesLike,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facetAddresses(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    facetFunctionSelectors(
+      _facet: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    facets(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    supportsInterface(
+      _interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    transferOwnership(
+      _newOwner: string,
+      overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
     checkNodeSignatures(
@@ -1056,17 +967,13 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    contractResolver(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     deriveEthAddressFromPubkey(
       pubkey: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    env(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     ethAddressToPkpId(
-      arg0: string,
+      ethAddress: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1088,11 +995,6 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getRoleAdmin(
-      role: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     getRootKeys(
       stakingContract: string,
       overrides?: CallOverrides
@@ -1103,43 +1005,13 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    grantRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    hasRole(
-      role: BytesLike,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     isRouted(
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     pubkeys(
-      arg0: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    renounceRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    revokeRole(
-      role: BytesLike,
-      account: string,
-      overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    rootKeys(
-      arg0: string,
-      arg1: BigNumberish,
+      tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1166,21 +1038,10 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    supportsInterface(
-      interfaceId: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     voteForRootKeys(
       stakingContractAddress: string,
       newRootKeys: IPubkeyRouter.RootKeyStruct[],
       overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    votesToRegisterRootKeys(
-      arg0: string,
-      arg1: BytesLike,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }

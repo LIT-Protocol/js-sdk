@@ -140,10 +140,6 @@ greenLog(
   true
 );
 
-<<<<<<< HEAD
-// get latest version
-let publishVersion;
-
 let TAG;
 
 try {
@@ -174,8 +170,6 @@ try {
     "Couldn't get latest version from npm, will use the config version"
   );
 }
-=======
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 
 await question('Are you sure you want to publish to? (y/n)', {
   yes: async () => {

@@ -21,12 +21,8 @@
     "access": "public",
     "directory": "../../dist/packages/nacl"
   },
-<<<<<<< HEAD
-  "version": "2.2.52",
   "group": "core",
-=======
-  "version": "3.0.3",
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
+  "version": "2.2.52",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

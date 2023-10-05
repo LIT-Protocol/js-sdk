@@ -16,7 +16,6 @@ import {
   encrypt,
   generateSessionKeyPair,
   verifyAndDecryptWithSignatureShares,
-  computeHDPubKey,
 } from '@lit-protocol/crypto';
 import { safeParams } from '@lit-protocol/encryption';
 import {
@@ -32,10 +31,7 @@ import {
   AuthMethod,
   AuthSig,
   ClaimKeyResponse,
-<<<<<<< HEAD
-=======
   ClaimProcessor,
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   ClaimRequest,
   CustomNetwork,
   DecryptRequest,
@@ -85,6 +81,7 @@ import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'lit-siwe';
 
 import { LitCore } from '@lit-protocol/core';
+import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 import {
   ILitResource,
@@ -747,9 +744,12 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // determine which node to run on
-    let hashId;
+    let ipfsId;
 
     if (params.code) {
+      // hash the code to get IPFS id
+      const blockstore = new IPFSBundledSDK.MemoryBlockstore();
+
       let content: string | Uint8Array = params.code;
 
       if (typeof content === 'string') {
@@ -763,14 +763,25 @@ export class LitNodeClientNodeJs extends LitCore {
         });
       }
 
-      hashId = sha256(content);
+      let lastCid;
+      for await (const { cid } of IPFSBundledSDK.importer(
+        [{ content }],
+        blockstore,
+        {
+          onlyHash: true,
+        }
+      )) {
+        lastCid = cid;
+      }
+
+      ipfsId = lastCid;
     } else {
-      hashId = params.ipfsId;
+      ipfsId = params.ipfsId;
     }
 
-    if (!hashId) {
+    if (!ipfsId) {
       return throwError({
-        message: 'hashId is required',
+        message: 'ipfsId is required',
         error: LIT_ERROR.INVALID_PARAM_TYPE,
       });
     }
@@ -781,7 +792,7 @@ export class LitNodeClientNodeJs extends LitCore {
     let nodeCounter = 0;
 
     while (randomSelectedNodeIndexes.length < targetNodeRange) {
-      const str = `${nodeCounter}:${hashId.toString()}`;
+      const str = `${nodeCounter}:${ipfsId.toString()}`;
       const cidBuffer = Buffer.from(str);
       const hash = sha256(cidBuffer);
       const hashAsNumber = BigNumber.from(hash);
@@ -843,11 +854,7 @@ export class LitNodeClientNodeJs extends LitCore {
       nodePromises.push(singleNodePromise);
     }
 
-<<<<<<< HEAD
-    const handledPromise = await this.handleNodePromises<NodeCommandResponse>(
-=======
     const handledPromise = (await this.handleNodePromises(
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
       nodePromises,
       targetNodeRange
     )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
@@ -941,20 +948,8 @@ export class LitNodeClientNodeJs extends LitCore {
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-<<<<<<< HEAD
-      const sigShares: Array<SigShare> = shares.map((s: any) => ({
-        sigType: s.sigType,
-        signatureShare: s.signatureShare.replace('"', ''),
-        shareIndex: s.shareIndex,
-        bigR: s.bigR.replace('"', ''),
-        publicKey: s.publicKey.replace('"', ''),
-        dataSigned: s.dataSigned.replace('"', ''),
-        siweMessage: s.siweMessage,
-      }));
-=======
       const sigShares: Array<SigShare> = shares.map((s: any) => {
         const share = this._getFlattenShare(s);
-        console.log('XX share', share);
 
         return {
           sigType: share.sigType,
@@ -966,7 +961,6 @@ export class LitNodeClientNodeJs extends LitCore {
           siweMessage: share.siweMessage,
         };
       });
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 
       log('getSessionSignatures - sigShares', sigShares);
 
@@ -995,15 +989,6 @@ export class LitNodeClientNodeJs extends LitCore {
         return;
       }
 
-<<<<<<< HEAD
-      let signature: any;
-
-      if (
-        sigType === SIGTYPE.EcdsaCaitSith ||
-        sigType === SIGTYPE.EcdsaCAITSITHP256
-      ) {
-        signature = combineEcdsaShares(sigShares);
-=======
       const signature: any = combineEcdsaShares(sigShares);
       if (!signature.r) {
         throwError({
@@ -1011,7 +996,6 @@ export class LitNodeClientNodeJs extends LitCore {
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name,
         });
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
       }
 
       const encodedSig = joinSignature({
@@ -1055,17 +1039,6 @@ export class LitNodeClientNodeJs extends LitCore {
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-<<<<<<< HEAD
-      const sigShares: Array<SigShare> = shares.map((s: any) => ({
-        sigType: s.sigType,
-        signatureShare: s.signatureShare as string,
-        shareIndex: s.shareIndex,
-        bigR: s.bigR,
-        publicKey: s.publicKey,
-        dataSigned: s.dataSigned,
-        sigName: s.sigName ? s.sigName : 'sig',
-      }));
-=======
       const sigShares: Array<SigShare> = shares.map((s: any) => {
         const share = this._getFlattenShare(s);
 
@@ -1079,7 +1052,6 @@ export class LitNodeClientNodeJs extends LitCore {
           sigName: share.sigName ? share.sigName : 'sig',
         };
       });
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 
       log('getSignatures - sigShares', sigShares);
 
@@ -1096,14 +1068,10 @@ export class LitNodeClientNodeJs extends LitCore {
       }
 
       // -- validate if signature type is ECDSA
-<<<<<<< HEAD
-      if (sigType !== 'EcdsaCaitSith') {
-=======
       if (
         sigType !== SIGTYPE.EcdsaCaitSith &&
         sigType !== SIGTYPE.EcdsaCAITSITHP256
       ) {
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
         throwError({
           message: `signature type is ${sigType} which is not ECDSA_CAIT_SITH`,
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
@@ -1112,15 +1080,6 @@ export class LitNodeClientNodeJs extends LitCore {
         return;
       }
 
-<<<<<<< HEAD
-      let signature: any;
-
-      if (
-        sigType === SIGTYPE.EcdsaCaitSith ||
-        sigType === SIGTYPE.EcdsaCAITSITHP256
-      ) {
-        signature = combineEcdsaShares(sigShares);
-=======
       const signature: any = combineEcdsaShares(sigShares);
       if (!signature.r) {
         throwError({
@@ -1128,7 +1087,6 @@ export class LitNodeClientNodeJs extends LitCore {
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name,
         });
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
       }
 
       const encodedSig = joinSignature({
@@ -1284,44 +1242,6 @@ export class LitNodeClientNodeJs extends LitCore {
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
     const signedDataList = responseData.map((r) => {
-<<<<<<< HEAD
-      // add the signed data to the signature share
-      delete r.signedData.result;
-
-      // nodes do not camel case the response from /web/pkp/sign.
-      const snakeToCamel = (s: string) =>
-        s.replace(/(_\w)/g, (k) => k[1].toUpperCase());
-      //@ts-ignore
-      const convertShare: any = (share: any) => {
-        const keys = Object.keys(share);
-        let convertedShare = {};
-        for (const key of keys) {
-          convertedShare = Object.defineProperty(
-            convertedShare,
-            snakeToCamel(key),
-            Object.getOwnPropertyDescriptor(share, key) as PropertyDecorator
-          );
-        }
-
-        return convertedShare;
-      };
-      const convertedShare: SigShare = convertShare(r.signedData);
-      const keys = Object.keys(convertedShare);
-      for (const key of keys) {
-        //@ts-ignore
-        if (typeof convertedShare[key] === 'string') {
-          //@ts-ignore
-          convertedShare[key] = convertedShare[key]
-            .replace('"', '')
-            .replace('"', '');
-        }
-      }
-      //@ts-ignore
-      convertedShare.dataSigned = convertedShare.digest;
-      return {
-        signature: convertedShare,
-      };
-=======
       const { signedData } = r;
       for (const key of Object.keys(signedData)) {
         for (const subkey of Object.keys(signedData[key])) {
@@ -1336,7 +1256,6 @@ export class LitNodeClientNodeJs extends LitCore {
         }
       }
       return signedData;
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
     });
 
     const signatures = this.getSignatures(signedDataList);
@@ -2246,13 +2165,9 @@ export class LitNodeClientNodeJs extends LitCore {
    * @param {ClaimKeyRequest} params an Auth Method and {@link MintCallback}
    * @returns {Promise<ClaimKeyResponse>}
    */
-<<<<<<< HEAD
-  async claimKeyId(params: ClaimRequest): Promise<ClaimKeyResponse> {
-=======
   async claimKeyId(
     params: ClaimRequest<ClaimProcessor>
   ): Promise<ClaimKeyResponse> {
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
     if (!this.ready) {
       const message =
         'LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
@@ -2263,10 +2178,6 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
-<<<<<<< HEAD
-    const nodePromises = await this.getNodePromises((url: string) => {
-      const requestId = this.getRequestId();
-=======
     if (params.authMethod.authMethodType == AuthMethodType.WebAuthn) {
       throwError({
         message:
@@ -2277,46 +2188,12 @@ export class LitNodeClientNodeJs extends LitCore {
     }
     const requestId = this.getRequestId();
     const nodePromises = await this.getNodePromises((url: string) => {
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
       const nodeRequestParams = {
         authMethod: params.authMethod,
       };
       return this.getClaimKeyExecutionShares(url, nodeRequestParams, requestId);
     });
 
-<<<<<<< HEAD
-    const responseData = await this.handleNodePromises(nodePromises);
-
-    if (responseData.success === true) {
-      const nodeSignatures = (
-        responseData as SuccessNodePromises<any>
-      ).values.map((r: any) => {
-        return ethers.utils.splitSignature(`0x${r.signature}`);
-      });
-
-      const derivedKeyId: string = (responseData as SuccessNodePromises<any>)
-        .values[0].derivedKeyId;
-
-      const pubkey: string = this.computePubKey(derivedKeyId);
-
-      const resp: ClaimKeyResponse = {
-        signatures: nodeSignatures,
-        derivedKeyId,
-        pubkey,
-      };
-
-      if (params.mintCallback) {
-        params.mintCallback(resp);
-        return resp;
-      }
-
-      await defaultMintClaimCallback(resp);
-
-      return resp;
-    } else {
-      return throwError({
-        message: 'claim request has failed',
-=======
     const responseData = await this.handleNodePromises(
       nodePromises,
       this.connectedNodes.size // require from all connected nodes
@@ -2374,7 +2251,6 @@ export class LitNodeClientNodeJs extends LitCore {
     } else {
       return throwError({
         message: `Claim request has failed. Request trace id: lit_${requestId} `,
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
         errorCode: LIT_ERROR.UNKNOWN_ERROR.code,
       });

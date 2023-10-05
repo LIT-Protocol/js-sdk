@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-
-import {
-  ClaimKeyResponse,
-=======
 import { AuthMethodType } from './enums';
 import * as ethers from 'ethers';
 import {
   AuthMethod,
   LitRelayConfig,
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
   SignInWithOTPParams,
   Signature,
   StytchOtpProviderOptions,
@@ -128,9 +122,6 @@ export type ProviderOptions =
   | WebAuthnProviderOptions;
 
 export type AuthenticateOptions = BaseAuthenticateOptions;
-<<<<<<< HEAD
-export type MintCallback = (response: ClaimKeyResponse) => void;
-=======
 
 /**
  * Type for expressing claim results being processed by a relay server
@@ -183,4 +174,3 @@ export type ClaimResult<T = ClaimProcessor> = {
   authMethodType: AuthMethodType
   pubkey: string, 
 } & (T extends 'relay' ? LitRelayConfig : {signer: ethers.Signer});
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2

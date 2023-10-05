@@ -466,11 +466,8 @@ export const checkAndSignEVMAuthMessage = async ({
   switchChain,
   expiration,
   uri,
-<<<<<<< HEAD
   cache = true,
-=======
   walletConnectProjectId,
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 }: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
   if (isNode()) {

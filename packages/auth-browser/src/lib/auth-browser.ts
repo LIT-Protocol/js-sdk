@@ -22,11 +22,8 @@ export const checkAndSignAuthMessage = ({
   expiration,
   uri,
   cosmosWalletType,
-<<<<<<< HEAD
   cache = true,
-=======
   walletConnectProjectId,
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
 }: AuthCallbackParams): Promise<AuthSig> => {
 
   const chainInfo = ALL_LIT_CHAINS[chain];
@@ -55,11 +52,8 @@ export const checkAndSignAuthMessage = ({
       switchChain,
       expiration,
       uri,
-<<<<<<< HEAD
       cache,
-=======
       walletConnectProjectId,
->>>>>>> feature/lit-1447-js-sdk-merge-sdk-v3-into-revamp-feature-branch-2
     });
   } else if (chainInfo.vmType === VMTYPE.SVM) {
     return checkAndSignSolAuthMessage({ cache });
