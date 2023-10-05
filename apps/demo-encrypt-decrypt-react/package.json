@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@lit-protocol/lit-node-client": "^2.1.158",
+    "@lit-protocol/lit-node-client": "^3.0.0",
     "@monaco-editor/react": "^4.5.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
