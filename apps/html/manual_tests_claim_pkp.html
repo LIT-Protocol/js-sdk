@@ -36,7 +36,7 @@
       var testSigningWithPkpSign = async () => {
         console.log('testing sig with pkpSign...');
         let sig = await litNodeClient.pkpSign({
-          toSign: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100], // hello world in Uint8Array
+          toSign: [84, 104, 105, 115, 32, 109, 101, 115, 115, 97, 103, 101, 32, 105, 115, 32, 101, 120, 97, 99, 116, 108, 121, 32, 51, 50, 32, 98, 121, 116, 101, 115], // "This message is exactly 32 bytes" in Uint8Array
           pubKey: claimResp.pubkey,
           authMethods: [authMethod],
           authSig,
@@ -104,8 +104,8 @@
           authSig,
           // all jsParams can be used anywhere in your litActionCode
           jsParams: {
-            // this is the string "Hello World" for testing
-            toSign: [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100],
+            // this is the string "This message is exactly 32 bytes" for testing
+            toSign: [84, 104, 105, 115, 32, 109, 101, 115, 115, 97, 103, 101, 32, 105, 115, 32, 101, 120, 97, 99, 116, 108, 121, 32, 51, 50, 32, 98, 121, 116, 101, 115],
             publicKey: "0x" + claimResp.pubkey,
             sigName: "sig1",
           },
@@ -210,6 +210,9 @@
         // }
 
         // document.getElementById('status').innerText = `All passed: ${allPassed}`;
+
+        console.log('sleeping 20s for node to sync...');
+        await new Promise((resolve) => setTimeout(resolve, 20000));
 
         let allPassed = true
         let result = await testSigningWithPkpSign();
