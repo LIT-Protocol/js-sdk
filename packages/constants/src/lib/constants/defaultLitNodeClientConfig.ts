@@ -1,7 +1,7 @@
 import { LitNodeClientConfig } from '@lit-protocol/types';
 
 export const defaultLitnodeClientConfig: LitNodeClientConfig = {
-  alertWhenUnauthorized: true,
+  alertWhenUnauthorized: false,
   minNodeCount: 2,
   debug: true,
   bootstrapUrls: [
