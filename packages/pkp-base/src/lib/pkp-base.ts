@@ -243,13 +243,23 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
 
     // If no authSig or sessionSigs are provided, throw error
-    if (!this.controllerAuthSig && !this.controllerSessionSigs) {
-      throw new Error('controllerAuthSig or controllerSessionSigs is required');
+    if (
+      !this.controllerAuthSig &&
+      !this.controllerSessionSigs &&
+      !this.controllerAuthMethods
+    ) {
+      throw new Error(
+        'controllerAuthSig, controllerSessionSigs or controllerAuthMethods are required'
+      );
     }
 
-    if (this.controllerAuthSig && this.controllerSessionSigs) {
+    if (
+      this.controllerAuthSig &&
+      this.controllerSessionSigs &&
+      this.controllerAuthMethods
+    ) {
       throw new Error(
-        'controllerAuthSig and controllerSessionSigs both defined, can only use one authorization type'
+        'controllerAuthSig, controllerSessionSigs both defined, can only use one authorization type'
       );
     }
 
@@ -344,13 +354,27 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
 
     // If no authSig or sessionSigs are provided, throw error
-    if (!this.controllerAuthSig && !this.controllerSessionSigs) {
-      throw new Error('controllerAuthSig or controllerSessionSigs is required');
+    if (
+      [
+        !this.controllerAuthSig &&
+          !this.controllerSessionSigs &&
+          !this.controllerAuthMethods,
+      ].filter((val, _index, _arr) => val).length > 2
+    ) {
+      throw new Error(
+        'controllerAuthSig, controllerSessionSigs or controllerAuthMethod is required'
+      );
     }
 
-    if (this.controllerAuthSig && this.controllerSessionSigs) {
+    if (
+      [
+        this.controllerAuthSig,
+        this.controllerSessionSigs,
+        this.controllerAuthMethods,
+      ].filter((val, index, arr) => val).length > 1
+    ) {
       throw new Error(
-        'controllerAuthSig and controllerSessionSigs both defined, can only use one authorization type'
+        'controllerAuthSig, controllerSessionSigs and controllerAuthMethod are defined, can only use one authorization type'
       );
     }
 
@@ -361,14 +385,20 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           toSign: toSign,
           pubKey: this.uncompressedPubKey,
           authSig: this.controllerAuthSig as AuthSig,
-          authMethods: []
+          authMethods: [],
         });
       } else if (this.controllerSessionSigs) {
         sig = await this.litNodeClient.pkpSign({
           toSign,
           pubKey: this.uncompressedPubKey,
           authMethods: this.controllerAuthMethods ?? [],
-          sessionSigs: this.controllerSessionSigs
+          sessionSigs: this.controllerSessionSigs,
+        });
+      } else if (this.controllerAuthMethods) {
+        sig = await this.litNodeClient.pkpSign({
+          toSign,
+          pubKey: this.uncompressedPubKey,
+          authMethods: this.controllerAuthMethods,
         });
       }
 
