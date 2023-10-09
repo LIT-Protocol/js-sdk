@@ -904,8 +904,11 @@ export class LitNodeClientNodeJs extends LitCore {
         hasProps(requiredSessionSigsShareProps) ||
         hasProps(requiredSignatureShareProps)
       ) {
+
+        const bigR = typedItem.bigR ?? typedItem.bigr;
+
         typedItem.signatureShare = typedItem.signatureShare.replaceAll('"', '');
-        typedItem.bigR = typedItem.bigR.replaceAll('"', '');
+        typedItem.bigR = bigR?.replaceAll('"', '');
         typedItem.publicKey = typedItem.publicKey.replaceAll('"', '');
         typedItem.dataSigned = typedItem.dataSigned.replaceAll('"', '');
 
@@ -942,20 +945,48 @@ export class LitNodeClientNodeJs extends LitCore {
     // TOOD: get keys of signedData
     const keys = Object.keys(signedData[0]);
 
+    // removeExtraBackslashesAndQuotes
+    const sanitise = (str: string) => {
+      // Check if str is a string and remove extra backslashes
+      if (typeof str === 'string') {
+        // Remove backslashes
+        let newStr = str.replace(/\\+/g, '');
+        // Remove leading and trailing double quotes
+        newStr = newStr.replace(/^"|"$/g, '');
+        return newStr;
+      }
+      return str;
+    };
+
     // -- execute
     keys.forEach((key: any) => {
+
+      log("key:", key);
+
       const shares = signedData.map((r: any) => r[key]);
+
+      log("shares:", shares);
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
       const sigShares: Array<SigShare> = shares.map((s: any) => {
         const share = this._getFlattenShare(s);
 
+        log("share:", share);
+
+        if (!share) {
+          throw new Error("share is null or undefined");
+        }
+
+        if (!share.bigr) {
+          throw new Error("bigR is missing");
+        }
+
         return {
           sigType: share.sigType,
-          signatureShare: share.signatureShare,
+          signatureShare: sanitise(share.signatureShare),
           shareIndex: share.shareIndex,
-          bigR: share.bigR,
+          bigR: sanitise(share.bigr),
           publicKey: share.publicKey,
           dataSigned: share.dataSigned,
           siweMessage: share.siweMessage,
@@ -1952,7 +1983,13 @@ export class LitNodeClientNodeJs extends LitCore {
     });
 
     // -- resolve promises
-    const res = await this.handleNodePromises(nodePromises);
+    let res;
+    try {
+      res = await this.handleNodePromises(nodePromises);
+      log("signSessionKey node promises:", res);
+    } catch (e) {
+      throw new Error(`Error when handling node promises: ${e}`);
+    }
 
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
@@ -1968,6 +2005,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const signedDataList = responseData.map(
       (r: any) => (r as SignedData).signedData
     );
+
+    log('signedDataList', signedDataList)
 
     const signatures = this.getSessionSignatures(signedDataList);
 

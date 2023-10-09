@@ -6,6 +6,7 @@ import { client } from '../00-setup.mjs';
 export async function main() {
   // ==================== Setup ====================
   // const xxx = 'yyy';
+  
   // ==================== Test Logic ====================
   // const res = await client.executeJs({
   //   authSig: LITCONFIG.CONTROLLER_AUTHSIG,
@@ -16,6 +17,7 @@ export async function main() {
   //     publicKey: LITCONFIG.PKP_PUBKEY,
   //   },
   // });
+  
   // ==================== Post-Validation ====================
   // if (!res.logs.includes('hello world')) {
   //   return fail('lit action client should be ready');

@@ -189,12 +189,25 @@ export const combineEcdsaShares = (
   const validShares = sigShares.reduce((acc, val) => {
     if (val.signatureShare !== '') {
       const newVal = _remapKeyShareForEcdsa(val);
+
+      if(!newVal.sig_name){
+        newVal.sig_name = 'sig-created-by-lit-sdk';
+      }
+
       acc.push(JSON.stringify(newVal));
     }
     return acc;
   }, []);
 
   log('Valid Shares:', validShares);
+
+  // try parsing each property of the share:
+  try {
+    const arrayOfObjects = validShares.map(JSON.parse);
+    log("obj:", arrayOfObjects)
+  } catch (error) {
+    console.error('Error parsing JSON:', error.message);
+  }
 
   // if there are no valid shares, throw an error
   if (validShares.length === 0) {
@@ -216,7 +229,7 @@ export const combineEcdsaShares = (
         try {
           sig = JSON.parse(res) as CombinedECDSASignature;
         } catch (e) {
-          console.log("xx res:", res); // ERROR: Could not deserialize value
+          console.log("'res' from wasmECDSA.combine_signature: ", res); // ERROR: Could not deserialize value
           throw new Error(`Failed to parse signature: ${e}`);
         }
 
@@ -250,7 +263,11 @@ export const combineEcdsaShares = (
     log('Failed to combine signatures:', e);
   }
 
-  log('signature', sig);
+  log('signature:', sig);
+
+  if (!sig) {
+    throw new Error('Failed to combine signatures')
+  }
 
   return sig;
 };

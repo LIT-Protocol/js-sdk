@@ -165,40 +165,68 @@ export abstract class BaseProvider {
         let response: SignSessionKeyResponse;
 
         if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
-          const authSig = JSON.parse(params.authMethod.accessToken);
-          response = await nodeClient.signSessionKey({
-            statement: authCallbackParams.statement,
-            sessionKey: params.sessionSigsParams.sessionKey,
-            authMethods: [],
-            authSig: authSig,
-            pkpPublicKey: params.pkpPublicKey,
-            expiration: authCallbackParams.expiration,
-            resources: authCallbackParams.resources,
-            chainId,
-          });
-        } else {
-          response = await nodeClient.signSessionKey({
-            sessionKey: params.sessionSigsParams.sessionKey,
-            statement: authCallbackParams.statement,
-            authMethods: [params.authMethod],
-            pkpPublicKey: params.pkpPublicKey,
-            expiration: authCallbackParams.expiration,
-            resources: authCallbackParams.resources,
-            chainId,
-          });
-        }
 
+          // it should be able to accept a string or an object
+          let authSig;
+
+          if (typeof params.authMethod.accessToken === 'string') {
+            try {
+              authSig = JSON.parse(params.authMethod.accessToken);
+            } catch (e) {
+              throw new Error('Unable to parse authSig')
+            }
+          } else {
+            authSig = params.authMethod.accessToken;
+          }
+
+          if (!authSig) {
+            throw new Error('AuthSig is not defined');
+          }
+
+          try {
+            response = await nodeClient.signSessionKey({
+              statement: authCallbackParams.statement,
+              sessionKey: params.sessionSigsParams.sessionKey,
+              authMethods: [],
+              authSig: authSig,
+              pkpPublicKey: params.pkpPublicKey,
+              expiration: authCallbackParams.expiration,
+              resources: authCallbackParams.resources,
+              chainId,
+            });
+          } catch (e) {
+            throw new Error("1. Error when signing session key");
+          }
+        } else {
+          try {
+            response = await nodeClient.signSessionKey({
+              sessionKey: params.sessionSigsParams.sessionKey,
+              statement: authCallbackParams.statement,
+              authMethods: [params.authMethod],
+              pkpPublicKey: params.pkpPublicKey,
+              expiration: authCallbackParams.expiration,
+              resources: authCallbackParams.resources,
+              chainId,
+            });
+          } catch (e) {
+            throw new Error("2. Error when signing session key");
+          }
+        }
         return response.authSig;
       };
     }
 
     // Generate session sigs with the given session params
-    const sessionSigs = await this.litNodeClient.getSessionSigs({
-      ...params.sessionSigsParams,
-      authNeededCallback,
-    });
+    try {
+      const sessionSigs = await this.litNodeClient.getSessionSigs({
+        ...params.sessionSigsParams,
+        authNeededCallback,
+      });
 
-    return sessionSigs;
+      return sessionSigs;
+    } catch (e) {
+      throw new Error(`Error when getting session sigs from litNodeClient: ${e}`);
+    }
   }
 
   /**

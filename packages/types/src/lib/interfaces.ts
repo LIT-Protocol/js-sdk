@@ -684,7 +684,8 @@ export interface SigShare {
   sigType: any;
   signatureShare: any;
   shareIndex: any;
-  bigR: string;
+  bigr?: string;
+  bigR?: string;
   publicKey: any;
   dataSigned: any;
   siweMessage?: string;
