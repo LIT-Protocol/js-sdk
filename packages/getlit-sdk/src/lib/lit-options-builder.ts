@@ -27,7 +27,7 @@ import {
   DiscordProvider,
   EthWalletProvider,
   GoogleProvider,
-  OtpProvider,
+  StytchOtpProvider,
   WebAuthnProvider,
 } from '@lit-protocol/lit-auth-client';
 import { ProviderType } from '@lit-protocol/constants';
@@ -227,7 +227,7 @@ export class LitOptionsBuilder {
       );
 
     globalThis.Lit.auth.otp =
-      globalThis.Lit.authClient.initProvider<OtpProvider>(ProviderType.Otp);
+      globalThis.Lit.authClient.initProvider<StytchOtpProvider>(ProviderType.StytchOtp);
 
     let authStatus = Object.entries(globalThis.Lit.auth)
       .map(([key, value]) => {

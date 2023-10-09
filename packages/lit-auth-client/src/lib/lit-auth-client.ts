@@ -5,8 +5,6 @@ import {
   OAuthProviderOptions,
   StytchOtpProviderOptions,
   ProviderOptions,
-  SignInWithOTPParams,
-  OtpProviderOptions,
   WebAuthnProviderOptions,
 } from '@lit-protocol/types';
 import { ProviderType } from '@lit-protocol/constants';
@@ -20,7 +18,6 @@ import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
-import { OtpProvider } from './providers/OtpProvider';
 
 /**
  * Class that handles authentication through Lit login
@@ -43,7 +40,8 @@ export class LitAuthClient {
    */
   private providers: Map<string, BaseProvider>;
 
-  private litOtpOptions: OtpProviderOptions | undefined;
+
+  private litOtpOptions: StytchOtpProviderOptions | undefined;
 
   private storageProvider: LitStorage | undefined;
 
@@ -55,6 +53,7 @@ export class LitAuthClient {
    * By default, @getlit/sdk would go for V3, but the primitive would stay with V2.
    */
   private version: 'V2' | 'V3' = 'V2';
+
 
   /**
    * Create a LitAuthClient instance
@@ -80,6 +79,7 @@ export class LitAuthClient {
           'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
         );
       }
+
       if (options?.litOtpConfig) {
         this.litOtpOptions = options?.litOtpConfig;
       }
@@ -94,10 +94,7 @@ export class LitAuthClient {
     }
 
     // Check if Lit node client is provided
-    if (
-      options?.litNodeClient &&
-      options.litNodeClient instanceof LitNodeClient
-    ) {
+    if (options?.litNodeClient) {
       this.litNodeClient = options?.litNodeClient;
     } else {
       this.litNodeClient = new LitNodeClient({
@@ -169,15 +166,6 @@ export class LitAuthClient {
             ...baseParams,
           },
           options as StytchOtpProviderOptions
-        ) as unknown as T;
-        break;
-      case `otp`:
-        provider = new OtpProvider(
-          {
-            ...baseParams,
-            ...(options as SignInWithOTPParams),
-          },
-          this.litOtpOptions
         ) as unknown as T;
         break;
       default:

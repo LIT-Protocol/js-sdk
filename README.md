@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V2</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V3</h1>
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
 <a href="https://twitter.com/LitProtocol"><img src="https://img.shields.io/twitter/follow/litprotocol?label=Follow&style=social"/></a>
@@ -16,7 +16,7 @@ https://developer.litprotocol.com/SDK/Explanation/installation
 </a>
 
 <br /><br />
-This new V2 SDK is written in Typescript and is a complete rewrite of the old SDK. It is much more modular and easier to use, and has a much smaller bundle size.
+This new V3 SDK is written in Typescript and is a complete rewrite of the old SDK. It is much more modular and easier to use, and has a much smaller bundle size.
 
 </div>
 
@@ -111,15 +111,6 @@ http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
 
 </div>
 
-## Demo
-
-| App                    | Link                                                |
-| ---------------------- | --------------------------------------------------- |
-| Simple Encrypt Decrypt | https://demo.encrypt-decrypt.react.litprotocol.com/ |
-| Contracts SDK          | https://demo.contracts-sdk.react.litprotocol.com/   |
-| (Test) Html            | http://test.lit-js-sdk-v2.html.litprotocol.com/     |
-| (Test) React           | http://test.lit-js-sdk-v2.react.litprotocol.com/    |
-
 > NOTE: For (Test) apps, all packages and functions can be called inside the browser console. eg. `window.LitJsSdk_[package_name].[function_name]`
 
 # Contributing and developing to this SDK
@@ -132,7 +123,7 @@ http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
 
 - NX Console: https://nx.dev/core-features/integrate-with-editors
 
-# Quick Start 
+# Quick Start
 
 The following commands will help you start developing with this repository.
 
@@ -162,7 +153,7 @@ The test apps are configured to automatically import all modules and expose all 
 yarn apps
 ```
 
-or runniny individually
+or running individually
 
 ```
 // html
@@ -184,10 +175,15 @@ yarn test:unit
 ## Run E2E tests
 
 ```
-yarn test:e2e
+
+// -- web
+yarn test:e2e:web
+
+// -- node
+yarn test:e2e:node
 ```
 
-# (WIP) Advanced
+# Advanced
 
 ## Creating a new library
 
@@ -214,7 +210,6 @@ yarn delete:app <app-name>
 yarn delete:package <package-name>
 ```
 
-
 ## Building
 
 ```jsx
@@ -231,11 +226,29 @@ yarn nx run <project-name>:build
 
 During development you may wish to build your code changes in `packages/` in a client application to test the correctness of the functionality.
 
-If you would like to establish a dependency between packages within this monorepo and an external client application that consumes these packages,
+If you would like to establish a dependency between packages within this monorepo and an external client application that consumes these packages:
 
 1. Run `npm link` at the root of the specific package you are making code changes in.
-2. Run `yarn build:target <package>` to build that specific package.
-3. In the client application, run `npm link <package> --force` to ensure that the `package.json` of the client application is updated with a `file:` link to the dependency. This effectively creates a symlink in the `node_modules` of the client application to the local dependency in this repository.
+
+```
+cd ./packages/*/<package-name>
+npm link
+```
+
+2. Build the packages with or without dependencies
+
+```
+yarn build
+# or
+yarn nx run lit-node-client-nodejs:build --with-deps=false
+```
+
+3. In the client application, run `npm link <package> --save` to ensure that the `package.json` of the client application is updated with a `file:` link to the dependency. This effectively creates a symlink in the `node_modules` of the client application to the local dependency in this repository.
+
+```
+cd path/to/client-application
+npm link <package> --save
+```
 
 Having done this setup, this is what the development cycle looks like moving forward:
 
@@ -249,26 +262,26 @@ Run `yarn bump` to bump the version. You must have at least nodejs v18 to do thi
 
 ### to npm
 
-```
+```sh
 yarn publish:packages
 ```
 
 ### clone & publish to npm
 
-```jsx
+```sh
 yarn tools --clone <project-name> <clone-project-name> <(?) --publish> <(?) --remove-after>
 
 // eg
 yarn tools --clone lit-node-client @litprotocol/dev --publish --remove-after
 ```
 
-## bump, build, test, gen docs, publish, git push
+## The Publish Pipeline - bump, build, test, gen docs, publish, git push
 
-```
+```sh
 yarn bump
 yarn build
 yarn test:unit
-yarn test:e2e
+yarn test:e2e:nodejs
 yarn gen:docs --push
 yarn publish:packages
 git add *
@@ -282,8 +295,10 @@ git push
 
 The following will serve the react testing app and launch the cypress e2e testing after
 
-```
-yarn test:e2e
+```sh
+yarn test:e2e:web
+or
+yarn test:e2e:node
 ```
 
 ### Environments
@@ -296,7 +311,7 @@ There are currently three environments can be tested on, each of which can be ge
 | React       | `yarn gen:react`  | http://localhost:4003      |
 | NodeJs      | `yarn gen:nodejs` | `yarn nx run nodejs:serve` |
 
-### Unit Tests (for Node)
+### Unit Tests
 
 ```jsx
 yarn test:unit
@@ -319,6 +334,41 @@ yarn tools --test --e2e html
 // E2E React
 yarn tools --test --e2e react
 ```
+
+## Testing with a Local Lit Node
+
+First, deploy your Lit Node Contracts, since the correct addresses will be pulled from the `../lit-assets/blockchain/contracts/deployed-lit-node-contracts-temp.json` file.
+
+Set these two env vars:
+
+```sh
+export LIT_JS_SDK_LOCAL_NODE_DEV="true"
+export LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY="putAFundedPrivateKeyOnChronicleHere"
+```
+
+Run:
+
+```sh
+yarn update:contracts-sdk --fetch
+yarn update:contracts-sdk --gen
+yarn build:packages
+```
+
+To run manual tests:
+
+```sh
+ yarn nx run nodejs:serve
+```
+
+## ENV Vars
+
+- LIT_JS_SDK_GITHUB_ACCESS_TOKEN - a github access token to get the contract ABIs from a private repo
+- LIT_JS_SDK_LOCAL_NODE_DEV - set to true to use a local node
+- LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY - set to a funded wallet on Chronicle Testnet
+
+# Dockerfile
+
+...coming soon
 
 ## Other Commands
 

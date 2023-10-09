@@ -12,7 +12,8 @@
     "module": "ES2020",
     "lib": [
       "ES2020",
-      "dom"
+      "dom",
+      "ES2021.String"
     ],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,

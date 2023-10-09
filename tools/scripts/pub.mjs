@@ -107,12 +107,16 @@ let namespace = await readJsonFile(`${dirs[0]}/package.json`);
 
 const maxNameLength = Math.max(...dirs.map((dir) => dir.length));
 
+let publishVersion = null;
+
 await asyncForEach(dirs, async (dir) => {
   const distPkg = await readJsonFile(`${dir}/package.json`);
 
   const paddedName = distPkg.name.padEnd(maxNameLength, ' ');
 
   greenLog(`${paddedName} ${npmVersion} => ${distPkg.version}`);
+
+  publishVersion = pkg.version;
 
   // remove peer dependencies
   delete distPkg.peerDependencies;
@@ -135,9 +139,6 @@ greenLog(
 `,
   true
 );
-
-// get latest version
-let publishVersion;
 
 let TAG;
 

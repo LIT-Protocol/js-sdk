@@ -6,7 +6,7 @@ import { LIT_ERROR, SessionKeyPair, SigShare } from '@lit-protocol/constants';
 
 import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
-import { isBrowser, log, throwError } from '@lit-protocol/misc';
+import { isBrowser, isNode, log, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
@@ -25,8 +25,7 @@ if (!globalThis.wasmExports) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [BLS SDK] wasmExports loaded. ${
-          Object.keys(exports).length
+        `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
       );
     }
@@ -48,13 +47,14 @@ if (!globalThis.wasmECDSA) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-          Object.keys(wasmECDSA).length
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );
     }
   });
 }
+
+
 /** ---------- Exports ---------- */
 
 export interface BlsSignatureShare {
@@ -123,10 +123,12 @@ export const verifyAndDecryptWithSignatureShares = (
   // Format the signature shares
   const sigShares = shares.map((s) => JSON.stringify(s));
 
+  const base64Identity = uint8ArrayToBase64(identity);
+
   // Decrypt
   const privateData = blsSdk.verify_and_decrypt_with_signature_shares(
     publicKey,
-    uint8ArrayToBase64(identity),
+    base64Identity,
     ciphertext,
     sigShares
   );
@@ -179,21 +181,33 @@ export const verifySignature = (
 export const combineEcdsaShares = (
   sigShares: Array<SigShare>
 ): CombinedECDSASignature => {
-  log('sigShares:', sigShares);
-  let type = sigShares[0].sigType;
+  const type = sigShares[0].sigType;
   // the public key can come from any node - it obviously will be identical from each node
   // const publicKey = sigShares[0].publicKey;
   // const dataSigned = '0x' + sigShares[0].dataSigned;
   // filter out empty shares
-  let validShares = sigShares.reduce((acc, val) => {
-    if (val.shareHex !== '') {
+  const validShares = sigShares.reduce((acc, val) => {
+    if (val.signatureShare !== '') {
       const newVal = _remapKeyShareForEcdsa(val);
+
+      if(!newVal.sig_name){
+        newVal.sig_name = 'sig-created-by-lit-sdk';
+      }
+
       acc.push(JSON.stringify(newVal));
     }
     return acc;
   }, []);
 
   log('Valid Shares:', validShares);
+
+  // try parsing each property of the share:
+  try {
+    const arrayOfObjects = validShares.map(JSON.parse);
+    log("obj:", arrayOfObjects)
+  } catch (error) {
+    console.error('Error parsing JSON:', error.message);
+  }
 
   // if there are no valid shares, throw an error
   if (validShares.length === 0) {
@@ -211,7 +225,14 @@ export const combineEcdsaShares = (
     switch (type) {
       case SIGTYPE.EcdsaCaitSith:
         res = wasmECDSA.combine_signature(validShares, 2);
-        sig = JSON.parse(res) as CombinedECDSASignature;
+
+        try {
+          sig = JSON.parse(res) as CombinedECDSASignature;
+        } catch (e) {
+          console.log("'res' from wasmECDSA.combine_signature: ", res); // ERROR: Could not deserialize value
+          throw new Error(`Failed to parse signature: ${e}`);
+        }
+
         /*
           r and s values of the signature should be maximum of 64 bytes
           r and s values can have polarity as the first two bits, here we remove 
@@ -229,6 +250,7 @@ export const combineEcdsaShares = (
         break;
       case SIGTYPE.ECDSCAITSITHP256:
         res = wasmECDSA.combine_signature(validShares, 3);
+        log('response from combine_signature', res);
         sig = JSON.parse(res);
         break;
       // if its another sig type, it shouldnt be resolving to this method
@@ -241,19 +263,26 @@ export const combineEcdsaShares = (
     log('Failed to combine signatures:', e);
   }
 
-  log('signature', sig);
+  log('signature:', sig);
+
+  if (!sig) {
+    throw new Error('Failed to combine signatures')
+  }
 
   return sig;
 };
 
-export const computeHDPubKey = (pubkeys: string[], keyId: string, sigType: SIGTYPE): string => {
+export const computeHDPubKey = (
+  pubkeys: string[],
+  keyId: string,
+  sigType: SIGTYPE
+): string => {
   // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
-
   try {
     switch (sigType) {
       case SIGTYPE.EcdsaCaitSith:
         return wasmECDSA.compute_public_key(keyId, pubkeys, 2);
-      defualt: throw new Error('Non supported signature type');
+        defualt: throw new Error('Non supported signature type');
     }
   } catch (e) {
     log('Failed to derive public key', e);

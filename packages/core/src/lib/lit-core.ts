@@ -1,4 +1,6 @@
 import { computeHDPubKey } from '@lit-protocol/crypto';
+import { keccak256 } from '@ethersproject/keccak256';
+import { toUtf8Bytes } from '@ethersproject/strings';
 import {
   canonicalAccessControlConditionFormatter,
   canonicalEVMContractConditionFormatter,
@@ -30,7 +32,7 @@ import {
   AuthSig,
   CustomNetwork,
   FormattedMultipleAccs,
-  HandshakeWithSgx,
+  HandshakeWithNodes,
   JsonHandshakeResponse,
   KV,
   LitNodeClientConfig,
@@ -38,6 +40,7 @@ import {
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
+  NodeErrorV3,
   NodePromiseResponse,
   RejectedNodePromises,
   SendNodeCommand,
@@ -46,6 +49,7 @@ import {
   SuccessNodePromises,
   SupportedJsonRequests,
 } from '@lit-protocol/types';
+import { ethers } from 'ethers';
 
 export class LitCore {
   config: LitNodeClientConfig;
@@ -59,7 +63,7 @@ export class LitCore {
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
-    let customConfig = args;
+    const customConfig = args;
 
     // -- initialize default config
     this.config = defaultLitnodeClientConfig;
@@ -129,7 +133,7 @@ export class LitCore {
     // -- handshake with each node
     const requestId = this.getRequestId();
     for (const url of this.config.bootstrapUrls) {
-      this.handshakeWithSgx({ url }, requestId)
+      this.handshakeWithNodes({ url }, requestId)
         .then((resp: any) => {
           this.connectedNodes.add(url);
 
@@ -140,6 +144,17 @@ export class LitCore {
             networkPubKeySet: resp.networkPublicKeySet,
             hdRootPubkeys: resp.hdRootPubkeys,
           };
+
+          // -- validate returned keys
+          if (
+            keys.serverPubKey === 'ERR' ||
+            keys.subnetPubKey === 'ERR' ||
+            keys.networkPubKey === 'ERR' ||
+            keys.networkPubKeySet === 'ERR'
+          ) {
+            log('Error connecting to node. Detected "ERR" in keys', url, keys);
+          }
+
           this.serverKeys[url] = keys;
         })
         .catch((e: any) => {
@@ -195,13 +210,10 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${
-              this.config.connectTimeout
-            }ms.  Could only connect to ${
-              Object.keys(this.serverKeys).length
-            } of ${
-              this.config.minNodeCount
-            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
+              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
+              } of ${this.config.minNodeCount
+              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             log(msg);
             reject(msg);
           }
@@ -225,15 +237,15 @@ export class LitCore {
 
   /**
    *
-   * Handshake with SGX
+   * Handshake with Nodes
    *
-   * @param { HandshakeWithSgx } params
+   * @param { HandshakeWithNodes } params
    *
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  handshakeWithSgx = async (
-    params: HandshakeWithSgx,
+  handshakeWithNodes = async (
+    params: HandshakeWithNodes,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
     // -- get properties from params
@@ -242,7 +254,7 @@ export class LitCore {
     // -- create url with path
     const urlWithPath = `${url}/web/handshake`;
 
-    log(`handshakeWithSgx ${urlWithPath}`);
+    log(`handshakeWithNodes ${urlWithPath}`);
 
     const data = {
       clientPublicKey: 'test',
@@ -299,7 +311,13 @@ export class LitCore {
 
         return data;
       })
-      .catch((error) => {
+      .catch((error: NodeErrorV3) => {
+        console.error(
+          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error?.message || error?.details
+            ? `Error is ${error.message} - ${error.details}`
+            : ''
+          }`
+        );
         return Promise.reject(error);
       });
   };
@@ -570,32 +588,54 @@ export class LitCore {
 
   /**
    * Calculates an HD public key from a given {@link keyId} the curve type or signature type will assumed to be k256 unless given
-   * @param keyId 
-   * @param sigType 
+   * @param keyId
+   * @param sigType
    * @returns {string} public key
    */
-  computePubKey = (keyId: string, sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith) => {
-    if(!this.hdRootPubkeys) {
+  computeHDPubKey = (
+    keyId: string,
+    sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith
+  ): string => {
+    if (!this.hdRootPubkeys) {
       throwError({
         message: `root public keys not found, have you connected to the nodes?`,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
-      }); 
+      });
     }
     return computeHDPubKey(this.hdRootPubkeys as string[], keyId, sigType);
-  }
+  };
 
-  collectData = (
-    date: string,
-    functionName: string,
-    executionTime: number
-  ) => {
-    fetch(TELEM_API_URL + '/collect', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ date, functionName, executionTime }),
-    });
+  /**
+   * Calculates a Key Id for claiming a pkp based on a user identifier and an app identifier.
+   * The key Identifier is an Auth Method Id which scopes the key uniquely to a specific application context.
+   * These identifiers are specific to each auth method and will derive the public key protion of a pkp which will be persited
+   * when a key is claimed.
+   * | Auth Method | User ID | App ID |
+   * |:------------|:--------|:-------|
+   * | Google OAuth | token `sub` | token `aud` |
+   * | Discord OAuth | user id | client app identifier |
+   * | Stytch OTP |token `sub` | token `aud`|
+   * | Lit Actions | user defined | ipfs cid |
+   * *Note* Lit Action claiming uses a different schema than oter auth methods
+   * isForActionContext should be set for true if using claiming through actions
+   * @param userId {string} user identifier for the Key Identifier
+   * @param appId {string} app identifier for the Key Identifier
+   * @returns {String} public key of pkp when claimed
+   */
+  computeHDKeyId(
+    userId: string,
+    appId: string,
+    isForActionContext: boolean = false
+  ): string {
+    if (!isForActionContext) {
+      return ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(`${userId}:${appId}`)
+      );
+    } else {
+      return ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(`${appId}:${userId}`)
+      );
+    }
   }
 }

@@ -1,7 +1,6 @@
 import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitStorage } from '@lit-protocol/lit-storage';
-import { AuthCallback } from '@lit-protocol/types';
 import {
   AuthCallbackParams,
   AuthMethod,
@@ -10,6 +9,7 @@ import {
   BaseProviderOptions,
   BaseProviderSessionSigsParams,
   ClaimKeyResponse,
+  ClaimProcessor,
   ClaimRequest,
   IRelay,
   IRelayPKP,
@@ -165,54 +165,115 @@ export abstract class BaseProvider {
         let response: SignSessionKeyResponse;
 
         if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
-          const authSig = JSON.parse(params.authMethod.accessToken);
-          response = await nodeClient.signSessionKey({
-            statement: authCallbackParams.statement,
-            sessionKey: params.sessionSigsParams.sessionKey,
-            authMethods: [],
-            authSig: authSig,
-            pkpPublicKey: params.pkpPublicKey,
-            expiration: authCallbackParams.expiration,
-            resources: authCallbackParams.resources,
-            chainId,
-          });
-        } else {
-          response = await nodeClient.signSessionKey({
-            statement: authCallbackParams.statement,
-            sessionKey: params.sessionSigsParams.sessionKey,
-            authMethods: [params.authMethod],
-            pkpPublicKey: params.pkpPublicKey,
-            expiration: authCallbackParams.expiration,
-            resources: authCallbackParams.resources,
-            chainId,
-          });
-        }
 
+          // it should be able to accept a string or an object
+          let authSig;
+
+          if (typeof params.authMethod.accessToken === 'string') {
+            try {
+              authSig = JSON.parse(params.authMethod.accessToken);
+            } catch (e) {
+              throw new Error('Unable to parse authSig')
+            }
+          } else {
+            authSig = params.authMethod.accessToken;
+          }
+
+          if (!authSig) {
+            throw new Error('AuthSig is not defined');
+          }
+
+          try {
+            response = await nodeClient.signSessionKey({
+              statement: authCallbackParams.statement,
+              sessionKey: params.sessionSigsParams.sessionKey,
+              authMethods: [],
+              authSig: authSig,
+              pkpPublicKey: params.pkpPublicKey,
+              expiration: authCallbackParams.expiration,
+              resources: authCallbackParams.resources,
+              chainId,
+            });
+          } catch (e) {
+            throw new Error("1. Error when signing session key");
+          }
+        } else {
+          try {
+            response = await nodeClient.signSessionKey({
+              sessionKey: params.sessionSigsParams.sessionKey,
+              statement: authCallbackParams.statement,
+              authMethods: [params.authMethod],
+              pkpPublicKey: params.pkpPublicKey,
+              expiration: authCallbackParams.expiration,
+              resources: authCallbackParams.resources,
+              chainId,
+            });
+          } catch (e) {
+            throw new Error("2. Error when signing session key");
+          }
+        }
         return response.authSig;
       };
     }
 
     // Generate session sigs with the given session params
-    const sessionSigs = await this.litNodeClient.getSessionSigs({
-      ...params.sessionSigsParams,
-      authNeededCallback,
-    });
+    try {
+      const sessionSigs = await this.litNodeClient.getSessionSigs({
+        ...params.sessionSigsParams,
+        authNeededCallback,
+      });
 
-    return sessionSigs;
+      return sessionSigs;
+    } catch (e) {
+      throw new Error(`Error when getting session sigs from litNodeClient: ${e}`);
+    }
   }
 
   /**
    * Authenticates an auth Method for claiming a Programmable Key Pair (PKP).
    * Uses the underyling {@link litNodeClient} instance to authenticate a given auth method
-   * @param claimRequest 
+   * @param claimRequest
    * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
    */
-  public async ClaimKeyId(
-    claimRequest: ClaimRequest
+  public async claimKeyId(
+    claimRequest: ClaimRequest<ClaimProcessor>
   ): Promise<ClaimKeyResponse> {
+    if (!this.litNodeClient.ready) {
+      await this.litNodeClient.connect().catch((err) => {
+        throw err; // throw error up to caller
+      });
+    }
+
     const res = await this.litNodeClient.claimKeyId(claimRequest);
     return res;
   }
+
+  /**
+ * Calculates a public key for a given `key identifier` which is an `Auth Method Identifier`
+ * the Auth Method Identifier is a hash of a user identifier and app idendtifer.
+ * These identifiers are specific to each auth method and will derive the public key protion of a pkp which will be persited
+ * when a key is claimed.
+ * | Auth Method | User ID | App ID |
+ * |:------------|:-------|:-------|
+ * | Google OAuth | token `sub` | token `aud` |
+ * | Discord OAuth | user id | client app identifier |
+ * | Stytch OTP |token `sub` | token `aud`|
+ * @param userId
+ * @param appId
+ * @returns
+ */
+  computePublicKeyFromAuthMethod = async (
+    authMethod: AuthMethod
+  ): Promise<String> => {
+    let authMethodId = await this.getAuthMethodId(authMethod);
+    authMethodId = authMethodId.slice(2);
+    if (!this.litNodeClient) {
+      throw new Error('Lit Node Client is configured');
+    }
+    return this.litNodeClient.computeHDPubKey(authMethodId);
+  };
+
+
 
   /**
    * Generate request data for minting and fetching PKPs via relay server

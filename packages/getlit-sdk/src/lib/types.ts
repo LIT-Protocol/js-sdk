@@ -9,7 +9,7 @@ import {
   LIT_NETWORKS_KEYS,
   LitNodeClientConfig,
   LitRelayConfig,
-  OtpProviderOptions,
+  StytchOtpProviderOptions,
   SessionSigs,
   SolRpcConditions,
   UnifiedAccessControlConditions,
@@ -23,7 +23,6 @@ import {
   EthWalletProvider,
   GoogleProvider,
   LitAuthClient,
-  OtpProvider,
   StytchOtpProvider,
   WebAuthnProvider,
 } from '@lit-protocol/lit-auth-client';
@@ -39,7 +38,7 @@ export namespace Types {
   }
   export interface AuthOptions {
     litRelayConfig?: LitRelayConfig;
-    litOtpConfig?: OtpProviderOptions;
+    litOtpConfig?: StytchOtpProviderOptions;
   }
 
   export type NodeOptions = { nodeOptions?: LitNodeClientConfig };

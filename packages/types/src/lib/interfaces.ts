@@ -4,6 +4,8 @@ import {
   AcceptedFileType,
   AccessControlConditions,
   Chain,
+  ClaimProcessor,
+  ClaimResult,
   ConditionType,
   EncryptedSymmetricKey,
   EvmContractConditions,
@@ -24,6 +26,7 @@ import { BytesLike, Signer } from 'ethers';
 
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
+import { AuthMethodType } from './enums';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -120,7 +123,14 @@ export interface AuthCallbackParams {
   // Leap -> window.leap
   cosmosWalletType?: CosmosWalletType;
 
+
   cache?: boolean;
+
+  /**
+   * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
+   */
+  walletConnectProjectId?: string;
+
 }
 
 /** ---------- Web3 ---------- */
@@ -227,21 +237,16 @@ export interface CustomNetwork {
 
 export interface Signature {
   r: string;
-
   s: string;
-  _vs: string;
-
-  recoveryParam: number;
   v: number;
-
-  yParityAndS: string;
-  compact: string;
 }
 
 export interface ClaimKeyResponse {
   signatures: Signature[];
-  derivedKeyId: string;
+
+  claimedKeyId: string;
   pubkey: string;
+  mintTx: string;
 }
 
 /**
@@ -292,21 +297,28 @@ export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
 export interface BaseJsonPkpSignRequest {
   toSign: ArrayLike<number>;
   pubKey: string;
-  // auth methods to resolve
-  authMethods?: Array<Object>;
 }
 
+
+export interface WithAuthMethodSigning extends BaseJsonPkpSignRequest {
+  // auth methods to resolve
+  authMethods: Array<AuthMethod>;
+  sessionSigs?: any;
+  authSig?: AuthSig;
+}
 export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
   sessionSigs: any;
   authSig?: AuthSig;
+  authMethods?: Array<AuthMethod>;
 }
 
 export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
   authSig: AuthSig;
   sessionSigs?: any;
+  authMethods?: Array<AuthMethod>;
 }
 
-export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning;
+export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning | WithAuthMethodSigning;
 
 /**
  * Struct in rust
@@ -549,6 +561,7 @@ export interface ExecuteJsResponse {
   decryptions: any[];
   response: string;
   logs: string;
+  claims?: Record<string, { signatures: Signature[], derivedKeyId: string }>;
   debug?: {
     allNodeResponses: NodeResponse[];
     allNodeLogs: NodeLog[];
@@ -556,7 +569,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise {}
+export interface LitNodePromise { }
 
 export interface SendNodeCommand {
   url: string;
@@ -565,12 +578,14 @@ export interface SendNodeCommand {
 }
 
 export interface NodeShare {
+  claimData: any;
   shareIndex: any;
   unsignedJwt: any;
   signedData: any;
   decryptedData: any;
   response: any;
   logs: any;
+  success?: any;
 }
 
 export interface PKPSignShare {
@@ -625,6 +640,26 @@ export interface NodeErrorV1 {
   errorCode?: string;
 }
 
+// V3 - Cayenne
+// {
+//   errorKind: 'Unexpected',
+//   errorCode: 'NodeUnknownError',
+//   status: 400,
+//   message: 'Unknown error occured',
+//   correlationId: 'lit_ef00fbaebb614',
+//   details: [
+//     'unexpected error: ECDSA signing failed: unexpected error: unexpected error: Message length to be signed is not 32 bytes.  Please hash it before sending it to the node to sign.  You can use SHA256 or Keccak256 for example'
+//   ]
+// }
+export interface NodeErrorV3 {
+  errorKind: string;
+  errorCode: string;
+  status: number;
+  message: string;
+  correlationId: string;
+  details: string[];
+}
+
 /**
  *
  * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
@@ -649,10 +684,12 @@ export interface SigShare {
   sigType: any;
   signatureShare: any;
   shareIndex: any;
-  bigR: string;
+  bigr?: string;
+  bigR?: string;
   publicKey: any;
   dataSigned: any;
   siweMessage?: string;
+  sigName?: string;
 }
 
 export interface SignedData {
@@ -732,7 +769,7 @@ export interface ValidateAndSignECDSA {
   auth_sig: AuthSig;
 }
 
-export interface HandshakeWithSgx {
+export interface HandshakeWithNodes {
   url: string;
 }
 
@@ -914,11 +951,6 @@ export interface AuthMethod {
 export interface AuthMethodWithOTPType extends AuthMethod {
   otpType: 'email' | 'phone';
 }
-export interface ClaimRequest {
-  authMethod: AuthMethod;
-  mintCallback?: MintCallback;
-}
-
 // pub struct JsonSignSessionKeyRequest {
 //     pub session_key: String,
 //     pub auth_methods: Vec<AuthMethod>,
@@ -1096,7 +1128,7 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export interface PKPEthersWalletProp extends PKPBaseProp {}
+export interface PKPEthersWalletProp extends PKPBaseProp { }
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
@@ -1140,7 +1172,7 @@ export interface LitAuthClientOptions {
    */
   litNodeClient?: any;
 
-  litOtpConfig?: OtpProviderOptions;
+  litOtpConfig?: StytchOtpProviderOptions;
 
   storageProvider?: any;
 
@@ -1494,7 +1526,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions {}
+export interface BaseAuthenticateOptions { }
 
 export interface OtpAuthenticateOptions {
   code: string;
@@ -1502,7 +1534,7 @@ export interface OtpAuthenticateOptions {
 
 export interface EthWalletAuthenticateOptions
   extends BaseAuthenticateOptions,
-    ExpirableOptions {
+  ExpirableOptions {
   /**
    * Ethereum wallet address
    */
@@ -1532,16 +1564,16 @@ export interface EthWalletAuthenticateOptions
 
 export interface OtpAuthenticateOptions
   extends BaseAuthenticateOptions,
-    ExpirableOptions {
+  ExpirableOptions {
   /**
    * User provided authentication code
    */
   code: string;
 }
 
-export interface GoogleAuthenticateOptions extends ExpirableOptions {}
-export interface DiscordAuthenticateOptions extends ExpirableOptions {}
-export interface WebAuthnAuthenticateOptions extends ExpirableOptions {}
+export interface GoogleAuthenticateOptions extends ExpirableOptions { }
+export interface DiscordAuthenticateOptions extends ExpirableOptions { }
+export interface WebAuthnAuthenticateOptions extends ExpirableOptions { }
 
 export interface ExpirableOptions {
   cache?: boolean;
@@ -1556,6 +1588,7 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    * see stych docs for more info: https://stytch.com/docs/api/session-get
    */
   accessToken: string;
+
   /* 
   /*
    Stytch user identifier for a project

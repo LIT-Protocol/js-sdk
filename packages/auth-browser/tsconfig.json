@@ -9,8 +9,8 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
+  "include": ["src/lib/connect-modal/modal.css"],
   "files": [],
-  "include": [],
   "references": [
     {
       "path": "./tsconfig.lib.json"

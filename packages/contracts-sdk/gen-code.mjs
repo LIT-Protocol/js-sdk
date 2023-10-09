@@ -7,6 +7,7 @@ import {
   readFile,
   writeFile,
   yellowLog,
+  replaceContent,
 } from '../../tools/scripts/utils.mjs';
 
 /** ====== Helper ====== */
@@ -26,24 +27,25 @@ const specialCases = (fileName) => {
     .replace('pkppermissions', 'pkpPermissions');
 };
 
-const abis = (await getFiles('./packages/contracts-sdk/src/abis'))
-  .filter((file) => file.includes('.ts') && !file.includes('data.ts'))
-  .map((fileName) => {
-    return {
-      fileName,
-      varName: specialCases(fileName),
-      varNameCamel:
-        specialCases(fileName).charAt(0).toLowerCase() +
-        specialCases(fileName).slice(1),
-      varNameContract: specialCases(fileName) + 'Contract',
-      varNameContractCamel:
-        specialCases(fileName).charAt(0).toLowerCase() +
-        specialCases(fileName).slice(1) +
-        'Contract',
-    };
-  });
+const contracts = await getFiles('./packages/contracts-sdk/src/abis');
 
-console.log(abis);
+const abis = contracts.map((contractSol) => {
+  const contractName = contractSol.replace('.sol', '');
+  // const contractData = `./packages/contracts-sdk/src/abis/${contractSol}/${contractName}Data.mjs`;
+
+  return {
+    fileName: contractName,
+    varName: specialCases(contractName),
+    varNameCamel:
+      specialCases(contractName).charAt(0).toLowerCase() +
+      specialCases(contractName).slice(1),
+    varNameContract: specialCases(contractName) + 'Contract',
+    varNameContractCamel:
+      specialCases(contractName).charAt(0).toLowerCase() +
+      specialCases(contractName).slice(1) +
+      'Contract',
+  };
+});
 
 // exit();
 
@@ -56,7 +58,7 @@ const generatedStrs = {
       // remove .ts
       const importPath = fileName.replace('.ts', '');
 
-      const importStr = `import { ${varNameCamel} } from '../abis/${importPath}.data';`;
+      const importStr = `import { ${importPath}Data } from '../abis/${importPath}.sol/${importPath}Data';`;
 
       return importStr;
     })
@@ -67,9 +69,9 @@ const generatedStrs = {
   // --------------------------------------
   importContracts: abis
     .map(({ fileName, varNameContractCamel }) => {
-      const importPath = `'../abis/${fileName.replace('.ts', '')}'`;
+      const importPath = fileName.replace('.ts', '');
 
-      const importStr = `import * as ${varNameContractCamel} from ${importPath};`;
+      const importStr = `import * as ${varNameContractCamel} from '../abis/${importPath}.sol/${importPath}';`;
 
       return importStr;
     })
@@ -80,10 +82,10 @@ const generatedStrs = {
   // accessControlConditionsContractSigner: accessControlConditionsContract.ContractContext;
   // --------------------------------------
   declares: abis
-    .map(({ varNameContractCamel }) => {
+    .map(({ varNameContractCamel, fileName }) => {
       const importStr = `  ${varNameContractCamel}: {
-    read: ${varNameContractCamel}.ContractContext,
-    write: ${varNameContractCamel}.ContractContext,
+    read: ${varNameContractCamel}.${fileName},
+    write: ${varNameContractCamel}.${fileName},
   }
             `;
 
@@ -115,18 +117,18 @@ const generatedStrs = {
       const importStr = `
     this.${varNameContractCamel} = {
         read: (new ethers.Contract(
-            ${varNameCamel}.address,
-            ${varNameCamel}.abi as any,
+            ${fileName}Data.address,
+            ${fileName}Data.abi as any,
             this.provider
-        ) as unknown as ${varNameContractCamel}.ContractContext & ${varNameContractCamel}.${fileName.replace(
+        ) as unknown as ${varNameContractCamel}.${fileName} & ${varNameContractCamel}.${fileName.replace(
         '.ts',
         ''
       )}),
         write: (new ethers.Contract(
-            ${varNameCamel}.address,
-            ${varNameCamel}.abi as any,
+            ${fileName}Data.address,
+            ${fileName}Data.abi as any,
             this.signer
-        ) as unknown as ${varNameContractCamel}.ContractContext & ${varNameContractCamel}.${fileName.replace(
+        ) as unknown as ${varNameContractCamel}.${fileName} & ${varNameContractCamel}.${fileName.replace(
         '.ts',
         ''
       )})
@@ -136,40 +138,37 @@ const generatedStrs = {
     .join('\n\n'),
 };
 
-let newContent = replaceAutogen({
+const timestamp = new Date().toISOString();
+
+let newContent = replaceContent({
   startsWith: '// ----- autogen:import-data:start  -----',
   endsWith: '// ----- autogen:import-data:end  -----',
-  oldContent: contractSdkFileContent,
-  newContent: generatedStrs.importData,
-});
+  newContent: `// Generated at ${timestamp}\n${generatedStrs.importData}`,
+})(contractSdkFileContent);
 
-newContent = replaceAutogen({
+newContent = replaceContent({
   startsWith: '// ----- autogen:imports:start  -----',
   endsWith: '// ----- autogen:imports:end  -----',
-  oldContent: newContent,
-  newContent: generatedStrs.importContracts,
-});
+  newContent: `// Generated at ${timestamp}\n${generatedStrs.importContracts}`,
+})(newContent);
 
-newContent = replaceAutogen({
+newContent = replaceContent({
   startsWith: '// ----- autogen:declares:start  -----',
   endsWith: '// ----- autogen:declares:end  -----',
-  oldContent: newContent,
-  newContent: generatedStrs.declares,
-});
+  newContent: `// Generated at ${timestamp}\n${generatedStrs.declares}`,
+})(newContent);
 
-newContent = replaceAutogen({
+newContent = replaceContent({
   startsWith: '// ----- autogen:blank-init:start  -----',
   endsWith: '// ----- autogen:blank-init:end  -----',
-  oldContent: newContent,
-  newContent: generatedStrs.blankInit,
-});
+  newContent: `// Generated at ${timestamp}\n${generatedStrs.blankInit}`,
+})(newContent);
 
-newContent = replaceAutogen({
+newContent = replaceContent({
   startsWith: '// ----- autogen:init:start  -----',
   endsWith: '// ----- autogen:init:end  -----',
-  oldContent: newContent,
-  newContent: generatedStrs.init,
-});
+  newContent: `// Generated at ${timestamp}\n${generatedStrs.init}`,
+})(newContent);
 
 writeFile('./packages/contracts-sdk/src/lib/contracts-sdk.ts', newContent);
 greenLog(

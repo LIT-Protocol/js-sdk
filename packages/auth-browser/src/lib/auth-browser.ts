@@ -23,6 +23,7 @@ export const checkAndSignAuthMessage = ({
   uri,
   cosmosWalletType,
   cache = true,
+  walletConnectProjectId,
 }: AuthCallbackParams): Promise<AuthSig> => {
 
   const chainInfo = ALL_LIT_CHAINS[chain];
@@ -52,6 +53,7 @@ export const checkAndSignAuthMessage = ({
       expiration,
       uri,
       cache,
+      walletConnectProjectId,
     });
   } else if (chainInfo.vmType === VMTYPE.SVM) {
     return checkAndSignSolAuthMessage({ cache });

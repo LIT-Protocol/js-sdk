@@ -21,8 +21,8 @@
     "universal"
   ],
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
-  "version": "2.2.52",
   "group": "core",
+  "version": "2.2.52",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

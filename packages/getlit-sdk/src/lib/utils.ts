@@ -27,7 +27,7 @@ import {
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
 
-const version = '0.0.753';
+const version = '0.0.761';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
