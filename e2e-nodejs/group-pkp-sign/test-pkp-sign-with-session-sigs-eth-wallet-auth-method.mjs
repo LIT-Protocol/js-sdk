@@ -33,18 +33,18 @@ export async function main() {
 
   const sessionKeyPair = client.getSessionKey();
 
-  const authNeededCallback = async (params) => {
-    const response = await client.signSessionKey({
-      sessionKey: sessionKeyPair,
-      statement: params.statement,
-      authMethods: [authMethod],
-      pkpPublicKey: `0x${LITCONFIG.PKP_PUBKEY}`,
-      expiration: params.expiration,
-      resources: params.resources,
-      chainId: 1,
-    });
-    return response.authSig;
-  };
+  // const authNeededCallback = async (params) => {
+  //   const response = await client.signSessionKey({
+  //     sessionKey: sessionKeyPair,
+  //     statement: params.statement,
+  //     authMethods: [authMethod],
+  //     pkpPublicKey: `0x${LITCONFIG.PKP_PUBKEY}`,
+  //     expiration: params.expiration,
+  //     resources: params.resources,
+  //     chainId: 1,
+  //   });
+  //   return response.authSig;
+  // };
 
   // ==================== Test Logic ====================
   const sessionSigs = await authProvider?.getSessionSigs({
@@ -59,7 +59,7 @@ export async function main() {
         },
       ],
       sessionKey: sessionKeyPair,
-      authNeededCallback,
+      // authNeededCallback,
     },
   });
 
