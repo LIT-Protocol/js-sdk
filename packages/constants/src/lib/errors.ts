@@ -56,6 +56,11 @@ export const LIT_ERROR = {
     code: 'invalid_argument_exception',
     kind: LitErrorKind.Validation,
   },
+  INVALID_BOOLEAN_EXCEPTION: {
+    name: 'InvalidBooleanException',
+    code: 'invalid_boolean_exception',
+    kind: LitErrorKind.Validation,
+  },
   UNKNOWN_ERROR: {
     name: 'UnknownError',
     code: 'unknown_error',
