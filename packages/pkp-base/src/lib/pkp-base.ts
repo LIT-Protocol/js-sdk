@@ -242,27 +242,18 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
-    // If no authSig or sessionSigs are provided, throw error
     if (
-      !this.controllerAuthSig &&
-      !this.controllerSessionSigs &&
-      !this.controllerAuthMethods
-    ) {
-      throw new Error(
-        'controllerAuthSig, controllerSessionSigs or controllerAuthMethods are required'
-      );
-    }
-
-    if (
-      this.controllerAuthSig &&
-      this.controllerSessionSigs &&
-      this.controllerAuthMethods
-    ) {
-      throw new Error(
-        'controllerAuthSig, controllerSessionSigs both defined, can only use one authorization type'
-      );
-    }
-
+       [
+         this.controllerAuthSig,
+         this.controllerSessionSigs,
+         this.controllerAuthMethods,
+       ].filter((val, index, arr) => val !== undefined).length > 1
+     ) {
+       throw new Error(
+         'controllerAuthSig, controllerSessionSigs and controllerAuthMethod are defined, can only use one authorization type'
+       );
+     }
+    
     // If session sigs are provided, they must be an object
     if (
       this.controllerSessionSigs &&
@@ -353,25 +344,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
-    // If no authSig or sessionSigs are provided, throw error
-    if (
-      [
-        !this.controllerAuthSig &&
-          !this.controllerSessionSigs &&
-          !this.controllerAuthMethods,
-      ].filter((val, _index, _arr) => val).length > 2
-    ) {
-      throw new Error(
-        'controllerAuthSig, controllerSessionSigs or controllerAuthMethod is required'
-      );
-    }
-
     if (
       [
         this.controllerAuthSig,
         this.controllerSessionSigs,
         this.controllerAuthMethods,
-      ].filter((val, index, arr) => val).length > 1
+      ].filter((val, index, arr) => val !== undefined).length > 1
     ) {
       throw new Error(
         'controllerAuthSig, controllerSessionSigs and controllerAuthMethod are defined, can only use one authorization type'
