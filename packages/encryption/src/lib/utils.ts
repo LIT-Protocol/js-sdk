@@ -10,7 +10,7 @@ function isTokenOperator(token: any): boolean {
   return token.hasOwnProperty("operator") && OPERATORS.includes(token.operator);
 }
 
-export function validateBooleanExpression(
+export function isValidBooleanExpression(
   expression: AccessControlConditions 
   | EvmContractConditions 
   | SolRpcConditions 
@@ -27,7 +27,7 @@ export function validateBooleanExpression(
           return false;
         }
         // Nested conditions expression
-        if (Array.isArray(token) && !validateBooleanExpression(token)) {
+        if (Array.isArray(token) && !isValidBooleanExpression(token)) {
           return false;
         }
         currentState = STATES.CONDITION;
