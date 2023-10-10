@@ -40,6 +40,7 @@ import {
   log,
 } from '@lit-protocol/misc';
 import { isHexString } from 'ethers/lib/utils';
+import { validateBooleanExpression } from './utils';
 
 export const safeParams = ({
   functionName,
@@ -530,6 +531,34 @@ class AccessControlConditionsValidator implements ParamsValidator {
         errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
+
+    if (!accessControlConditions && !validateBooleanExpression(accessControlConditions!!))
+      return ELeft({
+        message: 'Invalid boolean Access Control Conditions',
+        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
+      })
+
+    if (!evmContractConditions && !validateBooleanExpression(evmContractConditions!!))
+      return ELeft({
+        message: 'Invalid boolean EVM Access Control Conditions',
+        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
+      })
+
+    if (!solRpcConditions && !validateBooleanExpression(solRpcConditions!!))
+      return ELeft({
+        message: 'Invalid boolean Solana Access Control Conditions',
+        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
+      })
+
+    if (!unifiedAccessControlConditions && !validateBooleanExpression(unifiedAccessControlConditions!!))
+      return ELeft({
+        message: 'Invalid boolean Unified Access Control Conditions',
+        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
+      })
 
     return ERight(undefined);
   }
