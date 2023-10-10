@@ -60,8 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.63] - 2023-03-13
 
-- [[#44](https://github.com/LIT-Protocol/js-sdk/pull/44)] Separated Node Code into its own repository `@lit-protocol/lit-node-client-nodejs`, from which `@lit-protocol/lit-node-client` will extend, so there are no breaking changes for existing customers.
-
+- [[#44](https://github.com/LIT-Protocol/js-sdk/pull/44)] Separated Node Code into its own repository `@lit-protocol/lit-node-client-nodejs`, from which `@lit-protocol/lit-node-client` will extend, so there are no breaking changes for existing customers.    
 ### Added
 
 - `yarn v` to check the current npm version
@@ -70,3 +69,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `yarn bump:major` to update `major` version in `lerna.json` and `version.ts`
 - Logs will now include version number eg. `[LitJsSdk v2.1.63]`
 - `yarn tool:e2e` will now serve the react app and launch Cypress E2E testing automatically
+
+## [3.0.0] - 2023-09-26 
+- [[#199](https://github.com/LIT-Protocol/js-sdk/pull/199)] `Cayenne` network upgrade bumps `packages` to `3.0.0`
+### Added
+- [#145](https://github.com/LIT-Protocol/js-sdk/pull/145) ACC-based JWT Signing (V2)
+- `computePubKey` to `lit-core` which wraps an implementation in `crypto` for interfacing with a new wasm module for deriving HD public keys
+- Addition of `claimKeyId` method on `lit-node-client-nodejs` for  deriving a key from an `authMethod`
+    - Supports a new `MintCallBack` which is defined as `async (params: ClaimKeyResponse): Promise<ClaimKeyResponse>` which is called to route derived keys from a claim operation on chain.
+### Updates
+- Update `SIGTYPE` to include new ecdsa types
+- [#107](https://github.com/LIT-Protocol/js-sdk/pull/107) Adds support for new ECDSA implementations for signature recombine

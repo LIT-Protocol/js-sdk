@@ -14,8 +14,8 @@ export const stakingBalances = {
           "type": "uint8"
         }
       ],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
+      "name": "CannotAddFunctionToDiamondThatAlreadyExists",
+      "type": "error"
     },
     {
       "inputs": [],
@@ -141,10 +141,8 @@ export const stakingBalances = {
       "type": "error"
     },
     {
-      "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
           "internalType": "address",
           "name": "staker",
           "type": "address"
@@ -154,13 +152,17 @@ export const stakingBalances = {
           "internalType": "address",
           "name": "aliasAccount",
           "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_message",
+          "type": "string"
         }
       ],
       "name": "AliasAdded",
       "type": "event"
     },
     {
-      "anonymous": false,
       "inputs": [
         {
           "indexed": true,
@@ -179,7 +181,6 @@ export const stakingBalances = {
       "type": "event"
     },
     {
-      "anonymous": false,
       "inputs": [
         {
           "indexed": false,
@@ -194,6 +195,29 @@ export const stakingBalances = {
     {
       "anonymous": false,
       "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "facetAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "enum IDiamond.FacetCutAction",
+              "name": "action",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes4[]",
+              "name": "functionSelectors",
+              "type": "bytes4[]"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IDiamond.FacetCut[]",
+          "name": "_diamondCut",
+          "type": "tuple[]"
+        },
         {
           "indexed": false,
           "internalType": "uint256",
@@ -218,10 +242,30 @@ export const stakingBalances = {
       "type": "event"
     },
     {
-      "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
+          "components": [
+            {
+              "internalType": "address",
+              "name": "facetAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "enum IDiamond.FacetCutAction",
+              "name": "action",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes4[]",
+              "name": "functionSelectors",
+              "type": "bytes4[]"
+            }
+          ],
+          "internalType": "struct IDiamond.FacetCut[]",
+          "name": "_diamondCut",
+          "type": "tuple[]"
+        },
+        {
           "internalType": "address",
           "name": "previousOwner",
           "type": "address"
@@ -231,18 +275,22 @@ export const stakingBalances = {
           "internalType": "address",
           "name": "newOwner",
           "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_calldata",
+          "type": "bytes"
         }
       ],
       "name": "OwnershipTransferred",
       "type": "event"
     },
     {
-      "anonymous": false,
       "inputs": [
         {
           "indexed": false,
           "internalType": "address",
-          "name": "staker",
+          "name": "facetAddress_",
           "type": "address"
         }
       ],
@@ -250,10 +298,8 @@ export const stakingBalances = {
       "type": "event"
     },
     {
-      "anonymous": false,
       "inputs": [
         {
-          "indexed": false,
           "internalType": "address",
           "name": "staker",
           "type": "address"
@@ -276,6 +322,37 @@ export const stakingBalances = {
       "type": "event"
     },
     {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "owner_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "CallerNotOwner",
+      "type": "error"
+    },
+    {
       "anonymous": false,
       "inputs": [
         {
@@ -294,7 +371,13 @@ export const stakingBalances = {
         {
           "indexed": true,
           "internalType": "address",
-          "name": "staker",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
           "type": "address"
         },
         {
@@ -331,12 +414,12 @@ export const stakingBalances = {
       "inputs": [
         {
           "indexed": false,
-          "internalType": "uint256",
-          "name": "newTokenRewardPerTokenPerEpoch",
-          "type": "uint256"
+          "internalType": "uint8",
+          "name": "version",
+          "type": "uint8"
         }
       ],
-      "name": "TokenRewardPerTokenPerEpochSet",
+      "name": "Initialized",
       "type": "event"
     },
     {
@@ -363,9 +446,9 @@ export const stakingBalances = {
       "inputs": [
         {
           "indexed": true,
-          "internalType": "address",
-          "name": "staker",
-          "type": "address"
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
         },
         {
           "indexed": false,
@@ -400,19 +483,13 @@ export const stakingBalances = {
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "staker",
-          "type": "address"
-        },
-        {
           "indexed": false,
           "internalType": "uint256",
           "name": "amount",
           "type": "uint256"
         }
       ],
-      "name": "Withdrawn",
+      "name": "Withdrew",
       "type": "event"
     },
     {
@@ -533,17 +610,17 @@ export const stakingBalances = {
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "account",
-          "type": "address"
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
         }
       ],
       "name": "checkStakingAmounts",
       "outputs": [
         {
-          "internalType": "bool",
+          "internalType": "address",
           "name": "",
-          "type": "bool"
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -576,7 +653,9 @@ export const stakingBalances = {
       "type": "function"
     },
     {
-      "inputs": [
+      "inputs": [],
+      "name": "getPkpPermissionsAddress",
+      "outputs": [
         {
           "internalType": "address",
           "name": "account",
@@ -611,11 +690,8 @@ export const stakingBalances = {
           "type": "address"
         }
       ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
+      "name": "getPubkey",
+      "outputs": [
         {
           "internalType": "address",
           "name": "staker",
@@ -678,7 +754,12 @@ export const stakingBalances = {
       "outputs": [
         {
           "internalType": "address",
-          "name": "",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "operator",
           "type": "address"
         }
       ],

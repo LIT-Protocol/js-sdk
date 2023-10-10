@@ -130,7 +130,6 @@ export interface AuthCallbackParams {
    * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
    */
   walletConnectProjectId?: string;
-
 }
 
 /** ---------- Web3 ---------- */
@@ -243,7 +242,6 @@ export interface Signature {
 
 export interface ClaimKeyResponse {
   signatures: Signature[];
-
   claimedKeyId: string;
   pubkey: string;
   mintTx: string;
@@ -1588,8 +1586,6 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    * see stych docs for more info: https://stytch.com/docs/api/session-get
    */
   accessToken: string;
-
-  /* 
   /*
    Stytch user identifier for a project
   */

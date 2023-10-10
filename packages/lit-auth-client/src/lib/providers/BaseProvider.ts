@@ -2,6 +2,7 @@ import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitStorage } from '@lit-protocol/lit-storage';
 import {
+  AuthCallback,
   AuthCallbackParams,
   AuthMethod,
   AuthSig,
@@ -14,6 +15,7 @@ import {
   IRelay,
   IRelayPKP,
   IRelayRequestData,
+  RelayClaimProcessor,
   SessionSigs,
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
@@ -247,21 +249,20 @@ export abstract class BaseProvider {
     const res = await this.litNodeClient.claimKeyId(claimRequest);
     return res;
   }
-
   /**
- * Calculates a public key for a given `key identifier` which is an `Auth Method Identifier`
- * the Auth Method Identifier is a hash of a user identifier and app idendtifer.
- * These identifiers are specific to each auth method and will derive the public key protion of a pkp which will be persited
- * when a key is claimed.
- * | Auth Method | User ID | App ID |
- * |:------------|:-------|:-------|
- * | Google OAuth | token `sub` | token `aud` |
- * | Discord OAuth | user id | client app identifier |
- * | Stytch OTP |token `sub` | token `aud`|
- * @param userId
- * @param appId
- * @returns
- */
+   * Calculates a public key for a given `key identifier` which is an `Auth Method Identifier`
+   * the Auth Method Identifier is a hash of a user identifier and app idendtifer.
+   * These identifiers are specific to each auth method and will derive the public key protion of a pkp which will be persited
+   * when a key is claimed.
+   * | Auth Method | User ID | App ID |
+   * |:------------|:-------|:-------|
+   * | Google OAuth | token `sub` | token `aud` |
+   * | Discord OAuth | user id | client app identifier |
+   * | Stytch OTP |token `sub` | token `aud`|
+   * @param userId
+   * @param appId
+   * @returns
+   */
   computePublicKeyFromAuthMethod = async (
     authMethod: AuthMethod
   ): Promise<String> => {
@@ -273,8 +274,6 @@ export abstract class BaseProvider {
     return this.litNodeClient.computeHDPubKey(authMethodId);
   };
 
-
-
   /**
    * Generate request data for minting and fetching PKPs via relay server
    *
@@ -282,7 +281,7 @@ export abstract class BaseProvider {
    *
    * @returns {Promise<IRelayRequestData>} - Relay request data
    */
-  protected async prepareRelayRequestData(
+  public async prepareRelayRequestData(
     authMethod: AuthMethod
   ): Promise<IRelayRequestData> {
     const authMethodType = authMethod.authMethodType;

@@ -27,10 +27,13 @@ const specialCases = (fileName) => {
     .replace('pkppermissions', 'pkpPermissions');
 };
 
-const contracts = await getFiles('./packages/contracts-sdk/src/abis');
+let contracts = await getFiles('./packages/contracts-sdk/src/abis');
+
+contracts = contracts.filter((file) => file.includes('.sol'));
 
 const abis = contracts.map((contractSol) => {
   const contractName = contractSol.replace('.sol', '');
+
   // const contractData = `./packages/contracts-sdk/src/abis/${contractSol}/${contractName}Data.mjs`;
 
   return {

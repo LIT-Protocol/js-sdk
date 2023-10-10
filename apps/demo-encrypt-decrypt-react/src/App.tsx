@@ -66,7 +66,7 @@ const dataToEncryptHash = res.dataToEncryptHash;
 
 // { ms } 
 // { Loading... }
-const decryptedString = await litNodeClient.decryptToString({
+const decryptedString = await LitJsSdk.decryptToString({
   accessControlConditions: accs,
   ciphertext,
   dataToEncryptHash,
