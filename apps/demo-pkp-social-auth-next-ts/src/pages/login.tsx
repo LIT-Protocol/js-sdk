@@ -16,7 +16,6 @@ export default function LoginView() {
   const {
     authMethod,
     authWithEthWallet,
-    authWithOTP,
     authWithWebAuthn,
     authWithStytch,
     loading: authLoading,
@@ -130,7 +129,6 @@ export default function LoginView() {
       handleGoogleLogin={handleGoogleLogin}
       handleDiscordLogin={handleDiscordLogin}
       authWithEthWallet={authWithEthWallet}
-      authWithOTP={authWithOTP}
       authWithWebAuthn={authWithWebAuthn}
       authWithStytch={authWithStytch}
       signUp={goToSignUp}
