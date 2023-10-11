@@ -5,12 +5,12 @@ import {
   EthWalletProviderOptions,
   EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
-import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
+import { LIT_CHAINS, AuthMethodType, LIT_ERROR } from '@lit-protocol/constants';
 import { SiweMessage } from 'lit-siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
-import { isBrowser, isNode, log } from '@lit-protocol/misc';
+import { isBrowser, log, throwError } from '@lit-protocol/misc';
 import { isSignedMessageExpired } from '../utils';
 
 export default class EthWalletProvider extends BaseProvider {
@@ -36,14 +36,15 @@ export default class EthWalletProvider extends BaseProvider {
       this.origin = options.origin || window.location.origin;
     } catch (e) {
       log(
-        '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "https://localhost/login"'
+        '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
       );
       this.domain = options.domain || 'localhost';
-      this.origin = options.origin || 'https://localhost/login';
+      this.origin = options.origin || 'http://localhost';
     }
   }
 
   public getAuthMethodStorageUID(authSig: AuthSig | string): string {
+
     let _authSig: AuthSig;
 
     try {
@@ -184,11 +185,11 @@ export default class EthWalletProvider extends BaseProvider {
           chain,
           ...(_options?.expirationUnit &&
             _options?.expirationLength && {
-              expiration: this.storageProvider.convertToISOString(
-                _options.expirationLength,
-                _options.expirationUnit
-              ),
-            }),
+            expiration: this.storageProvider.convertToISOString(
+              _options.expirationLength,
+              _options.expirationUnit
+            ),
+          }),
           cache: false,
         });
       }
@@ -224,6 +225,22 @@ export default class EthWalletProvider extends BaseProvider {
 
       if (!authSig || authSig === undefined) {
         throw new Error('Unable to get auth sig');
+      }
+
+      // if authSig is there but all the values are empty then throw error
+      const missingKeys: any = [];
+      ['sig', 'derivedVia', 'signedMessage', 'address'].forEach((key: any) => {
+        // @ts-ignore
+        if (!authSig[key] || authSig[key] === '') {
+          missingKeys.push(key);
+        }
+      });
+
+      if (missingKeys.length > 0) {
+        throwError({
+          message: `Missing keys: ${missingKeys.join(', ')}. Received ${JSON.stringify(authSig)}`,
+          error: LIT_ERROR.PARAM_NULL_ERROR
+        })
       }
 
       if (setNewExpiration) {

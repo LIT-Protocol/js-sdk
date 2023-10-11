@@ -1,4 +1,4 @@
-import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
+import { ALL_LIT_CHAINS, AuthMethodType, LIT_ERROR } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitStorage } from '@lit-protocol/lit-storage';
 import {
@@ -20,7 +20,7 @@ import {
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-
+import { hexPrefixed, throwError } from '@lit-protocol/misc';
 export abstract class BaseProvider {
   /**
    * Endpoint to interact with a blockchain network. Defaults to the Lit Chronicle.
@@ -136,6 +136,10 @@ export abstract class BaseProvider {
   public async getSessionSigs(
     params: BaseProviderSessionSigsParams
   ): Promise<SessionSigs> {
+
+    // -- enforce formats
+    params.pkpPublicKey = hexPrefixed(params.pkpPublicKey);
+
     // Use provided LitNodeClient or create a new one
     if (params.litNodeClient && params.litNodeClient instanceof LitNodeClient) {
       this.litNodeClient = params.litNodeClient;
@@ -227,7 +231,10 @@ export abstract class BaseProvider {
 
       return sessionSigs;
     } catch (e) {
-      throw new Error(`Error when getting session sigs from litNodeClient: ${e}`);
+      return throwError({
+        message: `Error when getting session sigs from litNodeClient`,
+        error: LIT_ERROR.RETRIVAL_ERROR,
+      });
     }
   }
 
