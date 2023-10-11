@@ -8,6 +8,7 @@ export enum LitErrorKind {
   Parser = 'Parser',
   Serializer = 'Serializer',
   Timeout = 'Timeout',
+  DataRetrieval = 'DataRetrieval',
 }
 
 export const LIT_ERROR = {
@@ -115,6 +116,11 @@ export const LIT_ERROR = {
     name: 'UnknownSignatureError',
     code: 'unknown_signature_error',
     kind: LitErrorKind.Validation,
+  },
+  RETRIVAL_ERROR: {
+    name: 'RetrivalError',
+    code: 'retrival_error',
+    kind: LitErrorKind.Unexpected,
   },
   PARAM_NULL_ERROR: {
     name: 'ParamNullError',
