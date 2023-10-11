@@ -354,19 +354,24 @@ export class LitCore {
     authSig,
     sessionSigs,
     url,
+    mustHave = true,
   }: {
     authSig?: AuthSig;
     sessionSigs?: SessionSigsMap;
     url: string;
+    mustHave?: boolean;
   }): AuthSig | SessionSig => {
+
     if (!authSig && !sessionSigs) {
-      throwError({
-        message: `You must pass either authSig or sessionSigs`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      // @ts-ignore
-      return;
+      if (mustHave) {
+        throwError({
+          message: `You must pass either authSig or sessionSigs`,
+          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        });
+      } else {
+        log(`authSig or sessionSigs not found. This may be using authMethod`)
+      }
     }
 
     if (sessionSigs) {
