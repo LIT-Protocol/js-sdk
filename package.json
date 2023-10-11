@@ -31,6 +31,7 @@
     "publish:app:html": "yarn node ./tools/scripts/build-html.mjs && cd dist/apps/html && vercel --prod",
     "buildAndPublish": "yarn build:packages && yarn publish:packages",
     "bbp": "yarn bump && yarn build && yarn publish:dev",
+    "gen:demo": "yarn node ./tools/scripts/gen-demo-app.mjs",
     "gen:html": "yarn node ./tools/scripts/gen-html.mjs",
     "gen:react": "yarn node ./tools/scripts/gen-react.mjs",
     "gen:nodejs": "yarn node ./tools/scripts/gen-nodejs.mjs",
