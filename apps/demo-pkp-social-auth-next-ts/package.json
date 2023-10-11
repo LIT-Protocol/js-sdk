@@ -15,8 +15,7 @@
     "@lit-protocol/pkp-ethers": "^3.0.5",
     "@lit-protocol/types": "^3.0.5",
     "@radix-ui/react-radio-group": "^1.1.3",
-    "@stytch/nextjs": "^9.0.0",
-    "@stytch/vanilla-js": "^3.0.1",
+    "@stytch/nextjs": "^11.0.0",
     "dotenv": "^16.3.1",
     "eslint": "8.36.0",
     "eslint-config-next": "^13.5.4",
@@ -26,7 +25,6 @@
     "prettier": "^2.8.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "stytch": "^9.0.2",
     "wagmi": "^0.12.8"
   },
   "devDependencies": {
