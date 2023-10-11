@@ -39,6 +39,7 @@ import { HeliaProvider } from './ipfs-provider/providers/helia-provider';
 import { PinataProvider } from './ipfs-provider/providers/pinata-provider';
 import { infuraProvider } from './ipfs-provider/providers/infura-provider';
 import { handleAutoAuth } from './auth/handle-auto-auth';
+import { getEnv } from '@lit-protocol/misc';
 
 const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
 
@@ -55,8 +56,8 @@ export class LitOptionsBuilder {
   custom: {
     persistentStorage: boolean;
   } = {
-    persistentStorage: false,
-  };
+      persistentStorage: false,
+    };
 
   constructor() {
     this.initialiseEventEmitter();
@@ -141,7 +142,11 @@ export class LitOptionsBuilder {
     // -- start
     const nodeClientOpts = this._nodeClientOptions ?? {
       litNetwork: DEFAULT_NETWORK,
-      debug: false,
+      debug: getEnv({
+        nodeEnvVar: 'DEBUG',
+        urlQueryValue: 'debug=true',
+        defaultValue: false,
+      }),
     };
 
     log('using class "LitNodeClient"');
@@ -231,9 +236,8 @@ export class LitOptionsBuilder {
 
     let authStatus = Object.entries(globalThis.Lit.auth)
       .map(([key, value]) => {
-        return `${value ? '✅' : '❌'} authMethodType: ${
-          getProviderMap()[key.toLowerCase()]
-        } |  ${key}`;
+        return `${value ? '✅' : '❌'} authMethodType: ${getProviderMap()[key.toLowerCase()]
+          } |  ${key}`;
       })
       .join('\n');
 

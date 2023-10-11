@@ -313,10 +313,9 @@ export class LitCore {
       })
       .catch((error: NodeErrorV3) => {
         console.error(
-          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
-            error?.message || error?.details
-              ? `Error is ${error.message} - ${error.details}`
-              : ''
+          `Something went wrong, internal id for request: "lit_${requestId}". Please provide this identifier with any support requests. ${error?.message || error?.details
+            ? `Error is ${error.message} - ${error.details}`
+            : ''
           }`
         );
         return Promise.reject(error);
@@ -351,19 +350,24 @@ export class LitCore {
     authSig,
     sessionSigs,
     url,
+    mustHave = true,
   }: {
     authSig?: AuthSig;
     sessionSigs?: SessionSigsMap;
     url: string;
+    mustHave?: boolean;
   }): AuthSig | SessionSig => {
+
     if (!authSig && !sessionSigs) {
-      throwError({
-        message: `You must pass either authSig or sessionSigs`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-      // @ts-ignore
-      return;
+      if (mustHave) {
+        throwError({
+          message: `You must pass either authSig or sessionSigs`,
+          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        });
+      } else {
+        log(`authSig or sessionSigs not found. This may be using authMethod`)
+      }
     }
 
     if (sessionSigs) {

@@ -89,7 +89,7 @@ async function getNewPKP(privateKey) {
     'TESTING 123',
     'localhost',
     'http://localhost/login',
-    1000 * 60 * 60 * 24 * 7 * 100000
+    1000 * 60 * 60 * 24 * 49
   );
   console.log('✅ CONTROLLER_AUTHSIG:', CONTROLLER_AUTHSIG);
 

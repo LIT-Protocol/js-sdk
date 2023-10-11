@@ -284,9 +284,8 @@ export const checkType = ({
       ' or '
     )} type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
-    )}" type instead. value: ${
-      value instanceof Object ? JSON.stringify(value) : value
-    }`;
+    )}" type instead. value: ${value instanceof Object ? JSON.stringify(value) : value
+      }`;
 
     if (throwOnError) {
       throwError({
@@ -393,9 +392,8 @@ export const is = (
   if (getVarType(value) !== type) {
     let message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
-    )}" type instead. value: ${
-      value instanceof Object ? JSON.stringify(value) : value
-    }`;
+    )}" type instead. value: ${value instanceof Object ? JSON.stringify(value) : value
+      }`;
 
     if (throwOnError) {
       throwError({
@@ -535,3 +533,51 @@ export const defaultMintClaimCallback: MintCallback<
     throw e;
   }
 };
+
+export const hexPrefixed = (str: string) => {
+  if (str.startsWith('0x')) {
+    return str;
+  }
+
+  return '0x' + str;
+}
+
+/**
+ * getEnv - Determine the debug status based on environment variables or URL query parameters.
+ *
+ * @function
+ * @export
+ * @param {Object} [options={}] - Configuration options for determining debug status.
+ * @param {string} [options.nodeEnvVar='DEBUG'] - The Node.js environment variable to check.
+ * @param {string} [options.urlQueryParam='dev'] - The URL query parameter to check in a browser environment.
+ * @param {string} [options.urlQueryValue='debug=true'] - The expected value of the URL query parameter to enable debugging.
+ * @param {boolean} [options.defaultValue=false] - The default boolean value to return if no debug conditions are met.
+ * @returns {boolean} - True if debug conditions are met, otherwise returns the provided defaultValue.
+ *
+ * @example
+ * // Usage in Node.js environment
+ * process.env.DEBUG = 'true';
+ * console.log(getEnv()); // Outputs: true
+ *
+ * @example
+ * // Usage in Browser environment with URL: http://example.com?dev=debug=true
+ * console.log(getEnv()); // Outputs: true
+ */
+export function getEnv({
+  nodeEnvVar = 'DEBUG',
+  urlQueryParam = 'dev',
+  urlQueryValue = 'debug=true',
+  defaultValue = false
+} = {}) {
+  // Node.js environment
+  if (isNode()) {
+    return process.env[nodeEnvVar] === 'true';
+  }
+  // Browser environment
+  else if (isBrowser()) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(urlQueryParam) === urlQueryValue;
+  }
+  // Default
+  return defaultValue;
+}

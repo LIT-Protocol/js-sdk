@@ -41,7 +41,7 @@ export async function main() {
 
   // ==================== Success ====================
   return success(
-    `PKP sign endpoint should sign message. recoveredAddr: ${recoveredAddr}`
+    `PKP sign endpoint should sign message with authSig. recoveredAddr: ${recoveredAddr}`
   );
 }
 

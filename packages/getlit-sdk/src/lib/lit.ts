@@ -1,4 +1,5 @@
 import {
+  AuthCallback,
   AuthMethod,
   AuthSig,
   EncryptRequestBase,
@@ -37,15 +38,16 @@ import {
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
-import { isBrowser } from '@lit-protocol/misc';
+import { hexPrefixed, isBrowser } from '@lit-protocol/misc';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 import { handleGetAccounts } from './get-accounts/handle-get-accounts';
 import { withAuthData } from './middleware/with-auth-data';
 import {
   LitAbility,
-  LitAccessControlConditionResource,
+  LitActionResource,
 } from '@lit-protocol/auth-helpers';
 import { LitAnalytics } from './analytics';
+import { ethers } from 'ethers';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -406,59 +408,96 @@ ${LitMessages.persistentStorageExample}`;
   public async getAccountSession({
     accountPublicKey,
     authData,
+    authNeededCallback,
   }: {
     accountPublicKey: string;
     authData: LitAuthMethod[];
+    authNeededCallback?: AuthCallback;
   }) {
     log.start('getAccountSession');
+
+    if (isNode()) {
+      if (!authNeededCallback) {
+        log.throw("authNeededCallback is required when running in node");
+      }
+    }
 
     // we should be able to look up which auth method provider was used to authenticate the user by public key
     // PKPPermissions -> getPermittedAuthMethods(tokenId);
     const authMethodProvider = 'ethwallet';
 
+    // -- enforce correct format
+    accountPublicKey = hexPrefixed(accountPublicKey);
+
     log.info('accountPublicKey', accountPublicKey);
 
-    // if accountPublicKey doesn't start with '0x' add it
-    if (!accountPublicKey.startsWith('0x')) {
-      accountPublicKey = '0x' + accountPublicKey;
-    }
-
     // -- execute
-    const resource = new LitAccessControlConditionResource('*');
-    const ability = LitAbility.PKPSigning;
+    const resourceAbilities = [
+      {
+        resource: new LitActionResource('*'),
+        ability: LitAbility.PKPSigning,
+      },
+    ];
+
     const provider = globalThis.Lit.auth[authMethodProvider];
 
     log.info(`Getting session sigs for "${accountPublicKey}"...`);
+
+    // const sessionKeyPair = globalThis.Lit.nodeClient?.getSessionKey();
 
     // Use Promise.all to handle multiple async tasks concurrently
     try {
       const allSessionSigs = await Promise.all(
         authData.map(async (authMethodItem) => {
-          return await provider?.getSessionSigs({
+
+          log.info("authMethodItem:", authMethodItem);
+
+          log.info("provider:", provider);
+
+          const sessionSigs = await provider?.getSessionSigs({
             pkpPublicKey: accountPublicKey,
             authMethod: authMethodItem,
             sessionSigsParams: {
               chain: 'ethereum', // default EVM chain unless other chain
-              resourceAbilityRequests: [
-                {
-                  resource,
-                  ability,
-                },
-              ],
+              resourceAbilityRequests: resourceAbilities,
+
+              ...(isNode() && {
+                sessionKey: globalThis.Lit.nodeClient?.getSessionKey(),
+                authNeededCallback,
+              })
             },
           });
+
+          console.log("sessionSigs:", sessionSigs);
+
+          return sessionSigs;
         })
       );
 
       console.log('allSessionSigs: ', allSessionSigs);
 
+      log("Let's try to sign something with one of the session sigs...");
+      const oneOfThem = allSessionSigs[0];
+
+      log("This is the stringified form of one of the session sigs:", JSON.stringify(oneOfThem));
+
+      const pkpRes = await globalThis.Lit.nodeClient?.pkpSign({
+        toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+        pubKey: accountPublicKey,
+        sessionSigs: oneOfThem,
+      })
+
+      log("result from pkpSign()", pkpRes);
+      log("this is how one of the session sigs looks like:", oneOfThem);
       log.end('getAccountSession');
 
       return allSessionSigs;
     } catch (e) {
       log.end('getAccountSession');
-      log.throw('Error while getting account session', e);
+      log.throw(`Error while getting account session: ${JSON.stringify(e)}`);
     }
+
+    log.end('getAccountSession');
   }
 
   /**
