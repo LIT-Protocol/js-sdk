@@ -21,6 +21,7 @@ import { safeParams } from '@lit-protocol/encryption';
 import {
   convertLitActionsParams,
   defaultMintClaimCallback,
+  hexPrefixed,
   log,
   mostCommonString,
   throwError,
@@ -313,40 +314,59 @@ export class LitNodeClientNodeJs extends LitCore {
     expiration,
     sessionKeyUri,
   }: GetWalletSigProps): Promise<AuthSig> => {
+
     let walletSig: AuthSig;
 
     const storageKey = LOCAL_STORAGE_KEYS.WALLET_SIGNATURE;
     const storedWalletSigOrError = getStorageItem(storageKey);
 
+    // browser: 2 > 2.1 > 3
+    // nodejs: 1. > 1.1
+
     // -- (TRY) to get it in the local storage
     // -- IF NOT: Generates one
+    log(`getWalletSig - flow starts
+        storageKey: ${storageKey}
+        storedWalletSigOrError: ${JSON.stringify(storedWalletSigOrError)}
+    `);
+
     if (
       storedWalletSigOrError.type === EITHER_TYPE.ERROR ||
       !storedWalletSigOrError.result ||
       storedWalletSigOrError.result == ''
     ) {
+      log("getWalletSig - flow 1")
       console.warn(
         `Storage key "${storageKey}" is missing. Not a problem. Continue...`
       );
       if (authNeededCallback) {
-        walletSig = await authNeededCallback({
+        log("getWalletSig - flow 1.1");
+        const body = {
           chain,
           statement: sessionCapabilityObject?.statement,
           resources: sessionCapabilityObject
             ? [sessionCapabilityObject.encodeAsSiweResource()]
             : undefined,
-          switchChain,
+          ...(switchChain && { switchChain }),
           expiration,
           uri: sessionKeyUri,
-        });
+        };
+
+        log("callback body:", body);
+
+        walletSig = await authNeededCallback(body);
       } else {
+        log("getWalletSig - flow 1.2")
         if (!this.defaultAuthCallback) {
+          log("getWalletSig - flow 1.2.1")
           return throwError({
             message: 'No default auth callback provided',
             errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
             errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
           });
         }
+
+        log("getWalletSig - flow 1.2.2")
         walletSig = await this.defaultAuthCallback({
           chain,
           statement: sessionCapabilityObject.statement,
@@ -359,24 +379,31 @@ export class LitNodeClientNodeJs extends LitCore {
         });
       }
 
+      log("getWalletSig - flow 1.3")
+
       // (TRY) to set walletSig to local storage
       const storeNewWalletSigOrError = setStorageItem(
         storageKey,
         JSON.stringify(walletSig)
       );
       if (storeNewWalletSigOrError.type === 'ERROR') {
+        log("getWalletSig - flow 1.4")
         console.warn(
           `Unable to store walletSig in local storage. Not a problem. Continue...`
         );
       }
     } else {
+      log("getWalletSig - flow 2")
       try {
         walletSig = JSON.parse(storedWalletSigOrError.result as string);
+        log("getWalletSig - flow 2.1")
       } catch (e) {
         console.warn('Error parsing walletSig', e);
+        log("getWalletSig - flow 2.2")
       }
     }
 
+    log("getWalletSig - flow 3")
     return walletSig!;
   };
 
@@ -904,8 +931,11 @@ export class LitNodeClientNodeJs extends LitCore {
         hasProps(requiredSessionSigsShareProps) ||
         hasProps(requiredSignatureShareProps)
       ) {
+
+        const bigR = typedItem.bigR ?? typedItem.bigr;
+
         typedItem.signatureShare = typedItem.signatureShare.replaceAll('"', '');
-        typedItem.bigR = typedItem.bigR.replaceAll('"', '');
+        typedItem.bigR = bigR?.replaceAll('"', '');
         typedItem.publicKey = typedItem.publicKey.replaceAll('"', '');
         typedItem.dataSigned = typedItem.dataSigned.replaceAll('"', '');
 
@@ -942,21 +972,48 @@ export class LitNodeClientNodeJs extends LitCore {
     // TOOD: get keys of signedData
     const keys = Object.keys(signedData[0]);
 
+    // removeExtraBackslashesAndQuotes
+    const sanitise = (str: string) => {
+      // Check if str is a string and remove extra backslashes
+      if (typeof str === 'string') {
+        // Remove backslashes
+        let newStr = str.replace(/\\+/g, '');
+        // Remove leading and trailing double quotes
+        newStr = newStr.replace(/^"|"$/g, '');
+        return newStr;
+      }
+      return str;
+    };
+
     // -- execute
     keys.forEach((key: any) => {
+
+      log("key:", key);
+
       const shares = signedData.map((r: any) => r[key]);
+
+      log("shares:", shares);
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
       const sigShares: Array<SigShare> = shares.map((s: any) => {
         const share = this._getFlattenShare(s);
-        console.log('XX share', share);
+
+        log("share:", share);
+
+        if (!share) {
+          throw new Error("share is null or undefined");
+        }
+
+        if (!share.bigr) {
+          throw new Error("bigR is missing");
+        }
 
         return {
           sigType: share.sigType,
-          signatureShare: share.signatureShare,
+          signatureShare: sanitise(share.signatureShare),
           shareIndex: share.shareIndex,
-          bigR: share.bigR,
+          bigR: sanitise(share.bigr),
           publicKey: share.publicKey,
           dataSigned: share.dataSigned,
           siweMessage: share.siweMessage,
@@ -1220,7 +1277,6 @@ export class LitNodeClientNodeJs extends LitCore {
     const responseData = (res as SuccessNodePromises<NodeShare>).values;
     log('executeJs responseData', JSON.stringify(responseData, null, 2));
 
-
     // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
     if (responseData[0].success && Object.keys(responseData[0].signedData).length <= 0) {
       return responseData[0] as any as ExecuteJsResponse;
@@ -1324,6 +1380,29 @@ export class LitNodeClientNodeJs extends LitCore {
   pkpSign = async (params: JsonPkpSignRequest) => {
     let { authSig, sessionSigs, toSign, pubKey, authMethods } = params;
 
+    pubKey = hexPrefixed(pubKey);
+
+    // -- validate required params
+    (['toSign', 'pubKey'] as Array<keyof JsonPkpSignRequest>).forEach((key) => {
+      if (!params[key]) {
+        throwError({
+          message: `"${key}" cannot be undefined, empty, or null. Please provide a valid value.`,
+          errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+          errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
+        });
+      }
+    })
+
+    // -- validate present of accepted auth methods
+    if (!authSig && !sessionSigs && (!authMethods || authMethods.length <= 0)) {
+      throwError({
+        message: `Either authSig, sessionSigs, or authMethods (length > 0) must be present.`,
+        errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
+        errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
+      });
+    }
+
+
     // the nodes will only accept a normal array type as a paramater due to serizalization issues with Uint8Array type.
     // this loop below is to normalize the message to a basic array.
     let arr = [];
@@ -1339,14 +1418,19 @@ export class LitNodeClientNodeJs extends LitCore {
         authSig,
         sessionSigs,
         url,
+        mustHave: false,
       });
+
+      log("sigToPassToNode:", sigToPassToNode);
 
       let reqBody = {
         toSign,
         pubkey: pubKey,
-        authSig: sigToPassToNode,
+        ...(sigToPassToNode && sigToPassToNode !== undefined && { authSig: sigToPassToNode }),
         authMethods,
       };
+
+      log("XXX reqBody:", reqBody)
 
       return this.getPkpSignExecutionShares(url, reqBody, requestId);
     });
@@ -1898,7 +1982,6 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // -- construct SIWE message that will be signed by node to generate an authSig.
-
     const _expiration =
       params.expiration ||
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
@@ -1936,24 +2019,39 @@ export class LitNodeClientNodeJs extends LitCore {
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
     const requestId = this.getRequestId();
+
+    let body = {
+      sessionKey: sessionKeyUri,
+      authMethods: params.authMethods,
+      pkpPublicKey: params.pkpPublicKey,
+      ...(params?.authSig && { authSig: params.authSig }),
+      // authSig: params.authSig,
+      siweMessage: siweMessageStr,
+    };
+
+
+    log('XXX signSessionKey body', body);
+
     const nodePromises = this.getNodePromises((url: string) => {
       return this.getSignSessionKeyShares(
         url,
         {
-          body: {
-            sessionKey: sessionKeyUri,
-            authMethods: params.authMethods,
-            pkpPublicKey: params.pkpPublicKey,
-            authSig: params.authSig,
-            siweMessage: siweMessageStr,
-          },
+          body,
         },
         requestId
       );
     });
 
     // -- resolve promises
-    const res = await this.handleNodePromises(nodePromises);
+    let res;
+    try {
+      res = await this.handleNodePromises(nodePromises);
+      log("signSessionKey node promises:", res);
+    } catch (e) {
+      throw new Error(`Error when handling node promises: ${e}`);
+    }
+
+    log("XXX res:", res);
 
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
@@ -1969,6 +2067,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const signedDataList = responseData.map(
       (r: any) => (r as SignedData).signedData
     );
+
+    log('signedDataList', signedDataList)
 
     const signatures = this.getSessionSignatures(signedDataList);
 

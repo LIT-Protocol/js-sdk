@@ -6,7 +6,7 @@ import { LIT_ERROR, SessionKeyPair, SigShare } from '@lit-protocol/constants';
 
 import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
 
-import { isBrowser, isNode, log, throwError } from '@lit-protocol/misc';
+import { isBrowser, log, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
@@ -189,6 +189,11 @@ export const combineEcdsaShares = (
   const validShares = sigShares.reduce((acc, val) => {
     if (val.signatureShare !== '') {
       const newVal = _remapKeyShareForEcdsa(val);
+
+      if(!newVal.sig_name){
+        newVal.sig_name = 'sig-created-by-lit-sdk';
+      }
+
       acc.push(JSON.stringify(newVal));
     }
     return acc;
@@ -216,7 +221,7 @@ export const combineEcdsaShares = (
         try {
           sig = JSON.parse(res) as CombinedECDSASignature;
         } catch (e) {
-          console.log("xx res:", res); // ERROR: Could not deserialize value
+          console.log("'res' from wasmECDSA.combine_signature: ", res); // ERROR: Could not deserialize value
           throw new Error(`Failed to parse signature: ${e}`);
         }
 

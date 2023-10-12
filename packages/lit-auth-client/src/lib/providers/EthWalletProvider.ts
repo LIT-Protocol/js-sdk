@@ -10,6 +10,7 @@ import { SiweMessage } from 'lit-siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
+import { log } from '@lit-protocol/misc';
 
 export default class EthWalletProvider extends BaseProvider {
   /**
@@ -23,8 +24,16 @@ export default class EthWalletProvider extends BaseProvider {
 
   constructor(options: BaseProviderOptions & EthWalletProviderOptions) {
     super(options);
-    this.domain = options.domain || window.location.hostname;
-    this.origin = options.origin || window.location.origin;
+    try {
+      this.domain = options.domain || window.location.hostname;
+      this.origin = options.origin || window.location.origin;
+    } catch (e) {
+      log(
+        '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
+      );
+      this.domain = options.domain || 'localhost';
+      this.origin = options.origin || 'http://localhost';
+    }
   }
 
   /**
