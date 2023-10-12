@@ -13,13 +13,7 @@
   },
   "tasksRunnerOptions": {
     "default": {
-      "runner": "@nrwl/workspace/tasks-runners/default",
-      "options": {
-        "cacheableOperations": [
-          "build",
-          "test"
-        ]
-      }
+      "runner": "@nrwl/workspace/tasks-runners/default"
     }
   },
   "targetDefaults": {
