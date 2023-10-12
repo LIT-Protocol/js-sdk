@@ -566,7 +566,7 @@ export const hexPrefixed = (str: string) => {
 export function getEnv({
   nodeEnvVar = 'DEBUG',
   urlQueryParam = 'dev',
-  urlQueryValue = 'debug=true',
+  urlQueryValue = 'true',
   defaultValue = false
 } = {}) {
   // Node.js environment
@@ -580,4 +580,32 @@ export function getEnv({
   }
   // Default
   return defaultValue;
+}
+
+/**
+ * Utility function to add duration to a date based on the provided unit.
+ * @param {number} duration - The duration to add.
+ * @param {string} unit - The unit of the duration ('seconds', 'minutes', 'hours', 'days').
+ * @param {Date} date - Optional. The date to which the duration will be added. Defaults to the current date and time.
+ * @returns {Date} - The new date after adding the duration.
+ * @throws {Error} - Throws an error if the unit is not one of the allowed values.
+ */
+export function addDurationToDate(duration: number, unit: 'seconds' | 'minutes' | 'hours' | 'days', date = new Date()): Date {
+  switch (unit) {
+    case 'seconds':
+      date.setSeconds(date.getSeconds() + duration);
+      break;
+    case 'minutes':
+      date.setMinutes(date.getMinutes() + duration);
+      break;
+    case 'hours':
+      date.setHours(date.getHours() + duration);
+      break;
+    case 'days':
+      date.setDate(date.getDate() + duration);
+      break;
+    default:
+      throw new Error(`Invalid unit of time: ${unit}`);
+  }
+  return date;
 }
