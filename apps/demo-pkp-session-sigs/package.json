@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "react": "^18",
-    "react-dom": "^18",
-    "next": "13.5.4",
+    "@lit-protocol/auth-helpers": "file:../../dist/packages/auth-helpers",
+    "@lit-protocol/constants": "file:../../../../../../usr/local/lib/node_modules/@lit-protocol/constants",
+    "@lit-protocol/lit-auth-client": "file:../../dist/packages/lit-auth-client",
+    "@lit-protocol/lit-node-client": "file:../../dist/packages/lit-node-client",
+    "@lit-protocol/pkp-ethers": "file:../../dist/packages/pkp-ethers",
     "@radix-ui/colors": "^0.1.8",
     "@radix-ui/react-alert-dialog": "^1.0.2",
     "@radix-ui/react-icons": "^1.1.1",
@@ -21,15 +23,19 @@
     "@radix-ui/react-radio-group": "^1.1.1",
     "@radix-ui/react-select": "^1.2.0",
     "@radix-ui/react-toast": "^1.1.2",
-    "@tabler/icons-react": "^2.17.0"
+    "@tabler/icons-react": "^2.17.0",
+    "ethers": "^5.7.2",
+    "next": "13.5.4",
+    "react": "^18",
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10",
     "postcss": "^8",
-    "tailwindcss": "^3"
+    "tailwindcss": "^3",
+    "typescript": "^5"
   }
 }

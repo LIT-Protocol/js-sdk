@@ -48,7 +48,15 @@ fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 console.log(`\n📝 Available commands:\n\n`);
 console.log(`Project ${NEW_NAME} has been created in the ./apps directory.`);
 console.log(
-  `You can start the project by navigating to ./apps/${NEW_NAME} and running yarn install and then yarn dev.\n\n`
-);
+  `You can start the project by navigating to ./apps/${NEW_NAME} and running yarn install and then yarn dev.\n\n
+  
+  In order to use the monorepo packages, you need to first build the packages via yarn build.
 
+  Then, run run ./npm-link.sh --link lit-node-client lit-auth-client ...
+
+  make sure you've set correct permissions for the script by running chmod +x ./npm-link.sh
+
+  Then, in the new project, run npm link @lit-js-sdk/lit-node-client @lit-js-sdk/lit-auth-client ...
+  `
+);
 process.exit();
