@@ -1237,7 +1237,10 @@ async function matchVersionsFunc() {
 }
 
 async function versionFunc() {
-  greenLog('Getting latest version from npm...');
+  const args = process.argv.slice(2);
+  const TAG = args.find((arg) => arg.startsWith('--tag'))?.split('=')[1];
+
+  greenLog(`Getting latest version from npm ${TAG}...`);
 
   let res = await fetch(
     'https://registry.npmjs.org/@lit-protocol/lit-node-client'
@@ -1246,7 +1249,13 @@ async function versionFunc() {
   res = await res.json();
 
   // get the last one
-  const currentVersion = Object.keys(res.time).pop();
+  let currentVersion;
+
+  if(!TAG){
+    currentVersion = Object.keys(res.time).pop();
+  }else{
+    currentVersion = res['dist-tags'][TAG];
+  }
 
   const lernaJson = await readJsonFile(`lerna.json`);
   const versionTs = (
