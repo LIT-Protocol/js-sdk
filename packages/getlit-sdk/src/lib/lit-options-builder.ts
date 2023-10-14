@@ -9,7 +9,8 @@ import {
 } from './types';
 import {
   LitMessages,
-  clearSessions,
+  clearAuthMethodSessions,
+  clearLitSessionSigs,
   getProviderMap,
   getStoredAuthData,
   getStoredAuthDataWithKeys,
@@ -349,7 +350,8 @@ export class LitOptionsBuilder {
     globalThis.Lit.getStoredAuthData = getStoredAuthData;
     globalThis.Lit.getStoredAuthDataWithKeys = getStoredAuthDataWithKeys;
     globalThis.Lit.getStoredEncryptedData = getStoredEncryptedData;
-    globalThis.Lit.clearSessions = clearSessions;
+    globalThis.Lit.clearAuthMethodSessions = clearAuthMethodSessions;
+    globalThis.Lit.clearLitSessionSigs = clearLitSessionSigs;
 
     log.end('createUtils', 'done!');
   }

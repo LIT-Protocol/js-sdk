@@ -1,5 +1,6 @@
 import { LitNodejsStorage } from './lit-nodejs-storage';
 import { ILitStorage } from './types';
+import { addDurationToDate } from '@lit-protocol/misc';
 
 export class LitStorage implements ILitStorage {
   keys = {
@@ -77,24 +78,7 @@ export class LitStorage implements ILitStorage {
     duration: number,
     unit: 'seconds' | 'minutes' | 'hours' | 'days'
   ): void {
-    const expirationDate = new Date();
-
-    switch (unit) {
-      case 'seconds':
-        expirationDate.setSeconds(expirationDate.getSeconds() + duration);
-        break;
-      case 'minutes':
-        expirationDate.setMinutes(expirationDate.getMinutes() + duration);
-        break;
-      case 'hours':
-        expirationDate.setHours(expirationDate.getHours() + duration);
-        break;
-      case 'days':
-        expirationDate.setDate(expirationDate.getDate() + duration);
-        break;
-      default:
-        throw new Error(`Invalid unit of time: ${unit}`);
-    }
+    const expirationDate = addDurationToDate(duration, unit, new Date());
 
     const item = {
       value: value,

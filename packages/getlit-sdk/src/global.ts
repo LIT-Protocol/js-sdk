@@ -45,7 +45,7 @@ declare global {
     decrypt: LitInstance['decrypt'] | Function;
     createAccount: LitInstance['createAccount'] | Function;
     getAccounts: LitInstance['getAccounts'] | Function;
-    getAccountSession: LitInstance['getAccountSession'] | Function;
+    getAccountSessions: LitInstance['getAccountSessions'] | Function;
     sign: LitInstance['sign'] | Function;
 
     // auths
@@ -62,7 +62,8 @@ declare global {
     getStoredAuthData: OrNull<Function>;
     getStoredAuthDataWithKeys: OrNull<Function>;
     getStoredEncryptedData: OrNull<Function>;
-    clearSessions: OrNull<Function>;
+    clearAuthMethodSessions: OrNull<Function>;
+    clearLitSessionSigs: OrNull<Function>;
 
     // browser only
     browserHelper: BrowserHelper | null;
@@ -110,7 +111,7 @@ globalThis.Lit = {
   getAccounts: () => {
     console.log('not initialized');
   },
-  getAccountSession: () => {
+  getAccountSessions: () => {
     console.log('not initialized');
   },
   sign: () => {
@@ -137,7 +138,10 @@ globalThis.Lit = {
   getStoredEncryptedData: () => {
     console.log('not initialized');
   },
-  clearSessions: () => {
+  clearAuthMethodSessions: () => {
+    console.log('not initialized');
+  },
+  clearLitSessionSigs: () => {
     console.log('not initialized');
   },
 

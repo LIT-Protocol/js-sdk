@@ -7,9 +7,9 @@ export const handleGetAccounts = async (
   { cache }: { cache?: boolean } = {
     cache: true,
   }
-): Promise<Array<PKPInfo>> => {
+): Promise<PKPInfo[]> => {
   log.start('handleGetAccounts', `getting accounts by provider...`);
-  globalThis.Lit.eventEmitter?.getAccountsStatus('in_progress');
+
 
   // for each auth data in the array, get the provider in the provider map
   // and call the provider's fetchPKPsThroughRelayer method
@@ -57,8 +57,8 @@ export const handleGetAccounts = async (
         continue;
       }
     }
-    // -- OR: fetch manually
 
+    // -- OR: fetch manually
     if (!cachedAccounts) {
       log.info(
         `No cached accounts found for ${authMethodName} auth method. Fetching accounts manually...`
@@ -92,7 +92,6 @@ export const handleGetAccounts = async (
   }
 
   log.end('handleGetAccounts', `got accounts by provider!`);
-  globalThis.Lit.eventEmitter?.getAccountsStatus('completed', results);
 
   return results;
 };

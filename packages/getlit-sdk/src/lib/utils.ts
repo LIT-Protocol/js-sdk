@@ -27,7 +27,7 @@ import {
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
 
-const version = '0.0.776';
+const version = '0.0.784';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -671,8 +671,8 @@ export const prepareExportableEncryptedData = () => {
   return result;
 };
 
-export const clearSessions = () => {
-  log.start('clearSessions');
+export const clearAuthMethodSessions = () => {
+  log.start('clearAuthMethodSessions');
 
   // Iterate through all the keys in storage
   for (let i = 0; i < localStorage.length; i++) {
@@ -692,7 +692,26 @@ export const clearSessions = () => {
   // also remove lit-auth-signature
   globalThis.Lit.storage?.removeItem('lit-auth-signature');
 
-  log.end('clearSessions');
+  log.end('clearAuthMethodSessions');
+};
+
+/**
+ * This function clears all session data that starts with 'lit-session-sigs-'.
+ */
+export const clearLitSessionSigs = () => {
+  log.start('clearLitSessionSigs');
+
+  // Iterate through all the keys in storage
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+
+    // If the key starts with 'lit-session-sigs-', remove it
+    if (key && key.startsWith('lit-session-sigs-')) {
+      globalThis.Lit.storage?.removeItem(key);
+    }
+  }
+
+  log.end('clearLitSessionSigs');
 };
 
 export const LitMessages = {
@@ -757,4 +776,33 @@ export async function waitForLit(): Promise<void> {
     // Listen for 'ready' event
     globalThis.Lit.eventEmitter.on('ready', handleReady);
   });
+}
+
+/**
+ * Use stored auth methods/data if found
+ * If no auth data is provided, it will attempt to get it from the browser.
+ * If no auth data is provided and it is not in the browser, it will throw an error.
+ * @param fn
+ */
+export const useStoredAuthDataIfFound = (opts?: {
+  authData?: Array<LitAuthMethod>;
+}): any => {
+
+  let authData: Array<LitAuthMethod> | undefined = opts?.authData;
+
+  if (!authData) {
+    if (isBrowser()) {
+      log.info('getting auth data from browser');
+      authData = getStoredAuthData();
+      log.info('auth data from browser', authData);
+
+      if (authData.length <= 0) {
+        throw new Error('no auth data provided in browser');
+      }
+    } else {
+      throw new Error('no auth data provided in nodejs');
+    }
+  }
+
+  return authData;
 }

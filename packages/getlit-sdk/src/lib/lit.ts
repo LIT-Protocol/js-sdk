@@ -27,7 +27,6 @@ import {
   log,
   prepareEncryptionMetadata,
   deserializeFromType,
-  getStoredAuthData,
   getProviderMap,
   resolveACCType,
   isNode,
@@ -35,19 +34,20 @@ import {
   convertContentMaterial,
   LitMessages,
   waitForLit,
+  useStoredAuthDataIfFound,
 } from './utils';
 import { handleAuthData } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
-import { hexPrefixed, isBrowser } from '@lit-protocol/misc';
+import { addDurationToDate, hexPrefixed, isBrowser } from '@lit-protocol/misc';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 import { handleGetAccounts } from './get-accounts/handle-get-accounts';
-import { withAuthData } from './middleware/with-auth-data';
 import {
   LitAbility,
   LitActionResource,
 } from '@lit-protocol/auth-helpers';
 import { LitAnalytics } from './analytics';
 import { ethers } from 'ethers';
+import { LIT_CHAINS } from '@lit-protocol/constants';
 
 export class Lit {
   private _options: OrUndefined<Types.LitOptions>;
@@ -65,7 +65,7 @@ export class Lit {
     globalThis.Lit.sign = this.sign.bind(this);
     globalThis.Lit.createAccount = this.createAccount.bind(this);
     globalThis.Lit.getAccounts = this.getAccounts.bind(this);
-    globalThis.Lit.getAccountSession = this.getAccountSession.bind(this);
+    globalThis.Lit.getAccountSessions = this.getAccountSessions.bind(this);
 
     // util bindings
   }
@@ -285,7 +285,7 @@ ${LitMessages.persistentStorageExample}`;
     try {
       // -- when auth method provider ('google', 'discord', etc.) is provided
       if (!authMaterial && authMethodProvider?.provider) {
-        authMethods = getStoredAuthData();
+        authMethods = useStoredAuthDataIfFound();
         if (authMethods.length < 1) {
           log.throw(
             'No Authentication methods found in cache, need to re-authenticate'
@@ -379,42 +379,71 @@ ${LitMessages.persistentStorageExample}`;
 
   /**
    * Get all accounts associated with the given auth method(s).
-   * @param {LitAuthMethod[]} authData
+   * @param { LitAuthMethod[] } authData
+   * @param { boolean } cache
    */
-  public getAccounts = withAuthData(
-    async (authData: Array<LitAuthMethod>, cache: boolean) => {
-      log.start('getAccounts');
+  public async getAccounts({
+    authData,
+    cache = false
+  }: {
+    authData?: Array<LitAuthMethod>,
+    cache?: boolean,
+    getSessiongs?: boolean
+  }): Promise<PKPInfo[]> {
+    log.start('getAccounts');
+    globalThis.Lit.eventEmitter?.getAccountsStatus('in_progress');
 
-      let accounts;
+    const storedAuthData = useStoredAuthDataIfFound({ authData });
 
-      try {
-        accounts = await handleGetAccounts(authData, {
-          cache,
-        });
-      } catch (e) {
-        log.error('Error while getting accounts', e);
-        log.end('getAccounts');
-        throw e;
-      }
+    // -- get account details from each auth method, such as
+    // tokenId, publicKey, derived addresses, etc.
+    let accounts;
 
-      return accounts;
+    try {
+      accounts = await handleGetAccounts(storedAuthData, {
+        cache,
+      });
+    } catch (e) {
+      log.error('Error while getting accounts', e);
+      log.end('getAccounts');
+      throw e;
     }
-  );
+
+    globalThis.Lit.eventEmitter?.getAccountsStatus('completed', accounts);
+
+    return accounts;
+  }
 
   /**
    * Get the session sigs for the given account
    * NOTE: this function can only be called if user cached their auth data
    */
-  public async getAccountSession({
+  public async getAccountSessions({
     accountPublicKey,
     authData,
     authNeededCallback,
+    resource = new LitActionResource('*'),
+    ability = LitAbility.PKPSigning,
+    chain = 'ethereum',
+    expirationLength = 7,
+    expirationUnit = 'days',
+    debug = {
+      pkpSign: false,
+    },
   }: {
     accountPublicKey: string;
     authData: LitAuthMethod[];
     authNeededCallback?: AuthCallback;
+    resource?: LitActionResource,
+    ability?: LitAbility,
+    chain?: keyof typeof LIT_CHAINS,
+    expirationLength?: number;
+    expirationUnit?: 'seconds' | 'minutes' | 'hours' | 'days';
+    debug?: {
+      pkpSign?: boolean;
+    };
   }) {
-    log.start('getAccountSession');
+    log.start('getAccountSessions');
 
     if (isNode()) {
       if (!authNeededCallback) {
@@ -431,19 +460,13 @@ ${LitMessages.persistentStorageExample}`;
 
     log.info('accountPublicKey', accountPublicKey);
 
-    // -- execute
-    const resourceAbilities = [
-      {
-        resource: new LitActionResource('*'),
-        ability: LitAbility.PKPSigning,
-      },
-    ];
-
     const provider = globalThis.Lit.auth[authMethodProvider];
 
     log.info(`Getting session sigs for "${accountPublicKey}"...`);
 
-    // const sessionKeyPair = globalThis.Lit.nodeClient?.getSessionKey();
+    const expiration = addDurationToDate(expirationLength, expirationUnit, new Date()).toISOString();
+
+    log.info("expiration:", expiration);
 
     // Use Promise.all to handle multiple async tasks concurrently
     try {
@@ -458,9 +481,10 @@ ${LitMessages.persistentStorageExample}`;
             pkpPublicKey: accountPublicKey,
             authMethod: authMethodItem,
             sessionSigsParams: {
-              chain: 'ethereum', // default EVM chain unless other chain
-              resourceAbilityRequests: resourceAbilities,
+              chain: chain as string, // default EVM chain unless other chain
+              resourceAbilityRequests: [{ resource, ability }],
 
+              ...(expiration && { expiration }),
               ...(isNode() && {
                 sessionKey: globalThis.Lit.nodeClient?.getSessionKey(),
                 authNeededCallback,
@@ -468,7 +492,36 @@ ${LitMessages.persistentStorageExample}`;
             },
           });
 
-          console.log("sessionSigs:", sessionSigs);
+          log.info("sessionSigs:", sessionSigs);
+
+          // -- cache
+          if (sessionSigs && globalThis.Lit.storage) {
+            const storageKey = `lit-session-sigs-${accountPublicKey}`;
+            globalThis.Lit.storage.setExpirableItem(
+              storageKey,
+              JSON.stringify(sessionSigs),
+              expirationLength,
+              expirationUnit
+            );
+          }
+
+          if (debug?.pkpSign) {
+            log("Let's try to sign something with one of the session sigs...");
+
+            try {
+              const pkpRes = await globalThis.Lit.nodeClient?.pkpSign({
+                toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+                pubKey: accountPublicKey,
+                sessionSigs: sessionSigs,
+              })
+
+              log("result from pkpSign()", pkpRes);
+            } catch (e) {
+              log.error("Error while trying to sign with session sigs", e);
+            }
+          }
+
+          log.end('getAccountSessions');
 
           return sessionSigs;
         })
@@ -476,28 +529,13 @@ ${LitMessages.persistentStorageExample}`;
 
       console.log('allSessionSigs: ', allSessionSigs);
 
-      log("Let's try to sign something with one of the session sigs...");
-      const oneOfThem = allSessionSigs[0];
-
-      log("This is the stringified form of one of the session sigs:", JSON.stringify(oneOfThem));
-
-      const pkpRes = await globalThis.Lit.nodeClient?.pkpSign({
-        toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
-        pubKey: accountPublicKey,
-        sessionSigs: oneOfThem,
-      })
-
-      log("result from pkpSign()", pkpRes);
-      log("this is how one of the session sigs looks like:", oneOfThem);
-      log.end('getAccountSession');
-
       return allSessionSigs;
     } catch (e) {
-      log.end('getAccountSession');
+      log.end('getAccountSessions');
       log.throw(`Error while getting account session: ${JSON.stringify(e)}`);
     }
 
-    log.end('getAccountSession');
+    log.end('getAccountSessions');
   }
 
   /**
@@ -523,7 +561,7 @@ ${LitMessages.persistentStorageExample}`;
 
     if (options.provider) {
       // collect cached auth methods and attempt to auth with them
-      authMethods = getStoredAuthData();
+      authMethods = useStoredAuthDataIfFound();
       const providerMap = getProviderMap();
       for (const authMethod of authMethods) {
         if (
