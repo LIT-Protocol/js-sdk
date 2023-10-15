@@ -64,9 +64,7 @@ export const handleGetAccounts = async (
         `No cached accounts found for ${authMethodName} auth method. Fetching accounts manually...`
       );
       try {
-        const pkps: Array<IRelayPKP> =
-          await authProvider?.fetchPKPsThroughRelayer(authData);
-
+        const pkps: Array<IRelayPKP> = await authProvider?.fetchPKPsThroughRelayer(authData);
         const formattedPKPs: Array<PKPInfo> = pkps.map((pkp) => {
           return iRelayPKPToPKPInfo(pkp);
         });

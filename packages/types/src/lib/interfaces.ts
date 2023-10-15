@@ -1412,6 +1412,14 @@ export interface EthWalletProviderOptions {
    * The origin from which the signing request is made
    */
   origin?: string;
+
+  /**
+ * Handle both V2 and V3 versions of the access token, using different storage keys for each:
+ * - V2: `lit-auth-signature`
+ * - V3: `lit-ethwallet-token-<address>`
+ * By default, @getlit/sdk would go for V3, but the primitive would stay with V2.
+ */
+  version?: 'V2' | 'V3';
 }
 
 export interface WebAuthnProviderOptions {

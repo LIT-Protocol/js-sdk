@@ -1,5 +1,6 @@
 import { AuthMethod, LitNodeClientConfig } from '@lit-protocol/types';
 import {
+  OTPConfig,
   OrNull,
   OrUndefined,
   PersistentStorageConfig,
@@ -40,7 +41,8 @@ import { HeliaProvider } from './ipfs-provider/providers/helia-provider';
 import { PinataProvider } from './ipfs-provider/providers/pinata-provider';
 import { infuraProvider } from './ipfs-provider/providers/infura-provider';
 import { handleAutoAuth } from './auth/handle-auto-auth';
-import { getEnv } from '@lit-protocol/misc';
+import { getEnv, is } from '@lit-protocol/misc';
+import { StytchOTPProviderBundled } from './otp-provider/stytch-otp-provider-bundled';
 
 const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
 
@@ -51,6 +53,7 @@ export class LitOptionsBuilder {
   private _nodeClient: OrUndefined<Types.NodeClient> = undefined;
 
   private _persistentStorage: OrNull<BaseIPFSProvider> = null;
+  private _otpProvider: OrNull<StytchOTPProviderBundled> = null;
   private _emitter: OrUndefined<LitEmitter> = undefined;
   private _storage: OrUndefined<LitStorage> = undefined;
 
@@ -65,6 +68,9 @@ export class LitOptionsBuilder {
     this.initialiseIPFSProvider({
       provider: 'helia',
     });
+    this.initialiseOTPProvider({
+      provider: 'stytch',
+    })
     this.initialiseStorageProvider();
     this.createUtils();
     this.createBrowserUtils();
@@ -131,6 +137,21 @@ export class LitOptionsBuilder {
       provider,
       options,
     });
+    return this;
+  }
+
+  public withOTPProvider({ provider, options }: OTPConfig) {
+
+    console.log("xx provider:", provider);
+    console.log("yy options:", options);
+
+    log.info('------ withOTPProvider ------');
+
+    this.initialiseOTPProvider({
+      provider,
+      options,
+    });
+
     return this;
   }
 
@@ -226,14 +247,28 @@ export class LitOptionsBuilder {
       //   globalThis.Lit.authClient.initProvider<AppleProvider>(
       //     ProviderType.Apple
       //   );
+      globalThis.Lit.auth.otp = new StytchOTPProviderBundled({
+        projectId: '- not set -',
+        secret: '- not set -',
+      });
     }
+
+    if (isNode()) {
+      globalThis.Lit.auth.otp = new StytchOTPProviderBundled({
+        projectId: process.env['STYTCH_PROJECT_ID'] || '',
+        secret: process.env['STYTCH_SECRET'] || ''
+      });
+    }
+
     globalThis.Lit.auth.ethwallet =
       globalThis.Lit.authClient.initProvider<EthWalletProvider>(
-        ProviderType.EthWallet
+        ProviderType.EthWallet, {
+        version: 'V3',
+      }
       );
 
-    globalThis.Lit.auth.otp =
-      globalThis.Lit.authClient.initProvider<StytchOtpProvider>(ProviderType.StytchOtp);
+    // globalThis.Lit.auth.otp =
+    //   globalThis.Lit.authClient.initProvider<StytchOtpProvider>(ProviderType.StytchOtp);
 
     let authStatus = Object.entries(globalThis.Lit.auth)
       .map(([key, value]) => {
@@ -274,7 +309,7 @@ export class LitOptionsBuilder {
 
       // -- select persistent storage provider
       if (providerOptions[provider]) {
-        log.info('Provider selected: ', provider);
+        log.info('persistent storage provider selected: ', provider);
         const IPFSProvider = providerOptions[provider](options as any);
 
         // -- set globalThis.Lit.persistentStorage
@@ -299,6 +334,65 @@ export class LitOptionsBuilder {
     }
     log.end('initialiseIPFSProvider', '3 ERROR!');
     log.throw(`Error while attempting to initialize IPFSProvider`);
+  }
+
+  public initialiseOTPProvider({
+    provider,
+    options,
+  }: OTPConfig) {
+    log.start("initialiseOTPProvider", "starting...");
+
+    log.info("options:", options)
+
+    try {
+      const providerOptions = {
+        stytch: () => {
+
+          if (isNode()) {
+            return new StytchOTPProviderBundled({
+              projectId: options?.projectId ?? '',
+              secret: options?.secret ?? '',
+            })
+          }
+
+          return new StytchOTPProviderBundled({
+            publicToken: options?.publicToken ?? '',
+          })
+
+        },
+      };
+
+      if (providerOptions[provider]) {
+        log.info('OTP Provider selected: ', provider);
+        const StytchOTPProvider = providerOptions[provider]();
+
+        // -- set globalThis.Lit.OTPProvider
+        this._otpProvider = StytchOTPProvider;
+        globalThis.Lit.auth.otp = StytchOTPProvider;
+
+        if (globalThis.Lit.builder) {
+          globalThis.Lit.builder._otpProvider = StytchOTPProvider;
+        }
+
+        log.end('initialiseOTPProvider', '0 ERROR!');
+        return StytchOTPProvider;
+      } else {
+        log.end('initialiseOTPProvider', '1 ERROR!');
+        log.throw(`Invalid OTPProvider option: ${options}`);
+      }
+    } catch (e) {
+      log.end('initialiseOTPProvider', '2 ERROR!');
+      log.error(`
+      Error while attempting to initialize OTPProvider, please check your OTPProvider config\n
+  
+      ${LitMessages.OTPProviderExample}
+      
+      \n${e}`);
+    }
+
+    log.end("initialiseOTPProvider", "done!")
+
+    return null;
   }
 
   public initialiseStorageProvider(): LitStorage {

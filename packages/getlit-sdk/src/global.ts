@@ -7,7 +7,7 @@ import {
   DiscordProvider,
   EthWalletProvider,
   WebAuthnProvider,
-  StytchOtpProvider,
+  // StytchOtpProvider,
 } from '@lit-protocol/lit-auth-client';
 
 import { LitStorage } from '@lit-protocol/lit-storage';
@@ -15,6 +15,7 @@ import { LitEmitter } from './lib/events/lit-emitter';
 import { BrowserHelper } from './lib/browser-helper';
 import { BaseIPFSProvider } from './lib/ipfs-provider/providers/BaseIPFSProvider';
 import { waitForLit } from './lib/utils';
+import { StytchOTPProviderBundled } from './lib/otp-provider/stytch-otp-provider-bundled';
 
 declare global {
   //@ts-ignore
@@ -54,7 +55,7 @@ declare global {
       webauthn: OrNull<WebAuthnProvider>;
       discord: OrNull<DiscordProvider>;
       google: OrNull<GoogleProvider>;
-      otp: OrNull<StytchOtpProvider>;
+      otp: OrNull<StytchOTPProviderBundled>;
       apple: OrNull<AppleProvider>;
     };
 

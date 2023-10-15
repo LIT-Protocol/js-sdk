@@ -27,7 +27,7 @@ import {
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
 
-const version = '0.0.784';
+const version = '0.0.797';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -740,6 +740,30 @@ loadLit.withPersistentStorage({
   },
 },
 });`,
+  OTPProviderExample: `Please define a Stytch OTP provider using when instantiating the Lit SDK
+  
+  * You can sign up for a Stytch account at https://stytch.com/. Once you have an account,
+  * you can find your project ID and secret at https://stytch.com/dashboard/api-keys.
+  * See https://i.imgur.com/fR0oRGW.png for how to get these values
+  Examples:
+  
+  // -- Stytch (nodejs)
+  loadLit.withOTPProvider({
+    provider: 'stytch',
+    options: {
+      projectId: 'your-project-id',
+      secret: 'your-secret';
+    },
+  )
+
+  // -- Stytch (browser)
+  loadLit.withOTPProvider({
+    provider: 'stytch',
+    options: {
+      publicToken: '',
+    },
+  )
+  `,
   usageAnalyticsNotice: `
 ========================================================================\n
 NOTICE: We're collecting anonymous usage data to help improve our product.\n

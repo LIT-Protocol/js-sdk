@@ -27,6 +27,7 @@ import {
   WebAuthnProvider,
 } from '@lit-protocol/lit-auth-client';
 import { BaseIPFSProvider } from './ipfs-provider/providers/BaseIPFSProvider';
+import { StytchOTPProviderBundledOptions } from './otp-provider/stytch-otp-provider-bundled';
 
 export type OrNull<T> = T | null;
 export type OrUndefined<T> = T | undefined;
@@ -46,6 +47,8 @@ export namespace Types {
   export type NodeClient<T = LitNodeClient> = T;
 
   export type AuthClient<T = LitAuthClient> = T;
+
+  export type OTPProvider = OTPConfig;
 
   export type LitOptions = ContractOptions & AuthOptions & NodeOptions;
 }
@@ -130,21 +133,21 @@ export interface StorageContext {
 //  ensure that at least one of the context is present
 export type DecryptProps =
   | {
-      storageContext: StorageContext;
-      decryptionContext?: DecryptionContext;
-      decryptResponse?: DecryptRequest;
-      authMaterial?: Credential;
-      provider?: LitAuthMethodWithProvider;
-    }
+    storageContext: StorageContext;
+    decryptionContext?: DecryptionContext;
+    decryptResponse?: DecryptRequest;
+    authMaterial?: Credential;
+    provider?: LitAuthMethodWithProvider;
+  }
   | {
-      decryptionContext: DecryptionContext;
-      storageContext?: StorageContext;
-      decryptResponse?: DecryptRequest;
-      authMaterial?: Credential;
-      provider?: LitAuthMethodWithProvider;
-    };
+    decryptionContext: DecryptionContext;
+    storageContext?: StorageContext;
+    decryptResponse?: DecryptRequest;
+    authMaterial?: Credential;
+    provider?: LitAuthMethodWithProvider;
+  };
 
-export interface CreateAccountProps {}
+export interface CreateAccountProps { }
 
 export interface SignProps {
   accountPublicKey: string;
@@ -222,6 +225,13 @@ export type PersistentStorageConfig = {
   provider: 'pinata' | 'helia' | 'infura';
   options?: PersistentStorageConfigOptions;
 };
+
+export type StytchConfig = StytchOTPProviderBundledOptions;
+
+export type OTPConfig = {
+  provider: 'stytch';
+  options?: StytchConfig;
+}
 
 // export type LitAuthMethodTypes =
 //   | GoogleProvider
