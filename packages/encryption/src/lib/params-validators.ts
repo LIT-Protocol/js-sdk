@@ -532,33 +532,41 @@ class AccessControlConditionsValidator implements ParamsValidator {
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
 
-    if (!accessControlConditions && !isValidBooleanExpression(accessControlConditions!!))
+    if (accessControlConditions && !isValidBooleanExpression(accessControlConditions)) {
+      console.log('Invalid boolean Access Control Conditions');
       return ELeft({
         message: 'Invalid boolean Access Control Conditions',
         errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
       })
+    }
 
-    if (!evmContractConditions && !isValidBooleanExpression(evmContractConditions!!))
+    if (evmContractConditions && !isValidBooleanExpression(evmContractConditions)) {
+      console.log('Invalid boolean EVM Access Control Conditions');
       return ELeft({
         message: 'Invalid boolean EVM Access Control Conditions',
         errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
       })
+    }
 
-    if (!solRpcConditions && !isValidBooleanExpression(solRpcConditions!!))
+    if (solRpcConditions && !isValidBooleanExpression(solRpcConditions)) {
+      console.log('Invalid boolean Solana Access Control Conditions');
       return ELeft({
         message: 'Invalid boolean Solana Access Control Conditions',
         errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
       })
+    }
 
-    if (!unifiedAccessControlConditions && !isValidBooleanExpression(unifiedAccessControlConditions!!))
+    if (unifiedAccessControlConditions && !isValidBooleanExpression(unifiedAccessControlConditions)) {
+      console.log('Invalid boolean Unified Access Control Conditions');
       return ELeft({
         message: 'Invalid boolean Unified Access Control Conditions',
         errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
       })
+    }
 
     return ERight(undefined);
   }
