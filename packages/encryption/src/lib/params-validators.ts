@@ -532,28 +532,28 @@ class AccessControlConditionsValidator implements ParamsValidator {
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
 
-    if (!accessControlConditions && !isValidBooleanExpression(accessControlConditions!!))
+    if (accessControlConditions && !isValidBooleanExpression(accessControlConditions))
       return ELeft({
         message: 'Invalid boolean Access Control Conditions',
         errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
       })
 
-    if (!evmContractConditions && !isValidBooleanExpression(evmContractConditions!!))
+    if (evmContractConditions && !isValidBooleanExpression(evmContractConditions))
       return ELeft({
         message: 'Invalid boolean EVM Access Control Conditions',
         errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
       })
 
-    if (!solRpcConditions && !isValidBooleanExpression(solRpcConditions!!))
+    if (solRpcConditions && !isValidBooleanExpression(solRpcConditions))
       return ELeft({
         message: 'Invalid boolean Solana Access Control Conditions',
         errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
       })
 
-    if (!unifiedAccessControlConditions && !isValidBooleanExpression(unifiedAccessControlConditions!!))
+    if (unifiedAccessControlConditions && !isValidBooleanExpression(unifiedAccessControlConditions))
       return ELeft({
         message: 'Invalid boolean Unified Access Control Conditions',
         errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
