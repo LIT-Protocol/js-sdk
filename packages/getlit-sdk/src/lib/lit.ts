@@ -657,34 +657,42 @@ ${LitMessages.persistentStorageExample}`;
             "function transfer(address recipient, uint256 amount) public returns (bool)"
           ];
 
-          // If a token address is provided, send the token
-          if (!tokenAddress) {
-            log.info(`No token address provided, using Lit Token address: https://chain.litprotocol.com/address/${LITTokenData.address}`);
-            tokenAddress = LITTokenData.address;
+
+          if (tokenAddress) {
+            log.info(`Using token address: ${tokenAddress}`)
+            const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, ethWallet);
+
+            const amountInSmallestUnit = ethers.utils.parseUnits(amount, decimal);
+
+            const gasPrice = await ethWallet.getGasPrice();
+
+            let estimatedGasLimit;
+
+            try {
+              estimatedGasLimit = await tokenContract.estimateGas['transfer'](to, amountInSmallestUnit);
+            } catch (e) {
+              // swallow error
+              console.log("error while estimating gas limit, using default gas limit instead");
+              estimatedGasLimit = defaultEthGas ?? 500000;
+            }
+
+            txResponse = await tokenContract['transfer'](to, amountInSmallestUnit, {
+              gasPrice,
+              gasLimit: estimatedGasLimit,
+            });
+            console.log(`Token Transaction hash: ${txResponse.hash}`);
+          } else {
+            // use native token
+            const gasPrice = await ethWallet.getGasPrice();
+            txResponse = await ethWallet.sendTransaction({
+              to,
+              value: ethers.utils.parseEther(amount),
+              gasPrice,
+              gasLimit: defaultEthGas ?? 500000,
+            });
+
+            console.log(`Transaction hash: ${txResponse.hash}`);
           }
-
-          log.info(`Using token address: ${tokenAddress}`)
-          const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, ethWallet);
-
-          const amountInSmallestUnit = ethers.utils.parseUnits(amount, decimal);
-
-          const gasPrice = await ethWallet.getGasPrice();
-
-          let estimatedGasLimit;
-
-          try {
-            estimatedGasLimit = await tokenContract.estimateGas['transfer'](to, amountInSmallestUnit);
-          } catch (e) {
-            // swallow error
-            console.log("error while estimating gas limit, using default gas limit instead");
-            estimatedGasLimit = defaultEthGas ?? 500000;
-          }
-
-          txResponse = await tokenContract['transfer'](to, amountInSmallestUnit, {
-            gasPrice,
-            gasLimit: estimatedGasLimit,
-          });
-          console.log(`Token Transaction hash: ${txResponse.hash}`);
 
         }
 
