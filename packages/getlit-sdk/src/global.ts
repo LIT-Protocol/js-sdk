@@ -17,7 +17,7 @@ import { BaseIPFSProvider } from './lib/ipfs-provider/providers/base-ipfs-provid
 import { waitForLit } from './lib/utils';
 import { StytchOTPProviderBrowser } from './lib/stych-otp-provider/providers/stytch-otp-provider-browser';
 import { StytchOTPProviderNodeJS } from './lib/stych-otp-provider/providers/stytch-otp-provider-nodejs';
-
+import * as contractsSDK from '@lit-protocol/contracts-sdk';
 declare global {
   //@ts-ignore
   var Lit: {
@@ -72,6 +72,14 @@ declare global {
     browserHelper: BrowserHelper | null;
 
     collectAnalytics: boolean;
+
+    // contract addresses
+    contracts: {
+      LITToken: { address: string, abi: any[] };
+      PKPNFT: { address: string, abi: any[] };
+      PKPHelper: { address: string, abi: any[] };
+      PKPPermissions: { address: string, abi: any[] };
+    }
   };
 
   var ethereum: any;
@@ -123,6 +131,14 @@ globalThis.Lit = {
   },
   sign: () => {
     console.log('not initialized');
+  },
+
+  // contracts
+  contracts: {
+    LITToken: { address: contractsSDK.LITTokenData.address, abi: contractsSDK.LITTokenData.abi },
+    PKPNFT: { address: contractsSDK.PKPNFTData.address, abi: contractsSDK.PKPNFTData.abi },
+    PKPHelper: { address: contractsSDK.PKPHelperData.address, abi: contractsSDK.PKPHelperData.abi },
+    PKPPermissions: { address: contractsSDK.PKPPermissionsData.address, abi: contractsSDK.PKPPermissionsData.abi },
   },
 
   // auths

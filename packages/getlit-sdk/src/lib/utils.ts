@@ -22,6 +22,8 @@ import {
   AccessControlConditions,
   EncryptResponse,
   BaseAuthenticateOptions,
+  SessionSig,
+  SessionSigs,
 } from '@lit-protocol/types';
 
 // @ts-ignore
@@ -872,4 +874,35 @@ export const useStoredAuthMethodsIfFound = (opts?: {
   }
 
   return authMethods;
+}
+
+export function isSessionSigs(obj: any): obj is SessionSigs {
+  if (typeof obj !== 'object' || obj === null) return false;
+
+  for (let key in obj) {
+    if (!isSessionSig(obj[key])) return false;
+  }
+
+  return true;
+}
+
+export function isSessionSig(obj: any): obj is SessionSig {
+  return (
+    obj &&
+    typeof obj.sig === 'string' &&
+    typeof obj.derivedVia === 'string' &&
+    typeof obj.signedMessage === 'string' &&
+    typeof obj.address === 'string' &&
+    (typeof obj.algo === 'string' || obj.algo === undefined)
+  );
+}
+
+export function isAuthSig(obj: any): obj is SessionSig {
+  return (
+    obj &&
+    typeof obj.sig === 'string' &&
+    typeof obj.derivedVia === 'string' &&
+    typeof obj.signedMessage === 'string' &&
+    typeof obj.address === 'string'
+  )
 }

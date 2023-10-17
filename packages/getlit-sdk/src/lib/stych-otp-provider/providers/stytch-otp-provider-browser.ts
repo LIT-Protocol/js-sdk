@@ -46,7 +46,7 @@ export class StytchOTPProviderBrowser {
   async sendOTP({ method, userId }: {
     method: 'email' | 'sms' | 'whatsapp',
     userId: string
-  }): Promise<string> {
+  }): Promise<{ methodId: string }> {
 
     this.connect();
 
@@ -66,7 +66,7 @@ export class StytchOTPProviderBrowser {
 
     this.setMethodId(methodId);
 
-    return methodId;
+    return { methodId };
   }
 
 

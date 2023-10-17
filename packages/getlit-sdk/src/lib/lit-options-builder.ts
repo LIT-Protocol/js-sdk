@@ -347,8 +347,6 @@ export class LitOptionsBuilder {
       const providerOptions = {
         stytch: () => {
 
-
-
           if (isNode()) {
 
             const _options = options as StytchOTPProviderOptionsNodeJS;
@@ -380,7 +378,7 @@ export class LitOptionsBuilder {
           globalThis.Lit.builder._otpProvider = StytchOTPProvider;
         }
 
-        log.end('initialiseOTPProvider', '0 ERROR!');
+        log.end('initialiseOTPProvider', 'Done!');
         return StytchOTPProvider;
       } else {
         log.end('initialiseOTPProvider', '1 ERROR!');

@@ -167,10 +167,10 @@ export type PKPInfo = {
 };
 
 export type LitAuthMethod = {
-  storageKey?: string;
   accessToken: string;
   authMethodType: AuthMethodType;
-  otpType?: 'email' | 'phone';
+  // storageKey?: string;
+  // otpType?: 'email' | 'phone';
 };
 
 export type LitAuthMethodOTP = {
@@ -245,9 +245,12 @@ export type OTPConfig = {
 
 export interface StytchOTPProviderBrowserOptions extends ExpirableOptions {
   code: string;
+  methodId: string,
 };
 
-export interface StytchOTPProviderNodeJSOptions extends StytchOTPProviderBrowserOptions { };
+export interface StytchOTPProviderNodeJSOptions extends StytchOTPProviderBrowserOptions {
+
+};
 
 export type SessionItemValue = {
   pkpInfo: {
@@ -296,7 +299,7 @@ export interface GetLitAccountInstanceSend {
 }
 
 export interface GetLitAccountInstanceBalance {
-  tokenAddress: string;
+  tokenAddress?: string;
   denom?: string;
 }
 
@@ -305,5 +308,10 @@ export interface GetLitAccountInstance {
   cosmos: () => Promise<PKPCosmosWallet>,
   send: (params: GetLitAccountInstanceSend) => Promise<void>;
   sign: (content: any) => Promise<any>;
-  balance: (params: GetLitAccountInstanceBalance) => Promise<any>;
+  balance: (params?: GetLitAccountInstanceBalance) => Promise<any>;
+}
+
+export interface EncryptedMaterial {
+  encryptResponse: EncryptResponse;
+  metadata: EncryptionMetadata;
 }

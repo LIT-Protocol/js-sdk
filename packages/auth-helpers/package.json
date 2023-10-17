@@ -29,7 +29,7 @@
     "stream": false
   },
   "group": "core",
-  "version": "3.0.7",
+  "version": "3.0.10",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

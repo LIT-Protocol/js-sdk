@@ -116,7 +116,7 @@ await asyncForEach(dirs, async (dir) => {
 
   greenLog(`${paddedName} ${npmVersion} => ${distPkg.version}`);
 
-  publishVersion = pkg.version;
+  publishVersion = distPkg.version;
 
   // remove peer dependencies
   delete distPkg.peerDependencies;

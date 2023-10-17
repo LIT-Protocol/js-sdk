@@ -1,10 +1,10 @@
-import { AuthMethod } from "@lit-protocol/types";
-import { LitAuthClient } from "@lit-protocol/lit-auth-client";
+import { AuthMethod, StytchToken } from "@lit-protocol/types";
+import { LitAuthClient, StytchOtpProvider } from "@lit-protocol/lit-auth-client";
 
 import * as stytchNode from 'stytch';
-import { ProviderType } from "@lit-protocol/constants";
+import { AuthMethodType, ProviderType } from "@lit-protocol/constants";
 import { isNode } from "../../utils";
-import { StytchOTPProviderNodeJSOptions, StytchOTPProviderOptionsNodeJS } from "../../types";
+import { StytchOTPProviderBrowserOptions, StytchOTPProviderOptionsNodeJS } from "../../types";
 import { cacheStychOTP, convertToMinutes, getStychOTPStorageUID } from "./helpers";
 
 const MAX_EXPIRATION_LENGTH = 60;
@@ -59,7 +59,7 @@ export class StytchOTPProviderNodeJS {
   async sendOTP({ method, userId }: {
     method: 'email' | 'sms' | 'whatsapp',
     userId: string
-  }): Promise<string> {
+  }): Promise<{ methodId: string }> {
 
     this.connect();
 
@@ -94,7 +94,7 @@ export class StytchOTPProviderNodeJS {
 
     this.setMethodId(methodId);
 
-    return methodId;
+    return { methodId };
   }
 
   async sendEmailOTP(email: string): Promise<string> {
@@ -130,7 +130,9 @@ export class StytchOTPProviderNodeJS {
     return getStychOTPStorageUID(accessToken);
   }
 
-  async authenticate(options: StytchOTPProviderNodeJSOptions): Promise<AuthMethod> {
+  async authenticate(options: StytchOTPProviderBrowserOptions): Promise<AuthMethod> {
+
+    this.connect();
 
     const _options = {
       cache: true,
@@ -140,8 +142,9 @@ export class StytchOTPProviderNodeJS {
     const durationLength = _options.expirationLength || MAX_EXPIRATION_LENGTH;
     const durationUnit = _options.expirationUnit || MAX_EXPIRATION_UNIT;
     const durationMinutes = durationLength * convertToMinutes(durationUnit);
+    const methodId = options?.methodId || this.methodId;
 
-    if (!this.methodId) {
+    if (!methodId) {
       throw new Error('methodId is not set');
     }
 
@@ -153,31 +156,31 @@ export class StytchOTPProviderNodeJS {
       throw new Error('durationMinutes is not set');
     }
 
+    console.log("methodId:", methodId);
+    console.log("_options.code:", _options.code);
+    console.log("durationMinutes:", durationMinutes);
+
     let authResponse;
     let sessionStatus;
 
     authResponse = await this.stytchNodeClient.otps.authenticate({
-      method_id: this.methodId,
+      method_id: methodId,
       code: _options.code,
-      session_duration_minutes: durationMinutes
+      session_duration_minutes: durationMinutes,
     });
+
+    console.log("authResponse:", authResponse);
 
     sessionStatus = await this.stytchNodeClient.sessions.authenticate({
       session_token: authResponse.session_token,
     });
 
-    const authProvider = globalThis.Lit.authClient?.initProvider(ProviderType.StytchOtp, {
-      userId: sessionStatus.session.user_id,
-      appId: '',
-    });
+    const authMethod = {
+      authMethodType: AuthMethodType.StytchOtp,
+      accessToken: authResponse.session_jwt,
+    };
 
-    if (!authProvider) {
-      throw new Error('authProvider is not set');
-    }
-
-    const authMethod = await authProvider.authenticate({
-      accessToken: authResponse.session_token,
-    });
+    console.log("authMethod:", authMethod);
 
     if (_options?.cache) {
       cacheStychOTP({

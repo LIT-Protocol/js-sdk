@@ -24,6 +24,9 @@ import {
   GetLitAccountInstance,
   GetLitAccount,
   GetLitAccountInstanceSend,
+  GetLitAccountInstanceBalance,
+  DecryptionContext,
+  EncryptedMaterial,
 } from './types';
 import {
   convertSigningMaterial,
@@ -40,6 +43,8 @@ import {
   useStoredAuthMethodsIfFound,
   mapAuthMethodTypeToString,
   convertContentToBuffer,
+  isSessionSigs,
+  isAuthSig,
 } from './utils';
 import { handleAuthMethod } from './create-account/handle-auth-data';
 import { handleProvider } from './create-account/handle-provider';
@@ -231,136 +236,137 @@ ${LitMessages.persistentStorageExample}`;
    * @returns decrypted content as its {@link LitSerializable} compatible type
    *
    */
-  public async decrypt(opts: DecryptProps): Promise<DecryptRes> {
+  public async decrypt(opts: {
+    credentials?: SessionSigs | AuthSig,
+
+    // -- selecting a context
+    encryptedMaterial?: string | EncryptedMaterial;
+    storageKey?: string,
+  }): Promise<DecryptRes> {
     LitAnalytics.collect('decrypt');
 
-    // -- validation
-    if (!opts?.storageContext && !opts?.decryptionContext) {
+    // -- validation (at least one of the contexts must be provided)
+    if (!opts?.storageKey && !opts?.encryptedMaterial) {
       log.error(
         'Storage provider not set, cannot read from storage for decryption material'
       );
     }
+    let encryptedMaterial: EncryptedMaterial | undefined;
 
-    if (opts.storageContext && !opts.storageContext.storageKey) {
-      log.throw('Storage context is provided, but storage key is missing');
-    }
-
-    if (!opts?.decryptionContext && !opts?.decryptResponse) {
-      log.throw('Must provide encryptionMetadata');
-    }
-
-    interface Material {
-      encryptResponse: EncryptResponse;
-      metadata: EncryptionMetadata;
-    }
-
-    let material: Material | undefined;
+    const isStorageContext = opts?.storageKey && globalThis.Lit.storage;
+    const isEncryptedMaterialContext = opts?.encryptedMaterial && !isStorageContext;
 
     // -- using storage context
-    if (opts?.storageContext && globalThis.Lit.storage) {
-      let decryptionMaterial = globalThis.Lit.storage?.getItem(
-        opts?.storageContext.storageKey
+    if (isStorageContext) {
+
+      let encryptedMaterialStr = globalThis.Lit.storage?.getItem(
+        opts?.storageKey as string
       );
 
       // -- check if storage key exists
-      if (!decryptionMaterial) {
-        log.throw(`Unable to find key "${opts?.storageContext.storageKey}"`);
+      if (!encryptedMaterialStr) {
+        log.throw(`Unable to find key "${opts?.storageKey}"`);
       }
 
       // -- try to parse
       try {
-        material = JSON.parse(decryptionMaterial) as Material;
+        encryptedMaterial = JSON.parse(encryptedMaterialStr) as EncryptedMaterial;
       } catch (e) {
-        log.throw('Unable to parse decryption material from cache: ', e);
+        log.throw('Unable to parse encrypted material from cache: ', e);
       }
     }
 
-    // -- using decryption context
-    if (opts.decryptionContext && !material) {
-      material = opts.decryptionContext as unknown as Material;
+    // -- using encryption material context
+    if (isEncryptedMaterialContext) {
+
+      try {
+        encryptedMaterial = JSON.parse(opts?.encryptedMaterial as string) as EncryptedMaterial;
+      } catch (e) {
+        encryptedMaterial = opts?.encryptedMaterial as EncryptedMaterial;
+      }
     }
 
-    if (!material?.encryptResponse) {
+    if (!encryptedMaterial?.encryptResponse) {
       log.throw(`Unable to find encryption response in decryption material`);
     }
 
-    if (!material?.metadata) {
+    if (!encryptedMaterial?.metadata) {
       log.throw(`Unable to find encryption metadata in decryption material`);
     }
 
-    log.info('Material:', material);
+    if (!encryptedMaterial.metadata.accessControlConditions) {
+      throw new Error('Access Control Conditions are undefined');
+    }
+
+    log.info('encryptedMaterial:', encryptedMaterial);
+
+    let acc = resolveACCType(encryptedMaterial.metadata.accessControlConditions);
 
     // -- auths
-    let authMaterial = opts?.authMaterial;
-    let authMethodProvider = opts?.provider;
-    let authMethods: Array<LitAuthMethod> = [];
+    let response;
 
-    try {
-      // -- when auth method provider ('google', 'discord', etc.) is provided
-      if (!authMaterial && authMethodProvider?.provider) {
-        authMethods = useStoredAuthMethodsIfFound();
-        if (authMethods.length < 1) {
-          log.throw(
-            'No Authentication methods found in cache, need to re-authenticate'
-          );
-        }
-        for (const authMethod of authMethods) {
-          if (
-            getProviderMap()[authMethod.authMethodType] ===
-            opts.provider?.provider
-          ) {
-            // TODO: resolve pkp info and generate session signatures for access control
-          }
-        }
-      } else if (!authMaterial && !authMethodProvider) {
-        if (isBrowser()) {
-          authMaterial = await checkAndSignAuthMessage({
-            chain: material.metadata.chain,
-          });
-        }
+    const _isSessionSigs = isSessionSigs(opts.credentials);
+    const _isAuthSig = isAuthSig(opts.credentials);
+    const _isAuthMethod = false;
+    const _isDefault = !_isSessionSigs && !_isAuthSig && !_isAuthMethod;
+
+    if (_isDefault) {
+
+      if (isNode()) {
+        log.throw("credentials must be provided when running in node")
       }
 
-      opts.authMaterial = authMaterial;
-      log('resolved metadata for material: ', material.metadata);
-      log('typeof authMateiral ', typeof opts.authMaterial);
-
-      if (!material.metadata.accessControlConditions) {
-        log.throw('Access control conditions are undefined');
+      if (isBrowser()) {
+        const authSig = await checkAndSignAuthMessage({
+          chain: encryptedMaterial.metadata.chain,
+        })
+        response = await this._litNodeClient?.decrypt({
+          ...acc,
+          ciphertext: encryptedMaterial.encryptResponse.ciphertext,
+          dataToEncryptHash: encryptedMaterial.encryptResponse.dataToEncryptHash,
+          chain: encryptedMaterial.metadata.chain,
+          authSig,
+        });
       }
-
-      let acc = resolveACCType(material.metadata.accessControlConditions);
-      let res = await this._litNodeClient?.decrypt({
-        ...acc,
-        ciphertext: material.encryptResponse.ciphertext,
-        dataToEncryptHash: material.encryptResponse.dataToEncryptHash,
-        chain: material.metadata.chain,
-        authSig: opts.authMaterial as AuthSig,
-      });
-
-      const msg = deserializeFromType(
-        material.metadata.messageType,
-        res?.decryptedData as Uint8Array
-      );
-
-      log.info('msg:', msg);
-
-      if (!res?.decryptedData) {
-        log.throw('Could not decrypt data');
-      }
-
-      return {
-        data: msg,
-        rawData: res.decryptedData,
-      };
-    } catch (e) {
-      log.throw('Could not perform decryption operations ', e);
     }
+
+    if (_isSessionSigs) {
+      const sessionSigs = opts.credentials as SessionSigs;
+      response = await this._litNodeClient?.decrypt({
+        ...acc,
+        ciphertext: encryptedMaterial.encryptResponse.ciphertext,
+        dataToEncryptHash: encryptedMaterial.encryptResponse.dataToEncryptHash,
+        chain: encryptedMaterial.metadata.chain,
+        sessionSigs,
+      });
+    }
+
+    if (_isAuthSig) {
+      const authSig = opts.credentials as AuthSig;
+      response = await this._litNodeClient?.decrypt({
+        ...acc,
+        ciphertext: encryptedMaterial.encryptResponse.ciphertext,
+        dataToEncryptHash: encryptedMaterial.encryptResponse.dataToEncryptHash,
+        chain: encryptedMaterial.metadata.chain,
+        authSig,
+      });
+    }
+
+    // -- deserialise from type
+    const msg = deserializeFromType(
+      encryptedMaterial.metadata.messageType,
+      response?.decryptedData as Uint8Array
+    );
+
+    if (!response?.decryptedData) {
+      log.throw('Could not decrypt data');
+    }
+
+    return {
+      data: msg,
+      rawData: response.decryptedData,
+    };
   }
-
-  // ========== Signing ==========
-
-  // https://www.notion.so/litprotocol/SDK-Revamp-b0ee61ef448b41ee92eac6da2ec16082?pvs=4#f4f4d44e2a1340ebb08517dfd2c16265
-  // aka. mintWallet
 
   /**
    * Create a new PKP account with the given auth method(s).
@@ -643,9 +649,7 @@ ${LitMessages.persistentStorageExample}`;
           throw new Error(`Platform "${selectedPlatform}" is not supported yet! Ping us if you want to see this platform supported!`);
         }
 
-        log.info("Connecting pkpClient...");
         await pkpClient.connect();
-        log.info("Connected pkpClient!");
         let txResponse;
 
         // -- eth
@@ -747,10 +751,7 @@ ${LitMessages.persistentStorageExample}`;
       balance: async ({
         tokenAddress,
         denom = "uatom",
-      }: {
-        tokenAddress?: string;
-        denom?: string;
-      }) => {
+      }: GetLitAccountInstanceBalance = {}): Promise<any> => {
 
         await pkpClient.connect();
 
@@ -767,10 +768,12 @@ ${LitMessages.persistentStorageExample}`;
             return ethers.utils.formatEther(balance);  // Convert Wei to Ether format for better readability
           }
 
-          // If no token address is provided, retrieve Ether balance
+          // If no token address is provided, retrieve native (usually ETH, but here is LIT) balance
           else {
             const balance = await ethWallet.getBalance();
-            return ethers.utils.formatEther(balance);  // Convert Wei to Ether format for better readability
+
+            // Convert Wei to Ether format for better readability
+            return ethers.utils.formatEther(balance);
           }
 
         } else if (selectedPlatform === 'cosmos') {
@@ -790,13 +793,13 @@ ${LitMessages.persistentStorageExample}`;
 
         throw new Error(`Platform "${selectedPlatform}" is not supported for balance retrieval!`);
       }
-
     };
 
     return accountInstance;
   }
 
   /**
+   * @deprecated
    * Sign a message with a given pkp specified by the public key
    * Signature responses are valid ECDSA sigatures
    * **Note** at this time signatures are NOT deterministic
