@@ -16,6 +16,7 @@
     "@lit-protocol/types": "^3.0.6",
     "@radix-ui/react-radio-group": "^1.1.3",
     "@stytch/nextjs": "^11.0.0",
+    "@stytch/vanilla-js": "^2.2.0",
     "dotenv": "^16.3.1",
     "eslint": "8.36.0",
     "eslint-config-next": "^13.5.4",
