@@ -1,6 +1,6 @@
 import { CID } from 'blockstore-core/dist/src/base';
 import { isBrowser, isNode, log } from '../../utils';
-import { BaseIPFSProvider } from './BaseIPFSProvider';
+import { BaseIPFSProvider } from './base-ipfs-provider';
 import { fetchIPFSContent } from '../utils/ipfs-provider-sdk-helper';
 
 // These will be automatically injected if it is a browser environment

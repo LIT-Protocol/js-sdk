@@ -1,17 +1,17 @@
-import { LitAuthMethodWithAuthData } from '../types';
+import { LitAuthMethod } from '../types';
 import { getProviderMap, log } from '../utils';
 import { handleSingleAuth } from './handle-single-auth';
 import { handleMultiAuths } from './handle-multi-auths';
 import { validateCreateAccount } from './validate';
 
-export async function handleAuthData(opts: LitAuthMethodWithAuthData) {
-  const { authData = [] } = opts;
-  log.start('handleAuthData', 'creating account with provided multiple authData...');
+export async function handleAuthMethod({ authMethods }: { authMethods: LitAuthMethod[] }) {
 
-  validateCreateAccount(authData);
+  log.start('handleAuthMethod', 'creating account with provided multiple authMethod...');
+
+  validateCreateAccount(authMethods);
 
   log.info(
-    `authData found! [${authData.map(
+    `authMethod found! [${authMethods.map(
       (c) => `(${c.authMethodType}|${getProviderMap()[c.authMethodType]})`
     )}]`
   );
@@ -19,9 +19,9 @@ export async function handleAuthData(opts: LitAuthMethodWithAuthData) {
   /**
    * 1 Auth Method <> 1 PKP
    */
-  if (authData.length === 1) {
-    const PKPInfo = await handleSingleAuth(authData[0]);
-    log.end('handleAuthData', 'account created successfully!');
+  if (authMethods.length === 1) {
+    const PKPInfo = await handleSingleAuth(authMethods[0]);
+    log.end('handleAuthMethod', 'account created successfully!');
     return [PKPInfo];
   }
 
@@ -29,9 +29,9 @@ export async function handleAuthData(opts: LitAuthMethodWithAuthData) {
    * Multiple Auth Methods <> 1 PKP
    * TODO: implement this
    */
-  if (authData.length > 1) {
-    const PKPInfo = await handleMultiAuths(authData);
-    log.end('handleAuthData', 'account created successfully!');
+  if (authMethods.length > 1) {
+    const PKPInfo = await handleMultiAuths(authMethods);
+    log.end('handleAuthMethod', 'account created successfully!');
     return [PKPInfo];
   }
 

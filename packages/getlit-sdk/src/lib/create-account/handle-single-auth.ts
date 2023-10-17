@@ -6,14 +6,19 @@ import { WebAuthnProvider } from '@lit-protocol/lit-auth-client';
 export async function handleSingleAuth(authData: LitAuthMethod) {
   log.start('handleSingleAuth', 'handle-single-auth.ts');
   const providerMap = getProviderMap();
-  const authMethodType: ProviderType = providerMap[authData.authMethodType];
+
+  let authMethodType: ProviderType = providerMap[authData.authMethodType];
+
+  if (authMethodType === ProviderType.OTP) {
+    authMethodType = ProviderType.StytchOtp;
+  }
 
   const provider = globalThis.Lit.authClient?.getProvider(authMethodType);
 
   log('provider', provider);
 
   if (!provider) {
-    return log.throw(`provider "${authMethodType}" is not supported`);
+    return log.throw(`provider not found. authMethodType "${authMethodType}" is not supported`);
   }
 
   log.info(`authMethodType is webauthn`);

@@ -13,8 +13,9 @@ import {
   SessionSigs,
   SolRpcConditions,
   UnifiedAccessControlConditions,
+  ExpirableOptions,
 } from '@lit-protocol/types';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { AuthMethodType } from '@lit-protocol/constants';
 import {
@@ -26,8 +27,9 @@ import {
   StytchOtpProvider,
   WebAuthnProvider,
 } from '@lit-protocol/lit-auth-client';
-import { BaseIPFSProvider } from './ipfs-provider/providers/BaseIPFSProvider';
-import { StytchOTPProviderBundledOptions } from './otp-provider/stytch-otp-provider-bundled';
+import { BaseIPFSProvider } from './ipfs-provider/providers/base-ipfs-provider';
+import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
+import { PKPCosmosWallet } from '@lit-protocol/pkp-cosmos';
 
 export type OrNull<T> = T | null;
 export type OrUndefined<T> = T | undefined;
@@ -171,10 +173,6 @@ export type LitAuthMethod = {
   otpType?: 'email' | 'phone';
 };
 
-export type LitAuthMethodWithAuthData = {
-  authData: Array<LitAuthMethod>;
-};
-
 export type LitAuthMethodOTP = {
   provider: 'otp';
   phoneNumber: string;
@@ -192,18 +190,6 @@ export type LitAuthMethodWithProvider = {
 export type AuthKeys = LitAuthMethodWithProvider['provider'] extends infer T
   ? T
   : never;
-
-export type LitAuthMethodNull = {
-  provider: null;
-  authData: Array<LitAuthMethod>;
-};
-
-export type LitAuthMethodOptions =
-  | LitAuthMethodWithAuthData
-  | LitAuthMethodWithProvider
-  | LitAuthMethodOTP
-  | LitAuthMethodEthWallet
-  | LitAuthMethodNull;
 
 export type DecryptRes = {
   rawData: Uint8Array;
@@ -226,11 +212,26 @@ export type PersistentStorageConfig = {
   options?: PersistentStorageConfigOptions;
 };
 
-export type StytchConfig = StytchOTPProviderBundledOptions;
+// --------- OTP Configs ---------
+export interface StytchOTPProviderOptionsBrowser {
+  publicToken?: string;
+}
+export interface StytchOTPProviderOptionsNodeJS {
+  projectId?: string;
+  secret?: string;
+}
+
+export type OTPBarConfig = {};
+// Add more configs here if needed
+export type OTPConfigOptions =
+  StytchOTPProviderOptionsBrowser |
+  StytchOTPProviderOptionsNodeJS |
+  OTPBarConfig;
+
 
 export type OTPConfig = {
   provider: 'stytch';
-  options?: StytchConfig;
+  options?: OTPConfigOptions;
 }
 
 // export type LitAuthMethodTypes =
@@ -241,3 +242,68 @@ export type OTPConfig = {
 //   | AppleProvider
 //   | WebAuthnProvider
 //   | StytchOtpProvider;
+
+export interface StytchOTPProviderBrowserOptions extends ExpirableOptions {
+  code: string;
+};
+
+export interface StytchOTPProviderNodeJSOptions extends StytchOTPProviderBrowserOptions { };
+
+export type SessionItemValue = {
+  pkpInfo: {
+    tokenId: BigNumber,
+    publicKey: string,
+    ethAddress: string,
+  },
+  sessionSigs: {
+    [key: string]: {
+      sig: string;
+      derivedVia: string;
+      signedMessage: string;
+      address: string;
+      algo?: string;
+    }
+  }
+};
+
+export interface GetLitAccount {
+  accountPublicKey: string,
+  sessionSigs: SessionSigs,
+  configs?: {
+    platform: 'eth' | 'cosmos' | 'btc',
+    eth?: {
+      rpc: string,
+    },
+    cosmos?: {
+      rpc?: string,
+      addressPrefix: string | 'cosmos',
+    }
+  }
+}
+
+export interface GetLitAccountInstanceSend {
+  to: string;
+  amount: string;
+  tokenAddress?: string;
+  // eth only
+  decimal?: number;
+  defaultEthGas?: number;
+
+  // cosmos only
+  denom?: string | "uatom";
+  defaultCosmosGas?: number;
+  defaultCosmosGasLimit?: number;
+}
+
+export interface GetLitAccountInstanceBalance {
+  tokenAddress: string;
+  denom?: string;
+}
+
+export interface GetLitAccountInstance {
+  eth: () => Promise<PKPEthersWallet>,
+  cosmos: () => Promise<PKPCosmosWallet>,
+  send: (params: GetLitAccountInstanceSend) => Promise<void>;
+  sign: (content: any) => Promise<any>;
+  balance: (params: GetLitAccountInstanceBalance) => Promise<any>;
+}

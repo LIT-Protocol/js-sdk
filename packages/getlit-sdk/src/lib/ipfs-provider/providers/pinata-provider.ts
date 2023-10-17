@@ -1,5 +1,5 @@
 import { CID } from 'blockstore-core/dist/src/base';
-import { BaseIPFSProvider } from './BaseIPFSProvider';
+import { BaseIPFSProvider } from './base-ipfs-provider';
 import { isBrowser, isNode, log } from '../../utils';
 import { EncryptResponse } from '@lit-protocol/types';
 import { EncryptionMetadata } from '../../types';

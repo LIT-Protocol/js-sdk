@@ -590,7 +590,7 @@ export function getEnv({
  * @returns {Date} - The new date after adding the duration.
  * @throws {Error} - Throws an error if the unit is not one of the allowed values.
  */
-export function addDurationToDate(duration: number, unit: 'seconds' | 'minutes' | 'hours' | 'days', date = new Date()): Date {
+export function addTimeUnitToGivenDate(duration: number, unit: 'seconds' | 'minutes' | 'hours' | 'days', date = new Date()): Date {
   switch (unit) {
     case 'seconds':
       date.setSeconds(date.getSeconds() + duration);

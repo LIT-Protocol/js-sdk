@@ -42,5 +42,6 @@ export enum ProviderType {
   EthWallet = 'ethwallet',
   WebAuthn = 'webauthn',
   Apple = 'apple',
-  StytchOtp = 'stytchOtp'
+  StytchOtp = 'stytchOtp',
+  OTP = 'otp'
 }

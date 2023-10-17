@@ -1,6 +1,6 @@
 import { Lit, Lit as LitInstance } from './lib/lit';
 import { LitOptionsBuilder } from './lib/lit-options-builder';
-import { LitAuthMethod, OrNull, Types } from './lib/types';
+import { GetLitAccount, GetLitAccountInstance, LitAuthMethod, OrNull, Types } from './lib/types';
 import {
   GoogleProvider,
   AppleProvider,
@@ -13,9 +13,10 @@ import {
 import { LitStorage } from '@lit-protocol/lit-storage';
 import { LitEmitter } from './lib/events/lit-emitter';
 import { BrowserHelper } from './lib/browser-helper';
-import { BaseIPFSProvider } from './lib/ipfs-provider/providers/BaseIPFSProvider';
+import { BaseIPFSProvider } from './lib/ipfs-provider/providers/base-ipfs-provider';
 import { waitForLit } from './lib/utils';
-import { StytchOTPProviderBundled } from './lib/otp-provider/stytch-otp-provider-bundled';
+import { StytchOTPProviderBrowser } from './lib/stych-otp-provider/providers/stytch-otp-provider-browser';
+import { StytchOTPProviderNodeJS } from './lib/stych-otp-provider/providers/stytch-otp-provider-nodejs';
 
 declare global {
   //@ts-ignore
@@ -46,7 +47,8 @@ declare global {
     decrypt: LitInstance['decrypt'] | Function;
     createAccount: LitInstance['createAccount'] | Function;
     getAccounts: LitInstance['getAccounts'] | Function;
-    getAccountSessions: LitInstance['getAccountSessions'] | Function;
+    createAccountSession: LitInstance['createAccountSession'] | Function;
+    account: (params: GetLitAccount) => GetLitAccountInstance;
     sign: LitInstance['sign'] | Function;
 
     // auths
@@ -55,16 +57,16 @@ declare global {
       webauthn: OrNull<WebAuthnProvider>;
       discord: OrNull<DiscordProvider>;
       google: OrNull<GoogleProvider>;
-      otp: OrNull<StytchOTPProviderBundled>;
+      otp: OrNull<StytchOTPProviderBrowser | StytchOTPProviderNodeJS>;
       apple: OrNull<AppleProvider>;
     };
 
     // utils
-    getStoredAuthData: OrNull<Function>;
-    getStoredAuthDataWithKeys: OrNull<Function>;
+    getStoredAuthMethods: OrNull<Function>;
+    getStoredAuthMethodsWithKeys: OrNull<Function>;
     getStoredEncryptedData: OrNull<Function>;
     clearAuthMethodSessions: OrNull<Function>;
-    clearLitSessionSigs: OrNull<Function>;
+    clearLitSessionItems: OrNull<Function>;
 
     // browser only
     browserHelper: BrowserHelper | null;
@@ -112,8 +114,12 @@ globalThis.Lit = {
   getAccounts: () => {
     console.log('not initialized');
   },
-  getAccountSessions: () => {
+  createAccountSession: () => {
     console.log('not initialized');
+  },
+  account: () => {
+    console.log('not initialized');
+    return {} as GetLitAccountInstance;
   },
   sign: () => {
     console.log('not initialized');
@@ -130,10 +136,10 @@ globalThis.Lit = {
   },
 
   // utils
-  getStoredAuthData: () => {
+  getStoredAuthMethods: () => {
     console.log('not initialized');
   },
-  getStoredAuthDataWithKeys: () => {
+  getStoredAuthMethodsWithKeys: () => {
     console.log('not initialized');
   },
   getStoredEncryptedData: () => {
@@ -142,7 +148,7 @@ globalThis.Lit = {
   clearAuthMethodSessions: () => {
     console.log('not initialized');
   },
-  clearLitSessionSigs: () => {
+  clearLitSessionItems: () => {
     console.log('not initialized');
   },
 

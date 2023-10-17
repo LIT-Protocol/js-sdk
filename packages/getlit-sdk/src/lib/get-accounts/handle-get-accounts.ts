@@ -3,7 +3,7 @@ import { LitAuthMethod, PKPInfo } from '../types';
 import { iRelayPKPToPKPInfo, log, mapAuthMethodTypeToString } from '../utils';
 
 export const handleGetAccounts = async (
-  authDataArray: Array<LitAuthMethod>,
+  authMethods: Array<LitAuthMethod>,
   { cache }: { cache?: boolean } = {
     cache: true,
   }
@@ -15,8 +15,8 @@ export const handleGetAccounts = async (
   // and call the provider's fetchPKPsThroughRelayer method
   let results: Array<PKPInfo> = [];
 
-  for (let i = 0; i < authDataArray.length; i++) {
-    const authData = authDataArray[i];
+  for (let i = 0; i < authMethods.length; i++) {
+    const authData = authMethods[i];
 
     // -- prepare
     // convert authMethodType (eg. 6) to authMethodName (eg. 'google')
@@ -64,7 +64,7 @@ export const handleGetAccounts = async (
         `No cached accounts found for ${authMethodName} auth method. Fetching accounts manually...`
       );
       try {
-        const pkps: Array<IRelayPKP> = await authProvider?.fetchPKPsThroughRelayer(authData);
+        const pkps: Array<IRelayPKP> = await authProvider?.fetchPKPsThroughRelayer(authData) || [];
         const formattedPKPs: Array<PKPInfo> = pkps.map((pkp) => {
           return iRelayPKPToPKPInfo(pkp);
         });

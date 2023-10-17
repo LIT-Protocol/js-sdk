@@ -59,7 +59,7 @@ export class StytchOtpProvider extends BaseProvider {
         );
       }
 
-      const parsedToken: StytchToken = this._parseJWT(accessToken);
+      const parsedToken: StytchToken = StytchOtpProvider.parseJWT(accessToken);
       const audience = (parsedToken['aud'] as string[])[0];
       if (audience != this._params.appId) {
         reject(new Error('Parsed application id does not match parameters'));
@@ -103,7 +103,7 @@ export class StytchOtpProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    const tokenBody = this._parseJWT(authMethod.accessToken);
+    const tokenBody = StytchOtpProvider.parseJWT(authMethod.accessToken);
     const userId = tokenBody['sub'] as string;
     const orgId = (tokenBody['aud'] as string[])[0];
     const authMethodId = ethers.utils.keccak256(
@@ -117,14 +117,13 @@ export class StytchOtpProvider extends BaseProvider {
    * @param jwt token to parse
    * @returns {string}- userId contained within the token message
    */
-  private _parseJWT(jwt: string): StytchToken {
+  public static parseJWT(jwt: string): StytchToken {
     const parts = jwt.split('.');
     if (parts.length !== 3) {
       throw new Error('Invalid token length');
     }
     const body = Buffer.from(parts[1], 'base64');
     const parsedBody: StytchToken = JSON.parse(body.toString('ascii'));
-    console.log('JWT body: ', parsedBody);
     return parsedBody;
   }
 }

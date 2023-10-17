@@ -28,6 +28,7 @@
         "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod --group=core",
         "publish:dev": "yarn node ./tools/scripts/pub.mjs --tag dev --group=core",
         "publish:test": "yarn node ./tools/scripts/pub.mjs --tag test --group=core",
+        "publish:cayenne:dev": "yarn node ./tools/scripts/pub.mjs --tag cayenne-dev --group=core",
         "publish:revamp": "yarn node ./tools/scripts/pub.mjs --prod --group=revamp",
         "publish:revamp:dev": "yarn node ./tools/scripts/pub.mjs --tag dev --group=revamp",
         "test:bun": "bun ./tools/scripts/test-script.mjs",

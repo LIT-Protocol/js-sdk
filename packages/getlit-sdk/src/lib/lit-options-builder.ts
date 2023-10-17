@@ -1,9 +1,11 @@
-import { AuthMethod, LitNodeClientConfig } from '@lit-protocol/types';
+import { LitNodeClientConfig } from '@lit-protocol/types';
 import {
   OTPConfig,
   OrNull,
   OrUndefined,
   PersistentStorageConfig,
+  StytchOTPProviderOptionsBrowser,
+  StytchOTPProviderOptionsNodeJS,
   Types,
   infuraConfig,
   pinataConfig,
@@ -11,10 +13,10 @@ import {
 import {
   LitMessages,
   clearAuthMethodSessions,
-  clearLitSessionSigs,
+  clearLitSessionItems,
   getProviderMap,
-  getStoredAuthData,
-  getStoredAuthDataWithKeys,
+  getStoredAuthMethods,
+  getStoredAuthMethodsWithKeys,
   getStoredEncryptedData,
   isBrowser,
   isNode,
@@ -36,13 +38,14 @@ import { ProviderType } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 import { LitEmitter } from './events/lit-emitter';
 import { BrowserHelper } from './browser-helper';
-import { BaseIPFSProvider } from './ipfs-provider/providers/BaseIPFSProvider';
+import { BaseIPFSProvider } from './ipfs-provider/providers/base-ipfs-provider';
 import { HeliaProvider } from './ipfs-provider/providers/helia-provider';
 import { PinataProvider } from './ipfs-provider/providers/pinata-provider';
 import { infuraProvider } from './ipfs-provider/providers/infura-provider';
 import { handleAutoAuth } from './auth/handle-auto-auth';
 import { getEnv, is } from '@lit-protocol/misc';
-import { StytchOTPProviderBundled } from './otp-provider/stytch-otp-provider-bundled';
+import { StytchOTPProviderBrowser } from './stych-otp-provider/providers/stytch-otp-provider-browser';
+import { StytchOTPProviderNodeJS } from './stych-otp-provider/providers/stytch-otp-provider-nodejs';
 
 const DEFAULT_NETWORK = 'cayenne'; // changing to "cayenne" soon
 
@@ -53,7 +56,7 @@ export class LitOptionsBuilder {
   private _nodeClient: OrUndefined<Types.NodeClient> = undefined;
 
   private _persistentStorage: OrNull<BaseIPFSProvider> = null;
-  private _otpProvider: OrNull<StytchOTPProviderBundled> = null;
+  private _otpProvider: OrNull<StytchOTPProviderBrowser | StytchOTPProviderNodeJS> = null;
   private _emitter: OrUndefined<LitEmitter> = undefined;
   private _storage: OrUndefined<LitStorage> = undefined;
 
@@ -141,9 +144,6 @@ export class LitOptionsBuilder {
   }
 
   public withOTPProvider({ provider, options }: OTPConfig) {
-
-    console.log("xx provider:", provider);
-    console.log("yy options:", options);
 
     log.info('------ withOTPProvider ------');
 
@@ -247,18 +247,17 @@ export class LitOptionsBuilder {
       //   globalThis.Lit.authClient.initProvider<AppleProvider>(
       //     ProviderType.Apple
       //   );
-      globalThis.Lit.auth.otp = new StytchOTPProviderBundled({
-        projectId: '- not set -',
-        secret: '- not set -',
+      globalThis.Lit.auth.otp = new StytchOTPProviderBrowser({
+        publicToken: '- not set -'
       });
     }
 
-    if (isNode()) {
-      globalThis.Lit.auth.otp = new StytchOTPProviderBundled({
-        projectId: process.env['STYTCH_PROJECT_ID'] || '',
-        secret: process.env['STYTCH_SECRET'] || ''
-      });
-    }
+    // if (isNode()) {
+    //   globalThis.Lit.auth.otp = new StytchOTPProviderBundled({
+    //     projectId: process.env['STYTCH_PROJECT_ID'] || '',
+    //     secret: process.env['STYTCH_SECRET'] || ''
+    //   });
+    // }
 
     globalThis.Lit.auth.ethwallet =
       globalThis.Lit.authClient.initProvider<EthWalletProvider>(
@@ -348,15 +347,22 @@ export class LitOptionsBuilder {
       const providerOptions = {
         stytch: () => {
 
+
+
           if (isNode()) {
-            return new StytchOTPProviderBundled({
-              projectId: options?.projectId ?? '',
-              secret: options?.secret ?? '',
+
+            const _options = options as StytchOTPProviderOptionsNodeJS;
+
+            return new StytchOTPProviderNodeJS({
+              projectId: _options?.projectId ?? '',
+              secret: _options?.secret ?? '',
             })
           }
 
-          return new StytchOTPProviderBundled({
-            publicToken: options?.publicToken ?? '',
+          const _options = options as StytchOTPProviderOptionsBrowser;
+
+          return new StytchOTPProviderBrowser({
+            publicToken: _options?.publicToken ?? '',
           })
 
         },
@@ -441,11 +447,11 @@ export class LitOptionsBuilder {
   public createUtils() {
     log.start('createUtils', 'starting...');
 
-    globalThis.Lit.getStoredAuthData = getStoredAuthData;
-    globalThis.Lit.getStoredAuthDataWithKeys = getStoredAuthDataWithKeys;
+    globalThis.Lit.getStoredAuthMethods = getStoredAuthMethods;
+    globalThis.Lit.getStoredAuthMethodsWithKeys = getStoredAuthMethodsWithKeys;
     globalThis.Lit.getStoredEncryptedData = getStoredEncryptedData;
     globalThis.Lit.clearAuthMethodSessions = clearAuthMethodSessions;
-    globalThis.Lit.clearLitSessionSigs = clearLitSessionSigs;
+    globalThis.Lit.clearLitSessionItems = clearLitSessionItems;
 
     log.end('createUtils', 'done!');
   }
@@ -466,13 +472,13 @@ export class LitOptionsBuilder {
 
 // ---------- (to be added/deleted) Enable auto auth for browser ----------
 // if (isBrowser()) {
-//   handleAutoAuth(async (authData: AuthMethod) => {
+//   handleAutoAuth(async (authMethod: AuthMethod) => {
 //     globalThis.Lit.eventEmitter?.createAccountStatus('in_progress');
 //     log.info('Creating Lit account...');
 
 //     try {
 //       const PKPInfoArr = await globalThis.Lit.createAccount({
-//         authData: [authData],
+//         authMethods: [authMethod],
 //       });
 //       log.success('Lit account created!');
 //       log.info(`PKPInfo: ${JSON.stringify(PKPInfoArr)}`);

@@ -1,6 +1,6 @@
 import { EncryptResponse } from '@lit-protocol/types';
 import { log } from '../../utils';
-import { BaseIPFSProvider } from './BaseIPFSProvider';
+import { BaseIPFSProvider } from './base-ipfs-provider';
 import { EncryptionMetadata } from '../../types';
 import {
   createPayload,

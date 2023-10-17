@@ -27,7 +27,7 @@ import {
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
 
-const version = '0.0.797';
+const version = '0.0.833';
 const PREFIX = 'GetLit SDK';
 const logBuffer: Array<any[]> = [];
 
@@ -138,6 +138,35 @@ export const isBrowser = () => {
   return isNode() === false;
 };
 
+export function convertContentToBuffer(content: any): Buffer {
+  let bufferContent: Buffer;
+
+  switch (typeof content) {
+    case 'string':
+      bufferContent = Buffer.from(content, 'utf8');
+      break;
+    case 'number':
+      bufferContent = Buffer.from(content.toString(), 'utf8');
+      break;
+    case 'boolean':
+      bufferContent = Buffer.from(content ? 'true' : 'false', 'utf8');
+      break;
+    case 'object':
+      if (content instanceof ArrayBuffer) {
+        bufferContent = Buffer.from(content);
+      } else if (ArrayBuffer.isView(content)) {
+        bufferContent = Buffer.from(content.buffer);
+      } else {
+        bufferContent = Buffer.from(JSON.stringify(content), 'utf8');
+      }
+      break;
+    default:
+      throw new Error('Unsupported content type for conversion');
+  }
+
+  return bufferContent;
+}
+
 export function convertSigningMaterial(
   material: LitSerializable
 ): LitSerialized<number[]> {
@@ -235,6 +264,7 @@ export async function convertContentMaterial(
     type: input.constructor.name,
   };
 }
+
 export function deserializeFromType(
   type: 'string' | 'file' | 'blob' | 'arraybuffer' | 'uint8array',
   message: Uint8Array
@@ -265,12 +295,13 @@ export function deserializeFromType(
 // console.log(getProviderMap()[1]); // Outputs: 'ethwallet'
 // console.log(getProviderMap()['ethwallet']); // Outputs: 1
 export const getProviderMap = () => {
+
   enum ProviderType {
     EthWallet = 'ethwallet',
     WebAuthn = 'webauthn',
     Discord = 'discord',
     Google = 'google',
-    Otp = 'otp',
+    OTP = 'otp',
     Apple = 'apple',
   }
 
@@ -283,8 +314,9 @@ export const getProviderMap = () => {
     3: ProviderType.WebAuthn,
     4: ProviderType.Discord,
     6: ProviderType.Google,
-    7: ProviderType.Otp,
+    7: ProviderType.OTP,
     8: ProviderType.Apple,
+    9: ProviderType.OTP,
   };
 
   const inverseProviderMap = Object.keys(_providerMap).reduce(
@@ -303,11 +335,21 @@ export const getProviderMap = () => {
 };
 
 export const mapAuthMethodTypeToString = (authMethodType: number) => {
-  const authMethodName = getProviderMap()[
-    authMethodType
-  ].toLowerCase() as AuthKeys;
 
-  return authMethodName;
+  console.log("authMethodType:", authMethodType);
+
+  let authMethodName;
+
+  try {
+    authMethodName = getProviderMap()[
+      authMethodType
+    ].toLowerCase() as AuthKeys;
+
+    return authMethodName;
+
+  } catch (e) {
+    log.throw('Failed to map auth method type to string:', e);
+  }
 };
 
 export const getDerivedAddresses = (
@@ -517,15 +559,15 @@ export const resolveACC = (opts: EncryptProps): any => {
 };
 
 export const authKeysPrefixes = [
-  'lit-opt-token',
+  'lit-otp-token',
   'lit-discord-token',
   'lit-google-token',
   'lit-webauthn-token',
   'lit-ethwallet-token',
 ];
 
-export const getStoredAuthData = (): Array<LitAuthMethod> => {
-  const storedAuthData: Array<LitAuthMethod> = [];
+export const getStoredAuthMethods = (): Array<LitAuthMethod> => {
+  const storedAuthMethods: Array<LitAuthMethod> = [];
 
   // Iterate through all the keys in storage
   for (let i = 0; i < localStorage.length; i++) {
@@ -543,7 +585,7 @@ export const getStoredAuthData = (): Array<LitAuthMethod> => {
       if (str) {
         try {
           const authMethod = JSON.parse(str) as LitAuthMethod;
-          storedAuthData.push(authMethod);
+          storedAuthMethods.push(authMethod);
         } catch (e) {
           // Handle the error if needed
         }
@@ -551,13 +593,13 @@ export const getStoredAuthData = (): Array<LitAuthMethod> => {
     }
   }
 
-  return storedAuthData;
+  return storedAuthMethods;
 };
 
-export const getStoredAuthDataWithKeys = (): {
+export const getStoredAuthMethodsWithKeys = (): {
   [key: string]: LitAuthMethod;
 } => {
-  const storedAuthData: { [key: string]: LitAuthMethod } = {};
+  const storedAuthMethods: { [key: string]: LitAuthMethod } = {};
 
   // Iterate through all the keys in storage
   for (let i = 0; i < localStorage.length; i++) {
@@ -573,7 +615,7 @@ export const getStoredAuthDataWithKeys = (): {
       if (str) {
         try {
           const authMethod = JSON.parse(str) as LitAuthMethod;
-          storedAuthData[key] = authMethod; // Use the storage key as the key of the object
+          storedAuthMethods[key] = authMethod; // Use the storage key as the key of the object
         } catch (e) {
           // Handle the error if needed
         }
@@ -581,7 +623,7 @@ export const getStoredAuthDataWithKeys = (): {
     }
   }
 
-  return storedAuthData;
+  return storedAuthMethods;
 };
 
 // "authType" => google, discord, opt, webauthn, ethwallet
@@ -698,8 +740,8 @@ export const clearAuthMethodSessions = () => {
 /**
  * This function clears all session data that starts with 'lit-session-sigs-'.
  */
-export const clearLitSessionSigs = () => {
-  log.start('clearLitSessionSigs');
+export const clearLitSessionItems = () => {
+  log.start('clearLitSessionItems');
 
   // Iterate through all the keys in storage
   for (let i = 0; i < localStorage.length; i++) {
@@ -711,7 +753,7 @@ export const clearLitSessionSigs = () => {
     }
   }
 
-  log.end('clearLitSessionSigs');
+  log.end('clearLitSessionItems');
 };
 
 export const LitMessages = {
@@ -745,6 +787,7 @@ loadLit.withPersistentStorage({
   * You can sign up for a Stytch account at https://stytch.com/. Once you have an account,
   * you can find your project ID and secret at https://stytch.com/dashboard/api-keys.
   * See https://i.imgur.com/fR0oRGW.png for how to get these values
+ 
   Examples:
   
   // -- Stytch (nodejs)
@@ -808,19 +851,19 @@ export async function waitForLit(): Promise<void> {
  * If no auth data is provided and it is not in the browser, it will throw an error.
  * @param fn
  */
-export const useStoredAuthDataIfFound = (opts?: {
-  authData?: Array<LitAuthMethod>;
+export const useStoredAuthMethodsIfFound = (opts?: {
+  authMethods?: Array<LitAuthMethod>;
 }): any => {
 
-  let authData: Array<LitAuthMethod> | undefined = opts?.authData;
+  let authMethods: Array<LitAuthMethod> | undefined = opts?.authMethods;
 
-  if (!authData) {
+  if (!authMethods) {
     if (isBrowser()) {
       log.info('getting auth data from browser');
-      authData = getStoredAuthData();
-      log.info('auth data from browser', authData);
+      authMethods = getStoredAuthMethods();
+      log.info('auth data from browser', authMethods);
 
-      if (authData.length <= 0) {
+      if (authMethods.length <= 0) {
         throw new Error('no auth data provided in browser');
       }
     } else {
@@ -828,5 +871,5 @@ export const useStoredAuthDataIfFound = (opts?: {
     }
   }
 
-  return authData;
+  return authMethods;
 }

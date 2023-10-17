@@ -170,7 +170,7 @@ export class LitAuthClient {
         break;
       default:
         throw new Error(
-          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn' are supported at the moment."
+          "Invalid provider type provided. Only 'google', 'discord', 'ethereum','stytchOtp', and 'webauthn' are supported at the moment."
         );
     }
 

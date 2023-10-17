@@ -679,3 +679,5 @@ export const AUTH_METHOD_TYPE_IDS = {
 // ========== PKP Client ==========
 export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
 export const TELEM_API_URL = 'https://lit-general-worker.getlit.dev';
+
+export const LIT_RPC = "https://chain-rpc.litprotocol.com/http";

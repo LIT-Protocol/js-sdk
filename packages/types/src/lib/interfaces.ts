@@ -1588,6 +1588,16 @@ export interface ExpirableOptions {
 
   expirationLength?: number;
 }
+export interface ExpirableOptionsRequired {
+  cache: boolean;
+
+  expirationUnit: 'seconds' | 'minutes' | 'hours' | 'days';
+
+  expirationLength: number;
+
+  maxLength?: number
+}
+
 export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
   /*
    * JWT from an authenticated session
