@@ -1,0 +1,25 @@
+{
+  "name": "lit-claim-key-demo-nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "ts-node-esm index.ts"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@lit-protocol/lit-auth-client": "3.0.4",
+    "@lit-protocol/lit-node-client-nodejs": "3.0.4",
+    "@lit-protocol/pkp-ethers": "3.0.4",
+    "@types/node": "^20.7.2",
+    "@types/prompts": "^2.4.4",
+    "dotenv": "^16.3.1",
+    "ethers": "^5.7.2",
+    "prompts": "^2.4.2",
+    "stytch": "^8.3.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  }
+}
