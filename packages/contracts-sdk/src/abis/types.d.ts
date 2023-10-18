@@ -1,3 +1,4 @@
+export * from "./StakingBalances.sol/StakingBalances.ts";
 export * from "./Staking.sol/Staking.ts";
 export * from "./Multisender.sol/Multisender.ts";
 export * from "./LITToken.sol/LITToken.ts";

@@ -34,6 +34,7 @@ export default function Home() {
     });
 
     setStatus('Creating an auth provider...');
+
     // -- 3. Create an auth provider
     const authProvider = litAuthClient.initProvider<GoogleProvider>(ProviderType.Google);
 
