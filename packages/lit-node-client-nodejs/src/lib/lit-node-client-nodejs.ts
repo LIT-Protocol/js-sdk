@@ -1278,7 +1278,8 @@ export class LitNodeClientNodeJs extends LitCore {
     log('executeJs responseData', JSON.stringify(responseData, null, 2));
 
     // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
-    if (responseData[0].success && Object.keys(responseData[0].signedData).length <= 0) {
+    // we must also check for claim responses as a user may have submitted for a claim and signatures must be aggregated before returning
+    if (responseData[0].success && Object.keys(responseData[0].signedData).length <= 0 && Object.keys(responseData[0].claimData).length <= 0) {
       return responseData[0] as any as ExecuteJsResponse;
     }
 
