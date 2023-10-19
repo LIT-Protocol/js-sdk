@@ -996,7 +996,10 @@ export class LitNodeClientNodeJs extends LitCore {
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      const sigShares: Array<SigShare> = shares.map((s: any) => {
+      const sigShares: Array<SigShare> = shares.map((s: any, index: number) => {
+
+        log("Original Share Struct:", s);
+
         const share = this._getFlattenShare(s);
 
         log("share:", share);
@@ -1006,8 +1009,14 @@ export class LitNodeClientNodeJs extends LitCore {
         }
 
         if (!share.bigr) {
-          throw new Error("bigR is missing");
+          throw new Error(`bigR is missing in share ${index}. share ${JSON.stringify(share)}`);
         }
+
+        const sanitisedBigR = sanitise(share.bigr);
+        const sanitisedSigShare = sanitise(share.publicKey);
+
+        log("sanitisedBigR:", sanitisedBigR);
+        log("sanitisedSigShare:", sanitisedSigShare);
 
         return {
           sigType: share.sigType,
@@ -1085,15 +1094,50 @@ export class LitNodeClientNodeJs extends LitCore {
    */
   getSignatures = (signedData: Array<any>): any => {
     log(`getSignatures(): ${JSON.stringify(signedData, null, 2)}`);
+
+    const validatedSignedData = signedData.map((sigObj: any) => {
+
+      // -- detect whatever signature is available
+      let signature;
+      for (let key in sigObj) {
+        if (sigObj[key]) {
+          signature = sigObj[key];
+          break;
+        }
+      }
+
+      const requiredFields = ["signatureShare"];
+
+      for (const field of requiredFields) {
+        log("Checking signature:", signature);
+
+        if (!signature[field] || signature[field] === '') {
+          log(`Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`);
+          return null;
+        }
+      }
+
+      return sigObj
+    }).filter((sigObj) => sigObj !== null);
+
+
+    log("requested length:", signedData.length);
+    log("validated length:", validatedSignedData.length);
+    log("minimum required length:", this.config.minNodeCount);
+
+    if (validatedSignedData.length < this.config.minNodeCount) {
+      throw new Error(`not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSignedData.length}`);
+    }
+
     // -- prepare
     const signatures: any = {};
 
     // TOOD: get keys of signedData
-    const keys = Object.keys(signedData[0]);
+    const keys = Object.keys(validatedSignedData[0]);
 
     // -- execute
     keys.forEach((key: any) => {
-      const shares = signedData.map((r: any) => r[key]);
+      const shares = validatedSignedData.map((r: any) => r[key]);
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
@@ -1112,6 +1156,29 @@ export class LitNodeClientNodeJs extends LitCore {
       });
 
       log('getSignatures - sigShares', sigShares);
+
+      const validatedSigShares = sigShares.filter((s: any) => {
+
+        const requiredFields = ['sigType', 'signatureShare'];
+
+        for (const field of requiredFields) {
+          if (!s[field] || s[field] === '') {
+            log(`Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`);
+            return null;
+          }
+        }
+
+        return s;
+
+      }).filter((s) => s !== null);
+
+      log("requested length:", signedData.length);
+      log("validated length:", validatedSigShares.length);
+      log("minimum required length:", this.config.minNodeCount);
+
+      if (validatedSigShares.length < this.config.minNodeCount) {
+        throw new Error(`not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSigShares.length}`);
+      }
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
@@ -1431,7 +1498,7 @@ export class LitNodeClientNodeJs extends LitCore {
         authMethods,
       };
 
-      log("XXX reqBody:", reqBody)
+      log("reqBody:", reqBody)
 
       return this.getPkpSignExecutionShares(url, reqBody, requestId);
     });
@@ -2031,7 +2098,7 @@ export class LitNodeClientNodeJs extends LitCore {
     };
 
 
-    log('XXX signSessionKey body', body);
+    log('signSessionKey body', body);
 
     const nodePromises = this.getNodePromises((url: string) => {
       return this.getSignSessionKeyShares(
@@ -2052,7 +2119,7 @@ export class LitNodeClientNodeJs extends LitCore {
       throw new Error(`Error when handling node promises: ${e}`);
     }
 
-    log("XXX res:", res);
+    log("handleNodePromises res:", res);
 
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
@@ -2069,9 +2136,37 @@ export class LitNodeClientNodeJs extends LitCore {
       (r: any) => (r as SignedData).signedData
     );
 
-    log('signedDataList', signedDataList)
+    log('signedDataList', signedDataList);
 
-    const signatures = this.getSessionSignatures(signedDataList);
+    // -- checking if we have enough shares
+    const validatedSignedDataList = signedDataList.map((signedData: any) => {
+
+      const sessionSig = signedData['sessionSig'];
+
+      // each of this field cannot be empty
+      const requiredFields = ["sigType", 'dataSigned', 'signatureShare', 'bigr', 'publicKey', 'sigName', 'siweMessage'];
+
+      // check if all required fields are present
+      for (const field of requiredFields) {
+
+        if (!sessionSig[field] || sessionSig[field] === '') {
+          log(`Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`);
+          return null;
+        }
+      }
+
+      return signedData;
+    }).filter(item => item !== null);
+
+    log("requested length:", signedDataList.length);
+    log("validated length:", validatedSignedDataList.length);
+    log("minimum required length:", this.config.minNodeCount);
+
+    if (validatedSignedDataList.length < this.config.minNodeCount) {
+      throw new Error(`not enough nodes signed the session key.  Expected ${this.config.minNodeCount}, got ${validatedSignedDataList.length}`);
+    }
+
+    const signatures = this.getSessionSignatures(validatedSignedDataList);
 
     const { sessionSig } = signatures;
 
