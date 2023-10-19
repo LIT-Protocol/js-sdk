@@ -28,6 +28,28 @@ if (process.argv.length < 3) {
   throw Error("Please provide either --lookup or --claim flag");
 }
 
+/**
+ * Set up Lit Node Client
+ */
+
+const litNodeClient = new LitNodeClientNodeJs({
+  litNetwork: "cayenne",
+  debug: false,
+});
+
+await litNodeClient.connect();
+
+const authClient = new LitAuthClient({
+  litRelayConfig: {
+    relayApiKey: LIT_RELAY_API_KEY,
+  },
+  litNodeClient,
+});
+
+/**
+ * Setup STYTCH client
+ */
+
 const client = new stytch.Client({
   project_id: STYTCH_PROJECT_ID,
   secret: STYTCH_SECRET,
@@ -60,20 +82,6 @@ const authResponse = await client.otps.authenticate({
 
 const sessionStatus = await client.sessions.authenticate({
   session_token: authResponse.session_token,
-});
-
-const litNodeClient = new LitNodeClientNodeJs({
-  litNetwork: "cayenne",
-  debug: false,
-});
-
-await litNodeClient.connect();
-
-const authClient = new LitAuthClient({
-  litRelayConfig: {
-    relayApiKey: LIT_RELAY_API_KEY,
-  },
-  litNodeClient,
 });
 
 const session = authClient.initProvider<StytchOtpProvider>(
@@ -140,6 +148,13 @@ if (process.argv.length >= 3 && process.argv[2] === "--mfa") {
 const litActionCode = `
 const go = async () => {
   Lit.Actions.setResponse({response: JSON.stringify({"Lit.Auth": Lit.Auth})})
+
+  // Check the Lit.Auth object for auth methods (both 7 for OTP auth)
+  if () {
+    const sig = await Lit.Actions.signEcdsa({toSign, publicKey, sigName })
+  }
+};
+
 };
 
 go();
@@ -163,11 +178,14 @@ const runLitAction = async () => {
       authMethods: [
         authMethod,
         authPhoneMethod
-        
       ],
       // all jsParams can be used anywhere in your litActionCode
       jsParams: {
-        // this is the string "Hello World" for testing
+         // this is the string "Hello World" for testing
+        toSign: [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100],
+        publicKey:
+          "0x0404e12210c57f81617918a5b783e51b6133790eb28a79f141df22519fb97977d2a681cc047f9f1a9b533df480eb2d816fb36606bd7c716e71a179efd53d2a55d1",
+        sigName: "sig1",
       },
     });
     console.log("results: ", JSON.stringify(results.response, null, 2));
@@ -178,17 +196,3 @@ const runLitAction = async () => {
 
 runLitAction();
 }
-
-
-// const publicKey = await session.computPublicKeyFromAuthMethod(authMethod);
-// console.log("local public key computed: ", publicKey);
-
-// if (process.argv.length >= 3 && process.argv[2] === "--claim") {
-//   let claimResp = await session.claimKeyId({
-//     authMethod,
-//   });
-//   console.log("claim response public key: ", claimResp.pubkey);
-// } else if (process.argv.length >= 3 && process.argv[2] === "--lookup") {
-//   const pkpInfo = await session.fetchPKPsThroughRelayer(authMethod);
-//   console.log(pkpInfo);
-// }
