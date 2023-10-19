@@ -136,7 +136,8 @@
     "tslib": "^2.3.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
-    "uint8arrays": "^4.0.3"
+    "uint8arrays": "^4.0.3",
+    "viem": "^1.16.6"
   },
   "devDependencies": {
     "@getlit/contracts": "^0.2.0",
