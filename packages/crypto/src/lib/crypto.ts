@@ -182,6 +182,11 @@ export const combineEcdsaShares = (
   sigShares: Array<SigShare>
 ): CombinedECDSASignature => {
   const type = sigShares[0].sigType;
+
+  if (!type) {
+    throw new Error("Sig type is not defined! Here's your sigShares:", sigShares);
+  }
+
   // the public key can come from any node - it obviously will be identical from each node
   // const publicKey = sigShares[0].publicKey;
   // const dataSigned = '0x' + sigShares[0].dataSigned;
@@ -190,7 +195,7 @@ export const combineEcdsaShares = (
     if (val.signatureShare !== '') {
       const newVal = _remapKeyShareForEcdsa(val);
 
-      if(!newVal.sig_name){
+      if (!newVal.sig_name) {
         newVal.sig_name = 'sig-created-by-lit-sdk';
       }
 
