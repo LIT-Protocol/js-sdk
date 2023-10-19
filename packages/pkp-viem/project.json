@@ -1,0 +1,70 @@
+{
+  "name": "pkp-viem",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/pkp-viem/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn build:target pkp-viem"
+      }
+    },
+    "_buildTsc": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/packages/pkp-viem",
+        "main": "packages/pkp-viem/src/index.ts",
+        "tsConfig": "packages/pkp-viem/tsconfig.lib.json",
+        "assets": [
+          "packages/pkp-viem/*.md"
+        ]
+      }
+    },
+    "_buildWeb": {
+      "executor": "@websaam/nx-esbuild:package",
+      "options": {
+        "globalName": "LitJsSdk_pkpViem",
+        "outfile": "dist/packages/pkp-viem-vanilla/pkp-viem.js",
+        "entryPoints": [
+          "./packages/pkp-viem/src/index.ts"
+        ],
+        "define": {
+          "process.env.NODE_DEBUG": "false",
+          "global": "window"
+        },
+        "plugins": [
+          {
+            "package": "esbuild-node-builtins",
+            "function": "nodeBuiltIns"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/pkp-viem/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/packages/pkp-viem"
+      ],
+      "options": {
+        "jestConfig": "packages/pkp-viem/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

@@ -27,6 +27,7 @@
     "pkp-cosmos": "packages/pkp-cosmos",
     "pkp-ethers": "packages/pkp-ethers",
     "pkp-sui": "packages/pkp-sui",
+    "pkp-viem": "packages/pkp-viem",
     "pkp-walletconnect": "packages/pkp-walletconnect",
     "react": "apps/react",
     "types": "packages/types",

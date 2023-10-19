@@ -1,0 +1,30 @@
+{
+  "name": "@lit-protocol/pkp-viem",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "license": "MIT",
+  "homepage": "https://github.com/Lit-Protocol/js-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Lit-Protocol/js-sdk"
+  },
+  "keywords": [
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/Lit-Protocol/js-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/pkp-viem"
+  },
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts",
+  "browser": {
+    "crypto": false,
+    "stream": false
+  },
+  "tags": [
+    "universal"
+  ]
+}
