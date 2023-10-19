@@ -1,7 +1,7 @@
 {
   "name": "contracts-sdk",
-  "implicitDependencies": ["!pkp-ethers"],
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": ["!pkp-ethers"],
   "sourceRoot": "packages/contracts-sdk/src",
   "projectType": "library",
   "targets": {
@@ -12,13 +12,14 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/contracts-sdk",
         "main": "packages/contracts-sdk/src/index.ts",
         "tsConfig": "packages/contracts-sdk/tsconfig.lib.json",
-        "assets": ["packages/contracts-sdk/*.md"]
+        "assets": ["packages/contracts-sdk/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "_buildWeb": {
@@ -40,23 +41,23 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/contracts-sdk/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/contracts-sdk"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/contracts-sdk"],
       "options": {
         "jestConfig": "packages/contracts-sdk/jest.config.ts",
         "passWithNoTests": true
       }
     },
     "testWatch": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/contracts-sdk"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/contracts-sdk"],
       "options": {
         "jestConfig": "packages/contracts-sdk/jest.config.ts",
         "passWithNoTests": true,

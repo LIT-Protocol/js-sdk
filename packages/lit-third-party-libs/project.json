@@ -11,17 +11,14 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/lit-third-party-libs",
         "main": "packages/lit-third-party-libs/src/index.ts",
         "tsConfig": "packages/lit-third-party-libs/tsconfig.lib.json",
-        "assets": [
-          "packages/lit-third-party-libs/*.md"
-        ]
+        "assets": ["packages/lit-third-party-libs/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "_buildWeb": {
@@ -29,9 +26,7 @@
       "options": {
         "globalName": "LitJsSdk_litThirdPartyLibs",
         "outfile": "dist/packages/lit-third-party-libs-vanilla/lit-third-party-libs.js",
-        "entryPoints": [
-          "./packages/lit-third-party-libs/src/index.ts"
-        ],
+        "entryPoints": ["./packages/lit-third-party-libs/src/index.ts"],
         "define": {
           "process.env.NODE_DEBUG": "false",
           "global": "window"
@@ -45,21 +40,15 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/lit-third-party-libs/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/lit-third-party-libs/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/lit-third-party-libs"
-      ],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/lit-third-party-libs"],
       "options": {
         "jestConfig": "packages/lit-third-party-libs/jest.config.ts",
         "passWithNoTests": true

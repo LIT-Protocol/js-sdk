@@ -1,5 +1,5 @@
 // @ts-nocheck
-import * as pako from 'pako';
+import { inflate } from 'pako';
 
 const base64codes = [
   255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -5755,6 +5755,6 @@ export async function initWasmBlsSdk() {
     'BLgncF3EHg68LnwJIN9BpD/s8XSDvD6LA83EFDk4eGU6emeYYPY6ZMGJ9KyxMTNcwqsj34eecrF';
   b += 'PlsiywDTwz4seMecvbhQ+f8A9ABijQ==';
 
-  var input = pako.inflate(base64ToUint8Array(b));
+  var input = inflate(base64ToUint8Array(b));
   return __wbg_init(input);
 }

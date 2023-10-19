@@ -1,8 +1,8 @@
 export function pkpViem(): string {
   return 'pkp-viem';
 }
-import { PKPBase } from "@lit-protocol/pkp-base";
-import { PKPBaseProp } from "@lit-protocol/types";
+import { PKPBase } from '@lit-protocol/pkp-base';
+import { PKPBaseProp } from '@lit-protocol/types';
 import {
   SignableMessage,
   isBytes,
@@ -21,16 +21,16 @@ import {
   SerializedTransactionReturnType,
   Hex,
   Address,
-} from "viem";
-import { publicKeyToAddress, toHex } from "viem/utils";
+} from 'viem';
+import { publicKeyToAddress, toHex } from 'viem/utils';
 
 export class PKPViemAccount extends PKPBase implements LocalAccount {
   readonly publicKey!: Hex;
-  readonly source = "custom";
-  readonly type = "local";
+  readonly source = 'custom';
+  readonly type = 'local';
   readonly address!: Address;
 
-  defaultSigName: string = "pkp-viem-sign";
+  defaultSigName: string = 'pkp-viem-sign';
 
   constructor(prop: PKPBaseProp) {
     super(prop);
@@ -63,13 +63,11 @@ export class PKPViemAccount extends PKPBase implements LocalAccount {
   }
 
   async sign(msgHash: `0x${string}` | Uint8Array): Promise<Signature> {
-    if (!this.litNodeClientReady) {
-      await this.init();
-    }
+    await this.ensureLitNodeClientReady();
 
     if (isBytes(msgHash)) {
       if (this.useAction) {
-        const litSignature = await this.runLitAction(msgHash, "pkp-viem-sign");
+        const litSignature = await this.runLitAction(msgHash, 'pkp-viem-sign');
         const signature: Signature = {
           r: `0x${litSignature.r}` as Hex,
           s: `0x${litSignature.s}` as Hex,
@@ -90,7 +88,7 @@ export class PKPViemAccount extends PKPBase implements LocalAccount {
       if (this.useAction) {
         const litSignature = await this.runLitAction(
           msgHashUint8Array,
-          "pkp-viem-sign"
+          'pkp-viem-sign'
         );
         const signature: Signature = {
           r: `0x${litSignature.r}` as Hex,
@@ -100,8 +98,6 @@ export class PKPViemAccount extends PKPBase implements LocalAccount {
         return signature;
       } else {
         const litSignature = await this.runSign(msgHashUint8Array);
-        console.log(litSignature.recid);
-        console.log(BigInt(litSignature.recid));
         const signature: Signature = {
           r: `0x${litSignature.r}` as Hex,
           s: `0x${litSignature.s}` as Hex,
@@ -112,4 +108,3 @@ export class PKPViemAccount extends PKPBase implements LocalAccount {
     }
   }
 }
-

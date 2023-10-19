@@ -1,5 +1,5 @@
 // @ts-nocheck
-import pako from 'pako';
+import { inflate } from 'pako';
 
 // Contants
 
@@ -4538,6 +4538,6 @@ export async function initWasmEcdsaSdk() {
     'cCvt8g51J5D/hLjUmd34lLwd+wcI27wArz5DYFWot5/TiW8vfkXN7shrB6MuJ19oqiGbt5sHoPf';
   b += 'Z6drtv4/pNVxPg==';
 
-  var input = pako.inflate(base64ToUint8Array(b));
+  var input = inflate(base64ToUint8Array(b));
   return init(input);
 }

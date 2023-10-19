@@ -11,13 +11,14 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/pkp-client",
         "main": "packages/pkp-client/src/index.ts",
         "tsConfig": "packages/pkp-client/tsconfig.lib.json",
-        "assets": ["packages/pkp-client/*.md"]
+        "assets": ["packages/pkp-client/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "_buildWeb": {
@@ -39,15 +40,15 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/pkp-client/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/pkp-client"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/pkp-client"],
       "options": {
         "jestConfig": "packages/pkp-client/jest.config.ts",
         "passWithNoTests": true

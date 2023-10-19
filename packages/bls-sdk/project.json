@@ -11,13 +11,14 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/bls-sdk",
         "main": "packages/bls-sdk/src/index.ts",
         "tsConfig": "packages/bls-sdk/tsconfig.lib.json",
-        "assets": ["packages/bls-sdk/*.md"]
+        "assets": ["packages/bls-sdk/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "_buildWeb": {
@@ -38,8 +39,8 @@
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/bls-sdk"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/bls-sdk"],
       "options": {
         "jestConfig": "packages/bls-sdk/jest.config.ts",
         "passWithNoTests": true

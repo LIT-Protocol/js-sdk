@@ -11,13 +11,14 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/lit-node-client-nodejs",
         "main": "packages/lit-node-client-nodejs/src/index.ts",
         "tsConfig": "packages/lit-node-client-nodejs/tsconfig.lib.json",
-        "assets": ["packages/lit-node-client-nodejs/*.md"]
+        "assets": ["packages/lit-node-client-nodejs/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "_buildWeb": {
@@ -39,23 +40,23 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/lit-node-client-nodejs/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/lit-node-client-nodejs"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/lit-node-client-nodejs"],
       "options": {
         "jestConfig": "packages/lit-node-client-nodejs/jest.config.ts",
         "passWithNoTests": true
       }
     },
     "testWatch": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/lit-node-client-nodejs"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/lit-node-client-nodejs"],
       "options": {
         "jestConfig": "packages/lit-node-client-nodejs/jest.config.ts",
         "watch": true,

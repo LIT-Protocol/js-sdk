@@ -11,17 +11,14 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/pkp-sui",
         "main": "packages/pkp-sui/src/index.ts",
         "tsConfig": "packages/pkp-sui/tsconfig.lib.json",
-        "assets": [
-          "packages/pkp-sui/*.md"
-        ]
+        "assets": ["packages/pkp-sui/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "_buildWeb": {
@@ -29,9 +26,7 @@
       "options": {
         "globalName": "LitJsSdk_pkpSui",
         "outfile": "dist/packages/pkp-sui-vanilla/pkp-sui.js",
-        "entryPoints": [
-          "./packages/pkp-sui/src/index.ts"
-        ],
+        "entryPoints": ["./packages/pkp-sui/src/index.ts"],
         "define": {
           "process.env.NODE_DEBUG": "false",
           "global": "window"
@@ -45,21 +40,15 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/pkp-sui/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/pkp-sui/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/pkp-sui"
-      ],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/pkp-sui"],
       "options": {
         "jestConfig": "packages/pkp-sui/jest.config.ts",
         "passWithNoTests": true

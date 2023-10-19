@@ -15,16 +15,16 @@
         ],
         "parallel": false
       }
-      
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/auth-browser",
         "main": "packages/auth-browser/src/index.ts",
         "tsConfig": "packages/auth-browser/tsconfig.lib.json",
-        "assets": ["packages/auth-browser/*.md"]
+        "assets": ["packages/auth-browser/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "_buildWeb": {
@@ -46,15 +46,15 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/auth-browser/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/auth-browser"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/auth-browser"],
       "options": {
         "jestConfig": "packages/auth-browser/jest.config.ts",
         "passWithNoTests": true

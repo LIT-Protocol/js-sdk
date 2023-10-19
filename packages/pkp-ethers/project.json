@@ -11,13 +11,14 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/pkp-ethers",
         "main": "packages/pkp-ethers/src/index.ts",
         "tsConfig": "packages/pkp-ethers/tsconfig.lib.json",
-        "assets": ["packages/pkp-ethers/*.md"]
+        "assets": ["packages/pkp-ethers/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "_buildWeb": {
@@ -39,15 +40,15 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/pkp-ethers/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/pkp-ethers"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/pkp-ethers"],
       "options": {
         "jestConfig": "packages/pkp-ethers/jest.config.ts",
         "passWithNoTests": true

@@ -15,13 +15,14 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/lit-node-client",
         "main": "packages/lit-node-client/src/index.ts",
         "tsConfig": "packages/lit-node-client/tsconfig.lib.json",
-        "assets": ["packages/lit-node-client/*.md"]
+        "assets": ["packages/lit-node-client/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "_buildWeb": {
@@ -44,15 +45,15 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/lit-node-client/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/lit-node-client"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/lit-node-client"],
       "options": {
         "jestConfig": "packages/lit-node-client/jest.config.ts",
         "passWithNoTests": true

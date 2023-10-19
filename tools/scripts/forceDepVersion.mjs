@@ -1,8 +1,8 @@
-import { readCachedProjectGraph } from '@nrwl/devkit';
+import devkit from '@nx/devkit';
 import { readFileSync, writeFileSync } from 'fs';
 import chalk from 'chalk';
 
-const graph = readCachedProjectGraph();
+const graph = devkit.readCachedProjectGraph();
 const nodes = graph.nodes;
 const libs = [];
 

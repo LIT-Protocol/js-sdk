@@ -17,13 +17,14 @@
       }
     },
     "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/access-control-conditions",
         "main": "packages/access-control-conditions/src/index.ts",
         "tsConfig": "packages/access-control-conditions/tsconfig.lib.json",
-        "assets": ["packages/access-control-conditions/*.md"]
+        "assets": ["packages/access-control-conditions/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "_buildWeb": {
@@ -44,15 +45,17 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/access-control-conditions/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/access-control-conditions"],
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/packages/access-control-conditions"
+      ],
       "options": {
         "jestConfig": "packages/access-control-conditions/jest.config.ts",
         "passWithNoTests": true
