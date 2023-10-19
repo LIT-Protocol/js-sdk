@@ -20,7 +20,6 @@ export default function SignUpView() {
   const {
     authMethod,
     authWithEthWallet,
-    authWithOTP,
     authWithWebAuthn,
     authWithStytch,
     loading: authLoading,
@@ -98,7 +97,6 @@ export default function SignUpView() {
         handleGoogleLogin={handleGoogleLogin}
         handleDiscordLogin={handleDiscordLogin}
         authWithEthWallet={authWithEthWallet}
-        authWithOTP={authWithOTP}
         registerWithWebAuthn={registerWithWebAuthn}
         authWithWebAuthn={authWithWebAuthn}
         authWithStytch={authWithStytch}
