@@ -1098,20 +1098,24 @@ export class LitNodeClientNodeJs extends LitCore {
     const validatedSignedData = signedData.map((sigObj: any) => {
 
       // -- detect whatever signature is available
-      let signature;
+      let sigShare;
       for (let key in sigObj) {
         if (sigObj[key]) {
-          signature = sigObj[key];
+          sigShare = sigObj[key];
           break;
         }
+      }
+
+      if (!sigShare) {
+        return null;
       }
 
       const requiredFields = ["signatureShare"];
 
       for (const field of requiredFields) {
-        log("Checking signature:", signature);
+        log("Checking sigShare:", sigShare);
 
-        if (!signature[field] || signature[field] === '') {
+        if (!sigShare || !sigShare[field] || sigShare[field] === '') {
           log(`Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`);
           return null;
         }
@@ -1126,7 +1130,8 @@ export class LitNodeClientNodeJs extends LitCore {
     log("minimum required length:", this.config.minNodeCount);
 
     if (validatedSignedData.length < this.config.minNodeCount) {
-      throw new Error(`not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSignedData.length}`);
+      log(`not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSignedData.length}`);
+      return null
     }
 
     // -- prepare
@@ -1177,7 +1182,7 @@ export class LitNodeClientNodeJs extends LitCore {
       log("minimum required length:", this.config.minNodeCount);
 
       if (validatedSigShares.length < this.config.minNodeCount) {
-        throw new Error(`not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSigShares.length}`);
+        log(`not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSigShares.length}`);
       }
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
@@ -1383,6 +1388,7 @@ export class LitNodeClientNodeJs extends LitCore {
       return signedData;
     });
 
+    log("signedDataList:", signedDataList);
     const signatures = this.getSignatures(signedDataList);
 
     // -- 2. combine responses as a string, and get parse it as JSON
@@ -1413,6 +1419,8 @@ export class LitNodeClientNodeJs extends LitCore {
       return null;
     }).filter(item => item !== null);
 
+    log("claimList:", claimsList)
+
     let claims = undefined;
 
     if (claimsList.length > 0) {
@@ -1427,6 +1435,8 @@ export class LitNodeClientNodeJs extends LitCore {
       response,
       logs: mostCommonLogs,
     };
+
+    log("returnVal:", returnVal);
 
     // -- case: debug mode
     if (debug) {
