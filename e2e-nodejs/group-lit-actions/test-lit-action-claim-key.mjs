@@ -30,22 +30,28 @@ export async function main() {
 
   // -- should have claimData
   if (
-    res.claimData === undefined ||
-    res.claimData === null ||
-    Object.keys(res.claimData).length === 0
+    res.claims === undefined ||
+    res.claims === null ||
+    Object.keys(res.claims).length === 0
   ) {
     return fail(`claimData should not be empty`);
   }
 
-  if (res.claimData['foo'] === undefined) {
+  if (res.claims['foo'] === undefined) {
     return fail(`claimData should have "foo" key`);
   }
 
   ['signature', 'derivedKeyId'].forEach((key) => {
-    if (!res.claimData.foo[key]) {
+    if (!res.claims.foo[key]) {
       return fail(`claimData.foo should have ${key}`);
     }
   });
+
+  for (let i = 0; i < res.claims[key].signatures.length; i++) {
+    if (!res.claims[key].signatures[i].r || !res.claims[key].signatures[i].s || res.claims[key].signatures[i].v) {
+      return fail(`signature data misformed, should be of ethers signature format`);
+    }
+  }
 
   // ==================== Success ====================
   return success('Lit Action should return claim');
