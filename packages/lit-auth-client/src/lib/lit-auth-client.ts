@@ -17,6 +17,8 @@ import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
+import StytchEmailOtpProvider from './providers/StytchAuthFactorOtp';
+import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
 
 /**
  * Class that handles authentication through Lit login
@@ -130,12 +132,19 @@ export class LitAuthClient {
           ...(options as WebAuthnProviderOptions),
         }) as unknown as T;
         break;
-      case `stytchOtp`:
+      case 'stytchOtp':
         provider = new StytchOtpProvider(
           {
             ...baseParams,
           },
           options as StytchOtpProviderOptions
+        ) as unknown as T;
+        break;
+      case 'stytchEmailOtp':
+        provider = new StytchAuthFactorOtpProvider<'email'>(
+          { ...baseParams },
+          options as StytchOtpProviderOptions,
+          'email'
         ) as unknown as T;
         break;
       default:
