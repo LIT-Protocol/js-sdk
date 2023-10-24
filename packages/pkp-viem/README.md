@@ -1,6 +1,6 @@
 # pkp-viem
 
-This module is a modified version of Custom Account interface `toAccount()` from `viem`. `PKPViemAccount` does not store private key but still has all the functionality of its counterpart. `PKPViemAccount` class extended `PKPBase` class and implemented `LocalAccount` from `viem`,
+This module is a modified version of Custom Account interface `toAccount()` from `viem`. `PKPViemAccount` does not store private key but retains all the functionality of its counterpart. `PKPViemAccount` class extended `PKPBase` class and implemented `LocalAccount` from `viem`
 
 What is viem?
 https://viem.sh/docs/introduction.html
@@ -15,9 +15,9 @@ yarn add @lit-protocol/pkp-viem viem
 
 # Examples
 
-You can use Accoun action and Wallet action.
-`PKPViemAccount` is a `LocalAccount`, User can use Account Action with it. <br>
-using `createWalletClient` User can use Wallet Action.
+You can use Account action and Wallet action
+`PKPViemAccount` is a `LocalAccount`, and users can use Account Action with it <br>
+Using `createWalletClient`, users can utilize Wallet actions
 
 Wallet Action: https://viem.sh/docs/actions/wallet/introduction.html <br>
 Account Action: https://viem.sh/docs/accounts/custom.html
@@ -197,7 +197,7 @@ const hash = await walletClient.sendTransaction({
 ### Send Raw transaction
 
 ```typescript
-// get transaction request object from prepareTransactionRequest
+// get the transaction request object from prepareTransactionRequest
 const request = await walletClient.prepareTransactionRequest({
   account,
   to: recipient,
