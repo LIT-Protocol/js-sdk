@@ -140,16 +140,37 @@ export class LitAuthClient {
           options as StytchOtpProviderOptions
         ) as unknown as T;
         break;
-      case 'stytchEmailOtp':
+      case 'stytchEmailFactorOtp':
         provider = new StytchAuthFactorOtpProvider<'email'>(
           { ...baseParams },
           options as StytchOtpProviderOptions,
           'email'
         ) as unknown as T;
         break;
+      case 'stytchSmsFactorOtp':
+        provider = new StytchAuthFactorOtpProvider<'sms'>(
+          { ...baseParams },
+          options as StytchOtpProviderOptions,
+          'sms'
+        ) as unknown as T;
+        break;
+      case 'stytchWhatsAppFactorOtp':
+          provider = new StytchAuthFactorOtpProvider<'whatsApp'>(
+            { ...baseParams },
+            options as StytchOtpProviderOptions,
+            'whatsApp'
+          ) as unknown as T;
+          break;
+      case 'stytchTotpFactor':
+        provider = new StytchAuthFactorOtpProvider<'totp'>(
+          { ...baseParams },
+          options as StytchOtpProviderOptions,
+          'totp'
+        ) as unknown as T;
+        break;
       default:
         throw new Error(
-          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn' are supported at the moment."
+          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn', 'Stytch', and 'StytchFactor' are supported at the moment."
         );
     }
 

@@ -1,7 +1,7 @@
 import { StytchToken } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 
-export type FactorParser = 'email' | 'sms' | 'whatsapp' | 'totp';
+export type FactorParser = 'email' | 'sms' | 'whatsApp' | 'totp';
 
 export const emailOtpAuthFactorParser = (
   parsedToken: StytchToken,
@@ -113,7 +113,7 @@ export const totpAuthFactorParser = (
     );
   }
 
-  const userId = authFactor.phone_number_factor.phone_number;
+  const userId = authFactor.authenticator_app_factor.totp_id;
   const authMethodId = ethers.utils.keccak256(
     ethers.utils.toUtf8Bytes(
       `${userId.toLowerCase()}:${audience.toLowerCase()}`

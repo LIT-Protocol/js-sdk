@@ -72,13 +72,14 @@ export default class StytchAuthFactorOtpProvider<
       const factorParser = this._resolveAuthFactor(this._factor);
 
       try {
-        factorParser(parsedToken, this._provider);
+        factorParser.parser(parsedToken, this._provider);
       } catch (e) {
         reject(e);
       }
 
+      
       resolve({
-        authMethodType: AuthMethodType.StytchOtp,
+        authMethodType: factorParser.authMethodType,
         accessToken: accessToken,
       });
     });
@@ -91,26 +92,25 @@ export default class StytchAuthFactorOtpProvider<
     return new Promise<string>((_resolve, _reject) => {
       const accessToken = authMethod.accessToken;
       const parsedToken: StytchToken = this._parseJWT(accessToken);
-      const factorParser = this._resolveAuthFactor(this._factor);
+      const factorParser = this._resolveAuthFactor(this._factor).parser;
 
       return factorParser(parsedToken, this._provider);
     });
   }
 
-  private _resolveAuthFactor(factor: T): Function {
+  private _resolveAuthFactor(factor: T): {parser: Function, authMethodType: AuthMethodType }{
     switch (factor) {
       case 'email':
-        return emailOtpAuthFactorParser;
+        return { parser: emailOtpAuthFactorParser, authMethodType: AuthMethodType.StytchEmailFactorOtp };
       case 'sms':
-        return smsOtpAuthFactorParser;
-      case 'whatsapp':
-        return whatsAppOtpAuthFactorParser;
+        return { parser: smsOtpAuthFactorParser, authMethodType: AuthMethodType.StytchSmsFactorOtp };
+      case 'whatsApp':
+        return { parser: whatsAppOtpAuthFactorParser, authMethodType: AuthMethodType.StytchWhatsAppFactorOtp };
       case 'totp':
-        return totpAuthFactorParser;
+        return { parser: totpAuthFactorParser, authMethodType: AuthMethodType.StytchTotpFactorOtp };
     }
 
-    // if we get here somehow its bad so just return a function that will blow up in the caller
-    return () => {};
+    throw new Error("Unable to determine factor, are you using one of the supported factor types?");
   }
 
   /**
