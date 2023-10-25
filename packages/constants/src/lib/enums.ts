@@ -31,6 +31,10 @@ export enum AuthMethodType {
   GoogleJwt = 6,
   AppleJwt = 8,
   StytchOtp = 9,
+  StytchEmailFactorOtp = 10,
+  StytchSmsFactorOtp = 11,
+  StytchWhatsAppFactorOtp = 12,
+  StytchTotpFactorOtp = 13,
 }
 
 /**
@@ -42,5 +46,9 @@ export enum ProviderType {
   EthWallet = 'ethwallet',
   WebAuthn = 'webauthn',
   Apple = 'apple',
-  StytchOtp = 'stytchOtp'
+  StytchOtp = 'stytchOtp',
+  StytchEmailFactorOtp = 'stytchEmailFactorOtp',
+  StytchSmsFactorOtp = 'stytchSmsFactorOtp',
+  StytchWhatsAppFactorOtp = 'stytchWhatsAppFactorOtp',
+  StytchTotpFactor = 'stytchTotpFactor'
 }
