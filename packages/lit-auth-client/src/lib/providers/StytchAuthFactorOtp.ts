@@ -27,6 +27,8 @@ import {
   whatsAppOtpAuthFactorParser,
 } from './StytchAuthFactors';
 
+
+
 export default class StytchAuthFactorOtpProvider<
   T extends FactorParser
 > extends BaseProvider {
@@ -44,9 +46,13 @@ export default class StytchAuthFactorOtpProvider<
   }
 
   /**
+   * Validates claims within a stytch authenticated JSON Web Token
+   * Will parse out the given `authentication factor` and use the transport
+   * for the otp code as the `user identifier` for the given auth method.
+   * @param options authentication option containing the authenticated token
+   * @returns {AuthMethod} Authentication Method for auth method type OTP
    *
-   *
-   */
+  */
   public async authenticate<T extends BaseAuthenticateOptions>(
     options?: T | undefined
   ): Promise<AuthMethod> {
@@ -84,7 +90,16 @@ export default class StytchAuthFactorOtpProvider<
       });
     });
   }
-
+  
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method.
+   * Will parse out the given `authentication factor` and use the transport
+   * for the otp code as the `user identifier` for the given auth method.
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+  */
   public async getAuthMethodId(
     authMethod: AuthMethod,
     options?: any
