@@ -50,7 +50,7 @@ export async function main() {
 
   const pkpSignRes = await client?.executeJs({
     authSig: LITCONFIG.CONTROLLER_AUTHSIG_2,
-    authMethods: [authMethod], // This is not workingu!
+    authMethods: [authMethod], 
     code: `(async () => {
         const sigShare = await LitActions.signEcdsa({
           toSign,
@@ -89,7 +89,7 @@ export async function main() {
     return fail(`Missing keys: ${missingKeys.join(', ')}`);
   }
 
-  if (!pkpSignRes.response.authSigAddress == LITCONFIG.CONTROLLER_AUTHSIG.address) {
+  if (!pkpSignRes.response.authSigAddress == LITCONFIG.CONTROLLER_AUTHSIG_2.address) {
     return fail(`Missing or non matching auth sig address in Lit.Auth context`);
   }
 
