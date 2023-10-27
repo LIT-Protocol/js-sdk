@@ -367,10 +367,10 @@ export class LitCore {
     mustHave?: boolean;
   }): AuthSig | SessionSig | Object[] => {
 
-    if ([authMethods, authSig, sessionSigs].filter((val, index, arr) => val !== undefined).length < 1) {
+    if (!authSig && !sessionSigs) {
       if (mustHave) {
         throwError({
-          message: `You must pass either authSig, sessionSigs or authMethods`,
+          message: `You must pass either authSig, or sessionSigs`,
           errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
           errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
         });
