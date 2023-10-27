@@ -40,9 +40,6 @@ export class StytchOtpProvider extends BaseProvider {
         this._params.userId ??
         (options as unknown as StytchOtpAuthenticateOptions).userId;
 
-      if (!userId) {
-        reject(new Error('User id must be provided'));
-      }
       const accessToken: string | undefined = (
         options as unknown as StytchOtpAuthenticateOptions
       )?.accessToken;
