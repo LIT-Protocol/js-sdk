@@ -29,11 +29,14 @@ import {
   throwError,
 } from '@lit-protocol/misc';
 import {
+  AuthMethod,
   AuthSig,
   CustomNetwork,
   FormattedMultipleAccs,
   HandshakeWithSgx,
+  JsonExecutionRequest,
   JsonHandshakeResponse,
+  JsonPkpSignRequest,
   KV,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
@@ -350,22 +353,24 @@ export class LitCore {
    * Get either auth sig or session auth sig
    *
    */
-  getAuthSigOrSessionAuthSig = ({
+  getAuthMaterial = ({
+    authMethods,
     authSig,
     sessionSigs,
     url,
     mustHave = true,
   }: {
+    authMethods?: Array<Object>,
     authSig?: AuthSig;
     sessionSigs?: SessionSigsMap;
     url: string;
     mustHave?: boolean;
-  }): AuthSig | SessionSig => {
+  }): AuthSig | SessionSig | Object[] => {
 
-    if (!authSig && !sessionSigs) {
+    if ([authMethods, authSig, sessionSigs].filter((val, index, arr) => val !== undefined).length < 1) {
       if (mustHave) {
         throwError({
-          message: `You must pass either authSig or sessionSigs`,
+          message: `You must pass either authSig, sessionSigs or authMethods`,
           errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
           errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
         });
@@ -388,8 +393,27 @@ export class LitCore {
       return sigToPassToNode;
     }
 
+    if (authMethods) {
+      return authMethods;
+    }
+
     return authSig!;
   };
+
+  /*
+    Here we do a check on the 'length' property of the object
+    returned to see if it is an array type
+    we cast to the array type to check as the union of types does not overlap
+  */
+  setAuthMaterial<T extends JsonExecutionRequest | JsonPkpSignRequest>(reqBody: T, authMaterial: AuthSig | SessionSig | Object[]): T {
+      if (!(authMaterial as Object[]).length){ 
+        reqBody.authSig = (authMaterial as AuthSig);
+      } else {
+        reqBody.authMethods = (authMaterial as Object[]);
+      }
+ 
+      return reqBody;
+  }
 
   /**
    *

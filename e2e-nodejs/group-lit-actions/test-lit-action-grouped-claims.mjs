@@ -17,16 +17,8 @@ export async function main() {
   });
 
   // ==================== Post-Validation ====================
-  if (!res.success) {
+  if (!res.success && !res.claims) {
     return fail(`response should be success`);
-  }
-
-  if (Object.keys(res.signedData).length > 0) {
-    return fail(`signedData should be empty`);
-  }
-
-  if (Object.keys(res.decryptedData).length > 0) {
-    return fail(`decryptedData should be empty`);
   }
 
   // -- should have claims

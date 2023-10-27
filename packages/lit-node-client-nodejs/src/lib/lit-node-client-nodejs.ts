@@ -154,6 +154,7 @@ export class LitNodeClientNodeJs extends LitCore {
     const reqBody: JsonExecutionRequest = {
       ...(params.authSig && { authSig: params.authSig }),
       ...(params.sessionSigs && { sessionSigs: params.sessionSigs }),
+      ...(params.authMethods && {authMethods: params.authMethods}),
       jsParams: convertLitActionsParams(params.jsParams),
       // singleNode: params.singleNode ?? false,
       targetNodeRange: params.targetNodeRange ?? 0,
@@ -543,16 +544,16 @@ export class LitNodeClientNodeJs extends LitCore {
     // -- execute
     const urlWithPath = `${url}/web/execute`;
 
-    if (!authSig) {
-      throw new Error('authSig is required');
+    if (!authSig && !authMethods) {
+      throw new Error('authSig or authMethods are required');
     }
-
-    const data: JsonExecutionRequest = {
-      code,
-      ipfsId,
-      authSig,
-      jsParams,
-      authMethods,
+    let data: JsonExecutionRequest = {
+        authSig,
+        code,
+        ipfsId,
+        jsParams,
+        authMethods,
+        sessionSigs
     };
 
     return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
@@ -757,7 +758,7 @@ export class LitNodeClientNodeJs extends LitCore {
   ): Promise<
     SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises
   > => {
-    const { code, authSig, jsParams, debug, sessionSigs, targetNodeRange } =
+    const { code, authMethods, authSig, jsParams, debug, sessionSigs, targetNodeRange } =
       params;
 
     log('running runOnTargetedNodes:', targetNodeRange);
@@ -863,13 +864,14 @@ export class LitNodeClientNodeJs extends LitCore {
         this.getLitActionRequestBody(params);
 
       // -- choose the right signature
-      const sigToPassToNode = this.getAuthSigOrSessionAuthSig({
+      const sigToPassToNode = this.getAuthMaterial({
+        authMethods,
         authSig,
         sessionSigs,
         url,
       });
-
-      reqBody.authSig = sigToPassToNode;
+      
+      this.setAuthMaterial(reqBody, sigToPassToNode);
 
       // this return { url: string, data: JsonRequest }
       const singleNodePromise = this.getJsExecutionShares(
@@ -1276,6 +1278,7 @@ export class LitNodeClientNodeJs extends LitCore {
   executeJs = async (params: ExecuteJsProps): Promise<ExecuteJsResponse> => {
     // ========== Prepare Params ==========
     const {
+      authMethods,
       code,
       ipfsId,
       authSig,
@@ -1311,8 +1314,17 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
-    let res;
+    // the nodes will only accept a normal array type as a paramater due to serizalization issues with ArrayBuffer type.
+    // this loop below is to normalize the data to a basic array.
+    if (jsParams.toSign) {
+      let arr = [];
+      for (let i = 0; i < jsParams.toSign.length; i++) {
+        arr.push((jsParams.toSign as Buffer)[i]);
+      }
+      jsParams.toSign = arr;
+    }
 
+    let res;
     // -- only run on a single node
     if (targetNodeRange) {
       res = await this.runOnTargetedNodes(params);
@@ -1327,12 +1339,14 @@ export class LitNodeClientNodeJs extends LitCore {
       const requestId = this.getRequestId();
       const nodePromises = this.getNodePromises((url: string) => {
         // -- choose the right signature
-        let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
+        let sigToPassToNode = this.getAuthMaterial({
+          authMethods,
           authSig,
           sessionSigs,
           url,
         });
-        reqBody.authSig = sigToPassToNode;
+
+        this.setAuthMaterial(reqBody, sigToPassToNode);
 
         return this.getJsExecutionShares(url, reqBody, requestId);
       });
@@ -1492,7 +1506,7 @@ export class LitNodeClientNodeJs extends LitCore {
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- choose the right signature
-      let sigToPassToNode = this.getAuthSigOrSessionAuthSig({
+      let sigToPassToNode = this.getAuthMaterial({
         authSig,
         sessionSigs,
         url,
