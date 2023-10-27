@@ -536,7 +536,7 @@ export class LitNodeClientNodeJs extends LitCore {
     params: JsonExecutionRequest,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    const { code, ipfsId, authSig, jsParams, sessionSigs, authMethods } =
+    const { code, ipfsId, authSig, jsParams, authMethods } =
       params;
 
     log('getJsExecutionShares');
@@ -544,16 +544,15 @@ export class LitNodeClientNodeJs extends LitCore {
     // -- execute
     const urlWithPath = `${url}/web/execute`;
 
-    if (!authSig && !authMethods) {
-      throw new Error('authSig or authMethods are required');
+    if (!authSig) {
+      throw new Error('authSig or sessionSig is required');
     }
     let data: JsonExecutionRequest = {
         authSig,
         code,
         ipfsId,
         jsParams,
-        authMethods,
-        sessionSigs
+        authMethods
     };
 
     return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
