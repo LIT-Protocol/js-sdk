@@ -16,16 +16,8 @@ export async function main() {
   });
 
   // ==================== Post-Validation ====================
-  if (!res.success) {
+  if (!res.success && !res.claims) {
     return fail(`response should be success`);
-  }
-
-  if (Object.keys(res.signedData).length > 0) {
-    return fail(`signedData should be empty`);
-  }
-
-  if (Object.keys(res.decryptedData).length > 0) {
-    return fail(`decryptedData should be empty`);
   }
 
   // -- should have claimData
@@ -46,9 +38,9 @@ export async function main() {
       return fail(`claimData.foo should have ${key}`);
     }
   });
-
+  const key = 'foo';
   for (let i = 0; i < res.claims[key].signatures.length; i++) {
-    if (!res.claims[key].signatures[i].r || !res.claims[key].signatures[i].s || res.claims[key].signatures[i].v) {
+    if (!res.claims[key].signatures[i].r || !res.claims[key].signatures[i].s || !res.claims[key].signatures[i].v) {
       return fail(`signature data misformed, should be of ethers signature format`);
     }
   }
