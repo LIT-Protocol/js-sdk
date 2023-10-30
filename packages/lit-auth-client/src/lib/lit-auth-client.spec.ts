@@ -10,6 +10,7 @@ import {
   StytchOtpProvider
 } from '@lit-protocol/lit-auth-client';
 import { StytchOtpAuthenticateOptions } from '@lit-protocol/types';
+import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
 
 const isClass = (v: unknown) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
@@ -85,6 +86,30 @@ describe('initProvider', () => {
       ProviderType.WebAuthn
     );
     expect(provider).toBeInstanceOf(WebAuthnProvider);
+  });
+  
+  it('Should create Stytch auth factor', () => {
+    const provider = client.initProvider<StytchOtpProvider>(ProviderType.StytchOtp);
+    expect(provider).toBeInstanceOf(StytchOtpProvider);
+  });
+  it('Should create stytch auth factor providers email', () => {
+    const provider = client.initProvider<StytchAuthFactorOtpProvider<'email'>>(ProviderType.StytchEmailFactorOtp);
+    expect(provider).toBeInstanceOf(StytchAuthFactorOtpProvider<'email'>);
+  });
+  
+  it('Should Create stytch auth factor providers sms', () => {
+    const provider = client.initProvider<StytchAuthFactorOtpProvider<'sms'>>(ProviderType.StytchSmsFactorOtp);
+    expect(provider).toBeInstanceOf(StytchAuthFactorOtpProvider<'sms'>);
+  });
+
+  it('Should Create stytch auth factor providers whats app', () => {
+    const provider = client.initProvider<StytchAuthFactorOtpProvider<'whatsApp'>>(ProviderType.StytchWhatsAppFactorOtp);
+    expect(provider).toBeInstanceOf(StytchAuthFactorOtpProvider<'whatsApp'>);
+  });
+  
+  it('Should Create stytch auth factor providers totp', () => {
+    const provider = client.initProvider<StytchAuthFactorOtpProvider<'totp'>>(ProviderType.StytchEmailFactorOtp);
+    expect(provider).toBeInstanceOf(StytchAuthFactorOtpProvider<'totp'>);
   });
 });
 
