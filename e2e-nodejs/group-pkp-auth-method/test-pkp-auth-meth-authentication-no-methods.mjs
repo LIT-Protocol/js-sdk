@@ -15,39 +15,6 @@ const TO_SIGN = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEnc
 export async function main() {
   // ==================== Setup ====================
 
-  const litAuthClient = new LitAuthClient({
-    litRelayConfig: {
-      relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
-    },
-    version: 'V3',
-    litNodeClient: client,
-  });
-
-  // -- eth wallet
-  const authProvider = litAuthClient.initProvider(ProviderType.EthWallet);
-  const authMethod = {
-    authMethodType: AuthMethodType.EthWallet,
-    accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
-  };
-
-  let pkps = await authProvider.fetchPKPsThroughRelayer(authMethod);
-
-  if (pkps.length <= 0) {
-    try {
-      await authProvider.mintPKPThroughRelayer(authMethod);
-    } catch (e) {
-      return fail('Failed to mint PKP');
-    }
-    pkps = await authProvider.fetchPKPsThroughRelayer(authMethod);
-  }
-
-  const pkp = pkps[pkps.length - 1];
-
-  // convert BigNumber to string
-  pkp.tokenId = ethers.BigNumber.from(pkp.tokenId).toString();
-
-  const pkpPubKey = pkp.publicKey; 
-
   const pkpSignRes = await client?.executeJs({
     authSig: LITCONFIG.CONTROLLER_AUTHSIG,
     authMethods: [], 
