@@ -353,19 +353,17 @@ export class LitCore {
    * Get either auth sig or session auth sig
    *
    */
-  getAuthMaterial = ({
-    authMethods,
+  getSessionOrAuthSig = ({
     authSig,
     sessionSigs,
     url,
     mustHave = true,
   }: {
-    authMethods?: Array<Object>,
     authSig?: AuthSig;
     sessionSigs?: SessionSigsMap;
     url: string;
     mustHave?: boolean;
-  }): AuthSig | SessionSig | Object[] => {
+  }): AuthSig | SessionSig => {
 
     if (!authSig && !sessionSigs) {
       if (mustHave) {
@@ -393,27 +391,8 @@ export class LitCore {
       return sigToPassToNode;
     }
 
-    if (authMethods) {
-      return authMethods;
-    }
-
     return authSig!;
   };
-
-  /*
-    Here we do a check on the 'length' property of the object
-    returned to see if it is an array type
-    we cast to the array type to check as the union of types does not overlap
-  */
-  setAuthMaterial<T extends JsonExecutionRequest | JsonPkpSignRequest>(reqBody: T, authMaterial: AuthSig | SessionSig | Object[]): T {
-      if (!(authMaterial as Object[]).length){ 
-        reqBody.authSig = (authMaterial as AuthSig);
-      } else {
-        reqBody.authMethods = (authMaterial as Object[]);
-      }
- 
-      return reqBody;
-  }
 
   /**
    *
