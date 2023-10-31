@@ -19,6 +19,7 @@ export async function main() {
         sigName: "sig",
       });
     })();`,
+    authMethods: [],
     jsParams: {
       toSign: TO_SIGN,
       publicKey: LITCONFIG.PKP_PUBKEY,
