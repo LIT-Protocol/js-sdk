@@ -14,9 +14,10 @@ const TO_SIGN = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEnc
 
 export async function main() {
   // ==================== Setup ====================
+
   const pkpSignRes = await client?.executeJs({
-    authSig: LITCONFIG.CONTROLLER_AUTHSIG_2,
-    authMethods: [authMethod], 
+    authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+    authMethods: [], 
     code: `(async () => {
         const sigShare = await LitActions.signEcdsa({
           toSign,
@@ -59,8 +60,8 @@ export async function main() {
     return fail(`Missing or non matching auth sig address in Lit.Auth context`);
   }
 
-  if(pkpSignRes.response.authMethodContexts.length < 1) {
-    return fail('not enough authentication material in Lit.Auth context');
+  if(pkpSignRes.response.authMethodContexts.length > 0) {
+    return fail('should not have auth methods only authSigAddress');
   }
 
   // ==================== Success ====================

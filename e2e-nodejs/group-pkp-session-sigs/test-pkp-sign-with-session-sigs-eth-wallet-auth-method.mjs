@@ -27,7 +27,7 @@ export async function main() {
   const authProvider = litAuthClient.initProvider(ProviderType.EthWallet);
   const authMethod = {
     authMethodType: AuthMethodType.EthWallet,
-    accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
+    accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG_2),
   };
 
   let pkps = await authProvider.fetchPKPsThroughRelayer(authMethod);
@@ -91,6 +91,7 @@ export async function main() {
   const pkpWallet = new PKPEthersWallet({
     pkpPubKey: pkpPubKey,
     controllerSessionSigs: sessionSigs,
+    controllerAuthMethods: []
   });
 
   await pkpWallet.init();

@@ -10,6 +10,7 @@ export async function main() {
     code: `(async () => {
       Lit.Actions.claimKey({keyId: "foo"});
     })();`,
+    authMethods: [],
     jsParams: {
       // Nada!
     },

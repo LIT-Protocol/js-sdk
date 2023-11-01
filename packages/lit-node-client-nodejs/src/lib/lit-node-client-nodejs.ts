@@ -863,14 +863,13 @@ export class LitNodeClientNodeJs extends LitCore {
         this.getLitActionRequestBody(params);
 
       // -- choose the right signature
-      const sigToPassToNode = this.getAuthMaterial({
-        authMethods,
+      const sigToPassToNode = this.getSessionOrAuthSig({
         authSig,
         sessionSigs,
         url,
       });
       
-      this.setAuthMaterial(reqBody, sigToPassToNode);
+      reqBody.authSig = sigToPassToNode;
 
       // this return { url: string, data: JsonRequest }
       const singleNodePromise = this.getJsExecutionShares(
@@ -1338,14 +1337,13 @@ export class LitNodeClientNodeJs extends LitCore {
       const requestId = this.getRequestId();
       const nodePromises = this.getNodePromises((url: string) => {
         // -- choose the right signature
-        let sigToPassToNode = this.getAuthMaterial({
-          authMethods,
+        let sigToPassToNode = this.getSessionOrAuthSig({
           authSig,
           sessionSigs,
           url,
         });
 
-        this.setAuthMaterial(reqBody, sigToPassToNode);
+        reqBody.authSig = sigToPassToNode;
 
         return this.getJsExecutionShares(url, reqBody, requestId);
       });
@@ -1505,7 +1503,7 @@ export class LitNodeClientNodeJs extends LitCore {
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- choose the right signature
-      let sigToPassToNode = this.getAuthMaterial({
+      let sigToPassToNode = this.getSessionOrAuthSig({
         authSig,
         sessionSigs,
         url,

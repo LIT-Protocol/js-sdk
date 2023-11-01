@@ -31,6 +31,7 @@ export async function main() {
       const sigShares = await signMultipleSigs(numberOfSigs, toSign, publicKey);
 
     })();`,
+    authMethods: [],
     jsParams: {
       numberOfSigs: 2,
       toSign: TO_SIGN,
