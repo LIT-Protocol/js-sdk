@@ -53,6 +53,7 @@ import {
   SupportedJsonRequests,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+import { INTERNAL_DEFAULT_CONFIG } from '@lit-protocol/constants';
 
 export class LitCore {
   config: LitNodeClientConfig;
@@ -69,7 +70,16 @@ export class LitCore {
     const customConfig = args;
 
     // -- initialize default config
-    this.config = defaultLitnodeClientConfig;
+    switch (args.litNetwork) {
+      case 'cayenne':
+        this.config = defaultLitnodeClientConfig;
+        break;
+      case 'internalDev':
+        this.config = INTERNAL_DEFAULT_CONFIG as LitNodeClientConfig;
+        break;
+      default:
+        this.config = defaultLitnodeClientConfig;
+    }
 
     // -- initialize default auth callback
     // this.defaultAuthCallback = args?.defaultAuthCallback;
@@ -213,13 +223,10 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${
-              this.config.connectTimeout
-            }ms.  Could only connect to ${
-              Object.keys(this.serverKeys).length
-            } of ${
-              this.config.minNodeCount
-            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
+              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
+              } of ${this.config.minNodeCount
+              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             log(msg);
             reject(msg);
           }
@@ -319,10 +326,9 @@ export class LitCore {
       })
       .catch((error: NodeErrorV3) => {
         console.error(
-          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
-            error?.message || error?.details
-              ? `Error is ${error.message} - ${error.details}`
-              : ''
+          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error?.message || error?.details
+            ? `Error is ${error.message} - ${error.details}`
+            : ''
           }`
         );
         return Promise.reject(error);
