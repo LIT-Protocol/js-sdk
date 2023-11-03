@@ -7,4 +7,5 @@ export * from "./PKPNFT.sol/PKPNFT.ts";
 export * from "./RateLimitNFT.sol/RateLimitNFT.ts";
 export * from "./PKPHelper.sol/PKPHelper.ts";
 export * from "./PKPPermissions.sol/PKPPermissions.ts";
+export * from "./PKPNFTMetadata.sol/PKPNFTMetadata.ts";
 export * from "./Allowlist.sol/Allowlist.ts";
