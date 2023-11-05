@@ -294,7 +294,6 @@ export interface BaseJsonPkpSignRequest {
   pubKey: string;
 }
 
-
 export interface WithAuthMethodSigning extends BaseJsonPkpSignRequest {
   // auth methods to resolve
   authMethods: Array<AuthMethod>;
@@ -313,7 +312,10 @@ export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
   authMethods?: Array<AuthMethod>;
 }
 
-export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning | WithAuthMethodSigning;
+export type JsonPkpSignRequest =
+  | WithSessionSigsSigning
+  | WithAuthSigSigning
+  | WithAuthMethodSigning;
 
 /**
  * Struct in rust
@@ -556,7 +558,7 @@ export interface ExecuteJsResponse {
   decryptions: any[];
   response: string;
   logs: string;
-  claims?: Record<string, { signatures: Signature[], derivedKeyId: string }>;
+  claims?: Record<string, { signatures: Signature[]; derivedKeyId: string }>;
   debug?: {
     allNodeResponses: NodeResponse[];
     allNodeLogs: NodeLog[];
@@ -564,7 +566,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise { }
+export interface LitNodePromise {}
 
 export interface SendNodeCommand {
   url: string;
@@ -732,6 +734,7 @@ export interface NodeCommandServerKeysResponse {
   subnetPublicKey: any;
   networkPublicKey: any;
   networkPublicKeySet: any;
+  attestation: NodeAttestation;
 }
 
 export interface FormattedMultipleAccs {
@@ -764,8 +767,21 @@ export interface ValidateAndSignECDSA {
   auth_sig: AuthSig;
 }
 
-export interface HandshakeWithSgx {
+export interface HandshakeWithNode {
   url: string;
+  challenge: string;
+}
+
+export interface NodeAttestation {
+  type: string;
+  noonce: string;
+  data: {
+    INSTANCE_ID: string;
+    RELEASE_ID: string;
+    UNIX_TIME: string;
+  };
+  signatures: string[];
+  report: string;
 }
 
 export interface JsonHandshakeResponse {
@@ -1120,7 +1136,7 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export interface PKPEthersWalletProp extends PKPBaseProp { }
+export interface PKPEthersWalletProp extends PKPBaseProp {}
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
@@ -1481,7 +1497,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions { }
+export interface BaseAuthenticateOptions {}
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**

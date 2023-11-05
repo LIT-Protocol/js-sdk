@@ -4,7 +4,9 @@ import * as blsSdk from '@lit-protocol/bls-sdk';
 
 import { LIT_ERROR, SessionKeyPair, SigShare } from '@lit-protocol/constants';
 
-import * as wasmECDSA from '@lit-protocol/ecdsa-sdk';
+import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
+
+import * as sevSnpUtilsSdk from '@lit-protocol/sev-snp-utils-sdk';
 
 import { isBrowser, log, throwError } from '@lit-protocol/misc';
 
@@ -25,7 +27,8 @@ if (!globalThis.wasmExports) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
+        `✅ [BLS SDK] wasmExports loaded. ${
+          Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
       );
     }
@@ -33,7 +36,7 @@ if (!globalThis.wasmExports) {
 }
 
 if (!globalThis.wasmECDSA) {
-  let init = wasmECDSA.initWasmEcdsaSdk;
+  let init = ecdsaSdk.initWasmEcdsaSdk;
   let env;
 
   if (isBrowser()) {
@@ -47,13 +50,27 @@ if (!globalThis.wasmECDSA) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
+          Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );
     }
   });
 }
 
+if (!globalThis.wasmSevSnpUtils) {
+  sevSnpUtilsSdk.initWasmSevSnpUtilsSdk().then((exports) => {
+    globalThis.wasmSevSnpUtils = exports;
+
+    if (!globalThis.jestTesting) {
+      log(
+        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
+          Object.keys(exports).length
+        } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
+      );
+    }
+  });
+}
 
 /** ---------- Exports ---------- */
 
@@ -184,7 +201,10 @@ export const combineEcdsaShares = (
   const type = sigShares[0].sigType;
 
   if (!type) {
-    throw new Error("Sig type is not defined! Here's your sigShares:", sigShares);
+    throw new Error(
+      "Sig type is not defined! Here's your sigShares:",
+      sigShares
+    );
   }
 
   // the public key can come from any node - it obviously will be identical from each node
@@ -221,7 +241,7 @@ export const combineEcdsaShares = (
     let res: string = '';
     switch (type) {
       case SIGTYPE.EcdsaCaitSith:
-        res = wasmECDSA.combine_signature(validShares, 2);
+        res = ecdsaSdk.combine_signature(validShares, 2);
 
         try {
           sig = JSON.parse(res) as CombinedECDSASignature;
@@ -246,7 +266,7 @@ export const combineEcdsaShares = (
         }
         break;
       case SIGTYPE.ECDSCAITSITHP256:
-        res = wasmECDSA.combine_signature(validShares, 3);
+        res = ecdsaSdk.combine_signature(validShares, 3);
         log('response from combine_signature', res);
         sig = JSON.parse(res);
         break;
@@ -274,7 +294,7 @@ export const computeHDPubKey = (
   try {
     switch (sigType) {
       case SIGTYPE.EcdsaCaitSith:
-        return wasmECDSA.compute_public_key(keyId, pubkeys, 2);
+        return ecdsaSdk.compute_public_key(keyId, pubkeys, 2);
         defualt: throw new Error('Non supported signature type');
     }
   } catch (e) {
@@ -315,4 +335,66 @@ const _remapKeyShareForEcdsa = (share: SigShare): any[] => {
   }
 
   return newShare;
+};
+
+function base64ToBufferAsync(base64) {
+  var dataUrl = 'data:application/octet-binary;base64,' + base64;
+
+  return fetch(dataUrl)
+    .then((res) => res.arrayBuffer())
+    .then((buffer) => {
+      return new Uint8Array(buffer);
+    });
+}
+
+/**
+ *
+ * Check the attestation against AMD certs
+ *
+ * @param { NodeAttestation } attestation
+ * @param { string } challenge
+ *
+ * @returns { Promise<undefined> } A promise that throws if the attestation is invalid
+ */
+export const checkSevSnpAttestation = async (
+  attestation: NodeAttestation,
+  challenge: string
+) => {
+  /* attestation object looks like this:
+   "attestation": {
+      "type": "AMD_SEV_SNP",
+      "noonce": "RPFFYVWtSV37r9/VExEvma5xAjmPazJ4+AG51lT3cD0=",
+      "data": {
+          "INSTANCE_ID": "YzJjNmI3NjE=",
+          "RELEASE_ID": "ZmM1YzkyNTBjY2MxNTllNGEwM2QzOGZiNGRmMDdhNTM1OGE0NGEyN2NjNDkxYjBk",
+          "UNIX_TIME": "gqNFZQAAAAA="
+      },
+      "signatures": [
+          "MEQCIH4A2AhIi6GgedbNnmXVQFn+qx1tBppcsrEhmv4fK2vTAiAWhfHnJHPepkSoKzoxMc9Sc3wNtKyzEt1IJXdfqd0RgQEEouNBbEJ/Y5ZQNxtsJ1EfM+xOKzCnc1dSxSMXdCVTun8KDChld60axa7i6kCkUjDG7XrIRzaqjO3pHwbKOYSatQ=="
+      ],
+      "report": "AgAAAAAAAAAAAAMAAAAAAAEAAAAFEAABCwyQBQajBzX8XJJQzMFZ5KA9OPtN8HpTAAAAAAEAAAADAAAAAAAKqQEAAAAAAAAAAQAAAAAAAAD="
+  }
+  */
+
+  const { noonce, data, signatures, report, type } = attestation;
+  // base64 decode the noonce and compare it to the challenge
+  const decodedNoonce = Buffer.from(noonce, 'base64').toString('hex');
+  if (decodedNoonce !== challenge) {
+    throw new Error(
+      `Attestation noonce ${decodedNoonce} does not match challenge ${challenge}`
+    );
+  }
+
+  // console.log('report being verified', report);
+  // console.log('type: ', typeof report);
+
+  // // first try parsing it
+  // const parsed = sevSnpUtilsSdk.parse_attestation_report(report);
+  // console.log('parsed', parsed);
+
+  // const url = sevSnpUtilsSdk.get_vcek_url(report);
+  // console.log('vcek url', url);
+
+  // pass base64 encoded report to wasm wrapper
+  return sevSnpUtilsSdk.verify_attestation_report(report);
 };
