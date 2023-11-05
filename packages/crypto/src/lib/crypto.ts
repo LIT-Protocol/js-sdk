@@ -385,16 +385,6 @@ export const checkSevSnpAttestation = async (
     );
   }
 
-  // console.log('report being verified', report);
-  // console.log('type: ', typeof report);
-
-  // // first try parsing it
-  // const parsed = sevSnpUtilsSdk.parse_attestation_report(report);
-  // console.log('parsed', parsed);
-
-  // const url = sevSnpUtilsSdk.get_vcek_url(report);
-  // console.log('vcek url', url);
-
   // pass base64 encoded report to wasm wrapper
   return sevSnpUtilsSdk.verify_attestation_report(report);
 };
