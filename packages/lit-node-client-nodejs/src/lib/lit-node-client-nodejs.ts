@@ -79,7 +79,7 @@ import {
 
 import { computeAddress } from '@ethersproject/transactions';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-import { SiweMessage } from 'lit-siwe';
+import { generateNonce, SiweMessage } from 'lit-siwe';
 
 import { LitCore } from '@lit-protocol/core';
 import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
@@ -103,7 +103,7 @@ import { BigNumber, ethers, utils } from 'ethers';
 /** ---------- Main Export Class ---------- */
 
 export class LitNodeClientNodeJs extends LitCore {
-  defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
+  defaultAuthCallback?: (authSigParams: AuthCallbackParams, litNodeClient?: this) => Promise<AuthSig>;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -377,7 +377,7 @@ export class LitNodeClientNodeJs extends LitCore {
           switchChain,
           expiration,
           uri: sessionKeyUri,
-        });
+        }, this);
       }
 
       log("getWalletSig - flow 1.3")
@@ -427,7 +427,7 @@ export class LitNodeClientNodeJs extends LitCore {
           errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
         });
       }
-      authSig = await this.defaultAuthCallback(authCallbackParams);
+      authSig = await this.defaultAuthCallback(authCallbackParams, this);
     }
 
     // (TRY) to set walletSig to local storage
@@ -2103,6 +2103,7 @@ export class LitNodeClientNodeJs extends LitCore {
       chainId: params.chainId ?? 1,
       expirationTime: _expiration,
       resources: params.resources,
+      nonce: this.latest_blockhash || generateNonce()
     });
 
     let siweMessageStr: string = siweMessage.prepareMessage();

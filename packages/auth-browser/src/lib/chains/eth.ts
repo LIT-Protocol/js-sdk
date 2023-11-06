@@ -8,7 +8,7 @@ import {
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
 
-import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
+import { AuthSig, AuthCallbackParams, ILitNodeClient } from '@lit-protocol/types';
 
 import { ethers } from 'ethers';
 // import WalletConnectProvider from '@walletconnect/ethereum-provider';
@@ -22,7 +22,7 @@ import LitConnectModal from '../connect-modal/modal';
 
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
 
-import { SiweMessage } from 'lit-siwe';
+import { generateNonce, SiweMessage } from 'lit-siwe';
 import { getAddress } from 'ethers/lib/utils';
 
 // @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
@@ -457,6 +457,7 @@ export const disconnectWeb3 = (): void => {
  * Check and sign EVM auth message
  *
  * @param { CheckAndSignAuthParams }
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  * @returns
  */
 export const checkAndSignEVMAuthMessage = async ({
@@ -466,7 +467,8 @@ export const checkAndSignEVMAuthMessage = async ({
   expiration,
   uri,
   walletConnectProjectId,
-}: AuthCallbackParams): Promise<AuthSig> => {
+}: AuthCallbackParams,
+litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
   // -- check if it's nodejs
   if (isNode()) {
     log(
@@ -601,7 +603,7 @@ export const checkAndSignEVMAuthMessage = async ({
         resources,
         expiration: expirationString,
         uri,
-      });
+      }, litNodeClient);
     } catch (e: any) {
       log(e);
       return throwError({
@@ -634,7 +636,7 @@ export const checkAndSignEVMAuthMessage = async ({
       resources,
       expiration: expirationString,
       uri,
-    });
+    }, litNodeClient);
     log('7. authSig:', authSig);
 
     // -- 8. case: we are on the right wallet, but need to check the resources of the sig and re-sign if they don't match
@@ -649,7 +651,7 @@ export const checkAndSignEVMAuthMessage = async ({
         resources,
         expiration: expirationString,
         uri,
-      });
+      }, litNodeClient);
     }
     log('8. mustResign:', mustResign);
   }
@@ -666,7 +668,7 @@ export const checkAndSignEVMAuthMessage = async ({
       resources,
       expiration: expirationString,
       uri,
-    });
+    }, litNodeClient);
   }
 
   return authSig;
@@ -683,7 +685,8 @@ const _signAndGetAuth = async ({
   resources,
   expiration,
   uri,
-}: signAndSaveAuthParams): Promise<AuthSig> => {
+}: signAndSaveAuthParams,
+litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
   await signAndSaveAuthMessage({
     web3,
     account,
@@ -691,7 +694,7 @@ const _signAndGetAuth = async ({
     resources,
     expiration,
     uri,
-  });
+  }, litNodeClient);
 
   let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
 
@@ -716,7 +719,8 @@ const _signAndGetAuth = async ({
  * Sign the auth message with the user's wallet, and store it in localStorage.
  * Called by checkAndSignAuthMessage if the user does not have a signature stored.
  *
- * @param { signAndSaveAuthParams }}
+ * @param { signAndSaveAuthParams }
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  * @returns { AuthSig }
  */
 export const signAndSaveAuthMessage = async ({
@@ -726,7 +730,8 @@ export const signAndSaveAuthMessage = async ({
   resources,
   expiration,
   uri,
-}: signAndSaveAuthParams): Promise<AuthSig> => {
+}: signAndSaveAuthParams,
+litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
   // check if it's nodejs
   if (isNode()) {
     log('checkAndSignEVMAuthMessage is not supported in nodejs.');
@@ -745,6 +750,7 @@ export const signAndSaveAuthMessage = async ({
     version: '1',
     chainId,
     expirationTime: expiration,
+    nonce: litNodeClient?.latest_blockhash || generateNonce()
   };
 
   if (resources && resources.length > 0) {

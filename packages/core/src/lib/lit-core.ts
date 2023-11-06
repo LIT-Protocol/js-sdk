@@ -63,6 +63,7 @@ export class LitCore {
   networkPubKey: string | null;
   networkPubKeySet: string | null;
   hdRootPubkeys: string[] | null;
+  latest_blockhash: string | null;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -88,6 +89,7 @@ export class LitCore {
     this.networkPubKey = null;
     this.networkPubKeySet = null;
     this.hdRootPubkeys = null;
+    this.latest_blockhash = null;
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
@@ -146,6 +148,7 @@ export class LitCore {
             networkPubKey: resp.networkPublicKey,
             networkPubKeySet: resp.networkPublicKeySet,
             hdRootPubkeys: resp.hdRootPubkeys,
+            latest_blockhash: resp.latest_blockhash,
           };
 
           // -- validate returned keys
@@ -156,6 +159,10 @@ export class LitCore {
             keys.networkPubKeySet === 'ERR'
           ) {
             log('Error connecting to node. Detected "ERR" in keys', url, keys);
+          }
+
+          if (keys.latest_blockhash === "0x") {
+            log('Error getting latest blockhash from the node.');
           }
 
           this.serverKeys[url] = keys;
@@ -191,6 +198,11 @@ export class LitCore {
           this.hdRootPubkeys = mostCommonString(
             Object.values(this.serverKeys).map(
               (keysFromSingleNode: any) => keysFromSingleNode.hdRootPubkeys
+            )
+          );
+          this.latest_blockhash = mostCommonString(
+            Object.values(this.serverKeys).map(
+              (keysFromSingleNode: any) => keysFromSingleNode.latest_blockhash
             )
           );
           this.ready = true;

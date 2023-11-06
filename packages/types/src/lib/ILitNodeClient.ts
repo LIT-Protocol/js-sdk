@@ -33,6 +33,7 @@ export interface ILitNodeClient {
   subnetPubKey: string | null;
   networkPubKey: string | null;
   networkPubKeySet: string | null;
+  latest_blockhash: string | null;
 
   // ========== Constructor ==========
   // ** IMPORTANT !! You have to create your constructor when implementing this class **

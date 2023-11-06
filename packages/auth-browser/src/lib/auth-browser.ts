@@ -1,6 +1,6 @@
 import { ALL_LIT_CHAINS, LIT_ERROR, VMTYPE } from '@lit-protocol/constants';
 
-import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
+import { AuthCallbackParams, AuthSig, ILitNodeClient } from '@lit-protocol/types';
 
 import { throwError } from '@lit-protocol/misc';
 import { checkAndSignCosmosAuthMessage } from './chains/cosmos';
@@ -12,6 +12,7 @@ import { checkAndSignSolAuthMessage } from './chains/sol';
  * Check for an existing cryptographic authentication signature and create one of it does not exist.  This is used to prove ownership of a given crypto wallet address to the Lit nodes.  The result is stored in LocalStorage so the user doesn't have to sign every time they perform an operation.
  *
  * @param { AuthCallbackParams }
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
  *  @returns { AuthSig } The AuthSig created or retrieved
  */
@@ -23,7 +24,8 @@ export const checkAndSignAuthMessage = ({
   uri,
   cosmosWalletType,
   walletConnectProjectId,
-}: AuthCallbackParams): Promise<AuthSig> => {
+}: AuthCallbackParams,
+litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
   const chainInfo = ALL_LIT_CHAINS[chain];
 
   // -- validate: if chain info not found
@@ -44,6 +46,15 @@ export const checkAndSignAuthMessage = ({
 
   // -- check and sign auth message based on chain
   if (chainInfo.vmType === VMTYPE.EVM) {
+    // TODO: Uncomment below after the new node changes are deployed
+    // if (!litNodeClient) {
+    //   throwError({
+    //     message: 'litNodeClient not provided for EVM signing',
+    //     errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_PROVIDED.kind,
+    //     errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_PROVIDED.name,
+    //   });
+    // }
+
     return checkAndSignEVMAuthMessage({
       chain,
       resources,
@@ -51,7 +62,7 @@ export const checkAndSignAuthMessage = ({
       expiration,
       uri,
       walletConnectProjectId,
-    });
+    }, litNodeClient);
   } else if (chainInfo.vmType === VMTYPE.SVM) {
     return checkAndSignSolAuthMessage();
   } else if (chainInfo.vmType === VMTYPE.CVM) {
