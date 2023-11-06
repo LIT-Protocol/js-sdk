@@ -174,27 +174,32 @@ export class LitCore {
             });
           } else {
             // actually verify the attestation by checking the signature against AMD certs
-            log('Checking attestation against amd certs...');
-            const attestation = resp.attestation;
+            if (this.config.checkNodeAttestation) {
+              log('Checking attestation against amd certs...');
+              const attestation = resp.attestation;
 
-            try {
-              checkSevSnpAttestation(attestation, challenge).then(() => {
-                log(`Lit Node Attestation verified for ${url}`);
+              try {
+                checkSevSnpAttestation(attestation, challenge).then(() => {
+                  log(`Lit Node Attestation verified for ${url}`);
 
-                // only set server keys if attestation is valid
-                // so that we don't use this node if it's not valid
-                this.serverKeys[url] = keys;
-              });
-            } catch (e) {
-              console.error(
-                `Lit Node Attestation failed verification for ${url}`
-              );
-              console.error(e);
-              throwError({
-                message: `Lit Node Attestation failed verification for ${url}`,
-                errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
-                errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
-              });
+                  // only set server keys if attestation is valid
+                  // so that we don't use this node if it's not valid
+                  this.serverKeys[url] = keys;
+                });
+              } catch (e) {
+                console.error(
+                  `Lit Node Attestation failed verification for ${url}`
+                );
+                console.error(e);
+                throwError({
+                  message: `Lit Node Attestation failed verification for ${url}`,
+                  errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
+                  errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
+                });
+              }
+            } else {
+              // don't check attestation, just set server keys
+              this.serverKeys[url] = keys;
             }
           }
         })
