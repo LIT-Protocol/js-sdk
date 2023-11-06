@@ -261,6 +261,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
       sessionSigs: this.controllerSessionSigs,
       authSig: this.controllerAuthSig,
+      authMethods: this.controllerAuthMethods,
       jsParams: {
         ...{
           toSign,
