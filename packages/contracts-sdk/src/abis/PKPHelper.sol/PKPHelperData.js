@@ -1,850 +1,850 @@
 export const PKPHelperData = {
-  "date": "2023-10-03T01:28:09.000Z",
-  "address": "0xDe905Fde36562270AA6FEeBAbC5aB1f440f733c2",
-  "contractName": "PKPHelper",
-  "abi": [
+  date: '2023-10-03T01:28:09.000Z',
+  address: '0xDe905Fde36562270AA6FEeBAbC5aB1f440f733c2',
+  contractName: 'PKPHelper',
+  abi: [
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "_resolver",
-          "type": "address"
+          internalType: 'address',
+          name: '_resolver',
+          type: 'address',
         },
         {
-          "internalType": "enum ContractResolver.Env",
-          "name": "_env",
-          "type": "uint8"
-        }
+          internalType: 'enum ContractResolver.Env',
+          name: '_env',
+          type: 'uint8',
+        },
       ],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
+      stateMutability: 'nonpayable',
+      type: 'constructor',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": false,
-          "internalType": "address",
-          "name": "newResolverAddress",
-          "type": "address"
-        }
+          indexed: false,
+          internalType: 'address',
+          name: 'newResolverAddress',
+          type: 'address',
+        },
       ],
-      "name": "ContractResolverAddressSet",
-      "type": "event"
+      name: 'ContractResolverAddressSet',
+      type: 'event',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "previousOwner",
-          "type": "address"
+          indexed: true,
+          internalType: 'address',
+          name: 'previousOwner',
+          type: 'address',
         },
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
+          indexed: true,
+          internalType: 'address',
+          name: 'newOwner',
+          type: 'address',
+        },
       ],
-      "name": "OwnershipTransferred",
-      "type": "event"
+      name: 'OwnershipTransferred',
+      type: 'event',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "role",
-          "type": "bytes32"
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'role',
+          type: 'bytes32',
         },
         {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "previousAdminRole",
-          "type": "bytes32"
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'previousAdminRole',
+          type: 'bytes32',
         },
         {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "newAdminRole",
-          "type": "bytes32"
-        }
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'newAdminRole',
+          type: 'bytes32',
+        },
       ],
-      "name": "RoleAdminChanged",
-      "type": "event"
+      name: 'RoleAdminChanged',
+      type: 'event',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "role",
-          "type": "bytes32"
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'role',
+          type: 'bytes32',
         },
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "account",
-          "type": "address"
+          indexed: true,
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
         },
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "sender",
-          "type": "address"
-        }
+          indexed: true,
+          internalType: 'address',
+          name: 'sender',
+          type: 'address',
+        },
       ],
-      "name": "RoleGranted",
-      "type": "event"
+      name: 'RoleGranted',
+      type: 'event',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "role",
-          "type": "bytes32"
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'role',
+          type: 'bytes32',
         },
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "account",
-          "type": "address"
+          indexed: true,
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
         },
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "sender",
-          "type": "address"
-        }
+          indexed: true,
+          internalType: 'address',
+          name: 'sender',
+          type: 'address',
+        },
       ],
-      "name": "RoleRevoked",
-      "type": "event"
+      name: 'RoleRevoked',
+      type: 'event',
     },
     {
-      "inputs": [],
-      "name": "DEFAULT_ADMIN_ROLE",
-      "outputs": [
+      inputs: [],
+      name: 'DEFAULT_ADMIN_ROLE',
+      outputs: [
         {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
+          internalType: 'bytes32',
+          name: '',
+          type: 'bytes32',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "components": [
+          components: [
             {
-              "internalType": "uint256",
-              "name": "keyType",
-              "type": "uint256"
+              internalType: 'uint256',
+              name: 'keyType',
+              type: 'uint256',
             },
             {
-              "internalType": "bytes32",
-              "name": "derivedKeyId",
-              "type": "bytes32"
+              internalType: 'bytes32',
+              name: 'derivedKeyId',
+              type: 'bytes32',
             },
             {
-              "components": [
+              components: [
                 {
-                  "internalType": "bytes32",
-                  "name": "r",
-                  "type": "bytes32"
+                  internalType: 'bytes32',
+                  name: 'r',
+                  type: 'bytes32',
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "s",
-                  "type": "bytes32"
+                  internalType: 'bytes32',
+                  name: 's',
+                  type: 'bytes32',
                 },
                 {
-                  "internalType": "uint8",
-                  "name": "v",
-                  "type": "uint8"
-                }
+                  internalType: 'uint8',
+                  name: 'v',
+                  type: 'uint8',
+                },
               ],
-              "internalType": "struct IPubkeyRouter.Signature[]",
-              "name": "signatures",
-              "type": "tuple[]"
-            }
+              internalType: 'struct IPubkeyRouter.Signature[]',
+              name: 'signatures',
+              type: 'tuple[]',
+            },
           ],
-          "internalType": "struct LibPKPNFTStorage.ClaimMaterial",
-          "name": "claimMaterial",
-          "type": "tuple"
+          internalType: 'struct LibPKPNFTStorage.ClaimMaterial',
+          name: 'claimMaterial',
+          type: 'tuple',
         },
         {
-          "components": [
+          components: [
             {
-              "internalType": "uint256",
-              "name": "keyType",
-              "type": "uint256"
+              internalType: 'uint256',
+              name: 'keyType',
+              type: 'uint256',
             },
             {
-              "internalType": "bytes[]",
-              "name": "permittedIpfsCIDs",
-              "type": "bytes[]"
+              internalType: 'bytes[]',
+              name: 'permittedIpfsCIDs',
+              type: 'bytes[]',
             },
             {
-              "internalType": "uint256[][]",
-              "name": "permittedIpfsCIDScopes",
-              "type": "uint256[][]"
+              internalType: 'uint256[][]',
+              name: 'permittedIpfsCIDScopes',
+              type: 'uint256[][]',
             },
             {
-              "internalType": "address[]",
-              "name": "permittedAddresses",
-              "type": "address[]"
+              internalType: 'address[]',
+              name: 'permittedAddresses',
+              type: 'address[]',
             },
             {
-              "internalType": "uint256[][]",
-              "name": "permittedAddressScopes",
-              "type": "uint256[][]"
+              internalType: 'uint256[][]',
+              name: 'permittedAddressScopes',
+              type: 'uint256[][]',
             },
             {
-              "internalType": "uint256[]",
-              "name": "permittedAuthMethodTypes",
-              "type": "uint256[]"
+              internalType: 'uint256[]',
+              name: 'permittedAuthMethodTypes',
+              type: 'uint256[]',
             },
             {
-              "internalType": "bytes[]",
-              "name": "permittedAuthMethodIds",
-              "type": "bytes[]"
+              internalType: 'bytes[]',
+              name: 'permittedAuthMethodIds',
+              type: 'bytes[]',
             },
             {
-              "internalType": "bytes[]",
-              "name": "permittedAuthMethodPubkeys",
-              "type": "bytes[]"
+              internalType: 'bytes[]',
+              name: 'permittedAuthMethodPubkeys',
+              type: 'bytes[]',
             },
             {
-              "internalType": "uint256[][]",
-              "name": "permittedAuthMethodScopes",
-              "type": "uint256[][]"
+              internalType: 'uint256[][]',
+              name: 'permittedAuthMethodScopes',
+              type: 'uint256[][]',
             },
             {
-              "internalType": "bool",
-              "name": "addPkpEthAddressAsPermittedAddress",
-              "type": "bool"
+              internalType: 'bool',
+              name: 'addPkpEthAddressAsPermittedAddress',
+              type: 'bool',
             },
             {
-              "internalType": "bool",
-              "name": "sendPkpToItself",
-              "type": "bool"
-            }
+              internalType: 'bool',
+              name: 'sendPkpToItself',
+              type: 'bool',
+            },
           ],
-          "internalType": "struct PKPHelper.AuthMethodData",
-          "name": "authMethodData",
-          "type": "tuple"
-        }
+          internalType: 'struct PKPHelper.AuthMethodData',
+          name: 'authMethodData',
+          type: 'tuple',
+        },
       ],
-      "name": "claimAndMintNextAndAddAuthMethods",
-      "outputs": [
+      name: 'claimAndMintNextAndAddAuthMethods',
+      outputs: [
         {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
       ],
-      "stateMutability": "payable",
-      "type": "function"
+      stateMutability: 'payable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "components": [
+          components: [
             {
-              "internalType": "uint256",
-              "name": "keyType",
-              "type": "uint256"
+              internalType: 'uint256',
+              name: 'keyType',
+              type: 'uint256',
             },
             {
-              "internalType": "bytes32",
-              "name": "derivedKeyId",
-              "type": "bytes32"
+              internalType: 'bytes32',
+              name: 'derivedKeyId',
+              type: 'bytes32',
             },
             {
-              "components": [
+              components: [
                 {
-                  "internalType": "bytes32",
-                  "name": "r",
-                  "type": "bytes32"
+                  internalType: 'bytes32',
+                  name: 'r',
+                  type: 'bytes32',
                 },
                 {
-                  "internalType": "bytes32",
-                  "name": "s",
-                  "type": "bytes32"
+                  internalType: 'bytes32',
+                  name: 's',
+                  type: 'bytes32',
                 },
                 {
-                  "internalType": "uint8",
-                  "name": "v",
-                  "type": "uint8"
-                }
+                  internalType: 'uint8',
+                  name: 'v',
+                  type: 'uint8',
+                },
               ],
-              "internalType": "struct IPubkeyRouter.Signature[]",
-              "name": "signatures",
-              "type": "tuple[]"
-            }
+              internalType: 'struct IPubkeyRouter.Signature[]',
+              name: 'signatures',
+              type: 'tuple[]',
+            },
           ],
-          "internalType": "struct LibPKPNFTStorage.ClaimMaterial",
-          "name": "claimMaterial",
-          "type": "tuple"
+          internalType: 'struct LibPKPNFTStorage.ClaimMaterial',
+          name: 'claimMaterial',
+          type: 'tuple',
         },
         {
-          "components": [
+          components: [
             {
-              "internalType": "uint256",
-              "name": "keyType",
-              "type": "uint256"
+              internalType: 'uint256',
+              name: 'keyType',
+              type: 'uint256',
             },
             {
-              "internalType": "bytes[]",
-              "name": "permittedIpfsCIDs",
-              "type": "bytes[]"
+              internalType: 'bytes[]',
+              name: 'permittedIpfsCIDs',
+              type: 'bytes[]',
             },
             {
-              "internalType": "uint256[][]",
-              "name": "permittedIpfsCIDScopes",
-              "type": "uint256[][]"
+              internalType: 'uint256[][]',
+              name: 'permittedIpfsCIDScopes',
+              type: 'uint256[][]',
             },
             {
-              "internalType": "address[]",
-              "name": "permittedAddresses",
-              "type": "address[]"
+              internalType: 'address[]',
+              name: 'permittedAddresses',
+              type: 'address[]',
             },
             {
-              "internalType": "uint256[][]",
-              "name": "permittedAddressScopes",
-              "type": "uint256[][]"
+              internalType: 'uint256[][]',
+              name: 'permittedAddressScopes',
+              type: 'uint256[][]',
             },
             {
-              "internalType": "uint256[]",
-              "name": "permittedAuthMethodTypes",
-              "type": "uint256[]"
+              internalType: 'uint256[]',
+              name: 'permittedAuthMethodTypes',
+              type: 'uint256[]',
             },
             {
-              "internalType": "bytes[]",
-              "name": "permittedAuthMethodIds",
-              "type": "bytes[]"
+              internalType: 'bytes[]',
+              name: 'permittedAuthMethodIds',
+              type: 'bytes[]',
             },
             {
-              "internalType": "bytes[]",
-              "name": "permittedAuthMethodPubkeys",
-              "type": "bytes[]"
+              internalType: 'bytes[]',
+              name: 'permittedAuthMethodPubkeys',
+              type: 'bytes[]',
             },
             {
-              "internalType": "uint256[][]",
-              "name": "permittedAuthMethodScopes",
-              "type": "uint256[][]"
+              internalType: 'uint256[][]',
+              name: 'permittedAuthMethodScopes',
+              type: 'uint256[][]',
             },
             {
-              "internalType": "bool",
-              "name": "addPkpEthAddressAsPermittedAddress",
-              "type": "bool"
+              internalType: 'bool',
+              name: 'addPkpEthAddressAsPermittedAddress',
+              type: 'bool',
             },
             {
-              "internalType": "bool",
-              "name": "sendPkpToItself",
-              "type": "bool"
-            }
+              internalType: 'bool',
+              name: 'sendPkpToItself',
+              type: 'bool',
+            },
           ],
-          "internalType": "struct PKPHelper.AuthMethodData",
-          "name": "authMethodData",
-          "type": "tuple"
-        }
+          internalType: 'struct PKPHelper.AuthMethodData',
+          name: 'authMethodData',
+          type: 'tuple',
+        },
       ],
-      "name": "claimAndMintNextAndAddAuthMethodsWithTypes",
-      "outputs": [
+      name: 'claimAndMintNextAndAddAuthMethodsWithTypes',
+      outputs: [
         {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
       ],
-      "stateMutability": "payable",
-      "type": "function"
+      stateMutability: 'payable',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "contractResolver",
-      "outputs": [
+      inputs: [],
+      name: 'contractResolver',
+      outputs: [
         {
-          "internalType": "contract ContractResolver",
-          "name": "",
-          "type": "address"
-        }
+          internalType: 'contract ContractResolver',
+          name: '',
+          type: 'address',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "env",
-      "outputs": [
+      inputs: [],
+      name: 'env',
+      outputs: [
         {
-          "internalType": "enum ContractResolver.Env",
-          "name": "",
-          "type": "uint8"
-        }
+          internalType: 'enum ContractResolver.Env',
+          name: '',
+          type: 'uint8',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "getDomainWalletRegistry",
-      "outputs": [
+      inputs: [],
+      name: 'getDomainWalletRegistry',
+      outputs: [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "getPKPNftMetdataAddress",
-      "outputs": [
+      inputs: [],
+      name: 'getPKPNftMetdataAddress',
+      outputs: [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "getPkpNftAddress",
-      "outputs": [
+      inputs: [],
+      name: 'getPkpNftAddress',
+      outputs: [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "getPkpPermissionsAddress",
-      "outputs": [
+      inputs: [],
+      name: 'getPkpPermissionsAddress',
+      outputs: [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "bytes32",
-          "name": "role",
-          "type": "bytes32"
-        }
+          internalType: 'bytes32',
+          name: 'role',
+          type: 'bytes32',
+        },
       ],
-      "name": "getRoleAdmin",
-      "outputs": [
+      name: 'getRoleAdmin',
+      outputs: [
         {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
+          internalType: 'bytes32',
+          name: '',
+          type: 'bytes32',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "bytes32",
-          "name": "role",
-          "type": "bytes32"
+          internalType: 'bytes32',
+          name: 'role',
+          type: 'bytes32',
         },
         {
-          "internalType": "address",
-          "name": "account",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
+        },
       ],
-      "name": "grantRole",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'grantRole',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "bytes32",
-          "name": "role",
-          "type": "bytes32"
+          internalType: 'bytes32',
+          name: 'role',
+          type: 'bytes32',
         },
         {
-          "internalType": "address",
-          "name": "account",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
+        },
       ],
-      "name": "hasRole",
-      "outputs": [
+      name: 'hasRole',
+      outputs: [
         {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "uint256",
-          "name": "keyType",
-          "type": "uint256"
+          internalType: 'uint256',
+          name: 'keyType',
+          type: 'uint256',
         },
         {
-          "internalType": "uint256[]",
-          "name": "permittedAuthMethodTypes",
-          "type": "uint256[]"
+          internalType: 'uint256[]',
+          name: 'permittedAuthMethodTypes',
+          type: 'uint256[]',
         },
         {
-          "internalType": "bytes[]",
-          "name": "permittedAuthMethodIds",
-          "type": "bytes[]"
+          internalType: 'bytes[]',
+          name: 'permittedAuthMethodIds',
+          type: 'bytes[]',
         },
         {
-          "internalType": "bytes[]",
-          "name": "permittedAuthMethodPubkeys",
-          "type": "bytes[]"
+          internalType: 'bytes[]',
+          name: 'permittedAuthMethodPubkeys',
+          type: 'bytes[]',
         },
         {
-          "internalType": "uint256[][]",
-          "name": "permittedAuthMethodScopes",
-          "type": "uint256[][]"
+          internalType: 'uint256[][]',
+          name: 'permittedAuthMethodScopes',
+          type: 'uint256[][]',
         },
         {
-          "internalType": "bool",
-          "name": "addPkpEthAddressAsPermittedAddress",
-          "type": "bool"
+          internalType: 'bool',
+          name: 'addPkpEthAddressAsPermittedAddress',
+          type: 'bool',
         },
         {
-          "internalType": "bool",
-          "name": "sendPkpToItself",
-          "type": "bool"
-        }
+          internalType: 'bool',
+          name: 'sendPkpToItself',
+          type: 'bool',
+        },
       ],
-      "name": "mintNextAndAddAuthMethods",
-      "outputs": [
+      name: 'mintNextAndAddAuthMethods',
+      outputs: [
         {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
       ],
-      "stateMutability": "payable",
-      "type": "function"
+      stateMutability: 'payable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "uint256",
-          "name": "keyType",
-          "type": "uint256"
+          internalType: 'uint256',
+          name: 'keyType',
+          type: 'uint256',
         },
         {
-          "internalType": "bytes[]",
-          "name": "permittedIpfsCIDs",
-          "type": "bytes[]"
+          internalType: 'bytes[]',
+          name: 'permittedIpfsCIDs',
+          type: 'bytes[]',
         },
         {
-          "internalType": "uint256[][]",
-          "name": "permittedIpfsCIDScopes",
-          "type": "uint256[][]"
+          internalType: 'uint256[][]',
+          name: 'permittedIpfsCIDScopes',
+          type: 'uint256[][]',
         },
         {
-          "internalType": "address[]",
-          "name": "permittedAddresses",
-          "type": "address[]"
+          internalType: 'address[]',
+          name: 'permittedAddresses',
+          type: 'address[]',
         },
         {
-          "internalType": "uint256[][]",
-          "name": "permittedAddressScopes",
-          "type": "uint256[][]"
+          internalType: 'uint256[][]',
+          name: 'permittedAddressScopes',
+          type: 'uint256[][]',
         },
         {
-          "internalType": "uint256[]",
-          "name": "permittedAuthMethodTypes",
-          "type": "uint256[]"
+          internalType: 'uint256[]',
+          name: 'permittedAuthMethodTypes',
+          type: 'uint256[]',
         },
         {
-          "internalType": "bytes[]",
-          "name": "permittedAuthMethodIds",
-          "type": "bytes[]"
+          internalType: 'bytes[]',
+          name: 'permittedAuthMethodIds',
+          type: 'bytes[]',
         },
         {
-          "internalType": "bytes[]",
-          "name": "permittedAuthMethodPubkeys",
-          "type": "bytes[]"
+          internalType: 'bytes[]',
+          name: 'permittedAuthMethodPubkeys',
+          type: 'bytes[]',
         },
         {
-          "internalType": "uint256[][]",
-          "name": "permittedAuthMethodScopes",
-          "type": "uint256[][]"
+          internalType: 'uint256[][]',
+          name: 'permittedAuthMethodScopes',
+          type: 'uint256[][]',
         },
         {
-          "internalType": "bool",
-          "name": "addPkpEthAddressAsPermittedAddress",
-          "type": "bool"
+          internalType: 'bool',
+          name: 'addPkpEthAddressAsPermittedAddress',
+          type: 'bool',
         },
         {
-          "internalType": "bool",
-          "name": "sendPkpToItself",
-          "type": "bool"
-        }
+          internalType: 'bool',
+          name: 'sendPkpToItself',
+          type: 'bool',
+        },
       ],
-      "name": "mintNextAndAddAuthMethodsWithTypes",
-      "outputs": [
+      name: 'mintNextAndAddAuthMethodsWithTypes',
+      outputs: [
         {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
       ],
-      "stateMutability": "payable",
-      "type": "function"
+      stateMutability: 'payable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "uint256",
-          "name": "keyType",
-          "type": "uint256"
+          internalType: 'uint256',
+          name: 'keyType',
+          type: 'uint256',
         },
         {
-          "internalType": "uint256[]",
-          "name": "permittedAuthMethodTypes",
-          "type": "uint256[]"
+          internalType: 'uint256[]',
+          name: 'permittedAuthMethodTypes',
+          type: 'uint256[]',
         },
         {
-          "internalType": "bytes[]",
-          "name": "permittedAuthMethodIds",
-          "type": "bytes[]"
+          internalType: 'bytes[]',
+          name: 'permittedAuthMethodIds',
+          type: 'bytes[]',
         },
         {
-          "internalType": "bytes[]",
-          "name": "permittedAuthMethodPubkeys",
-          "type": "bytes[]"
+          internalType: 'bytes[]',
+          name: 'permittedAuthMethodPubkeys',
+          type: 'bytes[]',
         },
         {
-          "internalType": "uint256[][]",
-          "name": "permittedAuthMethodScopes",
-          "type": "uint256[][]"
+          internalType: 'uint256[][]',
+          name: 'permittedAuthMethodScopes',
+          type: 'uint256[][]',
         },
         {
-          "internalType": "string[]",
-          "name": "nftMetadata",
-          "type": "string[]"
+          internalType: 'string[]',
+          name: 'nftMetadata',
+          type: 'string[]',
         },
         {
-          "internalType": "bool",
-          "name": "addPkpEthAddressAsPermittedAddress",
-          "type": "bool"
+          internalType: 'bool',
+          name: 'addPkpEthAddressAsPermittedAddress',
+          type: 'bool',
         },
         {
-          "internalType": "bool",
-          "name": "sendPkpToItself",
-          "type": "bool"
-        }
+          internalType: 'bool',
+          name: 'sendPkpToItself',
+          type: 'bool',
+        },
       ],
-      "name": "mintNextAndAddDomainWalletMetadata",
-      "outputs": [
+      name: 'mintNextAndAddDomainWalletMetadata',
+      outputs: [
         {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
       ],
-      "stateMutability": "payable",
-      "type": "function"
+      stateMutability: 'payable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
+          internalType: 'address',
+          name: '',
+          type: 'address',
         },
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
+          internalType: 'address',
+          name: '',
+          type: 'address',
         },
         {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
         },
         {
-          "internalType": "bytes",
-          "name": "",
-          "type": "bytes"
-        }
+          internalType: 'bytes',
+          name: '',
+          type: 'bytes',
+        },
       ],
-      "name": "onERC721Received",
-      "outputs": [
+      name: 'onERC721Received',
+      outputs: [
         {
-          "internalType": "bytes4",
-          "name": "",
-          "type": "bytes4"
-        }
+          internalType: 'bytes4',
+          name: '',
+          type: 'bytes4',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
+      inputs: [],
+      name: 'owner',
+      outputs: [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        }
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
+        },
       ],
-      "name": "removePkpMetadata",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'removePkpMetadata',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "renounceOwnership",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      inputs: [],
+      name: 'renounceOwnership',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "bytes32",
-          "name": "role",
-          "type": "bytes32"
+          internalType: 'bytes32',
+          name: 'role',
+          type: 'bytes32',
         },
         {
-          "internalType": "address",
-          "name": "account",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
+        },
       ],
-      "name": "renounceRole",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'renounceRole',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "bytes32",
-          "name": "role",
-          "type": "bytes32"
+          internalType: 'bytes32',
+          name: 'role',
+          type: 'bytes32',
         },
         {
-          "internalType": "address",
-          "name": "account",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
+        },
       ],
-      "name": "revokeRole",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'revokeRole',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "newResolverAddress",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'newResolverAddress',
+          type: 'address',
+        },
       ],
-      "name": "setContractResolver",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'setContractResolver',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
         },
         {
-          "internalType": "string[]",
-          "name": "nftMetadata",
-          "type": "string[]"
-        }
+          internalType: 'string[]',
+          name: 'nftMetadata',
+          type: 'string[]',
+        },
       ],
-      "name": "setPkpMetadata",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'setPkpMetadata',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "bytes4",
-          "name": "interfaceId",
-          "type": "bytes4"
-        }
+          internalType: 'bytes4',
+          name: 'interfaceId',
+          type: 'bytes4',
+        },
       ],
-      "name": "supportsInterface",
-      "outputs": [
+      name: 'supportsInterface',
+      outputs: [
         {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'newOwner',
+          type: 'address',
+        },
       ],
-      "name": "transferOwnership",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }
-  ]
-}
+      name: 'transferOwnership',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+  ],
+};

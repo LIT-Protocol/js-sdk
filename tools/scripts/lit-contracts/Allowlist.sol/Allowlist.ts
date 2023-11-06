@@ -11,126 +11,126 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from "ethers";
+} from 'ethers';
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+} from '@ethersproject/abi';
+import type { Listener, Provider } from '@ethersproject/providers';
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from "./common";
+} from './common';
 
 export interface AllowlistInterface extends utils.Interface {
   functions: {
-    "addAdmin(address)": FunctionFragment;
-    "allowAll()": FunctionFragment;
-    "allowedItems(bytes32)": FunctionFragment;
-    "isAllowed(bytes32)": FunctionFragment;
-    "owner()": FunctionFragment;
-    "removeAdmin(address)": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
-    "setAllowAll(bool)": FunctionFragment;
-    "setAllowed(bytes32)": FunctionFragment;
-    "setNotAllowed(bytes32)": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
+    'addAdmin(address)': FunctionFragment;
+    'allowAll()': FunctionFragment;
+    'allowedItems(bytes32)': FunctionFragment;
+    'isAllowed(bytes32)': FunctionFragment;
+    'owner()': FunctionFragment;
+    'removeAdmin(address)': FunctionFragment;
+    'renounceOwnership()': FunctionFragment;
+    'setAllowAll(bool)': FunctionFragment;
+    'setAllowed(bytes32)': FunctionFragment;
+    'setNotAllowed(bytes32)': FunctionFragment;
+    'transferOwnership(address)': FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "addAdmin"
-      | "allowAll"
-      | "allowedItems"
-      | "isAllowed"
-      | "owner"
-      | "removeAdmin"
-      | "renounceOwnership"
-      | "setAllowAll"
-      | "setAllowed"
-      | "setNotAllowed"
-      | "transferOwnership"
+      | 'addAdmin'
+      | 'allowAll'
+      | 'allowedItems'
+      | 'isAllowed'
+      | 'owner'
+      | 'removeAdmin'
+      | 'renounceOwnership'
+      | 'setAllowAll'
+      | 'setAllowed'
+      | 'setNotAllowed'
+      | 'transferOwnership'
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: "addAdmin", values: [string]): string;
-  encodeFunctionData(functionFragment: "allowAll", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'addAdmin', values: [string]): string;
+  encodeFunctionData(functionFragment: 'allowAll', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "allowedItems",
+    functionFragment: 'allowedItems',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "isAllowed",
+    functionFragment: 'isAllowed',
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(functionFragment: "removeAdmin", values: [string]): string;
+  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'removeAdmin', values: [string]): string;
   encodeFunctionData(
-    functionFragment: "renounceOwnership",
+    functionFragment: 'renounceOwnership',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "setAllowAll",
+    functionFragment: 'setAllowAll',
     values: [boolean]
   ): string;
   encodeFunctionData(
-    functionFragment: "setAllowed",
+    functionFragment: 'setAllowed',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "setNotAllowed",
+    functionFragment: 'setNotAllowed',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "transferOwnership",
+    functionFragment: 'transferOwnership',
     values: [string]
   ): string;
 
-  decodeFunctionResult(functionFragment: "addAdmin", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "allowAll", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'addAdmin', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'allowAll', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "allowedItems",
+    functionFragment: 'allowedItems',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "isAllowed", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'isAllowed', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "removeAdmin",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceOwnership",
+    functionFragment: 'removeAdmin',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setAllowAll",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "setAllowed", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "setNotAllowed",
+    functionFragment: 'renounceOwnership',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "transferOwnership",
+    functionFragment: 'setAllowAll',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'setAllowed', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'setNotAllowed',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'transferOwnership',
     data: BytesLike
   ): Result;
 
   events: {
-    "AdminAdded(address)": EventFragment;
-    "AdminRemoved(address)": EventFragment;
-    "ItemAllowed(bytes32)": EventFragment;
-    "ItemNotAllowed(bytes32)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
+    'AdminAdded(address)': EventFragment;
+    'AdminRemoved(address)': EventFragment;
+    'ItemAllowed(bytes32)': EventFragment;
+    'ItemNotAllowed(bytes32)': EventFragment;
+    'OwnershipTransferred(address,address)': EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "AdminAdded"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "AdminRemoved"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ItemAllowed"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ItemNotAllowed"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'AdminAdded'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'AdminRemoved'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ItemAllowed'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ItemNotAllowed'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
 }
 
 export interface AdminAddedEventObject {
@@ -319,21 +319,21 @@ export interface Allowlist extends BaseContract {
   };
 
   filters: {
-    "AdminAdded(address)"(newAdmin?: string | null): AdminAddedEventFilter;
+    'AdminAdded(address)'(newAdmin?: string | null): AdminAddedEventFilter;
     AdminAdded(newAdmin?: string | null): AdminAddedEventFilter;
 
-    "AdminRemoved(address)"(newAdmin?: string | null): AdminRemovedEventFilter;
+    'AdminRemoved(address)'(newAdmin?: string | null): AdminRemovedEventFilter;
     AdminRemoved(newAdmin?: string | null): AdminRemovedEventFilter;
 
-    "ItemAllowed(bytes32)"(key?: BytesLike | null): ItemAllowedEventFilter;
+    'ItemAllowed(bytes32)'(key?: BytesLike | null): ItemAllowedEventFilter;
     ItemAllowed(key?: BytesLike | null): ItemAllowedEventFilter;
 
-    "ItemNotAllowed(bytes32)"(
+    'ItemNotAllowed(bytes32)'(
       key?: BytesLike | null
     ): ItemNotAllowedEventFilter;
     ItemNotAllowed(key?: BytesLike | null): ItemNotAllowedEventFilter;
 
-    "OwnershipTransferred(address,address)"(
+    'OwnershipTransferred(address,address)'(
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;

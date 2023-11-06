@@ -55,7 +55,8 @@ const logger = new Logger(version);
 
 export class PKPEthersWallet
   extends PKPBase
-  implements Signer, ExternallyOwnedAccount, TypedDataSigner, PKPClientHelpers {
+  implements Signer, ExternallyOwnedAccount, TypedDataSigner, PKPClientHelpers
+{
   readonly address!: string;
   readonly provider!: Provider;
   readonly _isSigner!: boolean;
@@ -172,7 +173,7 @@ export class PKPEthersWallet
         signature = (await this.runLitAction(toSign, 'pkp-eth-sign-tx'))
           .signature;
       } else {
-        this.log("requesting signature from nodes");
+        this.log('requesting signature from nodes');
         signature = (await this.runSign(toSign)).signature;
       }
 
@@ -191,7 +192,7 @@ export class PKPEthersWallet
       this.log('running lit action => sigName: pkp-eth-sign-message');
       signature = await this.runLitAction(toSign, 'pkp-eth-sign-message');
     } else {
-      this.log("requesting signature from nodes");
+      this.log('requesting signature from nodes');
       signature = await this.runSign(toSign);
     }
 
@@ -246,7 +247,7 @@ export class PKPEthersWallet
       this.log('running lit action => sigName: pkp-eth-sign-message');
       signature = await this.runLitAction(toSignBuffer, 'pkp-eth-sign-message');
     } else {
-      this.log("requesting signature from nodes");
+      this.log('requesting signature from nodes');
       signature = await this.runSign(toSignBuffer);
     }
 

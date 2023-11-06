@@ -16,7 +16,6 @@ import {
   StdFee,
 } from '@cosmjs/stargate';
 
-
 describe('PKPClient', () => {
   const pkpClient = new PKPClient({
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
@@ -140,7 +139,6 @@ describe('PKPClient', () => {
           expect(height).toBeDefined();
           expect(typeof height).toBe('number');
         });
-
       });
 
       describe('update config', () => {

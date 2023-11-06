@@ -3,21 +3,21 @@
   https://www.radix-ui.com/docs/primitives 
 */
 
-@import "@radix-ui/colors/blackA.css";
-@import "@radix-ui/colors/green.css";
-@import "@radix-ui/colors/mauve.css";
-@import "@radix-ui/colors/slate.css";
-@import "@radix-ui/colors/violet.css";
-@import "@radix-ui/colors/red.css";
+@import '@radix-ui/colors/blackA.css';
+@import '@radix-ui/colors/green.css';
+@import '@radix-ui/colors/mauve.css';
+@import '@radix-ui/colors/slate.css';
+@import '@radix-ui/colors/violet.css';
+@import '@radix-ui/colors/red.css';
 
 /* 
 // --------------------------------------
 //          Base Configuration                                    
 // -------------------------------------- 
 */
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
-@import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 /**
 Usage:
@@ -26,7 +26,7 @@ Usage:
 </main>
 [data-lit-theme="purple"] .button
 **/
-[data-lit-theme="purple"] {
+[data-lit-theme='purple'] {
   --lit-background-color: #0a132d;
   --lit-text-color: #e3e7ef;
   --lit-main-color: #7f53ad; /** eg. border, filled button **/
@@ -45,7 +45,7 @@ Usage:
 }
 
 body {
-  font-family: "Figtree", "Space Grotesk", -apple-system, BlinkMacSystemFont,
+  font-family: 'Figtree', 'Space Grotesk', -apple-system, BlinkMacSystemFont,
     Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans,
     Helvetica Neue, sans-serif;
   -webkit-font-smoothing: antialiased;

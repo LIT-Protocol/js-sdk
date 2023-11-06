@@ -13,19 +13,19 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from "ethers";
+} from 'ethers';
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+} from '@ethersproject/abi';
+import type { Listener, Provider } from '@ethersproject/providers';
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from "./common";
+} from './common';
 
 export declare namespace IDiamond {
   export type FacetCutStruct = {
@@ -67,158 +67,158 @@ export declare namespace LibRateLimitNFTStorage {
 
 export interface RateLimitNFTInterface extends utils.Interface {
   functions: {
-    "diamondCut((address,uint8,bytes4[])[],address,bytes)": FunctionFragment;
-    "facetAddress(bytes4)": FunctionFragment;
-    "facetAddresses()": FunctionFragment;
-    "facetFunctionSelectors(address)": FunctionFragment;
-    "facets()": FunctionFragment;
-    "owner()": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
-    "RLIHolderRateLimitWindowSeconds()": FunctionFragment;
-    "additionalRequestsPerKilosecondCost()": FunctionFragment;
-    "approve(address,uint256)": FunctionFragment;
-    "balanceOf(address)": FunctionFragment;
-    "burn(uint256)": FunctionFragment;
-    "calculateCost(uint256,uint256)": FunctionFragment;
-    "calculateRequestsPerKilosecond(uint256,uint256)": FunctionFragment;
-    "capacity(uint256)": FunctionFragment;
-    "defaultRateLimitWindowSeconds()": FunctionFragment;
-    "freeMint(uint256,uint256,bytes32,uint8,bytes32,bytes32)": FunctionFragment;
-    "freeMintSigTest(uint256,uint256,bytes32,uint8,bytes32,bytes32)": FunctionFragment;
-    "freeMintSigner()": FunctionFragment;
-    "freeRequestsPerRateLimitWindow()": FunctionFragment;
-    "getApproved(uint256)": FunctionFragment;
-    "initialize()": FunctionFragment;
-    "isApprovedForAll(address,address)": FunctionFragment;
-    "isExpired(uint256)": FunctionFragment;
-    "mint(uint256)": FunctionFragment;
-    "name()": FunctionFragment;
-    "ownerOf(uint256)": FunctionFragment;
-    "prefixed(bytes32)": FunctionFragment;
-    "redeemedFreeMints(bytes32)": FunctionFragment;
-    "safeTransferFrom(address,address,uint256)": FunctionFragment;
-    "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
-    "setAdditionalRequestsPerKilosecondCost(uint256)": FunctionFragment;
-    "setApprovalForAll(address,bool)": FunctionFragment;
-    "setFreeMintSigner(address)": FunctionFragment;
-    "setFreeRequestsPerRateLimitWindow(uint256)": FunctionFragment;
-    "setRLIHolderRateLimitWindowSeconds(uint256)": FunctionFragment;
-    "setRateLimitWindowSeconds(uint256)": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "symbol()": FunctionFragment;
-    "tokenByIndex(uint256)": FunctionFragment;
-    "tokenIdCounter()": FunctionFragment;
-    "tokenOfOwnerByIndex(address,uint256)": FunctionFragment;
-    "tokenURI(uint256)": FunctionFragment;
-    "totalSupply()": FunctionFragment;
-    "transferFrom(address,address,uint256)": FunctionFragment;
-    "withdraw()": FunctionFragment;
+    'diamondCut((address,uint8,bytes4[])[],address,bytes)': FunctionFragment;
+    'facetAddress(bytes4)': FunctionFragment;
+    'facetAddresses()': FunctionFragment;
+    'facetFunctionSelectors(address)': FunctionFragment;
+    'facets()': FunctionFragment;
+    'owner()': FunctionFragment;
+    'transferOwnership(address)': FunctionFragment;
+    'RLIHolderRateLimitWindowSeconds()': FunctionFragment;
+    'additionalRequestsPerKilosecondCost()': FunctionFragment;
+    'approve(address,uint256)': FunctionFragment;
+    'balanceOf(address)': FunctionFragment;
+    'burn(uint256)': FunctionFragment;
+    'calculateCost(uint256,uint256)': FunctionFragment;
+    'calculateRequestsPerKilosecond(uint256,uint256)': FunctionFragment;
+    'capacity(uint256)': FunctionFragment;
+    'defaultRateLimitWindowSeconds()': FunctionFragment;
+    'freeMint(uint256,uint256,bytes32,uint8,bytes32,bytes32)': FunctionFragment;
+    'freeMintSigTest(uint256,uint256,bytes32,uint8,bytes32,bytes32)': FunctionFragment;
+    'freeMintSigner()': FunctionFragment;
+    'freeRequestsPerRateLimitWindow()': FunctionFragment;
+    'getApproved(uint256)': FunctionFragment;
+    'initialize()': FunctionFragment;
+    'isApprovedForAll(address,address)': FunctionFragment;
+    'isExpired(uint256)': FunctionFragment;
+    'mint(uint256)': FunctionFragment;
+    'name()': FunctionFragment;
+    'ownerOf(uint256)': FunctionFragment;
+    'prefixed(bytes32)': FunctionFragment;
+    'redeemedFreeMints(bytes32)': FunctionFragment;
+    'safeTransferFrom(address,address,uint256)': FunctionFragment;
+    'safeTransferFrom(address,address,uint256,bytes)': FunctionFragment;
+    'setAdditionalRequestsPerKilosecondCost(uint256)': FunctionFragment;
+    'setApprovalForAll(address,bool)': FunctionFragment;
+    'setFreeMintSigner(address)': FunctionFragment;
+    'setFreeRequestsPerRateLimitWindow(uint256)': FunctionFragment;
+    'setRLIHolderRateLimitWindowSeconds(uint256)': FunctionFragment;
+    'setRateLimitWindowSeconds(uint256)': FunctionFragment;
+    'supportsInterface(bytes4)': FunctionFragment;
+    'symbol()': FunctionFragment;
+    'tokenByIndex(uint256)': FunctionFragment;
+    'tokenIdCounter()': FunctionFragment;
+    'tokenOfOwnerByIndex(address,uint256)': FunctionFragment;
+    'tokenURI(uint256)': FunctionFragment;
+    'totalSupply()': FunctionFragment;
+    'transferFrom(address,address,uint256)': FunctionFragment;
+    'withdraw()': FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "diamondCut"
-      | "facetAddress"
-      | "facetAddresses"
-      | "facetFunctionSelectors"
-      | "facets"
-      | "owner"
-      | "transferOwnership"
-      | "RLIHolderRateLimitWindowSeconds"
-      | "additionalRequestsPerKilosecondCost"
-      | "approve"
-      | "balanceOf"
-      | "burn"
-      | "calculateCost"
-      | "calculateRequestsPerKilosecond"
-      | "capacity"
-      | "defaultRateLimitWindowSeconds"
-      | "freeMint"
-      | "freeMintSigTest"
-      | "freeMintSigner"
-      | "freeRequestsPerRateLimitWindow"
-      | "getApproved"
-      | "initialize"
-      | "isApprovedForAll"
-      | "isExpired"
-      | "mint"
-      | "name"
-      | "ownerOf"
-      | "prefixed"
-      | "redeemedFreeMints"
-      | "safeTransferFrom(address,address,uint256)"
-      | "safeTransferFrom(address,address,uint256,bytes)"
-      | "setAdditionalRequestsPerKilosecondCost"
-      | "setApprovalForAll"
-      | "setFreeMintSigner"
-      | "setFreeRequestsPerRateLimitWindow"
-      | "setRLIHolderRateLimitWindowSeconds"
-      | "setRateLimitWindowSeconds"
-      | "supportsInterface"
-      | "symbol"
-      | "tokenByIndex"
-      | "tokenIdCounter"
-      | "tokenOfOwnerByIndex"
-      | "tokenURI"
-      | "totalSupply"
-      | "transferFrom"
-      | "withdraw"
+      | 'diamondCut'
+      | 'facetAddress'
+      | 'facetAddresses'
+      | 'facetFunctionSelectors'
+      | 'facets'
+      | 'owner'
+      | 'transferOwnership'
+      | 'RLIHolderRateLimitWindowSeconds'
+      | 'additionalRequestsPerKilosecondCost'
+      | 'approve'
+      | 'balanceOf'
+      | 'burn'
+      | 'calculateCost'
+      | 'calculateRequestsPerKilosecond'
+      | 'capacity'
+      | 'defaultRateLimitWindowSeconds'
+      | 'freeMint'
+      | 'freeMintSigTest'
+      | 'freeMintSigner'
+      | 'freeRequestsPerRateLimitWindow'
+      | 'getApproved'
+      | 'initialize'
+      | 'isApprovedForAll'
+      | 'isExpired'
+      | 'mint'
+      | 'name'
+      | 'ownerOf'
+      | 'prefixed'
+      | 'redeemedFreeMints'
+      | 'safeTransferFrom(address,address,uint256)'
+      | 'safeTransferFrom(address,address,uint256,bytes)'
+      | 'setAdditionalRequestsPerKilosecondCost'
+      | 'setApprovalForAll'
+      | 'setFreeMintSigner'
+      | 'setFreeRequestsPerRateLimitWindow'
+      | 'setRLIHolderRateLimitWindowSeconds'
+      | 'setRateLimitWindowSeconds'
+      | 'supportsInterface'
+      | 'symbol'
+      | 'tokenByIndex'
+      | 'tokenIdCounter'
+      | 'tokenOfOwnerByIndex'
+      | 'tokenURI'
+      | 'totalSupply'
+      | 'transferFrom'
+      | 'withdraw'
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "diamondCut",
+    functionFragment: 'diamondCut',
     values: [IDiamond.FacetCutStruct[], string, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "facetAddress",
+    functionFragment: 'facetAddress',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "facetAddresses",
+    functionFragment: 'facetAddresses',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "facetFunctionSelectors",
+    functionFragment: 'facetFunctionSelectors',
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'facets', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "transferOwnership",
+    functionFragment: 'transferOwnership',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "RLIHolderRateLimitWindowSeconds",
+    functionFragment: 'RLIHolderRateLimitWindowSeconds',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "additionalRequestsPerKilosecondCost",
+    functionFragment: 'additionalRequestsPerKilosecondCost',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "approve",
+    functionFragment: 'approve',
     values: [string, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
-  encodeFunctionData(functionFragment: "burn", values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
+  encodeFunctionData(functionFragment: 'burn', values: [BigNumberish]): string;
   encodeFunctionData(
-    functionFragment: "calculateCost",
+    functionFragment: 'calculateCost',
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "calculateRequestsPerKilosecond",
+    functionFragment: 'calculateRequestsPerKilosecond',
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "capacity",
+    functionFragment: 'capacity',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "defaultRateLimitWindowSeconds",
+    functionFragment: 'defaultRateLimitWindowSeconds',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "freeMint",
+    functionFragment: 'freeMint',
     values: [
       BigNumberish,
       BigNumberish,
@@ -229,7 +229,7 @@ export interface RateLimitNFTInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "freeMintSigTest",
+    functionFragment: 'freeMintSigTest',
     values: [
       BigNumberish,
       BigNumberish,
@@ -240,270 +240,270 @@ export interface RateLimitNFTInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "freeMintSigner",
+    functionFragment: 'freeMintSigner',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "freeRequestsPerRateLimitWindow",
+    functionFragment: 'freeRequestsPerRateLimitWindow',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getApproved",
+    functionFragment: 'getApproved',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "initialize",
+    functionFragment: 'initialize',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "isApprovedForAll",
+    functionFragment: 'isApprovedForAll',
     values: [string, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "isExpired",
+    functionFragment: 'isExpired',
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "mint", values: [BigNumberish]): string;
-  encodeFunctionData(functionFragment: "name", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'mint', values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'name', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "ownerOf",
+    functionFragment: 'ownerOf',
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "prefixed", values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'prefixed', values: [BytesLike]): string;
   encodeFunctionData(
-    functionFragment: "redeemedFreeMints",
+    functionFragment: 'redeemedFreeMints',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "safeTransferFrom(address,address,uint256)",
+    functionFragment: 'safeTransferFrom(address,address,uint256)',
     values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
+    functionFragment: 'safeTransferFrom(address,address,uint256,bytes)',
     values: [string, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "setAdditionalRequestsPerKilosecondCost",
+    functionFragment: 'setAdditionalRequestsPerKilosecondCost',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setApprovalForAll",
+    functionFragment: 'setApprovalForAll',
     values: [string, boolean]
   ): string;
   encodeFunctionData(
-    functionFragment: "setFreeMintSigner",
+    functionFragment: 'setFreeMintSigner',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setFreeRequestsPerRateLimitWindow",
+    functionFragment: 'setFreeRequestsPerRateLimitWindow',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setRLIHolderRateLimitWindowSeconds",
+    functionFragment: 'setRLIHolderRateLimitWindowSeconds',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setRateLimitWindowSeconds",
+    functionFragment: 'setRateLimitWindowSeconds',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "supportsInterface",
+    functionFragment: 'supportsInterface',
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'symbol', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "tokenByIndex",
+    functionFragment: 'tokenByIndex',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "tokenIdCounter",
+    functionFragment: 'tokenIdCounter',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "tokenOfOwnerByIndex",
+    functionFragment: 'tokenOfOwnerByIndex',
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "tokenURI",
+    functionFragment: 'tokenURI',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "totalSupply",
+    functionFragment: 'totalSupply',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "transferFrom",
+    functionFragment: 'transferFrom',
     values: [string, string, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'withdraw', values?: undefined): string;
 
-  decodeFunctionResult(functionFragment: "diamondCut", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'diamondCut', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "facetAddress",
+    functionFragment: 'facetAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "facetAddresses",
+    functionFragment: 'facetAddresses',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "facetFunctionSelectors",
+    functionFragment: 'facetFunctionSelectors',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'facets', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "RLIHolderRateLimitWindowSeconds",
+    functionFragment: 'transferOwnership',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "additionalRequestsPerKilosecondCost",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "calculateCost",
+    functionFragment: 'RLIHolderRateLimitWindowSeconds',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "calculateRequestsPerKilosecond",
+    functionFragment: 'additionalRequestsPerKilosecondCost',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "capacity", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'burn', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "defaultRateLimitWindowSeconds",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "freeMint", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "freeMintSigTest",
+    functionFragment: 'calculateCost',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "freeMintSigner",
+    functionFragment: 'calculateRequestsPerKilosecond',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'capacity', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'defaultRateLimitWindowSeconds',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'freeMint', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'freeMintSigTest',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "freeRequestsPerRateLimitWindow",
+    functionFragment: 'freeMintSigner',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getApproved",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "isApprovedForAll",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "isExpired", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "prefixed", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "redeemedFreeMints",
+    functionFragment: 'freeRequestsPerRateLimitWindow',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "safeTransferFrom(address,address,uint256)",
+    functionFragment: 'getApproved',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'initialize', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'isApprovedForAll',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'isExpired', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'mint', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'name', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'ownerOf', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'prefixed', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'redeemedFreeMints',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
+    functionFragment: 'safeTransferFrom(address,address,uint256)',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setAdditionalRequestsPerKilosecondCost",
+    functionFragment: 'safeTransferFrom(address,address,uint256,bytes)',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setApprovalForAll",
+    functionFragment: 'setAdditionalRequestsPerKilosecondCost',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setFreeMintSigner",
+    functionFragment: 'setApprovalForAll',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setFreeRequestsPerRateLimitWindow",
+    functionFragment: 'setFreeMintSigner',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setRLIHolderRateLimitWindowSeconds",
+    functionFragment: 'setFreeRequestsPerRateLimitWindow',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setRateLimitWindowSeconds",
+    functionFragment: 'setRLIHolderRateLimitWindowSeconds',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "supportsInterface",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "tokenByIndex",
+    functionFragment: 'setRateLimitWindowSeconds',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "tokenIdCounter",
+    functionFragment: 'supportsInterface',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'symbol', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'tokenByIndex',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "tokenOfOwnerByIndex",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "tokenURI", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "totalSupply",
+    functionFragment: 'tokenIdCounter',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "transferFrom",
+    functionFragment: 'tokenOfOwnerByIndex',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'tokenURI', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'totalSupply',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'transferFrom',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'withdraw', data: BytesLike): Result;
 
   events: {
-    "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
-    "AdditionalRequestsPerKilosecondCostSet(uint256)": EventFragment;
-    "Approval(address,address,uint256)": EventFragment;
-    "ApprovalForAll(address,address,bool)": EventFragment;
-    "FreeMintSignerSet(address)": EventFragment;
-    "FreeRequestsPerRateLimitWindowSet(uint256)": EventFragment;
-    "Initialized(uint8)": EventFragment;
-    "RLIHolderRateLimitWindowSecondsSet(uint256)": EventFragment;
-    "RateLimitWindowSecondsSet(uint256)": EventFragment;
-    "Transfer(address,address,uint256)": EventFragment;
-    "Withdrew(uint256)": EventFragment;
+    'DiamondCut((address,uint8,bytes4[])[],address,bytes)': EventFragment;
+    'OwnershipTransferred(address,address)': EventFragment;
+    'AdditionalRequestsPerKilosecondCostSet(uint256)': EventFragment;
+    'Approval(address,address,uint256)': EventFragment;
+    'ApprovalForAll(address,address,bool)': EventFragment;
+    'FreeMintSignerSet(address)': EventFragment;
+    'FreeRequestsPerRateLimitWindowSet(uint256)': EventFragment;
+    'Initialized(uint8)': EventFragment;
+    'RLIHolderRateLimitWindowSecondsSet(uint256)': EventFragment;
+    'RateLimitWindowSecondsSet(uint256)': EventFragment;
+    'Transfer(address,address,uint256)': EventFragment;
+    'Withdrew(uint256)': EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'DiamondCut'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "AdditionalRequestsPerKilosecondCostSet"
+    nameOrSignatureOrTopic: 'AdditionalRequestsPerKilosecondCostSet'
   ): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "FreeMintSignerSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Approval'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ApprovalForAll'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'FreeMintSignerSet'): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "FreeRequestsPerRateLimitWindowSet"
+    nameOrSignatureOrTopic: 'FreeRequestsPerRateLimitWindowSet'
   ): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Initialized'): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "RLIHolderRateLimitWindowSecondsSet"
+    nameOrSignatureOrTopic: 'RLIHolderRateLimitWindowSecondsSet'
   ): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RateLimitWindowSecondsSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Withdrew"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RateLimitWindowSecondsSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Transfer'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Withdrew'): EventFragment;
 }
 
 export interface DiamondCutEventObject {
@@ -683,9 +683,7 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string[]] & { _facetFunctionSelectors: string[] }>;
 
-    facets(
-      overrides?: CallOverrides
-    ): Promise<
+    facets(overrides?: CallOverrides): Promise<
       [IDiamondLoupe.FacetStructOutput[]] & {
         facets_: IDiamondLoupe.FacetStructOutput[];
       }
@@ -805,14 +803,14 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    "safeTransferFrom(address,address,uint256)"(
+    'safeTransferFrom(address,address,uint256)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "safeTransferFrom(address,address,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,bytes)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
@@ -1015,14 +1013,14 @@ export interface RateLimitNFT extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  "safeTransferFrom(address,address,uint256)"(
+  'safeTransferFrom(address,address,uint256)'(
     from: string,
     to: string,
     tokenId: BigNumberish,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "safeTransferFrom(address,address,uint256,bytes)"(
+  'safeTransferFrom(address,address,uint256,bytes)'(
     from: string,
     to: string,
     tokenId: BigNumberish,
@@ -1226,14 +1224,14 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    "safeTransferFrom(address,address,uint256)"(
+    'safeTransferFrom(address,address,uint256)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "safeTransferFrom(address,address,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,bytes)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
@@ -1307,7 +1305,7 @@ export interface RateLimitNFT extends BaseContract {
   };
 
   filters: {
-    "DiamondCut((address,uint8,bytes4[])[],address,bytes)"(
+    'DiamondCut((address,uint8,bytes4[])[],address,bytes)'(
       _diamondCut?: null,
       _init?: null,
       _calldata?: null
@@ -1318,7 +1316,7 @@ export interface RateLimitNFT extends BaseContract {
       _calldata?: null
     ): DiamondCutEventFilter;
 
-    "OwnershipTransferred(address,address)"(
+    'OwnershipTransferred(address,address)'(
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
@@ -1327,14 +1325,14 @@ export interface RateLimitNFT extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    "AdditionalRequestsPerKilosecondCostSet(uint256)"(
+    'AdditionalRequestsPerKilosecondCostSet(uint256)'(
       newAdditionalRequestsPerKilosecondCost?: null
     ): AdditionalRequestsPerKilosecondCostSetEventFilter;
     AdditionalRequestsPerKilosecondCostSet(
       newAdditionalRequestsPerKilosecondCost?: null
     ): AdditionalRequestsPerKilosecondCostSetEventFilter;
 
-    "Approval(address,address,uint256)"(
+    'Approval(address,address,uint256)'(
       owner?: string | null,
       approved?: string | null,
       tokenId?: BigNumberish | null
@@ -1345,7 +1343,7 @@ export interface RateLimitNFT extends BaseContract {
       tokenId?: BigNumberish | null
     ): ApprovalEventFilter;
 
-    "ApprovalForAll(address,address,bool)"(
+    'ApprovalForAll(address,address,bool)'(
       owner?: string | null,
       operator?: string | null,
       approved?: null
@@ -1356,38 +1354,38 @@ export interface RateLimitNFT extends BaseContract {
       approved?: null
     ): ApprovalForAllEventFilter;
 
-    "FreeMintSignerSet(address)"(
+    'FreeMintSignerSet(address)'(
       newFreeMintSigner?: string | null
     ): FreeMintSignerSetEventFilter;
     FreeMintSignerSet(
       newFreeMintSigner?: string | null
     ): FreeMintSignerSetEventFilter;
 
-    "FreeRequestsPerRateLimitWindowSet(uint256)"(
+    'FreeRequestsPerRateLimitWindowSet(uint256)'(
       newFreeRequestsPerRateLimitWindow?: null
     ): FreeRequestsPerRateLimitWindowSetEventFilter;
     FreeRequestsPerRateLimitWindowSet(
       newFreeRequestsPerRateLimitWindow?: null
     ): FreeRequestsPerRateLimitWindowSetEventFilter;
 
-    "Initialized(uint8)"(version?: null): InitializedEventFilter;
+    'Initialized(uint8)'(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
 
-    "RLIHolderRateLimitWindowSecondsSet(uint256)"(
+    'RLIHolderRateLimitWindowSecondsSet(uint256)'(
       newRLIHolderRateLimitWindowSeconds?: null
     ): RLIHolderRateLimitWindowSecondsSetEventFilter;
     RLIHolderRateLimitWindowSecondsSet(
       newRLIHolderRateLimitWindowSeconds?: null
     ): RLIHolderRateLimitWindowSecondsSetEventFilter;
 
-    "RateLimitWindowSecondsSet(uint256)"(
+    'RateLimitWindowSecondsSet(uint256)'(
       newRateLimitWindowSeconds?: null
     ): RateLimitWindowSecondsSetEventFilter;
     RateLimitWindowSecondsSet(
       newRateLimitWindowSeconds?: null
     ): RateLimitWindowSecondsSetEventFilter;
 
-    "Transfer(address,address,uint256)"(
+    'Transfer(address,address,uint256)'(
       from?: string | null,
       to?: string | null,
       tokenId?: BigNumberish | null
@@ -1398,7 +1396,7 @@ export interface RateLimitNFT extends BaseContract {
       tokenId?: BigNumberish | null
     ): TransferEventFilter;
 
-    "Withdrew(uint256)"(amount?: null): WithdrewEventFilter;
+    'Withdrew(uint256)'(amount?: null): WithdrewEventFilter;
     Withdrew(amount?: null): WithdrewEventFilter;
   };
 
@@ -1536,14 +1534,14 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "safeTransferFrom(address,address,uint256)"(
+    'safeTransferFrom(address,address,uint256)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "safeTransferFrom(address,address,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,bytes)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
@@ -1761,14 +1759,14 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "safeTransferFrom(address,address,uint256)"(
+    'safeTransferFrom(address,address,uint256)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "safeTransferFrom(address,address,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,bytes)'(
       from: string,
       to: string,
       tokenId: BigNumberish,

@@ -97,53 +97,53 @@ export class LitContracts {
   debug: boolean = false;
 
   // ----- autogen:declares:start  -----
-// Generated at 2023-10-03T14:05:25.449Z
+  // Generated at 2023-10-03T14:05:25.449Z
   allowlistContract: {
-    read: allowlistContract.Allowlist,
-    write: allowlistContract.Allowlist,
-  }
-            
+    read: allowlistContract.Allowlist;
+    write: allowlistContract.Allowlist;
+  };
+
   litTokenContract: {
-    read: litTokenContract.LITToken,
-    write: litTokenContract.LITToken,
-  }
-            
+    read: litTokenContract.LITToken;
+    write: litTokenContract.LITToken;
+  };
+
   multisenderContract: {
-    read: multisenderContract.Multisender,
-    write: multisenderContract.Multisender,
-  }
-            
+    read: multisenderContract.Multisender;
+    write: multisenderContract.Multisender;
+  };
+
   pkpHelperContract: {
-    read: pkpHelperContract.PKPHelper,
-    write: pkpHelperContract.PKPHelper,
-  }
-            
+    read: pkpHelperContract.PKPHelper;
+    write: pkpHelperContract.PKPHelper;
+  };
+
   pkpNftContract: {
-    read: pkpNftContract.PKPNFT,
-    write: pkpNftContract.PKPNFT,
-  }
-            
+    read: pkpNftContract.PKPNFT;
+    write: pkpNftContract.PKPNFT;
+  };
+
   pkpPermissionsContract: {
-    read: pkpPermissionsContract.PKPPermissions,
-    write: pkpPermissionsContract.PKPPermissions,
-  }
-            
+    read: pkpPermissionsContract.PKPPermissions;
+    write: pkpPermissionsContract.PKPPermissions;
+  };
+
   pubkeyRouterContract: {
-    read: pubkeyRouterContract.PubkeyRouter,
-    write: pubkeyRouterContract.PubkeyRouter,
-  }
-            
+    read: pubkeyRouterContract.PubkeyRouter;
+    write: pubkeyRouterContract.PubkeyRouter;
+  };
+
   rateLimitNftContract: {
-    read: rateLimitNftContract.RateLimitNFT,
-    write: rateLimitNftContract.RateLimitNFT,
-  }
-            
+    read: rateLimitNftContract.RateLimitNFT;
+    write: rateLimitNftContract.RateLimitNFT;
+  };
+
   stakingContract: {
-    read: stakingContract.Staking,
-    write: stakingContract.Staking,
-  }
-            
-// ----- autogen:declares:end  -----
+    read: stakingContract.Staking;
+    write: stakingContract.Staking;
+  };
+
+  // ----- autogen:declares:end  -----
 
   // make the constructor args optional
   constructor(args?: {
@@ -178,17 +178,17 @@ export class LitContracts {
     }
 
     // ----- autogen:blank-init:start  -----
-// Generated at 2023-10-03T14:05:25.449Z
-    this.allowlistContract = {} as any
-    this.litTokenContract = {} as any
-    this.multisenderContract = {} as any
-    this.pkpHelperContract = {} as any
-    this.pkpNftContract = {} as any
-    this.pkpPermissionsContract = {} as any
-    this.pubkeyRouterContract = {} as any
-    this.rateLimitNftContract = {} as any
-    this.stakingContract = {} as any
-// ----- autogen:blank-init:end  -----
+    // Generated at 2023-10-03T14:05:25.449Z
+    this.allowlistContract = {} as any;
+    this.litTokenContract = {} as any;
+    this.multisenderContract = {} as any;
+    this.pkpHelperContract = {} as any;
+    this.pkpNftContract = {} as any;
+    this.pkpPermissionsContract = {} as any;
+    this.pubkeyRouterContract = {} as any;
+    this.rateLimitNftContract = {} as any;
+    this.stakingContract = {} as any;
+    // ----- autogen:blank-init:end  -----
   }
 
   /**
@@ -357,133 +357,133 @@ export class LitContracts {
     }
 
     // ----- autogen:init:start  -----
-// Generated at 2023-10-03T14:05:25.449Z
+    // Generated at 2023-10-03T14:05:25.449Z
 
     this.allowlistContract = {
-        read: (new ethers.Contract(
-            AllowlistData.address,
-            AllowlistData.abi as any,
-            this.provider
-        ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist),
-        write: (new ethers.Contract(
-            AllowlistData.address,
-            AllowlistData.abi as any,
-            this.signer
-        ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist)
+      read: new ethers.Contract(
+        AllowlistData.address,
+        AllowlistData.abi as any,
+        this.provider
+      ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
+      write: new ethers.Contract(
+        AllowlistData.address,
+        AllowlistData.abi as any,
+        this.signer
+      ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
     };
-
 
     this.litTokenContract = {
-        read: (new ethers.Contract(
-            LITTokenData.address,
-            LITTokenData.abi as any,
-            this.provider
-        ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken),
-        write: (new ethers.Contract(
-            LITTokenData.address,
-            LITTokenData.abi as any,
-            this.signer
-        ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken)
+      read: new ethers.Contract(
+        LITTokenData.address,
+        LITTokenData.abi as any,
+        this.provider
+      ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken,
+      write: new ethers.Contract(
+        LITTokenData.address,
+        LITTokenData.abi as any,
+        this.signer
+      ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken,
     };
-
 
     this.multisenderContract = {
-        read: (new ethers.Contract(
-            MultisenderData.address,
-            MultisenderData.abi as any,
-            this.provider
-        ) as unknown as multisenderContract.Multisender & multisenderContract.Multisender),
-        write: (new ethers.Contract(
-            MultisenderData.address,
-            MultisenderData.abi as any,
-            this.signer
-        ) as unknown as multisenderContract.Multisender & multisenderContract.Multisender)
+      read: new ethers.Contract(
+        MultisenderData.address,
+        MultisenderData.abi as any,
+        this.provider
+      ) as unknown as multisenderContract.Multisender &
+        multisenderContract.Multisender,
+      write: new ethers.Contract(
+        MultisenderData.address,
+        MultisenderData.abi as any,
+        this.signer
+      ) as unknown as multisenderContract.Multisender &
+        multisenderContract.Multisender,
     };
-
 
     this.pkpHelperContract = {
-        read: (new ethers.Contract(
-            PKPHelperData.address,
-            PKPHelperData.abi as any,
-            this.provider
-        ) as unknown as pkpHelperContract.PKPHelper & pkpHelperContract.PKPHelper),
-        write: (new ethers.Contract(
-            PKPHelperData.address,
-            PKPHelperData.abi as any,
-            this.signer
-        ) as unknown as pkpHelperContract.PKPHelper & pkpHelperContract.PKPHelper)
+      read: new ethers.Contract(
+        PKPHelperData.address,
+        PKPHelperData.abi as any,
+        this.provider
+      ) as unknown as pkpHelperContract.PKPHelper & pkpHelperContract.PKPHelper,
+      write: new ethers.Contract(
+        PKPHelperData.address,
+        PKPHelperData.abi as any,
+        this.signer
+      ) as unknown as pkpHelperContract.PKPHelper & pkpHelperContract.PKPHelper,
     };
-
 
     this.pkpNftContract = {
-        read: (new ethers.Contract(
-            PKPNFTData.address,
-            PKPNFTData.abi as any,
-            this.provider
-        ) as unknown as pkpNftContract.PKPNFT & pkpNftContract.PKPNFT),
-        write: (new ethers.Contract(
-            PKPNFTData.address,
-            PKPNFTData.abi as any,
-            this.signer
-        ) as unknown as pkpNftContract.PKPNFT & pkpNftContract.PKPNFT)
+      read: new ethers.Contract(
+        PKPNFTData.address,
+        PKPNFTData.abi as any,
+        this.provider
+      ) as unknown as pkpNftContract.PKPNFT & pkpNftContract.PKPNFT,
+      write: new ethers.Contract(
+        PKPNFTData.address,
+        PKPNFTData.abi as any,
+        this.signer
+      ) as unknown as pkpNftContract.PKPNFT & pkpNftContract.PKPNFT,
     };
-
 
     this.pkpPermissionsContract = {
-        read: (new ethers.Contract(
-            PKPPermissionsData.address,
-            PKPPermissionsData.abi as any,
-            this.provider
-        ) as unknown as pkpPermissionsContract.PKPPermissions & pkpPermissionsContract.PKPPermissions),
-        write: (new ethers.Contract(
-            PKPPermissionsData.address,
-            PKPPermissionsData.abi as any,
-            this.signer
-        ) as unknown as pkpPermissionsContract.PKPPermissions & pkpPermissionsContract.PKPPermissions)
+      read: new ethers.Contract(
+        PKPPermissionsData.address,
+        PKPPermissionsData.abi as any,
+        this.provider
+      ) as unknown as pkpPermissionsContract.PKPPermissions &
+        pkpPermissionsContract.PKPPermissions,
+      write: new ethers.Contract(
+        PKPPermissionsData.address,
+        PKPPermissionsData.abi as any,
+        this.signer
+      ) as unknown as pkpPermissionsContract.PKPPermissions &
+        pkpPermissionsContract.PKPPermissions,
     };
-
 
     this.pubkeyRouterContract = {
-        read: (new ethers.Contract(
-            PubkeyRouterData.address,
-            PubkeyRouterData.abi as any,
-            this.provider
-        ) as unknown as pubkeyRouterContract.PubkeyRouter & pubkeyRouterContract.PubkeyRouter),
-        write: (new ethers.Contract(
-            PubkeyRouterData.address,
-            PubkeyRouterData.abi as any,
-            this.signer
-        ) as unknown as pubkeyRouterContract.PubkeyRouter & pubkeyRouterContract.PubkeyRouter)
+      read: new ethers.Contract(
+        PubkeyRouterData.address,
+        PubkeyRouterData.abi as any,
+        this.provider
+      ) as unknown as pubkeyRouterContract.PubkeyRouter &
+        pubkeyRouterContract.PubkeyRouter,
+      write: new ethers.Contract(
+        PubkeyRouterData.address,
+        PubkeyRouterData.abi as any,
+        this.signer
+      ) as unknown as pubkeyRouterContract.PubkeyRouter &
+        pubkeyRouterContract.PubkeyRouter,
     };
-
 
     this.rateLimitNftContract = {
-        read: (new ethers.Contract(
-            RateLimitNFTData.address,
-            RateLimitNFTData.abi as any,
-            this.provider
-        ) as unknown as rateLimitNftContract.RateLimitNFT & rateLimitNftContract.RateLimitNFT),
-        write: (new ethers.Contract(
-            RateLimitNFTData.address,
-            RateLimitNFTData.abi as any,
-            this.signer
-        ) as unknown as rateLimitNftContract.RateLimitNFT & rateLimitNftContract.RateLimitNFT)
+      read: new ethers.Contract(
+        RateLimitNFTData.address,
+        RateLimitNFTData.abi as any,
+        this.provider
+      ) as unknown as rateLimitNftContract.RateLimitNFT &
+        rateLimitNftContract.RateLimitNFT,
+      write: new ethers.Contract(
+        RateLimitNFTData.address,
+        RateLimitNFTData.abi as any,
+        this.signer
+      ) as unknown as rateLimitNftContract.RateLimitNFT &
+        rateLimitNftContract.RateLimitNFT,
     };
-
 
     this.stakingContract = {
-        read: (new ethers.Contract(
-            StakingData.address,
-            StakingData.abi as any,
-            this.provider
-        ) as unknown as stakingContract.Staking & stakingContract.Staking),
-        write: (new ethers.Contract(
-            StakingData.address,
-            StakingData.abi as any,
-            this.signer
-        ) as unknown as stakingContract.Staking & stakingContract.Staking)
+      read: new ethers.Contract(
+        StakingData.address,
+        StakingData.abi as any,
+        this.provider
+      ) as unknown as stakingContract.Staking & stakingContract.Staking,
+      write: new ethers.Contract(
+        StakingData.address,
+        StakingData.abi as any,
+        this.signer
+      ) as unknown as stakingContract.Staking & stakingContract.Staking,
     };
-// ----- autogen:init:end  -----
+    // ----- autogen:init:end  -----
 
     this.connected = true;
   };
@@ -767,38 +767,41 @@ export class LitContracts {
         tokenIdFromEvent = events[1].topics[1];
         console.warn('tokenIdFromEvent:', tokenIdFromEvent);
 
-        let publicKey = await this.pkpNftContract.read.getPubkey(tokenIdFromEvent);
+        let publicKey = await this.pkpNftContract.read.getPubkey(
+          tokenIdFromEvent
+        );
 
-        if (publicKey.startsWith("0x")) {
+        if (publicKey.startsWith('0x')) {
           publicKey = publicKey.slice(2);
         }
 
-        const pubkeyBuffer = Buffer.from(publicKey, "hex");
+        const pubkeyBuffer = Buffer.from(publicKey, 'hex');
 
         const ethAddress = computeAddress(pubkeyBuffer);
-
 
         return {
           pkp: {
             tokenId: tokenIdFromEvent,
             publicKey,
             ethAddress,
-          }, tx: sentTx, tokenId: tokenIdFromEvent, res
+          },
+          tx: sentTx,
+          tokenId: tokenIdFromEvent,
+          res,
         };
       },
 
       claimAndMint: async (
         derivedKeyId: BytesLike,
-        signatures: IPubkeyRouter.SignatureStruct[],
+        signatures: IPubkeyRouter.SignatureStruct[]
       ) => {
         let cost = await this.pkpNftContract.read.mintCost();
-        const tx =
-          await this.pkpNftContract.write.claimAndMint(
-            2,
-            derivedKeyId,
-            signatures,
-            { value: cost }
-          );
+        const tx = await this.pkpNftContract.write.claimAndMint(
+          2,
+          derivedKeyId,
+          signatures,
+          { value: cost }
+        );
         let txRec = await tx.wait();
         let events: any = 'events' in txRec ? txRec.events : txRec.logs;
         let tokenId = events[1].topics[1];

@@ -38,9 +38,9 @@ const build = async (name) => {
   await runCommand(`yarn nx run ${name}:_buildTsc`);
 
   greenLog('Building Vanilla...');
-  try{
+  try {
     await runCommand(`yarn nx run ${name}:_buildWeb`);
-  }catch(e){
+  } catch (e) {
     redLog('❌ Vanilla build failed, skipping...');
   }
 

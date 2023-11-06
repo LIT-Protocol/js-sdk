@@ -24,7 +24,7 @@ export default class WebAuthnProvider extends BaseProvider {
     super(options);
     this.rpName = options.rpName || 'lit';
   }
-  
+
   /**
    * Generate registration options for the browser to pass to a supported authenticator
    *

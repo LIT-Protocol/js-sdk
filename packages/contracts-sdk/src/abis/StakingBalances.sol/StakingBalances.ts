@@ -12,19 +12,19 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from "ethers";
+} from 'ethers';
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+} from '@ethersproject/abi';
+import type { Listener, Provider } from '@ethersproject/providers';
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from "./common";
+} from './common';
 
 export declare namespace IDiamond {
   export type FacetCutStruct = {
@@ -54,379 +54,379 @@ export declare namespace IDiamondLoupe {
 
 export interface StakingBalancesInterface extends utils.Interface {
   functions: {
-    "diamondCut((address,uint8,bytes4[])[],address,bytes)": FunctionFragment;
-    "facetAddress(bytes4)": FunctionFragment;
-    "facetAddresses()": FunctionFragment;
-    "facetFunctionSelectors(address)": FunctionFragment;
-    "facets()": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "owner()": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
-    "addAlias(address)": FunctionFragment;
-    "addPermittedStaker(address)": FunctionFragment;
-    "addPermittedStakers(address[])": FunctionFragment;
-    "balanceOf(address)": FunctionFragment;
-    "checkStakingAmounts(address)": FunctionFragment;
-    "getReward(address)": FunctionFragment;
-    "getStakingAddress()": FunctionFragment;
-    "getTokenAddress()": FunctionFragment;
-    "isPermittedStaker(address)": FunctionFragment;
-    "maximumStake()": FunctionFragment;
-    "minimumStake()": FunctionFragment;
-    "penalizeTokens(uint256,address)": FunctionFragment;
-    "permittedStakersOn()": FunctionFragment;
-    "removeAlias(address)": FunctionFragment;
-    "removePermittedStaker(address)": FunctionFragment;
-    "restakePenaltyTokens(address,uint256)": FunctionFragment;
-    "rewardOf(address)": FunctionFragment;
-    "rewardValidator(uint256,address)": FunctionFragment;
-    "setContractResolver(address)": FunctionFragment;
-    "setMaxAliasCount(uint256)": FunctionFragment;
-    "setMaximumStake(uint256)": FunctionFragment;
-    "setMinimumStake(uint256)": FunctionFragment;
-    "setPermittedStakersOn(bool)": FunctionFragment;
-    "stake(uint256,address)": FunctionFragment;
-    "totalStaked()": FunctionFragment;
-    "transferPenaltyTokens(uint256,address)": FunctionFragment;
-    "withdraw(uint256,address)": FunctionFragment;
-    "withdraw()": FunctionFragment;
-    "withdrawPenaltyTokens(uint256)": FunctionFragment;
+    'diamondCut((address,uint8,bytes4[])[],address,bytes)': FunctionFragment;
+    'facetAddress(bytes4)': FunctionFragment;
+    'facetAddresses()': FunctionFragment;
+    'facetFunctionSelectors(address)': FunctionFragment;
+    'facets()': FunctionFragment;
+    'supportsInterface(bytes4)': FunctionFragment;
+    'owner()': FunctionFragment;
+    'transferOwnership(address)': FunctionFragment;
+    'addAlias(address)': FunctionFragment;
+    'addPermittedStaker(address)': FunctionFragment;
+    'addPermittedStakers(address[])': FunctionFragment;
+    'balanceOf(address)': FunctionFragment;
+    'checkStakingAmounts(address)': FunctionFragment;
+    'getReward(address)': FunctionFragment;
+    'getStakingAddress()': FunctionFragment;
+    'getTokenAddress()': FunctionFragment;
+    'isPermittedStaker(address)': FunctionFragment;
+    'maximumStake()': FunctionFragment;
+    'minimumStake()': FunctionFragment;
+    'penalizeTokens(uint256,address)': FunctionFragment;
+    'permittedStakersOn()': FunctionFragment;
+    'removeAlias(address)': FunctionFragment;
+    'removePermittedStaker(address)': FunctionFragment;
+    'restakePenaltyTokens(address,uint256)': FunctionFragment;
+    'rewardOf(address)': FunctionFragment;
+    'rewardValidator(uint256,address)': FunctionFragment;
+    'setContractResolver(address)': FunctionFragment;
+    'setMaxAliasCount(uint256)': FunctionFragment;
+    'setMaximumStake(uint256)': FunctionFragment;
+    'setMinimumStake(uint256)': FunctionFragment;
+    'setPermittedStakersOn(bool)': FunctionFragment;
+    'stake(uint256,address)': FunctionFragment;
+    'totalStaked()': FunctionFragment;
+    'transferPenaltyTokens(uint256,address)': FunctionFragment;
+    'withdraw(uint256,address)': FunctionFragment;
+    'withdraw()': FunctionFragment;
+    'withdrawPenaltyTokens(uint256)': FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "diamondCut"
-      | "facetAddress"
-      | "facetAddresses"
-      | "facetFunctionSelectors"
-      | "facets"
-      | "supportsInterface"
-      | "owner"
-      | "transferOwnership"
-      | "addAlias"
-      | "addPermittedStaker"
-      | "addPermittedStakers"
-      | "balanceOf"
-      | "checkStakingAmounts"
-      | "getReward"
-      | "getStakingAddress"
-      | "getTokenAddress"
-      | "isPermittedStaker"
-      | "maximumStake"
-      | "minimumStake"
-      | "penalizeTokens"
-      | "permittedStakersOn"
-      | "removeAlias"
-      | "removePermittedStaker"
-      | "restakePenaltyTokens"
-      | "rewardOf"
-      | "rewardValidator"
-      | "setContractResolver"
-      | "setMaxAliasCount"
-      | "setMaximumStake"
-      | "setMinimumStake"
-      | "setPermittedStakersOn"
-      | "stake"
-      | "totalStaked"
-      | "transferPenaltyTokens"
-      | "withdraw(uint256,address)"
-      | "withdraw()"
-      | "withdrawPenaltyTokens"
+      | 'diamondCut'
+      | 'facetAddress'
+      | 'facetAddresses'
+      | 'facetFunctionSelectors'
+      | 'facets'
+      | 'supportsInterface'
+      | 'owner'
+      | 'transferOwnership'
+      | 'addAlias'
+      | 'addPermittedStaker'
+      | 'addPermittedStakers'
+      | 'balanceOf'
+      | 'checkStakingAmounts'
+      | 'getReward'
+      | 'getStakingAddress'
+      | 'getTokenAddress'
+      | 'isPermittedStaker'
+      | 'maximumStake'
+      | 'minimumStake'
+      | 'penalizeTokens'
+      | 'permittedStakersOn'
+      | 'removeAlias'
+      | 'removePermittedStaker'
+      | 'restakePenaltyTokens'
+      | 'rewardOf'
+      | 'rewardValidator'
+      | 'setContractResolver'
+      | 'setMaxAliasCount'
+      | 'setMaximumStake'
+      | 'setMinimumStake'
+      | 'setPermittedStakersOn'
+      | 'stake'
+      | 'totalStaked'
+      | 'transferPenaltyTokens'
+      | 'withdraw(uint256,address)'
+      | 'withdraw()'
+      | 'withdrawPenaltyTokens'
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "diamondCut",
+    functionFragment: 'diamondCut',
     values: [IDiamond.FacetCutStruct[], string, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "facetAddress",
+    functionFragment: 'facetAddress',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "facetAddresses",
+    functionFragment: 'facetAddresses',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "facetFunctionSelectors",
+    functionFragment: 'facetFunctionSelectors',
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'facets', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "supportsInterface",
+    functionFragment: 'supportsInterface',
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "transferOwnership",
+    functionFragment: 'transferOwnership',
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "addAlias", values: [string]): string;
+  encodeFunctionData(functionFragment: 'addAlias', values: [string]): string;
   encodeFunctionData(
-    functionFragment: "addPermittedStaker",
+    functionFragment: 'addPermittedStaker',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "addPermittedStakers",
+    functionFragment: 'addPermittedStakers',
     values: [string[]]
   ): string;
-  encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
+  encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
   encodeFunctionData(
-    functionFragment: "checkStakingAmounts",
+    functionFragment: 'checkStakingAmounts',
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "getReward", values: [string]): string;
+  encodeFunctionData(functionFragment: 'getReward', values: [string]): string;
   encodeFunctionData(
-    functionFragment: "getStakingAddress",
+    functionFragment: 'getStakingAddress',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getTokenAddress",
+    functionFragment: 'getTokenAddress',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "isPermittedStaker",
+    functionFragment: 'isPermittedStaker',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "maximumStake",
+    functionFragment: 'maximumStake',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "minimumStake",
+    functionFragment: 'minimumStake',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "penalizeTokens",
+    functionFragment: 'penalizeTokens',
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "permittedStakersOn",
+    functionFragment: 'permittedStakersOn',
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "removeAlias", values: [string]): string;
+  encodeFunctionData(functionFragment: 'removeAlias', values: [string]): string;
   encodeFunctionData(
-    functionFragment: "removePermittedStaker",
+    functionFragment: 'removePermittedStaker',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "restakePenaltyTokens",
+    functionFragment: 'restakePenaltyTokens',
     values: [string, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "rewardOf", values: [string]): string;
+  encodeFunctionData(functionFragment: 'rewardOf', values: [string]): string;
   encodeFunctionData(
-    functionFragment: "rewardValidator",
+    functionFragment: 'rewardValidator',
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setContractResolver",
+    functionFragment: 'setContractResolver',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setMaxAliasCount",
+    functionFragment: 'setMaxAliasCount',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setMaximumStake",
+    functionFragment: 'setMaximumStake',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setMinimumStake",
+    functionFragment: 'setMinimumStake',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setPermittedStakersOn",
+    functionFragment: 'setPermittedStakersOn',
     values: [boolean]
   ): string;
   encodeFunctionData(
-    functionFragment: "stake",
+    functionFragment: 'stake',
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "totalStaked",
+    functionFragment: 'totalStaked',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "transferPenaltyTokens",
+    functionFragment: 'transferPenaltyTokens',
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "withdraw(uint256,address)",
+    functionFragment: 'withdraw(uint256,address)',
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "withdraw()",
+    functionFragment: 'withdraw()',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "withdrawPenaltyTokens",
+    functionFragment: 'withdrawPenaltyTokens',
     values: [BigNumberish]
   ): string;
 
-  decodeFunctionResult(functionFragment: "diamondCut", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'diamondCut', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "facetAddress",
+    functionFragment: 'facetAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "facetAddresses",
+    functionFragment: 'facetAddresses',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "facetFunctionSelectors",
+    functionFragment: 'facetFunctionSelectors',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'facets', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "supportsInterface",
+    functionFragment: 'supportsInterface',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "transferOwnership",
+    functionFragment: 'transferOwnership',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "addAlias", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'addAlias', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "addPermittedStaker",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addPermittedStakers",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "checkStakingAmounts",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "getReward", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getStakingAddress",
+    functionFragment: 'addPermittedStaker',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getTokenAddress",
+    functionFragment: 'addPermittedStakers',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'checkStakingAmounts',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'getReward', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'getStakingAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isPermittedStaker",
+    functionFragment: 'getTokenAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "maximumStake",
+    functionFragment: 'isPermittedStaker',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "minimumStake",
+    functionFragment: 'maximumStake',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "penalizeTokens",
+    functionFragment: 'minimumStake',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "permittedStakersOn",
+    functionFragment: 'penalizeTokens',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "removeAlias",
+    functionFragment: 'permittedStakersOn',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "removePermittedStaker",
+    functionFragment: 'removeAlias',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "restakePenaltyTokens",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "rewardOf", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "rewardValidator",
+    functionFragment: 'removePermittedStaker',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setContractResolver",
+    functionFragment: 'restakePenaltyTokens',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'rewardOf', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'rewardValidator',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setMaxAliasCount",
+    functionFragment: 'setContractResolver',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setMaximumStake",
+    functionFragment: 'setMaxAliasCount',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setMinimumStake",
+    functionFragment: 'setMaximumStake',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setPermittedStakersOn",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "totalStaked",
+    functionFragment: 'setMinimumStake',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "transferPenaltyTokens",
+    functionFragment: 'setPermittedStakersOn',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'stake', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'totalStaked',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "withdraw(uint256,address)",
+    functionFragment: 'transferPenaltyTokens',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "withdraw()", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "withdrawPenaltyTokens",
+    functionFragment: 'withdraw(uint256,address)',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'withdraw()', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'withdrawPenaltyTokens',
     data: BytesLike
   ): Result;
 
   events: {
-    "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
-    "AliasAdded(address,address)": EventFragment;
-    "AliasRemoved(address,address)": EventFragment;
-    "MaxAliasCountSet(uint256)": EventFragment;
-    "MaximumStakeSet(uint256)": EventFragment;
-    "MinimumStakeSet(uint256)": EventFragment;
-    "PermittedStakerAdded(address)": EventFragment;
-    "PermittedStakerRemoved(address)": EventFragment;
-    "PermittedStakersOnChanged(bool)": EventFragment;
-    "ResolverContractAddressSet(address)": EventFragment;
-    "RewardPaid(address,uint256)": EventFragment;
-    "Staked(address,uint256)": EventFragment;
-    "TokenRewardPerTokenPerEpochSet(uint256)": EventFragment;
-    "ValidatorNotRewardedBecauseAlias(address,address)": EventFragment;
-    "ValidatorRewarded(address,uint256)": EventFragment;
-    "ValidatorTokensPenalized(address,uint256)": EventFragment;
-    "Withdrawn(address,uint256)": EventFragment;
+    'DiamondCut((address,uint8,bytes4[])[],address,bytes)': EventFragment;
+    'OwnershipTransferred(address,address)': EventFragment;
+    'AliasAdded(address,address)': EventFragment;
+    'AliasRemoved(address,address)': EventFragment;
+    'MaxAliasCountSet(uint256)': EventFragment;
+    'MaximumStakeSet(uint256)': EventFragment;
+    'MinimumStakeSet(uint256)': EventFragment;
+    'PermittedStakerAdded(address)': EventFragment;
+    'PermittedStakerRemoved(address)': EventFragment;
+    'PermittedStakersOnChanged(bool)': EventFragment;
+    'ResolverContractAddressSet(address)': EventFragment;
+    'RewardPaid(address,uint256)': EventFragment;
+    'Staked(address,uint256)': EventFragment;
+    'TokenRewardPerTokenPerEpochSet(uint256)': EventFragment;
+    'ValidatorNotRewardedBecauseAlias(address,address)': EventFragment;
+    'ValidatorRewarded(address,uint256)': EventFragment;
+    'ValidatorTokensPenalized(address,uint256)': EventFragment;
+    'Withdrawn(address,uint256)': EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "AliasAdded"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "AliasRemoved"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "MaxAliasCountSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "MaximumStakeSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "MinimumStakeSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "PermittedStakerAdded"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "PermittedStakerRemoved"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "PermittedStakersOnChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ResolverContractAddressSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RewardPaid"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Staked"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'DiamondCut'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'AliasAdded'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'AliasRemoved'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'MaxAliasCountSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'MaximumStakeSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'MinimumStakeSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'PermittedStakerAdded'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'PermittedStakerRemoved'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'PermittedStakersOnChanged'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ResolverContractAddressSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RewardPaid'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Staked'): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "TokenRewardPerTokenPerEpochSet"
+    nameOrSignatureOrTopic: 'TokenRewardPerTokenPerEpochSet'
   ): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "ValidatorNotRewardedBecauseAlias"
+    nameOrSignatureOrTopic: 'ValidatorNotRewardedBecauseAlias'
   ): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ValidatorRewarded"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ValidatorTokensPenalized"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Withdrawn"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ValidatorRewarded'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ValidatorTokensPenalized'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Withdrawn'): EventFragment;
 }
 
 export interface DiamondCutEventObject {
@@ -675,9 +675,7 @@ export interface StakingBalances extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string[]] & { _facetFunctionSelectors: string[] }>;
 
-    facets(
-      overrides?: CallOverrides
-    ): Promise<
+    facets(overrides?: CallOverrides): Promise<
       [IDiamondLoupe.FacetStructOutput[]] & {
         facets_: IDiamondLoupe.FacetStructOutput[];
       }
@@ -806,13 +804,13 @@ export interface StakingBalances extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "withdraw(uint256,address)"(
+    'withdraw(uint256,address)'(
       amount: BigNumberish,
       account: string,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "withdraw()"(
+    'withdraw()'(
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -966,13 +964,13 @@ export interface StakingBalances extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "withdraw(uint256,address)"(
+  'withdraw(uint256,address)'(
     amount: BigNumberish,
     account: string,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "withdraw()"(
+  'withdraw()'(
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1119,13 +1117,13 @@ export interface StakingBalances extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "withdraw(uint256,address)"(
+    'withdraw(uint256,address)'(
       amount: BigNumberish,
       account: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "withdraw()"(overrides?: CallOverrides): Promise<void>;
+    'withdraw()'(overrides?: CallOverrides): Promise<void>;
 
     withdrawPenaltyTokens(
       balance: BigNumberish,
@@ -1134,7 +1132,7 @@ export interface StakingBalances extends BaseContract {
   };
 
   filters: {
-    "DiamondCut((address,uint8,bytes4[])[],address,bytes)"(
+    'DiamondCut((address,uint8,bytes4[])[],address,bytes)'(
       _diamondCut?: null,
       _init?: null,
       _calldata?: null
@@ -1145,7 +1143,7 @@ export interface StakingBalances extends BaseContract {
       _calldata?: null
     ): DiamondCutEventFilter;
 
-    "OwnershipTransferred(address,address)"(
+    'OwnershipTransferred(address,address)'(
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
@@ -1154,7 +1152,7 @@ export interface StakingBalances extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    "AliasAdded(address,address)"(
+    'AliasAdded(address,address)'(
       staker?: string | null,
       aliasAccount?: null
     ): AliasAddedEventFilter;
@@ -1163,7 +1161,7 @@ export interface StakingBalances extends BaseContract {
       aliasAccount?: null
     ): AliasAddedEventFilter;
 
-    "AliasRemoved(address,address)"(
+    'AliasRemoved(address,address)'(
       staker?: string | null,
       aliasAccount?: null
     ): AliasRemovedEventFilter;
@@ -1172,65 +1170,65 @@ export interface StakingBalances extends BaseContract {
       aliasAccount?: null
     ): AliasRemovedEventFilter;
 
-    "MaxAliasCountSet(uint256)"(
+    'MaxAliasCountSet(uint256)'(
       newMaxAliasCount?: null
     ): MaxAliasCountSetEventFilter;
     MaxAliasCountSet(newMaxAliasCount?: null): MaxAliasCountSetEventFilter;
 
-    "MaximumStakeSet(uint256)"(
+    'MaximumStakeSet(uint256)'(
       newMaximumStake?: null
     ): MaximumStakeSetEventFilter;
     MaximumStakeSet(newMaximumStake?: null): MaximumStakeSetEventFilter;
 
-    "MinimumStakeSet(uint256)"(
+    'MinimumStakeSet(uint256)'(
       newMinimumStake?: null
     ): MinimumStakeSetEventFilter;
     MinimumStakeSet(newMinimumStake?: null): MinimumStakeSetEventFilter;
 
-    "PermittedStakerAdded(address)"(
+    'PermittedStakerAdded(address)'(
       staker?: null
     ): PermittedStakerAddedEventFilter;
     PermittedStakerAdded(staker?: null): PermittedStakerAddedEventFilter;
 
-    "PermittedStakerRemoved(address)"(
+    'PermittedStakerRemoved(address)'(
       staker?: null
     ): PermittedStakerRemovedEventFilter;
     PermittedStakerRemoved(staker?: null): PermittedStakerRemovedEventFilter;
 
-    "PermittedStakersOnChanged(bool)"(
+    'PermittedStakersOnChanged(bool)'(
       permittedStakersOn?: null
     ): PermittedStakersOnChangedEventFilter;
     PermittedStakersOnChanged(
       permittedStakersOn?: null
     ): PermittedStakersOnChangedEventFilter;
 
-    "ResolverContractAddressSet(address)"(
+    'ResolverContractAddressSet(address)'(
       newResolverAddress?: null
     ): ResolverContractAddressSetEventFilter;
     ResolverContractAddressSet(
       newResolverAddress?: null
     ): ResolverContractAddressSetEventFilter;
 
-    "RewardPaid(address,uint256)"(
+    'RewardPaid(address,uint256)'(
       staker?: string | null,
       reward?: null
     ): RewardPaidEventFilter;
     RewardPaid(staker?: string | null, reward?: null): RewardPaidEventFilter;
 
-    "Staked(address,uint256)"(
+    'Staked(address,uint256)'(
       staker?: string | null,
       amount?: null
     ): StakedEventFilter;
     Staked(staker?: string | null, amount?: null): StakedEventFilter;
 
-    "TokenRewardPerTokenPerEpochSet(uint256)"(
+    'TokenRewardPerTokenPerEpochSet(uint256)'(
       newTokenRewardPerTokenPerEpoch?: null
     ): TokenRewardPerTokenPerEpochSetEventFilter;
     TokenRewardPerTokenPerEpochSet(
       newTokenRewardPerTokenPerEpoch?: null
     ): TokenRewardPerTokenPerEpochSetEventFilter;
 
-    "ValidatorNotRewardedBecauseAlias(address,address)"(
+    'ValidatorNotRewardedBecauseAlias(address,address)'(
       staker?: string | null,
       aliasAccount?: null
     ): ValidatorNotRewardedBecauseAliasEventFilter;
@@ -1239,7 +1237,7 @@ export interface StakingBalances extends BaseContract {
       aliasAccount?: null
     ): ValidatorNotRewardedBecauseAliasEventFilter;
 
-    "ValidatorRewarded(address,uint256)"(
+    'ValidatorRewarded(address,uint256)'(
       staker?: string | null,
       amount?: null
     ): ValidatorRewardedEventFilter;
@@ -1248,7 +1246,7 @@ export interface StakingBalances extends BaseContract {
       amount?: null
     ): ValidatorRewardedEventFilter;
 
-    "ValidatorTokensPenalized(address,uint256)"(
+    'ValidatorTokensPenalized(address,uint256)'(
       staker?: string | null,
       amount?: null
     ): ValidatorTokensPenalizedEventFilter;
@@ -1257,7 +1255,7 @@ export interface StakingBalances extends BaseContract {
       amount?: null
     ): ValidatorTokensPenalizedEventFilter;
 
-    "Withdrawn(address,uint256)"(
+    'Withdrawn(address,uint256)'(
       staker?: string | null,
       amount?: null
     ): WithdrawnEventFilter;
@@ -1409,13 +1407,13 @@ export interface StakingBalances extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "withdraw(uint256,address)"(
+    'withdraw(uint256,address)'(
       amount: BigNumberish,
       account: string,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "withdraw()"(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
+    'withdraw()'(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
 
     withdrawPenaltyTokens(
       balance: BigNumberish,
@@ -1576,13 +1574,13 @@ export interface StakingBalances extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "withdraw(uint256,address)"(
+    'withdraw(uint256,address)'(
       amount: BigNumberish,
       account: string,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "withdraw()"(
+    'withdraw()'(
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

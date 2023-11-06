@@ -6,7 +6,6 @@ Despite these differences, it retains the ability to sign and send transactions,
 
 API: https://docs.ethers.org/v4/api-wallet.html
 
-
 ```
 yarn add @lit-protocol/pkp-ethers ethers
 ```

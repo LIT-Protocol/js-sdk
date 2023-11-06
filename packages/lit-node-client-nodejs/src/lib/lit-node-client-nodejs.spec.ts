@@ -19,7 +19,6 @@ const isClass = (v) => {
 };
 
 describe('LitNodeClientNodeJs', () => {
-
   // --start;
   it('imported { LitNodeClientNodeJs } is a class', async () => {
     expect(isClass(LitNodeClientNodeJs)).toBe(true);
@@ -29,7 +28,6 @@ describe('LitNodeClientNodeJs', () => {
     const litNodeClient = new LitNodeClientNodeJs();
     expect(litNodeClient).toBeDefined();
   });
-
 
   it('should be able to instantiate a new LitNodeClientNodeJs to localhost', async () => {
     const litNodeClient = new LitNodeClientNodeJs({
@@ -54,7 +52,9 @@ describe('LitNodeClientNodeJs', () => {
     const litResource = new LitAccessControlConditionResource(hashedResourceId);
 
     let sessionCapabilityObject =
-      LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards([litResource]);
+      LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards([
+        litResource,
+      ]);
     expect(sessionCapabilityObject.attenuations).toStrictEqual({
       [`lit-accesscontrolcondition://${hashedResourceId}`]: {
         '*/*': [{}],

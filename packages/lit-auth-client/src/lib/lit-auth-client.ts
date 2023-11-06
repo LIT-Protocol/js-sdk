@@ -155,12 +155,12 @@ export class LitAuthClient {
         ) as unknown as T;
         break;
       case 'stytchWhatsAppFactorOtp':
-          provider = new StytchAuthFactorOtpProvider<'whatsApp'>(
-            { ...baseParams },
-            options as StytchOtpProviderOptions,
-            'whatsApp'
-          ) as unknown as T;
-          break;
+        provider = new StytchAuthFactorOtpProvider<'whatsApp'>(
+          { ...baseParams },
+          options as StytchOtpProviderOptions,
+          'whatsApp'
+        ) as unknown as T;
+        break;
       case 'stytchTotpFactor':
         provider = new StytchAuthFactorOtpProvider<'totp'>(
           { ...baseParams },

@@ -284,8 +284,9 @@ export const checkType = ({
       ' or '
     )} type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
-    )}" type instead. value: ${value instanceof Object ? JSON.stringify(value) : value
-      }`;
+    )}" type instead. value: ${
+      value instanceof Object ? JSON.stringify(value) : value
+    }`;
 
     if (throwOnError) {
       throwError({
@@ -392,8 +393,9 @@ export const is = (
   if (getVarType(value) !== type) {
     let message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
-    )}" type instead. value: ${value instanceof Object ? JSON.stringify(value) : value
-      }`;
+    )}" type instead. value: ${
+      value instanceof Object ? JSON.stringify(value) : value
+    }`;
 
     if (throwOnError) {
       throwError({
@@ -518,7 +520,7 @@ export const defaultMintClaimCallback: MintCallback<
     });
 
     if (response.status < 200 || response.status >= 400) {
-      let errResp = await response.json() ?? "";
+      let errResp = (await response.json()) ?? '';
       let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
         errResp
       )}`;
@@ -540,7 +542,7 @@ export const hexPrefixed = (str: string) => {
   }
 
   return '0x' + str;
-}
+};
 
 /**
  * getEnv - Determine the debug status based on environment variables or URL query parameters.
@@ -567,7 +569,7 @@ export function getEnv({
   nodeEnvVar = 'DEBUG',
   urlQueryParam = 'dev',
   urlQueryValue = 'debug=true',
-  defaultValue = false
+  defaultValue = false,
 } = {}) {
   // Node.js environment
   if (isNode()) {

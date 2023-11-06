@@ -1,4 +1,8 @@
-import { uint8arrayFromString, uint8arrayToString, base64ToUint8Array } from './uint8arrays';
+import {
+  uint8arrayFromString,
+  uint8arrayToString,
+  base64ToUint8Array,
+} from './uint8arrays';
 import { base64StringToBlob } from '@lit-protocol/misc-browser';
 
 describe('Encoding Functions', () => {

@@ -91,7 +91,7 @@ export async function main() {
   const pkpWallet = new PKPEthersWallet({
     pkpPubKey: pkpPubKey,
     controllerSessionSigs: sessionSigs,
-    controllerAuthMethods: []
+    controllerAuthMethods: [],
   });
 
   await pkpWallet.init();

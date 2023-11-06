@@ -8,7 +8,7 @@ export enum VMTYPE {
 export enum SIGTYPE {
   BLS = 'BLS',
   EcdsaCaitSith = 'ECDSA_CAIT_SITH',
-  EcdsaCAITSITHP256 = 'EcdsaCaitSithP256'
+  EcdsaCAITSITHP256 = 'EcdsaCaitSithP256',
 }
 
 /**
@@ -50,5 +50,5 @@ export enum ProviderType {
   StytchEmailFactorOtp = 'stytchEmailFactorOtp',
   StytchSmsFactorOtp = 'stytchSmsFactorOtp',
   StytchWhatsAppFactorOtp = 'stytchWhatsAppFactorOtp',
-  StytchTotpFactor = 'stytchTotpFactor'
+  StytchTotpFactor = 'stytchTotpFactor',
 }
