@@ -243,14 +243,11 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
 
     if (
-       [
-         this.controllerAuthSig,
-         this.controllerSessionSigs,
-         this.controllerAuthMethods,
-       ].filter((val, index, arr) => val !== undefined).length > 1
+      this.controllerAuthSig &&
+      this.controllerSessionSigs
      ) {
        throw new Error(
-         'controllerAuthSig, controllerSessionSigs and controllerAuthMethod are defined, can only use one authorization type'
+         'controllerAuthSig, controllerSessionSigs are defined, can only use one or the other'
        );
      }
     
