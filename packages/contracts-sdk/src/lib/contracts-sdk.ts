@@ -11,29 +11,33 @@ try {
 }
 
 // ----- autogen:import-data:start  -----
-// Generated at 2023-10-03T14:05:25.449Z
+// Generated at 2023-11-07T01:50:52.460Z
 import { AllowlistData } from '../abis/Allowlist.sol/AllowlistData';
 import { LITTokenData } from '../abis/LITToken.sol/LITTokenData';
 import { MultisenderData } from '../abis/Multisender.sol/MultisenderData';
 import { PKPHelperData } from '../abis/PKPHelper.sol/PKPHelperData';
 import { PKPNFTData } from '../abis/PKPNFT.sol/PKPNFTData';
+import { PKPNFTMetadataData } from '../abis/PKPNFTMetadata.sol/PKPNFTMetadataData';
 import { PKPPermissionsData } from '../abis/PKPPermissions.sol/PKPPermissionsData';
 import { PubkeyRouterData } from '../abis/PubkeyRouter.sol/PubkeyRouterData';
 import { RateLimitNFTData } from '../abis/RateLimitNFT.sol/RateLimitNFTData';
 import { StakingData } from '../abis/Staking.sol/StakingData';
+import { StakingBalancesData } from '../abis/StakingBalances.sol/StakingBalancesData';
 // ----- autogen:import-data:end  -----
 
 // ----- autogen:imports:start  -----
-// Generated at 2023-10-03T14:05:25.449Z
+// Generated at 2023-11-07T01:50:52.460Z
 import * as allowlistContract from '../abis/Allowlist.sol/Allowlist';
 import * as litTokenContract from '../abis/LITToken.sol/LITToken';
 import * as multisenderContract from '../abis/Multisender.sol/Multisender';
 import * as pkpHelperContract from '../abis/PKPHelper.sol/PKPHelper';
 import * as pkpNftContract from '../abis/PKPNFT.sol/PKPNFT';
+import * as pkpNftMetadataContract from '../abis/PKPNFTMetadata.sol/PKPNFTMetadata';
 import * as pkpPermissionsContract from '../abis/PKPPermissions.sol/PKPPermissions';
 import * as pubkeyRouterContract from '../abis/PubkeyRouter.sol/PubkeyRouter';
 import * as rateLimitNftContract from '../abis/RateLimitNFT.sol/RateLimitNFT';
 import * as stakingContract from '../abis/Staking.sol/Staking';
+import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBalances';
 // ----- autogen:imports:end  -----
 
 import { TokenInfo, derivedAddresses } from './addresses';
@@ -97,7 +101,7 @@ export class LitContracts {
   debug: boolean = false;
 
   // ----- autogen:declares:start  -----
-// Generated at 2023-10-03T14:05:25.449Z
+// Generated at 2023-11-07T01:50:52.460Z
   allowlistContract: {
     read: allowlistContract.Allowlist,
     write: allowlistContract.Allowlist,
@@ -123,6 +127,11 @@ export class LitContracts {
     write: pkpNftContract.PKPNFT,
   }
             
+  pkpNftMetadataContract: {
+    read: pkpNftMetadataContract.PKPNFTMetadata,
+    write: pkpNftMetadataContract.PKPNFTMetadata,
+  }
+            
   pkpPermissionsContract: {
     read: pkpPermissionsContract.PKPPermissions,
     write: pkpPermissionsContract.PKPPermissions,
@@ -141,6 +150,11 @@ export class LitContracts {
   stakingContract: {
     read: stakingContract.Staking,
     write: stakingContract.Staking,
+  }
+            
+  stakingBalancesContract: {
+    read: stakingBalancesContract.StakingBalances,
+    write: stakingBalancesContract.StakingBalances,
   }
             
 // ----- autogen:declares:end  -----
@@ -178,16 +192,18 @@ export class LitContracts {
     }
 
     // ----- autogen:blank-init:start  -----
-// Generated at 2023-10-03T14:05:25.449Z
+// Generated at 2023-11-07T01:50:52.460Z
     this.allowlistContract = {} as any
     this.litTokenContract = {} as any
     this.multisenderContract = {} as any
     this.pkpHelperContract = {} as any
     this.pkpNftContract = {} as any
+    this.pkpNftMetadataContract = {} as any
     this.pkpPermissionsContract = {} as any
     this.pubkeyRouterContract = {} as any
     this.rateLimitNftContract = {} as any
     this.stakingContract = {} as any
+    this.stakingBalancesContract = {} as any
 // ----- autogen:blank-init:end  -----
   }
 
@@ -357,7 +373,7 @@ export class LitContracts {
     }
 
     // ----- autogen:init:start  -----
-// Generated at 2023-10-03T14:05:25.449Z
+// Generated at 2023-11-07T01:50:52.460Z
 
     this.allowlistContract = {
         read: (new ethers.Contract(
@@ -429,6 +445,20 @@ export class LitContracts {
     };
 
 
+    this.pkpNftMetadataContract = {
+        read: (new ethers.Contract(
+            PKPNFTMetadataData.address,
+            PKPNFTMetadataData.abi as any,
+            this.provider
+        ) as unknown as pkpNftMetadataContract.PKPNFTMetadata & pkpNftMetadataContract.PKPNFTMetadata),
+        write: (new ethers.Contract(
+            PKPNFTMetadataData.address,
+            PKPNFTMetadataData.abi as any,
+            this.signer
+        ) as unknown as pkpNftMetadataContract.PKPNFTMetadata & pkpNftMetadataContract.PKPNFTMetadata)
+    };
+
+
     this.pkpPermissionsContract = {
         read: (new ethers.Contract(
             PKPPermissionsData.address,
@@ -482,6 +512,20 @@ export class LitContracts {
             StakingData.abi as any,
             this.signer
         ) as unknown as stakingContract.Staking & stakingContract.Staking)
+    };
+
+
+    this.stakingBalancesContract = {
+        read: (new ethers.Contract(
+            StakingBalancesData.address,
+            StakingBalancesData.abi as any,
+            this.provider
+        ) as unknown as stakingBalancesContract.StakingBalances & stakingBalancesContract.StakingBalances),
+        write: (new ethers.Contract(
+            StakingBalancesData.address,
+            StakingBalancesData.abi as any,
+            this.signer
+        ) as unknown as stakingBalancesContract.StakingBalances & stakingBalancesContract.StakingBalances)
     };
 // ----- autogen:init:end  -----
 

@@ -162,19 +162,19 @@ export class LitCore {
             log('Error connecting to node. Detected "ERR" in keys', url, keys);
           }
 
-          // check attestation
-          if (!resp.attestation) {
-            console.error(
-              `Missing attestation in handshake response from ${url}`
-            );
-            throwError({
-              message: `Missing attestation in handshake response from ${url}`,
-              errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
-              errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
-            });
-          } else {
-            // actually verify the attestation by checking the signature against AMD certs
-            if (this.config.checkNodeAttestation) {
+          if (this.config.checkNodeAttestation) {
+            // check attestation
+            if (!resp.attestation) {
+              console.error(
+                `Missing attestation in handshake response from ${url}`
+              );
+              throwError({
+                message: `Missing attestation in handshake response from ${url}`,
+                errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
+                errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
+              });
+            } else {
+              // actually verify the attestation by checking the signature against AMD certs
               log('Checking attestation against amd certs...');
               const attestation = resp.attestation;
 
@@ -197,10 +197,10 @@ export class LitCore {
                   errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
                 });
               }
-            } else {
-              // don't check attestation, just set server keys
-              this.serverKeys[url] = keys;
             }
+          } else {
+            // don't check attestation, just set server keys
+            this.serverKeys[url] = keys;
           }
         })
         .catch((e: any) => {

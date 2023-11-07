@@ -294,7 +294,8 @@ const mintPkpAndSign = async () => {
     // use cayenne
     client = new LitJsSdk.LitNodeClient({
       litNetwork: 'cayenne',
-      debug: true
+      debug: true,
+      checkNodeAttestation: false
     });
   }
 
@@ -313,9 +314,9 @@ const mintPkpAndSign = async () => {
     const wallet = new ethers.Wallet(privateKey, provider);
     const authSig = await getAuthSig(wallet);
 
-    console.log('Sleeping for 30 seconds so that the chronicle node replica can sync up');
-    // Sleep for 30 seconds
-    await new Promise(resolve => setTimeout(resolve, 30000));
+    // console.log('Sleeping for 5 seconds so that the chronicle node replica can sync up');
+    // Sleep for 5 seconds
+    // await new Promise(resolve => setTimeout(resolve, 5000));
 
 
     let startTime = Date.now();

@@ -386,5 +386,10 @@ export const checkSevSnpAttestation = async (
   }
 
   // pass base64 encoded report to wasm wrapper
-  return sevSnpUtilsSdk.verify_attestation_report(report);
+  return sevSnpUtilsSdk.verify_attestation_report_and_check_challenge(
+    report,
+    data,
+    signatures,
+    challenge
+  );
 };
