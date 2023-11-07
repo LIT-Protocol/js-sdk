@@ -1285,6 +1285,20 @@ export class LitNodeClientNodeJs extends LitCore {
 
   // ========== Scoped Business Logics ==========
 
+  // Normalize the data to a basic array
+  public static normalizeParams(params: ExecuteJsProps): ExecuteJsProps {
+    for (const key of Object.keys(params.jsParams)) {
+      if (Array.isArray(params.jsParams[key]) || ArrayBuffer.isView(params.jsParams[key])) {
+        let arr = [];
+        for (let i = 0; i < params.jsParams[key].length; i++) {
+          arr.push((params.jsParams[key] as Buffer)[i]);
+        }
+        params.jsParams[key] = arr;
+      }
+    }
+    return params;
+  }
+
   /**
    *
    * Execute JS on the nodes and combine and return any resulting signatures
@@ -1333,17 +1347,19 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
-    // the nodes will only accept a normal array type as a paramater due to serizalization issues with ArrayBuffer type.
-    // this loop below is to normalize the data to a basic array.
+
+    // Call the normalizeParams function to normalize the parameters
+    params = LitNodeClientNodeJs.normalizeParams(params);
+
     for (const key of Object.keys(params.jsParams)) {
       if (Array.isArray(params.jsParams[key]) || ArrayBuffer.isView(params.jsParams[key])) {
-          let arr = [];
-          for (let i = 0; i < jsParams[key].length; i++) {
-            arr.push((jsParams[key] as Buffer)[i]);
-          }
-          params.jsParams[key] = arr;
+        let arr = [];
+        for (let i = 0; i < jsParams[key].length; i++) {
+          arr.push((jsParams[key] as Buffer)[i]);
+        }
+        params.jsParams[key] = arr;
       }
-    } 
+    }
 
     let res;
     // -- only run on a single node
@@ -2311,8 +2327,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     // -- (TRY) to get the wallet signature

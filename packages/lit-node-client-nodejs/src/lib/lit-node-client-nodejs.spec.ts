@@ -73,4 +73,67 @@ describe('LitNodeClientNodeJs', () => {
 
     expect(expiration).toContain('T');
   });
+
+  describe('normalizeParams', () => {
+    it('should normalise params', () => {
+      // Setup
+      const buffer = new ArrayBuffer(2);
+      const view = new Uint8Array(buffer);
+      view[0] = 1;
+      view[1] = 2;
+      let params = { jsParams: { bufferArray: view } };
+
+      // Action
+      params = LitNodeClientNodeJs.normalizeParams(params);
+
+      // Assert
+      expect(params.jsParams.bufferArray).toEqual([1, 2]);
+    })
+
+    it('should leave normal arrays unchanged', () => {
+      // Setup
+      let params = { jsParams: { normalArray: [1, 2, 3] } };
+
+      // Action
+      params = LitNodeClientNodeJs.normalizeParams(params);
+
+      // Assert
+      expect(params.jsParams.normalArray).toEqual([1, 2, 3]);
+    });
+
+    it('should ignore non-array and non-ArrayBuffer properties', () => {
+      // Setup
+      let params = { jsParams: { number: 123, string: 'test' } };
+
+      // Action
+      params = LitNodeClientNodeJs.normalizeParams(params);
+
+      // Assert
+      expect(params.jsParams.number).toEqual(123);
+      expect(params.jsParams.string).toEqual('test');
+    });
+
+    it('should handle multiple properties', () => {
+      // Setup
+      const buffer = new ArrayBuffer(2);
+      const view = new Uint8Array(buffer);
+      view[0] = 1;
+      view[1] = 2;
+      let params = {
+        jsParams: {
+          bufferArray: view,
+          normalArray: [3, 4, 5]
+        }
+      };
+
+      // Action
+      params = LitNodeClientNodeJs.normalizeParams(params);
+
+      // Assert
+      expect(params.jsParams.bufferArray).toEqual([1, 2]);
+      expect(params.jsParams.normalArray).toEqual([3, 4, 5]);
+    });
+
+  });
+
 });
