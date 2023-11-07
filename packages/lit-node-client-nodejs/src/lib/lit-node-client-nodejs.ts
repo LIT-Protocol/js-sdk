@@ -1287,6 +1287,11 @@ export class LitNodeClientNodeJs extends LitCore {
 
   // Normalize the data to a basic array
   public static normalizeParams(params: ExecuteJsProps): ExecuteJsProps {
+    if (!params.jsParams) {
+      params.jsParams = {};
+      return params;
+    }
+
     for (const key of Object.keys(params.jsParams)) {
       if (Array.isArray(params.jsParams[key]) || ArrayBuffer.isView(params.jsParams[key])) {
         let arr = [];
@@ -1350,16 +1355,6 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // Call the normalizeParams function to normalize the parameters
     params = LitNodeClientNodeJs.normalizeParams(params);
-
-    for (const key of Object.keys(params.jsParams)) {
-      if (Array.isArray(params.jsParams[key]) || ArrayBuffer.isView(params.jsParams[key])) {
-        let arr = [];
-        for (let i = 0; i < jsParams[key].length; i++) {
-          arr.push((jsParams[key] as Buffer)[i]);
-        }
-        params.jsParams[key] = arr;
-      }
-    }
 
     let res;
     // -- only run on a single node
