@@ -13,38 +13,30 @@ export async function main() {
   const res = await client.executeJs({
     authSig: LITCONFIG.CONTROLLER_AUTHSIG,
     code: `(async () => {
-      const sigShare = await LitActions.signEcdsa({
-        toSign: dataToSign,
-        publicKey,
-        sigName: "sig",
-      });
+        LitActions.setResponse({
+            response: JSON.stringify({success: true})
+          });
     })();`,
     authMethods: [],
-    jsParams: {
-      dataToSign: TO_SIGN,
-      publicKey: LITCONFIG.PKP_PUBKEY,
-    },
   });
 
   // ==================== Post-Validation ====================
-  if (Object.keys(res.signatures).length <= 0) {
+  let jsonRes;
+
+  try {
+    jsonRes = JSON.parse(res.response);
+  } catch (e) {
+    return fail(`response should be a valid JSON`);
+  }
+
+  if (jsonRes.success !== true) {
     return fail(
-      `should have at least 1 signature but received ${
-        Object.keys(res.signatures).length
-      }`
+      `jsonRes.success should be true but received "${jsonRes.success}"`
     );
   }
 
-  ['sig', 'r', 's', 'recid', 'signature', 'publicKey', 'dataSigned'].forEach(
-    (key) => {
-      if (!res.signatures.sig[key]) {
-        return fail(`sig.${key} is undefined, empty, or null`);
-      }
-    }
-  );
-
   // ==================== Success ====================
-  return success('Lit Action should log sign x1 sig');
+  return success('Lit action should return response with no params given');
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });
