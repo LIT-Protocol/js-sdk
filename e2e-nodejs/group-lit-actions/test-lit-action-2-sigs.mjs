@@ -28,13 +28,13 @@ export async function main() {
         return sigShares;
       }
 
-      const sigShares = await signMultipleSigs(numberOfSigs, toSign, publicKey);
+      const sigShares = await signMultipleSigs(numberOfSigs, signatureData, publicKey);
 
     })();`,
     authMethods: [],
     jsParams: {
       numberOfSigs: 2,
-      toSign: TO_SIGN,
+      signatureData: TO_SIGN,
       publicKey: LITCONFIG.PKP_PUBKEY,
       sigName: 'fooSig',
     },
