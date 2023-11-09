@@ -37,6 +37,7 @@ export async function main() {
   }
 
   // ==================== Post-Validation ====================
+  // NOTE: When using other auth methods, you might need to wait for a block to be mined before you can read the scopes
   // -- get the scopes
   const scopes =
     await contractClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
