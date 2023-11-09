@@ -552,7 +552,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       case AuthMethodType.WebAuthn:
         authId = await WebAuthnProvider.authMethodId(authMethod);
         break;
-      case AuthMethodType.Google:
+      case AuthMethodType.GoogleJwt:
         authId = await GoogleProvider.authMethodId(authMethod);
         break;
       case AuthMethodType.StytchOtp:
