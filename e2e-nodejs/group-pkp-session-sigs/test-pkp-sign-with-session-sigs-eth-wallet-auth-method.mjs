@@ -123,7 +123,7 @@ export async function main() {
   if (pkpSignRes) {
     ['r', 's', 'recid', 'signature', 'publicKey', 'dataSigned'].forEach(
       (key) => {
-        if (!pkpSignRes[key]) {
+        if (pkpSignRes[key] === undefined) {
           missingKeys.push(key);
         }
       }

@@ -1,3 +1,4 @@
+import { Provider } from '@ethersproject/abstract-provider';
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 import {
@@ -1114,6 +1115,7 @@ export interface PKPBaseProp {
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
+  provider?: Provider;
 }
 
 export interface RPCUrls {
