@@ -17,6 +17,7 @@ export async function main() {
 
   const litAuthClient = new LitAuthClient({
     litRelayConfig: {
+      relayUrl: 'http://localhost:6380',
       relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
     },
     version: 'V3',

@@ -115,6 +115,33 @@ export default class DiscordProvider extends BaseProvider {
     return authMethodId;
   }
 
+  public static async authMethodId(authMethod: AuthMethod, clientId?: string): Promise<string> {
+
+    const _clientId = clientId || '1052874239658692668';
+
+    // -- get user id from access token
+    let userId;
+    const meResponse = await fetch('https://discord.com/api/users/@me', {
+      method: 'GET',
+      headers: {
+        authorization: `Bearer ${authMethod.accessToken}`,
+      },
+    });
+    if (meResponse.ok) {
+      const user = await meResponse.json();
+      userId = user.id;
+    } else {
+      throw new Error('Unable to verify Discord account');
+    }
+
+    // -- get auth method id
+    const authMethodId = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${userId}:${_clientId}`)
+    );
+
+    return authMethodId;
+  }
+
   /**
    * Fetch Discord user ID
    *
