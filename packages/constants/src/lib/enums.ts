@@ -37,6 +37,12 @@ export enum AuthMethodType {
   StytchTotpFactorOtp = 13,
 }
 
+export declare enum AuthMethodScope {
+  NoPermissions = 0,
+  SignAnything = 1,
+  OnlySignMessages = 2,
+}
+
 /**
  * Supported provider types
  */

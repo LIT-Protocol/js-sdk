@@ -3,7 +3,7 @@ import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
-import { AuthMethodType } from '@lit-protocol/constants';
+import { AuthMethodType, AuthMethodScope } from '@lit-protocol/constants';
 
 export async function main() {
   // ========== Controller Setup ===========
@@ -29,7 +29,7 @@ export async function main() {
       authMethodType: AuthMethodType.EthWallet,
       accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
     },
-    scopes: [1, 2],
+    scopes: [AuthMethodScope.SignAnything, AuthMethodScope.OnlySignMessages],
   });
 
   if (!mintInfo.tx.transactionHash) {
