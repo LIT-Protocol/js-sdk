@@ -1,7 +1,8 @@
-import { BytesLike, ethers } from 'ethers';
+import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
+import { DiscordProvider, EthWalletProvider, GoogleProvider, WebAuthnProvider } from '@lit-protocol/lit-auth-client';
 
 let CID: any;
 try {
@@ -39,6 +40,8 @@ import * as stakingContract from '../abis/Staking.sol/Staking';
 import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
+import { AuthMethod } from '@lit-protocol/types';
+import { AuthMethodType } from '@lit-protocol/constants';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -488,6 +491,128 @@ export class LitContracts {
     this.connected = true;
   };
 
+  mintWithAuth = async ({ authMethod, scopes, pubkey }: {
+    authMethod: AuthMethod,
+    scopes: string[] | number[] | BigNumberish[],
+    pubkey?: string // only applies to webauthn auth method
+  }) => {
+
+    // -- validate
+    if (!this.connected) {
+      throw new Error(
+        'Contracts are not connected. Please call connect() first'
+      );
+    }
+
+    if (!this.pkpNftContract) {
+      throw new Error('Contract is not available');
+    }
+
+    if (authMethod && !authMethod?.authMethodType) {
+      throw new Error('authMethodType is required');
+    }
+
+    if (authMethod && !authMethod?.accessToken) {
+      throw new Error('accessToken is required');
+    }
+
+    if (scopes.length <= 0) {
+      throw new Error(`❌ Permission scopes are required!
+[0] No Permissions
+[1] Sign Anything	
+[2] Only Sign Messages
+Read more here:
+https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
+      `);
+    }
+
+    // -- prepare
+    const _pubkey = pubkey ?? '0x';
+
+    // if scopes are list of strings, turn them into numbers
+    scopes = scopes.map((scope) => {
+      if (typeof scope === 'string') {
+        return ethers.BigNumber.from(scope)
+      }
+      if (typeof scope === 'number') {
+        return ethers.BigNumber.from(scope.toString())
+      }
+      return scope;
+    });
+
+    let authId;
+
+    switch (authMethod.authMethodType) {
+      case AuthMethodType.EthWallet:
+        authId = await EthWalletProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.Discord:
+        authId = await DiscordProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.WebAuthn:
+        authId = await WebAuthnProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.GoogleJwt:
+        authId = await GoogleProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.StytchOtp:
+        authId = await GoogleProvider.authMethodId(authMethod);
+        break;
+      default:
+        throw new Error(`Unsupported auth method type: ${authMethod.authMethodType}`);
+    }
+
+    // -- go
+    const mintCost = await this.pkpNftContract.read.mintCost();
+
+    // -- start minting
+    const tx = await this.pkpHelperContract.write.mintNextAndAddAuthMethods(
+      2, // key type
+      [authMethod.authMethodType],
+      [authId],
+      [_pubkey],
+      [[...scopes]],
+      true,
+      true,
+      {
+        value: mintCost
+      }
+    );
+
+    const receipt = await tx.wait();
+
+    let events = 'events' in receipt ? receipt.events : receipt.logs;
+
+    if (!events) {
+      throw new Error('No events found in receipt');
+    }
+
+    let tokenId;
+
+    tokenId = events[0].topics[1];
+    console.warn('tokenId:', tokenId);
+
+    let publicKey = await this.pkpNftContract.read.getPubkey(
+      tokenId
+    );
+
+    if (publicKey.startsWith('0x')) {
+      publicKey = publicKey.slice(2);
+    }
+
+    const pubkeyBuffer = Buffer.from(publicKey, 'hex');
+
+    const ethAddress = computeAddress(pubkeyBuffer);
+
+    return {
+      pkp: {
+        tokenId,
+        publicKey,
+        ethAddress,
+      },
+      tx: receipt,
+    };
+  }
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
@@ -764,7 +889,7 @@ export class LitContracts {
 
         let tokenIdFromEvent;
 
-        tokenIdFromEvent = events[1].topics[1];
+        tokenIdFromEvent = events[0].topics[1];
         console.warn('tokenIdFromEvent:', tokenIdFromEvent);
 
         let publicKey = await this.pkpNftContract.read.getPubkey(
@@ -1393,7 +1518,7 @@ export class LitContracts {
 
         const res: any = await tx.wait();
 
-        const tokenIdFromEvent = res.events[0].topics[3];
+        const tokenIdFromEvent = res.events[0].topics[1];
 
         return { tx, tokenId: tokenIdFromEvent };
       },

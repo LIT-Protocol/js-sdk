@@ -99,6 +99,11 @@ async function main() {
 
       const group = file.split('/')[file.split('/').length - 2]; // Assuming group is the second last part of the file path
 
+      // skip the for loop if group is in IGNORE_DIRS
+      if (IGNORE_DIRS.includes(group)) {
+        continue;
+      }
+
       if (group !== currentGroup) {
         console.log(`\nRunning tests in ${group}`);
         currentGroup = group;

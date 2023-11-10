@@ -153,7 +153,13 @@ export default class WebAuthnProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    return WebAuthnProvider.authMethodId(authMethod, this.rpName);
+  }
+
+  public static async authMethodId(authMethod: AuthMethod, rpName?: string): Promise<string> {
     let credentialId: string;
+
+    const rpNameToUse = rpName || 'lit';
 
     try {
       credentialId = JSON.parse(authMethod.accessToken).rawId;
@@ -164,7 +170,7 @@ export default class WebAuthnProvider extends BaseProvider {
     }
 
     const authMethodId = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(`${credentialId}:${this.rpName}`)
+      ethers.utils.toUtf8Bytes(`${credentialId}:${rpNameToUse}`)
     );
     return authMethodId;
   }
