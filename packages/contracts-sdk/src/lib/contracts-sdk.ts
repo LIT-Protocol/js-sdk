@@ -2,7 +2,7 @@ import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
-import { DiscordProvider, EthWalletProvider, GoogleProvider, WebAuthnProvider } from '@lit-protocol/lit-auth-client';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 let CID: any;
 try {
@@ -540,27 +540,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       return scope;
     });
 
-    let authId;
-
-    switch (authMethod.authMethodType) {
-      case AuthMethodType.EthWallet:
-        authId = await EthWalletProvider.authMethodId(authMethod);
-        break;
-      case AuthMethodType.Discord:
-        authId = await DiscordProvider.authMethodId(authMethod);
-        break;
-      case AuthMethodType.WebAuthn:
-        authId = await WebAuthnProvider.authMethodId(authMethod);
-        break;
-      case AuthMethodType.GoogleJwt:
-        authId = await GoogleProvider.authMethodId(authMethod);
-        break;
-      case AuthMethodType.StytchOtp:
-        authId = await GoogleProvider.authMethodId(authMethod);
-        break;
-      default:
-        throw new Error(`Unsupported auth method type: ${authMethod.authMethodType}`);
-    }
+    const authId = await LitAuthClient.getAuthIdByAuthMethod(authMethod);
 
     // -- go
     const mintCost = await this.pkpNftContract.read.mintCost();
