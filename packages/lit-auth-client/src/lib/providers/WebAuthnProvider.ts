@@ -43,7 +43,8 @@ export default class WebAuthnProvider extends BaseProvider {
    * Mint PKP with verified registration data
    *
    * @param {PublicKeyCredentialCreationOptionsJSON} options - Registration options to pass to the authenticator
-   *
+   * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
+   * 
    * @returns {Promise<string>} - Mint transaction hash
    */
   public async verifyAndMintPKPThroughRelayer(
@@ -73,6 +74,7 @@ export default class WebAuthnProvider extends BaseProvider {
       addPkpEthAddressAsPermittedAddress: true,
       sendPkpToItself: true,
     };
+
 
     const args = {
       ...defaultArgs,
