@@ -89,6 +89,7 @@ async function main() {
   }
   let currentGroup = null;
   let errorCounter = 0;
+  let logs = [];
 
   // -- async mode
   if (mode === 'async') {
@@ -113,6 +114,10 @@ async function main() {
         await import(file);
       } catch (e) {
         errorCounter += 1;
+        logs.push(
+          `-------------------
+- [${errorCounter}] Error happened in ${file}, see below for details 👇 \n${e}`
+        );
         console.log(e);
       }
     }
@@ -141,6 +146,10 @@ async function main() {
 
   if (errorCounter > 0) {
     console.log(`❌ ${errorCounter} test(s) failed`);
+    logs.forEach((log) => {
+      console.log(log);
+    });
+
     process.exit(1);
   }
   process.exit(0);
