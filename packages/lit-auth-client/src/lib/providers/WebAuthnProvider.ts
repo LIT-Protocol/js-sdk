@@ -75,10 +75,11 @@ export default class WebAuthnProvider extends BaseProvider {
       sendPkpToItself: true,
     };
 
-    const args: MintRequestBody = {
+
+    const args = {
       ...defaultArgs,
-      ...customArgs,
-    };
+      ...customArgs
+    }
 
     const body = JSON.stringify(args);
 

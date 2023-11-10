@@ -4,6 +4,7 @@ import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
 import { AuthMethodType } from '@lit-protocol/constants';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 export async function main() {
   // ========== Controller Setup ===========
@@ -36,12 +37,17 @@ export async function main() {
   const tokenId = mintTxReceipt.events[0].topics[1];
   console.log('tokenId', tokenId);
 
+  const authId = LitAuthClient.getAuthIdByAuthMethod({
+    authMethodType: 1,
+    accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
+  });
+
   // -- get the scopes
   const scopes =
     await contractClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
       tokenId,
       AuthMethodType.EthWallet,
-      LITCONFIG.CONTROLLER_AUTHSIG.address, // auth id
+      authId,
       3 // we only offer 2 scopes atm. and index 0 doesn't exist, so either 1 = sign anything or 2 = only sign messages
     );
 

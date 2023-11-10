@@ -190,10 +190,14 @@ export class LitAuthClient {
     return this.providers.get(type);
   }
 
+  
   /**
-   * Get auth id by auth method
+   * Retrieves the authentication ID based on the provided authentication method.
+   *
+   * @param {AuthMethod} authMethod - The authentication method
+   * @returns {Promise<string>} - The authentication ID
    */
-  public static async getAuthIdByAuthMethod(authMethod: AuthMethod) {
+  public static async getAuthIdByAuthMethod(authMethod: AuthMethod): Promise<string> {
     let authId;
 
     switch (authMethod.authMethodType) {

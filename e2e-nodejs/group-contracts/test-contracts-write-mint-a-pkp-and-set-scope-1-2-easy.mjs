@@ -4,6 +4,7 @@ import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
 import { AuthMethodType, AuthMethodScope } from '@lit-protocol/constants';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 export async function main() {
   // ========== Controller Setup ===========
@@ -36,6 +37,11 @@ export async function main() {
     return fail(`failed to mint a PKP`);
   }
 
+  const authId = LitAuthClient.getAuthIdByAuthMethod({
+    authMethodType: 1,
+    accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
+  });
+
   // ==================== Post-Validation ====================
   // NOTE: When using other auth methods, you might need to wait for a block to be mined before you can read the scopes
   // -- get the scopes
@@ -43,7 +49,7 @@ export async function main() {
     await contractClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
       mintInfo.pkp.tokenId,
       AuthMethodType.EthWallet,
-      LITCONFIG.CONTROLLER_AUTHSIG.address, // auth id
+      authId,
       3 // we only offer 2 scopes atm. and index 0 doesn't exist, so either 1 = sign anything or 2 = only sign messages
     );
 

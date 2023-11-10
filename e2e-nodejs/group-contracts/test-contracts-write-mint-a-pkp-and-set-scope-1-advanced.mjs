@@ -4,6 +4,7 @@ import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
 import { AuthMethodType } from '@lit-protocol/constants';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 export async function main() {
   // ========== Controller Setup ===========
@@ -26,12 +27,17 @@ export async function main() {
   // ==================== Test Logic ====================
   const mintCost = await contractClient.pkpNftContract.read.mintCost();
 
+  const authId = LitAuthClient.getAuthIdByAuthMethod({
+    authMethodType: 1,
+    accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
+  });
+
   // -- minting a PKP
   const mintTx =
     await contractClient.pkpHelperContract.write.mintNextAndAddAuthMethods(
       2,
       [AuthMethodType.EthWallet],
-      [LITCONFIG.CONTROLLER_AUTHSIG.address], // auth id
+      [authId],
       ['0x'], // only for web3auth atm
       [[1]],
       true, // addPkpEthAddressAsPermittedAddress,
