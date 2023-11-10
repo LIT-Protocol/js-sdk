@@ -1258,13 +1258,13 @@ export interface LitRelayConfig {
 }
 
 export interface MintRequestBody {
-  keyType: number;
-  permittedAuthMethodTypes: number[];
-  permittedAuthMethodIds: string[];
-  permittedAuthMethodPubkeys: string[];
-  permittedAuthMethodScopes: any[][] // ethers.BigNumber;
-  addPkpEthAddressAsPermittedAddress: boolean;
-  sendPkpToItself: boolean;
+  keyType?: number;
+  permittedAuthMethodTypes?: number[];
+  permittedAuthMethodIds?: string[];
+  permittedAuthMethodPubkeys?: string[];
+  permittedAuthMethodScopes?: any[][] // ethers.BigNumber;
+  addPkpEthAddressAsPermittedAddress?: boolean;
+  sendPkpToItself?: boolean;
 };
 
 export interface IRelayRequestData {
