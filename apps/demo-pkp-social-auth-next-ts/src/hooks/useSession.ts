@@ -4,6 +4,7 @@ import { getSessionSigs } from '../utils/lit';
 import { LitAbility, LitActionResource } from '@lit-protocol/auth-helpers';
 import { IRelayPKP } from '@lit-protocol/types';
 import { SessionSigs } from '@lit-protocol/types';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 export default function useSession() {
   const [sessionSigs, setSessionSigs] = useState<SessionSigs>();
@@ -30,6 +31,19 @@ export default function useSession() {
           Date.now() + 1000 * 60 * 60 * 24 * 7
         ).toISOString(); // 1 week
 
+        // -- check permissions
+        const contractClient = new LitContracts();
+        await contractClient.connect();
+
+        // WIP: Come back to here to fix this after adding the abstract "getAuthIdByAuthMethod" function
+        // const scopes = await contractClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
+        //   pkp.tokenId,
+        //   authMethod.authMethodType,
+          
+        // );
+
+        console.log("authMethod:", authMethod);
+        return;
         // Generate session sigs
         const sessionSigs = await getSessionSigs({
           pkpPublicKey: pkp.publicKey,
