@@ -37,9 +37,7 @@ export default function useSession() {
         await contractClient.connect();
 
         const authId = await LitAuthClient.getAuthIdByAuthMethod(authMethod);
-
-        // If the token is freshly minted, wait for a while before checking the permissions
-        // await new Promise((resolve) => setTimeout(resolve, 10000));
+        
         const scopes = await contractClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
           pkp.tokenId,
           authMethod.authMethodType,
