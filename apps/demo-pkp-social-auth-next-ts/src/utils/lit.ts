@@ -12,6 +12,7 @@ import {
   AuthMethod,
   GetSessionSigsProps,
   IRelayPKP,
+  MintRequestBody,
   SessionSigs,
 } from '@lit-protocol/types';
 
@@ -180,6 +181,7 @@ export async function getSessionSigs({
   authMethod: AuthMethod;
   sessionSigsParams: GetSessionSigsProps;
 }): Promise<SessionSigs> {
+
   // const provider = getProviderByAuthMethod(authMethod);
   // if (provider) {
   //   const sessionSigs = await provider.getSessionSigs({
@@ -236,6 +238,10 @@ export async function getPKPs(authMethod: AuthMethod): Promise<IRelayPKP[]> {
 export async function mintPKP(authMethod: AuthMethod): Promise<IRelayPKP> {
   const provider = getProviderByAuthMethod(authMethod);
 
+  const authMethodScopePrompt = prompt('Enter the auth method scope.\n0 - no permissions\n1 - to sign anything\n2 - to only sign messages. \n\nRead more at https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes');
+  const authMethodScope = parseInt(authMethodScopePrompt);
+  console.log("authMethodScope:", authMethodScope);
+
   let txHash: string;
 
   if (authMethod.authMethodType === AuthMethodType.WebAuthn) {
@@ -243,12 +249,15 @@ export async function mintPKP(authMethod: AuthMethod): Promise<IRelayPKP> {
     const options = await (provider as WebAuthnProvider).register();
 
     // Verify registration and mint PKP through relay server
+    // TODO: Fix this after 3.0.21 is published to add optional custom args
     txHash = await (
       provider as WebAuthnProvider
     ).verifyAndMintPKPThroughRelayer(options);
   } else {
     // Mint PKP through relay server
-    txHash = await provider.mintPKPThroughRelayer(authMethod);
+    txHash = await provider.mintPKPThroughRelayer(authMethod, {
+      permittedAuthMethodScopes: [[authMethodScope]],
+    } as MintRequestBody);
   }
 
   const response = await provider.relay.pollRequestUntilTerminalState(txHash);

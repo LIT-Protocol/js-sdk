@@ -9,12 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lit-protocol/auth-helpers": "3.0.19",
-    "@lit-protocol/constants": "3.0.19",
-    "@lit-protocol/contracts-sdk": "^3.0.19",
-    "@lit-protocol/lit-auth-client": "3.0.19",
-    "@lit-protocol/pkp-ethers": "3.0.19",
-    "@lit-protocol/types": "3.0.19",
+    "@lit-protocol/auth-helpers": "3.0.20",
+    "@lit-protocol/constants": "3.0.20",
+    "@lit-protocol/contracts-sdk": "^3.0.20",
+    "@lit-protocol/lit-auth-client": "3.0.20",
+    "@lit-protocol/pkp-ethers": "3.0.20",
+    "@lit-protocol/types": "3.0.20",
     "@radix-ui/react-radio-group": "^1.1.3",
     "@stytch/nextjs": "^11.0.0",
     "@stytch/vanilla-js": "^2.2.0",

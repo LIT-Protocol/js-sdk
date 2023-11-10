@@ -71,6 +71,7 @@ export abstract class BaseProvider {
    * Mint a new PKP for the given auth method through the relay server
    *
    * @param {AuthMethod} authMethod - Auth method object
+   * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
    *
    * @returns {Promise<string>} - Mint transaction hash
    */

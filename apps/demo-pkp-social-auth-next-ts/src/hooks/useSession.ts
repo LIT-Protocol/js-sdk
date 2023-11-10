@@ -5,6 +5,7 @@ import { LitAbility, LitActionResource } from '@lit-protocol/auth-helpers';
 import { IRelayPKP } from '@lit-protocol/types';
 import { SessionSigs } from '@lit-protocol/types';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 export default function useSession() {
   const [sessionSigs, setSessionSigs] = useState<SessionSigs>();
@@ -35,15 +36,24 @@ export default function useSession() {
         const contractClient = new LitContracts();
         await contractClient.connect();
 
-        // WIP: Come back to here to fix this after adding the abstract "getAuthIdByAuthMethod" function
-        // const scopes = await contractClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
-        //   pkp.tokenId,
-        //   authMethod.authMethodType,
-          
-        // );
+        const authId = await LitAuthClient.getAuthIdByAuthMethod(authMethod);
 
-        console.log("authMethod:", authMethod);
-        return;
+        // If the token is freshly minted, wait for a while before checking the permissions
+        // await new Promise((resolve) => setTimeout(resolve, 10000));
+        const scopes = await contractClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
+          pkp.tokenId,
+          authMethod.authMethodType,
+          authId,
+          3
+        );
+
+        if (!scopes[1] && !scopes[2]) {
+          const msg = `Your PKP does not have the required permissions! Please use the 'addPermittedAuthMethodScope' method from the PKPPermissions contract to add the required permissions.\nRead more at https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes`;
+          console.error(msg);
+          alert(msg);
+          return;
+        }
+
         // Generate session sigs
         const sessionSigs = await getSessionSigs({
           pkpPublicKey: pkp.publicKey,

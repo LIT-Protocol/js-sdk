@@ -1,6 +1,7 @@
 import {
   AuthMethod,
   BaseProviderOptions,
+  MintRequestBody,
   WebAuthnProviderOptions,
 } from '@lit-protocol/types';
 import { AuthMethodType } from '@lit-protocol/constants';
@@ -42,11 +43,13 @@ export default class WebAuthnProvider extends BaseProvider {
    * Mint PKP with verified registration data
    *
    * @param {PublicKeyCredentialCreationOptionsJSON} options - Registration options to pass to the authenticator
-   *
+   * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
+   * 
    * @returns {Promise<string>} - Mint transaction hash
    */
   public async verifyAndMintPKPThroughRelayer(
-    options: PublicKeyCredentialCreationOptionsJSON
+    options: PublicKeyCredentialCreationOptionsJSON,
+    customArgs?: MintRequestBody
   ): Promise<string> {
     // Submit registration options to the authenticator
     const { startRegistration } = await import('@simplewebauthn/browser');
@@ -62,7 +65,7 @@ export default class WebAuthnProvider extends BaseProvider {
     const authMethodPubkey = this.getPublicKeyFromRegistration(attResp);
 
     // Format args for relay server
-    const args = {
+    const defaultArgs = {
       keyType: 2,
       permittedAuthMethodTypes: [AuthMethodType.WebAuthn],
       permittedAuthMethodIds: [authMethodId],
@@ -71,6 +74,12 @@ export default class WebAuthnProvider extends BaseProvider {
       addPkpEthAddressAsPermittedAddress: true,
       sendPkpToItself: true,
     };
+
+    const args: MintRequestBody = {
+      ...defaultArgs,
+      ...customArgs,
+    };
+
     const body = JSON.stringify(args);
 
     // Mint PKP
