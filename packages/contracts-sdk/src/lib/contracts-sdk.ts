@@ -2,7 +2,7 @@ import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
-import { DiscordProvider, EthWalletProvider, GoogleProvider, WebAuthnProvider } from '@lit-protocol/lit-auth-client';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 let CID: any;
 try {
