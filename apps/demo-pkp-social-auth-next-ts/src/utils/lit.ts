@@ -249,15 +249,16 @@ export async function mintPKP(authMethod: AuthMethod): Promise<IRelayPKP> {
     const options = await (provider as WebAuthnProvider).register();
 
     // Verify registration and mint PKP through relay server
-    // TODO: Fix this after 3.0.21 is published to add optional custom args
     txHash = await (
       provider as WebAuthnProvider
-    ).verifyAndMintPKPThroughRelayer(options);
+    ).verifyAndMintPKPThroughRelayer(options, {
+      permittedAuthMethodScopes: [[authMethodScope]],
+    });
   } else {
     // Mint PKP through relay server
     txHash = await provider.mintPKPThroughRelayer(authMethod, {
       permittedAuthMethodScopes: [[authMethodScope]],
-    } as MintRequestBody);
+    });
   }
 
   const response = await provider.relay.pollRequestUntilTerminalState(txHash);
