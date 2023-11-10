@@ -6,8 +6,9 @@ import {
   StytchOtpProviderOptions,
   ProviderOptions,
   WebAuthnProviderOptions,
+  AuthMethod,
 } from '@lit-protocol/types';
-import { ProviderType } from '@lit-protocol/constants';
+import { AuthMethodType, ProviderType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitRelay } from './relay';
 import { BaseProvider } from './providers/BaseProvider';
@@ -187,5 +188,38 @@ export class LitAuthClient {
    */
   getProvider(type: ProviderType): BaseProvider | undefined {
     return this.providers.get(type);
+  }
+
+  
+  /**
+   * Retrieves the authentication ID based on the provided authentication method.
+   *
+   * @param {AuthMethod} authMethod - The authentication method
+   * @returns {Promise<string>} - The authentication ID
+   */
+  public static async getAuthIdByAuthMethod(authMethod: AuthMethod): Promise<string> {
+    let authId;
+
+    switch (authMethod.authMethodType) {
+      case AuthMethodType.EthWallet:
+        authId = await EthWalletProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.Discord:
+        authId = await DiscordProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.WebAuthn:
+        authId = await WebAuthnProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.GoogleJwt:
+        authId = await GoogleProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.StytchOtp:
+        authId = await GoogleProvider.authMethodId(authMethod);
+        break;
+      default:
+        throw new Error(`Unsupported auth method type: ${authMethod.authMethodType}`);
+    }
+
+    return authId;
   }
 }
