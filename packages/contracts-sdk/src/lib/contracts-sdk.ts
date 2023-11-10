@@ -491,10 +491,10 @@ export class LitContracts {
     this.connected = true;
   };
 
-  mint = async ({ authMethod, scopes, pubkey }: {
+  mintWithAuth = async ({ authMethod, scopes, pubkey }: {
     authMethod: AuthMethod,
     scopes: string[] | number[] | BigNumberish[],
-    pubkey?: string
+    pubkey?: string // only applies to webauthn auth method
   }) => {
 
     // -- validate

@@ -24,7 +24,7 @@ export async function main() {
   await contractClient.connect();
 
   // ==================== Test Logic ====================
-  const mintInfo = await contractClient.mint({
+  const mintInfo = await contractClient.mintWithAuth({
     authMethod: {
       authMethodType: AuthMethodType.EthWallet,
       accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
