@@ -3,7 +3,7 @@ import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
-import { AuthMethodType } from '@lit-protocol/constants';
+import { AuthMethodType, AuthMethodScope } from '@lit-protocol/constants';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 export async function main() {
@@ -37,10 +37,12 @@ export async function main() {
   const tokenId = mintTxReceipt.events[0].topics[1];
   console.log('tokenId', tokenId);
 
-  const authId = LitAuthClient.getAuthIdByAuthMethod({
-    authMethodType: 1,
+  const authMethod = {
+    authMethodType: AuthMethodType.EthWallet,
     accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
-  });
+  };
+
+  const authId = LitAuthClient.getAuthIdByAuthMethod(authMethod);
 
   // -- get the scopes
   const scopes =
@@ -48,15 +50,15 @@ export async function main() {
       tokenId,
       AuthMethodType.EthWallet,
       authId,
-      3 // we only offer 2 scopes atm. and index 0 doesn't exist, so either 1 = sign anything or 2 = only sign messages
+      3
     );
 
   // -- validate both scopes should be false
-  if (scopes[1] !== false) {
+  if (scopes[AuthMethodScope.SignAnything] !== false) {
     return fail('scope 1 (sign anything) should be false');
   }
 
-  if (scopes[2] !== false) {
+  if (scopes[AuthMethodScope.OnlySignMessages] !== false) {
     return fail('scope 2 (only sign messages) should be false');
   }
 
@@ -66,7 +68,7 @@ export async function main() {
       tokenId,
       AuthMethodType.EthWallet,
       LITCONFIG.CONTROLLER_AUTHSIG.address, // auth id
-      1 // sign anything
+      AuthMethodScope.SignAnything
     );
 
   const setScopeTxReceipt = await setScopeTx.wait();
@@ -77,7 +79,7 @@ export async function main() {
       tokenId,
       AuthMethodType.EthWallet,
       LITCONFIG.CONTROLLER_AUTHSIG.address, // auth id
-      3 // we only offer 2 scopes atm. and index 0 doesn't exist, so either 1 = sign anything or 2 = only sign messages
+      3
     );
 
   // ==================== Post-Validation ====================

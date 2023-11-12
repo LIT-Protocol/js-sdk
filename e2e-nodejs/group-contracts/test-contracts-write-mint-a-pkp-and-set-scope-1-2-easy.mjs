@@ -25,22 +25,26 @@ export async function main() {
   await contractClient.connect();
 
   // ==================== Test Logic ====================
+
+  const authMethod = {
+    authMethodType: AuthMethodType.EthWallet,
+    accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
+  };
+
   const mintInfo = await contractClient.mintWithAuth({
-    authMethod: {
-      authMethodType: AuthMethodType.EthWallet,
-      accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
-    },
-    scopes: [AuthMethodScope.SignAnything, AuthMethodScope.OnlySignMessages],
+    authMethod,
+    scopes: [
+      // AuthMethodScope.NoPermissions,
+      AuthMethodScope.SignAnything,
+      AuthMethodScope.OnlySignMessages,
+    ],
   });
 
   if (!mintInfo.tx.transactionHash) {
     return fail(`failed to mint a PKP`);
   }
 
-  const authId = LitAuthClient.getAuthIdByAuthMethod({
-    authMethodType: 1,
-    accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
-  });
+  const authId = LitAuthClient.getAuthIdByAuthMethod(authMethod);
 
   // ==================== Post-Validation ====================
   // NOTE: When using other auth methods, you might need to wait for a block to be mined before you can read the scopes
@@ -50,7 +54,7 @@ export async function main() {
       mintInfo.pkp.tokenId,
       AuthMethodType.EthWallet,
       authId,
-      3 // we only offer 2 scopes atm. and index 0 doesn't exist, so either 1 = sign anything or 2 = only sign messages
+      3
     );
 
   const signAnythingScope = scopes[1];

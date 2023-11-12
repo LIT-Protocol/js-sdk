@@ -27,10 +27,12 @@ export async function main() {
   // ==================== Test Logic ====================
   const mintCost = await contractClient.pkpNftContract.read.mintCost();
 
-  const authId = LitAuthClient.getAuthIdByAuthMethod({
+  const authMethod = {
     authMethodType: 1,
     accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
-  });
+  };
+
+  const authId = LitAuthClient.getAuthIdByAuthMethod(authMethod);
 
   // -- minting a PKP
   const mintTx =
@@ -50,15 +52,14 @@ export async function main() {
   const mintTxReceipt = await mintTx.wait();
 
   const tokenId = mintTxReceipt.events[0].topics[1];
-  console.log('tokenId', tokenId);
 
   // -- get the scopes
   const scopes =
     await contractClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
       tokenId,
       AuthMethodType.EthWallet,
-      LITCONFIG.CONTROLLER_AUTHSIG.address, // auth id
-      3 // we only offer 2 scopes atm. and index 0 doesn't exist, so either 1 = sign anything or 2 = only sign messages
+      authId,
+      3
     );
 
   // ==================== Post-Validation ====================
