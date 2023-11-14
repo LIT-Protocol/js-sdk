@@ -11,7 +11,7 @@ try {
 }
 
 // ----- autogen:import-data:start  -----
-// Generated at 2023-11-07T01:50:52.460Z
+// Generated at 2023-11-10T22:19:13.004Z
 import { AllowlistData } from '../abis/Allowlist.sol/AllowlistData';
 import { LITTokenData } from '../abis/LITToken.sol/LITTokenData';
 import { MultisenderData } from '../abis/Multisender.sol/MultisenderData';
@@ -26,7 +26,7 @@ import { StakingBalancesData } from '../abis/StakingBalances.sol/StakingBalances
 // ----- autogen:import-data:end  -----
 
 // ----- autogen:imports:start  -----
-// Generated at 2023-11-07T01:50:52.460Z
+// Generated at 2023-11-10T22:19:13.004Z
 import * as allowlistContract from '../abis/Allowlist.sol/Allowlist';
 import * as litTokenContract from '../abis/LITToken.sol/LITToken';
 import * as multisenderContract from '../abis/Multisender.sol/Multisender';
@@ -101,7 +101,7 @@ export class LitContracts {
   debug: boolean = false;
 
   // ----- autogen:declares:start  -----
-// Generated at 2023-11-07T01:50:52.460Z
+// Generated at 2023-11-10T22:19:13.004Z
   allowlistContract: {
     read: allowlistContract.Allowlist,
     write: allowlistContract.Allowlist,
@@ -192,7 +192,7 @@ export class LitContracts {
     }
 
     // ----- autogen:blank-init:start  -----
-// Generated at 2023-11-07T01:50:52.460Z
+// Generated at 2023-11-10T22:19:13.004Z
     this.allowlistContract = {} as any
     this.litTokenContract = {} as any
     this.multisenderContract = {} as any
@@ -373,7 +373,7 @@ export class LitContracts {
     }
 
     // ----- autogen:init:start  -----
-// Generated at 2023-11-07T01:50:52.460Z
+// Generated at 2023-11-10T22:19:13.004Z
 
     this.allowlistContract = {
         read: (new ethers.Contract(

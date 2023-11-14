@@ -1,6 +1,6 @@
 export const RateLimitNFTData = {
   "date": "2023-10-02T18:22:08.000Z",
-  "address": "0xf3d48cad76f24ac7b602A73C6cc7f3cCb65abf59",
+  "address": "0xd1ADDbd07461B39113F18a4Dc9874d6E4B29F7CE",
   "contractName": "RateLimitNFT",
   "abi": [
     {
