@@ -401,6 +401,11 @@ export const checkSevSnpAttestation = async (
     );
   }
 
+  // get the VCEK certificate
+  const vcekUrl = sevSnpUtilsSdk.get_vcek_url(report);
+  // if browser, use local storage
+  // if nodejs, store in memory?
+
   // pass base64 encoded report to wasm wrapper
   return sevSnpUtilsSdk.verify_attestation_report_and_check_challenge(
     report,
