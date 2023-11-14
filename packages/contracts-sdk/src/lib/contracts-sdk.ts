@@ -898,14 +898,15 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
       claimAndMint: async (
         derivedKeyId: BytesLike,
-        signatures: IPubkeyRouter.SignatureStruct[]
+        signatures: IPubkeyRouter.SignatureStruct[],
+        txOpts?: any
       ) => {
         let cost = await this.pkpNftContract.read.mintCost();
         const tx = await this.pkpNftContract.write.claimAndMint(
           2,
           derivedKeyId,
           signatures,
-          { value: cost }
+          txOpts ?? { value: cost }
         );
         let txRec = await tx.wait();
         let events: any = 'events' in txRec ? txRec.events : txRec.logs;
