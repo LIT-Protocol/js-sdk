@@ -406,8 +406,6 @@ export const checkSevSnpAttestation = async (
     report,
     data,
     signatures,
-    challenge,
-    parsedUrl.hostname,
-    parsedUrl.port
+    challenge
   );
 };
