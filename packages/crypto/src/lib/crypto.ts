@@ -347,7 +347,12 @@ function base64ToBufferAsync(base64) {
     });
 }
 
-async function getAmdCert(url) {
+async function getAmdCert(url: string) {
+  // unfortunately, until AMD enables CORS, we have to use a proxy when in the browser
+  if (isBrowser()) {
+    // CORS proxy url
+    url = `https://shielded-earth-13917-10ba15245911.herokuapp.com/${url}`;
+  }
   const response = await fetch(url);
   const arrayBuffer = await response.arrayBuffer();
   return new Uint8Array(arrayBuffer);
@@ -432,7 +437,7 @@ export const checkSevSnpAttestation = async (
   if (isBrowser()) {
     vcekCert = localStorage.getItem(vcekUrl);
     if (vcekCert) {
-      veckCert = uint8ArrayFromString(vcekCert, 'base64');
+      vcekCert = uint8arrayFromString(vcekCert, 'base64');
     } else {
       vcekCert = await getAmdCert(vcekUrl);
       localStorage.setItem(vcekUrl, uint8arrayToString(vcekCert, 'base64'));

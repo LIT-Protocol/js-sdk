@@ -292,29 +292,31 @@ const mintPkpAndSign = async () => {
     });
   } else {
     // use cayenne
-    // client = new LitJsSdk.LitNodeClient({
-    //   litNetwork: 'cayenne',
-    //   debug: true,
-    //   checkNodeAttestation: false
-    // });
     client = new LitJsSdk.LitNodeClient({
+      litNetwork: 'cayenne',
       debug: true,
-      litNetwork: 'custom',
-      "minNodeCount": 6,
-      "bootstrapUrls": [
-        "https://199.115.117.113",
-        "https://199.115.117.114",
-        "https://108.62.0.105",
-        "https://64.131.85.106",
-        "https://64.131.85.108",
-        "https://167.114.17.201",
-        "https://167.114.17.202",
-        "https://167.114.17.203",
-        "https://167.114.17.204",
-        "https://167.114.17.205",
-      ],
-      checkNodeAttestation: true
+      checkNodeAttestation: false
     });
+
+    // for testing against InternalDev
+    // client = new LitJsSdk.LitNodeClient({
+    //   debug: true,
+    //   litNetwork: 'custom',
+    //   "minNodeCount": 6,
+    //   "bootstrapUrls": [
+    //     "https://199.115.117.113",
+    //     "https://199.115.117.114",
+    //     "https://108.62.0.105",
+    //     "https://64.131.85.106",
+    //     "https://64.131.85.108",
+    //     "https://167.114.17.201",
+    //     "https://167.114.17.202",
+    //     "https://167.114.17.203",
+    //     "https://167.114.17.204",
+    //     "https://167.114.17.205",
+    //   ],
+    //   checkNodeAttestation: true
+    // });
   }
 
   await client.connect();
