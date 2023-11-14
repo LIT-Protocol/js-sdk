@@ -347,6 +347,12 @@ function base64ToBufferAsync(base64) {
     });
 }
 
+async function getAmdCert(url) {
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  return new Uint8Array(arrayBuffer);
+}
+
 /**
  *
  * Check the attestation against AMD certs
@@ -402,15 +408,39 @@ export const checkSevSnpAttestation = async (
   }
 
   // get the VCEK certificate
+  let vcekCert;
   const vcekUrl = sevSnpUtilsSdk.get_vcek_url(report);
   // if browser, use local storage
-  // if nodejs, store in memory?
+  if (isBrowser()) {
+    vcekCert = localStorage.getItem(vcekUrl);
+    if (vcekCert) {
+      veckCert = uint8ArrayFromString(vcekCert, 'base64');
+    } else {
+      vcekCert = await getAmdCert(vcekUrl);
+      localStorage.setItem(vcekUrl, uint8arrayToString(vcekCert, 'base64'));
+    }
+  } else if (isNode()) {
+    // if nodejs, store in memory
+    if (!globalThis.amdCertStore) {
+      globalThis.amdCertStore = {};
+    }
+    vcekCert = globalThis.amdCertStore[vcekUrl];
+    if (!vcekCert) {
+      vcekCert = await getAmdCert(vcekUrl);
+      globalThis.amdCertStore[vcekUrl] = vcekCert;
+    }
+  } else {
+    throw new Error(
+      'Unknown environment - isBrowser() and isNode() both false'
+    );
+  }
 
   // pass base64 encoded report to wasm wrapper
   return sevSnpUtilsSdk.verify_attestation_report_and_check_challenge(
     report,
     data,
     signatures,
-    challenge
+    challenge,
+    vcekCert
   );
 };
