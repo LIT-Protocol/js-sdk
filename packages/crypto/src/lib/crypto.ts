@@ -351,14 +351,16 @@ function base64ToBufferAsync(base64) {
  *
  * Check the attestation against AMD certs
  *
- * @param { NodeAttestation } attestation
- * @param { string } challenge
+ * @param { NodeAttestation } attestation The actual attestation object, which includes the signature and report
+ * @param { string } challenge The challenge we sent
+ * @param { string } url The URL we talked to
  *
  * @returns { Promise<undefined> } A promise that throws if the attestation is invalid
  */
 export const checkSevSnpAttestation = async (
   attestation: NodeAttestation,
-  challenge: string
+  challenge: string,
+  url: string
 ) => {
   /* attestation object looks like this:
    "attestation": {
@@ -385,11 +387,27 @@ export const checkSevSnpAttestation = async (
     );
   }
 
+  const parsedUrl = new URL(url);
+  let ipWeTalkedTo = parsedUrl.hostname;
+  let portWeTalkedTo = parsedUrl.port;
+  if (ipWeTalkedTo !== data['EXTERNAL_ADDR']) {
+    throw new Error(
+      `Attestation external address ${data['EXTERNAL_ADDR']} does not match IP we talked to ${ipWeTalkedTo}`
+    );
+  }
+  if (portWeTalkedTo !== data['EXTERNAL_PORT']) {
+    throw new Error(
+      `Attestation external port ${data['EXTERNAL_PORT']} does not match port we talked to ${portWeTalkedTo}`
+    );
+  }
+
   // pass base64 encoded report to wasm wrapper
   return sevSnpUtilsSdk.verify_attestation_report_and_check_challenge(
     report,
     data,
     signatures,
-    challenge
+    challenge,
+    parsedUrl.hostname,
+    parsedUrl.port
   );
 };
