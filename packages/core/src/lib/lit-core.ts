@@ -179,7 +179,7 @@ export class LitCore {
               const attestation = resp.attestation;
 
               try {
-                checkSevSnpAttestation(attestation, challenge).then(() => {
+                checkSevSnpAttestation(attestation, challenge, url).then(() => {
                   log(`Lit Node Attestation verified for ${url}`);
 
                   // only set server keys if attestation is valid
