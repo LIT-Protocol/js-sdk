@@ -5,64 +5,88 @@ import path from 'path';
 const API =
   'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
 
-let data;
-
-try {
-  data = await fetch(API).then((res) => res.json());
-} catch (e) {
-  throw new Error(`Error fetching data from ${API}: ${e.toString()}`);
+function removeKickedValidators(activeValidators, kickedValidators) {
+  return activeValidators.filter(
+    (av) => !kickedValidators.some((kv) => kv.nodeAddress === av.nodeAddress)
+  );
 }
 
-// -- prepare
-const config = data.config;
-const stakingContract = data.data.find((item) => item.name === 'Staking')
-  .contracts[0];
-console.log('stakingContract', stakingContract);
-const address = stakingContract.address_hash;
-const abi = stakingContract.ABI;
+const getValidators = async () => {
+  let data;
+  try {
+    // Fetch and parse the JSON data in one step
+    data = await fetch(API).then((res) => res.json());
+  } catch (e) {
+    throw new Error(`Error fetching data from ${API}: ${e.toString()}`);
+  }
 
-// -- validate
-if (!config) {
-  throw new Error('❌ config is undefined');
-}
-if (!address) {
-  throw new Error('❌ address is undefined');
-}
-if (!abi) {
-  throw new Error('❌ abi is undefined');
-}
+  // Destructure the data for easier access
+  const { config, data: contractData } = data;
+  const stakingContract = contractData.find((item) => item.name === 'Staking')
+    .contracts[0];
+  const { address_hash: address, ABI: abi } = stakingContract;
 
-// -- go
-const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
-const contract = new ethers.Contract(address, abi, provider);
-console.log('contract', contract);
+  // Validate the required data
+  if (!config || !address || !abi) {
+    throw new Error('❌ Required contract data is missing');
+  }
 
-const configs = await contract.config();
-const minNodeCount = configs.minimumValidatorCount.toString();
-console.log('✅ minNodeCount', minNodeCount);
-const getValidatorsStructsInCurrentEpoch =
-  await contract.getValidatorsStructsInCurrentEpoch();
-console.log(
-  'getValidatorsStructsInCurrentEpoch:',
-  getValidatorsStructsInCurrentEpoch
-);
+  // Initialize contract
+  const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
+  const contract = new ethers.Contract(address, abi, provider);
 
-const networks = getValidatorsStructsInCurrentEpoch.map((item) => {
+  // Fetch contract data
+  const configs = await contract.config();
+  const minNodeCount = configs.minimumValidatorCount.toString();
+
+  // Fetch validators data in parallel
+  const [activeValidators, currentValidatorsCount, kickedValidators] =
+    await Promise.all([
+      contract.getValidatorsStructsInCurrentEpoch(),
+      contract.currentValidatorCountForConsensus(),
+      contract.getKickedValidators(),
+    ]);
+
+  const validators = [];
+
+  // Check if active validator set meets the threshold
+  if (
+    activeValidators.length - kickedValidators.length >=
+    currentValidatorsCount
+  ) {
+    // Process each validator
+    for (const validator of activeValidators) {
+      validators.push(validator);
+    }
+  } else {
+    console.log('❌ Active validator set does not meet the threshold');
+  }
+
+  const cleanedActiveValidators = removeKickedValidators(
+    activeValidators,
+    kickedValidators
+  );
+
+  return { minNodeCount, validators: cleanedActiveValidators };
+};
+
+const intToIP = (ip) => {
   // -- ip
   // Convert integer to binary string and pad with leading zeros to make it 32-bit
-  const binaryString = item.ip.toString(2).padStart(32, '0');
+  const binaryString = ip.toString(2).padStart(32, '0');
   // Split into octets and convert each one to decimal
   const ipArray = [];
   for (let i = 0; i < 32; i += 8) {
     ipArray.push(parseInt(binaryString.substring(i, i + 8), 2));
   }
   // Join the octets with dots to form the IP address
-  const ip = ipArray.join('.');
+  return ipArray.join('.');
+};
 
-  const address = `http://${ip}:${item.port}`;
+const { validators, minNodeCount } = await getValidators();
 
-  // -- port
-  return address;
+const networks = validators.map((item) => {
+  return `http://${intToIP(item.ip)}:${item.port}`;
 });
 
 console.log('✅ networks', networks);
