@@ -396,14 +396,32 @@ export const checkSevSnpAttestation = async (
   const parsedUrl = new URL(url);
   let ipWeTalkedTo = parsedUrl.hostname;
   let portWeTalkedTo = parsedUrl.port;
-  if (ipWeTalkedTo !== data['EXTERNAL_ADDR']) {
+  if (portWeTalkedTo === '') {
+    // if we're on HTTP or HTTPS, the port will be empty
+    if (url.startsWith('https://')) {
+      portWeTalkedTo = '443';
+    } else if (url.startsWith('http://')) {
+      portWeTalkedTo = '80';
+    } else {
+      throw new Error(`Unknown port in URL ${url}`);
+    }
+  }
+
+  let ipAndAddrFromReport = Buffer.from(
+    data['EXTERNAL_ADDR'],
+    'base64'
+  ).toString('utf8');
+  let ipFromReport = ipAndAddrFromReport.split(':')[0];
+  let portFromReport = ipAndAddrFromReport.split(':')[1];
+
+  if (ipWeTalkedTo !== ipFromReport) {
     throw new Error(
-      `Attestation external address ${data['EXTERNAL_ADDR']} does not match IP we talked to ${ipWeTalkedTo}`
+      `Attestation external address ${ipFromReport} does not match IP we talked to ${ipWeTalkedTo}`
     );
   }
-  if (portWeTalkedTo !== data['EXTERNAL_PORT']) {
+  if (portWeTalkedTo !== portFromReport) {
     throw new Error(
-      `Attestation external port ${data['EXTERNAL_PORT']} does not match port we talked to ${portWeTalkedTo}`
+      `Attestation external port ${portFromReport} does not match port we talked to ${portWeTalkedTo}`
     );
   }
 
@@ -419,7 +437,7 @@ export const checkSevSnpAttestation = async (
       vcekCert = await getAmdCert(vcekUrl);
       localStorage.setItem(vcekUrl, uint8arrayToString(vcekCert, 'base64'));
     }
-  } else if (isNode()) {
+  } else {
     // if nodejs, store in memory
     if (!globalThis.amdCertStore) {
       globalThis.amdCertStore = {};
@@ -429,10 +447,6 @@ export const checkSevSnpAttestation = async (
       vcekCert = await getAmdCert(vcekUrl);
       globalThis.amdCertStore[vcekUrl] = vcekCert;
     }
-  } else {
-    throw new Error(
-      'Unknown environment - isBrowser() and isNode() both false'
-    );
   }
 
   // pass base64 encoded report to wasm wrapper

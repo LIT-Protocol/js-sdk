@@ -1,6 +1,6 @@
 export const MultisenderData = {
   "date": "2023-11-14T15:45:41Z",
-  "address": "0xD4e3D27d21D6D6d596b6524610C486F8A9c70958",
+  "address": "0xb55D76a04c9d808420FbFB9cB6Fc07Cb1139A0F0",
   "contractName": "Multisender",
   "abi": [
     {

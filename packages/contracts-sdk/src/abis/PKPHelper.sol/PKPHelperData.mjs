@@ -1,6 +1,6 @@
 export const PKPHelperData = {
   "date": "2023-11-14T15:45:41Z",
-  "address": "0xF02b6D6b0970DB3810963300a6Ad38D8429c4cdb",
+  "address": "0x70dF0D7b12766127E80C9956f0d29D453CCd83cA",
   "contractName": "PKPHelper",
   "abi": [
     {
