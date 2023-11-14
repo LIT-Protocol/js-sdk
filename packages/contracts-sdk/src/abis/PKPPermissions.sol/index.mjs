@@ -1,2 +1,2 @@
-export * from './PKPPermissionsData.mjs';
-export * from './PKPPermissionsContract.mjs';
+export * from "./PKPPermissionsData.mjs";
+export * from "./PKPPermissionsContract.mjs";

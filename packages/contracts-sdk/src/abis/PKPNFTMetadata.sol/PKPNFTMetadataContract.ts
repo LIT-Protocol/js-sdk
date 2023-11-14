@@ -1,6 +1,6 @@
-import { ethers } from 'ethers';
-import { PKPNFTMetadataData } from './PKPNFTMetadataData';
-import { PKPNFTMetadata } from './PKPNFTMetadata';
+import { ethers } from "ethers";
+import { PKPNFTMetadataData } from "./PKPNFTMetadataData";
+import { PKPNFTMetadata } from "./PKPNFTMetadata";
 
 export const getPKPNFTMetadataContract = (provider: any) => {
   return new ethers.Contract(
@@ -8,4 +8,4 @@ export const getPKPNFTMetadataContract = (provider: any) => {
     PKPNFTMetadataData.abi,
     provider
   ) as unknown as PKPNFTMetadata;
-};
+}

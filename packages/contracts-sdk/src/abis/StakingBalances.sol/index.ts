@@ -1,3 +1,3 @@
-export * from './StakingBalancesData';
-export * from './StakingBalancesContract';
-export * from './StakingBalances';
+export * from "./StakingBalancesData";
+export * from "./StakingBalancesContract";
+export * from "./StakingBalances";

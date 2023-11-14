@@ -1,3 +1,3 @@
-export * from './PKPPermissionsData';
-export * from './PKPPermissionsContract';
-export * from './PKPPermissions';
+export * from "./PKPPermissionsData";
+export * from "./PKPPermissionsContract";
+export * from "./PKPPermissions";

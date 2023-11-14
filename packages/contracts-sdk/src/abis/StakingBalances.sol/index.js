@@ -1,2 +1,2 @@
-export * from './StakingBalancesData.js';
-export * from './StakingBalancesContract.js';
+export * from "./StakingBalancesData.js";
+export * from "./StakingBalancesContract.js";
