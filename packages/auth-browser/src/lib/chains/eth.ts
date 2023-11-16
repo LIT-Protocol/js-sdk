@@ -6,6 +6,7 @@ import {
   LIT_CHAINS,
   LIT_ERROR,
   LOCAL_STORAGE_KEYS,
+  getLatestEthBlockhash,
 } from '@lit-protocol/constants';
 
 import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
@@ -738,6 +739,13 @@ export const signAndSaveAuthMessage = async ({
     };
   }
 
+  let latestEthBlockhash;
+  try {
+    latestEthBlockhash = await getLatestEthBlockhash();
+  } catch(e: any) {
+    throw e;
+  }
+
   // -- 1. prepare 'sign-in with ethereum' message
   const preparedMessage: Partial<SiweMessage> = {
     domain: globalThis.location.host,
@@ -745,6 +753,7 @@ export const signAndSaveAuthMessage = async ({
     version: '1',
     chainId,
     expirationTime: expiration,
+    nonce: latestEthBlockhash,
   };
 
   if (resources && resources.length > 0) {

@@ -8,6 +8,7 @@ import {
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
   SIGTYPE,
+  getLatestEthBlockhash,
 } from '@lit-protocol/constants';
 
 import {
@@ -2135,6 +2136,13 @@ export class LitNodeClientNodeJs extends LitCore {
       siwe_statement += ' ' + params.statement;
     }
 
+    let latestEthBlockhash;
+    try {
+      latestEthBlockhash = await getLatestEthBlockhash();
+    } catch(e: any) {
+      throw e;
+    }
+
     let siweMessage: SiweMessage = new SiweMessage({
       domain: params?.domain || globalThis.location?.host || 'litprotocol.com',
       address: pkpEthAddress,
@@ -2144,6 +2152,7 @@ export class LitNodeClientNodeJs extends LitCore {
       chainId: params.chainId ?? 1,
       expirationTime: _expiration,
       resources: params.resources,
+      nonce: latestEthBlockhash,
     });
 
     let siweMessageStr: string = siweMessage.prepareMessage();

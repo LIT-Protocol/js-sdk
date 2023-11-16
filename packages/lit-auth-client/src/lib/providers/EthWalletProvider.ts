@@ -5,7 +5,7 @@ import {
   EthWalletProviderOptions,
   EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
-import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
+import { LIT_CHAINS, AuthMethodType, getLatestEthBlockhash } from '@lit-protocol/constants';
 import { SiweMessage } from 'lit-siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
@@ -66,6 +66,13 @@ export default class EthWalletProvider extends BaseProvider {
         options?.expiration ||
         new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
 
+      let latestEthBlockhash;
+      try {
+        latestEthBlockhash = await getLatestEthBlockhash();
+      } catch(e: any) {
+        throw e;
+      }
+
       // Prepare Sign in with Ethereum message
       const preparedMessage: Partial<SiweMessage> = {
         domain: this.domain,
@@ -74,6 +81,7 @@ export default class EthWalletProvider extends BaseProvider {
         version: '1',
         chainId,
         expirationTime: expiration,
+        nonce: latestEthBlockhash,
       };
 
       const message: SiweMessage = new SiweMessage(preparedMessage);
