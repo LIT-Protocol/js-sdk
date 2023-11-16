@@ -351,7 +351,7 @@ class FileValidator implements ParamsValidator {
     if (
       !checkType({
         value: this.file,
-        allowedTypes: ['Blob', 'File'],
+        allowedTypes: ['Blob', 'File', 'Uint8Array'],
         paramName: 'file',
         functionName: this.fnName,
       })
