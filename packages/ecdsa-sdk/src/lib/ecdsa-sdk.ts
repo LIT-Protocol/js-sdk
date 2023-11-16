@@ -107,7 +107,7 @@ function addHeapObject(obj) {
   return idx;
 }
 
-let cachedTextDecoder = new TextDecoder('utf-8', {
+let cachedTextDecoder = new TextDecoder({
   ignoreBOM: true,
   fatal: true,
 });
@@ -131,7 +131,7 @@ function getStringFromWasm0(ptr, len) {
 
 let WASM_VECTOR_LEN = 0;
 
-let cachedTextEncoder = new TextEncoder('utf-8');
+let cachedTextEncoder = new TextEncoder();
 
 const encodeString =
   typeof cachedTextEncoder.encodeInto === 'function'
