@@ -94,7 +94,7 @@ export type LITChain<T> = {
   [chainName: string]: T;
 };
 
-export type LIT_NETWORKS_KEYS = 'cayenne' | 'localhost' | 'custom';
+export type LIT_NETWORKS_KEYS = 'cayenne' | 'localhost' | 'custom' | 'internalDev';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
@@ -162,8 +162,8 @@ export type MintCallback<T = ClaimProcessor> = (
  */
 export type ClaimRequest<T = ClaimProcessor> = {
   authMethod: AuthMethod;
-  mintCallback?: MintCallback<T>, 
-} & (T extends 'relay' ? LitRelayConfig : {signer: ethers.Signer});
+  mintCallback?: MintCallback<T>,
+} & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
 
 /**
  * Result from network claim proccessing, used in {@link MintCallback}
@@ -172,5 +172,5 @@ export type ClaimResult<T = ClaimProcessor> = {
   signatures: Signature[],
   derivedKeyId: string,
   authMethodType: AuthMethodType
-  pubkey: string, 
-} & (T extends 'relay' ? LitRelayConfig : {signer: ethers.Signer});
+  pubkey: string,
+} & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });

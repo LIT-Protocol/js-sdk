@@ -52,3 +52,8 @@ export enum ProviderType {
   StytchWhatsAppFactorOtp = 'stytchWhatsAppFactorOtp',
   StytchTotpFactor = 'stytchTotpFactor'
 }
+
+export enum LitNetwork {
+  Cayenne = 'cayenne',
+  InternalDev = 'internalDev',
+}

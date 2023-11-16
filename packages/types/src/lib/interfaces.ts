@@ -764,7 +764,7 @@ export interface ValidateAndSignECDSA {
   auth_sig: AuthSig;
 }
 
-export interface HandshakeWithSgx {
+export interface HandshakeWithNodes {
   url: string;
 }
 
