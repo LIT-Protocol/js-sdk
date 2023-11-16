@@ -599,7 +599,7 @@ export const wasmBlsSdkHelpers = new (function () {
 
 let wasm;
 
-let cachedTextDecoder = new TextDecoder('utf-8', {
+let cachedTextDecoder = new TextDecoder({
   ignoreBOM: true,
   fatal: true,
 });
