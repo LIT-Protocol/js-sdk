@@ -32,11 +32,12 @@ export function ERight<T>(result: T): IEither<T> {
 }
 
 export async function getLatestEthBlockhash(): Promise<string> {
-  const provider = new ethers.providers.JsonRpcProvider(
-    LIT_EVM_CHAINS['ethereum'].rpcUrls[1]
-  );
-
+  // Not using the first rpc as it always returns the same nonce. Seems like the RPC just returns a dummy value
   for (let i = 1; i < LIT_EVM_CHAINS['ethereum'].rpcUrls.length; i++) {
+    const provider = new ethers.providers.JsonRpcProvider(
+      LIT_EVM_CHAINS['ethereum'].rpcUrls[i]
+    );
+
     try {
       console.log('Fetching the latest Eth blockhash from RPC- ', i);
       const latestEthBlockhash = (await provider.getBlock("latest")).hash;
