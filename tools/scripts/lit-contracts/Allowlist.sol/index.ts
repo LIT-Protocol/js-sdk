@@ -1,3 +1,3 @@
-export * from './AllowlistData';
-export * from './AllowlistContract';
-export * from './Allowlist';
+export * from "./AllowlistData";
+export * from "./AllowlistContract";
+export * from "./Allowlist";

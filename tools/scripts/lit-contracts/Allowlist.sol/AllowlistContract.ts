@@ -1,6 +1,6 @@
-import { ethers } from 'ethers';
-import { AllowlistData } from './AllowlistData';
-import { Allowlist } from './Allowlist';
+import { ethers } from "ethers";
+import { AllowlistData } from "./AllowlistData";
+import { Allowlist } from "./Allowlist";
 
 export const getAllowlistContract = (provider: any) => {
   return new ethers.Contract(
@@ -8,4 +8,4 @@ export const getAllowlistContract = (provider: any) => {
     AllowlistData.abi,
     provider
   ) as unknown as Allowlist;
-};
+}

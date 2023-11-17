@@ -1,6 +1,6 @@
-import { ethers } from 'ethers';
-import { StakingData } from './StakingData';
-import { Staking } from './Staking';
+import { ethers } from "ethers";
+import { StakingData } from "./StakingData";
+import { Staking } from "./Staking";
 
 export const getStakingContract = (provider: any) => {
   return new ethers.Contract(
@@ -8,4 +8,4 @@ export const getStakingContract = (provider: any) => {
     StakingData.abi,
     provider
   ) as unknown as Staking;
-};
+}

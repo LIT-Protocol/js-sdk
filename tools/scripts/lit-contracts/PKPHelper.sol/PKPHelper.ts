@@ -13,19 +13,19 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from 'ethers';
+} from "ethers";
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from '@ethersproject/abi';
-import type { Listener, Provider } from '@ethersproject/providers';
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from './common';
+} from "./common";
 
 export declare namespace IPubkeyRouter {
   export type SignatureStruct = { r: BytesLike; s: BytesLike; v: BigNumberish };
@@ -99,115 +99,115 @@ export declare namespace PKPHelper {
 
 export interface PKPHelperInterface extends utils.Interface {
   functions: {
-    'DEFAULT_ADMIN_ROLE()': FunctionFragment;
-    'claimAndMintNextAndAddAuthMethods((uint256,bytes32,(bytes32,bytes32,uint8)[]),(uint256,bytes[],uint256[][],address[],uint256[][],uint256[],bytes[],bytes[],uint256[][],bool,bool))': FunctionFragment;
-    'claimAndMintNextAndAddAuthMethodsWithTypes((uint256,bytes32,(bytes32,bytes32,uint8)[]),(uint256,bytes[],uint256[][],address[],uint256[][],uint256[],bytes[],bytes[],uint256[][],bool,bool))': FunctionFragment;
-    'contractResolver()': FunctionFragment;
-    'env()': FunctionFragment;
-    'getDomainWalletRegistry()': FunctionFragment;
-    'getPKPNftMetdataAddress()': FunctionFragment;
-    'getPkpNftAddress()': FunctionFragment;
-    'getPkpPermissionsAddress()': FunctionFragment;
-    'getRoleAdmin(bytes32)': FunctionFragment;
-    'grantRole(bytes32,address)': FunctionFragment;
-    'hasRole(bytes32,address)': FunctionFragment;
-    'mintNextAndAddAuthMethods(uint256,uint256[],bytes[],bytes[],uint256[][],bool,bool)': FunctionFragment;
-    'mintNextAndAddAuthMethodsWithTypes(uint256,bytes[],uint256[][],address[],uint256[][],uint256[],bytes[],bytes[],uint256[][],bool,bool)': FunctionFragment;
-    'mintNextAndAddDomainWalletMetadata(uint256,uint256[],bytes[],bytes[],uint256[][],string[],bool,bool)': FunctionFragment;
-    'onERC721Received(address,address,uint256,bytes)': FunctionFragment;
-    'owner()': FunctionFragment;
-    'removePkpMetadata(uint256)': FunctionFragment;
-    'renounceOwnership()': FunctionFragment;
-    'renounceRole(bytes32,address)': FunctionFragment;
-    'revokeRole(bytes32,address)': FunctionFragment;
-    'setContractResolver(address)': FunctionFragment;
-    'setPkpMetadata(uint256,string[])': FunctionFragment;
-    'supportsInterface(bytes4)': FunctionFragment;
-    'transferOwnership(address)': FunctionFragment;
+    "DEFAULT_ADMIN_ROLE()": FunctionFragment;
+    "claimAndMintNextAndAddAuthMethods((uint256,bytes32,(bytes32,bytes32,uint8)[]),(uint256,bytes[],uint256[][],address[],uint256[][],uint256[],bytes[],bytes[],uint256[][],bool,bool))": FunctionFragment;
+    "claimAndMintNextAndAddAuthMethodsWithTypes((uint256,bytes32,(bytes32,bytes32,uint8)[]),(uint256,bytes[],uint256[][],address[],uint256[][],uint256[],bytes[],bytes[],uint256[][],bool,bool))": FunctionFragment;
+    "contractResolver()": FunctionFragment;
+    "env()": FunctionFragment;
+    "getDomainWalletRegistry()": FunctionFragment;
+    "getPKPNftMetdataAddress()": FunctionFragment;
+    "getPkpNftAddress()": FunctionFragment;
+    "getPkpPermissionsAddress()": FunctionFragment;
+    "getRoleAdmin(bytes32)": FunctionFragment;
+    "grantRole(bytes32,address)": FunctionFragment;
+    "hasRole(bytes32,address)": FunctionFragment;
+    "mintNextAndAddAuthMethods(uint256,uint256[],bytes[],bytes[],uint256[][],bool,bool)": FunctionFragment;
+    "mintNextAndAddAuthMethodsWithTypes(uint256,bytes[],uint256[][],address[],uint256[][],uint256[],bytes[],bytes[],uint256[][],bool,bool)": FunctionFragment;
+    "mintNextAndAddDomainWalletMetadata(uint256,uint256[],bytes[],bytes[],uint256[][],string[],bool,bool)": FunctionFragment;
+    "onERC721Received(address,address,uint256,bytes)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "removePkpMetadata(uint256)": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "renounceRole(bytes32,address)": FunctionFragment;
+    "revokeRole(bytes32,address)": FunctionFragment;
+    "setContractResolver(address)": FunctionFragment;
+    "setPkpMetadata(uint256,string[])": FunctionFragment;
+    "supportsInterface(bytes4)": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | 'DEFAULT_ADMIN_ROLE'
-      | 'claimAndMintNextAndAddAuthMethods'
-      | 'claimAndMintNextAndAddAuthMethodsWithTypes'
-      | 'contractResolver'
-      | 'env'
-      | 'getDomainWalletRegistry'
-      | 'getPKPNftMetdataAddress'
-      | 'getPkpNftAddress'
-      | 'getPkpPermissionsAddress'
-      | 'getRoleAdmin'
-      | 'grantRole'
-      | 'hasRole'
-      | 'mintNextAndAddAuthMethods'
-      | 'mintNextAndAddAuthMethodsWithTypes'
-      | 'mintNextAndAddDomainWalletMetadata'
-      | 'onERC721Received'
-      | 'owner'
-      | 'removePkpMetadata'
-      | 'renounceOwnership'
-      | 'renounceRole'
-      | 'revokeRole'
-      | 'setContractResolver'
-      | 'setPkpMetadata'
-      | 'supportsInterface'
-      | 'transferOwnership'
+      | "DEFAULT_ADMIN_ROLE"
+      | "claimAndMintNextAndAddAuthMethods"
+      | "claimAndMintNextAndAddAuthMethodsWithTypes"
+      | "contractResolver"
+      | "env"
+      | "getDomainWalletRegistry"
+      | "getPKPNftMetdataAddress"
+      | "getPkpNftAddress"
+      | "getPkpPermissionsAddress"
+      | "getRoleAdmin"
+      | "grantRole"
+      | "hasRole"
+      | "mintNextAndAddAuthMethods"
+      | "mintNextAndAddAuthMethodsWithTypes"
+      | "mintNextAndAddDomainWalletMetadata"
+      | "onERC721Received"
+      | "owner"
+      | "removePkpMetadata"
+      | "renounceOwnership"
+      | "renounceRole"
+      | "revokeRole"
+      | "setContractResolver"
+      | "setPkpMetadata"
+      | "supportsInterface"
+      | "transferOwnership"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: 'DEFAULT_ADMIN_ROLE',
+    functionFragment: "DEFAULT_ADMIN_ROLE",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: 'claimAndMintNextAndAddAuthMethods',
+    functionFragment: "claimAndMintNextAndAddAuthMethods",
     values: [
       LibPKPNFTStorage.ClaimMaterialStruct,
       PKPHelper.AuthMethodDataStruct
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: 'claimAndMintNextAndAddAuthMethodsWithTypes',
+    functionFragment: "claimAndMintNextAndAddAuthMethodsWithTypes",
     values: [
       LibPKPNFTStorage.ClaimMaterialStruct,
       PKPHelper.AuthMethodDataStruct
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: 'contractResolver',
+    functionFragment: "contractResolver",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: 'env', values?: undefined): string;
+  encodeFunctionData(functionFragment: "env", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: 'getDomainWalletRegistry',
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: 'getPKPNftMetdataAddress',
+    functionFragment: "getDomainWalletRegistry",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: 'getPkpNftAddress',
+    functionFragment: "getPKPNftMetdataAddress",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: 'getPkpPermissionsAddress',
+    functionFragment: "getPkpNftAddress",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: 'getRoleAdmin',
+    functionFragment: "getPkpPermissionsAddress",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getRoleAdmin",
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: 'grantRole',
+    functionFragment: "grantRole",
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: 'hasRole',
+    functionFragment: "hasRole",
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: 'mintNextAndAddAuthMethods',
+    functionFragment: "mintNextAndAddAuthMethods",
     values: [
       BigNumberish,
       BigNumberish[],
@@ -219,7 +219,7 @@ export interface PKPHelperInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: 'mintNextAndAddAuthMethodsWithTypes',
+    functionFragment: "mintNextAndAddAuthMethodsWithTypes",
     values: [
       BigNumberish,
       BytesLike[],
@@ -235,7 +235,7 @@ export interface PKPHelperInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: 'mintNextAndAddDomainWalletMetadata',
+    functionFragment: "mintNextAndAddDomainWalletMetadata",
     values: [
       BigNumberish,
       BigNumberish[],
@@ -248,142 +248,142 @@ export interface PKPHelperInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: 'onERC721Received',
+    functionFragment: "onERC721Received",
     values: [string, string, BigNumberish, BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: 'removePkpMetadata',
+    functionFragment: "removePkpMetadata",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: 'renounceOwnership',
+    functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: 'renounceRole',
+    functionFragment: "renounceRole",
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: 'revokeRole',
+    functionFragment: "revokeRole",
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: 'setContractResolver',
+    functionFragment: "setContractResolver",
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: 'setPkpMetadata',
+    functionFragment: "setPkpMetadata",
     values: [BigNumberish, string[]]
   ): string;
   encodeFunctionData(
-    functionFragment: 'supportsInterface',
+    functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: 'transferOwnership',
+    functionFragment: "transferOwnership",
     values: [string]
   ): string;
 
   decodeFunctionResult(
-    functionFragment: 'DEFAULT_ADMIN_ROLE',
+    functionFragment: "DEFAULT_ADMIN_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'claimAndMintNextAndAddAuthMethods',
+    functionFragment: "claimAndMintNextAndAddAuthMethods",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'claimAndMintNextAndAddAuthMethodsWithTypes',
+    functionFragment: "claimAndMintNextAndAddAuthMethodsWithTypes",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'contractResolver',
+    functionFragment: "contractResolver",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: 'env', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "env", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'getDomainWalletRegistry',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: 'getPKPNftMetdataAddress',
+    functionFragment: "getDomainWalletRegistry",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'getPkpNftAddress',
+    functionFragment: "getPKPNftMetdataAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'getPkpPermissionsAddress',
+    functionFragment: "getPkpNftAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'getRoleAdmin',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: 'grantRole', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'hasRole', data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: 'mintNextAndAddAuthMethods',
+    functionFragment: "getPkpPermissionsAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'mintNextAndAddAuthMethodsWithTypes',
+    functionFragment: "getRoleAdmin",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "mintNextAndAddAuthMethods",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'mintNextAndAddDomainWalletMetadata',
+    functionFragment: "mintNextAndAddAuthMethodsWithTypes",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'onERC721Received',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: 'removePkpMetadata',
+    functionFragment: "mintNextAndAddDomainWalletMetadata",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'renounceOwnership',
+    functionFragment: "onERC721Received",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "removePkpMetadata",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'renounceRole',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: 'revokeRole', data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: 'setContractResolver',
+    functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'setPkpMetadata',
+    functionFragment: "renounceRole",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setContractResolver",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'supportsInterface',
+    functionFragment: "setPkpMetadata",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'transferOwnership',
+    functionFragment: "supportsInterface",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
 
   events: {
-    'ContractResolverAddressSet(address)': EventFragment;
-    'OwnershipTransferred(address,address)': EventFragment;
-    'RoleAdminChanged(bytes32,bytes32,bytes32)': EventFragment;
-    'RoleGranted(bytes32,address,address)': EventFragment;
-    'RoleRevoked(bytes32,address,address)': EventFragment;
+    "ContractResolverAddressSet(address)": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
+    "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
+    "RoleGranted(bytes32,address,address)": EventFragment;
+    "RoleRevoked(bytes32,address,address)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: 'ContractResolverAddressSet'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'RoleAdminChanged'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'RoleGranted'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'RoleRevoked'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ContractResolverAddressSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
 }
 
 export interface ContractResolverAddressSetEventObject {
@@ -865,14 +865,14 @@ export interface PKPHelper extends BaseContract {
   };
 
   filters: {
-    'ContractResolverAddressSet(address)'(
+    "ContractResolverAddressSet(address)"(
       newResolverAddress?: null
     ): ContractResolverAddressSetEventFilter;
     ContractResolverAddressSet(
       newResolverAddress?: null
     ): ContractResolverAddressSetEventFilter;
 
-    'OwnershipTransferred(address,address)'(
+    "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
@@ -881,7 +881,7 @@ export interface PKPHelper extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    'RoleAdminChanged(bytes32,bytes32,bytes32)'(
+    "RoleAdminChanged(bytes32,bytes32,bytes32)"(
       role?: BytesLike | null,
       previousAdminRole?: BytesLike | null,
       newAdminRole?: BytesLike | null
@@ -892,7 +892,7 @@ export interface PKPHelper extends BaseContract {
       newAdminRole?: BytesLike | null
     ): RoleAdminChangedEventFilter;
 
-    'RoleGranted(bytes32,address,address)'(
+    "RoleGranted(bytes32,address,address)"(
       role?: BytesLike | null,
       account?: string | null,
       sender?: string | null
@@ -903,7 +903,7 @@ export interface PKPHelper extends BaseContract {
       sender?: string | null
     ): RoleGrantedEventFilter;
 
-    'RoleRevoked(bytes32,address,address)'(
+    "RoleRevoked(bytes32,address,address)"(
       role?: BytesLike | null,
       account?: string | null,
       sender?: string | null

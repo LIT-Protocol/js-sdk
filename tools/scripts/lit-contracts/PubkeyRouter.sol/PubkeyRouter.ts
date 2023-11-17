@@ -12,19 +12,19 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from 'ethers';
+} from "ethers";
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from '@ethersproject/abi';
-import type { Listener, Provider } from '@ethersproject/providers';
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from './common';
+} from "./common";
 
 export declare namespace IDiamond {
   export type FacetCutStruct = {
@@ -85,230 +85,230 @@ export declare namespace LibPubkeyRouterStorage {
 
 export interface PubkeyRouterInterface extends utils.Interface {
   functions: {
-    'diamondCut((address,uint8,bytes4[])[],address,bytes)': FunctionFragment;
-    'facetAddress(bytes4)': FunctionFragment;
-    'facetAddresses()': FunctionFragment;
-    'facetFunctionSelectors(address)': FunctionFragment;
-    'facets()': FunctionFragment;
-    'supportsInterface(bytes4)': FunctionFragment;
-    'owner()': FunctionFragment;
-    'transferOwnership(address)': FunctionFragment;
-    'checkNodeSignatures((bytes32,bytes32,uint8)[],bytes,address)': FunctionFragment;
-    'deriveEthAddressFromPubkey(bytes)': FunctionFragment;
-    'ethAddressToPkpId(address)': FunctionFragment;
-    'getDerivedPubkey(address,bytes32)': FunctionFragment;
-    'getEthAddress(uint256)': FunctionFragment;
-    'getPkpNftAddress()': FunctionFragment;
-    'getPubkey(uint256)': FunctionFragment;
-    'getRootKeys(address)': FunctionFragment;
-    'getRoutingData(uint256)': FunctionFragment;
-    'isRouted(uint256)': FunctionFragment;
-    'pubkeys(uint256)': FunctionFragment;
-    'setContractResolver(address)': FunctionFragment;
-    'setRoutingData(uint256,bytes,address,uint256,bytes32)': FunctionFragment;
-    'setRoutingDataAsAdmin(uint256,bytes,address,uint256,bytes32)': FunctionFragment;
-    'voteForRootKeys(address,(bytes,uint256)[])': FunctionFragment;
+    "diamondCut((address,uint8,bytes4[])[],address,bytes)": FunctionFragment;
+    "facetAddress(bytes4)": FunctionFragment;
+    "facetAddresses()": FunctionFragment;
+    "facetFunctionSelectors(address)": FunctionFragment;
+    "facets()": FunctionFragment;
+    "supportsInterface(bytes4)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
+    "checkNodeSignatures((bytes32,bytes32,uint8)[],bytes,address)": FunctionFragment;
+    "deriveEthAddressFromPubkey(bytes)": FunctionFragment;
+    "ethAddressToPkpId(address)": FunctionFragment;
+    "getDerivedPubkey(address,bytes32)": FunctionFragment;
+    "getEthAddress(uint256)": FunctionFragment;
+    "getPkpNftAddress()": FunctionFragment;
+    "getPubkey(uint256)": FunctionFragment;
+    "getRootKeys(address)": FunctionFragment;
+    "getRoutingData(uint256)": FunctionFragment;
+    "isRouted(uint256)": FunctionFragment;
+    "pubkeys(uint256)": FunctionFragment;
+    "setContractResolver(address)": FunctionFragment;
+    "setRoutingData(uint256,bytes,address,uint256,bytes32)": FunctionFragment;
+    "setRoutingDataAsAdmin(uint256,bytes,address,uint256,bytes32)": FunctionFragment;
+    "voteForRootKeys(address,(bytes,uint256)[])": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | 'diamondCut'
-      | 'facetAddress'
-      | 'facetAddresses'
-      | 'facetFunctionSelectors'
-      | 'facets'
-      | 'supportsInterface'
-      | 'owner'
-      | 'transferOwnership'
-      | 'checkNodeSignatures'
-      | 'deriveEthAddressFromPubkey'
-      | 'ethAddressToPkpId'
-      | 'getDerivedPubkey'
-      | 'getEthAddress'
-      | 'getPkpNftAddress'
-      | 'getPubkey'
-      | 'getRootKeys'
-      | 'getRoutingData'
-      | 'isRouted'
-      | 'pubkeys'
-      | 'setContractResolver'
-      | 'setRoutingData'
-      | 'setRoutingDataAsAdmin'
-      | 'voteForRootKeys'
+      | "diamondCut"
+      | "facetAddress"
+      | "facetAddresses"
+      | "facetFunctionSelectors"
+      | "facets"
+      | "supportsInterface"
+      | "owner"
+      | "transferOwnership"
+      | "checkNodeSignatures"
+      | "deriveEthAddressFromPubkey"
+      | "ethAddressToPkpId"
+      | "getDerivedPubkey"
+      | "getEthAddress"
+      | "getPkpNftAddress"
+      | "getPubkey"
+      | "getRootKeys"
+      | "getRoutingData"
+      | "isRouted"
+      | "pubkeys"
+      | "setContractResolver"
+      | "setRoutingData"
+      | "setRoutingDataAsAdmin"
+      | "voteForRootKeys"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: 'diamondCut',
+    functionFragment: "diamondCut",
     values: [IDiamond.FacetCutStruct[], string, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: 'facetAddress',
+    functionFragment: "facetAddress",
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: 'facetAddresses',
+    functionFragment: "facetAddresses",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: 'facetFunctionSelectors',
+    functionFragment: "facetFunctionSelectors",
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: 'facets', values?: undefined): string;
+  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: 'supportsInterface',
+    functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: 'transferOwnership',
+    functionFragment: "transferOwnership",
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: 'checkNodeSignatures',
+    functionFragment: "checkNodeSignatures",
     values: [IPubkeyRouter.SignatureStruct[], BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: 'deriveEthAddressFromPubkey',
+    functionFragment: "deriveEthAddressFromPubkey",
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: 'ethAddressToPkpId',
+    functionFragment: "ethAddressToPkpId",
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: 'getDerivedPubkey',
+    functionFragment: "getDerivedPubkey",
     values: [string, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: 'getEthAddress',
+    functionFragment: "getEthAddress",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: 'getPkpNftAddress',
+    functionFragment: "getPkpNftAddress",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: 'getPubkey',
+    functionFragment: "getPubkey",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: 'getRootKeys', values: [string]): string;
+  encodeFunctionData(functionFragment: "getRootKeys", values: [string]): string;
   encodeFunctionData(
-    functionFragment: 'getRoutingData',
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: 'isRouted',
+    functionFragment: "getRoutingData",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: 'pubkeys',
+    functionFragment: "isRouted",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: 'setContractResolver',
+    functionFragment: "pubkeys",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setContractResolver",
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: 'setRoutingData',
+    functionFragment: "setRoutingData",
     values: [BigNumberish, BytesLike, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: 'setRoutingDataAsAdmin',
+    functionFragment: "setRoutingDataAsAdmin",
     values: [BigNumberish, BytesLike, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: 'voteForRootKeys',
+    functionFragment: "voteForRootKeys",
     values: [string, IPubkeyRouter.RootKeyStruct[]]
   ): string;
 
-  decodeFunctionResult(functionFragment: 'diamondCut', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "diamondCut", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'facetAddress',
+    functionFragment: "facetAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'facetAddresses',
+    functionFragment: "facetAddresses",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'facetFunctionSelectors',
+    functionFragment: "facetFunctionSelectors",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: 'facets', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'supportsInterface',
+    functionFragment: "supportsInterface",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'transferOwnership',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: 'checkNodeSignatures',
+    functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'deriveEthAddressFromPubkey',
+    functionFragment: "checkNodeSignatures",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'ethAddressToPkpId',
+    functionFragment: "deriveEthAddressFromPubkey",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'getDerivedPubkey',
+    functionFragment: "ethAddressToPkpId",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'getEthAddress',
+    functionFragment: "getDerivedPubkey",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'getPkpNftAddress',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: 'getPubkey', data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: 'getRootKeys',
+    functionFragment: "getEthAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'getRoutingData',
+    functionFragment: "getPkpNftAddress",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: 'isRouted', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'pubkeys', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getPubkey", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'setContractResolver',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: 'setRoutingData',
+    functionFragment: "getRootKeys",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'setRoutingDataAsAdmin',
+    functionFragment: "getRoutingData",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "isRouted", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "pubkeys", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setContractResolver",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'voteForRootKeys',
+    functionFragment: "setRoutingData",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setRoutingDataAsAdmin",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "voteForRootKeys",
     data: BytesLike
   ): Result;
 
   events: {
-    'DiamondCut((address,uint8,bytes4[])[],address,bytes)': EventFragment;
-    'OwnershipTransferred(address,address)': EventFragment;
-    'ContractResolverAddressSet(address)': EventFragment;
-    'PubkeyRoutingDataSet(uint256,bytes,address,uint256,bytes32)': EventFragment;
-    'RootKeySet(address,(bytes,uint256))': EventFragment;
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
+    "ContractResolverAddressSet(address)": EventFragment;
+    "PubkeyRoutingDataSet(uint256,bytes,address,uint256,bytes32)": EventFragment;
+    "RootKeySet(address,(bytes,uint256))": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: 'DiamondCut'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'ContractResolverAddressSet'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'PubkeyRoutingDataSet'): EventFragment;
-  getEvent(nameOrSignatureOrTopic: 'RootKeySet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ContractResolverAddressSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PubkeyRoutingDataSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RootKeySet"): EventFragment;
 }
 
 export interface DiamondCutEventObject {
@@ -420,7 +420,9 @@ export interface PubkeyRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string[]] & { _facetFunctionSelectors: string[] }>;
 
-    facets(overrides?: CallOverrides): Promise<
+    facets(
+      overrides?: CallOverrides
+    ): Promise<
       [IDiamondLoupe.FacetStructOutput[]] & {
         facets_: IDiamondLoupe.FacetStructOutput[];
       }
@@ -756,7 +758,7 @@ export interface PubkeyRouter extends BaseContract {
   };
 
   filters: {
-    'DiamondCut((address,uint8,bytes4[])[],address,bytes)'(
+    "DiamondCut((address,uint8,bytes4[])[],address,bytes)"(
       _diamondCut?: null,
       _init?: null,
       _calldata?: null
@@ -767,7 +769,7 @@ export interface PubkeyRouter extends BaseContract {
       _calldata?: null
     ): DiamondCutEventFilter;
 
-    'OwnershipTransferred(address,address)'(
+    "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
@@ -776,14 +778,14 @@ export interface PubkeyRouter extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    'ContractResolverAddressSet(address)'(
+    "ContractResolverAddressSet(address)"(
       newResolverAddress?: null
     ): ContractResolverAddressSetEventFilter;
     ContractResolverAddressSet(
       newResolverAddress?: null
     ): ContractResolverAddressSetEventFilter;
 
-    'PubkeyRoutingDataSet(uint256,bytes,address,uint256,bytes32)'(
+    "PubkeyRoutingDataSet(uint256,bytes,address,uint256,bytes32)"(
       tokenId?: BigNumberish | null,
       pubkey?: null,
       stakingContract?: null,
@@ -798,7 +800,7 @@ export interface PubkeyRouter extends BaseContract {
       derivedKeyId?: null
     ): PubkeyRoutingDataSetEventFilter;
 
-    'RootKeySet(address,(bytes,uint256))'(
+    "RootKeySet(address,(bytes,uint256))"(
       stakingContract?: null,
       rootKey?: null
     ): RootKeySetEventFilter;

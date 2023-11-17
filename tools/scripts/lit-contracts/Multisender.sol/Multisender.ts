@@ -12,84 +12,84 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from 'ethers';
+} from "ethers";
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from '@ethersproject/abi';
-import type { Listener, Provider } from '@ethersproject/providers';
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from './common';
+} from "./common";
 
 export interface MultisenderInterface extends utils.Interface {
   functions: {
-    'owner()': FunctionFragment;
-    'renounceOwnership()': FunctionFragment;
-    'sendEth(address[])': FunctionFragment;
-    'sendTokens(address[],address)': FunctionFragment;
-    'transferOwnership(address)': FunctionFragment;
-    'withdraw()': FunctionFragment;
-    'withdrawTokens(address)': FunctionFragment;
+    "owner()": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "sendEth(address[])": FunctionFragment;
+    "sendTokens(address[],address)": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
+    "withdraw()": FunctionFragment;
+    "withdrawTokens(address)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | 'owner'
-      | 'renounceOwnership'
-      | 'sendEth'
-      | 'sendTokens'
-      | 'transferOwnership'
-      | 'withdraw'
-      | 'withdrawTokens'
+      | "owner"
+      | "renounceOwnership"
+      | "sendEth"
+      | "sendTokens"
+      | "transferOwnership"
+      | "withdraw"
+      | "withdrawTokens"
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: 'renounceOwnership',
+    functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: 'sendEth', values: [string[]]): string;
+  encodeFunctionData(functionFragment: "sendEth", values: [string[]]): string;
   encodeFunctionData(
-    functionFragment: 'sendTokens',
+    functionFragment: "sendTokens",
     values: [string[], string]
   ): string;
   encodeFunctionData(
-    functionFragment: 'transferOwnership',
+    functionFragment: "transferOwnership",
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: 'withdraw', values?: undefined): string;
+  encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: 'withdrawTokens',
+    functionFragment: "withdrawTokens",
     values: [string]
   ): string;
 
-  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'renounceOwnership',
+    functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: 'sendEth', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'sendTokens', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "sendEth", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "sendTokens", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'transferOwnership',
+    functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: 'withdraw', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: 'withdrawTokens',
+    functionFragment: "withdrawTokens",
     data: BytesLike
   ): Result;
 
   events: {
-    'OwnershipTransferred(address,address)': EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
 
 export interface OwnershipTransferredEventObject {
@@ -221,7 +221,7 @@ export interface Multisender extends BaseContract {
   };
 
   filters: {
-    'OwnershipTransferred(address,address)'(
+    "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
