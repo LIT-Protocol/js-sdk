@@ -674,6 +674,126 @@
         });
       };
 
+      var ETHOnBase = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'base',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnBase',
+        });
+      };
+
+      var ETHOnBaseGoerli = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'baseGoerli',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnBaseGoerli',
+        });
+      };
+
+      var ETHOnLukso = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'lukso',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnLukso',
+        });
+      };
+
+      var ETHOnLuksoTestnet = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'luksoTestnet',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnLuksoTestnet',
+        });
+      };
+
+      var ETHOnZora = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'zora',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnZora',
+        });
+      };
+
+      var ETHOnZoraGoerli = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'zoraGoerli',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnZoraGoerli',
+        });
+      };
+
       var ETHOnZksyncTestnet = async () => {
         const accessControlConditions = [
           {
@@ -1633,6 +1753,24 @@
     <br />
     <br />
     <button onclick="ETHOnZksync()">ETHOnZksync</button>
+    <br />
+    <br />
+    <button onclick="ETHOnBase()">ETHOnBase</button>
+    <br />
+    <br />
+    <button onclick="ETHOnBaseGoerli()">ETHOnBaseGoerli</button>
+    <br />
+    <br />
+    <button onclick="ETHOnLukso()">ETHOnLukso</button>
+    <br />
+    <br />
+    <button onclick="ETHOnLuksoTestnet()">ETHOnLuksoTestnet</button>
+    <br />
+    <br />
+    <button onclick="ETHOnZora()">ETHOnZora</button>
+    <br />
+    <br />
+    <button onclick="ETHOnZoraGoerli()">ETHOnZoraGoerli</button>
     <br />
     <br />
     <button onclick="ETHOnZksyncTestnet()">ETHOnZksyncTestnet</button>
