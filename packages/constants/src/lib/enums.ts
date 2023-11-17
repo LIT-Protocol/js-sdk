@@ -57,3 +57,12 @@ export enum LitNetwork {
   Cayenne = 'cayenne',
   InternalDev = 'internalDev',
 }
+
+export enum StakingStates {
+  Active,
+  NextValidatorSetLocked,
+  ReadyForNextEpoch,
+  Unlocked,
+  Paused,
+  Restore
+}

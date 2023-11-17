@@ -20,6 +20,7 @@ import {
   TELEM_API_URL,
   SIGTYPE,
   LitNetwork,
+  StakingStates,
 } from '@lit-protocol/constants';
 
 import {
@@ -203,8 +204,11 @@ export class LitCore {
   listenForNewEpoch = async (): Promise<void> => {
     const stakingContract = await LitContracts.getStakingContract(this.config.litNetwork as LitNetwork);
 
-    stakingContract.on("StateChanged", async () => {
-      await this.setNewConfig();
+    stakingContract.on("StateChanged", async (state: StakingStates) => {
+      log(`New state detected: "${state}"`);
+      if (state === StakingStates.NextValidatorSetLocked) {
+        await this.setNewConfig();
+      }
     });
   };
 

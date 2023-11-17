@@ -538,7 +538,12 @@ export class LitContracts {
     return minNodeCount;
   }
 
-  public static getValidators = async (network: LitNetwork.Cayenne | LitNetwork.InternalDev): Promise<string[]> => {
+  public static getValidators = async (
+    network: LitNetwork.Cayenne | LitNetwork.InternalDev,
+    protocol?: 'http' | 'https'
+  ): Promise<string[]> => {
+
+    const _protocol = protocol || 'https';
 
     const contract = await LitContracts.getStakingContract(network);
 
@@ -571,7 +576,7 @@ export class LitContracts {
     );
 
     const networks = cleanedActiveValidators.map((item: any) => {
-      return `http://${intToIP(item.ip)}:${item.port}`;
+      return `${_protocol}://${intToIP(item.ip)}:${item.port}`;
     });
 
     return networks;
