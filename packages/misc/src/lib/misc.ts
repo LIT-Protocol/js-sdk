@@ -210,9 +210,6 @@ export const throwRemovedFunctionError = (functionName: string) => {
  * @returns { void }
  */
 export const log = (...args: any): void => {
-  // append the prefix
-  args.unshift(`[Lit-JS-SDK v${version}]`);
-
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);
@@ -239,6 +236,44 @@ export const log = (...args: any): void => {
 
   globalThis?.logger.info('', ...args);
 };
+
+
+/**
+ *
+ * logging with respect to log level, defaults to trace or all logs
+ *
+ * @param { any } args
+ *
+ * @returns { void }
+ */
+export const logWithLevel = (level = "trace", ...args: any): void => {
+  if (!globalThis) {
+    // there is no globalThis, just print the log
+    console.log(...args);
+    return;
+  }
+
+  // check if config is loaded yet
+  if (!globalThis?.litConfig) {
+    // config isn't loaded yet, push into buffer
+    logBuffer.push(args);
+    return;
+  }
+
+  if (globalThis?.litConfig?.debug !== true) {
+    return;
+  }
+  // config is loaded, and debug is true
+
+  // if there are there are logs in buffer, print them first and empty the buffer.
+  while (logBuffer.length > 0) {
+    const log = logBuffer.shift() ?? '';
+    globalThis?.logger.info('', ...log);
+  }
+
+  globalThis?.logger.info(...args);
+};
+
 
 /**
  *

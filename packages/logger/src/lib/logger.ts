@@ -1,3 +1,5 @@
+import { version } from '@lit-protocol/constants';
+
 export enum LogLevel {
   INFO = 0,
   DEBUG = 1,
@@ -7,18 +9,53 @@ export enum LogLevel {
   OFF = 5,
 }
 
+const colours = {
+  reset: "\x1b[0m",
+  bright: "\x1b[1m",
+  dim: "\x1b[2m",
+  underscore: "\x1b[4m",
+  blink: "\x1b[5m",
+  reverse: "\x1b[7m",
+  hidden: "\x1b[8m",
+  
+  fg: {
+      black: "\x1b[30m",
+      red: "\x1b[31m",
+      green: "\x1b[32m",
+      yellow: "\x1b[33m",
+      blue: "\x1b[34m",
+      magenta: "\x1b[35m",
+      cyan: "\x1b[36m",
+      white: "\x1b[37m",
+      gray: "\x1b[90m",
+      crimson: "\x1b[38m" // Scarlet
+  },
+  bg: {
+      black: "\x1b[40m",
+      red: "\x1b[41m",
+      green: "\x1b[42m",
+      yellow: "\x1b[43m",
+      blue: "\x1b[44m",
+      magenta: "\x1b[45m",
+      cyan: "\x1b[46m",
+      white: "\x1b[47m",
+      gray: "\x1b[100m",
+      crimson: "\x1b[48m"
+  }
+};
+
 function _convertLoggingLevel(level: LogLevel): string {
   switch (level) {
     case LogLevel.INFO:
-      return '[INFO]';
+      return `${colours.fg.cyan}[INFO]`;
     case LogLevel.DEBUG:
-      return '[DEBUG]';
+      return `${colours.fg.cyan}[DEBUG]`;
     case LogLevel.WARN:
-      return '[WARN]';
+      return `${colours.fg.yellow}[WARN]`;
     case LogLevel.ERROR:
-      return '[ERROR]';
+      return `${colours.fg.red}[ERROR]`;
     case LogLevel.FATAL:
-      return '[FATAL]';
+      return `${colours.fg.crimson}[FATAL]`;
   }
 
   return '[UNKNOWN]';
@@ -85,7 +122,7 @@ class Log implements ILog {
   }
 
   toString(): string {
-    var fmtStr: string = `${_convertLoggingLevel(this.level)}[${
+    var fmtStr: string = `[Lit-JS-SDK v${version}]${_convertLoggingLevel(this.level)}[${
       this.timestamp
     }]${this.category}[id: ${this.id}] ${this.message}`;
     for (var i = 0; i < this.args.length; i++) {
@@ -96,6 +133,10 @@ class Log implements ILog {
       }
     }
     return fmtStr;
+  }
+
+  toArray(): string[] {
+    
   }
 
   toJSON(): Record<string, unknown> {
@@ -142,40 +183,40 @@ export class Logger {
     this._handler = handler;
   }
 
-  public info(message: string, ...args: any[]): void {
+  public info(message: string = "", ...args: any[]): void {
     this._log(LogLevel.INFO, message, args);
   }
 
-  public debug(message: string, ...args: any[]): void {
+  public debug(message: string = "", ...args: any[]): void {
     this._log(LogLevel.DEBUG, message, args);
   }
 
-  public warn(message: string, ...args: any[]): void {
+  public warn(message: string = "", ...args: any[]): void {
     this._log(LogLevel.WARN, message, args);
   }
 
-  public error(message: string, ...args: any[]): void {
+  public error(message: string = "", ...args: any[]): void {
     this._log(LogLevel.ERROR, message, args);
   }
 
-  public fatal(message: string, ...args: any[]): void {
+  public fatal(message: string = "", ...args: any[]): void {
     this._log(LogLevel.FATAL, message, args);
   }
 
-  public trace(message: string, ...args: any[]): void {
+  public trace(message: string = "", ...args: any[]): void {
     this._log(LogLevel.FATAL, message, args);
   }
 
-  public timeStart(message: string): void {
+  public timeStart(message: string = ""): void {
     this._level < LogLevel.OFF && console.time(`${this._category} ${message}`);
   }
 
-  public timeEnd(message: string): void {
+  public timeEnd(message: string = ""): void {
     this._level < LogLevel.OFF &&
       console.timeEnd(`${this._category} ${message}`);
   }
 
-  private _log(level: LogLevel, message: string, ...args: any[]): void {
+  private _log(level: LogLevel, message: string = "", ...args: any[]): void {
     const log = new Log(
       new Date().toISOString(),
       message,
