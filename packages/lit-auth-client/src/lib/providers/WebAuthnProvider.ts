@@ -44,7 +44,7 @@ export default class WebAuthnProvider extends BaseProvider {
    *
    * @param {PublicKeyCredentialCreationOptionsJSON} options - Registration options to pass to the authenticator
    * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
-   * 
+   *
    * @returns {Promise<string>} - Mint transaction hash
    */
   public async verifyAndMintPKPThroughRelayer(
@@ -75,11 +75,10 @@ export default class WebAuthnProvider extends BaseProvider {
       sendPkpToItself: true,
     };
 
-
     const args = {
       ...defaultArgs,
-      ...customArgs
-    }
+      ...customArgs,
+    };
 
     const body = JSON.stringify(args);
 
@@ -166,7 +165,10 @@ export default class WebAuthnProvider extends BaseProvider {
     return WebAuthnProvider.authMethodId(authMethod, this.rpName);
   }
 
-  public static async authMethodId(authMethod: AuthMethod, rpName?: string): Promise<string> {
+  public static async authMethodId(
+    authMethod: AuthMethod,
+    rpName?: string
+  ): Promise<string> {
     let credentialId: string;
 
     const rpNameToUse = rpName || 'lit';

@@ -497,7 +497,7 @@ const _abi = [
         type: 'uint8',
       },
     ],
-    name: 'MustBeInNextValidatorSetLockedOrReadyForNextEpochState',
+    name: 'MustBeInNextValidatorSetLockedOrReadyForNextEpochOrRestoreState',
     type: 'error',
   },
   {
@@ -697,6 +697,24 @@ const _abi = [
         indexed: false,
         internalType: 'uint256',
         name: 'newMinimumValidatorCount',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'newMaxConcurrentRequests',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'newMaxTripleCount',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'newMinTripleCount',
         type: 'uint256',
       },
     ],
@@ -1105,6 +1123,21 @@ const _abi = [
       {
         internalType: 'uint256',
         name: 'newMinimumValidatorCount',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'newMaxConcurrentRequests',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'newMaxTripleCount',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'newMinTripleCount',
         type: 'uint256',
       },
     ],
@@ -1536,6 +1569,21 @@ const _abi = [
             name: 'minimumValidatorCount',
             type: 'uint256',
           },
+          {
+            internalType: 'uint256',
+            name: 'maxConcurrentRequests',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'maxTripleCount',
+            type: 'uint256',
+          },
+          {
+            internalType: 'uint256',
+            name: 'minTripleCount',
+            type: 'uint256',
+          },
         ],
         internalType: 'struct LibStakingStorage.Config',
         name: '',
@@ -1658,6 +1706,37 @@ const _abi = [
         internalType: 'address[]',
         name: '',
         type: 'address[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address[]',
+        name: 'addresses',
+        type: 'address[]',
+      },
+    ],
+    name: 'getNodeStakerAddressMappings',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'nodeAddress',
+            type: 'address',
+          },
+          {
+            internalType: 'address',
+            name: 'stakerAddress',
+            type: 'address',
+          },
+        ],
+        internalType: 'struct LibStakingStorage.AddressMapping[]',
+        name: '',
+        type: 'tuple[]',
       },
     ],
     stateMutability: 'view',

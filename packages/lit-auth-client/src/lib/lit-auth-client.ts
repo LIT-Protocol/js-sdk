@@ -190,14 +190,15 @@ export class LitAuthClient {
     return this.providers.get(type);
   }
 
-  
   /**
    * Retrieves the authentication ID based on the provided authentication method.
    *
    * @param {AuthMethod} authMethod - The authentication method
    * @returns {Promise<string>} - The authentication ID
    */
-  public static async getAuthIdByAuthMethod(authMethod: AuthMethod): Promise<string> {
+  public static async getAuthIdByAuthMethod(
+    authMethod: AuthMethod
+  ): Promise<string> {
     let authId;
 
     switch (authMethod.authMethodType) {
@@ -217,7 +218,9 @@ export class LitAuthClient {
         authId = await GoogleProvider.authMethodId(authMethod);
         break;
       default:
-        throw new Error(`Unsupported auth method type: ${authMethod.authMethodType}`);
+        throw new Error(
+          `Unsupported auth method type: ${authMethod.authMethodType}`
+        );
     }
 
     return authId;

@@ -1,6 +1,6 @@
 export const StakingData = {
-  date: '2023-10-03T13:58:56.000Z',
-  address: '0x436567C2EFF125099d4Dc827652D9B0276631e93',
+  date: '2023-11-14T15:45:41Z',
+  address: '0x5bFa704aF947b3b0f966e4248DED7bfa6edeF952',
   contractName: 'Staking',
   abi: [
     {
@@ -493,7 +493,7 @@ export const StakingData = {
           type: 'uint8',
         },
       ],
-      name: 'MustBeInNextValidatorSetLockedOrReadyForNextEpochState',
+      name: 'MustBeInNextValidatorSetLockedOrReadyForNextEpochOrRestoreState',
       type: 'error',
     },
     {
@@ -693,6 +693,24 @@ export const StakingData = {
           indexed: false,
           internalType: 'uint256',
           name: 'newMinimumValidatorCount',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'newMaxConcurrentRequests',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'newMaxTripleCount',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'newMinTripleCount',
           type: 'uint256',
         },
       ],
@@ -1101,6 +1119,21 @@ export const StakingData = {
         {
           internalType: 'uint256',
           name: 'newMinimumValidatorCount',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: 'newMaxConcurrentRequests',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: 'newMaxTripleCount',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: 'newMinTripleCount',
           type: 'uint256',
         },
       ],
@@ -1532,6 +1565,21 @@ export const StakingData = {
               name: 'minimumValidatorCount',
               type: 'uint256',
             },
+            {
+              internalType: 'uint256',
+              name: 'maxConcurrentRequests',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'maxTripleCount',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'minTripleCount',
+              type: 'uint256',
+            },
           ],
           internalType: 'struct LibStakingStorage.Config',
           name: '',
@@ -1654,6 +1702,37 @@ export const StakingData = {
           internalType: 'address[]',
           name: '',
           type: 'address[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address[]',
+          name: 'addresses',
+          type: 'address[]',
+        },
+      ],
+      name: 'getNodeStakerAddressMappings',
+      outputs: [
+        {
+          components: [
+            {
+              internalType: 'address',
+              name: 'nodeAddress',
+              type: 'address',
+            },
+            {
+              internalType: 'address',
+              name: 'stakerAddress',
+              type: 'address',
+            },
+          ],
+          internalType: 'struct LibStakingStorage.AddressMapping[]',
+          name: '',
+          type: 'tuple[]',
         },
       ],
       stateMutability: 'view',

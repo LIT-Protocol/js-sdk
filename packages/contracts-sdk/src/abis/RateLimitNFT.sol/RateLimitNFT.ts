@@ -74,45 +74,53 @@ export interface RateLimitNFTInterface extends utils.Interface {
     'facets()': FunctionFragment;
     'owner()': FunctionFragment;
     'transferOwnership(address)': FunctionFragment;
-    'RLIHolderRateLimitWindowSeconds()': FunctionFragment;
-    'additionalRequestsPerKilosecondCost()': FunctionFragment;
     'approve(address,uint256)': FunctionFragment;
     'balanceOf(address)': FunctionFragment;
     'burn(uint256)': FunctionFragment;
-    'calculateCost(uint256,uint256)': FunctionFragment;
-    'calculateRequestsPerKilosecond(uint256,uint256)': FunctionFragment;
-    'capacity(uint256)': FunctionFragment;
-    'defaultRateLimitWindowSeconds()': FunctionFragment;
     'freeMint(uint256,uint256,bytes32,uint8,bytes32,bytes32)': FunctionFragment;
-    'freeMintSigTest(uint256,uint256,bytes32,uint8,bytes32,bytes32)': FunctionFragment;
-    'freeMintSigner()': FunctionFragment;
-    'freeRequestsPerRateLimitWindow()': FunctionFragment;
     'getApproved(uint256)': FunctionFragment;
     'initialize()': FunctionFragment;
     'isApprovedForAll(address,address)': FunctionFragment;
-    'isExpired(uint256)': FunctionFragment;
     'mint(uint256)': FunctionFragment;
     'name()': FunctionFragment;
     'ownerOf(uint256)': FunctionFragment;
-    'prefixed(bytes32)': FunctionFragment;
-    'redeemedFreeMints(bytes32)': FunctionFragment;
     'safeTransferFrom(address,address,uint256)': FunctionFragment;
     'safeTransferFrom(address,address,uint256,bytes)': FunctionFragment;
     'setAdditionalRequestsPerKilosecondCost(uint256)': FunctionFragment;
     'setApprovalForAll(address,bool)': FunctionFragment;
     'setFreeMintSigner(address)': FunctionFragment;
     'setFreeRequestsPerRateLimitWindow(uint256)': FunctionFragment;
+    'setMaxExpirationSeconds(uint256)': FunctionFragment;
+    'setMaxRequestsPerKilosecond(uint256)': FunctionFragment;
     'setRLIHolderRateLimitWindowSeconds(uint256)': FunctionFragment;
     'setRateLimitWindowSeconds(uint256)': FunctionFragment;
     'supportsInterface(bytes4)': FunctionFragment;
     'symbol()': FunctionFragment;
     'tokenByIndex(uint256)': FunctionFragment;
-    'tokenIdCounter()': FunctionFragment;
     'tokenOfOwnerByIndex(address,uint256)': FunctionFragment;
     'tokenURI(uint256)': FunctionFragment;
     'totalSupply()': FunctionFragment;
     'transferFrom(address,address,uint256)': FunctionFragment;
     'withdraw()': FunctionFragment;
+    'RLIHolderRateLimitWindowSeconds()': FunctionFragment;
+    'additionalRequestsPerKilosecondCost()': FunctionFragment;
+    'calculateCost(uint256,uint256)': FunctionFragment;
+    'calculateRequestsPerKilosecond(uint256,uint256)': FunctionFragment;
+    'capacity(uint256)': FunctionFragment;
+    'checkBelowMaxRequestsPerKilosecond(uint256)': FunctionFragment;
+    'currentSoldRequestsPerKilosecond()': FunctionFragment;
+    'defaultRateLimitWindowSeconds()': FunctionFragment;
+    'freeMintSigTest(uint256,uint256,bytes32,uint8,bytes32,bytes32)': FunctionFragment;
+    'freeMintSigner()': FunctionFragment;
+    'freeRequestsPerRateLimitWindow()': FunctionFragment;
+    'isExpired(uint256)': FunctionFragment;
+    'maxExpirationSeconds()': FunctionFragment;
+    'maxRequestsPerKilosecond()': FunctionFragment;
+    'prefixed(bytes32)': FunctionFragment;
+    'redeemedFreeMints(bytes32)': FunctionFragment;
+    'tokenIdCounter()': FunctionFragment;
+    'tokenSVG(uint256)': FunctionFragment;
+    'totalSoldRequestsPerKilosecondByExpirationTime(uint256)': FunctionFragment;
   };
 
   getFunction(
@@ -124,45 +132,53 @@ export interface RateLimitNFTInterface extends utils.Interface {
       | 'facets'
       | 'owner'
       | 'transferOwnership'
-      | 'RLIHolderRateLimitWindowSeconds'
-      | 'additionalRequestsPerKilosecondCost'
       | 'approve'
       | 'balanceOf'
       | 'burn'
-      | 'calculateCost'
-      | 'calculateRequestsPerKilosecond'
-      | 'capacity'
-      | 'defaultRateLimitWindowSeconds'
       | 'freeMint'
-      | 'freeMintSigTest'
-      | 'freeMintSigner'
-      | 'freeRequestsPerRateLimitWindow'
       | 'getApproved'
       | 'initialize'
       | 'isApprovedForAll'
-      | 'isExpired'
       | 'mint'
       | 'name'
       | 'ownerOf'
-      | 'prefixed'
-      | 'redeemedFreeMints'
       | 'safeTransferFrom(address,address,uint256)'
       | 'safeTransferFrom(address,address,uint256,bytes)'
       | 'setAdditionalRequestsPerKilosecondCost'
       | 'setApprovalForAll'
       | 'setFreeMintSigner'
       | 'setFreeRequestsPerRateLimitWindow'
+      | 'setMaxExpirationSeconds'
+      | 'setMaxRequestsPerKilosecond'
       | 'setRLIHolderRateLimitWindowSeconds'
       | 'setRateLimitWindowSeconds'
       | 'supportsInterface'
       | 'symbol'
       | 'tokenByIndex'
-      | 'tokenIdCounter'
       | 'tokenOfOwnerByIndex'
       | 'tokenURI'
       | 'totalSupply'
       | 'transferFrom'
       | 'withdraw'
+      | 'RLIHolderRateLimitWindowSeconds'
+      | 'additionalRequestsPerKilosecondCost'
+      | 'calculateCost'
+      | 'calculateRequestsPerKilosecond'
+      | 'capacity'
+      | 'checkBelowMaxRequestsPerKilosecond'
+      | 'currentSoldRequestsPerKilosecond'
+      | 'defaultRateLimitWindowSeconds'
+      | 'freeMintSigTest'
+      | 'freeMintSigner'
+      | 'freeRequestsPerRateLimitWindow'
+      | 'isExpired'
+      | 'maxExpirationSeconds'
+      | 'maxRequestsPerKilosecond'
+      | 'prefixed'
+      | 'redeemedFreeMints'
+      | 'tokenIdCounter'
+      | 'tokenSVG'
+      | 'totalSoldRequestsPerKilosecondByExpirationTime'
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -188,35 +204,11 @@ export interface RateLimitNFTInterface extends utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: 'RLIHolderRateLimitWindowSeconds',
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: 'additionalRequestsPerKilosecondCost',
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: 'approve',
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
   encodeFunctionData(functionFragment: 'burn', values: [BigNumberish]): string;
-  encodeFunctionData(
-    functionFragment: 'calculateCost',
-    values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: 'calculateRequestsPerKilosecond',
-    values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: 'capacity',
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: 'defaultRateLimitWindowSeconds',
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: 'freeMint',
     values: [
@@ -227,25 +219,6 @@ export interface RateLimitNFTInterface extends utils.Interface {
       BytesLike,
       BytesLike
     ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: 'freeMintSigTest',
-    values: [
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BigNumberish,
-      BytesLike,
-      BytesLike
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: 'freeMintSigner',
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: 'freeRequestsPerRateLimitWindow',
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: 'getApproved',
@@ -259,20 +232,11 @@ export interface RateLimitNFTInterface extends utils.Interface {
     functionFragment: 'isApprovedForAll',
     values: [string, string]
   ): string;
-  encodeFunctionData(
-    functionFragment: 'isExpired',
-    values: [BigNumberish]
-  ): string;
   encodeFunctionData(functionFragment: 'mint', values: [BigNumberish]): string;
   encodeFunctionData(functionFragment: 'name', values?: undefined): string;
   encodeFunctionData(
     functionFragment: 'ownerOf',
     values: [BigNumberish]
-  ): string;
-  encodeFunctionData(functionFragment: 'prefixed', values: [BytesLike]): string;
-  encodeFunctionData(
-    functionFragment: 'redeemedFreeMints',
-    values: [BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: 'safeTransferFrom(address,address,uint256)',
@@ -299,6 +263,14 @@ export interface RateLimitNFTInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: 'setMaxExpirationSeconds',
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'setMaxRequestsPerKilosecond',
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: 'setRLIHolderRateLimitWindowSeconds',
     values: [BigNumberish]
   ): string;
@@ -314,10 +286,6 @@ export interface RateLimitNFTInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: 'tokenByIndex',
     values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: 'tokenIdCounter',
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: 'tokenOfOwnerByIndex',
@@ -336,6 +304,86 @@ export interface RateLimitNFTInterface extends utils.Interface {
     values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: 'withdraw', values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: 'RLIHolderRateLimitWindowSeconds',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'additionalRequestsPerKilosecondCost',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'calculateCost',
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'calculateRequestsPerKilosecond',
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'capacity',
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'checkBelowMaxRequestsPerKilosecond',
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'currentSoldRequestsPerKilosecond',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'defaultRateLimitWindowSeconds',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'freeMintSigTest',
+    values: [
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BigNumberish,
+      BytesLike,
+      BytesLike
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'freeMintSigner',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'freeRequestsPerRateLimitWindow',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'isExpired',
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'maxExpirationSeconds',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'maxRequestsPerKilosecond',
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: 'prefixed', values: [BytesLike]): string;
+  encodeFunctionData(
+    functionFragment: 'redeemedFreeMints',
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'tokenIdCounter',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'tokenSVG',
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'totalSoldRequestsPerKilosecondByExpirationTime',
+    values: [BigNumberish]
+  ): string;
 
   decodeFunctionResult(functionFragment: 'diamondCut', data: BytesLike): Result;
   decodeFunctionResult(
@@ -356,43 +404,10 @@ export interface RateLimitNFTInterface extends utils.Interface {
     functionFragment: 'transferOwnership',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: 'RLIHolderRateLimitWindowSeconds',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: 'additionalRequestsPerKilosecondCost',
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'burn', data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: 'calculateCost',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: 'calculateRequestsPerKilosecond',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: 'capacity', data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: 'defaultRateLimitWindowSeconds',
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: 'freeMint', data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: 'freeMintSigTest',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: 'freeMintSigner',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: 'freeRequestsPerRateLimitWindow',
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: 'getApproved',
     data: BytesLike
@@ -402,15 +417,9 @@ export interface RateLimitNFTInterface extends utils.Interface {
     functionFragment: 'isApprovedForAll',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: 'isExpired', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'mint', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'name', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'ownerOf', data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: 'prefixed', data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: 'redeemedFreeMints',
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: 'safeTransferFrom(address,address,uint256)',
     data: BytesLike
@@ -436,6 +445,14 @@ export interface RateLimitNFTInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: 'setMaxExpirationSeconds',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'setMaxRequestsPerKilosecond',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: 'setRLIHolderRateLimitWindowSeconds',
     data: BytesLike
   ): Result;
@@ -453,10 +470,6 @@ export interface RateLimitNFTInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: 'tokenIdCounter',
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: 'tokenOfOwnerByIndex',
     data: BytesLike
   ): Result;
@@ -470,6 +483,70 @@ export interface RateLimitNFTInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: 'withdraw', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'RLIHolderRateLimitWindowSeconds',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'additionalRequestsPerKilosecondCost',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'calculateCost',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'calculateRequestsPerKilosecond',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'capacity', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'checkBelowMaxRequestsPerKilosecond',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'currentSoldRequestsPerKilosecond',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'defaultRateLimitWindowSeconds',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'freeMintSigTest',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'freeMintSigner',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'freeRequestsPerRateLimitWindow',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'isExpired', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'maxExpirationSeconds',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'maxRequestsPerKilosecond',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'prefixed', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'redeemedFreeMints',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'tokenIdCounter',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'tokenSVG', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'totalSoldRequestsPerKilosecondByExpirationTime',
+    data: BytesLike
+  ): Result;
 
   events: {
     'DiamondCut((address,uint8,bytes4[])[],address,bytes)': EventFragment;
@@ -696,14 +773,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    RLIHolderRateLimitWindowSeconds(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    additionalRequestsPerKilosecondCost(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -717,27 +786,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    calculateCost(
-      requestsPerKilosecond: BigNumberish,
-      expiresAt: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    calculateRequestsPerKilosecond(
-      payingAmount: BigNumberish,
-      expiresAt: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    capacity(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[LibRateLimitNFTStorage.RateLimitStructOutput]>;
-
-    defaultRateLimitWindowSeconds(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     freeMint(
       expiresAt: BigNumberish,
       requestsPerKilosecond: BigNumberish,
@@ -747,22 +795,6 @@ export interface RateLimitNFT extends BaseContract {
       sVal: BytesLike,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
-
-    freeMintSigTest(
-      expiresAt: BigNumberish,
-      requestsPerKilosecond: BigNumberish,
-      msgHash: BytesLike,
-      v: BigNumberish,
-      r: BytesLike,
-      sVal: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[void]>;
-
-    freeMintSigner(overrides?: CallOverrides): Promise<[string]>;
-
-    freeRequestsPerRateLimitWindow(
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     getApproved(
       tokenId: BigNumberish,
@@ -779,11 +811,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    isExpired(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
     mint(
       expiresAt: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
@@ -795,13 +822,6 @@ export interface RateLimitNFT extends BaseContract {
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string]>;
-
-    prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<[string]>;
-
-    redeemedFreeMints(
-      msgHash: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
 
     'safeTransferFrom(address,address,uint256)'(
       from: string,
@@ -839,6 +859,16 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
+    setMaxExpirationSeconds(
+      newMaxExpirationSeconds: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
+    setMaxRequestsPerKilosecond(
+      newMaxRequestsPerKilosecond: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<ContractTransaction>;
+
     setRLIHolderRateLimitWindowSeconds(
       newRLIHolderRateLimitWindowSeconds: BigNumberish,
       overrides?: Overrides & { from?: string }
@@ -860,8 +890,6 @@ export interface RateLimitNFT extends BaseContract {
       index: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
-
-    tokenIdCounter(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     tokenOfOwnerByIndex(
       owner: string,
@@ -886,6 +914,88 @@ export interface RateLimitNFT extends BaseContract {
     withdraw(
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
+
+    RLIHolderRateLimitWindowSeconds(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    additionalRequestsPerKilosecondCost(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    calculateCost(
+      requestsPerKilosecond: BigNumberish,
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    calculateRequestsPerKilosecond(
+      payingAmount: BigNumberish,
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    capacity(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[LibRateLimitNFTStorage.RateLimitStructOutput]>;
+
+    checkBelowMaxRequestsPerKilosecond(
+      requestedRequestsPerKilosecond: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    currentSoldRequestsPerKilosecond(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    defaultRateLimitWindowSeconds(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    freeMintSigTest(
+      expiresAt: BigNumberish,
+      requestsPerKilosecond: BigNumberish,
+      msgHash: BytesLike,
+      v: BigNumberish,
+      r: BytesLike,
+      sVal: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[void]>;
+
+    freeMintSigner(overrides?: CallOverrides): Promise<[string]>;
+
+    freeRequestsPerRateLimitWindow(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    isExpired(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    maxExpirationSeconds(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    maxRequestsPerKilosecond(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<[string]>;
+
+    redeemedFreeMints(
+      msgHash: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    tokenIdCounter(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    tokenSVG(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    totalSoldRequestsPerKilosecondByExpirationTime(
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
   };
 
   diamondCut(
@@ -916,14 +1026,6 @@ export interface RateLimitNFT extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  RLIHolderRateLimitWindowSeconds(
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  additionalRequestsPerKilosecondCost(
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   approve(
     to: string,
     tokenId: BigNumberish,
@@ -937,25 +1039,6 @@ export interface RateLimitNFT extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  calculateCost(
-    requestsPerKilosecond: BigNumberish,
-    expiresAt: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  calculateRequestsPerKilosecond(
-    payingAmount: BigNumberish,
-    expiresAt: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  capacity(
-    tokenId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<LibRateLimitNFTStorage.RateLimitStructOutput>;
-
-  defaultRateLimitWindowSeconds(overrides?: CallOverrides): Promise<BigNumber>;
-
   freeMint(
     expiresAt: BigNumberish,
     requestsPerKilosecond: BigNumberish,
@@ -965,20 +1048,6 @@ export interface RateLimitNFT extends BaseContract {
     sVal: BytesLike,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
-
-  freeMintSigTest(
-    expiresAt: BigNumberish,
-    requestsPerKilosecond: BigNumberish,
-    msgHash: BytesLike,
-    v: BigNumberish,
-    r: BytesLike,
-    sVal: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<void>;
-
-  freeMintSigner(overrides?: CallOverrides): Promise<string>;
-
-  freeRequestsPerRateLimitWindow(overrides?: CallOverrides): Promise<BigNumber>;
 
   getApproved(
     tokenId: BigNumberish,
@@ -995,8 +1064,6 @@ export interface RateLimitNFT extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  isExpired(tokenId: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
-
   mint(
     expiresAt: BigNumberish,
     overrides?: PayableOverrides & { from?: string }
@@ -1005,13 +1072,6 @@ export interface RateLimitNFT extends BaseContract {
   name(overrides?: CallOverrides): Promise<string>;
 
   ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-  prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<string>;
-
-  redeemedFreeMints(
-    msgHash: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
 
   'safeTransferFrom(address,address,uint256)'(
     from: string,
@@ -1049,6 +1109,16 @@ export interface RateLimitNFT extends BaseContract {
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
+  setMaxExpirationSeconds(
+    newMaxExpirationSeconds: BigNumberish,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
+  setMaxRequestsPerKilosecond(
+    newMaxRequestsPerKilosecond: BigNumberish,
+    overrides?: Overrides & { from?: string }
+  ): Promise<ContractTransaction>;
+
   setRLIHolderRateLimitWindowSeconds(
     newRLIHolderRateLimitWindowSeconds: BigNumberish,
     overrides?: Overrides & { from?: string }
@@ -1071,8 +1141,6 @@ export interface RateLimitNFT extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  tokenIdCounter(overrides?: CallOverrides): Promise<BigNumber>;
-
   tokenOfOwnerByIndex(
     owner: string,
     index: BigNumberish,
@@ -1093,6 +1161,78 @@ export interface RateLimitNFT extends BaseContract {
   withdraw(
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
+
+  RLIHolderRateLimitWindowSeconds(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  additionalRequestsPerKilosecondCost(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  calculateCost(
+    requestsPerKilosecond: BigNumberish,
+    expiresAt: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  calculateRequestsPerKilosecond(
+    payingAmount: BigNumberish,
+    expiresAt: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  capacity(
+    tokenId: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<LibRateLimitNFTStorage.RateLimitStructOutput>;
+
+  checkBelowMaxRequestsPerKilosecond(
+    requestedRequestsPerKilosecond: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  currentSoldRequestsPerKilosecond(
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  defaultRateLimitWindowSeconds(overrides?: CallOverrides): Promise<BigNumber>;
+
+  freeMintSigTest(
+    expiresAt: BigNumberish,
+    requestsPerKilosecond: BigNumberish,
+    msgHash: BytesLike,
+    v: BigNumberish,
+    r: BytesLike,
+    sVal: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<void>;
+
+  freeMintSigner(overrides?: CallOverrides): Promise<string>;
+
+  freeRequestsPerRateLimitWindow(overrides?: CallOverrides): Promise<BigNumber>;
+
+  isExpired(tokenId: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
+
+  maxExpirationSeconds(overrides?: CallOverrides): Promise<BigNumber>;
+
+  maxRequestsPerKilosecond(overrides?: CallOverrides): Promise<BigNumber>;
+
+  prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<string>;
+
+  redeemedFreeMints(
+    msgHash: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  tokenIdCounter(overrides?: CallOverrides): Promise<BigNumber>;
+
+  tokenSVG(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+  totalSoldRequestsPerKilosecondByExpirationTime(
+    expiresAt: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   callStatic: {
     diamondCut(
@@ -1125,14 +1265,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    RLIHolderRateLimitWindowSeconds(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    additionalRequestsPerKilosecondCost(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -1143,27 +1275,6 @@ export interface RateLimitNFT extends BaseContract {
 
     burn(tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-    calculateCost(
-      requestsPerKilosecond: BigNumberish,
-      expiresAt: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    calculateRequestsPerKilosecond(
-      payingAmount: BigNumberish,
-      expiresAt: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    capacity(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<LibRateLimitNFTStorage.RateLimitStructOutput>;
-
-    defaultRateLimitWindowSeconds(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     freeMint(
       expiresAt: BigNumberish,
       requestsPerKilosecond: BigNumberish,
@@ -1171,22 +1282,6 @@ export interface RateLimitNFT extends BaseContract {
       v: BigNumberish,
       r: BytesLike,
       sVal: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    freeMintSigTest(
-      expiresAt: BigNumberish,
-      requestsPerKilosecond: BigNumberish,
-      msgHash: BytesLike,
-      v: BigNumberish,
-      r: BytesLike,
-      sVal: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    freeMintSigner(overrides?: CallOverrides): Promise<string>;
-
-    freeRequestsPerRateLimitWindow(
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1203,11 +1298,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    isExpired(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
     mint(
       expiresAt: BigNumberish,
       overrides?: CallOverrides
@@ -1216,13 +1306,6 @@ export interface RateLimitNFT extends BaseContract {
     name(overrides?: CallOverrides): Promise<string>;
 
     ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-    prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<string>;
-
-    redeemedFreeMints(
-      msgHash: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
 
     'safeTransferFrom(address,address,uint256)'(
       from: string,
@@ -1260,6 +1343,16 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setMaxExpirationSeconds(
+      newMaxExpirationSeconds: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setMaxRequestsPerKilosecond(
+      newMaxRequestsPerKilosecond: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setRLIHolderRateLimitWindowSeconds(
       newRLIHolderRateLimitWindowSeconds: BigNumberish,
       overrides?: CallOverrides
@@ -1282,8 +1375,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    tokenIdCounter(overrides?: CallOverrides): Promise<BigNumber>;
-
     tokenOfOwnerByIndex(
       owner: string,
       index: BigNumberish,
@@ -1302,6 +1393,85 @@ export interface RateLimitNFT extends BaseContract {
     ): Promise<void>;
 
     withdraw(overrides?: CallOverrides): Promise<void>;
+
+    RLIHolderRateLimitWindowSeconds(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    additionalRequestsPerKilosecondCost(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calculateCost(
+      requestsPerKilosecond: BigNumberish,
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calculateRequestsPerKilosecond(
+      payingAmount: BigNumberish,
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    capacity(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<LibRateLimitNFTStorage.RateLimitStructOutput>;
+
+    checkBelowMaxRequestsPerKilosecond(
+      requestedRequestsPerKilosecond: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    currentSoldRequestsPerKilosecond(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    defaultRateLimitWindowSeconds(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    freeMintSigTest(
+      expiresAt: BigNumberish,
+      requestsPerKilosecond: BigNumberish,
+      msgHash: BytesLike,
+      v: BigNumberish,
+      r: BytesLike,
+      sVal: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    freeMintSigner(overrides?: CallOverrides): Promise<string>;
+
+    freeRequestsPerRateLimitWindow(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    isExpired(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    maxExpirationSeconds(overrides?: CallOverrides): Promise<BigNumber>;
+
+    maxRequestsPerKilosecond(overrides?: CallOverrides): Promise<BigNumber>;
+
+    prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<string>;
+
+    redeemedFreeMints(
+      msgHash: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    tokenIdCounter(overrides?: CallOverrides): Promise<BigNumber>;
+
+    tokenSVG(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+    totalSoldRequestsPerKilosecondByExpirationTime(
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
   };
 
   filters: {
@@ -1429,14 +1599,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    RLIHolderRateLimitWindowSeconds(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    additionalRequestsPerKilosecondCost(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -1450,27 +1612,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    calculateCost(
-      requestsPerKilosecond: BigNumberish,
-      expiresAt: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    calculateRequestsPerKilosecond(
-      payingAmount: BigNumberish,
-      expiresAt: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    capacity(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    defaultRateLimitWindowSeconds(
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     freeMint(
       expiresAt: BigNumberish,
       requestsPerKilosecond: BigNumberish,
@@ -1479,22 +1620,6 @@ export interface RateLimitNFT extends BaseContract {
       r: BytesLike,
       sVal: BytesLike,
       overrides?: Overrides & { from?: string }
-    ): Promise<BigNumber>;
-
-    freeMintSigTest(
-      expiresAt: BigNumberish,
-      requestsPerKilosecond: BigNumberish,
-      msgHash: BytesLike,
-      v: BigNumberish,
-      r: BytesLike,
-      sVal: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    freeMintSigner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    freeRequestsPerRateLimitWindow(
-      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getApproved(
@@ -1510,11 +1635,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    isExpired(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     mint(
       expiresAt: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
@@ -1524,13 +1644,6 @@ export interface RateLimitNFT extends BaseContract {
 
     ownerOf(
       tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
-
-    redeemedFreeMints(
-      msgHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1570,6 +1683,16 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
+    setMaxExpirationSeconds(
+      newMaxExpirationSeconds: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
+    setMaxRequestsPerKilosecond(
+      newMaxRequestsPerKilosecond: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<BigNumber>;
+
     setRLIHolderRateLimitWindowSeconds(
       newRLIHolderRateLimitWindowSeconds: BigNumberish,
       overrides?: Overrides & { from?: string }
@@ -1592,8 +1715,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    tokenIdCounter(overrides?: CallOverrides): Promise<BigNumber>;
-
     tokenOfOwnerByIndex(
       owner: string,
       index: BigNumberish,
@@ -1615,6 +1736,88 @@ export interface RateLimitNFT extends BaseContract {
     ): Promise<BigNumber>;
 
     withdraw(overrides?: Overrides & { from?: string }): Promise<BigNumber>;
+
+    RLIHolderRateLimitWindowSeconds(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    additionalRequestsPerKilosecondCost(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calculateCost(
+      requestsPerKilosecond: BigNumberish,
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    calculateRequestsPerKilosecond(
+      payingAmount: BigNumberish,
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    capacity(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    checkBelowMaxRequestsPerKilosecond(
+      requestedRequestsPerKilosecond: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    currentSoldRequestsPerKilosecond(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    defaultRateLimitWindowSeconds(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    freeMintSigTest(
+      expiresAt: BigNumberish,
+      requestsPerKilosecond: BigNumberish,
+      msgHash: BytesLike,
+      v: BigNumberish,
+      r: BytesLike,
+      sVal: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    freeMintSigner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    freeRequestsPerRateLimitWindow(
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    isExpired(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    maxExpirationSeconds(overrides?: CallOverrides): Promise<BigNumber>;
+
+    maxRequestsPerKilosecond(overrides?: CallOverrides): Promise<BigNumber>;
+
+    prefixed(hash: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+
+    redeemedFreeMints(
+      msgHash: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    tokenIdCounter(overrides?: CallOverrides): Promise<BigNumber>;
+
+    tokenSVG(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    totalSoldRequestsPerKilosecondByExpirationTime(
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -1646,14 +1849,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    RLIHolderRateLimitWindowSeconds(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    additionalRequestsPerKilosecondCost(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -1670,27 +1865,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    calculateCost(
-      requestsPerKilosecond: BigNumberish,
-      expiresAt: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    calculateRequestsPerKilosecond(
-      payingAmount: BigNumberish,
-      expiresAt: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    capacity(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    defaultRateLimitWindowSeconds(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     freeMint(
       expiresAt: BigNumberish,
       requestsPerKilosecond: BigNumberish,
@@ -1699,22 +1873,6 @@ export interface RateLimitNFT extends BaseContract {
       r: BytesLike,
       sVal: BytesLike,
       overrides?: Overrides & { from?: string }
-    ): Promise<PopulatedTransaction>;
-
-    freeMintSigTest(
-      expiresAt: BigNumberish,
-      requestsPerKilosecond: BigNumberish,
-      msgHash: BytesLike,
-      v: BigNumberish,
-      r: BytesLike,
-      sVal: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    freeMintSigner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    freeRequestsPerRateLimitWindow(
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getApproved(
@@ -1732,11 +1890,6 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    isExpired(
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     mint(
       expiresAt: BigNumberish,
       overrides?: PayableOverrides & { from?: string }
@@ -1746,16 +1899,6 @@ export interface RateLimitNFT extends BaseContract {
 
     ownerOf(
       tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    prefixed(
-      hash: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    redeemedFreeMints(
-      msgHash: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1795,6 +1938,16 @@ export interface RateLimitNFT extends BaseContract {
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
+    setMaxExpirationSeconds(
+      newMaxExpirationSeconds: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    setMaxRequestsPerKilosecond(
+      newMaxRequestsPerKilosecond: BigNumberish,
+      overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
     setRLIHolderRateLimitWindowSeconds(
       newRLIHolderRateLimitWindowSeconds: BigNumberish,
       overrides?: Overrides & { from?: string }
@@ -1816,8 +1969,6 @@ export interface RateLimitNFT extends BaseContract {
       index: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    tokenIdCounter(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     tokenOfOwnerByIndex(
       owner: string,
@@ -1841,6 +1992,95 @@ export interface RateLimitNFT extends BaseContract {
 
     withdraw(
       overrides?: Overrides & { from?: string }
+    ): Promise<PopulatedTransaction>;
+
+    RLIHolderRateLimitWindowSeconds(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    additionalRequestsPerKilosecondCost(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    calculateCost(
+      requestsPerKilosecond: BigNumberish,
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    calculateRequestsPerKilosecond(
+      payingAmount: BigNumberish,
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    capacity(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    checkBelowMaxRequestsPerKilosecond(
+      requestedRequestsPerKilosecond: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    currentSoldRequestsPerKilosecond(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    defaultRateLimitWindowSeconds(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    freeMintSigTest(
+      expiresAt: BigNumberish,
+      requestsPerKilosecond: BigNumberish,
+      msgHash: BytesLike,
+      v: BigNumberish,
+      r: BytesLike,
+      sVal: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    freeMintSigner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    freeRequestsPerRateLimitWindow(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    isExpired(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    maxExpirationSeconds(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    maxRequestsPerKilosecond(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    prefixed(
+      hash: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    redeemedFreeMints(
+      msgHash: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    tokenIdCounter(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    tokenSVG(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    totalSoldRequestsPerKilosecondByExpirationTime(
+      expiresAt: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }

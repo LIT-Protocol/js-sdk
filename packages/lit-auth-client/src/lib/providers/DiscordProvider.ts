@@ -115,8 +115,10 @@ export default class DiscordProvider extends BaseProvider {
     return authMethodId;
   }
 
-  public static async authMethodId(authMethod: AuthMethod, clientId?: string): Promise<string> {
-
+  public static async authMethodId(
+    authMethod: AuthMethod,
+    clientId?: string
+  ): Promise<string> {
     const _clientId = clientId || '1052874239658692668';
 
     // -- get user id from access token

@@ -1,6 +1,6 @@
 export const PKPPermissionsData = {
-  date: '2023-10-02T18:22:24.000Z',
-  address: '0x9a0a6DD9D229eEfa5119cEB237c90D843d5e1003',
+  date: '2023-11-14T15:45:41Z',
+  address: '0xD01c9C30f8F6fa443721629775e1CC7DD9c9e209',
   contractName: 'PKPPermissions',
   abi: [
     {

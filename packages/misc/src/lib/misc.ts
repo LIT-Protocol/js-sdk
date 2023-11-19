@@ -189,6 +189,8 @@ declare global {
   var litConfig: any;
   var wasmExport: any;
   var wasmECDSA: any;
+  var logger: any;
+  var logManager: any;
 }
 
 export const throwRemovedFunctionError = (functionName: string) => {
@@ -232,10 +234,10 @@ export const log = (...args: any): void => {
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
-    console.log(...log);
+    globalThis?.logger.info('', ...log);
   }
 
-  console.log(...args);
+  globalThis?.logger.info('', ...args);
 };
 
 /**
