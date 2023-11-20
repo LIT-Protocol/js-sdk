@@ -5,12 +5,13 @@ import {
   EthWalletProviderOptions,
   EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
-import { LIT_CHAINS, AuthMethodType, getLatestEthBlockhash } from '@lit-protocol/constants';
+import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { SiweMessage } from 'lit-siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
 import { log } from '@lit-protocol/misc';
+import { getLatestEthBlockhash } from '@lit-protocol/auth-browser';
 
 export default class EthWalletProvider extends BaseProvider {
   /**

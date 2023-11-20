@@ -1,4 +1,4 @@
-import { ALL_LIT_CHAINS, LIT_ERROR, VMTYPE } from '@lit-protocol/constants';
+import { ALL_LIT_CHAINS, LIT_ERROR, LIT_EVM_CHAINS, VMTYPE } from '@lit-protocol/constants';
 
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 
@@ -6,6 +6,7 @@ import { throwError } from '@lit-protocol/misc';
 import { checkAndSignCosmosAuthMessage } from './chains/cosmos';
 import { checkAndSignEVMAuthMessage } from './chains/eth';
 import { checkAndSignSolAuthMessage } from './chains/sol';
+import { ethers } from 'ethers';
 
 /**
  *
@@ -69,3 +70,33 @@ export const checkAndSignAuthMessage = ({
     });
   }
 };
+
+/**
+ *
+ * Fetches the latest Ethereum blockhash from public RPCs. If a RPC call fails we try the other endpoints until all the tries have exhausted.
+ *
+ *  @returns { string } The latest Ethereum blockhash
+ */
+export async function getLatestEthBlockhash(): Promise<string> {
+  // Not using the first rpc as it always returns the same nonce. Seems like the RPC just returns a dummy value
+  for (let i = 1; i < LIT_EVM_CHAINS['ethereum'].rpcUrls.length; i++) {
+    const provider = new ethers.providers.JsonRpcProvider(
+      LIT_EVM_CHAINS['ethereum'].rpcUrls[i]
+    );
+
+    try {
+      console.log('Fetching the latest Eth blockhash from RPC- ', i);
+      const latestEthBlockhash = (await provider.getBlock("latest")).hash;
+      console.log('latestEthBlockhash- ', latestEthBlockhash);
+
+      return latestEthBlockhash;
+    } catch (e: any) {
+      console.error(
+        'Error getting the latest Eth blockhash- ' + i + ', trying again: ',
+        e
+      );
+    }
+  }
+
+  throw new Error('Unable to get the latestBlockhash from any RPCs');
+}

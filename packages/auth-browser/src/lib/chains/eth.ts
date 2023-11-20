@@ -6,7 +6,6 @@ import {
   LIT_CHAINS,
   LIT_ERROR,
   LOCAL_STORAGE_KEYS,
-  getLatestEthBlockhash,
 } from '@lit-protocol/constants';
 
 import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
@@ -42,6 +41,7 @@ import {
   throwError,
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
+import { getLatestEthBlockhash } from '../auth-browser';
 
 if (typeof global.Buffer === 'undefined') {
   global.Buffer = BufferPolyfill;

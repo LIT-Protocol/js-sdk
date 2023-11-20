@@ -8,7 +8,6 @@ import {
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
   SIGTYPE,
-  getLatestEthBlockhash,
 } from '@lit-protocol/constants';
 
 import {
@@ -99,6 +98,7 @@ import {
   setStorageItem,
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
+import { getLatestEthBlockhash } from '@lit-protocol/auth-browser';
 import { BigNumber, ethers, utils } from 'ethers';
 
 /** ---------- Main Export Class ---------- */
