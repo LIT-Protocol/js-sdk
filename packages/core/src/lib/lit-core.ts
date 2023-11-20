@@ -206,7 +206,8 @@ export class LitCore {
 
     stakingContract.on("StateChanged", async (state: StakingStates) => {
       log(`New state detected: "${state}"`);
-      if (state === StakingStates.NextValidatorSetLocked) {
+
+      if (state === StakingStates.Active) {
         await this.setNewConfig();
       }
     });
