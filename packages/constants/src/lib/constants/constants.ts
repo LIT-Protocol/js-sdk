@@ -38,7 +38,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     decimals: 18,
     type: 'ERC1155',
     rpcUrls: [
-      'https://eth-mainnet.alchemyapi.io/v2/EuGnkVlzVoEkzdg0lpCarhm8YHOxWVxE',
+      // 'https://eth-mainnet.alchemyapi.io/v2/EuGnkVlzVoEkzdg0lpCarhm8YHOxWVxE',
       'https://eth.llamarpc.com',
       'https://eth.rpc.blxrbdn.com',
       'https://go.getblock.io/d7dab8149ec04390aaa923ff2768f914',
