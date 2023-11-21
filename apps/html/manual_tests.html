@@ -21,22 +21,47 @@
 
       //var authSig = JSON.parse("{\"sig\":\"0x18a173d68d2f78cc5c13da0dfe36eec2a293285bee6d42547b9577bf26cdc985660ed3dddc4e75d422366cac07e8a9fc77669b10373bef9c7b8e4280252dfddf1b\",\"derivedVia\":\"web3.eth.personal.sign\",\"signedMessage\":\"I am creating an account to use LITs at 2021-08-04T20:14:04.918Z\",\"address\":\"0xdbd360f30097fb6d938dcc8b7b62854b36160b45\"}")
 
-      var CheckAndSignAuthMessageWorksWithoutBlockhash = async() => {
+      var CheckAndSignAuthMessageWithoutBlockhash = async() => {
         const authSig = await LitJsSdk.checkAndSignAuthMessage({
             chain: "ethereum",
         });
+        let nonceLine = authSig.signedMessage.match(/^Nonce: (.+)$/m);
+
+        if (nonceLine[1].length ===  17) {
+          document.getElementById(
+            'status'
+          ).innerText = "CheckAndSignAuthMessageWithoutBlockhash passed!";
+          return true;
+        } else {
+          document.getElementById('status').innerText = "CheckAndSignAuthMessageWithoutBlockhash failed!";
+          return false;
+        }
+
+        await LitJsSdk.disconnectWeb3();
       }
 
       // The nonce should be we the below blockhash
-      var CheckAndSignAuthMessageWorksWithBlockhash = async() => {
+      var CheckAndSignAuthMessageWithBlockhash = async() => {
         // Currently this will be undefined but later we should replace it with the hardcoded blockhash
-        const nonce = litNodeClient.getLatestBlockhash() 
-        || "0xfe88c94d860f01a17f961bf4bdfb6e0c6cd10d3fda5cc861e805ca1240c58553";
+        const TEST_BLOCKHASH = "0xfe88c94d860f01a17f961bf4bdfb6e0c6cd10d3fda5cc861e805ca1240c58553";
+        const nonce = litNodeClient.getLatestBlockhash() || TEST_BLOCKHASH;
 
         const authSig = await LitJsSdk.checkAndSignAuthMessage({
             chain: "ethereum",
             nonce,
         });
+
+        if (authSig.signedMessage.includes(TEST_BLOCKHASH)) {
+          document.getElementById(
+            'status'
+          ).innerText = "CheckAndSignAuthMessageWithBlockhash passed!";
+          return true;
+        } else {
+          document.getElementById('status').innerText = "CheckAndSignAuthMessageWithBlockhash failed!";
+          return false;
+        }
+
+        await LitJsSdk.disconnectWeb3();
       }
 
       var testEncryptingFileAndZipWithMetadata = async ({
@@ -1582,10 +1607,10 @@
     <div id="networkStatus">Connecting to Lit Protocol Network...</div>
     <br />
     <br />
-    <button onclick="CheckAndSignAuthMessageWorksWithoutBlockhash()">checkAndSignAuthMessage without blockhash nonce</button>
+    <button onclick="CheckAndSignAuthMessageWithoutBlockhash()">checkAndSignAuthMessage without blockhash</button>
     <br />
     <br />
-    <button onclick="CheckAndSignAuthMessageWorksWithBlockhash()">checkAndSignAuthMessage with blockhash nonce</button>
+    <button onclick="CheckAndSignAuthMessageWithBlockhash()">checkAndSignAuthMessage with blockhash</button>
     <br />
     <br />
     <button onclick="ETHEmptyWallet()">ETH (Empty Wallet)</button>
