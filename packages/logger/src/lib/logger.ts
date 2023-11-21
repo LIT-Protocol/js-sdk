@@ -79,7 +79,7 @@ function _resolveLoggingHandler(level: LogLevel): any {
 function replacer(key: string, value: any) {
   // Filtering out properties
   if (typeof value === "object") {
-    return JSON.stringify(value);
+    return JSON.stringify(value, null);
   }
   return value;
 }
@@ -127,7 +127,8 @@ class Log implements ILog {
     }]${this.category}[id: ${this.id}] ${this.message}`;
     for (var i = 0; i < this.args.length; i++) {
       if (typeof this.args[i] === 'object') {
-        fmtStr = `${fmtStr} ${JSON.stringify(this.args[i], replacer)}`;
+        if (this.args[i].length && this.args.length > 1)
+          fmtStr = `${fmtStr} ${JSON.stringify(this.args[i], replacer, '\t')}`;
       } else {
         fmtStr = `${fmtStr} ${this.args[i]}`;
       }
@@ -136,7 +137,19 @@ class Log implements ILog {
   }
 
   toArray(): string[] {
+    let args = [];
+    args.push(`[Lit-JS-SDK v${version}]`);
+    args.push(_convertLoggingLevel(this.level));
+    args.push(`${this.category}`);
+
+    this.id && args.push(`[id: ${this.id}]`);
+    this.message && args.push(this.message);
     
+    for (var i = 0; i < this.args.length; i++) {
+      args.push(this.args[i]);
+    }
+
+    return args;
   }
 
   toJSON(): Record<string, unknown> {
@@ -217,6 +230,7 @@ export class Logger {
   }
 
   private _log(level: LogLevel, message: string = "", ...args: any[]): void {
+    args.pop();
     const log = new Log(
       new Date().toISOString(),
       message,
@@ -225,7 +239,14 @@ export class Logger {
       this._category,
       level
     );
-    this._level <= level && this._consoleHandler(log.toString());
+
+    const arrayLog = log.toArray();
+    let m = arrayLog.shift();
+    if (arrayLog.length > 1) {
+      this._level <= level && this._consoleHandler(m, ... arrayLog); 
+    } else {
+      this._level <= level && this._consoleHandler(m);
+    }
     this._level <= level && this._handler && this._handler(log);
   }
 }
@@ -233,7 +254,7 @@ export class Logger {
 export class LogManager {
   private static _instance: LogManager;
   private _loggers: Map<string, Logger>;
-  private _level: LogLevel | undefined;
+  private _level: LogLevel | undefined = LogLevel.DEBUG;
 
   static get Instance(): LogManager {
     if (!LogManager._instance) {

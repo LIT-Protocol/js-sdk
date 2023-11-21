@@ -53,7 +53,7 @@ import {
   SupportedJsonRequests,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { LogManager } from '@lit-protocol/logger';
+import { LogLevel, LogManager } from '@lit-protocol/logger';
 
 export class LitCore {
   config: LitNodeClientConfig;
@@ -95,7 +95,8 @@ export class LitCore {
     // -- set global variables
     globalThis.litConfig = this.config;
     globalThis.logManager = LogManager.Instance;
-    globalThis.logger = globalThis.logManager.get('trace', 'core');
+    globalThis.logManager.setLevel(LogLevel.DEBUG);
+    globalThis.logger = globalThis.logManager.get('core');
   }
 
   // ========== Scoped Class Helpers ==========
