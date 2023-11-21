@@ -12,7 +12,6 @@ import { checkAndSignSolAuthMessage } from './chains/sol';
  * Check for an existing cryptographic authentication signature and create one of it does not exist.  This is used to prove ownership of a given crypto wallet address to the Lit nodes.  The result is stored in LocalStorage so the user doesn't have to sign every time they perform an operation.
  *
  * @param { AuthCallbackParams }
- * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
  *  @returns { AuthSig } The AuthSig created or retrieved
  */

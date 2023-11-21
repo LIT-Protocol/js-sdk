@@ -74,7 +74,7 @@ export default class EthWalletProvider extends BaseProvider {
         version: '1',
         chainId,
         expirationTime: expiration,
-        nonce: this.litNodeClient.latest_blockhash || generateNonce()
+        nonce: this.litNodeClient.latest_blockhash || generateNonce(),
       };
 
       const message: SiweMessage = new SiweMessage(preparedMessage);

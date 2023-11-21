@@ -22,7 +22,7 @@ import LitConnectModal from '../connect-modal/modal';
 
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
 
-import { generateNonce, SiweMessage } from 'lit-siwe';
+import { SiweMessage } from 'lit-siwe';
 import { getAddress } from 'ethers/lib/utils';
 
 // @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
@@ -458,7 +458,6 @@ export const disconnectWeb3 = (): void => {
  * Check and sign EVM auth message
  *
  * @param { CheckAndSignAuthParams }
- * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  * @returns
  */
 export const checkAndSignEVMAuthMessage = async ({
@@ -728,7 +727,6 @@ const _signAndGetAuth = async ({
  * Called by checkAndSignAuthMessage if the user does not have a signature stored.
  *
  * @param { signAndSaveAuthParams }
- * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  * @returns { AuthSig }
  */
 export const signAndSaveAuthMessage = async ({

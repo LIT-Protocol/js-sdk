@@ -2107,7 +2107,7 @@ export class LitNodeClientNodeJs extends LitCore {
       chainId: params.chainId ?? 1,
       expirationTime: _expiration,
       resources: params.resources,
-      nonce: this.latest_blockhash || generateNonce()
+      nonce: this.latest_blockhash || generateNonce(),
     });
 
     let siweMessageStr: string = siweMessage.prepareMessage();
