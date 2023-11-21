@@ -735,7 +735,7 @@ export interface NodeCommandServerKeysResponse {
   subnetPublicKey: any;
   networkPublicKey: any;
   networkPublicKeySet: any;
-  latest_blockhash?: string;
+  latestBlockhash?: string;
 }
 
 export interface FormattedMultipleAccs {
@@ -778,7 +778,7 @@ export interface JsonHandshakeResponse {
   networkPubKey: string;
   networkPubKeySet: string;
   hdRootPubkeys: string[];
-  latest_blockhash?: string,
+  latestBlockhash?: string,
 }
 
 export interface EncryptToIpfsProps {

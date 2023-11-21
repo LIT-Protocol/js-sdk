@@ -303,7 +303,7 @@ export class LitNodeClientNodeJs extends LitCore {
   }
 
   getLatestBlockhash = () => {
-    return this.latest_blockhash;
+    return this.latestBlockhash;
   }
 
   /**
@@ -2109,7 +2109,7 @@ export class LitNodeClientNodeJs extends LitCore {
       chainId: params.chainId ?? 1,
       expirationTime: _expiration,
       resources: params.resources,
-      nonce: this.latest_blockhash || generateNonce(),
+      nonce: this.latestBlockhash || generateNonce(),
     });
 
     let siweMessageStr: string = siweMessage.prepareMessage();
@@ -2280,7 +2280,7 @@ export class LitNodeClientNodeJs extends LitCore {
         params.resourceAbilityRequests.map((r) => r.resource)
       );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
-    let nonce = this.latest_blockhash || generateNonce();
+    let nonce = this.latestBlockhash || generateNonce();
 
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({
