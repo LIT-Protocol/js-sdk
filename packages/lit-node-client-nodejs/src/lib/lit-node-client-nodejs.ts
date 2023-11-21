@@ -103,7 +103,7 @@ import { BigNumber, ethers, utils } from 'ethers';
 /** ---------- Main Export Class ---------- */
 
 export class LitNodeClientNodeJs extends LitCore {
-  defaultAuthCallback?: (authSigParams: AuthCallbackParams, litNodeClient?: this) => Promise<AuthSig>;
+  defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -314,7 +314,9 @@ export class LitNodeClientNodeJs extends LitCore {
     switchChain,
     expiration,
     sessionKeyUri,
+    nonce,
   }: GetWalletSigProps): Promise<AuthSig> => {
+    log("getWalletSig- ", nonce);
 
     let walletSig: AuthSig;
 
@@ -351,6 +353,7 @@ export class LitNodeClientNodeJs extends LitCore {
           ...(switchChain && { switchChain }),
           expiration,
           uri: sessionKeyUri,
+          nonce,
         };
 
         log("callback body:", body);
@@ -377,7 +380,8 @@ export class LitNodeClientNodeJs extends LitCore {
           switchChain,
           expiration,
           uri: sessionKeyUri,
-        }, this);
+          nonce,
+        });
       }
 
       log("getWalletSig - flow 1.3")
@@ -427,7 +431,7 @@ export class LitNodeClientNodeJs extends LitCore {
           errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
         });
       }
-      authSig = await this.defaultAuthCallback(authCallbackParams, this);
+      authSig = await this.defaultAuthCallback(authCallbackParams);
     }
 
     // (TRY) to set walletSig to local storage
@@ -2274,6 +2278,10 @@ export class LitNodeClientNodeJs extends LitCore {
         params.resourceAbilityRequests.map((r) => r.resource)
       );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
+    let nonce = this.latest_blockhash || generateNonce();
+
+    log("getSessionSigs latest_blockhash- ", this.latest_blockhash);
+    log("getSessionSigs- ", nonce);
 
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({
@@ -2283,6 +2291,7 @@ export class LitNodeClientNodeJs extends LitCore {
       switchChain: params.switchChain,
       expiration: expiration,
       sessionKeyUri: sessionKeyUri,
+      nonce,
     });
 
     let needToResignSessionKey = await this.checkNeedToResignSessionKey({
@@ -2303,6 +2312,7 @@ export class LitNodeClientNodeJs extends LitCore {
           switchChain: params.switchChain,
           expiration,
           uri: sessionKeyUri,
+          nonce,
         },
       });
     }

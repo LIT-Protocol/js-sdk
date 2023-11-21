@@ -161,7 +161,9 @@ export class LitCore {
             log('Error connecting to node. Detected "ERR" in keys', url, keys);
           }
 
-          if (keys.latest_blockhash === "0x") {
+          log("keys.latest_blockhash- ", keys.latest_blockhash);
+
+          if (!keys.latest_blockhash) {
             log('Error getting latest blockhash from the node.');
           }
 

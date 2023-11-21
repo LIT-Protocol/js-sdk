@@ -8,7 +8,7 @@ import {
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
 
-import { AuthSig, AuthCallbackParams, ILitNodeClient } from '@lit-protocol/types';
+import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
 
 import { ethers } from 'ethers';
 // import WalletConnectProvider from '@walletconnect/ethereum-provider';
@@ -89,6 +89,7 @@ interface signAndSaveAuthParams {
   resources: any;
   expiration: string;
   uri?: string;
+  nonce: string,
 }
 
 interface IABI {
@@ -467,9 +468,10 @@ export const checkAndSignEVMAuthMessage = async ({
   expiration,
   uri,
   walletConnectProjectId,
-}: AuthCallbackParams,
-litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
+  nonce,
+}: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
+  log("checkAndSignEVMAuthMessage- ", nonce);
   if (isNode()) {
     log(
       'checkAndSignEVMAuthMessage is not supported in nodejs.  You can create a SIWE on your own using the SIWE package.'
@@ -603,7 +605,8 @@ litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
         resources,
         expiration: expirationString,
         uri,
-      }, litNodeClient);
+        nonce,
+      });
     } catch (e: any) {
       log(e);
       return throwError({
@@ -636,7 +639,8 @@ litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
       resources,
       expiration: expirationString,
       uri,
-    }, litNodeClient);
+      nonce,
+    });
     log('7. authSig:', authSig);
 
     // -- 8. case: we are on the right wallet, but need to check the resources of the sig and re-sign if they don't match
@@ -651,7 +655,8 @@ litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
         resources,
         expiration: expirationString,
         uri,
-      }, litNodeClient);
+        nonce,
+      });
     }
     log('8. mustResign:', mustResign);
   }
@@ -668,7 +673,8 @@ litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
       resources,
       expiration: expirationString,
       uri,
-    }, litNodeClient);
+      nonce,
+    });
   }
 
   return authSig;
@@ -685,8 +691,9 @@ const _signAndGetAuth = async ({
   resources,
   expiration,
   uri,
-}: signAndSaveAuthParams,
-litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
+  nonce,
+}: signAndSaveAuthParams): Promise<AuthSig> => {
+  log("_signAndGetAuth- ", nonce);
   await signAndSaveAuthMessage({
     web3,
     account,
@@ -694,7 +701,8 @@ litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
     resources,
     expiration,
     uri,
-  }, litNodeClient);
+    nonce,
+  });
 
   let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
 
@@ -730,8 +738,9 @@ export const signAndSaveAuthMessage = async ({
   resources,
   expiration,
   uri,
-}: signAndSaveAuthParams,
-litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
+  nonce,
+}: signAndSaveAuthParams): Promise<AuthSig> => {
+  log("signAndSaveAuthMessage- ", nonce);
   // check if it's nodejs
   if (isNode()) {
     log('checkAndSignEVMAuthMessage is not supported in nodejs.');
@@ -750,7 +759,7 @@ litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
     version: '1',
     chainId,
     expirationTime: expiration,
-    nonce: litNodeClient?.latest_blockhash || generateNonce()
+    nonce,
   };
 
   if (resources && resources.length > 0) {

@@ -1,6 +1,6 @@
 import { ALL_LIT_CHAINS, LIT_ERROR, VMTYPE } from '@lit-protocol/constants';
 
-import { AuthCallbackParams, AuthSig, ILitNodeClient } from '@lit-protocol/types';
+import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';
 
 import { throwError } from '@lit-protocol/misc';
 import { checkAndSignCosmosAuthMessage } from './chains/cosmos';
@@ -24,8 +24,9 @@ export const checkAndSignAuthMessage = ({
   uri,
   cosmosWalletType,
   walletConnectProjectId,
-}: AuthCallbackParams,
-litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
+  nonce,
+}: AuthCallbackParams): Promise<AuthSig> => {
+  console.log("checkAndSignAuthMessage- ", nonce);
   const chainInfo = ALL_LIT_CHAINS[chain];
 
   // -- validate: if chain info not found
@@ -46,15 +47,6 @@ litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
 
   // -- check and sign auth message based on chain
   if (chainInfo.vmType === VMTYPE.EVM) {
-    // TODO: Uncomment below after the new node changes are deployed
-    // if (!litNodeClient) {
-    //   throwError({
-    //     message: 'litNodeClient not provided for EVM signing',
-    //     errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_PROVIDED.kind,
-    //     errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_PROVIDED.name,
-    //   });
-    // }
-
     return checkAndSignEVMAuthMessage({
       chain,
       resources,
@@ -62,7 +54,8 @@ litNodeClient?: ILitNodeClient): Promise<AuthSig> => {
       expiration,
       uri,
       walletConnectProjectId,
-    }, litNodeClient);
+      nonce,
+    });
   } else if (chainInfo.vmType === VMTYPE.SVM) {
     return checkAndSignSolAuthMessage();
   } else if (chainInfo.vmType === VMTYPE.CVM) {

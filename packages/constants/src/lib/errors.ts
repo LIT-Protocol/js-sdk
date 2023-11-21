@@ -46,11 +46,6 @@ export const LIT_ERROR = {
     code: 'lit_node_client_not_ready_error',
     kind: LitErrorKind.Unexpected,
   },
-  LIT_NODE_CLIENT_NOT_PROVIDED: {
-    name: 'LitNodeClientNotProvidedError',
-    code: 'lit_node_client_not_provided_error',
-    kind: LitErrorKind.Unexpected,
-  },
   UNAUTHROZIED_EXCEPTION: {
     name: 'UnauthroziedException',
     code: 'unauthrozied_exception',
