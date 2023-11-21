@@ -470,7 +470,6 @@ export const checkAndSignEVMAuthMessage = async ({
   nonce,
 }: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
-  log("checkAndSignEVMAuthMessage- ", nonce);
   if (isNode()) {
     log(
       'checkAndSignEVMAuthMessage is not supported in nodejs.  You can create a SIWE on your own using the SIWE package.'
@@ -692,7 +691,6 @@ const _signAndGetAuth = async ({
   uri,
   nonce,
 }: signAndSaveAuthParams): Promise<AuthSig> => {
-  log("_signAndGetAuth- ", nonce);
   await signAndSaveAuthMessage({
     web3,
     account,
@@ -738,7 +736,6 @@ export const signAndSaveAuthMessage = async ({
   uri,
   nonce,
 }: signAndSaveAuthParams): Promise<AuthSig> => {
-  log("signAndSaveAuthMessage- ", nonce);
   // check if it's nodejs
   if (isNode()) {
     log('checkAndSignEVMAuthMessage is not supported in nodejs.');

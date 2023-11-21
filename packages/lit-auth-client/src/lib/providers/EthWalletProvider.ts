@@ -90,7 +90,6 @@ export default class EthWalletProvider extends BaseProvider {
         address: address,
       };
     } else {
-      log("authenticate latest_blockhash- ", this.litNodeClient.latest_blockhash);
       authSig = await checkAndSignAuthMessage({
         chain,
         nonce: this.litNodeClient.latest_blockhash || generateNonce(),

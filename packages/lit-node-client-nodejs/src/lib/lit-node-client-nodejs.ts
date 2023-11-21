@@ -320,8 +320,6 @@ export class LitNodeClientNodeJs extends LitCore {
     sessionKeyUri,
     nonce,
   }: GetWalletSigProps): Promise<AuthSig> => {
-    log("getWalletSig- ", nonce);
-
     let walletSig: AuthSig;
 
     const storageKey = LOCAL_STORAGE_KEYS.WALLET_SIGNATURE;
@@ -2283,9 +2281,6 @@ export class LitNodeClientNodeJs extends LitCore {
       );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
     let nonce = this.latest_blockhash || generateNonce();
-
-    log("getSessionSigs latest_blockhash- ", this.latest_blockhash);
-    log("getSessionSigs- ", nonce);
 
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({

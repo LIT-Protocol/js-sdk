@@ -25,7 +25,6 @@ export const checkAndSignAuthMessage = ({
   walletConnectProjectId,
   nonce,
 }: AuthCallbackParams): Promise<AuthSig> => {
-  console.log("checkAndSignAuthMessage- ", nonce);
   const chainInfo = ALL_LIT_CHAINS[chain];
 
   // -- validate: if chain info not found
