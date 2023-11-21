@@ -302,6 +302,10 @@ export class LitNodeClientNodeJs extends LitCore {
     return LitNodeClientNodeJs.getExpiration();
   }
 
+  getLatestBlockhash = () => {
+    return this.latest_blockhash;
+  }
+
   /**
    *
    * Get the signature from local storage, if not, generates one
