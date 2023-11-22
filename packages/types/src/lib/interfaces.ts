@@ -1,3 +1,4 @@
+import { Provider } from '@ethersproject/abstract-provider';
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 import {
@@ -294,7 +295,6 @@ export interface BaseJsonPkpSignRequest {
   pubKey: string;
 }
 
-
 export interface WithAuthMethodSigning extends BaseJsonPkpSignRequest {
   // auth methods to resolve
   authMethods: Array<AuthMethod>;
@@ -313,7 +313,10 @@ export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
   authMethods?: Array<AuthMethod>;
 }
 
-export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning | WithAuthMethodSigning;
+export type JsonPkpSignRequest =
+  | WithSessionSigsSigning
+  | WithAuthSigSigning
+  | WithAuthMethodSigning;
 
 /**
  * Struct in rust
@@ -556,7 +559,7 @@ export interface ExecuteJsResponse {
   decryptions: any[];
   response: string;
   logs: string;
-  claims?: Record<string, { signatures: Signature[], derivedKeyId: string }>;
+  claims?: Record<string, { signatures: Signature[]; derivedKeyId: string }>;
   debug?: {
     allNodeResponses: NodeResponse[];
     allNodeLogs: NodeLog[];
@@ -1112,6 +1115,7 @@ export interface PKPBaseProp {
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
+  provider?: Provider;
 }
 
 export interface RPCUrls {
@@ -1252,6 +1256,16 @@ export interface LitRelayConfig {
    */
   relayApiKey?: string;
 }
+
+export interface MintRequestBody {
+  keyType?: number;
+  permittedAuthMethodTypes?: number[];
+  permittedAuthMethodIds?: string[];
+  permittedAuthMethodPubkeys?: string[];
+  permittedAuthMethodScopes?: any[][] // ethers.BigNumber;
+  addPkpEthAddressAsPermittedAddress?: boolean;
+  sendPkpToItself?: boolean;
+};
 
 export interface IRelayRequestData {
   /**

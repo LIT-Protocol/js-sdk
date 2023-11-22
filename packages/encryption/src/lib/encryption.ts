@@ -571,7 +571,12 @@ export const encryptFileAndZipWithMetadata = async (
 
   folder.file(file.name, uint8arrayFromString(ciphertext, 'base64'));
 
-  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  let zipBlob;
+  if (isBrowser()) {
+    zipBlob = await zip.generateAsync({ type: 'blob' });
+  } else {
+    zipBlob = await zip.generateAsync({ type: 'nodebuffer' });
+  }
 
   return zipBlob;
 };

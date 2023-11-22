@@ -9,7 +9,6 @@ import {
 
 // ---------- Test Cases ----------
 describe('hashing.ts', () => {
-
   it('hashes a resource id', async () => {
     const path = '/bglyaysu8rvblxlk7x0ksn';
 

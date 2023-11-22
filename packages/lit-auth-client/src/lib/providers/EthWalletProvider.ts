@@ -110,6 +110,10 @@ export default class EthWalletProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    return EthWalletProvider.authMethodId(authMethod);
+  }
+
+  public static async authMethodId(authMethod: AuthMethod): Promise<string> {
     let address: string;
 
     try {

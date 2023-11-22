@@ -4,11 +4,18 @@ import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { ethRequestHandler } from '@lit-protocol/pkp-ethers';
 import { ethers } from 'ethers';
+import { AuthMethodType, ProviderType } from '@lit-protocol/constants';
 
 export async function main() {
   // ==================== Setup ====================
+  const authMethod = {
+    authMethodType: AuthMethodType.EthWallet,
+    accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
+  };
+
   const pkpEthersWallet = new PKPEthersWallet({
-    controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+    controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG_2,
+    controllerAuthMethods: [authMethod],
     pkpPubKey: LITCONFIG.PKP_PUBKEY,
     rpc: LITCONFIG.CHRONICLE_RPC,
   });

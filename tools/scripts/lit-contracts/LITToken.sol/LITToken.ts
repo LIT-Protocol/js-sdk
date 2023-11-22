@@ -12,19 +12,19 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from "ethers";
+} from 'ethers';
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+} from '@ethersproject/abi';
+import type { Listener, Provider } from '@ethersproject/providers';
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from "./common";
+} from './common';
 
 export declare namespace ERC20Votes {
   export type CheckpointStruct = {
@@ -40,148 +40,148 @@ export declare namespace ERC20Votes {
 
 export interface LITTokenInterface extends utils.Interface {
   functions: {
-    "ADMIN_ROLE()": FunctionFragment;
-    "CLOCK_MODE()": FunctionFragment;
-    "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "DOMAIN_SEPARATOR()": FunctionFragment;
-    "MINTER_ROLE()": FunctionFragment;
-    "PAUSER_ROLE()": FunctionFragment;
-    "allowance(address,address)": FunctionFragment;
-    "approve(address,uint256)": FunctionFragment;
-    "balanceOf(address)": FunctionFragment;
-    "burn(uint256)": FunctionFragment;
-    "burnFrom(address,uint256)": FunctionFragment;
-    "cap()": FunctionFragment;
-    "checkpoints(address,uint32)": FunctionFragment;
-    "clock()": FunctionFragment;
-    "decimals()": FunctionFragment;
-    "decreaseAllowance(address,uint256)": FunctionFragment;
-    "delegate(address)": FunctionFragment;
-    "delegateBySig(address,uint256,uint256,uint8,bytes32,bytes32)": FunctionFragment;
-    "delegates(address)": FunctionFragment;
-    "eip712Domain()": FunctionFragment;
-    "getPastTotalSupply(uint256)": FunctionFragment;
-    "getPastVotes(address,uint256)": FunctionFragment;
-    "getRoleAdmin(bytes32)": FunctionFragment;
-    "getVotes(address)": FunctionFragment;
-    "grantRole(bytes32,address)": FunctionFragment;
-    "hasRole(bytes32,address)": FunctionFragment;
-    "increaseAllowance(address,uint256)": FunctionFragment;
-    "mint(address,uint256)": FunctionFragment;
-    "name()": FunctionFragment;
-    "nonces(address)": FunctionFragment;
-    "numCheckpoints(address)": FunctionFragment;
-    "pause()": FunctionFragment;
-    "paused()": FunctionFragment;
-    "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)": FunctionFragment;
-    "renounceRole(bytes32,address)": FunctionFragment;
-    "revokeRole(bytes32,address)": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "symbol()": FunctionFragment;
-    "totalSupply()": FunctionFragment;
-    "transfer(address,uint256)": FunctionFragment;
-    "transferFrom(address,address,uint256)": FunctionFragment;
-    "unpause()": FunctionFragment;
+    'ADMIN_ROLE()': FunctionFragment;
+    'CLOCK_MODE()': FunctionFragment;
+    'DEFAULT_ADMIN_ROLE()': FunctionFragment;
+    'DOMAIN_SEPARATOR()': FunctionFragment;
+    'MINTER_ROLE()': FunctionFragment;
+    'PAUSER_ROLE()': FunctionFragment;
+    'allowance(address,address)': FunctionFragment;
+    'approve(address,uint256)': FunctionFragment;
+    'balanceOf(address)': FunctionFragment;
+    'burn(uint256)': FunctionFragment;
+    'burnFrom(address,uint256)': FunctionFragment;
+    'cap()': FunctionFragment;
+    'checkpoints(address,uint32)': FunctionFragment;
+    'clock()': FunctionFragment;
+    'decimals()': FunctionFragment;
+    'decreaseAllowance(address,uint256)': FunctionFragment;
+    'delegate(address)': FunctionFragment;
+    'delegateBySig(address,uint256,uint256,uint8,bytes32,bytes32)': FunctionFragment;
+    'delegates(address)': FunctionFragment;
+    'eip712Domain()': FunctionFragment;
+    'getPastTotalSupply(uint256)': FunctionFragment;
+    'getPastVotes(address,uint256)': FunctionFragment;
+    'getRoleAdmin(bytes32)': FunctionFragment;
+    'getVotes(address)': FunctionFragment;
+    'grantRole(bytes32,address)': FunctionFragment;
+    'hasRole(bytes32,address)': FunctionFragment;
+    'increaseAllowance(address,uint256)': FunctionFragment;
+    'mint(address,uint256)': FunctionFragment;
+    'name()': FunctionFragment;
+    'nonces(address)': FunctionFragment;
+    'numCheckpoints(address)': FunctionFragment;
+    'pause()': FunctionFragment;
+    'paused()': FunctionFragment;
+    'permit(address,address,uint256,uint256,uint8,bytes32,bytes32)': FunctionFragment;
+    'renounceRole(bytes32,address)': FunctionFragment;
+    'revokeRole(bytes32,address)': FunctionFragment;
+    'supportsInterface(bytes4)': FunctionFragment;
+    'symbol()': FunctionFragment;
+    'totalSupply()': FunctionFragment;
+    'transfer(address,uint256)': FunctionFragment;
+    'transferFrom(address,address,uint256)': FunctionFragment;
+    'unpause()': FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "ADMIN_ROLE"
-      | "CLOCK_MODE"
-      | "DEFAULT_ADMIN_ROLE"
-      | "DOMAIN_SEPARATOR"
-      | "MINTER_ROLE"
-      | "PAUSER_ROLE"
-      | "allowance"
-      | "approve"
-      | "balanceOf"
-      | "burn"
-      | "burnFrom"
-      | "cap"
-      | "checkpoints"
-      | "clock"
-      | "decimals"
-      | "decreaseAllowance"
-      | "delegate"
-      | "delegateBySig"
-      | "delegates"
-      | "eip712Domain"
-      | "getPastTotalSupply"
-      | "getPastVotes"
-      | "getRoleAdmin"
-      | "getVotes"
-      | "grantRole"
-      | "hasRole"
-      | "increaseAllowance"
-      | "mint"
-      | "name"
-      | "nonces"
-      | "numCheckpoints"
-      | "pause"
-      | "paused"
-      | "permit"
-      | "renounceRole"
-      | "revokeRole"
-      | "supportsInterface"
-      | "symbol"
-      | "totalSupply"
-      | "transfer"
-      | "transferFrom"
-      | "unpause"
+      | 'ADMIN_ROLE'
+      | 'CLOCK_MODE'
+      | 'DEFAULT_ADMIN_ROLE'
+      | 'DOMAIN_SEPARATOR'
+      | 'MINTER_ROLE'
+      | 'PAUSER_ROLE'
+      | 'allowance'
+      | 'approve'
+      | 'balanceOf'
+      | 'burn'
+      | 'burnFrom'
+      | 'cap'
+      | 'checkpoints'
+      | 'clock'
+      | 'decimals'
+      | 'decreaseAllowance'
+      | 'delegate'
+      | 'delegateBySig'
+      | 'delegates'
+      | 'eip712Domain'
+      | 'getPastTotalSupply'
+      | 'getPastVotes'
+      | 'getRoleAdmin'
+      | 'getVotes'
+      | 'grantRole'
+      | 'hasRole'
+      | 'increaseAllowance'
+      | 'mint'
+      | 'name'
+      | 'nonces'
+      | 'numCheckpoints'
+      | 'pause'
+      | 'paused'
+      | 'permit'
+      | 'renounceRole'
+      | 'revokeRole'
+      | 'supportsInterface'
+      | 'symbol'
+      | 'totalSupply'
+      | 'transfer'
+      | 'transferFrom'
+      | 'unpause'
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "ADMIN_ROLE",
+    functionFragment: 'ADMIN_ROLE',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "CLOCK_MODE",
+    functionFragment: 'CLOCK_MODE',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
+    functionFragment: 'DEFAULT_ADMIN_ROLE',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "DOMAIN_SEPARATOR",
+    functionFragment: 'DOMAIN_SEPARATOR',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "MINTER_ROLE",
+    functionFragment: 'MINTER_ROLE',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "PAUSER_ROLE",
+    functionFragment: 'PAUSER_ROLE',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "allowance",
+    functionFragment: 'allowance',
     values: [string, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "approve",
+    functionFragment: 'approve',
     values: [string, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
-  encodeFunctionData(functionFragment: "burn", values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
+  encodeFunctionData(functionFragment: 'burn', values: [BigNumberish]): string;
   encodeFunctionData(
-    functionFragment: "burnFrom",
+    functionFragment: 'burnFrom',
     values: [string, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "cap", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'cap', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "checkpoints",
+    functionFragment: 'checkpoints',
     values: [string, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "clock", values?: undefined): string;
-  encodeFunctionData(functionFragment: "decimals", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'clock', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'decimals', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "decreaseAllowance",
+    functionFragment: 'decreaseAllowance',
     values: [string, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "delegate", values: [string]): string;
+  encodeFunctionData(functionFragment: 'delegate', values: [string]): string;
   encodeFunctionData(
-    functionFragment: "delegateBySig",
+    functionFragment: 'delegateBySig',
     values: [
       string,
       BigNumberish,
@@ -191,50 +191,50 @@ export interface LITTokenInterface extends utils.Interface {
       BytesLike
     ]
   ): string;
-  encodeFunctionData(functionFragment: "delegates", values: [string]): string;
+  encodeFunctionData(functionFragment: 'delegates', values: [string]): string;
   encodeFunctionData(
-    functionFragment: "eip712Domain",
+    functionFragment: 'eip712Domain',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getPastTotalSupply",
+    functionFragment: 'getPastTotalSupply',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getPastVotes",
+    functionFragment: 'getPastVotes',
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getRoleAdmin",
+    functionFragment: 'getRoleAdmin',
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "getVotes", values: [string]): string;
+  encodeFunctionData(functionFragment: 'getVotes', values: [string]): string;
   encodeFunctionData(
-    functionFragment: "grantRole",
+    functionFragment: 'grantRole',
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "hasRole",
+    functionFragment: 'hasRole',
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "increaseAllowance",
+    functionFragment: 'increaseAllowance',
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "mint",
+    functionFragment: 'mint',
     values: [string, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "name", values?: undefined): string;
-  encodeFunctionData(functionFragment: "nonces", values: [string]): string;
+  encodeFunctionData(functionFragment: 'name', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'nonces', values: [string]): string;
   encodeFunctionData(
-    functionFragment: "numCheckpoints",
+    functionFragment: 'numCheckpoints',
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "pause", values?: undefined): string;
-  encodeFunctionData(functionFragment: "paused", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'pause', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'paused', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "permit",
+    functionFragment: 'permit',
     values: [
       string,
       string,
@@ -246,149 +246,149 @@ export interface LITTokenInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "renounceRole",
+    functionFragment: 'renounceRole',
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "revokeRole",
+    functionFragment: 'revokeRole',
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "supportsInterface",
+    functionFragment: 'supportsInterface',
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'symbol', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "totalSupply",
+    functionFragment: 'totalSupply',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "transfer",
+    functionFragment: 'transfer',
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "transferFrom",
+    functionFragment: 'transferFrom',
     values: [string, string, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'unpause', values?: undefined): string;
 
-  decodeFunctionResult(functionFragment: "ADMIN_ROLE", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "CLOCK_MODE", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'ADMIN_ROLE', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'CLOCK_MODE', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
+    functionFragment: 'DEFAULT_ADMIN_ROLE',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "DOMAIN_SEPARATOR",
+    functionFragment: 'DOMAIN_SEPARATOR',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "MINTER_ROLE",
+    functionFragment: 'MINTER_ROLE',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "PAUSER_ROLE",
+    functionFragment: 'PAUSER_ROLE',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "allowance", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "burnFrom", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "cap", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'allowance', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'burn', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'burnFrom', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'cap', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "checkpoints",
+    functionFragment: 'checkpoints',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "clock", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "decimals", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'clock', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'decimals', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "decreaseAllowance",
+    functionFragment: 'decreaseAllowance',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "delegate", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'delegate', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "delegateBySig",
+    functionFragment: 'delegateBySig',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "delegates", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'delegates', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "eip712Domain",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getPastTotalSupply",
+    functionFragment: 'eip712Domain',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getPastVotes",
+    functionFragment: 'getPastTotalSupply',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getRoleAdmin",
+    functionFragment: 'getPastVotes',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "getVotes", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "increaseAllowance",
+    functionFragment: 'getRoleAdmin',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "nonces", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getVotes', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'grantRole', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'hasRole', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "numCheckpoints",
+    functionFragment: 'increaseAllowance',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "pause", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "permit", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'mint', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'name', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'nonces', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "renounceRole",
+    functionFragment: 'numCheckpoints',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'pause', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'paused', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'permit', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "supportsInterface",
+    functionFragment: 'renounceRole',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'revokeRole', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "totalSupply",
+    functionFragment: 'supportsInterface',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "transfer", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'symbol', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "transferFrom",
+    functionFragment: 'totalSupply',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "unpause", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'transfer', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'transferFrom',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
 
   events: {
-    "Approval(address,address,uint256)": EventFragment;
-    "DelegateChanged(address,address,address)": EventFragment;
-    "DelegateVotesChanged(address,uint256,uint256)": EventFragment;
-    "EIP712DomainChanged()": EventFragment;
-    "Paused(address)": EventFragment;
-    "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
-    "RoleGranted(bytes32,address,address)": EventFragment;
-    "RoleRevoked(bytes32,address,address)": EventFragment;
-    "Transfer(address,address,uint256)": EventFragment;
-    "Unpaused(address)": EventFragment;
+    'Approval(address,address,uint256)': EventFragment;
+    'DelegateChanged(address,address,address)': EventFragment;
+    'DelegateVotesChanged(address,uint256,uint256)': EventFragment;
+    'EIP712DomainChanged()': EventFragment;
+    'Paused(address)': EventFragment;
+    'RoleAdminChanged(bytes32,bytes32,bytes32)': EventFragment;
+    'RoleGranted(bytes32,address,address)': EventFragment;
+    'RoleRevoked(bytes32,address,address)': EventFragment;
+    'Transfer(address,address,uint256)': EventFragment;
+    'Unpaused(address)': EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "DelegateChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "DelegateVotesChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "EIP712DomainChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Approval'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'DelegateChanged'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'DelegateVotesChanged'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'EIP712DomainChanged'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Paused'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RoleAdminChanged'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RoleGranted'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RoleRevoked'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Transfer'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Unpaused'): EventFragment;
 }
 
 export interface ApprovalEventObject {
@@ -599,9 +599,7 @@ export interface LITToken extends BaseContract {
 
     delegates(account: string, overrides?: CallOverrides): Promise<[string]>;
 
-    eip712Domain(
-      overrides?: CallOverrides
-    ): Promise<
+    eip712Domain(overrides?: CallOverrides): Promise<
       [string, string, string, BigNumber, string, string, BigNumber[]] & {
         fields: string;
         name: string;
@@ -789,9 +787,7 @@ export interface LITToken extends BaseContract {
 
   delegates(account: string, overrides?: CallOverrides): Promise<string>;
 
-  eip712Domain(
-    overrides?: CallOverrides
-  ): Promise<
+  eip712Domain(overrides?: CallOverrides): Promise<
     [string, string, string, BigNumber, string, string, BigNumber[]] & {
       fields: string;
       name: string;
@@ -970,9 +966,7 @@ export interface LITToken extends BaseContract {
 
     delegates(account: string, overrides?: CallOverrides): Promise<string>;
 
-    eip712Domain(
-      overrides?: CallOverrides
-    ): Promise<
+    eip712Domain(overrides?: CallOverrides): Promise<
       [string, string, string, BigNumber, string, string, BigNumber[]] & {
         fields: string;
         name: string;
@@ -1082,7 +1076,7 @@ export interface LITToken extends BaseContract {
   };
 
   filters: {
-    "Approval(address,address,uint256)"(
+    'Approval(address,address,uint256)'(
       owner?: string | null,
       spender?: string | null,
       value?: null
@@ -1093,7 +1087,7 @@ export interface LITToken extends BaseContract {
       value?: null
     ): ApprovalEventFilter;
 
-    "DelegateChanged(address,address,address)"(
+    'DelegateChanged(address,address,address)'(
       delegator?: string | null,
       fromDelegate?: string | null,
       toDelegate?: string | null
@@ -1104,7 +1098,7 @@ export interface LITToken extends BaseContract {
       toDelegate?: string | null
     ): DelegateChangedEventFilter;
 
-    "DelegateVotesChanged(address,uint256,uint256)"(
+    'DelegateVotesChanged(address,uint256,uint256)'(
       delegate?: string | null,
       previousBalance?: null,
       newBalance?: null
@@ -1115,13 +1109,13 @@ export interface LITToken extends BaseContract {
       newBalance?: null
     ): DelegateVotesChangedEventFilter;
 
-    "EIP712DomainChanged()"(): EIP712DomainChangedEventFilter;
+    'EIP712DomainChanged()'(): EIP712DomainChangedEventFilter;
     EIP712DomainChanged(): EIP712DomainChangedEventFilter;
 
-    "Paused(address)"(account?: null): PausedEventFilter;
+    'Paused(address)'(account?: null): PausedEventFilter;
     Paused(account?: null): PausedEventFilter;
 
-    "RoleAdminChanged(bytes32,bytes32,bytes32)"(
+    'RoleAdminChanged(bytes32,bytes32,bytes32)'(
       role?: BytesLike | null,
       previousAdminRole?: BytesLike | null,
       newAdminRole?: BytesLike | null
@@ -1132,7 +1126,7 @@ export interface LITToken extends BaseContract {
       newAdminRole?: BytesLike | null
     ): RoleAdminChangedEventFilter;
 
-    "RoleGranted(bytes32,address,address)"(
+    'RoleGranted(bytes32,address,address)'(
       role?: BytesLike | null,
       account?: string | null,
       sender?: string | null
@@ -1143,7 +1137,7 @@ export interface LITToken extends BaseContract {
       sender?: string | null
     ): RoleGrantedEventFilter;
 
-    "RoleRevoked(bytes32,address,address)"(
+    'RoleRevoked(bytes32,address,address)'(
       role?: BytesLike | null,
       account?: string | null,
       sender?: string | null
@@ -1154,7 +1148,7 @@ export interface LITToken extends BaseContract {
       sender?: string | null
     ): RoleRevokedEventFilter;
 
-    "Transfer(address,address,uint256)"(
+    'Transfer(address,address,uint256)'(
       from?: string | null,
       to?: string | null,
       value?: null
@@ -1165,7 +1159,7 @@ export interface LITToken extends BaseContract {
       value?: null
     ): TransferEventFilter;
 
-    "Unpaused(address)"(account?: null): UnpausedEventFilter;
+    'Unpaused(address)'(account?: null): UnpausedEventFilter;
     Unpaused(account?: null): UnpausedEventFilter;
   };
 

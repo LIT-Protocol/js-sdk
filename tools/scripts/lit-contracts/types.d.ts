@@ -1,3 +1,4 @@
+export * from "./StakingBalances.sol/StakingBalances.ts";
 export * from "./Staking.sol/Staking.ts";
 export * from "./Multisender.sol/Multisender.ts";
 export * from "./LITToken.sol/LITToken.ts";
@@ -6,4 +7,5 @@ export * from "./PKPNFT.sol/PKPNFT.ts";
 export * from "./RateLimitNFT.sol/RateLimitNFT.ts";
 export * from "./PKPHelper.sol/PKPHelper.ts";
 export * from "./PKPPermissions.sol/PKPPermissions.ts";
+export * from "./PKPNFTMetadata.sol/PKPNFTMetadata.ts";
 export * from "./Allowlist.sol/Allowlist.ts";

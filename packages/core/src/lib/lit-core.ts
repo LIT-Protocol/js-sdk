@@ -461,7 +461,6 @@ export class LitCore {
     url: string;
     mustHave?: boolean;
   }): AuthSig | SessionSig => {
-
     if (!authSig && !sessionSigs) {
       if (mustHave) {
         throwError({
@@ -470,7 +469,7 @@ export class LitCore {
           errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
         });
       } else {
-        log(`authSig or sessionSigs not found. This may be using authMethod`)
+        log(`authSig or sessionSigs not found. This may be using authMethod`);
       }
     }
 

@@ -1,17 +1,16 @@
 'use client';
-import { LitLogo } from '@/components/LitLogo'
+import { LitLogo } from '@/components/LitLogo';
 import { useState } from 'react';
 
 export default function Home() {
-
   const [status, setStatus] = useState('');
   const [response, setResponse] = useState('');
 
   async function go() {
     // ...your code here
     setStatus('Getting started...');
-    
-    const foo = { 'foo': 'bar' };
+
+    const foo = { foo: 'bar' };
     setResponse(`foo: ${JSON.stringify(foo)}`);
   }
 
@@ -22,13 +21,13 @@ export default function Home() {
       </div>
 
       <div className="flex justify-center mt-10">
-        <h1 className="text-5xl font-bold">
-          Lit Protocol:: Session Sigs
-        </h1>
+        <h1 className="text-5xl font-bold">Lit Protocol:: Session Sigs</h1>
       </div>
 
       <div className="flex justify-center mt-10">
-        <button onClick={go} className="lit-button">Go</button>
+        <button onClick={go} className="lit-button">
+          Go
+        </button>
       </div>
 
       <div className="flex justify-center mt-10 text-white">
@@ -38,7 +37,6 @@ export default function Home() {
       <div className="flex justify-center mt-10 text-white">
         <p>{response}</p>
       </div>
-
     </main>
-  )
+  );
 }

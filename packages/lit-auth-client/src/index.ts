@@ -7,6 +7,7 @@ import AppleProvider from './lib/providers/AppleProvider';
 import WebAuthnProvider from './lib/providers/WebAuthnProvider';
 import { StytchOtpProvider } from './lib/providers/StytchOtpProvider';
 import { isSignInRedirect, getProviderFromUrl } from './lib/utils';
+import StytchAuthFactorOtpProvider from './lib/providers/StytchAuthFactorOtp';
 
 declare global {
   var LitAuthClient: any; //eslint-disable-line no-var
@@ -27,6 +28,7 @@ export {
   AppleProvider,
   WebAuthnProvider,
   StytchOtpProvider,
+  StytchAuthFactorOtpProvider,
   isSignInRedirect,
   getProviderFromUrl,
 };

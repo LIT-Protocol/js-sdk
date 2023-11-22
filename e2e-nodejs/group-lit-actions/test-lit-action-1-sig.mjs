@@ -14,14 +14,14 @@ export async function main() {
     authSig: LITCONFIG.CONTROLLER_AUTHSIG,
     code: `(async () => {
       const sigShare = await LitActions.signEcdsa({
-        toSign,
+        toSign: dataToSign,
         publicKey,
         sigName: "sig",
       });
     })();`,
     authMethods: [],
     jsParams: {
-      toSign: TO_SIGN,
+      dataToSign: TO_SIGN,
       publicKey: LITCONFIG.PKP_PUBKEY,
     },
   });

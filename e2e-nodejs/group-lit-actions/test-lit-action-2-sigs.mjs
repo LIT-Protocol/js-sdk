@@ -9,6 +9,7 @@ import { ethers } from 'ethers';
 const TO_SIGN = ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5]));
 
 export async function main() {
+  
   // ==================== Test Logic ====================
   const res = await client.executeJs({
     authSig: LITCONFIG.CONTROLLER_AUTHSIG,
@@ -28,13 +29,13 @@ export async function main() {
         return sigShares;
       }
 
-      const sigShares = await signMultipleSigs(numberOfSigs, toSign, publicKey);
+      const sigShares = await signMultipleSigs(numberOfSigs, signatureData, publicKey);
 
     })();`,
     authMethods: [],
     jsParams: {
       numberOfSigs: 2,
-      toSign: TO_SIGN,
+      signatureData: TO_SIGN,
       publicKey: LITCONFIG.PKP_PUBKEY,
       sigName: 'fooSig',
     },
@@ -57,7 +58,7 @@ export async function main() {
 
     ['r', 's', 'recid', 'signature', 'publicKey', 'dataSigned'].forEach(
       (key) => {
-        if (!sig[key]) {
+        if (sig[key] === undefined) {
           return fail(`sig.${key} is undefined, empty, or null`);
         }
       }

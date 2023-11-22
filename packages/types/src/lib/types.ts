@@ -141,11 +141,11 @@ export type ClaimProcessor = RelayClaimProcessor | ClientClaimProcessor;
 
 /**
  * Callback function for processing claim requests.
- * 
+ *
  * This function can be used in two scenarios:
  * 1. When the claim is processed by a relay server.
  * 2. When the claim is processed by a contract client.
- * 
+ *
  * For contract clients, you can use the `contract-sdk` or implement your own client.
  * Ensure that your client has the correct ABI and contract addresses for successful processing.
  */

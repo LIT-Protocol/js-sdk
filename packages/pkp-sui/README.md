@@ -13,6 +13,7 @@ yarn add @lit-protocol/pkp-sui @mysten/sui.js
 # Examples
 
 ## Create a wallet and get the address
+
 ```typescript
 import { PKPSuiWallet } from '@lit-protocol/pkp-sui';
 import { JsonRpcProvider, mainnetConnection } from '@mysten/sui.js';
@@ -27,7 +28,8 @@ const pkpSuiWallet = new PKPSuiWallet(
 return await pkpSuiWallet.getAddress();
 ```
 
-## Change wallet rpc/network 
+## Change wallet rpc/network
+
 ```typescript
 import { JsonRpcProvider, testnetConnection, Connection } from '@mysten/sui.js';
 // connect to testnet
@@ -37,6 +39,7 @@ pkpSuiWallet.connect(new JsonRpcProvider(new Connection({ fullnode: rpcUrl })));
 ```
 
 ## Transfer Sui
+
 ```typescript
 import { TransactionBlock } from '@mysten/sui.js';
 
@@ -50,6 +53,7 @@ return await pkpSuiWallet.signAndExecuteTransactionBlock({
 ```
 
 ## Stake Sui
+
 ```typescript
 import { SUI_SYSTEM_STATE_OBJECT_ID, TransactionBlock } from '@mysten/sui.js';
 
@@ -69,6 +73,7 @@ return await pkpSuiWallet.signAndExecuteTransactionBlock({
 ```
 
 ## Get balance
+
 ```typescript
 const provider = new JsonRpcProvider(mainnetConnection);
 const address = await pkpSuiWallet.getAddress();
@@ -76,16 +81,19 @@ const balance = await provider.getBalance(address);
 ```
 
 ## Sign message
+
 ```typescript
 await pkpSuiWallet.signMessage({ message });
 ```
 
 ## Sign transaction
+
 ```typescript
 await pkpSuiWallet.signTransactionBlock({ transactionBlock });
 ```
 
 ## dryRunTransactionBlock for estimating transaction result
+
 ```typescript
 await pkpSuiWallet.dryRunTransactionBlock({ transactionBlock });
 ```
