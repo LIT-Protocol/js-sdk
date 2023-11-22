@@ -1,6 +1,6 @@
 export const StakingBalancesData = {
-  "date": "2023-10-15T09:47:32.000Z",
-  "address": "0x75678229Ec842Cd4A1335B9502398047dC7700b2",
+  "date": "2023-11-14T15:45:41Z",
+  "address": "0x095251de2aD2A78aDe96F2a11F7feAA7CF93e6B5",
   "contractName": "StakingBalances",
   "abi": [
     {

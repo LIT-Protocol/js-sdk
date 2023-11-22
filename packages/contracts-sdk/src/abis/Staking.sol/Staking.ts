@@ -71,6 +71,9 @@ export declare namespace LibStakingStorage {
     complaintIntervalSecs: BigNumberish;
     keyTypes: BigNumberish[];
     minimumValidatorCount: BigNumberish;
+    maxConcurrentRequests: BigNumberish;
+    maxTripleCount: BigNumberish;
+    minTripleCount: BigNumberish;
   };
 
   export type ConfigStructOutput = [
@@ -78,6 +81,9 @@ export declare namespace LibStakingStorage {
     BigNumber,
     BigNumber,
     BigNumber[],
+    BigNumber,
+    BigNumber,
+    BigNumber,
     BigNumber
   ] & {
     tokenRewardPerTokenPerEpoch: BigNumber;
@@ -85,6 +91,9 @@ export declare namespace LibStakingStorage {
     complaintIntervalSecs: BigNumber;
     keyTypes: BigNumber[];
     minimumValidatorCount: BigNumber;
+    maxConcurrentRequests: BigNumber;
+    maxTripleCount: BigNumber;
+    minTripleCount: BigNumber;
   };
 
   export type EpochStruct = {
@@ -107,6 +116,16 @@ export declare namespace LibStakingStorage {
     endTime: BigNumber;
     retries: BigNumber;
     timeout: BigNumber;
+  };
+
+  export type AddressMappingStruct = {
+    nodeAddress: string;
+    stakerAddress: string;
+  };
+
+  export type AddressMappingStructOutput = [string, string] & {
+    nodeAddress: string;
+    stakerAddress: string;
   };
 
   export type ValidatorStruct = {
@@ -158,7 +177,7 @@ export interface StakingInterface extends utils.Interface {
     "lockValidatorsForNextEpoch()": FunctionFragment;
     "requestToJoin(uint32,uint128,uint32,address,uint256,uint256)": FunctionFragment;
     "requestToLeave()": FunctionFragment;
-    "setConfig(uint256,uint256,uint256,uint256[],uint256)": FunctionFragment;
+    "setConfig(uint256,uint256,uint256,uint256[],uint256,uint256,uint256,uint256)": FunctionFragment;
     "setContractResolver(address)": FunctionFragment;
     "setEpochEndTime(uint256)": FunctionFragment;
     "setEpochLength(uint256)": FunctionFragment;
@@ -186,6 +205,7 @@ export interface StakingInterface extends utils.Interface {
     "epoch()": FunctionFragment;
     "getKeyTypes()": FunctionFragment;
     "getKickedValidators()": FunctionFragment;
+    "getNodeStakerAddressMappings(address[])": FunctionFragment;
     "getStakingBalancesAddress()": FunctionFragment;
     "getTokenAddress()": FunctionFragment;
     "getValidatorsInCurrentEpoch()": FunctionFragment;
@@ -255,6 +275,7 @@ export interface StakingInterface extends utils.Interface {
       | "epoch"
       | "getKeyTypes"
       | "getKickedValidators"
+      | "getNodeStakerAddressMappings"
       | "getStakingBalancesAddress"
       | "getTokenAddress"
       | "getValidatorsInCurrentEpoch"
@@ -350,6 +371,9 @@ export interface StakingInterface extends utils.Interface {
       BigNumberish,
       BigNumberish,
       BigNumberish[],
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
       BigNumberish
     ]
   ): string;
@@ -466,6 +490,10 @@ export interface StakingInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "getKickedValidators",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getNodeStakerAddressMappings",
+    values: [string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "getStakingBalancesAddress",
@@ -693,6 +721,10 @@ export interface StakingInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getNodeStakerAddressMappings",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getStakingBalancesAddress",
     data: BytesLike
   ): Result;
@@ -766,7 +798,7 @@ export interface StakingInterface extends utils.Interface {
   events: {
     "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
-    "ConfigSet(uint256,uint256,uint256,uint256[],uint256)": EventFragment;
+    "ConfigSet(uint256,uint256,uint256,uint256[],uint256,uint256,uint256,uint256)": EventFragment;
     "EpochEndTimeSet(uint256)": EventFragment;
     "EpochLengthSet(uint256)": EventFragment;
     "EpochTimeoutSet(uint256)": EventFragment;
@@ -838,9 +870,21 @@ export interface ConfigSetEventObject {
   newComplaintIntervalSecs: BigNumber;
   newKeyTypes: BigNumber[];
   newMinimumValidatorCount: BigNumber;
+  newMaxConcurrentRequests: BigNumber;
+  newMaxTripleCount: BigNumber;
+  newMinTripleCount: BigNumber;
 }
 export type ConfigSetEvent = TypedEvent<
-  [BigNumber, BigNumber, BigNumber, BigNumber[], BigNumber],
+  [
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    BigNumber[],
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    BigNumber
+  ],
   ConfigSetEventObject
 >;
 
@@ -1131,6 +1175,9 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
+      newMaxConcurrentRequests: BigNumberish,
+      newMaxTripleCount: BigNumberish,
+      newMinTripleCount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -1257,6 +1304,11 @@ export interface Staking extends BaseContract {
     getKeyTypes(overrides?: CallOverrides): Promise<[BigNumber[]]>;
 
     getKickedValidators(overrides?: CallOverrides): Promise<[string[]]>;
+
+    getNodeStakerAddressMappings(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<[LibStakingStorage.AddressMappingStructOutput[]]>;
 
     getStakingBalancesAddress(overrides?: CallOverrides): Promise<[string]>;
 
@@ -1424,6 +1476,9 @@ export interface Staking extends BaseContract {
     newComplaintIntervalSecs: BigNumberish,
     newKeyTypes: BigNumberish[],
     newMinimumValidatorCount: BigNumberish,
+    newMaxConcurrentRequests: BigNumberish,
+    newMaxTripleCount: BigNumberish,
+    newMinTripleCount: BigNumberish,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1550,6 +1605,11 @@ export interface Staking extends BaseContract {
   getKeyTypes(overrides?: CallOverrides): Promise<BigNumber[]>;
 
   getKickedValidators(overrides?: CallOverrides): Promise<string[]>;
+
+  getNodeStakerAddressMappings(
+    addresses: string[],
+    overrides?: CallOverrides
+  ): Promise<LibStakingStorage.AddressMappingStructOutput[]>;
 
   getStakingBalancesAddress(overrides?: CallOverrides): Promise<string>;
 
@@ -1709,6 +1769,9 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
+      newMaxConcurrentRequests: BigNumberish,
+      newMaxTripleCount: BigNumberish,
+      newMinTripleCount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1828,6 +1891,11 @@ export interface Staking extends BaseContract {
 
     getKickedValidators(overrides?: CallOverrides): Promise<string[]>;
 
+    getNodeStakerAddressMappings(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<LibStakingStorage.AddressMappingStructOutput[]>;
+
     getStakingBalancesAddress(overrides?: CallOverrides): Promise<string>;
 
     getTokenAddress(overrides?: CallOverrides): Promise<string>;
@@ -1925,19 +1993,25 @@ export interface Staking extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    "ConfigSet(uint256,uint256,uint256,uint256[],uint256)"(
+    "ConfigSet(uint256,uint256,uint256,uint256[],uint256,uint256,uint256,uint256)"(
       newTokenRewardPerTokenPerEpoch?: null,
       newComplaintTolerance?: null,
       newComplaintIntervalSecs?: null,
       newKeyTypes?: null,
-      newMinimumValidatorCount?: null
+      newMinimumValidatorCount?: null,
+      newMaxConcurrentRequests?: null,
+      newMaxTripleCount?: null,
+      newMinTripleCount?: null
     ): ConfigSetEventFilter;
     ConfigSet(
       newTokenRewardPerTokenPerEpoch?: null,
       newComplaintTolerance?: null,
       newComplaintIntervalSecs?: null,
       newKeyTypes?: null,
-      newMinimumValidatorCount?: null
+      newMinimumValidatorCount?: null,
+      newMaxConcurrentRequests?: null,
+      newMaxTripleCount?: null,
+      newMinTripleCount?: null
     ): ConfigSetEventFilter;
 
     "EpochEndTimeSet(uint256)"(
@@ -2124,6 +2198,9 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
+      newMaxConcurrentRequests: BigNumberish,
+      newMaxTripleCount: BigNumberish,
+      newMinTripleCount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -2242,6 +2319,11 @@ export interface Staking extends BaseContract {
     getKeyTypes(overrides?: CallOverrides): Promise<BigNumber>;
 
     getKickedValidators(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getNodeStakerAddressMappings(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getStakingBalancesAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2412,6 +2494,9 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
+      newMaxConcurrentRequests: BigNumberish,
+      newMaxTripleCount: BigNumberish,
+      newMinTripleCount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
@@ -2534,6 +2619,11 @@ export interface Staking extends BaseContract {
     getKeyTypes(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getKickedValidators(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getNodeStakerAddressMappings(
+      addresses: string[],
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
