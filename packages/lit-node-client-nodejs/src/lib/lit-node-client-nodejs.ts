@@ -714,7 +714,7 @@ export class LitNodeClientNodeJs extends LitCore {
     ) {
       const msg =
         'Unsigned JWT is not the same from all the nodes.  This means the combined signature will be bad because the nodes signed the wrong things';
-      log(msg);
+      logError(msg);
     }
 
     // ========== Sorting ==========
