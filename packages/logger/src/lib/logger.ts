@@ -56,15 +56,15 @@ function _convertLoggingLevel(level: LogLevel): string {
     case LogLevel.DEBUG:
       return `${colours.fg.cyan}[DEBUG]${colours.reset}`;
     case LogLevel.WARN:
-      return '[WARN]';
+      return `${colours.fg.yellow}[WARN]${colours.reset}`;
     case LogLevel.ERROR:
       return `${colours.fg.red}[ERROR]${colours.reset}`;
     case LogLevel.FATAL:
-      return '[FATAL]';
+      return `${colours.fg.red}[FATAL]${colours.reset}`;
     case LogLevel.TIMING_START:
-        return '[TIME_START]'
+        return `${colours.fg.green}[TIME_START]${colours.reset}`
     case LogLevel.TIMING_END:
-      return '[TIME_END]'
+      return `${colours.fg.green}[TIME_END]${colours.reset}`
   }
 
   return '[UNKNOWN]';
@@ -154,7 +154,7 @@ class Log implements ILog {
     args.push(_convertLoggingLevel(this.level));
     args.push(`[${this.category}]`);
 
-    this.id && args.push(`[id: ${this.id}]`);
+    this.id && args.push(`${colours.fg.cyan}[id: ${this.id}]${colours.reset}`);
     this.message && args.push(this.message);
     
     for (var i = 0; i < this.args.length; i++) {
