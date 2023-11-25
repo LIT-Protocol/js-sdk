@@ -231,12 +231,97 @@ export const log = (...args: any): void => {
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
-    globalThis?.logger.debug(...log);
+      globalThis?.logger.debug(...log);
   }
-  
+
   globalThis?.logger.debug(...args);
 };
 
+export const logWithRequestId = (id: string, ...args: any) => {
+  if (!globalThis) {
+    // there is no globalThis, just print the log
+    console.log(...args);
+    return;
+  }
+
+  // check if config is loaded yet
+  if (!globalThis?.litConfig) {
+    // config isn't loaded yet, push into buffer
+    logBuffer.push(args);
+    return;
+  }
+
+  if (globalThis?.litConfig?.debug !== true) {
+    return;
+  }
+  // config is loaded, and debug is true
+
+  // if there are there are logs in buffer, print them first and empty the buffer.
+  while (logBuffer.length > 0) {
+    const log = logBuffer.shift() ?? '';
+    globalThis.logManager.get(globalThis.logger.category, id).debug(...log);
+  }
+
+  globalThis.logManager.get(globalThis.logger.category, id).debug(...args);
+}
+
+
+export const logErrorWithRequestId = (id: string, ...args: any) => {
+  if (!globalThis) {
+    // there is no globalThis, just print the log
+    console.log(...args);
+    return;
+  }
+
+  // check if config is loaded yet
+  if (!globalThis?.litConfig) {
+    // config isn't loaded yet, push into buffer
+    logBuffer.push(args);
+    return;
+  }
+
+  if (globalThis?.litConfig?.debug !== true) {
+    return;
+  }
+  // config is loaded, and debug is true
+
+  // if there are there are logs in buffer, print them first and empty the buffer.
+  while (logBuffer.length > 0) {
+    const log = logBuffer.shift() ?? '';
+    globalThis.logManager.get(globalThis.logger.category, id).error(...log);
+  }
+
+  globalThis.logManager.get(globalThis.logger.category, id).error(...args);
+}
+
+
+export const logError = (...args: any) => {
+  if (!globalThis) {
+    // there is no globalThis, just print the log
+    console.log(...args);
+    return;
+  }
+
+  // check if config is loaded yet
+  if (!globalThis?.litConfig) {
+    // config isn't loaded yet, push into buffer
+    logBuffer.push(args);
+    return;
+  }
+
+  if (globalThis?.litConfig?.debug !== true) {
+    return;
+  }
+  // config is loaded, and debug is true
+
+  // if there are there are logs in buffer, print them first and empty the buffer.
+  while (logBuffer.length > 0) {
+    const log = logBuffer.shift() ?? '';
+    globalThis.logManager.get(globalThis.logger.category).error(...log);
+  }
+
+  globalThis.logManager.get(globalThis.logger.category).error(...args);
+}
 
 /**
  *
