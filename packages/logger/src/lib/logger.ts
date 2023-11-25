@@ -52,13 +52,13 @@ const colours = {
 function _convertLoggingLevel(level: LogLevel): string {
   switch (level) {
     case LogLevel.INFO:
-      return '[INFO]';
+      return `${colours.fg.green}[INFO]${colours.reset}`;
     case LogLevel.DEBUG:
-      return '[DEBUG]';
+      return `${colours.fg.cyan}[DEBUG]${colours.reset}`;
     case LogLevel.WARN:
       return '[WARN]';
     case LogLevel.ERROR:
-      return '[ERROR]';
+      return `${colours.fg.red}[ERROR]${colours.reset}`;
     case LogLevel.FATAL:
       return '[FATAL]';
     case LogLevel.TIMING_START:
