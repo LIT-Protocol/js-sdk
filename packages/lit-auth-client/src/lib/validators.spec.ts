@@ -1,6 +1,5 @@
 import { validateMintRequestBody } from './validators';
 
-
 describe('validateMintRequestBody', () => {
   const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
 
@@ -46,7 +45,9 @@ describe('validateMintRequestBody', () => {
       keyType: '2', // should be a number
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('Invalid type for keyType'));
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Invalid type for keyType')
+    );
   });
 
   it('should fail validation and log error for incorrect permittedAuthMethodTypes', () => {
@@ -54,7 +55,9 @@ describe('validateMintRequestBody', () => {
       permittedAuthMethodTypes: ['1'], // should be an array of numbers
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('Invalid type for permittedAuthMethodTypes'));
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Invalid type for permittedAuthMethodTypes')
+    );
   });
 
   it('should fail validation and log error for incorrect permittedAuthMethodIds', () => {
@@ -62,7 +65,9 @@ describe('validateMintRequestBody', () => {
       permittedAuthMethodIds: [123], // should be an array of strings
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('Invalid type for permittedAuthMethodIds'));
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Invalid type for permittedAuthMethodIds')
+    );
   });
 
   it('should fail validation and log error for incorrect permittedAuthMethodPubkeys', () => {
@@ -70,7 +75,9 @@ describe('validateMintRequestBody', () => {
       permittedAuthMethodPubkeys: [123], // should be an array of strings
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('Invalid type for permittedAuthMethodPubkeys'));
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Invalid type for permittedAuthMethodPubkeys')
+    );
   });
   it('should fail validation and log error for incorrect permittedAuthMethodScopes', () => {
     const customArgs = {
@@ -84,7 +91,11 @@ describe('validateMintRequestBody', () => {
       addPkpEthAddressAsPermittedAddress: 'true', // should be a boolean
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('Invalid type for addPkpEthAddressAsPermittedAddress'));
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Invalid type for addPkpEthAddressAsPermittedAddress'
+      )
+    );
   });
 
   it('should fail validation and log error for incorrect sendPkpToItself', () => {
@@ -92,7 +103,9 @@ describe('validateMintRequestBody', () => {
       sendPkpToItself: 'true', // should be a boolean
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('Invalid type for sendPkpToItself'));
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Invalid type for sendPkpToItself')
+    );
   });
 
   it('should fail validation and log error for extraneous keys', () => {
@@ -100,7 +113,8 @@ describe('validateMintRequestBody', () => {
       extraneousKey: 'unexpected', // This key is not defined in MintRequestBody
     };
     expect(validateMintRequestBody(customArgs as any)).toBe(false);
-    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining('Invalid key found: extraneousKey'));
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Invalid key found: extraneousKey')
+    );
   });
-
 });

@@ -89,7 +89,7 @@ interface signAndSaveAuthParams {
   resources: any;
   expiration: string;
   uri?: string;
-  nonce: string,
+  nonce: string;
 }
 
 interface IABI {

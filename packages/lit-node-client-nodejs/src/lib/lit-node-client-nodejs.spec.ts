@@ -88,7 +88,7 @@ describe('LitNodeClientNodeJs', () => {
 
       // Assert
       expect(params.jsParams.bufferArray).toEqual([1, 2]);
-    })
+    });
 
     it('should leave normal arrays unchanged', () => {
       // Setup
@@ -122,8 +122,8 @@ describe('LitNodeClientNodeJs', () => {
       let params = {
         jsParams: {
           bufferArray: view,
-          normalArray: [3, 4, 5]
-        }
+          normalArray: [3, 4, 5],
+        },
       };
 
       // Action
@@ -133,7 +133,5 @@ describe('LitNodeClientNodeJs', () => {
       expect(params.jsParams.bufferArray).toEqual([1, 2]);
       expect(params.jsParams.normalArray).toEqual([3, 4, 5]);
     });
-
   });
-
 });

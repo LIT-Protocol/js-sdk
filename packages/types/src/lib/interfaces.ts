@@ -570,7 +570,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise { }
+export interface LitNodePromise {}
 
 export interface SendNodeCommand {
   url: string;
@@ -781,7 +781,7 @@ export interface JsonHandshakeResponse {
   networkPubKey: string;
   networkPubKeySet: string;
   hdRootPubkeys: string[];
-  latestBlockhash?: string,
+  latestBlockhash?: string;
 }
 
 export interface EncryptToIpfsProps {
@@ -1074,7 +1074,7 @@ export interface GetWalletSigProps {
   switchChain?: boolean;
   expiration: string;
   sessionKeyUri: string;
-  nonce: string,
+  nonce: string;
 }
 
 export interface SessionSigningTemplate {
@@ -1130,7 +1130,7 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export interface PKPEthersWalletProp extends PKPBaseProp { }
+export interface PKPEthersWalletProp extends PKPBaseProp {}
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
@@ -1268,10 +1268,10 @@ export interface MintRequestBody {
   permittedAuthMethodTypes?: number[];
   permittedAuthMethodIds?: string[];
   permittedAuthMethodPubkeys?: string[];
-  permittedAuthMethodScopes?: any[][] // ethers.BigNumber;
+  permittedAuthMethodScopes?: any[][]; // ethers.BigNumber;
   addPkpEthAddressAsPermittedAddress?: boolean;
   sendPkpToItself?: boolean;
-};
+}
 
 export interface IRelayRequestData {
   /**
@@ -1501,7 +1501,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions { }
+export interface BaseAuthenticateOptions {}
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**

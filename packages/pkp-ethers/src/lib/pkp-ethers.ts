@@ -125,7 +125,7 @@ export class PKPEthersWallet
     this.manualGasLimit = undefined;
     this.nonce = undefined;
     this.chainId = undefined;
-  }
+  };
 
   get publicKey(): string {
     return this.uncompressedPubKey;
@@ -426,7 +426,6 @@ export class PKPEthersWallet
     transaction: ethers.utils.Deferrable<TransactionRequest>,
     blockTag?: ethers.providers.BlockTag | undefined
   ): Promise<string> {
-
     if (!blockTag) {
       return this.throwError(`blockTag is required`);
     }
@@ -434,11 +433,15 @@ export class PKPEthersWallet
     const resolved = await resolveProperties({
       transaction: this.rpcProvider._getTransactionRequest(transaction),
       blockTag: this.rpcProvider._getBlockTag(blockTag),
-      ccipReadEnabled: Promise.resolve(transaction.ccipReadEnabled)
+      ccipReadEnabled: Promise.resolve(transaction.ccipReadEnabled),
     });
 
     // @ts-ignore
-    return this.rpcProvider._call(resolved.transaction, resolved.blockTag, resolved.ccipReadEnabled);
+    return this.rpcProvider._call(
+      resolved.transaction,
+      resolved.blockTag,
+      resolved.ccipReadEnabled
+    );
   }
 
   async getChainId() {
@@ -469,7 +472,7 @@ export class PKPEthersWallet
   }
 
   _checkProvider(operation?: string | undefined): void {
-    this.log("This function is not implemented yet, but will skip it for now.");
+    this.log('This function is not implemented yet, but will skip it for now.');
   }
 
   get mnemonic() {

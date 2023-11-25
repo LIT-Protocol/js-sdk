@@ -75,14 +75,20 @@ export abstract class BaseProvider {
    *
    * @returns {Promise<string>} - Mint transaction hash
    */
-  public async mintPKPThroughRelayer(authMethod: AuthMethod, customArgs?: MintRequestBody): Promise<string> {
+  public async mintPKPThroughRelayer(
+    authMethod: AuthMethod,
+    customArgs?: MintRequestBody
+  ): Promise<string> {
     const data = await this.prepareRelayRequestData(authMethod);
 
     if (customArgs && !validateMintRequestBody(customArgs)) {
       throw new Error('Invalid mint request body');
-    };
+    }
 
-    const body = this.prepareMintBody(data, customArgs ?? {} as MintRequestBody);
+    const body = this.prepareMintBody(
+      data,
+      customArgs ?? ({} as MintRequestBody)
+    );
     const mintRes = await this.relay.mintPKP(body);
     if (!mintRes || !mintRes.requestId) {
       throw new Error('Missing mint response or request ID from relay server');
@@ -260,10 +266,13 @@ export abstract class BaseProvider {
    * @param {string} data.authMethodId - ID of auth method
    * @param {string} [data.authMethodPubKey] - Public key associated with the auth method (used only in WebAuthn)
    * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
-   * 
+   *
    * @returns {string} - Relay request body for minting PKP
    */
-  protected prepareMintBody(data: IRelayRequestData, customArgs: MintRequestBody): string {
+  protected prepareMintBody(
+    data: IRelayRequestData,
+    customArgs: MintRequestBody
+  ): string {
     const pubkey = data.authMethodPubKey || '0x';
 
     const defaultArgs: MintRequestBody = {

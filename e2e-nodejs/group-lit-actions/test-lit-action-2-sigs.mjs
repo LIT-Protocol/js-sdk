@@ -9,7 +9,6 @@ import { ethers } from 'ethers';
 const TO_SIGN = ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5]));
 
 export async function main() {
-  
   // ==================== Test Logic ====================
   const res = await client.executeJs({
     authSig: LITCONFIG.CONTROLLER_AUTHSIG,

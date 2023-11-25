@@ -313,7 +313,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
   getLatestBlockhash = () => {
     return this.latestBlockhash;
-  }
+  };
 
   /**
    *
@@ -1300,7 +1300,10 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     for (const key of Object.keys(params.jsParams)) {
-      if (Array.isArray(params.jsParams[key]) || ArrayBuffer.isView(params.jsParams[key])) {
+      if (
+        Array.isArray(params.jsParams[key]) ||
+        ArrayBuffer.isView(params.jsParams[key])
+      ) {
         let arr = [];
         for (let i = 0; i < params.jsParams[key].length; i++) {
           arr.push((params.jsParams[key] as Buffer)[i]);
@@ -1358,7 +1361,6 @@ export class LitNodeClientNodeJs extends LitCore {
         errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
     }
-
 
     // Call the normalizeParams function to normalize the parameters
     params = LitNodeClientNodeJs.normalizeParams(params);
@@ -2330,8 +2332,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
     let nonce = this.latestBlockhash || generateNonce();
 

@@ -491,12 +491,15 @@ export class LitContracts {
     this.connected = true;
   };
 
-  mintWithAuth = async ({ authMethod, scopes, pubkey }: {
-    authMethod: AuthMethod,
-    scopes: string[] | number[] | BigNumberish[],
-    pubkey?: string // only applies to webauthn auth method
+  mintWithAuth = async ({
+    authMethod,
+    scopes,
+    pubkey,
+  }: {
+    authMethod: AuthMethod;
+    scopes: string[] | number[] | BigNumberish[];
+    pubkey?: string; // only applies to webauthn auth method
   }) => {
-
     // -- validate
     if (!this.connected) {
       throw new Error(
@@ -532,10 +535,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     // if scopes are list of strings, turn them into numbers
     scopes = scopes.map((scope) => {
       if (typeof scope === 'string') {
-        return ethers.BigNumber.from(scope)
+        return ethers.BigNumber.from(scope);
       }
       if (typeof scope === 'number') {
-        return ethers.BigNumber.from(scope.toString())
+        return ethers.BigNumber.from(scope.toString());
       }
       return scope;
     });
@@ -555,7 +558,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       true,
       true,
       {
-        value: mintCost
+        value: mintCost,
       }
     );
 
@@ -572,9 +575,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     tokenId = events[0].topics[1];
     console.warn('tokenId:', tokenId);
 
-    let publicKey = await this.pkpNftContract.read.getPubkey(
-      tokenId
-    );
+    let publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
 
     if (publicKey.startsWith('0x')) {
       publicKey = publicKey.slice(2);
@@ -592,7 +593,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       },
       tx: receipt,
     };
-  }
+  };
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
