@@ -1,4 +1,7 @@
 import { version } from '@lit-protocol/constants';
+import { hashMessage } from 'ethers/lib/utils';
+import { encode } from 'punycode';
+import { toString as uint8arrayToString } from 'uint8arrays';
 
 export enum LogLevel {
   INFO = 0,
@@ -6,6 +9,8 @@ export enum LogLevel {
   WARN = 2,
   ERROR = 3,
   FATAL = 4,
+  TIMING_START = 5,
+  TIMING_END = 6,
   OFF = 5,
 }
 
@@ -47,15 +52,19 @@ const colours = {
 function _convertLoggingLevel(level: LogLevel): string {
   switch (level) {
     case LogLevel.INFO:
-      return `${colours.fg.cyan}[INFO]`;
+      return '[INFO]';
     case LogLevel.DEBUG:
-      return `${colours.fg.cyan}[DEBUG]`;
+      return '[DEBUG]';
     case LogLevel.WARN:
-      return `${colours.fg.yellow}[WARN]`;
+      return '[WARN]';
     case LogLevel.ERROR:
-      return `${colours.fg.red}[ERROR]`;
+      return '[ERROR]';
     case LogLevel.FATAL:
-      return `${colours.fg.crimson}[FATAL]`;
+      return '[FATAL]';
+    case LogLevel.TIMING_START:
+        return '[TIME_START]'
+    case LogLevel.TIMING_END:
+      return '[TIME_END]'
   }
 
   return '[UNKNOWN]';
@@ -73,6 +82,10 @@ function _resolveLoggingHandler(level: LogLevel): any {
       return console.warn;
     case LogLevel.FATAL:
       return console.error;
+    case LogLevel.TIMING_END:
+      return console.timeLog;
+    case LogLevel.TIMING_START:
+      return console.time;
   }
 }
 
@@ -122,13 +135,10 @@ class Log implements ILog {
   }
 
   toString(): string {
-    var fmtStr: string = `[Lit-JS-SDK v${version}]${_convertLoggingLevel(this.level)}[${
-      this.timestamp
-    }]${this.category}[id: ${this.id}] ${this.message}`;
+    var fmtStr: string = `[Lit-JS-SDK v${version}]${_convertLoggingLevel(this.level)} [${this.category}] [id: ${this.id}] ${this.message}`;
     for (var i = 0; i < this.args.length; i++) {
       if (typeof this.args[i] === 'object') {
-        if (this.args[i].length && this.args.length > 1)
-          fmtStr = `${fmtStr} ${JSON.stringify(this.args[i], replacer, '\t')}`;
+          fmtStr = `${fmtStr} ${JSON.stringify(this.args[i])}`;
       } else {
         fmtStr = `${fmtStr} ${this.args[i]}`;
       }
@@ -136,11 +146,13 @@ class Log implements ILog {
     return fmtStr;
   }
 
+
+
   toArray(): string[] {
     let args = [];
     args.push(`[Lit-JS-SDK v${version}]`);
     args.push(_convertLoggingLevel(this.level));
-    args.push(`${this.category}`);
+    args.push(`[${this.category}]`);
 
     this.id && args.push(`[id: ${this.id}]`);
     this.message && args.push(this.message);
@@ -172,20 +184,45 @@ export class Logger {
   private _id: string;
   private _handler: messageHandler | undefined;
   private _consoleHandler: any;
+  private _logs: Log[] = [];
+  private _logHashes: Map<string, boolean> = new Map();
+  private _config: Record<string, any> | undefined;
 
   public static createLogger(
     category: string,
     level: LogLevel,
-    id: string
+    id: string,
+    config?: Record<string, any>
   ): Logger {
-    return new Logger(category, level, id);
+    return new Logger(category, level, id, config);
   }
 
-  private constructor(category: string, level: LogLevel, id: string) {
-    this._category = `[${category}]`;
+  private constructor(category: string, level: LogLevel, id: string, config?: Record<string, any>) {
+    this._category = category;
     this._level = level;
     this._id = id;
     this._consoleHandler = _resolveLoggingHandler(this._level);
+    this._config = config;
+  }
+
+  get id(): string {
+    return this._id;
+  }
+
+  get category(): string {
+    return this._category;
+  }
+
+  get Logs(): Log[] {
+    return this._logs;
+  }
+
+  set Config(value: Record<string, any>| undefined) {
+    this._config = value;
+  }
+
+  get Config(): Record<string, any> | undefined {
+    return this._config;
   }
 
   public setLevel(level: LogLevel): void {
@@ -197,11 +234,11 @@ export class Logger {
   }
 
   public info(message: string = "", ...args: any[]): void {
-    this._log(LogLevel.INFO, message, args);
+    this._log(LogLevel.INFO, message, ...args);
   }
 
   public debug(message: string = "", ...args: any[]): void {
-    this._log(LogLevel.DEBUG, message, args);
+    this._log(LogLevel.DEBUG, message, ...args);
   }
 
   public warn(message: string = "", ...args: any[]): void {
@@ -209,28 +246,27 @@ export class Logger {
   }
 
   public error(message: string = "", ...args: any[]): void {
-    this._log(LogLevel.ERROR, message, args);
+    this._log(LogLevel.ERROR, message, ...args);
   }
 
   public fatal(message: string = "", ...args: any[]): void {
-    this._log(LogLevel.FATAL, message, args);
+    this._log(LogLevel.FATAL, message, ...args);
   }
 
   public trace(message: string = "", ...args: any[]): void {
-    this._log(LogLevel.FATAL, message, args);
+    this._log(LogLevel.FATAL, message, ...args);
   }
 
-  public timeStart(message: string = ""): void {
-    this._level < LogLevel.OFF && console.time(`${this._category} ${message}`);
+  public timeStart(message: string = "", ...args: any[]): void {
+    this._log(LogLevel.TIMING_START, message, ...args);
   }
 
-  public timeEnd(message: string = ""): void {
+  public timeEnd(message: string = "", ...args: any[]): void {
     this._level < LogLevel.OFF &&
-      console.timeEnd(`${this._category} ${message}`);
+      this._log(LogLevel.TIMING_END, message, ...args);
   }
 
   private _log(level: LogLevel, message: string = "", ...args: any[]): void {
-    args.pop();
     const log = new Log(
       new Date().toISOString(),
       message,
@@ -239,15 +275,49 @@ export class Logger {
       this._category,
       level
     );
-
+    
     const arrayLog = log.toArray();
-    let m = arrayLog.shift();
-    if (arrayLog.length > 1) {
-      this._level <= level && this._consoleHandler(m, ... arrayLog); 
+    if (this._config?.['condenseLogs'] && !this._checkHash(log)) {
+        (this._level >= level || level === LogLevel.ERROR) && this._consoleHandler(... arrayLog); 
+        (this._level >= level || level === LogLevel.ERROR) && this._handler && this._handler(log);
+        // (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
     } else {
-      this._level <= level && this._consoleHandler(m);
+      (this._level >= level || level === LogLevel.ERROR) && this._consoleHandler(... arrayLog); 
+      (this._level >= level || level === LogLevel.ERROR) && this._handler && this._handler(log);
+      (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
     }
-    this._level <= level && this._handler && this._handler(log);
+  }
+
+  private _checkHash(log: Log): boolean {
+    const digest = hashMessage(log.message);
+    const hash = digest.toString()
+    let item = this._logHashes.get(hash);
+    if(item) {
+      return true;
+    } else {
+      this._logHashes.set(hash, true);
+      return false;
+    }
+  }
+
+  private _addLog(log: Log) {
+    this._logs.push(log);
+    this._addToLocalStorage(log);
+  }
+
+  private _addToLocalStorage(log: Log) {
+    if (globalThis.localStorage) {
+      let bucket: any = globalThis.localStorage.getItem(log.id);
+      if (bucket) {
+        bucket = JSON.parse(bucket);
+        bucket?.logs.push(log.toString());
+        globalThis.localStorage.setItem(log.id, JSON.stringify(bucket));
+      } else {
+        globalThis.localStorage.setItem(log.id, JSON.stringify({
+          logs: [log.toString()]
+        }));
+      }
+    }
   }
 }
 
@@ -255,6 +325,7 @@ export class LogManager {
   private static _instance: LogManager;
   private _loggers: Map<string, Logger>;
   private _level: LogLevel | undefined = LogLevel.DEBUG;
+  private _config: Record<string, any> | undefined;
 
   static get Instance(): LogManager {
     if (!LogManager._instance) {
@@ -263,8 +334,19 @@ export class LogManager {
     return LogManager._instance;
   }
 
+  static clearInstance() {
+    (LogManager._instance as any) = undefined;
+  }
+
   private constructor() {
     this._loggers = new Map();
+  }
+
+  public withConfig(config: Record<string, any>) {
+    this._config = config;
+    for (const logger of this._loggers) {
+      logger[1].Config = config;
+    }
   }
 
   public setLevel(level: LogLevel) {
@@ -280,16 +362,51 @@ export class LogManager {
     }
   }
 
+  // if a logger is given an id it will persist logs under its logger instance
   public get(category: string, id?: string): Logger {
-    if (this._loggers.get(category) !== undefined) {
-      return this._loggers.get(category) as Logger;
+    let instance = this._loggers.get(`${category}${id}`);
+    if (instance !== undefined) {
+      return instance;
     }
+
     const logger = Logger.createLogger(
       category,
       this._level ?? LogLevel.INFO,
       id ?? ''
     );
-    this._loggers.set(category, logger);
+    
+    logger.Config = this._config as Record<string, any>;
+
+    this._loggers.set(`${category}${id}`, logger);
     return logger;
+  }
+
+   getById(id: string): Logger | undefined {
+    for (const logger of this._loggers) {
+      if (logger[1].id == id) {
+        return logger[1];
+      }
+    }
+
+    return undefined;
+  }
+
+  public getLogsForId(id: string): string[] {
+    if (globalThis.localStorage) {
+      let bucket: string | null = globalThis.localStorage.getItem(id);
+      if (bucket !== null) {
+        let data = JSON.parse(bucket as string);
+        return data.logs as string[];
+      }
+    } else {
+      let logs = this.getById(id)?.Logs;
+      let logsStrs = [];
+      for (const log of logs as Log[]) {
+        logsStrs.push(log.toString());
+      }
+      return logsStrs;
+    }
+
+    return []
   }
 }
