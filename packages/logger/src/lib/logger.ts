@@ -278,10 +278,10 @@ export class Logger {
     
     const arrayLog = log.toArray();
     if (this._config?.['condenseLogs'] && !this._checkHash(log)) {
-        (this._level >= level || level === LogLevel.ERROR) && this._consoleHandler(... arrayLog); 
-        (this._level >= level || level === LogLevel.ERROR) && this._handler && this._handler(log);
-        // (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
-    } else {
+      (this._level >= level || level === LogLevel.ERROR) && this._consoleHandler(... arrayLog); 
+      (this._level >= level || level === LogLevel.ERROR) && this._handler && this._handler(log);
+      (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
+    } else if (!this._config?.['condenseLogs']) {
       (this._level >= level || level === LogLevel.ERROR) && this._consoleHandler(... arrayLog); 
       (this._level >= level || level === LogLevel.ERROR) && this._handler && this._handler(log);
       (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);

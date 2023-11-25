@@ -23,6 +23,7 @@ import {
   defaultMintClaimCallback,
   hexPrefixed,
   log,
+  logError,
   logWithRequestId,
   mostCommonString,
   throwError,
@@ -1146,7 +1147,7 @@ export class LitNodeClientNodeJs extends LitCore {
     log('minimum required length:', this.config.minNodeCount);
 
     if (validatedSignedData.length < this.config.minNodeCount) {
-      log(
+      logError(
         `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSignedData.length}`
       );
       return null;
@@ -1202,7 +1203,7 @@ export class LitNodeClientNodeJs extends LitCore {
       log('minimum required length:', this.config.minNodeCount);
 
       if (validatedSigShares.length < this.config.minNodeCount) {
-        log(
+        logError(
           `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSigShares.length}`
         );
       }
@@ -1555,7 +1556,7 @@ export class LitNodeClientNodeJs extends LitCore {
         mustHave: false,
       });
 
-      log('sigToPassToNode:', sigToPassToNode);
+      logWithRequestId(requestId, 'sigToPassToNode:', sigToPassToNode);
 
       let reqBody = {
         toSign,
@@ -1871,6 +1872,8 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
+    const requestId = this.getRequestId();
+
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
     let hashOfConditions: ArrayBuffer | undefined =
@@ -1914,7 +1917,6 @@ export class LitNodeClientNodeJs extends LitCore {
     log('identityParam', identityParam);
 
     // ========== Get Network Signature ==========
-    const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
       let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
@@ -1947,7 +1949,7 @@ export class LitNodeClientNodeJs extends LitCore {
       res as SuccessNodePromises<NodeBlsSigningShare>
     ).values;
 
-    log('signatureShares', signatureShares);
+    logWithRequestId(requestId, 'signatureShares', signatureShares);
 
     // ========== Result ==========
     const decryptedData = this.#decryptWithSignatureShares(
@@ -2164,7 +2166,7 @@ export class LitNodeClientNodeJs extends LitCore {
       siweMessage: siweMessageStr,
     };
 
-    log('signSessionKey body', body);
+    logWithRequestId(requestId, 'signSessionKey body', body);
 
     const nodePromises = this.getNodePromises((url: string) => {
       return this.getSignSessionKeyShares(
@@ -2185,7 +2187,7 @@ export class LitNodeClientNodeJs extends LitCore {
       throw new Error(`Error when handling node promises: ${e}`);
     }
 
-    log('handleNodePromises res:', res);
+    logWithRequestId(requestId, 'handleNodePromises res:', res);
 
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
@@ -2194,7 +2196,7 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     const responseData = res.values;
-    log('responseData', JSON.stringify(responseData, null, 2));
+    logWithRequestId(requestId, 'responseData', JSON.stringify(responseData, null, 2));
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
@@ -2202,7 +2204,7 @@ export class LitNodeClientNodeJs extends LitCore {
       (r: any) => (r as SignedData).signedData
     );
 
-    log('signedDataList', signedDataList);
+    logWithRequestId(requestId, 'signedDataList', signedDataList);
 
     // -- checking if we have enough shares
     const validatedSignedDataList = signedDataList
@@ -2234,9 +2236,9 @@ export class LitNodeClientNodeJs extends LitCore {
       })
       .filter((item) => item !== null);
 
-    log('requested length:', signedDataList.length);
-    log('validated length:', validatedSignedDataList.length);
-    log('minimum required length:', this.config.minNodeCount);
+    logWithRequestId(requestId, 'requested length:', signedDataList.length);
+    logWithRequestId(requestId, 'validated length:', validatedSignedDataList.length);
+    logWithRequestId(requestId, 'minimum required length:', this.config.minNodeCount);
 
     if (validatedSignedDataList.length < this.config.minNodeCount) {
       throw new Error(
