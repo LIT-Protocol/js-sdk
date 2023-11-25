@@ -438,9 +438,9 @@ export class PKPEthersWallet
 
     // @ts-ignore
     return this.rpcProvider._call(
-      resolved.transaction,
+      resolved.transaction as TransactionRequest,
       resolved.blockTag,
-      resolved.ccipReadEnabled
+      resolved.ccipReadEnabled as any
     );
   }
 
