@@ -23,6 +23,7 @@ import {
   defaultMintClaimCallback,
   hexPrefixed,
   log,
+  logWithRequestId,
   mostCommonString,
   throwError,
 } from '@lit-protocol/misc';
@@ -546,7 +547,7 @@ export class LitNodeClientNodeJs extends LitCore {
   ): Promise<NodeCommandResponse> => {
     const { code, ipfsId, authSig, jsParams, authMethods } = params;
 
-    log('getJsExecutionShares');
+    logWithRequestId(requestId, 'getJsExecutionShares');
 
     // -- execute
     const urlWithPath = `${url}/web/execute`;
@@ -1359,6 +1360,7 @@ export class LitNodeClientNodeJs extends LitCore {
     params = LitNodeClientNodeJs.normalizeParams(params);
 
     let res;
+    const requestId = this.getRequestId();
     // -- only run on a single node
     if (targetNodeRange) {
       res = await this.runOnTargetedNodes(params);
@@ -1370,7 +1372,6 @@ export class LitNodeClientNodeJs extends LitCore {
 
       // ========== Get Node Promises ==========
       // -- fetch shares from nodes
-      const requestId = this.getRequestId();
       const nodePromises = this.getNodePromises((url: string) => {
         // -- choose the right signature
         let sigToPassToNode = this.getSessionOrAuthSig({
@@ -1394,7 +1395,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<NodeShare>).values;
-    log('executeJs responseData', JSON.stringify(responseData, null, 2));
+    logWithRequestId(requestId, 'executeJs responseData', JSON.stringify(responseData, null, 2));
 
     // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
     // we must also check for claim responses as a user may have submitted for a claim and signatures must be aggregated before returning
@@ -1439,7 +1440,7 @@ export class LitNodeClientNodeJs extends LitCore {
       return signedData;
     });
 
-    log('signedDataList:', signedDataList);
+    logWithRequestId(requestId, 'signedDataList:', signedDataList);
     const signatures = this.getSignatures(signedDataList);
 
     // -- 2. combine responses as a string, and get parse it as JSON
@@ -1475,7 +1476,7 @@ export class LitNodeClientNodeJs extends LitCore {
       })
       .filter((item) => item !== null);
 
-    log('claimList:', claimsList);
+    logWithRequestId(requestId, 'claimList:', claimsList);
 
     let claims = undefined;
 

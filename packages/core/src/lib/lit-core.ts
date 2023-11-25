@@ -25,6 +25,8 @@ import {
 import {
   isBrowser,
   log,
+  logErrorWithRequestId,
+  logWithRequestId,
   mostCommonString,
   throwError,
 } from '@lit-protocol/misc';
@@ -95,9 +97,18 @@ export class LitCore {
     // -- set global variables
     globalThis.litConfig = this.config;
     globalThis.logManager = LogManager.Instance;
+    globalThis.logManager.withConfig({
+      "condenseLogs": true
+    });
     globalThis.logManager.setLevel(LogLevel.DEBUG);
     globalThis.logger = globalThis.logManager.get('core');
   }
+  
+  // ========== Logger utilities ==========
+  getLogsForRequestId = (id: string): string[] => {
+    return globalThis.logManager.getLogsForId(id);
+  }
+
 
   // ========== Scoped Class Helpers ==========
 
@@ -292,7 +303,7 @@ export class LitCore {
     data,
     requestId,
   }: SendNodeCommand): Promise<any> => {
-    log(`sendCommandToNode with url ${url} and data`, data);
+    logWithRequestId(requestId, `sendCommandToNode with url ${url} and data`, data);
 
     const req: RequestInit = {
       method: 'POST',
@@ -322,7 +333,7 @@ export class LitCore {
         return data;
       })
       .catch((error: NodeErrorV3) => {
-        console.error(
+        logErrorWithRequestId(requestId,
           `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
             error?.message || error?.details
               ? `Error is ${error.message} - ${error.details}`
