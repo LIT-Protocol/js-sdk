@@ -74,62 +74,62 @@ process.exit(0);
 
 // Get a new PKP
 async function getNewPKP(privateKey) {
-  // const provider = new ethers.providers.JsonRpcProvider(LITPROTOCOL_CHAIN_RPC);
+  const provider = new ethers.providers.JsonRpcProvider(LITPROTOCOL_CHAIN_RPC);
 
-  // const wallet = new ethers.Wallet(privateKey, provider);
+  const wallet = new ethers.Wallet(privateKey, provider);
 
-  // const CONTROLLER_ADDRESS = wallet.address;
-  // console.log('✅ CONTROLLER_ADDRESS:', CONTROLLER_ADDRESS);
+  const CONTROLLER_ADDRESS = wallet.address;
+  console.log('✅ CONTROLLER_ADDRESS:', CONTROLLER_ADDRESS);
 
-  // // -- mint a PKP
-  // const PKPNFTContract = getPKPNFTContract(wallet);
+  // -- mint a PKP
+  const PKPNFTContract = getPKPNFTContract(wallet);
 
-  // let PKPMintTx;
+  let PKPMintTx;
 
-  // console.log('...minting PKP');
-  // try {
-  //   PKPMintTx = await PKPNFTContract.mintNext(2, {
-  //     value: await PKPNFTContract.mintCost(),
-  //     // gasLimit: 1000000, // NOTE: Sometimes this is needed. To be monitored. 11/09/23
-  //   });
+  console.log('...minting PKP');
+  try {
+    PKPMintTx = await PKPNFTContract.mintNext(2, {
+      value: await PKPNFTContract.mintCost(),
+      // gasLimit: 1000000, // NOTE: Sometimes this is needed. To be monitored. 11/09/23
+    });
 
-  //   PKPMintTx = await PKPMintTx.wait();
-  // } catch (e) {
-  //   console.log(e);
-  // }
-  // // ======================================================================
-  // // =                              PKP INFO                              =
-  // // ======================================================================
-  // // -- token id
-  // let PKP_TOKENID = BigInt(PKPMintTx.events[0].topics[1]).toString();
-  // console.log('✅ PKP_TOKENID:', PKP_TOKENID);
+    PKPMintTx = await PKPMintTx.wait();
+  } catch (e) {
+    console.log(e);
+  }
+  // ======================================================================
+  // =                              PKP INFO                              =
+  // ======================================================================
+  // -- token id
+  let PKP_TOKENID = BigInt(PKPMintTx.events[0].topics[1]).toString();
+  console.log('✅ PKP_TOKENID:', PKP_TOKENID);
 
-  // // -- public key
-  // let PKP_PUBKEY = await PKPNFTContract.getPubkey(PKP_TOKENID);
-  // console.log('✅ PKP_PUBKEY:', PKP_PUBKEY);
+  // -- public key
+  let PKP_PUBKEY = await PKPNFTContract.getPubkey(PKP_TOKENID);
+  console.log('✅ PKP_PUBKEY:', PKP_PUBKEY);
 
-  // // -- public key in buffer form
-  // const pubKeyBuffer = getPubKeyBuffer(PKP_PUBKEY);
+  // -- public key in buffer form
+  const pubKeyBuffer = getPubKeyBuffer(PKP_PUBKEY);
 
-  // // -- eth address
-  // const PKP_ETH_ADDRESS = ethers.utils.computeAddress(PKP_PUBKEY);
-  // console.log('✅ PKP_ETH_ADDRESS:', PKP_ETH_ADDRESS);
+  // -- eth address
+  const PKP_ETH_ADDRESS = ethers.utils.computeAddress(PKP_PUBKEY);
+  console.log('✅ PKP_ETH_ADDRESS:', PKP_ETH_ADDRESS);
 
-  // // -- cosmos address
-  // const PKP_COSMOS_ADDRESS = getCosmosAddress(pubKeyBuffer);
-  // console.log('✅ PKP_COSMOS_ADDRESS:', PKP_COSMOS_ADDRESS);
+  // -- cosmos address
+  const PKP_COSMOS_ADDRESS = getCosmosAddress(pubKeyBuffer);
+  console.log('✅ PKP_COSMOS_ADDRESS:', PKP_COSMOS_ADDRESS);
 
-  // // -- sui address
-  // const suiWallet = new PKPSuiWallet({
-  //   pkpPubKey: PKP_PUBKEY,
-  // });
+  // -- sui address
+  const suiWallet = new PKPSuiWallet({
+    pkpPubKey: PKP_PUBKEY,
+  });
 
-  // const PKP_SUI_ADDRESS = await suiWallet.getAddress();
-  // console.log('✅ PKP_SUI_ADDRESS:', PKP_SUI_ADDRESS);
+  const PKP_SUI_ADDRESS = await suiWallet.getAddress();
+  console.log('✅ PKP_SUI_ADDRESS:', PKP_SUI_ADDRESS);
 
-  // if (PKP_PUBKEY.startsWith('0x')) {
-  //   PKP_PUBKEY = PKP_PUBKEY.slice(2);
-  // }
+  if (PKP_PUBKEY.startsWith('0x')) {
+    PKP_PUBKEY = PKP_PUBKEY.slice(2);
+  }
 
   // ======================================================================================
   // =                              Authenticated signatures                              =

@@ -6,7 +6,7 @@ import {
   EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
 import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
-import { SiweMessage } from 'lit-siwe';
+import { generateNonce, SiweMessage } from 'lit-siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
@@ -74,6 +74,7 @@ export default class EthWalletProvider extends BaseProvider {
         version: '1',
         chainId,
         expirationTime: expiration,
+        nonce: this.litNodeClient.latestBlockhash || generateNonce(),
       };
 
       const message: SiweMessage = new SiweMessage(preparedMessage);
@@ -91,6 +92,7 @@ export default class EthWalletProvider extends BaseProvider {
     } else {
       authSig = await checkAndSignAuthMessage({
         chain,
+        nonce: this.litNodeClient.latestBlockhash || generateNonce(),
       });
     }
 

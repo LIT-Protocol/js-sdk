@@ -108,6 +108,9 @@ export interface AuthCallbackParams {
   // statement.
   statement?: string;
 
+  // Either the blockhash that the nodes return during the handshake or a randomly generated nonce with lit-siwe's `generateNonce()` function
+  nonce: string;
+
   // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
   resources?: string[];
 
@@ -735,6 +738,7 @@ export interface NodeCommandServerKeysResponse {
   subnetPublicKey: any;
   networkPublicKey: any;
   networkPublicKeySet: any;
+  latestBlockhash?: string;
 }
 
 export interface FormattedMultipleAccs {
@@ -777,6 +781,7 @@ export interface JsonHandshakeResponse {
   networkPubKey: string;
   networkPubKeySet: string;
   hdRootPubkeys: string[];
+  latestBlockhash?: string;
 }
 
 export interface EncryptToIpfsProps {
@@ -1069,6 +1074,7 @@ export interface GetWalletSigProps {
   switchChain?: boolean;
   expiration: string;
   sessionKeyUri: string;
+  nonce: string;
 }
 
 export interface SessionSigningTemplate {

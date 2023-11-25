@@ -36,6 +36,11 @@ export async function main() {
   const tx = await stargateClient.getTx(TX_HASH);
 
   // ==================== Post-Validation ====================
+
+  if (!tx) {
+    return fail('tx should exist');
+  }
+
   if (cosmosWallet.litNodeClientReady !== true) {
     return fail('litNodeClient should be ready');
   }

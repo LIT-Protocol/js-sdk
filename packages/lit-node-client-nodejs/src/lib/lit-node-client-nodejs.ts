@@ -81,7 +81,7 @@ import {
 
 import { computeAddress } from '@ethersproject/transactions';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-import { SiweMessage } from 'lit-siwe';
+import { generateNonce, SiweMessage } from 'lit-siwe';
 
 import { LitCore } from '@lit-protocol/core';
 import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
@@ -313,6 +313,10 @@ export class LitNodeClientNodeJs extends LitCore {
     return LitNodeClientNodeJs.getExpiration();
   };
 
+  getLatestBlockhash = () => {
+    return this.latestBlockhash;
+  };
+
   /**
    *
    * Get the signature from local storage, if not, generates one
@@ -325,6 +329,7 @@ export class LitNodeClientNodeJs extends LitCore {
     switchChain,
     expiration,
     sessionKeyUri,
+    nonce,
   }: GetWalletSigProps): Promise<AuthSig> => {
     let walletSig: AuthSig;
 
@@ -361,6 +366,7 @@ export class LitNodeClientNodeJs extends LitCore {
           ...(switchChain && { switchChain }),
           expiration,
           uri: sessionKeyUri,
+          nonce,
         };
 
         log('callback body:', body);
@@ -387,6 +393,7 @@ export class LitNodeClientNodeJs extends LitCore {
           switchChain,
           expiration,
           uri: sessionKeyUri,
+          nonce,
         });
       }
 
@@ -2149,6 +2156,7 @@ export class LitNodeClientNodeJs extends LitCore {
       chainId: params.chainId ?? 1,
       expirationTime: _expiration,
       resources: params.resources,
+      nonce: this.latestBlockhash || generateNonce(),
     });
 
     let siweMessageStr: string = siweMessage.prepareMessage();
@@ -2330,6 +2338,7 @@ export class LitNodeClientNodeJs extends LitCore {
           params.resourceAbilityRequests.map((r) => r.resource)
         );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
+    let nonce = this.latestBlockhash || generateNonce();
 
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({
@@ -2339,6 +2348,7 @@ export class LitNodeClientNodeJs extends LitCore {
       switchChain: params.switchChain,
       expiration: expiration,
       sessionKeyUri: sessionKeyUri,
+      nonce,
     });
 
     let needToResignSessionKey = await this.checkNeedToResignSessionKey({
@@ -2359,6 +2369,7 @@ export class LitNodeClientNodeJs extends LitCore {
           switchChain: params.switchChain,
           expiration,
           uri: sessionKeyUri,
+          nonce,
         },
       });
     }

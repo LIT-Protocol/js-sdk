@@ -109,6 +109,16 @@ export declare namespace LibStakingStorage {
     timeout: BigNumber;
   };
 
+  export type AddressMappingStruct = {
+    nodeAddress: string;
+    stakerAddress: string;
+  };
+
+  export type AddressMappingStructOutput = [string, string] & {
+    nodeAddress: string;
+    stakerAddress: string;
+  };
+
   export type ValidatorStruct = {
     ip: BigNumberish;
     ipv6: BigNumberish;
@@ -186,6 +196,7 @@ export interface StakingInterface extends utils.Interface {
     'epoch()': FunctionFragment;
     'getKeyTypes()': FunctionFragment;
     'getKickedValidators()': FunctionFragment;
+    'getNodeStakerAddressMappings(address[])': FunctionFragment;
     'getStakingBalancesAddress()': FunctionFragment;
     'getTokenAddress()': FunctionFragment;
     'getValidatorsInCurrentEpoch()': FunctionFragment;
@@ -255,6 +266,7 @@ export interface StakingInterface extends utils.Interface {
       | 'epoch'
       | 'getKeyTypes'
       | 'getKickedValidators'
+      | 'getNodeStakerAddressMappings'
       | 'getStakingBalancesAddress'
       | 'getTokenAddress'
       | 'getValidatorsInCurrentEpoch'
@@ -466,6 +478,10 @@ export interface StakingInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: 'getKickedValidators',
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'getNodeStakerAddressMappings',
+    values: [string[]]
   ): string;
   encodeFunctionData(
     functionFragment: 'getStakingBalancesAddress',
@@ -690,6 +706,10 @@ export interface StakingInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: 'getKickedValidators',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'getNodeStakerAddressMappings',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -1256,6 +1276,11 @@ export interface Staking extends BaseContract {
 
     getKickedValidators(overrides?: CallOverrides): Promise<[string[]]>;
 
+    getNodeStakerAddressMappings(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<[LibStakingStorage.AddressMappingStructOutput[]]>;
+
     getStakingBalancesAddress(overrides?: CallOverrides): Promise<[string]>;
 
     getTokenAddress(overrides?: CallOverrides): Promise<[string]>;
@@ -1549,6 +1574,11 @@ export interface Staking extends BaseContract {
 
   getKickedValidators(overrides?: CallOverrides): Promise<string[]>;
 
+  getNodeStakerAddressMappings(
+    addresses: string[],
+    overrides?: CallOverrides
+  ): Promise<LibStakingStorage.AddressMappingStructOutput[]>;
+
   getStakingBalancesAddress(overrides?: CallOverrides): Promise<string>;
 
   getTokenAddress(overrides?: CallOverrides): Promise<string>;
@@ -1825,6 +1855,11 @@ export interface Staking extends BaseContract {
     getKeyTypes(overrides?: CallOverrides): Promise<BigNumber[]>;
 
     getKickedValidators(overrides?: CallOverrides): Promise<string[]>;
+
+    getNodeStakerAddressMappings(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<LibStakingStorage.AddressMappingStructOutput[]>;
 
     getStakingBalancesAddress(overrides?: CallOverrides): Promise<string>;
 
@@ -2241,6 +2276,11 @@ export interface Staking extends BaseContract {
 
     getKickedValidators(overrides?: CallOverrides): Promise<BigNumber>;
 
+    getNodeStakerAddressMappings(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     getStakingBalancesAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
     getTokenAddress(overrides?: CallOverrides): Promise<BigNumber>;
@@ -2532,6 +2572,11 @@ export interface Staking extends BaseContract {
     getKeyTypes(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getKickedValidators(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getNodeStakerAddressMappings(
+      addresses: string[],
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

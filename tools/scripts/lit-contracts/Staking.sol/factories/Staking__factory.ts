@@ -497,7 +497,7 @@ const _abi = [
         type: 'uint8',
       },
     ],
-    name: 'MustBeInNextValidatorSetLockedOrReadyForNextEpochState',
+    name: 'MustBeInNextValidatorSetLockedOrReadyForNextEpochOrRestoreState',
     type: 'error',
   },
   {
@@ -1658,6 +1658,37 @@ const _abi = [
         internalType: 'address[]',
         name: '',
         type: 'address[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address[]',
+        name: 'addresses',
+        type: 'address[]',
+      },
+    ],
+    name: 'getNodeStakerAddressMappings',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'nodeAddress',
+            type: 'address',
+          },
+          {
+            internalType: 'address',
+            name: 'stakerAddress',
+            type: 'address',
+          },
+        ],
+        internalType: 'struct LibStakingStorage.AddressMapping[]',
+        name: '',
+        type: 'tuple[]',
       },
     ],
     stateMutability: 'view',
