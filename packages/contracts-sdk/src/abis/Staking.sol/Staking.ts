@@ -71,6 +71,9 @@ export declare namespace LibStakingStorage {
     complaintIntervalSecs: BigNumberish;
     keyTypes: BigNumberish[];
     minimumValidatorCount: BigNumberish;
+    maxConcurrentRequests: BigNumberish;
+    maxTripleCount: BigNumberish;
+    minTripleCount: BigNumberish;
   };
 
   export type ConfigStructOutput = [
@@ -78,6 +81,9 @@ export declare namespace LibStakingStorage {
     BigNumber,
     BigNumber,
     BigNumber[],
+    BigNumber,
+    BigNumber,
+    BigNumber,
     BigNumber
   ] & {
     tokenRewardPerTokenPerEpoch: BigNumber;
@@ -85,6 +91,9 @@ export declare namespace LibStakingStorage {
     complaintIntervalSecs: BigNumber;
     keyTypes: BigNumber[];
     minimumValidatorCount: BigNumber;
+    maxConcurrentRequests: BigNumber;
+    maxTripleCount: BigNumber;
+    minTripleCount: BigNumber;
   };
 
   export type EpochStruct = {
@@ -362,6 +371,9 @@ export interface StakingInterface extends utils.Interface {
       BigNumberish,
       BigNumberish,
       BigNumberish[],
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
       BigNumberish
     ]
   ): string;
@@ -858,9 +870,21 @@ export interface ConfigSetEventObject {
   newComplaintIntervalSecs: BigNumber;
   newKeyTypes: BigNumber[];
   newMinimumValidatorCount: BigNumber;
+  newMaxConcurrentRequests: BigNumber;
+  newMaxTripleCount: BigNumber;
+  newMinTripleCount: BigNumber;
 }
 export type ConfigSetEvent = TypedEvent<
-  [BigNumber, BigNumber, BigNumber, BigNumber[], BigNumber],
+  [
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    BigNumber[],
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    BigNumber
+  ],
   ConfigSetEventObject
 >;
 
@@ -1149,6 +1173,9 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
+      newMaxConcurrentRequests: BigNumberish,
+      newMaxTripleCount: BigNumberish,
+      newMinTripleCount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -1447,6 +1474,9 @@ export interface Staking extends BaseContract {
     newComplaintIntervalSecs: BigNumberish,
     newKeyTypes: BigNumberish[],
     newMinimumValidatorCount: BigNumberish,
+    newMaxConcurrentRequests: BigNumberish,
+    newMaxTripleCount: BigNumberish,
+    newMinTripleCount: BigNumberish,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1737,6 +1767,9 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
+      newMaxConcurrentRequests: BigNumberish,
+      newMaxTripleCount: BigNumberish,
+      newMinTripleCount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1963,14 +1996,20 @@ export interface Staking extends BaseContract {
       newComplaintTolerance?: null,
       newComplaintIntervalSecs?: null,
       newKeyTypes?: null,
-      newMinimumValidatorCount?: null
+      newMinimumValidatorCount?: null,
+      newMaxConcurrentRequests?: null,
+      newMaxTripleCount?: null,
+      newMinTripleCount?: null
     ): ConfigSetEventFilter;
     ConfigSet(
       newTokenRewardPerTokenPerEpoch?: null,
       newComplaintTolerance?: null,
       newComplaintIntervalSecs?: null,
       newKeyTypes?: null,
-      newMinimumValidatorCount?: null
+      newMinimumValidatorCount?: null,
+      newMaxConcurrentRequests?: null,
+      newMaxTripleCount?: null,
+      newMinTripleCount?: null
     ): ConfigSetEventFilter;
 
     'EpochEndTimeSet(uint256)'(
@@ -2157,6 +2196,9 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
+      newMaxConcurrentRequests: BigNumberish,
+      newMaxTripleCount: BigNumberish,
+      newMinTripleCount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -2450,6 +2492,9 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
+      newMaxConcurrentRequests: BigNumberish,
+      newMaxTripleCount: BigNumberish,
+      newMinTripleCount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

@@ -21,7 +21,6 @@ import {
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
 import { toString as uint8arrayToString } from 'uint8arrays';
-import { defaultLitnodeClientConfig } from '@lit-protocol/constants';
 
 /**
  * Compresses a given public key.
@@ -101,10 +100,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       ...(prop.bootstrapUrls &&
         prop.litNetwork == 'custom' && { minNodeCount: prop.minNodeCount }),
       debug: this.debug,
-      minNodeCount:
-        prop.bootstrapUrls && prop.litNetwork == 'custom'
-          ? prop.minNodeCount
-          : defaultLitnodeClientConfig.minNodeCount,
+      // minNodeCount:
+      //   prop.bootstrapUrls && prop.litNetwork == 'custom'
+      //     ? prop.minNodeCount
+      //     : defaultLitnodeClientConfig.minNodeCount,
     });
   }
 
@@ -242,9 +241,15 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
-    if (this.controllerAuthSig && this.controllerSessionSigs) {
+    if (
+      [
+        this.controllerAuthSig,
+        this.controllerSessionSigs,
+        this.controllerAuthMethods,
+      ].filter((val, index, arr) => val !== undefined).length > 1
+    ) {
       throw new Error(
-        'controllerAuthSig, controllerSessionSigs are defined, can only use one or the other'
+        'controllerAuthSig, controllerSessionSigs and controllerAuthMethod are defined, can only use one authorization type'
       );
     }
 

@@ -16,10 +16,11 @@ import {
   LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORKS,
-  defaultLitnodeClientConfig,
   version,
   TELEM_API_URL,
   SIGTYPE,
+  LitNetwork,
+  StakingStates,
 } from '@lit-protocol/constants';
 
 import {
@@ -33,7 +34,7 @@ import {
   AuthSig,
   CustomNetwork,
   FormattedMultipleAccs,
-  HandshakeWithSgx,
+  HandshakeWithNodes,
   JsonExecutionRequest,
   JsonHandshakeResponse,
   JsonPkpSignRequest,
@@ -54,7 +55,7 @@ import {
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { INTERNAL_DEFAULT_CONFIG } from '@lit-protocol/constants';
-
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 export class LitCore {
   config: LitNodeClientConfig;
   connectedNodes: SetConstructor | Set<any> | any;
@@ -70,26 +71,42 @@ export class LitCore {
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
     const customConfig = args;
 
-    // -- initialize default config
-    switch (args.litNetwork) {
-      case 'cayenne':
-        this.config = defaultLitnodeClientConfig;
-        break;
-      case 'internalDev':
-        this.config = INTERNAL_DEFAULT_CONFIG as LitNodeClientConfig;
-        break;
-      default:
-        this.config = defaultLitnodeClientConfig;
+    let _defaultConfig = {
+      alertWhenUnauthorized: false,
+      debug: true,
+      connectTimeout: 20000,
+      litNetwork: '', // Default value, should be replaced
+      minNodeCount: 2, // Default value, should be replaced
+      bootstrapUrls: [] // Default value, should be replaced
+    };
+
+    // Initialize default config based on litNetwork
+    if (args && 'litNetwork' in args) {
+      switch (args.litNetwork) {
+        case LitNetwork.Cayenne:
+          this.config = {
+            ..._defaultConfig,
+            litNetwork: LitNetwork.Cayenne,
+          } as LitNodeClientConfig;
+          break;
+        case LitNetwork.InternalDev:
+          this.config = {
+            ..._defaultConfig,
+            litNetwork: LitNetwork.InternalDev,
+          } as LitNodeClientConfig;
+          break;
+        default:
+          this.config = {
+            ..._defaultConfig,
+            ...customConfig,
+          } as LitNodeClientConfig;
+      }
+
+    } else {
+      this.config = { ..._defaultConfig, ...customConfig };
     }
 
-    // -- initialize default auth callback
-    // this.defaultAuthCallback = args?.defaultAuthCallback;
 
-    // -- if config params are specified, replace it
-    if (customConfig) {
-      this.config = { ...this.config, ...customConfig };
-      // this.config = override(this.config, customConfig);
-    }
 
     // -- init default properties
     this.connectedNodes = new Set();
@@ -138,17 +155,91 @@ export class LitCore {
   };
 
   /**
+   * Asynchronously updates the configuration settings for the LitNodeClient.
+   * This function fetches the minimum node count and bootstrap URLs for the
+   * specified Lit network. It validates these values and updates the client's
+   * configuration accordingly. If the network is set to 'InternalDev', it
+   * dynamically updates the bootstrap URLs in the configuration.
    *
-   * Connect to the LIT nodes
-   *
-   * @returns { Promise } A promise that resolves when the nodes are connected.
-   *
+   * @throws Will throw an error if the minimum node count is invalid or if
+   *         the bootstrap URLs array is empty.
+   * @returns {Promise<void>} A promise that resolves when the configuration is updated.
    */
-  connect = (): Promise<any> => {
+  setNewConfig = async (): Promise<void> => {
+    const minNodeCount = await LitContracts.getMinNodeCount(this.config.litNetwork as LitNetwork);
+    const bootstrapUrls = await LitContracts.getValidators(this.config.litNetwork as LitNetwork);
+
+    if (minNodeCount <= 0) {
+      throwError({
+        message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    if (bootstrapUrls.length <= 0) {
+      throwError({
+        message: `bootstrapUrls is empty, which is invalid. Please check your network connection and try again.`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    // -- Update config
+    // TODO TEMPORARY: only dynamically update when it's set to internalDev
+    if (this.config.litNetwork === LitNetwork.InternalDev) {
+      this.config.bootstrapUrls = bootstrapUrls;
+    }
+
+    this.config.minNodeCount = minNodeCount;
+  }
+
+  /**
+   * Sets up a listener to detect state changes (new epochs) in the staking contract.
+   * When a new epoch is detected, it triggers the `setNewConfig` function to update
+   * the client's configuration based on the new state of the network. This ensures
+   * that the client's configuration is always in sync with the current state of the
+   * staking contract.
+   *
+   * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
+   */
+  listenForNewEpoch = async (): Promise<void> => {
+    const stakingContract = await LitContracts.getStakingContract(this.config.litNetwork as LitNetwork);
+
+    stakingContract.on("StateChanged", async (state: StakingStates) => {
+      log(`New state detected: "${state}"`);
+
+      if (state === StakingStates.Active) {
+        await this.setNewConfig();
+      }
+    });
+  };
+
+  /**
+   * Initiates the connection process for the LitNodeClient. This function performs several key steps:
+   * 1. Updates the client's configuration by fetching the latest minimum node count and bootstrap URLs.
+   * 2. Sets up a listener to detect new epochs in the staking contract and update the configuration accordingly.
+   * 3. Performs a handshake with each node in the bootstrap URLs list, storing their public keys.
+   * 4. Waits until a sufficient number of nodes are connected (based on the minimum node count) or until a timeout occurs.
+   * 5. Selects the most common public keys among the connected nodes to mitigate the risk of connecting to malicious nodes.
+   * 6. Marks the client as ready and makes it globally accessible if in a browser environment.
+   * 7. Dispatches a 'lit-ready' event in a browser environment.
+   *
+   * The function returns a promise that resolves when the client is successfully connected to the required number of nodes,
+   * or rejects if the connection process times out or fails to connect to enough nodes.
+   *
+   * @returns {Promise<any>} A promise that resolves when the client is connected and ready, or rejects with an error message if the connection fails.
+   */
+  connect = async (): Promise<any> => {
+
+    await this.setNewConfig();
+    await this.listenForNewEpoch();
+
     // -- handshake with each node
     const requestId = this.getRequestId();
+
     for (const url of this.config.bootstrapUrls) {
-      this.handshakeWithSgx({ url }, requestId)
+      this.handshakeWithNodes({ url }, requestId)
         .then((resp: any) => {
           this.connectedNodes.add(url);
 
@@ -262,15 +353,15 @@ export class LitCore {
 
   /**
    *
-   * Handshake with SGX
+   * Handshake with Nodes
    *
-   * @param { HandshakeWithSgx } params
+   * @param { HandshakeWithNodes } params
    *
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  handshakeWithSgx = async (
-    params: HandshakeWithSgx,
+  handshakeWithNodes = async (
+    params: HandshakeWithNodes,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
     // -- get properties from params
@@ -279,7 +370,7 @@ export class LitCore {
     // -- create url with path
     const urlWithPath = `${url}/web/handshake`;
 
-    log(`handshakeWithSgx ${urlWithPath}`);
+    log(`handshakeWithNodes ${urlWithPath}`);
 
     const data = {
       clientPublicKey: 'test',

@@ -1,6 +1,8 @@
 {
   "name": "contracts-sdk",
-  "implicitDependencies": ["!pkp-ethers"],
+  "implicitDependencies": [
+    "!pkp-ethers"
+  ],
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/contracts-sdk/src",
   "projectType": "library",
@@ -8,17 +10,25 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target contracts-sdk"
+        "commands": [
+          "yarn build:target constants --skip",
+          "yarn build:target contracts-sdk"
+        ],
+        "parallel": false
       }
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/contracts-sdk",
         "main": "packages/contracts-sdk/src/index.ts",
         "tsConfig": "packages/contracts-sdk/tsconfig.lib.json",
-        "assets": ["packages/contracts-sdk/*.md"]
+        "assets": [
+          "packages/contracts-sdk/*.md"
+        ]
       }
     },
     "_buildWeb": {
@@ -26,7 +36,9 @@
       "options": {
         "globalName": "LitJsSdk_contractsSdk",
         "outfile": "dist/packages/contracts-sdk-vanilla/contracts-sdk.js",
-        "entryPoints": ["./packages/contracts-sdk/src/index.ts"],
+        "entryPoints": [
+          "./packages/contracts-sdk/src/index.ts"
+        ],
         "define": {
           "process.env.NODE_DEBUG": "false",
           "global": "window"
@@ -41,14 +53,20 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/contracts-sdk/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/contracts-sdk/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/contracts-sdk"],
+      "outputs": [
+        "coverage/packages/contracts-sdk"
+      ],
       "options": {
         "jestConfig": "packages/contracts-sdk/jest.config.ts",
         "passWithNoTests": true
@@ -56,7 +74,9 @@
     },
     "testWatch": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/contracts-sdk"],
+      "outputs": [
+        "coverage/packages/contracts-sdk"
+      ],
       "options": {
         "jestConfig": "packages/contracts-sdk/jest.config.ts",
         "passWithNoTests": true,
