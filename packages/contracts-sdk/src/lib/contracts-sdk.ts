@@ -104,7 +104,7 @@ export class LitContracts {
   debug: boolean = false;
 
   // ----- autogen:declares:start  -----
-// Generated at 2023-11-07T01:50:52.460Z
+  // Generated at 2023-11-07T01:50:52.460Z
   allowlistContract: {
     read: allowlistContract.Allowlist;
     write: allowlistContract.Allowlist;
@@ -126,15 +126,15 @@ export class LitContracts {
   };
 
   pkpNftContract: {
-    read: pkpNftContract.PKPNFT,
-    write: pkpNftContract.PKPNFT,
-  }
-            
+    read: pkpNftContract.PKPNFT;
+    write: pkpNftContract.PKPNFT;
+  };
+
   pkpNftMetadataContract: {
-    read: pkpNftMetadataContract.PKPNFTMetadata,
-    write: pkpNftMetadataContract.PKPNFTMetadata,
-  }
-            
+    read: pkpNftMetadataContract.PKPNFTMetadata;
+    write: pkpNftMetadataContract.PKPNFTMetadata;
+  };
+
   pkpPermissionsContract: {
     read: pkpPermissionsContract.PKPPermissions;
     write: pkpPermissionsContract.PKPPermissions;
@@ -151,16 +151,16 @@ export class LitContracts {
   };
 
   stakingContract: {
-    read: stakingContract.Staking,
-    write: stakingContract.Staking,
-  }
-            
+    read: stakingContract.Staking;
+    write: stakingContract.Staking;
+  };
+
   stakingBalancesContract: {
-    read: stakingBalancesContract.StakingBalances,
-    write: stakingBalancesContract.StakingBalances,
-  }
-            
-// ----- autogen:declares:end  -----
+    read: stakingBalancesContract.StakingBalances;
+    write: stakingBalancesContract.StakingBalances;
+  };
+
+  // ----- autogen:declares:end  -----
 
   // make the constructor args optional
   constructor(args?: {
@@ -195,19 +195,19 @@ export class LitContracts {
     }
 
     // ----- autogen:blank-init:start  -----
-// Generated at 2023-11-07T01:50:52.460Z
-    this.allowlistContract = {} as any
-    this.litTokenContract = {} as any
-    this.multisenderContract = {} as any
-    this.pkpHelperContract = {} as any
-    this.pkpNftContract = {} as any
-    this.pkpNftMetadataContract = {} as any
-    this.pkpPermissionsContract = {} as any
-    this.pubkeyRouterContract = {} as any
-    this.rateLimitNftContract = {} as any
-    this.stakingContract = {} as any
-    this.stakingBalancesContract = {} as any
-// ----- autogen:blank-init:end  -----
+    // Generated at 2023-11-07T01:50:52.460Z
+    this.allowlistContract = {} as any;
+    this.litTokenContract = {} as any;
+    this.multisenderContract = {} as any;
+    this.pkpHelperContract = {} as any;
+    this.pkpNftContract = {} as any;
+    this.pkpNftMetadataContract = {} as any;
+    this.pkpPermissionsContract = {} as any;
+    this.pubkeyRouterContract = {} as any;
+    this.rateLimitNftContract = {} as any;
+    this.stakingContract = {} as any;
+    this.stakingBalancesContract = {} as any;
+    // ----- autogen:blank-init:end  -----
   }
 
   /**
@@ -376,7 +376,7 @@ export class LitContracts {
     }
 
     // ----- autogen:init:start  -----
-// Generated at 2023-11-07T01:50:52.460Z
+    // Generated at 2023-11-07T01:50:52.460Z
 
     this.allowlistContract = {
       read: new ethers.Contract(
@@ -445,20 +445,20 @@ export class LitContracts {
       ) as unknown as pkpNftContract.PKPNFT & pkpNftContract.PKPNFT,
     };
 
-
     this.pkpNftMetadataContract = {
-        read: (new ethers.Contract(
-            PKPNFTMetadataData.address,
-            PKPNFTMetadataData.abi as any,
-            this.provider
-        ) as unknown as pkpNftMetadataContract.PKPNFTMetadata & pkpNftMetadataContract.PKPNFTMetadata),
-        write: (new ethers.Contract(
-            PKPNFTMetadataData.address,
-            PKPNFTMetadataData.abi as any,
-            this.signer
-        ) as unknown as pkpNftMetadataContract.PKPNFTMetadata & pkpNftMetadataContract.PKPNFTMetadata)
+      read: new ethers.Contract(
+        PKPNFTMetadataData.address,
+        PKPNFTMetadataData.abi as any,
+        this.provider
+      ) as unknown as pkpNftMetadataContract.PKPNFTMetadata &
+        pkpNftMetadataContract.PKPNFTMetadata,
+      write: new ethers.Contract(
+        PKPNFTMetadataData.address,
+        PKPNFTMetadataData.abi as any,
+        this.signer
+      ) as unknown as pkpNftMetadataContract.PKPNFTMetadata &
+        pkpNftMetadataContract.PKPNFTMetadata,
     };
-
 
     this.pkpPermissionsContract = {
       read: new ethers.Contract(
@@ -518,20 +518,21 @@ export class LitContracts {
       ) as unknown as stakingContract.Staking & stakingContract.Staking,
     };
 
-
     this.stakingBalancesContract = {
-        read: (new ethers.Contract(
-            StakingBalancesData.address,
-            StakingBalancesData.abi as any,
-            this.provider
-        ) as unknown as stakingBalancesContract.StakingBalances & stakingBalancesContract.StakingBalances),
-        write: (new ethers.Contract(
-            StakingBalancesData.address,
-            StakingBalancesData.abi as any,
-            this.signer
-        ) as unknown as stakingBalancesContract.StakingBalances & stakingBalancesContract.StakingBalances)
+      read: new ethers.Contract(
+        StakingBalancesData.address,
+        StakingBalancesData.abi as any,
+        this.provider
+      ) as unknown as stakingBalancesContract.StakingBalances &
+        stakingBalancesContract.StakingBalances,
+      write: new ethers.Contract(
+        StakingBalancesData.address,
+        StakingBalancesData.abi as any,
+        this.signer
+      ) as unknown as stakingBalancesContract.StakingBalances &
+        stakingBalancesContract.StakingBalances,
     };
-// ----- autogen:init:end  -----
+    // ----- autogen:init:end  -----
 
     this.connected = true;
   };

@@ -6,7 +6,7 @@ const client = new LitNodeClient({
   litNetwork: LITCONFIG.TEST_ENV.litNetwork,
   debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
   minNodeCount: LITCONFIG.TEST_ENV.minNodeCount,
-  checkNodeAttestation: false
+  checkNodeAttestation: false,
 });
 await client.connect();
 

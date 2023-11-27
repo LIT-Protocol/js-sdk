@@ -672,7 +672,7 @@ export const testThese = async (tests) => {
 
       // calculate the time it takes to run the test
       const start = Date.now();
-      
+
       const { status, message } = await t.fn();
 
       const end = Date.now();

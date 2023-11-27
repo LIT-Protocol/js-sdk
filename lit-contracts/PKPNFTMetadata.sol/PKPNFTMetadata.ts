@@ -12,195 +12,195 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from "ethers";
+} from 'ethers';
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+} from '@ethersproject/abi';
+import type { Listener, Provider } from '@ethersproject/providers';
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from "./common";
+} from './common';
 
 export interface PKPNFTMetadataInterface extends utils.Interface {
   functions: {
-    "ADMIN_ROLE()": FunctionFragment;
-    "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "WRITER_ROLE()": FunctionFragment;
-    "bytesToHex(bytes)": FunctionFragment;
-    "contractResolver()": FunctionFragment;
-    "env()": FunctionFragment;
-    "getRoleAdmin(bytes32)": FunctionFragment;
-    "grantRole(bytes32,address)": FunctionFragment;
-    "hasRole(bytes32,address)": FunctionFragment;
-    "removeProfileForPkp(uint256)": FunctionFragment;
-    "removeUrlForPKP(uint256)": FunctionFragment;
-    "renounceRole(bytes32,address)": FunctionFragment;
-    "revokeRole(bytes32,address)": FunctionFragment;
-    "setPKPHelperWriterAddress(address)": FunctionFragment;
-    "setProfileForPKP(uint256,string)": FunctionFragment;
-    "setUrlForPKP(uint256,string)": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "tokenURI(uint256,bytes,address)": FunctionFragment;
+    'ADMIN_ROLE()': FunctionFragment;
+    'DEFAULT_ADMIN_ROLE()': FunctionFragment;
+    'WRITER_ROLE()': FunctionFragment;
+    'bytesToHex(bytes)': FunctionFragment;
+    'contractResolver()': FunctionFragment;
+    'env()': FunctionFragment;
+    'getRoleAdmin(bytes32)': FunctionFragment;
+    'grantRole(bytes32,address)': FunctionFragment;
+    'hasRole(bytes32,address)': FunctionFragment;
+    'removeProfileForPkp(uint256)': FunctionFragment;
+    'removeUrlForPKP(uint256)': FunctionFragment;
+    'renounceRole(bytes32,address)': FunctionFragment;
+    'revokeRole(bytes32,address)': FunctionFragment;
+    'setPKPHelperWriterAddress(address)': FunctionFragment;
+    'setProfileForPKP(uint256,string)': FunctionFragment;
+    'setUrlForPKP(uint256,string)': FunctionFragment;
+    'supportsInterface(bytes4)': FunctionFragment;
+    'tokenURI(uint256,bytes,address)': FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "ADMIN_ROLE"
-      | "DEFAULT_ADMIN_ROLE"
-      | "WRITER_ROLE"
-      | "bytesToHex"
-      | "contractResolver"
-      | "env"
-      | "getRoleAdmin"
-      | "grantRole"
-      | "hasRole"
-      | "removeProfileForPkp"
-      | "removeUrlForPKP"
-      | "renounceRole"
-      | "revokeRole"
-      | "setPKPHelperWriterAddress"
-      | "setProfileForPKP"
-      | "setUrlForPKP"
-      | "supportsInterface"
-      | "tokenURI"
+      | 'ADMIN_ROLE'
+      | 'DEFAULT_ADMIN_ROLE'
+      | 'WRITER_ROLE'
+      | 'bytesToHex'
+      | 'contractResolver'
+      | 'env'
+      | 'getRoleAdmin'
+      | 'grantRole'
+      | 'hasRole'
+      | 'removeProfileForPkp'
+      | 'removeUrlForPKP'
+      | 'renounceRole'
+      | 'revokeRole'
+      | 'setPKPHelperWriterAddress'
+      | 'setProfileForPKP'
+      | 'setUrlForPKP'
+      | 'supportsInterface'
+      | 'tokenURI'
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "ADMIN_ROLE",
+    functionFragment: 'ADMIN_ROLE',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
+    functionFragment: 'DEFAULT_ADMIN_ROLE',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "WRITER_ROLE",
+    functionFragment: 'WRITER_ROLE',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "bytesToHex",
+    functionFragment: 'bytesToHex',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "contractResolver",
+    functionFragment: 'contractResolver',
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "env", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'env', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getRoleAdmin",
+    functionFragment: 'getRoleAdmin',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "grantRole",
+    functionFragment: 'grantRole',
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "hasRole",
+    functionFragment: 'hasRole',
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "removeProfileForPkp",
+    functionFragment: 'removeProfileForPkp',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "removeUrlForPKP",
+    functionFragment: 'removeUrlForPKP',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "renounceRole",
+    functionFragment: 'renounceRole',
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "revokeRole",
+    functionFragment: 'revokeRole',
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setPKPHelperWriterAddress",
+    functionFragment: 'setPKPHelperWriterAddress',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setProfileForPKP",
+    functionFragment: 'setProfileForPKP',
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setUrlForPKP",
+    functionFragment: 'setUrlForPKP',
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "supportsInterface",
+    functionFragment: 'supportsInterface',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "tokenURI",
+    functionFragment: 'tokenURI',
     values: [BigNumberish, BytesLike, string]
   ): string;
 
-  decodeFunctionResult(functionFragment: "ADMIN_ROLE", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'ADMIN_ROLE', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "DEFAULT_ADMIN_ROLE",
+    functionFragment: 'DEFAULT_ADMIN_ROLE',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "WRITER_ROLE",
+    functionFragment: 'WRITER_ROLE',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "bytesToHex", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'bytesToHex', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "contractResolver",
+    functionFragment: 'contractResolver',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "env", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'env', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "getRoleAdmin",
+    functionFragment: 'getRoleAdmin',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'grantRole', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'hasRole', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "removeProfileForPkp",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "removeUrlForPKP",
+    functionFragment: 'removeProfileForPkp',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "renounceRole",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "setPKPHelperWriterAddress",
+    functionFragment: 'removeUrlForPKP',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setProfileForPKP",
+    functionFragment: 'renounceRole',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'revokeRole', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'setPKPHelperWriterAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setUrlForPKP",
+    functionFragment: 'setProfileForPKP',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "supportsInterface",
+    functionFragment: 'setUrlForPKP',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "tokenURI", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'supportsInterface',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'tokenURI', data: BytesLike): Result;
 
   events: {
-    "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
-    "RoleGranted(bytes32,address,address)": EventFragment;
-    "RoleRevoked(bytes32,address,address)": EventFragment;
+    'RoleAdminChanged(bytes32,bytes32,bytes32)': EventFragment;
+    'RoleGranted(bytes32,address,address)': EventFragment;
+    'RoleRevoked(bytes32,address,address)': EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RoleAdminChanged'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RoleGranted'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RoleRevoked'): EventFragment;
 }
 
 export interface RoleAdminChangedEventObject {
@@ -502,7 +502,7 @@ export interface PKPNFTMetadata extends BaseContract {
   };
 
   filters: {
-    "RoleAdminChanged(bytes32,bytes32,bytes32)"(
+    'RoleAdminChanged(bytes32,bytes32,bytes32)'(
       role?: BytesLike | null,
       previousAdminRole?: BytesLike | null,
       newAdminRole?: BytesLike | null
@@ -513,7 +513,7 @@ export interface PKPNFTMetadata extends BaseContract {
       newAdminRole?: BytesLike | null
     ): RoleAdminChangedEventFilter;
 
-    "RoleGranted(bytes32,address,address)"(
+    'RoleGranted(bytes32,address,address)'(
       role?: BytesLike | null,
       account?: string | null,
       sender?: string | null
@@ -524,7 +524,7 @@ export interface PKPNFTMetadata extends BaseContract {
       sender?: string | null
     ): RoleGrantedEventFilter;
 
-    "RoleRevoked(bytes32,address,address)"(
+    'RoleRevoked(bytes32,address,address)'(
       role?: BytesLike | null,
       account?: string | null,
       sender?: string | null
