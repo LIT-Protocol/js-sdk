@@ -1251,9 +1251,9 @@ async function versionFunc() {
   // get the last one
   let currentVersion;
 
-  if(!TAG){
+  if (!TAG) {
     currentVersion = Object.keys(res.time).pop();
-  }else{
+  } else {
     currentVersion = res['dist-tags'][TAG];
   }
 

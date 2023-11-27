@@ -9,6 +9,8 @@ import {
 
 import { getPKPNFTContract } from './lit-contracts/PKPNFT.sol/index.mjs';
 import { PKPSuiWallet } from '@lit-protocol/pkp-sui';
+import { LitAbility, LitActionResource } from '@lit-protocol/auth-helpers';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 // ----- Default values
 const defaultPrivateKey =
@@ -79,9 +81,6 @@ async function getNewPKP(privateKey) {
   const CONTROLLER_ADDRESS = wallet.address;
   console.log('✅ CONTROLLER_ADDRESS:', CONTROLLER_ADDRESS);
 
-  const CONTROLLER_AUTHSIG = await signAuthMessage(PKEY);
-  console.log('✅ CONTROLLER_AUTHSIG:', CONTROLLER_AUTHSIG);
-
   // -- mint a PKP
   const PKPNFTContract = getPKPNFTContract(wallet);
 
@@ -98,40 +97,124 @@ async function getNewPKP(privateKey) {
   } catch (e) {
     console.log(e);
   }
-
-  // console.log("PKPMintTx:", PKPMintTx);
-  let PKP_TOKENID = PKPMintTx.events[0].topics[1];
-
-  PKP_TOKENID = BigInt(PKP_TOKENID).toString();
-
+  // ======================================================================
+  // =                              PKP INFO                              =
+  // ======================================================================
+  // -- token id
+  let PKP_TOKENID = BigInt(PKPMintTx.events[0].topics[1]).toString();
   console.log('✅ PKP_TOKENID:', PKP_TOKENID);
 
+  // -- public key
   let PKP_PUBKEY = await PKPNFTContract.getPubkey(PKP_TOKENID);
-
   console.log('✅ PKP_PUBKEY:', PKP_PUBKEY);
 
-  const PKP_ETH_ADDRESS = ethers.utils.computeAddress(PKP_PUBKEY);
-
+  // -- public key in buffer form
   const pubKeyBuffer = getPubKeyBuffer(PKP_PUBKEY);
 
+  // -- eth address
+  const PKP_ETH_ADDRESS = ethers.utils.computeAddress(PKP_PUBKEY);
+  console.log('✅ PKP_ETH_ADDRESS:', PKP_ETH_ADDRESS);
+
+  // -- cosmos address
   const PKP_COSMOS_ADDRESS = getCosmosAddress(pubKeyBuffer);
   console.log('✅ PKP_COSMOS_ADDRESS:', PKP_COSMOS_ADDRESS);
 
+  // -- sui address
   const suiWallet = new PKPSuiWallet({
     pkpPubKey: PKP_PUBKEY,
   });
 
   const PKP_SUI_ADDRESS = await suiWallet.getAddress();
-
   console.log('✅ PKP_SUI_ADDRESS:', PKP_SUI_ADDRESS);
 
   if (PKP_PUBKEY.startsWith('0x')) {
     PKP_PUBKEY = PKP_PUBKEY.slice(2);
   }
 
+  // ======================================================================================
+  // =                              Authenticated signatures                              =
+  // ======================================================================================
+
+  // (option 1) -- auth sig
+  const CONTROLLER_AUTHSIG = await signAuthMessage(PKEY);
+  console.log('✅ CONTROLLER_AUTHSIG:', CONTROLLER_AUTHSIG);
+
+  // -- (option 2) -- session sigs using eth wallet
+  // const litNodeClient = new LitNodeClient({
+  //   network: 'cayenne',
+  // });
+  // await litNodeClient.connect();
+
+  // const litAuthClient = new LitAuthClient({
+  //   litRelayConfig: {
+  //     relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
+  //   },
+  //   version: 'V3',
+  //   litNodeClient,
+  // });
+
+  // // -- getting auth method
+  // const authProvider = litAuthClient.initProvider('ethwallet'); // in typescript, use "ProviderType.EthWallet"
+  // const authMethod = {
+  //   authMethodType: 1, // in typescript, use "AuthMethodType.EthWallet"
+  //   accessToken: JSON.stringify(CONTROLLER_AUTHSIG),
+  // };
+
+  // // -- fetch pkp through the relayer
+  // let pkps = await authProvider.fetchPKPsThroughRelayer(authMethod);
+
+  // // -- use the first pkp found. If not found, mint a new one then use it
+  // if (pkps.length <= 0) {
+  //   try {
+  //     await authProvider.mintPKPThroughRelayer(authMethod);
+  //   } catch (e) {
+  //     return fail('Failed to mint PKP');
+  //   }
+  //   pkps = await authProvider.fetchPKPsThroughRelayer(authMethod);
+  // }
+
+  // const pkp = pkps[pkps.length - 1];
+
+  // // convert BigNumber to string
+  // pkp.tokenId = ethers.BigNumber.from(pkp.tokenId).toString();
+
+  // const sessionKeyPair = litNodeClient.getSessionKey();
+
+  // const authNeededCallback = async (params) => {
+  //   const response = await litNodeClient.signSessionKey({
+  //     sessionKey: sessionKeyPair,
+  //     statement: params.statement,
+  //     authSig: JSON.parse(authMethod.accessToken), // When this is empty or undefined, it will fail
+  //     authMethods: [authMethod],
+  //     pkpPublicKey: pkp.publicKey,
+  //     expiration: params.expiration,
+  //     resources: params.resources,
+  //     chainId: 1,
+  //   });
+  //   return response.authSig;
+  // };
+
+  // const resourceAbilities = [
+  //   {
+  //     resource: new LitActionResource('*'),
+  //     ability: LitAbility.PKPSigning,
+  //   },
+  // ];
+
+  // const CONTROLLER_SESSIONSIGS = await litNodeClient.getSessionSigs({
+  //   chain: 'ethereum',
+  //   expiration: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
+  //   resourceAbilityRequests: resourceAbilities,
+  //   sessionKey: sessionKeyPair,
+  //   authNeededCallback,
+  // });
+
+  // console.log('✅ CONTROLLER_SESSIONSIGS:', CONTROLLER_SESSIONSIGS);
+
   return {
     CONTROLLER_ADDRESS,
     CONTROLLER_AUTHSIG,
+    // CONTROLLER_SESSIONSIGS,
     PKP_TOKENID,
     PKP_PUBKEY,
     PKP_ETH_ADDRESS,

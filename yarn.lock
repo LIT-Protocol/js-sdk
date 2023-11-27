@@ -20,6 +20,27 @@
   resolved "https://registry.npmjs.org/@assemblyscript/loader/-/loader-0.9.4.tgz#a483c54c1253656bb33babd464e3154a173e1577"
   integrity sha512-HazVq9zwTVwGmqdwYzu7WyQ6FQVZ7SwET0KKQuKm55jD0IfUpZgN0OPIiZG3zV1iSrVYcN0bdwLRXI/VNCYsUA==
 
+"@async-generators/from-emitter@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@async-generators/from-emitter/-/from-emitter-0.3.0.tgz#3496bf2a25f40ddbf2bcf5873ae3ceb3f4aa2dc4"
+  integrity sha512-9ne/GfJfbw77wuA08WtuNIvMhpDwAEPT/GX/Dn33y/Bu1zKqO0bOWmcWTpLiHrO2vedEbW0GihfkG7EINEghsA==
+  dependencies:
+    "@async-generators/subject" "^0.4"
+    "@async-generators/terminator" "^0.4"
+
+"@async-generators/subject@^0.4":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@async-generators/subject/-/subject-0.4.0.tgz#ca411ae5e07f800c886ad51b67dc8ed710c27d00"
+  integrity sha512-ydMe58ouMupnJlvBq6SaG6ranw1uX6rcAfAVE37oNJLen9RJ1+sY6yju8xp6en8RwWn3gBtAx03ot1Ycr3U0QQ==
+  dependencies:
+    "@async-generators/terminator" "^0.4.0"
+    events "^1.1.1"
+
+"@async-generators/terminator@^0.4", "@async-generators/terminator@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@async-generators/terminator/-/terminator-0.4.0.tgz#a2aa109337fdea375905b8df8596376ab237bbc0"
+  integrity sha512-Kj08FqHgdx4QZ1mwJrlN3L2MWNNWHHWSQezfClxMUvGU1pYjoRa/4Yev1U/2Y71aqDDXEYC7pr13HNv7Un7Kog==
+
 "@babel/code-frame@7.12.11":
   version "7.12.11"
   resolved "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.12.11.tgz#f4ad435aa263db935b8f10f2c552d23fb716a63f"
@@ -4475,6 +4496,11 @@
     strict-event-emitter-types "^2.0.0"
     ws "^7.0.0"
 
+"@openzeppelin/contracts@4.8.3":
+  version "4.8.3"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.8.3.tgz#cbef3146bfc570849405f59cba18235da95a252a"
+  integrity sha512-bQHV8R9Me8IaJoJ2vPG4rXcL7seB7YVuskr4f+f5RyOStSZetwzkWtoqDMl5erkBJy0lDRUnIR2WIkPiC0GJlg==
+
 "@parcel/watcher@2.0.4":
   version "2.0.4"
   resolved "https://registry.npmjs.org/@parcel/watcher/-/watcher-2.0.4.tgz#f300fef4cc38008ff4b8c29d92588eced3ce014b"
@@ -5304,6 +5330,28 @@
   integrity sha512-+PmQX0PiAYPMeVYe237LJAYvOMYW1j2rH5YROyS3b4CTVJum34HfRvKvAzozHAQG0TnHNdUfY9nCeUyRAs//cw==
   dependencies:
     defer-to-connect "^2.0.1"
+
+"@tableland/evm@^4.3.0":
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/@tableland/evm/-/evm-4.4.0.tgz#c4f2513ffe80e20fb5e5b8919f05395a034adbbd"
+  integrity sha512-iSVwqr2/6ohbKavY+X0u3ysmuGCyzCz5D4IacK6vdXAqv+wIc4wR1hRBFgZs01hY5MTADxdnon1V3LQmdxAVgQ==
+  dependencies:
+    "@openzeppelin/contracts" "4.8.3"
+
+"@tableland/sdk@^4.5.3":
+  version "4.5.3"
+  resolved "https://registry.yarnpkg.com/@tableland/sdk/-/sdk-4.5.3.tgz#9bde627fdc0c390682c810cb87baa784b68ed724"
+  integrity sha512-2uJexQovp/uPEYArVgTTBAlLNHR7vkxs9u2Jzn685xpo8bS9awS91qpHZxKeHNZj+voLqDmihlSpKa209jFSew==
+  dependencies:
+    "@async-generators/from-emitter" "^0.3.0"
+    "@tableland/evm" "^4.3.0"
+    "@tableland/sqlparser" "^1.3.0"
+    ethers "^5.7.2"
+
+"@tableland/sqlparser@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@tableland/sqlparser/-/sqlparser-1.3.0.tgz#1b55a8d4307dad18ec44b31cbcbb16c5d2165f52"
+  integrity sha512-5DddKKbxa3q1DcUBcf+D9bF0xYjoqWYRs8t941vZWDMRQjuHNPW7JjRA0W8zH+LDeKYqWmyJFsm1se8RxTcJPA==
 
 "@testing-library/cypress@^8.0.2", "@testing-library/cypress@^8.0.3":
   version "8.0.7"
@@ -12985,7 +13033,7 @@ ethers@^4.0.32, ethers@^4.0.45, ethers@^4.0.47:
     uuid "2.0.1"
     xmlhttprequest "1.8.0"
 
-ethers@^5.0.13, ethers@^5.1.4, ethers@^5.7.1, "ethersv5@npm:ethers@^5.0.32":
+ethers@^5.0.13, ethers@^5.1.4, ethers@^5.7.1, ethers@^5.7.2, "ethersv5@npm:ethers@^5.0.32":
   version "5.7.2"
   resolved "https://registry.npmjs.org/ethers/-/ethers-5.7.2.tgz#3a7deeabbb8c030d4126b24f84e525466145872e"
   integrity sha512-wswUsmWo1aOK8rR7DIKiWSw9DbLWe6x98Jrn8wcTflTVvaXhAMaB5zGAXy0GYQEQp9iO1iSHWVyARQm11zUtyg==
@@ -13078,6 +13126,11 @@ eventemitter3@4.0.7, eventemitter3@^4.0.0, eventemitter3@^4.0.4:
   version "4.0.7"
   resolved "https://registry.npmjs.org/eventemitter3/-/eventemitter3-4.0.7.tgz#2de9b68f6528d5644ef5c59526a1b4a07306169f"
   integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
+
+events@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/events/-/events-1.1.1.tgz#9ebdb7635ad099c70dcc4c2a1f5004288e8bd924"
+  integrity sha512-kEcvvCBByWXGnZy6JUlgAp2gBIUjfCAV6P6TgT1/aaQKcmuAEC4OZTV1I4EWQLz2gxZw76atuVyvHhTxvi0Flw==
 
 events@^3.0.0, events@^3.1.0, events@^3.2.0, events@^3.3.0:
   version "3.3.0"

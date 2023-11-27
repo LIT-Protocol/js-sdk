@@ -89,6 +89,7 @@ interface signAndSaveAuthParams {
   resources: any;
   expiration: string;
   uri?: string;
+  nonce: string;
 }
 
 interface IABI {
@@ -466,6 +467,7 @@ export const checkAndSignEVMAuthMessage = async ({
   expiration,
   uri,
   walletConnectProjectId,
+  nonce,
 }: AuthCallbackParams): Promise<AuthSig> => {
   // -- check if it's nodejs
   if (isNode()) {
@@ -601,6 +603,7 @@ export const checkAndSignEVMAuthMessage = async ({
         resources,
         expiration: expirationString,
         uri,
+        nonce,
       });
     } catch (e: any) {
       log(e);
@@ -634,6 +637,7 @@ export const checkAndSignEVMAuthMessage = async ({
       resources,
       expiration: expirationString,
       uri,
+      nonce,
     });
     log('7. authSig:', authSig);
 
@@ -649,6 +653,7 @@ export const checkAndSignEVMAuthMessage = async ({
         resources,
         expiration: expirationString,
         uri,
+        nonce,
       });
     }
     log('8. mustResign:', mustResign);
@@ -666,6 +671,7 @@ export const checkAndSignEVMAuthMessage = async ({
       resources,
       expiration: expirationString,
       uri,
+      nonce,
     });
   }
 
@@ -683,6 +689,7 @@ const _signAndGetAuth = async ({
   resources,
   expiration,
   uri,
+  nonce,
 }: signAndSaveAuthParams): Promise<AuthSig> => {
   await signAndSaveAuthMessage({
     web3,
@@ -691,6 +698,7 @@ const _signAndGetAuth = async ({
     resources,
     expiration,
     uri,
+    nonce,
   });
 
   let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
@@ -716,7 +724,7 @@ const _signAndGetAuth = async ({
  * Sign the auth message with the user's wallet, and store it in localStorage.
  * Called by checkAndSignAuthMessage if the user does not have a signature stored.
  *
- * @param { signAndSaveAuthParams }}
+ * @param { signAndSaveAuthParams }
  * @returns { AuthSig }
  */
 export const signAndSaveAuthMessage = async ({
@@ -726,6 +734,7 @@ export const signAndSaveAuthMessage = async ({
   resources,
   expiration,
   uri,
+  nonce,
 }: signAndSaveAuthParams): Promise<AuthSig> => {
   // check if it's nodejs
   if (isNode()) {
@@ -745,6 +754,7 @@ export const signAndSaveAuthMessage = async ({
     version: '1',
     chainId,
     expirationTime: expiration,
+    nonce,
   };
 
   if (resources && resources.length > 0) {

@@ -242,18 +242,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
-    if (
-       [
-         this.controllerAuthSig,
-         this.controllerSessionSigs,
-         this.controllerAuthMethods,
-       ].filter((val, index, arr) => val !== undefined).length > 1
-     ) {
-       throw new Error(
-         'controllerAuthSig, controllerSessionSigs and controllerAuthMethod are defined, can only use one authorization type'
-       );
-     }
-    
+    if (this.controllerAuthSig && this.controllerSessionSigs) {
+      throw new Error(
+        'controllerAuthSig, controllerSessionSigs are defined, can only use one or the other'
+      );
+    }
+
     // If session sigs are provided, they must be an object
     if (
       this.controllerSessionSigs &&
@@ -267,6 +261,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
       sessionSigs: this.controllerSessionSigs,
       authSig: this.controllerAuthSig,
+      authMethods: this.controllerAuthMethods,
       jsParams: {
         ...{
           toSign,
@@ -344,13 +339,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
-    if (
-      [
-        this.controllerAuthSig,
-        this.controllerSessionSigs,
-        this.controllerAuthMethods,
-      ].filter((val, index, arr) => val !== undefined).length > 1
-    ) {
+    if (this.controllerAuthSig && this.controllerSessionSigs) {
       throw new Error(
         'controllerAuthSig, controllerSessionSigs and controllerAuthMethod are defined, can only use one authorization type'
       );

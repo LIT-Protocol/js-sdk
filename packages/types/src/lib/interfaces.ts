@@ -1,3 +1,4 @@
+import { Provider } from '@ethersproject/abstract-provider';
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 import {
@@ -106,6 +107,9 @@ export interface AuthCallbackParams {
   // is for signing a SIWE message, you MUST add this statement to the end of the SIWE
   // statement.
   statement?: string;
+
+  // Either the blockhash that the nodes return during the handshake or a randomly generated nonce with lit-siwe's `generateNonce()` function
+  nonce: string;
 
   // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
   resources?: string[];
@@ -294,7 +298,6 @@ export interface BaseJsonPkpSignRequest {
   pubKey: string;
 }
 
-
 export interface WithAuthMethodSigning extends BaseJsonPkpSignRequest {
   // auth methods to resolve
   authMethods: Array<AuthMethod>;
@@ -313,7 +316,10 @@ export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
   authMethods?: Array<AuthMethod>;
 }
 
-export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning | WithAuthMethodSigning;
+export type JsonPkpSignRequest =
+  | WithSessionSigsSigning
+  | WithAuthSigSigning
+  | WithAuthMethodSigning;
 
 /**
  * Struct in rust
@@ -556,7 +562,7 @@ export interface ExecuteJsResponse {
   decryptions: any[];
   response: string;
   logs: string;
-  claims?: Record<string, { signatures: Signature[], derivedKeyId: string }>;
+  claims?: Record<string, { signatures: Signature[]; derivedKeyId: string }>;
   debug?: {
     allNodeResponses: NodeResponse[];
     allNodeLogs: NodeLog[];
@@ -564,7 +570,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise { }
+export interface LitNodePromise {}
 
 export interface SendNodeCommand {
   url: string;
@@ -732,6 +738,7 @@ export interface NodeCommandServerKeysResponse {
   subnetPublicKey: any;
   networkPublicKey: any;
   networkPublicKeySet: any;
+  latestBlockhash?: string;
 }
 
 export interface FormattedMultipleAccs {
@@ -774,6 +781,7 @@ export interface JsonHandshakeResponse {
   networkPubKey: string;
   networkPubKeySet: string;
   hdRootPubkeys: string[];
+  latestBlockhash?: string;
 }
 
 export interface EncryptToIpfsProps {
@@ -1066,6 +1074,7 @@ export interface GetWalletSigProps {
   switchChain?: boolean;
   expiration: string;
   sessionKeyUri: string;
+  nonce: string;
 }
 
 export interface SessionSigningTemplate {
@@ -1112,6 +1121,7 @@ export interface PKPBaseProp {
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
+  provider?: Provider;
 }
 
 export interface RPCUrls {
@@ -1120,7 +1130,7 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export interface PKPEthersWalletProp extends PKPBaseProp { }
+export interface PKPEthersWalletProp extends PKPBaseProp {}
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
@@ -1251,6 +1261,16 @@ export interface LitRelayConfig {
    * API key for Lit's relay server
    */
   relayApiKey?: string;
+}
+
+export interface MintRequestBody {
+  keyType?: number;
+  permittedAuthMethodTypes?: number[];
+  permittedAuthMethodIds?: string[];
+  permittedAuthMethodPubkeys?: string[];
+  permittedAuthMethodScopes?: any[][]; // ethers.BigNumber;
+  addPkpEthAddressAsPermittedAddress?: boolean;
+  sendPkpToItself?: boolean;
 }
 
 export interface IRelayRequestData {
@@ -1481,7 +1501,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions { }
+export interface BaseAuthenticateOptions {}
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**

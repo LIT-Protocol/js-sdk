@@ -43,7 +43,7 @@ state.encryptResponse = await LitJsSdk_encryption.zipAndEncryptFiles(
     authSig: state.authSig,
     chain: state.chain,
   },
-  state.litNodeClient,
+  state.litNodeClient
 );
 
 state.decryptedFiles = await LitJsSdk_encryption.decryptToZip(
@@ -52,9 +52,9 @@ state.decryptedFiles = await LitJsSdk_encryption.decryptToZip(
     authSig: state.authSig,
     chain: state.chain,
     ciphertext: state.encryptResponse.ciphertext,
-    dataToEncryptHash: state.encryptResponse.dataToEncryptHash
+    dataToEncryptHash: state.encryptResponse.dataToEncryptHash,
   },
-  state.litNodeClient,
+  state.litNodeClient
 );
 
 console.warn('⬇️⬇️⬇️⬇️');

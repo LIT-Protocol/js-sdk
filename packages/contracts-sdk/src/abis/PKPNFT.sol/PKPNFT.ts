@@ -13,19 +13,19 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from "ethers";
+} from 'ethers';
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+} from '@ethersproject/abi';
+import type { Listener, Provider } from '@ethersproject/providers';
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from "./common";
+} from './common';
 
 export declare namespace IDiamond {
   export type FacetCutStruct = {
@@ -65,401 +65,401 @@ export declare namespace IPubkeyRouter {
 
 export interface PKPNFTInterface extends utils.Interface {
   functions: {
-    "diamondCut((address,uint8,bytes4[])[],address,bytes)": FunctionFragment;
-    "facetAddress(bytes4)": FunctionFragment;
-    "facetAddresses()": FunctionFragment;
-    "facetFunctionSelectors(address)": FunctionFragment;
-    "facets()": FunctionFragment;
-    "owner()": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
-    "approve(address,uint256)": FunctionFragment;
-    "balanceOf(address)": FunctionFragment;
-    "burn(uint256)": FunctionFragment;
-    "claimAndMint(uint256,bytes32,(bytes32,bytes32,uint8)[])": FunctionFragment;
-    "exists(uint256)": FunctionFragment;
-    "freeMintSigner()": FunctionFragment;
-    "getApproved(uint256)": FunctionFragment;
-    "getEthAddress(uint256)": FunctionFragment;
-    "getNextDerivedKeyId()": FunctionFragment;
-    "getPkpNftMetadataAddress()": FunctionFragment;
-    "getPkpPermissionsAddress()": FunctionFragment;
-    "getPubkey(uint256)": FunctionFragment;
-    "getRouterAddress()": FunctionFragment;
-    "getStakingAddress()": FunctionFragment;
-    "initialize()": FunctionFragment;
-    "isApprovedForAll(address,address)": FunctionFragment;
-    "mintCost()": FunctionFragment;
-    "mintGrantAndBurnNext(uint256,bytes)": FunctionFragment;
-    "mintNext(uint256)": FunctionFragment;
-    "name()": FunctionFragment;
-    "ownerOf(uint256)": FunctionFragment;
-    "prefixed(bytes32)": FunctionFragment;
-    "redeemedFreeMintIds(uint256)": FunctionFragment;
-    "safeTransferFrom(address,address,uint256)": FunctionFragment;
-    "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
-    "setApprovalForAll(address,bool)": FunctionFragment;
-    "setContractResolver(address)": FunctionFragment;
-    "setFreeMintSigner(address)": FunctionFragment;
-    "setMintCost(uint256)": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "symbol()": FunctionFragment;
-    "tokenByIndex(uint256)": FunctionFragment;
-    "tokenOfOwnerByIndex(address,uint256)": FunctionFragment;
-    "tokenURI(uint256)": FunctionFragment;
-    "totalSupply()": FunctionFragment;
-    "transferFrom(address,address,uint256)": FunctionFragment;
-    "withdraw()": FunctionFragment;
+    'diamondCut((address,uint8,bytes4[])[],address,bytes)': FunctionFragment;
+    'facetAddress(bytes4)': FunctionFragment;
+    'facetAddresses()': FunctionFragment;
+    'facetFunctionSelectors(address)': FunctionFragment;
+    'facets()': FunctionFragment;
+    'owner()': FunctionFragment;
+    'transferOwnership(address)': FunctionFragment;
+    'approve(address,uint256)': FunctionFragment;
+    'balanceOf(address)': FunctionFragment;
+    'burn(uint256)': FunctionFragment;
+    'claimAndMint(uint256,bytes32,(bytes32,bytes32,uint8)[])': FunctionFragment;
+    'exists(uint256)': FunctionFragment;
+    'freeMintSigner()': FunctionFragment;
+    'getApproved(uint256)': FunctionFragment;
+    'getEthAddress(uint256)': FunctionFragment;
+    'getNextDerivedKeyId()': FunctionFragment;
+    'getPkpNftMetadataAddress()': FunctionFragment;
+    'getPkpPermissionsAddress()': FunctionFragment;
+    'getPubkey(uint256)': FunctionFragment;
+    'getRouterAddress()': FunctionFragment;
+    'getStakingAddress()': FunctionFragment;
+    'initialize()': FunctionFragment;
+    'isApprovedForAll(address,address)': FunctionFragment;
+    'mintCost()': FunctionFragment;
+    'mintGrantAndBurnNext(uint256,bytes)': FunctionFragment;
+    'mintNext(uint256)': FunctionFragment;
+    'name()': FunctionFragment;
+    'ownerOf(uint256)': FunctionFragment;
+    'prefixed(bytes32)': FunctionFragment;
+    'redeemedFreeMintIds(uint256)': FunctionFragment;
+    'safeTransferFrom(address,address,uint256)': FunctionFragment;
+    'safeTransferFrom(address,address,uint256,bytes)': FunctionFragment;
+    'setApprovalForAll(address,bool)': FunctionFragment;
+    'setContractResolver(address)': FunctionFragment;
+    'setFreeMintSigner(address)': FunctionFragment;
+    'setMintCost(uint256)': FunctionFragment;
+    'supportsInterface(bytes4)': FunctionFragment;
+    'symbol()': FunctionFragment;
+    'tokenByIndex(uint256)': FunctionFragment;
+    'tokenOfOwnerByIndex(address,uint256)': FunctionFragment;
+    'tokenURI(uint256)': FunctionFragment;
+    'totalSupply()': FunctionFragment;
+    'transferFrom(address,address,uint256)': FunctionFragment;
+    'withdraw()': FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "diamondCut"
-      | "facetAddress"
-      | "facetAddresses"
-      | "facetFunctionSelectors"
-      | "facets"
-      | "owner"
-      | "transferOwnership"
-      | "approve"
-      | "balanceOf"
-      | "burn"
-      | "claimAndMint"
-      | "exists"
-      | "freeMintSigner"
-      | "getApproved"
-      | "getEthAddress"
-      | "getNextDerivedKeyId"
-      | "getPkpNftMetadataAddress"
-      | "getPkpPermissionsAddress"
-      | "getPubkey"
-      | "getRouterAddress"
-      | "getStakingAddress"
-      | "initialize"
-      | "isApprovedForAll"
-      | "mintCost"
-      | "mintGrantAndBurnNext"
-      | "mintNext"
-      | "name"
-      | "ownerOf"
-      | "prefixed"
-      | "redeemedFreeMintIds"
-      | "safeTransferFrom(address,address,uint256)"
-      | "safeTransferFrom(address,address,uint256,bytes)"
-      | "setApprovalForAll"
-      | "setContractResolver"
-      | "setFreeMintSigner"
-      | "setMintCost"
-      | "supportsInterface"
-      | "symbol"
-      | "tokenByIndex"
-      | "tokenOfOwnerByIndex"
-      | "tokenURI"
-      | "totalSupply"
-      | "transferFrom"
-      | "withdraw"
+      | 'diamondCut'
+      | 'facetAddress'
+      | 'facetAddresses'
+      | 'facetFunctionSelectors'
+      | 'facets'
+      | 'owner'
+      | 'transferOwnership'
+      | 'approve'
+      | 'balanceOf'
+      | 'burn'
+      | 'claimAndMint'
+      | 'exists'
+      | 'freeMintSigner'
+      | 'getApproved'
+      | 'getEthAddress'
+      | 'getNextDerivedKeyId'
+      | 'getPkpNftMetadataAddress'
+      | 'getPkpPermissionsAddress'
+      | 'getPubkey'
+      | 'getRouterAddress'
+      | 'getStakingAddress'
+      | 'initialize'
+      | 'isApprovedForAll'
+      | 'mintCost'
+      | 'mintGrantAndBurnNext'
+      | 'mintNext'
+      | 'name'
+      | 'ownerOf'
+      | 'prefixed'
+      | 'redeemedFreeMintIds'
+      | 'safeTransferFrom(address,address,uint256)'
+      | 'safeTransferFrom(address,address,uint256,bytes)'
+      | 'setApprovalForAll'
+      | 'setContractResolver'
+      | 'setFreeMintSigner'
+      | 'setMintCost'
+      | 'supportsInterface'
+      | 'symbol'
+      | 'tokenByIndex'
+      | 'tokenOfOwnerByIndex'
+      | 'tokenURI'
+      | 'totalSupply'
+      | 'transferFrom'
+      | 'withdraw'
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "diamondCut",
+    functionFragment: 'diamondCut',
     values: [IDiamond.FacetCutStruct[], string, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "facetAddress",
+    functionFragment: 'facetAddress',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "facetAddresses",
+    functionFragment: 'facetAddresses',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "facetFunctionSelectors",
+    functionFragment: 'facetFunctionSelectors',
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'facets', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "transferOwnership",
+    functionFragment: 'transferOwnership',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "approve",
+    functionFragment: 'approve',
     values: [string, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
-  encodeFunctionData(functionFragment: "burn", values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
+  encodeFunctionData(functionFragment: 'burn', values: [BigNumberish]): string;
   encodeFunctionData(
-    functionFragment: "claimAndMint",
+    functionFragment: 'claimAndMint',
     values: [BigNumberish, BytesLike, IPubkeyRouter.SignatureStruct[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "exists",
+    functionFragment: 'exists',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "freeMintSigner",
+    functionFragment: 'freeMintSigner',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getApproved",
+    functionFragment: 'getApproved',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getEthAddress",
+    functionFragment: 'getEthAddress',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getNextDerivedKeyId",
+    functionFragment: 'getNextDerivedKeyId',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getPkpNftMetadataAddress",
+    functionFragment: 'getPkpNftMetadataAddress',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getPkpPermissionsAddress",
+    functionFragment: 'getPkpPermissionsAddress',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getPubkey",
+    functionFragment: 'getPubkey',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getRouterAddress",
+    functionFragment: 'getRouterAddress',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getStakingAddress",
+    functionFragment: 'getStakingAddress',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "initialize",
+    functionFragment: 'initialize',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "isApprovedForAll",
+    functionFragment: 'isApprovedForAll',
     values: [string, string]
   ): string;
-  encodeFunctionData(functionFragment: "mintCost", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'mintCost', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "mintGrantAndBurnNext",
+    functionFragment: 'mintGrantAndBurnNext',
     values: [BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "mintNext",
+    functionFragment: 'mintNext',
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "name", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'name', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "ownerOf",
+    functionFragment: 'ownerOf',
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "prefixed", values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'prefixed', values: [BytesLike]): string;
   encodeFunctionData(
-    functionFragment: "redeemedFreeMintIds",
+    functionFragment: 'redeemedFreeMintIds',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "safeTransferFrom(address,address,uint256)",
+    functionFragment: 'safeTransferFrom(address,address,uint256)',
     values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
+    functionFragment: 'safeTransferFrom(address,address,uint256,bytes)',
     values: [string, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "setApprovalForAll",
+    functionFragment: 'setApprovalForAll',
     values: [string, boolean]
   ): string;
   encodeFunctionData(
-    functionFragment: "setContractResolver",
+    functionFragment: 'setContractResolver',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setFreeMintSigner",
+    functionFragment: 'setFreeMintSigner',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setMintCost",
+    functionFragment: 'setMintCost',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "supportsInterface",
+    functionFragment: 'supportsInterface',
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'symbol', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "tokenByIndex",
+    functionFragment: 'tokenByIndex',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "tokenOfOwnerByIndex",
+    functionFragment: 'tokenOfOwnerByIndex',
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "tokenURI",
+    functionFragment: 'tokenURI',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "totalSupply",
+    functionFragment: 'totalSupply',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "transferFrom",
+    functionFragment: 'transferFrom',
     values: [string, string, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'withdraw', values?: undefined): string;
 
-  decodeFunctionResult(functionFragment: "diamondCut", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'diamondCut', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "facetAddress",
+    functionFragment: 'facetAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "facetAddresses",
+    functionFragment: 'facetAddresses',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "facetFunctionSelectors",
+    functionFragment: 'facetFunctionSelectors',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'facets', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "transferOwnership",
+    functionFragment: 'transferOwnership',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'burn', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "claimAndMint",
+    functionFragment: 'claimAndMint',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "exists", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'exists', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "freeMintSigner",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getApproved",
+    functionFragment: 'freeMintSigner',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getEthAddress",
+    functionFragment: 'getApproved',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getNextDerivedKeyId",
+    functionFragment: 'getEthAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getPkpNftMetadataAddress",
+    functionFragment: 'getNextDerivedKeyId',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getPkpPermissionsAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "getPubkey", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getRouterAddress",
+    functionFragment: 'getPkpNftMetadataAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getStakingAddress",
+    functionFragment: 'getPkpPermissionsAddress',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getPubkey', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "isApprovedForAll",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "mintCost", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "mintGrantAndBurnNext",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "mintNext", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "prefixed", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "redeemedFreeMintIds",
+    functionFragment: 'getRouterAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "safeTransferFrom(address,address,uint256)",
+    functionFragment: 'getStakingAddress',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'initialize', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'isApprovedForAll',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'mintCost', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'mintGrantAndBurnNext',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'mintNext', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'name', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'ownerOf', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'prefixed', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'redeemedFreeMintIds',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
+    functionFragment: 'safeTransferFrom(address,address,uint256)',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setApprovalForAll",
+    functionFragment: 'safeTransferFrom(address,address,uint256,bytes)',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setContractResolver",
+    functionFragment: 'setApprovalForAll',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setFreeMintSigner",
+    functionFragment: 'setContractResolver',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setMintCost",
+    functionFragment: 'setFreeMintSigner',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "supportsInterface",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "tokenByIndex",
+    functionFragment: 'setMintCost',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "tokenOfOwnerByIndex",
+    functionFragment: 'supportsInterface',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "tokenURI", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'symbol', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "totalSupply",
+    functionFragment: 'tokenByIndex',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "transferFrom",
+    functionFragment: 'tokenOfOwnerByIndex',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'tokenURI', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'totalSupply',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'transferFrom',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'withdraw', data: BytesLike): Result;
 
   events: {
-    "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
-    "Approval(address,address,uint256)": EventFragment;
-    "ApprovalForAll(address,address,bool)": EventFragment;
-    "ContractResolverAddressSet(address)": EventFragment;
-    "FreeMintSignerSet(address)": EventFragment;
-    "Initialized(uint8)": EventFragment;
-    "MintCostSet(uint256)": EventFragment;
-    "PKPMinted(uint256,bytes)": EventFragment;
-    "Transfer(address,address,uint256)": EventFragment;
-    "Withdrew(uint256)": EventFragment;
+    'DiamondCut((address,uint8,bytes4[])[],address,bytes)': EventFragment;
+    'OwnershipTransferred(address,address)': EventFragment;
+    'Approval(address,address,uint256)': EventFragment;
+    'ApprovalForAll(address,address,bool)': EventFragment;
+    'ContractResolverAddressSet(address)': EventFragment;
+    'FreeMintSignerSet(address)': EventFragment;
+    'Initialized(uint8)': EventFragment;
+    'MintCostSet(uint256)': EventFragment;
+    'PKPMinted(uint256,bytes)': EventFragment;
+    'Transfer(address,address,uint256)': EventFragment;
+    'Withdrew(uint256)': EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ContractResolverAddressSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "FreeMintSignerSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "MintCostSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "PKPMinted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Withdrew"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'DiamondCut'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Approval'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ApprovalForAll'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ContractResolverAddressSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'FreeMintSignerSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Initialized'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'MintCostSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'PKPMinted'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Transfer'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Withdrew'): EventFragment;
 }
 
 export interface DiamondCutEventObject {
@@ -624,9 +624,7 @@ export interface PKPNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string[]] & { _facetFunctionSelectors: string[] }>;
 
-    facets(
-      overrides?: CallOverrides
-    ): Promise<
+    facets(overrides?: CallOverrides): Promise<
       [IDiamondLoupe.FacetStructOutput[]] & {
         facets_: IDiamondLoupe.FacetStructOutput[];
       }
@@ -728,14 +726,14 @@ export interface PKPNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    "safeTransferFrom(address,address,uint256)"(
+    'safeTransferFrom(address,address,uint256)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
-    "safeTransferFrom(address,address,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,bytes)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
@@ -909,14 +907,14 @@ export interface PKPNFT extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  "safeTransferFrom(address,address,uint256)"(
+  'safeTransferFrom(address,address,uint256)'(
     from: string,
     to: string,
     tokenId: BigNumberish,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
-  "safeTransferFrom(address,address,uint256,bytes)"(
+  'safeTransferFrom(address,address,uint256,bytes)'(
     from: string,
     to: string,
     tokenId: BigNumberish,
@@ -1087,14 +1085,14 @@ export interface PKPNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    "safeTransferFrom(address,address,uint256)"(
+    'safeTransferFrom(address,address,uint256)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "safeTransferFrom(address,address,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,bytes)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
@@ -1156,7 +1154,7 @@ export interface PKPNFT extends BaseContract {
   };
 
   filters: {
-    "DiamondCut((address,uint8,bytes4[])[],address,bytes)"(
+    'DiamondCut((address,uint8,bytes4[])[],address,bytes)'(
       _diamondCut?: null,
       _init?: null,
       _calldata?: null
@@ -1167,7 +1165,7 @@ export interface PKPNFT extends BaseContract {
       _calldata?: null
     ): DiamondCutEventFilter;
 
-    "OwnershipTransferred(address,address)"(
+    'OwnershipTransferred(address,address)'(
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
@@ -1176,7 +1174,7 @@ export interface PKPNFT extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    "Approval(address,address,uint256)"(
+    'Approval(address,address,uint256)'(
       owner?: string | null,
       approved?: string | null,
       tokenId?: BigNumberish | null
@@ -1187,7 +1185,7 @@ export interface PKPNFT extends BaseContract {
       tokenId?: BigNumberish | null
     ): ApprovalEventFilter;
 
-    "ApprovalForAll(address,address,bool)"(
+    'ApprovalForAll(address,address,bool)'(
       owner?: string | null,
       operator?: string | null,
       approved?: null
@@ -1198,27 +1196,27 @@ export interface PKPNFT extends BaseContract {
       approved?: null
     ): ApprovalForAllEventFilter;
 
-    "ContractResolverAddressSet(address)"(
+    'ContractResolverAddressSet(address)'(
       newResolverAddress?: null
     ): ContractResolverAddressSetEventFilter;
     ContractResolverAddressSet(
       newResolverAddress?: null
     ): ContractResolverAddressSetEventFilter;
 
-    "FreeMintSignerSet(address)"(
+    'FreeMintSignerSet(address)'(
       newFreeMintSigner?: string | null
     ): FreeMintSignerSetEventFilter;
     FreeMintSignerSet(
       newFreeMintSigner?: string | null
     ): FreeMintSignerSetEventFilter;
 
-    "Initialized(uint8)"(version?: null): InitializedEventFilter;
+    'Initialized(uint8)'(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
 
-    "MintCostSet(uint256)"(newMintCost?: null): MintCostSetEventFilter;
+    'MintCostSet(uint256)'(newMintCost?: null): MintCostSetEventFilter;
     MintCostSet(newMintCost?: null): MintCostSetEventFilter;
 
-    "PKPMinted(uint256,bytes)"(
+    'PKPMinted(uint256,bytes)'(
       tokenId?: BigNumberish | null,
       pubkey?: null
     ): PKPMintedEventFilter;
@@ -1227,7 +1225,7 @@ export interface PKPNFT extends BaseContract {
       pubkey?: null
     ): PKPMintedEventFilter;
 
-    "Transfer(address,address,uint256)"(
+    'Transfer(address,address,uint256)'(
       from?: string | null,
       to?: string | null,
       tokenId?: BigNumberish | null
@@ -1238,7 +1236,7 @@ export interface PKPNFT extends BaseContract {
       tokenId?: BigNumberish | null
     ): TransferEventFilter;
 
-    "Withdrew(uint256)"(amount?: null): WithdrewEventFilter;
+    'Withdrew(uint256)'(amount?: null): WithdrewEventFilter;
     Withdrew(amount?: null): WithdrewEventFilter;
   };
 
@@ -1358,14 +1356,14 @@ export interface PKPNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "safeTransferFrom(address,address,uint256)"(
+    'safeTransferFrom(address,address,uint256)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
-    "safeTransferFrom(address,address,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,bytes)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
@@ -1559,14 +1557,14 @@ export interface PKPNFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "safeTransferFrom(address,address,uint256)"(
+    'safeTransferFrom(address,address,uint256)'(
       from: string,
       to: string,
       tokenId: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 
-    "safeTransferFrom(address,address,uint256,bytes)"(
+    'safeTransferFrom(address,address,uint256,bytes)'(
       from: string,
       to: string,
       tokenId: BigNumberish,

@@ -8,10 +8,7 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "lib": [
-      "ES2021",
-      "DOM"
-    ]
+    "lib": ["ES2021", "DOM"]
   },
   "files": [],
   "include": [],

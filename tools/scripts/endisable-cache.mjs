@@ -26,7 +26,10 @@ if (enableCache) {
 
 fs.writeFileSync(nxConfigPath, JSON.stringify(nxConfig, null, 2));
 
-greenLog('\n📝 This script enables or disables the cache in the nx.json file.\n', true);
+greenLog(
+  '\n📝 This script enables or disables the cache in the nx.json file.\n',
+  true
+);
 greenLog('--enable=true: Enable the cache', true);
 greenLog('--enable=false: Disable the cache', true);
 process.exit();

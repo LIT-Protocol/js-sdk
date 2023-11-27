@@ -12,19 +12,19 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from "ethers";
+} from 'ethers';
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+} from '@ethersproject/abi';
+import type { Listener, Provider } from '@ethersproject/providers';
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from "./common";
+} from './common';
 
 export declare namespace IDiamond {
   export type FacetCutStruct = {
@@ -109,6 +109,16 @@ export declare namespace LibStakingStorage {
     timeout: BigNumber;
   };
 
+  export type AddressMappingStruct = {
+    nodeAddress: string;
+    stakerAddress: string;
+  };
+
+  export type AddressMappingStructOutput = [string, string] & {
+    nodeAddress: string;
+    stakerAddress: string;
+  };
+
   export type ValidatorStruct = {
     ip: BigNumberish;
     ipv6: BigNumberish;
@@ -140,196 +150,198 @@ export declare namespace LibStakingStorage {
 
 export interface StakingInterface extends utils.Interface {
   functions: {
-    "diamondCut((address,uint8,bytes4[])[],address,bytes)": FunctionFragment;
-    "facetAddress(bytes4)": FunctionFragment;
-    "facetAddresses()": FunctionFragment;
-    "facetFunctionSelectors(address)": FunctionFragment;
-    "facets()": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "owner()": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
-    "adminKickValidatorInNextEpoch(address)": FunctionFragment;
-    "adminRejoinValidator(address)": FunctionFragment;
-    "adminSlashValidator(address,uint256)": FunctionFragment;
-    "advanceEpoch()": FunctionFragment;
-    "exit()": FunctionFragment;
-    "getReward()": FunctionFragment;
-    "kickValidatorInNextEpoch(address,uint256,bytes)": FunctionFragment;
-    "lockValidatorsForNextEpoch()": FunctionFragment;
-    "requestToJoin(uint32,uint128,uint32,address,uint256,uint256)": FunctionFragment;
-    "requestToLeave()": FunctionFragment;
-    "setConfig(uint256,uint256,uint256,uint256[],uint256)": FunctionFragment;
-    "setContractResolver(address)": FunctionFragment;
-    "setEpochEndTime(uint256)": FunctionFragment;
-    "setEpochLength(uint256)": FunctionFragment;
-    "setEpochState(uint8)": FunctionFragment;
-    "setEpochTimeout(uint256)": FunctionFragment;
-    "setIpPortNodeAddressAndCommunicationPubKeys(uint32,uint128,uint32,address,uint256,uint256)": FunctionFragment;
-    "setKickPenaltyPercent(uint256,uint256)": FunctionFragment;
-    "signalReadyForNextEpoch(uint256)": FunctionFragment;
-    "stake(uint256)": FunctionFragment;
-    "stakeAndJoin(uint256,uint32,uint128,uint32,address,uint256,uint256)": FunctionFragment;
-    "unlockValidatorsForNextEpoch()": FunctionFragment;
-    "withdraw(uint256)": FunctionFragment;
-    "checkVersion((uint256,uint256,uint256))": FunctionFragment;
-    "getMaxVersion()": FunctionFragment;
-    "getMaxVersionString()": FunctionFragment;
-    "getMinVersion()": FunctionFragment;
-    "getMinVersionString()": FunctionFragment;
-    "setMaxVersion((uint256,uint256,uint256))": FunctionFragment;
-    "setMinVersion((uint256,uint256,uint256))": FunctionFragment;
-    "config()": FunctionFragment;
-    "contractResolver()": FunctionFragment;
-    "countOfCurrentValidatorsReadyForNextEpoch()": FunctionFragment;
-    "countOfNextValidatorsReadyForNextEpoch()": FunctionFragment;
-    "currentValidatorCountForConsensus()": FunctionFragment;
-    "epoch()": FunctionFragment;
-    "getKeyTypes()": FunctionFragment;
-    "getKickedValidators()": FunctionFragment;
-    "getStakingBalancesAddress()": FunctionFragment;
-    "getTokenAddress()": FunctionFragment;
-    "getValidatorsInCurrentEpoch()": FunctionFragment;
-    "getValidatorsInCurrentEpochLength()": FunctionFragment;
-    "getValidatorsInNextEpoch()": FunctionFragment;
-    "getValidatorsStructs(address[])": FunctionFragment;
-    "getValidatorsStructsInCurrentEpoch()": FunctionFragment;
-    "getValidatorsStructsInNextEpoch()": FunctionFragment;
-    "getVotingStatusToKickValidator(uint256,address,address)": FunctionFragment;
-    "isActiveValidator(address)": FunctionFragment;
-    "isActiveValidatorByNodeAddress(address)": FunctionFragment;
-    "isReadyForNextEpoch()": FunctionFragment;
-    "kickPenaltyPercentByReason(uint256)": FunctionFragment;
-    "nextValidatorCountForConsensus()": FunctionFragment;
-    "nodeAddressToStakerAddress(address)": FunctionFragment;
-    "readyForNextEpoch(address)": FunctionFragment;
-    "shouldKickValidator(address)": FunctionFragment;
-    "state()": FunctionFragment;
-    "validators(address)": FunctionFragment;
+    'diamondCut((address,uint8,bytes4[])[],address,bytes)': FunctionFragment;
+    'facetAddress(bytes4)': FunctionFragment;
+    'facetAddresses()': FunctionFragment;
+    'facetFunctionSelectors(address)': FunctionFragment;
+    'facets()': FunctionFragment;
+    'supportsInterface(bytes4)': FunctionFragment;
+    'owner()': FunctionFragment;
+    'transferOwnership(address)': FunctionFragment;
+    'adminKickValidatorInNextEpoch(address)': FunctionFragment;
+    'adminRejoinValidator(address)': FunctionFragment;
+    'adminSlashValidator(address,uint256)': FunctionFragment;
+    'advanceEpoch()': FunctionFragment;
+    'exit()': FunctionFragment;
+    'getReward()': FunctionFragment;
+    'kickValidatorInNextEpoch(address,uint256,bytes)': FunctionFragment;
+    'lockValidatorsForNextEpoch()': FunctionFragment;
+    'requestToJoin(uint32,uint128,uint32,address,uint256,uint256)': FunctionFragment;
+    'requestToLeave()': FunctionFragment;
+    'setConfig(uint256,uint256,uint256,uint256[],uint256)': FunctionFragment;
+    'setContractResolver(address)': FunctionFragment;
+    'setEpochEndTime(uint256)': FunctionFragment;
+    'setEpochLength(uint256)': FunctionFragment;
+    'setEpochState(uint8)': FunctionFragment;
+    'setEpochTimeout(uint256)': FunctionFragment;
+    'setIpPortNodeAddressAndCommunicationPubKeys(uint32,uint128,uint32,address,uint256,uint256)': FunctionFragment;
+    'setKickPenaltyPercent(uint256,uint256)': FunctionFragment;
+    'signalReadyForNextEpoch(uint256)': FunctionFragment;
+    'stake(uint256)': FunctionFragment;
+    'stakeAndJoin(uint256,uint32,uint128,uint32,address,uint256,uint256)': FunctionFragment;
+    'unlockValidatorsForNextEpoch()': FunctionFragment;
+    'withdraw(uint256)': FunctionFragment;
+    'checkVersion((uint256,uint256,uint256))': FunctionFragment;
+    'getMaxVersion()': FunctionFragment;
+    'getMaxVersionString()': FunctionFragment;
+    'getMinVersion()': FunctionFragment;
+    'getMinVersionString()': FunctionFragment;
+    'setMaxVersion((uint256,uint256,uint256))': FunctionFragment;
+    'setMinVersion((uint256,uint256,uint256))': FunctionFragment;
+    'config()': FunctionFragment;
+    'contractResolver()': FunctionFragment;
+    'countOfCurrentValidatorsReadyForNextEpoch()': FunctionFragment;
+    'countOfNextValidatorsReadyForNextEpoch()': FunctionFragment;
+    'currentValidatorCountForConsensus()': FunctionFragment;
+    'epoch()': FunctionFragment;
+    'getKeyTypes()': FunctionFragment;
+    'getKickedValidators()': FunctionFragment;
+    'getNodeStakerAddressMappings(address[])': FunctionFragment;
+    'getStakingBalancesAddress()': FunctionFragment;
+    'getTokenAddress()': FunctionFragment;
+    'getValidatorsInCurrentEpoch()': FunctionFragment;
+    'getValidatorsInCurrentEpochLength()': FunctionFragment;
+    'getValidatorsInNextEpoch()': FunctionFragment;
+    'getValidatorsStructs(address[])': FunctionFragment;
+    'getValidatorsStructsInCurrentEpoch()': FunctionFragment;
+    'getValidatorsStructsInNextEpoch()': FunctionFragment;
+    'getVotingStatusToKickValidator(uint256,address,address)': FunctionFragment;
+    'isActiveValidator(address)': FunctionFragment;
+    'isActiveValidatorByNodeAddress(address)': FunctionFragment;
+    'isReadyForNextEpoch()': FunctionFragment;
+    'kickPenaltyPercentByReason(uint256)': FunctionFragment;
+    'nextValidatorCountForConsensus()': FunctionFragment;
+    'nodeAddressToStakerAddress(address)': FunctionFragment;
+    'readyForNextEpoch(address)': FunctionFragment;
+    'shouldKickValidator(address)': FunctionFragment;
+    'state()': FunctionFragment;
+    'validators(address)': FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "diamondCut"
-      | "facetAddress"
-      | "facetAddresses"
-      | "facetFunctionSelectors"
-      | "facets"
-      | "supportsInterface"
-      | "owner"
-      | "transferOwnership"
-      | "adminKickValidatorInNextEpoch"
-      | "adminRejoinValidator"
-      | "adminSlashValidator"
-      | "advanceEpoch"
-      | "exit"
-      | "getReward"
-      | "kickValidatorInNextEpoch"
-      | "lockValidatorsForNextEpoch"
-      | "requestToJoin"
-      | "requestToLeave"
-      | "setConfig"
-      | "setContractResolver"
-      | "setEpochEndTime"
-      | "setEpochLength"
-      | "setEpochState"
-      | "setEpochTimeout"
-      | "setIpPortNodeAddressAndCommunicationPubKeys"
-      | "setKickPenaltyPercent"
-      | "signalReadyForNextEpoch"
-      | "stake"
-      | "stakeAndJoin"
-      | "unlockValidatorsForNextEpoch"
-      | "withdraw"
-      | "checkVersion"
-      | "getMaxVersion"
-      | "getMaxVersionString"
-      | "getMinVersion"
-      | "getMinVersionString"
-      | "setMaxVersion"
-      | "setMinVersion"
-      | "config"
-      | "contractResolver"
-      | "countOfCurrentValidatorsReadyForNextEpoch"
-      | "countOfNextValidatorsReadyForNextEpoch"
-      | "currentValidatorCountForConsensus"
-      | "epoch"
-      | "getKeyTypes"
-      | "getKickedValidators"
-      | "getStakingBalancesAddress"
-      | "getTokenAddress"
-      | "getValidatorsInCurrentEpoch"
-      | "getValidatorsInCurrentEpochLength"
-      | "getValidatorsInNextEpoch"
-      | "getValidatorsStructs"
-      | "getValidatorsStructsInCurrentEpoch"
-      | "getValidatorsStructsInNextEpoch"
-      | "getVotingStatusToKickValidator"
-      | "isActiveValidator"
-      | "isActiveValidatorByNodeAddress"
-      | "isReadyForNextEpoch"
-      | "kickPenaltyPercentByReason"
-      | "nextValidatorCountForConsensus"
-      | "nodeAddressToStakerAddress"
-      | "readyForNextEpoch"
-      | "shouldKickValidator"
-      | "state"
-      | "validators"
+      | 'diamondCut'
+      | 'facetAddress'
+      | 'facetAddresses'
+      | 'facetFunctionSelectors'
+      | 'facets'
+      | 'supportsInterface'
+      | 'owner'
+      | 'transferOwnership'
+      | 'adminKickValidatorInNextEpoch'
+      | 'adminRejoinValidator'
+      | 'adminSlashValidator'
+      | 'advanceEpoch'
+      | 'exit'
+      | 'getReward'
+      | 'kickValidatorInNextEpoch'
+      | 'lockValidatorsForNextEpoch'
+      | 'requestToJoin'
+      | 'requestToLeave'
+      | 'setConfig'
+      | 'setContractResolver'
+      | 'setEpochEndTime'
+      | 'setEpochLength'
+      | 'setEpochState'
+      | 'setEpochTimeout'
+      | 'setIpPortNodeAddressAndCommunicationPubKeys'
+      | 'setKickPenaltyPercent'
+      | 'signalReadyForNextEpoch'
+      | 'stake'
+      | 'stakeAndJoin'
+      | 'unlockValidatorsForNextEpoch'
+      | 'withdraw'
+      | 'checkVersion'
+      | 'getMaxVersion'
+      | 'getMaxVersionString'
+      | 'getMinVersion'
+      | 'getMinVersionString'
+      | 'setMaxVersion'
+      | 'setMinVersion'
+      | 'config'
+      | 'contractResolver'
+      | 'countOfCurrentValidatorsReadyForNextEpoch'
+      | 'countOfNextValidatorsReadyForNextEpoch'
+      | 'currentValidatorCountForConsensus'
+      | 'epoch'
+      | 'getKeyTypes'
+      | 'getKickedValidators'
+      | 'getNodeStakerAddressMappings'
+      | 'getStakingBalancesAddress'
+      | 'getTokenAddress'
+      | 'getValidatorsInCurrentEpoch'
+      | 'getValidatorsInCurrentEpochLength'
+      | 'getValidatorsInNextEpoch'
+      | 'getValidatorsStructs'
+      | 'getValidatorsStructsInCurrentEpoch'
+      | 'getValidatorsStructsInNextEpoch'
+      | 'getVotingStatusToKickValidator'
+      | 'isActiveValidator'
+      | 'isActiveValidatorByNodeAddress'
+      | 'isReadyForNextEpoch'
+      | 'kickPenaltyPercentByReason'
+      | 'nextValidatorCountForConsensus'
+      | 'nodeAddressToStakerAddress'
+      | 'readyForNextEpoch'
+      | 'shouldKickValidator'
+      | 'state'
+      | 'validators'
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "diamondCut",
+    functionFragment: 'diamondCut',
     values: [IDiamond.FacetCutStruct[], string, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "facetAddress",
+    functionFragment: 'facetAddress',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "facetAddresses",
+    functionFragment: 'facetAddresses',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "facetFunctionSelectors",
+    functionFragment: 'facetFunctionSelectors',
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'facets', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "supportsInterface",
+    functionFragment: 'supportsInterface',
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "transferOwnership",
+    functionFragment: 'transferOwnership',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "adminKickValidatorInNextEpoch",
+    functionFragment: 'adminKickValidatorInNextEpoch',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "adminRejoinValidator",
+    functionFragment: 'adminRejoinValidator',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "adminSlashValidator",
+    functionFragment: 'adminSlashValidator',
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "advanceEpoch",
+    functionFragment: 'advanceEpoch',
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "exit", values?: undefined): string;
-  encodeFunctionData(functionFragment: "getReward", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'exit', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'getReward', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "kickValidatorInNextEpoch",
+    functionFragment: 'kickValidatorInNextEpoch',
     values: [string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "lockValidatorsForNextEpoch",
+    functionFragment: 'lockValidatorsForNextEpoch',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "requestToJoin",
+    functionFragment: 'requestToJoin',
     values: [
       BigNumberish,
       BigNumberish,
@@ -340,11 +352,11 @@ export interface StakingInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "requestToLeave",
+    functionFragment: 'requestToLeave',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "setConfig",
+    functionFragment: 'setConfig',
     values: [
       BigNumberish,
       BigNumberish,
@@ -354,27 +366,27 @@ export interface StakingInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "setContractResolver",
+    functionFragment: 'setContractResolver',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setEpochEndTime",
+    functionFragment: 'setEpochEndTime',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setEpochLength",
+    functionFragment: 'setEpochLength',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setEpochState",
+    functionFragment: 'setEpochState',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setEpochTimeout",
+    functionFragment: 'setEpochTimeout',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setIpPortNodeAddressAndCommunicationPubKeys",
+    functionFragment: 'setIpPortNodeAddressAndCommunicationPubKeys',
     values: [
       BigNumberish,
       BigNumberish,
@@ -385,16 +397,16 @@ export interface StakingInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "setKickPenaltyPercent",
+    functionFragment: 'setKickPenaltyPercent',
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "signalReadyForNextEpoch",
+    functionFragment: 'signalReadyForNextEpoch',
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "stake", values: [BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'stake', values: [BigNumberish]): string;
   encodeFunctionData(
-    functionFragment: "stakeAndJoin",
+    functionFragment: 'stakeAndJoin',
     values: [
       BigNumberish,
       BigNumberish,
@@ -406,405 +418,413 @@ export interface StakingInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "unlockValidatorsForNextEpoch",
+    functionFragment: 'unlockValidatorsForNextEpoch',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "withdraw",
+    functionFragment: 'withdraw',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "checkVersion",
+    functionFragment: 'checkVersion',
     values: [LibStakingStorage.VersionStruct]
   ): string;
   encodeFunctionData(
-    functionFragment: "getMaxVersion",
+    functionFragment: 'getMaxVersion',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getMaxVersionString",
+    functionFragment: 'getMaxVersionString',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getMinVersion",
+    functionFragment: 'getMinVersion',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getMinVersionString",
+    functionFragment: 'getMinVersionString',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "setMaxVersion",
+    functionFragment: 'setMaxVersion',
     values: [LibStakingStorage.VersionStruct]
   ): string;
   encodeFunctionData(
-    functionFragment: "setMinVersion",
+    functionFragment: 'setMinVersion',
     values: [LibStakingStorage.VersionStruct]
   ): string;
-  encodeFunctionData(functionFragment: "config", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'config', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "contractResolver",
+    functionFragment: 'contractResolver',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "countOfCurrentValidatorsReadyForNextEpoch",
+    functionFragment: 'countOfCurrentValidatorsReadyForNextEpoch',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "countOfNextValidatorsReadyForNextEpoch",
+    functionFragment: 'countOfNextValidatorsReadyForNextEpoch',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "currentValidatorCountForConsensus",
+    functionFragment: 'currentValidatorCountForConsensus',
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "epoch", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'epoch', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getKeyTypes",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getKickedValidators",
+    functionFragment: 'getKeyTypes',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getStakingBalancesAddress",
+    functionFragment: 'getKickedValidators',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getTokenAddress",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getValidatorsInCurrentEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getValidatorsInCurrentEpochLength",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getValidatorsInNextEpoch",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getValidatorsStructs",
+    functionFragment: 'getNodeStakerAddressMappings',
     values: [string[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "getValidatorsStructsInCurrentEpoch",
+    functionFragment: 'getStakingBalancesAddress',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getValidatorsStructsInNextEpoch",
+    functionFragment: 'getTokenAddress',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getVotingStatusToKickValidator",
+    functionFragment: 'getValidatorsInCurrentEpoch',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'getValidatorsInCurrentEpochLength',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'getValidatorsInNextEpoch',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'getValidatorsStructs',
+    values: [string[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'getValidatorsStructsInCurrentEpoch',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'getValidatorsStructsInNextEpoch',
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: 'getVotingStatusToKickValidator',
     values: [BigNumberish, string, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "isActiveValidator",
+    functionFragment: 'isActiveValidator',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "isActiveValidatorByNodeAddress",
+    functionFragment: 'isActiveValidatorByNodeAddress',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "isReadyForNextEpoch",
+    functionFragment: 'isReadyForNextEpoch',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "kickPenaltyPercentByReason",
+    functionFragment: 'kickPenaltyPercentByReason',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "nextValidatorCountForConsensus",
+    functionFragment: 'nextValidatorCountForConsensus',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "nodeAddressToStakerAddress",
+    functionFragment: 'nodeAddressToStakerAddress',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "readyForNextEpoch",
+    functionFragment: 'readyForNextEpoch',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "shouldKickValidator",
+    functionFragment: 'shouldKickValidator',
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "state", values?: undefined): string;
-  encodeFunctionData(functionFragment: "validators", values: [string]): string;
+  encodeFunctionData(functionFragment: 'state', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'validators', values: [string]): string;
 
-  decodeFunctionResult(functionFragment: "diamondCut", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'diamondCut', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "facetAddress",
+    functionFragment: 'facetAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "facetAddresses",
+    functionFragment: 'facetAddresses',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "facetFunctionSelectors",
+    functionFragment: 'facetFunctionSelectors',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'facets', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "supportsInterface",
+    functionFragment: 'supportsInterface',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "adminKickValidatorInNextEpoch",
+    functionFragment: 'transferOwnership',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "adminRejoinValidator",
+    functionFragment: 'adminKickValidatorInNextEpoch',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "adminSlashValidator",
+    functionFragment: 'adminRejoinValidator',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "advanceEpoch",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "exit", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getReward", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "kickValidatorInNextEpoch",
+    functionFragment: 'adminSlashValidator',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "lockValidatorsForNextEpoch",
+    functionFragment: 'advanceEpoch',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'exit', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'getReward', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'kickValidatorInNextEpoch',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "requestToJoin",
+    functionFragment: 'lockValidatorsForNextEpoch',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "requestToLeave",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "setConfig", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "setContractResolver",
+    functionFragment: 'requestToJoin',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setEpochEndTime",
+    functionFragment: 'requestToLeave',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'setConfig', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'setContractResolver',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setEpochLength",
+    functionFragment: 'setEpochEndTime',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setEpochState",
+    functionFragment: 'setEpochLength',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setEpochTimeout",
+    functionFragment: 'setEpochState',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setIpPortNodeAddressAndCommunicationPubKeys",
+    functionFragment: 'setEpochTimeout',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setKickPenaltyPercent",
+    functionFragment: 'setIpPortNodeAddressAndCommunicationPubKeys',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "signalReadyForNextEpoch",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "stakeAndJoin",
+    functionFragment: 'setKickPenaltyPercent',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "unlockValidatorsForNextEpoch",
+    functionFragment: 'signalReadyForNextEpoch',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'stake', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "checkVersion",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getMaxVersion",
+    functionFragment: 'stakeAndJoin',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getMaxVersionString",
+    functionFragment: 'unlockValidatorsForNextEpoch',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'withdraw', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'checkVersion',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getMinVersion",
+    functionFragment: 'getMaxVersion',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getMinVersionString",
+    functionFragment: 'getMaxVersionString',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setMaxVersion",
+    functionFragment: 'getMinVersion',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setMinVersion",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "config", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "contractResolver",
+    functionFragment: 'getMinVersionString',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "countOfCurrentValidatorsReadyForNextEpoch",
+    functionFragment: 'setMaxVersion',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "countOfNextValidatorsReadyForNextEpoch",
+    functionFragment: 'setMinVersion',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'config', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'contractResolver',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "currentValidatorCountForConsensus",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "epoch", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getKeyTypes",
+    functionFragment: 'countOfCurrentValidatorsReadyForNextEpoch',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getKickedValidators",
+    functionFragment: 'countOfNextValidatorsReadyForNextEpoch',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getStakingBalancesAddress",
+    functionFragment: 'currentValidatorCountForConsensus',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'epoch', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'getKeyTypes',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getTokenAddress",
+    functionFragment: 'getKickedValidators',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getValidatorsInCurrentEpoch",
+    functionFragment: 'getNodeStakerAddressMappings',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getValidatorsInCurrentEpochLength",
+    functionFragment: 'getStakingBalancesAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getValidatorsInNextEpoch",
+    functionFragment: 'getTokenAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getValidatorsStructs",
+    functionFragment: 'getValidatorsInCurrentEpoch',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getValidatorsStructsInCurrentEpoch",
+    functionFragment: 'getValidatorsInCurrentEpochLength',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getValidatorsStructsInNextEpoch",
+    functionFragment: 'getValidatorsInNextEpoch',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getVotingStatusToKickValidator",
+    functionFragment: 'getValidatorsStructs',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isActiveValidator",
+    functionFragment: 'getValidatorsStructsInCurrentEpoch',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isActiveValidatorByNodeAddress",
+    functionFragment: 'getValidatorsStructsInNextEpoch',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isReadyForNextEpoch",
+    functionFragment: 'getVotingStatusToKickValidator',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "kickPenaltyPercentByReason",
+    functionFragment: 'isActiveValidator',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "nextValidatorCountForConsensus",
+    functionFragment: 'isActiveValidatorByNodeAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "nodeAddressToStakerAddress",
+    functionFragment: 'isReadyForNextEpoch',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "readyForNextEpoch",
+    functionFragment: 'kickPenaltyPercentByReason',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "shouldKickValidator",
+    functionFragment: 'nextValidatorCountForConsensus',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "state", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "validators", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'nodeAddressToStakerAddress',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'readyForNextEpoch',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'shouldKickValidator',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'state', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'validators', data: BytesLike): Result;
 
   events: {
-    "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
-    "ConfigSet(uint256,uint256,uint256,uint256[],uint256)": EventFragment;
-    "EpochEndTimeSet(uint256)": EventFragment;
-    "EpochLengthSet(uint256)": EventFragment;
-    "EpochTimeoutSet(uint256)": EventFragment;
-    "KickPenaltyPercentSet(uint256,uint256)": EventFragment;
-    "ReadyForNextEpoch(address,uint256)": EventFragment;
-    "Recovered(address,uint256)": EventFragment;
-    "RequestToJoin(address)": EventFragment;
-    "RequestToLeave(address)": EventFragment;
-    "ResolverContractAddressSet(address)": EventFragment;
-    "RewardsDurationUpdated(uint256)": EventFragment;
-    "StakingTokenSet(address)": EventFragment;
-    "StateChanged(uint8)": EventFragment;
-    "ValidatorKickedFromNextEpoch(address,uint256)": EventFragment;
-    "ValidatorRejoinedNextEpoch(address)": EventFragment;
-    "VotedToKickValidatorInNextEpoch(address,address,uint256,bytes)": EventFragment;
+    'DiamondCut((address,uint8,bytes4[])[],address,bytes)': EventFragment;
+    'OwnershipTransferred(address,address)': EventFragment;
+    'ConfigSet(uint256,uint256,uint256,uint256[],uint256)': EventFragment;
+    'EpochEndTimeSet(uint256)': EventFragment;
+    'EpochLengthSet(uint256)': EventFragment;
+    'EpochTimeoutSet(uint256)': EventFragment;
+    'KickPenaltyPercentSet(uint256,uint256)': EventFragment;
+    'ReadyForNextEpoch(address,uint256)': EventFragment;
+    'Recovered(address,uint256)': EventFragment;
+    'RequestToJoin(address)': EventFragment;
+    'RequestToLeave(address)': EventFragment;
+    'ResolverContractAddressSet(address)': EventFragment;
+    'RewardsDurationUpdated(uint256)': EventFragment;
+    'StakingTokenSet(address)': EventFragment;
+    'StateChanged(uint8)': EventFragment;
+    'ValidatorKickedFromNextEpoch(address,uint256)': EventFragment;
+    'ValidatorRejoinedNextEpoch(address)': EventFragment;
+    'VotedToKickValidatorInNextEpoch(address,address,uint256,bytes)': EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ConfigSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "EpochEndTimeSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "EpochLengthSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "EpochTimeoutSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "KickPenaltyPercentSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ReadyForNextEpoch"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Recovered"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RequestToJoin"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RequestToLeave"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ResolverContractAddressSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RewardsDurationUpdated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "StakingTokenSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "StateChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'DiamondCut'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ConfigSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'EpochEndTimeSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'EpochLengthSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'EpochTimeoutSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'KickPenaltyPercentSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ReadyForNextEpoch'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'Recovered'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RequestToJoin'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RequestToLeave'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ResolverContractAddressSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RewardsDurationUpdated'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'StakingTokenSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'StateChanged'): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "ValidatorKickedFromNextEpoch"
+    nameOrSignatureOrTopic: 'ValidatorKickedFromNextEpoch'
   ): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ValidatorRejoinedNextEpoch"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ValidatorRejoinedNextEpoch'): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "VotedToKickValidatorInNextEpoch"
+    nameOrSignatureOrTopic: 'VotedToKickValidatorInNextEpoch'
   ): EventFragment;
 }
 
@@ -1052,9 +1072,7 @@ export interface Staking extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string[]] & { _facetFunctionSelectors: string[] }>;
 
-    facets(
-      overrides?: CallOverrides
-    ): Promise<
+    facets(overrides?: CallOverrides): Promise<
       [IDiamondLoupe.FacetStructOutput[]] & {
         facets_: IDiamondLoupe.FacetStructOutput[];
       }
@@ -1257,6 +1275,11 @@ export interface Staking extends BaseContract {
     getKeyTypes(overrides?: CallOverrides): Promise<[BigNumber[]]>;
 
     getKickedValidators(overrides?: CallOverrides): Promise<[string[]]>;
+
+    getNodeStakerAddressMappings(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<[LibStakingStorage.AddressMappingStructOutput[]]>;
 
     getStakingBalancesAddress(overrides?: CallOverrides): Promise<[string]>;
 
@@ -1551,6 +1574,11 @@ export interface Staking extends BaseContract {
 
   getKickedValidators(overrides?: CallOverrides): Promise<string[]>;
 
+  getNodeStakerAddressMappings(
+    addresses: string[],
+    overrides?: CallOverrides
+  ): Promise<LibStakingStorage.AddressMappingStructOutput[]>;
+
   getStakingBalancesAddress(overrides?: CallOverrides): Promise<string>;
 
   getTokenAddress(overrides?: CallOverrides): Promise<string>;
@@ -1828,6 +1856,11 @@ export interface Staking extends BaseContract {
 
     getKickedValidators(overrides?: CallOverrides): Promise<string[]>;
 
+    getNodeStakerAddressMappings(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<LibStakingStorage.AddressMappingStructOutput[]>;
+
     getStakingBalancesAddress(overrides?: CallOverrides): Promise<string>;
 
     getTokenAddress(overrides?: CallOverrides): Promise<string>;
@@ -1905,7 +1938,7 @@ export interface Staking extends BaseContract {
   };
 
   filters: {
-    "DiamondCut((address,uint8,bytes4[])[],address,bytes)"(
+    'DiamondCut((address,uint8,bytes4[])[],address,bytes)'(
       _diamondCut?: null,
       _init?: null,
       _calldata?: null
@@ -1916,7 +1949,7 @@ export interface Staking extends BaseContract {
       _calldata?: null
     ): DiamondCutEventFilter;
 
-    "OwnershipTransferred(address,address)"(
+    'OwnershipTransferred(address,address)'(
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
@@ -1925,7 +1958,7 @@ export interface Staking extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    "ConfigSet(uint256,uint256,uint256,uint256[],uint256)"(
+    'ConfigSet(uint256,uint256,uint256,uint256[],uint256)'(
       newTokenRewardPerTokenPerEpoch?: null,
       newComplaintTolerance?: null,
       newComplaintIntervalSecs?: null,
@@ -1940,20 +1973,20 @@ export interface Staking extends BaseContract {
       newMinimumValidatorCount?: null
     ): ConfigSetEventFilter;
 
-    "EpochEndTimeSet(uint256)"(
+    'EpochEndTimeSet(uint256)'(
       newEpochEndTime?: null
     ): EpochEndTimeSetEventFilter;
     EpochEndTimeSet(newEpochEndTime?: null): EpochEndTimeSetEventFilter;
 
-    "EpochLengthSet(uint256)"(newEpochLength?: null): EpochLengthSetEventFilter;
+    'EpochLengthSet(uint256)'(newEpochLength?: null): EpochLengthSetEventFilter;
     EpochLengthSet(newEpochLength?: null): EpochLengthSetEventFilter;
 
-    "EpochTimeoutSet(uint256)"(
+    'EpochTimeoutSet(uint256)'(
       newEpochTimeout?: null
     ): EpochTimeoutSetEventFilter;
     EpochTimeoutSet(newEpochTimeout?: null): EpochTimeoutSetEventFilter;
 
-    "KickPenaltyPercentSet(uint256,uint256)"(
+    'KickPenaltyPercentSet(uint256,uint256)'(
       reason?: null,
       newKickPenaltyPercent?: null
     ): KickPenaltyPercentSetEventFilter;
@@ -1962,7 +1995,7 @@ export interface Staking extends BaseContract {
       newKickPenaltyPercent?: null
     ): KickPenaltyPercentSetEventFilter;
 
-    "ReadyForNextEpoch(address,uint256)"(
+    'ReadyForNextEpoch(address,uint256)'(
       staker?: string | null,
       epochNumber?: null
     ): ReadyForNextEpochEventFilter;
@@ -1971,43 +2004,43 @@ export interface Staking extends BaseContract {
       epochNumber?: null
     ): ReadyForNextEpochEventFilter;
 
-    "Recovered(address,uint256)"(
+    'Recovered(address,uint256)'(
       token?: null,
       amount?: null
     ): RecoveredEventFilter;
     Recovered(token?: null, amount?: null): RecoveredEventFilter;
 
-    "RequestToJoin(address)"(staker?: string | null): RequestToJoinEventFilter;
+    'RequestToJoin(address)'(staker?: string | null): RequestToJoinEventFilter;
     RequestToJoin(staker?: string | null): RequestToJoinEventFilter;
 
-    "RequestToLeave(address)"(
+    'RequestToLeave(address)'(
       staker?: string | null
     ): RequestToLeaveEventFilter;
     RequestToLeave(staker?: string | null): RequestToLeaveEventFilter;
 
-    "ResolverContractAddressSet(address)"(
+    'ResolverContractAddressSet(address)'(
       newResolverContractAddress?: null
     ): ResolverContractAddressSetEventFilter;
     ResolverContractAddressSet(
       newResolverContractAddress?: null
     ): ResolverContractAddressSetEventFilter;
 
-    "RewardsDurationUpdated(uint256)"(
+    'RewardsDurationUpdated(uint256)'(
       newDuration?: null
     ): RewardsDurationUpdatedEventFilter;
     RewardsDurationUpdated(
       newDuration?: null
     ): RewardsDurationUpdatedEventFilter;
 
-    "StakingTokenSet(address)"(
+    'StakingTokenSet(address)'(
       newStakingTokenAddress?: null
     ): StakingTokenSetEventFilter;
     StakingTokenSet(newStakingTokenAddress?: null): StakingTokenSetEventFilter;
 
-    "StateChanged(uint8)"(newState?: null): StateChangedEventFilter;
+    'StateChanged(uint8)'(newState?: null): StateChangedEventFilter;
     StateChanged(newState?: null): StateChangedEventFilter;
 
-    "ValidatorKickedFromNextEpoch(address,uint256)"(
+    'ValidatorKickedFromNextEpoch(address,uint256)'(
       staker?: string | null,
       amountBurned?: null
     ): ValidatorKickedFromNextEpochEventFilter;
@@ -2016,14 +2049,14 @@ export interface Staking extends BaseContract {
       amountBurned?: null
     ): ValidatorKickedFromNextEpochEventFilter;
 
-    "ValidatorRejoinedNextEpoch(address)"(
+    'ValidatorRejoinedNextEpoch(address)'(
       staker?: null
     ): ValidatorRejoinedNextEpochEventFilter;
     ValidatorRejoinedNextEpoch(
       staker?: null
     ): ValidatorRejoinedNextEpochEventFilter;
 
-    "VotedToKickValidatorInNextEpoch(address,address,uint256,bytes)"(
+    'VotedToKickValidatorInNextEpoch(address,address,uint256,bytes)'(
       reporter?: string | null,
       validatorStakerAddress?: string | null,
       reason?: BigNumberish | null,
@@ -2242,6 +2275,11 @@ export interface Staking extends BaseContract {
     getKeyTypes(overrides?: CallOverrides): Promise<BigNumber>;
 
     getKickedValidators(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getNodeStakerAddressMappings(
+      addresses: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getStakingBalancesAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2534,6 +2572,11 @@ export interface Staking extends BaseContract {
     getKeyTypes(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getKickedValidators(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getNodeStakerAddressMappings(
+      addresses: string[],
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

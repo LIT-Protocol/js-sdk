@@ -141,11 +141,11 @@ export type ClaimProcessor = RelayClaimProcessor | ClientClaimProcessor;
 
 /**
  * Callback function for processing claim requests.
- * 
+ *
  * This function can be used in two scenarios:
  * 1. When the claim is processed by a relay server.
  * 2. When the claim is processed by a contract client.
- * 
+ *
  * For contract clients, you can use the `contract-sdk` or implement your own client.
  * Ensure that your client has the correct ABI and contract addresses for successful processing.
  */
@@ -162,15 +162,15 @@ export type MintCallback<T = ClaimProcessor> = (
  */
 export type ClaimRequest<T = ClaimProcessor> = {
   authMethod: AuthMethod;
-  mintCallback?: MintCallback<T>, 
-} & (T extends 'relay' ? LitRelayConfig : {signer: ethers.Signer});
+  mintCallback?: MintCallback<T>;
+} & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
 
 /**
  * Result from network claim proccessing, used in {@link MintCallback}
  */
 export type ClaimResult<T = ClaimProcessor> = {
-  signatures: Signature[],
-  derivedKeyId: string,
-  authMethodType: AuthMethodType
-  pubkey: string, 
-} & (T extends 'relay' ? LitRelayConfig : {signer: ethers.Signer});
+  signatures: Signature[];
+  derivedKeyId: string;
+  authMethodType: AuthMethodType;
+  pubkey: string;
+} & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });

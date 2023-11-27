@@ -25,7 +25,8 @@ if (!globalThis.wasmExports) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
+        `✅ [BLS SDK] wasmExports loaded. ${
+          Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
       );
     }
@@ -47,13 +48,13 @@ if (!globalThis.wasmECDSA) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
+          Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );
     }
   });
 }
-
 
 /** ---------- Exports ---------- */
 
@@ -184,7 +185,10 @@ export const combineEcdsaShares = (
   const type = sigShares[0].sigType;
 
   if (!type) {
-    throw new Error("Sig type is not defined! Here's your sigShares:", sigShares);
+    throw new Error(
+      "Sig type is not defined! Here's your sigShares:",
+      sigShares
+    );
   }
 
   // the public key can come from any node - it obviously will be identical from each node

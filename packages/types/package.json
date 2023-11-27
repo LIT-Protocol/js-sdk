@@ -23,7 +23,7 @@
   "buildOptions": {
     "genReact": false
   },
-  "version": "3.0.16",
+  "version": "3.0.24",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

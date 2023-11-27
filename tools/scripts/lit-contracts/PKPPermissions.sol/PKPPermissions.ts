@@ -12,19 +12,19 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from "ethers";
+} from 'ethers';
 import type {
   FunctionFragment,
   Result,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+} from '@ethersproject/abi';
+import type { Listener, Provider } from '@ethersproject/providers';
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from "./common";
+} from './common';
 
 export declare namespace IDiamond {
   export type FacetCutStruct = {
@@ -68,120 +68,120 @@ export declare namespace LibPKPPermissionsStorage {
 
 export interface PKPPermissionsInterface extends utils.Interface {
   functions: {
-    "diamondCut((address,uint8,bytes4[])[],address,bytes)": FunctionFragment;
-    "facetAddress(bytes4)": FunctionFragment;
-    "facetAddresses()": FunctionFragment;
-    "facetFunctionSelectors(address)": FunctionFragment;
-    "facets()": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "owner()": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
-    "addPermittedAction(uint256,bytes,uint256[])": FunctionFragment;
-    "addPermittedAddress(uint256,address,uint256[])": FunctionFragment;
-    "addPermittedAuthMethod(uint256,(uint256,bytes,bytes),uint256[])": FunctionFragment;
-    "addPermittedAuthMethodScope(uint256,uint256,bytes,uint256)": FunctionFragment;
-    "batchAddRemoveAuthMethods(uint256,uint256[],bytes[],bytes[],uint256[][],uint256[],bytes[])": FunctionFragment;
-    "getAuthMethodId(uint256,bytes)": FunctionFragment;
-    "getEthAddress(uint256)": FunctionFragment;
-    "getPermittedActions(uint256)": FunctionFragment;
-    "getPermittedAddresses(uint256)": FunctionFragment;
-    "getPermittedAuthMethodScopes(uint256,uint256,bytes,uint256)": FunctionFragment;
-    "getPermittedAuthMethods(uint256)": FunctionFragment;
-    "getPkpNftAddress()": FunctionFragment;
-    "getPubkey(uint256)": FunctionFragment;
-    "getRouterAddress()": FunctionFragment;
-    "getTokenIdsForAuthMethod(uint256,bytes)": FunctionFragment;
-    "getUserPubkeyForAuthMethod(uint256,bytes)": FunctionFragment;
-    "isPermittedAction(uint256,bytes)": FunctionFragment;
-    "isPermittedAddress(uint256,address)": FunctionFragment;
-    "isPermittedAuthMethod(uint256,uint256,bytes)": FunctionFragment;
-    "isPermittedAuthMethodScopePresent(uint256,uint256,bytes,uint256)": FunctionFragment;
-    "removePermittedAction(uint256,bytes)": FunctionFragment;
-    "removePermittedAddress(uint256,address)": FunctionFragment;
-    "removePermittedAuthMethod(uint256,uint256,bytes)": FunctionFragment;
-    "removePermittedAuthMethodScope(uint256,uint256,bytes,uint256)": FunctionFragment;
-    "setContractResolver(address)": FunctionFragment;
-    "setRootHash(uint256,uint256,bytes32)": FunctionFragment;
-    "verifyState(uint256,uint256,bytes32[],bytes32)": FunctionFragment;
-    "verifyStates(uint256,uint256,bytes32[],bool[],bytes32[])": FunctionFragment;
+    'diamondCut((address,uint8,bytes4[])[],address,bytes)': FunctionFragment;
+    'facetAddress(bytes4)': FunctionFragment;
+    'facetAddresses()': FunctionFragment;
+    'facetFunctionSelectors(address)': FunctionFragment;
+    'facets()': FunctionFragment;
+    'supportsInterface(bytes4)': FunctionFragment;
+    'owner()': FunctionFragment;
+    'transferOwnership(address)': FunctionFragment;
+    'addPermittedAction(uint256,bytes,uint256[])': FunctionFragment;
+    'addPermittedAddress(uint256,address,uint256[])': FunctionFragment;
+    'addPermittedAuthMethod(uint256,(uint256,bytes,bytes),uint256[])': FunctionFragment;
+    'addPermittedAuthMethodScope(uint256,uint256,bytes,uint256)': FunctionFragment;
+    'batchAddRemoveAuthMethods(uint256,uint256[],bytes[],bytes[],uint256[][],uint256[],bytes[])': FunctionFragment;
+    'getAuthMethodId(uint256,bytes)': FunctionFragment;
+    'getEthAddress(uint256)': FunctionFragment;
+    'getPermittedActions(uint256)': FunctionFragment;
+    'getPermittedAddresses(uint256)': FunctionFragment;
+    'getPermittedAuthMethodScopes(uint256,uint256,bytes,uint256)': FunctionFragment;
+    'getPermittedAuthMethods(uint256)': FunctionFragment;
+    'getPkpNftAddress()': FunctionFragment;
+    'getPubkey(uint256)': FunctionFragment;
+    'getRouterAddress()': FunctionFragment;
+    'getTokenIdsForAuthMethod(uint256,bytes)': FunctionFragment;
+    'getUserPubkeyForAuthMethod(uint256,bytes)': FunctionFragment;
+    'isPermittedAction(uint256,bytes)': FunctionFragment;
+    'isPermittedAddress(uint256,address)': FunctionFragment;
+    'isPermittedAuthMethod(uint256,uint256,bytes)': FunctionFragment;
+    'isPermittedAuthMethodScopePresent(uint256,uint256,bytes,uint256)': FunctionFragment;
+    'removePermittedAction(uint256,bytes)': FunctionFragment;
+    'removePermittedAddress(uint256,address)': FunctionFragment;
+    'removePermittedAuthMethod(uint256,uint256,bytes)': FunctionFragment;
+    'removePermittedAuthMethodScope(uint256,uint256,bytes,uint256)': FunctionFragment;
+    'setContractResolver(address)': FunctionFragment;
+    'setRootHash(uint256,uint256,bytes32)': FunctionFragment;
+    'verifyState(uint256,uint256,bytes32[],bytes32)': FunctionFragment;
+    'verifyStates(uint256,uint256,bytes32[],bool[],bytes32[])': FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "diamondCut"
-      | "facetAddress"
-      | "facetAddresses"
-      | "facetFunctionSelectors"
-      | "facets"
-      | "supportsInterface"
-      | "owner"
-      | "transferOwnership"
-      | "addPermittedAction"
-      | "addPermittedAddress"
-      | "addPermittedAuthMethod"
-      | "addPermittedAuthMethodScope"
-      | "batchAddRemoveAuthMethods"
-      | "getAuthMethodId"
-      | "getEthAddress"
-      | "getPermittedActions"
-      | "getPermittedAddresses"
-      | "getPermittedAuthMethodScopes"
-      | "getPermittedAuthMethods"
-      | "getPkpNftAddress"
-      | "getPubkey"
-      | "getRouterAddress"
-      | "getTokenIdsForAuthMethod"
-      | "getUserPubkeyForAuthMethod"
-      | "isPermittedAction"
-      | "isPermittedAddress"
-      | "isPermittedAuthMethod"
-      | "isPermittedAuthMethodScopePresent"
-      | "removePermittedAction"
-      | "removePermittedAddress"
-      | "removePermittedAuthMethod"
-      | "removePermittedAuthMethodScope"
-      | "setContractResolver"
-      | "setRootHash"
-      | "verifyState"
-      | "verifyStates"
+      | 'diamondCut'
+      | 'facetAddress'
+      | 'facetAddresses'
+      | 'facetFunctionSelectors'
+      | 'facets'
+      | 'supportsInterface'
+      | 'owner'
+      | 'transferOwnership'
+      | 'addPermittedAction'
+      | 'addPermittedAddress'
+      | 'addPermittedAuthMethod'
+      | 'addPermittedAuthMethodScope'
+      | 'batchAddRemoveAuthMethods'
+      | 'getAuthMethodId'
+      | 'getEthAddress'
+      | 'getPermittedActions'
+      | 'getPermittedAddresses'
+      | 'getPermittedAuthMethodScopes'
+      | 'getPermittedAuthMethods'
+      | 'getPkpNftAddress'
+      | 'getPubkey'
+      | 'getRouterAddress'
+      | 'getTokenIdsForAuthMethod'
+      | 'getUserPubkeyForAuthMethod'
+      | 'isPermittedAction'
+      | 'isPermittedAddress'
+      | 'isPermittedAuthMethod'
+      | 'isPermittedAuthMethodScopePresent'
+      | 'removePermittedAction'
+      | 'removePermittedAddress'
+      | 'removePermittedAuthMethod'
+      | 'removePermittedAuthMethodScope'
+      | 'setContractResolver'
+      | 'setRootHash'
+      | 'verifyState'
+      | 'verifyStates'
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "diamondCut",
+    functionFragment: 'diamondCut',
     values: [IDiamond.FacetCutStruct[], string, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "facetAddress",
+    functionFragment: 'facetAddress',
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "facetAddresses",
+    functionFragment: 'facetAddresses',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "facetFunctionSelectors",
+    functionFragment: 'facetFunctionSelectors',
     values: [string]
   ): string;
-  encodeFunctionData(functionFragment: "facets", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'facets', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "supportsInterface",
+    functionFragment: 'supportsInterface',
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "transferOwnership",
+    functionFragment: 'transferOwnership',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "addPermittedAction",
+    functionFragment: 'addPermittedAction',
     values: [BigNumberish, BytesLike, BigNumberish[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "addPermittedAddress",
+    functionFragment: 'addPermittedAddress',
     values: [BigNumberish, string, BigNumberish[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "addPermittedAuthMethod",
+    functionFragment: 'addPermittedAuthMethod',
     values: [
       BigNumberish,
       LibPKPPermissionsStorage.AuthMethodStruct,
@@ -189,11 +189,11 @@ export interface PKPPermissionsInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "addPermittedAuthMethodScope",
+    functionFragment: 'addPermittedAuthMethodScope',
     values: [BigNumberish, BigNumberish, BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "batchAddRemoveAuthMethods",
+    functionFragment: 'batchAddRemoveAuthMethods',
     values: [
       BigNumberish,
       BigNumberish[],
@@ -205,254 +205,254 @@ export interface PKPPermissionsInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "getAuthMethodId",
+    functionFragment: 'getAuthMethodId',
     values: [BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "getEthAddress",
+    functionFragment: 'getEthAddress',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getPermittedActions",
+    functionFragment: 'getPermittedActions',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getPermittedAddresses",
+    functionFragment: 'getPermittedAddresses',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getPermittedAuthMethodScopes",
+    functionFragment: 'getPermittedAuthMethodScopes',
     values: [BigNumberish, BigNumberish, BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getPermittedAuthMethods",
+    functionFragment: 'getPermittedAuthMethods',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getPkpNftAddress",
+    functionFragment: 'getPkpNftAddress',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getPubkey",
+    functionFragment: 'getPubkey',
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getRouterAddress",
+    functionFragment: 'getRouterAddress',
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getTokenIdsForAuthMethod",
+    functionFragment: 'getTokenIdsForAuthMethod',
     values: [BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "getUserPubkeyForAuthMethod",
+    functionFragment: 'getUserPubkeyForAuthMethod',
     values: [BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "isPermittedAction",
+    functionFragment: 'isPermittedAction',
     values: [BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "isPermittedAddress",
+    functionFragment: 'isPermittedAddress',
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "isPermittedAuthMethod",
+    functionFragment: 'isPermittedAuthMethod',
     values: [BigNumberish, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "isPermittedAuthMethodScopePresent",
+    functionFragment: 'isPermittedAuthMethodScopePresent',
     values: [BigNumberish, BigNumberish, BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "removePermittedAction",
+    functionFragment: 'removePermittedAction',
     values: [BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "removePermittedAddress",
+    functionFragment: 'removePermittedAddress',
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "removePermittedAuthMethod",
+    functionFragment: 'removePermittedAuthMethod',
     values: [BigNumberish, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "removePermittedAuthMethodScope",
+    functionFragment: 'removePermittedAuthMethodScope',
     values: [BigNumberish, BigNumberish, BytesLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "setContractResolver",
+    functionFragment: 'setContractResolver',
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setRootHash",
+    functionFragment: 'setRootHash',
     values: [BigNumberish, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "verifyState",
+    functionFragment: 'verifyState',
     values: [BigNumberish, BigNumberish, BytesLike[], BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "verifyStates",
+    functionFragment: 'verifyStates',
     values: [BigNumberish, BigNumberish, BytesLike[], boolean[], BytesLike[]]
   ): string;
 
-  decodeFunctionResult(functionFragment: "diamondCut", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'diamondCut', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "facetAddress",
+    functionFragment: 'facetAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "facetAddresses",
+    functionFragment: 'facetAddresses',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "facetFunctionSelectors",
+    functionFragment: 'facetFunctionSelectors',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "facets", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'facets', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "supportsInterface",
+    functionFragment: 'supportsInterface',
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addPermittedAction",
+    functionFragment: 'transferOwnership',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "addPermittedAddress",
+    functionFragment: 'addPermittedAction',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "addPermittedAuthMethod",
+    functionFragment: 'addPermittedAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "addPermittedAuthMethodScope",
+    functionFragment: 'addPermittedAuthMethod',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "batchAddRemoveAuthMethods",
+    functionFragment: 'addPermittedAuthMethodScope',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getAuthMethodId",
+    functionFragment: 'batchAddRemoveAuthMethods',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getEthAddress",
+    functionFragment: 'getAuthMethodId',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getPermittedActions",
+    functionFragment: 'getEthAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getPermittedAddresses",
+    functionFragment: 'getPermittedActions',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getPermittedAuthMethodScopes",
+    functionFragment: 'getPermittedAddresses',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getPermittedAuthMethods",
+    functionFragment: 'getPermittedAuthMethodScopes',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getPkpNftAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "getPubkey", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getRouterAddress",
+    functionFragment: 'getPermittedAuthMethods',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getTokenIdsForAuthMethod",
+    functionFragment: 'getPkpNftAddress',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: 'getPubkey', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'getRouterAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getUserPubkeyForAuthMethod",
+    functionFragment: 'getTokenIdsForAuthMethod',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isPermittedAction",
+    functionFragment: 'getUserPubkeyForAuthMethod',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isPermittedAddress",
+    functionFragment: 'isPermittedAction',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isPermittedAuthMethod",
+    functionFragment: 'isPermittedAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isPermittedAuthMethodScopePresent",
+    functionFragment: 'isPermittedAuthMethod',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "removePermittedAction",
+    functionFragment: 'isPermittedAuthMethodScopePresent',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "removePermittedAddress",
+    functionFragment: 'removePermittedAction',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "removePermittedAuthMethod",
+    functionFragment: 'removePermittedAddress',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "removePermittedAuthMethodScope",
+    functionFragment: 'removePermittedAuthMethod',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setContractResolver",
+    functionFragment: 'removePermittedAuthMethodScope',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setRootHash",
+    functionFragment: 'setContractResolver',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "verifyState",
+    functionFragment: 'setRootHash',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "verifyStates",
+    functionFragment: 'verifyState',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'verifyStates',
     data: BytesLike
   ): Result;
 
   events: {
-    "DiamondCut((address,uint8,bytes4[])[],address,bytes)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
-    "ContractResolverAddressSet(address)": EventFragment;
-    "PermittedAuthMethodAdded(uint256,uint256,bytes,bytes)": EventFragment;
-    "PermittedAuthMethodRemoved(uint256,uint256,bytes)": EventFragment;
-    "PermittedAuthMethodScopeAdded(uint256,uint256,bytes,uint256)": EventFragment;
-    "PermittedAuthMethodScopeRemoved(uint256,uint256,bytes,uint256)": EventFragment;
-    "RootHashUpdated(uint256,uint256,bytes32)": EventFragment;
+    'DiamondCut((address,uint8,bytes4[])[],address,bytes)': EventFragment;
+    'OwnershipTransferred(address,address)': EventFragment;
+    'ContractResolverAddressSet(address)': EventFragment;
+    'PermittedAuthMethodAdded(uint256,uint256,bytes,bytes)': EventFragment;
+    'PermittedAuthMethodRemoved(uint256,uint256,bytes)': EventFragment;
+    'PermittedAuthMethodScopeAdded(uint256,uint256,bytes,uint256)': EventFragment;
+    'PermittedAuthMethodScopeRemoved(uint256,uint256,bytes,uint256)': EventFragment;
+    'RootHashUpdated(uint256,uint256,bytes32)': EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ContractResolverAddressSet"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "PermittedAuthMethodAdded"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "PermittedAuthMethodRemoved"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'DiamondCut'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'ContractResolverAddressSet'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'PermittedAuthMethodAdded'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'PermittedAuthMethodRemoved'): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "PermittedAuthMethodScopeAdded"
+    nameOrSignatureOrTopic: 'PermittedAuthMethodScopeAdded'
   ): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "PermittedAuthMethodScopeRemoved"
+    nameOrSignatureOrTopic: 'PermittedAuthMethodScopeRemoved'
   ): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RootHashUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'RootHashUpdated'): EventFragment;
 }
 
 export interface DiamondCutEventObject {
@@ -605,9 +605,7 @@ export interface PKPPermissions extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string[]] & { _facetFunctionSelectors: string[] }>;
 
-    facets(
-      overrides?: CallOverrides
-    ): Promise<
+    facets(overrides?: CallOverrides): Promise<
       [IDiamondLoupe.FacetStructOutput[]] & {
         facets_: IDiamondLoupe.FacetStructOutput[];
       }
@@ -1228,7 +1226,7 @@ export interface PKPPermissions extends BaseContract {
   };
 
   filters: {
-    "DiamondCut((address,uint8,bytes4[])[],address,bytes)"(
+    'DiamondCut((address,uint8,bytes4[])[],address,bytes)'(
       _diamondCut?: null,
       _init?: null,
       _calldata?: null
@@ -1239,7 +1237,7 @@ export interface PKPPermissions extends BaseContract {
       _calldata?: null
     ): DiamondCutEventFilter;
 
-    "OwnershipTransferred(address,address)"(
+    'OwnershipTransferred(address,address)'(
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
@@ -1248,14 +1246,14 @@ export interface PKPPermissions extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    "ContractResolverAddressSet(address)"(
+    'ContractResolverAddressSet(address)'(
       newResolverAddress?: null
     ): ContractResolverAddressSetEventFilter;
     ContractResolverAddressSet(
       newResolverAddress?: null
     ): ContractResolverAddressSetEventFilter;
 
-    "PermittedAuthMethodAdded(uint256,uint256,bytes,bytes)"(
+    'PermittedAuthMethodAdded(uint256,uint256,bytes,bytes)'(
       tokenId?: BigNumberish | null,
       authMethodType?: null,
       id?: null,
@@ -1268,7 +1266,7 @@ export interface PKPPermissions extends BaseContract {
       userPubkey?: null
     ): PermittedAuthMethodAddedEventFilter;
 
-    "PermittedAuthMethodRemoved(uint256,uint256,bytes)"(
+    'PermittedAuthMethodRemoved(uint256,uint256,bytes)'(
       tokenId?: BigNumberish | null,
       authMethodType?: null,
       id?: null
@@ -1279,7 +1277,7 @@ export interface PKPPermissions extends BaseContract {
       id?: null
     ): PermittedAuthMethodRemovedEventFilter;
 
-    "PermittedAuthMethodScopeAdded(uint256,uint256,bytes,uint256)"(
+    'PermittedAuthMethodScopeAdded(uint256,uint256,bytes,uint256)'(
       tokenId?: BigNumberish | null,
       authMethodType?: null,
       id?: null,
@@ -1292,7 +1290,7 @@ export interface PKPPermissions extends BaseContract {
       scopeId?: null
     ): PermittedAuthMethodScopeAddedEventFilter;
 
-    "PermittedAuthMethodScopeRemoved(uint256,uint256,bytes,uint256)"(
+    'PermittedAuthMethodScopeRemoved(uint256,uint256,bytes,uint256)'(
       tokenId?: BigNumberish | null,
       authMethodType?: null,
       id?: null,
@@ -1305,7 +1303,7 @@ export interface PKPPermissions extends BaseContract {
       scopeId?: null
     ): PermittedAuthMethodScopeRemovedEventFilter;
 
-    "RootHashUpdated(uint256,uint256,bytes32)"(
+    'RootHashUpdated(uint256,uint256,bytes32)'(
       tokenId?: BigNumberish | null,
       group?: BigNumberish | null,
       root?: null
