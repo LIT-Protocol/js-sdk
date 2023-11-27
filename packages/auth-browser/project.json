@@ -15,7 +15,6 @@
         ],
         "parallel": false
       }
-      
     },
     "_buildTsc": {
       "executor": "@nrwl/js:tsc",

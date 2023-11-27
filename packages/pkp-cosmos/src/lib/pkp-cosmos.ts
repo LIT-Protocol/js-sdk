@@ -145,10 +145,7 @@ export class PKPCosmosWallet
     // Run the LIT action to obtain the signature.
     let signature;
     if (this.useAction) {
-      signature = await this.runLitAction(
-        hashedMessage,
-        this.defaultSigName
-      );
+      signature = await this.runLitAction(hashedMessage, this.defaultSigName);
     } else {
       signature = await this.runSign(hashedMessage);
     }

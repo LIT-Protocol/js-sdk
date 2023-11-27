@@ -55,12 +55,19 @@ const logger = new Logger(version);
 
 export class PKPEthersWallet
   extends PKPBase
-  implements Signer, ExternallyOwnedAccount, TypedDataSigner, PKPClientHelpers {
+  implements Signer, ExternallyOwnedAccount, TypedDataSigner, PKPClientHelpers
+{
   readonly address!: string;
-  readonly provider!: Provider;
   readonly _isSigner!: boolean;
 
   rpcProvider: ethers.providers.JsonRpcProvider;
+  provider!: Provider;
+
+  // -- manual tx settings --
+  manualGasPrice?: string;
+  manualGasLimit?: string;
+  nonce?: string;
+  chainId?: number;
 
   constructor(prop: PKPEthersWalletProp) {
     super(prop);
@@ -68,6 +75,8 @@ export class PKPEthersWallet
     this.rpcProvider = new ethers.providers.JsonRpcProvider(
       prop.rpc ?? LIT_CHAINS['chronicleTestnet'].rpcUrls[0]
     );
+
+    this.provider = prop.provider ?? this.rpcProvider;
 
     defineReadOnly(this, '_isSigner', true);
 
@@ -95,6 +104,29 @@ export class PKPEthersWallet
     });
   };
 
+  setGasPrice = (gasPrice: string): void => {
+    this.manualGasPrice = gasPrice;
+  };
+
+  setGasLimit = (gasLimit: string): void => {
+    this.manualGasLimit = gasLimit;
+  };
+
+  setNonce = (nonce: string): void => {
+    this.nonce = nonce;
+  };
+
+  setChainId = (chainId: number): void => {
+    this.chainId = chainId;
+  };
+
+  resetManualSettings = (): void => {
+    this.manualGasPrice = undefined;
+    this.manualGasLimit = undefined;
+    this.nonce = undefined;
+    this.chainId = undefined;
+  };
+
   get publicKey(): string {
     return this.uncompressedPubKey;
   }
@@ -117,6 +149,23 @@ export class PKPEthersWallet
 
     const addr = await this.getAddress();
     this.log('signTransaction => addr:', addr);
+
+    // if manual settings are set, use them
+    if (this.manualGasPrice) {
+      transaction.gasPrice = this.manualGasPrice;
+    }
+
+    if (this.manualGasLimit) {
+      transaction.gasLimit = this.manualGasLimit;
+    }
+
+    if (this.nonce) {
+      transaction.nonce = this.nonce;
+    }
+
+    if (this.chainId) {
+      transaction.chainId = this.chainId;
+    }
 
     try {
       if (!transaction['gasLimit']) {
@@ -172,9 +221,12 @@ export class PKPEthersWallet
         signature = (await this.runLitAction(toSign, 'pkp-eth-sign-tx'))
           .signature;
       } else {
-        this.log("requesting signature from nodes");
+        this.log('requesting signature from nodes');
         signature = (await this.runSign(toSign)).signature;
       }
+
+      // -- reset manual settings --
+      this.resetManualSettings();
 
       return serialize(<UnsignedTransaction>tx, signature);
     });
@@ -191,7 +243,7 @@ export class PKPEthersWallet
       this.log('running lit action => sigName: pkp-eth-sign-message');
       signature = await this.runLitAction(toSign, 'pkp-eth-sign-message');
     } else {
-      this.log("requesting signature from nodes");
+      this.log('requesting signature from nodes');
       signature = await this.runSign(toSign);
     }
 
@@ -246,7 +298,7 @@ export class PKPEthersWallet
       this.log('running lit action => sigName: pkp-eth-sign-message');
       signature = await this.runLitAction(toSignBuffer, 'pkp-eth-sign-message');
     } else {
-      this.log("requesting signature from nodes");
+      this.log('requesting signature from nodes');
       signature = await this.runSign(toSignBuffer);
     }
 
@@ -370,22 +422,36 @@ export class PKPEthersWallet
     return this.rpcProvider.estimateGas(transaction);
   }
 
-  call(
+  async call(
     transaction: ethers.utils.Deferrable<TransactionRequest>,
     blockTag?: ethers.providers.BlockTag | undefined
   ): Promise<string> {
-    return this.throwError(`Not available in PKPEthersWallet`);
+    if (!blockTag) {
+      return this.throwError(`blockTag is required`);
+    }
+
+    const resolved = await resolveProperties({
+      transaction: this.rpcProvider._getTransactionRequest(transaction),
+      blockTag: this.rpcProvider._getBlockTag(blockTag),
+      ccipReadEnabled: Promise.resolve(transaction.ccipReadEnabled),
+    });
+
+    // @ts-ignore
+    return this.rpcProvider._call(
+      resolved.transaction as TransactionRequest,
+      resolved.blockTag,
+      resolved.ccipReadEnabled as any
+    );
   }
 
-  getChainId(): Promise<number> {
-    return this.throwError(`Not available in PKPEthersWallet`);
+  async getChainId() {
+    return (await this.rpcProvider.getNetwork()).chainId;
   }
 
-  getGasPrice(): Promise<ethers.BigNumber> {
+  getGasPrice() {
     return this.rpcProvider.getGasPrice();
   }
-
-  getFeeData(): Promise<ethers.providers.FeeData> {
+  getFeeData() {
     return this.rpcProvider.getFeeData();
   }
 
@@ -406,7 +472,7 @@ export class PKPEthersWallet
   }
 
   _checkProvider(operation?: string | undefined): void {
-    return this.throwError(`Not available in PKPEthersWallet`);
+    this.log('This function is not implemented yet, but will skip it for now.');
   }
 
   get mnemonic() {

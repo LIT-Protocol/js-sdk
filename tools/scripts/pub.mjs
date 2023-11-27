@@ -95,7 +95,6 @@ greenLog(
   true
 );
 
-
 await question('Are you sure you want to publish to? (y/n)', {
   yes: async () => {
     greenLog('Publishing...');

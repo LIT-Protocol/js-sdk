@@ -9,8 +9,9 @@ const __dirname = path.dirname(__filename);
 
 const ROOT_DIR = path.resolve(__dirname, '../');
 const DIR = ROOT_DIR + '/e2e-nodejs/';
-const IGNORE_LIST = ['index.mjs', 'template.mjs', '00-setup.mjs'];
 
+const IGNORE_LIST = ['index.mjs', 'template.mjs', '00-setup.mjs'];
+const IGNORE_DIRS = ['0_manual-tests'];
 /**
  * Function to get all files from the directory excluding 'index'
  * @param {string} dir - The directory path
@@ -19,6 +20,7 @@ const IGNORE_LIST = ['index.mjs', 'template.mjs', '00-setup.mjs'];
 const getFilesFromDir = (dir) => {
   let results = [];
   const list = fs.readdirSync(dir);
+
   list.forEach((file) => {
     const filePath = path.join(dir, file);
     const stat = fs.statSync(filePath);
@@ -87,11 +89,21 @@ async function main() {
   }
   let currentGroup = null;
   let errorCounter = 0;
+  let logs = [];
 
   // -- async mode
   if (mode === 'async') {
     for (const file of files) {
+      if (IGNORE_DIRS.includes(file)) {
+        return;
+      }
+
       const group = file.split('/')[file.split('/').length - 2]; // Assuming group is the second last part of the file path
+
+      // skip the for loop if group is in IGNORE_DIRS
+      if (IGNORE_DIRS.includes(group)) {
+        continue;
+      }
 
       if (group !== currentGroup) {
         console.log(`\nRunning tests in ${group}`);
@@ -102,6 +114,10 @@ async function main() {
         await import(file);
       } catch (e) {
         errorCounter += 1;
+        logs.push(
+          `-------------------
+- [${errorCounter}] Error happened in ${file}, see below for details 👇 \n${e}`
+        );
         console.log(e);
       }
     }
@@ -130,6 +146,10 @@ async function main() {
 
   if (errorCounter > 0) {
     console.log(`❌ ${errorCounter} test(s) failed`);
+    logs.forEach((log) => {
+      console.log(log);
+    });
+
     process.exit(1);
   }
   process.exit(0);

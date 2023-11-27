@@ -21,6 +21,49 @@
 
       //var authSig = JSON.parse("{\"sig\":\"0x18a173d68d2f78cc5c13da0dfe36eec2a293285bee6d42547b9577bf26cdc985660ed3dddc4e75d422366cac07e8a9fc77669b10373bef9c7b8e4280252dfddf1b\",\"derivedVia\":\"web3.eth.personal.sign\",\"signedMessage\":\"I am creating an account to use LITs at 2021-08-04T20:14:04.918Z\",\"address\":\"0xdbd360f30097fb6d938dcc8b7b62854b36160b45\"}")
 
+      var CheckAndSignAuthMessageWithoutBlockhash = async() => {
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+            chain: "ethereum",
+        });
+        let nonceLine = authSig.signedMessage.match(/^Nonce: (.+)$/m);
+
+        if (nonceLine[1].length ===  17) {
+          document.getElementById(
+            'status'
+          ).innerText = "CheckAndSignAuthMessageWithoutBlockhash passed!";
+          return true;
+        } else {
+          document.getElementById('status').innerText = "CheckAndSignAuthMessageWithoutBlockhash failed!";
+          return false;
+        }
+
+        await LitJsSdk.disconnectWeb3();
+      }
+
+      // The nonce should be we the below blockhash
+      var CheckAndSignAuthMessageWithBlockhash = async() => {
+        // Currently this will be undefined but later we should replace it with the hardcoded blockhash
+        const TEST_BLOCKHASH = "0xfe88c94d860f01a17f961bf4bdfb6e0c6cd10d3fda5cc861e805ca1240c58553";
+        const nonce = litNodeClient.getLatestBlockhash() || TEST_BLOCKHASH;
+
+        const authSig = await LitJsSdk.checkAndSignAuthMessage({
+            chain: "ethereum",
+            nonce,
+        });
+
+        if (authSig.signedMessage.includes(TEST_BLOCKHASH)) {
+          document.getElementById(
+            'status'
+          ).innerText = "CheckAndSignAuthMessageWithBlockhash passed!";
+          return true;
+        } else {
+          document.getElementById('status').innerText = "CheckAndSignAuthMessageWithBlockhash failed!";
+          return false;
+        }
+
+        await LitJsSdk.disconnectWeb3();
+      }
+
       var testEncryptingFileAndZipWithMetadata = async ({
         accessControlConditions,
         evmContractConditions,
@@ -671,6 +714,126 @@
         await testProvisoningAndSigning({
           accessControlConditions,
           testName: 'ETHOnZksync',
+        });
+      };
+
+      var ETHOnBase = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'base',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnBase',
+        });
+      };
+
+      var ETHOnBaseGoerli = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'baseGoerli',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnBaseGoerli',
+        });
+      };
+
+      var ETHOnLukso = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'lukso',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnLukso',
+        });
+      };
+
+      var ETHOnLuksoTestnet = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'luksoTestnet',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnLuksoTestnet',
+        });
+      };
+
+      var ETHOnZora = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'zora',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnZora',
+        });
+      };
+
+      var ETHOnZoraGoerli = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'zoraGoerli',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnZoraGoerli',
         });
       };
 
@@ -1564,6 +1727,12 @@
     <div id="networkStatus">Connecting to Lit Protocol Network...</div>
     <br />
     <br />
+    <button onclick="CheckAndSignAuthMessageWithoutBlockhash()">checkAndSignAuthMessage without blockhash</button>
+    <br />
+    <br />
+    <button onclick="CheckAndSignAuthMessageWithBlockhash()">checkAndSignAuthMessage with blockhash</button>
+    <br />
+    <br />
     <button onclick="ETHEmptyWallet()">ETH (Empty Wallet)</button>
     <br />
     <br />
@@ -1633,6 +1802,24 @@
     <br />
     <br />
     <button onclick="ETHOnZksync()">ETHOnZksync</button>
+    <br />
+    <br />
+    <button onclick="ETHOnBase()">ETHOnBase</button>
+    <br />
+    <br />
+    <button onclick="ETHOnBaseGoerli()">ETHOnBaseGoerli</button>
+    <br />
+    <br />
+    <button onclick="ETHOnLukso()">ETHOnLukso</button>
+    <br />
+    <br />
+    <button onclick="ETHOnLuksoTestnet()">ETHOnLuksoTestnet</button>
+    <br />
+    <br />
+    <button onclick="ETHOnZora()">ETHOnZora</button>
+    <br />
+    <br />
+    <button onclick="ETHOnZoraGoerli()">ETHOnZoraGoerli</button>
     <br />
     <br />
     <button onclick="ETHOnZksyncTestnet()">ETHOnZksyncTestnet</button>

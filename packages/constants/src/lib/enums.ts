@@ -8,7 +8,7 @@ export enum VMTYPE {
 export enum SIGTYPE {
   BLS = 'BLS',
   EcdsaCaitSith = 'ECDSA_CAIT_SITH',
-  EcdsaCAITSITHP256 = 'EcdsaCaitSithP256'
+  EcdsaCAITSITHP256 = 'EcdsaCaitSithP256',
 }
 
 /**
@@ -37,6 +37,12 @@ export enum AuthMethodType {
   StytchTotpFactorOtp = 13,
 }
 
+export enum AuthMethodScope {
+  NoPermissions = 0,
+  SignAnything = 1,
+  OnlySignMessages = 2,
+}
+
 /**
  * Supported provider types
  */
@@ -50,5 +56,5 @@ export enum ProviderType {
   StytchEmailFactorOtp = 'stytchEmailFactorOtp',
   StytchSmsFactorOtp = 'stytchSmsFactorOtp',
   StytchWhatsAppFactorOtp = 'stytchWhatsAppFactorOtp',
-  StytchTotpFactor = 'stytchTotpFactor'
+  StytchTotpFactor = 'stytchTotpFactor',
 }

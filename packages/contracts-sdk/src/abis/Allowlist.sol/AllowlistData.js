@@ -1,232 +1,232 @@
 export const AllowlistData = {
-  "date": "2023-11-14T15:45:41Z",
-  "address": "0x3d5b64A0E8A5D63fbEb193857faa355E19e90853",
-  "contractName": "Allowlist",
-  "abi": [
+  date: '2023-11-14T15:45:41Z',
+  address: '0xfc7Bebd150b36921549595A776D7723fBC4Bb2D9',
+  contractName: 'Allowlist',
+  abi: [
     {
-      "inputs": [],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
+      inputs: [],
+      stateMutability: 'nonpayable',
+      type: 'constructor',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "newAdmin",
-          "type": "address"
-        }
+          indexed: true,
+          internalType: 'address',
+          name: 'newAdmin',
+          type: 'address',
+        },
       ],
-      "name": "AdminAdded",
-      "type": "event"
+      name: 'AdminAdded',
+      type: 'event',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "newAdmin",
-          "type": "address"
-        }
+          indexed: true,
+          internalType: 'address',
+          name: 'newAdmin',
+          type: 'address',
+        },
       ],
-      "name": "AdminRemoved",
-      "type": "event"
+      name: 'AdminRemoved',
+      type: 'event',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "key",
-          "type": "bytes32"
-        }
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'key',
+          type: 'bytes32',
+        },
       ],
-      "name": "ItemAllowed",
-      "type": "event"
+      name: 'ItemAllowed',
+      type: 'event',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "key",
-          "type": "bytes32"
-        }
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'key',
+          type: 'bytes32',
+        },
       ],
-      "name": "ItemNotAllowed",
-      "type": "event"
+      name: 'ItemNotAllowed',
+      type: 'event',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "previousOwner",
-          "type": "address"
+          indexed: true,
+          internalType: 'address',
+          name: 'previousOwner',
+          type: 'address',
         },
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
+          indexed: true,
+          internalType: 'address',
+          name: 'newOwner',
+          type: 'address',
+        },
       ],
-      "name": "OwnershipTransferred",
-      "type": "event"
+      name: 'OwnershipTransferred',
+      type: 'event',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "newAdmin",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'newAdmin',
+          type: 'address',
+        },
       ],
-      "name": "addAdmin",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'addAdmin',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "allowAll",
-      "outputs": [
+      inputs: [],
+      name: 'allowAll',
+      outputs: [
         {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
+          internalType: 'bytes32',
+          name: '',
+          type: 'bytes32',
+        },
       ],
-      "name": "allowedItems",
-      "outputs": [
+      name: 'allowedItems',
+      outputs: [
         {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "bytes32",
-          "name": "key",
-          "type": "bytes32"
-        }
+          internalType: 'bytes32',
+          name: 'key',
+          type: 'bytes32',
+        },
       ],
-      "name": "isAllowed",
-      "outputs": [
+      name: 'isAllowed',
+      outputs: [
         {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
+      inputs: [],
+      name: 'owner',
+      outputs: [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "newAdmin",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'newAdmin',
+          type: 'address',
+        },
       ],
-      "name": "removeAdmin",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'removeAdmin',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "renounceOwnership",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      inputs: [],
+      name: 'renounceOwnership',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "bool",
-          "name": "_allowAll",
-          "type": "bool"
-        }
+          internalType: 'bool',
+          name: '_allowAll',
+          type: 'bool',
+        },
       ],
-      "name": "setAllowAll",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'setAllowAll',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "bytes32",
-          "name": "key",
-          "type": "bytes32"
-        }
+          internalType: 'bytes32',
+          name: 'key',
+          type: 'bytes32',
+        },
       ],
-      "name": "setAllowed",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'setAllowed',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "bytes32",
-          "name": "key",
-          "type": "bytes32"
-        }
+          internalType: 'bytes32',
+          name: 'key',
+          type: 'bytes32',
+        },
       ],
-      "name": "setNotAllowed",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'setNotAllowed',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'newOwner',
+          type: 'address',
+        },
       ],
-      "name": "transferOwnership",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }
-  ]
-}
+      name: 'transferOwnership',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+  ],
+};

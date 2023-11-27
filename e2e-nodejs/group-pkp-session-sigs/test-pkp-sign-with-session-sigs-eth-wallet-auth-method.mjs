@@ -30,11 +30,21 @@ export async function main() {
     accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG_2),
   };
 
+  // -- setting scope for the auth method
+  // https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
+  const options = {
+    permittedAuthMethodScopes: [[1]],
+  };
+
   let pkps = await authProvider.fetchPKPsThroughRelayer(authMethod);
 
   if (pkps.length <= 0) {
     try {
-      await authProvider.mintPKPThroughRelayer(authMethod);
+      const auth = await authProvider.mintPKPThroughRelayer(
+        authMethod,
+        options
+      );
+      console.log('auth', auth);
     } catch (e) {
       return fail('Failed to mint PKP');
     }
@@ -45,6 +55,8 @@ export async function main() {
 
   // convert BigNumber to string
   pkp.tokenId = ethers.BigNumber.from(pkp.tokenId).toString();
+
+  console.log('pkp', pkp);
 
   const pkpPubKey = pkp.publicKey;
 
@@ -91,7 +103,7 @@ export async function main() {
   const pkpWallet = new PKPEthersWallet({
     pkpPubKey: pkpPubKey,
     controllerSessionSigs: sessionSigs,
-    controllerAuthMethods: []
+    controllerAuthMethods: [],
   });
 
   await pkpWallet.init();
@@ -111,7 +123,7 @@ export async function main() {
   if (pkpSignRes) {
     ['r', 's', 'recid', 'signature', 'publicKey', 'dataSigned'].forEach(
       (key) => {
-        if (!pkpSignRes[key]) {
+        if (pkpSignRes[key] === undefined) {
           missingKeys.push(key);
         }
       }

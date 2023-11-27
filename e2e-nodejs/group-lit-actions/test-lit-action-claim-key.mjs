@@ -41,8 +41,14 @@ export async function main() {
   });
   const key = 'foo';
   for (let i = 0; i < res.claims[key].signatures.length; i++) {
-    if (!res.claims[key].signatures[i].r || !res.claims[key].signatures[i].s || !res.claims[key].signatures[i].v) {
-      return fail(`signature data misformed, should be of ethers signature format`);
+    if (
+      !res.claims[key].signatures[i].r ||
+      !res.claims[key].signatures[i].s ||
+      !res.claims[key].signatures[i].v
+    ) {
+      return fail(
+        `signature data misformed, should be of ethers signature format`
+      );
     }
   }
 

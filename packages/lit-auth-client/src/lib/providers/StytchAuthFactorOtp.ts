@@ -27,8 +27,6 @@ import {
   whatsAppOtpAuthFactorParser,
 } from './StytchAuthFactors';
 
-
-
 export default class StytchAuthFactorOtpProvider<
   T extends FactorParser
 > extends BaseProvider {
@@ -52,7 +50,7 @@ export default class StytchAuthFactorOtpProvider<
    * @param options authentication option containing the authenticated token
    * @returns {AuthMethod} Authentication Method for auth method type OTP
    *
-  */
+   */
   public async authenticate<T extends BaseAuthenticateOptions>(
     options?: T | undefined
   ): Promise<AuthMethod> {
@@ -83,14 +81,13 @@ export default class StytchAuthFactorOtpProvider<
         reject(e);
       }
 
-      
       resolve({
         authMethodType: factorParser.authMethodType,
         accessToken: accessToken,
       });
     });
   }
-  
+
   /**
    * Get auth method id that can be used to look up and interact with
    * PKPs associated with the given auth method.
@@ -99,7 +96,7 @@ export default class StytchAuthFactorOtpProvider<
    * @param {AuthMethod} authMethod - Auth method object
    *
    * @returns {Promise<string>} - Auth method id
-  */
+   */
   public async getAuthMethodId(
     authMethod: AuthMethod,
     options?: any
@@ -113,19 +110,36 @@ export default class StytchAuthFactorOtpProvider<
     });
   }
 
-  private _resolveAuthFactor(factor: T): {parser: Function, authMethodType: AuthMethodType }{
+  private _resolveAuthFactor(factor: T): {
+    parser: Function;
+    authMethodType: AuthMethodType;
+  } {
     switch (factor) {
       case 'email':
-        return { parser: emailOtpAuthFactorParser, authMethodType: AuthMethodType.StytchEmailFactorOtp };
+        return {
+          parser: emailOtpAuthFactorParser,
+          authMethodType: AuthMethodType.StytchEmailFactorOtp,
+        };
       case 'sms':
-        return { parser: smsOtpAuthFactorParser, authMethodType: AuthMethodType.StytchSmsFactorOtp };
+        return {
+          parser: smsOtpAuthFactorParser,
+          authMethodType: AuthMethodType.StytchSmsFactorOtp,
+        };
       case 'whatsApp':
-        return { parser: whatsAppOtpAuthFactorParser, authMethodType: AuthMethodType.StytchWhatsAppFactorOtp };
+        return {
+          parser: whatsAppOtpAuthFactorParser,
+          authMethodType: AuthMethodType.StytchWhatsAppFactorOtp,
+        };
       case 'totp':
-        return { parser: totpAuthFactorParser, authMethodType: AuthMethodType.StytchTotpFactorOtp };
+        return {
+          parser: totpAuthFactorParser,
+          authMethodType: AuthMethodType.StytchTotpFactorOtp,
+        };
     }
 
-    throw new Error("Unable to determine factor, are you using one of the supported factor types?");
+    throw new Error(
+      'Unable to determine factor, are you using one of the supported factor types?'
+    );
   }
 
   /**

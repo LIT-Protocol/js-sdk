@@ -1,19 +1,16 @@
-import { isValidBooleanExpression } from './utils'
-import { AccsDefaultParams } from "@lit-protocol/types";
+import { isValidBooleanExpression } from './utils';
+import { AccsDefaultParams } from '@lit-protocol/types';
 
 const conditionA: AccsDefaultParams = {
   contractAddress: '',
   standardContractType: '',
   chain: 'ethereum',
   method: 'eth_getBalance',
-  parameters: [
-    ':userAddress',
-    'latest'
-  ],
+  parameters: [':userAddress', 'latest'],
   returnValueTest: {
     comparator: '>=',
-    value: '10000000000000'
-  }
+    value: '10000000000000',
+  },
 };
 
 const conditionB: AccsDefaultParams = {
@@ -21,21 +18,20 @@ const conditionB: AccsDefaultParams = {
   standardContractType: 'ERC20',
   chain: 'ethereum',
   method: 'balanceOf',
-  parameters: [
-    ':userAddress'
-  ],
+  parameters: [':userAddress'],
   returnValueTest: {
     comparator: '>',
-    value: '0'
-  }
+    value: '0',
+  },
 };
 
-const groupValid: any = [
-  conditionA, { operator: "or" }, conditionB,
-];
+const groupValid: any = [conditionA, { operator: 'or' }, conditionB];
 
 const groupInvalid: any = [
-  conditionA, { operator: "or" }, conditionB, { operator: "and" }
+  conditionA,
+  { operator: 'or' },
+  conditionB,
+  { operator: 'and' },
 ];
 
 describe('encryption', () => {
@@ -43,28 +39,50 @@ describe('encryption', () => {
     expect(isValidBooleanExpression([conditionA])).toBeTruthy();
   });
   it('should pass boolean access control condition', () => {
-    expect(isValidBooleanExpression([conditionA, { operator: "or" }, conditionB])).toBeTruthy();
+    expect(
+      isValidBooleanExpression([conditionA, { operator: 'or' }, conditionB])
+    ).toBeTruthy();
   });
   it('should fail trailing boolean operator', () => {
-    expect(isValidBooleanExpression([conditionA, { operator: "or" }, conditionB, { operator: "and" }])).toBeFalsy();
+    expect(
+      isValidBooleanExpression([
+        conditionA,
+        { operator: 'or' },
+        conditionB,
+        { operator: 'and' },
+      ])
+    ).toBeFalsy();
   });
   it('should fail consecutive boolean operators', () => {
-    expect(isValidBooleanExpression([conditionA, { operator: "or" }, { operator: "and" }, conditionB])).toBeFalsy();
+    expect(
+      isValidBooleanExpression([
+        conditionA,
+        { operator: 'or' },
+        { operator: 'and' },
+        conditionB,
+      ])
+    ).toBeFalsy();
   });
   it('should fail only boolean operator', () => {
-    expect(isValidBooleanExpression([{ operator: "or" }])).toBeFalsy();
+    expect(isValidBooleanExpression([{ operator: 'or' }])).toBeFalsy();
   });
   it('should fail consecutive boolean conditions', () => {
     expect(isValidBooleanExpression([conditionA, conditionB])).toBeFalsy();
   });
   it('should pass boolean condition and group', () => {
-    expect(isValidBooleanExpression([conditionA, { operator: "or" }, groupValid])).toBeTruthy();
+    expect(
+      isValidBooleanExpression([conditionA, { operator: 'or' }, groupValid])
+    ).toBeTruthy();
   });
   it('should pass boolean group and condition', () => {
-    expect(isValidBooleanExpression([groupValid, { operator: "and" }, conditionA])).toBeTruthy();
+    expect(
+      isValidBooleanExpression([groupValid, { operator: 'and' }, conditionA])
+    ).toBeTruthy();
   });
   it('should pass boolean group and group', () => {
-    expect(isValidBooleanExpression([groupValid, { operator: "and" }, groupValid])).toBeTruthy();
+    expect(
+      isValidBooleanExpression([groupValid, { operator: 'and' }, groupValid])
+    ).toBeTruthy();
   });
   it('should pass group only', () => {
     expect(isValidBooleanExpression([groupValid])).toBeTruthy();
@@ -73,18 +91,39 @@ describe('encryption', () => {
     expect(isValidBooleanExpression([groupInvalid])).toBeFalsy();
   });
   it('should fail trailing boolean operator with group', () => {
-    expect(isValidBooleanExpression([groupValid, { operator: "and" }])).toBeFalsy();
+    expect(
+      isValidBooleanExpression([groupValid, { operator: 'and' }])
+    ).toBeFalsy();
   });
   it('should fail consecutive boolean operators with group', () => {
-    expect(isValidBooleanExpression([groupValid, { operator: "and" }, { operator: "or" }, groupValid])).toBeFalsy();
+    expect(
+      isValidBooleanExpression([
+        groupValid,
+        { operator: 'and' },
+        { operator: 'or' },
+        groupValid,
+      ])
+    ).toBeFalsy();
   });
   it('should fail boolean with invalid group', () => {
-    expect(isValidBooleanExpression([groupValid, { operator: "and" }, groupInvalid])).toBeFalsy();
+    expect(
+      isValidBooleanExpression([groupValid, { operator: 'and' }, groupInvalid])
+    ).toBeFalsy();
   });
   it('should fail boolean with invalid group and valid condition', () => {
-    expect(isValidBooleanExpression([groupInvalid, { operator: "or" }, conditionB])).toBeFalsy();
+    expect(
+      isValidBooleanExpression([groupInvalid, { operator: 'or' }, conditionB])
+    ).toBeFalsy();
   });
   it('should pass boolean condition after group', () => {
-    expect(isValidBooleanExpression([conditionB, { operator: "or" }, groupValid, { operator: "and" }, conditionA])).toBeTruthy();
+    expect(
+      isValidBooleanExpression([
+        conditionB,
+        { operator: 'or' },
+        groupValid,
+        { operator: 'and' },
+        conditionA,
+      ])
+    ).toBeTruthy();
   });
 });

@@ -66,6 +66,7 @@ export class LitCore {
   networkPubKey: string | null;
   networkPubKeySet: string | null;
   hdRootPubkeys: string[] | null;
+  latestBlockhash: string | null;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -91,6 +92,7 @@ export class LitCore {
     this.networkPubKey = null;
     this.networkPubKeySet = null;
     this.hdRootPubkeys = null;
+    this.latestBlockhash = null;
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
@@ -150,6 +152,7 @@ export class LitCore {
             networkPubKey: resp.networkPublicKey,
             networkPubKeySet: resp.networkPublicKeySet,
             hdRootPubkeys: resp.hdRootPubkeys,
+            latestBlockhash: resp.latestBlockhash,
           };
 
           // -- validate returned keys
@@ -162,46 +165,11 @@ export class LitCore {
             log('Error connecting to node. Detected "ERR" in keys', url, keys);
           }
 
-          if (this.config.checkNodeAttestation) {
-            // check attestation
-            if (!resp.attestation) {
-              console.error(
-                `Missing attestation in handshake response from ${url}`
-              );
-              throwError({
-                message: `Missing attestation in handshake response from ${url}`,
-                errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
-                errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
-              });
-            } else {
-              // actually verify the attestation by checking the signature against AMD certs
-              log('Checking attestation against amd certs...');
-              const attestation = resp.attestation;
-
-              try {
-                checkSevSnpAttestation(attestation, challenge, url).then(() => {
-                  log(`Lit Node Attestation verified for ${url}`);
-
-                  // only set server keys if attestation is valid
-                  // so that we don't use this node if it's not valid
-                  this.serverKeys[url] = keys;
-                });
-              } catch (e) {
-                console.error(
-                  `Lit Node Attestation failed verification for ${url}`
-                );
-                console.error(e);
-                throwError({
-                  message: `Lit Node Attestation failed verification for ${url}`,
-                  errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
-                  errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
-                });
-              }
-            }
-          } else {
-            // don't check attestation, just set server keys
-            this.serverKeys[url] = keys;
+          if (!keys.latestBlockhash) {
+            log('Error getting latest blockhash from the node.');
           }
+
+          this.serverKeys[url] = keys;
         })
         .catch((e: any) => {
           log('Error connecting to node ', url, e);
@@ -234,6 +202,11 @@ export class LitCore {
           this.hdRootPubkeys = mostCommonString(
             Object.values(this.serverKeys).map(
               (keysFromSingleNode: any) => keysFromSingleNode.hdRootPubkeys
+            )
+          );
+          this.latestBlockhash = mostCommonString(
+            Object.values(this.serverKeys).map(
+              (keysFromSingleNode: any) => keysFromSingleNode.latestBlockhash
             )
           );
           this.ready = true;

@@ -1,6 +1,6 @@
-import { ethers } from "ethers";
-import { LITTokenData } from "./LITTokenData";
-import { LITToken } from "./LITToken";
+import { ethers } from 'ethers';
+import { LITTokenData } from './LITTokenData';
+import { LITToken } from './LITToken';
 
 export const getLITTokenContract = (provider: any) => {
   return new ethers.Contract(
@@ -8,4 +8,4 @@ export const getLITTokenContract = (provider: any) => {
     LITTokenData.abi,
     provider
   ) as unknown as LITToken;
-}
+};

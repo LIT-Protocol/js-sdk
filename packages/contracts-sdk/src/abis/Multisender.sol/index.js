@@ -1,2 +1,2 @@
-export * from "./MultisenderData.js";
-export * from "./MultisenderContract.js";
+export * from './MultisenderData.js';
+export * from './MultisenderContract.js';
