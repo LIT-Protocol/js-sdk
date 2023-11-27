@@ -473,7 +473,8 @@ export class LitCore {
    */
   handleNodePromises = async <T>(
     nodePromises: Array<Promise<T>>,
-    minNodeCount?: number
+    requestId?: string,
+    minNodeCount?: number,
   ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
     // -- prepare
     const responses = await Promise.allSettled(nodePromises);
@@ -505,7 +506,7 @@ export class LitCore {
       )
     );
 
-    log(`most common error: ${JSON.stringify(mostCommonError)}`);
+    logErrorWithRequestId(requestId || "", `most common error: ${JSON.stringify(mostCommonError)}`);
 
     const rejectedPromises: RejectedNodePromises = {
       success: false,
