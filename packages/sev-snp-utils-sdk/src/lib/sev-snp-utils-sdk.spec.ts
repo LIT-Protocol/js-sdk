@@ -1,10 +1,13 @@
 // @ts-nocheck
 import { TextEncoder, TextDecoder } from 'util';
+import * as fetch from 'node-fetch';
+
 global.TextEncoder = TextEncoder;
 // @ts-ignore
 global.TextDecoder = TextDecoder;
 
 import * as sevSnpUtilsSdk from './sev-snp-utils-sdk';
+import { uint8arrayFromString } from '../../../uint8arrays/src/lib/uint8arrays';
 
 // a valid vcek url returned by the get_vcek_url function run on the VALID_REPORT below
 const VALID_REPORT_VCEK_URL =
@@ -31,14 +34,17 @@ describe('imported functions', () => {
 });
 
 describe('sevSnpUtilsSdk', () => {
+  let cert: Uint8Array;
   beforeAll(async () => {
     await sevSnpUtilsSdk.initWasmSevSnpUtilsSdk();
+    const certData = await fetch(VALID_REPORT_VCEK_URL);
+    cert = new Uint8Array(await certData.arrayBuffer());
   });
 
   it('should verify an attestation report', async () => {
     let verified = false;
     try {
-      await sevSnpUtilsSdk.verify_attestation_report(VALID_REPORT);
+      await sevSnpUtilsSdk.verify_attestation_report(VALID_REPORT, cert);
       verified = true;
     } catch (e) {
       console.error(e);
