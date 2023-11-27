@@ -11,5 +11,5 @@ export const defaultLitnodeClientConfig: LitNodeClientConfig = {
   ],
   litNetwork: 'cayenne',
   connectTimeout: 20000,
-  checkNodeAttestation: true,
+  checkNodeAttestation: false,
 };
