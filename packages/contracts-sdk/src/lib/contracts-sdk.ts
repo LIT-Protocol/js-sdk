@@ -2,7 +2,6 @@ import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
-import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 const INTERNAL_DEV_API =
   'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
@@ -48,8 +47,7 @@ import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
 import { LIT_CHAINS, LitNetwork } from '@lit-protocol/constants';
-import { AuthMethod } from '@lit-protocol/types';
-import { AuthMethodType } from '@lit-protocol/constants';
+
 
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
@@ -624,7 +622,7 @@ export class LitContracts {
 
     return networks;
   };
-
+  /*
   mintWithAuth = async ({
     authMethod,
     scopes,
@@ -729,6 +727,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       tx: receipt,
     };
   };
+  */
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
