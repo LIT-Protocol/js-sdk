@@ -4,6 +4,7 @@ import {
   LITEVMChain,
   LITSVMChain,
 } from '@lit-protocol/types';
+import { INTERNAL_DEV } from './autogen_internal';
 
 /**
  * Lit Protocol Network Public Key
@@ -717,6 +718,7 @@ export const LIT_NETWORKS = {
     'http://localhost:7479',
   ],
   custom: [],
+  internalDev: INTERNAL_DEV
 };
 
 // ========== Lit Sessions ==========

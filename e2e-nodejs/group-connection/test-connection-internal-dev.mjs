@@ -3,15 +3,12 @@ import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
-const LIT_NETWORK = 'cayenne';
+const LIT_NETWORK = 'internalDev';
 
 export async function main() {
   // ==================== Test Logic ====================
   const client = new LitNodeClient({
-    litNetwork: LIT_NETWORK,
-    debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
-    minNodeCount: LITCONFIG.TEST_ENV.minNodeCount,
-    checkNodeAttestation: false,
+    litNetwork: 'internalDev'
   });
   await client.connect();
 

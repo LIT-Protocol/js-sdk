@@ -1,8 +1,7 @@
 import { BigNumberish, BytesLike, ethers } from 'ethers';
-import { hexToDec, decToHex } from './hex2dec';
+import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
-import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 let CID: any;
 try {
@@ -44,8 +43,6 @@ import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBal
 import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
-import { AuthMethod } from '@lit-protocol/types';
-import { AuthMethodType } from '@lit-protocol/constants';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -537,6 +534,97 @@ export class LitContracts {
     this.connected = true;
   };
 
+  public static async getStakingContract(network: "cayenne" | "internalDev") {
+
+    const rpcUrl = DEFAULT_RPC;
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+
+    if (network === 'cayenne') {
+      return new ethers.Contract(StakingData.address, StakingData.abi, provider);
+    } else if (network === 'internalDev') {
+      const INTERNAL_DEV_API =
+        'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
+
+      let data;
+      try {
+        // Fetch and parse the JSON data in one step
+        data = await fetch(INTERNAL_DEV_API).then((res) => res.json());
+      } catch (e: any) {
+        throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
+      }
+      // Destructure the data for easier access
+      const { config, data: contractData } = data;
+      const stakingContract = contractData.find((item: { name: string }) => item.name === 'Staking')
+        .contracts[0];
+      const { address_hash: address, ABI: abi } = stakingContract;
+
+      // Validate the required data
+      if (!config || !address || !abi) {
+        throw new Error('❌ Required contract data is missing');
+      }
+
+      return new ethers.Contract(address, abi, provider);
+    } else {
+      throw new Error(`Invalid network. Only cayenne and internalDev are supported.`);
+    }
+  }
+
+  public static getMinNodeCount = async (network: "cayenne" | "internalDev") => {
+
+    const contract = await LitContracts.getStakingContract(network);
+
+    const configs = await contract['config']();
+    const minNodeCount = configs.minimumValidatorCount.toString();
+
+    if (!minNodeCount) {
+      throw new Error('❌ Minimum validator count is not set');
+    }
+    return minNodeCount;
+  }
+
+  public static getValidators = async (network: "cayenne" | "internalDev"): Promise<string[]> => {
+
+    const contract = await LitContracts.getStakingContract(network);
+
+    // Fetch contract data
+    const [activeValidators, currentValidatorsCount, kickedValidators] =
+      await Promise.all([
+        contract['getValidatorsStructsInCurrentEpoch'](),
+        contract['currentValidatorCountForConsensus'](),
+        contract['getKickedValidators'](),
+      ]);
+
+    const validators = [];
+
+    // Check if active validator set meets the threshold
+    if (
+      activeValidators.length - kickedValidators.length >=
+      currentValidatorsCount
+    ) {
+      // Process each validator
+      for (const validator of activeValidators) {
+        validators.push(validator);
+      }
+    } else {
+      console.log('❌ Active validator set does not meet the threshold');
+    }
+
+    // remove kicked validators in active validators
+    const cleanedActiveValidators = activeValidators.filter(
+      (av: any) => !kickedValidators.some((kv: any) => kv.nodeAddress === av.nodeAddress)
+    );
+
+    const networks = cleanedActiveValidators.map((item: any) => {
+      let proto = "https://";
+      if (item.port !== 443) {
+        proto = "http://";
+      }
+      return `${proto}${intToIP(item.ip)}:${item.port}`;
+    });
+
+    return networks;
+  };
+  /*
   mintWithAuth = async ({
     authMethod,
     scopes,
@@ -640,6 +728,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       tx: receipt,
     };
   };
+  */
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 

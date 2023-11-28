@@ -3,7 +3,7 @@ export * from './lib/version';
 
 // ----------- Constants -----------
 export * from './lib/constants/constants';
-export * from './lib/constants/defaultLitNodeClientConfig';
+export * from './lib/constants/autogen_internal';
 
 // ----------- Interfaces -----------
 export * from './lib/interfaces/i-errors';

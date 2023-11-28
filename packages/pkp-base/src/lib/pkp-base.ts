@@ -21,7 +21,6 @@ import {
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
 import { toString as uint8arrayToString } from 'uint8arrays';
-import { defaultLitnodeClientConfig } from '@lit-protocol/constants';
 
 /**
  * Compresses a given public key.
@@ -101,10 +100,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       ...(prop.bootstrapUrls &&
         prop.litNetwork == 'custom' && { minNodeCount: prop.minNodeCount }),
       debug: this.debug,
-      minNodeCount:
-        prop.bootstrapUrls && prop.litNetwork == 'custom'
-          ? prop.minNodeCount
-          : defaultLitnodeClientConfig.minNodeCount,
+      // minNodeCount:
+      //   prop.bootstrapUrls && prop.litNetwork == 'custom'
+      //     ? prop.minNodeCount
+      //     : defaultLitnodeClientConfig.minNodeCount,
     });
   }
 

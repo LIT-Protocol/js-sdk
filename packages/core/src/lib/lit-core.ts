@@ -14,10 +14,11 @@ import {
 } from '@lit-protocol/access-control-conditions';
 
 import {
+  INTERNAL_DEFAULT_CONFIG,
+  LitNetwork,
   LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORKS,
-  defaultLitnodeClientConfig,
   version,
   TELEM_API_URL,
   SIGTYPE,
@@ -56,6 +57,7 @@ import {
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { uint8arrayFromString } from '@lit-protocol/uint8arrays';
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 export class LitCore {
   config: LitNodeClientConfig;
@@ -71,9 +73,40 @@ export class LitCore {
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
     const customConfig = args;
+    let _defaultConfig = {
+      alertWhenUnauthorized: false,
+      debug: true,
+      connectTimeout: 20000,
+      litNetwork: '', // Default value, should be replaced
+      minNodeCount: 2, // Default value, should be replaced
+      bootstrapUrls: [] // Default value, should be replaced
+    };
 
-    // -- initialize default config
-    this.config = defaultLitnodeClientConfig;
+    // Initialize default config based on litNetwork
+    if (args && 'litNetwork' in args) {
+      switch (args.litNetwork) {
+        case LitNetwork.Cayenne:
+          this.config = {
+            ..._defaultConfig,
+            litNetwork: LitNetwork.Cayenne,
+          } as unknown as  LitNodeClientConfig;
+          break;
+        case LitNetwork.InternalDev:
+          this.config = {
+            ..._defaultConfig,
+            litNetwork: LitNetwork.InternalDev,
+          } as unknown as LitNodeClientConfig;
+          break;
+        default:
+          this.config = {
+            ..._defaultConfig,
+            ...customConfig,
+          } as LitNodeClientConfig;
+      }
+
+    } else {
+      this.config = { ..._defaultConfig, ...customConfig };
+    }
 
     // -- initialize default auth callback
     // this.defaultAuthCallback = args?.defaultAuthCallback;
@@ -101,6 +134,45 @@ export class LitCore {
   }
 
   // ========== Scoped Class Helpers ==========
+  /**
+   * Asynchronously updates the configuration settings for the LitNodeClient.
+   * This function fetches the minimum node count and bootstrap URLs for the
+   * specified Lit network. It validates these values and updates the client's
+   * configuration accordingly. If the network is set to 'InternalDev', it
+   * dynamically updates the bootstrap URLs in the configuration.
+   *
+   * @throws Will throw an error if the minimum node count is invalid or if
+   *         the bootstrap URLs array is empty.
+   * @returns {Promise<void>} A promise that resolves when the configuration is updated.
+   */
+  setNewConfig = async (): Promise<void> => {
+    const minNodeCount = await LitContracts.getMinNodeCount(this.config.litNetwork as LitNetwork);
+    const bootstrapUrls = await LitContracts.getValidators(this.config.litNetwork as LitNetwork);
+
+    if (minNodeCount <= 0) {
+      throwError({
+        message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    if (bootstrapUrls.length <= 0) {
+      throwError({
+        message: `bootstrapUrls is empty, which is invalid. Please check your network connection and try again.`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+    }
+
+    // -- Update config
+    // TODO TEMPORARY: only dynamically update when it's set to internalDev
+    if (this.config.litNetwork === LitNetwork.InternalDev) {
+      this.config.bootstrapUrls = bootstrapUrls;
+    }
+
+    this.config.minNodeCount = minNodeCount;
+  }
 
   /**
    *
@@ -268,12 +340,9 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${
-              this.config.connectTimeout
-            }ms.  Could only connect to ${
-              Object.keys(this.serverKeys).length
-            } of ${
-              this.config.minNodeCount
+            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
+            }ms.  Could only connect to ${Object.keys(this.serverKeys).length
+            } of ${this.config.minNodeCount
             } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             log(msg);
             reject(msg);
@@ -388,12 +457,9 @@ export class LitCore {
       })
       .catch((error: NodeErrorV3) => {
         console.error(
-          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
-            error?.message || error?.details
-              ? `Error is ${error.message} - ${error.details}`
-              : ''
-          }`
-        );
+          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error?.message || error?.details
+            ? `Error is ${error.message} - ${error.details}`
+            : ''}`);
         return Promise.reject(error);
       });
   };
