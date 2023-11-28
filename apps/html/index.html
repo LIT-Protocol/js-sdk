@@ -88,6 +88,7 @@ pre {
     <script src="dist/packages/pkp-ethers-vanilla/pkp-ethers.js"></script>
     <script src="dist/packages/pkp-sui-vanilla/pkp-sui.js"></script>
     <script src="dist/packages/pkp-walletconnect-vanilla/pkp-walletconnect.js"></script>
+    <script src="dist/packages/sev-snp-utils-sdk-vanilla/sev-snp-utils-sdk.js"></script>
     <script src="dist/packages/types-vanilla/types.js"></script>
     <script src="dist/packages/uint8arrays-vanilla/uint8arrays.js"></script>
 
@@ -1749,7 +1750,79 @@ pre {
     </script>
     
 
-    <!-- (24): TYPES -->
+    <!-- (24): SEVSNPUTILSSDK -->
+    <script>
+        if(typeof LitJsSdk_sevSnpUtilsSdk === 'undefined') {
+            console.error("LitJsSdk_sevSnpUtilsSdk:", LitJsSdk_sevSnpUtilsSdk);
+        }else{
+            console.warn("LitJsSdk_sevSnpUtilsSdk:", LitJsSdk_sevSnpUtilsSdk);
+            window.LitJsSdk_sevSnpUtilsSdk = LitJsSdk_sevSnpUtilsSdk;
+        }
+        window.addEventListener('load', function() {
+
+            var root = document.getElementById('root');
+            var result = document.getElementById('result');
+            var entries = Object.entries(LitJsSdk_sevSnpUtilsSdk);
+            var lis = entries.map(([key, value]) => `
+            <li>
+                <div id="LitJsSdk_sevSnpUtilsSdk_${key}" class="key" onClick="(async (e) => {
+                    var fn = LitJsSdk_sevSnpUtilsSdk['${key}'];
+                    var fnType = typeof fn;
+                    console.warn('[${key}] is type of [' + fnType + ']');
+
+                    if ( fnType === 'string' ) return;
+
+                    if( fnType === 'function' ){
+                        try{
+                            console.log('params:', globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
+                            res = JSON.stringify(res, null, 2);
+                            result.innerText = res;
+                            console.log(res);
+                        }catch(e){
+                            console.error('Please set the [params] variable in the console then click again');
+                            console.log(e);
+                        }
+                        return;
+                    }
+
+                    if( fnType === 'object' ){
+                        var res = await fn;
+                        window.output = res;
+                        res = JSON.stringify(res, null, 2);
+                        result.innerText = res;
+                        console.log(res);
+                        return;
+                    }
+                    
+                    
+                })();">${key}</div>
+                <pre class="code">
+<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                </pre>
+            </li>`);
+            lis = lis.join(' ');
+            var template = `
+            <div class="cat">
+                <h1>LitJsSdk_sevSnpUtilsSdk has ${entries.length} functions</h1>
+                    <ul>
+                        ${ lis }
+                    </ul>
+                </div>
+            `;
+            root.insertAdjacentHTML('beforeend', template);
+        });
+    </script>
+    
+
+    <!-- (25): TYPES -->
     <script>
         if(typeof LitJsSdk_types === 'undefined') {
             console.error("LitJsSdk_types:", LitJsSdk_types);
@@ -1821,7 +1894,7 @@ pre {
     </script>
     
 
-    <!-- (25): UINT8ARRAYS -->
+    <!-- (26): UINT8ARRAYS -->
     <script>
         if(typeof LitJsSdk_uint8arrays === 'undefined') {
             console.error("LitJsSdk_uint8arrays:", LitJsSdk_uint8arrays);

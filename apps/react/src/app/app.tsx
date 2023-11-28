@@ -24,6 +24,7 @@ import * as LitJsSdk_pkpCosmos from 'dist/packages/pkp-cosmos';
 import * as LitJsSdk_pkpEthers from 'dist/packages/pkp-ethers';
 import * as LitJsSdk_pkpSui from 'dist/packages/pkp-sui';
 import * as LitJsSdk_pkpWalletconnect from 'dist/packages/pkp-walletconnect';
+import * as LitJsSdk_sevSnpUtilsSdk from 'dist/packages/sev-snp-utils-sdk';
 import * as LitJsSdk_types from 'dist/packages/types';
 import * as LitJsSdk_uint8arrays from 'dist/packages/uint8arrays';
 
@@ -52,6 +53,7 @@ declare global {
     LitJsSdk_pkpEthers: any;
     LitJsSdk_pkpSui: any;
     LitJsSdk_pkpWalletconnect: any;
+    LitJsSdk_sevSnpUtilsSdk: any;
     LitJsSdk_types: any;
     LitJsSdk_uint8arrays: any;
   }
@@ -1649,6 +1651,7 @@ export function App() {
         });
     
     
+
 
 
     

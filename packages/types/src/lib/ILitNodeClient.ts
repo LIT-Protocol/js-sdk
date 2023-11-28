@@ -7,7 +7,7 @@ import {
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetSignedTokenRequest,
-  HandshakeWithSgx,
+  HandshakeWithNode,
   JsonExecutionRequest,
   KV,
   LitNodeClientConfig,
@@ -236,13 +236,13 @@ export interface ILitNodeClient {
    *
    * Handshake with SGX
    *
-   * @param { HandshakeWithSgx } params
+   * @param { HandshakeWithNode } params
    *
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  handshakeWithSgx(
-    params: HandshakeWithSgx,
+  handshakeWithNode(
+    params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse>;
 

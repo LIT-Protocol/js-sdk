@@ -146,6 +146,11 @@ export const LIT_ERROR = {
     code: 'no_valid_shares',
     kind: LitErrorKind.Unexpected,
   },
+  INVALID_NODE_ATTESTATION: {
+    name: 'InvalidNodeAttestation',
+    code: 'invalid_node_attestation',
+    kind: LitErrorKind.Unexpected,
+  },
 };
 
 export const LIT_ERROR_CODE = {
