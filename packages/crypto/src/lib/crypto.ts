@@ -20,6 +20,8 @@ import { nacl } from '@lit-protocol/nacl';
 import { SIGTYPE } from '@lit-protocol/constants';
 import { CombinedECDSASignature } from '@lit-protocol/types';
 
+const AMD_PROXY = 'https://shielded-earth-13917-10ba15245911.herokuapp.com';
+
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
   blsSdk.initWasmBlsSdk().then((exports) => {
@@ -27,8 +29,7 @@ if (!globalThis.wasmExports) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [BLS SDK] wasmExports loaded. ${
-          Object.keys(exports).length
+        `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
       );
     }
@@ -50,8 +51,7 @@ if (!globalThis.wasmECDSA) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-          Object.keys(wasmECDSA).length
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );
     }
@@ -64,8 +64,7 @@ if (!globalThis.wasmSevSnpUtils) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
-          Object.keys(exports).length
+        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
       );
     }
@@ -351,7 +350,7 @@ async function getAmdCert(url: string) {
   // unfortunately, until AMD enables CORS, we have to use a proxy when in the browser
   if (isBrowser()) {
     // CORS proxy url
-    url = `https://shielded-earth-13917-10ba15245911.herokuapp.com/${url}`;
+    url = `${AMD_PROXY}/${url}`;
   }
   const response = await fetch(url);
   const arrayBuffer = await response.arrayBuffer();

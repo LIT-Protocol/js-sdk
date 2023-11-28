@@ -80,7 +80,8 @@ export class LitCore {
       connectTimeout: 20000,
       litNetwork: '', // Default value, should be replaced
       minNodeCount: 2, // Default value, should be replaced
-      bootstrapUrls: [] // Default value, should be replaced
+      bootstrapUrls: [], // Default value, should be replaced
+      checkNodeAttestation: false
     };
 
     // Initialize default config based on litNetwork

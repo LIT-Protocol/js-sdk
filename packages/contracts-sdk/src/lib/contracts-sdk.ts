@@ -1,8 +1,11 @@
-import {BigNumberish, BytesLike, ethers } from 'ethers';
+import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
+
+const INTERNAL_DEV_API =
+  'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
 
 let CID: any;
 try {
@@ -527,7 +530,7 @@ export class LitContracts {
         stakingBalancesContract.StakingBalances,
     };
     // ----- autogen:init:end  -----
-    
+
     this.connected = true;
   };
 
@@ -540,8 +543,6 @@ export class LitContracts {
     if (network === 'cayenne') {
       return new ethers.Contract(StakingData.address, StakingData.abi, provider);
     } else if (network === 'internalDev') {
-      const INTERNAL_DEV_API =
-        'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
 
       let data;
       try {
@@ -566,7 +567,7 @@ export class LitContracts {
       throw new Error(`Invalid network. Only cayenne and internalDev are supported.`);
     }
   }
-  
+
   public static getMinNodeCount = async (network: LitNetwork.Cayenne | LitNetwork.InternalDev) => {
 
     const contract = await LitContracts.getStakingContract(network);
