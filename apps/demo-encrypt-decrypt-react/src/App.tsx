@@ -17,7 +17,7 @@ function App() {
   const [data, setData] = useState<object | string>({
     data: {
       name: 'Lit Protocol',
-      description: 'Threadshold cryptography for the win!',
+      description: 'Threshold cryptography for the win!',
     }
   });
   const [str, setStr] = useState('This test is working! Omg!');
