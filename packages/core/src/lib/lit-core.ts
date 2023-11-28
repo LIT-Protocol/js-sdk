@@ -1,6 +1,7 @@
-import { computeHDPubKey } from '@lit-protocol/crypto';
+import { computeHDPubKey, checkSevSnpAttestation } from '@lit-protocol/crypto';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
+
 import {
   canonicalAccessControlConditionFormatter,
   canonicalEVMContractConditionFormatter,
@@ -34,13 +35,14 @@ import {
   AuthSig,
   CustomNetwork,
   FormattedMultipleAccs,
-  HandshakeWithNodes,
+  HandshakeWithNode,
   JsonExecutionRequest,
   JsonHandshakeResponse,
   JsonPkpSignRequest,
   KV,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
+  NodeAttestation,
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
@@ -54,8 +56,9 @@ import {
   SupportedJsonRequests,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { INTERNAL_DEFAULT_CONFIG } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { uint8arrayFromString } from '@lit-protocol/uint8arrays';
+
 export class LitCore {
   config: LitNodeClientConfig;
   connectedNodes: SetConstructor | Set<any> | any;
@@ -239,7 +242,8 @@ export class LitCore {
     const requestId = this.getRequestId();
 
     for (const url of this.config.bootstrapUrls) {
-      this.handshakeWithNodes({ url }, requestId)
+      const challenge = this.getRandomHexString(64);
+      this.handshakeWithNode({ url, challenge }, requestId)
         .then((resp: any) => {
           this.connectedNodes.add(url);
 
@@ -266,7 +270,46 @@ export class LitCore {
             log('Error getting latest blockhash from the node.');
           }
 
-          this.serverKeys[url] = keys;
+          if (this.config.checkNodeAttestation) {
+            // check attestation
+            if (!resp.attestation) {
+              console.error(
+                `Missing attestation in handshake response from ${url}`
+              );
+              throwError({
+                message: `Missing attestation in handshake response from ${url}`,
+                errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
+                errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
+              });
+            } else {
+              // actually verify the attestation by checking the signature against AMD certs
+              log('Checking attestation against amd certs...');
+              const attestation = resp.attestation;
+
+              try {
+                checkSevSnpAttestation(attestation, challenge, url).then(() => {
+                  log(`Lit Node Attestation verified for ${url}`);
+
+                  // only set server keys if attestation is valid
+                  // so that we don't use this node if it's not valid
+                  this.serverKeys[url] = keys;
+                });
+              } catch (e) {
+                console.error(
+                  `Lit Node Attestation failed verification for ${url}`
+                );
+                console.error(e);
+                throwError({
+                  message: `Lit Node Attestation failed verification for ${url}`,
+                  errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
+                  errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
+                });
+              }
+            }
+          } else {
+            // don't check attestation, just set server keys
+            this.serverKeys[url] = keys;
+          }
         })
         .catch((e: any) => {
           log('Error connecting to node ', url, e);
@@ -343,7 +386,7 @@ export class LitCore {
   /**
    *
    * Get a random request ID
-   *   *
+   *
    * @returns { string }
    *
    */
@@ -353,15 +396,28 @@ export class LitCore {
 
   /**
    *
-   * Handshake with Nodes
+   * Get a random hex string for use as an attestation challenge
    *
-   * @param { HandshakeWithNodes } params
+   * @returns { string }
+   */
+
+  getRandomHexString(size: number) {
+    return [...Array(size)]
+      .map(() => Math.floor(Math.random() * 16).toString(16))
+      .join('');
+  }
+
+  /**
+   *
+   * Handshake with Node
+   *
+   * @param { HandshakeWithNode } params
    *
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  handshakeWithNodes = async (
-    params: HandshakeWithNodes,
+  handshakeWithNode = async (
+    params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
     // -- get properties from params
@@ -370,10 +426,11 @@ export class LitCore {
     // -- create url with path
     const urlWithPath = `${url}/web/handshake`;
 
-    log(`handshakeWithNodes ${urlWithPath}`);
+    log(`handshakeWithNode ${urlWithPath}`);
 
     const data = {
       clientPublicKey: 'test',
+      challenge: params.challenge,
     };
 
     return this.sendCommandToNode({

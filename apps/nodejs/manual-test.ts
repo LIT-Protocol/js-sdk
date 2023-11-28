@@ -294,8 +294,29 @@ const mintPkpAndSign = async () => {
     // use cayenne
     client = new LitJsSdk.LitNodeClient({
       litNetwork: 'cayenne',
-      debug: true
+      debug: true,
+      checkNodeAttestation: false
     });
+
+    // for testing against InternalDev
+    // client = new LitJsSdk.LitNodeClient({
+    //   debug: true,
+    //   litNetwork: 'custom',
+    //   "minNodeCount": 6,
+    //   "bootstrapUrls": [
+    //     "https://199.115.117.113",
+    //     "https://199.115.117.114",
+    //     "https://108.62.0.105",
+    //     "https://64.131.85.106",
+    //     "https://64.131.85.108",
+    //     "https://167.114.17.201",
+    //     "https://167.114.17.202",
+    //     "https://167.114.17.203",
+    //     "https://167.114.17.204",
+    //     "https://167.114.17.205",
+    //   ],
+    //   checkNodeAttestation: true
+    // });
   }
 
   await client.connect();
@@ -313,9 +334,9 @@ const mintPkpAndSign = async () => {
     const wallet = new ethers.Wallet(privateKey, provider);
     const authSig = await getAuthSig(wallet);
 
-    console.log('Sleeping for 30 seconds so that the chronicle node replica can sync up');
-    // Sleep for 30 seconds
-    await new Promise(resolve => setTimeout(resolve, 30000));
+    // console.log('Sleeping for 5 seconds so that the chronicle node replica can sync up');
+    // Sleep for 5 seconds
+    // await new Promise(resolve => setTimeout(resolve, 5000));
 
 
     let startTime = Date.now();
