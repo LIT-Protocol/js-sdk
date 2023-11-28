@@ -2,6 +2,7 @@ import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
+import { AuthMethod } from '@lit-protocol/types';
 
 let CID: any;
 try {
@@ -43,6 +44,7 @@ import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBal
 import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
+import { getAuthIdByAuthMethod } from './auth-utils';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -624,7 +626,7 @@ export class LitContracts {
 
     return networks;
   };
-  /*
+  
   mintWithAuth = async ({
     authMethod,
     scopes,
@@ -677,7 +679,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       return scope;
     });
 
-    const authId = await LitAuthClient.getAuthIdByAuthMethod(authMethod);
+    const authId = await getAuthIdByAuthMethod(authMethod);
 
     // -- go
     const mintCost = await this.pkpNftContract.read.mintCost();
@@ -728,7 +730,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       tx: receipt,
     };
   };
-  */
+  
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
