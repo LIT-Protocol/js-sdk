@@ -1,29 +1,29 @@
-import { SupportedJsonRequests } from './types';
 import {
+  DecryptRequest,
+  DecryptResponse,
+  EncryptRequest,
+  EncryptResponse,
   ExecuteJsProps,
   ExecuteJsResponse,
   FormattedMultipleAccs,
-  HandshakeWithSgx,
-  JsonEncryptionRetrieveRequest,
+  GetSignedTokenRequest,
+  HandshakeWithNode,
   JsonExecutionRequest,
-  JsonSaveEncryptionKeyRequest,
-  JsonSignChainDataRequest,
-  JsonSigningRetrieveRequest,
-  JsonSigningStoreRequest,
-  JsonStoreSigningRequest,
   KV,
   LitNodeClientConfig,
+  MultipleAccessControlConditions,
+  NodeBlsSigningShare,
   NodeCommandResponse,
   NodeCommandServerKeysResponse,
   NodeShare,
   RejectedNodePromises,
   SendNodeCommand,
-  SignedChainDataToken,
-  // SignWithECDSA,
   SignConditionECDSA,
+  SigningAccessControlConditionRequest,
   SuccessNodePromises,
   ValidateAndSignECDSA,
 } from './interfaces';
+import { SupportedJsonRequests } from './types';
 
 export interface ILitNodeClient {
   config: LitNodeClientConfig;
@@ -33,6 +33,7 @@ export interface ILitNodeClient {
   subnetPubKey: string | null;
   networkPubKey: string | null;
   networkPubKeySet: string | null;
+  latestBlockhash: string | null;
 
   // ========== Constructor ==========
   // ** IMPORTANT !! You have to create your constructor when implementing this class **
@@ -78,18 +79,14 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Combine Shares from network public key set and signature shares
+   * Combine Shares from signature shares
    *
-   * @param { string } networkPubKeySet
-   * @param { any } signatureShares
+   * @param { NodeBlsSigningShare } signatureShares
    *
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  combineSharesAndGetJWT(
-    networkPubKeySet: string,
-    signatureShares: Array<NodeShare>
-  ): string;
+  combineSharesAndGetJWT(signatureShares: Array<NodeBlsSigningShare>): string;
 
   /**
    *
@@ -108,13 +105,13 @@ export interface ILitNodeClient {
    *
    * Get hash of access control conditions
    *
-   * @param { JsonStoreSigningRequest } params
+   * @param { MultipleAccessControlConditions } params
    *
    * @returns { Promise<ArrayBuffer | undefined> }
    *
    */
   getHashedAccessControlConditions(
-    params: JsonStoreSigningRequest
+    params: MultipleAccessControlConditions
   ): Promise<ArrayBuffer | undefined>;
 
   // ========== Promise Handlers ==========
@@ -133,14 +130,14 @@ export interface ILitNodeClient {
   /**
    * Handle node promises
    *
-   * @param { Array<Promise<any>> } nodePromises
+   * @param { Array<Promise<T>> } nodePromises
    *
-   * @returns { Promise<SuccessNodePromises | RejectedNodePromises> }
+   * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    *
    */
-  handleNodePromises(
-    nodePromises: Array<Promise<any>>
-  ): Promise<SuccessNodePromises | RejectedNodePromises>;
+  handleNodePromises<T>(
+    nodePromises: Array<Promise<T>>
+  ): Promise<SuccessNodePromises<T> | RejectedNodePromises>;
 
   /**
    *
@@ -151,7 +148,7 @@ export interface ILitNodeClient {
    * @returns { void }
    *
    */
-  throwNodeError(res: RejectedNodePromises): void;
+  _throwNodeError(res: RejectedNodePromises): void;
 
   // ========== Shares Resolvers ==========
   /**
@@ -164,17 +161,6 @@ export interface ILitNodeClient {
    *
    */
   getSignatures(signedData: Array<any>): any;
-
-  /**
-   *
-   * Get the decryptions from the decrypted data list
-   *
-   * @param { Array<any> } decryptedData
-   *
-   * @returns { Promise<Array<any> }
-   *
-   */
-  getDecryptions(decryptedData: Array<any>): Promise<Array<any>>;
 
   /**
    *
@@ -216,82 +202,17 @@ export interface ILitNodeClient {
   ): Promise<NodeCommandResponse>;
 
   /**
-   *
-   * Get Chain Data Signing Shares
-   *
-   * @param { string } url
-   * @param { JsonSignChainDataRequest } params
-   *
-   * @returns { Promise<any> }
-   *
-   */
-  getChainDataSigningShare(
-    url: string,
-    params: JsonSignChainDataRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
-   *
-   * Get Signing Shares from Nodes
+   * Get Signing Shares for Token containing Access Control Condition
    *
    * @param { string } url
-   * @param { JsonSigningRetrieveRequest } params
-   *
-   * @returns { Promise<any>}
-   *
-   */
-  getSigningShare(
-    url: string,
-    params: JsonSigningRetrieveRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
-   *
-   * Ger Decryption Shares from Nodes
-   *
-   * @param { string } url
-   * @param { JsonEncryptionRetrieveRequest } params
-   *
-   * @returns { Promise<any> }
-   *
-   */
-  getDecryptionShare(
-    url: string,
-    params: JsonEncryptionRetrieveRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
-   *
-   * Store signing conditions to nodes
-   *
-   * @param { string } url
-   * @param { JsonSigningStoreRequest } params
+   * @param { SigningAccessControlConditionRequest } params
    *
    * @returns { Promise<NodeCommandResponse> }
    *
    */
-  storeSigningConditionWithNode(
+  getSigningShareForToken(
     url: string,
-    params: JsonSigningStoreRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
-   *
-   * Store encryption conditions to nodes
-   *
-   * @param { string } urk
-   * @param { JsonEncryptionStoreRequest } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  storeEncryptionConditionWithNode(
-    url: string,
-    params: JsonSigningStoreRequest,
+    params: SigningAccessControlConditionRequest,
     requestId: string
   ): Promise<NodeCommandResponse>;
 
@@ -315,13 +236,13 @@ export interface ILitNodeClient {
    *
    * Handshake with SGX
    *
-   * @param { HandshakeWithSgx } params
+   * @param { HandshakeWithNode } params
    *
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
-  handshakeWithSgx(
-    params: HandshakeWithSgx,
+  handshakeWithNode(
+    params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse>;
 
@@ -339,59 +260,28 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Request a signed JWT of any solidity function call from the LIT network.  There are no prerequisites for this function.  You should use this function if you need to transmit information across chains, or from a blockchain to a centralized DB or server.  The signature of the returned JWT verifies that the response is genuine.
+   * Request a signed JWT from the LIT network. Before calling this function, you must know the access control conditions for the item you wish to gain authorization for.
    *
-   * @param { SignedChainDataToken } params
-   *
-   * @returns { Promise<string | undefined>}
-   */
-  getSignedChainDataToken(
-    params: SignedChainDataToken
-  ): Promise<string | undefined>;
-
-  /**
-   *
-   * Request a signed JWT from the LIT network. Before calling this function, you must either create or know of a resource id and access control conditions for the item you wish to gain authorization for. You can create an access control condition using the saveSigningCondition function.
-   *
-   * @param { JsonSigningRetrieveRequest } params
+   * @param { GetSignedTokenRequest } params
    *
    * @returns { Promise<string> } final JWT
    *
    */
-  getSignedToken(
-    params: JsonSigningRetrieveRequest
-  ): Promise<string | undefined>;
+  getSignedToken(params: GetSignedTokenRequest): Promise<string | undefined>;
 
   /**
+   * Encrypt data with Lit identity-based Timelock Encryption.
    *
-   * Associated access control conditions with a resource on the web.  After calling this function, users may use the getSignedToken function to request a signed JWT from the LIT network.  This JWT proves that the user meets the access control conditions, and is authorized to access the resource you specified in the resourceId parameter of the saveSigningCondition function.
-   *
-   * @param { JsonStoreSigningRequest } params
-   *
-   * @returns { Promise<boolean | undefined }
-   *
+   * @param params
    */
-  saveSigningCondition(
-    params: JsonStoreSigningRequest
-  ): Promise<boolean | undefined>;
+  encrypt(params: EncryptRequest): Promise<EncryptResponse>;
 
   /**
+   * Decrypt data with Lit identity-based Timelock Encryption.
    *
-   * Retrieve the symmetric encryption key from the LIT nodes.  Note that this will only work if the current user meets the access control conditions specified when the data was encrypted.  That access control condition is typically that the user is a holder of the NFT that corresponds to this encrypted data.  This NFT token address and ID was specified when this LIT was created.
-   *
+   * @param params
    */
-  getEncryptionKey(params: JsonEncryptionRetrieveRequest): Promise<Uint8Array>;
-
-  /**
-   *
-   * Securely save the association between access control conditions and something that you wish to decrypt
-   *
-   * @param { JsonSaveEncryptionKeyRequest } params
-   *
-   * @returns { Promise<Uint8Array | undefined }
-   *
-   */
-  saveEncryptionKey(params: JsonSaveEncryptionKeyRequest): Promise<Uint8Array>;
+  decrypt(params: DecryptRequest): Promise<DecryptResponse>;
 
   /**
    *

@@ -104,6 +104,9 @@ export default class AppleProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    return AppleProvider.authMethodId(authMethod);
+  }
+  public static async authMethodId(authMethod: AuthMethod): Promise<string> {
     const tokenPayload = jose.decodeJwt(authMethod.accessToken);
     const userId: string = tokenPayload['sub'] as string;
     const audience: string = tokenPayload['aud'] as string;

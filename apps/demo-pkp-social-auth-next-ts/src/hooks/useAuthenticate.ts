@@ -9,7 +9,6 @@ import {
   authenticateWithDiscord,
   authenticateWithEthWallet,
   authenticateWithWebAuthn,
-  authenticateWithOTP,
   authenticateWithStytch,
 } from '../utils/lit';
 import { useConnect } from 'wagmi';
@@ -120,24 +119,6 @@ export default function useAuthenticate(redirectUri?: string) {
   );
 
   /**
-   * Authenticate with OTP
-   */
-  const authWithOTP = useCallback(async (code: string): Promise<void> => {
-    setLoading(true);
-    setError(undefined);
-    setAuthMethod(undefined);
-
-    try {
-      const result: AuthMethod = (await authenticateWithOTP(code)) as any;
-      setAuthMethod(result);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  /**
    * Authenticate with Stytch
    */
   const authWithStytch = useCallback(
@@ -177,7 +158,6 @@ export default function useAuthenticate(redirectUri?: string) {
   return {
     authWithEthWallet,
     authWithWebAuthn,
-    authWithOTP,
     authWithStytch,
     authMethod,
     loading,

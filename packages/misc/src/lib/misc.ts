@@ -14,6 +14,12 @@ import {
   NodeClientErrorV1,
   NodeErrorV0,
   NodeErrorV1,
+  ClaimRequest,
+  ClaimKeyResponse,
+  ClaimResult,
+  ClaimProcessor,
+  MintCallback,
+  RelayClaimProcessor,
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
@@ -494,3 +500,86 @@ export const genRandomPath = (): string => {
     Math.random().toString(36).substring(2, 15)
   );
 };
+
+export const defaultMintClaimCallback: MintCallback<
+  RelayClaimProcessor
+> = async (params: ClaimResult<RelayClaimProcessor>): Promise<string> => {
+  try {
+    const relayUrl = params.relayUrl
+      ? params.relayUrl
+      : 'https://relayer-server-staging-cayenne.getlit.dev/auth/claim';
+    const response = await fetch(relayUrl, {
+      method: 'POST',
+      body: JSON.stringify(params),
+      headers: {
+        'api-key': params.relayApiKey
+          ? params.relayApiKey
+          : '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status < 200 || response.status >= 400) {
+      let errResp = (await response.json()) ?? '';
+      let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
+        errResp
+      )}`;
+      console.warn(errStmt);
+      throw new Error(errStmt);
+    }
+
+    let body: any = await response.json();
+    return body.requestId;
+  } catch (e) {
+    console.error((e as Error).message);
+    throw e;
+  }
+};
+
+export const hexPrefixed = (str: string) => {
+  if (str.startsWith('0x')) {
+    return str;
+  }
+
+  return '0x' + str;
+};
+
+/**
+ * getEnv - Determine the debug status based on environment variables or URL query parameters.
+ *
+ * @function
+ * @export
+ * @param {Object} [options={}] - Configuration options for determining debug status.
+ * @param {string} [options.nodeEnvVar='DEBUG'] - The Node.js environment variable to check.
+ * @param {string} [options.urlQueryParam='dev'] - The URL query parameter to check in a browser environment.
+ * @param {string} [options.urlQueryValue='debug=true'] - The expected value of the URL query parameter to enable debugging.
+ * @param {boolean} [options.defaultValue=false] - The default boolean value to return if no debug conditions are met.
+ * @returns {boolean} - True if debug conditions are met, otherwise returns the provided defaultValue.
+ *
+ * @example
+ * // Usage in Node.js environment
+ * process.env.DEBUG = 'true';
+ * console.log(getEnv()); // Outputs: true
+ *
+ * @example
+ * // Usage in Browser environment with URL: http://example.com?dev=debug=true
+ * console.log(getEnv()); // Outputs: true
+ */
+export function getEnv({
+  nodeEnvVar = 'DEBUG',
+  urlQueryParam = 'dev',
+  urlQueryValue = 'debug=true',
+  defaultValue = false,
+} = {}) {
+  // Node.js environment
+  if (isNode()) {
+    return process.env[nodeEnvVar] === 'true';
+  }
+  // Browser environment
+  else if (isBrowser()) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(urlQueryParam) === urlQueryValue;
+  }
+  // Default
+  return defaultValue;
+}

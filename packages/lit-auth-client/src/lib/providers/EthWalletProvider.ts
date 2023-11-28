@@ -6,10 +6,11 @@ import {
   EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
 import { LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
-import { SiweMessage } from 'lit-siwe';
+import { generateNonce, SiweMessage } from 'lit-siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
+import { log } from '@lit-protocol/misc';
 
 export default class EthWalletProvider extends BaseProvider {
   /**
@@ -23,8 +24,16 @@ export default class EthWalletProvider extends BaseProvider {
 
   constructor(options: BaseProviderOptions & EthWalletProviderOptions) {
     super(options);
-    this.domain = options.domain || window.location.hostname;
-    this.origin = options.origin || window.location.origin;
+    try {
+      this.domain = options.domain || window.location.hostname;
+      this.origin = options.origin || window.location.origin;
+    } catch (e) {
+      log(
+        '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
+      );
+      this.domain = options.domain || 'localhost';
+      this.origin = options.origin || 'http://localhost';
+    }
   }
 
   /**
@@ -65,6 +74,7 @@ export default class EthWalletProvider extends BaseProvider {
         version: '1',
         chainId,
         expirationTime: expiration,
+        nonce: this.litNodeClient.latestBlockhash || generateNonce(),
       };
 
       const message: SiweMessage = new SiweMessage(preparedMessage);
@@ -82,6 +92,7 @@ export default class EthWalletProvider extends BaseProvider {
     } else {
       authSig = await checkAndSignAuthMessage({
         chain,
+        nonce: this.litNodeClient.latestBlockhash || generateNonce(),
       });
     }
 
@@ -101,6 +112,10 @@ export default class EthWalletProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    return EthWalletProvider.authMethodId(authMethod);
+  }
+
+  public static async authMethodId(authMethod: AuthMethod): Promise<string> {
     let address: string;
 
     try {

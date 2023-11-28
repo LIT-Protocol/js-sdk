@@ -10,7 +10,6 @@
     "contracts-sdk": "packages/contracts-sdk",
     "core": "packages/core",
     "crypto": "packages/crypto",
-    "demo-contracts-sdk-react": "apps/demo-contracts-sdk-react",
     "demo-encrypt-decrypt-react": "apps/demo-encrypt-decrypt-react",
     "ecdsa-sdk": "packages/ecdsa-sdk",
     "encryption": "packages/encryption",
@@ -30,6 +29,7 @@
     "pkp-sui": "packages/pkp-sui",
     "pkp-walletconnect": "packages/pkp-walletconnect",
     "react": "apps/react",
+    "sev-snp-utils-sdk": "packages/sev-snp-utils-sdk",
     "types": "packages/types",
     "uint8arrays": "packages/uint8arrays"
   }

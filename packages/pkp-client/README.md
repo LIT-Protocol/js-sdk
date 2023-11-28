@@ -2,7 +2,7 @@
 
 This modules `PKPClient` manages multiple wallets for different blockchain networks (e.g., Ethereum and Cosmos) and offers a convenient way to create and interact with these wallets.
 
-It provides the functionalities to register supported wallets (_registerSupportedWallets), retrieve a list of supported chains (getSupportedChains), and access wallets for specific chains (getWallet, getEthWallet, getCosmosWallet, getBtcWallet).
+It provides the functionalities to register supported wallets (\_registerSupportedWallets), retrieve a list of supported chains (getSupportedChains), and access wallets for specific chains (getWallet, getEthWallet, getCosmosWallet, getBtcWallet).
 
 # Getting Started
 
@@ -28,7 +28,6 @@ const pkpEthWallet = pkpClient.getEthWallet();
 const pkpCosmosWallet = pkpClient.getCosmosWallet();
 
 // using a btc wallet (coming soon)
-
 ```
 
 More examples here:

@@ -5,9 +5,9 @@ import EthWalletProvider from './lib/providers/EthWalletProvider';
 import GoogleProvider from './lib/providers/GoogleProvider';
 import AppleProvider from './lib/providers/AppleProvider';
 import WebAuthnProvider from './lib/providers/WebAuthnProvider';
-import { OtpProvider } from './lib/providers/OtpProvider';
 import { StytchOtpProvider } from './lib/providers/StytchOtpProvider';
 import { isSignInRedirect, getProviderFromUrl } from './lib/utils';
+import StytchAuthFactorOtpProvider from './lib/providers/StytchAuthFactorOtp';
 
 declare global {
   var LitAuthClient: any; //eslint-disable-line no-var
@@ -27,8 +27,8 @@ export {
   GoogleProvider,
   AppleProvider,
   WebAuthnProvider,
-  OtpProvider,
   StytchOtpProvider,
+  StytchAuthFactorOtpProvider,
   isSignInRedirect,
   getProviderFromUrl,
 };

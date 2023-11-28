@@ -128,7 +128,10 @@ function base64ToBase64UrlPad(base64Str: string): string {
   return base64Str.replace('+', '-').replace('/', '_').replace(/=+$/, '');
 }
 
-export function uint8arrayFromString(str: string, encoding = 'utf8') {
+export function uint8arrayFromString(
+  str: string,
+  encoding = 'utf8'
+): Uint8Array {
   switch (encoding) {
     case 'utf8':
       return utf8Encode(str);
@@ -140,15 +143,18 @@ export function uint8arrayFromString(str: string, encoding = 'utf8') {
       return new Uint8Array(arr);
     case 'base64':
       return base64ToUint8Array(str);
-    case 'base64urlpad':
     case 'base64url':
+    case 'base64urlpad':
       return base64ToUint8Array(base64UrlPadToBase64(str));
     default:
       throw new Error(`Unsupported encoding "${encoding}"`);
   }
 }
 
-export function uint8arrayToString(uint8array: Uint8Array, encoding = 'utf8') {
+export function uint8arrayToString(
+  uint8array: Uint8Array,
+  encoding = 'utf8'
+): string {
   let _uint8array = new Uint8Array(uint8array);
 
   switch (encoding) {
@@ -156,12 +162,12 @@ export function uint8arrayToString(uint8array: Uint8Array, encoding = 'utf8') {
       return utf8Decode(_uint8array);
     case 'base16':
       return Array.from(_uint8array)
-        .map((byte) => byte.toString(16).padStart(2, '0'))
+        .map((byte: number) => byte.toString(16).padStart(2, '0'))
         .join('');
     case 'base64':
       return uint8ArrayToBase64(_uint8array);
-    case 'base64urlpad':
     case 'base64url':
+    case 'base64urlpad':
       return base64ToBase64UrlPad(uint8ArrayToBase64(_uint8array));
     default:
       throw new Error(`Unsupported encoding "${encoding}"`);

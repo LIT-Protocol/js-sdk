@@ -1,22 +1,15 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
-import { TextEncoder, TextDecoder } from 'util';
-global.TextEncoder = TextEncoder;
-// @ts-ignore - TextDecoder is not defined in Node
-global.TextDecoder = TextDecoder;
-// @ts-ignore - set global variable for testing
-global.jestTesting = true;
-
 import * as LITCONFIG from './../../../../lit.config.json';
-
 import { ProviderType } from '@lit-protocol/constants';
-import { LitAuthClient } from './lit-auth-client';
-import GoogleProvider from './providers/GoogleProvider';
-import DiscordProvider from './providers/DiscordProvider';
-import WebAuthnProvider from './providers/WebAuthnProvider';
-import EthWalletProvider from './providers/EthWalletProvider';
-import AppleProvider from './providers/AppleProvider';
-import { OtpProvider } from './providers/OtpProvider';
+import {
+  LitAuthClient,
+  GoogleProvider,
+  DiscordProvider,
+  WebAuthnProvider,
+  EthWalletProvider,
+  AppleProvider,
+  StytchOtpProvider,
+  StytchAuthFactorOtpProvider,
+} from '@lit-protocol/lit-auth-client';
 import { StytchOtpAuthenticateOptions } from '@lit-protocol/types';
 
 const isClass = (v: unknown) => {
@@ -95,9 +88,38 @@ describe('initProvider', () => {
     expect(provider).toBeInstanceOf(WebAuthnProvider);
   });
 
-  it('should return an instance of OtpProvider', () => {
-    const provider = client.initProvider<OtpProvider>(ProviderType.Otp);
-    expect(provider).toBeInstanceOf(OtpProvider);
+  it('Should create Stytch auth factor', () => {
+    const provider = client.initProvider<StytchOtpProvider>(
+      ProviderType.StytchOtp
+    );
+    expect(provider).toBeInstanceOf(StytchOtpProvider);
+  });
+  it('Should create stytch auth factor providers email', () => {
+    const provider = client.initProvider<StytchAuthFactorOtpProvider<'email'>>(
+      ProviderType.StytchEmailFactorOtp
+    );
+    expect(provider).toBeInstanceOf(StytchAuthFactorOtpProvider);
+  });
+
+  it('Should Create stytch auth factor providers sms', () => {
+    const provider = client.initProvider<StytchAuthFactorOtpProvider<'sms'>>(
+      ProviderType.StytchSmsFactorOtp
+    );
+    expect(provider).toBeInstanceOf(StytchAuthFactorOtpProvider);
+  });
+
+  it('Should Create stytch auth factor providers whats app', () => {
+    const provider = client.initProvider<
+      StytchAuthFactorOtpProvider<'whatsApp'>
+    >(ProviderType.StytchWhatsAppFactorOtp);
+    expect(provider).toBeInstanceOf(StytchAuthFactorOtpProvider);
+  });
+
+  it('Should Create stytch auth factor providers totp', () => {
+    const provider = client.initProvider<StytchAuthFactorOtpProvider<'totp'>>(
+      ProviderType.StytchTotpFactor
+    );
+    expect(provider).toBeInstanceOf(StytchAuthFactorOtpProvider);
   });
 });
 
@@ -128,33 +150,33 @@ describe('getProvider', () => {
   });
 });
 
-describe('StytchOtpProvider', () => {
-  let client: LitAuthClient;
-  let provider: OtpProvider;
+// describe('StytchOtpProvider', () => {
+//   let client: LitAuthClient;
+//   let provider: StytchOtpProvider;
 
-  beforeEach(() => {
-    client = new LitAuthClient({
-      litRelayConfig: { relayApiKey: 'test-api-key' },
-    });
+//   beforeEach(() => {
+//     client = new LitAuthClient({
+//       litRelayConfig: { relayApiKey: 'test-api-key' },
+//     });
 
-    provider = client.initProvider<StytchOtpAuthenticateOptions>(ProviderType.StytchOtp, {
-      appId: LITCONFIG.STYTCH_APP_ID,
-      userId: LITCONFIG.STYTCH_USER_ID,
-    });
-  });
+//     provider = client.initProvider<StytchOtpAuthenticateOptions>(ProviderType.StytchOtp, {
+//       appId: LITCONFIG.STYTCH_APP_ID,
+//       userId: LITCONFIG.STYTCH_USER_ID,
+//     });
+//   });
 
-  it('should parse jwt and resolve session', async () => {
-    const token: string = LITCONFIG.STYTCH_TEST_TOKEN;
-    const userId: string = LITCONFIG.STYTCH_USER_ID;
-    const authMethod = await provider.authenticate<OtpProviderOptions>({
-      accessToken: token,
-      userId: userId,
-    });
-    expect(authMethod).toBeDefined();
+//   it('should parse jwt and resolve session', async () => {
+//     const token: string = LITCONFIG.STYTCH_TEST_TOKEN;
+//     const userId: string = LITCONFIG.STYTCH_USER_ID;
+//     const authMethod = await provider.authenticate<OtpProviderOptions>({
+//       accessToken: token,
+//       userId: userId,
+//     });
+//     expect(authMethod).toBeDefined();
 
-    expect(authMethod.accessToken).toEqual(token);
-  });
-});
+//     expect(authMethod.accessToken).toEqual(token);
+//   });
+// });
 
 // describe('GoogleProvider', () => {
 //   let client: LitAuthClient;

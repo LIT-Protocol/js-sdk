@@ -5,11 +5,10 @@ import {
   OAuthProviderOptions,
   StytchOtpProviderOptions,
   ProviderOptions,
-  SignInWithOTPParams,
-  OtpProviderOptions,
   WebAuthnProviderOptions,
+  AuthMethod,
 } from '@lit-protocol/types';
-import { ProviderType } from '@lit-protocol/constants';
+import { AuthMethodType, ProviderType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitRelay } from './relay';
 import { BaseProvider } from './providers/BaseProvider';
@@ -19,7 +18,8 @@ import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
-import { OtpProvider } from './providers/OtpProvider';
+import StytchEmailOtpProvider from './providers/StytchAuthFactorOtp';
+import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
 
 /**
  * Class that handles authentication through Lit login
@@ -41,8 +41,6 @@ export class LitAuthClient {
    * Map of providers
    */
   private providers: Map<string, BaseProvider>;
-
-  private litOtpOptions: OtpProviderOptions | undefined;
 
   /**
    * Create a LitAuthClient instance
@@ -68,20 +66,14 @@ export class LitAuthClient {
           'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
         );
       }
-      if (options?.litOtpConfig) {
-        this.litOtpOptions = options?.litOtpConfig;
-      }
     }
 
     // Check if Lit node client is provided
-    if (
-      options?.litNodeClient &&
-      options.litNodeClient instanceof LitNodeClient
-    ) {
+    if (options?.litNodeClient) {
       this.litNodeClient = options?.litNodeClient;
     } else {
       this.litNodeClient = new LitNodeClient({
-        litNetwork: 'serrano',
+        litNetwork: 'cayenne',
         debug: false,
       });
     }
@@ -141,7 +133,7 @@ export class LitAuthClient {
           ...(options as WebAuthnProviderOptions),
         }) as unknown as T;
         break;
-      case `stytchOtp`:
+      case 'stytchOtp':
         provider = new StytchOtpProvider(
           {
             ...baseParams,
@@ -149,18 +141,37 @@ export class LitAuthClient {
           options as StytchOtpProviderOptions
         ) as unknown as T;
         break;
-      case `otp`:
-        provider = new OtpProvider(
-          {
-            ...baseParams,
-            ...(options as SignInWithOTPParams),
-          },
-          this.litOtpOptions
+      case 'stytchEmailFactorOtp':
+        provider = new StytchAuthFactorOtpProvider<'email'>(
+          { ...baseParams },
+          options as StytchOtpProviderOptions,
+          'email'
+        ) as unknown as T;
+        break;
+      case 'stytchSmsFactorOtp':
+        provider = new StytchAuthFactorOtpProvider<'sms'>(
+          { ...baseParams },
+          options as StytchOtpProviderOptions,
+          'sms'
+        ) as unknown as T;
+        break;
+      case 'stytchWhatsAppFactorOtp':
+        provider = new StytchAuthFactorOtpProvider<'whatsApp'>(
+          { ...baseParams },
+          options as StytchOtpProviderOptions,
+          'whatsApp'
+        ) as unknown as T;
+        break;
+      case 'stytchTotpFactor':
+        provider = new StytchAuthFactorOtpProvider<'totp'>(
+          { ...baseParams },
+          options as StytchOtpProviderOptions,
+          'totp'
         ) as unknown as T;
         break;
       default:
         throw new Error(
-          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn' are supported at the moment."
+          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn', 'Stytch', and 'StytchFactor' are supported at the moment."
         );
     }
 
@@ -177,5 +188,41 @@ export class LitAuthClient {
    */
   getProvider(type: ProviderType): BaseProvider | undefined {
     return this.providers.get(type);
+  }
+
+  /**
+   * Retrieves the authentication ID based on the provided authentication method.
+   *
+   * @param {AuthMethod} authMethod - The authentication method
+   * @returns {Promise<string>} - The authentication ID
+   */
+  public static async getAuthIdByAuthMethod(
+    authMethod: AuthMethod
+  ): Promise<string> {
+    let authId;
+
+    switch (authMethod.authMethodType) {
+      case AuthMethodType.EthWallet:
+        authId = await EthWalletProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.Discord:
+        authId = await DiscordProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.WebAuthn:
+        authId = await WebAuthnProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.GoogleJwt:
+        authId = await GoogleProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.StytchOtp:
+        authId = await GoogleProvider.authMethodId(authMethod);
+        break;
+      default:
+        throw new Error(
+          `Unsupported auth method type: ${authMethod.authMethodType}`
+        );
+    }
+
+    return authId;
   }
 }

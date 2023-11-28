@@ -1,23 +1,31 @@
-import { LIT_ERROR, NETWORK_PUB_KEY } from '@lit-protocol/constants';
+import {
+  EITHER_TYPE,
+  ILitError,
+  LIT_ERROR,
+  NETWORK_PUB_KEY,
+} from '@lit-protocol/constants';
+import { verifySignature } from '@lit-protocol/crypto';
 
 import {
-  AcceptedFileType,
-  DecryptFileProps,
+  DecryptFromIpfsProps,
+  DecryptRequest,
   DecryptZipFileWithMetadata,
   DecryptZipFileWithMetadataProps,
-  EncryptedFile,
-  EncryptedString,
-  EncryptedZip,
   EncryptFileAndZipWithMetadataProps,
+  EncryptFileRequest,
+  EncryptRequestBase,
+  EncryptResponse,
+  EncryptStringRequest,
+  EncryptToIpfsDataType,
+  EncryptToIpfsPayload,
   EncryptToIpfsProps,
-  DecryptFromIpfsProps,
+  EncryptZipRequest,
   IJWT,
-  SymmetricKey,
-  ThreeKeys,
+  ILitNodeClient,
+  MetadataForFile,
+  SigningAccessControlConditionJWTPayload,
   VerifyJWTProps,
 } from '@lit-protocol/types';
-
-import { wasmBlsSdkHelpers } from '@lit-protocol/bls-sdk';
 
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
@@ -27,91 +35,39 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-import {
-  decryptWithSymmetricKey,
-  encryptWithSymmetricKey,
-  generateSymmetricKey,
-  importSymmetricKey,
-} from '@lit-protocol/crypto';
-
 import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
 
 import { safeParams } from './params-validators';
 
 import * as ipfsClient from 'ipfs-http-client';
 
-// ---------- Local Interfaces ----------
-
-interface MetadataForFile {
-  name: string | any;
-  type: string | any;
-  size: string | number | any;
-  accessControlConditions: any[] | any;
-  evmContractConditions: any[] | any;
-  solRpcConditions: any[] | any;
-  unifiedAccessControlConditions: any[] | any;
-  chain: string;
-  encryptedSymmetricKey: Uint8Array | any;
-}
-
-// ---------- Local Helpers ----------
-
 /**
  *
- * Get all the metadata needed to decrypt something in the future.  If you're encrypting files with Lit and storing them in IPFS or Arweave, then this function will provide you with a properly formatted metadata object that you should save alongside the files.
+ * Encrypt a string or file using the LIT network public key and upload all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS using the ipfs-client-http SDK & returns the IPFS CID.
  *
- * @param { MetadataForFile }
+ * @param { EncryptToIpfsProps } - The params required to encrypt & upload to IPFS
  *
- * @return { MetadataForFile }
+ * @returns { Promise<string> } - IPFS CID
  *
  */
-const metadataForFile = ({
-  name,
-  type,
-  size,
-  accessControlConditions,
-  evmContractConditions,
-  solRpcConditions,
-  unifiedAccessControlConditions,
-  chain,
-  encryptedSymmetricKey,
-}: MetadataForFile): MetadataForFile => {
-  return {
-    name,
-    type,
-    size,
+export const encryptToIpfs = async (
+  params: EncryptToIpfsProps
+): Promise<string> => {
+  const {
+    authSig,
+    sessionSigs,
     accessControlConditions,
     evmContractConditions,
     solRpcConditions,
     unifiedAccessControlConditions,
     chain,
-    encryptedSymmetricKey: uint8arrayToString(encryptedSymmetricKey, 'base16'),
-  };
-};
+    string,
+    file,
+    litNodeClient,
+    infuraId,
+    infuraSecretKey,
+  } = params;
 
-/**
- *
- * Encrypt a string or file, save the key to the Lit network, and upload all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS using the ipfs-client-http SDK & returns the IPFS CID.
- *
- * @param { EncryptToIpfsProps }
- *
- * @returns { Promise<string> }
- *
- */
-export const encryptToIpfs = async ({
-  authSig,
-  sessionSigs,
-  accessControlConditions,
-  evmContractConditions,
-  solRpcConditions,
-  unifiedAccessControlConditions,
-  chain,
-  string,
-  file,
-  litNodeClient,
-  infuraId,
-  infuraSecretKey,
-}: EncryptToIpfsProps): Promise<string> => {
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'encryptToIpfs',
@@ -129,64 +85,37 @@ export const encryptToIpfs = async ({
     },
   });
 
-  if (!paramsIsSafe)
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `authSig, sessionSigs, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, litNodeClient, string or file must be provided`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
-  if (string === undefined && file === undefined)
-    return throwError({
-      message: `Either string or file must be provided`,
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
+  let ciphertext: string;
+  let dataToEncryptHash: string;
+  let dataType: EncryptToIpfsDataType;
 
-  if (!infuraId || !infuraSecretKey) {
-    return throwError({
-      message:
-        'Please provide your Infura Project Id and Infura API Key Secret to add the encrypted metadata on IPFS',
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
-  }
-
-  let encryptedData;
-  let symmetricKey;
-  if (string !== undefined && file !== undefined) {
-    return throwError({
-      message: 'Provide only either a string or file to encrypt',
-      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-    });
-  } else if (string !== undefined) {
-    const encryptedString = await encryptString(string);
-    encryptedData = encryptedString.encryptedString;
-    symmetricKey = encryptedString.symmetricKey;
+  if (string !== undefined) {
+    const encryptResponse = await encryptString(
+      {
+        ...params,
+        dataToEncrypt: string,
+      },
+      litNodeClient
+    );
+    ciphertext = encryptResponse.ciphertext;
+    dataToEncryptHash = encryptResponse.dataToEncryptHash;
+    dataType = 'string';
   } else {
-    const encryptedFile = await encryptFile({ file: file! });
-    encryptedData = encryptedFile.encryptedFile;
-    symmetricKey = encryptedFile.symmetricKey;
+    const encryptResponse = await encryptFile(
+      { ...params, file: file! },
+      litNodeClient
+    );
+    ciphertext = encryptResponse.ciphertext;
+    dataToEncryptHash = encryptResponse.dataToEncryptHash;
+    dataType = 'file';
   }
-
-  const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-    accessControlConditions,
-    evmContractConditions,
-    solRpcConditions,
-    unifiedAccessControlConditions,
-    symmetricKey,
-    authSig,
-    sessionSigs,
-    chain,
-  });
-
-  log('encrypted key saved to Lit', encryptedSymmetricKey);
-
-  const encryptedSymmetricKeyString = uint8arrayToString(
-    encryptedSymmetricKey,
-    'base16'
-  );
 
   const authorization =
     'Basic ' + Buffer.from(`${infuraId}:${infuraSecretKey}`).toString('base64');
@@ -197,28 +126,24 @@ export const encryptToIpfs = async ({
     },
   });
 
-  const encryptedDataJson = Buffer.from(
-    await encryptedData.arrayBuffer()
-  ).toJSON();
   try {
     const res = await ipfs.add(
       JSON.stringify({
-        [string !== undefined ? 'encryptedString' : 'encryptedFile']:
-          encryptedDataJson,
-        encryptedSymmetricKeyString,
+        ciphertext,
+        dataToEncryptHash,
         accessControlConditions,
         evmContractConditions,
         solRpcConditions,
         unifiedAccessControlConditions,
         chain,
-      })
+        dataType,
+      } as EncryptToIpfsPayload)
     );
 
     return res.path;
   } catch (e) {
     return throwError({
-      message:
-        "Provided INFURA_ID or INFURA_SECRET_KEY in invalid hence can't upload to IPFS",
+      message: 'Unable to upload to IPFS',
       errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
       errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
     });
@@ -229,17 +154,16 @@ export const encryptToIpfs = async ({
  *
  * Decrypt & return the string or file (in Uint8Array format) using its metadata stored on IPFS with the given ipfsCid.
  *
- * @param { DecryptFromIpfsProps }
+ * @param { DecryptFromIpfsProps } - The params required to decrypt from IPFS
  *
- * @returns { Promise<string | Uint8Array> }
+ * @returns { Promise<string | Uint8Array> } - The decrypted string or file (in Uint8Array format)
  *
  */
-export const decryptFromIpfs = async ({
-  authSig,
-  sessionSigs,
-  ipfsCid,
-  litNodeClient,
-}: DecryptFromIpfsProps): Promise<string | Uint8Array> => {
+export const decryptFromIpfs = async (
+  params: DecryptFromIpfsProps
+): Promise<string | Uint8Array> => {
+  const { authSig, sessionSigs, ipfsCid, litNodeClient } = params;
+
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'decryptFromIpfs',
@@ -251,43 +175,53 @@ export const decryptFromIpfs = async ({
     },
   });
 
-  if (!paramsIsSafe)
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `authSig, sessionSigs, ipfsCid, litNodeClient must be provided`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
   try {
-    const metadata = await (
+    const metadata: EncryptToIpfsPayload = await (
       await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`)
     ).json();
-    const symmetricKey = await litNodeClient.getEncryptionKey({
-      accessControlConditions: metadata.accessControlConditions,
-      evmContractConditions: metadata.evmContractConditions,
-      solRpcConditions: metadata.solRpcConditions,
-      unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
-      toDecrypt: metadata.encryptedSymmetricKeyString,
-      chain: metadata.chain,
-      authSig,
-      sessionSigs,
-    });
-
-    if (metadata.encryptedString !== undefined) {
-      const encryptedStringBlob = new Blob(
-        [Buffer.from(metadata.encryptedString)],
-        { type: 'application/octet-stream' }
+    if (metadata.dataType === 'string') {
+      return decryptToString(
+        {
+          accessControlConditions: metadata.accessControlConditions,
+          evmContractConditions: metadata.evmContractConditions,
+          solRpcConditions: metadata.solRpcConditions,
+          unifiedAccessControlConditions:
+            metadata.unifiedAccessControlConditions,
+          ciphertext: metadata.ciphertext,
+          dataToEncryptHash: metadata.dataToEncryptHash,
+          chain: metadata.chain,
+          authSig,
+          sessionSigs,
+        },
+        litNodeClient
       );
-      return await decryptString(encryptedStringBlob, symmetricKey);
+    } else {
+      return decryptToFile(
+        {
+          accessControlConditions: metadata.accessControlConditions,
+          evmContractConditions: metadata.evmContractConditions,
+          solRpcConditions: metadata.solRpcConditions,
+          unifiedAccessControlConditions:
+            metadata.unifiedAccessControlConditions,
+          ciphertext: metadata.ciphertext,
+          dataToEncryptHash: metadata.dataToEncryptHash,
+          chain: metadata.chain,
+          authSig,
+          sessionSigs,
+        },
+        litNodeClient
+      );
     }
-
-    const encryptedFileBlob = new Blob([Buffer.from(metadata.encryptedFile)], {
-      type: 'application/octet-stream',
-    });
-    return await decryptFile({ file: encryptedFileBlob, symmetricKey });
   } catch (e) {
     return throwError({
-      message: 'Invalid ipfsCid',
+      message: 'Unable to fetch or decrypt from IPFS',
       errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
       errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
     });
@@ -300,107 +234,87 @@ export const decryptFromIpfs = async ({
  *
  * Encrypt a string.  This is used to encrypt any string that is to be locked via the Lit Protocol.
  *
- * @param { string } str The string to encrypt
- * @returns { Promise<Object> } A promise containing the encryptedString as a Blob and the symmetricKey used to encrypt it, as a Uint8Array.
+ * @param { EncryptStringRequest } params - The params required to encrypt a string
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
+ *
+ * @returns { Promise<EncryptResponse> } - The encrypted string and the hash of the string
  */
-export const encryptString = async (str: string): Promise<EncryptedString> => {
+export const encryptString = async (
+  params: EncryptStringRequest,
+  litNodeClient: ILitNodeClient
+): Promise<EncryptResponse> => {
   // -- validate
-  if (
-    !checkType({
-      value: str,
-      allowedTypes: ['String'],
-      paramName: 'str',
-      functionName: 'encryptString',
-    })
-  ) {
+  const paramsIsSafe = safeParams({
+    functionName: 'encryptString',
+    params,
+  });
+
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `{${str}} must be a string`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
-  }
 
-  // -- prepare
-  const encodedString: Uint8Array = uint8arrayFromString(str, 'utf8');
-
-  const symmKey: CryptoKey = await generateSymmetricKey();
-
-  const encryptedString: Blob = await encryptWithSymmetricKey(
-    symmKey,
-    encodedString.buffer
-  );
-
-  const exportedSymmKey: Uint8Array = new Uint8Array(
-    await crypto.subtle.exportKey('raw', symmKey)
-  );
-
-  return {
-    symmetricKey: exportedSymmKey,
-    encryptedString,
-    encryptedData: encryptedString,
-  };
+  return litNodeClient.encrypt({
+    ...params,
+    dataToEncrypt: uint8arrayFromString(params.dataToEncrypt, 'utf8'),
+  });
 };
 
 /**
  *
- * Decrypt a string that was encrypted with the encryptString function.
+ * Decrypt ciphertext into a string that was encrypted with the encryptString function.
  *
- * @param { AcceptedFileType } encryptedStringBlob The encrypted string as a Blob
- * @param { Uint8Array } symmKey The symmetric key used that will be used to decrypt this.
- *
- * @returns { Promise<string> } A promise containing the decrypted string
+ * @param { DecryptRequest } params - The params required to decrypt a string
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
+
+ * @returns { Promise<string> } - The decrypted string
  */
-export const decryptString = async (
-  encryptedStringBlob: Blob,
-  symmKey: Uint8Array
+export const decryptToString = async (
+  params: DecryptRequest,
+  litNodeClient: ILitNodeClient
 ): Promise<string> => {
   // -- validate
   const paramsIsSafe = safeParams({
-    functionName: 'decryptString',
-    params: [encryptedStringBlob, symmKey],
+    functionName: 'decrypt',
+    params,
   });
 
-  if (!paramsIsSafe) {
-    throwError({
-      message: 'Invalid params',
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
+    return throwError({
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
-  }
 
-  // -- import the decrypted symm key
-  const importedSymmKey: CryptoKey = await importSymmetricKey(symmKey);
+  const { decryptedData } = await litNodeClient.decrypt(params);
 
-  const decryptedStringArrayBuffer: Uint8Array = await decryptWithSymmetricKey(
-    encryptedStringBlob,
-    importedSymmKey
-  );
-
-  return uint8arrayToString(new Uint8Array(decryptedStringArrayBuffer), 'utf8');
+  return uint8arrayToString(decryptedData, 'utf8');
 };
 
 /**
  *
  * Zip and encrypt a string.  This is used to encrypt any string that is to be locked via the Lit Protocol.
  *
- * @param { string } string The string to zip and encrypt
+ * @param { EncryptStringRequest } params - The params required to encrypt a string
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
- * @returns { Promise<Object> } A promise containing the encryptedZip as a Blob and the symmetricKey used to encrypt it, as a Uint8Array.  The encrypted zip will contain a single file called "string.txt"
+ * @returns { Promise<EncryptResponse> } - The encrypted string and the hash of the string
  */
 export const zipAndEncryptString = async (
-  string: string
-): Promise<EncryptedZip> => {
+  params: EncryptStringRequest,
+  litNodeClient: ILitNodeClient
+): Promise<EncryptResponse> => {
   // -- validate
-  if (
-    !checkType({
-      value: string,
-      allowedTypes: ['String'],
-      paramName: 'string',
-      functionName: 'zipAndEncryptString',
-    })
-  )
-    throwError({
-      message: 'Invalid string',
+  const paramsIsSafe = safeParams({
+    functionName: 'zipAndEncryptString',
+    params,
+  });
+
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
+    return throwError({
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
@@ -413,23 +327,27 @@ export const zipAndEncryptString = async (
     zip = new JSZip();
   }
 
-  zip.file('string.txt', string);
+  zip.file('string.txt', params.dataToEncrypt);
 
-  return encryptZip(zip);
+  return encryptZip({ ...params, zip }, litNodeClient);
 };
 
 /**
  * 
  * Zip and encrypt multiple files.
  * 
- * @param { Array<File> } files An array of the files you wish to zip and encrypt
+ * @param { Array<File> } files - The files to encrypt
+ * @param { EncryptRequestBase } paramsBase - The params required to encrypt a file
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  * 
- * @returns {Promise<Object>} A promise containing the encryptedZip as a Blob and the symmetricKey used to encrypt it, as a Uint8Array.  The encrypted zip will contain a folder "encryptedAssets" and all of the files will be inside it.
+ * @returns { Promise<EncryptResponse> } - The encrypted file and the hash of the file
  
 */
 export const zipAndEncryptFiles = async (
-  files: Array<File>
-): Promise<EncryptedZip> => {
+  files: Array<File>,
+  paramsBase: EncryptRequestBase,
+  litNodeClient: ILitNodeClient
+): Promise<EncryptResponse> => {
   // let's zip em
   let zip;
 
@@ -470,46 +388,36 @@ export const zipAndEncryptFiles = async (
     folder.file(files[i].name, files[i]);
   }
 
-  return encryptZip(zip);
+  return encryptZip({ ...paramsBase, zip }, litNodeClient);
 };
 
 /**
  *
  * Decrypt and unzip a zip that was created using encryptZip, zipAndEncryptString, or zipAndEncryptFiles.
  *
- * @param { AcceptedFileType } encryptedZipBlob The encrypted zip as a Blob
- * @param { SymmetricKey } symmKey The symmetric key used that will be used to decrypt this zip.
+ * @param { DecryptRequest } params - The params required to decrypt a string
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
- * @returns { Promise<Object> } A promise containing a JSZip object indexed by the filenames of the zipped files.  For example, if you have a file called "meow.jpg" in the root of your zip, you could get it from the JSZip object by doing this: const imageBlob = await decryptedZip['meow.jpg'].async('blob')
+ * @returns { Promise<{ [key: string]: JSZip.JSZipObject }>} - The decrypted zip file
  */
-export const decryptZip = async (
-  encryptedZipBlob: AcceptedFileType,
-  symmKey: SymmetricKey
+export const decryptToZip = async (
+  params: DecryptRequest,
+  litNodeClient: ILitNodeClient
 ): Promise<{ [key: string]: JSZip.JSZipObject }> => {
   // -- validate
   const paramsIsSafe = safeParams({
-    functionName: 'decryptZip',
-    params: {
-      encryptedZipBlob,
-      symmKey,
-    },
+    functionName: 'decrypt',
+    params,
   });
 
-  if (!paramsIsSafe) {
-    throwError({
-      message: `encryptedZipBlob must be a Blob or File. symmKey must be a Uint8Array`,
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
+    return throwError({
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
-  }
 
-  // import the decrypted symm key
-  const importedSymmKey = await importSymmetricKey(symmKey);
-
-  const decryptedZipArrayBuffer = await decryptWithSymmetricKey(
-    encryptedZipBlob,
-    importedSymmKey
-  );
+  const { decryptedData } = await litNodeClient.decrypt(params);
 
   // unpack the zip
   let zip;
@@ -519,20 +427,38 @@ export const decryptZip = async (
   } catch (e) {
     zip = new JSZip();
   }
-  const unzipped = await zip.loadAsync(decryptedZipArrayBuffer);
+  const unzipped = await zip.loadAsync(decryptedData);
 
   return unzipped.files;
 };
 
 /**
  *
- * Encrypt a zip file created with JSZip using a new random symmetric key via WebCrypto.
+ * Encrypt a zip file created with JSZip.
  *
- * @param { JSZip } zip The JSZip instance to encrypt
+ * @param { EncryptZipRequest } params - The params required to encrypt a zip
+ * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
- * @returns { Promise<Object> } A promise containing the encryptedZip as a Blob and the symmetricKey used to encrypt it, as a Uint8Array string.
+ * @returns { Promise<EncryptResponse> } - The encrypted zip file and the hash of the zip file
  */
-export const encryptZip = async (zip: JSZip): Promise<EncryptedZip> => {
+export const encryptZip = async (
+  params: EncryptZipRequest,
+  litNodeClient: ILitNodeClient
+): Promise<EncryptResponse> => {
+  // -- validate
+  const paramsIsSafe = safeParams({
+    functionName: 'encryptZip',
+    params,
+  });
+
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
+    return throwError({
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+    });
+
+  const { zip } = params;
   let zipBlob;
   let zipBlobArrayBuffer: ArrayBuffer;
 
@@ -543,49 +469,40 @@ export const encryptZip = async (zip: JSZip): Promise<EncryptedZip> => {
     zipBlobArrayBuffer = await zip.generateAsync({ type: 'nodebuffer' });
   }
 
-  const symmKey: CryptoKey = await generateSymmetricKey();
-
-  const encryptedZipBlob: Blob = await encryptWithSymmetricKey(
-    symmKey,
-    zipBlobArrayBuffer
-  );
-
   // to download the encrypted zip file for testing, uncomment this
   // saveAs(encryptedZipBlob, 'encrypted.bin')
 
-  const exportedSymmKey: Uint8Array = new Uint8Array(
-    await crypto.subtle.exportKey('raw', symmKey)
-  );
-
-  const encryptedZip: EncryptedZip = {
-    symmetricKey: exportedSymmKey,
-    encryptedZip: encryptedZipBlob,
-  };
-
-  return encryptedZip;
+  return litNodeClient.encrypt({
+    ...params,
+    dataToEncrypt: new Uint8Array(zipBlobArrayBuffer),
+  });
 };
 
 /**
  *
- * Encrypt a single file, save the key to the Lit network, and then zip it up with the metadata.
+ * Encrypt a single file and then zip it up with the metadata.
  *
- * @param { EncryptFileAndZipWithMetadataProps }
+ * @param { EncryptFileAndZipWithMetadataProps } params - The params required to encrypt a file and zip it up with the metadata
  *
- * @returns { Promise<ThreeKeys> }
+ * @returns { Promise<any> } - The encrypted zip file and the hash of the zip file
  *
  */
-export const encryptFileAndZipWithMetadata = async ({
-  authSig,
-  sessionSigs,
-  accessControlConditions,
-  evmContractConditions,
-  solRpcConditions,
-  unifiedAccessControlConditions,
-  chain,
-  file,
-  litNodeClient,
-  readme,
-}: EncryptFileAndZipWithMetadataProps): Promise<ThreeKeys> => {
+export const encryptFileAndZipWithMetadata = async (
+  params: EncryptFileAndZipWithMetadataProps
+): Promise<any> => {
+  const {
+    authSig,
+    sessionSigs,
+    accessControlConditions,
+    evmContractConditions,
+    solRpcConditions,
+    unifiedAccessControlConditions,
+    chain,
+    file,
+    litNodeClient,
+    readme,
+  } = params;
+
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'encryptFileAndZipWithMetadata',
@@ -603,40 +520,20 @@ export const encryptFileAndZipWithMetadata = async ({
     },
   });
 
-  if (!paramsIsSafe)
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `authSig, sessionSigs, accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions, chain, file, litNodeClient, and readme must be provided`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
-  // -- validate
-  const symmetricKey = await generateSymmetricKey();
-  const exportedSymmKey = new Uint8Array(
-    await crypto.subtle.exportKey('raw', symmetricKey)
-  );
-  // log('exportedSymmKey in hex', uint8arrayToString(exportedSymmKey, 'base16'))
-
-  const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-    accessControlConditions,
-    evmContractConditions,
-    solRpcConditions,
-    unifiedAccessControlConditions,
-    symmetricKey: exportedSymmKey,
-    authSig,
-    sessionSigs,
-    chain,
-  });
-
-  log('encrypted key saved to Lit', encryptedSymmetricKey);
-
   // encrypt the file
-  var fileAsArrayBuffer = await file.arrayBuffer();
-  const encryptedZipBlob = await encryptWithSymmetricKey(
-    symmetricKey,
-    fileAsArrayBuffer
+  const { ciphertext, dataToEncryptHash } = await encryptFile(
+    { ...params },
+    litNodeClient
   );
 
+  // Zip up with metadata
   let zip;
 
   try {
@@ -644,17 +541,17 @@ export const encryptFileAndZipWithMetadata = async ({
   } catch (e) {
     zip = new JSZip();
   }
-  const metadata = metadataForFile({
+  const metadata: MetadataForFile = {
     name: file.name,
     type: file.type,
     size: file.size,
-    encryptedSymmetricKey,
     accessControlConditions,
     evmContractConditions,
     solRpcConditions,
     unifiedAccessControlConditions,
     chain,
-  });
+    dataToEncryptHash,
+  };
 
   zip.file('lit_protocol_metadata.json', JSON.stringify(metadata));
   if (readme) {
@@ -672,36 +569,31 @@ export const encryptFileAndZipWithMetadata = async ({
     });
   }
 
-  folder.file(file.name, encryptedZipBlob);
+  folder.file(file.name, uint8arrayFromString(ciphertext, 'base64'));
 
-  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  let zipBlob;
+  if (isBrowser()) {
+    zipBlob = await zip.generateAsync({ type: 'blob' });
+  } else {
+    zipBlob = await zip.generateAsync({ type: 'nodebuffer' });
+  }
 
-  const threeKeys: ThreeKeys = {
-    zipBlob,
-    encryptedSymmetricKey,
-    symmetricKey: exportedSymmKey,
-  };
-
-  return threeKeys;
+  return zipBlob;
 };
 
 /**
  *
  * Given a zip file with metadata inside it, unzip, load the metadata, and return the decrypted file and the metadata.  This zip file would have been created with the encryptFileAndZipWithMetadata function.
  *
- * @param { DecryptZipFileWithMetadataProps }
+ * @param { DecryptZipFileWithMetadataProps } params - The params required to decrypt a zip file with metadata
  *
  * @returns { Promise<DecryptZipFileWithMetadata> } A promise containing an object that contains decryptedFile and metadata properties.  The decryptedFile is an ArrayBuffer that is ready to use, and metadata is an object that contains all the properties of the file like it's name and size and type.
  */
-export const decryptZipFileWithMetadata = async ({
-  authSig,
-  sessionSigs,
-  file,
-  litNodeClient,
-  additionalAccessControlConditions,
-}: DecryptZipFileWithMetadataProps): Promise<
-  DecryptZipFileWithMetadata | undefined
-> => {
+export const decryptZipFileWithMetadata = async (
+  params: DecryptZipFileWithMetadataProps
+): Promise<DecryptZipFileWithMetadata | undefined> => {
+  const { authSig, sessionSigs, file, litNodeClient } = params;
+
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'decryptZipFileWithMetadata',
@@ -710,11 +602,15 @@ export const decryptZipFileWithMetadata = async ({
       sessionSigs,
       file,
       litNodeClient,
-      additionalAccessControlConditions,
     },
   });
 
-  if (!paramsIsSafe) return;
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
+    return throwError({
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+    });
 
   // -- execute
   const zip = await JSZip.loadAsync(file);
@@ -728,82 +624,9 @@ export const decryptZipFileWithMetadata = async ({
     return;
   }
 
-  const metadata = JSON.parse(await jsonFile.async('string'));
+  const metadata: MetadataForFile = JSON.parse(await jsonFile.async('string'));
 
   log('zip metadata', metadata);
-
-  let symmKey;
-
-  try {
-    symmKey = await litNodeClient.getEncryptionKey({
-      accessControlConditions: metadata.accessControlConditions,
-      evmContractConditions: metadata.evmContractConditions,
-      solRpcConditions: metadata.solRpcConditions,
-      unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
-      toDecrypt: metadata.encryptedSymmetricKey,
-      chain: metadata.chain, // -- validate
-      authSig,
-      sessionSigs,
-    });
-  } catch (e: any) {
-    if (
-      e.errorCode === 'NodeNotAuthorized' ||
-      e.errorCode === 'not_authorized'
-    ) {
-      // try more additionalAccessControlConditions
-      if (!additionalAccessControlConditions) {
-        throw e;
-      }
-      log('trying additionalAccessControlConditions');
-
-      // -- loop start
-      for (let i = 0; i < additionalAccessControlConditions.length; i++) {
-        const accessControlConditions =
-          additionalAccessControlConditions[i].accessControlConditions;
-
-        log('trying additional condition', accessControlConditions);
-
-        try {
-          symmKey = await litNodeClient.getEncryptionKey({
-            accessControlConditions: accessControlConditions,
-            toDecrypt:
-              additionalAccessControlConditions[i].encryptedSymmetricKey,
-            chain: metadata.chain,
-            authSig,
-            sessionSigs,
-          });
-
-          // okay we got the additional symmkey, now we need to decrypt the symmkey and then use it to decrypt the original symmkey
-          // const importedAdditionalSymmKey = await importSymmetricKey(symmKey)
-          // symmKey = await decryptWithSymmetricKey(additionalAccessControlConditions[i].encryptedSymmetricKey, importedAdditionalSymmKey)
-
-          break; // it worked, we can leave the loop and stop checking additional access control conditions
-        } catch (e: any) {
-          // swallow not_authorized because we are gonna try some more accessControlConditions
-          if (
-            e.errorCode === 'NodeNotAuthorized' ||
-            e.errorCode === 'not_authorized'
-          ) {
-            throw e;
-          }
-        }
-      }
-      // -- loop ends
-
-      if (!symmKey) {
-        // we tried all the access control conditions and none worked
-        throw e;
-      }
-    } else {
-      throw e;
-    }
-  }
-
-  if (!symmKey) {
-    return;
-  }
-
-  const importedSymmKey = await importSymmetricKey(symmKey);
 
   const folder: JSZip | null = zip.folder('encryptedAssets');
 
@@ -821,9 +644,21 @@ export const decryptZipFileWithMetadata = async ({
 
   const encryptedFile = await _file.async('blob');
 
-  const decryptedFile = await decryptWithSymmetricKey(
-    encryptedFile,
-    importedSymmKey
+  const decryptedFile = await decryptToFile(
+    {
+      ...params,
+      accessControlConditions: metadata.accessControlConditions,
+      evmContractConditions: metadata.evmContractConditions,
+      solRpcConditions: metadata.solRpcConditions,
+      unifiedAccessControlConditions: metadata.unifiedAccessControlConditions,
+      chain: metadata.chain,
+      ciphertext: uint8arrayToString(
+        new Uint8Array(await encryptedFile.arrayBuffer()),
+        'base64'
+      ),
+      dataToEncryptHash: metadata.dataToEncryptHash,
+    },
+    litNodeClient
   );
 
   const data: DecryptZipFileWithMetadata = { decryptedFile, metadata };
@@ -833,93 +668,68 @@ export const decryptZipFileWithMetadata = async ({
 
 /**
  *
- * Encrypt a file without doing any zipping or packing.  This is useful for large files.  A 1gb file can be encrypted in only 2 seconds, for example.  A new random symmetric key will be created and returned along with the encrypted file.
+ * Encrypt a file without doing any zipping or packing.  This is useful for large files.  A 1gb file can be encrypted in only 2 seconds, for example.
  *
- * @param { Object } params
- * @param { AcceptedFileType } params.file The file you wish to encrypt
+ * @param { EncryptFileRequest } params - The params required to encrypt a file
+ * @param { ILitNodeClient } litNodeClient - The lit node client to use to encrypt the file
  *
- * @returns { Promise<Object> } A promise containing an object with keys encryptedFile and symmetricKey.  encryptedFile is a Blob, and symmetricKey is a Uint8Array that can be used to decrypt the file.
+ * @returns { Promise<EncryptResponse> } - The encrypted file and the hash of the file
  */
-export const encryptFile = async ({
-  file,
-}: {
-  file: AcceptedFileType;
-}): Promise<EncryptedFile> => {
+export const encryptFile = async (
+  params: EncryptFileRequest,
+  litNodeClient: ILitNodeClient
+): Promise<EncryptResponse> => {
   // -- validate
-  if (
-    !checkType({
-      value: file,
-      allowedTypes: ['Blob', 'File'],
-      paramName: 'file',
-      functionName: 'encryptFile',
-    })
-  ) {
+  const paramsIsSafe = safeParams({
+    functionName: 'encryptFile',
+    params,
+  });
+
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: 'file must be a Blob or File',
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
-  }
-
-  // generate a random symmetric key
-  const symmetricKey = await generateSymmetricKey();
-  const exportedSymmKey = new Uint8Array(
-    await crypto.subtle.exportKey('raw', symmetricKey)
-  );
 
   // encrypt the file
-  var fileAsArrayBuffer = await file.arrayBuffer();
-  const encryptedFile = await encryptWithSymmetricKey(
-    symmetricKey,
-    fileAsArrayBuffer
-  );
+  var fileAsArrayBuffer = await params.file.arrayBuffer();
 
-  const _encryptedFile: EncryptedFile = {
-    encryptedFile,
-    symmetricKey: exportedSymmKey,
-  };
-
-  return _encryptedFile;
+  return litNodeClient.encrypt({
+    ...params,
+    dataToEncrypt: new Uint8Array(fileAsArrayBuffer),
+  });
 };
 
 /**
  *
  * Decrypt a file that was encrypted with the encryptFile function, without doing any unzipping or unpacking.  This is useful for large files.  A 1gb file can be decrypted in only 1 second, for example.
  *
- * @property { Object } params
- * @property { AcceptedFileType } params.file The file you wish to decrypt
- * @property { Uint8Array } params.symmetricKey The symmetric key used that will be used to decrypt this.
+ * @param { DecryptRequest } params - The params required to decrypt a file
+ * @param { ILitNodeClient } litNodeClient - The lit node client to use to decrypt the file
  *
- * @returns { Promise<Object> } A promise containing the decrypted file.  The file is an ArrayBuffer.
+ * @returns { Promise<Uint8Array> } - The decrypted file
  */
-export const decryptFile = async ({
-  file,
-  symmetricKey,
-}: DecryptFileProps): Promise<Uint8Array> => {
+export const decryptToFile = async (
+  params: DecryptRequest,
+  litNodeClient: ILitNodeClient
+): Promise<Uint8Array> => {
   // -- validate
   const paramsIsSafe = safeParams({
-    functionName: 'decryptFile',
-    params: {
-      file,
-      symmetricKey,
-    },
+    functionName: 'decrypt',
+    params,
   });
 
-  if (!paramsIsSafe) {
+  if (paramsIsSafe.type === EITHER_TYPE.ERROR)
     return throwError({
-      message: `file type must be Blob or File, and symmetricKey type must be Uint8Array | string | CryptoKey | BufferSource`,
+      message: `Invalid params: ${(paramsIsSafe.result as ILitError).message}`,
       errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
-  }
 
-  // -- execute
-  const importedSymmKey = await importSymmetricKey(symmetricKey);
+  const { decryptedData } = await litNodeClient.decrypt(params);
 
-  // decrypt the file
-  const decryptedFile = await decryptWithSymmetricKey(file, importedSymmKey);
-
-  return decryptedFile;
+  return decryptedData;
 };
 
 declare global {
@@ -932,13 +742,16 @@ declare global {
 /**
  * // TODO check for expiration
  *
- * Verify a JWT from the LIT network.  Use this for auth on your server.  For some background, users can define resources (URLs) for authorization via on-chain conditions using the saveSigningCondition function.  Other users can then request a signed JWT proving that their ETH account meets those on-chain conditions using the getSignedToken function.  Then, servers can verify that JWT using this function.  A successful verification proves that the user meets the on-chain conditions defined in the saveSigningCondition step.  For example, the on-chain condition could be posession of a specific NFT.
+ * Verify a JWT from the LIT network.  Use this for auth on your server.  For some background, users can specify access control condiitons for various URLs, and then other users can then request a signed JWT proving that their ETH account meets those on-chain conditions using the getSignedToken function.  Then, servers can verify that JWT using this function.  A successful verification proves that the user meets the access control conditions defined earlier.  For example, the on-chain condition could be posession of a specific NFT.
  *
  * @param { VerifyJWTProps } jwt
  *
- * @returns { IJWT } An object with 4 keys: "verified": A boolean that represents whether or not the token verifies successfully.  A true result indicates that the token was successfully verified.  "header": the JWT header.  "payload": the JWT payload which includes the resource being authorized, etc.  "signature": A uint8array that represents the raw  signature of the JWT.
+ * @returns { IJWT<T> } An object with 4 keys: "verified": A boolean that represents whether or not the token verifies successfully.  A true result indicates that the token was successfully verified.  "header": the JWT header.  "payload": the JWT payload which includes the resource being authorized, etc.  "signature": A uint8array that represents the raw  signature of the JWT.
  */
-export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT => {
+export const verifyJwt = ({
+  publicKey,
+  jwt,
+}: VerifyJWTProps): IJWT<SigningAccessControlConditionJWTPayload> => {
   // -- validate
   if (
     !checkType({
@@ -961,34 +774,24 @@ export const verifyJwt = ({ jwt }: VerifyJWTProps): IJWT => {
     log('wasmExports is not loaded.');
   }
 
-  const pubKey = uint8arrayFromString(NETWORK_PUB_KEY, 'base16');
-  // log("pubkey is ", pubKey);
-
   const jwtParts = jwt.split('.');
-  const sig = uint8arrayFromString(jwtParts[2], 'base64url');
-  // log("sig is ", uint8arrayToString(sig, "base16"));
+  const signature = uint8arrayFromString(jwtParts[2], 'base64url');
 
   const unsignedJwt = `${jwtParts[0]}.${jwtParts[1]}`;
-  // log("unsignedJwt is ", unsignedJwt);
 
   const message = uint8arrayFromString(unsignedJwt);
-  // log("message is ", message);
 
-  // p is public key uint8array
-  // s is signature uint8array
-  // m is message uint8array
-  // function is: function (p, s, m)
-  const verified = Boolean(wasmBlsSdkHelpers.verify(pubKey, sig, message));
+  verifySignature(publicKey, message, signature);
 
-  const _jwt: IJWT = {
-    verified,
+  const _jwt: IJWT<SigningAccessControlConditionJWTPayload> = {
+    verified: true,
     header: JSON.parse(
       uint8arrayToString(uint8arrayFromString(jwtParts[0], 'base64url'))
     ),
     payload: JSON.parse(
       uint8arrayToString(uint8arrayFromString(jwtParts[1], 'base64url'))
     ),
-    signature: sig,
+    signature,
   };
 
   return _jwt;

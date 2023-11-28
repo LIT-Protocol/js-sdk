@@ -3,6 +3,7 @@ import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 import { CustomNetwork, LitNodeClientConfig } from '@lit-protocol/types';
 import { isNode, log } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
+import { EITHER_TYPE } from '@lit-protocol/constants';
 
 export class LitNodeClient extends LitNodeClientNodeJs {
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -29,13 +30,13 @@ export class LitNodeClient extends LitNodeClientNodeJs {
     const storageConfigOrError = getStorageItem(storageKey);
 
     // -- validate
-    if (storageConfigOrError.type === 'ERROR') {
+    if (storageConfigOrError.type === EITHER_TYPE.ERROR) {
       log(`Storage key "${storageKey}" is missing. `);
       return;
     }
 
     // -- execute
-    const storageConfig = JSON.parse(storageConfigOrError.result);
+    const storageConfig = JSON.parse(storageConfigOrError.result as string);
     // this.config = override(this.config, storageConfig);
     this.config = { ...this.config, ...storageConfig };
   };

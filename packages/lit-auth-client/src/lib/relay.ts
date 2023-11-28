@@ -36,8 +36,9 @@ export class LitRelay implements IRelay {
    */
   constructor(config: LitRelayConfig) {
     this.relayUrl =
-      config.relayUrl || 'https://relay-server-staging.herokuapp.com';
+      config.relayUrl || 'https://relayer-server-staging-cayenne.getlit.dev';
     this.relayApiKey = config.relayApiKey || '';
+    console.log("Lit's relay server URL:", this.relayUrl);
   }
 
   /**

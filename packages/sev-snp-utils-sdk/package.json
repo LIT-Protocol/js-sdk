@@ -1,0 +1,33 @@
+{
+  "name": "@lit-protocol/sev-snp-utils-sdk",
+  "license": "MIT",
+  "homepage": "https://github.com/Lit-Protocol/js-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LIT-Protocol/js-sdk"
+  },
+  "keywords": [
+    "library"
+  ],
+  "bugs": {
+    "url": "https://github.com/LIT-Protocol/js-sdk/issues"
+  },
+  "type": "commonjs",
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/sev-snp-utils-sdk"
+  },
+  "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
+  "peerDependencies": {
+    "pako": "^2.1.0"
+  },
+  "tags": [
+    "universal"
+  ],
+  "buildOptions": {
+    "genReact": false
+  },
+  "version": "3.0.24",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
+}

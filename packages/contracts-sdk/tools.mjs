@@ -15,16 +15,12 @@ if (!OPTION || OPTION === '' || OPTION === '--help') {
         Usage: node 'packages/contracts-sdk/tools.mjs' [option]
         Options:
             --help: show this help
-            --fetch: Fetches and processes ABI files for a set of deployed contracts.
+            --fetch: yarn update:contracts
             --gen: replacing certain sections of the contracts-sdk.ts file with the generated content
     `,
     true
   );
   exit();
-}
-
-if (OPTION === '--fetch') {
-  await childRunCommand('node packages/contracts-sdk/fetch-contracts.mjs');
 }
 
 if (OPTION === '--gen') {

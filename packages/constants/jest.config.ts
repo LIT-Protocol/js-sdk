@@ -12,4 +12,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/constants',
+  setupFilesAfterEnv: ['../../jest.setup.js'],
 };

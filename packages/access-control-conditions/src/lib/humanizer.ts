@@ -226,10 +226,14 @@ export const humanizeEvmBasicAccessControlConditions = async ({
           decimals = tokenFromList.decimals;
           name = tokenFromList.symbol;
         } else {
-          decimals = await decimalPlaces({
-            contractAddress: acc.contractAddress,
-            chain: acc.chain,
-          });
+          try {
+            decimals = await decimalPlaces({
+              contractAddress: acc.contractAddress,
+              chain: acc.chain,
+            });
+          } catch (e) {
+            console.log(`Failed to get decimals for ${acc.contractAddress}`);
+          }
         }
         log('decimals', decimals);
         return `Owns ${humanizeComparator(

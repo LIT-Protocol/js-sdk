@@ -1,15 +1,19 @@
+import { Provider } from '@ethersproject/abstract-provider';
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 import {
   AcceptedFileType,
   AccessControlConditions,
   Chain,
+  ClaimProcessor,
+  ClaimResult,
   ConditionType,
   EncryptedSymmetricKey,
   EvmContractConditions,
   IRelayAuthStatus,
   JsonRequest,
   LIT_NETWORKS_KEYS,
+  MintCallback,
   SolRpcConditions,
   SymmetricKey,
   UnifiedAccessControlConditions,
@@ -20,6 +24,10 @@ import {
   LitResourceAbilityRequest,
 } from '@lit-protocol/auth-helpers';
 import { BytesLike } from 'ethers';
+
+// @ts-ignore
+import * as JSZip from 'jszip/dist/jszip.js';
+import { AuthMethodType } from './enums';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -100,6 +108,9 @@ export interface AuthCallbackParams {
   // statement.
   statement?: string;
 
+  // Either the blockhash that the nodes return during the handshake or a randomly generated nonce with lit-siwe's `generateNonce()` function
+  nonce: string;
+
   // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
   resources?: string[];
 
@@ -129,31 +140,26 @@ export interface IProvider {
 }
 
 /** ---------- Crypto ---------- */
-export interface EncryptedString {
-  symmetricKey: SymmetricKey;
-  encryptedString: Blob;
-  encryptedData?: Blob;
-}
-
 export interface EncryptedZip {
   symmetricKey: SymmetricKey;
   encryptedZip: Blob;
 }
 
-export interface ThreeKeys {
-  // zipBlob is a zip file that contains an encrypted file and the metadata needed to decrypt it via the Lit network.
-  zipBlob: any;
-
-  // encryptedSymmetricKey is the symmetric key needed to decrypt the content, encrypted with the Lit network public key.  You may wish to store encryptedSymmetricKey in your own database to support quicker re-encryption operations when adding additional access control conditions in the future, but this is entirely optional, and this key is already stored inside the zipBlob.
-  encryptedSymmetricKey: EncryptedSymmetricKey;
-
-  // symmetricKey is the raw symmetric key used to encrypt the files.  DO NOT STORE IT.  It is provided in case you wish to create additional "OR" access control conditions for the same file.
-  symmetricKey: SymmetricKey;
-}
-
 export interface DecryptZipFileWithMetadata {
   decryptedFile: Uint8Array;
-  metadata: string;
+  metadata: MetadataForFile;
+}
+
+export interface MetadataForFile {
+  name: string | any;
+  type: string | any;
+  size: string | number | any;
+  accessControlConditions: any[] | any;
+  evmContractConditions: any[] | any;
+  solRpcConditions: any[] | any;
+  unifiedAccessControlConditions: any[] | any;
+  chain: string;
+  dataToEncryptHash: string;
 }
 
 export interface EncryptedFile {
@@ -167,15 +173,30 @@ export interface DecryptFileProps {
 }
 
 export interface VerifyJWTProps {
+  publicKey: string;
   // A JWT signed by the LIT network using the BLS12-381 algorithm
   jwt: string;
 }
 
-export interface IJWT {
+export interface IJWT<T> {
   verified: boolean;
-  header: object;
-  payload: object;
+  header: JWTHeader;
+  payload: T;
   signature: Uint8Array;
+}
+
+export interface JWTHeader {
+  alg: string;
+  typ: string;
+}
+
+export interface SigningAccessControlConditionJWTPayload
+  extends MultipleAccessControlConditions {
+  iss: string;
+  sub: string;
+  chain?: string;
+  iat: number;
+  exp: number;
 }
 
 export interface HumanizedAccsProps {
@@ -207,11 +228,25 @@ export interface LitNodeClientConfig {
   bootstrapUrls: Array<string>;
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
+  checkNodeAttestation: boolean;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
 export interface CustomNetwork {
   litNetwork: LIT_NETWORKS_KEYS;
+}
+
+export interface Signature {
+  r: string;
+  s: string;
+  v: number;
+}
+
+export interface ClaimKeyResponse {
+  signatures: Signature[];
+  claimedKeyId: string;
+  pubkey: string;
+  mintTx: string;
 }
 
 /**
@@ -262,21 +297,30 @@ export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
 export interface BaseJsonPkpSignRequest {
   toSign: ArrayLike<number>;
   pubKey: string;
-  // auth methods to resolve
-  authMethods?: Array<Object>;
 }
 
+export interface WithAuthMethodSigning extends BaseJsonPkpSignRequest {
+  // auth methods to resolve
+  authMethods: Array<AuthMethod>;
+  sessionSigs?: any;
+  authSig?: AuthSig;
+}
 export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
   sessionSigs: any;
   authSig?: AuthSig;
+  authMethods?: Array<AuthMethod>;
 }
 
 export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
   authSig: AuthSig;
   sessionSigs?: any;
+  authMethods?: Array<AuthMethod>;
 }
 
-export type JsonPkpSignRequest = WithSessionSigsSigning | WithAuthSigSigning;
+export type JsonPkpSignRequest =
+  | WithSessionSigsSigning
+  | WithAuthSigSigning
+  | WithAuthMethodSigning;
 
 /**
  * Struct in rust
@@ -314,6 +358,20 @@ export interface JsonSigningResourceId {
   extraData: string;
 }
 
+export interface MultipleAccessControlConditions {
+  // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  accessControlConditions?: AccessControlConditions;
+
+  // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  evmContractConditions?: EvmContractConditions;
+
+  // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.
+  solRpcConditions?: SolRpcConditions;
+
+  // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  unifiedAccessControlConditions?: UnifiedAccessControlConditions;
+}
+
 export interface JsonAccsRequest {
   // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
   accessControlConditions?: AccessControlConditions;
@@ -336,7 +394,7 @@ export interface JsonAccsRequest {
   // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
   authSig?: AuthSig;
 
-  sessionSigs?: SessionSigsMap;
+  sessionSigs?: SessionSig;
 }
 
 /**
@@ -360,11 +418,32 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
   sessionSigs?: any;
 }
 
-export interface JsonStoreSigningRequest extends JsonAccsRequest {
-  // Whether or not the access control condition should be saved permanently.  If false, the access control conditions will be updateable by the creator.  If you don't pass this param, it's set to true by default.
-  permanant?: boolean | 0 | 1;
-  permanent?: boolean | 0 | 1;
-  sessionSigs?: any;
+export interface GetSignedTokenRequest
+  extends SigningAccessControlConditionRequest {
+  sessionSigs?: SessionSigsMap;
+}
+
+export interface SigningAccessControlConditionRequest {
+  // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  accessControlConditions?: AccessControlConditions;
+
+  // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  evmContractConditions?: EvmContractConditions;
+
+  // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.
+  solRpcConditions?: SolRpcConditions;
+
+  // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  unifiedAccessControlConditions?: UnifiedAccessControlConditions;
+
+  // The chain name of the chain that you are querying.  See ALL_LIT_CHAINS for currently supported chains.
+  chain?: string;
+
+  // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
+  authSig?: SessionSig;
+
+  iat?: number;
+  exp?: number;
 }
 
 /**
@@ -411,24 +490,57 @@ export type ExecuteJsProps = JsonExecutionRequest & {
   debug?: boolean;
 };
 
-export interface JsonSaveEncryptionKeyRequest {
+export interface EncryptRequestBase {
   accessControlConditions?: AccessControlConditions;
   evmContractConditions?: EvmContractConditions;
   solRpcConditions?: SolRpcConditions;
   unifiedAccessControlConditions?: UnifiedAccessControlConditions;
-  authSig?: AuthSig;
+
   chain: Chain;
 
-  // The symmetric encryption key that was used to encrypt the locked content inside the LIT as a Uint8Array.  You should use zipAndEncryptString or zipAndEncryptFiles to get this encryption key.  This key will be hashed and the hash will be sent to the LIT nodes.  You must pass either symmetricKey or encryptedSymmetricKey.
-  symmetricKey: SymmetricKey;
-
-  // The encrypted symmetric key of the item you with to update.  You must pass either symmetricKey or encryptedSymmetricKey.
-  encryptedSymmetricKey?: EncryptedSymmetricKey;
-
-  permanant?: boolean | 0 | 1;
-  permanent?: boolean | 0 | 1;
-
+  authSig?: AuthSig;
   sessionSigs?: SessionSigsMap;
+}
+
+export interface EncryptRequest extends EncryptRequestBase {
+  // The data that you wish to encrypt as a Uint8Array
+  dataToEncrypt: Uint8Array;
+}
+
+export interface EncryptResponse {
+  // The base64-encoded ciphertext
+  ciphertext: string;
+  // The hash of the data that was encrypted
+  dataToEncryptHash: string;
+}
+
+export interface EncryptStringRequest extends EncryptRequestBase {
+  // String that you wish to encrypt
+  dataToEncrypt: string;
+}
+
+export interface EncryptZipRequest extends EncryptRequestBase {
+  zip: JSZip;
+}
+
+export interface EncryptFileRequest extends EncryptRequestBase {
+  file: AcceptedFileType;
+}
+
+export interface DecryptRequest extends EncryptRequestBase {
+  // The base64-encoded ciphertext
+  ciphertext: string;
+  // The hash of the data that was encrypted
+  dataToEncryptHash: string;
+}
+
+export interface DecryptResponse {
+  // The decrypted data as a Uint8Array
+  decryptedData: Uint8Array;
+}
+
+export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {
+  dataToEncryptHash: string;
 }
 
 export interface SignConditionECDSA {
@@ -451,6 +563,7 @@ export interface ExecuteJsResponse {
   decryptions: any[];
   response: string;
   logs: string;
+  claims?: Record<string, { signatures: Signature[]; derivedKeyId: string }>;
   debug?: {
     allNodeResponses: NodeResponse[];
     allNodeLogs: NodeLog[];
@@ -467,17 +580,37 @@ export interface SendNodeCommand {
 }
 
 export interface NodeShare {
+  claimData: any;
   shareIndex: any;
   unsignedJwt: any;
   signedData: any;
   decryptedData: any;
   response: any;
   logs: any;
+  success?: any;
 }
 
-export interface SuccessNodePromises {
+export interface PKPSignShare {
   success: boolean;
-  values: Array<NodeShare>;
+  signedData: any;
+  signatureShare: any;
+}
+
+export interface NodeBlsSigningShare {
+  shareIndex: any;
+  unsignedJwt?: any;
+  signatureShare: BlsSignatureShare;
+  response?: any;
+  logs?: any;
+}
+
+export interface BlsSignatureShare {
+  ProofOfPossession: string;
+}
+
+export interface SuccessNodePromises<T> {
+  success: boolean;
+  values: Array<T>;
 }
 
 export interface RejectedNodePromises {
@@ -509,6 +642,26 @@ export interface NodeErrorV1 {
   errorCode?: string;
 }
 
+// V3 - Cayenne
+// {
+//   errorKind: 'Unexpected',
+//   errorCode: 'NodeUnknownError',
+//   status: 400,
+//   message: 'Unknown error occured',
+//   correlationId: 'lit_ef00fbaebb614',
+//   details: [
+//     'unexpected error: ECDSA signing failed: unexpected error: unexpected error: Message length to be signed is not 32 bytes.  Please hash it before sending it to the node to sign.  You can use SHA256 or Keccak256 for example'
+//   ]
+// }
+export interface NodeErrorV3 {
+  errorKind: string;
+  errorCode: string;
+  status: number;
+  message: string;
+  correlationId: string;
+  details: string[];
+}
+
 /**
  *
  * @deprecated - This is the old error object.  It will be removed in the future. Use NodeClientErrorV1 instead.
@@ -531,13 +684,14 @@ export interface NodeClientErrorV1 {
 
 export interface SigShare {
   sigType: any;
-  shareHex: any;
+  signatureShare: any;
   shareIndex: any;
-  localX: any;
-  localY: any;
+  bigr?: string;
+  bigR?: string;
   publicKey: any;
   dataSigned: any;
   siweMessage?: string;
+  sigName?: string;
 }
 
 export interface SignedData {
@@ -585,6 +739,8 @@ export interface NodeCommandServerKeysResponse {
   subnetPublicKey: any;
   networkPublicKey: any;
   networkPublicKeySet: any;
+  attestation: NodeAttestation;
+  latestBlockhash?: string;
 }
 
 export interface FormattedMultipleAccs {
@@ -606,14 +762,32 @@ export interface SignWithECDSA {
   exp: number;
 }
 
+export interface CombinedECDSASignature {
+  r: string;
+  s: string;
+  recid: number;
+}
 export interface ValidateAndSignECDSA {
   accessControlConditions: AccessControlConditions;
   chain: Chain;
   auth_sig: AuthSig;
 }
 
-export interface HandshakeWithSgx {
+export interface HandshakeWithNode {
   url: string;
+  challenge: string;
+}
+
+export interface NodeAttestation {
+  type: string;
+  noonce: string;
+  data: {
+    INSTANCE_ID: string;
+    RELEASE_ID: string;
+    UNIX_TIME: string;
+  };
+  signatures: string[];
+  report: string;
 }
 
 export interface JsonHandshakeResponse {
@@ -621,6 +795,8 @@ export interface JsonHandshakeResponse {
   subnetPubKey: string;
   networkPubKey: string;
   networkPubKeySet: string;
+  hdRootPubkeys: string[];
+  latestBlockhash?: string;
 }
 
 export interface EncryptToIpfsProps {
@@ -659,6 +835,29 @@ export interface EncryptToIpfsProps {
 
   // Your Infura API Key Secret
   infuraSecretKey: string;
+}
+
+export type EncryptToIpfsDataType = 'string' | 'file';
+
+export interface EncryptToIpfsPayload {
+  // The access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  accessControlConditions?: AccessControlConditions;
+
+  // EVM Smart Contract access control conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.  This is different than accessControlConditions because accessControlConditions only supports a limited number of contract calls.  evmContractConditions supports any contract call.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  evmContractConditions?: EvmContractConditions;
+
+  // Solana RPC call conditions that the user must meet to obtain this signed token.  This could be posession of an NFT, for example.
+  solRpcConditions?: SolRpcConditions;
+
+  // An array of unified access control conditions.  You may use AccessControlCondition, EVMContractCondition, or SolRpcCondition objects in this array, but make sure you add a conditionType for each one.  You must pass either accessControlConditions or evmContractConditions or solRpcConditions or unifiedAccessControlConditions.
+  unifiedAccessControlConditions?: UnifiedAccessControlConditions;
+
+  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
+  chain: Chain;
+
+  ciphertext: string;
+  dataToEncryptHash: string;
+  dataType: EncryptToIpfsDataType;
 }
 
 export interface DecryptFromIpfsProps {
@@ -719,9 +918,6 @@ export interface DecryptZipFileWithMetadataProps {
 
   // An instance of LitNodeClient that is already connected
   litNodeClient: ILitNodeClient;
-
-  // Addtional access control conditions
-  additionalAccessControlConditions?: any[];
 }
 
 /**
@@ -893,6 +1089,7 @@ export interface GetWalletSigProps {
   switchChain?: boolean;
   expiration: string;
   sessionKeyUri: string;
+  nonce: string;
 }
 
 export interface SessionSigningTemplate {
@@ -939,6 +1136,7 @@ export interface PKPBaseProp {
   litActionCode?: string;
   litActionIPFS?: string;
   litActionJsParams?: any;
+  provider?: Provider;
 }
 
 export interface RPCUrls {
@@ -1078,6 +1276,16 @@ export interface LitRelayConfig {
    * API key for Lit's relay server
    */
   relayApiKey?: string;
+}
+
+export interface MintRequestBody {
+  keyType?: number;
+  permittedAuthMethodTypes?: number[];
+  permittedAuthMethodIds?: string[];
+  permittedAuthMethodPubkeys?: string[];
+  permittedAuthMethodScopes?: any[][]; // ethers.BigNumber;
+  addPkpEthAddressAsPermittedAddress?: boolean;
+  sendPkpToItself?: boolean;
 }
 
 export interface IRelayRequestData {
@@ -1346,7 +1554,7 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    * see stych docs for more info: https://stytch.com/docs/api/session-get
    */
   accessToken: string;
-  /* 
+  /*
    Stytch user identifier for a project
   */
   userId?: string;

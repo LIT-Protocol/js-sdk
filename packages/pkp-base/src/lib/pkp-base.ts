@@ -21,6 +21,7 @@ import {
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
 import { toString as uint8arrayToString } from 'uint8arrays';
+import { defaultLitnodeClientConfig } from '@lit-protocol/constants';
 
 /**
  * Compresses a given public key.
@@ -94,7 +95,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.setLitAction(prop);
     this.setLitActionJsParams(prop.litActionJsParams || {});
     this.litNodeClient = new LitNodeClient({
-      litNetwork: prop.litNetwork ?? 'serrano',
+      litNetwork: prop.litNetwork ?? 'cayenne',
       ...(prop.bootstrapUrls &&
         prop.litNetwork === 'custom' && { bootstrapUrls: prop.bootstrapUrls }),
       ...(prop.bootstrapUrls &&
@@ -103,7 +104,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       minNodeCount:
         prop.bootstrapUrls && prop.litNetwork == 'custom'
           ? prop.minNodeCount
-          : 6,
+          : defaultLitnodeClientConfig.minNodeCount,
     });
   }
 
@@ -241,14 +242,9 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
-    // If no authSig or sessionSigs are provided, throw error
-    if (!this.controllerAuthSig && !this.controllerSessionSigs) {
-      throw new Error('controllerAuthSig or controllerSessionSigs is required');
-    }
-
     if (this.controllerAuthSig && this.controllerSessionSigs) {
       throw new Error(
-        'controllerAuthSig and controllerSessionSigs both defined, can only use one authorization type'
+        'controllerAuthSig, controllerSessionSigs are defined, can only use one or the other'
       );
     }
 
@@ -265,6 +261,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
       sessionSigs: this.controllerSessionSigs,
       authSig: this.controllerAuthSig,
+      authMethods: this.controllerAuthMethods,
       jsParams: {
         ...{
           toSign,
@@ -342,14 +339,9 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
-    // If no authSig or sessionSigs are provided, throw error
-    if (!this.controllerAuthSig && !this.controllerSessionSigs) {
-      throw new Error('controllerAuthSig or controllerSessionSigs is required');
-    }
-
     if (this.controllerAuthSig && this.controllerSessionSigs) {
       throw new Error(
-        'controllerAuthSig and controllerSessionSigs both defined, can only use one authorization type'
+        'controllerAuthSig, controllerSessionSigs and controllerAuthMethod are defined, can only use one authorization type'
       );
     }
 
@@ -368,6 +360,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           pubKey: this.uncompressedPubKey,
           authMethods: this.controllerAuthMethods ?? [],
           sessionSigs: this.controllerSessionSigs,
+        });
+      } else if (this.controllerAuthMethods) {
+        sig = await this.litNodeClient.pkpSign({
+          toSign,
+          pubKey: this.uncompressedPubKey,
+          authMethods: this.controllerAuthMethods,
         });
       }
 

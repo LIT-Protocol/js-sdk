@@ -72,10 +72,7 @@ export const signTypedDataLegacy = async <T>(
 
   if ((signer as PKPEthersWallet).runLitAction) {
     let _signer = signer as PKPEthersWallet;
-    sig = await _signer.runLitAction(
-      ethers.utils.arrayify(messageHash),
-      'sig1'
-    );
+    sig = await _signer.runSign(ethers.utils.arrayify(messageHash));
   } else {
     throw new Error(
       `Unabled to runLitAction. This signer is not a PKPEthersWallet`

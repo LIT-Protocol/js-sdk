@@ -5,7 +5,13 @@
 // *******************************************************************************************************
 
 import { exit } from 'process';
-import { writeFile, getFiles, greenLog, listDirsRecursive, yellowLog } from './utils.mjs';
+import {
+  writeFile,
+  getFiles,
+  greenLog,
+  listDirsRecursive,
+  yellowLog,
+} from './utils.mjs';
 import {
   GEN_STYLE,
   GEN_FOOTER_SCRIPTS,
@@ -106,13 +112,15 @@ const consoleLogs = modules
   .map((mod, i) => {
     // read the package.json from dir
     const packageJson = fs.readFileSync(mod.dir + '/package.json', 'utf8');
-    
+
     const json = JSON.parse(packageJson);
 
     // -- if buildOptions.genReact is false, skip
-    if(json?.buildOptions?.genReact === false){
-      yellowLog(`Skipping "${mod.moduleName}" because buildOptions.genReact is false`)
-      return
+    if (json?.buildOptions?.genReact === false) {
+      yellowLog(
+        `Skipping "${mod.moduleName}" because buildOptions.genReact is false`
+      );
+      return;
     }
 
     return getConsoleTemplate(

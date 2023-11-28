@@ -56,6 +56,11 @@ export const LIT_ERROR = {
     code: 'invalid_argument_exception',
     kind: LitErrorKind.Validation,
   },
+  INVALID_BOOLEAN_EXCEPTION: {
+    name: 'InvalidBooleanException',
+    code: 'invalid_boolean_exception',
+    kind: LitErrorKind.Validation,
+  },
   UNKNOWN_ERROR: {
     name: 'UnknownError',
     code: 'unknown_error',
@@ -106,6 +111,11 @@ export const LIT_ERROR = {
     code: 'unknown_signature_type',
     kind: LitErrorKind.Validation,
   },
+  UNKNOWN_SIGNATURE_ERROR: {
+    name: 'UnknownSignatureError',
+    code: 'unknown_signature_error',
+    kind: LitErrorKind.Validation,
+  },
   PARAM_NULL_ERROR: {
     name: 'ParamNullError',
     code: 'param_null_error',
@@ -134,6 +144,11 @@ export const LIT_ERROR = {
   NO_VALID_SHARES: {
     name: 'NoValidShares',
     code: 'no_valid_shares',
+    kind: LitErrorKind.Unexpected,
+  },
+  INVALID_NODE_ATTESTATION: {
+    name: 'InvalidNodeAttestation',
+    code: 'invalid_node_attestation',
     kind: LitErrorKind.Unexpected,
   },
 };

@@ -28,7 +28,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Environment:**
- - Lit SDK version (including the network (ie, "serrano") if different, and type - browser or backend) 
+ - Lit SDK version (including the network (ie, "cayenne") if different, and type - browser or backend) 
  - Node version
  - Framework (React, Vue, Angular, Svelte - just Plain HTML!, etc)
  - Specific tooling (Webpack, Vite, browserify, etc) 

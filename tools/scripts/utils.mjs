@@ -6,10 +6,30 @@ import readline from 'readline';
 import { join } from 'path';
 import events from 'events';
 import util from 'util';
+
+import { toBech32 } from '@cosmjs/encoding';
+import { Secp256k1 } from '@cosmjs/crypto';
+import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
+import siwe from 'lit-siwe';
+import { ethers } from 'ethers';
+
 const eventsEmitter = new events.EventEmitter();
 
 const rl = readline.createInterface(process.stdin, process.stdout);
 
+export const success = (message) => {
+  return {
+    status: 200,
+    message,
+  };
+};
+
+export const fail = (message) => {
+  return {
+    status: 500,
+    message,
+  };
+};
 /**
  * replaceAutogen - Replaces the content between the specified start and end delimiters
  * with new content.
@@ -40,6 +60,20 @@ export const replaceAutogen = ({
 
   return newStr;
 };
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+export function replaceContent(options) {
+  const { startsWith, endsWith, newContent } = options;
+  const pattern = new RegExp(
+    `${escapeRegExp(startsWith)}[\\s\\S]*?${escapeRegExp(endsWith)}`,
+    'g'
+  );
+  const replacement = `${startsWith}\n${newContent}\n${endsWith}`;
+  return (input) => input.replace(pattern, replacement);
+}
 
 // read the file and return as json
 export async function readJsonFile(filename) {
@@ -153,6 +187,19 @@ export const spawnCommand = (
     }
     options2.exitCallback(code);
   });
+};
+
+export const bunSpawn = async (commands, options = {}) => {
+  const defaultOptions = { stdout: 'inherit' };
+
+  let _commands = commands.split(' ');
+
+  const proc = Bun.spawn(_commands, {
+    ...defaultOptions,
+    ...options,
+  });
+
+  await proc.exited;
 };
 
 export const spawnListener = (commands, callback, prefix = '', color = 31) => {
@@ -502,8 +549,6 @@ export function it(testDescription, testFunction) {
 
 // Expect function
 export function expect(value) {
-  console.log('value:', value);
-
   return {
     toBe(expectedValue) {
       if (value !== expectedValue) {
@@ -565,6 +610,58 @@ export const log = Object.assign(
     },
   }
 );
+/**
+ * testThis - Runs a test and logs the result
+ * 
+ * This test relies on the `success` and `fail` functions to either return
+ * 200 or 500 status code. If neither is returned, the test it not correctly implemented.
+ * 
+ * It DOES not process.exit() on failure, this event is handled by the caller, in this case
+ * in the test runner script at ./e2e-nodejs/index.mjs
+ * 
+ * if (errorCounter > 0) {
+    console.log(`❌ ${errorCounter} test(s) failed`);
+    process.exit(1);
+  }
+  process.exit(0);
+ * 
+* This ensures that all tests are run and the user is notified of all failures, and could be integrated
+* with a CI/CD pipeline.
+ * @param {*} test 
+ * @returns 
+ */
+export const testThis = async (test) => {
+  // calculate the time it takes to run the test
+  const start = Date.now();
+
+  const { status, message } = await test.fn();
+
+  let errorIsThrown = false;
+
+  try {
+    const end = Date.now();
+
+    const time = end - start;
+
+    if (status === 200) {
+      log.green(`\t${message} (${time}ms)`);
+      return true;
+    } else {
+      const _errorMsg = `\t(FAILED 200) ${message} (${time}ms) | ${test.name}`;
+      errorIsThrown = true;
+      log.red(_errorMsg);
+      throw new Error(_errorMsg);
+    }
+  } catch (e) {
+    if (!errorIsThrown) {
+      const end = Date.now();
+      const time = end - start;
+      const _errorMsg = `\t(FAILED 500) ${message} (${time}ms) | ${test.name}`;
+      log.red(_errorMsg);
+      throw new Error(_errorMsg);
+    }
+  }
+};
 
 export const testThese = async (tests) => {
   console.log(`Running ${tests.length} tests...\n`);
@@ -575,7 +672,7 @@ export const testThese = async (tests) => {
 
       // calculate the time it takes to run the test
       const start = Date.now();
-      
+
       const { status, message } = await t.fn();
 
       const end = Date.now();
@@ -665,4 +762,84 @@ export async function checkEmptyDirectories(dirPath) {
   }
 
   return emptyDirs;
+}
+
+export function getCosmosAddress(pubkeyBuffer) {
+  return toBech32(
+    'cosmos',
+    rawSecp256k1PubkeyToRawAddress(Secp256k1.compressPubkey(pubkeyBuffer))
+  );
+}
+
+export function getPubKeyBuffer(pubKey) {
+  if (pubKey.startsWith('0x')) {
+    pubKey = pubKey.slice(2);
+  }
+  return Buffer.from(pubKey, 'hex');
+}
+
+export async function signAuthMessage(
+  privateKey,
+  statement = 'TESTING TESTING 123',
+  domain = 'localhost',
+  origin = 'https://localhost/login'
+) {
+  const wallet = new ethers.Wallet(privateKey);
+
+  // expirtaion time in ISO 8601 format
+  const expirationTime = new Date(
+    Date.now() + 1000 * 60 * 60 * 24 * 7 * 10000
+  ).toISOString();
+
+  const siweMessage = new siwe.SiweMessage({
+    domain,
+    address: wallet.address,
+    statement,
+    uri: origin,
+    version: '1',
+    chainId: '1',
+    expirationTime,
+  });
+
+  let messageToSign = siweMessage.prepareMessage();
+
+  const signature = await wallet.signMessage(messageToSign);
+
+  console.log('signature', signature);
+
+  const recoveredAddress = ethers.utils.verifyMessage(messageToSign, signature);
+
+  const authSig = {
+    sig: signature,
+    derivedVia: 'web3.eth.personal.sign',
+    signedMessage: messageToSign,
+    address: recoveredAddress,
+  };
+
+  return authSig;
+}
+
+/**
+ * Gets the value of the flag from the command line arguments.
+ * @param {string} flag The name of the flag without the '--' prefix.
+ * @returns {string | null} The value of the flag or null if not found.
+ */
+export function getFlagValue(flag) {
+  const index = process.argv.indexOf(`--${flag}`);
+  if (index !== -1 && index + 1 < process.argv.length) {
+    return process.argv[index + 1];
+  }
+  return null;
+}
+
+export function formatNxLikeLine(path, number) {
+  const bold = '\x1b[1m';
+  const regular = '\x1b[22m';
+  const orangeBg = '\x1b[48;5;208m';
+  const black = '\x1b[30m';
+  const orange = '\x1b[38;5;208m';
+  const reset = '\x1b[0m';
+
+  const formattedLine = `${orange} >  ${bold}${orangeBg} LIT ${reset}   ${orange}Running target ${bold}${path} ${regular}for ${number} file(s) ${reset}\n`;
+  return formattedLine;
 }

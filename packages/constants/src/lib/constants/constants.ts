@@ -364,6 +364,61 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  base: {
+    contractAddress: null,
+    chainId: 8453,
+    name: 'Base Mainnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://mainnet.base.org'],
+    blockExplorerUrls: ['https://basescan.org'],
+    type: null,
+    vmType: 'EVM',
+  },
+  lukso: {
+    contractAddress: null,
+    chainId: 42,
+    name: 'Lukso',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.lukso.gateway.fm'],
+    blockExplorerUrls: ['https://explorer.execution.mainnet.lukso.network/'],
+    type: null,
+    vmType: 'EVM',
+  },
+  luksoTestnet: {
+    contractAddress: null,
+    chainId: 4201,
+    name: 'Lukso Testnet',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.testnet.lukso.network'],
+    blockExplorerUrls: ['https://explorer.execution.testnet.lukso.network'],
+    type: null,
+    vmType: 'EVM',
+  },
+  zora: {
+    contractAddress: null,
+    chainId: 7777777,
+    name: '	Zora',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.zora.energy/'],
+    blockExplorerUrls: ['https://explorer.zora.energy'],
+    type: null,
+    vmType: 'EVM',
+  },
+  zoraGoerli: {
+    contractAddress: null,
+    chainId: 999,
+    name: 'Zora Goerli',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://testnet.rpc.zora.energy'],
+    blockExplorerUrls: ['https://testnet.explorer.zora.energy'],
+    type: null,
+    vmType: 'EVM',
+  },
   zksyncTestnet: {
     contractAddress: null,
     chainId: 280,
@@ -644,29 +699,10 @@ export const SYMM_KEY_ALGO_PARAMS = {
  *
  */
 export const LIT_NETWORKS = {
-  jalapeno: [
-    'https://node2.litgateway.com:7370',
-    'https://node2.litgateway.com:7371',
-    'https://node2.litgateway.com:7372',
-    'https://node2.litgateway.com:7373',
-    'https://node2.litgateway.com:7374',
-    'https://node2.litgateway.com:7375',
-    'https://node2.litgateway.com:7376',
-    'https://node2.litgateway.com:7377',
-    'https://node2.litgateway.com:7378',
-    'https://node2.litgateway.com:7379',
-  ],
-  serrano: [
-    'https://serrano.litgateway.com:7370',
-    'https://serrano.litgateway.com:7371',
-    'https://serrano.litgateway.com:7372',
-    'https://serrano.litgateway.com:7373',
-    'https://serrano.litgateway.com:7374',
-    'https://serrano.litgateway.com:7375',
-    'https://serrano.litgateway.com:7376',
-    'https://serrano.litgateway.com:7377',
-    'https://serrano.litgateway.com:7378',
-    'https://serrano.litgateway.com:7379',
+  cayenne: [
+    'https://cayenne.litgateway.com:7370',
+    'https://cayenne.litgateway.com:7371',
+    'https://cayenne.litgateway.com:7372',
   ],
   localhost: [
     'http://localhost:7470',
@@ -697,3 +733,4 @@ export const AUTH_METHOD_TYPE_IDS = {
 
 // ========== PKP Client ==========
 export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
+export const TELEM_API_URL = 'https://lit-general-worker.getlit.dev';

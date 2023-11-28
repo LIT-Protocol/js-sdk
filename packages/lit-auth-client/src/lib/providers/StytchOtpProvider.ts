@@ -40,9 +40,6 @@ export class StytchOtpProvider extends BaseProvider {
         this._params.userId ??
         (options as unknown as StytchOtpAuthenticateOptions).userId;
 
-      if (!userId) {
-        reject(new Error('User id must be provided'));
-      }
       const accessToken: string | undefined = (
         options as unknown as StytchOtpAuthenticateOptions
       )?.accessToken;
@@ -52,8 +49,7 @@ export class StytchOtpProvider extends BaseProvider {
         );
       }
 
-      const parsedToken: StytchToken = this._parseJWT(accessToken);
-      console.log(`otpProvider: parsed token body`, parsedToken);
+      const parsedToken: StytchToken = StytchOtpProvider._parseJWT(accessToken);
       const audience = (parsedToken['aud'] as string[])[0];
       if (audience != this._params.appId) {
         reject(new Error('Parsed application id does not match parameters'));
@@ -68,14 +64,15 @@ export class StytchOtpProvider extends BaseProvider {
       }
       const session = parsedToken[this._provider];
       const authFactor = session['authentication_factors'][0];
+
       if (!authFactor) {
         reject(new Error('Could not find authentication info in session'));
       }
 
-      if (userId != parsedToken['sub']) {
+      if (userId && userId != parsedToken['sub']) {
         reject(
           new Error(
-            'AppId does not match token contents. is this the right token for your application?'
+            'UserId does not match token contents. is this the right token for your application?'
           )
         );
       }
@@ -96,7 +93,11 @@ export class StytchOtpProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-    const tokenBody = this._parseJWT(authMethod.accessToken);
+    return StytchOtpProvider.authMethodId(authMethod);
+  }
+
+  public static async authMethodId(authMethod: AuthMethod): Promise<string> {
+    const tokenBody = StytchOtpProvider._parseJWT(authMethod.accessToken);
     const userId = tokenBody['sub'] as string;
     const orgId = (tokenBody['aud'] as string[])[0];
     const authMethodId = ethers.utils.keccak256(
@@ -110,7 +111,7 @@ export class StytchOtpProvider extends BaseProvider {
    * @param jwt token to parse
    * @returns {string}- userId contained within the token message
    */
-  private _parseJWT(jwt: string): StytchToken {
+  public static _parseJWT(jwt: string): StytchToken {
     const parts = jwt.split('.');
     if (parts.length !== 3) {
       throw new Error('Invalid token length');

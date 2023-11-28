@@ -1,19 +1,26 @@
 import { ALL_LIT_CHAINS, AuthMethodType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
+  AuthCallback,
   AuthCallbackParams,
   AuthMethod,
   AuthSig,
   AuthenticateOptions,
   BaseProviderOptions,
   BaseProviderSessionSigsParams,
+  ClaimKeyResponse,
+  ClaimProcessor,
+  ClaimRequest,
   IRelay,
   IRelayPKP,
   IRelayRequestData,
+  MintRequestBody,
+  RelayClaimProcessor,
   SessionSigs,
   SignSessionKeyResponse,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
+import { validateMintRequestBody } from '../validators';
 
 export abstract class BaseProvider {
   /**
@@ -40,10 +47,12 @@ export abstract class BaseProvider {
    *
    * @template T - Type representing the specific options for the authenticate method
    * @param {T} [options] - Optional parameters that vary based on the provider
+   * @param {(currentUrl: string, redirectUri: string) => boolean} [urlCheckCallback] - Optional callback to handle authentication data or errors
    * @returns {Promise<AuthMethod>} - Auth method object that contains authentication data
    */
   abstract authenticate<T extends AuthenticateOptions>(
-    options?: T
+    options?: T,
+    urlCheckCallback?: (currentUrl: string, redirectUri: string) => boolean
   ): Promise<AuthMethod>;
 
   /**
@@ -64,12 +73,24 @@ export abstract class BaseProvider {
    * Mint a new PKP for the given auth method through the relay server
    *
    * @param {AuthMethod} authMethod - Auth method object
+   * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
    *
    * @returns {Promise<string>} - Mint transaction hash
    */
-  public async mintPKPThroughRelayer(authMethod: AuthMethod): Promise<string> {
+  public async mintPKPThroughRelayer(
+    authMethod: AuthMethod,
+    customArgs?: MintRequestBody
+  ): Promise<string> {
     const data = await this.prepareRelayRequestData(authMethod);
-    const body = this.prepareMintBody(data);
+
+    if (customArgs && !validateMintRequestBody(customArgs)) {
+      throw new Error('Invalid mint request body');
+    }
+
+    const body = this.prepareMintBody(
+      data,
+      customArgs ?? ({} as MintRequestBody)
+    );
     const mintRes = await this.relay.mintPKP(body);
     if (!mintRes || !mintRes.requestId) {
       throw new Error('Missing mint response or request ID from relay server');
@@ -143,8 +164,8 @@ export abstract class BaseProvider {
         if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
           const authSig = JSON.parse(params.authMethod.accessToken);
           response = await nodeClient.signSessionKey({
-            sessionKey: params.sessionSigsParams.sessionKey,
             statement: authCallbackParams.statement,
+            sessionKey: params.sessionSigsParams.sessionKey,
             authMethods: [],
             authSig: authSig,
             pkpPublicKey: params.pkpPublicKey,
@@ -178,13 +199,56 @@ export abstract class BaseProvider {
   }
 
   /**
+   * Authenticates an auth Method for claiming a Programmable Key Pair (PKP).
+   * Uses the underyling {@link litNodeClient} instance to authenticate a given auth method
+   * @param claimRequest
+   * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
+   */
+  public async claimKeyId(
+    claimRequest: ClaimRequest<ClaimProcessor>
+  ): Promise<ClaimKeyResponse> {
+    if (!this.litNodeClient.ready) {
+      await this.litNodeClient.connect().catch((err) => {
+        throw err; // throw error up to caller
+      });
+    }
+
+    const res = await this.litNodeClient.claimKeyId(claimRequest);
+    return res;
+  }
+  /**
+   * Calculates a public key for a given `key identifier` which is an `Auth Method Identifier`
+   * the Auth Method Identifier is a hash of a user identifier and app idendtifer.
+   * These identifiers are specific to each auth method and will derive the public key protion of a pkp which will be persited
+   * when a key is claimed.
+   * | Auth Method | User ID | App ID |
+   * |:------------|:-------|:-------|
+   * | Google OAuth | token `sub` | token `aud` |
+   * | Discord OAuth | user id | client app identifier |
+   * | Stytch OTP |token `sub` | token `aud`|
+   * @param userId
+   * @param appId
+   * @returns
+   */
+  computePublicKeyFromAuthMethod = async (
+    authMethod: AuthMethod
+  ): Promise<String> => {
+    let authMethodId = await this.getAuthMethodId(authMethod);
+    authMethodId = authMethodId.slice(2);
+    if (!this.litNodeClient) {
+      throw new Error('Lit Node Client is configured');
+    }
+    return this.litNodeClient.computeHDPubKey(authMethodId);
+  };
+
+  /**
    * Generate request data for minting and fetching PKPs via relay server
    *
    * @param {AuthMethod} authMethod - Auth method obejct
    *
    * @returns {Promise<IRelayRequestData>} - Relay request data
    */
-  protected async prepareRelayRequestData(
+  public async prepareRelayRequestData(
     authMethod: AuthMethod
   ): Promise<IRelayRequestData> {
     const authMethodType = authMethod.authMethodType;
@@ -203,12 +267,18 @@ export abstract class BaseProvider {
    * @param {number} data.authMethodType - Type of auth method
    * @param {string} data.authMethodId - ID of auth method
    * @param {string} [data.authMethodPubKey] - Public key associated with the auth method (used only in WebAuthn)
+   * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
    *
    * @returns {string} - Relay request body for minting PKP
    */
-  protected prepareMintBody(data: IRelayRequestData): string {
+  protected prepareMintBody(
+    data: IRelayRequestData,
+    customArgs: MintRequestBody
+  ): string {
     const pubkey = data.authMethodPubKey || '0x';
-    const args = {
+
+    const defaultArgs: MintRequestBody = {
+      // default params
       keyType: 2,
       permittedAuthMethodTypes: [data.authMethodType],
       permittedAuthMethodIds: [data.authMethodId],
@@ -217,6 +287,12 @@ export abstract class BaseProvider {
       addPkpEthAddressAsPermittedAddress: true,
       sendPkpToItself: true,
     };
+
+    const args: MintRequestBody = {
+      ...defaultArgs,
+      ...customArgs,
+    };
+
     const body = JSON.stringify(args);
     return body;
   }

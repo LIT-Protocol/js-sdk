@@ -7,7 +7,8 @@ export enum VMTYPE {
 
 export enum SIGTYPE {
   BLS = 'BLS',
-  ECDSA = 'ECDSA',
+  EcdsaCaitSith = 'ECDSA_CAIT_SITH',
+  EcdsaCAITSITHP256 = 'EcdsaCaitSithP256',
 }
 
 /**
@@ -23,14 +24,23 @@ export const enum EITHER_TYPE {
  */
 export enum AuthMethodType {
   EthWallet = 1,
-  LitAction,
-  WebAuthn,
-  Discord,
-  Google,
-  GoogleJwt,
-  OTP,
-  AppleJwt,
-  StytchOtp,
+  LitAction = 2,
+  WebAuthn = 3,
+  Discord = 4,
+  Google = 5,
+  GoogleJwt = 6,
+  AppleJwt = 8,
+  StytchOtp = 9,
+  StytchEmailFactorOtp = 10,
+  StytchSmsFactorOtp = 11,
+  StytchWhatsAppFactorOtp = 12,
+  StytchTotpFactorOtp = 13,
+}
+
+export enum AuthMethodScope {
+  NoPermissions = 0,
+  SignAnything = 1,
+  OnlySignMessages = 2,
 }
 
 /**
@@ -41,7 +51,10 @@ export enum ProviderType {
   Google = 'google',
   EthWallet = 'ethwallet',
   WebAuthn = 'webauthn',
-  Otp = 'otp',
-  StytchOtp = 'stytchOtp',
   Apple = 'apple',
+  StytchOtp = 'stytchOtp',
+  StytchEmailFactorOtp = 'stytchEmailFactorOtp',
+  StytchSmsFactorOtp = 'stytchSmsFactorOtp',
+  StytchWhatsAppFactorOtp = 'stytchWhatsAppFactorOtp',
+  StytchTotpFactor = 'stytchTotpFactor',
 }

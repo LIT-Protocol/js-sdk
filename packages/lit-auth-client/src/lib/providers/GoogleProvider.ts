@@ -1,5 +1,6 @@
 import {
   AuthMethod,
+  AuthenticateOptions,
   BaseProviderOptions,
   OAuthProviderOptions,
 } from '@lit-protocol/types';
@@ -28,13 +29,19 @@ export default class GoogleProvider extends BaseProvider {
   /**
    * Redirect user to the Lit's Google login page
    *
+    * @param {Function} [callback] - Optional callback to handle login URL
    * @returns {Promise<void>} - Redirects user to Lit login page
    */
-  public async signIn(): Promise<void> {
+  public async signIn(callback?: (url: string) => void): Promise<void> {
     // Get login url
     const loginUrl = await prepareLoginUrl('google', this.redirectUri);
-    // Redirect to login url
-    window.location.assign(loginUrl);
+
+    // If callback is provided, use it. Otherwise, redirect to login url
+    if (callback) {
+      callback(loginUrl);
+    } else {
+      window.location.assign(loginUrl);
+    }
   }
 
   /**
@@ -42,9 +49,17 @@ export default class GoogleProvider extends BaseProvider {
    *
    * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
    */
-  public async authenticate(): Promise<AuthMethod> {
-    // Check if current url matches redirect uri
-    if (!window.location.href.startsWith(this.redirectUri)) {
+  public async authenticate<T extends AuthenticateOptions>(
+    _?: T,
+    urlCheckCallback?: (currentUrl: string, redirectUri: string) => boolean
+  ): Promise<AuthMethod> {
+
+    // Check if current url matches redirect uri using the callback if provided
+    const isUrlValid = urlCheckCallback
+      ? urlCheckCallback(window.location.href, this.redirectUri)
+      : window.location.href.startsWith(this.redirectUri);
+
+    if (!isUrlValid) {
       throw new Error(
         `Current url "${window.location.href}" does not match provided redirect uri "${this.redirectUri}"`
       );
@@ -104,6 +119,10 @@ export default class GoogleProvider extends BaseProvider {
    * @returns {Promise<string>} - Auth method id
    */
   public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    return GoogleProvider.authMethodId(authMethod);
+  }
+
+  public static async authMethodId(authMethod: AuthMethod): Promise<string> {
     const tokenPayload = jose.decodeJwt(authMethod.accessToken);
     const userId: string = tokenPayload['sub'] as string;
     const audience: string = tokenPayload['aud'] as string;

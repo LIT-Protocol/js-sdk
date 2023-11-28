@@ -15,7 +15,7 @@
 
       const LitJsSdk = LitJsSdk_litNodeClient;
 
-      const litNodeClient = new LitNodeClient({litNetwork: 'serrano'});
+      const litNodeClient = new LitNodeClient({litNetwork: 'cayenne'});
       litNodeClient.connect();
       
       //var authSig = JSON.parse("{\"sig\":\"0x18a173d68d2f78cc5c13da0dfe36eec2a293285bee6d42547b9577bf26cdc985660ed3dddc4e75d422366cac07e8a9fc77669b10373bef9c7b8e4280252dfddf1b\",\"derivedVia\":\"web3.eth.personal.sign\",\"signedMessage\":\"I am creating an account to use LITs at 2021-08-04T20:14:04.918Z\",\"address\":\"0xdbd360f30097fb6d938dcc8b7b62854b36160b45\"}")
@@ -42,37 +42,19 @@
           chain: "ethereum",
         });
 
-        let resourceId = {
-          baseUrl: "my-dynamic-content-server.com",
-          path: randomPath(),
-          orgId: "",
-          role: "",
-          extraData: "",
-        };
-
-        await litNodeClient.saveSigningCondition({
-          unifiedAccessControlConditions,
-          authSig: {
-            solana: solAuthSig,
-            ethereum: ethAuthSig,
-          },
-          resourceId,
-        });
-
         let jwt = await litNodeClient.getSignedToken({
           unifiedAccessControlConditions,
           authSig: {
             solana: solAuthSig,
             ethereum: ethAuthSig,
           },
-          resourceId,
         });
         console.log("jwt", jwt);
 
         // uncomment this to break the jwt, to test an invalid jwt
         // jwt = jwt.replace(/.$/, "3");
 
-        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt });
+        const { verified, header, payload } = LitJsSdk.verifyJwt({ jwt, publicKey: litNodeClient.networkPubKey });
         console.log("verified", verified);
         console.log("header", header);
         console.log("payload", payload);
@@ -103,34 +85,34 @@
           { unifiedAccessControlConditions }
         )}`;
 
-        const { encryptedZip, symmetricKey } =
-          await LitJsSdk.zipAndEncryptString("this is a secret message");
-
-        const encryptedSymmetricKey = await litNodeClient.saveEncryptionKey({
-          unifiedAccessControlConditions,
-          symmetricKey,
-          authSig: {
-            ethereum: ethAuthSig,
-            solana: solAuthSig,
+        const { ciphertext, dataToEncryptHash } = await LitJsSdk.zipAndEncryptString(
+          {
+            dataToEncrypt: 'this is a secret message',
+            unifiedAccessControlConditions,
+            authSig: {
+              ethereum: ethAuthSig,
+              solana: solAuthSig,
+            },
           },
-        });
-
-        console.log("encrypted symmetric key", encryptedSymmetricKey);
+          litNodeClient,
+        );
 
         if (sleepTime) {
           let failed = false;
           try {
-            const retrievedSymmKey = await litNodeClient.getEncryptionKey({
-              unifiedAccessControlConditions,
-              toDecrypt: LitJsSdk.uint8arrayToString(
-                encryptedSymmetricKey,
-                "base16"
-              ),
-              authSig: {
-                ethereum: ethAuthSig,
-                solana: solAuthSig,
+            const decryptedFiles = await LitJsSdk.decryptToZip(
+              {
+                unifiedAccessControlConditions,
+                chain: "ethereum",
+                authSig: {
+                  ethereum: ethAuthSig,
+                  solana: solAuthSig,
+                },
+                ciphertext,
+                dataToEncryptHash,
               },
-            });
+              litNodeClient,
+            );
           } catch (e) {
             console.log("exception thrown when unlocking", e);
             if (isNodeNotAuthorized(e.errorCode)) {
@@ -151,21 +133,18 @@
           await new Promise((resolve) => setTimeout(resolve, sleepTime));
         }
 
-        const retrievedSymmKey = await litNodeClient.getEncryptionKey({
-          unifiedAccessControlConditions,
-          toDecrypt: LitJsSdk.uint8arrayToString(
-            encryptedSymmetricKey,
-            "base16"
-          ),
-          authSig: {
-            ethereum: ethAuthSig,
-            solana: solAuthSig,
+        const decryptedFiles = await LitJsSdk.decryptToZip(
+          {
+            unifiedAccessControlConditions,
+            chain: "ethereum",
+            authSig: {
+              ethereum: ethAuthSig,
+              solana: solAuthSig,
+            },
+            ciphertext,
+            dataToEncryptHash,
           },
-        });
-
-        const decryptedFiles = await LitJsSdk.decryptZip(
-          encryptedZip,
-          retrievedSymmKey
+          litNodeClient,
         );
         const decryptedString = await decryptedFiles["string.txt"].async(
           "text"
@@ -396,7 +375,7 @@
       );
 
       function isNodeNotAuthorized(errorCode) {
-        return errorCode === 'not_authorized' || errorCode === 'NodeNotAuthorized';
+        return errorCode === 'not_authorized' || errorCode === 'NodeNotAuthorized' || errorCode === 'NodeAccessControlConditionsReturnedNotAuthorized';
       }
     </script>
   </head>

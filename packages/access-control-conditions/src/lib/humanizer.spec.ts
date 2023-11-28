@@ -1,26 +1,3 @@
-import { TextEncoder, TextDecoder } from 'util';
-global.TextEncoder = TextEncoder;
-// @ts-ignore
-global.TextDecoder = TextDecoder;
-
-import crypto, { createHash } from 'crypto';
-Object.defineProperty(global.self, 'crypto', {
-  value: {
-    getRandomValues: (arr: any) => crypto.randomBytes(arr.length),
-    subtle: {
-      digest: (algorithm: string, data: Uint8Array) => {
-        return new Promise((resolve, reject) =>
-          resolve(
-            createHash(algorithm.toLowerCase().replace('-', ''))
-              .update(data)
-              .digest()
-          )
-        );
-      },
-    },
-  },
-});
-
 import * as humanizer from './humanizer';
 import { humanizeAccessControlConditions } from './humanizer';
 import {
@@ -311,14 +288,14 @@ describe('humanizer.ts', () => {
           contractAddress: '0x5b8B8C9aD976aFCAd24fd6CF424294d372c190Ac',
           returnValueTest: {
             value: '100000000000000000000',
-            comparator: '>='
+            comparator: '>=',
           },
-          standardContractType: 'ERC20'
-        }
-      ]
+          standardContractType: 'ERC20',
+        },
+      ],
     });
-    expect(result).toContain("0x5b8B8C9aD976aFCAd24fd6CF424294d372c190Ac");
-    expect(result).toContain("100.0");
-    expect(result).toContain("at least");
+    expect(result).toContain('0x5b8B8C9aD976aFCAd24fd6CF424294d372c190Ac');
+    expect(result).toContain('100.0');
+    expect(result).toContain('at least');
   });
 });

@@ -1,0 +1,874 @@
+export const PubkeyRouterData = {
+  date: '2023-11-14T15:45:41Z',
+  address: '0x4B5E97F2D811520e031A8F924e698B329ad83E29',
+  contractName: 'PubkeyRouter',
+  abi: [
+    {
+      inputs: [
+        {
+          internalType: 'bytes4',
+          name: '_selector',
+          type: 'bytes4',
+        },
+      ],
+      name: 'CannotAddFunctionToDiamondThatAlreadyExists',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes4[]',
+          name: '_selectors',
+          type: 'bytes4[]',
+        },
+      ],
+      name: 'CannotAddSelectorsToZeroAddress',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes4',
+          name: '_selector',
+          type: 'bytes4',
+        },
+      ],
+      name: 'CannotRemoveFunctionThatDoesNotExist',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes4',
+          name: '_selector',
+          type: 'bytes4',
+        },
+      ],
+      name: 'CannotRemoveImmutableFunction',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes4',
+          name: '_selector',
+          type: 'bytes4',
+        },
+      ],
+      name: 'CannotReplaceFunctionThatDoesNotExists',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes4',
+          name: '_selector',
+          type: 'bytes4',
+        },
+      ],
+      name: 'CannotReplaceFunctionWithTheSameFunctionFromTheSameFacet',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes4[]',
+          name: '_selectors',
+          type: 'bytes4[]',
+        },
+      ],
+      name: 'CannotReplaceFunctionsFromFacetWithZeroAddress',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes4',
+          name: '_selector',
+          type: 'bytes4',
+        },
+      ],
+      name: 'CannotReplaceImmutableFunction',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint8',
+          name: '_action',
+          type: 'uint8',
+        },
+      ],
+      name: 'IncorrectFacetCutAction',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: '_initializationContractAddress',
+          type: 'address',
+        },
+        {
+          internalType: 'bytes',
+          name: '_calldata',
+          type: 'bytes',
+        },
+      ],
+      name: 'InitializationFunctionReverted',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: '_contractAddress',
+          type: 'address',
+        },
+        {
+          internalType: 'string',
+          name: '_message',
+          type: 'string',
+        },
+      ],
+      name: 'NoBytecodeAtAddress',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: '_facetAddress',
+          type: 'address',
+        },
+      ],
+      name: 'NoSelectorsProvidedForFacetForCut',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: '_user',
+          type: 'address',
+        },
+        {
+          internalType: 'address',
+          name: '_contractOwner',
+          type: 'address',
+        },
+      ],
+      name: 'NotContractOwner',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: '_facetAddress',
+          type: 'address',
+        },
+      ],
+      name: 'RemoveFacetAddressMustBeZeroAddress',
+      type: 'error',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          components: [
+            {
+              internalType: 'address',
+              name: 'facetAddress',
+              type: 'address',
+            },
+            {
+              internalType: 'enum IDiamond.FacetCutAction',
+              name: 'action',
+              type: 'uint8',
+            },
+            {
+              internalType: 'bytes4[]',
+              name: 'functionSelectors',
+              type: 'bytes4[]',
+            },
+          ],
+          indexed: false,
+          internalType: 'struct IDiamond.FacetCut[]',
+          name: '_diamondCut',
+          type: 'tuple[]',
+        },
+        {
+          indexed: false,
+          internalType: 'address',
+          name: '_init',
+          type: 'address',
+        },
+        {
+          indexed: false,
+          internalType: 'bytes',
+          name: '_calldata',
+          type: 'bytes',
+        },
+      ],
+      name: 'DiamondCut',
+      type: 'event',
+    },
+    {
+      inputs: [
+        {
+          components: [
+            {
+              internalType: 'address',
+              name: 'facetAddress',
+              type: 'address',
+            },
+            {
+              internalType: 'enum IDiamond.FacetCutAction',
+              name: 'action',
+              type: 'uint8',
+            },
+            {
+              internalType: 'bytes4[]',
+              name: 'functionSelectors',
+              type: 'bytes4[]',
+            },
+          ],
+          internalType: 'struct IDiamond.FacetCut[]',
+          name: '_diamondCut',
+          type: 'tuple[]',
+        },
+        {
+          internalType: 'address',
+          name: '_init',
+          type: 'address',
+        },
+        {
+          internalType: 'bytes',
+          name: '_calldata',
+          type: 'bytes',
+        },
+      ],
+      name: 'diamondCut',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes4',
+          name: '_functionSelector',
+          type: 'bytes4',
+        },
+      ],
+      name: 'facetAddress',
+      outputs: [
+        {
+          internalType: 'address',
+          name: 'facetAddress_',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'facetAddresses',
+      outputs: [
+        {
+          internalType: 'address[]',
+          name: 'facetAddresses_',
+          type: 'address[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: '_facet',
+          type: 'address',
+        },
+      ],
+      name: 'facetFunctionSelectors',
+      outputs: [
+        {
+          internalType: 'bytes4[]',
+          name: '_facetFunctionSelectors',
+          type: 'bytes4[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'facets',
+      outputs: [
+        {
+          components: [
+            {
+              internalType: 'address',
+              name: 'facetAddress',
+              type: 'address',
+            },
+            {
+              internalType: 'bytes4[]',
+              name: 'functionSelectors',
+              type: 'bytes4[]',
+            },
+          ],
+          internalType: 'struct IDiamondLoupe.Facet[]',
+          name: 'facets_',
+          type: 'tuple[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes4',
+          name: '_interfaceId',
+          type: 'bytes4',
+        },
+      ],
+      name: 'supportsInterface',
+      outputs: [
+        {
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'previousOwner',
+          type: 'address',
+        },
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'newOwner',
+          type: 'address',
+        },
+      ],
+      name: 'OwnershipTransferred',
+      type: 'event',
+    },
+    {
+      inputs: [],
+      name: 'owner',
+      outputs: [
+        {
+          internalType: 'address',
+          name: 'owner_',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: '_newOwner',
+          type: 'address',
+        },
+      ],
+      name: 'transferOwnership',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'CallerNotOwner',
+      type: 'error',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: 'address',
+          name: 'newResolverAddress',
+          type: 'address',
+        },
+      ],
+      name: 'ContractResolverAddressSet',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'bytes',
+          name: 'pubkey',
+          type: 'bytes',
+        },
+        {
+          indexed: false,
+          internalType: 'address',
+          name: 'stakingContract',
+          type: 'address',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'keyType',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'bytes32',
+          name: 'derivedKeyId',
+          type: 'bytes32',
+        },
+      ],
+      name: 'PubkeyRoutingDataSet',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: 'address',
+          name: 'stakingContract',
+          type: 'address',
+        },
+        {
+          components: [
+            {
+              internalType: 'bytes',
+              name: 'pubkey',
+              type: 'bytes',
+            },
+            {
+              internalType: 'uint256',
+              name: 'keyType',
+              type: 'uint256',
+            },
+          ],
+          indexed: false,
+          internalType: 'struct IPubkeyRouter.RootKey',
+          name: 'rootKey',
+          type: 'tuple',
+        },
+      ],
+      name: 'RootKeySet',
+      type: 'event',
+    },
+    {
+      inputs: [
+        {
+          components: [
+            {
+              internalType: 'bytes32',
+              name: 'r',
+              type: 'bytes32',
+            },
+            {
+              internalType: 'bytes32',
+              name: 's',
+              type: 'bytes32',
+            },
+            {
+              internalType: 'uint8',
+              name: 'v',
+              type: 'uint8',
+            },
+          ],
+          internalType: 'struct IPubkeyRouter.Signature[]',
+          name: 'signatures',
+          type: 'tuple[]',
+        },
+        {
+          internalType: 'bytes',
+          name: 'signedMessage',
+          type: 'bytes',
+        },
+        {
+          internalType: 'address',
+          name: 'stakingContractAddress',
+          type: 'address',
+        },
+      ],
+      name: 'checkNodeSignatures',
+      outputs: [
+        {
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes',
+          name: 'pubkey',
+          type: 'bytes',
+        },
+      ],
+      name: 'deriveEthAddressFromPubkey',
+      outputs: [
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'pure',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'ethAddress',
+          type: 'address',
+        },
+      ],
+      name: 'ethAddressToPkpId',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'stakingContract',
+          type: 'address',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'derivedKeyId',
+          type: 'bytes32',
+        },
+      ],
+      name: 'getDerivedPubkey',
+      outputs: [
+        {
+          internalType: 'bytes',
+          name: '',
+          type: 'bytes',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
+        },
+      ],
+      name: 'getEthAddress',
+      outputs: [
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'getPkpNftAddress',
+      outputs: [
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
+        },
+      ],
+      name: 'getPubkey',
+      outputs: [
+        {
+          internalType: 'bytes',
+          name: '',
+          type: 'bytes',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'stakingContract',
+          type: 'address',
+        },
+      ],
+      name: 'getRootKeys',
+      outputs: [
+        {
+          components: [
+            {
+              internalType: 'bytes',
+              name: 'pubkey',
+              type: 'bytes',
+            },
+            {
+              internalType: 'uint256',
+              name: 'keyType',
+              type: 'uint256',
+            },
+          ],
+          internalType: 'struct IPubkeyRouter.RootKey[]',
+          name: '',
+          type: 'tuple[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
+        },
+      ],
+      name: 'getRoutingData',
+      outputs: [
+        {
+          components: [
+            {
+              internalType: 'bytes',
+              name: 'pubkey',
+              type: 'bytes',
+            },
+            {
+              internalType: 'uint256',
+              name: 'keyType',
+              type: 'uint256',
+            },
+            {
+              internalType: 'bytes32',
+              name: 'derivedKeyId',
+              type: 'bytes32',
+            },
+          ],
+          internalType: 'struct LibPubkeyRouterStorage.PubkeyRoutingData',
+          name: '',
+          type: 'tuple',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
+        },
+      ],
+      name: 'isRouted',
+      outputs: [
+        {
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
+        },
+      ],
+      name: 'pubkeys',
+      outputs: [
+        {
+          components: [
+            {
+              internalType: 'bytes',
+              name: 'pubkey',
+              type: 'bytes',
+            },
+            {
+              internalType: 'uint256',
+              name: 'keyType',
+              type: 'uint256',
+            },
+            {
+              internalType: 'bytes32',
+              name: 'derivedKeyId',
+              type: 'bytes32',
+            },
+          ],
+          internalType: 'struct LibPubkeyRouterStorage.PubkeyRoutingData',
+          name: '',
+          type: 'tuple',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'newResolverAddress',
+          type: 'address',
+        },
+      ],
+      name: 'setContractResolver',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
+        },
+        {
+          internalType: 'bytes',
+          name: 'pubkey',
+          type: 'bytes',
+        },
+        {
+          internalType: 'address',
+          name: 'stakingContractAddress',
+          type: 'address',
+        },
+        {
+          internalType: 'uint256',
+          name: 'keyType',
+          type: 'uint256',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'derivedKeyId',
+          type: 'bytes32',
+        },
+      ],
+      name: 'setRoutingData',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'tokenId',
+          type: 'uint256',
+        },
+        {
+          internalType: 'bytes',
+          name: 'pubkey',
+          type: 'bytes',
+        },
+        {
+          internalType: 'address',
+          name: 'stakingContract',
+          type: 'address',
+        },
+        {
+          internalType: 'uint256',
+          name: 'keyType',
+          type: 'uint256',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'derivedKeyId',
+          type: 'bytes32',
+        },
+      ],
+      name: 'setRoutingDataAsAdmin',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'stakingContractAddress',
+          type: 'address',
+        },
+        {
+          components: [
+            {
+              internalType: 'bytes',
+              name: 'pubkey',
+              type: 'bytes',
+            },
+            {
+              internalType: 'uint256',
+              name: 'keyType',
+              type: 'uint256',
+            },
+          ],
+          internalType: 'struct IPubkeyRouter.RootKey[]',
+          name: 'newRootKeys',
+          type: 'tuple[]',
+        },
+      ],
+      name: 'voteForRootKeys',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+  ],
+};

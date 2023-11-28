@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import AuthMethods from './AuthMethods';
-import EmailSMSAuth from './EmailSMSAuth';
 import WalletMethods from './WalletMethods';
 import WebAuthn from './WebAuthn';
 import StytchOTP from './StytchOTP';
@@ -10,7 +9,6 @@ interface SignUpProps {
   handleGoogleLogin: () => Promise<void>;
   handleDiscordLogin: () => Promise<void>;
   authWithEthWallet: any;
-  authWithOTP: any;
   registerWithWebAuthn: any;
   authWithWebAuthn: any;
   authWithStytch: any;
@@ -24,7 +22,6 @@ export default function SignUpMethods({
   handleGoogleLogin,
   handleDiscordLogin,
   authWithEthWallet,
-  authWithOTP,
   registerWithWebAuthn,
   authWithWebAuthn,
   authWithStytch,
@@ -64,13 +61,6 @@ export default function SignUpMethods({
               </button>
             </div>
           </>
-        )}
-        {view === 'email' && (
-          <EmailSMSAuth
-            method={'email'}
-            setView={setView}
-            authWithOTP={authWithOTP}
-          />
         )}
         {/* {view === 'phone' && (
           <EmailSMSAuth
