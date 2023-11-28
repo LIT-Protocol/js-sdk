@@ -669,7 +669,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const _pubkey = pubkey ?? '0x';
 
     // if scopes are list of strings, turn them into numbers
-    scopes = scopes.map((scope) => {
+    scopes = scopes.map((
+      scope: any) => {
       if (typeof scope === 'string') {
         return ethers.BigNumber.from(scope);
       }
@@ -1115,7 +1116,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
                 tokenId
               );
             if (addresses.length <= 0) {
-              await new Promise((resolve) => setTimeout(resolve, 1000));
+              await new Promise((resolve: any) => setTimeout(resolve, 1000));
               tries++;
               continue;
             } else {
@@ -1166,7 +1167,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
               );
 
             if (actions.length <= 0) {
-              await new Promise((resolve) => setTimeout(resolve, 1000));
+              await new Promise((resolve: any) => setTimeout(resolve, 1000));
               tries++;
               continue;
             } else {
