@@ -1,7 +1,8 @@
-import { BytesLike, ethers } from 'ethers';
+import {BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 let CID: any;
 try {
@@ -44,6 +45,9 @@ import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
 import { LIT_CHAINS, LitNetwork } from '@lit-protocol/constants';
+import { AuthMethod } from '@lit-protocol/types';
+import { AuthMethodType } from '@lit-protocol/constants';
+
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -523,25 +527,15 @@ export class LitContracts {
         stakingBalancesContract.StakingBalances,
     };
     // ----- autogen:init:end  -----
-
+    
     this.connected = true;
   };
 
-  mintWithAuth = async ({
-    authMethod,
-    scopes,
-    pubkey,
-  }: {
-    authMethod: AuthMethod;
-    scopes: string[] | number[] | BigNumberish[];
-    pubkey?: string; // only applies to webauthn auth method
-  }) => {
-    // -- validate
-    if (!this.connected) {
-      throw new Error(
-        'Contracts are not connected. Please call connect() first'
-      );
-    }
+  public static async getStakingContract(network:
+    LitNetwork.Cayenne | LitNetwork.InternalDev) {
+
+    const rpcUrl = LIT_CHAINS['chronicleTestnet']['rpcUrls'][0];
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
     if (network === 'cayenne') {
       return new ethers.Contract(StakingData.address, StakingData.abi, provider);
@@ -549,34 +543,22 @@ export class LitContracts {
       const INTERNAL_DEV_API =
         'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
 
-    if (authMethod && !authMethod?.authMethodType) {
-      throw new Error('authMethodType is required');
-    }
-
-    if (authMethod && !authMethod?.accessToken) {
-      throw new Error('accessToken is required');
-    }
-
-    if (scopes.length <= 0) {
-      throw new Error(`❌ Permission scopes are required!
-[0] No Permissions
-[1] Sign Anything	
-[2] Only Sign Messages
-Read more here:
-https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
-      `);
-    }
-
-    // -- prepare
-    const _pubkey = pubkey ?? '0x';
-
-    // if scopes are list of strings, turn them into numbers
-    scopes = scopes.map((scope) => {
-      if (typeof scope === 'string') {
-        return ethers.BigNumber.from(scope);
+      let data;
+      try {
+        // Fetch and parse the JSON data in one step
+        data = await fetch(INTERNAL_DEV_API).then((res) => res.json());
+      } catch (e: any) {
+        throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
       }
-      if (typeof scope === 'number') {
-        return ethers.BigNumber.from(scope.toString());
+      // Destructure the data for easier access
+      const { config, data: contractData } = data;
+      const stakingContract = contractData.find((item: { name: string }) => item.name === 'Staking')
+        .contracts[0];
+      const { address_hash: address, ABI: abi } = stakingContract;
+
+      // Validate the required data
+      if (!config || !address || !abi) {
+        throw new Error('❌ Required contract data is missing');
       }
 
       return new ethers.Contract(address, abi, provider);
@@ -584,7 +566,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       throw new Error(`Invalid network. Only cayenne and internalDev are supported.`);
     }
   }
-
+  
   public static getMinNodeCount = async (network: LitNetwork.Cayenne | LitNetwork.InternalDev) => {
 
     const contract = await LitContracts.getStakingContract(network);
@@ -642,6 +624,60 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     return networks;
   };
 
+  mintWithAuth = async ({
+    authMethod,
+    scopes,
+    pubkey,
+  }: {
+    authMethod: AuthMethod;
+    scopes: string[] | number[] | BigNumberish[];
+    pubkey?: string; // only applies to webauthn auth method
+  }) => {
+    // -- validate
+    if (!this.connected) {
+      throw new Error(
+        'Contracts are not connected. Please call connect() first'
+      );
+    }
+
+    if (!this.pkpNftContract) {
+      throw new Error('Contract is not available');
+    }
+
+    if (authMethod && !authMethod?.authMethodType) {
+      throw new Error('authMethodType is required');
+    }
+
+    if (authMethod && !authMethod?.accessToken) {
+      throw new Error('accessToken is required');
+    }
+
+    if (scopes.length <= 0) {
+      throw new Error(`❌ Permission scopes are required!
+[0] No Permissions
+[1] Sign Anything	
+[2] Only Sign Messages
+Read more here:
+https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
+      `);
+    }
+
+    // -- prepare
+    const _pubkey = pubkey ?? '0x';
+
+    // if scopes are list of strings, turn them into numbers
+    scopes = scopes.map((scope) => {
+      if (typeof scope === 'string') {
+        return ethers.BigNumber.from(scope);
+      }
+      if (typeof scope === 'number') {
+        return ethers.BigNumber.from(scope.toString());
+      }
+      return scope;
+    });
+
+    const authId = await LitAuthClient.getAuthIdByAuthMethod(authMethod);
+
     // -- go
     const mintCost = await this.pkpNftContract.read.mintCost();
 
@@ -678,6 +714,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       publicKey = publicKey.slice(2);
     }
 
+    //@ts-ignore
     const pubkeyBuffer = Buffer.from(publicKey, 'hex');
 
     const ethAddress = computeAddress(pubkeyBuffer);
