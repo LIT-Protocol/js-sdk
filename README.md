@@ -248,7 +248,7 @@ Run `yarn bump` to bump the version. You must have at least nodejs v18 to do thi
 ### to npm
 
 ```
-yarn publish:packages
+yarn publish:serrano-jalapeno
 ```
 
 ### clone & publish to npm
