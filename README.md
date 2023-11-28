@@ -272,12 +272,13 @@ yarn tools --clone <project-name> <clone-project-name> <(?) --publish> <(?) --re
 yarn tools --clone lit-node-client @litprotocol/dev --publish --remove-after
 ```
 
-### Publishing to cayenne
+### Publishing to Serrano / Jalapno
 
 ```sh
+git checkout serrano
 yarn bump
 yarn build
-yarn publish:cayenne
+yarn node ./tools/scripts/pub.mjs --tag serrano-jalapeno
 ```
 
 ## The Publish Pipeline - bump, build, test, gen docs, publish, git push
