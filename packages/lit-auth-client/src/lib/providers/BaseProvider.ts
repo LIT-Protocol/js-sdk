@@ -47,10 +47,12 @@ export abstract class BaseProvider {
    *
    * @template T - Type representing the specific options for the authenticate method
    * @param {T} [options] - Optional parameters that vary based on the provider
+   * @param {(currentUrl: string, redirectUri: string) => boolean} [urlCheckCallback] - Optional callback to handle authentication data or errors
    * @returns {Promise<AuthMethod>} - Auth method object that contains authentication data
    */
   abstract authenticate<T extends AuthenticateOptions>(
-    options?: T
+    options?: T,
+    urlCheckCallback?: (currentUrl: string, redirectUri: string) => boolean
   ): Promise<AuthMethod>;
 
   /**
