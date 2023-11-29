@@ -26,6 +26,8 @@ import {
 import {
   isBrowser,
   log,
+  logErrorWithRequestId,
+  logWithRequestId,
   mostCommonString,
   throwError,
 } from '@lit-protocol/misc';
@@ -55,7 +57,7 @@ import {
   SupportedJsonRequests,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { uint8arrayFromString } from '@lit-protocol/uint8arrays';
+import { LogLevel, LogManager } from '@lit-protocol/logger';
 
 export class LitCore {
   config: LitNodeClientConfig;
@@ -98,7 +100,19 @@ export class LitCore {
 
     // -- set global variables
     globalThis.litConfig = this.config;
+    globalThis.logManager = LogManager.Instance;
+    globalThis.logManager.withConfig({
+      "condenseLogs": true
+    });
+    globalThis.logManager.setLevel(LogLevel.DEBUG);
+    globalThis.logger = globalThis.logManager.get('core');
   }
+  
+  // ========== Logger utilities ==========
+  getLogsForRequestId = (id: string): string[] => {
+    return globalThis.logManager.getLogsForId(id);
+  }
+
 
   // ========== Scoped Class Helpers ==========
 
@@ -162,11 +176,11 @@ export class LitCore {
             keys.networkPubKey === 'ERR' ||
             keys.networkPubKeySet === 'ERR'
           ) {
-            log('Error connecting to node. Detected "ERR" in keys', url, keys);
+            logErrorWithRequestId(requestId, 'Error connecting to node. Detected "ERR" in keys', url, keys);
           }
 
           if (!keys.latestBlockhash) {
-            log('Error getting latest blockhash from the node.');
+            logErrorWithRequestId(requestId, 'Error getting latest blockhash from the node.');
           }
 
           if (this.config.checkNodeAttestation) {
@@ -197,7 +211,7 @@ export class LitCore {
                 console.error(
                   `Lit Node Attestation failed verification for ${url}`
                 );
-                console.error(e);
+                logErrorWithRequestId(requestId, `Lit Node Attestation failed verification for ${url}`);
                 throwError({
                   message: `Lit Node Attestation failed verification for ${url}`,
                   errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
@@ -357,7 +371,7 @@ export class LitCore {
     data,
     requestId,
   }: SendNodeCommand): Promise<any> => {
-    log(`sendCommandToNode with url ${url} and data`, data);
+    logWithRequestId(requestId, `sendCommandToNode with url ${url} and data`, data);
 
     const req: RequestInit = {
       method: 'POST',
@@ -387,7 +401,7 @@ export class LitCore {
         return data;
       })
       .catch((error: NodeErrorV3) => {
-        console.error(
+        logErrorWithRequestId(requestId,
           `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
             error?.message || error?.details
               ? `Error is ${error.message} - ${error.details}`
@@ -515,7 +529,8 @@ export class LitCore {
    */
   handleNodePromises = async <T>(
     nodePromises: Array<Promise<T>>,
-    minNodeCount?: number
+    requestId?: string,
+    minNodeCount?: number,
   ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
     // -- prepare
     const responses = await Promise.allSettled(nodePromises);
@@ -547,7 +562,7 @@ export class LitCore {
       )
     );
 
-    log(`most common error: ${JSON.stringify(mostCommonError)}`);
+    logErrorWithRequestId(requestId || "", `most common error: ${JSON.stringify(mostCommonError)}`);
 
     const rejectedPromises: RejectedNodePromises = {
       success: false,

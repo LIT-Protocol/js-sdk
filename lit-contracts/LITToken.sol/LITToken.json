@@ -1,18 +1,398 @@
 {
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+  "date": "2023-11-14T15:45:41Z",
+  "address": "0x19593CbBC56Ddd339Fde26278A544a25166C2388",
+  "contractName": "RateLimitNFT",
+========
   "date": "2023-10-26T17:57:25.000Z",
   "address": "0x53695556f8a1a064EdFf91767f15652BbfaFaD04",
   "contractName": "LITToken",
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
   "abi": [
     {
       "inputs": [
         {
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotAddFunctionToDiamondThatAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4[]",
+          "name": "_selectors",
+          "type": "bytes4[]"
+        }
+      ],
+      "name": "CannotAddSelectorsToZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotRemoveFunctionThatDoesNotExist",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotRemoveImmutableFunction",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotReplaceFunctionThatDoesNotExists",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotReplaceFunctionWithTheSameFunctionFromTheSameFacet",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4[]",
+          "name": "_selectors",
+          "type": "bytes4[]"
+        }
+      ],
+      "name": "CannotReplaceFunctionsFromFacetWithZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "CannotReplaceImmutableFunction",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "_action",
+          "type": "uint8"
+        }
+      ],
+      "name": "IncorrectFacetCutAction",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_initializationContractAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_calldata",
+          "type": "bytes"
+        }
+      ],
+      "name": "InitializationFunctionReverted",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_contractAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_message",
+          "type": "string"
+        }
+      ],
+      "name": "NoBytecodeAtAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_facetAddress",
+          "type": "address"
+        }
+      ],
+      "name": "NoSelectorsProvidedForFacetForCut",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_user",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_contractOwner",
+          "type": "address"
+        }
+      ],
+      "name": "NotContractOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_facetAddress",
+          "type": "address"
+        }
+      ],
+      "name": "RemoveFacetAddressMustBeZeroAddress",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "facetAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "enum IDiamond.FacetCutAction",
+              "name": "action",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes4[]",
+              "name": "functionSelectors",
+              "type": "bytes4[]"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IDiamond.FacetCut[]",
+          "name": "_diamondCut",
+          "type": "tuple[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "_init",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "_calldata",
+          "type": "bytes"
+        }
+      ],
+      "name": "DiamondCut",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "facetAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "enum IDiamond.FacetCutAction",
+              "name": "action",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes4[]",
+              "name": "functionSelectors",
+              "type": "bytes4[]"
+            }
+          ],
+          "internalType": "struct IDiamond.FacetCut[]",
+          "name": "_diamondCut",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "address",
+          "name": "_init",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_calldata",
+          "type": "bytes"
+        }
+      ],
+      "name": "diamondCut",
+      "outputs": [],
+========
           "internalType": "uint256",
           "name": "cap",
           "type": "uint256"
         }
       ],
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
       "stateMutability": "nonpayable",
-      "type": "constructor"
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_functionSelector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "facetAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "facetAddress_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "facetAddresses",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "facetAddresses_",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_facet",
+          "type": "address"
+        }
+      ],
+      "name": "facetFunctionSelectors",
+      "outputs": [
+        {
+          "internalType": "bytes4[]",
+          "name": "_facetFunctionSelectors",
+          "type": "bytes4[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "facets",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "facetAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4[]",
+              "name": "functionSelectors",
+              "type": "bytes4[]"
+            }
+          ],
+          "internalType": "struct IDiamondLoupe.Facet[]",
+          "name": "facets_",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "owner_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "CallerNotOwner",
+      "type": "error"
     },
     {
       "inputs": [],
@@ -67,6 +447,58 @@
         {
           "indexed": true,
           "internalType": "address",
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "ApprovalForAll",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newFreeMintSigner",
+          "type": "address"
+        }
+      ],
+      "name": "FreeMintSignerSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newFreeRequestsPerRateLimitWindow",
+          "type": "uint256"
+        }
+      ],
+      "name": "FreeRequestsPerRateLimitWindowSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "version",
+          "type": "uint8"
+        }
+      ],
+      "name": "Initialized",
+========
           "name": "fromDelegate",
           "type": "address"
         },
@@ -109,6 +541,7 @@
       "anonymous": false,
       "inputs": [],
       "name": "EIP712DomainChanged",
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
       "type": "event"
     },
     {
@@ -238,6 +671,9 @@
       "type": "event"
     },
     {
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+      "inputs": [
+========
       "inputs": [],
       "name": "ADMIN_ROLE",
       "outputs": [
@@ -267,6 +703,7 @@
       "inputs": [],
       "name": "DEFAULT_ADMIN_ROLE",
       "outputs": [
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
         {
           "internalType": "bytes32",
           "name": "",
@@ -398,6 +835,11 @@
     {
       "inputs": [
         {
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+          "internalType": "uint256",
+          "name": "expiresAt",
+          "type": "uint256"
+========
           "internalType": "address",
           "name": "account",
           "type": "address"
@@ -494,11 +936,35 @@
           "internalType": "address",
           "name": "spender",
           "type": "address"
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
         },
         {
           "internalType": "uint256",
           "name": "subtractedValue",
           "type": "uint256"
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+        },
+        {
+          "internalType": "bytes32",
+          "name": "msgHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "v",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "r",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "sVal",
+          "type": "bytes32"
+========
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
         }
       ],
       "name": "decreaseAllowance",
@@ -534,6 +1000,36 @@
         },
         {
           "internalType": "uint256",
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getApproved",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+========
           "name": "nonce",
           "type": "uint256"
         },
@@ -605,6 +1101,7 @@
           "internalType": "uint256",
           "name": "chainId",
           "type": "uint256"
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
         },
         {
           "internalType": "address",
@@ -629,6 +1126,9 @@
       "inputs": [
         {
           "internalType": "uint256",
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+          "name": "expiresAt",
+========
           "name": "timepoint",
           "type": "uint256"
         }
@@ -782,6 +1282,7 @@
         {
           "internalType": "uint256",
           "name": "_amount",
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
           "type": "uint256"
         }
       ],
@@ -805,6 +1306,8 @@
     },
     {
       "inputs": [
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+========
         {
           "internalType": "address",
           "name": "owner",
@@ -813,6 +1316,7 @@
       ],
       "name": "nonces",
       "outputs": [
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
         {
           "internalType": "uint256",
           "name": "",
@@ -825,6 +1329,8 @@
     {
       "inputs": [
         {
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+========
           "internalType": "address",
           "name": "account",
           "type": "address"
@@ -864,6 +1370,7 @@
     {
       "inputs": [
         {
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
           "internalType": "address",
           "name": "owner",
           "type": "address"
@@ -935,7 +1442,76 @@
           "type": "address"
         }
       ],
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+      "name": "setFreeMintSigner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "newFreeRequestsPerRateLimitWindow",
+          "type": "uint256"
+        }
+      ],
+      "name": "setFreeRequestsPerRateLimitWindow",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "newMaxExpirationSeconds",
+          "type": "uint256"
+        }
+      ],
+      "name": "setMaxExpirationSeconds",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "newMaxRequestsPerKilosecond",
+          "type": "uint256"
+        }
+      ],
+      "name": "setMaxRequestsPerKilosecond",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "newRLIHolderRateLimitWindowSeconds",
+          "type": "uint256"
+        }
+      ],
+      "name": "setRLIHolderRateLimitWindowSeconds",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "newRateLimitWindowSeconds",
+          "type": "uint256"
+        }
+      ],
+      "name": "setRateLimitWindowSeconds",
+========
       "name": "revokeRole",
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -973,6 +1549,71 @@
       "type": "function"
     },
     {
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenByIndex",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenOfOwnerByIndex",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+========
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
       "inputs": [],
       "name": "totalSupply",
       "outputs": [
@@ -1028,6 +1669,16 @@
         }
       ],
       "name": "transferFrom",
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "withdraw",
+      "outputs": [],
+========
       "outputs": [
         {
           "internalType": "bool",
@@ -1035,14 +1686,360 @@
           "type": "bool"
         }
       ],
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "inputs": [],
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+      "name": "RLIHolderRateLimitWindowSeconds",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "additionalRequestsPerKilosecondCost",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "requestsPerKilosecond",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "expiresAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "calculateCost",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "payingAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "expiresAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "calculateRequestsPerKilosecond",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "capacity",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "requestsPerKilosecond",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "expiresAt",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct LibRateLimitNFTStorage.RateLimit",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "requestedRequestsPerKilosecond",
+          "type": "uint256"
+        }
+      ],
+      "name": "checkBelowMaxRequestsPerKilosecond",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentSoldRequestsPerKilosecond",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "defaultRateLimitWindowSeconds",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "expiresAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "requestsPerKilosecond",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "msgHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "v",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "r",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "sVal",
+          "type": "bytes32"
+        }
+      ],
+      "name": "freeMintSigTest",
+========
       "name": "unpause",
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
       "outputs": [],
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "freeMintSigner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "freeRequestsPerRateLimitWindow",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "isExpired",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "maxExpirationSeconds",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "maxRequestsPerKilosecond",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "prefixed",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "msgHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "redeemedFreeMints",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "tokenIdCounter",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenSVG",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "expiresAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "totalSoldRequestsPerKilosecondByExpirationTime",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     }
   ]
