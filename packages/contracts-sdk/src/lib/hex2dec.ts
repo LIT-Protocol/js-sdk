@@ -102,3 +102,16 @@ export function hexToDec(hexStr) {
   hexStr = hexStr.toLowerCase();
   return convertBase(hexStr, 16, 10);
 }
+
+export const intToIP = (ip) => {
+  // -- ip
+  // Convert integer to binary string and pad with leading zeros to make it 32-bit
+  const binaryString = ip.toString(2).padStart(32, '0');
+  // Split into octets and convert each one to decimal
+  const ipArray = [];
+  for (let i = 0; i < 32; i += 8) {
+    ipArray.push(parseInt(binaryString.substring(i, i + 8), 2));
+  }
+  // Join the octets with dots to form the IP address
+  return ipArray.join('.');
+};

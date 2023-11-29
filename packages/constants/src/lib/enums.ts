@@ -37,10 +37,25 @@ export enum AuthMethodType {
   StytchTotpFactorOtp = 13,
 }
 
+export enum StakingStates {
+  Active,
+  NextValidatorSetLocked,
+  ReadyForNextEpoch,
+  Unlocked,
+  Paused,
+  Restore
+}
+
+
 export enum AuthMethodScope {
   NoPermissions = 0,
   SignAnything = 1,
   OnlySignMessages = 2,
+}
+
+export enum LitNetwork {
+  Cayenne = 'cayenne',
+  InternalDev = 'internalDev',
 }
 
 /**
