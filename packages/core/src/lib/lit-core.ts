@@ -176,11 +176,11 @@ export class LitCore {
             keys.networkPubKey === 'ERR' ||
             keys.networkPubKeySet === 'ERR'
           ) {
-            log('Error connecting to node. Detected "ERR" in keys', url, keys);
+            logErrorWithRequestId(requestId, 'Error connecting to node. Detected "ERR" in keys', url, keys);
           }
 
           if (!keys.latestBlockhash) {
-            log('Error getting latest blockhash from the node.');
+            logErrorWithRequestId(requestId, 'Error getting latest blockhash from the node.');
           }
 
           if (this.config.checkNodeAttestation) {
@@ -211,7 +211,7 @@ export class LitCore {
                 console.error(
                   `Lit Node Attestation failed verification for ${url}`
                 );
-                console.error(e);
+                logErrorWithRequestId(requestId, `Lit Node Attestation failed verification for ${url}`);
                 throwError({
                   message: `Lit Node Attestation failed verification for ${url}`,
                   errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
