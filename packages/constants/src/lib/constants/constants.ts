@@ -445,7 +445,7 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     contractAddress: null,
     chainId: 175177,
     name: 'Chronicle - Lit Protocol Testnet',
-    symbol: 'LIT',
+    symbol: 'testLIT',
     decimals: 18,
     rpcUrls: ['https://chain-rpc.litprotocol.com/http'],
     blockExplorerUrls: ['https://chain.litprotocol.com/'],
