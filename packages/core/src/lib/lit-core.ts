@@ -301,7 +301,7 @@ export class LitCore {
               try {
                 checkSevSnpAttestation(attestation, challenge, url).then(() => {
                   log(`Lit Node Attestation verified for ${url}`);
-
+                  
                   // only set server keys if attestation is valid
                   // so that we don't use this node if it's not valid
                   this.serverKeys[url] = keys;
@@ -361,6 +361,12 @@ export class LitCore {
           log(
             `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`
           );
+          log('current network config', {
+            networkPubkey: this.networkPubKey,
+            networkPubKeySet: this.networkPubKeySet,
+            hdRootPubkeys: this.hdRootPubkeys,
+            subnetPubkey: this.subnetPubKey
+          });
 
           // @ts-ignore
           globalThis.litNodeClient = this;
