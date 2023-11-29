@@ -18,6 +18,7 @@
     "lit-node-client": "packages/lit-node-client",
     "lit-node-client-nodejs": "packages/lit-node-client-nodejs",
     "lit-third-party-libs": "packages/lit-third-party-libs",
+    "logger": "packages/logger",
     "misc": "packages/misc",
     "misc-browser": "packages/misc-browser",
     "nacl": "packages/nacl",

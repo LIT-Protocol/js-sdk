@@ -1,0 +1,14 @@
+{
+  "name": "@lit-protocol/logger",
+  "version": "3.0.24",
+  "type": "commonjs",
+  "tags": [
+    "universal"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "directory": "../../dist/packages/logger"
+  },
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
+}

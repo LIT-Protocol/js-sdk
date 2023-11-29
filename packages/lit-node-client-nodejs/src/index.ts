@@ -1,7 +1,7 @@
 import { isNode, log } from '@lit-protocol/misc';
 import * as _LitNodeClientNodeJs from './lib/lit-node-client-nodejs';
-
 // ==================== Environment ====================
+
 if (isNode()) {
   log('Oh hey you are running in Node.js!');
   const fetch = require('node-fetch');

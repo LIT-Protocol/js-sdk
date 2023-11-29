@@ -15,6 +15,7 @@ import * as LitJsSdk_litAuthClient from 'dist/packages/lit-auth-client';
 import * as LitJsSdk_litNodeClient from 'dist/packages/lit-node-client';
 import * as LitJsSdk_litNodeClientNodejs from 'dist/packages/lit-node-client-nodejs';
 import * as LitJsSdk_litThirdPartyLibs from 'dist/packages/lit-third-party-libs';
+import * as LitJsSdk_logger from 'dist/packages/logger';
 import * as LitJsSdk_misc from 'dist/packages/misc';
 import * as LitJsSdk_miscBrowser from 'dist/packages/misc-browser';
 import * as LitJsSdk_nacl from 'dist/packages/nacl';
@@ -44,6 +45,7 @@ declare global {
     LitJsSdk_litNodeClient: any;
     LitJsSdk_litNodeClientNodejs: any;
     LitJsSdk_litThirdPartyLibs: any;
+    LitJsSdk_logger: any;
     LitJsSdk_misc: any;
     LitJsSdk_miscBrowser: any;
     LitJsSdk_nacl: any;
@@ -994,6 +996,78 @@ export function App() {
             var template = `
             <div class="cat">
                 <h1>LitJsSdk_litThirdPartyLibs has ${entries.length} functions</h1>
+                    <ul>
+                        ${ lis }
+                    </ul>
+                </div>
+            `;
+            root.insertAdjacentHTML('beforeend', template);
+        });
+    
+    
+
+    
+    
+        if(typeof LitJsSdk_logger === 'undefined') {
+            console.error("LitJsSdk_logger:", LitJsSdk_logger);
+        }else{
+            console.warn("LitJsSdk_logger:", LitJsSdk_logger);
+            window.LitJsSdk_logger = LitJsSdk_logger;
+        }
+        window.addEventListener('load', function() {
+
+            var root = document.getElementById('root');
+            var result = document.getElementById('result');
+            var entries = Object.entries(LitJsSdk_logger);
+            var lis = entries.map(([key, value]) => `
+            <li>
+                <div id="LitJsSdk_logger_${key}" class="key" onClick="(async (e) => {
+                    var fn = LitJsSdk_logger['${key}'];
+                    var fnType = typeof fn;
+                    console.warn('[${key}] is type of [' + fnType + ']');
+
+                    if ( fnType === 'string' ) return;
+
+                    if( fnType === 'function' ){
+                        try{
+                            console.log('params:', globalThis.params);
+
+                            var res;
+                            try{
+                                res = new fn(globalThis.params);
+                            }catch{
+                                res = await fn(globalThis.params);
+                            }
+                            window.output = res;
+                            res = JSON.stringify(res, null, 2);
+                            result.innerText = res;
+                            console.log(res);
+                        }catch(e){
+                            console.error('Please set the [params] variable in the console then click again');
+                            console.log(e);
+                        }
+                        return;
+                    }
+
+                    if( fnType === 'object' ){
+                        var res = await fn;
+                        window.output = res;
+                        res = JSON.stringify(res, null, 2);
+                        result.innerText = res;
+                        console.log(res);
+                        return;
+                    }
+                    
+                    
+                })();">${key}</div>
+                <pre class="code">
+<code>${(typeof value === 'function' ? value : JSON.stringify(value, null, 2))}</code>
+                </pre>
+            </li>`);
+            lis = lis.join(' ');
+            var template = `
+            <div class="cat">
+                <h1>LitJsSdk_logger has ${entries.length} functions</h1>
                     <ul>
                         ${ lis }
                     </ul>
