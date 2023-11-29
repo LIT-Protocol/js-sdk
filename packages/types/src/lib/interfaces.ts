@@ -228,6 +228,7 @@ export interface LitNodeClientConfig {
   bootstrapUrls: Array<string>;
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
+  checkNodeAttestation: boolean;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
@@ -738,6 +739,7 @@ export interface NodeCommandServerKeysResponse {
   subnetPublicKey: any;
   networkPublicKey: any;
   networkPublicKeySet: any;
+  attestation: NodeAttestation;
   latestBlockhash?: string;
 }
 
@@ -771,8 +773,21 @@ export interface ValidateAndSignECDSA {
   auth_sig: AuthSig;
 }
 
-export interface HandshakeWithSgx {
+export interface HandshakeWithNode {
   url: string;
+  challenge: string;
+}
+
+export interface NodeAttestation {
+  type: string;
+  noonce: string;
+  data: {
+    INSTANCE_ID: string;
+    RELEASE_ID: string;
+    UNIX_TIME: string;
+  };
+  signatures: string[];
+  report: string;
 }
 
 export interface JsonHandshakeResponse {

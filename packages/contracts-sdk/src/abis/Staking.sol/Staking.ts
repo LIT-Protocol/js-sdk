@@ -71,9 +71,6 @@ export declare namespace LibStakingStorage {
     complaintIntervalSecs: BigNumberish;
     keyTypes: BigNumberish[];
     minimumValidatorCount: BigNumberish;
-    maxConcurrentRequests: BigNumberish;
-    maxTripleCount: BigNumberish;
-    minTripleCount: BigNumberish;
   };
 
   export type ConfigStructOutput = [
@@ -81,9 +78,6 @@ export declare namespace LibStakingStorage {
     BigNumber,
     BigNumber,
     BigNumber[],
-    BigNumber,
-    BigNumber,
-    BigNumber,
     BigNumber
   ] & {
     tokenRewardPerTokenPerEpoch: BigNumber;
@@ -91,9 +85,6 @@ export declare namespace LibStakingStorage {
     complaintIntervalSecs: BigNumber;
     keyTypes: BigNumber[];
     minimumValidatorCount: BigNumber;
-    maxConcurrentRequests: BigNumber;
-    maxTripleCount: BigNumber;
-    minTripleCount: BigNumber;
   };
 
   export type EpochStruct = {
@@ -177,7 +168,7 @@ export interface StakingInterface extends utils.Interface {
     'lockValidatorsForNextEpoch()': FunctionFragment;
     'requestToJoin(uint32,uint128,uint32,address,uint256,uint256)': FunctionFragment;
     'requestToLeave()': FunctionFragment;
-    'setConfig(uint256,uint256,uint256,uint256[],uint256,uint256,uint256,uint256)': FunctionFragment;
+    'setConfig(uint256,uint256,uint256,uint256[],uint256)': FunctionFragment;
     'setContractResolver(address)': FunctionFragment;
     'setEpochEndTime(uint256)': FunctionFragment;
     'setEpochLength(uint256)': FunctionFragment;
@@ -371,9 +362,6 @@ export interface StakingInterface extends utils.Interface {
       BigNumberish,
       BigNumberish,
       BigNumberish[],
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
       BigNumberish
     ]
   ): string;
@@ -798,7 +786,7 @@ export interface StakingInterface extends utils.Interface {
   events: {
     'DiamondCut((address,uint8,bytes4[])[],address,bytes)': EventFragment;
     'OwnershipTransferred(address,address)': EventFragment;
-    'ConfigSet(uint256,uint256,uint256,uint256[],uint256,uint256,uint256,uint256)': EventFragment;
+    'ConfigSet(uint256,uint256,uint256,uint256[],uint256)': EventFragment;
     'EpochEndTimeSet(uint256)': EventFragment;
     'EpochLengthSet(uint256)': EventFragment;
     'EpochTimeoutSet(uint256)': EventFragment;
@@ -870,21 +858,9 @@ export interface ConfigSetEventObject {
   newComplaintIntervalSecs: BigNumber;
   newKeyTypes: BigNumber[];
   newMinimumValidatorCount: BigNumber;
-  newMaxConcurrentRequests: BigNumber;
-  newMaxTripleCount: BigNumber;
-  newMinTripleCount: BigNumber;
 }
 export type ConfigSetEvent = TypedEvent<
-  [
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    BigNumber[],
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    BigNumber
-  ],
+  [BigNumber, BigNumber, BigNumber, BigNumber[], BigNumber],
   ConfigSetEventObject
 >;
 
@@ -1173,9 +1149,6 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
-      newMaxConcurrentRequests: BigNumberish,
-      newMaxTripleCount: BigNumberish,
-      newMinTripleCount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<ContractTransaction>;
 
@@ -1474,9 +1447,6 @@ export interface Staking extends BaseContract {
     newComplaintIntervalSecs: BigNumberish,
     newKeyTypes: BigNumberish[],
     newMinimumValidatorCount: BigNumberish,
-    newMaxConcurrentRequests: BigNumberish,
-    newMaxTripleCount: BigNumberish,
-    newMinTripleCount: BigNumberish,
     overrides?: Overrides & { from?: string }
   ): Promise<ContractTransaction>;
 
@@ -1767,9 +1737,6 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
-      newMaxConcurrentRequests: BigNumberish,
-      newMaxTripleCount: BigNumberish,
-      newMinTripleCount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1991,25 +1958,19 @@ export interface Staking extends BaseContract {
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
 
-    'ConfigSet(uint256,uint256,uint256,uint256[],uint256,uint256,uint256,uint256)'(
+    'ConfigSet(uint256,uint256,uint256,uint256[],uint256)'(
       newTokenRewardPerTokenPerEpoch?: null,
       newComplaintTolerance?: null,
       newComplaintIntervalSecs?: null,
       newKeyTypes?: null,
-      newMinimumValidatorCount?: null,
-      newMaxConcurrentRequests?: null,
-      newMaxTripleCount?: null,
-      newMinTripleCount?: null
+      newMinimumValidatorCount?: null
     ): ConfigSetEventFilter;
     ConfigSet(
       newTokenRewardPerTokenPerEpoch?: null,
       newComplaintTolerance?: null,
       newComplaintIntervalSecs?: null,
       newKeyTypes?: null,
-      newMinimumValidatorCount?: null,
-      newMaxConcurrentRequests?: null,
-      newMaxTripleCount?: null,
-      newMinTripleCount?: null
+      newMinimumValidatorCount?: null
     ): ConfigSetEventFilter;
 
     'EpochEndTimeSet(uint256)'(
@@ -2196,9 +2157,6 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
-      newMaxConcurrentRequests: BigNumberish,
-      newMaxTripleCount: BigNumberish,
-      newMinTripleCount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<BigNumber>;
 
@@ -2492,9 +2450,6 @@ export interface Staking extends BaseContract {
       newComplaintIntervalSecs: BigNumberish,
       newKeyTypes: BigNumberish[],
       newMinimumValidatorCount: BigNumberish,
-      newMaxConcurrentRequests: BigNumberish,
-      newMaxTripleCount: BigNumberish,
-      newMinTripleCount: BigNumberish,
       overrides?: Overrides & { from?: string }
     ): Promise<PopulatedTransaction>;
 

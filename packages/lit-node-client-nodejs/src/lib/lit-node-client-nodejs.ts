@@ -1923,7 +1923,8 @@ export class LitNodeClientNodeJs extends LitCore {
       hashOfConditionsStr,
       dataToEncryptHash
     );
-    log('identityParam', identityParam);
+
+    logWithRequestId(requestId, 'identityParam', identityParam);
 
     // ========== Get Network Signature ==========
     const nodePromises = this.getNodePromises((url: string) => {
@@ -2249,7 +2250,6 @@ export class LitNodeClientNodeJs extends LitCore {
     logWithRequestId(requestId, 'requested length:', signedDataList.length);
     logWithRequestId(requestId, 'validated length:', validatedSignedDataList.length);
     logWithRequestId(requestId, 'minimum required length:', this.config.minNodeCount);
-
     if (validatedSignedDataList.length < this.config.minNodeCount) {
       throw new Error(
         `not enough nodes signed the session key.  Expected ${this.config.minNodeCount}, got ${validatedSignedDataList.length}`
@@ -2502,13 +2502,13 @@ export class LitNodeClientNodeJs extends LitCore {
         };
       });
 
-      log(`responseData: ${JSON.stringify(responseData, null, 2)}`);
+      logWithRequestId(requestId, `responseData: ${JSON.stringify(responseData, null, 2)}`);
 
       const derivedKeyId = (responseData as SuccessNodePromises<any>).values[0]
         .derivedKeyId;
 
       const pubkey: string = this.computeHDPubKey(derivedKeyId);
-      log(`pubkey ${pubkey} derived from key id ${derivedKeyId}`);
+      logWithRequestId(requestId, `pubkey ${pubkey} derived from key id ${derivedKeyId}`);
 
       const relayParams: ClaimRequest<'relay'> =
         params as ClaimRequest<'relay'>;

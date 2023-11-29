@@ -251,6 +251,11 @@
       ],
       "name": "diamondCut",
       "outputs": [],
+          "internalType": "uint256",
+          "name": "cap",
+          "type": "uint256"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -381,17 +386,20 @@
       "type": "error"
     },
     {
-      "anonymous": false,
+      "inputs": [],
+      "name": "InvalidShortString",
+      "type": "error"
+    },
+    {
       "inputs": [
         {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "newAdditionalRequestsPerKilosecondCost",
-          "type": "uint256"
+          "internalType": "string",
+          "name": "str",
+          "type": "string"
         }
       ],
-      "name": "AdditionalRequestsPerKilosecondCostSet",
-      "type": "event"
+      "name": "StringTooLong",
+      "type": "error"
     },
     {
       "anonymous": false,
@@ -405,13 +413,13 @@
         {
           "indexed": true,
           "internalType": "address",
-          "name": "approved",
+          "name": "spender",
           "type": "address"
         },
         {
-          "indexed": true,
+          "indexed": false,
           "internalType": "uint256",
-          "name": "tokenId",
+          "name": "value",
           "type": "uint256"
         }
       ],
@@ -424,12 +432,13 @@
         {
           "indexed": true,
           "internalType": "address",
-          "name": "owner",
+          "name": "delegator",
           "type": "address"
         },
         {
           "indexed": true,
           "internalType": "address",
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
           "name": "operator",
           "type": "address"
         },
@@ -480,6 +489,50 @@
         }
       ],
       "name": "Initialized",
+========
+          "name": "fromDelegate",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "toDelegate",
+          "type": "address"
+        }
+      ],
+      "name": "DelegateChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "delegate",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "previousBalance",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newBalance",
+          "type": "uint256"
+        }
+      ],
+      "name": "DelegateVotesChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "EIP712DomainChanged",
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
       "type": "event"
     },
     {
@@ -487,25 +540,87 @@
       "inputs": [
         {
           "indexed": false,
-          "internalType": "uint256",
-          "name": "newRLIHolderRateLimitWindowSeconds",
-          "type": "uint256"
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
         }
       ],
-      "name": "RLIHolderRateLimitWindowSecondsSet",
+      "name": "Paused",
       "type": "event"
     },
     {
       "anonymous": false,
       "inputs": [
         {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "newRateLimitWindowSeconds",
-          "type": "uint256"
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
         }
       ],
-      "name": "RateLimitWindowSecondsSet",
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
       "type": "event"
     },
     {
@@ -524,9 +639,9 @@
           "type": "address"
         },
         {
-          "indexed": true,
+          "indexed": false,
           "internalType": "uint256",
-          "name": "tokenId",
+          "name": "value",
           "type": "uint256"
         }
       ],
@@ -538,30 +653,94 @@
       "inputs": [
         {
           "indexed": false,
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
         }
       ],
-      "name": "Withdrew",
+      "name": "Unpaused",
       "type": "event"
     },
     {
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
       "inputs": [
+========
+      "inputs": [],
+      "name": "ADMIN_ROLE",
+      "outputs": [
         {
-          "internalType": "address",
-          "name": "to",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
         }
       ],
-      "name": "approve",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "CLOCK_MODE",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DOMAIN_SEPARATOR",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MINTER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PAUSER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -569,6 +748,54 @@
         {
           "internalType": "address",
           "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        }
+      ],
+      "name": "allowance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
           "type": "address"
         }
       ],
@@ -587,7 +814,7 @@
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "tokenId",
+          "name": "amount",
           "type": "uint256"
         }
       ],
@@ -599,14 +826,114 @@
     {
       "inputs": [
         {
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
           "internalType": "uint256",
           "name": "expiresAt",
           "type": "uint256"
+========
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "requestsPerKilosecond",
+          "name": "amount",
           "type": "uint256"
+        }
+      ],
+      "name": "burnFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "cap",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "pos",
+          "type": "uint32"
+        }
+      ],
+      "name": "checkpoints",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "fromBlock",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint224",
+              "name": "votes",
+              "type": "uint224"
+            }
+          ],
+          "internalType": "struct ERC20Votes.Checkpoint",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "clock",
+      "outputs": [
+        {
+          "internalType": "uint48",
+          "name": "",
+          "type": "uint48"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
+        },
+        {
+          "internalType": "uint256",
+          "name": "subtractedValue",
+          "type": "uint256"
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
         },
         {
           "internalType": "bytes32",
@@ -627,14 +954,16 @@
           "internalType": "bytes32",
           "name": "sVal",
           "type": "bytes32"
+========
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
         }
       ],
-      "name": "freeMint",
+      "name": "decreaseAllowance",
       "outputs": [
         {
-          "internalType": "uint256",
+          "internalType": "bool",
           "name": "",
-          "type": "uint256"
+          "type": "bool"
         }
       ],
       "stateMutability": "nonpayable",
@@ -643,7 +972,26 @@
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "delegatee",
+          "type": "address"
+        }
+      ],
+      "name": "delegate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "delegatee",
+          "type": "address"
+        },
+        {
           "internalType": "uint256",
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
           "name": "tokenId",
           "type": "uint256"
         }
@@ -672,14 +1020,215 @@
           "internalType": "address",
           "name": "owner",
           "type": "address"
+========
+          "name": "nonce",
+          "type": "uint256"
         },
         {
+          "internalType": "uint256",
+          "name": "expiry",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "v",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "r",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "s",
+          "type": "bytes32"
+        }
+      ],
+      "name": "delegateBySig",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
-          "name": "operator",
+          "name": "account",
           "type": "address"
         }
       ],
-      "name": "isApprovedForAll",
+      "name": "delegates",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "eip712Domain",
+      "outputs": [
+        {
+          "internalType": "bytes1",
+          "name": "fields",
+          "type": "bytes1"
+        },
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "chainId",
+          "type": "uint256"
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
+        },
+        {
+          "internalType": "address",
+          "name": "verifyingContract",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "salt",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "extensions",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+          "name": "expiresAt",
+========
+          "name": "timepoint",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPastTotalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "timepoint",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPastVotes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "getVotes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
       "outputs": [
         {
           "internalType": "bool",
@@ -693,20 +1242,44 @@
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
           "internalType": "uint256",
-          "name": "expiresAt",
+          "name": "addedValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "increaseAllowance",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
           "type": "uint256"
         }
       ],
       "name": "mint",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "payable",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -724,18 +1297,21 @@
     },
     {
       "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        }
-      ],
-      "name": "ownerOf",
-      "outputs": [
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+========
         {
           "internalType": "address",
-          "name": "",
+          "name": "owner",
           "type": "address"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -744,81 +1320,84 @@
     {
       "inputs": [
         {
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
+========
           "internalType": "address",
-          "name": "from",
+          "name": "account",
           "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "to",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
         }
       ],
-      "name": "safeTransferFrom",
+      "name": "numCheckpoints",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pause",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "from",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "to",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes",
-          "name": "data",
-          "type": "bytes"
-        }
-      ],
-      "name": "safeTransferFrom",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "newAdditionalRequestsPerKilosecondCost",
-          "type": "uint256"
-        }
-      ],
-      "name": "setAdditionalRequestsPerKilosecondCost",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "operator",
-          "type": "address"
-        },
+      "inputs": [],
+      "name": "paused",
+      "outputs": [
         {
           "internalType": "bool",
-          "name": "approved",
+          "name": "",
           "type": "bool"
         }
       ],
-      "name": "setApprovalForAll",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "deadline",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "v",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "r",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "s",
+          "type": "bytes32"
+        }
+      ],
+      "name": "permit",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -826,11 +1405,35 @@
     {
       "inputs": [
         {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
           "internalType": "address",
-          "name": "newFreeMintSigner",
+          "name": "account",
           "type": "address"
         }
       ],
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
       "name": "setFreeMintSigner",
       "outputs": [],
       "stateMutability": "nonpayable",
@@ -897,6 +1500,9 @@
         }
       ],
       "name": "setRateLimitWindowSeconds",
+========
+      "name": "revokeRole",
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -934,6 +1540,7 @@
       "type": "function"
     },
     {
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
       "inputs": [
         {
           "internalType": "uint256",
@@ -996,6 +1603,8 @@
       "type": "function"
     },
     {
+========
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
       "inputs": [],
       "name": "totalSupply",
       "outputs": [
@@ -1012,6 +1621,30 @@
       "inputs": [
         {
           "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
           "name": "from",
           "type": "address"
         },
@@ -1022,11 +1655,12 @@
         },
         {
           "internalType": "uint256",
-          "name": "tokenId",
+          "name": "amount",
           "type": "uint256"
         }
       ],
       "name": "transferFrom",
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1035,11 +1669,21 @@
       "inputs": [],
       "name": "withdraw",
       "outputs": [],
+========
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "inputs": [],
+<<<<<<<< HEAD:packages/contracts-sdk/src/abis/RateLimitNFT.sol/RateLimitNFT.json
       "name": "RLIHolderRateLimitWindowSeconds",
       "outputs": [
         {
@@ -1222,6 +1866,9 @@
         }
       ],
       "name": "freeMintSigTest",
+========
+      "name": "unpause",
+>>>>>>>> 02976b78949dfc07fa3463e7b845464178b330e2:lit-contracts/LITToken.sol/LITToken.json
       "outputs": [],
       "stateMutability": "view",
       "type": "function"

@@ -30,6 +30,7 @@
     "pkp-sui": "packages/pkp-sui",
     "pkp-walletconnect": "packages/pkp-walletconnect",
     "react": "apps/react",
+    "sev-snp-utils-sdk": "packages/sev-snp-utils-sdk",
     "types": "packages/types",
     "uint8arrays": "packages/uint8arrays"
   }

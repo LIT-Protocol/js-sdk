@@ -695,24 +695,6 @@ export const StakingData = {
           name: 'newMinimumValidatorCount',
           type: 'uint256',
         },
-        {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'newMaxConcurrentRequests',
-          type: 'uint256',
-        },
-        {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'newMaxTripleCount',
-          type: 'uint256',
-        },
-        {
-          indexed: false,
-          internalType: 'uint256',
-          name: 'newMinTripleCount',
-          type: 'uint256',
-        },
       ],
       name: 'ConfigSet',
       type: 'event',
@@ -1119,21 +1101,6 @@ export const StakingData = {
         {
           internalType: 'uint256',
           name: 'newMinimumValidatorCount',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'newMaxConcurrentRequests',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'newMaxTripleCount',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'newMinTripleCount',
           type: 'uint256',
         },
       ],
@@ -1563,21 +1530,6 @@ export const StakingData = {
             {
               internalType: 'uint256',
               name: 'minimumValidatorCount',
-              type: 'uint256',
-            },
-            {
-              internalType: 'uint256',
-              name: 'maxConcurrentRequests',
-              type: 'uint256',
-            },
-            {
-              internalType: 'uint256',
-              name: 'maxTripleCount',
-              type: 'uint256',
-            },
-            {
-              internalType: 'uint256',
-              name: 'minTripleCount',
               type: 'uint256',
             },
           ],

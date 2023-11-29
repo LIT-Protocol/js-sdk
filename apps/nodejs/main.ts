@@ -27,6 +27,7 @@ import * as pkpCosmos from '@lit-protocol/pkp-cosmos';
 import * as pkpEthers from '@lit-protocol/pkp-ethers';
 import * as pkpSui from '@lit-protocol/pkp-sui';
 import * as pkpWalletconnect from '@lit-protocol/pkp-walletconnect';
+import * as sevSnpUtilsSdk from '@lit-protocol/sev-snp-utils-sdk';
 import * as types from '@lit-protocol/types';
 import * as uint8arrays from '@lit-protocol/uint8arrays';
 
@@ -54,6 +55,7 @@ console.log("pkpCosmos:", hasItems(pkpCosmos));
 console.log("pkpEthers:", hasItems(pkpEthers));
 console.log("pkpSui:", hasItems(pkpSui));
 console.log("pkpWalletconnect:", hasItems(pkpWalletconnect));
+console.log("sevSnpUtilsSdk:", hasItems(sevSnpUtilsSdk));
 console.log("types:", hasItems(types));
 console.log("uint8arrays:", hasItems(uint8arrays));
 

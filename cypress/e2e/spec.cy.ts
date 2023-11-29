@@ -554,16 +554,18 @@ describe('Lit Action', () => {
   });
 
   it('Handshake with Sgx', async () => {
-    const params: HandshakeWithSgx = {
+    const params: HandshakeWithNode = {
       url: 'https://cayenne.litgateway.com:7371',
+      challenge: "deadbeef"
     };
-    const res = await savedParams.litNodeClient.handshakeWithSgx(params);
+    const res = await savedParams.litNodeClient.handshakeWithNode(params);
     expect(res).to.have.keys(
       'clientSdkVersion',
       'networkPublicKey',
       'networkPublicKeySet',
       'serverPublicKey',
-      'subnetPublicKey'
+      'subnetPublicKey',
+      'attestation'
     );
   });
 });
