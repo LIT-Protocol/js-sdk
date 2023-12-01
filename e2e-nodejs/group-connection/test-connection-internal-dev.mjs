@@ -8,7 +8,8 @@ const LIT_NETWORK = 'internalDev';
 export async function main() {
   // ==================== Test Logic ====================
   const client = new LitNodeClient({
-    litNetwork: 'internalDev'
+    litNetwork: 'internalDev',
+    checkNodeAttestation: true
   });
   await client.connect();
 

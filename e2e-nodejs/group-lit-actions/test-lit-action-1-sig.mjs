@@ -11,7 +11,7 @@ const TO_SIGN = ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5]));
 export async function main() {
   // ==================== Test Logic ====================
   const res = await client.executeJs({
-    authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+    authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
     code: `(async () => {
       const sigShare = await LitActions.signEcdsa({
         toSign: dataToSign,
@@ -22,7 +22,7 @@ export async function main() {
     authMethods: [],
     jsParams: {
       dataToSign: TO_SIGN,
-      publicKey: LITCONFIG.PKP_PUBKEY,
+      publicKey: globalThis.LitCI.PKP_INFO.publicKey,
     },
   });
 

@@ -18,7 +18,7 @@ export async function main() {
   // ==================== Setup ====================
 
   const pkpSignRes = await client?.executeJs({
-    authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+    authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
     authMethods: [],
     code: `(async () => {
         const sigShare = await LitActions.signEcdsa({
@@ -30,7 +30,7 @@ export async function main() {
       })();`,
     jsParams: {
       toSign: TO_SIGN,
-      publicKey: LITCONFIG.PKP_PUBKEY,
+      publicKey: globalThis.LitCI.PKP_INFO.publicKey,
     },
   });
 
