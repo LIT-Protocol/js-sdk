@@ -3,6 +3,7 @@ import LITCONFIG from '../lit.config.json' assert { type: 'json' };
 import { fail } from '../tools/scripts/utils.mjs';
 import {LitContracts} from "@lit-protocol/contracts-sdk";
 import {ethers} from "ethers";
+import * as siwe from 'siwe';
 
 const network = process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork;
 const debug = process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug;
@@ -26,25 +27,51 @@ if (LITCONFIG.CONTROLLER_AUTHSIG === undefined) {
   fail('Controller authSig cannot be empty');
 }
 
+const provider = new ethers.providers.JsonRpcProvider(
+  LITCONFIG.CHRONICLE_RPC
+);
+const wallet = new ethers.Wallet(LITCONFIG.CONTROLLER_PRIVATE_KEY, provider);
+const address = ethers.utils.getAddress(await wallet.getAddress());
+
+// Craft the SIWE message
+const domain = 'localhost';
+const origin = 'https://localhost/login';
+const statement =
+  'This is a test statement.  You can put anything you want here.';
+const siweMessage = new siwe.SiweMessage({
+  domain,
+  address: address,
+  statement,
+  uri: origin,
+  version: '1',
+  chainId: 1,
+  expirationTime: new Date(Date.now() + 1000 * 60).toISOString()
+});
+const messageToSign = siweMessage.prepareMessage();
+
+// Sign the message and format the authSig
+const signature = await wallet.signMessage(messageToSign);
+
+const authSig = {
+  sig: signature,
+  derivedVia: 'web3.eth.personal.sign',
+  signedMessage: messageToSign,
+  address: address,
+};
+console.log("generated siwe for test run: ", authSig);
+
 globalThis.LitCI = {};
 globalThis.LitCI.network = network;
 globalThis.LitCI.debug = debug;
 globalThis.LitCI.sevAttestation = checkSevAttestation;
+globalThis.LitCI.CONTROLLER_AUTHSIG = authSig;
 
-
-// todo: fund the wallet with cayenne token contract tokens
-// right now we are using a pkp preminted on cayenne
-// but for internalDev, the pkp will be JIT created
 if (network === 'cayenne') {
   globalThis.LitCI.PKP_INFO = {};
   globalThis.LitCI.PKP_INFO.publicKey = LITCONFIG.PKP_PUBKEY;
-  globalThis.LitCI.CONTROLLER_AUTHSIG = LITCONFIG.CONTROLLER_AUTHSIG;
   globalThis.LitCI.CONTROLLER_AUTHSIG_2 = LITCONFIG.CONTROLLER_AUTHSIG_2;
-  const provider = new ethers.providers.JsonRpcProvider(
-    LITCONFIG.CHRONICLE_RPC
-  );
   let contractClient = new LitContracts({
-    signer: new ethers.Wallet(LITCONFIG.CONTROLLER_PRIVATE_KEY, provider),
+    signer: wallet,
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
     network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork, 
   });
@@ -56,13 +83,9 @@ if (network === 'cayenne') {
 
   let pubKey = await contractClient.pkpPermissionsContract.read.getPubkey(tokenId);
   globalThis.LitCI.PKP_INFO.publicKey2 = pubKey;
-} else if (network === 'internalDev') {
-  const provider = new ethers.providers.JsonRpcProvider(
-    LITCONFIG.CHRONICLE_RPC
-  );
-  
+} else if (network === 'internalDev') {  
   let contractClient = new LitContracts({
-    signer: new ethers.Wallet(LITCONFIG.CONTROLLER_PRIVATE_KEY, provider),
+    signer: wallet,
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
     network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
   });
@@ -70,7 +93,6 @@ if (network === 'cayenne') {
   
   let res = await contractClient.pkpNftContractUtils.write.mint();
   globalThis.LitCI.PKP_INFO = res.pkp;
-  globalThis.LitCI.CONTROLLER_AUTHSIG = LITCONFIG.CONTROLLER_AUTHSIG;
 }
 
 // ==================== Success ====================
