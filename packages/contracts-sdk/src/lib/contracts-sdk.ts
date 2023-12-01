@@ -1,7 +1,7 @@
 import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
-import { isBrowser, isNode } from '@lit-protocol/misc';
+import { isBrowser, isNode, log } from '@lit-protocol/misc';
 import { AuthMethod } from '@lit-protocol/types';
 
 let CID: any;
@@ -101,6 +101,7 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
+  network: "cayenne" | "internalDev" = "internalDev";
 
   // ----- autogen:declares:start  -----
   // Generated at 2023-11-07T01:50:52.460Z
@@ -173,6 +174,7 @@ export class LitContracts {
       storeOrUseStorageKey?: boolean;
     };
     debug?: boolean;
+    network?: "cayenne" | "internalDev"
   }) {
     // this.provider = args?.provider;
     this.rpc = args?.rpc;
@@ -374,45 +376,47 @@ export class LitContracts {
       this.log('Your Provider(from signer):', this.provider);
     }
 
+    let addresses: any = await LitContracts.getContractAddresses(this.network);
+    this.log(addresses);
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
 
     this.allowlistContract = {
       read: new ethers.Contract(
-        AllowlistData.address,
-        AllowlistData.abi as any,
+        addresses.Allowlist.address,
+        addresses.Allowlist.abi as any,
         this.provider
       ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
       write: new ethers.Contract(
-        AllowlistData.address,
-        AllowlistData.abi as any,
+        addresses.Allowlist.address,
+        addresses.Allowlist.abi as any,
         this.signer
       ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
     };
 
     this.litTokenContract = {
       read: new ethers.Contract(
-        LITTokenData.address,
-        LITTokenData.abi as any,
+        addresses.LITToken.address,
+        addresses.LITToken.abi as any,
         this.provider
       ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken,
       write: new ethers.Contract(
-        LITTokenData.address,
-        LITTokenData.abi as any,
+        addresses.LITToken.address,
+        addresses.LITToken.abi as any,
         this.signer
       ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken,
     };
 
     this.multisenderContract = {
       read: new ethers.Contract(
-        MultisenderData.address,
-        MultisenderData.abi as any,
+        addresses.Multisender.address,
+        addresses.Multisender.abi as any,
         this.provider
       ) as unknown as multisenderContract.Multisender &
         multisenderContract.Multisender,
       write: new ethers.Contract(
-        MultisenderData.address,
-        MultisenderData.abi as any,
+        addresses.Multisender.address,
+        addresses.Multisender.abi as any,
         this.signer
       ) as unknown as multisenderContract.Multisender &
         multisenderContract.Multisender,
@@ -420,40 +424,40 @@ export class LitContracts {
 
     this.pkpHelperContract = {
       read: new ethers.Contract(
-        PKPHelperData.address,
-        PKPHelperData.abi as any,
+        addresses.PKPHelper.address,
+        addresses.PKPHelper.abi as any,
         this.provider
       ) as unknown as pkpHelperContract.PKPHelper & pkpHelperContract.PKPHelper,
       write: new ethers.Contract(
-        PKPHelperData.address,
-        PKPHelperData.abi as any,
+        addresses.PKPHelper.address,
+        addresses.PKPHelper.abi as any,
         this.signer
       ) as unknown as pkpHelperContract.PKPHelper & pkpHelperContract.PKPHelper,
     };
 
     this.pkpNftContract = {
       read: new ethers.Contract(
-        PKPNFTData.address,
-        PKPNFTData.abi as any,
+        addresses.PKPNFT.address,
+        addresses.PKPNFT.abi as any,
         this.provider
       ) as unknown as pkpNftContract.PKPNFT & pkpNftContract.PKPNFT,
       write: new ethers.Contract(
-        PKPNFTData.address,
-        PKPNFTData.abi as any,
+        addresses.PKPNFT.address,
+        addresses.PKPNFT.abi as any,
         this.signer
       ) as unknown as pkpNftContract.PKPNFT & pkpNftContract.PKPNFT,
     };
 
     this.pkpNftMetadataContract = {
       read: new ethers.Contract(
-        PKPNFTMetadataData.address,
-        PKPNFTMetadataData.abi as any,
+        addresses.PKPNFTMetadata.address,
+        addresses.PKPNFTMetadata.abi as any,
         this.provider
       ) as unknown as pkpNftMetadataContract.PKPNFTMetadata &
         pkpNftMetadataContract.PKPNFTMetadata,
       write: new ethers.Contract(
-        PKPNFTMetadataData.address,
-        PKPNFTMetadataData.abi as any,
+        addresses.PKPNFTMetadata.address,
+        addresses.PKPNFTMetadata.abi as any,
         this.signer
       ) as unknown as pkpNftMetadataContract.PKPNFTMetadata &
         pkpNftMetadataContract.PKPNFTMetadata,
@@ -461,14 +465,14 @@ export class LitContracts {
 
     this.pkpPermissionsContract = {
       read: new ethers.Contract(
-        PKPPermissionsData.address,
-        PKPPermissionsData.abi as any,
+        addresses.PKPPermissions.address,
+        addresses.PKPPermissions.abi as any,
         this.provider
       ) as unknown as pkpPermissionsContract.PKPPermissions &
         pkpPermissionsContract.PKPPermissions,
       write: new ethers.Contract(
-        PKPPermissionsData.address,
-        PKPPermissionsData.abi as any,
+        addresses.PKPPermissions.address,
+        addresses.PKPPermissions.abi as any,
         this.signer
       ) as unknown as pkpPermissionsContract.PKPPermissions &
         pkpPermissionsContract.PKPPermissions,
@@ -476,14 +480,14 @@ export class LitContracts {
 
     this.pubkeyRouterContract = {
       read: new ethers.Contract(
-        PubkeyRouterData.address,
-        PubkeyRouterData.abi as any,
+        addresses.PubkeyRouter.address,
+        addresses.PubkeyRouter.abi as any,
         this.provider
       ) as unknown as pubkeyRouterContract.PubkeyRouter &
         pubkeyRouterContract.PubkeyRouter,
       write: new ethers.Contract(
-        PubkeyRouterData.address,
-        PubkeyRouterData.abi as any,
+        addresses.PubkeyRouter.address,
+        addresses.PubkeyRouter.abi as any,
         this.signer
       ) as unknown as pubkeyRouterContract.PubkeyRouter &
         pubkeyRouterContract.PubkeyRouter,
@@ -491,14 +495,14 @@ export class LitContracts {
 
     this.rateLimitNftContract = {
       read: new ethers.Contract(
-        RateLimitNFTData.address,
-        RateLimitNFTData.abi as any,
+        addresses.RateLimitNFT.address,
+        addresses.RateLimitNFT.abi as any,
         this.provider
       ) as unknown as rateLimitNftContract.RateLimitNFT &
         rateLimitNftContract.RateLimitNFT,
       write: new ethers.Contract(
-        RateLimitNFTData.address,
-        RateLimitNFTData.abi as any,
+        addresses.RateLimitNFT.address,
+        addresses.RateLimitNFT.abi as any,
         this.signer
       ) as unknown as rateLimitNftContract.RateLimitNFT &
         rateLimitNftContract.RateLimitNFT,
@@ -506,27 +510,27 @@ export class LitContracts {
 
     this.stakingContract = {
       read: new ethers.Contract(
-        StakingData.address,
-        StakingData.abi as any,
+        addresses.Staking.address,
+        addresses.Staking.abi as any,
         this.provider
       ) as unknown as stakingContract.Staking & stakingContract.Staking,
       write: new ethers.Contract(
-        StakingData.address,
-        StakingData.abi as any,
+        addresses.Staking.address,
+        addresses.Staking.abi as any,
         this.signer
       ) as unknown as stakingContract.Staking & stakingContract.Staking,
     };
 
     this.stakingBalancesContract = {
       read: new ethers.Contract(
-        StakingBalancesData.address,
-        StakingBalancesData.abi as any,
+        addresses.StakingBalances.address,
+        addresses.StakingBalances.abi as any,
         this.provider
       ) as unknown as stakingBalancesContract.StakingBalances &
         stakingBalancesContract.StakingBalances,
       write: new ethers.Contract(
-        StakingBalancesData.address,
-        StakingBalancesData.abi as any,
+        addresses.StakingBalances.address,
+        addresses.StakingBalances.abi as any,
         this.signer
       ) as unknown as stakingBalancesContract.StakingBalances &
         stakingBalancesContract.StakingBalances,
@@ -535,6 +539,8 @@ export class LitContracts {
 
     this.connected = true;
   };
+
+
 
   public static async getStakingContract(network: "cayenne" | "internalDev") {
 
@@ -556,6 +562,7 @@ export class LitContracts {
       }
       // Destructure the data for easier access
       const { config, data: contractData } = data;
+
       const stakingContract = contractData.find((item: { name: string }) => item.name === 'Staking')
         .contracts[0];
       const { address_hash: address, ABI: abi } = stakingContract;
@@ -566,6 +573,99 @@ export class LitContracts {
       }
 
       return new ethers.Contract(address, abi, provider);
+    } else {
+      throw new Error(`Invalid network. Only cayenne and internalDev are supported.`);
+    }
+  }
+
+
+  public static async getContractAddresses(network: "cayenne" | "internalDev") {
+
+    const rpcUrl = DEFAULT_RPC;
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+
+    if (network === 'cayenne') {
+      return new ethers.Contract(StakingData.address, StakingData.abi, provider);
+    } else if (network === 'internalDev') {
+      const INTERNAL_DEV_API =
+        'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
+
+      let data;
+      try {
+        // Fetch and parse the JSON data in one step
+        data = await fetch(INTERNAL_DEV_API).then((res) => res.json());
+      } catch (e: any) {
+        throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
+      }
+      // Destructure the data for easier access
+      const { config, data: contractData } = data;
+      const addresses: any = {};
+      for (const contract of contractData) {
+        switch (contract.name) {
+          case "Allowlist":
+            addresses.Allowlist = {};
+            addresses.Allowlist.address = contract.contracts[0].address_hash;
+            addresses.Allowlist.abi = contract.contracts[0].ABI;
+            break;
+          case 'PKPHelper':
+            addresses.PKPHelper = {}; 
+            addresses.PKPHelper.address = contract.contracts[0].address_hash;
+            addresses.PKPHelper.abi = contract.contracts[0].ABI;
+            break;
+          case 'PKPNFT':
+            addresses.PKPNFT = {}; 
+            addresses.PKPNFT.address = contract.contracts[0].address_hash;
+            addresses.PKPNFT.abi = contract.contracts[0].ABI;
+            break;
+          case 'Staking':
+            addresses.Staking = {};
+            addresses.Staking.address = contract.contracts[0].address_hash;
+            addresses.Staking.abi = contract.contracts[0].ABI;
+          break;
+          case 'RateLimitNFT':
+            addresses.RateLimitNFT = {}; 
+            addresses.RateLimitNFT.address = contract.contracts[0].address_hash;
+            addresses.RateLimitNFT.abi = contract.contracts[0].ABI;
+            break;
+          case 'PKPPermissions':
+            addresses.PKPPermissions = {};
+            addresses.PKPPermissions.address = contract.contracts[0].address_hash;
+            addresses.PKPPermissions.abi = contract.contracts[0].ABI; 
+            break;
+          case 'PKPNFTMetadata':
+            addresses.PKPNFTMetadata = {}; 
+            addresses.PKPNFTMetadata.address = contract.contracts[0].address_hash;
+            addresses.PKPNFTMetadata.abi = contract.contracts[0].ABI; 
+            break;
+          case 'PubkeyRouter':
+            addresses.PubkeyRouter = {};
+            addresses.PubkeyRouter.address = contract.contracts[0].address_hash;
+            addresses.PubkeyRouter.abi = contract.contracts[0].ABI;
+            break;
+          case 'LITToken':
+            addresses.LITToken = {};
+            addresses.LITToken.address = contract.contracts[0].address_hash;
+            addresses.LITToken.abi = contract.contracts[0].ABI;
+            break;
+          case 'StakingBalances':
+            addresses.StakingBalances = {};
+            addresses.StakingBalances.address = contract.contracts[0].address_hash;
+            addresses.StakingBalances.abi = contract.contracts[0].ABI;
+            break;
+          case 'Multisender':
+            addresses.Multisender = {};
+            addresses.Multisender.address = contract.contracts[0].address_hash;
+            addresses.Multisender.abi = contract.contracts[0].ABI;
+            break;
+        }
+      }
+
+      // Validate the required data
+      if (Object.keys(addresses).length < 5) {
+        throw new Error('❌ Required contract data is missing');
+      }
+
+      return addresses;
     } else {
       throw new Error(`Invalid network. Only cayenne and internalDev are supported.`);
     }
@@ -597,7 +697,8 @@ export class LitContracts {
       ]);
 
     const validators = [];
-
+    console.log("active validators", activeValidators);
+    console.log("kicked validators", kickedValidators);
     // Check if active validator set meets the threshold
     if (
       activeValidators.length - kickedValidators.length >=
