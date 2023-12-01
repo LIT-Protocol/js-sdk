@@ -71,20 +71,20 @@ globalThis.LitCI.sevAttestation = checkSevAttestation;
 globalThis.LitCI.CONTROLLER_AUTHSIG = authSig;
 globalThis.LitCI.CONTROLLER_AUTHSIG_2 = LITCONFIG.CONTROLLER_AUTHSIG_2;
 
-if (network === 'cayenne') {
-  globalThis.LitCI.PKP_INFO = {};
-  globalThis.LitCI.PKP_INFO.publicKey = LITCONFIG.PKP_PUBKEY;
-} else if (network === 'internalDev') {  
-  let contractClient = new LitContracts({
-    signer: wallet,
-    debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
-    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
-  });
-  await contractClient.connect();
+
+globalThis.LitCI.PKP_INFO = {};
+globalThis.LitCI.PKP_INFO.publicKey = LITCONFIG.PKP_PUBKEY;
+
+let contractClient = new LitContracts({
+  signer: wallet,
+  debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
+  network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
+});
+await contractClient.connect();
   
-  let res = await contractClient.pkpNftContractUtils.write.mint();
-  globalThis.LitCI.PKP_INFO = res.pkp;
-}
+let res = await contractClient.pkpNftContractUtils.write.mint();
+globalThis.LitCI.PKP_INFO = res.pkp;
+
 
 // ==================== Success ====================
 export { client };

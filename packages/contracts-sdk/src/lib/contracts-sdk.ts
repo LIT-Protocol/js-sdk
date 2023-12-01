@@ -580,95 +580,97 @@ export class LitContracts {
 
 
   public static async getContractAddresses(network: "cayenne" | "internalDev") {
-
-    const rpcUrl = DEFAULT_RPC;
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-
-    if (network === 'cayenne') {
-      return new ethers.Contract(StakingData.address, StakingData.abi, provider);
-    } else if (network === 'internalDev') {
-      const INTERNAL_DEV_API =
-        'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
-
-      let data;
+    let data;
+    const INTERNAL_DEV_API =
+    'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
+    const CAYENNE_API = "https://lit-general-worker.getlit.dev/contract-addresses";
+    if (network == "cayenne") {
       try {
+        // Fetch and parse the JSON data in one step
+        data = await fetch(CAYENNE_API).then((res) => res.json());
+      } catch (e: any) {
+        throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
+      }
+    } else if (network == "internalDev") {
+      try {
+        const INTERNAL_DEV_API =
+        'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
         // Fetch and parse the JSON data in one step
         data = await fetch(INTERNAL_DEV_API).then((res) => res.json());
       } catch (e: any) {
         throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
       }
-      // Destructure the data for easier access
-      const { config, data: contractData } = data;
-      const addresses: any = {};
-      for (const contract of contractData) {
-        switch (contract.name) {
-          case "Allowlist":
-            addresses.Allowlist = {};
-            addresses.Allowlist.address = contract.contracts[0].address_hash;
-            addresses.Allowlist.abi = contract.contracts[0].ABI;
-            break;
-          case 'PKPHelper':
-            addresses.PKPHelper = {}; 
-            addresses.PKPHelper.address = contract.contracts[0].address_hash;
-            addresses.PKPHelper.abi = contract.contracts[0].ABI;
-            break;
-          case 'PKPNFT':
-            addresses.PKPNFT = {}; 
-            addresses.PKPNFT.address = contract.contracts[0].address_hash;
-            addresses.PKPNFT.abi = contract.contracts[0].ABI;
-            break;
-          case 'Staking':
-            addresses.Staking = {};
-            addresses.Staking.address = contract.contracts[0].address_hash;
-            addresses.Staking.abi = contract.contracts[0].ABI;
-          break;
-          case 'RateLimitNFT':
-            addresses.RateLimitNFT = {}; 
-            addresses.RateLimitNFT.address = contract.contracts[0].address_hash;
-            addresses.RateLimitNFT.abi = contract.contracts[0].ABI;
-            break;
-          case 'PKPPermissions':
-            addresses.PKPPermissions = {};
-            addresses.PKPPermissions.address = contract.contracts[0].address_hash;
-            addresses.PKPPermissions.abi = contract.contracts[0].ABI; 
-            break;
-          case 'PKPNFTMetadata':
-            addresses.PKPNFTMetadata = {}; 
-            addresses.PKPNFTMetadata.address = contract.contracts[0].address_hash;
-            addresses.PKPNFTMetadata.abi = contract.contracts[0].ABI; 
-            break;
-          case 'PubkeyRouter':
-            addresses.PubkeyRouter = {};
-            addresses.PubkeyRouter.address = contract.contracts[0].address_hash;
-            addresses.PubkeyRouter.abi = contract.contracts[0].ABI;
-            break;
-          case 'LITToken':
-            addresses.LITToken = {};
-            addresses.LITToken.address = contract.contracts[0].address_hash;
-            addresses.LITToken.abi = contract.contracts[0].ABI;
-            break;
-          case 'StakingBalances':
-            addresses.StakingBalances = {};
-            addresses.StakingBalances.address = contract.contracts[0].address_hash;
-            addresses.StakingBalances.abi = contract.contracts[0].ABI;
-            break;
-          case 'Multisender':
-            addresses.Multisender = {};
-            addresses.Multisender.address = contract.contracts[0].address_hash;
-            addresses.Multisender.abi = contract.contracts[0].ABI;
-            break;
-        }
-      }
-
-      // Validate the required data
-      if (Object.keys(addresses).length < 5) {
-        throw new Error('❌ Required contract data is missing');
-      }
-
-      return addresses;
-    } else {
-      throw new Error(`Invalid network. Only cayenne and internalDev are supported.`);
     }
+
+    // Destructure the data for easier access
+    const { config, data: contractData } = data;
+    const addresses: any = {};
+    for (const contract of contractData) {
+      switch (contract.name) {
+        case "Allowlist":
+          addresses.Allowlist = {};
+          addresses.Allowlist.address = contract.contracts[0].address_hash;
+          addresses.Allowlist.abi = contract.contracts[0].ABI;
+          break;
+        case 'PKPHelper':
+          addresses.PKPHelper = {}; 
+          addresses.PKPHelper.address = contract.contracts[0].address_hash;
+          addresses.PKPHelper.abi = contract.contracts[0].ABI;
+          break;
+        case 'PKPNFT':
+          addresses.PKPNFT = {}; 
+          addresses.PKPNFT.address = contract.contracts[0].address_hash;
+          addresses.PKPNFT.abi = contract.contracts[0].ABI;
+          break;
+        case 'Staking':
+          addresses.Staking = {};
+          addresses.Staking.address = contract.contracts[0].address_hash;
+          addresses.Staking.abi = contract.contracts[0].ABI;
+        break;
+        case 'RateLimitNFT':
+          addresses.RateLimitNFT = {}; 
+          addresses.RateLimitNFT.address = contract.contracts[0].address_hash;
+          addresses.RateLimitNFT.abi = contract.contracts[0].ABI;
+          break;
+        case 'PKPPermissions':
+          addresses.PKPPermissions = {};
+          addresses.PKPPermissions.address = contract.contracts[0].address_hash;
+          addresses.PKPPermissions.abi = contract.contracts[0].ABI; 
+          break;
+        case 'PKPNFTMetadata':
+          addresses.PKPNFTMetadata = {}; 
+          addresses.PKPNFTMetadata.address = contract.contracts[0].address_hash;
+          addresses.PKPNFTMetadata.abi = contract.contracts[0].ABI; 
+          break;
+        case 'PubkeyRouter':
+          addresses.PubkeyRouter = {};
+          addresses.PubkeyRouter.address = contract.contracts[0].address_hash;
+          addresses.PubkeyRouter.abi = contract.contracts[0].ABI;
+          break;
+        case 'LITToken':
+          addresses.LITToken = {};
+          addresses.LITToken.address = contract.contracts[0].address_hash;
+          addresses.LITToken.abi = contract.contracts[0].ABI;
+          break;
+        case 'StakingBalances':
+          addresses.StakingBalances = {};
+          addresses.StakingBalances.address = contract.contracts[0].address_hash;
+          addresses.StakingBalances.abi = contract.contracts[0].ABI;
+          break;
+        case 'Multisender':
+          addresses.Multisender = {};
+          addresses.Multisender.address = contract.contracts[0].address_hash;
+          addresses.Multisender.abi = contract.contracts[0].ABI;
+          break;
+      }
+    }
+
+    // Validate the required data
+    if (Object.keys(addresses).length < 5) {
+      throw new Error('❌ Required contract data is missing');
+    }
+
+    return addresses;
   }
 
   public static getMinNodeCount = async (network: "cayenne" | "internalDev") => {
