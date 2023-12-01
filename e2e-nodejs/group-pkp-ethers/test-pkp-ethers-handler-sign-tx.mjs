@@ -18,6 +18,7 @@ export async function main() {
     controllerAuthMethods: [authMethod],
     pkpPubKey: LITCONFIG.PKP_PUBKEY,
     rpc: LITCONFIG.CHRONICLE_RPC,
+    litNetwork: LITCONFIG.TEST_ENV.litNetwork
   });
 
   await pkpEthersWallet.init();

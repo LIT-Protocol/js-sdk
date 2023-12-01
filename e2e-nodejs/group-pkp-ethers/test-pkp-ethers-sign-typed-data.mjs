@@ -11,6 +11,7 @@ export async function main() {
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
     pkpPubKey: LITCONFIG.PKP_PUBKEY,
     // debug: true,
+    litNetwork: LITCONFIG.TEST_ENV.litNetwork,
   });
 
   await pkpEthersWallet.init();
