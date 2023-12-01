@@ -76,7 +76,7 @@ export async function main() {
         return res;
     })(),
     (async () => {
-        console.time("sig3");
+        console.time("request 3");
         let res = await client.executeJs({
             authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
             code: `(async () => {
@@ -104,11 +104,11 @@ export async function main() {
               publicKey: globalThis.LitCI.PKP_INFO.publicKey,
             },
         });
-        console.timeEnd("sig3");
+        console.timeEnd("request 3");
         return res;
     })(),
     (async () => {
-        console.time("sig4");
+        console.time("request 4");
         let res = await client.executeJs({
             authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
             code: `(async () => {
@@ -136,11 +136,11 @@ export async function main() {
               publicKey: globalThis.LitCI.PKP_INFO.publicKey,
             },
         });
-        console.timeEnd("sig4");
+        console.timeEnd("request 4");
         return res;
     })(),
     (async () => {
-        console.time("sig5");
+        console.time("request 5");
         let res = await client.executeJs({
             authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
             code: `(async () => {
@@ -168,7 +168,7 @@ export async function main() {
               publicKey: globalThis.LitCI.PKP_INFO.publicKey,
             },
         });
-        console.timeEnd("sig5");
+        console.timeEnd("request 5");
         return res;
     })()
   ]);
