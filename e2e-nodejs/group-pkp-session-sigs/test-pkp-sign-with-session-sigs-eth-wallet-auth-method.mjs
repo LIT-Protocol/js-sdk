@@ -14,61 +14,19 @@ const TO_SIGN = ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5]));
 
 export async function main() {
   // ==================== Setup ====================
-
-  const litAuthClient = new LitAuthClient({
-    litRelayConfig: {
-      relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
-    },
-    version: 'V3',
-    litNodeClient: client,
-  });
-
-  // -- eth wallet
-  const authProvider = litAuthClient.initProvider(ProviderType.EthWallet);
+  const sessionKeyPair = client.getSessionKey();
   const authMethod = {
     authMethodType: AuthMethodType.EthWallet,
-    accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG_2),
+    accessToken: JSON.stringify(globalThis.LitCI.CONTROLLER_AUTHSIG_2),
   };
-
-  // -- setting scope for the auth method
-  // https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
-  const options = {
-    permittedAuthMethodScopes: [[1]],
-  };
-
-  let pkps = await authProvider.fetchPKPsThroughRelayer(authMethod);
-
-  if (pkps.length <= 0) {
-    try {
-      const auth = await authProvider.mintPKPThroughRelayer(
-        authMethod,
-        options
-      );
-      console.log('auth', auth);
-    } catch (e) {
-      return fail('Failed to mint PKP');
-    }
-    pkps = await authProvider.fetchPKPsThroughRelayer(authMethod);
-  }
-
-  const pkp = pkps[pkps.length - 1];
-
-  // convert BigNumber to string
-  pkp.tokenId = ethers.BigNumber.from(pkp.tokenId).toString();
-
-  console.log('pkp', pkp);
-
-  const pkpPubKey = pkp.publicKey;
-
-  const sessionKeyPair = client.getSessionKey();
 
   const authNeededCallback = async (params) => {
     const response = await client.signSessionKey({
       sessionKey: sessionKeyPair,
       statement: params.statement,
-      authSig: JSON.parse(authMethod.accessToken), // When this is empty or undefined, it will fail
       authMethods: [authMethod],
-      pkpPublicKey: pkpPubKey,
+      authSig: globalThis.LitCI.CONTROLLER_AUTHSIG_2, // When this is empty or undefined, it will fail
+      pkpPublicKey: `0x${globalThis.LitCI.PKP_INFO.publicKey2}`,
       expiration: params.expiration,
       resources: params.resources,
       chainId: 1,
@@ -95,7 +53,7 @@ export async function main() {
 
   const pkpSignRes = await client?.pkpSign({
     toSign: TO_SIGN,
-    pubKey: pkpPubKey,
+    pubKey: globalThis.LitCI.PKP_INFO.publicKey2,
     sessionSigs: sessionSigs,
     // authMethods: [authMethod], // This is not working!
   });
