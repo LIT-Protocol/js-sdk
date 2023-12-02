@@ -6,12 +6,12 @@ import { client } from '../00-setup.mjs';
 export async function main() {
   // ==================== Test Logic ====================
   const res = await client.executeJs({
-    authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+    authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
     code: `(async () => {
       console.log('hello world')
     })();`,
     jsParams: {
-      publicKey: LITCONFIG.PKP_PUBKEY,
+      publicKey: globalThis.LitCI.PKP_INFO.publicKey,
     },
   });
 

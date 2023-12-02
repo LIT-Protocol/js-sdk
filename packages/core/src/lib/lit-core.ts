@@ -28,6 +28,7 @@ import {
 import {
   isBrowser,
   log,
+  logError,
   logErrorWithRequestId,
   logWithRequestId,
   mostCommonString,
@@ -162,32 +163,34 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the configuration is updated.
    */
   setNewConfig = async (): Promise<void> => {
-    const minNodeCount = await LitContracts.getMinNodeCount(this.config.litNetwork as LitNetwork);
-    const bootstrapUrls = await LitContracts.getValidators(this.config.litNetwork as LitNetwork);
-
-    if (minNodeCount <= 0) {
-      throwError({
-        message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
+    
+    if(this.config.litNetwork !== LitNetwork.Cayenne) {
+      const minNodeCount = await LitContracts.getMinNodeCount(this.config.litNetwork as LitNetwork);
+      const bootstrapUrls = await LitContracts.getValidators(this.config.litNetwork as LitNetwork);
+      log("Bootstrap urls: ", bootstrapUrls);
+      if (minNodeCount <= 0) {
+        throwError({
+          message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
+          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        });
+      }
+  
+      if (bootstrapUrls.length <= 0) {
+        throwError({
+          message: `bootstrapUrls is empty, which is invalid. Please check your network connection and try again.`,
+          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        });
+      }
+  
+      this.config.minNodeCount = minNodeCount;
+    } else {
+      // If the network is cayenne it is a centralized testnet so we use a static config
+      // This is due to staking contracts holding local ip / port contexts which are innacurate to the ip / port exposed to the world
+      this.config.bootstrapUrls = LIT_NETWORKS.cayenne;
+      this.config.minNodeCount = LIT_NETWORKS.cayenne.length == 2 ? 2 : LIT_NETWORKS.cayenne.length / 3;
     }
-
-    if (bootstrapUrls.length <= 0) {
-      throwError({
-        message: `bootstrapUrls is empty, which is invalid. Please check your network connection and try again.`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    // -- Update config
-    // TODO TEMPORARY: only dynamically update when it's set to internalDev
-    if (this.config.litNetwork === LitNetwork.InternalDev) {
-      this.config.bootstrapUrls = bootstrapUrls;
-    }
-
-    this.config.minNodeCount = minNodeCount;
   }
 
 
@@ -285,7 +288,8 @@ export class LitCore {
           if (this.config.checkNodeAttestation) {
             // check attestation
             if (!resp.attestation) {
-              console.error(
+              logErrorWithRequestId(
+                requestId,
                 `Missing attestation in handshake response from ${url}`
               );
               throwError({
@@ -307,9 +311,6 @@ export class LitCore {
                   this.serverKeys[url] = keys;
                 });
               } catch (e) {
-                console.error(
-                  `Lit Node Attestation failed verification for ${url}`
-                );
                 logErrorWithRequestId(requestId, `Lit Node Attestation failed verification for ${url}`);
                 throwError({
                   message: `Lit Node Attestation failed verification for ${url}`,
@@ -386,7 +387,7 @@ export class LitCore {
               }ms.  Could only connect to ${Object.keys(this.serverKeys).length
               } of ${this.config.minNodeCount
               } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
-            log(msg);
+            logErrorWithRequestId(requestId, msg);
             reject(msg);
           }
         }
@@ -787,6 +788,7 @@ export class LitCore {
     sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith
   ): string => {
     if (!this.hdRootPubkeys) {
+      logError('root public keys not found, have you connected to the nodes?');
       throwError({
         message: `root public keys not found, have you connected to the nodes?`,
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,

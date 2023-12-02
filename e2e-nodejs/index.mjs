@@ -47,6 +47,7 @@ async function main() {
   
   🌍 ENVs:
       DEBUG=true yarn test:e2e:node (Enables debug mode)
+      NETOWRK=<cayenne | internalDev> yarn test:e2e:node (Choose your network)
       REAL_TX=true yarn test:e2e:node (Enables real tx that costs gas)
 
   🚩 Flags:

@@ -15,7 +15,10 @@ export async function main() {
     toSign: DATA_TO_SIGN,
     pubKey: LITCONFIG.PKP_PUBKEY,
     authMethod: [],
-    authSig: LITCONFIG.CONTROLLER_AUTHSIG,
+    authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+    pubKey: globalThis.LitCI.PKP_INFO.publicKey,
+    rpc: LITCONFIG.CHRONICLE_RPC,
+    litNetwork: globalThis.LitCI.network,
   });
 
   const recoveredPk = ethers.utils.recoverPublicKey(

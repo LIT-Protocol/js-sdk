@@ -4,7 +4,7 @@ import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { ethRequestHandler } from '@lit-protocol/pkp-ethers';
 import { ethers } from 'ethers';
-
+import { client } from '../00-setup.mjs';
 import {
   SignTypedDataVersion,
   recoverTypedSignature,
@@ -13,9 +13,10 @@ import {
 export async function main() {
   // ==================== Setup ====================
   const pkpEthersWallet = new PKPEthersWallet({
-    controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-    pkpPubKey: LITCONFIG.PKP_PUBKEY,
+    controllerAuthSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+    pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
     rpc: LITCONFIG.CHRONICLE_RPC,
+    litNetwork: globalThis.LitCI.network
   });
 
   await pkpEthersWallet.init();
