@@ -18,6 +18,7 @@ export async function main() {
   // ==================== LitContracts Setup ====================
   const contractClient = new LitContracts({
     signer: controllerWallet,
+    network: LITCONFIG.TEST_ENV.litNetwork
   });
 
   await contractClient.connect();

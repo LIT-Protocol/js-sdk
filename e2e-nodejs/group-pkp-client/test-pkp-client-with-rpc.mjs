@@ -14,6 +14,7 @@ export async function main() {
       eth: LITCONFIG.CHRONICLE_RPC,
       cosmos: LITCONFIG.COSMOS_RPC,
     },
+    litNetwork: LITCONFIG.TEST_ENV.litNetwork,
     cosmosAddressPrefix: 'cosmos',
   });
 

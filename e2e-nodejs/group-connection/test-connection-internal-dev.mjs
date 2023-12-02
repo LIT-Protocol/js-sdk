@@ -1,6 +1,6 @@
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
-import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
+
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 const LIT_NETWORK = 'internalDev';

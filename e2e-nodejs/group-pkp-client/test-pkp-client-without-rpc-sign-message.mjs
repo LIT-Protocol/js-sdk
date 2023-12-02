@@ -9,6 +9,7 @@ export async function main() {
   const pkpClient = new PKPClient({
     controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
     pkpPubKey: LITCONFIG.PKP_PUBKEY,
+    litNetwork: LITCONFIG.TEST_ENV.litNetwork,
     cosmosAddressPrefix: 'cosmos',
   });
 
