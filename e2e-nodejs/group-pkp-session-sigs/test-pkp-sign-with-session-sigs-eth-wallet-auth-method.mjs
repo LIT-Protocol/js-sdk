@@ -14,7 +14,7 @@ const TO_SIGN = ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5]));
 
 export async function main() {
   // ==================== Setup ====================
-  if(globalThis.network === "cayenne") {
+  if(globalThis.LitCI.network === "cayenne") {
     const litAuthClient = new LitAuthClient({
       litRelayConfig: {
         relayApiKey: '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',

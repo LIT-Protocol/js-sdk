@@ -13,7 +13,6 @@ export async function main() {
 
   const sig = await client.pkpSign({
     toSign: DATA_TO_SIGN,
-    pubKey: LITCONFIG.PKP_PUBKEY,
     authMethod: [],
     authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
     pubKey: globalThis.LitCI.PKP_INFO.publicKey,

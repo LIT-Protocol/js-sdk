@@ -1,20 +1,19 @@
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
-import { client } from '../00-setup.mjs';
 import { PKPClient } from '@lit-protocol/pkp-client';
 import { ethers } from 'ethers';
 
 export async function main() {
   // ==================== Setup ====================
   const pkpClient = new PKPClient({
-    controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-    pkpPubKey: LITCONFIG.PKP_PUBKEY,
+    controllerAuthSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+    pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
     rpcs: {
       eth: LITCONFIG.CHRONICLE_RPC,
       cosmos: LITCONFIG.COSMOS_RPC,
     },
-    litNetwork: LITCONFIG.TEST_ENV.litNetwork,
+    litNetwork: globalThis.LitCI.network,
     cosmosAddressPrefix: 'cosmos',
   });
 
