@@ -45,6 +45,7 @@ import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
 import { getAuthIdByAuthMethod } from './auth-utils';
+import { Logger, LogManager } from "@lit-protocol/logger";
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -101,8 +102,9 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
-  network: "cayenne" | "internalDev" = "internalDev";
+  network: "cayenne" | "internalDev";
 
+  static logger: Logger = LogManager.Instance.get('contract-sdk');
   // ----- autogen:declares:start  -----
   // Generated at 2023-11-07T01:50:52.460Z
   allowlistContract: {
@@ -185,7 +187,7 @@ export class LitContracts {
     this.randomPrivateKey = args?.randomPrivatekey ?? false;
     this.options = args?.options;
     this.debug = args?.debug ?? false;
-
+    this.network = args?.network || 'cayenne';
     // if rpc is not specified, use the default rpc
     if (!this.rpc) {
       this.rpc = DEFAULT_RPC;
@@ -214,12 +216,11 @@ export class LitContracts {
   /**
    * Logs a message to the console.
    *
-   * @param {string} str The message to log.
-   * @param {any} [opt] An optional value to log with the message.
+   * @param {any} [args] An optional value to log with the message.
    */
-  log = (str: string, opt?: any) => {
+  log = (...args: any) => {
     if (this.debug) {
-      console.log(`[@lit-protocol/contracts-sdk] ${str}`, opt ?? '');
+      LitContracts.logger.debug(...args);
     }
   };
 
@@ -377,7 +378,7 @@ export class LitContracts {
     }
 
     let addresses: any = await LitContracts.getContractAddresses(this.network);
-    this.log(addresses);
+    this.log("resolved contract addresses for: ", this.network, addresses);
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
 
@@ -542,66 +543,29 @@ export class LitContracts {
 
 
 
-  public static async getStakingContract(network: "cayenne" | "internalDev") {
+  public static async getStakingContract(network: "cayenne" | "internalDev" | "custom" | "localhost") {
+    let data = await LitContracts._resolveContractContext(network);
 
     const rpcUrl = DEFAULT_RPC;
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
-    if (network === 'cayenne') {
-      return new ethers.Contract(StakingData.address, StakingData.abi, provider);
-    } else if (network === 'internalDev') {
-      const INTERNAL_DEV_API =
-        'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
+    const { config, data: contractData } = data;
 
-      let data;
-      try {
-        // Fetch and parse the JSON data in one step
-        data = await fetch(INTERNAL_DEV_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
-      }
-      // Destructure the data for easier access
-      const { config, data: contractData } = data;
+    const stakingContract = contractData.find((item: { name: string }) => item.name === 'Staking')
+      .contracts[0];
+    const { address_hash: address, ABI: abi } = stakingContract;
 
-      const stakingContract = contractData.find((item: { name: string }) => item.name === 'Staking')
-        .contracts[0];
-      const { address_hash: address, ABI: abi } = stakingContract;
-
-      // Validate the required data
-      if (!config || !address || !abi) {
-        throw new Error('❌ Required contract data is missing');
-      }
-
-      return new ethers.Contract(address, abi, provider);
-    } else {
-      throw new Error(`Invalid network. Only cayenne and internalDev are supported.`);
+    // Validate the required data
+    if (!config || !address || !abi) {
+      throw new Error('❌ Required contract data is missing');
     }
+
+    return new ethers.Contract(address, abi, provider);
   }
 
 
-  public static async getContractAddresses(network: "cayenne" | "internalDev") {
-    let data;
-    const INTERNAL_DEV_API =
-    'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
-    const CAYENNE_API = "https://lit-general-worker.getlit.dev/contract-addresses";
-    if (network == "cayenne") {
-      try {
-        // Fetch and parse the JSON data in one step
-        data = await fetch(CAYENNE_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
-      }
-    } else if (network == "internalDev") {
-      try {
-        const INTERNAL_DEV_API =
-        'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
-        // Fetch and parse the JSON data in one step
-        data = await fetch(INTERNAL_DEV_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
-      }
-    }
-
+  public static async getContractAddresses(network:  "cayenne" | "internalDev" | "custom" | "localhost") {
+    const data = await LitContracts._resolveContractContext(network);
     // Destructure the data for easier access
     const { config, data: contractData } = data;
     const addresses: any = {};
@@ -673,7 +637,7 @@ export class LitContracts {
     return addresses;
   }
 
-  public static getMinNodeCount = async (network: "cayenne" | "internalDev") => {
+  public static getMinNodeCount = async (network:  "cayenne" | "internalDev" | "custom" | "localhost") => {
 
     const contract = await LitContracts.getStakingContract(network);
 
@@ -686,7 +650,7 @@ export class LitContracts {
     return minNodeCount;
   }
 
-  public static getValidators = async (network: "cayenne" | "internalDev"): Promise<string[]> => {
+  public static getValidators = async (network: "cayenne" | "internalDev" | "custom" | "localhost"): Promise<string[]> => {
 
     const contract = await LitContracts.getStakingContract(network);
 
@@ -699,8 +663,8 @@ export class LitContracts {
       ]);
 
     const validators = [];
-    console.log("active validators", activeValidators);
-    console.log("kicked validators", kickedValidators);
+    LitContracts.logger.debug("active validators", activeValidators);
+    LitContracts.logger.debug("kicked validators", kickedValidators);
     // Check if active validator set meets the threshold
     if (
       activeValidators.length - kickedValidators.length >=
@@ -711,7 +675,7 @@ export class LitContracts {
         validators.push(validator);
       }
     } else {
-      console.log('❌ Active validator set does not meet the threshold');
+      LitContracts.logger.error('❌ Active validator set does not meet the threshold');
     }
 
     // remove kicked validators in active validators
@@ -730,6 +694,30 @@ export class LitContracts {
     return networks;
   };
   
+  private static async _resolveContractContext(network:  "cayenne" | "internalDev" | "custom" | "localhost") {
+    let data;
+    const INTERNAL_DEV_API =
+    'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
+    const CAYENNE_API = "https://lit-general-worker.getlit.dev/contract-addresses";
+    if (network === "cayenne") {
+      try {
+        // Fetch and parse the JSON data in one step
+        data = await fetch(CAYENNE_API).then((res) => res.json());
+      } catch (e: any) {
+        throw new Error(`Error fetching data from ${CAYENNE_API}: ${e.toString()}`);
+      }
+    } else if (network === "internalDev") {
+      try {
+        // Fetch and parse the JSON data in one step
+        data = await fetch(INTERNAL_DEV_API).then((res) => res.json());
+      } catch (e: any) {
+        throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
+      }
+    }
+    console.log("contract data: ", data);
+    return data;
+  }
+
   mintWithAuth = async ({
     authMethod,
     scopes,
