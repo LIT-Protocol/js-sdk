@@ -1,9 +1,7 @@
-import { LitNodeClient, uint8arrayFromString } from '@lit-protocol/lit-node-client';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import LITCONFIG from '../lit.config.json' assert { type: 'json' };
-import { fail, formatNxLikeLine } from '../tools/scripts/utils.mjs';
-import {LitContracts} from "@lit-protocol/contracts-sdk";
-import {ethers} from "ethers";
-import * as siwe from 'siwe';
+import { fail } from '../tools/scripts/utils.mjs';
+
 
 const client = new LitNodeClient({
   litNetwork: globalThis.LitCI.network,

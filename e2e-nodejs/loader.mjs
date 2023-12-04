@@ -1,5 +1,4 @@
 import LITCONFIG from '../lit.config.json' assert { type: 'json' };
-import { fail, formatNxLikeLine, greenLog } from '../tools/scripts/utils.mjs';
 import {LitContracts} from "@lit-protocol/contracts-sdk";
 import {ethers} from "ethers";
 import * as siwe from 'siwe';
