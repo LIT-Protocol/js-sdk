@@ -1,0 +1,72 @@
+import LITCONFIG from '../lit.config.json' assert { type: 'json' };
+import { fail, formatNxLikeLine, greenLog } from '../tools/scripts/utils.mjs';
+import {LitContracts} from "@lit-protocol/contracts-sdk";
+import {ethers} from "ethers";
+import * as siwe from 'siwe';
+
+// ==================== ENV Loading ====================
+const network = process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork;
+const debug = process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug;
+const minNodeCount = LITCONFIG.TEST_ENV.minNodeCount;
+const checkSevAttestation = process.env.CHECK_SEV ?? false;
+const mintNew = process.env.MINT_NEW  ?? false;
+
+// ==================== SIWE Gen ====================
+const provider = new ethers.providers.JsonRpcProvider(
+  LITCONFIG.CHRONICLE_RPC
+);
+
+const wallet = new ethers.Wallet(LITCONFIG.CONTROLLER_PRIVATE_KEY, provider);
+const address = ethers.utils.getAddress(await wallet.getAddress());
+
+// Craft the SIWE message
+const domain = 'localhost';
+const origin = 'https://localhost/login';
+const statement =
+  'This is a test statement.  You can put anything you want here.';
+const siweMessage = new siwe.SiweMessage({
+  domain,
+  address: address,
+  statement,
+  uri: origin,
+  version: '1',
+  chainId: 1,
+  expirationTime: new Date(Date.now() + 1000 * 60).toISOString()
+});
+const messageToSign = siweMessage.prepareMessage();
+
+// Sign the message and format the authSig
+const signature = await wallet.signMessage(messageToSign);
+
+const authSig = {
+  sig: signature,
+  derivedVia: 'web3.eth.personal.sign',
+  signedMessage: messageToSign,
+  address: address,
+};
+
+// ==================== Global Vars ====================
+globalThis.LitCI = {};
+globalThis.LitCI.network = network;
+globalThis.LitCI.debug = debug;
+globalThis.LitCI.sevAttestation = checkSevAttestation;
+globalThis.LitCI.CONTROLLER_AUTHSIG = authSig;
+globalThis.LitCI.CONTROLLER_AUTHSIG_2 = LITCONFIG.CONTROLLER_AUTHSIG_2;
+
+
+globalThis.LitCI.PKP_INFO = {};
+globalThis.LitCI.PKP_INFO.publicKey = LITCONFIG.PKP_PUBKEY;
+if (mintNew) {
+  let contractClient = new LitContracts({
+    signer: wallet,
+    debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
+    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
+  });
+  await contractClient.connect();
+  let res = await contractClient.pkpNftContractUtils.write.mint();
+  
+  globalThis.LitCI.PKP_INFO = res.pkp;
+}
+
+console.log("");
+console.log(globalThis.LitCI); 
