@@ -11,7 +11,7 @@ const ROOT_DIR = path.resolve(__dirname, '../');
 const DIR = ROOT_DIR + '/e2e-nodejs/';
 const ENV_LOADER_PATH = path.resolve(__dirname, 'loader.mjs');
 
-const IGNORE_LIST = ['index.mjs', 'template.mjs', '00-setup.mjs'];
+const IGNORE_LIST = ['index.mjs', 'template.mjs', '00-setup.mjs', 'loader.mjs', 'README.md'];
 const IGNORE_DIRS = ['0_manual-tests'];
 /**
  * Function to get all files from the directory excluding 'index'
@@ -96,7 +96,16 @@ async function main() {
   let logs = [];
 
   // load enviorment context and init global state
-  await import(ENV_LOADER_PATH);
+  try {
+    await import('./loader.mjs');
+  } catch(e) {
+    errorCounter += 1;
+    logs.push(
+      `-------------------
+- [${errorCounter}] Error happened in enviorment loading, see below for details 👇 \n${e}`
+    );
+    console.log(e);
+  }
   
   // -- async mode
   if (mode === 'async') {

@@ -7,12 +7,11 @@ import * as siwe from 'siwe';
 // ==================== ENV Loading ====================
 const network = process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork;
 const debug = process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug;
-const minNodeCount = LITCONFIG.TEST_ENV.minNodeCount;
 const checkSevAttestation = process.env.CHECK_SEV ?? false;
-const mintNew = process.env.MINT_NEW  ?? false;
+const mintNew = process.env.MINT_NEW  ?? true;
 
 // ==================== SIWE Gen ====================
-const provider = new ethers.providers.JsonRpcProvider(
+const provider = new ethers.przoviders.JsonRpcProvider(
   LITCONFIG.CHRONICLE_RPC
 );
 
@@ -64,9 +63,9 @@ if (mintNew) {
   });
   await contractClient.connect();
   let res = await contractClient.pkpNftContractUtils.write.mint();
-  
+
   globalThis.LitCI.PKP_INFO = res.pkp;
 }
 
-console.log("");
+console.log("Enviorment Arguments");
 console.log(globalThis.LitCI); 
