@@ -184,12 +184,12 @@ export class LitCore {
         });
       }
   
-      this.config.minNodeCount = minNodeCount;
+      this.config.minNodeCount = parseInt(minNodeCount, 10);
     } else if (this.config.litNetwork === LitNetwork.Cayenne){
       // If the network is cayenne it is a centralized testnet so we use a static config
       // This is due to staking contracts holding local ip / port contexts which are innacurate to the ip / port exposed to the world
       this.config.bootstrapUrls = LIT_NETWORKS.cayenne;
-      this.config.minNodeCount = LIT_NETWORKS.cayenne.length == 2 ? 2 : LIT_NETWORKS.cayenne.length / 3;
+      this.config.minNodeCount = LIT_NETWORKS.cayenne.length == 2 ? 2 : (LIT_NETWORKS.cayenne.length * 2) / 3;
     }
   }
 
