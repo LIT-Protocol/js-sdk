@@ -544,23 +544,22 @@ export class LitContracts {
 
 
   public static async getStakingContract(network: "cayenne" | "internalDev" | "custom" | "localhost") {
-    let data = await LitContracts._resolveContractContext(network);
+    let manifest = await LitContracts._resolveContractContext(network);
 
     const rpcUrl = DEFAULT_RPC;
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
-    const { config, data: contractData } = data;
+    const { config, data: contractData } = manifest;
 
-    const stakingContract = contractData.find((item: { name: string }) => item.name === 'Staking')
-      .contracts[0];
-    const { address_hash: address, ABI: abi } = stakingContract;
+    const stakingContract = contractData.find((item: { name: string }) => item.name === 'Staking').contracts[0];
+    const { address_hash, ABI } = stakingContract;
 
     // Validate the required data
-    if (!config || !address || !abi) {
+    if (!address_hash || !ABI) {
       throw new Error('❌ Required contract data is missing');
     }
 
-    return new ethers.Contract(address, abi, provider);
+    return new ethers.Contract(address_hash, ABI, provider);
   }
 
 
@@ -663,8 +662,7 @@ export class LitContracts {
       ]);
 
     const validators = [];
-    LitContracts.logger.debug("active validators", activeValidators);
-    LitContracts.logger.debug("kicked validators", kickedValidators);
+
     // Check if active validator set meets the threshold
     if (
       activeValidators.length - kickedValidators.length >=
@@ -714,7 +712,7 @@ export class LitContracts {
         throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
       }
     }
-    console.log("contract data: ", data);
+    
     return data;
   }
 
