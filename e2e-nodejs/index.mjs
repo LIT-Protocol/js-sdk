@@ -95,14 +95,14 @@ async function main() {
   let errorCounter = 0;
   let logs = [];
 
-  // load enviorment context and init global state
+  // load environment context and init global state
   try {
     await import('./loader.mjs');
   } catch(e) {
     errorCounter += 1;
     logs.push(
       `-------------------
-- [${errorCounter}] Error happened in enviorment loading, see below for details 👇 \n${e}`
+- [${errorCounter}] Error happened in environment loading, see below for details 👇 \n${e}`
     );
     console.log(e);
   }

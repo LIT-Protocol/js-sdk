@@ -94,5 +94,5 @@ if (mintNew) {
   };
 }
 
-console.log("Enviorment Arguments");
+console.log("environment Arguments");
 console.log(globalThis.LitCI); 
