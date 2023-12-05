@@ -92,8 +92,6 @@ if (mintNew) {
     authMethodId,
     authMethodType: 1
   };
-
-  console.log("auth methd pkp eth address", ethAddr);
 }
 
 console.log("Enviorment Arguments");
