@@ -59,9 +59,9 @@ export async function main() {
     return fail('signature should be defined');
   }
 
-  if (recoveredAddress !== LITCONFIG.PKP_ETH_ADDRESS) {
+  if (recoveredAddress !== globalThis.LitCI.PKP_INFO.ethAddress) {
     return fail(
-      `recoveredAddres should be ${LITCONFIG.PKP_ETH_ADDRESS}, got ${recoveredAddress}`
+      `recoveredAddres should be ${globalThis.LitCI.PKP_INFO.ethAddress}, got ${recoveredAddress}`
     );
   }
 

@@ -41,7 +41,7 @@ export async function main() {
   });
 
   // ==================== Post-Validation ====================
-  if (Object.keys(res.signatures).length !== 2) {
+  if (!res.signatures || Object.keys(res.signatures).length !== 2) {
     return fail(
       `should have 2 signatures but received ${
         Object.keys(res.signatures).length

@@ -42,7 +42,6 @@ export async function main() {
       }
     }
   );
-
   // ==================== Success ====================
   return success('Lit Action should log sign x1 sig');
 }

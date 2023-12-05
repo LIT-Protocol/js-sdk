@@ -4,9 +4,7 @@ import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { client } from '../00-setup.mjs';
 import { ethers } from 'ethers';
 
-const DATA_TO_SIGN = ethers.utils.arrayify(
-  ethers.utils.keccak256([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])
-);
+const DATA_TO_SIGN = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("Hello world")));
 
 export async function main() {
   // ==================== Test Logic ====================
@@ -35,7 +33,7 @@ export async function main() {
     }
   });
 
-  if (recoveredAddr !== LITCONFIG.PKP_ETH_ADDRESS) {
+  if (recoveredAddr !== globalThis.LitCI.PKP_INFO.ethAddress) {
     return fail(
       `recovered address ${recoveredAddr} should be ${LITCONFIG.PKP_ETH_ADDRESS}`
     );
