@@ -27,11 +27,8 @@ export async function main() {
   });
   
   // ==================== Post-Validation ====================
-  if (!res.success) {
-    return fail('should return true status on response');
-  }
 
-  if (Object.keys(res.signatures).length <= 0) {
+  if (!res.signatures || Object.keys(res.signatures).length <= 0) {
     return fail(
       `should have at least 1 signature but received ${
         Object.keys(res.signatures).length

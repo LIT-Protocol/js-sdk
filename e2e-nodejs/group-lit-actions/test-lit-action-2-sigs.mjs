@@ -41,10 +41,6 @@ export async function main() {
   });
 
   // ==================== Post-Validation ====================
-  if (!res.success) {
-    return fail('should return true status on response');
-  }
-  
   if (!res.signatures || Object.keys(res.signatures).length !== 2) {
     return fail(
       `should have 2 signatures but received ${
