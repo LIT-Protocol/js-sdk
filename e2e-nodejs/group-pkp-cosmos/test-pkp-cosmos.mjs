@@ -7,8 +7,8 @@ import { PKPCosmosWallet } from '@lit-protocol/pkp-cosmos';
 export async function main() {
   // ==================== Setup ====================
   const cosmosWallet = new PKPCosmosWallet({
-    controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-    pkpPubKey: LITCONFIG.PKP_PUBKEY,
+    controllerAuthSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+    pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
     rpc: LITCONFIG.COSMOS_RPC,
     // debug: true,
     addressPrefix: 'cosmos',
@@ -24,10 +24,16 @@ export async function main() {
     return fail('litNodeClient should be ready');
   }
 
-  if (pkpAccount.address !== LITCONFIG.PKP_COSMOS_ADDRESS) {
-    return fail(`Expecting PKP address to be ${LITCONFIG.PKP_COSMOS_ADDRESS}`);
+  if (!pkpAccount.address.includes('cosmos')) {
+    return fail(`expecting account address to include "cosmos"`);
+  }
+  if (pkpAccount.algo != 'secp256k1') {
+    return fail('algo does not match: ', 'secp256k1');
   }
 
+  if (pkpAccount.pubkey.length !== 33) {
+    return fail('pubkey buffer expected length is incorrect recieved: ', pkpAccount.pubkey.length, "expected", 33);
+  }
   // ==================== Success ====================
   return success('PKPCosmosWallet should be able to getAccounts');
 }

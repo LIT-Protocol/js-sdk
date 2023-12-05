@@ -12,8 +12,8 @@ export async function main() {
 
   const suiWallet = new PKPSuiWallet(
     {
-      controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-      pkpPubKey: LITCONFIG.PKP_PUBKEY,
+      controllerAuthSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+      pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
     },
     provider
   );

@@ -8,9 +8,9 @@ import { ethers } from 'ethers';
 export async function main() {
   // ==================== Setup ====================
   const pkpClient = new PKPClient({
-    controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-    pkpPubKey: LITCONFIG.PKP_PUBKEY,
-    litNetwork: LITCONFIG.TEST_ENV.litNetwork,
+    controllerAuthSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+    pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
+    litNetwork: globalThis.LitCI.network,
     cosmosAddressPrefix: 'cosmos',
   });
 
@@ -56,9 +56,9 @@ export async function main() {
     return fail('signature should be defined');
   }
 
-  if (recoveredAddress !== LITCONFIG.PKP_ETH_ADDRESS) {
+  if (recoveredAddress !== globalThis.LitCI.PKP_INFO.ethAddress) {
     return fail(
-      `recoveredAddres should be ${LITCONFIG.PKP_ETH_ADDRESS}, got ${recoveredAddress}`
+      `recoveredAddres should be ${globalThis.LitCI.PKP_INFO.ethAddress}, got ${recoveredAddress}`
     );
   }
   // ==================== Success ====================

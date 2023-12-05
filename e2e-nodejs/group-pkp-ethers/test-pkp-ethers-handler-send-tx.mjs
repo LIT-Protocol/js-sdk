@@ -20,8 +20,8 @@ export async function main() {
   // ==================== Test Logic ====================
 
   // Transaction to sign and send
-  const from = LITCONFIG.PKP_ETH_ADDRESS;
-  const to = LITCONFIG.PKP_ETH_ADDRESS;
+  const from = globalThis.LitCI.PKP_INFO.ethAddress;
+  const to = globalThis.LitCI.PKP_INFO.ethAddress;
   const gasLimit = ethers.BigNumber.from('21000');
   const value = ethers.BigNumber.from('0');
   const data = '0x';

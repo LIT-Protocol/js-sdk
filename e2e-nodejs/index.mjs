@@ -9,8 +9,9 @@ const __dirname = path.dirname(__filename);
 
 const ROOT_DIR = path.resolve(__dirname, '../');
 const DIR = ROOT_DIR + '/e2e-nodejs/';
+const ENV_LOADER_PATH = path.resolve(__dirname, 'loader.mjs');
 
-const IGNORE_LIST = ['index.mjs', 'template.mjs', '00-setup.mjs'];
+const IGNORE_LIST = ['index.mjs', 'template.mjs', '00-setup.mjs', 'loader.mjs', 'README.md'];
 const IGNORE_DIRS = ['0_manual-tests'];
 /**
  * Function to get all files from the directory excluding 'index'
@@ -42,13 +43,15 @@ const getFilesFromDir = (dir) => {
 };
 
 async function main() {
-  console.log(`  
+  greenLog(`  
   💡 Usage: yarn test:e2e:node
   
   🌍 ENVs:
-      DEBUG=true yarn test:e2e:node (Enables debug mode)
-      NETOWRK=<cayenne | internalDev> yarn test:e2e:node (Choose your network)
-      REAL_TX=true yarn test:e2e:node (Enables real tx that costs gas)
+     DEBUG=true (Enables debug mode)
+     NETOWRK=<cayenne | internalDev> (Choose your network)
+     CHECK_SEV=true (enable sev attestation checks)
+     MINT_NEW=true (mint new pkp resources for test run)
+     REAL_TX=true yarn (Enables real tx that costs gas)
 
   🚩 Flags:
       --filter=<keyword> (Filters files by keyword)
@@ -92,6 +95,18 @@ async function main() {
   let errorCounter = 0;
   let logs = [];
 
+  // load environment context and init global state
+  try {
+    await import('./loader.mjs');
+  } catch(e) {
+    errorCounter += 1;
+    logs.push(
+      `-------------------
+- [${errorCounter}] Error happened in environment loading, see below for details 👇 \n${e}`
+    );
+    console.log(e);
+  }
+  
   // -- async mode
   if (mode === 'async') {
     for (const file of files) {
