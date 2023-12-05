@@ -640,8 +640,7 @@ export class LitContracts {
 
     const contract = await LitContracts.getStakingContract(network);
 
-    const configs = await contract['config']();
-    const minNodeCount = configs.minimumValidatorCount.toString();
+    const minNodeCount = await contract['currentValidatorCountForConsensus']();
 
     if (!minNodeCount) {
       throw new Error('❌ Minimum validator count is not set');
