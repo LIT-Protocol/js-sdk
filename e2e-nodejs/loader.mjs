@@ -30,7 +30,7 @@ const siweMessage = new siwe.SiweMessage({
   uri: origin,
   version: '1',
   chainId: 1,
-  expirationTime: new Date(Date.now() + 1000 * 60).toISOString()
+  expirationTime: new Date(Date.now() + 1000 * 60 * 7).toISOString()
 });
 const messageToSign = siweMessage.prepareMessage();
 
