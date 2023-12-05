@@ -96,5 +96,5 @@ if (mintNew) {
   console.log("auth methd pkp eth address", ethAddr);
 }
 
-console.log("Enviorment Arguments");
+console.log("environment Arguments");
 console.log(globalThis.LitCI); 

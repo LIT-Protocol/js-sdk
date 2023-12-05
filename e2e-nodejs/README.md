@@ -1,6 +1,6 @@
 # End to End NodeJS testing
 
-End to end testing enviorment for different operations on the Lit Network
+End to end testing environment for different operations on the Lit Network
 - Message singing
 - Transaction signing
 - Session signature generation / signing
@@ -21,7 +21,7 @@ Each test suite is contained in a single folder which is called a `group` groups
 In the above example, only tests in the `group-lit-actions` will run as filter flags omit the `group` prefix
 
 
-## Enviorment Configuration
+## environment Configuration
 ```
 NETWORK= cayenne | internalDev #Configures the network context for the test run
 DEBUG = true | false #Turns on or off logging
