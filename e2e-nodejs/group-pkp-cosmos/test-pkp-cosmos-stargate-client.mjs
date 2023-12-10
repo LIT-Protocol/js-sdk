@@ -18,8 +18,8 @@ const TX_HASH =
 export async function main() {
   // ==================== Setup ====================
   const cosmosWallet = new PKPCosmosWallet({
-    controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-    pkpPubKey: LITCONFIG.PKP_PUBKEY,
+    controllerAuthSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+    pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
     rpc: LITCONFIG.COSMOS_RPC,
     // debug: true,
     addressPrefix: 'cosmos',

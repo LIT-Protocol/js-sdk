@@ -75,7 +75,7 @@ export async function main() {
     signer: pkpEthersWallet,
     payload: {
       method: 'eth_signTypedData_v4',
-      params: [LITCONFIG.PKP_ETH_ADDRESS, JSON.stringify(msgParams)],
+      params: [globalThis.LitCI.PKP_INFO.ethAddress, JSON.stringify(msgParams)],
     },
   });
 
@@ -92,7 +92,7 @@ export async function main() {
     return fail('signature should be 132 characters long');
   }
 
-  if (recoveredAddr.toLowerCase() !== LITCONFIG.PKP_ETH_ADDRESS.toLowerCase()) {
+  if (recoveredAddr.toLowerCase() !== globalThis.LitCI.PKP_INFO.ethAddress.toLowerCase()) {
     return fail(
       `recoveredAddr ${recoveredAddr} should be ${LITCONFIG.PKP_ETH_ADDRESS}`
     );

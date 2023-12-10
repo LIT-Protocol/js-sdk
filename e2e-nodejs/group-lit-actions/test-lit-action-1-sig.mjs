@@ -27,7 +27,8 @@ export async function main() {
   });
   
   // ==================== Post-Validation ====================
-  if (Object.keys(res.signatures).length <= 0) {
+
+  if (!res.signatures || Object.keys(res.signatures).length <= 0) {
     return fail(
       `should have at least 1 signature but received ${
         Object.keys(res.signatures).length
@@ -42,7 +43,6 @@ export async function main() {
       }
     }
   );
-
   // ==================== Success ====================
   return success('Lit Action should log sign x1 sig');
 }

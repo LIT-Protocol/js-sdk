@@ -164,7 +164,7 @@ export class LitCore {
    */
   setNewConfig = async (): Promise<void> => {
     
-    if(this.config.litNetwork !== LitNetwork.Cayenne) {
+    if(this.config.litNetwork === LitNetwork.InternalDev) {
       const minNodeCount = await LitContracts.getMinNodeCount(this.config.litNetwork as LitNetwork);
       const bootstrapUrls = await LitContracts.getValidators(this.config.litNetwork as LitNetwork);
       log("Bootstrap urls: ", bootstrapUrls);
@@ -184,12 +184,12 @@ export class LitCore {
         });
       }
   
-      this.config.minNodeCount = minNodeCount;
-    } else {
+      this.config.minNodeCount = parseInt(minNodeCount, 10);
+    } else if (this.config.litNetwork === LitNetwork.Cayenne){
       // If the network is cayenne it is a centralized testnet so we use a static config
       // This is due to staking contracts holding local ip / port contexts which are innacurate to the ip / port exposed to the world
       this.config.bootstrapUrls = LIT_NETWORKS.cayenne;
-      this.config.minNodeCount = LIT_NETWORKS.cayenne.length == 2 ? 2 : LIT_NETWORKS.cayenne.length / 3;
+      this.config.minNodeCount = LIT_NETWORKS.cayenne.length == 2 ? 2 : (LIT_NETWORKS.cayenne.length * 2) / 3;
     }
   }
 
@@ -204,14 +204,16 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
    */
     listenForNewEpoch = async (): Promise<void> => {
-      const stakingContract = await LitContracts.getStakingContract(this.config.litNetwork as LitNetwork);
-  
-      stakingContract.on("StateChanged", async (state: StakingStates) => {
-        log(`New state detected: "${state}"`);
-        if (state === StakingStates.NextValidatorSetLocked) {
-          await this.setNewConfig();
-        }
-      });
+      if (this.config.litNetwork === LitNetwork.InternalDev) {
+        const stakingContract = await LitContracts.getStakingContract(this.config.litNetwork as any);
+        log('listening for state change on staking contract: ', stakingContract.address);
+        stakingContract.on("StateChanged", async (state: StakingStates) => {
+          log(`New state detected: "${state}"`);
+          if (state === StakingStates.NextValidatorSetLocked) {
+            await this.setNewConfig();
+          }
+        });
+      }
     };
 
   /**

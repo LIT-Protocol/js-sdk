@@ -1,15 +1,16 @@
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
-
+import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
-const LIT_NETWORK = 'internalDev';
+const LIT_NETWORK = 'cayenne';
 
 export async function main() {
   // ==================== Test Logic ====================
   const client = new LitNodeClient({
-    litNetwork: 'internalDev',
-    checkNodeAttestation: true
+    litNetwork: globalThis.LitCI.network,
+    debug: LITCONFIG.TEST_ENV.debug,
+    checkNodeAttestation: globalThis.LitCI.sevAttestation
   });
   await client.connect();
 
@@ -17,12 +18,12 @@ export async function main() {
   if (!client.ready) {
     return fail('client not ready');
   }
-  if (client.config.litNetwork !== LIT_NETWORK) {
-    return fail(`client not connected to ${LIT_NETWORK}`);
+  if (client.config.litNetwork !== globalThis.LitCI.network) {
+    return fail(`client not connected to ${globalThis.LitCI.network}`);
   }
 
   // ==================== Success ====================
-  return success(`Connected to ${LIT_NETWORK}`);
+  return success(`Connected to ${globalThis.LitCI.network}`);
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });

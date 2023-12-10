@@ -29,7 +29,7 @@ export async function main() {
     signer: pkpEthersWallet,
     payload: {
       method: 'personal_sign',
-      params: [hexMsg, LITCONFIG.PKP_ETH_ADDRESS],
+      params: [hexMsg, globalThis.LitCI.PKP_INFO.ethAddress],
     },
   });
 
@@ -40,7 +40,7 @@ export async function main() {
     return fail('signature should be 132 characters long');
   }
 
-  if (recoveredAddr !== LITCONFIG.PKP_ETH_ADDRESS) {
+  if (recoveredAddr !== globalThis.LitCI.PKP_INFO.ethAddress) {
     return fail(
       `recoveredAddr should be ${LITCONFIG.PKP_ETH_ADDRESS} but got ${recoveredAddr}`
     );

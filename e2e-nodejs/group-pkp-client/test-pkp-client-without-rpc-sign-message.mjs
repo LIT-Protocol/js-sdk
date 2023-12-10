@@ -7,9 +7,9 @@ import { PKPClient } from '@lit-protocol/pkp-client';
 export async function main() {
   // ==================== Setup ====================
   const pkpClient = new PKPClient({
-    controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
-    pkpPubKey: LITCONFIG.PKP_PUBKEY,
-    litNetwork: LITCONFIG.TEST_ENV.litNetwork,
+    controllerAuthSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+    pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
+    litNetwork: globalThis.LitCI.network,
     cosmosAddressPrefix: 'cosmos',
   });
 
