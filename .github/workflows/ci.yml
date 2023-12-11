@@ -49,7 +49,7 @@ jobs:
         run: yarn build
       - uses: nrwl/nx-set-shas@v3
       - name: Link packages
-        run: chmod +x dev.sh && ./dev.sh
+        run: chmod +x ${{ github.action_path }}/dev.sh && ./${{ github.action_path }}/dev.sh
       - name: Run lit action tests
         if: steps.build.outputs.exit_code == 0
         run: yarn test:e2e:node --group=connection
