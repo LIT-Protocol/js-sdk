@@ -48,6 +48,8 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'master'
+      - name: Build packages
+        run: yarn build
       - name: Run lit action tests
         run: yarn test:e2e:node --group=lit-actions
   e2e-connection:
@@ -72,6 +74,8 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'master'
+      - name: Build packages
+        run: yarn build
       - name: Run lit action tests
         run: yarn test:e2e:node --group=connection
   e2e-auth-methods:
@@ -96,5 +100,7 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'master'
+      - name: Build packages
+        run: yarn build
       - name: Run lit action tests
         run: yarn test:e2e:node --group=pkp-auth-method
