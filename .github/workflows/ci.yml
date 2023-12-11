@@ -22,8 +22,6 @@ jobs:
       - name: Install project dependencies
         run: yarn install
       - uses: nrwl/nx-set-shas@v3
-        with:
-          main-branch-name: 'master'
       - name: Run tests
         run: npx nx test
   e2e-actions:
@@ -46,10 +44,9 @@ jobs:
       - name: Install project dependencies
         run: yarn install
       - uses: nrwl/nx-set-shas@v3
-        with:
-          main-branch-name: 'master'
       - name: Build packages
         run: yarn build
+      - uses: nrwl/nx-set-shas@v3
       - name: Run lit action tests
         run: yarn test:e2e:node --group=lit-actions
   e2e-connection:
@@ -72,10 +69,9 @@ jobs:
       - name: Install project dependencies
         run: yarn install
       - uses: nrwl/nx-set-shas@v3
-        with:
-          main-branch-name: 'master'
       - name: Build packages
         run: yarn build
+      - uses: nrwl/nx-set-shas@v3
       - name: Run lit action tests
         run: yarn test:e2e:node --group=connection
   e2e-auth-methods:
