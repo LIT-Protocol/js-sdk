@@ -281,9 +281,15 @@ export class LitNodeClientNodeJs extends LitCore {
    * @param litResources is an array of LIT resources
    */
   static generateSessionCapabilityObjectWithWildcards = (
-    litResources: Array<ILitResource>
+    litResources: Array<ILitResource>,
+    rateLimitAuthSig?: AuthSig
   ): ISessionCapabilityObject => {
     const sessionCapabilityObject = newSessionCapabilityObject();
+
+    if (rateLimitAuthSig) {
+      sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
+    }
+
     for (const litResource of litResources) {
       sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
     }
@@ -292,10 +298,12 @@ export class LitNodeClientNodeJs extends LitCore {
 
   // backward compatibility
   generateSessionCapabilityObjectWithWildcards = (
-    litResources: Array<ILitResource>
+    litResources: Array<ILitResource>,
+    rateLimitAuthSig: AuthSig
   ): ISessionCapabilityObject => {
     return LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
-      litResources
+      litResources,
+      rateLimitAuthSig,
     );
   };
 
@@ -2337,8 +2345,9 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource),
+        params.rateLimitAuthSig,
+      );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
     let nonce = this.latestBlockhash || generateNonce();
 

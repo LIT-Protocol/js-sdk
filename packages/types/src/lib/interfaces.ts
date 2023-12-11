@@ -571,7 +571,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise {}
+export interface LitNodePromise { }
 
 export interface SendNodeCommand {
   url: string;
@@ -1045,6 +1045,8 @@ export interface GetSessionSigsProps {
 
   // The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
   sessionKey?: any;
+
+  rateLimitAuthSig: AuthSig
 }
 
 export interface AuthCallback {
@@ -1145,7 +1147,7 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export interface PKPEthersWalletProp extends PKPBaseProp {}
+export interface PKPEthersWalletProp extends PKPBaseProp { }
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
@@ -1516,7 +1518,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions {}
+export interface BaseAuthenticateOptions { }
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**

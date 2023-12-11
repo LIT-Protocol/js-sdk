@@ -1,5 +1,5 @@
 import { SiweMessage } from 'siwe';
-
+import { AuthSig } from '@lit-protocol/types';
 export type PlainJSON =
   | boolean
   | number
@@ -127,6 +127,11 @@ export interface ISessionCapabilityObject {
    * resource.
    */
   addAllCapabilitiesForResource(litResource: ILitResource): void;
+
+  /**
+   * The AuthSig they insert would own a rate limit nft and can put restrictions on how it * can be used.
+   */
+  addRateLimitAuthSig(authSig: AuthSig): void;
 }
 
 export interface ILitResource {
