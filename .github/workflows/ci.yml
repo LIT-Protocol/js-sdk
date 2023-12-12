@@ -50,8 +50,8 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
       - name: Link packages
         run: |
-         chmod +x ./dev.sh
-         ./dev.sh
+         chmod +x ./dev
+         ./dev
       - name: Run lit action tests
         if: steps.build.outputs.exit_code == 0
         run: yarn test:e2e:node --group=connection
