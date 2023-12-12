@@ -40,18 +40,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'yarn'
       - name: Install project dependencies
         run: yarn install
-      - uses: nrwl/nx-set-shas@v3
       - name: Build packages
         id: build
         run: yarn build
-      - uses: nrwl/nx-set-shas@v3
-      - name: Link packages
-        run: |
-         chmod +x ./dev
-         ./dev
       - name: Run lit action tests
         if: steps.build.outputs.exit_code == 0
         run: yarn test:e2e:node --group=connection
