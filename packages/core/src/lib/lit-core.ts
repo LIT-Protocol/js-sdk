@@ -26,6 +26,7 @@ import {
 } from '@lit-protocol/constants';
 
 import {
+  bootstrapLogManager,
   isBrowser,
   log,
   logError,
@@ -136,12 +137,7 @@ export class LitCore {
 
     // -- set global variables
     globalThis.litConfig = this.config;
-    globalThis.logManager = LogManager.Instance;
-    globalThis.logManager.withConfig({
-      "condenseLogs": true
-    });
-    globalThis.logManager.setLevel(LogLevel.DEBUG);
-    globalThis.logger = globalThis.logManager.get('core');
+    bootstrapLogManager('core');
   }
   
   // ========== Logger utilities ==========
