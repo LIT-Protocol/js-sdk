@@ -1189,7 +1189,13 @@ export interface LitAuthClientOptions {
    */
   litNodeClient?: any;
 
+  /**
+   * If enable will turn on logging
+   */
+  debug?: boolean;
+
   litOtpConfig?: OtpProviderOptions;
+
 }
 
 export interface OtpSessionResult {
