@@ -20,6 +20,7 @@ import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
 import StytchEmailOtpProvider from './providers/StytchAuthFactorOtp';
 import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
+import { bootstrapLogManager, log } from '@lit-protocol/misc';
 
 /**
  * Class that handles authentication through Lit login
@@ -43,6 +44,11 @@ export class LitAuthClient {
   private providers: Map<string, BaseProvider>;
 
   /**
+   * Configures logging
+   */
+  private debug: boolean;
+
+  /**
    * Create a LitAuthClient instance
    *
    * @param {LitAuthClientOptions} options
@@ -53,7 +59,8 @@ export class LitAuthClient {
    */
   constructor(options?: LitAuthClientOptions) {
     this.providers = new Map();
-
+    bootstrapLogManager('auth-client');
+    this.debug = options?.debug ?? false;
     // Check if custom relay object is provided
     if (options?.customRelay) {
       this.relay = options?.customRelay;
@@ -74,12 +81,15 @@ export class LitAuthClient {
     } else {
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'cayenne',
-        debug: false,
+        debug: options.debug ?? false,
       });
     }
 
     // Set RPC URL
     this.rpcUrl = options?.rpcUrl || 'https://chain-rpc.litprotocol.com/http';
+    this.log('rpc url: ', this.rpcUrl);
+    this.log('relay config: ', options.litRelayConfig);
+    this.log('relay instance: ', this.relay);
   }
 
   /**
@@ -101,7 +111,7 @@ export class LitAuthClient {
     };
 
     let provider: T;
-
+    log('resolving provider of type: ', type);
     switch (type) {
       case 'google':
         provider = new GoogleProvider({
@@ -224,5 +234,11 @@ export class LitAuthClient {
     }
 
     return authId;
+  }
+
+  private log(... args: any) {
+    if (this.debug) {
+      log(... args);
+    }
   }
 }
