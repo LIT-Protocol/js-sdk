@@ -9,16 +9,6 @@ import {
   StytchToken,
 } from '@lit-protocol/types';
 
-export interface EmailAuthFactor {
-  email_address: string;
-  email_id: string;
-  created_at: string;
-  delivery_method: string;
-  last_authenticated_at: string;
-  type: string;
-  updated_at: string;
-}
-import { ethers } from 'ethers';
 import {
   FactorParser,
   emailOtpAuthFactorParser,
@@ -101,12 +91,15 @@ export default class StytchAuthFactorOtpProvider<
     authMethod: AuthMethod,
     options?: any
   ): Promise<string> {
-    return new Promise<string>((_resolve, _reject) => {
+    return new Promise<string>((resolve, reject) => {
       const accessToken = authMethod.accessToken;
       const parsedToken: StytchToken = this._parseJWT(accessToken);
       const factorParser = this._resolveAuthFactor(this._factor).parser;
-
-      return factorParser(parsedToken, this._provider);
+      try {
+        resolve(factorParser(parsedToken, this._provider));
+      } catch(e) {
+        reject(e);
+      }
     });
   }
 
@@ -154,7 +147,6 @@ export default class StytchAuthFactorOtpProvider<
     }
     const body = Buffer.from(parts[1], 'base64');
     const parsedBody: StytchToken = JSON.parse(body.toString('ascii'));
-    console.log('JWT body: ', parsedBody);
     return parsedBody;
   }
 }
