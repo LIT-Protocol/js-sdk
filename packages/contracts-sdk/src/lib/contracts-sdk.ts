@@ -7,9 +7,7 @@ import { AuthMethod } from '@lit-protocol/types';
 let CID: any;
 try {
   CID = require('multiformats/cid');
-} catch (e) {
-  console.log('CID not found');
-}
+} catch (e) {}
 
 // ----- autogen:import-data:start  -----
 // Generated at 2023-11-07T01:50:52.460Z
