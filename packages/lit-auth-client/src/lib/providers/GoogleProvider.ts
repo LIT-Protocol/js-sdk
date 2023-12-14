@@ -29,7 +29,7 @@ export default class GoogleProvider extends BaseProvider {
   /**
    * Redirect user to the Lit's Google login page
    *
-    * @param {Function} [callback] - Optional callback to handle login URL
+   * @param {Function} [callback] - Optional callback to handle login URL
    * @returns {Promise<void>} - Redirects user to Lit login page
    */
   public async signIn(callback?: (url: string) => void): Promise<void> {
@@ -53,7 +53,6 @@ export default class GoogleProvider extends BaseProvider {
     _?: T,
     urlCheckCallback?: (currentUrl: string, redirectUri: string) => boolean
   ): Promise<AuthMethod> {
-
     // Check if current url matches redirect uri using the callback if provided
     const isUrlValid = urlCheckCallback
       ? urlCheckCallback(window.location.href, this.redirectUri)

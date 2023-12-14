@@ -718,7 +718,7 @@ export const LIT_NETWORKS = {
     'http://localhost:7479',
   ],
   custom: [],
-  internalDev: INTERNAL_DEV
+  internalDev: INTERNAL_DEV,
 };
 
 // ========== Lit Sessions ==========

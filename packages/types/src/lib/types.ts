@@ -94,7 +94,11 @@ export type LITChain<T> = {
   [chainName: string]: T;
 };
 
-export type LIT_NETWORKS_KEYS = 'cayenne' | 'localhost' | 'custom' | 'internalDev';
+export type LIT_NETWORKS_KEYS =
+  | 'cayenne'
+  | 'localhost'
+  | 'custom'
+  | 'internalDev';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 

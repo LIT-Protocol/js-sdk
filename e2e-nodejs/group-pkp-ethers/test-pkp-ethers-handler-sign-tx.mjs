@@ -89,7 +89,10 @@ export async function main() {
     );
   }
 
-  if (recoveredAddress.toLowerCase() !== globalThis.LitCI.PKP_INFO.ethAddress.toLowerCase()) {
+  if (
+    recoveredAddress.toLowerCase() !==
+    globalThis.LitCI.PKP_INFO.ethAddress.toLowerCase()
+  ) {
     return fail(
       `recoveredAddres should be ${globalThis.LitCI.PKP_INFO.ethAddress}, got ${recoveredAddress}`
     );

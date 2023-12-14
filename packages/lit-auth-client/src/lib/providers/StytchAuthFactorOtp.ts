@@ -63,8 +63,11 @@ export default class StytchAuthFactorOtpProvider<
         );
       }
 
-      const parsedToken: StytchToken = StytchAuthFactorOtpProvider._parseJWT(accessToken);
-      const factorParser = StytchAuthFactorOtpProvider._resolveAuthFactor(this._factor);
+      const parsedToken: StytchToken =
+        StytchAuthFactorOtpProvider._parseJWT(accessToken);
+      const factorParser = StytchAuthFactorOtpProvider._resolveAuthFactor(
+        this._factor
+      );
 
       try {
         factorParser.parser(parsedToken, StytchAuthFactorOtpProvider._provider);
@@ -79,7 +82,6 @@ export default class StytchAuthFactorOtpProvider<
     });
   }
 
-
   /**
    * Get auth method id that can be used to look up and interact with
    * PKPs associated with the given auth method
@@ -88,9 +90,9 @@ export default class StytchAuthFactorOtpProvider<
    *
    * @returns {Promise<string>} - Auth method id
    */
-    public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
-      return StytchAuthFactorOtpProvider.authMethodId(authMethod);
-    }
+  public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+    return StytchAuthFactorOtpProvider.authMethodId(authMethod);
+  }
 
   /**
    * Get auth method id that can be used to look up and interact with
@@ -107,15 +109,16 @@ export default class StytchAuthFactorOtpProvider<
   ): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const accessToken = authMethod.accessToken;
-      const parsedToken: StytchToken = StytchAuthFactorOtpProvider._parseJWT(accessToken);
+      const parsedToken: StytchToken =
+        StytchAuthFactorOtpProvider._parseJWT(accessToken);
       let factor: FactorParser = 'email';
-      switch(authMethod.authMethodType) {
+      switch (authMethod.authMethodType) {
         case AuthMethodType.StytchEmailFactorOtp:
           factor = 'email';
           break;
         case AuthMethodType.StytchSmsFactorOtp:
-            factor = 'sms';
-            break;
+          factor = 'sms';
+          break;
         case AuthMethodType.StytchWhatsAppFactorOtp:
           factor = 'whatsApp';
           break;
@@ -123,12 +126,12 @@ export default class StytchAuthFactorOtpProvider<
           factor = 'totp';
           break;
         default:
-          throw new Error("Unsupport stytch auth type");
+          throw new Error('Unsupport stytch auth type');
       }
       const factorParser = this._resolveAuthFactor(factor).parser;
       try {
         resolve(factorParser(parsedToken, this._provider));
-      } catch(e) {
+      } catch (e) {
         reject(e);
       }
     });
