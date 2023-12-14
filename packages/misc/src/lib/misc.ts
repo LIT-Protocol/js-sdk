@@ -23,7 +23,7 @@ import {
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
-
+import { LogLevel, LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
 
 const logBuffer: Array<Array<any>> = [];
@@ -200,6 +200,22 @@ export const throwRemovedFunctionError = (functionName: string) => {
     errorCode: LIT_ERROR.REMOVED_FUNCTION_ERROR.name,
   });
 };
+
+export const bootstrapLogManager = (id: string, level: LogLevel = LogLevel.DEBUG) => {
+  if(!globalThis.logManager) {
+    globalThis.logManager = LogManager.Instance;
+    globalThis.logManager.withConfig({
+      "condenseLogs": true
+    });
+    globalThis.logManager.setLevel(level);
+  }
+  
+  globalThis.logger = globalThis.logManager.get(id);
+}
+
+export const getLoggerbyId = (id: string) => {
+ return globalThis.logManager.get(id); 
+}
 
 /**
  *

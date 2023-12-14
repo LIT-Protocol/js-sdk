@@ -11,6 +11,7 @@ import {
   StytchAuthFactorOtpProvider,
 } from '@lit-protocol/lit-auth-client';
 import { StytchOtpAuthenticateOptions } from '@lit-protocol/types';
+import { AuthMethodType } from '@lit-protocol/constants';
 
 const isClass = (v: unknown) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
@@ -121,6 +122,40 @@ describe('initProvider', () => {
     );
     expect(provider).toBeInstanceOf(StytchAuthFactorOtpProvider);
   });
+});
+
+describe('getAuthMethodId', () => {
+  let client: LitAuthClient;
+  // static tokens from test project
+  let accessTokenEmailFactor = "eyJhbGciOiJSUzI1NiIsImtpZCI6Imp3ay10ZXN0LWZiMjhlYmY2LTQ3NTMtNDdkMS1iMGUzLTRhY2NkMWE1MTc1NyIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsicHJvamVjdC10ZXN0LWRlNGUyNjkwLTE1MDYtNGNmNS04YmNlLTQ0NTcxZGRhZWJjOSJdLCJleHAiOjE2ODg1Njc0MTQsImh0dHBzOi8vc3R5dGNoLmNvbS9zZXNzaW9uIjp7ImlkIjoic2Vzc2lvbi10ZXN0LTlkZDI3ZGE1LTVjNjQtNDE5NS04NjdlLWIxNGE3MWE5M2MxMSIsInN0YXJ0ZWRfYXQiOiIyMDIzLTA3LTA1VDE0OjI1OjE0WiIsImxhc3RfYWNjZXNzZWRfYXQiOiIyMDIzLTA3LTA1VDE0OjI1OjE0WiIsImV4cGlyZXNfYXQiOiIyMDIzLTA5LTEzVDAxOjA1OjE0WiIsImF0dHJpYnV0ZXMiOnsidXNlcl9hZ2VudCI6IiIsImlwX2FkZHJlc3MiOiIifSwiYXV0aGVudGljYXRpb25fZmFjdG9ycyI6W3sidHlwZSI6Im90cCIsImRlbGl2ZXJ5X21ldGhvZCI6ImVtYWlsIiwibGFzdF9hdXRoZW50aWNhdGVkX2F0IjoiMjAyMy0wNy0wNVQxNDoyNToxNFoiLCJlbWFpbF9mYWN0b3IiOnsiZW1haWxfaWQiOiJlbWFpbC10ZXN0LTAwMzZmM2YzLTQ0MjQtNDg2My1iYWQ3LTFkNGU3NTM1ZDJiMCIsImVtYWlsX2FkZHJlc3MiOiJqb3NoQGxpdHByb3RvY29sLmNvbSJ9fV19LCJpYXQiOjE2ODg1NjcxMTQsImlzcyI6InN0eXRjaC5jb20vcHJvamVjdC10ZXN0LWRlNGUyNjkwLTE1MDYtNGNmNS04YmNlLTQ0NTcxZGRhZWJjOSIsIm5iZiI6MTY4ODU2NzExNCwic3ViIjoidXNlci10ZXN0LTY4MTAzZTAxLTc0NjgtNGFiZi04M2M4LTg4NWRiMmNhMWM2YyJ9.rZgaunT1UV2pmliZ0V7nYqYtyfdGas4eY6Q6RCzEEBc5y1K66lopUbvvkfNsLJUjSc3vw12NlIX3Q47zm0XEP8AahrJ0QWAC4v9gmZKVYbKiL2JppqnaxtNLZV9Zo1KAiqm9gdqRQSD29222RTC59PI52AOZd4iTv4lSBIPG2J9rUkUwaRI23bGLMQ8XVkTSS7wcd1Ls08Q-VDXuwl8vuoJhssBfNfxFigk7cKHwbbM-o1sh3upEzV-WFgvJrTstPUNbHOBvGnqKDZX6A_45M5zBnHrerifz4-ST771tajiuW2lQXWvocyYlRT8_a0XBsW77UhU-YBTvKVpj3jmH4A";
+  let accessTokenSmsFactor = "eyJhbGciOiJSUzI1NiIsImtpZCI6Imp3ay10ZXN0LTYyNWViODMxLTAwOWYtNGNiMy05YTk3LWJlNzU3YTMzNjQwZiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsicHJvamVjdC10ZXN0LTI3OTA2MzVkLWJhMzEtNDcwNS1hYWY0LTIxM2JiMGYwNjgxMiJdLCJleHAiOjE2OTgzNTQyMTksImh0dHBzOi8vc3R5dGNoLmNvbS9zZXNzaW9uIjp7ImlkIjoic2Vzc2lvbi10ZXN0LWRhMzliOTBlLTkxMTMtNDQ3NC1hOWEyLWE5NTE3MzdkMGVlNSIsInN0YXJ0ZWRfYXQiOiIyMDIzLTEwLTI2VDIwOjU4OjM4WiIsImxhc3RfYWNjZXNzZWRfYXQiOiIyMDIzLTEwLTI2VDIwOjU4OjM5WiIsImV4cGlyZXNfYXQiOiIyMDIzLTExLTAyVDIwOjU4OjM4WiIsImF0dHJpYnV0ZXMiOnsidXNlcl9hZ2VudCI6IiIsImlwX2FkZHJlc3MiOiIifSwiYXV0aGVudGljYXRpb25fZmFjdG9ycyI6W3sidHlwZSI6Im90cCIsImRlbGl2ZXJ5X21ldGhvZCI6InNtcyIsImxhc3RfYXV0aGVudGljYXRlZF9hdCI6IjIwMjMtMTAtMjZUMjA6NTg6MzhaIiwicGhvbmVfbnVtYmVyX2ZhY3RvciI6eyJwaG9uZV9pZCI6InBob25lLW51bWJlci10ZXN0LWNmYTJjYTFlLTVmNzMtNGM0NS1hOWU2LWNjYWE5MWZkYjE3ZCIsInBob25lX251bWJlciI6IisxMjAxNDA3MjA3MyJ9fV19LCJpYXQiOjE2OTgzNTM5MTksImlzcyI6InN0eXRjaC5jb20vcHJvamVjdC10ZXN0LTI3OTA2MzVkLWJhMzEtNDcwNS1hYWY0LTIxM2JiMGYwNjgxMiIsIm5iZiI6MTY5ODM1MzkxOSwic3ViIjoidXNlci10ZXN0LWFhMGUwZmFhLTFjZTgtNGY4Yy05MGJhLWU2OTZmMWY4OTFlZiJ9.c-TAC_UNHQZgbcUBWYhBMCfctQAaVrL41bWGC3LifgEzFV-AWB9sPG8Ws18X2AdIi2FytAvpluWto4-oIdA5vghXx99pYnn45MuKvbvtixkz7tKXeyVN9BiXiPNWiHMjx_Iw_rPaF-KTLqQi7nCuS_UHcFr5uZrErDuYMdwfXxZPdl1pC0M_7Eh-wIOn_Fyy8bdftT1vqPlFTjxyTIZ2CLoAqizJi8cfPfAaC3dkxA54GT4LJdB9FY5VTkXO9Dc4BNZiL4MDx2jMNtE-RhY2iDDL4KC1yi4MQEdNSTm0KEoAF8_A7uzGkpHtJKjFyB8bZTmcrzqzgq6m732_nhMUbw";
+  beforeEach(() => {
+    client = new LitAuthClient({
+      litRelayConfig: { relayApiKey: 'test-api-key' },
+    });
+  });
+
+  it('should get auth method for stytch email factor', async () => {
+    let provider = client.initProvider(ProviderType.StytchEmailFactorOtp);
+    let id = await provider.getAuthMethodId({
+      authMethodType: AuthMethodType.StytchEmailFactorOtp,
+      accessToken: accessTokenEmailFactor
+    });
+
+    expect(id).toBeDefined();
+  });
+
+
+  it('should get auth method for stytch sms factor', async () => {
+    let provider = client.initProvider(ProviderType.StytchSmsFactorOtp);
+    let id = await provider.getAuthMethodId({
+      authMethodType: AuthMethodType.StytchSmsFactorOtp,
+      accessToken: accessTokenSmsFactor
+    });
+
+    expect(id).toBeDefined();
+  });
+
 });
 
 describe('getProvider', () => {
