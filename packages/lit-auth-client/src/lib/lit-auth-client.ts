@@ -18,9 +18,8 @@ import EthWalletProvider from './providers/EthWalletProvider';
 import WebAuthnProvider from './providers/WebAuthnProvider';
 import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
-import StytchEmailOtpProvider from './providers/StytchAuthFactorOtp';
 import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
-import { bootstrapLogManager, log } from '@lit-protocol/misc';
+import { bootstrapLogManager, getLoggerbyId, log } from '@lit-protocol/misc';
 
 /**
  * Class that handles authentication through Lit login
@@ -225,7 +224,10 @@ export class LitAuthClient {
         authId = await GoogleProvider.authMethodId(authMethod);
         break;
       case AuthMethodType.StytchOtp:
-        authId = await GoogleProvider.authMethodId(authMethod);
+        authId = await StytchOtpProvider.authMethodId(authMethod);
+        break;
+      case AuthMethodType.StytchEmailFactorOtp:
+        authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
         break;
       default:
         throw new Error(
@@ -238,7 +240,7 @@ export class LitAuthClient {
 
   private log(... args: any) {
     if (this.debug) {
-      log(... args);
+      getLoggerbyId('auth-client').debug(...args); 
     }
   }
 }

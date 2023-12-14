@@ -21,8 +21,9 @@ export default class StytchAuthFactorOtpProvider<
   T extends FactorParser
 > extends BaseProvider {
   private _params: StytchOtpProviderOptions;
-  private _provider: string = 'https://stytch.com/session';
   private _factor: T;
+  private static _provider: string = 'https://stytch.com/session';
+
   constructor(
     params: BaseProviderOptions,
     config: StytchOtpProviderOptions,
@@ -62,11 +63,11 @@ export default class StytchAuthFactorOtpProvider<
         );
       }
 
-      const parsedToken: StytchToken = this._parseJWT(accessToken);
-      const factorParser = this._resolveAuthFactor(this._factor);
+      const parsedToken: StytchToken = StytchAuthFactorOtpProvider._parseJWT(accessToken);
+      const factorParser = StytchAuthFactorOtpProvider._resolveAuthFactor(this._factor);
 
       try {
-        factorParser.parser(parsedToken, this._provider);
+        factorParser.parser(parsedToken, StytchAuthFactorOtpProvider._provider);
       } catch (e) {
         reject(e);
       }
@@ -78,6 +79,19 @@ export default class StytchAuthFactorOtpProvider<
     });
   }
 
+
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+    public async getAuthMethodId(authMethod: AuthMethod): Promise<string> {
+      return StytchAuthFactorOtpProvider.authMethodId(authMethod);
+    }
+
   /**
    * Get auth method id that can be used to look up and interact with
    * PKPs associated with the given auth method.
@@ -87,14 +101,31 @@ export default class StytchAuthFactorOtpProvider<
    *
    * @returns {Promise<string>} - Auth method id
    */
-  public async getAuthMethodId(
+  public static async authMethodId(
     authMethod: AuthMethod,
     options?: any
   ): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const accessToken = authMethod.accessToken;
-      const parsedToken: StytchToken = this._parseJWT(accessToken);
-      const factorParser = this._resolveAuthFactor(this._factor).parser;
+      const parsedToken: StytchToken = StytchAuthFactorOtpProvider._parseJWT(accessToken);
+      let factor: FactorParser = 'email';
+      switch(authMethod.authMethodType) {
+        case AuthMethodType.StytchEmailFactorOtp:
+          factor = 'email';
+          break;
+        case AuthMethodType.StytchSmsFactorOtp:
+            factor = 'sms';
+            break;
+        case AuthMethodType.StytchWhatsAppFactorOtp:
+          factor = 'whatsApp';
+          break;
+        case AuthMethodType.StytchTotpFactorOtp:
+          factor = 'totp';
+          break;
+        default:
+          throw new Error("Unsupport stytch auth type");
+      }
+      const factorParser = this._resolveAuthFactor(factor).parser;
       try {
         resolve(factorParser(parsedToken, this._provider));
       } catch(e) {
@@ -103,7 +134,7 @@ export default class StytchAuthFactorOtpProvider<
     });
   }
 
-  private _resolveAuthFactor(factor: T): {
+  private static _resolveAuthFactor(factor: FactorParser): {
     parser: Function;
     authMethodType: AuthMethodType;
   } {
@@ -129,10 +160,6 @@ export default class StytchAuthFactorOtpProvider<
           authMethodType: AuthMethodType.StytchTotpFactorOtp,
         };
     }
-
-    throw new Error(
-      'Unable to determine factor, are you using one of the supported factor types?'
-    );
   }
 
   /**
@@ -140,7 +167,7 @@ export default class StytchAuthFactorOtpProvider<
    * @param jwt token to parse
    * @returns {string}- userId contained within the token message
    */
-  private _parseJWT(jwt: string): StytchToken {
+  private static _parseJWT(jwt: string): StytchToken {
     const parts = jwt.split('.');
     if (parts.length !== 3) {
       throw new Error('Invalid token length');
