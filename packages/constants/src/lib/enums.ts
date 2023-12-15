@@ -43,9 +43,8 @@ export enum StakingStates {
   ReadyForNextEpoch,
   Unlocked,
   Paused,
-  Restore
+  Restore,
 }
-
 
 export enum AuthMethodScope {
   NoPermissions = 0,
@@ -56,7 +55,7 @@ export enum AuthMethodScope {
 export enum LitNetwork {
   Cayenne = 'cayenne',
   InternalDev = 'internalDev',
-  Custom = 'custom'
+  Custom = 'custom',
 }
 
 /**

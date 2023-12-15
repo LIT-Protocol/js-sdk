@@ -1195,7 +1195,6 @@ export interface LitAuthClientOptions {
   debug?: boolean;
 
   litOtpConfig?: OtpProviderOptions;
-
 }
 
 export interface OtpSessionResult {

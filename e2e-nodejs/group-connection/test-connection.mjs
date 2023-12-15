@@ -10,7 +10,7 @@ export async function main() {
   const client = new LitNodeClient({
     litNetwork: globalThis.LitCI.network,
     debug: LITCONFIG.TEST_ENV.debug,
-    checkNodeAttestation: globalThis.LitCI.sevAttestation
+    checkNodeAttestation: globalThis.LitCI.sevAttestation,
   });
   await client.connect();
 

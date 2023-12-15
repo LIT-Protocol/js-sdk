@@ -8,22 +8,22 @@ describe('logger', () => {
   });
 
   it('Log Manager singleton should be defined', () => {
-    expect(typeof lm).toEqual("object");
+    expect(typeof lm).toEqual('object');
   });
 
   it('should make logger with category', () => {
     const logger = lm.get('category');
     expect(logger.category).toEqual('category');
   });
-  
-  it ('should make logger with id and category', () => {
+
+  it('should make logger with id and category', () => {
     const logger = lm.get('category', 'foo');
     expect(logger.id).toEqual('foo');
   });
 
   it('Log Manager should pass config to loggers', () => {
     lm.withConfig({
-      "condenseLogs": true
+      condenseLogs: true,
     });
     let logger = lm.get('category');
     expect(logger.Config?.['condenseLogs']).toEqual(true);
@@ -31,12 +31,12 @@ describe('logger', () => {
 
   it('Hashing enabled should filter non unique logs', () => {
     lm.withConfig({
-      "condenseLogs": true
+      condenseLogs: true,
     });
     let logger = lm.get('category', 'bar');
     expect(logger.Config?.['condenseLogs']).toEqual(true);
-    logger.info("hello");
-    logger.info("hello");
+    logger.info('hello');
+    logger.info('hello');
     let logs = lm.getLogsForId('bar');
     expect(logs.length).toEqual(1);
   });
@@ -54,8 +54,8 @@ describe('logger', () => {
     const logger = lm.get('info-logger', 'foo2');
     logger.setLevel(LogLevel.DEBUG);
     logger.debug('logging');
-    logger.error("error");
+    logger.error('error');
     let logs = lm.getLogsForId('foo2');
-    expect(logs.length).toEqual(2); 
+    expect(logs.length).toEqual(2);
   });
 });

@@ -18,10 +18,12 @@ export async function main() {
       sessionKey: sessionKeyPair,
       statement: params.statement,
       // authSig: globalThis.LitCI.CONTROLLER_AUTHSIG, // When this is empty or undefined, it will fail
-      authMethods: [{
-        authMethodType: 1,
-        accessToken: JSON.stringify(globalThis.LitCI.CONTROLLER_AUTHSIG)
-      }],
+      authMethods: [
+        {
+          authMethodType: 1,
+          accessToken: JSON.stringify(globalThis.LitCI.CONTROLLER_AUTHSIG),
+        },
+      ],
       pkpPublicKey: `0x${globalThis.LitCI.AUTH_METHOD_PKP_INFO.publicKey}`,
       expiration: params.expiration,
       resources: params.resources,

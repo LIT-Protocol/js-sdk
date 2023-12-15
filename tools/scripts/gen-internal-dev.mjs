@@ -86,10 +86,10 @@ const intToIP = (ip) => {
 const { validators, minNodeCount } = await getValidators();
 
 const networks = validators.map((item) => {
-    let proto = "https://";
-    if (item.port !== 443) {
-        proto = "http://";
-    }
+  let proto = 'https://';
+  if (item.port !== 443) {
+    proto = 'http://';
+  }
   return `${proto}${intToIP(item.ip)}:${item.port}`;
 });
 

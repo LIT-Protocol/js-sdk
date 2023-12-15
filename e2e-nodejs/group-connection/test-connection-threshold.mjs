@@ -2,16 +2,14 @@ import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import {LitContracts} from '@lit-protocol/contracts-sdk';
-
-
+import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 export async function main() {
   // ==================== Test Logic ====================
   const client = new LitNodeClient({
     litNetwork: globalThis.LitCI.network,
     debug: LITCONFIG.TEST_ENV.debug,
-    checkNodeAttestation: globalThis.LitCI.sevAttestation
+    checkNodeAttestation: globalThis.LitCI.sevAttestation,
   });
   await client.connect();
 
@@ -23,13 +21,14 @@ export async function main() {
     return fail(`client not connected to ${globalThis.LitCI.network}`);
   }
 
-
   let threshold = await LitContracts.getMinNodeCount(globalThis.LitCI.network);
   console.log(`threshold ${threshold}`);
   console.log(`config threshold ${client.config.minNodeCount}`);
 
   if (parseInt(client.config.minNodeCount, 10) !== parseInt(threshold, 10)) {
-    return fail(`threshold does not match config threshold, network state diverged`);
+    return fail(
+      `threshold does not match config threshold, network state diverged`
+    );
   }
 
   // ==================== Success ====================

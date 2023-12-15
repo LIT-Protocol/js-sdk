@@ -12,10 +12,10 @@ export async function main() {
   // ==================== Test Logic ====================
   let results = await Promise.all([
     (async () => {
-        console.time("request 1");
-        let res = await client.executeJs({
-            authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-            code: `(async () => {
+      console.time('request 1');
+      let res = await client.executeJs({
+        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+        code: `(async () => {
                 console.log('hello world')
           
                 async function signMultipleSigs(numSigs, toSign, publicKey) {
@@ -33,21 +33,21 @@ export async function main() {
           
                 const sigShares = await signMultipleSigs(numberOfSigs, dataToSign, publicKey);
             })();`,
-            authMethods: [],
-            jsParams: {
-              numberOfSigs: 2,
-              dataToSign: TO_SIGN,
-              publicKey: globalThis.LitCI.PKP_INFO.publicKey,
-            },
-        });
-        console.timeEnd("request 1");
-        return res;
+        authMethods: [],
+        jsParams: {
+          numberOfSigs: 2,
+          dataToSign: TO_SIGN,
+          publicKey: globalThis.LitCI.PKP_INFO.publicKey,
+        },
+      });
+      console.timeEnd('request 1');
+      return res;
     })(),
     (async () => {
-        console.time("request 2");
-        let res = await client.executeJs({
-            authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-            code: `(async () => {
+      console.time('request 2');
+      let res = await client.executeJs({
+        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+        code: `(async () => {
                 console.log('hello world')
           
                 async function signMultipleSigs(numSigs, toSign, publicKey) {
@@ -65,21 +65,21 @@ export async function main() {
           
                 const sigShares = await signMultipleSigs(numberOfSigs, dataToSign, publicKey);
             })();`,
-            authMethods: [],
-            jsParams: {
-              numberOfSigs: 2,
-              dataToSign: TO_SIGN,
-              publicKey: globalThis.LitCI.PKP_INFO.publicKey,
-            },
-        });
-        console.timeEnd("request 2");
-        return res;
+        authMethods: [],
+        jsParams: {
+          numberOfSigs: 2,
+          dataToSign: TO_SIGN,
+          publicKey: globalThis.LitCI.PKP_INFO.publicKey,
+        },
+      });
+      console.timeEnd('request 2');
+      return res;
     })(),
     (async () => {
-        console.time("request 3");
-        let res = await client.executeJs({
-            authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-            code: `(async () => {
+      console.time('request 3');
+      let res = await client.executeJs({
+        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+        code: `(async () => {
                 console.log('hello world')
           
                 async function signMultipleSigs(numSigs, toSign, publicKey) {
@@ -97,21 +97,21 @@ export async function main() {
           
                 const sigShares = await signMultipleSigs(numberOfSigs, dataToSign, publicKey);
             })();`,
-            authMethods: [],
-            jsParams: {
-              numberOfSigs: 2,
-              dataToSign: TO_SIGN,
-              publicKey: globalThis.LitCI.PKP_INFO.publicKey,
-            },
-        });
-        console.timeEnd("request 3");
-        return res;
+        authMethods: [],
+        jsParams: {
+          numberOfSigs: 2,
+          dataToSign: TO_SIGN,
+          publicKey: globalThis.LitCI.PKP_INFO.publicKey,
+        },
+      });
+      console.timeEnd('request 3');
+      return res;
     })(),
     (async () => {
-        console.time("request 4");
-        let res = await client.executeJs({
-            authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-            code: `(async () => {
+      console.time('request 4');
+      let res = await client.executeJs({
+        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+        code: `(async () => {
                 console.log('hello world')
           
                 async function signMultipleSigs(numSigs, toSign, publicKey) {
@@ -129,21 +129,21 @@ export async function main() {
           
                 const sigShares = await signMultipleSigs(numberOfSigs, dataToSign, publicKey);
             })();`,
-            authMethods: [],
-            jsParams: {
-              numberOfSigs: 2,
-              dataToSign: TO_SIGN,
-              publicKey: globalThis.LitCI.PKP_INFO.publicKey,
-            },
-        });
-        console.timeEnd("request 4");
-        return res;
+        authMethods: [],
+        jsParams: {
+          numberOfSigs: 2,
+          dataToSign: TO_SIGN,
+          publicKey: globalThis.LitCI.PKP_INFO.publicKey,
+        },
+      });
+      console.timeEnd('request 4');
+      return res;
     })(),
     (async () => {
-        console.time("request 5");
-        let res = await client.executeJs({
-            authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-            code: `(async () => {
+      console.time('request 5');
+      let res = await client.executeJs({
+        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+        code: `(async () => {
                 console.log('hello world')
           
                 async function signMultipleSigs(numSigs, toSign, publicKey) {
@@ -161,32 +161,32 @@ export async function main() {
           
                 const sigShares = await signMultipleSigs(numberOfSigs, dataToSign, publicKey);
             })();`,
-            authMethods: [],
-            jsParams: {
-              numberOfSigs: 2,
-              dataToSign: TO_SIGN,
-              publicKey: globalThis.LitCI.PKP_INFO.publicKey,
-            },
-        });
-        console.timeEnd("request 5");
-        return res;
-    })()
+        authMethods: [],
+        jsParams: {
+          numberOfSigs: 2,
+          dataToSign: TO_SIGN,
+          publicKey: globalThis.LitCI.PKP_INFO.publicKey,
+        },
+      });
+      console.timeEnd('request 5');
+      return res;
+    })(),
   ]);
   // ==================== Post-Validation ====================
   for (const res of results) {
     Object.entries(res.signatures).forEach(([key, sig]) => {
-        if (key !== 'sig0' && key !== 'sig1') {
-          return fail(`sig name ${key} is not expected`);
-        }
-    
-        ['r', 's', 'recid', 'signature', 'publicKey', 'dataSigned'].forEach(
-          (key) => {
-            if (sig[key] === undefined) {
-              return fail(`sig.${key} is undefined, empty, or null`);
-            }
+      if (key !== 'sig0' && key !== 'sig1') {
+        return fail(`sig name ${key} is not expected`);
+      }
+
+      ['r', 's', 'recid', 'signature', 'publicKey', 'dataSigned'].forEach(
+        (key) => {
+          if (sig[key] === undefined) {
+            return fail(`sig.${key} is undefined, empty, or null`);
           }
-        );
-      });
+        }
+      );
+    });
   }
 
   // ==================== Success ====================

@@ -1,17 +1,18 @@
 # End to End NodeJS testing
 
 End to end testing environment for different operations on the Lit Network
+
 - Message singing
 - Transaction signing
 - Session signature generation / signing
 - Lit Action api testing
 - LitContracts testing
 - Concurrency operation tests
-   - 1 signature tests
-   - multi signature tests
-
+  - 1 signature tests
+  - multi signature tests
 
 ## Usage
+
 To run all tests in all groups you can use the command
 `yarn test:e2e:node`
 
@@ -24,6 +25,7 @@ In the above example, only tests in the `group-lit-actions` will run as group fl
 In the above example, we only run the `lit-actions` test group with a filter on the `test-lit-action-1-sig` which is reduced to `1-sig` from the `group` flag
 
 ## environment Configuration
+
 ```
 NETWORK = cayenne | internalDev #Configures the network context for the test run
 DEBUG = true | false # Turns on or off logging

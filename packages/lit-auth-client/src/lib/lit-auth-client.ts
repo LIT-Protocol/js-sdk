@@ -238,9 +238,9 @@ export class LitAuthClient {
     return authId;
   }
 
-  private log(... args: any) {
+  private log(...args: any) {
     if (this.debug) {
-      getLoggerbyId('auth-client').debug(...args); 
+      getLoggerbyId('auth-client').debug(...args);
     }
   }
 }

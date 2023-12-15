@@ -32,7 +32,12 @@ export async function main() {
   }
 
   if (pkpAccount.pubkey.length !== 33) {
-    return fail('pubkey buffer expected length is incorrect recieved: ', pkpAccount.pubkey.length, "expected", 33);
+    return fail(
+      'pubkey buffer expected length is incorrect recieved: ',
+      pkpAccount.pubkey.length,
+      'expected',
+      33
+    );
   }
   // ==================== Success ====================
   return success('PKPCosmosWallet should be able to getAccounts');
