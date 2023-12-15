@@ -98,7 +98,8 @@ export type LIT_NETWORKS_KEYS =
   | 'cayenne'
   | 'localhost'
   | 'custom'
-  | 'internalDev';
+  | 'internalDev'
+  | 'manzano';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 

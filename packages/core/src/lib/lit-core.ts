@@ -61,9 +61,7 @@ import {
   SupportedJsonRequests,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { uint8arrayFromString } from '@lit-protocol/uint8arrays';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { LogLevel, LogManager } from '@lit-protocol/logger';
 
 export class LitCore {
   config: LitNodeClientConfig;
@@ -102,6 +100,12 @@ export class LitCore {
             ..._defaultConfig,
             litNetwork: LitNetwork.InternalDev,
           } as unknown as LitNodeClientConfig;
+          break;
+        case LitNetwork.Manzano:
+          this.config = {
+            ..._defaultConfig,
+            litNetwork: LitNetwork.Manzano,
+          } as unknown as LitNodeClientConfig
           break;
         default:
           this.config = {
@@ -157,7 +161,7 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the configuration is updated.
    */
   setNewConfig = async (): Promise<void> => {
-    if (this.config.litNetwork === LitNetwork.InternalDev) {
+    if (this.config.litNetwork === LitNetwork.InternalDev || this.config.litNetwork === LitNetwork.Manzano) {
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork as LitNetwork
       );
@@ -182,6 +186,7 @@ export class LitCore {
       }
 
       this.config.minNodeCount = parseInt(minNodeCount, 10);
+      this.config.bootstrapUrls = bootstrapUrls;
     } else if (this.config.litNetwork === LitNetwork.Cayenne) {
       // If the network is cayenne it is a centralized testnet so we use a static config
       // This is due to staking contracts holding local ip / port contexts which are innacurate to the ip / port exposed to the world
@@ -203,7 +208,7 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
    */
   listenForNewEpoch = async (): Promise<void> => {
-    if (this.config.litNetwork === LitNetwork.InternalDev) {
+    if (this.config.litNetwork === LitNetwork.InternalDev || this.config.litNetwork === LitNetwork.Manzano) {
       const stakingContract = await LitContracts.getStakingContract(
         this.config.litNetwork as any
       );
@@ -211,6 +216,7 @@ export class LitCore {
         'listening for state change on staking contract: ',
         stakingContract.address
       );
+
       stakingContract.on('StateChanged', async (state: StakingStates) => {
         log(`New state detected: "${state}"`);
         if (state === StakingStates.NextValidatorSetLocked) {

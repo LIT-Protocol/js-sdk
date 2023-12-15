@@ -719,6 +719,7 @@ export const LIT_NETWORKS = {
   ],
   custom: [],
   internalDev: INTERNAL_DEV,
+  manzano: [],
 };
 
 // ========== Lit Sessions ==========

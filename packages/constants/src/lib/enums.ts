@@ -55,6 +55,7 @@ export enum AuthMethodScope {
 export enum LitNetwork {
   Cayenne = 'cayenne',
   InternalDev = 'internalDev',
+  Manzano = 'manzano',
   Custom = 'custom',
 }
 
