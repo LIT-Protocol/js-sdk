@@ -540,7 +540,7 @@ export class LitContracts {
   };
 
   public static async getStakingContract(
-    network: 'cayenne' | 'internalDev' | 'manzano' | 'custom' | 'localhost'
+    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost'
   ) {
     let manifest = await LitContracts._resolveContractContext(network);
 
@@ -639,7 +639,7 @@ export class LitContracts {
   }
 
   public static getMinNodeCount = async (
-    network: 'cayenne' | 'internalDev' | 'manzano' | 'custom' | 'localhost'
+    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost'
   ) => {
     const contract = await LitContracts.getStakingContract(network);
 
@@ -652,7 +652,7 @@ export class LitContracts {
   };
 
   public static getValidators = async (
-    network: 'cayenne' | 'internalDev' | 'manzano' | 'custom' | 'localhost'
+    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost'
   ): Promise<string[]> => {
     const contract = await LitContracts.getStakingContract(network);
 
@@ -699,7 +699,7 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: 'cayenne' | 'internalDev' | 'manzano' | 'custom' | 'localhost'
+    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost'
   ) {
     let data;
     const INTERNAL_DEV_API =
@@ -707,7 +707,8 @@ export class LitContracts {
     const CAYENNE_API =
       'https://lit-general-worker.getlit.dev/contract-addresses';
     const MANZANO_API = 'https://lit-general-worker.getlit.dev/manzano-contract-addresses'; 
-    
+    const HABANERO_API = 'https://lit-general-worker.getlit.dev/habanero-contract-addresses';
+
     if (network === 'cayenne') {
       try {
         // Fetch and parse the JSON data in one step
@@ -732,6 +733,14 @@ export class LitContracts {
       } catch(e: any) {
         throw new Error(
           `Error fetching data from ${MANZANO_API}: ${e.toString()}`
+        );
+      }
+    } else if (network === 'habanero') {
+      try {
+        data = await fetch(HABANERO_API).then((res) => res.json());
+      } catch(e: any) {
+        throw new Error(
+          `Error fetching data from ${HABANERO_API}: ${e.toString()}`
         );
       }
     }

@@ -99,6 +99,7 @@ export type LIT_NETWORKS_KEYS =
   | 'localhost'
   | 'custom'
   | 'internalDev'
+  | 'habanero'
   | 'manzano';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';

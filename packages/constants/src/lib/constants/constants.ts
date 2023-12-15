@@ -720,6 +720,7 @@ export const LIT_NETWORKS = {
   custom: [],
   internalDev: INTERNAL_DEV,
   manzano: [],
+  habanero: []
 };
 
 // ========== Lit Sessions ==========
