@@ -309,8 +309,7 @@ export function unparse(buf: any) {
   );
 }
 
-
-export function log(... args: any) {
+export function log(...args: any) {
   const logger = getLoggerbyId('auth-client');
   logger.debug(...args);
 }

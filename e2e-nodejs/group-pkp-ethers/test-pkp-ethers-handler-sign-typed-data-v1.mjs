@@ -16,7 +16,7 @@ export async function main() {
     controllerAuthSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
     pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
     rpc: LITCONFIG.CHRONICLE_RPC,
-    litNetwork: globalThis.LitCI.network
+    litNetwork: globalThis.LitCI.network,
   });
 
   await pkpEthersWallet.init();
@@ -56,7 +56,10 @@ export async function main() {
     return fail('signature should be 132 characters long');
   }
 
-  if (recoveredAddr.toLowerCase() !== globalThis.LitCI.PKP_INFO.ethAddress.toLowerCase()) {
+  if (
+    recoveredAddr.toLowerCase() !==
+    globalThis.LitCI.PKP_INFO.ethAddress.toLowerCase()
+  ) {
     return fail(
       `recoveredAddr ${recoveredAddr} should be ${LITCONFIG.PKP_ETH_ADDRESS}`
     );

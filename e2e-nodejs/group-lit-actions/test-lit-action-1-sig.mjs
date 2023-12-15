@@ -25,7 +25,7 @@ export async function main() {
       publicKey: globalThis.LitCI.PKP_INFO.publicKey,
     },
   });
-  
+
   // ==================== Post-Validation ====================
 
   if (!res.signatures || Object.keys(res.signatures).length <= 0) {

@@ -85,7 +85,7 @@ export class LitCore {
       connectTimeout: 20000,
       litNetwork: '', // Default value, should be replaced
       minNodeCount: 2, // Default value, should be replaced
-      bootstrapUrls: [] // Default value, should be replaced
+      bootstrapUrls: [], // Default value, should be replaced
     };
 
     // Initialize default config based on litNetwork
@@ -95,7 +95,7 @@ export class LitCore {
           this.config = {
             ..._defaultConfig,
             litNetwork: LitNetwork.Cayenne,
-          } as unknown as  LitNodeClientConfig;
+          } as unknown as LitNodeClientConfig;
           break;
         case LitNetwork.InternalDev:
           this.config = {
@@ -109,7 +109,6 @@ export class LitCore {
             ...customConfig,
           } as LitNodeClientConfig;
       }
-
     } else {
       this.config = { ..._defaultConfig, ...customConfig };
     }
@@ -139,12 +138,11 @@ export class LitCore {
     globalThis.litConfig = this.config;
     bootstrapLogManager('core');
   }
-  
+
   // ========== Logger utilities ==========
   getLogsForRequestId = (id: string): string[] => {
     return globalThis.logManager.getLogsForId(id);
-  }
-
+  };
 
   // ========== Scoped Class Helpers ==========
   /**
@@ -159,11 +157,14 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the configuration is updated.
    */
   setNewConfig = async (): Promise<void> => {
-    
-    if(this.config.litNetwork === LitNetwork.InternalDev) {
-      const minNodeCount = await LitContracts.getMinNodeCount(this.config.litNetwork as LitNetwork);
-      const bootstrapUrls = await LitContracts.getValidators(this.config.litNetwork as LitNetwork);
-      log("Bootstrap urls: ", bootstrapUrls);
+    if (this.config.litNetwork === LitNetwork.InternalDev) {
+      const minNodeCount = await LitContracts.getMinNodeCount(
+        this.config.litNetwork as LitNetwork
+      );
+      const bootstrapUrls = await LitContracts.getValidators(
+        this.config.litNetwork as LitNetwork
+      );
+      log('Bootstrap urls: ', bootstrapUrls);
       if (minNodeCount <= 0) {
         throwError({
           message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
@@ -171,7 +172,7 @@ export class LitCore {
           errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
         });
       }
-  
+
       if (bootstrapUrls.length <= 0) {
         throwError({
           message: `bootstrapUrls is empty, which is invalid. Please check your network connection and try again.`,
@@ -179,18 +180,20 @@ export class LitCore {
           errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
         });
       }
-  
+
       this.config.minNodeCount = parseInt(minNodeCount, 10);
-    } else if (this.config.litNetwork === LitNetwork.Cayenne){
+    } else if (this.config.litNetwork === LitNetwork.Cayenne) {
       // If the network is cayenne it is a centralized testnet so we use a static config
       // This is due to staking contracts holding local ip / port contexts which are innacurate to the ip / port exposed to the world
       this.config.bootstrapUrls = LIT_NETWORKS.cayenne;
-      this.config.minNodeCount = LIT_NETWORKS.cayenne.length == 2 ? 2 : (LIT_NETWORKS.cayenne.length * 2) / 3;
+      this.config.minNodeCount =
+        LIT_NETWORKS.cayenne.length == 2
+          ? 2
+          : (LIT_NETWORKS.cayenne.length * 2) / 3;
     }
-  }
+  };
 
-
-    /**
+  /**
    * Sets up a listener to detect state changes (new epochs) in the staking contract.
    * When a new epoch is detected, it triggers the `setNewConfig` function to update
    * the client's configuration based on the new state of the network. This ensures
@@ -199,18 +202,23 @@ export class LitCore {
    *
    * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
    */
-    listenForNewEpoch = async (): Promise<void> => {
-      if (this.config.litNetwork === LitNetwork.InternalDev) {
-        const stakingContract = await LitContracts.getStakingContract(this.config.litNetwork as any);
-        log('listening for state change on staking contract: ', stakingContract.address);
-        stakingContract.on("StateChanged", async (state: StakingStates) => {
-          log(`New state detected: "${state}"`);
-          if (state === StakingStates.NextValidatorSetLocked) {
-            await this.setNewConfig();
-          }
-        });
-      }
-    };
+  listenForNewEpoch = async (): Promise<void> => {
+    if (this.config.litNetwork === LitNetwork.InternalDev) {
+      const stakingContract = await LitContracts.getStakingContract(
+        this.config.litNetwork as any
+      );
+      log(
+        'listening for state change on staking contract: ',
+        stakingContract.address
+      );
+      stakingContract.on('StateChanged', async (state: StakingStates) => {
+        log(`New state detected: "${state}"`);
+        if (state === StakingStates.NextValidatorSetLocked) {
+          await this.setNewConfig();
+        }
+      });
+    }
+  };
 
   /**
    *
@@ -276,11 +284,19 @@ export class LitCore {
             keys.networkPubKey === 'ERR' ||
             keys.networkPubKeySet === 'ERR'
           ) {
-            logErrorWithRequestId(requestId, 'Error connecting to node. Detected "ERR" in keys', url, keys);
+            logErrorWithRequestId(
+              requestId,
+              'Error connecting to node. Detected "ERR" in keys',
+              url,
+              keys
+            );
           }
 
           if (!keys.latestBlockhash) {
-            logErrorWithRequestId(requestId, 'Error getting latest blockhash from the node.');
+            logErrorWithRequestId(
+              requestId,
+              'Error getting latest blockhash from the node.'
+            );
           }
 
           if (this.config.checkNodeAttestation) {
@@ -303,13 +319,16 @@ export class LitCore {
               try {
                 checkSevSnpAttestation(attestation, challenge, url).then(() => {
                   log(`Lit Node Attestation verified for ${url}`);
-                  
+
                   // only set server keys if attestation is valid
                   // so that we don't use this node if it's not valid
                   this.serverKeys[url] = keys;
                 });
               } catch (e) {
-                logErrorWithRequestId(requestId, `Lit Node Attestation failed verification for ${url}`);
+                logErrorWithRequestId(
+                  requestId,
+                  `Lit Node Attestation failed verification for ${url}`
+                );
                 throwError({
                   message: `Lit Node Attestation failed verification for ${url}`,
                   errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
@@ -364,7 +383,7 @@ export class LitCore {
             networkPubkey: this.networkPubKey,
             networkPubKeySet: this.networkPubKeySet,
             hdRootPubkeys: this.hdRootPubkeys,
-            subnetPubkey: this.subnetPubKey
+            subnetPubkey: this.subnetPubKey,
           });
 
           // @ts-ignore
@@ -381,10 +400,13 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
-              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
-              } of ${this.config.minNodeCount
-              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${
+              this.config.connectTimeout
+            }ms.  Could only connect to ${
+              Object.keys(this.serverKeys).length
+            } of ${
+              this.config.minNodeCount
+            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             logErrorWithRequestId(requestId, msg);
             reject(msg);
           }
@@ -467,7 +489,11 @@ export class LitCore {
     data,
     requestId,
   }: SendNodeCommand): Promise<any> => {
-    logWithRequestId(requestId, `sendCommandToNode with url ${url} and data`, data);
+    logWithRequestId(
+      requestId,
+      `sendCommandToNode with url ${url} and data`,
+      data
+    );
 
     const req: RequestInit = {
       method: 'POST',
@@ -497,10 +523,13 @@ export class LitCore {
         return data;
       })
       .catch((error: NodeErrorV3) => {
-        logErrorWithRequestId(requestId,
-          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error?.message || error?.details
-            ? `Error is ${error.message} - ${error.details}`
-            : ''}`
+        logErrorWithRequestId(
+          requestId,
+          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
+            error?.message || error?.details
+              ? `Error is ${error.message} - ${error.details}`
+              : ''
+          }`
         );
         return Promise.reject(error);
       });
@@ -624,7 +653,7 @@ export class LitCore {
   handleNodePromises = async <T>(
     nodePromises: Array<Promise<T>>,
     requestId?: string,
-    minNodeCount?: number,
+    minNodeCount?: number
   ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
     // -- prepare
     const responses = await Promise.allSettled(nodePromises);
@@ -656,7 +685,10 @@ export class LitCore {
       )
     );
 
-    logErrorWithRequestId(requestId || "", `most common error: ${JSON.stringify(mostCommonError)}`);
+    logErrorWithRequestId(
+      requestId || '',
+      `most common error: ${JSON.stringify(mostCommonError)}`
+    );
 
     const rejectedPromises: RejectedNodePromises = {
       success: false,

@@ -4,7 +4,9 @@ import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { client } from '../00-setup.mjs';
 import { ethers } from 'ethers';
 
-const DATA_TO_SIGN = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("Hello world")));
+const DATA_TO_SIGN = new Uint8Array(
+  await crypto.subtle.digest('SHA-256', new TextEncoder().encode('Hello world'))
+);
 
 export async function main() {
   // ==================== Test Logic ====================

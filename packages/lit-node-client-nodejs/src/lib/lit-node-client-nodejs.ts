@@ -1141,7 +1141,8 @@ export class LitNodeClientNodeJs extends LitCore {
 
           if (!sigShare || !sigShare[field] || sigShare[field] === '') {
             logWithRequestId(
-              requestId, `Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
+              requestId,
+              `Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
             );
             return null;
           }
@@ -1152,12 +1153,21 @@ export class LitNodeClientNodeJs extends LitCore {
       .filter((sigObj) => sigObj !== null);
 
     logWithRequestId(requestId, 'requested length:', signedData.length);
-    logWithRequestId(requestId, 'validated length:', validatedSignedData.length);
-    logWithRequestId(requestId, 'minimum required length:', this.config.minNodeCount);
+    logWithRequestId(
+      requestId,
+      'validated length:',
+      validatedSignedData.length
+    );
+    logWithRequestId(
+      requestId,
+      'minimum required length:',
+      this.config.minNodeCount
+    );
 
     if (validatedSignedData.length < this.config.minNodeCount) {
       logErrorWithRequestId(
-        requestId, `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSignedData.length}`
+        requestId,
+        `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSignedData.length}`
       );
       return null;
     }
@@ -1197,7 +1207,8 @@ export class LitNodeClientNodeJs extends LitCore {
           for (const field of requiredFields) {
             if (!s[field] || s[field] === '') {
               logWithRequestId(
-                requestId, `Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
+                requestId,
+                `Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
               );
               return null;
             }
@@ -1208,12 +1219,21 @@ export class LitNodeClientNodeJs extends LitCore {
         .filter((s) => s !== null);
 
       logWithRequestId(requestId, 'requested length:', signedData.length);
-      logWithRequestId(requestId, 'validated length:', validatedSigShares.length);
-      logWithRequestId(requestId, 'minimum required length:', this.config.minNodeCount);
+      logWithRequestId(
+        requestId,
+        'validated length:',
+        validatedSigShares.length
+      );
+      logWithRequestId(
+        requestId,
+        'minimum required length:',
+        this.config.minNodeCount
+      );
 
       if (validatedSigShares.length < this.config.minNodeCount) {
         logErrorWithRequestId(
-          requestId, `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSigShares.length}`
+          requestId,
+          `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSigShares.length}`
         );
       }
 
@@ -1277,7 +1297,10 @@ export class LitNodeClientNodeJs extends LitCore {
    * @returns { string } signature
    *
    */
-  getSignature = async (shareData: Array<any>, requestId: string): Promise<any> => {
+  getSignature = async (
+    shareData: Array<any>,
+    requestId: string
+  ): Promise<any> => {
     // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
     const R_x = shareData[0].local_x;
     const R_y = shareData[0].local_y;
@@ -1405,7 +1428,11 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<NodeShare>).values;
-    logWithRequestId(requestId, 'executeJs responseData', JSON.stringify(responseData, null, 2));
+    logWithRequestId(
+      requestId,
+      'executeJs responseData',
+      JSON.stringify(responseData, null, 2)
+    );
 
     // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
     // we must also check for claim responses as a user may have submitted for a claim and signatures must be aggregated before returning
@@ -1589,7 +1616,11 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<PKPSignShare>).values;
-    logWithRequestId(requestId, 'responseData', JSON.stringify(responseData, null, 2));
+    logWithRequestId(
+      requestId,
+      'responseData',
+      JSON.stringify(responseData, null, 2)
+    );
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
@@ -1746,7 +1777,10 @@ export class LitNodeClientNodeJs extends LitCore {
     log('signatureShares', signatureShares);
 
     // ========== Result ==========
-    const finalJwt: string = this.combineSharesAndGetJWT(signatureShares, requestId);
+    const finalJwt: string = this.combineSharesAndGetJWT(
+      signatureShares,
+      requestId
+    );
 
     return finalJwt;
   };
@@ -2207,7 +2241,11 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     const responseData = res.values;
-    logWithRequestId(requestId, 'responseData', JSON.stringify(responseData, null, 2));
+    logWithRequestId(
+      requestId,
+      'responseData',
+      JSON.stringify(responseData, null, 2)
+    );
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
@@ -2248,8 +2286,16 @@ export class LitNodeClientNodeJs extends LitCore {
       .filter((item) => item !== null);
 
     logWithRequestId(requestId, 'requested length:', signedDataList.length);
-    logWithRequestId(requestId, 'validated length:', validatedSignedDataList.length);
-    logWithRequestId(requestId, 'minimum required length:', this.config.minNodeCount);
+    logWithRequestId(
+      requestId,
+      'validated length:',
+      validatedSignedDataList.length
+    );
+    logWithRequestId(
+      requestId,
+      'minimum required length:',
+      this.config.minNodeCount
+    );
     if (validatedSignedDataList.length < this.config.minNodeCount) {
       throw new Error(
         `not enough nodes signed the session key.  Expected ${this.config.minNodeCount}, got ${validatedSignedDataList.length}`
@@ -2502,13 +2548,19 @@ export class LitNodeClientNodeJs extends LitCore {
         };
       });
 
-      logWithRequestId(requestId, `responseData: ${JSON.stringify(responseData, null, 2)}`);
+      logWithRequestId(
+        requestId,
+        `responseData: ${JSON.stringify(responseData, null, 2)}`
+      );
 
       const derivedKeyId = (responseData as SuccessNodePromises<any>).values[0]
         .derivedKeyId;
 
       const pubkey: string = this.computeHDPubKey(derivedKeyId);
-      logWithRequestId(requestId, `pubkey ${pubkey} derived from key id ${derivedKeyId}`);
+      logWithRequestId(
+        requestId,
+        `pubkey ${pubkey} derived from key id ${derivedKeyId}`
+      );
 
       const relayParams: ClaimRequest<'relay'> =
         params as ClaimRequest<'relay'>;
