@@ -6,9 +6,9 @@ import * as siwe from 'siwe';
 
 // ==================== ENV Loading ====================
 const network = process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork;
-const debug = process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug;
+const debug = process.env.DEBUG === 'true' ? true : false;
 const checkSevAttestation = process.env.CHECK_SEV ?? false;
-const mintNew = process.env.MINT_NEW ?? true;
+const mintNew = process.env.MINT_NEW === 'true' ? true : false;
 
 // ==================== SIWE Gen ====================
 const provider = new ethers.providers.JsonRpcProvider(LITCONFIG.CHRONICLE_RPC);

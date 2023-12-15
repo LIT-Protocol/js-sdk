@@ -1,6 +1,5 @@
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
-import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 
@@ -8,7 +7,7 @@ export async function main() {
   // ==================== Test Logic ====================
   const client = new LitNodeClient({
     litNetwork: globalThis.LitCI.network,
-    debug: LITCONFIG.TEST_ENV.debug,
+    debug: globalThis.LitCI.debug,
     checkNodeAttestation: globalThis.LitCI.sevAttestation,
   });
   await client.connect();

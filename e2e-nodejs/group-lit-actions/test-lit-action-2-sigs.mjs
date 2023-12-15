@@ -18,8 +18,11 @@ export async function main() {
       async function signMultipleSigs(numSigs, toSign, publicKey) {
         const sigShares = [];
         for(let i = 0; i < numSigs; i++) {
+          const DATA_TO_SIGN = new Uint8Array(
+            await crypto.subtle.digest('SHA-256', new TextEncoder().encode('Hello world' + i))
+          );
           const sigShare = await LitActions.signEcdsa({
-            toSign,
+            toSign: DATA_TO_SIGN,
             publicKey,
             sigName: "sig" + i,
           });
@@ -44,7 +47,7 @@ export async function main() {
   if (!res.signatures || Object.keys(res.signatures).length !== 2) {
     return fail(
       `should have 2 signatures but received ${
-        Object.keys(res.signatures).length
+        Object.keys(res.signatures).length ?? 0
       }`
     );
   }
