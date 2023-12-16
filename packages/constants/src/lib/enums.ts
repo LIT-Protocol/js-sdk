@@ -56,6 +56,7 @@ export enum LitNetwork {
   Cayenne = 'cayenne',
   InternalDev = 'internalDev',
   Manzano = 'manzano',
+  Habanero = 'habanero',
   Custom = 'custom',
 }
 
