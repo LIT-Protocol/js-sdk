@@ -1,5 +1,5 @@
 // @ts-nocheck
-import pako from 'pako';
+import * as pako from 'pako';
 
 // Contants
 
