@@ -17,13 +17,8 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
-      "@lit-protocol/*": [
-        "packages/*/src"
-      ]
+      "@lit-protocol/*": ["packages/*/src"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }

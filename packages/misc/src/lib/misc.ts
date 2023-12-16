@@ -23,7 +23,7 @@ import {
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
-
+import { LogLevel, LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
 
 const logBuffer: Array<Array<any>> = [];
@@ -201,6 +201,25 @@ export const throwRemovedFunctionError = (functionName: string) => {
   });
 };
 
+export const bootstrapLogManager = (
+  id: string,
+  level: LogLevel = LogLevel.DEBUG
+) => {
+  if (!globalThis.logManager) {
+    globalThis.logManager = LogManager.Instance;
+    globalThis.logManager.withConfig({
+      condenseLogs: true,
+    });
+    globalThis.logManager.setLevel(level);
+  }
+
+  globalThis.logger = globalThis.logManager.get(id);
+};
+
+export const getLoggerbyId = (id: string) => {
+  return globalThis.logManager.get(id);
+};
+
 /**
  *
  * console.log but prepend [Lit-JS-SDK] before the message
@@ -231,7 +250,7 @@ export const log = (...args: any): void => {
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
-      globalThis?.logger.debug(...log);
+    globalThis?.logger.debug(...log);
   }
 
   globalThis?.logger.debug(...args);
@@ -263,8 +282,7 @@ export const logWithRequestId = (id: string, ...args: any) => {
   }
 
   globalThis.logManager.get(globalThis.logger.category, id).debug(...args);
-}
-
+};
 
 export const logErrorWithRequestId = (id: string, ...args: any) => {
   if (!globalThis) {
@@ -292,8 +310,7 @@ export const logErrorWithRequestId = (id: string, ...args: any) => {
   }
 
   globalThis.logManager.get(globalThis.logger.category, id).error(...args);
-}
-
+};
 
 export const logError = (...args: any) => {
   if (!globalThis) {
@@ -321,7 +338,7 @@ export const logError = (...args: any) => {
   }
 
   globalThis.logManager.get(globalThis.logger.category).error(...args);
-}
+};
 
 /**
  *
