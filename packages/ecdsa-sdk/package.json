@@ -24,7 +24,6 @@
   "tags": [
     "universal"
   ],
-  
   "version": "3.0.24",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
