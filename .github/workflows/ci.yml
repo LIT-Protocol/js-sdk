@@ -20,9 +20,28 @@ jobs:
           node-version: '18'
           cache: 'yarn'
       - name: Install project dependencies
-        run: yarn install
+        run: yarn --frozen-lockfile
       - uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'master'
-      - name: Run tests
-        run: npx nx test
+      - name: Build
+        run: yarn build
+      - name: Run Unit tests
+        run: yarn tools --test --unit
+  linter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+      - name: Install project dependencies
+        run: yarn install
+      - name: Lint
+        run: yarn prettier:check

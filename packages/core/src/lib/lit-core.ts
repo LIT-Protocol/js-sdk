@@ -83,7 +83,7 @@ export class LitCore {
       alertWhenUnauthorized: false,
       debug: true,
       connectTimeout: 20000,
-      litNetwork: '', // Default value, should be replaced
+      litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
       minNodeCount: 2, // Default value, should be replaced
       bootstrapUrls: [], // Default value, should be replaced
     };
