@@ -24,8 +24,12 @@ jobs:
       - uses: nrwl/nx-set-shas@v3
         with:
           main-branch-name: 'master'
-      - name: Run Package tests
-        run: yarn tools --test --unit
+      - name: Run Lit Node Client Tests 
+        run: yarn nx test
+      - name: Run Crypto Tests
+        run: yarn nx run crypto:test
+      - name: Run Misc Tests
+        run: yarn nx run misc:test
   linter:
     runs-on: ubuntu-latest
     timeout-minutes: 10
