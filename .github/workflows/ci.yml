@@ -66,6 +66,6 @@ jobs:
       - name: Build packages
         id: build
         run: yarn build
-      - name: Run lit action tests
+      - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:e2e:node --group=connection
+        run: yarn test:e2e:node --group=connection --group=lit-actions --group=concurrent-signing
