@@ -26,12 +26,8 @@ jobs:
           main-branch-name: 'master'
       - name: Build
         run: yarn build
-      - name: Run Lit Node Client Tests
-        run: yarn nx test
-      - name: Run Crypto Tests
-        run: yarn nx run crypto:test
-      - name: Run Misc Tests
-        run: yarn nx run misc:test
+      - name: Run Unit tests
+        run: yarn tools --test --unit
   linter:
     runs-on: ubuntu-latest
     timeout-minutes: 10
