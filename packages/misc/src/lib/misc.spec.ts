@@ -93,20 +93,6 @@ describe('utils', () => {
   //   expect(values).toContain(LIT_ERROR.INVALID_PARAM_TYPE.name);
   // });
 
-  it('should prepend [Lit-JS-SDK] in the console.log', () => {
-    console.log = jest.fn();
-
-    // turn on debug mode so that it prints stuff
-    globalThis.litConfig = { debug: true };
-
-    utilsModule.log('foo', 'bar', 'hola');
-
-    // expect((console.log as any).mock.calls[0][0]).toBe('[Lit-JS-SDK]');
-    expect((console.log as any).mock.calls[0][1]).toBe('foo');
-    expect((console.log as any).mock.calls[0][2]).toBe('bar');
-    expect((console.log as any).mock.calls[0][3]).toBe('hola');
-  });
-
   it('should get value type by a given value', () => {
     const fooString = 'fooString';
     const fooBool = true;

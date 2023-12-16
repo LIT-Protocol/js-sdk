@@ -12,105 +12,105 @@ export async function main() {
   // ==================== Test Logic ====================
   let results = await Promise.all([
     (async () => {
-        console.time("request 1");
-        let res = await client.executeJs({
-            authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-            code: `(async () => {
+      console.time('request 1');
+      let res = await client.executeJs({
+        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+        code: `(async () => {
               const sigShare = await LitActions.signEcdsa({
                 toSign: dataToSign,
                 publicKey,
                 sigName: "sig",
               });
             })();`,
-            authMethods: [],
-            jsParams: {
-              dataToSign: TO_SIGN,
-              publicKey: globalThis.LitCI.PKP_INFO.publicKey,
-            },
-        });
-        console.timeEnd("request 1");
-        return res;
+        authMethods: [],
+        jsParams: {
+          dataToSign: TO_SIGN,
+          publicKey: globalThis.LitCI.PKP_INFO.publicKey,
+        },
+      });
+      console.timeEnd('request 1');
+      return res;
     })(),
     (async () => {
-        console.time("request 2");
-        let res = await client.executeJs({
-            authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-            code: `(async () => {
+      console.time('request 2');
+      let res = await client.executeJs({
+        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+        code: `(async () => {
               const sigShare = await LitActions.signEcdsa({
                 toSign: dataToSign,
                 publicKey,
                 sigName: "sig",
               });
             })();`,
-            authMethods: [],
-            jsParams: {
-              dataToSign: TO_SIGN,
-              publicKey: globalThis.LitCI.PKP_INFO.publicKey,
-            },
-        });
-        console.timeEnd("request 2");
-        return res;
+        authMethods: [],
+        jsParams: {
+          dataToSign: TO_SIGN,
+          publicKey: globalThis.LitCI.PKP_INFO.publicKey,
+        },
+      });
+      console.timeEnd('request 2');
+      return res;
     })(),
     (async () => {
-        console.time("request 3");
-        let res =  await client.executeJs({
-            authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-            code: `(async () => {
+      console.time('request 3');
+      let res = await client.executeJs({
+        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+        code: `(async () => {
               const sigShare = await LitActions.signEcdsa({
                 toSign: dataToSign,
                 publicKey,
                 sigName: "sig",
               });
             })();`,
-            authMethods: [],
-            jsParams: {
-              dataToSign: TO_SIGN,
-              publicKey: globalThis.LitCI.PKP_INFO.publicKey,
-            },
-        });
-        console.timeEnd("request 3");
-        return res;
+        authMethods: [],
+        jsParams: {
+          dataToSign: TO_SIGN,
+          publicKey: globalThis.LitCI.PKP_INFO.publicKey,
+        },
+      });
+      console.timeEnd('request 3');
+      return res;
     })(),
     (async () => {
-        console.time("request 4");
-        let res =  await client.executeJs({
-            authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-            code: `(async () => {
+      console.time('request 4');
+      let res = await client.executeJs({
+        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+        code: `(async () => {
               const sigShare = await LitActions.signEcdsa({
                 toSign: dataToSign,
                 publicKey,
                 sigName: "sig",
               });
             })();`,
-            authMethods: [],
-            jsParams: {
-              dataToSign: TO_SIGN,
-              publicKey: globalThis.LitCI.PKP_INFO.publicKey,
-            },
-        });
-        console.timeEnd("request 4");
-        return res;
+        authMethods: [],
+        jsParams: {
+          dataToSign: TO_SIGN,
+          publicKey: globalThis.LitCI.PKP_INFO.publicKey,
+        },
+      });
+      console.timeEnd('request 4');
+      return res;
     })(),
     (async () => {
-        console.time("request 5");
-        let res =  await client.executeJs({
-            authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-            code: `(async () => {
+      console.time('request 5');
+      let res = await client.executeJs({
+        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+        code: `(async () => {
               const sigShare = await LitActions.signEcdsa({
                 toSign: dataToSign,
                 publicKey,
                 sigName: "sig",
               });
             })();`,
-            authMethods: [],
-            jsParams: {
-              dataToSign: TO_SIGN,
-              publicKey: globalThis.LitCI.PKP_INFO.publicKey,
-            },
-        });
-        console.timeEnd("request 5");
-        return res;
-    })()
+        authMethods: [],
+        jsParams: {
+          dataToSign: TO_SIGN,
+          publicKey: globalThis.LitCI.PKP_INFO.publicKey,
+        },
+      });
+      console.timeEnd('request 5');
+      return res;
+    })(),
   ]);
   // ==================== Post-Validation ====================
   for (const res of results) {
@@ -121,7 +121,7 @@ export async function main() {
         }`
       );
     }
-  
+
     ['sig', 'r', 's', 'recid', 'signature', 'publicKey', 'dataSigned'].forEach(
       (key) => {
         if (!res.signatures.sig[key]) {

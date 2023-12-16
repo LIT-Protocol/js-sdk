@@ -63,6 +63,7 @@
     "b": "git branch --show",
     "txServer": "node tx-handler-server.mjs",
     "prettier": "nx format:write --all",
+    "prettier:check": "nx format:check --all",
     "delete:merged-branches": "git branch --merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d",
     "delete:no-merged-branches": "git branch --no-merged | egrep -v '(^\\*|master|main|develop)' | xargs git branch -d",
     "cache:enable": "node ./tools/scripts/endisable-cache.mjs --enable=true",

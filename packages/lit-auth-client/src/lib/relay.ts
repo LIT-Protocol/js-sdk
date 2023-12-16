@@ -5,6 +5,7 @@ import {
   IRelayPollStatusResponse,
   LitRelayConfig,
 } from '@lit-protocol/types';
+import { log } from './utils';
 
 /**
  * Class that communicates with Lit relay server
@@ -38,7 +39,7 @@ export class LitRelay implements IRelay {
     this.relayUrl =
       config.relayUrl || 'https://relayer-server-staging-cayenne.getlit.dev';
     this.relayApiKey = config.relayApiKey || '';
-    console.log("Lit's relay server URL:", this.relayUrl);
+    log("Lit's relay server URL:", this.relayUrl);
   }
 
   /**

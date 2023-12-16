@@ -104,6 +104,12 @@ export class PKPEthersWallet
     });
   };
 
+  request = async <T = ETHSignature | ETHTxRes>(
+    payload: ETHRequestSigningPayload
+  ): Promise<T> => {
+    return this.handleRequest<T>(payload);
+  };
+
   setGasPrice = (gasPrice: string): void => {
     this.manualGasPrice = gasPrice;
   };

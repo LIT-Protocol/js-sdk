@@ -15,38 +15,38 @@ export enum LogLevel {
 }
 
 const colours = {
-  reset: "\x1b[0m",
-  bright: "\x1b[1m",
-  dim: "\x1b[2m",
-  underscore: "\x1b[4m",
-  blink: "\x1b[5m",
-  reverse: "\x1b[7m",
-  hidden: "\x1b[8m",
-  
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  dim: '\x1b[2m',
+  underscore: '\x1b[4m',
+  blink: '\x1b[5m',
+  reverse: '\x1b[7m',
+  hidden: '\x1b[8m',
+
   fg: {
-      black: "\x1b[30m",
-      red: "\x1b[31m",
-      green: "\x1b[32m",
-      yellow: "\x1b[33m",
-      blue: "\x1b[34m",
-      magenta: "\x1b[35m",
-      cyan: "\x1b[36m",
-      white: "\x1b[37m",
-      gray: "\x1b[90m",
-      crimson: "\x1b[38m" // Scarlet
+    black: '\x1b[30m',
+    red: '\x1b[31m',
+    green: '\x1b[32m',
+    yellow: '\x1b[33m',
+    blue: '\x1b[34m',
+    magenta: '\x1b[35m',
+    cyan: '\x1b[36m',
+    white: '\x1b[37m',
+    gray: '\x1b[90m',
+    crimson: '\x1b[38m', // Scarlet
   },
   bg: {
-      black: "\x1b[40m",
-      red: "\x1b[41m",
-      green: "\x1b[42m",
-      yellow: "\x1b[43m",
-      blue: "\x1b[44m",
-      magenta: "\x1b[45m",
-      cyan: "\x1b[46m",
-      white: "\x1b[47m",
-      gray: "\x1b[100m",
-      crimson: "\x1b[48m"
-  }
+    black: '\x1b[40m',
+    red: '\x1b[41m',
+    green: '\x1b[42m',
+    yellow: '\x1b[43m',
+    blue: '\x1b[44m',
+    magenta: '\x1b[45m',
+    cyan: '\x1b[46m',
+    white: '\x1b[47m',
+    gray: '\x1b[100m',
+    crimson: '\x1b[48m',
+  },
 };
 
 function _convertLoggingLevel(level: LogLevel): string {
@@ -62,9 +62,9 @@ function _convertLoggingLevel(level: LogLevel): string {
     case LogLevel.FATAL:
       return `${colours.fg.red}[FATAL]${colours.reset}`;
     case LogLevel.TIMING_START:
-        return `${colours.fg.green}[TIME_START]${colours.reset}`
+      return `${colours.fg.green}[TIME_START]${colours.reset}`;
     case LogLevel.TIMING_END:
-      return `${colours.fg.green}[TIME_END]${colours.reset}`
+      return `${colours.fg.green}[TIME_END]${colours.reset}`;
   }
 
   return '[UNKNOWN]';
@@ -91,7 +91,7 @@ function _resolveLoggingHandler(level: LogLevel): any {
 
 function replacer(key: string, value: any) {
   // Filtering out properties
-  if (typeof value === "object") {
+  if (typeof value === 'object') {
     return JSON.stringify(value, null);
   }
   return value;
@@ -135,18 +135,18 @@ class Log implements ILog {
   }
 
   toString(): string {
-    var fmtStr: string = `[Lit-JS-SDK v${version}]${_convertLoggingLevel(this.level)} [${this.category}] [id: ${this.id}] ${this.message}`;
+    var fmtStr: string = `[Lit-JS-SDK v${version}]${_convertLoggingLevel(
+      this.level
+    )} [${this.category}] [id: ${this.id}] ${this.message}`;
     for (var i = 0; i < this.args.length; i++) {
       if (typeof this.args[i] === 'object') {
-          fmtStr = `${fmtStr} ${JSON.stringify(this.args[i])}`;
+        fmtStr = `${fmtStr} ${JSON.stringify(this.args[i])}`;
       } else {
         fmtStr = `${fmtStr} ${this.args[i]}`;
       }
     }
     return fmtStr;
   }
-
-
 
   toArray(): string[] {
     let args = [];
@@ -156,7 +156,7 @@ class Log implements ILog {
 
     this.id && args.push(`${colours.fg.cyan}[id: ${this.id}]${colours.reset}`);
     this.message && args.push(this.message);
-    
+
     for (var i = 0; i < this.args.length; i++) {
       args.push(this.args[i]);
     }
@@ -197,7 +197,12 @@ export class Logger {
     return new Logger(category, level, id, config);
   }
 
-  private constructor(category: string, level: LogLevel, id: string, config?: Record<string, any>) {
+  private constructor(
+    category: string,
+    level: LogLevel,
+    id: string,
+    config?: Record<string, any>
+  ) {
     this._category = category;
     this._level = level;
     this._id = id;
@@ -217,7 +222,7 @@ export class Logger {
     return this._logs;
   }
 
-  set Config(value: Record<string, any>| undefined) {
+  set Config(value: Record<string, any> | undefined) {
     this._config = value;
   }
 
@@ -233,40 +238,40 @@ export class Logger {
     this._handler = handler;
   }
 
-  public info(message: string = "", ...args: any[]): void {
+  public info(message: string = '', ...args: any[]): void {
     this._log(LogLevel.INFO, message, ...args);
   }
 
-  public debug(message: string = "", ...args: any[]): void {
+  public debug(message: string = '', ...args: any[]): void {
     this._log(LogLevel.DEBUG, message, ...args);
   }
 
-  public warn(message: string = "", ...args: any[]): void {
+  public warn(message: string = '', ...args: any[]): void {
     this._log(LogLevel.WARN, message, args);
   }
 
-  public error(message: string = "", ...args: any[]): void {
+  public error(message: string = '', ...args: any[]): void {
     this._log(LogLevel.ERROR, message, ...args);
   }
 
-  public fatal(message: string = "", ...args: any[]): void {
+  public fatal(message: string = '', ...args: any[]): void {
     this._log(LogLevel.FATAL, message, ...args);
   }
 
-  public trace(message: string = "", ...args: any[]): void {
+  public trace(message: string = '', ...args: any[]): void {
     this._log(LogLevel.FATAL, message, ...args);
   }
 
-  public timeStart(message: string = "", ...args: any[]): void {
+  public timeStart(message: string = '', ...args: any[]): void {
     this._log(LogLevel.TIMING_START, message, ...args);
   }
 
-  public timeEnd(message: string = "", ...args: any[]): void {
+  public timeEnd(message: string = '', ...args: any[]): void {
     this._level < LogLevel.OFF &&
       this._log(LogLevel.TIMING_END, message, ...args);
   }
 
-  private _log(level: LogLevel, message: string = "", ...args: any[]): void {
+  private _log(level: LogLevel, message: string = '', ...args: any[]): void {
     const log = new Log(
       new Date().toISOString(),
       message,
@@ -275,24 +280,30 @@ export class Logger {
       this._category,
       level
     );
-    
+
     const arrayLog = log.toArray();
     if (this._config?.['condenseLogs'] && !this._checkHash(log)) {
-      (this._level >= level || level === LogLevel.ERROR) && this._consoleHandler(... arrayLog); 
-      (this._level >= level || level === LogLevel.ERROR) && this._handler && this._handler(log);
+      (this._level >= level || level === LogLevel.ERROR) &&
+        this._consoleHandler(...arrayLog);
+      (this._level >= level || level === LogLevel.ERROR) &&
+        this._handler &&
+        this._handler(log);
       (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
     } else if (!this._config?.['condenseLogs']) {
-      (this._level >= level || level === LogLevel.ERROR) && this._consoleHandler(... arrayLog); 
-      (this._level >= level || level === LogLevel.ERROR) && this._handler && this._handler(log);
+      (this._level >= level || level === LogLevel.ERROR) &&
+        this._consoleHandler(...arrayLog);
+      (this._level >= level || level === LogLevel.ERROR) &&
+        this._handler &&
+        this._handler(log);
       (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
     }
   }
 
   private _checkHash(log: Log): boolean {
     const digest = hashMessage(log.message);
-    const hash = digest.toString()
+    const hash = digest.toString();
     let item = this._logHashes.get(hash);
-    if(item) {
+    if (item) {
       return true;
     } else {
       this._logHashes.set(hash, true);
@@ -313,9 +324,12 @@ export class Logger {
         bucket?.logs.push(log.toString());
         globalThis.localStorage.setItem(log.id, JSON.stringify(bucket));
       } else {
-        globalThis.localStorage.setItem(log.id, JSON.stringify({
-          logs: [log.toString()]
-        }));
+        globalThis.localStorage.setItem(
+          log.id,
+          JSON.stringify({
+            logs: [log.toString()],
+          })
+        );
       }
     }
   }
@@ -374,14 +388,14 @@ export class LogManager {
       this._level ?? LogLevel.INFO,
       id ?? ''
     );
-    
+
     logger.Config = this._config as Record<string, any>;
 
     this._loggers.set(`${category}${id}`, logger);
     return logger;
   }
 
-   getById(id: string): Logger | undefined {
+  getById(id: string): Logger | undefined {
     for (const logger of this._loggers) {
       if (logger[1].id == id) {
         return logger[1];
@@ -407,6 +421,6 @@ export class LogManager {
       return logsStrs;
     }
 
-    return []
+    return [];
   }
 }

@@ -10,13 +10,19 @@ export async function main() {
 
   // ==================== Post-Validation ====================
   for (const validator of cayenneValidators) {
-    if (!validator.includes(':') || (!validator.includes('http://') && !validator.includes('https://'))) {
+    if (
+      !validator.includes(':') ||
+      (!validator.includes('http://') && !validator.includes('https://'))
+    ) {
       return fail('validator should contain ":" and "http://" or "https://"');
     }
   }
 
   for (const validator of internalDevValidators) {
-    if (!validator.includes(':') || (!validator.includes('http://') && !validator.includes('https://'))) {
+    if (
+      !validator.includes(':') ||
+      (!validator.includes('http://') && !validator.includes('https://'))
+    ) {
       return fail('validator should contain ":" and "http://" or "https://"');
     }
   }

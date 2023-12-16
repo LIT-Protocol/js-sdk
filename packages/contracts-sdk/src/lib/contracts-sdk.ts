@@ -7,9 +7,7 @@ import { AuthMethod } from '@lit-protocol/types';
 let CID: any;
 try {
   CID = require('multiformats/cid');
-} catch (e) {
-  console.log('CID not found');
-}
+} catch (e) {}
 
 // ----- autogen:import-data:start  -----
 // Generated at 2023-11-07T01:50:52.460Z
@@ -45,7 +43,7 @@ import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
 import { getAuthIdByAuthMethod } from './auth-utils';
-import { Logger, LogManager } from "@lit-protocol/logger";
+import { Logger, LogManager } from '@lit-protocol/logger';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -102,7 +100,7 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
-  network: "cayenne" | "internalDev";
+  network: 'cayenne';
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
   // ----- autogen:declares:start  -----
@@ -176,7 +174,7 @@ export class LitContracts {
       storeOrUseStorageKey?: boolean;
     };
     debug?: boolean;
-    network?: "cayenne" | "internalDev"
+    network?: 'cayenne';
   }) {
     // this.provider = args?.provider;
     this.rpc = args?.rpc;
@@ -378,7 +376,7 @@ export class LitContracts {
     }
 
     let addresses: any = await LitContracts.getContractAddresses(this.network);
-    this.log("resolved contract addresses for: ", this.network, addresses);
+    this.log('resolved contract addresses for: ', this.network, addresses);
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
 
@@ -541,9 +539,9 @@ export class LitContracts {
     this.connected = true;
   };
 
-
-
-  public static async getStakingContract(network: "cayenne" | "internalDev" | "custom" | "localhost") {
+  public static async getStakingContract(
+    network: 'cayenne' | 'custom' | 'localhost'
+  ) {
     let manifest = await LitContracts._resolveContractContext(network);
 
     const rpcUrl = DEFAULT_RPC;
@@ -551,7 +549,9 @@ export class LitContracts {
 
     const { config, data: contractData } = manifest;
 
-    const stakingContract = contractData.find((item: { name: string }) => item.name === 'Staking').contracts[0];
+    const stakingContract = contractData.find(
+      (item: { name: string }) => item.name === 'Staking'
+    ).contracts[0];
     const { address_hash, ABI } = stakingContract;
 
     // Validate the required data
@@ -562,26 +562,27 @@ export class LitContracts {
     return new ethers.Contract(address_hash, ABI, provider);
   }
 
-
-  public static async getContractAddresses(network:  "cayenne" | "internalDev" | "custom" | "localhost") {
+  public static async getContractAddresses(
+    network: 'cayenne' | 'custom' | 'localhost'
+  ) {
     const data = await LitContracts._resolveContractContext(network);
     // Destructure the data for easier access
     const { config, data: contractData } = data;
     const addresses: any = {};
     for (const contract of contractData) {
       switch (contract.name) {
-        case "Allowlist":
+        case 'Allowlist':
           addresses.Allowlist = {};
           addresses.Allowlist.address = contract.contracts[0].address_hash;
           addresses.Allowlist.abi = contract.contracts[0].ABI;
           break;
         case 'PKPHelper':
-          addresses.PKPHelper = {}; 
+          addresses.PKPHelper = {};
           addresses.PKPHelper.address = contract.contracts[0].address_hash;
           addresses.PKPHelper.abi = contract.contracts[0].ABI;
           break;
         case 'PKPNFT':
-          addresses.PKPNFT = {}; 
+          addresses.PKPNFT = {};
           addresses.PKPNFT.address = contract.contracts[0].address_hash;
           addresses.PKPNFT.abi = contract.contracts[0].ABI;
           break;
@@ -589,21 +590,21 @@ export class LitContracts {
           addresses.Staking = {};
           addresses.Staking.address = contract.contracts[0].address_hash;
           addresses.Staking.abi = contract.contracts[0].ABI;
-        break;
+          break;
         case 'RateLimitNFT':
-          addresses.RateLimitNFT = {}; 
+          addresses.RateLimitNFT = {};
           addresses.RateLimitNFT.address = contract.contracts[0].address_hash;
           addresses.RateLimitNFT.abi = contract.contracts[0].ABI;
           break;
         case 'PKPPermissions':
           addresses.PKPPermissions = {};
           addresses.PKPPermissions.address = contract.contracts[0].address_hash;
-          addresses.PKPPermissions.abi = contract.contracts[0].ABI; 
+          addresses.PKPPermissions.abi = contract.contracts[0].ABI;
           break;
         case 'PKPNFTMetadata':
-          addresses.PKPNFTMetadata = {}; 
+          addresses.PKPNFTMetadata = {};
           addresses.PKPNFTMetadata.address = contract.contracts[0].address_hash;
-          addresses.PKPNFTMetadata.abi = contract.contracts[0].ABI; 
+          addresses.PKPNFTMetadata.abi = contract.contracts[0].ABI;
           break;
         case 'PubkeyRouter':
           addresses.PubkeyRouter = {};
@@ -617,7 +618,8 @@ export class LitContracts {
           break;
         case 'StakingBalances':
           addresses.StakingBalances = {};
-          addresses.StakingBalances.address = contract.contracts[0].address_hash;
+          addresses.StakingBalances.address =
+            contract.contracts[0].address_hash;
           addresses.StakingBalances.abi = contract.contracts[0].ABI;
           break;
         case 'Multisender':
@@ -636,8 +638,9 @@ export class LitContracts {
     return addresses;
   }
 
-  public static getMinNodeCount = async (network:  "cayenne" | "internalDev" | "custom" | "localhost") => {
-
+  public static getMinNodeCount = async (
+    network: 'cayenne' | 'custom' | 'localhost'
+  ) => {
     const contract = await LitContracts.getStakingContract(network);
 
     const minNodeCount = await contract['currentValidatorCountForConsensus']();
@@ -646,10 +649,11 @@ export class LitContracts {
       throw new Error('❌ Minimum validator count is not set');
     }
     return minNodeCount;
-  }
+  };
 
-  public static getValidators = async (network: "cayenne" | "internalDev" | "custom" | "localhost"): Promise<string[]> => {
-
+  public static getValidators = async (
+    network: 'cayenne' | 'custom' | 'localhost'
+  ): Promise<string[]> => {
     const contract = await LitContracts.getStakingContract(network);
 
     // Fetch contract data
@@ -672,46 +676,45 @@ export class LitContracts {
         validators.push(validator);
       }
     } else {
-      LitContracts.logger.error('❌ Active validator set does not meet the threshold');
+      LitContracts.logger.error(
+        '❌ Active validator set does not meet the threshold'
+      );
     }
 
     // remove kicked validators in active validators
     const cleanedActiveValidators = activeValidators.filter(
-      (av: any) => !kickedValidators.some((kv: any) => kv.nodeAddress === av.nodeAddress)
+      (av: any) =>
+        !kickedValidators.some((kv: any) => kv.nodeAddress === av.nodeAddress)
     );
 
     const networks = cleanedActiveValidators.map((item: any) => {
-      let proto = "https://";
+      let proto = 'https://';
       if (item.port !== 443) {
-        proto = "http://";
+        proto = 'http://';
       }
       return `${proto}${intToIP(item.ip)}:${item.port}`;
     });
 
     return networks;
   };
-  
-  private static async _resolveContractContext(network:  "cayenne" | "internalDev" | "custom" | "localhost") {
+
+  private static async _resolveContractContext(
+    network: 'cayenne' | 'custom' | 'localhost'
+  ) {
     let data;
-    const INTERNAL_DEV_API =
-    'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
-    const CAYENNE_API = "https://lit-general-worker.getlit.dev/contract-addresses";
-    if (network === "cayenne") {
+    const CAYENNE_API =
+      'https://lit-general-worker.getlit.dev/contract-addresses';
+    if (network === 'cayenne') {
       try {
         // Fetch and parse the JSON data in one step
         data = await fetch(CAYENNE_API).then((res) => res.json());
       } catch (e: any) {
-        throw new Error(`Error fetching data from ${CAYENNE_API}: ${e.toString()}`);
-      }
-    } else if (network === "internalDev") {
-      try {
-        // Fetch and parse the JSON data in one step
-        data = await fetch(INTERNAL_DEV_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
+        throw new Error(
+          `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
+        );
       }
     }
-    
+
     return data;
   }
 
@@ -757,8 +760,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const _pubkey = pubkey ?? '0x';
 
     // if scopes are list of strings, turn them into numbers
-    scopes = scopes.map((
-      scope: any) => {
+    scopes = scopes.map((scope: any) => {
       if (typeof scope === 'string') {
         return ethers.BigNumber.from(scope);
       }
@@ -819,7 +821,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       tx: receipt,
     };
   };
-  
+
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
