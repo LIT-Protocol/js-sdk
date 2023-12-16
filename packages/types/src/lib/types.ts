@@ -97,8 +97,7 @@ export type LITChain<T> = {
 export type LIT_NETWORKS_KEYS =
   | 'cayenne'
   | 'localhost'
-  | 'custom'
-  | 'internalDev';
+  | 'custom';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 

@@ -100,7 +100,7 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
-  network: 'cayenne' | 'internalDev';
+  network: 'cayenne';
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
   // ----- autogen:declares:start  -----
@@ -174,7 +174,7 @@ export class LitContracts {
       storeOrUseStorageKey?: boolean;
     };
     debug?: boolean;
-    network?: 'cayenne' | 'internalDev';
+    network?: 'cayenne';
   }) {
     // this.provider = args?.provider;
     this.rpc = args?.rpc;
@@ -540,7 +540,7 @@ export class LitContracts {
   };
 
   public static async getStakingContract(
-    network: 'cayenne' | 'internalDev' | 'custom' | 'localhost'
+    network: 'cayenne' | 'custom' | 'localhost'
   ) {
     let manifest = await LitContracts._resolveContractContext(network);
 
@@ -563,7 +563,7 @@ export class LitContracts {
   }
 
   public static async getContractAddresses(
-    network: 'cayenne' | 'internalDev' | 'custom' | 'localhost'
+    network: 'cayenne' | 'custom' | 'localhost'
   ) {
     const data = await LitContracts._resolveContractContext(network);
     // Destructure the data for easier access
@@ -639,7 +639,7 @@ export class LitContracts {
   }
 
   public static getMinNodeCount = async (
-    network: 'cayenne' | 'internalDev' | 'custom' | 'localhost'
+    network: 'cayenne' | 'custom' | 'localhost'
   ) => {
     const contract = await LitContracts.getStakingContract(network);
 
@@ -652,7 +652,7 @@ export class LitContracts {
   };
 
   public static getValidators = async (
-    network: 'cayenne' | 'internalDev' | 'custom' | 'localhost'
+    network: 'cayenne' | 'custom' | 'localhost'
   ): Promise<string[]> => {
     const contract = await LitContracts.getStakingContract(network);
 
@@ -699,11 +699,9 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: 'cayenne' | 'internalDev' | 'custom' | 'localhost'
+    network: 'cayenne' | 'custom' | 'localhost'
   ) {
     let data;
-    const INTERNAL_DEV_API =
-      'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
     const CAYENNE_API =
       'https://lit-general-worker.getlit.dev/contract-addresses';
     if (network === 'cayenne') {
@@ -713,15 +711,6 @@ export class LitContracts {
       } catch (e: any) {
         throw new Error(
           `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
-        );
-      }
-    } else if (network === 'internalDev') {
-      try {
-        // Fetch and parse the JSON data in one step
-        data = await fetch(INTERNAL_DEV_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`
         );
       }
     }
