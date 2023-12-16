@@ -7,7 +7,7 @@ import * as siwe from 'siwe';
 // ==================== ENV Loading ====================
 const network = process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork;
 const debug = process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug;
-const checkSevAttestation = process.env.CHECK_SEV ?? false;
+const checkSevAttestation = process.env.CHECK_SEV === true ? true : false;
 const mintNew = process.env.MINT_NEW ?? true;
 
 // ==================== SIWE Gen ====================
