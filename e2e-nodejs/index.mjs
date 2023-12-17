@@ -66,17 +66,29 @@ async function main() {
   const mode = process.argv.includes('--parallel') ? 'parallel' : 'async';
   const args = process.argv.slice(2);
   const filesArg = args.find((arg) => arg.startsWith('--filter'));
-  const groupArg = args.find((arg) => arg.startsWith('--group'));
+  const groupArgs = args.filter((arg) => arg.startsWith('--group'));
+
   let filesValue = filesArg ? filesArg.split('=')[1] : null;
-  let groupValue = groupArg ? groupArg.split('=')[1] : null;
+
+  let groupValues = groupArgs
+    ? groupArgs.map((group) => group.split('=')[1])
+    : [];
+
   filesValue = filesValue ? filesValue.split(',') : null;
 
   let files = getFilesFromDir(DIR).filter((file) => {
     return filesValue ? filesValue.some((value) => file.includes(value)) : true;
   });
 
-  if (groupValue) {
-    files = files.filter((file) => file.includes(`group-${groupValue}`));
+  if (groupValues.length > 0) {
+    let filteredFiles = [];
+    for (const groupValue of groupValues) {
+      console.log('group ', groupValue);
+      filteredFiles = filteredFiles.concat(
+        files.filter((file) => file.includes(`group-${groupValue}`))
+      );
+    }
+    files = filteredFiles;
   }
 
   if (files.length <= 0) {
@@ -94,8 +106,8 @@ async function main() {
     '\n  --------------------------------------------------------------------------------'
   );
 
-  if (groupValue) {
-    console.log(`\n🚀 Running tests in group: ${groupValue}`);
+  if (groupValues) {
+    console.log(`\n🚀 Running tests in group: ${groupValues}`);
   }
   let currentGroup = null;
   let errorCounter = 0;
