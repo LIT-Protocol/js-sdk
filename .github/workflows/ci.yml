@@ -50,8 +50,8 @@ jobs:
     timeout-minutes: 30
     env:
       NETWORK: cayenne
-      MINT_NEW: false
-      DEBUG: false
+      MINT_NEW: true
+      DEBUG: true
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -68,4 +68,4 @@ jobs:
         run: yarn build
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:e2e:node --group=connection --group=lit-actions --group=concurrent-signing
+        run: yarn test:e2e:node --group=connection --group=lit-actions --group=pkp-auth-method --group=pkp-ethers
