@@ -45,3 +45,27 @@ jobs:
         run: yarn install
       - name: Lint
         run: yarn prettier:check
+  e2e-connection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NETWORK: cayenne
+      MINT_NEW: true
+      DEBUG: true
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install project dependencies
+        run: yarn install
+      - name: Build packages
+        id: build
+        run: yarn build
+      - name: Run End to End Tests
+        if: steps.build.outputs.exit_code == 0
+        run: yarn test:e2e:node --group=connection --group=lit-actions --group=pkp-auth-method --group=pkp-ethers

@@ -497,6 +497,9 @@ async function buildFunc() {
 
     await childRunCommand(`yarn nx run ${TARGET}:_buildTsc`);
     spawnListener(`yarn nx run ${TARGET}:_buildWeb`);
+    await childRunCommand(
+      `yarn tools --postBuildIndividual --target ${TARGET}`
+    );
     await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
     await childRunCommand(`yarn postBuild:mapDepsToDist`);
     await childRunCommand(`yarn gen:html`);
