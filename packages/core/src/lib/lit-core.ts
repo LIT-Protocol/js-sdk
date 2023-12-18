@@ -281,6 +281,7 @@ export class LitCore {
             networkPubKey: resp.networkPublicKey,
             networkPubKeySet: resp.networkPublicKeySet,
             hdRootPubkeys: resp.hdRootPubkeys,
+            latestBlockhash: resp.latestBlockhash,
           };
 
           // -- validate returned keys
@@ -378,6 +379,11 @@ export class LitCore {
           this.hdRootPubkeys = mostCommonString(
             Object.values(this.serverKeys).map(
               (keysFromSingleNode: any) => keysFromSingleNode.hdRootPubkeys
+            )
+          );
+          this.latestBlockhash = mostCommonString(
+            Object.values(this.serverKeys).map(
+              (keysFromSingleNode: any) => keysFromSingleNode.latestBlockhash
             )
           );
           this.ready = true;
