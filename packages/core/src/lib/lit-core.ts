@@ -45,6 +45,7 @@ import {
   JsonHandshakeResponse,
   JsonPkpSignRequest,
   KV,
+  LitContractContext,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
   NodeAttestation,
@@ -73,6 +74,7 @@ export class LitCore {
   networkPubKeySet: string | null;
   hdRootPubkeys: string[] | null;
   latestBlockhash: string | null;
+  contractContext?: LitContractContext | null;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
