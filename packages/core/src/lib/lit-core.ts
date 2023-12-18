@@ -396,6 +396,7 @@ export class LitCore {
             networkPubKeySet: this.networkPubKeySet,
             hdRootPubkeys: this.hdRootPubkeys,
             subnetPubkey: this.subnetPubKey,
+            latestBlockhash: this.latestBlockhash
           });
 
           // @ts-ignore
