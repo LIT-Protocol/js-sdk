@@ -100,7 +100,7 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
-  network: 'cayenne' | 'internalDev';
+  network: 'cayenne';
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
   // ----- autogen:declares:start  -----
@@ -174,7 +174,7 @@ export class LitContracts {
       storeOrUseStorageKey?: boolean;
     };
     debug?: boolean;
-    network?: 'cayenne' | 'internalDev';
+    network?: 'cayenne';
   }) {
     // this.provider = args?.provider;
     this.rpc = args?.rpc;
@@ -563,7 +563,7 @@ export class LitContracts {
   }
 
   public static async getContractAddresses(
-    network: 'cayenne' | 'internalDev' | 'custom' | 'localhost'
+    network: 'cayenne' | 'custom' | 'localhost'
   ) {
     const data = await LitContracts._resolveContractContext(network);
     // Destructure the data for easier access
@@ -702,10 +702,10 @@ export class LitContracts {
     network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost'
   ) {
     let data;
-    const INTERNAL_DEV_API =
-      'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
     const CAYENNE_API =
       'https://lit-general-worker.getlit.dev/contract-addresses';
+    const INTERNAL_DEV_API =
+      'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
     const MANZANO_API = 'https://lit-general-worker.getlit.dev/manzano-contract-addresses'; 
     const HABANERO_API = 'https://lit-general-worker.getlit.dev/habanero-contract-addresses';
 

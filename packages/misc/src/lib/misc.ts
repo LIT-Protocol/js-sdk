@@ -250,10 +250,10 @@ export const log = (...args: any): void => {
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
-    globalThis?.logger.debug(...log);
+    globalThis?.logger && globalThis?.logger.debug(...log);
   }
 
-  globalThis?.logger.debug(...args);
+  globalThis?.logger && globalThis?.logger.debug(...args);
 };
 
 export const logWithRequestId = (id: string, ...args: any) => {
@@ -278,10 +278,12 @@ export const logWithRequestId = (id: string, ...args: any) => {
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
-    globalThis.logManager.get(globalThis.logger.category, id).debug(...log);
+    globalThis?.logger &&
+      globalThis.logManager.get(globalThis.logger.category, id).debug(...log);
   }
 
-  globalThis.logManager.get(globalThis.logger.category, id).debug(...args);
+  globalThis?.logger &&
+    globalThis.logManager.get(globalThis.logger.category, id).debug(...args);
 };
 
 export const logErrorWithRequestId = (id: string, ...args: any) => {
@@ -306,10 +308,12 @@ export const logErrorWithRequestId = (id: string, ...args: any) => {
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
-    globalThis.logManager.get(globalThis.logger.category, id).error(...log);
+    globalThis?.logger &&
+      globalThis.logManager.get(globalThis.logger.category, id).error(...log);
   }
 
-  globalThis.logManager.get(globalThis.logger.category, id).error(...args);
+  globalThis?.logger &&
+    globalThis.logManager.get(globalThis.logger.category, id).error(...args);
 };
 
 export const logError = (...args: any) => {
@@ -334,10 +338,12 @@ export const logError = (...args: any) => {
   // if there are there are logs in buffer, print them first and empty the buffer.
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
-    globalThis.logManager.get(globalThis.logger.category).error(...log);
+    globalThis?.logger &&
+      globalThis.logManager.get(globalThis.logger.category).error(...log);
   }
 
-  globalThis.logManager.get(globalThis.logger.category).error(...args);
+  globalThis?.logger &&
+    globalThis.logManager.get(globalThis.logger.category).error(...args);
 };
 
 /**
