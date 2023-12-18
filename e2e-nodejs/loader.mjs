@@ -3,6 +3,7 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { uint8arrayFromString } from '@lit-protocol/uint8arrays';
 import { BigNumber, ethers } from 'ethers';
 import * as siwe from 'siwe';
+import * as LitJsSdk from '@lit-protocol/lit-node-client';
 
 // ==================== ENV Loading ====================
 const network = process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork;
@@ -17,6 +18,13 @@ const wallet = new ethers.Wallet(LITCONFIG.CONTROLLER_PRIVATE_KEY, provider);
 const address = ethers.utils.getAddress(await wallet.getAddress());
 
 // Craft the SIWE message
+
+const litNodeClient = new LitJsSdk.LitNodeClient({
+  litNetwork: network,
+});
+await litNodeClient.connect();
+let nonce = litNodeClient.getLatestBlockhash();
+console.log('GENERATED NONCE: ', nonce);
 const domain = 'localhost';
 const origin = 'https://localhost/login';
 const statement =
@@ -28,6 +36,7 @@ const siweMessage = new siwe.SiweMessage({
   uri: origin,
   version: '1',
   chainId: 1,
+  nonce,
   expirationTime: new Date(Date.now() + 1000 * 60 * 7).toISOString(),
 });
 const messageToSign = siweMessage.prepareMessage();
@@ -51,6 +60,7 @@ globalThis.LitCI.CONTROLLER_AUTHSIG = authSig;
 
 globalThis.LitCI.PKP_INFO = {};
 globalThis.LitCI.PKP_INFO.publicKey = LITCONFIG.PKP_PUBKEY;
+
 if (mintNew) {
   let contractClient = new LitContracts({
     signer: wallet,
