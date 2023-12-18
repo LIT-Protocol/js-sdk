@@ -1,6 +1,5 @@
 import { AuthMethodType } from './enums';
 import * as ethers from 'ethers';
-import { StakingBalances } from '../../../../dist/packages/contracts-sdk/src/abis/StakingBalances.sol/StakingBalances';
 import {
   AuthMethod,
   LitRelayConfig,
@@ -181,35 +180,3 @@ export type ClaimResult<T = ClaimProcessor> = {
   authMethodType: AuthMethodType;
   pubkey: string;
 } & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
-
-export type LitContract = {
-  address: string,
-  abi?: any;
-  name?: string;
-};
-
-/**
- * Defines a set of contract metadata for bootstrapping
- * network context and interfacing with contracts on Chroncile blockchain
- * 
-*/
-export type LitContractContext = {
-  [index:string]: LitContract;
-
-  Allowlist: LitContract,
-  LITToken: LitContract,
-  Multisender: LitContract,
-  PKPHelper: LitContract,
-  PKPNFT: LitContract,
-  PKPNFTMetadata: LitContract,
-  PKPPermissions: LitContract,
-  PubkeyRouter: LitContract,
-  RateLitmitNFT: LitContract,
-  Staking: LitContract,
-  StakingBalances: LitContract
-};
-
-/**
- *  
-*/
-export type Resolver = ethers.Contract;

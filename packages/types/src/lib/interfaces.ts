@@ -5,14 +5,15 @@ import {
   AcceptedFileType,
   AccessControlConditions,
   Chain,
+  ClaimProcessor,
+  ClaimResult,
   ConditionType,
   EncryptedSymmetricKey,
   EvmContractConditions,
   IRelayAuthStatus,
   JsonRequest,
   LIT_NETWORKS_KEYS,
-  LitContractContext,
-  Resolver,
+  MintCallback,
   SolRpcConditions,
   SymmetricKey,
   UnifiedAccessControlConditions,
@@ -22,9 +23,11 @@ import {
   ISessionCapabilityObject,
   LitResourceAbilityRequest,
 } from '@lit-protocol/auth-helpers';
+import { BytesLike } from 'ethers';
 
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
+import { AuthMethodType } from './enums';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -224,7 +227,6 @@ export interface LitNodeClientConfig {
   debug: boolean;
   bootstrapUrls: Array<string>;
   litNetwork: LIT_NETWORKS_KEYS;
-  contracts?: LitContractContext | Resolver,
   connectTimeout: number;
   checkNodeAttestation: boolean;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;

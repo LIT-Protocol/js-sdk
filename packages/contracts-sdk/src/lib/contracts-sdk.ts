@@ -1,8 +1,8 @@
 import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
-import { isBrowser, isNode } from '@lit-protocol/misc';
-import { AuthMethod, LitContractContext } from '@lit-protocol/types';
+import { isBrowser, isNode, log } from '@lit-protocol/misc';
+import { AuthMethod } from '@lit-protocol/types';
 
 let CID: any;
 try {
@@ -101,7 +101,6 @@ export class LitContracts {
   isPKP: boolean = false;
   debug: boolean = false;
   network: 'cayenne';
-  customContext?: LitContractContext;
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
   // ----- autogen:declares:start  -----
@@ -166,7 +165,6 @@ export class LitContracts {
   // make the constructor args optional
   constructor(args?: {
     provider?: ethers.providers.JsonRpcProvider | any;
-    customContext?: LitContracts;
     rpcs?: string[] | any;
     rpc?: string | any;
     signer?: ethers.Signer | any;
@@ -179,7 +177,6 @@ export class LitContracts {
     network?: 'cayenne';
   }) {
     // this.provider = args?.provider;
-    this.customContext = args?.customContext;
     this.rpc = args?.rpc;
     this.rpcs = args?.rpcs;
     this.signer = args?.signer;
@@ -543,8 +540,7 @@ export class LitContracts {
   };
 
   public static async getStakingContract(
-    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContracts
+    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost'
   ) {
     let manifest = await LitContracts._resolveContractContext(network);
 
@@ -567,26 +563,9 @@ export class LitContracts {
   }
 
   public static async getContractAddresses(
-    network: 'cayenne' | 'custom' | 'localhost',
-    context?: LitContractContext
+    network: 'cayenne' | 'custom' | 'localhost'
   ) {
-
-    let data
-    if (context) {
-      let reMap = [];
-      let keys = Object.keys(context);
-      for (const key of keys) {
-        context[key].name = key;
-        reMap.push(context[key].name = key);
-      }
-      data = {
-        contractData: reMap
-      };
-    } else {
-      data = await LitContracts._resolveContractContext(network);
-    }
-
-
+    const data = await LitContracts._resolveContractContext(network);
     // Destructure the data for easier access
     const { config, data: contractData } = data;
     const addresses: any = {};
@@ -594,59 +573,59 @@ export class LitContracts {
       switch (contract.name) {
         case 'Allowlist':
           addresses.Allowlist = {};
-          addresses.Allowlist.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.Allowlist.abi = contract.contracts[0].ABI ?? AllowlistData.abi;
+          addresses.Allowlist.address = contract.contracts[0].address_hash;
+          addresses.Allowlist.abi = contract.contracts[0].ABI;
           break;
         case 'PKPHelper':
           addresses.PKPHelper = {};
-          addresses.PKPHelper.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.PKPHelper.abi = contract.contracts[0].ABI ?? PKPHelperData.abi;
+          addresses.PKPHelper.address = contract.contracts[0].address_hash;
+          addresses.PKPHelper.abi = contract.contracts[0].ABI;
           break;
         case 'PKPNFT':
           addresses.PKPNFT = {};
-          addresses.PKPNFT.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.PKPNFT.abi = contract.contracts[0].ABI ?? PKPNFTData.abi;
+          addresses.PKPNFT.address = contract.contracts[0].address_hash;
+          addresses.PKPNFT.abi = contract.contracts[0].ABI;
           break;
         case 'Staking':
           addresses.Staking = {};
-          addresses.Staking.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.Staking.abi = contract.contracts[0].ABI ?? StakingData.abi;
+          addresses.Staking.address = contract.contracts[0].address_hash;
+          addresses.Staking.abi = contract.contracts[0].ABI;
           break;
         case 'RateLimitNFT':
           addresses.RateLimitNFT = {};
-          addresses.RateLimitNFT.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.RateLimitNFT.abi = contract.contracts[0].ABI ?? RateLimitNFTData.abi;
+          addresses.RateLimitNFT.address = contract.contracts[0].address_hash;
+          addresses.RateLimitNFT.abi = contract.contracts[0].ABI;
           break;
         case 'PKPPermissions':
           addresses.PKPPermissions = {};
-          addresses.PKPPermissions.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.PKPPermissions.abi = contract.contracts[0].ABI ?? PKPPermissionsData.abi;
+          addresses.PKPPermissions.address = contract.contracts[0].address_hash;
+          addresses.PKPPermissions.abi = contract.contracts[0].ABI;
           break;
         case 'PKPNFTMetadata':
           addresses.PKPNFTMetadata = {};
-          addresses.PKPNFTMetadata.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.PKPNFTMetadata.abi = contract.contracts[0].ABI ?? PKPNFTMetadataData.abi;
+          addresses.PKPNFTMetadata.address = contract.contracts[0].address_hash;
+          addresses.PKPNFTMetadata.abi = contract.contracts[0].ABI;
           break;
         case 'PubkeyRouter':
           addresses.PubkeyRouter = {};
-          addresses.PubkeyRouter.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.PubkeyRouter.abi = contract.contracts[0].ABI ?? PubkeyRouterData.abi;
+          addresses.PubkeyRouter.address = contract.contracts[0].address_hash;
+          addresses.PubkeyRouter.abi = contract.contracts[0].ABI;
           break;
         case 'LITToken':
           addresses.LITToken = {};
-          addresses.LITToken.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.LITToken.abi = contract.contracts[0].ABI ?? LITTokenData.abi;
+          addresses.LITToken.address = contract.contracts[0].address_hash;
+          addresses.LITToken.abi = contract.contracts[0].ABI;
           break;
         case 'StakingBalances':
           addresses.StakingBalances = {};
           addresses.StakingBalances.address =
-            contract.contracts[0].address_hash ?? contract.address;
-          addresses.StakingBalances.abi = contract.contracts[0].ABI ?? StakingBalancesData.abi;
+            contract.contracts[0].address_hash;
+          addresses.StakingBalances.abi = contract.contracts[0].ABI;
           break;
         case 'Multisender':
           addresses.Multisender = {};
-          addresses.Multisender.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.Multisender.abi = contract.contracts[0].ABI ?? MultisenderData.abi;
+          addresses.Multisender.address = contract.contracts[0].address_hash;
+          addresses.Multisender.abi = contract.contracts[0].ABI;
           break;
       }
     }
