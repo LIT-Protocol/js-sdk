@@ -2,9 +2,19 @@ import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
+import { LitAccessControlConditionResource, LitAbility } from '@lit-protocol/auth-helpers';
 import { fromString as uint8arrayFromString } from 'uint8arrays/from-string';
 import ethers from 'ethers';
-import siwe from 'siwe';
+import { SiweMessage } from 'siwe';
+
+async function hashBytes({ bytes }) {
+  const hashOfBytes = await crypto.subtle.digest('SHA-256', bytes);
+  const hashOfBytesStr = LitJsSdk.uint8arrayToString(
+    new Uint8Array(hashOfBytes),
+    'base16'
+  );
+  return hashOfBytesStr;
+}
 
 export async function main() {
   // ==================== Setup ====================
@@ -14,58 +24,90 @@ export async function main() {
   const privKeyBuffer = uint8arrayFromString(privKey, 'base16');
   const wallet = new ethers.Wallet(privKeyBuffer);
 
+  const chain = 'ethereum';
   const domain = 'localhost';
-  const origin = 'https://localhost/login';
   const statement =
     'This is a test statement. You can put anything you want here.';
 
-  const TEST_BLOCKHASH =
-    '0xfe88c94d860f01a17f961bf4bdfb6e0c6cd10d3fda5cc861e805ca1240c58553';
-
+  const accessControlConditions = [
+    {
+      contractAddress: '',
+      standardContractType: '',
+      chain,
+      method: 'eth_getBalance',
+      parameters: [':userAddress', 'latest'],
+      returnValueTest: {
+        comparator: '>=',
+        value: '0',
+      },
+    },
+  ];
+ 
   // ==================== Test Logic ====================
 
   const litNodeClient = new LitJsSdk.LitNodeClient({
     litNetwork: 'cayenne',
   });
   await litNodeClient.connect();
+
   let nonce = litNodeClient.getLatestBlockhash();
+  console.log('Eth blockhash nonce- ', nonce);
 
   if (!nonce) {
-    console.log(
-      "Latest blockhash is undefined as the corr node changes hasn't been deployed"
+    fail(
+      'Latest Eth blockhash is undefined'
     );
-    nonce = TEST_BLOCKHASH;
   }
 
-  const siweMessage = new siwe.SiweMessage({
-    domain,
-    address: wallet.address,
-    statement,
-    uri: origin,
-    version: '1',
-    chainId: '1',
-    nonce,
-  });
+  const authNeededCallback = async ({ resources, expiration, uri }) => {
+    const message = new SiweMessage({
+      domain,
+      address: wallet.address,
+      statement,
+      uri,
+      version: '1',
+      chainId: '1',
+      expirationTime: expiration,
+      resources,
+      nonce,
+    });
 
-  const messageToSign = siweMessage.prepareMessage();
-  const signature = await wallet.signMessage(messageToSign);
+    const toSign = message.prepareMessage();
+    const signature = await wallet.signMessage(toSign);
+  
+    const authSig = {
+      sig: signature,
+      derivedVia: 'web3.eth.personal.sign',
+      signedMessage: toSign,
+      address: wallet.address,
+    };
+  
+    return authSig;
+  };
+
+  const hashedEncryptedSymmetricKeyStr = await hashBytes({
+		bytes: new Uint8Array(accessControlConditions),
+	});
+
+  const litResource = new LitAccessControlConditionResource(
+    hashedEncryptedSymmetricKeyStr
+  );
 
   // ==================== Post-Validation ====================
 
-  const recoveredAddress = ethers.utils.verifyMessage(messageToSign, signature);
+  // NOTE: `getSessionSigs` will fail if the nonce is not a valid Eth blockhash
+  const sessionSigs = await litNodeClient.getSessionSigs({
+    chain,
+    resourceAbilityRequests: [
+      {
+        resource: litResource,
+        ability: LitAbility.AccessControlConditionDecryption
+      }
+    ],
+    authNeededCallback,
+  });
 
-  const authSig = {
-    sig: signature,
-    derivedVia: 'web3.eth.personal.sign',
-    signedMessage: messageToSign,
-    address: recoveredAddress,
-  };
-
-  console.log(authSig);
-
-  if (!authSig.signedMessage.includes(TEST_BLOCKHASH)) {
-    return fail("authSig doesn't contain the blockhash");
-  }
+  console.log(sessionSigs);
 
   // ==================== Success ====================
 
