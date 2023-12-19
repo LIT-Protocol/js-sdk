@@ -2,7 +2,6 @@ import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
 
-
 export async function main() {
   // ==================== Test Logic ====================
   const litNodeClient = new LitJsSdk.LitNodeClient({
@@ -12,7 +11,7 @@ export async function main() {
   let nonce = litNodeClient.getLatestBlockhash();
 
   if (!nonce) {
-    return fail("Block hash is undefined from the network handshake");
+    return fail('Block hash is undefined from the network handshake');
   }
 
   // ==================== Success ====================
