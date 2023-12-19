@@ -166,7 +166,7 @@ export class LitContracts {
   // make the constructor args optional
   constructor(args?: {
     provider?: ethers.providers.JsonRpcProvider | any;
-    customContext?: LitContracts;
+    customContext?: LitContractContext,
     rpcs?: string[] | any;
     rpc?: string | any;
     signer?: ethers.Signer | any;

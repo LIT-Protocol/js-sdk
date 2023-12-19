@@ -207,9 +207,12 @@ export type LitContractContext = {
   RateLitmitNFT: LitContract,
   Staking: LitContract,
   StakingBalances: LitContract
-};
+} | Resolver;
 
 /**
  *  
 */
-export type Resolver = ethers.Contract;
+export type ResolverContext = {
+  address: string | Uint8Array,
+  contract?: ethers.Contract,
+};

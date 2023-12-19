@@ -232,6 +232,7 @@ export interface LitNodeClientConfig {
 
 export interface CustomNetwork {
   litNetwork: LIT_NETWORKS_KEYS;
+  contractContext?: LitContractContext | null;
 }
 
 export interface Signature {
