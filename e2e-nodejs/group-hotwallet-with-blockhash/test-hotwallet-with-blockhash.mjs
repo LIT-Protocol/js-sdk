@@ -12,13 +12,7 @@ export async function main() {
   let nonce = litNodeClient.getLatestBlockhash();
 
   if (!nonce) {
-    console.log(
-      "Latest blockhash is undefined as the corr node changes hasn't been deployed"
-    );
-  }
-
-  if (!nonce) {
-    return fail("authSig doesn't contain the blockhash");
+    return fail("Block hash is undefined from the network handshake");
   }
 
   // ==================== Success ====================
