@@ -12,7 +12,6 @@ import {
   JsonRequest,
   LIT_NETWORKS_KEYS,
   LitContractContext,
-  Resolver,
   SolRpcConditions,
   SymmetricKey,
   UnifiedAccessControlConditions,
@@ -224,7 +223,6 @@ export interface LitNodeClientConfig {
   debug: boolean;
   bootstrapUrls: Array<string>;
   litNetwork: LIT_NETWORKS_KEYS;
-  contracts?: LitContractContext | Resolver,
   connectTimeout: number;
   checkNodeAttestation: boolean;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
@@ -232,6 +230,8 @@ export interface LitNodeClientConfig {
 
 export interface CustomNetwork {
   litNetwork: LIT_NETWORKS_KEYS;
+  bootstrapUrls: Array<string>,
+  minNodeCount?: number,
   contractContext?: LitContractContext | null;
 }
 

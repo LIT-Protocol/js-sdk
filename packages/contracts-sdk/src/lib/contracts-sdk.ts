@@ -544,7 +544,7 @@ export class LitContracts {
 
   public static async getStakingContract(
     network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContracts
+    context?: LitContractContext
   ) {
     let manifest = await LitContracts._resolveContractContext(network);
 
@@ -673,9 +673,10 @@ export class LitContracts {
   };
 
   public static getValidators = async (
-    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost'
+    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    context?: LitContractContext
   ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(network);
+    const contract = await LitContracts.getStakingContract(network, context);
 
     // Fetch contract data
     const [activeValidators, currentValidatorsCount, kickedValidators] =
