@@ -2,7 +2,10 @@ import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
-import { LitAccessControlConditionResource, LitAbility } from '@lit-protocol/auth-helpers';
+import {
+  LitAccessControlConditionResource,
+  LitAbility,
+} from '@lit-protocol/auth-helpers';
 import { fromString as uint8arrayFromString } from 'uint8arrays/from-string';
 import ethers from 'ethers';
 import { SiweMessage } from 'siwe';
@@ -42,7 +45,7 @@ export async function main() {
       },
     },
   ];
- 
+
   // ==================== Test Logic ====================
 
   const litNodeClient = new LitJsSdk.LitNodeClient({
@@ -54,9 +57,7 @@ export async function main() {
   console.log('Eth blockhash nonce- ', nonce);
 
   if (!nonce) {
-    fail(
-      'Latest Eth blockhash is undefined'
-    );
+    fail('Latest Eth blockhash is undefined');
   }
 
   const authNeededCallback = async ({ resources, expiration, uri }) => {
@@ -74,20 +75,20 @@ export async function main() {
 
     const toSign = message.prepareMessage();
     const signature = await wallet.signMessage(toSign);
-  
+
     const authSig = {
       sig: signature,
       derivedVia: 'web3.eth.personal.sign',
       signedMessage: toSign,
       address: wallet.address,
     };
-  
+
     return authSig;
   };
 
   const hashedEncryptedSymmetricKeyStr = await hashBytes({
-		bytes: new Uint8Array(accessControlConditions),
-	});
+    bytes: new Uint8Array(accessControlConditions),
+  });
 
   const litResource = new LitAccessControlConditionResource(
     hashedEncryptedSymmetricKeyStr
@@ -101,8 +102,8 @@ export async function main() {
     resourceAbilityRequests: [
       {
         resource: litResource,
-        ability: LitAbility.AccessControlConditionDecryption
-      }
+        ability: LitAbility.AccessControlConditionDecryption,
+      },
     ],
     authNeededCallback,
   });

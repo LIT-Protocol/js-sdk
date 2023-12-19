@@ -52,7 +52,7 @@ export async function main() {
   const pkpSignRes = await client?.pkpSign({
     toSign: TO_SIGN,
     pubKey: globalThis.LitCI.AUTH_METHOD_PKP_INFO.publicKey,
-    sessionSigs: sessionSigs
+    sessionSigs: sessionSigs,
   });
 
   const pkpWallet = new PKPEthersWallet({
