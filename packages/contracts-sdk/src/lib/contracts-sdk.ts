@@ -546,24 +546,29 @@ export class LitContracts {
     network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost',
     context?: LitContractContext
   ) {
-    let manifest = await LitContracts._resolveContractContext(network);
-
     const rpcUrl = DEFAULT_RPC;
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
-    const { config, data: contractData } = manifest;
+    if (!context) {
+      let manifest = await LitContracts._resolveContractContext(network);
+  
+      const { config, data: contractData } = manifest;
+  
+      const stakingContract = contractData.find(
+        (item: { name: string }) => item.name === 'Staking'
+      ).contracts[0];
+      const { address_hash, ABI } = stakingContract;
+  
+      // Validate the required data
+      if (!address_hash || !ABI) {
+        throw new Error('❌ Required contract data is missing');
+      }
 
-    const stakingContract = contractData.find(
-      (item: { name: string }) => item.name === 'Staking'
-    ).contracts[0];
-    const { address_hash, ABI } = stakingContract;
-
-    // Validate the required data
-    if (!address_hash || !ABI) {
-      throw new Error('❌ Required contract data is missing');
+      return new ethers.Contract(address_hash, ABI, provider);
+    } else {
+      let stakingContract = context.Staking;
+      return new ethers.Contract(stakingContract.address, stakingContract.abi ?? StakingData.abi, provider);
     }
-
-    return new ethers.Contract(address_hash, ABI, provider);
   }
 
   public static async getContractAddresses(
@@ -577,7 +582,7 @@ export class LitContracts {
       let keys = Object.keys(context);
       for (const key of keys) {
         context[key].name = key;
-        reMap.push(context[key].name = key);
+        reMap.push(context[key]);
       }
       data = {
         contractData: reMap
@@ -660,9 +665,10 @@ export class LitContracts {
   }
 
   public static getMinNodeCount = async (
-    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost'
+    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    context?: LitContractContext
   ) => {
-    const contract = await LitContracts.getStakingContract(network);
+    const contract = await LitContracts.getStakingContract(network, context);
 
     const minNodeCount = await contract['currentValidatorCountForConsensus']();
 

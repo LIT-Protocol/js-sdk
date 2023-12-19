@@ -225,6 +225,7 @@ export interface LitNodeClientConfig {
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
   checkNodeAttestation: boolean;
+  contractContext?: LitContractContext;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
@@ -232,7 +233,7 @@ export interface CustomNetwork {
   litNetwork: LIT_NETWORKS_KEYS;
   bootstrapUrls: Array<string>,
   minNodeCount?: number,
-  contractContext?: LitContractContext | null;
+  contractContext?: LitContractContext;
 }
 
 export interface Signature {

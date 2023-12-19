@@ -1,6 +1,6 @@
 import { AuthMethodType } from './enums';
 import * as ethers from 'ethers';
-import { StakingBalances } from '../../../../dist/packages/contracts-sdk/src/abis/StakingBalances.sol/StakingBalances';
+
 import {
   AuthMethod,
   LitRelayConfig,
@@ -194,7 +194,7 @@ export type LitContract = {
  * 
 */
 export type LitContractContext = {
-  [index:string]: any;
+  [index: string]: string | any;
 
   Allowlist: LitContract,
   LITToken: LitContract,
@@ -204,15 +204,16 @@ export type LitContractContext = {
   PKPNFTMetadata: LitContract,
   PKPPermissions: LitContract,
   PubkeyRouter: LitContract,
-  RateLitmitNFT: LitContract,
+  RateLimitNFT: LitContract,
   Staking: LitContract,
   StakingBalances: LitContract
-} | ResolverContext;
+};
 
 /**
  *  
 */
 export type ResolverContext = {
+  [index: string]: string | ethers.Contract | Uint8Array | undefined,
   address: string | Uint8Array,
   contract?: ethers.Contract,
   abi?: any

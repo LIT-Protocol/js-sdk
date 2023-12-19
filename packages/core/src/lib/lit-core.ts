@@ -196,6 +196,38 @@ export class LitCore {
         LIT_NETWORKS.cayenne.length == 2
           ? 2
           : (LIT_NETWORKS.cayenne.length * 2) / 3;
+    
+    } else if (this.config.litNetwork == LitNetwork.Custom && this.config.bootstrapUrls.length < 1) {
+      log('using custom contracts: ', this.config.contractContext);
+
+      const minNodeCount = await LitContracts.getMinNodeCount(
+        this.config.litNetwork as LitNetwork,
+        this.config.contractContext
+      );
+
+      const bootstrapUrls = await LitContracts.getValidators(
+        this.config.litNetwork as LitNetwork,
+        this.config.contractContext
+      );
+      log('Bootstrap urls: ', bootstrapUrls);
+      if (minNodeCount <= 0) {
+        throwError({
+          message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
+          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        });
+      }
+
+      if (bootstrapUrls.length <= 0) {
+        throwError({
+          message: `bootstrapUrls is empty, which is invalid. Please check your network connection and try again.`,
+          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        });
+      }
+
+      this.config.minNodeCount = parseInt(minNodeCount, 10);
+      this.config.bootstrapUrls = bootstrapUrls; 
     }
   };
 
