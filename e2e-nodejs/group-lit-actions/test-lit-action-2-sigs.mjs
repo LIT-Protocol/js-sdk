@@ -13,13 +13,14 @@ export async function main() {
   const res = await client.executeJs({
     authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
     code: `(async () => {
-      console.log('hello world')
-
       async function signMultipleSigs(numSigs, toSign, publicKey) {
         const sigShares = [];
         for(let i = 0; i < numSigs; i++) {
+          const DATA_TO_SIGN = new Uint8Array(
+            await crypto.subtle.digest('SHA-256', new TextEncoder().encode('Hello world' + i))
+          );
           const sigShare = await LitActions.signEcdsa({
-            toSign,
+            toSign: DATA_TO_SIGN,
             publicKey,
             sigName: "sig" + i,
           });
