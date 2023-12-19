@@ -108,7 +108,7 @@ export interface AuthCallbackParams {
   // statement.
   statement?: string;
 
-  // Either the blockhash that the nodes return during the handshake or a randomly generated nonce with lit-siwe's `generateNonce()` function
+  // The blockhash that the nodes return during the handshake
   nonce: string;
 
   // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.

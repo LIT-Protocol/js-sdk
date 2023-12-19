@@ -151,6 +151,11 @@ export const LIT_ERROR = {
     code: 'invalid_node_attestation',
     kind: LitErrorKind.Unexpected,
   },
+  INVALID_ETH_BLOCKHASH: {
+    name: 'InvalidEthBlockhash',
+    code: 'invalid_eth_blockhash',
+    kind: LitErrorKind.Unexpected,
+  },
 };
 
 export const LIT_ERROR_CODE = {
