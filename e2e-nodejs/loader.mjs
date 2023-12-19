@@ -37,7 +37,7 @@ const siweMessage = new siwe.SiweMessage({
   version: '1',
   chainId: 1,
   nonce,
-  expirationTime: new Date(Date.now() + 1000 * 60 * 7).toISOString(),
+  expirationTime: new Date(Date.now() + 60 * 60 * 24).toISOString(),
 });
 const messageToSign = siweMessage.prepareMessage();
 
