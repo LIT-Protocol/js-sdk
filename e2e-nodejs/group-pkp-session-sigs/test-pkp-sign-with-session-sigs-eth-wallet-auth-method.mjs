@@ -43,7 +43,7 @@ export async function main() {
 
   const sessionSigs = await client.getSessionSigs({
     chain: 'ethereum',
-    expiration: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
+    expiration: new Date(Date.now() + 60 * 60).toISOString(),
     resourceAbilityRequests: resourceAbilities,
     sessionKey: sessionKeyPair,
     authNeededCallback,
@@ -52,8 +52,7 @@ export async function main() {
   const pkpSignRes = await client?.pkpSign({
     toSign: TO_SIGN,
     pubKey: globalThis.LitCI.AUTH_METHOD_PKP_INFO.publicKey,
-    sessionSigs: sessionSigs,
-    // authMethods: [authMethod], // This is not working!
+    sessionSigs: sessionSigs
   });
 
   const pkpWallet = new PKPEthersWallet({
