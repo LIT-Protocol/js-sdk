@@ -106,7 +106,7 @@ export class LitCore {
           this.config = {
             ..._defaultConfig,
             litNetwork: LitNetwork.Manzano,
-          } as unknown as LitNodeClientConfig
+          } as unknown as LitNodeClientConfig;
           break;
         default:
           this.config = {
@@ -162,7 +162,10 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the configuration is updated.
    */
   setNewConfig = async (): Promise<void> => {
-    if (this.config.litNetwork === LitNetwork.InternalDev || this.config.litNetwork === LitNetwork.Manzano) {
+    if (
+      this.config.litNetwork === LitNetwork.InternalDev ||
+      this.config.litNetwork === LitNetwork.Manzano
+    ) {
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork as LitNetwork
       );
@@ -196,13 +199,16 @@ export class LitCore {
         LIT_NETWORKS.cayenne.length == 2
           ? 2
           : (LIT_NETWORKS.cayenne.length * 2) / 3;
-    
-    /**
-     * Here we are checking if a custom network defined with no node urls (bootstrap urls) defined
-     * If this is the case we need to bootstrap the network state from the set of contracts given.
-     * So we call to the Staking contract with the address given by the caller to resolve the network state.
-     */
-    } else if (this.config.litNetwork === LitNetwork.Custom && this.config.bootstrapUrls.length < 1) {
+
+      /**
+       * Here we are checking if a custom network defined with no node urls (bootstrap urls) defined
+       * If this is the case we need to bootstrap the network state from the set of contracts given.
+       * So we call to the Staking contract with the address given by the caller to resolve the network state.
+       */
+    } else if (
+      this.config.litNetwork === LitNetwork.Custom &&
+      this.config.bootstrapUrls.length < 1
+    ) {
       log('using custom contracts: ', this.config.contractContext);
 
       const minNodeCount = await LitContracts.getMinNodeCount(
@@ -233,9 +239,8 @@ export class LitCore {
 
       this.config.minNodeCount = parseInt(minNodeCount, 10);
       this.config.bootstrapUrls = bootstrapUrls;
-
     }
-  }
+  };
 
   /**
    * Sets up a listener to detect state changes (new epochs) in the staking contract.
@@ -247,7 +252,10 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
    */
   listenForNewEpoch = async (): Promise<void> => {
-    if (this.config.litNetwork === LitNetwork.InternalDev || this.config.litNetwork === LitNetwork.Manzano) {
+    if (
+      this.config.litNetwork === LitNetwork.InternalDev ||
+      this.config.litNetwork === LitNetwork.Manzano
+    ) {
       const stakingContract = await LitContracts.getStakingContract(
         this.config.litNetwork as any
       );
@@ -396,7 +404,10 @@ export class LitCore {
     const promise = new Promise((resolve: any, reject: any) => {
       const startTime = Date.now();
       const interval = setInterval(() => {
-        if (Object.keys(this.serverKeys).length == this.config.bootstrapUrls.length) {
+        if (
+          Object.keys(this.serverKeys).length ==
+          this.config.bootstrapUrls.length
+        ) {
           clearInterval(interval);
 
           // pick the most common public keys for the subnet and network from the bunch, in case some evil node returned a bad key
@@ -435,7 +446,7 @@ export class LitCore {
             networkPubKeySet: this.networkPubKeySet,
             hdRootPubkeys: this.hdRootPubkeys,
             subnetPubkey: this.subnetPubKey,
-            latestBlockhash: this.latestBlockhash
+            latestBlockhash: this.latestBlockhash,
           });
 
           // @ts-ignore
@@ -452,10 +463,13 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
-              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
-              } of ${this.config.minNodeCount
-              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${
+              this.config.connectTimeout
+            }ms.  Could only connect to ${
+              Object.keys(this.serverKeys).length
+            } of ${
+              this.config.minNodeCount
+            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             logErrorWithRequestId(requestId, msg);
             reject(msg);
           }
@@ -574,9 +588,10 @@ export class LitCore {
       .catch((error: NodeErrorV3) => {
         logErrorWithRequestId(
           requestId,
-          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error?.message || error?.details
-            ? `Error is ${error.message} - ${error.details}`
-            : ''
+          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
+            error?.message || error?.details
+              ? `Error is ${error.message} - ${error.details}`
+              : ''
           }`
         );
         return Promise.reject(error);

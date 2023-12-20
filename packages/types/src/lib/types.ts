@@ -183,7 +183,7 @@ export type ClaimResult<T = ClaimProcessor> = {
 } & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
 
 export type LitContract = {
-  address?: string,
+  address?: string;
   abi?: any;
   name?: string;
 };
@@ -191,22 +191,22 @@ export type LitContract = {
 /**
  * Defines a set of contract metadata for bootstrapping
  * network context and interfacing with contracts on Chroncile blockchain
- * 
-*/
+ *
+ */
 export type LitContractContext = {
   [index: string]: string | any;
 
-  Allowlist: LitContract,
-  LITToken: LitContract,
-  Multisender: LitContract,
-  PKPHelper: LitContract,
-  PKPNFT: LitContract,
-  PKPNFTMetadata: LitContract,
-  PKPPermissions: LitContract,
-  PubkeyRouter: LitContract,
-  RateLimitNFT: LitContract,
-  Staking: LitContract,
-  StakingBalances: LitContract
+  Allowlist: LitContract;
+  LITToken: LitContract;
+  Multisender: LitContract;
+  PKPHelper: LitContract;
+  PKPNFT: LitContract;
+  PKPNFTMetadata: LitContract;
+  PKPPermissions: LitContract;
+  PubkeyRouter: LitContract;
+  RateLimitNFT: LitContract;
+  Staking: LitContract;
+  StakingBalances: LitContract;
 };
 
 /**
@@ -214,11 +214,11 @@ export type LitContractContext = {
  * In place of LitContractContext for loading addresses of lit contracts
  * an instance of LitContractContext can still be provided. which will be used for abi data.
  *
-*/
+ */
 export type LitContractResolverContext = {
-  [index: string]: string | LitContractContext | undefined | number,
-  resolverAddress: string,
-  abi: any,
-  enviorment: number,
-  contractContext: LitContractContext
+  [index: string]: string | LitContractContext | undefined | number;
+  resolverAddress: string;
+  abi: any;
+  enviorment: number;
+  contractContext: LitContractContext;
 };

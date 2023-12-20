@@ -232,8 +232,8 @@ export interface LitNodeClientConfig {
 
 export interface CustomNetwork {
   litNetwork: LIT_NETWORKS_KEYS;
-  bootstrapUrls: Array<string>,
-  minNodeCount?: number,
+  bootstrapUrls: Array<string>;
+  minNodeCount?: number;
   contractContext?: LitContractContext;
 }
 

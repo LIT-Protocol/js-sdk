@@ -57,7 +57,7 @@ if (mintNew) {
   let contractClient = new LitContracts({
     signer: wallet,
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
-    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork
+    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
   });
 
   await contractClient.connect();
@@ -80,7 +80,7 @@ if (mintNew) {
       value: mintCost,
     }
   );
-  
+
   let tx = await res.wait();
   let tokenId = tx.events ? tx.events[0].topics[1] : tx.logs[0].topics[1];
   let pubkeyWithAuthMethod = await contractClient.pkpNftContract.read.getPubkey(
