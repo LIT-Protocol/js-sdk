@@ -2,7 +2,7 @@ import { SiweMessage } from 'siwe';
 import { Recap } from 'siwe-recap';
 import {
   AttenuationsObject,
-  CID,
+  CID as CIDString,
   ILitResource,
   ISessionCapabilityObject,
   LitAbility,
@@ -11,33 +11,63 @@ import {
 import { getRecapNamespaceAndAbility } from './utils';
 import { sanitizeSiweMessage } from '../siwe';
 import { AuthSig } from '../models';
+// import * as bs58Pkg from 'bs58';
+// import * as cidPkg from 'multiformats/cid';
+
+// console.log("cidPkg:", cidPkg);
+
+// let bs58: {
+//   encode: any;
+//   decodeUnsafe: any;
+//   decode: any;
+// }
+
+// try {
+//   bs58 = bs58Pkg;
+//   console.log("bs58:", bs58);
+// } catch (e) {
+//   console.log('bs58 not found!');
+// }
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   #inner: Recap;
 
   constructor(
     att: AttenuationsObject = {},
-    prf: Array<CID> | Array<string> = []
+    prf: Array<CIDString> | Array<string> = []
   ) {
     this.#inner = new Recap(att, prf);
   }
 
+  static async sha256(data: Buffer): Promise<ArrayBuffer> {
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return digest;
+  }
+
   /**
-   * Adds a Rate Limit Authorization Signature (AuthSig) as a proof to the Recap object.
-   * This method serializes the AuthSig object into a JSON string and adds it to the proofs
+   * Adds a Rate Limit Authorization Signature (AuthSig) as an proof to the Recap object.
+   * This method serializes the AuthSig object into a JSON string and adds it to the proof
    * of the Recap object. The AuthSig typically contains authentication details like signature,
    * method of derivation, the signed message, and the address of the signer. This proof is
    * used to verify that the user has the necessary authorization, such as a Rate Limit Increase NFT.
    *
    * @param authSig The AuthSig object containing the rate limit authorization details.
    */
-  addRateLimitAuthSig(authSig: AuthSig): void {
+  async addRateLimitAuthSig(
+    authSig: AuthSig,
+  )
+    : Promise<void> {
 
-    // Serialize the AuthSig object into a JSON string
-    const serializedAuthSig = JSON.stringify(authSig);
+    // @ts-ignore
+    const Hash = await import('ipfs-only-hash');
+    const data = JSON.stringify(authSig);
+    const hash = await Hash.of(data);
 
-    // Add the serialized AuthSig as a proof to the Recap object
-    this.#inner.addProof(serializedAuthSig);
+    try {
+      this.addProof(hash);
+    } catch (e: any) {
+      throw new Error(e);
+    }
   }
 
   static decode(encoded: string): RecapSessionCapabilityObject {
@@ -60,7 +90,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     return this.#inner.attenuations;
   }
 
-  get proofs(): Array<CID> {
+  get proofs(): Array<CIDString> {
     return this.#inner.proofs.map((cid: any) => cid.toString());
   }
 
