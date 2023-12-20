@@ -550,13 +550,11 @@ export class LitContracts {
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
     if (!context) {
-      let manifest = await LitContracts._resolveContractContext(network);
-  
-      const { config, data: contractData } = manifest;
+      let contractData = await LitContracts._resolveContractContext(network);
   
       const stakingContract = contractData.find(
         (item: { name: string }) => item.name === 'Staking'
-      ).contracts[0];
+      );
       const { address, abi } = stakingContract;
   
       // Validate the required data
