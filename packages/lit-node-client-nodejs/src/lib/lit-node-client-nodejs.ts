@@ -2386,6 +2386,14 @@ export class LitNodeClientNodeJs extends LitCore {
           params.resourceAbilityRequests.map((r) => r.resource)
         );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
+
+    if (!this.latestBlockhash) {
+      throwError({
+        message: 'Eth Blockhash is undefined.',
+        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
+        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
+      });
+    }
     let nonce = this.latestBlockhash!;
 
     // -- (TRY) to get the wallet signature
