@@ -576,7 +576,7 @@ export class LitContracts {
         }
         return new ethers.Contract(stakingContract.address, stakingContract.abi ?? StakingData.abi, provider);
       } else {
-        let contractContext = await LitContracts._getContractsFromResolver(context.resolverAddress, context.abi, context.enviorment, context.contractContext);
+        let contractContext = await LitContracts._getContractsFromResolver(context as LitContractResolverContext, ['Staking']);
         if (!contractContext.Staking.address) {
           throw new Error("❌ Could not get Staking Contract from contract resolver instance");
         }
@@ -585,57 +585,64 @@ export class LitContracts {
     }
   }
 
-  private static async _getContractsFromResolver(address: string, abi: any, enviorment: number, contracts?: LitContractContext): Promise<LitContractContext> {
+  private static async _getContractsFromResolver(context: LitContractResolverContext, contractNames?: Array<keyof LitContractContext>): Promise<LitContractContext> {
     const rpcUrl = DEFAULT_RPC;
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    let resolverContract = new ethers.Contract(context.resolverAddress, context.abi, provider);
 
-    let resolverContract = new ethers.Contract(address, abi, provider);
-    let addresses: LitContractContext = {
-      Allowlist: {
-        address: await resolverContract['getContract'](await resolverContract['ALLOWLIST_CONTRACT'](), enviorment),
-        abi: contracts?.Allowlist?.abi
-      },
-      LITToken: {
-        address: await resolverContract['getContract'](await resolverContract['LIT_TOKEN_CONTRACT'](), enviorment),
-        abi: contracts?.LITToken?.abi
-      },
-      Multisender: {
-        address: await resolverContract['getContract'](await resolverContract['MULTI_SENDER_CONTRACT'](), enviorment),
-        abi: contracts?.Multisender?.abi
-      },
-      PKPNFT: {
-        address: await resolverContract['getContract'](await resolverContract['PKP_NFT_CONTRACT'](), enviorment),
-        abi: contracts?.PKPNFT?.abi
-      },
-      PKPNFTMetadata: {
-        address: await resolverContract['getContract'](await resolverContract['PKP_NFT_METADATA_CONTRACT'](), enviorment),
-        abi: contracts?.PKPNFTMetadata?.abi
-      },
-      PKPPermissions: {
-        address: await resolverContract['getContract'](await resolverContract['PKP_PERMISSIONS_CONTRACT'](), enviorment),
-        abi: contracts?.PKPPermissions?.abi
-      },
-      PKPHelper: {
-        address: await resolverContract['getContract'](await resolverContract['PKP_HELPER_CONTRACT'](), enviorment),
-        abi: contracts?.PKPHelper?.abi
-      },
-      PubkeyRouter: {
-        address: await resolverContract['getContract'](await resolverContract['PUB_KEY_ROUTER_CONTRACT'](), enviorment),
-        abi: contracts?.PubkeyRouter?.abi
-      },
-      RateLimitNFT: {
-        address: await resolverContract['getContract'](await resolverContract['RATE_LIMIT_NFT_CONTRACT'](), enviorment),
-        abi: contracts?.RateLimitNFT?.abi
-      },
-      Staking: {
-        address: await resolverContract['getContract'](await resolverContract['STAKING_CONTRACT'](), enviorment),
-        abi: contracts?.Staking?.abi
-      },
-      StakingBalances: {
-        address: await resolverContract['getContract'](await resolverContract['STAKING_BALANCES_CONTRACT'](), enviorment), 
-        abi: contracts?.StakingBalances?.abi
+    let getContract = async function(contract: keyof LitContractContext, enviorment: number): Promise<string> {
+      let address: string = "";
+      switch(contract) {
+        case 'Allowlist':
+          address = await resolverContract['getContract'](await resolverContract['ALLOWLIST_CONTRACT'](), enviorment);
+          break;
+        case 'LITToken':
+          address = await resolverContract['getContract'](await resolverContract['LIT_TOKEN_CONTRACT'](), enviorment);
+          break;
+        case 'Multisender':
+          address = await resolverContract['getContract'](await resolverContract['MULTI_SENDER_CONTRACT'](), enviorment);
+          break;
+        case 'PKPNFT':
+          address = await resolverContract['getContract'](await resolverContract['PKP_NFT_CONTRACT'](), enviorment);
+          break;
+        case 'PKPNFTMetadata':
+          address = await resolverContract['getContract'](await resolverContract['PKP_NFT_METADATA_CONTRACT'](), enviorment);
+          break;
+        case 'PKPPermissions':
+          address = await resolverContract['getContract'](await resolverContract['PKP_PERMISSIONS_CONTRACT'](), enviorment);
+          break;
+        case 'PKPHelper':
+          address = await resolverContract['getContract'](await resolverContract['PKP_HELPER_CONTRACT'](), enviorment);
+          break;
+        case 'PubkeyRouter':
+          address = await resolverContract['getContract'](await resolverContract['PUB_KEY_ROUTER_CONTRACT'](), enviorment);
+          break;
+        case 'RateLimitNFT':
+          address = await resolverContract['getContract'](await resolverContract['RATE_LIMIT_NFT_CONTRACT'](), enviorment);
+          break;
+        case 'Staking':
+          address = await resolverContract['getContract'](await resolverContract['STAKING_CONTRACT'](), enviorment);
+          break;
+        case 'StakingBalances':
+          address = await resolverContract['getContract'](await resolverContract['STAKING_BALANCES_CONTRACT'](), enviorment);
+          break;        
       }
-    };
+
+      return address;
+    }
+
+    if (!contractNames) {
+        contractNames = ['Allowlist', 'Staking', 'RateLimitNFT', 'PubkeyRouter', 'PKPHelper', 'PKPPermissions', 'PKPNFTMetadata', 'PKPNFT', 'Multisender', 'LITToken', 'StakingBalances'];
+    }
+
+    let addresses: LitContractContext = {} as LitContractContext;
+    for (const contract of contractNames) {
+      let contracts = context?.contractContext;
+      addresses[contract] = {
+        address: await getContract(contract, context.enviorment),
+        abi: contracts?.[contract]?.abi ?? undefined
+      }
+    }
 
     return addresses;
   }
@@ -649,7 +656,7 @@ export class LitContracts {
       // if there is a resolver address we use the resolver contract to query the rest of the contracts
       // here we override context to be what is returned from the resolver which is of type LitContractContext
       if (context?.resolverAddress) {
-        context = await LitContracts._getContractsFromResolver(context.resolverAddress, context.abi, context.enviorment, context.contractContext);
+        context = await LitContracts._getContractsFromResolver(context as LitContractResolverContext);
       }
 
       let flatten = [];
@@ -800,7 +807,8 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost'
+    network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+
   ) {
     let data;
     const CAYENNE_API =
