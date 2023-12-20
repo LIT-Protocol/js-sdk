@@ -651,7 +651,7 @@ export class LitContracts {
     network: 'cayenne' | 'custom' | 'localhost',
     context?: LitContractContext | LitContractResolverContext
   ) {
-    let data
+    let contractData;
     if (context) {
       // if there is a resolver address we use the resolver contract to query the rest of the contracts
       // here we override context to be what is returned from the resolver which is of type LitContractContext
@@ -665,16 +665,13 @@ export class LitContracts {
         context[key].name = key;
         flatten.push(context[key]);
       }
-      data = {
-        contractData: flatten
-      };
+        contractData =  flatten
     } else {
-      data = await LitContracts._resolveContractContext(network);
+      contractData = await LitContracts._resolveContractContext(network);
     }
 
 
     // Destructure the data for easier access
-    const { contractData } = data;
     const addresses: any = {};
     for (const contract of contractData) {
       switch (contract.name) {
@@ -857,9 +854,9 @@ export class LitContracts {
     }
     // Data pulled over http is formatted differently than
     // what the type expects. Here we normmalize to the LitContractContext type.
-    data = data.map((c: any) => {
+    data = data.data.map((c: any) => {
       return {
-        address: c.contracts[0].address_hex,
+        address: c.contracts[0].address_hash,
         abi: c.contracts[0].ABI,
         name: c.name
       };
