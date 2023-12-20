@@ -20,7 +20,7 @@ async function hashBytes({ bytes }) {
 }
 
 function checkNonceInEachSessionSig(sessionSig, nonce) {
-  return Object.keys(sessionSig).every(key => {
+  return Object.keys(sessionSig).every((key) => {
     const signedMessage = sessionSig[key].signedMessage;
     return signedMessage.includes(nonce);
   });
