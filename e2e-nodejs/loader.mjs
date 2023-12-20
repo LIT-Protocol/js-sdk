@@ -44,6 +44,7 @@ const authSig = {
 
 // ==================== Global Vars ====================
 globalThis.LitCI = {};
+globalThis.LitCI.wallet = wallet;
 globalThis.LitCI.network = network;
 globalThis.LitCI.debug = debug;
 globalThis.LitCI.sevAttestation = checkSevAttestation;
@@ -51,11 +52,12 @@ globalThis.LitCI.CONTROLLER_AUTHSIG = authSig;
 
 globalThis.LitCI.PKP_INFO = {};
 globalThis.LitCI.PKP_INFO.publicKey = LITCONFIG.PKP_PUBKEY;
+
 if (mintNew) {
   let contractClient = new LitContracts({
     signer: wallet,
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
-    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
+    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork
   });
 
   await contractClient.connect();
@@ -78,7 +80,7 @@ if (mintNew) {
       value: mintCost,
     }
   );
-
+  
   let tx = await res.wait();
   let tokenId = tx.events ? tx.events[0].topics[1] : tx.logs[0].topics[1];
   let pubkeyWithAuthMethod = await contractClient.pkpNftContract.read.getPubkey(
