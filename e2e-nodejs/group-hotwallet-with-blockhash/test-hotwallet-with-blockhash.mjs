@@ -19,6 +19,13 @@ async function hashBytes({ bytes }) {
   return hashOfBytesStr;
 }
 
+function checkNonceInEachSessionSig(sessionSig, nonce) {
+  return Object.keys(sessionSig).every(key => {
+    const signedMessage = sessionSig[key].signedMessage;
+    return signedMessage.includes(nonce);
+  });
+}
+
 export async function main() {
   // ==================== Setup ====================
 
@@ -109,6 +116,10 @@ export async function main() {
   });
 
   console.log(sessionSigs);
+
+  if (!checkNonceInEachSessionSig(sessionSigs, nonce)) {
+    return fail("sessionSig doesn't contain the blockhash");
+  }
 
   // ==================== Success ====================
 
