@@ -19,7 +19,7 @@ export async function main() {
 
   const authMethod = {
     authMethodType: AuthMethodType.EthWallet,
-    accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG_2),
+    accessToken: JSON.stringify(globalThis.LitCI.CONTROLLER_AUTHSIG),
   };
 
   const pkpSignRes = await client?.executeJs({
