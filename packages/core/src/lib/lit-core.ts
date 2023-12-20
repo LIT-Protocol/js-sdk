@@ -396,7 +396,7 @@ export class LitCore {
     const promise = new Promise((resolve: any, reject: any) => {
       const startTime = Date.now();
       const interval = setInterval(() => {
-        if (Object.keys(this.serverKeys).length >= this.config.minNodeCount) {
+        if (Object.keys(this.serverKeys).length == this.config.bootstrapUrls.length) {
           clearInterval(interval);
 
           // pick the most common public keys for the subnet and network from the bunch, in case some evil node returned a bad key
@@ -452,13 +452,10 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${
-              this.config.connectTimeout
-            }ms.  Could only connect to ${
-              Object.keys(this.serverKeys).length
-            } of ${
-              this.config.minNodeCount
-            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
+              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
+              } of ${this.config.minNodeCount
+              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             logErrorWithRequestId(requestId, msg);
             reject(msg);
           }
@@ -577,10 +574,9 @@ export class LitCore {
       .catch((error: NodeErrorV3) => {
         logErrorWithRequestId(
           requestId,
-          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
-            error?.message || error?.details
-              ? `Error is ${error.message} - ${error.details}`
-              : ''
+          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error?.message || error?.details
+            ? `Error is ${error.message} - ${error.details}`
+            : ''
           }`
         );
         return Promise.reject(error);

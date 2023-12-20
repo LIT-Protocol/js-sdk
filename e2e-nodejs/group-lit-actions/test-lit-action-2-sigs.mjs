@@ -13,8 +13,6 @@ export async function main() {
   const res = await client.executeJs({
     authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
     code: `(async () => {
-      console.log('hello world')
-
       async function signMultipleSigs(numSigs, toSign, publicKey) {
         const sigShares = [];
         for(let i = 0; i < numSigs; i++) {

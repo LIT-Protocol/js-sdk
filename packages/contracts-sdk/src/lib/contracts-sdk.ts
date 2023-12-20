@@ -7,7 +7,7 @@ import { AuthMethod, LitContractContext, LitContractResolverContext } from '@lit
 let CID: any;
 try {
   CID = require('multiformats/cid');
-} catch (e) {}
+} catch (e) { }
 
 // ----- autogen:import-data:start  -----
 // Generated at 2023-11-07T01:50:52.460Z
@@ -767,7 +767,7 @@ export class LitContracts {
     // Fetch contract data
     const [activeValidators, currentValidatorsCount, kickedValidators] =
       await Promise.all([
-        contract['getValidatorsStructsInCurrentEpoch'](),
+        contract['getValidatorsInCurrentEpoch'](),
         contract['currentValidatorCountForConsensus'](),
         contract['getKickedValidators'](),
       ]);
@@ -792,10 +792,12 @@ export class LitContracts {
     // remove kicked validators in active validators
     const cleanedActiveValidators = activeValidators.filter(
       (av: any) =>
-        !kickedValidators.some((kv: any) => kv.nodeAddress === av.nodeAddress)
+        !kickedValidators.some((kv: any) => kv === av)
     );
 
-    const networks = cleanedActiveValidators.map((item: any) => {
+    const activeValidatorStructs = await contract['getValidatorsStructs'](cleanedActiveValidators);
+
+    const networks = activeValidatorStructs.map((item: any) => {
       let proto = 'https://';
       if (item.port !== 443) {
         proto = 'http://';
