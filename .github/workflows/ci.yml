@@ -4,8 +4,7 @@ on:
     branches:
       - master
   pull_request:
-    branches:
-      - **
+    types: [opened]
 
 jobs:
   master:
