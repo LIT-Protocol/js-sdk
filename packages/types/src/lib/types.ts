@@ -183,7 +183,7 @@ export type ClaimResult<T = ClaimProcessor> = {
 } & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
 
 export type LitContract = {
-  address: string,
+  address?: string,
   abi?: any;
   name?: string;
 };
@@ -210,11 +210,15 @@ export type LitContractContext = {
 };
 
 /**
- *  
+ * Type for a contract resolver instance which will be used
+ * In place of LitContractContext for loading addresses of lit contracts
+ * an instance of LitContractContext can still be provided. which will be used for abi data.
+ *
 */
-export type ResolverContext = {
-  [index: string]: string | ethers.Contract | Uint8Array | undefined,
-  address: string | Uint8Array,
-  contract?: ethers.Contract,
-  abi?: any
+export type LitContractResolverContext = {
+  [index: string]: string | LitContractContext | undefined | number,
+  resolverAddress: string,
+  abi: any,
+  enviorment: number,
+  contractContext: LitContractContext
 };

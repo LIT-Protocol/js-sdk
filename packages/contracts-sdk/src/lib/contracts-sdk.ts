@@ -2,7 +2,7 @@ import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
-import { AuthMethod, LitContractContext } from '@lit-protocol/types';
+import { AuthMethod, LitContractContext, LitContractResolverContext } from '@lit-protocol/types';
 
 let CID: any;
 try {
@@ -101,7 +101,7 @@ export class LitContracts {
   isPKP: boolean = false;
   debug: boolean = false;
   network: 'cayenne';
-  customContext?: LitContractContext;
+  customContext?: LitContractContext | LitContractResolverContext;
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
   // ----- autogen:declares:start  -----
@@ -166,7 +166,7 @@ export class LitContracts {
   // make the constructor args optional
   constructor(args?: {
     provider?: ethers.providers.JsonRpcProvider | any;
-    customContext?: LitContractContext,
+    customContext?: LitContractContext | LitContractResolverContext,
     rpcs?: string[] | any;
     rpc?: string | any;
     signer?: ethers.Signer | any;
@@ -378,7 +378,7 @@ export class LitContracts {
       this.log('Your Provider(from signer):', this.provider);
     }
 
-    let addresses: any = await LitContracts.getContractAddresses(this.network);
+    let addresses: any = await LitContracts.getContractAddresses(this.network, this.customContext);
     this.log('resolved contract addresses for: ', this.network, addresses);
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
@@ -544,7 +544,7 @@ export class LitContracts {
 
   public static async getStakingContract(
     network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext
+    context?: LitContractContext | LitContractResolverContext
   ) {
     const rpcUrl = DEFAULT_RPC;
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
@@ -557,35 +557,109 @@ export class LitContracts {
       const stakingContract = contractData.find(
         (item: { name: string }) => item.name === 'Staking'
       ).contracts[0];
-      const { address_hash, ABI } = stakingContract;
+      const { address, abi } = stakingContract;
   
       // Validate the required data
-      if (!address_hash || !ABI) {
+      if (!address || !abi) {
         throw new Error('❌ Required contract data is missing');
       }
 
-      return new ethers.Contract(address_hash, ABI, provider);
+      return new ethers.Contract(address, abi, provider);
     } else {
-      let stakingContract = context.Staking;
-      return new ethers.Contract(stakingContract.address, stakingContract.abi ?? StakingData.abi, provider);
+      // if we have contract context then we determine if there exists a `resolverAddres`
+      // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
+      if (!context.resolverAddress) {
+        let stakingContract = (context as LitContractContext).Staking;
+
+        if (!stakingContract.address) {
+          throw new Error('❌ Could not get staking contract address from contract context');
+        }
+        return new ethers.Contract(stakingContract.address, stakingContract.abi ?? StakingData.abi, provider);
+      } else {
+        let contractContext = await LitContracts._getContractsFromResolver(context.resolverAddress, context.abi, context.enviorment, context.contractContext);
+        if (!contractContext.Staking.address) {
+          throw new Error("❌ Could not get Staking Contract from contract resolver instance");
+        }
+        return new ethers.Contract(contractContext.Staking.address, contractContext.Staking.abi ?? StakingData.abi, provider); 
+      }
     }
+  }
+
+  private static async _getContractsFromResolver(address: string, abi: any, enviorment: number, contracts?: LitContractContext): Promise<LitContractContext> {
+    const rpcUrl = DEFAULT_RPC;
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+
+    let resolverContract = new ethers.Contract(address, abi, provider);
+    let addresses: LitContractContext = {
+      Allowlist: {
+        address: await resolverContract['getContract'](await resolverContract['ALLOWLIST_CONTRACT'](), enviorment),
+        abi: contracts?.Allowlist?.abi
+      },
+      LITToken: {
+        address: await resolverContract['getContract'](await resolverContract['LIT_TOKEN_CONTRACT'](), enviorment),
+        abi: contracts?.LITToken?.abi
+      },
+      Multisender: {
+        address: await resolverContract['getContract'](await resolverContract['MULTI_SENDER_CONTRACT'](), enviorment),
+        abi: contracts?.Multisender?.abi
+      },
+      PKPNFT: {
+        address: await resolverContract['getContract'](await resolverContract['PKP_NFT_CONTRACT'](), enviorment),
+        abi: contracts?.PKPNFT?.abi
+      },
+      PKPNFTMetadata: {
+        address: await resolverContract['getContract'](await resolverContract['PKP_NFT_METADATA_CONTRACT'](), enviorment),
+        abi: contracts?.PKPNFTMetadata?.abi
+      },
+      PKPPermissions: {
+        address: await resolverContract['getContract'](await resolverContract['PKP_PERMISSIONS_CONTRACT'](), enviorment),
+        abi: contracts?.PKPPermissions?.abi
+      },
+      PKPHelper: {
+        address: await resolverContract['getContract'](await resolverContract['PKP_HELPER_CONTRACT'](), enviorment),
+        abi: contracts?.PKPHelper?.abi
+      },
+      PubkeyRouter: {
+        address: await resolverContract['getContract'](await resolverContract['PUB_KEY_ROUTER_CONTRACT'](), enviorment),
+        abi: contracts?.PubkeyRouter?.abi
+      },
+      RateLimitNFT: {
+        address: await resolverContract['getContract'](await resolverContract['RATE_LIMIT_NFT_CONTRACT'](), enviorment),
+        abi: contracts?.RateLimitNFT?.abi
+      },
+      Staking: {
+        address: await resolverContract['getContract'](await resolverContract['STAKING_CONTRACT'](), enviorment),
+        abi: contracts?.Staking?.abi
+      },
+      StakingBalances: {
+        address: await resolverContract['getContract'](await resolverContract['STAKING_BALANCES_CONTRACT'](), enviorment), 
+        abi: contracts?.StakingBalances?.abi
+      }
+    };
+
+    return addresses;
   }
 
   public static async getContractAddresses(
     network: 'cayenne' | 'custom' | 'localhost',
-    context?: LitContractContext
+    context?: LitContractContext | LitContractResolverContext
   ) {
-
     let data
     if (context) {
-      let reMap = [];
+      // if there is a resolver address we use the resolver contract to query the rest of the contracts
+      // here we override context to be what is returned from the resolver which is of type LitContractContext
+      if (context?.resolverAddress) {
+        context = await LitContracts._getContractsFromResolver(context.resolverAddress, context.abi, context.enviorment, context.contractContext);
+      }
+
+      let flatten = [];
       let keys = Object.keys(context);
       for (const key of keys) {
         context[key].name = key;
-        reMap.push(context[key]);
+        flatten.push(context[key]);
       }
       data = {
-        contractData: reMap
+        contractData: flatten
       };
     } else {
       data = await LitContracts._resolveContractContext(network);
@@ -593,65 +667,64 @@ export class LitContracts {
 
 
     // Destructure the data for easier access
-    const { config, data: contractData } = data;
+    const { contractData } = data;
     const addresses: any = {};
     for (const contract of contractData) {
       switch (contract.name) {
         case 'Allowlist':
           addresses.Allowlist = {};
-          addresses.Allowlist.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.Allowlist.abi = contract.contracts[0].ABI ?? AllowlistData.abi;
+          addresses.Allowlist.address = contract.address;
+          addresses.Allowlist.abi = contract.abi ?? AllowlistData.abi;
           break;
         case 'PKPHelper':
           addresses.PKPHelper = {};
-          addresses.PKPHelper.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.PKPHelper.abi = contract.contracts[0].ABI ?? PKPHelperData.abi;
+          addresses.PKPHelper.address = contract.address;
+          addresses.PKPHelper.abi = contract?.abi ?? PKPHelperData.abi;
           break;
         case 'PKPNFT':
           addresses.PKPNFT = {};
-          addresses.PKPNFT.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.PKPNFT.abi = contract.contracts[0].ABI ?? PKPNFTData.abi;
+          addresses.PKPNFT.address = contract.address;
+          addresses.PKPNFT.abi = contract?.abi ?? PKPNFTData.abi;
           break;
         case 'Staking':
           addresses.Staking = {};
-          addresses.Staking.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.Staking.abi = contract.contracts[0].ABI ?? StakingData.abi;
+          addresses.Staking.address = contract.address;
+          addresses.Staking.abi = contract.abi ?? StakingData.abi;
           break;
         case 'RateLimitNFT':
           addresses.RateLimitNFT = {};
-          addresses.RateLimitNFT.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.RateLimitNFT.abi = contract.contracts[0].ABI ?? RateLimitNFTData.abi;
+          addresses.RateLimitNFT.address = contract.address;
+          addresses.RateLimitNFT.abi = contract.abi ?? RateLimitNFTData.abi;
           break;
         case 'PKPPermissions':
           addresses.PKPPermissions = {};
-          addresses.PKPPermissions.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.PKPPermissions.abi = contract.contracts[0].ABI ?? PKPPermissionsData.abi;
+          addresses.PKPPermissions.address = contract.address;
+          addresses.PKPPermissions.abi = contract.abi ?? PKPPermissionsData.abi;
           break;
         case 'PKPNFTMetadata':
           addresses.PKPNFTMetadata = {};
-          addresses.PKPNFTMetadata.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.PKPNFTMetadata.abi = contract.contracts[0].ABI ?? PKPNFTMetadataData.abi;
+          addresses.PKPNFTMetadata.address = contract.address;
+          addresses.PKPNFTMetadata.abi = contract.abi ?? PKPNFTMetadataData.abi;
           break;
         case 'PubkeyRouter':
           addresses.PubkeyRouter = {};
-          addresses.PubkeyRouter.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.PubkeyRouter.abi = contract.contracts[0].ABI ?? PubkeyRouterData.abi;
+          addresses.PubkeyRouter.address = contract.address;
+          addresses.PubkeyRouter.abi = contract?.abi ?? PubkeyRouterData.abi;
           break;
         case 'LITToken':
           addresses.LITToken = {};
-          addresses.LITToken.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.LITToken.abi = contract.contracts[0].ABI ?? LITTokenData.abi;
+          addresses.LITToken.address = contract.address;
+          addresses.LITToken.abi = contract?.abi ?? LITTokenData.abi;
           break;
         case 'StakingBalances':
           addresses.StakingBalances = {};
-          addresses.StakingBalances.address =
-            contract.contracts[0].address_hash ?? contract.address;
-          addresses.StakingBalances.abi = contract.contracts[0].ABI ?? StakingBalancesData.abi;
+          addresses.StakingBalances.address = contract.address;
+          addresses.StakingBalances.abi = contract.abi ?? StakingBalancesData.abi;
           break;
         case 'Multisender':
           addresses.Multisender = {};
-          addresses.Multisender.address = contract.contracts[0].address_hash ?? contract.address;
-          addresses.Multisender.abi = contract.contracts[0].ABI ?? MultisenderData.abi;
+          addresses.Multisender.address = contract.address;
+          addresses.Multisender.abi = contract?.abi ?? MultisenderData.abi;
           break;
       }
     }
@@ -666,7 +739,7 @@ export class LitContracts {
 
   public static getMinNodeCount = async (
     network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext
+    context?: LitContractContext | LitContractResolverContext
   ) => {
     const contract = await LitContracts.getStakingContract(network, context);
 
@@ -680,7 +753,7 @@ export class LitContracts {
 
   public static getValidators = async (
     network: 'cayenne' | 'internalDev' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext
+    context?: LitContractContext | LitContractResolverContext
   ): Promise<string[]> => {
     const contract = await LitContracts.getStakingContract(network, context);
 
@@ -772,7 +845,15 @@ export class LitContracts {
         );
       }
     }
-
+    // Data pulled over http is formatted differently than
+    // what the type expects. Here we normmalize to the LitContractContext type.
+    data = data.map((c: any) => {
+      return {
+        address: c.contracts[0].address_hex,
+        abi: c.contracts[0].ABI,
+        name: c.name
+      };
+    });
     return data;
   }
 

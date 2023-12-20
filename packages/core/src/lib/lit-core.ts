@@ -197,7 +197,12 @@ export class LitCore {
           ? 2
           : (LIT_NETWORKS.cayenne.length * 2) / 3;
     
-    } else if (this.config.litNetwork == LitNetwork.Custom && this.config.bootstrapUrls.length < 1) {
+    /**
+     * Here we are checking if a custom network defined with no node urls (bootstrap urls) defined
+     * If this is the case we need to bootstrap the network state from the set of contracts given.
+     * So we call to the Staking contract with the address given by the caller to resolve the network state.
+     */
+    } else if (this.config.litNetwork === LitNetwork.Custom && this.config.bootstrapUrls.length < 1) {
       log('using custom contracts: ', this.config.contractContext);
 
       const minNodeCount = await LitContracts.getMinNodeCount(
@@ -227,9 +232,10 @@ export class LitCore {
       }
 
       this.config.minNodeCount = parseInt(minNodeCount, 10);
-      this.config.bootstrapUrls = bootstrapUrls; 
+      this.config.bootstrapUrls = bootstrapUrls;
+
     }
-  };
+  }
 
   /**
    * Sets up a listener to detect state changes (new epochs) in the staking contract.
