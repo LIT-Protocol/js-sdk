@@ -1137,7 +1137,26 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
      * @param {string} multihash A base58 encoded multihash string
      * @returns {Multihash}
      */
-    getBytes32FromMultihash: (ipfsId: string) => {
+    getBytes32FromMultihash: async (ipfsId: string) => {
+
+      let CID: any;
+      try {
+        CID = await import('multiformats/cid');
+
+        if (!CID) {
+          CID = CID.CID;
+
+          if (!CID) {
+            console.log('1 CID not found');
+          }
+        }
+      } catch (e) {
+        console.log('2 CID not found');
+      }
+
+      // const CID = await import('multiformats/cid');
+
+
       const cid = CID.parse(ipfsId);
       const hashFunction = cid.multihash.code;
       const size = cid.multihash.size;
