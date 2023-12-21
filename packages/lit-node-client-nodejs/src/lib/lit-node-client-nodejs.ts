@@ -280,14 +280,15 @@ export class LitNodeClientNodeJs extends LitCore {
    * specified.
    * @param litResources is an array of LIT resources
    */
-  static generateSessionCapabilityObjectWithWildcards = (
+  static async generateSessionCapabilityObjectWithWildcards(
     litResources: Array<ILitResource>,
     rateLimitAuthSig?: AuthSig
-  ): ISessionCapabilityObject => {
+  ): Promise<ISessionCapabilityObject> {
+
     const sessionCapabilityObject = newSessionCapabilityObject();
 
     if (rateLimitAuthSig) {
-      sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
+      await sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
     }
 
     for (const litResource of litResources) {
@@ -297,11 +298,11 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   // backward compatibility
-  generateSessionCapabilityObjectWithWildcards = (
+  async generateSessionCapabilityObjectWithWildcards(
     litResources: Array<ILitResource>,
     rateLimitAuthSig: AuthSig
-  ): ISessionCapabilityObject => {
-    return LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
+  ): Promise<ISessionCapabilityObject> {
+    return await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
       litResources,
       rateLimitAuthSig,
     );
@@ -2344,7 +2345,7 @@ export class LitNodeClientNodeJs extends LitCore {
     // First get or generate the session capability object for the specified resources.
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
-      : this.generateSessionCapabilityObjectWithWildcards(
+      : await this.generateSessionCapabilityObjectWithWildcards(
         params.resourceAbilityRequests.map((r) => r.resource),
         params.rateLimitAuthSig,
       );
