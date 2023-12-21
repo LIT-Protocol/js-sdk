@@ -11,23 +11,6 @@ import {
 import { getRecapNamespaceAndAbility } from './utils';
 import { sanitizeSiweMessage } from '../siwe';
 import { AuthSig } from '../models';
-// import * as bs58Pkg from 'bs58';
-// import * as cidPkg from 'multiformats/cid';
-
-// console.log("cidPkg:", cidPkg);
-
-// let bs58: {
-//   encode: any;
-//   decodeUnsafe: any;
-//   decode: any;
-// }
-
-// try {
-//   bs58 = bs58Pkg;
-//   console.log("bs58:", bs58);
-// } catch (e) {
-//   console.log('bs58 not found!');
-// }
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   #inner: Recap;
@@ -61,7 +44,16 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     // @ts-ignore
     const Hash = await import('ipfs-only-hash');
     const data = JSON.stringify(authSig);
-    const hash = await Hash.of(data);
+
+    console.log("data:", data);
+
+    let hash;
+
+    try {
+      hash = await Hash.of(data);
+    } catch (e: any) {
+      throw new Error(e);
+    }
 
     try {
       this.addProof(hash);
