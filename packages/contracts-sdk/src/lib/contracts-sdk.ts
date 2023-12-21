@@ -4,13 +4,6 @@ import bs58 from 'bs58';
 import { isBrowser, isNode, log } from '@lit-protocol/misc';
 import { AuthMethod } from '@lit-protocol/types';
 
-let CID: any;
-try {
-  CID = require('multiformats/cid');
-} catch (e) {
-  console.log('CID not found');
-}
-
 // ----- autogen:import-data:start  -----
 // Generated at 2023-11-07T01:50:52.460Z
 import { AllowlistData } from '../abis/Allowlist.sol/AllowlistData';
@@ -563,7 +556,7 @@ export class LitContracts {
   }
 
 
-  public static async getContractAddresses(network:  "cayenne" | "internalDev" | "custom" | "localhost") {
+  public static async getContractAddresses(network: "cayenne" | "internalDev" | "custom" | "localhost") {
     const data = await LitContracts._resolveContractContext(network);
     // Destructure the data for easier access
     const { config, data: contractData } = data;
@@ -576,12 +569,12 @@ export class LitContracts {
           addresses.Allowlist.abi = contract.contracts[0].ABI;
           break;
         case 'PKPHelper':
-          addresses.PKPHelper = {}; 
+          addresses.PKPHelper = {};
           addresses.PKPHelper.address = contract.contracts[0].address_hash;
           addresses.PKPHelper.abi = contract.contracts[0].ABI;
           break;
         case 'PKPNFT':
-          addresses.PKPNFT = {}; 
+          addresses.PKPNFT = {};
           addresses.PKPNFT.address = contract.contracts[0].address_hash;
           addresses.PKPNFT.abi = contract.contracts[0].ABI;
           break;
@@ -589,21 +582,21 @@ export class LitContracts {
           addresses.Staking = {};
           addresses.Staking.address = contract.contracts[0].address_hash;
           addresses.Staking.abi = contract.contracts[0].ABI;
-        break;
+          break;
         case 'RateLimitNFT':
-          addresses.RateLimitNFT = {}; 
+          addresses.RateLimitNFT = {};
           addresses.RateLimitNFT.address = contract.contracts[0].address_hash;
           addresses.RateLimitNFT.abi = contract.contracts[0].ABI;
           break;
         case 'PKPPermissions':
           addresses.PKPPermissions = {};
           addresses.PKPPermissions.address = contract.contracts[0].address_hash;
-          addresses.PKPPermissions.abi = contract.contracts[0].ABI; 
+          addresses.PKPPermissions.abi = contract.contracts[0].ABI;
           break;
         case 'PKPNFTMetadata':
-          addresses.PKPNFTMetadata = {}; 
+          addresses.PKPNFTMetadata = {};
           addresses.PKPNFTMetadata.address = contract.contracts[0].address_hash;
-          addresses.PKPNFTMetadata.abi = contract.contracts[0].ABI; 
+          addresses.PKPNFTMetadata.abi = contract.contracts[0].ABI;
           break;
         case 'PubkeyRouter':
           addresses.PubkeyRouter = {};
@@ -636,7 +629,7 @@ export class LitContracts {
     return addresses;
   }
 
-  public static getMinNodeCount = async (network:  "cayenne" | "internalDev" | "custom" | "localhost") => {
+  public static getMinNodeCount = async (network: "cayenne" | "internalDev" | "custom" | "localhost") => {
 
     const contract = await LitContracts.getStakingContract(network);
 
@@ -690,11 +683,11 @@ export class LitContracts {
 
     return networks;
   };
-  
-  private static async _resolveContractContext(network:  "cayenne" | "internalDev" | "custom" | "localhost") {
+
+  private static async _resolveContractContext(network: "cayenne" | "internalDev" | "custom" | "localhost") {
     let data;
     const INTERNAL_DEV_API =
-    'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
+      'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
     const CAYENNE_API = "https://lit-general-worker.getlit.dev/contract-addresses";
     if (network === "cayenne") {
       try {
@@ -711,7 +704,7 @@ export class LitContracts {
         throw new Error(`Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`);
       }
     }
-    
+
     return data;
   }
 
@@ -819,7 +812,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       tx: receipt,
     };
   };
-  
+
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
@@ -886,7 +879,26 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
      * @param {string} multihash A base58 encoded multihash string
      * @returns {Multihash}
      */
-    getBytes32FromMultihash: (ipfsId: string) => {
+    getBytes32FromMultihash: async (ipfsId: string) => {
+
+      let CID: any;
+      try {
+        CID = await import('multiformats/cid');
+
+        if (!CID) {
+          CID = CID.CID;
+
+          if (!CID) {
+            console.log('1 CID not found');
+          }
+        }
+      } catch (e) {
+        console.log('2 CID not found');
+      }
+
+      // const CID = await import('multiformats/cid');
+
+
       const cid = CID.parse(ipfsId);
       const hashFunction = cid.multihash.code;
       const size = cid.multihash.size;
