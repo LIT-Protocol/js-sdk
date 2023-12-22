@@ -9,8 +9,8 @@ const client = new LitNodeClient({
   minNodeCount: globalThis.LitCI.minNodeCount,
   checkNodeAttestation: globalThis.LitCI.sevAttestation,
   storageProvider: {
-    provider: new LocalStorage('./storage.test.db')
-  }
+    provider: new LocalStorage('./storage.test.db'),
+  },
 });
 await client.connect();
 

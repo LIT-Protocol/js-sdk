@@ -21,6 +21,7 @@ const address = ethers.utils.getAddress(await wallet.getAddress());
 
 const litNodeClient = new LitJsSdk.LitNodeClient({
   litNetwork: network,
+  debug: false
 });
 await litNodeClient.connect();
 let nonce = litNodeClient.getLatestBlockhash();
@@ -37,7 +38,7 @@ const siweMessage = new siwe.SiweMessage({
   version: '1',
   chainId: 1,
   nonce,
-  expirationTime: new Date(Date.now() + (60_000 * 60)).toISOString(),
+  expirationTime: new Date(Date.now() + 60_000 * 60).toISOString(),
 });
 const messageToSign = siweMessage.prepareMessage();
 
