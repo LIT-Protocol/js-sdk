@@ -229,11 +229,21 @@ export interface LitNodeClientConfig {
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
   checkNodeAttestation: boolean;
+  storageProvider?: StorageProvider
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
 export interface CustomNetwork {
   litNetwork: LIT_NETWORKS_KEYS;
+}
+
+/**
+ * Override for LocalStorage and SessionStorage
+ * if running in NodeJs and this is implicitly
+ * binded globally
+ */
+export interface StorageProvider {
+  provider: Storage
 }
 
 export interface Signature {

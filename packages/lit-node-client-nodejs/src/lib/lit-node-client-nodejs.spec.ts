@@ -13,6 +13,7 @@ import {
   LitAccessControlConditionResource,
 } from '@lit-protocol/auth-helpers';
 import * as LITCONFIG from 'lit.config.json';
+import { StorageProvider } from '../../../types/src/lib/interfaces';
 
 const isClass = (v) => {
   return typeof v === 'function' && /^\s*class\s+/.test(v.toString());
@@ -35,6 +36,36 @@ describe('LitNodeClientNodeJs', () => {
     });
     expect(litNodeClient).toBeDefined();
   });
+
+  it('should be able to instantiate a new LitNodeClientNodeJs to custom', async () => {
+    const litNodeClient = new LitNodeClientNodeJs({
+      litNetwork: 'custom',
+    });
+    expect(litNodeClient).toBeDefined();
+  });
+
+  it('should be able to instantiate a new LitNodeClientNodeJs to cayenne', async () => {
+    const litNodeClient = new LitNodeClientNodeJs({
+      litNetwork: 'cayenne',
+    });
+    expect(litNodeClient).toBeDefined();
+  });
+
+  it('should be able to defined a storage provider', async () => {
+    const tmp = globalThis.localStorage;
+    globalThis.localStorage = undefined; // null localStorage for test
+    const ls = require('node-localstorage').LocalStorage;
+    const litNodeClient = new LitNodeClientNodeJs({
+      litNetwork: 'custom',
+      storageProvider: {
+        provider: new ls('./storage.test.db')
+      }
+    });
+    expect(litNodeClient).toBeDefined();
+    expect(litNodeClient.config.storageProvider?.provider).toBeInstanceOf(ls);
+    globalThis.localStorage = tmp; // set it back
+  });
+
 
   it('gets capabilities', async () => {
     const path = '/bglyaysu8rvblxlk7x0ksn';
