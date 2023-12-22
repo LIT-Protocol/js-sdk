@@ -58,14 +58,13 @@ describe('LitNodeClientNodeJs', () => {
     const litNodeClient = new LitNodeClientNodeJs({
       litNetwork: 'custom',
       storageProvider: {
-        provider: new ls('./storage.test.db')
-      }
+        provider: new ls('./storage.test.db'),
+      },
     });
     expect(litNodeClient).toBeDefined();
     expect(litNodeClient.config.storageProvider?.provider).toBeInstanceOf(ls);
     globalThis.localStorage = tmp; // set it back
   });
-
 
   it('gets capabilities', async () => {
     const path = '/bglyaysu8rvblxlk7x0ksn';
