@@ -250,6 +250,9 @@ export const combineEcdsaShares = (
           throw new Error(`Failed to parse signature: ${e}`);
         }
 
+        if (!sig.r || !sig.r || !sig.v) {
+          throw new Error('Signature combination failed');
+        }
         /*
           r and s values of the signature should be maximum of 64 bytes
           r and s values can have polarity as the first two bits, here we remove 

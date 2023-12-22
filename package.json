@@ -93,7 +93,7 @@
     "@walletconnect/utils": "2.9.2",
     "@walletconnect/web3wallet": "1.8.8",
     "@websaam/nx-esbuild": "^0.0.1",
-    "axios": "^0.27.2", 
+    "axios": "^0.27.2",
     "base64url": "^3.0.1",
     "bitcoinjs-lib": "^6.1.0",
     "blockstore-core": "^3.0.0",

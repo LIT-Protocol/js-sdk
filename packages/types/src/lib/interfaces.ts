@@ -229,7 +229,7 @@ export interface LitNodeClientConfig {
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
   checkNodeAttestation: boolean;
-  storageProvider?: StorageProvider
+  storageProvider?: StorageProvider;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
@@ -243,7 +243,7 @@ export interface CustomNetwork {
  * binded globally
  */
 export interface StorageProvider {
-  provider: Storage
+  provider: Storage;
 }
 
 export interface Signature {
