@@ -28,6 +28,7 @@ import {
 import {
   bootstrapLogManager,
   isBrowser,
+  isNode,
   log,
   logError,
   logErrorWithRequestId,
@@ -131,6 +132,26 @@ export class LitCore {
     // -- set global variables
     globalThis.litConfig = this.config;
     bootstrapLogManager('core');
+
+    // -- configure local storage if not present
+    // LitNodeClientNodejs is a base for LitNodeClient
+    // First check for if our runtime is node
+    // If the user sets a new storage provider we respect it over our default storage
+    // If the user sets a new file path, we respect it over the default path.
+    if (this.config.storageProvider?.provider) {
+      log(
+        'localstorage api not found, injecting persistance instance found in config'
+      );
+      globalThis.localStorage = this.config.storageProvider.provider;
+    } else if (
+      isNode() &&
+      !globalThis.localStorage &&
+      !this.config.storageProvider?.provider
+    ) {
+      log(
+        'Looks like you are running in NodeJS and did not provide a storage provider, youre sessions will not be cached'
+      );
+    }
   }
 
   // ========== Logger utilities ==========

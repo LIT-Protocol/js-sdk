@@ -21,6 +21,7 @@ const address = ethers.utils.getAddress(await wallet.getAddress());
 
 const litNodeClient = new LitJsSdk.LitNodeClient({
   litNetwork: network,
+  debug: false,
 });
 await litNodeClient.connect();
 let nonce = litNodeClient.getLatestBlockhash();
