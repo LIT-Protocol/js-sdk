@@ -44,6 +44,7 @@ const authSig = {
 
 // ==================== Global Vars ====================
 globalThis.LitCI = {};
+globalThis.LitCI.wallet = wallet;
 globalThis.LitCI.network = network;
 globalThis.LitCI.debug = debug;
 globalThis.LitCI.sevAttestation = checkSevAttestation;
@@ -51,6 +52,7 @@ globalThis.LitCI.CONTROLLER_AUTHSIG = authSig;
 
 globalThis.LitCI.PKP_INFO = {};
 globalThis.LitCI.PKP_INFO.publicKey = LITCONFIG.PKP_PUBKEY;
+
 if (mintNew) {
   let contractClient = new LitContracts({
     signer: wallet,
