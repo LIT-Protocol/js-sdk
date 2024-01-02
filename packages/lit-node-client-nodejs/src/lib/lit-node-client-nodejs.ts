@@ -94,6 +94,7 @@ import {
   LitResourceAbilityRequest,
   decode,
   newSessionCapabilityObject,
+  RecapSessionCapabilityObject
 } from '@lit-protocol/auth-helpers';
 import {
   getStorageItem,
@@ -285,15 +286,25 @@ export class LitNodeClientNodeJs extends LitCore {
     rateLimitAuthSig?: AuthSig
   ): Promise<ISessionCapabilityObject> {
 
-    const sessionCapabilityObject = newSessionCapabilityObject();
+    const att = {
+      someResource: {
+        'lit-ratelimitincrease/1337': [{}],
+      },
+    };
+
+    const sessionCapabilityObject = new RecapSessionCapabilityObject(
+      att,
+      []
+    );
+
+    for (const litResource of litResources) {
+      sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
+    }
 
     if (rateLimitAuthSig) {
       await sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
     }
 
-    for (const litResource of litResources) {
-      sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
-    }
     return sessionCapabilityObject;
   };
 
