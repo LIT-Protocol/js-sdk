@@ -92,7 +92,8 @@ export default class EthWalletProvider extends BaseProvider {
     } else {
       if (!this.litNodeClient.latestBlockhash) {
         throwError({
-          message: 'Eth Blockhash is undefined. Try connecting to the Lit network again.',
+          message:
+            'Eth Blockhash is undefined. Try connecting to the Lit network again.',
           errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
           errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
         });
