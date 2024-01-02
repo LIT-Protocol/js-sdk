@@ -43,7 +43,6 @@ export async function main() {
 
   const sessionSigs = await client.getSessionSigs({
     chain: 'ethereum',
-    expiration: new Date(Date.now() + 60 * 60).toISOString(),
     resourceAbilityRequests: resourceAbilities,
     sessionKey: sessionKeyPair,
     authNeededCallback,
