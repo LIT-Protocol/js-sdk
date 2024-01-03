@@ -82,7 +82,7 @@ import {
 
 import { computeAddress } from '@ethersproject/transactions';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-import { generateNonce, SiweMessage } from 'lit-siwe';
+import { SiweMessage } from 'lit-siwe';
 
 import { LitCore } from '@lit-protocol/core';
 import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
@@ -2193,7 +2193,7 @@ export class LitNodeClientNodeJs extends LitCore {
       chainId: params.chainId ?? 1,
       expirationTime: _expiration,
       resources: params.resources,
-      nonce: this.latestBlockhash || generateNonce(),
+      nonce: this.latestBlockhash!,
     });
 
     let siweMessageStr: string = siweMessage.prepareMessage();
@@ -2386,7 +2386,15 @@ export class LitNodeClientNodeJs extends LitCore {
           params.resourceAbilityRequests.map((r) => r.resource)
         );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
-    let nonce = this.latestBlockhash || generateNonce();
+
+    if (!this.latestBlockhash) {
+      throwError({
+        message: 'Eth Blockhash is undefined.',
+        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
+        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
+      });
+    }
+    let nonce = this.latestBlockhash!;
 
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({

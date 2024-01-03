@@ -404,6 +404,20 @@ export class LitCore {
               (keysFromSingleNode: any) => keysFromSingleNode.latestBlockhash
             )
           );
+
+          if (!this.latestBlockhash) {
+            logErrorWithRequestId(
+              requestId,
+              'Error getting latest blockhash from the nodes.'
+            );
+
+            throwError({
+              message: 'Error getting latest blockhash from the nodes.',
+              errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
+              errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
+            });
+          }
+
           this.ready = true;
 
           log(
