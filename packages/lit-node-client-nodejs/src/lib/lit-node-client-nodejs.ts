@@ -306,7 +306,7 @@ export class LitNodeClientNodeJs extends LitCore {
    */
   static getExpiration = () => {
     // set the default exp to one day
-    return new Date(Date.now()  + (60_000 * 60) * 24).toISOString();
+    return new Date(Date.now() + 60_000 * 60 * 24).toISOString();
   };
 
   // backward compatibility
