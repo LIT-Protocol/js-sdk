@@ -64,7 +64,8 @@ export default class EthWalletProvider extends BaseProvider {
       // Get expiration or default to 24 hours
       const expiration =
         options?.expiration ||
-        new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+        this.litNodeClient.getExpiration() ||
+        new Date(Date.now() + 60_000 * 60 * 24).toISOString();
 
       // Prepare Sign in with Ethereum message
       const preparedMessage: Partial<SiweMessage> = {
