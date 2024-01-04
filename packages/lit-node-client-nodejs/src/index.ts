@@ -4,8 +4,12 @@ import * as _LitNodeClientNodeJs from './lib/lit-node-client-nodejs';
 // ==================== Environment ====================
 if (isNode()) {
   log('Oh hey you are running in Node.js!');
-  const fetch = require('node-fetch');
-  globalThis.fetch = fetch;
+  // @ts-ignore
+  if (typeof (fetch) === "undefined") {
+    log("fetch is undefined");
+    const fetch = require('node-fetch');
+    globalThis.fetch = fetch;
+  } 
 }
 
 declare global {
