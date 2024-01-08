@@ -232,7 +232,7 @@ export abstract class BaseProvider {
    */
   computePublicKeyFromAuthMethod = async (
     authMethod: AuthMethod
-  ): Promise<String> => {
+  ): Promise<string> => {
     let authMethodId = await this.getAuthMethodId(authMethod);
     authMethodId = authMethodId.slice(2);
     if (!this.litNodeClient) {
@@ -283,7 +283,7 @@ export abstract class BaseProvider {
       permittedAuthMethodTypes: [data.authMethodType],
       permittedAuthMethodIds: [data.authMethodId],
       permittedAuthMethodPubkeys: [pubkey],
-      permittedAuthMethodScopes: [[ethers.BigNumber.from('0')]],
+      permittedAuthMethodScopes: [[ethers.BigNumber.from('1')]],
       addPkpEthAddressAsPermittedAddress: true,
       sendPkpToItself: true,
     };

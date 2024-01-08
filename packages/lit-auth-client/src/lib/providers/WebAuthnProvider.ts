@@ -62,7 +62,8 @@ export default class WebAuthnProvider extends BaseProvider {
     });
 
     // Get auth method pub key
-    const authMethodPubkey = this.getPublicKeyFromRegistration(attResp);
+    const authMethodPubkey =
+      WebAuthnProvider.getPublicKeyFromRegistration(attResp);
 
     // Format args for relay server
     const defaultArgs = {
@@ -70,7 +71,7 @@ export default class WebAuthnProvider extends BaseProvider {
       permittedAuthMethodTypes: [AuthMethodType.WebAuthn],
       permittedAuthMethodIds: [authMethodId],
       permittedAuthMethodPubkeys: [authMethodPubkey],
-      permittedAuthMethodScopes: [[ethers.BigNumber.from('0')]],
+      permittedAuthMethodScopes: [[ethers.BigNumber.from('1')]],
       addPkpEthAddressAsPermittedAddress: true,
       sendPkpToItself: true,
     };
@@ -194,7 +195,7 @@ export default class WebAuthnProvider extends BaseProvider {
    *
    * @returns {string} - WebAuthn credential public key in hex format
    */
-  public getPublicKeyFromRegistration(
+  public static getPublicKeyFromRegistration(
     attResp: RegistrationResponseJSON
   ): string {
     let publicKey: string;

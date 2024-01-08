@@ -7,6 +7,7 @@ import {
   ProviderOptions,
   WebAuthnProviderOptions,
   AuthMethod,
+  MintRequestBody,
 } from '@lit-protocol/types';
 import { AuthMethodType, ProviderType } from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
@@ -20,6 +21,7 @@ import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
 import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
 import { bootstrapLogManager, getLoggerbyId, log } from '@lit-protocol/misc';
+import { ethers } from 'ethers';
 
 /**
  * Class that handles authentication through Lit login
@@ -86,9 +88,9 @@ export class LitAuthClient {
 
     // Set RPC URL
     this.rpcUrl = options?.rpcUrl || 'https://chain-rpc.litprotocol.com/http';
-    this.log('rpc url: ', this.rpcUrl);
-    this.log('relay config: ', options.litRelayConfig);
-    this.log('relay instance: ', this.relay);
+    log('rpc url: ', this.rpcUrl);
+    log('relay config: ', options.litRelayConfig);
+    log('relay instance: ', this.relay);
   }
 
   /**
@@ -230,6 +232,7 @@ export class LitAuthClient {
         authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
         break;
       default:
+        log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
         throw new Error(
           `Unsupported auth method type: ${authMethod.authMethodType}`
         );
@@ -238,9 +241,80 @@ export class LitAuthClient {
     return authId;
   }
 
-  private log(...args: any) {
-    if (this.debug) {
-      getLoggerbyId('auth-client').debug(...args);
+  public async mintPKPWithAuthMethods(
+    authMethods: AuthMethod[],
+    options: {
+      pkpPermissionScopes: number[][];
+      sendPkpToitself: boolean;
+      addPkpEthAddressAsPermittedAddress: boolean;
     }
+  ): Promise<{
+    pkpTokenId?: string;
+    pkpEthAddress?: string;
+    pkpPublicKey?: string;
+  }> {
+    if (authMethods.length < 1) {
+      throw new Error('Must provide atleast one auth method');
+    }
+
+    if (
+      !options.pkpPermissionScopes ||
+      options.pkpPermissionScopes.length < 1
+    ) {
+      options.pkpPermissionScopes = [];
+      for (let i = 0; i < authMethods.length; i++) {
+        options.pkpPermissionScopes.push([
+          ethers.BigNumber.from('1').toNumber(),
+        ]);
+      }
+    }
+
+    const reqBody: MintRequestBody = {
+      keyType: 2,
+      permittedAuthMethodTypes: authMethods.map((value) => {
+        return value.authMethodType;
+      }),
+      permittedAuthMethodScopes: options.pkpPermissionScopes,
+      addPkpEthAddressAsPermittedAddress:
+        options.addPkpEthAddressAsPermittedAddress,
+      sendPkpToItself: options.sendPkpToitself,
+    };
+
+    const permittedAuthMethodIds = [];
+    const permittedAuthMethodPubkeys = [];
+    for (const authMethod of authMethods) {
+      const id = await LitAuthClient.getAuthIdByAuthMethod(authMethod);
+      permittedAuthMethodIds.push(id);
+      if (authMethod.authMethodType === AuthMethodType.WebAuthn) {
+        permittedAuthMethodPubkeys.push(
+          WebAuthnProvider.getPublicKeyFromRegistration(
+            JSON.parse(authMethod.accessToken)
+          )
+        );
+      } else {
+        // only webauthn has a `authMethodPubkey`
+        permittedAuthMethodPubkeys.push('0x');
+      }
+    }
+
+    reqBody.permittedAuthMethodIds = permittedAuthMethodIds;
+    reqBody.permittedAuthMethodPubkeys = permittedAuthMethodPubkeys;
+
+    const mintRes = await this.relay.mintPKP(JSON.stringify(reqBody));
+    if (!mintRes || !mintRes.requestId) {
+      throw new Error(
+        `Missing mint response or request ID from mint response ${mintRes.error}`
+      );
+    }
+
+    const pollerResult = await this.relay.pollRequestUntilTerminalState(
+      mintRes.requestId
+    );
+
+    return {
+      pkpTokenId: pollerResult.pkpTokenId,
+      pkpPublicKey: pollerResult.pkpPublicKey,
+      pkpEthAddress: pollerResult.pkpEthAddress,
+    };
   }
 }

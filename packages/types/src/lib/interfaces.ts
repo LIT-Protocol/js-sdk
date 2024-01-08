@@ -1479,7 +1479,7 @@ export interface StytchOtpProviderOptions {
     Stytch application identifier
   */
   appId: string;
-  /* 
+  /*
    Stytch user identifier for a project
   */
   userId?: string;
