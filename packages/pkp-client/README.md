@@ -31,4 +31,4 @@ const pkpCosmosWallet = pkpClient.getCosmosWallet();
 ```
 
 More examples here:
-https://github.com/LIT-Protocol/js-sdk/blob/master/packages/pkp-client/src/lib/pkp-client.spec.ts
+https://github.com/LIT-Protocol/js-sdk/blob/master/packages/pkp-client/src/lib/wallet-factory.spec.ts
