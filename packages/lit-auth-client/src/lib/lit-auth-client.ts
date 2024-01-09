@@ -251,7 +251,7 @@ export class LitAuthClient {
    * @param {AuthMethod[]} - AuthMethods authentication methods to be added to the pkp
    * @param {{ pkpPermissionScopes?: number[][]; sendPkpToitself?: boolean; addPkpEthAddressAsPermittedAddress?: boolean;}}
    * @returns {Promise<{pkpTokenId?: string; pkpEthAddress?: string; pkpPublicKey?: string}>} pkp information
-  */
+   */
   public async mintPKPWithAuthMethods(
     authMethods: AuthMethod[],
     options: {
