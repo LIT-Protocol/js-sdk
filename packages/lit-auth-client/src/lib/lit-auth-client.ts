@@ -241,12 +241,19 @@ export class LitAuthClient {
     return authId;
   }
 
+  /**
+   * Mints a new pkp with all AuthMethods provided. Allows for permissions and flags to be set seperately.
+   * If no permissions are provided then each auth method will be assigned `1` for sign anything
+   * If no flags are provided then `sendPkpToitself` will be false, and `addPkpEthAddressAsPermittedAddress` will be true
+   * It is then up to the implementor to transfer the pkp nft to the pkp address.
+   * **note** When adding permissions, each permission should be added in the same order the auth methods are ordered
+   */
   public async mintPKPWithAuthMethods(
     authMethods: AuthMethod[],
     options: {
-      pkpPermissionScopes: number[][];
-      sendPkpToitself: boolean;
-      addPkpEthAddressAsPermittedAddress: boolean;
+      pkpPermissionScopes?: number[][];
+      sendPkpToitself?: boolean;
+      addPkpEthAddressAsPermittedAddress?: boolean;
     }
   ): Promise<{
     pkpTokenId?: string;
@@ -276,8 +283,8 @@ export class LitAuthClient {
       }),
       permittedAuthMethodScopes: options.pkpPermissionScopes,
       addPkpEthAddressAsPermittedAddress:
-        options.addPkpEthAddressAsPermittedAddress,
-      sendPkpToItself: options.sendPkpToitself,
+        options.addPkpEthAddressAsPermittedAddress ?? true,
+      sendPkpToItself: options.sendPkpToitself ?? false,
     };
 
     const permittedAuthMethodIds = [];
