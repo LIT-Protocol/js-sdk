@@ -38,7 +38,6 @@ export async function main() {
     fail('Type of mint response is not of type string');
   }
 
-  const sessionKeyPair = client.getSessionKey();
   const authNeededCallback = async (params) => {
     const response = await client.signSessionKey({
       sessionKey: params.sessionKeyPair,
