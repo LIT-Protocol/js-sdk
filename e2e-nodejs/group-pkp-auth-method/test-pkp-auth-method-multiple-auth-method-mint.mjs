@@ -79,7 +79,7 @@ export async function main() {
   }
 
   if (Object.keys(sessionSigs).length < client.config.minNodeCount) {
-    fail('Session key map is not at least the same as the node threshold.')
+    fail('Session key map is not at least the same as the node threshold.');
   }
 
   return success('mint returned type of string with multiple auth methods');
