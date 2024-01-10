@@ -42,7 +42,6 @@ export async function main() {
     const response = await client.signSessionKey({
       sessionKey: params.sessionKeyPair,
       statement: params.statement,
-      // authSig: globalThis.LitCI.CONTROLLER_AUTHSIG, // When this is empty or undefined, it will fail
       authMethods: [
         {
           authMethodType: 1,
@@ -77,6 +76,10 @@ export async function main() {
 
   if (!sessionSigs) {
     fail('session signatures have not been signed');
+  }
+
+  if (Object.keys(sessionSigs).length < client.config.minNodeCount) {
+    fail('Session key map is not at least the same as the node threshold.')
   }
 
   return success('mint returned type of string with multiple auth methods');
