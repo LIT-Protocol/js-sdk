@@ -3,7 +3,7 @@
 // const loadEnv = process.env.LOAD_ENV === 'false' ? false : LITCONFIG.TEST_ENV.loadEnv;
 // if (loadEnv) { ... }
 // Usage: LOAD_ENV=false yarn test:e2e:nodejs --filter=test-recap-from-lit-node-client
-
+// NETWORK=manzano MINT_NEW=true yarn test:e2e:nodejs --filter=test-recap-from-lit
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
@@ -28,13 +28,59 @@ import { ethers } from 'ethers';
 import * as siwe from 'siwe';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
 
+const getStandardAuthSigh = async (wallet) => {
+  const address = wallet.address;
+
+  // siwe message
+  const domain = 'localhost';
+  const origin = 'https://localhost/login';
+  const statement =
+    'This is a test statement.  You can put anything you want here.';
+  const siweMessage = new siwe.SiweMessage({
+    domain,
+    address: address,
+    statement,
+    uri: origin,
+    version: '1',
+    chainId: 1,
+    expirationTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+  });
+  const messageToSign = siweMessage.prepareMessage();
+
+  const signature = await wallet.signMessage(messageToSign);
+
+  return {
+    sig: signature,
+    derivedVia: 'web3.eth.personal.sign',
+    signedMessage: messageToSign,
+    address: address,
+  };
+};
+
 export async function main() {
+  if (process.env.LOAD_ENV === 'false') {
+    console.log('❗️ This test cannot be run with LOAD_ENV=false');
+    process.exit();
+  }
+
   // ==================== Setup ====================
+  const delegatedWalletA = globalThis.LitCI.wallet;
+  const delegatedWalletA_address = globalThis.LitCI.wallet.address;
+  const delegateWalletA_authSig = globalThis.LitCI.CONTROLLER_AUTHSIG;
+  const delegatedWalletA_pkpPublicKey = globalThis.LitCI.PKP_INFO.publicKey;
+
+  console.log('delegateWalletA_authSig:', delegateWalletA_authSig);
+  console.log('delegatedWalletA_address:', delegatedWalletA_address);
+  console.log('delegatedWalletA_pkpPublicKey:', delegatedWalletA_pkpPublicKey);
+
+  const delegatedWalletB = new ethers.Wallet.createRandom();
+  const delegatedWalletB_address = delegatedWalletB.address;
+  // const delegateWalletB_authSig = await getStandardAuthSigh(delegatedWalletB);
+  // console.log('delegatedWalletB_address:', delegatedWalletB_address);
 
   // ====================================================
   // =                    dAPP OWNER                    =
   // ====================================================
-
   // -- 1. dApp owner wallet
   const wallet = new ethers.Wallet(
     LITCONFIG.CONTROLLER_PRIVATE_KEY,
@@ -69,10 +115,8 @@ export async function main() {
   const { rliDelegationAuthSig } = await client.createRliDelegationAuthSig({
     dAppOwnerWallet: wallet,
     rliTokenId: rliTokenIdStr,
-    addresses: [
-      '0xBD4701851e9C9a22f448860A78872A00Da87899e',
-      // '0x93E47A604BA72899a5f8dF986cF26C97AfdaE2A0',
-    ],
+    // rliTokenId: 10,
+    addresses: [delegatedWalletA_address, delegatedWalletB_address],
   });
 
   console.log('rliDelegationAuthSig:', rliDelegationAuthSig);
@@ -81,7 +125,6 @@ export async function main() {
   // =                     END USER                     =
   // ====================================================
 
-  
   const authNeededCallback = async ({ chain, resources, expiration, uri }) => {
     const message = new siwe.SiweMessage({
       domain: 'example.com',
@@ -116,10 +159,31 @@ export async function main() {
       },
     ],
     authNeededCallback,
-    rliDelegationAuthSig
+    rliDelegationAuthSig,
   });
 
   console.log('sessionSigs:', sessionSigs);
+
+  // -- now try to run lit action
+  const res = await client.executeJs({
+    authSig: delegateWalletA_authSig,
+    code: `(async () => {
+      const sigShare = await LitActions.signEcdsa({
+        toSign: dataToSign,
+        publicKey,
+        sigName: "sig",
+      });
+    })();`,
+    authMethods: [],
+    jsParams: {
+      dataToSign: ethers.utils.arrayify(
+        ethers.utils.keccak256([1, 2, 3, 4, 5])
+      ),
+      publicKey: delegatedWalletA_pkpPublicKey,
+    },
+  });
+
+  console.log('res:', res);
 
   process.exit();
 
