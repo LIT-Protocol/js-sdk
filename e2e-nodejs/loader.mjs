@@ -58,6 +58,7 @@ globalThis.LitCI.network = network;
 globalThis.LitCI.debug = debug;
 globalThis.LitCI.sevAttestation = checkSevAttestation;
 globalThis.LitCI.CONTROLLER_AUTHSIG = authSig;
+globalThis.LitCI.CONTROLLER_WALLET = wallet;
 
 globalThis.LitCI.PKP_INFO = {};
 globalThis.LitCI.PKP_INFO.publicKey = LITCONFIG.PKP_PUBKEY;
