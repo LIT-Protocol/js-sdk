@@ -28,34 +28,34 @@ import { ethers } from 'ethers';
 import * as siwe from 'siwe';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
 
-const getStandardAuthSigh = async (wallet) => {
-  const address = wallet.address;
+// const getStandardAuthSigh = async (wallet) => {
+//   const address = wallet.address;
 
-  // siwe message
-  const domain = 'localhost';
-  const origin = 'https://localhost/login';
-  const statement =
-    'This is a test statement.  You can put anything you want here.';
-  const siweMessage = new siwe.SiweMessage({
-    domain,
-    address: address,
-    statement,
-    uri: origin,
-    version: '1',
-    chainId: 1,
-    expirationTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-  });
-  const messageToSign = siweMessage.prepareMessage();
+//   // siwe message
+//   const domain = 'localhost';
+//   const origin = 'https://localhost/login';
+//   const statement =
+//     'This is a test statement.  You can put anything you want here.';
+//   const siweMessage = new siwe.SiweMessage({
+//     domain,
+//     address: address,
+//     statement,
+//     uri: origin,
+//     version: '1',
+//     chainId: 1,
+//     expirationTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+//   });
+//   const messageToSign = siweMessage.prepareMessage();
 
-  const signature = await wallet.signMessage(messageToSign);
+//   const signature = await wallet.signMessage(messageToSign);
 
-  return {
-    sig: signature,
-    derivedVia: 'web3.eth.personal.sign',
-    signedMessage: messageToSign,
-    address: address,
-  };
-};
+//   return {
+//     sig: signature,
+//     derivedVia: 'web3.eth.personal.sign',
+//     signedMessage: messageToSign,
+//     address: address,
+//   };
+// };
 
 export async function main() {
   if (process.env.LOAD_ENV === 'false') {
@@ -75,6 +75,8 @@ export async function main() {
 
   const delegatedWalletB = new ethers.Wallet.createRandom();
   const delegatedWalletB_address = delegatedWalletB.address;
+
+  const rliTokenIdMock = '41';
   // const delegateWalletB_authSig = await getStandardAuthSigh(delegatedWalletB);
   // console.log('delegatedWalletB_address:', delegatedWalletB_address);
 
@@ -82,26 +84,26 @@ export async function main() {
   // =                    dAPP OWNER                    =
   // ====================================================
   // -- 1. dApp owner wallet
-  const wallet = new ethers.Wallet(
-    LITCONFIG.CONTROLLER_PRIVATE_KEY,
-    new ethers.providers.JsonRpcProvider(LITCONFIG.CHRONICLE_RPC)
-  );
+  // const wallet = new ethers.Wallet(
+  //   LITCONFIG.CONTROLLER_PRIVATE_KEY,
+  //   new ethers.providers.JsonRpcProvider(LITCONFIG.CHRONICLE_RPC)
+  // );
 
   // -- 2. minting RLI
   let contractClient = new LitContracts({
-    signer: wallet,
+    signer: delegatedWalletA,
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
     network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
   });
 
   await contractClient.connect();
 
-  const { rliTokenIdStr } = await contractClient.mintRLI({
-    requestsPerDay: 14400, // 10 request per minute
-    daysUntilUTCMidnightExpiration: 2,
-  });
+  // const { rliTokenIdStr } = await contractClient.mintRLI({
+  //   requestsPerDay: 14400, // 10 request per minute
+  //   daysUntilUTCMidnightExpiration: 2,
+  // });
 
-  console.log('rliTokenIdStr:', rliTokenIdStr);
+  // console.log('rliTokenIdStr:', rliTokenIdStr);
 
   const client = new LitNodeClient({
     litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
@@ -112,23 +114,29 @@ export async function main() {
 
   await client.connect();
 
-  const { rliDelegationAuthSig } = await client.createRliDelegationAuthSig({
-    dAppOwnerWallet: wallet,
-    rliTokenId: rliTokenIdStr,
-    // rliTokenId: 10,
-    addresses: [delegatedWalletA_address, delegatedWalletB_address],
-  });
+  const { rliDelegationAuthSig, litResource } =
+    await client.createRliDelegationAuthSig({
+      dAppOwnerWallet: delegatedWalletA,
+      // rliTokenId: rliTokenIdStr,
+      rliTokenId: rliTokenIdMock,
+      addresses: [delegatedWalletA_address, delegatedWalletB_address],
+    });
 
   console.log('rliDelegationAuthSig:', rliDelegationAuthSig);
 
   // ====================================================
   // =                     END USER                     =
   // ====================================================
+  // const sessionKeyPair = client.getSessionKey();
 
-  const authNeededCallback = async ({ chain, resources, expiration, uri }) => {
+  const authNeededCallback = async ({ resources, expiration, uri }) => {
+    console.log('XX resources:', resources);
+    console.log('XX expiration:', expiration);
+    console.log('XX uri:', uri);
+
     const message = new siwe.SiweMessage({
       domain: 'example.com',
-      address: wallet.address,
+      address: delegatedWalletA_address,
       statement: 'Sign a session key to use with Lit Protocol',
       uri,
       version: '1',
@@ -137,13 +145,13 @@ export async function main() {
       resources,
     });
     const toSign = message.prepareMessage();
-    const signature = await wallet.signMessage(toSign);
+    const signature = await delegatedWalletA.signMessage(toSign);
 
     const authSig = {
       sig: signature,
       derivedVia: 'web3.eth.personal.sign',
       signedMessage: toSign,
-      address: wallet.address,
+      address: delegatedWalletA_address,
     };
 
     return authSig;
@@ -154,7 +162,7 @@ export async function main() {
     chain: 'ethereum',
     resourceAbilityRequests: [
       {
-        resource: new LitActionResource('*'),
+        resource: new LitRLIResource(rliTokenIdMock),
         ability: LitAbility.RateLimitIncreaseAuth,
       },
     ],
@@ -165,8 +173,18 @@ export async function main() {
   console.log('sessionSigs:', sessionSigs);
 
   // -- now try to run lit action
+  // errConstructorFunc {
+  //   message: "auth_sig passed is invalid or couldn't be verified",
+  //   errorCode: 'NodeInvalidAuthSig',
+  //   errorKind: 'Validation',
+  //   status: 401,
+  //   details: [
+  //     'validation error: Invalid URI for top level auth sig: lit:session:b27d3888442ea04e9f87d17272710942bbeb30fd344b18c66ece95affd29cce0'
+  //   ]
+  // }
   const res = await client.executeJs({
-    authSig: delegateWalletA_authSig,
+    // authSig: delegateWalletA_authSig,
+    sessionSigs: sessionSigs,
     code: `(async () => {
       const sigShare = await LitActions.signEcdsa({
         toSign: dataToSign,
