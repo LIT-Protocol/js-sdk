@@ -121,41 +121,6 @@ export async function main() {
 
   process.exit();
 
-  // -- information dApp to publicizes
-  // const siweCID = await RecapSessionCapabilityObject.strToCID(messageToSign);
-  // console.log('siweCID:', siweCID);
-
-  // const expectedResult = 'QmQiy7M88uboUkSF68Hv73NWL8dnrbMNZmbstVVi3UVrgM';
-
-  // ==================== Test Logic ====================
-  // if (recapObject.proofs[0] !== expectedResult) {
-  //   return fail(
-  //     `Failed to get proof from Recap Session Capability, it should be ${expectedResult} but is ${recapObject.proofs[0]}`
-  //   );
-  // }
-
-  // -- get session sigs
-  // const sessionSigs =
-
-  // -- Application developer (Wallet A) and delegates RLI to your end users
-
-  // -- Wallet A: a wallet that has a minted with a rate limit increase
-
-  // -- Wallet B: Doesn't have that NFT
-  // Wallet A delegates to Wallet B
-
-  // -- Check if rate limited.
-  // mints a rate limit NFT
-
-  // -- The maximum request without a Rate Limit NFT is 3
-
-  // ==================== Post-Validation ====================
-  // if (proof === expectedResult) {
-  //   return success(
-  //     `Recap Session Capability has proof at index 0 of ${expectedResult}`
-  //   );
-  // }
-
   return fail(`Failed to get proof from Recap Session Capability`);
 }
 
