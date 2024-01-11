@@ -198,11 +198,11 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // -- validate addresses has to be an array and has to have at least one address
-    // if (!Array.isArray(addresses) || addresses.length === 0) {
-    //   throw new Error(
-    //     'Addresses must be an array and has to have at least one'
-    //   );
-    // }
+    if (!Array.isArray(addresses) || addresses.length === 0) {
+      throw new Error(
+        'Addresses must be an array and has to have at least one'
+      );
+    }
 
     // -- create LitRLIResource (note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
     const litResource = new LitRLIResource(rliTokenId);
@@ -213,38 +213,11 @@ export class LitNodeClientNodeJs extends LitCore {
         litResource,
       ]);
 
-
-    // It seems like the node code only accepts a single wallet address atm.?
-    // https://github.com/LIT-Protocol/lit-assets/blob/10b6d00e0dce1ded9bad4264ce35f5e805989f40/rust/lit-node/tests/common/auth_sig.rs#L126
-    if (addresses.length === 1) {
-      recapObject.addCapabilityForResource(
-        litResource,
-        LitAbility.RateLimitIncreaseAuth,
-        { nft_id: rliTokenId, delegate_to: addresses[0] }
-      );
-    }
-
-    // According to spec:
-    // https://www.notion.so/litprotocol/Capability-Delegation-c7fc696bac93422b996adb2b04208cc5?pvs=4#628784737187480c94a1bd6bf13fbded
-    else {
-      console.log(`❗️❗️WARNING! Multiple addresses seems to be not implemeneted yet on the node side:
-        Please see original spec: https://www.notion.so/litprotocol/Capability-Delegation-c7fc696bac93422b996adb2b04208cc5?pvs=4#628784737187480c94a1bd6bf13fbded
-        and current implementation: https://github.com/LIT-Protocol/lit-assets/blob/10b6d00e0dce1ded9bad4264ce35f5e805989f40/rust/lit-node/tests/common/auth_sig.rs#L126
-      ❗️❗️`);
-      // -- create unified access control conditions for RLI delegation
-      const unifiedAccsHash = await generateUnifiedAccsForRLIDelegation(
-        addresses
-      );
-
-      console.log('unifiedAccsHash:', unifiedAccsHash);
-
-      // 'lit-ratelimitincrease://17': { '*/*': [ {} ], 'Auth/Auth': [ {} ] }
-      recapObject.addCapabilityForResource(
-        litResource,
-        LitAbility.RateLimitIncreaseAuth,
-        { accessControlConditionResource: unifiedAccsHash }
-      );
-    }
+    recapObject.addCapabilityForResource(
+      litResource,
+      LitAbility.RateLimitIncreaseAuth,
+      { nft_id: rliTokenId, delegate_to: addresses }
+    );
 
     console.log('recapObject:', recapObject);
     console.log('attenuations:', JSON.stringify(recapObject.attenuations));
