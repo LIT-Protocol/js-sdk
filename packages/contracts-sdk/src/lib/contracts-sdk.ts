@@ -1,4 +1,4 @@
-import { BigNumberish, BytesLike, ethers } from 'ethers';
+import { BigNumber, BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
@@ -7,11 +7,6 @@ import {
   LitContractContext,
   LitContractResolverContext,
 } from '@lit-protocol/types';
-
-let CID: any;
-try {
-  CID = require('multiformats/cid');
-} catch (e) {}
 
 // ----- autogen:import-data:start  -----
 // Generated at 2023-11-07T01:50:52.460Z
@@ -47,7 +42,8 @@ import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
 import { getAuthIdByAuthMethod } from './auth-utils';
-import { Logger, LogManager } from '@lit-protocol/logger';
+import { Logger, LogManager } from "@lit-protocol/logger";
+import { calculateRequestsPerKilosecond, calculateUTCMidnightExpiration, convertRequestsPerDayToPerSecond } from './utils';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -1070,6 +1066,72 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       tx: receipt,
     };
   };
+
+  // Mints a Rate Limit Increase (RLI) NFT token with the specified daily request rate and expiration period.
+  // The expiration date is calculated to be at midnight UTC, a specific number of days from now.
+  mintRLI = async (
+    {
+      requestsPerDay,
+      daysUntilUTCMidnightExpiration
+    }: {
+      requestsPerDay: number,
+      daysUntilUTCMidnightExpiration: number
+    }
+  ): Promise<{
+    rliTxHash: string;
+    rliTokenId: BigNumber;
+    rliTokenIdStr: string
+  }> => {
+
+    console.log('Minting RLI...');
+
+    const requestsPerSecond = convertRequestsPerDayToPerSecond(requestsPerDay);
+    const requestsPerKilosecond = Math.round(calculateRequestsPerKilosecond(requestsPerSecond));
+    const expiresAt = calculateUTCMidnightExpiration(daysUntilUTCMidnightExpiration);
+
+    let mintCost;
+
+    try {
+      mintCost = await this.rateLimitNftContract.read.calculateCost(
+        requestsPerKilosecond,
+        expiresAt
+      );
+
+    } catch (e) {
+      console.log('Error calculating mint cost:', e);
+      throw e;
+    }
+
+    console.log('RLI mint cost:', mintCost.toString());
+    console.log('Requests per day:', requestsPerDay);
+    console.log('Requests per kilosecond:', requestsPerKilosecond);
+    console.log(`Expires at (Unix Timestamp): ${expiresAt}`);
+
+    const expirationDate = new Date(expiresAt * 1000);
+    console.log('Expiration Date (UTC):', expirationDate.toUTCString());
+
+    try {
+      const res = await this.rateLimitNftContract.write.mint(
+        expiresAt,
+        { value: mintCost }
+      );
+
+      const txHash = res.hash;
+      let tx = await res.wait();
+      console.log('Transaction:', tx);
+
+      const tokenId = ethers.BigNumber.from(tx.logs[0].topics[3]);
+
+      return {
+        rliTxHash: txHash,
+        rliTokenId: tokenId,
+        rliTokenIdStr: tokenId.toString()
+      };
+    } catch (e) {
+      console.error('Error minting RLI:', e);
+      throw e; // Rethrow the error after logging
+    }
+  }
 
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));

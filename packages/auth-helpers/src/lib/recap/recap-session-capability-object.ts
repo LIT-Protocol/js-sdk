@@ -11,6 +11,7 @@ import {
 import { getRecapNamespaceAndAbility } from './utils';
 import { sanitizeSiweMessage } from '../siwe';
 import { AuthSig } from '../models';
+import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   #inner: Recap;
@@ -22,9 +23,53 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     this.#inner = new Recap(att, prf);
   }
 
-  static async sha256(data: Buffer): Promise<ArrayBuffer> {
-    const digest = await crypto.subtle.digest('SHA-256', data);
-    return digest;
+  // static async sha256(data: Buffer): Promise<ArrayBuffer> {
+  //   const digest = await crypto.subtle.digest('SHA-256', data);
+  //   return digest;
+  // }
+
+  // This should ideally be placed in the IPFSBundledSDK package, but for some reasons
+  // there seems to be bundling issues where the jest test would fail, but somehow
+  // works here.
+  public static async strToCID(data: string | Uint8Array | object): Promise<string> {
+    let content: Uint8Array;
+
+    // Check the type of data and convert accordingly
+    if (typeof data === 'string') {
+      // console.log("Type A");
+      // Encode the string directly if data is a string
+      content = new TextEncoder().encode(data);
+    } else if (data instanceof Uint8Array) {
+      // console.log("Type B");
+      // Use the Uint8Array directly
+      content = data;
+    } else if (typeof data === 'object') {
+      // console.log("Type C");
+      // Stringify and encode if data is an object
+      const contentStr = JSON.stringify(data);
+      content = new TextEncoder().encode(contentStr);
+    } else {
+      // console.log("Type D");
+      throw new Error("Invalid content type");
+    }
+
+    // Create the CID
+    let ipfsId;
+    for await (const { cid } of IPFSBundledSDK.importer(
+      [{ content }],
+      new IPFSBundledSDK.MemoryBlockstore(),
+      { onlyHash: true }
+    )) {
+      ipfsId = cid;
+    }
+
+    // Validate the IPFS ID
+    if (!ipfsId) {
+      throw new Error("Could not create IPFS ID");
+    }
+
+    // Return the IPFS ID as a string
+    return ipfsId.toString();
   }
 
   /**
@@ -36,27 +81,12 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
    *
    * @param authSig The AuthSig object containing the rate limit authorization details.
    */
-  async addRateLimitAuthSig(
-    authSig: AuthSig,
-  )
-    : Promise<void> {
+  async addRateLimitAuthSig(authSig: AuthSig) {
 
-    // @ts-ignore
-    const Hash = await import('ipfs-only-hash');
-    const data = JSON.stringify(authSig);
-
-    console.log("data:", data);
-
-    let hash;
+    const ipfsId = await RecapSessionCapabilityObject.strToCID(authSig);
 
     try {
-      hash = await Hash.of(data);
-    } catch (e: any) {
-      throw new Error(e);
-    }
-
-    try {
-      this.addProof(hash);
+      this.addProof(ipfsId);
     } catch (e: any) {
       throw new Error(e);
     }
@@ -114,7 +144,8 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   /** LIT specific methods */
   addCapabilityForResource(
     litResource: ILitResource,
-    ability: LitAbility
+    ability: LitAbility,
+    data: any = {}
   ): void {
     // Validate Lit ability is compatible with the Lit resource.
     if (!litResource.isValidLitAbility(ability)) {
@@ -126,11 +157,21 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     const { recapNamespace, recapAbility } =
       getRecapNamespaceAndAbility(ability);
 
+    if (!data) {
+      return this.addAttenuation(
+        litResource.getResourceKey(),
+        recapNamespace,
+        recapAbility,
+      );
+    }
+
     return this.addAttenuation(
       litResource.getResourceKey(),
       recapNamespace,
-      recapAbility
+      recapAbility,
+      data
     );
+
   }
 
   verifyCapabilitiesForResource(

@@ -19,6 +19,66 @@ import {
 } from './canonicalFormatter';
 import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 
+
+// Same as:
+// const unifiedAccs = [
+//   {
+//     conditionType: 'evmBasic',
+//     contractAddress: '',
+//     standardContractType: '',
+//     chain: 'ethereum',
+//     method: '',
+//     parameters: [':userAddress'],
+//     returnValueTest: {
+//       comparator: '=',
+//       value: '0xBD4701851e9C9a22f448860A78872A00Da87899e',
+//     },
+//   },
+//   { operator: 'or' },
+//   {
+//     conditionType: 'evmBasic',
+//     contractAddress: '',
+//     standardContractType: '',
+//     chain: 'ethereum',
+//     method: '',
+//     parameters: [':userAddress'],
+//     returnValueTest: {
+//       comparator: '=',
+//       value: '0x93E47A604BA72899a5f8dF986cF26C97AfdaE2A0',
+//     },
+//   },
+// ];
+export const generateUnifiedAccsForRLIDelegation = async (ethAddresses: string[]): Promise<string> => {
+  const unifiedAccs: (any)[] = [];
+
+  ethAddresses.forEach((address, index) => {
+    const condition = {
+      conditionType: 'evmBasic',
+      contractAddress: '',
+      standardContractType: '',
+      chain: 'ethereum',
+      method: '',
+      parameters: [':userAddress'],
+      returnValueTest: {
+        comparator: '=',
+        value: address,
+      },
+    };
+
+    unifiedAccs.push(condition);
+
+    // Add the operator for all but the last address
+    if (index < ethAddresses.length - 1) {
+      unifiedAccs.push({ operator: 'or' });
+    }
+  });
+
+  const hash = await hashUnifiedAccessControlConditions(unifiedAccs);
+
+  return uint8arrayToString(new Uint8Array(hash), 'base16');
+
+}
+
 /**
  *
  * Hash the unified access control conditions using SHA-256 in a deterministic way.
