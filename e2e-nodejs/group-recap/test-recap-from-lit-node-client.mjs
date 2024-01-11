@@ -3,6 +3,7 @@
 // const loadEnv = process.env.LOAD_ENV === 'false' ? false : LITCONFIG.TEST_ENV.loadEnv;
 // if (loadEnv) { ... }
 // Usage: LOAD_ENV=false yarn test:e2e:nodejs --filter=test-recap-from-lit-node-client
+// MINT_NEW=true yarn test:e2e:nodejs --filter=test-recap-from-lit
 
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
@@ -55,7 +56,7 @@ export async function main() {
     daysUntilUTCMidnightExpiration: 2,
   });
 
-  // console.log('rliTokenIdStr:', rliTokenIdStr);
+  console.log('rliTokenIdStr:', rliTokenIdStr);
 
   const client = new LitNodeClient({
     litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
@@ -80,29 +81,24 @@ export async function main() {
   // ====================================================
   // =                     END USER                     =
   // ====================================================
-
-  const authNeededCallback = async ({ chain, resources, expiration, uri }) => {
-    const message = new siwe.SiweMessage({
-      domain: 'example.com',
-      address: wallet.address,
-      statement: 'Sign a session key to use with Lit Protocol',
-      uri,
-      version: '1',
-      chainId: '1',
-      expirationTime: expiration,
-      resources,
+  const sessionKeyPair = client.getSessionKey();
+  const authNeededCallback = async (params) => {
+    const response = await client.signSessionKey({
+      sessionKey: sessionKeyPair,
+      statement: params.statement,
+      // authSig: globalThis.LitCI.CONTROLLER_AUTHSIG, // When this is empty or undefined, it will fail
+      authMethods: [
+        {
+          authMethodType: 1,
+          accessToken: JSON.stringify(globalThis.LitCI.CONTROLLER_AUTHSIG),
+        },
+      ],
+      pkpPublicKey: `0x${globalThis.LitCI.AUTH_METHOD_PKP_INFO.publicKey}`,
+      expiration: params.expiration,
+      resources: params.resources,
+      chainId: 1,
     });
-    const toSign = message.prepareMessage();
-    const signature = await wallet.signMessage(toSign);
-
-    const authSig = {
-      sig: signature,
-      derivedVia: 'web3.eth.personal.sign',
-      signedMessage: toSign,
-      address: wallet.address,
-    };
-
-    return authSig;
+    return response.authSig;
   };
 
   const sessionSigs = await client.getSessionSigs({
@@ -111,9 +107,10 @@ export async function main() {
     resourceAbilityRequests: [
       {
         resource: new LitActionResource('*'),
-        ability: LitAbility.RateLimitIncreaseAuth,
+        ability: LitAbility.PKPSigning,
       },
     ],
+    sessionKeyPair,
     authNeededCallback,
   });
 
