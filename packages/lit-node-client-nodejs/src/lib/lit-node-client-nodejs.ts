@@ -236,7 +236,7 @@ export class LitNodeClientNodeJs extends LitCore {
     console.log('verified:', verified);
 
     // -- get auth sig
-    const siweMessage = new siwe.SiweMessage({
+    let siweMessage = new siwe.SiweMessage({
       domain,
       address: dAppOwnerWalletAddress,
       statement,
@@ -245,6 +245,8 @@ export class LitNodeClientNodeJs extends LitCore {
       chainId: 1,
       expirationTime: new Date(Date.now() + 1000 * 60 * 7).toISOString(),
     });
+
+    siweMessage = recapObject.addToSiweMessage(siweMessage);
 
     const messageToSign = siweMessage.prepareMessage();
     console.log('messageToSign:', messageToSign);
@@ -2516,8 +2518,7 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource),
-        params.rateLimitAuthSig,
+        params.resourceAbilityRequests.map((r) => r.resource)
       );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
     let nonce = this.latestBlockhash || generateNonce();

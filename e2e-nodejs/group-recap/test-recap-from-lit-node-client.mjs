@@ -172,6 +172,8 @@ export async function main() {
 
   console.log('sessionSigs:', sessionSigs);
 
+  // process.exit();
+
   // -- now try to run lit action
   // errConstructorFunc {
   //   message: "auth_sig passed is invalid or couldn't be verified",
