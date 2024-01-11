@@ -17,6 +17,8 @@ import {
 import {
   LitAbility,
   LitAccessControlConditionResource,
+  LitRLIResource,
+  LitActionResource,
 } from '@lit-protocol/auth-helpers';
 
 import { generateUnifiedAccsForRLIDelegation } from '@lit-protocol/access-control-conditions';
@@ -29,6 +31,10 @@ import * as LitJsSdk from '@lit-protocol/lit-node-client';
 export async function main() {
   // ==================== Setup ====================
 
+  // ====================================================
+  // =                    dAPP OWNER                    =
+  // ====================================================
+
   // -- 1. dApp owner wallet
   const wallet = new ethers.Wallet(
     LITCONFIG.CONTROLLER_PRIVATE_KEY,
@@ -36,104 +42,88 @@ export async function main() {
   );
 
   // -- 2. minting RLI
-  // let contractClient = new LitContracts({
-  //   signer: wallet,
-  //   debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
-  //   network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
-  // });
+  let contractClient = new LitContracts({
+    signer: wallet,
+    debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
+    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
+  });
 
-  // await contractClient.connect();
+  await contractClient.connect();
 
-  // const { rliTokenIdStr } = await contractClient.mintRLI({
-  //   requestsPerDay: 14400, // 10 request per minute
-  //   daysUntilUTCMidnightExpiration: 2,
-  // });
+  const { rliTokenIdStr } = await contractClient.mintRLI({
+    requestsPerDay: 14400, // 10 request per minute
+    daysUntilUTCMidnightExpiration: 2,
+  });
 
   // console.log('rliTokenIdStr:', rliTokenIdStr);
 
-  // -- 4. by setting unified access control conditions
-  const unifiedAccsHash = await generateUnifiedAccsForRLIDelegation([
-    '0xBD4701851e9C9a22f448860A78872A00Da87899e',
-    '0x93E47A604BA72899a5f8dF986cF26C97AfdaE2A0',
-  ]);
+  const client = new LitNodeClient({
+    litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
+    debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
+    minNodeCount: undefined,
+    checkNodeAttestation: process.env.CHECK_SEV ?? false,
+  });
 
-  console.log('unifiedAccsHash:', unifiedAccsHash);
+  await client.connect();
+
+  const { rliDelegationAuthSig } = await client.createRliDelegationAuthSig({
+    dAppOwnerWallet: wallet,
+    rliTokenId: rliTokenIdStr,
+    addresses: [
+      '0xBD4701851e9C9a22f448860A78872A00Da87899e',
+      // '0x93E47A604BA72899a5f8dF986cF26C97AfdaE2A0',
+    ],
+  });
+
+  console.log('rliDelegationAuthSig:', rliDelegationAuthSig);
+
+  // ====================================================
+  // =                     END USER                     =
+  // ====================================================
+
+  const authNeededCallback = async ({ chain, resources, expiration, uri }) => {
+    const message = new siwe.SiweMessage({
+      domain: 'example.com',
+      address: wallet.address,
+      statement: 'Sign a session key to use with Lit Protocol',
+      uri,
+      version: '1',
+      chainId: '1',
+      expirationTime: expiration,
+      resources,
+    });
+    const toSign = message.prepareMessage();
+    const signature = await wallet.signMessage(toSign);
+
+    const authSig = {
+      sig: signature,
+      derivedVia: 'web3.eth.personal.sign',
+      signedMessage: toSign,
+      address: wallet.address,
+    };
+
+    return authSig;
+  };
+
+  const sessionSigs = await client.getSessionSigs({
+    expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
+    chain: 'ethereum',
+    resourceAbilityRequests: [
+      {
+        resource: new LitActionResource('*'),
+        ability: LitAbility.RateLimitIncreaseAuth,
+      },
+    ],
+    authNeededCallback,
+  });
+
+  console.log('sessionSigs:', sessionSigs);
 
   process.exit();
 
-  // -- 5. get authSig from dApp owner
-  const address = ethers.utils.getAddress(await wallet.getAddress());
-  const domain = 'localhost';
-  const origin = 'https://localhost/login';
-  const statement =
-    'This is a test statement.  You can put anything you want here.';
-  const siweMessage = new siwe.SiweMessage({
-    domain,
-    address: address,
-    statement,
-    uri: origin,
-    version: '1',
-    chainId: 1,
-    expirationTime: new Date(Date.now() + 1000 * 60 * 7).toISOString(),
-  });
-  const messageToSign = siweMessage.prepareMessage();
-
-  const signature = await wallet.signMessage(messageToSign);
-
-  const authSig = {
-    sig: signature,
-    derivedVia: 'web3.eth.personal.sign',
-    signedMessage: messageToSign,
-    address: address,
-  };
-
-  console.log('5. authSig:', authSig);
-
-  // -- set access control conditions
-
-  // -- set abilities
-  // const getHash = ();
-
-  // -- mint a Rate Limit NFT
-  // LIT Relying Party (RP)
-  // Resource: "lit-ratelimitincrease://${RLI_TOKEN_ID}"
-
-  // - old
-  // const att = {
-  //   someResource: {
-  //     [`lit-ratelimitincrease://${rliTokenIdStr}`]: [
-  //       { accessControlConditions: 'hashOfAccs' },
-  //     ],
-  //   },
-  // };
-
-  // - new
-  // const att = {
-  //   [`lit-ratelimitincrease://${rliTokenIdStr}`]: [
-  //     { accessControlConditions: 'hashOfAccs' },
-  //   ],
-  // };
-
-  // const path = '/bglyaysu8rvblxlk7x0ksn';
-
-  // let resourceId = {
-  //   baseUrl: 'my-dynamic-content-server.com',
-  //   path,
-  //   orgId: '',
-  //   role: '',
-  //   extraData: '',
-  // };
-
-  // let hashedResourceId = await hashResourceIdForSigning(resourceId);
-
-  // const litResource = new LitAccessControlConditionResource(hashedResourceId);
-  // const litResources = [litResource];
-
-  // const recapObject =
-  //   await LitNodeClient.generateSessionCapabilityObjectWithWildcards(
-  //     litResources,
-  //     mockAuthSig
-  //   );
+  // -- information dApp to publicizes
+  // const siweCID = await RecapSessionCapabilityObject.strToCID(messageToSign);
+  // console.log('siweCID:', siweCID);
 
   // const expectedResult = 'QmQiy7M88uboUkSF68Hv73NWL8dnrbMNZmbstVVi3UVrgM';
 

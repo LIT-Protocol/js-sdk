@@ -117,7 +117,8 @@ export interface ISessionCapabilityObject {
    */
   addCapabilityForResource(
     litResource: ILitResource,
-    ability: LitAbility
+    ability: LitAbility,
+    data?: any
   ): void;
 
   /**

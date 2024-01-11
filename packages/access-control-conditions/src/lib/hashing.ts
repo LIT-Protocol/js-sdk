@@ -73,8 +73,6 @@ export const generateUnifiedAccsForRLIDelegation = async (ethAddresses: string[]
     }
   });
 
-  console.log("unifiedAccs:", unifiedAccs)
-
   const hash = await hashUnifiedAccessControlConditions(unifiedAccs);
 
   return uint8arrayToString(new Uint8Array(hash), 'base16');

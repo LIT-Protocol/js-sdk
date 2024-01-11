@@ -23,10 +23,10 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     this.#inner = new Recap(att, prf);
   }
 
-  static async sha256(data: Buffer): Promise<ArrayBuffer> {
-    const digest = await crypto.subtle.digest('SHA-256', data);
-    return digest;
-  }
+  // static async sha256(data: Buffer): Promise<ArrayBuffer> {
+  //   const digest = await crypto.subtle.digest('SHA-256', data);
+  //   return digest;
+  // }
 
   // This should ideally be placed in the IPFSBundledSDK package, but for some reasons
   // there seems to be bundling issues where the jest test would fail, but somehow
@@ -73,14 +73,14 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   }
 
   /**
- * Adds a Rate Limit Authorization Signature (AuthSig) as an proof to the Recap object.
- * This method serializes the AuthSig object into a JSON string and adds it to the proof
- * of the Recap object. The AuthSig typically contains authentication details like signature,
- * method of derivation, the signed message, and the address of the signer. This proof is
- * used to verify that the user has the necessary authorization, such as a Rate Limit Increase NFT.
- *
- * @param authSig The AuthSig object containing the rate limit authorization details.
- */
+   * Adds a Rate Limit Authorization Signature (AuthSig) as an proof to the Recap object.
+   * This method serializes the AuthSig object into a JSON string and adds it to the proof
+   * of the Recap object. The AuthSig typically contains authentication details like signature,
+   * method of derivation, the signed message, and the address of the signer. This proof is
+   * used to verify that the user has the necessary authorization, such as a Rate Limit Increase NFT.
+   *
+   * @param authSig The AuthSig object containing the rate limit authorization details.
+   */
   async addRateLimitAuthSig(authSig: AuthSig) {
 
     const ipfsId = await RecapSessionCapabilityObject.strToCID(authSig);
@@ -91,6 +91,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
       throw new Error(e);
     }
   }
+
 
   static decode(encoded: string): RecapSessionCapabilityObject {
     const recap = Recap.decode_urn(encoded);
@@ -144,7 +145,8 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   /** LIT specific methods */
   addCapabilityForResource(
     litResource: ILitResource,
-    ability: LitAbility
+    ability: LitAbility,
+    data: any = {}
   ): void {
     // Validate Lit ability is compatible with the Lit resource.
     if (!litResource.isValidLitAbility(ability)) {
@@ -156,11 +158,21 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
     const { recapNamespace, recapAbility } =
       getRecapNamespaceAndAbility(ability);
 
+    if (!data) {
+      return this.addAttenuation(
+        litResource.getResourceKey(),
+        recapNamespace,
+        recapAbility,
+      );
+    }
+
     return this.addAttenuation(
       litResource.getResourceKey(),
       recapNamespace,
-      recapAbility
+      recapAbility,
+      data
     );
+
   }
 
   verifyCapabilitiesForResource(
