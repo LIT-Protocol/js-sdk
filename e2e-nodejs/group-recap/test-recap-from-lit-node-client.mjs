@@ -36,13 +36,7 @@ export async function main() {
   // ====================================================
   // =                    dAPP OWNER                    =
   // ====================================================
-  // -- 1. dApp owner wallet
-  // const wallet = new ethers.Wallet(
-  //   LITCONFIG.CONTROLLER_PRIVATE_KEY,
-  //   new ethers.providers.JsonRpcProvider(LITCONFIG.CHRONICLE_RPC)
-  // );
-
-  // -- 2. minting RLI
+  // -- 1. minting RLI
   let contractClient = new LitContracts({
     signer: dAppOwnerWallet,
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
@@ -51,13 +45,13 @@ export async function main() {
 
   await contractClient.connect();
 
-  // const rliTokenIdStr = '11';
-  const { rliTokenIdStr } = await contractClient.mintRLI({
-    requestsPerDay: 14400, // 10 request per minute
-    daysUntilUTCMidnightExpiration: 2,
-  });
+  const rliTokenIdStr = '15';
+  // const { rliTokenIdStr } = await contractClient.mintRLI({
+  //   requestsPerDay: 14400, // 10 request per minute
+  //   daysUntilUTCMidnightExpiration: 2,
+  // });
 
-  console.log('rliTokenIdStr:', rliTokenIdStr);
+  // console.log('rliTokenIdStr:', rliTokenIdStr);
 
   const client = new LitNodeClient({
     litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
@@ -76,6 +70,7 @@ export async function main() {
     });
 
   console.log('rliDelegationAuthSig:', rliDelegationAuthSig);
+  console.log('litResource:', JSON.stringify(litResource));
 
   // ====================================================
   // =                     END USER                     =
@@ -125,7 +120,7 @@ export async function main() {
 
   console.log('sessionSigs:', sessionSigs);
 
-  // process.exit();
+  process.exit();
 
   // -- now try to run lit action
   // errConstructorFunc {
