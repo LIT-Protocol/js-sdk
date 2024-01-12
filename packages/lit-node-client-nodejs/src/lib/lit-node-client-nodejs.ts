@@ -119,16 +119,15 @@ export class LitNodeClientNodeJs extends LitCore {
   static getClaims = (
     claims: any[]
   ): Record<string, { signatures: Signature[]; derivedKeyId: string }> => {
-    let keys: string[] = Object.keys(claims[0]);
-    let signatures: Record<string, Signature[]> = {};
-    let claimRes: Record<
+    const keys: string[] = Object.keys(claims[0]);
+    const signatures: Record<string, Signature[]> = {};
+    const claimRes: Record<
       string,
       { signatures: Signature[]; derivedKeyId: string }
     > = {};
     for (let i = 0; i < keys.length; i++) {
-      let claimSet: { signature: string; derivedKeyId: string }[] = claims.map(
-        (c) => c[keys[i]]
-      );
+      const claimSet: { signature: string; derivedKeyId: string }[] =
+        claims.map((c) => c[keys[i]]);
       signatures[keys[i]] = [];
       claimSet.map((c) => {
         let sig = ethers.utils.splitSignature(`0x${c.signature}`);
@@ -1305,8 +1304,6 @@ export class LitNodeClientNodeJs extends LitCore {
     const R_x = shareData[0].local_x;
     const R_y = shareData[0].local_y;
 
-    // the public key can come from any node - it obviously will be identical from each node
-    const public_key = shareData[0].public_key;
     const valid_shares = shareData.map((s: any) => s.signature_share);
     const shares = JSON.stringify(valid_shares);
 
@@ -1331,7 +1328,7 @@ export class LitNodeClientNodeJs extends LitCore {
         Array.isArray(params.jsParams[key]) ||
         ArrayBuffer.isView(params.jsParams[key])
       ) {
-        let arr = [];
+        const arr = [];
         for (let i = 0; i < params.jsParams[key].length; i++) {
           arr.push((params.jsParams[key] as Buffer)[i]);
         }
@@ -1407,7 +1404,7 @@ export class LitNodeClientNodeJs extends LitCore {
       // -- fetch shares from nodes
       const nodePromises = this.getNodePromises((url: string) => {
         // -- choose the right signature
-        let sigToPassToNode = this.getSessionOrAuthSig({
+        const sigToPassToNode = this.getSessionOrAuthSig({
           authSig,
           sessionSigs,
           url,
@@ -1522,7 +1519,7 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // ========== Result ==========
-    let returnVal: ExecuteJsResponse = {
+    const returnVal: ExecuteJsResponse = {
       claims,
       signatures,
       decryptions: [], // FIXME: Fix if and when we enable decryptions from within a Lit Action.
@@ -1576,7 +1573,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // the nodes will only accept a normal array type as a paramater due to serizalization issues with Uint8Array type.
     // this loop below is to normalize the message to a basic array.
-    let arr = [];
+    const arr = [];
     for (let i = 0; i < toSign.length; i++) {
       arr.push((toSign as Buffer)[i]);
     }
@@ -1585,7 +1582,7 @@ export class LitNodeClientNodeJs extends LitCore {
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- choose the right signature
-      let sigToPassToNode = this.getSessionOrAuthSig({
+      const sigToPassToNode = this.getSessionOrAuthSig({
         authSig,
         sessionSigs,
         url,
@@ -1594,7 +1591,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
       logWithRequestId(requestId, 'sigToPassToNode:', sigToPassToNode);
 
-      let reqBody = {
+      const reqBody = {
         toSign,
         pubkey: pubKey,
         ...(sigToPassToNode &&
@@ -1743,7 +1740,7 @@ export class LitNodeClientNodeJs extends LitCore {
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
-      let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+      const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
       return this.getSigningShareForToken(
         url,
@@ -1828,7 +1825,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
-    let hashOfConditions: ArrayBuffer | undefined =
+    const hashOfConditions: ArrayBuffer | undefined =
       await this.getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
