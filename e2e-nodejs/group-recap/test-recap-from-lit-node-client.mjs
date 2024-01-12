@@ -1,9 +1,4 @@
-// This test requires LOAD_ENV=false implementation at
-// loader.mjs
-// const loadEnv = process.env.LOAD_ENV === 'false' ? false : LITCONFIG.TEST_ENV.loadEnv;
-// if (loadEnv) { ... }
-// Usage: LOAD_ENV=false yarn test:e2e:nodejs --filter=test-recap-from-lit-node-client
-// NETWORK=manzano MINT_NEW=true yarn test:e2e:nodejs --filter=test-recap-from-lit
+// Usage: DEBUG=true NETWORK=manzano yarn test:e2e:nodejs --filter=test-recap-from-lit
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
@@ -20,7 +15,13 @@ export async function main() {
     process.exit();
   }
 
+  // NOTE: In this example, the dApp owner would be both the RLI delegator and the delegatee (end user)
+  // for ease of testing.
   // ==================== Setup ====================
+
+  // ====================================================
+  // =               dApp Owner's Perspetive            =
+  // ====================================================
   const dAppOwnerWallet = globalThis.LitCI.wallet;
   const dAppOwnerWallet_address = globalThis.LitCI.wallet.address;
   const dAppOwnerWallet_authSig = globalThis.LitCI.CONTROLLER_AUTHSIG;
@@ -33,10 +34,8 @@ export async function main() {
   const delegatedWalletB = new ethers.Wallet.createRandom();
   const delegatedWalletB_address = delegatedWalletB.address;
 
-  // ====================================================
-  // =                    dAPP OWNER                    =
-  // ====================================================
-  // -- 1. minting RLI
+  // As a dApp owner, I want to mint a Rate Limit Increase NFT so he who owns or delegated to
+  // would be able to perform 14400 requests per day
   let contractClient = new LitContracts({
     signer: dAppOwnerWallet,
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
@@ -53,15 +52,18 @@ export async function main() {
 
   // console.log('rliTokenIdStr:', rliTokenIdStr);
 
-  const client = new LitNodeClient({
+  const litNodeClient = new LitNodeClient({
     litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
     minNodeCount: undefined,
     checkNodeAttestation: process.env.CHECK_SEV ?? false,
   });
 
-  await client.connect();
+  await litNodeClient.connect();
 
+  // we will create an delegation auth sig, which internally we will create
+  // a recap object, add the resource "lit-ratelimitincrease://{tokenId}" to it, and add it to the siwe
+  // message. We will then sign the siwe message with the dApp owner's wallet.
   const { rliDelegationAuthSig, litResource } =
     await client.createRliDelegationAuthSig({
       dAppOwnerWallet: dAppOwnerWallet,
@@ -73,10 +75,10 @@ export async function main() {
   console.log('litResource:', JSON.stringify(litResource));
 
   // ====================================================
-  // =                     END USER                     =
+  // =                  As an end user                  =
   // ====================================================
-  // const sessionKeyPair = client.getSessionKey();
 
+  // We need to setup a generic siwe auth callback that will be called by the lit-node-client
   const authNeededCallback = async ({ resources, expiration, uri }) => {
     console.log('XX resources:', resources);
     console.log('XX expiration:', expiration);
@@ -92,8 +94,10 @@ export async function main() {
       expirationTime: expiration,
       resources,
     });
-    const toSign = message.prepareMessage();
+    let toSign = message.prepareMessage();
     const signature = await dAppOwnerWallet.signMessage(toSign);
+
+    toSign = toSign.replace(/\/\/n/g, '/n'); // note: might be serialisation issue
 
     const authSig = {
       sig: signature,
@@ -105,7 +109,13 @@ export async function main() {
     return authSig;
   };
 
-  const sessionSigs = await client.getSessionSigs({
+  // 1. When generating a session sigs, we need to specify the resourceAbilityRequests, which
+  // is a list of resources and abilities that we want to be able to perform. In this case,
+  // we want to be able to perform the ability "rate-limit-increase-auth" on the resource
+  // "lit-ratelimitincrease://{tokenId}" that the dApp owner has delegated to us.
+  // 2. We also included the rliDelegationAuthSig that we created earlier, which would be
+  // added to the capabilities array in the signing template.
+  let sessionSigs = await client.getSessionSigs({
     expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
     chain: 'ethereum',
     resourceAbilityRequests: [
@@ -118,9 +128,7 @@ export async function main() {
     rliDelegationAuthSig,
   });
 
-  console.log('sessionSigs:', sessionSigs);
-
-  process.exit();
+  console.log('XX sessionSigs:', sessionSigs);
 
   // -- now try to run lit action
   // errConstructorFunc {
@@ -132,9 +140,11 @@ export async function main() {
   //     'validation error: Invalid URI for top level auth sig: lit:session:b27d3888442ea04e9f87d17272710942bbeb30fd344b18c66ece95affd29cce0'
   //   ]
   // }
-  const res = await client.executeJs({
+
+  // Finally, we use the session sigs that includes the RLI delegation auth sig to sign
+  const res = await litNodeClient.executeJs({
     // authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-    sessionSigs: sessionSigs,
+    sessionSigs,
     code: `(async () => {
       const sigShare = await LitActions.signEcdsa({
         toSign: dataToSign,
