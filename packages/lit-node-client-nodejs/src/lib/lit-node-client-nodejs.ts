@@ -158,10 +158,12 @@ export class LitNodeClientNodeJs extends LitCore {
     dAppOwnerWallet,
     rliTokenId,
     addresses,
+    use,
   }: {
     dAppOwnerWallet: ethers.Wallet;
     rliTokenId: string;
     addresses: string[];
+    use: number;
   }): Promise<{
     litResource: LitRLIResource;
     rliDelegationAuthSig: AuthSig;
@@ -204,7 +206,13 @@ export class LitNodeClientNodeJs extends LitCore {
       );
     }
 
+    // -- validate use is set
+    if (!use) {
+      throw new Error('use must be set');
+    }
+
     // -- create LitRLIResource (note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
+    // lit-ratelimitincrease://{tokenId}
     const litResource = new LitRLIResource(rliTokenId);
     console.log('litResource:', litResource);
 
@@ -216,7 +224,7 @@ export class LitNodeClientNodeJs extends LitCore {
     recapObject.addCapabilityForResource(
       litResource,
       LitAbility.RateLimitIncreaseAuth,
-      { nft_id: rliTokenId, delegate_to: addresses }
+      { nft_id: rliTokenId, delegate_to: addresses, use }
     );
 
     console.log('recapObject:', recapObject);
@@ -243,12 +251,14 @@ export class LitNodeClientNodeJs extends LitCore {
       uri: ORIGIN,
       version: '1',
       chainId: 1,
+      // nonce(??) <-- we should supply this (called in lit node client)
       expirationTime: new Date(Date.now() + 1000 * 60 * 7).toISOString(),
     });
 
     siweMessage = recapObject.addToSiweMessage(siweMessage);
+    console.log("XX siweMessage:", siweMessage);
 
-    const messageToSign = siweMessage.prepareMessage();
+    let messageToSign = siweMessage.prepareMessage();
     console.log('messageToSign:', messageToSign);
 
     const signature = await dAppOwnerWallet.signMessage(messageToSign);
@@ -2540,6 +2550,8 @@ export class LitNodeClientNodeJs extends LitCore {
       resourceAbilityRequests: params.resourceAbilityRequests,
     });
 
+    console.log("XXX needToResignSessionKey:", needToResignSessionKey);
+
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
       log('need to re-sign session key.  Signing...');
@@ -2600,6 +2612,11 @@ export class LitNodeClientNodeJs extends LitCore {
 
       let signedMessage = JSON.stringify(toSign);
 
+      // sanitise signedMessage, replace //n with /n
+      // signedMessage = signedMessage.replaceAll(/\/\/n/g, '/n');
+
+      console.log("XX signedMessage:", signedMessage);
+
       const uint8arrayKey = uint8arrayFromString(
         sessionKey.secretKey,
         'base16'
@@ -2607,11 +2624,12 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
       let signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
+
       // log("signature", signature);
       signatures[nodeAddress] = {
         sig: uint8arrayToString(signature, 'base16'),
         derivedVia: 'litSessionSignViaNacl',
-        signedMessage,
+        signedMessage: signedMessage,
         address: sessionKey.publicKey,
         algo: 'ed25519',
       };
