@@ -27,6 +27,7 @@ import {
 
 import {
   bootstrapLogManager,
+  executeWithRetry,
   isBrowser,
   isNode,
   log,
@@ -34,6 +35,7 @@ import {
   logErrorWithRequestId,
   logWithRequestId,
   mostCommonString,
+  sendRequest,
   throwError,
 } from '@lit-protocol/misc';
 import {
@@ -313,7 +315,7 @@ export class LitCore {
               keys
             );
           }
-
+          log("returned keys: ", keys);
           if (!keys.latestBlockhash) {
             logErrorWithRequestId(
               requestId,
@@ -445,13 +447,10 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${
-              this.config.connectTimeout
-            }ms.  Could only connect to ${
-              Object.keys(this.serverKeys).length
-            } of ${
-              this.config.minNodeCount
-            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
+              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
+              } of ${this.config.minNodeCount
+              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             logErrorWithRequestId(requestId, msg);
             reject(msg);
           }
@@ -551,32 +550,17 @@ export class LitCore {
       body: JSON.stringify(data),
     };
 
-    return fetch(url, req)
-      .then(async (response) => {
-        const isJson = response.headers
-          .get('content-type')
-          ?.includes('application/json');
-
-        const data = isJson ? await response.json() : null;
-
-        if (!response.ok) {
-          // get error message from body or default to response status
-          const error = data || response.status;
-          return Promise.reject(error);
+    return executeWithRetry(fetch, [
+      url, req
+    ],
+      (error: any, isFinal: boolean) => {
+        if (typeof error === "string" && isFinal) {
+          logErrorWithRequestId(requestId, `Something went wrong. Internal request id lit_${requestId}. Please provide this identifier with any support request. ${error}`);
+        } else if (isFinal) {
+          logWithRequestId(requestId, "Something went wrong", error);
+        } else {
+          logWithRequestId('Request for ${url} failed retrying ...');
         }
-
-        return data;
-      })
-      .catch((error: NodeErrorV3) => {
-        logErrorWithRequestId(
-          requestId,
-          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
-            error?.message || error?.details
-              ? `Error is ${error.message} - ${error.details}`
-              : ''
-          }`
-        );
-        return Promise.reject(error);
       });
   };
 
