@@ -65,7 +65,7 @@ export async function main() {
   // a recap object, add the resource "lit-ratelimitincrease://{tokenId}" to it, and add it to the siwe
   // message. We will then sign the siwe message with the dApp owner's wallet.
   const { rliDelegationAuthSig, litResource } =
-    await client.createRliDelegationAuthSig({
+    await litNodeClient.createRliDelegationAuthSig({
       dAppOwnerWallet: dAppOwnerWallet,
       rliTokenId: rliTokenIdStr,
       addresses: [dAppOwnerWallet_address, delegatedWalletB_address],
@@ -115,7 +115,7 @@ export async function main() {
   // "lit-ratelimitincrease://{tokenId}" that the dApp owner has delegated to us.
   // 2. We also included the rliDelegationAuthSig that we created earlier, which would be
   // added to the capabilities array in the signing template.
-  let sessionSigs = await client.getSessionSigs({
+  let sessionSigs = await litNodeClient.getSessionSigs({
     expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
     chain: 'ethereum',
     resourceAbilityRequests: [
