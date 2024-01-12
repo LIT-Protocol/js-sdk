@@ -29,7 +29,7 @@ export async function main() {
       chain,
       dataToEncrypt: message,
     },
-    client,
+    client
   );
   const decryptedMessage = await LitJsSdk.decryptToString(
     {
@@ -39,7 +39,7 @@ export async function main() {
       authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
       chain,
     },
-    client,
+    client
   );
 
   // ==================== Post-Validation ====================

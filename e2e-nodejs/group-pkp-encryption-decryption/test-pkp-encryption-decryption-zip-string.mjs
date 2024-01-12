@@ -22,14 +22,14 @@ export async function main() {
   const message = 'Hello world';
 
   // ==================== Test Logic ====================
-  const { ciphertext, dataToEncryptHash} = await LitJsSdk.zipAndEncryptString(
+  const { ciphertext, dataToEncryptHash } = await LitJsSdk.zipAndEncryptString(
     {
       accessControlConditions,
       authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
       chain,
       dataToEncrypt: message,
     },
-    client,
+    client
   );
   const decryptedZip = await LitJsSdk.decryptToZip(
     {
@@ -39,7 +39,7 @@ export async function main() {
       authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
       chain,
     },
-    client,
+    client
   );
 
   const decryptedMessage = await decryptedZip['string.txt'].async('string');
@@ -52,7 +52,9 @@ export async function main() {
   }
 
   // ==================== Success ====================
-  return success('Message was zipped and encrypted, then decrypted successfully');
+  return success(
+    'Message was zipped and encrypted, then decrypted successfully'
+  );
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });

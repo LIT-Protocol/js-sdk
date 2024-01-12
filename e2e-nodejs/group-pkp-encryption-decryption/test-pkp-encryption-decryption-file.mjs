@@ -31,7 +31,7 @@ export async function main() {
       chain,
       file: blob,
     },
-    client,
+    client
   );
   const decriptedFile = await LitJsSdk.decryptToFile(
     {
@@ -41,7 +41,7 @@ export async function main() {
       authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
       chain,
     },
-    client,
+    client
   );
 
   // ==================== Post-Validation ====================
