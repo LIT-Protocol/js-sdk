@@ -744,19 +744,22 @@ export function executeWithRetry(
         timer = setTimeout(() => {
           isTimeout = true;
         }, opts.timeout);
+        console.log('sending request to node');
         const response = await execCallback(...args).catch((err) => {
-          log('error while hitting remote endpoint');
+          console.log('error while hitting remote endpoint');
           counter += 1;
           errorCallback && errorCallback(`Error is ${err.message}-${err.details}`, counter >= opts.maxRetryCount ? true : false);
         });
- 
+
         clearTimeout(timer);
         const isJson = response?.headers.get('content-type')?.includes('application/json');
         const respData = isJson ? await response?.json() : null;
         // if we see a failure flag or there are no keys we retry
         // TODO: make a better retry agent
         if (respData.success === false
-          || respData.success === "success") {
+          || respData.result === "failure"
+          || respData.errorKind) {
+          console.log("an error occured sending request to node ", respData);
           counter += 1;
           errorCallback && errorCallback(respData, counter >= opts.maxRetryCount ? true : false);
         } else {
@@ -765,7 +768,7 @@ export function executeWithRetry(
         }
 
         if (counter >= opts.maxRetryCount) {
-          return { ok: false };
+          return { success: false, result: "success" };
         }
 
       } catch (e) {
@@ -777,7 +780,7 @@ export function executeWithRetry(
     }
 
     // If we get here we broke out of the loop on event of a timeout being hit.
-    return { ok: false };
+    return { success: false, result: "success" };
   };
 
   return poll();
