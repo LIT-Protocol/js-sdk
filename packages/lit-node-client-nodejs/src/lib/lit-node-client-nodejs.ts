@@ -571,7 +571,9 @@ export class LitNodeClientNodeJs extends LitCore {
       authMethods,
     };
 
-    return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
+    let res = await this.sendCommandToNode({ url: urlWithPath, data, requestId });
+    logWithRequestId(requestId, `response node with url: ${url} from endpoint ${urlWithPath}`, res);
+    return res;
   };
 
   getPkpSignExecutionShares = async (
@@ -1117,70 +1119,40 @@ export class LitNodeClientNodeJs extends LitCore {
    *
    */
   getSignatures = (signedData: Array<any>, requestId: string = ''): any => {
-    log(`getSignatures(): ${JSON.stringify(signedData, null, 2)}`);
-
-    const validatedSignedData = signedData
-      .map((sigObj: any) => {
-        // -- detect whatever signature is available
-        let sigShare;
-        for (let key in sigObj) {
-          if (sigObj[key]) {
-            sigShare = sigObj[key];
-            break;
-          }
-        }
-
-        if (!sigShare) {
-          return null;
-        }
-
+    // processing signature shares for failed or invalid contents.
+    for (const signatureResponse of signedData) {
+      for (const sigName of Object.keys(signatureResponse)) {
         const requiredFields = ['signatureShare'];
 
         for (const field of requiredFields) {
-          logWithRequestId(requestId, 'Checking sigShare:', sigShare);
-
-          if (!sigShare || !sigShare[field] || sigShare[field] === '') {
+          if (!signatureResponse[sigName][field] || !signatureResponse[sigName][field] || signatureResponse[sigName][field] === 'failed') {
             logWithRequestId(
               requestId,
-              `Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
+              `Invalid signed data ${field} is invalid. continuing with share processing`
             );
-            return null;
+            // destructive operation on the object to remove invalid shares inline, without a new collection.
+            delete signatureResponse[sigName];
           }
-        }
-
-        return sigObj;
-      })
-      .filter((sigObj) => sigObj !== null);
-
-    logWithRequestId(requestId, 'requested length:', signedData.length);
-    logWithRequestId(
-      requestId,
-      'validated length:',
-      validatedSignedData.length
-    );
-    logWithRequestId(
-      requestId,
-      'minimum required length:',
-      this.config.minNodeCount
-    );
-
-    if (validatedSignedData.length < this.config.minNodeCount) {
-      logErrorWithRequestId(
-        requestId,
-        `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSignedData.length}`
-      );
-      return null;
+        } 
+      }
     }
+
+    const validatedSignedData = signedData;
 
     // -- prepare
     const signatures: any = {};
 
-    // TOOD: get keys of signedData
-    const keys = Object.keys(validatedSignedData[0]);
-
-    // -- execute
-    keys.forEach((key: any) => {
-      const shares = validatedSignedData.map((r: any) => r[key]);
+    // get all signature shares names from all node responses.
+    const allKeys = [...new Set(validatedSignedData.flatMap(i=>Object.keys(i)))]
+    
+    // -- combine
+    allKeys.forEach((key: any) => {
+      // here we use a map filter implementation to find common shares in each node response.
+      // we then filter out undefined object from the key access.
+      // currently we are unable to know the total signature count requested by the user.
+      // but this allows for incomplete sets of signature shares to be aggregated 
+      // and then checked against threshold
+      const shares = validatedSignedData.map((r: any) => r[key]).filter((r: any) => r !== undefined);
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
@@ -1197,36 +1169,21 @@ export class LitNodeClientNodeJs extends LitCore {
           sigName: share.sigName ? share.sigName : 'sig',
         };
       });
+      let sigName = sigShares[0].sigName;
+      logWithRequestId(requestId, `processing signature shares for sig name: ${sigName}`, sigShares);
 
-      logWithRequestId(requestId, 'getSignatures - sigShares', sigShares);
-
-      const validatedSigShares = sigShares
-        .filter((s: any) => {
-          const requiredFields = ['sigType', 'signatureShare'];
-
-          for (const field of requiredFields) {
-            if (!s[field] || s[field] === '') {
-              logWithRequestId(
-                requestId,
-                `Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
-              );
-              return null;
-            }
-          }
-
-          return s;
-        })
-        .filter((s) => s !== null);
+      // TODO: MOVE THIS LOGIC UP TO THE DESTRUCTIVE LOOP WHERE WE ARE CHECKING SHARE PROPERTIES
+      const validatedSigShares = sigShares;
 
       logWithRequestId(requestId, 'requested length:', signedData.length);
       logWithRequestId(
         requestId,
-        'validated length:',
+        `validated length for signature: ${sigName}`,
         validatedSigShares.length
       );
       logWithRequestId(
         requestId,
-        'minimum required length:',
+        'minimum required shares for threshold:',
         this.config.minNodeCount
       );
 
@@ -1415,7 +1372,8 @@ export class LitNodeClientNodeJs extends LitCore {
 
         reqBody.authSig = sigToPassToNode;
 
-        return this.getJsExecutionShares(url, reqBody, requestId);
+        const shares = this.getJsExecutionShares(url, reqBody, requestId);
+        return shares;
       });
       // -- resolve promises
       res = await this.handleNodePromises(nodePromises, requestId);
@@ -1428,12 +1386,13 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<NodeShare>).values;
+    
     logWithRequestId(
       requestId,
-      'executeJs responseData',
+      'executeJs responseData from node : ',
       JSON.stringify(responseData, null, 2)
     );
-
+    
     // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
     // we must also check for claim responses as a user may have submitted for a claim and signatures must be aggregated before returning
     if (
@@ -1477,7 +1436,7 @@ export class LitNodeClientNodeJs extends LitCore {
       return signedData;
     });
 
-    logWithRequestId(requestId, 'signedDataList:', signedDataList);
+    logWithRequestId(requestId, 'signatures shares to combine: ', signedDataList);
     const signatures = this.getSignatures(signedDataList, requestId);
 
     // -- 2. combine responses as a string, and get parse it as JSON
@@ -1513,7 +1472,7 @@ export class LitNodeClientNodeJs extends LitCore {
       })
       .filter((item) => item !== null);
 
-    logWithRequestId(requestId, 'claimList:', claimsList);
+    // logWithRequestId(requestId, 'claimList:', claimsList);
 
     let claims = undefined;
 
@@ -2172,7 +2131,7 @@ export class LitNodeClientNodeJs extends LitCore {
     let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
-    const pkpEthAddress = (function () {
+    const pkpEthAddress = (function() {
       if (params.pkpPublicKey) return computeAddress(params.pkpPublicKey);
 
       // This will be populated by the node, using dummy value for now.
@@ -2383,8 +2342,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
