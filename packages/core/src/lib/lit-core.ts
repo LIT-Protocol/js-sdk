@@ -611,9 +611,9 @@ export class LitCore {
         if (typeof error === "string" && isFinal) {
           logErrorWithRequestId(requestId, `Something went wrong. Internal request id lit_${requestId}. Please provide this identifier with any support request. ${error}`);
         } else if (isFinal) {
-          logWithRequestId(requestId, "Something went wrong", error);
+          logWithRequestId(requestId, `Something went wrong sending request to node: ${url} retry limit was reached: `, error);
         } else {
-          logWithRequestId('Request for ${url} failed retrying ...');
+          logWithRequestId(requestId, `Request for ${url} failed retrying ... `);
         }
       });
   };
