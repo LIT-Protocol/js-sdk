@@ -1132,6 +1132,18 @@ export class LitNodeClientNodeJs extends LitCore {
             );
             // destructive operation on the object to remove invalid shares inline, without a new collection.
             delete signatureResponse[sigName];
+          } else {
+            let share = this._getFlattenShare(signatureResponse[sigName]);            
+
+            share = {
+              sigType: share.sigType,
+              signatureShare: share.signatureShare,
+              shareIndex: share.shareIndex,
+              bigR: share.bigR,
+              publicKey: share.publicKey,
+              dataSigned: share.dataSigned,
+              sigName: share.sigName ? share.sigName : 'sig',
+            };
           }
         } 
       }
@@ -1143,43 +1155,27 @@ export class LitNodeClientNodeJs extends LitCore {
     const signatures: any = {};
 
     // get all signature shares names from all node responses.
+    // use a set to filter duplicates and copy into an array
     const allKeys = [...new Set(validatedSignedData.flatMap(i=>Object.keys(i)))]
     
     // -- combine
-    allKeys.forEach((key: any) => {
+    for(var i = 0; i < allKeys.length; i++) {
       // here we use a map filter implementation to find common shares in each node response.
       // we then filter out undefined object from the key access.
       // currently we are unable to know the total signature count requested by the user.
       // but this allows for incomplete sets of signature shares to be aggregated 
       // and then checked against threshold
-      const shares = validatedSignedData.map((r: any) => r[key]).filter((r: any) => r !== undefined);
+      const shares = validatedSignedData.map((r: any) => r[allKeys[i]]).filter((r: any) => r !== undefined);
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      const sigShares: Array<SigShare> = shares.map((s: any) => {
-        const share = this._getFlattenShare(s);
-
-        return {
-          sigType: share.sigType,
-          signatureShare: share.signatureShare,
-          shareIndex: share.shareIndex,
-          bigR: share.bigR,
-          publicKey: share.publicKey,
-          dataSigned: share.dataSigned,
-          sigName: share.sigName ? share.sigName : 'sig',
-        };
-      });
-      let sigName = sigShares[0].sigName;
-      logWithRequestId(requestId, `processing signature shares for sig name: ${sigName}`, sigShares);
-
-      // TODO: MOVE THIS LOGIC UP TO THE DESTRUCTIVE LOOP WHERE WE ARE CHECKING SHARE PROPERTIES
-      const validatedSigShares = sigShares;
-
+      let sigName = shares[0].sigName;
+      logWithRequestId(requestId, `processing signature shares for sig name: ${sigName}`, shares);
       logWithRequestId(requestId, 'requested length:', signedData.length);
       logWithRequestId(
         requestId,
         `validated length for signature: ${sigName}`,
-        validatedSigShares.length
+        shares.length
       );
       logWithRequestId(
         requestId,
@@ -1187,14 +1183,14 @@ export class LitNodeClientNodeJs extends LitCore {
         this.config.minNodeCount
       );
 
-      if (validatedSigShares.length < this.config.minNodeCount) {
+      if (shares.length < this.config.minNodeCount) {
         logErrorWithRequestId(
           requestId,
-          `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSigShares.length}`
+          `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${shares.length}`
         );
       }
 
-      const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
+      const sigType = mostCommonString(shares.map((s: any) => s.sigType));
 
       // -- validate if this.networkPubKeySet is null
       if (this.networkPubKeySet === null) {
@@ -1219,7 +1215,7 @@ export class LitNodeClientNodeJs extends LitCore {
         return;
       }
 
-      const signature: any = combineEcdsaShares(sigShares);
+      const signature: any = combineEcdsaShares(shares);
       if (!signature.r) {
         throwError({
           message: 'siganture could not be combined',
@@ -1234,13 +1230,13 @@ export class LitNodeClientNodeJs extends LitCore {
         v: signature.recid,
       });
 
-      signatures[key] = {
+      signatures[allKeys[i]] = {
         ...signature,
         signature: encodedSig,
-        publicKey: mostCommonString(sigShares.map((s: any) => s.publicKey)),
-        dataSigned: mostCommonString(sigShares.map((s: any) => s.dataSigned)),
+        publicKey: mostCommonString(shares.map((s: any) => s.publicKey)),
+        dataSigned: mostCommonString(shares.map((s: any) => s.dataSigned)),
       };
-    });
+    }
 
     return signatures;
   };
