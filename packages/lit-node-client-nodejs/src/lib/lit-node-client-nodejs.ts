@@ -1129,7 +1129,7 @@ export class LitNodeClientNodeJs extends LitCore {
           ) {
             logWithRequestId(
               requestId,
-              `Invalid signed data ${field} is invalid. continuing with share processing`
+              `invalid field ${field} in signature share: ${sigName}, continuing with share processing`
             );
             // destructive operation on the object to remove invalid shares inline, without a new collection.
             delete signatureResponse[sigName];
@@ -1145,6 +1145,7 @@ export class LitNodeClientNodeJs extends LitCore {
               dataSigned: share.dataSigned,
               sigName: share.sigName ? share.sigName : 'sig',
             };
+            signatureResponse[sigName] = share;
           }
         }
       }
@@ -1177,10 +1178,10 @@ export class LitNodeClientNodeJs extends LitCore {
       let sigName = shares[0].sigName;
       logWithRequestId(
         requestId,
-        `processing signature shares for sig name: ${sigName}`,
+        `starting signature combine for sig name: ${sigName}`,
         shares
       );
-      logWithRequestId(requestId, 'requested length:', signedData.length);
+      logWithRequestId(requestId, `number of shares for ${sigName}:`, signedData.length);
       logWithRequestId(
         requestId,
         `validated length for signature: ${sigName}`,
