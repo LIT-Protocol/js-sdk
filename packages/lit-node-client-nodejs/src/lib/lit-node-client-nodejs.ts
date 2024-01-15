@@ -37,6 +37,7 @@ import {
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
+  CombinedECDSASignature,
   CustomNetwork,
   DecryptRequest,
   DecryptResponse,
@@ -1123,9 +1124,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
         for (const field of requiredFields) {
           if (
-            !signatureResponse[sigName][field] ||
-            !signatureResponse[sigName][field] ||
-            signatureResponse[sigName][field] === 'failed'
+            !signatureResponse[sigName][field]
           ) {
             logWithRequestId(
               requestId,
@@ -1225,7 +1224,7 @@ export class LitNodeClientNodeJs extends LitCore {
         return;
       }
 
-      const signature: any = combineEcdsaShares(shares);
+      const signature = combineEcdsaShares(shares);
       if (!signature.r) {
         throwError({
           message: 'siganture could not be combined',
