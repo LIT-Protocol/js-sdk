@@ -1123,9 +1123,7 @@ export class LitNodeClientNodeJs extends LitCore {
         const requiredFields = ['signatureShare'];
 
         for (const field of requiredFields) {
-          if (
-            !signatureResponse[sigName][field]
-          ) {
+          if (!signatureResponse[sigName][field]) {
             logWithRequestId(
               requestId,
               `invalid field ${field} in signature share: ${sigName}, continuing with share processing`
@@ -1180,7 +1178,11 @@ export class LitNodeClientNodeJs extends LitCore {
         `starting signature combine for sig name: ${sigName}`,
         shares
       );
-      logWithRequestId(requestId, `number of shares for ${sigName}:`, signedData.length);
+      logWithRequestId(
+        requestId,
+        `number of shares for ${sigName}:`,
+        signedData.length
+      );
       logWithRequestId(
         requestId,
         `validated length for signature: ${sigName}`,
