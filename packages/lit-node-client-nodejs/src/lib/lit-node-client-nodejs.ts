@@ -1117,6 +1117,8 @@ export class LitNodeClientNodeJs extends LitCore {
    *
    */
   getSignatures = (signedData: Array<any>, requestId: string = ''): any => {
+    const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
+
     // processing signature shares for failed or invalid contents.
     for (const signatureResponse of signedData) {
       for (const sigName of Object.keys(signatureResponse)) {
@@ -1158,6 +1160,14 @@ export class LitNodeClientNodeJs extends LitCore {
     const allKeys = [
       ...new Set(validatedSignedData.flatMap((i) => Object.keys(i))),
     ];
+
+    if (allKeys.length !== initialKeys.length) {
+      throwError({
+        message: 'total number of valid signatures does not match requested',
+        errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
+        errorCode: LIT_ERROR.NO_VALID_SHARES.code,
+      });
+    }
 
     // -- combine
     for (var i = 0; i < allKeys.length; i++) {
