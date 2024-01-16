@@ -37,6 +37,7 @@ import {
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
+  CombinedECDSASignature,
   CustomNetwork,
   DecryptRequest,
   DecryptResponse,
@@ -119,16 +120,15 @@ export class LitNodeClientNodeJs extends LitCore {
   static getClaims = (
     claims: any[]
   ): Record<string, { signatures: Signature[]; derivedKeyId: string }> => {
-    let keys: string[] = Object.keys(claims[0]);
-    let signatures: Record<string, Signature[]> = {};
-    let claimRes: Record<
+    const keys: string[] = Object.keys(claims[0]);
+    const signatures: Record<string, Signature[]> = {};
+    const claimRes: Record<
       string,
       { signatures: Signature[]; derivedKeyId: string }
     > = {};
     for (let i = 0; i < keys.length; i++) {
-      let claimSet: { signature: string; derivedKeyId: string }[] = claims.map(
-        (c) => c[keys[i]]
-      );
+      const claimSet: { signature: string; derivedKeyId: string }[] =
+        claims.map((c) => c[keys[i]]);
       signatures[keys[i]] = [];
       claimSet.map((c) => {
         let sig = ethers.utils.splitSignature(`0x${c.signature}`);
@@ -1119,21 +1119,23 @@ export class LitNodeClientNodeJs extends LitCore {
    *
    */
   getSignatures = (signedData: Array<any>, requestId: string = ''): any => {
+    const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
+
     // processing signature shares for failed or invalid contents.
     for (const signatureResponse of signedData) {
       for (const sigName of Object.keys(signatureResponse)) {
         const requiredFields = ['signatureShare'];
 
         for (const field of requiredFields) {
-          if (!signatureResponse[sigName][field] || !signatureResponse[sigName][field] || signatureResponse[sigName][field] === 'failed') {
+          if (!signatureResponse[sigName][field]) {
             logWithRequestId(
               requestId,
-              `Invalid signed data ${field} is invalid. continuing with share processing`
+              `invalid field ${field} in signature share: ${sigName}, continuing with share processing`
             );
             // destructive operation on the object to remove invalid shares inline, without a new collection.
             delete signatureResponse[sigName];
           } else {
-            let share = this._getFlattenShare(signatureResponse[sigName]);            
+            let share = this._getFlattenShare(signatureResponse[sigName]);
 
             share = {
               sigType: share.sigType,
@@ -1144,8 +1146,9 @@ export class LitNodeClientNodeJs extends LitCore {
               dataSigned: share.dataSigned,
               sigName: share.sigName ? share.sigName : 'sig',
             };
+            signatureResponse[sigName] = share;
           }
-        } 
+        }
       }
     }
 
@@ -1156,22 +1159,42 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // get all signature shares names from all node responses.
     // use a set to filter duplicates and copy into an array
-    const allKeys = [...new Set(validatedSignedData.flatMap(i=>Object.keys(i)))]
-    
+    const allKeys = [
+      ...new Set(validatedSignedData.flatMap((i) => Object.keys(i))),
+    ];
+
+    if (allKeys.length !== initialKeys.length) {
+      throwError({
+        message: 'total number of valid signatures does not match requested',
+        errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
+        errorCode: LIT_ERROR.NO_VALID_SHARES.code,
+      });
+    }
+
     // -- combine
-    for(var i = 0; i < allKeys.length; i++) {
+    for (var i = 0; i < allKeys.length; i++) {
       // here we use a map filter implementation to find common shares in each node response.
       // we then filter out undefined object from the key access.
       // currently we are unable to know the total signature count requested by the user.
-      // but this allows for incomplete sets of signature shares to be aggregated 
+      // but this allows for incomplete sets of signature shares to be aggregated
       // and then checked against threshold
-      const shares = validatedSignedData.map((r: any) => r[allKeys[i]]).filter((r: any) => r !== undefined);
+      const shares = validatedSignedData
+        .map((r: any) => r[allKeys[i]])
+        .filter((r: any) => r !== undefined);
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
       let sigName = shares[0].sigName;
-      logWithRequestId(requestId, `processing signature shares for sig name: ${sigName}`, shares);
-      logWithRequestId(requestId, 'requested length:', signedData.length);
+      logWithRequestId(
+        requestId,
+        `starting signature combine for sig name: ${sigName}`,
+        shares
+      );
+      logWithRequestId(
+        requestId,
+        `number of shares for ${sigName}:`,
+        signedData.length
+      );
       logWithRequestId(
         requestId,
         `validated length for signature: ${sigName}`,
@@ -1215,7 +1238,7 @@ export class LitNodeClientNodeJs extends LitCore {
         return;
       }
 
-      const signature: any = combineEcdsaShares(shares);
+      const signature = combineEcdsaShares(shares);
       if (!signature.r) {
         throwError({
           message: 'siganture could not be combined',
@@ -1258,8 +1281,6 @@ export class LitNodeClientNodeJs extends LitCore {
     const R_x = shareData[0].local_x;
     const R_y = shareData[0].local_y;
 
-    // the public key can come from any node - it obviously will be identical from each node
-    const public_key = shareData[0].public_key;
     const valid_shares = shareData.map((s: any) => s.signature_share);
     const shares = JSON.stringify(valid_shares);
 
@@ -1284,7 +1305,7 @@ export class LitNodeClientNodeJs extends LitCore {
         Array.isArray(params.jsParams[key]) ||
         ArrayBuffer.isView(params.jsParams[key])
       ) {
-        let arr = [];
+        const arr = [];
         for (let i = 0; i < params.jsParams[key].length; i++) {
           arr.push((params.jsParams[key] as Buffer)[i]);
         }
@@ -1360,7 +1381,7 @@ export class LitNodeClientNodeJs extends LitCore {
       // -- fetch shares from nodes
       const nodePromises = this.getNodePromises((url: string) => {
         // -- choose the right signature
-        let sigToPassToNode = this.getSessionOrAuthSig({
+        const sigToPassToNode = this.getSessionOrAuthSig({
           authSig,
           sessionSigs,
           url,
@@ -1477,7 +1498,7 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // ========== Result ==========
-    let returnVal: ExecuteJsResponse = {
+    const returnVal: ExecuteJsResponse = {
       claims,
       signatures,
       decryptions: [], // FIXME: Fix if and when we enable decryptions from within a Lit Action.
@@ -1531,7 +1552,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // the nodes will only accept a normal array type as a paramater due to serizalization issues with Uint8Array type.
     // this loop below is to normalize the message to a basic array.
-    let arr = [];
+    const arr = [];
     for (let i = 0; i < toSign.length; i++) {
       arr.push((toSign as Buffer)[i]);
     }
@@ -1540,7 +1561,7 @@ export class LitNodeClientNodeJs extends LitCore {
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- choose the right signature
-      let sigToPassToNode = this.getSessionOrAuthSig({
+      const sigToPassToNode = this.getSessionOrAuthSig({
         authSig,
         sessionSigs,
         url,
@@ -1549,7 +1570,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
       logWithRequestId(requestId, 'sigToPassToNode:', sigToPassToNode);
 
-      let reqBody = {
+      const reqBody = {
         toSign,
         pubkey: pubKey,
         ...(sigToPassToNode &&
@@ -1698,7 +1719,7 @@ export class LitNodeClientNodeJs extends LitCore {
     const requestId = this.getRequestId();
     const nodePromises = this.getNodePromises((url: string) => {
       // -- if session key is available, use it
-      let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+      const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
       return this.getSigningShareForToken(
         url,
@@ -1783,7 +1804,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
-    let hashOfConditions: ArrayBuffer | undefined =
+    const hashOfConditions: ArrayBuffer | undefined =
       await this.getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
