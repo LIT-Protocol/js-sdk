@@ -37,6 +37,7 @@ import {
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
+  CombinedECDSASignature,
   CustomNetwork,
   DecryptRequest,
   DecryptResponse,
@@ -1116,127 +1117,101 @@ export class LitNodeClientNodeJs extends LitCore {
    *
    */
   getSignatures = (signedData: Array<any>, requestId: string = ''): any => {
-    log(`getSignatures(): ${JSON.stringify(signedData, null, 2)}`);
+    const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
 
-    const validatedSignedData = signedData
-      .map((sigObj: any) => {
-        // -- detect whatever signature is available
-        let sigShare;
-        for (let key in sigObj) {
-          if (sigObj[key]) {
-            sigShare = sigObj[key];
-            break;
-          }
-        }
-
-        if (!sigShare) {
-          return null;
-        }
-
+    // processing signature shares for failed or invalid contents.
+    for (const signatureResponse of signedData) {
+      for (const sigName of Object.keys(signatureResponse)) {
         const requiredFields = ['signatureShare'];
 
         for (const field of requiredFields) {
-          logWithRequestId(requestId, 'Checking sigShare:', sigShare);
-
-          if (!sigShare || !sigShare[field] || sigShare[field] === '') {
+          if (!signatureResponse[sigName][field]) {
             logWithRequestId(
               requestId,
-              `Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
+              `invalid field ${field} in signature share: ${sigName}, continuing with share processing`
             );
-            return null;
+            // destructive operation on the object to remove invalid shares inline, without a new collection.
+            delete signatureResponse[sigName];
+          } else {
+            let share = this._getFlattenShare(signatureResponse[sigName]);
+
+            share = {
+              sigType: share.sigType,
+              signatureShare: share.signatureShare,
+              shareIndex: share.shareIndex,
+              bigR: share.bigR,
+              publicKey: share.publicKey,
+              dataSigned: share.dataSigned,
+              sigName: share.sigName ? share.sigName : 'sig',
+            };
+            signatureResponse[sigName] = share;
           }
         }
-
-        return sigObj;
-      })
-      .filter((sigObj) => sigObj !== null);
-
-    logWithRequestId(requestId, 'requested length:', signedData.length);
-    logWithRequestId(
-      requestId,
-      'validated length:',
-      validatedSignedData.length
-    );
-    logWithRequestId(
-      requestId,
-      'minimum required length:',
-      this.config.minNodeCount
-    );
-
-    if (validatedSignedData.length < this.config.minNodeCount) {
-      logErrorWithRequestId(
-        requestId,
-        `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSignedData.length}`
-      );
-      return null;
+      }
     }
+
+    const validatedSignedData = signedData;
 
     // -- prepare
     const signatures: any = {};
 
-    // TOOD: get keys of signedData
-    const keys = Object.keys(validatedSignedData[0]);
+    // get all signature shares names from all node responses.
+    // use a set to filter duplicates and copy into an array
+    const allKeys = [
+      ...new Set(validatedSignedData.flatMap((i) => Object.keys(i))),
+    ];
 
-    // -- execute
-    keys.forEach((key: any) => {
-      const shares = validatedSignedData.map((r: any) => r[key]);
+    if (allKeys.length !== initialKeys.length) {
+      throwError({
+        message: 'total number of valid signatures does not match requested',
+        errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
+        errorCode: LIT_ERROR.NO_VALID_SHARES.code,
+      });
+    }
+
+    // -- combine
+    for (var i = 0; i < allKeys.length; i++) {
+      // here we use a map filter implementation to find common shares in each node response.
+      // we then filter out undefined object from the key access.
+      // currently we are unable to know the total signature count requested by the user.
+      // but this allows for incomplete sets of signature shares to be aggregated
+      // and then checked against threshold
+      const shares = validatedSignedData
+        .map((r: any) => r[allKeys[i]])
+        .filter((r: any) => r !== undefined);
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      const sigShares: Array<SigShare> = shares.map((s: any) => {
-        const share = this._getFlattenShare(s);
-
-        return {
-          sigType: share.sigType,
-          signatureShare: share.signatureShare,
-          shareIndex: share.shareIndex,
-          bigR: share.bigR,
-          publicKey: share.publicKey,
-          dataSigned: share.dataSigned,
-          sigName: share.sigName ? share.sigName : 'sig',
-        };
-      });
-
-      logWithRequestId(requestId, 'getSignatures - sigShares', sigShares);
-
-      const validatedSigShares = sigShares
-        .filter((s: any) => {
-          const requiredFields = ['sigType', 'signatureShare'];
-
-          for (const field of requiredFields) {
-            if (!s[field] || s[field] === '') {
-              logWithRequestId(
-                requestId,
-                `Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
-              );
-              return null;
-            }
-          }
-
-          return s;
-        })
-        .filter((s) => s !== null);
-
-      logWithRequestId(requestId, 'requested length:', signedData.length);
+      let sigName = shares[0].sigName;
       logWithRequestId(
         requestId,
-        'validated length:',
-        validatedSigShares.length
+        `starting signature combine for sig name: ${sigName}`,
+        shares
       );
       logWithRequestId(
         requestId,
-        'minimum required length:',
+        `number of shares for ${sigName}:`,
+        signedData.length
+      );
+      logWithRequestId(
+        requestId,
+        `validated length for signature: ${sigName}`,
+        shares.length
+      );
+      logWithRequestId(
+        requestId,
+        'minimum required shares for threshold:',
         this.config.minNodeCount
       );
 
-      if (validatedSigShares.length < this.config.minNodeCount) {
+      if (shares.length < this.config.minNodeCount) {
         logErrorWithRequestId(
           requestId,
-          `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${validatedSigShares.length}`
+          `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${shares.length}`
         );
       }
 
-      const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
+      const sigType = mostCommonString(shares.map((s: any) => s.sigType));
 
       // -- validate if this.networkPubKeySet is null
       if (this.networkPubKeySet === null) {
@@ -1261,7 +1236,7 @@ export class LitNodeClientNodeJs extends LitCore {
         return;
       }
 
-      const signature: any = combineEcdsaShares(sigShares);
+      const signature = combineEcdsaShares(shares);
       if (!signature.r) {
         throwError({
           message: 'siganture could not be combined',
@@ -1276,13 +1251,13 @@ export class LitNodeClientNodeJs extends LitCore {
         v: signature.recid,
       });
 
-      signatures[key] = {
+      signatures[allKeys[i]] = {
         ...signature,
         signature: encodedSig,
-        publicKey: mostCommonString(sigShares.map((s: any) => s.publicKey)),
-        dataSigned: mostCommonString(sigShares.map((s: any) => s.dataSigned)),
+        publicKey: mostCommonString(shares.map((s: any) => s.publicKey)),
+        dataSigned: mostCommonString(shares.map((s: any) => s.dataSigned)),
       };
-    });
+    }
 
     return signatures;
   };
