@@ -158,12 +158,12 @@ export class LitNodeClientNodeJs extends LitCore {
     dAppOwnerWallet,
     rliTokenId,
     addresses,
-    use,
+    uses,
   }: {
     dAppOwnerWallet: ethers.Wallet;
     rliTokenId: string;
     addresses: string[];
-    use: number;
+    uses: number;
   }): Promise<{
     litResource: LitRLIResource;
     rliDelegationAuthSig: AuthSig;
@@ -207,8 +207,8 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // -- validate use is set
-    if (!use) {
-      throw new Error('use must be set');
+    if (!uses) {
+      throw new Error('uses must be set');
     }
 
     // -- create LitRLIResource (note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
@@ -224,7 +224,7 @@ export class LitNodeClientNodeJs extends LitCore {
     recapObject.addCapabilityForResource(
       litResource,
       LitAbility.RateLimitIncreaseAuth,
-      { nft_id: rliTokenId, delegate_to: addresses, use }
+      { nft_id: [rliTokenId], delegate_to: addresses, uses }
     );
 
     console.log('recapObject:', recapObject);
