@@ -315,7 +315,7 @@ export class LitCore {
               keys
             );
           }
-          log("returned keys: ", keys);
+          log('returned keys: ', keys);
           if (!keys.latestBlockhash) {
             logErrorWithRequestId(
               requestId,
@@ -447,10 +447,13 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
-              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
-              } of ${this.config.minNodeCount
-              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${
+              this.config.connectTimeout
+            }ms.  Could only connect to ${
+              Object.keys(this.serverKeys).length
+            } of ${
+              this.config.minNodeCount
+            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             logErrorWithRequestId(requestId, msg);
             reject(msg);
           }
@@ -550,18 +553,7 @@ export class LitCore {
       body: JSON.stringify(data),
     };
 
-    return executeWithRetry(fetch, [
-      url, req
-    ],
-      (error: any, isFinal: boolean) => {
-        if (typeof error === "string" && isFinal) {
-          logErrorWithRequestId(requestId, `Something went wrong. Internal request id lit_${requestId}. Please provide this identifier with any support request. ${error}`);
-        } else if (isFinal) {
-          logWithRequestId(requestId, `Something went wrong sending request to node: ${url} retry limit was reached: `, error);
-        } else {
-          logWithRequestId(requestId, `Request for ${url} failed retrying ... `);
-        }
-      });
+    return sendRequest(url, req, requestId);
   };
 
   /**
