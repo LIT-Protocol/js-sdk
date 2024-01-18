@@ -21,6 +21,8 @@ import {
   ClaimProcessor,
   MintCallback,
   RelayClaimProcessor,
+  SuccessNodePromises,
+  RejectedNodePromises,
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
@@ -84,7 +86,7 @@ export const throwErrorV0 = ({
   errorCode,
   error,
 }: ILitError): never => {
-  const errConstructorFunc = function(
+  const errConstructorFunc = function (
     this: any,
     message: string,
     name: string,
@@ -122,7 +124,7 @@ export const throwErrorV1 = ({
   message,
   errorCode,
 }: NodeClientErrorV1): never => {
-  const errConstructorFunc = function(
+  const errConstructorFunc = function (
     this: any,
     errorKind: string,
     status: number,
@@ -147,7 +149,7 @@ export const throwErrorV1 = ({
 };
 
 export const throwGenericError = (e: any): never => {
-  const errConstructorFunc = function(this: any, message: string) {
+  const errConstructorFunc = function (this: any, message: string) {
     this.message = message;
     this.errorKind = LIT_ERROR.UNKNOWN_ERROR.name;
     this.errorCode = LIT_ERROR.UNKNOWN_ERROR.code;
@@ -393,8 +395,9 @@ export const checkType = ({
       ' or '
     )} type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
-    )}" type instead. value: ${value instanceof Object ? JSON.stringify(value) : value
-      }`;
+    )}" type instead. value: ${
+      value instanceof Object ? JSON.stringify(value) : value
+    }`;
 
     if (throwOnError) {
       throwError({
@@ -501,8 +504,9 @@ export const is = (
   if (getVarType(value) !== type) {
     let message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
-    )}" type instead. value: ${value instanceof Object ? JSON.stringify(value) : value
-      }`;
+    )}" type instead. value: ${
+      value instanceof Object ? JSON.stringify(value) : value
+    }`;
 
     if (throwOnError) {
       throwError({
@@ -691,7 +695,11 @@ export function getEnv({
   return defaultValue;
 }
 
-export function sendRequest(url: string, req: RequestInit, requestId: string): Promise<Response> {
+export function sendRequest(
+  url: string,
+  req: RequestInit,
+  requestId: string
+): Promise<Response> {
   return fetch(url, req)
     .then(async (response) => {
       const isJson = response.headers
@@ -711,23 +719,26 @@ export function sendRequest(url: string, req: RequestInit, requestId: string): P
     .catch((error: NodeErrorV3) => {
       logErrorWithRequestId(
         requestId,
-        `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error?.message || error?.details
-          ? `Error is ${error.message} - ${error.details}`
-          : ''
+        `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
+          error?.message || error?.details
+            ? `Error is ${error.message} - ${error.details}`
+            : ''
         }`
       );
       return Promise.reject(error);
     });
 }
 
-
-
 export function executeWithRetry(
-  execCallback: (...args: any) => Promise<Response>,
-  args: any[],
-  errorCallback?: (error: any, isFinal: boolean) => void,
-  opts?: any): Promise<Response> {
-
+  execCallback: (
+    requestId: string
+  ) => Promise<SuccessNodePromises<any> | RejectedNodePromises>,
+  errorCallback?: (error: any, requestId: string, isFinal: boolean) => void,
+  opts?: any
+): Promise<
+  | (SuccessNodePromises<any> & { requestId: string })
+  | (RejectedNodePromises & { requestId: string })
+> {
   let timer: any | null;
   let counter = 0;
   let isTimeout = false;
@@ -737,42 +748,50 @@ export function executeWithRetry(
     }
     opts.timeout = opts.timeout ?? 31_000; // We wait for 31 seconds as the timeout period on the nodes is 30 seconds.
     opts.interval = opts.interval ?? 100;
-    opts.maxRetryCount = 3;
-
+    opts.maxRetryCount = opts.maxRetryCount ?? 3;
+    let requestId: string;
+    console.log('starting nettwork operation');
     while (!isTimeout) {
+      requestId = Math.random().toString(16).slice(2);
       try {
         timer = setTimeout(() => {
           isTimeout = true;
         }, opts.timeout);
-        console.log('sending request to node');
-        const response = await execCallback(...args).catch((err) => {
-          console.log('error while hitting remote endpoint');
+        const response: any = await execCallback(requestId).catch((err) => {
           counter += 1;
-          errorCallback && errorCallback(`Error is ${err.message}-${err.details}`, counter >= opts.maxRetryCount ? true : false);
+          errorCallback &&
+            errorCallback(
+              `Error is ${err.message}-${err.details}`,
+              requestId,
+              counter >= opts.maxRetryCount ? true : false
+            );
         });
 
         clearTimeout(timer);
-        const isJson = response?.headers.get('content-type')?.includes('application/json');
-        const respData = isJson ? await response?.json() : null;
-        // if we see a failure flag or there are no keys we retry
-        // TODO: make a better retry agent
-        if (respData.success === false
-          || respData.result === "failure"
-          || respData.errorKind) {
-          console.log("an error occured sending request to node ", respData);
+        response.requestId = requestId;
+        if ((response as RejectedNodePromises).error) {
           counter += 1;
-          errorCallback && errorCallback(respData, counter >= opts.maxRetryCount ? true : false);
+          errorCallback &&
+            errorCallback(
+              response,
+              requestId,
+              counter >= opts.maxRetryCount ? true : false
+            );
         } else {
           clearTimeout(timer);
-          return respData;
+          return response;
         }
 
         if (counter >= opts.maxRetryCount) {
-          return { success: false, result: "success" };
+          return response;
         }
-
       } catch (e) {
-        errorCallback && errorCallback((e as Error).toString(), counter > opts.maxRetryCount ? true : false);
+        errorCallback &&
+          errorCallback(
+            (e as Error).toString(),
+            requestId,
+            counter > opts.maxRetryCount ? true : false
+          );
         counter += 1;
       }
 
@@ -780,12 +799,8 @@ export function executeWithRetry(
     }
 
     // If we get here we broke out of the loop on event of a timeout being hit.
-    return { success: false, result: "success" };
+    return { success: false };
   };
 
   return poll();
 }
-
-
-
-
