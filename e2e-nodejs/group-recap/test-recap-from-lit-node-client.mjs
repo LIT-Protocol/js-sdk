@@ -72,20 +72,19 @@ export async function main() {
       addresses: [dAppOwnerWallet_address, delegatedWalletB_address],
     });
 
-  console.log('rliDelegationAuthSig:', rliDelegationAuthSig);
+  console.log('YY rliDelegationAuthSig:', rliDelegationAuthSig);
   console.log('litResource:', JSON.stringify(litResource));
 
   // ====================================================
   // =                  As an end user                  =
   // ====================================================
-
   const sessionKey = litNodeClient.getSessionKey();
   const sessionKeyUri = litNodeClient.getSessionKeyUri(sessionKey.publicKey);
   console.log('XXX sessionKey:', sessionKey);
   console.log('xxx sessionKeyUri:', sessionKeyUri);
 
   // We need to setup a generic siwe auth callback that will be called by the lit-node-client
-  const authNeededCallback = async ({ resources, expiration }) => {
+  const authNeededCallback = async ({ resources, expiration, uri }) => {
     console.log('XX resources:', resources);
     console.log('XX expiration:', expiration);
 
@@ -93,7 +92,32 @@ export async function main() {
       domain: 'example.com',
       address: dAppOwnerWallet_address,
       statement: 'Sign a session key to use with Lit Protocol',
-      uri: 'lit:capability:delegation',
+      uri, // lit:session:xxx
+      version: '1',
+      chainId: '1',
+      expirationTime: expiration,
+      resources,
+    });
+
+    const toSign = message.prepareMessage();
+    const signature = await dAppOwnerWallet.signMessage(toSign);
+
+    const authSig = {
+      sig: signature,
+      derivedVia: 'web3.eth.personal.sign',
+      signedMessage: toSign,
+      address: dAppOwnerWallet_address,
+    };
+
+    return authSig;
+  };
+
+  const getAuthSigForSessionSigs = async ({ resources, expiration, uri }) => {
+    const message = new siwe.SiweMessage({
+      domain: 'localhost:3000',
+      address: dAppOwnerWallet_address,
+      statement: 'Sign a session key to use with Lit Protocol',
+      uri: 'localhost:3000',
       version: '1',
       chainId: '1',
       expirationTime: expiration,
@@ -120,7 +144,7 @@ export async function main() {
   // 2. We also included the rliDelegationAuthSig that we created earlier, which would be
   // added to the capabilities array in the signing template.
   let sessionSigs = await litNodeClient.getSessionSigs({
-    sessionKey,
+    // sessionKey,
     expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
     chain: 'ethereum',
     resourceAbilityRequests: [
@@ -149,9 +173,19 @@ export async function main() {
   // }
 
   // Finally, we use the session sigs that includes the RLI delegation auth sig to sign
-  const res = await litNodeClient.executeJs({
-    // authSig: rliDelegationAuthSig,
-    sessionSigs,
+
+  //  /web/pkp/sign
+  // const res = await litNodeClient.pkpSign({
+  //   toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+  //   pubKey: dAppOwnerWallet_pkpPublicKey,
+  //   sessionSigs,
+  // });
+
+  // /web/execute
+  const res2 = await litNodeClient.executeJs({
+    // authSig: regularAuthSig,
+    authSig: sessionSigs['https://84.16.248.164:443'],
+    // sessionSigs, // lit:session:xxx or lit:capability:delegation doesn't URI which is not accepted.
     code: `(async () => {
       const sigShare = await LitActions.signEcdsa({
         toSign: dataToSign,
@@ -168,7 +202,8 @@ export async function main() {
     },
   });
 
-  console.log('res:', res);
+  // console.log('res:', res);
+  console.log('res2:', res2);
 
   process.exit();
 
