@@ -184,8 +184,8 @@ export async function main() {
   // /web/execute
   const res2 = await litNodeClient.executeJs({
     // authSig: regularAuthSig,
-    authSig: sessionSigs['https://84.16.248.164:443'],
-    // sessionSigs, // lit:session:xxx or lit:capability:delegation doesn't URI which is not accepted.
+    // authSig: sessionSigs['https://84.16.248.164:443'],
+    sessionSigs, // lit:session:xxx or lit:capability:delegation doesn't URI which is not accepted.
     code: `(async () => {
       const sigShare = await LitActions.signEcdsa({
         toSign: dataToSign,

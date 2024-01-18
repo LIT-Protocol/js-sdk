@@ -2590,7 +2590,7 @@ export class LitNodeClientNodeJs extends LitCore {
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
     let sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
-    const capabilities = params.rliDelegationAuthSig ? [authSig, params.rliDelegationAuthSig] : [authSig];
+    const capabilities = params.rliDelegationAuthSig ? [params.rliDelegationAuthSig, authSig] : [authSig];
 
     console.log("capabilities:", capabilities);
 
