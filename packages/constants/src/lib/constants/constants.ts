@@ -277,6 +277,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  baseSepolia: {
+    contractAddress: null,
+    chainId: 84532,
+    name: 'Base Sepolia',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://sepolia.base.org'],
+    blockExplorerUrls: ['https://sepolia.basescan.org'],
+    type: null,
+    vmType: 'EVM',
+  },
   moonbeam: {
     contractAddress: null,
     chainId: 1284,
