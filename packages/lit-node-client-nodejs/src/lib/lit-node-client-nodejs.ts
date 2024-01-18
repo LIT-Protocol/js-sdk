@@ -106,6 +106,7 @@ import {
 import { nacl } from '@lit-protocol/nacl';
 import { BigNumber, ethers, utils } from 'ethers';
 import * as siwe from 'siwe';
+import { Recap } from 'siwe-recap';
 
 /** ---------- Main Export Class ---------- */
 
@@ -219,32 +220,44 @@ export class LitNodeClientNodeJs extends LitCore {
     // Strip the 0x prefix from each element in the addresses array
     addresses = addresses.map(address => address.startsWith('0x') ? address.slice(2) : address);
 
-    const recapObject =
-      await this.generateSessionCapabilityObjectWithWildcards([
-        litResource,
-      ]);
+    // const recapObject =
+    //   await this.generateSessionCapabilityObjectWithWildcards([
+    //     litResource,
+    //   ]);
 
-    recapObject.addCapabilityForResource(
-      litResource,
-      LitAbility.RateLimitIncreaseAuth,
-      { nft_id: [rliTokenId], delegate_to: addresses, uses: uses.toString() }
-    );
+    const recapObject = new Recap();
+
+    // for (const litResource of litResources) {
+    //   sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
+    // }
+
+    // if (rateLimitAuthSig) {
+    //   await sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
+    // }
+
+    // recapObject.addCapabilityForResource(
+    //   litResource,
+    //   LitAbility.RateLimitIncreaseAuth,
+    //   { nft_id: [rliTokenId], delegate_to: addresses, uses: uses.toString() }
+    // );
+
+    recapObject.addAttenuation("lit-ratelimitincrease://*", 'Auth', 'Auth', { nft_id: [rliTokenId], delegate_to: addresses, uses: uses.toString() });
 
     console.log('recapObject:', recapObject);
     console.log('attenuations:', JSON.stringify(recapObject.attenuations));
 
-    // make sure that the resource is added to the recapObject
-    const verified = recapObject.verifyCapabilitiesForResource(
-      litResource,
-      LitAbility.RateLimitIncreaseAuth
-    );
+    // // make sure that the resource is added to the recapObject
+    // const verified = recapObject.verifyCapabilitiesForResource(
+    //   litResource,
+    //   LitAbility.RateLimitIncreaseAuth
+    // );
 
-    // -- validate
-    if (!verified) {
-      throw new Error('Failed to verify capabilities for resource');
-    }
+    // // -- validate
+    // if (!verified) {
+    //   throw new Error('Failed to verify capabilities for resource');
+    // }
 
-    console.log('verified:', verified);
+    // console.log('verified:', verified);
 
     // -- get auth sig
     let siweMessage = new siwe.SiweMessage({
@@ -258,7 +271,7 @@ export class LitNodeClientNodeJs extends LitCore {
       expirationTime: new Date(Date.now() + 1000 * 60 * 7).toISOString(),
     });
 
-    siweMessage = recapObject.addToSiweMessage(siweMessage);
+    siweMessage = recapObject.add_to_siwe_message(siweMessage);
     console.log("XX siweMessage:", siweMessage);
 
     let messageToSign = siweMessage.prepareMessage();
