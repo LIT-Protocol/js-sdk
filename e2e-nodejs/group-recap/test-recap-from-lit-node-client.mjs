@@ -3,7 +3,11 @@ import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { LitAbility, LitRLIResource } from '@lit-protocol/auth-helpers';
+import {
+  LitAbility,
+  LitRLIResource,
+  LitActionResource,
+} from '@lit-protocol/auth-helpers';
 
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
@@ -78,61 +82,65 @@ export async function main() {
   // ====================================================
   // =                  As an end user                  =
   // ====================================================
-  const sessionKey = litNodeClient.getSessionKey();
-  const sessionKeyUri = litNodeClient.getSessionKeyUri(sessionKey.publicKey);
-  console.log('XXX sessionKey:', sessionKey);
-  console.log('xxx sessionKeyUri:', sessionKeyUri);
+  // const sessionKey = litNodeClient.getSessionKey();
+  // const sessionKeyUri = litNodeClient.getSessionKeyUri(sessionKey.publicKey);
+  // console.log('XXX sessionKey:', sessionKey);
+  // console.log('xxx sessionKeyUri:', sessionKeyUri);
 
   // We need to setup a generic siwe auth callback that will be called by the lit-node-client
   const authNeededCallback = async ({ resources, expiration, uri }) => {
     console.log('XX resources:', resources);
     console.log('XX expiration:', expiration);
 
-    const message = new siwe.SiweMessage({
-      domain: 'example.com',
-      address: dAppOwnerWallet_address,
-      statement: 'Sign a session key to use with Lit Protocol',
-      uri, // lit:session:xxx
-      version: '1',
-      chainId: '1',
-      expirationTime: expiration,
-      resources,
-    });
+    const litResource = new LitActionResource('*');
 
-    const toSign = message.prepareMessage();
-    const signature = await dAppOwnerWallet.signMessage(toSign);
+    const recapObject =
+      await litNodeClient.generateSessionCapabilityObjectWithWildcards([
+        litResource,
+      ]);
 
-    const authSig = {
-      sig: signature,
-      derivedVia: 'web3.eth.personal.sign',
-      signedMessage: toSign,
-      address: dAppOwnerWallet_address,
-    };
+    recapObject.addCapabilityForResource(
+      litResource,
+      LitAbility.LitActionExecution
+    );
 
-    return authSig;
-  };
+    const verified = recapObject.verifyCapabilitiesForResource(
+      litResource,
+      LitAbility.LitActionExecution
+    );
 
-  const getAuthSigForSessionSigs = async ({ resources, expiration, uri }) => {
-    const message = new siwe.SiweMessage({
+    if (!verified) {
+      throw new Error('Failed to verify capabilities for resource');
+    }
+
+    console.log('authCallback verified:', verified);
+
+    let siweMessage = new siwe.SiweMessage({
       domain: 'localhost:3000',
       address: dAppOwnerWallet_address,
-      statement: 'Sign a session key to use with Lit Protocol',
-      uri: 'localhost:3000',
+      statement: 'Some custom statement',
+      uri,
       version: '1',
       chainId: '1',
       expirationTime: expiration,
       resources,
     });
 
-    const toSign = message.prepareMessage();
-    const signature = await dAppOwnerWallet.signMessage(toSign);
+    siweMessage = recapObject.addToSiweMessage(siweMessage);
+    console.log('authCallback siwe:', siweMessage);
+
+    const messageToSign = siweMessage.prepareMessage();
+    const signature = await dAppOwnerWallet.signMessage(messageToSign);
 
     const authSig = {
       sig: signature,
       derivedVia: 'web3.eth.personal.sign',
-      signedMessage: toSign,
+      signedMessage: messageToSign,
+      // address: dAppOwnerWallet_address.replace('0x', '').toLowerCase(),
       address: dAppOwnerWallet_address,
     };
+
+    console.log('authCallback authSig:', authSig);
 
     return authSig;
   };
@@ -150,8 +158,11 @@ export async function main() {
     resourceAbilityRequests: [
       {
         // resource: new LitRLIResource('*'), this delegation wallet holds like 30+ RLIs.
-        resource: new LitRLIResource(rliTokenIdStr),
-        ability: LitAbility.RateLimitIncreaseAuth,
+        // resource: new LitRLIResource(rliTokenIdStr),
+        // ability: LitAbility.RateLimitIncreaseAuth,
+        resource: new LitActionResource('*'),
+        ability: LitAbility.LitActionExecution,
+        // ability: LitAbility.PKPSigning,
       },
     ],
     authNeededCallback,
@@ -184,7 +195,7 @@ export async function main() {
   // /web/execute
   const res2 = await litNodeClient.executeJs({
     // authSig: regularAuthSig,
-    // authSig: sessionSigs['https://84.16.248.164:443'],
+    // authSig: sessionSigs['https://64.131.85.108:443'],
     sessionSigs, // lit:session:xxx or lit:capability:delegation doesn't URI which is not accepted.
     code: `(async () => {
       const sigShare = await LitActions.signEcdsa({
