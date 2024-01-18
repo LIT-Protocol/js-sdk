@@ -216,6 +216,9 @@ export class LitNodeClientNodeJs extends LitCore {
     const litResource = new LitRLIResource(rliTokenId);
     console.log('litResource:', litResource);
 
+    // Strip the 0x prefix from each element in the addresses array
+    addresses = addresses.map(address => address.startsWith('0x') ? address.slice(2) : address);
+
     const recapObject =
       await this.generateSessionCapabilityObjectWithWildcards([
         litResource,
@@ -224,7 +227,7 @@ export class LitNodeClientNodeJs extends LitCore {
     recapObject.addCapabilityForResource(
       litResource,
       LitAbility.RateLimitIncreaseAuth,
-      { nft_id: [rliTokenId], delegate_to: addresses, uses }
+      { nft_id: [rliTokenId], delegate_to: addresses, uses: uses.toString() }
     );
 
     console.log('recapObject:', recapObject);
@@ -2590,7 +2593,7 @@ export class LitNodeClientNodeJs extends LitCore {
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
     let sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
-    const capabilities = params.rliDelegationAuthSig ? [params.rliDelegationAuthSig, authSig] : [authSig];
+    const capabilities = params.rliDelegationAuthSig ? [authSig, params.rliDelegationAuthSig] : [authSig];
 
     console.log("capabilities:", capabilities);
 
