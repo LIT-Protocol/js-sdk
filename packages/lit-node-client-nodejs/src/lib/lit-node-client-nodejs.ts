@@ -163,7 +163,7 @@ export class LitNodeClientNodeJs extends LitCore {
     dAppOwnerWallet: ethers.Wallet;
     rliTokenId: string;
     addresses: string[];
-    uses: number;
+    uses: string;
   }): Promise<{
     litResource: LitRLIResource;
     rliDelegationAuthSig: AuthSig;
@@ -176,8 +176,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- to be changed(?)
     const domain = 'example.com';
-    const statement =
-      'This is a test statement. You can put anything you want here.';
+    const statement = '';
 
     // -- if it's not ready yet, then connect
     if (!this.ready) {
@@ -267,10 +266,11 @@ export class LitNodeClientNodeJs extends LitCore {
     const signature = await dAppOwnerWallet.signMessage(messageToSign);
 
     const authSig = {
-      sig: signature,
+      sig: signature.replace('0x', ''),
       derivedVia: 'web3.eth.personal.sign',
       signedMessage: messageToSign,
-      address: dAppOwnerWalletAddress,
+      address: dAppOwnerWalletAddress.replace('0x', '').toLowerCase(),
+      algo: null,
     };
 
     return { litResource, rliDelegationAuthSig: authSig };
@@ -410,7 +410,8 @@ export class LitNodeClientNodeJs extends LitCore {
    */
   static async generateSessionCapabilityObjectWithWildcards(
     litResources: Array<ILitResource>,
-    rateLimitAuthSig?: AuthSig
+    rateLimitAuthSig?: AuthSig,
+    addAllCapabilities?: boolean,
   ): Promise<ISessionCapabilityObject> {
 
     const sessionCapabilityObject = new RecapSessionCapabilityObject(
@@ -418,8 +419,13 @@ export class LitNodeClientNodeJs extends LitCore {
       []
     );
 
-    for (const litResource of litResources) {
-      sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
+    // disable for now
+    const _addAllCapabilities = addAllCapabilities ?? false;
+
+    if (_addAllCapabilities) {
+      for (const litResource of litResources) {
+        sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
+      }
     }
 
     if (rateLimitAuthSig) {
@@ -2593,7 +2599,8 @@ export class LitNodeClientNodeJs extends LitCore {
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
     let sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
-    const capabilities = params.rliDelegationAuthSig ? [authSig, params.rliDelegationAuthSig] : [authSig];
+    const capabilities = params.rliDelegationAuthSig ? [params.rliDelegationAuthSig, authSig] : [authSig];
+    // const capabilities = params.rliDelegationAuthSig ? [authSig, params.rliDelegationAuthSig] : [authSig];
 
     console.log("capabilities:", capabilities);
 
