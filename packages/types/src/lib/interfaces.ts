@@ -1584,7 +1584,7 @@ export interface RetryTollerance {
   /**
    * An amount of time to wait for canceling the operating (in milliseconds)
    */
-  timout?: number;
+  timeout?: number;
 
   /**
    * How long to wait between retries (in milliseconds)

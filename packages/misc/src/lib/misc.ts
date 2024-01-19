@@ -23,6 +23,7 @@ import {
   RelayClaimProcessor,
   SuccessNodePromises,
   RejectedNodePromises,
+  RetryTollerance,
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
@@ -739,7 +740,7 @@ export function sendRequest(
 export async function executeWithRetry<T>(
   execCallback: (requestId: string) => Promise<T>,
   errorCallback?: (error: any, requestId: string, isFinal: boolean) => void,
-  opts?: any
+  opts?: RetryTollerance
 ): Promise<
   (T & { requestId: string }) | (RejectedNodePromises & { requestId: string })
 > {
