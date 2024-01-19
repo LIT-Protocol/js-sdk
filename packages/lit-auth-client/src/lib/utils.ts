@@ -233,7 +233,7 @@ export function parseAuthenticatorData(
         authData.length
       );
 
-      let publicKey: any = cbor.decode(publicKeyCoseBufferCbor);
+      const publicKey: any = cbor.decode(publicKeyCoseBufferCbor);
       publicKeyCoseBufferCbor = cbor.encode(publicKey);
 
       attestedCredentialData['credentialPublicKey'] = publicKeyCoseBufferCbor;

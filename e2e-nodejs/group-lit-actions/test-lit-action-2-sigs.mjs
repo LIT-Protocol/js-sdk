@@ -34,7 +34,7 @@ export async function main() {
     })();`,
     authMethods: [],
     jsParams: {
-      numberOfSigs: 2,
+      numberOfSigs: 5,
       signatureData: TO_SIGN,
       publicKey: globalThis.LitCI.PKP_INFO.publicKey,
       sigName: 'fooSig',
@@ -42,7 +42,7 @@ export async function main() {
   });
 
   // ==================== Post-Validation ====================
-  if (!res.signatures || Object.keys(res.signatures).length !== 2) {
+  if (!res.signatures || Object.keys(res.signatures).length !== 5) {
     return fail(
       `should have 2 signatures but received ${
         Object.keys(res.signatures).length ?? 0

@@ -156,6 +156,21 @@ describe('getAuthMethodId', () => {
 
     expect(id).toBeDefined();
   });
+  it('should get auth method id for stytch auth method helper', async () => {
+    let id = StytchAuthFactorOtpProvider.authMethodId({
+      authMethodType: AuthMethodType.StytchEmailFactorOtp,
+      accessToken: accessTokenEmailFactor,
+    });
+
+    expect(id).toBeDefined();
+
+    id = StytchAuthFactorOtpProvider.authMethodId({
+      authMethodType: AuthMethodType.StytchSmsFactorOtp,
+      accessToken: accessTokenSmsFactor,
+    });
+
+    expect(id).toBeDefined();
+  });
 });
 
 describe('getProvider', () => {

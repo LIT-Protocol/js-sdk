@@ -757,6 +757,26 @@
         });
       };
 
+      var ETHOnBaseSepolia = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'baseSepolia',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnBaseSepolia',
+        });
+      };
+
       var ETHOnLukso = async () => {
         const accessControlConditions = [
           {
@@ -1808,6 +1828,9 @@
     <br />
     <br />
     <button onclick="ETHOnBaseGoerli()">ETHOnBaseGoerli</button>
+    <br />
+    <br />
+    <button onclick="ETHOnBaseSepolia()">ETHOnBaseSepolia</button>
     <br />
     <br />
     <button onclick="ETHOnLukso()">ETHOnLukso</button>

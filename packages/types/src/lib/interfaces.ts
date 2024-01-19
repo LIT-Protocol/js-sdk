@@ -105,7 +105,7 @@ export interface AuthCallbackParams {
   // statement.
   statement?: string;
 
-  // Either the blockhash that the nodes return during the handshake or a randomly generated nonce with lit-siwe's `generateNonce()` function
+  // The blockhash that the nodes return during the handshake
   nonce: string;
 
   // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
@@ -227,6 +227,7 @@ export interface LitNodeClientConfig {
   connectTimeout: number;
   checkNodeAttestation: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
+  storageProvider?: StorageProvider;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
@@ -235,6 +236,15 @@ export interface CustomNetwork {
   bootstrapUrls: Array<string>;
   minNodeCount?: number;
   contractContext?: LitContractContext;
+}
+
+/**
+ * Override for LocalStorage and SessionStorage
+ * if running in NodeJs and this is implicitly
+ * binded globally
+ */
+export interface StorageProvider {
+  provider: Storage;
 }
 
 export interface Signature {
@@ -1470,7 +1480,7 @@ export interface StytchOtpProviderOptions {
     Stytch application identifier
   */
   appId: string;
-  /* 
+  /*
    Stytch user identifier for a project
   */
   userId?: string;

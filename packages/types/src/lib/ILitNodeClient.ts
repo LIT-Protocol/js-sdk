@@ -160,7 +160,7 @@ export interface ILitNodeClient {
    * @returns { any }
    *
    */
-  getSignatures(signedData: Array<any>): any;
+  getSignatures(signedData: Array<any>, requestId: string): any;
 
   /**
    *
@@ -182,7 +182,7 @@ export interface ILitNodeClient {
    * @returns { string } signature
    *
    */
-  getSignature(shareData: Array<any>): Promise<any>;
+  getSignature(shareData: Array<any>, requestId: string): Promise<any>;
 
   // ========== API Calls to Nodes ==========
   sendCommandToNode({ url, data, requestId }: SendNodeCommand): Promise<any>;

@@ -2,11 +2,7 @@ import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { client } from '../00-setup.mjs';
-import { LitAbility, LitActionResource } from '@lit-protocol/auth-helpers';
-import { LitAuthClient } from '@lit-protocol/lit-auth-client';
-import { AuthMethodType, ProviderType } from '@lit-protocol/constants';
-import { ethers } from 'ethers';
-import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
+import { AuthMethodType } from '@lit-protocol/constants';
 
 // NOTE: you need to hash data before you send it in.
 // If you send something that isn't 32 bytes, the nodes will return an error.
