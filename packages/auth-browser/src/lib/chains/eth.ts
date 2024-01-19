@@ -389,7 +389,7 @@ export const connectWeb3 = async ({
 
   const provider = await dialog.getWalletProvider();
 
-  log('got provider', provider);
+  log('got provider');
 
   // @ts-ignore
   const web3 = new Web3Provider(provider);

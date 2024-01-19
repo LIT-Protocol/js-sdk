@@ -89,12 +89,30 @@ function _resolveLoggingHandler(level: LogLevel): any {
   }
 }
 
-function replacer(key: string, value: any) {
-  // Filtering out properties
-  if (typeof value === 'object') {
-    return JSON.stringify(value, null);
-  }
-  return value;
+/**
+ * Implementation of `JSON.stringify` which removes circular object references
+ * @example
+ * let circ = {foo: 'bar'};
+ * circ.circ = circ; // creates a circular reference
+ * _safeStringify(circ) -> {foo: 'bar'}
+ * @param obj object to check for circular references
+ * @param indent number of indents to include (spaces)
+ * @returns obj param without without circular references
+ */
+function _safeStringify(obj: any, indent = 2) {
+  let cache: any[] | null = [];
+  const retVal = JSON.stringify(
+    obj,
+    (_key, value) =>
+      typeof value === 'object' && value !== null
+        ? cache?.includes(value)
+          ? undefined // Duplicate reference found, discard key
+          : cache?.push(value) && value // Store value in our collection
+        : value,
+    indent
+  );
+  cache = null;
+  return retVal;
 }
 
 interface ILog {
@@ -140,7 +158,7 @@ class Log implements ILog {
     )} [${this.category}] [id: ${this.id}] ${this.message}`;
     for (var i = 0; i < this.args.length; i++) {
       if (typeof this.args[i] === 'object') {
-        fmtStr = `${fmtStr} ${JSON.stringify(this.args[i])}`;
+        fmtStr = `${fmtStr} ${_safeStringify(this.args[i])}`;
       } else {
         fmtStr = `${fmtStr} ${this.args[i]}`;
       }
@@ -322,11 +340,11 @@ export class Logger {
       if (bucket) {
         bucket = JSON.parse(bucket);
         bucket?.logs.push(log.toString());
-        globalThis.localStorage.setItem(log.id, JSON.stringify(bucket));
+        globalThis.localStorage.setItem(log.id, _safeStringify(bucket));
       } else {
         globalThis.localStorage.setItem(
           log.id,
-          JSON.stringify({
+          _safeStringify({
             logs: [log.toString()],
           })
         );
