@@ -753,7 +753,7 @@ export async function executeWithRetry<T>(
   opts.interval = opts.interval ?? 100;
   opts.maxRetryCount = opts.maxRetryCount ?? 3;
   let requestId: string = '';
-  console.log('starting nettwork operation');
+
   while (!isTimeout) {
     requestId = Math.random().toString(16).slice(2);
     try {
@@ -764,6 +764,8 @@ export async function executeWithRetry<T>(
 
       clearTimeout(timer);
       response.requestId = requestId;
+      // this will work for now as errors should all follow the
+      // RejectedNodePromise type definition which contains an `error` property
       if ('error' in response) {
         counter += 1;
         errorCallback &&
