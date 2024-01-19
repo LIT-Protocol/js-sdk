@@ -31,8 +31,8 @@ export async function main() {
   const resourceAbilities = [
     {
       resource: new LitActionResource('*'),
-      ability: LitAbility.AccessControlConditionDecryption
-    }
+      ability: LitAbility.AccessControlConditionDecryption,
+    },
   ];
   const sessionSigs = await client.getSessionSigs({
     chain: 'ethereum',
@@ -79,13 +79,13 @@ export async function main() {
   // In this case, the PKP is the user
   const accessControlConditions = [
     {
-      contractAddress: "",
-      standardContractType: "",
+      contractAddress: '',
+      standardContractType: '',
       chain,
-      method: "",
-      parameters: [":userAddress"],
+      method: '',
+      parameters: [':userAddress'],
       returnValueTest: {
-        comparator: "=",
+        comparator: '=',
         value: pkpWallet.address,
       },
     },
@@ -121,7 +121,9 @@ export async function main() {
   }
 
   // ==================== Success ====================
-  return success('Message was encrypted and then decrypted using the pkp successfully');
+  return success(
+    'Message was encrypted and then decrypted using the pkp successfully'
+  );
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });
