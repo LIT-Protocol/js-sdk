@@ -140,7 +140,7 @@ class Log implements ILog {
     )} [${this.category}] [id: ${this.id}] ${this.message}`;
     for (var i = 0; i < this.args.length; i++) {
       if (typeof this.args[i] === 'object') {
-        fmtStr = `${fmtStr} ${JSON.stringify(this.args[i])}`;
+        fmtStr = `${fmtStr} ${this._safeStringify(this.args[i])}`;
       } else {
         fmtStr = `${fmtStr} ${this.args[i]}`;
       }
@@ -175,6 +175,22 @@ class Log implements ILog {
       level: this.level,
     };
   }
+
+  private _safeStringify(obj: any, indent = 2) {
+    let cache: any[] | null = [];
+    const retVal = JSON.stringify(
+      obj,
+      (key, value) =>
+        typeof value === "object" && value !== null
+          ? cache?.includes(value)
+            ? undefined // Duplicate reference found, discard key
+            : cache?.push(value) && value // Store value in our collection
+          : value,
+      indent
+    );
+    cache = null;
+    return retVal;
+  };
 }
 
 export type messageHandler = (log: Log) => void;
@@ -323,17 +339,34 @@ export class Logger {
       if (bucket) {
         bucket = JSON.parse(bucket);
         bucket?.logs.push(log.toString());
-        globalThis.localStorage.setItem(log.id, JSON.stringify(bucket));
+        globalThis.localStorage.setItem(log.id, this._safeStringify(bucket));
       } else {
         globalThis.localStorage.setItem(
           log.id,
-          JSON.stringify({
+          this._safeStringify({
             logs: [log.toString()],
           })
         );
       }
     }
   }
+
+  private _safeStringify(obj: any, indent = 2) {
+    let cache: any[] | null = [];
+    const retVal = JSON.stringify(
+      obj,
+      (key, value) =>
+        typeof value === "object" && value !== null
+          ? cache?.includes(value)
+            ? undefined // Duplicate reference found, discard key
+            : cache?.push(value) && value // Store value in our collection
+          : value,
+      indent
+    );
+    cache = null;
+    return retVal;
+  };
+  
 }
 
 export class LogManager {
