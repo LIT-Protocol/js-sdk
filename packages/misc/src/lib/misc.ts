@@ -764,7 +764,7 @@ export async function executeWithRetry<T>(
 
       clearTimeout(timer);
       response.requestId = requestId;
-      if (response && response.error) {
+      if ('error' in response) {
         counter += 1;
         errorCallback &&
           errorCallback(
