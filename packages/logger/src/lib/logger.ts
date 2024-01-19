@@ -94,7 +94,7 @@ function _safeStringify(obj: any, indent = 2) {
   const retVal = JSON.stringify(
     obj,
     (key, value) =>
-      typeof value === "object" && value !== null
+      typeof value === 'object' && value !== null
         ? cache?.includes(value)
           ? undefined // Duplicate reference found, discard key
           : cache?.push(value) && value // Store value in our collection
@@ -103,7 +103,7 @@ function _safeStringify(obj: any, indent = 2) {
   );
   cache = null;
   return retVal;
-};
+}
 
 interface ILog {
   timestamp: string;
