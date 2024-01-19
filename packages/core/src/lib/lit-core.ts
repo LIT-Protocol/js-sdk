@@ -534,11 +534,10 @@ export class LitCore {
 
     let res = await executeWithRetry<NodeCommandServerKeysResponse>(
       wrapper,
-      (_error: any, requestId: string, isFinal: boolean) => {
+      (_error: any, _requestId: string, isFinal: boolean) => {
         if (!isFinal) {
-          logErrorWithRequestId(
-            requestId,
-            'an error occured, attempting to retry'
+          logError(
+            'an error occured, attempting to retry',
           );
         }
       },
