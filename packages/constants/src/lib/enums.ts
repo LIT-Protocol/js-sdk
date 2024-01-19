@@ -9,6 +9,7 @@ export enum SIGTYPE {
   BLS = 'BLS',
   EcdsaCaitSith = 'ECDSA_CAIT_SITH',
   EcdsaCAITSITHP256 = 'EcdsaCaitSithP256',
+  FrostEd25519Sha512v1 = 'FROST-ED25519-SHA512-v1',
 }
 
 /**

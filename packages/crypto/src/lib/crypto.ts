@@ -252,7 +252,7 @@ export const combineEcdsaShares = (
 
         /*
           r and s values of the signature should be maximum of 64 bytes
-          r and s values can have polarity as the first two bits, here we remove 
+          r and s values can have polarity as the first two bits, here we remove
         */
         if (sig && sig.r && sig.r.length > 64) {
           while (sig.r.length > 64) {
@@ -270,6 +270,12 @@ export const combineEcdsaShares = (
         log('response from combine_signature', res);
         sig = JSON.parse(res);
         break;
+      case SIGTYPE.FrostEd25519Sha512v1:
+        res = ecdsaSdk.combine_signature(validShares, 4);
+        log('response from combine_signature', res);
+        sig = JSON.parse(res);
+        // TODO(cairomassimo): the return type here does not conform to CombinedECDSASignature
+        break;
       // if its another sig type, it shouldnt be resolving to this method
       default:
         throw new Error(
@@ -277,7 +283,7 @@ export const combineEcdsaShares = (
         );
     }
   } catch (e) {
-    log('Failed to combine signatures:', e);
+        log('Failed to combine signatures:', e);
   }
 
   log('signature', sig);

@@ -223,3 +223,69 @@ describe('combine ECDSA Shares', () => {
     expect(recoveredAddr).toEqual(addr);
   });
 });
+
+describe('combine FROST Shares', () => {
+  beforeAll(async () => {
+    await initWasmEcdsaSdk();
+  });
+
+  it('Should recombine FROST signature shares', async () => {
+    const sigShares = [
+      {
+        sigType: 'FROST-ED25519-SHA512-v1',
+        dataSigned: '74657374',
+        signatureShare:
+          'a8272cf614b6af2c178575792574c438ad9b617d3aca925edd4f58419d307304',
+        verifyingShare:
+          '270e65d2e7d990c24d376b5fe008bcefe8638af62d38971e67b4c89bd2bdec07',
+        shareIndex:
+          '0100000000000000000000000000000000000000000000000000000000000000',
+        hidingNonce:
+          '8ded48acb6cb53aecc4c3db42881d68139899e87b3eee9eabd87d05a685d046d',
+        bindingNonce:
+          '2371452b8cce8907c5a056f468dad53149334de2098000a3f9c98badf48d99a0',
+        publicKey:
+          '899196af442a2c0d32d9c18b837a838379db18b37148bf35a4917202e0214658',
+        sigName: 'sig',
+      },
+      {
+        sigType: 'FROST-ED25519-SHA512-v1',
+        dataSigned: '74657374',
+        signatureShare:
+          '943afc49d0397adfea011b78f4963543be476aea4d1e4a35afb915bba3721c09',
+        verifyingShare:
+          '70f3807ea1c784f36fc900158a1c8ec3aaff7026be02e8edc0a2237c1eb73ccb',
+        shareIndex:
+          '0200000000000000000000000000000000000000000000000000000000000000',
+        hidingNonce:
+          'a895aa9a8e588caeb89d765c738df48a5f4be3fa6b91b953e0b7bce5074c54fc',
+        bindingNonce:
+          'e3b026a1b011c7e6a9d09ce2b4945cbac261a61ad2f43234993c12edf63a630c',
+        publicKey:
+          '899196af442a2c0d32d9c18b837a838379db18b37148bf35a4917202e0214658',
+        sigName: 'sig',
+      },
+      {
+        sigType: 'FROST-ED25519-SHA512-v1',
+        dataSigned: '74657374',
+        signatureShare:
+          '2527bed7775274fd49c72e94beddb2cb16be356db29ac5b8a1bc795fc714e402',
+        verifyingShare:
+          '3d6b6fdc64465c5d515770211fa981b799e3237b5d7023bf7f6a7e370add3ea7',
+        shareIndex:
+          '0300000000000000000000000000000000000000000000000000000000000000',
+        hidingNonce:
+          '7762508c2d030f72359daf77e82c9ecdc99d39a2f36f7d9cbc69ba9153e85013',
+        bindingNonce:
+          '1c2172836dc0b927e3d226458bd0be8d624cacca13fa82a258367eb025f41a38',
+        publicKey:
+          '899196af442a2c0d32d9c18b837a838379db18b37148bf35a4917202e0214658',
+        sigName: 'sig',
+      },
+    ];
+
+    const sig = combineEcdsaShares(sigShares);
+
+    // TODO: the return type does not conform to CombinedECDSASignature
+  });
+});
