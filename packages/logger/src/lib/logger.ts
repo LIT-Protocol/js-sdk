@@ -89,6 +89,16 @@ function _resolveLoggingHandler(level: LogLevel): any {
   }
 }
 
+/**
+ * Implementation of `JSON.stringify` which removes circular object references
+ * @example
+ * let circ = {foo: 'bar'};
+ * circ.circ = circ; // creates a circular reference
+ * _safeStringify(circ) -> {foo: 'bar'}
+ * @param obj object to check for circular references
+ * @param indent number of indents to include (spaces)
+ * @returns obj param without without circular references
+ */
 function _safeStringify(obj: any, indent = 2) {
   let cache: any[] | null = [];
   const retVal = JSON.stringify(
