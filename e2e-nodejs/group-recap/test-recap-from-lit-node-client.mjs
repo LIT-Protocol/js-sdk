@@ -48,13 +48,13 @@ export async function main() {
 
   await contractClient.connect();
 
-  const rliTokenIdStr = '15';
-  // const { rliTokenIdStr } = await contractClient.mintRLI({
-  //   requestsPerDay: 14400, // 10 request per minute
-  //   daysUntilUTCMidnightExpiration: 2,
-  // });
+  // const rliTokenIdStr = '3';
+  const { rliTokenIdStr } = await contractClient.mintRLI({
+    requestsPerDay: 14400, // 10 request per minute
+    daysUntilUTCMidnightExpiration: 2,
+  });
 
-  // console.log('rliTokenIdStr:', rliTokenIdStr);
+  console.log('rliTokenIdStr:', rliTokenIdStr);
 
   const litNodeClient = new LitNodeClient({
     litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
@@ -70,10 +70,13 @@ export async function main() {
   // message. We will then sign the siwe message with the dApp owner's wallet.
   const { rliDelegationAuthSig, litResource } =
     await litNodeClient.createRliDelegationAuthSig({
-      uses: 10,
+      uses: '0',
       dAppOwnerWallet: dAppOwnerWallet,
       rliTokenId: rliTokenIdStr,
-      addresses: [dAppOwnerWallet_address, delegatedWalletB_address],
+      addresses: [
+        dAppOwnerWallet_address.replace('0x', '').toLowerCase(),
+        delegatedWalletB_address.replace('0x', '').toLowerCase(),
+      ],
     });
 
   console.log('YY rliDelegationAuthSig:', rliDelegationAuthSig);
@@ -118,7 +121,7 @@ export async function main() {
     let siweMessage = new siwe.SiweMessage({
       domain: 'localhost:3000',
       address: dAppOwnerWallet_address,
-      statement: 'Some custom statement',
+      statement: 'Some custom statement.',
       uri,
       version: '1',
       chainId: '1',
@@ -133,11 +136,12 @@ export async function main() {
     const signature = await dAppOwnerWallet.signMessage(messageToSign);
 
     const authSig = {
-      sig: signature,
+      sig: signature.replace('0x', ''),
       derivedVia: 'web3.eth.personal.sign',
       signedMessage: messageToSign,
-      // address: dAppOwnerWallet_address.replace('0x', '').toLowerCase(),
-      address: dAppOwnerWallet_address,
+      address: dAppOwnerWallet_address.replace('0x', '').toLowerCase(),
+      // address: dAppOwnerWallet_address,
+      algo: null,
     };
 
     console.log('authCallback authSig:', authSig);
