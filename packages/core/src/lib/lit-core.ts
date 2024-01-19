@@ -590,9 +590,7 @@ export class LitCore {
       wrapper,
       (_error: any, _requestId: string, isFinal: boolean) => {
         if (!isFinal) {
-          logError(
-            'an error occured, attempting to retry',
-          );
+          logError('an error occured, attempting to retry');
         }
       },
       this.config.retryTollerance
