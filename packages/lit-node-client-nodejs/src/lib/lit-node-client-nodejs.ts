@@ -2212,8 +2212,7 @@ export class LitNodeClientNodeJs extends LitCore {
     );
 
     // ========== Node Promises ==========
-    let requestId;
-    const wrapper = async (id: string): Promise<string> => {
+    const wrapper = async (id: string): Promise<RejectedNodePromises | SuccessNodePromises<any>> => {
       const nodePromises = this.getNodePromises((url: string) => {
         return this.signConditionEcdsa(
           url,
@@ -2231,23 +2230,12 @@ export class LitNodeClientNodeJs extends LitCore {
       });
 
       // ----- Resolve Promises -----
-      try {
-        const shareData = await Promise.all(nodePromises);
-
-        if (shareData[0].result == 'failure') {
-          return 'Condition Failed';
-        }
-
-        const signature = this.getSignature(shareData, id);
-        return signature;
-      } catch (e) {
-        log('Error - signed_ecdsa_messages - ', e);
-        const signed_ecdsa_message = nodePromises[0];
-        return signed_ecdsa_message;
-      }
+      const responses = await this.handleNodePromises(nodePromises, id);
+      
+      return responses;
     };
 
-    let res = await executeWithRetry<string>(
+    let res = await executeWithRetry<RejectedNodePromises | SuccessNodePromises<any>>(
       wrapper,
       (error: any, requestId: string, isFinal: boolean) => {
         if (!isFinal) {
@@ -2261,8 +2249,22 @@ export class LitNodeClientNodeJs extends LitCore {
       this.config.retryTollerance
     );
 
+    const requestId = res.requestId;
     // return the first value as this will be the signature data
-    return res as string;
+    try {
+      if (res.success === false) {
+        return 'Condition Failed';
+      }
+      const shareData = (res as SuccessNodePromises<any>).values;
+      const signature = this.getSignature(shareData, requestId);
+      return signature;
+    } catch(e) {
+      logErrorWithRequestId(requestId, "Error - signed_ecdsa_messages - ", e);
+      const signed_ecdsa_message = (res as RejectedNodePromises);
+      // have to cast to any to keep with above `string` return value
+      // this will be returned as `RejectedNodePromise`
+      return signed_ecdsa_message as any; 
+    }
   };
 
   /** ============================== SESSION ============================== */
