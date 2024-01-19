@@ -729,78 +729,78 @@ export function sendRequest(
     });
 }
 
-export function executeWithRetry(
-  execCallback: (
-    requestId: string
-  ) => Promise<SuccessNodePromises<any> | RejectedNodePromises>,
+/**
+ * Allows for invoking a callback and re exucting while re generating a new request identifier
+ * @param execCallback
+ * @param errorCallback
+ * @param opts
+ * @returns {T}
+ */
+export async function executeWithRetry<T>(
+  execCallback: (requestId: string) => Promise<T>,
   errorCallback?: (error: any, requestId: string, isFinal: boolean) => void,
   opts?: any
 ): Promise<
-  | (SuccessNodePromises<any> & { requestId: string })
-  | (RejectedNodePromises & { requestId: string })
+  (T & { requestId: string }) | (RejectedNodePromises & { requestId: string })
 > {
   let timer: any | null;
   let counter = 0;
   let isTimeout = false;
-  const poll = async (): Promise<any> => {
-    if (!opts) {
-      opts = {};
-    }
-    opts.timeout = opts.timeout ?? 31_000; // We wait for 31 seconds as the timeout period on the nodes is 30 seconds.
-    opts.interval = opts.interval ?? 100;
-    opts.maxRetryCount = opts.maxRetryCount ?? 3;
-    let requestId: string;
-    console.log('starting nettwork operation');
-    while (!isTimeout) {
-      requestId = Math.random().toString(16).slice(2);
-      try {
-        timer = setTimeout(() => {
-          isTimeout = true;
-        }, opts.timeout);
-        const response: any = await execCallback(requestId).catch((err) => {
-          counter += 1;
-          errorCallback &&
-            errorCallback(
-              `Error is ${err.message}-${err.details}`,
-              requestId,
-              counter >= opts.maxRetryCount ? true : false
-            );
-        });
+  if (!opts) {
+    opts = {};
+  }
+  opts.timeout = opts.timeout ?? 31_000; // We wait for 31 seconds as the timeout period on the nodes is 30 seconds.
+  opts.interval = opts.interval ?? 100;
+  opts.maxRetryCount = opts.maxRetryCount ?? 3;
+  let requestId: string = '';
+  console.log('starting nettwork operation');
+  while (!isTimeout) {
+    requestId = Math.random().toString(16).slice(2);
+    try {
+      timer = setTimeout(() => {
+        isTimeout = true;
+      }, opts.timeout);
+      const response: any = await execCallback(requestId);
 
-        clearTimeout(timer);
-        response.requestId = requestId;
-        if ((response as RejectedNodePromises).error) {
-          counter += 1;
-          errorCallback &&
-            errorCallback(
-              response,
-              requestId,
-              counter >= opts.maxRetryCount ? true : false
-            );
-        } else {
-          clearTimeout(timer);
-          return response;
-        }
-
-        if (counter >= opts.maxRetryCount) {
-          return response;
-        }
-      } catch (e) {
+      clearTimeout(timer);
+      response.requestId = requestId;
+      if (response && response.error) {
+        counter += 1;
         errorCallback &&
           errorCallback(
-            (e as Error).toString(),
+            response,
             requestId,
-            counter > opts.maxRetryCount ? true : false
+            counter >= opts.maxRetryCount ? true : false
           );
-        counter += 1;
+      } else {
+        clearTimeout(timer);
+        return response;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, opts?.interval));
+      if (counter >= opts.maxRetryCount) {
+        return response;
+      }
+    } catch (err: any) {
+      errorCallback &&
+        errorCallback(
+          `Error is ${err.message}-${err.details}`,
+          requestId,
+          counter >= opts.maxRetryCount ? true : false
+        );
+      counter += 1;
     }
 
-    // If we get here we broke out of the loop on event of a timeout being hit.
-    return { success: false };
-  };
+    await new Promise((resolve) => setTimeout(resolve, opts?.interval));
+  }
 
-  return poll();
+  // If we get here we broke out of the loop on event of a timeout being hit.
+  return {
+    success: false,
+    error: {
+      errorKind: 'Timeout',
+      status: 500,
+      details: [`timeout limit reached timeout limit: ${opts.timeout}ms`],
+    },
+    requestId,
+  };
 }

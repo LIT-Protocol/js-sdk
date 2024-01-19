@@ -707,7 +707,7 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     };
 
-    let res = await executeWithRetry(
+    let res = await executeWithRetry<any>(
       wrapper,
       (error: any, requestid: string, isFinal: boolean) => {
         if (!isFinal) {
@@ -717,7 +717,8 @@ export class LitNodeClientNodeJs extends LitCore {
             error
           );
         }
-      }
+      },
+      this.config.retryTollerance
     );
 
     return res as unknown as NodeCommandResponse;
@@ -943,7 +944,7 @@ export class LitNodeClientNodeJs extends LitCore {
       return handledPromise;
     };
 
-    return executeWithRetry(
+    return executeWithRetry<RejectedNodePromises | SuccessNodePromises<any>>(
       wrapper,
       (error: any, requestId: string, isFinal: boolean) => {
         logErrorWithRequestId(
@@ -951,7 +952,8 @@ export class LitNodeClientNodeJs extends LitCore {
           'error has occured, attempting to retry',
           error
         );
-      }
+      },
+      this.config.retryTollerance
     );
   };
 
@@ -1445,11 +1447,14 @@ export class LitNodeClientNodeJs extends LitCore {
         res = await this.handleNodePromises(nodePromises, requestId);
         return res;
       };
-      res = await executeWithRetry(
+      res = await executeWithRetry<
+        RejectedNodePromises | SuccessNodePromises<any>
+      >(
         wrapper,
         (error: any, requestId: string, isFinal: boolean) => {
           logError('an error occured', error);
-        }
+        },
+        this.config.retryTollerance
       );
 
       requestId = res.requestId;
@@ -1652,7 +1657,9 @@ export class LitNodeClientNodeJs extends LitCore {
       const res = await this.handleNodePromises(nodePromises, id);
       return res;
     };
-    const res = await executeWithRetry(
+    const res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
       wrapper,
       (error: any, requestId: string, isFinal: boolean) => {
         if (!isFinal) {
@@ -1662,7 +1669,8 @@ export class LitNodeClientNodeJs extends LitCore {
             error
           );
         }
-      }
+      },
+      this.config.retryTollerance
     );
     requestId = res.requestId;
 
@@ -1827,7 +1835,9 @@ export class LitNodeClientNodeJs extends LitCore {
       return res;
     };
 
-    const res = await executeWithRetry(
+    const res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
       wrapper,
       (error: any, requestId: string, isFinal: boolean) => {
         if (!isFinal) {
@@ -1837,7 +1847,8 @@ export class LitNodeClientNodeJs extends LitCore {
             error
           );
         }
-      }
+      },
+      this.config.retryTollerance
     );
 
     // -- case: promises rejected
@@ -2063,7 +2074,9 @@ export class LitNodeClientNodeJs extends LitCore {
       return res;
     };
 
-    const res = await executeWithRetry(
+    const res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
       wrapper,
       (error: string, requestId: string, isFinal: boolean) => {
         logErrorWithRequestId(
@@ -2071,7 +2084,8 @@ export class LitNodeClientNodeJs extends LitCore {
           'An error occured attempting to retry: ',
           error
         );
-      }
+      },
+      this.config.retryTollerance
     );
 
     requestId = res.requestId;
@@ -2198,37 +2212,57 @@ export class LitNodeClientNodeJs extends LitCore {
     );
 
     // ========== Node Promises ==========
-    const requestId = this.getRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      return this.signConditionEcdsa(
-        url,
-        {
-          accessControlConditions: formattedAccessControlConditions,
-          evmContractConditions: undefined,
-          solRpcConditions: undefined,
-          auth_sig,
-          chain,
-          iat,
-          exp,
-        },
-        requestId
-      );
-    });
+    let requestId;
+    const wrapper = async (id: string): Promise<string> => {
+      const nodePromises = this.getNodePromises((url: string) => {
+        return this.signConditionEcdsa(
+          url,
+          {
+            accessControlConditions: formattedAccessControlConditions,
+            evmContractConditions: undefined,
+            solRpcConditions: undefined,
+            auth_sig,
+            chain,
+            iat,
+            exp,
+          },
+          id
+        );
+      });
 
-    // ----- Resolve Promises -----
-    try {
-      const shareData = await Promise.all(nodePromises);
+      // ----- Resolve Promises -----
+      try {
+        const shareData = await Promise.all(nodePromises);
 
-      if (shareData[0].result == 'failure') return 'Condition Failed';
+        if (shareData[0].result == 'failure') {
+          return 'Condition Failed';
+        }
 
-      const signature = this.getSignature(shareData, requestId);
+        const signature = this.getSignature(shareData, id);
+        return signature;
+      } catch (e) {
+        log('Error - signed_ecdsa_messages - ', e);
+        const signed_ecdsa_message = nodePromises[0];
+        return signed_ecdsa_message;
+      }
+    };
 
-      return signature;
-    } catch (e) {
-      log('Error - signed_ecdsa_messages - ', e);
-      const signed_ecdsa_message = nodePromises[0];
-      return signed_ecdsa_message;
-    }
+    let res = await executeWithRetry<string>(
+      wrapper,
+      (error: any, requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logErrorWithRequestId(
+            requestId,
+            'an error has occured, attempting to retry ',
+            error
+          );
+        }
+      },
+      this.config.retryTollerance
+    );
+
+    // return the first value as this will be the signature data
+    return res as string;
   };
 
   /** ============================== SESSION ============================== */
@@ -2328,7 +2362,9 @@ export class LitNodeClientNodeJs extends LitCore {
       return res;
     };
 
-    let res = await executeWithRetry(
+    let res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
       wrapper,
       (error: any, requestId: string, isFinal: boolean) => {
         if (!isFinal) {
@@ -2338,7 +2374,8 @@ export class LitNodeClientNodeJs extends LitCore {
             error
           );
         }
-      }
+      },
+      this.config.retryTollerance
     );
 
     requestId = res.requestId;
@@ -2640,19 +2677,42 @@ export class LitNodeClientNodeJs extends LitCore {
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
-    const requestId = this.getRequestId();
-    const nodePromises = await this.getNodePromises((url: string) => {
-      const nodeRequestParams = {
-        authMethod: params.authMethod,
-      };
-      return this.getClaimKeyExecutionShares(url, nodeRequestParams, requestId);
-    });
+    let requestId;
+    const wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      const nodePromises = await this.getNodePromises((url: string) => {
+        const nodeRequestParams = {
+          authMethod: params.authMethod,
+        };
+        return this.getClaimKeyExecutionShares(url, nodeRequestParams, id);
+      });
 
-    const responseData = await this.handleNodePromises(
-      nodePromises,
-      requestId,
-      this.connectedNodes.size // require from all connected nodes
+      const responseData = await this.handleNodePromises(
+        nodePromises,
+        id,
+        this.connectedNodes.size // require from all connected nodes
+      );
+
+      return responseData;
+    };
+
+    let responseData = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (error: any, requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logErrorWithRequestId(
+            requestId,
+            'an error occured, attempting to retry ',
+            error
+          );
+        }
+      },
+      this.config.retryTollerance
     );
+    requestId = responseData.requestId;
 
     if (responseData.success === true) {
       const nodeSignatures: Signature[] = (
