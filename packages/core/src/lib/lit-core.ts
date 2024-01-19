@@ -57,6 +57,7 @@ import {
   NodeErrorV3,
   NodePromiseResponse,
   RejectedNodePromises,
+  RetryTollerance,
   SendNodeCommand,
   SessionSig,
   SessionSigsMap,
@@ -89,6 +90,11 @@ export class LitCore {
       litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
       minNodeCount: 2, // Default value, should be replaced
       bootstrapUrls: [], // Default value, should be replaced
+      retryTollerance: {
+        timeout: 31_000,
+        maxRetryLimit: 3,
+        interval: 100,
+      },
     };
 
     // Initialize default config based on litNetwork
@@ -501,24 +507,45 @@ export class LitCore {
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
-    // -- get properties from params
-    const { url } = params;
+    const wrapper = async (id: string) => {
+      // -- get properties from params
+      const { url } = params;
 
-    // -- create url with path
-    const urlWithPath = `${url}/web/handshake`;
+      // -- create url with path
+      const urlWithPath = `${url}/web/handshake`;
 
-    log(`handshakeWithNode ${urlWithPath}`);
+      log(`handshakeWithNode ${urlWithPath}`);
 
-    const data = {
-      clientPublicKey: 'test',
-      challenge: params.challenge,
+      const data = {
+        clientPublicKey: 'test',
+        challenge: params.challenge,
+      };
+
+      let res = await this.sendCommandToNode({
+        url: urlWithPath,
+        data,
+        requestId,
+      }).catch((err: NodeErrorV3) => {
+        return err;
+      });
+
+      return res;
     };
 
-    return this.sendCommandToNode({
-      url: urlWithPath,
-      data,
-      requestId,
-    });
+    let res = await executeWithRetry<NodeCommandServerKeysResponse>(
+      wrapper,
+      (_error: any, requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logErrorWithRequestId(
+            requestId,
+            'an error occured, attempting to retry'
+          );
+        }
+      },
+      this.config.retryTollerance
+    );
+
+    return res as NodeCommandServerKeysResponse;
   };
 
   // ==================== SENDING COMMAND ====================
