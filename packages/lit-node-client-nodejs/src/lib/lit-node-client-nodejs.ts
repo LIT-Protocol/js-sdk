@@ -709,12 +709,10 @@ export class LitNodeClientNodeJs extends LitCore {
 
     let res = await executeWithRetry<any>(
       wrapper,
-      (error: any, requestid: string, isFinal: boolean) => {
+      (_error: any, _requestid: string, isFinal: boolean) => {
         if (!isFinal) {
-          logErrorWithRequestId(
-            requestId,
+          logError(
             'An error occured. attempting to retry: ',
-            error
           );
         }
       },
@@ -946,12 +944,12 @@ export class LitNodeClientNodeJs extends LitCore {
 
     return executeWithRetry<RejectedNodePromises | SuccessNodePromises<any>>(
       wrapper,
-      (error: any, requestId: string, isFinal: boolean) => {
-        logErrorWithRequestId(
-          requestId,
-          'error has occured, attempting to retry',
-          error
-        );
+      (_error: any, _requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError(
+            'error has occured, attempting to retry'
+          );
+        }
       },
       this.config.retryTollerance
     );
@@ -1444,7 +1442,7 @@ export class LitNodeClientNodeJs extends LitCore {
           return shares;
         });
         // -- resolve promises
-        res = await this.handleNodePromises(nodePromises, requestId);
+        res = await this.handleNodePromises(nodePromises, requestId, this.config.minNodeCount);
         return res;
       };
       res = await executeWithRetry<
@@ -1452,7 +1450,7 @@ export class LitNodeClientNodeJs extends LitCore {
       >(
         wrapper,
         (error: any, requestId: string, isFinal: boolean) => {
-          logError('an error occured', error);
+          logError('an error occured, attempting to retry operation');
         },
         this.config.retryTollerance
       );
@@ -1654,7 +1652,7 @@ export class LitNodeClientNodeJs extends LitCore {
         return this.getPkpSignExecutionShares(url, reqBody, id);
       });
 
-      const res = await this.handleNodePromises(nodePromises, id);
+      const res = await this.handleNodePromises(nodePromises, id, this.config.minNodeCount);
       return res;
     };
     const res = await executeWithRetry<
@@ -1663,10 +1661,8 @@ export class LitNodeClientNodeJs extends LitCore {
       wrapper,
       (error: any, requestId: string, isFinal: boolean) => {
         if (!isFinal) {
-          logErrorWithRequestId(
-            requestId,
-            'errror occured, retrying operation ',
-            error
+          logError(
+            'errror occured, retrying operation'
           );
         }
       },
@@ -1831,7 +1827,7 @@ export class LitNodeClientNodeJs extends LitCore {
       });
 
       // -- resolve promises
-      const res = await this.handleNodePromises(nodePromises, id);
+      const res = await this.handleNodePromises(nodePromises, id, this.config.minNodeCount);
       return res;
     };
 
@@ -1841,10 +1837,8 @@ export class LitNodeClientNodeJs extends LitCore {
       wrapper,
       (error: any, requestId: string, isFinal: boolean) => {
         if (!isFinal) {
-          logErrorWithRequestId(
-            requestId,
-            'An error occured, attempting to retry ',
-            error
+          logError(
+            'an error occured, attempting to retry ',
           );
         }
       },
@@ -2070,7 +2064,7 @@ export class LitNodeClientNodeJs extends LitCore {
       });
 
       // -- resolve promises
-      const res = await this.handleNodePromises(nodePromises, id);
+      const res = await this.handleNodePromises(nodePromises, id, this.config.minNodeCount);
       return res;
     };
 
@@ -2078,11 +2072,9 @@ export class LitNodeClientNodeJs extends LitCore {
       RejectedNodePromises | SuccessNodePromises<any>
     >(
       wrapper,
-      (error: string, requestId: string, isFinal: boolean) => {
-        logErrorWithRequestId(
-          requestId,
-          'An error occured attempting to retry: ',
-          error
+      (_error: string, _requestId: string, _isFinal: boolean) => {
+        logError(
+          'an error occured attempting to retry'
         );
       },
       this.config.retryTollerance
@@ -2230,19 +2222,17 @@ export class LitNodeClientNodeJs extends LitCore {
       });
 
       // ----- Resolve Promises -----
-      const responses = await this.handleNodePromises(nodePromises, id);
+      const responses = await this.handleNodePromises(nodePromises, id, this.config.minNodeCount);
       
       return responses;
     };
 
     let res = await executeWithRetry<RejectedNodePromises | SuccessNodePromises<any>>(
       wrapper,
-      (error: any, requestId: string, isFinal: boolean) => {
+      (_error: any, _requestId: string, isFinal: boolean) => {
         if (!isFinal) {
-          logErrorWithRequestId(
-            requestId,
+          logError(
             'an error has occured, attempting to retry ',
-            error
           );
         }
       },
@@ -2356,7 +2346,7 @@ export class LitNodeClientNodeJs extends LitCore {
       // -- resolve promises
       let res;
       try {
-        res = await this.handleNodePromises(nodePromises, id);
+        res = await this.handleNodePromises(nodePromises, id, this.config.minNodeCount);
         log('signSessionKey node promises:', res);
       } catch (e) {
         throw new Error(`Error when handling node promises: ${e}`);
@@ -2368,12 +2358,10 @@ export class LitNodeClientNodeJs extends LitCore {
       RejectedNodePromises | SuccessNodePromises<any>
     >(
       wrapper,
-      (error: any, requestId: string, isFinal: boolean) => {
+      (_error: any, _requestId: string, isFinal: boolean) => {
         if (!isFinal) {
-          logErrorWithRequestId(
-            requestId,
-            'an error occured, attempting to retry ',
-            error
+          logError(
+            'an error occured, attempting to retry '
           );
         }
       },
@@ -2693,7 +2681,7 @@ export class LitNodeClientNodeJs extends LitCore {
       const responseData = await this.handleNodePromises(
         nodePromises,
         id,
-        this.connectedNodes.size // require from all connected nodes
+        this.config.minNodeCount
       );
 
       return responseData;
@@ -2703,12 +2691,10 @@ export class LitNodeClientNodeJs extends LitCore {
       RejectedNodePromises | SuccessNodePromises<any>
     >(
       wrapper,
-      (error: any, requestId: string, isFinal: boolean) => {
+      (_error: any, _requestId: string, isFinal: boolean) => {
         if (!isFinal) {
-          logErrorWithRequestId(
-            requestId,
-            'an error occured, attempting to retry ',
-            error
+          logError(
+            'an error occured, attempting to retry'
           );
         }
       },
