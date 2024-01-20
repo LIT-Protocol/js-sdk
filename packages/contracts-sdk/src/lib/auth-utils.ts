@@ -44,7 +44,11 @@ export const isSessionSigs = (obj: any) => {
   return hasAlgoKey && hasUrlKey;
 }
 
-
+/**
+ * Get the auth method id for an eth auth method, the access token can either be an auth sig or a session sigs object
+ * @param authMethod 
+ * @returns 
+ */
 export function getEthAuthMethodId(authMethod: any): string {
   let address: string;
   let accessToken: any;
