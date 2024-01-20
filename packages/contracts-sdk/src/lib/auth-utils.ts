@@ -1,3 +1,4 @@
+import { SessionSig } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import * as jose from 'jose';
 /**
@@ -30,15 +31,46 @@ export async function getAuthIdByAuthMethod(authMethod: any): Promise<string> {
   return authId;
 }
 
-function getEthAuthMethodId(authMethod: any): string {
-  let address: string;
 
+// check if the given object is a session sigs object
+export const isSessionSigs = (obj: any) => {
+
+  // the key is an url
+  const hasUrlKey = Object.keys(obj).every((key) => key.includes('https://'));
+
+  // the key is an algo
+  const hasAlgoKey = Object.values(obj).every((sig: any) => sig['algo']);
+
+  return hasAlgoKey && hasUrlKey;
+}
+
+/**
+ * Get the auth method id for an eth auth method, the access token can either be an auth sig or a session sigs object
+ * @param authMethod 
+ * @returns 
+ */
+export function getEthAuthMethodId(authMethod: any): string {
+  let address: string;
+  let accessToken: any;
+
+  // -- try if access token can be parsed as JSON object first
   try {
-    address = JSON.parse(authMethod.accessToken).address;
+    accessToken = JSON.parse(authMethod.accessToken);
   } catch (err) {
-    throw new Error(
-      `Error when parsing auth method to generate auth method ID for Eth wallet: ${err}`
-    );
+    throw new Error("Unable to parse access token as JSON object");
+  }
+
+  // -- now check if the access token is an authSig or session sigs object
+  if (isSessionSigs(accessToken)) {
+    const sessionSig = Object.values(accessToken).find((sig: any) => sig.address) as SessionSig;
+    address = sessionSig.address;
+  } else {
+    address = accessToken.address;
+  }
+
+  // -- check if address is empty
+  if (!address) {
+    throw new Error('No address found in access token');
   }
 
   return address.toLowerCase();
