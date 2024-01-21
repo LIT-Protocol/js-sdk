@@ -34,14 +34,16 @@ export async function getAuthIdByAuthMethod(authMethod: any): Promise<string> {
 
 // check if the given object is a session sigs object
 export const isSessionSigs = (obj: any) => {
-
   // the "top-level" object must have a key that starts with "https://"
-  const hasUrlKey = Object.keys(obj).every((key) => key.includes('https://'));
-
   // one of the objects inside the session sigs must have the "algo" key
-  const hasAlgoKey = Object.values(obj).every((sig: any) => sig['algo']);
+  // -- check if key is a url and if the object has an algo key
+  for (const key in obj) {
+    if (!key.includes('https://') || !obj[key]['algo']) {
+      return false;
+    }
+  }
 
-  return hasAlgoKey && hasUrlKey;
+  return true;
 }
 
 /**
