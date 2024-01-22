@@ -777,6 +777,46 @@
         });
       };
 
+      var ETHOnScroll = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'scroll',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnScroll',
+        });
+      };
+
+      var ETHOnscrollAlphaTestnet = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'scrollAlphaTestnet',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnscrollAlphaTestnet',
+        });
+      };
+
       var ETHOnLukso = async () => {
         const accessControlConditions = [
           {
@@ -1831,6 +1871,12 @@
     <br />
     <br />
     <button onclick="ETHOnBaseSepolia()">ETHOnBaseSepolia</button>
+    <br />
+    <br />
+    <button onclick="ETHOnScroll()">ETHOnScroll</button>
+    <br />
+    <br />
+    <button onclick="ETHOnscrollAlphaTestnet()">ETHOnscrollAlphaTestnet</button>
     <br />
     <br />
     <button onclick="ETHOnLukso()">ETHOnLukso</button>
