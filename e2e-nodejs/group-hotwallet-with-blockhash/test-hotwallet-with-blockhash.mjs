@@ -119,12 +119,12 @@ export async function main() {
 
   console.log(sessionSigs);
 
-  console.log(authSig);
+  // console.log(authSig);
 
-  if (authSig.signedMessage.includes(TEST_BLOCKHASH)) {
-    // return fail("authSig doesn't contain the blockhash");
-    console.log("authSig doesn't contain the blockhash");
-  }
+  // if (authSig.signedMessage.includes(TEST_BLOCKHASH)) {
+  //   // return fail("authSig doesn't contain the blockhash");
+  //   console.log("authSig doesn't contain the blockhash");
+  // }
 
   if (!checkNonceInEachSessionSig(sessionSigs, nonce)) {
     return fail("sessionSig doesn't contain the blockhash");

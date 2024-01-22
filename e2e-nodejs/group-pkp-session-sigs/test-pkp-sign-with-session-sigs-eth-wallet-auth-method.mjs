@@ -43,11 +43,13 @@ export async function main() {
 
   const sessionSigs = await client.getSessionSigs({
     chain: 'ethereum',
-    expiration: new Date(Date.now() + 60 * 60).toISOString(),
+    expiration: new Date(Date.now() + 60_000 * 60).toISOString(),
     resourceAbilityRequests: resourceAbilities,
     sessionKey: sessionKeyPair,
     authNeededCallback,
   });
+
+  console.log('sessionSigs:', sessionSigs);
 
   const pkpSignRes = await client?.pkpSign({
     toSign: TO_SIGN,

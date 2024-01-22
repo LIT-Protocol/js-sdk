@@ -54,7 +54,7 @@ async function main() {
   
   🌍 ENVs:
      DEBUG=true (Enables debug mode)
-     NETOWRK=<cayenne | internalDev> (Choose your network)
+     NETOWRK=<cayenne | internalDev | habanero | manzano> (Choose your network)
      CHECK_SEV=true (enable sev attestation checks)
      MINT_NEW=true (mint new pkp resources for test run)
      REAL_TX=true yarn (Enables real tx that costs gas)
