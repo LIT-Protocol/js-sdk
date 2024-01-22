@@ -256,6 +256,20 @@ const unifiedAccessControlConditions = [
     },
   },
 ];
+const invalidUnifiedAccessControlConditions = [
+  {
+    conditionType: "zkSync", // Does not exist
+    contractAddress: "",
+    standardContractType: "",
+    chain: "ethereum",
+    method: "eth_getBalance",
+    parameters: [":userAddress", "latest"],
+    returnValueTest: {
+      comparator: ">=",
+      value: "10000000000000",
+    },
+  },
+]
 
 await testThese([
   { name: path.basename(import.meta.url), fn: accessControlConditionsTest('evmBasicMissingFields', evmBasicAccessControlConditionsWithMissingFields) },
@@ -265,4 +279,5 @@ await testThese([
   { name: path.basename(import.meta.url), fn: accessControlConditionsTest('evmContractInvalidFields', evmContractNestedAccessControlConditionsWithInvalidFields) },
   { name: path.basename(import.meta.url), fn: accessControlConditionsTest('solMissingFields', solAccessControlConditionsWithMissingFields) },
   { name: path.basename(import.meta.url), fn: accessControlConditionsTest('unifiedMissingFields', unifiedAccessControlConditions) },
+  { name: path.basename(import.meta.url), fn: accessControlConditionsTest('unifiedInvalidSchema', invalidUnifiedAccessControlConditions) },
 ]);

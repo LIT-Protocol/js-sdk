@@ -42,7 +42,7 @@ import {
 } from '@lit-protocol/misc';
 import { isHexString } from 'ethers/lib/utils';
 import { isValidBooleanExpression, isTokenOperator } from './utils';
-import { SCHEMAS } from './schemas';
+import { getSchema } from './schemas';
 
 export const safeParams = ({
   functionName,
@@ -545,7 +545,7 @@ class AccessControlConditionsValidator implements ParamsValidator {
 
       const accs = this.flattenAndFilter(accessControlConditions, isTokenOperator);
       for (const acc of accs) {
-        if (!checkSchema(acc, SCHEMAS['evmBasic'], 'accessControlConditions', this.fnName)) {
+        if (!checkSchema(acc, getSchema('evmBasic'), 'accessControlConditions', this.fnName)) {
           return ELeft({
             message: 'EVM Basic Access Control Conditions failed to validate the schema',
             errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
@@ -566,7 +566,7 @@ class AccessControlConditionsValidator implements ParamsValidator {
 
       const accs = this.flattenAndFilter(evmContractConditions, isTokenOperator);
       for (const acc of accs) {
-        if (!checkSchema(acc, SCHEMAS['evmContract'], 'accessControlConditions', this.fnName)) {
+        if (!checkSchema(acc, getSchema('evmContract'), 'accessControlConditions', this.fnName)) {
           return ELeft({
             message: 'EVM Contract Access Control Conditions failed to validate the schema',
             errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
@@ -587,7 +587,7 @@ class AccessControlConditionsValidator implements ParamsValidator {
 
       const accs = this.flattenAndFilter(solRpcConditions, isTokenOperator);
       for (const acc of accs) {
-        if (!checkSchema(acc, SCHEMAS['solRpc'], 'accessControlConditions', this.fnName)) {
+        if (!checkSchema(acc, getSchema('solRpc'), 'accessControlConditions', this.fnName)) {
           return ELeft({
             message: 'Solana Access Control Conditions failed to validate the schema',
             errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
@@ -608,7 +608,7 @@ class AccessControlConditionsValidator implements ParamsValidator {
 
       const accs = this.flattenAndFilter(unifiedAccessControlConditions, isTokenOperator);
       for (const acc of accs) {
-        if (!checkSchema(acc, SCHEMAS[acc.conditionType], 'accessControlConditions', this.fnName)) {
+        if (!checkSchema(acc, getSchema(acc.conditionType), 'accessControlConditions', this.fnName)) {
           return ELeft({
             message: 'EVM Basic Access Control Conditions failed to validate the schema',
             errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
