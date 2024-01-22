@@ -256,22 +256,21 @@ Having done this setup, this is what the development cycle looks like moving for
 
 ## Publishing
 
-Run `yarn bump` to bump the version. You must have at least nodejs v18 to do this. Next, run `yarn buildAndPublish` to build and then publish.
+You must have at least nodejs v18 to do this.
 
-### to npm
+1. Install the latest packages with `yarn install`
 
-```sh
-yarn publish:packages
-```
+2. Run `yarn bump` to bump the version
 
-### clone & publish to npm
+3. Build all the packages with `yarn build`
 
-```sh
-yarn tools --clone <project-name> <clone-project-name> <(?) --publish> <(?) --remove-after>
+4. Run the unit tests with `yarn test:unit` & e2e node tests `yarn test:e2e:nodejs` locally & ensure that they pass
 
-// eg
-yarn tools --clone lit-node-client @litprotocol/dev --publish --remove-after
-```
+5. Update the docs with `yarn gen:docs --push`
+
+6. Finally, publish with the `@cayenne` tag: `yarn publish:cayenne`
+
+7. Commit these changes "Published version X.X.X"
 
 ### Publishing to Serrano / Jalapno
 
@@ -280,20 +279,6 @@ git checkout serrano
 yarn bump
 yarn build
 yarn node ./tools/scripts/pub.mjs --tag serrano-jalapeno
-```
-
-## The Publish Pipeline - bump, build, test, gen docs, publish, git push
-
-```sh
-yarn bump
-yarn build
-yarn test:unit
-yarn test:e2e:nodejs
-yarn gen:docs --push
-yarn publish:packages
-git add *
-git commit -m "Published version X.X.X"
-git push
 ```
 
 ## Testing
