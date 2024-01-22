@@ -5,6 +5,9 @@
   "description": "",
   "type": "object",
   "properties": {
+    "conditionType": {
+      "type": "string"
+    },
     "contractAddress": {
       "type": "string"
     },
@@ -43,9 +46,6 @@
       "items": [
         {
           "type": "string"
-        },
-        {
-          "type": "string"
         }
       ]
     },
@@ -69,7 +69,6 @@
         }
       }
     },
-
     "returnValueTest": {
       "type": "object",
       "properties": {

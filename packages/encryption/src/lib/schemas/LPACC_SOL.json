@@ -5,24 +5,23 @@
   "description": "",
   "type": "object",
   "properties": {
+    "conditionType": {
+      "type": "string"
+    },
     "method": {
       "type": "string"
     },
     "params": {
       "type": "array",
-      "items": [
-        {
-          "type": "string"
-        }
-      ]
+      "items": {
+        "type": "string"
+      }
     },
     "pdaParams":{
       "type": "array",
-      "items": [
-        {
-          "type": "string"
-        }
-      ]
+      "items": {
+        "type": "string"
+      }
     },
     "pdaInterface": {
       "type": "object",
@@ -75,9 +74,6 @@
   "required": [
     "method",
     "params",
-    "pdaParams",
-    "pdaInterface",
-    "pdaKey",
     "chain",
     "returnValueTest"
   ]

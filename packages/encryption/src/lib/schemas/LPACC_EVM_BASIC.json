@@ -4,6 +4,9 @@
   "description": "",
   "type": "object",
   "properties": {
+    "conditionType": {
+      "type": "string"
+    },
     "contractAddress": {
       "type": "string"
     },
@@ -39,12 +42,16 @@
         "",
         "ERC20",
         "ERC721",
+        "ERC721MetadataName",
         "ERC1155",
+        "CASK",
+        "Creaton",
         "POAP",
         "timestamp",
         "MolochDAOv2.1",
         "ProofOfHumanity",
-        "SIWE"
+        "SIWE",
+        "PKPPermissions"
       ]
     },
     "method": {
@@ -52,26 +59,35 @@
     },
     "parameters": {
       "type": "array",
-      "items": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "string"
-        }
-      ]
+      "items": {
+        "type": "string"
+      }
     },
     "returnValueTest": {
       "type": "object",
       "properties": {
+        "key": {
+          "type": "string"
+        },
         "comparator": {
-          "enum": ["contains", "=", ">", ">=", "<", "<="]
+          "enum": [
+            "contains",
+            "=",
+            ">",
+            ">=",
+            "<",
+            "<="
+          ]
         },
         "value": {
           "type": "string"
         }
       },
-      "required": ["comparator", "value"]
+      "required": [
+        "key",
+        "comparator",
+        "value"
+      ]
     }
   },
   "required": [

@@ -19,9 +19,21 @@
         "evmosCosmosTestnet"
       ]
     },
+    "method": {
+      "type": "string"
+    },
+    "parameters": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "returnValueTest": {
       "type": "object",
       "properties": {
+        "key": {
+          "type": "string"
+        },
         "comparator": {
           "enum": [
             "contains",
@@ -44,7 +56,6 @@
     }
   },
   "required": [
-    "conditionType",
     "path",
     "chain",
     "returnValueTest"
