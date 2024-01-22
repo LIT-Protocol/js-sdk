@@ -169,8 +169,7 @@ export class LitCore {
    * Asynchronously updates the configuration settings for the LitNodeClient.
    * This function fetches the minimum node count and bootstrap URLs for the
    * specified Lit network. It validates these values and updates the client's
-   * configuration accordingly. If the network is set to 'InternalDev', it
-   * dynamically updates the bootstrap URLs in the configuration.
+   * configuration accordingly.
    *
    * @throws Will throw an error if the minimum node count is invalid or if
    *         the bootstrap URLs array is empty.
