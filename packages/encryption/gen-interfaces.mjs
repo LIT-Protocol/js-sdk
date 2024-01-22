@@ -17,10 +17,11 @@ const files = (await getFiles(INPUT_DIR))
 const jsonFiles = await Promise.all(files
   .map((file) => readJsonFile(`${INPUT_DIR}/${file}`)));
 
-jsonFiles.forEach(async (jsonFile) => {
+const tsFiles = jsonFiles.map(async (jsonFile) => {
   const ts = await compile(jsonFile, jsonFile.title);
   await writeFile(`${OUTPUT_DIR}/${jsonFile.title}.ts`, ts);
 });
+await Promise.all(tsFiles);
 
 greenLog('✅ Successfully generated interfaces from schemas', true);
 
