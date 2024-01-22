@@ -97,12 +97,6 @@ export class LitCore {
             litNetwork: LitNetwork.Cayenne,
           } as unknown as LitNodeClientConfig;
           break;
-        case LitNetwork.InternalDev:
-          this.config = {
-            ..._defaultConfig,
-            litNetwork: LitNetwork.InternalDev,
-          } as unknown as LitNodeClientConfig;
-          break;
         case LitNetwork.Manzano:
           this.config = {
             ..._defaultConfig,
@@ -184,7 +178,6 @@ export class LitCore {
    */
   setNewConfig = async (): Promise<void> => {
     if (
-      this.config.litNetwork === LitNetwork.InternalDev ||
       this.config.litNetwork === LitNetwork.Manzano
     ) {
       const minNodeCount = await LitContracts.getMinNodeCount(
@@ -274,7 +267,6 @@ export class LitCore {
    */
   listenForNewEpoch = async (): Promise<void> => {
     if (
-      this.config.litNetwork === LitNetwork.InternalDev ||
       this.config.litNetwork === LitNetwork.Manzano
     ) {
       const stakingContract = await LitContracts.getStakingContract(
