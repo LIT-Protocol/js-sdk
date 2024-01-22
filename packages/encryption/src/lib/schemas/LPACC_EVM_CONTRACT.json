@@ -1,0 +1,108 @@
+{
+  "$id": "https://litprotocol.com/schemas/LPACC_EVM_CONTRACT.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LPACC_EVM_CONTRACT",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "contractAddress": {
+      "type": "string"
+    },
+    "chain": {
+      "enum": [
+        "ethereum",
+        "polygon",
+        "fantom",
+        "xdai",
+        "bsc",
+        "arbitrum",
+        "avalanche",
+        "fuji",
+        "harmony",
+        "kovan",
+        "mumbai",
+        "goerli",
+        "ropsten",
+        "rinkeby",
+        "cronos",
+        "optimism",
+        "celo",
+        "aurora",
+        "eluvio",
+        "alfajores",
+        "xdc",
+        "evmos",
+        "evmosTestnet"
+      ]
+    },
+    "functionName": {
+      "type": "string"
+    },
+    "functionParams": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "functionAbi": {
+      "type": "object",
+      "properties":{
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "stateMutability": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "array"
+        },
+        "outputs": {
+          "type": "array"
+        }
+      }
+    },
+
+    "returnValueTest": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "comparator": {
+          "enum": [
+            "contains",
+            "=",
+            ">",
+            ">=",
+            "<",
+            "<="
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "comparator",
+        "value"
+      ]
+    }
+  },
+  "required": [
+    "contractAddress",
+    "chain",
+    "functionName",
+    "functionParams",
+    "functionAbi",
+    "returnValueTest"
+  ]
+}

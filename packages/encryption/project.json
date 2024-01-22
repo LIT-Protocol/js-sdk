@@ -23,7 +23,7 @@
         "outputPath": "dist/packages/encryption",
         "main": "packages/encryption/src/index.ts",
         "tsConfig": "packages/encryption/tsconfig.lib.json",
-        "assets": ["packages/encryption/*.md"]
+        "assets": ["packages/encryption/*.md", "packages/encryption/**/*.json"]
       }
     },
     "_buildWeb": {

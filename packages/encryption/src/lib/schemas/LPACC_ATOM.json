@@ -1,0 +1,52 @@
+{
+  "$id": "https://litprotocol.com/schemas/LPACC_EVM_ATOM.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LPACC_EVM_ATOM",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "conditionType": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "chain": {
+      "enum": [
+        "cosmos",
+        "kyve",
+        "evmosCosmos",
+        "evmosCosmosTestnet"
+      ]
+    },
+    "returnValueTest": {
+      "type": "object",
+      "properties": {
+        "comparator": {
+          "enum": [
+            "contains",
+            "=",
+            ">",
+            ">=",
+            "<",
+            "<="
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "comparator",
+        "value"
+      ]
+    }
+  },
+  "required": [
+    "conditionType",
+    "path",
+    "chain",
+    "returnValueTest"
+  ]
+}
