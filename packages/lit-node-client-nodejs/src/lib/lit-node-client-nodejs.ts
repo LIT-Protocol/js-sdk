@@ -714,7 +714,7 @@ export class LitNodeClientNodeJs extends LitCore {
           logError('An error occured. attempting to retry: ');
         }
       },
-      this.config.retryTollerance
+      this.config.retryTolerance
     );
 
     return res as unknown as NodeCommandResponse;
@@ -947,7 +947,7 @@ export class LitNodeClientNodeJs extends LitCore {
           logError('error has occured, attempting to retry');
         }
       },
-      this.config.retryTollerance
+      this.config.retryTolerance
     );
   };
 
@@ -1452,7 +1452,7 @@ export class LitNodeClientNodeJs extends LitCore {
         (error: any, requestId: string, isFinal: boolean) => {
           logError('an error occured, attempting to retry operation');
         },
-        this.config.retryTollerance
+        this.config.retryTolerance
       );
 
       requestId = res.requestId;
@@ -1668,7 +1668,7 @@ export class LitNodeClientNodeJs extends LitCore {
           logError('errror occured, retrying operation');
         }
       },
-      this.config.retryTollerance
+      this.config.retryTolerance
     );
     requestId = res.requestId;
 
@@ -1846,7 +1846,7 @@ export class LitNodeClientNodeJs extends LitCore {
           logError('an error occured, attempting to retry ');
         }
       },
-      this.config.retryTollerance
+      this.config.retryTolerance
     );
 
     // -- case: promises rejected
@@ -2083,7 +2083,7 @@ export class LitNodeClientNodeJs extends LitCore {
       (_error: string, _requestId: string, _isFinal: boolean) => {
         logError('an error occured attempting to retry');
       },
-      this.config.retryTollerance
+      this.config.retryTolerance
     );
 
     requestId = res.requestId;
@@ -2248,7 +2248,7 @@ export class LitNodeClientNodeJs extends LitCore {
           logError('an error has occured, attempting to retry ');
         }
       },
-      this.config.retryTollerance
+      this.config.retryTolerance
     );
 
     const requestId = res.requestId;
@@ -2379,7 +2379,7 @@ export class LitNodeClientNodeJs extends LitCore {
           logError('an error occured, attempting to retry ');
         }
       },
-      this.config.retryTollerance
+      this.config.retryTolerance
     );
 
     requestId = res.requestId;
@@ -2710,7 +2710,7 @@ export class LitNodeClientNodeJs extends LitCore {
           logError('an error occured, attempting to retry');
         }
       },
-      this.config.retryTollerance
+      this.config.retryTolerance
     );
     requestId = responseData.requestId;
 
