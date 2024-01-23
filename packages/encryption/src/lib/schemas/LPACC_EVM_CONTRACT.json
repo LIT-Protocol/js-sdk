@@ -42,11 +42,9 @@
     },
     "functionParams": {
       "type": "array",
-      "items": [
-        {
-          "type": "string"
-        }
-      ]
+      "items": {
+        "type": "string"
+      }
     },
     "functionAbi": {
       "type": "object",
@@ -60,13 +58,61 @@
         "stateMutability": {
           "type": "string"
         },
+        "constant": {
+          "type": "boolean"
+        },
         "inputs": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "internalType": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "type"
+            ],
+            "additionalProperties": false
+          }
         },
         "outputs": {
-          "type": "array"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "internalType": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "type"
+            ],
+            "additionalProperties": false
+          }
         }
-      }
+      },
+      "required": [
+        "name",
+        "stateMutability",
+        "inputs",
+        "outputs"
+      ],
+      "additionalProperties": false
     },
     "returnValueTest": {
       "type": "object",
@@ -92,7 +138,8 @@
         "key",
         "comparator",
         "value"
-      ]
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
@@ -102,5 +149,6 @@
     "functionParams",
     "functionAbi",
     "returnValueTest"
-  ]
+  ],
+  "additionalProperties": false
 }

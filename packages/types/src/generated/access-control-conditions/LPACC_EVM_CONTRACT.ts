@@ -33,20 +33,26 @@ export interface LPACC_EVM_CONTRACT {
     | "evmos"
     | "evmosTestnet";
   functionName: string;
-  functionParams: [] | [string];
+  functionParams: string[];
   functionAbi: {
-    name?: string;
+    name: string;
     type?: string;
-    stateMutability?: string;
-    inputs?: unknown[];
-    outputs?: unknown[];
-    [k: string]: unknown;
+    stateMutability: string;
+    constant?: boolean;
+    inputs: {
+      name: string;
+      type: string;
+      internalType?: string;
+    }[];
+    outputs: {
+      name: string;
+      type: string;
+      internalType?: string;
+    }[];
   };
   returnValueTest: {
     key: string;
     comparator: "contains" | "=" | ">" | ">=" | "<" | "<=";
     value: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }

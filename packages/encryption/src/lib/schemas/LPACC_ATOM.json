@@ -51,12 +51,14 @@
         "key",
         "comparator",
         "value"
-      ]
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
     "path",
     "chain",
     "returnValueTest"
-  ]
+  ],
+  "additionalProperties": false
 }

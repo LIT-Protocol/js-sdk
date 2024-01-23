@@ -83,7 +83,8 @@
       "required": [
         "comparator",
         "value"
-      ]
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
@@ -93,5 +94,6 @@
     "method",
     "parameters",
     "returnValueTest"
-  ]
+  ],
+  "additionalProperties": false
 }

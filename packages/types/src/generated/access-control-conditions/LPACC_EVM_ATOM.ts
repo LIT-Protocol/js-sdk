@@ -15,7 +15,5 @@ export interface LPACC_EVM_ATOM {
     key: string;
     comparator: "contains" | "=" | ">" | ">=" | "<" | "<=";
     value: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }

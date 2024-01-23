@@ -10,20 +10,17 @@ export interface LPACC_SOL {
   method: string;
   params: string[];
   pdaParams?: string[];
-  pdaInterface?: {
-    offset?: number;
-    fields?: {
+  pdaInterface: {
+    offset: number;
+    fields: {
       [k: string]: unknown;
     };
-    [k: string]: unknown;
   };
-  pdaKey?: string;
+  pdaKey: string;
   chain: "solana" | "solanaDevnet" | "solanaTestnet";
   returnValueTest: {
     key: string;
     comparator: "contains" | "=" | ">" | ">=" | "<" | "<=";
     value: string;
-    [k: string]: unknown;
   };
-  [k: string]: unknown;
 }
