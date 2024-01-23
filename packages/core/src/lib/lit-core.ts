@@ -58,7 +58,7 @@ import {
   NodeErrorV3,
   NodePromiseResponse,
   RejectedNodePromises,
-  RetryTollerance,
+  RetryTolerance,
   SendNodeCommand,
   SessionSig,
   SessionSigsMap,
@@ -89,7 +89,7 @@ export class LitCore {
       litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
       minNodeCount: 2, // Default value, should be replaced
       bootstrapUrls: [], // Default value, should be replaced
-      retryTollerance: {
+      retryTolerance: {
         timeout: 31_000,
         maxRetryLimit: 3,
         interval: 100,
@@ -593,7 +593,7 @@ export class LitCore {
           logError('an error occured, attempting to retry');
         }
       },
-      this.config.retryTollerance
+      this.config.retryTolerance
     );
 
     return res as NodeCommandServerKeysResponse;

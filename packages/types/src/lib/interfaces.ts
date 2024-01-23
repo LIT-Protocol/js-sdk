@@ -228,7 +228,7 @@ export interface LitNodeClientConfig {
   checkNodeAttestation: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
-  retryTollerance?: RetryTollerance;
+  retryTolerance?: RetryTolerance;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
@@ -1580,7 +1580,7 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
 /**
  * Configuration for retry operations
  */
-export interface RetryTollerance {
+export interface RetryTolerance {
   /**
    * An amount of time to wait for canceling the operating (in milliseconds)
    */
