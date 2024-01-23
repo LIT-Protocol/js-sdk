@@ -49,7 +49,6 @@ export interface LPACC_EVM_BASIC {
   method: string;
   parameters: string[];
   returnValueTest: {
-    key: string;
     comparator: "contains" | "=" | ">" | ">=" | "<" | "<=";
     value: string;
     [k: string]: unknown;

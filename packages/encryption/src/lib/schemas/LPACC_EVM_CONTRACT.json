@@ -1,6 +1,5 @@
 {
   "$id": "https://litprotocol.com/schemas/LPACC_EVM_CONTRACT.json",
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "LPACC_EVM_CONTRACT",
   "description": "",
   "type": "object",

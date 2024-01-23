@@ -1,6 +1,5 @@
 {
   "$id": "https://litprotocol.com/schemas/LPACC_SOL.json",
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "LPACC_SOL",
   "description": "",
   "type": "object",
