@@ -41,7 +41,7 @@ jest.setTimeout(60000);
 describe('ACC interfaces', () => {
   // This test is not idempotent. Running it will update TS interfaces definitions so a second run will succeed even when first one failed.
   it('should have updated TS definitions based on JSON schemas', async () => {
-    const interfacesDirectory = '.';
+    const interfacesDirectory = '../../../../types/src/generated/access-control-conditions';
 
     const initialHashes = await hashDirectory(path.join(__dirname, interfacesDirectory));
 

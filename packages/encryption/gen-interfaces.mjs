@@ -9,7 +9,7 @@ import {
 } from '../../tools/scripts/utils.mjs';
 
 const INPUT_DIR = './packages/encryption/src/lib/schemas';
-const OUTPUT_DIR = './packages/encryption/src/lib/generated';
+const OUTPUT_DIR = './packages/types/src/generated/access-control-conditions';
 
 const files = (await getFiles(INPUT_DIR))
   .filter((file) => file.includes('.json'));
