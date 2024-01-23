@@ -46,7 +46,7 @@ jobs:
       - name: Install project dependencies
         run: yarn install
       - name: Lint
-        run: nx format:check --all
+        run: yarn nx format:check --all
   e2e-connection:
     runs-on: ubuntu-latest
     timeout-minutes: 30
