@@ -53,7 +53,7 @@ describe('LitNodeClientNodeJs', () => {
 
   it('should be able to defined a storage provider', async () => {
     const tmp = globalThis.localStorage;
-    globalThis.localStorage = undefined; // null localStorage for test
+    Object.defineProperty(globalThis, 'localStorage', { value: undefined });
     const ls = require('node-localstorage').LocalStorage;
     const litNodeClient = new LitNodeClientNodeJs({
       litNetwork: 'custom',
@@ -63,7 +63,7 @@ describe('LitNodeClientNodeJs', () => {
     });
     expect(litNodeClient).toBeDefined();
     expect(litNodeClient.config.storageProvider?.provider).toBeInstanceOf(ls);
-    globalThis.localStorage = tmp; // set it back
+    Object.defineProperty(globalThis, 'localStorage', { value: tmp });
   });
 
   it('gets capabilities', async () => {
