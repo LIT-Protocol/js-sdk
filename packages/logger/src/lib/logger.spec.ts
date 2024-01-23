@@ -60,12 +60,12 @@ describe('logger', () => {
   });
 
   it('should safe serialize circular references', () => {
-    const logger = lm.get('info-logger', 'foo2');
+    const logger = lm.get('info-logger', 'foo3');
     logger.setLevel(LogLevel.DEBUG);
     let circ: any = { foo: 'bar' };
     circ.circ = circ;
     logger.debug('circular reference to serialize', circ);
-    console.log(lm.getLogsForId('foo2'));
-    expect(lm.getLogsForId('foo2').length).toEqual(1);
+    console.log(lm.getLogsForId('foo3'));
+    expect(lm.getLogsForId('foo3').length).toEqual(1);
   });
 });
