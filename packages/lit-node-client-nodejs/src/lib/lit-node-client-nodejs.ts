@@ -969,7 +969,7 @@ export class LitNodeClientNodeJs extends LitCore {
       return null;
     });
 
-    // removes all null values and should only have one item
+    // removed all null values and should only have one item
     const flattenShare = flattenObj.filter(
       (item) => item !== null
     )[0] as SigShare;
