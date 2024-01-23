@@ -550,12 +550,7 @@ export class LitContracts {
   };
 
   public static async getStakingContract(
-    network:
-      | 'cayenne'
-      | 'manzano'
-      | 'habanero'
-      | 'custom'
-      | 'localhost',
+    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
     context?: LitContractContext | LitContractResolverContext
   ) {
     const rpcUrl = DEFAULT_RPC;
@@ -824,12 +819,7 @@ export class LitContracts {
   }
 
   public static getMinNodeCount = async (
-    network:
-      | 'cayenne'
-      | 'manzano'
-      | 'habanero'
-      | 'custom'
-      | 'localhost',
+    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
     context?: LitContractContext | LitContractResolverContext
   ) => {
     const contract = await LitContracts.getStakingContract(network, context);
@@ -843,12 +833,7 @@ export class LitContracts {
   };
 
   public static getValidators = async (
-    network:
-      | 'cayenne'
-      | 'manzano'
-      | 'habanero'
-      | 'custom'
-      | 'localhost',
+    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
     context?: LitContractContext | LitContractResolverContext
   ): Promise<string[]> => {
     const contract = await LitContracts.getStakingContract(network, context);
@@ -899,12 +884,7 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network:
-      | 'cayenne'
-      | 'manzano'
-      | 'habanero'
-      | 'custom'
-      | 'localhost'
+    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost'
   ) {
     let data;
     const CAYENNE_API =
