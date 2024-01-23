@@ -67,23 +67,13 @@
       "type": "object",
       "properties": {
         "comparator": {
-          "enum": [
-            "contains",
-            "=",
-            ">",
-            ">=",
-            "<",
-            "<="
-          ]
+          "enum": ["contains", "=", ">", ">=", "<", "<="]
         },
         "value": {
           "type": "string"
         }
       },
-      "required": [
-        "comparator",
-        "value"
-      ],
+      "required": ["comparator", "value"],
       "additionalProperties": false
     }
   },

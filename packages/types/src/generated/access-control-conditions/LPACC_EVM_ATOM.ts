@@ -8,12 +8,12 @@
 export interface LPACC_EVM_ATOM {
   conditionType?: string;
   path: string;
-  chain: "cosmos" | "kyve" | "evmosCosmos" | "evmosCosmosTestnet";
+  chain: 'cosmos' | 'kyve' | 'evmosCosmos' | 'evmosCosmosTestnet';
   method?: string;
   parameters?: string[];
   returnValueTest: {
     key: string;
-    comparator: "contains" | "=" | ">" | ">=" | "<" | "<=";
+    comparator: 'contains' | '=' | '>' | '>=' | '<' | '<=';
     value: string;
   };
 }

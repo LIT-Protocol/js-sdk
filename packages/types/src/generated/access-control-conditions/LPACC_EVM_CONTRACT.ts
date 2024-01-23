@@ -9,29 +9,29 @@ export interface LPACC_EVM_CONTRACT {
   conditionType?: string;
   contractAddress: string;
   chain:
-    | "ethereum"
-    | "polygon"
-    | "fantom"
-    | "xdai"
-    | "bsc"
-    | "arbitrum"
-    | "avalanche"
-    | "fuji"
-    | "harmony"
-    | "kovan"
-    | "mumbai"
-    | "goerli"
-    | "ropsten"
-    | "rinkeby"
-    | "cronos"
-    | "optimism"
-    | "celo"
-    | "aurora"
-    | "eluvio"
-    | "alfajores"
-    | "xdc"
-    | "evmos"
-    | "evmosTestnet";
+    | 'ethereum'
+    | 'polygon'
+    | 'fantom'
+    | 'xdai'
+    | 'bsc'
+    | 'arbitrum'
+    | 'avalanche'
+    | 'fuji'
+    | 'harmony'
+    | 'kovan'
+    | 'mumbai'
+    | 'goerli'
+    | 'ropsten'
+    | 'rinkeby'
+    | 'cronos'
+    | 'optimism'
+    | 'celo'
+    | 'aurora'
+    | 'eluvio'
+    | 'alfajores'
+    | 'xdc'
+    | 'evmos'
+    | 'evmosTestnet';
   functionName: string;
   functionParams: string[];
   functionAbi: {
@@ -52,7 +52,7 @@ export interface LPACC_EVM_CONTRACT {
   };
   returnValueTest: {
     key: string;
-    comparator: "contains" | "=" | ">" | ">=" | "<" | "<=";
+    comparator: 'contains' | '=' | '>' | '>=' | '<' | '<=';
     value: string;
   };
 }

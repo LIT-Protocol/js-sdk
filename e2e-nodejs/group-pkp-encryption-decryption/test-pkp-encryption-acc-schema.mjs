@@ -5,57 +5,59 @@ import { client } from '../00-setup.mjs';
 
 const chain = 'ethereum';
 
-const accessControlConditionsTestSuccess = (testName, accessControlConditions) => async () => {
-  // ==================== Test Logic ====================
-  try {
-    await LitJsSdk.encryptString(
-      {
-        ...accessControlConditions,
-        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-        chain,
-        dataToEncrypt: 'Hello world',
-      },
-      client
-    );
-  } catch (e) {
-    // ==================== Fail ====================
-    return fail(
-      `${testName} failed validating access control conditions schemas`
-    );
-  }
-
-  // ==================== Post-Validation ====================
-  return success(
-    `${testName} validated access control conditions schemas successfully`
-  );
-}
-
-const accessControlConditionsTestFailure = (testName, accessControlConditions) => async () => {
-  // ==================== Test Logic ====================
-  try {
-    await LitJsSdk.encryptString(
-      {
-        ...accessControlConditions,
-        authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-        chain,
-        dataToEncrypt: 'Hello world',
-      },
-      client
-    );
-  } catch (e) {
-    if (e.errorKind === 'Validation') {
-      // ==================== Success ====================
-      return success(
-        `${testName} validated access control conditions schemas successfully`
+const accessControlConditionsTestSuccess =
+  (testName, accessControlConditions) => async () => {
+    // ==================== Test Logic ====================
+    try {
+      await LitJsSdk.encryptString(
+        {
+          ...accessControlConditions,
+          authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+          chain,
+          dataToEncrypt: 'Hello world',
+        },
+        client
+      );
+    } catch (e) {
+      // ==================== Fail ====================
+      return fail(
+        `${testName} failed validating access control conditions schemas`
       );
     }
-  }
 
-  // ==================== Post-Validation ====================
-  return fail(
-    `${testName} should reject access control conditions with incorrect schemas`
-  );
-}
+    // ==================== Post-Validation ====================
+    return success(
+      `${testName} validated access control conditions schemas successfully`
+    );
+  };
+
+const accessControlConditionsTestFailure =
+  (testName, accessControlConditions) => async () => {
+    // ==================== Test Logic ====================
+    try {
+      await LitJsSdk.encryptString(
+        {
+          ...accessControlConditions,
+          authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
+          chain,
+          dataToEncrypt: 'Hello world',
+        },
+        client
+      );
+    } catch (e) {
+      if (e.errorKind === 'Validation') {
+        // ==================== Success ====================
+        return success(
+          `${testName} validated access control conditions schemas successfully`
+        );
+      }
+    }
+
+    // ==================== Post-Validation ====================
+    return fail(
+      `${testName} should reject access control conditions with incorrect schemas`
+    );
+  };
 
 // Success cases
 const evmBasicAccessControlConditions = [
@@ -295,7 +297,7 @@ const evmBasicNestedAccessControlConditionsWithMissingFields = [
 ];
 const evmBasicAccessControlConditionsWithInvalidFields = [
   {
-    contractAddress: 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D,
+    contractAddress: 0x7a250d5630b4cf539739df2c5dacb4c659f2488d,
     standardContractType: 'AMM',
     chain: 'bitcoin',
     method: 'eth_getBalance',
@@ -341,11 +343,11 @@ const evmContractAccessControlConditionsWithMissingFields = [
       comparator: '>',
       value: '0',
     },
-  }
+  },
 ];
 const evmContractNestedAccessControlConditionsWithInvalidFields = [
   {
-    contractAddress: 0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88,
+    contractAddress: 0x7c7757a9675f06f3be4618bb68732c4ab25d2e88,
     functionName: 'balanceOf',
     functionParams: [':userAddress', '8'],
     functionAbi: {
@@ -378,7 +380,7 @@ const evmContractNestedAccessControlConditionsWithInvalidFields = [
       comparator: '>',
       value: '0',
     },
-  }
+  },
 ];
 const solAccessControlConditionsWithMissingFields = [
   {
@@ -393,7 +395,7 @@ const solAccessControlConditionsWithMissingFields = [
       comparator: '>=',
       value: '100000000', // equals 0.1 SOL
     },
-  }
+  },
 ];
 const invalidUnifiedAccessControlConditions = [
   {
@@ -474,7 +476,7 @@ const invalidConditionUnifiedAccessControlConditions = [
       value: '10000000000000',
     },
   },
-]
+];
 const noTypeUnifiedAccessControlConditions = [
   {
     // conditionType: 'evmBasic',
@@ -488,27 +490,119 @@ const noTypeUnifiedAccessControlConditions = [
       value: '10000000000000',
     },
   },
-]
+];
 
 await testThese([
   // Success cases
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestSuccess('evmBasic', { accessControlConditions: evmBasicAccessControlConditions }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestSuccess('evmBasicBoolean', { accessControlConditions: evmBasicBooleanAccessControlConditions }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestSuccess('evmBasicNested', { accessControlConditions: evmBasicNestedAccessControlConditions }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestSuccess('evmContract', { evmContractConditions: evmContractAccessControlConditions }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestSuccess('sol', { solRpcConditions: solAccessControlConditions }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestSuccess('cosmos', { unifiedAccessControlConditions: cosmosAccessControlConditions }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestSuccess('unified', { unifiedAccessControlConditions: unifiedAccessControlConditions }) },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestSuccess('evmBasic', {
+      accessControlConditions: evmBasicAccessControlConditions,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestSuccess('evmBasicBoolean', {
+      accessControlConditions: evmBasicBooleanAccessControlConditions,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestSuccess('evmBasicNested', {
+      accessControlConditions: evmBasicNestedAccessControlConditions,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestSuccess('evmContract', {
+      evmContractConditions: evmContractAccessControlConditions,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestSuccess('sol', {
+      solRpcConditions: solAccessControlConditions,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestSuccess('cosmos', {
+      unifiedAccessControlConditions: cosmosAccessControlConditions,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestSuccess('unified', {
+      unifiedAccessControlConditions: unifiedAccessControlConditions,
+    }),
+  },
   // Failing cases
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestFailure('noConditions', {}) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestFailure('emptyArrayConditions', { accessControlConditions: noConditions }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestFailure('evmBasicMissingFields', { accessControlConditions: evmBasicAccessControlConditionsWithMissingFields }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestFailure('evmBasicMissingNestedFields', { accessControlConditions: evmBasicNestedAccessControlConditionsWithMissingFields }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestFailure('evmBasicInvalidFields', { accessControlConditions: evmBasicAccessControlConditionsWithInvalidFields }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestFailure('evmContractMissingFields', { evmContractConditions: evmContractAccessControlConditionsWithMissingFields }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestFailure('evmContractInvalidFields', { evmContractConditions: evmContractNestedAccessControlConditionsWithInvalidFields }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestFailure('solMissingFields', { solRpcConditions: solAccessControlConditionsWithMissingFields }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestFailure('unifiedMissingFields', { unifiedAccessControlConditions: invalidUnifiedAccessControlConditions }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestFailure('unifiedInvalidSchema', { unifiedAccessControlConditions: invalidConditionUnifiedAccessControlConditions }) },
-  { name: path.basename(import.meta.url), fn: accessControlConditionsTestFailure('unifiedNoType', { unifiedAccessControlConditions: noTypeUnifiedAccessControlConditions }) },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestFailure('noConditions', {}),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestFailure('emptyArrayConditions', {
+      accessControlConditions: noConditions,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestFailure('evmBasicMissingFields', {
+      accessControlConditions: evmBasicAccessControlConditionsWithMissingFields,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestFailure('evmBasicMissingNestedFields', {
+      accessControlConditions:
+        evmBasicNestedAccessControlConditionsWithMissingFields,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestFailure('evmBasicInvalidFields', {
+      accessControlConditions: evmBasicAccessControlConditionsWithInvalidFields,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestFailure('evmContractMissingFields', {
+      evmContractConditions:
+        evmContractAccessControlConditionsWithMissingFields,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestFailure('evmContractInvalidFields', {
+      evmContractConditions:
+        evmContractNestedAccessControlConditionsWithInvalidFields,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestFailure('solMissingFields', {
+      solRpcConditions: solAccessControlConditionsWithMissingFields,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestFailure('unifiedMissingFields', {
+      unifiedAccessControlConditions: invalidUnifiedAccessControlConditions,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestFailure('unifiedInvalidSchema', {
+      unifiedAccessControlConditions:
+        invalidConditionUnifiedAccessControlConditions,
+    }),
+  },
+  {
+    name: path.basename(import.meta.url),
+    fn: accessControlConditionsTestFailure('unifiedNoType', {
+      unifiedAccessControlConditions: noTypeUnifiedAccessControlConditions,
+    }),
+  },
 ]);

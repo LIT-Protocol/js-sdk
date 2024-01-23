@@ -543,11 +543,22 @@ class AccessControlConditionsValidator implements ParamsValidator {
         });
       }
 
-      const accs = this.flattenAndFilter(accessControlConditions, isTokenOperator);
+      const accs = this.flattenAndFilter(
+        accessControlConditions,
+        isTokenOperator
+      );
       for (const acc of accs) {
-        if (!checkSchema(acc, getSchema('evmBasic'), 'accessControlConditions', this.fnName)) {
+        if (
+          !checkSchema(
+            acc,
+            getSchema('evmBasic'),
+            'accessControlConditions',
+            this.fnName
+          )
+        ) {
           return ELeft({
-            message: 'EVM Basic Access Control Conditions failed to validate the schema',
+            message:
+              'EVM Basic Access Control Conditions failed to validate the schema',
             errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
             errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
           });
@@ -564,11 +575,22 @@ class AccessControlConditionsValidator implements ParamsValidator {
         });
       }
 
-      const accs = this.flattenAndFilter(evmContractConditions, isTokenOperator);
+      const accs = this.flattenAndFilter(
+        evmContractConditions,
+        isTokenOperator
+      );
       for (const acc of accs) {
-        if (!checkSchema(acc, getSchema('evmContract'), 'accessControlConditions', this.fnName)) {
+        if (
+          !checkSchema(
+            acc,
+            getSchema('evmContract'),
+            'accessControlConditions',
+            this.fnName
+          )
+        ) {
           return ELeft({
-            message: 'EVM Contract Access Control Conditions failed to validate the schema',
+            message:
+              'EVM Contract Access Control Conditions failed to validate the schema',
             errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
             errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
           });
@@ -587,9 +609,17 @@ class AccessControlConditionsValidator implements ParamsValidator {
 
       const accs = this.flattenAndFilter(solRpcConditions, isTokenOperator);
       for (const acc of accs) {
-        if (!checkSchema(acc, getSchema('solRpc'), 'accessControlConditions', this.fnName)) {
+        if (
+          !checkSchema(
+            acc,
+            getSchema('solRpc'),
+            'accessControlConditions',
+            this.fnName
+          )
+        ) {
           return ELeft({
-            message: 'Solana Access Control Conditions failed to validate the schema',
+            message:
+              'Solana Access Control Conditions failed to validate the schema',
             errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
             errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
           });
@@ -606,11 +636,22 @@ class AccessControlConditionsValidator implements ParamsValidator {
         });
       }
 
-      const accs = this.flattenAndFilter(unifiedAccessControlConditions, isTokenOperator);
+      const accs = this.flattenAndFilter(
+        unifiedAccessControlConditions,
+        isTokenOperator
+      );
       for (const acc of accs) {
-        if (!checkSchema(acc, getSchema(acc.conditionType), 'accessControlConditions', this.fnName)) {
+        if (
+          !checkSchema(
+            acc,
+            getSchema(acc.conditionType),
+            'accessControlConditions',
+            this.fnName
+          )
+        ) {
           return ELeft({
-            message: 'EVM Basic Access Control Conditions failed to validate the schema',
+            message:
+              'EVM Basic Access Control Conditions failed to validate the schema',
             errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
             errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
           });
@@ -623,7 +664,10 @@ class AccessControlConditionsValidator implements ParamsValidator {
 
   // Filters an array of things that can themselves be nested arrays
   // Result is a flat array of all the things that pass the filter
-  private flattenAndFilter(values: any[], filter: (value: any) => boolean): any[] {
+  private flattenAndFilter(
+    values: any[],
+    filter: (value: any) => boolean
+  ): any[] {
     const filteredConditions: any[] = [];
     for (const value of values) {
       if (Array.isArray(value)) {

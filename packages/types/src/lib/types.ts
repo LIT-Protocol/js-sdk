@@ -25,7 +25,6 @@ import {
   LPACC_EVM_BASIC,
 } from '../generated';
 
-
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
 export type AccsDefaultParams = LPACC_EVM_BASIC;

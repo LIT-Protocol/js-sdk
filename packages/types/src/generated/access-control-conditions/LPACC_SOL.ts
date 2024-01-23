@@ -17,10 +17,10 @@ export interface LPACC_SOL {
     };
   };
   pdaKey: string;
-  chain: "solana" | "solanaDevnet" | "solanaTestnet";
+  chain: 'solana' | 'solanaDevnet' | 'solanaTestnet';
   returnValueTest: {
     key: string;
-    comparator: "contains" | "=" | ">" | ">=" | "<" | "<=";
+    comparator: 'contains' | '=' | '>' | '>=' | '<' | '<=';
     value: string;
   };
 }

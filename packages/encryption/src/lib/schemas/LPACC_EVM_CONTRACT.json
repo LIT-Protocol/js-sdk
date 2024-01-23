@@ -48,7 +48,7 @@
     },
     "functionAbi": {
       "type": "object",
-      "properties":{
+      "properties": {
         "name": {
           "type": "string"
         },
@@ -76,10 +76,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "name",
-              "type"
-            ],
+            "required": ["name", "type"],
             "additionalProperties": false
           }
         },
@@ -98,20 +95,12 @@
                 "type": "string"
               }
             },
-            "required": [
-              "name",
-              "type"
-            ],
+            "required": ["name", "type"],
             "additionalProperties": false
           }
         }
       },
-      "required": [
-        "name",
-        "stateMutability",
-        "inputs",
-        "outputs"
-      ],
+      "required": ["name", "stateMutability", "inputs", "outputs"],
       "additionalProperties": false
     },
     "returnValueTest": {
@@ -121,24 +110,13 @@
           "type": "string"
         },
         "comparator": {
-          "enum": [
-            "contains",
-            "=",
-            ">",
-            ">=",
-            "<",
-            "<="
-          ]
+          "enum": ["contains", "=", ">", ">=", "<", "<="]
         },
         "value": {
           "type": "string"
         }
       },
-      "required": [
-        "key",
-        "comparator",
-        "value"
-      ],
+      "required": ["key", "comparator", "value"],
       "additionalProperties": false
     }
   },

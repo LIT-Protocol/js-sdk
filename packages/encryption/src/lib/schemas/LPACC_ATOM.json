@@ -11,12 +11,7 @@
       "type": "string"
     },
     "chain": {
-      "enum": [
-        "cosmos",
-        "kyve",
-        "evmosCosmos",
-        "evmosCosmosTestnet"
-      ]
+      "enum": ["cosmos", "kyve", "evmosCosmos", "evmosCosmosTestnet"]
     },
     "method": {
       "type": "string"
@@ -34,31 +29,16 @@
           "type": "string"
         },
         "comparator": {
-          "enum": [
-            "contains",
-            "=",
-            ">",
-            ">=",
-            "<",
-            "<="
-          ]
+          "enum": ["contains", "=", ">", ">=", "<", "<="]
         },
         "value": {
           "type": "string"
         }
       },
-      "required": [
-        "key",
-        "comparator",
-        "value"
-      ],
+      "required": ["key", "comparator", "value"],
       "additionalProperties": false
     }
   },
-  "required": [
-    "path",
-    "chain",
-    "returnValueTest"
-  ],
+  "required": ["path", "chain", "returnValueTest"],
   "additionalProperties": false
 }

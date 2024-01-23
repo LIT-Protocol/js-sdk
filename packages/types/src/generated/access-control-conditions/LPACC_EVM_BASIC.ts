@@ -9,47 +9,47 @@ export interface LPACC_EVM_BASIC {
   conditionType?: string;
   contractAddress: string;
   chain:
-    | "ethereum"
-    | "polygon"
-    | "fantom"
-    | "xdai"
-    | "bsc"
-    | "arbitrum"
-    | "avalanche"
-    | "fuji"
-    | "harmony"
-    | "kovan"
-    | "mumbai"
-    | "goerli"
-    | "ropsten"
-    | "rinkeby"
-    | "cronos"
-    | "optimism"
-    | "celo"
-    | "aurora"
-    | "eluvio"
-    | "alfajores"
-    | "xdc"
-    | "evmos"
-    | "evmosTestnet";
+    | 'ethereum'
+    | 'polygon'
+    | 'fantom'
+    | 'xdai'
+    | 'bsc'
+    | 'arbitrum'
+    | 'avalanche'
+    | 'fuji'
+    | 'harmony'
+    | 'kovan'
+    | 'mumbai'
+    | 'goerli'
+    | 'ropsten'
+    | 'rinkeby'
+    | 'cronos'
+    | 'optimism'
+    | 'celo'
+    | 'aurora'
+    | 'eluvio'
+    | 'alfajores'
+    | 'xdc'
+    | 'evmos'
+    | 'evmosTestnet';
   standardContractType:
-    | ""
-    | "ERC20"
-    | "ERC721"
-    | "ERC721MetadataName"
-    | "ERC1155"
-    | "CASK"
-    | "Creaton"
-    | "POAP"
-    | "timestamp"
-    | "MolochDAOv2.1"
-    | "ProofOfHumanity"
-    | "SIWE"
-    | "PKPPermissions";
+    | ''
+    | 'ERC20'
+    | 'ERC721'
+    | 'ERC721MetadataName'
+    | 'ERC1155'
+    | 'CASK'
+    | 'Creaton'
+    | 'POAP'
+    | 'timestamp'
+    | 'MolochDAOv2.1'
+    | 'ProofOfHumanity'
+    | 'SIWE'
+    | 'PKPPermissions';
   method: string;
   parameters: string[];
   returnValueTest: {
-    comparator: "contains" | "=" | ">" | ">=" | "<" | "<=";
+    comparator: 'contains' | '=' | '>' | '>=' | '<' | '<=';
     value: string;
   };
 }

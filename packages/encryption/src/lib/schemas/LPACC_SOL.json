@@ -16,7 +16,7 @@
         "type": "string"
       }
     },
-    "pdaParams":{
+    "pdaParams": {
       "type": "array",
       "items": {
         "type": "string"
@@ -24,29 +24,22 @@
     },
     "pdaInterface": {
       "type": "object",
-      "properties":{
-        "offset":{
+      "properties": {
+        "offset": {
           "type": "number"
         },
-        "fields":{
+        "fields": {
           "type": "object"
         }
       },
-      "required": [
-        "offset",
-        "fields"
-      ],
+      "required": ["offset", "fields"],
       "additionalProperties": false
     },
-    "pdaKey" :{
+    "pdaKey": {
       "type": "string"
     },
     "chain": {
-      "enum": [
-        "solana",
-        "solanaDevnet",
-        "solanaTestnet"
-      ]
+      "enum": ["solana", "solanaDevnet", "solanaTestnet"]
     },
     "returnValueTest": {
       "type": "object",
@@ -55,24 +48,13 @@
           "type": "string"
         },
         "comparator": {
-          "enum": [
-            "contains",
-            "=",
-            ">",
-            ">=",
-            "<",
-            "<="
-          ]
+          "enum": ["contains", "=", ">", ">=", "<", "<="]
         },
         "value": {
           "type": "string"
         }
       },
-      "required": [
-        "comparator",
-        "value",
-        "key"
-      ],
+      "required": ["comparator", "value", "key"],
       "additionalProperties": false
     }
   },
