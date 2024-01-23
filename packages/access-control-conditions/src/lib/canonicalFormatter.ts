@@ -6,7 +6,6 @@ import {
   AccsDefaultParams,
   AccsEVMParams,
   AccsOperatorParams,
-  AccsRegularParams,
   AccsSOLV2Params,
   ConditionItem,
   JsonSigningResourceId,
@@ -66,7 +65,7 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
 
   // -- otherwise
   if ('returnValueTest' in cond) {
-    const _cond = cond as AccsRegularParams;
+    const _cond = cond;
     const _conditionType = _cond.conditionType;
 
     switch (_conditionType) {
@@ -129,7 +128,7 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
 * @param { object } cond
 * @param { boolean } requireV2Conditions
 *
-* @returns { any[] | AccsOperatorParams | AccsRegularParams | AccsSOLV2Params | ILitError | any }
+* @returns { any[] | AccsOperatorParams | AccsSOLV2Params | ILitError | any }
 */
 export const canonicalSolRpcConditionFormatter = (
   cond: ConditionItem,
@@ -137,7 +136,7 @@ export const canonicalSolRpcConditionFormatter = (
 ):
   | any[]
   | AccsOperatorParams
-  | AccsRegularParams
+  | ConditionItem
   | AccsSOLV2Params
   | ILitError
   | any => {
@@ -155,9 +154,10 @@ export const canonicalSolRpcConditionFormatter = (
 
   // -- if it has a return value
   if ('returnValueTest' in cond) {
-    const { returnValueTest } = cond as AccsRegularParams;
+    const { returnValueTest } = cond;
 
     const canonicalReturnValueTest = {
+      // @ts-ignore
       key: returnValueTest.key,
       comparator: returnValueTest.comparator,
       value: returnValueTest.value,
@@ -204,10 +204,12 @@ export const canonicalSolRpcConditionFormatter = (
 
       // -- SOL version 2:: return default params
     } else {
-      const _solV1Cond = cond as AccsRegularParams;
+      const _solV1Cond = cond;
 
-      const _requiredParams: AccsRegularParams = {
+      const _requiredParams = {
+        // @ts-ignore
         method: _solV1Cond.method,
+        // @ts-ignore
         params: _solV1Cond.params,
         chain: _solV1Cond.chain,
         returnValueTest: canonicalReturnValueTest,

@@ -9,12 +9,7 @@ import {
   WebAuthnProviderOptions,
 } from './interfaces';
 import {
-  AccsCOSMOSParams,
-  AccsDefaultParams,
-  AccsEVMParams,
   AccsOperatorParams,
-  AccsRegularParams,
-  AccsSOLV2Params,
   EthWalletProviderOptions,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
@@ -23,19 +18,33 @@ import {
   OAuthProviderOptions,
   BaseAuthenticateOptions,
 } from './interfaces';
+import {
+  LPACC_EVM_ATOM,
+  LPACC_EVM_CONTRACT,
+  LPACC_SOL,
+  LPACC_EVM_BASIC,
+} from '../generated';
 
-export type AccessControlConditions = AccsRegularParams[] | AccsDefaultParams[];
 
-export type EvmContractConditions = AccsEVMParams[];
-export type SolRpcConditions = AccsSOLV2Params[];
-export type UnifiedAccessControlConditions = (
-  | AccsRegularParams
+export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
+
+export type AccsDefaultParams = LPACC_EVM_BASIC;
+export type AccsSOLV2Params = LPACC_SOL;
+export type AccsEVMParams = LPACC_EVM_CONTRACT;
+export type AccsCOSMOSParams = LPACC_EVM_ATOM;
+
+// union type for all the different types of conditions
+export type ConditionItem =
   | AccsDefaultParams
   | AccsEVMParams
   | AccsSOLV2Params
   | AccsCOSMOSParams
-  | AccsOperatorParams
-)[];
+  | AccsOperatorParams;
+
+export type AccessControlConditions = AccsDefaultParams[];
+export type EvmContractConditions = AccsEVMParams[];
+export type SolRpcConditions = AccsSOLV2Params[];
+export type UnifiedAccessControlConditions = ConditionItem[];
 
 export type JsonRequest = JsonExecutionRequest | JsonSignChainDataRequest;
 
@@ -95,15 +104,6 @@ export type LITChain<T> = {
 };
 
 export type LIT_NETWORKS_KEYS = 'cayenne' | 'localhost' | 'custom';
-
-export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
-
-// union type for all the different types of conditions
-export type ConditionItem =
-  | AccsOperatorParams
-  | AccsRegularParams
-  | AccsDefaultParams
-  | AccsSOLV2Params;
 
 export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
 export type EncryptedSymmetricKey = string | Uint8Array | any;
