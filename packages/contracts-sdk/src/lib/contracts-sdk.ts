@@ -552,7 +552,6 @@ export class LitContracts {
   public static async getStakingContract(
     network:
       | 'cayenne'
-      | 'internalDev'
       | 'manzano'
       | 'habanero'
       | 'custom'
@@ -827,7 +826,6 @@ export class LitContracts {
   public static getMinNodeCount = async (
     network:
       | 'cayenne'
-      | 'internalDev'
       | 'manzano'
       | 'habanero'
       | 'custom'
@@ -847,7 +845,6 @@ export class LitContracts {
   public static getValidators = async (
     network:
       | 'cayenne'
-      | 'internalDev'
       | 'manzano'
       | 'habanero'
       | 'custom'
@@ -904,7 +901,6 @@ export class LitContracts {
   private static async _resolveContractContext(
     network:
       | 'cayenne'
-      | 'internalDev'
       | 'manzano'
       | 'habanero'
       | 'custom'
@@ -913,8 +909,6 @@ export class LitContracts {
     let data;
     const CAYENNE_API =
       'https://lit-general-worker.getlit.dev/contract-addresses';
-    const INTERNAL_DEV_API =
-      'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
     const MANZANO_API =
       'https://lit-general-worker.getlit.dev/manzano-contract-addresses';
     const HABANERO_API =
@@ -927,15 +921,6 @@ export class LitContracts {
       } catch (e: any) {
         throw new Error(
           `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
-        );
-      }
-    } else if (network === 'internalDev') {
-      try {
-        // Fetch and parse the JSON data in one step
-        data = await fetch(INTERNAL_DEV_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${INTERNAL_DEV_API}: ${e.toString()}`
         );
       }
     } else if (network === 'manzano') {
