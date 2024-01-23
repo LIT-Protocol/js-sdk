@@ -176,9 +176,7 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the configuration is updated.
    */
   setNewConfig = async (): Promise<void> => {
-    if (
-      this.config.litNetwork === LitNetwork.Manzano
-    ) {
+    if (this.config.litNetwork === LitNetwork.Manzano) {
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork as LitNetwork
       );
@@ -265,9 +263,7 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
    */
   listenForNewEpoch = async (): Promise<void> => {
-    if (
-      this.config.litNetwork === LitNetwork.Manzano
-    ) {
+    if (this.config.litNetwork === LitNetwork.Manzano) {
       const stakingContract = await LitContracts.getStakingContract(
         this.config.litNetwork as any
       );
@@ -489,10 +485,13 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
-              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
-              } of ${this.config.minNodeCount
-              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${
+              this.config.connectTimeout
+            }ms.  Could only connect to ${
+              Object.keys(this.serverKeys).length
+            } of ${
+              this.config.minNodeCount
+            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             logErrorWithRequestId(requestId, msg);
             reject(msg);
           }
@@ -611,9 +610,10 @@ export class LitCore {
       .catch((error: NodeErrorV3) => {
         logErrorWithRequestId(
           requestId,
-          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error?.message || error?.details
-            ? `Error is ${error.message} - ${error.details}`
-            : ''
+          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
+            error?.message || error?.details
+              ? `Error is ${error.message} - ${error.details}`
+              : ''
           }`
         );
         return Promise.reject(error);
