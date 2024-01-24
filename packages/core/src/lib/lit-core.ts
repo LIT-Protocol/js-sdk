@@ -176,7 +176,7 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the configuration is updated.
    */
   setNewConfig = async (): Promise<void> => {
-    if (this.config.litNetwork === LitNetwork.Manzano) {
+    if (this.config.litNetwork === LitNetwork.Manzano || this.config.litNetwork === LitNetwork.Habanero) {
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork as LitNetwork
       );
@@ -263,7 +263,7 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
    */
   listenForNewEpoch = async (): Promise<void> => {
-    if (this.config.litNetwork === LitNetwork.Manzano) {
+    if (this.config.litNetwork === LitNetwork.Manzano || this.config.litNetwork === LitNetwork.Habanero) {
       const stakingContract = await LitContracts.getStakingContract(
         this.config.litNetwork as any
       );
