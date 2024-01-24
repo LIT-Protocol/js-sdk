@@ -282,20 +282,21 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.log('executeJsArgs:', executeJsArgs);
 
-    
-
     try {
       const res = await executeWithRetry<ExecuteJsResponse>(
-        async (_id: string) => await this.litNodeClient.executeJs(executeJsArgs),
+        async (_id: string) =>
+          await this.litNodeClient.executeJs(executeJsArgs),
         (error: any, requestId: string, isFinal: boolean) => {
-          if(!isFinal) {
+          if (!isFinal) {
             this.log('an error has occured, attempting to retry');
           }
         }
       );
 
       if ('error' in res) {
-       return this.throwError(`error while attempting signature operation, request identifier: lit_${res.requestId}`); 
+        return this.throwError(
+          `error while attempting signature operation, request identifier: lit_${res.requestId}`
+        );
       }
       const sig = (res as ExecuteJsResponse).signatures[sigName];
 
