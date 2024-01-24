@@ -412,11 +412,12 @@ export class LitNodeClientNodeJs extends LitCore {
    * Generates wildcard capability for each of the LIT resources
    * specified.
    * @param litResources is an array of LIT resources
+   * @param addAllCapabilities is a boolean that specifies whether to add all capabilities for each resource
    */
   static async generateSessionCapabilityObjectWithWildcards(
     litResources: Array<ILitResource>,
+    addAllCapabilities?: boolean,
     rateLimitAuthSig?: AuthSig,
-    addAllCapabilities?: boolean
   ): Promise<ISessionCapabilityObject> {
     const sessionCapabilityObject = new RecapSessionCapabilityObject({}, []);
 
