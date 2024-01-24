@@ -42,8 +42,12 @@ import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
 import { getAuthIdByAuthMethod } from './auth-utils';
-import { Logger, LogManager } from "@lit-protocol/logger";
-import { calculateRequestsPerKilosecond, calculateUTCMidnightExpiration, convertRequestsPerDayToPerSecond } from './utils';
+import { Logger, LogManager } from '@lit-protocol/logger';
+import {
+  calculateRequestsPerKilosecond,
+  calculateUTCMidnightExpiration,
+  convertRequestsPerDayToPerSecond,
+} from './utils';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -1034,25 +1038,26 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
   // Mints a Rate Limit Increase (RLI) NFT token with the specified daily request rate and expiration period.
   // The expiration date is calculated to be at midnight UTC, a specific number of days from now.
-  mintRLI = async (
-    {
-      requestsPerDay,
-      daysUntilUTCMidnightExpiration
-    }: {
-      requestsPerDay: number,
-      daysUntilUTCMidnightExpiration: number
-    }
-  ): Promise<{
+  mintRLI = async ({
+    requestsPerDay,
+    daysUntilUTCMidnightExpiration,
+  }: {
+    requestsPerDay: number;
+    daysUntilUTCMidnightExpiration: number;
+  }): Promise<{
     rliTxHash: string;
     rliTokenId: BigNumber;
-    rliTokenIdStr: string
+    rliTokenIdStr: string;
   }> => {
-
     console.log('Minting RLI...');
 
     const requestsPerSecond = convertRequestsPerDayToPerSecond(requestsPerDay);
-    const requestsPerKilosecond = Math.round(calculateRequestsPerKilosecond(requestsPerSecond));
-    const expiresAt = calculateUTCMidnightExpiration(daysUntilUTCMidnightExpiration);
+    const requestsPerKilosecond = Math.round(
+      calculateRequestsPerKilosecond(requestsPerSecond)
+    );
+    const expiresAt = calculateUTCMidnightExpiration(
+      daysUntilUTCMidnightExpiration
+    );
 
     let mintCost;
 
@@ -1061,7 +1066,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         requestsPerKilosecond,
         expiresAt
       );
-
     } catch (e) {
       console.log('Error calculating mint cost:', e);
       throw e;
@@ -1076,10 +1080,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     console.log('Expiration Date (UTC):', expirationDate.toUTCString());
 
     try {
-      const res = await this.rateLimitNftContract.write.mint(
-        expiresAt,
-        { value: mintCost }
-      );
+      const res = await this.rateLimitNftContract.write.mint(expiresAt, {
+        value: mintCost,
+      });
 
       const txHash = res.hash;
       let tx = await res.wait();
@@ -1090,13 +1093,13 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       return {
         rliTxHash: txHash,
         rliTokenId: tokenId,
-        rliTokenIdStr: tokenId.toString()
+        rliTokenIdStr: tokenId.toString(),
       };
     } catch (e) {
       console.error('Error minting RLI:', e);
       throw e; // Rethrow the error after logging
     }
-  }
+  };
 
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
@@ -1165,7 +1168,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
      * @returns {Multihash}
      */
     getBytes32FromMultihash: async (ipfsId: string) => {
-
       let CID: any;
       try {
         CID = await import('multiformats/cid');
@@ -1182,7 +1184,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       }
 
       // const CID = await import('multiformats/cid');
-
 
       const cid = CID.parse(ipfsId);
       const hashFunction = cid.multihash.code;

@@ -19,7 +19,6 @@ import {
 } from './canonicalFormatter';
 import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 
-
 // Same as:
 // const unifiedAccs = [
 //   {
@@ -48,8 +47,10 @@ import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 //     },
 //   },
 // ];
-export const generateUnifiedAccsForRLIDelegation = async (ethAddresses: string[]): Promise<string> => {
-  const unifiedAccs: (any)[] = [];
+export const generateUnifiedAccsForRLIDelegation = async (
+  ethAddresses: string[]
+): Promise<string> => {
+  const unifiedAccs: any[] = [];
 
   ethAddresses.forEach((address, index) => {
     const condition = {
@@ -76,8 +77,7 @@ export const generateUnifiedAccsForRLIDelegation = async (ethAddresses: string[]
   const hash = await hashUnifiedAccessControlConditions(unifiedAccs);
 
   return uint8arrayToString(new Uint8Array(hash), 'base16');
-
-}
+};
 
 /**
  *

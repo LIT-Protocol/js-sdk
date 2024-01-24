@@ -46,7 +46,6 @@ describe('recapSessionCapabilityObject', () => {
     expect(recapSessionCapabilityObject.proofs).toEqual([]);
   });
 
-
   it('should be able to decode a RecapSessionCapabilityObject', async () => {
     const recapSessionCapabilityObject = new RecapSessionCapabilityObject();
     const litResource = new LitAccessControlConditionResource('someResource');
@@ -106,7 +105,6 @@ describe('recapSessionCapabilityObject', () => {
   });
 
   it('shold be able to add rate limit auth sig', async () => {
-
     const att = {
       someResource: {
         'lit-ratelimitincrease/1337': [{}],
@@ -119,11 +117,12 @@ describe('recapSessionCapabilityObject', () => {
     );
 
     const mockAuthSig = {
-      "sig": "0x137b66529678d1fc58ab5b340ad036082af5b9912f823ba22c2851b8f50990a666ad8f2ab2328e8c94414c0a870163743bde91a5f96e9f967fd45d5e0c17c3911b",
-      "derivedVia": "web3.eth.personal.sign",
-      "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nTESTING TESTING 123\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: eoeo0dsvyLL2gcHsC\nIssued At: 2023-11-17T15:04:20.324Z\nExpiration Time: 2215-07-14T15:04:20.323Z",
-      "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37"
-    }
+      sig: '0x137b66529678d1fc58ab5b340ad036082af5b9912f823ba22c2851b8f50990a666ad8f2ab2328e8c94414c0a870163743bde91a5f96e9f967fd45d5e0c17c3911b',
+      derivedVia: 'web3.eth.personal.sign',
+      signedMessage:
+        'localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nTESTING TESTING 123\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: eoeo0dsvyLL2gcHsC\nIssued At: 2023-11-17T15:04:20.324Z\nExpiration Time: 2215-07-14T15:04:20.323Z',
+      address: '0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37',
+    };
 
     await recapSessionCapabilityObject.addRateLimitAuthSig(mockAuthSig);
 
@@ -132,7 +131,9 @@ describe('recapSessionCapabilityObject', () => {
         'lit-ratelimitincrease/1337': [{}],
       },
     });
-    expect(recapSessionCapabilityObject.proofs[0]).toBe("QmQiy7M88uboUkSF68Hv73NWL8dnrbMNZmbstVVi3UVrgM");
+    expect(recapSessionCapabilityObject.proofs[0]).toBe(
+      'QmQiy7M88uboUkSF68Hv73NWL8dnrbMNZmbstVVi3UVrgM'
+    );
   });
 
   it('should be able to get proofs', async () => {
@@ -218,8 +219,10 @@ describe('recapSessionCapabilityObject', () => {
     const newSiweMessage =
       recapSessionCapabilityObject.addToSiweMessage(siweMessage);
     expect(newSiweMessage.statement).toEqual(
-      `This is some existing statement. I further authorize the stated URI to perform the following actions on my behalf: (1) '${LitNamespace.Threshold
-      }': '${LitRecapAbility.Decryption
+      `This is some existing statement. I further authorize the stated URI to perform the following actions on my behalf: (1) '${
+        LitNamespace.Threshold
+      }': '${
+        LitRecapAbility.Decryption
       }' for '${litResource.getResourceKey()}'.`
     );
     expect(newSiweMessage.resources).toEqual([
@@ -445,19 +448,19 @@ describe('recapSessionCapabilityObject', () => {
 
 describe('strToCID', () => {
   it('should handle string input', async () => {
-    const input = "Hello, world!";
+    const input = 'Hello, world!';
     const result = await RecapSessionCapabilityObject.strToCID(input);
     expect(result).toBe('QmWGeRAEgtsHW3ec7U4qW2CyVy7eA2mFRVbk1nb24jFyks');
   });
 
   it('should handle Uint8Array input', async () => {
-    const input = new TextEncoder().encode("Hello, world!");
+    const input = new TextEncoder().encode('Hello, world!');
     const result = await RecapSessionCapabilityObject.strToCID(input);
     expect(result).toBe('QmWGeRAEgtsHW3ec7U4qW2CyVy7eA2mFRVbk1nb24jFyks');
   });
 
   it('should handle object input', async () => {
-    const input = { message: "Hello, world!" };
+    const input = { message: 'Hello, world!' };
     const result = await RecapSessionCapabilityObject.strToCID(input);
     expect(result).toBe('QmTR2kDqux4yo5X9W6GKJKEn6azDqXqifRMGYtX27oAQLk');
   });

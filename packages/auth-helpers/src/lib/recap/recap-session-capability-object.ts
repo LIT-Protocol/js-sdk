@@ -31,7 +31,9 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   // This should ideally be placed in the IPFSBundledSDK package, but for some reasons
   // there seems to be bundling issues where the jest test would fail, but somehow
   // works here.
-  public static async strToCID(data: string | Uint8Array | object): Promise<string> {
+  public static async strToCID(
+    data: string | Uint8Array | object
+  ): Promise<string> {
     let content: Uint8Array;
 
     // Check the type of data and convert accordingly
@@ -50,7 +52,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
       content = new TextEncoder().encode(contentStr);
     } else {
       // console.log("Type D");
-      throw new Error("Invalid content type");
+      throw new Error('Invalid content type');
     }
 
     // Create the CID
@@ -65,7 +67,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
 
     // Validate the IPFS ID
     if (!ipfsId) {
-      throw new Error("Could not create IPFS ID");
+      throw new Error('Could not create IPFS ID');
     }
 
     // Return the IPFS ID as a string
@@ -82,7 +84,6 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
    * @param authSig The AuthSig object containing the rate limit authorization details.
    */
   async addRateLimitAuthSig(authSig: AuthSig) {
-
     const ipfsId = await RecapSessionCapabilityObject.strToCID(authSig);
 
     try {
@@ -161,7 +162,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
       return this.addAttenuation(
         litResource.getResourceKey(),
         recapNamespace,
-        recapAbility,
+        recapAbility
       );
     }
 
@@ -171,7 +172,6 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
       recapAbility,
       data
     );
-
   }
 
   verifyCapabilitiesForResource(

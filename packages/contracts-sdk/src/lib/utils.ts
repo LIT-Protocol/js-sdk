@@ -1,5 +1,7 @@
 // Converts the number of requests per day to requests per second.
-export function convertRequestsPerDayToPerSecond(requestsPerDay: number): number {
+export function convertRequestsPerDayToPerSecond(
+  requestsPerDay: number
+): number {
   const secondsInADay = 86400; // 24 hours * 60 minutes * 60 seconds
   return requestsPerDay / secondsInADay;
 }
@@ -18,6 +20,8 @@ export function calculateUTCMidnightExpiration(daysFromNow: number): number {
 }
 
 // Utility function to calculate requests per kilosecond
-export function calculateRequestsPerKilosecond(requestsPerSecond: number): number {
+export function calculateRequestsPerKilosecond(
+  requestsPerSecond: number
+): number {
   return requestsPerSecond * 1000;
 }

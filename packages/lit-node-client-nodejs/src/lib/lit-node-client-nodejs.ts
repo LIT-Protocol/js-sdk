@@ -1,4 +1,7 @@
-import { canonicalAccessControlConditionFormatter, generateUnifiedAccsForRLIDelegation } from '@lit-protocol/access-control-conditions';
+import {
+  canonicalAccessControlConditionFormatter,
+  generateUnifiedAccsForRLIDelegation,
+} from '@lit-protocol/access-control-conditions';
 
 import {
   AUTH_METHOD_TYPE_IDS,
@@ -97,7 +100,7 @@ import {
   newSessionCapabilityObject,
   RecapSessionCapabilityObject,
   LitRLIResource,
-  LitAbility
+  LitAbility,
 } from '@lit-protocol/auth-helpers';
 import {
   getStorageItem,
@@ -168,8 +171,9 @@ export class LitNodeClientNodeJs extends LitCore {
     litResource: LitRLIResource;
     rliDelegationAuthSig: AuthSig;
   }> => {
-
-    const dAppOwnerWalletAddress = ethers.utils.getAddress(await dAppOwnerWallet.getAddress());
+    const dAppOwnerWalletAddress = ethers.utils.getAddress(
+      await dAppOwnerWallet.getAddress()
+    );
 
     // -- siwe settings
     const ORIGIN = 'lit:capability:delegation';
@@ -216,12 +220,13 @@ export class LitNodeClientNodeJs extends LitCore {
     console.log('litResource:', litResource);
 
     // Strip the 0x prefix from each element in the addresses array
-    addresses = addresses.map(address => address.startsWith('0x') ? address.slice(2) : address);
+    addresses = addresses.map((address) =>
+      address.startsWith('0x') ? address.slice(2) : address
+    );
 
-    const recapObject =
-      await this.generateSessionCapabilityObjectWithWildcards([
-        litResource,
-      ]);
+    const recapObject = await this.generateSessionCapabilityObjectWithWildcards(
+      [litResource]
+    );
 
     recapObject.addCapabilityForResource(
       litResource,
@@ -258,7 +263,7 @@ export class LitNodeClientNodeJs extends LitCore {
     });
 
     siweMessage = recapObject.addToSiweMessage(siweMessage);
-    console.log("XX siweMessage:", siweMessage);
+    console.log('XX siweMessage:', siweMessage);
 
     let messageToSign = siweMessage.prepareMessage();
     console.log('messageToSign:', messageToSign);
@@ -274,7 +279,7 @@ export class LitNodeClientNodeJs extends LitCore {
     };
 
     return { litResource, rliDelegationAuthSig: authSig };
-  }
+  };
 
   // ========== Scoped Class Helpers ==========
 
@@ -411,13 +416,9 @@ export class LitNodeClientNodeJs extends LitCore {
   static async generateSessionCapabilityObjectWithWildcards(
     litResources: Array<ILitResource>,
     rateLimitAuthSig?: AuthSig,
-    addAllCapabilities?: boolean,
+    addAllCapabilities?: boolean
   ): Promise<ISessionCapabilityObject> {
-
-    const sessionCapabilityObject = new RecapSessionCapabilityObject(
-      {},
-      []
-    );
+    const sessionCapabilityObject = new RecapSessionCapabilityObject({}, []);
 
     // disable for now
     const _addAllCapabilities = addAllCapabilities ?? false;
@@ -433,25 +434,24 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     return sessionCapabilityObject;
-  };
+  }
 
   // backward compatibility
   async generateSessionCapabilityObjectWithWildcards(
     litResources: Array<ILitResource>,
     rateLimitAuthSig?: AuthSig
   ): Promise<ISessionCapabilityObject> {
-
     if (rateLimitAuthSig) {
       return await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
         litResources,
-        rateLimitAuthSig,
+        rateLimitAuthSig
       );
     }
 
     return await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
       litResources
     );
-  };
+  }
 
   /**
    *
@@ -2509,8 +2509,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
@@ -2539,7 +2539,7 @@ export class LitNodeClientNodeJs extends LitCore {
       resourceAbilityRequests: params.resourceAbilityRequests,
     });
 
-    console.log("XXX needToResignSessionKey:", needToResignSessionKey);
+    console.log('XXX needToResignSessionKey:', needToResignSessionKey);
 
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
@@ -2579,10 +2579,12 @@ export class LitNodeClientNodeJs extends LitCore {
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
     let sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
-    const capabilities = params.rliDelegationAuthSig ? [params.rliDelegationAuthSig, authSig] : [authSig];
+    const capabilities = params.rliDelegationAuthSig
+      ? [params.rliDelegationAuthSig, authSig]
+      : [authSig];
     // const capabilities = params.rliDelegationAuthSig ? [authSig, params.rliDelegationAuthSig] : [authSig];
 
-    console.log("capabilities:", capabilities);
+    console.log('capabilities:', capabilities);
 
     const signingTemplate = {
       sessionKey: sessionKey.publicKey,
@@ -2605,7 +2607,7 @@ export class LitNodeClientNodeJs extends LitCore {
       // sanitise signedMessage, replace //n with /n
       // signedMessage = signedMessage.replaceAll(/\/\/n/g, '/n');
 
-      console.log("XX signedMessage:", signedMessage);
+      console.log('XX signedMessage:', signedMessage);
 
       const uint8arrayKey = uint8arrayFromString(
         sessionKey.secretKey,
