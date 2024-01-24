@@ -1051,7 +1051,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     rliTokenId: BigNumber;
     rliTokenIdStr: string;
   }> => {
-    console.log('Minting RLI...');
+    this.log('Minting RLI...');
 
     const requestsPerSecond = convertRequestsPerDayToPerSecond(requestsPerDay);
     const requestsPerKilosecond = Math.round(
@@ -1069,17 +1069,17 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         expiresAt
       );
     } catch (e) {
-      console.log('Error calculating mint cost:', e);
+      this.log('Error calculating mint cost:', e);
       throw e;
     }
 
-    console.log('RLI mint cost:', mintCost.toString());
-    console.log('Requests per day:', requestsPerDay);
-    console.log('Requests per kilosecond:', requestsPerKilosecond);
-    console.log(`Expires at (Unix Timestamp): ${expiresAt}`);
+    this.log('RLI mint cost:', mintCost.toString());
+    this.log('Requests per day:', requestsPerDay);
+    this.log('Requests per kilosecond:', requestsPerKilosecond);
+    this.log(`Expires at (Unix Timestamp): ${expiresAt}`);
 
     const expirationDate = new Date(expiresAt * 1000);
-    console.log('Expiration Date (UTC):', expirationDate.toUTCString());
+    this.log('Expiration Date (UTC):', expirationDate.toUTCString());
 
     try {
       const res = await this.rateLimitNftContract.write.mint(expiresAt, {
@@ -1088,7 +1088,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
       const txHash = res.hash;
       let tx = await res.wait();
-      console.log('Transaction:', tx);
+      this.log('Transaction:', tx);
 
       const tokenId = ethers.BigNumber.from(tx.logs[0].topics[3]);
 
@@ -1097,9 +1097,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         rliTokenId: tokenId,
         rliTokenIdStr: tokenId.toString(),
       };
-    } catch (e) {
-      console.error('Error minting RLI:', e);
-      throw e; // Rethrow the error after logging
+    } catch (e: any) {
+      throw new Error(e);
     }
   };
 
