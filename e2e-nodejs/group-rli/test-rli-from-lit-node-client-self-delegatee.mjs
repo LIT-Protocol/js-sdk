@@ -80,7 +80,7 @@ export async function main() {
   // message. We will then sign the siwe message with the dApp owner's wallet.
   const { rliDelegationAuthSig, litResource } =
     await litNodeClient.createRliDelegationAuthSig({
-      uses: '5',
+      uses: '1',
       dAppOwnerWallet: dAppOwnerWallet,
       rliTokenId: rliTokenIdStr,
       addresses: [
