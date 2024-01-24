@@ -40,5 +40,127 @@
     "derivedVia": "web3.eth.personal.sign",
     "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nTESTING TESTING 123\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: gOv4cHte0F8Bg59Mb\nIssued At: 2023-11-17T15:04:32.857Z\nExpiration Time: 2215-07-14T15:04:32.857Z",
     "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37"
+  },
+  "CACHE": {
+    "wallet": {
+      "_isSigner": true,
+      "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37",
+      "provider": {
+        "_isProvider": true,
+        "_events": [],
+        "_emitted": {
+          "block": -2,
+          "t:0xdcdc3b47e44ceee24c600cae2708c2c6a1d01806b20655e152b44fa8d51f1ae0": 1573875,
+          "t:0xefc5a9c1978eb0decc63bfc90d39aa3c6183ee048adb70bf36a9e2fe18618ded": 1573891
+        },
+        "disableCcipRead": false,
+        "formatter": {
+          "formats": {
+            "transaction": {},
+            "transactionRequest": {},
+            "receiptLog": {},
+            "receipt": {},
+            "block": {},
+            "blockWithTransactions": {},
+            "filter": {},
+            "filterLog": {}
+          }
+        },
+        "anyNetwork": false,
+        "_networkPromise": {},
+        "_maxInternalBlockNumber": 1573890,
+        "_lastBlockNumber": -2,
+        "_maxFilterBlockRange": 10,
+        "_pollingInterval": 4000,
+        "_fastQueryDate": 1706097377006,
+        "connection": {
+          "url": "https://chain-rpc.litprotocol.com/http"
+        },
+        "_nextId": 75,
+        "_eventLoopCache": {
+          "detectNetwork": null,
+          "eth_chainId": null,
+          "eth_blockNumber": null
+        },
+        "_network": {
+          "chainId": 175177,
+          "name": "unknown"
+        },
+        "_internalBlockNumber": {},
+        "_fastBlockNumber": 1573890,
+        "_fastBlockNumberPromise": {}
+      }
+    },
+    "network": "habanero",
+    "debug": true,
+    "sevAttestation": false,
+    "CONTROLLER_AUTHSIG": {
+      "sig": "0xa0d9d9dcb257b2953e3626b99ad3b9c13fa3deb4462d7a4531c627d341d83dea0740e75aae40e6b91d4201e649581683540d88a9bf2e3d44c58c12a2a5fa52d11c",
+      "derivedVia": "web3.eth.personal.sign",
+      "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nThis is a test statement.  You can put anything you want here.\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: 0x8b6659d8d8a27b3cd29e9a2b89fb1653322cf2bcd4d7c46b2c7811c7a3310cfc\nIssued At: 2024-01-24T11:55:51.193Z\nExpiration Time: 2024-01-24T12:55:51.187Z",
+      "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37"
+    },
+    "CONTROLLER_WALLET": {
+      "_isSigner": true,
+      "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37",
+      "provider": {
+        "_isProvider": true,
+        "_events": [],
+        "_emitted": {
+          "block": -2,
+          "t:0xdcdc3b47e44ceee24c600cae2708c2c6a1d01806b20655e152b44fa8d51f1ae0": 1573875,
+          "t:0xefc5a9c1978eb0decc63bfc90d39aa3c6183ee048adb70bf36a9e2fe18618ded": 1573891
+        },
+        "disableCcipRead": false,
+        "formatter": {
+          "formats": {
+            "transaction": {},
+            "transactionRequest": {},
+            "receiptLog": {},
+            "receipt": {},
+            "block": {},
+            "blockWithTransactions": {},
+            "filter": {},
+            "filterLog": {}
+          }
+        },
+        "anyNetwork": false,
+        "_networkPromise": {},
+        "_maxInternalBlockNumber": 1573890,
+        "_lastBlockNumber": -2,
+        "_maxFilterBlockRange": 10,
+        "_pollingInterval": 4000,
+        "_fastQueryDate": 1706097377006,
+        "connection": {
+          "url": "https://chain-rpc.litprotocol.com/http"
+        },
+        "_nextId": 75,
+        "_eventLoopCache": {
+          "detectNetwork": null,
+          "eth_chainId": null,
+          "eth_blockNumber": null
+        },
+        "_network": {
+          "chainId": 175177,
+          "name": "unknown"
+        },
+        "_internalBlockNumber": {},
+        "_fastBlockNumber": 1573890,
+        "_fastBlockNumberPromise": {}
+      }
+    },
+    "PKP_INFO": {
+      "tokenId": "0xf0e3dfc83ce58e5bd6e7b7cabaff4fbf8ae83ebd7de97738d1f1c0602cd83a94",
+      "publicKey": "0412b135084b84de12da3d64340017daccf11bb558597703824cb7ad9e8b0534ca39535372bef943d1598a7df06284e5ad148ab05070b5607b81509ad4ce630334",
+      "ethAddress": "0x86C2153F26cDA2AAB397B6Aa01117baE6f923ddA"
+    },
+    "AUTH_METHOD_PKP_INFO": {
+      "publicKey": "04a5962f7ce1835d60161db42b8fe915483f7df92f8b5a99fbef2eb4b2db136c63a0a257820ea07527cc219a98efa3eb2dc110ed69c3869706615a0efca644b415",
+      "ethAddress": "0x4DbB5D413DAfF10E5333eFf803c0a555155C4619",
+      "authMethod": {
+        "authMethodId": "0x170d13600caea2933912f39a0334eca3d22e472be203f937c4bad0213d92ed71",
+        "authMethodType": 1
+      }
+    }
   }
 }
