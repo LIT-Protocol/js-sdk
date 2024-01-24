@@ -1177,11 +1177,11 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           CID = CID.CID;
 
           if (!CID) {
-            console.log('1 CID not found');
+            this.log('1 CID not found');
           }
         }
       } catch (e) {
-        console.log('2 CID not found');
+        this.log('2 CID not found');
       }
 
       // const CID = await import('multiformats/cid');
