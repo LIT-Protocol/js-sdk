@@ -47,37 +47,37 @@ import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 //     },
 //   },
 // ];
-export const generateUnifiedAccsForRLIDelegation = async (
-  ethAddresses: string[]
-): Promise<string> => {
-  const unifiedAccs: any[] = [];
+// export const generateUnifiedAccsForRLIDelegation = async (
+//   ethAddresses: string[]
+// ): Promise<string> => {
+//   const unifiedAccs: any[] = [];
 
-  ethAddresses.forEach((address, index) => {
-    const condition = {
-      conditionType: 'evmBasic',
-      contractAddress: '',
-      standardContractType: '',
-      chain: 'ethereum',
-      method: '',
-      parameters: [':userAddress'],
-      returnValueTest: {
-        comparator: '=',
-        value: address,
-      },
-    };
+//   ethAddresses.forEach((address, index) => {
+//     const condition = {
+//       conditionType: 'evmBasic',
+//       contractAddress: '',
+//       standardContractType: '',
+//       chain: 'ethereum',
+//       method: '',
+//       parameters: [':userAddress'],
+//       returnValueTest: {
+//         comparator: '=',
+//         value: address,
+//       },
+//     };
 
-    unifiedAccs.push(condition);
+//     unifiedAccs.push(condition);
 
-    // Add the operator for all but the last address
-    if (index < ethAddresses.length - 1) {
-      unifiedAccs.push({ operator: 'or' });
-    }
-  });
+//     // Add the operator for all but the last address
+//     if (index < ethAddresses.length - 1) {
+//       unifiedAccs.push({ operator: 'or' });
+//     }
+//   });
 
-  const hash = await hashUnifiedAccessControlConditions(unifiedAccs);
+//   const hash = await hashUnifiedAccessControlConditions(unifiedAccs);
 
-  return uint8arrayToString(new Uint8Array(hash), 'base16');
-};
+//   return uint8arrayToString(new Uint8Array(hash), 'base16');
+// };
 
 /**
  *

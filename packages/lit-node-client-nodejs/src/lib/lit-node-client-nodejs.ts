@@ -1,6 +1,6 @@
 import {
   canonicalAccessControlConditionFormatter,
-  generateUnifiedAccsForRLIDelegation,
+  // generateUnifiedAccsForRLIDelegation,
 } from '@lit-protocol/access-control-conditions';
 
 import {
@@ -441,14 +441,14 @@ export class LitNodeClientNodeJs extends LitCore {
   // backward compatibility
   async generateSessionCapabilityObjectWithWildcards(
     litResources: Array<ILitResource>,
-    rateLimitAuthSig?: AuthSig
+    // rateLimitAuthSig?: AuthSig
   ): Promise<ISessionCapabilityObject> {
-    if (rateLimitAuthSig) {
-      return await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
-        litResources,
-        rateLimitAuthSig
-      );
-    }
+    // if (rateLimitAuthSig) {
+    //   return await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
+    //     litResources,
+    //     rateLimitAuthSig
+    //   );
+    // }
 
     return await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
       litResources
