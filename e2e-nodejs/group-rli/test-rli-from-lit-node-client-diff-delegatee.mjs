@@ -192,10 +192,10 @@ export async function main() {
   console.log('YY sessionSigs:', sessionSigs);
 
   // write to current directory sessionSigs.json
-  fs.writeFileSync(
-    path.join(process.cwd(), 'sessionSigs.json'),
-    JSON.stringify(sessionSigs)
-  );
+  // fs.writeFileSync(
+  //   path.join(process.cwd(), 'sessionSigs.json'),
+  //   JSON.stringify(sessionSigs)
+  // );
 
   // process.exit();
 
