@@ -207,7 +207,7 @@ export async function main() {
   // });
 
   // /web/execute
-  const res2 = await litNodeClient.executeJs({
+  const res = await litNodeClient.executeJs({
     // authSig: regularAuthSig,
     // authSig: sessionSigs['https://64.131.85.108:443'],
     sessionSigs, // lit:session:xxx or lit:capability:delegation doesn't URI which is not accepted.
@@ -227,10 +227,9 @@ export async function main() {
     },
   });
 
-  // console.log('res:', res);
-  console.log('res2:', res2);
-
-  process.exit();
+  if (res) {
+    return success('recap works');
+  }
 
   return fail(`Failed to get proof from Recap Session Capability`);
 }
