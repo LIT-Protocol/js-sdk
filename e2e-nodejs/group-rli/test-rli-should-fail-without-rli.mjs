@@ -99,25 +99,7 @@ export async function main() {
     return fail('should fail when no RLI');
   }
 
-  // ==================== Post-Validation ====================
-
-  if (!res.signatures || Object.keys(res.signatures).length <= 0) {
-    return fail(
-      `should have at least 1 signature but received ${
-        Object.keys(res.signatures).length
-      }`
-    );
-  }
-
-  ['sig', 'r', 's', 'recid', 'signature', 'publicKey', 'dataSigned'].forEach(
-    (key) => {
-      if (!res.signatures.sig[key]) {
-        return fail(`sig.${key} is undefined, empty, or null`);
-      }
-    }
-  );
-  // ==================== Success ====================
-  return success('Lit Action should log sign x1 sig');
+  return fail('shoudnt reach here');
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });

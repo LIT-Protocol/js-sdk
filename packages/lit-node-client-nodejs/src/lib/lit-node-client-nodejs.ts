@@ -2700,8 +2700,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
