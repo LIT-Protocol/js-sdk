@@ -24,6 +24,7 @@ import { safeParams } from '@lit-protocol/encryption';
 import {
   convertLitActionsParams,
   defaultMintClaimCallback,
+  executeWithRetry,
   hexPrefixed,
   log,
   logError,
@@ -737,7 +738,17 @@ export class LitNodeClientNodeJs extends LitCore {
       authMethods,
     };
 
-    return await this.sendCommandToNode({ url: urlWithPath, data, requestId });
+    let res = await this.sendCommandToNode({
+      url: urlWithPath,
+      data,
+      requestId,
+    });
+    logWithRequestId(
+      requestId,
+      `response node with url: ${url} from endpoint ${urlWithPath}`,
+      res
+    );
+    return res;
   };
 
   getPkpSignExecutionShares = async (
@@ -839,24 +850,40 @@ export class LitNodeClientNodeJs extends LitCore {
     params: SignConditionECDSA,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    log('signConditionEcdsa');
-    const urlWithPath = `${url}/web/signing/signConditionEcdsa`;
+    const wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      log('signConditionEcdsa');
+      const urlWithPath = `${url}/web/signing/signConditionEcdsa`;
 
-    const data = {
-      access_control_conditions: params.accessControlConditions,
-      evmContractConditions: params.evmContractConditions,
-      solRpcConditions: params.solRpcConditions,
-      auth_sig: params.auth_sig,
-      chain: params.chain,
-      iat: params.iat,
-      exp: params.exp,
+      const data = {
+        access_control_conditions: params.accessControlConditions,
+        evmContractConditions: params.evmContractConditions,
+        solRpcConditions: params.solRpcConditions,
+        auth_sig: params.auth_sig,
+        chain: params.chain,
+        iat: params.iat,
+        exp: params.exp,
+      };
+
+      return await this.sendCommandToNode({
+        url: urlWithPath,
+        data,
+        requestId: id,
+      });
     };
 
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data,
-      requestId,
-    });
+    let res = await executeWithRetry<any>(
+      wrapper,
+      (_error: any, _requestid: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError('An error occured. attempting to retry: ');
+        }
+      },
+      this.config.retryTolerance
+    );
+
+    return res as unknown as NodeCommandResponse;
   };
 
   /**
@@ -1032,53 +1059,62 @@ export class LitNodeClientNodeJs extends LitCore {
 
     log('Final Selected Indexes:', randomSelectedNodeIndexes);
 
-    const requestId = this.getRequestId();
-    const nodePromises = [];
+    const wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      const nodePromises = [];
 
-    for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
-      // should we mix in the jsParams?  to do this, we need a canonical way to serialize the jsParams object that will be identical in rust.
-      // const jsParams = params.jsParams || {};
-      // const jsParamsString = JSON.stringify(jsParams);
+      for (let i = 0; i < randomSelectedNodeIndexes.length; i++) {
+        // should we mix in the jsParams?  to do this, we need a canonical way to serialize the jsParams object that will be identical in rust.
+        // const jsParams = params.jsParams || {};
+        // const jsParamsString = JSON.stringify(jsParams);
 
-      const nodeIndex = randomSelectedNodeIndexes[i];
+        const nodeIndex = randomSelectedNodeIndexes[i];
 
-      // FIXME: we are using this.config.bootstrapUrls to pick the selected node, but we
-      // should be using something like the list of nodes from the staking contract
-      // because the staking nodes can change, and the rust code will use the same list
-      const url = this.config.bootstrapUrls[nodeIndex];
+        // FIXME: we are using this.config.bootstrapUrls to pick the selected node, but we
+        // should be using something like the list of nodes from the staking contract
+        // because the staking nodes can change, and the rust code will use the same list
+        const url = this.config.bootstrapUrls[nodeIndex];
 
-      log(`running on node ${nodeIndex} at ${url}`);
+        log(`running on node ${nodeIndex} at ${url}`);
 
-      const reqBody: JsonExecutionRequest =
-        this.getLitActionRequestBody(params);
+        const reqBody: JsonExecutionRequest =
+          this.getLitActionRequestBody(params);
 
-      // -- choose the right signature
-      const sigToPassToNode = this.getSessionOrAuthSig({
-        authSig,
-        sessionSigs,
-        url,
-      });
+        // -- choose the right signature
+        const sigToPassToNode = this.getSessionOrAuthSig({
+          authSig,
+          sessionSigs,
+          url,
+        });
 
-      reqBody.authSig = sigToPassToNode;
+        reqBody.authSig = sigToPassToNode;
 
-      // this return { url: string, data: JsonRequest }
-      const singleNodePromise = this.getJsExecutionShares(
-        url,
-        reqBody,
-        requestId
-      );
+        // this return { url: string, data: JsonRequest }
+        const singleNodePromise = this.getJsExecutionShares(url, reqBody, id);
 
-      nodePromises.push(singleNodePromise);
-    }
+        nodePromises.push(singleNodePromise);
+      }
 
-    const handledPromise = (await this.handleNodePromises(
-      nodePromises,
-      requestId,
-      targetNodeRange
-    )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
+      const handledPromise = (await this.handleNodePromises(
+        nodePromises,
+        id,
+        targetNodeRange
+      )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
 
-    // -- handle response
-    return handledPromise;
+      // -- handle response
+      return handledPromise;
+    };
+
+    return executeWithRetry<RejectedNodePromises | SuccessNodePromises<any>>(
+      wrapper,
+      (_error: any, _requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError('error has occured, attempting to retry');
+        }
+      },
+      this.config.retryTolerance
+    );
   };
 
   // ========== Shares Resolvers ==========
@@ -1375,6 +1411,13 @@ export class LitNodeClientNodeJs extends LitCore {
           requestId,
           `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${shares.length}`
         );
+
+        throwError({
+          message:
+            'total number of valid signatures shares does not match threshold',
+          errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
+          errorCode: LIT_ERROR.NO_VALID_SHARES.code,
+        });
       }
 
       const sigType = mostCommonString(shares.map((s: any) => s.sigType));
@@ -1531,7 +1574,7 @@ export class LitNodeClientNodeJs extends LitCore {
     params = LitNodeClientNodeJs.normalizeParams(params);
 
     let res;
-    const requestId = this.getRequestId();
+    let requestId = this.getRequestId();
     // -- only run on a single node
     if (targetNodeRange) {
       res = await this.runOnTargetedNodes(params);
@@ -1542,23 +1585,44 @@ export class LitNodeClientNodeJs extends LitCore {
         this.getLitActionRequestBody(params);
 
       // ========== Get Node Promises ==========
+
       // -- fetch shares from nodes
-      const nodePromises = this.getNodePromises((url: string) => {
-        // -- choose the right signature
-        const sigToPassToNode = this.getSessionOrAuthSig({
-          authSig,
-          sessionSigs,
-          url,
+      let wrapper = async (
+        requestId: string
+      ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+        const nodePromises = this.getNodePromises((url: string) => {
+          // -- choose the right signature
+          const sigToPassToNode = this.getSessionOrAuthSig({
+            authSig,
+            sessionSigs,
+            url,
+          });
+
+          reqBody.authSig = sigToPassToNode;
+
+          const shares = this.getJsExecutionShares(url, reqBody, requestId);
+          return shares;
         });
+        // -- resolve promises
+        res = await this.handleNodePromises(
+          nodePromises,
+          requestId,
+          this.config.minNodeCount
+        );
+        return res;
+      };
+      res = await executeWithRetry<
+        RejectedNodePromises | SuccessNodePromises<any>
+      >(
+        wrapper,
+        (error: any, requestId: string, isFinal: boolean) => {
+          logError('an error occured, attempting to retry operation');
+        },
+        this.config.retryTolerance
+      );
 
-        reqBody.authSig = sigToPassToNode;
-
-        return this.getJsExecutionShares(url, reqBody, requestId);
-      });
-      // -- resolve promises
-      res = await this.handleNodePromises(nodePromises, requestId);
+      requestId = res.requestId;
     }
-
     // -- case: promises rejected
     if (res.success === false) {
       this._throwNodeError(res as RejectedNodePromises);
@@ -1566,9 +1630,10 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<NodeShare>).values;
+
     logWithRequestId(
       requestId,
-      'executeJs responseData',
+      'executeJs responseData from node : ',
       JSON.stringify(responseData, null, 2)
     );
 
@@ -1615,7 +1680,11 @@ export class LitNodeClientNodeJs extends LitCore {
       return signedData;
     });
 
-    logWithRequestId(requestId, 'signedDataList:', signedDataList);
+    logWithRequestId(
+      requestId,
+      'signatures shares to combine: ',
+      signedDataList
+    );
     const signatures = this.getSignatures(signedDataList, requestId);
 
     // -- 2. combine responses as a string, and get parse it as JSON
@@ -1651,7 +1720,7 @@ export class LitNodeClientNodeJs extends LitCore {
       })
       .filter((item) => item !== null);
 
-    logWithRequestId(requestId, 'claimList:', claimsList);
+    // logWithRequestId(requestId, 'claimList:', claimsList);
 
     let claims = undefined;
 
@@ -1720,32 +1789,54 @@ export class LitNodeClientNodeJs extends LitCore {
     }
     toSign = arr;
 
-    const requestId = this.getRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      // -- choose the right signature
-      const sigToPassToNode = this.getSessionOrAuthSig({
-        authSig,
-        sessionSigs,
-        url,
-        mustHave: false,
+    let requestId;
+
+    const wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      const nodePromises = this.getNodePromises((url: string) => {
+        // -- choose the right signature
+        const sigToPassToNode = this.getSessionOrAuthSig({
+          authSig,
+          sessionSigs,
+          url,
+          mustHave: false,
+        });
+
+        logWithRequestId(id, 'sigToPassToNode:', sigToPassToNode);
+
+        const reqBody = {
+          toSign,
+          pubkey: pubKey,
+          ...(sigToPassToNode &&
+            sigToPassToNode !== undefined && { authSig: sigToPassToNode }),
+          authMethods,
+        };
+
+        logWithRequestId(id, 'reqBody:', reqBody);
+
+        return this.getPkpSignExecutionShares(url, reqBody, id);
       });
 
-      logWithRequestId(requestId, 'sigToPassToNode:', sigToPassToNode);
-
-      const reqBody = {
-        toSign,
-        pubkey: pubKey,
-        ...(sigToPassToNode &&
-          sigToPassToNode !== undefined && { authSig: sigToPassToNode }),
-        authMethods,
-      };
-
-      logWithRequestId(requestId, 'reqBody:', reqBody);
-
-      return this.getPkpSignExecutionShares(url, reqBody, requestId);
-    });
-
-    const res = await this.handleNodePromises(nodePromises, requestId);
+      const res = await this.handleNodePromises(
+        nodePromises,
+        id,
+        this.config.minNodeCount
+      );
+      return res;
+    };
+    const res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (error: any, requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError('errror occured, retrying operation');
+        }
+      },
+      this.config.retryTolerance
+    );
+    requestId = res.requestId;
 
     // -- case: promises rejected
     if (res.success === false) {
@@ -1878,30 +1969,51 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // ========== Get Node Promises ==========
-    const requestId = this.getRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      // -- if session key is available, use it
-      const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+    let requestId;
+    const wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      const nodePromises = this.getNodePromises((url: string) => {
+        // -- if session key is available, use it
+        const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
-      return this.getSigningShareForToken(
-        url,
-        {
-          accessControlConditions: formattedAccessControlConditions,
-          evmContractConditions: formattedEVMContractConditions,
-          solRpcConditions: formattedSolRpcConditions,
-          unifiedAccessControlConditions:
-            formattedUnifiedAccessControlConditions,
-          chain,
-          authSig: authSigToSend,
-          iat,
-          exp,
-        },
-        requestId
+        return this.getSigningShareForToken(
+          url,
+          {
+            accessControlConditions: formattedAccessControlConditions,
+            evmContractConditions: formattedEVMContractConditions,
+            solRpcConditions: formattedSolRpcConditions,
+            unifiedAccessControlConditions:
+              formattedUnifiedAccessControlConditions,
+            chain,
+            authSig: authSigToSend,
+            iat,
+            exp,
+          },
+          id
+        );
+      });
+
+      // -- resolve promises
+      const res = await this.handleNodePromises(
+        nodePromises,
+        id,
+        this.config.minNodeCount
       );
-    });
+      return res;
+    };
 
-    // -- resolve promises
-    const res = await this.handleNodePromises(nodePromises, requestId);
+    const res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (error: any, requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError('an error occured, attempting to retry ');
+        }
+      },
+      this.config.retryTolerance
+    );
 
     // -- case: promises rejected
     if (res.success === false) {
@@ -2053,8 +2165,6 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
-    const requestId = this.getRequestId();
-
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
     let hashOfConditions: ArrayBuffer | undefined =
@@ -2096,31 +2206,53 @@ export class LitNodeClientNodeJs extends LitCore {
       dataToEncryptHash
     );
 
-    logWithRequestId(requestId, 'identityParam', identityParam);
+    log('identityParam', identityParam);
 
+    let requestId;
     // ========== Get Network Signature ==========
-    const nodePromises = this.getNodePromises((url: string) => {
-      // -- if session key is available, use it
-      let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+    const wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      const nodePromises = this.getNodePromises((url: string) => {
+        // -- if session key is available, use it
+        let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
-      return this.getSigningShareForDecryption(
-        url,
-        {
-          accessControlConditions: formattedAccessControlConditions,
-          evmContractConditions: formattedEVMContractConditions,
-          solRpcConditions: formattedSolRpcConditions,
-          unifiedAccessControlConditions:
-            formattedUnifiedAccessControlConditions,
-          dataToEncryptHash,
-          chain,
-          authSig: authSigToSend,
-        },
-        requestId
+        return this.getSigningShareForDecryption(
+          url,
+          {
+            accessControlConditions: formattedAccessControlConditions,
+            evmContractConditions: formattedEVMContractConditions,
+            solRpcConditions: formattedSolRpcConditions,
+            unifiedAccessControlConditions:
+              formattedUnifiedAccessControlConditions,
+            dataToEncryptHash,
+            chain,
+            authSig: authSigToSend,
+          },
+          id
+        );
+      });
+
+      // -- resolve promises
+      const res = await this.handleNodePromises(
+        nodePromises,
+        id,
+        this.config.minNodeCount
       );
-    });
+      return res;
+    };
 
-    // -- resolve promises
-    const res = await this.handleNodePromises(nodePromises, requestId);
+    const res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (_error: string, _requestId: string, _isFinal: boolean) => {
+        logError('an error occured attempting to retry');
+      },
+      this.config.retryTolerance
+    );
+
+    requestId = res.requestId;
 
     // -- case: promises rejected
     if (res.success === false) {
@@ -2244,36 +2376,62 @@ export class LitNodeClientNodeJs extends LitCore {
     );
 
     // ========== Node Promises ==========
-    const requestId = this.getRequestId();
-    const nodePromises = this.getNodePromises((url: string) => {
-      return this.signConditionEcdsa(
-        url,
-        {
-          accessControlConditions: formattedAccessControlConditions,
-          evmContractConditions: undefined,
-          solRpcConditions: undefined,
-          auth_sig,
-          chain,
-          iat,
-          exp,
-        },
-        requestId
+    const wrapper = async (
+      id: string
+    ): Promise<RejectedNodePromises | SuccessNodePromises<any>> => {
+      const nodePromises = this.getNodePromises((url: string) => {
+        return this.signConditionEcdsa(
+          url,
+          {
+            accessControlConditions: formattedAccessControlConditions,
+            evmContractConditions: undefined,
+            solRpcConditions: undefined,
+            auth_sig,
+            chain,
+            iat,
+            exp,
+          },
+          id
+        );
+      });
+
+      // ----- Resolve Promises -----
+      const responses = await this.handleNodePromises(
+        nodePromises,
+        id,
+        this.config.minNodeCount
       );
-    });
 
-    // ----- Resolve Promises -----
+      return responses;
+    };
+
+    let res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (_error: any, _requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError('an error has occured, attempting to retry ');
+        }
+      },
+      this.config.retryTolerance
+    );
+
+    const requestId = res.requestId;
+    // return the first value as this will be the signature data
     try {
-      const shareData = await Promise.all(nodePromises);
-
-      if (shareData[0].result == 'failure') return 'Condition Failed';
-
+      if (res.success === false) {
+        return 'Condition Failed';
+      }
+      const shareData = (res as SuccessNodePromises<any>).values;
       const signature = this.getSignature(shareData, requestId);
-
       return signature;
     } catch (e) {
-      log('Error - signed_ecdsa_messages - ', e);
-      const signed_ecdsa_message = nodePromises[0];
-      return signed_ecdsa_message;
+      logErrorWithRequestId(requestId, 'Error - signed_ecdsa_messages - ', e);
+      const signed_ecdsa_message = res as RejectedNodePromises;
+      // have to cast to any to keep with above `string` return value
+      // this will be returned as `RejectedNodePromise`
+      return signed_ecdsa_message as any;
     }
   };
 
@@ -2338,7 +2496,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
-    const requestId = this.getRequestId();
+    let requestId;
 
     let body = {
       sessionKey: sessionKeyUri,
@@ -2349,27 +2507,48 @@ export class LitNodeClientNodeJs extends LitCore {
       siweMessage: siweMessageStr,
     };
 
-    logWithRequestId(requestId, 'signSessionKey body', body);
+    let wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      logWithRequestId(id, 'signSessionKey body', body);
+      const nodePromises = this.getNodePromises((url: string) => {
+        return this.getSignSessionKeyShares(
+          url,
+          {
+            body,
+          },
+          id
+        );
+      });
 
-    const nodePromises = this.getNodePromises((url: string) => {
-      return this.getSignSessionKeyShares(
-        url,
-        {
-          body,
-        },
-        requestId
-      );
-    });
+      // -- resolve promises
+      let res;
+      try {
+        res = await this.handleNodePromises(
+          nodePromises,
+          id,
+          this.config.minNodeCount
+        );
+        log('signSessionKey node promises:', res);
+      } catch (e) {
+        throw new Error(`Error when handling node promises: ${e}`);
+      }
+      return res;
+    };
 
-    // -- resolve promises
-    let res;
-    try {
-      res = await this.handleNodePromises(nodePromises, requestId);
-      log('signSessionKey node promises:', res);
-    } catch (e) {
-      throw new Error(`Error when handling node promises: ${e}`);
-    }
+    let res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (_error: any, _requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError('an error occured, attempting to retry ');
+        }
+      },
+      this.config.retryTolerance
+    );
 
+    requestId = res.requestId;
     logWithRequestId(requestId, 'handleNodePromises res:', res);
 
     // -- case: promises rejected
@@ -2521,8 +2700,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
@@ -2683,19 +2862,38 @@ export class LitNodeClientNodeJs extends LitCore {
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
       });
     }
-    const requestId = this.getRequestId();
-    const nodePromises = await this.getNodePromises((url: string) => {
-      const nodeRequestParams = {
-        authMethod: params.authMethod,
-      };
-      return this.getClaimKeyExecutionShares(url, nodeRequestParams, requestId);
-    });
+    let requestId;
+    const wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      const nodePromises = await this.getNodePromises((url: string) => {
+        const nodeRequestParams = {
+          authMethod: params.authMethod,
+        };
+        return this.getClaimKeyExecutionShares(url, nodeRequestParams, id);
+      });
 
-    const responseData = await this.handleNodePromises(
-      nodePromises,
-      requestId,
-      this.connectedNodes.size // require from all connected nodes
+      const responseData = await this.handleNodePromises(
+        nodePromises,
+        id,
+        this.config.minNodeCount
+      );
+
+      return responseData;
+    };
+
+    let responseData = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (_error: any, _requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError('an error occured, attempting to retry');
+        }
+      },
+      this.config.retryTolerance
     );
+    requestId = responseData.requestId;
 
     if (responseData.success === true) {
       const nodeSignatures: Signature[] = (

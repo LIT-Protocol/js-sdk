@@ -27,6 +27,7 @@ import {
 
 import {
   bootstrapLogManager,
+  executeWithRetry,
   isBrowser,
   isNode,
   log,
@@ -34,6 +35,7 @@ import {
   logErrorWithRequestId,
   logWithRequestId,
   mostCommonString,
+  sendRequest,
   throwError,
 } from '@lit-protocol/misc';
 import {
@@ -56,6 +58,7 @@ import {
   NodeErrorV3,
   NodePromiseResponse,
   RejectedNodePromises,
+  RetryTolerance,
   SendNodeCommand,
   SessionSig,
   SessionSigsMap,
@@ -86,6 +89,11 @@ export class LitCore {
       litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
       minNodeCount: 2, // Default value, should be replaced
       bootstrapUrls: [], // Default value, should be replaced
+      retryTolerance: {
+        timeout: 31_000,
+        maxRetryLimit: 3,
+        interval: 100,
+      },
     };
 
     // Initialize default config based on litNetwork
@@ -147,7 +155,11 @@ export class LitCore {
       log(
         'localstorage api not found, injecting persistance instance found in config'
       );
-      globalThis.localStorage = this.config.storageProvider.provider;
+      // using Object definProperty in order to set a property previously defined as readonly.
+      // if the user wants to override the storage option explicitly we override.
+      Object.defineProperty(globalThis, 'localStorage', {
+        value: this.config.storageProvider?.provider,
+      });
     } else if (
       isNode() &&
       !globalThis.localStorage &&
@@ -367,7 +379,7 @@ export class LitCore {
               keys
             );
           }
-
+          log('returned keys: ', keys);
           if (!keys.latestBlockhash) {
             logErrorWithRequestId(
               requestId,
@@ -553,24 +565,42 @@ export class LitCore {
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
-    // -- get properties from params
-    const { url } = params;
+    const wrapper = async (id: string) => {
+      // -- get properties from params
+      const { url } = params;
 
-    // -- create url with path
-    const urlWithPath = `${url}/web/handshake`;
+      // -- create url with path
+      const urlWithPath = `${url}/web/handshake`;
 
-    log(`handshakeWithNode ${urlWithPath}`);
+      log(`handshakeWithNode ${urlWithPath}`);
 
-    const data = {
-      clientPublicKey: 'test',
-      challenge: params.challenge,
+      const data = {
+        clientPublicKey: 'test',
+        challenge: params.challenge,
+      };
+
+      let res = await this.sendCommandToNode({
+        url: urlWithPath,
+        data,
+        requestId,
+      }).catch((err: NodeErrorV3) => {
+        return err;
+      });
+
+      return res;
     };
 
-    return this.sendCommandToNode({
-      url: urlWithPath,
-      data,
-      requestId,
-    });
+    let res = await executeWithRetry<NodeCommandServerKeysResponse>(
+      wrapper,
+      (_error: any, _requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError('an error occured, attempting to retry');
+        }
+      },
+      this.config.retryTolerance
+    );
+
+    return res as NodeCommandServerKeysResponse;
   };
 
   // ==================== SENDING COMMAND ====================
@@ -605,33 +635,7 @@ export class LitCore {
       body: JSON.stringify(data),
     };
 
-    return fetch(url, req)
-      .then(async (response) => {
-        const isJson = response.headers
-          .get('content-type')
-          ?.includes('application/json');
-
-        const data = isJson ? await response.json() : null;
-
-        if (!response.ok) {
-          // get error message from body or default to response status
-          const error = data || response.status;
-          return Promise.reject(error);
-        }
-
-        return data;
-      })
-      .catch((error: NodeErrorV3) => {
-        logErrorWithRequestId(
-          requestId,
-          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
-            error?.message || error?.details
-              ? `Error is ${error.message} - ${error.details}`
-              : ''
-          }`
-        );
-        return Promise.reject(error);
-      });
+    return sendRequest(url, req, requestId);
   };
 
   /**

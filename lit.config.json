@@ -2,8 +2,7 @@
   "TEST_ENV": {
     "litNetwork": "cayenne",
     "debug": false,
-    "minNodeCount": 2,
-    "loadEnv": true
+    "minNodeCount": 2
   },
   "test": {
     "sendRealTxThatCostsMoney": false
@@ -43,13 +42,13 @@
     "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37"
   },
   "CACHE": {
-    "network": "manzano",
+    "network": "habanero",
     "debug": true,
     "sevAttestation": false,
     "CONTROLLER_AUTHSIG": {
-      "sig": "0x7305b05e95661cd89b68a6f450ced83ebefb1c46c9055a9f6e0f45b7214dd8c52088bbe9a6fa4da4c68d38377ba99ae42fd63207b7bf52fb772a00460b8fa6ef1c",
+      "sig": "0xcaab6516fce0b99b112e45a6182d880f3d4e9c969aed2d462682c8b38f1501f1090110325a09b39ad636de8909d7d3b949f054a21b69d599c0de502d4c0b02221c",
       "derivedVia": "web3.eth.personal.sign",
-      "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nThis is a test statement.  You can put anything you want here.\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: 0xd1031c1677233b2ae75d552c0b78cd13085983f39877e9ae4aa5a834afc0aa4f\nIssued At: 2024-01-24T17:17:22.765Z\nExpiration Time: 2024-01-24T18:17:22.762Z",
+      "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nThis is a test statement.  You can put anything you want here.\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: 0x95b4b8ea8ed37311fa261d0ec36038e2e4c9be70cd9ca2eca237a1c42c2f310e\nIssued At: 2024-01-24T16:52:24.083Z\nExpiration Time: 2024-01-24T17:52:24.077Z",
       "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37"
     },
     "CONTROLLER_WALLET": {
@@ -60,8 +59,8 @@
         "_events": [],
         "_emitted": {
           "block": -2,
-          "t:0xb1140308262e57c56d099468fec94e9e1731ceaa5c2d75168c46e0714873e57d": 1576335,
-          "t:0xa5cc4381e6e6e9cb0b444bbfad47f42eff93129cc9cfa4c2a4c9461f936b97e9": 1576337
+          "t:0xda7d244b6cb6d516a037462629a92109a25ff744fcc5818819f6f70bd7b9f0e5": 1576144,
+          "t:0xea2e2344d08b0bd5f28bef648a3c19934bae46925bb30c10651c527f655d8c13": 1576145
         },
         "disableCcipRead": false,
         "formatter": {
@@ -78,15 +77,15 @@
         },
         "anyNetwork": false,
         "_networkPromise": {},
-        "_maxInternalBlockNumber": 1576336,
+        "_maxInternalBlockNumber": 1576143,
         "_lastBlockNumber": -2,
         "_maxFilterBlockRange": 10,
         "_pollingInterval": 4000,
-        "_fastQueryDate": 1706116665969,
+        "_fastQueryDate": 1706115145738,
         "connection": {
           "url": "https://chain-rpc.litprotocol.com/http"
         },
-        "_nextId": 75,
+        "_nextId": 73,
         "_eventLoopCache": {
           "detectNetwork": null,
           "eth_chainId": null,
@@ -97,18 +96,18 @@
           "name": "unknown"
         },
         "_internalBlockNumber": {},
-        "_fastBlockNumber": 1576336,
+        "_fastBlockNumber": 1576143,
         "_fastBlockNumberPromise": {}
       }
     },
     "PKP_INFO": {
-      "tokenId": "0x01483ce60691fd4632b9b85256aaca98af044802f070059309b98e07422d0ec9",
-      "publicKey": "04ccc0e95c0895d51fc94418bfe5561bb733b9cfc4a0dd8c6baa7b6a412da5032b7f6e7db5dd89d468fb71176958a8547a9140e6582035bed1a31087c0a94a7b93",
-      "ethAddress": "0x3237a1D3E406ad0e77AFecE460C381C1A5e9F8B9"
+      "tokenId": "0xed095e724f482727b7b1b64e0e3e5e0ac5351344d781afd3e33e89a89101fcc0",
+      "publicKey": "0496231cf6cc81bcf57d917009669f3a5956adba1372676d8c8f0031711d09a04c23d2d7d6fa26dbcccad706e33e83dd5c6e6d300631f03b6a0bce491f122be718",
+      "ethAddress": "0x68D8d9eA96839861F6747Bd4Fadf3b5f2Edbdb74"
     },
     "AUTH_METHOD_PKP_INFO": {
-      "publicKey": "04c7a100a8c974a78ce45c930550442c2046c83300ec498e4bb30637005f166ac67e977a9c3f1e1dec9b34601bc5852c9848e65e2aa3422db8631030d312b6a108",
-      "ethAddress": "0x2BFcD537a787C0A3D725330148138380ff264543",
+      "publicKey": "0492fdc19de9f75997ae91b72ffa586b12d500583091dd9506ef3a50aca4a0f29a8841b678259d1b398137a0efcc407c588687da2f06a92cdbd415a029777b90d4",
+      "ethAddress": "0xC6F4b6a10CBdA723f38e6308c6628d65AEb2E17A",
       "authMethod": {
         "authMethodId": "0x170d13600caea2933912f39a0334eca3d22e472be203f937c4bad0213d92ed71",
         "authMethodType": 1
