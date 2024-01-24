@@ -11,7 +11,7 @@ const network = process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork;
 const debug = process.env.DEBUG === 'true' ? true : false;
 const checkSevAttestation = process.env.CHECK_SEV === 'true' ?? false;
 const mintNew = process.env.MINT_NEW === 'true' ? true : false;
-const useCache = process.env.USE_CACHE === 'true' ? true : false;
+const useCache = process.env.E2E_CACHE === 'true' ? true : false;
 
 if (mintNew && useCache) {
   console.log('cannot mint new and use cache at the same time');
@@ -133,6 +133,7 @@ if (!useCache) {
     const file = 'lit.config.json';
     litConfigJson = JSON.parse(fs.readFileSync(file, 'utf8'));
     litConfigJson.CACHE = globalThis.LitCI;
+    delete litConfigJson.CACHE.wallet;
     fs.writeFileSync(file, JSON.stringify(litConfigJson, null, 2), 'utf8');
   } catch (e) {
     console.log('could not parse or write to lit.config.json');
