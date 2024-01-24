@@ -139,5 +139,3 @@ if (!useCache) {
     console.log(e);
   }
 }
-
-process.exit();
