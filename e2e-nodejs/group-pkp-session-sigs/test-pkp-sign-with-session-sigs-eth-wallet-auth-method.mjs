@@ -15,7 +15,6 @@ export async function main() {
   const sessionKeyPair = client.getSessionKey();
   const authNeededCallback = async (params) => {
     const response = await client.signSessionKey({
-      sessionKey: sessionKeyPair,
       statement: params.statement,
       // authSig: globalThis.LitCI.CONTROLLER_AUTHSIG, // When this is empty or undefined, it will fail
       authMethods: [

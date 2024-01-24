@@ -17,10 +17,12 @@ import {
   SessionSigs,
   RPCUrls,
   AuthMethod,
+  ExecuteJsResponse,
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
 import { toString as uint8arrayToString } from 'uint8arrays';
+import { executeWithRetry, logError } from '@lit-protocol/misc';
 
 /**
  * Compresses a given public key.
@@ -280,39 +282,22 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.log('executeJsArgs:', executeJsArgs);
 
-    async function executeWithRetries<T>(
-      operation: () => Promise<T>,
-      maxAttempts: number
-    ): Promise<T> {
-      let attempts = 0;
-
-      while (attempts < maxAttempts) {
-        try {
-          return await operation();
-        } catch (err: any) {
-          console.log(`Attempt ${attempts + 1} failed with error:`, err);
-          attempts++;
-          if (attempts === maxAttempts) {
-            throw new Error(
-              `Operation failed after ${maxAttempts} attempts: ${err.message}`
-            );
-          }
-        }
-      }
-
-      // Add this return statement with a never type
-      return (() => {
-        throw new Error('This code should never be reached');
-      })() as never;
-    }
+    
 
     try {
-      const res = await executeWithRetries(
-        async () => await this.litNodeClient.executeJs(executeJsArgs),
-        5
+      const res = await executeWithRetry<ExecuteJsResponse>(
+        async (_id: string) => await this.litNodeClient.executeJs(executeJsArgs),
+        (error: any, requestId: string, isFinal: boolean) => {
+          if(!isFinal) {
+            this.log('an error has occured, attempting to retry');
+          }
+        }
       );
 
-      const sig = res.signatures[sigName];
+      if ('error' in res) {
+       return this.throwError(`error while attempting signature operation, request identifier: lit_${res.requestId}`); 
+      }
+      const sig = (res as ExecuteJsResponse).signatures[sigName];
 
       this.log('res:', res);
       this.log('res.signatures[sigName]:', sig);
