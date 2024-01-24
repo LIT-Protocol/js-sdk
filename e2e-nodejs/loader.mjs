@@ -4,12 +4,19 @@ import { uint8arrayFromString } from '@lit-protocol/uint8arrays';
 import { BigNumber, ethers } from 'ethers';
 import * as siwe from 'siwe';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
+import fs from 'fs';
 
 // ==================== ENV Loading ====================
 const network = process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork;
 const debug = process.env.DEBUG === 'true' ? true : false;
 const checkSevAttestation = process.env.CHECK_SEV === 'true' ?? false;
 const mintNew = process.env.MINT_NEW === 'true' ? true : false;
+const useCache = process.env.USE_CACHE === 'true' ? true : false;
+
+if (mintNew && useCache) {
+  console.log('cannot mint new and use cache at the same time');
+  process.exit();
+}
 
 // ==================== SIWE Gen ====================
 const provider = new ethers.providers.JsonRpcProvider(LITCONFIG.CHRONICLE_RPC);
@@ -18,14 +25,15 @@ const wallet = new ethers.Wallet(LITCONFIG.CONTROLLER_PRIVATE_KEY, provider);
 const address = ethers.utils.getAddress(await wallet.getAddress());
 
 // Craft the SIWE message
-
 const litNodeClient = new LitJsSdk.LitNodeClient({
   litNetwork: network,
-  debug: false,
+  debug,
 });
+
 await litNodeClient.connect();
 let nonce = litNodeClient.getLatestBlockhash();
 console.log('GENERATED NONCE: ', nonce);
+
 const domain = 'localhost';
 const origin = 'https://localhost/login';
 const statement =
@@ -53,16 +61,20 @@ const authSig = {
 };
 
 // ==================== Global Vars ====================
-globalThis.LitCI = {};
-globalThis.LitCI.wallet = wallet;
-globalThis.LitCI.network = network;
-globalThis.LitCI.debug = debug;
-globalThis.LitCI.sevAttestation = checkSevAttestation;
-globalThis.LitCI.CONTROLLER_AUTHSIG = authSig;
-globalThis.LitCI.CONTROLLER_WALLET = wallet;
+if (useCache) {
+  globalThis.LitCI = LITCONFIG.CACHE;
+} else {
+  globalThis.LitCI = {};
+  globalThis.LitCI.wallet = wallet;
+  globalThis.LitCI.network = network;
+  globalThis.LitCI.debug = debug;
+  globalThis.LitCI.sevAttestation = checkSevAttestation;
+  globalThis.LitCI.CONTROLLER_AUTHSIG = authSig;
+  globalThis.LitCI.CONTROLLER_WALLET = wallet;
 
-globalThis.LitCI.PKP_INFO = {};
-globalThis.LitCI.PKP_INFO.publicKey = LITCONFIG.PKP_PUBKEY;
+  globalThis.LitCI.PKP_INFO = {};
+  globalThis.LitCI.PKP_INFO.publicKey = LITCONFIG.PKP_PUBKEY;
+}
 
 if (mintNew) {
   let contractClient = new LitContracts({
@@ -75,6 +87,7 @@ if (mintNew) {
   let res = await contractClient.pkpNftContractUtils.write.mint();
 
   globalThis.LitCI.PKP_INFO = res.pkp;
+
   const mintCost = await contractClient.pkpNftContract.read.mintCost();
   let authMethodId = ethers.utils.keccak256(
     uint8arrayFromString(`${authSig.address}:lit`)
@@ -111,3 +124,20 @@ if (mintNew) {
 
 console.log('environment Arguments');
 console.log(globalThis.LitCI);
+
+// -- write to lit.config.json
+if (!useCache) {
+  let litConfigJson;
+
+  try {
+    const file = 'lit.config.json';
+    litConfigJson = JSON.parse(fs.readFileSync(file, 'utf8'));
+    litConfigJson.CACHE = globalThis.LitCI;
+    fs.writeFileSync(file, JSON.stringify(litConfigJson, null, 2), 'utf8');
+  } catch (e) {
+    console.log('could not parse or write to lit.config.json');
+    console.log(e);
+  }
+}
+
+process.exit();
