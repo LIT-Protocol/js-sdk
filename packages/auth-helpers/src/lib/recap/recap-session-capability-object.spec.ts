@@ -219,8 +219,10 @@ describe('recapSessionCapabilityObject', () => {
     const newSiweMessage =
       recapSessionCapabilityObject.addToSiweMessage(siweMessage);
     expect(newSiweMessage.statement).toEqual(
-      `This is some existing statement. I further authorize the stated URI to perform the following actions on my behalf: (1) '${LitNamespace.Threshold
-      }': '${LitRecapAbility.Decryption
+      `This is some existing statement. I further authorize the stated URI to perform the following actions on my behalf: (1) '${
+        LitNamespace.Threshold
+      }': '${
+        LitRecapAbility.Decryption
       }' for '${litResource.getResourceKey()}'.`
     );
     expect(newSiweMessage.resources).toEqual([

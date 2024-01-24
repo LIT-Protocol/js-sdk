@@ -186,7 +186,8 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- to be changed(?)
     const _domain = domain ?? 'example.com';
-    const _expiration = expiration ?? new Date(Date.now() + 1000 * 60 * 7).toISOString();
+    const _expiration =
+      expiration ?? new Date(Date.now() + 1000 * 60 * 7).toISOString();
     const statement = '';
 
     // -- if it's not ready yet, then connect
@@ -255,7 +256,7 @@ export class LitNodeClientNodeJs extends LitCore {
       throw new Error('Failed to verify capabilities for resource');
     }
 
-    // console.log('verified:', verified);  
+    // console.log('verified:', verified);
 
     let nonce = this.getLatestBlockhash();
 
@@ -426,7 +427,7 @@ export class LitNodeClientNodeJs extends LitCore {
   static async generateSessionCapabilityObjectWithWildcards(
     litResources: Array<ILitResource>,
     addAllCapabilities?: boolean,
-    rateLimitAuthSig?: AuthSig,
+    rateLimitAuthSig?: AuthSig
   ): Promise<ISessionCapabilityObject> {
     const sessionCapabilityObject = new RecapSessionCapabilityObject({}, []);
 
@@ -440,7 +441,7 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     if (rateLimitAuthSig) {
-      throw new Error("Not implemented yet.");
+      throw new Error('Not implemented yet.');
       // await sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
     }
 
@@ -449,7 +450,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
   // backward compatibility
   async generateSessionCapabilityObjectWithWildcards(
-    litResources: Array<ILitResource>,
+    litResources: Array<ILitResource>
     // rateLimitAuthSig?: AuthSig
   ): Promise<ISessionCapabilityObject> {
     // if (rateLimitAuthSig) {

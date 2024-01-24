@@ -1045,7 +1045,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     requestsPerDay: number;
     daysUntilUTCMidnightExpiration: number;
   }): Promise<{
-
     // TODO: clean up task for this
     rliTxHash: string;
     rliTokenId: BigNumber;

@@ -84,7 +84,7 @@ export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
    * @param authSig The AuthSig object containing the rate limit authorization details.
    */
   async addRateLimitAuthSig(authSig: AuthSig) {
-    throw new Error("Not implemented yet. ");
+    throw new Error('Not implemented yet. ');
     // const ipfsId = await RecapSessionCapabilityObject.strToCID(authSig);
 
     // try {
