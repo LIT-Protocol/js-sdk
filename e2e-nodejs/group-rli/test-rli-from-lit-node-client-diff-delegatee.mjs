@@ -84,7 +84,7 @@ export async function main() {
       uses: '1',
       dAppOwnerWallet: dAppOwnerWallet,
       rliTokenId: rliTokenIdStr,
-      addresses: [delegatedWalletB_address.replace('0x', '').toLowerCase()],
+      addresses: [delegatedWalletB_address],
     });
 
   console.log('YY rliDelegationAuthSig:', rliDelegationAuthSig);
@@ -161,7 +161,7 @@ export async function main() {
       sig: signature.replace('0x', ''),
       derivedVia: 'web3.eth.personal.sign',
       signedMessage: messageToSign,
-      // address: delegatedWalletB_address.replace('0x', '').toLowerCase(),
+      // address: delegatedWalletB_address,
       address: delegatedWalletB_address,
       // algo: null,
     };
