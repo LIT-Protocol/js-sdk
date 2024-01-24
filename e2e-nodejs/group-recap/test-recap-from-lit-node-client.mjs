@@ -26,7 +26,15 @@ export async function main() {
   // ====================================================
   // =               dApp Owner's Perspetive            =
   // ====================================================
+  const provider = new ethers.providers.JsonRpcProvider(
+    LITCONFIG.CHRONICLE_RPC
+  );
+  globalThis.LitCI.wallet = new ethers.Wallet(
+    LITCONFIG.CONTROLLER_PRIVATE_KEY,
+    provider
+  );
   const dAppOwnerWallet = globalThis.LitCI.wallet;
+
   const dAppOwnerWallet_address = globalThis.LitCI.wallet.address;
   const dAppOwnerWallet_authSig = globalThis.LitCI.CONTROLLER_AUTHSIG;
   const dAppOwnerWallet_pkpPublicKey = globalThis.LitCI.PKP_INFO.publicKey;
@@ -48,13 +56,15 @@ export async function main() {
 
   await contractClient.connect();
 
-  // const rliTokenIdStr = '3';
-  const { rliTokenIdStr } = await contractClient.mintRLI({
-    requestsPerDay: 14400, // 10 request per minute
-    daysUntilUTCMidnightExpiration: 2,
-  });
+  const rliTokenIdStr = '2';
+  // const { rliTokenIdStr } = await contractClient.mintRLI({
+  //   requestsPerDay: 14400, // 10 request per minute
+  //   daysUntilUTCMidnightExpiration: 2,
+  // });
 
   console.log('rliTokenIdStr:', rliTokenIdStr);
+
+  console.log('dAppOwnerWallet:', dAppOwnerWallet);
 
   const litNodeClient = new LitNodeClient({
     litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
