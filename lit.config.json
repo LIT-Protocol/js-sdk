@@ -2,7 +2,8 @@
   "TEST_ENV": {
     "litNetwork": "cayenne",
     "debug": false,
-    "minNodeCount": 2
+    "minNodeCount": 2,
+    "loadEnv": true
   },
   "test": {
     "sendRealTxThatCostsMoney": false

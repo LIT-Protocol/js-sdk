@@ -1,5 +1,12 @@
 import { SiweMessage } from 'siwe';
 
+// This is here to prevent circular dependency issue
+export interface AuthSig {
+  sig: any;
+  derivedVia: string;
+  signedMessage: string;
+  address: string;
+}
 export type PlainJSON =
   | boolean
   | number
@@ -110,7 +117,8 @@ export interface ISessionCapabilityObject {
    */
   addCapabilityForResource(
     litResource: ILitResource,
-    ability: LitAbility
+    ability: LitAbility,
+    data?: any
   ): void;
 
   /**
@@ -127,6 +135,11 @@ export interface ISessionCapabilityObject {
    * resource.
    */
   addAllCapabilitiesForResource(litResource: ILitResource): void;
+
+  /**
+   * The AuthSig they insert would own a rate limit nft and can put restrictions on how it * can be used.
+   */
+  addRateLimitAuthSig(authSig: AuthSig): Promise<void>;
 }
 
 export interface ILitResource {

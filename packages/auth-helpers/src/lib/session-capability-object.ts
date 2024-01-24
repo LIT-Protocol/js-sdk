@@ -12,15 +12,15 @@ import { RecapSessionCapabilityObject } from './recap/recap-session-capability-o
  * This function serves as an abstraction and router to the
  * underlying implementation of the ISessionCapabilityObject.
  *
- * @param att the attenuations you want to add to the capability object
- * @param prf the proofs you want to add to the capability object
+ * @param attenuations the attenuations you want to add to the capability object
+ * @param proof the proofs you want to add to the capability object
  * @returns a ISessionCapabilityObject
  */
 export function newSessionCapabilityObject(
-  att: AttenuationsObject = {},
-  prf: Array<CID> = []
+  attenuations: AttenuationsObject = {},
+  proof: Array<CID> = []
 ): ISessionCapabilityObject {
-  return new RecapSessionCapabilityObject(att, prf);
+  return new RecapSessionCapabilityObject(attenuations, proof);
 }
 
 export function decode(encoded: string): ISessionCapabilityObject {
