@@ -162,11 +162,13 @@ export class LitNodeClientNodeJs extends LitCore {
     rliTokenId,
     addresses,
     uses,
+    domain,
   }: {
     dAppOwnerWallet: ethers.Wallet;
     rliTokenId: string;
     addresses: string[];
     uses: string;
+    domain: string;
   }): Promise<{
     litResource: LitRLIResource;
     rliDelegationAuthSig: AuthSig;
@@ -179,7 +181,7 @@ export class LitNodeClientNodeJs extends LitCore {
     const ORIGIN = 'lit:capability:delegation';
 
     // -- to be changed(?)
-    const domain = 'example.com';
+    const _domain = domain ?? 'example.com';
     const statement = '';
 
     // -- if it's not ready yet, then connect
@@ -252,7 +254,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- get auth sig
     let siweMessage = new siwe.SiweMessage({
-      domain,
+      domain: _domain,
       address: dAppOwnerWalletAddress,
       statement,
       uri: ORIGIN,
