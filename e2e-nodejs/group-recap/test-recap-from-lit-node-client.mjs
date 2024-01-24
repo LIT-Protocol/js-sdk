@@ -80,7 +80,7 @@ export async function main() {
   // message. We will then sign the siwe message with the dApp owner's wallet.
   const { rliDelegationAuthSig, litResource } =
     await litNodeClient.createRliDelegationAuthSig({
-      uses: '0',
+      uses: '5',
       dAppOwnerWallet: dAppOwnerWallet,
       rliTokenId: rliTokenIdStr,
       addresses: [
@@ -95,11 +95,6 @@ export async function main() {
   // ====================================================
   // =                  As an end user                  =
   // ====================================================
-  // const sessionKey = litNodeClient.getSessionKey();
-  // const sessionKeyUri = litNodeClient.getSessionKeyUri(sessionKey.publicKey);
-  // console.log('XXX sessionKey:', sessionKey);
-  // console.log('xxx sessionKeyUri:', sessionKeyUri);
-
   // We need to setup a generic siwe auth callback that will be called by the lit-node-client
   const authNeededCallback = async ({ resources, expiration, uri }) => {
     console.log('XX resources:', resources);
@@ -150,7 +145,6 @@ export async function main() {
       derivedVia: 'web3.eth.personal.sign',
       signedMessage: messageToSign,
       address: dAppOwnerWallet_address.replace('0x', '').toLowerCase(),
-      // address: dAppOwnerWallet_address,
       algo: null,
     };
 
@@ -159,24 +153,18 @@ export async function main() {
     return authSig;
   };
 
-  // 1. When generating a session sigs, we need to specify the resourceAbilityRequests, which
-  // is a list of resources and abilities that we want to be able to perform. In this case,
-  // we want to be able to perform the ability "rate-limit-increase-auth" on the resource
+  // - When generating a session sigs, we need to specify the resourceAbilityRequests, which
+  // is a list of resources and abilities that we want to be able to perform.
   // "lit-ratelimitincrease://{tokenId}" that the dApp owner has delegated to us.
-  // 2. We also included the rliDelegationAuthSig that we created earlier, which would be
+  // - We also included the rliDelegationAuthSig that we created earlier, which would be
   // added to the capabilities array in the signing template.
   let sessionSigs = await litNodeClient.getSessionSigs({
-    // sessionKey,
     expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
     chain: 'ethereum',
     resourceAbilityRequests: [
       {
-        // resource: new LitRLIResource('*'), this delegation wallet holds like 30+ RLIs.
-        // resource: new LitRLIResource(rliTokenIdStr),
-        // ability: LitAbility.RateLimitIncreaseAuth,
         resource: new LitActionResource('*'),
         ability: LitAbility.LitActionExecution,
-        // ability: LitAbility.PKPSigning,
       },
     ],
     authNeededCallback,
@@ -184,27 +172,6 @@ export async function main() {
   });
 
   console.log('XX sessionSigs:', sessionSigs);
-
-  // -- now try to run lit action
-  // errConstructorFunc {
-  //   message: 'Wallet Signature not in JSON format',
-  //   errorCode: 'NodeWalletSignatureJSONError',
-  //   errorKind: 'Parser',
-  //   status: 502,
-  //   details: [
-  //     'parser error: Signed session key does not match the one we verified above',
-  //     'Signed session key does not match the one we verified above'
-  //   ]
-  // }
-
-  // Finally, we use the session sigs that includes the RLI delegation auth sig to sign
-
-  //  /web/pkp/sign
-  // const res = await litNodeClient.pkpSign({
-  //   toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
-  //   pubKey: dAppOwnerWallet_pkpPublicKey,
-  //   sessionSigs,
-  // });
 
   // /web/execute
   const res = await litNodeClient.executeJs({
