@@ -157,6 +157,8 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   // ========== Rate Limit NFT ==========
+
+  // TODO: Add support for browser feature/lit-2321-js-sdk-add-browser-support-for-createrlidelegationauthsig
   createRliDelegationAuthSig = async ({
     dAppOwnerWallet,
     rliTokenId,
@@ -200,9 +202,9 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // -- validate dAppOwnerWallet is an ethers wallet
-    if (!(dAppOwnerWallet instanceof ethers.Wallet)) {
-      throw new Error('dAppOwnerWallet must be an ethers wallet');
-    }
+    // if (!(dAppOwnerWallet instanceof ethers.Wallet || ethers.Signer)) {
+    //   throw new Error('dAppOwnerWallet must be an ethers wallet');
+    // }
 
     // -- validate addresses has to be an array and has to have at least one address
     if (!Array.isArray(addresses) || addresses.length === 0) {
