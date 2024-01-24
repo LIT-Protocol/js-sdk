@@ -165,12 +165,14 @@ export class LitNodeClientNodeJs extends LitCore {
     addresses,
     uses,
     domain,
+    expiration,
   }: {
     dAppOwnerWallet: ethers.Wallet;
     rliTokenId: string;
     addresses: string[];
     uses: string;
-    domain: string;
+    domain?: string;
+    expiration?: string;
   }): Promise<{
     litResource: LitRLIResource;
     rliDelegationAuthSig: AuthSig;
@@ -184,6 +186,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- to be changed(?)
     const _domain = domain ?? 'example.com';
+    const _expiration = expiration ?? new Date(Date.now() + 1000 * 60 * 7).toISOString();
     const statement = '';
 
     // -- if it's not ready yet, then connect
@@ -252,7 +255,9 @@ export class LitNodeClientNodeJs extends LitCore {
       throw new Error('Failed to verify capabilities for resource');
     }
 
-    // console.log('verified:', verified);
+    // console.log('verified:', verified);  
+
+    let nonce = this.getLatestBlockhash();
 
     // -- get auth sig
     let siweMessage = new siwe.SiweMessage({
@@ -262,8 +267,8 @@ export class LitNodeClientNodeJs extends LitCore {
       uri: ORIGIN,
       version: '1',
       chainId: 1,
-      // nonce(??) <-- we should supply this (called in lit node client)
-      expirationTime: new Date(Date.now() + 1000 * 60 * 7).toISOString(),
+      nonce: nonce?.toString(),
+      expirationTime: _expiration,
     });
 
     siweMessage = recapObject.addToSiweMessage(siweMessage);
