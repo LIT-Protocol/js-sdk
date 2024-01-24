@@ -217,7 +217,7 @@ export class LitNodeClientNodeJs extends LitCore {
     // -- create LitRLIResource (note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
     // lit-ratelimitincrease://{tokenId}
     const litResource = new LitRLIResource(rliTokenId);
-    console.log('litResource:', litResource);
+    // console.log('litResource:', litResource);
 
     // Strip the 0x prefix from each element in the addresses array
     addresses = addresses.map((address) =>
@@ -234,8 +234,8 @@ export class LitNodeClientNodeJs extends LitCore {
       { nft_id: [rliTokenId], delegate_to: addresses, uses: uses.toString() }
     );
 
-    console.log('recapObject:', recapObject);
-    console.log('attenuations:', JSON.stringify(recapObject.attenuations));
+    // console.log('recapObject:', recapObject);
+    // console.log('attenuations:', JSON.stringify(recapObject.attenuations));
 
     // make sure that the resource is added to the recapObject
     const verified = recapObject.verifyCapabilitiesForResource(
@@ -248,7 +248,7 @@ export class LitNodeClientNodeJs extends LitCore {
       throw new Error('Failed to verify capabilities for resource');
     }
 
-    console.log('verified:', verified);
+    // console.log('verified:', verified);
 
     // -- get auth sig
     let siweMessage = new siwe.SiweMessage({
@@ -263,10 +263,10 @@ export class LitNodeClientNodeJs extends LitCore {
     });
 
     siweMessage = recapObject.addToSiweMessage(siweMessage);
-    console.log('XX siweMessage:', siweMessage);
+    // console.log('XX siweMessage:', siweMessage);
 
     let messageToSign = siweMessage.prepareMessage();
-    console.log('messageToSign:', messageToSign);
+    // console.log('messageToSign:', messageToSign);
 
     const signature = await dAppOwnerWallet.signMessage(messageToSign);
 
@@ -430,7 +430,8 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     if (rateLimitAuthSig) {
-      await sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
+      throw new Error("Not implemented yet.");
+      // await sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
     }
 
     return sessionCapabilityObject;
@@ -2509,8 +2510,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
@@ -2539,7 +2540,7 @@ export class LitNodeClientNodeJs extends LitCore {
       resourceAbilityRequests: params.resourceAbilityRequests,
     });
 
-    console.log('XXX needToResignSessionKey:', needToResignSessionKey);
+    // console.log('XXX needToResignSessionKey:', needToResignSessionKey);
 
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
@@ -2584,7 +2585,7 @@ export class LitNodeClientNodeJs extends LitCore {
       : [authSig];
     // const capabilities = params.rliDelegationAuthSig ? [authSig, params.rliDelegationAuthSig] : [authSig];
 
-    console.log('capabilities:', capabilities);
+    // console.log('capabilities:', capabilities);
 
     const signingTemplate = {
       sessionKey: sessionKey.publicKey,
@@ -2607,7 +2608,7 @@ export class LitNodeClientNodeJs extends LitCore {
       // sanitise signedMessage, replace //n with /n
       // signedMessage = signedMessage.replaceAll(/\/\/n/g, '/n');
 
-      console.log('XX signedMessage:', signedMessage);
+      // console.log('XX signedMessage:', signedMessage);
 
       const uint8arrayKey = uint8arrayFromString(
         sessionKey.secretKey,
