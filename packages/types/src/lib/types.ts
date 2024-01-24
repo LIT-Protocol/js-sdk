@@ -33,12 +33,14 @@ export type AccsEVMParams = LPACC_EVM_CONTRACT;
 export type AccsCOSMOSParams = LPACC_EVM_ATOM;
 
 // union type for all the different types of conditions
-export type ConditionItem =
+export type AccsParams =
   | AccsDefaultParams
   | AccsEVMParams
   | AccsSOLV2Params
-  | AccsCOSMOSParams
-  | AccsOperatorParams;
+  | AccsCOSMOSParams;
+
+// union type for all the different types of conditions including operator
+export type ConditionItem = AccsParams | AccsOperatorParams;
 
 export type AccessControlConditions = AccsDefaultParams[];
 export type EvmContractConditions = AccsEVMParams[];

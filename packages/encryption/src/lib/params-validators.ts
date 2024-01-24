@@ -14,7 +14,9 @@ import {
 import {
   AcceptedFileType,
   AccessControlConditions,
+  AccsParams,
   AuthSig,
+  ConditionType,
   DecryptFileProps,
   DecryptFromIpfsProps,
   DecryptRequest,
@@ -638,13 +640,13 @@ class AccessControlConditionsValidator implements ParamsValidator {
 
       const accs = this.flattenAndFilter(
         unifiedAccessControlConditions,
-        isTokenOperator
-      );
+        isTokenOperator // filter operators in ACCs
+      ) as AccsParams[];
       for (const acc of accs) {
         if (
           !checkSchema(
             acc,
-            getSchema(acc.conditionType),
+            getSchema(acc.conditionType as ConditionType),
             'accessControlConditions',
             this.fnName
           )
@@ -664,11 +666,11 @@ class AccessControlConditionsValidator implements ParamsValidator {
 
   // Filters an array of things that can themselves be nested arrays
   // Result is a flat array of all the things that pass the filter
-  private flattenAndFilter(
-    values: any[],
-    filter: (value: any) => boolean
-  ): any[] {
-    const filteredConditions: any[] = [];
+  private flattenAndFilter<T>(
+    values: T[],
+    filter: (value: T) => boolean
+  ): T[] {
+    const filteredConditions: T[] = [];
     for (const value of values) {
       if (Array.isArray(value)) {
         filteredConditions.push(...this.flattenAndFilter(value, filter));
