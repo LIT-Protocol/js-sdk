@@ -1056,6 +1056,10 @@ export interface GetSessionSigsProps {
 
   // The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
   sessionKey?: any;
+
+  // rateLimitAuthSig: AuthSig;
+
+  rliDelegationAuthSig: AuthSig;
 }
 
 export interface AuthCallback {

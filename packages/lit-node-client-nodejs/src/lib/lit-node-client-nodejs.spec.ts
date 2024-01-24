@@ -21,6 +21,39 @@ const isClass = (v) => {
 
 describe('LitNodeClientNodeJs', () => {
   // --start;
+
+  it('gets capabilities with rate limit auth sig', async () => {
+    const mockAuthSigWithRLI = {
+      sig: '0x137b66529678d1fc58ab5b340ad036082af5b9912f823ba22c2851b8f50990a666ad8f2ab2328e8c94414c0a870163743bde91a5f96e9f967fd45d5e0c17c3911b',
+      derivedVia: 'web3.eth.personal.sign',
+      signedMessage:
+        'localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nTESTING TESTING 123\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: eoeo0dsvyLL2gcHsC\nIssued At: 2023-11-17T15:04:20.324Z\nExpiration Time: 2215-07-14T15:04:20.323Z',
+      address: '0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37',
+    };
+
+    const path = '/bglyaysu8rvblxlk7x0ksn';
+
+    let resourceId = {
+      baseUrl: 'my-dynamic-content-server.com',
+      path,
+      orgId: '',
+      role: '',
+      extraData: '',
+    };
+
+    let hashedResourceId = await hashResourceIdForSigning(resourceId);
+
+    const litResource = new LitAccessControlConditionResource(hashedResourceId);
+
+    let sessionCapabilityObject =
+      await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
+        [litResource],
+        mockAuthSigWithRLI
+      );
+
+    expect(sessionCapabilityObject.proofs).toBe(2);
+  });
+
   it('imported { LitNodeClientNodeJs } is a class', async () => {
     expect(isClass(LitNodeClientNodeJs)).toBe(true);
   });
