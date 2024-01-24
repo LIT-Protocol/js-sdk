@@ -156,6 +156,11 @@ export const LIT_ERROR = {
     code: 'invalid_eth_blockhash',
     kind: LitErrorKind.Unexpected,
   },
+  INIT_ERROR: {
+    name: 'InitError',
+    code: 'init_error',
+    kind: LitErrorKind.Unexpected,
+  },
 };
 
 export const LIT_ERROR_CODE = {
