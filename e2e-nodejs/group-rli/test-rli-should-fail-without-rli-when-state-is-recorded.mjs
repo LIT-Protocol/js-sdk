@@ -54,7 +54,7 @@ export async function main() {
   );
 
   const walletNoRLI = new ethers.Wallet(
-    '0xe1090085b352120867ea7b154ceeee30654903a6c37afa1d5c5bcabc63c96676',
+    '0x89faea1d1a74d9de8a807771d17c7cce20cce496244b5f8350330742ba37d099',
     provider
   );
 
