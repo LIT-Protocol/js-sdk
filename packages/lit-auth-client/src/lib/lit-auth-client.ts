@@ -88,9 +88,9 @@ export class LitAuthClient {
 
     // Set RPC URL
     this.rpcUrl = options?.rpcUrl || 'https://chain-rpc.litprotocol.com/http';
-    log('rpc url: ', this.rpcUrl);
-    log('relay config: ', options.litRelayConfig);
-    log('relay instance: ', this.relay);
+    logDebug('rpc url: ', this.rpcUrl);
+    logDebug('relay config: ', options.litRelayConfig);
+    logDebug('relay instance: ', this.relay);
   }
 
   /**
@@ -112,7 +112,7 @@ export class LitAuthClient {
     };
 
     let provider: T;
-    log('resolving provider of type: ', type);
+    logDebug('resolving provider of type: ', type);
     switch (type) {
       case 'google':
         provider = new GoogleProvider({
@@ -232,7 +232,7 @@ export class LitAuthClient {
         authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
         break;
       default:
-        log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
+        logDebug(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
         throw new Error(
           `Unsupported auth method type: ${authMethod.authMethodType}`
         );

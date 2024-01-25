@@ -26,7 +26,7 @@ if (!globalThis.wasmExports) {
     globalThis.wasmExports = exports;
 
     if (!globalThis.jestTesting) {
-      log(
+      logDebug(
         `✅ [BLS SDK] wasmExports loaded. ${
           Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
@@ -49,7 +49,7 @@ if (!globalThis.wasmECDSA) {
     globalThis.wasmECDSA = sdk;
 
     if (!globalThis.jestTesting) {
-      log(
+      logDebug(
         `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
           Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
@@ -63,7 +63,7 @@ if (!globalThis.wasmSevSnpUtils) {
     globalThis.wasmSevSnpUtils = exports;
 
     if (!globalThis.jestTesting) {
-      log(
+      logDebug(
         `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
           Object.keys(exports).length
         } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
@@ -224,7 +224,7 @@ export const combineEcdsaShares = (
     return acc;
   }, []);
 
-  log('Valid Shares:', validShares);
+  logDebug('Valid Shares:', validShares);
 
   // if there are no valid shares, throw an error
   if (validShares.length === 0) {
@@ -267,7 +267,7 @@ export const combineEcdsaShares = (
         break;
       case SIGTYPE.ECDSCAITSITHP256:
         res = ecdsaSdk.combine_signature(validShares, 3);
-        log('response from combine_signature', res);
+        logDebug('response from combine_signature', res);
         sig = JSON.parse(res);
         break;
       // if its another sig type, it shouldnt be resolving to this method
@@ -277,10 +277,10 @@ export const combineEcdsaShares = (
         );
     }
   } catch (e) {
-    log('Failed to combine signatures:', e);
+    logDebug('Failed to combine signatures:', e);
   }
 
-  log('signature', sig);
+  logDebug('signature', sig);
 
   return sig;
 };
@@ -298,7 +298,7 @@ export const computeHDPubKey = (
         defualt: throw new Error('Non supported signature type');
     }
   } catch (e) {
-    log('Failed to derive public key', e);
+    logDebug('Failed to derive public key', e);
   }
 };
 

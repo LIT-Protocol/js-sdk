@@ -39,7 +39,7 @@ export class LitRelay implements IRelay {
     this.relayUrl =
       config.relayUrl || 'https://relayer-server-staging-cayenne.getlit.dev';
     this.relayApiKey = config.relayApiKey || '';
-    log("Lit's relay server URL:", this.relayUrl);
+    logDebug("Lit's relay server URL:", this.relayUrl);
   }
 
   /**
@@ -60,12 +60,12 @@ export class LitRelay implements IRelay {
     });
 
     if (response.status < 200 || response.status >= 400) {
-      log('Something wrong with the API call', await response.json());
+      logDebug('Something wrong with the API call', await response.json());
       const err = new Error('Unable to mint PKP through relay server');
       throw err;
     } else {
       const resBody = await response.json();
-      log('Successfully initiated minting PKP with relayer');
+      logDebug('Successfully initiated minting PKP with relayer');
       return resBody;
     }
   }
@@ -96,7 +96,7 @@ export class LitRelay implements IRelay {
       );
 
       if (response.status < 200 || response.status >= 400) {
-        log('Something wrong with the API call', await response.json());
+        logDebug('Something wrong with the API call', await response.json());
         const err = new Error(
           `Unable to poll the status of this mint PKP transaction: ${requestId}`
         );
@@ -104,18 +104,18 @@ export class LitRelay implements IRelay {
       }
 
       const resBody = await response.json();
-      log('Response OK', { body: resBody });
+      logDebug('Response OK', { body: resBody });
 
       if (resBody.error) {
         // exit loop since error
-        log('Something wrong with the API call', {
+        logDebug('Something wrong with the API call', {
           error: resBody.error,
         });
         const err = new Error(resBody.error);
         throw err;
       } else if (resBody.status === 'Succeeded') {
         // exit loop since success
-        log('Successfully authed', { ...resBody });
+        logDebug('Successfully authed', { ...resBody });
         return resBody;
       }
 
