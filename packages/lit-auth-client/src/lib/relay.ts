@@ -5,7 +5,7 @@ import {
   IRelayPollStatusResponse,
   LitRelayConfig,
 } from '@lit-protocol/types';
-import { log } from './utils';
+import { logDebug } from './utils';
 
 /**
  * Class that communicates with Lit relay server

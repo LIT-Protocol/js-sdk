@@ -1,7 +1,7 @@
 import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
-import { isBrowser, isNode, log } from '@lit-protocol/misc';
+import { isBrowser, isNode, logDebug } from '@lit-protocol/misc';
 import { AuthMethod } from '@lit-protocol/types';
 
 let CID: any;
