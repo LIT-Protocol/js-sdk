@@ -8,9 +8,10 @@ import { AuthMethodType, AuthMethodScope } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
 import * as siwe from 'siwe';
-import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
-import { ethRequestHandler } from '@lit-protocol/pkp-ethers';
-import { AuthMethodType } from '@lit-protocol/constants';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
+
+// import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
+// import { ethRequestHandler } from '@lit-protocol/pkp-ethers';
 
 async function getAuthSig(wallet, litNodeClient) {
   const domain = 'localhost';
@@ -58,6 +59,14 @@ export async function main() {
   }
 
   // ==================== Setup ====================
+  const litNodeClient = new LitNodeClient({
+    litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
+    debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
+    minNodeCount: undefined,
+    checkNodeAttestation: process.env.CHECK_SEV ?? false,
+  });
+
+  await litNodeClient.connect();
 
   // *********************************************************
   // 1. As a dApp Owner, I want to mint a Capacity Credits NFT
@@ -130,59 +139,49 @@ export async function main() {
     accessToken: JSON.stringify(secondWalletControllerAuthSig),
   };
 
-  // -- no scopes
-  // // -- get mint cost
-  // const mintCost = await contractClient2.pkpNftContract.read.mintCost();
+  const mintInfo = await contractClient2.mintWithAuth({
+    authMethod: authMethod,
+    scopes: [
+      // AuthMethodScope.NoPermissions,
+      AuthMethodScope.SignAnything,
+      AuthMethodScope.OnlySignMessages,
+    ],
+  });
 
-  // // -- minting a PKP using a PKP
-  // const mintTx = await contractClient.pkpNftContract.write.mintNext(2, {
-  //   value: mintCost,
-  // });
+  const authId = LitAuthClient.getAuthIdByAuthMethod(authMethod);
 
-  // const mintTxReceipt = await mintTx.wait();
+  const scopes =
+    await contractClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
+      mintInfo.pkp.tokenId,
+      AuthMethodType.EthWallet,
+      authId,
+      3
+    );
 
-  // const secondWalletPKPTokenId = mintTxReceipt.events[0].topics[1];
+  const signAnythingScope = scopes[1];
+  const onlySignMessagesScope = scopes[2];
 
-  let secondWalletPKPPublicKey =
-    await contractClient.pkpNftContract.read.getPubkey(secondWalletPKPTokenId);
+  if (!signAnythingScope) {
+    return fail(`signAnythingScope should be true`);
+  }
 
-  const secondWalletPKPEthAddress = ethers.utils.computeAddress(
-    Buffer.from(secondWalletPKPPublicKey.replace('0x', ''), 'hex')
-  );
+  if (!onlySignMessagesScope) {
+    return fail(`onlySignMessagesScope should be true`);
+  }
 
-  // example outoupt:
-  // secondWalletPKPInfo {
-  //   tokenId: '0xc6ccfa03cd028e950779dbad131e59015d3f7da35e737195d20459a1a9dba706',
-  //   publicKey: '0x04f3b0daeb47783281acf0d3adf2473abd422e90efb32129da9655bd2cc9ffa343f81a6e6377b73feb88cc39b4c540b31a23e472b9d9c9a1612e7fc07a24486b75',
-  //   ethAddress: '0x2eEca3374e1ea59e8667A995b497a8152a8462a7'
-  // }
   const secondWalletPKPInfo = {
-    tokenId: secondWalletPKPTokenId,
-    publicKey: secondWalletPKPPublicKey,
-    ethAddress: secondWalletPKPEthAddress,
+    tokenId: mintInfo.pkp.tokenId,
+    publicKey: `0x${mintInfo.pkp.publicKey}`,
+    ethAddress: mintInfo.pkp.ethAddress,
   };
 
   console.log('secondWalletPKPInfo', secondWalletPKPInfo);
-
-  // const authMethod = {
-  //   authMethodType: AuthMethodType.EthWallet,
-  //   accessToken: JSON.stringify(LITCONFIG.CONTROLLER_AUTHSIG),
-  // };
 
   // ***************************************************************
   // 3. As a dApp owner, I want to create a Capacity Delegation AuthSig
   //    that delegates the Capacity Credits NFT to the PKP NFT
   // ***************************************************************
-  const litNodeClient = new LitNodeClient({
-    litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
-    debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
-    minNodeCount: undefined,
-    checkNodeAttestation: process.env.CHECK_SEV ?? false,
-  });
 
-  await litNodeClient.connect();
-
-  // uri: lit:capability:delegation
   const { capacityDelegationAuthSig } =
     await litNodeClient.createCapacityDelegationAuthSig({
       uses: '1',
@@ -200,20 +199,18 @@ export async function main() {
   // 4. As a PKP, I want to sign the message with recap capabilities
   // ***************************************************************
   const pkpAuthNeededCallback = async ({ resources, expiration, uri }) => {
-    console.log('resources:', resources);
-    console.log('expiration:', expiration);
-    console.log('uri:', uri); // lit:session:xx
-
-    // -- 1. settin up pkp
-    const secondWalletControllerAuthSig = await getAuthSig(
-      secondWallet,
-      litNodeClient
-    );
-
+    console.log('pkpAuthNeededCallback resources:', resources);
+    console.log('pkpAuthNeededCallback expiration:', expiration);
+    console.log('pkpAuthNeededCallback uri:', uri); // lit:session:xx
     console.log(
-      'secondWalletControllerAuthSig:',
+      'pkpAuthNeededCallback secondWalletControllerAuthSig:',
       secondWalletControllerAuthSig
     );
+
+    // console.log(
+    //   'secondWalletControllerAuthSig:',
+    //   secondWalletControllerAuthSig
+    // );
 
     const sessionKeyPair = litNodeClient.getSessionKey();
 
@@ -263,7 +260,6 @@ export async function main() {
   // 6. Mint a PKP for the PKP so that it can sign the message
   // ***************************************************************
 
-  
   // ***************************************************************
   // 7. Finally sign the message using the PKP's PKP
   // ***************************************************************
