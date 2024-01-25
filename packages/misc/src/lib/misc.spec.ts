@@ -6,6 +6,7 @@ global.TextDecoder = TextDecoder;
 
 import { LitErrorKind, LIT_ERROR } from '@lit-protocol/constants';
 import * as utilsModule from './misc';
+import exp from 'constants';
 
 describe('utils', () => {
   /**
@@ -27,6 +28,19 @@ describe('utils', () => {
     expect((console.log as any).mock.calls[0][0]).toBe('Error Stack');
     expect((console.log as any).mock.calls[1][0]).toBe('Error Name');
     expect((console.log as any).mock.calls[2][0]).toBe('Error Message');
+  });
+
+  it.only('should have debug, info, trace, warn, and error functions', () => {
+    expect(utilsModule.logDebug).toBeDefined();
+    expect(utilsModule.logDebugWithRequestId).toBeDefined();
+    expect(utilsModule.logInfo).toBeDefined();
+    expect(utilsModule.logInfoWithRequestId).toBeDefined();
+    expect(utilsModule.logTrace).toBeDefined();
+    expect(utilsModule.logTraceWithRequestId).toBeDefined();
+    expect(utilsModule.logWarn).toBeDefined();
+    expect(utilsModule.logWarnWithRequestId).toBeDefined();
+    expect(utilsModule.logError).toBeDefined();
+    expect(utilsModule.logErrorWithRequestId).toBeDefined();
   });
 
   it('should get the most common string in an array', () => {

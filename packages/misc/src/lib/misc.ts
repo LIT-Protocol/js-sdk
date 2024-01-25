@@ -228,7 +228,7 @@ export const getLoggerbyId = (id: string) => {
  *
  * @returns { void }
  */
-export const log = (...args: any): void => {
+export const logDebug = (...args: any): void => {
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);
@@ -256,7 +256,7 @@ export const log = (...args: any): void => {
   globalThis?.logger && globalThis?.logger.debug(...args);
 };
 
-export const logWithRequestId = (id: string, ...args: any) => {
+export const logDebugWithRequestId = (id: string, ...args: any) => {
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);
@@ -286,7 +286,35 @@ export const logWithRequestId = (id: string, ...args: any) => {
     globalThis.logManager.get(globalThis.logger.category, id).debug(...args);
 };
 
-export const logErrorWithRequestId = (id: string, ...args: any) => {
+export const logInfo = (...args: any) => {
+  if (!globalThis) {
+    // there is no globalThis, just print the log
+    console.log(...args);
+    return;
+  }
+
+  // check if config is loaded yet
+  if (!globalThis?.litConfig) {
+    // config isn't loaded yet, push into buffer
+    logBuffer.push(args);
+    return;
+  }
+
+  if (globalThis?.litConfig?.debug !== true) {
+    return;
+  }
+  // config is loaded, and debug is true
+
+  // if there are there are logs in buffer, print them first and empty the buffer.
+  while (logBuffer.length > 0) {
+    const log = logBuffer.shift() ?? '';
+    globalThis?.logger && globalThis?.logger.info(...log);
+  }
+
+  globalThis?.logger && globalThis?.logger.info(...args);
+};
+
+export const logInfoWithRequestId = (id: string, ...args: any) => {
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);
@@ -309,11 +337,118 @@ export const logErrorWithRequestId = (id: string, ...args: any) => {
   while (logBuffer.length > 0) {
     const log = logBuffer.shift() ?? '';
     globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category, id).error(...log);
+      globalThis.logManager.get(globalThis.logger.category, id).info(...log);
   }
 
   globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category, id).error(...args);
+    globalThis.logManager.get(globalThis.logger.category, id).info(...args);
+};
+
+export const logTrace = (...args: any) => {
+  if (!globalThis) {
+    // there is no globalThis, just print the log
+    console.log(...args);
+    return;
+  }
+
+  // check if config is loaded yet
+  if (!globalThis?.litConfig) {
+    // config isn't loaded yet, push into buffer
+    logBuffer.push(args);
+    return;
+  }
+
+  if (globalThis?.litConfig?.debug !== true) {
+    return;
+  }
+  // config is loaded, and debug is true
+
+  // if there are there are logs in buffer, print them first and empty the buffer.
+  while (logBuffer.length > 0) {
+    const log = logBuffer.shift() ?? '';
+    globalThis?.logger && globalThis?.logger.trace(...log);
+  }
+
+  globalThis?.logger && globalThis?.logger.trace(...args);
+};
+
+export const logTraceWithRequestId = (id: string, ...args: any) => {
+  if (!globalThis) {
+    // there is no globalThis, just print the log
+    console.log(...args);
+    return;
+  }
+
+  // check if config is loaded yet
+  if (!globalThis?.litConfig) {
+    // config isn't loaded yet, push into buffer
+    logBuffer.push(args);
+    return;
+  }
+
+  if (globalThis?.litConfig?.debug !== true) {
+    return;
+  }
+  // config is loaded, and debug is true
+
+  // if there are there are logs in buffer, print them first and empty the buffer.
+  while (logBuffer.length > 0) {
+    const log = logBuffer.shift() ?? '';
+    globalThis?.logger &&
+      globalThis.logManager.get(globalThis.logger.category, id).trace(...log);
+  }
+
+  globalThis?.logger &&
+    globalThis.logManager.get(globalThis.logger.category, id).trace(...args);
+};
+
+export const logWarn = (...args: any) => {
+  if (!globalThis) {
+    // there is no globalThis, just print the log
+    console.log(...args);
+    return;
+  }
+
+  // check if config is loaded yet
+  if (!globalThis?.litConfig) {
+    // config isn't loaded yet, push into buffer
+    logBuffer.push(args);
+    return;
+  }
+
+  // if there are there are logs in buffer, print them first and empty the buffer.
+  while (logBuffer.length > 0) {
+    const log = logBuffer.shift() ?? '';
+    globalThis?.logger && globalThis?.logger.warn(...log);
+  }
+
+  globalThis?.logger && globalThis?.logger.warn(...args);
+};
+
+export const logWarnWithRequestId = (id: string, ...args: any) => {
+  if (!globalThis) {
+    // there is no globalThis, just print the log
+    console.log(...args);
+    return;
+  }
+
+  // check if config is loaded yet
+  if (!globalThis?.litConfig) {
+    // config isn't loaded yet, push into buffer
+    logBuffer.push(args);
+    return;
+  }
+  // config is loaded, and debug is true
+
+  // if there are there are logs in buffer, print them first and empty the buffer.
+  while (logBuffer.length > 0) {
+    const log = logBuffer.shift() ?? '';
+    globalThis?.logger &&
+      globalThis.logManager.get(globalThis.logger.category, id).warn(...log);
+  }
+
+  globalThis?.logger &&
+    globalThis.logManager.get(globalThis.logger.category, id).warn(...args);
 };
 
 export const logError = (...args: any) => {
@@ -344,6 +479,36 @@ export const logError = (...args: any) => {
 
   globalThis?.logger &&
     globalThis.logManager.get(globalThis.logger.category).error(...args);
+};
+
+export const logErrorWithRequestId = (id: string, ...args: any) => {
+  if (!globalThis) {
+    // there is no globalThis, just print the log
+    console.log(...args);
+    return;
+  }
+
+  // check if config is loaded yet
+  if (!globalThis?.litConfig) {
+    // config isn't loaded yet, push into buffer
+    logBuffer.push(args);
+    return;
+  }
+
+  if (globalThis?.litConfig?.debug !== true) {
+    return;
+  }
+  // config is loaded, and debug is true
+
+  // if there are there are logs in buffer, print them first and empty the buffer.
+  while (logBuffer.length > 0) {
+    const log = logBuffer.shift() ?? '';
+    globalThis?.logger &&
+      globalThis.logManager.get(globalThis.logger.category, id).error(...log);
+  }
+
+  globalThis?.logger &&
+    globalThis.logManager.get(globalThis.logger.category, id).error(...args);
 };
 
 /**
@@ -423,7 +588,7 @@ export const checkIfAuthSigRequiresChainParam = (
   chain: string,
   functionName: string
 ): boolean => {
-  log('checkIfAuthSigRequiresChainParam');
+  logDebug('checkIfAuthSigRequiresChainParam');
   for (const key of LIT_AUTH_SIG_CHAIN_KEYS) {
     if (key in authSig) {
       return true;
