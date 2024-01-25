@@ -10,6 +10,7 @@ import { ethers } from 'ethers';
 import * as siwe from 'siwe';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { ethRequestHandler } from '@lit-protocol/pkp-ethers';
+import { AuthMethodType } from '@lit-protocol/constants';
 
 async function getAuthSig(wallet, litNodeClient) {
   const domain = 'localhost';
@@ -79,9 +80,9 @@ export async function main() {
 
   // -- connect to contract client
   let contractClient = new LitContracts({
+    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
     signer: dAppOwnerWallet,
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
-    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
   });
 
   await contractClient.connect();
@@ -111,24 +112,36 @@ export async function main() {
 
   // -- connect to contract client
   let contractClient2 = new LitContracts({
+    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
     signer: secondWallet,
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
-    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
   });
 
   await contractClient2.connect();
 
-  // -- get mint cost
-  const mintCost = await contractClient2.pkpNftContract.read.mintCost();
+  const secondWalletControllerAuthSig = await getAuthSig(
+    secondWallet,
+    litNodeClient
+  );
 
-  // -- minting a PKP using a PKP
-  const mintTx = await contractClient.pkpNftContract.write.mintNext(2, {
-    value: mintCost,
-  });
+  // -- scopes
+  const authMethod = {
+    authMethodType: AuthMethodType.EthWallet,
+    accessToken: JSON.stringify(secondWalletControllerAuthSig),
+  };
 
-  const mintTxReceipt = await mintTx.wait();
+  // -- no scopes
+  // // -- get mint cost
+  // const mintCost = await contractClient2.pkpNftContract.read.mintCost();
 
-  const secondWalletPKPTokenId = mintTxReceipt.events[0].topics[1];
+  // // -- minting a PKP using a PKP
+  // const mintTx = await contractClient.pkpNftContract.write.mintNext(2, {
+  //   value: mintCost,
+  // });
+
+  // const mintTxReceipt = await mintTx.wait();
+
+  // const secondWalletPKPTokenId = mintTxReceipt.events[0].topics[1];
 
   let secondWalletPKPPublicKey =
     await contractClient.pkpNftContract.read.getPubkey(secondWalletPKPTokenId);
@@ -250,6 +263,7 @@ export async function main() {
   // 6. Mint a PKP for the PKP so that it can sign the message
   // ***************************************************************
 
+  
   // ***************************************************************
   // 7. Finally sign the message using the PKP's PKP
   // ***************************************************************
