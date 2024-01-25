@@ -142,7 +142,11 @@ export class LitCore {
       log(
         'localstorage api not found, injecting persistance instance found in config'
       );
-      globalThis.localStorage = this.config.storageProvider.provider;
+      // using Object definProperty in order to set a property previously defined as readonly.
+      // if the user wants to override the storage option explicitly we override.
+      Object.defineProperty(globalThis, 'localStorage', {
+        value: this.config.storageProvider?.provider,
+      });
     } else if (
       isNode() &&
       !globalThis.localStorage &&

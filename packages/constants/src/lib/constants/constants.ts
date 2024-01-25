@@ -365,6 +365,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  scroll: {
+    contractAddress: null,
+    chainId: 534352,
+    name: 'Scroll',
+    symbol: 'ETH',
+    decimals: 18,
+    rpcUrls: ['https://rpc.scroll.io'],
+    blockExplorerUrls: ['https://scrollscan.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
   zksync: {
     contractAddress: null,
     chainId: 324,

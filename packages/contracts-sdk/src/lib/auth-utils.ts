@@ -31,7 +31,6 @@ export async function getAuthIdByAuthMethod(authMethod: any): Promise<string> {
   return authId;
 }
 
-
 // check if the given object is a session sigs object
 export const isSessionSigs = (obj: any) => {
   // the "top-level" object must have a key that starts with "https://"
@@ -44,12 +43,12 @@ export const isSessionSigs = (obj: any) => {
   }
 
   return true;
-}
+};
 
 /**
  * Get the auth method id for an eth auth method, the access token can either be an auth sig or a session sigs object
- * @param authMethod 
- * @returns 
+ * @param authMethod
+ * @returns
  */
 export function getEthAuthMethodId(authMethod: any): string {
   let address: string;
@@ -59,12 +58,14 @@ export function getEthAuthMethodId(authMethod: any): string {
   try {
     accessToken = JSON.parse(authMethod.accessToken);
   } catch (err) {
-    throw new Error("Unable to parse access token as JSON object");
+    throw new Error('Unable to parse access token as JSON object');
   }
 
   // -- now check if the access token is an authSig or session sigs object
   if (isSessionSigs(accessToken)) {
-    const sessionSig = Object.values(accessToken).find((sig: any) => sig.address) as SessionSig;
+    const sessionSig = Object.values(accessToken).find(
+      (sig: any) => sig.address
+    ) as SessionSig;
     address = sessionSig.address;
   } else {
     address = accessToken.address;
