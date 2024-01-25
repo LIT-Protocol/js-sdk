@@ -30,7 +30,7 @@ describe('utils', () => {
     expect((console.log as any).mock.calls[2][0]).toBe('Error Message');
   });
 
-  it.only('should have debug, info, trace, warn, and error functions', () => {
+  it('should have debug, info, trace, warn, and error functions', () => {
     expect(utilsModule.logDebug).toBeDefined();
     expect(utilsModule.logDebugWithRequestId).toBeDefined();
     expect(utilsModule.logInfo).toBeDefined();
