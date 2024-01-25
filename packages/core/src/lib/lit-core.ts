@@ -139,7 +139,7 @@ export class LitCore {
     // If the user sets a new storage provider we respect it over our default storage
     // If the user sets a new file path, we respect it over the default path.
     if (this.config.storageProvider?.provider) {
-      logDebug
+      log(
         'localstorage api not found, injecting persistance instance found in config'
       );
       // using Object definProperty in order to set a property previously defined as readonly.
@@ -152,7 +152,7 @@ export class LitCore {
       !globalThis.localStorage &&
       !this.config.storageProvider?.provider
     ) {
-      logDebug
+      log(
         'Looks like you are running in NodeJS and did not provide a storage provider, youre sessions will not be cached'
       );
     }
@@ -186,7 +186,7 @@ export class LitCore {
       const bootstrapUrls = await LitContracts.getValidators(
         this.config.litNetwork as LitNetwork
       );
-      logDebug'Bootstrap urls: ', bootstrapUrls);
+      log('Bootstrap urls: ', bootstrapUrls);
       if (minNodeCount <= 0) {
         throwError({
           message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
@@ -232,12 +232,12 @@ export class LitCore {
       const stakingContract = await LitContracts.getStakingContract(
         this.config.litNetwork as any
       );
-      logDebug
+      log(
         'listening for state change on staking contract: ',
         stakingContract.address
       );
       stakingContract.on('StateChanged', async (state: StakingStates) => {
-        logDebug`New state detected: "${state}"`);
+        log(`New state detected: "${state}"`);
         if (state === StakingStates.NextValidatorSetLocked) {
           await this.setNewConfig();
         }
@@ -339,12 +339,12 @@ export class LitCore {
               });
             } else {
               // actually verify the attestation by checking the signature against AMD certs
-              logDebug'Checking attestation against amd certs...');
+              log('Checking attestation against amd certs...');
               const attestation = resp.attestation;
 
               try {
                 checkSevSnpAttestation(attestation, challenge, url).then(() => {
-                  logDebug`Lit Node Attestation verified for ${url}`);
+                  log(`Lit Node Attestation verified for ${url}`);
 
                   // only set server keys if attestation is valid
                   // so that we don't use this node if it's not valid
@@ -368,7 +368,7 @@ export class LitCore {
           }
         })
         .catch((e: any) => {
-          logDebug'Error connecting to node ', url, e);
+          log('Error connecting to node ', url, e);
         });
     }
 
@@ -424,10 +424,10 @@ export class LitCore {
 
           this.ready = true;
 
-          logDebug
+          log(
             `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`
           );
-          logDebug'current network config', {
+          log('current network config', {
             networkPubkey: this.networkPubKey,
             networkPubKeySet: this.networkPubKeySet,
             hdRootPubkeys: this.hdRootPubkeys,
@@ -509,7 +509,7 @@ export class LitCore {
     // -- create url with path
     const urlWithPath = `${url}/web/handshake`;
 
-    logDebug`handshakeWithNode ${urlWithPath}`);
+    log(`handshakeWithNode ${urlWithPath}`);
 
     const data = {
       clientPublicKey: 'test',
@@ -627,7 +627,7 @@ export class LitCore {
           errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
         });
       } else {
-        logDebug`authSig or sessionSigs not found. This may be using authMethod`);
+        log(`authSig or sessionSigs not found. This may be using authMethod`);
       }
     }
 
@@ -763,7 +763,7 @@ export class LitCore {
           res.error.errorCode === 'not_authorized') &&
         this.config.alertWhenUnauthorized
       ) {
-        logDebug
+        log(
           '[Alert originally] You are not authorized to access to this content'
         );
       }
@@ -814,7 +814,7 @@ export class LitCore {
       formattedAccessControlConditions = accessControlConditions.map((c: any) =>
         canonicalAccessControlConditionFormatter(c)
       );
-      logDebug
+      log(
         'formattedAccessControlConditions',
         JSON.stringify(formattedAccessControlConditions)
       );
@@ -822,7 +822,7 @@ export class LitCore {
       formattedEVMContractConditions = evmContractConditions.map((c: any) =>
         canonicalEVMContractConditionFormatter(c)
       );
-      logDebug
+      log(
         'formattedEVMContractConditions',
         JSON.stringify(formattedEVMContractConditions)
       );
@@ -830,7 +830,7 @@ export class LitCore {
       formattedSolRpcConditions = solRpcConditions.map((c: any) =>
         canonicalSolRpcConditionFormatter(c)
       );
-      logDebug
+      log(
         'formattedSolRpcConditions',
         JSON.stringify(formattedSolRpcConditions)
       );
@@ -839,7 +839,7 @@ export class LitCore {
         unifiedAccessControlConditions.map((c: any) =>
           canonicalUnifiedAccessControlConditionFormatter(c)
         );
-      logDebug
+      log(
         'formattedUnifiedAccessControlConditions',
         JSON.stringify(formattedUnifiedAccessControlConditions)
       );

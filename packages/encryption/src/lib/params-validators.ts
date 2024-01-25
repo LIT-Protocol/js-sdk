@@ -50,7 +50,7 @@ export const safeParams = ({
   params: any[] | any;
 }): IEither<void> => {
   if (!paramsValidators[functionName]) {
-    logDebug`This function ${functionName} is skipping params safe guarding.`);
+    log(`This function ${functionName} is skipping params safe guarding.`);
     return ERight(undefined);
   }
 

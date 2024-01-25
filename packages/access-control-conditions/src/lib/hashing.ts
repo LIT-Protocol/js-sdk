@@ -29,14 +29,14 @@ import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 export const hashUnifiedAccessControlConditions = (
   unifiedAccessControlConditions: UnifiedAccessControlConditions
 ): Promise<ArrayBuffer> => {
-  logDebug'unifiedAccessControlConditions:', unifiedAccessControlConditions);
+  log('unifiedAccessControlConditions:', unifiedAccessControlConditions);
 
   const conditions = unifiedAccessControlConditions.map(
     (condition: ConditionItem) => {
       return canonicalUnifiedAccessControlConditionFormatter(condition);
     }
   );
-  logDebug'conditions:', conditions);
+  log('conditions:', conditions);
 
   // check if there's any undefined in the conditions
   const hasUndefined = conditions.some((c) => c === undefined);
@@ -57,7 +57,7 @@ export const hashUnifiedAccessControlConditions = (
   }
   const toHash = JSON.stringify(conditions);
 
-  logDebug'Hashing unified access control conditions: ', toHash);
+  log('Hashing unified access control conditions: ', toHash);
 
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
@@ -116,7 +116,7 @@ export const hashAccessControlConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  logDebug'Hashing access control conditions: ', toHash);
+  log('Hashing access control conditions: ', toHash);
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
 
@@ -140,7 +140,7 @@ export const hashEVMContractConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  logDebug'Hashing evm contract conditions: ', toHash);
+  log('Hashing evm contract conditions: ', toHash);
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
   return crypto.subtle.digest('SHA-256', data);
@@ -163,7 +163,7 @@ export const hashSolRpcConditions = (
   );
 
   const toHash = JSON.stringify(conds);
-  logDebug'Hashing sol rpc conditions: ', toHash);
+  log('Hashing sol rpc conditions: ', toHash);
   const encoder = new TextEncoder();
   const data = encoder.encode(toHash);
 

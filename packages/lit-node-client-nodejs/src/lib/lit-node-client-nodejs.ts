@@ -215,7 +215,7 @@ export class LitNodeClientNodeJs extends LitCore {
     try {
       response = JSON.parse(responseString);
     } catch (e) {
-      logDebug
+      log(
         'Error parsing response as json.  Swallowing and returning as string.',
         responseString
       );
@@ -341,7 +341,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- (TRY) to get it in the local storage
     // -- IF NOT: Generates one
-    logDebug`getWalletSig - flow starts
+    log(`getWalletSig - flow starts
         storageKey: ${storageKey}
         storedWalletSigOrError: ${JSON.stringify(storedWalletSigOrError)}
     `);
@@ -351,12 +351,12 @@ export class LitNodeClientNodeJs extends LitCore {
       !storedWalletSigOrError.result ||
       storedWalletSigOrError.result == ''
     ) {
-      logDebug'getWalletSig - flow 1');
+      log('getWalletSig - flow 1');
       console.warn(
         `Storage key "${storageKey}" is missing. Not a problem. Continue...`
       );
       if (authNeededCallback) {
-        logDebug'getWalletSig - flow 1.1');
+        log('getWalletSig - flow 1.1');
         const body = {
           chain,
           statement: sessionCapabilityObject?.statement,
@@ -369,13 +369,13 @@ export class LitNodeClientNodeJs extends LitCore {
           nonce,
         };
 
-        logDebug'callback body:', body);
+        log('callback body:', body);
 
         walletSig = await authNeededCallback(body);
       } else {
-        logDebug'getWalletSig - flow 1.2');
+        log('getWalletSig - flow 1.2');
         if (!this.defaultAuthCallback) {
-          logDebug'getWalletSig - flow 1.2.1');
+          log('getWalletSig - flow 1.2.1');
           return throwError({
             message: 'No default auth callback provided',
             errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
@@ -383,7 +383,7 @@ export class LitNodeClientNodeJs extends LitCore {
           });
         }
 
-        logDebug'getWalletSig - flow 1.2.2');
+        log('getWalletSig - flow 1.2.2');
         walletSig = await this.defaultAuthCallback({
           chain,
           statement: sessionCapabilityObject.statement,
@@ -397,7 +397,7 @@ export class LitNodeClientNodeJs extends LitCore {
         });
       }
 
-      logDebug'getWalletSig - flow 1.3');
+      log('getWalletSig - flow 1.3');
 
       // (TRY) to set walletSig to local storage
       const storeNewWalletSigOrError = setStorageItem(
@@ -405,23 +405,23 @@ export class LitNodeClientNodeJs extends LitCore {
         JSON.stringify(walletSig)
       );
       if (storeNewWalletSigOrError.type === 'ERROR') {
-        logDebug'getWalletSig - flow 1.4');
+        log('getWalletSig - flow 1.4');
         console.warn(
           `Unable to store walletSig in local storage. Not a problem. Continue...`
         );
       }
     } else {
-      logDebug'getWalletSig - flow 2');
+      log('getWalletSig - flow 2');
       try {
         walletSig = JSON.parse(storedWalletSigOrError.result as string);
-        logDebug'getWalletSig - flow 2.1');
+        log('getWalletSig - flow 2.1');
       } catch (e) {
         console.warn('Error parsing walletSig', e);
-        logDebug'getWalletSig - flow 2.2');
+        log('getWalletSig - flow 2.2');
       }
     }
 
-    logDebug'getWalletSig - flow 3');
+    log('getWalletSig - flow 3');
     return walletSig!;
   };
 
@@ -648,7 +648,7 @@ export class LitNodeClientNodeJs extends LitCore {
     params: GetSigningShareForDecryptionRequest,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    logDebug'getSigningShareForDecryption');
+    log('getSigningShareForDecryption');
     const urlWithPath = `${url}/web/encryption/sign`;
 
     return await this.sendCommandToNode({
@@ -673,7 +673,7 @@ export class LitNodeClientNodeJs extends LitCore {
     params: SignConditionECDSA,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    logDebug'signConditionEcdsa');
+    log('signConditionEcdsa');
     const urlWithPath = `${url}/web/signing/signConditionEcdsa`;
 
     const data = {
@@ -784,7 +784,7 @@ export class LitNodeClientNodeJs extends LitCore {
       targetNodeRange,
     } = params;
 
-    logDebug'running runOnTargetedNodes:', targetNodeRange);
+    log('running runOnTargetedNodes:', targetNodeRange);
 
     if (!targetNodeRange) {
       return throwError({
@@ -852,7 +852,7 @@ export class LitNodeClientNodeJs extends LitCore {
         .mod(this.config.bootstrapUrls.length)
         .toNumber();
 
-      logDebug'nodeIndex:', nodeIndex);
+      log('nodeIndex:', nodeIndex);
 
       // must be unique & less than bootstrapUrls.length
       if (
@@ -864,7 +864,7 @@ export class LitNodeClientNodeJs extends LitCore {
       nodeCounter++;
     }
 
-    logDebug'Final Selected Indexes:', randomSelectedNodeIndexes);
+    log('Final Selected Indexes:', randomSelectedNodeIndexes);
 
     const requestId = this.getRequestId();
     const nodePromises = [];
@@ -881,7 +881,7 @@ export class LitNodeClientNodeJs extends LitCore {
       // because the staking nodes can change, and the rust code will use the same list
       const url = this.config.bootstrapUrls[nodeIndex];
 
-      logDebug`running on node ${nodeIndex} at ${url}`);
+      log(`running on node ${nodeIndex} at ${url}`);
 
       const reqBody: JsonExecutionRequest =
         this.getLitActionRequestBody(params);
@@ -1011,20 +1011,20 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- execute
     keys.forEach((key: any) => {
-      logDebug'key:', key);
+      log('key:', key);
 
       const shares = signedData.map((r: any) => r[key]);
 
-      logDebug'shares:', shares);
+      log('shares:', shares);
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
       const sigShares: Array<SigShare> = shares.map((s: any, index: number) => {
-        logDebug'Original Share Struct:', s);
+        log('Original Share Struct:', s);
 
         const share = this._getFlattenShare(s);
 
-        logDebug'share:', share);
+        log('share:', share);
 
         if (!share) {
           throw new Error('share is null or undefined');
@@ -1039,8 +1039,8 @@ export class LitNodeClientNodeJs extends LitCore {
         const sanitisedBigR = sanitise(share.bigr);
         const sanitisedSigShare = sanitise(share.publicKey);
 
-        logDebug'sanitisedBigR:', sanitisedBigR);
-        logDebug'sanitisedSigShare:', sanitisedSigShare);
+        log('sanitisedBigR:', sanitisedBigR);
+        log('sanitisedSigShare:', sanitisedSigShare);
 
         return {
           sigType: share.sigType,
@@ -1053,7 +1053,7 @@ export class LitNodeClientNodeJs extends LitCore {
         };
       });
 
-      logDebug'getSessionSignatures - sigShares', sigShares);
+      log('getSessionSignatures - sigShares', sigShares);
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
@@ -1502,7 +1502,7 @@ export class LitNodeClientNodeJs extends LitCore {
       logs: mostCommonLogs,
     };
 
-    logDebug'returnVal:', returnVal);
+    log('returnVal:', returnVal);
 
     // -- case: debug mode
     if (debug) {
@@ -1746,7 +1746,7 @@ export class LitNodeClientNodeJs extends LitCore {
       res as SuccessNodePromises<NodeBlsSigningShare>
     ).values;
 
-    logDebug'signatureShares', signatureShares);
+    log('signatureShares', signatureShares);
 
     // ========== Result ==========
     const finalJwt: string = this.combineSharesAndGetJWT(
@@ -2072,7 +2072,7 @@ export class LitNodeClientNodeJs extends LitCore {
     formattedAccessControlConditions = accessControlConditions.map((c: any) =>
       canonicalAccessControlConditionFormatter(c)
     );
-    logDebug
+    log(
       'formattedAccessControlConditions',
       JSON.stringify(formattedAccessControlConditions)
     );
@@ -2105,7 +2105,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
       return signature;
     } catch (e) {
-      logDebug'Error - signed_ecdsa_messages - ', e);
+      log('Error - signed_ecdsa_messages - ', e);
       const signed_ecdsa_message = nodePromises[0];
       return signed_ecdsa_message;
     }
@@ -2199,7 +2199,7 @@ export class LitNodeClientNodeJs extends LitCore {
     let res;
     try {
       res = await this.handleNodePromises(nodePromises, requestId);
-      logDebug'signSessionKey node promises:', res);
+      log('signSessionKey node promises:', res);
     } catch (e) {
       throw new Error(`Error when handling node promises: ${e}`);
     }
@@ -2246,7 +2246,7 @@ export class LitNodeClientNodeJs extends LitCore {
         // check if all required fields are present
         for (const field of requiredFields) {
           if (!sessionSig[field] || sessionSig[field] === '') {
-            logDebug
+            log(
               `Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
             );
             return null;
@@ -2298,7 +2298,7 @@ export class LitNodeClientNodeJs extends LitCore {
     params: GetSignSessionKeySharesProp,
     requestId: string
   ) => {
-    logDebug'getSignSessionKeyShares');
+    log('getSignSessionKeyShares');
     const urlWithPath = `${url}/web/sign_session_key`;
     return await this.sendCommandToNode({
       url: urlWithPath,
@@ -2387,7 +2387,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
-      logDebug'need to re-sign session key.  Signing...');
+      log('need to re-sign session key.  Signing...');
       authSig = await this.#authCallbackAndUpdateStorageItem({
         authCallback: params.authNeededCallback,
         authCallbackParams: {
@@ -2448,7 +2448,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
       let signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
-      // logDebug"signature", signature);
+      // log("signature", signature);
       signatures[nodeAddress] = {
         sig: uint8arrayToString(signature, 'base16'),
         derivedVia: 'litSessionSignViaNacl',
@@ -2458,7 +2458,7 @@ export class LitNodeClientNodeJs extends LitCore {
       };
     });
 
-    logDebug'signatures:', signatures);
+    log('signatures:', signatures);
 
     return signatures;
   };

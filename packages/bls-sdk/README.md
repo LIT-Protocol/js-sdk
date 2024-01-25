@@ -17,7 +17,7 @@ import { initWasmBlsSdk } from '@lit-protocol/bls-sdk';
 
 initWasmBlsSdk().then((exports) => {
   globalThis.wasmExports = exports;
-  logDebug
+  log(
     `✅ [BLS SDK] wasmExports loaded. ${
       Object.keys(exports).length
     } functions available. Run 'wasmExports' in the console to see them.`

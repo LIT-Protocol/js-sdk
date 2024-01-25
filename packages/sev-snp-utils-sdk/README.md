@@ -17,7 +17,7 @@ import { initSevSnpUtilsSdk } from '@lit-protocol/sev-snp-utils-sdk';
 
 initSevSnpUtilsSdk().then((exports) => {
   globalThis.wasmExports = exports;
-  logDebug
+  log(
     `✅ [SEV SNP Utils SDK] wasmExports loaded. ${
       Object.keys(exports).length
     } functions available. Run 'wasmExports' in the console to see them.`

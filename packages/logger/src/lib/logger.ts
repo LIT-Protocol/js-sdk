@@ -290,7 +290,7 @@ export class Logger {
   }
 
   private _log(level: LogLevel, message: string = '', ...args: any[]): void {
-    const log = new logDebug
+    const log = new Log(
       new Date().toISOString(),
       message,
       args,

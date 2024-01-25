@@ -377,7 +377,7 @@ export const zipAndEncryptFiles = async (
     const folder: JSZip | null = zip.folder('encryptedAssets');
 
     if (!folder) {
-      logDebug"Failed to get 'encryptedAssets' from zip.folder() ");
+      log("Failed to get 'encryptedAssets' from zip.folder() ");
       return throwError({
         message: "Failed to get 'encryptedAssets' from zip.folder() ",
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
@@ -561,7 +561,7 @@ export const encryptFileAndZipWithMetadata = async (
   const folder: JSZip | null = zip.folder('encryptedAssets');
 
   if (!folder) {
-    logDebug"Failed to get 'encryptedAssets' from zip.folder() ");
+    log("Failed to get 'encryptedAssets' from zip.folder() ");
     return throwError({
       message: `Failed to get 'encryptedAssets' from zip.folder()`,
       errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
@@ -620,25 +620,25 @@ export const decryptZipFileWithMetadata = async (
   );
 
   if (!jsonFile) {
-    logDebug`Failed to read lit_protocol_metadata.json while zip.file()`);
+    log(`Failed to read lit_protocol_metadata.json while zip.file()`);
     return;
   }
 
   const metadata: MetadataForFile = JSON.parse(await jsonFile.async('string'));
 
-  logDebug'zip metadata', metadata);
+  log('zip metadata', metadata);
 
   const folder: JSZip | null = zip.folder('encryptedAssets');
 
   if (!folder) {
-    logDebug"Failed to get 'encryptedAssets' from zip.folder() ");
+    log("Failed to get 'encryptedAssets' from zip.folder() ");
     return;
   }
 
   const _file: JSZip.JSZipObject | null = folder.file(metadata.name);
 
   if (!_file) {
-    logDebug"Failed to get 'metadata.name' while zip.folder().file()");
+    log("Failed to get 'metadata.name' while zip.folder().file()");
     return;
   }
 
@@ -767,11 +767,11 @@ export const verifyJwt = ({
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
-  logDebug'verifyJwt', jwt);
+  log('verifyJwt', jwt);
 
   // verify that the wasm was loaded
   if (!globalThis.wasmExports) {
-    logDebug'wasmExports is not loaded.');
+    log('wasmExports is not loaded.');
   }
 
   const jwtParts = jwt.split('.');
