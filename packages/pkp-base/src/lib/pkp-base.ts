@@ -398,7 +398,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    * @returns {void} - This function does not return a value.
    */
 
-  log(...args: any[]): void {
+  logDebug...args: any[]): void {
     if (this.debug) {
       console.log(this.orange + this.PREFIX + this.reset, ...args);
     }

@@ -142,7 +142,7 @@ export const checkAndSignCosmosAuthMessage = async ({
 
   // -- if not found in local storage
   if (!authSig) {
-    log('signing auth message because sig is not in local storage');
+    logDebug'signing auth message because sig is not in local storage');
 
     await signAndSaveAuthMessage(connectedCosmosProvider);
 
@@ -154,7 +154,7 @@ export const checkAndSignCosmosAuthMessage = async ({
 
   // -- validate
   if (connectedCosmosProvider.account != authSig.address) {
-    log(
+    logDebug
       'signing auth message because account is not the same as the address in the auth sig'
     );
     await signAndSaveAuthMessage(connectedCosmosProvider);
@@ -162,7 +162,7 @@ export const checkAndSignCosmosAuthMessage = async ({
     authSig = JSON.parse(authSig);
   }
 
-  log('authSig', authSig);
+  logDebug'authSig', authSig);
 
   return authSig;
 };

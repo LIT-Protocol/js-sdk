@@ -28,7 +28,7 @@ export default class EthWalletProvider extends BaseProvider {
       this.domain = options.domain || window.location.hostname;
       this.origin = options.origin || window.location.origin;
     } catch (e) {
-      log(
+      logDebug
         '⚠️ Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
       );
       this.domain = options.domain || 'localhost';

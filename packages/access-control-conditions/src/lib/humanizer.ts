@@ -60,7 +60,7 @@ export const humanizeComparator = (comparator: string): string | undefined => {
   let selected: string | undefined = list[comparator];
 
   if (!selected) {
-    log(`Unregonized comparator ${comparator}`);
+    logDebug`Unregonized comparator ${comparator}`);
     return;
   }
 
@@ -86,9 +86,9 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing evm basic access control conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('accessControlConditions', accessControlConditions);
+  logDebug'humanizing evm basic access control conditions');
+  logDebug'myWalletAddress', myWalletAddress);
+  logDebug'accessControlConditions', accessControlConditions);
 
   let fixedConditions: any = accessControlConditions;
 
@@ -235,7 +235,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
             console.log(`Failed to get decimals for ${acc.contractAddress}`);
           }
         }
-        log('decimals', decimals);
+        logDebug'decimals', decimals);
         return `Owns ${humanizeComparator(
           acc.returnValueTest.comparator
         )} ${formatUnits(acc.returnValueTest.value, decimals)} of ${
@@ -286,9 +286,9 @@ export const humanizeEvmContractConditions = async ({
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing evm contract conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('evmContractConditions', evmContractConditions);
+  logDebug'humanizing evm contract conditions');
+  logDebug'myWalletAddress', myWalletAddress);
+  logDebug'evmContractConditions', evmContractConditions);
 
   const promises = await Promise.all(
     evmContractConditions.map(async (acc: any) => {
@@ -347,9 +347,9 @@ export const humanizeSolRpcConditions = async ({
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing sol rpc conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('solRpcConditions', solRpcConditions);
+  logDebug'humanizing sol rpc conditions');
+  logDebug'myWalletAddress', myWalletAddress);
+  logDebug'solRpcConditions', solRpcConditions);
 
   const promises = await Promise.all(
     solRpcConditions.map(async (acc: any) => {
@@ -421,9 +421,9 @@ export const humanizeCosmosConditions = async ({
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
-  log('humanizing cosmos conditions');
-  log('myWalletAddress', myWalletAddress);
-  log('cosmosConditions', cosmosConditions);
+  logDebug'humanizing cosmos conditions');
+  logDebug'myWalletAddress', myWalletAddress);
+  logDebug'cosmosConditions', cosmosConditions);
 
   const promises = await Promise.all(
     cosmosConditions.map(async (acc: any) => {

@@ -115,7 +115,7 @@ export class PKPClient {
     ).length;
 
     if (successfulInits !== this._wallets.size) {
-      log(
+      logDebug
         `Not all wallets initialized successfully. Details: ${JSON.stringify(
           walletStatus,
           null,

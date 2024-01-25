@@ -3,7 +3,7 @@ import * as _LitNodeClient from './lib/lit-node-client';
 
 // ==================== Environment ====================
 if (isNode()) {
-  log('Oh hey you are running in Node.js!');
+  logDebug'Oh hey you are running in Node.js!');
   const fetch = require('node-fetch');
   globalThis.fetch = fetch;
 }

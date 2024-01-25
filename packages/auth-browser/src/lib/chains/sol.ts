@@ -84,7 +84,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
   const res = await connectSolProvider();
 
   if (!res) {
-    log('Failed to connect sol provider');
+    logDebug'Failed to connect sol provider');
   }
 
   const provider = res?.provider;
@@ -98,7 +98,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
 
   // -- case: if unable to get auth from local storage
   if (authSigOrError.type === EITHER_TYPE.ERROR) {
-    log('signing auth message because sig is not in local storage');
+    logDebug'signing auth message because sig is not in local storage');
 
     await signAndSaveAuthMessage({ provider });
 
@@ -122,7 +122,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
 
   // -- if the wallet address isn't the same as the address from local storage
   if (account !== authSig.address) {
-    log(
+    logDebug
       'signing auth message because account is not the same as the address in the auth sig'
     );
 
@@ -135,7 +135,7 @@ export const checkAndSignSolAuthMessage = async (): Promise<AuthSig> => {
     authSig = JSON.parse(authSigOrError.result);
   }
 
-  log('authSig', authSig);
+  logDebug'authSig', authSig);
 
   return authSig;
 };
