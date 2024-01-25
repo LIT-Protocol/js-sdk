@@ -1,17 +1,15 @@
-// Usage: DEBUG=true NETWORK=manzano yarn test:e2e:nodejs --filter=test-recap-from-lit
+// Usage:
+// DEBUG=true NETWORK=habanero MINT_NEW=true yarn test:e2e:nodejs --filter=test-rli-from-lit-node-client-diff-delegatee.mjs
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import {
-  LitAbility,
-  LitRLIResource,
-  LitActionResource,
-} from '@lit-protocol/auth-helpers';
+import { LitAbility, LitActionResource } from '@lit-protocol/auth-helpers';
 
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
 import * as siwe from 'siwe';
+import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 
 export async function main() {
   if (process.env.LOAD_ENV === 'false') {
@@ -24,7 +22,7 @@ export async function main() {
   // ==================== Setup ====================
 
   // ====================================================
-  // =               dApp Owner's Perspetive            =
+  // =               dApp Owner's Perspective           =
   // ====================================================
   const provider = new ethers.providers.JsonRpcProvider(
     LITCONFIG.CHRONICLE_RPC
@@ -33,8 +31,8 @@ export async function main() {
     LITCONFIG.CONTROLLER_PRIVATE_KEY,
     provider
   );
-  const dAppOwnerWallet = globalThis.LitCI.wallet;
 
+  const dAppOwnerWallet = globalThis.LitCI.wallet;
   const dAppOwnerWallet_address = globalThis.LitCI.wallet.address;
   const dAppOwnerWallet_authSig = globalThis.LitCI.CONTROLLER_AUTHSIG;
   const dAppOwnerWallet_pkpPublicKey = globalThis.LitCI.PKP_INFO.publicKey;
@@ -43,7 +41,11 @@ export async function main() {
   console.log('dAppOwnerWallet_address:', dAppOwnerWallet_address);
   console.log('dAppOwnerWallet_pkpPublicKey:', dAppOwnerWallet_pkpPublicKey);
 
-  const delegatedWalletB = new ethers.Wallet.createRandom();
+  const delegatedWalletB = new ethers.Wallet(
+    '0xe1090085b352120867ea7b154ceeee30654903a6c37afa1d5c5bcabc63c96676',
+    new ethers.providers.JsonRpcProvider(LITCONFIG.CHRONICLE_RPC)
+  );
+
   const delegatedWalletB_address = delegatedWalletB.address;
 
   // As a dApp owner, I want to mint a Rate Limit Increase NFT so he who owns or delegated to
@@ -56,14 +58,18 @@ export async function main() {
 
   await contractClient.connect();
 
-  const capacityTokenIdStr = '2';
+  // -- mint RLI
+
+  // -- static to test faster
+  const capacityTokenIdStr = '20';
+
+  // -- mint new RLI
   // const { capacityTokenIdStr } = await contractClient.mintRLI({
   //   requestsPerDay: 14400, // 10 request per minute
   //   daysUntilUTCMidnightExpiration: 2,
   // });
 
   console.log('capacityTokenIdStr:', capacityTokenIdStr);
-
   console.log('dAppOwnerWallet:', dAppOwnerWallet);
 
   const litNodeClient = new LitNodeClient({
@@ -75,27 +81,46 @@ export async function main() {
 
   await litNodeClient.connect();
 
-  // we will create an delegation auth sig, which internally we will create
-  // a recap object, add the resource "lit-ratelimitincrease://{tokenId}" to it, and add it to the siwe
-  // message. We will then sign the siwe message with the dApp owner's wallet.
+  // ====================================================
+  // =                  As an end user                  =
+  // ====================================================
+  const endUserContractClient = new LitContracts({
+    signer: delegatedWalletB,
+    debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
+    network: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
+  });
+
+  await endUserContractClient.connect();
+
+  let endUserPkpMintRes =
+    await endUserContractClient.pkpNftContractUtils.write.mint();
+
+  const endUserPkpInfo = endUserPkpMintRes.pkp;
+
+  console.log('endUserPkpInfo:', endUserPkpInfo);
+
+  // ====================================================
+  // =                  Create Capacity Auth Sig                  =
+  // ====================================================
   const { capacityDelegationAuthSig, litResource } =
     await litNodeClient.createCapacityDelegationAuthSig({
       uses: '1',
       dAppOwnerWallet: dAppOwnerWallet,
       capacityTokenId: capacityTokenIdStr,
-      delegateeAddresses: [dAppOwnerWallet_address, delegatedWalletB_address],
+      delegateeAddresses: [delegatedWalletB_address, endUserPkpInfo.ethAddress],
     });
 
-  console.log('YY capacityDelegationAuthSig:', capacityDelegationAuthSig);
+  console.log('capacityDelegationAuthSig:', capacityDelegationAuthSig);
   console.log('litResource:', JSON.stringify(litResource));
 
-  // ====================================================
-  // =                  As an end user                  =
-  // ====================================================
   // We need to setup a generic siwe auth callback that will be called by the lit-node-client
-  const authNeededCallback = async ({ resources, expiration, uri }) => {
-    console.log('XX resources:', resources);
-    console.log('XX expiration:', expiration);
+  const endUserControllerAuthNeededCallback = async ({
+    resources,
+    expiration,
+    uri,
+  }) => {
+    console.log('resources:', resources);
+    console.log('expiration:', expiration);
 
     const litResource = new LitActionResource('*');
 
@@ -122,7 +147,7 @@ export async function main() {
 
     let siweMessage = new siwe.SiweMessage({
       domain: 'localhost:3000',
-      address: dAppOwnerWallet_address,
+      address: delegatedWalletB_address,
       statement: 'Some custom statement.',
       uri,
       version: '1',
@@ -135,14 +160,13 @@ export async function main() {
     console.log('authCallback siwe:', siweMessage);
 
     const messageToSign = siweMessage.prepareMessage();
-    const signature = await dAppOwnerWallet.signMessage(messageToSign);
+    const signature = await delegatedWalletB.signMessage(messageToSign);
 
     const authSig = {
       sig: signature.replace('0x', ''),
       derivedVia: 'web3.eth.personal.sign',
       signedMessage: messageToSign,
-      address: dAppOwnerWallet_address,
-      algo: null,
+      address: delegatedWalletB_address,
     };
 
     console.log('authCallback authSig:', authSig);
@@ -164,17 +188,13 @@ export async function main() {
         ability: LitAbility.LitActionExecution,
       },
     ],
-    authNeededCallback,
+    authNeededCallback: endUserControllerAuthNeededCallback,
     capacityDelegationAuthSig,
   });
 
-  console.log('XX sessionSigs:', sessionSigs);
-
   // /web/execute
   const res = await litNodeClient.executeJs({
-    // authSig: regularAuthSig,
-    // authSig: sessionSigs['https://64.131.85.108:443'],
-    sessionSigs, // lit:session:xxx or lit:capability:delegation doesn't URI which is not accepted.
+    sessionSigs,
     code: `(async () => {
       const sigShare = await LitActions.signEcdsa({
         toSign: dataToSign,
@@ -187,12 +207,31 @@ export async function main() {
       dataToSign: ethers.utils.arrayify(
         ethers.utils.keccak256([1, 2, 3, 4, 5])
       ),
-      publicKey: dAppOwnerWallet_pkpPublicKey,
+      publicKey: endUserPkpInfo.publicKey,
     },
   });
 
+  // const secondWalletPkpEthersWallet = new PKPEthersWallet({
+  //   controllerSessionSigs: sessionSigs,
+  //   pkpPubKey: endUserPkpInfo.publicKey,
+  //   rpc: LITCONFIG.CHRONICLE_RPC,
+  //   litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
+  //   debug: true,
+  // });
+
+  // const msgToSign = 'TEST MESSAGE TO SIGN';
+
+  // const hexMsg = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(msgToSign));
+
+  // const signature = await secondWalletPkpEthersWallet.signMessage(hexMsg);
+
+  // const recoveredAddr = ethers.utils.verifyMessage(msgToSign, signature);
+
+  // console.log('signature:', signature);
+  // console.log('recoveredAddr:', recoveredAddr);
+
   if (res) {
-    return success('recap works');
+    return success('delegatee able to sign');
   }
 
   return fail(`Failed to get proof from Recap Session Capability`);

@@ -6,6 +6,8 @@ import {
   AuthMethod,
   LitContractContext,
   LitContractResolverContext,
+  MintRLIPerDayContext,
+  MintRLIRes,
 } from '@lit-protocol/types';
 
 // ----- autogen:import-data:start  -----
@@ -1041,17 +1043,10 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   mintRLI = async ({
     requestsPerDay,
     daysUntilUTCMidnightExpiration,
-  }: {
-    requestsPerDay: number;
-    daysUntilUTCMidnightExpiration: number;
-  }): Promise<{
-    // TODO: clean up task for this
-    rliTxHash: string;
-    rliTokenId: BigNumber;
-    rliTokenIdStr: string;
-  }> => {
+  }: MintRLIPerDayContext): Promise<MintRLIRes> => {
     this.log('Minting RLI...');
 
+    // -- in the context of "request per day"
     const requestsPerSecond = convertRequestsPerDayToPerSecond(requestsPerDay);
     const requestsPerKilosecond = Math.round(
       calculateRequestsPerKilosecond(requestsPerSecond)
@@ -1093,8 +1088,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
       return {
         rliTxHash: txHash,
-        rliTokenId: tokenId,
-        rliTokenIdStr: tokenId.toString(),
+        capacityTokenId: tokenId,
+        capacityTokenIdStr: tokenId.toString(),
       };
     } catch (e: any) {
       throw new Error(e);

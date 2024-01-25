@@ -1013,6 +1013,10 @@ export interface SignSessionKeyProp {
 
   //domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
   domain?: string;
+
+  litResource?: any;
+
+  capability?: any;
 }
 
 export interface SignSessionKeyResponse {
@@ -1060,7 +1064,7 @@ export interface GetSessionSigsProps {
 
   // rateLimitAuthSig: AuthSig;
 
-  rliDelegationAuthSig: AuthSig;
+  capacityDelegationAuthSig: AuthSig;
 }
 
 export interface AuthCallback {
@@ -1599,4 +1603,20 @@ export interface RetryTolerance {
    * How many times to retry the operation
    */
   maxRetryCount?: number;
+}
+
+export interface MintRLIPerDayContext {
+  requestsPerDay: number;
+  daysUntilUTCMidnightExpiration: number;
+}
+
+export interface MintRLIPerMinuteContext {
+  requestPerMinute: number;
+  daysUntilUTCMidnightExpiration: number;
+}
+
+export interface MintRLIRes {
+  rliTxHash: string;
+  capacityTokenId: any;
+  capacityTokenIdStr: string;
 }

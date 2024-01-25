@@ -1,4 +1,5 @@
-// Usage: DEBUG=true NETWORK=manzano yarn test:e2e:nodejs --filter=test-recap-from-lit
+// Usage:
+// DEBUG=true NETWORK=habanero MINT_NEW=true yarn test:e2e:nodejs --filter=test-rli-from-lit-node-client-diff-delegatee.mjs
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
@@ -8,7 +9,6 @@ import { LitAbility, LitActionResource } from '@lit-protocol/auth-helpers';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
 import * as siwe from 'siwe';
-import fs from 'fs';
 
 export async function main() {
   if (process.env.LOAD_ENV === 'false') {
@@ -58,13 +58,17 @@ export async function main() {
   await contractClient.connect();
 
   // -- mint RLI
-  const rliTokenIdStr = '2';
-  // const { rliTokenIdStr } = await contractClient.mintRLI({
-  //   requestsPerDay: 14400, // 10 request per minute
-  //   daysUntilUTCMidnightExpiration: 2,
-  // });
 
-  console.log('rliTokenIdStr:', rliTokenIdStr);
+  // -- static to test faster
+  // const capacityTokenIdStr = '2';
+
+  // -- mint new RLI
+  const { capacityTokenIdStr } = await contractClient.mintRLI({
+    requestsPerDay: 14400, // 10 request per minute
+    daysUntilUTCMidnightExpiration: 2,
+  });
+
+  console.log('capacityTokenIdStr:', capacityTokenIdStr);
   console.log('dAppOwnerWallet:', dAppOwnerWallet);
 
   const litNodeClient = new LitNodeClient({
@@ -79,15 +83,15 @@ export async function main() {
   // we will create an delegation auth sig, which internally we will create
   // a recap object, add the resource "lit-ratelimitincrease://{tokenId}" to it, and add it to the siwe
   // message. We will then sign the siwe message with the dApp owner's wallet.
-  const { rliDelegationAuthSig, litResource } =
-    await litNodeClient.createRliDelegationAuthSig({
+  const { capacityDelegationAuthSig, litResource } =
+    await litNodeClient.createCapacityDelegationAuthSig({
       uses: '1',
       dAppOwnerWallet: dAppOwnerWallet,
-      rliTokenId: rliTokenIdStr,
-      addresses: [delegatedWalletB_address],
+      capacityTokenId: capacityTokenIdStr,
+      delegateeAddresses: [delegatedWalletB_address],
     });
 
-  console.log('YY rliDelegationAuthSig:', rliDelegationAuthSig);
+  console.log('capacityDelegationAuthSig:', capacityDelegationAuthSig);
   console.log('litResource:', JSON.stringify(litResource));
 
   // ====================================================
@@ -174,7 +178,7 @@ export async function main() {
   // - When generating a session sigs, we need to specify the resourceAbilityRequests, which
   // is a list of resources and abilities that we want to be able to perform.
   // "lit-ratelimitincrease://{tokenId}" that the dApp owner has delegated to us.
-  // - We also included the rliDelegationAuthSig that we created earlier, which would be
+  // - We also included the capacityDelegationAuthSig that we created earlier, which would be
   // added to the capabilities array in the signing template.
   let sessionSigs = await litNodeClient.getSessionSigs({
     expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
@@ -186,7 +190,7 @@ export async function main() {
       },
     ],
     authNeededCallback: endUserControllerAuthNeededCallback,
-    rliDelegationAuthSig,
+    capacityDelegationAuthSig,
   });
 
   console.log('YY sessionSigs:', sessionSigs);

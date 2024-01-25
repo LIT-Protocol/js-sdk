@@ -11,6 +11,7 @@ import {
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
   SIGTYPE,
+  SIWE_DELEGATION_URI,
 } from '@lit-protocol/constants';
 
 import {
@@ -98,7 +99,7 @@ import {
   LitAccessControlConditionResource,
   LitResourceAbilityRequest,
   decode,
-  newSessionCapabilityObject,
+  // newSessionCapabilityObject,
   RecapSessionCapabilityObject,
   LitRLIResource,
   LitAbility,
@@ -111,6 +112,23 @@ import {
 import { nacl } from '@lit-protocol/nacl';
 import { BigNumber, ethers, utils } from 'ethers';
 import * as siwe from 'siwe';
+
+// TODO: move this to auth-helper for next patch
+interface CapacityCreditsReq {
+  dAppOwnerWallet: ethers.Wallet;
+  capacityTokenId: string;
+  delegateeAddresses: string[];
+  uses?: string;
+  domain?: string;
+  expiration?: string;
+  statement?: string;
+}
+
+// TODO: move this to auth-helper for next patch
+interface CapacityCreditsRes {
+  litResource: LitRLIResource;
+  capacityDelegationAuthSig: AuthSig;
+}
 
 /** ---------- Main Export Class ---------- */
 
@@ -159,50 +177,47 @@ export class LitNodeClientNodeJs extends LitCore {
 
   // ========== Rate Limit NFT ==========
 
-  // TODO: Add support for browser feature/lit-2321-js-sdk-add-browser-support-for-createrlidelegationauthsig
-  createRliDelegationAuthSig = async ({
-    dAppOwnerWallet,
-    rliTokenId,
-    addresses,
-    uses,
-    domain,
-    expiration,
-  }: {
-    dAppOwnerWallet: ethers.Wallet;
-    rliTokenId: string;
-    addresses: string[];
-    uses: string;
-    domain?: string;
-    expiration?: string;
-  }): Promise<{
-    litResource: LitRLIResource;
-    rliDelegationAuthSig: AuthSig;
-  }> => {
+  // TODO: Add support for browser feature/lit-2321-js-sdk-add-browser-support-for-createCapacityDelegationAuthSig
+  createCapacityDelegationAuthSig = async (
+    params: CapacityCreditsReq
+  ): Promise<CapacityCreditsRes> => {
+    let {
+      dAppOwnerWallet,
+      capacityTokenId,
+      delegateeAddresses,
+      uses,
+      domain,
+      expiration,
+      statement,
+    } = params;
+
+    // -- This is the owner address who holds the RLI and wants to delegate its
+    // usage to a list of delegatee addresses
     const dAppOwnerWalletAddress = ethers.utils.getAddress(
       await dAppOwnerWallet.getAddress()
     );
 
-    // -- siwe settings
-    const ORIGIN = 'lit:capability:delegation';
-
-    // -- to be changed(?)
+    // -- default configuration for siwe message unless there are arguments
     const _domain = domain ?? 'example.com';
     const _expiration =
       expiration ?? new Date(Date.now() + 1000 * 60 * 7).toISOString();
-    const statement = '';
+    const _statement = '' ?? statement;
+
+    // -- default configuration for recap object capability
+    const _uses = uses ?? '1';
 
     // -- if it's not ready yet, then connect
     if (!this.ready) {
       await this.connect();
     }
 
-    // -- validate if rliTokenId is empty
-    if (!rliTokenId) {
-      throw new Error('rliTokenId must exist');
+    // -- validate if capacityTokenId is empty
+    if (!capacityTokenId) {
+      throw new Error('capacityTokenId must exist');
     }
 
     // -- validate
-    if (!dAppOwnerWallet || !addresses) {
+    if (!dAppOwnerWallet || !delegateeAddresses) {
       throw new Error('Both parameters must exist');
     }
 
@@ -211,25 +226,20 @@ export class LitNodeClientNodeJs extends LitCore {
     //   throw new Error('dAppOwnerWallet must be an ethers wallet');
     // }
 
-    // -- validate addresses has to be an array and has to have at least one address
-    if (!Array.isArray(addresses) || addresses.length === 0) {
+    // -- validate delegateeAddresses has to be an array and has to have at least one address
+    if (!Array.isArray(delegateeAddresses) || delegateeAddresses.length === 0) {
       throw new Error(
-        'Addresses must be an array and has to have at least one'
+        'delegateeAddresses must be an array and has to have at least one'
       );
     }
 
-    // -- validate use is set
-    if (!uses) {
-      throw new Error('uses must be set');
-    }
-
-    // -- create LitRLIResource (note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
+    // -- create LitRLIResource
+    // Note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
     // lit-ratelimitincrease://{tokenId}
-    const litResource = new LitRLIResource(rliTokenId);
-    // console.log('litResource:', litResource);
+    const litResource = new LitRLIResource(capacityTokenId);
 
     // Strip the 0x prefix from each element in the addresses array
-    addresses = addresses.map((address) =>
+    delegateeAddresses = delegateeAddresses.map((address) =>
       address.startsWith('0x') ? address.slice(2) : address
     );
 
@@ -240,11 +250,12 @@ export class LitNodeClientNodeJs extends LitCore {
     recapObject.addCapabilityForResource(
       litResource,
       LitAbility.RateLimitIncreaseAuth,
-      { nft_id: [rliTokenId], delegate_to: addresses, uses: uses.toString() }
+      {
+        nft_id: [capacityTokenId],
+        delegate_to: delegateeAddresses,
+        uses: _uses.toString(),
+      }
     );
-
-    // console.log('recapObject:', recapObject);
-    // console.log('attenuations:', JSON.stringify(recapObject.attenuations));
 
     // make sure that the resource is added to the recapObject
     const verified = recapObject.verifyCapabilitiesForResource(
@@ -257,16 +268,14 @@ export class LitNodeClientNodeJs extends LitCore {
       throw new Error('Failed to verify capabilities for resource');
     }
 
-    // console.log('verified:', verified);
-
     let nonce = this.getLatestBlockhash();
 
     // -- get auth sig
     let siweMessage = new siwe.SiweMessage({
       domain: _domain,
       address: dAppOwnerWalletAddress,
-      statement,
-      uri: ORIGIN,
+      statement: _statement,
+      uri: SIWE_DELEGATION_URI,
       version: '1',
       chainId: 1,
       nonce: nonce?.toString(),
@@ -274,22 +283,22 @@ export class LitNodeClientNodeJs extends LitCore {
     });
 
     siweMessage = recapObject.addToSiweMessage(siweMessage);
-    // console.log('XX siweMessage:', siweMessage);
 
     let messageToSign = siweMessage.prepareMessage();
-    // console.log('messageToSign:', messageToSign);
 
-    const signature = await dAppOwnerWallet.signMessage(messageToSign);
+    let signature = await dAppOwnerWallet.signMessage(messageToSign);
+    // replacing 0x to match the tested working authSig from node
+    signature = signature.replace('0x', '');
 
     const authSig = {
-      sig: signature.replace('0x', ''),
+      sig: signature,
       derivedVia: 'web3.eth.personal.sign',
       signedMessage: messageToSign,
       address: dAppOwnerWalletAddress.replace('0x', '').toLowerCase(),
-      algo: null,
+      algo: null, // This is added to match the tested working authSig from node
     };
 
-    return { litResource, rliDelegationAuthSig: authSig };
+    return { litResource, capacityDelegationAuthSig: authSig };
   };
 
   // ========== Scoped Class Helpers ==========
@@ -2492,6 +2501,30 @@ export class LitNodeClientNodeJs extends LitCore {
       nonce: this.latestBlockhash!,
     });
 
+    if (params?.capability && params?.litResource) {
+      const recapObject =
+        await this.generateSessionCapabilityObjectWithWildcards([
+          params.litResource,
+        ]);
+
+      recapObject.addCapabilityForResource(
+        params.litResource,
+        params.capability
+      );
+
+      const verified = recapObject.verifyCapabilitiesForResource(
+        params.litResource,
+        params.capability
+      );
+
+      if (!verified) {
+        throw new Error('Failed to verify capabilities for resource');
+      }
+
+      // @ts-ignore
+      siweMessage = recapObject.addToSiweMessage(siweMessage);
+    }
+
     let siweMessageStr: string = siweMessage.prepareMessage();
 
     // ========== Get Node Promises ==========
@@ -2770,10 +2803,10 @@ export class LitNodeClientNodeJs extends LitCore {
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
     let sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
-    const capabilities = params.rliDelegationAuthSig
-      ? [params.rliDelegationAuthSig, authSig]
+    const capabilities = params.capacityDelegationAuthSig
+      ? [params.capacityDelegationAuthSig, authSig]
       : [authSig];
-    // const capabilities = params.rliDelegationAuthSig ? [authSig, params.rliDelegationAuthSig] : [authSig];
+    // const capabilities = params.capacityDelegationAuthSig ? [authSig, params.capacityDelegationAuthSig] : [authSig];
 
     // console.log('capabilities:', capabilities);
 

@@ -99,7 +99,9 @@ export async function main() {
     return fail('should fail when no RLI');
   }
 
-  return fail('shouldnt reach here at fresh state, but if nodes have recoded your state then this test will fail');
+  return fail(
+    'shouldnt reach here at fresh state, but if nodes have recoded your state then this test will fail'
+  );
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });
