@@ -538,7 +538,7 @@ export class LitCore {
     data,
     requestId,
   }: SendNodeCommand): Promise<any> => {
-    logWithRequestId(
+    logDebugWithRequestId(
       requestId,
       `sendCommandToNode with url ${url} and data`,
       data

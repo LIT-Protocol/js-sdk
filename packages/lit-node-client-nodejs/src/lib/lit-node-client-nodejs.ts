@@ -555,7 +555,7 @@ export class LitNodeClientNodeJs extends LitCore {
   ): Promise<NodeCommandResponse> => {
     const { code, ipfsId, authSig, jsParams, authMethods } = params;
 
-    logWithRequestId(requestId, 'getJsExecutionShares');
+    logDebugWithRequestId(requestId, 'getJsExecutionShares');
 
     // -- execute
     const urlWithPath = `${url}/web/execute`;
@@ -579,7 +579,7 @@ export class LitNodeClientNodeJs extends LitCore {
     params: any,
     requestId: string
   ) => {
-    logWithRequestId(requestId, 'getPkpSigningShares');
+    logDebugWithRequestId(requestId, 'getPkpSigningShares');
     const urlWithPath = `${url}/web/pkp/sign`;
     if (!params.authSig) {
       throw new Error('authSig is required');
@@ -597,7 +597,7 @@ export class LitNodeClientNodeJs extends LitCore {
     params: any,
     requestId: string
   ) => {
-    logWithRequestId(requestId, 'getPkpSigningShares');
+    logDebugWithRequestId(requestId, 'getPkpSigningShares');
     const urlWithPath = `${url}/web/pkp/claim`;
     if (!params.authMethod) {
       throw new Error('authMethod is required');
@@ -624,7 +624,7 @@ export class LitNodeClientNodeJs extends LitCore {
     params: SigningAccessControlConditionRequest,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    logWithRequestId(requestId, 'getSigningShareForToken');
+    logDebugWithRequestId(requestId, 'getSigningShareForToken');
     const urlWithPath = `${url}/web/signing/access_control_condition`;
 
     return this.sendCommandToNode({
@@ -727,7 +727,7 @@ export class LitNodeClientNodeJs extends LitCore {
       signatureShares.map((s) => s.signatureShare)
     );
 
-    logWithRequestId(requestId, 'signature is', signature);
+    logDebugWithRequestId(requestId, 'signature is', signature);
 
     const unsignedJwt = mostCommonString(
       signatureShares.map((s: any) => s.unsignedJwt)
@@ -1126,7 +1126,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
         for (const field of requiredFields) {
           if (!signatureResponse[sigName][field]) {
-            logWithRequestId(
+            logDebugWithRequestId(
               requestId,
               `invalid field ${field} in signature share: ${sigName}, continuing with share processing`
             );
@@ -1183,22 +1183,22 @@ export class LitNodeClientNodeJs extends LitCore {
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
       let sigName = shares[0].sigName;
-      logWithRequestId(
+      logDebugWithRequestId(
         requestId,
         `starting signature combine for sig name: ${sigName}`,
         shares
       );
-      logWithRequestId(
+      logDebugWithRequestId(
         requestId,
         `number of shares for ${sigName}:`,
         signedData.length
       );
-      logWithRequestId(
+      logDebugWithRequestId(
         requestId,
         `validated length for signature: ${sigName}`,
         shares.length
       );
-      logWithRequestId(
+      logDebugWithRequestId(
         requestId,
         'minimum required shares for threshold:',
         this.config.minNodeCount
@@ -1284,7 +1284,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     await wasmECDSA.initWasmEcdsaSdk(); // init WASM
     const signature = wasmECDSA.combine_signature(R_x, R_y, shares);
-    logWithRequestId(requestId, 'raw ecdsa sig', signature);
+    logDebugWithRequestId(requestId, 'raw ecdsa sig', signature);
 
     return signature;
   };
@@ -1400,7 +1400,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<NodeShare>).values;
-    logWithRequestId(
+    logDebugWithRequestId(
       requestId,
       'executeJs responseData',
       JSON.stringify(responseData, null, 2)
@@ -1449,7 +1449,7 @@ export class LitNodeClientNodeJs extends LitCore {
       return signedData;
     });
 
-    logWithRequestId(requestId, 'signedDataList:', signedDataList);
+    logDebugWithRequestId(requestId, 'signedDataList:', signedDataList);
     const signatures = this.getSignatures(signedDataList, requestId);
 
     // -- 2. combine responses as a string, and get parse it as JSON
@@ -1485,7 +1485,7 @@ export class LitNodeClientNodeJs extends LitCore {
       })
       .filter((item) => item !== null);
 
-    logWithRequestId(requestId, 'claimList:', claimsList);
+    logDebugWithRequestId(requestId, 'claimList:', claimsList);
 
     let claims = undefined;
 
@@ -1564,7 +1564,7 @@ export class LitNodeClientNodeJs extends LitCore {
         mustHave: false,
       });
 
-      logWithRequestId(requestId, 'sigToPassToNode:', sigToPassToNode);
+      logDebugWithRequestId(requestId, 'sigToPassToNode:', sigToPassToNode);
 
       const reqBody = {
         toSign,
@@ -1574,7 +1574,7 @@ export class LitNodeClientNodeJs extends LitCore {
         authMethods,
       };
 
-      logWithRequestId(requestId, 'reqBody:', reqBody);
+      logDebugWithRequestId(requestId, 'reqBody:', reqBody);
 
       return this.getPkpSignExecutionShares(url, reqBody, requestId);
     });
@@ -1588,7 +1588,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<PKPSignShare>).values;
-    logWithRequestId(
+    logDebugWithRequestId(
       requestId,
       'responseData',
       JSON.stringify(responseData, null, 2)
@@ -1636,7 +1636,7 @@ export class LitNodeClientNodeJs extends LitCore {
     });
 
     const signatures = this.getSignatures(signedDataList, requestId);
-    logWithRequestId(requestId, `signature combination`, signatures);
+    logDebugWithRequestId(requestId, `signature combination`, signatures);
 
     return signatures.signature; // only a single signature is ever present, so we just return it.
   };
@@ -1930,7 +1930,7 @@ export class LitNodeClientNodeJs extends LitCore {
       dataToEncryptHash
     );
 
-    logWithRequestId(requestId, 'identityParam', identityParam);
+    logDebugWithRequestId(requestId, 'identityParam', identityParam);
 
     // ========== Get Network Signature ==========
     const nodePromises = this.getNodePromises((url: string) => {
@@ -1965,7 +1965,7 @@ export class LitNodeClientNodeJs extends LitCore {
       res as SuccessNodePromises<NodeBlsSigningShare>
     ).values;
 
-    logWithRequestId(requestId, 'signatureShares', signatureShares);
+    logDebugWithRequestId(requestId, 'signatureShares', signatureShares);
 
     // ========== Result ==========
     const decryptedData = this.#decryptWithSignatureShares(
@@ -2183,7 +2183,7 @@ export class LitNodeClientNodeJs extends LitCore {
       siweMessage: siweMessageStr,
     };
 
-    logWithRequestId(requestId, 'signSessionKey body', body);
+    logDebugWithRequestId(requestId, 'signSessionKey body', body);
 
     const nodePromises = this.getNodePromises((url: string) => {
       return this.getSignSessionKeyShares(
@@ -2204,7 +2204,7 @@ export class LitNodeClientNodeJs extends LitCore {
       throw new Error(`Error when handling node promises: ${e}`);
     }
 
-    logWithRequestId(requestId, 'handleNodePromises res:', res);
+    logDebugWithRequestId(requestId, 'handleNodePromises res:', res);
 
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
@@ -2213,7 +2213,7 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     const responseData = res.values;
-    logWithRequestId(
+    logDebugWithRequestId(
       requestId,
       'responseData',
       JSON.stringify(responseData, null, 2)
@@ -2225,7 +2225,7 @@ export class LitNodeClientNodeJs extends LitCore {
       (r: any) => (r as SignedData).signedData
     );
 
-    logWithRequestId(requestId, 'signedDataList', signedDataList);
+    logDebugWithRequestId(requestId, 'signedDataList', signedDataList);
 
     // -- checking if we have enough shares
     const validatedSignedDataList = signedDataList
@@ -2257,13 +2257,13 @@ export class LitNodeClientNodeJs extends LitCore {
       })
       .filter((item) => item !== null);
 
-    logWithRequestId(requestId, 'requested length:', signedDataList.length);
-    logWithRequestId(
+    logDebugWithRequestId(requestId, 'requested length:', signedDataList.length);
+    logDebugWithRequestId(
       requestId,
       'validated length:',
       validatedSignedDataList.length
     );
-    logWithRequestId(
+    logDebugWithRequestId(
       requestId,
       'minimum required length:',
       this.config.minNodeCount
@@ -2528,7 +2528,7 @@ export class LitNodeClientNodeJs extends LitCore {
         };
       });
 
-      logWithRequestId(
+      logDebugWithRequestId(
         requestId,
         `responseData: ${JSON.stringify(responseData, null, 2)}`
       );
@@ -2537,7 +2537,7 @@ export class LitNodeClientNodeJs extends LitCore {
         .derivedKeyId;
 
       const pubkey: string = this.computeHDPubKey(derivedKeyId);
-      logWithRequestId(
+      logDebugWithRequestId(
         requestId,
         `pubkey ${pubkey} derived from key id ${derivedKeyId}`
       );
