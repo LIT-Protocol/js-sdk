@@ -36,7 +36,7 @@ import { Buffer as BufferPolyfill } from 'buffer';
 import {
   isBrowser,
   isNode,
-  log,
+  logDebug,
   numberToHex,
   throwError,
 } from '@lit-protocol/misc';

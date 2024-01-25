@@ -3,7 +3,7 @@ import { PKPCosmosWallet } from '@lit-protocol/pkp-cosmos';
 import { PKPClientProp } from '@lit-protocol/types';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import { WalletFactory } from './wallet-factory';
-import { log } from '@lit-protocol/misc';
+import { logDebug } from '@lit-protocol/misc';
 import { PKP_CLIENT_SUPPORTED_CHAINS } from '@lit-protocol/constants';
 
 export class PKPClient {

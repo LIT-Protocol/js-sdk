@@ -1,4 +1,4 @@
-import { isNode, log } from '@lit-protocol/misc';
+import { isNode, logDebug } from '@lit-protocol/misc';
 import * as _LitNodeClient from './lib/lit-node-client';
 
 // ==================== Environment ====================

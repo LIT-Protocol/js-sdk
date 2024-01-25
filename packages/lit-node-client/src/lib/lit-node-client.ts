@@ -1,7 +1,7 @@
 import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
 import { CustomNetwork, LitNodeClientConfig } from '@lit-protocol/types';
-import { isNode, log } from '@lit-protocol/misc';
+import { isNode, logDebug } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 import { EITHER_TYPE } from '@lit-protocol/constants';
 

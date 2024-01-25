@@ -11,7 +11,7 @@ import {
 } from '@lit-protocol/constants';
 
 import { AuthSig, CosmosWalletType } from '@lit-protocol/types';
-import { log, sortedObject, throwError } from '@lit-protocol/misc';
+import { logDebug, sortedObject, throwError } from '@lit-protocol/misc';
 
 /** ---------- Declaration ---------- */
 declare global {

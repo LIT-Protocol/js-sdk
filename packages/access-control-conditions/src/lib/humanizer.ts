@@ -10,7 +10,7 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
-import { decimalPlaces, log, throwError } from '@lit-protocol/misc';
+import { decimalPlaces, logDebug, throwError } from '@lit-protocol/misc';
 import { formatEther, formatUnits } from 'ethers/lib/utils';
 
 /**

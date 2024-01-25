@@ -9,7 +9,7 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
-import { log, throwError } from '@lit-protocol/misc';
+import { logDebug, throwError } from '@lit-protocol/misc';
 import {
   canonicalAccessControlConditionFormatter,
   canonicalEVMContractConditionFormatter,

@@ -8,7 +8,7 @@ import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
 
 import * as sevSnpUtilsSdk from '@lit-protocol/sev-snp-utils-sdk';
 
-import { isBrowser, log, throwError } from '@lit-protocol/misc';
+import { isBrowser, logDebug, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,

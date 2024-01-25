@@ -29,10 +29,10 @@ import {
   bootstrapLogManager,
   isBrowser,
   isNode,
-  log,
+  logDebug,
   logError,
   logErrorWithRequestId,
-  logWithRequestId,
+  logDebugWithRequestId,
   mostCommonString,
   throwError,
 } from '@lit-protocol/misc';

@@ -35,7 +35,7 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
+import { checkType, isBrowser, logDebug, throwError } from '@lit-protocol/misc';
 
 import { safeParams } from './params-validators';
 

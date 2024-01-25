@@ -20,7 +20,11 @@ import WebAuthnProvider from './providers/WebAuthnProvider';
 import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
 import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
-import { bootstrapLogManager, getLoggerbyId, log } from '@lit-protocol/misc';
+import {
+  bootstrapLogManager,
+  getLoggerbyId,
+  logDebug,
+} from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 
 /**

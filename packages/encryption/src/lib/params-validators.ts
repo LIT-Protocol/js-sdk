@@ -37,7 +37,7 @@ import {
   checkIfAuthSigRequiresChainParam,
   checkType,
   is,
-  log,
+  logDebug,
 } from '@lit-protocol/misc';
 import { isHexString } from 'ethers/lib/utils';
 import { isValidBooleanExpression } from './utils';

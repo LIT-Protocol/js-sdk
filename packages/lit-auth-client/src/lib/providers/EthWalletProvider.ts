@@ -10,7 +10,7 @@ import { SiweMessage } from 'lit-siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
-import { log, throwError } from '@lit-protocol/misc';
+import { logDebug, throwError } from '@lit-protocol/misc';
 
 export default class EthWalletProvider extends BaseProvider {
   /**
