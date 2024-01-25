@@ -89,6 +89,7 @@ import {
 import { computeAddress } from '@ethersproject/transactions';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'lit-siwe';
+import * as siweNormal from 'siwe';
 
 import { LitCore } from '@lit-protocol/core';
 import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
@@ -2489,17 +2490,7 @@ export class LitNodeClientNodeJs extends LitCore {
       siwe_statement += ' ' + params.statement;
     }
 
-    let siweMessage: SiweMessage = new SiweMessage({
-      domain: params?.domain || globalThis.location?.host || 'litprotocol.com',
-      address: pkpEthAddress,
-      statement: siwe_statement,
-      uri: sessionKeyUri,
-      version: '1',
-      chainId: params.chainId ?? 1,
-      expirationTime: _expiration,
-      resources: params.resources,
-      nonce: this.latestBlockhash!,
-    });
+    let siweMessage;
 
     if (params?.capability && params?.litResource) {
       const recapObject =
@@ -2521,11 +2512,38 @@ export class LitNodeClientNodeJs extends LitCore {
         throw new Error('Failed to verify capabilities for resource');
       }
 
-      // @ts-ignore
+      // regular siwe
+      siweMessage = new siweNormal.SiweMessage({
+        domain:
+          params?.domain || globalThis.location?.host || 'litprotocol.com',
+        address: pkpEthAddress,
+        statement: siwe_statement,
+        uri: sessionKeyUri,
+        version: '1',
+        chainId: params.chainId ?? 1,
+        expirationTime: _expiration,
+        resources: params.resources,
+        nonce: this.latestBlockhash!,
+      });
+
       siweMessage = recapObject.addToSiweMessage(siweMessage);
+    } else {
+      // lit-siwe (NOT regular siwe)
+      siweMessage = new SiweMessage({
+        domain:
+          params?.domain || globalThis.location?.host || 'litprotocol.com',
+        address: pkpEthAddress,
+        statement: siwe_statement,
+        uri: sessionKeyUri,
+        version: '1',
+        chainId: params.chainId ?? 1,
+        expirationTime: _expiration,
+        resources: params.resources,
+        nonce: this.latestBlockhash!,
+      });
     }
 
-    let siweMessageStr: string = siweMessage.prepareMessage();
+    let siweMessageStr: string = (siweMessage as SiweMessage).prepareMessage();
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes

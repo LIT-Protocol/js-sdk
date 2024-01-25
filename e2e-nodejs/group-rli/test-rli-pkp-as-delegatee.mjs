@@ -169,6 +169,7 @@ export async function main() {
 
   await litNodeClient.connect();
 
+  // uri: lit:capability:delegation
   const { capacityDelegationAuthSig } =
     await litNodeClient.createCapacityDelegationAuthSig({
       uses: '1',
@@ -188,7 +189,7 @@ export async function main() {
   const pkpAuthNeededCallback = async ({ resources, expiration, uri }) => {
     console.log('resources:', resources);
     console.log('expiration:', expiration);
-    console.log('uri:', uri);
+    console.log('uri:', uri); // lit:session:xx
 
     // -- 1. settin up pkp
     const secondWalletControllerAuthSig = await getAuthSig(
@@ -216,6 +217,8 @@ export async function main() {
       expiration: expiration,
       resources: resources,
       chainId: 1,
+
+      // optional (this would use normal siwe lib, without it, it would use lit-siwe)
       litResource: new LitActionResource('*'),
       capability: LitAbility.LitActionExecution,
     });
@@ -223,97 +226,6 @@ export async function main() {
     console.log('response:', response);
 
     return response.authSig;
-
-    // -- eth wallet method
-    const secondWalletPkpEthersWallet = new PKPEthersWallet({
-      controllerAuthSig: secondWalletControllerAuthSig,
-      pkpPubKey: secondWalletPKPInfo.publicKey,
-      rpc: LITCONFIG.CHRONICLE_RPC,
-      litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
-      debug: true,
-    });
-
-    await secondWalletPkpEthersWallet.init();
-
-    // secondWalletPkpEthersWallet.useAction = true;
-    // secondWalletPkpEthersWallet.setLitAction({
-    //   pkpPubKey: secondWalletPKPInfo.publicKey,
-    // });
-
-    // -- 2. setup resource
-    const litResource = new LitActionResource('*');
-
-    const recapObject =
-      await litNodeClient.generateSessionCapabilityObjectWithWildcards([
-        litResource,
-      ]);
-
-    recapObject.addCapabilityForResource(
-      litResource,
-      LitAbility.LitActionExecution
-    );
-
-    const verified = recapObject.verifyCapabilitiesForResource(
-      litResource,
-      LitAbility.LitActionExecution
-    );
-
-    if (!verified) {
-      throw new Error('Failed to verify capabilities for resource');
-    }
-
-    console.log('authCallback verified:', verified);
-
-    const nonce = litNodeClient.getLatestBlockhash();
-
-    let siweMessage = new siwe.SiweMessage({
-      domain: 'localhost:3000',
-      address: secondWalletPkpEthersWallet.address,
-      statement: 'Some custom statement.',
-      uri,
-      version: '1',
-      chainId: '1',
-      expirationTime: expiration,
-      resources,
-      nonce: nonce?.toString(),
-    });
-
-    siweMessage = recapObject.addToSiweMessage(siweMessage);
-
-    console.log('siweMessage:', siweMessage);
-
-    const messageToSign = siweMessage.prepareMessage();
-
-    console.log('messageToSign:', messageToSign);
-
-    // 3. Sign message using PKP
-    const hexMsg = ethers.utils.hexlify(
-      ethers.utils.toUtf8Bytes(messageToSign)
-    );
-
-    console.log('hexMsg:', hexMsg);
-
-    // controller -> pkp as a controller -> pkp -> sign
-    // [Lit-JS-SDK v3.1.0] [2024-01-25T18:22:35.685Z] [ERROR] [core] [id: f5abf7f29ec9c] Something went wrong, internal id for request: lit_f5abf7f29ec9c. Please provide this identifier with any support requests. Error is Rate limit exceeded.  Try again at 2024-01-26T16:31:36.689446230+00:00 - undefined
-    const signature = await secondWalletPkpEthersWallet.signMessage(hexMsg);
-
-    const recoveredAddr = ethers.utils.verifyMessage(messageToSign, signature);
-
-    console.log(`
-    - PKP address: ${secondWalletPkpEthersWallet.address}
-    - PKP recovered address: ${recoveredAddr}
-    `);
-
-    const authSig = {
-      sig: signature.replace('0x', ''),
-      derivedVia: 'web3.eth.personal.sign',
-      signedMessage: messageToSign,
-      address: secondWalletPkpEthersWallet.address,
-    };
-
-    console.log('PKP authSig:', authSig);
-
-    return authSig;
   };
 
   // ***************************************************************
@@ -341,6 +253,7 @@ export async function main() {
   // ***************************************************************
   // 7. Finally sign the message using the PKP's PKP
   // ***************************************************************
+  // const pkpsPKPPublicKey = '';
 
   // -- Mint a PKP using a PKP
   // const res = await litNodeClient.executeJs({
@@ -357,7 +270,7 @@ export async function main() {
   //     dataToSign: ethers.utils.arrayify(
   //       ethers.utils.keccak256([1, 2, 3, 4, 5])
   //     ),
-  //     publicKey: "pkp's PKP public key"
+  //     publicKey: pkpsPKPPublicKey
   //   },
   // });
 
