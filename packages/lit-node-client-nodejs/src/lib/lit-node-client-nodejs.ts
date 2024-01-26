@@ -2495,8 +2495,6 @@ export class LitNodeClientNodeJs extends LitCore {
     if (params?.resourceAbilityRequests) {
       const resources = params.resourceAbilityRequests.map((r) => r.resource);
 
-      console.log('resources:', resources);
-
       const recapObject =
         await this.generateSessionCapabilityObjectWithWildcards(resources);
 
