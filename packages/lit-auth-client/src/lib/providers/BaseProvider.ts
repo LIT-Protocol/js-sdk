@@ -174,8 +174,9 @@ export abstract class BaseProvider {
             chainId,
 
             // optional
-            ...(params.resourceAbilityRequests && { resourceAbilityRequests: params.resourceAbilityRequests })
-
+            ...(params.resourceAbilityRequests && {
+              resourceAbilityRequests: params.resourceAbilityRequests,
+            }),
           });
         } else {
           response = await nodeClient.signSessionKey({
@@ -188,7 +189,9 @@ export abstract class BaseProvider {
             chainId,
 
             // optional
-            ...(params.resourceAbilityRequests && { resourceAbilityRequests: params.resourceAbilityRequests })
+            ...(params.resourceAbilityRequests && {
+              resourceAbilityRequests: params.resourceAbilityRequests,
+            }),
           });
         }
 

@@ -193,7 +193,6 @@ export async function main() {
     resources,
     resourceAbilityRequests,
   }) => {
-
     // -- validate
     if (!expiration) {
       throw new Error('expiration is required');
