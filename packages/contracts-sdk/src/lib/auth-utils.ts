@@ -61,22 +61,14 @@ export function getEthAuthMethodId(authMethod: any): string {
     throw new Error('Unable to parse access token as JSON object');
   }
 
-  // -- now check if the access token is an authSig or session sigs object
-  if (isSessionSigs(accessToken)) {
-    const sessionSig = Object.values(accessToken).find(
-      (sig: any) => sig.address
-    ) as SessionSig;
-    address = sessionSig.address;
-  } else {
-    address = accessToken.address;
-  }
+  address = accessToken.address;
 
   // -- check if address is empty
   if (!address) {
     throw new Error('No address found in access token');
   }
 
-  return address.toLowerCase();
+  return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`${address}:lit`));
 }
 
 async function getDiscordAuthId(authMethod: any): Promise<string> {

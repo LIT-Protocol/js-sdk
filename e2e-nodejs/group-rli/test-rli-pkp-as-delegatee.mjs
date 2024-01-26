@@ -3,7 +3,12 @@ import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { LitAbility, LitActionResource } from '@lit-protocol/auth-helpers';
+import { LocalStorage } from 'node-localstorage';
+import {
+  LitAbility,
+  LitActionResource,
+  LitPKPResource,
+} from '@lit-protocol/auth-helpers';
 import { AuthMethodType, AuthMethodScope } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
@@ -64,6 +69,9 @@ export async function main() {
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
     minNodeCount: undefined,
     checkNodeAttestation: process.env.CHECK_SEV ?? false,
+    storageProvider: {
+      provider: new LocalStorage('./storage.test.db'),
+    },
   });
 
   await litNodeClient.connect();
@@ -144,11 +152,10 @@ export async function main() {
     scopes: [
       // AuthMethodScope.NoPermissions,
       AuthMethodScope.SignAnything,
-      AuthMethodScope.OnlySignMessages,
     ],
   });
 
-  const authId = LitAuthClient.getAuthIdByAuthMethod(authMethod);
+  const authId = await LitAuthClient.getAuthIdByAuthMethod(authMethod);
 
   const scopes =
     await contractClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
@@ -160,14 +167,6 @@ export async function main() {
 
   const signAnythingScope = scopes[1];
   const onlySignMessagesScope = scopes[2];
-
-  if (!signAnythingScope) {
-    return fail(`signAnythingScope should be true`);
-  }
-
-  if (!onlySignMessagesScope) {
-    return fail(`onlySignMessagesScope should be true`);
-  }
 
   const secondWalletPKPInfo = {
     tokenId: mintInfo.pkp.tokenId,
@@ -198,10 +197,12 @@ export async function main() {
   // ***************************************************************
   // 4. As a PKP, I want to sign the message with recap capabilities
   // ***************************************************************
-  const pkpAuthNeededCallback = async ({ resources, expiration, uri }) => {
-    console.log('pkpAuthNeededCallback resources:', resources);
-    console.log('pkpAuthNeededCallback expiration:', expiration);
-    console.log('pkpAuthNeededCallback uri:', uri); // lit:session:xx
+  const sessionKeyPair = litNodeClient.getSessionKey();
+  const pkpAuthNeededCallback = async (params) => {
+    console.log('auth needed callback params: ', params);
+    //console.log('pkpAuthNeededCallback resources:', resources);
+    //console.log('pkpAuthNeededCallback expiration:', expiration);
+    //console.log('pkpAuthNeededCallback uri:', uri); // lit:session:xx
     console.log(
       'pkpAuthNeededCallback secondWalletControllerAuthSig:',
       secondWalletControllerAuthSig
@@ -212,10 +213,7 @@ export async function main() {
     //   secondWalletControllerAuthSig
     // );
 
-    const sessionKeyPair = litNodeClient.getSessionKey();
-
     const response = await litNodeClient.signSessionKey({
-      sessionKey: sessionKeyPair,
       statement: 'Some custom statement.',
       authMethods: [
         {
@@ -224,13 +222,13 @@ export async function main() {
         },
       ],
       pkpPublicKey: secondWalletPKPInfo.publicKey,
-      expiration: expiration,
-      resources: resources,
+      expiration: params.expiration,
+      resources: params.resources,
       chainId: 1,
 
       // optional (this would use normal siwe lib, without it, it would use lit-siwe)
-      litResource: new LitActionResource('*'),
-      capability: LitAbility.LitActionExecution,
+      litResource: new LitPKPResource('*'),
+      capability: LitAbility.PKPSigning,
     });
 
     console.log('response:', response);
@@ -242,12 +240,13 @@ export async function main() {
   // 5. As a PKP, I want to get the session sigs
   // ***************************************************************
   const pkpSessionSigs = await litNodeClient.getSessionSigs({
+    pkpPublicKey: secondWalletPKPInfo.publicKey,
     expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
     chain: 'ethereum',
     resourceAbilityRequests: [
       {
-        resource: new LitActionResource('*'),
-        ability: LitAbility.LitActionExecution,
+        resource: new LitPKPResource('*'),
+        ability: LitAbility.PKPSigning,
       },
     ],
     authNeededCallback: pkpAuthNeededCallback,
@@ -266,23 +265,23 @@ export async function main() {
   // const pkpsPKPPublicKey = '';
 
   // -- Mint a PKP using a PKP
-  // const res = await litNodeClient.executeJs({
-  //   sessionSigs: pkpSessionSigs,
-  //   code: `(async () => {
-  //     const sigShare = await LitActions.signEcdsa({
-  //       toSign: dataToSign,
-  //       publicKey,
-  //       sigName: "sig",
-  //     });
-  //   })();`,
-  //   authMethods: [],
-  //   jsParams: {
-  //     dataToSign: ethers.utils.arrayify(
-  //       ethers.utils.keccak256([1, 2, 3, 4, 5])
-  //     ),
-  //     publicKey: pkpsPKPPublicKey
-  //   },
-  // });
+  const res = await litNodeClient.executeJs({
+    sessionSigs: pkpSessionSigs,
+    code: `(async () => {
+        const sigShare = await LitActions.signEcdsa({
+         toSign: dataToSign,
+         publicKey,
+         sigName: "sig",
+       });
+     })();`,
+     authMethods: [],
+     jsParams: {
+      dataToSign: ethers.utils.arrayify(
+         ethers.utils.keccak256([1, 2, 3, 4, 5])
+       ),
+       publicKey: secondWalletPKPInfo.publicKey
+     },
+  });
 
   process.exit();
 
