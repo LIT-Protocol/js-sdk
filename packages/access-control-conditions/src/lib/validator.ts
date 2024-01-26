@@ -6,10 +6,7 @@ import {
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
-import {
-  checkSchema,
-  throwError,
-} from '@lit-protocol/misc';
+import { checkSchema, throwError } from '@lit-protocol/misc';
 import { getSchema } from '@lit-protocol/encryption';
 
 /**
