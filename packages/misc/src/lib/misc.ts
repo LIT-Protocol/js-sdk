@@ -429,8 +429,8 @@ export const checkSchema = (
   schema: JSONSchemaType<any>,
   paramName: string,
   functionName: string,
-  throwOnError = true
-) => {
+  throwOnError: boolean = true
+): boolean => {
   const validate = ajv.compile(schema);
 
   const validates = validate(value);

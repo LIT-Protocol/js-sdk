@@ -16,11 +16,3 @@ yarn add @lit-protocol/encryption
   console.log(LitJsSdk_encryption);
 </script>
 ```
-
-### Update TS interfaces
-
-After updating the JSON schema definitions for any access control conditions, run the following command to update the TS interfaces:
-
-```bash
-node ./packages/encryption/tools.mjs --gen
-```

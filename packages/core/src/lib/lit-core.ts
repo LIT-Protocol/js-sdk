@@ -664,13 +664,13 @@ export class LitCore {
     } = params;
 
     if (accessControlConditions) {
-      validateAccessControlConditionsSchema(accessControlConditions);
+      await validateAccessControlConditionsSchema(accessControlConditions);
     } else if (evmContractConditions) {
-      validateEVMContractConditionsSchema(evmContractConditions);
+      await validateEVMContractConditionsSchema(evmContractConditions);
     } else if (solRpcConditions) {
-      validateSolRpcConditionsSchema(solRpcConditions);
+      await validateSolRpcConditionsSchema(solRpcConditions);
     } else if (unifiedAccessControlConditions) {
-      validateUnifiedAccessControlConditionsSchema(
+      await validateUnifiedAccessControlConditionsSchema(
         unifiedAccessControlConditions
       );
     }

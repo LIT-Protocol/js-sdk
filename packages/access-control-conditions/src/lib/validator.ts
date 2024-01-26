@@ -2,39 +2,62 @@ import { JSONSchemaType } from 'ajv';
 import { LIT_ERROR } from '@lit-protocol/constants';
 import {
   AccessControlConditions,
+  ConditionType,
   EvmContractConditions,
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 import { checkSchema, throwError } from '@lit-protocol/misc';
-import { getSchema } from '@lit-protocol/encryption';
+import { loadSchema } from 'lit-accs-validator';
+
+const SCHEMA_NAME_MAP: { [K in ConditionType]: string } = {
+  cosmos: 'LPACC_ATOM',
+  evmBasic: 'LPACC_EVM_BASIC',
+  evmContract: 'LPACC_EVM_CONTRACT',
+  solRpc: 'LPACC_SOL',
+};
+
+async function getSchema<T>(
+  accType: ConditionType
+): Promise<JSONSchemaType<T>> {
+  try {
+    const schemaName = SCHEMA_NAME_MAP[accType];
+    return loadSchema(schemaName) as Promise<JSONSchemaType<T>>;
+  } catch (err) {
+    return throwError({
+      message: `No schema found for condition type ${accType}`,
+      errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+      errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+    });
+  }
+}
 
 /**
  * Validates EVM basic access control conditions schema
  * @param { AccessControlConditions } accs
  */
-export const validateAccessControlConditionsSchema = (
+export const validateAccessControlConditionsSchema = async (
   accs: AccessControlConditions
-): boolean => {
-  accs.forEach((acc) => {
+): Promise<boolean> => {
+  for (const acc of accs) {
     // conditions can be nested to make boolean expressions
     if (Array.isArray(acc)) {
-      validateAccessControlConditionsSchema(acc);
-      return;
+      await validateAccessControlConditionsSchema(acc);
+      continue;
     }
 
     if ('operator' in acc) {
       // condition is operator, skip
-      return;
+      continue;
     }
 
     checkSchema(
       acc,
-      getSchema('evmBasic'),
+      await getSchema('evmBasic'),
       'accessControlConditions',
       'validateAccessControlConditionsSchema'
     );
-  });
+  }
 
   return true;
 };
@@ -43,28 +66,28 @@ export const validateAccessControlConditionsSchema = (
  * Validates EVM contract access control conditions schema
  * @param { EvmContractConditions } accs
  */
-export const validateEVMContractConditionsSchema = (
+export const validateEVMContractConditionsSchema = async (
   accs: EvmContractConditions
-): boolean => {
-  accs.forEach((acc) => {
+): Promise<boolean> => {
+  for (const acc of accs) {
     // conditions can be nested to make boolean expressions
     if (Array.isArray(acc)) {
-      validateEVMContractConditionsSchema(acc);
-      return;
+      await validateEVMContractConditionsSchema(acc);
+      continue;
     }
 
     if ('operator' in acc) {
       // condition is operator, skip
-      return;
+      continue;
     }
 
     checkSchema(
       acc,
-      getSchema('evmContract'),
+      await getSchema('evmContract'),
       'evmContractConditions',
       'validateEVMContractConditionsSchema'
     );
-  });
+  }
 
   return true;
 };
@@ -73,28 +96,28 @@ export const validateEVMContractConditionsSchema = (
  * Validates Sol access control conditions schema
  * @param { SolRpcConditions } accs
  */
-export const validateSolRpcConditionsSchema = (
+export const validateSolRpcConditionsSchema = async (
   accs: SolRpcConditions
-): boolean => {
-  accs.forEach((acc) => {
+): Promise<boolean> => {
+  for (const acc of accs) {
     // conditions can be nested to make boolean expressions
     if (Array.isArray(acc)) {
-      validateSolRpcConditionsSchema(acc);
-      return;
+      await validateSolRpcConditionsSchema(acc);
+      continue;
     }
 
     if ('operator' in acc) {
       // condition is operator, skip
-      return;
+      continue;
     }
 
     checkSchema(
       acc,
-      getSchema('solRpc'),
+      await getSchema('solRpc'),
       'solRpcConditions',
       'validateSolRpcConditionsSchema'
     );
-  });
+  }
 
   return true;
 };
@@ -103,34 +126,34 @@ export const validateSolRpcConditionsSchema = (
  * Validates unified access control conditions schema
  * @param { UnifiedAccessControlConditions } accs
  */
-export const validateUnifiedAccessControlConditionsSchema = (
+export const validateUnifiedAccessControlConditionsSchema = async (
   accs: UnifiedAccessControlConditions
-): boolean => {
-  accs.forEach((acc) => {
+): Promise<boolean> => {
+  for (const acc of accs) {
     // conditions can be nested to make boolean expressions
     if (Array.isArray(acc)) {
-      validateUnifiedAccessControlConditionsSchema(acc);
-      return;
+      await validateUnifiedAccessControlConditionsSchema(acc);
+      continue;
     }
 
     if ('operator' in acc) {
       // condition is operator, skip
-      return;
+      continue;
     }
 
     let schema: JSONSchemaType<any> | undefined;
     switch (acc.conditionType) {
       case 'evmBasic':
-        schema = getSchema('evmBasic');
+        schema = await getSchema('evmBasic');
         break;
       case 'evmContract':
-        schema = getSchema('evmContract');
+        schema = await getSchema('evmContract');
         break;
       case 'solRpc':
-        schema = getSchema('solRpc');
+        schema = await getSchema('solRpc');
         break;
       case 'cosmos':
-        schema = getSchema('cosmos');
+        schema = await getSchema('cosmos');
         break;
     }
     if (schema) {
@@ -147,7 +170,7 @@ export const validateUnifiedAccessControlConditionsSchema = (
       errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
       errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
     });
-  });
+  }
 
   return true;
 };

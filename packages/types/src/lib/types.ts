@@ -1,6 +1,12 @@
 import { AuthMethodType } from './enums';
 import * as ethers from 'ethers';
 import {
+  LPACC_EVM_ATOM,
+  LPACC_EVM_CONTRACT,
+  LPACC_SOL,
+  LPACC_EVM_BASIC,
+} from 'lit-accs-validator';
+import {
   AuthMethod,
   LitRelayConfig,
   SignInWithOTPParams,
@@ -18,12 +24,6 @@ import {
   OAuthProviderOptions,
   BaseAuthenticateOptions,
 } from './interfaces';
-import {
-  LPACC_EVM_ATOM,
-  LPACC_EVM_CONTRACT,
-  LPACC_SOL,
-  LPACC_EVM_BASIC,
-} from '../generated';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
