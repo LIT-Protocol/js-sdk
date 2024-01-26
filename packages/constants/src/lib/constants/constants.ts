@@ -741,6 +741,8 @@ export const LIT_NETWORKS = {
   ],
   custom: [],
   internalDev: INTERNAL_DEV,
+  manzano: [],
+  habanero: [],
 };
 
 // ========== Lit Sessions ==========
@@ -758,3 +760,6 @@ export const AUTH_METHOD_TYPE_IDS = {
 // ========== PKP Client ==========
 export const PKP_CLIENT_SUPPORTED_CHAINS = ['eth', 'cosmos'];
 export const TELEM_API_URL = 'https://lit-general-worker.getlit.dev';
+
+// ========== RLI Delegation ==========
+export const SIWE_DELEGATION_URI = 'lit:capability:delegation';

@@ -1,5 +1,6 @@
 import { AuthMethodType } from './enums';
 import * as ethers from 'ethers';
+
 import {
   AuthMethod,
   LitRelayConfig,
@@ -94,7 +95,12 @@ export type LITChain<T> = {
   [chainName: string]: T;
 };
 
-export type LIT_NETWORKS_KEYS = 'cayenne' | 'localhost' | 'custom';
+export type LIT_NETWORKS_KEYS =
+  | 'cayenne'
+  | 'localhost'
+  | 'custom'
+  | 'habanero'
+  | 'manzano';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
@@ -174,3 +180,44 @@ export type ClaimResult<T = ClaimProcessor> = {
   authMethodType: AuthMethodType;
   pubkey: string;
 } & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
+
+export type LitContract = {
+  address?: string;
+  abi?: any;
+  name?: string;
+};
+
+/**
+ * Defines a set of contract metadata for bootstrapping
+ * network context and interfacing with contracts on Chroncile blockchain
+ *
+ */
+export type LitContractContext = {
+  [index: string]: string | any;
+
+  Allowlist: LitContract;
+  LITToken: LitContract;
+  Multisender: LitContract;
+  PKPHelper: LitContract;
+  PKPNFT: LitContract;
+  PKPNFTMetadata: LitContract;
+  PKPPermissions: LitContract;
+  PubkeyRouter: LitContract;
+  RateLimitNFT: LitContract;
+  Staking: LitContract;
+  StakingBalances: LitContract;
+};
+
+/**
+ * Type for a contract resolver instance which will be used
+ * In place of LitContractContext for loading addresses of lit contracts
+ * an instance of LitContractContext can still be provided. which will be used for abi data.
+ *
+ */
+export type LitContractResolverContext = {
+  [index: string]: string | LitContractContext | undefined | number;
+  resolverAddress: string;
+  abi: any;
+  enviorment: number;
+  contractContext: LitContractContext;
+};

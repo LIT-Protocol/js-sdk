@@ -56,7 +56,9 @@ export async function main() {
   // ==================== Test Logic ====================
 
   const litNodeClient = new LitJsSdk.LitNodeClient({
-    litNetwork: 'cayenne',
+    // litNetwork: 'cayenne',
+    litNetwork: globalThis.LitCI.network,
+    debug: globalThis.LitCI.debug,
   });
   await litNodeClient.connect();
 

@@ -169,6 +169,7 @@ class Log implements ILog {
   toArray(): string[] {
     let args = [];
     args.push(`[Lit-JS-SDK v${version}]`);
+    args.push(`[${this.timestamp}]`);
     args.push(_convertLoggingLevel(this.level));
     args.push(`[${this.category}]`);
 

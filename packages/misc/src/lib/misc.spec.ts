@@ -178,4 +178,64 @@ describe('utils', () => {
       )
     ).toBe(true);
   });
+
+  it('should run the same callback as many time as configured for retry', async () => {
+    let cb = async (
+      _id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      cb.count = cb.count ? (cb.count += 1) : 1;
+      return {
+        success: false,
+        error: 'blah blah',
+      };
+    };
+
+    let res = await utilsModule.executeWithRetry(
+      cb,
+      (err: any, requestId: string, isFinal: boolean) => {
+        console.log('errr', err);
+      }
+    );
+
+    // check that the counter matches the retry count.
+    expect(cb.count).toEqual(3);
+    expect(res.requestId).toBeDefined();
+
+    cb.count = 0;
+    res = await utilsModule.executeWithRetry(
+      cb,
+      (err: any, requestId: string, isFinal: boolean) => {
+        console.log('errr', err);
+      },
+      {
+        timeout: 31_000,
+        interval: 100,
+        maxRetryCount: 10,
+      }
+    );
+
+    expect(cb.count).toEqual(10);
+  });
+
+  it('should only run once if request returns success', async () => {
+    let cb = async (
+      _id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      cb.count = cb.count ? (cb.count += 1) : 1;
+      return {
+        success: true,
+        values: [{ foo: 'bar' }],
+      };
+    };
+
+    const res = await utilsModule.executeWithRetry(
+      cb,
+      (err: any, requestId: string, isFinal: boolean) => {
+        console.log('errr', err);
+      }
+    );
+
+    expect(cb.count).toBe(1);
+    expect(res.requestId).toBeDefined();
+  });
 });

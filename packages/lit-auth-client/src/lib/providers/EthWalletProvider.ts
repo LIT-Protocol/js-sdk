@@ -135,6 +135,6 @@ export default class EthWalletProvider extends BaseProvider {
       );
     }
 
-    return address.toLowerCase();
+    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`${address}:lit`));
   }
 }

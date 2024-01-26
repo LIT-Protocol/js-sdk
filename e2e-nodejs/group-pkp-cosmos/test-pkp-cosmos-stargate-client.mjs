@@ -12,7 +12,7 @@ import {
 } from '@cosmjs/stargate';
 
 const TX_HASH =
-  '0D37992882EAF76E0C914B55CFACFDDDA17C9D8B698A6FDB171038AE05B91AB5';
+  '6E7CA7AC2A30FAA852DB67E85284E7EE670E581CBFD06DE104AF00C2A1796A1B';
 
 // Note: You can check your TX using https://www.mintscan.io/
 export async function main() {
@@ -21,7 +21,7 @@ export async function main() {
     controllerAuthSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
     pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
     rpc: LITCONFIG.COSMOS_RPC,
-    // debug: true,
+    debug: true,
     addressPrefix: 'cosmos',
   });
 
@@ -33,7 +33,16 @@ export async function main() {
     cosmosWallet
   );
 
-  const tx = await stargateClient.getTx(TX_HASH);
+  console.log('stargateClient:', stargateClient);
+
+  let tx;
+
+  try {
+    tx = await stargateClient.getTx(TX_HASH);
+  } catch (e) {
+    console.log('error:', e);
+    process.exit();
+  }
 
   // ==================== Post-Validation ====================
 

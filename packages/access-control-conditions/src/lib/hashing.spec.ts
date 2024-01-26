@@ -1,4 +1,5 @@
 import {
+  // generateUnifiedAccsForRLIDelegation,
   hashAccessControlConditions,
   hashEVMContractConditions,
   hashResourceId,
@@ -9,6 +10,14 @@ import {
 
 // ---------- Test Cases ----------
 describe('hashing.ts', () => {
+  // it('creates a hash for Capacity Credits NFT delegation accs', async () => {
+  //   const hash = await generateUnifiedAccsForRLIDelegation(['0x01', '0x02']);
+
+  //   expect(hash).toBe(
+  //     '95ccb92934f816417d7b87fef8c03f9c9c13ca13c75de993d4cb31a0c63f04d9'
+  //   );
+  // });
+
   it('hashes a resource id', async () => {
     const path = '/bglyaysu8rvblxlk7x0ksn';
 

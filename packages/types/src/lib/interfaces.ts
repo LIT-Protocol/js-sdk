@@ -5,15 +5,14 @@ import {
   AcceptedFileType,
   AccessControlConditions,
   Chain,
-  ClaimProcessor,
-  ClaimResult,
   ConditionType,
   EncryptedSymmetricKey,
   EvmContractConditions,
   IRelayAuthStatus,
   JsonRequest,
   LIT_NETWORKS_KEYS,
-  MintCallback,
+  LitContractContext,
+  LitContractResolverContext,
   SolRpcConditions,
   SymmetricKey,
   UnifiedAccessControlConditions,
@@ -23,11 +22,9 @@ import {
   ISessionCapabilityObject,
   LitResourceAbilityRequest,
 } from '@lit-protocol/auth-helpers';
-import { BytesLike } from 'ethers';
 
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
-import { AuthMethodType } from './enums';
 
 export interface AccsOperatorParams {
   operator: string;
@@ -131,6 +128,8 @@ export interface AuthCallbackParams {
    * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
    */
   walletConnectProjectId?: string;
+
+  resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
 /** ---------- Web3 ---------- */
@@ -229,12 +228,17 @@ export interface LitNodeClientConfig {
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
   checkNodeAttestation: boolean;
+  contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
+  retryTolerance?: RetryTolerance;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
 export interface CustomNetwork {
   litNetwork: LIT_NETWORKS_KEYS;
+  bootstrapUrls: Array<string>;
+  minNodeCount?: number;
+  contractContext?: LitContractContext;
 }
 
 /**
@@ -1011,6 +1015,8 @@ export interface SignSessionKeyProp {
 
   //domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
   domain?: string;
+
+  resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
 export interface SignSessionKeyResponse {
@@ -1055,6 +1061,10 @@ export interface GetSessionSigsProps {
 
   // The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
   sessionKey?: any;
+
+  // rateLimitAuthSig: AuthSig;
+
+  capacityDelegationAuthSig: AuthSig;
 }
 
 export interface AuthCallback {
@@ -1506,6 +1516,8 @@ export interface BaseProviderSessionSigsParams {
    * Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
    */
   litNodeClient?: any;
+
+  resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
 export interface LoginUrlParams {
@@ -1573,4 +1585,34 @@ export interface StytchOtpAuthenticateOptions extends BaseAuthenticateOptions {
    Stytch user identifier for a project
   */
   userId?: string;
+}
+
+/**
+ * Configuration for retry operations
+ */
+export interface RetryTolerance {
+  /**
+   * An amount of time to wait for canceling the operating (in milliseconds)
+   */
+  timeout?: number;
+
+  /**
+   * How long to wait between retries (in milliseconds)
+   */
+  interval?: number;
+
+  /**
+   * How many times to retry the operation
+   */
+  maxRetryCount?: number;
+}
+
+export interface MintCapacityCreditsPerDayContext {
+  requestsPerDay: number;
+  daysUntilUTCMidnightExpiration: number;
+}
+export interface MintCapacityCreditsRes {
+  rliTxHash: string;
+  capacityTokenId: any;
+  capacityTokenIdStr: string;
 }
