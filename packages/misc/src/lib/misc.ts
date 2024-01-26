@@ -28,6 +28,7 @@ import { version } from '@lit-protocol/constants';
 import Ajv, { JSONSchemaType } from 'ajv';
 
 const logBuffer: Array<Array<any>> = [];
+const ajv = new Ajv();
 
 /**
  *
@@ -430,7 +431,6 @@ export const checkSchema = (
   functionName: string,
   throwOnError = true
 ) => {
-  const ajv = new Ajv();
   const validate = ajv.compile(schema);
 
   const validates = validate(value);
