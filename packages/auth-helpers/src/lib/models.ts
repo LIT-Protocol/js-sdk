@@ -43,9 +43,9 @@ export enum LitAbility {
   PKPSigning = 'pkp-signing',
 
   /**
-   * This is the ability to use a Rate Limit Increase (RLI) token during
+   * This is the ability to use a Rate Limit Increase (Capacity Credits NFT) token during
    * authentication with the nodes. The resource will specify the corresponding
-   * RLI token ID.
+   * Capacity Credits NFT token ID.
    */
   RateLimitIncreaseAuth = 'rate-limit-increase-auth',
 

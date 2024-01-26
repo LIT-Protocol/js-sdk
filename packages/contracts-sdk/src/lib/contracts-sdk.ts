@@ -6,8 +6,8 @@ import {
   AuthMethod,
   LitContractContext,
   LitContractResolverContext,
-  MintRLIPerDayContext,
-  MintRLIRes,
+  MintCapacityCreditsPerDayContext,
+  MintCapacityCreditsRes,
 } from '@lit-protocol/types';
 
 // ----- autogen:import-data:start  -----
@@ -1038,13 +1038,13 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     };
   };
 
-  // Mints a Rate Limit Increase (RLI) NFT token with the specified daily request rate and expiration period.
+  // Mints a Capacity Credits NFT (RLI) token with the specified daily request rate and expiration period.
   // The expiration date is calculated to be at midnight UTC, a specific number of days from now.
-  mintRLI = async ({
+  mintCapacityCreditsNFT = async ({
     requestsPerDay,
     daysUntilUTCMidnightExpiration,
-  }: MintRLIPerDayContext): Promise<MintRLIRes> => {
-    this.log('Minting RLI...');
+  }: MintCapacityCreditsPerDayContext): Promise<MintCapacityCreditsRes> => {
+    this.log('Minting Capacity Credits NFT...');
 
     // -- in the context of "request per day"
     const requestsPerSecond = convertRequestsPerDayToPerSecond(requestsPerDay);
@@ -1067,7 +1067,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       throw e;
     }
 
-    this.log('RLI mint cost:', mintCost.toString());
+    this.log('Capacity Credits NFT mint cost:', mintCost.toString());
     this.log('Requests per day:', requestsPerDay);
     this.log('Requests per kilosecond:', requestsPerKilosecond);
     this.log(`Expires at (Unix Timestamp): ${expiresAt}`);

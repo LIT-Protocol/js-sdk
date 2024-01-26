@@ -128,6 +128,8 @@ export interface AuthCallbackParams {
    * Optional project ID for WalletConnect V2. Only required if one is using checkAndSignAuthMessage and wants to display WalletConnect as an option.
    */
   walletConnectProjectId?: string;
+
+  resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
 /** ---------- Web3 ---------- */
@@ -1014,9 +1016,7 @@ export interface SignSessionKeyProp {
   //domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
   domain?: string;
 
-  litResource?: any;
-
-  capability?: any;
+  resourceAbilityRequests: LitResourceAbilityRequest[];
 }
 
 export interface SignSessionKeyResponse {
@@ -1605,17 +1605,11 @@ export interface RetryTolerance {
   maxRetryCount?: number;
 }
 
-export interface MintRLIPerDayContext {
+export interface MintCapacityCreditsPerDayContext {
   requestsPerDay: number;
   daysUntilUTCMidnightExpiration: number;
 }
-
-export interface MintRLIPerMinuteContext {
-  requestPerMinute: number;
-  daysUntilUTCMidnightExpiration: number;
-}
-
-export interface MintRLIRes {
+export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
   capacityTokenIdStr: string;
