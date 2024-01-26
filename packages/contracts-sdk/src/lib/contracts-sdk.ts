@@ -106,7 +106,7 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
-  network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost';
+  network: 'cayenne';
   customContext?: LitContractContext | LitContractResolverContext;
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
@@ -182,7 +182,7 @@ export class LitContracts {
       storeOrUseStorageKey?: boolean;
     };
     debug?: boolean;
-    network?: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero';
+    network?: 'cayenne';
   }) {
     // this.provider = args?.provider;
     this.customContext = args?.customContext;
@@ -725,7 +725,7 @@ export class LitContracts {
   }
 
   public static async getContractAddresses(
-    network: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero',
+    network: 'cayenne' | 'custom' | 'localhost',
     context?: LitContractContext | LitContractResolverContext
   ) {
     let contractData;
