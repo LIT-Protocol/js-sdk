@@ -256,10 +256,6 @@ export async function main() {
   console.log('pkpSessionSigs:', pkpSessionSigs);
 
   // ***************************************************************
-  // 6. Mint a PKP for the PKP so that it can sign the message
-  // ***************************************************************
-
-  // ***************************************************************
   // 7. Finally sign the message using the PKP's PKP
   // ***************************************************************
   // const pkpsPKPPublicKey = '';
