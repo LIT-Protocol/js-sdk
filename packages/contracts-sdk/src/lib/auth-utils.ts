@@ -1,4 +1,4 @@
-import { SessionSig } from '@lit-protocol/types';
+import { SessionSig, StytchToken } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import * as jose from 'jose';
 /**
@@ -20,7 +20,13 @@ export async function getAuthIdByAuthMethod(authMethod: any): Promise<string> {
       authId = await getGoogleJwtAuthId(authMethod);
       break;
     case 9:
-      authId = await getGoogleJwtAuthId(authMethod);
+      authId = await getStytchAuthId(authMethod);
+      break;
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+      authId = await getStytchFactorAuthMethodId(authMethod);
       break;
     default:
       throw new Error(
@@ -102,6 +108,61 @@ async function getWebauthnAuthId(authMethod: any): Promise<string> {
   return authMethodId;
 }
 
+async function getStytchAuthId(authMethod: any): Promise<string> {
+  try {
+    let tokenBody = _parseJWT(authMethod.accessToken);
+    const userId = tokenBody['sub'] as string;
+    const orgId = (tokenBody['aud'] as string[])[0];
+    const authMethodId = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(`${userId.toLowerCase()}:${orgId.toLowerCase()}`)
+    );
+    return authMethodId;
+  } catch (err) {
+    throw new Error(
+      `Error while parsing auth method to generate auth method id for Stytch OTP: ${err}`
+    );
+  }
+}
+
+/**
+ * Get auth method id that can be used to look up and interact with
+ * PKPs associated with the given auth method.
+ * Will parse out the given `authentication factor` and use the transport
+ * for the otp code as the `user identifier` for the given auth method.
+ * @param {AuthMethod} authMethod - Auth method object
+ *
+ * @returns {Promise<string>} - Auth method id
+ */
+function getStytchFactorAuthMethodId(authMethod: any): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const accessToken = authMethod.accessToken;
+    const parsedToken: StytchToken = _parseJWT(accessToken);
+    let factor: string = 'email';
+    switch (authMethod.authMethodType) {
+      case 10:
+        factor = 'email';
+        break;
+      case 11:
+        factor = 'sms';
+        break;
+      case 12:
+        factor = 'whatsApp';
+        break;
+      case 13:
+        factor = 'totp';
+        break;
+      default:
+        throw new Error('Unsupport stytch auth type');
+    }
+    const factorParser = _resolveAuthFactor(factor).parser;
+    try {
+      resolve(factorParser(parsedToken, 'https://stytch.com/session'));
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
 async function getGoogleJwtAuthId(authMethod: any): Promise<string> {
   const tokenPayload = jose.decodeJwt(authMethod.accessToken);
   const userId: string = tokenPayload['sub'] as string;
@@ -110,4 +171,170 @@ async function getGoogleJwtAuthId(authMethod: any): Promise<string> {
     ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
   );
   return authMethodId;
+}
+
+/**
+ *
+ * @param jwt token to parse
+ * @returns {string}- userId contained within the token message
+ */
+function _parseJWT(jwt: string): StytchToken {
+  const parts = jwt.split('.');
+  if (parts.length !== 3) {
+    throw new Error('Invalid token length');
+  }
+  const body = Buffer.from(parts[1], 'base64');
+  const parsedBody: StytchToken = JSON.parse(body.toString('ascii'));
+  console.log('JWT body: ', parsedBody);
+  return parsedBody;
+}
+
+export const emailOtpAuthFactorParser = (
+  parsedToken: StytchToken,
+  provider: string
+): string => {
+  const session = parsedToken[provider];
+  const authFactors: any[] = session['authentication_factors'];
+  let authFactor = authFactors.find((value, _index, _obj) => {
+    if (value.email_factor) return value;
+  });
+
+  if (!authFactor) {
+    throw new Error('Could not find email authentication info in session');
+  }
+  const audience = (parsedToken['aud'] as string[])[0];
+  if (!audience) {
+    throw new Error(
+      'Token does not contain an audience (project identifier), aborting'
+    );
+  }
+
+  const userId = authFactor.email_factor.email_address;
+  const authMethodId = ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes(
+      `${userId.toLowerCase()}:${audience.toLowerCase()}`
+    )
+  );
+
+  return authMethodId;
+};
+
+export const smsOtpAuthFactorParser = (
+  parsedToken: StytchToken,
+  provider: string
+): string => {
+  const session = parsedToken[provider];
+  const authFactors: any[] = session['authentication_factors'];
+  let authFactor = authFactors.find((value, _index, _obj) => {
+    if (value.phone_number_factor) return value;
+  });
+
+  if (!authFactor) {
+    throw new Error('Could not find email authentication info in session');
+  }
+  const audience = (parsedToken['aud'] as string[])[0];
+  if (!audience) {
+    throw new Error(
+      'Token does not contain an audience (project identifier), aborting'
+    );
+  }
+
+  const userId = authFactor.phone_number_factor.phone_number;
+  const authMethodId = ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes(
+      `${userId.toLowerCase()}:${audience.toLowerCase()}`
+    )
+  );
+
+  return authMethodId;
+};
+
+export const whatsAppOtpAuthFactorParser = (
+  parsedToken: StytchToken,
+  provider: string
+): string => {
+  const session = parsedToken[provider];
+  const authFactors: any[] = session['authentication_factors'];
+  let authFactor = authFactors.find((value, _index, _obj) => {
+    if (value.phone_number_factor) return value;
+  });
+
+  if (!authFactor) {
+    throw new Error('Could not find email authentication info in session');
+  }
+  const audience = (parsedToken['aud'] as string[])[0];
+  if (!audience) {
+    throw new Error(
+      'Token does not contain an audience (project identifier), aborting'
+    );
+  }
+
+  const userId = authFactor.phone_number_factor.phone_number;
+  const authMethodId = ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes(
+      `${userId.toLowerCase()}:${audience.toLowerCase()}`
+    )
+  );
+
+  return authMethodId;
+};
+
+export const totpAuthFactorParser = (
+  parsedToken: StytchToken,
+  provider: string
+): string => {
+  const session = parsedToken[provider];
+  const authFactors: any[] = session['authentication_factors'];
+  let authFactor = authFactors.find((value, _index, _obj) => {
+    if (value.phone_number_factor) return value;
+  });
+
+  if (!authFactor) {
+    throw new Error('Could not find email authentication info in session');
+  }
+  const audience = (parsedToken['aud'] as string[])[0];
+  if (!audience) {
+    throw new Error(
+      'Token does not contain an audience (project identifier), aborting'
+    );
+  }
+
+  const userId = authFactor.authenticator_app_factor.totp_id;
+  const authMethodId = ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes(
+      `${userId.toLowerCase()}:${audience.toLowerCase()}`
+    )
+  );
+
+  return authMethodId;
+};
+
+function _resolveAuthFactor(factor: any): {
+  parser: Function;
+  authMethodType: any;
+} {
+  switch (factor) {
+    case 'email':
+      return {
+        parser: emailOtpAuthFactorParser,
+        authMethodType: 10,
+      };
+    case 'sms':
+      return {
+        parser: smsOtpAuthFactorParser,
+        authMethodType: 11,
+      };
+    case 'whatsApp':
+      return {
+        parser: whatsAppOtpAuthFactorParser,
+        authMethodType: 12,
+      };
+    case 'totp':
+      return {
+        parser: totpAuthFactorParser,
+        authMethodType: 13,
+      };
+  }
+
+  throw new Error(`Error could not find auth with factor ${factor}`);
 }
