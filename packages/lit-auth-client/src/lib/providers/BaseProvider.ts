@@ -172,6 +172,10 @@ export abstract class BaseProvider {
             expiration: authCallbackParams.expiration,
             resources: authCallbackParams.resources,
             chainId,
+
+            // optional
+            ...(params.resourceAbilityRequests && { resourceAbilityRequests: params.resourceAbilityRequests })
+
           });
         } else {
           response = await nodeClient.signSessionKey({
@@ -182,6 +186,9 @@ export abstract class BaseProvider {
             expiration: authCallbackParams.expiration,
             resources: authCallbackParams.resources,
             chainId,
+
+            // optional
+            ...(params.resourceAbilityRequests && { resourceAbilityRequests: params.resourceAbilityRequests })
           });
         }
 

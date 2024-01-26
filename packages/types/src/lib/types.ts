@@ -221,5 +221,3 @@ export type LitContractResolverContext = {
   enviorment: number;
   contractContext: LitContractContext;
 };
-
-// export type MintRLI = MintRLIPerDayContext | MintRLIPerMinuteContext;
