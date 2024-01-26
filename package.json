@@ -121,7 +121,7 @@
     "ipfs-unixfs-importer": "^12.0.0",
     "jose": "^4.14.4",
     "jszip": "^3.10.1",
-    "lit-accs-validator": "../accs-schemas/dist/lit-accs-validator-v0.0.1.tgz",
+    "lit-accs-validator": "../accs-schemas/dist/lit-accs-validator-v0.0.2.tgz",
     "lit-siwe": "^1.1.8",
     "micromodal": "^0.4.10",
     "multiformats": "^10.0.2",

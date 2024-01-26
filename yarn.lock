@@ -18416,9 +18416,9 @@ listr2@^3.8.3:
     through "^2.3.8"
     wrap-ansi "^7.0.0"
 
-lit-accs-validator@../accs-schemas/dist/lit-accs-validator-v0.0.1.tgz:
-  version "0.0.1"
-  resolved "../accs-schemas/dist/lit-accs-validator-v0.0.1.tgz#d44eed5fae1df74e16df0bf9fc3f9674bd51bc04"
+lit-accs-validator@../accs-schemas/dist/lit-accs-validator-v0.0.2.tgz:
+  version "0.0.2"
+  resolved "../accs-schemas/dist/lit-accs-validator-v0.0.2.tgz#841bcb307ca23e37f217d9d3beb244a4d1a30325"
   dependencies:
     ajv "^8.12.0"
 

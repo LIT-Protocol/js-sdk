@@ -431,7 +431,10 @@ export const checkSchema = (
   functionName: string,
   throwOnError: boolean = true
 ): boolean => {
-  const validate = ajv.compile(schema);
+  let validate = schema.$id ? ajv.getSchema(schema.$id) : undefined;
+  if (!validate) {
+    validate = ajv.compile(schema);
+  }
 
   const validates = validate(value);
 

@@ -163,13 +163,13 @@ export const validateUnifiedAccessControlConditionsSchema = async (
         'accessControlConditions',
         'validateUnifiedAccessControlConditionsSchema'
       );
+    } else {
+      throwError({
+        message: `Missing schema to validate condition type ${acc.conditionType}`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
     }
-
-    throwError({
-      message: `No schema found for condition type ${acc.conditionType}`,
-      errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-      errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-    });
   }
 
   return true;

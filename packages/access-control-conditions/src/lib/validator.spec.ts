@@ -15,7 +15,7 @@ import {
 } from './validator';
 
 describe('validator.ts', () => {
-  it('should validate schema of an EVM Basic ACC', () => {
+  it('should validate schema of an EVM Basic ACC', async () => {
     const evmBasicAccessControlConditions: AccessControlConditions = [
       {
         contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
@@ -31,11 +31,13 @@ describe('validator.ts', () => {
     ];
 
     expect(
-      validateAccessControlConditionsSchema(evmBasicAccessControlConditions)
+      await validateAccessControlConditionsSchema(
+        evmBasicAccessControlConditions
+      )
     ).toBeTruthy();
   });
 
-  it('should validate schema of a boolean expression ACCs', () => {
+  it('should validate schema of a boolean expression ACCs', async () => {
     const evmBasicAccessControlConditions: AccessControlConditions = [
       {
         contractAddress: '0x22C1f6050E56d2876009903609a2cC3fEf83B415',
@@ -65,11 +67,13 @@ describe('validator.ts', () => {
     ];
 
     expect(
-      validateAccessControlConditionsSchema(evmBasicAccessControlConditions)
+      await validateAccessControlConditionsSchema(
+        evmBasicAccessControlConditions
+      )
     ).toBeTruthy();
   });
 
-  it('should validate schema of a nested boolean expression of ACCs', () => {
+  it('should validate schema of a nested boolean expression of ACCs', async () => {
     const evmBasicAccessControlConditions: AccessControlConditions = [
       {
         contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
@@ -115,11 +119,13 @@ describe('validator.ts', () => {
     ];
 
     expect(
-      validateAccessControlConditionsSchema(evmBasicAccessControlConditions)
+      await validateAccessControlConditionsSchema(
+        evmBasicAccessControlConditions
+      )
     ).toBeTruthy();
   });
 
-  it('should validate schema of an EVM Contract ACC', () => {
+  it('should validate schema of an EVM Contract ACC', async () => {
     const evmContractAccessControlConditions: EvmContractConditions = [
       {
         contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
@@ -159,11 +165,13 @@ describe('validator.ts', () => {
     ];
 
     expect(
-      validateEVMContractConditionsSchema(evmContractAccessControlConditions)
+      await validateEVMContractConditionsSchema(
+        evmContractAccessControlConditions
+      )
     ).toBeTruthy();
   });
 
-  it('should validate schema of a Solana ACC', () => {
+  it('should validate schema of a Solana ACC', async () => {
     const solAccessControlConditions: SolRpcConditions = [
       {
         method: 'getBalance',
@@ -181,11 +189,11 @@ describe('validator.ts', () => {
     ];
 
     expect(
-      validateSolRpcConditionsSchema(solAccessControlConditions)
+      await validateSolRpcConditionsSchema(solAccessControlConditions)
     ).toBeTruthy();
   });
 
-  it('should validate schema of a Cosmos ACC', () => {
+  it('should validate schema of a Cosmos ACC', async () => {
     const cosmosAccessControlConditions: UnifiedAccessControlConditions = [
       {
         conditionType: 'cosmos',
@@ -200,13 +208,13 @@ describe('validator.ts', () => {
     ];
 
     expect(
-      validateUnifiedAccessControlConditionsSchema(
+      await validateUnifiedAccessControlConditionsSchema(
         cosmosAccessControlConditions
       )
     ).toBeTruthy();
   });
 
-  it('should validate schema of a set of unified ACCs', () => {
+  it('should validate schema of a set of unified ACCs', async () => {
     const unifiedAccessControlConditions: UnifiedAccessControlConditions = [
       {
         conditionType: 'solRpc',
@@ -275,13 +283,13 @@ describe('validator.ts', () => {
     ];
 
     expect(
-      validateUnifiedAccessControlConditionsSchema(
+      await validateUnifiedAccessControlConditionsSchema(
         unifiedAccessControlConditions
       )
     ).toBeTruthy();
   });
 
-  it('should throw when schema does not have all required fields', () => {
+  it('should throw when schema does not have all required fields', async () => {
     const evmBasicAccessControlConditions: AccessControlConditions = [
       {
         contractAddress: '',
@@ -298,7 +306,9 @@ describe('validator.ts', () => {
 
     let error: NodeClientErrorV1 | undefined;
     try {
-      validateAccessControlConditionsSchema(evmBasicAccessControlConditions);
+      await validateAccessControlConditionsSchema(
+        evmBasicAccessControlConditions
+      );
     } catch (e) {
       error = e as NodeClientErrorV1;
     }
@@ -308,7 +318,7 @@ describe('validator.ts', () => {
     expect(error!.errorCode).toBe(LIT_ERROR.INVALID_PARAM_TYPE.name);
   });
 
-  it('should throw when schema has invalid fields', () => {
+  it('should throw when schema has invalid fields', async () => {
     // Disable TS here to test invalid fields
     const evmBasicAccessControlConditions: AccessControlConditions = [
       {
@@ -330,7 +340,9 @@ describe('validator.ts', () => {
 
     let error: NodeClientErrorV1 | undefined;
     try {
-      validateAccessControlConditionsSchema(evmBasicAccessControlConditions);
+      await validateAccessControlConditionsSchema(
+        evmBasicAccessControlConditions
+      );
     } catch (e) {
       error = e as NodeClientErrorV1;
     }
@@ -340,7 +352,7 @@ describe('validator.ts', () => {
     expect(error!.errorCode).toBe(LIT_ERROR.INVALID_PARAM_TYPE.name);
   });
 
-  it('should throw when schema of a nested ACC does not validate', () => {
+  it('should throw when schema of a nested ACC does not validate', async () => {
     const evmBasicAccessControlConditions: AccessControlConditions = [
       {
         contractAddress: '',
@@ -387,7 +399,9 @@ describe('validator.ts', () => {
 
     let error: NodeClientErrorV1 | undefined;
     try {
-      validateAccessControlConditionsSchema(evmBasicAccessControlConditions);
+      await validateAccessControlConditionsSchema(
+        evmBasicAccessControlConditions
+      );
     } catch (e) {
       error = e as NodeClientErrorV1;
     }
