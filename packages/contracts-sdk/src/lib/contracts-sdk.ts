@@ -4,6 +4,7 @@ import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import {
   AuthMethod,
+  LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
   MintCapacityCreditsPerDayContext,
@@ -106,7 +107,7 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
-  network: 'habanero';
+  network: LIT_NETWORKS_KEYS;
   customContext?: LitContractContext | LitContractResolverContext;
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
@@ -182,7 +183,7 @@ export class LitContracts {
       storeOrUseStorageKey?: boolean;
     };
     debug?: boolean;
-    network?: 'cayenne';
+    network?: 'habanero';
   }) {
     // this.provider = args?.provider;
     this.customContext = args?.customContext;
@@ -725,7 +726,7 @@ export class LitContracts {
   }
 
   public static async getContractAddresses(
-    network: 'cayenne' | 'custom' | 'localhost',
+    network: LIT_NETWORKS_KEYS,
     context?: LitContractContext | LitContractResolverContext
   ) {
     let contractData;
