@@ -1,12 +1,11 @@
 import { LIT_ERROR } from '@lit-protocol/constants';
 
 import {
+  AccessControlConditions,
   AccsCOSMOSParams,
-  AccsDefaultParams,
-  AccsEVMParams,
-  AccsOperatorParams,
-  AccsSOLV2Params,
+  EvmContractConditions,
   HumanizedAccsProps,
+  SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
@@ -82,7 +81,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  accessControlConditions: Array<AccsDefaultParams | AccsOperatorParams>;
+  accessControlConditions: AccessControlConditions;
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
@@ -282,7 +281,7 @@ export const humanizeEvmContractConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  evmContractConditions: Array<AccsEVMParams>;
+  evmContractConditions: EvmContractConditions;
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
@@ -343,7 +342,7 @@ export const humanizeSolRpcConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  solRpcConditions: Array<AccsSOLV2Params>;
+  solRpcConditions: SolRpcConditions;
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {

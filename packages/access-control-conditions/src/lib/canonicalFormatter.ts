@@ -2,13 +2,17 @@ import { ILitError, LIT_ERROR } from '@lit-protocol/constants';
 
 import {
   ABIParams,
+  AccessControlConditions,
   AccsCOSMOSParams,
   AccsDefaultParams,
   AccsEVMParams,
   AccsOperatorParams,
+  AccsParams,
   AccsSOLV2Params,
   ConditionItem,
+  EvmContractConditions,
   JsonSigningResourceId,
+  UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
 import { throwError } from '@lit-protocol/misc';
@@ -47,11 +51,11 @@ const canonicalAbiParamss = (params: Array<ABIParams>): Array<ABIParams> => {
  *
  * Canonical Unified Access Control Condition Formatter
  *
- * @param { ConditionItem | Array<ConditionItem> } cond
+ * @param { UnifiedAccessControlConditions | ConditionItem } cond
  * @returns { any[] | AccsOperatorParams | any }
  */
 export const canonicalUnifiedAccessControlConditionFormatter = (
-  cond: ConditionItem | Array<ConditionItem>
+  cond: AccsParams | AccsOperatorParams | UnifiedAccessControlConditions
 ): AccsOperatorParams | any => {
   // -- if it's an array
   if (Array.isArray(cond)) {
@@ -73,13 +77,15 @@ export const canonicalUnifiedAccessControlConditionFormatter = (
         return canonicalSolRpcConditionFormatter(cond, true);
 
       case 'evmBasic':
-        return canonicalAccessControlConditionFormatter(cond);
+        return canonicalAccessControlConditionFormatter(
+          cond as AccsDefaultParams
+        );
 
       case 'evmContract':
-        return canonicalEVMContractConditionFormatter(cond);
+        return canonicalEVMContractConditionFormatter(cond as AccsEVMParams);
 
       case 'cosmos':
-        return canonicalCosmosConditionFormatter(cond);
+        return canonicalCosmosConditionFormatter(cond as AccsCOSMOSParams);
 
       default:
         throwError({
@@ -243,12 +249,12 @@ export const canonicalSolRpcConditionFormatter = (
   }
   ---
 *
-* @param { object } cond
+* @param { AccsDefaultParams | AccsOperatorParams | AccessControlConditions } cond
 *
 * @returns { any[] | AccsOperatorParams | AccsDefaultParams | any }
 */
 export const canonicalAccessControlConditionFormatter = (
-  cond: ConditionItem
+  cond: AccsDefaultParams | AccsOperatorParams | AccessControlConditions
 ): any[] | AccsOperatorParams | AccsDefaultParams | any => {
   // -- if it's an array
   if (Array.isArray(cond)) {
@@ -301,12 +307,12 @@ export const canonicalAccessControlConditionFormatter = (
   }
   ---
 *
-* @param { ConditionItem } cond
+* @param { AccsEVMParams | AccsOperatorParams | EvmContractConditions } cond
 *
 * @returns
 */
 export const canonicalEVMContractConditionFormatter = (
-  cond: ConditionItem
+  cond: AccsEVMParams | AccsOperatorParams | EvmContractConditions
 ): any[] | AccsOperatorParams | AccsEVMParams | any => {
   // -- if it's an array
   if (Array.isArray(cond)) {

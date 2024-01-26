@@ -42,10 +42,26 @@ export type AccsParams =
 // union type for all the different types of conditions including operator
 export type ConditionItem = AccsParams | AccsOperatorParams;
 
-export type AccessControlConditions = AccsDefaultParams[];
-export type EvmContractConditions = AccsEVMParams[];
-export type SolRpcConditions = AccsSOLV2Params[];
-export type UnifiedAccessControlConditions = ConditionItem[];
+export type AccessControlConditions = (
+  | AccsDefaultParams
+  | AccsOperatorParams
+  | AccessControlConditions
+)[];
+export type EvmContractConditions = (
+  | AccsEVMParams
+  | AccsOperatorParams
+  | EvmContractConditions
+)[];
+export type SolRpcConditions = (
+  | AccsSOLV2Params
+  | AccsOperatorParams
+  | SolRpcConditions
+)[];
+export type UnifiedAccessControlConditions = (
+  | AccsParams
+  | AccsOperatorParams
+  | UnifiedAccessControlConditions
+)[];
 
 export type JsonRequest = JsonExecutionRequest | JsonSignChainDataRequest;
 

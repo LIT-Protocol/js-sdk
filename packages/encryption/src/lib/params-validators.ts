@@ -14,9 +14,7 @@ import {
 import {
   AcceptedFileType,
   AccessControlConditions,
-  AccsParams,
   AuthSig,
-  ConditionType,
   DecryptFileProps,
   DecryptFromIpfsProps,
   DecryptRequest,
@@ -38,13 +36,11 @@ import {
 import {
   checkIfAuthSigRequiresChainParam,
   checkType,
-  checkSchema,
   is,
   log,
 } from '@lit-protocol/misc';
 import { isHexString } from 'ethers/lib/utils';
-import { isValidBooleanExpression, isTokenOperator } from './utils';
-import { getSchema } from './schemas';
+import { isValidBooleanExpression } from './utils';
 
 export const safeParams = ({
   functionName,
@@ -536,148 +532,43 @@ class AccessControlConditionsValidator implements ParamsValidator {
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
 
-    if (accessControlConditions) {
-      if (!isValidBooleanExpression(accessControlConditions)) {
-        return ELeft({
-          message: 'Invalid boolean Access Control Conditions',
-          errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-        });
-      }
+    if (
+      accessControlConditions &&
+      !isValidBooleanExpression(accessControlConditions)
+    )
+      return ELeft({
+        message: 'Invalid boolean Access Control Conditions',
+        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
+      });
 
-      const accs = this.flattenAndFilter(
-        accessControlConditions,
-        isTokenOperator
-      );
-      for (const acc of accs) {
-        if (
-          !checkSchema(
-            acc,
-            getSchema('evmBasic'),
-            'accessControlConditions',
-            this.fnName
-          )
-        ) {
-          return ELeft({
-            message:
-              'EVM Basic Access Control Conditions failed to validate the schema',
-            errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-            errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-          });
-        }
-      }
-    }
+    if (
+      evmContractConditions &&
+      !isValidBooleanExpression(evmContractConditions)
+    )
+      return ELeft({
+        message: 'Invalid boolean EVM Access Control Conditions',
+        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
+      });
 
-    if (evmContractConditions) {
-      if (!isValidBooleanExpression(evmContractConditions)) {
-        return ELeft({
-          message: 'Invalid boolean EVM Access Control Conditions',
-          errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-        });
-      }
+    if (solRpcConditions && !isValidBooleanExpression(solRpcConditions))
+      return ELeft({
+        message: 'Invalid boolean Solana Access Control Conditions',
+        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
+      });
 
-      const accs = this.flattenAndFilter(
-        evmContractConditions,
-        isTokenOperator
-      );
-      for (const acc of accs) {
-        if (
-          !checkSchema(
-            acc,
-            getSchema('evmContract'),
-            'accessControlConditions',
-            this.fnName
-          )
-        ) {
-          return ELeft({
-            message:
-              'EVM Contract Access Control Conditions failed to validate the schema',
-            errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-            errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-          });
-        }
-      }
-    }
-
-    if (solRpcConditions) {
-      if (!isValidBooleanExpression(solRpcConditions)) {
-        return ELeft({
-          message: 'Invalid boolean Solana Access Control Conditions',
-          errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-        });
-      }
-
-      const accs = this.flattenAndFilter(solRpcConditions, isTokenOperator);
-      for (const acc of accs) {
-        if (
-          !checkSchema(
-            acc,
-            getSchema('solRpc'),
-            'accessControlConditions',
-            this.fnName
-          )
-        ) {
-          return ELeft({
-            message:
-              'Solana Access Control Conditions failed to validate the schema',
-            errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-            errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-          });
-        }
-      }
-    }
-
-    if (unifiedAccessControlConditions) {
-      if (!isValidBooleanExpression(unifiedAccessControlConditions)) {
-        return ELeft({
-          message: 'Invalid boolean Unified Access Control Conditions',
-          errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-        });
-      }
-
-      const accs = this.flattenAndFilter(
-        unifiedAccessControlConditions,
-        isTokenOperator // filter operators in ACCs
-      ) as AccsParams[];
-      for (const acc of accs) {
-        if (
-          !checkSchema(
-            acc,
-            getSchema(acc.conditionType as ConditionType),
-            'accessControlConditions',
-            this.fnName
-          )
-        ) {
-          return ELeft({
-            message:
-              'EVM Basic Access Control Conditions failed to validate the schema',
-            errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
-            errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
-          });
-        }
-      }
-    }
+    if (
+      unifiedAccessControlConditions &&
+      !isValidBooleanExpression(unifiedAccessControlConditions)
+    )
+      return ELeft({
+        message: 'Invalid boolean Unified Access Control Conditions',
+        errorKind: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_BOOLEAN_EXCEPTION.name,
+      });
 
     return ERight(undefined);
-  }
-
-  // Filters an array of things that can themselves be nested arrays
-  // Result is a flat array of all the things that pass the filter
-  private flattenAndFilter<T>(
-    values: T[],
-    filter: (value: T) => boolean
-  ): T[] {
-    const filteredConditions: T[] = [];
-    for (const value of values) {
-      if (Array.isArray(value)) {
-        filteredConditions.push(...this.flattenAndFilter(value, filter));
-      } else if (!filter(value)) {
-        filteredConditions.push(value);
-      }
-    }
-    return filteredConditions;
   }
 }

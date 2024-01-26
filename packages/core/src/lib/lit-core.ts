@@ -11,6 +11,10 @@ import {
   hashEVMContractConditions,
   hashSolRpcConditions,
   hashUnifiedAccessControlConditions,
+  validateAccessControlConditionsSchema,
+  validateEVMContractConditionsSchema,
+  validateSolRpcConditionsSchema,
+  validateUnifiedAccessControlConditionsSchema,
 } from '@lit-protocol/access-control-conditions';
 
 import {
@@ -646,6 +650,32 @@ export class LitCore {
     }
 
     return authSig!;
+  };
+
+  validateAccessControlConditionsSchema = async (
+    params: MultipleAccessControlConditions
+  ): Promise<boolean> => {
+    // ========== Prepare Params ==========
+    const {
+      accessControlConditions,
+      evmContractConditions,
+      solRpcConditions,
+      unifiedAccessControlConditions,
+    } = params;
+
+    if (accessControlConditions) {
+      validateAccessControlConditionsSchema(accessControlConditions);
+    } else if (evmContractConditions) {
+      validateEVMContractConditionsSchema(evmContractConditions);
+    } else if (solRpcConditions) {
+      validateSolRpcConditionsSchema(solRpcConditions);
+    } else if (unifiedAccessControlConditions) {
+      validateUnifiedAccessControlConditionsSchema(
+        unifiedAccessControlConditions
+      );
+    }
+
+    return true;
   };
 
   /**
