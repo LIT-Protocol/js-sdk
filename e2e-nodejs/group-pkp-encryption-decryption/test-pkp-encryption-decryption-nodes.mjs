@@ -47,7 +47,7 @@ export async function main() {
     pkpPubKey: globalThis.LitCI.AUTH_METHOD_PKP_INFO.publicKey,
     controllerSessionSigs: sessionSigs,
     rpc: LITCONFIG.CHRONICLE_RPC,
-    litNetwork: globalThis.LitCI.network 
+    litNetwork: globalThis.LitCI.network,
   });
 
   await pkpWallet.init();
