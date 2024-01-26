@@ -1016,7 +1016,7 @@ export interface SignSessionKeyProp {
   //domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
   domain?: string;
 
-  resourceAbilityRequests: LitResourceAbilityRequest[];
+  resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
 export interface SignSessionKeyResponse {
@@ -1516,6 +1516,8 @@ export interface BaseProviderSessionSigsParams {
    * Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
    */
   litNodeClient?: any;
+
+  resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
 export interface LoginUrlParams {

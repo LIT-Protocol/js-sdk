@@ -56,10 +56,6 @@ export async function main() {
     process.exit();
   }
 
-  console.log('TESTING!!!');
-
-  process.exit();
-
   // ==================== Setup ====================
   const litNodeClient = new LitNodeClient({
     litNetwork: process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork,
@@ -186,35 +182,41 @@ export async function main() {
   // rate limit increase when signing.
   // ***************************************************************
 
-  // -- define the resources that you want to access
-  const litResource = new LitPKPResource('*');
-  const capability = LitAbility.PKPSigning;
-
   // -- define the authMethod of the delegatee's controller auth sig (second wallet controller auth sig)
   const secondWalletControllerAuthMethod = {
     authMethodType: 1,
     accessToken: JSON.stringify(secondWalletControllerAuthSig),
   };
 
-  const pkpAuthNeededCallback = async (params) => {
-    console.log('auth needed callback params: ', params);
-    console.log(
-      'pkpAuthNeededCallback secondWalletControllerAuthSig:',
-      secondWalletControllerAuthSig
-    );
+  const pkpAuthNeededCallback = async ({
+    expiration,
+    resources,
+    resourceAbilityRequests,
+  }) => {
+
+    // -- validate
+    if (!expiration) {
+      throw new Error('expiration is required');
+    }
+
+    if (!resources) {
+      throw new Error('resources is required');
+    }
+
+    if (!resourceAbilityRequests) {
+      throw new Error('resourceAbilityRequests is required');
+    }
 
     const response = await litNodeClient.signSessionKey({
       statement: 'Some custom statement.',
       authMethods: [secondWalletControllerAuthMethod],
       pkpPublicKey: secondWalletPKPInfo.publicKey,
-      expiration: params.expiration,
-      resources: params.resources,
+      expiration: expiration,
+      resources: resources,
       chainId: 1,
 
       // optional (this would use normal siwe lib, without it, it would use lit-siwe)
-      resourceAbilityRequests: params.resourceAbilityRequests,
-      litResource,
-      capability,
+      resourceAbilityRequests: resourceAbilityRequests,
     });
 
     console.log('response:', response);
