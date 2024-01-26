@@ -270,13 +270,13 @@ export async function main() {
          sigName: "sig",
        });
      })();`,
-     authMethods: [],
-     jsParams: {
+    authMethods: [],
+    jsParams: {
       dataToSign: ethers.utils.arrayify(
-         ethers.utils.keccak256([1, 2, 3, 4, 5])
-       ),
-       publicKey: secondWalletPKPInfo.publicKey
-     },
+        ethers.utils.keccak256([1, 2, 3, 4, 5])
+      ),
+      publicKey: secondWalletPKPInfo.publicKey,
+    },
   });
 
   process.exit();
