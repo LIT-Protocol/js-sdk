@@ -10,7 +10,7 @@ import {
 
 // ---------- Test Cases ----------
 describe('hashing.ts', () => {
-  // it('creates a hash for RLI delegation accs', async () => {
+  // it('creates a hash for Capacity Credits NFT delegation accs', async () => {
   //   const hash = await generateUnifiedAccsForRLIDelegation(['0x01', '0x02']);
 
   //   expect(hash).toBe(

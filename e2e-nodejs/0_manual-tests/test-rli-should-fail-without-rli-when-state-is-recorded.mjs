@@ -93,10 +93,10 @@ export async function main() {
     console.log('e:', e.errorCode);
 
     if (e.errorCode === 'rate_limit_exceeded') {
-      return success('should fail when no RLI');
+      return success('should fail when no Capacity Credits NFT');
     }
 
-    return fail('should fail when no RLI');
+    return fail('should fail when no Capacity Credits NFT');
   }
 
   return fail(

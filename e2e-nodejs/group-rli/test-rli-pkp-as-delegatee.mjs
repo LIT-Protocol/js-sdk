@@ -4,19 +4,12 @@ import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LocalStorage } from 'node-localstorage';
-import {
-  LitAbility,
-  LitActionResource,
-  LitPKPResource,
-} from '@lit-protocol/auth-helpers';
+import { LitAbility, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { AuthMethodType, AuthMethodScope } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
 import * as siwe from 'siwe';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
-
-// import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
-// import { ethRequestHandler } from '@lit-protocol/pkp-ethers';
 
 async function getAuthSig(wallet, litNodeClient) {
   const domain = 'localhost';
@@ -81,19 +74,10 @@ export async function main() {
   // *********************************************************
 
   // -- setup dApp owner wallet
-  globalThis.LitCI.wallet = new ethers.Wallet(
+  const dAppOwnerWallet = new ethers.Wallet(
     LITCONFIG.CONTROLLER_PRIVATE_KEY,
     new ethers.providers.JsonRpcProvider(LITCONFIG.CHRONICLE_RPC)
   );
-
-  const dAppOwnerWallet = globalThis.LitCI.wallet;
-  const dAppOwnerWallet_address = globalThis.LitCI.wallet.address;
-  const dAppOwnerWallet_authSig = globalThis.LitCI.CONTROLLER_AUTHSIG;
-  const dAppOwnerWallet_pkpPublicKey = globalThis.LitCI.PKP_INFO.publicKey;
-
-  console.log('dAppOwnerWallet_authSig:', dAppOwnerWallet_authSig);
-  console.log('dAppOwnerWallet_address:', dAppOwnerWallet_address);
-  console.log('dAppOwnerWallet_pkpPublicKey:', dAppOwnerWallet_pkpPublicKey);
 
   // -- connect to contract client
   let contractClient = new LitContracts({
@@ -104,15 +88,14 @@ export async function main() {
 
   await contractClient.connect();
 
-  // -- mint RLI
   // -- static to test faster
-  const capacityTokenIdStr = '2';
+  // const capacityTokenIdStr = '2';
 
-  // -- mint new RLI
-  // const { capacityTokenIdStr } = await contractCl  ient.mintRLI({
-  //   requestsPerDay: 14400, // 10 request per minute
-  //   daysUntilUTCMidnightExpiration: 2,
-  // });
+  // -- mint a new Capacity Credits NFT
+  const { capacityTokenIdStr } = await contractClient.mintCapacityCreditsNFT({
+    requestsPerDay: 14400, // 10 request per minute
+    daysUntilUTCMidnightExpiration: 2,
+  });
 
   console.log('capacityTokenIdStr:', capacityTokenIdStr);
   console.log('dAppOwnerWallet:', dAppOwnerWallet);
@@ -165,8 +148,9 @@ export async function main() {
       3
     );
 
-  const signAnythingScope = scopes[1];
-  const onlySignMessagesScope = scopes[2];
+  if (!scopes[1]) {
+    return fail('signAnythingScope is not true');
+  }
 
   const secondWalletPKPInfo = {
     tokenId: mintInfo.pkp.tokenId,
@@ -176,59 +160,63 @@ export async function main() {
 
   console.log('secondWalletPKPInfo', secondWalletPKPInfo);
 
-  // ***************************************************************
+  // ***********************************************************************
   // 3. As a dApp owner, I want to create a Capacity Delegation AuthSig
-  //    that delegates the Capacity Credits NFT to the PKP NFT
-  // ***************************************************************
+  // that delegates the Capacity Credits NFT to the PKP NFT so that the
+  // PKP NFT can benefit from the Capacity Credits NFT's rate limit increase
+  // when signing.
+  // ************************************************************************
 
   const { capacityDelegationAuthSig } =
     await litNodeClient.createCapacityDelegationAuthSig({
       uses: '1',
       dAppOwnerWallet: dAppOwnerWallet,
       capacityTokenId: capacityTokenIdStr,
-      delegateeAddresses: [
-        // secondWallet.address,
-        secondWalletPKPInfo.ethAddress,
-      ],
+      delegateeAddresses: [secondWalletPKPInfo.ethAddress],
     });
 
   console.log('capacityDelegationAuthSig:', capacityDelegationAuthSig);
 
   // ***************************************************************
-  // 4. As a PKP, I want to sign the message with recap capabilities
+  // 4. As a PKP, I want to benefit from the Capacity Credits NFT's
+  // rate limit increase when signing.
   // ***************************************************************
-  const sessionKeyPair = litNodeClient.getSessionKey();
-  const pkpAuthNeededCallback = async (params) => {
-    console.log('auth needed callback params: ', params);
-    //console.log('pkpAuthNeededCallback resources:', resources);
-    //console.log('pkpAuthNeededCallback expiration:', expiration);
-    //console.log('pkpAuthNeededCallback uri:', uri); // lit:session:xx
-    console.log(
-      'pkpAuthNeededCallback secondWalletControllerAuthSig:',
-      secondWalletControllerAuthSig
-    );
 
-    // console.log(
-    //   'secondWalletControllerAuthSig:',
-    //   secondWalletControllerAuthSig
-    // );
+  // -- define the authMethod of the delegatee's controller auth sig (second wallet controller auth sig)
+  const secondWalletControllerAuthMethod = {
+    authMethodType: 1,
+    accessToken: JSON.stringify(secondWalletControllerAuthSig),
+  };
+
+  const pkpAuthNeededCallback = async ({
+    expiration,
+    resources,
+    resourceAbilityRequests,
+  }) => {
+
+    // -- validate
+    if (!expiration) {
+      throw new Error('expiration is required');
+    }
+
+    if (!resources) {
+      throw new Error('resources is required');
+    }
+
+    if (!resourceAbilityRequests) {
+      throw new Error('resourceAbilityRequests is required');
+    }
 
     const response = await litNodeClient.signSessionKey({
       statement: 'Some custom statement.',
-      authMethods: [
-        {
-          authMethodType: 1,
-          accessToken: JSON.stringify(secondWalletControllerAuthSig),
-        },
-      ],
+      authMethods: [secondWalletControllerAuthMethod],
       pkpPublicKey: secondWalletPKPInfo.publicKey,
-      expiration: params.expiration,
-      resources: params.resources,
+      expiration: expiration,
+      resources: resources,
       chainId: 1,
 
       // optional (this would use normal siwe lib, without it, it would use lit-siwe)
-      litResource: new LitPKPResource('*'),
-      capability: LitAbility.PKPSigning,
+      resourceAbilityRequests: resourceAbilityRequests,
     });
 
     console.log('response:', response);
@@ -270,19 +258,17 @@ export async function main() {
          sigName: "sig",
        });
      })();`,
-     authMethods: [],
-     jsParams: {
+    authMethods: [],
+    jsParams: {
       dataToSign: ethers.utils.arrayify(
-         ethers.utils.keccak256([1, 2, 3, 4, 5])
-       ),
-       publicKey: secondWalletPKPInfo.publicKey
-     },
+        ethers.utils.keccak256([1, 2, 3, 4, 5])
+      ),
+      publicKey: secondWalletPKPInfo.publicKey,
+    },
   });
 
-  process.exit();
-
   if (res) {
-    return success('recap works');
+    return success('pkp able to sign as a delegatee');
   }
 
   return fail(`Failed to get proof from Recap Session Capability`);

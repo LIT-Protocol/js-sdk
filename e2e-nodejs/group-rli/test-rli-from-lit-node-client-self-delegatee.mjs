@@ -19,7 +19,7 @@ export async function main() {
     process.exit();
   }
 
-  // NOTE: In this example, the dApp owner would be both the RLI delegator and the delegatee (end user)
+  // NOTE: In this example, the dApp owner would be both the Capacity Credits NFT delegator and the delegatee (end user)
   // for ease of testing.
   // ==================== Setup ====================
 
@@ -57,7 +57,7 @@ export async function main() {
   await contractClient.connect();
 
   const capacityTokenIdStr = '2';
-  // const { capacityTokenIdStr } = await contractClient.mintRLI({
+  // const { capacityTokenIdStr } = await contractClient.mintCapacityCreditsNFT({
   //   requestsPerDay: 14400, // 10 request per minute
   //   daysUntilUTCMidnightExpiration: 2,
   // });

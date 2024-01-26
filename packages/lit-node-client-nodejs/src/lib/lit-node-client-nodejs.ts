@@ -192,7 +192,7 @@ export class LitNodeClientNodeJs extends LitCore {
       statement,
     } = params;
 
-    // -- This is the owner address who holds the RLI and wants to delegate its
+    // -- This is the owner address who holds the Capacity Credits NFT token and wants to delegate its
     // usage to a list of delegatee addresses
     const dAppOwnerWalletAddress = ethers.utils.getAddress(
       await dAppOwnerWallet.getAddress()
@@ -2492,25 +2492,24 @@ export class LitNodeClientNodeJs extends LitCore {
 
     let siweMessage;
 
-    if (params?.capability && params?.litResource) {
+    if (params?.resourceAbilityRequests) {
+      const resources = params.resourceAbilityRequests.map((r) => r.resource);
+
       const recapObject =
-        await this.generateSessionCapabilityObjectWithWildcards([
-          params.litResource,
-        ]);
+        await this.generateSessionCapabilityObjectWithWildcards(resources);
 
-      recapObject.addCapabilityForResource(
-        params.litResource,
-        params.capability
-      );
+      params.resourceAbilityRequests.forEach((r) => {
+        recapObject.addCapabilityForResource(r.resource, r.ability);
 
-      const verified = recapObject.verifyCapabilitiesForResource(
-        params.litResource,
-        params.capability
-      );
+        const verified = recapObject.verifyCapabilitiesForResource(
+          r.resource,
+          r.ability
+        );
 
-      if (!verified) {
-        throw new Error('Failed to verify capabilities for resource');
-      }
+        if (!verified) {
+          throw new Error('Failed to verify capabilities for resource');
+        }
+      });
 
       // regular siwe
       siweMessage = new siweNormal.SiweMessage({
@@ -2796,6 +2795,7 @@ export class LitNodeClientNodeJs extends LitCore {
           expiration,
           uri: sessionKeyUri,
           nonce,
+          resourceAbilityRequests: params.resourceAbilityRequests,
         },
       });
     }
