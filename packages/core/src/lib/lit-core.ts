@@ -193,10 +193,10 @@ export class LitCore {
       this.config.litNetwork === LitNetwork.Habanero
     ) {
       const minNodeCount = await LitContracts.getMinNodeCount(
-        this.config.litNetwork as LitNetwork
+        this.config.litNetwork as any
       );
       const bootstrapUrls = await LitContracts.getValidators(
-        this.config.litNetwork as LitNetwork
+        this.config.litNetwork as any
       );
       logDebug('Bootstrap urls: ', bootstrapUrls);
       if (minNodeCount <= 0) {
@@ -235,18 +235,16 @@ export class LitCore {
       this.config.litNetwork === LitNetwork.Custom &&
       this.config.bootstrapUrls.length < 1
     ) {
-      log('using custom contracts: ', this.config.contractContext);
+      logDebug('using custom contracts: ', this.config.contractContext);
 
       const minNodeCount = await LitContracts.getMinNodeCount(
-        this.config.litNetwork as LitNetwork,
-        this.config.contractContext
+        this.config.litNetwork as any
       );
 
       const bootstrapUrls = await LitContracts.getValidators(
-        this.config.litNetwork as LitNetwork,
-        this.config.contractContext
+        this.config.litNetwork as any
       );
-      log('Bootstrap urls: ', bootstrapUrls);
+      logDebug('Bootstrap urls: ', bootstrapUrls);
       if (minNodeCount <= 0) {
         throwError({
           message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
@@ -379,7 +377,7 @@ export class LitCore {
               keys
             );
           }
-          log('returned keys: ', keys);
+          logDebug('returned keys: ', keys);
           if (!keys.latestBlockhash) {
             logErrorWithRequestId(
               requestId,
@@ -572,7 +570,7 @@ export class LitCore {
       // -- create url with path
       const urlWithPath = `${url}/web/handshake`;
 
-    logDebug(`handshakeWithNode ${urlWithPath}`);
+      logDebug(`handshakeWithNode ${urlWithPath}`);
 
       const data = {
         clientPublicKey: 'test',

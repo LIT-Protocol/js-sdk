@@ -158,7 +158,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
 
     if (!prop.litActionCode && !prop.litActionIPFS) {
-      this.log(
+      this.logDebug(
         'No lit action code or IPFS hash provided. Using default action.'
       );
       this.useAction = false;
@@ -216,7 +216,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     try {
       await this.litNodeClient.connect();
       this.litNodeClientReady = true;
-      this.log('Connected to Lit Node');
+      this.logDebug('Connected to Lit Node');
     } catch (e) {
       return this.throwError('Failed to connect to Lit Node');
     }
@@ -280,7 +280,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       return this.throwError('executeJsArgs must have either code or ipfsId');
     }
 
-    this.log('executeJsArgs:', executeJsArgs);
+    this.logDebug('executeJsArgs:', executeJsArgs);
 
     try {
       const res = await executeWithRetry<ExecuteJsResponse>(
@@ -288,7 +288,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           await this.litNodeClient.executeJs(executeJsArgs),
         (error: any, requestId: string, isFinal: boolean) => {
           if (!isFinal) {
-            this.log('an error has occured, attempting to retry');
+            this.logDebug('an error has occured, attempting to retry');
           }
         }
       );
@@ -300,8 +300,8 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       }
       const sig = (res as ExecuteJsResponse).signatures[sigName];
 
-      this.log('res:', res);
-      this.log('res.signatures[sigName]:', sig);
+      this.logDebug('res:', res);
+      this.logDebug('res.signatures[sigName]:', sig);
 
       // pad sigs with 0 if length is odd
       sig.r = sig.r.length % 2 === 0 ? sig.r : '0' + sig.r;

@@ -170,7 +170,7 @@ export class PKPCosmosWallet
     );
 
     // Log the encoded signature.
-    this.log('stdSignature:', stdSignature);
+    this.logDebug('stdSignature:', stdSignature);
 
     // Return the signed transaction and encoded signature.
     return {

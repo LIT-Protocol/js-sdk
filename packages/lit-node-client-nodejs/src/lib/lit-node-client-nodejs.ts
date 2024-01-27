@@ -753,7 +753,7 @@ export class LitNodeClientNodeJs extends LitCore {
       data,
       requestId,
     });
-    logWithRequestId(
+    logDebugWithRequestId(
       requestId,
       `response node with url: ${url} from endpoint ${urlWithPath}`,
       res
@@ -860,8 +860,11 @@ export class LitNodeClientNodeJs extends LitCore {
     params: SignConditionECDSA,
     requestId: string
   ): Promise<NodeCommandResponse> => {
-    logDebug('signConditionEcdsa');
-    const urlWithPath = `${url}/web/signing/signConditionEcdsa`;
+    const wrapper = async (
+      id: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      logDebug('signConditionEcdsa');
+      const urlWithPath = `${url}/web/signing/signConditionEcdsa`;
 
       const data = {
         access_control_conditions: params.accessControlConditions,
@@ -1083,7 +1086,7 @@ export class LitNodeClientNodeJs extends LitCore {
         // because the staking nodes can change, and the rust code will use the same list
         const url = this.config.bootstrapUrls[nodeIndex];
 
-      logDebug(`running on node ${nodeIndex} at ${url}`);
+        logDebug(`running on node ${nodeIndex} at ${url}`);
 
         const reqBody: JsonExecutionRequest =
           this.getLitActionRequestBody(params);
@@ -1637,6 +1640,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<NodeShare>).values;
+
     logDebugWithRequestId(
       requestId,
       'executeJs responseData from node : ',
@@ -1686,7 +1690,11 @@ export class LitNodeClientNodeJs extends LitCore {
       return signedData;
     });
 
-    logDebugWithRequestId(requestId, 'signedDataList:', signedDataList);
+    logDebugWithRequestId(
+      requestId,
+      'signatures shares to combine: ',
+      signedDataList
+    );
     const signatures = this.getSignatures(signedDataList, requestId);
 
     // -- 2. combine responses as a string, and get parse it as JSON
@@ -1722,7 +1730,7 @@ export class LitNodeClientNodeJs extends LitCore {
       })
       .filter((item) => item !== null);
 
-    logDebugWithRequestId(requestId, 'claimList:', claimsList);
+    // logDebugWithRequestId(requestId, 'claimList:', claimsList);
 
     let claims = undefined;
 
@@ -2208,7 +2216,7 @@ export class LitNodeClientNodeJs extends LitCore {
       dataToEncryptHash
     );
 
-    logDebugWithRequestId(requestId, 'identityParam', identityParam);
+    logDebug('identityParam', identityParam);
 
     let requestId;
     // ========== Get Network Signature ==========
@@ -2429,9 +2437,11 @@ export class LitNodeClientNodeJs extends LitCore {
       const signature = this.getSignature(shareData, requestId);
       return signature;
     } catch (e) {
-      logDebug('Error - signed_ecdsa_messages - ', e);
-      const signed_ecdsa_message = nodePromises[0];
-      return signed_ecdsa_message;
+      logErrorWithRequestId(requestId, 'Error - signed_ecdsa_messages - ', e);
+      const signed_ecdsa_message = res as RejectedNodePromises;
+      // have to cast to any to keep with above `string` return value
+      // this will be returned as `RejectedNodePromise`
+      return signed_ecdsa_message as any;
     }
   };
 
@@ -2774,7 +2784,7 @@ export class LitNodeClientNodeJs extends LitCore {
       resourceAbilityRequests: params.resourceAbilityRequests,
     });
 
-    // console.log('XXX needToResignSessionKey:', needToResignSessionKey);
+    // console.logDebug('XXX needToResignSessionKey:', needToResignSessionKey);
 
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
@@ -2820,7 +2830,7 @@ export class LitNodeClientNodeJs extends LitCore {
       : [authSig];
     // const capabilities = params.capacityDelegationAuthSig ? [authSig, params.capacityDelegationAuthSig] : [authSig];
 
-    // console.log('capabilities:', capabilities);
+    // console.logDebug('capabilities:', capabilities);
 
     const signingTemplate = {
       sessionKey: sessionKey.publicKey,
@@ -2843,7 +2853,7 @@ export class LitNodeClientNodeJs extends LitCore {
       // sanitise signedMessage, replace //n with /n
       // signedMessage = signedMessage.replaceAll(/\/\/n/g, '/n');
 
-      // console.log('XX signedMessage:', signedMessage);
+      // console.logDebug('XX signedMessage:', signedMessage);
 
       const uint8arrayKey = uint8arrayFromString(
         sessionKey.secretKey,
@@ -2852,6 +2862,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
       const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
       let signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
+
       // logDebug("signature", signature);
       signatures[nodeAddress] = {
         sig: uint8arrayToString(signature, 'base16'),

@@ -1,4 +1,3 @@
-import { getAddress } from '@ethersproject/address';
 import { Provider, TransactionRequest } from '@ethersproject/abstract-provider';
 import {
   ExternallyOwnedAccount,
@@ -147,14 +146,14 @@ export class PKPEthersWallet
   }
 
   async signTransaction(transaction: TransactionRequest): Promise<string> {
-    this.log('signTransaction => transaction:', transaction);
+    this.logDebug('signTransaction => transaction:', transaction);
 
     if (!this.litNodeClientReady) {
       await this.init();
     }
 
     const addr = await this.getAddress();
-    this.log('signTransaction => addr:', addr);
+    this.logDebug('signTransaction => addr:', addr);
 
     // if manual settings are set, use them
     if (this.manualGasPrice) {
@@ -176,36 +175,36 @@ export class PKPEthersWallet
     try {
       if (!transaction['gasLimit']) {
         transaction.gasLimit = await this.rpcProvider.estimateGas(transaction);
-        this.log('signTransaction => gasLimit:', transaction.gasLimit);
+        this.logDebug('signTransaction => gasLimit:', transaction.gasLimit);
       }
 
       if (!transaction['nonce']) {
         transaction.nonce = await this.rpcProvider.getTransactionCount(addr);
-        this.log('signTransaction => nonce:', transaction.nonce);
+        this.logDebug('signTransaction => nonce:', transaction.nonce);
       }
 
       if (!transaction['chainId']) {
         transaction.chainId = (await this.rpcProvider.getNetwork()).chainId;
-        this.log('signTransaction => chainId:', transaction.chainId);
+        this.logDebug('signTransaction => chainId:', transaction.chainId);
       }
 
       if (!transaction['gasPrice']) {
         transaction.gasPrice = await this.getGasPrice();
-        this.log('signTransaction => gasPrice:', transaction.gasPrice);
+        this.logDebug('signTransaction => gasPrice:', transaction.gasPrice);
       }
     } catch (err) {
-      this.log(
+      this.logDebug(
         'signTransaction => unable to populate transaction with details:',
         err
       );
     }
 
     return resolveProperties(transaction).then(async (tx) => {
-      this.log('tx.from:', tx.from);
-      this.log('this.address:', this.address);
+      this.logDebug('tx.from:', tx.from);
+      this.logDebug('this.address:', this.address);
 
       if (tx.from != null) {
-        if (getAddress(tx.from) !== this.address) {
+        if (tx.from !== this.address) {
           logger.throwArgumentError(
             'transaction from address mismatch',
             'transaction.from',
@@ -223,11 +222,11 @@ export class PKPEthersWallet
       let signature;
 
       if (this.useAction) {
-        this.log('running lit action => sigName: pkp-eth-sign-tx');
+        this.logDebug('running lit action => sigName: pkp-eth-sign-tx');
         signature = (await this.runLitAction(toSign, 'pkp-eth-sign-tx'))
           .signature;
       } else {
-        this.log('requesting signature from nodes');
+        this.logDebug('requesting signature from nodes');
         signature = (await this.runSign(toSign)).signature;
       }
 
@@ -246,10 +245,10 @@ export class PKPEthersWallet
     const toSign = arrayify(hashMessage(message));
     let signature;
     if (this.useAction) {
-      this.log('running lit action => sigName: pkp-eth-sign-message');
+      this.logDebug('running lit action => sigName: pkp-eth-sign-message');
       signature = await this.runLitAction(toSign, 'pkp-eth-sign-message');
     } else {
-      this.log('requesting signature from nodes');
+      this.logDebug('requesting signature from nodes');
       signature = await this.runSign(toSign);
     }
 
@@ -301,10 +300,10 @@ export class PKPEthersWallet
     let signature;
 
     if (this.useAction) {
-      this.log('running lit action => sigName: pkp-eth-sign-message');
+      this.logDebug('running lit action => sigName: pkp-eth-sign-message');
       signature = await this.runLitAction(toSignBuffer, 'pkp-eth-sign-message');
     } else {
-      this.log('requesting signature from nodes');
+      this.logDebug('requesting signature from nodes');
       signature = await this.runSign(toSignBuffer);
     }
 
@@ -337,7 +336,7 @@ export class PKPEthersWallet
   }
 
   async sendTransaction(transaction: TransactionRequest | any): Promise<any> {
-    this.log('sendTransaction => transaction:', transaction);
+    this.logDebug('sendTransaction => transaction:', transaction);
 
     let res;
     let signedTxn;
@@ -352,7 +351,7 @@ export class PKPEthersWallet
 
       res = await this.rpcProvider.sendTransaction(signedTxn);
     } catch (e) {
-      this.log('sendTransaction => error:', e);
+      this.logDebug('sendTransaction => error:', e);
       throw e;
     }
 
@@ -478,7 +477,9 @@ export class PKPEthersWallet
   }
 
   _checkProvider(operation?: string | undefined): void {
-    this.log('This function is not implemented yet, but will skip it for now.');
+    this.logDebug(
+      'This function is not implemented yet, but will skip it for now.'
+    );
   }
 
   get mnemonic() {
