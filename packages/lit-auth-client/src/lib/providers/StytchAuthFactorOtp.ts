@@ -103,10 +103,7 @@ export default class StytchAuthFactorOtpProvider<
    *
    * @returns {Promise<string>} - Auth method id
    */
-  public static async authMethodId(
-    authMethod: AuthMethod,
-    options?: any
-  ): Promise<string> {
+  public static async authMethodId(authMethod: AuthMethod): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const accessToken = authMethod.accessToken;
       const parsedToken: StytchToken =

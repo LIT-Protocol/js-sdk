@@ -45,7 +45,7 @@ export async function main() {
   if (!res.signatures || Object.keys(res.signatures).length !== 5) {
     return fail(
       `should have 2 signatures but received ${
-        Object.keys(res.signatures).length
+        Object.keys(res.signatures).length ?? 0
       }`
     );
   }

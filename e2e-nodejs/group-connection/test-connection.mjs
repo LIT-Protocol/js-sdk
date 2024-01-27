@@ -9,7 +9,7 @@ export async function main() {
   // ==================== Test Logic ====================
   const client = new LitNodeClient({
     litNetwork: globalThis.LitCI.network,
-    debug: LITCONFIG.TEST_ENV.debug,
+    debug: globalThis.LitCI.debug,
     checkNodeAttestation: globalThis.LitCI.sevAttestation,
   });
   await client.connect();

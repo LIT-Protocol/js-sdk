@@ -21,5 +21,7 @@
     "universal"
   ],
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
-  "version": "3.0.32"
+  "version": "3.1.0",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }

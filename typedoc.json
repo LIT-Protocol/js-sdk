@@ -15,6 +15,7 @@
     "./packages/lit-node-client/src/index.ts",
     "./packages/lit-node-client-nodejs/src/index.ts",
     "./packages/lit-third-party-libs/src/index.ts",
+    "./packages/logger/src/index.ts",
     "./packages/misc/src/index.ts",
     "./packages/misc-browser/src/index.ts",
     "./packages/nacl/src/index.ts",
@@ -24,6 +25,7 @@
     "./packages/pkp-ethers/src/index.ts",
     "./packages/pkp-sui/src/index.ts",
     "./packages/pkp-walletconnect/src/index.ts",
+    "./packages/sev-snp-utils-sdk/src/index.ts",
     "./packages/types/src/index.ts",
     "./packages/uint8arrays/src/index.ts"
   ],

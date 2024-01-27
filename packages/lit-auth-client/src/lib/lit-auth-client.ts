@@ -233,6 +233,9 @@ export class LitAuthClient {
         authId = await StytchOtpProvider.authMethodId(authMethod);
         break;
       case AuthMethodType.StytchEmailFactorOtp:
+      case AuthMethodType.StytchSmsFactorOtp:
+      case AuthMethodType.StytchTotpFactorOtp:
+      case AuthMethodType.StytchWhatsAppFactorOtp:
         authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
         break;
       default:

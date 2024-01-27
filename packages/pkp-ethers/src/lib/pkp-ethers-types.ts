@@ -57,6 +57,7 @@ export interface ETHRequestSigningPayload {
 export type ETHHandlerReq = {
   signer: LitTypeDataSigner;
   payload: ETHRequestSigningPayload;
+  capability?: any;
 };
 
 export type ETHRequestHandler = (

@@ -246,8 +246,12 @@ export const combineEcdsaShares = (
         try {
           sig = JSON.parse(res) as CombinedECDSASignature;
         } catch (e) {
-          console.log("'res' from wasmECDSA.combine_signature: ", res); // ERROR: Could not deserialize value
-          throw new Error(`Failed to parse signature: ${e}`);
+          logError('Error while combining signatures shares', validShares);
+          throwError({
+            message: (e as Error).message,
+            name: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.name,
+            kind: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.kind,
+          });
         }
 
         /*

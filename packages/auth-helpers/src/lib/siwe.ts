@@ -1,4 +1,9 @@
 export function sanitizeSiweMessage(message: string): string {
-  // replace all escaped double quotes with single quotes.
-  return message.replace(/\"/g, "'");
+  // Unescape double-escaped newlines
+  let sanitizedMessage = message.replace(/\\\\n/g, '\\n');
+
+  // Replace escaped double quotes with single quotes
+  sanitizedMessage = sanitizedMessage.replace(/\\"/g, "'");
+
+  return sanitizedMessage;
 }

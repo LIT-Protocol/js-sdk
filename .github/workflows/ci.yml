@@ -4,7 +4,9 @@ on:
     branches:
       - master
   pull_request:
-
+    branches:
+      - master
+      - feat/**
 jobs:
   master:
     runs-on: ubuntu-latest
@@ -44,7 +46,7 @@ jobs:
       - name: Install project dependencies
         run: yarn install
       - name: Lint
-        run: yarn prettier:check
+        run: yarn nx format:check --all
   e2e-connection:
     runs-on: ubuntu-latest
     timeout-minutes: 30
