@@ -409,25 +409,20 @@ export class LogManager {
   public get(category: string, id?: string): Logger {
     let instance = this._loggers.get(category);
     if (!instance && !id) {
-      this._loggers.set(category, Logger.createLogger(
+      this._loggers.set(
         category,
-        this._level ?? LogLevel.INFO,
-        '',
-        true
-      ));
+        Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
+      );
 
       instance = this._loggers.get(category) as Logger;
       instance.Config = this._config;
       return instance;
     }
 
-
-    this._loggers.set(category, Logger.createLogger(
+    this._loggers.set(
       category,
-      this._level ?? LogLevel.INFO,
-      '',
-      true
-    ));
+      Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
+    );
 
     instance = this._loggers.get(category) as Logger;
     instance.Config = this._config;
@@ -438,13 +433,16 @@ export class LogManager {
       if (child) {
         return child;
       }
-      children?.set(id, Logger.createLogger(
-        category,
-        this._level ?? LogLevel.INFO,
-        id ?? '',
-        true
-      ))
-      
+      children?.set(
+        id,
+        Logger.createLogger(
+          category,
+          this._level ?? LogLevel.INFO,
+          id ?? '',
+          true
+        )
+      );
+
       child = children?.get(id) as Logger;
       child.Config = this._config;
       return children?.get(id) as Logger;
@@ -457,7 +455,7 @@ export class LogManager {
     let logStrs: string[] = [];
     for (const category of this._loggers.entries()) {
       let logger = category[1].Children.get(id);
-      if (logger)  {
+      if (logger) {
         let logStr = [];
         for (const log of logger.Logs) {
           logStr.push(log.toString());
@@ -472,10 +470,13 @@ export class LogManager {
   public getLogsForId(id: string): string[] {
     let logsForRequest: string[] = this.getById(id);
     if (logsForRequest.length < 1 && globalThis.localStorage) {
-      for (const category of this._loggers.keys()) { 
-        let bucketStr: string | null = globalThis.localStorage.getItem(category);
+      for (const category of this._loggers.keys()) {
+        let bucketStr: string | null =
+          globalThis.localStorage.getItem(category);
         let bucket: { logs: string[] } = JSON.parse(bucketStr as string);
-        const logsForId: string[] = bucket.logs.filter((log: string) => log.includes(id));
+        const logsForId: string[] = bucket.logs.filter((log: string) =>
+          log.includes(id)
+        );
         logsForRequest = logsForId.concat(logsForRequest);
       }
     }
