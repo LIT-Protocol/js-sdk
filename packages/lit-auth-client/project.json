@@ -7,7 +7,8 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target lit-auth-client"
+        "command": "yarn build:target lit-auth-client",
+        "parallel": false
       }
     },
     "_buildTsc": {

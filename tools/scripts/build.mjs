@@ -35,11 +35,11 @@ const build = async (name) => {
   greenLog(`Matching packages/${name}/project.json versions to lerna.json...`);
 
   greenLog('Building Tsc...');
-  await runCommand(`yarn nx run ${name}:_buildTsc`);
+  await runCommand(`yarn nx run ${name}:_buildTsc --parallel 1`);
 
   greenLog('Building Vanilla...');
   try {
-    await runCommand(`yarn nx run ${name}:_buildWeb`);
+    await runCommand(`yarn nx run ${name}:_buildWeb --parallel 1`);
   } catch (e) {
     redLog('❌ Vanilla build failed, skipping...');
   }

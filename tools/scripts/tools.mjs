@@ -418,7 +418,7 @@ async function findFunc() {
     greenLog(
       `
         Usage: node tools/scripts/tools.mjs --find [option]
-            [option]: 
+            [option]:
                 --imports: find all imports from a directory
     `,
       true
@@ -529,7 +529,7 @@ async function buildFunc() {
       .map((item) => item.replace('apps/', ''))
       .join(',');
 
-    const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
+    const command = `yarn nx run-many --target=build --exclude=${ignoreList} --parallel 1`;
 
     spawnListener(command, {
       onDone: () => {
@@ -1114,7 +1114,7 @@ async function commentFunc() {
   console.log(
     `
 // ${line}${up.join('')}${line}
-//          ${MESSAGE}                                    
+//          ${MESSAGE}
 // ${line}${down.join('')}${line}
     `
   );

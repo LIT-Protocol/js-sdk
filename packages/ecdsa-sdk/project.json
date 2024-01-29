@@ -7,7 +7,8 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target ecdsa-sdk"
+        "command": "yarn build:target ecdsa-sdk",
+        "parallel": false
       }
     },
     "_buildTsc": {

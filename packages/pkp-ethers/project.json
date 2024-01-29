@@ -7,7 +7,8 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target pkp-ethers"
+        "command": "yarn build:target pkp-ethers",
+        "parallel": false
       }
     },
     "_buildTsc": {

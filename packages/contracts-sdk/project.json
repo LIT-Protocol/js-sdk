@@ -11,7 +11,8 @@
         "commands": [
           "yarn build:target constants --skip",
           "yarn build:target contracts-sdk"
-        ]
+        ],
+        "parallel": false
       }
     },
     "_buildTsc": {

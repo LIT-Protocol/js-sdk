@@ -7,7 +7,8 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target crypto"
+        "command": "yarn build:target crypto",
+        "parallel": false
       }
     },
     "_buildTsc": {

@@ -7,7 +7,8 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target sev-snp-utils-sdk"
+        "command": "yarn build:target sev-snp-utils-sdk",
+        "parallel": false
       }
     },
     "_buildTsc": {

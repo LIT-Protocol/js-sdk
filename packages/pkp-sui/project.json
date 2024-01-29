@@ -7,7 +7,8 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn build:target pkp-sui"
+        "command": "yarn build:target pkp-sui",
+        "parallel": false
       }
     },
     "_buildTsc": {
