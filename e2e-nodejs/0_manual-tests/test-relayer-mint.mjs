@@ -70,7 +70,7 @@ export async function main() {
   const litAuthClient = new LitAuthClient({
     litNodeClient,
     litRelayConfig: {
-      relayUrl: 'https://habanero-relayer.getlit.dev',
+      relayUrl: 'https://manzano-relayer.getlit.dev',
       relayApiKey: '...',
     },
     debug: true,
@@ -98,17 +98,12 @@ export async function main() {
     addPkpEthAddressAsPermittedAddress: true,
   });
 
-  console.log('res', res);
-
-  process.exit();
-
+  if (!res) {
+    return fail(`Res is empty, expected a response from the relayer`);
+  }
 
   // ==================== Post-Validation ====================
-  return success('WORKS');
-
-  return fail(
-    `Failed to get proof from Recap Session Capability, it should be ${expectedResult} but is ${proof}`
-  );
+  return success(`Minted PKP via the relayer with auth methods`);
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });
