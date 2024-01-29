@@ -27,10 +27,10 @@ import {
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
-import { LogLevel, LogManager } from '@lit-protocol/logger';
+import { LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
 
-const logBuffer: Array<Array<any>> = [];
+const defaultLogger = LogManager.Instance.get('lit-sdk');
 
 /**
  *
@@ -190,11 +190,8 @@ export const isNodeErrorV0 = (
 };
 
 declare global {
-  var litConfig: any;
   var wasmExport: any;
   var wasmECDSA: any;
-  var logger: any;
-  var logManager: any;
 }
 
 export const throwRemovedFunctionError = (functionName: string) => {
@@ -203,25 +200,6 @@ export const throwRemovedFunctionError = (functionName: string) => {
     errorKind: LIT_ERROR.REMOVED_FUNCTION_ERROR.kind,
     errorCode: LIT_ERROR.REMOVED_FUNCTION_ERROR.name,
   });
-};
-
-export const bootstrapLogManager = (
-  id: string,
-  level: LogLevel = LogLevel.DEBUG
-) => {
-  if (!globalThis.logManager) {
-    globalThis.logManager = LogManager.Instance;
-    globalThis.logManager.withConfig({
-      condenseLogs: true,
-    });
-    globalThis.logManager.setLevel(level);
-  }
-
-  globalThis.logger = globalThis.logManager.get(id);
-};
-
-export const getLoggerbyId = (id: string) => {
-  return globalThis.logManager.get(id);
 };
 
 /**
@@ -233,121 +211,19 @@ export const getLoggerbyId = (id: string) => {
  * @returns { void }
  */
 export const log = (...args: any): void => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!globalThis?.litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  if (globalThis?.litConfig?.debug !== true) {
-    return;
-  }
-  // config is loaded, and debug is true
-
-  // if there are there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger && globalThis?.logger.debug(...log);
-  }
-
-  globalThis?.logger && globalThis?.logger.debug(...args);
+  defaultLogger.debug(...args);
 };
 
 export const logWithRequestId = (id: string, ...args: any) => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!globalThis?.litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  if (globalThis?.litConfig?.debug !== true) {
-    return;
-  }
-  // config is loaded, and debug is true
-
-  // if there are there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category, id).debug(...log);
-  }
-
-  globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category, id).debug(...args);
+  LogManager.Instance.get('lit-sdk', id).debug(...args);
 };
 
 export const logErrorWithRequestId = (id: string, ...args: any) => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!globalThis?.litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  if (globalThis?.litConfig?.debug !== true) {
-    return;
-  }
-  // config is loaded, and debug is true
-
-  // if there are there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category, id).error(...log);
-  }
-
-  globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category, id).error(...args);
+  LogManager.Instance.get('lit-sdk', id).error(...args);
 };
 
 export const logError = (...args: any) => {
-  if (!globalThis) {
-    // there is no globalThis, just print the log
-    console.log(...args);
-    return;
-  }
-
-  // check if config is loaded yet
-  if (!globalThis?.litConfig) {
-    // config isn't loaded yet, push into buffer
-    logBuffer.push(args);
-    return;
-  }
-
-  if (globalThis?.litConfig?.debug !== true) {
-    return;
-  }
-  // config is loaded, and debug is true
-
-  // if there are there are logs in buffer, print them first and empty the buffer.
-  while (logBuffer.length > 0) {
-    const log = logBuffer.shift() ?? '';
-    globalThis?.logger &&
-      globalThis.logManager.get(globalThis.logger.category).error(...log);
-  }
-
-  globalThis?.logger &&
-    globalThis.logManager.get(globalThis.logger.category).error(...args);
+  defaultLogger.error(...args);
 };
 
 /**

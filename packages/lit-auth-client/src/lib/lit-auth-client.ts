@@ -20,7 +20,7 @@ import WebAuthnProvider from './providers/WebAuthnProvider';
 import { StytchOtpProvider } from './providers/StytchOtpProvider';
 import AppleProvider from './providers/AppleProvider';
 import StytchAuthFactorOtpProvider from './providers/StytchAuthFactorOtp';
-import { bootstrapLogManager, getLoggerbyId, log } from '@lit-protocol/misc';
+import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 
 /**
@@ -60,7 +60,6 @@ export class LitAuthClient {
    */
   constructor(options?: LitAuthClientOptions) {
     this.providers = new Map();
-    bootstrapLogManager('auth-client');
     this.debug = options?.debug ?? false;
     // Check if custom relay object is provided
     if (options?.customRelay) {
