@@ -47,9 +47,19 @@ async function getAuthSig(wallet, litNodeClient) {
 export async function main() {
   // ==================== Setup ====================
 
+  if (!process.env.NETWORK) {
+    return fail(`NETWORK env var not set.`);
+  }
+
+  if (!['cayenne', 'habanero', 'manzano'].includes(process.env.NETWORK)) {
+    return fail(
+      `Invalid NETWORK env var set. It has to be either 'manzano', 'habanero', or 'cayenne'`
+    );
+  }
+
   // -- setting up lit node client
   const litNodeClient = new LitNodeClient({
-    litNetwork: 'manzano',
+    litNetwork: process.env.NETWORK,
     debug: true,
     checkNodeAttestation: true,
     storageProvider: {
@@ -70,7 +80,6 @@ export async function main() {
   const litAuthClient = new LitAuthClient({
     litNodeClient,
     litRelayConfig: {
-      relayUrl: 'https://manzano-relayer.getlit.dev',
       relayApiKey: '...',
     },
     debug: true,
