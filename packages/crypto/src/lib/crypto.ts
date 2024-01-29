@@ -298,8 +298,12 @@ export const computeHDPubKey = (
   try {
     switch (sigType) {
       case SIGTYPE.EcdsaCaitSith:
+        pubkeys = pubkeys.map((value: string) => {
+          return value.replace('0x', '');
+        });
         return ecdsaSdk.compute_public_key(keyId, pubkeys, 2);
-        defualt: throw new Error('Non supported signature type');
+      default:
+        throw new Error('Non supported signature type');
     }
   } catch (e) {
     log('Failed to derive public key', e);
