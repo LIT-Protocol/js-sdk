@@ -298,9 +298,11 @@ export const computeHDPubKey = (
   try {
     switch (sigType) {
       case SIGTYPE.EcdsaCaitSith:
+        // a bit of pre processing to remove characters which will cause our wasm module to reject the values.
         pubkeys = pubkeys.map((value: string) => {
           return value.replace('0x', '');
         });
+        keyId = keyId.replace('0x', '');
         return ecdsaSdk.compute_public_key(keyId, pubkeys, 2);
       default:
         throw new Error('Non supported signature type');
