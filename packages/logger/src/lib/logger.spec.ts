@@ -68,4 +68,14 @@ describe('logger', () => {
     console.log(lm.getLogsForId('foo3'));
     expect(lm.getLogsForId('foo3').length).toEqual(1);
   });
+
+  it('should trace logs through multiple categories', () => {
+    const logger = lm.get('info-logger', 'foo4');
+    logger.setLevel(LogLevel.DEBUG);
+    const logger2 = lm.get('debug-logger', 'foo4') 
+    logger2.setLevel(LogLevel.DEBUG);
+    logger2.debug('foo');
+    logger.debug('bar');
+    expect(lm.getLogsForId('foo4').length).toEqual(2);
+  });
 });
