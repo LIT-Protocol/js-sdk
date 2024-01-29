@@ -347,10 +347,11 @@ export class Logger {
 
   private _addToLocalStorage(log: Log) {
     if (globalThis.localStorage) {
-      let bucket: { [index: string]: string[] } | string | null  = globalThis.localStorage.getItem(log.category);
+      let bucket: { [index: string]: string[] } | string | null =
+        globalThis.localStorage.getItem(log.category);
       if (bucket) {
         bucket = JSON.parse(bucket) as { [index: string]: string[] };
-        if(!bucket[log.id]) {
+        if (!bucket[log.id]) {
           bucket[log.id] = [];
         }
         bucket[log.id].push(log.toString());
@@ -358,10 +359,7 @@ export class Logger {
       } else {
         const bucket: { [index: string]: string[] } = {};
         bucket[log.id] = [log.toString()];
-        globalThis.localStorage.setItem(
-          log.category,
-          _safeStringify(bucket)
-        );
+        globalThis.localStorage.setItem(log.category, _safeStringify(bucket));
       }
     }
   }
@@ -476,7 +474,9 @@ export class LogManager {
       for (const category of this._loggers.keys()) {
         let bucketStr: string | null =
           globalThis.localStorage.getItem(category);
-        let bucket: { [key: string]: string[] } = JSON.parse(bucketStr as string);
+        let bucket: { [key: string]: string[] } = JSON.parse(
+          bucketStr as string
+        );
         const logsForId: string[] = bucket[id].filter((log: string) =>
           log.includes(id)
         );

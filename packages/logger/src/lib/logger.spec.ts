@@ -84,7 +84,7 @@ describe('logger', () => {
     for (let i = 0; i < count; i++) {
       const logger = lm.get('' + i, 'foo4');
       logger.setLevel(LogLevel.OFF);
-      logger.debug(i + "");
+      logger.debug(i + '');
     }
 
     expect(lm.getLogsForId('foo4').length).toEqual(count);
