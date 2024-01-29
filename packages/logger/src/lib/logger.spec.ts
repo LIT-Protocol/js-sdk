@@ -78,4 +78,15 @@ describe('logger', () => {
     logger.debug('bar');
     expect(lm.getLogsForId('foo4').length).toEqual(2);
   });
+
+  it('should trace logs through multiple categories scale test', () => {
+    const count = 1_000;
+    for (let i = 0; i < count; i++) {
+      const logger = lm.get('' + i, 'foo4');
+      logger.setLevel(LogLevel.OFF);
+      logger.debug(i + "");
+    }
+
+    expect(lm.getLogsForId('foo4').length).toEqual(count);
+  });
 });
