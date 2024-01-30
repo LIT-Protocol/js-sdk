@@ -37,7 +37,7 @@ export async function main() {
     scopes: [
       // AuthMethodScope.NoPermissions,
       AuthMethodScope.SignAnything,
-      AuthMethodScope.OnlySignMessages,
+      AuthMethodScope.PersonalSign,
     ],
   });
 
@@ -59,14 +59,14 @@ export async function main() {
     );
 
   const signAnythingScope = scopes[1];
-  const onlySignMessagesScope = scopes[2];
+  const PersonalSignScope = scopes[2];
 
   if (!signAnythingScope) {
     return fail(`signAnythingScope should be true`);
   }
 
-  if (!onlySignMessagesScope) {
-    return fail(`onlySignMessagesScope should be true`);
+  if (!PersonalSignScope) {
+    return fail(`PersonalSignScope should be true`);
   }
 
   // ==================== Success ====================
@@ -76,7 +76,7 @@ Logs:
 tokenId: ${mintInfo.pkp.tokenId}
 transactionHash: ${mintInfo.tx.transactionHash}
 signAnythingScope: ${signAnythingScope}
-onlySignMessagesScope: ${onlySignMessagesScope}
+PersonalSignScope: ${PersonalSignScope}
 `);
 }
 
