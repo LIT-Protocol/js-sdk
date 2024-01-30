@@ -26,6 +26,7 @@ import {
 } from '@lit-protocol/constants';
 
 import {
+  bootstrapLogManager,
   executeWithRetry,
   isBrowser,
   isNode,
@@ -66,7 +67,6 @@ import {
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { LogManager } from '@lit-protocol/logger';
 
 export class LitCore {
   config: LitNodeClientConfig;
@@ -142,6 +142,10 @@ export class LitCore {
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
+    // -- set global variables
+    globalThis.litConfig = this.config;
+    bootstrapLogManager('core');
+
     // -- configure local storage if not present
     // LitNodeClientNodejs is a base for LitNodeClient
     // First check for if our runtime is node
@@ -169,7 +173,7 @@ export class LitCore {
 
   // ========== Logger utilities ==========
   getLogsForRequestId = (id: string): string[] => {
-    return LogManager.Instance.getLogsForId(id);
+    return globalThis.logManager.getLogsForId(id);
   };
 
   // ========== Scoped Class Helpers ==========
@@ -483,7 +487,7 @@ export class LitCore {
           this.ready = true;
 
           log(
-            `🔥 lit is ready. NOTE: litNodeClient is no longer set globally. Run "globalThis.litNodeClient = client" for backward compatibility.`
+            `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`
           );
           log('current network config', {
             networkPubkey: this.networkPubKey,
@@ -492,6 +496,9 @@ export class LitCore {
             subnetPubkey: this.subnetPubKey,
             latestBlockhash: this.latestBlockhash,
           });
+
+          // @ts-ignore
+          globalThis.litNodeClient = this;
 
           // browser only
           if (isBrowser()) {

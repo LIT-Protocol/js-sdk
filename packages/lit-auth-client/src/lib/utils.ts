@@ -1,4 +1,4 @@
-import { LogManager } from '@lit-protocol/logger';
+import { getLoggerbyId } from '@lit-protocol/misc';
 import { LoginUrlParams } from '@lit-protocol/types';
 import * as cbor from 'cbor-web';
 
@@ -310,6 +310,6 @@ export function unparse(buf: any) {
 }
 
 export function log(...args: any) {
-  const logger = LogManager.Instance.get('auth-client');
+  const logger = getLoggerbyId('auth-client');
   logger.debug(...args);
 }
