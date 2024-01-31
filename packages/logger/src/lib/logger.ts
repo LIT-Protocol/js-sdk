@@ -11,7 +11,7 @@ export enum LogLevel {
   FATAL = 4,
   TIMING_START = 5,
   TIMING_END = 6,
-  OFF = 5,
+  OFF = 7,
 }
 
 const colours = {
@@ -312,19 +312,19 @@ export class Logger {
 
     const arrayLog = log.toArray();
     if (this._config?.['condenseLogs'] && !this._checkHash(log)) {
-      (this._level >= level || level === LogLevel.ERROR) &&
+      (this._level <= level || level === LogLevel.ERROR) &&
         this._consoleHandler(...arrayLog);
-      (this._level >= level || level === LogLevel.ERROR) &&
+      (this._level <= level || level === LogLevel.ERROR) &&
         this._handler &&
         this._handler(log);
-      (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
+      (this._level <= level || level === LogLevel.ERROR) && this._addLog(log);
     } else if (!this._config?.['condenseLogs']) {
-      (this._level >= level || level === LogLevel.ERROR) &&
+      (this._level <= level || level === LogLevel.ERROR) &&
         this._consoleHandler(...arrayLog);
-      (this._level >= level || level === LogLevel.ERROR) &&
+      (this._level <= level || level === LogLevel.ERROR) &&
         this._handler &&
         this._handler(log);
-      (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
+      (this._level <= level || level === LogLevel.ERROR) && this._addLog(log);
     }
   }
 
@@ -418,15 +418,15 @@ export class LogManager {
       instance = this._loggers.get(category) as Logger;
       instance.Config = this._config;
       return instance;
+    } else {
+      this._loggers.set(
+        category,
+        Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
+      );
+
+      instance = this._loggers.get(category) as Logger;
+      instance.Config = this._config;
     }
-
-    this._loggers.set(
-      category,
-      Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
-    );
-
-    instance = this._loggers.get(category) as Logger;
-    instance.Config = this._config;
 
     if (id) {
       let children = instance?.Children;
@@ -477,10 +477,12 @@ export class LogManager {
         let bucket: { [key: string]: string[] } = JSON.parse(
           bucketStr as string
         );
-        const logsForId: string[] = bucket[id].filter((log: string) =>
-          log.includes(id)
-        );
-        logsForRequest = logsForId.concat(logsForRequest);
+        if (bucket && bucket[id]) {
+          const logsForId: string[] = bucket[id].filter((log: string) =>
+            log.includes(id)
+          );
+          logsForRequest = logsForId.concat(logsForRequest);
+        }
       }
     }
 
