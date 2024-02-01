@@ -1064,7 +1064,7 @@ export interface GetSessionSigsProps {
 
   // rateLimitAuthSig: AuthSig;
 
-  capacityDelegationAuthSig: AuthSig;
+  capacityDelegationAuthSig?: AuthSig;
 }
 
 export interface AuthCallback {

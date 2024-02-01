@@ -91,7 +91,7 @@ import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'lit-siwe';
 import * as siweNormal from 'siwe';
 
-import { LitCore } from '@lit-protocol/core';
+import { LitCore, compatibilityCheck } from '@lit-protocol/core';
 import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 import {
@@ -2740,6 +2740,13 @@ export class LitNodeClientNodeJs extends LitCore {
   getSessionSigs = async (
     params: GetSessionSigsProps
   ): Promise<SessionSigsMap> => {
+    // -- validate
+    compatibilityCheck({
+      network: this.config.litNetwork,
+      func: 'getSessionSigs',
+      params,
+    });
+
     // -- prepare
     // Try to get it from local storage, if not generates one~
     let sessionKey = params.sessionKey ?? this.getSessionKey();
@@ -2821,12 +2828,9 @@ export class LitNodeClientNodeJs extends LitCore {
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
     let sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
-    const capabilities = params.capacityDelegationAuthSig
+    const capabilities = params?.capacityDelegationAuthSig
       ? [params.capacityDelegationAuthSig, authSig]
       : [authSig];
-    // const capabilities = params.capacityDelegationAuthSig ? [authSig, params.capacityDelegationAuthSig] : [authSig];
-
-    // console.log('capabilities:', capabilities);
 
     const signingTemplate = {
       sessionKey: sessionKey.publicKey,
