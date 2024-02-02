@@ -109,6 +109,14 @@ export class LitCore {
           this.config = {
             ..._defaultConfig,
             litNetwork: LitNetwork.Manzano,
+            checkSevSnpAttestation: true,
+          } as unknown as LitNodeClientConfig;
+          break;
+        case LitNetwork.Habanero:
+          this.config = {
+            ..._defaultConfig,
+            litNetwork: LitNetwork.Habanero,
+            checkSevSnpAttestation: true,
           } as unknown as LitNodeClientConfig;
           break;
         default:
@@ -387,7 +395,11 @@ export class LitCore {
             );
           }
 
-          if (this.config.checkNodeAttestation) {
+          if (
+            this.config.checkNodeAttestation ||
+            this.config.litNetwork === LitNetwork.Manzano ||
+            this.config.litNetwork === LitNetwork.Habanero
+          ) {
             // check attestation
             if (!resp.attestation) {
               logErrorWithRequestId(
