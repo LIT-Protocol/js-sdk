@@ -8,7 +8,7 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 import { checkSchema, throwError } from '@lit-protocol/misc';
-import { loadSchema } from 'lit-accs-validator';
+import { loadSchema } from '@lit-protocol/accs-validator';
 
 const SCHEMA_NAME_MAP: { [K in ConditionType]: string } = {
   cosmos: 'LPACC_ATOM',

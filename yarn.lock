@@ -3269,6 +3269,13 @@
   resolved "https://registry.yarnpkg.com/@lit-labs/ssr-dom-shim/-/ssr-dom-shim-1.1.2.tgz#d693d972974a354034454ec1317eb6afd0b00312"
   integrity sha512-jnOD+/+dSrfTWYfSXBXlo5l5f0q1UuJo3tkbMDCYA2lKUYq79jaxqtGEvnRoh049nt1vdo1+45RinipU6FGY2g==
 
+"@lit-protocol/accs-validator@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/accs-validator/-/accs-validator-0.0.2.tgz#0498e9fee3344a29aabd754edbc4e7273fca7e43"
+  integrity sha512-CRQroa/47RbkIkgs0HnQWEKINkiU/EWFEEvcaEE6mEMBcXB3Opzy/WDetv0/0Cw0buzpEY1XEkHeZqmI0GGKtQ==
+  dependencies:
+    ajv "^8.12.0"
+
 "@lit/reactive-element@^1.3.0", "@lit/reactive-element@^1.6.0":
   version "1.6.3"
   resolved "https://registry.yarnpkg.com/@lit/reactive-element/-/reactive-element-1.6.3.tgz#25b4eece2592132845d303e091bad9b04cdcfe03"
@@ -18415,12 +18422,6 @@ listr2@^3.8.3:
     rxjs "^7.5.1"
     through "^2.3.8"
     wrap-ansi "^7.0.0"
-
-lit-accs-validator@../accs-schemas/dist/lit-accs-validator-v0.0.2.tgz:
-  version "0.0.2"
-  resolved "../accs-schemas/dist/lit-accs-validator-v0.0.2.tgz#841bcb307ca23e37f217d9d3beb244a4d1a30325"
-  dependencies:
-    ajv "^8.12.0"
 
 lit-element@^3.3.0:
   version "3.3.3"

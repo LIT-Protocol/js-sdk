@@ -5,7 +5,7 @@ import {
   LPACC_EVM_CONTRACT,
   LPACC_SOL,
   LPACC_EVM_BASIC,
-} from 'lit-accs-validator';
+} from '@lit-protocol/accs-validator';
 import {
   AuthMethod,
   LitRelayConfig,
