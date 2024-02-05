@@ -1,0 +1,19 @@
+{
+  "name": "@lit-protocol/ng",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/ng/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/ng",
+        "main": "packages/ng/src/index.ts",
+        "tsConfig": "packages/ng/tsconfig.lib.json",
+        "assets": []
+      }
+    }
+  },
+  "tags": []
+}
