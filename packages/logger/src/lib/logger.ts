@@ -418,17 +418,18 @@ export class LogManager {
       instance = this._loggers.get(category) as Logger;
       instance.Config = this._config;
       return instance;
-    } else {
-      this._loggers.set(
-        category,
-        Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
-      );
-
-      instance = this._loggers.get(category) as Logger;
-      instance.Config = this._config;
     }
 
     if (id) {
+      if (!instance) {
+        this._loggers.set(
+          category,
+          Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
+        );
+
+        instance = this._loggers.get(category) as Logger;
+        instance.Config = this._config;
+      }
       let children = instance?.Children;
       let child = children?.get(id);
       if (child) {
@@ -447,6 +448,16 @@ export class LogManager {
       child = children?.get(id) as Logger;
       child.Config = this._config;
       return children?.get(id) as Logger;
+      // fall through condition for if there is no id for the logger and the category is not yet created.
+      // ex: LogManager.Instance.get('foo');
+    } else if (!instance) {
+      this._loggers.set(
+        category,
+        Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
+      );
+
+      instance = this._loggers.get(category) as Logger;
+      instance.Config = this._config;
     }
 
     return instance as Logger;
