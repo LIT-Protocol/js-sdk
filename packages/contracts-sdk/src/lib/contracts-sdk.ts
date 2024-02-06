@@ -2132,7 +2132,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           sendPkpToItself,
           { value: mintCost }
         );
-        console.log('tx', tx);
         return tx;
       },
       // claimAndMintNextAndAddAuthMethods: async (
