@@ -1,5 +1,9 @@
 import { getJestProjects } from '@nx/jest';
+import type { Config } from 'jest';
 
-export default {
+const config: Config = {
   projects: getJestProjects(),
+  cache: false,
 };
+
+export default config;

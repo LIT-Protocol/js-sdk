@@ -1,7 +1,11 @@
-import { ng } from './ng';
+import { greet, init } from './ng';
 
 describe('ng', () => {
-  it('should work', async () => {
-    expect(await ng()).toEqual('Hello, wasm!');
+  beforeEach(async () => {
+    await init();
+  });
+
+  it('should greet us nicely', async () => {
+    expect(greet()).toEqual('Hello, wasm!');
   });
 });
