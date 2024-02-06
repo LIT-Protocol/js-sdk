@@ -68,4 +68,36 @@ describe('logger', () => {
     console.log(lm.getLogsForId('foo3'));
     expect(lm.getLogsForId('foo3').length).toEqual(1);
   });
+
+  it('should trace logs through multiple categories', () => {
+    const logger = lm.get('info-logger', 'foo4');
+    logger.setLevel(LogLevel.DEBUG);
+    const logger2 = lm.get('debug-logger', 'foo4');
+    logger2.setLevel(LogLevel.DEBUG);
+    logger2.debug('foo');
+    logger.debug('bar');
+    expect(lm.getLogsForId('foo4').length).toEqual(2);
+  });
+
+  it('should not persist logs if level set to OFF', () => {
+    const count = 1_000;
+    for (let i = 0; i < count; i++) {
+      const logger = lm.get('' + i, 'foo4');
+      logger.setLevel(LogLevel.OFF);
+      logger.debug(i + '');
+    }
+
+    expect(lm.getLogsForId('foo4').length).toEqual(0);
+  });
+
+  it('should persist logs across categories', async () => {
+    const count = 1_000;
+    for (let i = 0; i < count; i++) {
+      const logger = lm.get('' + i, 'foo4');
+      logger.setLevel(LogLevel.DEBUG);
+      logger.debug(i + '');
+    }
+
+    expect(lm.getLogsForId('foo4').length).toEqual(count);
+  });
 });
