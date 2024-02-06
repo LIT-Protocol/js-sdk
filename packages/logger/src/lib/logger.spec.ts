@@ -88,11 +88,7 @@ describe('logger', () => {
       logger.debug(i + '');
     }
 
-    expect(
-      lm.getLogsForId(
-        'foo5'
-      ).length
-    ).toEqual(0);
+    expect(lm.getLogsForId('foo5').length).toEqual(0);
   });
 
   it('should persist logs across categories', async () => {
