@@ -34,6 +34,7 @@ describe('logger', () => {
       condenseLogs: true,
     });
     let logger = lm.get('category', 'bar');
+    logger.setLevel(LogLevel.INFO);
     expect(logger.Config?.['condenseLogs']).toEqual(true);
     logger.info('hello');
     logger.info('hello');
@@ -82,22 +83,22 @@ describe('logger', () => {
   it('should not persist logs if level set to OFF', () => {
     const count = 1_000;
     for (let i = 0; i < count; i++) {
-      const logger = lm.get('' + i, 'foo4');
+      const logger = lm.get('' + i, 'foo5');
       logger.setLevel(LogLevel.OFF);
       logger.debug(i + '');
     }
 
-    expect(lm.getLogsForId('foo4').length).toEqual(0);
+    expect(lm.getLogsForId('foo5').length).toEqual(0);
   });
 
   it('should persist logs across categories', async () => {
     const count = 1_000;
     for (let i = 0; i < count; i++) {
-      const logger = lm.get('' + i, 'foo4');
+      const logger = lm.get('' + i, 'foo6');
       logger.setLevel(LogLevel.DEBUG);
       logger.debug(i + '');
     }
 
-    expect(lm.getLogsForId('foo4').length).toEqual(count);
+    expect(lm.getLogsForId('foo6').length).toEqual(count);
   });
 });

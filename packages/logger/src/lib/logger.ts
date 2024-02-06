@@ -11,7 +11,7 @@ export enum LogLevel {
   FATAL = 4,
   TIMING_START = 5,
   TIMING_END = 6,
-  OFF = 7,
+  OFF = -1,
 }
 
 const colours = {
@@ -312,19 +312,19 @@ export class Logger {
 
     const arrayLog = log.toArray();
     if (this._config?.['condenseLogs'] && !this._checkHash(log)) {
-      (this._level <= level || level === LogLevel.ERROR) &&
+      (this._level >= level || level === LogLevel.ERROR) &&
         this._consoleHandler(...arrayLog);
-      (this._level <= level || level === LogLevel.ERROR) &&
+      (this._level >= level || level === LogLevel.ERROR) &&
         this._handler &&
         this._handler(log);
-      (this._level <= level || level === LogLevel.ERROR) && this._addLog(log);
+      (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
     } else if (!this._config?.['condenseLogs']) {
-      (this._level <= level || level === LogLevel.ERROR) &&
+      (this._level >= level || level === LogLevel.ERROR) &&
         this._consoleHandler(...arrayLog);
-      (this._level <= level || level === LogLevel.ERROR) &&
+      (this._level >= level || level === LogLevel.ERROR) &&
         this._handler &&
         this._handler(log);
-      (this._level <= level || level === LogLevel.ERROR) && this._addLog(log);
+      (this._level >= level || level === LogLevel.ERROR) && this._addLog(log);
     }
   }
 
