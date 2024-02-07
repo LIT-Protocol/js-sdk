@@ -1043,15 +1043,37 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   // The expiration date is calculated to be at midnight UTC, a specific number of days from now.
   mintCapacityCreditsNFT = async ({
     requestsPerDay,
+    requestsPerSecond,
+    requestsPerKilosecond,
     daysUntilUTCMidnightExpiration,
   }: MintCapacityCreditsPerDayContext): Promise<MintCapacityCreditsRes> => {
     this.log('Minting Capacity Credits NFT...');
 
-    // -- in the context of "request per day"
-    const requestsPerSecond = convertRequestsPerDayToPerSecond(requestsPerDay);
-    const requestsPerKilosecond = Math.round(
-      calculateRequestsPerKilosecond(requestsPerSecond)
-    );
+    // Validate input: at least one of the request parameters must be provided
+    if (!requestsPerDay && !requestsPerSecond && !requestsPerKilosecond) {
+      throw new Error('At least one of requestsPerDay, requestsPerSecond, or requestsPerKilosecond is required');
+    }
+
+    // Helper functions 
+    function convertRequestsPerDayToPerSecond(requestsPerDay: number): number {
+      return requestsPerDay / (24 * 60 * 60);
+    }
+
+    function calculateUTCMidnightExpiration(daysUntilExpiration: number): number {
+      const now = new Date();
+      now.setUTCDate(now.getUTCDate() + daysUntilExpiration);
+      now.setUTCHours(0, 0, 0, 0);
+      return Math.floor(now.getTime() / 1000);
+    }
+
+    // Calculate effectiveRequestsPerKilosecond based on provided parameters
+    let effectiveRequestsPerKilosecond = requestsPerKilosecond;
+
+    if (!effectiveRequestsPerKilosecond) {
+      const effectiveRequestsPerSecond = requestsPerSecond ?? convertRequestsPerDayToPerSecond(requestsPerDay!);
+      effectiveRequestsPerKilosecond = Math.round(effectiveRequestsPerSecond * 1000);
+    }
+
     const expiresAt = calculateUTCMidnightExpiration(
       daysUntilUTCMidnightExpiration
     );
@@ -1060,7 +1082,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     try {
       mintCost = await this.rateLimitNftContract.read.calculateCost(
-        requestsPerKilosecond,
+        effectiveRequestsPerKilosecond,
         expiresAt
       );
     } catch (e) {
@@ -1069,8 +1091,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     }
 
     this.log('Capacity Credits NFT mint cost:', mintCost.toString());
-    this.log('Requests per day:', requestsPerDay);
-    this.log('Requests per kilosecond:', requestsPerKilosecond);
+    if (requestsPerDay) this.log('Requests per day:', requestsPerDay);
+    if (requestsPerSecond) this.log('Requests per second:', requestsPerSecond);
+    this.log('Effective requests per kilosecond:', effectiveRequestsPerKilosecond);
     this.log(`Expires at (Unix Timestamp): ${expiresAt}`);
 
     const expirationDate = new Date(expiresAt * 1000);
@@ -1096,6 +1119,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       throw new Error(e);
     }
   };
+
 
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
