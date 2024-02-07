@@ -4,7 +4,7 @@ describe('conversion', () => {
   describe('requestsToKilosecond', () => {
     test('converts per day to per kilosecond correctly', () => {
       expect(
-        Math.round(requestsToKilosecond({ requests: 86400, period: 'day' }))
+        requestsToKilosecond({ requests: 86400, period: 'day' })
       ).toBe(1000);
     });
 
