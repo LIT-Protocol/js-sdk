@@ -47,9 +47,9 @@ import { computeAddress } from 'ethers/lib/utils';
 import { getAuthIdByAuthMethod } from './auth-utils';
 import { Logger, LogManager } from '@lit-protocol/logger';
 import {
-  calculateRequestsPerKilosecond,
   calculateUTCMidnightExpiration,
   convertRequestsPerDayToPerSecond,
+  requestsToKilosecond,
 } from './utils';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
@@ -1056,29 +1056,33 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       );
     }
 
-    // Helper functions
-    function convertRequestsPerDayToPerSecond(requestsPerDay: number): number {
-      return requestsPerDay / (24 * 60 * 60);
-    }
-
-    function calculateUTCMidnightExpiration(
-      daysUntilExpiration: number
-    ): number {
-      const now = new Date();
-      now.setUTCDate(now.getUTCDate() + daysUntilExpiration);
-      now.setUTCHours(0, 0, 0, 0);
-      return Math.floor(now.getTime() / 1000);
-    }
-
     // Calculate effectiveRequestsPerKilosecond based on provided parameters
-    let effectiveRequestsPerKilosecond = requestsPerKilosecond;
+    let effectiveRequestsPerKilosecond: number | undefined;
 
-    if (!effectiveRequestsPerKilosecond) {
-      const effectiveRequestsPerSecond =
-        requestsPerSecond ?? convertRequestsPerDayToPerSecond(requestsPerDay!);
-      effectiveRequestsPerKilosecond = Math.round(
-        effectiveRequestsPerSecond * 1000
-      );
+    // Determine the effective requests per kilosecond based on the input
+
+    // -- requestsPerDay
+    if (requestsPerDay !== undefined) {
+      effectiveRequestsPerKilosecond = requestsToKilosecond({
+        period: 'day',
+        requests: requestsPerDay,
+      });
+
+      // -- requestsPerSecond
+    } else if (requestsPerSecond !== undefined) {
+      effectiveRequestsPerKilosecond = requestsToKilosecond({
+        period: 'second',
+        requests: requestsPerSecond,
+      });
+
+      // -- requestsPerKilosecond
+    } else if (requestsPerKilosecond !== undefined) {
+      effectiveRequestsPerKilosecond = requestsPerKilosecond;
+    }
+
+    // Check if effectiveRequestsPerKilosecond was successfully set
+    if (effectiveRequestsPerKilosecond === undefined) {
+      throw new Error('Effective requests per kilosecond is required.');
     }
 
     const expiresAt = calculateUTCMidnightExpiration(

@@ -19,9 +19,71 @@ export function calculateUTCMidnightExpiration(daysFromNow: number): number {
   return Math.floor(futureDate.getTime() / 1000);
 }
 
-// Utility function to calculate requests per kilosecond
-export function calculateRequestsPerKilosecond(
-  requestsPerSecond: number
-): number {
-  return requestsPerSecond * 1000;
+export function requestsToKilosecond({
+  period,
+  requests,
+}: {
+  period: 'day' | 'second';
+  requests: number;
+}) {
+  const secondsPerDay = 86400; // Total seconds in a day
+  const kilosecondsPerDay = secondsPerDay / 1000; // Convert seconds in a day to kiloseconds
+
+  switch (period) {
+    case 'day':
+      // Convert requests per day to requests per kilosecond
+      // Divide the total requests by kiloseconds in a day to get requests per kilosecond
+      return requests / kilosecondsPerDay;
+    case 'second':
+      // Convert requests per second to requests per kilosecond
+      // Since 1 kilosecond = 1000 seconds, multiplying requests by kilosecondsPerSecond
+      // actually divides the number of requests by 1000, converting to requests per kilosecond
+      return requests / 1000;
+    default:
+      throw new Error('Invalid period');
+  }
+}
+
+export function requestsToDay({
+  period,
+  requests,
+}: {
+  period: 'second' | 'kilosecond';
+  requests: number;
+}): number {
+  const secondsPerDay = 86400; // Total seconds in a day
+
+  switch (period) {
+    case 'second':
+      // Convert requests per second to requests per day
+      return requests * secondsPerDay;
+    case 'kilosecond':
+      // Convert requests per kilosecond to requests per day
+      // First convert kiloseconds to seconds (1 kilosecond = 1000 seconds), then multiply by seconds in a day
+      return requests * 1000 * (secondsPerDay / 1000);
+    default:
+      throw new Error('Invalid period');
+  }
+}
+
+export function requestsToSecond({
+  period,
+  requests,
+}: {
+  period: 'day' | 'kilosecond';
+  requests: number;
+}): number {
+  const secondsPerDay = 86400; // Total seconds in a day
+
+  switch (period) {
+    case 'day':
+      // Convert requests per day to requests per second
+      return requests / secondsPerDay;
+    case 'kilosecond':
+      // Convert requests per kilosecond to requests per second
+      // Since 1 kilosecond = 1000 seconds, this is a direct conversion
+      return requests * 1000;
+    default:
+      throw new Error('Invalid period');
+  }
 }
