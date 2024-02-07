@@ -1,22 +1,21 @@
 // Usage:
-// DEBUG=true NETWORK=habanero MINT_NEW=true yarn test:e2e:nodejs --filter=test-rli-from-lit-node-client-diff-delegatee.mjs
+// DEBUG=true NETWORK=manzano yarn test:e2e:nodejs --filter=test-rli-mint-kilosecond.mjs
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { LitAbility, LitActionResource } from '@lit-protocol/auth-helpers';
-
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
-import * as siwe from 'siwe';
 
 export async function main() {
   if (process.env.LOAD_ENV === 'false') {
     console.log('❗️ This test cannot be run with LOAD_ENV=false');
     process.exit();
   }
-
   // ==================== Setup ====================
+  const REQUESTS_PER_KILLOSECOND = 1000;
+
+  // 5% of the expected upper bound
+  const EXPECTED_UPPER_BOUND = REQUESTS_PER_KILLOSECOND * 1.05;
 
   let contractClient = new LitContracts({
     signer: new ethers.Wallet(
@@ -29,9 +28,10 @@ export async function main() {
 
   await contractClient.connect();
 
+  // ==================== Test Logic ====================
   // -- mint new Capacity Credits NFT
   const { capacityTokenIdStr } = await contractClient.mintCapacityCreditsNFT({
-    requestsPerKilosecond: 999,
+    requestsPerKilosecond: REQUEST_PER_KILLOSECOND,
     daysUntilUTCMidnightExpiration: 1,
   });
 
@@ -43,12 +43,18 @@ export async function main() {
 
   console.log('capacityTokenIdStr:', capacityTokenIdStr);
   console.log('requestsPerKilosecond:', requestsPerKilosecond);
+  console.log('EXPECTED_UPPER_BOUND:', EXPECTED_UPPER_BOUND);
 
-  if (capacityTokenIdStr) {
-    return success('Successfully minted a capacity credits nft');
+  // ==================== Post-Validation ====================
+  if (requestsPerKilosecond <= EXPECTED_UPPER_BOUND) {
+    return success(
+      `Successfully minted a capacity credits nft with id: ${capacityTokenIdStr} and rate limit: ${requestsPerKilosecond} which is less than or equal to the expected upper bound: ${EXPECTED_UPPER_BOUND}`
+    );
   }
 
-  return fail(`Failed to get proof from Recap Session Capability`);
+  return fail(
+    `Failed to mint a capacity credits nft with id: ${capacityTokenIdStr} and rate limit: ${requestsPerKilosecond} which is greater than the expected upper bound: ${EXPECTED_UPPER_BOUND}`
+  );
 }
 
 await testThis({ name: path.basename(import.meta.url), fn: main });
