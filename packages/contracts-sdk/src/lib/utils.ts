@@ -26,7 +26,6 @@ export function requestsToKilosecond({
   period: 'day' | 'second';
   requests: number;
 }) {
-
   const secondsPerDay = 86400; // Total seconds in a day
   const kilosecondsPerDay = secondsPerDay / 1000; // Convert seconds in a day to kiloseconds
 

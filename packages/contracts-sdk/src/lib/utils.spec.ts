@@ -3,9 +3,7 @@ import { requestsToDay, requestsToKilosecond, requestsToSecond } from './utils';
 describe('conversion', () => {
   describe('requestsToKilosecond', () => {
     test('converts per day to per kilosecond correctly', () => {
-      expect(requestsToKilosecond({ requests: 86, period: 'day' })).toBe(
-        1
-      );
+      expect(requestsToKilosecond({ requests: 86, period: 'day' })).toBe(1);
     });
 
     test('converts per second to per kilosecond correctly', () => {

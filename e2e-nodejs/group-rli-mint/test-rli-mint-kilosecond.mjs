@@ -31,7 +31,7 @@ export async function main() {
   // ==================== Test Logic ====================
   // -- mint new Capacity Credits NFT
   const { capacityTokenIdStr } = await contractClient.mintCapacityCreditsNFT({
-    requestsPerKilosecond: REQUEST_PER_KILLOSECOND,
+    requestsPerKilosecond: REQUESTS_PER_KILLOSECOND,
     daysUntilUTCMidnightExpiration: 1,
   });
 
