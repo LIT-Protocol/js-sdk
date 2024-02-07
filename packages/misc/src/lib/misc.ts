@@ -29,8 +29,10 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 import { LogLevel, LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
+import Ajv, { JSONSchemaType } from 'ajv';
 
 const logBuffer: Array<Array<any>> = [];
+const ajv = new Ajv();
 
 /**
  *
@@ -411,6 +413,50 @@ export const checkType = ({
   }
 
   // -- else
+  return true;
+};
+
+/**
+ * Check if the given value complies with the given schema
+ * If not, throw `invalidParamType` error
+ *
+ * @param { any } value
+ * @param { JSONSchemaType<any> } schema
+ * @param { string } paramName
+ * @param { string } functionName
+ * @param { boolean } throwOnError
+ *
+ * @returns { Boolean } true/false
+ */
+export const checkSchema = (
+  value: any,
+  schema: JSONSchemaType<any>,
+  paramName: string,
+  functionName: string,
+  throwOnError: boolean = true
+): boolean => {
+  let validate = schema.$id ? ajv.getSchema(schema.$id) : undefined;
+  if (!validate) {
+    validate = ajv.compile(schema);
+  }
+
+  const validates = validate(value);
+
+  const message = `FAILED schema validation for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(). Value: ${
+    value instanceof Object ? JSON.stringify(value) : value
+  }. Errors: ${JSON.stringify(validate.errors)}`;
+
+  if (!validates) {
+    if (throwOnError) {
+      throwError({
+        message,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
+    }
+    return false;
+  }
+
   return true;
 };
 

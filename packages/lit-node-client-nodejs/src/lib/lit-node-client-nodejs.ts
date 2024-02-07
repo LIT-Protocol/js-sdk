@@ -2086,6 +2086,9 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
+    // ========== Validate Access Control Conditions Schema ==========
+    await this.validateAccessControlConditionsSchema(params);
+
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
     const hashOfConditions: ArrayBuffer | undefined =
