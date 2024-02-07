@@ -1,13 +1,15 @@
-import { BigNumberish, BytesLike, ethers } from 'ethers';
+import { BigNumber, BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
-import { isBrowser, isNode, log } from '@lit-protocol/misc';
-import { AuthMethod } from '@lit-protocol/types';
-
-let CID: any;
-try {
-  CID = require('multiformats/cid');
-} catch (e) {}
+import { isBrowser, isNode } from '@lit-protocol/misc';
+import {
+  AuthMethod,
+  LIT_NETWORKS_KEYS,
+  LitContractContext,
+  LitContractResolverContext,
+  MintCapacityCreditsPerDayContext,
+  MintCapacityCreditsRes,
+} from '@lit-protocol/types';
 
 // ----- autogen:import-data:start  -----
 // Generated at 2023-11-07T01:50:52.460Z
@@ -44,6 +46,11 @@ import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
 import { getAuthIdByAuthMethod } from './auth-utils';
 import { Logger, LogManager } from '@lit-protocol/logger';
+import {
+  calculateRequestsPerKilosecond,
+  calculateUTCMidnightExpiration,
+  convertRequestsPerDayToPerSecond,
+} from './utils';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -100,7 +107,8 @@ export class LitContracts {
   connected: boolean = false;
   isPKP: boolean = false;
   debug: boolean = false;
-  network: 'cayenne';
+  network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost';
+  customContext?: LitContractContext | LitContractResolverContext;
 
   static logger: Logger = LogManager.Instance.get('contract-sdk');
   // ----- autogen:declares:start  -----
@@ -165,6 +173,7 @@ export class LitContracts {
   // make the constructor args optional
   constructor(args?: {
     provider?: ethers.providers.JsonRpcProvider | any;
+    customContext?: LitContractContext | LitContractResolverContext;
     rpcs?: string[] | any;
     rpc?: string | any;
     signer?: ethers.Signer | any;
@@ -174,9 +183,10 @@ export class LitContracts {
       storeOrUseStorageKey?: boolean;
     };
     debug?: boolean;
-    network?: 'cayenne';
+    network?: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero';
   }) {
     // this.provider = args?.provider;
+    this.customContext = args?.customContext;
     this.rpc = args?.rpc;
     this.rpcs = args?.rpcs;
     this.signer = args?.signer;
@@ -375,7 +385,10 @@ export class LitContracts {
       this.log('Your Provider(from signer):', this.provider);
     }
 
-    let addresses: any = await LitContracts.getContractAddresses(this.network);
+    let addresses: any = await LitContracts.getContractAddresses(
+      this.network,
+      this.customContext
+    );
     this.log('resolved contract addresses for: ', this.network, addresses);
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
@@ -540,92 +553,262 @@ export class LitContracts {
   };
 
   public static async getStakingContract(
-    network: 'cayenne' | 'custom' | 'localhost'
+    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    context?: LitContractContext | LitContractResolverContext
   ) {
-    let manifest = await LitContracts._resolveContractContext(network);
-
     const rpcUrl = DEFAULT_RPC;
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
-    const { config, data: contractData } = manifest;
+    if (!context) {
+      let contractData = await LitContracts._resolveContractContext(network);
 
-    const stakingContract = contractData.find(
-      (item: { name: string }) => item.name === 'Staking'
-    ).contracts[0];
-    const { address_hash, ABI } = stakingContract;
+      const stakingContract = contractData.find(
+        (item: { name: string }) => item.name === 'Staking'
+      );
+      const { address, abi } = stakingContract;
 
-    // Validate the required data
-    if (!address_hash || !ABI) {
-      throw new Error('❌ Required contract data is missing');
+      // Validate the required data
+      if (!address || !abi) {
+        throw new Error('❌ Required contract data is missing');
+      }
+
+      return new ethers.Contract(address, abi, provider);
+    } else {
+      // if we have contract context then we determine if there exists a `resolverAddres`
+      // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
+      if (!context.resolverAddress) {
+        let stakingContract = (context as LitContractContext).Staking;
+
+        if (!stakingContract.address) {
+          throw new Error(
+            '❌ Could not get staking contract address from contract context'
+          );
+        }
+        return new ethers.Contract(
+          stakingContract.address,
+          stakingContract.abi ?? StakingData.abi,
+          provider
+        );
+      } else {
+        let contractContext = await LitContracts._getContractsFromResolver(
+          context as LitContractResolverContext,
+          ['Staking']
+        );
+        if (!contractContext.Staking.address) {
+          throw new Error(
+            '❌ Could not get Staking Contract from contract resolver instance'
+          );
+        }
+        return new ethers.Contract(
+          contractContext.Staking.address,
+          contractContext.Staking.abi ?? StakingData.abi,
+          provider
+        );
+      }
+    }
+  }
+
+  private static async _getContractsFromResolver(
+    context: LitContractResolverContext,
+    contractNames?: Array<keyof LitContractContext>
+  ): Promise<LitContractContext> {
+    const rpcUrl = DEFAULT_RPC;
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    let resolverContract = new ethers.Contract(
+      context.resolverAddress,
+      context.abi,
+      provider
+    );
+
+    let getContract = async function (
+      contract: keyof LitContractContext,
+      enviorment: number
+    ): Promise<string> {
+      let address: string = '';
+      switch (contract) {
+        case 'Allowlist':
+          address = await resolverContract['getContract'](
+            await resolverContract['ALLOWLIST_CONTRACT'](),
+            enviorment
+          );
+          break;
+        case 'LITToken':
+          address = await resolverContract['getContract'](
+            await resolverContract['LIT_TOKEN_CONTRACT'](),
+            enviorment
+          );
+          break;
+        case 'Multisender':
+          address = await resolverContract['getContract'](
+            await resolverContract['MULTI_SENDER_CONTRACT'](),
+            enviorment
+          );
+          break;
+        case 'PKPNFT':
+          address = await resolverContract['getContract'](
+            await resolverContract['PKP_NFT_CONTRACT'](),
+            enviorment
+          );
+          break;
+        case 'PKPNFTMetadata':
+          address = await resolverContract['getContract'](
+            await resolverContract['PKP_NFT_METADATA_CONTRACT'](),
+            enviorment
+          );
+          break;
+        case 'PKPPermissions':
+          address = await resolverContract['getContract'](
+            await resolverContract['PKP_PERMISSIONS_CONTRACT'](),
+            enviorment
+          );
+          break;
+        case 'PKPHelper':
+          address = await resolverContract['getContract'](
+            await resolverContract['PKP_HELPER_CONTRACT'](),
+            enviorment
+          );
+          break;
+        case 'PubkeyRouter':
+          address = await resolverContract['getContract'](
+            await resolverContract['PUB_KEY_ROUTER_CONTRACT'](),
+            enviorment
+          );
+          break;
+        case 'RateLimitNFT':
+          address = await resolverContract['getContract'](
+            await resolverContract['RATE_LIMIT_NFT_CONTRACT'](),
+            enviorment
+          );
+          break;
+        case 'Staking':
+          address = await resolverContract['getContract'](
+            await resolverContract['STAKING_CONTRACT'](),
+            enviorment
+          );
+          break;
+        case 'StakingBalances':
+          address = await resolverContract['getContract'](
+            await resolverContract['STAKING_BALANCES_CONTRACT'](),
+            enviorment
+          );
+          break;
+      }
+
+      return address;
+    };
+
+    if (!contractNames) {
+      contractNames = [
+        'Allowlist',
+        'Staking',
+        'RateLimitNFT',
+        'PubkeyRouter',
+        'PKPHelper',
+        'PKPPermissions',
+        'PKPNFTMetadata',
+        'PKPNFT',
+        'Multisender',
+        'LITToken',
+        'StakingBalances',
+      ];
     }
 
-    return new ethers.Contract(address_hash, ABI, provider);
+    let addresses: LitContractContext = {} as LitContractContext;
+    for (const contract of contractNames) {
+      let contracts = context?.contractContext;
+      addresses[contract] = {
+        address: await getContract(contract, context.enviorment),
+        abi: contracts?.[contract]?.abi ?? undefined,
+      };
+    }
+
+    return addresses;
   }
 
   public static async getContractAddresses(
-    network: 'cayenne' | 'custom' | 'localhost'
+    network: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero',
+    context?: LitContractContext | LitContractResolverContext
   ) {
-    const data = await LitContracts._resolveContractContext(network);
+    let contractData;
+    if (context) {
+      // if there is a resolver address we use the resolver contract to query the rest of the contracts
+      // here we override context to be what is returned from the resolver which is of type LitContractContext
+      if (context?.resolverAddress) {
+        context = await LitContracts._getContractsFromResolver(
+          context as LitContractResolverContext
+        );
+      }
+
+      let flatten = [];
+      let keys = Object.keys(context);
+      for (const key of keys) {
+        context[key].name = key;
+        flatten.push(context[key]);
+      }
+      contractData = flatten;
+    } else {
+      contractData = await LitContracts._resolveContractContext(network);
+    }
+
     // Destructure the data for easier access
-    const { config, data: contractData } = data;
     const addresses: any = {};
     for (const contract of contractData) {
       switch (contract.name) {
         case 'Allowlist':
           addresses.Allowlist = {};
-          addresses.Allowlist.address = contract.contracts[0].address_hash;
-          addresses.Allowlist.abi = contract.contracts[0].ABI;
+          addresses.Allowlist.address = contract.address;
+          addresses.Allowlist.abi = contract.abi ?? AllowlistData.abi;
           break;
         case 'PKPHelper':
           addresses.PKPHelper = {};
-          addresses.PKPHelper.address = contract.contracts[0].address_hash;
-          addresses.PKPHelper.abi = contract.contracts[0].ABI;
+          addresses.PKPHelper.address = contract.address;
+          addresses.PKPHelper.abi = contract?.abi ?? PKPHelperData.abi;
           break;
         case 'PKPNFT':
           addresses.PKPNFT = {};
-          addresses.PKPNFT.address = contract.contracts[0].address_hash;
-          addresses.PKPNFT.abi = contract.contracts[0].ABI;
+          addresses.PKPNFT.address = contract.address;
+          addresses.PKPNFT.abi = contract?.abi ?? PKPNFTData.abi;
           break;
         case 'Staking':
           addresses.Staking = {};
-          addresses.Staking.address = contract.contracts[0].address_hash;
-          addresses.Staking.abi = contract.contracts[0].ABI;
+          addresses.Staking.address = contract.address;
+          addresses.Staking.abi = contract.abi ?? StakingData.abi;
           break;
         case 'RateLimitNFT':
           addresses.RateLimitNFT = {};
-          addresses.RateLimitNFT.address = contract.contracts[0].address_hash;
-          addresses.RateLimitNFT.abi = contract.contracts[0].ABI;
+          addresses.RateLimitNFT.address = contract.address;
+          addresses.RateLimitNFT.abi = contract.abi ?? RateLimitNFTData.abi;
           break;
         case 'PKPPermissions':
           addresses.PKPPermissions = {};
-          addresses.PKPPermissions.address = contract.contracts[0].address_hash;
-          addresses.PKPPermissions.abi = contract.contracts[0].ABI;
+          addresses.PKPPermissions.address = contract.address;
+          addresses.PKPPermissions.abi = contract.abi ?? PKPPermissionsData.abi;
           break;
         case 'PKPNFTMetadata':
           addresses.PKPNFTMetadata = {};
-          addresses.PKPNFTMetadata.address = contract.contracts[0].address_hash;
-          addresses.PKPNFTMetadata.abi = contract.contracts[0].ABI;
+          addresses.PKPNFTMetadata.address = contract.address;
+          addresses.PKPNFTMetadata.abi = contract.abi ?? PKPNFTMetadataData.abi;
           break;
         case 'PubkeyRouter':
           addresses.PubkeyRouter = {};
-          addresses.PubkeyRouter.address = contract.contracts[0].address_hash;
-          addresses.PubkeyRouter.abi = contract.contracts[0].ABI;
+          addresses.PubkeyRouter.address = contract.address;
+          addresses.PubkeyRouter.abi = contract?.abi ?? PubkeyRouterData.abi;
           break;
         case 'LITToken':
           addresses.LITToken = {};
-          addresses.LITToken.address = contract.contracts[0].address_hash;
-          addresses.LITToken.abi = contract.contracts[0].ABI;
+          addresses.LITToken.address = contract.address;
+          addresses.LITToken.abi = contract?.abi ?? LITTokenData.abi;
           break;
         case 'StakingBalances':
           addresses.StakingBalances = {};
-          addresses.StakingBalances.address =
-            contract.contracts[0].address_hash;
-          addresses.StakingBalances.abi = contract.contracts[0].ABI;
+          addresses.StakingBalances.address = contract.address;
+          addresses.StakingBalances.abi =
+            contract.abi ?? StakingBalancesData.abi;
           break;
         case 'Multisender':
           addresses.Multisender = {};
-          addresses.Multisender.address = contract.contracts[0].address_hash;
-          addresses.Multisender.abi = contract.contracts[0].ABI;
+          addresses.Multisender.address = contract.address;
+          addresses.Multisender.abi = contract?.abi ?? MultisenderData.abi;
           break;
       }
     }
@@ -639,9 +822,10 @@ export class LitContracts {
   }
 
   public static getMinNodeCount = async (
-    network: 'cayenne' | 'custom' | 'localhost'
+    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    context?: LitContractContext | LitContractResolverContext
   ) => {
-    const contract = await LitContracts.getStakingContract(network);
+    const contract = await LitContracts.getStakingContract(network, context);
 
     const minNodeCount = await contract['currentValidatorCountForConsensus']();
 
@@ -652,9 +836,10 @@ export class LitContracts {
   };
 
   public static getValidators = async (
-    network: 'cayenne' | 'custom' | 'localhost'
+    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    context?: LitContractContext | LitContractResolverContext
   ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(network);
+    const contract = await LitContracts.getStakingContract(network, context);
 
     // Fetch contract data
     const [activeValidators, currentValidatorsCount, kickedValidators] =
@@ -702,11 +887,16 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: 'cayenne' | 'custom' | 'localhost'
+    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost'
   ) {
     let data;
     const CAYENNE_API =
       'https://lit-general-worker.getlit.dev/contract-addresses';
+    const MANZANO_API =
+      'https://lit-general-worker.getlit.dev/manzano-contract-addresses';
+    const HABANERO_API =
+      'https://lit-general-worker.getlit.dev/habanero-contract-addresses';
+
     if (network === 'cayenne') {
       try {
         // Fetch and parse the JSON data in one step
@@ -716,8 +906,32 @@ export class LitContracts {
           `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
         );
       }
+    } else if (network === 'manzano') {
+      try {
+        data = await fetch(MANZANO_API).then((res) => res.json());
+      } catch (e: any) {
+        throw new Error(
+          `Error fetching data from ${MANZANO_API}: ${e.toString()}`
+        );
+      }
+    } else if (network === 'habanero') {
+      try {
+        data = await fetch(HABANERO_API).then((res) => res.json());
+      } catch (e: any) {
+        throw new Error(
+          `Error fetching data from ${HABANERO_API}: ${e.toString()}`
+        );
+      }
     }
-
+    // Data pulled over http is formatted differently than
+    // what the type expects. Here we normmalize to the LitContractContext type.
+    data = data.data.map((c: any) => {
+      return {
+        address: c.contracts[0].address_hash,
+        abi: c.contracts[0].ABI,
+        name: c.name,
+      };
+    });
     return data;
   }
 
@@ -825,6 +1039,64 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     };
   };
 
+  // Mints a Capacity Credits NFT (RLI) token with the specified daily request rate and expiration period.
+  // The expiration date is calculated to be at midnight UTC, a specific number of days from now.
+  mintCapacityCreditsNFT = async ({
+    requestsPerDay,
+    daysUntilUTCMidnightExpiration,
+  }: MintCapacityCreditsPerDayContext): Promise<MintCapacityCreditsRes> => {
+    this.log('Minting Capacity Credits NFT...');
+
+    // -- in the context of "request per day"
+    const requestsPerSecond = convertRequestsPerDayToPerSecond(requestsPerDay);
+    const requestsPerKilosecond = Math.round(
+      calculateRequestsPerKilosecond(requestsPerSecond)
+    );
+    const expiresAt = calculateUTCMidnightExpiration(
+      daysUntilUTCMidnightExpiration
+    );
+
+    let mintCost;
+
+    try {
+      mintCost = await this.rateLimitNftContract.read.calculateCost(
+        requestsPerKilosecond,
+        expiresAt
+      );
+    } catch (e) {
+      this.log('Error calculating mint cost:', e);
+      throw e;
+    }
+
+    this.log('Capacity Credits NFT mint cost:', mintCost.toString());
+    this.log('Requests per day:', requestsPerDay);
+    this.log('Requests per kilosecond:', requestsPerKilosecond);
+    this.log(`Expires at (Unix Timestamp): ${expiresAt}`);
+
+    const expirationDate = new Date(expiresAt * 1000);
+    this.log('Expiration Date (UTC):', expirationDate.toUTCString());
+
+    try {
+      const res = await this.rateLimitNftContract.write.mint(expiresAt, {
+        value: mintCost,
+      });
+
+      const txHash = res.hash;
+      let tx = await res.wait();
+      this.log('Transaction:', tx);
+
+      const tokenId = ethers.BigNumber.from(tx.logs[0].topics[3]);
+
+      return {
+        rliTxHash: txHash,
+        capacityTokenId: tokenId,
+        capacityTokenIdStr: tokenId.toString(),
+      };
+    } catch (e: any) {
+      throw new Error(e);
+    }
+  };
+
   // getRandomPrivateKeySignerProvider = () => {
   //   const privateKey = ethers.utils.hexlify(ethers.utils.randomBytes(32));
 
@@ -891,7 +1163,24 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
      * @param {string} multihash A base58 encoded multihash string
      * @returns {Multihash}
      */
-    getBytes32FromMultihash: (ipfsId: string) => {
+    getBytes32FromMultihash: async (ipfsId: string) => {
+      let CID: any;
+      try {
+        CID = await import('multiformats/cid');
+
+        if (!CID) {
+          CID = CID.CID;
+
+          if (!CID) {
+            this.log('1 CID not found');
+          }
+        }
+      } catch (e) {
+        this.log('2 CID not found');
+      }
+
+      // const CID = await import('multiformats/cid');
+
       const cid = CID.parse(ipfsId);
       const hashFunction = cid.multihash.code;
       const size = cid.multihash.size;
@@ -1843,7 +2132,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           sendPkpToItself,
           { value: mintCost }
         );
-        console.log('tx', tx);
         return tx;
       },
       // claimAndMintNextAndAddAuthMethods: async (

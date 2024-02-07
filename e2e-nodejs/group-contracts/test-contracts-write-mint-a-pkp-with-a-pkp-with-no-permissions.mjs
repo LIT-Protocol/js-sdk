@@ -5,7 +5,7 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { ethers } from 'ethers';
 
-async function getFundsFromPKPController() {
+async function getFundsFromPKPController(ethAddress) {
   // ========== Controller Setup ===========
   const provider = new ethers.providers.JsonRpcProvider(
     LITCONFIG.CHRONICLE_RPC
@@ -23,27 +23,33 @@ async function getFundsFromPKPController() {
   );
 
   // send some funds to the pkp
-  const amount = '0.0000001';
+  const amount = '0.000001';
 
   const tx = await controllerWallet.sendTransaction({
-    to: LITCONFIG.PKP_ETH_ADDRESS,
+    to: ethAddress,
     value: ethers.utils.parseEther(amount),
   });
 
   await tx.wait();
 
-  console.log(
-    'New Controller Balance:',
-    (await controllerWallet.getBalance()).toString()
-  );
+  const newBalance = (await controllerWallet.getBalance()).toString();
+
+  console.log('New Controller Balance:', newBalance);
+
+  if (newBalance <= 0) {
+    console.log('Controller Balance is still 0');
+    process.exit();
+  }
   console.log(`Sent ${amount} ETH to ${LITCONFIG.PKP_ETH_ADDRESS}`);
 }
 
 export async function main() {
+  // We no longer allow
+
   // ========== PKP WALLET SETUP ===========
   const pkpWallet = new PKPEthersWallet({
-    pkpPubKey: LITCONFIG.PKP_PUBKEY,
-    controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+    pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
+    controllerAuthSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
     rpc: LITCONFIG.CHRONICLE_RPC,
   });
 
@@ -55,7 +61,9 @@ export async function main() {
     console.log(
       `PKP Balance is ${pkpBalance}. Getting funds from controller...`
     );
-    await getFundsFromPKPController();
+    const pkpAddress = await pkpWallet.getAddress();
+    console.log('pkpAddress:', pkpAddress);
+    await getFundsFromPKPController(pkpAddress);
     console.log('New PKP Balance:', (await pkpWallet.getBalance()).toString());
   }
 

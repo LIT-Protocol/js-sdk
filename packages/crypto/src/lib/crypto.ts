@@ -8,7 +8,7 @@ import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
 
 import * as sevSnpUtilsSdk from '@lit-protocol/sev-snp-utils-sdk';
 
-import { isBrowser, log, throwError } from '@lit-protocol/misc';
+import { isBrowser, log, logError, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
@@ -246,8 +246,12 @@ export const combineEcdsaShares = (
         try {
           sig = JSON.parse(res) as CombinedECDSASignature;
         } catch (e) {
-          console.log("'res' from wasmECDSA.combine_signature: ", res); // ERROR: Could not deserialize value
-          throw new Error(`Failed to parse signature: ${e}`);
+          logError('Error while combining signatures shares', validShares);
+          throwError({
+            message: (e as Error).message,
+            name: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.name,
+            kind: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.kind,
+          });
         }
 
         /*
@@ -294,8 +298,14 @@ export const computeHDPubKey = (
   try {
     switch (sigType) {
       case SIGTYPE.EcdsaCaitSith:
+        // a bit of pre processing to remove characters which will cause our wasm module to reject the values.
+        pubkeys = pubkeys.map((value: string) => {
+          return value.replace('0x', '');
+        });
+        keyId = keyId.replace('0x', '');
         return ecdsaSdk.compute_public_key(keyId, pubkeys, 2);
-        defualt: throw new Error('Non supported signature type');
+      default:
+        throw new Error('Non supported signature type');
     }
   } catch (e) {
     log('Failed to derive public key', e);

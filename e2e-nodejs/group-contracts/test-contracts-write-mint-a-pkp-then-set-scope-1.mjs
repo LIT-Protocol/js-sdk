@@ -59,8 +59,8 @@ export async function main() {
     return fail('scope 1 (sign anything) should be false');
   }
 
-  if (scopes[AuthMethodScope.OnlySignMessages] !== false) {
-    return fail('scope 2 (only sign messages) should be false');
+  if (scopes[AuthMethodScope.PersonalSign] !== false) {
+    return fail('scope 2 (personal sign) should be false');
   }
 
   // -- set the scope

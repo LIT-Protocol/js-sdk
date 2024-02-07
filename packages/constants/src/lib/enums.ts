@@ -49,11 +49,13 @@ export enum StakingStates {
 export enum AuthMethodScope {
   NoPermissions = 0,
   SignAnything = 1,
-  OnlySignMessages = 2,
+  PersonalSign = 2,
 }
 
 export enum LitNetwork {
   Cayenne = 'cayenne',
+  Manzano = 'manzano',
+  Habanero = 'habanero',
   Custom = 'custom',
 }
 

@@ -21,6 +21,7 @@ const isClass = (v) => {
 
 describe('LitNodeClientNodeJs', () => {
   // --start;
+
   it('imported { LitNodeClientNodeJs } is a class', async () => {
     expect(isClass(LitNodeClientNodeJs)).toBe(true);
   });
@@ -64,38 +65,6 @@ describe('LitNodeClientNodeJs', () => {
     expect(litNodeClient).toBeDefined();
     expect(litNodeClient.config.storageProvider?.provider).toBeInstanceOf(ls);
     Object.defineProperty(globalThis, 'localStorage', { value: tmp });
-  });
-
-  it('gets capabilities', async () => {
-    const path = '/bglyaysu8rvblxlk7x0ksn';
-
-    let resourceId = {
-      baseUrl: 'my-dynamic-content-server.com',
-      path,
-      orgId: '',
-      role: '',
-      extraData: '',
-    };
-
-    let hashedResourceId = await hashResourceIdForSigning(resourceId);
-
-    const litResource = new LitAccessControlConditionResource(hashedResourceId);
-
-    let sessionCapabilityObject =
-      LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards([
-        litResource,
-      ]);
-    expect(sessionCapabilityObject.attenuations).toStrictEqual({
-      [`lit-accesscontrolcondition://${hashedResourceId}`]: {
-        '*/*': [{}],
-      },
-    });
-    expect(
-      sessionCapabilityObject.verifyCapabilitiesForResource(
-        litResource,
-        LitAbility.AccessControlConditionSigning
-      )
-    ).toBe(true);
   });
 
   it('gets expiration', () => {

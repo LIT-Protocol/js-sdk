@@ -22,7 +22,7 @@
   "PKP_PUBKEY": "04b5caf00c9f5adc9b22ca460b88482bad44ed4fac8ee63014b727cf60efc568dbdfe498a94fbd9cd294d651529f9fe76e057e9736150eea038415b06f64a87939",
   "PKP_ETH_ADDRESS": "0xDd66eE5E696911F92e19B8612F711FA508816a6e",
   "PKP_COSMOS_ADDRESS": "cosmos1v8wr9cvhhy7n43vmyswp69akszdhqtuzh4pztf",
-  "PKP_SUI_ADDRESS": "0x8c0d831a2db7a71ba0d151f27e3a11349a45b5430eba956a65c9955db06d4e22",
+  "PKP_SUI_ADDRESS": "0xfb10524e4b0107dffcdbc9c1daf28ccb1c75ecc776e812001aa682b14f6ff952",
   "CONTROLLER_AUTHSIG": {
     "sig": "0x137b66529678d1fc58ab5b340ad036082af5b9912f823ba22c2851b8f50990a666ad8f2ab2328e8c94414c0a870163743bde91a5f96e9f967fd45d5e0c17c3911b",
     "derivedVia": "web3.eth.personal.sign",
@@ -40,5 +40,78 @@
     "derivedVia": "web3.eth.personal.sign",
     "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nTESTING TESTING 123\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: gOv4cHte0F8Bg59Mb\nIssued At: 2023-11-17T15:04:32.857Z\nExpiration Time: 2215-07-14T15:04:32.857Z",
     "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37"
+  },
+  "CACHE": {
+    "network": "manzano",
+    "debug": true,
+    "sevAttestation": false,
+    "CONTROLLER_AUTHSIG": {
+      "sig": "0x8234b6ab642c2f8d2edbd0adf7fafa25355c972bf5a5071035e4aad45eeba5f405ffbac757b07b8c9cbd073bc3589cad40af87373fa2a98278f45f3033a366b11b",
+      "derivedVia": "web3.eth.personal.sign",
+      "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nThis is a test statement.  You can put anything you want here.\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: 0x1f89d12f7313557abbe9ef60f6cdb2fb3d276a05609dbf984f5ab881fa837b33\nIssued At: 2024-02-06T21:34:17.641Z\nExpiration Time: 2024-02-06T22:34:17.635Z",
+      "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37"
+    },
+    "CONTROLLER_WALLET": {
+      "_isSigner": true,
+      "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37",
+      "provider": {
+        "_isProvider": true,
+        "_events": [],
+        "_emitted": {
+          "block": -2,
+          "t:0x24fc5489c0e792f4975646d89f3c96eccd621dcb688fdb97e06d5c45d1057e7e": 1711201,
+          "t:0x5690c38801ac95e7e14f5ea60e36cab6f91ba1314345b2c0bcc57878c27a9078": 1711204
+        },
+        "disableCcipRead": false,
+        "formatter": {
+          "formats": {
+            "transaction": {},
+            "transactionRequest": {},
+            "receiptLog": {},
+            "receipt": {},
+            "block": {},
+            "blockWithTransactions": {},
+            "filter": {},
+            "filterLog": {}
+          }
+        },
+        "anyNetwork": false,
+        "_networkPromise": {},
+        "_maxInternalBlockNumber": 1711203,
+        "_lastBlockNumber": -2,
+        "_maxFilterBlockRange": 10,
+        "_pollingInterval": 4000,
+        "_fastQueryDate": 1707255280186,
+        "connection": {
+          "url": "https://chain-rpc.litprotocol.com/http"
+        },
+        "_nextId": 75,
+        "_eventLoopCache": {
+          "detectNetwork": null,
+          "eth_chainId": null,
+          "eth_blockNumber": null
+        },
+        "_network": {
+          "chainId": 175177,
+          "name": "unknown"
+        },
+        "_internalBlockNumber": {},
+        "_fastBlockNumber": 1711203,
+        "_fastBlockNumberPromise": {}
+      }
+    },
+    "PKP_INFO": {
+      "tokenId": "0x6cafa5604d3dac3ed39533bd399609d15553e5063cf699432477d9c35784bb2d",
+      "publicKey": "0439068de07bcc4fed3a1192a7d3395b3834c71fb7f5dfd78c9e658cb3ad7a4c243960e7bc009cb7c47cbfced47d64b63361e61c506b2ddba3a73f1de4a41753d7",
+      "ethAddress": "0x3C7da8933788e1a293CA76Cb65B21174475e4A51"
+    },
+    "AUTH_METHOD_PKP_INFO": {
+      "publicKey": "04097dfb08502ed5a3217d04323ab86c3922bebe09a8917e226cb8664884c6bd31d2cd7c2ba4de9ea029b21280454473e78e596986a6bf981b867b62404971c12f",
+      "ethAddress": "0x577Bd2bF2069129013b8922dE2e02a28fe08c11f",
+      "authMethod": {
+        "authMethodId": "0x170d13600caea2933912f39a0334eca3d22e472be203f937c4bad0213d92ed71",
+        "authMethodType": 1
+      }
+    }
   }
 }

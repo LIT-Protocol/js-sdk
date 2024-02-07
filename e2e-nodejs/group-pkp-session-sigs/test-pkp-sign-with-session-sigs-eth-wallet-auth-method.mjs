@@ -15,7 +15,6 @@ export async function main() {
   const sessionKeyPair = client.getSessionKey();
   const authNeededCallback = async (params) => {
     const response = await client.signSessionKey({
-      sessionKey: sessionKeyPair,
       statement: params.statement,
       // authSig: globalThis.LitCI.CONTROLLER_AUTHSIG, // When this is empty or undefined, it will fail
       authMethods: [
@@ -43,11 +42,13 @@ export async function main() {
 
   const sessionSigs = await client.getSessionSigs({
     chain: 'ethereum',
-    expiration: new Date(Date.now() + 60 * 60).toISOString(),
+    expiration: new Date(Date.now() + 60_000 * 60).toISOString(),
     resourceAbilityRequests: resourceAbilities,
     sessionKey: sessionKeyPair,
     authNeededCallback,
   });
+
+  console.log('sessionSigs:', sessionSigs);
 
   const pkpSignRes = await client?.pkpSign({
     toSign: TO_SIGN,

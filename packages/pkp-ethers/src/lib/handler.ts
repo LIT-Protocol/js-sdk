@@ -310,12 +310,18 @@ export const signHandler = async ({
 export const personalSignHandler = async ({
   signer,
   payload,
+  capability,
 }: ETHHandlerReq): Promise<ETHHandlerRes> => {
   const addressRequested = payload.params[1];
 
   validateAddressesMatch((signer as PKPEthersWallet).address, addressRequested);
 
   const msg = convertHexToUtf8(payload.params[0]);
+
+  // -- we will add capability to for resource
+  if (capability) {
+  }
+
   const signature = await (signer as PKPEthersWallet).signMessage(msg);
 
   validateSignature(signature);

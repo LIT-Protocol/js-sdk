@@ -62,6 +62,7 @@ export class LitAuthClient {
     this.providers = new Map();
     bootstrapLogManager('auth-client');
     this.debug = options?.debug ?? false;
+
     // Check if custom relay object is provided
     if (options?.customRelay) {
       this.relay = options?.customRelay;
@@ -84,6 +85,46 @@ export class LitAuthClient {
         litNetwork: 'cayenne',
         debug: options.debug ?? false,
       });
+    }
+
+    // -- choose the correct relayer based on litNodeClient
+    // and if litRelayConfig.relayUrl is not set
+    if (!options?.litRelayConfig?.relayUrl) {
+      if (!options?.litRelayConfig?.relayApiKey) {
+        throw new Error(
+          '2 An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
+        );
+      }
+
+      const supportedNetworks = ['cayenne', 'habanero', 'manzano'];
+
+      if (!supportedNetworks.includes(this.litNodeClient.config.litNetwork)) {
+        throw new Error(
+          `Unsupported litNetwork: ${
+            this.litNodeClient.config.litNetwork
+          }. Supported networks are: ${supportedNetworks.join(', ')}`
+        );
+      }
+
+      let url;
+
+      switch (this.litNodeClient.config.litNetwork) {
+        case 'cayenne':
+          url = 'https://relayer-server-staging-cayenne.getlit.dev';
+          break;
+        case 'habanero':
+          url = 'https://habanero-relayer.getlit.dev';
+          break;
+        case 'manzano':
+          url = 'https://manzano-relayer.getlit.dev';
+          break;
+      }
+
+      if (this.litNodeClient.config.litNetwork)
+        this.relay = new LitRelay({
+          relayUrl: url,
+          relayApiKey: options?.litRelayConfig?.relayApiKey,
+        });
     }
 
     // Set RPC URL
@@ -229,6 +270,9 @@ export class LitAuthClient {
         authId = await StytchOtpProvider.authMethodId(authMethod);
         break;
       case AuthMethodType.StytchEmailFactorOtp:
+      case AuthMethodType.StytchSmsFactorOtp:
+      case AuthMethodType.StytchTotpFactorOtp:
+      case AuthMethodType.StytchWhatsAppFactorOtp:
         authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
         break;
       default:

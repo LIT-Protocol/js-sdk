@@ -31,6 +31,7 @@ import {
 
 import {
   bootstrapLogManager,
+  executeWithRetry,
   isBrowser,
   isNode,
   log,
@@ -38,6 +39,7 @@ import {
   logErrorWithRequestId,
   logWithRequestId,
   mostCommonString,
+  sendRequest,
   throwError,
 } from '@lit-protocol/misc';
 import {
@@ -50,6 +52,7 @@ import {
   JsonHandshakeResponse,
   JsonPkpSignRequest,
   KV,
+  LitContractContext,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
   NodeAttestation,
@@ -59,6 +62,7 @@ import {
   NodeErrorV3,
   NodePromiseResponse,
   RejectedNodePromises,
+  RetryTolerance,
   SendNodeCommand,
   SessionSig,
   SessionSigsMap,
@@ -66,9 +70,7 @@ import {
   SupportedJsonRequests,
 } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { uint8arrayFromString } from '@lit-protocol/uint8arrays';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { LogLevel, LogManager } from '@lit-protocol/logger';
 
 export class LitCore {
   config: LitNodeClientConfig;
@@ -91,6 +93,11 @@ export class LitCore {
       litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
       minNodeCount: 2, // Default value, should be replaced
       bootstrapUrls: [], // Default value, should be replaced
+      retryTolerance: {
+        timeout: 31_000,
+        maxRetryLimit: 3,
+        interval: 100,
+      },
     };
 
     // Initialize default config based on litNetwork
@@ -100,6 +107,20 @@ export class LitCore {
           this.config = {
             ..._defaultConfig,
             litNetwork: LitNetwork.Cayenne,
+          } as unknown as LitNodeClientConfig;
+          break;
+        case LitNetwork.Manzano:
+          this.config = {
+            ..._defaultConfig,
+            litNetwork: LitNetwork.Manzano,
+            checkSevSnpAttestation: true,
+          } as unknown as LitNodeClientConfig;
+          break;
+        case LitNetwork.Habanero:
+          this.config = {
+            ..._defaultConfig,
+            litNetwork: LitNetwork.Habanero,
+            checkSevSnpAttestation: true,
           } as unknown as LitNodeClientConfig;
           break;
         default:
@@ -172,8 +193,7 @@ export class LitCore {
    * Asynchronously updates the configuration settings for the LitNodeClient.
    * This function fetches the minimum node count and bootstrap URLs for the
    * specified Lit network. It validates these values and updates the client's
-   * configuration accordingly. If the network is set to 'InternalDev', it
-   * dynamically updates the bootstrap URLs in the configuration.
+   * configuration accordingly.
    *
    * @throws Will throw an error if the minimum node count is invalid or if
    *         the bootstrap URLs array is empty.
@@ -181,8 +201,8 @@ export class LitCore {
    */
   setNewConfig = async (): Promise<void> => {
     if (
-      this.config.litNetwork !== LitNetwork.Cayenne &&
-      this.config.litNetwork !== LitNetwork.Custom
+      this.config.litNetwork === LitNetwork.Manzano ||
+      this.config.litNetwork === LitNetwork.Habanero
     ) {
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork as LitNetwork
@@ -208,6 +228,7 @@ export class LitCore {
       }
 
       this.config.minNodeCount = parseInt(minNodeCount, 10);
+      this.config.bootstrapUrls = bootstrapUrls;
     } else if (this.config.litNetwork === LitNetwork.Cayenne) {
       // If the network is cayenne it is a centralized testnet so we use a static config
       // This is due to staking contracts holding local ip / port contexts which are innacurate to the ip / port exposed to the world
@@ -216,6 +237,46 @@ export class LitCore {
         LIT_NETWORKS.cayenne.length == 2
           ? 2
           : (LIT_NETWORKS.cayenne.length * 2) / 3;
+
+      /**
+       * Here we are checking if a custom network defined with no node urls (bootstrap urls) defined
+       * If this is the case we need to bootstrap the network state from the set of contracts given.
+       * So we call to the Staking contract with the address given by the caller to resolve the network state.
+       */
+    } else if (
+      this.config.litNetwork === LitNetwork.Custom &&
+      this.config.bootstrapUrls.length < 1
+    ) {
+      log('using custom contracts: ', this.config.contractContext);
+
+      const minNodeCount = await LitContracts.getMinNodeCount(
+        this.config.litNetwork as LitNetwork,
+        this.config.contractContext
+      );
+
+      const bootstrapUrls = await LitContracts.getValidators(
+        this.config.litNetwork as LitNetwork,
+        this.config.contractContext
+      );
+      log('Bootstrap urls: ', bootstrapUrls);
+      if (minNodeCount <= 0) {
+        throwError({
+          message: `minNodeCount is ${minNodeCount}, which is invalid. Please check your network connection and try again.`,
+          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        });
+      }
+
+      if (bootstrapUrls.length <= 0) {
+        throwError({
+          message: `bootstrapUrls is empty, which is invalid. Please check your network connection and try again.`,
+          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        });
+      }
+
+      this.config.minNodeCount = parseInt(minNodeCount, 10);
+      this.config.bootstrapUrls = bootstrapUrls;
     }
   };
 
@@ -230,8 +291,8 @@ export class LitCore {
    */
   listenForNewEpoch = async (): Promise<void> => {
     if (
-      this.config.litNetwork !== LitNetwork.Cayenne &&
-      this.config.litNetwork !== LitNetwork.Custom
+      this.config.litNetwork === LitNetwork.Manzano ||
+      this.config.litNetwork === LitNetwork.Habanero
     ) {
       const stakingContract = await LitContracts.getStakingContract(
         this.config.litNetwork as any
@@ -240,6 +301,7 @@ export class LitCore {
         'listening for state change on staking contract: ',
         stakingContract.address
       );
+
       stakingContract.on('StateChanged', async (state: StakingStates) => {
         log(`New state detected: "${state}"`);
         if (state === StakingStates.NextValidatorSetLocked) {
@@ -292,6 +354,14 @@ export class LitCore {
     // -- handshake with each node
     const requestId = this.getRequestId();
 
+    if (this.config.bootstrapUrls.length <= 0) {
+      throwError({
+        message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
+        errorKind: LIT_ERROR.INIT_ERROR.kind,
+        errorCode: LIT_ERROR.INIT_ERROR.name,
+      });
+    }
+
     for (const url of this.config.bootstrapUrls) {
       const challenge = this.getRandomHexString(64);
       this.handshakeWithNode({ url, challenge }, requestId)
@@ -321,7 +391,7 @@ export class LitCore {
               keys
             );
           }
-
+          log('returned keys: ', keys);
           if (!keys.latestBlockhash) {
             logErrorWithRequestId(
               requestId,
@@ -329,7 +399,11 @@ export class LitCore {
             );
           }
 
-          if (this.config.checkNodeAttestation) {
+          if (
+            this.config.checkNodeAttestation ||
+            this.config.litNetwork === LitNetwork.Manzano ||
+            this.config.litNetwork === LitNetwork.Habanero
+          ) {
             // check attestation
             if (!resp.attestation) {
               logErrorWithRequestId(
@@ -436,7 +510,7 @@ export class LitCore {
             networkPubKeySet: this.networkPubKeySet,
             hdRootPubkeys: this.hdRootPubkeys,
             subnetPubkey: this.subnetPubKey,
-            latesBlockhash: this.latestBlockhash,
+            latestBlockhash: this.latestBlockhash,
           });
 
           // @ts-ignore
@@ -507,24 +581,42 @@ export class LitCore {
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
-    // -- get properties from params
-    const { url } = params;
+    const wrapper = async (id: string) => {
+      // -- get properties from params
+      const { url } = params;
 
-    // -- create url with path
-    const urlWithPath = `${url}/web/handshake`;
+      // -- create url with path
+      const urlWithPath = `${url}/web/handshake`;
 
-    log(`handshakeWithNode ${urlWithPath}`);
+      log(`handshakeWithNode ${urlWithPath}`);
 
-    const data = {
-      clientPublicKey: 'test',
-      challenge: params.challenge,
+      const data = {
+        clientPublicKey: 'test',
+        challenge: params.challenge,
+      };
+
+      let res = await this.sendCommandToNode({
+        url: urlWithPath,
+        data,
+        requestId,
+      }).catch((err: NodeErrorV3) => {
+        return err;
+      });
+
+      return res;
     };
 
-    return this.sendCommandToNode({
-      url: urlWithPath,
-      data,
-      requestId,
-    });
+    let res = await executeWithRetry<NodeCommandServerKeysResponse>(
+      wrapper,
+      (_error: any, _requestId: string, isFinal: boolean) => {
+        if (!isFinal) {
+          logError('an error occured, attempting to retry');
+        }
+      },
+      this.config.retryTolerance
+    );
+
+    return res as NodeCommandServerKeysResponse;
   };
 
   // ==================== SENDING COMMAND ====================
@@ -559,33 +651,7 @@ export class LitCore {
       body: JSON.stringify(data),
     };
 
-    return fetch(url, req)
-      .then(async (response) => {
-        const isJson = response.headers
-          .get('content-type')
-          ?.includes('application/json');
-
-        const data = isJson ? await response.json() : null;
-
-        if (!response.ok) {
-          // get error message from body or default to response status
-          const error = data || response.status;
-          return Promise.reject(error);
-        }
-
-        return data;
-      })
-      .catch((error: NodeErrorV3) => {
-        logErrorWithRequestId(
-          requestId,
-          `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
-            error?.message || error?.details
-              ? `Error is ${error.message} - ${error.details}`
-              : ''
-          }`
-        );
-        return Promise.reject(error);
-      });
+    return sendRequest(url, req, requestId);
   };
 
   /**

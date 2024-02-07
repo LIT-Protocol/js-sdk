@@ -14,12 +14,16 @@ import {
   NodeClientErrorV1,
   NodeErrorV0,
   NodeErrorV1,
+  NodeErrorV3,
   ClaimRequest,
   ClaimKeyResponse,
   ClaimResult,
   ClaimProcessor,
   MintCallback,
   RelayClaimProcessor,
+  SuccessNodePromises,
+  RejectedNodePromises,
+  RetryTolerance,
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
@@ -736,4 +740,116 @@ export function getEnv({
   }
   // Default
   return defaultValue;
+}
+
+export function sendRequest(
+  url: string,
+  req: RequestInit,
+  requestId: string
+): Promise<Response> {
+  return fetch(url, req)
+    .then(async (response) => {
+      const isJson = response.headers
+        .get('content-type')
+        ?.includes('application/json');
+
+      const data = isJson ? await response.json() : null;
+
+      if (!response.ok) {
+        // get error message from body or default to response status
+        const error = data || response.status;
+        return Promise.reject(error);
+      }
+
+      return data;
+    })
+    .catch((error: NodeErrorV3) => {
+      logErrorWithRequestId(
+        requestId,
+        `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
+          error?.message || error?.details
+            ? `Error is ${error.message} - ${error.details}`
+            : ''
+        }`
+      );
+      return Promise.reject(error);
+    });
+}
+
+/**
+ * Allows for invoking a callback and re exucting while re generating a new request identifier
+ * @param execCallback
+ * @param errorCallback
+ * @param opts
+ * @returns {T}
+ */
+export async function executeWithRetry<T>(
+  execCallback: (requestId: string) => Promise<T>,
+  errorCallback?: (error: any, requestId: string, isFinal: boolean) => void,
+  opts?: RetryTolerance
+): Promise<
+  (T & { requestId: string }) | (RejectedNodePromises & { requestId: string })
+> {
+  let timer: any | null;
+  let counter = 0;
+  let isTimeout = false;
+  if (!opts) {
+    opts = {};
+  }
+  opts.timeout = opts.timeout ?? 31_000; // We wait for 31 seconds as the timeout period on the nodes is 30 seconds.
+  opts.interval = opts.interval ?? 100;
+  opts.maxRetryCount = opts.maxRetryCount ?? 3;
+  let requestId: string = '';
+
+  while (!isTimeout) {
+    requestId = Math.random().toString(16).slice(2);
+    try {
+      timer = setTimeout(() => {
+        isTimeout = true;
+      }, opts.timeout);
+      const response: any = await execCallback(requestId);
+
+      clearTimeout(timer);
+      response.requestId = requestId;
+      // this will work for now as errors should all follow the
+      // RejectedNodePromise type definition which contains an `error` property
+      if ('error' in response) {
+        counter += 1;
+        errorCallback &&
+          errorCallback(
+            response,
+            requestId,
+            counter >= opts.maxRetryCount ? true : false
+          );
+      } else {
+        clearTimeout(timer);
+        return response;
+      }
+
+      if (counter >= opts.maxRetryCount) {
+        return response;
+      }
+    } catch (err: any) {
+      errorCallback &&
+        errorCallback(
+          `Error is ${err.message}-${err.details}`,
+          requestId,
+          counter >= opts.maxRetryCount ? true : false
+        );
+      counter += 1;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, opts?.interval));
+  }
+
+  // If we get here we broke out of the loop on event of a timeout being hit.
+  return {
+    success: false,
+    error: {
+      errorKind: 'Timeout',
+      status: 500,
+      details: [`timeout limit reached timeout limit: ${opts.timeout}ms`],
+    },
+    requestId,
+  };
 }
