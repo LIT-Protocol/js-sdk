@@ -3,14 +3,14 @@ import { requestsToDay, requestsToKilosecond, requestsToSecond } from './utils';
 describe('conversion', () => {
   describe('requestsToKilosecond', () => {
     test('converts per day to per kilosecond correctly', () => {
-      expect(
-        requestsToKilosecond({ requests: 86400, period: 'day' })
-      ).toBe(1000);
+      expect(requestsToKilosecond({ requests: 86, period: 'day' })).toBe(
+        1
+      );
     });
 
     test('converts per second to per kilosecond correctly', () => {
-      expect(requestsToKilosecond({ requests: 1000, period: 'second' })).toBe(
-        1
+      expect(requestsToKilosecond({ requests: 1, period: 'second' })).toBe(
+        1000
       );
     });
   });
@@ -21,7 +21,7 @@ describe('conversion', () => {
     });
 
     test('converts requests per kilosecond to requests per day correctly', () => {
-      expect(requestsToDay({ requests: 1, period: 'kilosecond' })).toBe(86400);
+      expect(requestsToDay({ requests: 1, period: 'kilosecond' })).toBe(86);
     });
   });
 
