@@ -301,7 +301,41 @@ export class LitCore {
       stakingContract.on('StateChanged', async (state: StakingStates) => {
         log(`New state detected: "${state}"`);
         if (state === StakingStates.NextValidatorSetLocked) {
+          log(
+            'State found to be new validator set locked, checking validator set'
+          );
+          let oldNodeUrls: string[] = [...this.config.bootstrapUrls].sort();
           await this.setNewConfig();
+          let currentNodeUrls: string[] = this.config.bootstrapUrls.sort();
+          let delta: string[] = currentNodeUrls.filter(
+            (item) => oldNodeUrls.indexOf(item) > -1
+          );
+          // if the sets differ we reconnect.
+          if (delta.length > 1) {
+            // check if the node sets are non matching and re connect if they do not.
+            /*
+              TODO: While this covers most cases where a node may come in or out of the active 
+              set which we will need to re attest to the execution enviorments.
+              The sdk currently does not know if there is an active network operation pending.
+              Such that the state when the request was sent will now mutate when the response is sent back.
+              The sdk should be able to understand its current execution enviorment and wait on an active 
+              network request to the previous epoch's node set before changing over.
+              
+            */
+            log(
+              'Active validator sets changed, new validators ',
+              delta,
+              'starting node connection'
+            );
+            await this._runHandshakeWithBootstrapUrls().catch(
+              (err: NodeClientErrorV0 | NodeClientErrorV1) => {
+                logError(
+                  'Error while attempting to reconnect to nodes after epoch transition: ',
+                  err.message
+                );
+              }
+            );
+          }
         }
       });
     }
@@ -346,7 +380,15 @@ export class LitCore {
     // -- handshake with each node
     await this.setNewConfig();
     await this.listenForNewEpoch();
+    await this._runHandshakeWithBootstrapUrls();
+  };
 
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+
+  _runHandshakeWithBootstrapUrls = async (): Promise<any> => {
     // -- handshake with each node
     const requestId = this.getRequestId();
 
