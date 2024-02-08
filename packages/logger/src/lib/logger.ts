@@ -342,7 +342,12 @@ export class Logger {
 
   private _addLog(log: Log) {
     this._logs.push(log);
-    log.id && this._addToLocalStorage(log);
+
+    // TODO: currently we are not deleting old request id's which over time will fill local storage as the maximum storage size is 10mb
+    // we should be deleting keys from the front of the collection of `Object.keys(category)` such that the first keys entered are deleted when we reach a pre defined key threshold
+    // this implementation assumes that serialization / deserialization from `localStorage` keeps the same key ordering in each `category` object as we will asssume the array produced from `Object.keys` will always be the same ordering.
+    // which then allows us to start at the front of the array and do `delete` operation on each key we wish to delete from the object.
+    //log.id && this._addToLocalStorage(log);
   }
 
   private _addToLocalStorage(log: Log) {
