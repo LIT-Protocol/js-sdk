@@ -304,11 +304,11 @@ export class LitCore {
           log(
             'State found to be new validator set locked, checking validator set'
           );
-          let oldNodeUrls: string[] = [...this.config.bootstrapUrls].sort();
+          const oldNodeUrls: string[] = [...this.config.bootstrapUrls].sort();
           await this.setNewConfig();
-          let currentNodeUrls: string[] = this.config.bootstrapUrls.sort();
-          let delta: string[] = currentNodeUrls.filter(
-            (item) => oldNodeUrls.indexOf(item) > -1
+          const currentNodeUrls: string[] = this.config.bootstrapUrls.sort();
+          const delta: string[] = currentNodeUrls.filter((item) =>
+            oldNodeUrls.includes(item)
           );
           // if the sets differ we reconnect.
           if (delta.length > 1) {
@@ -327,14 +327,15 @@ export class LitCore {
               delta,
               'starting node connection'
             );
-            await this._runHandshakeWithBootstrapUrls().catch(
-              (err: NodeClientErrorV0 | NodeClientErrorV1) => {
-                logError(
-                  'Error while attempting to reconnect to nodes after epoch transition: ',
-                  err.message
-                );
-              }
-            );
+            this.connectedNodes =
+              await this._runHandshakeWithBootstrapUrls().catch(
+                (err: NodeClientErrorV0 | NodeClientErrorV1) => {
+                  logError(
+                    'Error while attempting to reconnect to nodes after epoch transition: ',
+                    err.message
+                  );
+                }
+              );
           }
         }
       });
@@ -391,6 +392,9 @@ export class LitCore {
   _runHandshakeWithBootstrapUrls = async (): Promise<any> => {
     // -- handshake with each node
     const requestId = this.getRequestId();
+
+    // reset connectedNodes for the new handshake operation
+    this.connectedNodes = new Set();
 
     if (this.config.bootstrapUrls.length <= 0) {
       throwError({
