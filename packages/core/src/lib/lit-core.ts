@@ -82,6 +82,7 @@ export class LitCore {
   networkPubKeySet: string | null;
   hdRootPubkeys: string[] | null;
   latestBlockhash: string | null;
+  lastblockHashRetrieved: number | null;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -151,6 +152,7 @@ export class LitCore {
     this.networkPubKeySet = null;
     this.hdRootPubkeys = null;
     this.latestBlockhash = null;
+    this.lastblockHashRetrieved = null;
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
@@ -499,7 +501,7 @@ export class LitCore {
               errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
             });
           }
-
+          this.lastblockHashRetrieved = Date.now();
           this.ready = true;
 
           log(

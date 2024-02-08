@@ -490,7 +490,13 @@ export class LitNodeClientNodeJs extends LitCore {
     return LitNodeClientNodeJs.getExpiration();
   };
 
-  getLatestBlockhash = () => {
+
+  /**
+   * returns the latest block hash.
+   * will call {@link connect} if the block hash is expired
+   * @returns {Promise<string>} latest block hash from `handhsake` with the lit network.
+   */
+  getLatestBlockhash = async (): Promise<string> => {
     return this.latestBlockhash;
   };
 
