@@ -1049,10 +1049,14 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   }: MintCapacityCreditsContext): Promise<MintCapacityCreditsRes> => {
     this.log('Minting Capacity Credits NFT...');
 
-    // Validate input: at least one of the request parameters must be provided
-    if (!requestsPerDay && !requestsPerSecond && !requestsPerKilosecond) {
+    // Validate input: at least one of the request parameters must be provided and more than 0
+    if (
+      (requestsPerDay === null || requestsPerDay === undefined || requestsPerDay <= 0) &&
+      (requestsPerSecond === null || requestsPerSecond === undefined || requestsPerSecond <= 0) &&
+      (requestsPerKilosecond === null || requestsPerKilosecond === undefined || requestsPerKilosecond <= 0)
+    ) {
       throw new Error(
-        'At least one of requestsPerDay, requestsPerSecond, or requestsPerKilosecond is required'
+        'At least one of requestsPerDay, requestsPerSecond, or requestsPerKilosecond is required and must be more than 0'
       );
     }
 
