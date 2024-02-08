@@ -547,6 +547,7 @@ export class LitCore {
               errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
             });
           }
+
           this.lastblockHashRetrieved = Date.now();
           this.ready = true;
 
