@@ -35,7 +35,7 @@ if (loadEnv) {
   });
 
   await litNodeClient.connect();
-  let nonce = litNodeClient.getLatestBlockhash();
+  let nonce = await litNodeClient.getLatestBlockhash();
   console.log('GENERATED NONCE: ', nonce);
 
   const domain = 'localhost';
