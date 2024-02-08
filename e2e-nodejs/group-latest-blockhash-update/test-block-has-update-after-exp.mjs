@@ -24,7 +24,7 @@ export async function main() {
   let updatedBlockhash = await client.getLatestBlockhash();
 
   if (blockhash === updatedBlockhash) {
-    fail('block hash should be updated from handshake');
+    return fail('block hash should be updated from handshake');
   }
   console.log('block hashes: ', blockhash, updatedBlockhash);
   return success('block hash updates after expiration period');
