@@ -585,7 +585,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise { }
+export interface LitNodePromise {}
 
 export interface SendNodeCommand {
   url: string;
@@ -1168,7 +1168,7 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export interface PKPEthersWalletProp extends PKPBaseProp { }
+export interface PKPEthersWalletProp extends PKPBaseProp {}
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
@@ -1546,7 +1546,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions { }
+export interface BaseAuthenticateOptions {}
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
@@ -1620,10 +1620,14 @@ export interface MintCapacityCreditsPerDay extends BaseMintCapacityContext {
 export interface MintCapacityCreditsPerSecond extends BaseMintCapacityContext {
   requestsPerSecond?: number;
 }
-export interface MintCapacityCreditsPerKilosecond extends BaseMintCapacityContext {
+export interface MintCapacityCreditsPerKilosecond
+  extends BaseMintCapacityContext {
   requestsPerKilosecond?: number;
 }
-export interface MintCapacityCreditsContext extends MintCapacityCreditsPerDay, MintCapacityCreditsPerSecond, MintCapacityCreditsPerKilosecond { }
+export interface MintCapacityCreditsContext
+  extends MintCapacityCreditsPerDay,
+    MintCapacityCreditsPerSecond,
+    MintCapacityCreditsPerKilosecond {}
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;

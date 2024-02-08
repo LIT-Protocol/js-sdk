@@ -1051,9 +1051,15 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     // Validate input: at least one of the request parameters must be provided and more than 0
     if (
-      (requestsPerDay === null || requestsPerDay === undefined || requestsPerDay <= 0) &&
-      (requestsPerSecond === null || requestsPerSecond === undefined || requestsPerSecond <= 0) &&
-      (requestsPerKilosecond === null || requestsPerKilosecond === undefined || requestsPerKilosecond <= 0)
+      (requestsPerDay === null ||
+        requestsPerDay === undefined ||
+        requestsPerDay <= 0) &&
+      (requestsPerSecond === null ||
+        requestsPerSecond === undefined ||
+        requestsPerSecond <= 0) &&
+      (requestsPerKilosecond === null ||
+        requestsPerKilosecond === undefined ||
+        requestsPerKilosecond <= 0)
     ) {
       throw new Error(
         'At least one of requestsPerDay, requestsPerSecond, or requestsPerKilosecond is required and must be more than 0'
@@ -1085,8 +1091,13 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     }
 
     // Check if effectiveRequestsPerKilosecond was successfully set
-    if (effectiveRequestsPerKilosecond === undefined || effectiveRequestsPerKilosecond <= 0) {
-      throw new Error('Effective requests per kilosecond is required and must be more than 0');
+    if (
+      effectiveRequestsPerKilosecond === undefined ||
+      effectiveRequestsPerKilosecond <= 0
+    ) {
+      throw new Error(
+        'Effective requests per kilosecond is required and must be more than 0'
+      );
     }
 
     const expiresAt = calculateUTCMidnightExpiration(
