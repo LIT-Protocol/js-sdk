@@ -1082,10 +1082,12 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       // -- requestsPerKilosecond
     } else if (requestsPerKilosecond !== undefined) {
       effectiveRequestsPerKilosecond = requestsPerKilosecond;
-    } else {
-      throw new Error('Effective requests per kilosecond is required and must be more than 0');
     }
 
+    // Check if effectiveRequestsPerKilosecond was successfully set
+    if (effectiveRequestsPerKilosecond === undefined || effectiveRequestsPerKilosecond <= 0) {
+      throw new Error('Effective requests per kilosecond is required and must be more than 0');
+    }
 
     const expiresAt = calculateUTCMidnightExpiration(
       daysUntilUTCMidnightExpiration
