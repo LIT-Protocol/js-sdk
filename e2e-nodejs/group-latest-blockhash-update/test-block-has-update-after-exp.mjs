@@ -1,6 +1,6 @@
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
-import * as LitJsSdk from '@lit-protocol/lit-node-client';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LocalStorage } from 'node-localstorage';
 
 export async function main() {
@@ -15,12 +15,11 @@ export async function main() {
   });
 
   await client.connect();
-  let blockhash = await client.getLatestBlockhash();
-  await Promise.resolve(
-    new Promise((resolve, reject) => {
-      setTimeout(resolve, 40_000);
-    })
-  );
+  let blockhash = client.getLatestBlockhash();
+  await new Promise((resolve, _reject) => {
+      setTimeout(resolve, 35_000);
+  });
+
   let updatedBlockhash = await client.getLatestBlockhash();
 
   if (blockhash === updatedBlockhash) {
