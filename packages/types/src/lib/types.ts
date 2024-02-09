@@ -2,6 +2,12 @@ import { AuthMethodType } from './enums';
 import * as ethers from 'ethers';
 
 import {
+  LPACC_EVM_ATOM,
+  LPACC_EVM_CONTRACT,
+  LPACC_SOL,
+  LPACC_EVM_BASIC,
+} from '@lit-protocol/accs-validator';
+import {
   AuthMethod,
   LitRelayConfig,
   SignInWithOTPParams,
@@ -10,12 +16,7 @@ import {
   WebAuthnProviderOptions,
 } from './interfaces';
 import {
-  AccsCOSMOSParams,
-  AccsDefaultParams,
-  AccsEVMParams,
   AccsOperatorParams,
-  AccsRegularParams,
-  AccsSOLV2Params,
   EthWalletProviderOptions,
   JsonEncryptionRetrieveRequest,
   JsonExecutionRequest,
@@ -25,17 +26,42 @@ import {
   BaseAuthenticateOptions,
 } from './interfaces';
 
-export type AccessControlConditions = AccsRegularParams[] | AccsDefaultParams[];
+export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
 
-export type EvmContractConditions = AccsEVMParams[];
-export type SolRpcConditions = AccsSOLV2Params[];
-export type UnifiedAccessControlConditions = (
-  | AccsRegularParams
+export type AccsDefaultParams = LPACC_EVM_BASIC;
+export type AccsSOLV2Params = LPACC_SOL;
+export type AccsEVMParams = LPACC_EVM_CONTRACT;
+export type AccsCOSMOSParams = LPACC_EVM_ATOM;
+
+// union type for all the different types of conditions
+export type AccsParams =
   | AccsDefaultParams
   | AccsEVMParams
   | AccsSOLV2Params
-  | AccsCOSMOSParams
+  | AccsCOSMOSParams;
+
+// union type for all the different types of conditions including operator
+export type ConditionItem = AccsParams | AccsOperatorParams;
+
+export type AccessControlConditions = (
+  | AccsDefaultParams
   | AccsOperatorParams
+  | AccessControlConditions
+)[];
+export type EvmContractConditions = (
+  | AccsEVMParams
+  | AccsOperatorParams
+  | EvmContractConditions
+)[];
+export type SolRpcConditions = (
+  | AccsSOLV2Params
+  | AccsOperatorParams
+  | SolRpcConditions
+)[];
+export type UnifiedAccessControlConditions = (
+  | AccsParams
+  | AccsOperatorParams
+  | UnifiedAccessControlConditions
 )[];
 
 export type JsonRequest = JsonExecutionRequest | JsonSignChainDataRequest;
@@ -101,15 +127,6 @@ export type LIT_NETWORKS_KEYS =
   | 'custom'
   | 'habanero'
   | 'manzano';
-
-export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
-
-// union type for all the different types of conditions
-export type ConditionItem =
-  | AccsOperatorParams
-  | AccsRegularParams
-  | AccsDefaultParams
-  | AccsSOLV2Params;
 
 export type SymmetricKey = Uint8Array | string | CryptoKey | BufferSource;
 export type EncryptedSymmetricKey = string | Uint8Array | any;

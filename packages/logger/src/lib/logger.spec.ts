@@ -92,7 +92,7 @@ describe('logger', () => {
   });
 
   it('should persist logs across categories', async () => {
-    const count = 1_000;
+    const count = 10_000;
     for (let i = 0; i < count; i++) {
       const logger = lm.get('' + i, 'foo6');
       logger.setLevel(LogLevel.DEBUG);

@@ -1,12 +1,11 @@
 import { LIT_ERROR } from '@lit-protocol/constants';
 
 import {
+  AccessControlConditions,
   AccsCOSMOSParams,
-  AccsDefaultParams,
-  AccsEVMParams,
-  AccsRegularParams,
-  AccsSOLV2Params,
+  EvmContractConditions,
   HumanizedAccsProps,
+  SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
@@ -48,7 +47,7 @@ export const formatAtom = (amount: number): string => {
  * @returns { string } humanized version of the comparator
  */
 export const humanizeComparator = (comparator: string): string | undefined => {
-  let list: any = {
+  const list: { [key: string]: string } = {
     '>': 'more than',
     '>=': 'at least',
     '=': 'exactly',
@@ -57,7 +56,7 @@ export const humanizeComparator = (comparator: string): string | undefined => {
     contains: 'contains',
   };
 
-  let selected: string | undefined = list[comparator];
+  const selected: string | undefined = list[comparator];
 
   if (!selected) {
     log(`Unregonized comparator ${comparator}`);
@@ -71,7 +70,7 @@ export const humanizeComparator = (comparator: string): string | undefined => {
  *
  * Humanize EVM basic access control conditions
  *
- * @property { Array<AccsRegularParams | AccsDefaultParams | any> } accessControlConditions
+ * @property { Array<AccsDefaultParams | any> } accessControlConditions
  * @property { Array<any | string> } tokenList
  * @property { string } myWalletAddress
  *
@@ -82,7 +81,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  accessControlConditions: Array<AccsRegularParams | AccsDefaultParams | any>;
+  accessControlConditions: AccessControlConditions;
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
@@ -90,7 +89,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
   log('myWalletAddress', myWalletAddress);
   log('accessControlConditions', accessControlConditions);
 
-  let fixedConditions: any = accessControlConditions;
+  let fixedConditions = accessControlConditions;
 
   // inject and operator if needed
   // this is done because before we supported operators,
@@ -100,7 +99,7 @@ export const humanizeEvmBasicAccessControlConditions = async ({
     let containsOperator = false;
 
     for (let i = 0; i < accessControlConditions.length; i++) {
-      if (accessControlConditions[i].operator) {
+      if ('operator' in accessControlConditions[i]) {
         containsOperator = true;
       }
     }
@@ -282,7 +281,7 @@ export const humanizeEvmContractConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  evmContractConditions: Array<AccsEVMParams>;
+  evmContractConditions: EvmContractConditions;
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
@@ -343,7 +342,7 @@ export const humanizeSolRpcConditions = async ({
   tokenList,
   myWalletAddress,
 }: {
-  solRpcConditions: Array<AccsSOLV2Params>;
+  solRpcConditions: SolRpcConditions;
   tokenList?: Array<any | string>;
   myWalletAddress?: string;
 }): Promise<string> => {
@@ -484,7 +483,7 @@ export const humanizeCosmosConditions = async ({
  *
  * Humanize unified access control conditions
  *
- * @property { Array<AccsRegularParams | AccsDefaultParams | AccsSOLV2Params | AccsEVMParams | AccsCOSMOSParams> } unifiedAccessControlConditions
+ * @property { Array<UnifiedAccessControlConditions> } unifiedAccessControlConditions
  * @property { Array<any | string> } tokenList
  * @property { string } myWalletAddress
  *

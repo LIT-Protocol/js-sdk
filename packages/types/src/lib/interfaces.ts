@@ -1,5 +1,4 @@
 import { Provider } from '@ethersproject/abstract-provider';
-/** ---------- Access Control Conditions Interfaces ---------- */
 
 import {
   AcceptedFileType,
@@ -26,63 +25,15 @@ import {
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
 
-export interface AccsOperatorParams {
-  operator: string;
-}
-
-export interface AccsRegularParams {
-  conditionType?: ConditionType;
-  returnValueTest: {
-    key?: string;
-    comparator: string;
-    value: string;
-  };
-  method?: string;
-  params?: any[];
-  chain: Chain;
-}
-
-export interface AccsDefaultParams extends AccsRegularParams {
-  contractAddress?: string;
-  standardContractType?: string;
-  parameters?: any;
-}
-
-export interface AccsSOLV2Params extends AccsRegularParams {
-  pdaKey: string;
-  pdaInterface: {
-    offset: string | number;
-    fields: string | object;
-  };
-  pdaParams: [];
-}
+/** ---------- Access Control Conditions Interfaces ---------- */
 
 export interface ABIParams {
   name: string;
   type: string;
 }
 
-export interface FunctionABI {
-  name: string;
-  type?: string;
-  stateMutability: string;
-  inputs: Array<ABIParams | any>;
-  outputs: Array<ABIParams | any>;
-  constant?: string | boolean;
-  payable?: boolean;
-}
-
-export interface AccsEVMParams extends AccsRegularParams {
-  functionAbi: FunctionABI;
-  contractAddress: string;
-  functionName: string;
-  functionParams: any[];
-}
-
-export interface AccsCOSMOSParams extends AccsRegularParams {
-  path: string;
-  method?: string;
-  parameters?: string[];
+export interface AccsOperatorParams {
+  operator: string;
 }
 
 /** ---------- Auth Sig ---------- */
@@ -1610,10 +1561,24 @@ export interface RetryTolerance {
   maxRetryCount?: number;
 }
 
-export interface MintCapacityCreditsPerDayContext {
-  requestsPerDay: number;
+export interface BaseMintCapacityContext {
   daysUntilUTCMidnightExpiration: number;
 }
+
+export interface MintCapacityCreditsPerDay extends BaseMintCapacityContext {
+  requestsPerDay?: number;
+}
+export interface MintCapacityCreditsPerSecond extends BaseMintCapacityContext {
+  requestsPerSecond?: number;
+}
+export interface MintCapacityCreditsPerKilosecond
+  extends BaseMintCapacityContext {
+  requestsPerKilosecond?: number;
+}
+export interface MintCapacityCreditsContext
+  extends MintCapacityCreditsPerDay,
+    MintCapacityCreditsPerSecond,
+    MintCapacityCreditsPerKilosecond {}
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
