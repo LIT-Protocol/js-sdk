@@ -1561,10 +1561,24 @@ export interface RetryTolerance {
   maxRetryCount?: number;
 }
 
-export interface MintCapacityCreditsPerDayContext {
-  requestsPerDay: number;
+export interface BaseMintCapacityContext {
   daysUntilUTCMidnightExpiration: number;
 }
+
+export interface MintCapacityCreditsPerDay extends BaseMintCapacityContext {
+  requestsPerDay?: number;
+}
+export interface MintCapacityCreditsPerSecond extends BaseMintCapacityContext {
+  requestsPerSecond?: number;
+}
+export interface MintCapacityCreditsPerKilosecond
+  extends BaseMintCapacityContext {
+  requestsPerKilosecond?: number;
+}
+export interface MintCapacityCreditsContext
+  extends MintCapacityCreditsPerDay,
+    MintCapacityCreditsPerSecond,
+    MintCapacityCreditsPerKilosecond {}
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
