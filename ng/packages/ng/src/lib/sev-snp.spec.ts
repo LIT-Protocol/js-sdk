@@ -1,14 +1,14 @@
 /// <reference types="jest" />
 
 import * as fs from 'node:fs';
-import { init, sevSnpGetVcekUrl, sevSnpVerify } from '../ng';
+import { init, sevSnpGetVcekUrl, sevSnpVerify } from './ng';
 import {
   attestation,
   challenge as challengeHex,
   vcekUrl,
-} from './spec/data.json';
+} from './sev-snp.spec/data.json';
 
-const data = new Map(
+const data = Object.fromEntries(
   Object.entries(attestation.data).map(([key, value]) => [
     key,
     Buffer.from(value, 'base64'),
@@ -17,7 +17,7 @@ const data = new Map(
 const signatures = attestation.signatures.map((s) => Buffer.from(s, 'base64'));
 const challenge = Buffer.from(challengeHex, 'hex');
 const report = Buffer.from(attestation.report, 'base64');
-const vcek = fs.readFileSync(`${__dirname}/spec/vcek.crt`);
+const vcek = fs.readFileSync(`${__dirname}/sev-snp.spec/vcek.crt`);
 
 describe('ng sev-snp', () => {
   beforeEach(async () => {
@@ -41,21 +41,21 @@ describe('ng sev-snp', () => {
   });
 
   it('should reject wrong vcek', async () => {
-    const vcek2 = fs.readFileSync(`${__dirname}/spec/vcek2.crt`);
+    const vcek2 = fs.readFileSync(`${__dirname}/sev-snp.spec/vcek2.crt`);
     expect(() =>
       sevSnpVerify(report, data, signatures, challenge, vcek2)
     ).toThrow();
   });
 
   it('should reject extra data', async () => {
-    const data2 = new Map([...data.entries(), ['a', Buffer.alloc(0)]]);
+    const data2 = Object.fromEntries([...Object.entries(data), ['a', Buffer.alloc(0)]]);
     expect(() =>
       sevSnpVerify(report, data2, signatures, challenge, vcek)
     ).toThrow();
   });
 
   it('should reject missing data', async () => {
-    const data2 = new Map([...data.entries()].slice(0, -1));
+    const data2 = Object.fromEntries([...Object.entries(data)].slice(0, -1));
     expect(() =>
       sevSnpVerify(report, data2, signatures, challenge, vcek)
     ).toThrow();

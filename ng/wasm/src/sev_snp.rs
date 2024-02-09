@@ -1,20 +1,19 @@
 use std::collections::BTreeMap;
 
-use serde::Deserialize;
+use js_sys::Uint8Array;
 use sev::certs::snp::Certificate;
 use sev::firmware::host::TcbVersion;
 use sha2::{Digest, Sha512};
-use tsify::Tsify;
 use wasm_bindgen::prelude::*;
 
 use sev::certs::snp::{builtin::milan, ca, Chain, Verifiable};
 use sev::firmware::guest::AttestationReport;
 
-use crate::bytes::Bytes;
+use crate::abi::{from_js, JsResult};
 
 /// Gets the vcek url for the given attestation report.  You can fetch this certificate yourself, and pass it in to verify_attestation_report
 #[wasm_bindgen(js_name = "sevSnpGetVcekUrl")]
-pub fn sev_snp_get_vcek_url(attestation_report: &[u8]) -> Result<String, JsError> {
+pub fn sev_snp_get_vcek_url(attestation_report: &[u8]) -> JsResult<String> {
     let attestation_report = parse_attestation_report(attestation_report)?;
     let url = get_vcek_url(attestation_report);
     Ok(url)
@@ -55,42 +54,45 @@ fn get_vcek_url(attestation_report: AttestationReport) -> String {
     )
 }
 
-#[derive(Tsify, Deserialize)]
-#[tsify(from_wasm_abi)]
-pub struct AttestationData(BTreeMap<String, Bytes<Vec<u8>>>);
-
-#[derive(Tsify, Deserialize)]
-#[tsify(from_wasm_abi)]
-pub struct AttestationSignatures(Vec<Bytes<Vec<u8>>>);
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(typescript_type = "Record<string, Uint8Array>")]
+    pub type AttestationData;
+}
 
 #[wasm_bindgen(js_name = "sevSnpVerify")]
 pub fn sev_snp_verify(
     attestation_report: &[u8],
-    data: AttestationData,
-    signatures: AttestationSignatures,
+    attestation_data: AttestationData,
+    signatures: Vec<Uint8Array>,
     challenge: &[u8],
     vcek_certificate: &[u8],
-) -> Result<(), JsError> {
+) -> JsResult<()> {
     let attestation_report = parse_attestation_report(attestation_report)?;
+    let attestation_data = from_js(attestation_data)?;
+    let signatures = signatures
+        .into_iter()
+        .map(from_js::<Vec<u8>>)
+        .collect::<JsResult<Vec<_>>>()?;
     let vcek_certificate = parse_certificate(vcek_certificate)?;
 
     verify_certificate(vcek_certificate, attestation_report)?;
-    verify_challenge(challenge, data, signatures, attestation_report)?;
+    verify_challenge(challenge, attestation_data, signatures, attestation_report)?;
 
     Ok(())
 }
 
-fn parse_attestation_report(attestation_report: &[u8]) -> Result<AttestationReport, JsError> {
+fn parse_attestation_report(attestation_report: &[u8]) -> JsResult<AttestationReport> {
     let report = unsafe { std::ptr::read(attestation_report.as_ptr() as *const _) };
     // TODO: run some validation here?
     Ok(report)
 }
 
-fn parse_certificate(vcek_certificate: &[u8]) -> Result<Certificate, JsError> {
+fn parse_certificate(vcek_certificate: &[u8]) -> JsResult<Certificate> {
     Certificate::from_der(&vcek_certificate).map_err(|e| JsError::new(e.to_string().as_str()))
 }
 
-fn verify_certificate(vcek: Certificate, report: AttestationReport) -> Result<(), JsError> {
+fn verify_certificate(vcek: Certificate, report: AttestationReport) -> JsResult<()> {
     let ark = milan::ark().unwrap();
     let ask = milan::ask().unwrap();
 
@@ -105,11 +107,11 @@ fn verify_certificate(vcek: Certificate, report: AttestationReport) -> Result<()
 
 fn verify_challenge(
     challenge: &[u8],
-    data: AttestationData,
-    signatures: AttestationSignatures,
+    data: BTreeMap<String, Vec<u8>>,
+    signatures: Vec<Vec<u8>>,
     attestation_report: AttestationReport,
-) -> Result<(), JsError> {
-    let expected_report_data = get_expected_report_data(data.0, signatures.0, challenge);
+) -> JsResult<()> {
+    let expected_report_data = get_expected_report_data(data, signatures, challenge);
 
     if attestation_report.report_data != expected_report_data {
         return Err(
@@ -122,8 +124,8 @@ fn verify_challenge(
 }
 
 fn get_expected_report_data(
-    data: BTreeMap<String, Bytes<Vec<u8>>>,
-    signatures: Vec<Bytes<Vec<u8>>>,
+    data: BTreeMap<String, Vec<u8>>,
+    signatures: Vec<Vec<u8>>,
     challenge: &[u8],
 ) -> [u8; 64] {
     let mut hasher = Sha512::new();

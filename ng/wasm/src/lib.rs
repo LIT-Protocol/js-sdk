@@ -1,5 +1,8 @@
-pub mod bytes;
+pub mod abi;
+pub mod bls;
+pub mod ecdsa;
 pub mod sev_snp;
+pub mod frost;
 
 use wasm_bindgen::prelude::*;
 
