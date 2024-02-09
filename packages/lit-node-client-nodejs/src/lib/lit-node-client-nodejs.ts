@@ -269,7 +269,7 @@ export class LitNodeClientNodeJs extends LitCore {
       throw new Error('Failed to verify capabilities for resource');
     }
 
-    let nonce = await this.getLatestBlockhash();
+    let nonce = this.getLatestBlockhash();
 
     // -- get auth sig
     let siweMessage = new siwe.SiweMessage({
@@ -495,19 +495,13 @@ export class LitNodeClientNodeJs extends LitCore {
    * will call refresh if the block hash is expired
    * @returns {Promise<string>} latest block hash from `handhsake` with the lit network.
    */
-  getLatestBlockhash = async (): Promise<string> => {
+  getLatestBlockhash = (): string => {
     if (!this.ready) {
       logError('Client not connected, remember to call connect');
       throwError({
         message: 'Client not connected',
         errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
         errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
-      });
-    }
-
-    if (Date.now() - this.lastblockHashRetrieved! >= 30_000) {
-      await this._runHandshakeWithBootstrapUrls().catch((err: any) => {
-        logError('errror while attempting to update block hash ', err);
       });
     }
 

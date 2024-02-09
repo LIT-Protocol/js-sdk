@@ -83,6 +83,7 @@ export class LitCore {
   hdRootPubkeys: string[] | null;
   latestBlockhash: string | null;
   lastblockHashRetrieved: number | null;
+  networkSyncInterval: any | null;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -569,6 +570,30 @@ export class LitCore {
           if (isBrowser()) {
             document.dispatchEvent(new Event('lit-ready'));
           }
+          // if the interval is defined we clear it
+          if (this.networkSyncInterval) {
+            clearInterval(this.networkSyncInterval);
+          }
+
+          this.networkSyncInterval = setInterval(async () => {
+            if (Date.now() - this.lastblockHashRetrieved! >= 30_000) {
+              log(
+                'Syncing state for new network context current config: ',
+                this.config,
+                'current blockhash: ',
+                this.lastblockHashRetrieved
+              );
+              await this._runHandshakeWithBootstrapUrls().catch((err) => {
+                throw err;
+              });
+              log(
+                'Done syncing state new config: ',
+                this.config,
+                'new blockhash: ',
+                this.lastblockHashRetrieved
+              );
+            }
+          }, 30_000);
 
           // @ts-ignore: Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?ts(2794)
           resolve();
