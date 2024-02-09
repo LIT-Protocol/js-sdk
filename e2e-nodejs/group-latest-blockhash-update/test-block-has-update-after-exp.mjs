@@ -15,6 +15,9 @@ export async function main() {
   });
 
   await client.connect();
+  console.log(client.hdRootPubkeys);
+  let subnetKey = "" + client.subnetPubKey;
+  let rootKeys = client.hdRootPubkeys;
   let blockhash = client.getLatestBlockhash();
   await new Promise((resolve, _reject) => {
       setTimeout(resolve, 35_000);
@@ -24,6 +27,12 @@ export async function main() {
 
   if (blockhash === updatedBlockhash) {
     return fail('block hash should be updated from handshake');
+  }
+
+  if (rootKeys.filter((item) => client.hdRootPubkeys.includes(item) === false).length > 0 || subnetKey != client.subnetPubKey) {
+    console.log("current root keys: ", client.hdRootPubkeys, "old root keys: ", rootKeys);
+    console.log("old subnet key: ", subnetKey, "current subnnet key: ", client.subnetPubKey);
+    return fail('network properties do not match after syncing');
   }
   console.log('block hashes: ', blockhash, updatedBlockhash);
   return success('block hash updates after expiration period');
