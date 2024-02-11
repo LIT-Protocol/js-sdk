@@ -35,7 +35,7 @@ if (loadEnv) {
   });
 
   await litNodeClient.connect();
-  let nonce = await litNodeClient.getLatestBlockhash();
+  let nonce = litNodeClient.getLatestBlockhash();
   console.log('GENERATED NONCE: ', nonce);
 
   const domain = 'localhost';
@@ -55,7 +55,7 @@ if (loadEnv) {
   const messageToSign = siweMessage.prepareMessage();
 
   // Sign the message and format the authSig
-  const signature = wallet.signMessage(messageToSign);
+  const signature = await wallet.signMessage(messageToSign);
 
   const authSig = {
     sig: signature,
