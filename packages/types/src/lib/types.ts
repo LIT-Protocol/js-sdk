@@ -173,7 +173,8 @@ export type ClaimProcessor = RelayClaimProcessor | ClientClaimProcessor;
  * Ensure that your client has the correct ABI and contract addresses for successful processing.
  */
 export type MintCallback<T = ClaimProcessor> = (
-  response: ClaimResult<T>
+  response: ClaimResult<T>,
+  network: string
 ) => Promise<string>;
 
 /**

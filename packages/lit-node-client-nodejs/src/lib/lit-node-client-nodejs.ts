@@ -10,6 +10,7 @@ import {
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
+  LitNetwork,
   SIGTYPE,
   SIWE_DELEGATION_URI,
 } from '@lit-protocol/constants';
@@ -2980,22 +2981,28 @@ export class LitNodeClientNodeJs extends LitCore {
 
       let mintTx = '';
       if (params.mintCallback && 'signer' in params) {
-        mintTx = await params.mintCallback({
-          derivedKeyId,
-          authMethodType: params.authMethod.authMethodType,
-          signatures: nodeSignatures,
-          pubkey,
-          signer: (params as ClaimRequest<'client'>).signer,
-          ...relayParams,
-        });
+        mintTx = await params.mintCallback(
+          {
+            derivedKeyId,
+            authMethodType: params.authMethod.authMethodType,
+            signatures: nodeSignatures,
+            pubkey,
+            signer: (params as ClaimRequest<'client'>).signer,
+            ...relayParams,
+          },
+          this.config.litNetwork as LitNetwork
+        );
       } else {
-        mintTx = await defaultMintClaimCallback({
-          derivedKeyId,
-          authMethodType: params.authMethod.authMethodType,
-          signatures: nodeSignatures,
-          pubkey,
-          ...relayParams,
-        });
+        mintTx = await defaultMintClaimCallback(
+          {
+            derivedKeyId,
+            authMethodType: params.authMethod.authMethodType,
+            signatures: nodeSignatures,
+            pubkey,
+            ...relayParams,
+          },
+          this.config.litNetwork as LitNetwork
+        );
       }
 
       return {
