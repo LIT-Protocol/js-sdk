@@ -55,7 +55,7 @@ if (loadEnv) {
   const messageToSign = siweMessage.prepareMessage();
 
   // Sign the message and format the authSig
-  const signature = await wallet.signMessage(messageToSign);
+  const signature = wallet.signMessage(messageToSign);
 
   const authSig = {
     sig: signature,
