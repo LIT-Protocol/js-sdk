@@ -13,8 +13,9 @@ const checkSevAttestation = process.env.CHECK_SEV === 'true' ?? false;
 const mintNew = process.env.MINT_NEW === 'true' ? true : false;
 const useCache = process.env.E2E_CACHE === 'true' ? true : false;
 const loadEnv = process.env.LOAD_ENV === 'true' ? false : true; // default to true
+const isLocalTest = process.env.LOCAL_INTIGRATION_TEST === 'true' ? true : false;
 
-if (loadEnv) {
+if (loadEnv && !isLocalTest) {
   if (mintNew && useCache) {
     console.log('cannot mint new and use cache at the same time');
     process.exit();
