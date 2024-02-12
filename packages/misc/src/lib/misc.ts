@@ -4,6 +4,10 @@ import {
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
   LIT_ERROR,
+  LitNetwork,
+  RELAY_URL_CAYENNE,
+  RELAY_URL_HABANERO,
+  RELAY_URL_MANZANO,
 } from '@lit-protocol/constants';
 
 import {
@@ -661,12 +665,26 @@ export const genRandomPath = (): string => {
 
 export const defaultMintClaimCallback: MintCallback<
   RelayClaimProcessor
-> = async (params: ClaimResult<RelayClaimProcessor>): Promise<string> => {
+> = async (
+  params: ClaimResult<RelayClaimProcessor>,
+  network: string = 'cayenne'
+): Promise<string> => {
   try {
-    const relayUrl = params.relayUrl
-      ? params.relayUrl
-      : 'https://relayer-server-staging-cayenne.getlit.dev/auth/claim';
-    const response = await fetch(relayUrl, {
+    let relayUrl: string = '';
+
+    switch (network) {
+      case LitNetwork.Cayenne:
+        relayUrl = RELAY_URL_CAYENNE + '/auth/claim';
+        break;
+      case LitNetwork.Habanero:
+        relayUrl = RELAY_URL_HABANERO + 'auth/claim';
+        break;
+      case LitNetwork.Manzano:
+        relayUrl = RELAY_URL_MANZANO + 'auth/claim';
+    }
+
+    const url = params.relayUrl ? params.relayUrl : relayUrl;
+    const response = await fetch(url, {
       method: 'POST',
       body: JSON.stringify(params),
       headers: {
