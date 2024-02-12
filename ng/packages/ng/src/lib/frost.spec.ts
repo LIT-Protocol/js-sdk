@@ -18,20 +18,18 @@ describe('FROST', () => {
   });
 
   it('should sign and verify', () => {
-    expect(
-      Buffer.from(
-        frostCombine(
-          'Ed25519Sha512',
-          message,
-          publicKey,
-          shares.map((s) => Buffer.from(s.identifierHex, 'hex')),
-          shares.map((s) => Buffer.from(s.hidingNonceHex, 'hex')),
-          shares.map((s) => Buffer.from(s.bindingNonceHex, 'hex')),
-          shares.map((s) => Buffer.from(s.signatureShareHex, 'hex')),
-          shares.map((s) => Buffer.from(s.verifyingShareHex, 'hex'))
-        )
-      )
-    ).toEqual(signature);
+    const combinedSignature = frostCombine(
+      'Ed25519Sha512',
+      message,
+      publicKey,
+      shares.map((s) => Buffer.from(s.identifierHex, 'hex')),
+      shares.map((s) => Buffer.from(s.hidingNonceHex, 'hex')),
+      shares.map((s) => Buffer.from(s.bindingNonceHex, 'hex')),
+      shares.map((s) => Buffer.from(s.signatureShareHex, 'hex')),
+      shares.map((s) => Buffer.from(s.verifyingShareHex, 'hex'))
+    );
+    expect(combinedSignature).toBeInstanceOf(Uint8Array);
+    expect(Buffer.from(combinedSignature)).toEqual(signature);
 
     frostVerify('Ed25519Sha512', message, publicKey, signature);
   });

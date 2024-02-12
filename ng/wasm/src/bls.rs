@@ -135,7 +135,7 @@ where
             identity,
         )?;
         let ciphertext = serde_bare::to_vec(&ciphertext)?;
-        let ciphertext = into_js(&ciphertext)?;
+        let ciphertext = into_js(Bytes::new(&ciphertext))?;
 
         Ok(ciphertext)
     }
