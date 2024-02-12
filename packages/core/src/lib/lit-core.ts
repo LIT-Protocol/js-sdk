@@ -53,6 +53,7 @@ import {
   JsonPkpSignRequest,
   KV,
   LitContractContext,
+  LitContractResolverContext,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
   NodeAttestation,
@@ -295,10 +296,12 @@ export class LitCore {
   listenForNewEpoch = async (): Promise<void> => {
     if (
       this.config.litNetwork === LitNetwork.Manzano ||
-      this.config.litNetwork === LitNetwork.Habanero
+      this.config.litNetwork === LitNetwork.Habanero ||
+      this.config.litNetwork === LitNetwork.Custom
     ) {
       const stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork as any
+        this.config.litNetwork as any,
+        this.config.contractContext
       );
       log(
         'listening for state change on staking contract: ',
