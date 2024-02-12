@@ -1,12 +1,12 @@
 /// <reference types="jest" />
 
 import {
-  signatureHex,
   messageHex,
   publicKeyHex,
   shares,
+  signatureHex,
 } from './frost-data.spec.json';
-import { frostEd25519Combine, frostEd25519Verify, init } from './ng';
+import { frostCombine, frostVerify, init } from './ng';
 
 const message = Buffer.from(messageHex, 'hex');
 const publicKey = Buffer.from(publicKeyHex, 'hex');
@@ -20,7 +20,8 @@ describe('FROST', () => {
   it('should sign and verify', () => {
     expect(
       Buffer.from(
-        frostEd25519Combine(
+        frostCombine(
+          'Ed25519Sha512',
           message,
           publicKey,
           shares.map((s) => Buffer.from(s.identifierHex, 'hex')),
@@ -32,13 +33,14 @@ describe('FROST', () => {
       )
     ).toEqual(signature);
 
-    frostEd25519Verify(message, publicKey, signature);
+    frostVerify('Ed25519Sha512', message, publicKey, signature);
   });
-
 
   it('should reject invalid signatures', () => {
     const invalidSignature = Buffer.from(signature);
     invalidSignature[0] ^= 0x01;
-    expect(() => frostEd25519Verify(message, publicKey, invalidSignature)).toThrow();
+    expect(() =>
+      frostVerify('Ed25519Sha512', message, publicKey, invalidSignature)
+    ).toThrow();
   });
 });

@@ -7,7 +7,7 @@ import {
   publicKey as publicKeyHex,
   signatureShares,
 } from './ecdsa-data.spec.json';
-import { ecdsaK256Combine, init } from './ng';
+import { ecdsaCombine, init } from './ng';
 
 describe('ECDSA', () => {
   beforeEach(async () => {
@@ -17,7 +17,8 @@ describe('ECDSA', () => {
   it('should combine signatures', () => {
     const publicKey = Buffer.from(publicKeyHex, 'hex');
     const R = Buffer.from(bigR, 'hex');
-    const s = ecdsaK256Combine(
+    const s = ecdsaCombine(
+      'K256',
       signatureShares.map((s) => Buffer.from(s, 'hex'))
     );
 

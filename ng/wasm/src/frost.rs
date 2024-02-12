@@ -8,10 +8,29 @@ use frost_core::{
     Ciphersuite, Identifier, Signature, SigningPackage, VerifyingKey,
 };
 use js_sys::Uint8Array;
+use serde::Deserialize;
 use serde_bytes::Bytes;
+use tsify::Tsify;
 use wasm_bindgen::prelude::*;
 
 use crate::abi::{from_js, into_js, JsResult};
+
+#[derive(Tsify, Deserialize)]
+#[tsify(from_wasm_abi)]
+pub enum FrostVariant {
+    Ed25519Sha512,
+    Ed448Shake256,
+    Ristretto255Sha512,
+    #[cfg(any())]
+    Secp256K1Sha256,
+    P256Sha256,
+    #[cfg(any())]
+    P384Sha384,
+    #[cfg(any())]
+    JubjubBlake2b512,
+    #[cfg(any())]
+    Secp256K1Taproot,
+}
 
 pub fn combine_signature<C: Ciphersuite>(
     message: Uint8Array,
@@ -162,7 +181,7 @@ fn signature_from_js<C: Ciphersuite>(k: Uint8Array) -> JsResult<Signature<C>> {
 mod tests {
     use std::convert::TryInto;
 
-    use frost_core::{keys::PublicKeyPackage, Signature};
+    use frost_core::Signature;
     use js_sys::Uint8Array;
     use rand::SeedableRng as _;
     use serde_bytes::Bytes;
@@ -268,8 +287,9 @@ mod tests {
     }
 }
 
-#[wasm_bindgen(js_name = "frostEd25519Combine")]
-pub fn frost_ed25519_combine(
+#[wasm_bindgen(js_name = "frostCombine")]
+pub fn frost_combine(
+    variant: FrostVariant,
     message: Uint8Array,
     public_key: Uint8Array,
     identifiers: Vec<Uint8Array>,
@@ -278,240 +298,123 @@ pub fn frost_ed25519_combine(
     signature_shares: Vec<Uint8Array>,
     verifying_shares: Vec<Uint8Array>,
 ) -> JsResult<Uint8Array> {
-    combine_signature::<frost_ed25519::Ed25519Sha512>(
-        message,
-        public_key,
-        identifiers,
-        hiding_nonces,
-        binding_nonces,
-        signature_shares,
-        verifying_shares,
-    )
+    match variant {
+        FrostVariant::Ed25519Sha512 => combine_signature::<frost_ed25519::Ed25519Sha512>(
+            message,
+            public_key,
+            identifiers,
+            hiding_nonces,
+            binding_nonces,
+            signature_shares,
+            verifying_shares,
+        ),
+        FrostVariant::Ed448Shake256 => combine_signature::<frost_ed448::Ed448Shake256>(
+            message,
+            public_key,
+            identifiers,
+            hiding_nonces,
+            binding_nonces,
+            signature_shares,
+            verifying_shares,
+        ),
+        FrostVariant::Ristretto255Sha512 => {
+            combine_signature::<frost_ristretto255::Ristretto255Sha512>(
+                message,
+                public_key,
+                identifiers,
+                hiding_nonces,
+                binding_nonces,
+                signature_shares,
+                verifying_shares,
+            )
+        }
+        #[cfg(any())]
+        FrostVariant::Secp256K1Sha256 => combine_signature::<frost_secp256k1::Secp256K1Sha256>(
+            message,
+            public_key,
+            identifiers,
+            hiding_nonces,
+            binding_nonces,
+            signature_shares,
+            verifying_shares,
+        ),
+        FrostVariant::P256Sha256 => combine_signature::<frost_p256::P256Sha256>(
+            message,
+            public_key,
+            identifiers,
+            hiding_nonces,
+            binding_nonces,
+            signature_shares,
+            verifying_shares,
+        ),
+        #[cfg(any())]
+        FrostVariant::P384Sha384 => combine_signature::<frost_p384::P384Sha384>(
+            message,
+            public_key,
+            identifiers,
+            hiding_nonces,
+            binding_nonces,
+            signature_shares,
+            verifying_shares,
+        ),
+        #[cfg(any())]
+        FrostVariant::JubjubBlake2b512 => combine_signature::<frost_redjubjub::JubjubBlake2b512>(
+            message,
+            public_key,
+            identifiers,
+            hiding_nonces,
+            binding_nonces,
+            signature_shares,
+            verifying_shares,
+        ),
+        #[cfg(any())]
+        FrostVariant::Secp256K1Taproot => combine_signature::<frost_taproot::Secp256K1Taproot>(
+            message,
+            public_key,
+            identifiers,
+            hiding_nonces,
+            binding_nonces,
+            signature_shares,
+            verifying_shares,
+        ),
+    }
 }
 
-#[wasm_bindgen(js_name = "frostEd25519Verify")]
-pub fn frost_ed25519_verify(
+#[wasm_bindgen(js_name = "frostVerify")]
+pub fn frost_verify(
+    variant: FrostVariant,
     message: Uint8Array,
     public_key: Uint8Array,
     signature: Uint8Array,
 ) -> JsResult<()> {
-    verify_signature::<frost_ed25519::Ed25519Sha512>(message, public_key, signature)
-}
-
-#[wasm_bindgen(js_name = "frostEd448Combine")]
-pub fn frost_ed448_combine(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    identifiers: Vec<Uint8Array>,
-    hiding_nonces: Vec<Uint8Array>,
-    binding_nonces: Vec<Uint8Array>,
-    signature_shares: Vec<Uint8Array>,
-    verifying_shares: Vec<Uint8Array>,
-) -> JsResult<Uint8Array> {
-    combine_signature::<frost_ed448::Ed448Shake256>(
-        message,
-        public_key,
-        identifiers,
-        hiding_nonces,
-        binding_nonces,
-        signature_shares,
-        verifying_shares,
-    )
-}
-
-#[wasm_bindgen(js_name = "frostEd448Verify")]
-pub fn frost_ed448_verify(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    signature: Uint8Array,
-) -> JsResult<()> {
-    verify_signature::<frost_ed448::Ed448Shake256>(message, public_key, signature)
-}
-
-#[wasm_bindgen(js_name = "frostRistretto255Combine")]
-pub fn frost_ristretto255_combine(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    identifiers: Vec<Uint8Array>,
-    hiding_nonces: Vec<Uint8Array>,
-    binding_nonces: Vec<Uint8Array>,
-    signature_shares: Vec<Uint8Array>,
-    verifying_shares: Vec<Uint8Array>,
-) -> JsResult<Uint8Array> {
-    combine_signature::<frost_ristretto255::Ristretto255Sha512>(
-        message,
-        public_key,
-        identifiers,
-        hiding_nonces,
-        binding_nonces,
-        signature_shares,
-        verifying_shares,
-    )
-}
-
-#[wasm_bindgen(js_name = "frostRistretto255Verify")]
-pub fn frost_ristretto255_verify(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    signature: Uint8Array,
-) -> JsResult<()> {
-    verify_signature::<frost_ristretto255::Ristretto255Sha512>(message, public_key, signature)
-}
-
-#[cfg(any())]
-#[wasm_bindgen(js_name = "frostSecp256k1Combine")]
-pub fn frost_secp256k1_combine(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    identifiers: Vec<Uint8Array>,
-    hiding_nonces: Vec<Uint8Array>,
-    binding_nonces: Vec<Uint8Array>,
-    signature_shares: Vec<Uint8Array>,
-    verifying_shares: Vec<Uint8Array>,
-) -> JsResult<Uint8Array> {
-    combine_signature::<frost_secp256k1::Secp256K1Sha256>(
-        message,
-        public_key,
-        identifiers,
-        hiding_nonces,
-        binding_nonces,
-        signature_shares,
-        verifying_shares,
-    )
-}
-
-#[cfg(any())]
-#[wasm_bindgen(js_name = "frostSecp256k1Verify")]
-pub fn frost_secp256k1_verify(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    signature: Uint8Array,
-) -> JsResult<()> {
-    verify_signature::<frost_secp256k1::Secp256K1Sha256>(message, public_key, signature)
-}
-
-#[wasm_bindgen(js_name = "frostP256Combine")]
-pub fn frost_p256_combine(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    identifiers: Vec<Uint8Array>,
-    hiding_nonces: Vec<Uint8Array>,
-    binding_nonces: Vec<Uint8Array>,
-    signature_shares: Vec<Uint8Array>,
-    verifying_shares: Vec<Uint8Array>,
-) -> JsResult<Uint8Array> {
-    combine_signature::<frost_p256::P256Sha256>(
-        message,
-        public_key,
-        identifiers,
-        hiding_nonces,
-        binding_nonces,
-        signature_shares,
-        verifying_shares,
-    )
-}
-
-#[wasm_bindgen(js_name = "frostP256Verify")]
-pub fn frost_p256_verify(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    signature: Uint8Array,
-) -> JsResult<()> {
-    verify_signature::<frost_p256::P256Sha256>(message, public_key, signature)
-}
-
-#[cfg(any())]
-#[wasm_bindgen(js_name = "frostP384Combine")]
-pub fn frost_p384_combine(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    identifiers: Vec<Uint8Array>,
-    hiding_nonces: Vec<Uint8Array>,
-    binding_nonces: Vec<Uint8Array>,
-    signature_shares: Vec<Uint8Array>,
-    verifying_shares: Vec<Uint8Array>,
-) -> JsResult<Uint8Array> {
-    combine_signature::<frost_p384::P384Sha384>(
-        message,
-        public_key,
-        identifiers,
-        hiding_nonces,
-        binding_nonces,
-        signature_shares,
-        verifying_shares,
-    )
-}
-
-#[cfg(any())]
-#[wasm_bindgen(js_name = "frostP384Verify")]
-pub fn frost_p384_verify(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    signature: Uint8Array,
-) -> JsResult<()> {
-    verify_signature::<frost_p384::P384Sha384>(message, public_key, signature)
-}
-
-#[cfg(any())]
-#[wasm_bindgen(js_name = "frostRedjubjubCombine")]
-pub fn frost_redjubjub_combine(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    identifiers: Vec<Uint8Array>,
-    hiding_nonces: Vec<Uint8Array>,
-    binding_nonces: Vec<Uint8Array>,
-    signature_shares: Vec<Uint8Array>,
-    verifying_shares: Vec<Uint8Array>,
-) -> JsResult<Uint8Array> {
-    combine_signature::<frost_redjubjub::JubjubBlake2b512>(
-        message,
-        public_key,
-        identifiers,
-        hiding_nonces,
-        binding_nonces,
-        signature_shares,
-        verifying_shares,
-    )
-}
-
-#[cfg(any())]
-#[wasm_bindgen(js_name = "frostRedjubjubVerify")]
-pub fn frost_redjubjub_verify(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    signature: Uint8Array,
-) -> JsResult<()> {
-    verify_signature::<frost_redjubjub::JubjubBlake2b512>(message, public_key, signature)
-}
-
-#[cfg(any())]
-#[wasm_bindgen(js_name = "frostTaprootCombine")]
-pub fn frost_taproot_combine(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    identifiers: Vec<Uint8Array>,
-    hiding_nonces: Vec<Uint8Array>,
-    binding_nonces: Vec<Uint8Array>,
-    signature_shares: Vec<Uint8Array>,
-    verifying_shares: Vec<Uint8Array>,
-) -> JsResult<Uint8Array> {
-    combine_signature::<frost_taproot::Secp256K1Taproot>(
-        message,
-        public_key,
-        identifiers,
-        hiding_nonces,
-        binding_nonces,
-        signature_shares,
-        verifying_shares,
-    )
-}
-
-#[cfg(any())]
-#[wasm_bindgen(js_name = "frostTaprootVerify")]
-pub fn frost_taproot_verify(
-    message: Uint8Array,
-    public_key: Uint8Array,
-    signature: Uint8Array,
-) -> JsResult<()> {
-    verify_signature::<frost_taproot::Secp256K1Taproot>(message, public_key, signature)
+    match variant {
+        FrostVariant::Ed25519Sha512 => {
+            verify_signature::<frost_ed25519::Ed25519Sha512>(message, public_key, signature)
+        }
+        FrostVariant::Ed448Shake256 => {
+            verify_signature::<frost_ed448::Ed448Shake256>(message, public_key, signature)
+        }
+        FrostVariant::Ristretto255Sha512 => verify_signature::<
+            frost_ristretto255::Ristretto255Sha512,
+        >(message, public_key, signature),
+        #[cfg(any())]
+        FrostVariant::Secp256K1Sha256 => {
+            verify_signature::<frost_secp256k1::Secp256K1Sha256>(message, public_key, signature)
+        }
+        FrostVariant::P256Sha256 => {
+            verify_signature::<frost_p256::P256Sha256>(message, public_key, signature)
+        }
+        #[cfg(any())]
+        FrostVariant::P384Sha384 => {
+            verify_signature::<frost_p384::P384Sha384>(message, public_key, signature)
+        }
+        #[cfg(any())]
+        FrostVariant::JubjubBlake2b512 => {
+            verify_signature::<frost_redjubjub::JubjubBlake2b512>(message, public_key, signature)
+        }
+        #[cfg(any())]
+        FrostVariant::Secp256K1Taproot => {
+            verify_signature::<frost_taproot::Secp256K1Taproot>(message, public_key, signature)
+        }
+    }
 }

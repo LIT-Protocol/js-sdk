@@ -1,6 +1,6 @@
 // TODO(cairomassimo): move the data into a separate file
 
-import { blsG2Combine, blsG2Decrypt, blsG2Verify, init } from './ng';
+import { blsCombine, blsDecrypt, blsVerify, init } from './ng';
 
 const signatureShares = [
   '01b2b44a0bf7184f19efacad98e213818edd3f8909dd798129ef169b877d68d77ba630005609f48b80203717d82092a45b06a9de0e61a97b2672b38b31f9ae43e64383d0375a51c75db8972613cc6b099b95c189fd8549ed973ee94b08749f4cac',
@@ -23,7 +23,7 @@ describe('BLS', () => {
       '911bf01a53576c53cf7667e32ef76799711f881a72d8894aa6a7186b5189e0345065a29e5dda5a19571b63ada860b03d07125369bfd902280599052475959f34a937f1075ef1acfb8baff9b8a22fc8b0d0655ad7b6e2860117029ebc98e47898',
       'hex'
     );
-    const signature = blsG2Combine(signatureShares);
+    const signature = blsCombine('Bls12381G2', signatureShares);
 
     expect(signature.length).toEqual(96);
     expect(Buffer.from(signature)).toEqual(expectedSignature);
@@ -33,7 +33,7 @@ describe('BLS', () => {
       'base64'
     );
 
-    const plaintext = blsG2Decrypt(ciphertext, signature);
+    const plaintext = blsDecrypt('Bls12381G2', ciphertext, signature);
 
     expect(Buffer.from(plaintext)).toEqual(secretMessage);
   });
@@ -92,6 +92,6 @@ describe('BLS', () => {
       207,
     ]);
 
-    blsG2Verify(publicKey, message, signature);
+    blsVerify('Bls12381G2', publicKey, message, signature);
   });
 });

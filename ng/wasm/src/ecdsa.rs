@@ -9,11 +9,19 @@ use elliptic_curve::{
 use js_sys::Uint8Array;
 use k256::Secp256k1;
 use p256::NistP256;
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Deserialize};
 use serde_bytes::Bytes;
+use tsify::Tsify;
 use wasm_bindgen::{prelude::*, JsError};
 
 use crate::abi::{from_js, into_js, JsResult};
+
+#[derive(Tsify, Deserialize)]
+#[tsify(from_wasm_abi)]
+pub enum EcdsaVariant {
+    K256,
+    P256,
+}
 
 struct Ecdsa<C>(C);
 
@@ -249,22 +257,25 @@ where
     }
 }
 
-#[wasm_bindgen(js_name = "ecdsaK256Combine")]
-pub fn ecdsa_k256_combine(signature_shares: Vec<Uint8Array>) -> JsResult<Uint8Array> {
-    Ecdsa::<Secp256k1>::combine(signature_shares)
+#[wasm_bindgen(js_name = "ecdsaCombine")]
+pub fn ecdsa_combine(
+    variant: EcdsaVariant,
+    signature_shares: Vec<Uint8Array>,
+) -> JsResult<Uint8Array> {
+    match variant {
+        EcdsaVariant::K256 => Ecdsa::<Secp256k1>::combine(signature_shares),
+        EcdsaVariant::P256 => Ecdsa::<NistP256>::combine(signature_shares),
+    }
 }
 
-#[wasm_bindgen(js_name = "ecdsaK256DeriveKey")]
-pub fn ecdsa_k256_derive_key(id: Uint8Array, public_keys: Vec<Uint8Array>) -> JsResult<Uint8Array> {
-    Ecdsa::<Secp256k1>::derive_key(id, public_keys)
-}
-
-#[wasm_bindgen(js_name = "ecdsaP256Combine")]
-pub fn ecdsa_p256_combine(signature_shares: Vec<Uint8Array>) -> JsResult<Uint8Array> {
-    Ecdsa::<NistP256>::combine(signature_shares)
-}
-
-#[wasm_bindgen(js_name = "ecdsaP256DeriveKey")]
-pub fn ecdsa_p256_derive_key(id: Uint8Array, public_keys: Vec<Uint8Array>) -> JsResult<Uint8Array> {
-    Ecdsa::<NistP256>::derive_key(id, public_keys)
+#[wasm_bindgen(js_name = "ecdsaDeriveKey")]
+pub fn ecdsa_derive_key(
+    variant: EcdsaVariant,
+    id: Uint8Array,
+    public_keys: Vec<Uint8Array>,
+) -> JsResult<Uint8Array> {
+    match variant {
+        EcdsaVariant::K256 => Ecdsa::<Secp256k1>::derive_key(id, public_keys),
+        EcdsaVariant::P256 => Ecdsa::<NistP256>::derive_key(id, public_keys),
+    }
 }

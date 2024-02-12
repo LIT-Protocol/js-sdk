@@ -63,6 +63,7 @@ frost-p256 = "1.0.0-rc.0"
 frost-rerandomized = "1.0.0-rc.0"
 frost-ristretto255 = "1.0.0-rc.0"
 frost-secp256k1 = "0.7.0"
+tsify = { version = "0.4.5", default-features = false, features = ["js"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"

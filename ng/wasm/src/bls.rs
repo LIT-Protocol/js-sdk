@@ -7,10 +7,19 @@ use blsful::{
 };
 use elliptic_curve::group::GroupEncoding;
 use js_sys::Uint8Array;
+use serde::Deserialize;
 use serde_bytes::Bytes;
+use tsify::Tsify;
 use wasm_bindgen::prelude::*;
 
 use crate::abi::{from_js, into_js, JsResult};
+
+#[derive(Tsify, Deserialize)]
+#[tsify(from_wasm_abi)]
+pub enum BlsVariant {
+    Bls12381G1,
+    Bls12381G2,
+}
 
 struct Bls<C>(C);
 
@@ -145,58 +154,48 @@ where
     }
 }
 
-#[wasm_bindgen(js_name = "blsG1Combine")]
-pub fn bls_g1_combine(signature_shares: Vec<Uint8Array>) -> JsResult<Uint8Array> {
-    Bls::<Bls12381G1Impl>::combine(signature_shares)
+#[wasm_bindgen(js_name = "blsCombine")]
+pub fn bls_combine(variant: BlsVariant, signature_shares: Vec<Uint8Array>) -> JsResult<Uint8Array> {
+    match variant {
+        BlsVariant::Bls12381G1 => Bls::<Bls12381G1Impl>::combine(signature_shares),
+        BlsVariant::Bls12381G2 => Bls::<Bls12381G2Impl>::combine(signature_shares),
+    }
 }
 
-#[wasm_bindgen(js_name = "blsG2Combine")]
-pub fn bls_g2_combine(signature_shares: Vec<Uint8Array>) -> JsResult<Uint8Array> {
-    Bls::<Bls12381G2Impl>::combine(signature_shares)
-}
-
-#[wasm_bindgen(js_name = "blsG1Verify")]
-pub fn bls_g1_verify(
+#[wasm_bindgen(js_name = "blsVerify")]
+pub fn bls_verify(
+    variant: BlsVariant,
     public_key: Uint8Array,
     message: Uint8Array,
     signature: Uint8Array,
 ) -> JsResult<()> {
-    Bls::<Bls12381G1Impl>::verify(public_key, message, signature)
+    match variant {
+        BlsVariant::Bls12381G1 => Bls::<Bls12381G1Impl>::verify(public_key, message, signature),
+        BlsVariant::Bls12381G2 => Bls::<Bls12381G2Impl>::verify(public_key, message, signature),
+    }
 }
 
-#[wasm_bindgen(js_name = "blsG2Verify")]
-pub fn bls_g2_verify(
-    public_key: Uint8Array,
-    message: Uint8Array,
-    signature: Uint8Array,
-) -> JsResult<()> {
-    Bls::<Bls12381G2Impl>::verify(public_key, message, signature)
-}
-
-#[wasm_bindgen(js_name = "blsG1Encrypt")]
-pub fn bls_g1_encrypt(
+#[wasm_bindgen(js_name = "blsEncrypt")]
+pub fn bls_encrypt(
+    variant: BlsVariant,
     encryption_key: Uint8Array,
     message: Uint8Array,
     identity: Uint8Array,
 ) -> JsResult<Uint8Array> {
-    Bls::<Bls12381G1Impl>::encrypt(encryption_key, message, identity)
+    match variant {
+        BlsVariant::Bls12381G1 => Bls::<Bls12381G1Impl>::encrypt(encryption_key, message, identity),
+        BlsVariant::Bls12381G2 => Bls::<Bls12381G2Impl>::encrypt(encryption_key, message, identity),
+    }
 }
 
-#[wasm_bindgen(js_name = "blsG2Encrypt")]
-pub fn bls_g2_encrypt(
-    encryption_key: Uint8Array,
-    message: Uint8Array,
-    identity: Uint8Array,
+#[wasm_bindgen(js_name = "blsDecrypt")]
+pub fn bls_decrypt(
+    variant: BlsVariant,
+    ciphertext: Uint8Array,
+    decryption_key: Uint8Array,
 ) -> JsResult<Uint8Array> {
-    Bls::<Bls12381G2Impl>::encrypt(encryption_key, message, identity)
-}
-
-#[wasm_bindgen(js_name = "blsG1Decrypt")]
-pub fn bls_g1_decrypt(ciphertext: Uint8Array, decryption_key: Uint8Array) -> JsResult<Uint8Array> {
-    Bls::<Bls12381G1Impl>::decrypt(ciphertext, decryption_key)
-}
-
-#[wasm_bindgen(js_name = "blsG2Decrypt")]
-pub fn bls_g2_decrypt(ciphertext: Uint8Array, decryption_key: Uint8Array) -> JsResult<Uint8Array> {
-    Bls::<Bls12381G2Impl>::decrypt(ciphertext, decryption_key)
+    match variant {
+        BlsVariant::Bls12381G1 => Bls::<Bls12381G1Impl>::decrypt(ciphertext, decryption_key),
+        BlsVariant::Bls12381G2 => Bls::<Bls12381G2Impl>::decrypt(ciphertext, decryption_key),
+    }
 }
