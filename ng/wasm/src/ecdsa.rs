@@ -1,6 +1,7 @@
 use elliptic_curve::{
-    group::cofactor::CofactorGroup,
+    group::{cofactor::CofactorGroup, GroupEncoding},
     hash2curve::{ExpandMsgXmd, FromOkm, GroupDigest},
+    point::AffineCoordinates as _,
     scalar::IsHigh as _,
     sec1::{EncodedPoint, FromEncodedPoint, ModulusSize, ToEncodedPoint},
     subtle::ConditionallySelectable as _,
@@ -9,7 +10,7 @@ use elliptic_curve::{
 use js_sys::Uint8Array;
 use k256::Secp256k1;
 use p256::NistP256;
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::Deserialize;
 use serde_bytes::Bytes;
 use tsify::Tsify;
 use wasm_bindgen::{prelude::*, JsError};
@@ -40,13 +41,16 @@ impl HdCtx for NistP256 {
 
 impl<C: PrimeCurve + CurveArithmetic + GroupDigest> Ecdsa<C>
 where
-    C::AffinePoint: DeserializeOwned,
-    C::Scalar: DeserializeOwned + FromOkm,
+    C::AffinePoint: GroupEncoding + FromEncodedPoint<C>,
+    C::Scalar: FromOkm,
     C::FieldBytesSize: ModulusSize,
     C::ProjectivePoint: CofactorGroup + FromEncodedPoint<C> + ToEncodedPoint<C>,
     C: HdCtx,
 {
-    pub fn combine(signature_shares: Vec<Uint8Array>) -> JsResult<Uint8Array> {
+    pub fn combine(
+        presignature: Uint8Array,
+        signature_shares: Vec<Uint8Array>,
+    ) -> JsResult<Uint8Array> {
         let signature_shares = signature_shares
             .into_iter()
             .map(|s| {
@@ -60,12 +64,26 @@ where
             })
             .collect::<JsResult<Vec<_>>>()?;
 
+        let big_r = presignature;
+        let big_r = from_js::<Vec<u8>>(big_r)?;
+        let big_r = EncodedPoint::<C>::from_bytes(big_r)?;
+        let big_r = C::AffinePoint::from_encoded_point(&big_r);
+        let big_r = Option::<C::AffinePoint>::from(big_r)
+            .ok_or_else(|| JsError::new("cannot parse input public key"))?;
+
+        let r = big_r.x();
+        let v = u8::conditional_select(&0, &1, big_r.y_is_odd());
+
         let s = Self::sum_scalars(signature_shares)?;
         let s = s.to_repr();
-        let s = Bytes::new(s.as_ref());
-        let s = into_js(&s)?;
 
-        Ok(s)
+        let mut signature = Vec::new();
+        signature.extend_from_slice(&r);
+        signature.extend_from_slice(&s);
+        signature.push(v);
+        let signature = into_js(Bytes::new(signature.as_ref()))?;
+
+        Ok(signature)
     }
 
     fn sum_scalars(values: Vec<C::Scalar>) -> JsResult<C::Scalar> {
@@ -257,14 +275,17 @@ where
     }
 }
 
+/// Combine ECDSA signatures shares
+/// The signature is returned in the format `r || s || v`, i.e., 65-bytes, Ethereum-compatible.
 #[wasm_bindgen(js_name = "ecdsaCombine")]
 pub fn ecdsa_combine(
     variant: EcdsaVariant,
+    presignature: Uint8Array,
     signature_shares: Vec<Uint8Array>,
 ) -> JsResult<Uint8Array> {
     match variant {
-        EcdsaVariant::K256 => Ecdsa::<Secp256k1>::combine(signature_shares),
-        EcdsaVariant::P256 => Ecdsa::<NistP256>::combine(signature_shares),
+        EcdsaVariant::K256 => Ecdsa::<Secp256k1>::combine(presignature, signature_shares),
+        EcdsaVariant::P256 => Ecdsa::<NistP256>::combine(presignature, signature_shares),
     }
 }
 
