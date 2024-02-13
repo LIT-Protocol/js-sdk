@@ -11,13 +11,6 @@ export async function main() {
     environment: 0,
   };
 
-  const DATA_TO_SIGN = new Uint8Array(
-    await crypto.subtle.digest(
-      'SHA-256',
-      new TextEncoder().encode('Hello world')
-    )
-  );
-
   const client = new LitNodeClient({
     // litNetwork: 'cayenne',
     litNetwork: 'custom',
