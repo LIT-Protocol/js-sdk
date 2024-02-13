@@ -27,7 +27,6 @@ export async function main() {
   });
   await client.connect();
 
-
   if (client.config.bootstrapUrls.length > 1) {
     fail('Should have more than 0 urls bootstrapped');
   }
