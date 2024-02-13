@@ -387,8 +387,10 @@ export class LitContracts {
 
     let addresses: any = await LitContracts.getContractAddresses(
       this.network,
+      this.customContext?.provider ?? this.provider,
       this.customContext
     );
+
     this.log('resolved contract addresses for: ', this.network, addresses);
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
@@ -556,11 +558,19 @@ export class LitContracts {
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
     context?: LitContractContext | LitContractResolverContext
   ) {
+    let provider: ethers.providers.JsonRpcProvider;
     const rpcUrl = DEFAULT_RPC;
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    if (context && 'provider' in context!) {
+      provider = context.provider;
+    } else {
+      provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    }
 
     if (!context) {
-      let contractData = await LitContracts._resolveContractContext(network);
+      let contractData = await LitContracts._resolveContractContext(
+        network,
+        context
+      );
 
       const stakingContract = contractData.find(
         (item: { name: string }) => item.name === 'Staking'
@@ -592,6 +602,7 @@ export class LitContracts {
       } else {
         let contractContext = await LitContracts._getContractsFromResolver(
           context as LitContractResolverContext,
+          provider,
           ['Staking']
         );
         if (!contractContext.Staking.address) {
@@ -610,10 +621,10 @@ export class LitContracts {
 
   private static async _getContractsFromResolver(
     context: LitContractResolverContext,
+    provider: ethers.providers.JsonRpcProvider,
     contractNames?: Array<keyof LitContractContext>
   ): Promise<LitContractContext> {
     const rpcUrl = DEFAULT_RPC;
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     let resolverContract = new ethers.Contract(
       context.resolverAddress,
       context.abi,
@@ -622,74 +633,74 @@ export class LitContracts {
 
     let getContract = async function (
       contract: keyof LitContractContext,
-      enviorment: number
+      environment: number
     ): Promise<string> {
       let address: string = '';
       switch (contract) {
         case 'Allowlist':
           address = await resolverContract['getContract'](
             await resolverContract['ALLOWLIST_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'LITToken':
           address = await resolverContract['getContract'](
             await resolverContract['LIT_TOKEN_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'Multisender':
           address = await resolverContract['getContract'](
             await resolverContract['MULTI_SENDER_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPNFT':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_NFT_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPNFTMetadata':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_NFT_METADATA_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPPermissions':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_PERMISSIONS_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPHelper':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_HELPER_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PubkeyRouter':
           address = await resolverContract['getContract'](
             await resolverContract['PUB_KEY_ROUTER_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'RateLimitNFT':
           address = await resolverContract['getContract'](
             await resolverContract['RATE_LIMIT_NFT_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'Staking':
           address = await resolverContract['getContract'](
             await resolverContract['STAKING_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'StakingBalances':
           address = await resolverContract['getContract'](
             await resolverContract['STAKING_BALANCES_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
       }
@@ -717,7 +728,7 @@ export class LitContracts {
     for (const contract of contractNames) {
       let contracts = context?.contractContext;
       addresses[contract] = {
-        address: await getContract(contract, context.enviorment),
+        address: await getContract(contract, context.environment),
         abi: contracts?.[contract]?.abi ?? undefined,
       };
     }
@@ -727,6 +738,7 @@ export class LitContracts {
 
   public static async getContractAddresses(
     network: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero',
+    provider: ethers.providers.JsonRpcProvider,
     context?: LitContractContext | LitContractResolverContext
   ) {
     let contractData;
@@ -735,7 +747,8 @@ export class LitContracts {
       // here we override context to be what is returned from the resolver which is of type LitContractContext
       if (context?.resolverAddress) {
         context = await LitContracts._getContractsFromResolver(
-          context as LitContractResolverContext
+          context as LitContractResolverContext,
+          provider
         );
       }
 
@@ -887,7 +900,8 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost'
+    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    context?: LitContractContext | LitContractResolverContext
   ) {
     let data;
     const CAYENNE_API =
@@ -920,6 +934,16 @@ export class LitContracts {
       } catch (e: any) {
         throw new Error(
           `Error fetching data from ${HABANERO_API}: ${e.toString()}`
+        );
+      }
+    } else if (network === 'custom' || network === 'localhost') {
+      try {
+        // Fetch and parse the JSON data in one step
+        // just use cayenne abis
+        data = await fetch(CAYENNE_API).then((res) => res.json());
+      } catch (e: any) {
+        throw new Error(
+          `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
         );
       }
     }

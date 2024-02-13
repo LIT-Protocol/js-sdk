@@ -53,6 +53,7 @@ import {
   JsonPkpSignRequest,
   KV,
   LitContractContext,
+  LitContractResolverContext,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
   NodeAttestation,
@@ -295,10 +296,12 @@ export class LitCore {
   listenForNewEpoch = async (): Promise<void> => {
     if (
       this.config.litNetwork === LitNetwork.Manzano ||
-      this.config.litNetwork === LitNetwork.Habanero
+      this.config.litNetwork === LitNetwork.Habanero ||
+      this.config.litNetwork === LitNetwork.Custom
     ) {
       const stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork as any
+        this.config.litNetwork as any,
+        this.config.contractContext
       );
       log(
         'listening for state change on staking contract: ',
@@ -322,10 +325,10 @@ export class LitCore {
             // check if the node sets are non matching and re connect if they do not.
             /*
               TODO: While this covers most cases where a node may come in or out of the active 
-              set which we will need to re attest to the execution enviorments.
+              set which we will need to re attest to the execution environments.
               The sdk currently does not know if there is an active network operation pending.
               Such that the state when the request was sent will now mutate when the response is sent back.
-              The sdk should be able to understand its current execution enviorment and wait on an active 
+              The sdk should be able to understand its current execution environment and wait on an active 
               network request to the previous epoch's node set before changing over.
               
             */

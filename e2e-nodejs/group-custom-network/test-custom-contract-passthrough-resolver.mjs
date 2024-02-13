@@ -8,7 +8,7 @@ export async function main() {
   const contractContext = {
     resolverAddress: '0x9F0Ede26261451C5E784DC799D71ECf766EB7562',
     abi: resolverAbi,
-    enviorment: 0,
+    environment: 0,
   };
 
   const DATA_TO_SIGN = new Uint8Array(
