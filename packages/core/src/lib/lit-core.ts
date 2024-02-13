@@ -83,7 +83,7 @@ export class LitCore {
   networkPubKeySet: string | null;
   hdRootPubkeys: string[] | null;
   latestBlockhash: string | null;
-  lastblockHashRetrieved: number | null;
+  lastBlockHashRetrieved: number | null;
   networkSyncInterval: any | null;
 
   // ========== Constructor ==========
@@ -154,7 +154,7 @@ export class LitCore {
     this.networkPubKeySet = null;
     this.hdRootPubkeys = null;
     this.latestBlockhash = null;
-    this.lastblockHashRetrieved = null;
+    this.lastBlockHashRetrieved = null;
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
@@ -325,10 +325,10 @@ export class LitCore {
             // check if the node sets are non matching and re connect if they do not.
             /*
               TODO: While this covers most cases where a node may come in or out of the active 
-              set which we will need to re attest to the execution enviorments.
+              set which we will need to re attest to the execution environments.
               The sdk currently does not know if there is an active network operation pending.
               Such that the state when the request was sent will now mutate when the response is sent back.
-              The sdk should be able to understand its current execution enviorment and wait on an active 
+              The sdk should be able to understand its current execution environment and wait on an active 
               network request to the previous epoch's node set before changing over.
               
             */
@@ -552,7 +552,7 @@ export class LitCore {
             });
           }
 
-          this.lastblockHashRetrieved = Date.now();
+          this.lastBlockHashRetrieved = Date.now();
           this.ready = true;
 
           log(
@@ -579,12 +579,12 @@ export class LitCore {
           }
 
           this.networkSyncInterval = setInterval(async () => {
-            if (Date.now() - this.lastblockHashRetrieved! >= 30_000) {
+            if (Date.now() - this.lastBlockHashRetrieved! >= 30_000) {
               log(
                 'Syncing state for new network context current config: ',
                 this.config,
                 'current blockhash: ',
-                this.lastblockHashRetrieved
+                this.lastBlockHashRetrieved
               );
               await this._runHandshakeWithBootstrapUrls().catch((err) => {
                 throw err;
@@ -593,7 +593,7 @@ export class LitCore {
                 'Done syncing state new config: ',
                 this.config,
                 'new blockhash: ',
-                this.lastblockHashRetrieved
+                this.lastBlockHashRetrieved
               );
             }
           }, 30_000);

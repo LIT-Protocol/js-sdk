@@ -633,74 +633,74 @@ export class LitContracts {
 
     let getContract = async function (
       contract: keyof LitContractContext,
-      enviorment: number
+      environment: number
     ): Promise<string> {
       let address: string = '';
       switch (contract) {
         case 'Allowlist':
           address = await resolverContract['getContract'](
             await resolverContract['ALLOWLIST_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'LITToken':
           address = await resolverContract['getContract'](
             await resolverContract['LIT_TOKEN_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'Multisender':
           address = await resolverContract['getContract'](
             await resolverContract['MULTI_SENDER_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPNFT':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_NFT_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPNFTMetadata':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_NFT_METADATA_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPPermissions':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_PERMISSIONS_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPHelper':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_HELPER_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PubkeyRouter':
           address = await resolverContract['getContract'](
             await resolverContract['PUB_KEY_ROUTER_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'RateLimitNFT':
           address = await resolverContract['getContract'](
             await resolverContract['RATE_LIMIT_NFT_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'Staking':
           address = await resolverContract['getContract'](
             await resolverContract['STAKING_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'StakingBalances':
           address = await resolverContract['getContract'](
             await resolverContract['STAKING_BALANCES_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
       }
@@ -728,7 +728,7 @@ export class LitContracts {
     for (const contract of contractNames) {
       let contracts = context?.contractContext;
       addresses[contract] = {
-        address: await getContract(contract, context.enviorment),
+        address: await getContract(contract, context.environment),
         abi: contracts?.[contract]?.abi ?? undefined,
       };
     }

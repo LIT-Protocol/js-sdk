@@ -241,7 +241,7 @@ export type LitContractResolverContext = {
     | number;
   resolverAddress: string;
   abi: any;
-  enviorment: number;
+  environment: number;
   contractContext?: LitContractContext;
   provider?: ethers.providers.JsonRpcProvider;
 };
