@@ -763,3 +763,8 @@ export const TELEM_API_URL = 'https://lit-general-worker.getlit.dev';
 
 // ========== RLI Delegation ==========
 export const SIWE_DELEGATION_URI = 'lit:capability:delegation';
+
+export const RELAY_URL_CAYENNE =
+  'https://relayer-server-staging-cayenne.getlit.dev';
+export const RELAY_URL_HABANERO = 'https://habanero-relayer.getlit.dev';
+export const RELAY_URL_MANZANO = 'https://manzano-relayer.getlit.dev';
