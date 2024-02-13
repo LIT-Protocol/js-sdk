@@ -4,6 +4,10 @@ import {
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
   LIT_ERROR,
+  LitNetwork,
+  RELAY_URL_CAYENNE,
+  RELAY_URL_HABANERO,
+  RELAY_URL_MANZANO,
 } from '@lit-protocol/constants';
 
 import {
@@ -29,8 +33,10 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 import { LogLevel, LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
+import Ajv, { JSONSchemaType } from 'ajv';
 
 const logBuffer: Array<Array<any>> = [];
+const ajv = new Ajv();
 
 /**
  *
@@ -415,6 +421,50 @@ export const checkType = ({
 };
 
 /**
+ * Check if the given value complies with the given schema
+ * If not, throw `invalidParamType` error
+ *
+ * @param { any } value
+ * @param { JSONSchemaType<any> } schema
+ * @param { string } paramName
+ * @param { string } functionName
+ * @param { boolean } throwOnError
+ *
+ * @returns { Boolean } true/false
+ */
+export const checkSchema = (
+  value: any,
+  schema: JSONSchemaType<any>,
+  paramName: string,
+  functionName: string,
+  throwOnError: boolean = true
+): boolean => {
+  let validate = schema.$id ? ajv.getSchema(schema.$id) : undefined;
+  if (!validate) {
+    validate = ajv.compile(schema);
+  }
+
+  const validates = validate(value);
+
+  const message = `FAILED schema validation for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(). Value: ${
+    value instanceof Object ? JSON.stringify(value) : value
+  }. Errors: ${JSON.stringify(validate.errors)}`;
+
+  if (!validates) {
+    if (throwOnError) {
+      throwError({
+        message,
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
+    }
+    return false;
+  }
+
+  return true;
+};
+
+/**
  *
  * @param { AuthSig } authSig
  * @param { string } chain
@@ -615,12 +665,26 @@ export const genRandomPath = (): string => {
 
 export const defaultMintClaimCallback: MintCallback<
   RelayClaimProcessor
-> = async (params: ClaimResult<RelayClaimProcessor>): Promise<string> => {
+> = async (
+  params: ClaimResult<RelayClaimProcessor>,
+  network: string = 'cayenne'
+): Promise<string> => {
   try {
-    const relayUrl = params.relayUrl
-      ? params.relayUrl
-      : 'https://relayer-server-staging-cayenne.getlit.dev/auth/claim';
-    const response = await fetch(relayUrl, {
+    let relayUrl: string = '';
+
+    switch (network) {
+      case LitNetwork.Cayenne:
+        relayUrl = RELAY_URL_CAYENNE + '/auth/claim';
+        break;
+      case LitNetwork.Habanero:
+        relayUrl = RELAY_URL_HABANERO + 'auth/claim';
+        break;
+      case LitNetwork.Manzano:
+        relayUrl = RELAY_URL_MANZANO + 'auth/claim';
+    }
+
+    const url = params.relayUrl ? params.relayUrl : relayUrl;
+    const response = await fetch(url, {
       method: 'POST',
       body: JSON.stringify(params),
       headers: {

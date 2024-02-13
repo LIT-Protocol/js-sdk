@@ -10,6 +10,7 @@ import {
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
+  LitNetwork,
   SIGTYPE,
   SIWE_DELEGATION_URI,
 } from '@lit-protocol/constants';
@@ -490,8 +491,23 @@ export class LitNodeClientNodeJs extends LitCore {
     return LitNodeClientNodeJs.getExpiration();
   };
 
-  getLatestBlockhash = () => {
-    return this.latestBlockhash;
+  /**
+   * returns the latest block hash.
+   * will call refresh if the block hash is expired
+   * @returns {Promise<string>} latest block hash from `handhsake` with the lit network.
+   */
+  getLatestBlockhash = (): string => {
+    if (!this.ready) {
+      logError('Client not connected, remember to call connect');
+      throwError({
+        message: 'Client not connected',
+        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
+      });
+    }
+
+    // we are confident in this value being non null so we return
+    return this.latestBlockhash!;
   };
 
   /**
@@ -2086,6 +2102,9 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
+    // ========== Validate Access Control Conditions Schema ==========
+    await this.validateAccessControlConditionsSchema(params);
+
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
     const hashOfConditions: ArrayBuffer | undefined =
@@ -2977,22 +2996,28 @@ export class LitNodeClientNodeJs extends LitCore {
 
       let mintTx = '';
       if (params.mintCallback && 'signer' in params) {
-        mintTx = await params.mintCallback({
-          derivedKeyId,
-          authMethodType: params.authMethod.authMethodType,
-          signatures: nodeSignatures,
-          pubkey,
-          signer: (params as ClaimRequest<'client'>).signer,
-          ...relayParams,
-        });
+        mintTx = await params.mintCallback(
+          {
+            derivedKeyId,
+            authMethodType: params.authMethod.authMethodType,
+            signatures: nodeSignatures,
+            pubkey,
+            signer: (params as ClaimRequest<'client'>).signer,
+            ...relayParams,
+          },
+          this.config.litNetwork as LitNetwork
+        );
       } else {
-        mintTx = await defaultMintClaimCallback({
-          derivedKeyId,
-          authMethodType: params.authMethod.authMethodType,
-          signatures: nodeSignatures,
-          pubkey,
-          ...relayParams,
-        });
+        mintTx = await defaultMintClaimCallback(
+          {
+            derivedKeyId,
+            authMethodType: params.authMethod.authMethodType,
+            signatures: nodeSignatures,
+            pubkey,
+            ...relayParams,
+          },
+          this.config.litNetwork as LitNetwork
+        );
       }
 
       return {

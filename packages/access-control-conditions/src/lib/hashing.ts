@@ -91,11 +91,9 @@ export const hashUnifiedAccessControlConditions = (
 ): Promise<ArrayBuffer> => {
   log('unifiedAccessControlConditions:', unifiedAccessControlConditions);
 
-  const conditions = unifiedAccessControlConditions.map(
-    (condition: ConditionItem) => {
-      return canonicalUnifiedAccessControlConditionFormatter(condition);
-    }
-  );
+  const conditions = unifiedAccessControlConditions.map((condition) => {
+    return canonicalUnifiedAccessControlConditionFormatter(condition);
+  });
   log('conditions:', conditions);
 
   // check if there's any undefined in the conditions

@@ -35,6 +35,7 @@ if (loadEnv) {
   });
 
   await litNodeClient.connect();
+
   let nonce = litNodeClient.getLatestBlockhash();
   console.log('GENERATED NONCE: ', nonce);
 
@@ -88,6 +89,16 @@ if (loadEnv) {
     });
 
     await contractClient.connect();
+
+    // -- mint a new Capacity Credits NFT
+    // we only need to do this because if the pkp controller has the capactiy
+    // credits NFT, then we should be able to use it without delegating it
+    // to the pkp
+    await contractClient.mintCapacityCreditsNFT({
+      requestsPerDay: 14400,
+      daysUntilUTCMidnightExpiration: 1,
+    });
+
     let res = await contractClient.pkpNftContractUtils.write.mint();
 
     globalThis.LitCI.PKP_INFO = res.pkp;

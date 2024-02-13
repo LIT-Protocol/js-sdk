@@ -7,7 +7,7 @@ import {
   LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
-  MintCapacityCreditsPerDayContext,
+  MintCapacityCreditsContext,
   MintCapacityCreditsRes,
 } from '@lit-protocol/types';
 
@@ -47,9 +47,9 @@ import { computeAddress } from 'ethers/lib/utils';
 import { getAuthIdByAuthMethod } from './auth-utils';
 import { Logger, LogManager } from '@lit-protocol/logger';
 import {
-  calculateRequestsPerKilosecond,
   calculateUTCMidnightExpiration,
   convertRequestsPerDayToPerSecond,
+  requestsToKilosecond,
 } from './utils';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
@@ -387,8 +387,10 @@ export class LitContracts {
 
     let addresses: any = await LitContracts.getContractAddresses(
       this.network,
+      this.customContext?.provider ?? this.provider,
       this.customContext
     );
+
     this.log('resolved contract addresses for: ', this.network, addresses);
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
@@ -556,11 +558,19 @@ export class LitContracts {
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
     context?: LitContractContext | LitContractResolverContext
   ) {
+    let provider: ethers.providers.JsonRpcProvider;
     const rpcUrl = DEFAULT_RPC;
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    if (context && 'provider' in context!) {
+      provider = context.provider;
+    } else {
+      provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    }
 
     if (!context) {
-      let contractData = await LitContracts._resolveContractContext(network);
+      let contractData = await LitContracts._resolveContractContext(
+        network,
+        context
+      );
 
       const stakingContract = contractData.find(
         (item: { name: string }) => item.name === 'Staking'
@@ -592,6 +602,7 @@ export class LitContracts {
       } else {
         let contractContext = await LitContracts._getContractsFromResolver(
           context as LitContractResolverContext,
+          provider,
           ['Staking']
         );
         if (!contractContext.Staking.address) {
@@ -610,10 +621,10 @@ export class LitContracts {
 
   private static async _getContractsFromResolver(
     context: LitContractResolverContext,
+    provider: ethers.providers.JsonRpcProvider,
     contractNames?: Array<keyof LitContractContext>
   ): Promise<LitContractContext> {
     const rpcUrl = DEFAULT_RPC;
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     let resolverContract = new ethers.Contract(
       context.resolverAddress,
       context.abi,
@@ -622,74 +633,74 @@ export class LitContracts {
 
     let getContract = async function (
       contract: keyof LitContractContext,
-      enviorment: number
+      environment: number
     ): Promise<string> {
       let address: string = '';
       switch (contract) {
         case 'Allowlist':
           address = await resolverContract['getContract'](
             await resolverContract['ALLOWLIST_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'LITToken':
           address = await resolverContract['getContract'](
             await resolverContract['LIT_TOKEN_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'Multisender':
           address = await resolverContract['getContract'](
             await resolverContract['MULTI_SENDER_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPNFT':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_NFT_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPNFTMetadata':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_NFT_METADATA_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPPermissions':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_PERMISSIONS_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PKPHelper':
           address = await resolverContract['getContract'](
             await resolverContract['PKP_HELPER_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'PubkeyRouter':
           address = await resolverContract['getContract'](
             await resolverContract['PUB_KEY_ROUTER_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'RateLimitNFT':
           address = await resolverContract['getContract'](
             await resolverContract['RATE_LIMIT_NFT_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'Staking':
           address = await resolverContract['getContract'](
             await resolverContract['STAKING_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
         case 'StakingBalances':
           address = await resolverContract['getContract'](
             await resolverContract['STAKING_BALANCES_CONTRACT'](),
-            enviorment
+            environment
           );
           break;
       }
@@ -717,7 +728,7 @@ export class LitContracts {
     for (const contract of contractNames) {
       let contracts = context?.contractContext;
       addresses[contract] = {
-        address: await getContract(contract, context.enviorment),
+        address: await getContract(contract, context.environment),
         abi: contracts?.[contract]?.abi ?? undefined,
       };
     }
@@ -727,6 +738,7 @@ export class LitContracts {
 
   public static async getContractAddresses(
     network: 'cayenne' | 'custom' | 'localhost' | 'manzano' | 'habanero',
+    provider: ethers.providers.JsonRpcProvider,
     context?: LitContractContext | LitContractResolverContext
   ) {
     let contractData;
@@ -735,7 +747,8 @@ export class LitContracts {
       // here we override context to be what is returned from the resolver which is of type LitContractContext
       if (context?.resolverAddress) {
         context = await LitContracts._getContractsFromResolver(
-          context as LitContractResolverContext
+          context as LitContractResolverContext,
+          provider
         );
       }
 
@@ -887,7 +900,8 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost'
+    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    context?: LitContractContext | LitContractResolverContext
   ) {
     let data;
     const CAYENNE_API =
@@ -920,6 +934,16 @@ export class LitContracts {
       } catch (e: any) {
         throw new Error(
           `Error fetching data from ${HABANERO_API}: ${e.toString()}`
+        );
+      }
+    } else if (network === 'custom' || network === 'localhost') {
+      try {
+        // Fetch and parse the JSON data in one step
+        // just use cayenne abis
+        data = await fetch(CAYENNE_API).then((res) => res.json());
+      } catch (e: any) {
+        throw new Error(
+          `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
         );
       }
     }
@@ -1043,15 +1067,63 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   // The expiration date is calculated to be at midnight UTC, a specific number of days from now.
   mintCapacityCreditsNFT = async ({
     requestsPerDay,
+    requestsPerSecond,
+    requestsPerKilosecond,
     daysUntilUTCMidnightExpiration,
-  }: MintCapacityCreditsPerDayContext): Promise<MintCapacityCreditsRes> => {
+  }: MintCapacityCreditsContext): Promise<MintCapacityCreditsRes> => {
     this.log('Minting Capacity Credits NFT...');
 
-    // -- in the context of "request per day"
-    const requestsPerSecond = convertRequestsPerDayToPerSecond(requestsPerDay);
-    const requestsPerKilosecond = Math.round(
-      calculateRequestsPerKilosecond(requestsPerSecond)
-    );
+    // Validate input: at least one of the request parameters must be provided and more than 0
+    if (
+      (requestsPerDay === null ||
+        requestsPerDay === undefined ||
+        requestsPerDay <= 0) &&
+      (requestsPerSecond === null ||
+        requestsPerSecond === undefined ||
+        requestsPerSecond <= 0) &&
+      (requestsPerKilosecond === null ||
+        requestsPerKilosecond === undefined ||
+        requestsPerKilosecond <= 0)
+    ) {
+      throw new Error(
+        'At least one of requestsPerDay, requestsPerSecond, or requestsPerKilosecond is required and must be more than 0'
+      );
+    }
+
+    // Calculate effectiveRequestsPerKilosecond based on provided parameters
+    let effectiveRequestsPerKilosecond: number | undefined;
+
+    // Determine the effective requests per kilosecond based on the input
+
+    // -- requestsPerDay
+    if (requestsPerDay !== undefined) {
+      effectiveRequestsPerKilosecond = requestsToKilosecond({
+        period: 'day',
+        requests: requestsPerDay,
+      });
+
+      // -- requestsPerSecond
+    } else if (requestsPerSecond !== undefined) {
+      effectiveRequestsPerKilosecond = requestsToKilosecond({
+        period: 'second',
+        requests: requestsPerSecond,
+      });
+
+      // -- requestsPerKilosecond
+    } else if (requestsPerKilosecond !== undefined) {
+      effectiveRequestsPerKilosecond = requestsPerKilosecond;
+    }
+
+    // Check if effectiveRequestsPerKilosecond was successfully set
+    if (
+      effectiveRequestsPerKilosecond === undefined ||
+      effectiveRequestsPerKilosecond <= 0
+    ) {
+      throw new Error(
+        'Effective requests per kilosecond is required and must be more than 0'
+      );
+    }
+
     const expiresAt = calculateUTCMidnightExpiration(
       daysUntilUTCMidnightExpiration
     );
@@ -1060,7 +1132,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     try {
       mintCost = await this.rateLimitNftContract.read.calculateCost(
-        requestsPerKilosecond,
+        effectiveRequestsPerKilosecond,
         expiresAt
       );
     } catch (e) {
@@ -1069,8 +1141,12 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     }
 
     this.log('Capacity Credits NFT mint cost:', mintCost.toString());
-    this.log('Requests per day:', requestsPerDay);
-    this.log('Requests per kilosecond:', requestsPerKilosecond);
+    if (requestsPerDay) this.log('Requests per day:', requestsPerDay);
+    if (requestsPerSecond) this.log('Requests per second:', requestsPerSecond);
+    this.log(
+      'Effective requests per kilosecond:',
+      effectiveRequestsPerKilosecond
+    );
     this.log(`Expires at (Unix Timestamp): ${expiresAt}`);
 
     const expirationDate = new Date(expiresAt * 1000);

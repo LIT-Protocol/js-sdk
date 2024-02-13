@@ -6,19 +6,15 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 export async function main() {
   // ==================== Setup ====================
   const cayenneValidators = await LitContracts.getValidators('cayenne');
-  const internalDevValidators = await LitContracts.getValidators('internalDev');
+  const manzanoValidators = await LitContracts.getValidators('manzano');
+  const habaneroValidators = await LitContracts.getValidators('habanero');
 
   // ==================== Post-Validation ====================
-  for (const validator of cayenneValidators) {
-    if (
-      !validator.includes(':') ||
-      (!validator.includes('http://') && !validator.includes('https://'))
-    ) {
-      return fail('validator should contain ":" and "http://" or "https://"');
-    }
-  }
-
-  for (const validator of internalDevValidators) {
+  for (const validator of [
+    ...cayenneValidators,
+    ...manzanoValidators,
+    ...habaneroValidators,
+  ]) {
     if (
       !validator.includes(':') ||
       (!validator.includes('http://') && !validator.includes('https://'))

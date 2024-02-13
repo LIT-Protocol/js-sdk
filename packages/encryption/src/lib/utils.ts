@@ -5,7 +5,7 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
-function isTokenOperator(token: any): boolean {
+export function isTokenOperator(token: any): boolean {
   const OPERATORS = ['and', 'or']; // Only permissible boolean operators on the nodes
   return token.hasOwnProperty('operator') && OPERATORS.includes(token.operator);
 }
