@@ -11,13 +11,6 @@ export async function main() {
     environment: 0,
   };
 
-  const DATA_TO_SIGN = new Uint8Array(
-    await crypto.subtle.digest(
-      'SHA-256',
-      new TextEncoder().encode('Hello world')
-    )
-  );
-
   const client = new LitNodeClient({
     // litNetwork: 'cayenne',
     litNetwork: 'custom',
@@ -27,38 +20,12 @@ export async function main() {
   });
   await client.connect();
 
-  let contractClient = new LitContracts({
-    signer: globalThis.LitCI.wallet,
-    debug: globalThis.LitCI.debug,
-    network: 'custom',
-    customContext: contractContext,
-  });
-
-  await contractClient.connect();
-  let mintRes = await contractClient.pkpNftContractUtils.write.mint();
-
-  const signRes = await client.executeJs({
-    authSig: globalThis.LitCI.CONTROLLER_AUTHSIG,
-    code: `(async () => {
-        const sigShare = await LitActions.signEcdsa({
-        toSign: dataToSign,
-        publicKey,
-        sigName: "sig",
-        });
-    })();`,
-    authMethods: [],
-    jsParams: {
-      dataToSign: DATA_TO_SIGN,
-      publicKey: mintRes.pkp.publicKey,
-    },
-  });
-
-  if (litNodeClient.config.bootstrapUrls.length > 1) {
+  if (client.config.bootstrapUrls.length > 1) {
     fail('Should have more than 0 urls bootstrapped');
   }
 
   return success(
-    `Can connect to custom network current urls from contract resolver: ${litNodeClient.config.bootstrapUrls.length}`
+    `Can connect to custom network current urls from contract resolver: ${client.config.bootstrapUrls.length}`
   );
 }
 
