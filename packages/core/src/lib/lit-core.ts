@@ -82,6 +82,8 @@ export class LitCore {
   networkPubKeySet: string | null;
   hdRootPubkeys: string[] | null;
   latestBlockhash: string | null;
+  lastBlockHashRetrieved: number | null;
+  networkSyncInterval: any | null;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -151,6 +153,7 @@ export class LitCore {
     this.networkPubKeySet = null;
     this.hdRootPubkeys = null;
     this.latestBlockhash = null;
+    this.lastBlockHashRetrieved = null;
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
@@ -546,6 +549,7 @@ export class LitCore {
             });
           }
 
+          this.lastBlockHashRetrieved = Date.now();
           this.ready = true;
 
           log(
@@ -566,6 +570,30 @@ export class LitCore {
           if (isBrowser()) {
             document.dispatchEvent(new Event('lit-ready'));
           }
+          // if the interval is defined we clear it
+          if (this.networkSyncInterval) {
+            clearInterval(this.networkSyncInterval);
+          }
+
+          this.networkSyncInterval = setInterval(async () => {
+            if (Date.now() - this.lastBlockHashRetrieved! >= 30_000) {
+              log(
+                'Syncing state for new network context current config: ',
+                this.config,
+                'current blockhash: ',
+                this.lastBlockHashRetrieved
+              );
+              await this._runHandshakeWithBootstrapUrls().catch((err) => {
+                throw err;
+              });
+              log(
+                'Done syncing state new config: ',
+                this.config,
+                'new blockhash: ',
+                this.lastBlockHashRetrieved
+              );
+            }
+          }, 30_000);
 
           // @ts-ignore: Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?ts(2794)
           resolve();
