@@ -1386,7 +1386,7 @@ async function versionFunc() {
 
 async function validateDependencyVersions() {
   const PREFIX = '@lit-protocol';
-  const ignoreList = ['@lit-protocol/accs-validator'];
+  const ignoreList = ['@lit-protocol/accs-schemas'];
 
   const packageList = (await listDirsRecursive('./packages', false)).map(
     (item) => {
