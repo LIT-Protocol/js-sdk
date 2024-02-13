@@ -82,7 +82,7 @@ export class LitCore {
   networkPubKeySet: string | null;
   hdRootPubkeys: string[] | null;
   latestBlockhash: string | null;
-  lastblockHashRetrieved: number | null;
+  lastBlockHashRetrieved: number | null;
   networkSyncInterval: any | null;
 
   // ========== Constructor ==========
@@ -153,7 +153,7 @@ export class LitCore {
     this.networkPubKeySet = null;
     this.hdRootPubkeys = null;
     this.latestBlockhash = null;
-    this.lastblockHashRetrieved = null;
+    this.lastBlockHashRetrieved = null;
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
@@ -549,7 +549,7 @@ export class LitCore {
             });
           }
 
-          this.lastblockHashRetrieved = Date.now();
+          this.lastBlockHashRetrieved = Date.now();
           this.ready = true;
 
           log(
@@ -576,12 +576,12 @@ export class LitCore {
           }
 
           this.networkSyncInterval = setInterval(async () => {
-            if (Date.now() - this.lastblockHashRetrieved! >= 30_000) {
+            if (Date.now() - this.lastBlockHashRetrieved! >= 30_000) {
               log(
                 'Syncing state for new network context current config: ',
                 this.config,
                 'current blockhash: ',
-                this.lastblockHashRetrieved
+                this.lastBlockHashRetrieved
               );
               await this._runHandshakeWithBootstrapUrls().catch((err) => {
                 throw err;
@@ -590,7 +590,7 @@ export class LitCore {
                 'Done syncing state new config: ',
                 this.config,
                 'new blockhash: ',
-                this.lastblockHashRetrieved
+                this.lastBlockHashRetrieved
               );
             }
           }, 30_000);
