@@ -1,6 +1,8 @@
-use std::convert::TryInto as _;
+use std::{
+    array::TryFromSliceError,
+    convert::{TryFrom, TryInto as _},
+};
 
-use bls12_381_plus::{G1Projective, G2Projective};
 use blsful::{
     Bls12381G1Impl, Bls12381G2Impl, BlsSignatureImpl, InnerPointShareG1, InnerPointShareG2,
     PublicKey, Signature, SignatureSchemes, TimeCryptCiphertext,
@@ -23,79 +25,40 @@ pub enum BlsVariant {
 
 struct Bls<C>(C);
 
-// We have to create this trait because G1/G2 implementations do not use a common trait for all the methods we need.
-// TODO(cairomassimo): can we fix blsful and/or bls12_381_plus so that they do?
+// TODO(cairomassimo): add missing `TryFrom` impls to `blsful` and remove ours once merged
 
-trait FromBytesRepr
-where
-    Self: Sized,
-{
-    fn try_from_bytes(bytes: &[u8]) -> JsResult<Self>;
+pub trait TryFrom2<T>: Sized {
+    type Error;
 
-    fn from_js(x: Uint8Array) -> JsResult<Self> {
-        let x = from_js::<Vec<u8>>(x)?;
-        let x = Self::try_from_bytes(&x)?;
-        Ok(x)
+    fn try_from2(value: T) -> Result<Self, Self::Error>;
+}
+
+impl<'a> TryFrom2<&'a [u8]> for InnerPointShareG1 {
+    type Error = TryFromSliceError;
+
+    fn try_from2(bytes: &'a [u8]) -> Result<Self, Self::Error> {
+        Ok(Self(bytes.try_into()?))
     }
 }
 
-impl FromBytesRepr for InnerPointShareG1 {
-    fn try_from_bytes(bytes: &[u8]) -> JsResult<Self> {
-        let bytes = bytes
-            .try_into()
-            .map_err(|_| JsError::new("cannot deserialize"))?;
-        Ok(Self(bytes))
-    }
-}
+impl<'a> TryFrom2<&'a [u8]> for InnerPointShareG2 {
+    type Error = TryFromSliceError;
 
-impl FromBytesRepr for InnerPointShareG2 {
-    fn try_from_bytes(bytes: &[u8]) -> JsResult<Self> {
-        let bytes = bytes
-            .try_into()
-            .map_err(|_| JsError::new("cannot deserialize"))?;
-        Ok(Self(bytes))
-    }
-}
-
-impl FromBytesRepr for G1Projective {
-    fn try_from_bytes(bytes: &[u8]) -> JsResult<Self> {
-        let x = bytes
-            .try_into()
-            .ok()
-            .ok_or_else(|| JsError::new("cannot deserialize"))?;
-        let x = Self::from_compressed(&x);
-        let x = Option::from(x).ok_or_else(|| JsError::new("cannot deserialize"))?;
-        Ok(x)
-    }
-}
-
-impl FromBytesRepr for G2Projective {
-    fn try_from_bytes(bytes: &[u8]) -> JsResult<Self> {
-        let x = bytes
-            .try_into()
-            .ok()
-            .ok_or_else(|| JsError::new("cannot deserialize"))?;
-        let x = Self::from_compressed(&x);
-        let x = Option::from(x).ok_or_else(|| JsError::new("cannot deserialize"))?;
-        Ok(x)
+    fn try_from2(bytes: &'a [u8]) -> Result<Self, Self::Error> {
+        Ok(Self(bytes.try_into()?))
     }
 }
 
 impl<C: BlsSignatureImpl> Bls<C>
 where
-    C::PublicKey: FromBytesRepr,
-    C::Signature: FromBytesRepr,
-    C::SignatureShare: FromBytesRepr,
+    C::PublicKey: for<'a> TryFrom<&'a [u8]>,
+    C::Signature: for<'a> TryFrom<&'a [u8]>,
+    C::SignatureShare: for<'a> TryFrom2<&'a [u8]>,
 {
     pub fn combine(signature_shares: Vec<Uint8Array>) -> JsResult<Uint8Array> {
         let signature_shares = signature_shares
             .into_iter()
-            .map(|s| {
-                let s = from_js::<Vec<u8>>(s)?;
-                let s = C::SignatureShare::try_from_bytes(&s)?;
-
-                Ok(s)
-            })
+            .map(Self::signature_share_from_js)
             .collect::<JsResult<Vec<_>>>()?;
 
         let signature = C::core_combine_signature_shares(&signature_shares)?;
@@ -109,8 +72,8 @@ where
         message: Uint8Array,
         signature: Uint8Array,
     ) -> JsResult<()> {
-        let public_key = C::PublicKey::from_js(public_key)?;
-        let signature = C::Signature::from_js(signature)?;
+        let public_key = Self::public_key_from_js(public_key)?;
+        let signature = Self::signature_from_js(signature)?;
         let message = from_js::<Vec<u8>>(message)?;
 
         let signature = Signature::<C>::ProofOfPossession(signature);
@@ -125,11 +88,13 @@ where
         message: Uint8Array,
         identity: Uint8Array,
     ) -> JsResult<Uint8Array> {
-        let encryption_key = C::PublicKey::from_js(encryption_key)?;
+        let encryption_key = Self::public_key_from_js(encryption_key)?;
+        let encryption_key = PublicKey::<C>(encryption_key);
+
         let message = from_js::<Vec<u8>>(message)?;
         let identity = from_js::<Vec<u8>>(identity)?;
 
-        let ciphertext = PublicKey::<C>(encryption_key).encrypt_time_lock(
+        let ciphertext = encryption_key.encrypt_time_lock(
             SignatureSchemes::ProofOfPossession,
             message,
             identity,
@@ -141,7 +106,8 @@ where
     }
 
     pub fn decrypt(ciphertext: Uint8Array, decryption_key: Uint8Array) -> JsResult<Uint8Array> {
-        let decryption_key = C::Signature::from_js(decryption_key)?;
+        let decryption_key = Self::signature_from_js(decryption_key)?;
+
         let ciphertext = from_js::<Vec<u8>>(ciphertext)?;
         let ciphertext = serde_bare::from_slice::<TimeCryptCiphertext<C>>(&ciphertext)?;
 
@@ -151,6 +117,33 @@ where
         let message = into_js(Bytes::new(&message))?;
 
         Ok(message)
+    }
+
+    fn public_key_from_js(k: Uint8Array) -> JsResult<C::PublicKey> {
+        let k = from_js::<Vec<u8>>(k)?;
+        let k = C::PublicKey::try_from(&k);
+        let k = k
+            .ok()
+            .ok_or_else(|| JsError::new("cannot deserialize public key"))?;
+        Ok(k)
+    }
+
+    fn signature_from_js(s: Uint8Array) -> JsResult<C::Signature> {
+        let s = from_js::<Vec<u8>>(s)?;
+        let s = C::Signature::try_from(&s);
+        let s = s
+            .ok()
+            .ok_or_else(|| JsError::new("cannot deserialize signature"))?;
+        Ok(s)
+    }
+
+    fn signature_share_from_js(s: Uint8Array) -> JsResult<C::SignatureShare> {
+        let s = from_js::<Vec<u8>>(s)?;
+        let s = C::SignatureShare::try_from2(&s);
+        let s = s
+            .ok()
+            .ok_or_else(|| JsError::new("cannot deserialize signature share"))?;
+        Ok(s)
     }
 }
 
