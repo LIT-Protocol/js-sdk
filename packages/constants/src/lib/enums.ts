@@ -7,7 +7,8 @@ export enum VMTYPE {
 
 export enum SIGTYPE {
   BLS = 'BLS',
-  EcdsaCaitSith = 'ECDSA_CAIT_SITH',
+  EcdsaK256 = 'K256',
+  EcdsaCaitSith = 'ECDSA_CAIT_SITH', // Legacy alias of K256
   EcdsaCAITSITHP256 = 'EcdsaCaitSithP256',
 }
 
