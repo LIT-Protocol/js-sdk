@@ -19,7 +19,6 @@ serde = "1.0"
 serde_json = "1.0"
 serde_bare = "0.5"
 serde-wasm-bindgen = "0.5"
-bls12_381_plus = { version = "=0.8.9" }
 
 num-bigint = { version = "0.2.2", features = ["rand"] }
 num-integer = "0.1"
@@ -49,21 +48,29 @@ console_error_panic_hook = { version = "0.1.7", optional = true }
 wasm-bindgen-futures = "0.4.40"
 js-sys = "0.3.67"
 
-sev = { git = "https://github.com/virtee/sev", version = "2.0.2", default-features = false, features = [
+sev = { version = "2.0.2", default-features = false, features = [
   "snp",
   "crypto_nossl",
 ] }
 rand = "0.8"
 serde_bytes = "0.11.14"
 vsss-rs = "3.3.4"
-frost-core = "1.0.0-rc.0"
-frost-ed25519 = "1.0.0-rc.0"
-frost-ed448 = "1.0.0-rc.0"
-frost-p256 = "1.0.0-rc.0"
-frost-rerandomized = "1.0.0-rc.0"
-frost-ristretto255 = "1.0.0-rc.0"
-frost-secp256k1 = "0.7.0"
+frost-core = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-ed25519 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-ed448 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-p256 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-p384 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-redjubjub = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-rerandomized = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-ristretto255 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-secp256k1 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-taproot = { git = "https://github.com/LIT-Protocol/frost.git" }
+lit-frost = { git = "https://github.com/LIT-Protocol/lit-frost.git" }
 tsify = { version = "0.4.5", default-features = false, features = ["js"] }
+
+# TODO(cairomassimo): remove once https://github.com/mikelodder7/bls12_381_plus/pull/4 lands on crates.io
+[patch.crates-io]
+bls12_381_plus = { git = "https://github.com/mikelodder7/bls12_381_plus.git" }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"

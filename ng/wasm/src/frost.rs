@@ -21,14 +21,10 @@ pub enum FrostVariant {
     Ed25519Sha512,
     Ed448Shake256,
     Ristretto255Sha512,
-    #[cfg(any())]
     Secp256K1Sha256,
     P256Sha256,
-    #[cfg(any())]
     P384Sha384,
-    #[cfg(any())]
     JubjubBlake2b512,
-    #[cfg(any())]
     Secp256K1Taproot,
 }
 
@@ -328,7 +324,6 @@ pub fn frost_combine(
                 verifying_shares,
             )
         }
-        #[cfg(any())]
         FrostVariant::Secp256K1Sha256 => combine_signature::<frost_secp256k1::Secp256K1Sha256>(
             message,
             public_key,
@@ -347,7 +342,6 @@ pub fn frost_combine(
             signature_shares,
             verifying_shares,
         ),
-        #[cfg(any())]
         FrostVariant::P384Sha384 => combine_signature::<frost_p384::P384Sha384>(
             message,
             public_key,
@@ -357,7 +351,6 @@ pub fn frost_combine(
             signature_shares,
             verifying_shares,
         ),
-        #[cfg(any())]
         FrostVariant::JubjubBlake2b512 => combine_signature::<frost_redjubjub::JubjubBlake2b512>(
             message,
             public_key,
@@ -367,7 +360,6 @@ pub fn frost_combine(
             signature_shares,
             verifying_shares,
         ),
-        #[cfg(any())]
         FrostVariant::Secp256K1Taproot => combine_signature::<frost_taproot::Secp256K1Taproot>(
             message,
             public_key,
@@ -397,22 +389,18 @@ pub fn frost_verify(
         FrostVariant::Ristretto255Sha512 => verify_signature::<
             frost_ristretto255::Ristretto255Sha512,
         >(message, public_key, signature),
-        #[cfg(any())]
         FrostVariant::Secp256K1Sha256 => {
             verify_signature::<frost_secp256k1::Secp256K1Sha256>(message, public_key, signature)
         }
         FrostVariant::P256Sha256 => {
             verify_signature::<frost_p256::P256Sha256>(message, public_key, signature)
         }
-        #[cfg(any())]
         FrostVariant::P384Sha384 => {
             verify_signature::<frost_p384::P384Sha384>(message, public_key, signature)
         }
-        #[cfg(any())]
         FrostVariant::JubjubBlake2b512 => {
             verify_signature::<frost_redjubjub::JubjubBlake2b512>(message, public_key, signature)
         }
-        #[cfg(any())]
         FrostVariant::Secp256K1Taproot => {
             verify_signature::<frost_taproot::Secp256K1Taproot>(message, public_key, signature)
         }
