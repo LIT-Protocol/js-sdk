@@ -241,6 +241,7 @@ export const combineEcdsaShares = (
     let res: string = '';
     switch (type) {
       case SIGTYPE.EcdsaCaitSith:
+      case SIGTYPE.EcdsaK256:
         res = ecdsaSdk.combine_signature(validShares, 2);
 
         try {
@@ -256,7 +257,7 @@ export const combineEcdsaShares = (
 
         /*
           r and s values of the signature should be maximum of 64 bytes
-          r and s values can have polarity as the first two bits, here we remove 
+          r and s values can have polarity as the first two bits, here we remove
         */
         if (sig && sig.r && sig.r.length > 64) {
           while (sig.r.length > 64) {
@@ -298,6 +299,7 @@ export const computeHDPubKey = (
   try {
     switch (sigType) {
       case SIGTYPE.EcdsaCaitSith:
+      case SIGTYPE.EcdsaK256:
         // a bit of pre processing to remove characters which will cause our wasm module to reject the values.
         pubkeys = pubkeys.map((value: string) => {
           return value.replace('0x', '');
