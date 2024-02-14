@@ -361,7 +361,7 @@ async function getAmdCert(url: string) {
   // unfortunately, until AMD enables CORS, we have to use a proxy when in the browser
   if (isBrowser()) {
     // CORS proxy url
-    url = `https://shielded-earth-13917-10ba15245911.herokuapp.com/${url}`;
+    url = `https://cors.litgateway.com/${url}`;
   }
   const response = await fetch(url);
   const arrayBuffer = await response.arrayBuffer();
