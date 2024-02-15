@@ -612,23 +612,23 @@ export const log = Object.assign(
 );
 /**
  * testThis - Runs a test and logs the result
- * 
+ *
  * This test relies on the `success` and `fail` functions to either return
  * 200 or 500 status code. If neither is returned, the test it not correctly implemented.
- * 
+ *
  * It DOES not process.exit() on failure, this event is handled by the caller, in this case
  * in the test runner script at ./e2e-nodejs/index.mjs
- * 
+ *
  * if (errorCounter > 0) {
     console.log(`❌ ${errorCounter} test(s) failed`);
     process.exit(1);
   }
   process.exit(0);
- * 
+ *
 * This ensures that all tests are run and the user is notified of all failures, and could be integrated
 * with a CI/CD pipeline.
- * @param {*} test 
- * @returns 
+ * @param {*} test
+ * @returns
  */
 export const testThis = async (test) => {
   // calculate the time it takes to run the test
@@ -690,8 +690,6 @@ export const testThese = async (tests) => {
       log.red(`\t${e.message}`);
     }
   }
-
-  process.exit();
 };
 
 export function findArg(args, flag) {
