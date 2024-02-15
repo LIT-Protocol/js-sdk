@@ -27,8 +27,7 @@ if (!globalThis.wasmExports) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [BLS SDK] wasmExports loaded. ${
-          Object.keys(exports).length
+        `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
       );
     }
@@ -50,8 +49,7 @@ if (!globalThis.wasmECDSA) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-          Object.keys(wasmECDSA).length
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );
     }
@@ -64,8 +62,7 @@ if (!globalThis.wasmSevSnpUtils) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
-          Object.keys(exports).length
+        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
       );
     }
@@ -361,6 +358,7 @@ function base64ToBufferAsync(base64) {
 
 async function getAmdCert(url: string) {
   // unfortunately, until AMD enables CORS, we have to use a proxy when in the browser
+  // This project is hosted on heroku and uses this codebase: https://github.com/LIT-Protocol/cors-proxy-amd
   if (isBrowser()) {
     // CORS proxy url
     url = `https://cors.litgateway.com/${url}`;
