@@ -59,7 +59,7 @@ export async function main() {
 
   const pkpWallet = new PKPEthersWallet({
     pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
-    rpc: globalThis.LitCI.CONTROLLER_WALLET.connection.url,
+    rpc: LITCONFIG.CHRONICLE_RPC,
     litNetwork: globalThis.LitCI.network,
     authContext: {
       client,
