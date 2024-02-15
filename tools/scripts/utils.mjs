@@ -625,8 +625,8 @@ export const log = Object.assign(
   }
   process.exit(0);
  *
-* This ensures that all tests are run and the user is notified of all failures, and could be integrated
-* with a CI/CD pipeline.
+ * This ensures that all tests are run and the user is notified of all failures, and could be integrated
+ * with a CI/CD pipeline.
  * @param {*} test
  * @returns
  */
@@ -663,32 +663,19 @@ export const testThis = async (test) => {
   }
 };
 
+/**
+ * testThese - Runs a list of tests using testThis
+ * Check testThis for more details
+ *
+ * @param {*} tests
+ *
+ * @returns
+ */
 export const testThese = async (tests) => {
   console.log(`Running ${tests.length} tests...\n`);
 
   for (const t of tests) {
-    try {
-      console.log(`${t.name}`);
-
-      // calculate the time it takes to run the test
-      const start = Date.now();
-
-      const { status, message } = await t.fn();
-
-      const end = Date.now();
-
-      const time = end - start;
-
-      if (status === 200) {
-        log.green(`\t${message} (${time}ms)`);
-      } else {
-        log.red(`\t${message} (${time}ms)`);
-      }
-
-      console.log();
-    } catch (e) {
-      log.red(`\t${e.message}`);
-    }
+    await testThis(t);
   }
 };
 
