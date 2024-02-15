@@ -174,7 +174,7 @@ describe('combine ECDSA Shares', () => {
         sigName: 'sig',
       },
       {
-        sigType: 'ECDSA_CAIT_SITH',
+        sigType: 'K256',
         signatureShare:
           'BA77EB500884A60583DEA49578D4BB64BB55EF497F37C88DF935D739CE8E0A9F',
         shareIndex: 0,

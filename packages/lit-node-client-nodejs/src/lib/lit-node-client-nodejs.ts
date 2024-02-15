@@ -1298,10 +1298,11 @@ export class LitNodeClientNodeJs extends LitCore {
       // -- validate if signature type is ECDSA
       if (
         sigType !== SIGTYPE.EcdsaCaitSith &&
+        sigType !== SIGTYPE.EcdsaK256 &&
         sigType !== SIGTYPE.EcdsaCAITSITHP256
       ) {
         throwError({
-          message: `signature type is ${sigType} which is not ECDSA_CAIT_SITH`,
+          message: `signature type is ${sigType} which is invalid`,
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
@@ -1461,10 +1462,11 @@ export class LitNodeClientNodeJs extends LitCore {
       // -- validate if signature type is ECDSA
       if (
         sigType !== SIGTYPE.EcdsaCaitSith &&
+        sigType !== SIGTYPE.EcdsaK256 &&
         sigType !== SIGTYPE.EcdsaCAITSITHP256
       ) {
         throwError({
-          message: `signature type is ${sigType} which is not ECDSA_CAIT_SITH`,
+          message: `signature type is ${sigType} which is invalid`,
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
