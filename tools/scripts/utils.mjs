@@ -677,8 +677,6 @@ export const testThese = async (tests) => {
   for (const t of tests) {
     await testThis(t);
   }
-
-  process.exit();
 };
 
 export function findArg(args, flag) {
