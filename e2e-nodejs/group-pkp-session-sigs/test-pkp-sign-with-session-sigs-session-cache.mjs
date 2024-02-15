@@ -14,6 +14,8 @@ const TO_SIGN = ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5]));
 export async function main() {
   // ==================== Setup ====================
   const sessionKeyPair = client.getSessionKey();
+  const resourceAbilities = [];
+
   const authNeededCallback = async (params) => {
     const response = await client.signSessionKey({
       statement: params.statement,
@@ -28,16 +30,11 @@ export async function main() {
       expiration: params.expiration,
       resources: params.resources,
       chainId: 1,
+      resourceAbilityRequests: resourceAbilities,
     });
     return response.authSig;
   };
 
-  const resourceAbilities = [
-    {
-      resource: new LitActionResource('*'),
-      ability: LitAbility.PKPSigning,
-    },
-  ];
 
   // ==================== Test Logic ====================
 
