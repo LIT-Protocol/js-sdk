@@ -34,23 +34,22 @@ export async function main() {
       ability: LitAbility.AccessControlConditionDecryption,
     },
   ];
-  const sessionSigs = await client.getSessionSigs({
-    chain: 'ethereum',
-    expiration: new Date(Date.now() + 60_000 * 60).toISOString(),
-    resourceAbilityRequests: resourceAbilities,
-    sessionKey: sessionKeyPair,
-    authNeededCallback,
-  });
 
-  // Initializing the PKP wallet itself
   const pkpWallet = new PKPEthersWallet({
-    pkpPubKey: globalThis.LitCI.AUTH_METHOD_PKP_INFO.publicKey,
-    controllerSessionSigs: sessionSigs,
-    rpc: LITCONFIG.CHRONICLE_RPC,
+    pkpPubKey: globalThis.LitCI.PKP_INFO.publicKey,
+    rpc: globalThis.LitCI.CONTROLLER_WALLET.connection.url,
     litNetwork: globalThis.LitCI.network,
+    authContext: {
+      client,
+      getSessionSigsProps: {
+        chain: 'ethereum',
+        // expiration: new Date(Date.now() + 60_000 * 60).toISOString(),
+        resourceAbilityRequests: resourceAbilities,
+        sessionKey: sessionKeyPair,
+        authNeededCallback,
+      },
+    },
   });
-
-  await pkpWallet.init();
 
   // Using the PKP to get an authentication signature for it
   const statement =
