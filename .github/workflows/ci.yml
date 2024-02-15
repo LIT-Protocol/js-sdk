@@ -70,4 +70,4 @@ jobs:
         run: yarn build
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:e2e:node --group=connection --group=lit-actions --group=pkp-auth-method --group=pkp-ethers --group=pkp-encryption-decryption
+        run: yarn test:e2e:node --group=connection --group=lit-actions --group=pkp-auth-method --group=pkp-ethers --group=pkp-encryption-decryption --group=pkp-session-sigs
