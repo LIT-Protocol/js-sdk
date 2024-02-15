@@ -9,11 +9,10 @@ use frost_core::{
 };
 use js_sys::Uint8Array;
 use serde::Deserialize;
-use serde_bytes::Bytes;
 use tsify::Tsify;
 use wasm_bindgen::prelude::*;
 
-use crate::abi::{from_js, into_js, JsResult};
+use crate::abi::{from_js, into_uint8array, JsResult};
 
 #[derive(Tsify, Deserialize)]
 #[tsify(from_wasm_abi)]
@@ -94,9 +93,7 @@ pub fn combine_signature<C: Ciphersuite>(
         &public_key_package,
     )?;
 
-    let signature = into_js(Bytes::new(signature.serialize().as_ref()))?;
-
-    Ok(signature)
+    into_uint8array(signature.serialize())
 }
 
 pub fn verify_signature<C: Ciphersuite>(
@@ -178,14 +175,12 @@ mod tests {
     use std::convert::TryInto;
 
     use frost_core::Signature;
-    use js_sys::Uint8Array;
     use rand::SeedableRng as _;
-    use serde_bytes::Bytes;
     use wasm_bindgen::JsValue;
     use wasm_bindgen_test::{console_log, wasm_bindgen_test};
 
     use crate::{
-        abi::{from_js, into_js},
+        abi::{from_js, into_uint8array},
         frost::combine_signature,
     };
 
@@ -196,11 +191,11 @@ mod tests {
 
         let msg = hex::decode("74657374").unwrap();
 
-        let message = into_js::<Uint8Array>(Bytes::new(&msg))?;
-        let public_key = into_js::<Uint8Array>(Bytes::new(
+        let message = into_uint8array(&msg)?;
+        let public_key = into_uint8array(
             &hex::decode("899196af442a2c0d32d9c18b837a838379db18b37148bf35a4917202e0214658")
                 .unwrap(),
-        ))?;
+        )?;
 
         let identifiers = [
             "0100000000000000000000000000000000000000000000000000000000000000",
@@ -208,7 +203,7 @@ mod tests {
             "0300000000000000000000000000000000000000000000000000000000000000",
         ]
         .iter()
-        .map(|s| into_js::<Uint8Array>(Bytes::new(&hex::decode(s).unwrap())))
+        .map(|s| into_uint8array(hex::decode(s).unwrap()))
         .collect::<Result<Vec<_>, _>>()?;
 
         let hiding_nonces = [
@@ -217,7 +212,7 @@ mod tests {
             "7762508c2d030f72359daf77e82c9ecdc99d39a2f36f7d9cbc69ba9153e85013",
         ]
         .iter()
-        .map(|s| into_js::<Uint8Array>(Bytes::new(&hex::decode(s).unwrap())))
+        .map(|s| into_uint8array(hex::decode(s).unwrap()))
         .collect::<Result<Vec<_>, _>>()?;
 
         let binding_nonces = [
@@ -226,7 +221,7 @@ mod tests {
             "1c2172836dc0b927e3d226458bd0be8d624cacca13fa82a258367eb025f41a38",
         ]
         .iter()
-        .map(|s| into_js::<Uint8Array>(Bytes::new(&hex::decode(s).unwrap())))
+        .map(|s| into_uint8array(hex::decode(s).unwrap()))
         .collect::<Result<Vec<_>, _>>()?;
 
         let signature_shares = [
@@ -235,7 +230,7 @@ mod tests {
             "2527bed7775274fd49c72e94beddb2cb16be356db29ac5b8a1bc795fc714e402",
         ]
         .iter()
-        .map(|s| into_js::<Uint8Array>(Bytes::new(&hex::decode(s).unwrap())))
+        .map(|s| into_uint8array(hex::decode(s).unwrap()))
         .collect::<Result<Vec<_>, _>>()?;
 
         let verifying_shares = [
@@ -244,7 +239,7 @@ mod tests {
             "3d6b6fdc64465c5d515770211fa981b799e3237b5d7023bf7f6a7e370add3ea7",
         ]
         .iter()
-        .map(|s| into_js::<Uint8Array>(Bytes::new(&hex::decode(s).unwrap())))
+        .map(|s| into_uint8array(hex::decode(s).unwrap()))
         .collect::<Result<Vec<_>, _>>()?;
 
         let signature = combine_signature::<frost_ed25519::Ed25519Sha512>(

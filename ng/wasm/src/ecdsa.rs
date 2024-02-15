@@ -11,11 +11,10 @@ use js_sys::Uint8Array;
 use k256::Secp256k1;
 use p256::NistP256;
 use serde::Deserialize;
-use serde_bytes::Bytes;
 use tsify::Tsify;
 use wasm_bindgen::{prelude::*, JsError};
 
-use crate::abi::{from_js, into_js, JsResult};
+use crate::abi::{from_js, into_uint8array, JsResult};
 
 #[derive(Tsify, Deserialize)]
 #[tsify(from_wasm_abi)]
@@ -85,10 +84,8 @@ where
 
         let k = deriver.hd_derive_public_key(&public_keys);
         let k = k.to_encoded_point(false);
-        let k = Bytes::new(k.as_bytes().as_ref());
-        let k = into_js(&k)?;
 
-        Ok(k)
+        into_uint8array(k.as_bytes())
     }
 
     fn scalar_from_js(s: Uint8Array) -> JsResult<C::Scalar> {
@@ -116,9 +113,8 @@ where
         let s = s.to_repr();
 
         let bytes = Self::concat_rsv(r, s, v);
-        let signature = into_js(Bytes::new(&bytes))?;
 
-        Ok(signature)
+        into_uint8array(bytes)
     }
 
     fn concat_rsv(

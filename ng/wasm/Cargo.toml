@@ -11,7 +11,10 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
-blsful = { version = "2", default-features = false, features = ["rust"] }
+# TODO(cairomassimo): remove git/branch if https://github.com/mikelodder7/blsful/pull/3 lands on crates.io
+blsful = { git = "https://github.com/cairomassimo/blsful.git", branch = "add-inner-point-share-u8-slice-conversions", version = "2", default-features = false, features = [
+  "rust",
+] }
 base64_light = "0.1"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
