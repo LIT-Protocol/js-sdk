@@ -1125,6 +1125,12 @@ export interface PKPBaseProp {
   rpc?: string;
   rpcs?: RPCUrls;
   controllerAuthSig?: AuthSig;
+  // @deprecated
+  controllerAuthMethods?: AuthMethod[];
+  // @deprecated
+  controllerSessionSigs?: SessionSigs;
+  // @deprecated
+  sessionSigsExpiration?: string;
   authContext?: AuthenticationProps;
   litNetwork?: any;
   debug?: boolean;
