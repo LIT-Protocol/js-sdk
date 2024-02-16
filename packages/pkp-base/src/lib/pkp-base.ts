@@ -183,7 +183,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    */
   getAddress(): Promise<string> {
     return Promise.reject(
-      new Error('getAddress not implemented. Please use a subclass of PKPBase.')
+      this.throwError('getAddress not implemented. Please use a subclass of PKPBase.')
     );
   }
 
@@ -202,7 +202,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
   private validateAuthContext() {
     if (this.controllerAuthSig && this.authContext) {
-      throw new Error(
+      this.throwError(
         'controllerAuthSig and authContext are defined, can only use one or the other'
       );
     }
@@ -225,7 +225,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     // If no PKP public key is provided, throw error
     if (!this.uncompressedPubKey) {
-      throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
+      this.throwError('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
     this.validateAuthContext();
@@ -237,7 +237,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       typeof this.authContext?.getSessionSigsProps !== 'function' &&
       !Array.isArray(this.authContext?.authMethods)
     ) {
-      throw new Error('controllerSessionSigs must be an object');
+      this.throwError('controllerSessionSigs must be an object');
     }
 
     const controllerSessionSigs =
@@ -318,7 +318,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     // If no PKP public key is provided, throw error
     if (!this.uncompressedPubKey) {
-      throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
+      this.throwError('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
     this.validateAuthContext();
