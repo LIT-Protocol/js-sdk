@@ -1,7 +1,9 @@
 name: lint
 on:
-  - pull_request
-  - push
+  pull_request:
+  push:
+    branches:
+      - master
 jobs:
   linter:
     runs-on: ubuntu-latest
