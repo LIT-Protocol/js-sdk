@@ -42,7 +42,6 @@ export async function main() {
     return response.authSig;
   };
 
-
   // ==================== Test Logic ====================
 
   // const sessionSigs = await client.getSessionSigs({
