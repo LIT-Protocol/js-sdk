@@ -183,7 +183,9 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    */
   getAddress(): Promise<string> {
     return Promise.reject(
-      this.throwError('getAddress not implemented. Please use a subclass of PKPBase.')
+      this.throwError(
+        'getAddress not implemented. Please use a subclass of PKPBase.'
+      )
     );
   }
 
@@ -205,6 +207,19 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       this.throwError(
         'controllerAuthSig and authContext are defined, can only use one or the other'
       );
+    }
+
+    // Check auth context if provided
+    if (this.authContext) {
+      // It must have a valid client and getSessionSigsProps
+      if (
+        !(this.authContext.client instanceof LitNodeClientNodeJs) ||
+        !this.authContext.getSessionSigsProps
+      ) {
+        this.throwError(
+          'authContext must be an object with a lit client and getSessionSigsProps'
+        );
+      }
     }
   }
 
@@ -229,16 +244,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
 
     this.validateAuthContext();
-
-    // If auth context is provided, it must have a client, props and auth methods
-    if (
-      this.authContext &&
-      typeof this.authContext?.client !== 'object' &&
-      typeof this.authContext?.getSessionSigsProps !== 'function' &&
-      !Array.isArray(this.authContext?.authMethods)
-    ) {
-      this.throwError('controllerSessionSigs must be an object');
-    }
 
     const controllerSessionSigs =
       await this.authContext?.client?.getSessionSigs(
