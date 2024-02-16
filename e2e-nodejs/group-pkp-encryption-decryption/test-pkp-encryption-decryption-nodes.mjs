@@ -10,10 +10,8 @@ import { client } from '../00-setup.mjs';
 export async function main() {
   // ========== PKP WALLET SETUP ===========
   // Getting the session signatures that will control the PKP
-  const sessionKeyPair = client.getSessionKey();
   const authNeededCallback = async (params) => {
     const response = await client.signSessionKey({
-      sessionKey: sessionKeyPair,
       statement: params.statement,
       authMethods: [
         {
@@ -45,7 +43,6 @@ export async function main() {
         chain: 'ethereum',
         // expiration: new Date(Date.now() + 60_000 * 60).toISOString(),
         resourceAbilityRequests: resourceAbilities,
-        sessionKey: sessionKeyPair,
         authNeededCallback,
       },
     },

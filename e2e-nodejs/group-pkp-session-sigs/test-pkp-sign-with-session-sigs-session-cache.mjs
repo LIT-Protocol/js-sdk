@@ -14,7 +14,6 @@ const message = [1, 2, 3, 4, 5];
 
 export async function main() {
   // ==================== Setup ====================
-  const sessionKeyPair = client.getSessionKey();
   const resourceAbilities = [
     {
       resource: new LitActionResource('*'),
@@ -71,7 +70,6 @@ export async function main() {
         chain: 'ethereum',
         expiration: new Date(Date.now() + 60_000 * 60).toISOString(),
         resourceAbilityRequests: resourceAbilities,
-        sessionKey: sessionKeyPair,
         authNeededCallback,
       },
     },
