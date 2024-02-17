@@ -89,8 +89,7 @@ import {
 
 import { computeAddress } from '@ethersproject/transactions';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-import { SiweMessage } from 'lit-siwe';
-import * as siweNormal from 'siwe';
+import * as from 'siwe';
 
 import { LitCore } from '@lit-protocol/core';
 import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
@@ -113,7 +112,7 @@ import {
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
 import { BigNumber, ethers, utils } from 'ethers';
-import * as siwe from 'siwe';
+import { SiweMessage } from 'siwe';
 
 // TODO: move this to auth-helper for next patch
 interface CapacityCreditsReq {
@@ -2533,7 +2532,7 @@ export class LitNodeClientNodeJs extends LitCore {
       });
 
       // regular siwe
-      siweMessage = new siweNormal.SiweMessage({
+      siweMessage = new SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
         address: pkpEthAddress,
@@ -2548,7 +2547,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
       siweMessage = recapObject.addToSiweMessage(siweMessage);
     } else {
-      // lit-siwe (NOT regular siwe)
+      // regular siwe without recap
       siweMessage = new SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
@@ -2771,8 +2770,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {

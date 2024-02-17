@@ -22,7 +22,7 @@ import LitConnectModal from '../connect-modal/modal';
 
 import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
 
-import { SiweMessage } from 'lit-siwe';
+import { SiweMessage } from 'siwe';
 import { getAddress } from 'ethers/lib/utils';
 
 // @ts-ignore: If importing 'nacl' directly, the built files will use .default instead

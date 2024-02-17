@@ -10,7 +10,7 @@ import util from 'util';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
-import siwe from 'lit-siwe';
+import siwe from 'siwe';
 import { ethers } from 'ethers';
 
 const eventsEmitter = new events.EventEmitter();
@@ -160,7 +160,7 @@ export const spawnCommand = (
   options = {},
   options2 = {
     logExit: true,
-    exitCallback: () => {},
+    exitCallback: () => { },
   }
 ) => {
   // Use the spawn() function to run the command in a child process
