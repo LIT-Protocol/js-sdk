@@ -11,10 +11,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
-# TODO(cairomassimo): remove git/branch if https://github.com/mikelodder7/blsful/pull/3 lands on crates.io
-blsful = { git = "https://github.com/cairomassimo/blsful.git", branch = "add-inner-point-share-u8-slice-conversions", version = "2", default-features = false, features = [
-  "rust",
-] }
+blsful = { version = "2.5.3", default-features = false, features = ["rust"] }
+bls12_381_plus = "0.8.14"
 base64_light = "0.1"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
@@ -72,9 +70,9 @@ lit-frost = { git = "https://github.com/LIT-Protocol/lit-frost.git" }
 tsify = { version = "0.4.5", default-features = false, features = ["js"] }
 hd-keys-curves = { git = "https://github.com/LIT-Protocol/hd-keys-curves.git", branch = "fix-wasm32-compile-error-convert-scalars", version = "0.2.0" }
 
-# TODO(cairomassimo): remove once https://github.com/mikelodder7/bls12_381_plus/pull/4 lands on crates.io
-[patch.crates-io]
-bls12_381_plus = { git = "https://github.com/mikelodder7/bls12_381_plus.git" }
+# TODO(cairomassimo): remove once https://github.com/LIT-Protocol/jubjub/pull/1 is merged
+[patch.'https://github.com/LIT-Protocol/jubjub.git']
+jubjub = { git = "https://github.com/LIT-Protocol/jubjub.git#", branch = "fix-remove-dep-bls12381plus-hashing" }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"
