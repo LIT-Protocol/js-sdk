@@ -214,7 +214,7 @@ export async function main() {
       resources: resources,
       chainId: 1,
 
-      // optional (this would use normal siwe lib, without it, it would use lit-siwe)
+      // optional (this would use normal siwe lib, without it, it would use siwe-recap)
       resourceAbilityRequests: resourceAbilityRequests,
     });
 
