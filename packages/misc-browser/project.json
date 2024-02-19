@@ -20,23 +20,6 @@
         "assets": ["packages/misc-browser/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_miscBrowser",
-        "outfile": "dist/packages/misc-browser-vanilla/misc-browser.js",
-        "entryPoints": ["./packages/misc-browser/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],

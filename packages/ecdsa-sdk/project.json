@@ -20,23 +20,6 @@
         "assets": ["packages/ecdsa-sdk/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_ecdsaSdk",
-        "outfile": "dist/packages/ecdsa-sdk-vanilla/ecdsa-sdk.js",
-        "entryPoints": ["./packages/ecdsa-sdk/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/packages/ecdsa-sdk"],

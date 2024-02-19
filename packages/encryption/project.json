@@ -26,23 +26,6 @@
         "assets": ["packages/encryption/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_encryption",
-        "outfile": "dist/packages/encryption-vanilla/encryption.js",
-        "entryPoints": ["./packages/encryption/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],

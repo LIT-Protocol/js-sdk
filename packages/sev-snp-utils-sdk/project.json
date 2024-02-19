@@ -20,23 +20,6 @@
         "assets": ["packages/sev-snp-utils-sdk/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_blsSdk",
-        "outfile": "dist/packages/sev-snp-utils-sdk-vanilla/sev-snp-utils-sdk.js",
-        "entryPoints": ["./packages/sev-snp-utils-sdk/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/packages/sev-snp-utils-sdk"],
