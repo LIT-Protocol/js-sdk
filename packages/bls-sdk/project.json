@@ -20,23 +20,6 @@
         "assets": ["packages/bls-sdk/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_blsSdk",
-        "outfile": "dist/packages/bls-sdk-vanilla/bls-sdk.js",
-        "entryPoints": ["./packages/bls-sdk/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/packages/bls-sdk"],

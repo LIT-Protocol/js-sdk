@@ -24,26 +24,6 @@
         ]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_litThirdPartyLibs",
-        "outfile": "dist/packages/lit-third-party-libs-vanilla/lit-third-party-libs.js",
-        "entryPoints": [
-          "./packages/lit-third-party-libs/src/index.ts"
-        ],
-        "define": {
-          "process.env.NODE_DEBUG": "false",
-          "global": "window"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": [
