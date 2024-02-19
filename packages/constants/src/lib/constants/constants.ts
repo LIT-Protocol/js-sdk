@@ -768,3 +768,7 @@ export const RELAY_URL_CAYENNE =
   'https://relayer-server-staging-cayenne.getlit.dev';
 export const RELAY_URL_HABANERO = 'https://habanero-relayer.getlit.dev';
 export const RELAY_URL_MANZANO = 'https://manzano-relayer.getlit.dev';
+
+// ========== Lit Actions ==========
+export const LIT_ACTION_IPFS_HASH =
+  'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
