@@ -62,6 +62,13 @@ try {
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
 
+let CID: any;
+try {
+  CID = require('multiformats/cid');
+} catch (e) {
+  console.log('CID not found');
+}
+
 // This function asynchronously executes a provided callback function for each item in the given array.
 // The callback function is awaited before continuing to the next iteration.
 // The resulting array of callback return values is then returned.
