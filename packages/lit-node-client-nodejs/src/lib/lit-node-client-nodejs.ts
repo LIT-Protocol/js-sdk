@@ -2563,7 +2563,9 @@ export class LitNodeClientNodeJs
       });
     }
 
-    const siweMessageStr: string = (siweMessage as siwe.SiweMessage).prepareMessage();
+    const siweMessageStr: string = (
+      siweMessage as siwe.SiweMessage
+    ).prepareMessage();
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
@@ -2769,8 +2771,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
