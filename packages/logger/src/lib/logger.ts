@@ -1,6 +1,4 @@
 import { version } from '@lit-protocol/constants';
-import { hashMessage } from 'ethers/lib/utils';
-import { encode } from 'punycode';
 import { toString as uint8arrayToString } from 'uint8arrays';
 
 export enum LogLevel {
@@ -329,7 +327,7 @@ export class Logger {
   }
 
   private _checkHash(log: Log): boolean {
-    const digest = hashMessage(log.message);
+    const digest = this.hashCode(log.message);
     const hash = digest.toString();
     let item = this._logHashes.get(hash);
     if (item) {
@@ -348,6 +346,22 @@ export class Logger {
     // this implementation assumes that serialization / deserialization from `localStorage` keeps the same key ordering in each `category` object as we will asssume the array produced from `Object.keys` will always be the same ordering.
     // which then allows us to start at the front of the array and do `delete` operation on each key we wish to delete from the object.
     //log.id && this._addToLocalStorage(log);
+  }
+
+  /**
+    simple non secure 32 bit hashing function.
+
+  */
+  hashCode(str: string, seed: number = 0) {
+    var hash = 0;
+    var i, chr;
+    if (str.length === 0) return hash;
+    for (i = 0; i < str.length; i++) {
+      chr = str.charCodeAt(i);
+      hash = (hash << 5) - hash + chr;
+      hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
   }
 
   private _addToLocalStorage(log: Log) {
