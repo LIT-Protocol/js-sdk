@@ -89,9 +89,6 @@ import {
 
 import { computeAddress } from '@ethersproject/transactions';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-import { SiweMessage } from 'lit-siwe';
-import * as siweNormal from 'siwe';
-
 import { LitCore } from '@lit-protocol/core';
 import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
@@ -113,7 +110,7 @@ import {
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
 import { BigNumber, ethers, utils } from 'ethers';
-import * as siwe from 'siwe';
+import siwe from 'siwe';
 
 // TODO: move this to auth-helper for next patch
 interface CapacityCreditsReq {
@@ -682,7 +679,7 @@ export class LitNodeClientNodeJs extends LitCore {
     sessionKeyUri: any;
     resourceAbilityRequests: Array<LitResourceAbilityRequest>;
   }): Promise<boolean> => {
-    const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
+    const authSigSiweMessage = new siwe.SiweMessage(authSig.signedMessage);
 
     try {
       await authSigSiweMessage.validate(authSig.sig);
@@ -2533,7 +2530,7 @@ export class LitNodeClientNodeJs extends LitCore {
       });
 
       // regular siwe
-      siweMessage = new siweNormal.SiweMessage({
+      siweMessage = new siwe.SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
         address: pkpEthAddress,
@@ -2549,7 +2546,7 @@ export class LitNodeClientNodeJs extends LitCore {
       siweMessage = recapObject.addToSiweMessage(siweMessage);
     } else {
       // lit-siwe (NOT regular siwe)
-      siweMessage = new SiweMessage({
+      siweMessage = new siwe.SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
         address: pkpEthAddress,
@@ -2563,7 +2560,7 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
-    let siweMessageStr: string = (siweMessage as SiweMessage).prepareMessage();
+    let siweMessageStr: string = (siweMessage as siwe.SiweMessage).prepareMessage();
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
@@ -2771,8 +2768,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
