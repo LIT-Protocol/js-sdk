@@ -89,7 +89,7 @@ import {
 
 import { computeAddress } from '@ethersproject/transactions';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-import * as from 'siwe';
+import siwe from 'siwe';
 
 import { LitCore } from '@lit-protocol/core';
 import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
@@ -2770,8 +2770,8 @@ export class LitNodeClientNodeJs extends LitCore {
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
