@@ -112,7 +112,7 @@ import {
 } from '@lit-protocol/misc-browser';
 import { nacl } from '@lit-protocol/nacl';
 import { BigNumber, ethers, utils } from 'ethers';
-import siwe from 'siwe';
+import * as siwe from 'siwe';
 
 // TODO: move this to auth-helper for next patch
 interface CapacityCreditsReq {
