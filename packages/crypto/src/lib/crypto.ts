@@ -361,6 +361,7 @@ function base64ToBufferAsync(base64) {
 
 async function getAmdCert(url: string) {
   // unfortunately, until AMD enables CORS, we have to use a proxy when in the browser
+  // This project is hosted on heroku and uses this codebase: https://github.com/LIT-Protocol/cors-proxy-amd
   if (isBrowser()) {
     // CORS proxy url
     url = `https://cors.litgateway.com/${url}`;
