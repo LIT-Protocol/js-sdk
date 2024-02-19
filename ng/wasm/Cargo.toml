@@ -68,7 +68,9 @@ frost-secp256k1 = { git = "https://github.com/LIT-Protocol/frost.git" }
 frost-taproot = { git = "https://github.com/LIT-Protocol/frost.git" }
 lit-frost = { git = "https://github.com/LIT-Protocol/lit-frost.git" }
 tsify = { version = "0.4.5", default-features = false, features = ["js"] }
-hd-keys-curves = { git = "https://github.com/LIT-Protocol/hd-keys-curves.git", branch = "fix-wasm32-compile-error-convert-scalars", version = "0.2.0" }
+
+# TODO(cairomassimo): remove branch once merged
+hd-keys-curves = { git = "https://github.com/LIT-Protocol/hd-keys-curves.git", branch = "fix-blsful-default-features-optional", version = "0.2.0", default-features = false }
 
 # TODO(cairomassimo): remove once https://github.com/LIT-Protocol/jubjub/pull/1 is merged
 [patch.'https://github.com/LIT-Protocol/jubjub.git']
