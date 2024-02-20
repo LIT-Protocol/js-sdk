@@ -160,7 +160,7 @@ export const spawnCommand = (
   options = {},
   options2 = {
     logExit: true,
-    exitCallback: () => { },
+    exitCallback: () => {},
   }
 ) => {
   // Use the spawn() function to run the command in a child process
