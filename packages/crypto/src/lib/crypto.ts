@@ -467,6 +467,10 @@ export const checkSevSnpAttestation = async (
     }
   }
 
+  if (!vcekCert || vcekCert.length === 0 || vcekCert.length < 256) {
+    throw new Error('Unable to retrieve VCEK certificate from AMD');
+  }
+
   // pass base64 encoded report to wasm wrapper
   return sevSnpUtilsSdk.verify_attestation_report_and_check_challenge(
     report,
