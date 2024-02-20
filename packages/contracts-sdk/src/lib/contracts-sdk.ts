@@ -52,13 +52,6 @@ import {
   requestsToKilosecond,
 } from './utils';
 
-let CID: any;
-try {
-  CID = require('multiformats/cid');
-} catch (e) {
-  console.log('CID not found');
-}
-
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
 
