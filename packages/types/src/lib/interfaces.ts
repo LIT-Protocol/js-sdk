@@ -1094,15 +1094,44 @@ export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
 /**
  * ========== PKP ==========
  */
+export interface LitClientSessionManager {
+  getSessionKey: () => SessionKeyPair;
+  isSessionKeyPair(obj: any): boolean;
+  getExpiration: () => string;
+  getWalletSig: (getWalletSigProps: GetWalletSigProps) => Promise<AuthSig>;
+  // #authCallbackAndUpdateStorageItem: (params: {
+  //   authCallbackParams: AuthCallbackParams;
+  //   authCallback?: AuthCallback;
+  // }) => Promise<AuthSig>;
+  checkNeedToResignSessionKey: (params: {
+    authSig: AuthSig;
+    sessionKeyUri: any;
+    resourceAbilityRequests: Array<LitResourceAbilityRequest>;
+  }) => Promise<boolean>;
+  getSessionSigs: (params: GetSessionSigsProps) => Promise<SessionSigsMap>;
+  signSessionKey: (
+    params: SignSessionKeyProp
+  ) => Promise<SignSessionKeyResponse>;
+}
+
+export interface AuthenticationProps {
+  client: LitClientSessionManager;
+  getSessionSigsProps: GetSessionSigsProps;
+  authMethods: AuthMethod[];
+}
 
 export interface PKPBaseProp {
   pkpPubKey: string;
   rpc?: string;
   rpcs?: RPCUrls;
   controllerAuthSig?: AuthSig;
+  // @deprecated
   controllerAuthMethods?: AuthMethod[];
+  // @deprecated
   controllerSessionSigs?: SessionSigs;
+  // @deprecated
   sessionSigsExpiration?: string;
+  authContext?: AuthenticationProps;
   litNetwork?: any;
   debug?: boolean;
   bootstrapUrls?: string[];
