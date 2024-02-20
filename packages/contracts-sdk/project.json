@@ -24,24 +24,7 @@
         "assets": ["packages/contracts-sdk/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_contractsSdk",
-        "outfile": "dist/packages/contracts-sdk-vanilla/contracts-sdk.js",
-        "entryPoints": ["./packages/contracts-sdk/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false",
-          "global": "window"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
+
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],

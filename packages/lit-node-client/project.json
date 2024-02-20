@@ -24,25 +24,6 @@
         "assets": ["packages/lit-node-client/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_litNodeClient",
-        "outfile": "dist/packages/lit-node-client-vanilla/lit-node-client.js",
-        "entryPoints": ["./packages/lit-node-client/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false",
-          "global": "window",
-          "Buffer": "Buffer"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],

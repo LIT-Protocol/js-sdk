@@ -20,24 +20,6 @@
         "assets": ["packages/pkp-base/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_pkpBase",
-        "outfile": "dist/packages/pkp-base-vanilla/pkp-base.js",
-        "entryPoints": ["./packages/pkp-base/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false",
-          "global": "window"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],

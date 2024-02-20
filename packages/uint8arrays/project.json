@@ -21,23 +21,6 @@
         "assets": ["packages/uint8arrays/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_uint8arrays",
-        "outfile": "dist/packages/uint8arrays-vanilla/uint8arrays.js",
-        "entryPoints": ["./packages/uint8arrays/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/packages/uint8arrays"],

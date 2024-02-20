@@ -20,24 +20,6 @@
         "assets": ["packages/pkp-sui/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_pkpSui",
-        "outfile": "dist/packages/pkp-sui-vanilla/pkp-sui.js",
-        "entryPoints": ["./packages/pkp-sui/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false",
-          "global": "window"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
