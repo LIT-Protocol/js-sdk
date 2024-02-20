@@ -496,7 +496,6 @@ async function buildFunc() {
     }
 
     await childRunCommand(`yarn nx run ${TARGET}:_buildTsc`);
-    spawnListener(`yarn nx run ${TARGET}:_buildWeb`);
     await childRunCommand(
       `yarn tools --postBuildIndividual --target ${TARGET}`
     );
@@ -534,9 +533,6 @@ async function buildFunc() {
     spawnListener(command, {
       onDone: () => {
         console.log('Done!');
-
-        // // then run vanilla build
-        // const command = `yarn nx run-many --target=_buildWeb --exclude=${ignoreList}`;
 
         // spawnListener(command, {
         //   onDone: async () => {

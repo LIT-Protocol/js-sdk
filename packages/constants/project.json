@@ -21,24 +21,6 @@
         "assets": ["packages/constants/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "bundle": true,
-        "sourcemap": true,
-        "metafile": true,
-        "globalName": "LitJsSdk_constants",
-        "outfile": "dist/packages/constants-vanilla/constants.js",
-        "entryPoints": ["./packages/constants/src/index.ts"],
-        "define": { "global": "window" },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
 
     "copyJSONFilesToDist": {
       "executor": "nx:run-commands",

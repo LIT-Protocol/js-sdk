@@ -49,7 +49,6 @@
     "tools": "yarn node ./tools/scripts/tools.mjs",
     "graph": "nx graph",
     "npm:login": "npm login",
-    "cy:open:html": "yarn tools --test --e2e html",
     "cy:open:react": "yarn tools --test --e2e react",
     "dev": "nodemon --watch packages --ext js,ts --exec \"yarn build:packages && yarn tools --yalc --publish\"",
     "dev:target": "yarn tools --watch --target",
