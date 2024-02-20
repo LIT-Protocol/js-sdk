@@ -7,6 +7,7 @@ import {
   AUTH_METHOD_TYPE_IDS,
   AuthMethodType,
   EITHER_TYPE,
+  LIT_ACTION_IPFS_HASH,
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
@@ -92,7 +93,6 @@ import { computeAddress } from '@ethersproject/transactions';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
 
 import { LitCore } from '@lit-protocol/core';
-import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 import {
   ILitResource,
@@ -981,9 +981,42 @@ export class LitNodeClientNodeJs
   };
 
   // ========== Promise Handlers ==========
+  getIpfsId = async ({
+    dataToHash,
+    authSig,
+    debug = false,
+  }: {
+    dataToHash: string;
+    authSig: AuthSig;
+    debug?: boolean;
+  }) => {
+    const laRes = await this.executeJs({
+      authSig,
+      ipfsId: LIT_ACTION_IPFS_HASH,
+      authMethods: [],
+      jsParams: {
+        dataToHash,
+      },
+      debug,
+    }).catch((e) => {
+      logError('Error getting IPFS ID', e);
+      throw e;
+    });
+
+    const data = JSON.parse(laRes.response).res;
+
+    if (!data.success) {
+      logError('Error getting IPFS ID', data.data);
+    }
+
+    return data.data;
+  };
 
   /**
    * Run lit action on a single deterministicly selected node. It's important that the nodes use the same deterministic selection algorithm.
+   *
+   * Lit Action: dataToHash -> IPFS CID
+   * QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3
    *
    * @param { ExecuteJsProps } params
    *
@@ -1016,47 +1049,11 @@ export class LitNodeClientNodeJs
     }
 
     // determine which node to run on
-    let ipfsId;
-
-    if (params.code) {
-      // hash the code to get IPFS id
-      const blockstore = new IPFSBundledSDK.MemoryBlockstore();
-
-      let content: string | Uint8Array = params.code;
-
-      if (typeof content === 'string') {
-        content = new TextEncoder().encode(content);
-      } else {
-        throwError({
-          message:
-            'Invalid code content type for single node execution.  Your code param must be a string',
-          errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-          errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-        });
-      }
-
-      let lastCid;
-      for await (const { cid } of IPFSBundledSDK.importer(
-        [{ content }],
-        blockstore,
-        {
-          onlyHash: true,
-        }
-      )) {
-        lastCid = cid;
-      }
-
-      ipfsId = lastCid;
-    } else {
-      ipfsId = params.ipfsId;
-    }
-
-    if (!ipfsId) {
-      return throwError({
-        message: 'ipfsId is required',
-        error: LIT_ERROR.INVALID_PARAM_TYPE,
-      });
-    }
+    let ipfsId = await this.getIpfsId({
+      dataToHash: code!,
+      authSig: authSig!,
+      debug,
+    });
 
     // select targetNodeRange number of random index of the bootstrapUrls.length
     const randomSelectedNodeIndexes: Array<number> = [];

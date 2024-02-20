@@ -11,7 +11,6 @@ import {
 import { getRecapNamespaceAndAbility } from './utils';
 import { sanitizeSiweMessage } from '../siwe';
 import { AuthSig } from '../models';
-// import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   #inner: Recap;
