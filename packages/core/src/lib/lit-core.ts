@@ -11,6 +11,10 @@ import {
   hashEVMContractConditions,
   hashSolRpcConditions,
   hashUnifiedAccessControlConditions,
+  validateAccessControlConditionsSchema,
+  validateEVMContractConditionsSchema,
+  validateSolRpcConditionsSchema,
+  validateUnifiedAccessControlConditionsSchema,
 } from '@lit-protocol/access-control-conditions';
 
 import {
@@ -49,6 +53,7 @@ import {
   JsonPkpSignRequest,
   KV,
   LitContractContext,
+  LitContractResolverContext,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
   NodeAttestation,
@@ -78,6 +83,8 @@ export class LitCore {
   networkPubKeySet: string | null;
   hdRootPubkeys: string[] | null;
   latestBlockhash: string | null;
+  lastBlockHashRetrieved: number | null;
+  networkSyncInterval: any | null;
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -109,6 +116,14 @@ export class LitCore {
           this.config = {
             ..._defaultConfig,
             litNetwork: LitNetwork.Manzano,
+            checkSevSnpAttestation: true,
+          } as unknown as LitNodeClientConfig;
+          break;
+        case LitNetwork.Habanero:
+          this.config = {
+            ..._defaultConfig,
+            litNetwork: LitNetwork.Habanero,
+            checkSevSnpAttestation: true,
           } as unknown as LitNodeClientConfig;
           break;
         default:
@@ -139,6 +154,7 @@ export class LitCore {
     this.networkPubKeySet = null;
     this.hdRootPubkeys = null;
     this.latestBlockhash = null;
+    this.lastBlockHashRetrieved = null;
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
@@ -280,10 +296,12 @@ export class LitCore {
   listenForNewEpoch = async (): Promise<void> => {
     if (
       this.config.litNetwork === LitNetwork.Manzano ||
-      this.config.litNetwork === LitNetwork.Habanero
+      this.config.litNetwork === LitNetwork.Habanero ||
+      this.config.litNetwork === LitNetwork.Custom
     ) {
       const stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork as any
+        this.config.litNetwork as any,
+        this.config.contractContext
       );
       log(
         'listening for state change on staking contract: ',
@@ -293,7 +311,42 @@ export class LitCore {
       stakingContract.on('StateChanged', async (state: StakingStates) => {
         log(`New state detected: "${state}"`);
         if (state === StakingStates.NextValidatorSetLocked) {
+          log(
+            'State found to be new validator set locked, checking validator set'
+          );
+          const oldNodeUrls: string[] = [...this.config.bootstrapUrls].sort();
           await this.setNewConfig();
+          const currentNodeUrls: string[] = this.config.bootstrapUrls.sort();
+          const delta: string[] = currentNodeUrls.filter((item) =>
+            oldNodeUrls.includes(item)
+          );
+          // if the sets differ we reconnect.
+          if (delta.length > 1) {
+            // check if the node sets are non matching and re connect if they do not.
+            /*
+              TODO: While this covers most cases where a node may come in or out of the active 
+              set which we will need to re attest to the execution environments.
+              The sdk currently does not know if there is an active network operation pending.
+              Such that the state when the request was sent will now mutate when the response is sent back.
+              The sdk should be able to understand its current execution environment and wait on an active 
+              network request to the previous epoch's node set before changing over.
+              
+            */
+            log(
+              'Active validator sets changed, new validators ',
+              delta,
+              'starting node connection'
+            );
+            this.connectedNodes =
+              await this._runHandshakeWithBootstrapUrls().catch(
+                (err: NodeClientErrorV0 | NodeClientErrorV1) => {
+                  logError(
+                    'Error while attempting to reconnect to nodes after epoch transition: ',
+                    err.message
+                  );
+                }
+              );
+          }
         }
       });
     }
@@ -338,9 +391,20 @@ export class LitCore {
     // -- handshake with each node
     await this.setNewConfig();
     await this.listenForNewEpoch();
+    await this._runHandshakeWithBootstrapUrls();
+  };
 
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+
+  _runHandshakeWithBootstrapUrls = async (): Promise<any> => {
     // -- handshake with each node
     const requestId = this.getRequestId();
+
+    // reset connectedNodes for the new handshake operation
+    this.connectedNodes = new Set();
 
     if (this.config.bootstrapUrls.length <= 0) {
       throwError({
@@ -387,7 +451,11 @@ export class LitCore {
             );
           }
 
-          if (this.config.checkNodeAttestation) {
+          if (
+            this.config.checkNodeAttestation ||
+            this.config.litNetwork === LitNetwork.Manzano ||
+            this.config.litNetwork === LitNetwork.Habanero
+          ) {
             // check attestation
             if (!resp.attestation) {
               logErrorWithRequestId(
@@ -484,6 +552,7 @@ export class LitCore {
             });
           }
 
+          this.lastBlockHashRetrieved = Date.now();
           this.ready = true;
 
           log(
@@ -504,6 +573,30 @@ export class LitCore {
           if (isBrowser()) {
             document.dispatchEvent(new Event('lit-ready'));
           }
+          // if the interval is defined we clear it
+          if (this.networkSyncInterval) {
+            clearInterval(this.networkSyncInterval);
+          }
+
+          this.networkSyncInterval = setInterval(async () => {
+            if (Date.now() - this.lastBlockHashRetrieved! >= 30_000) {
+              log(
+                'Syncing state for new network context current config: ',
+                this.config,
+                'current blockhash: ',
+                this.lastBlockHashRetrieved
+              );
+              await this._runHandshakeWithBootstrapUrls().catch((err) => {
+                throw err;
+              });
+              log(
+                'Done syncing state new config: ',
+                this.config,
+                'new blockhash: ',
+                this.lastBlockHashRetrieved
+              );
+            }
+          }, 30_000);
 
           // @ts-ignore: Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?ts(2794)
           resolve();
@@ -700,6 +793,32 @@ export class LitCore {
     }
 
     return authSig!;
+  };
+
+  validateAccessControlConditionsSchema = async (
+    params: MultipleAccessControlConditions
+  ): Promise<boolean> => {
+    // ========== Prepare Params ==========
+    const {
+      accessControlConditions,
+      evmContractConditions,
+      solRpcConditions,
+      unifiedAccessControlConditions,
+    } = params;
+
+    if (accessControlConditions) {
+      await validateAccessControlConditionsSchema(accessControlConditions);
+    } else if (evmContractConditions) {
+      await validateEVMContractConditionsSchema(evmContractConditions);
+    } else if (solRpcConditions) {
+      await validateSolRpcConditionsSchema(solRpcConditions);
+    } else if (unifiedAccessControlConditions) {
+      await validateUnifiedAccessControlConditionsSchema(
+        unifiedAccessControlConditions
+      );
+    }
+
+    return true;
   };
 
   /**

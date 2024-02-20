@@ -9,7 +9,13 @@ import {
   AuthMethod,
   MintRequestBody,
 } from '@lit-protocol/types';
-import { AuthMethodType, ProviderType } from '@lit-protocol/constants';
+import {
+  AuthMethodType,
+  ProviderType,
+  RELAY_URL_CAYENNE,
+  RELAY_URL_HABANERO,
+  RELAY_URL_MANZANO,
+} from '@lit-protocol/constants';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitRelay } from './relay';
 import { BaseProvider } from './providers/BaseProvider';
@@ -110,13 +116,13 @@ export class LitAuthClient {
 
       switch (this.litNodeClient.config.litNetwork) {
         case 'cayenne':
-          url = 'https://relayer-server-staging-cayenne.getlit.dev';
+          url = RELAY_URL_CAYENNE;
           break;
         case 'habanero':
-          url = 'https://habanero-relayer.getlit.dev';
+          url = RELAY_URL_HABANERO;
           break;
         case 'manzano':
-          url = 'https://manzano-relayer.getlit.dev';
+          url = RELAY_URL_MANZANO;
           break;
       }
 

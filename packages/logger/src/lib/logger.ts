@@ -11,7 +11,7 @@ export enum LogLevel {
   FATAL = 4,
   TIMING_START = 5,
   TIMING_END = 6,
-  OFF = 5,
+  OFF = -1,
 }
 
 const colours = {
@@ -206,20 +206,24 @@ export class Logger {
   private _logs: Log[] = [];
   private _logHashes: Map<string, boolean> = new Map();
   private _config: Record<string, any> | undefined;
+  private _isParent: boolean;
+  private _children: Map<string, Logger>;
 
   public static createLogger(
     category: string,
     level: LogLevel,
     id: string,
+    isParent: boolean,
     config?: Record<string, any>
   ): Logger {
-    return new Logger(category, level, id, config);
+    return new Logger(category, level, id, isParent, config);
   }
 
   private constructor(
     category: string,
     level: LogLevel,
     id: string,
+    isParent: boolean,
     config?: Record<string, any>
   ) {
     this._category = category;
@@ -227,6 +231,8 @@ export class Logger {
     this._id = id;
     this._consoleHandler = _resolveLoggingHandler(this._level);
     this._config = config;
+    this._children = new Map();
+    this._isParent = isParent;
   }
 
   get id(): string {
@@ -247,6 +253,10 @@ export class Logger {
 
   get Config(): Record<string, any> | undefined {
     return this._config;
+  }
+
+  get Children(): Map<string, Logger> {
+    return this._children;
   }
 
   public setLevel(level: LogLevel): void {
@@ -332,23 +342,29 @@ export class Logger {
 
   private _addLog(log: Log) {
     this._logs.push(log);
-    this._addToLocalStorage(log);
+
+    // TODO: currently we are not deleting old request id's which over time will fill local storage as the maximum storage size is 10mb
+    // we should be deleting keys from the front of the collection of `Object.keys(category)` such that the first keys entered are deleted when we reach a pre defined key threshold
+    // this implementation assumes that serialization / deserialization from `localStorage` keeps the same key ordering in each `category` object as we will asssume the array produced from `Object.keys` will always be the same ordering.
+    // which then allows us to start at the front of the array and do `delete` operation on each key we wish to delete from the object.
+    //log.id && this._addToLocalStorage(log);
   }
 
   private _addToLocalStorage(log: Log) {
     if (globalThis.localStorage) {
-      let bucket: any = globalThis.localStorage.getItem(log.id);
+      let bucket: { [index: string]: string[] } | string | null =
+        globalThis.localStorage.getItem(log.category);
       if (bucket) {
-        bucket = JSON.parse(bucket);
-        bucket?.logs.push(log.toString());
-        globalThis.localStorage.setItem(log.id, _safeStringify(bucket));
+        bucket = JSON.parse(bucket) as { [index: string]: string[] };
+        if (!bucket[log.id]) {
+          bucket[log.id] = [];
+        }
+        bucket[log.id].push(log.toString());
+        globalThis.localStorage.setItem(log.category, _safeStringify(bucket));
       } else {
-        globalThis.localStorage.setItem(
-          log.id,
-          _safeStringify({
-            logs: [log.toString()],
-          })
-        );
+        const bucket: { [index: string]: string[] } = {};
+        bucket[log.id] = [log.toString()];
+        globalThis.localStorage.setItem(log.category, _safeStringify(bucket));
       }
     }
   }
@@ -397,49 +413,95 @@ export class LogManager {
 
   // if a logger is given an id it will persist logs under its logger instance
   public get(category: string, id?: string): Logger {
-    let instance = this._loggers.get(`${category}${id}`);
-    if (instance !== undefined) {
+    let instance = this._loggers.get(category);
+    if (!instance && !id) {
+      this._loggers.set(
+        category,
+        Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
+      );
+
+      instance = this._loggers.get(category) as Logger;
+      instance.Config = this._config;
       return instance;
     }
 
-    const logger = Logger.createLogger(
-      category,
-      this._level ?? LogLevel.INFO,
-      id ?? ''
-    );
+    if (id) {
+      if (!instance) {
+        this._loggers.set(
+          category,
+          Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
+        );
 
-    logger.Config = this._config as Record<string, any>;
+        instance = this._loggers.get(category) as Logger;
+        instance.Config = this._config;
+      }
+      let children = instance?.Children;
+      let child = children?.get(id);
+      if (child) {
+        return child;
+      }
+      children?.set(
+        id,
+        Logger.createLogger(
+          category,
+          this._level ?? LogLevel.INFO,
+          id ?? '',
+          true
+        )
+      );
 
-    this._loggers.set(`${category}${id}`, logger);
-    return logger;
+      child = children?.get(id) as Logger;
+      child.Config = this._config;
+      return children?.get(id) as Logger;
+      // fall through condition for if there is no id for the logger and the category is not yet created.
+      // ex: LogManager.Instance.get('foo');
+    } else if (!instance) {
+      this._loggers.set(
+        category,
+        Logger.createLogger(category, this._level ?? LogLevel.INFO, '', true)
+      );
+
+      instance = this._loggers.get(category) as Logger;
+      instance.Config = this._config;
+    }
+
+    return instance as Logger;
   }
 
-  getById(id: string): Logger | undefined {
-    for (const logger of this._loggers) {
-      if (logger[1].id == id) {
-        return logger[1];
+  getById(id: string): string[] {
+    let logStrs: string[] = [];
+    for (const category of this._loggers.entries()) {
+      let logger = category[1].Children.get(id);
+      if (logger) {
+        let logStr = [];
+        for (const log of logger.Logs) {
+          logStr.push(log.toString());
+        }
+        logStrs = logStrs.concat(logStr);
       }
     }
 
-    return undefined;
+    return logStrs;
   }
 
   public getLogsForId(id: string): string[] {
-    if (globalThis.localStorage) {
-      let bucket: string | null = globalThis.localStorage.getItem(id);
-      if (bucket !== null) {
-        let data = JSON.parse(bucket as string);
-        return data.logs as string[];
+    let logsForRequest: string[] = this.getById(id);
+    if (logsForRequest.length < 1 && globalThis.localStorage) {
+      for (const category of this._loggers.keys()) {
+        let bucketStr: string | null =
+          globalThis.localStorage.getItem(category);
+        let bucket: { [key: string]: string[] } = JSON.parse(
+          bucketStr as string
+        );
+        if (bucket && bucket[id]) {
+          const logsForId: string[] = bucket[id].filter((log: string) =>
+            log.includes(id)
+          );
+          logsForRequest = logsForId.concat(logsForRequest);
+        }
       }
-    } else {
-      let logs = this.getById(id)?.Logs;
-      let logsStrs = [];
-      for (const log of logs as Log[]) {
-        logsStrs.push(log.toString());
-      }
-      return logsStrs;
     }
 
-    return [];
+    return logsForRequest;
   }
 }
