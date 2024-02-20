@@ -1,10 +1,12 @@
 /// <reference types="jest" />
 
+import { ecdsaVerify } from '@lit-protocol/wasm/wasm';
 import { ethers } from 'ethers';
 import {
   messageHex,
   presignatureHex,
   publicKeyHex,
+  signatureHex,
   signatureSharesHex,
 } from './ecdsa-data.spec.json';
 import { ecdsaCombine, ecdsaDeriveKey, init } from './ng';
@@ -15,17 +17,65 @@ const presignature = Buffer.from(presignatureHex, 'hex');
 const signatureShares = signatureSharesHex.map((s) => Buffer.from(s, 'hex'));
 const message = Buffer.from(messageHex, 'hex');
 
+const signature = {
+  r: Buffer.from(signatureHex.r, 'hex'),
+  s: Buffer.from(signatureHex.s, 'hex'),
+  v: signatureHex.v,
+};
+
 describe('ECDSA', () => {
   beforeEach(async () => {
     await init();
   });
 
   it('should combine signatures', () => {
-    const signature = ecdsaCombine('K256', presignature, signatureShares);
-    expect(signature).toBeInstanceOf(Uint8Array);
-    expect(ethers.utils.recoverPublicKey(message, signature)).toEqual(
-      uncompressedPublicKey
-    );
+    const [r, s, v] = ecdsaCombine('K256', presignature, signatureShares);
+    expect(r).toBeInstanceOf(Uint8Array);
+    expect(s).toBeInstanceOf(Uint8Array);
+    expect(v === 0 || v === 1).toBeTruthy();
+
+    expect(Buffer.from(r)).toEqual(signature.r);
+    expect(Buffer.from(s)).toEqual(signature.s);
+    expect(v).toEqual(signature.v);
+  });
+
+  it('should generate valid signatures for ethers', () => {
+    expect(
+      ethers.utils.recoverPublicKey(
+        message,
+        Buffer.concat([signature.r, signature.s, Buffer.from([signature.v])])
+      )
+    ).toEqual(uncompressedPublicKey);
+  });
+
+  it('should verify signature', () => {
+    ecdsaVerify('K256', message, publicKey, [
+      signature.r,
+      signature.s,
+      signature.v,
+    ]);
+  });
+
+  it('should reject invalid signature', () => {
+    const invalidS = Buffer.from(signature.s);
+    invalidS[invalidS.length - 1] ^= 0x01;
+    expect(() => {
+      ecdsaVerify('K256', message, publicKey, [
+        signature.r,
+        invalidS,
+        signature.v,
+      ]);
+    }).toThrow();
+
+    const invalidR = Buffer.from(signature.r);
+    invalidR[invalidR.length - 1] ^= 0x01;
+    expect(() => {
+      ecdsaVerify('K256', message, publicKey, [
+        invalidR,
+        signature.s,
+        signature.v,
+      ]);
+    }).toThrow();
   });
 
   it('should derive keys', () => {
