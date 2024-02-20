@@ -6,11 +6,13 @@ import {
   combineSignatureShares,
   verifySignature,
   combineEcdsaShares,
+  EcdsaSignatureShare,
 } from './crypto';
 import * as ethers from 'ethers';
 import { joinSignature } from 'ethers/lib/utils';
 
 import * as blsSdk from '@lit-protocol/bls-sdk';
+import { SIGTYPE } from '@lit-protocol/constants';
 
 const publicKey =
   '8e29447d7b0666fe41c357dbbdbdac0ac8ac973f88439a07f85fa31fa6fa3cea87c2eaa8b367e1c97764800fb5636892';
@@ -160,9 +162,9 @@ describe('combine ECDSA Shares', () => {
   });
 
   it('Should recombine ECDSA signature shares', async () => {
-    const sigShares = [
+    const sigShares: EcdsaSignatureShare[] = [
       {
-        sigType: 'ECDSA_CAIT_SITH',
+        sigType: 'ECDSA_CAIT_SITH' as SIGTYPE,
         signatureShare:
           'BC8108AD9CAE8358942BB4B27632B87FFA705CCB675F85A59847CC1B84845A38',
         shareIndex: 0,
@@ -174,7 +176,7 @@ describe('combine ECDSA Shares', () => {
         sigName: 'sig',
       },
       {
-        sigType: 'ECDSA_CAIT_SITH',
+        sigType: 'ECDSA_CAIT_SITH' as SIGTYPE,
         signatureShare:
           'BA77EB500884A60583DEA49578D4BB64BB55EF497F37C88DF935D739CE8E0A9F',
         shareIndex: 0,
@@ -186,7 +188,7 @@ describe('combine ECDSA Shares', () => {
         sigName: 'sig',
       },
       {
-        sigType: 'ECDSA_CAIT_SITH',
+        sigType: 'ECDSA_CAIT_SITH' as SIGTYPE,
         signatureShare:
           'EF850AE61B6D658976B2560B880BF03ABC1A070BACDEAE2311781F65A524F245',
         shareIndex: 0,
