@@ -6,7 +6,7 @@ import {
   EthWalletAuthenticateOptions,
 } from '@lit-protocol/types';
 import { LIT_CHAINS, AuthMethodType, LIT_ERROR } from '@lit-protocol/constants';
-import { SiweMessage } from 'lit-siwe';
+import { SiweMessage } from 'siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
 import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
