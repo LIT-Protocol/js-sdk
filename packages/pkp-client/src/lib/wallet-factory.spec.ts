@@ -67,7 +67,7 @@ describe('WalletFactory', () => {
     };
 
     expect(() => WalletFactory.createWallet('eth', ethProp)).toThrowError(
-      'controllerAuthSig and authContext are defined, can only use one or the other'
+      'Multiple authentications are defined, can only use one at a time'
     );
   });
 
