@@ -118,7 +118,7 @@ import * as siwe from 'siwe';
 interface CapacityCreditsReq {
   dAppOwnerWallet: ethers.Wallet;
   capacityTokenId: string;
-  delegateeAddresses: string[];
+  delegateeAddresses?: string[];
   uses?: string;
   domain?: string;
   expiration?: string;
@@ -135,8 +135,7 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
-{
+  implements LitClientSessionManager {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -195,6 +194,11 @@ export class LitNodeClientNodeJs
       statement,
     } = params;
 
+    // -- if delegateeAddresses is not provided, set it to an empty array
+    if (!delegateeAddresses) {
+      delegateeAddresses = [];
+    }
+
     // -- This is the owner address who holds the Capacity Credits NFT token and wants to delegate its
     // usage to a list of delegatee addresses
     const dAppOwnerWalletAddress = ethers.utils.getAddress(
@@ -221,8 +225,8 @@ export class LitNodeClientNodeJs
     }
 
     // -- validate
-    if (!dAppOwnerWallet || !delegateeAddresses) {
-      throw new Error('Both parameters must exist');
+    if (!dAppOwnerWallet) {
+      throw new Error('dAppOwnerWallet must exist');
     }
 
     // -- validate dAppOwnerWallet is an ethers wallet
@@ -230,10 +234,10 @@ export class LitNodeClientNodeJs
     //   throw new Error('dAppOwnerWallet must be an ethers wallet');
     // }
 
-    // -- validate delegateeAddresses has to be an array and has to have at least one address
-    if (!Array.isArray(delegateeAddresses) || delegateeAddresses.length === 0) {
-      throw new Error(
-        'delegateeAddresses must be an array and has to have at least one'
+    // -- Strip the 0x prefix from each element in the addresses array if it exists
+    if (delegateeAddresses && delegateeAddresses.length > 0) {
+      delegateeAddresses = delegateeAddresses.map((address) =>
+        address.startsWith('0x') ? address.slice(2) : address
       );
     }
 
@@ -241,11 +245,6 @@ export class LitNodeClientNodeJs
     // Note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
     // lit-ratelimitincrease://{tokenId}
     const litResource = new LitRLIResource(capacityTokenId);
-
-    // Strip the 0x prefix from each element in the addresses array
-    delegateeAddresses = delegateeAddresses.map((address) =>
-      address.startsWith('0x') ? address.slice(2) : address
-    );
 
     const recapObject = await this.generateSessionCapabilityObjectWithWildcards(
       [litResource]
@@ -2768,8 +2767,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
