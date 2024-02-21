@@ -7,6 +7,7 @@ import {
   AUTH_METHOD_TYPE_IDS,
   AuthMethodType,
   EITHER_TYPE,
+  LIT_ACTION_IPFS_HASH,
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
@@ -59,6 +60,7 @@ import {
   GetWalletSigProps,
   JsonExecutionRequest,
   JsonPkpSignRequest,
+  LitClientSessionManager,
   LitNodeClientConfig,
   NodeBlsSigningShare,
   NodeCommandResponse,
@@ -89,11 +91,8 @@ import {
 
 import { computeAddress } from '@ethersproject/transactions';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-import { SiweMessage } from 'lit-siwe';
-import * as siweNormal from 'siwe';
 
 import { LitCore } from '@lit-protocol/core';
-import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
 
 import {
   ILitResource,
@@ -119,7 +118,7 @@ import * as siwe from 'siwe';
 interface CapacityCreditsReq {
   dAppOwnerWallet: ethers.Wallet;
   capacityTokenId: string;
-  delegateeAddresses: string[];
+  delegateeAddresses?: string[];
   uses?: string;
   domain?: string;
   expiration?: string;
@@ -134,7 +133,10 @@ interface CapacityCreditsRes {
 
 /** ---------- Main Export Class ---------- */
 
-export class LitNodeClientNodeJs extends LitCore {
+export class LitNodeClientNodeJs
+  extends LitCore
+  implements LitClientSessionManager
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -193,6 +195,11 @@ export class LitNodeClientNodeJs extends LitCore {
       statement,
     } = params;
 
+    // -- if delegateeAddresses is not provided, set it to an empty array
+    if (!delegateeAddresses) {
+      delegateeAddresses = [];
+    }
+
     // -- This is the owner address who holds the Capacity Credits NFT token and wants to delegate its
     // usage to a list of delegatee addresses
     const dAppOwnerWalletAddress = ethers.utils.getAddress(
@@ -219,8 +226,8 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // -- validate
-    if (!dAppOwnerWallet || !delegateeAddresses) {
-      throw new Error('Both parameters must exist');
+    if (!dAppOwnerWallet) {
+      throw new Error('dAppOwnerWallet must exist');
     }
 
     // -- validate dAppOwnerWallet is an ethers wallet
@@ -228,10 +235,10 @@ export class LitNodeClientNodeJs extends LitCore {
     //   throw new Error('dAppOwnerWallet must be an ethers wallet');
     // }
 
-    // -- validate delegateeAddresses has to be an array and has to have at least one address
-    if (!Array.isArray(delegateeAddresses) || delegateeAddresses.length === 0) {
-      throw new Error(
-        'delegateeAddresses must be an array and has to have at least one'
+    // -- Strip the 0x prefix from each element in the addresses array if it exists
+    if (delegateeAddresses && delegateeAddresses.length > 0) {
+      delegateeAddresses = delegateeAddresses.map((address) =>
+        address.startsWith('0x') ? address.slice(2) : address
       );
     }
 
@@ -239,11 +246,6 @@ export class LitNodeClientNodeJs extends LitCore {
     // Note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
     // lit-ratelimitincrease://{tokenId}
     const litResource = new LitRLIResource(capacityTokenId);
-
-    // Strip the 0x prefix from each element in the addresses array
-    delegateeAddresses = delegateeAddresses.map((address) =>
-      address.startsWith('0x') ? address.slice(2) : address
-    );
 
     const recapObject = await this.generateSessionCapabilityObjectWithWildcards(
       [litResource]
@@ -682,7 +684,7 @@ export class LitNodeClientNodeJs extends LitCore {
     sessionKeyUri: any;
     resourceAbilityRequests: Array<LitResourceAbilityRequest>;
   }): Promise<boolean> => {
-    const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
+    const authSigSiweMessage = new siwe.SiweMessage(authSig.signedMessage);
 
     try {
       await authSigSiweMessage.validate(authSig.sig);
@@ -979,9 +981,42 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   // ========== Promise Handlers ==========
+  getIpfsId = async ({
+    dataToHash,
+    authSig,
+    debug = false,
+  }: {
+    dataToHash: string;
+    authSig: AuthSig;
+    debug?: boolean;
+  }) => {
+    const laRes = await this.executeJs({
+      authSig,
+      ipfsId: LIT_ACTION_IPFS_HASH,
+      authMethods: [],
+      jsParams: {
+        dataToHash,
+      },
+      debug,
+    }).catch((e) => {
+      logError('Error getting IPFS ID', e);
+      throw e;
+    });
+
+    const data = JSON.parse(laRes.response).res;
+
+    if (!data.success) {
+      logError('Error getting IPFS ID', data.data);
+    }
+
+    return data.data;
+  };
 
   /**
    * Run lit action on a single deterministicly selected node. It's important that the nodes use the same deterministic selection algorithm.
+   *
+   * Lit Action: dataToHash -> IPFS CID
+   * QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3
    *
    * @param { ExecuteJsProps } params
    *
@@ -1014,47 +1049,11 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // determine which node to run on
-    let ipfsId;
-
-    if (params.code) {
-      // hash the code to get IPFS id
-      const blockstore = new IPFSBundledSDK.MemoryBlockstore();
-
-      let content: string | Uint8Array = params.code;
-
-      if (typeof content === 'string') {
-        content = new TextEncoder().encode(content);
-      } else {
-        throwError({
-          message:
-            'Invalid code content type for single node execution.  Your code param must be a string',
-          errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-          errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-        });
-      }
-
-      let lastCid;
-      for await (const { cid } of IPFSBundledSDK.importer(
-        [{ content }],
-        blockstore,
-        {
-          onlyHash: true,
-        }
-      )) {
-        lastCid = cid;
-      }
-
-      ipfsId = lastCid;
-    } else {
-      ipfsId = params.ipfsId;
-    }
-
-    if (!ipfsId) {
-      return throwError({
-        message: 'ipfsId is required',
-        error: LIT_ERROR.INVALID_PARAM_TYPE,
-      });
-    }
+    let ipfsId = await this.getIpfsId({
+      dataToHash: code!,
+      authSig: authSig!,
+      debug,
+    });
 
     // select targetNodeRange number of random index of the bootstrapUrls.length
     const randomSelectedNodeIndexes: Array<number> = [];
@@ -1817,8 +1816,6 @@ export class LitNodeClientNodeJs extends LitCore {
     }
     toSign = arr;
 
-    let requestId;
-
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
@@ -1864,10 +1861,10 @@ export class LitNodeClientNodeJs extends LitCore {
       },
       this.config.retryTolerance
     );
-    requestId = res.requestId;
+    const requestId = res.requestId;
 
     // -- case: promises rejected
-    if (res.success === false) {
+    if (!res.success) {
       this._throwNodeError(res as RejectedNodePromises);
     }
 
@@ -2495,8 +2492,8 @@ export class LitNodeClientNodeJs extends LitCore {
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     // Try to get it from local storage, if not generates one~
-    let sessionKey = params.sessionKey ?? this.getSessionKey();
-    let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
+    const sessionKey = params.sessionKey ?? this.getSessionKey();
+    const sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
     const pkpEthAddress = (function () {
@@ -2533,7 +2530,7 @@ export class LitNodeClientNodeJs extends LitCore {
       });
 
       // regular siwe
-      siweMessage = new siweNormal.SiweMessage({
+      siweMessage = new siwe.SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
         address: pkpEthAddress,
@@ -2549,7 +2546,7 @@ export class LitNodeClientNodeJs extends LitCore {
       siweMessage = recapObject.addToSiweMessage(siweMessage);
     } else {
       // lit-siwe (NOT regular siwe)
-      siweMessage = new SiweMessage({
+      siweMessage = new siwe.SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
         address: pkpEthAddress,
@@ -2563,13 +2560,13 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
-    let siweMessageStr: string = (siweMessage as SiweMessage).prepareMessage();
+    const siweMessageStr: string = (
+      siweMessage as siwe.SiweMessage
+    ).prepareMessage();
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
-    let requestId;
-
-    let body = {
+    const body = {
       sessionKey: sessionKeyUri,
       authMethods: params.authMethods,
       pkpPublicKey: params.pkpPublicKey,
@@ -2578,7 +2575,7 @@ export class LitNodeClientNodeJs extends LitCore {
       siweMessage: siweMessageStr,
     };
 
-    let wrapper = async (
+    const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       logWithRequestId(id, 'signSessionKey body', body);
@@ -2607,7 +2604,7 @@ export class LitNodeClientNodeJs extends LitCore {
       return res;
     };
 
-    let res = await executeWithRetry<
+    const res = await executeWithRetry<
       RejectedNodePromises | SuccessNodePromises<any>
     >(
       wrapper,
@@ -2619,7 +2616,7 @@ export class LitNodeClientNodeJs extends LitCore {
       this.config.retryTolerance
     );
 
-    requestId = res.requestId;
+    const requestId = res.requestId;
     logWithRequestId(requestId, 'handleNodePromises res:', res);
 
     // -- case: promises rejected
@@ -2763,9 +2760,9 @@ export class LitNodeClientNodeJs extends LitCore {
   ): Promise<SessionSigsMap> => {
     // -- prepare
     // Try to get it from local storage, if not generates one~
-    let sessionKey = params.sessionKey ?? this.getSessionKey();
+    const sessionKey = params.sessionKey ?? this.getSessionKey();
 
-    let sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
+    const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
 
     // First get or generate the session capability object for the specified resources.
     const sessionCapabilityObject = params.sessionCapabilityObject
@@ -2773,7 +2770,7 @@ export class LitNodeClientNodeJs extends LitCore {
       : await this.generateSessionCapabilityObjectWithWildcards(
           params.resourceAbilityRequests.map((r) => r.resource)
         );
-    let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
+    const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
       throwError({
@@ -2782,7 +2779,7 @@ export class LitNodeClientNodeJs extends LitCore {
         errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
       });
     }
-    let nonce = this.latestBlockhash!;
+    const nonce = this.latestBlockhash!;
 
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({
@@ -2795,7 +2792,7 @@ export class LitNodeClientNodeJs extends LitCore {
       nonce,
     });
 
-    let needToResignSessionKey = await this.checkNeedToResignSessionKey({
+    const needToResignSessionKey = await this.checkNeedToResignSessionKey({
       authSig,
       sessionKeyUri,
       resourceAbilityRequests: params.resourceAbilityRequests,
@@ -2840,7 +2837,7 @@ export class LitNodeClientNodeJs extends LitCore {
     // - Let's sign the resources with the session key
     // - 5 minutes is the default expiration for a session signature
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
-    let sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
+    const sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
     const capabilities = params.capacityDelegationAuthSig
       ? [params.capacityDelegationAuthSig, authSig]
@@ -2865,7 +2862,7 @@ export class LitNodeClientNodeJs extends LitCore {
         nodeAddress,
       };
 
-      let signedMessage = JSON.stringify(toSign);
+      const signedMessage = JSON.stringify(toSign);
 
       // sanitise signedMessage, replace //n with /n
       // signedMessage = signedMessage.replaceAll(/\/\/n/g, '/n');
@@ -2878,7 +2875,7 @@ export class LitNodeClientNodeJs extends LitCore {
       );
 
       const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
-      let signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
+      const signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
 
       // log("signature", signature);
       signatures[nodeAddress] = {

@@ -1,3 +1,4 @@
+import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs';
 import { PKPCosmosWallet } from '@lit-protocol/pkp-cosmos';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { WalletFactory } from './wallet-factory';
@@ -18,6 +19,56 @@ describe('WalletFactory', () => {
     const ethWallet = WalletFactory.createWallet('eth', ethProp);
 
     expect(ethWallet).toBeInstanceOf(PKPEthersWallet);
+  });
+
+  it('should create an Ethereum wallet using auth context', () => {
+    const client = new LitNodeClientNodeJs({
+      litNetwork: 'localhost',
+    });
+    const ethProp: PKPEthersWalletProp = {
+      authContext: {
+        client,
+        authMethods: [],
+        getSessionSigsProps: {
+          chain: 'ethereum',
+          resourceAbilityRequests: [],
+        },
+      },
+      pkpPubKey: LITCONFIG.PKP_PUBKEY,
+      rpcs: {
+        eth: LITCONFIG.CHRONICLE_RPC,
+        cosmos: LITCONFIG.COSMOS_RPC,
+      },
+    };
+    const ethWallet = WalletFactory.createWallet('eth', ethProp);
+
+    expect(ethWallet).toBeInstanceOf(PKPEthersWallet);
+  });
+
+  it('should throw when creating an Ethereum wallet using auth sig and auth context simultaneously', () => {
+    const client = new LitNodeClientNodeJs({
+      litNetwork: 'localhost',
+    });
+    const ethProp: PKPEthersWalletProp = {
+      controllerAuthSig: LITCONFIG.CONTROLLER_AUTHSIG,
+      authContext: {
+        client,
+        authMethods: [],
+        getSessionSigsProps: {
+          chain: 'ethereum',
+          resourceAbilityRequests: [],
+        },
+      },
+      pkpPubKey: LITCONFIG.PKP_PUBKEY,
+      rpcs: {
+        eth: LITCONFIG.CHRONICLE_RPC,
+        cosmos: LITCONFIG.COSMOS_RPC,
+      },
+    };
+
+    expect(() => WalletFactory.createWallet('eth', ethProp)).toThrowError(
+      'Multiple authentications are defined, can only use one at a time'
+    );
   });
 
   it('should create a Cosmos wallet', () => {

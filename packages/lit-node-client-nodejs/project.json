@@ -20,24 +20,6 @@
         "assets": ["packages/lit-node-client-nodejs/*.md"]
       }
     },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_litNodeClientNodejs",
-        "outfile": "dist/packages/lit-node-client-nodejs-vanilla/lit-node-client-nodejs.js",
-        "entryPoints": ["./packages/lit-node-client-nodejs/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false",
-          "global": "window"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
-      }
-    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
