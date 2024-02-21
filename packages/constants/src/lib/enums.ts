@@ -66,6 +66,8 @@ export enum LitNetwork {
 export enum ProviderType {
   Discord = 'discord',
   Google = 'google',
+  GoogleJwt = 'googleJwt',
+  GoogleBearer = 'googleBearer',
   EthWallet = 'ethwallet',
   WebAuthn = 'webauthn',
   Apple = 'apple',

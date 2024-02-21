@@ -162,21 +162,32 @@ export class LitAuthClient {
     log('resolving provider of type: ', type);
     switch (type) {
       case 'google':
+      case 'googleJwt':
         provider = new GoogleProvider({
           ...baseParams,
           ...(options as OAuthProviderOptions),
+          authMethodType: AuthMethodType.GoogleJwt,
         }) as unknown as T;
         break;
+        case 'googleBearer':
+          provider = new GoogleProvider({
+            ...baseParams,
+            ...(options as OAuthProviderOptions),
+            authMethodType: AuthMethodType.Google,
+          }) as unknown as T;
+          break;
       case 'apple':
         provider = new AppleProvider({
           ...baseParams,
           ...(options as OAuthProviderOptions),
+          authMethodType: AuthMethodType.AppleJwt,
         }) as unknown as T;
         break;
       case 'discord':
         provider = new DiscordProvider({
           ...baseParams,
           ...(options as OAuthProviderOptions),
+          authMethodType: AuthMethodType.Discord,
         }) as unknown as T;
         break;
       case 'ethwallet':

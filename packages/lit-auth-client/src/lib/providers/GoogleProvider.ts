@@ -20,10 +20,16 @@ export default class GoogleProvider extends BaseProvider {
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
+  
+  /**
+   * The actual AuthMethodType for GoogleProvider.  This can be either Google or GoogleJwt.
+   */
+  public authMethodType: AuthMethodType;
 
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
     this.redirectUri = options.redirectUri || window.location.origin;
+    this.authMethodType = options.authMethodType || AuthMethodType.GoogleJwt;
   }
 
   /**
@@ -65,7 +71,7 @@ export default class GoogleProvider extends BaseProvider {
     }
 
     // Check url for params
-    const { provider, idToken, state, error } = parseLoginParams(
+    const { provider, idToken, state, error, accessToken } = parseLoginParams(
       window.location.search
     );
 
@@ -95,18 +101,32 @@ export default class GoogleProvider extends BaseProvider {
       window.location.pathname
     );
 
-    // Check if id token is present in url
-    if (!idToken) {
-      throw new Error(
-        `Missing ID token in redirect callback URL for Google OAuth"`
-      );
+    if (this.authMethodType === AuthMethodType.Google) {
+      // Check if access token is present in url
+      if (!accessToken) {
+        throw new Error(
+          `Missing ID token in redirect callback URL for Google OAuth"`
+        );
+      }
+      const authMethod = {
+        authMethodType: AuthMethodType.Google,
+        accessToken: accessToken,
+      };
+      return authMethod;
     }
-
-    const authMethod = {
-      authMethodType: AuthMethodType.GoogleJwt,
-      accessToken: idToken,
-    };
-    return authMethod;
+    else {
+      // Check if id token is present in url
+      if (!idToken) {
+        throw new Error(
+          `Missing ID token in redirect callback URL for Google OAuth"`
+        );
+      }
+      const authMethod = {
+        authMethodType: AuthMethodType.GoogleJwt,
+        accessToken: idToken,
+      };
+      return authMethod;
+    }
   }
 
   /**
