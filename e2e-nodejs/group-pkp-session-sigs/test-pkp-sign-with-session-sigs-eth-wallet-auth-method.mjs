@@ -8,6 +8,10 @@ import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
 
 // NOTE: you need to hash data before you send it in.
 // If you send something that isn't 32 bytes, the nodes will return an error.
+// We can also simply use crypto.subtile like this:
+// const TO_SIGN = new Uint8Array(
+//   await crypto.subtle.digest('SHA-256', new TextEncoder().encode('meow'))
+// );
 const TO_SIGN = ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5]));
 
 export async function main() {
