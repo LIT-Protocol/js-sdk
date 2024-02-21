@@ -216,7 +216,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     ].filter(Boolean).length;
 
     if (providedAuthentications !== 1) {
-
       // log which authentications has the user provided
       if (this.controllerAuthSig) {
         logError('controllerAuthSig is provided');

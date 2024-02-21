@@ -135,7 +135,8 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager {
+  implements LitClientSessionManager
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -2767,8 +2768,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {

@@ -13,7 +13,8 @@
 <div class="tsd-page-title">
 <h2>@lit-protocol/js-sdk</h2></div>
 <div class="tsd-panel tsd-typography"><div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V3.1.3</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V3.2.0</h1>
+
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
 <a href="https://twitter.com/LitProtocol"><img src="https://img.shields.io/twitter/follow/litprotocol?label=Follow&style=social"/></a>
@@ -54,14 +55,6 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <p>Operable in both Node.js and the browser</p>
 <pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">add</span><span class="hl-1"> @</span><span class="hl-0">lit</span><span class="hl-1">-</span><span class="hl-0">protocol</span><span class="hl-1">/</span><span class="hl-0">lit</span><span class="hl-1">-</span><span class="hl-0">node</span><span class="hl-1">-</span><span class="hl-0">client</span>
 </code></pre>
-<p>or..</p>
-
-<a href="#vanilla-javascript-umd" id="vanilla-javascript-umd" style="color: inherit; text-decoration: none;">
-  <h3>Vanilla JavaScript (UMD)</h3>
-</a>
-<p>For usage directly in the browser with a script tag</p>
-<pre><code class="language-js"><span class="hl-2">&lt;</span><span class="hl-3">script</span><span class="hl-1"> </span><span class="hl-4">src</span><span class="hl-1">=</span><span class="hl-5">&quot;https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.js&quot;</span><span class="hl-2">&gt;&lt;/</span><span class="hl-3">script</span><span class="hl-2">&gt;</span><br/><span class="hl-2">&lt;</span><span class="hl-3">script</span><span class="hl-2">&gt;</span><br/><span class="hl-1">  const authSig = LitJsSdk_litNodeClient.checkAndSignAuthMessage(</span><span class="hl-6">{</span><span class="hl-0">chain</span><span class="hl-7">: </span><span class="hl-5">&#39;ethereum&#39;</span><span class="hl-6">}</span><span class="hl-1">);</span><br/><span class="hl-2">&lt;/</span><span class="hl-3">script</span><span class="hl-2">&gt;</span>
-</code></pre>
 </div>
 
 <div align="center">
@@ -85,13 +78,13 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <tbody><tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client-nodejs">@lit-protocol/lit-node-client-nodejs</a></td>
 <td><img src="https://img.shields.io/badge/-nodejs-2E8B57" alt="lit-node-client-nodejs" title="lit-node-client-nodejs"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client-nodejs">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-nodejs-vanilla/lit-node-client-nodejs.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-node-client">@lit-protocol/lit-node-client</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="lit-node-client" title="lit-node-client"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-node-client">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 </tbody></table>
@@ -108,145 +101,139 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <tbody><tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/access-control-conditions">@lit-protocol/access-control-conditions</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="access-control-conditions" title="access-control-conditions"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/access-control-conditions">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/access-control-conditions-vanilla/access-control-conditions.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-helpers">@lit-protocol/auth-helpers</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="auth-helpers" title="auth-helpers"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-helpers">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/auth-helpers-vanilla/auth-helpers.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/bls-sdk">@lit-protocol/bls-sdk</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="bls-sdk" title="bls-sdk"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/bls-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/bls-sdk-vanilla/bls-sdk.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/constants">@lit-protocol/constants</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="constants" title="constants"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/constants">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/constants-vanilla/constants.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/contracts-sdk">@lit-protocol/contracts-sdk</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="contracts-sdk" title="contracts-sdk"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/contracts-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/contracts-sdk-vanilla/contracts-sdk.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/core">@lit-protocol/core</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="core" title="core"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/core">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/core-vanilla/core.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/crypto">@lit-protocol/crypto</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="crypto" title="crypto"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/crypto">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/crypto-vanilla/crypto.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/ecdsa-sdk">@lit-protocol/ecdsa-sdk</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="ecdsa-sdk" title="ecdsa-sdk"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/ecdsa-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/ecdsa-sdk-vanilla/ecdsa-sdk.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/encryption">@lit-protocol/encryption</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="encryption" title="encryption"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/encryption">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/encryption-vanilla/encryption.min.js">Vanilla JS (UMD)</a></td>
-</tr>
-<tr>
-<td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/lit-third-party-libs">@lit-protocol/lit-third-party-libs</a></td>
-<td><img src="https://img.shields.io/badge/-universal-8A6496" alt="lit-third-party-libs" title="lit-third-party-libs"></td>
-<td>3.1.3</td>
-<td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/lit-third-party-libs">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-third-party-libs-vanilla/lit-third-party-libs.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/logger">@lit-protocol/logger</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="logger" title="logger"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/logger">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/logger-vanilla/logger.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc">@lit-protocol/misc</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="misc" title="misc"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/misc-vanilla/misc.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/nacl">@lit-protocol/nacl</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="nacl" title="nacl"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/nacl">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/nacl-vanilla/nacl.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-base">@lit-protocol/pkp-base</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="pkp-base" title="pkp-base"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-base">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-base-vanilla/pkp-base.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-client">@lit-protocol/pkp-client</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="pkp-client" title="pkp-client"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-client">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-client-vanilla/pkp-client.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-cosmos">@lit-protocol/pkp-cosmos</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="pkp-cosmos" title="pkp-cosmos"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-cosmos">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-cosmos-vanilla/pkp-cosmos.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-ethers">@lit-protocol/pkp-ethers</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="pkp-ethers" title="pkp-ethers"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-ethers">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-ethers-vanilla/pkp-ethers.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-sui">@lit-protocol/pkp-sui</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="pkp-sui" title="pkp-sui"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-sui">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-sui-vanilla/pkp-sui.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/pkp-walletconnect">@lit-protocol/pkp-walletconnect</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="pkp-walletconnect" title="pkp-walletconnect"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/pkp-walletconnect">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/pkp-walletconnect-vanilla/pkp-walletconnect.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/sev-snp-utils-sdk">@lit-protocol/sev-snp-utils-sdk</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="sev-snp-utils-sdk" title="sev-snp-utils-sdk"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/sev-snp-utils-sdk">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/sev-snp-utils-sdk-vanilla/sev-snp-utils-sdk.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/types">@lit-protocol/types</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="types" title="types"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/types">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/types-vanilla/types.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/uint8arrays">@lit-protocol/uint8arrays</a></td>
 <td><img src="https://img.shields.io/badge/-universal-8A6496" alt="uint8arrays" title="uint8arrays"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/uint8arrays">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/uint8arrays-vanilla/uint8arrays.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/auth-browser">@lit-protocol/auth-browser</a></td>
 <td><img src="https://img.shields.io/badge/-browser-E98869" alt="auth-browser" title="auth-browser"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/auth-browser">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/auth-browser-vanilla/auth-browser.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 <tr>
 <td><a href="https://github.com/LIT-Protocol/js-sdk/tree/master/packages/misc-browser">@lit-protocol/misc-browser</a></td>
 <td><img src="https://img.shields.io/badge/-browser-E98869" alt="misc-browser" title="misc-browser"></td>
-<td>3.1.3</td>
+<td>3.2.0</td>
 <td><a target="_blank" href="https://www.npmjs.com/package/@lit-protocol/misc-browser">npm</a><br/><a href="https://cdn.jsdelivr.net/npm/@lit-protocol/misc-browser-vanilla/misc-browser.min.js">Vanilla JS (UMD)</a></td>
 </tr>
 </tbody></table>
@@ -256,7 +243,16 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <a href="#api-doc" id="api-doc" style="color: inherit; text-decoration: none;">
   <h2>API Doc</h2>
 </a>
-<p><a href="http://docs.lit-js-sdk-v2.litprotocol.com/">http://docs.lit-js-sdk-v2.litprotocol.com/</a> <br/></p>
+<ul>
+<li>V3 (Current): <a href="https://v3.api-docs.getlit.dev/">https://v3.api-docs.getlit.dev/</a> <b4/></li>
+</ul>
+
+<a href="#old-apis-docs" id="old-apis-docs" style="color: inherit; text-decoration: none;">
+  <h3>Old APIs Doc(s)</h3>
+</a>
+<ul>
+<li>V2: <a href="http://docs.lit-js-sdk-v2.litprotocol.com/">http://docs.lit-js-sdk-v2.litprotocol.com/</a> <br/></li>
+</ul>
 </div>
 
 <blockquote>
@@ -300,22 +296,22 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
   <h2>Running Test Apps</h2>
 </a>
 <p>The test apps are configured to automatically import all modules and expose all module functions. For browsers, you can access these functions using <code>window.LitJsSdk_&lt;package_name&gt;.&lt;function_name&gt;</code></p>
-<pre><code class="language-jsx"><span class="hl-8">// Running apps...</span><br/><span class="hl-8">// html: http://localhost:4002</span><br/><span class="hl-8">// react: http://localhost:4003</span><br/><span class="hl-8">// nodejs: in the terminal</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">apps</span>
+<pre><code class="language-jsx"><span class="hl-2">// Running apps...</span><br/><span class="hl-2">// html: http://localhost:4002</span><br/><span class="hl-2">// react: http://localhost:4003</span><br/><span class="hl-2">// nodejs: in the terminal</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">apps</span>
 </code></pre>
 <p>or running individually</p>
-<pre><code><span class="hl-8">// html</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> </span><span class="hl-9">html</span><span class="hl-1">:</span><span class="hl-0">serve</span><br/><br/><span class="hl-8">// react</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> </span><span class="hl-9">react</span><span class="hl-1">:</span><span class="hl-0">serve</span><br/><br/><span class="hl-8">// nodejs</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> </span><span class="hl-9">nodejs</span><span class="hl-1">:</span><span class="hl-0">serve</span>
+<pre><code><span class="hl-2">// html</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> </span><span class="hl-3">html</span><span class="hl-1">:</span><span class="hl-0">serve</span><br/><br/><span class="hl-2">// react</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> </span><span class="hl-3">react</span><span class="hl-1">:</span><span class="hl-0">serve</span><br/><br/><span class="hl-2">// nodejs</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> </span><span class="hl-3">nodejs</span><span class="hl-1">:</span><span class="hl-0">serve</span>
 </code></pre>
 
 <a href="#run-unit-tests" id="run-unit-tests" style="color: inherit; text-decoration: none;">
   <h2>Run unit tests</h2>
 </a>
-<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">test</span><span class="hl-1">:</span><span class="hl-0">unit</span>
+<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-3">test</span><span class="hl-1">:</span><span class="hl-0">unit</span>
 </code></pre>
 
 <a href="#run-e2e-tests" id="run-e2e-tests" style="color: inherit; text-decoration: none;">
   <h2>Run E2E tests</h2>
 </a>
-<pre><code><br/><span class="hl-8">// -- web</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">test</span><span class="hl-1">:</span><span class="hl-9">e2e</span><span class="hl-1">:</span><span class="hl-0">web</span><br/><br/><span class="hl-8">// -- node</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">test</span><span class="hl-1">:</span><span class="hl-9">e2e</span><span class="hl-1">:</span><span class="hl-0">node</span>
+<pre><code><br/><span class="hl-2">// -- web</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-3">test</span><span class="hl-1">:</span><span class="hl-3">e2e</span><span class="hl-1">:</span><span class="hl-0">web</span><br/><br/><span class="hl-2">// -- node</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-3">test</span><span class="hl-1">:</span><span class="hl-3">e2e</span><span class="hl-1">:</span><span class="hl-0">node</span>
 </code></pre>
 
 <a href="#advanced" id="advanced" style="color: inherit; text-decoration: none;">
@@ -327,7 +323,7 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 </a>
 <p>By default, NX provides a command to generate a library
 <code>nx generate @nrwl/js:library</code>. However, it doesn&#39;t have an esbuild built-in so that we&#39;ve created a custom tool that modify the build commands.</p>
-<pre><code class="language-js"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">gen</span><span class="hl-1">:</span><span class="hl-0">lib</span><span class="hl-1"> &lt;</span><span class="hl-10">package</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt; </span><span class="hl-2">&lt;</span><span class="hl-3">tag</span><span class="hl-2">&gt;</span>
+<pre><code class="language-js"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-3">gen</span><span class="hl-1">:</span><span class="hl-0">lib</span><span class="hl-1"> &lt;</span><span class="hl-4">package</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt; </span><span class="hl-5">&lt;</span><span class="hl-6">tag</span><span class="hl-5">&gt;</span>
 </code></pre>
 
 <a href="#create-a-new-react-demo-app-using-the-lit-js-sdk" id="create-a-new-react-demo-app-using-the-lit-js-sdk" style="color: inherit; text-decoration: none;">
@@ -339,7 +335,7 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <a href="#deleting-a-package-or-app" id="deleting-a-package-or-app" style="color: inherit; text-decoration: none;">
   <h2>Deleting a package or app</h2>
 </a>
-<pre><code><span class="hl-8">// delete an app from ./app/&lt;app-name&gt;</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">delete</span><span class="hl-1">:</span><span class="hl-0">app</span><span class="hl-1"> &lt;</span><span class="hl-0">app</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;</span><br/><br/><span class="hl-8">// delete a package from ./packages/&lt;package-name&gt;</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">delete</span><span class="hl-1">:</span><span class="hl-10">package</span><span class="hl-1"> &lt;</span><span class="hl-10">package</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;</span>
+<pre><code><span class="hl-2">// delete an app from ./app/&lt;app-name&gt;</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-3">delete</span><span class="hl-1">:</span><span class="hl-0">app</span><span class="hl-1"> &lt;</span><span class="hl-0">app</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;</span><br/><br/><span class="hl-2">// delete a package from ./packages/&lt;package-name&gt;</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-3">delete</span><span class="hl-1">:</span><span class="hl-4">package</span><span class="hl-1"> &lt;</span><span class="hl-4">package</span><span class="hl-1">-</span><span class="hl-0">name</span><span class="hl-1">&gt;</span>
 </code></pre>
 
 <a href="#building-1" id="building-1" style="color: inherit; text-decoration: none;">
@@ -362,17 +358,17 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <ol>
 <li>Run <code>npm link</code> at the root of the specific package you are making code changes in.</li>
 </ol>
-<pre><code><span class="hl-0">cd</span><span class="hl-1"> ./</span><span class="hl-0">packages</span><span class="hl-8">/*/&lt;package-name&gt;</span><br/><span class="hl-8">npm link</span>
+<pre><code><span class="hl-0">cd</span><span class="hl-1"> ./</span><span class="hl-0">packages</span><span class="hl-2">/*/&lt;package-name&gt;</span><br/><span class="hl-2">npm link</span>
 </code></pre>
 <ol start="2">
 <li>Build the packages with or without dependencies</li>
 </ol>
-<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">build</span><br/><span class="hl-1"># </span><span class="hl-0">or</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> </span><span class="hl-0">lit</span><span class="hl-1">-</span><span class="hl-0">node</span><span class="hl-1">-</span><span class="hl-0">client</span><span class="hl-1">-</span><span class="hl-9">nodejs</span><span class="hl-1">:</span><span class="hl-0">build</span><span class="hl-1"> --</span><span class="hl-10">with</span><span class="hl-1">-</span><span class="hl-0">deps</span><span class="hl-1">=</span><span class="hl-6">false</span>
+<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">build</span><br/><span class="hl-1"># </span><span class="hl-0">or</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">nx</span><span class="hl-1"> </span><span class="hl-0">run</span><span class="hl-1"> </span><span class="hl-0">lit</span><span class="hl-1">-</span><span class="hl-0">node</span><span class="hl-1">-</span><span class="hl-0">client</span><span class="hl-1">-</span><span class="hl-3">nodejs</span><span class="hl-1">:</span><span class="hl-0">build</span><span class="hl-1"> --</span><span class="hl-4">with</span><span class="hl-1">-</span><span class="hl-0">deps</span><span class="hl-1">=</span><span class="hl-7">false</span>
 </code></pre>
 <ol start="3">
 <li>In the client application, run <code>npm link &lt;package&gt; --save</code> to ensure that the <code>package.json</code> of the client application is updated with a <code>file:</code> link to the dependency. This effectively creates a symlink in the <code>node_modules</code> of the client application to the local dependency in this repository.</li>
 </ol>
-<pre><code><span class="hl-0">cd</span><span class="hl-1"> </span><span class="hl-0">path</span><span class="hl-1">/</span><span class="hl-0">to</span><span class="hl-1">/</span><span class="hl-0">client</span><span class="hl-1">-</span><span class="hl-0">application</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-0">link</span><span class="hl-1"> &lt;</span><span class="hl-10">package</span><span class="hl-1">&gt; --</span><span class="hl-0">save</span>
+<pre><code><span class="hl-0">cd</span><span class="hl-1"> </span><span class="hl-0">path</span><span class="hl-1">/</span><span class="hl-0">to</span><span class="hl-1">/</span><span class="hl-0">client</span><span class="hl-1">-</span><span class="hl-0">application</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-0">link</span><span class="hl-1"> &lt;</span><span class="hl-4">package</span><span class="hl-1">&gt; --</span><span class="hl-0">save</span>
 </code></pre>
 <p>Having done this setup, this is what the development cycle looks like moving forward:</p>
 <ol>
@@ -405,7 +401,7 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <a href="#publishing-to-serrano--jalapno" id="publishing-to-serrano--jalapno" style="color: inherit; text-decoration: none;">
   <h3>Publishing to Serrano / Jalapno</h3>
 </a>
-<pre><code class="language-sh"><span class="hl-11">git</span><span class="hl-1"> </span><span class="hl-5">checkout</span><span class="hl-1"> </span><span class="hl-5">serrano</span><br/><span class="hl-11">yarn</span><span class="hl-1"> </span><span class="hl-5">bump</span><br/><span class="hl-11">yarn</span><span class="hl-1"> </span><span class="hl-5">build</span><br/><span class="hl-11">yarn</span><span class="hl-1"> </span><span class="hl-5">node</span><span class="hl-1"> </span><span class="hl-5">./tools/scripts/pub.mjs</span><span class="hl-1"> </span><span class="hl-6">--tag</span><span class="hl-1"> </span><span class="hl-5">serrano-jalapeno</span>
+<pre><code class="language-sh"><span class="hl-8">git</span><span class="hl-1"> </span><span class="hl-9">checkout</span><span class="hl-1"> </span><span class="hl-9">serrano</span><br/><span class="hl-8">yarn</span><span class="hl-1"> </span><span class="hl-9">bump</span><br/><span class="hl-8">yarn</span><span class="hl-1"> </span><span class="hl-9">build</span><br/><span class="hl-8">yarn</span><span class="hl-1"> </span><span class="hl-9">node</span><span class="hl-1"> </span><span class="hl-9">./tools/scripts/pub.mjs</span><span class="hl-1"> </span><span class="hl-7">--tag</span><span class="hl-1"> </span><span class="hl-9">serrano-jalapeno</span>
 </code></pre>
 
 <a href="#testing" id="testing" style="color: inherit; text-decoration: none;">
@@ -416,7 +412,7 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
   <h3>Quick Start on E2E Testing</h3>
 </a>
 <p>The following will serve the react testing app and launch the cypress e2e testing after</p>
-<pre><code class="language-sh"><span class="hl-11">yarn</span><span class="hl-1"> </span><span class="hl-5">test:e2e:web</span><br/><span class="hl-11">or</span><br/><span class="hl-11">yarn</span><span class="hl-1"> </span><span class="hl-5">test:e2e:node</span>
+<pre><code class="language-sh"><span class="hl-8">yarn</span><span class="hl-1"> </span><span class="hl-9">test:e2e:web</span><br/><span class="hl-8">or</span><br/><span class="hl-8">yarn</span><span class="hl-1"> </span><span class="hl-9">test:e2e:node</span>
 </code></pre>
 
 <a href="#environments" id="environments" style="color: inherit; text-decoration: none;">
@@ -451,7 +447,7 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <a href="#unit-tests" id="unit-tests" style="color: inherit; text-decoration: none;">
   <h3>Unit Tests</h3>
 </a>
-<pre><code class="language-jsx"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-9">test</span><span class="hl-1">:</span><span class="hl-0">unit</span>
+<pre><code class="language-jsx"><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-3">test</span><span class="hl-1">:</span><span class="hl-0">unit</span>
 </code></pre>
 
 <a href="#e2e-testing-with-metamask-using-cypress-for-browser" id="e2e-testing-with-metamask-using-cypress-for-browser" style="color: inherit; text-decoration: none;">
@@ -459,10 +455,10 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 </a>
 <p>Since both HTML &amp; React UIs are identical, we can run the same test suite against two different environments of libraries. This is done by setting the <code>PORT</code> number before Cypress launch.</p>
 <p><b>HTML</b></p>
-<pre><code class="language-jsx"><span class="hl-8">// E2E HTML</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">test</span><span class="hl-1"> --</span><span class="hl-0">e2e</span><span class="hl-1"> </span><span class="hl-0">html</span>
+<pre><code class="language-jsx"><span class="hl-2">// E2E HTML</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">test</span><span class="hl-1"> --</span><span class="hl-0">e2e</span><span class="hl-1"> </span><span class="hl-0">html</span>
 </code></pre>
 <p><b>React</b></p>
-<pre><code class="language-jsx"><span class="hl-8">// E2E React</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">test</span><span class="hl-1"> --</span><span class="hl-0">e2e</span><span class="hl-1"> </span><span class="hl-0">react</span>
+<pre><code class="language-jsx"><span class="hl-2">// E2E React</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">tools</span><span class="hl-1"> --</span><span class="hl-0">test</span><span class="hl-1"> --</span><span class="hl-0">e2e</span><span class="hl-1"> </span><span class="hl-0">react</span>
 </code></pre>
 
 <a href="#testing-with-a-local-lit-node" id="testing-with-a-local-lit-node" style="color: inherit; text-decoration: none;">
@@ -470,13 +466,13 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 </a>
 <p>First, deploy your Lit Node Contracts, since the correct addresses will be pulled from the <code>../lit-assets/blockchain/contracts/deployed-lit-node-contracts-temp.json</code> file.</p>
 <p>Set these two env vars:</p>
-<pre><code class="language-sh"><span class="hl-6">export</span><span class="hl-1"> </span><span class="hl-0">LIT_JS_SDK_LOCAL_NODE_DEV</span><span class="hl-1">=</span><span class="hl-5">&quot;true&quot;</span><br/><span class="hl-6">export</span><span class="hl-1"> </span><span class="hl-0">LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY</span><span class="hl-1">=</span><span class="hl-5">&quot;putAFundedPrivateKeyOnChronicleHere&quot;</span>
+<pre><code class="language-sh"><span class="hl-7">export</span><span class="hl-1"> </span><span class="hl-0">LIT_JS_SDK_LOCAL_NODE_DEV</span><span class="hl-1">=</span><span class="hl-9">&quot;true&quot;</span><br/><span class="hl-7">export</span><span class="hl-1"> </span><span class="hl-0">LIT_JS_SDK_FUNDED_WALLET_PRIVATE_KEY</span><span class="hl-1">=</span><span class="hl-9">&quot;putAFundedPrivateKeyOnChronicleHere&quot;</span>
 </code></pre>
 <p>Run:</p>
-<pre><code class="language-sh"><span class="hl-11">yarn</span><span class="hl-1"> </span><span class="hl-5">update:contracts-sdk</span><span class="hl-1"> </span><span class="hl-6">--fetch</span><br/><span class="hl-11">yarn</span><span class="hl-1"> </span><span class="hl-5">update:contracts-sdk</span><span class="hl-1"> </span><span class="hl-6">--gen</span><br/><span class="hl-11">yarn</span><span class="hl-1"> </span><span class="hl-5">build:packages</span>
+<pre><code class="language-sh"><span class="hl-8">yarn</span><span class="hl-1"> </span><span class="hl-9">update:contracts-sdk</span><span class="hl-1"> </span><span class="hl-7">--fetch</span><br/><span class="hl-8">yarn</span><span class="hl-1"> </span><span class="hl-9">update:contracts-sdk</span><span class="hl-1"> </span><span class="hl-7">--gen</span><br/><span class="hl-8">yarn</span><span class="hl-1"> </span><span class="hl-9">build:packages</span>
 </code></pre>
 <p>To run manual tests:</p>
-<pre><code class="language-sh"><span class="hl-1"> </span><span class="hl-11">yarn</span><span class="hl-1"> </span><span class="hl-5">nx</span><span class="hl-1"> </span><span class="hl-5">run</span><span class="hl-1"> </span><span class="hl-5">nodejs:serve</span>
+<pre><code class="language-sh"><span class="hl-1"> </span><span class="hl-8">yarn</span><span class="hl-1"> </span><span class="hl-9">nx</span><span class="hl-1"> </span><span class="hl-9">run</span><span class="hl-1"> </span><span class="hl-9">nodejs:serve</span>
 </code></pre>
 
 <a href="#env-vars" id="env-vars" style="color: inherit; text-decoration: none;">
@@ -512,7 +508,7 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 
 <p>In your React package.json, add <code>GENERATE_SOURCEMAP=false</code> to your start script</p>
 <p>eg.</p>
-<pre><code><span class="hl-1">  </span><span class="hl-5">&quot;scripts&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">    </span><span class="hl-5">&quot;start&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-5">&quot;GENERATE_SOURCEMAP=false react-scripts start&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">&quot;build&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-5">&quot;react-scripts build&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">&quot;test&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-5">&quot;react-scripts test&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">&quot;eject&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-5">&quot;react-scripts eject&quot;</span><br/><span class="hl-1">  },</span>
+<pre><code><span class="hl-1">  </span><span class="hl-9">&quot;scripts&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">    </span><span class="hl-9">&quot;start&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-9">&quot;GENERATE_SOURCEMAP=false react-scripts start&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-9">&quot;build&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-9">&quot;react-scripts build&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-9">&quot;test&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-9">&quot;react-scripts test&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-9">&quot;eject&quot;</span><span class="hl-0">:</span><span class="hl-1"> </span><span class="hl-9">&quot;react-scripts eject&quot;</span><br/><span class="hl-1">  },</span>
 </code></pre>
 </details>
 
@@ -520,14 +516,14 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <summary>Web bundling using esbuild</summary>
 
 <p>It’s currently using a custom plugin <a href="https://www.npmjs.com/package/@websaam/nx-esbuild">@websaam/nx-esbuild</a> which is a fork from <a href="https://www.npmjs.com/package/@wanews/nx-esbuild">@wanews/nx-esbuild</a></p>
-<pre><code class="language-json"><span class="hl-5">&quot;_buildWeb&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">    </span><span class="hl-12">&quot;executor&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;@websaam/nx-esbuild:package&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-12">&quot;options&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;banner&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">        </span><span class="hl-12">&quot;js&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;import { createRequire } from &#39;module&#39;;const require = createRequire(import.meta.url);&quot;</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;globalName&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;LitJsSdk_CoreBrowser&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;outfile&quot;</span><span class="hl-1">:</span><span class="hl-5">&quot;dist/packages/core-browser-vanilla/core-browser.js&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;entryPoints&quot;</span><span class="hl-1">: [</span><span class="hl-5">&quot;./packages/core-browser/src/index.ts&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;define&quot;</span><span class="hl-1">: { </span><span class="hl-12">&quot;global&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;window&quot;</span><span class="hl-1"> },</span><br/><span class="hl-1">      </span><span class="hl-12">&quot;plugins&quot;</span><span class="hl-1">:[</span><br/><span class="hl-1">        {</span><br/><span class="hl-1">          </span><span class="hl-12">&quot;package&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;esbuild-node-builtins&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">          </span><span class="hl-12">&quot;function&quot;</span><span class="hl-1">: </span><span class="hl-5">&quot;nodeBuiltIns&quot;</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">      ]</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">  }</span>
+<pre><code class="language-json"><span class="hl-9">&quot;_buildWeb&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">    </span><span class="hl-10">&quot;executor&quot;</span><span class="hl-1">: </span><span class="hl-9">&quot;@websaam/nx-esbuild:package&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-10">&quot;options&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">      </span><span class="hl-10">&quot;banner&quot;</span><span class="hl-1">: {</span><br/><span class="hl-1">        </span><span class="hl-10">&quot;js&quot;</span><span class="hl-1">: </span><span class="hl-9">&quot;import { createRequire } from &#39;module&#39;;const require = createRequire(import.meta.url);&quot;</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">      </span><span class="hl-10">&quot;globalName&quot;</span><span class="hl-1">: </span><span class="hl-9">&quot;LitJsSdk_CoreBrowser&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-10">&quot;outfile&quot;</span><span class="hl-1">:</span><span class="hl-9">&quot;dist/packages/core-browser-vanilla/core-browser.js&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">      </span><span class="hl-10">&quot;entryPoints&quot;</span><span class="hl-1">: [</span><span class="hl-9">&quot;./packages/core-browser/src/index.ts&quot;</span><span class="hl-1">],</span><br/><span class="hl-1">      </span><span class="hl-10">&quot;define&quot;</span><span class="hl-1">: { </span><span class="hl-10">&quot;global&quot;</span><span class="hl-1">: </span><span class="hl-9">&quot;window&quot;</span><span class="hl-1"> },</span><br/><span class="hl-1">      </span><span class="hl-10">&quot;plugins&quot;</span><span class="hl-1">:[</span><br/><span class="hl-1">        {</span><br/><span class="hl-1">          </span><span class="hl-10">&quot;package&quot;</span><span class="hl-1">: </span><span class="hl-9">&quot;esbuild-node-builtins&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">          </span><span class="hl-10">&quot;function&quot;</span><span class="hl-1">: </span><span class="hl-9">&quot;nodeBuiltIns&quot;</span><br/><span class="hl-1">        }</span><br/><span class="hl-1">      ]</span><br/><span class="hl-1">    }</span><br/><span class="hl-1">  }</span>
 </code></pre>
 </details>
 
 <details>
 <summary>Reference Error: crypto is not defined</summary>
 
-<pre><code class="language-js"><span class="hl-10">import</span><span class="hl-1"> </span><span class="hl-0">crypto</span><span class="hl-1">, { </span><span class="hl-0">createHash</span><span class="hl-1"> } </span><span class="hl-10">from</span><span class="hl-1"> </span><span class="hl-5">&#39;crypto&#39;</span><span class="hl-1">;</span><br/><span class="hl-0">Object</span><span class="hl-1">.</span><span class="hl-11">defineProperty</span><span class="hl-1">(</span><span class="hl-0">globalThis</span><span class="hl-1">, </span><span class="hl-5">&#39;crypto&#39;</span><span class="hl-1">, {</span><br/><span class="hl-1">  </span><span class="hl-0">value:</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-11">getRandomValues</span><span class="hl-0">:</span><span class="hl-1"> (</span><span class="hl-0">arr</span><span class="hl-1">: </span><span class="hl-13">any</span><span class="hl-1">) </span><span class="hl-6">=&gt;</span><span class="hl-1"> </span><span class="hl-0">crypto</span><span class="hl-1">.</span><span class="hl-11">randomBytes</span><span class="hl-1">(</span><span class="hl-0">arr</span><span class="hl-1">.</span><span class="hl-0">length</span><span class="hl-1">),</span><br/><span class="hl-1">    </span><span class="hl-0">subtle:</span><span class="hl-1"> {</span><br/><span class="hl-1">      </span><span class="hl-11">digest</span><span class="hl-0">:</span><span class="hl-1"> (</span><span class="hl-0">algorithm</span><span class="hl-1">: </span><span class="hl-13">string</span><span class="hl-1">, </span><span class="hl-0">data</span><span class="hl-1">: </span><span class="hl-13">Uint8Array</span><span class="hl-1">) </span><span class="hl-6">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-10">return</span><span class="hl-1"> </span><span class="hl-6">new</span><span class="hl-1"> </span><span class="hl-13">Promise</span><span class="hl-1">((</span><span class="hl-0">resolve</span><span class="hl-1">, </span><span class="hl-0">reject</span><span class="hl-1">) </span><span class="hl-6">=&gt;</span><br/><span class="hl-1">          </span><span class="hl-11">resolve</span><span class="hl-1">(</span><br/><span class="hl-1">            </span><span class="hl-11">createHash</span><span class="hl-1">(</span><span class="hl-0">algorithm</span><span class="hl-1">.</span><span class="hl-11">toLowerCase</span><span class="hl-1">().</span><span class="hl-11">replace</span><span class="hl-1">(</span><span class="hl-5">&#39;-&#39;</span><span class="hl-1">, </span><span class="hl-5">&#39;&#39;</span><span class="hl-1">))</span><br/><span class="hl-1">              .</span><span class="hl-11">update</span><span class="hl-1">(</span><span class="hl-0">data</span><span class="hl-1">)</span><br/><span class="hl-1">              .</span><span class="hl-11">digest</span><span class="hl-1">()</span><br/><span class="hl-1">          )</span><br/><span class="hl-1">        );</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">    },</span><br/><span class="hl-1">  },</span><br/><span class="hl-1">});</span>
+<pre><code class="language-js"><span class="hl-4">import</span><span class="hl-1"> </span><span class="hl-0">crypto</span><span class="hl-1">, { </span><span class="hl-0">createHash</span><span class="hl-1"> } </span><span class="hl-4">from</span><span class="hl-1"> </span><span class="hl-9">&#39;crypto&#39;</span><span class="hl-1">;</span><br/><span class="hl-0">Object</span><span class="hl-1">.</span><span class="hl-8">defineProperty</span><span class="hl-1">(</span><span class="hl-0">globalThis</span><span class="hl-1">, </span><span class="hl-9">&#39;crypto&#39;</span><span class="hl-1">, {</span><br/><span class="hl-1">  </span><span class="hl-0">value:</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-8">getRandomValues</span><span class="hl-0">:</span><span class="hl-1"> (</span><span class="hl-0">arr</span><span class="hl-1">: </span><span class="hl-11">any</span><span class="hl-1">) </span><span class="hl-7">=&gt;</span><span class="hl-1"> </span><span class="hl-0">crypto</span><span class="hl-1">.</span><span class="hl-8">randomBytes</span><span class="hl-1">(</span><span class="hl-0">arr</span><span class="hl-1">.</span><span class="hl-0">length</span><span class="hl-1">),</span><br/><span class="hl-1">    </span><span class="hl-0">subtle:</span><span class="hl-1"> {</span><br/><span class="hl-1">      </span><span class="hl-8">digest</span><span class="hl-0">:</span><span class="hl-1"> (</span><span class="hl-0">algorithm</span><span class="hl-1">: </span><span class="hl-11">string</span><span class="hl-1">, </span><span class="hl-0">data</span><span class="hl-1">: </span><span class="hl-11">Uint8Array</span><span class="hl-1">) </span><span class="hl-7">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-4">return</span><span class="hl-1"> </span><span class="hl-7">new</span><span class="hl-1"> </span><span class="hl-11">Promise</span><span class="hl-1">((</span><span class="hl-0">resolve</span><span class="hl-1">, </span><span class="hl-0">reject</span><span class="hl-1">) </span><span class="hl-7">=&gt;</span><br/><span class="hl-1">          </span><span class="hl-8">resolve</span><span class="hl-1">(</span><br/><span class="hl-1">            </span><span class="hl-8">createHash</span><span class="hl-1">(</span><span class="hl-0">algorithm</span><span class="hl-1">.</span><span class="hl-8">toLowerCase</span><span class="hl-1">().</span><span class="hl-8">replace</span><span class="hl-1">(</span><span class="hl-9">&#39;-&#39;</span><span class="hl-1">, </span><span class="hl-9">&#39;&#39;</span><span class="hl-1">))</span><br/><span class="hl-1">              .</span><span class="hl-8">update</span><span class="hl-1">(</span><span class="hl-0">data</span><span class="hl-1">)</span><br/><span class="hl-1">              .</span><span class="hl-8">digest</span><span class="hl-1">()</span><br/><span class="hl-1">          )</span><br/><span class="hl-1">        );</span><br/><span class="hl-1">      },</span><br/><span class="hl-1">    },</span><br/><span class="hl-1">  },</span><br/><span class="hl-1">});</span>
 </code></pre>
 </details>
 <details>
@@ -573,7 +569,6 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <li class="tsd-kind-module"><a href="modules/lit_auth_client_src.html">lit-<wbr/>auth-<wbr/>client/src</a></li>
 <li class="tsd-kind-module"><a href="modules/lit_node_client_nodejs_src.html">lit-<wbr/>node-<wbr/>client-<wbr/>nodejs/src</a></li>
 <li class="tsd-kind-module"><a href="modules/lit_node_client_src.html">lit-<wbr/>node-<wbr/>client/src</a></li>
-<li class="tsd-kind-module"><a href="modules/lit_third_party_libs_src.html">lit-<wbr/>third-<wbr/>party-<wbr/>libs/src</a></li>
 <li class="tsd-kind-module"><a href="modules/logger_src.html">logger/src</a></li>
 <li class="tsd-kind-module"><a href="modules/misc_browser_src.html">misc-<wbr/>browser/src</a></li>
 <li class="tsd-kind-module"><a href="modules/misc_src.html">misc/src</a></li>
