@@ -169,13 +169,13 @@ export class LitAuthClient {
           authMethodType: AuthMethodType.GoogleJwt,
         }) as unknown as T;
         break;
-        case 'googleBearer':
-          provider = new GoogleProvider({
-            ...baseParams,
-            ...(options as OAuthProviderOptions),
-            authMethodType: AuthMethodType.Google,
-          }) as unknown as T;
-          break;
+      case 'googleBearer':
+        provider = new GoogleProvider({
+          ...baseParams,
+          ...(options as OAuthProviderOptions),
+          authMethodType: AuthMethodType.Google,
+        }) as unknown as T;
+        break;
       case 'apple':
         provider = new AppleProvider({
           ...baseParams,

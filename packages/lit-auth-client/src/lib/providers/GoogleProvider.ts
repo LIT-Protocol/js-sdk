@@ -20,7 +20,7 @@ export default class GoogleProvider extends BaseProvider {
    * The redirect URI that Lit's login server should send the user back to
    */
   public redirectUri: string;
-  
+
   /**
    * The actual AuthMethodType for GoogleProvider.  This can be either Google or GoogleJwt.
    */
@@ -113,8 +113,7 @@ export default class GoogleProvider extends BaseProvider {
         accessToken: accessToken,
       };
       return authMethod;
-    }
-    else {
+    } else {
       // Check if id token is present in url
       if (!idToken) {
         throw new Error(
@@ -142,12 +141,30 @@ export default class GoogleProvider extends BaseProvider {
   }
 
   public static async authMethodId(authMethod: AuthMethod): Promise<string> {
-    const tokenPayload = jose.decodeJwt(authMethod.accessToken);
-    const userId: string = tokenPayload['sub'] as string;
-    const audience: string = tokenPayload['aud'] as string;
-    const authMethodId = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
-    );
-    return authMethodId;
+    if (authMethod.authMethodType === AuthMethodType.Google) {
+      // hit the google API to get the user id
+      const url = `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${authMethod.accessToken}`;
+      const response = await fetch(url, {
+        headers: {
+          Accept: `application/json`,
+        },
+      });
+      const userInfo = await response.json();
+      const audience: string = userInfo['issued_to'] as string;
+      const userId: string = userInfo['user_id'] as string;
+      const authMethodId = ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
+      );
+      return authMethodId;
+    } else {
+      // decode the JWT and get the user id
+      const tokenPayload = jose.decodeJwt(authMethod.accessToken);
+      const userId: string = tokenPayload['sub'] as string;
+      const audience: string = tokenPayload['aud'] as string;
+      const authMethodId = ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
+      );
+      return authMethodId;
+    }
   }
 }
