@@ -696,6 +696,28 @@ export class LitCore {
     return res as NodeCommandServerKeysResponse;
   };
 
+  getCurrentEpochNumber = async (): Promise<number> => {
+    try {
+      const stakingContract = await LitContracts.getStakingContract(
+        this.config.litNetwork as any,
+        this.config.contractContext
+      );
+
+      const epoch = await stakingContract['epoch']();
+
+      const epochNumber = epoch.number.toNumber();
+
+      return epochNumber;
+
+    } catch (error) {
+      return throwError({
+        message: `Error getting current eporch number: ${error}`,
+        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
+      });
+    }
+  };
+
   // ==================== SENDING COMMAND ====================
   /**
    *
@@ -711,6 +733,10 @@ export class LitCore {
     data,
     requestId,
   }: SendNodeCommand): Promise<any> => {
+    const epochNumber = await this.getCurrentEpochNumber();
+
+    data = { ...data, epochNumber };
+
     logWithRequestId(
       requestId,
       `sendCommandToNode with url ${url} and data`,
