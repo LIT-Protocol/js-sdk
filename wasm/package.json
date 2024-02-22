@@ -1,0 +1,19 @@
+{
+  "name": "@lit-protocol/wasm",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "rust:build": "wasm-pack ./rust --target web --out-name @lit-protocol/wasm-internal --dev",
+    "build": "tsup",
+    "test": "jest",
+    "lint": "eslint ./src/"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.1",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^7.0.2"
+  }
+}

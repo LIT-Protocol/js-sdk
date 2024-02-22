@@ -1,6 +1,6 @@
 // TODO(cairomassimo): move the data into a separate file
 
-import { blsCombine, blsDecrypt, blsEncrypt, blsVerify, init } from './ng';
+import { blsCombine, blsDecrypt, blsEncrypt, blsVerify, init } from '.';
 
 import {
   ciphertextBase64,

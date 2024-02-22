@@ -6,7 +6,7 @@ import {
   shares,
   signatureHex,
 } from './frost-data.spec.json';
-import { frostCombine, frostVerify, init } from './ng';
+import { frostCombine, frostVerify, init } from '.';
 
 const message = Buffer.from(messageHex, 'hex');
 const publicKey = Buffer.from(publicKeyHex, 'hex');

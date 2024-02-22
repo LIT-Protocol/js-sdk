@@ -16,8 +16,7 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@lit-protocol/ng": ["packages/ng/src/index.ts"],
-      "@lit-protocol/wasm/*": ["wasm/pkg/*"]
+      "@lit-protocol/wasm-internal/*": ["./rust/pkg/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

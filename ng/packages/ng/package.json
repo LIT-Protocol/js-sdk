@@ -1,8 +1,0 @@
-{
-  "name": "@lit-protocol/ng",
-  "version": "0.0.1",
-  "dependencies": {},
-  "main": "./index.cjs",
-  "types": "./index.d.ts",
-  "module": "./index.js"
-}

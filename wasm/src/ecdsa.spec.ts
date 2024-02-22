@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { ecdsaVerify } from '@lit-protocol/wasm/wasm';
+import { ecdsaVerify } from '@lit-protocol/wasm-internal/wasm';
 import { ethers } from 'ethers';
 import {
   messageHex,
@@ -9,7 +9,7 @@ import {
   signatureHex,
   signatureSharesHex,
 } from './ecdsa-data.spec.json';
-import { ecdsaCombine, ecdsaDeriveKey, init } from './ng';
+import { ecdsaCombine, ecdsaDeriveKey, init } from '.';
 
 const publicKey = Buffer.from(publicKeyHex, 'hex');
 const uncompressedPublicKey = ethers.utils.computePublicKey(publicKey);

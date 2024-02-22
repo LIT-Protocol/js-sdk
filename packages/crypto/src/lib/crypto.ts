@@ -5,6 +5,7 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
+import * as wasm from '@lit-protocol/wasm';
 import {
   EcdsaVariant,
   blsCombine,
@@ -12,8 +13,12 @@ import {
   blsEncrypt,
   blsVerify,
   ecdsaCombine,
+  ecdsaDeriveKey,
+  ecdsaVerify,
   init,
-} from '@lit-protocol/ng';
+  sevSnpGetVcekUrl,
+  sevSnpVerify,
+} from '@lit-protocol/wasm';
 
 import { LIT_ERROR, SIGTYPE } from '@lit-protocol/constants';
 import { nacl } from '@lit-protocol/nacl';
@@ -21,15 +26,11 @@ import {
   CombinedECDSASignature,
   NodeAttestation,
   SessionKeyPair,
+  SigShare,
 } from '@lit-protocol/types';
-import {
-  ecdsaDeriveKey,
-  ecdsaVerify,
-  sevSnpGetVcekUrl,
-  sevSnpVerify,
-} from '@lit-protocol/wasm/wasm';
 import { splitSignature } from 'ethers/lib/utils';
 
+console.log(wasm);
 init();
 
 /** ---------- Exports ---------- */
@@ -127,15 +128,15 @@ export const verifySignature = (
   blsVerify('Bls12381G2', publicKey, message, signature);
 };
 
-export interface EcdsaSignatureShare {
-  sigType: SIGTYPE;
-  signatureShare: string;
-  shareIndex: number; // ignored
-  publicKey: string;
-  dataSigned: string;
-  bigR: string;
-  sigName: string; // ignored
-}
+// export interface EcdsaSignatureShare {
+//   sigType: SIGTYPE;
+//   signatureShare: string;
+//   shareIndex: number; // ignored
+//   publicKey: string;
+//   dataSigned: string;
+//   bigR: string;
+//   sigName: string; // ignored
+// }
 
 const ecdsaSigntureTypeMap: Partial<Record<SIGTYPE, EcdsaVariant>> = {
   [SIGTYPE.EcdsaCaitSith]: 'K256',
@@ -147,13 +148,13 @@ const ecdsaSigntureTypeMap: Partial<Record<SIGTYPE, EcdsaVariant>> = {
  *
  * Combine ECDSA Shares
  *
- * @param { Array<EcdsaSignatureShare> } sigShares
+ * @param { Array<SigShare> } sigShares
  *
  * @returns { any }
  *
  */
 export const combineEcdsaShares = (
-  sigShares: Array<EcdsaSignatureShare>
+  sigShares: Array<SigShare>
 ): CombinedECDSASignature => {
   const validShares = sigShares.filter((share) => share.signatureShare);
 
@@ -167,14 +168,14 @@ export const combineEcdsaShares = (
     });
   }
 
-  const variant = ecdsaSigntureTypeMap[anyValidShare.sigType];
+  const variant = ecdsaSigntureTypeMap[anyValidShare.sigType as SIGTYPE];
   if (!variant) {
     throw new Error(
       'Unsupported signature type present in signature shares. Please report this issue'
     );
   }
 
-  const presignature = Buffer.from(anyValidShare.bigR, 'hex');
+  const presignature = Buffer.from(anyValidShare.bigR!, 'hex');
 
   const signatureShares = validShares.map((share) =>
     Buffer.from(share.signatureShare, 'hex')

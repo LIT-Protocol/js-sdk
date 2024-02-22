@@ -17,8 +17,7 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
-      "@lit-protocol/ng": ["ng/packages/ng/src"],
-      "@lit-protocol/wasm/*": ["ng/wasm/pkg/*"],
+      "@lit-protocol/wasm": ["wasm/dist"],
       "@lit-protocol/*": ["packages/*/src"]
     }
   },

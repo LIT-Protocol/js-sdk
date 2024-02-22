@@ -8,14 +8,7 @@ export default {
     },
   },
   transform: {
-    '^.+\\.[tj]s$': [
-      'esbuild-jest-transform',
-      {
-        ...require('../../ng/esbuild.config.cjs'),
-        platform: 'node',
-        outbase: 'src', // Needed for inline snapshots to work
-      },
-    ],
+    '^.+\\.[t]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/crypto',

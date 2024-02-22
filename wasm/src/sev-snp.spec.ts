@@ -1,7 +1,7 @@
 /// <reference types="jest" />
 
 import * as fs from 'node:fs';
-import { init, sevSnpGetVcekUrl, sevSnpVerify } from './ng';
+import { init, sevSnpGetVcekUrl, sevSnpVerify } from '.';
 import {
   attestation,
   challenge as challengeHex,
@@ -19,20 +19,20 @@ const challenge = Buffer.from(challengeHex, 'hex');
 const report = Buffer.from(attestation.report, 'base64');
 const vcek = fs.readFileSync(`${__dirname}/sev-snp.spec/vcek.crt`);
 
-describe('ng sev-snp', () => {
+describe('wasm sev-snp', () => {
   beforeEach(async () => {
     await init();
   });
 
-  it('should get the vcek url', async () => {
+  it('should get the vcek url', () => {
     expect(sevSnpGetVcekUrl(report)).toEqual(vcekUrl);
   });
 
-  it('should verify attestation reports', async () => {
+  it('should verify attestation reports', () => {
     sevSnpVerify(report, data, signatures, challenge, vcek);
   });
 
-  it('should reject invalid vcek', async () => {
+  it('should reject invalid vcek', () => {
     const vcek2 = Buffer.from(vcek);
     vcek2[vcek2.length - 1] ^= 0x01;
     expect(() =>
@@ -40,28 +40,28 @@ describe('ng sev-snp', () => {
     ).toThrow();
   });
 
-  it('should reject wrong vcek', async () => {
+  it('should reject wrong vcek', () => {
     const vcek2 = fs.readFileSync(`${__dirname}/sev-snp.spec/vcek2.crt`);
     expect(() =>
       sevSnpVerify(report, data, signatures, challenge, vcek2)
     ).toThrow();
   });
 
-  it('should reject extra data', async () => {
+  it('should reject extra data', () => {
     const data2 = Object.fromEntries([...Object.entries(data), ['a', Buffer.alloc(0)]]);
     expect(() =>
       sevSnpVerify(report, data2, signatures, challenge, vcek)
     ).toThrow();
   });
 
-  it('should reject missing data', async () => {
+  it('should reject missing data', () => {
     const data2 = Object.fromEntries([...Object.entries(data)].slice(0, -1));
     expect(() =>
       sevSnpVerify(report, data2, signatures, challenge, vcek)
     ).toThrow();
   });
 
-  it('should reject wrong challenge', async () => {
+  it('should reject wrong challenge', () => {
     const challenge2 = Buffer.from(challenge);
     challenge2[0] ^= 0x01;
     expect(() =>
