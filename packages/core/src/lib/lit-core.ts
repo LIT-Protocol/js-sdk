@@ -944,13 +944,13 @@ export class LitCore {
       throwError({
         ...res.error,
         message:
-          res.error.message ||
+          `Message: ${res.error.message}.  Details: ${res.error.details}` ||
           'You are not authorized to access to this content',
         errorCode: res.error.errorCode!,
       } as NodeClientErrorV0 | NodeClientErrorV1);
     } else {
       throwError({
-        message: `There was an error getting the signing shares from the nodes`,
+        message: `There was an error getting the signing shares from the nodes.  Message: ${res.error.message}.  Details: ${res.error.details}`,
         error: LIT_ERROR.UNKNOWN_ERROR,
       });
     }
