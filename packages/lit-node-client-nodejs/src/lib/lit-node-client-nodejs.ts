@@ -246,14 +246,16 @@ export class LitNodeClientNodeJs
       [litResource]
     );
 
+    const capabilities = {
+      ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
+      delegate_to: delegateeAddresses,
+      uses: _uses.toString(),
+    }
+
     recapObject.addCapabilityForResource(
       litResource,
       LitAbility.RateLimitIncreaseAuth,
-      {
-        nft_id: capacityTokenId ? [capacityTokenId] : [],
-        delegate_to: delegateeAddresses,
-        uses: _uses.toString(),
-      }
+      capabilities
     );
 
     // make sure that the resource is added to the recapObject
