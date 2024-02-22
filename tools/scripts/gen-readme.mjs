@@ -30,14 +30,6 @@ const badge = (lib, text) => {
   return `![${lib}](https://img.shields.io/badge/-${text}-${color} "${lib}")`;
 };
 
-const CDNLink = (lib) => {
-  return `<a href="https://cdn.jsdelivr.net/npm/${lib}-vanilla/${
-    lib.split('/')[1]
-  }.min.js">Vanilla JS (UMD)</a>`;
-  // return `<a target="_blank" href="https://www.jsdelivr.com/package/npm/${lib}-vanilla">Vanilla JS (UMD)</a>`;
-  // return `[![](https://data.jsdelivr.com/v1/package/npm/${lib}-vanilla/badge)](https://www.jsdelivr.com/package/npm/${lib}-vanilla)`;
-};
-
 const getSize = (lib) => {
   return `![](https://img.shields.io/bundlephobia/min/${lib})`;
 };
@@ -63,7 +55,7 @@ libs.map((lib) => {
 
   const _packagePath = 'https://github.com/LIT-Protocol/js-sdk/tree/master/';
   const _package = `[${name}](${_packagePath}packages/${lib})`;
-  const _vanillaJs = CDNLink(name);
+
   let _tag;
 
   try {
@@ -73,7 +65,7 @@ libs.map((lib) => {
   }
   const _version = version;
   // const _size = getSize(name);
-  const _download = `${getNpm(name)}<br/>${_vanillaJs}`;
+  const _download = `${getNpm(name)}`;
 
   const content = `| ${_package} | ${_tag} | ${_version} | ${_download}`;
 

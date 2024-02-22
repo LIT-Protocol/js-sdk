@@ -216,6 +216,19 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     ].filter(Boolean).length;
 
     if (providedAuthentications !== 1) {
+      // log which authentications has the user provided
+      if (this.controllerAuthSig) {
+        logError('controllerAuthSig is provided');
+      }
+
+      if (this.controllerSessionSigs) {
+        logError('controllerSessionSigs is provided');
+      }
+
+      if (this.authContext) {
+        logError('authContext is provided');
+      }
+
       this.throwError(
         'Multiple authentications are defined, can only use one at a time'
       );
