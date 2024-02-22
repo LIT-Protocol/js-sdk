@@ -21,9 +21,15 @@ export default class GoogleProvider extends BaseProvider {
    */
   public redirectUri: string;
 
+  /**
+   * The actual AuthMethodType for GoogleProvider.  This can be either Google or GoogleJwt.
+   */
+  public authMethodType: AuthMethodType;
+
   constructor(options: BaseProviderOptions & OAuthProviderOptions) {
     super(options);
     this.redirectUri = options.redirectUri || window.location.origin;
+    this.authMethodType = options.authMethodType || AuthMethodType.GoogleJwt;
   }
 
   /**
@@ -65,7 +71,7 @@ export default class GoogleProvider extends BaseProvider {
     }
 
     // Check url for params
-    const { provider, idToken, state, error } = parseLoginParams(
+    const { provider, idToken, state, error, accessToken } = parseLoginParams(
       window.location.search
     );
 
@@ -95,18 +101,31 @@ export default class GoogleProvider extends BaseProvider {
       window.location.pathname
     );
 
-    // Check if id token is present in url
-    if (!idToken) {
-      throw new Error(
-        `Missing ID token in redirect callback URL for Google OAuth"`
-      );
+    if (this.authMethodType === AuthMethodType.Google) {
+      // Check if access token is present in url
+      if (!accessToken) {
+        throw new Error(
+          `Missing ID token in redirect callback URL for Google OAuth"`
+        );
+      }
+      const authMethod = {
+        authMethodType: AuthMethodType.Google,
+        accessToken: accessToken,
+      };
+      return authMethod;
+    } else {
+      // Check if id token is present in url
+      if (!idToken) {
+        throw new Error(
+          `Missing ID token in redirect callback URL for Google OAuth"`
+        );
+      }
+      const authMethod = {
+        authMethodType: AuthMethodType.GoogleJwt,
+        accessToken: idToken,
+      };
+      return authMethod;
     }
-
-    const authMethod = {
-      authMethodType: AuthMethodType.GoogleJwt,
-      accessToken: idToken,
-    };
-    return authMethod;
   }
 
   /**
@@ -122,12 +141,30 @@ export default class GoogleProvider extends BaseProvider {
   }
 
   public static async authMethodId(authMethod: AuthMethod): Promise<string> {
-    const tokenPayload = jose.decodeJwt(authMethod.accessToken);
-    const userId: string = tokenPayload['sub'] as string;
-    const audience: string = tokenPayload['aud'] as string;
-    const authMethodId = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
-    );
-    return authMethodId;
+    if (authMethod.authMethodType === AuthMethodType.Google) {
+      // hit the google API to get the user id
+      const url = `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${authMethod.accessToken}`;
+      const response = await fetch(url, {
+        headers: {
+          Accept: `application/json`,
+        },
+      });
+      const userInfo = await response.json();
+      const audience: string = userInfo['issued_to'] as string;
+      const userId: string = userInfo['user_id'] as string;
+      const authMethodId = ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
+      );
+      return authMethodId;
+    } else {
+      // decode the JWT and get the user id
+      const tokenPayload = jose.decodeJwt(authMethod.accessToken);
+      const userId: string = tokenPayload['sub'] as string;
+      const audience: string = tokenPayload['aud'] as string;
+      const authMethodId = ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(`${userId}:${audience}`)
+      );
+      return authMethodId;
+    }
   }
 }

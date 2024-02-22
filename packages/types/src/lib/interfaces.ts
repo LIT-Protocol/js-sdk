@@ -1377,6 +1377,10 @@ export interface OAuthProviderOptions {
    * OAuth client ID
    */
   clientId?: string;
+  /**
+   * The actual auth method type number
+   */
+  authMethodType?: number;
 }
 
 export interface EthWalletProviderOptions {
