@@ -42,9 +42,6 @@ const build = async (name) => {
 
   await childRunCommand(`yarn tools postBuildIndividual --target=${name}`);
 
-  // greenLog('Setting up local development tools...');
-  // await childRunCommand(`yarn build:setupLocalDev ${name}`);
-
   if (!skipGen) {
     greenLog('...mapping dist package name to package.json name');
     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');

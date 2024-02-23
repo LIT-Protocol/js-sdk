@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
-    "reset:hard": "yarn reset && sh ./tools/scripts/reset.sh",
     "build": "yarn build:packages",
     "build:packages": "yarn gen:internal-dev && yarn update:contracts && yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn tools --build --packages && yarn gen:readme && yarn build:verify",
     "build:target": "yarn node tools/scripts/build.mjs",
