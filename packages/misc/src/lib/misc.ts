@@ -179,15 +179,6 @@ export const isNodeClientErrorV0 = (
   return nodeError.hasOwnProperty('errorCode');
 };
 
-export const isNodeErrorV1 = (
-  nodeError: NodeErrorV1
-): nodeError is NodeErrorV1 => {
-  return (
-    nodeError.hasOwnProperty('errorCode') &&
-    nodeError.hasOwnProperty('errorKind')
-  );
-};
-
 declare global {
   var litConfig: any;
   var wasmExport: any;
