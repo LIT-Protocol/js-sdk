@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "build": "yarn build:packages",
-    "build:packages": "yarn gen:internal-dev && yarn update:contracts && yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn tools --build --packages && build:setupLocalDev && yarn gen:readme && yarn build:verify",
+    "build:packages": "yarn gen:internal-dev && yarn update:contracts && yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn tools --build --packages && yarn build:setupLocalDev && yarn gen:readme && yarn build:verify",
     "build:target": "yarn node tools/scripts/build.mjs",
     "build:setupLocalDev": "yarn tools --setup-local-dev",
     "build:verify": "yarn tools --verify",
