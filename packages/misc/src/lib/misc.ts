@@ -16,7 +16,6 @@ import {
   KV,
   NodeClientErrorV0,
   NodeClientErrorV1,
-  NodeErrorV0,
   NodeErrorV1,
   NodeErrorV3,
   ClaimRequest,
@@ -181,18 +180,12 @@ export const isNodeClientErrorV0 = (
 };
 
 export const isNodeErrorV1 = (
-  nodeError: NodeErrorV0 | NodeErrorV1
+  nodeError: NodeErrorV1
 ): nodeError is NodeErrorV1 => {
   return (
     nodeError.hasOwnProperty('errorCode') &&
     nodeError.hasOwnProperty('errorKind')
   );
-};
-
-export const isNodeErrorV0 = (
-  nodeError: NodeErrorV0 | NodeErrorV1
-): nodeError is NodeErrorV0 => {
-  return nodeError.hasOwnProperty('errorCode');
 };
 
 declare global {
