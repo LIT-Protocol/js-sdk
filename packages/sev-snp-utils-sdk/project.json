@@ -5,12 +5,6 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "yarn build:target sev-snp-utils-sdk"
-      }
-    },
-    "_buildTsc": {
       "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
