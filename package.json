@@ -4,9 +4,8 @@
   "license": "MIT",
   "scripts": {
     "build": "yarn build:packages",
-    "build:packages": "yarn gen:internal-dev && yarn update:contracts && yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn tools --build --packages && yarn build:setupLocalDev && yarn gen:readme && yarn build:verify",
+    "build:packages": "yarn tools --remove-local-dev && rm -rf ./dist && yarn gen:internal-dev && yarn update:contracts && yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn tools --build --packages && yarn tools --setup-local-dev && yarn gen:readme && yarn build:verify",
     "build:target": "yarn node tools/scripts/build.mjs",
-    "build:setupLocalDev": "yarn tools --setup-local-dev",
     "build:verify": "yarn tools --verify",
     "bundles": "yarn node ./esbuilder/lit-connect-modal/esbuild.js",
     "pipe": "node ./tools/scripts/pipeline.mjs",
