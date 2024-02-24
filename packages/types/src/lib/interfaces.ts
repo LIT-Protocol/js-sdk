@@ -635,6 +635,7 @@ export interface NodeClientErrorV1 {
   errorCode: string;
   details?: string[];
   status?: number;
+  requestId?: string;
 }
 
 export interface SigShare {

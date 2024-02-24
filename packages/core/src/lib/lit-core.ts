@@ -929,7 +929,7 @@ export class LitCore {
    * @returns { void }
    *
    */
-  _throwNodeError = (res: RejectedNodePromises): void => {
+  _throwNodeError = (res: RejectedNodePromises, requestId: string): void => {
     if (res.error) {
       if (
         ((res.error.errorCode &&
@@ -946,6 +946,7 @@ export class LitCore {
           res.error.message ||
           'There was an error getting the signing shares from the nodes',
         errorCode: res.error.errorCode || LIT_ERROR.UNKNOWN_ERROR.code,
+        requestId,
       } as NodeClientErrorV0 | NodeClientErrorV1);
     } else {
       throwError({
@@ -953,6 +954,7 @@ export class LitCore {
           res
         )}`,
         error: LIT_ERROR.UNKNOWN_ERROR,
+        requestId,
       });
     }
   };

@@ -129,6 +129,7 @@ export const throwErrorV1 = ({
   status,
   message,
   errorCode,
+  requestId,
 }: NodeClientErrorV1): never => {
   const errConstructorFunc = function (
     this: any,
@@ -136,13 +137,15 @@ export const throwErrorV1 = ({
     status: number,
     details: string[],
     message?: string,
-    errorCode?: string
+    errorCode?: string,
+    requestId?: string
   ) {
     this.message = message;
     this.errorCode = errorCode;
     this.errorKind = errorKind;
     this.status = status;
     this.details = details;
+    this.requestId = requestId;
   };
 
   throw new (errConstructorFunc as any)(
@@ -150,7 +153,8 @@ export const throwErrorV1 = ({
     status,
     details,
     message,
-    errorCode
+    errorCode,
+    requestId
   );
 };
 
