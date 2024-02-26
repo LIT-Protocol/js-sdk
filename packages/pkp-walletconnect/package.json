@@ -33,5 +33,5 @@
     "universal"
   ],
   "main": "./dist/src/index.js",
-  "typings": "./dist/undefined"
+  "typings": "./dist/index.d.ts"
 }

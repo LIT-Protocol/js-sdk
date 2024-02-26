@@ -1157,7 +1157,7 @@ async function setupLocalDevFunc() {
     const distPackageJson = await readJsonFile(distPackageJsonPath);
 
     packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
-    packageJson.typings = prefixPathWithDir(distPackageJson.typings, 'dist');
+    packageJson.typings = "./dist/index.d.ts";
 
     greenLog(`Updating ${packageJsonPath}...`);
     greenLog(`packageJson.main: ${packageJson.main}`);
