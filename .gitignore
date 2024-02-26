@@ -64,3 +64,5 @@ apps/nodejs/main.ts
 apps/react/src/app/app.tsx
 
 storage.test.db
+
+.nx
