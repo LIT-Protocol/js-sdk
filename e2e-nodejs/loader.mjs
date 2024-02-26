@@ -94,10 +94,12 @@ if (loadEnv) {
     // we only need to do this because if the pkp controller has the capactiy
     // credits NFT, then we should be able to use it without delegating it
     // to the pkp
-    await contractClient.mintCapacityCreditsNFT({
+    const ccNFT = await contractClient.mintCapacityCreditsNFT({
       requestsPerDay: 14400,
-      daysUntilUTCMidnightExpiration: 1,
+      daysUntilUTCMidnightExpiration: 2,
     });
+
+    console.log("ccNFT:", ccNFT);
 
     let res = await contractClient.pkpNftContractUtils.write.mint();
 
