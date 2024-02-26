@@ -5,31 +5,35 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "yarn build:target pkp-walletconnect"
-      }
-    },
-    "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/pkp-walletconnect",
         "main": "packages/pkp-walletconnect/src/index.ts",
         "tsConfig": "packages/pkp-walletconnect/tsconfig.lib.json",
-        "assets": ["packages/pkp-walletconnect/*.md"]
+        "assets": [
+          "packages/pkp-walletconnect/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/pkp-walletconnect/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/pkp-walletconnect/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/pkp-walletconnect"],
+      "outputs": [
+        "coverage/packages/pkp-walletconnect"
+      ],
       "options": {
         "jestConfig": "packages/pkp-walletconnect/jest.config.ts",
         "passWithNoTests": true

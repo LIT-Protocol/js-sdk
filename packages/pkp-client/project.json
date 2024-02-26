@@ -5,31 +5,35 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "yarn build:target pkp-client"
-      }
-    },
-    "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/pkp-client",
         "main": "packages/pkp-client/src/index.ts",
         "tsConfig": "packages/pkp-client/tsconfig.lib.json",
-        "assets": ["packages/pkp-client/*.md"]
+        "assets": [
+          "packages/pkp-client/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/pkp-client/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/pkp-client/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/pkp-client"],
+      "outputs": [
+        "coverage/packages/pkp-client"
+      ],
       "options": {
         "jestConfig": "packages/pkp-client/jest.config.ts",
         "passWithNoTests": true

@@ -5,31 +5,35 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "yarn build:target misc"
-      }
-    },
-    "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/misc",
         "main": "packages/misc/src/index.ts",
         "tsConfig": "packages/misc/tsconfig.lib.json",
-        "assets": ["packages/misc/*.md"]
+        "assets": [
+          "packages/misc/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/misc/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/misc/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/misc"],
+      "outputs": [
+        "coverage/packages/misc"
+      ],
       "options": {
         "jestConfig": "packages/misc/jest.config.ts",
         "passWithNoTests": true

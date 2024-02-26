@@ -5,37 +5,35 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          "yarn build:target constants --skip",
-          "yarn build:target misc --skip",
-          "yarn build:target uint8arrays --skip",
-          "yarn build:target encryption"
-        ],
-        "parallel": false
-      }
-    },
-    "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/encryption",
         "main": "packages/encryption/src/index.ts",
         "tsConfig": "packages/encryption/tsconfig.lib.json",
-        "assets": ["packages/encryption/*.md"]
+        "assets": [
+          "packages/encryption/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/encryption/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/encryption/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/encryption"],
+      "outputs": [
+        "coverage/packages/encryption"
+      ],
       "options": {
         "jestConfig": "packages/encryption/jest.config.ts",
         "passWithNoTests": true
@@ -43,7 +41,9 @@
     },
     "testWatch": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/encryption"],
+      "outputs": [
+        "coverage/packages/encryption"
+      ],
       "options": {
         "jestConfig": "packages/encryption/jest.config.ts",
         "passWithNoTests": true,

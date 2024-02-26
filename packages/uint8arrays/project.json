@@ -1,29 +1,31 @@
 {
   "name": "uint8arrays",
-  "implicitDependencies": ["!misc-browser"],
+  "implicitDependencies": [
+    "!misc-browser"
+  ],
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/uint8arrays/src",
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "yarn build:target uint8arrays"
-      }
-    },
-    "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/uint8arrays",
         "main": "packages/uint8arrays/src/index.ts",
         "tsConfig": "packages/uint8arrays/tsconfig.lib.json",
-        "assets": ["packages/uint8arrays/*.md"]
+        "assets": [
+          "packages/uint8arrays/*.md"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/uint8arrays"],
+      "outputs": [
+        "coverage/packages/uint8arrays"
+      ],
       "options": {
         "jestConfig": "packages/uint8arrays/jest.config.ts",
         "passWithNoTests": true

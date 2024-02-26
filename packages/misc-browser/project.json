@@ -5,31 +5,35 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "yarn build:target misc-browser"
-      }
-    },
-    "_buildTsc": {
       "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/packages/misc-browser",
         "main": "packages/misc-browser/src/index.ts",
         "tsConfig": "packages/misc-browser/tsconfig.lib.json",
-        "assets": ["packages/misc-browser/*.md"]
+        "assets": [
+          "packages/misc-browser/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/misc-browser/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/misc-browser/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/misc-browser"],
+      "outputs": [
+        "coverage/packages/misc-browser"
+      ],
       "options": {
         "jestConfig": "packages/misc-browser/jest.config.ts",
         "passWithNoTests": true
