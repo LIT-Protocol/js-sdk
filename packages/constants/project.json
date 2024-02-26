@@ -5,55 +5,46 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "yarn build:target constants"
-      }
-    },
-
-    "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/constants",
         "main": "packages/constants/src/index.ts",
         "tsConfig": "packages/constants/tsconfig.lib.json",
-        "assets": ["packages/constants/*.md"]
+        "assets": ["packages/constants/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
-
     "copyJSONFilesToDist": {
       "executor": "nx:run-commands",
       "options": {
         "command": "mkdir -p dist/packages/constants/web/abis && cp ./packages/constants/src/lib/abis/ERC20.json dist/packages/constants/web/abis/ERC20.json && cp ./packages/constants/src/lib/abis/LIT.json dist/packages/constants/web/abis/LIT.json"
       }
     },
-
     "generateDoc": {
       "executor": "nx:run-commands",
       "options": {
         "command": "yarn typedoc --entryPointStrategy expand packages/constants/src --exclude packages/constants/src/**/*.spec.** --tsconfig packages/constants/tsconfig.json"
       }
     },
-
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/constants/**/*.ts"]
       }
     },
     "testPackage": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/constants"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/constants"],
       "options": {
         "jestConfig": "packages/constants/jest.config.ts",
         "passWithNoTests": true
       }
     },
     "testWatch": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/constants"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/constants"],
       "options": {
         "jestConfig": "packages/constants/jest.config.ts",
         "passWithNoTests": true,

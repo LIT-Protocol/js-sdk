@@ -16,7 +16,6 @@ import {
   KV,
   NodeClientErrorV0,
   NodeClientErrorV1,
-  NodeErrorV0,
   NodeErrorV1,
   NodeErrorV3,
   ClaimRequest,
@@ -130,6 +129,7 @@ export const throwErrorV1 = ({
   status,
   message,
   errorCode,
+  requestId,
 }: NodeClientErrorV1): never => {
   const errConstructorFunc = function (
     this: any,
@@ -137,13 +137,15 @@ export const throwErrorV1 = ({
     status: number,
     details: string[],
     message?: string,
-    errorCode?: string
+    errorCode?: string,
+    requestId?: string
   ) {
     this.message = message;
     this.errorCode = errorCode;
     this.errorKind = errorKind;
     this.status = status;
     this.details = details;
+    this.requestId = requestId;
   };
 
   throw new (errConstructorFunc as any)(
@@ -151,7 +153,8 @@ export const throwErrorV1 = ({
     status,
     details,
     message,
-    errorCode
+    errorCode,
+    requestId
   );
 };
 
@@ -177,21 +180,6 @@ export const isNodeClientErrorV1 = (
 export const isNodeClientErrorV0 = (
   nodeError: NodeClientErrorV0 | NodeClientErrorV1
 ): nodeError is NodeClientErrorV0 => {
-  return nodeError.hasOwnProperty('errorCode');
-};
-
-export const isNodeErrorV1 = (
-  nodeError: NodeErrorV0 | NodeErrorV1
-): nodeError is NodeErrorV1 => {
-  return (
-    nodeError.hasOwnProperty('errorCode') &&
-    nodeError.hasOwnProperty('errorKind')
-  );
-};
-
-export const isNodeErrorV0 = (
-  nodeError: NodeErrorV0 | NodeErrorV1
-): nodeError is NodeErrorV0 => {
   return nodeError.hasOwnProperty('errorCode');
 };
 
