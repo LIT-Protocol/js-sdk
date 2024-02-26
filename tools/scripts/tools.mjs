@@ -495,7 +495,7 @@ async function buildFunc() {
       .map((item) => item.replace('apps/', ''))
       .join(',');
 
-    const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
+    const command = `yarn nx run-many --target=build --exclude=${ignoreList} --parallel=false`;
 
     spawnListener(command, {
       onDone: () => {
@@ -1157,7 +1157,7 @@ async function setupLocalDevFunc() {
     const distPackageJson = await readJsonFile(distPackageJsonPath);
 
     packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
-    packageJson.typings = "./dist/index.d.ts";
+    packageJson.typings = "./dist/src/index.d.ts";
 
     greenLog(`Updating ${packageJsonPath}...`);
     greenLog(`packageJson.main: ${packageJson.main}`);

@@ -148,7 +148,7 @@ export interface ILitNodeClient {
    * @returns { void }
    *
    */
-  _throwNodeError(res: RejectedNodePromises): void;
+  _throwNodeError(res: RejectedNodePromises, requestId: string): void;
 
   // ========== Shares Resolvers ==========
   /**
