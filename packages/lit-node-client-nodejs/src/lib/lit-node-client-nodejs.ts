@@ -117,7 +117,7 @@ import * as siwe from 'siwe';
 // TODO: move this to auth-helper for next patch
 interface CapacityCreditsReq {
   dAppOwnerWallet: ethers.Wallet;
-  capacityTokenId: string;
+  capacityTokenId?: string;
   delegateeAddresses?: string[];
   uses?: string;
   domain?: string;
@@ -220,11 +220,6 @@ export class LitNodeClientNodeJs
       await this.connect();
     }
 
-    // -- validate if capacityTokenId is empty
-    if (!capacityTokenId) {
-      throw new Error('capacityTokenId must exist');
-    }
-
     // -- validate
     if (!dAppOwnerWallet) {
       throw new Error('dAppOwnerWallet must exist');
@@ -245,20 +240,22 @@ export class LitNodeClientNodeJs
     // -- create LitRLIResource
     // Note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
     // lit-ratelimitincrease://{tokenId}
-    const litResource = new LitRLIResource(capacityTokenId);
+    const litResource = new LitRLIResource(capacityTokenId ?? '*');
 
     const recapObject = await this.generateSessionCapabilityObjectWithWildcards(
       [litResource]
     );
 
+    const capabilities = {
+      ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
+      delegate_to: delegateeAddresses,
+      uses: _uses.toString(),
+    }
+
     recapObject.addCapabilityForResource(
       litResource,
       LitAbility.RateLimitIncreaseAuth,
-      {
-        nft_id: [capacityTokenId],
-        delegate_to: delegateeAddresses,
-        uses: _uses.toString(),
-      }
+      capabilities
     );
 
     // make sure that the resource is added to the recapObject

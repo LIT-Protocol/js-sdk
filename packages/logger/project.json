@@ -5,35 +5,26 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/logger",
         "main": "packages/logger/src/index.ts",
         "tsConfig": "packages/logger/tsconfig.lib.json",
-        "assets": ["packages/logger/*.md"]
-      }
-    },
-    "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/packages/logger",
-        "main": "packages/logger/src/index.ts",
-        "tsConfig": "packages/logger/tsconfig.lib.json",
-        "assets": ["packages/logger/*.md"]
+        "assets": ["packages/logger/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/logger/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/logger"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/logger"],
       "options": {
         "jestConfig": "packages/logger/jest.config.ts",
         "passWithNoTests": true
