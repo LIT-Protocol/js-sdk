@@ -10,5 +10,5 @@
     "directory": "../../dist/packages/logger"
   },
   "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  "typings": "./dist/index.d.ts"
 }

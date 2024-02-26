@@ -261,44 +261,11 @@ async function testFunc() {
   }
 
   if (TEST_TYPE === '--unit') {
-    // start the server if it's not running
-    // const startServer = () => {
-    //   const serverProcess = spawn('yarn', ['txServer']);
-
-    //   serverProcess.on('close', (code) => {
-    //     console.log(`Server process exited with code ${code}`);
-    //   });
-
-    //   return serverProcess;
-    // };
-
-    // const serverProcess = startServer();
-
-    // const stopServer = (serverProcess) => {
-    //   serverProcess.kill('SIGTERM');
-    // };
-
-    // Read the workspace configuration file
-    const workspaceConfig = JSON.parse(
-      fs.readFileSync('./workspace.json', 'utf-8')
-    );
-
-    // remove all projects that are in the apps folder
-    Object.keys(workspaceConfig.projects).forEach((key) => {
-      if (workspaceConfig.projects[key].includes('apps')) {
-        delete workspaceConfig.projects[key];
-      }
-    });
-
-    console.log(Object.keys(workspaceConfig.projects));
-
-    // Extract project names from the workspace configuration
-    const projectNames = Object.keys(workspaceConfig.projects).join(',');
 
     // Run the nx run-many command with the --projects flag set to the project names
     const nx = spawn(
       'nx',
-      ['run-many', '--target=test', `--projects=${projectNames}`],
+      ['run-many', '--target=test'],
       {
         stdio: 'inherit', // This maintains the log output color
         shell: true,
@@ -1190,7 +1157,7 @@ async function setupLocalDevFunc() {
     const distPackageJson = await readJsonFile(distPackageJsonPath);
 
     packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
-    packageJson.typings = prefixPathWithDir(distPackageJson.typings, 'dist');
+    packageJson.typings = "./dist/index.d.ts";
 
     greenLog(`Updating ${packageJsonPath}...`);
     greenLog(`packageJson.main: ${packageJson.main}`);
@@ -1397,7 +1364,7 @@ async function validateDependencyVersions() {
     const packageJson = await readJsonFile(pkg);
     const pkgVersion = packageJson.version;
 
-    const dependencies = packageJson.dependencies;
+    const dependencies = packageJson?.dependencies ?? {};
 
     let total = 0;
     let passes = 0;
