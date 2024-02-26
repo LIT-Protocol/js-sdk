@@ -261,44 +261,11 @@ async function testFunc() {
   }
 
   if (TEST_TYPE === '--unit') {
-    // start the server if it's not running
-    // const startServer = () => {
-    //   const serverProcess = spawn('yarn', ['txServer']);
-
-    //   serverProcess.on('close', (code) => {
-    //     console.log(`Server process exited with code ${code}`);
-    //   });
-
-    //   return serverProcess;
-    // };
-
-    // const serverProcess = startServer();
-
-    // const stopServer = (serverProcess) => {
-    //   serverProcess.kill('SIGTERM');
-    // };
-
-    // Read the workspace configuration file
-    const workspaceConfig = JSON.parse(
-      fs.readFileSync('./workspace.json', 'utf-8')
-    );
-
-    // remove all projects that are in the apps folder
-    Object.keys(workspaceConfig.projects).forEach((key) => {
-      if (workspaceConfig.projects[key].includes('apps')) {
-        delete workspaceConfig.projects[key];
-      }
-    });
-
-    console.log(Object.keys(workspaceConfig.projects));
-
-    // Extract project names from the workspace configuration
-    const projectNames = Object.keys(workspaceConfig.projects).join(',');
 
     // Run the nx run-many command with the --projects flag set to the project names
     const nx = spawn(
       'nx',
-      ['run-many', '--target=test', `--projects=${projectNames}`],
+      ['run-many', '--target=test'],
       {
         stdio: 'inherit', // This maintains the log output color
         shell: true,
