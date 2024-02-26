@@ -6,23 +6,17 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/ecdsa-sdk",
         "main": "packages/ecdsa-sdk/src/index.ts",
         "tsConfig": "packages/ecdsa-sdk/tsconfig.lib.json",
-        "assets": [
-          "packages/ecdsa-sdk/*.md"
-        ]
+        "assets": ["packages/ecdsa-sdk/*.md"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/ecdsa-sdk"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/ecdsa-sdk"],
       "options": {
         "jestConfig": "packages/ecdsa-sdk/jest.config.ts",
         "passWithNoTests": true

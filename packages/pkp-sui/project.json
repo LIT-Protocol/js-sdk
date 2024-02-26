@@ -6,34 +6,24 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/pkp-sui",
         "main": "packages/pkp-sui/src/index.ts",
         "tsConfig": "packages/pkp-sui/tsconfig.lib.json",
-        "assets": [
-          "packages/pkp-sui/*.md"
-        ]
+        "assets": ["packages/pkp-sui/*.md"]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/pkp-sui/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/pkp-sui/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/pkp-sui"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/pkp-sui"],
       "options": {
         "jestConfig": "packages/pkp-sui/jest.config.ts",
         "passWithNoTests": true

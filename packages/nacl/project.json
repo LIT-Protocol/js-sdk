@@ -6,34 +6,24 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/nacl",
         "main": "packages/nacl/src/index.ts",
         "tsConfig": "packages/nacl/tsconfig.lib.json",
-        "assets": [
-          "packages/nacl/*.md"
-        ]
+        "assets": ["packages/nacl/*.md"]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/nacl/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/nacl/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/nacl"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/nacl"],
       "options": {
         "jestConfig": "packages/nacl/jest.config.ts",
         "passWithNoTests": true
@@ -41,9 +31,7 @@
     },
     "testWatch": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/nacl"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/nacl"],
       "options": {
         "jestConfig": "packages/nacl/jest.config.ts",
         "passWithNoTests": true,

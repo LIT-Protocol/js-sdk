@@ -1397,7 +1397,7 @@ async function validateDependencyVersions() {
     const packageJson = await readJsonFile(pkg);
     const pkgVersion = packageJson.version;
 
-    const dependencies = packageJson.dependencies;
+    const dependencies = packageJson?.dependencies ?? {};
 
     let total = 0;
     let passes = 0;

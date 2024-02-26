@@ -6,16 +6,12 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/constants",
         "main": "packages/constants/src/index.ts",
         "tsConfig": "packages/constants/tsconfig.lib.json",
-        "assets": [
-          "packages/constants/*.md"
-        ]
+        "assets": ["packages/constants/*.md"]
       }
     },
     "copyJSONFilesToDist": {
@@ -32,20 +28,14 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/constants/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/constants/**/*.ts"]
       }
     },
     "testPackage": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/constants"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/constants"],
       "options": {
         "jestConfig": "packages/constants/jest.config.ts",
         "passWithNoTests": true
@@ -53,9 +43,7 @@
     },
     "testWatch": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/constants"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/constants"],
       "options": {
         "jestConfig": "packages/constants/jest.config.ts",
         "passWithNoTests": true,

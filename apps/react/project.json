@@ -21,9 +21,7 @@
         "scripts": [],
         "webpackConfig": "apps/react/webpack.config.js"
       },
-      "configurations": {
-
-      }
+      "configurations": {}
     },
     "serve": {
       "executor": "@nrwl/web:dev-server",
@@ -33,8 +31,7 @@
         "hmr": true,
         "port": 4003
       },
-      "configurations": {
-      }
+      "configurations": {}
     }
   },
   "tags": []

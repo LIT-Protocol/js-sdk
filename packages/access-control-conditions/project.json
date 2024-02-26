@@ -6,33 +6,25 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/access-control-conditions",
         "main": "packages/access-control-conditions/src/index.ts",
         "tsConfig": "packages/access-control-conditions/tsconfig.lib.json",
-        "assets": [
-          "packages/access-control-conditions/*.md"
-        ]
+        "assets": ["packages/access-control-conditions/*.md"]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/access-control-conditions/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/access-control-conditions/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": [
-        "coverage/packages/access-control-conditions"
+        "{workspaceRoot}/coverage/packages/access-control-conditions"
       ],
       "options": {
         "jestConfig": "packages/access-control-conditions/jest.config.ts",

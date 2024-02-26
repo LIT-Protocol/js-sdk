@@ -6,34 +6,24 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/auth-helpers",
         "main": "packages/auth-helpers/src/index.ts",
         "tsConfig": "packages/auth-helpers/tsconfig.lib.json",
-        "assets": [
-          "packages/auth-helpers/*.md"
-        ]
+        "assets": ["packages/auth-helpers/*.md"]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/auth-helpers/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/auth-helpers/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/auth-helpers"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/auth-helpers"],
       "options": {
         "jestConfig": "packages/auth-helpers/jest.config.ts",
         "passWithNoTests": true
@@ -41,9 +31,7 @@
     },
     "testWatch": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/auth-helpers"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/auth-helpers"],
       "options": {
         "jestConfig": "packages/auth-helpers/jest.config.ts",
         "passWithNoTests": true,

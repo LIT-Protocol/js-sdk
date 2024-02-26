@@ -6,23 +6,17 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/sev-snp-utils-sdk",
         "main": "packages/sev-snp-utils-sdk/src/index.ts",
         "tsConfig": "packages/sev-snp-utils-sdk/tsconfig.lib.json",
-        "assets": [
-          "packages/sev-snp-utils-sdk/*.md"
-        ]
+        "assets": ["packages/sev-snp-utils-sdk/*.md"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/packages/sev-snp-utils-sdk"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/packages/sev-snp-utils-sdk"],
       "options": {
         "jestConfig": "packages/sev-snp-utils-sdk/jest.config.ts",
         "passWithNoTests": true
