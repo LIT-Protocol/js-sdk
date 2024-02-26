@@ -5,13 +5,26 @@
   },
   "tasksRunnerOptions": {
     "default": {
-      "runner": "@nx/workspace/tasks-runners/default"
+      "runner": "@nx/workspace/tasks-runners/default",
+      "options": {
+        "cacheableOperations": [
+          "build",
+          "test",
+          "lint",
+          "e2e"
+        ]
+      }
     }
   },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ]
     }
   },
   "workspaceLayout": {
@@ -53,8 +66,14 @@
   },
   "defaultProject": "lit-node-client",
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
     "sharedGlobals": [],
-    "production": ["default", "!{projectRoot}/src/test-setup.[jt]s"]
+    "production": [
+      "default",
+      "!{projectRoot}/src/test-setup.[jt]s"
+    ]
   }
 }
