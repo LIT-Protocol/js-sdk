@@ -495,7 +495,7 @@ async function buildFunc() {
       .map((item) => item.replace('apps/', ''))
       .join(',');
 
-    const command = `yarn nx run-many --target=build --exclude=${ignoreList} --parallel=false`;
+    const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
 
     spawnListener(command, {
       onDone: () => {
