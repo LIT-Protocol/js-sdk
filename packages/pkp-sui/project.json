@@ -5,24 +5,25 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/pkp-sui",
         "main": "packages/pkp-sui/src/index.ts",
         "tsConfig": "packages/pkp-sui/tsconfig.lib.json",
-        "assets": ["packages/pkp-sui/*.md"]
+        "assets": ["packages/pkp-sui/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/pkp-sui/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/packages/pkp-sui"],
       "options": {
         "jestConfig": "packages/pkp-sui/jest.config.ts",

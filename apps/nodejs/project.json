@@ -5,17 +5,19 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/node:webpack",
+      "executor": "@nx/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/nodejs",
         "main": "apps/nodejs/main.ts",
         "tsConfig": "apps/nodejs/tsconfig.app.json",
-        "assets": []
+        "assets": [],
+        "compiler": "tsc",
+        "target": "node"
       }
     },
     "serve": {
-      "executor": "@nrwl/node:node",
+      "executor": "@nx/js:node",
       "options": {
         "buildTarget": "nodejs:build"
       }

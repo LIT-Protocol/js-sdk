@@ -5,13 +5,14 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/constants",
         "main": "packages/constants/src/index.ts",
         "tsConfig": "packages/constants/tsconfig.lib.json",
-        "assets": ["packages/constants/*.md"]
+        "assets": ["packages/constants/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "copyJSONFilesToDist": {
@@ -27,14 +28,14 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/constants/**/*.ts"]
       }
     },
     "testPackage": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/packages/constants"],
       "options": {
         "jestConfig": "packages/constants/jest.config.ts",
@@ -42,7 +43,7 @@
       }
     },
     "testWatch": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/packages/constants"],
       "options": {
         "jestConfig": "packages/constants/jest.config.ts",
