@@ -1,5 +1,5 @@
 // Usage:
-// DEBUG=true NETWORK=manzano MINT_NEW=true yarn test:e2e:nodejs --filter=test-rli-from-lit-node-client-optional-capacity-token-id.mjs
+// DEBUG=true NETWORK=habanero MINT_NEW=true yarn test:e2e:nodejs --filter=test-rli-from-lit-node-client-optional-capacity-token-id.mjs
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
