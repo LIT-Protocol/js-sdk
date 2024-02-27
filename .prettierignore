@@ -11,3 +11,4 @@
 /tmp
 /packages/*/dist
 .nx
+tools
