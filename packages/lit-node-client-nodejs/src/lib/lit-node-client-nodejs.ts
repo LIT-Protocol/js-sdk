@@ -250,7 +250,7 @@ export class LitNodeClientNodeJs
       ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
       delegate_to: delegateeAddresses,
       uses: _uses.toString(),
-    }
+    };
 
     recapObject.addCapabilityForResource(
       litResource,

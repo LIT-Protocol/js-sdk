@@ -99,7 +99,7 @@ if (loadEnv) {
       daysUntilUTCMidnightExpiration: 2,
     });
 
-    console.log("ccNFT:", ccNFT);
+    console.log('ccNFT:', ccNFT);
 
     let res = await contractClient.pkpNftContractUtils.write.mint();
 
