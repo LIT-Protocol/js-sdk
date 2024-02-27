@@ -3,6 +3,11 @@ import LITCONFIG from '../lit.config.json' assert { type: 'json' };
 import { fail } from '../tools/scripts/utils.mjs';
 import { LocalStorage } from 'node-localstorage';
 
+// -- This is to fix CI "ReferenceError: crypto is not defined" error
+if (typeof globalThis.crypto === 'undefined') {
+  globalThis.crypto = require('crypto');
+}
+
 const client = new LitNodeClient({
   litNetwork: globalThis.LitCI.network,
   debug: globalThis.LitCI.debug,
