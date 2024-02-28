@@ -752,11 +752,16 @@ export class LitCore {
       log('Fetching current epoch number')
       const epoch = await stakingContract['epoch']();
       const epochNumber = epoch.number.toNumber();
+
+      // Update the cache
+      this.epochCache.number = epochNumber;
+      this.epochCache.lastUpdateTime = Date.now();
+
       return epochNumber;
 
     } catch (error) {
       return throwError({
-        message: `Error getting current eporch number: ${error}`,
+        message: `Error getting current epoch number: ${error}`,
         errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
         errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
       });
