@@ -6,8 +6,8 @@ if (typeof globalThis.crypto === 'undefined') {
 }
 
 globalThis.litConfig = {
-  debug: true
-}
+  debug: true,
+};
 
 const DATA_TO_SIGN = new Uint8Array(
   await crypto.subtle.digest('SHA-256', new TextEncoder().encode('Hello world'))
