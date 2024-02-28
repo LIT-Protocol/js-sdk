@@ -1,6 +1,4 @@
-import { computeHDPubKey, checkSevSnpAttestation } from '@lit-protocol/crypto';
-import { keccak256 } from '@ethersproject/keccak256';
-import { toUtf8Bytes } from '@ethersproject/strings';
+import { ethers } from 'ethers';
 
 import {
   canonicalAccessControlConditionFormatter,
@@ -16,19 +14,17 @@ import {
   validateSolRpcConditionsSchema,
   validateUnifiedAccessControlConditionsSchema,
 } from '@lit-protocol/access-control-conditions';
-
 import {
-  INTERNAL_DEFAULT_CONFIG,
-  LitNetwork,
   LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORKS,
-  version,
-  TELEM_API_URL,
+  LitNetwork,
   SIGTYPE,
   StakingStates,
+  version,
 } from '@lit-protocol/constants';
-
+import { LitContracts } from '@lit-protocol/contracts-sdk';
+import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
   executeWithRetry,
@@ -42,36 +38,28 @@ import {
   sendRequest,
   throwError,
 } from '@lit-protocol/misc';
-import {
-  AuthMethod,
+
+import type {
   AuthSig,
   CustomNetwork,
   FormattedMultipleAccs,
   HandshakeWithNode,
-  JsonExecutionRequest,
   JsonHandshakeResponse,
-  JsonPkpSignRequest,
   KV,
-  LitContractContext,
-  LitContractResolverContext,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
-  NodeAttestation,
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
   NodeErrorV3,
   NodePromiseResponse,
   RejectedNodePromises,
-  RetryTolerance,
   SendNodeCommand,
   SessionSig,
   SessionSigsMap,
   SuccessNodePromises,
   SupportedJsonRequests,
 } from '@lit-protocol/types';
-import { ethers } from 'ethers';
-import { LitContracts } from '@lit-protocol/contracts-sdk';
 
 export const DELAY_BEFORE_NEXT_EPOCH = 30000;
 // export const MAX_CACHE_AGE = 30000;
@@ -99,12 +87,13 @@ export class LitCore {
   };
 
   // ========== Constructor ==========
-  constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
-    const customConfig = args;
-    let _defaultConfig = {
+  constructor(config: LitNodeClientConfig | CustomNetwork) {
+    const customConfig = config;
+    const _defaultConfig = {
       alertWhenUnauthorized: false,
       debug: true,
       connectTimeout: 20000,
+      checkNodeAttestation: false,
       litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
       minNodeCount: 2, // Default value, should be replaced
       bootstrapUrls: [], // Default value, should be replaced
@@ -116,8 +105,8 @@ export class LitCore {
     };
 
     // Initialize default config based on litNetwork
-    if (args && 'litNetwork' in args) {
-      switch (args.litNetwork) {
+    if (config && 'litNetwork' in config) {
+      switch (config.litNetwork) {
         case LitNetwork.Cayenne:
           this.config = {
             ..._defaultConfig,
@@ -346,15 +335,15 @@ export class LitCore {
           );
           // if the sets differ we reconnect.
           if (delta.length > 1) {
-            // check if the node sets are non matching and re connect if they do not.
+            // check if the node sets are non-matching and re-connect if they do not.
             /*
-              TODO: While this covers most cases where a node may come in or out of the active 
+              TODO: While this covers most cases where a node may come in or out of the active
               set which we will need to re attest to the execution environments.
               The sdk currently does not know if there is an active network operation pending.
               Such that the state when the request was sent will now mutate when the response is sent back.
-              The sdk should be able to understand its current execution environment and wait on an active 
+              The sdk should be able to understand its current execution environment and wait on an active
               network request to the previous epoch's node set before changing over.
-              
+
             */
             log(
               'Active validator sets changed, new validators ',
@@ -455,7 +444,7 @@ export class LitCore {
         .then((resp: any) => {
           this.connectedNodes.add(url);
 
-          let keys: JsonHandshakeResponse = {
+          const keys: JsonHandshakeResponse = {
             serverPubKey: resp.serverPublicKey,
             subnetPubKey: resp.subnetPublicKey,
             networkPubKey: resp.networkPublicKey,
@@ -538,7 +527,7 @@ export class LitCore {
     }
 
     // -- get promise
-    const promise = new Promise((resolve: any, reject: any) => {
+    return new Promise((resolve: any, reject: any) => {
       const startTime = Date.now();
       const interval = setInterval(() => {
         if (
@@ -601,6 +590,7 @@ export class LitCore {
             latestBlockhash: this.latestBlockhash,
           });
 
+          // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
           // @ts-ignore
           globalThis.litNodeClient = this;
 
@@ -633,7 +623,6 @@ export class LitCore {
             }
           }, 30_000);
 
-          // @ts-ignore: Expected 1 arguments, but got 0. Did you forget to include 'void' in your type argument to 'Promise'?ts(2794)
           resolve();
         } else {
           const now = Date.now();
@@ -652,8 +641,6 @@ export class LitCore {
         }
       }, 500);
     });
-
-    return promise;
   };
 
   /**
@@ -685,7 +672,7 @@ export class LitCore {
    * Handshake with Node
    *
    * @param { HandshakeWithNode } params
-   *
+   * @param { string } requestId
    * @returns { Promise<NodeCommandServerKeysResponse> }
    *
    */
@@ -707,7 +694,7 @@ export class LitCore {
         challenge: params.challenge,
       };
 
-      let res = await this.sendCommandToNode({
+      const res = await this.sendCommandToNode({
         url: urlWithPath,
         data,
         requestId,
@@ -718,7 +705,7 @@ export class LitCore {
       return res;
     };
 
-    let res = await executeWithRetry<NodeCommandServerKeysResponse>(
+    const res = await executeWithRetry<NodeCommandServerKeysResponse>(
       wrapper,
       (_error: any, _requestId: string, isFinal: boolean) => {
         if (!isFinal) {
