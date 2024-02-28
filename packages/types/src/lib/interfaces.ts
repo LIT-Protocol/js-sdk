@@ -690,11 +690,12 @@ export interface NodeCommandResponse {
 }
 
 export interface NodeCommandServerKeysResponse {
-  serverPublicKey: any;
-  subnetPublicKey: any;
-  networkPublicKey: any;
-  networkPublicKeySet: any;
-  attestation: NodeAttestation;
+  serverPublicKey: string;
+  subnetPublicKey: string;
+  networkPublicKey: string;
+  networkPublicKeySet: string;
+  hdRootPubkeys: string[];
+  attestation?: NodeAttestation;
   latestBlockhash?: string;
 }
 
