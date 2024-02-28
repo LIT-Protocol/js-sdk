@@ -929,29 +929,32 @@ export class LitCore {
    * @returns { void }
    *
    */
-  _throwNodeError = (res: RejectedNodePromises): void => {
-    if (res.error && res.error.errorCode) {
+  _throwNodeError = (res: RejectedNodePromises, requestId: string): void => {
+    if (res.error) {
       if (
-        (res.error.errorCode === LIT_ERROR_CODE.NODE_NOT_AUTHORIZED ||
+        ((res.error.errorCode &&
+          res.error.errorCode === LIT_ERROR_CODE.NODE_NOT_AUTHORIZED) ||
           res.error.errorCode === 'not_authorized') &&
         this.config.alertWhenUnauthorized
       ) {
-        log(
-          '[Alert originally] You are not authorized to access to this content'
-        );
+        log('You are not authorized to access this content');
       }
 
       throwError({
         ...res.error,
         message:
           res.error.message ||
-          'You are not authorized to access to this content',
-        errorCode: res.error.errorCode!,
+          'There was an error getting the signing shares from the nodes',
+        errorCode: res.error.errorCode || LIT_ERROR.UNKNOWN_ERROR.code,
+        requestId,
       } as NodeClientErrorV0 | NodeClientErrorV1);
     } else {
       throwError({
-        message: `There was an error getting the signing shares from the nodes`,
+        message: `There was an error getting the signing shares from the nodes.  Response from the nodes: ${JSON.stringify(
+          res
+        )}`,
         error: LIT_ERROR.UNKNOWN_ERROR,
+        requestId,
       });
     }
   };

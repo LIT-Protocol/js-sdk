@@ -46,9 +46,9 @@
     "debug": true,
     "sevAttestation": false,
     "CONTROLLER_AUTHSIG": {
-      "sig": "0xcf98137cd6a0770463ec0023848c552601f6ae1a18034a0264df1cff4f5997901281ddc9bda1866ec1ae69a735889174398526fa2af6302223e0f520b1bf614f1b",
+      "sig": "0xd2e58a1b39452255e5d366e2b1afcf21c90a2ff9bd4048f909ea89ee66dadbf5545ffa7bf2891636eb191cdbc107dc1c98dcc91a2dfd2670e159faf877ceb3711c",
       "derivedVia": "web3.eth.personal.sign",
-      "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nThis is a test statement.  You can put anything you want here.\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: 0x58ecdc1927f9d2bdf265a54a29aaa2b9fe93c2ec32b4d85a1b5b605627fa5dc2\nIssued At: 2024-02-21T01:42:45.604Z\nExpiration Time: 2024-02-21T02:42:45.601Z",
+      "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nThis is a test statement.  You can put anything you want here.\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: 0xa177a5c051531d093915b710656129a825434b54b2e35db7916279efccbecd36\nIssued At: 2024-02-28T05:37:24.697Z\nExpiration Time: 2024-02-28T06:37:24.692Z",
       "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37"
     },
     "CONTROLLER_WALLET": {
@@ -58,7 +58,10 @@
         "_isProvider": true,
         "_events": [],
         "_emitted": {
-          "block": -2
+          "block": -2,
+          "t:0x150a5de0b15dc7a4632647c558a884cfd7ec58dd5d4e645251af65f20ffc2785": 1820799,
+          "t:0xa530790547267c3e04ef0580c25e643bb82e98302b12ca0ecafff97299ab2d06": 1820800,
+          "t:0x1e8f5c7af8432d894c9e49e1bed03b5fb65ba5849ad138595f0e8af21fa843b4": 1820802
         },
         "disableCcipRead": false,
         "formatter": {
@@ -75,23 +78,41 @@
         },
         "anyNetwork": false,
         "_networkPromise": {},
-        "_maxInternalBlockNumber": -1024,
+        "_maxInternalBlockNumber": 1820801,
         "_lastBlockNumber": -2,
         "_maxFilterBlockRange": 10,
         "_pollingInterval": 4000,
-        "_fastQueryDate": 0,
+        "_fastQueryDate": 1709098680185,
         "connection": {
           "url": "https://chain-rpc.litprotocol.com/http"
         },
-        "_nextId": 43,
+        "_nextId": 91,
         "_eventLoopCache": {
           "detectNetwork": null,
-          "eth_chainId": null
-        }
+          "eth_chainId": null,
+          "eth_blockNumber": null
+        },
+        "_network": {
+          "chainId": 175177,
+          "name": "unknown"
+        },
+        "_internalBlockNumber": {},
+        "_fastBlockNumber": 1820801,
+        "_fastBlockNumberPromise": {}
       }
     },
     "PKP_INFO": {
-      "publicKey": "04b5caf00c9f5adc9b22ca460b88482bad44ed4fac8ee63014b727cf60efc568dbdfe498a94fbd9cd294d651529f9fe76e057e9736150eea038415b06f64a87939"
+      "tokenId": "0x03fefec833469f7d99c5e985bf8d89b819b12ac453fb33ff6dce386c3b1b97fb",
+      "publicKey": "04c5dd0a128406a89fc4f66fe60e2c56a0291aa537fbfbc2bd124cf22a8d75f9832dc07359da4081080a69c7b5715719545d1e001fdfb60d3437237acf1f9c31c7",
+      "ethAddress": "0xec4611a5375246F86D9af17528B75AeF2Efb3895"
+    },
+    "AUTH_METHOD_PKP_INFO": {
+      "publicKey": "043a983b46327040564ad59418d8c047f634c1fb4e4976338afdbc896c9ef2cb146998d87cb46f1f61d2f0f4b8731de750d0e433ef2efb6376002459a5cc6416e1",
+      "ethAddress": "0xb24a2c4d90eEcaFD12adE1De778E0E1658d69308",
+      "authMethod": {
+        "authMethodId": "0x170d13600caea2933912f39a0334eca3d22e472be203f937c4bad0213d92ed71",
+        "authMethodType": 1
+      }
     }
   }
 }

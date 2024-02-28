@@ -580,23 +580,13 @@ export interface SuccessNodePromises<T> {
 
 export interface RejectedNodePromises {
   success: boolean;
-  error: NodeErrorV0 | NodeErrorV1;
+  error: NodeErrorV1;
 }
 
 export interface NodePromiseResponse {
   status?: string;
   value?: any;
   reason?: any;
-}
-
-/**
- * The error object returned by the node.
- *
- * @deprecated - This is the old error object.  It will be removed in the future. Use NodeErrorV1 instead.
- */
-export interface NodeErrorV0 {
-  errorCode: string;
-  message: string;
 }
 
 export interface NodeErrorV1 {
@@ -645,6 +635,7 @@ export interface NodeClientErrorV1 {
   errorCode: string;
   details?: string[];
   status?: number;
+  requestId?: string;
 }
 
 export interface SigShare {

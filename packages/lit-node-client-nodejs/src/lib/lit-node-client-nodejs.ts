@@ -117,7 +117,7 @@ import * as siwe from 'siwe';
 // TODO: move this to auth-helper for next patch
 interface CapacityCreditsReq {
   dAppOwnerWallet: ethers.Wallet;
-  capacityTokenId: string;
+  capacityTokenId?: string;
   delegateeAddresses?: string[];
   uses?: string;
   domain?: string;
@@ -220,11 +220,6 @@ export class LitNodeClientNodeJs
       await this.connect();
     }
 
-    // -- validate if capacityTokenId is empty
-    if (!capacityTokenId) {
-      throw new Error('capacityTokenId must exist');
-    }
-
     // -- validate
     if (!dAppOwnerWallet) {
       throw new Error('dAppOwnerWallet must exist');
@@ -245,20 +240,22 @@ export class LitNodeClientNodeJs
     // -- create LitRLIResource
     // Note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
     // lit-ratelimitincrease://{tokenId}
-    const litResource = new LitRLIResource(capacityTokenId);
+    const litResource = new LitRLIResource(capacityTokenId ?? '*');
 
     const recapObject = await this.generateSessionCapabilityObjectWithWildcards(
       [litResource]
     );
 
+    const capabilities = {
+      ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
+      delegate_to: delegateeAddresses,
+      uses: _uses.toString(),
+    };
+
     recapObject.addCapabilityForResource(
       litResource,
       LitAbility.RateLimitIncreaseAuth,
-      {
-        nft_id: [capacityTokenId],
-        delegate_to: delegateeAddresses,
-        uses: _uses.toString(),
-      }
+      capabilities
     );
 
     // make sure that the resource is added to the recapObject
@@ -1347,7 +1344,7 @@ export class LitNodeClientNodeJs
   getSignatures = (signedData: Array<any>, requestId: string = ''): any => {
     const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
 
-    // processing signature shares for failed or invalid contents.
+    // processing signature shares for failed or invalid contents.  mutates the signedData object.
     for (const signatureResponse of signedData) {
       for (const sigName of Object.keys(signatureResponse)) {
         const requiredFields = ['signatureShare'];
@@ -1439,10 +1436,10 @@ export class LitNodeClientNodeJs
         );
 
         throwError({
-          message:
-            'total number of valid signatures shares does not match threshold',
+          message: `The total number of valid signatures shares ${shares.length} does not meet the threshold of ${this.config.minNodeCount}`,
           errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
           errorCode: LIT_ERROR.NO_VALID_SHARES.code,
+          requestId,
         });
       }
 
@@ -1601,7 +1598,7 @@ export class LitNodeClientNodeJs
     params = LitNodeClientNodeJs.normalizeParams(params);
 
     let res;
-    let requestId = this.getRequestId();
+    let requestId = '';
     // -- only run on a single node
     if (targetNodeRange) {
       res = await this.runOnTargetedNodes(params);
@@ -1652,7 +1649,7 @@ export class LitNodeClientNodeJs
     }
     // -- case: promises rejected
     if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
     // -- case: promises success (TODO: check the keys of "values")
@@ -1865,7 +1862,7 @@ export class LitNodeClientNodeJs
 
     // -- case: promises rejected
     if (!res.success) {
-      this._throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
     // -- case: promises success (TODO: check the keys of "values")
@@ -1994,7 +1991,6 @@ export class LitNodeClientNodeJs
     }
 
     // ========== Get Node Promises ==========
-    let requestId;
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
@@ -2039,10 +2035,11 @@ export class LitNodeClientNodeJs
       },
       this.config.retryTolerance
     );
+    const requestId = res.requestId;
 
     // -- case: promises rejected
     if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
     const signatureShares: Array<NodeBlsSigningShare> = (
@@ -2236,7 +2233,6 @@ export class LitNodeClientNodeJs
 
     log('identityParam', identityParam);
 
-    let requestId;
     // ========== Get Network Signature ==========
     const wrapper = async (
       id: string
@@ -2280,11 +2276,11 @@ export class LitNodeClientNodeJs
       this.config.retryTolerance
     );
 
-    requestId = res.requestId;
+    const requestId = res.requestId;
 
     // -- case: promises rejected
     if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
     const signatureShares: Array<NodeBlsSigningShare> = (
@@ -2621,7 +2617,7 @@ export class LitNodeClientNodeJs
 
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
-      this._throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises, requestId);
       return {} as SignSessionKeyResponse;
     }
 
