@@ -36,7 +36,17 @@ const LitNodeClientPage = () => {
     // @ts-ignore 
     globalThis.authBrowser = authBrowser;
 
-    const authsig = await authBrowser.checkAndSignAuthMessage({ chain: 'ethereum' });
+    const client = new LitJsSdk.LitNodeClient({
+      litNetwork: 'cayenne',
+      debug: true,
+    });
+
+    const latestBlockhash = client.getLatestBlockhash();
+
+    const authsig = await authBrowser.checkAndSignAuthMessage({
+      chain: 'ethereum',
+      nonce: latestBlockhash,
+    });
     console.log('authsig:', authsig)
   };
 

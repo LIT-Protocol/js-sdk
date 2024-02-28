@@ -5,39 +5,34 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "yarn build:target crypto"
-      }
-    },
-    "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/crypto",
         "main": "packages/crypto/src/index.ts",
         "tsConfig": "packages/crypto/tsconfig.lib.json",
-        "assets": ["packages/crypto/*.md"]
+        "assets": ["packages/crypto/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/crypto/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/crypto"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/crypto"],
       "options": {
         "jestConfig": "packages/crypto/jest.config.ts",
         "passWithNoTests": true
       }
     },
     "testWatch": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/crypto"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/crypto"],
       "options": {
         "jestConfig": "packages/crypto/jest.config.ts",
         "passWithNoTests": true,

@@ -10,3 +10,5 @@
 /node_modules
 /tmp
 /packages/*/dist
+.nx
+tools

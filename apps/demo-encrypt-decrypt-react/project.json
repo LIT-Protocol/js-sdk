@@ -1,16 +1,15 @@
 {
-    "name": "demo-encrypt-decrypt-react",
-    "$schema": "../../node_modules/nx/schemas/project-schema.json",
-    "sourceRoot": "apps/demo-encrypt-decrypt-react/src",
-    "projectType": "application",
-    "targets": {
-      "serve":{
-        "executor": "nx:run-commands",
-        "options": {
-          "command": "cd apps/demo-encrypt-decrypt-react && yarn start"
-        }
+  "name": "demo-encrypt-decrypt-react",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/demo-encrypt-decrypt-react/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd apps/demo-encrypt-decrypt-react && yarn start"
       }
-    },
-    "tags": []
-  }
-  
+    }
+  },
+  "tags": []
+}
