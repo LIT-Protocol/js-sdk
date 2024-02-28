@@ -1,5 +1,13 @@
 import { Provider } from '@ethersproject/abstract-provider';
+// @ts-ignore
+import * as JSZip from 'jszip/dist/jszip.js';
 
+import {
+  ISessionCapabilityObject,
+  LitResourceAbilityRequest,
+} from '@lit-protocol/auth-helpers';
+
+import { ILitNodeClient } from './ILitNodeClient';
 import {
   AcceptedFileType,
   AccessControlConditions,
@@ -16,14 +24,6 @@ import {
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
-import { ILitNodeClient } from './ILitNodeClient';
-import {
-  ISessionCapabilityObject,
-  LitResourceAbilityRequest,
-} from '@lit-protocol/auth-helpers';
-
-// @ts-ignore
-import * as JSZip from 'jszip/dist/jszip.js';
 
 /** ---------- Access Control Conditions Interfaces ---------- */
 
@@ -185,12 +185,11 @@ export interface LitNodeClientConfig {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
-export interface CustomNetwork {
-  litNetwork: LIT_NETWORKS_KEYS;
-  bootstrapUrls: Array<string>;
-  minNodeCount?: number;
-  contractContext?: LitContractContext;
-}
+export type CustomNetwork = Pick<
+  LitNodeClientConfig,
+  'litNetwork' | 'bootstrapUrls' | 'minNodeCount' | 'contractContext'
+> &
+  Partial<Pick<LitNodeClientConfig, 'minNodeCount'>>;
 
 /**
  * Override for LocalStorage and SessionStorage
@@ -1139,7 +1138,7 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export interface PKPEthersWalletProp extends PKPBaseProp {}
+export type PKPEthersWalletProp = PKPBaseProp;
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
