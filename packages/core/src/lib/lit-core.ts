@@ -93,9 +93,9 @@ export class LitCore {
     number: number | null;
     lastUpdateTime: number | null;
   } = {
-    number: null,
-    lastUpdateTime: null,
-  };
+      number: null,
+      lastUpdateTime: null,
+    };
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -640,13 +640,10 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${
-              this.config.connectTimeout
-            }ms.  Could only connect to ${
-              Object.keys(this.serverKeys).length
-            } of ${
-              this.config.minNodeCount
-            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
+              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
+              } of ${this.config.minNodeCount
+              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             logErrorWithRequestId(requestId, msg);
             reject(msg);
           }
@@ -736,13 +733,13 @@ export class LitCore {
     try {
       // (epoch) step 3: first check the cache and use the cached value if it's not more than 30 seconds old. If it's a cache miss or the cached value is too old, fall back to fetching the current epoch number
       const now = Date.now();
-
       const cacheAge = now - this.epochCache.lastUpdateTime!;
 
       if (
         this.epochCache.number !== null &&
         cacheAge <= DELAY_BEFORE_NEXT_EPOCH
       ) {
+        log('Using cached epoch number', this.epochCache.number);
         return this.epochCache.number;
       }
 
@@ -752,11 +749,11 @@ export class LitCore {
         this.config.contractContext
       );
 
+      log('Fetching current epoch number')
       const epoch = await stakingContract['epoch']();
-
       const epochNumber = epoch.number.toNumber();
-
       return epochNumber;
+
     } catch (error) {
       return throwError({
         message: `Error getting current eporch number: ${error}`,
