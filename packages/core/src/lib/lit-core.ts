@@ -680,36 +680,32 @@ export class LitCore {
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
-    const wrapper = async (id: string) => {
-      // -- get properties from params
-      const { url } = params;
-
-      // -- create url with path
-      const urlWithPath = `${url}/web/handshake`;
-
-      log(`handshakeWithNode ${urlWithPath}`);
-
-      const data = {
-        clientPublicKey: 'test',
-        challenge: params.challenge,
-      };
-
-      const res = await this.sendCommandToNode({
-        url: urlWithPath,
-        data,
-        requestId,
-      }).catch((err: NodeErrorV3) => {
-        return err;
-      });
-
-      return res;
-    };
-
     const res = await executeWithRetry<NodeCommandServerKeysResponse>(
-      wrapper,
+      async () => {
+        // -- get properties from params
+        const { url } = params;
+
+        // -- create url with path
+        const urlWithPath = `${url}/web/handshake`;
+
+        log(`handshakeWithNode ${urlWithPath}`);
+
+        const data = {
+          clientPublicKey: 'test',
+          challenge: params.challenge,
+        };
+
+        return await this.sendCommandToNode({
+          url: urlWithPath,
+          data,
+          requestId,
+        }).catch((err: NodeErrorV3) => {
+          return err;
+        });
+      },
       (_error: any, _requestId: string, isFinal: boolean) => {
         if (!isFinal) {
-          logError('an error occured, attempting to retry');
+          logError('an error occurred, attempting to retry');
         }
       },
       this.config.retryTolerance
@@ -938,8 +934,9 @@ export class LitCore {
    *
    * @param { Array<Promise<any>> } nodePromises
    *
+   * @param { string } requestId requestId to be logged in case of error
+   * @param { number } minNodeCount number of nodes we need valid results from in order to resolve
    * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
-   *
    */
   handleNodePromises = async <T>(
     nodePromises: Array<Promise<T>>,
@@ -990,12 +987,10 @@ export class LitCore {
 
     // -- case: success (when success responses are more than minNodeCount)
     if (successes.length >= minNodeCount) {
-      const successPromises: SuccessNodePromises<T> = {
+      return {
         success: true,
         values: successes,
       };
-
-      return successPromises;
     }
 
     // -- case: if we're here, then we did not succeed.  time to handle and report errors.
@@ -1008,12 +1003,10 @@ export class LitCore {
       `most common error: ${JSON.stringify(mostCommonError)}`
     );
 
-    const rejectedPromises: RejectedNodePromises = {
+    return {
       success: false,
       error: mostCommonError,
     };
-
-    return rejectedPromises;
   };
 
   /**
@@ -1129,9 +1122,10 @@ export class LitCore {
   };
 
   /**
-   * Calculates an HD public key from a given {@link keyId} the curve type or signature type will assumed to be k256 unless given
+   * Calculates an HD public key from a given keyId
+   * The curve type or signature type is assumed to be k256 unless provided
    * @param keyId
-   * @param sigType
+   * @param {SIGTYPE} sigType
    * @returns {string} public key
    */
   computeHDPubKey = (
@@ -1152,7 +1146,7 @@ export class LitCore {
   /**
    * Calculates a Key Id for claiming a pkp based on a user identifier and an app identifier.
    * The key Identifier is an Auth Method Id which scopes the key uniquely to a specific application context.
-   * These identifiers are specific to each auth method and will derive the public key protion of a pkp which will be persited
+   * These identifiers are specific to each auth method and will derive the public key portion of a pkp which will be persisted
    * when a key is claimed.
    * | Auth Method | User ID | App ID |
    * |:------------|:--------|:-------|
@@ -1160,11 +1154,13 @@ export class LitCore {
    * | Discord OAuth | user id | client app identifier |
    * | Stytch OTP |token `sub` | token `aud`|
    * | Lit Actions | user defined | ipfs cid |
-   * *Note* Lit Action claiming uses a different schema than oter auth methods
-   * isForActionContext should be set for true if using claiming through actions
-   * @param userId {string} user identifier for the Key Identifier
-   * @param appId {string} app identifier for the Key Identifier
-   * @returns {String} public key of pkp when claimed
+   * *Note* Lit Action claiming uses a different schema than other auth methods
+   *
+   * @param {string} userId user identifier for the Key Identifier
+   * @param {string} appId app identifier for the Key Identifier
+   * @param {boolean} isForActionContext should be set for true if using claiming through actions
+   *
+   * @returns {string} public key of pkp when claimed
    */
   computeHDKeyId(
     userId: string,
