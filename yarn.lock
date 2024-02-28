@@ -7367,7 +7367,7 @@ array-ify@^1.0.0:
   resolved "https://registry.yarnpkg.com/array-ify/-/array-ify-1.0.0.tgz#9e528762b4a9066ad163a6962a364418e9626ece"
   integrity sha512-c5AMf34bKdvPhQ7tBGhqkgKNUzMr4WUs+WDtC2ZUGOUncbxKMTvqxYctiseW3+L4bA8ec+GcZ6/A/FW4m8ukng==
 
-array-includes@^3.1.3, array-includes@^3.1.4, array-includes@^3.1.5, array-includes@^3.1.6, array-includes@^3.1.7:
+array-includes@^3.1.3, array-includes@^3.1.5, array-includes@^3.1.6, array-includes@^3.1.7:
   version "3.1.7"
   resolved "https://registry.yarnpkg.com/array-includes/-/array-includes-3.1.7.tgz#8cd2e01b26f7a3086cbc87271593fe921c62abda"
   integrity sha512-dlcsNBIiWhPkHdOEEKnehA+RNUWDc4UqFtnIXU4uuYDPtA4LDkr7qip2p0VvFAEXNDr0yWZ9PJyIRiGjRLQzwQ==
@@ -7427,7 +7427,7 @@ array.prototype.findlastindex@^1.2.3:
     es-errors "^1.3.0"
     es-shim-unscopables "^1.0.2"
 
-array.prototype.flat@^1.2.4, array.prototype.flat@^1.2.5, array.prototype.flat@^1.3.1, array.prototype.flat@^1.3.2:
+array.prototype.flat@^1.2.4, array.prototype.flat@^1.3.1, array.prototype.flat@^1.3.2:
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/array.prototype.flat/-/array.prototype.flat-1.3.2.tgz#1476217df8cff17d72ee8f3ba06738db5b387d18"
   integrity sha512-djYB+Zx2vLewY8RWlNCUdHjDXs2XOgm602S9E7P/UpHgfeHL00cRiIF+IN/G/aUJ7kGPb6yO/ErDI5V2s8iycA==
@@ -12162,7 +12162,7 @@ eslint-import-resolver-typescript@^2.7.1:
     resolve "^1.22.0"
     tsconfig-paths "^3.14.1"
 
-eslint-module-utils@^2.6.2, eslint-module-utils@^2.7.3, eslint-module-utils@^2.8.0:
+eslint-module-utils@^2.6.2, eslint-module-utils@^2.8.0:
   version "2.8.1"
   resolved "https://registry.yarnpkg.com/eslint-module-utils/-/eslint-module-utils-2.8.1.tgz#52f2404300c3bd33deece9d7372fb337cc1d7c34"
   integrity sha512-rXDXR3h7cs7dy9RNpUlQf80nX31XWJEyGq1tRMo+6GsO5VmTe4UTwtmonAD4ZkAsrfMVDA2wlGJ3790Ys+D49Q==
