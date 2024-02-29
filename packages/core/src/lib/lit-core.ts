@@ -64,17 +64,30 @@ import type {
 export const DELAY_BEFORE_NEXT_EPOCH = 30000;
 // export const MAX_CACHE_AGE = 30000;
 export class LitCore {
-  config: LitNodeClientConfig;
-  connectedNodes: SetConstructor | Set<any> | any;
-  serverKeys: KV | any;
-  ready: boolean;
-  subnetPubKey: string | null;
-  networkPubKey: string | null;
-  networkPubKeySet: string | null;
-  hdRootPubkeys: string[] | null;
-  latestBlockhash: string | null;
-  lastBlockHashRetrieved: number | null;
-  networkSyncInterval: any | null;
+  config: LitNodeClientConfig = {
+    alertWhenUnauthorized: false,
+    debug: true,
+    connectTimeout: 20000,
+    checkNodeAttestation: false,
+    litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
+    minNodeCount: 2, // Default value, should be replaced
+    bootstrapUrls: [], // Default value, should be replaced
+    retryTolerance: {
+      timeout: 31_000,
+      maxRetryCount: 3,
+      interval: 100,
+    },
+  };
+  connectedNodes: Set<string> = new Set();
+  serverKeys: KV = {};
+  ready: boolean = false;
+  subnetPubKey: string | null = null;
+  networkPubKey: string | null = null;
+  networkPubKeySet: string | null = null;
+  hdRootPubkeys: string[] | null = null;
+  latestBlockhash: string | null = null;
+  lastBlockHashRetrieved: number | null = null;
+  networkSyncInterval: ReturnType<typeof setInterval> | null = null;
 
   private epochChangeListenerSet = false;
 
@@ -146,16 +159,6 @@ export class LitCore {
       // this.config = override(this.config, customConfig);
     }
 
-    // -- init default properties
-    this.connectedNodes = new Set();
-    this.serverKeys = {};
-    this.ready = false;
-    this.subnetPubKey = null;
-    this.networkPubKey = null;
-    this.networkPubKeySet = null;
-    this.hdRootPubkeys = null;
-    this.latestBlockhash = null;
-    this.lastBlockHashRetrieved = null;
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
     this.setCustomBootstrapUrls();
 
