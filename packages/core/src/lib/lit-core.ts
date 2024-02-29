@@ -101,62 +101,33 @@ export class LitCore {
 
   // ========== Constructor ==========
   constructor(config: LitNodeClientConfig | CustomNetwork) {
-    const customConfig = config;
-    const _defaultConfig = {
-      alertWhenUnauthorized: false,
-      debug: true,
-      connectTimeout: 20000,
-      checkNodeAttestation: false,
-      litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
-      minNodeCount: 2, // Default value, should be replaced
-      bootstrapUrls: [], // Default value, should be replaced
-      retryTolerance: {
-        timeout: 31_000,
-        maxRetryLimit: 3,
-        interval: 100,
-      },
-    };
-
     // Initialize default config based on litNetwork
-    if (config && 'litNetwork' in config) {
-      switch (config.litNetwork) {
-        case LitNetwork.Cayenne:
-          this.config = {
-            ..._defaultConfig,
-            litNetwork: LitNetwork.Cayenne,
-          } as unknown as LitNodeClientConfig;
-          break;
-        case LitNetwork.Manzano:
-          this.config = {
-            ..._defaultConfig,
-            litNetwork: LitNetwork.Manzano,
-            checkSevSnpAttestation: true,
-          } as unknown as LitNodeClientConfig;
-          break;
-        case LitNetwork.Habanero:
-          this.config = {
-            ..._defaultConfig,
-            litNetwork: LitNetwork.Habanero,
-            checkSevSnpAttestation: true,
-          } as unknown as LitNodeClientConfig;
-          break;
-        default:
-          this.config = {
-            ..._defaultConfig,
-            ...customConfig,
-          } as LitNodeClientConfig;
-      }
-    } else {
-      this.config = { ..._defaultConfig, ...customConfig };
-    }
-
-    // -- initialize default auth callback
-    // this.defaultAuthCallback = args?.defaultAuthCallback;
-
-    // -- if config params are specified, replace it
-    if (customConfig) {
-      this.config = { ...this.config, ...customConfig };
-      // this.config = override(this.config, customConfig);
+    switch (config?.litNetwork) {
+      case LitNetwork.Cayenne:
+        this.config = {
+          ...this.config,
+          litNetwork: LitNetwork.Cayenne,
+        };
+        break;
+      case LitNetwork.Manzano:
+        this.config = {
+          ...this.config,
+          litNetwork: LitNetwork.Manzano,
+          checkNodeAttestation: true,
+        };
+        break;
+      case LitNetwork.Habanero:
+        this.config = {
+          ...this.config,
+          litNetwork: LitNetwork.Habanero,
+          checkNodeAttestation: true,
+        };
+        break;
+      default:
+        this.config = {
+          ...this.config,
+          ...config,
+        };
     }
 
     // -- set bootstrapUrls to match the network litNetwork unless it's set to custom
@@ -173,9 +144,9 @@ export class LitCore {
     // If the user sets a new file path, we respect it over the default path.
     if (this.config.storageProvider?.provider) {
       log(
-        'localstorage api not found, injecting persistance instance found in config'
+        'localstorage api not found, injecting persistence instance found in config'
       );
-      // using Object definProperty in order to set a property previously defined as readonly.
+      // using Object defineProperty in order to set a property previously defined as readonly.
       // if the user wants to override the storage option explicitly we override.
       Object.defineProperty(globalThis, 'localStorage', {
         value: this.config.storageProvider?.provider,
@@ -186,7 +157,7 @@ export class LitCore {
       !this.config.storageProvider?.provider
     ) {
       log(
-        'Looks like you are running in NodeJS and did not provide a storage provider, youre sessions will not be cached'
+        'Looks like you are running in NodeJS and did not provide a storage provider, your sessions will not be cached'
       );
     }
   }
@@ -213,10 +184,10 @@ export class LitCore {
       this.config.litNetwork === LitNetwork.Habanero
     ) {
       const minNodeCount = await LitContracts.getMinNodeCount(
-        this.config.litNetwork as LitNetwork
+        this.config.litNetwork
       );
       const bootstrapUrls = await LitContracts.getValidators(
-        this.config.litNetwork as LitNetwork
+        this.config.litNetwork
       );
       log('Bootstrap urls: ', bootstrapUrls);
       if (minNodeCount <= 0) {
@@ -238,7 +209,7 @@ export class LitCore {
       this.config.minNodeCount = parseInt(minNodeCount, 10);
       this.config.bootstrapUrls = bootstrapUrls;
     } else if (this.config.litNetwork === LitNetwork.Cayenne) {
-      // If the network is cayenne it is a centralized testnet so we use a static config
+      // If the network is cayenne it is a centralized testnet, so we use a static config
       // This is due to staking contracts holding local ip / port contexts which are innacurate to the ip / port exposed to the world
       this.config.bootstrapUrls = LIT_NETWORKS.cayenne;
       this.config.minNodeCount =
@@ -258,12 +229,12 @@ export class LitCore {
       log('using custom contracts: ', this.config.contractContext);
 
       const minNodeCount = await LitContracts.getMinNodeCount(
-        this.config.litNetwork as LitNetwork,
+        this.config.litNetwork,
         this.config.contractContext
       );
 
       const bootstrapUrls = await LitContracts.getValidators(
-        this.config.litNetwork as LitNetwork,
+        this.config.litNetwork,
         this.config.contractContext
       );
       log('Bootstrap urls: ', bootstrapUrls);
@@ -340,13 +311,12 @@ export class LitCore {
           if (delta.length > 1) {
             // check if the node sets are non-matching and re-connect if they do not.
             /*
-              TODO: While this covers most cases where a node may come in or out of the active
+              TODO: This covers *most* cases where a node may come in or out of the active
               set which we will need to re attest to the execution environments.
-              The sdk currently does not know if there is an active network operation pending.
+              However, the sdk currently does not know if there is an active network operation pending.
               Such that the state when the request was sent will now mutate when the response is sent back.
               The sdk should be able to understand its current execution environment and wait on an active
               network request to the previous epoch's node set before changing over.
-
             */
             log(
               'Active validator sets changed, new validators ',
@@ -671,7 +641,6 @@ export class LitCore {
   }
 
   /**
-   *
    * Handshake with Node
    *
    * @param { HandshakeWithNode } params
