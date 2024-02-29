@@ -187,7 +187,7 @@ export interface LitNodeClientConfig {
 
 export type CustomNetwork = Pick<
   LitNodeClientConfig,
-  'litNetwork' | 'bootstrapUrls' | 'minNodeCount' | 'contractContext'
+  'litNetwork' | 'bootstrapUrls' | 'contractContext' | 'checkNodeAttestation'
 > &
   Partial<Pick<LitNodeClientConfig, 'minNodeCount'>>;
 
