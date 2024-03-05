@@ -78,6 +78,8 @@
     "@cypress/react": "^6.2.0",
     "@cypress/webpack-dev-server": "^2.3.0",
     "@lit-protocol/accs-schemas": "0.0.6",
+    "@lit-protocol/core": "file:.yalc/@lit-protocol/core",
+    "@lit-protocol/lit-node-client-nodejs": "file:.yalc/@lit-protocol/lit-node-client-nodejs",
     "@metamask/eth-sig-util": "5.0.2",
     "@mysten/sui.js": "^0.37.1",
     "@playwright/test": "^1.25.2",
@@ -151,6 +153,8 @@
     "@nx/jest": "17.3.0",
     "@nx/js": "17.3.0",
     "@nx/linter": "17.3.0",
+    "@nx/next": "17.3.0",
+    "@nx/node": "17.3.0",
     "@nx/plugin": "17.3.0",
     "@nx/react": "17.3.0",
     "@nx/web": "17.3.0",
@@ -198,9 +202,7 @@
     "ts-jest": "29.1.2",
     "ts-node": "10.9.1",
     "typedoc": "^0.23.10",
-    "typescript": "~4.7.2",
-    "@nx/next": "17.3.0",
-    "@nx/node": "17.3.0"
+    "typescript": "~4.7.2"
   },
   "workspaces": [
     "packages/*"
