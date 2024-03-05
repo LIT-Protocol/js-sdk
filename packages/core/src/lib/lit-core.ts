@@ -908,7 +908,6 @@ export class LitCore {
       });
     }
 
-    // -- wait until we've received n responses
     const {successes, errors} = await waitForNSuccessesWithErrors(nodePromises, minNodeCount)
 
     // console.log(`successes: ${JSON.stringify(successes, null, 2)}`)
