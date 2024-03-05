@@ -927,7 +927,7 @@ export class LitCore {
     // -- case: if we're here, then we did not succeed.  time to handle and report errors.
     const mostCommonError = JSON.parse(
       mostCommonString(
-        errors.map((r: NodePromiseResponse) => JSON.stringify(r.reason))
+        errors.map((r: any) => JSON.stringify(r))
       )
     );
 
