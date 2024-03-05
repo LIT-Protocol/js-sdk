@@ -890,14 +890,16 @@ export class LitCore {
         promises.forEach((promise) => {
           promise.then((result) => {
             successes.push(result);
+            if(successes.length >= n) {
+              // If we've got enough successful responses to continue, resolve immediately even if some are pending
+              resolve({ successes, errors });
+            }
           }).catch((error) => {
             errors.push(error);
           }).finally(() => {
             responses++;
-            if (responses === n) {
-              resolve({ successes, errors });
-            } else if (responses === promises.length) {
-              // In case the total number of promises is less than n,
+            if (responses === promises.length) {
+              // In case the total number of successful responses is less than n,
               // resolve what we have when all promises are settled.
               resolve({ successes, errors });
             }
