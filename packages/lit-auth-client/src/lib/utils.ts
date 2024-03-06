@@ -3,6 +3,7 @@ import { LoginUrlParams } from '@lit-protocol/types';
 import * as cbor from 'cbor-web';
 
 export const STATE_PARAM_KEY = 'lit-state-param';
+export const LIT_LOGIN_GATEWAY = 'https://login.litgateway.com';
 
 /**
  * Check if OAuth provider is supported
@@ -25,9 +26,9 @@ export function isSocialLoginSupported(provider: string): boolean {
  */
 export async function prepareLoginUrl(
   provider: string,
-  redirectUri: string
+  redirectUri: string,
+  baseUrl = LIT_LOGIN_GATEWAY,
 ): Promise<string> {
-  const baseUrl = 'https://login.litgateway.com';
   const loginUrl = `${baseUrl}${getLoginRoute(provider)}`;
   const state = encode(await setStateParam());
   const authParams = {
