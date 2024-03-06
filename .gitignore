@@ -66,3 +66,5 @@ apps/react/src/app/app.tsx
 storage.test.db
 
 .nx
+
+.yalc
