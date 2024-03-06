@@ -1631,7 +1631,7 @@ export class LitNodeClientNodeJs
         res = await this.handleNodePromises(
           nodePromises,
           requestId,
-          this.config.minNodeCount
+          this.connectedNodes.size
         );
         return res;
       };
@@ -1843,7 +1843,7 @@ export class LitNodeClientNodeJs
       const res = await this.handleNodePromises(
         nodePromises,
         id,
-        this.config.minNodeCount
+        this.connectedNodes.size // ECDSA requires responses from all nodes, but only shares from minNodeCount.
       );
       return res;
     };
@@ -2423,7 +2423,7 @@ export class LitNodeClientNodeJs
       const responses = await this.handleNodePromises(
         nodePromises,
         id,
-        this.config.minNodeCount
+        this.connectedNodes.size
       );
 
       return responses;
@@ -2591,7 +2591,7 @@ export class LitNodeClientNodeJs
         res = await this.handleNodePromises(
           nodePromises,
           id,
-          this.config.minNodeCount
+          this.connectedNodes.size
         );
         log('signSessionKey node promises:', res);
       } catch (e) {
@@ -2941,7 +2941,7 @@ export class LitNodeClientNodeJs
       const responseData = await this.handleNodePromises(
         nodePromises,
         id,
-        this.config.minNodeCount
+        this.connectedNodes.size
       );
 
       return responseData;
