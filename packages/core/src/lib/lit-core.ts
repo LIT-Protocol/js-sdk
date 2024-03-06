@@ -609,7 +609,7 @@ export class LitCore {
             }ms.  Could only connect to ${
               Object.keys(this.serverKeys).length
             } of ${
-              this.config.minNodeCount
+              this.config.bootstrapUrls.length
             } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             logErrorWithRequestId(requestId, msg);
             reject(msg);
