@@ -877,7 +877,6 @@ export class LitCore {
     requestId: string,
     minNodeCount: number
   ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
-
     async function waitForNSuccessesWithErrors<T>(
       promises: Array<Promise<T>>,
       n: number
@@ -885,31 +884,37 @@ export class LitCore {
       let responses = 0;
       const successes: T[] = [];
       const errors: any[] = [];
-    
+
       return new Promise((resolve) => {
         promises.forEach((promise) => {
-          promise.then((result) => {
-            successes.push(result);
-            if(successes.length >= n) {
-              // If we've got enough successful responses to continue, resolve immediately even if some are pending
-              resolve({ successes, errors });
-            }
-          }).catch((error) => {
-            errors.push(error);
-          }).finally(() => {
-            responses++;
-            if (responses === promises.length) {
-              // In case the total number of successful responses is less than n,
-              // resolve what we have when all promises are settled.
-              resolve({ successes, errors });
-            }
-          });
+          promise
+            .then((result) => {
+              successes.push(result);
+              if (successes.length >= n) {
+                // If we've got enough successful responses to continue, resolve immediately even if some are pending
+                resolve({ successes, errors });
+              }
+            })
+            .catch((error) => {
+              errors.push(error);
+            })
+            .finally(() => {
+              responses++;
+              if (responses === promises.length) {
+                // In case the total number of successful responses is less than n,
+                // resolve what we have when all promises are settled.
+                resolve({ successes, errors });
+              }
+            });
         });
       });
     }
 
     // -- wait until we've received n responses
-    const {successes, errors} = await waitForNSuccessesWithErrors(nodePromises, minNodeCount)
+    const { successes, errors } = await waitForNSuccessesWithErrors(
+      nodePromises,
+      minNodeCount
+    );
 
     // console.log(`successes: ${JSON.stringify(successes, null, 2)}`)
     // console.log(`errors: ${JSON.stringify(errors, null, 2)}`)
@@ -926,9 +931,7 @@ export class LitCore {
 
     // -- case: if we're here, then we did not succeed.  time to handle and report errors.
     const mostCommonError = JSON.parse(
-      mostCommonString(
-        errors.map((r: any) => JSON.stringify(r))
-      )
+      mostCommonString(errors.map((r: any) => JSON.stringify(r)))
     );
 
     logErrorWithRequestId(
