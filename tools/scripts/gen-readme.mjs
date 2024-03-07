@@ -35,8 +35,9 @@ const getSize = (lib) => {
 };
 
 const getNpm = (lib) => {
-  return `<a target="_blank" href="https://www.npmjs.com/package/${lib}">npm</a>`;
-  return `<a href="https://www.npmjs.com/package/${lib}"><img src="https://img.shields.io/npm/dw/${lib}?label=NPM"/></a>`;
+  // return `<a target="_blank" href="https://www.npmjs.com/package/${lib}">npm</a>`;
+  // return `<a href="https://www.npmjs.com/package/${lib}"><img src="https://img.shields.io/npm/dw/${lib}?label=NPM"/></a>`;
+  return `<a target="_blank" href="https://www.npmjs.com/package/${lib}"><img src="https://img.shields.io/npm/v/${lib}"/></a>`;
 };
 
 const libs = (await listDirsRecursive('packages', false)).map((lib) =>
@@ -63,11 +64,10 @@ libs.map((lib) => {
   } catch (e) {
     redLog(`${name}/package.json doesn't have "tags" property`);
   }
-  const _version = version;
   // const _size = getSize(name);
   const _download = `${getNpm(name)}`;
 
-  const content = `| ${_package} | ${_tag} | ${_version} | ${_download}`;
+  const content = `| ${_package} | ${_tag} | ${_download}`;
 
   if (tags[0] === 'universal') {
     universals.push(content);
@@ -115,7 +115,7 @@ mainRows = mainRows.sort((a, b) => {
 });
 
 const tables = {
-  headers: ['Package', 'Category', 'Version', 'Download'],
+  headers: ['Package', 'Category', 'Download'],
   mainRows: mainRows,
   otherRows: otherRows,
 };
