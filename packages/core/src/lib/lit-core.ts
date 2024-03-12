@@ -376,6 +376,9 @@ export class LitCore {
     }
   };
 
+  /**
+   *  Stops internal listeners/polling that refresh network state and watch for epoch changes
+   */
   async disconnect() {
     this._stopListeningForNewEpoch();
     this._stopNetworkPolling();
