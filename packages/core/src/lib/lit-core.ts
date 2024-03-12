@@ -94,9 +94,9 @@ export class LitCore {
     number: number | null;
     lastUpdateTime: number | null;
   } = {
-      number: null,
-      lastUpdateTime: null,
-    };
+    number: null,
+    lastUpdateTime: null,
+  };
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -331,7 +331,6 @@ export class LitCore {
         setTimeout(async () => {
           const newEpochNumber = await this.getCurrentEpochNumber();
           this.updateEpochCache(newEpochNumber);
-
         }, DELAY_BEFORE_NEXT_EPOCH);
 
         log(`New state detected: "${state}"`);
@@ -640,10 +639,13 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
-              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
-              } of ${this.config.minNodeCount
-              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${
+              this.config.connectTimeout
+            }ms.  Could only connect to ${
+              Object.keys(this.serverKeys).length
+            } of ${
+              this.config.minNodeCount
+            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             logErrorWithRequestId(requestId, msg);
             reject(msg);
           }
@@ -741,7 +743,7 @@ export class LitCore {
       // const cacheAge = now - this.epochCache.lastUpdateTime!;
 
       // if (
-      this.epochCache.number !== null
+      this.epochCache.number !== null;
       // && cacheAge <= MAX_CACHE_AGE
       // ) {
       //   log('Using cached epoch number', this.epochCache.number);
