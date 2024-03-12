@@ -27,7 +27,7 @@ export function isSocialLoginSupported(provider: string): boolean {
 export async function prepareLoginUrl(
   provider: string,
   redirectUri: string,
-  baseUrl = LIT_LOGIN_GATEWAY,
+  baseUrl = LIT_LOGIN_GATEWAY
 ): Promise<string> {
   const loginUrl = `${baseUrl}${getLoginRoute(provider)}`;
   const state = encode(await setStateParam());
