@@ -323,7 +323,7 @@ export class LitCore {
       );
       log(
         'listening for state change on staking contract: ',
-        stakingContract.address
+        stakingContract['address']
       );
 
       stakingContract.on('StateChanged', async (state: StakingStates) => {
@@ -954,37 +954,64 @@ export class LitCore {
    */
   handleNodePromises = async <T>(
     nodePromises: Array<Promise<T>>,
-    requestId?: string,
-    minNodeCount?: number
+    requestId: string,
+    minNodeCount: number
   ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
-    // -- prepare
-    const responses = await Promise.allSettled(nodePromises);
-    const minNodes = minNodeCount ?? this.config.minNodeCount;
+    async function waitForNSuccessesWithErrors<T>(
+      promises: Array<Promise<T>>,
+      n: number
+    ): Promise<{ successes: T[]; errors: any[] }> {
+      let responses = 0;
+      const successes: T[] = [];
+      const errors: any[] = [];
 
-    // -- get fulfilled responses
-    const successes: Array<NodePromiseResponse> = responses.filter(
-      (r: any) => r.status === 'fulfilled'
+      return new Promise((resolve) => {
+        promises.forEach((promise) => {
+          promise
+            .then((result) => {
+              successes.push(result);
+              if (successes.length >= n) {
+                // If we've got enough successful responses to continue, resolve immediately even if some are pending
+                resolve({ successes, errors });
+              }
+            })
+            .catch((error) => {
+              errors.push(error);
+            })
+            .finally(() => {
+              responses++;
+              if (responses === promises.length) {
+                // In case the total number of successful responses is less than n,
+                // resolve what we have when all promises are settled.
+                resolve({ successes, errors });
+              }
+            });
+        });
+      });
+    }
+
+    // -- wait until we've received n responses
+    const { successes, errors } = await waitForNSuccessesWithErrors(
+      nodePromises,
+      minNodeCount
     );
 
+    // console.log(`successes: ${JSON.stringify(successes, null, 2)}`)
+    // console.log(`errors: ${JSON.stringify(errors, null, 2)}`)
+
     // -- case: success (when success responses are more than minNodeCount)
-    if (successes.length >= minNodes) {
+    if (successes.length >= minNodeCount) {
       const successPromises: SuccessNodePromises<T> = {
         success: true,
-        values: successes.map((r: any) => r.value),
+        values: successes,
       };
 
       return successPromises;
     }
 
     // -- case: if we're here, then we did not succeed.  time to handle and report errors.
-
-    // -- get "rejected" responses
-    const rejected = responses.filter((r: any) => r.status === 'rejected');
-
     const mostCommonError = JSON.parse(
-      mostCommonString(
-        rejected.map((r: NodePromiseResponse) => JSON.stringify(r.reason))
-      )
+      mostCommonString(errors.map((r: any) => JSON.stringify(r)))
     );
 
     logErrorWithRequestId(
