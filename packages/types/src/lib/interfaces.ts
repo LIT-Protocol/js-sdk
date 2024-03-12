@@ -176,7 +176,7 @@ export interface LitNodeClientConfig {
   bootstrapUrls: string[];
   litNetwork: LIT_NETWORKS_KEYS;
   connectTimeout: number;
-  checkNodeAttestation: boolean;
+  checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
   retryTolerance?: RetryTolerance;
@@ -241,7 +241,7 @@ export interface BaseJsonExecutionRequest {
   targetNodeRange?: number;
 
   // auth methods to resolve
-  authMethods?: Object[];
+  authMethods?: AuthMethod[];
 }
 
 export interface WithAuthSig extends BaseJsonExecutionRequest {
