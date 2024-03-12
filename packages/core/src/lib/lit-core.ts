@@ -45,7 +45,6 @@ import type {
   FormattedMultipleAccs,
   HandshakeWithNode,
   JsonHandshakeResponse,
-  KV,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
   NodeClientErrorV0,
@@ -63,6 +62,17 @@ import type {
 
 export const DELAY_BEFORE_NEXT_EPOCH = 30000;
 // export const MAX_CACHE_AGE = 30000;
+type Listener = (...args: any[]) => void;
+
+interface CoreNodeConfig {
+  subnetPubKey: string;
+  networkPubKey: string;
+  networkPubKeySet: string;
+  hdRootPubkeys: string[];
+  latestBlockhash: string;
+  lastBlockHashRetrieved: number;
+}
+
 export class LitCore {
   config: LitNodeClientConfig = {
     alertWhenUnauthorized: false,
@@ -78,8 +88,8 @@ export class LitCore {
       interval: 100,
     },
   };
-  connectedNodes: Set<string> = new Set();
-  serverKeys: KV = {};
+  connectedNodes = new Set<string>();
+  serverKeys: Record<string, JsonHandshakeResponse> = {};
   ready: boolean = false;
   subnetPubKey: string | null = null;
   networkPubKey: string | null = null;
@@ -87,7 +97,10 @@ export class LitCore {
   hdRootPubkeys: string[] | null = null;
   latestBlockhash: string | null = null;
   lastBlockHashRetrieved: number | null = null;
-  networkSyncInterval: ReturnType<typeof setInterval> | null = null;
+  private _networkSyncInterval: ReturnType<typeof setInterval> | null = null;
+  private _stakingContract: ethers.Contract | null = null;
+  private _stakingContractListener: null | Listener = null;
+  private _connectingPromise: null | Promise<void> = null;
 
   private epochChangeListenerSet = false;
 
@@ -106,24 +119,25 @@ export class LitCore {
       case LitNetwork.Cayenne:
         this.config = {
           ...this.config,
-          litNetwork: LitNetwork.Cayenne,
+          ...config,
         };
         break;
       case LitNetwork.Manzano:
         this.config = {
           ...this.config,
-          litNetwork: LitNetwork.Manzano,
           checkNodeAttestation: true,
+          ...config,
         };
         break;
       case LitNetwork.Habanero:
         this.config = {
           ...this.config,
-          litNetwork: LitNetwork.Habanero,
           checkNodeAttestation: true,
+          ...config,
         };
         break;
       default:
+        // Probably `custom` or `localhost`
         this.config = {
           ...this.config,
           ...config,
@@ -259,6 +273,64 @@ export class LitCore {
     }
   };
 
+  async handleStakingContractStateChange(state: StakingStates) {
+    // (epoch) step 2: listen for epoch changes and update the cache accordingly, with a 30-second delay for using the new epoch number
+    setTimeout(async () => {
+      const newEpochNumber = await this.getCurrentEpochNumber();
+      this.updateEpochCache(newEpochNumber);
+    }, DELAY_BEFORE_NEXT_EPOCH);
+
+    log(`New state detected: "${state}"`);
+    if (state === StakingStates.NextValidatorSetLocked) {
+      try {
+        log(
+          'State found to be new validator set locked, checking validator set'
+        );
+        const oldNodeUrls: string[] = [...this.config.bootstrapUrls].sort();
+        await this.setNewConfig();
+        const currentNodeUrls: string[] = this.config.bootstrapUrls.sort();
+        const delta: string[] = currentNodeUrls.filter((item) =>
+          oldNodeUrls.includes(item)
+        );
+        // if the sets differ we reconnect.
+        if (delta.length > 1) {
+          // check if the node sets are non-matching and re-connect if they do not.
+          /*
+              TODO: This covers *most* cases where a node may come in or out of the active
+              set which we will need to re attest to the execution environments.
+              However, the sdk currently does not know if there is an active network operation pending.
+              Such that the state when the request was sent will now mutate when the response is sent back.
+              The sdk should be able to understand its current execution environment and wait on an active
+              network request to the previous epoch's node set before changing over.
+            */
+          log(
+            'Active validator sets changed, new validators ',
+            delta,
+            'starting node connection'
+          );
+        }
+
+        await this.connect();
+
+
+        const newEpochNumber = await this.getCurrentEpochNumber();
+        this.updateEpochCache(newEpochNumber);
+      } catch (err: unknown) {
+        // FIXME: We should emit an error event so that consumers know that we are de-synced and can connect() again
+        // But for now, our every-30-second network sync will fix things in at most 30s from now.
+        // this.ready = false; Should we assume core is invalid if we encountered errors refreshing from an epoch change?
+        const { message = '' } = err as
+          | Error
+          | NodeClientErrorV0
+          | NodeClientErrorV1;
+        logError(
+          'Error while attempting to reconnect to nodes after epoch transition:',
+          message
+        );
+      }
+    }
+  }
+
   /**
    * Sets up a listener to detect state changes (new epochs) in the staking contract.
    * When a new epoch is detected, it triggers the `setNewConfig` function to update
@@ -275,74 +347,52 @@ export class LitCore {
       return;
     }
 
+    if (this._stakingContractListener) {
+      // Already listening, do nothing
+      return;
+    }
+
     if (
       this.config.litNetwork === LitNetwork.Manzano ||
       this.config.litNetwork === LitNetwork.Habanero ||
       this.config.litNetwork === LitNetwork.Custom
     ) {
       const stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork as any,
+        this.config.litNetwork,
         this.config.contractContext
       );
       log(
         'listening for state change on staking contract: ',
-        stakingContract['address']
+        stakingContract.address
       );
 
-      stakingContract.on('StateChanged', async (state: StakingStates) => {
-        // (epoch) step 2: listen for epoch changes and update the cache accordingly, with a 30-second delay for using the new epoch number
-        setTimeout(async () => {
-          const newEpochNumber = await this.getCurrentEpochNumber();
-          this.updateEpochCache(newEpochNumber);
-        }, DELAY_BEFORE_NEXT_EPOCH);
-
-        log(`New state detected: "${state}"`);
-        if (state === StakingStates.NextValidatorSetLocked) {
-          log(
-            'State found to be new validator set locked, checking validator set'
-          );
-          const oldNodeUrls: string[] = [...this.config.bootstrapUrls].sort();
-          await this.setNewConfig();
-          const currentNodeUrls: string[] = this.config.bootstrapUrls.sort();
-          const delta: string[] = currentNodeUrls.filter((item) =>
-            oldNodeUrls.includes(item)
-          );
-          // if the sets differ we reconnect.
-          if (delta.length > 1) {
-            // check if the node sets are non-matching and re-connect if they do not.
-            /*
-              TODO: This covers *most* cases where a node may come in or out of the active
-              set which we will need to re attest to the execution environments.
-              However, the sdk currently does not know if there is an active network operation pending.
-              Such that the state when the request was sent will now mutate when the response is sent back.
-              The sdk should be able to understand its current execution environment and wait on an active
-              network request to the previous epoch's node set before changing over.
-            */
-            log(
-              'Active validator sets changed, new validators ',
-              delta,
-              'starting node connection'
-            );
-            this.connectedNodes =
-              await this._runHandshakeWithBootstrapUrls().catch(
-                (err: NodeClientErrorV0 | NodeClientErrorV1) => {
-                  logError(
-                    'Error while attempting to reconnect to nodes after epoch transition: ',
-                    err.message
-                  );
-                }
-              );
-          }
-        }
-
-        const newEpochNumber = await this.getCurrentEpochNumber();
-        this.updateEpochCache(newEpochNumber);
-      });
-
-      // Mark that we've set up the listener
-      this.epochChangeListenerSet = true;
+      this._stakingContract = stakingContract;
+      // Stash a function instance, because its identity must be consistent for '.off()' usage to work later
+      this._stakingContractListener = (state: StakingStates) => {
+        // Intentionally not return or await; Listeners are _not async_
+        this.handleStakingContractStateChange(state);
+      };
+      this._stakingContract.on('StateChanged', this._stakingContractListener);
     }
   };
+
+  async disconnect() {
+    this._stopListeningForNewEpoch();
+    this._stopNetworkPolling();
+  }
+
+  _stopNetworkPolling() {
+    if (this._networkSyncInterval) {
+      clearInterval(this._networkSyncInterval);
+      this._networkSyncInterval = null;
+    }
+  }
+  _stopListeningForNewEpoch() {
+    if (this._stakingContract && this._stakingContractListener) {
+      this._stakingContract.off('StateChanged', this._stakingContractListener);
+      this._stakingContractListener = null;
+    }
+  }
 
   /**
    *
@@ -373,35 +423,170 @@ export class LitCore {
   };
 
   /**
-   *
    * Connect to the LIT nodes
    *
    * @returns { Promise } A promise that resolves when the nodes are connected.
    *
    */
-  connect = async (): Promise<any> => {
-    // -- handshake with each node
+  async connect(): Promise<void> {
+    // Ensure that multiple closely timed calls to `connect()` don't result in concurrent connect() operations being run
+    if (this._connectingPromise) {
+      return this._connectingPromise;
+    }
+
+    this._connectingPromise = this._connect();
+
+    await this._connectingPromise.finally(() => {
+      this._connectingPromise = null;
+    });
+  }
+
+  private async _connect() {
+    // Ensure an ill-timed epoch change event doesn't trigger concurrent config changes while we're already doing that
+    this._stopListeningForNewEpoch();
+
+    // Ensure we don't fire an existing network sync poll handler while we're in the midst of connecting anyway
+    this._stopNetworkPolling();
+
     await this.setNewConfig();
 
     // (epoch) step 1: Initialize epoch number cache
     this.epochCache.number = await this.getCurrentEpochNumber();
     this.epochCache.lastUpdateTime = Date.now();
+
+    // -- handshake with each node.  Note that if we've previously initialized successfully, but this call fails,
+    // core will remain useable but with the existing set of `connectedNodes` and `serverKeys`.
+    const { connectedNodes, serverKeys, coreNodeConfig } =
+      await this._runHandshakeWithBootstrapUrls();
+    Object.assign(this, { ...coreNodeConfig, connectedNodes, serverKeys });
+
+    this.scheduleNetworkSync();
     await this.listenForNewEpoch();
 
-    await this._runHandshakeWithBootstrapUrls();
-  };
+    // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
+    // @ts-ignore
 
-  /**
+    globalThis.litNodeClient = this;
+    this.ready = true;
+
+    log(`🔥 lit is ready. "litNodeClient" variable is ready to use globally.`);
+    log('current network config', {
+      networkPubkey: this.networkPubKey,
+      networkPubKeySet: this.networkPubKeySet,
+      hdRootPubkeys: this.hdRootPubkeys,
+      subnetPubkey: this.subnetPubKey,
+      latestBlockhash: this.latestBlockhash,
+    });
+
+    // browser only
+    if (isBrowser()) {
+      document.dispatchEvent(new Event('lit-ready'));
+    }
+  }
+
+  private async handshakeAndVerifyNodeAttestation({
+    url,
+    requestId,
+  }: {
+    url: string;
+    requestId: string;
+  }): Promise<JsonHandshakeResponse> {
+    const challenge = this.getRandomHexString(64);
+
+    const handshakeResult = await this.handshakeWithNode(
+      { url, challenge },
+      requestId
+    );
+
+    const keys: JsonHandshakeResponse = {
+      serverPubKey: handshakeResult.serverPublicKey,
+      subnetPubKey: handshakeResult.subnetPublicKey,
+      networkPubKey: handshakeResult.networkPublicKey,
+      networkPubKeySet: handshakeResult.networkPublicKeySet,
+      hdRootPubkeys: handshakeResult.hdRootPubkeys,
+      latestBlockhash: handshakeResult.latestBlockhash,
+    };
+
+    // Nodes that have just bootstrapped will not have negotiated their keys, yet
+    // They will return ERR for those values until they reach consensus
+
+    // Note that if node attestation checks are disabled or checkSevSnpAttestation() succeeds, we will still track the
+    // node, even though its keys may be "ERR".
+    // Should we really track servers with ERR as keys?
+    if (
+      keys.serverPubKey === 'ERR' ||
+      keys.subnetPubKey === 'ERR' ||
+      keys.networkPubKey === 'ERR' ||
+      keys.networkPubKeySet === 'ERR'
+    ) {
+      logErrorWithRequestId(
+        requestId,
+        'Error connecting to node. Detected "ERR" in keys',
+        url,
+        keys
+      );
+    }
+
+    log(`Handshake with ${url} returned keys: `, keys);
+    if (!keys.latestBlockhash) {
+      logErrorWithRequestId(
+        requestId,
+        `Error getting latest blockhash from the node ${url}.`
+      );
+    }
+
+    if (
+      this.config.checkNodeAttestation ||
+      this.config.litNetwork === LitNetwork.Manzano ||
+      this.config.litNetwork === LitNetwork.Habanero
+    ) {
+      const attestation = handshakeResult.attestation;
+
+      if (!attestation) {
+        throwError({
+          message: `Missing attestation in handshake response from ${url}`,
+          errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
+          errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
+        });
+      }
+
+      // actually verify the attestation by checking the signature against AMD certs
+      log('Checking attestation against amd certs...');
+
+      try {
+        // ensure we won't try to use a node with an invalid attestation response
+        await checkSevSnpAttestation(attestation, challenge, url);
+        log(`Lit Node Attestation verified for ${url}`);
+      } catch (e: any) {
+        throwError({
+          message: `Lit Node Attestation failed verification for ${url} - ${e.message}`,
+          errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
+          errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
+        });
+      }
+    }
+
+    return keys;
+  }
+
+  /** Handshakes with all nodes that are in `bootstrapUrls`
+   * @private
    *
-   * @returns {Promise<any>}
+   * @returns {Promise<{connectedNodes: Set<string>, serverKeys: {}}>} Returns a set of the urls of nodes that we
+   * successfully connected to, an object containing their returned keys, and our 'core' config (most common values for
+   * critical values)
    */
-
-  _runHandshakeWithBootstrapUrls = async (): Promise<any> => {
+  private async _runHandshakeWithBootstrapUrls(): Promise<{
+    connectedNodes: Set<string>;
+    serverKeys: Record<string, JsonHandshakeResponse>;
+    coreNodeConfig: CoreNodeConfig;
+  }> {
     // -- handshake with each node
-    const requestId = this.getRequestId();
+    const requestId: string = this.getRequestId();
 
-    // reset connectedNodes for the new handshake operation
-    this.connectedNodes = new Set();
+    // track connectedNodes for the new handshake operation
+    const connectedNodes = new Set<string>();
+    const serverKeys: Record<string, JsonHandshakeResponse> = {};
 
     if (this.config.bootstrapUrls.length <= 0) {
       throwError({
@@ -411,210 +596,146 @@ export class LitCore {
       });
     }
 
-    for (const url of this.config.bootstrapUrls) {
-      const challenge = this.getRandomHexString(64);
-      this.handshakeWithNode({ url, challenge }, requestId)
-        .then((resp: any) => {
-          this.connectedNodes.add(url);
+    let timeoutHandle: ReturnType<typeof setTimeout>;
+    await Promise.race([
+      new Promise((_resolve, reject) => {
+        timeoutHandle = setTimeout(() => {
+          const msg = `Error: Could not connect to enough nodes after timeout of ${
+            this.config.connectTimeout
+          }ms.  Could only connect to ${Object.keys(serverKeys).length} of ${
+            this.config.minNodeCount
+          } required nodes, from ${
+            this.config.bootstrapUrls.length
+          } possible nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
-          const keys: JsonHandshakeResponse = {
-            serverPubKey: resp.serverPublicKey,
-            subnetPubKey: resp.subnetPublicKey,
-            networkPubKey: resp.networkPublicKey,
-            networkPubKeySet: resp.networkPublicKeySet,
-            hdRootPubkeys: resp.hdRootPubkeys,
-            latestBlockhash: resp.latestBlockhash,
-          };
-
-          // -- validate returned keys
-          if (
-            keys.serverPubKey === 'ERR' ||
-            keys.subnetPubKey === 'ERR' ||
-            keys.networkPubKey === 'ERR' ||
-            keys.networkPubKeySet === 'ERR'
-          ) {
-            logErrorWithRequestId(
-              requestId,
-              'Error connecting to node. Detected "ERR" in keys',
-              url,
-              keys
-            );
+          try {
+            // TODO: Kludge, replace with standard error construction
+            throwError({
+              message: msg,
+              errorKind: LIT_ERROR.INIT_ERROR.kind,
+              errorCode: LIT_ERROR.INIT_ERROR.name,
+            });
+          } catch (e) {
+            reject(e);
           }
-          log('returned keys: ', keys);
-          if (!keys.latestBlockhash) {
-            logErrorWithRequestId(
-              requestId,
-              'Error getting latest blockhash from the node.'
-            );
-          }
-
-          if (
-            this.config.checkNodeAttestation ||
-            this.config.litNetwork === LitNetwork.Manzano ||
-            this.config.litNetwork === LitNetwork.Habanero
-          ) {
-            // check attestation
-            if (!resp.attestation) {
-              logErrorWithRequestId(
-                requestId,
-                `Missing attestation in handshake response from ${url}`
-              );
-              throwError({
-                message: `Missing attestation in handshake response from ${url}`,
-                errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
-                errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
-              });
-            } else {
-              // actually verify the attestation by checking the signature against AMD certs
-              log('Checking attestation against amd certs...');
-              const attestation = resp.attestation;
-
-              try {
-                checkSevSnpAttestation(attestation, challenge, url).then(() => {
-                  log(`Lit Node Attestation verified for ${url}`);
-
-                  // only set server keys if attestation is valid
-                  // so that we don't use this node if it's not valid
-                  this.serverKeys[url] = keys;
-                });
-              } catch (e) {
-                logErrorWithRequestId(
-                  requestId,
-                  `Lit Node Attestation failed verification for ${url}`
-                );
-                throwError({
-                  message: `Lit Node Attestation failed verification for ${url}`,
-                  errorKind: LIT_ERROR.INVALID_NODE_ATTESTATION.kind,
-                  errorCode: LIT_ERROR.INVALID_NODE_ATTESTATION.name,
-                });
-              }
-            }
-          } else {
-            // don't check attestation, just set server keys
-            this.serverKeys[url] = keys;
-          }
+        }, this.config.connectTimeout);
+      }),
+      Promise.all(
+        this.config.bootstrapUrls.map(async (url) => {
+          serverKeys[url] = await this.handshakeAndVerifyNodeAttestation({
+            url,
+            requestId,
+          });
+          connectedNodes.add(url);
         })
-        .catch((e: any) => {
-          log('Error connecting to node ', url, e);
-        });
+      ).finally(() => {
+        clearTimeout(timeoutHandle);
+      }),
+    ]);
+
+    const coreNodeConfig = this._getCoreNodeConfigFromHandshakeResults({
+      serverKeys,
+      requestId,
+    });
+
+    return { connectedNodes, serverKeys, coreNodeConfig };
+  }
+
+  private _getCoreNodeConfigFromHandshakeResults({
+    serverKeys,
+    requestId,
+  }: {
+    serverKeys: Record<string, JsonHandshakeResponse>;
+    requestId: string;
+  }): CoreNodeConfig {
+    const latestBlockhash = mostCommonString(
+      Object.values(serverKeys).map(
+        (keysFromSingleNode: any) => keysFromSingleNode.latestBlockhash
+      )
+    );
+
+    if (!latestBlockhash) {
+      logErrorWithRequestId(
+        requestId,
+        'Error getting latest blockhash from the nodes.'
+      );
+
+      throwError({
+        message: 'Error getting latest blockhash from the nodes.',
+        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
+        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
+      });
     }
 
-    // -- get promise
-    return new Promise((resolve: any, reject: any) => {
-      const startTime = Date.now();
-      const interval = setInterval(() => {
-        if (
-          Object.keys(this.serverKeys).length ==
-          this.config.bootstrapUrls.length
-        ) {
-          clearInterval(interval);
+    // pick the most common public keys for the subnet and network from the bunch, in case some evil node returned a bad key
+    return {
+      subnetPubKey: mostCommonString(
+        Object.values(serverKeys).map(
+          (keysFromSingleNode: any) => keysFromSingleNode.subnetPubKey
+        )
+      ),
+      networkPubKey: mostCommonString(
+        Object.values(serverKeys).map(
+          (keysFromSingleNode: any) => keysFromSingleNode.networkPubKey
+        )
+      ),
+      networkPubKeySet: mostCommonString(
+        Object.values(serverKeys).map(
+          (keysFromSingleNode: any) => keysFromSingleNode.networkPubKeySet
+        )
+      ),
+      hdRootPubkeys: mostCommonString(
+        Object.values(serverKeys).map(
+          (keysFromSingleNode: any) => keysFromSingleNode.hdRootPubkeys
+        )
+      ),
+      latestBlockhash,
+      lastBlockHashRetrieved: Date.now(),
+    } as CoreNodeConfig;
+  }
 
-          // pick the most common public keys for the subnet and network from the bunch, in case some evil node returned a bad key
-          this.subnetPubKey = mostCommonString(
-            Object.values(this.serverKeys).map(
-              (keysFromSingleNode: any) => keysFromSingleNode.subnetPubKey
-            )
-          );
-          this.networkPubKey = mostCommonString(
-            Object.values(this.serverKeys).map(
-              (keysFromSingleNode: any) => keysFromSingleNode.networkPubKey
-            )
-          );
-          this.networkPubKeySet = mostCommonString(
-            Object.values(this.serverKeys).map(
-              (keysFromSingleNode: any) => keysFromSingleNode.networkPubKeySet
-            )
-          );
-          this.hdRootPubkeys = mostCommonString(
-            Object.values(this.serverKeys).map(
-              (keysFromSingleNode: any) => keysFromSingleNode.hdRootPubkeys
-            )
-          );
-          this.latestBlockhash = mostCommonString(
-            Object.values(this.serverKeys).map(
-              (keysFromSingleNode: any) => keysFromSingleNode.latestBlockhash
-            )
-          );
+  /** Currently, we perform a full sync every 30s, including handshaking with every node
+   * However, we also have a state change listener that watches for staking contract state change events, which
+   * _should_ be the only time that we need to perform handshakes with every node.
+   *
+   * However, the current block hash does need to be updated regularly, and we currently update it only when we
+   * handshake with every node.
+   *
+   * We can remove this network sync code entirely if we refactor our code to fetch latest blockhash on-demand.
+   * @private
+   */
+  private scheduleNetworkSync() {
+    if (this._networkSyncInterval) {
+      clearInterval(this._networkSyncInterval);
+    }
 
-          if (!this.latestBlockhash) {
-            logErrorWithRequestId(
-              requestId,
-              'Error getting latest blockhash from the nodes.'
-            );
-
-            throwError({
-              message: 'Error getting latest blockhash from the nodes.',
-              errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
-              errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
-            });
-          }
-
-          this.lastBlockHashRetrieved = Date.now();
-          this.ready = true;
-
+    this._networkSyncInterval = setInterval(async () => {
+      if (Date.now() - this.lastBlockHashRetrieved! >= 30_000) {
+        log(
+          'Syncing state for new network context current config: ',
+          this.config,
+          'current blockhash: ',
+          this.lastBlockHashRetrieved
+        );
+        try {
+          await this.connect();
           log(
-            `🔥 lit is ready. "litNodeClient" variable is ready to use globally.`
+            'Done syncing state new config: ',
+            this.config,
+            'new blockhash: ',
+            this.lastBlockHashRetrieved
           );
-          log('current network config', {
-            networkPubkey: this.networkPubKey,
-            networkPubKeySet: this.networkPubKeySet,
-            hdRootPubkeys: this.hdRootPubkeys,
-            subnetPubkey: this.subnetPubKey,
-            latestBlockhash: this.latestBlockhash,
-          });
-
-          // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
-          // @ts-ignore
-          globalThis.litNodeClient = this;
-
-          // browser only
-          if (isBrowser()) {
-            document.dispatchEvent(new Event('lit-ready'));
-          }
-          // if the interval is defined we clear it
-          if (this.networkSyncInterval) {
-            clearInterval(this.networkSyncInterval);
-          }
-
-          this.networkSyncInterval = setInterval(async () => {
-            if (Date.now() - this.lastBlockHashRetrieved! >= 30_000) {
-              log(
-                'Syncing state for new network context current config: ',
-                this.config,
-                'current blockhash: ',
-                this.lastBlockHashRetrieved
-              );
-              await this._runHandshakeWithBootstrapUrls().catch((err) => {
-                throw err;
-              });
-              log(
-                'Done syncing state new config: ',
-                this.config,
-                'new blockhash: ',
-                this.lastBlockHashRetrieved
-              );
-            }
-          }, 30_000);
-
-          resolve();
-        } else {
-          const now = Date.now();
-          if (now - startTime > this.config.connectTimeout) {
-            clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${
-              this.config.connectTimeout
-            }ms.  Could only connect to ${
-              Object.keys(this.serverKeys).length
-            } of ${
-              this.config.minNodeCount
-            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
-            logErrorWithRequestId(requestId, msg);
-            reject(msg);
-          }
+        } catch (err: unknown) {
+          // Don't let error from this setInterval handler bubble up to runtime; it'd be an unhandledRejectionError
+          const { message = '' } = err as Error | NodeClientErrorV1;
+          logError(
+            'Error while attempting to refresh nodes to fetch new latestBlockhash:',
+            message
+          );
         }
-      }, 500);
-    });
-  };
+      }
+    }, 30_000);
+  }
 
   /**
    *
@@ -777,7 +898,7 @@ export class LitCore {
    * @returns { Array<Promise<any>> }
    *
    */
-  getNodePromises = (callback: Function): Array<Promise<any>> => {
+  getNodePromises = (callback: Function): Promise<any>[] => {
     const nodePromises = [];
 
     for (const url of this.connectedNodes) {
@@ -911,12 +1032,12 @@ export class LitCore {
    * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    */
   handleNodePromises = async <T>(
-    nodePromises: Array<Promise<T>>,
+    nodePromises: Promise<T>[],
     requestId: string,
     minNodeCount: number
   ): Promise<SuccessNodePromises<T> | RejectedNodePromises> => {
     async function waitForNSuccessesWithErrors<T>(
-      promises: Array<Promise<T>>,
+      promises: Promise<T>[],
       n: number
     ): Promise<{ successes: T[]; errors: any[] }> {
       let responses = 0;
