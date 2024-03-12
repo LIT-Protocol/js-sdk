@@ -9,13 +9,19 @@ export function convertRequestsPerDayToPerSecond(
 // Calculates the expiration timestamp in UTC for a given number of days from now.
 // The expiration time is set to midnight (00:00:00) UTC of the target day.
 export function calculateUTCMidnightExpiration(daysFromNow: number): number {
+  // Create a Date object for the current time in UTC
   const now = new Date();
-  const futureDate = new Date(
+  const utcNow = Date.UTC(
     now.getUTCFullYear(),
     now.getUTCMonth(),
-    now.getUTCDate() + daysFromNow
+    now.getUTCDate()
   );
+
+  // Create a future Date object in UTC, adding the specified number of days
+  const futureDate = new Date(utcNow);
+  futureDate.setUTCDate(futureDate.getUTCDate() + daysFromNow);
   futureDate.setUTCHours(0, 0, 0, 0); // Set to midnight UTC
+
   return Math.floor(futureDate.getTime() / 1000);
 }
 
