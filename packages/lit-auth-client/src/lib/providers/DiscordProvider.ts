@@ -10,6 +10,7 @@ import {
   parseLoginParams,
   getStateParam,
   decode,
+  LIT_LOGIN_GATEWAY,
 } from '../utils';
 import { ethers } from 'ethers';
 
@@ -97,6 +98,61 @@ export default class DiscordProvider extends BaseProvider {
       accessToken: accessToken,
     };
     return authMethod;
+  }
+
+  /**
+   * Sign in using popup window
+   *
+   * @param baseURL
+   */
+  public async signInUsingPopup(baseURL: string): Promise<AuthMethod> {
+    const width = 500;
+    const height = 600;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+
+    const url = await prepareLoginUrl('discord', this.redirectUri, baseURL);
+    const popup = window.open(
+      `${url}&caller=${window.location.origin}`,
+      'popup',
+      `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, copyhistory=no, width=${width}, height=${height}, top=${top}, left=${left}`
+    );
+
+    if (!popup) {
+      throw new Error('Failed to open popup window');
+    }
+
+    return new Promise((resolve, reject) => {
+      // window does not have a closed event, so we need to poll using a timer
+      const interval = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(interval);
+          reject(new Error('User closed popup window'));
+        }
+      }, 1000);
+
+      window.addEventListener('message', (event) => {
+        if (event.origin !== (baseURL || LIT_LOGIN_GATEWAY)) {
+          return;
+        }
+
+        const { provider, token, error } = event.data;
+
+        if (error) {
+          clearInterval(interval);
+          reject(new Error(error));
+        }
+
+        if (provider === 'discord' && token) {
+          clearInterval(interval);
+          popup.close();
+          resolve({
+            authMethodType: AuthMethodType.Discord,
+            accessToken: token,
+          });
+        }
+      });
+    });
   }
 
   /**
