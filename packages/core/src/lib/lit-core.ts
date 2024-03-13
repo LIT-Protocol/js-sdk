@@ -59,8 +59,7 @@ import type {
   SupportedJsonRequests,
 } from '@lit-protocol/types';
 
-export const DELAY_BEFORE_NEXT_EPOCH = 30000;
-// export const MAX_CACHE_AGE = 30000;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
 
 interface CoreNodeConfig {
@@ -74,6 +73,7 @@ interface CoreNodeConfig {
 
 /* This interval is responsible for keeping latest block hash up to date */
 const NETWORK_SYNC_INTERVAL = 30_000;
+export const DELAY_BEFORE_NEXT_EPOCH = 30000;
 
 export class LitCore {
   config: LitNodeClientConfig = {
@@ -469,8 +469,7 @@ export class LitCore {
     await this.listenForNewEpoch();
 
     // FIXME: don't create global singleton; multiple instances of `core` should not all write to global
-    // @ts-ignore
-
+    // @ts-expect-error typeof globalThis is not defined. We're going to get rid of the global soon.
     globalThis.litNodeClient = this;
     this.ready = true;
 
@@ -562,6 +561,7 @@ export class LitCore {
         // ensure we won't try to use a node with an invalid attestation response
         await checkSevSnpAttestation(attestation, challenge, url);
         log(`Lit Node Attestation verified for ${url}`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         throwError({
           message: `Lit Node Attestation failed verification for ${url} - ${e.message}`,
@@ -655,7 +655,7 @@ export class LitCore {
   }): CoreNodeConfig {
     const latestBlockhash = mostCommonString(
       Object.values(serverKeys).map(
-        (keysFromSingleNode: any) => keysFromSingleNode.latestBlockhash
+        (keysFromSingleNode) => keysFromSingleNode.latestBlockhash
       )
     );
 
@@ -676,27 +676,27 @@ export class LitCore {
     return {
       subnetPubKey: mostCommonString(
         Object.values(serverKeys).map(
-          (keysFromSingleNode: any) => keysFromSingleNode.subnetPubKey
+          (keysFromSingleNode) => keysFromSingleNode.subnetPubKey
         )
       ),
       networkPubKey: mostCommonString(
         Object.values(serverKeys).map(
-          (keysFromSingleNode: any) => keysFromSingleNode.networkPubKey
+          (keysFromSingleNode) => keysFromSingleNode.networkPubKey
         )
       ),
       networkPubKeySet: mostCommonString(
         Object.values(serverKeys).map(
-          (keysFromSingleNode: any) => keysFromSingleNode.networkPubKeySet
+          (keysFromSingleNode) => keysFromSingleNode.networkPubKeySet
         )
       ),
       hdRootPubkeys: mostCommonString(
         Object.values(serverKeys).map(
-          (keysFromSingleNode: any) => keysFromSingleNode.hdRootPubkeys
+          (keysFromSingleNode) => keysFromSingleNode.hdRootPubkeys
         )
       ),
       latestBlockhash,
       lastBlockHashRetrieved: Date.now(),
-    } as CoreNodeConfig;
+    };
   }
 
   /** Currently, we perform a full sync every 30s, including handshaking with every node
@@ -715,7 +715,10 @@ export class LitCore {
     }
 
     this._networkSyncInterval = setInterval(async () => {
-      if (Date.now() - this.lastBlockHashRetrieved! >= NETWORK_SYNC_INTERVAL) {
+      if (
+        !this.lastBlockHashRetrieved ||
+        Date.now() - this.lastBlockHashRetrieved >= NETWORK_SYNC_INTERVAL
+      ) {
         log(
           'Syncing state for new network context current config: ',
           this.config,
@@ -801,6 +804,7 @@ export class LitCore {
           return err;
         });
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (_error: any, _requestId: string, isFinal: boolean) => {
         if (!isFinal) {
           logError('an error occurred, attempting to retry');
@@ -869,7 +873,10 @@ export class LitCore {
     url,
     data,
     requestId,
-  }: SendNodeCommand): Promise<any> => {
+  }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  SendNodeCommand): Promise<any> => {
+    // FIXME: Replace <any> usage with explicit, strongly typed handlers
+
     const epochNumber = await this.getCurrentEpochNumber();
 
     data = { ...data, epochNumber };
@@ -903,7 +910,9 @@ export class LitCore {
    * @returns { Array<Promise<any>> }
    *
    */
-  getNodePromises = (callback: Function): Promise<any>[] => {
+  // FIXME: Replace <any> usage with explicit, strongly typed handlers
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getNodePromises = (callback: (url: string) => any): Promise<any>[] => {
     const nodePromises = [];
 
     for (const url of this.connectedNodes) {
@@ -1044,9 +1053,11 @@ export class LitCore {
     async function waitForNSuccessesWithErrors<T>(
       promises: Promise<T>[],
       n: number
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ): Promise<{ successes: T[]; errors: any[] }> {
       let responses = 0;
       const successes: T[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errors: any[] = [];
 
       return new Promise((resolve) => {
@@ -1093,6 +1104,7 @@ export class LitCore {
 
     // -- case: if we're here, then we did not succeed.  time to handle and report errors.
     const mostCommonError = JSON.parse(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mostCommonString(errors.map((r: any) => JSON.stringify(r)))
     );
 
@@ -1174,7 +1186,7 @@ export class LitCore {
     let error = false;
 
     if (accessControlConditions) {
-      formattedAccessControlConditions = accessControlConditions.map((c: any) =>
+      formattedAccessControlConditions = accessControlConditions.map((c) =>
         canonicalAccessControlConditionFormatter(c)
       );
       log(
@@ -1182,7 +1194,7 @@ export class LitCore {
         JSON.stringify(formattedAccessControlConditions)
       );
     } else if (evmContractConditions) {
-      formattedEVMContractConditions = evmContractConditions.map((c: any) =>
+      formattedEVMContractConditions = evmContractConditions.map((c) =>
         canonicalEVMContractConditionFormatter(c)
       );
       log(
@@ -1190,6 +1202,8 @@ export class LitCore {
         JSON.stringify(formattedEVMContractConditions)
       );
     } else if (solRpcConditions) {
+      // FIXME: ConditionItem is too narrow, or `solRpcConditions` is too wide
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formattedSolRpcConditions = solRpcConditions.map((c: any) =>
         canonicalSolRpcConditionFormatter(c)
       );
@@ -1199,7 +1213,7 @@ export class LitCore {
       );
     } else if (unifiedAccessControlConditions) {
       formattedUnifiedAccessControlConditions =
-        unifiedAccessControlConditions.map((c: any) =>
+        unifiedAccessControlConditions.map((c) =>
           canonicalUnifiedAccessControlConditionFormatter(c)
         );
       log(
