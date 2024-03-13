@@ -73,6 +73,8 @@ import {
 import { ethers } from 'ethers';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 
+export const DELAY_BEFORE_NEXT_EPOCH = 30000;
+// export const MAX_CACHE_AGE = 30000;
 export class LitCore {
   config: LitNodeClientConfig;
   connectedNodes: SetConstructor | Set<any> | any;
@@ -85,6 +87,16 @@ export class LitCore {
   latestBlockhash: string | null;
   lastBlockHashRetrieved: number | null;
   networkSyncInterval: any | null;
+
+  private epochChangeListenerSet = false;
+
+  epochCache: {
+    number: number | null;
+    lastUpdateTime: number | null;
+  } = {
+    number: null,
+    lastUpdateTime: null,
+  };
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -294,6 +306,12 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the listener is successfully set up.
    */
   listenForNewEpoch = async (): Promise<void> => {
+    // Check if we've already set up the listener to avoid duplicates
+    if (this.epochChangeListenerSet) {
+      log('Epoch change listener already set.');
+      return;
+    }
+
     if (
       this.config.litNetwork === LitNetwork.Manzano ||
       this.config.litNetwork === LitNetwork.Habanero ||
@@ -305,10 +323,16 @@ export class LitCore {
       );
       log(
         'listening for state change on staking contract: ',
-        stakingContract.address
+        stakingContract['address']
       );
 
       stakingContract.on('StateChanged', async (state: StakingStates) => {
+        // (epoch) step 2: listen for epoch changes and update the cache accordingly, with a 30-second delay for using the new epoch number
+        setTimeout(async () => {
+          const newEpochNumber = await this.getCurrentEpochNumber();
+          this.updateEpochCache(newEpochNumber);
+        }, DELAY_BEFORE_NEXT_EPOCH);
+
         log(`New state detected: "${state}"`);
         if (state === StakingStates.NextValidatorSetLocked) {
           log(
@@ -348,7 +372,13 @@ export class LitCore {
               );
           }
         }
+
+        const newEpochNumber = await this.getCurrentEpochNumber();
+        this.updateEpochCache(newEpochNumber);
       });
+
+      // Mark that we've set up the listener
+      this.epochChangeListenerSet = true;
     }
   };
 
@@ -390,7 +420,12 @@ export class LitCore {
   connect = async (): Promise<any> => {
     // -- handshake with each node
     await this.setNewConfig();
+
+    // (epoch) step 1: Initialize epoch number cache
+    this.epochCache.number = await this.getCurrentEpochNumber();
+    this.epochCache.lastUpdateTime = Date.now();
     await this.listenForNewEpoch();
+
     await this._runHandshakeWithBootstrapUrls();
   };
 
@@ -609,7 +644,7 @@ export class LitCore {
             }ms.  Could only connect to ${
               Object.keys(this.serverKeys).length
             } of ${
-              this.config.bootstrapUrls.length
+              this.config.minNodeCount
             } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             logErrorWithRequestId(requestId, msg);
             reject(msg);
@@ -696,6 +731,49 @@ export class LitCore {
     return res as NodeCommandServerKeysResponse;
   };
 
+  updateEpochCache = async (epochNumber: number): Promise<void> => {
+    this.epochCache.number = epochNumber;
+    this.epochCache.lastUpdateTime = Date.now();
+  };
+
+  getCurrentEpochNumber = async (): Promise<number> => {
+    try {
+      // (epoch) step 3: first check the cache and use the cached value if it's not more than 30 seconds old. If it's a cache miss or the cached value is too old, fall back to fetching the current epoch number
+      // const now = Date.now();
+      // const cacheAge = now - this.epochCache.lastUpdateTime!;
+
+      // if (
+      this.epochCache.number !== null;
+      // && cacheAge <= MAX_CACHE_AGE
+      // ) {
+      //   log('Using cached epoch number', this.epochCache.number);
+      //   return this.epochCache.number;
+      // }
+
+      // Cache miss or cached value too old, fetch new epoch number
+      const stakingContract = await LitContracts.getStakingContract(
+        this.config.litNetwork as any,
+        this.config.contractContext
+      );
+
+      log('Fetching current epoch number');
+      const epoch = await stakingContract['epoch']();
+      const epochNumber = epoch.number.toNumber();
+
+      // Update the cache
+      // this.epochCache.number = epochNumber;
+      // this.epochCache.lastUpdateTime = Date.now();
+
+      return epochNumber;
+    } catch (error) {
+      return throwError({
+        message: `Error getting current epoch number: ${error}`,
+        errorKind: LIT_ERROR.UNKNOWN_ERROR.kind,
+        errorCode: LIT_ERROR.UNKNOWN_ERROR.name,
+      });
+    }
+  };
+
   // ==================== SENDING COMMAND ====================
   /**
    *
@@ -711,6 +789,10 @@ export class LitCore {
     data,
     requestId,
   }: SendNodeCommand): Promise<any> => {
+    const epochNumber = await this.getCurrentEpochNumber();
+
+    data = { ...data, epochNumber };
+
     logWithRequestId(
       requestId,
       `sendCommandToNode with url ${url} and data`,

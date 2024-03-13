@@ -7,7 +7,7 @@
     "reset:dev": "yarn tools --remove-local-dev",
     "reset": "rm -rf ./dist/packages && yarn reset:dev",
     "build": "yarn build:packages",
-    "build:packages": "yarn tools --remove-local-dev && rm -rf ./dist && yarn gen:internal-dev && yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn tools --build --packages && yarn tools --setup-local-dev && yarn gen:readme && yarn build:verify",
+    "build:packages": "yarn tools --remove-local-dev && rm -rf ./dist && yarn gen:internal-dev && yarn tools check --no-empty-directories=true && yarn tools fixTsConfig && yarn tools --build --packages && yarn tools --setup-local-dev && yarn gen:readme && yarn build:verify && yarn nx format:write --all",
     "build:target": "yarn node tools/scripts/build.mjs",
     "build:setupLocalDev": "yarn tools --setup-local-dev",
     "build:verify": "yarn tools --verify",
@@ -151,8 +151,6 @@
     "@nx/jest": "17.3.0",
     "@nx/js": "17.3.0",
     "@nx/linter": "17.3.0",
-    "@nx/next": "17.3.0",
-    "@nx/node": "17.3.0",
     "@nx/plugin": "17.3.0",
     "@nx/react": "17.3.0",
     "@nx/web": "17.3.0",
@@ -200,7 +198,9 @@
     "ts-jest": "29.1.2",
     "ts-node": "10.9.1",
     "typedoc": "^0.23.10",
-    "typescript": "~4.7.2"
+    "typescript": "~4.7.2",
+    "@nx/next": "17.3.0",
+    "@nx/node": "17.3.0"
   },
   "workspaces": [
     "packages/*"
