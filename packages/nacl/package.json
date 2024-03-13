@@ -21,5 +21,7 @@
     "access": "public",
     "directory": "../../dist/packages/nacl"
   },
-  "version": "3.2.6"
+  "version": "3.2.6",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }

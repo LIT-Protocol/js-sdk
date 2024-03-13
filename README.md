@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V3.2.2</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V3.2.6</h1>
 
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
