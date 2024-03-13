@@ -51,7 +51,6 @@ import type {
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
   NodeErrorV3,
-  NodePromiseResponse,
   RejectedNodePromises,
   SendNodeCommand,
   SessionSig,
