@@ -73,6 +73,9 @@ interface CoreNodeConfig {
   lastBlockHashRetrieved: number;
 }
 
+/* This interval is responsible for keeping latest block hash up to date */
+const NETWORK_SYNC_INTERVAL = 30_000;
+
 export class LitCore {
   config: LitNodeClientConfig = {
     alertWhenUnauthorized: false,
@@ -713,7 +716,7 @@ export class LitCore {
     }
 
     this._networkSyncInterval = setInterval(async () => {
-      if (Date.now() - this.lastBlockHashRetrieved! >= 30_000) {
+      if (Date.now() - this.lastBlockHashRetrieved! >= NETWORK_SYNC_INTERVAL) {
         log(
           'Syncing state for new network context current config: ',
           this.config,
@@ -737,7 +740,7 @@ export class LitCore {
           );
         }
       }
-    }, 30_000);
+    }, NETWORK_SYNC_INTERVAL);
   }
 
   /**
