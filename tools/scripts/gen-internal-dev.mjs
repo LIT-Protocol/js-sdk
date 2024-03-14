@@ -2,6 +2,12 @@ import { ethers } from 'ethers';
 import fs from 'fs/promises';
 import path from 'path';
 
+// -- check if it's offline
+if(process.env.offline){
+  console.log("Offline mode detected, ignoring this script");
+  process.exit();
+}
+
 const API =
   'https://lit-general-worker.getlit.dev/internal-dev-contract-addresses';
 
@@ -12,6 +18,7 @@ function removeKickedValidators(activeValidators, kickedValidators) {
 }
 
 const getValidators = async () => {
+
   let data;
   try {
     // Fetch and parse the JSON data in one step
