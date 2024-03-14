@@ -14,19 +14,26 @@ const DATA_TO_SIGN = new Uint8Array(
 );
 
 export async function main() {
-  // ==================== Test Logic ====================
-  const litNodeClient = new LitNodeClient({
-    litNetwork: 'cayenne',
-    debug: true,
-  });
+  try {
+    const litNodeClient = new LitNodeClient({
+      litNetwork: 'cayenne',
+      debug: true,
+    });
 
-  await litNodeClient.connect();
+    await litNodeClient.connect();
 
-  // for every second, get new epoch number
-  setInterval(async () => {
-    const epochNumber = await litNodeClient.getCurrentEpochNumber();
-    console.log('epochNumber:', epochNumber);
-  }, 1000);
+    // for every second, get new epoch number
+    setInterval(async () => {
+      try {
+        const epochNumber = litNodeClient.currentEpochNumber;
+        console.log('epochNumber:', epochNumber);
+      } catch (e) {
+        console.log(e);
+      }
+    }, 1000);
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 main();
