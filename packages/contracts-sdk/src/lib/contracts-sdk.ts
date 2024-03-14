@@ -105,6 +105,7 @@ export class LitContracts {
   provider: ethers.providers.JsonRpcProvider | any;
   rpc: string;
   rpcs: string[];
+  chainId: number | undefined;
   signer: ethers.Signer | ethers.Wallet;
   privateKey: string | undefined;
   options?: {
@@ -183,6 +184,7 @@ export class LitContracts {
     customContext?: LitContractContext | LitContractResolverContext;
     rpcs?: string[] | any;
     rpc?: string | any;
+    chainId?: number;
     signer?: ethers.Signer | any;
     privateKey?: string | undefined;
     randomPrivatekey?: boolean;
@@ -196,6 +198,7 @@ export class LitContracts {
     this.customContext = args?.customContext;
     this.rpc = args?.rpc;
     this.rpcs = args?.rpcs;
+    this.chainId = args?.chainId;
     this.signer = args?.signer;
     this.privateKey = args?.privateKey;
     this.provider = args?.provider;
@@ -263,13 +266,16 @@ export class LitContracts {
       }
 
       const chainInfo = {
-        chainId: '0x2AC49',
+        chainId: this.chainId ?? '0x2AC49',
         chainName: 'Chronicle - Lit Protocol Testnet',
         nativeCurrency: { name: 'LIT', symbol: 'LIT', decimals: 18 },
         rpcUrls: this.rpcs,
         blockExplorerUrls: [BLOCK_EXPLORER],
         iconUrls: ['future'],
       };
+
+      console.log("chainInfo:", chainInfo)
+
 
       try {
         await web3Provider.send('wallet_switchEthereumChain', [
@@ -402,46 +408,52 @@ export class LitContracts {
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
 
-    this.allowlistContract = {
-      read: new ethers.Contract(
-        addresses.Allowlist.address,
-        addresses.Allowlist.abi as any,
-        this.provider
-      ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
-      write: new ethers.Contract(
-        addresses.Allowlist.address,
-        addresses.Allowlist.abi as any,
-        this.signer
-      ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
-    };
+    if (addresses?.Allowlist) {
+      this.allowlistContract = {
+        read: new ethers.Contract(
+          addresses.Allowlist.address,
+          addresses.Allowlist.abi as any,
+          this.provider
+        ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
+        write: new ethers.Contract(
+          addresses.Allowlist.address,
+          addresses.Allowlist.abi as any,
+          this.signer
+        ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
+      };
+    }
 
-    this.litTokenContract = {
-      read: new ethers.Contract(
-        addresses.LITToken.address,
-        addresses.LITToken.abi as any,
-        this.provider
-      ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken,
-      write: new ethers.Contract(
-        addresses.LITToken.address,
-        addresses.LITToken.abi as any,
-        this.signer
-      ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken,
-    };
+    if (addresses?.LITToken) {
+      this.litTokenContract = {
+        read: new ethers.Contract(
+          addresses.LITToken.address,
+          addresses.LITToken.abi as any,
+          this.provider
+        ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken,
+        write: new ethers.Contract(
+          addresses.LITToken.address,
+          addresses.LITToken.abi as any,
+          this.signer
+        ) as unknown as litTokenContract.LITToken & litTokenContract.LITToken,
+      };
+    }
 
-    this.multisenderContract = {
-      read: new ethers.Contract(
-        addresses.Multisender.address,
-        addresses.Multisender.abi as any,
-        this.provider
-      ) as unknown as multisenderContract.Multisender &
-        multisenderContract.Multisender,
-      write: new ethers.Contract(
-        addresses.Multisender.address,
-        addresses.Multisender.abi as any,
-        this.signer
-      ) as unknown as multisenderContract.Multisender &
-        multisenderContract.Multisender,
-    };
+    if (addresses?.Multisender) {
+      this.multisenderContract = {
+        read: new ethers.Contract(
+          addresses.Multisender.address,
+          addresses.Multisender.abi as any,
+          this.provider
+        ) as unknown as multisenderContract.Multisender &
+          multisenderContract.Multisender,
+        write: new ethers.Contract(
+          addresses.Multisender.address,
+          addresses.Multisender.abi as any,
+          this.signer
+        ) as unknown as multisenderContract.Multisender &
+          multisenderContract.Multisender,
+      };
+    }
 
     this.pkpHelperContract = {
       read: new ethers.Contract(
@@ -944,14 +956,19 @@ export class LitContracts {
         );
       }
     } else if (network === 'custom' || network === 'localhost') {
-      try {
-        // Fetch and parse the JSON data in one step
-        // just use cayenne abis
-        data = await fetch(CAYENNE_API).then((res) => res.json());
-      } catch (e: any) {
-        throw new Error(
-          `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
-        );
+
+      if (context) {
+        data = context;
+      } else {
+        try {
+          // Fetch and parse the JSON data in one step
+          // just use cayenne abis
+          data = await fetch(CAYENNE_API).then((res) => res.json());
+        } catch (e: any) {
+          throw new Error(
+            `Error fetching data from ${CAYENNE_API}: ${e.toString()}`
+          );
+        }
       }
     }
     // Data pulled over http is formatted differently than
