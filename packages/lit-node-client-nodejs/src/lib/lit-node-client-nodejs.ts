@@ -17,6 +17,7 @@ import {
 } from '@lit-protocol/constants';
 
 import {
+  checkSevSnpAttestation,
   combineEcdsaShares,
   combineSignatureShares,
   encrypt,
@@ -59,6 +60,7 @@ import {
   GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
   JsonExecutionRequest,
+  JsonHandshakeResponse,
   JsonPkpSignRequest,
   LitClientSessionManager,
   LitNodeClientConfig,
@@ -269,7 +271,7 @@ export class LitNodeClientNodeJs
       throw new Error('Failed to verify capabilities for resource');
     }
 
-    let nonce = this.getLatestBlockhash();
+    let nonce = await this.getLatestBlockhash();
 
     // -- get auth sig
     let siweMessage = new siwe.SiweMessage({
@@ -495,18 +497,66 @@ export class LitNodeClientNodeJs
    * will call refresh if the block hash is expired
    * @returns {Promise<string>} latest block hash from `handhsake` with the lit network.
    */
-  getLatestBlockhash = (): string => {
-    if (!this.ready) {
-      logError('Client not connected, remember to call connect');
+  getLatestBlockhash = async (): Promise<string> => {
+    const requestId = this.getRequestId();
+
+    this.connectedNodes = new Set();
+
+    if (this.config.bootstrapUrls.length <= 0) {
       throwError({
-        message: 'Client not connected',
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
+        message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
+        errorKind: LIT_ERROR.INIT_ERROR.kind,
+        errorCode: LIT_ERROR.INIT_ERROR.name,
       });
     }
 
-    // we are confident in this value being non null so we return
-    return this.latestBlockhash!;
+    const respList = [];
+
+    for (const url of this.config.bootstrapUrls) {
+      const challenge = this.getRandomHexString(64);
+
+      try {
+        const resp = await this.handshakeWithNode(
+          { url, challenge },
+          requestId
+        );
+        respList.push(resp);
+      } catch (e) {
+        logError(`Error getting latestBlockhash from node ${url}`, e);
+      }
+    }
+
+    // -- if the list is empty, then return an error
+    if (respList.length === 0) {
+      throwError({
+        message: 'Failed to get latestBlockhash from any node',
+        errorKind: LIT_ERROR.INIT_ERROR.kind,
+        errorCode: LIT_ERROR.INIT_ERROR.name,
+      });
+    }
+
+    // -- pick the latestBlockhash the appears the most
+    const blockhashCounts = respList.reduce(
+      (acc: { [key: string]: number }, response) => {
+        const { latestBlockhash } = response;
+
+        // Check if latestBlockhash is defined
+        if (latestBlockhash) {
+          acc[latestBlockhash] = (acc[latestBlockhash] || 0) + 1;
+        }
+
+        return acc;
+      },
+      {}
+    );
+
+    // -- get the most frequent blockhash
+    const mostFrequestBlockhash = Object.keys(blockhashCounts).reduce(
+      (a: string, b: string) =>
+        blockhashCounts[a] > blockhashCounts[b] ? a : b
+    );
+
+    return mostFrequestBlockhash;
   };
 
   /**
