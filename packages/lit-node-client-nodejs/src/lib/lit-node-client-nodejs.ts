@@ -122,8 +122,6 @@ interface CapacityCreditsRes {
   capacityDelegationAuthSig: AuthSig;
 }
 
-/** ---------- Main Export Class ---------- */
-
 export class LitNodeClientNodeJs
   extends LitCore
   implements LitClientSessionManager
@@ -180,18 +178,12 @@ export class LitNodeClientNodeJs
     const {
       dAppOwnerWallet,
       capacityTokenId,
+      delegateeAddresses,
       uses,
       domain,
       expiration,
       statement,
     } = params;
-
-    let { delegateeAddresses } = params;
-
-    // -- if delegateeAddresses is not provided, set it to an empty array
-    if (!delegateeAddresses) {
-      delegateeAddresses = [];
-    }
 
     // -- This is the owner address who holds the Capacity Credits NFT token and wants to delegate its
     // usage to a list of delegatee addresses
@@ -223,13 +215,6 @@ export class LitNodeClientNodeJs
     //   throw new Error('dAppOwnerWallet must be an ethers wallet');
     // }
 
-    // -- Strip the 0x prefix from each element in the addresses array if it exists
-    if (delegateeAddresses && delegateeAddresses.length > 0) {
-      delegateeAddresses = delegateeAddresses.map((address) =>
-        address.startsWith('0x') ? address.slice(2) : address
-      );
-    }
-
     // -- create LitRLIResource
     // Note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
     // lit-ratelimitincrease://{tokenId}
@@ -241,7 +226,13 @@ export class LitNodeClientNodeJs
 
     const capabilities = {
       ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
-      delegate_to: delegateeAddresses,
+      ...(delegateeAddresses
+        ? {
+            delegate_to: delegateeAddresses.map((address) =>
+              address.startsWith('0x') ? address.slice(2) : address
+            ),
+          }
+        : {}),
       uses: _uses.toString(),
     };
 
