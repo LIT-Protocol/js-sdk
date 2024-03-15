@@ -684,7 +684,7 @@ export class LitNodeClientNodeJs
     const authSigSiweMessage = new siwe.SiweMessage(authSig.signedMessage);
 
     try {
-      await authSigSiweMessage.validate(authSig.sig);
+      await authSigSiweMessage.verify({signature: hexPrefixed(authSig.sig)});
     } catch (e) {
       console.debug('Need retry because verify failed', e);
       return true;
