@@ -137,8 +137,7 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
-{
+  implements LitClientSessionManager {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -551,9 +550,8 @@ export class LitNodeClientNodeJs
     );
 
     // -- get the most frequent blockhash
-    const mostFrequestBlockhash = Object.keys(blockhashCounts).reduce(
-      (a: string, b: string) =>
-        blockhashCounts[a] > blockhashCounts[b] ? a : b
+    const mostFrequestBlockhash = mostCommonString(
+      Object.keys(blockhashCounts)
     );
 
     return mostFrequestBlockhash;
@@ -2814,8 +2812,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
