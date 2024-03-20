@@ -94,9 +94,9 @@ export class LitCore {
     number: number | null;
     lastUpdateTime: number | null;
   } = {
-      number: null,
-      lastUpdateTime: null,
-    };
+    number: null,
+    lastUpdateTime: null,
+  };
 
   // ========== Constructor ==========
   constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
@@ -416,7 +416,6 @@ export class LitCore {
    * @returns {Promise<string>} latest block hash from `handhsake` with the lit network.
    */
   getLatestBlockhash = async (): Promise<string> => {
-
     await this.connect();
 
     return this.latestBlockhash as string;
@@ -651,10 +650,13 @@ export class LitCore {
           const now = Date.now();
           if (now - startTime > this.config.connectTimeout) {
             clearInterval(interval);
-            const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
-              }ms.  Could only connect to ${Object.keys(this.serverKeys).length
-              } of ${this.config.minNodeCount
-              } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+            const msg = `Error: Could not connect to enough nodes after timeout of ${
+              this.config.connectTimeout
+            }ms.  Could only connect to ${
+              Object.keys(this.serverKeys).length
+            } of ${
+              this.config.minNodeCount
+            } required nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
             logErrorWithRequestId(requestId, msg);
             reject(msg);
           }
