@@ -137,7 +137,8 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager {
+  implements LitClientSessionManager
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -489,70 +490,6 @@ export class LitNodeClientNodeJs
   // backward compatibility
   getExpiration = () => {
     return LitNodeClientNodeJs.getExpiration();
-  };
-
-  /**
-   * returns the latest block hash.
-   * will call refresh if the block hash is expired
-   * @returns {Promise<string>} latest block hash from `handhsake` with the lit network.
-   */
-  getLatestBlockhash = async (): Promise<string> => {
-    const requestId = this.getRequestId();
-
-    if (this.config.bootstrapUrls.length <= 0) {
-      throwError({
-        message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
-    }
-
-    const respList = [];
-
-    for (const url of this.config.bootstrapUrls) {
-      const challenge = this.getRandomHexString(64);
-
-      try {
-        const resp = await this.handshakeWithNode(
-          { url, challenge },
-          requestId
-        );
-        respList.push(resp);
-      } catch (e) {
-        logError(`Error getting latestBlockhash from node ${url}`, e);
-      }
-    }
-
-    // -- if the list is empty, then return an error
-    if (respList.length === 0) {
-      throwError({
-        message: 'Failed to get latestBlockhash from any node',
-        errorKind: LIT_ERROR.INIT_ERROR.kind,
-        errorCode: LIT_ERROR.INIT_ERROR.name,
-      });
-    }
-
-    // -- pick the latestBlockhash the appears the most
-    const blockhashCounts = respList.reduce(
-      (acc: { [key: string]: number }, response) => {
-        const { latestBlockhash } = response;
-
-        // Check if latestBlockhash is defined
-        if (latestBlockhash) {
-          acc[latestBlockhash] = (acc[latestBlockhash] || 0) + 1;
-        }
-
-        return acc;
-      },
-      {}
-    );
-
-    // -- get the most frequent blockhash
-    const mostFrequestBlockhash = mostCommonString(
-      Object.keys(blockhashCounts)
-    );
-
-    return mostFrequestBlockhash;
   };
 
   /**
@@ -2810,8 +2747,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
