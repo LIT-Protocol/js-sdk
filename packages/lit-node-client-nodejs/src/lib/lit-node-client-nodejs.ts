@@ -1,8 +1,19 @@
-import {
-  canonicalAccessControlConditionFormatter,
-  // generateUnifiedAccsForRLIDelegation,
-} from '@lit-protocol/access-control-conditions';
+import { computeAddress } from '@ethersproject/transactions';
+import { BigNumber, ethers } from 'ethers';
+import { joinSignature, sha256 } from 'ethers/lib/utils';
+import * as siwe from 'siwe';
 
+import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-control-conditions';
+import {
+  ILitResource,
+  ISessionCapabilityObject,
+  LitAccessControlConditionResource,
+  LitResourceAbilityRequest,
+  decode,
+  RecapSessionCapabilityObject,
+  LitRLIResource,
+  LitAbility,
+} from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE_IDS,
   AuthMethodType,
@@ -15,7 +26,7 @@ import {
   SIGTYPE,
   SIWE_DELEGATION_URI,
 } from '@lit-protocol/constants';
-
+import { LitCore } from '@lit-protocol/core';
 import {
   checkSevSnpAttestation,
   combineEcdsaShares,
@@ -38,6 +49,17 @@ import {
   throwError,
 } from '@lit-protocol/misc';
 import {
+  getStorageItem,
+  removeStorageItem,
+  setStorageItem,
+} from '@lit-protocol/misc-browser';
+import { nacl } from '@lit-protocol/nacl';
+import {
+  uint8arrayFromString,
+  uint8arrayToString,
+} from '@lit-protocol/uint8arrays';
+
+import type {
   AuthCallback,
   AuthCallbackParams,
   AuthMethod,
@@ -45,7 +67,6 @@ import {
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
-  CombinedECDSASignature,
   CustomNetwork,
   DecryptRequest,
   DecryptResponse,
@@ -71,7 +92,6 @@ import {
   NodeShare,
   PKPSignShare,
   RejectedNodePromises,
-  RelayClaimProcessor,
   SessionKeyPair,
   SessionSigningTemplate,
   SessionSigsMap,
@@ -86,35 +106,6 @@ import {
   ValidateAndSignECDSA,
   WebAuthnAuthenticationVerificationParams,
 } from '@lit-protocol/types';
-import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
-
-import { computeAddress } from '@ethersproject/transactions';
-import { joinSignature, sha256 } from 'ethers/lib/utils';
-
-import { LitCore } from '@lit-protocol/core';
-
-import {
-  ILitResource,
-  ISessionCapabilityObject,
-  LitAccessControlConditionResource,
-  LitResourceAbilityRequest,
-  decode,
-  // newSessionCapabilityObject,
-  RecapSessionCapabilityObject,
-  LitRLIResource,
-  LitAbility,
-} from '@lit-protocol/auth-helpers';
-import {
-  getStorageItem,
-  removeStorageItem,
-  setStorageItem,
-} from '@lit-protocol/misc-browser';
-import { nacl } from '@lit-protocol/nacl';
-import { BigNumber, ethers, utils } from 'ethers';
-import * as siwe from 'siwe';
 
 // TODO: move this to auth-helper for next patch
 interface CapacityCreditsReq {
@@ -133,8 +124,6 @@ interface CapacityCreditsRes {
   capacityDelegationAuthSig: AuthSig;
 }
 
-/** ---------- Main Export Class ---------- */
-
 export class LitNodeClientNodeJs
   extends LitCore
   implements LitClientSessionManager
@@ -142,11 +131,12 @@ export class LitNodeClientNodeJs
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
-  constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
+  constructor(args: LitNodeClientConfig | CustomNetwork) {
     super(args);
 
-    // -- initialize default auth callback
-    this.defaultAuthCallback = args?.defaultAuthCallback;
+    if ('defaultAuthCallback' in args) {
+      this.defaultAuthCallback = args.defaultAuthCallback;
+    }
   }
 
   // ========== STATIC METHODS ==========
@@ -164,8 +154,8 @@ export class LitNodeClientNodeJs
         claims.map((c) => c[keys[i]]);
       signatures[keys[i]] = [];
       claimSet.map((c) => {
-        let sig = ethers.utils.splitSignature(`0x${c.signature}`);
-        let convertedSig = {
+        const sig = ethers.utils.splitSignature(`0x${c.signature}`);
+        const convertedSig = {
           r: sig.r,
           s: sig.s,
           v: sig.v,
@@ -187,7 +177,7 @@ export class LitNodeClientNodeJs
   createCapacityDelegationAuthSig = async (
     params: CapacityCreditsReq
   ): Promise<CapacityCreditsRes> => {
-    let {
+    const {
       dAppOwnerWallet,
       capacityTokenId,
       delegateeAddresses,
@@ -196,11 +186,6 @@ export class LitNodeClientNodeJs
       expiration,
       statement,
     } = params;
-
-    // -- if delegateeAddresses is not provided, set it to an empty array
-    if (!delegateeAddresses) {
-      delegateeAddresses = [];
-    }
 
     // -- This is the owner address who holds the Capacity Credits NFT token and wants to delegate its
     // usage to a list of delegatee addresses
@@ -232,13 +217,6 @@ export class LitNodeClientNodeJs
     //   throw new Error('dAppOwnerWallet must be an ethers wallet');
     // }
 
-    // -- Strip the 0x prefix from each element in the addresses array if it exists
-    if (delegateeAddresses && delegateeAddresses.length > 0) {
-      delegateeAddresses = delegateeAddresses.map((address) =>
-        address.startsWith('0x') ? address.slice(2) : address
-      );
-    }
-
     // -- create LitRLIResource
     // Note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
     // lit-ratelimitincrease://{tokenId}
@@ -250,7 +228,13 @@ export class LitNodeClientNodeJs
 
     const capabilities = {
       ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
-      delegate_to: delegateeAddresses,
+      ...(delegateeAddresses
+        ? {
+            delegate_to: delegateeAddresses.map((address) =>
+              address.startsWith('0x') ? address.slice(2) : address
+            ),
+          }
+        : {}),
       uses: _uses.toString(),
     };
 
@@ -287,7 +271,7 @@ export class LitNodeClientNodeJs
 
     siweMessage = recapObject.addToSiweMessage(siweMessage);
 
-    let messageToSign = siweMessage.prepareMessage();
+    const messageToSign = siweMessage.prepareMessage();
 
     let signature = await dAppOwnerWallet.signMessage(messageToSign);
     // replacing 0x to match the tested working authSig from node
@@ -438,7 +422,7 @@ export class LitNodeClientNodeJs
    * @param addAllCapabilities is a boolean that specifies whether to add all capabilities for each resource
    */
   static async generateSessionCapabilityObjectWithWildcards(
-    litResources: Array<ILitResource>,
+    litResources: ILitResource[],
     addAllCapabilities?: boolean,
     rateLimitAuthSig?: AuthSig
   ): Promise<ISessionCapabilityObject> {
@@ -463,7 +447,7 @@ export class LitNodeClientNodeJs
 
   // backward compatibility
   async generateSessionCapabilityObjectWithWildcards(
-    litResources: Array<ILitResource>
+    litResources: ILitResource[]
     // rateLimitAuthSig?: AuthSig
   ): Promise<ISessionCapabilityObject> {
     // if (rateLimitAuthSig) {
@@ -662,7 +646,7 @@ export class LitNodeClientNodeJs
   }: {
     authSig: AuthSig;
     sessionKeyUri: any;
-    resourceAbilityRequests: Array<LitResourceAbilityRequest>;
+    resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
     const authSigSiweMessage = new siwe.SiweMessage(authSig.signedMessage);
 
@@ -738,7 +722,7 @@ export class LitNodeClientNodeJs
     if (!authSig) {
       throw new Error('authSig or sessionSig is required');
     }
-    let data: JsonExecutionRequest = {
+    const data: JsonExecutionRequest = {
       authSig,
       code,
       ipfsId,
@@ -746,7 +730,7 @@ export class LitNodeClientNodeJs
       authMethods,
     };
 
-    let res = await this.sendCommandToNode({
+    const res = await this.sendCommandToNode({
       url: urlWithPath,
       data,
       requestId,
@@ -881,7 +865,7 @@ export class LitNodeClientNodeJs
       });
     };
 
-    let res = await executeWithRetry<any>(
+    const res = await executeWithRetry<any>(
       wrapper,
       (_error: any, _requestid: string, isFinal: boolean) => {
         if (!isFinal) {
@@ -904,7 +888,7 @@ export class LitNodeClientNodeJs
    *
    */
   combineSharesAndGetJWT = (
-    signatureShares: Array<NodeBlsSigningShare>,
+    signatureShares: NodeBlsSigningShare[],
     requestId: string = ''
   ): string => {
     // ========== Shares Validations ==========
@@ -948,7 +932,7 @@ export class LitNodeClientNodeJs
     networkPubKey: string,
     identityParam: Uint8Array,
     ciphertext: string,
-    signatureShares: Array<NodeBlsSigningShare>
+    signatureShares: NodeBlsSigningShare[]
   ): Uint8Array => {
     const sigShares = signatureShares.map((s: any) => s.signatureShare);
 
@@ -1029,14 +1013,14 @@ export class LitNodeClientNodeJs
     }
 
     // determine which node to run on
-    let ipfsId = await this.getIpfsId({
+    const ipfsId = await this.getIpfsId({
       dataToHash: code!,
       authSig: authSig!,
       debug,
     });
 
     // select targetNodeRange number of random index of the bootstrapUrls.length
-    const randomSelectedNodeIndexes: Array<number> = [];
+    const randomSelectedNodeIndexes: number[] = [];
 
     let nodeCounter = 0;
 
@@ -1196,9 +1180,9 @@ export class LitNodeClientNodeJs
    * @returns { any }
    *
    */
-  getSessionSignatures = (signedData: Array<any>): any => {
+  getSessionSignatures = (signedData: any[]): any => {
     // -- prepare
-    let signatures: any = {};
+    const signatures: any = {};
 
     // TOOD: get keys of signedData
     const keys = Object.keys(signedData[0]);
@@ -1226,7 +1210,7 @@ export class LitNodeClientNodeJs
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      const sigShares: Array<SigShare> = shares.map((s: any, index: number) => {
+      const sigShares: SigShare[] = shares.map((s: any, index: number) => {
         log('Original Share Struct:', s);
 
         const share = this._getFlattenShare(s);
@@ -1324,7 +1308,7 @@ export class LitNodeClientNodeJs
    * @returns { any }
    *
    */
-  getSignatures = (signedData: Array<any>, requestId: string = ''): any => {
+  getSignatures = (signedData: any[], requestId: string = ''): any => {
     const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
 
     // processing signature shares for failed or invalid contents.  mutates the signedData object.
@@ -1390,7 +1374,7 @@ export class LitNodeClientNodeJs
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      let sigName = shares[0].sigName;
+      const sigName = shares[0].sigName;
       logWithRequestId(
         requestId,
         `starting signature combine for sig name: ${sigName}`,
@@ -1487,10 +1471,7 @@ export class LitNodeClientNodeJs
    * @returns { string } signature
    *
    */
-  getSignature = async (
-    shareData: Array<any>,
-    requestId: string
-  ): Promise<any> => {
+  getSignature = async (shareData: any[], requestId: string): Promise<any> => {
     // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
     const R_x = shareData[0].local_x;
     const R_y = shareData[0].local_y;
@@ -1594,7 +1575,7 @@ export class LitNodeClientNodeJs
       // ========== Get Node Promises ==========
 
       // -- fetch shares from nodes
-      let wrapper = async (
+      const wrapper = async (
         requestId: string
       ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
         const nodePromises = this.getNodePromises((url: string) => {
@@ -1769,7 +1750,7 @@ export class LitNodeClientNodeJs
     pubKey = hexPrefixed(pubKey);
 
     // -- validate required params
-    (['toSign', 'pubKey'] as Array<keyof JsonPkpSignRequest>).forEach((key) => {
+    (['toSign', 'pubKey'] as (keyof JsonPkpSignRequest)[]).forEach((key) => {
       if (!params[key]) {
         throwError({
           message: `"${key}" cannot be undefined, empty, or null. Please provide a valid value.`,
@@ -2025,7 +2006,7 @@ export class LitNodeClientNodeJs
       this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
-    const signatureShares: Array<NodeBlsSigningShare> = (
+    const signatureShares: NodeBlsSigningShare[] = (
       res as SuccessNodePromises<NodeBlsSigningShare>
     ).values;
 
@@ -2175,7 +2156,7 @@ export class LitNodeClientNodeJs
 
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
-    let hashOfConditions: ArrayBuffer | undefined =
+    const hashOfConditions: ArrayBuffer | undefined =
       await this.getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
@@ -2222,7 +2203,7 @@ export class LitNodeClientNodeJs
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       const nodePromises = this.getNodePromises((url: string) => {
         // -- if session key is available, use it
-        let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+        const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
         return this.getSigningShareForDecryption(
           url,
@@ -2266,7 +2247,7 @@ export class LitNodeClientNodeJs
       this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
-    const signatureShares: Array<NodeBlsSigningShare> = (
+    const signatureShares: NodeBlsSigningShare[] = (
       res as SuccessNodePromises<NodeBlsSigningShare>
     ).values;
 
@@ -2288,7 +2269,7 @@ export class LitNodeClientNodeJs
   ): Promise<LitAccessControlConditionResource> => {
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
-    let hashOfConditions: ArrayBuffer | undefined =
+    const hashOfConditions: ArrayBuffer | undefined =
       await this.getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
@@ -2412,7 +2393,7 @@ export class LitNodeClientNodeJs
       return responses;
     };
 
-    let res = await executeWithRetry<
+    const res = await executeWithRetry<
       RejectedNodePromises | SuccessNodePromises<any>
     >(
       wrapper,
@@ -2483,7 +2464,7 @@ export class LitNodeClientNodeJs
     })();
 
     let siwe_statement = 'Lit Protocol PKP session signature';
-    if (!!params.statement) {
+    if (params.statement) {
       siwe_statement += ' ' + params.statement;
     }
 
@@ -2930,7 +2911,7 @@ export class LitNodeClientNodeJs
       return responseData;
     };
 
-    let responseData = await executeWithRetry<
+    const responseData = await executeWithRetry<
       RejectedNodePromises | SuccessNodePromises<any>
     >(
       wrapper,
