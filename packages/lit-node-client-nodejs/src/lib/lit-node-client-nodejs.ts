@@ -499,8 +499,6 @@ export class LitNodeClientNodeJs
   getLatestBlockhash = async (): Promise<string> => {
     const requestId = this.getRequestId();
 
-    this.connectedNodes = new Set();
-
     if (this.config.bootstrapUrls.length <= 0) {
       throwError({
         message: `Failed to get bootstrapUrls for network ${this.config.litNetwork}`,
