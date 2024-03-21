@@ -576,6 +576,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  verifyTestnet: {
+    contractAddress: null,
+    chainId: 1833,
+    name: 'Verify Testnet',
+    symbol: 'MATIC',
+    decimals: 18,
+    rpcUrls: ['https://rpc.verify-testnet.gelato.digital'],
+    blockExplorerUrls: ['https://verify-testnet.blockscout.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
