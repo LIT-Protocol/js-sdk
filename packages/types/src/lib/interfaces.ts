@@ -170,12 +170,12 @@ export type KV = Record<string, any>;
 
 /** ---------- Lit Node Client ---------- */
 export interface LitNodeClientConfig {
-  alertWhenUnauthorized: boolean;
-  minNodeCount: number;
-  debug: boolean;
-  bootstrapUrls: string[];
   litNetwork: LIT_NETWORKS_KEYS;
-  connectTimeout: number;
+  alertWhenUnauthorized?: boolean;
+  minNodeCount?: number;
+  debug?: boolean;
+  bootstrapUrls?: string[];
+  connectTimeout?: number;
   checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
