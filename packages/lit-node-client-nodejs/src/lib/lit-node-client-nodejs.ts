@@ -28,7 +28,6 @@ import {
 } from '@lit-protocol/constants';
 import { LitCore } from '@lit-protocol/core';
 import {
-  checkSevSnpAttestation,
   combineEcdsaShares,
   combineSignatureShares,
   encrypt,
