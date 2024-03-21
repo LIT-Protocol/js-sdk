@@ -4,7 +4,7 @@
     "conventionalCommits.scopes": [
         "contracts-sdk",
         "lit-node-client-nodejs",
-        "core"
+        "core",
     ],
     // "restoreTerminals.terminals": [
     //     {
