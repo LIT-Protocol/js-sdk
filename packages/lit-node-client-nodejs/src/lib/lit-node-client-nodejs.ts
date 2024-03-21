@@ -253,7 +253,7 @@ export class LitNodeClientNodeJs
       throw new Error('Failed to verify capabilities for resource');
     }
 
-    let nonce = await this.getLatestBlockhash();
+    const nonce = await this.getLatestBlockhash();
 
     // -- get auth sig
     let siweMessage = new siwe.SiweMessage({
