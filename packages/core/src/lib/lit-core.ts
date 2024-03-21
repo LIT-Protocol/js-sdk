@@ -76,13 +76,28 @@ interface EpochCache {
   lastUpdateTime: null | number;
 }
 
+export type LitNodeClientConfigWithDefaults = Required<
+  Pick<
+    LitNodeClientConfig,
+    | 'bootstrapUrls'
+    | 'alertWhenUnauthorized'
+    | 'debug'
+    | 'connectTimeout'
+    | 'checkNodeAttestation'
+    | 'litNetwork'
+    | 'minNodeCount'
+    | 'retryTolerance'
+  >
+> &
+  Partial<Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext'>>;
+
 // On epoch change, we wait this many seconds for the nodes to update to the new epoch before using the new epoch #
 const EPOCH_PROPAGATION_DELAY = 30_000;
 // This interval is responsible for keeping latest block hash up to date
 const NETWORK_SYNC_INTERVAL = 30_000;
 
 export class LitCore {
-  config: LitNodeClientConfig = {
+  config: LitNodeClientConfigWithDefaults = {
     alertWhenUnauthorized: false,
     debug: true,
     connectTimeout: 20000,
