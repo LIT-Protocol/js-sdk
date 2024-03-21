@@ -80,7 +80,6 @@ import type {
   GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
   JsonExecutionRequest,
-  JsonHandshakeResponse,
   JsonPkpSignRequest,
   LitClientSessionManager,
   LitNodeClientConfig,
