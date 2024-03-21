@@ -5,6 +5,8 @@
         "lit-node-client-nodejs",
         "core"
         "contracts-sdk"
+        "lit-node-client-nodejs",
+        "core"
     ],
     // "restoreTerminals.terminals": [
     //     {
