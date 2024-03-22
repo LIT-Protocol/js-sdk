@@ -230,10 +230,10 @@ export class LitNodeClientNodeJs
       ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
       ...(delegateeAddresses
         ? {
-          delegate_to: delegateeAddresses.map((address) =>
-            address.startsWith('0x') ? address.slice(2) : address
-          ),
-        }
+            delegate_to: delegateeAddresses.map((address) =>
+              address.startsWith('0x') ? address.slice(2) : address
+            ),
+          }
         : {}),
       uses: _uses.toString(),
     };
