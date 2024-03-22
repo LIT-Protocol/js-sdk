@@ -28,6 +28,7 @@ import {
 } from '@lit-protocol/constants';
 import { LitCore } from '@lit-protocol/core';
 import {
+  checkSevSnpAttestation,
   combineEcdsaShares,
   combineSignatureShares,
   encrypt,
@@ -80,6 +81,7 @@ import type {
   GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
   JsonExecutionRequest,
+  JsonHandshakeResponse,
   JsonPkpSignRequest,
   LitClientSessionManager,
   LitNodeClientConfig,
@@ -124,8 +126,7 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
-{
+  implements LitClientSessionManager {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -228,10 +229,10 @@ export class LitNodeClientNodeJs
       ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
       ...(delegateeAddresses
         ? {
-            delegate_to: delegateeAddresses.map((address) =>
-              address.startsWith('0x') ? address.slice(2) : address
-            ),
-          }
+          delegate_to: delegateeAddresses.map((address) =>
+            address.startsWith('0x') ? address.slice(2) : address
+          ),
+        }
         : {}),
       uses: _uses.toString(),
     };
@@ -2726,8 +2727,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
