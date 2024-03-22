@@ -2,9 +2,7 @@
     "liveServer.settings.port": 5502,
     "todo-tree.tree.scanMode": "workspace",
     "conventionalCommits.scopes": [
-        "lit-node-client-nodejs",
-        "core"
-        "contracts-sdk"
+        "contracts-sdk",
         "lit-node-client-nodejs",
         "core"
     ],
