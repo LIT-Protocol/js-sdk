@@ -110,7 +110,7 @@ const LIT_RPC_URL = 'http://127.0.0.1:8545';
   // const messageToSign = siweMessage.prepareMessage();
   // const signature = await wallet.signMessage(messageToSign);
 
-  console.log('SIWE Message:', siweMessage);
+  // console.log('SIWE Message:', siweMessage);
 
   // base 64 encode this
   const code = Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString('base64');
@@ -118,12 +118,12 @@ const LIT_RPC_URL = 'http://127.0.0.1:8545';
   const signingRequest: JsonSignSessionKeyRequest = {
     sessionKey: sessionKeyUri, // Adjust based on how you handle session keys in TS
     authMethods: [authMethod],
-    pkpPublicKey: `0x${pkp.publicKey}`,
+    pkpPublicKey: pkp.publicKey,
     siweMessage: siweMessage.toMessage(),
     code,
     // litActionIpfsId: '',
     jsParams: {
-      publicKey: `0x${pkp.publicKey}`,
+      publicKey: pkp.publicKey,
       sigName: 'unified-auth-sig',
     },
   };
@@ -133,7 +133,6 @@ const LIT_RPC_URL = 'http://127.0.0.1:8545';
   // const handshakesRes = await litNodeClient.handshakeWithNode({
   //   params: {}
   // });
-
 
   // const SESSION_KEY_SIGN_ENDPOINT = '/web/sign_session_key';
 
@@ -150,22 +149,51 @@ const LIT_RPC_URL = 'http://127.0.0.1:8545';
 
   const requestId = litNodeClient.getRequestId();
 
+  // --- test
+  // const url1 = litNodeClient.config.bootstrapUrls[1];
 
+  // const challenge1 = litNodeClient.getRandomHexString(64);
 
-  for (const url of litNodeClient.config.bootstrapUrls) {
+  // const testRes1 = await litNodeClient.handshakeWithNode({
+  //   url: url1,
+  //   challenge: challenge1,
+  //   path: '/web/sign_session_key',
+  //   data: signingRequest,
+  // }, requestId);
+
+  // console.log("testRes1:", testRes1);
+
+  // --- and test
+  const handshakePromises = litNodeClient.config.bootstrapUrls.map(async (url) => {
     const challenge = await litNodeClient.getRandomHexString(64);
-
-    const hsRes = await litNodeClient.handshakeWithNode({
+    // Removed await here to not wait for handshakeWithNode to complete before continuing the loop
+    return litNodeClient.handshakeWithNode({
       url,
       challenge,
       path: '/web/sign_session_key',
       data: signingRequest,
     }, requestId);
+  });
 
-    process.exit();
+  const handshakeResponses = await Promise.all(handshakePromises);
+
+  // Log the responses
+  handshakeResponses.forEach(hsRes => {
     console.log('hsRes:', hsRes);
+  });
+  // for (const url of litNodeClient.config.bootstrapUrls) {
+  //   const challenge = await litNodeClient.getRandomHexString(64);
 
-  }
+  //   const hsRes = await litNodeClient.handshakeWithNode({
+  //     url,
+  //     challenge,
+  //     path: '/web/sign_session_key',
+  //     data: signingRequest,
+  //   }, requestId);
+
+  //   console.log('hsRes:', hsRes);
+  // }
+
   // const sessionSigs = await getSessionSigs({
   //   code: VALID_SESSION_SIG_LIT_ACTION_CODE,
   //   authSig,
