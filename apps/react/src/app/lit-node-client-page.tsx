@@ -41,7 +41,7 @@ const LitNodeClientPage = () => {
       debug: true,
     });
 
-    const latestBlockhash = client.getLatestBlockhash();
+    const latestBlockhash = await client.getLatestBlockhash();
 
     const authsig = await authBrowser.checkAndSignAuthMessage({
       chain: 'ethereum',

@@ -62,7 +62,7 @@ export async function main() {
   });
   await litNodeClient.connect();
 
-  let nonce = litNodeClient.getLatestBlockhash();
+  let nonce = await litNodeClient.getLatestBlockhash();
   console.log('Eth blockhash nonce- ', nonce);
 
   if (!nonce) {

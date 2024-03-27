@@ -18,7 +18,7 @@ export async function main() {
   console.log(client.hdRootPubkeys);
   let subnetKey = '' + client.subnetPubKey;
   let rootKeys = client.hdRootPubkeys;
-  let blockhash = client.getLatestBlockhash();
+  let blockhash = await client.getLatestBlockhash();
   await new Promise((resolve, _reject) => {
     setTimeout(resolve, 35_000);
   });

@@ -484,6 +484,17 @@ export class LitCore {
   };
 
   /**
+   * Return the latest blockhash from the nodes
+   * @returns { Promise<string> } latest blockhash
+   */
+  getLatestBlockhash = async (): Promise<string> => {
+    await this.connect();
+
+    return this.latestBlockhash as string;
+  };
+
+  /**
+   *
    * Connect to the LIT nodes
    *
    * @returns { Promise } A promise that resolves when the nodes are connected.

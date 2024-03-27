@@ -25,7 +25,5 @@
     "crypto": false,
     "stream": false
   },
-  "version": "4.1.1",
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  "version": "4.1.1"
 }
