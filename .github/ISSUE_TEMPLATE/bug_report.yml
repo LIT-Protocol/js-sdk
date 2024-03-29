@@ -10,13 +10,13 @@ body:
     options:
     - label: I have searched the existing issues
       required: true
-- type: text
+- type: textarea
   attributes:
     label: SDK version
     description: Which version(s) of the SDK are you using?
   validations:
     required: true
-- type: text
+- type: textarea
   attributes:
     label: Lit Network
     description: Which Lit network(s) are you using?
