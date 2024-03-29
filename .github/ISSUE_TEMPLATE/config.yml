@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "Community"
+    url: "https://developer.litprotocol.com/ecosystem/community"
+    about: "Join Lit Protocol's Community to ask questions and share your projects"
+  - name: "Documentation"
+    url: "https://developer.litprotocol.com/v3"
+    about: "Find more information in the Lit Protocol's official documentation"
