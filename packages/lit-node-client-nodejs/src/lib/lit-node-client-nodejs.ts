@@ -124,8 +124,7 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
-{
+  implements LitClientSessionManager {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -228,10 +227,10 @@ export class LitNodeClientNodeJs
       ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
       ...(delegateeAddresses
         ? {
-            delegate_to: delegateeAddresses.map((address) =>
-              address.startsWith('0x') ? address.slice(2) : address
-            ),
-          }
+          delegate_to: delegateeAddresses.map((address) =>
+            address.startsWith('0x') ? address.slice(2) : address
+          ),
+        }
         : {}),
       uses: _uses.toString(),
     };
@@ -2550,6 +2549,16 @@ export class LitNodeClientNodeJs
       ...(params?.authSig && { authSig: params.authSig }),
       // authSig: params.authSig,
       siweMessage: siweMessageStr,
+
+      // -- parameters for auth unification
+      ...(params?.litActionCode && { code: params.litActionCode }),
+
+      ...(params?.jsParams && {
+        jsParams: {
+          sigName: params.jsParams?.sigName ?? 'auth-unification-sig',
+          publicKey: params.jsParams?.publicKey,
+        }
+      })
     };
 
     const wrapper = async (
@@ -2745,8 +2754,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {

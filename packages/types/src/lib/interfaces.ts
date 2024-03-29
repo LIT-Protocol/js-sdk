@@ -180,6 +180,7 @@ export interface LitNodeClientConfig {
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
   retryTolerance?: RetryTolerance;
+  rpcUrl?: string | null;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
@@ -533,7 +534,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise {}
+export interface LitNodePromise { }
 
 export interface SendNodeCommand {
   url: string;
@@ -957,6 +958,15 @@ export interface SignSessionKeyProp {
   domain?: string;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
+
+  // parameters for auth-unification
+  litActionCode?: string;
+
+  jsParams?: {
+    publicKey: string;
+    sigName?: string;
+  },
+
 }
 
 export interface SignSessionKeyResponse {
@@ -1504,7 +1514,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions {}
+export interface BaseAuthenticateOptions { }
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
@@ -1584,8 +1594,8 @@ export interface MintCapacityCreditsPerKilosecond
 }
 export interface MintCapacityCreditsContext
   extends MintCapacityCreditsPerDay,
-    MintCapacityCreditsPerSecond,
-    MintCapacityCreditsPerKilosecond {}
+  MintCapacityCreditsPerSecond,
+  MintCapacityCreditsPerKilosecond { }
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;

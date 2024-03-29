@@ -87,6 +87,7 @@ export type LitNodeClientConfigWithDefaults = Required<
     | 'litNetwork'
     | 'minNodeCount'
     | 'retryTolerance'
+    | 'rpcUrl'
   >
 > &
   Partial<Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext'>>;
@@ -110,6 +111,7 @@ export class LitCore {
       maxRetryCount: 3,
       interval: 100,
     },
+    rpcUrl: null,
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -215,6 +217,12 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the configuration is updated.
    */
   setNewConfig = async (): Promise<void> => {
+
+    const IS_LOCAL_NODE_SDK_DEVELOPMENT =
+      this.config.litNetwork === LitNetwork.Custom &&
+      this.config.bootstrapUrls.length >= 1 &&
+      this.config.rpcUrl;
+
     if (
       this.config.litNetwork === LitNetwork.Manzano ||
       this.config.litNetwork === LitNetwork.Habanero
@@ -310,6 +318,30 @@ export class LitCore {
 
       this.config.minNodeCount = parseInt(minNodeCount, 10);
       this.config.bootstrapUrls = bootstrapUrls;
+    } else if (IS_LOCAL_NODE_SDK_DEVELOPMENT) {
+      log("Using custom bootstrap urls:", this.config.bootstrapUrls);
+
+      // const provider = new ethers.providers.JsonRpcProvider(this.config.rpcUrl);
+
+      const minNodeCount = await LitContracts.getMinNodeCount(
+        this.config.litNetwork,
+        this.config.contractContext,
+        this.config.rpcUrl!
+      );
+      this.config.minNodeCount = parseInt(minNodeCount, 10);
+
+      const bootstrapUrls = await LitContracts.getValidators(
+        this.config.litNetwork,
+        this.config.contractContext,
+        this.config.rpcUrl!
+      );
+      this.config.bootstrapUrls = bootstrapUrls;
+
+      this._stakingContract = await LitContracts.getStakingContract(
+        this.config.litNetwork,
+        this.config.contractContext,
+        this.config.rpcUrl!
+      );
     }
   };
 
@@ -325,7 +357,6 @@ export class LitCore {
     if (this._epochUpdateTimeout) {
       clearTimeout(this._epochUpdateTimeout);
     }
-
     this._epochUpdateTimeout = setTimeout(async () => {
       try {
         this.currentEpochNumber = await this.fetchCurrentEpochNumber();
@@ -662,13 +693,10 @@ export class LitCore {
     await Promise.race([
       new Promise((_resolve, reject) => {
         timeoutHandle = setTimeout(() => {
-          const msg = `Error: Could not connect to enough nodes after timeout of ${
-            this.config.connectTimeout
-          }ms.  Could only connect to ${Object.keys(serverKeys).length} of ${
-            this.config.minNodeCount
-          } required nodes, from ${
-            this.config.bootstrapUrls.length
-          } possible nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+          const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
+            }ms.  Could only connect to ${Object.keys(serverKeys).length} of ${this.config.minNodeCount
+            } required nodes, from ${this.config.bootstrapUrls.length
+            } possible nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
           try {
             // TODO: Kludge, replace with standard error construction
@@ -916,7 +944,7 @@ export class LitCore {
     data,
     requestId,
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  SendNodeCommand): Promise<any> => {
+    SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
     data = { ...data, epochNumber: this.currentEpochNumber };
 

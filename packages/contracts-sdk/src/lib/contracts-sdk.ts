@@ -563,10 +563,11 @@ export class LitContracts {
 
   public static async getStakingContract(
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string,
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    const rpcUrl = DEFAULT_RPC;
+    rpcUrl = rpcUrl ?? DEFAULT_RPC;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
@@ -843,9 +844,14 @@ export class LitContracts {
 
   public static getMinNodeCount = async (
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
   ) => {
-    const contract = await LitContracts.getStakingContract(network, context);
+    const contract = await LitContracts.getStakingContract(
+      network,
+      context,
+      rpcUrl,
+    );
 
     const minNodeCount = await contract['currentValidatorCountForConsensus']();
 
@@ -857,9 +863,10 @@ export class LitContracts {
 
   public static getValidators = async (
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
   ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(network, context);
+    const contract = await LitContracts.getStakingContract(network, context, rpcUrl);
 
     // Fetch contract data
     const [activeValidators, currentValidatorsCount, kickedValidators] =
