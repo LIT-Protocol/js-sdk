@@ -1,6 +1,6 @@
 name: 🆘 General Support
 description: Request general support or assistance
-title: "[Team Name] <title-for-the-request>"
+title: "[Team Name] <title-for-the-issue>"
 labels: [General Support]
 body:
 - type: textarea
