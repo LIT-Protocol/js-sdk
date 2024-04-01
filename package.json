@@ -77,7 +77,7 @@
     "@cypress/code-coverage": "^3.10.0",
     "@cypress/react": "^6.2.0",
     "@cypress/webpack-dev-server": "^2.3.0",
-    "@lit-protocol/accs-schemas": "0.0.6",
+    "@lit-protocol/accs-schemas": "0.0.7",
     "@metamask/eth-sig-util": "5.0.2",
     "@mysten/sui.js": "^0.37.1",
     "@playwright/test": "^1.25.2",
