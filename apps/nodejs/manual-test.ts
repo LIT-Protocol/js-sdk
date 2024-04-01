@@ -3,7 +3,7 @@ import * as LitJsSdk from '@lit-protocol/lit-node-client';
 // import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from 'ethers';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
-import { SiweMessage } from 'lit-siwe';
+import { SiweMessage } from 'siwe';
 import { LIT_EVM_CHAINS } from '@lit-protocol/constants';
 
 
@@ -206,30 +206,30 @@ const runLogic = async (contract: LitContracts) => {
 // };
 
 const pkpSign = async (client, pkpPubkey, authSig) => {
-     // try and sign something
-     let sig = await client.pkpSign({
-      toSign:  ethers.utils.arrayify(ethers.utils.keccak256([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])), // hello world in Uint8Array
-      pubKey: pkpPubkey,
-      authSig,
-    });
+  // try and sign something
+  let sig = await client.pkpSign({
+    toSign: ethers.utils.arrayify(ethers.utils.keccak256([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])), // hello world in Uint8Array
+    pubKey: pkpPubkey,
+    authSig,
+  });
 
-    // console.log("sig: ", sig);
+  // console.log("sig: ", sig);
 
-    const recoveredPk = ethers.utils.recoverPublicKey("0x" + sig.dataSigned, sig.signature);
-    const addr = ethers.utils.computeAddress('0x' + sig.publicKey);
-    const recoveredAddr = ethers.utils.computeAddress(recoveredPk);
-    const claimedAddr = ethers.utils.computeAddress(pkpPubkey);
+  const recoveredPk = ethers.utils.recoverPublicKey("0x" + sig.dataSigned, sig.signature);
+  const addr = ethers.utils.computeAddress('0x' + sig.publicKey);
+  const recoveredAddr = ethers.utils.computeAddress(recoveredPk);
+  const claimedAddr = ethers.utils.computeAddress(pkpPubkey);
 
-    const allGood = addr === recoveredAddr && addr === claimedAddr;
+  const allGood = addr === recoveredAddr && addr === claimedAddr;
 
-    console.log('all addresses match: ', allGood);
-    return allGood;
+  console.log('all addresses match: ', allGood);
+  return allGood;
 }
 
-const litActionSign = async(client, pkpPubkey, authSig) => {
-    console.log('testing sig with lit actions...');
-    // this code will be run on the node
-    const litActionCode = `
+const litActionSign = async (client, pkpPubkey, authSig) => {
+  console.log('testing sig with lit actions...');
+  // this code will be run on the node
+  const litActionCode = `
     const go = async () => {  
       // this requests a signature share from the Lit Node
       // the signature share will be automatically returned in the HTTP response from the node
@@ -241,40 +241,40 @@ const litActionSign = async(client, pkpPubkey, authSig) => {
     go();
     `;
 
-    const signatures = await client.executeJs({
-      code: litActionCode,
-      authSig,
-      // all jsParams can be used anywhere in your litActionCode
-      jsParams: {
-        // this is the string "Hello World" for testing
-        toSign: ethers.utils.arrayify(ethers.utils.keccak256([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])),
-        publicKey: pkpPubkey,
-        sigName: "sig1",
-      },
-    });
-    // console.log("signatures: ", signatures);
-    const { sig1, sig2 } = signatures.signatures
-    const sigKeys = {
-      sig1: {
-        recovered: ethers.utils.computeAddress(ethers.utils.recoverPublicKey("0x" + sig1.dataSigned, sig1.signature)),
-        reported: ethers.utils.computeAddress('0x' + sig1.publicKey)
-      },
-      sig2: {
-        recovered: ethers.utils.computeAddress(ethers.utils.recoverPublicKey("0x" + sig2.dataSigned, sig2.signature)),
-        reported: ethers.utils.computeAddress('0x' + sig2.publicKey)
-      },
-    }
-
-    // console.log(`sigKeys: ${JSON.stringify(sigKeys, null, 2)}`)
-
-    const pkpAddr = ethers.utils.computeAddress(pkpPubkey);
-    // console.log('pkpAddr:', pkpAddr)
-
-
-    let allGood = sigKeys.sig1.recovered == sigKeys.sig1.reported && sigKeys.sig2.recovered == sigKeys.sig2.reported && sigKeys.sig1.recovered == sigKeys.sig2.recovered && sigKeys.sig1.recovered == pkpAddr;
-    console.log('all addresses match: ', allGood);
-    return allGood;
+  const signatures = await client.executeJs({
+    code: litActionCode,
+    authSig,
+    // all jsParams can be used anywhere in your litActionCode
+    jsParams: {
+      // this is the string "Hello World" for testing
+      toSign: ethers.utils.arrayify(ethers.utils.keccak256([104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])),
+      publicKey: pkpPubkey,
+      sigName: "sig1",
+    },
+  });
+  // console.log("signatures: ", signatures);
+  const { sig1, sig2 } = signatures.signatures
+  const sigKeys = {
+    sig1: {
+      recovered: ethers.utils.computeAddress(ethers.utils.recoverPublicKey("0x" + sig1.dataSigned, sig1.signature)),
+      reported: ethers.utils.computeAddress('0x' + sig1.publicKey)
+    },
+    sig2: {
+      recovered: ethers.utils.computeAddress(ethers.utils.recoverPublicKey("0x" + sig2.dataSigned, sig2.signature)),
+      reported: ethers.utils.computeAddress('0x' + sig2.publicKey)
+    },
   }
+
+  // console.log(`sigKeys: ${JSON.stringify(sigKeys, null, 2)}`)
+
+  const pkpAddr = ethers.utils.computeAddress(pkpPubkey);
+  // console.log('pkpAddr:', pkpAddr)
+
+
+  let allGood = sigKeys.sig1.recovered == sigKeys.sig1.reported && sigKeys.sig2.recovered == sigKeys.sig2.reported && sigKeys.sig1.recovered == sigKeys.sig2.recovered && sigKeys.sig1.recovered == pkpAddr;
+  console.log('all addresses match: ', allGood);
+  return allGood;
+}
 
 const mintPkpAndSign = async () => {
   let client;
@@ -321,37 +321,37 @@ const mintPkpAndSign = async () => {
 
   await client.connect();
 
-    const litContracts = new LitContracts({
-      privateKey: TEST_FUNDED_PRIVATE_KEY,
-    });
-    const pkpPubkey = await runLogic(litContracts);
-    console.log('pkpPubkey:', pkpPubkey);
+  const litContracts = new LitContracts({
+    privateKey: TEST_FUNDED_PRIVATE_KEY,
+  });
+  const pkpPubkey = await runLogic(litContracts);
+  console.log('pkpPubkey:', pkpPubkey);
 
-    const privateKey = TEST_FUNDED_PRIVATE_KEY;
-    const provider = new ethers.providers.JsonRpcProvider(
-      LIT_EVM_CHAINS['chronicleTestnet'].rpcUrls[0]
-    );
-    const wallet = new ethers.Wallet(privateKey, provider);
-    const authSig = await getAuthSig(wallet);
+  const privateKey = TEST_FUNDED_PRIVATE_KEY;
+  const provider = new ethers.providers.JsonRpcProvider(
+    LIT_EVM_CHAINS['chronicleTestnet'].rpcUrls[0]
+  );
+  const wallet = new ethers.Wallet(privateKey, provider);
+  const authSig = await getAuthSig(wallet);
 
-    // console.log('Sleeping for 5 seconds so that the chronicle node replica can sync up');
-    // Sleep for 5 seconds
-    // await new Promise(resolve => setTimeout(resolve, 5000));
+  // console.log('Sleeping for 5 seconds so that the chronicle node replica can sync up');
+  // Sleep for 5 seconds
+  // await new Promise(resolve => setTimeout(resolve, 5000));
 
 
-    let startTime = Date.now();
-    let allGood = true;
-    const testCount = 1;
-    for(let i = 0; i < testCount; i++){
-      console.log(`testing ${i + 1} of ${testCount}`);
-      let result = await pkpSign(client, pkpPubkey, authSig);
-      if (!result) {
-        allGood = false;
-      }
+  let startTime = Date.now();
+  let allGood = true;
+  const testCount = 1;
+  for (let i = 0; i < testCount; i++) {
+    console.log(`testing ${i + 1} of ${testCount}`);
+    let result = await pkpSign(client, pkpPubkey, authSig);
+    if (!result) {
+      allGood = false;
     }
-    console.log(`it took ${(Date.now() - startTime) / 1000}s to run ${testCount} tests`)
-    console.log('all tests were good', allGood);
-    // await litActionSign(client, pkpPubkey, authSig);
+  }
+  console.log(`it took ${(Date.now() - startTime) / 1000}s to run ${testCount} tests`)
+  console.log('all tests were good', allGood);
+  // await litActionSign(client, pkpPubkey, authSig);
 }
 
 const getAuthSig = async (wallet) => {

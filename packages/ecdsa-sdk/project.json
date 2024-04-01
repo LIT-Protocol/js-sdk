@@ -5,41 +5,19 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "yarn build:target ecdsa-sdk"
-      }
-    },
-    "_buildTsc": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/ecdsa-sdk",
         "main": "packages/ecdsa-sdk/src/index.ts",
         "tsConfig": "packages/ecdsa-sdk/tsconfig.lib.json",
-        "assets": ["packages/ecdsa-sdk/*.md"]
-      }
-    },
-    "_buildWeb": {
-      "executor": "@websaam/nx-esbuild:package",
-      "options": {
-        "globalName": "LitJsSdk_ecdsaSdk",
-        "outfile": "dist/packages/ecdsa-sdk-vanilla/ecdsa-sdk.js",
-        "entryPoints": ["./packages/ecdsa-sdk/src/index.ts"],
-        "define": {
-          "process.env.NODE_DEBUG": "false"
-        },
-        "plugins": [
-          {
-            "package": "esbuild-node-builtins",
-            "function": "nodeBuiltIns"
-          }
-        ]
+        "assets": ["packages/ecdsa-sdk/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/ecdsa-sdk"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/ecdsa-sdk"],
       "options": {
         "jestConfig": "packages/ecdsa-sdk/jest.config.ts",
         "passWithNoTests": true

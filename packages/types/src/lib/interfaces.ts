@@ -1,5 +1,13 @@
 import { Provider } from '@ethersproject/abstract-provider';
+// @ts-ignore
+import * as JSZip from 'jszip/dist/jszip.js';
 
+import {
+  ISessionCapabilityObject,
+  LitResourceAbilityRequest,
+} from '@lit-protocol/auth-helpers';
+
+import { ILitNodeClient } from './ILitNodeClient';
 import {
   AcceptedFileType,
   AccessControlConditions,
@@ -16,14 +24,6 @@ import {
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
-import { ILitNodeClient } from './ILitNodeClient';
-import {
-  ISessionCapabilityObject,
-  LitResourceAbilityRequest,
-} from '@lit-protocol/auth-helpers';
-
-// @ts-ignore
-import * as JSZip from 'jszip/dist/jszip.js';
 
 /** ---------- Access Control Conditions Interfaces ---------- */
 
@@ -161,36 +161,33 @@ export interface HumanizedAccsProps {
 
   // The array of unified access control conditions that you want to humanize
   unifiedAccessControlConditions?: UnifiedAccessControlConditions;
-  tokenList?: Array<any | string>;
+  tokenList?: (any | string)[];
   myWalletAddress?: string;
 }
 
 /** ---------- Key Value Type ---------- */
-export interface KV {
-  [key: string]: any;
-}
+export type KV = Record<string, any>;
 
 /** ---------- Lit Node Client ---------- */
 export interface LitNodeClientConfig {
-  alertWhenUnauthorized: boolean;
-  minNodeCount: number;
-  debug: boolean;
-  bootstrapUrls: Array<string>;
   litNetwork: LIT_NETWORKS_KEYS;
-  connectTimeout: number;
-  checkNodeAttestation: boolean;
+  alertWhenUnauthorized?: boolean;
+  minNodeCount?: number;
+  debug?: boolean;
+  bootstrapUrls?: string[];
+  connectTimeout?: number;
+  checkNodeAttestation?: boolean;
   contractContext?: LitContractContext | LitContractResolverContext;
   storageProvider?: StorageProvider;
   retryTolerance?: RetryTolerance;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 }
 
-export interface CustomNetwork {
-  litNetwork: LIT_NETWORKS_KEYS;
-  bootstrapUrls: Array<string>;
-  minNodeCount?: number;
-  contractContext?: LitContractContext;
-}
+export type CustomNetwork = Pick<
+  LitNodeClientConfig,
+  'litNetwork' | 'bootstrapUrls' | 'contractContext' | 'checkNodeAttestation'
+> &
+  Partial<Pick<LitNodeClientConfig, 'minNodeCount'>>;
 
 /**
  * Override for LocalStorage and SessionStorage
@@ -244,7 +241,7 @@ export interface BaseJsonExecutionRequest {
   targetNodeRange?: number;
 
   // auth methods to resolve
-  authMethods?: Array<Object>;
+  authMethods?: AuthMethod[];
 }
 
 export interface WithAuthSig extends BaseJsonExecutionRequest {
@@ -266,20 +263,20 @@ export interface BaseJsonPkpSignRequest {
 
 export interface WithAuthMethodSigning extends BaseJsonPkpSignRequest {
   // auth methods to resolve
-  authMethods: Array<AuthMethod>;
+  authMethods: AuthMethod[];
   sessionSigs?: any;
   authSig?: AuthSig;
 }
 export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
   sessionSigs: any;
   authSig?: AuthSig;
-  authMethods?: Array<AuthMethod>;
+  authMethods?: AuthMethod[];
 }
 
 export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
   authSig: AuthSig;
   sessionSigs?: any;
-  authMethods?: Array<AuthMethod>;
+  authMethods?: AuthMethod[];
 }
 
 export type JsonPkpSignRequest =
@@ -298,7 +295,7 @@ pub struct JsonSignChainDataRequest {
 }
 */
 export interface JsonSignChainDataRequest {
-  callRequests: Array<CallRequest>;
+  callRequests: CallRequest[];
   chain: Chain;
   iat: number;
   exp: number;
@@ -575,28 +572,18 @@ export interface BlsSignatureShare {
 
 export interface SuccessNodePromises<T> {
   success: boolean;
-  values: Array<T>;
+  values: T[];
 }
 
 export interface RejectedNodePromises {
   success: boolean;
-  error: NodeErrorV0 | NodeErrorV1;
+  error: NodeErrorV1;
 }
 
 export interface NodePromiseResponse {
   status?: string;
   value?: any;
   reason?: any;
-}
-
-/**
- * The error object returned by the node.
- *
- * @deprecated - This is the old error object.  It will be removed in the future. Use NodeErrorV1 instead.
- */
-export interface NodeErrorV0 {
-  errorCode: string;
-  message: string;
 }
 
 export interface NodeErrorV1 {
@@ -645,6 +632,7 @@ export interface NodeClientErrorV1 {
   errorCode: string;
   details?: string[];
   status?: number;
+  requestId?: string;
 }
 
 export interface SigShare {
@@ -688,7 +676,7 @@ export interface CallRequest {
 
 export interface SignedChainDataToken {
   // The call requests to make.  The responses will be signed and returned.
-  callRequests: Array<CallRequest>;
+  callRequests: CallRequest[];
 
   // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
   chain: Chain;
@@ -700,11 +688,12 @@ export interface NodeCommandResponse {
 }
 
 export interface NodeCommandServerKeysResponse {
-  serverPublicKey: any;
-  subnetPublicKey: any;
-  networkPublicKey: any;
-  networkPublicKeySet: any;
-  attestation: NodeAttestation;
+  serverPublicKey: string;
+  subnetPublicKey: string;
+  networkPublicKey: string;
+  networkPublicKeySet: string;
+  hdRootPubkeys: string[];
+  attestation?: NodeAttestation;
   latestBlockhash?: string;
 }
 
@@ -1021,17 +1010,13 @@ export interface GetSessionSigsProps {
   capacityDelegationAuthSig?: AuthSig;
 }
 
-export interface AuthCallback {
-  (params: AuthCallbackParams): Promise<AuthSig>;
-}
+export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
 
 /**
  * A map of node addresses to the session signature payload
  * for that node specifically.
  */
-export interface SessionSigsMap {
-  [nodeAddress: string]: SessionSig;
-}
+export type SessionSigsMap = Record<string, SessionSig>;
 
 export interface SessionSig {
   sig: string;
@@ -1041,16 +1026,11 @@ export interface SessionSig {
   algo?: string;
 }
 
-export interface SessionSigs {
-  /**
-   * Map of Lit node urls to session signatures
-   */
-  [key: string]: SessionSig;
-}
+export type SessionSigs = Record<string, SessionSig>;
 
 export interface SessionRequestBody {
   sessionKey: string;
-  authMethods: Array<AuthMethod>;
+  authMethods: AuthMethod[];
   pkpPublicKey?: string;
   authSig?: AuthSig;
   siweMessage: string;
@@ -1094,15 +1074,44 @@ export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
 /**
  * ========== PKP ==========
  */
+export interface LitClientSessionManager {
+  getSessionKey: () => SessionKeyPair;
+  isSessionKeyPair(obj: any): boolean;
+  getExpiration: () => string;
+  getWalletSig: (getWalletSigProps: GetWalletSigProps) => Promise<AuthSig>;
+  // #authCallbackAndUpdateStorageItem: (params: {
+  //   authCallbackParams: AuthCallbackParams;
+  //   authCallback?: AuthCallback;
+  // }) => Promise<AuthSig>;
+  checkNeedToResignSessionKey: (params: {
+    authSig: AuthSig;
+    sessionKeyUri: any;
+    resourceAbilityRequests: LitResourceAbilityRequest[];
+  }) => Promise<boolean>;
+  getSessionSigs: (params: GetSessionSigsProps) => Promise<SessionSigsMap>;
+  signSessionKey: (
+    params: SignSessionKeyProp
+  ) => Promise<SignSessionKeyResponse>;
+}
+
+export interface AuthenticationProps {
+  client: LitClientSessionManager;
+  getSessionSigsProps: GetSessionSigsProps;
+  authMethods: AuthMethod[];
+}
 
 export interface PKPBaseProp {
   pkpPubKey: string;
   rpc?: string;
   rpcs?: RPCUrls;
   controllerAuthSig?: AuthSig;
+  // @deprecated
   controllerAuthMethods?: AuthMethod[];
+  // @deprecated
   controllerSessionSigs?: SessionSigs;
+  // @deprecated
   sessionSigsExpiration?: string;
+  authContext?: AuthenticationProps;
   litNetwork?: any;
   debug?: boolean;
   bootstrapUrls?: string[];
@@ -1119,7 +1128,7 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export interface PKPEthersWalletProp extends PKPBaseProp {}
+export type PKPEthersWalletProp = PKPBaseProp;
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
@@ -1449,9 +1458,7 @@ export interface StytchOtpProviderOptions {
   userId?: string;
 }
 
-export interface StytchToken {
-  [key: string]: any;
-}
+export type StytchToken = Record<string, any>;
 
 export interface BaseProviderSessionSigsParams {
   /**

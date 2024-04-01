@@ -1,6 +1,9 @@
 {
     "liveServer.settings.port": 5502,
     "todo-tree.tree.scanMode": "workspace",
+    "conventionalCommits.scopes": [
+        "contracts-sdk"
+    ],
     // "restoreTerminals.terminals": [
     //     {
     //       "splitTerminals": [

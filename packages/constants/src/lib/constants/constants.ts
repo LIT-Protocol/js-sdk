@@ -4,7 +4,9 @@ import {
   LITEVMChain,
   LITSVMChain,
 } from '@lit-protocol/types';
+
 import { INTERNAL_DEV } from './autogen_internal';
+import { LitNetwork } from '../enums';
 
 /**
  * Lit Protocol Network Public Key
@@ -14,7 +16,7 @@ export const NETWORK_PUB_KEY: string =
 
 // you can either pass a "chain" param to lit functions, which it uses to tell which network your sig came from.
 // or, you can pass a authSig that has and of these keys in it to tell which network your sig came from.
-export const LIT_AUTH_SIG_CHAIN_KEYS: Array<string> = [
+export const LIT_AUTH_SIG_CHAIN_KEYS: string[] = [
   'ethereum',
   'solana',
   'cosmos',
@@ -574,6 +576,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  verifyTestnet: {
+    contractAddress: null,
+    chainId: 1833,
+    name: 'Verify Testnet',
+    symbol: 'MATIC',
+    decimals: 18,
+    rpcUrls: ['https://rpc.verify-testnet.gelato.digital'],
+    blockExplorerUrls: ['https://verify-testnet.blockscout.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
 };
 
 export const LIT_EVM_CHAINS = LIT_CHAINS;
@@ -717,16 +730,23 @@ export const SYMM_KEY_ALGO_PARAMS = {
 };
 
 /**
- *
- * ALL LIT NETWORKS
- *
+ * Default node URLs for each LIT network
+ * Note: Dynamic networks such as Habanero have no default node URLS; they are always
+ * loaded from the chain during initialization
  */
-export const LIT_NETWORKS = {
-  cayenne: [
+export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
+  localhost: string[];
+  internalDev: string[];
+} = {
+  [LitNetwork.Cayenne]: [
     'https://cayenne.litgateway.com:7370',
     'https://cayenne.litgateway.com:7371',
     'https://cayenne.litgateway.com:7372',
   ],
+  [LitNetwork.Manzano]: [],
+  [LitNetwork.Habanero]: [],
+  [LitNetwork.Custom]: [],
+  // FIXME: Remove localhost and internalDev; replaced with 'custom' type networks
   localhost: [
     'http://localhost:7470',
     'http://localhost:7471',
@@ -739,10 +759,7 @@ export const LIT_NETWORKS = {
     'http://localhost:7478',
     'http://localhost:7479',
   ],
-  custom: [],
   internalDev: INTERNAL_DEV,
-  manzano: [],
-  habanero: [],
 };
 
 // ========== Lit Sessions ==========
@@ -768,3 +785,7 @@ export const RELAY_URL_CAYENNE =
   'https://relayer-server-staging-cayenne.getlit.dev';
 export const RELAY_URL_HABANERO = 'https://habanero-relayer.getlit.dev';
 export const RELAY_URL_MANZANO = 'https://manzano-relayer.getlit.dev';
+
+// ========== Lit Actions ==========
+export const LIT_ACTION_IPFS_HASH =
+  'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';

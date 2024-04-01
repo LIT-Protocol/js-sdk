@@ -18,6 +18,7 @@ import {
   init,
   sevSnpGetVcekUrl,
   sevSnpVerify,
+  sev
 } from '@lit-protocol/wasm';
 
 import { LIT_ERROR, SIGTYPE } from '@lit-protocol/constants';
@@ -248,6 +249,7 @@ function doCombineSignatureShares(shares: BlsSignatureShare[]) {
 
 async function getAmdCert(url: string) {
   // unfortunately, until AMD enables CORS, we have to use a proxy when in the browser
+  // This project is hosted on heroku and uses this codebase: https://github.com/LIT-Protocol/cors-proxy-amd
   if (isBrowser()) {
     // CORS proxy url
     url = `https://cors.litgateway.com/${url}`;
@@ -340,5 +342,16 @@ export const checkSevSnpAttestation = async (
     vcekCert = cache[vcekUrl];
   }
 
-  sevSnpVerify(report, data, signatures, challenge, vcekCert);
+  if (!vcekCert || vcekCert.length === 0 || vcekCert.length < 256) {
+    throw new Error('Unable to retrieve VCEK certificate from AMD');
+  }
+
+  // pass base64 encoded report to wasm wrapper
+  return sevSnpVerify.verify_attestation_report_and_check_challenge(
+    report,
+    data,
+    signatures,
+    challenge,
+    vcekCert
+  );
 };

@@ -54,7 +54,7 @@ if (
 
 greenLog(`Creating ${PROJECT_NAME} library...`);
 try {
-  await runCommand(`yarn nx generate @nrwl/js:library --name=${PROJECT_NAME}`);
+  await runCommand(`yarn nx generate @nx/js:library --name=${PROJECT_NAME}`);
 } catch (e) {
   greenLog(`${PROJECT_NAME} already exists.`);
   alreadyExists = true;
@@ -75,40 +75,6 @@ const createBuild = (name) => {
       executor: 'nx:run-commands',
       options: {
         command: `yarn build:target ${name}`,
-      },
-    },
-  };
-};
-
-/**
- *
- * This function creates a new build config for esbuild,
- * and add it under the "targets" property in the project.json
- * @param { string } name the name of the project
- * @param { object }
- *  @property { string } globalPrefix the prefix of the global variable
- *
- */
-const createBuildWeb = (name, { globalPrefix = 'LitJsSdk' }) => {
-  const camelCase = name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-
-  return {
-    _buildWeb: {
-      executor: '@websaam/nx-esbuild:package',
-      options: {
-        globalName: `${globalPrefix}_${camelCase}`,
-        outfile: `dist/packages/${name}-vanilla/${name}.js`,
-        entryPoints: [`./packages/${name}/src/index.ts`],
-        define: {
-          'process.env.NODE_DEBUG': 'false',
-          global: 'window',
-        },
-        plugins: [
-          {
-            package: 'esbuild-node-builtins',
-            function: 'nodeBuiltIns',
-          },
-        ],
       },
     },
   };
@@ -161,9 +127,6 @@ const editProjectJson = async () => {
   delete project.targets.build.dependsOn;
 
   project.targets['_buildTsc'] = project.targets.build;
-  project.targets['_buildWeb'] = createBuildWeb(PROJECT_NAME, {
-    globalPrefix: 'LitJsSdk',
-  })._buildWeb;
   project.targets['build'] = createBuild(PROJECT_NAME).build;
 
   // move 'lint' and 'test' objects to the end

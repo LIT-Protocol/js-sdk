@@ -1,0 +1,42 @@
+name: 🚀 Feature Request
+description: Request a new feature or enhancement
+title: "[Team Name] <title-for-the-request>"
+labels: [Feature Request, Enhancement]
+body:
+- type: textarea
+  attributes:
+    label: Description of the feature request
+    description: A clear and concise description of the feature or enhancement you are requesting.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Use case for the feature
+    description: How would this feature benefit your integration or use case?
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Proposed solution
+    description: If you have any ideas or suggestions for how this feature could be implemented, please provide them here.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Additional context
+    description: |
+      Links? References? Screenshots? Anything that will give us more context about the feature you are requesting!
+      
+      Tip: You can attach images or files by clicking this area to highlight it and then dragging files in.
+  validations:
+    required: false
+# - type: dropdown
+#   id: browsers
+#   attributes:
+#     label: What browsers do you expect this feature to work on?
+#     multiple: true
+#     options:
+#       - Firefox
+#       - Chrome
+#       - Safari
+#       - Microsoft Edge

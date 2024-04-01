@@ -55,6 +55,13 @@ import {
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
 
+let CID: any;
+try {
+  CID = require('multiformats/cid');
+} catch (e) {
+  console.log('CID not found');
+}
+
 // This function asynchronously executes a provided callback function for each item in the given array.
 // The callback function is awaited before continuing to the next iteration.
 // The resulting array of callback return values is then returned.
@@ -1240,23 +1247,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
      * @returns {Multihash}
      */
     getBytes32FromMultihash: async (ipfsId: string) => {
-      let CID: any;
-      try {
-        CID = await import('multiformats/cid');
-
-        if (!CID) {
-          CID = CID.CID;
-
-          if (!CID) {
-            this.log('1 CID not found');
-          }
-        }
-      } catch (e) {
-        this.log('2 CID not found');
-      }
-
-      // const CID = await import('multiformats/cid');
-
       const cid = CID.parse(ipfsId);
       const hashFunction = cid.multihash.code;
       const size = cid.multihash.size;

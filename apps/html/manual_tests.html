@@ -857,6 +857,26 @@
         });
       };
 
+      var ETHOnVerifyTestnet = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'verifyTestnet',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnVerifyTestnet',
+        });
+      };
+
       var ETHOnZora = async () => {
         const accessControlConditions = [
           {
@@ -1883,6 +1903,9 @@
     <br />
     <br />
     <button onclick="ETHOnLuksoTestnet()">ETHOnLuksoTestnet</button>
+    <br />
+    <br />
+    <button onclick="ETHOnVerifyTestnet()">ETHOnVerifyTestnet</button>
     <br />
     <br />
     <button onclick="ETHOnZora()">ETHOnZora</button>

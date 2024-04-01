@@ -9,6 +9,7 @@
  */
 
 import {
+  AuthenticationProps,
   ExecuteJsProps,
   PKPBaseProp,
   AuthSig,
@@ -52,6 +53,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   controllerAuthMethods?: AuthMethod[];
   controllerSessionSigs?: SessionSigs;
   sessionSigsExpiration?: string;
+  authContext?: AuthenticationProps;
 
   uncompressedPubKey!: string;
   uncompressedPubKeyBuffer!: Uint8Array;
@@ -91,6 +93,9 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.controllerAuthMethods = prop.controllerAuthMethods;
     this.controllerSessionSigs = prop.controllerSessionSigs;
     this.sessionSigsExpiration = prop.sessionSigsExpiration;
+    this.authContext = prop.authContext;
+
+    this.validateAuthContext();
 
     this.debug = prop.debug || false;
     this.setLitAction(prop);
@@ -168,34 +173,13 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   /**
    * A function that sets the value of the litActionJsParams property to the given params object.
    * @template CustomType - A generic type that extends T, where T is the type of the litActionJsParams property.
+   *
    * @param { CustomType } params - An object of type CustomType that contains the parameters to be set as litActionJsParams.
+   *
    * @returns { void }
-   * @memberOf SomeClass
    */
   setLitActionJsParams<CustomType extends T = T>(params: CustomType): void {
     this.litActionJsParams = params;
-  }
-
-  /**
-   * Creates and sets the session sigs and their expiration.
-   *
-   * @param {GetSessionSigsProps} sessionParams - The parameters for generating session sigs.
-   */
-  async createAndSetSessionSigs(
-    sessionParams: GetSessionSigsProps
-  ): Promise<void | never> {
-    try {
-      const expiration =
-        sessionParams.expiration || this.litNodeClient.getExpiration();
-      const sessionSigs = await this.litNodeClient.getSessionSigs(
-        sessionParams
-      );
-
-      this.controllerSessionSigs = sessionSigs;
-      this.sessionSigsExpiration = expiration;
-    } catch (e) {
-      return this.throwError('Failed to create and set session sigs');
-    }
   }
 
   /**
@@ -205,7 +189,9 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    */
   getAddress(): Promise<string> {
     return Promise.reject(
-      new Error('getAddress not implemented. Please use a subclass of PKPBase.')
+      this.throwError(
+        'getAddress not implemented. Please use a subclass of PKPBase.'
+      )
     );
   }
 
@@ -222,6 +208,53 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
   }
 
+  private validateAuthContext() {
+    const providedAuthentications = [
+      this.controllerAuthSig,
+      this.controllerSessionSigs,
+      this.authContext,
+    ].filter(Boolean).length;
+
+    if (providedAuthentications !== 1) {
+      // log which authentications has the user provided
+      if (this.controllerAuthSig) {
+        logError('controllerAuthSig is provided');
+      }
+
+      if (this.controllerSessionSigs) {
+        logError('controllerSessionSigs is provided');
+      }
+
+      if (this.authContext) {
+        logError('authContext is provided');
+      }
+
+      this.throwError(
+        'Multiple authentications are defined, can only use one at a time'
+      );
+    }
+
+    // Print deprecation warning for controllerSessionSigs
+    if (this.controllerSessionSigs) {
+      logError(
+        'controllerSessionSigs is deprecated, please use authContext instead'
+      );
+    }
+
+    // Check auth context if provided
+    if (this.authContext) {
+      // It must have a valid client and getSessionSigsProps
+      if (
+        !(this.authContext.client instanceof LitNodeClientNodeJs) ||
+        !this.authContext.getSessionSigsProps
+      ) {
+        this.throwError(
+          'authContext must be an object with a lit client and getSessionSigsProps'
+        );
+      }
+    }
+  }
+
   /**
    * Runs the specified Lit action with the given parameters.
    *
@@ -232,7 +265,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    *
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, if `executeJsArgs` does not have either `code` or `ipfsId`, or if an error occurs during the execution of the Lit action.
    */
-
   async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
     if (!this.litNodeClientReady) {
       await this.init();
@@ -240,29 +272,22 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     // If no PKP public key is provided, throw error
     if (!this.uncompressedPubKey) {
-      throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
+      this.throwError('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
-    if (this.controllerAuthSig && this.controllerSessionSigs) {
-      throw new Error(
-        'controllerAuthSig, controllerSessionSigs are defined, can only use one or the other'
-      );
-    }
+    this.validateAuthContext();
 
-    // If session sigs are provided, they must be an object
-    if (
-      this.controllerSessionSigs &&
-      typeof this.controllerSessionSigs !== 'object'
-    ) {
-      throw new Error('controllerSessionSigs must be an object');
-    }
+    const controllerSessionSigs =
+      (await this.authContext?.client?.getSessionSigs(
+        this.authContext.getSessionSigsProps
+      )) || this.controllerSessionSigs;
 
     const executeJsArgs: ExecuteJsProps = {
       ...(this.litActionCode && { code: this.litActionCode }),
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
-      sessionSigs: this.controllerSessionSigs,
+      sessionSigs: controllerSessionSigs,
       authSig: this.controllerAuthSig,
-      authMethods: this.controllerAuthMethods,
+      authMethods: this.authContext?.authMethods,
       jsParams: {
         ...{
           toSign,
@@ -288,7 +313,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           await this.litNodeClient.executeJs(executeJsArgs),
         (error: any, requestId: string, isFinal: boolean) => {
           if (!isFinal) {
-            this.log('an error has occured, attempting to retry');
+            this.log('an error has occurred, attempting to retry');
           }
         }
       );
@@ -314,6 +339,15 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
   }
 
+  /**
+   * Sign the provided data with the PKP private key.
+   *
+   * @param {Uint8Array} toSign - The data to be signed.
+   *
+   * @returns {Promise<any>} - A Promise that resolves with the signature of the provided data.
+   *
+   * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, or if an error occurs during the signing process.
+   */
   async runSign(toSign: Uint8Array): Promise<any> {
     if (!this.litNodeClientReady) {
       await this.init();
@@ -321,14 +355,15 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     // If no PKP public key is provided, throw error
     if (!this.uncompressedPubKey) {
-      throw new Error('pkpPubKey (aka. uncompressPubKey) is required');
+      this.throwError('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
-    if (this.controllerAuthSig && this.controllerSessionSigs) {
-      throw new Error(
-        'controllerAuthSig, controllerSessionSigs and controllerAuthMethod are defined, can only use one authorization type'
-      );
-    }
+    this.validateAuthContext();
+
+    const controllerSessionSigs =
+      (await this.authContext?.client?.getSessionSigs(
+        this.authContext.getSessionSigsProps
+      )) || this.controllerSessionSigs;
 
     try {
       let sig;
@@ -339,18 +374,18 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           authSig: this.controllerAuthSig as AuthSig,
           authMethods: [],
         });
-      } else if (this.controllerSessionSigs) {
+      } else if (controllerSessionSigs) {
         sig = await this.litNodeClient.pkpSign({
           toSign,
           pubKey: this.uncompressedPubKey,
-          authMethods: this.controllerAuthMethods ?? [],
-          sessionSigs: this.controllerSessionSigs,
+          authMethods: this.authContext?.authMethods ?? [],
+          sessionSigs: controllerSessionSigs,
         });
-      } else if (this.controllerAuthMethods) {
+      } else if (this.authContext?.authMethods) {
         sig = await this.litNodeClient.pkpSign({
           toSign,
           pubKey: this.uncompressedPubKey,
-          authMethods: this.controllerAuthMethods,
+          authMethods: this.authContext.authMethods,
         });
       }
 
@@ -361,6 +396,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       return sig;
     } catch (e) {
       console.log('err: ', e);
+      throw e;
     }
   }
 
@@ -383,7 +419,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    *
    * @returns {void} - This function does not return a value.
    */
-
   log(...args: any[]): void {
     if (this.debug) {
       console.log(this.orange + this.PREFIX + this.reset, ...args);
@@ -397,7 +432,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    *
    * @returns {never} - This function does not return a value since it always throws an Error.
    */
-
   throwError = (message: string): never => {
     console.error(
       this.orange + this.PREFIX + this.reset,

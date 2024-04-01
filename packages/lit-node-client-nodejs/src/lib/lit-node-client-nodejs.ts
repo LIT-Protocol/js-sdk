@@ -1,12 +1,24 @@
-import {
-  canonicalAccessControlConditionFormatter,
-  // generateUnifiedAccsForRLIDelegation,
-} from '@lit-protocol/access-control-conditions';
+import { computeAddress } from '@ethersproject/transactions';
+import { BigNumber, ethers } from 'ethers';
+import { joinSignature, sha256 } from 'ethers/lib/utils';
+import * as siwe from 'siwe';
 
+import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-control-conditions';
+import {
+  ILitResource,
+  ISessionCapabilityObject,
+  LitAccessControlConditionResource,
+  LitResourceAbilityRequest,
+  decode,
+  RecapSessionCapabilityObject,
+  LitRLIResource,
+  LitAbility,
+} from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE_IDS,
   AuthMethodType,
   EITHER_TYPE,
+  LIT_ACTION_IPFS_HASH,
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
@@ -14,7 +26,7 @@ import {
   SIGTYPE,
   SIWE_DELEGATION_URI,
 } from '@lit-protocol/constants';
-
+import { LitCore } from '@lit-protocol/core';
 import {
   combineEcdsaShares,
   combineSignatureShares,
@@ -36,6 +48,17 @@ import {
   throwError,
 } from '@lit-protocol/misc';
 import {
+  getStorageItem,
+  removeStorageItem,
+  setStorageItem,
+} from '@lit-protocol/misc-browser';
+import { nacl } from '@lit-protocol/nacl';
+import {
+  uint8arrayFromString,
+  uint8arrayToString,
+} from '@lit-protocol/uint8arrays';
+
+import type {
   AuthCallback,
   AuthCallbackParams,
   AuthMethod,
@@ -43,7 +66,6 @@ import {
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
-  CombinedECDSASignature,
   CustomNetwork,
   DecryptRequest,
   DecryptResponse,
@@ -59,6 +81,7 @@ import {
   GetWalletSigProps,
   JsonExecutionRequest,
   JsonPkpSignRequest,
+  LitClientSessionManager,
   LitNodeClientConfig,
   NodeBlsSigningShare,
   NodeCommandResponse,
@@ -67,7 +90,6 @@ import {
   NodeShare,
   PKPSignShare,
   RejectedNodePromises,
-  RelayClaimProcessor,
   SessionKeyPair,
   SessionSigningTemplate,
   SessionSigsMap,
@@ -82,44 +104,12 @@ import {
   ValidateAndSignECDSA,
   WebAuthnAuthenticationVerificationParams,
 } from '@lit-protocol/types';
-import {
-  uint8arrayFromString,
-  uint8arrayToString,
-} from '@lit-protocol/uint8arrays';
-
-import { computeAddress } from '@ethersproject/transactions';
-import { joinSignature, sha256 } from 'ethers/lib/utils';
-import { SiweMessage } from 'lit-siwe';
-import * as siweNormal from 'siwe';
-
-import { LitCore } from '@lit-protocol/core';
-import { IPFSBundledSDK } from '@lit-protocol/lit-third-party-libs';
-
-import {
-  ILitResource,
-  ISessionCapabilityObject,
-  LitAccessControlConditionResource,
-  LitResourceAbilityRequest,
-  decode,
-  // newSessionCapabilityObject,
-  RecapSessionCapabilityObject,
-  LitRLIResource,
-  LitAbility,
-} from '@lit-protocol/auth-helpers';
-import {
-  getStorageItem,
-  removeStorageItem,
-  setStorageItem,
-} from '@lit-protocol/misc-browser';
-import { nacl } from '@lit-protocol/nacl';
-import { BigNumber, ethers, utils } from 'ethers';
-import * as siwe from 'siwe';
 
 // TODO: move this to auth-helper for next patch
 interface CapacityCreditsReq {
   dAppOwnerWallet: ethers.Wallet;
-  capacityTokenId: string;
-  delegateeAddresses: string[];
+  capacityTokenId?: string;
+  delegateeAddresses?: string[];
   uses?: string;
   domain?: string;
   expiration?: string;
@@ -132,17 +122,19 @@ interface CapacityCreditsRes {
   capacityDelegationAuthSig: AuthSig;
 }
 
-/** ---------- Main Export Class ---------- */
-
-export class LitNodeClientNodeJs extends LitCore {
+export class LitNodeClientNodeJs
+  extends LitCore
+  implements LitClientSessionManager
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
-  constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
+  constructor(args: LitNodeClientConfig | CustomNetwork) {
     super(args);
 
-    // -- initialize default auth callback
-    this.defaultAuthCallback = args?.defaultAuthCallback;
+    if ('defaultAuthCallback' in args) {
+      this.defaultAuthCallback = args.defaultAuthCallback;
+    }
   }
 
   // ========== STATIC METHODS ==========
@@ -160,8 +152,8 @@ export class LitNodeClientNodeJs extends LitCore {
         claims.map((c) => c[keys[i]]);
       signatures[keys[i]] = [];
       claimSet.map((c) => {
-        let sig = ethers.utils.splitSignature(`0x${c.signature}`);
-        let convertedSig = {
+        const sig = ethers.utils.splitSignature(`0x${c.signature}`);
+        const convertedSig = {
           r: sig.r,
           s: sig.s,
           v: sig.v,
@@ -183,7 +175,7 @@ export class LitNodeClientNodeJs extends LitCore {
   createCapacityDelegationAuthSig = async (
     params: CapacityCreditsReq
   ): Promise<CapacityCreditsRes> => {
-    let {
+    const {
       dAppOwnerWallet,
       capacityTokenId,
       delegateeAddresses,
@@ -213,14 +205,9 @@ export class LitNodeClientNodeJs extends LitCore {
       await this.connect();
     }
 
-    // -- validate if capacityTokenId is empty
-    if (!capacityTokenId) {
-      throw new Error('capacityTokenId must exist');
-    }
-
     // -- validate
-    if (!dAppOwnerWallet || !delegateeAddresses) {
-      throw new Error('Both parameters must exist');
+    if (!dAppOwnerWallet) {
+      throw new Error('dAppOwnerWallet must exist');
     }
 
     // -- validate dAppOwnerWallet is an ethers wallet
@@ -228,35 +215,31 @@ export class LitNodeClientNodeJs extends LitCore {
     //   throw new Error('dAppOwnerWallet must be an ethers wallet');
     // }
 
-    // -- validate delegateeAddresses has to be an array and has to have at least one address
-    if (!Array.isArray(delegateeAddresses) || delegateeAddresses.length === 0) {
-      throw new Error(
-        'delegateeAddresses must be an array and has to have at least one'
-      );
-    }
-
     // -- create LitRLIResource
     // Note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
     // lit-ratelimitincrease://{tokenId}
-    const litResource = new LitRLIResource(capacityTokenId);
-
-    // Strip the 0x prefix from each element in the addresses array
-    delegateeAddresses = delegateeAddresses.map((address) =>
-      address.startsWith('0x') ? address.slice(2) : address
-    );
+    const litResource = new LitRLIResource(capacityTokenId ?? '*');
 
     const recapObject = await this.generateSessionCapabilityObjectWithWildcards(
       [litResource]
     );
 
+    const capabilities = {
+      ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
+      ...(delegateeAddresses
+        ? {
+            delegate_to: delegateeAddresses.map((address) =>
+              address.startsWith('0x') ? address.slice(2) : address
+            ),
+          }
+        : {}),
+      uses: _uses.toString(),
+    };
+
     recapObject.addCapabilityForResource(
       litResource,
       LitAbility.RateLimitIncreaseAuth,
-      {
-        nft_id: [capacityTokenId],
-        delegate_to: delegateeAddresses,
-        uses: _uses.toString(),
-      }
+      capabilities
     );
 
     // make sure that the resource is added to the recapObject
@@ -270,7 +253,7 @@ export class LitNodeClientNodeJs extends LitCore {
       throw new Error('Failed to verify capabilities for resource');
     }
 
-    let nonce = this.getLatestBlockhash();
+    const nonce = this.getLatestBlockhash();
 
     // -- get auth sig
     let siweMessage = new siwe.SiweMessage({
@@ -286,7 +269,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     siweMessage = recapObject.addToSiweMessage(siweMessage);
 
-    let messageToSign = siweMessage.prepareMessage();
+    const messageToSign = siweMessage.prepareMessage();
 
     let signature = await dAppOwnerWallet.signMessage(messageToSign);
     // replacing 0x to match the tested working authSig from node
@@ -437,7 +420,7 @@ export class LitNodeClientNodeJs extends LitCore {
    * @param addAllCapabilities is a boolean that specifies whether to add all capabilities for each resource
    */
   static async generateSessionCapabilityObjectWithWildcards(
-    litResources: Array<ILitResource>,
+    litResources: ILitResource[],
     addAllCapabilities?: boolean,
     rateLimitAuthSig?: AuthSig
   ): Promise<ISessionCapabilityObject> {
@@ -462,7 +445,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
   // backward compatibility
   async generateSessionCapabilityObjectWithWildcards(
-    litResources: Array<ILitResource>
+    litResources: ILitResource[]
     // rateLimitAuthSig?: AuthSig
   ): Promise<ISessionCapabilityObject> {
     // if (rateLimitAuthSig) {
@@ -680,9 +663,9 @@ export class LitNodeClientNodeJs extends LitCore {
   }: {
     authSig: AuthSig;
     sessionKeyUri: any;
-    resourceAbilityRequests: Array<LitResourceAbilityRequest>;
+    resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
-    const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
+    const authSigSiweMessage = new siwe.SiweMessage(authSig.signedMessage);
 
     try {
       await authSigSiweMessage.validate(authSig.sig);
@@ -756,7 +739,7 @@ export class LitNodeClientNodeJs extends LitCore {
     if (!authSig) {
       throw new Error('authSig or sessionSig is required');
     }
-    let data: JsonExecutionRequest = {
+    const data: JsonExecutionRequest = {
       authSig,
       code,
       ipfsId,
@@ -764,7 +747,7 @@ export class LitNodeClientNodeJs extends LitCore {
       authMethods,
     };
 
-    let res = await this.sendCommandToNode({
+    const res = await this.sendCommandToNode({
       url: urlWithPath,
       data,
       requestId,
@@ -899,7 +882,7 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     };
 
-    let res = await executeWithRetry<any>(
+    const res = await executeWithRetry<any>(
       wrapper,
       (_error: any, _requestid: string, isFinal: boolean) => {
         if (!isFinal) {
@@ -922,7 +905,7 @@ export class LitNodeClientNodeJs extends LitCore {
    *
    */
   combineSharesAndGetJWT = (
-    signatureShares: Array<NodeBlsSigningShare>,
+    signatureShares: NodeBlsSigningShare[],
     requestId: string = ''
   ): string => {
     // ========== Shares Validations ==========
@@ -966,7 +949,7 @@ export class LitNodeClientNodeJs extends LitCore {
     networkPubKey: string,
     identityParam: Uint8Array,
     ciphertext: string,
-    signatureShares: Array<NodeBlsSigningShare>
+    signatureShares: NodeBlsSigningShare[]
   ): Uint8Array => {
     const sigShares = signatureShares.map((s: any) => s.signatureShare);
 
@@ -979,9 +962,42 @@ export class LitNodeClientNodeJs extends LitCore {
   };
 
   // ========== Promise Handlers ==========
+  getIpfsId = async ({
+    dataToHash,
+    authSig,
+    debug = false,
+  }: {
+    dataToHash: string;
+    authSig: AuthSig;
+    debug?: boolean;
+  }) => {
+    const laRes = await this.executeJs({
+      authSig,
+      ipfsId: LIT_ACTION_IPFS_HASH,
+      authMethods: [],
+      jsParams: {
+        dataToHash,
+      },
+      debug,
+    }).catch((e) => {
+      logError('Error getting IPFS ID', e);
+      throw e;
+    });
+
+    const data = JSON.parse(laRes.response).res;
+
+    if (!data.success) {
+      logError('Error getting IPFS ID', data.data);
+    }
+
+    return data.data;
+  };
 
   /**
    * Run lit action on a single deterministicly selected node. It's important that the nodes use the same deterministic selection algorithm.
+   *
+   * Lit Action: dataToHash -> IPFS CID
+   * QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3
    *
    * @param { ExecuteJsProps } params
    *
@@ -1014,50 +1030,14 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // determine which node to run on
-    let ipfsId;
-
-    if (params.code) {
-      // hash the code to get IPFS id
-      const blockstore = new IPFSBundledSDK.MemoryBlockstore();
-
-      let content: string | Uint8Array = params.code;
-
-      if (typeof content === 'string') {
-        content = new TextEncoder().encode(content);
-      } else {
-        throwError({
-          message:
-            'Invalid code content type for single node execution.  Your code param must be a string',
-          errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-          errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-        });
-      }
-
-      let lastCid;
-      for await (const { cid } of IPFSBundledSDK.importer(
-        [{ content }],
-        blockstore,
-        {
-          onlyHash: true,
-        }
-      )) {
-        lastCid = cid;
-      }
-
-      ipfsId = lastCid;
-    } else {
-      ipfsId = params.ipfsId;
-    }
-
-    if (!ipfsId) {
-      return throwError({
-        message: 'ipfsId is required',
-        error: LIT_ERROR.INVALID_PARAM_TYPE,
-      });
-    }
+    const ipfsId = await this.getIpfsId({
+      dataToHash: code!,
+      authSig: authSig!,
+      debug,
+    });
 
     // select targetNodeRange number of random index of the bootstrapUrls.length
-    const randomSelectedNodeIndexes: Array<number> = [];
+    const randomSelectedNodeIndexes: number[] = [];
 
     let nodeCounter = 0;
 
@@ -1217,9 +1197,9 @@ export class LitNodeClientNodeJs extends LitCore {
    * @returns { any }
    *
    */
-  getSessionSignatures = (signedData: Array<any>): any => {
+  getSessionSignatures = (signedData: any[]): any => {
     // -- prepare
-    let signatures: any = {};
+    const signatures: any = {};
 
     // TOOD: get keys of signedData
     const keys = Object.keys(signedData[0]);
@@ -1247,7 +1227,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      const sigShares: Array<SigShare> = shares.map((s: any, index: number) => {
+      const sigShares: SigShare[] = shares.map((s: any, index: number) => {
         log('Original Share Struct:', s);
 
         const share = this._getFlattenShare(s);
@@ -1345,10 +1325,10 @@ export class LitNodeClientNodeJs extends LitCore {
    * @returns { any }
    *
    */
-  getSignatures = (signedData: Array<any>, requestId: string = ''): any => {
+  getSignatures = (signedData: any[], requestId: string = ''): any => {
     const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
 
-    // processing signature shares for failed or invalid contents.
+    // processing signature shares for failed or invalid contents.  mutates the signedData object.
     for (const signatureResponse of signedData) {
       for (const sigName of Object.keys(signatureResponse)) {
         const requiredFields = ['signatureShare'];
@@ -1411,7 +1391,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
-      let sigName = shares[0].sigName;
+      const sigName = shares[0].sigName;
       logWithRequestId(
         requestId,
         `starting signature combine for sig name: ${sigName}`,
@@ -1440,10 +1420,10 @@ export class LitNodeClientNodeJs extends LitCore {
         );
 
         throwError({
-          message:
-            'total number of valid signatures shares does not match threshold',
+          message: `The total number of valid signatures shares ${shares.length} does not meet the threshold of ${this.config.minNodeCount}`,
           errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
           errorCode: LIT_ERROR.NO_VALID_SHARES.code,
+          requestId,
         });
       }
 
@@ -1508,10 +1488,7 @@ export class LitNodeClientNodeJs extends LitCore {
    * @returns { string } signature
    *
    */
-  getSignature = async (
-    shareData: Array<any>,
-    requestId: string
-  ): Promise<any> => {
+  getSignature = async (shareData: any[], requestId: string): Promise<any> => {
     // R_x & R_y values can come from any node (they will be different per node), and will generate a valid signature
     const R_x = shareData[0].local_x;
     const R_y = shareData[0].local_y;
@@ -1602,7 +1579,7 @@ export class LitNodeClientNodeJs extends LitCore {
     params = LitNodeClientNodeJs.normalizeParams(params);
 
     let res;
-    let requestId = this.getRequestId();
+    let requestId = '';
     // -- only run on a single node
     if (targetNodeRange) {
       res = await this.runOnTargetedNodes(params);
@@ -1615,7 +1592,7 @@ export class LitNodeClientNodeJs extends LitCore {
       // ========== Get Node Promises ==========
 
       // -- fetch shares from nodes
-      let wrapper = async (
+      const wrapper = async (
         requestId: string
       ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
         const nodePromises = this.getNodePromises((url: string) => {
@@ -1635,7 +1612,7 @@ export class LitNodeClientNodeJs extends LitCore {
         res = await this.handleNodePromises(
           nodePromises,
           requestId,
-          this.config.minNodeCount
+          this.connectedNodes.size
         );
         return res;
       };
@@ -1653,7 +1630,7 @@ export class LitNodeClientNodeJs extends LitCore {
     }
     // -- case: promises rejected
     if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
     // -- case: promises success (TODO: check the keys of "values")
@@ -1790,7 +1767,7 @@ export class LitNodeClientNodeJs extends LitCore {
     pubKey = hexPrefixed(pubKey);
 
     // -- validate required params
-    (['toSign', 'pubKey'] as Array<keyof JsonPkpSignRequest>).forEach((key) => {
+    (['toSign', 'pubKey'] as (keyof JsonPkpSignRequest)[]).forEach((key) => {
       if (!params[key]) {
         throwError({
           message: `"${key}" cannot be undefined, empty, or null. Please provide a valid value.`,
@@ -1816,8 +1793,6 @@ export class LitNodeClientNodeJs extends LitCore {
       arr.push((toSign as Buffer)[i]);
     }
     toSign = arr;
-
-    let requestId;
 
     const wrapper = async (
       id: string
@@ -1849,7 +1824,7 @@ export class LitNodeClientNodeJs extends LitCore {
       const res = await this.handleNodePromises(
         nodePromises,
         id,
-        this.config.minNodeCount
+        this.connectedNodes.size // ECDSA requires responses from all nodes, but only shares from minNodeCount.
       );
       return res;
     };
@@ -1864,11 +1839,11 @@ export class LitNodeClientNodeJs extends LitCore {
       },
       this.config.retryTolerance
     );
-    requestId = res.requestId;
+    const requestId = res.requestId;
 
     // -- case: promises rejected
-    if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises);
+    if (!res.success) {
+      this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
     // -- case: promises success (TODO: check the keys of "values")
@@ -1997,7 +1972,6 @@ export class LitNodeClientNodeJs extends LitCore {
     }
 
     // ========== Get Node Promises ==========
-    let requestId;
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
@@ -2042,13 +2016,14 @@ export class LitNodeClientNodeJs extends LitCore {
       },
       this.config.retryTolerance
     );
+    const requestId = res.requestId;
 
     // -- case: promises rejected
     if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
-    const signatureShares: Array<NodeBlsSigningShare> = (
+    const signatureShares: NodeBlsSigningShare[] = (
       res as SuccessNodePromises<NodeBlsSigningShare>
     ).values;
 
@@ -2198,7 +2173,7 @@ export class LitNodeClientNodeJs extends LitCore {
 
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
-    let hashOfConditions: ArrayBuffer | undefined =
+    const hashOfConditions: ArrayBuffer | undefined =
       await this.getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
@@ -2239,14 +2214,13 @@ export class LitNodeClientNodeJs extends LitCore {
 
     log('identityParam', identityParam);
 
-    let requestId;
     // ========== Get Network Signature ==========
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       const nodePromises = this.getNodePromises((url: string) => {
         // -- if session key is available, use it
-        let authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+        const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
         return this.getSigningShareForDecryption(
           url,
@@ -2283,14 +2257,14 @@ export class LitNodeClientNodeJs extends LitCore {
       this.config.retryTolerance
     );
 
-    requestId = res.requestId;
+    const requestId = res.requestId;
 
     // -- case: promises rejected
     if (res.success === false) {
-      this._throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
-    const signatureShares: Array<NodeBlsSigningShare> = (
+    const signatureShares: NodeBlsSigningShare[] = (
       res as SuccessNodePromises<NodeBlsSigningShare>
     ).values;
 
@@ -2312,7 +2286,7 @@ export class LitNodeClientNodeJs extends LitCore {
   ): Promise<LitAccessControlConditionResource> => {
     // ========== Hashing Access Control Conditions =========
     // hash the access control conditions
-    let hashOfConditions: ArrayBuffer | undefined =
+    const hashOfConditions: ArrayBuffer | undefined =
       await this.getHashedAccessControlConditions(params);
 
     if (!hashOfConditions) {
@@ -2430,13 +2404,13 @@ export class LitNodeClientNodeJs extends LitCore {
       const responses = await this.handleNodePromises(
         nodePromises,
         id,
-        this.config.minNodeCount
+        this.connectedNodes.size
       );
 
       return responses;
     };
 
-    let res = await executeWithRetry<
+    const res = await executeWithRetry<
       RejectedNodePromises | SuccessNodePromises<any>
     >(
       wrapper,
@@ -2495,8 +2469,8 @@ export class LitNodeClientNodeJs extends LitCore {
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     // Try to get it from local storage, if not generates one~
-    let sessionKey = params.sessionKey ?? this.getSessionKey();
-    let sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
+    const sessionKey = params.sessionKey ?? this.getSessionKey();
+    const sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
     const pkpEthAddress = (function () {
@@ -2507,7 +2481,7 @@ export class LitNodeClientNodeJs extends LitCore {
     })();
 
     let siwe_statement = 'Lit Protocol PKP session signature';
-    if (!!params.statement) {
+    if (params.statement) {
       siwe_statement += ' ' + params.statement;
     }
 
@@ -2533,7 +2507,7 @@ export class LitNodeClientNodeJs extends LitCore {
       });
 
       // regular siwe
-      siweMessage = new siweNormal.SiweMessage({
+      siweMessage = new siwe.SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
         address: pkpEthAddress,
@@ -2549,7 +2523,7 @@ export class LitNodeClientNodeJs extends LitCore {
       siweMessage = recapObject.addToSiweMessage(siweMessage);
     } else {
       // lit-siwe (NOT regular siwe)
-      siweMessage = new SiweMessage({
+      siweMessage = new siwe.SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
         address: pkpEthAddress,
@@ -2563,13 +2537,13 @@ export class LitNodeClientNodeJs extends LitCore {
       });
     }
 
-    let siweMessageStr: string = (siweMessage as SiweMessage).prepareMessage();
+    const siweMessageStr: string = (
+      siweMessage as siwe.SiweMessage
+    ).prepareMessage();
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
-    let requestId;
-
-    let body = {
+    const body = {
       sessionKey: sessionKeyUri,
       authMethods: params.authMethods,
       pkpPublicKey: params.pkpPublicKey,
@@ -2578,7 +2552,7 @@ export class LitNodeClientNodeJs extends LitCore {
       siweMessage: siweMessageStr,
     };
 
-    let wrapper = async (
+    const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       logWithRequestId(id, 'signSessionKey body', body);
@@ -2598,7 +2572,7 @@ export class LitNodeClientNodeJs extends LitCore {
         res = await this.handleNodePromises(
           nodePromises,
           id,
-          this.config.minNodeCount
+          this.connectedNodes.size
         );
         log('signSessionKey node promises:', res);
       } catch (e) {
@@ -2607,7 +2581,7 @@ export class LitNodeClientNodeJs extends LitCore {
       return res;
     };
 
-    let res = await executeWithRetry<
+    const res = await executeWithRetry<
       RejectedNodePromises | SuccessNodePromises<any>
     >(
       wrapper,
@@ -2619,12 +2593,12 @@ export class LitNodeClientNodeJs extends LitCore {
       this.config.retryTolerance
     );
 
-    requestId = res.requestId;
+    const requestId = res.requestId;
     logWithRequestId(requestId, 'handleNodePromises res:', res);
 
     // -- case: promises rejected
     if (!this.#isSuccessNodePromises(res)) {
-      this._throwNodeError(res as RejectedNodePromises);
+      this._throwNodeError(res as RejectedNodePromises, requestId);
       return {} as SignSessionKeyResponse;
     }
 
@@ -2763,9 +2737,9 @@ export class LitNodeClientNodeJs extends LitCore {
   ): Promise<SessionSigsMap> => {
     // -- prepare
     // Try to get it from local storage, if not generates one~
-    let sessionKey = params.sessionKey ?? this.getSessionKey();
+    const sessionKey = params.sessionKey ?? this.getSessionKey();
 
-    let sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
+    const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
 
     // First get or generate the session capability object for the specified resources.
     const sessionCapabilityObject = params.sessionCapabilityObject
@@ -2773,7 +2747,7 @@ export class LitNodeClientNodeJs extends LitCore {
       : await this.generateSessionCapabilityObjectWithWildcards(
           params.resourceAbilityRequests.map((r) => r.resource)
         );
-    let expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
+    const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
       throwError({
@@ -2782,7 +2756,7 @@ export class LitNodeClientNodeJs extends LitCore {
         errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
       });
     }
-    let nonce = this.latestBlockhash!;
+    const nonce = this.latestBlockhash!;
 
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({
@@ -2795,7 +2769,7 @@ export class LitNodeClientNodeJs extends LitCore {
       nonce,
     });
 
-    let needToResignSessionKey = await this.checkNeedToResignSessionKey({
+    const needToResignSessionKey = await this.checkNeedToResignSessionKey({
       authSig,
       sessionKeyUri,
       resourceAbilityRequests: params.resourceAbilityRequests,
@@ -2840,7 +2814,7 @@ export class LitNodeClientNodeJs extends LitCore {
     // - Let's sign the resources with the session key
     // - 5 minutes is the default expiration for a session signature
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
-    let sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
+    const sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
     const capabilities = params.capacityDelegationAuthSig
       ? [params.capacityDelegationAuthSig, authSig]
@@ -2865,7 +2839,7 @@ export class LitNodeClientNodeJs extends LitCore {
         nodeAddress,
       };
 
-      let signedMessage = JSON.stringify(toSign);
+      const signedMessage = JSON.stringify(toSign);
 
       // sanitise signedMessage, replace //n with /n
       // signedMessage = signedMessage.replaceAll(/\/\/n/g, '/n');
@@ -2878,7 +2852,7 @@ export class LitNodeClientNodeJs extends LitCore {
       );
 
       const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
-      let signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
+      const signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
 
       // log("signature", signature);
       signatures[nodeAddress] = {
@@ -2948,13 +2922,13 @@ export class LitNodeClientNodeJs extends LitCore {
       const responseData = await this.handleNodePromises(
         nodePromises,
         id,
-        this.config.minNodeCount
+        this.connectedNodes.size
       );
 
       return responseData;
     };
 
-    let responseData = await executeWithRetry<
+    const responseData = await executeWithRetry<
       RejectedNodePromises | SuccessNodePromises<any>
     >(
       wrapper,

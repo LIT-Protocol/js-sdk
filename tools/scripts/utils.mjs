@@ -10,7 +10,7 @@ import util from 'util';
 import { toBech32 } from '@cosmjs/encoding';
 import { Secp256k1 } from '@cosmjs/crypto';
 import { rawSecp256k1PubkeyToRawAddress } from '@cosmjs/amino';
-import siwe from 'lit-siwe';
+import siwe from 'siwe';
 import { ethers } from 'ethers';
 
 const eventsEmitter = new events.EventEmitter();
@@ -471,7 +471,8 @@ export const replaceFileContent = async (path, oldContent, newContent) => {
  * 2. prefixPathWithDir('src/index.js', 'components') => './components/src/index.js'
  */
 export const prefixPathWithDir = (path, dirName) => {
-  if (path.slice(0, 2) === './') {
+
+  if (path?.slice(0, 2) === './') {
     return `./${dirName}/${path.slice(2)}`;
   } else {
     return `./${dirName}/${path}`;
@@ -612,23 +613,23 @@ export const log = Object.assign(
 );
 /**
  * testThis - Runs a test and logs the result
- * 
+ *
  * This test relies on the `success` and `fail` functions to either return
  * 200 or 500 status code. If neither is returned, the test it not correctly implemented.
- * 
+ *
  * It DOES not process.exit() on failure, this event is handled by the caller, in this case
  * in the test runner script at ./e2e-nodejs/index.mjs
- * 
+ *
  * if (errorCounter > 0) {
     console.log(`❌ ${errorCounter} test(s) failed`);
     process.exit(1);
   }
   process.exit(0);
- * 
-* This ensures that all tests are run and the user is notified of all failures, and could be integrated
-* with a CI/CD pipeline.
- * @param {*} test 
- * @returns 
+ *
+ * This ensures that all tests are run and the user is notified of all failures, and could be integrated
+ * with a CI/CD pipeline.
+ * @param {*} test
+ * @returns
  */
 export const testThis = async (test) => {
   // calculate the time it takes to run the test
@@ -663,35 +664,20 @@ export const testThis = async (test) => {
   }
 };
 
+/**
+ * testThese - Runs a list of tests using testThis
+ * Check testThis for more details
+ *
+ * @param {*} tests
+ *
+ * @returns
+ */
 export const testThese = async (tests) => {
   console.log(`Running ${tests.length} tests...\n`);
 
   for (const t of tests) {
-    try {
-      console.log(`${t.name}`);
-
-      // calculate the time it takes to run the test
-      const start = Date.now();
-
-      const { status, message } = await t.fn();
-
-      const end = Date.now();
-
-      const time = end - start;
-
-      if (status === 200) {
-        log.green(`\t${message} (${time}ms)`);
-      } else {
-        log.red(`\t${message} (${time}ms)`);
-      }
-
-      console.log();
-    } catch (e) {
-      log.red(`\t${e.message}`);
-    }
+    await testThis(t);
   }
-
-  process.exit();
 };
 
 export function findArg(args, flag) {
