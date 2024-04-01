@@ -396,7 +396,7 @@ export class LitContracts {
       this.network,
       this.customContext?.provider ?? this.provider,
       this.customContext
-    );
+    );  
 
     this.log('resolved contract addresses for: ', this.network, addresses);
     // ----- autogen:init:start  -----
@@ -414,7 +414,7 @@ export class LitContracts {
         this.signer
       ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
     };
-
+    
     this.litTokenContract = {
       read: new ethers.Contract(
         addresses.LITToken.address,
@@ -564,7 +564,7 @@ export class LitContracts {
   public static async getStakingContract(
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
     context?: LitContractContext | LitContractResolverContext,
-    rpcUrl?: string,
+    rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
     rpcUrl = rpcUrl ?? DEFAULT_RPC;
@@ -775,7 +775,7 @@ export class LitContracts {
     const addresses: any = {};
     for (const contract of contractData) {
       switch (contract.name) {
-        case 'Allowlist':
+        case 'AllowList' || 'AllowList':
           addresses.Allowlist = {};
           addresses.Allowlist.address = contract.address;
           addresses.Allowlist.abi = contract.abi ?? AllowlistData.abi;
@@ -850,7 +850,7 @@ export class LitContracts {
     const contract = await LitContracts.getStakingContract(
       network,
       context,
-      rpcUrl,
+      rpcUrl
     );
 
     const minNodeCount = await contract['currentValidatorCountForConsensus']();
@@ -866,7 +866,11 @@ export class LitContracts {
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(network, context, rpcUrl);
+    const contract = await LitContracts.getStakingContract(
+      network,
+      context,
+      rpcUrl
+    );
 
     // Fetch contract data
     const [activeValidators, currentValidatorsCount, kickedValidators] =
