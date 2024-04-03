@@ -2,7 +2,6 @@
 // client side. Anything server side, we will no longer accpet authSig.
 
 import { AuthMethod, LitContractContext } from '@lit-protocol/types';
-import { networkContext } from '../../network-context';
 import {
   LitNodeClient,
 } from '@lit-protocol/lit-node-client';
@@ -11,6 +10,30 @@ import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 import { getHotWalletAuthSig } from './get-hot-wallet-authsig';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { AuthSig } from '@lit-protocol/auth-helpers';
+
+let networkContext;
+
+try {
+  networkContext = require('./networkContext.ts');
+} catch (e) {
+  console.error(`❌ networkContext not found. Please generate it from the node side and place it in the "setup" folder.
+
+To generate networkContext.ts:
+---------------------------
+1. git clone lit-assets
+2. run '~/.foundry/bin/anvil' (make sure it’s using **Lit Protocol Anvil Fork Launching**)
+3. In the './blockchain/contracts' directory, run 'npm run deploy -- --network localchain'
+    - Mostly answers to default, except:
+    
+    ? How many wallets would you like to stake (but not request to join the network)? 0
+    ? How many wallets would you like to stake and request to join the network? 3
+    ? Would you like to deploy with the above configuration? (y/N)  - Yes
+    
+4. You should see a network context file generated at './blockchain/contracts/networkContext.ts'
+5. In the './rust/lit-node' directory, run './scripts/start_dev.sh 3'
+`);
+  process.exit();
+}
 
 // ----- Test Configuration -----
 export const devEnv = async (): Promise<{
