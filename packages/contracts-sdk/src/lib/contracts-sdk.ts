@@ -563,10 +563,11 @@ export class LitContracts {
 
   public static async getStakingContract(
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    const rpcUrl = DEFAULT_RPC;
+    rpcUrl = rpcUrl ?? DEFAULT_RPC;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
@@ -591,6 +592,7 @@ export class LitContracts {
 
       return new ethers.Contract(address, abi, provider);
     } else {
+
       // if we have contract context then we determine if there exists a `resolverAddres`
       // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
       if (!context.resolverAddress) {
@@ -774,7 +776,7 @@ export class LitContracts {
     const addresses: any = {};
     for (const contract of contractData) {
       switch (contract.name) {
-        case 'Allowlist':
+        case 'AllowList' || 'AllowList':
           addresses.Allowlist = {};
           addresses.Allowlist.address = contract.address;
           addresses.Allowlist.abi = contract.abi ?? AllowlistData.abi;
@@ -843,9 +845,14 @@ export class LitContracts {
 
   public static getMinNodeCount = async (
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
   ) => {
-    const contract = await LitContracts.getStakingContract(network, context);
+    const contract = await LitContracts.getStakingContract(
+      network,
+      context,
+      rpcUrl
+    );
 
     const minNodeCount = await contract['currentValidatorCountForConsensus']();
 
@@ -857,9 +864,14 @@ export class LitContracts {
 
   public static getValidators = async (
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
   ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(network, context);
+    const contract = await LitContracts.getStakingContract(
+      network,
+      context,
+      rpcUrl
+    );
 
     // Fetch contract data
     const [activeValidators, currentValidatorsCount, kickedValidators] =
@@ -1048,7 +1060,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     let tokenId;
 
     tokenId = events[0].topics[1];
-    console.warn('tokenId:', tokenId);
 
     let publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
 
@@ -1457,7 +1468,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         let tokenIdFromEvent;
 
         tokenIdFromEvent = events[0].topics[1];
-        console.warn('tokenIdFromEvent:', tokenIdFromEvent);
 
         let publicKey = await this.pkpNftContract.read.getPubkey(
           tokenIdFromEvent

@@ -11,10 +11,10 @@ import { getHotWalletAuthSig } from './get-hot-wallet-authsig';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { AuthSig } from '@lit-protocol/auth-helpers';
 
-let networkContext;
+let data;
 
 try {
-  networkContext = require('./networkContext.ts');
+  data = require('./networkContext.ts');
 } catch (e) {
   console.error(`❌ networkContext not found. Please generate it from the node side and place it in the "setup" folder.
 
@@ -34,6 +34,8 @@ To generate networkContext.ts:
 `);
   process.exit();
 }
+
+const { networkContext } = data;
 
 // ----- Test Configuration -----
 export const devEnv = async (): Promise<{

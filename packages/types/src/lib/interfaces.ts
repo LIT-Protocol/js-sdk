@@ -181,6 +181,7 @@ export interface LitNodeClientConfig {
   storageProvider?: StorageProvider;
   retryTolerance?: RetryTolerance;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
+  rpcUrl?: string | null;
 }
 
 export type CustomNetwork = Pick<
