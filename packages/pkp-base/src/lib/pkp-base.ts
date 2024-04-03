@@ -94,7 +94,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.debug = prop.debug || false;
     this.setLitAction(prop);
     this.setLitActionJsParams(prop.litActionJsParams || {});
-    this.litNodeClient = new LitNodeClient({
+    this.litNodeClient = prop?.litNodeClient ?? new LitNodeClient({
       litNetwork: prop.litNetwork ?? 'cayenne',
       ...(prop.bootstrapUrls &&
         prop.litNetwork === 'custom' && { bootstrapUrls: prop.bootstrapUrls }),
@@ -193,12 +193,18 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    * Initializes the PKPBase instance by connecting to the LIT node.
    */
   async init(): Promise<void | never> {
+
+    if (this.litNodeClient.ready) {
+      this.litNodeClientReady = true;
+      return;
+    }
+
     try {
       await this.litNodeClient.connect();
       this.litNodeClientReady = true;
       this.log('Connected to Lit Node');
-    } catch (e) {
-      return this.throwError('Failed to connect to Lit Node');
+    } catch (e: any) {
+      throw new Error(e);
     }
   }
 
@@ -260,9 +266,9 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.validateAuthContext();
 
     const controllerSessionSigs =
-      (await this.authContext?.client?.getSessionSigs(
+      await this.authContext?.client?.getSessionSigs(
         this.authContext.getSessionSigsProps
-      ));
+      );
 
     const executeJsArgs: ExecuteJsProps = {
       ...(this.litActionCode && { code: this.litActionCode }),
@@ -343,9 +349,9 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.validateAuthContext();
 
     const controllerSessionSigs =
-      (await this.authContext?.client?.getSessionSigs(
+      await this.authContext?.client?.getSessionSigs(
         this.authContext.getSessionSigsProps
-      ));
+      );
 
     try {
       let sig;
