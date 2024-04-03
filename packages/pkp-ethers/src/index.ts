@@ -47,5 +47,4 @@ export {
   sendTransactionHandler,
   sendRawTransactionHandler,
   isEthRequest,
-  SupportedETHSigningMethods,
 };
