@@ -275,6 +275,10 @@ export class LitCore {
     ) {
       log('using custom contracts: ', this.config.contractContext);
 
+      if (!this.config.contractContext) {
+        throw new Error('Contract context is required for custom network');
+      }
+
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork,
         this.config.contractContext
