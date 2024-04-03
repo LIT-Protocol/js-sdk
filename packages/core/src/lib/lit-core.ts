@@ -217,7 +217,6 @@ export class LitCore {
    * @returns {Promise<void>} A promise that resolves when the configuration is updated.
    */
   setNewConfig = async (): Promise<void> => {
-
     const IS_LOCAL_NODE_SDK_DEVELOPMENT =
       this.config.litNetwork === LitNetwork.Custom &&
       this.config.bootstrapUrls.length >= 1 &&
@@ -319,7 +318,7 @@ export class LitCore {
       this.config.minNodeCount = parseInt(minNodeCount, 10);
       this.config.bootstrapUrls = bootstrapUrls;
     } else if (IS_LOCAL_NODE_SDK_DEVELOPMENT) {
-      log("Using custom bootstrap urls:", this.config.bootstrapUrls);
+      log('Using custom bootstrap urls:', this.config.bootstrapUrls);
 
       // const provider = new ethers.providers.JsonRpcProvider(this.config.rpcUrl);
 
@@ -693,10 +692,13 @@ export class LitCore {
     await Promise.race([
       new Promise((_resolve, reject) => {
         timeoutHandle = setTimeout(() => {
-          const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
-            }ms.  Could only connect to ${Object.keys(serverKeys).length} of ${this.config.minNodeCount
-            } required nodes, from ${this.config.bootstrapUrls.length
-            } possible nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+          const msg = `Error: Could not connect to enough nodes after timeout of ${
+            this.config.connectTimeout
+          }ms.  Could only connect to ${Object.keys(serverKeys).length} of ${
+            this.config.minNodeCount
+          } required nodes, from ${
+            this.config.bootstrapUrls.length
+          } possible nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
           try {
             // TODO: Kludge, replace with standard error construction
@@ -944,7 +946,7 @@ export class LitCore {
     data,
     requestId,
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    SendNodeCommand): Promise<any> => {
+  SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
     data = { ...data, epochNumber: this.currentEpochNumber };
 

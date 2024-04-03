@@ -1,0 +1,33 @@
+❗️ SessionSig Signed Message Information:
+--------------------------------
+🔑 Session Key: 964bbe7b3b112369143d7ef239881d1454e0962a402dff14828cf550557a16d2
+✅ Resource: "lit-pkp://*" with the ability of "pkp-signing"
+✅ Resource: "lit-resolvedauthcontext://*" with the ability of "rate-limit-increase-auth"
+✅ Capabilities | found (1)
+❗️ [1] Capability Signed Message Information
+   --------------------------------
+   Action 1:
+   ---------
+    1. (1) 'Threshold': 'Signing' for 'lit-pkp://*'.
+    2. (2) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.
+    3. URI: lit:session:42da720c49840752c5fd79b80133855e368515b5e5578360c6338fdc0bd562f5
+
+   ✅ Resources (from Recap URNs) | found (1):
+   --------------------------------
+      [1]
+{
+  "att": {
+    "lit-pkp://*": {
+      "Threshold/Signing": [
+        {}
+      ]
+    },
+    "lit-resolvedauthcontext://*": {
+      "Auth/Auth": [
+        {}
+      ]
+    }
+  },
+  "prf": []
+}
+   

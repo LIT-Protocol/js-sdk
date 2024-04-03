@@ -396,7 +396,7 @@ export class LitContracts {
       this.network,
       this.customContext?.provider ?? this.provider,
       this.customContext
-    );  
+    );
 
     this.log('resolved contract addresses for: ', this.network, addresses);
     // ----- autogen:init:start  -----
@@ -414,7 +414,7 @@ export class LitContracts {
         this.signer
       ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
     };
-    
+
     this.litTokenContract = {
       read: new ethers.Contract(
         addresses.LITToken.address,
@@ -1059,7 +1059,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     let tokenId;
 
     tokenId = events[0].topics[1];
-    console.warn('tokenId:', tokenId);
 
     let publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
 

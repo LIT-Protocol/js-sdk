@@ -48,16 +48,18 @@ export interface AuthSig {
 export type CosmosWalletType = 'keplr' | 'leap';
 
 export interface AuthCallbackParams {
+  // ----- Required
   // The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
   chain: Chain;
 
+  // The blockhash that the nodes return during the handshake
+  nonce: string;
+
+  // ----- Optionals
   // The statement that describes what the user is signing. If the auth callback
   // is for signing a SIWE message, you MUST add this statement to the end of the SIWE
   // statement.
   statement?: string;
-
-  // The blockhash that the nodes return during the handshake
-  nonce: string;
 
   // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
   resources?: string[];
@@ -534,7 +536,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise { }
+export interface LitNodePromise {}
 
 export interface SendNodeCommand {
   url: string;
@@ -965,8 +967,7 @@ export interface SignSessionKeyProp {
   jsParams?: {
     publicKey: string;
     sigName?: string;
-  },
-
+  };
 }
 
 export interface SignSessionKeyResponse {
@@ -979,6 +980,8 @@ export interface GetSignSessionKeySharesProp {
 }
 
 export interface GetSessionSigsProps {
+  pkpPublicKey?: string;
+
   // When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
   expiration?: any;
 
@@ -1014,10 +1017,10 @@ export interface GetSessionSigsProps {
 
   // rateLimitAuthSig: AuthSig;
 
-  // Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
-  // on both manzano and habanero networks capacity credit proof is required.
-  // see more here: https://developer.litprotocol.com/v3/sdk/capacity-credits
-  capacityDelegationAuthSig?: AuthSig;
+  /**
+   * For delegation of Capacity Credit (aka. capacityDelegationAuthSig previously) - This signature will be checked for proof of capacity credit. on both manzano and habanero networks capacity credit proof is required. see more here: https://developer.litprotocol.com/v3/sdk/capacity-credits
+   */
+  capabilities?: AuthSig[];
 }
 
 export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
@@ -1054,6 +1057,7 @@ export interface GetWalletSigProps {
   expiration: string;
   sessionKeyUri: string;
   nonce: string;
+  resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
 export interface SessionSigningTemplate {
@@ -1115,12 +1119,6 @@ export interface PKPBaseProp {
   rpc?: string;
   rpcs?: RPCUrls;
   controllerAuthSig?: AuthSig;
-  // @deprecated
-  controllerAuthMethods?: AuthMethod[];
-  // @deprecated
-  controllerSessionSigs?: SessionSigs;
-  // @deprecated
-  sessionSigsExpiration?: string;
   authContext?: AuthenticationProps;
   litNetwork?: any;
   debug?: boolean;
@@ -1514,7 +1512,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions { }
+export interface BaseAuthenticateOptions {}
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
@@ -1594,8 +1592,8 @@ export interface MintCapacityCreditsPerKilosecond
 }
 export interface MintCapacityCreditsContext
   extends MintCapacityCreditsPerDay,
-  MintCapacityCreditsPerSecond,
-  MintCapacityCreditsPerKilosecond { }
+    MintCapacityCreditsPerSecond,
+    MintCapacityCreditsPerKilosecond {}
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;

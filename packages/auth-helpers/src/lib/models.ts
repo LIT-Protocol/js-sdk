@@ -66,6 +66,7 @@ export enum LitResourcePrefix {
   PKP = 'lit-pkp',
   RLI = 'lit-ratelimitincrease',
   LitAction = 'lit-litaction',
+  Auth = 'lit-resolvedauthcontext',
 }
 
 export interface ISessionCapabilityObject {
@@ -135,11 +136,6 @@ export interface ISessionCapabilityObject {
    * resource.
    */
   addAllCapabilitiesForResource(litResource: ILitResource): void;
-
-  /**
-   * The AuthSig they insert would own a rate limit nft and can put restrictions on how it * can be used.
-   */
-  addRateLimitAuthSig(authSig: AuthSig): Promise<void>;
 }
 
 export interface ILitResource {
@@ -173,4 +169,5 @@ export interface ILitResource {
 export type LitResourceAbilityRequest = {
   resource: ILitResource;
   ability: LitAbility;
+  data?: any;
 };

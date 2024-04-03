@@ -1,6 +1,6 @@
 export const networkContext = {
   "AllowList": {
-    "address": "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
+    "address": "0x67d269191c92Caf3cD7723F116c85e6E9bf55933",
     "abi": [
       {
         "inputs": [],
@@ -1279,7 +1279,7 @@ export const networkContext = {
     "name": "LITToken"
   },
   "Multisender": {
-    "address": "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
+    "address": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
     "abi": [
       {
         "anonymous": false,
@@ -1388,7 +1388,7 @@ export const networkContext = {
     "name": "Multisender"
   },
   "PKPHelper": {
-    "address": "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+    "address": "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823",
     "abi": [
       {
         "inputs": [
@@ -2237,7 +2237,7 @@ export const networkContext = {
     "name": "PKPHelper"
   },
   "PKPNFT": {
-    "address": "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49",
+    "address": "0xf5059a5D33d5853360D16C683c16e67980206f36",
     "abi": [
       {
         "inputs": [
@@ -3431,7 +3431,7 @@ export const networkContext = {
     "name": "PKPNFT"
   },
   "PKPNFTMetadata": {
-    "address": "0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f",
+    "address": "0x7969c5eD335650692Bc04293B07F5BF2e7A673C0",
     "abi": [
       {
         "inputs": [
@@ -3448,120 +3448,6 @@ export const networkContext = {
         ],
         "stateMutability": "nonpayable",
         "type": "constructor"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "bytes32",
-            "name": "role",
-            "type": "bytes32"
-          },
-          {
-            "indexed": true,
-            "internalType": "bytes32",
-            "name": "previousAdminRole",
-            "type": "bytes32"
-          },
-          {
-            "indexed": true,
-            "internalType": "bytes32",
-            "name": "newAdminRole",
-            "type": "bytes32"
-          }
-        ],
-        "name": "RoleAdminChanged",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "bytes32",
-            "name": "role",
-            "type": "bytes32"
-          },
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "account",
-            "type": "address"
-          },
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "sender",
-            "type": "address"
-          }
-        ],
-        "name": "RoleGranted",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "bytes32",
-            "name": "role",
-            "type": "bytes32"
-          },
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "account",
-            "type": "address"
-          },
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "sender",
-            "type": "address"
-          }
-        ],
-        "name": "RoleRevoked",
-        "type": "event"
-      },
-      {
-        "inputs": [],
-        "name": "ADMIN_ROLE",
-        "outputs": [
-          {
-            "internalType": "bytes32",
-            "name": "",
-            "type": "bytes32"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "DEFAULT_ADMIN_ROLE",
-        "outputs": [
-          {
-            "internalType": "bytes32",
-            "name": "",
-            "type": "bytes32"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "WRITER_ROLE",
-        "outputs": [
-          {
-            "internalType": "bytes32",
-            "name": "",
-            "type": "bytes32"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
       },
       {
         "inputs": [
@@ -3611,67 +3497,6 @@ export const networkContext = {
       {
         "inputs": [
           {
-            "internalType": "bytes32",
-            "name": "role",
-            "type": "bytes32"
-          }
-        ],
-        "name": "getRoleAdmin",
-        "outputs": [
-          {
-            "internalType": "bytes32",
-            "name": "",
-            "type": "bytes32"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "bytes32",
-            "name": "role",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "address",
-            "name": "account",
-            "type": "address"
-          }
-        ],
-        "name": "grantRole",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "bytes32",
-            "name": "role",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "address",
-            "name": "account",
-            "type": "address"
-          }
-        ],
-        "name": "hasRole",
-        "outputs": [
-          {
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
             "internalType": "uint256",
             "name": "tokenId",
             "type": "uint256"
@@ -3691,55 +3516,6 @@ export const networkContext = {
           }
         ],
         "name": "removeUrlForPKP",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "bytes32",
-            "name": "role",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "address",
-            "name": "account",
-            "type": "address"
-          }
-        ],
-        "name": "renounceRole",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "bytes32",
-            "name": "role",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "address",
-            "name": "account",
-            "type": "address"
-          }
-        ],
-        "name": "revokeRole",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "address",
-            "name": "pkpHelperWriterAddress",
-            "type": "address"
-          }
-        ],
-        "name": "setPKPHelperWriterAddress",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -3783,25 +3559,6 @@ export const networkContext = {
       {
         "inputs": [
           {
-            "internalType": "bytes4",
-            "name": "interfaceId",
-            "type": "bytes4"
-          }
-        ],
-        "name": "supportsInterface",
-        "outputs": [
-          {
-            "internalType": "bool",
-            "name": "",
-            "type": "bool"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
             "internalType": "uint256",
             "name": "tokenId",
             "type": "uint256"
@@ -3832,7 +3589,7 @@ export const networkContext = {
     "name": "PKPNFTMetadata"
   },
   "PKPPermissions": {
-    "address": "0x21dF544947ba3E8b3c32561399E88B52Dc8b2823",
+    "address": "0x4C4a2f8c81640e47606d3fd77B353E87Ba015584",
     "abi": [
       {
         "inputs": [
@@ -5098,7 +4855,7 @@ export const networkContext = {
     "name": "PKPPermissions"
   },
   "PubkeyRouter": {
-    "address": "0x82e01223d51Eb87e16A03E24687EDF0F294da6f1",
+    "address": "0x1291Be112d480055DaFd8a610b7d1e203891C274",
     "abi": [
       {
         "inputs": [
@@ -5984,7 +5741,7 @@ export const networkContext = {
     "name": "PubkeyRouter"
   },
   "RateLimitNFT": {
-    "address": "0x809d550fca64d94Bd9F66E60752A544199cfAC3D",
+    "address": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf",
     "abi": [
       {
         "inputs": [
@@ -7373,7 +7130,7 @@ export const networkContext = {
     "name": "RateLimitNFT"
   },
   "Staking": {
-    "address": "0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E",
+    "address": "0xc5a5C42992dECbae36851359345FE25997F5C42d",
     "abi": [
       {
         "inputs": [
@@ -9669,7 +9426,7 @@ export const networkContext = {
     "name": "Staking"
   },
   "StakingBalances": {
-    "address": "0x59b670e9fA9D0A427751Af201D676719a970857b",
+    "address": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
     "abi": [
       {
         "inputs": [

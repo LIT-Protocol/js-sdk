@@ -1,0 +1,6 @@
+export const __dataSessionSig = {
+  sig: "0xc5fa42f46cbcb65d3098eb4c936c0107551d1da3bd635d33148e0600209687d13b548dfd41e20461df4e89ce645fb1bbf11f5ec9d19b4f7c590c13ff06fdfe171c",
+  derivedVia: "web3.eth.personal.sign via Lit PKP",
+  signedMessage: "litprotocol.com wants you to sign in with your Ethereum account:\n0x3245E06B1328b461520c43db3AfF9F13C0ca299f\n\nLit Protocol PKP session signature I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Signing' for 'lit-pkp://*'. (2) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.\n\nURI: lit:session:9fff45163f6c9e870c96a4fca04e10333901b62a269ab15f9a6b80c9d03cfc45\nVersion: 1\nChain ID: 1\nNonce: 0x9f9f576b77323d65875a3c8c4f59f711fa367f34cdebd014e5eb87cc8bdd99f6\nIssued At: 2024-04-03T15:53:11Z\nExpiration Time: 2024-04-03T16:53:34.182Z\nResources:\n- urn:recap:eyJhdHQiOnsibGl0LXBrcDovLyoiOnsiVGhyZXNob2xkL1NpZ25pbmciOlt7fV19LCJsaXQtcmVzb2x2ZWRhdXRoY29udGV4dDovLyoiOnsiQXV0aC9BdXRoIjpbe31dfX0sInByZiI6W119",
+  address: "0x3245E06B1328b461520c43db3AfF9F13C0ca299f",
+};

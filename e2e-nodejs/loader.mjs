@@ -5,6 +5,7 @@ import { BigNumber, ethers } from 'ethers';
 import * as siwe from 'siwe';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
 import fs from 'fs';
+import { networkContext } from './network-context.mjs';
 
 // ==================== ENV Loading ====================
 const network = process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork;
@@ -32,6 +33,11 @@ if (loadEnv) {
   const litNodeClient = new LitJsSdk.LitNodeClient({
     litNetwork: network,
     debug,
+
+    ...(network === 'custom' && {
+      litNetwork: 'custom',
+      context: networkContext,
+    }),
   });
 
   await litNodeClient.connect();

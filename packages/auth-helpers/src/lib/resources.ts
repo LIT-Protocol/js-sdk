@@ -74,6 +74,21 @@ export class LitRLIResource extends LitResourceBase implements ILitResource {
   }
 }
 
+export class LitAuthResource extends LitResourceBase implements ILitResource {
+  public readonly resourcePrefix = LitResourcePrefix.Auth;
+
+  /**
+   * Creates a new LitAuthResource.
+   * @param resource The identifier for the resource.
+   */
+  constructor(resource: string) {
+    super(resource);
+  }
+
+  isValidLitAbility(litAbility: LitAbility): boolean {
+    return litAbility === LitAbility.RateLimitIncreaseAuth;
+  }
+}
 export class LitActionResource extends LitResourceBase implements ILitResource {
   public readonly resourcePrefix = LitResourcePrefix.LitAction;
 

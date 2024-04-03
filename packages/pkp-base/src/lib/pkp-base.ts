@@ -50,9 +50,6 @@ const compressPubKey = (pubKey: string): string => {
 export class PKPBase<T = PKPBaseDefaultParams> {
   rpcs?: RPCUrls;
   controllerAuthSig?: AuthSig;
-  controllerAuthMethods?: AuthMethod[];
-  controllerSessionSigs?: SessionSigs;
-  sessionSigsExpiration?: string;
   authContext?: AuthenticationProps;
 
   uncompressedPubKey!: string;
@@ -90,9 +87,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.rpcs = prop.rpcs;
     this.controllerAuthSig = prop.controllerAuthSig;
-    this.controllerAuthMethods = prop.controllerAuthMethods;
-    this.controllerSessionSigs = prop.controllerSessionSigs;
-    this.sessionSigsExpiration = prop.sessionSigsExpiration;
     this.authContext = prop.authContext;
 
     this.validateAuthContext();
@@ -211,7 +205,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   private validateAuthContext() {
     const providedAuthentications = [
       this.controllerAuthSig,
-      this.controllerSessionSigs,
       this.authContext,
     ].filter(Boolean).length;
 
@@ -221,23 +214,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
         logError('controllerAuthSig is provided');
       }
 
-      if (this.controllerSessionSigs) {
-        logError('controllerSessionSigs is provided');
-      }
-
       if (this.authContext) {
         logError('authContext is provided');
       }
 
       this.throwError(
         'Multiple authentications are defined, can only use one at a time'
-      );
-    }
-
-    // Print deprecation warning for controllerSessionSigs
-    if (this.controllerSessionSigs) {
-      logError(
-        'controllerSessionSigs is deprecated, please use authContext instead'
       );
     }
 
@@ -280,7 +262,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     const controllerSessionSigs =
       (await this.authContext?.client?.getSessionSigs(
         this.authContext.getSessionSigsProps
-      )) || this.controllerSessionSigs;
+      ));
 
     const executeJsArgs: ExecuteJsProps = {
       ...(this.litActionCode && { code: this.litActionCode }),
@@ -363,7 +345,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     const controllerSessionSigs =
       (await this.authContext?.client?.getSessionSigs(
         this.authContext.getSessionSigsProps
-      )) || this.controllerSessionSigs;
+      ));
 
     try {
       let sig;

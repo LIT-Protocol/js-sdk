@@ -1,0 +1,59 @@
+❗️ SessionSig Signed Message Information:
+--------------------------------
+🔑 Session Key: e59e5657716fd57a6dec04026a0fdc6dd3870f5b7bd6c588cff8b3c4154251c1
+✅ Resource: "lit-pkp://*" with the ability of "pkp-signing"
+✅ Capabilities | found (1)
+❗️ [1] Capability Signed Message Information
+   --------------------------------
+   👍 [1] Authorized actions to be performed on my behalf:
+   ---------
+    1. (1) '*': '*' for 'lit-accesscontrolcondition://*'.
+    2. (2) '*': '*' for 'lit-litaction://*'.
+
+   👍 [2] Authorized actions to be performed on my behalf:
+   ---------
+    1. (1) 'Threshold': 'Signing' for 'lit-pkp://*'.
+
+   👍 [3] Authorized actions to be performed on my behalf:
+   ---------
+    1. (1) 'Threshold': 'Signing' for 'lit-pkp://*'.
+    2. (2) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.
+
+   ✅ Resources (from Recap URNs) | found (1):
+   --------------------------------
+      [1]
+{
+  "att": {
+    "lit-pkp://*": {
+      "Threshold/Signing": [
+        {
+          "some_lit_resource": ""
+        }
+      ]
+    },
+    "lit-resolvedauthcontext://*": {
+      "Auth/Auth": [
+        {
+          "auth_context": {
+            "actionIpfsIds": [
+              "QmNZQXmY2VijUPfNrkC6zWykBnEniDouAeUpFi9r6aaqNz"
+            ],
+            "authMethodContexts": [
+              {
+                "appId": "lit",
+                "authMethodType": 1,
+                "expiration": 1712624807,
+                "usedForSignSessionKeyRequest": true,
+                "userId": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+              }
+            ],
+            "authSigAddress": null,
+            "resources": []
+          }
+        }
+      ]
+    }
+  },
+  "prf": []
+}
+   

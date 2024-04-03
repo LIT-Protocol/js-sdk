@@ -203,7 +203,17 @@ export async function main() {
     }
 
     if (!resourceAbilityRequests) {
-      throw new Error('resourceAbilityRequests is required');
+      // throw new Error('resourceAbilityRequests is required');
+      console.log(
+        'resourceAbilityRequests IS SUPPOSED TO BE LOADED AUTOMATICALLY, BUT IT IS NOT LOADED HERE.'
+      );
+
+      resourceAbilityRequests = [
+        {
+          resource: new LitPKPResource('*'),
+          ability: LitAbility.PKPSigning,
+        },
+      ];
     }
 
     const response = await litNodeClient.signSessionKey({

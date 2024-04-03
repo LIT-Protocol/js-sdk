@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch via Bun",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeExecutable": "bun",
+      "args": ["./e2e-nodejs/group-auth-unification/test-auth-unification.ts"],
+      "cwd": "${workspaceFolder}",
+      "protocol": "inspector",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}

@@ -420,8 +420,7 @@ export class LitNodeClientNodeJs
    */
   static async generateSessionCapabilityObjectWithWildcards(
     litResources: ILitResource[],
-    addAllCapabilities?: boolean,
-    rateLimitAuthSig?: AuthSig
+    addAllCapabilities?: boolean
   ): Promise<ISessionCapabilityObject> {
     const sessionCapabilityObject = new RecapSessionCapabilityObject({}, []);
 
@@ -432,11 +431,6 @@ export class LitNodeClientNodeJs
       for (const litResource of litResources) {
         sessionCapabilityObject.addAllCapabilitiesForResource(litResource);
       }
-    }
-
-    if (rateLimitAuthSig) {
-      throw new Error('Not implemented yet.');
-      // await sessionCapabilityObject.addRateLimitAuthSig(rateLimitAuthSig);
     }
 
     return sessionCapabilityObject;
@@ -505,6 +499,7 @@ export class LitNodeClientNodeJs
     expiration,
     sessionKeyUri,
     nonce,
+    resourceAbilityRequests,
   }: GetWalletSigProps): Promise<AuthSig> => {
     let walletSig: AuthSig;
 
@@ -542,6 +537,7 @@ export class LitNodeClientNodeJs
           expiration,
           uri: sessionKeyUri,
           nonce,
+          ...(resourceAbilityRequests && { resourceAbilityRequests }),
         };
 
         log('callback body:', body);
@@ -2484,7 +2480,17 @@ export class LitNodeClientNodeJs
       siwe_statement += ' ' + params.statement;
     }
 
-    let siweMessage;
+    let siweMessage = new siwe.SiweMessage({
+      domain: params?.domain || globalThis.location?.host || 'litprotocol.com',
+      address: pkpEthAddress,
+      statement: siwe_statement,
+      uri: sessionKeyUri,
+      version: '1',
+      chainId: params.chainId ?? 1,
+      expirationTime: _expiration,
+      resources: params.resources,
+      nonce: this.latestBlockhash!,
+    });
 
     if (params?.resourceAbilityRequests) {
       const resources = params.resourceAbilityRequests.map((r) => r.resource);
@@ -2493,7 +2499,11 @@ export class LitNodeClientNodeJs
         await this.generateSessionCapabilityObjectWithWildcards(resources);
 
       params.resourceAbilityRequests.forEach((r) => {
-        recapObject.addCapabilityForResource(r.resource, r.ability);
+        recapObject.addCapabilityForResource(
+          r.resource,
+          r.ability,
+          r.data || {}
+        );
 
         const verified = recapObject.verifyCapabilitiesForResource(
           r.resource,
@@ -2505,35 +2515,7 @@ export class LitNodeClientNodeJs
         }
       });
 
-      // regular siwe
-      siweMessage = new siwe.SiweMessage({
-        domain:
-          params?.domain || globalThis.location?.host || 'litprotocol.com',
-        address: pkpEthAddress,
-        statement: siwe_statement,
-        uri: sessionKeyUri,
-        version: '1',
-        chainId: params.chainId ?? 1,
-        expirationTime: _expiration,
-        resources: params.resources,
-        nonce: this.latestBlockhash!,
-      });
-
       siweMessage = recapObject.addToSiweMessage(siweMessage);
-    } else {
-      // lit-siwe (NOT regular siwe)
-      siweMessage = new siwe.SiweMessage({
-        domain:
-          params?.domain || globalThis.location?.host || 'litprotocol.com',
-        address: pkpEthAddress,
-        statement: siwe_statement,
-        uri: sessionKeyUri,
-        version: '1',
-        chainId: params.chainId ?? 1,
-        expirationTime: _expiration,
-        resources: params.resources,
-        nonce: this.latestBlockhash!,
-      });
     }
 
     const siweMessageStr: string = (
@@ -2557,8 +2539,8 @@ export class LitNodeClientNodeJs
         jsParams: {
           sigName: params.jsParams?.sigName ?? 'auth-unification-sig',
           publicKey: params.jsParams?.publicKey,
-        }
-      })
+        },
+      }),
     };
 
     const wrapper = async (
@@ -2766,7 +2748,11 @@ export class LitNodeClientNodeJs
       });
     }
     const nonce = this.latestBlockhash!;
-
+    console.log('XXX HERE 1');
+    console.log(
+      'params.resourceAbilityRequests:',
+      params.resourceAbilityRequests
+    );
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({
       authNeededCallback: params.authNeededCallback,
@@ -2775,17 +2761,17 @@ export class LitNodeClientNodeJs
       switchChain: params.switchChain,
       expiration: expiration,
       sessionKeyUri: sessionKeyUri,
+      resourceAbilityRequests: params.resourceAbilityRequests,
       nonce,
     });
 
+    console.log('XXX HERE 2');
     const needToResignSessionKey = await this.checkNeedToResignSessionKey({
       authSig,
       sessionKeyUri,
       resourceAbilityRequests: params.resourceAbilityRequests,
     });
-
-    // console.log('XXX needToResignSessionKey:', needToResignSessionKey);
-
+    console.log('XXX HERE 3');
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
       log('need to re-sign session key.  Signing...');
@@ -2802,6 +2788,7 @@ export class LitNodeClientNodeJs
           resourceAbilityRequests: params.resourceAbilityRequests,
         },
       });
+      console.log("needToResignSessionKey authSig :", authSig);
     }
 
     if (
@@ -2825,12 +2812,7 @@ export class LitNodeClientNodeJs
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
     const sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
-    const capabilities = params.capacityDelegationAuthSig
-      ? [params.capacityDelegationAuthSig, authSig]
-      : [authSig];
-    // const capabilities = params.capacityDelegationAuthSig ? [authSig, params.capacityDelegationAuthSig] : [authSig];
-
-    // console.log('capabilities:', capabilities);
+    const capabilities = [authSig, ...(params.capabilities || [])];
 
     const signingTemplate = {
       sessionKey: sessionKey.publicKey,
