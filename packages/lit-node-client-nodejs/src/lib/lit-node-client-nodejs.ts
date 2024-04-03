@@ -2612,6 +2612,9 @@ export class LitNodeClientNodeJs
     const validatedSignedDataList = signedDataList
       .map((signedData: any) => {
         const sessionSig = signedData['sessionSig'];
+        
+        // add backwards compatibility for `sigType` field
+        sessionSig['sigType'] = sessionSig['curveType'];
 
         // each of this field cannot be empty
         const requiredFields = [
@@ -2628,7 +2631,7 @@ export class LitNodeClientNodeJs
         for (const field of requiredFields) {
           if (!sessionSig[field] || sessionSig[field] === '') {
             log(
-              `Invalid signed data. ${field} is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
+              `Invalid signed data. "${field}" is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
             );
             return null;
           }
