@@ -2,9 +2,7 @@
 // client side. Anything server side, we will no longer accpet authSig.
 
 import { AuthMethod, LitContractContext } from '@lit-protocol/types';
-import {
-  LitNodeClient,
-} from '@lit-protocol/lit-node-client';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ethers } from 'ethers';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 import { getHotWalletAuthSig } from './get-hot-wallet-authsig';
@@ -37,20 +35,26 @@ To generate networkContext.ts:
 
 const { networkContext } = data;
 
+export enum ENV {
+  LOCALHOST = 'localhost',
+  HABANERO = 'habanero',
+  MANZANO = 'manzano',
+}
+
 // ----- Test Configuration -----
-export const devEnv = async (): Promise<{
-  litNodeClient: LitNodeClient,
-  litContractsClient: LitContracts,
-  hotWalletAuthSig: AuthSig,
-  hotWalletAuthMethod: AuthMethod,
+export const devEnv = async (env: ENV = ENV.LOCALHOST): Promise<{
+  litNodeClient: LitNodeClient;
+  litContractsClient: LitContracts;
+  hotWalletAuthSig: AuthSig;
+  hotWalletAuthMethod: AuthMethod;
   hotWalletOwnedPkp: {
-    tokenId: string,
-    publicKey: string,
-    ethAddress: string,
-  },
-  lastestBlockhash: string,
-  capacityTokenId: string,
-  capacityDelegationAuthSig: AuthSig,
+    tokenId: string;
+    publicKey: string;
+    ethAddress: string;
+  };
+  lastestBlockhash: string;
+  capacityTokenId: string;
+  capacityDelegationAuthSig: AuthSig;
 }> => {
   const PRIVATE_KEY =
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
@@ -67,14 +71,23 @@ export const devEnv = async (): Promise<{
    * Setting up Lit Node Client
    * ====================================
    */
-  const litNodeClient = new LitNodeClient({
-    litNetwork: 'custom',
-    bootstrapUrls: BOOTSTRAP_URLS,
-    rpcUrl: LIT_RPC_URL,
-    debug: true,
-    checkNodeAttestation: false, // disable node attestation check for local testing
-    contractContext: networkContext as unknown as LitContractContext,
-  });
+  let litNodeClient;
+
+  if (env === ENV.LOCALHOST) {
+    litNodeClient = new LitNodeClient({
+      litNetwork: 'custom',
+      bootstrapUrls: BOOTSTRAP_URLS,
+      rpcUrl: LIT_RPC_URL,
+      debug: true,
+      checkNodeAttestation: false, // disable node attestation check for local testing
+      contractContext: networkContext as unknown as LitContractContext,
+    });
+  } else {
+    litNodeClient = new LitNodeClient({
+      litNetwork: env, // 'habanero' or 'manzano'
+      debug: true,
+    });
+  }
 
   await litNodeClient.connect();
 
@@ -87,7 +100,7 @@ export const devEnv = async (): Promise<{
    * ====================================
    * Setup EOA Wallet using private key, and connects to LIT RPC URL
    * ====================================
-  */
+   */
   const provider = new ethers.providers.JsonRpcProvider(LIT_RPC_URL);
   const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
@@ -95,21 +108,21 @@ export const devEnv = async (): Promise<{
    * ====================================
    * Get nonce from lit node
    * ====================================
-  */
+   */
   const nonce = await litNodeClient.getLatestBlockhash();
 
   /**
    * ====================================
    * Get Hot Wallet Auth Sig
    * ====================================
-  */
+   */
   const hotWalletAuthSig = await getHotWalletAuthSig(wallet, nonce);
 
   /**
    * ====================================
    * Craft an authMethod from the authSig for the eth wallet auth method
    * ====================================
-  */
+   */
   const hotWalletAuthMethod = {
     authMethodType: AuthMethodType.EthWallet,
     accessToken: JSON.stringify(hotWalletAuthSig),
@@ -119,13 +132,22 @@ export const devEnv = async (): Promise<{
    * ====================================
    * Setup contracts-sdk client
    * ====================================
-  */
-  const litContractsClient = new LitContracts({
-    signer: wallet,
-    debug: false,
-    rpc: LIT_RPC_URL, // anvil rpc
-    customContext: networkContext as unknown as LitContractContext,
-  });
+   */
+  let litContractsClient;
+
+  if (env === ENV.LOCALHOST) {
+    litContractsClient = new LitContracts({
+      signer: wallet,
+      debug: false,
+      rpc: LIT_RPC_URL, // anvil rpc
+      customContext: networkContext as unknown as LitContractContext,
+    });
+  } else {
+    litContractsClient = new LitContracts({
+      signer: wallet,
+      debug: false,
+    });
+  }
 
   await litContractsClient.connect();
 
@@ -139,7 +161,7 @@ export const devEnv = async (): Promise<{
    * ====================================
    * Mint a PKP using the hot wallet auth method.
    * ====================================
-  */
+   */
   const mintResFromHotWallet = await litContractsClient.mintWithAuth({
     authMethod: hotWalletAuthMethod,
     scopes: [AuthMethodScope.SignAnything],
@@ -154,11 +176,12 @@ export const devEnv = async (): Promise<{
    * ====================================
    * Mint a Capacity Credits NFT and get a capacity delegation authSig with it
    * ====================================
-  */
-  const { capacityTokenIdStr } = await litContractsClient.mintCapacityCreditsNFT({
-    requestsPerDay: 14400, // 10 request per minute
-    daysUntilUTCMidnightExpiration: 2,
-  });
+   */
+  const { capacityTokenIdStr } =
+    await litContractsClient.mintCapacityCreditsNFT({
+      requestsPerDay: 14400, // 10 request per minute
+      daysUntilUTCMidnightExpiration: 2,
+    });
 
   const { capacityDelegationAuthSig, litResource } =
     await litNodeClient.createCapacityDelegationAuthSig({
@@ -190,5 +213,5 @@ export const devEnv = async (): Promise<{
     lastestBlockhash: nonce,
     capacityTokenId: capacityTokenIdStr,
     capacityDelegationAuthSig,
-  }
-}
+  };
+};
