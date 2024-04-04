@@ -80,7 +80,7 @@ export const getAuthNeededCallback = ({
       chainId: 1,
 
       // TO BE CONFIRMED: We don't need sign this because the node would inject it for us
-      // resourceAbilityRequests: callbackBody.resourceAbilityRequests,
+      resourceAbilityRequests: callbackBody.resourceAbilityRequests,
 
       // -- Auth Unification parameters
       // base 64 encode this
