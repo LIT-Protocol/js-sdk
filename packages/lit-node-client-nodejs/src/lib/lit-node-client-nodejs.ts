@@ -1566,7 +1566,11 @@ export class LitNodeClientNodeJs
     // ===== Better error reporting for jsParams =====
     if (jsParams) {
       if (jsParams.hasOwnProperty('publicKey', 'pubKey')) {
-        throw new Error(`'publicKey' and 'pubKey' are reserved for PKP Public Key. If provided, please remove the '0x' prefix.`);
+        if (jsParams['publicKey'].startsWith('0x') || jsParams['pubKey'].startsWith('0x')) {
+          throw new Error(
+            `'publicKey' and 'pubKey' are reserved for PKP Public Key. If provided, please remove the '0x' prefix.`
+          );
+        }
       }
     }
 
