@@ -7,10 +7,12 @@ import {
 import { ENV, devEnv } from './setup/env-setup';
 import { getAuthNeededCallback } from './auth-needed-callback';
 import * as ethers from 'ethers';
+import { SiweMessage } from 'siwe';
 
 const {
   litNodeClient,
   litContractsClient,
+  hotWallet,
   hotWalletAuthSig,
   hotWalletAuthMethod,
   hotWalletOwnedPkp,
@@ -23,7 +25,7 @@ const {
   debug: true,
 });
 
-const testExecuteJs = async () => {
+const testExecuteJsWithHotWalletAuthSig = async () => {
   const TO_SIGN = ethers.utils.arrayify(
     ethers.utils.keccak256([1, 2, 3, 4, 5])
   );
@@ -46,53 +48,119 @@ const testExecuteJs = async () => {
   console.log('runWithAuthSig:', runWithAuthSig);
 };
 
-await testExecuteJs();
-
-process.exit();
-
-const resourceAbilityRequests = [
-  {
-    resource: new LitActionResource('*'),
-    ability: LitAbility.LitActionExecution,
-  },
-];
 
 // -- get session sigs for the hot wallet
-const authNeededCallback = async (params) => {
-  const response = await litNodeClient.signSessionKey({
-    sessionKey: params.sessionKeyPair,
-    statement: params.statement,
-    authMethods: [hotWalletAuthMethod],
-    pkpPublicKey: hotWalletOwnedPkp.publicKey,
-    expiration: params.expiration,
-    resources: params.resources,
-    chainId: 1,
-    resourceAbilityRequests: resourceAbilityRequests,
+const testGetHotWalletSessionSigs = async () => {
+  const resourceAbilityRequests = [
+    {
+      resource: new LitActionResource('*'),
+      ability: LitAbility.LitActionExecution,
+    },
+
+  ];
+
+  const hotWalletAuthNeededCallback = async ({ resources, expiration, uri }) => {
+
+    const nonce = await litNodeClient.getLatestBlockhash();
+
+    const message = new SiweMessage({
+      domain: 'localhost',
+      address: hotWallet.address,
+      statement: 'This is a test statement.  You can put anything you want here.',
+      uri,
+      version: '1',
+      chainId: 1,
+      expirationTime: expiration,
+      resources,
+      nonce,
+    })
+
+    const toSign = message.prepareMessage();
+    const signature = await hotWallet.signMessage(toSign);
+
+    const authSig = {
+      sig: signature,
+      derivedVia: 'web3.eth.personal.sign',
+      signedMessage: toSign,
+      address: hotWallet.address,
+    };
+
+    return authSig;
+  }
+
+  const sessionSigs = await litNodeClient.getSessionSigs({
+    chain: 'ethereum',
+    resourceAbilityRequests,
+    authNeededCallback: hotWalletAuthNeededCallback as any,
   });
-  return response.authSig;
-};
 
-const sessionSigs = await litNodeClient.getSessionSigs({
-  pkpPublicKey: hotWalletOwnedPkp.publicKey,
-  chain: 'ethereum',
-  resourceAbilityRequests,
-  authNeededCallback: authNeededCallback,
-  capacityDelegationAuthSig,
-});
+  console.log('sessionSigs:', sessionSigs);
 
-console.log('sessionSigs:', sessionSigs);
+  const runWithSessionSigs = await litNodeClient.executeJs({
+    sessionSigs,
+    code: `(async () => {
+      const sigShare = await LitActions.signEcdsa({
+        toSign: dataToSign,
+        publicKey,
+        sigName: "sig",
+      });
+    })();`,
+    jsParams: {
+      dataToSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+      publicKey: hotWalletOwnedPkp.publicKey,
+    },
+  });
 
-// -- execute js
-const TO_SIGN = ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5]));
+  console.log('runWithSessionSigs:', runWithSessionSigs);
+}
 
-const res = await litNodeClient.executeJs({
-  sessionSigs,
-  code: `(async() => {
-    console.log("Testing!");
-  })()`,
-  jsParams: {},
-});
+// await testExecuteJsWithHotWalletAuthSig();
+await testGetHotWalletSessionSigs();
+// process.exit();
 
-console.log('res:', res);
+// const authNeededCallback = async (params) => {
+
+//   console.log("params:", params);
+
+//   // write the params to local file
+//   const fs = require('fs');
+//   fs.writeFileSync('./e2e-nodejs/bun-tests/logs/auth-needed-callback-params.json', JSON.stringify(params, null, 2));
+
+//   const response = await litNodeClient.signSessionKey({
+//     // sessionKey: params.sessionKeyPair,
+//     sessionKeyUri: params.sessionKeyUri,
+//     statement: params.statement,
+//     authMethods: [hotWalletAuthMethod],
+//     pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
+//     expiration: params.expiration,
+//     resources: params.resources,
+//     chainId: 1,
+//     resourceAbilityRequests: resourceAbilityRequests,
+//   });
+//   return response.authSig;
+// };
+
+// const sessionSigs = await litNodeClient.getSessionSigs({
+//   pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
+//   chain: 'ethereum',
+//   resourceAbilityRequests,
+//   authNeededCallback: authNeededCallback,
+//   capacityDelegationAuthSig,
+// });
+
+// console.log('sessionSigs:', sessionSigs);
+
+// // -- execute js
+// const TO_SIGN = ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5]));
+
+// const res = await litNodeClient.executeJs({
+//   sessionSigs,
+//   code: `(async() => {
+//     console.log("Testing!");
+//   })()`,
+//   jsParams: {},
+// });
+
+// console.log('res:', res);
 
 process.exit();

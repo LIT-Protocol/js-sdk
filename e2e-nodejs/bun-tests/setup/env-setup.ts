@@ -65,6 +65,7 @@ export const devEnv = async (
 ): Promise<{
   litNodeClient: LitNodeClient;
   litContractsClient: LitContracts;
+  hotWallet: ethers.Wallet;
   hotWalletOwnedPkp: PKPInfo,
   hotWalletAuthSig: AuthSig;
   hotWalletAuthMethod: AuthMethod;
@@ -221,11 +222,6 @@ export const devEnv = async (
   });
 
   let { pkp: hotWalletAuthMethodOwnedPkp } = mintWithAuthRes;
-  hotWalletAuthMethodOwnedPkp.publicKey = hotWalletAuthMethodOwnedPkp.publicKey.startsWith('0x')
-    ? hotWalletAuthMethodOwnedPkp.publicKey.slice(2)
-    : hotWalletAuthMethodOwnedPkp.publicKey;
-
-  console.log('hotWalletAuthMethodOwnedPkp:', hotWalletAuthMethodOwnedPkp);
 
   console.log(`\n----- Development Environment Configuration -----
 ✅ Chain RPC URL: ${LIT_RPC_URL}
@@ -244,6 +240,7 @@ export const devEnv = async (
   return {
     litNodeClient,
     litContractsClient,
+    hotWallet: wallet,
     hotWalletAuthSig,
     hotWalletOwnedPkp,
     hotWalletAuthMethod,
