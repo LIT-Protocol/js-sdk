@@ -49,6 +49,8 @@ export const devEnv = async (): Promise<{
     ethAddress: string,
   },
   lastestBlockhash: string,
+  capacityTokenId: string,
+  capacityDelegationAuthSig: AuthSig,
 }> => {
   const PRIVATE_KEY =
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
@@ -148,6 +150,23 @@ export const devEnv = async (): Promise<{
     ? hotWalletOwnedPkp.publicKey
     : '0x' + hotWalletOwnedPkp.publicKey;
 
+  /**
+   * ====================================
+   * Mint a Capacity Credits NFT and get a capacity delegation authSig with it
+   * ====================================
+  */
+  const { capacityTokenIdStr } = await litContractsClient.mintCapacityCreditsNFT({
+    requestsPerDay: 14400, // 10 request per minute
+    daysUntilUTCMidnightExpiration: 2,
+  });
+
+  const { capacityDelegationAuthSig, litResource } =
+    await litNodeClient.createCapacityDelegationAuthSig({
+      uses: '1',
+      dAppOwnerWallet: wallet,
+      capacityTokenId: capacityTokenIdStr,
+      delegateeAddresses: [wallet.address],
+    });
 
   console.log(`\n----- Development Environment Configuration -----
 ✅ Chain RPC URL: ${LIT_RPC_URL}
@@ -156,6 +175,8 @@ export const devEnv = async (): Promise<{
 ✅ Hot Wallet Auth Sig: ${JSON.stringify(hotWalletAuthSig)}
 ✅ Hot Wallet Auth Method: ${JSON.stringify(hotWalletAuthMethod)}
 ✅ Hot Wallet Owned PKP: ${JSON.stringify(hotWalletOwnedPkp)}
+✅ Capacity Token ID: ${capacityTokenIdStr}
+✅ Capacity Delegation Auth Sig: ${JSON.stringify(capacityDelegationAuthSig)}
 
 ----- Test Starts Below -----
 `);
@@ -167,5 +188,7 @@ export const devEnv = async (): Promise<{
     hotWalletAuthMethod,
     hotWalletOwnedPkp,
     lastestBlockhash: nonce,
+    capacityTokenId: capacityTokenIdStr,
+    capacityDelegationAuthSig,
   }
 }
