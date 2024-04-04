@@ -2499,8 +2499,20 @@ export class LitNodeClientNodeJs
       siwe_statement += ' ' + params.statement;
     }
 
-    let siweMessage;
+    let siweMessage = new siwe.SiweMessage({
+      domain:
+        params?.domain || globalThis.location?.host || 'litprotocol.com',
+      address: pkpEthAddress,
+      statement: siwe_statement,
+      uri: sessionKeyUri,
+      version: '1',
+      chainId: params.chainId ?? 1,
+      expirationTime: _expiration,
+      resources: params.resources,
+      nonce: this.latestBlockhash!,
+    });
 
+    // context: if resourceAbilityRequests is provided, we want to inject the capabilities to the siwe message
     if (params?.resourceAbilityRequests) {
       const resources = params.resourceAbilityRequests.map((r) => r.resource);
 
@@ -2519,36 +2531,7 @@ export class LitNodeClientNodeJs
           throw new Error('Failed to verify capabilities for resource');
         }
       });
-
-      // regular siwe
-      siweMessage = new siwe.SiweMessage({
-        domain:
-          params?.domain || globalThis.location?.host || 'litprotocol.com',
-        address: pkpEthAddress,
-        statement: siwe_statement,
-        uri: sessionKeyUri,
-        version: '1',
-        chainId: params.chainId ?? 1,
-        expirationTime: _expiration,
-        resources: params.resources,
-        nonce: this.latestBlockhash!,
-      });
-
       siweMessage = recapObject.addToSiweMessage(siweMessage);
-    } else {
-      // lit-siwe (NOT regular siwe)
-      siweMessage = new siwe.SiweMessage({
-        domain:
-          params?.domain || globalThis.location?.host || 'litprotocol.com',
-        address: pkpEthAddress,
-        statement: siwe_statement,
-        uri: sessionKeyUri,
-        version: '1',
-        chainId: params.chainId ?? 1,
-        expirationTime: _expiration,
-        resources: params.resources,
-        nonce: this.latestBlockhash!,
-      });
     }
 
     const siweMessageStr: string = (
