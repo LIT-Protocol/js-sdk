@@ -1814,7 +1814,7 @@ export class LitNodeClientNodeJs
           pubkey: pubKey,
           ...(sigToPassToNode &&
             sigToPassToNode !== undefined && { authSig: sigToPassToNode }),
-          authMethods,
+          ...(authMethods && authMethods.length > 0 && { authMethods }),
         };
 
         logWithRequestId(id, 'reqBody:', reqBody);
