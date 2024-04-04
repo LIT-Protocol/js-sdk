@@ -964,7 +964,7 @@ export interface SignSessionKeyProp {
 
   litActionCode?: string;
 
-  jsParams: {
+  jsParams?: {
     [key: string]: any;
     publicKey: string;
     sigName: string;
