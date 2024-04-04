@@ -2,12 +2,16 @@
 // client side. Anything server side, we will no longer accpet authSig.
 
 import { AuthMethod, LitContractContext } from '@lit-protocol/types';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { ethers } from 'ethers';
-import { AuthMethodScope, AuthMethodType, LIT_CHAINS } from '@lit-protocol/constants';
+import {
+  LitNodeClient,
+  uint8arrayFromString,
+} from '@lit-protocol/lit-node-client';
+import { BigNumber, ethers } from 'ethers';
+import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 import { getHotWalletAuthSig } from './get-hot-wallet-authsig';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { AuthSig } from '@lit-protocol/auth-helpers';
+import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 
 let data;
 
@@ -40,6 +44,11 @@ export enum ENV {
   HABANERO = 'habanero',
   MANZANO = 'manzano',
 }
+export type PKPInfo = {
+  tokenId: string;
+  publicKey: string;
+  ethAddress: string;
+};
 
 // ----- Test Configuration -----
 export const devEnv = async (
@@ -56,13 +65,10 @@ export const devEnv = async (
 ): Promise<{
   litNodeClient: LitNodeClient;
   litContractsClient: LitContracts;
+  hotWalletOwnedPkp: PKPInfo,
   hotWalletAuthSig: AuthSig;
   hotWalletAuthMethod: AuthMethod;
-  hotWalletOwnedPkp: {
-    tokenId: string;
-    publicKey: string;
-    ethAddress: string;
-  };
+  hotWalletAuthMethodOwnedPkp: PKPInfo;
   lastestBlockhash: string;
   capacityTokenId: string;
   capacityDelegationAuthSig: AuthSig;
@@ -82,7 +88,7 @@ export const devEnv = async (
    * Setting up Lit Node Client
    * ====================================
    */
-  let litNodeClient;
+  let litNodeClient: LitNodeClient;
 
   if (env === ENV.LOCALHOST) {
     litNodeClient = new LitNodeClient({
@@ -118,7 +124,7 @@ export const devEnv = async (
   if (env === ENV.LOCALHOST) {
     rpc = LIT_RPC_URL;
   } else {
-    rpc = LIT_CHAINS.chronicleTestnet.rpcUrls[0];
+    rpc = 'https://chain-rpc.litprotocol.com/http';
   }
   const provider = new ethers.providers.JsonRpcProvider(rpc);
   const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
@@ -152,7 +158,7 @@ export const devEnv = async (
    * Setup contracts-sdk client
    * ====================================
    */
-  let litContractsClient;
+  let litContractsClient: LitContracts;
 
   if (env === ENV.LOCALHOST) {
     litContractsClient = new LitContracts({
@@ -179,21 +185,6 @@ export const devEnv = async (
 
   /**
    * ====================================
-   * Mint a PKP using the hot wallet auth method.
-   * ====================================
-   */
-  const mintResFromHotWallet = await litContractsClient.mintWithAuth({
-    authMethod: hotWalletAuthMethod,
-    scopes: [AuthMethodScope.SignAnything],
-  });
-
-  let { pkp: hotWalletOwnedPkp } = mintResFromHotWallet;
-  hotWalletOwnedPkp.publicKey = hotWalletOwnedPkp.publicKey.startsWith('0x')
-    ? hotWalletOwnedPkp.publicKey
-    : '0x' + hotWalletOwnedPkp.publicKey;
-
-  /**
-   * ====================================
    * Mint a Capacity Credits NFT and get a capacity delegation authSig with it
    * ====================================
    */
@@ -211,13 +202,39 @@ export const devEnv = async (
       delegateeAddresses: [wallet.address],
     });
 
+  /**
+   * ====================================
+   * Mint a PKP
+   * ====================================
+   */
+  const mintRes = await litContractsClient.pkpNftContractUtils.write.mint();
+  const hotWalletOwnedPkp = mintRes.pkp;
+
+  /**
+   * ====================================
+   * Mint a PKP using the hot wallet auth method.
+   * ====================================
+   */
+  const mintWithAuthRes = await litContractsClient.mintWithAuth({
+    authMethod: hotWalletAuthMethod,
+    scopes: [AuthMethodScope.SignAnything],
+  });
+
+  let { pkp: hotWalletAuthMethodOwnedPkp } = mintWithAuthRes;
+  hotWalletAuthMethodOwnedPkp.publicKey = hotWalletAuthMethodOwnedPkp.publicKey.startsWith('0x')
+    ? hotWalletAuthMethodOwnedPkp.publicKey.slice(2)
+    : hotWalletAuthMethodOwnedPkp.publicKey;
+
+  console.log('hotWalletAuthMethodOwnedPkp:', hotWalletAuthMethodOwnedPkp);
+
   console.log(`\n----- Development Environment Configuration -----
 ✅ Chain RPC URL: ${LIT_RPC_URL}
 ✅ Bootstrap URLs: ${BOOTSTRAP_URLS}
 ✅ Wallet Address: ${await wallet.getAddress()}
 ✅ Hot Wallet Auth Sig: ${JSON.stringify(hotWalletAuthSig)}
+✅ Hot Wallet Owned PKP ${JSON.stringify(hotWalletOwnedPkp)}
 ✅ Hot Wallet Auth Method: ${JSON.stringify(hotWalletAuthMethod)}
-✅ Hot Wallet Owned PKP: ${JSON.stringify(hotWalletOwnedPkp)}
+✅ Hot Wallet Auth Method Owned PKP: ${JSON.stringify(hotWalletAuthMethodOwnedPkp)}
 ✅ Capacity Token ID: ${capacityTokenIdStr}
 ✅ Capacity Delegation Auth Sig: ${JSON.stringify(capacityDelegationAuthSig)}
 
@@ -228,8 +245,9 @@ export const devEnv = async (
     litNodeClient,
     litContractsClient,
     hotWalletAuthSig,
-    hotWalletAuthMethod,
     hotWalletOwnedPkp,
+    hotWalletAuthMethod,
+    hotWalletAuthMethodOwnedPkp,
     lastestBlockhash: nonce,
     capacityTokenId: capacityTokenIdStr,
     capacityDelegationAuthSig,
