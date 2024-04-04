@@ -124,7 +124,8 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager {
+  implements LitClientSessionManager
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -227,10 +228,10 @@ export class LitNodeClientNodeJs
       ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
       ...(delegateeAddresses
         ? {
-          delegate_to: delegateeAddresses.map((address) =>
-            address.startsWith('0x') ? address.slice(2) : address
-          ),
-        }
+            delegate_to: delegateeAddresses.map((address) =>
+              address.startsWith('0x') ? address.slice(2) : address
+            ),
+          }
         : {}),
       uses: _uses.toString(),
     };
@@ -1563,16 +1564,6 @@ export class LitNodeClientNodeJs
       });
     }
 
-    // ===== Better error reporting for jsParams =====
-    if (jsParams && ('publicKey' in jsParams || 'pubKey' in jsParams)) {
-      // Check both keys for the '0x' prefix and throw an error if found
-      if (jsParams.publicKey?.startsWith('0x') || jsParams.pubKey?.startsWith('0x')) {
-        throw new Error(
-          `'publicKey' and 'pubKey' are reserved for PKP Public Key. If provided, please remove the '0x' prefix.`
-        );
-      }
-    }
-
     const paramsIsSafe = safeParams({
       functionName: 'executeJs',
       params: params,
@@ -2486,12 +2477,15 @@ export class LitNodeClientNodeJs
       sessionKeyUri = params.sessionKeyUri;
     } else {
       // Try to get it from local storage, if not generates one~
-      let sessionKey: SessionKeyPair = params.sessionKey ?? this.getSessionKey();
+      let sessionKey: SessionKeyPair =
+        params.sessionKey ?? this.getSessionKey();
       sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
     }
 
     if (!sessionKeyUri) {
-      throw new Error("sessionKeyUri is not defined. Please provide a sessionKeyUri or a sessionKey.");
+      throw new Error(
+        'sessionKeyUri is not defined. Please provide a sessionKeyUri or a sessionKey.'
+      );
     }
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
@@ -2508,8 +2502,7 @@ export class LitNodeClientNodeJs
     }
 
     let siweMessage = new siwe.SiweMessage({
-      domain:
-        params?.domain || globalThis.location?.host || 'litprotocol.com',
+      domain: params?.domain || globalThis.location?.host || 'litprotocol.com',
       address: pkpEthAddress,
       statement: siwe_statement,
       uri: sessionKeyUri,
@@ -2756,8 +2749,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
