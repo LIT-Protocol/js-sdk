@@ -1564,13 +1564,12 @@ export class LitNodeClientNodeJs
     }
 
     // ===== Better error reporting for jsParams =====
-    if (jsParams) {
-      if (jsParams.hasOwnProperty('publicKey', 'pubKey')) {
-        if (jsParams['publicKey'].startsWith('0x') || jsParams['pubKey'].startsWith('0x')) {
-          throw new Error(
-            `'publicKey' and 'pubKey' are reserved for PKP Public Key. If provided, please remove the '0x' prefix.`
-          );
-        }
+    if (jsParams && ('publicKey' in jsParams || 'pubKey' in jsParams)) {
+      // Check both keys for the '0x' prefix and throw an error if found
+      if (jsParams.publicKey?.startsWith('0x') || jsParams.pubKey?.startsWith('0x')) {
+        throw new Error(
+          `'publicKey' and 'pubKey' are reserved for PKP Public Key. If provided, please remove the '0x' prefix.`
+        );
       }
     }
 
@@ -2510,7 +2509,7 @@ export class LitNodeClientNodeJs
 
     let siweMessage = new siwe.SiweMessage({
       domain:
-      params?.domain || globalThis.location?.host || 'litprotocol.com',
+        params?.domain || globalThis.location?.host || 'litprotocol.com',
       address: pkpEthAddress,
       statement: siwe_statement,
       uri: sessionKeyUri,
