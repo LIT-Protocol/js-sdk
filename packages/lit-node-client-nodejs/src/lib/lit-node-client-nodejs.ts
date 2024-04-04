@@ -543,8 +543,6 @@ export class LitNodeClientNodeJs
           expiration,
           uri: sessionKeyUri,
           nonce,
-
-          // To be confirmed: we probably don't need this field because the node would inject it for us
           ...(resourceAbilityRequests && { resourceAbilityRequests }),
         };
 
@@ -2770,9 +2768,6 @@ export class LitNodeClientNodeJs
       expiration: expiration,
       sessionKeyUri: sessionKeyUri,
       nonce,
-
-
-      // To be confirmed: we probably don't need this field because the node would inject it for us
       resourceAbilityRequests: params.resourceAbilityRequests,
     });
 

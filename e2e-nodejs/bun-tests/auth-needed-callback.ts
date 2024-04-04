@@ -78,8 +78,6 @@ export const getAuthNeededCallback = ({
       expiration: callbackBody.expiration,
       resources: callbackBody.resources,
       chainId: 1,
-
-      // TO BE CONFIRMED: We don't need sign this because the node would inject it for us
       resourceAbilityRequests: callbackBody.resourceAbilityRequests,
 
       // -- Auth Unification parameters
