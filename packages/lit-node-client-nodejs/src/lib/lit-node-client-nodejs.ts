@@ -2637,7 +2637,10 @@ export class LitNodeClientNodeJs
         const sessionSig = signedData['sessionSig'];
 
         // add backwards compatibility for `sigType` field
-        sessionSig['sigType'] = sessionSig['curveType'];
+        // For more context: Previously, the field was called `sigType` but it was changed to `curveType` because we are now using BLS instead of ECDSA.
+        if (sessionSig['curveType'] && !sessionSig['sigType']) {
+          sessionSig['sigType'] = sessionSig['curveType'];
+        }
 
         // each of this field cannot be empty
         const requiredFields = [
