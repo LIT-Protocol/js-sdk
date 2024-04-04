@@ -4,7 +4,7 @@
 import { AuthMethod, LitContractContext } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ethers } from 'ethers';
-import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
+import { AuthMethodScope, AuthMethodType, LIT_CHAINS } from '@lit-protocol/constants';
 import { getHotWalletAuthSig } from './get-hot-wallet-authsig';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { AuthSig } from '@lit-protocol/auth-helpers';
@@ -42,7 +42,18 @@ export enum ENV {
 }
 
 // ----- Test Configuration -----
-export const devEnv = async (env: ENV = ENV.LOCALHOST): Promise<{
+export const devEnv = async (
+  {
+    env,
+    debug,
+  }: {
+    env?: ENV;
+    debug?: boolean;
+  } = {
+      env: ENV.LOCALHOST,
+      debug: true,
+    }
+): Promise<{
   litNodeClient: LitNodeClient;
   litContractsClient: LitContracts;
   hotWalletAuthSig: AuthSig;
@@ -78,14 +89,15 @@ export const devEnv = async (env: ENV = ENV.LOCALHOST): Promise<{
       litNetwork: 'custom',
       bootstrapUrls: BOOTSTRAP_URLS,
       rpcUrl: LIT_RPC_URL,
-      debug: true,
+      debug,
       checkNodeAttestation: false, // disable node attestation check for local testing
       contractContext: networkContext as unknown as LitContractContext,
     });
   } else {
     litNodeClient = new LitNodeClient({
       litNetwork: env, // 'habanero' or 'manzano'
-      debug: true,
+      checkNodeAttestation: true,
+      debug,
     });
   }
 
@@ -101,7 +113,14 @@ export const devEnv = async (env: ENV = ENV.LOCALHOST): Promise<{
    * Setup EOA Wallet using private key, and connects to LIT RPC URL
    * ====================================
    */
-  const provider = new ethers.providers.JsonRpcProvider(LIT_RPC_URL);
+  let rpc: string;
+
+  if (env === ENV.LOCALHOST) {
+    rpc = LIT_RPC_URL;
+  } else {
+    rpc = LIT_CHAINS.chronicleTestnet.rpcUrls[0];
+  }
+  const provider = new ethers.providers.JsonRpcProvider(rpc);
   const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
   /**
@@ -138,14 +157,15 @@ export const devEnv = async (env: ENV = ENV.LOCALHOST): Promise<{
   if (env === ENV.LOCALHOST) {
     litContractsClient = new LitContracts({
       signer: wallet,
-      debug: false,
+      debug,
       rpc: LIT_RPC_URL, // anvil rpc
       customContext: networkContext as unknown as LitContractContext,
     });
   } else {
     litContractsClient = new LitContracts({
       signer: wallet,
-      debug: false,
+      debug,
+      network: env,
     });
   }
 
