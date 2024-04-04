@@ -1563,6 +1563,13 @@ export class LitNodeClientNodeJs
       });
     }
 
+    // ===== Better error reporting for jsParams =====
+    if (jsParams) {
+      if (jsParams.hasOwnProperty('publicKey', 'pubKey')) {
+        throw new Error(`'publicKey' and 'pubKey' are reserved for PKP Public Key. If provided, please remove the '0x' prefix.`);
+      }
+    }
+
     const paramsIsSafe = safeParams({
       functionName: 'executeJs',
       params: params,
@@ -2499,7 +2506,7 @@ export class LitNodeClientNodeJs
 
     let siweMessage = new siwe.SiweMessage({
       domain:
-        params?.domain || globalThis.location?.host || 'litprotocol.com',
+      params?.domain || globalThis.location?.host || 'litprotocol.com',
       address: pkpEthAddress,
       statement: siwe_statement,
       uri: sessionKeyUri,
