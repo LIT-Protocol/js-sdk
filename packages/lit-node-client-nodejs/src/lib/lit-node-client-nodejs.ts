@@ -124,8 +124,7 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
-{
+  implements LitClientSessionManager {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -228,10 +227,10 @@ export class LitNodeClientNodeJs
       ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
       ...(delegateeAddresses
         ? {
-            delegate_to: delegateeAddresses.map((address) =>
-              address.startsWith('0x') ? address.slice(2) : address
-            ),
-          }
+          delegate_to: delegateeAddresses.map((address) =>
+            address.startsWith('0x') ? address.slice(2) : address
+          ),
+        }
         : {}),
       uses: _uses.toString(),
     };
@@ -506,6 +505,7 @@ export class LitNodeClientNodeJs
     expiration,
     sessionKeyUri,
     nonce,
+    resourceAbilityRequests,
   }: GetWalletSigProps): Promise<AuthSig> => {
     let walletSig: AuthSig;
 
@@ -543,6 +543,9 @@ export class LitNodeClientNodeJs
           expiration,
           uri: sessionKeyUri,
           nonce,
+
+          // To be confirmed: we probably don't need this field because the node would inject it for us
+          ...(resourceAbilityRequests && { resourceAbilityRequests }),
         };
 
         log('callback body:', body);
@@ -2468,9 +2471,20 @@ export class LitNodeClientNodeJs
       params.expiration ||
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    // Try to get it from local storage, if not generates one~
-    const sessionKey = params.sessionKey ?? this.getSessionKey();
-    const sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
+    let sessionKeyUri: string;
+
+    // This allow the user to provide a sessionKeyUri directly without using the session key pair
+    if (params?.sessionKeyUri) {
+      sessionKeyUri = params.sessionKeyUri;
+    } else {
+      // Try to get it from local storage, if not generates one~
+      let sessionKey: SessionKeyPair = params.sessionKey ?? this.getSessionKey();
+      sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
+    }
+
+    if (!sessionKeyUri) {
+      throw new Error("sessionKeyUri is not defined. Please provide a sessionKeyUri or a sessionKey.");
+    }
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
     const pkpEthAddress = (function () {
@@ -2621,7 +2635,7 @@ export class LitNodeClientNodeJs
     const validatedSignedDataList = signedDataList
       .map((signedData: any) => {
         const sessionSig = signedData['sessionSig'];
-        
+
         // add backwards compatibility for `sigType` field
         sessionSig['sigType'] = sessionSig['curveType'];
 
@@ -2748,8 +2762,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
@@ -2770,6 +2784,10 @@ export class LitNodeClientNodeJs
       expiration: expiration,
       sessionKeyUri: sessionKeyUri,
       nonce,
+
+
+      // To be confirmed: we probably don't need this field because the node would inject it for us
+      resourceAbilityRequests: params.resourceAbilityRequests,
     });
 
     const needToResignSessionKey = await this.checkNeedToResignSessionKey({

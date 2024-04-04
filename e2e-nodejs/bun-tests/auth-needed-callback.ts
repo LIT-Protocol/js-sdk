@@ -2,10 +2,13 @@ import {
   LitAbility,
   LitActionResource,
   LitPKPResource,
+  LitResourceAbilityRequest,
 } from '@lit-protocol/auth-helpers';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
   AuthCallback,
   AuthCallbackParams,
+  AuthMethod,
   SessionKeyPair,
 } from '@lit-protocol/types';
 
@@ -29,38 +32,55 @@ export const INVALID_SESSION_SIG_LIT_ACTION_CODE = `
 export const getAuthNeededCallback = ({
   litNodeClient,
   authMethod,
-  pkpPublickey,
+  pkp,
   VALID_LIT_ACTION_CODE = true,
+}: {
+  litNodeClient: LitNodeClient,
+  authMethod: AuthMethod,
+  pkp: {
+    tokenId: string,
+    publicKey: string,
+    ethAddress: string,
+  },
+  VALID_LIT_ACTION_CODE?: boolean,
 }) => {
-  const authNeededCallback = async ({
-    expiration,
-    resources,
-    resourceAbilityRequests,
-    statement,
+  const authNeededCallback = async (callbackBody: {
+    chain: string,
+    statement: string,
+    resources: string[], // array of urn:recap:eyJxxx
+    expiration: string,
+    uri: string, // lit:session:xxx
+    nonce: string, // 0x5f...
+    resourceAbilityRequests: LitResourceAbilityRequest[],
   }) => {
     // -- validate
-    if (!expiration) {
+    if (!callbackBody.expiration) {
       throw new Error('expiration is required');
     }
 
-    if (!resources) {
+    if (!callbackBody.resources) {
       throw new Error('resources is required');
     }
 
-    console.log('resourceAbilityRequests:', resourceAbilityRequests);
-    if (!resourceAbilityRequests) {
+    if (!callbackBody.resourceAbilityRequests) {
       throw new Error('❌ resourceAbilityRequests is required');
     }
 
+    if (callbackBody.chain !== 'ethereum') {
+      throw new Error('❌ chain must be ethereum so that chainId is 1');
+    };
+
     const response = await litNodeClient.signSessionKey({
-      // sessionKey: params.sessionKeyPair,
-      statement: statement,
+      sessionKeyUri: callbackBody.uri,
+      statement: callbackBody.statement,
       authMethods: [authMethod],
-      pkpPublicKey: pkpPublickey,
-      expiration: expiration,
-      resources: resources,
+      pkpPublicKey: pkp.publicKey,
+      expiration: callbackBody.expiration,
+      resources: callbackBody.resources,
       chainId: 1,
-      resourceAbilityRequests,
+
+      // TO BE CONFIRMED: We don't need sign this because the node would inject it for us
+      // resourceAbilityRequests: callbackBody.resourceAbilityRequests,
 
       // -- Auth Unification parameters
       // base 64 encode this
@@ -70,7 +90,7 @@ export const getAuthNeededCallback = ({
           : INVALID_SESSION_SIG_LIT_ACTION_CODE
       ).toString('base64'),
       jsParams: {
-        publicKey: pkpPublickey,
+        publicKey: pkp.publicKey,
         sigName: 'unified-auth-sig',
       },
     });
