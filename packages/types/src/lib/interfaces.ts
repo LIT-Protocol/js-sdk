@@ -981,6 +981,8 @@ export interface GetSignSessionKeySharesProp {
 }
 
 export interface GetSessionSigsProps {
+  pkpPublicKey?: string;
+
   // When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
   expiration?: any;
 
@@ -1603,4 +1605,11 @@ export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
   capacityTokenIdStr: string;
+}
+export interface JsExecutionRequestBody {
+  authSig?: AuthSig;
+  code?: string;
+  ipfsId?: string;
+  authMethods?: AuthMethod[];
+  jsParams?: any;
 }

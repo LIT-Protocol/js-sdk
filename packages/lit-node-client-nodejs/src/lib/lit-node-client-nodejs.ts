@@ -79,6 +79,7 @@ import type {
   GetSignedTokenRequest,
   GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
+  JsExecutionRequestBody,
   JsonExecutionRequest,
   JsonPkpSignRequest,
   LitClientSessionManager,
@@ -124,8 +125,7 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
-{
+  implements LitClientSessionManager {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -228,10 +228,10 @@ export class LitNodeClientNodeJs
       ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
       ...(delegateeAddresses
         ? {
-            delegate_to: delegateeAddresses.map((address) =>
-              address.startsWith('0x') ? address.slice(2) : address
-            ),
-          }
+          delegate_to: delegateeAddresses.map((address) =>
+            address.startsWith('0x') ? address.slice(2) : address
+          ),
+        }
         : {}),
       uses: _uses.toString(),
     };
@@ -741,12 +741,12 @@ export class LitNodeClientNodeJs
     if (!authSig) {
       throw new Error('authSig or sessionSig is required');
     }
-    const data: JsonExecutionRequest = {
-      authSig,
-      code,
-      ipfsId,
-      jsParams,
-      authMethods,
+    const data : JsExecutionRequestBody= {
+      ...(authSig ? { authSig } : {}),
+      ...(code ? { code } : {}),
+      ...(ipfsId ? { ipfsId } : {}),
+      ...(authMethods ? { authMethods } : {}),
+      ...(jsParams ? { jsParams } : {}),
     };
 
     const res = await this.sendCommandToNode({
@@ -1608,6 +1608,7 @@ export class LitNodeClientNodeJs
           reqBody.authSig = sigToPassToNode;
 
           const shares = this.getJsExecutionShares(url, reqBody, requestId);
+
           return shares;
         });
         // -- resolve promises
@@ -2493,7 +2494,7 @@ export class LitNodeClientNodeJs
 
       // prefix '0x' if it's not already prefixed
       params.pkpPublicKey = hexPrefixed(params.pkpPublicKey!);
-      
+
       if (params.pkpPublicKey) return computeAddress(params.pkpPublicKey);
 
       // This will be populated by the node, using dummy value for now.
@@ -2753,8 +2754,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
