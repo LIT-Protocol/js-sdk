@@ -40,7 +40,7 @@ const { networkContext } = data;
 // ----- Test Configuration -----
 export const devEnv = async (): Promise<{
   litNodeClient: LitNodeClient,
-  contractsClient: LitContracts,
+  litContractsClient: LitContracts,
   hotWalletAuthSig: AuthSig,
   hotWalletAuthMethod: AuthMethod,
   hotWalletOwnedPkp: {
@@ -48,6 +48,7 @@ export const devEnv = async (): Promise<{
     publicKey: string,
     ethAddress: string,
   },
+  lastestBlockhash: string,
 }> => {
   const PRIVATE_KEY =
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
@@ -59,7 +60,11 @@ export const devEnv = async (): Promise<{
     'http://127.0.0.1:7472',
   ];
 
-  // -- Setup Lit Node Client
+  /**
+   * ====================================
+   * Setting up Lit Node Client
+   * ====================================
+   */
   const litNodeClient = new LitNodeClient({
     litNetwork: 'custom',
     bootstrapUrls: BOOTSTRAP_URLS,
@@ -71,41 +76,69 @@ export const devEnv = async (): Promise<{
 
   await litNodeClient.connect();
 
-  // -- Setup EOA Wallet using private key, and connects to LIT RPC URL
+  if (!litNodeClient.ready) {
+    console.error('❌ litNodeClient not ready');
+    process.exit();
+  }
+
+  /**
+   * ====================================
+   * Setup EOA Wallet using private key, and connects to LIT RPC URL
+   * ====================================
+  */
   const provider = new ethers.providers.JsonRpcProvider(LIT_RPC_URL);
   const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-  console.log(`wallet address: ${await wallet.getAddress()}`);
 
-  // -- Get nonce from lit node
+  /**
+   * ====================================
+   * Get nonce from lit node
+   * ====================================
+  */
   const nonce = await litNodeClient.getLatestBlockhash();
 
-  // -- Get authSig,
+  /**
+   * ====================================
+   * Get Hot Wallet Auth Sig
+   * ====================================
+  */
   const hotWalletAuthSig = await getHotWalletAuthSig(wallet, nonce);
 
-  // --- Craft an authMethod from the authSig for the eth wallet auth method. For eth wallet auth method type, the access token is the authSig. This is different than the other auth methods where the access token might be a google, discord or other auth provider token.
+  /**
+   * ====================================
+   * Craft an authMethod from the authSig for the eth wallet auth method
+   * ====================================
+  */
   const hotWalletAuthMethod = {
     authMethodType: AuthMethodType.EthWallet,
     accessToken: JSON.stringify(hotWalletAuthSig),
   };
 
-  // --- Setup contracts-sdk client
-  const contractsClient = new LitContracts({
+  /**
+   * ====================================
+   * Setup contracts-sdk client
+   * ====================================
+  */
+  const litContractsClient = new LitContracts({
     signer: wallet,
     debug: false,
     rpc: LIT_RPC_URL, // anvil rpc
     customContext: networkContext as unknown as LitContractContext,
   });
 
-  await contractsClient.connect();
+  await litContractsClient.connect();
 
   // (assert) check if contracts-sdk is connected
-  if (!contractsClient.connected) {
-    console.error('❌ contractsClient not connected');
+  if (!litContractsClient.connected) {
+    console.error('❌ litContractsClient not connected');
     process.exit();
   }
 
-  // -- Mint a PKP using the hot wallet auth method.
-  const mintResFromHotWallet = await contractsClient.mintWithAuth({
+  /**
+   * ====================================
+   * Mint a PKP using the hot wallet auth method.
+   * ====================================
+  */
+  const mintResFromHotWallet = await litContractsClient.mintWithAuth({
     authMethod: hotWalletAuthMethod,
     scopes: [AuthMethodScope.SignAnything],
   });
@@ -129,9 +162,10 @@ export const devEnv = async (): Promise<{
 
   return {
     litNodeClient,
-    contractsClient,
+    litContractsClient,
     hotWalletAuthSig,
     hotWalletAuthMethod,
     hotWalletOwnedPkp,
+    lastestBlockhash: nonce,
   }
 }
