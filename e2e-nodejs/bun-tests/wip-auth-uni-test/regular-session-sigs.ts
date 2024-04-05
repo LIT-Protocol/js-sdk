@@ -1,7 +1,7 @@
 // Test command: bun run ./e2e-nodejs/bun-tests/regular-session-sigs.ts
-import { LitAbility, LitPKPResource } from "@lit-protocol/auth-helpers";
-import { devEnv } from "./setup/env-setup";
-import { getAuthNeededCallback } from "./auth-needed-callback";
+import { LitAbility, LitPKPResource } from '@lit-protocol/auth-helpers';
+import { ENV, devEnv } from './setup/env-setup';
+import { getAuthNeededCallback } from './auth-needed-callback';
 import * as ethers from 'ethers';
 
 const {
@@ -10,8 +10,11 @@ const {
   hotWalletAuthSig,
   hotWalletAuthMethod,
   hotWalletOwnedPkp,
-  lastestBlockhash
-} = await devEnv();
+  lastestBlockhash,
+} = await devEnv({
+  env: ENV.HABANERO,
+  debug: true,
+});
 
 const resourceAbilityRequests = [
   {
@@ -21,7 +24,7 @@ const resourceAbilityRequests = [
 ];
 
 const sessionSigs = await litNodeClient.getSessionSigs({
-  chain: "ethereum",
+  chain: 'ethereum',
   resourceAbilityRequests,
   authNeededCallback: getAuthNeededCallback({
     litNodeClient,

@@ -35,23 +35,23 @@ export const getAuthNeededCallback = ({
   pkp,
   VALID_LIT_ACTION_CODE = true,
 }: {
-  litNodeClient: LitNodeClient,
-  authMethod: AuthMethod,
+  litNodeClient: LitNodeClient;
+  authMethod: AuthMethod;
   pkp: {
-    tokenId: string,
-    publicKey: string,
-    ethAddress: string,
-  },
-  VALID_LIT_ACTION_CODE?: boolean,
+    tokenId: string;
+    publicKey: string;
+    ethAddress: string;
+  };
+  VALID_LIT_ACTION_CODE?: boolean;
 }) => {
   const authNeededCallback = async (callbackBody: {
-    chain: string,
-    statement: string,
-    resources: string[], // array of urn:recap:eyJxxx
-    expiration: string,
-    uri: string, // lit:session:xxx
-    nonce: string, // 0x5f...
-    resourceAbilityRequests: LitResourceAbilityRequest[],
+    chain: string;
+    statement: string;
+    resources: string[]; // array of urn:recap:eyJxxx
+    expiration: string;
+    uri: string; // lit:session:xxx
+    nonce: string; // 0x5f...
+    resourceAbilityRequests: LitResourceAbilityRequest[];
   }) => {
     // -- validate
     if (!callbackBody.expiration) {
@@ -68,7 +68,7 @@ export const getAuthNeededCallback = ({
 
     if (callbackBody.chain !== 'ethereum') {
       throw new Error('❌ chain must be ethereum so that chainId is 1');
-    };
+    }
 
     const response = await litNodeClient.signSessionKey({
       sessionKeyUri: callbackBody.uri,
