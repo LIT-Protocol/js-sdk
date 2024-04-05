@@ -29,7 +29,7 @@ const identityParam = new Uint8Array([
 describe('crypto', () => {
   beforeAll(async () => {
     // await blsSdk.initWasmBlsSdk();
-    console.log(init)
+    console.log(init);
     await init();
   });
 

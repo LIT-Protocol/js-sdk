@@ -5,7 +5,6 @@ import {
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-import * as wasm from '@lit-protocol/wasm';
 import {
   EcdsaVariant,
   blsCombine,
@@ -18,7 +17,6 @@ import {
   init,
   sevSnpGetVcekUrl,
   sevSnpVerify,
-  sev
 } from '@lit-protocol/wasm';
 
 import { LIT_ERROR, SIGTYPE } from '@lit-protocol/constants';
@@ -31,8 +29,15 @@ import {
 } from '@lit-protocol/types';
 import { splitSignature } from 'ethers/lib/utils';
 
-console.log(wasm);
-init();
+try {
+  init();
+} catch (e) {
+  throwError({
+    message: 'Wasm module failed to load',
+    errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
+    errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
+  });
+}
 
 /** ---------- Exports ---------- */
 
@@ -56,10 +61,18 @@ export const encrypt = (
   const publicKey = Buffer.from(publicKeyHex, 'hex');
 
   // TODO(cairomassimo): determine G1/G2 based on the public key size
-
-  return Buffer.from(
-    blsEncrypt('Bls12381G2', publicKey, message, identity)
-  ).toString('hex');
+  switch (publicKeyHex.replace('0x', '').length) {
+    case 94:
+      return Buffer.from(
+        blsEncrypt('Bls12381G2', publicKey, message, identity)
+      ).toString('hex');
+    case 192:
+      return Buffer.from(
+        blsEncrypt('Bls12381G1', publicKey, message, identity)
+      ).toString('hex');
+    default:
+      return '';
+  }
 };
 
 /**
@@ -347,11 +360,5 @@ export const checkSevSnpAttestation = async (
   }
 
   // pass base64 encoded report to wasm wrapper
-  return sevSnpVerify.verify_attestation_report_and_check_challenge(
-    report,
-    data,
-    signatures,
-    challenge,
-    vcekCert
-  );
+  return sevSnpVerify(report, data, signatures, challenge, vcekCert);
 };
