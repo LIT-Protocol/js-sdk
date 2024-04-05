@@ -17,7 +17,6 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "paths": {
-      "@lit-protocol/wasm": ["wasm/dist"],
       "@lit-protocol/*": ["packages/*/src"]
     }
   },
