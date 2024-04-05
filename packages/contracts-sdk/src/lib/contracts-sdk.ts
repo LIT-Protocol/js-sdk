@@ -402,18 +402,18 @@ export class LitContracts {
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
 
-    this.allowlistContract = {
-      read: new ethers.Contract(
-        addresses.Allowlist.address,
-        addresses.Allowlist.abi as any,
-        this.provider
-      ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
-      write: new ethers.Contract(
-        addresses.Allowlist.address,
-        addresses.Allowlist.abi as any,
-        this.signer
-      ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
-    };
+    // this.allowlistContract = {
+    //   read: new ethers.Contract(
+    //     addresses.Allowlist.address,
+    //     addresses.Allowlist.abi as any,
+    //     this.provider
+    //   ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
+    //   write: new ethers.Contract(
+    //     addresses.Allowlist.address,
+    //     addresses.Allowlist.abi as any,
+    //     this.signer
+    //   ) as unknown as allowlistContract.Allowlist & allowlistContract.Allowlist,
+    // };
 
     this.litTokenContract = {
       read: new ethers.Contract(
@@ -592,7 +592,6 @@ export class LitContracts {
 
       return new ethers.Contract(address, abi, provider);
     } else {
-
       // if we have contract context then we determine if there exists a `resolverAddres`
       // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
       if (!context.resolverAddress) {
@@ -1053,7 +1052,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     let events = 'events' in receipt ? receipt.events : receipt.logs;
 
-    if (!events) {
+    if (!events || events.length <= 0) {
       throw new Error('No events found in receipt');
     }
 
