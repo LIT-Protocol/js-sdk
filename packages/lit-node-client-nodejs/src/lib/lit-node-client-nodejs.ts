@@ -125,7 +125,8 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager {
+  implements LitClientSessionManager
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -228,10 +229,10 @@ export class LitNodeClientNodeJs
       ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
       ...(delegateeAddresses
         ? {
-          delegate_to: delegateeAddresses.map((address) =>
-            address.startsWith('0x') ? address.slice(2) : address
-          ),
-        }
+            delegate_to: delegateeAddresses.map((address) =>
+              address.startsWith('0x') ? address.slice(2) : address
+            ),
+          }
         : {}),
       uses: _uses.toString(),
     };
@@ -741,7 +742,7 @@ export class LitNodeClientNodeJs
     if (!authSig) {
       throw new Error('authSig or sessionSig is required');
     }
-    const data : JsExecutionRequestBody= {
+    const data: JsExecutionRequestBody = {
       ...(authSig ? { authSig } : {}),
       ...(code ? { code } : {}),
       ...(ipfsId ? { ipfsId } : {}),
@@ -2491,7 +2492,6 @@ export class LitNodeClientNodeJs
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
     const pkpEthAddress = (function () {
-
       // prefix '0x' if it's not already prefixed
       params.pkpPublicKey = hexPrefixed(params.pkpPublicKey!);
 
@@ -2754,8 +2754,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
