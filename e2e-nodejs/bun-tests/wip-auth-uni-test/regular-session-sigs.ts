@@ -1,6 +1,6 @@
 // Test command: bun run ./e2e-nodejs/bun-tests/regular-session-sigs.ts
 import { LitAbility, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { ENV, devEnv } from './setup/env-setup';
+import { ENV, devEnv } from '../setup/env-setup';
 import { getAuthNeededCallback } from './auth-needed-callback';
 import * as ethers from 'ethers';
 
@@ -12,7 +12,7 @@ const {
   hotWalletOwnedPkp,
   lastestBlockhash,
 } = await devEnv({
-  env: ENV.HABANERO,
+  env: ENV.LOCALHOST,
   debug: true,
 });
 

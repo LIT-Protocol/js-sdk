@@ -83,7 +83,7 @@ export async function main() {
   // we will create an delegation auth sig, which internally we will create
   // a recap object, add the resource "lit-ratelimitincrease://{tokenId}" to it, and add it to the siwe
   // message. We will then sign the siwe message with the dApp owner's wallet.
-  const { capacityDelegationAuthSig, litResource } =
+  const { capacityDelegationAuthSig } =
     await litNodeClient.createCapacityDelegationAuthSig({
       uses: '1',
       dAppOwnerWallet: dAppOwnerWallet,
@@ -92,7 +92,6 @@ export async function main() {
     });
 
   console.log('capacityDelegationAuthSig:', capacityDelegationAuthSig);
-  console.log('litResource:', JSON.stringify(litResource));
 
   // ====================================================
   // =                  As an end user                  =
