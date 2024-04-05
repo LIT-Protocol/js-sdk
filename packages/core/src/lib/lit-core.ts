@@ -47,6 +47,7 @@ import type {
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
+  NodeAttestation,
   NodeClientErrorV0,
   NodeClientErrorV1,
   NodeCommandServerKeysResponse,
@@ -616,7 +617,11 @@ export class LitCore {
 
       try {
         // ensure we won't try to use a node with an invalid attestation response
-        await checkSevSnpAttestation(attestation, challenge, url);
+        await checkSevSnpAttestation(
+          attestation as NodeAttestation,
+          challenge,
+          url
+        );
         log(`Lit Node Attestation verified for ${url}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
