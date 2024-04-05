@@ -4,14 +4,16 @@
 import { AuthMethod, LitContractContext } from '@lit-protocol/types';
 import {
   LitNodeClient,
-  uint8arrayFromString,
 } from '@lit-protocol/lit-node-client';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
-import { getHotWalletAuthSig } from './get-hot-wallet-authsig';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { AuthSig } from '@lit-protocol/auth-helpers';
-import { LitAuthClient } from '@lit-protocol/lit-auth-client';
+import {
+  AuthSig,
+  BaseSiweMessage,
+  createSiweMessage,
+  craftAuthSig
+} from '@lit-protocol/auth-helpers';
 
 let data;
 
@@ -66,7 +68,7 @@ export const devEnv = async (
   litNodeClient: LitNodeClient;
   litContractsClient: LitContracts;
   hotWallet: ethers.Wallet;
-  hotWalletOwnedPkp: PKPInfo,
+  hotWalletOwnedPkp: PKPInfo;
   hotWalletAuthSig: AuthSig;
   hotWalletAuthMethod: AuthMethod;
   hotWalletAuthMethodOwnedPkp: PKPInfo;
@@ -142,7 +144,18 @@ export const devEnv = async (
    * Get Hot Wallet Auth Sig
    * ====================================
    */
-  const hotWalletAuthSig = await getHotWalletAuthSig(wallet, nonce);
+
+  console.log("wallet.address:", wallet.address);
+
+  const siweMessage = await createSiweMessage<BaseSiweMessage>({
+    nonce,
+    walletAddress: wallet.address,
+  });
+
+  const hotWalletAuthSig = await craftAuthSig({
+    signer: wallet,
+    toSign: siweMessage,
+  });
 
   /**
    * ====================================
@@ -195,7 +208,7 @@ export const devEnv = async (
       daysUntilUTCMidnightExpiration: 2,
     });
 
-  const { capacityDelegationAuthSig, litResource } =
+  const { capacityDelegationAuthSig } =
     await litNodeClient.createCapacityDelegationAuthSig({
       uses: '1',
       dAppOwnerWallet: wallet,
@@ -230,7 +243,9 @@ export const devEnv = async (
 ✅ Hot Wallet Auth Sig: ${JSON.stringify(hotWalletAuthSig)}
 ✅ Hot Wallet Owned PKP ${JSON.stringify(hotWalletOwnedPkp)}
 ✅ Hot Wallet Auth Method: ${JSON.stringify(hotWalletAuthMethod)}
-✅ Hot Wallet Auth Method Owned PKP: ${JSON.stringify(hotWalletAuthMethodOwnedPkp)}
+✅ Hot Wallet Auth Method Owned PKP: ${JSON.stringify(
+    hotWalletAuthMethodOwnedPkp
+  )}
 ✅ Capacity Token ID: ${capacityTokenIdStr}
 ✅ Capacity Delegation Auth Sig: ${JSON.stringify(capacityDelegationAuthSig)}
 

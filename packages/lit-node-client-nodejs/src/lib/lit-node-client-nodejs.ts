@@ -13,6 +13,9 @@ import {
   RecapSessionCapabilityObject,
   LitRLIResource,
   LitAbility,
+  createSiweMessage,
+  CapacityCreditsFields,
+  craftAuthSig,
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE_IDS,
@@ -119,7 +122,6 @@ interface CapacityCreditsReq {
 
 // TODO: move this to auth-helper for next patch
 interface CapacityCreditsRes {
-  litResource: LitRLIResource;
   capacityDelegationAuthSig: AuthSig;
 }
 
@@ -192,15 +194,6 @@ export class LitNodeClientNodeJs
       await dAppOwnerWallet.getAddress()
     );
 
-    // -- default configuration for siwe message unless there are arguments
-    const _domain = domain ?? 'example.com';
-    const _expiration =
-      expiration ?? new Date(Date.now() + 1000 * 60 * 7).toISOString();
-    const _statement = '' ?? statement;
-
-    // -- default configuration for recap object capability
-    const _uses = uses ?? '1';
-
     // -- if it's not ready yet, then connect
     if (!this.ready) {
       await this.connect();
@@ -211,80 +204,33 @@ export class LitNodeClientNodeJs
       throw new Error('dAppOwnerWallet must exist');
     }
 
-    // -- validate dAppOwnerWallet is an ethers wallet
-    // if (!(dAppOwnerWallet instanceof ethers.Wallet || ethers.Signer)) {
-    //   throw new Error('dAppOwnerWallet must be an ethers wallet');
-    // }
-
-    // -- create LitRLIResource
-    // Note: we have other resources such as LitAccessControlConditionResource, LitPKPResource and LitActionResource)
-    // lit-ratelimitincrease://{tokenId}
-    const litResource = new LitRLIResource(capacityTokenId ?? '*');
-
-    const recapObject = await this.generateSessionCapabilityObjectWithWildcards(
-      [litResource]
-    );
-
-    const capabilities = {
-      ...(capacityTokenId ? { nft_id: [capacityTokenId] } : {}), // Conditionally include nft_id
-      ...(delegateeAddresses
-        ? {
-            delegate_to: delegateeAddresses.map((address) =>
-              address.startsWith('0x') ? address.slice(2) : address
-            ),
-          }
-        : {}),
-      uses: _uses.toString(),
-    };
-
-    recapObject.addCapabilityForResource(
-      litResource,
-      LitAbility.RateLimitIncreaseAuth,
-      capabilities
-    );
-
-    // make sure that the resource is added to the recapObject
-    const verified = recapObject.verifyCapabilitiesForResource(
-      litResource,
-      LitAbility.RateLimitIncreaseAuth
-    );
-
-    // -- validate
-    if (!verified) {
-      throw new Error('Failed to verify capabilities for resource');
-    }
-
     const nonce = this.getLatestBlockhash();
 
-    // -- get auth sig
-    let siweMessage = new siwe.SiweMessage({
-      domain: _domain,
-      address: dAppOwnerWalletAddress,
-      statement: _statement,
-      uri: SIWE_DELEGATION_URI,
-      version: '1',
-      chainId: 1,
+    const siweMessage = await createSiweMessage<CapacityCreditsFields>({
+      litNodeClient: this,
+      walletAddress: dAppOwnerWalletAddress,
       nonce: nonce?.toString(),
-      expirationTime: _expiration,
+
+      // -- default configuration for recap object capability
+      expiration:
+        expiration ?? new Date(Date.now() + 1000 * 60 * 7).toISOString(),
+      domain: domain ?? 'example.com',
+      statement:
+        statement ??
+        'This is a test statement.  You can put anything you want here.',
+
+      // -- capacity delegation specific configuration
+      uses: uses ?? '1',
+      delegateeAddresses: delegateeAddresses,
+      capacityTokenId: capacityTokenId,
     });
 
-    siweMessage = recapObject.addToSiweMessage(siweMessage);
+    const authSig = await craftAuthSig({
+      signer: dAppOwnerWallet,
+      toSign: siweMessage,
+    });
 
-    const messageToSign = siweMessage.prepareMessage();
-
-    let signature = await dAppOwnerWallet.signMessage(messageToSign);
-    // replacing 0x to match the tested working authSig from node
-    signature = signature.replace('0x', '');
-
-    const authSig = {
-      sig: signature,
-      derivedVia: 'web3.eth.personal.sign',
-      signedMessage: messageToSign,
-      address: dAppOwnerWalletAddress.replace('0x', '').toLowerCase(),
-      algo: null, // This is added to match the tested working authSig from node
-    };
-
-    return { litResource, capacityDelegationAuthSig: authSig };
+    return { capacityDelegationAuthSig: authSig };
   };
 
   // ========== Scoped Class Helpers ==========
