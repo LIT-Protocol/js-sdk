@@ -1,0 +1,93 @@
+[package]
+name = "wasm"
+version = "0.1.0"
+edition = "2018"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+
+[dependencies]
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+blsful = { version = "2.5.3", default-features = false, features = ["rust"] }
+bls12_381_plus = "0.8.14"
+base64_light = "0.1"
+getrandom = { version = "0.2", features = ["js"] }
+hex = "0.4"
+serde = "1.0"
+serde_json = "1.0"
+serde_bare = "0.5"
+serde-wasm-bindgen = "0.5"
+
+num-bigint = { version = "0.2.2", features = ["rand"] }
+num-integer = "0.1"
+num-traits = "0.2.15"
+
+elliptic-curve = { version = "0.13.5", features = ["serde"] }
+k256 = { version = "0.13.0", features = [
+  "sha256",
+  "ecdsa",
+  "serde",
+  "ecdsa-core",
+  "expose-field",
+  "hash2curve",
+], optional = false }
+p256 = { version = "0.13", features = [
+  "ecdsa-core",
+  "expose-field",
+  "hash2curve",
+  "sha256",
+  "serde",
+] }
+sha2 = "0.10"
+
+wee_alloc = { version = "0.4.5", optional = true }
+
+console_error_panic_hook = { version = "0.1.7", optional = true }
+wasm-bindgen-futures = "0.4.40"
+js-sys = "0.3.67"
+
+sev = { version = "2.0.2", default-features = false, features = [
+  "snp",
+  "crypto_nossl",
+] }
+rand = "0.8"
+serde_bytes = "0.11.14"
+vsss-rs = "3.3.4"
+frost-core = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-ed25519 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-ed448 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-p256 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-p384 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-redjubjub = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-rerandomized = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-ristretto255 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-secp256k1 = { git = "https://github.com/LIT-Protocol/frost.git" }
+frost-taproot = { git = "https://github.com/LIT-Protocol/frost.git" }
+lit-frost = { git = "https://github.com/LIT-Protocol/lit-frost.git" }
+tsify = { version = "0.4.5", default-features = false, features = ["js"] }
+
+# TODO(cairomassimo): remove branch once merged
+hd-keys-curves = { git = "https://github.com/LIT-Protocol/hd-keys-curves.git", branch = "fix-blsful-default-features-optional", version = "0.2.0", default-features = false }
+
+# TODO(cairomassimo): remove once https://github.com/LIT-Protocol/jubjub/pull/1 is merged
+[patch.'https://github.com/LIT-Protocol/jubjub.git']
+jubjub = { git = "https://github.com/LIT-Protocol/jubjub.git#", branch = "fix-remove-dep-bls12381plus-hashing" }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.34"
+ciborium = "0.2"
+k256 = "0.13"
+rand = "0.8"
+rand_chacha = "0.3"
+digest = "0.10"
+vsss-rs = { version = "3.2", features = ["std"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+
+[package.metadata.wasm-pack.profile.profiling]
+wasm-opt = ['-g', '-O']

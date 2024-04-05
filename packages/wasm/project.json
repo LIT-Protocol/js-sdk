@@ -1,0 +1,44 @@
+{
+  "name": "wasm",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "wasm/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/wasm",
+        "main": "packages/wasm/src/index.ts",
+        "tsConfig": "packages/wasm/tsconfig.lib.json",
+        "assets": ["packages/wasm/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/wasm/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/wasm"],
+      "options": {
+        "jestConfig": "packages/wasm/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "testWatch": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/wasm"],
+      "options": {
+        "jestConfig": "packages/wasm/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
+    }
+  },
+  "tags": []
+}
