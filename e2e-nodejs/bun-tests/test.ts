@@ -1,4 +1,4 @@
-// Test command: bun run ./e2e-nodejs/bun-tests/test-session-sigs.ts
+// Test command: bun run ./e2e-nodejs/bun-tests/test.ts
 import {
   LitAbility,
   LitActionResource,
@@ -9,6 +9,7 @@ import {
 import { devEnv } from './setup/env-setup';
 import * as ethers from 'ethers';
 import { getNetworkFlag, showTests, runTests } from './setup/utils';
+import { getSessionSigReport } from './signed-message-reader';
 
 const devEnvPromise = devEnv({
   env: getNetworkFlag(),
@@ -70,6 +71,7 @@ const tests = {
     });
 
     console.log('sessionSigs:', sessionSigs);
+    console.log(getSessionSigReport(sessionSigs[litNodeClient.config.bootstrapUrls[0]]));
 
     return sessionSigs;
   },
