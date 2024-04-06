@@ -1,17 +1,25 @@
-import { ENV } from "./env-setup";
+import { ENV } from './env-setup';
 
 export const getNetworkFlag = (): ENV => {
   const networkArg = process.argv.find((arg) => arg.startsWith('--network='));
 
-  const network: string = networkArg ? networkArg.replace('--network=', '') : 'localhost';
+  const network: string = networkArg
+    ? networkArg.replace('--network=', '')
+    : 'localhost';
 
-  if (network !== ENV.LOCALHOST && network !== ENV.HABANERO && network !== ENV.MANZANO) {
-    console.log('Invalid network argument. Please use --network=localhost, --network=habanero, or --network=manzano');
+  if (
+    network !== ENV.LOCALHOST &&
+    network !== ENV.HABANERO &&
+    network !== ENV.MANZANO
+  ) {
+    console.log(
+      'Invalid network argument. Please use --network=localhost, --network=habanero, or --network=manzano'
+    );
     process.exit();
   }
 
   return network;
-}
+};
 
 // Function to parse command line arguments for filters
 export const getFiltersFlag = (): string[] => {
@@ -32,7 +40,7 @@ export const showTests = (tests): void => {
     Object.entries(tests).forEach(([testName, testFunction], i) => {
       console.log(`${i + 1}. ${testName}`);
     });
-    console.log('\n')
+    console.log('\n');
     process.exit();
   }
 };

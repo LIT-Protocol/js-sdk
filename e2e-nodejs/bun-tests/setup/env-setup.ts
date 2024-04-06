@@ -2,9 +2,7 @@
 // client side. Anything server side, we will no longer accpet authSig.
 
 import { AuthMethod, LitContractContext } from '@lit-protocol/types';
-import {
-  LitNodeClient,
-} from '@lit-protocol/lit-node-client';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ethers } from 'ethers';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
@@ -12,7 +10,7 @@ import {
   AuthSig,
   BaseSiweMessage,
   createSiweMessage,
-  craftAuthSig
+  craftAuthSig,
 } from '@lit-protocol/auth-helpers';
 
 let data;
@@ -61,9 +59,9 @@ export const devEnv = async (
     env?: ENV;
     debug?: boolean;
   } = {
-      env: ENV.LOCALHOST,
-      debug: true,
-    }
+    env: ENV.LOCALHOST,
+    debug: true,
+  }
 ): Promise<{
   litNodeClient: LitNodeClient;
   litContractsClient: LitContracts;
@@ -145,7 +143,7 @@ export const devEnv = async (
    * ====================================
    */
 
-  console.log("wallet.address:", wallet.address);
+  console.log('wallet.address:', wallet.address);
 
   const siweMessage = await createSiweMessage<BaseSiweMessage>({
     nonce,
