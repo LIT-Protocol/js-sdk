@@ -1,12 +1,4 @@
-import { isNode, log } from '@lit-protocol/misc';
 import * as _LitNodeClient from './lib/lit-node-client';
-
-// ==================== Environment ====================
-if (isNode()) {
-  log('Oh hey you are running in Node.js!');
-  const fetch = require('node-fetch');
-  globalThis.fetch = fetch;
-}
 
 const LitNodeClient = _LitNodeClient.LitNodeClient;
 if (!globalThis.LitNodeClient) {
