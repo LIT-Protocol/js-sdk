@@ -4,6 +4,12 @@
   "sourceRoot": "wasm/src",
   "projectType": "library",
   "targets": {
+    "prebuild": {
+      "executor": "nx:run-script",
+      "options": {
+        "script": "rust:build"
+      }
+    },
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],

@@ -51,7 +51,7 @@ export const encrypt = (
 
   // TODO(cairomassimo): determine G1/G2 based on the public key size
   switch (publicKeyHex.replace('0x', '').length) {
-    case 94:
+    case 96:
       return Buffer.from(
         blsEncrypt('Bls12381G2', publicKey, message, identity)
       ).toString('hex');
@@ -239,6 +239,7 @@ export const generateSessionKeyPair = (): SessionKeyPair => {
 };
 
 function doDecrypt(ciphertextBase64: string, signature: Uint8Array) {
+  console.log('signature from encrypt op: ', signature);
   const ciphertext = Buffer.from(ciphertextBase64, 'base64');
   return blsDecrypt('Bls12381G2', ciphertext, signature);
 }

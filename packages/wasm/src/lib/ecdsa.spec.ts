@@ -23,7 +23,6 @@ const signature = {
 };
 
 describe('ECDSA', () => {
-
   it('should combine signatures', () => {
     const [r, s, v] = ecdsaCombine('K256', presignature, signatureShares);
     expect(r).toBeInstanceOf(Uint8Array);
