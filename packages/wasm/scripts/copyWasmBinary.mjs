@@ -4,12 +4,16 @@ const WASM_MODULE_PATH = 'rust/pkg/wasm-internal_bg.wasm';
 const WASM_BINDING_PATH = 'rust/pkg/wasm-internal.js';
 const CHUNK_SIZE = 100;
 const REMOVE_LINES = [
-  ` if (typeof input === 'undefined') {
-    input = new URL('ecdsa_wasm_bg.wasm', import.meta.url);
-  }`,
-  ` if (typeof input === 'string' || (typeof Request === 'function' && input instanceof Request) || (typeof URL === 'function' && input instanceof URL)) {
-    input = fetch(input);
-  }`,
+  `
+    if (typeof input === 'undefined') {
+        input = new URL('wasm-internal_bg.wasm', import.meta.url);
+    }
+`,
+  `
+    if (typeof input === 'string' || (typeof Request === 'function' && input instanceof Request) || (typeof URL === 'function' && input instanceof URL)) {
+        input = fetch(input);
+    }
+`,
 ];
 
 function main() {
@@ -33,6 +37,16 @@ function main() {
 
   bindingModuleString += wasmBindingModule;
 
+  for (const removeItem of REMOVE_LINES) {
+    const regex = new RegExp(
+      removeItem.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'),
+      'g'
+    ); // Escape special characters
+    console.log('escaped string', regex, removeItem);
+    bindingModuleString = bindingModuleString.replace(regex, '');
+  }
+
+  console.log('Writing wasm module');
   fs.writeFileSync(WASM_BINDING_PATH, bindingModuleString);
 }
 
