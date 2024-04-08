@@ -12,6 +12,10 @@ export interface CapacityCreditsFields extends BaseSiweMessage {
 export const createCapacityDelegationRecapObject = async (
   params: CapacityCreditsFields
 ) => {
+  if (!params.litNodeClient) {
+    throw new Error('litNodeClient is required');
+  }
+
   const uses = params.uses ?? '1';
   const litResource = new LitRLIResource(params.capacityTokenId ?? '*');
 
