@@ -42,7 +42,6 @@ const optionMaps = new Map([
   ['--switch', () => switchFunc()],
   ['--dev', () => devFunc()],
   ['--watch', () => watchFunc()],
-  ['--polyfills', () => polyfillsFunc()],
   ['--comment', () => commentFunc()],
   ['--remove-local-dev', () => removeLocalDevFunc()],
   ['--setup-local-dev', () => setupLocalDevFunc()],
@@ -385,7 +384,7 @@ async function findFunc() {
     greenLog(
       `
         Usage: node tools/scripts/tools.mjs --find [option]
-            [option]: 
+            [option]:
                 --imports: find all imports from a directory
     `,
       true
@@ -471,7 +470,6 @@ async function buildFunc() {
     await childRunCommand(`yarn gen:html`);
     await childRunCommand(`yarn gen:react`);
     await childRunCommand(`yarn gen:nodejs`);
-    await childRunCommand(`yarn tools --polyfills ${TARGET}`);
   }
 
   if (BUILD_TYPE === '--packages') {
@@ -500,14 +498,7 @@ async function buildFunc() {
     spawnListener(command, {
       onDone: () => {
         console.log('Done!');
-
-        // spawnListener(command, {
-        //   onDone: async () => {
-        //     console.log("Done!");
-        //     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
         exit();
-        //   }
-        // })
       },
     });
   }
@@ -950,7 +941,6 @@ async function watchFunc() {
       childRunCommand(
         `nodemon --watch packages/${TARGET} --ext js,ts --exec "yarn tools --build --target ${TARGET}"`
       );
-      // spawnListener(`yarn tools --polyfills lit-node-client`);
     }
   }
 }
@@ -1006,45 +996,6 @@ async function checkFunc() {
   process.exit(0);
 }
 
-async function polyfillsFunc() {
-  const PROJECT_NAME = args[1];
-
-  if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
-    greenLog(
-      `
-        Usage: node tools/scripts/tools.mjs --polyfills [project]
-            [project]: the project to add polyfills to
-        `,
-      true
-    );
-
-    exit();
-  }
-
-  try {
-    const polyfill = await readFile(`packages/${PROJECT_NAME}/polyfills.js`);
-
-    const buildIndexJsPath = `dist/packages/${PROJECT_NAME}/src/index.js`;
-    const builtIndexJs = await readFile(buildIndexJsPath);
-
-    const newBuiltIndexJs = replaceAutogen({
-      oldContent: builtIndexJs,
-      startsWith: '// ----- autogen:polyfills:start  -----',
-      endsWith: '// ----- autogen:polyfills:end  -----',
-      newContent: polyfill,
-    });
-
-    await writeFile(buildIndexJsPath, newBuiltIndexJs);
-
-    greenLog('✅ Polyfills injected into index.js');
-  } catch (e) {
-    yellowLog(
-      `No packages/${PROJECT_NAME}/polyfills.js found for ` + PROJECT_NAME
-    );
-  }
-  exit();
-}
-
 async function commentFunc() {
   const C = args[1] ?? '=';
 
@@ -1077,7 +1028,7 @@ async function commentFunc() {
   console.log(
     `
 // ${line}${up.join('')}${line}
-//          ${MESSAGE}                                    
+//          ${MESSAGE}
 // ${line}${down.join('')}${line}
     `
   );

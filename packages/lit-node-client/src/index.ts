@@ -16,7 +16,3 @@ export {
 } from '@lit-protocol/auth-browser';
 
 export * from '@lit-protocol/lit-node-client-nodejs';
-
-// ----- autogen:polyfills:start  -----
-//
-// ----- autogen:polyfills:end  -----

@@ -1,7 +1,3 @@
-// ----- autogen:polyfills:start  -----
-//
-// ----- autogen:polyfills:end  -----
-
 import {
   uint8arrayFromString,
   uint8arrayToString,
