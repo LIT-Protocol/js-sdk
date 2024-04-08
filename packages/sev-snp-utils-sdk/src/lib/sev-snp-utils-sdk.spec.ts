@@ -1,13 +1,6 @@
-// @ts-nocheck
-import { TextEncoder, TextDecoder } from 'util';
-import * as fetch from 'node-fetch';
-
-global.TextEncoder = TextEncoder;
-// @ts-ignore
-global.TextDecoder = TextDecoder;
+import fetch from 'cross-fetch';
 
 import * as sevSnpUtilsSdk from './sev-snp-utils-sdk';
-import { uint8arrayFromString } from '../../../uint8arrays/src/lib/uint8arrays';
 
 // a valid vcek url returned by the get_vcek_url function run on the VALID_REPORT below
 const VALID_REPORT_VCEK_URL =
@@ -39,7 +32,7 @@ describe('sevSnpUtilsSdk', () => {
     await sevSnpUtilsSdk.initWasmSevSnpUtilsSdk();
     const certData = await fetch(VALID_REPORT_VCEK_URL);
     cert = new Uint8Array(await certData.arrayBuffer());
-  });
+  }, 10000); // Sometimes this step takes more than the default 5000ms as init'ing wasm is a hefty task
 
   it('should verify an attestation report', async () => {
     let verified = false;
@@ -57,10 +50,10 @@ describe('sevSnpUtilsSdk', () => {
   it('should fail to verify a corrupt attestation report', async () => {
     let verified = false;
     try {
-      await sevSnpUtilsSdk.verify_attestation_report(CORRUPT_REPORT);
+      await sevSnpUtilsSdk.verify_attestation_report(CORRUPT_REPORT, cert);
       verified = true;
     } catch (e) {
-      console.error(e);
+      console.info(e);
     }
 
     // assert
@@ -70,10 +63,10 @@ describe('sevSnpUtilsSdk', () => {
   it('should fail to verify an attestation report with bad sigs', async () => {
     let verified = false;
     try {
-      await sevSnpUtilsSdk.verify_attestation_report(BAD_SIG_REPORT);
+      await sevSnpUtilsSdk.verify_attestation_report(BAD_SIG_REPORT, cert);
       verified = true;
     } catch (e) {
-      console.error(e);
+      console.info(e);
     }
 
     // assert
