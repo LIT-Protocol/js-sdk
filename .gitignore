@@ -68,3 +68,6 @@ storage.test.db
 .nx
 
 .yalc
+
+packages/wasm/rust/target
+packages/wasm/rust/pkg
