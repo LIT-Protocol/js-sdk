@@ -1,5 +1,5 @@
 //@ts-ignore source map not found
-import {getModule, initSync} from './pkg/wasm-internal';
+import { getModule, initSync } from './pkg/wasm-internal';
 
 export type {
   BlsVariant,
