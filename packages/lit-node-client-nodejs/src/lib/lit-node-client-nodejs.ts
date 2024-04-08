@@ -715,7 +715,8 @@ export class LitNodeClientNodeJs
     requestId: string
   ) => {
     logWithRequestId(requestId, 'getPkpSigningShares');
-    const urlWithPath = `${url}/web/pkp/sign`;
+    const urlWithPath = `${url}/web/pkp/sign/v1`;
+
     if (!params.authSig) {
       throw new Error('authSig is required');
     }
@@ -2644,7 +2645,7 @@ export class LitNodeClientNodeJs
     requestId: string
   ) => {
     log('getSignSessionKeyShares');
-    const urlWithPath = `${url}/web/sign_session_key`;
+    const urlWithPath = `${url}/web/sign_session_key/v1`;
     return await this.sendCommandToNode({
       url: urlWithPath,
       data: params.body,
