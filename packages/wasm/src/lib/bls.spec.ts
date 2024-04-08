@@ -1,6 +1,6 @@
 // TODO(cairomassimo): move the data into a separate file
 
-import { blsCombine, blsDecrypt, blsEncrypt, blsVerify, init } from '..';
+import { blsCombine, blsDecrypt, blsEncrypt, blsVerify } from '..';
 
 import {
   ciphertextBase64,
@@ -19,10 +19,6 @@ const signature = Buffer.from(signatureHex, 'hex');
 const ciphertext = Buffer.from(ciphertextBase64, 'base64');
 
 describe('BLS', () => {
-  beforeEach(async () => {
-    await init();
-  });
-
   it('should encrypt', () => {
     blsEncrypt('Bls12381G2', publicKey, message, identity);
   });

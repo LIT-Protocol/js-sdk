@@ -1,6 +1,5 @@
 /// <reference types="jest" />
 
-import { ecdsaVerify } from '@lit-protocol/wasm-internal/wasm';
 import { ethers } from 'ethers';
 import {
   messageHex,
@@ -9,7 +8,7 @@ import {
   signatureHex,
   signatureSharesHex,
 } from './ecdsa-data.spec.json';
-import { ecdsaCombine, ecdsaDeriveKey, init } from '..';
+import { ecdsaCombine, ecdsaVerify, ecdsaDeriveKey } from '..';
 
 const publicKey = Buffer.from(publicKeyHex, 'hex');
 const uncompressedPublicKey = ethers.utils.computePublicKey(publicKey);
@@ -24,9 +23,6 @@ const signature = {
 };
 
 describe('ECDSA', () => {
-  beforeEach(async () => {
-    await init();
-  });
 
   it('should combine signatures', () => {
     const [r, s, v] = ecdsaCombine('K256', presignature, signatureShares);

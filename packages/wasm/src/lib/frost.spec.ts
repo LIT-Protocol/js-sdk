@@ -6,17 +6,13 @@ import {
   shares,
   signatureHex,
 } from './frost-data.spec.json';
-import { frostCombine, frostVerify, init } from '..';
+import { frostCombine, frostVerify } from '..';
 
 const message = Buffer.from(messageHex, 'hex');
 const publicKey = Buffer.from(publicKeyHex, 'hex');
 const signature = Buffer.from(signatureHex, 'hex');
 
 describe('FROST', () => {
-  beforeEach(async () => {
-    await init();
-  });
-
   it('should sign and verify', () => {
     const combinedSignature = frostCombine(
       'Ed25519Sha512',

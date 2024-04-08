@@ -1,7 +1,7 @@
 /// <reference types="jest" />
 
 import * as fs from 'node:fs';
-import { init, sevSnpGetVcekUrl, sevSnpVerify } from '..';
+import { sevSnpGetVcekUrl, sevSnpVerify } from '..';
 import {
   attestation,
   challenge as challengeHex,
@@ -20,10 +20,6 @@ const report = Buffer.from(attestation.report, 'base64');
 const vcek = fs.readFileSync(`${__dirname}/sev-snp.spec/vcek.crt`);
 
 describe('wasm sev-snp', () => {
-  beforeEach(async () => {
-    await init();
-  });
-
   it('should get the vcek url', () => {
     expect(sevSnpGetVcekUrl(report)).toEqual(vcekUrl);
   });

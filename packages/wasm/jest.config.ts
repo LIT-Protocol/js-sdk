@@ -1,25 +1,16 @@
-import type { BuildOptions } from 'esbuild';
-import type { Config } from 'jest';
-
-const config: Config = {
-  displayName: '@lit-protocol/wasm-internal',
-  testEnvironment: 'node',
-  moduleFileExtensions: ['ts', 'js', 'html'],
-  transform: {
-    '^.+\\.ts$': [
-      'esbuild-jest-transform',
-      {
-        platform: 'node',
-        loader: {
-          '.wasm': 'binary',
-        },
-        logOverride: {
-          'empty-import-meta': 'silent',
-        },
-      } satisfies BuildOptions,
-    ],
+/* eslint-disable */
+export default {
+  displayName: 'wasm',
+  preset: '../../jest.preset.js',
+  globals: {
+    'ts-jest': {
+      tsconfig: '<rootDir>/tsconfig.spec.json',
+    },
   },
-  cache: false, // using a builder does not play nice with the cache
+  transform: {
+    '^.+\\.[t]s$': 'ts-jest',
+  },
+  moduleFileExtensions: ['ts', 'js', 'html'],
+  coverageDirectory: '../../coverage/packages/wasm',
+  setupFilesAfterEnv: ['../../jest.setup.js'],
 };
-
-export default config;
