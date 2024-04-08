@@ -55,6 +55,7 @@ const optionMaps = new Map([
   ['postBuildIndividual', () => postBuildIndividualFunc()],
   ['fixTsConfig', () => fixTsConfigFunc()],
   ['check', () => checkFunc()],
+  ['--prebuild', () => preBuildFunc()]
 ]);
 
 const setup = () => {
@@ -496,6 +497,59 @@ async function buildFunc() {
       .join(',');
 
     const command = `yarn nx run-many --target=build --exclude=${ignoreList}`;
+
+    spawnListener(command, {
+      onDone: () => {
+        console.log('Done!');
+
+        // spawnListener(command, {
+        //   onDone: async () => {
+        //     console.log("Done!");
+        //     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
+        exit();
+        //   }
+        // })
+      },
+    });
+  }
+}
+
+async function preBuildFunc() {
+  const BUILD_TYPE = args[1];
+
+  if (!BUILD_TYPE || BUILD_TYPE === '' || BUILD_TYPE === '--help') {
+    greenLog(
+      `
+        Usage: node tools/scripts/tools.mjs --prebuild [option]
+            [option]: the option to run
+                --packages: run prebuild in all packages
+    `,
+      true
+    );
+
+    exit();
+  }
+
+  if (BUILD_TYPE === '--packages') {
+    const MODE = args[2];
+    // console.log('MODE:', MODE);
+
+    if (!MODE || MODE === '' || MODE === '--help') {
+      greenLog(
+        `
+            Usage: node tools/scripts/tools.mjs --prebuild --packages [option]
+
+                [option]: the option to run
+            `,
+        true
+      );
+    }
+
+    const ignoreList = (await listDirsRecursive('./apps', false))
+      .map((item) => item.replace('apps/', ''))
+      .join(',');
+
+    const command = `yarn nx run-many --target=prebuild --exclude=${ignoreList}`;
 
     spawnListener(command, {
       onDone: () => {
