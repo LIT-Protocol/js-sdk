@@ -1,7 +1,7 @@
-import { AuthSig, LitResourceAbilityRequest } from "./models";
+import { AuthSig, LitResourceAbilityRequest } from './models';
 
 export function humanizedSiweSignedMessage(signedMessage: string) {
-  let report = ""; // Initialize an empty string to accumulate the report
+  let report = ''; // Initialize an empty string to accumulate the report
 
   try {
     const sessionSig = JSON.parse(signedMessage);
@@ -10,12 +10,14 @@ export function humanizedSiweSignedMessage(signedMessage: string) {
       report += `\x1b[36mSession Key: ${sessionSig.sessionKey}\x1b[0m\n`;
 
       if (sessionSig.resourceAbilityRequests) {
-        sessionSig.resourceAbilityRequests.forEach((request: LitResourceAbilityRequest, index: number) => {
-          report += `\x1b[33mResourceAbilityRequest #${index + 1}:\x1b[0m\n`;
-          report += `  Resource: ${request.resource.resource}\n`;
-          report += `  Resource Prefix: ${request.resource.resourcePrefix}\n`;
-          report += `  Ability: ${request.ability}\n`;
-        });
+        sessionSig.resourceAbilityRequests.forEach(
+          (request: LitResourceAbilityRequest, index: number) => {
+            report += `\x1b[33mResourceAbilityRequest #${index + 1}:\x1b[0m\n`;
+            report += `  Resource: ${request.resource.resource}\n`;
+            report += `  Resource Prefix: ${request.resource.resourcePrefix}\n`;
+            report += `  Ability: ${request.ability}\n`;
+          }
+        );
       }
 
       if (sessionSig.capabilities) {
@@ -25,23 +27,37 @@ export function humanizedSiweSignedMessage(signedMessage: string) {
           report += `  Derived Via: ${capability.derivedVia}\n`;
           report += `  Address: ${capability.address}\n`;
 
-          const signedMessageDetails : any = capability.signedMessage.split('\n');
-
-          const ethereumAccountAddress = signedMessageDetails.find((line: string) => line.startsWith('0x'));
-          const uri = signedMessageDetails.find((line: string) => line.startsWith('URI:')).replace('URI: ', '');
-          const resources = signedMessageDetails.find((line: string) => line.startsWith('- urn:recap:')).replace('- urn:recap:', '').trim();
-
-          const decodedResources = JSON.parse(atob(resources));
-
-          // Extract session key from URI and compare
-          // const uriSessionKey = uri.split(':')[2];
-          // const sessionKeyMatch = uriSessionKey === sessionSig.sessionKey ? "Yes" : "No";
+          const signedMessageDetails: any =
+            capability.signedMessage.split('\n');
 
           report += `  ❗️ Signed Message Details:\n`;
-          report += `     Ethereum Account Address: ${ethereumAccountAddress}\n`;
-          report += `\x1b[36m     URI: ${uri}\x1b[0m\n`;
-          // report += `    Session Key Matches URI: ${sessionKeyMatch}\n`;
-          report += `     Resources: ${JSON.stringify(decodedResources)}\n`;
+
+          try {
+            const ethereumAccountAddress = signedMessageDetails.find(
+              (line: string) => line.startsWith('0x')
+            );
+            const uri = signedMessageDetails
+              .find((line: string) => line.startsWith('URI:'))
+              .replace('URI: ', '');
+            const resources = signedMessageDetails
+              .find((line: string) => line.startsWith('- urn:recap:'))
+              .replace('- urn:recap:', '')
+              .trim();
+
+            const decodedResources = JSON.parse(atob(resources));
+
+            // Extract session key from URI and compare
+            // const uriSessionKey = uri.split(':')[2];
+            // const sessionKeyMatch = uriSessionKey === sessionSig.sessionKey ? "Yes" : "No";
+
+            report += `     Ethereum Account Address: ${ethereumAccountAddress}\n`;
+            report += `\x1b[36m     URI: ${uri}\x1b[0m\n`;
+            // report += `    Session Key Matches URI: ${sessionKeyMatch}\n`;
+            report += `     Resources: ${JSON.stringify(decodedResources)}\n`;
+          } catch (e) {
+            report += `     Error parsing, but here's the signedMessageDetails:\n`;
+            report += `     ${signedMessageDetails}\n`;
+          }
         });
       }
     } else {
@@ -55,13 +71,14 @@ export function humanizedSiweSignedMessage(signedMessage: string) {
 }
 
 export function getSessionSigReport(sessionSig: any) {
-  let report = "\n=========== 📝 Session Sig Report ===========\n";
+  let report = '\n=========== 📝 Session Sig Report ===========\n\n';
   report += `Sig: ${sessionSig.sig}\n`;
   report += `Derived Via: ${sessionSig.derivedVia}\n`;
   report += `\x1b[36mAddress: ${sessionSig.address}\x1b[0m\n`;
   report += `Algo: ${sessionSig.algo}\n\n`;
   report += `❗️ Signed Message Report:\n`;
   report += humanizedSiweSignedMessage(sessionSig.signedMessage);
+  report += '\n=========== Session Sig Completed ===========\n';
 
   return report;
 }
