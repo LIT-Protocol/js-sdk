@@ -14,7 +14,6 @@ import {
   ecdsaCombine,
   ecdsaDeriveKey,
   ecdsaVerify,
-  init,
   sevSnpGetVcekUrl,
   sevSnpVerify,
 } from '@lit-protocol/wasm';
@@ -28,16 +27,6 @@ import {
   SigShare,
 } from '@lit-protocol/types';
 import { splitSignature } from 'ethers/lib/utils';
-
-try {
-  init();
-} catch (e) {
-  throwError({
-    message: 'Wasm module failed to load',
-    errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-    errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
-  });
-}
 
 /** ---------- Exports ---------- */
 

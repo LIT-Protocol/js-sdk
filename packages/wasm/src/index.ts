@@ -1,4 +1,5 @@
-import * as mod from './pkg/wasm-internal';
+//@ts-ignore source map not found
+import {getModule, initSync} from './pkg/wasm-internal';
 
 export type {
   BlsVariant,
@@ -21,8 +22,9 @@ export {
   sevSnpVerify,
 } from './pkg/wasm-internal';
 
-export async function init() {
-  //@ts-ignore module added from our post build script, not in the source mapping
-  let buffer = mod.getModule();
-  mod.initSync(buffer);
-}
+/**
+ * Initalization for our Web Assembly module
+ */
+
+let buffer = getModule();
+initSync(buffer);
