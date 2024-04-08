@@ -108,6 +108,7 @@
     "commander": "^9.4.0",
     "concurrently": "^7.4.0",
     "core-js": "^3.6.5",
+    "cross-fetch": "^3.1.4",
     "crypto-browserify": "^3.12.0",
     "cypress-wait-until": "^1.7.2",
     "cypress-watch-and-reload": "^1.10.3",
@@ -120,15 +121,12 @@
     "find-config": "^1.0.0",
     "g": "^2.0.1",
     "https-browserify": "^1.0.0",
-    "ipfs-http-client": "56.0.0",
-    "ipfs-unixfs-importer": "^12.0.0",
     "jose": "^4.14.4",
     "jszip": "^3.10.1",
     "micromodal": "^0.4.10",
     "multiformats": "^9.7.1",
     "nanoid": "3.3.4",
     "next": "13.3.0",
-    "node-fetch": "^2.6.1",
     "react": "18.0.0",
     "react-dom": "18.0.0",
     "regenerator-runtime": "0.13.7",
@@ -152,6 +150,8 @@
     "@nx/jest": "17.3.0",
     "@nx/js": "17.3.0",
     "@nx/linter": "17.3.0",
+    "@nx/next": "17.3.0",
+    "@nx/node": "17.3.0",
     "@nx/plugin": "17.3.0",
     "@nx/react": "17.3.0",
     "@nx/web": "17.3.0",
@@ -199,9 +199,7 @@
     "ts-jest": "29.1.2",
     "ts-node": "10.9.1",
     "typedoc": "^0.23.10",
-    "typescript": "~4.7.2",
-    "@nx/next": "17.3.0",
-    "@nx/node": "17.3.0"
+    "typescript": "~4.7.2"
   },
   "workspaces": [
     "packages/*"
