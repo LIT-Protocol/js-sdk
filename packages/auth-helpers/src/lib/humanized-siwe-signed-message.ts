@@ -71,14 +71,15 @@ export function humanizedSiweSignedMessage(signedMessage: string) {
 }
 
 export function getSessionSigReport(sessionSig: any) {
-  let report = '\n=========== 📝 Session Sig Report ===========\n\n';
+  let report = '\n=========== 📝 Human-readable session sig 📝 ===========\n\n';
   report += `Sig: ${sessionSig.sig}\n`;
   report += `Derived Via: ${sessionSig.derivedVia}\n`;
   report += `\x1b[36mAddress: ${sessionSig.address}\x1b[0m\n`;
   report += `Algo: ${sessionSig.algo}\n\n`;
   report += `❗️ Signed Message Report:\n`;
   report += humanizedSiweSignedMessage(sessionSig.signedMessage);
-  report += '\n=========== Session Sig Completed ===========\n';
+  report +=
+    '\n=========== 📝 Human-readable session sig completed 📝 ===========\n';
 
   return report;
 }
