@@ -522,7 +522,17 @@ export interface SignConditionECDSA {
  *
  */
 export interface ExecuteJsResponse {
-  signatures: any;
+  success?: boolean;
+  signatures: {
+    sig: {
+      r: string;
+      s: string;
+      recid: number;
+      signature: string; // 0x...
+      publicKey: string; // pkp public key
+      dataSigned: string; 
+    },
+  } | any;
   decryptions: any[];
   response: string;
   logs: string;
