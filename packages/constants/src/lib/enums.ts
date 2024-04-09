@@ -12,6 +12,11 @@ export enum SIGTYPE {
   EcdsaCAITSITHP256 = 'EcdsaCaitSithP256',
 }
 
+export enum DERIVED_VIA {
+  BLS = 'lit.bls',
+  LIT_ETH_PERSONAL_SIGN = 'web3.eth.personal.sign via Lit PKP',
+}
+
 /**
  * The only either possible error types
  */
