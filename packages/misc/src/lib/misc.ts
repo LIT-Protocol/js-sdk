@@ -252,6 +252,32 @@ export const log = (...args: any): void => {
   }
 
   globalThis?.logger && globalThis?.logger.debug(...args);
+
+  // also write logs to a file by appending
+  if (isNode()) {
+
+    try {
+      const fs = require('fs');
+
+      const message = args
+        .map((arg: any) => (typeof arg === 'object' ? JSON.stringify(arg) : arg))
+        .join(' ');
+
+      // create the logs folder if it doesn't exist
+      if (!fs.existsSync('./logs')) {
+        fs.mkdirSync('./logs');
+      }
+
+      fs.appendFileSync(
+        process.env['LOG_FILE']
+          ? `./logs/${process.env['LOG_FILE']}`
+          : `./logs/lit-sdk.log`,
+        `${new Date().toISOString()} ${message}\n`
+      );
+    } catch (e) {
+      console.log('[misc][log] all cool, just logging to console.')
+    }
+  }
 };
 
 export const logWithRequestId = (id: string, ...args: any) => {
@@ -390,9 +416,8 @@ export const checkType = ({
       ' or '
     )} type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
-    )}" type instead. value: ${
-      value instanceof Object ? JSON.stringify(value) : value
-    }`;
+    )}" type instead. value: ${value instanceof Object ? JSON.stringify(value) : value
+      }`;
 
     if (throwOnError) {
       throwError({
@@ -434,9 +459,8 @@ export const checkSchema = (
 
   const validates = validate(value);
 
-  const message = `FAILED schema validation for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(). Value: ${
-    value instanceof Object ? JSON.stringify(value) : value
-  }. Errors: ${JSON.stringify(validate.errors)}`;
+  const message = `FAILED schema validation for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(). Value: ${value instanceof Object ? JSON.stringify(value) : value
+    }. Errors: ${JSON.stringify(validate.errors)}`;
 
   if (!validates) {
     if (throwOnError) {
@@ -543,9 +567,8 @@ export const is = (
   if (getVarType(value) !== type) {
     let message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
-    )}" type instead. value: ${
-      value instanceof Object ? JSON.stringify(value) : value
-    }`;
+    )}" type instead. value: ${value instanceof Object ? JSON.stringify(value) : value
+      }`;
 
     if (throwOnError) {
       throwError({
@@ -657,48 +680,48 @@ export const defaultMintClaimCallback: MintCallback<
   params: ClaimResult<RelayClaimProcessor>,
   network: string = 'cayenne'
 ): Promise<string> => {
-  try {
-    let relayUrl: string = '';
+    try {
+      let relayUrl: string = '';
 
-    switch (network) {
-      case LitNetwork.Cayenne:
-        relayUrl = RELAY_URL_CAYENNE + '/auth/claim';
-        break;
-      case LitNetwork.Habanero:
-        relayUrl = RELAY_URL_HABANERO + 'auth/claim';
-        break;
-      case LitNetwork.Manzano:
-        relayUrl = RELAY_URL_MANZANO + 'auth/claim';
+      switch (network) {
+        case LitNetwork.Cayenne:
+          relayUrl = RELAY_URL_CAYENNE + '/auth/claim';
+          break;
+        case LitNetwork.Habanero:
+          relayUrl = RELAY_URL_HABANERO + 'auth/claim';
+          break;
+        case LitNetwork.Manzano:
+          relayUrl = RELAY_URL_MANZANO + 'auth/claim';
+      }
+
+      const url = params.relayUrl ? params.relayUrl : relayUrl;
+      const response = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(params),
+        headers: {
+          'api-key': params.relayApiKey
+            ? params.relayApiKey
+            : '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status < 200 || response.status >= 400) {
+        let errResp = (await response.json()) ?? '';
+        let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
+          errResp
+        )}`;
+        console.warn(errStmt);
+        throw new Error(errStmt);
+      }
+
+      let body: any = await response.json();
+      return body.requestId;
+    } catch (e) {
+      console.error((e as Error).message);
+      throw e;
     }
-
-    const url = params.relayUrl ? params.relayUrl : relayUrl;
-    const response = await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(params),
-      headers: {
-        'api-key': params.relayApiKey
-          ? params.relayApiKey
-          : '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (response.status < 200 || response.status >= 400) {
-      let errResp = (await response.json()) ?? '';
-      let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
-        errResp
-      )}`;
-      console.warn(errStmt);
-      throw new Error(errStmt);
-    }
-
-    let body: any = await response.json();
-    return body.requestId;
-  } catch (e) {
-    console.error((e as Error).message);
-    throw e;
-  }
-};
+  };
 
 export const hexPrefixed = (str: string) => {
   if (str.startsWith('0x')) {
@@ -772,10 +795,9 @@ export function sendRequest(
     .catch((error: NodeErrorV3) => {
       logErrorWithRequestId(
         requestId,
-        `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
-          error?.message || error?.details
-            ? `Error is ${error.message} - ${error.details}`
-            : ''
+        `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error?.message || error?.details
+          ? `Error is ${error.message} - ${error.details}`
+          : ''
         }`
       );
       return Promise.reject(error);
@@ -858,4 +880,53 @@ export async function executeWithRetry<T>(
     },
     requestId,
   };
+}
+
+/**
+ * Attempts to normalize a string by unescaping it until it can be parsed as a JSON object,
+ * then stringifies it exactly once. If the input is a regular string that does not represent
+ * a JSON object or array, the function will return it as is without modification.
+ * This function is designed to handle cases where strings might be excessively escaped due
+ * to multiple layers of encoding, ensuring that JSON data is stored in a consistent and
+ * predictable format, and regular strings are left unchanged.
+ * 
+ * @param input The potentially excessively escaped string.
+ * @return A string that is either the JSON.stringify version of the original JSON object
+ *         or the original string if it does not represent a JSON object or array.
+ */
+export function normalizeAndStringify(input: string): string {
+  try {
+    // Directly return the string if it's not in a JSON format
+    if (!input.startsWith('{') && !input.startsWith('[')) {
+      return input;
+    }
+
+    // Attempt to parse the input as JSON
+    const parsed = JSON.parse(input);
+
+    // If parsing succeeds, return the stringified version of the parsed JSON
+    return JSON.stringify(parsed);
+  } catch (error) {
+    // If parsing fails, it might be due to extra escaping
+    const unescaped = input.replace(/\\(.)/g, '$1');
+
+    // If unescaping doesn't change the string, return it as is
+    if (input === unescaped) {
+      return input;
+    }
+
+    // Otherwise, recursively call the function with the unescaped string
+    return normalizeAndStringify(unescaped);
+  }
+}
+
+/**
+ * Removes unnecessary escape slashes from a JSON string.
+ * @param str The input string with extra escape slashes.
+ * @returns The corrected JSON string without unnecessary escape slashes.
+ */
+export function removeExtraSlashes(str: string): string {
+  // Replace escaped double quotes with just double quotes
+  // and remove the leading and trailing double quotes if they are part of the string itself.
+  return str.replace(/\\"/g, '"').replace(/^"|"$/g, '');
 }
