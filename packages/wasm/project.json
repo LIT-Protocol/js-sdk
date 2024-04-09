@@ -19,7 +19,8 @@
         "tsConfig": "packages/wasm/tsconfig.lib.json",
         "assets": ["packages/wasm/*.md"],
         "updateBuildableProjectDepsInPackageJson": true
-      }
+      },
+      "dependsOn": ["rust:build"]
     },
     "lint": {
       "executor": "@nx/linter:eslint",

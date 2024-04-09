@@ -3,6 +3,9 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/crypto/src",
   "projectType": "library",
+  "implicitDependencies": [
+    "wasm"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
