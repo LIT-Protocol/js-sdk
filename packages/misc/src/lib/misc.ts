@@ -919,14 +919,3 @@ export function normalizeAndStringify(input: string): string {
     return normalizeAndStringify(unescaped);
   }
 }
-
-/**
- * Removes unnecessary escape slashes from a JSON string.
- * @param str The input string with extra escape slashes.
- * @returns The corrected JSON string without unnecessary escape slashes.
- */
-export function removeExtraSlashes(str: string): string {
-  // Replace escaped double quotes with just double quotes
-  // and remove the leading and trailing double quotes if they are part of the string itself.
-  return str.replace(/\\"/g, '"').replace(/^"|"$/g, '');
-}
