@@ -42,7 +42,7 @@ function main() {
       removeItem.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'),
       'g'
     ); // Escape special characters
-    console.log('escaped string', regex, removeItem);
+
     bindingModuleString = bindingModuleString.replace(regex, '');
   }
 
