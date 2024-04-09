@@ -26,7 +26,7 @@ import {
   LIT_ACTION_IPFS_HASH,
   LIT_ENDPOINT,
   LIT_ERROR,
-  LIT_SESSION_KEY_URI,
+  LIT_URI,
   LOCAL_STORAGE_KEYS,
   LitNetwork,
   SIGTYPE,
@@ -2512,7 +2512,7 @@ export class LitNodeClientNodeJs
       // Try to get it from local storage, if not generates one~
       let sessionKey: SessionKeyPair =
         params.sessionKey ?? this.getSessionKey();
-      sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
+      sessionKeyUri = LIT_URI.SESSION_KEY + sessionKey.publicKey;
 
       log(
         `[signSessionKey] sessionKeyUri is not found in params, generating a new one`,
@@ -2927,7 +2927,7 @@ export class LitNodeClientNodeJs
     }
     const nonce = this.latestBlockhash!;
 
-    // -- (TRY) to get the wallet signature
+    // -- try to get the wallet signature
     log('[getSessionSigs] Trying to get wallet signature for session key');
     let authSig = await this.getWalletSig({
       authNeededCallback: params.authNeededCallback,
@@ -2947,7 +2947,7 @@ export class LitNodeClientNodeJs
     });
     log('[getSessionSigs] needToResignSessionKey:', needToResignSessionKey);
 
-    // -- (CHECK) if we need to resign the session key
+    // -- check if we need to resign the session key
     if (needToResignSessionKey) {
       log('[getSessionSigs] need to re-sign session key.  Signing...');
       authSig = await this.#authCallbackAndUpdateStorageItem({
@@ -3053,7 +3053,7 @@ export class LitNodeClientNodeJs
    * @returns { string } the session key uri
    */
   getSessionKeyUri = (publicKey: string): string => {
-    return LIT_SESSION_KEY_URI + publicKey;
+    return LIT_URI.SESSION_KEY + publicKey;
   };
 
   /**

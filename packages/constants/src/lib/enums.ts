@@ -91,3 +91,7 @@ export enum LIT_ENDPOINT {
   ENCRYPTION_SIGN = '/web/encryption/sign',
   SIGN_ECDSA = '/web/signing/signConditionEcdsa',
 }
+
+export enum LIT_URI{
+  SESSION_KEY = 'lit:session:'
+}

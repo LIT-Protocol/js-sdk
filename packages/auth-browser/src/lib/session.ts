@@ -1,4 +1,4 @@
-import { LIT_SESSION_KEY_URI } from '@lit-protocol/constants';
+import { LIT_URI } from '@lit-protocol/constants';
 
 /**
  *
@@ -12,7 +12,7 @@ export const getSessionKeyUri = ({
 }: {
   publicKey: string;
 }): string => {
-  return LIT_SESSION_KEY_URI + publicKey;
+  return LIT_URI.SESSION_KEY + publicKey;
 };
 
 /**

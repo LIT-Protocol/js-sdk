@@ -762,9 +762,6 @@ export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
   internalDev: INTERNAL_DEV,
 };
 
-// ========== Lit Sessions ==========
-export const LIT_SESSION_KEY_URI = 'lit:session:';
-
 // ========== Lit Auth Methods ==========
 
 export const AUTH_METHOD_TYPE_IDS = {
