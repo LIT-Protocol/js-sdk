@@ -383,9 +383,6 @@ export class LitContracts {
       }
     }
 
-    this.log('Your Signer:', this.signer);
-    this.log('Your Provider:', this.provider);
-
     if (!this.provider) {
       this.log('No provide found. Will try to use the one from the signer.');
       this.provider = this.signer.provider;
@@ -397,8 +394,6 @@ export class LitContracts {
       this.customContext?.provider ?? this.provider,
       this.customContext
     );
-
-    this.log('resolved contract addresses for: ', this.network, addresses);
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
 
@@ -1176,8 +1171,6 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
       const txHash = res.hash;
       let tx = await res.wait();
-      this.log('Transaction:', tx);
-
       const tokenId = ethers.BigNumber.from(tx.logs[0].topics[3]);
 
       return {
@@ -1456,12 +1449,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
             value: mintCost,
           });
         }
-
-        this.log('sentTx:', sentTx);
-
         const res: any = await sentTx.wait();
-        this.log('res:', res);
-
         let events = 'events' in res ? res.events : res.logs;
 
         let tokenIdFromEvent;
