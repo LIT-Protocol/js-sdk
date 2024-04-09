@@ -30,7 +30,6 @@ import {
   LOCAL_STORAGE_KEYS,
   LitNetwork,
   SIGTYPE,
-  SIWE_DELEGATION_URI,
 } from '@lit-protocol/constants';
 import { LitCore } from '@lit-protocol/core';
 import {

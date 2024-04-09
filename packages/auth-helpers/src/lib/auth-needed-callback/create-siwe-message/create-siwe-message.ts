@@ -4,6 +4,7 @@ import {
   createCapacityDelegationRecapObject,
 } from '../create-recap-object/create-capacity-delegation-recap';
 import { LitResourceAbilityRequest } from '../../models';
+import { LIT_URI } from '@lit-protocol/constants';
 
 export interface BaseSiweMessage {
   walletAddress: string;
@@ -30,11 +31,6 @@ export interface WithRecapFields extends BaseSiweMessage {
   litNodeClient: any;
   resourceAbilityRequests: LitResourceAbilityRequest[];
   type: CreateSiweType.WITH_RECAP;
-}
-
-export enum SIWE_URI {
-  // SESSION_KEY = 'lit:session:',
-  CAPABILITY_DELEGATION = 'lit:capability:delegation',
 }
 
 /**
@@ -75,7 +71,7 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
 
   // -- override URI for CAPABILITY_DELEGATION
   if (params.type === CreateSiweType.CAPABILITY_DELEGATION) {
-    siweParams.uri = SIWE_URI.CAPABILITY_DELEGATION;
+    siweParams.uri = LIT_URI.CAPABILITY_DELEGATION;
   }
 
   let siweMessage = new siwe.SiweMessage(siweParams);

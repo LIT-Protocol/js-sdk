@@ -93,5 +93,6 @@ export enum LIT_ENDPOINT {
 }
 
 export enum LIT_URI{
-  SESSION_KEY = 'lit:session:'
+  SESSION_KEY = 'lit:session:',
+  CAPABILITY_DELEGATION = 'lit:capability:delegation',
 }
