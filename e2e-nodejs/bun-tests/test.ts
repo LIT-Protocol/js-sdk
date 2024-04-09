@@ -26,7 +26,7 @@ const devEnvPromise = devEnv({
 const tests = {
   /**
    * Test Commands:
-   * ✅ yarn test:integrate --filter=testUseAuthSigToExecuteJsConsoleLog --network=habanero --version=0
+   * ✅ yarn test:integrate --filter=testUseAuthSigToExecuteJsConsoleLog --network=habanero --version=v0
    * ✅ yarn test:integrate --filter=testUseAuthSigToExecuteJsConsoleLog --network=localchain --version=v0
    */
   testUseAuthSigToExecuteJsConsoleLog: async () => {
