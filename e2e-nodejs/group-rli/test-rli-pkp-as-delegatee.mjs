@@ -1,4 +1,4 @@
-// Usage: DEBUG=true NETWORK=habanero MINT_NEW=true yarn test:e2e:nodejs --filter=test-rli-pkp-as-delegatee
+// Usage: LIT_ENDPOINT_VERSION=v0 DEBUG=true NETWORK=habanero MINT_NEW=true yarn test:e2e:nodejs --filter=test-rli-pkp-as-delegatee
 import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import LITCONFIG from '../../lit.config.json' assert { type: 'json' };
@@ -62,9 +62,9 @@ export async function main() {
     debug: process.env.DEBUG === 'true' ?? LITCONFIG.TEST_ENV.debug,
     minNodeCount: undefined,
     checkNodeAttestation: process.env.CHECK_SEV ?? false,
-    storageProvider: {
-      provider: new LocalStorage('./storage.test.db'),
-    },
+    // storageProvider: {
+    //   provider: new LocalStorage('./storage.test.db'),
+    // },
   });
 
   await litNodeClient.connect();
@@ -241,6 +241,7 @@ export async function main() {
   });
 
   console.log('pkpSessionSigs:', pkpSessionSigs);
+  // process.exit();
 
   // ***************************************************************
   // 7. Finally sign the message using the PKP's PKP
@@ -248,23 +249,34 @@ export async function main() {
   // const pkpsPKPPublicKey = '';
 
   // -- Mint a PKP using a PKP
-  const res = await litNodeClient.executeJs({
+  // const res = await litNodeClient.executeJs({
+  //   sessionSigs: pkpSessionSigs,
+  //   code: `(async () => {
+  //       const sigShare = await LitActions.signEcdsa({
+  //        toSign: dataToSign,
+  //        publicKey,
+  //        sigName: "sig",
+  //      });
+  //    })();`,
+  //   authMethods: [],
+  //   jsParams: {
+  //     dataToSign: ethers.utils.arrayify(
+  //       ethers.utils.keccak256([1, 2, 3, 4, 5])
+  //     ),
+  //     publicKey: secondWalletPKPInfo.publicKey,
+  //   },
+  // });
+
+  // console.log('res:', res);
+
+  const res2 = await litNodeClient.pkpSign({
+    toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+    pubKey: secondWalletPKPInfo.publicKey,
     sessionSigs: pkpSessionSigs,
-    code: `(async () => {
-        const sigShare = await LitActions.signEcdsa({
-         toSign: dataToSign,
-         publicKey,
-         sigName: "sig",
-       });
-     })();`,
-    authMethods: [],
-    jsParams: {
-      dataToSign: ethers.utils.arrayify(
-        ethers.utils.keccak256([1, 2, 3, 4, 5])
-      ),
-      publicKey: secondWalletPKPInfo.publicKey,
-    },
   });
+
+  console.log('haleyluya res2:', res2);
+  process.exit();
 
   if (res) {
     return success('pkp able to sign as a delegatee');
