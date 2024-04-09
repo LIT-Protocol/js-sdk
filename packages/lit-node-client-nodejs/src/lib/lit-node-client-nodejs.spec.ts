@@ -28,7 +28,7 @@ describe('LitNodeClientNodeJs', () => {
 
   it('should be able to instantiate a new LitNodeClientNodeJs', async () => {
     const litNodeClient = new LitNodeClientNodeJs({
-      network: 'cayenne'
+      network: 'cayenne',
     });
     expect(litNodeClient).toBeDefined();
   });
