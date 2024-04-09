@@ -534,7 +534,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise {}
+export interface LitNodePromise { }
 
 export interface SendNodeCommand {
   url: string;
@@ -1519,7 +1519,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions {}
+export interface BaseAuthenticateOptions { }
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
@@ -1599,8 +1599,8 @@ export interface MintCapacityCreditsPerKilosecond
 }
 export interface MintCapacityCreditsContext
   extends MintCapacityCreditsPerDay,
-    MintCapacityCreditsPerSecond,
-    MintCapacityCreditsPerKilosecond {}
+  MintCapacityCreditsPerSecond,
+  MintCapacityCreditsPerKilosecond { }
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
@@ -1612,4 +1612,41 @@ export interface JsExecutionRequestBody {
   ipfsId?: string;
   authMethods?: AuthMethod[];
   jsParams?: any;
+}
+
+// pub struct JsonSignSessionKeyRequestV1 {
+//   pub session_key: String,
+//   pub auth_methods: Vec<AuthMethod>,
+//   pub pkp_public_key: Option<String>,
+//   pub auth_sig: Option<AuthSigItem>, // For backwards compatibility
+//   pub siwe_message: String,
+//   pub curve_type: CurveType,
+//   pub code: Option<String>,
+//   pub lit_action_ipfs_id: Option<String>,
+//   pub js_params: Option<Value>,
+//   #[serde(default = "default_epoch")]
+//   pub epoch: u64,
+// }
+export interface JsonSignSessionKeyRequestV1 {
+  sessionKey: string;
+  authMethods: AuthMethod[];
+  pkpPublicKey?: string;
+  authSig?: AuthSig;
+  siweMessage: string;
+  curveType: 'BLS' | 'ECDSA';
+  code?: string;
+  litActionIpfsId?: string;
+  jsParams?: any;
+  epoch?: number;
+}
+export interface BlsResponseData {
+  result: boolean,
+  signatureShare: {
+    ProofOfPossession: string,
+  },
+  shareIndex: number,
+  curveType: string,
+  siweMessage: string,
+  dataSigned: string,
+  blsRootPubkey: string,
 }

@@ -16,10 +16,12 @@ import {
   createSiweMessage,
   CapacityCreditsFields,
   craftAuthSig,
+  CreateSiweType,
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE_IDS,
   AuthMethodType,
+  DERIVED_VIA,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
   LIT_ERROR,
@@ -43,11 +45,13 @@ import {
   defaultMintClaimCallback,
   executeWithRetry,
   hexPrefixed,
+  isNode,
   log,
   logError,
   logErrorWithRequestId,
   logWithRequestId,
   mostCommonString,
+  normalizeAndStringify,
   throwError,
 } from '@lit-protocol/misc';
 import {
@@ -66,6 +70,7 @@ import type {
   AuthCallbackParams,
   AuthMethod,
   AuthSig,
+  BlsResponseData,
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
@@ -85,6 +90,7 @@ import type {
   JsExecutionRequestBody,
   JsonExecutionRequest,
   JsonPkpSignRequest,
+  JsonSignSessionKeyRequestV1,
   LitClientSessionManager,
   LitNodeClientConfig,
   NodeBlsSigningShare,
@@ -109,6 +115,16 @@ import type {
   WebAuthnAuthenticationVerificationParams,
 } from '@lit-protocol/types';
 
+import * as blsSdk from '@lit-protocol/bls-sdk';
+
+type SessionKeyCache = {
+  value: SessionKeyPair;
+  timestamp: number;
+};
+
+// Global cache variable
+let sessionKeyCache: SessionKeyCache | null = null;
+
 // TODO: move this to auth-helper for next patch
 interface CapacityCreditsReq {
   dAppOwnerWallet: ethers.Wallet;
@@ -125,10 +141,29 @@ interface CapacityCreditsRes {
   capacityDelegationAuthSig: AuthSig;
 }
 
+// Allow user to modify environment variable LIT_ENDPOINT_VERSION if only running
+// in nodejs
+let LIT_ENDPOINT_VERSION = 'v1'; // Default version
+
+if (isNode()) {
+  const versionArg = process.argv.find((arg) => arg.startsWith('--version='));
+  const version = versionArg ? versionArg.split('=')[1] : null;
+
+  // Use environment variable if set; default to 'v1' otherwise
+  LIT_ENDPOINT_VERSION = version || process.env['LIT_ENDPOINT_VERSION'] || 'v1';
+
+  // Normalize 'v0' to an empty string, ensure other versions are prefixed with '/'
+  LIT_ENDPOINT_VERSION =
+    LIT_ENDPOINT_VERSION === 'v0' ? '' : `/${LIT_ENDPOINT_VERSION}`;
+} else {
+  // Ensure the default 'v1' is prefixed with '/' when not running in Node.js
+  LIT_ENDPOINT_VERSION = `/v1`;
+}
+
+log(`💡 LIT_ENDPOINT_VERSION${LIT_ENDPOINT_VERSION === '' ? '(legacy): /' : `: ${LIT_ENDPOINT_VERSION}`}`);
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
-{
+  implements LitClientSessionManager {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -188,6 +223,8 @@ export class LitNodeClientNodeJs
       statement,
     } = params;
 
+    // TODO: WARNING console when there are no delegatees, we need to warn the user
+
     // -- This is the owner address who holds the Capacity Credits NFT token and wants to delegate its
     // usage to a list of delegatee addresses
     const dAppOwnerWalletAddress = ethers.utils.getAddress(
@@ -223,6 +260,7 @@ export class LitNodeClientNodeJs
       uses: uses ?? '1',
       delegateeAddresses: delegateeAddresses,
       capacityTokenId: capacityTokenId,
+      type: CreateSiweType.CAPABILITY_DELEGATION,
     });
 
     const authSig = await craftAuthSig({
@@ -316,30 +354,54 @@ export class LitNodeClientNodeJs
    * @return { SessionKeyPair } session key pair
    */
   getSessionKey = (): SessionKeyPair => {
-    const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
+    const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY; // lit-session-key
     const storedSessionKeyOrError = getStorageItem(storageKey);
+
+    log(`[getSessionKey] storageKey: ${storageKey}`);
+    log(
+      `[getSessionKey] storedSessionKeyOrError: ${JSON.stringify(
+        storedSessionKeyOrError
+      )}`
+    );
 
     if (
       storedSessionKeyOrError.type === EITHER_TYPE.ERROR ||
       !storedSessionKeyOrError.result ||
       storedSessionKeyOrError.result === ''
     ) {
-      console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
-      );
+      log(`[getSessionKey] Storage key "${storageKey}" is missing. Not a problem. Contiune...`);
+
+      // Check if a valid session key exists in cache
+      if (sessionKeyCache && (Date.now() - sessionKeyCache.timestamp) < 30000) {
+        log(`[getSessionKey] Returning session key from cache.`);
+        return sessionKeyCache.value;
+      }
 
       // Generate new one
       const newSessionKey = generateSessionKeyPair();
+      log(`[getSessionKey] newSessionKey: ${JSON.stringify(newSessionKey)}`);
 
-      // (TRY) to set to local storage
+      // Try to set to local storage
       try {
         localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
+        log(`[getSessionKey] newSessionKey set to local storage`);
       } catch (e) {
-        console.warn(`Localstorage not available. Not a problem. Contiune...`);
+        log(
+          `[getSessionKey] Localstorage not available. Not a problem. Contiune...`
+        );
+
+        // Store in cache
+        sessionKeyCache = {
+          value: newSessionKey,
+          timestamp: Date.now(),
+        };
+
+        log(`[getSessionKey] newSessionKey set to cache:`, sessionKeyCache);
       }
 
       return newSessionKey;
     } else {
+      log(`[getSessionKey] Storage key "${storageKey}" found. Continue...`);
       return JSON.parse(storedSessionKeyOrError.result as string);
     }
   };
@@ -465,7 +527,7 @@ export class LitNodeClientNodeJs
 
     // -- (TRY) to get it in the local storage
     // -- IF NOT: Generates one
-    log(`getWalletSig - flow starts
+    log(`[getWalletSig] flow starts
         storageKey: ${storageKey}
         storedWalletSigOrError: ${JSON.stringify(storedWalletSigOrError)}
     `);
@@ -475,12 +537,17 @@ export class LitNodeClientNodeJs
       !storedWalletSigOrError.result ||
       storedWalletSigOrError.result == ''
     ) {
-      log('getWalletSig - flow 1');
-      console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Continue...`
+      log('[getWalletSig] flow 1');
+      log(
+        `[getWalletSig] storageKey: ${storageKey} is missing. Not a problem. Continue...`
       );
+
       if (authNeededCallback) {
-        log('getWalletSig - flow 1.1');
+        log('[getWalletSig] flow 1.1');
+        log(
+          `[getWalletSig] authNeededCallback found from params. Creating a callback body...`
+        );
+
         const body = {
           chain,
           statement: sessionCapabilityObject?.statement,
@@ -494,13 +561,20 @@ export class LitNodeClientNodeJs
           ...(resourceAbilityRequests && { resourceAbilityRequests }),
         };
 
-        log('callback body:', body);
+        log('[getWalletSig] callback body:', body);
+        log(
+          `[getWalletSig] passing the callback body to the authNeededCallback. Please note that the implementation differs based on user's implementation.`
+        );
 
         walletSig = await authNeededCallback(body);
+        log(
+          `[getWalletSig] walletSig from user's authNeededCallback`,
+          walletSig
+        );
       } else {
-        log('getWalletSig - flow 1.2');
+        log('[getWalletSig] flow 1.2');
         if (!this.defaultAuthCallback) {
-          log('getWalletSig - flow 1.2.1');
+          log('[getWalletSig] flow 1.2.1');
           return throwError({
             message: 'No default auth callback provided',
             errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
@@ -508,7 +582,7 @@ export class LitNodeClientNodeJs
           });
         }
 
-        log('getWalletSig - flow 1.2.2');
+        log('[getWalletSig] flow 1.2.2');
         walletSig = await this.defaultAuthCallback({
           chain,
           statement: sessionCapabilityObject.statement,
@@ -522,7 +596,7 @@ export class LitNodeClientNodeJs
         });
       }
 
-      log('getWalletSig - flow 1.3');
+      log('[getWalletSig] flow 1.3');
 
       // (TRY) to set walletSig to local storage
       const storeNewWalletSigOrError = setStorageItem(
@@ -530,23 +604,23 @@ export class LitNodeClientNodeJs
         JSON.stringify(walletSig)
       );
       if (storeNewWalletSigOrError.type === 'ERROR') {
-        log('getWalletSig - flow 1.4');
+        log('[getWalletSig] flow 1.4');
         console.warn(
           `Unable to store walletSig in local storage. Not a problem. Continue...`
         );
       }
     } else {
-      log('getWalletSig - flow 2');
+      log('[getWalletSig] flow 2');
       try {
         walletSig = JSON.parse(storedWalletSigOrError.result as string);
-        log('getWalletSig - flow 2.1');
+        log('[getWalletSig] flow 2.1');
       } catch (e) {
         console.warn('Error parsing walletSig', e);
-        log('getWalletSig - flow 2.2');
+        log('[getWalletSig] flow 2.2');
       }
     }
 
-    log('getWalletSig - flow 3');
+    log('[getWalletSig] flow 3');
     return walletSig!;
   };
 
@@ -683,7 +757,7 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, 'getJsExecutionShares');
 
     // -- execute
-    const urlWithPath = `${url}/web/execute`;
+    const urlWithPath = `${url}/web/execute${LIT_ENDPOINT_VERSION}`;
 
     if (!authSig) {
       throw new Error('authSig or sessionSig is required');
@@ -714,8 +788,8 @@ export class LitNodeClientNodeJs
     params: any,
     requestId: string
   ) => {
-    logWithRequestId(requestId, 'getPkpSigningShares');
-    const urlWithPath = `${url}/web/pkp/sign/v1`;
+    const urlWithPath = `${url}/web/pkp/sign${LIT_ENDPOINT_VERSION}`;
+    logWithRequestId(requestId, `[getPkpSigningShares] ${urlWithPath}`);
 
     if (!params.authSig) {
       throw new Error('authSig is required');
@@ -734,7 +808,7 @@ export class LitNodeClientNodeJs
     requestId: string
   ) => {
     logWithRequestId(requestId, 'getPkpSigningShares');
-    const urlWithPath = `${url}/web/pkp/claim`;
+    const urlWithPath = `${url}/web/pkp/claim${LIT_ENDPOINT_VERSION}`;
     if (!params.authMethod) {
       throw new Error('authMethod is required');
     }
@@ -761,7 +835,7 @@ export class LitNodeClientNodeJs
     requestId: string
   ): Promise<NodeCommandResponse> => {
     logWithRequestId(requestId, 'getSigningShareForToken');
-    const urlWithPath = `${url}/web/signing/access_control_condition`;
+    const urlWithPath = `${url}/web/signing/access_control_condition${LIT_ENDPOINT_VERSION}`;
 
     return this.sendCommandToNode({
       url: urlWithPath,
@@ -785,7 +859,7 @@ export class LitNodeClientNodeJs
     requestId: string
   ): Promise<NodeCommandResponse> => {
     log('getSigningShareForDecryption');
-    const urlWithPath = `${url}/web/encryption/sign`;
+    const urlWithPath = `${url}/web/encryption/sign${LIT_ENDPOINT_VERSION}`;
 
     return await this.sendCommandToNode({
       url: urlWithPath,
@@ -813,7 +887,7 @@ export class LitNodeClientNodeJs
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       log('signConditionEcdsa');
-      const urlWithPath = `${url}/web/signing/signConditionEcdsa`;
+      const urlWithPath = `${url}/web/signing/signConditionEcdsa${LIT_ENDPOINT_VERSION}`;
 
       const data = {
         access_control_conditions: params.accessControlConditions,
@@ -1169,20 +1243,20 @@ export class LitNodeClientNodeJs
 
     // -- execute
     keys.forEach((key: any) => {
-      log('key:', key);
+      log('[getSessionSignatures] key:', key);
 
       const shares = signedData.map((r: any) => r[key]);
 
-      log('shares:', shares);
+      log('[getSessionSignatures] shares:', shares);
 
       shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
 
       const sigShares: SigShare[] = shares.map((s: any, index: number) => {
-        log('Original Share Struct:', s);
+        log('[getSessionSignatures] Original Share Struct:', s);
 
         const share = this._getFlattenShare(s);
 
-        log('share:', share);
+        log('[getSessionSignatures] share:', share);
 
         if (!share) {
           throw new Error('share is null or undefined');
@@ -1197,8 +1271,8 @@ export class LitNodeClientNodeJs
         const sanitisedBigR = sanitise(share.bigr);
         const sanitisedSigShare = sanitise(share.publicKey);
 
-        log('sanitisedBigR:', sanitisedBigR);
-        log('sanitisedSigShare:', sanitisedSigShare);
+        log('[getSessionSignatures] sanitisedBigR:', sanitisedBigR);
+        log('[getSessionSignatures] sanitisedSigShare:', sanitisedSigShare);
 
         return {
           sigType: share.sigType,
@@ -1211,14 +1285,14 @@ export class LitNodeClientNodeJs
         };
       });
 
-      log('getSessionSignatures - sigShares', sigShares);
+      log('[getSessionSignatures] sigShares', sigShares);
 
       const sigType = mostCommonString(sigShares.map((s: any) => s.sigType));
 
       // -- validate if this.networkPubKeySet is null
       if (this.networkPubKeySet === null) {
         throwError({
-          message: 'networkPubKeySet cannot be null',
+          message: '[getSessionSignatures] networkPubKeySet cannot be null',
           errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
           errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
         });
@@ -1232,7 +1306,7 @@ export class LitNodeClientNodeJs
         sigType !== SIGTYPE.EcdsaCAITSITHP256
       ) {
         throwError({
-          message: `signature type is ${sigType} which is invalid`,
+          message: `[getSessionSignatures] signature type is ${sigType} which is invalid`,
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
@@ -1240,9 +1314,10 @@ export class LitNodeClientNodeJs
       }
 
       const signature: any = combineEcdsaShares(sigShares);
+
       if (!signature.r) {
         throwError({
-          message: 'siganture could not be combined',
+          message: '[getSessionSignatures] siganture could not be combined',
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name,
         });
@@ -1254,6 +1329,8 @@ export class LitNodeClientNodeJs
         v: signature.recid,
       });
 
+      log(`[getSessionSignatures] encodedSig: ${encodedSig}`)
+
       signatures[key] = {
         ...signature,
         signature: encodedSig,
@@ -1261,6 +1338,8 @@ export class LitNodeClientNodeJs
         dataSigned: mostCommonString(sigShares.map((s: any) => s.dataSigned)),
         siweMessage: mostCommonString(sigShares.map((s) => s.siweMessage)),
       };
+
+      log(`[getSessionSignatures] signatures[${key}]:`, signatures[key]);
     });
 
     return signatures;
@@ -1344,33 +1423,33 @@ export class LitNodeClientNodeJs
       const sigName = shares[0].sigName;
       logWithRequestId(
         requestId,
-        `starting signature combine for sig name: ${sigName}`,
+        `[getSignatures] starting signature combine for sig name: ${sigName}`,
         shares
       );
       logWithRequestId(
         requestId,
-        `number of shares for ${sigName}:`,
+        `[getSignatures] number of shares for ${sigName}:`,
         signedData.length
       );
       logWithRequestId(
         requestId,
-        `validated length for signature: ${sigName}`,
+        `[getSignatures] validated length for signature: ${sigName}`,
         shares.length
       );
       logWithRequestId(
         requestId,
-        'minimum required shares for threshold:',
+        '[getSignatures] minimum required shares for threshold:',
         this.config.minNodeCount
       );
 
       if (shares.length < this.config.minNodeCount) {
         logErrorWithRequestId(
           requestId,
-          `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${shares.length}`
+          `[getSignatures] not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${shares.length}`
         );
 
         throwError({
-          message: `The total number of valid signatures shares ${shares.length} does not meet the threshold of ${this.config.minNodeCount}`,
+          message: `[getSignatures] The total number of valid signatures shares ${shares.length} does not meet the threshold of ${this.config.minNodeCount}`,
           errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
           errorCode: LIT_ERROR.NO_VALID_SHARES.code,
           requestId,
@@ -1382,7 +1461,7 @@ export class LitNodeClientNodeJs
       // -- validate if this.networkPubKeySet is null
       if (this.networkPubKeySet === null) {
         throwError({
-          message: 'networkPubKeySet cannot be null',
+          message: '[getSignatures] networkPubKeySet cannot be null',
           errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
           errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
         });
@@ -1396,7 +1475,7 @@ export class LitNodeClientNodeJs
         sigType !== SIGTYPE.EcdsaCAITSITHP256
       ) {
         throwError({
-          message: `signature type is ${sigType} which is invalid`,
+          message: `[getSignatures] signature type is ${sigType} which is invalid`,
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
         });
@@ -1406,7 +1485,7 @@ export class LitNodeClientNodeJs
       const signature = combineEcdsaShares(shares);
       if (!signature.r) {
         throwError({
-          message: 'siganture could not be combined',
+          message: '[getSignatures] siganture could not be combined',
           errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.kind,
           errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name,
         });
@@ -1455,7 +1534,7 @@ export class LitNodeClientNodeJs
 
   // ========== Scoped Business Logics ==========
 
-  // Normalize the data to a basic array
+  //  the data to a basic array
   public static normalizeParams(params: ExecuteJsProps): ExecuteJsProps {
     if (!params.jsParams) {
       params.jsParams = {};
@@ -1589,7 +1668,7 @@ export class LitNodeClientNodeJs
 
     logWithRequestId(
       requestId,
-      'executeJs responseData from node : ',
+      '[executeJs] responseData from node : ',
       JSON.stringify(responseData, null, 2)
     );
 
@@ -1693,7 +1772,7 @@ export class LitNodeClientNodeJs
       logs: mostCommonLogs,
     };
 
-    log('returnVal:', returnVal);
+    log('[executeJs] returnVal:', returnVal);
 
     // -- case: debug mode
     if (debug) {
@@ -1714,6 +1793,7 @@ export class LitNodeClientNodeJs
 
   pkpSign = async (params: JsonPkpSignRequest) => {
     let { authSig, sessionSigs, toSign, pubKey, authMethods } = params;
+    log('[pkpSign] params:', params);
 
     pubKey = hexPrefixed(pubKey);
 
@@ -1721,7 +1801,7 @@ export class LitNodeClientNodeJs
     (['toSign', 'pubKey'] as (keyof JsonPkpSignRequest)[]).forEach((key) => {
       if (!params[key]) {
         throwError({
-          message: `"${key}" cannot be undefined, empty, or null. Please provide a valid value.`,
+          message: `[pkpSign] "${key}" cannot be undefined, empty, or null. Please provide a valid value.`,
           errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
           errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
         });
@@ -1731,7 +1811,7 @@ export class LitNodeClientNodeJs
     // -- validate present of accepted auth methods
     if (!authSig && !sessionSigs && (!authMethods || authMethods.length <= 0)) {
       throwError({
-        message: `Either authSig, sessionSigs, or authMethods (length > 0) must be present.`,
+        message: `[pkpSign] Either authSig, sessionSigs, or authMethods (length > 0) must be present.`,
         errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
         errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
       });
@@ -1757,7 +1837,7 @@ export class LitNodeClientNodeJs
           mustHave: false,
         });
 
-        logWithRequestId(id, 'sigToPassToNode:', sigToPassToNode);
+        logWithRequestId(id, '[pkpSign] sigToPassToNode:', sigToPassToNode);
 
         const reqBody = {
           toSign,
@@ -1767,7 +1847,7 @@ export class LitNodeClientNodeJs
           ...(authMethods && authMethods.length > 0 && { authMethods }),
         };
 
-        logWithRequestId(id, 'reqBody:', reqBody);
+        logWithRequestId(id, '[pkpSign] reqBody:', reqBody);
 
         return this.getPkpSignExecutionShares(url, reqBody, id);
       });
@@ -1785,7 +1865,7 @@ export class LitNodeClientNodeJs
       wrapper,
       (error: any, requestId: string, isFinal: boolean) => {
         if (!isFinal) {
-          logError('errror occured, retrying operation');
+          logError('[pkpSign] error occured, retrying operation');
         }
       },
       this.config.retryTolerance
@@ -1801,7 +1881,7 @@ export class LitNodeClientNodeJs
     const responseData = (res as SuccessNodePromises<PKPSignShare>).values;
     logWithRequestId(
       requestId,
-      'responseData',
+      '[pkpSign] responseData',
       JSON.stringify(responseData, null, 2)
     );
 
@@ -1847,7 +1927,7 @@ export class LitNodeClientNodeJs
     });
 
     const signatures = this.getSignatures(signedDataList, requestId);
-    logWithRequestId(requestId, `signature combination`, signatures);
+    logWithRequestId(requestId, `[pkpSign] signature combination`, signatures);
 
     return signatures.signature; // only a single signature is ever present, so we just return it.
   };
@@ -2401,6 +2481,8 @@ export class LitNodeClientNodeJs
   signSessionKey = async (
     params: SignSessionKeyProp
   ): Promise<SignSessionKeyResponse> => {
+    log(`[signSessionKey] params:`, params);
+
     // ========== Validate Params ==========
     // -- validate: If it's NOT ready
     if (!this.ready) {
@@ -2424,16 +2506,22 @@ export class LitNodeClientNodeJs
     // This allow the user to provide a sessionKeyUri directly without using the session key pair
     if (params?.sessionKeyUri) {
       sessionKeyUri = params.sessionKeyUri;
+      log(`[signSessionKey] sessionKeyUri found in params:`, sessionKeyUri);
     } else {
       // Try to get it from local storage, if not generates one~
       let sessionKey: SessionKeyPair =
         params.sessionKey ?? this.getSessionKey();
       sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
+
+      log(
+        `[signSessionKey] sessionKeyUri is not found in params, generating a new one`,
+        sessionKeyUri
+      );
     }
 
     if (!sessionKeyUri) {
       throw new Error(
-        'sessionKeyUri is not defined. Please provide a sessionKeyUri or a sessionKey.'
+        '[signSessionKey] sessionKeyUri is not defined. Please provide a sessionKeyUri or a sessionKey.'
       );
     }
 
@@ -2451,6 +2539,7 @@ export class LitNodeClientNodeJs
     let siwe_statement = 'Lit Protocol PKP session signature';
     if (params.statement) {
       siwe_statement += ' ' + params.statement;
+      log(`[signSessionKey] statement found in params: "${params.statement}"`);
     }
 
     let siweMessage = new siwe.SiweMessage({
@@ -2467,6 +2556,10 @@ export class LitNodeClientNodeJs
 
     // context: if resourceAbilityRequests is provided, we want to inject the capabilities to the siwe message
     if (params?.resourceAbilityRequests) {
+      log(
+        `[signSessionKey] resourceAbilityRequests found in params:`,
+        params.resourceAbilityRequests
+      );
       const resources = params.resourceAbilityRequests.map((r) => r.resource);
 
       const recapObject =
@@ -2493,14 +2586,22 @@ export class LitNodeClientNodeJs
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
-    const body = {
+    const body: JsonSignSessionKeyRequestV1 = {
       sessionKey: sessionKeyUri,
       authMethods: params.authMethods,
-      pkpPublicKey: params.pkpPublicKey,
+      ...(params?.pkpPublicKey && { pkpPublicKey: params.pkpPublicKey }),
       ...(params?.authSig && { authSig: params.authSig }),
       // authSig: params.authSig,
       siweMessage: siweMessageStr,
+      curveType: 'BLS',
+
+      // -- custom auths
+      ...(params?.litActionCode && { code: params.litActionCode }),
+      ...(params?.jsParams && { jsParams: params.jsParams }),
+      ...(this.currentEpochNumber && { epoch: this.currentEpochNumber }),
     };
+
+    log(`[signSessionKey] body:`, body);
 
     const wrapper = async (
       id: string
@@ -2555,22 +2656,58 @@ export class LitNodeClientNodeJs
     const responseData = res.values;
     logWithRequestId(
       requestId,
-      'responseData',
+      '[signSessionKey] responseData',
       JSON.stringify(responseData, null, 2)
     );
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = responseData.map(
-      (r: any) => (r as SignedData).signedData
-    );
+    let curveType = responseData[0]?.curveType;
 
-    logWithRequestId(requestId, 'signedDataList', signedDataList);
+    if (!curveType) {
+      log(`[signSessionKey] curveType not found. Defaulting to ECDSA.`)
+      curveType = 'ECDSA';
+    }
+
+    log(`[signSessionKey] curveType is "${curveType}"`)
+
+    let signedDataList: any[] = [];
+
+
+    if (curveType === SIGTYPE.BLS) {
+
+      let _responseData: BlsResponseData[] = responseData;
+
+      const signatureShares = _responseData.map((s) => ({
+        ProofOfPossession: s.signatureShare.ProofOfPossession,
+      }));
+
+      log(`[signSessionKey] signatureShares:`, signatureShares);
+
+      signedDataList = _responseData.map((s) => {
+        return s.dataSigned;
+      });
+
+      signedDataList = _responseData;
+
+    } else {
+      signedDataList = responseData.map(
+        (r: any) => (r as SignedData).signedData
+      )
+    }
+
+    if (signedDataList.length <= 0) {
+      const err = `[signSessionKey] signedDataList is empty.`
+      log(err)
+      throw new Error(err);
+    }
+
+    logWithRequestId(requestId, '[signSessionKey] signedDataList', signedDataList);
 
     // -- checking if we have enough shares
     const validatedSignedDataList = signedDataList
       .map((signedData: any) => {
-        const sessionSig = signedData['sessionSig'];
+        const sessionSig = signedData['sessionSig'] ?? signedData;
 
         // add backwards compatibility for `sigType` field
         // For more context: Previously, the field was called `sigType` but it was changed to `curveType` because we are now using BLS instead of ECDSA.
@@ -2579,7 +2716,15 @@ export class LitNodeClientNodeJs
         }
 
         // each of this field cannot be empty
-        const requiredFields = [
+        let requiredFields = curveType === SIGTYPE.BLS ? [
+          'signatureShare',
+          'curveType',
+          'shareIndex',
+          'siweMessage',
+          'dataSigned',
+          'blsRootPubkey',
+          'result',
+        ] : [
           'sigType',
           'dataSigned',
           'signatureShare',
@@ -2593,9 +2738,17 @@ export class LitNodeClientNodeJs
         for (const field of requiredFields) {
           if (!sessionSig[field] || sessionSig[field] === '') {
             log(
-              `Invalid signed data. "${field}" is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
+              `[signSessionKey] Invalid signed data. "${field}" is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
             );
             return null;
+          }
+        }
+
+        if (curveType === SIGTYPE.BLS) {
+          if (!sessionSig.signatureShare.ProofOfPossession) {
+            const err = `[signSessionKey] Invalid signed data. "ProofOfPossession" is missing.`
+            log(err)
+            throw new Error(err);
           }
         }
 
@@ -2603,32 +2756,89 @@ export class LitNodeClientNodeJs
       })
       .filter((item) => item !== null);
 
-    logWithRequestId(requestId, 'requested length:', signedDataList.length);
+    logWithRequestId(requestId, '[signSessionKey] requested length:', signedDataList.length);
     logWithRequestId(
       requestId,
-      'validated length:',
+      '[signSessionKey] validated length:',
       validatedSignedDataList.length
     );
     logWithRequestId(
       requestId,
-      'minimum required length:',
+      '[signSessionKey] minimum required length:',
       this.config.minNodeCount
     );
     if (validatedSignedDataList.length < this.config.minNodeCount) {
       throw new Error(
-        `not enough nodes signed the session key.  Expected ${this.config.minNodeCount}, got ${validatedSignedDataList.length}`
+        `[signSessionKey] not enough nodes signed the session key.  Expected ${this.config.minNodeCount}, got ${validatedSignedDataList.length}`
       );
     }
 
-    const signatures = this.getSessionSignatures(validatedSignedDataList);
+    let signatures: any;
+
+    if (curveType === SIGTYPE.BLS) {
+
+      const blsSignedData: BlsResponseData[] = validatedSignedDataList as BlsResponseData[];
+
+      const sigType = mostCommonString(blsSignedData.map((s: any) => s.sigType));
+      log(`[signSessionKey] sigType:`, sigType);
+
+      const signatureShares = blsSignedData.map((s) => ({
+        ProofOfPossession: s.signatureShare.ProofOfPossession,
+      }));
+
+      log(`[signSessionKey] signatureShares:`, signatureShares);
+
+      const blsCombinedSignature = blsSdk.combine_signature_shares(
+        signatureShares.map((s) => JSON.stringify(s))
+      );
+
+      log(`[signSessionKey] blsCombinedSignature:`, blsCombinedSignature);
+
+      const publicKey = params.pkpPublicKey.startsWith('0x') ? params.pkpPublicKey.slice(2) : params.pkpPublicKey;
+
+      const dataSigned = mostCommonString(blsSignedData.map((s: any) => s.dataSigned));
+      const siweMessage = mostCommonString(blsSignedData.map((s: any) => s.siweMessage));
+      signatures = {
+        sessionSig: {
+          signature: blsCombinedSignature,
+          publicKey,
+          dataSigned,
+          siweMessage,
+        },
+      }
+    } else {
+      // Shape: [signSessionKey] signatures: {
+      //   sessionSig: {
+      //     r: "xx",
+      //     s: "yy",
+      //     recid: 1,
+      //     signature: "0x...",
+      //     publicKey: "04e...",
+      //     dataSigned: "7c1...",
+      //     siweMessage: "litprotocol.com wants you to sign in with your Ethereum account:\n0xd69969c6a2E56C928d63F12325fe1d9D47115C91\n\nLit Protocol PKP session signature Some custom statement. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Signing' for 'lit-pkp://*'.\n\nURI: lit:session:95ff87b5d2210c382ccfcba6bdb16ceb217da9726c91d0fdda5eb888f087488f\nVersion: 1\nChain ID: 1\nNonce: 0x337906a8c2a6da52d438495fc1b0145ed5632ec32ffa1dda1064f43775b3a802\nIssued At: 2024-04-09T17:58:47Z\nExpiration Time: 2024-04-10T17:59:13.420Z\nResources:\n- urn:recap:eyJhdHQiOnt9LCJwcmYiOltdfQ\n- urn:recap:eyJhdHQiOnsibGl0LXBrcDovLyoiOnsiVGhyZXNob2xkL1NpZ25pbmciOlt7fV19fSwicHJmIjpbXX0",
+      //   },
+      // }
+      signatures = this.getSessionSignatures(validatedSignedDataList);
+    }
+
+    log('[signSessionKey] signatures:', signatures);
 
     const { sessionSig } = signatures;
 
+    const signedMessage = normalizeAndStringify(sessionSig.siweMessage);
+
+    log(`[signSessionKey] signedMessage:`, signedMessage);
+
     return {
       authSig: {
-        sig: sessionSig.signature,
-        derivedVia: 'web3.eth.personal.sign via Lit PKP',
-        signedMessage: sessionSig.siweMessage,
+        sig: curveType === SIGTYPE.BLS ? JSON.stringify({
+          ProofOfPossession: sessionSig.signature,
+        }) : sessionSig.signature,
+        derivedVia:
+          curveType === SIGTYPE.BLS ?
+            DERIVED_VIA.BLS :
+            DERIVED_VIA.LIT_ETH_PERSONAL_SIGN,
+        signedMessage,
         address: computeAddress('0x' + sessionSig.publicKey),
       },
       pkpPublicKey: sessionSig.publicKey,
@@ -2644,8 +2854,8 @@ export class LitNodeClientNodeJs
     params: GetSignSessionKeySharesProp,
     requestId: string
   ) => {
-    log('getSignSessionKeyShares');
-    const urlWithPath = `${url}/web/sign_session_key/v1`;
+    const urlWithPath = `${url}/web/sign_session_key${LIT_ENDPOINT_VERSION}`;
+    log(`[getSignSessionKeyShares] from ${urlWithPath}`);
     return await this.sendCommandToNode({
       url: urlWithPath,
       data: params.body,
@@ -2694,15 +2904,17 @@ export class LitNodeClientNodeJs
     // -- prepare
     // Try to get it from local storage, if not generates one~
     const sessionKey = params.sessionKey ?? this.getSessionKey();
-
+    log('[getSessionSigs] sessionKey:', sessionKey);
     const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
+    log('[getSessionSigs] sessionKeyUri:', sessionKeyUri);
 
     // First get or generate the session capability object for the specified resources.
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
+
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
     if (!this.latestBlockhash) {
@@ -2715,6 +2927,7 @@ export class LitNodeClientNodeJs
     const nonce = this.latestBlockhash!;
 
     // -- (TRY) to get the wallet signature
+    log('[getSessionSigs] Trying to get wallet signature for session key');
     let authSig = await this.getWalletSig({
       authNeededCallback: params.authNeededCallback,
       chain: params.chain,
@@ -2731,12 +2944,11 @@ export class LitNodeClientNodeJs
       sessionKeyUri,
       resourceAbilityRequests: params.resourceAbilityRequests,
     });
-
-    // console.log('XXX needToResignSessionKey:', needToResignSessionKey);
+    log('[getSessionSigs] needToResignSessionKey:', needToResignSessionKey);
 
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
-      log('need to re-sign session key.  Signing...');
+      log('[getSessionSigs] need to re-sign session key.  Signing...');
       authSig = await this.#authCallbackAndUpdateStorageItem({
         authCallback: params.authNeededCallback,
         authCallbackParams: {
@@ -2759,7 +2971,7 @@ export class LitNodeClientNodeJs
       authSig.signedMessage === ''
     ) {
       throwError({
-        message: 'No wallet signature found',
+        message: '[getSessionSigs] No wallet signature found',
         errorKind: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.kind,
         errorCode: LIT_ERROR.WALLET_SIGNATURE_NOT_FOUND_ERROR.name,
       });
@@ -2778,6 +2990,8 @@ export class LitNodeClientNodeJs
       : [authSig];
     // const capabilities = params.capacityDelegationAuthSig ? [authSig, params.capacityDelegationAuthSig] : [authSig];
 
+    log('[getSessionSigs] capabilities:', capabilities);
+
     // console.log('capabilities:', capabilities);
 
     const signingTemplate = {
@@ -2788,6 +3002,8 @@ export class LitNodeClientNodeJs
       expiration: sessionExpiration.toISOString(),
     };
 
+    log('[getSessionSigs] signingTemplate:', signingTemplate);
+
     const signatures: SessionSigsMap = {};
 
     this.connectedNodes.forEach((nodeAddress: string) => {
@@ -2796,12 +3012,10 @@ export class LitNodeClientNodeJs
         nodeAddress,
       };
 
+      log(`[getSessionSigs] toSign:`, toSign);
+
       const signedMessage = JSON.stringify(toSign);
-
-      // sanitise signedMessage, replace //n with /n
-      // signedMessage = signedMessage.replaceAll(/\/\/n/g, '/n');
-
-      // console.log('XX signedMessage:', signedMessage);
+      log(`[getSessionSigs] signedMessage: ${signedMessage}`);
 
       const uint8arrayKey = uint8arrayFromString(
         sessionKey.secretKey,
@@ -2810,18 +3024,22 @@ export class LitNodeClientNodeJs
 
       const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
       const signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
+      log(`[getSessionSigs] signature:`, signature);
 
-      // log("signature", signature);
-      signatures[nodeAddress] = {
+      const signatureObject = {
         sig: uint8arrayToString(signature, 'base16'),
         derivedVia: 'litSessionSignViaNacl',
         signedMessage: signedMessage,
         address: sessionKey.publicKey,
         algo: 'ed25519',
       };
+
+      signatures[nodeAddress] = signatureObject;
+
+      log(`[getSessionSigs] signatureObject from ${nodeAddress}`, signatureObject);
     });
 
-    log('signatures:', signatures);
+    log('[getSessionSigs] sessionSigs:', signatures);
 
     return signatures;
   };
@@ -2912,7 +3130,7 @@ export class LitNodeClientNodeJs
 
       logWithRequestId(
         requestId,
-        `responseData: ${JSON.stringify(responseData, null, 2)}`
+        `[claimKeyId] responseData: ${JSON.stringify(responseData, null, 2)}`
       );
 
       const derivedKeyId = (responseData as SuccessNodePromises<any>).values[0]
