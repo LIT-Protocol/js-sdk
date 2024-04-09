@@ -224,7 +224,7 @@ export const combineEcdsaShares = (
     return acc;
   }, []);
 
-  log('Valid Shares:', validShares);
+  log('[combineEcdsaShares] Valid Shares:', validShares);
 
   // if there are no valid shares, throw an error
   if (validShares.length === 0) {
@@ -247,7 +247,7 @@ export const combineEcdsaShares = (
         try {
           sig = JSON.parse(res) as CombinedECDSASignature;
         } catch (e) {
-          logError('Error while combining signatures shares', validShares);
+          logError('[combineEcdsaShares] Error while combining signatures shares', validShares);
           throwError({
             message: (e as Error).message,
             name: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.name,
@@ -272,7 +272,7 @@ export const combineEcdsaShares = (
         break;
       case SIGTYPE.ECDSCAITSITHP256:
         res = ecdsaSdk.combine_signature(validShares, 3);
-        log('response from combine_signature', res);
+        log('[combineEcdsaShares] response from combine_signature', res);
         sig = JSON.parse(res);
         break;
       // if its another sig type, it shouldnt be resolving to this method
@@ -285,7 +285,7 @@ export const combineEcdsaShares = (
     log('Failed to combine signatures:', e);
   }
 
-  log('signature', sig);
+  log('[combineEcdsaShares] signature', sig);
 
   return sig;
 };

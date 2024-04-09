@@ -178,7 +178,7 @@ export class LitCore {
     // If the user sets a new file path, we respect it over the default path.
     if (this.config.storageProvider?.provider) {
       log(
-        'localstorage api not found, injecting persistence instance found in config'
+        '[LitCore constructor] localstorage api not found, injecting persistence instance found in config'
       );
       // using Object defineProperty in order to set a property previously defined as readonly.
       // if the user wants to override the storage option explicitly we override.
@@ -191,7 +191,7 @@ export class LitCore {
       !this.config.storageProvider?.provider
     ) {
       log(
-        'Looks like you are running in NodeJS and did not provide a storage provider, your sessions will not be cached'
+        '[LitCore constructor] Looks like you are running in NodeJS and did not provide a storage provider, your sessions will not be cached'
       );
     }
   }
