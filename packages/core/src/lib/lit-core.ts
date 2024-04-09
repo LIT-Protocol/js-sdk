@@ -15,6 +15,7 @@ import {
   validateUnifiedAccessControlConditionsSchema,
 } from '@lit-protocol/access-control-conditions';
 import {
+  LIT_ENDPOINT,
   LIT_ERROR,
   LIT_ERROR_CODE,
   LIT_NETWORKS,
@@ -874,7 +875,7 @@ export class LitCore {
         const { url } = params;
 
         // -- create url with path
-        const urlWithPath = `${url}/web/handshake`;
+        const urlWithPath = `${url}${LIT_ENDPOINT.HANDSHAKE}`;
 
         log(`handshakeWithNode ${urlWithPath}`);
 

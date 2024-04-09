@@ -24,6 +24,7 @@ import {
   DERIVED_VIA,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
+  LIT_ENDPOINT,
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
@@ -757,7 +758,7 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, 'getJsExecutionShares');
 
     // -- execute
-    const urlWithPath = `${url}/web/execute${LIT_ENDPOINT_VERSION}`;
+    const urlWithPath = `${url}${LIT_ENDPOINT.EXECUTE_JS}${LIT_ENDPOINT_VERSION}`;
 
     if (!authSig) {
       throw new Error('authSig or sessionSig is required');
@@ -788,7 +789,7 @@ export class LitNodeClientNodeJs
     params: any,
     requestId: string
   ) => {
-    const urlWithPath = `${url}/web/pkp/sign${LIT_ENDPOINT_VERSION}`;
+    const urlWithPath = `${url}${LIT_ENDPOINT.PKP_SIGN}${LIT_ENDPOINT_VERSION}`;
     logWithRequestId(requestId, `[getPkpSigningShares] ${urlWithPath}`);
 
     if (!params.authSig) {
@@ -808,7 +809,7 @@ export class LitNodeClientNodeJs
     requestId: string
   ) => {
     logWithRequestId(requestId, 'getPkpSigningShares');
-    const urlWithPath = `${url}/web/pkp/claim${LIT_ENDPOINT_VERSION}`;
+    const urlWithPath = `${url}${LIT_ENDPOINT.PKP_CLAIM}${LIT_ENDPOINT_VERSION}`;
     if (!params.authMethod) {
       throw new Error('authMethod is required');
     }
@@ -835,7 +836,7 @@ export class LitNodeClientNodeJs
     requestId: string
   ): Promise<NodeCommandResponse> => {
     logWithRequestId(requestId, 'getSigningShareForToken');
-    const urlWithPath = `${url}/web/signing/access_control_condition${LIT_ENDPOINT_VERSION}`;
+    const urlWithPath = `${url}${LIT_ENDPOINT.SIGN_ACCS}${LIT_ENDPOINT_VERSION}`;
 
     return this.sendCommandToNode({
       url: urlWithPath,
@@ -859,7 +860,7 @@ export class LitNodeClientNodeJs
     requestId: string
   ): Promise<NodeCommandResponse> => {
     log('getSigningShareForDecryption');
-    const urlWithPath = `${url}/web/encryption/sign${LIT_ENDPOINT_VERSION}`;
+    const urlWithPath = `${url}${LIT_ENDPOINT.ENCRYPTION_SIGN}${LIT_ENDPOINT_VERSION}`;
 
     return await this.sendCommandToNode({
       url: urlWithPath,
@@ -887,7 +888,7 @@ export class LitNodeClientNodeJs
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       log('signConditionEcdsa');
-      const urlWithPath = `${url}/web/signing/signConditionEcdsa${LIT_ENDPOINT_VERSION}`;
+      const urlWithPath = `${url}${LIT_ENDPOINT.SIGN_ECDSA}${LIT_ENDPOINT_VERSION}`;
 
       const data = {
         access_control_conditions: params.accessControlConditions,
@@ -2854,7 +2855,7 @@ export class LitNodeClientNodeJs
     params: GetSignSessionKeySharesProp,
     requestId: string
   ) => {
-    const urlWithPath = `${url}/web/sign_session_key${LIT_ENDPOINT_VERSION}`;
+    const urlWithPath = `${url}${LIT_ENDPOINT.SIGN_SESSION_KEY}${LIT_ENDPOINT_VERSION}`;
     log(`[getSignSessionKeyShares] from ${urlWithPath}`);
     return await this.sendCommandToNode({
       url: urlWithPath,
