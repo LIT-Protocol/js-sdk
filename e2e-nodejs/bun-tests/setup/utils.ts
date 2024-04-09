@@ -5,15 +5,15 @@ export const getNetworkFlag = (): ENV => {
 
   const network: string = networkArg
     ? networkArg.replace('--network=', '')
-    : 'localhost';
+    : 'localchain';
 
   if (
-    network !== ENV.LOCALHOST &&
+    network !== ENV.LOCALCHAIN &&
     network !== ENV.HABANERO &&
     network !== ENV.MANZANO
   ) {
     console.log(
-      'Invalid network argument. Please use --network=localhost, --network=habanero, or --network=manzano'
+      'Invalid network argument. Please use --network=localchain, --network=habanero, or --network=manzano'
     );
     process.exit();
   }
