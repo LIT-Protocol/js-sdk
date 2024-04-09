@@ -1,2 +1,4 @@
 # Add files here to ignore them from prettier formatting
 /dist
+/rust/target
+/src/pkg

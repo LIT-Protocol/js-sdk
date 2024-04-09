@@ -1,1 +1,3 @@
 node_modules
+/rust/target
+/src/pkg
