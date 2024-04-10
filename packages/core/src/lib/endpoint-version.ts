@@ -20,24 +20,28 @@ export const getLitEndpointPath = () => {
     const version = versionArg ? versionArg.split('=')[1] : null;
 
     // Use environment variable if set; default to 'v1' otherwise
-    const detectedVersion =
+    let detectedVersion =
       version || // check for --version flag
       process.env[LIT_PROCESS_ENV.LIT_ENDPOINT_VERSION] || // check for environment variable
       LIT_ENDPOINT_VERSION.V1; // default to 'v1'
 
-    // get keys from LitEndPointPath enum
-    const keys = Object.keys(LIT_ENDPOINT_VERSION);
+    // to lower case and prefix with '/' if not already
+    detectedVersion = detectedVersion.toLowerCase();
+    detectedVersion = detectedVersion.startsWith('/') ? detectedVersion : `/${detectedVersion}`;
 
-    if (!keys.includes(detectedVersion)) {
+    // get keys from LitEndPointPath enum
+    const keys = Object.values(LIT_ENDPOINT_VERSION);
+
+    if (!keys.includes(detectedVersion as LIT_ENDPOINT_VERSION)) {
       log(`[getLitEndpointPath] Invalid Lit endpoint version: "${detectedVersion}" - must be one of: "${keys.join('", "')}. Defaulting to "${LIT_ENDPOINT_VERSION.V1}".`);
     }
 
     endpointPath = detectedVersion === LIT_ENDPOINT_VERSION.V1
       ? LIT_ENDPOINT_VERSION.V1
       : LIT_ENDPOINT_VERSION.LEGACY;
-
-    log(`🔥 [getLitEndpointPath] Using Lit endpoint version: "${endpointPath}"`);
   }
+
+  log(`🔥 [getLitEndpointPath] Using Lit endpoint version: "${endpointPath}"`);
 
   return endpointPath;
 }
