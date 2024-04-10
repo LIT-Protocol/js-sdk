@@ -209,8 +209,8 @@ const tests = {
       chain: 'ethereum',
       resourceAbilityRequests: [
         {
-          resource: new LitActionResource('*'),
-          ability: LitAbility.LitActionExecution,
+          resource: new LitPKPResource('*'),
+          ability: LitAbility.PKPSigning,
         },
       ],
       authNeededCallback: async ({
@@ -249,13 +249,11 @@ const tests = {
           expiration: expiration,
           resources: resources,
           walletAddress: hotWallet.address,
-          nonce: 'lastestBlockhash',
+          nonce: lastestBlockhash,
           litNodeClient: litNodeClient,
           resourceAbilityRequests,
           type: CreateSiweType.WITH_RECAP,
         });
-
-        console.log('siweMessage:', siweMessage);
 
         const authSig = await craftAuthSig({
           signer: hotWallet,
@@ -264,7 +262,7 @@ const tests = {
 
         return authSig;
       },
-      capacityDelegationAuthSig,
+      // capacityDelegationAuthSig,
     });
 
     console.log('sessionSigs:', sessionSigs);
@@ -303,7 +301,6 @@ const tests = {
    * ✅ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUsePkpSessionSigsToPkpSign: async () => {
-    hotWalletAuthMethodOwnedPkp.publicKey = `0x${hotWalletAuthMethodOwnedPkp.publicKey}`;
 
     const pkpSessionSigs = await litNodeClient.getSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
@@ -313,7 +310,6 @@ const tests = {
         {
           resource: new LitPKPResource('*'),
           ability: LitAbility.PKPSigning,
-          // ability: LitAbility.WILDCARD,
         },
       ],
       authNeededCallback: async (params) => {
@@ -346,7 +342,7 @@ const tests = {
 
         return response.authSig;
       },
-      // capacityDelegationAuthSig,
+      // capacityDelegationAuthSig, // unnecessary
     });
 
     console.log('pkpSessionSigs:', pkpSessionSigs);
@@ -368,10 +364,9 @@ const tests = {
 
   /**
    * Test Commands:
-   * ❌ yarn test:integrate --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=localchain --version=v1
+   * ✅ yarn test:integrate --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=localchain --version=v1
    * ❌ yarn test:integrate --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=habanero --version=v0
    *
-   * Localchain Error: Invalid Capability object in SIWE resource ReCap
    * Habanero Error: There was an error getting the signing shares from the nodes
    */
   testUseValidLitActionCodeGeneratedSessionSigsToPkpSign: async () => {
@@ -383,8 +378,6 @@ if (Lit.Auth.authMethodContexts.some(e => e.authMethodType === 1)) {
   LitActions.setResponse({ response: "false" });
 }
 `;
-
-    hotWalletAuthMethodOwnedPkp.publicKey = `0x${hotWalletAuthMethodOwnedPkp.publicKey}`;
 
     const pkpSessionSigs = await litNodeClient.getSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
@@ -433,7 +426,7 @@ if (Lit.Auth.authMethodContexts.some(e => e.authMethodType === 1)) {
 
         return response.authSig;
       },
-      capacityDelegationAuthSig,
+      // capacityDelegationAuthSig,
     });
 
     console.log('pkpSessionSigs:', pkpSessionSigs);
