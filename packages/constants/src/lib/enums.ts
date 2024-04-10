@@ -116,9 +116,3 @@ export enum LIT_ENDPOINT_VERSION {
   LEGACY = '/',
   V1 = '/v1',
 }
-
-export interface LitUrl {
-  url: string;
-  endpoint: LIT_ENDPOINT;
-  version?: LIT_ENDPOINT_VERSION
-}
