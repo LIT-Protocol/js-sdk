@@ -55,7 +55,6 @@ const optionMaps = new Map([
   ['postBuildIndividual', () => postBuildIndividualFunc()],
   ['fixTsConfig', () => fixTsConfigFunc()],
   ['check', () => checkFunc()],
-  ['--prebuild', () => preBuildFunc()]
 ]);
 
 const setup = () => {
