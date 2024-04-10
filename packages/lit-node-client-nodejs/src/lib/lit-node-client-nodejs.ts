@@ -2603,7 +2603,7 @@ export class LitNodeClientNodeJs
       ...(params?.authSig && { authSig: params.authSig }),
       // authSig: params.authSig,
       siweMessage: siweMessageStr,
-      curveType: 'BLS',
+      curveType: SIGTYPE.BLS,
 
       // -- custom auths
       ...(params?.litActionCode && { code: params.litActionCode }),
