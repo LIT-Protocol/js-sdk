@@ -12,7 +12,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 blsful = { version = "2.5.3", default-features = false, features = ["rust"] }
-bls12_381_plus = "0.8.14"
+bls12_381_plus = {version = "0.8.13", features = ["hashing"] }
 base64_light = "0.1"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
@@ -55,26 +55,14 @@ sev = { version = "2.0.2", default-features = false, features = [
 ] }
 rand = "0.8"
 serde_bytes = "0.11.14"
-vsss-rs = "3.3.4"
-frost-core = { git = "https://github.com/LIT-Protocol/frost.git" }
-frost-ed25519 = { git = "https://github.com/LIT-Protocol/frost.git" }
-frost-ed448 = { git = "https://github.com/LIT-Protocol/frost.git" }
-frost-p256 = { git = "https://github.com/LIT-Protocol/frost.git" }
-frost-p384 = { git = "https://github.com/LIT-Protocol/frost.git" }
-frost-redjubjub = { git = "https://github.com/LIT-Protocol/frost.git" }
-frost-rerandomized = { git = "https://github.com/LIT-Protocol/frost.git" }
-frost-ristretto255 = { git = "https://github.com/LIT-Protocol/frost.git" }
-frost-secp256k1 = { git = "https://github.com/LIT-Protocol/frost.git" }
-frost-taproot = { git = "https://github.com/LIT-Protocol/frost.git" }
-lit-frost = { git = "https://github.com/LIT-Protocol/lit-frost.git" }
+vsss-rs = { version = "4.0", features = ["std"] }
+lit-frost = { git = "https://github.com/LIT-Protocol/lit-frost.git", branch = "main"}
 tsify = { version = "0.4.5", default-features = false, features = ["js"] }
+jubjub = { version = "0.10", git = "https://github.com/LIT-Protocol/jubjub.git", branch = "main"}
 
 # TODO(cairomassimo): remove branch once merged
-hd-keys-curves = { git = "https://github.com/LIT-Protocol/hd-keys-curves.git", branch = "fix-blsful-default-features-optional", version = "0.2.0", default-features = false }
+hd-keys-curves = {path = "../../../../hd-keys-curves", default-features = false }
 
-# TODO(cairomassimo): remove once https://github.com/LIT-Protocol/jubjub/pull/1 is merged
-[patch.'https://github.com/LIT-Protocol/jubjub.git']
-jubjub = { git = "https://github.com/LIT-Protocol/jubjub.git#", branch = "fix-remove-dep-bls12381plus-hashing" }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"
@@ -83,7 +71,7 @@ k256 = "0.13"
 rand = "0.8"
 rand_chacha = "0.3"
 digest = "0.10"
-vsss-rs = { version = "3.2", features = ["std"] }
+vsss-rs = { version = "4.0", features = ["std"] }
 
 [profile.release]
 opt-level = "s"
