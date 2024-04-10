@@ -233,11 +233,11 @@ export type LitContractContext = {
  */
 export type LitContractResolverContext = {
   [index: string]:
-  | string
-  | LitContractContext
-  | EthersJsonRpcProviderLike
-  | undefined
-  | number;
+    | string
+    | LitContractContext
+    | EthersJsonRpcProviderLike
+    | undefined
+    | number;
   resolverAddress: string;
   abi: any;
   environment: number;

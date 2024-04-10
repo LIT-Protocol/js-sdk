@@ -61,9 +61,9 @@ export const devEnv = async (
     env?: ENV;
     debug?: boolean;
   } = {
-      env: ENV.LOCALCHAIN,
-      debug: true,
-    }
+    env: ENV.LOCALCHAIN,
+    debug: true,
+  }
 ): Promise<{
   litNodeClient: LitNodeClient;
   litContractsClient: LitContracts;

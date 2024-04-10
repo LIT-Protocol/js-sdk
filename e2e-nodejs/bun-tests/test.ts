@@ -301,7 +301,6 @@ const tests = {
    * ✅ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUsePkpSessionSigsToPkpSign: async () => {
-
     const pkpSessionSigs = await litNodeClient.getSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
       expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours

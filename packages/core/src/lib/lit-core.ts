@@ -695,10 +695,13 @@ export class LitCore {
     await Promise.race([
       new Promise((_resolve, reject) => {
         timeoutHandle = setTimeout(() => {
-          const msg = `Error: Could not connect to enough nodes after timeout of ${this.config.connectTimeout
-            }ms.  Could only connect to ${Object.keys(serverKeys).length} of ${this.config.minNodeCount
-            } required nodes, from ${this.config.bootstrapUrls.length
-            } possible nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
+          const msg = `Error: Could not connect to enough nodes after timeout of ${
+            this.config.connectTimeout
+          }ms.  Could only connect to ${Object.keys(serverKeys).length} of ${
+            this.config.minNodeCount
+          } required nodes, from ${
+            this.config.bootstrapUrls.length
+          } possible nodes.  Please check your network connection and try again.  Note that you can control this timeout with the connectTimeout config option which takes milliseconds.`;
 
           try {
             // TODO: Kludge, replace with standard error construction
@@ -877,7 +880,7 @@ export class LitCore {
         const urlWithPath = composeLitUrl({
           url,
           endpoint: LIT_ENDPOINT.HANDSHAKE,
-          version: LIT_ENDPOINT_VERSION.LEGACY
+          version: LIT_ENDPOINT_VERSION.LEGACY,
         });
 
         log(`handshakeWithNode ${urlWithPath}`);
@@ -950,7 +953,7 @@ export class LitCore {
     data,
     requestId,
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    SendNodeCommand): Promise<any> => {
+  SendNodeCommand): Promise<any> => {
     // FIXME: Replace <any> usage with explicit, strongly typed handlers
     data = { ...data, epochNumber: this.currentEpochNumber };
 

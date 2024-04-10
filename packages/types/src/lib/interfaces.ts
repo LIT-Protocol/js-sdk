@@ -519,17 +519,17 @@ export interface SignConditionECDSA {
 export interface ExecuteJsResponse {
   success?: boolean;
   signatures:
-  | {
-    sig: {
-      r: string;
-      s: string;
-      recid: number;
-      signature: string; // 0x...
-      publicKey: string; // pkp public key
-      dataSigned: string;
-    };
-  }
-  | any;
+    | {
+        sig: {
+          r: string;
+          s: string;
+          recid: number;
+          signature: string; // 0x...
+          publicKey: string; // pkp public key
+          dataSigned: string;
+        };
+      }
+    | any;
   decryptions: any[];
   response: string;
   logs: string;
@@ -541,7 +541,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise { }
+export interface LitNodePromise {}
 
 export interface SendNodeCommand {
   url: string;
@@ -1526,7 +1526,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions { }
+export interface BaseAuthenticateOptions {}
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
@@ -1606,8 +1606,8 @@ export interface MintCapacityCreditsPerKilosecond
 }
 export interface MintCapacityCreditsContext
   extends MintCapacityCreditsPerDay,
-  MintCapacityCreditsPerSecond,
-  MintCapacityCreditsPerKilosecond { }
+    MintCapacityCreditsPerSecond,
+    MintCapacityCreditsPerKilosecond {}
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
@@ -1658,7 +1658,7 @@ export interface BlsResponseData {
   blsRootPubkey: string;
 }
 export interface CapacityCreditsReq {
-  dAppOwnerWallet: SignerLike,
+  dAppOwnerWallet: SignerLike;
   capacityTokenId?: string;
   delegateeAddresses?: string[];
   uses?: string;
@@ -1673,7 +1673,7 @@ export interface CapacityCreditsRes {
 /**
  * Signer that has the ability to sign messages
  * eg. ethers.Wallet or ethers.Signer
- * 
+ *
  * for context: This is a common interface so can keep this package clean without
  * importing external libraries directly
  */
@@ -1686,7 +1686,7 @@ export interface EthersJsonRpcProviderLike {
   [key: string]: any;
   detectNetwork: () => Promise<any>;
   getSigner: (addressOrIndex?: string | number) => SignerLike;
-  getUncheckedSigner: (addressOrIndex?: string | number) => any,
+  getUncheckedSigner: (addressOrIndex?: string | number) => any;
   listAccounts: () => Promise<string[]>;
   send: (method: string, params: any[]) => Promise<any>;
   prepareRequest(method: string, params: any[]): any;
