@@ -25,9 +25,8 @@
     "universal"
   ],
   "scripts": {
+    "preinstall": "yarn rust:build",
     "rust:build": "wasm-pack build ./rust --target web --out-name wasm-internal --dev && yarn rust:postbuild",
     "rust:postbuild": "node scripts/copyWasmBinary.mjs && rm -rf src/pkg && mv rust/pkg src/pkg"
-  },
-  "main": "./dist/src/index.js",
-  "typings": "./dist/src/index.d.ts"
+  }
 }
