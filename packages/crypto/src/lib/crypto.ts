@@ -17,7 +17,7 @@ import {
 } from '@lit-protocol/uint8arrays';
 
 import { nacl } from '@lit-protocol/nacl';
-import { SIGTYPE } from '@lit-protocol/constants';
+import { LIT_CURVE } from '@lit-protocol/constants';
 import { CombinedECDSASignature } from '@lit-protocol/types';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
@@ -240,8 +240,8 @@ export const combineEcdsaShares = (
   try {
     let res: string = '';
     switch (type) {
-      case SIGTYPE.EcdsaCaitSith:
-      case SIGTYPE.EcdsaK256:
+      case LIT_CURVE.EcdsaCaitSith:
+      case LIT_CURVE.EcdsaK256:
         res = ecdsaSdk.combine_signature(validShares, 2);
 
         try {
@@ -273,7 +273,7 @@ export const combineEcdsaShares = (
           }
         }
         break;
-      case SIGTYPE.ECDSCAITSITHP256:
+      case LIT_CURVE.ECDSCAITSITHP256:
         res = ecdsaSdk.combine_signature(validShares, 3);
         log('[combineEcdsaShares] response from combine_signature', res);
         sig = JSON.parse(res);
@@ -296,13 +296,13 @@ export const combineEcdsaShares = (
 export const computeHDPubKey = (
   pubkeys: string[],
   keyId: string,
-  sigType: SIGTYPE
+  sigType: LIT_CURVE
 ): string => {
   // TODO: hardcoded for now, need to be replaced on each DKG as the last dkg id will be the active root key set.
   try {
     switch (sigType) {
-      case SIGTYPE.EcdsaCaitSith:
-      case SIGTYPE.EcdsaK256:
+      case LIT_CURVE.EcdsaCaitSith:
+      case LIT_CURVE.EcdsaK256:
         // a bit of pre processing to remove characters which will cause our wasm module to reject the values.
         pubkeys = pubkeys.map((value: string) => {
           return value.replace('0x', '');

@@ -32,7 +32,7 @@ import {
   LOCAL_STORAGE_KEYS,
   LIT_ENDPOINT,
   LitNetwork,
-  SIGTYPE,
+  LIT_CURVE,
   LIT_ENDPOINT_VERSION,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
@@ -1298,9 +1298,9 @@ export class LitNodeClientNodeJs
 
       // -- validate if signature type is ECDSA
       if (
-        sigType !== SIGTYPE.EcdsaCaitSith &&
-        sigType !== SIGTYPE.EcdsaK256 &&
-        sigType !== SIGTYPE.EcdsaCAITSITHP256
+        sigType !== LIT_CURVE.EcdsaCaitSith &&
+        sigType !== LIT_CURVE.EcdsaK256 &&
+        sigType !== LIT_CURVE.EcdsaCAITSITHP256
       ) {
         throwError({
           message: `[getSessionSignatures] signature type is ${sigType} which is invalid`,
@@ -1467,9 +1467,9 @@ export class LitNodeClientNodeJs
 
       // -- validate if signature type is ECDSA
       if (
-        sigType !== SIGTYPE.EcdsaCaitSith &&
-        sigType !== SIGTYPE.EcdsaK256 &&
-        sigType !== SIGTYPE.EcdsaCAITSITHP256
+        sigType !== LIT_CURVE.EcdsaCaitSith &&
+        sigType !== LIT_CURVE.EcdsaK256 &&
+        sigType !== LIT_CURVE.EcdsaCAITSITHP256
       ) {
         throwError({
           message: `[getSignatures] signature type is ${sigType} which is invalid`,
@@ -2589,7 +2589,7 @@ export class LitNodeClientNodeJs
       ...(params?.authSig && { authSig: params.authSig }),
       // authSig: params.authSig,
       siweMessage: siweMessageStr,
-      curveType: SIGTYPE.BLS,
+      curveType: LIT_CURVE.BLS,
 
       // -- custom auths
       ...(params?.litActionCode && { code: params.litActionCode }),
@@ -2669,7 +2669,7 @@ export class LitNodeClientNodeJs
 
     let signedDataList: any[] = [];
 
-    if (curveType === SIGTYPE.BLS) {
+    if (curveType === LIT_CURVE.BLS) {
       let _responseData: BlsResponseData[] = responseData;
 
       const signatureShares = _responseData.map((s) => ({
@@ -2714,7 +2714,7 @@ export class LitNodeClientNodeJs
 
         // each of this field cannot be empty
         let requiredFields =
-          curveType === SIGTYPE.BLS
+          curveType === LIT_CURVE.BLS
             ? [
                 'signatureShare',
                 'curveType',
@@ -2744,7 +2744,7 @@ export class LitNodeClientNodeJs
           }
         }
 
-        if (curveType === SIGTYPE.BLS) {
+        if (curveType === LIT_CURVE.BLS) {
           if (!sessionSig.signatureShare.ProofOfPossession) {
             const err = `[signSessionKey] Invalid signed data. "ProofOfPossession" is missing.`;
             log(err);
@@ -2779,7 +2779,7 @@ export class LitNodeClientNodeJs
 
     let signatures: any;
 
-    if (curveType === SIGTYPE.BLS) {
+    if (curveType === LIT_CURVE.BLS) {
       const blsSignedData: BlsResponseData[] =
         validatedSignedDataList as BlsResponseData[];
 
@@ -2841,7 +2841,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] signedMessage:`, signedMessage);
 
-    if (curveType === SIGTYPE.BLS) {
+    if (curveType === LIT_CURVE.BLS) {
       return {
         authSig: {
           sig: JSON.stringify({

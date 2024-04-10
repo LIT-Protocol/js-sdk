@@ -5,7 +5,9 @@ export enum VMTYPE {
   CVM = 'CVM',
 }
 
-export enum SIGTYPE {
+
+// BREAKING: This enum has been from `SIGTYPE` to `LIT_CURVE`
+export enum LIT_CURVE {
   BLS = 'BLS',
   EcdsaK256 = 'K256',
   EcdsaCaitSith = 'ECDSA_CAIT_SITH', // Legacy alias of K256
