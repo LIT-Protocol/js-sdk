@@ -7,8 +7,6 @@ import {
   AcceptedFileType,
   AccessControlConditions,
   Chain,
-  ConditionType,
-  EncryptedSymmetricKey,
   EvmContractConditions,
   IRelayAuthStatus,
   JsonRequest,
@@ -521,17 +519,17 @@ export interface SignConditionECDSA {
 export interface ExecuteJsResponse {
   success?: boolean;
   signatures:
-    | {
-        sig: {
-          r: string;
-          s: string;
-          recid: number;
-          signature: string; // 0x...
-          publicKey: string; // pkp public key
-          dataSigned: string;
-        };
-      }
-    | any;
+  | {
+    sig: {
+      r: string;
+      s: string;
+      recid: number;
+      signature: string; // 0x...
+      publicKey: string; // pkp public key
+      dataSigned: string;
+    };
+  }
+  | any;
   decryptions: any[];
   response: string;
   logs: string;
@@ -543,7 +541,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise {}
+export interface LitNodePromise { }
 
 export interface SendNodeCommand {
   url: string;
@@ -1528,7 +1526,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions {}
+export interface BaseAuthenticateOptions { }
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
@@ -1608,8 +1606,8 @@ export interface MintCapacityCreditsPerKilosecond
 }
 export interface MintCapacityCreditsContext
   extends MintCapacityCreditsPerDay,
-    MintCapacityCreditsPerSecond,
-    MintCapacityCreditsPerKilosecond {}
+  MintCapacityCreditsPerSecond,
+  MintCapacityCreditsPerKilosecond { }
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
@@ -1659,3 +1657,28 @@ export interface BlsResponseData {
   dataSigned: string;
   blsRootPubkey: string;
 }
+export interface CapacityCreditsReq {
+  dAppOwnerWallet: SignerLike,
+  capacityTokenId?: string;
+  delegateeAddresses?: string[];
+  uses?: string;
+  domain?: string;
+  expiration?: string;
+  statement?: string;
+}
+export interface CapacityCreditsRes {
+  capacityDelegationAuthSig: AuthSig;
+}
+
+/**
+ * Signer that has the ability to sign messages
+ * eg. ethers.Wallet or ethers.Signer
+ * 
+ * for context: This is a common interface so can keep this package clean without
+ * importing external libraries directly
+ */
+export interface SignerLike {
+  signMessage: (message: string | any) => Promise<string>;
+  getAddress: () => Promise<string>;
+}
+
