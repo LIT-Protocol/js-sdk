@@ -100,3 +100,25 @@ export enum LIT_URI {
 export enum AUTHSIG_ALGO {
   BLS = 'LIT_BLS',
 }
+
+/**
+ * CLI arguments
+ */
+export enum LIT_PROCESS_ENV {
+  LIT_ENDPOINT_VERSION = 'LIT_ENDPOINT_VERSION',
+}
+
+export enum LIT_PROCESS_FLAG {
+  VERSION = '--version=',
+}
+
+export enum LIT_ENDPOINT_VERSION {
+  LEGACY = '/',
+  V1 = '/v1',
+}
+
+export interface LitUrl {
+  url: string;
+  endpoint: LIT_ENDPOINT;
+  version?: LIT_ENDPOINT_VERSION
+}

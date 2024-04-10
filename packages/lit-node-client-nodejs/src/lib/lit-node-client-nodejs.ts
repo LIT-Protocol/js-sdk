@@ -8,7 +8,6 @@ import {
   LitAccessControlConditionResource,
   decode,
   RecapSessionCapabilityObject,
-  LitRLIResource,
   createSiweMessage,
   CapacityCreditsFields,
   craftAuthSig,
@@ -28,14 +27,15 @@ import {
   DERIVED_VIA,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
-  LIT_ENDPOINT,
   LIT_ERROR,
   LIT_URI,
   LOCAL_STORAGE_KEYS,
+  LIT_ENDPOINT,
   LitNetwork,
   SIGTYPE,
+  LIT_ENDPOINT_VERSION,
 } from '@lit-protocol/constants';
-import { LitCore } from '@lit-protocol/core';
+import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
   combineEcdsaShares,
   combineSignatureShares,
@@ -75,6 +75,8 @@ import type {
   AuthMethod,
   AuthSig,
   BlsResponseData,
+  CapacityCreditsReq,
+  CapacityCreditsRes,
   ClaimKeyResponse,
   ClaimProcessor,
   ClaimRequest,
@@ -129,50 +131,9 @@ type SessionKeyCache = {
 // Global cache variable
 let sessionKeyCache: SessionKeyCache | null = null;
 
-// TODO: move this to auth-helper for next patch
-interface CapacityCreditsReq {
-  dAppOwnerWallet: ethers.Wallet;
-  capacityTokenId?: string;
-  delegateeAddresses?: string[];
-  uses?: string;
-  domain?: string;
-  expiration?: string;
-  statement?: string;
-}
-
-// TODO: move this to auth-helper for next patch
-interface CapacityCreditsRes {
-  capacityDelegationAuthSig: AuthSig;
-}
-
-// Allow user to modify environment variable LIT_ENDPOINT_VERSION if only running
-// in nodejs
-let LIT_ENDPOINT_VERSION = 'v1'; // Default version
-
-if (isNode()) {
-  const versionArg = process.argv.find((arg) => arg.startsWith('--version='));
-  const version = versionArg ? versionArg.split('=')[1] : null;
-
-  // Use environment variable if set; default to 'v1' otherwise
-  LIT_ENDPOINT_VERSION = version || process.env['LIT_ENDPOINT_VERSION'] || 'v1';
-
-  // Normalize 'v0' to an empty string, ensure other versions are prefixed with '/'
-  LIT_ENDPOINT_VERSION =
-    LIT_ENDPOINT_VERSION === 'v0' ? '' : `/${LIT_ENDPOINT_VERSION}`;
-} else {
-  // Ensure the default 'v1' is prefixed with '/' when not running in Node.js
-  LIT_ENDPOINT_VERSION = `/v1`;
-}
-
-log(
-  `💡 LIT_ENDPOINT_VERSION${
-    LIT_ENDPOINT_VERSION === '' ? '(legacy): /' : `: ${LIT_ENDPOINT_VERSION}`
-  }`
-);
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
-{
+  implements LitClientSessionManager {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -370,7 +331,8 @@ export class LitNodeClientNodeJs
     log(
       `[getSessionKey] storedSessionKeyOrError: ${JSON.stringify(
         storedSessionKeyOrError
-      )}`
+      )
+      }`
     );
 
     if (
@@ -379,7 +341,7 @@ export class LitNodeClientNodeJs
       storedSessionKeyOrError.result === ''
     ) {
       log(
-        `[getSessionKey] Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+        `[getSessionKey] Storage key "${storageKey}" is missing.Not a problem.Contiune...`
       );
 
       // Check if a valid session key exists in cache
@@ -398,7 +360,7 @@ export class LitNodeClientNodeJs
         log(`[getSessionKey] newSessionKey set to local storage`);
       } catch (e) {
         log(
-          `[getSessionKey] Localstorage not available. Not a problem. Contiune...`
+          `[getSessionKey] Localstorage not available.Not a problem.Contiune...`
         );
 
         // Store in cache
@@ -407,12 +369,12 @@ export class LitNodeClientNodeJs
           timestamp: Date.now(),
         };
 
-        log(`[getSessionKey] newSessionKey set to cache:`, sessionKeyCache);
+        log(`[getSessionKey] newSessionKey set to cache: `, sessionKeyCache);
       }
 
       return newSessionKey;
     } else {
-      log(`[getSessionKey] Storage key "${storageKey}" found. Continue...`);
+      log(`[getSessionKey] Storage key "${storageKey}" found.Continue...`);
       return JSON.parse(storedSessionKeyOrError.result as string);
     }
   };
@@ -541,7 +503,7 @@ export class LitNodeClientNodeJs
     log(`[getWalletSig] flow starts
         storageKey: ${storageKey}
         storedWalletSigOrError: ${JSON.stringify(storedWalletSigOrError)}
-    `);
+  `);
 
     if (
       storedWalletSigOrError.type === EITHER_TYPE.ERROR ||
@@ -550,13 +512,13 @@ export class LitNodeClientNodeJs
     ) {
       log('[getWalletSig] flow 1');
       log(
-        `[getWalletSig] storageKey: ${storageKey} is missing. Not a problem. Continue...`
+        `[getWalletSig] storageKey: ${storageKey} is missing.Not a problem.Continue...`
       );
 
       if (authNeededCallback) {
         log('[getWalletSig] flow 1.1');
         log(
-          `[getWalletSig] authNeededCallback found from params. Creating a callback body...`
+          `[getWalletSig] authNeededCallback found from params.Creating a callback body...`
         );
 
         const body = {
@@ -574,7 +536,7 @@ export class LitNodeClientNodeJs
 
         log('[getWalletSig] callback body:', body);
         log(
-          `[getWalletSig] passing the callback body to the authNeededCallback. Please note that the implementation differs based on user's implementation.`
+          `[getWalletSig] passing the callback body to the authNeededCallback.Please note that the implementation differs based on user's implementation.`
         );
 
         walletSig = await authNeededCallback(body);
@@ -768,7 +730,10 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, 'getJsExecutionShares');
 
     // -- execute
-    const urlWithPath = `${url}${LIT_ENDPOINT.EXECUTE_JS}${LIT_ENDPOINT_VERSION}`;
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.EXECUTE_JS,
+    });
 
     if (!authSig) {
       throw new Error('authSig or sessionSig is required');
@@ -799,7 +764,11 @@ export class LitNodeClientNodeJs
     params: any,
     requestId: string
   ) => {
-    const urlWithPath = `${url}${LIT_ENDPOINT.PKP_SIGN}${LIT_ENDPOINT_VERSION}`;
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.PKP_SIGN,
+    });
+
     logWithRequestId(requestId, `[getPkpSigningShares] ${urlWithPath}`);
 
     if (!params.authSig) {
@@ -819,7 +788,12 @@ export class LitNodeClientNodeJs
     requestId: string
   ) => {
     logWithRequestId(requestId, 'getPkpSigningShares');
-    const urlWithPath = `${url}${LIT_ENDPOINT.PKP_CLAIM}${LIT_ENDPOINT_VERSION}`;
+
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.PKP_CLAIM,
+    });
+
     if (!params.authMethod) {
       throw new Error('authMethod is required');
     }
@@ -846,7 +820,11 @@ export class LitNodeClientNodeJs
     requestId: string
   ): Promise<NodeCommandResponse> => {
     logWithRequestId(requestId, 'getSigningShareForToken');
-    const urlWithPath = `${url}${LIT_ENDPOINT.SIGN_ACCS}${LIT_ENDPOINT_VERSION}`;
+
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.SIGN_ACCS,
+    });
 
     return this.sendCommandToNode({
       url: urlWithPath,
@@ -870,7 +848,11 @@ export class LitNodeClientNodeJs
     requestId: string
   ): Promise<NodeCommandResponse> => {
     log('getSigningShareForDecryption');
-    const urlWithPath = `${url}${LIT_ENDPOINT.ENCRYPTION_SIGN}${LIT_ENDPOINT_VERSION}`;
+
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
+    });
 
     return await this.sendCommandToNode({
       url: urlWithPath,
@@ -898,7 +880,11 @@ export class LitNodeClientNodeJs
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       log('signConditionEcdsa');
-      const urlWithPath = `${url}${LIT_ENDPOINT.SIGN_ECDSA}${LIT_ENDPOINT_VERSION}`;
+
+      const urlWithPath = composeLitUrl({
+        url,
+        endpoint: LIT_ENDPOINT.SIGN_ECDSA,
+      });
 
       const data = {
         access_control_conditions: params.accessControlConditions,
@@ -2730,23 +2716,23 @@ export class LitNodeClientNodeJs
         let requiredFields =
           curveType === SIGTYPE.BLS
             ? [
-                'signatureShare',
-                'curveType',
-                'shareIndex',
-                'siweMessage',
-                'dataSigned',
-                'blsRootPubkey',
-                'result',
-              ]
+              'signatureShare',
+              'curveType',
+              'shareIndex',
+              'siweMessage',
+              'dataSigned',
+              'blsRootPubkey',
+              'result',
+            ]
             : [
-                'sigType',
-                'dataSigned',
-                'signatureShare',
-                'bigr',
-                'publicKey',
-                'sigName',
-                'siweMessage',
-              ];
+              'sigType',
+              'dataSigned',
+              'signatureShare',
+              'bigr',
+              'publicKey',
+              'sigName',
+              'siweMessage',
+            ];
 
         // check if all required fields are present
         for (const field of requiredFields) {
@@ -2890,7 +2876,11 @@ export class LitNodeClientNodeJs
     params: GetSignSessionKeySharesProp,
     requestId: string
   ) => {
-    const urlWithPath = `${url}${LIT_ENDPOINT.SIGN_SESSION_KEY}${LIT_ENDPOINT_VERSION}`;
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
+    });
+
     log(`[getSignSessionKeyShares] from ${urlWithPath}`);
     return await this.sendCommandToNode({
       url: urlWithPath,
@@ -2948,8 +2938,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
 
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
@@ -3225,3 +3215,4 @@ export class LitNodeClientNodeJs
     }
   }
 }
+
