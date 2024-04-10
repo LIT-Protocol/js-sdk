@@ -276,7 +276,10 @@ export const log = (...args: any): void => {
       // for each process arg, split them with = and get the second part and link them all together with _
       const processArgsString = processArgs.map((arg: string) => arg.split('=')[1]).join('_');
 
-      const filename = `${new Date().toISOString().split('T')[0]}_${processArgsString}.log`;
+      const date = new Date();
+      const currentDate = date.toISOString().split('T')[0].replaceAll('-', '_');
+
+      const filename = `${currentDate}_${processArgsString}.log`;
 
       fs.appendFileSync(
         process.env[LIT_PROCESS_ENV.LOG_FILE]
