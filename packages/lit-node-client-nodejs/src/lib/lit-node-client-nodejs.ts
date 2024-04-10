@@ -33,7 +33,6 @@ import {
   LIT_ENDPOINT,
   LitNetwork,
   LIT_CURVE,
-  LIT_ENDPOINT_VERSION,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -88,6 +87,7 @@ import type {
   ExecuteJsProps,
   ExecuteJsResponse,
   FormattedMultipleAccs,
+  GetPkpSessionSigs,
   GetSessionSigsProps,
   GetSignSessionKeySharesProp,
   GetSignedTokenRequest,
@@ -133,8 +133,7 @@ let sessionKeyCache: SessionKeyCache | null = null;
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
-{
+  implements LitClientSessionManager {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -2716,23 +2715,23 @@ export class LitNodeClientNodeJs
         let requiredFields =
           curveType === LIT_CURVE.BLS
             ? [
-                'signatureShare',
-                'curveType',
-                'shareIndex',
-                'siweMessage',
-                'dataSigned',
-                'blsRootPubkey',
-                'result',
-              ]
+              'signatureShare',
+              'curveType',
+              'shareIndex',
+              'siweMessage',
+              'dataSigned',
+              'blsRootPubkey',
+              'result',
+            ]
             : [
-                'sigType',
-                'dataSigned',
-                'signatureShare',
-                'bigr',
-                'publicKey',
-                'sigName',
-                'siweMessage',
-              ];
+              'sigType',
+              'dataSigned',
+              'signatureShare',
+              'bigr',
+              'publicKey',
+              'sigName',
+              'siweMessage',
+            ];
 
         // check if all required fields are present
         for (const field of requiredFields) {
@@ -2938,8 +2937,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
 
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
@@ -2956,7 +2955,7 @@ export class LitNodeClientNodeJs
     log('[getSessionSigs] Trying to get wallet signature for session key');
     let authSig = await this.getWalletSig({
       authNeededCallback: params.authNeededCallback,
-      chain: params.chain,
+      chain: params.chain || 'ethereum',
       sessionCapabilityObject,
       switchChain: params.switchChain,
       expiration: expiration,
@@ -2978,7 +2977,7 @@ export class LitNodeClientNodeJs
       authSig = await this.#authCallbackAndUpdateStorageItem({
         authCallback: params.authNeededCallback,
         authCallbackParams: {
-          chain: params.chain,
+          chain: params.chain || 'ethereum',
           statement: sessionCapabilityObject.statement,
           resources: [sessionCapabilityObject.encodeAsSiweResource()],
           switchChain: params.switchChain,
@@ -3071,6 +3070,52 @@ export class LitNodeClientNodeJs
     log('[getSessionSigs] sessionSigs:', signatures);
 
     return signatures;
+  };
+
+  /**
+   * Get PKP session sigs
+   */
+  getPkpSessionSigs = async (
+    params: GetPkpSessionSigs
+  ) => {
+
+    const chain = params?.chain || 'ethereum';
+
+    const pkpSessionSigs = this.getSessionSigs({
+      ...params,
+      chain,
+      pkpPublicKey: params.pkpPublicKey,
+      authNeededCallback: async (props) => {
+        // -- validate
+        if (!props.expiration) {
+          throw new Error('[getPkpSessionSigs/callback] expiration is required');
+        }
+
+        if (!props.resources) {
+          throw new Error('[getPkpSessionSigs/callback]resources is required');
+        }
+
+        if (!props.resourceAbilityRequests) {
+          throw new Error('[getPkpSessionSigs/callback]resourceAbilityRequests is required');
+        }
+
+        const response = await this.signSessionKey({
+          statement: props.statement || 'Some custom statement.',
+          authMethods: [...params.authMethods],
+          pkpPublicKey: params.pkpPublicKey,
+          expiration: props.expiration,
+          resources: props.resources,
+          chainId: 1,
+
+          // -- required fields
+          resourceAbilityRequests: props.resourceAbilityRequests,
+        });
+
+        return response.authSig;
+      },
+    });
+
+    return pkpSessionSigs;
   };
 
   /**

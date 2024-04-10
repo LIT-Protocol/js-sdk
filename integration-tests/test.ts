@@ -301,51 +301,18 @@ const tests = {
    * ✅ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUsePkpSessionSigsToPkpSign: async () => {
-    const pkpSessionSigs = await litNodeClient.getSessionSigs({
+
+    const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
-      expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
-      chain: 'ethereum',
+      authMethods: [hotWalletAuthMethod],
       resourceAbilityRequests: [
         {
           resource: new LitPKPResource('*'),
           ability: LitAbility.PKPSigning,
         },
-      ],
-      authNeededCallback: async (params) => {
-        // -- validate
-        if (!params.expiration) {
-          throw new Error('expiration is required');
-        }
-
-        if (!params.resources) {
-          throw new Error('resources is required');
-        }
-
-        if (!params.resourceAbilityRequests) {
-          throw new Error('resourceAbilityRequests is required');
-        }
-
-        console.log('params:', params);
-
-        const response = await litNodeClient.signSessionKey({
-          statement: 'Some custom statement.',
-          authMethods: [hotWalletAuthMethod],
-          pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
-          expiration: params.expiration,
-          resources: params.resources,
-          chainId: 1,
-
-          // -- required fields
-          resourceAbilityRequests: params.resourceAbilityRequests,
-        });
-
-        return response.authSig;
-      },
-      // capacityDelegationAuthSig, // unnecessary
+      ]
     });
-
-    console.log('pkpSessionSigs:', pkpSessionSigs);
-
+    
     try {
       const res = await litNodeClient.pkpSign({
         toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
