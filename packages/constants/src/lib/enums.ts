@@ -108,10 +108,14 @@ export enum AUTHSIG_ALGO {
  */
 export enum LIT_PROCESS_ENV {
   LIT_ENDPOINT_VERSION = 'LIT_ENDPOINT_VERSION',
+  LOG_FILE = 'LOG_FILE',
 }
 
 export enum LIT_PROCESS_FLAG {
   VERSION = '--version=',
+  FILTER = '--filter=',
+  SHOW = '--show',
+  NETWORK = '--network=',
 }
 
 export enum LIT_ENDPOINT_VERSION {
