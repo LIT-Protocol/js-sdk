@@ -1,11 +1,10 @@
-import {
-  EITHER_TYPE,
-  ILitError,
-  LIT_ERROR,
-  NETWORK_PUB_KEY,
-} from '@lit-protocol/constants';
-import { verifySignature } from '@lit-protocol/crypto';
+import fetch from 'cross-fetch';
+// @ts-expect-error jszip types don't resolve. :sad_panda:
+import * as JSZip from 'jszip/dist/jszip.js';
 
+import { EITHER_TYPE, ILitError, LIT_ERROR } from '@lit-protocol/constants';
+import { verifySignature } from '@lit-protocol/crypto';
+import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
 import {
   DecryptFromIpfsProps,
   DecryptRequest,
@@ -16,7 +15,6 @@ import {
   EncryptRequestBase,
   EncryptResponse,
   EncryptStringRequest,
-  EncryptToIpfsDataType,
   EncryptToIpfsPayload,
   EncryptToIpfsProps,
   EncryptZipRequest,
@@ -26,26 +24,64 @@ import {
   SigningAccessControlConditionJWTPayload,
   VerifyJWTProps,
 } from '@lit-protocol/types';
-
-// @ts-ignore
-import * as JSZip from 'jszip/dist/jszip.js';
-
 import {
   uint8arrayFromString,
   uint8arrayToString,
 } from '@lit-protocol/uint8arrays';
 
-import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
-
 import { safeParams } from './params-validators';
 
-import * as ipfsClient from 'ipfs-http-client';
+const createIpfsPayload = (serialisedData: string) => {
+  const boundary = '---------------------------' + Date.now().toString(16); // Generate a unique boundary
+  const buffer = new TextEncoder().encode(serialisedData);
+
+  const payload = `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="string.txt"\r\nContent-Type: text/plain\r\n\r\n${new TextDecoder().decode(
+    buffer
+  )}\r\n--${boundary}--\r\n`;
+
+  return { payload, boundary };
+};
+
+async function postToInfuraIpfs({
+  serialisedData,
+  infuraId,
+  infuraSecretKey,
+}: {
+  serialisedData: string;
+  infuraId: string;
+  infuraSecretKey: string;
+}) {
+  const { payload, boundary } = createIpfsPayload(serialisedData);
+  const res = await fetch(
+    `https://ipfs.infura.io:5001/api/v0/add?pin=true&cid-version=1&hash=sha2-256`,
+    {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+        authorization: `Basic ${Buffer.from(
+          `${infuraId}:${infuraSecretKey}`
+        ).toString('base64')}`,
+      },
+      body: payload,
+    }
+  );
+
+  if (res.status !== 200) {
+    throw new Error(`Failed to post to Infura IPFS: ${res.statusText}`);
+  }
+
+  // https://docs.infura.io/api/networks/ipfs/http-api-methods/add#response
+  const { Hash } = (await res.json()) as { Hash: string };
+
+  return Hash;
+}
 
 /**
  *
  * Encrypt a string or file using the LIT network public key and upload all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS using the ipfs-client-http SDK & returns the IPFS CID.
  *
- * @param { EncryptToIpfsProps } - The params required to encrypt & upload to IPFS
+ * @param params { EncryptToIpfsProps } - The params required to encrypt & upload to IPFS
  *
  * @returns { Promise<string> } - IPFS CID
  *
@@ -92,43 +128,17 @@ export const encryptToIpfs = async (
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
-  let ciphertext: string;
-  let dataToEncryptHash: string;
-  let dataType: EncryptToIpfsDataType;
-
   if (string !== undefined) {
-    const encryptResponse = await encryptString(
+    const { ciphertext, dataToEncryptHash } = await encryptString(
       {
         ...params,
         dataToEncrypt: string,
       },
       litNodeClient
     );
-    ciphertext = encryptResponse.ciphertext;
-    dataToEncryptHash = encryptResponse.dataToEncryptHash;
-    dataType = 'string';
-  } else {
-    const encryptResponse = await encryptFile(
-      { ...params, file: file! },
-      litNodeClient
-    );
-    ciphertext = encryptResponse.ciphertext;
-    dataToEncryptHash = encryptResponse.dataToEncryptHash;
-    dataType = 'file';
-  }
 
-  const authorization =
-    'Basic ' + Buffer.from(`${infuraId}:${infuraSecretKey}`).toString('base64');
-  const ipfs = ipfsClient.create({
-    url: 'https://ipfs.infura.io:5001/api/v0',
-    headers: {
-      authorization,
-    },
-  });
-
-  try {
-    const res = await ipfs.add(
-      JSON.stringify({
+    return await postToInfuraIpfs({
+      serialisedData: JSON.stringify({
         ciphertext,
         dataToEncryptHash,
         accessControlConditions,
@@ -136,17 +146,33 @@ export const encryptToIpfs = async (
         solRpcConditions,
         unifiedAccessControlConditions,
         chain,
-        dataType,
-      } as EncryptToIpfsPayload)
+        dataType: 'string',
+      } as EncryptToIpfsPayload),
+      infuraId,
+      infuraSecretKey,
+    });
+  } else if (file) {
+    const { ciphertext, dataToEncryptHash } = await encryptFile(
+      { ...params, file },
+      litNodeClient
     );
 
-    return res.path;
-  } catch (e) {
-    return throwError({
-      message: 'Unable to upload to IPFS',
-      errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-      errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+    return await postToInfuraIpfs({
+      serialisedData: JSON.stringify({
+        ciphertext,
+        dataToEncryptHash,
+        accessControlConditions,
+        evmContractConditions,
+        solRpcConditions,
+        unifiedAccessControlConditions,
+        chain,
+        dataType: 'file',
+      } as EncryptToIpfsPayload),
+      infuraId,
+      infuraSecretKey,
     });
+  } else {
+    throw new Error(`You must provide either 'file' or 'string'.`);
   }
 };
 
@@ -183,6 +209,9 @@ export const decryptFromIpfs = async (
     });
 
   try {
+    // FIXME: We use Infura to upload, but pinata to fetch, which could lead to false failures to GET
+    // When recently POSTed items haven't replicated yet.
+    // Ideally, we shouldn't be responsible for deciding which IPFS hosts someone uses for these operations.
     const metadata: EncryptToIpfsPayload = await (
       await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`)
     ).json();
@@ -333,18 +362,18 @@ export const zipAndEncryptString = async (
 };
 
 /**
- * 
+ *
  * Zip and encrypt multiple files.
- * 
+ *
  * @param { Array<File> } files - The files to encrypt
  * @param { EncryptRequestBase } paramsBase - The params required to encrypt a file
  * @param { ILitNodeClient } litNodeClient - The Lit Node Client
- * 
+ *
  * @returns { Promise<EncryptResponse> } - The encrypted file and the hash of the file
- 
+
 */
 export const zipAndEncryptFiles = async (
-  files: Array<File>,
+  files: File[],
   paramsBase: EncryptRequestBase,
   litNodeClient: ILitNodeClient
 ): Promise<EncryptResponse> => {
@@ -403,7 +432,7 @@ export const zipAndEncryptFiles = async (
 export const decryptToZip = async (
   params: DecryptRequest,
   litNodeClient: ILitNodeClient
-): Promise<{ [key: string]: JSZip.JSZipObject }> => {
+): Promise<Record<string, JSZip.JSZipObject>> => {
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'decrypt',
@@ -693,7 +722,7 @@ export const encryptFile = async (
     });
 
   // encrypt the file
-  var fileAsArrayBuffer = await params.file.arrayBuffer();
+  const fileAsArrayBuffer = await params.file.arrayBuffer();
 
   return litNodeClient.encrypt({
     ...params,
@@ -733,10 +762,14 @@ export const decryptToFile = async (
 };
 
 declare global {
+  // `var` is required for global hackery
+  // FIXME: `any` types for wasm are no bueno
+  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
   var wasmExports: any;
+  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
   var wasmECDSA: any;
+  // eslint-disable-next-line no-var, @typescript-eslint/no-explicit-any
   var LitNodeClient: any;
-  // var litNodeClient: ILitNodeClient;
 }
 
 /**
