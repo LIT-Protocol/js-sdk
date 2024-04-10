@@ -1,4 +1,4 @@
-import { AuthSig } from '@lit-protocol/types';
+import { AuthSig, SignerLike } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 
 /**
@@ -18,7 +18,7 @@ export const craftAuthSig = async ({
   toSign,
   address,
 }: {
-  signer: ethers.Wallet | ethers.Signer;
+  signer: ethers.Wallet | ethers.Signer | SignerLike;
   toSign: string;
   address?: string;
 }): Promise<AuthSig> => {
