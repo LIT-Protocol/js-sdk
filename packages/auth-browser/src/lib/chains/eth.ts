@@ -42,8 +42,12 @@ import {
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 
-if (typeof global.Buffer === 'undefined') {
+if (global && typeof global.Buffer === 'undefined') {
   global.Buffer = BufferPolyfill;
+}
+
+if (globalThis && typeof globalThis.Buffer === 'undefined') {
+  globalThis.Buffer = BufferPolyfill;
 }
 
 // log("naclUtil:", naclUtil);
