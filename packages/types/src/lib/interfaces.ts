@@ -1682,3 +1682,13 @@ export interface SignerLike {
   getAddress: () => Promise<string>;
 }
 
+export interface EthersJsonRpcProviderLike {
+  [key: string]: any;
+  detectNetwork: () => Promise<any>;
+  getSigner: (addressOrIndex?: string | number) => SignerLike;
+  getUncheckedSigner: (addressOrIndex?: string | number) => any,
+  listAccounts: () => Promise<string[]>;
+  send: (method: string, params: any[]) => Promise<any>;
+  prepareRequest(method: string, params: any[]): any;
+  perform(request: any): Promise<any>;
+}
