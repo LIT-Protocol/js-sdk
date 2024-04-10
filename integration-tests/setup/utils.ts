@@ -1,10 +1,12 @@
+import { LIT_PROCESS_FLAG } from '@lit-protocol/constants';
 import { ENV } from './env-setup';
+import { log } from '@lit-protocol/misc';
 
 export const getNetworkFlag = (): ENV => {
-  const networkArg = process.argv.find((arg) => arg.startsWith('--network='));
+  const networkArg = process.argv.find((arg) => arg.startsWith(LIT_PROCESS_FLAG.NETWORK));
 
   const network: string = networkArg
-    ? networkArg.replace('--network=', '')
+    ? networkArg.replace(LIT_PROCESS_FLAG.NETWORK, '')
     : 'localchain';
 
   if (
@@ -12,8 +14,8 @@ export const getNetworkFlag = (): ENV => {
     network !== ENV.HABANERO &&
     network !== ENV.MANZANO
   ) {
-    console.log(
-      'Invalid network argument. Please use --network=localchain, --network=habanero, or --network=manzano'
+    log(
+      '[getNetworkFlag] Invalid network argument. Please use --network=localchain, --network=habanero, or --network=manzano'
     );
     process.exit();
   }
@@ -23,24 +25,24 @@ export const getNetworkFlag = (): ENV => {
 
 // Function to parse command line arguments for filters
 export const getFiltersFlag = (): string[] => {
-  const filterArg = process.argv.find((arg) => arg.startsWith('--filter='));
-  return filterArg ? filterArg.replace('--filter=', '').split(',') : [];
+  const filterArg = process.argv.find((arg) => arg.startsWith(LIT_PROCESS_FLAG.FILTER));
+  return filterArg ? filterArg.replace(LIT_PROCESS_FLAG.FILTER, '').split(',') : [];
 };
 
 // get --show flag
 export const showTests = (tests): void => {
-  const testsArg = process.argv.find((arg) => arg.startsWith('--show'));
+  const testsArg = process.argv.find((arg) => arg.startsWith(LIT_PROCESS_FLAG.SHOW));
 
   const showTests = testsArg === undefined ? false : true;
 
   if (showTests) {
-    console.log('Available tests:');
-    console.log(`Run with --filter=testName to run a specific test`);
-    console.log('----------------');
+    log('[showTests] Available tests:');
+    log(`[showTests] Run with --filter=testName to run a specific test`);
+    log('[showTests] ----------------');
     Object.entries(tests).forEach(([testName, testFunction], i) => {
-      console.log(`${i + 1}. ${testName}`);
+      log(`${i + 1}. ${testName}`);
     });
-    console.log('\n');
+    log('\n');
     process.exit();
   }
 };
@@ -52,7 +54,7 @@ export const runTests = async (tests) => {
   );
 
   for (const [testName, testFunction] of testsToRun) {
-    console.log(`Running ${testName}...`);
+    log(`Running ${testName}...`);
 
     // @ts-ignore
     await testFunction();
