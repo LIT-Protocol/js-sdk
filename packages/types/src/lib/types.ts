@@ -1,5 +1,4 @@
 import { AuthMethodType } from './enums';
-import * as ethers from 'ethers';
 
 import {
   LPACC_EVM_ATOM,
@@ -15,8 +14,6 @@ import {
   Signature,
   StytchOtpProviderOptions,
   WebAuthnProviderOptions,
-} from './interfaces';
-import {
   AccsOperatorParams,
   EthWalletProviderOptions,
   JsonEncryptionRetrieveRequest,
@@ -25,10 +22,11 @@ import {
   JsonSigningRetrieveRequest,
   OAuthProviderOptions,
   BaseAuthenticateOptions,
+  SignerLike,
+  EthersJsonRpcProviderLike,
 } from './interfaces';
 
 export type ConditionType = 'solRpc' | 'evmBasic' | 'evmContract' | 'cosmos';
-
 export type AccsDefaultParams = LPACC_EVM_BASIC;
 export type AccsSOLV2Params = LPACC_SOL;
 export type AccsEVMParams = LPACC_EVM_CONTRACT;
@@ -188,7 +186,7 @@ export type MintCallback<T = ClaimProcessor> = (
 export type ClaimRequest<T = ClaimProcessor> = {
   authMethod: AuthMethod;
   mintCallback?: MintCallback<T>;
-} & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
+} & (T extends 'relay' ? LitRelayConfig : { signer: SignerLike });
 
 /**
  * Result from network claim proccessing, used in {@link MintCallback}
@@ -198,7 +196,7 @@ export type ClaimResult<T = ClaimProcessor> = {
   derivedKeyId: string;
   authMethodType: AuthMethodType;
   pubkey: string;
-} & (T extends 'relay' ? LitRelayConfig : { signer: ethers.Signer });
+} & (T extends 'relay' ? LitRelayConfig : { signer: SignerLike });
 
 export type LitContract = {
   address?: string;
@@ -235,14 +233,14 @@ export type LitContractContext = {
  */
 export type LitContractResolverContext = {
   [index: string]:
-    | string
-    | LitContractContext
-    | ethers.providers.JsonRpcProvider
-    | undefined
-    | number;
+  | string
+  | LitContractContext
+  | EthersJsonRpcProviderLike
+  | undefined
+  | number;
   resolverAddress: string;
   abi: any;
   environment: number;
   contractContext?: LitContractContext;
-  provider?: ethers.providers.JsonRpcProvider;
+  provider?: EthersJsonRpcProviderLike;
 };
