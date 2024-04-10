@@ -3053,10 +3053,10 @@ export class LitNodeClientNodeJs
 
       const signatureObject = {
         sig: uint8arrayToString(signature, 'base16'),
-        derivedVia: 'litSessionSignViaNacl',
+        derivedVia: DERIVED_VIA.LIT_SESSION_SIGN,
         signedMessage: signedMessage,
         address: sessionKey.publicKey,
-        algo: 'ed25519',
+        algo: AUTHSIG_ALGO.ED25519,
       };
 
       signatures[nodeAddress] = signatureObject;

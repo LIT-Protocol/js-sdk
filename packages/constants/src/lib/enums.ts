@@ -17,6 +17,7 @@ export enum LIT_CURVE {
 export enum DERIVED_VIA {
   BLS = 'lit.bls',
   LIT_ETH_PERSONAL_SIGN = 'web3.eth.personal.sign via Lit PKP',
+  LIT_SESSION_SIGN = 'litSessionSignViaNacl',
 }
 
 /**
@@ -101,6 +102,7 @@ export enum LIT_URI {
 
 export enum AUTHSIG_ALGO {
   BLS = 'LIT_BLS',
+  ED25519 = 'ed25519',
 }
 
 /**
