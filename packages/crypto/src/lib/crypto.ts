@@ -247,7 +247,10 @@ export const combineEcdsaShares = (
         try {
           sig = JSON.parse(res) as CombinedECDSASignature;
         } catch (e) {
-          logError('[combineEcdsaShares] Error while combining signatures shares', validShares);
+          logError(
+            '[combineEcdsaShares] Error while combining signatures shares',
+            validShares
+          );
           throwError({
             message: (e as Error).message,
             name: LIT_ERROR.SIGNATURE_VALIDATION_ERROR.name,

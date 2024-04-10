@@ -5,9 +5,7 @@ import * as siwe from 'siwe';
 
 import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-control-conditions';
 import {
-
   LitAccessControlConditionResource,
-
   decode,
   RecapSessionCapabilityObject,
   LitRLIResource,
@@ -19,7 +17,8 @@ import {
 
 import {
   ILitResource,
-  ISessionCapabilityObject, LitResourceAbilityRequest,
+  ISessionCapabilityObject,
+  LitResourceAbilityRequest,
 } from '@lit-protocol/types';
 
 import {
@@ -165,10 +164,15 @@ if (isNode()) {
   LIT_ENDPOINT_VERSION = `/v1`;
 }
 
-log(`💡 LIT_ENDPOINT_VERSION${LIT_ENDPOINT_VERSION === '' ? '(legacy): /' : `: ${LIT_ENDPOINT_VERSION}`}`);
+log(
+  `💡 LIT_ENDPOINT_VERSION${
+    LIT_ENDPOINT_VERSION === '' ? '(legacy): /' : `: ${LIT_ENDPOINT_VERSION}`
+  }`
+);
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager {
+  implements LitClientSessionManager
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -374,10 +378,12 @@ export class LitNodeClientNodeJs
       !storedSessionKeyOrError.result ||
       storedSessionKeyOrError.result === ''
     ) {
-      log(`[getSessionKey] Storage key "${storageKey}" is missing. Not a problem. Contiune...`);
+      log(
+        `[getSessionKey] Storage key "${storageKey}" is missing. Not a problem. Contiune...`
+      );
 
       // Check if a valid session key exists in cache
-      if (sessionKeyCache && (Date.now() - sessionKeyCache.timestamp) < 30000) {
+      if (sessionKeyCache && Date.now() - sessionKeyCache.timestamp < 30000) {
         log(`[getSessionKey] Returning session key from cache.`);
         return sessionKeyCache.value;
       }
@@ -1334,7 +1340,7 @@ export class LitNodeClientNodeJs
         v: signature.recid,
       });
 
-      log(`[getSessionSignatures] encodedSig: ${encodedSig}`)
+      log(`[getSessionSignatures] encodedSig: ${encodedSig}`);
 
       signatures[key] = {
         ...signature,
@@ -2669,17 +2675,15 @@ export class LitNodeClientNodeJs
     let curveType = responseData[0]?.curveType;
 
     if (!curveType) {
-      log(`[signSessionKey] curveType not found. Defaulting to ECDSA.`)
+      log(`[signSessionKey] curveType not found. Defaulting to ECDSA.`);
       curveType = 'ECDSA';
     }
 
-    log(`[signSessionKey] curveType is "${curveType}"`)
+    log(`[signSessionKey] curveType is "${curveType}"`);
 
     let signedDataList: any[] = [];
 
-
     if (curveType === SIGTYPE.BLS) {
-
       let _responseData: BlsResponseData[] = responseData;
 
       const signatureShares = _responseData.map((s) => ({
@@ -2693,20 +2697,23 @@ export class LitNodeClientNodeJs
       });
 
       signedDataList = _responseData;
-
     } else {
       signedDataList = responseData.map(
         (r: any) => (r as SignedData).signedData
-      )
+      );
     }
 
     if (signedDataList.length <= 0) {
-      const err = `[signSessionKey] signedDataList is empty.`
-      log(err)
+      const err = `[signSessionKey] signedDataList is empty.`;
+      log(err);
       throw new Error(err);
     }
 
-    logWithRequestId(requestId, '[signSessionKey] signedDataList', signedDataList);
+    logWithRequestId(
+      requestId,
+      '[signSessionKey] signedDataList',
+      signedDataList
+    );
 
     // -- checking if we have enough shares
     const validatedSignedDataList = signedDataList
@@ -2720,23 +2727,26 @@ export class LitNodeClientNodeJs
         }
 
         // each of this field cannot be empty
-        let requiredFields = curveType === SIGTYPE.BLS ? [
-          'signatureShare',
-          'curveType',
-          'shareIndex',
-          'siweMessage',
-          'dataSigned',
-          'blsRootPubkey',
-          'result',
-        ] : [
-          'sigType',
-          'dataSigned',
-          'signatureShare',
-          'bigr',
-          'publicKey',
-          'sigName',
-          'siweMessage',
-        ];
+        let requiredFields =
+          curveType === SIGTYPE.BLS
+            ? [
+                'signatureShare',
+                'curveType',
+                'shareIndex',
+                'siweMessage',
+                'dataSigned',
+                'blsRootPubkey',
+                'result',
+              ]
+            : [
+                'sigType',
+                'dataSigned',
+                'signatureShare',
+                'bigr',
+                'publicKey',
+                'sigName',
+                'siweMessage',
+              ];
 
         // check if all required fields are present
         for (const field of requiredFields) {
@@ -2750,8 +2760,8 @@ export class LitNodeClientNodeJs
 
         if (curveType === SIGTYPE.BLS) {
           if (!sessionSig.signatureShare.ProofOfPossession) {
-            const err = `[signSessionKey] Invalid signed data. "ProofOfPossession" is missing.`
-            log(err)
+            const err = `[signSessionKey] Invalid signed data. "ProofOfPossession" is missing.`;
+            log(err);
             throw new Error(err);
           }
         }
@@ -2760,7 +2770,11 @@ export class LitNodeClientNodeJs
       })
       .filter((item) => item !== null);
 
-    logWithRequestId(requestId, '[signSessionKey] requested length:', signedDataList.length);
+    logWithRequestId(
+      requestId,
+      '[signSessionKey] requested length:',
+      signedDataList.length
+    );
     logWithRequestId(
       requestId,
       '[signSessionKey] validated length:',
@@ -2780,10 +2794,12 @@ export class LitNodeClientNodeJs
     let signatures: any;
 
     if (curveType === SIGTYPE.BLS) {
+      const blsSignedData: BlsResponseData[] =
+        validatedSignedDataList as BlsResponseData[];
 
-      const blsSignedData: BlsResponseData[] = validatedSignedDataList as BlsResponseData[];
-
-      const sigType = mostCommonString(blsSignedData.map((s: any) => s.sigType));
+      const sigType = mostCommonString(
+        blsSignedData.map((s: any) => s.sigType)
+      );
       log(`[signSessionKey] sigType:`, sigType);
 
       const signatureShares = blsSignedData.map((s) => ({
@@ -2798,10 +2814,16 @@ export class LitNodeClientNodeJs
 
       log(`[signSessionKey] blsCombinedSignature:`, blsCombinedSignature);
 
-      const publicKey = params.pkpPublicKey.startsWith('0x') ? params.pkpPublicKey.slice(2) : params.pkpPublicKey;
+      const publicKey = params.pkpPublicKey.startsWith('0x')
+        ? params.pkpPublicKey.slice(2)
+        : params.pkpPublicKey;
 
-      const dataSigned = mostCommonString(blsSignedData.map((s: any) => s.dataSigned));
-      const siweMessage = mostCommonString(blsSignedData.map((s: any) => s.siweMessage));
+      const dataSigned = mostCommonString(
+        blsSignedData.map((s: any) => s.dataSigned)
+      );
+      const siweMessage = mostCommonString(
+        blsSignedData.map((s: any) => s.siweMessage)
+      );
       signatures = {
         sessionSig: {
           signature: blsCombinedSignature,
@@ -2809,7 +2831,7 @@ export class LitNodeClientNodeJs
           dataSigned,
           siweMessage,
         },
-      }
+      };
     } else {
       // Shape: [signSessionKey] signatures: {
       //   sessionSig: {
@@ -2857,8 +2879,7 @@ export class LitNodeClientNodeJs
       },
       pkpPublicKey: sessionSig.publicKey,
     };
-
-  }
+  };
 
   #isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
     return res.success === true;
@@ -2927,8 +2948,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
 
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
@@ -3051,7 +3072,10 @@ export class LitNodeClientNodeJs
 
       signatures[nodeAddress] = signatureObject;
 
-      log(`[getSessionSigs] signatureObject from ${nodeAddress}`, signatureObject);
+      log(
+        `[getSessionSigs] signatureObject from ${nodeAddress}`,
+        signatureObject
+      );
     });
 
     log('[getSessionSigs] sessionSigs:', signatures);

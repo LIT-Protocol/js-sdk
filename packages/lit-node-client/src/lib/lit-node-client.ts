@@ -31,7 +31,9 @@ export class LitNodeClient extends LitNodeClientNodeJs {
 
     // -- validate
     if (storageConfigOrError.type === EITHER_TYPE.ERROR) {
-      log(`[overrideConfigsFromLocalStorage] Storage key "${storageKey}" is missing. `);
+      log(
+        `[overrideConfigsFromLocalStorage] Storage key "${storageKey}" is missing. `
+      );
       return;
     }
 

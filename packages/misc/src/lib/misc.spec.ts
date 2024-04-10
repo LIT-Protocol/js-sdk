@@ -242,23 +242,32 @@ describe('utils', () => {
   describe('double escaped JSON string', () => {
     test('A doubly escaped JSON string', () => {
       const doublyEscapedJson = '{\\"key\\": \\"value\\"}';
-      expect(utilsModule.normalizeAndStringify(doublyEscapedJson)).toBe('{"key":"value"}');
-    })
+      expect(utilsModule.normalizeAndStringify(doublyEscapedJson)).toBe(
+        '{"key":"value"}'
+      );
+    });
 
     test('A triply escaped JSON string', () => {
       const triplyEscapedJson = '{\\\\\\"key\\\\\\": \\\\\\"value\\\\\\"}';
-      expect(utilsModule.normalizeAndStringify(triplyEscapedJson)).toBe('{"key":"value"}');
-    })
+      expect(utilsModule.normalizeAndStringify(triplyEscapedJson)).toBe(
+        '{"key":"value"}'
+      );
+    });
 
     test('A correctly escaped JSON string (for comparison)', () => {
       const correctlyEscapedJson = '{"key":"value"}';
-      expect(utilsModule.normalizeAndStringify(correctlyEscapedJson)).toBe('{"key":"value"}');
-    })
+      expect(utilsModule.normalizeAndStringify(correctlyEscapedJson)).toBe(
+        '{"key":"value"}'
+      );
+    });
 
     test('regular siwe message', () => {
-      const regularString = "litprotocol.com wants you to sign in with your Ethereum account:\\n0x3edB...";
+      const regularString =
+        'litprotocol.com wants you to sign in with your Ethereum account:\\n0x3edB...';
 
-      expect(utilsModule.normalizeAndStringify(regularString)).toBe(regularString);
-    })
-  })
+      expect(utilsModule.normalizeAndStringify(regularString)).toBe(
+        regularString
+      );
+    });
+  });
 });
