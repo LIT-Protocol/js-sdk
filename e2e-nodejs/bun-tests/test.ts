@@ -38,7 +38,9 @@ const tests = {
       jsParams: {},
     });
 
-    console.log('res:', res);
+    if (res && res.success) {
+      console.log('✅ res:', res);
+    }
   },
 
   /**
@@ -52,7 +54,7 @@ const tests = {
     );
 
     try {
-      const runWithAuthSig = await litNodeClient.executeJs({
+      const res = await litNodeClient.executeJs({
         authSig: hotWalletAuthSig,
         code: `(async () => {
           const sigShare = await LitActions.signEcdsa({
@@ -67,7 +69,11 @@ const tests = {
         },
       });
 
-      console.log('✅ runWithAuthSig:', runWithAuthSig);
+      if (res.signatures.sig.signature) {
+        console.log('✅ res:', res);
+      } else {
+        console.log('❌ Error res:', res);
+      }
     } catch (e) {
       console.log('Error:', e);
     }
@@ -76,7 +82,7 @@ const tests = {
   /**
    * Test Commands:
    * ✅ yarn test:integrate --filter=testGetSessionSigs --network=habanero --version=v0
-   * ✅ yarn test:integrate --filter=testGetSessionSigs --network=localchain --version=v0
+   * ✅ yarn test:integrate --filter=testGetSessionSigs --network=localchain --version=v1
    */
   testGetSessionSigs: async () => {
     const sessionSigs = await litNodeClient.getSessionSigs({
@@ -296,7 +302,7 @@ const tests = {
   /**
    * Test Commands:
    * ✅ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=habanero --version=v0
-   * ❌ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
+   * ✅ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1   
    */
   testUsePkpSessionSigsToPkpSign: async () => {
     hotWalletAuthMethodOwnedPkp.publicKey = `0x${hotWalletAuthMethodOwnedPkp.publicKey}`;
@@ -309,6 +315,7 @@ const tests = {
         {
           resource: new LitPKPResource('*'),
           ability: LitAbility.PKPSigning,
+          // ability: LitAbility.WILDCARD,
         },
       ],
       authNeededCallback: async (params) => {
@@ -341,7 +348,7 @@ const tests = {
 
         return response.authSig;
       },
-      capacityDelegationAuthSig,
+      // capacityDelegationAuthSig,
     });
 
     console.log('pkpSessionSigs:', pkpSessionSigs);

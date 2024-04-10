@@ -5,20 +5,25 @@ import * as siwe from 'siwe';
 
 import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-control-conditions';
 import {
-  ILitResource,
-  ISessionCapabilityObject,
+
   LitAccessControlConditionResource,
-  LitResourceAbilityRequest,
+
   decode,
   RecapSessionCapabilityObject,
   LitRLIResource,
-  LitAbility,
   createSiweMessage,
   CapacityCreditsFields,
   craftAuthSig,
   CreateSiweType,
 } from '@lit-protocol/auth-helpers';
+
 import {
+  ILitResource,
+  ISessionCapabilityObject, LitResourceAbilityRequest,
+} from '@lit-protocol/types';
+
+import {
+  AUTHSIG_ALGO,
   AUTH_METHOD_TYPE_IDS,
   AuthMethodType,
   DERIVED_VIA,
@@ -2477,7 +2482,6 @@ export class LitNodeClientNodeJs
    * Sign a session public key using a PKP, which generates an authSig.
    * @returns {Object} An object containing the resulting signature.
    */
-
   signSessionKey = async (
     params: SignSessionKeyProp
   ): Promise<SignSessionKeyResponse> => {
@@ -2487,7 +2491,7 @@ export class LitNodeClientNodeJs
     // -- validate: If it's NOT ready
     if (!this.ready) {
       const message =
-        '8 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '[signSessionKey] ]LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
       throwError({
         message,
@@ -2829,21 +2833,32 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] signedMessage:`, signedMessage);
 
+    if (curveType === SIGTYPE.BLS) {
+      return {
+        authSig: {
+          sig: JSON.stringify({
+            ProofOfPossession: sessionSig.signature,
+          }),
+          algo: AUTHSIG_ALGO.BLS,
+          derivedVia: DERIVED_VIA.BLS,
+          signedMessage,
+          address: computeAddress('0x' + sessionSig.publicKey),
+        },
+        pkpPublicKey: sessionSig.publicKey,
+      };
+    }
+
     return {
       authSig: {
-        sig: curveType === SIGTYPE.BLS ? JSON.stringify({
-          ProofOfPossession: sessionSig.signature,
-        }) : sessionSig.signature,
-        derivedVia:
-          curveType === SIGTYPE.BLS ?
-            DERIVED_VIA.BLS :
-            DERIVED_VIA.LIT_ETH_PERSONAL_SIGN,
+        sig: sessionSig.signature,
+        derivedVia: DERIVED_VIA.LIT_ETH_PERSONAL_SIGN,
         signedMessage,
         address: computeAddress('0x' + sessionSig.publicKey),
       },
       pkpPublicKey: sessionSig.publicKey,
     };
-  };
+
+  }
 
   #isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
     return res.success === true;
