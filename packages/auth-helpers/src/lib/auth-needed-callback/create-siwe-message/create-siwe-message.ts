@@ -3,7 +3,7 @@ import {
   CapacityCreditsFields,
   createCapacityDelegationRecapObject,
 } from '../create-recap-object/create-capacity-delegation-recap';
-import { LitResourceAbilityRequest } from '../../models';
+import { LitResourceAbilityRequest } from '@lit-protocol/types';
 import { LIT_URI } from '@lit-protocol/constants';
 
 export interface BaseSiweMessage {

@@ -7,6 +7,7 @@ import {
   LPACC_SOL,
   LPACC_EVM_BASIC,
 } from '@lit-protocol/accs-schemas';
+
 import {
   AuthMethod,
   LitRelayConfig,

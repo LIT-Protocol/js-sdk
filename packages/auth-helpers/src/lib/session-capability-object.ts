@@ -1,5 +1,9 @@
 import { SiweMessage } from 'siwe';
-import { AttenuationsObject, CID, ISessionCapabilityObject } from './models';
+import {
+  AttenuationsObject,
+  CID,
+  ISessionCapabilityObject,
+} from '@lit-protocol/types';
 import { RecapSessionCapabilityObject } from './recap/recap-session-capability-object';
 
 /**

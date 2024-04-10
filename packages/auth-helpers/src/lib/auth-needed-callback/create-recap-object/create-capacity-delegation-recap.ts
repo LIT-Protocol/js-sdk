@@ -1,4 +1,4 @@
-import { LitAbility } from '../../models';
+import { LitAbility } from '@lit-protocol/types';
 import { LitRLIResource } from '../../resources';
 import { BaseSiweMessage } from '../create-siwe-message/create-siwe-message';
 

@@ -1,4 +1,4 @@
-import { LitAbility, LitResourcePrefix } from '../models';
+import { LitAbility, LitResourcePrefix } from '@lit-protocol/types';
 
 /**
  * Map from a LitAbility to the Recap namespace and ability.

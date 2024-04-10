@@ -1,5 +1,5 @@
+import { AuthSig } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { AuthSig } from '../models';
 
 /**
  * Crafts an AuthSig object using the signer.

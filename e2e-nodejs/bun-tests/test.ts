@@ -3,7 +3,6 @@
 // Test command: yarn test:integrate --filter={testName} --network={network | 'localhost' is default}
 
 import {
-  LitAbility,
   LitActionResource,
   LitPKPResource,
   createSiweMessage,
@@ -16,7 +15,7 @@ import { devEnv } from './setup/env-setup';
 import * as ethers from 'ethers';
 import { getNetworkFlag, showTests, runTests } from './setup/utils';
 import { getSessionSigReport } from 'packages/auth-helpers/src/lib/humanized-siwe-signed-message';
-import { AuthCallbackParams } from '@lit-protocol/types';
+import { AuthCallbackParams, LitAbility } from '@lit-protocol/types';
 
 const devEnvPromise = devEnv({
   env: getNetworkFlag(),
@@ -206,7 +205,6 @@ const tests = {
    * ❌ yarn test:integrate --filter=testUseSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUseSessionSigsToPkpSign: async () => {
-
     const sessionSigs = await litNodeClient.getSessionSigs({
       chain: 'ethereum',
       resourceAbilityRequests: [
@@ -302,7 +300,7 @@ const tests = {
   /**
    * Test Commands:
    * ✅ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=habanero --version=v0
-   * ✅ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1   
+   * ✅ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUsePkpSessionSigsToPkpSign: async () => {
     hotWalletAuthMethodOwnedPkp.publicKey = `0x${hotWalletAuthMethodOwnedPkp.publicKey}`;

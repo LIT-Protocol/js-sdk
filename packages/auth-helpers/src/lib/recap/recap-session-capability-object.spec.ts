@@ -1,5 +1,5 @@
 import { SiweMessage } from 'siwe';
-import { LitAbility, LitResourcePrefix } from '../models';
+import { LitAbility, LitResourcePrefix } from '@lit-protocol/types';
 import { LitAccessControlConditionResource } from '../resources';
 import { RecapSessionCapabilityObject } from './recap-session-capability-object';
 import { LitNamespace, LitRecapAbility } from './utils';

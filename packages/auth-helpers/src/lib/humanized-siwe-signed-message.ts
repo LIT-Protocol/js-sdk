@@ -1,4 +1,4 @@
-import { AuthSig, LitResourceAbilityRequest } from './models';
+import { AuthSig, LitResourceAbilityRequest } from '@lit-protocol/types';
 
 export function humanizedSiweSignedMessage(signedMessage: string) {
   let report = ''; // Initialize an empty string to accumulate the report

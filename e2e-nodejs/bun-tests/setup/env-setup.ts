@@ -7,7 +7,6 @@ import { ethers } from 'ethers';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
-  AuthSig,
   BaseSiweMessage,
   createSiweMessage,
   craftAuthSig,
@@ -15,7 +14,7 @@ import {
 } from '@lit-protocol/auth-helpers';
 // import { LocalStorage } from 'node-localstorage';
 import { log } from '@lit-protocol/misc';
-
+import { AuthSig } from '@lit-protocol/types';
 let data;
 
 try {
@@ -78,8 +77,7 @@ export const devEnv = async (
   capacityDelegationAuthSig: AuthSig;
   capacityDelegationAuthSigWithPkp: AuthSig;
 }> => {
-
-  log('🧪 [env-setup.ts] Starting devEnv')
+  log('🧪 [env-setup.ts] Starting devEnv');
   const PRIVATE_KEY =
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
   const LIT_RPC_URL = 'http://127.0.0.1:8545';
@@ -95,7 +93,7 @@ export const devEnv = async (
    * Setting up Lit Node Client
    * ====================================
    */
-  log('🧪 [env-setup.ts] Setting up LitNodeClient')
+  log('🧪 [env-setup.ts] Setting up LitNodeClient');
   let litNodeClient: LitNodeClient;
 
   if (env === ENV.LOCALCHAIN) {
@@ -139,7 +137,9 @@ export const devEnv = async (
    * Setup EOA Wallet using private key, and connects to LIT RPC URL
    * ====================================
    */
-  log('🧪 [env-setup.ts] Setup EOA Wallet using private key, and connects to LIT RPC URL')
+  log(
+    '🧪 [env-setup.ts] Setup EOA Wallet using private key, and connects to LIT RPC URL'
+  );
   let rpc: string;
 
   if (env === ENV.LOCALCHAIN) {
@@ -155,7 +155,7 @@ export const devEnv = async (
    * Get nonce from lit node
    * ====================================
    */
-  log('🧪 [env-setup.ts] Get nonce from lit node')
+  log('🧪 [env-setup.ts] Get nonce from lit node');
   const nonce = await litNodeClient.getLatestBlockhash();
 
   /**
@@ -163,14 +163,14 @@ export const devEnv = async (
    * Get Hot Wallet Auth Sig
    * ====================================
    */
-  log('🧪 [env-setup.ts] Get Hot Wallet Auth Sig')
+  log('🧪 [env-setup.ts] Get Hot Wallet Auth Sig');
   const siweMessage = await createSiweMessage<BaseSiweMessage>({
     nonce,
     walletAddress: wallet.address,
     type: CreateSiweType.DEFAULT,
   });
 
-  log('🧪 [env-setup.ts] Crafting Auth Sig')
+  log('🧪 [env-setup.ts] Crafting Auth Sig');
   const hotWalletAuthSig = await craftAuthSig({
     signer: wallet,
     toSign: siweMessage,
@@ -182,7 +182,9 @@ export const devEnv = async (
    * ====================================
    */
 
-  log('🧪 [env-setup.ts] Craft an authMethod from the authSig for the eth wallet auth method')
+  log(
+    '🧪 [env-setup.ts] Craft an authMethod from the authSig for the eth wallet auth method'
+  );
   const hotWalletAuthMethod = {
     authMethodType: AuthMethodType.EthWallet,
     accessToken: JSON.stringify(hotWalletAuthSig),
@@ -193,7 +195,7 @@ export const devEnv = async (
    * Setup contracts-sdk client
    * ====================================
    */
-  log('🧪 [env-setup.ts] Setting up contracts-sdk client')
+  log('🧪 [env-setup.ts] Setting up contracts-sdk client');
   let litContractsClient: LitContracts;
 
   if (env === ENV.LOCALCHAIN) {
@@ -224,14 +226,16 @@ export const devEnv = async (
    * Mint a Capacity Credits NFT and get a capacity delegation authSig with it
    * ====================================
    */
-  log('🧪 [env-setup.ts] Mint a Capacity Credits NFT and get a capacity delegation authSig with it')
+  log(
+    '🧪 [env-setup.ts] Mint a Capacity Credits NFT and get a capacity delegation authSig with it'
+  );
   const { capacityTokenIdStr } =
     await litContractsClient.mintCapacityCreditsNFT({
       requestsPerDay: 14400, // 10 request per minute
       daysUntilUTCMidnightExpiration: 2,
     });
 
-  log('🧪 [env-setup.ts] Creating a delegation auth sig')
+  log('🧪 [env-setup.ts] Creating a delegation auth sig');
   const { capacityDelegationAuthSig } =
     await litNodeClient.createCapacityDelegationAuthSig({
       uses: '1',
@@ -245,7 +249,7 @@ export const devEnv = async (
    * Mint a PKP
    * ====================================
    */
-  log('🧪 [env-setup.ts] Mint a PKP')
+  log('🧪 [env-setup.ts] Mint a PKP');
   const mintRes = await litContractsClient.pkpNftContractUtils.write.mint();
   const hotWalletOwnedPkp = mintRes.pkp;
 
@@ -254,7 +258,7 @@ export const devEnv = async (
    * Mint a PKP using the hot wallet auth method.
    * ====================================
    */
-  log('🧪 [env-setup.ts] Mint a PKP using the hot wallet auth method')
+  log('🧪 [env-setup.ts] Mint a PKP using the hot wallet auth method');
   const mintWithAuthRes = await litContractsClient.mintWithAuth({
     authMethod: hotWalletAuthMethod,
     scopes: [AuthMethodScope.SignAnything],
@@ -268,7 +272,9 @@ export const devEnv = async (
    * that has PKP as one of the delegatees
    * ====================================
    */
-  log('🧪 [env-setup.ts] Creates a Capacity Delegation AuthSig that has PKP as one of the delegatees')
+  log(
+    '🧪 [env-setup.ts] Creates a Capacity Delegation AuthSig that has PKP as one of the delegatees'
+  );
   const { capacityDelegationAuthSig: capacityDelegationAuthSigWithPkp } =
     await litNodeClient.createCapacityDelegationAuthSig({
       uses: '1',
@@ -295,7 +301,7 @@ export const devEnv = async (
 
 ----- Test Starts Below -----
 `);
-  log('🧪 [env-setup.ts] End of devEnv')
+  log('🧪 [env-setup.ts] End of devEnv');
   return {
     litNodeClient,
     litContractsClient,

@@ -7,10 +7,10 @@ import {
   ISessionCapabilityObject,
   LitAbility,
   PlainJSON,
-} from '../models';
+  AuthSig,
+} from '@lit-protocol/types';
 import { getRecapNamespaceAndAbility } from './utils';
 import { sanitizeSiweMessage } from '../siwe';
-import { AuthSig } from '../models';
 
 export class RecapSessionCapabilityObject implements ISessionCapabilityObject {
   #inner: Recap;

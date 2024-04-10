@@ -1,12 +1,6 @@
 import { SiweMessage } from 'siwe';
+import { AuthSig } from './interfaces';
 
-// This is here to prevent circular dependency issue
-export interface AuthSig {
-  sig: any;
-  derivedVia: string;
-  signedMessage: string;
-  address: string;
-}
 export type PlainJSON =
   | boolean
   | number

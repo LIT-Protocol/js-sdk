@@ -92,7 +92,11 @@ export enum LIT_ENDPOINT {
   SIGN_ECDSA = '/web/signing/signConditionEcdsa',
 }
 
-export enum LIT_URI{
+export enum LIT_URI {
   SESSION_KEY = 'lit:session:',
   CAPABILITY_DELEGATION = 'lit:capability:delegation',
+}
+
+export enum AUTHSIG_ALGO {
+  BLS = 'LIT_BLS',
 }

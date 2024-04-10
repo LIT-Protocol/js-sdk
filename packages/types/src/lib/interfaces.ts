@@ -2,11 +2,6 @@ import { Provider } from '@ethersproject/abstract-provider';
 // @ts-ignore
 import * as JSZip from 'jszip/dist/jszip.js';
 
-import {
-  ISessionCapabilityObject,
-  LitResourceAbilityRequest,
-} from '@lit-protocol/auth-helpers';
-
 import { ILitNodeClient } from './ILitNodeClient';
 import {
   AcceptedFileType,
@@ -24,6 +19,7 @@ import {
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
+import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
 
 /** ---------- Access Control Conditions Interfaces ---------- */
 
@@ -43,6 +39,7 @@ export interface AuthSig {
   derivedVia: string;
   signedMessage: string;
   address: string;
+  algo?: string;
 }
 
 export type CosmosWalletType = 'keplr' | 'leap';
@@ -523,16 +520,18 @@ export interface SignConditionECDSA {
  */
 export interface ExecuteJsResponse {
   success?: boolean;
-  signatures: {
-    sig: {
-      r: string;
-      s: string;
-      recid: number;
-      signature: string; // 0x...
-      publicKey: string; // pkp public key
-      dataSigned: string; 
-    },
-  } | any;
+  signatures:
+    | {
+        sig: {
+          r: string;
+          s: string;
+          recid: number;
+          signature: string; // 0x...
+          publicKey: string; // pkp public key
+          dataSigned: string;
+        };
+      }
+    | any;
   decryptions: any[];
   response: string;
   logs: string;
@@ -544,7 +543,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise { }
+export interface LitNodePromise {}
 
 export interface SendNodeCommand {
   url: string;
@@ -1529,7 +1528,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions { }
+export interface BaseAuthenticateOptions {}
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
@@ -1609,8 +1608,8 @@ export interface MintCapacityCreditsPerKilosecond
 }
 export interface MintCapacityCreditsContext
   extends MintCapacityCreditsPerDay,
-  MintCapacityCreditsPerSecond,
-  MintCapacityCreditsPerKilosecond { }
+    MintCapacityCreditsPerSecond,
+    MintCapacityCreditsPerKilosecond {}
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
@@ -1650,13 +1649,13 @@ export interface JsonSignSessionKeyRequestV1 {
   epoch?: number;
 }
 export interface BlsResponseData {
-  result: boolean,
+  result: boolean;
   signatureShare: {
-    ProofOfPossession: string,
-  },
-  shareIndex: number,
-  curveType: string,
-  siweMessage: string,
-  dataSigned: string,
-  blsRootPubkey: string,
+    ProofOfPossession: string;
+  };
+  shareIndex: number;
+  curveType: string;
+  siweMessage: string;
+  dataSigned: string;
+  blsRootPubkey: string;
 }
