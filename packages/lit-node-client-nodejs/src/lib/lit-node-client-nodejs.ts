@@ -704,7 +704,7 @@ export class LitNodeClientNodeJs
           resourceAbilityRequest.ability
         )
       ) {
-        console.debug('Need retry because capabilities do not match', {
+        log('Need retry because capabilities do not match', {
           authSigSessionCapabilityObject,
           resourceAbilityRequest,
         });
@@ -2474,6 +2474,8 @@ export class LitNodeClientNodeJs
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
     const pkpEthAddress = (function () {
+      params.pkpPublicKey = hexPrefixed(params.pkpPublicKey!);
+
       if (params.pkpPublicKey) return computeAddress(params.pkpPublicKey);
 
       // This will be populated by the node, using dummy value for now.
