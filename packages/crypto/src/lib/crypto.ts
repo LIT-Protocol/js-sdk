@@ -373,7 +373,7 @@ async function getAmdCert(url: string, retryConfig: RetryTolerance) {
     url = `https://cors.litgateway.com/${url}`;
   }
   const response = await executeWithRetry<Response>(
-    async (id: string) => {
+    async (requestId: string) => {
       return await fetch(url)
         .then((response) => {
           if (!response.ok) {
