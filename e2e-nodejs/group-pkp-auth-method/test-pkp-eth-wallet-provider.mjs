@@ -18,9 +18,10 @@ export async function main() {
 
   const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
-  const ethWalletProvider = new EthWalletProvider({ litNodeClient: client });
-
-  const authMethod = await ethWalletProvider.authenticate(wallet);
+  const authMethod = await EthWalletProvider.authenticate({
+    signer: wallet,
+    litNodeClient: client,
+  });
 
   if (!authMethod) {
     fail('Unable to authenticate with eth wallet provider');

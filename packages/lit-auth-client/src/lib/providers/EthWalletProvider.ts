@@ -9,7 +9,10 @@ import { LIT_CHAINS, AuthMethodType, LIT_ERROR } from '@lit-protocol/constants';
 import { SiweMessage } from 'siwe';
 import { ethers } from 'ethers';
 import { BaseProvider } from './BaseProvider';
-import { checkAndSignAuthMessage } from '@lit-protocol/lit-node-client';
+import {
+  LitNodeClient,
+  checkAndSignAuthMessage,
+} from '@lit-protocol/lit-node-client';
 import { log, throwError } from '@lit-protocol/misc';
 
 export default class EthWalletProvider extends BaseProvider {
@@ -56,46 +59,92 @@ export default class EthWalletProvider extends BaseProvider {
   public async authenticate(
     options?: EthWalletAuthenticateOptions
   ): Promise<AuthMethod> {
-    const address = options?.address;
-    const chain = options?.chain || 'ethereum';
+    return EthWalletProvider.authenticate({
+      signer: options,
+      address: options?.address,
+      chain: options?.chain,
+      litNodeClient: this.litNodeClient,
+      expiration: options?.expiration,
+      domain: this.domain,
+      origin: this.origin,
+    });
+  }
+
+  /**
+   * Generate a wallet signature to use as an auth method
+   * 
+   * @param {EthWalletAuthenticateOptions} options
+   * @param {string} [options.address] - Address to sign with
+   * @param {function} [options.signMessage] - Function to sign message with
+   * @param {string} [options.chain] - Name of chain to use for signature
+   * @param {number} [options.expiration] - When the auth signature expires
+   * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
+   * @static
+   * @memberof EthWalletProvider
+   * 
+   * @example
+   * ```typescript
+   *   const authMethod = await EthWalletProvider.authenticate({
+   *      signer: wallet,
+   *      litNodeClient: client,
+   *   });
+   * ```
+   */
+  public static async authenticate({
+    signer,
+    address,
+    chain,
+    litNodeClient,
+    expiration,
+    domain,
+    origin,
+  }: {
+    signer: ethers.Signer | ethers.Wallet | any;
+    litNodeClient: LitNodeClient;
+    address?: string;
+    chain?: string;
+    expiration?: string;
+    domain?: string;
+    origin?: string;
+  }): Promise<AuthMethod> {
+    chain = chain || 'ethereum';
 
     let authSig: AuthSig;
 
-    if (address && options?.signMessage) {
+    if (signer?.signMessage) {
       // Get chain ID or default to Ethereum mainnet
       const selectedChain = LIT_CHAINS[chain];
       const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
 
       // Get expiration or default to 24 hours
-      const expiration =
-        options?.expiration ||
-        new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+      expiration =
+        expiration || new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
 
       // Prepare Sign in with Ethereum message
       const preparedMessage: Partial<SiweMessage> = {
-        domain: this.domain,
-        uri: this.origin,
-        address: ethers.utils.getAddress(address), // convert to EIP-55 format or else SIWE complains
+        domain: domain || 'localhost',
+        uri: origin || 'http://localhost',
+        address: ethers.utils.getAddress(address || signer?.address), // convert to EIP-55 format or else SIWE complains
         version: '1',
         chainId,
         expirationTime: expiration,
-        nonce: this.litNodeClient.latestBlockhash!,
+        nonce: litNodeClient.latestBlockhash!,
       };
 
       const message: SiweMessage = new SiweMessage(preparedMessage);
       const toSign: string = message.prepareMessage();
 
       // Use provided function to sign message
-      const signature = await options.signMessage(toSign);
+      const signature = await signer.signMessage(toSign);
 
       authSig = {
         sig: signature,
         derivedVia: 'web3.eth.personal.sign',
         signedMessage: toSign,
-        address: address,
+        address: signer.address,
       };
     } else {
-      if (!this.litNodeClient.latestBlockhash) {
+      if (!litNodeClient.latestBlockhash) {
         throwError({
           message:
             'Eth Blockhash is undefined. Try connecting to the Lit network again.',
@@ -106,7 +155,7 @@ export default class EthWalletProvider extends BaseProvider {
 
       authSig = await checkAndSignAuthMessage({
         chain,
-        nonce: this.litNodeClient.latestBlockhash!,
+        nonce: litNodeClient.latestBlockhash!,
       });
     }
 
