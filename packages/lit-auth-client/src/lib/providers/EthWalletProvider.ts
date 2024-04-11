@@ -25,13 +25,8 @@ export default class EthWalletProvider extends BaseProvider {
    */
   public origin: string;
 
-  constructor(options: EthWalletProviderOptions) {
-    super({
-      rpcUrl: '',
-      relay: null as any,
-      litNodeClient: null,
-      ...options,
-    });
+  constructor(options: EthWalletProviderOptions & BaseProviderOptions) {
+    super(options);
 
     try {
       this.domain = options.domain || window.location.hostname;
