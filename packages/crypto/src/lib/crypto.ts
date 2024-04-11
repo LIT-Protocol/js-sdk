@@ -373,35 +373,35 @@ async function getAmdCert(url: string, retryConfig: RetryTolerance) {
     url = `https://cors.litgateway.com/${url}`;
   }
   const response = await executeWithRetry<Response>(
-    async (requestId: string) => {
+    async (_requestId: string) => {
       return await fetch(url)
-        .then((response) => {
+        .then((response: Response) => {
           if (!response.ok) {
             // get error message from body or default to response status
-            const error = data || response.status;
+            const error = response.status;
             return Promise.reject(error);
           }
+          return response;
         })
-        .catch((err) => {
-          logErrorWithRequestId(
-            requestId,
+        .catch((error) => {
+          logError(
             `Something went wrong when attempting to fetch AMD SEV attestation certificates ${
               error?.message || error?.details
                 ? `Error is ${error.message} - ${error.details}`
                 : ''
             }`
           );
+          return Promise.reject(error);
         });
     },
     (error: any, _requestId: string, isFinal: boolean) => {
       if (!isFinal) {
-        logErrorWithRequestId(
-          requestId,
+        logError(
           `Something went wrong when attempting to fetch AMD SEV attestation certificates ${
             error?.message || error?.details
               ? `Error is ${error.message} - ${error.details}`
               : ''
-          }`
+          } retrying operation...`
         );
       }
     },
