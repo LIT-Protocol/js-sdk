@@ -27,7 +27,7 @@ export default class EthWalletProvider extends BaseProvider {
       rpcUrl: '',
       relay: null as any,
       litNodeClient: null,
-      ...options
+      ...options,
     });
     try {
       this.domain = options.domain || window.location.hostname;
@@ -62,7 +62,6 @@ export default class EthWalletProvider extends BaseProvider {
     let authSig: AuthSig;
 
     if (address && options?.signMessage) {
-
       // Get chain ID or default to Ethereum mainnet
       const selectedChain = LIT_CHAINS[chain];
       const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
@@ -86,10 +85,8 @@ export default class EthWalletProvider extends BaseProvider {
       const message: SiweMessage = new SiweMessage(preparedMessage);
       const toSign: string = message.prepareMessage();
 
-      console.log('toSign:', toSign);
-
       // Use provided function to sign message
-      const signature = await options?.signMessage(toSign);
+      const signature = await options.signMessage(toSign);
 
       authSig = {
         sig: signature,

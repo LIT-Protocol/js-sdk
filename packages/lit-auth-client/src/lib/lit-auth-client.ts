@@ -90,9 +90,12 @@ export class LitAuthClient {
     if (options?.litNodeClient) {
       this.litNodeClient = options?.litNodeClient;
     } else {
-
       if (!options?.litNetwork) {
-        throw new Error(`"litNetwork" is required to create a LitNodeClient. Received: "${options?.litNetwork}". Here are the supported networks: ${Object.values(LitNetwork)}`);
+        throw new Error(
+          `"litNetwork" is required to create a LitNodeClient. Received: "${
+            options?.litNetwork
+          }". Here are the supported networks: ${Object.values(LitNetwork)}`
+        );
       }
 
       this.litNodeClient = new LitNodeClient({
@@ -114,7 +117,8 @@ export class LitAuthClient {
 
       if (!supportedNetworks.includes(this.litNodeClient.config.litNetwork)) {
         throw new Error(
-          `Unsupported litNetwork: ${this.litNodeClient.config.litNetwork
+          `Unsupported litNetwork: ${
+            this.litNodeClient.config.litNetwork
           }. Supported networks are: ${supportedNetworks.join(', ')}`
         );
       }
@@ -255,7 +259,9 @@ export class LitAuthClient {
     return this.providers.get(type);
   }
 
-  public static getEthWalletProvider(params: EthWalletProviderOptions): EthWalletProvider {
+  public static getEthWalletProvider(
+    params: EthWalletProviderOptions
+  ): EthWalletProvider {
     return new EthWalletProvider(params);
   }
 
