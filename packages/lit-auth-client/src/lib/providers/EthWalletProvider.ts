@@ -22,8 +22,13 @@ export default class EthWalletProvider extends BaseProvider {
    */
   public origin: string;
 
-  constructor(options: BaseProviderOptions & EthWalletProviderOptions) {
-    super(options);
+  constructor(options: EthWalletProviderOptions) {
+    super({
+      rpcUrl: '',
+      relay: null as any,
+      litNodeClient: null,
+      ...options
+    });
     try {
       this.domain = options.domain || window.location.hostname;
       this.origin = options.origin || window.location.origin;
@@ -51,12 +56,13 @@ export default class EthWalletProvider extends BaseProvider {
     options?: EthWalletAuthenticateOptions
   ): Promise<AuthMethod> {
     const address = options?.address;
-    const signMessage = options?.signMessage;
+
     const chain = options?.chain || 'ethereum';
 
     let authSig: AuthSig;
 
-    if (address && signMessage) {
+    if (address && options?.signMessage) {
+
       // Get chain ID or default to Ethereum mainnet
       const selectedChain = LIT_CHAINS[chain];
       const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
@@ -80,8 +86,10 @@ export default class EthWalletProvider extends BaseProvider {
       const message: SiweMessage = new SiweMessage(preparedMessage);
       const toSign: string = message.prepareMessage();
 
+      console.log('toSign:', toSign);
+
       // Use provided function to sign message
-      const signature = await signMessage(toSign);
+      const signature = await options?.signMessage(toSign);
 
       authSig = {
         sig: signature,

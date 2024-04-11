@@ -1178,6 +1178,8 @@ export interface LitAuthClientOptions {
   debug?: boolean;
 
   litOtpConfig?: OtpProviderOptions;
+
+  litNetwork?: LIT_NETWORKS_KEYS;
 }
 
 export interface OtpSessionResult {
@@ -1397,6 +1399,8 @@ export interface EthWalletProviderOptions {
    * The origin from which the signing request is made
    */
   origin?: string;
+
+  litNodeClient?: any;
 }
 
 export interface WebAuthnProviderOptions {

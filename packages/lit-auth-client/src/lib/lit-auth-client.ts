@@ -8,9 +8,11 @@ import {
   WebAuthnProviderOptions,
   AuthMethod,
   MintRequestBody,
+  BaseProviderOptions,
 } from '@lit-protocol/types';
 import {
   AuthMethodType,
+  LitNetwork,
   ProviderType,
   RELAY_URL_CAYENNE,
   RELAY_URL_HABANERO,
@@ -84,11 +86,17 @@ export class LitAuthClient {
     }
 
     // Check if Lit node client is provided
+    // FIXME: In the near future, a breaking change will introduce to always require a LitNodeClient
     if (options?.litNodeClient) {
       this.litNodeClient = options?.litNodeClient;
     } else {
+
+      if (!options?.litNetwork) {
+        throw new Error(`"litNetwork" is required to create a LitNodeClient. Received: "${options?.litNetwork}". Here are the supported networks: ${Object.values(LitNetwork)}`);
+      }
+
       this.litNodeClient = new LitNodeClient({
-        litNetwork: 'cayenne',
+        litNetwork: options.litNetwork,
         debug: options.debug ?? false,
       });
     }
@@ -106,8 +114,7 @@ export class LitAuthClient {
 
       if (!supportedNetworks.includes(this.litNodeClient.config.litNetwork)) {
         throw new Error(
-          `Unsupported litNetwork: ${
-            this.litNodeClient.config.litNetwork
+          `Unsupported litNetwork: ${this.litNodeClient.config.litNetwork
           }. Supported networks are: ${supportedNetworks.join(', ')}`
         );
       }
@@ -246,6 +253,10 @@ export class LitAuthClient {
    */
   getProvider(type: ProviderType): BaseProvider | undefined {
     return this.providers.get(type);
+  }
+
+  public static getEthWalletProvider(params: EthWalletProviderOptions): EthWalletProvider {
+    return new EthWalletProvider(params);
   }
 
   /**
