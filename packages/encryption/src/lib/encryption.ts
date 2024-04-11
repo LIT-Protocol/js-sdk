@@ -1,4 +1,3 @@
-import fetch from 'cross-fetch';
 // @ts-expect-error jszip types don't resolve. :sad_panda:
 import * as JSZip from 'jszip/dist/jszip.js';
 
@@ -6,7 +5,6 @@ import { EITHER_TYPE, ILitError, LIT_ERROR } from '@lit-protocol/constants';
 import { verifySignature } from '@lit-protocol/crypto';
 import { checkType, isBrowser, log, throwError } from '@lit-protocol/misc';
 import {
-  DecryptFromIpfsProps,
   DecryptRequest,
   DecryptZipFileWithMetadata,
   DecryptZipFileWithMetadataProps,
@@ -15,14 +13,15 @@ import {
   EncryptRequestBase,
   EncryptResponse,
   EncryptStringRequest,
-  EncryptToIpfsPayload,
-  EncryptToIpfsProps,
   EncryptZipRequest,
   IJWT,
   ILitNodeClient,
   MetadataForFile,
   SigningAccessControlConditionJWTPayload,
   VerifyJWTProps,
+  EncryptToJsonPayload,
+  EncryptToJsonProps,
+  DecryptFromJsonProps,
 } from '@lit-protocol/types';
 import {
   uint8arrayFromString,
@@ -30,68 +29,21 @@ import {
 } from '@lit-protocol/uint8arrays';
 
 import { safeParams } from './params-validators';
-
-const createIpfsPayload = (serialisedData: string) => {
-  const boundary = '---------------------------' + Date.now().toString(16); // Generate a unique boundary
-  const buffer = new TextEncoder().encode(serialisedData);
-
-  const payload = `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="string.txt"\r\nContent-Type: text/plain\r\n\r\n${new TextDecoder().decode(
-    buffer
-  )}\r\n--${boundary}--\r\n`;
-
-  return { payload, boundary };
-};
-
-async function postToInfuraIpfs({
-  serialisedData,
-  infuraId,
-  infuraSecretKey,
-}: {
-  serialisedData: string;
-  infuraId: string;
-  infuraSecretKey: string;
-}) {
-  const { payload, boundary } = createIpfsPayload(serialisedData);
-  const res = await fetch(
-    `https://ipfs.infura.io:5001/api/v0/add?pin=true&cid-version=1&hash=sha2-256`,
-    {
-      method: 'POST',
-      headers: {
-        accept: 'application/json',
-        'Content-Type': `multipart/form-data; boundary=${boundary}`,
-        authorization: `Basic ${Buffer.from(
-          `${infuraId}:${infuraSecretKey}`
-        ).toString('base64')}`,
-      },
-      body: payload,
-    }
-  );
-
-  if (res.status !== 200) {
-    throw new Error(`Failed to post to Infura IPFS: ${res.statusText}`);
-  }
-
-  // https://docs.infura.io/api/networks/ipfs/http-api-methods/add#response
-  const { Hash } = (await res.json()) as { Hash: string };
-
-  return Hash;
-}
-
 /**
+ * Encrypt a string or file using the LIT network public key and serialise all the metadata required to decrypt
+ * i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to JSON
  *
- * Encrypt a string or file using the LIT network public key and upload all the metadata required to decrypt i.e. accessControlConditions, evmContractConditions, solRpcConditions, unifiedAccessControlConditions & chain to IPFS using the ipfs-client-http SDK & returns the IPFS CID.
+ * Useful for encrypting/decrypting data in IPFS or other storage without compressing it in a ZIP file.
  *
- * @param params { EncryptToIpfsProps } - The params required to encrypt & upload to IPFS
+ * @param params { EncryptToJsonProps } - The params required to encrypt either a file or string and serialise it to JSON
  *
- * @returns { Promise<string> } - IPFS CID
+ * @returns { Promise<string> } - JSON serialised string of the encrypted data and associated metadata necessary to decrypt it later
  *
  */
-export const encryptToIpfs = async (
-  params: EncryptToIpfsProps
+export const encryptToJson = async (
+  params: EncryptToJsonProps
 ): Promise<string> => {
   const {
-    authSig,
-    sessionSigs,
     accessControlConditions,
     evmContractConditions,
     solRpcConditions,
@@ -100,25 +52,12 @@ export const encryptToIpfs = async (
     string,
     file,
     litNodeClient,
-    infuraId,
-    infuraSecretKey,
   } = params;
 
   // -- validate
   const paramsIsSafe = safeParams({
-    functionName: 'encryptToIpfs',
-    params: {
-      authSig,
-      sessionSigs,
-      accessControlConditions,
-      evmContractConditions,
-      solRpcConditions,
-      unifiedAccessControlConditions,
-      chain,
-      string,
-      file,
-      litNodeClient,
-    },
+    functionName: 'encryptToJson',
+    params,
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
@@ -137,40 +76,32 @@ export const encryptToIpfs = async (
       litNodeClient
     );
 
-    return await postToInfuraIpfs({
-      serialisedData: JSON.stringify({
-        ciphertext,
-        dataToEncryptHash,
-        accessControlConditions,
-        evmContractConditions,
-        solRpcConditions,
-        unifiedAccessControlConditions,
-        chain,
-        dataType: 'string',
-      } as EncryptToIpfsPayload),
-      infuraId,
-      infuraSecretKey,
-    });
+    return JSON.stringify({
+      ciphertext,
+      dataToEncryptHash,
+      accessControlConditions,
+      evmContractConditions,
+      solRpcConditions,
+      unifiedAccessControlConditions,
+      chain,
+      dataType: 'string',
+    } as EncryptToJsonPayload);
   } else if (file) {
     const { ciphertext, dataToEncryptHash } = await encryptFile(
       { ...params, file },
       litNodeClient
     );
 
-    return await postToInfuraIpfs({
-      serialisedData: JSON.stringify({
-        ciphertext,
-        dataToEncryptHash,
-        accessControlConditions,
-        evmContractConditions,
-        solRpcConditions,
-        unifiedAccessControlConditions,
-        chain,
-        dataType: 'file',
-      } as EncryptToIpfsPayload),
-      infuraId,
-      infuraSecretKey,
-    });
+    return JSON.stringify({
+      ciphertext,
+      dataToEncryptHash,
+      accessControlConditions,
+      evmContractConditions,
+      solRpcConditions,
+      unifiedAccessControlConditions,
+      chain,
+      dataType: 'file',
+    } as EncryptToJsonPayload);
   } else {
     throw new Error(`You must provide either 'file' or 'string'.`);
   }
@@ -178,27 +109,23 @@ export const encryptToIpfs = async (
 
 /**
  *
- * Decrypt & return the string or file (in Uint8Array format) using its metadata stored on IPFS with the given ipfsCid.
+ * Decrypt & return a previously encrypted string (as a string) or file (as a Uint8Array) using the metadata included
+ * in the parsed JSON data
  *
- * @param { DecryptFromIpfsProps } - The params required to decrypt from IPFS
+ * @param params { DecryptFromJsonProps } - The params required to decrypt a parsed JSON blob containing appropriate metadata
  *
- * @returns { Promise<string | Uint8Array> } - The decrypted string or file (in Uint8Array format)
+ * @returns { Promise<string | Uint8Array> } - The decrypted `string` or file (as a `Uint8Array`) depending on `dataType` property in the parsed JSON provided
  *
  */
-export const decryptFromIpfs = async (
-  params: DecryptFromIpfsProps
+export const decryptFromJson = async (
+  params: DecryptFromJsonProps
 ): Promise<string | Uint8Array> => {
-  const { authSig, sessionSigs, ipfsCid, litNodeClient } = params;
+  const { authSig, sessionSigs, parsedJsonData, litNodeClient } = params;
 
   // -- validate
   const paramsIsSafe = safeParams({
-    functionName: 'decryptFromIpfs',
-    params: {
-      authSig,
-      sessionSigs,
-      ipfsCid,
-      litNodeClient,
-    },
+    functionName: 'decryptFromJson',
+    params,
   });
 
   if (paramsIsSafe.type === EITHER_TYPE.ERROR)
@@ -208,52 +135,39 @@ export const decryptFromIpfs = async (
       errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
     });
 
-  try {
-    // FIXME: We use Infura to upload, but pinata to fetch, which could lead to false failures to GET
-    // When recently POSTed items haven't replicated yet.
-    // Ideally, we shouldn't be responsible for deciding which IPFS hosts someone uses for these operations.
-    const metadata: EncryptToIpfsPayload = await (
-      await fetch(`https://gateway.pinata.cloud/ipfs/${ipfsCid}`)
-    ).json();
-    if (metadata.dataType === 'string') {
-      return decryptToString(
-        {
-          accessControlConditions: metadata.accessControlConditions,
-          evmContractConditions: metadata.evmContractConditions,
-          solRpcConditions: metadata.solRpcConditions,
-          unifiedAccessControlConditions:
-            metadata.unifiedAccessControlConditions,
-          ciphertext: metadata.ciphertext,
-          dataToEncryptHash: metadata.dataToEncryptHash,
-          chain: metadata.chain,
-          authSig,
-          sessionSigs,
-        },
-        litNodeClient
-      );
-    } else {
-      return decryptToFile(
-        {
-          accessControlConditions: metadata.accessControlConditions,
-          evmContractConditions: metadata.evmContractConditions,
-          solRpcConditions: metadata.solRpcConditions,
-          unifiedAccessControlConditions:
-            metadata.unifiedAccessControlConditions,
-          ciphertext: metadata.ciphertext,
-          dataToEncryptHash: metadata.dataToEncryptHash,
-          chain: metadata.chain,
-          authSig,
-          sessionSigs,
-        },
-        litNodeClient
-      );
-    }
-  } catch (e) {
-    return throwError({
-      message: 'Unable to fetch or decrypt from IPFS',
-      errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-      errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-    });
+  // FIXME: The return type of this function is inferrable based on the value of `params.dataType`
+  if (parsedJsonData.dataType === 'string') {
+    return decryptToString(
+      {
+        accessControlConditions: parsedJsonData.accessControlConditions,
+        evmContractConditions: parsedJsonData.evmContractConditions,
+        solRpcConditions: parsedJsonData.solRpcConditions,
+        unifiedAccessControlConditions:
+          parsedJsonData.unifiedAccessControlConditions,
+        ciphertext: parsedJsonData.ciphertext,
+        dataToEncryptHash: parsedJsonData.dataToEncryptHash,
+        chain: parsedJsonData.chain,
+        authSig,
+        sessionSigs,
+      },
+      litNodeClient
+    );
+  } else {
+    return decryptToFile(
+      {
+        accessControlConditions: parsedJsonData.accessControlConditions,
+        evmContractConditions: parsedJsonData.evmContractConditions,
+        solRpcConditions: parsedJsonData.solRpcConditions,
+        unifiedAccessControlConditions:
+          parsedJsonData.unifiedAccessControlConditions,
+        ciphertext: parsedJsonData.ciphertext,
+        dataToEncryptHash: parsedJsonData.dataToEncryptHash,
+        chain: parsedJsonData.chain,
+        authSig,
+        sessionSigs,
+      },
+      litNodeClient
+    );
   }
 };
 
