@@ -19,14 +19,14 @@ export * from './lib/lit-node-client-nodejs';
 
 export {
   decryptToFile,
+  decryptFromJson,
   decryptToString,
   decryptToZip,
   decryptZipFileWithMetadata,
-  decryptFromIpfs,
   encryptFile,
   encryptFileAndZipWithMetadata,
+  encryptToJson,
   encryptString,
-  encryptToIpfs,
   encryptZip,
   verifyJwt,
   zipAndEncryptFiles,
