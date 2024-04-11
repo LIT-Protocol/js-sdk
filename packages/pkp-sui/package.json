@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/pkp-sui",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -24,5 +24,7 @@
   },
   "tags": [
     "universal"
-  ]
+  ],
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }
