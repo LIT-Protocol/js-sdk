@@ -8,7 +8,13 @@ import * as ecdsaSdk from '@lit-protocol/ecdsa-sdk';
 
 import * as sevSnpUtilsSdk from '@lit-protocol/sev-snp-utils-sdk';
 
-import { isBrowser, log, logError, throwError } from '@lit-protocol/misc';
+import {
+  executeWithRetry,
+  isBrowser,
+  log,
+  logError,
+  throwError,
+} from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
@@ -18,7 +24,7 @@ import {
 
 import { nacl } from '@lit-protocol/nacl';
 import { SIGTYPE } from '@lit-protocol/constants';
-import { CombinedECDSASignature } from '@lit-protocol/types';
+import { CombinedECDSASignature, RetryTolerance } from '@lit-protocol/types';
 
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
@@ -359,14 +365,16 @@ function base64ToBufferAsync(base64) {
     });
 }
 
-async function getAmdCert(url: string) {
+async function getAmdCert(url: string, retryConfig: RetryTolerance) {
   // unfortunately, until AMD enables CORS, we have to use a proxy when in the browser
   // This project is hosted on heroku and uses this codebase: https://github.com/LIT-Protocol/cors-proxy-amd
   if (isBrowser()) {
     // CORS proxy url
     url = `https://cors.litgateway.com/${url}`;
   }
-  const response = await fetch(url);
+  const response = await executeWithRetry<Response>(async (id: string) => {
+    return await fetch(url);
+  }, retryConfig);
   const arrayBuffer = await response.arrayBuffer();
   return new Uint8Array(arrayBuffer);
 }
@@ -384,7 +392,8 @@ async function getAmdCert(url: string) {
 export const checkSevSnpAttestation = async (
   attestation: NodeAttestation,
   challenge: string,
-  url: string
+  url: string,
+  retryConfig: RetryTolerance
 ) => {
   /* attestation object looks like this:
    "attestation": {
@@ -452,7 +461,7 @@ export const checkSevSnpAttestation = async (
     if (vcekCert) {
       vcekCert = uint8arrayFromString(vcekCert, 'base64');
     } else {
-      vcekCert = await getAmdCert(vcekUrl);
+      vcekCert = await getAmdCert(vcekUrl, retryConfig);
       localStorage.setItem(vcekUrl, uint8arrayToString(vcekCert, 'base64'));
     }
   } else {
@@ -462,7 +471,7 @@ export const checkSevSnpAttestation = async (
     }
     vcekCert = globalThis.amdCertStore[vcekUrl];
     if (!vcekCert) {
-      vcekCert = await getAmdCert(vcekUrl);
+      vcekCert = await getAmdCert(vcekUrl, retryConfig);
       globalThis.amdCertStore[vcekUrl] = vcekCert;
     }
   }

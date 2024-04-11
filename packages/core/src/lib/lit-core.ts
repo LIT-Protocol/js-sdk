@@ -616,7 +616,12 @@ export class LitCore {
 
       try {
         // ensure we won't try to use a node with an invalid attestation response
-        await checkSevSnpAttestation(attestation, challenge, url);
+        await checkSevSnpAttestation(
+          attestation,
+          challenge,
+          url,
+          this.config.retryTolerance
+        );
         log(`Lit Node Attestation verified for ${url}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
