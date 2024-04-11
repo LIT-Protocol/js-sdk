@@ -132,7 +132,6 @@ yarn build:dev
 yarn build
 ```
 
-
 ## Running Test Apps
 
 The test apps are configured to automatically import all modules and expose all module functions. For browsers, you can access these functions using `window.LitJsSdk_<package_name>.<function_name>`
