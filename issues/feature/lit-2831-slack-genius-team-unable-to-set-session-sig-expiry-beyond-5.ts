@@ -79,10 +79,8 @@ const _log = (...params: any[]) =>
 
   const { pkp: authMethodOwnedPkp } = mintReceipt;
 
-  _log('authMethodOwnedPkp:', authMethodOwnedPkp);
-
   const sessionSigs = await litNodeClient.getSessionSigs({
-    pkpPublicKey: `0x${authMethodOwnedPkp.publicKey}`,
+    pkpPublicKey: authMethodOwnedPkp.publicKey,
     expiration: expiration,
     chain: 'ethereum',
     resourceAbilityRequests: [
@@ -92,11 +90,12 @@ const _log = (...params: any[]) =>
       },
     ],
     authNeededCallback: async (params) => {
+
       return (
         await litNodeClient.signSessionKey({
           statement: 'Some custom statement.',
           authMethods: [authMethod],
-          pkpPublicKey: authMethodOwnedPkp.publicKey,
+          pkpPublicKey: `0x${authMethodOwnedPkp.publicKey}`,
           expiration: params.expiration,
           resources: params.resources,
           chainId: 1,
@@ -116,8 +115,8 @@ const _log = (...params: any[]) =>
   const daysToExpiredFromNowFromSessionSig = Math.round(
     (expirationTimeDate.getTime() -
       new Date(new Date().toISOString()).getTime()) /
-      (1000 * 60 * 60) /
-      24
+    (1000 * 60 * 60) /
+    24
   );
 
   _log(
