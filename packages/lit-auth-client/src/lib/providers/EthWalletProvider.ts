@@ -54,6 +54,11 @@ export default class EthWalletProvider extends BaseProvider {
   public async authenticate(
     options?: EthWalletAuthenticateOptions
   ): Promise<AuthMethod> {
+
+    if (!options) {
+      throw new Error("Options are required to authenticate with EthWalletProvider.");
+    }
+
     return EthWalletProvider.authenticate({
       signer: options,
       address: options?.address,
@@ -94,7 +99,7 @@ export default class EthWalletProvider extends BaseProvider {
     domain,
     origin,
   }: {
-    signer: ethers.Signer | ethers.Wallet | any;
+    signer: ethers.Signer | ethers.Wallet | EthWalletAuthenticateOptions;
     litNodeClient: LitNodeClient;
     address?: string;
     chain?: string;
@@ -105,6 +110,15 @@ export default class EthWalletProvider extends BaseProvider {
     chain = chain || 'ethereum';
 
     let authSig: AuthSig;
+
+    // convert to EIP-55 format or else SIWE complains
+    address = address || await signer?.getAddress!() || (signer as ethers.Wallet)?.address;
+
+    if (!address) {
+      throw new Error(`Address is required to authenticate with EthWalletProvider. Cannot find it in signer or options.`);
+    }
+
+    address = ethers.utils.getAddress(address);
 
     if (signer?.signMessage) {
       // Get chain ID or default to Ethereum mainnet
@@ -119,7 +133,7 @@ export default class EthWalletProvider extends BaseProvider {
       const preparedMessage: Partial<SiweMessage> = {
         domain: domain || 'localhost',
         uri: origin || 'http://localhost',
-        address: ethers.utils.getAddress(address || signer?.address), // convert to EIP-55 format or else SIWE complains
+        address,
         version: '1',
         chainId,
         expirationTime: expiration,
@@ -136,7 +150,7 @@ export default class EthWalletProvider extends BaseProvider {
         sig: signature,
         derivedVia: 'web3.eth.personal.sign',
         signedMessage: toSign,
-        address: signer.address,
+        address: address,
       };
     } else {
       if (!litNodeClient.latestBlockhash) {
