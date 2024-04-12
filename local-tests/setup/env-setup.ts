@@ -15,31 +15,7 @@ import {
 // import { LocalStorage } from 'node-localstorage';
 import { log } from '@lit-protocol/misc';
 import { AuthSig } from '@lit-protocol/types';
-let data;
-
-try {
-  data = require('./networkContext.ts');
-} catch (e) {
-  console.error(`❌ networkContext not found. Please generate it from the node side and place it in the "setup" folder.
-
-To generate networkContext.ts:
----------------------------
-1. git clone lit-assets
-2. run '~/.foundry/bin/anvil' (make sure it’s using **Lit Protocol Anvil Fork Launching**)
-3. In the './blockchain/contracts' directory, run 'npm run deploy -- --network localchain'
-    - Mostly answers to default, except:
-    
-    ? How many wallets would you like to stake (but not request to join the network)? 0
-    ? How many wallets would you like to stake and request to join the network? 3
-    ? Would you like to deploy with the above configuration? (y/N)  - Yes
-    
-4. You should see a network context file generated at './blockchain/contracts/networkContext.ts'
-5. In the './rust/lit-node' directory, run './scripts/start_dev.sh 3'
-`);
-  process.exit();
-}
-
-const { networkContext } = data;
+import networkContext from './networkContext.json';
 
 export enum ENV {
   LOCALCHAIN = 'localchain',
@@ -103,8 +79,7 @@ export const devEnv = async (
       rpcUrl: LIT_RPC_URL,
       debug,
       checkNodeAttestation: false, // disable node attestation check for local testing
-      contractContext: networkContext as unknown as LitContractContext,
-
+      contractContext: networkContext as LitContractContext,
       // FIXME: When this  is not provided, we are having issues of verified siwe session key mistmatched with the
       // one being signed, because we generate a new session key again when we cannot find the storage provider.
       // storageProvider: {

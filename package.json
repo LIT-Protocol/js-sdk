@@ -26,7 +26,7 @@
     "test:unit": "yarn test:packages",
     "test:custom": "yarn tools --test --custom",
     "test:bun": "bun ./tools/scripts/test-script.mjs",
-    "test:integrate": "bun run ./integration-tests/test.ts",
+    "test:local": "bun run ./local-tests/test.ts",
     "publish:packages": "yarn node ./tools/scripts/pub.mjs --prod",
     "publish:beta": "yarn node ./tools/scripts/pub.mjs --tag beta",
     "publish:staging": "yarn node ./tools/scripts/pub.mjs --tag staging",

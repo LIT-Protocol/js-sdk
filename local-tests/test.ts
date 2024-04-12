@@ -14,8 +14,8 @@ import {
 import { devEnv } from './setup/env-setup';
 import * as ethers from 'ethers';
 import { getNetworkFlag, showTests, runTests } from './setup/utils';
-import { getSessionSigReport } from 'packages/auth-helpers/src/lib/humanized-siwe-signed-message';
 import { AuthCallbackParams, LitAbility } from '@lit-protocol/types';
+import { AUTHSIG_ALGO } from '@lit-protocol/constants';
 
 const devEnvPromise = devEnv({
   env: getNetworkFlag(),
@@ -130,9 +130,6 @@ const tests = {
     });
 
     console.log('sessionSigs:', sessionSigs);
-    console.log(
-      getSessionSigReport(sessionSigs[litNodeClient.config.bootstrapUrls[0]])
-    );
 
     return sessionSigs;
   },
@@ -201,16 +198,20 @@ const tests = {
 
   /**
    * Test Commands:
-   * ✅ yarn test:integrate --filter=testUseSessionSigsToPkpSign --network=habanero --version=v0
-   * ❌ yarn test:integrate --filter=testUseSessionSigsToPkpSign --network=localchain --version=v1
+   * ✅ yarn test:integrate --filter=testUseEoaSessionSigsToPkpSign --network=habanero --version=v0
+   * ❌ yarn test:integrate --filter=testUseEoaSessionSigsToPkpSign --network=localchain --version=v1
    */
-  testUseSessionSigsToPkpSign: async () => {
+  testUseEoaSessionSigsToPkpSign: async () => {
     const sessionSigs = await litNodeClient.getSessionSigs({
       chain: 'ethereum',
       resourceAbilityRequests: [
         {
           resource: new LitPKPResource('*'),
           ability: LitAbility.PKPSigning,
+        },
+        {
+          resource: new LitActionResource('*'),
+          ability: LitAbility.LitActionExecution,
         },
       ],
       authNeededCallback: async ({
@@ -258,14 +259,13 @@ const tests = {
         const authSig = await craftAuthSig({
           signer: hotWallet,
           toSign: siweMessage,
+          algo: AUTHSIG_ALGO.ED25519,
         });
 
         return authSig;
       },
       // capacityDelegationAuthSig,
     });
-
-    console.log('sessionSigs:', sessionSigs);
 
     const TO_SIGN = ethers.utils.arrayify(
       ethers.utils.keccak256([1, 2, 3, 4, 5])
@@ -288,7 +288,6 @@ const tests = {
     if (error) {
       // check your session sig
       const sessionSig = sessionSigs[litNodeClient.config.bootstrapUrls[0]];
-      console.log(getSessionSigReport(sessionSig));
       console.log('This is the session sig you were using:');
       console.log(sessionSig);
       throw new Error(error.message);
@@ -301,7 +300,6 @@ const tests = {
    * ✅ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUsePkpSessionSigsToPkpSign: async () => {
-
     const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
       authMethods: [hotWalletAuthMethod],
@@ -310,9 +308,11 @@ const tests = {
           resource: new LitPKPResource('*'),
           ability: LitAbility.PKPSigning,
         },
-      ]
+      ],
     });
-    
+
+    console.log('pkpSessionSigs:', pkpSessionSigs);
+
     try {
       const res = await litNodeClient.pkpSign({
         toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),

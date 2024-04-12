@@ -3,7 +3,9 @@ import { ENV } from './env-setup';
 import { log } from '@lit-protocol/misc';
 
 export const getNetworkFlag = (): ENV => {
-  const networkArg = process.argv.find((arg) => arg.startsWith(LIT_PROCESS_FLAG.NETWORK));
+  const networkArg = process.argv.find((arg) =>
+    arg.startsWith(LIT_PROCESS_FLAG.NETWORK)
+  );
 
   const network: string = networkArg
     ? networkArg.replace(LIT_PROCESS_FLAG.NETWORK, '')
@@ -25,13 +27,19 @@ export const getNetworkFlag = (): ENV => {
 
 // Function to parse command line arguments for filters
 export const getFiltersFlag = (): string[] => {
-  const filterArg = process.argv.find((arg) => arg.startsWith(LIT_PROCESS_FLAG.FILTER));
-  return filterArg ? filterArg.replace(LIT_PROCESS_FLAG.FILTER, '').split(',') : [];
+  const filterArg = process.argv.find((arg) =>
+    arg.startsWith(LIT_PROCESS_FLAG.FILTER)
+  );
+  return filterArg
+    ? filterArg.replace(LIT_PROCESS_FLAG.FILTER, '').split(',')
+    : [];
 };
 
 // get --show flag
 export const showTests = (tests): void => {
-  const testsArg = process.argv.find((arg) => arg.startsWith(LIT_PROCESS_FLAG.SHOW));
+  const testsArg = process.argv.find((arg) =>
+    arg.startsWith(LIT_PROCESS_FLAG.SHOW)
+  );
 
   const showTests = testsArg === undefined ? false : true;
 
