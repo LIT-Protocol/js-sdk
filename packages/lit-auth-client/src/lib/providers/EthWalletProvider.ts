@@ -107,6 +107,16 @@ export default class EthWalletProvider extends BaseProvider {
     domain?: string;
     origin?: string;
   }): Promise<AuthMethod> {
+
+    if (!litNodeClient.latestBlockhash) {
+      throwError({
+        message:
+          'Eth Blockhash is undefined. Try connecting to the Lit network again.',
+        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
+        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
+      });
+    }
+
     chain = chain || 'ethereum';
 
     let authSig: AuthSig;
@@ -153,15 +163,6 @@ export default class EthWalletProvider extends BaseProvider {
         address: address,
       };
     } else {
-      if (!litNodeClient.latestBlockhash) {
-        throwError({
-          message:
-            'Eth Blockhash is undefined. Try connecting to the Lit network again.',
-          errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
-          errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name,
-        });
-      }
-
       authSig = await checkAndSignAuthMessage({
         chain,
         nonce: litNodeClient.latestBlockhash!,
