@@ -487,6 +487,7 @@ export const checkSevSnpAttestation = async (
   // get the VCEK certificate
   let vcekCert;
   const vcekUrl = sevSnpUtilsSdk.get_vcek_url(report);
+  log('Got cert file url: ', vcekUrl, 'downloading certificate');
   // if browser, use local storage
   if (isBrowser()) {
     vcekCert = localStorage.getItem(vcekUrl);
@@ -498,10 +499,13 @@ export const checkSevSnpAttestation = async (
     }
   } else {
     // if nodejs, store in memory
-    if (!globalThis.amdCertStore) {
+    if (!globalThis.amdCertStore && !localStorage) {
       globalThis.amdCertStore = {};
+      vcekCert = globalThis.amdCertStore[vcekUrl];
+    } else if(localStorage) {
+      vcekCert = localStorage.getItem(vcekUrl);
     }
-    vcekCert = globalThis.amdCertStore[vcekUrl];
+
     if (!vcekCert) {
       vcekCert = await getAmdCert(vcekUrl, retryConfig);
       globalThis.amdCertStore[vcekUrl] = vcekCert;
