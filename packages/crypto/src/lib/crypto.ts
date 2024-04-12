@@ -499,16 +499,24 @@ export const checkSevSnpAttestation = async (
     }
   } else {
     // if nodejs, store in memory
-    if (!globalThis.amdCertStore && !localStorage) {
+    if (!globalThis.amdCertStore && !globalThis.localStorage) {
       globalThis.amdCertStore = {};
-      vcekCert = globalThis.amdCertStore[vcekUrl];
-    } else if(localStorage) {
+    } else if (globalThis.localStorage) {
       vcekCert = localStorage.getItem(vcekUrl);
+      vcekCert =
+        vcekCert != null ? uint8arrayFromString(vcekCert, 'base64') : undefined;
     }
 
     if (!vcekCert) {
       vcekCert = await getAmdCert(vcekUrl, retryConfig);
-      globalThis.amdCertStore[vcekUrl] = vcekCert;
+      if (!globalThis.localStorage) {
+        globalThis.amdCertStore[vcekUrl] = vcekCert;
+      } else {
+        globalThis.localStorage.setItem(
+          vcekUrl,
+          uint8arrayToString(vcekCert, 'base64')
+        );
+      }
     }
   }
 
