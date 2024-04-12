@@ -70,3 +70,5 @@ storage.test.db
 .yalc
 
 logs
+
+local-tests/setup/networkContext.json
