@@ -2,13 +2,16 @@ import path from 'path';
 import { success, fail, testThis } from '../../tools/scripts/utils.mjs';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-
+import { LocalStorage } from 'node-localstorage';
 export async function main() {
   // ==================== Test Logic ====================
   const client = new LitNodeClient({
     litNetwork: globalThis.LitCI.network,
     debug: globalThis.LitCI.debug,
     checkNodeAttestation: globalThis.LitCI.sevAttestation,
+    storageProvider: {
+      provider: new LocalStorage('./storage.test.db'),
+    },
   });
   await client.connect();
 

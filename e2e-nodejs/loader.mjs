@@ -5,6 +5,7 @@ import { BigNumber, ethers } from 'ethers';
 import * as siwe from 'siwe';
 import * as LitJsSdk from '@lit-protocol/lit-node-client';
 import fs from 'fs';
+import { LocalStorage } from 'node-localstorage';
 
 // ==================== ENV Loading ====================
 const network = process.env.NETWORK ?? LITCONFIG.TEST_ENV.litNetwork;
@@ -32,6 +33,9 @@ if (loadEnv) {
   const litNodeClient = new LitJsSdk.LitNodeClient({
     litNetwork: network,
     debug,
+    storageProvider: {
+      provider: new LocalStorage('./storage.test.db'),
+    },
   });
 
   await litNodeClient.connect();

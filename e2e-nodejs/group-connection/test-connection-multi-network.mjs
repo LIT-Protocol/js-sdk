@@ -1,7 +1,7 @@
 import path from 'path';
 import { success, fail, testThis, log } from '../../tools/scripts/utils.mjs';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-
+import { LocalStorage } from 'node-localstorage';
 export async function main() {
   const networks = ['cayenne', 'habanero', 'manzano'];
 
@@ -10,6 +10,9 @@ export async function main() {
     const client = new LitNodeClient({
       litNetwork: network,
       debug: globalThis.LitCI.debug,
+      storageProvider: {
+        provider: new LocalStorage('./storage.test.db'),
+      },
     });
     log(`connecting to ${network.toUpperCase()}...`);
     await client.connect();
