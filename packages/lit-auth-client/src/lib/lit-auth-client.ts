@@ -109,7 +109,8 @@ export class LitAuthClient {
 
       if (!supportedNetworks.includes(this.litNodeClient.config.litNetwork)) {
         throw new Error(
-          `Unsupported litNetwork: ${this.litNodeClient.config.litNetwork
+          `Unsupported litNetwork: ${
+            this.litNodeClient.config.litNetwork
           }. Supported networks are: ${supportedNetworks.join(', ')}`
         );
       }
