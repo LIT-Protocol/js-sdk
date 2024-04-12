@@ -2474,10 +2474,12 @@ export class LitNodeClientNodeJs
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
     const pkpEthAddress = (function () {
-      // prefix '0x' if it's not already prefixed
-      const hexedPkpPublicKey = hexPrefixed(params.pkpPublicKey!);
+      if (params.pkpPublicKey) {
+        // prefix '0x' if it's not already prefixed
+        const hexedPkpPublicKey = hexPrefixed(params.pkpPublicKey);
 
-      if (hexedPkpPublicKey) return computeAddress(hexedPkpPublicKey);
+        if (hexedPkpPublicKey) return computeAddress(hexedPkpPublicKey);
+      }
 
       // This will be populated by the node, using dummy value for now.
       return '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
