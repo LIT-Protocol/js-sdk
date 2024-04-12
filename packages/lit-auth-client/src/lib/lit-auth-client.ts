@@ -87,8 +87,13 @@ export class LitAuthClient {
     if (options?.litNodeClient) {
       this.litNodeClient = options?.litNodeClient;
     } else {
+
+      if(!options.litNetwork){
+        throw new Error(`litNetwork is required to create a LitNodeClient`);
+      }
+
       this.litNodeClient = new LitNodeClient({
-        litNetwork: 'cayenne',
+        litNetwork: options.litNetwork,
         debug: options.debug ?? false,
       });
     }
