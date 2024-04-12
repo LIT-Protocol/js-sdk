@@ -11,8 +11,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
-blsful = { version = "2.5.3", default-features = false, features = ["rust"] }
-bls12_381_plus = {version = "0.8.13", features = ["hashing"] }
+blsful = { version = "2.5.7", default-features = false, features = ["rust"] }
 base64_light = "0.1"
 getrandom = { version = "0.2", features = ["js"] }
 hex = "0.4"
@@ -61,7 +60,7 @@ tsify = { version = "0.4.5", default-features = false, features = ["js"] }
 jubjub = { version = "0.10", git = "https://github.com/LIT-Protocol/jubjub.git", branch = "main"}
 
 # TODO(cairomassimo): remove branch once merged
-hd-keys-curves = {path = "../../../../hd-keys-curves", default-features = false }
+hd-keys-curves = { git = "ssh://git@github.com/LIT-Protocol/hd-keys-curves.git" }
 
 
 [dev-dependencies]
