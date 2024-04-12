@@ -88,9 +88,8 @@ export class LitAuthClient {
       this.litNodeClient = options?.litNodeClient;
     } else {
       if (!options.litNetwork) {
-        throw new Error(`litNetwork is required to create a LitNodeClient`);
+        console.warn(`litNetwork is required to create a LitNodeClient`);
       }
-
       this.litNodeClient = new LitNodeClient({
         litNetwork: options.litNetwork,
         debug: options.debug ?? false,
@@ -110,8 +109,7 @@ export class LitAuthClient {
 
       if (!supportedNetworks.includes(this.litNodeClient.config.litNetwork)) {
         throw new Error(
-          `Unsupported litNetwork: ${
-            this.litNodeClient.config.litNetwork
+          `Unsupported litNetwork: ${this.litNodeClient.config.litNetwork
           }. Supported networks are: ${supportedNetworks.join(', ')}`
         );
       }
