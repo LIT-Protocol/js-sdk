@@ -1179,7 +1179,7 @@ export interface LitAuthClientOptions {
 
   litOtpConfig?: OtpProviderOptions;
 
-  litNetwork?: LIT_NETWORKS_KEYS
+  litNetwork?: LIT_NETWORKS_KEYS;
 }
 
 export interface OtpSessionResult {

@@ -54,9 +54,10 @@ export default class EthWalletProvider extends BaseProvider {
   public async authenticate(
     options?: EthWalletAuthenticateOptions
   ): Promise<AuthMethod> {
-
     if (!options) {
-      throw new Error("Options are required to authenticate with EthWalletProvider.");
+      throw new Error(
+        'Options are required to authenticate with EthWalletProvider.'
+      );
     }
 
     return EthWalletProvider.authenticate({
@@ -72,7 +73,7 @@ export default class EthWalletProvider extends BaseProvider {
 
   /**
    * Generate a wallet signature to use as an auth method
-   * 
+   *
    * @param {EthWalletAuthenticateOptions} options
    * @param {string} [options.address] - Address to sign with
    * @param {function} [options.signMessage] - Function to sign message with
@@ -81,7 +82,7 @@ export default class EthWalletProvider extends BaseProvider {
    * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
    * @static
    * @memberof EthWalletProvider
-   * 
+   *
    * @example
    * ```typescript
    *   const authMethod = await EthWalletProvider.authenticate({
@@ -107,7 +108,6 @@ export default class EthWalletProvider extends BaseProvider {
     domain?: string;
     origin?: string;
   }): Promise<AuthMethod> {
-
     if (!litNodeClient.latestBlockhash) {
       throwError({
         message:
@@ -122,10 +122,15 @@ export default class EthWalletProvider extends BaseProvider {
     let authSig: AuthSig;
 
     // convert to EIP-55 format or else SIWE complains
-    address = address || await signer?.getAddress!() || (signer as ethers.Wallet)?.address;
+    address =
+      address ||
+      (await signer?.getAddress!()) ||
+      (signer as ethers.Wallet)?.address;
 
     if (!address) {
-      throw new Error(`Address is required to authenticate with EthWalletProvider. Cannot find it in signer or options.`);
+      throw new Error(
+        `Address is required to authenticate with EthWalletProvider. Cannot find it in signer or options.`
+      );
     }
 
     address = ethers.utils.getAddress(address);
