@@ -377,28 +377,30 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
     `[getAmdCert] Fetching AMD cert using proxy URL ${proxyUrl} due to CORS restrictions.`
   );
 
-  let response;
-
-  try {
-    response = await fetch(proxyUrl);
-    if (!response.ok) {
+  async function fetchAsUint8Array(targetUrl) {
+    const res = await fetch(targetUrl);
+    if (!res.ok) {
       throw new Error(`[getAmdCert] HTTP error! status: ${response.status}`);
     }
-  } catch (e) {
-    log(`[getAmdCert] Failed to fetch AMD cert from proxy:`, e);
-
-    // Try direct fetch only if proxy fails
-    log('[getAmdCert] Attempting to fetch directly without proxy.');
-    try {
-      response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    } catch (e) {
-      log('[getAmdCert] Direct fetch also failed:', e);
-      throw e; // Re-throw to signal that both methods failed
-    }
+    const arrayBuffer = await res.arrayBuffer();
+    return new Uint8Array(arrayBuffer);
   }
+
+   try {
+    return await fetchAsUint8Array(proxyUrl);
+  } catch (e) {
+      log(`[getAmdCert] Failed to fetch AMD cert from proxy:`, e);
+  }
+  
+  // Try direct fetch only if proxy fails
+  log('[getAmdCert] Attempting to fetch directly without proxy.');
+  try {
+    return await fetchAsUint8Array(url);
+  } catch (e) {
+    log('[getAmdCert] Direct fetch also failed:', e);
+    throw e; // Re-throw to signal that both methods failed
+  }
+
 
   const arrayBuffer = await response.arrayBuffer();
   return new Uint8Array(arrayBuffer);
