@@ -1,3 +1,4 @@
+import { AUTHSIG_ALGO } from '@lit-protocol/constants';
 import { AuthSig, SignerLike } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 
@@ -17,10 +18,12 @@ export const craftAuthSig = async ({
   signer,
   toSign,
   address,
+  algo,
 }: {
   signer: ethers.Wallet | ethers.Signer | SignerLike;
   toSign: string;
   address?: string;
+  algo?: AUTHSIG_ALGO;
 }): Promise<AuthSig> => {
   if (!signer?.signMessage) {
     throw new Error('signer does not have a signMessage method');
@@ -43,5 +46,6 @@ export const craftAuthSig = async ({
     derivedVia: 'web3.eth.personal.sign',
     signedMessage: toSign,
     address: address,
+    ...(algo && { algo }),
   };
 };
