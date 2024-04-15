@@ -1,45 +1,27 @@
 import * as siwe from 'siwe';
 import {
-  CapacityCreditsFields,
-  createCapacityDelegationRecapObject,
-} from '../create-recap-object/create-capacity-delegation-recap';
-import { LitResourceAbilityRequest } from '@lit-protocol/types';
+  BaseSiweMessage,
+  CapacityDelegationFields,
+  CapacityDelegationRequest,
+  ILitNodeClient,
+  LitAbility,
+  LitResourceAbilityRequest,
+} from '@lit-protocol/types';
+import { LitRLIResource } from '@lit-protocol/auth-helpers';
 import { LIT_URI } from '@lit-protocol/constants';
 
-export interface BaseSiweMessage {
-  walletAddress: string;
-  nonce: string;
-
-  // -- filled in by default
-  expiration?: string;
-  resources?: string[];
-  uri?: string; // This is important in authNeededCallback params eg. (lit:session:xxx)
-  domain?: string;
-  statement?: string;
-  version?: string;
-  chainId?: number;
-  type: CreateSiweType;
-}
-
-export interface AuthCallbackFields extends BaseSiweMessage {
+export interface WithRecap extends BaseSiweMessage {
   uri: string;
   expiration: string;
-  resources: string[];
+  resources: LitResourceAbilityRequest[];
 }
 
-export interface WithRecapFields extends BaseSiweMessage {
+export interface WithCapacityDelegation extends BaseSiweMessage {
+  uri: LIT_URI.CAPABILITY_DELEGATION;
   litNodeClient: any;
-  resourceAbilityRequests: LitResourceAbilityRequest[];
-  type: CreateSiweType.INCLUDE_RECAPS;
-}
-
-/**
- * Based on the type, we will decide how to fill the siwe message
- */
-export enum CreateSiweType {
-  DEFAULT = 'DEFAULT',
-  CAPABILITY_DELEGATION = 'CAPABILITY_DELEGATION',
-  INCLUDE_RECAPS = 'INCLUDE_RECAPS',
+  capacityTokenId?: string;
+  delegateeAddresses?: string[];
+  uses?: string;
 }
 
 export const createSiweMessage = async <T extends BaseSiweMessage>(
@@ -65,69 +47,121 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
     chainId: params?.chainId ?? 1,
     nonce: params.nonce,
     expirationTime: params?.expiration ?? ONE_WEEK_FROM_NOW,
-
-    ...(params.resources && { resources: params.resources }),
   };
-
-  // -- override URI for CAPABILITY_DELEGATION
-  if (params.type === CreateSiweType.CAPABILITY_DELEGATION) {
-    siweParams.uri = LIT_URI.CAPABILITY_DELEGATION;
-  }
 
   let siweMessage = new siwe.SiweMessage(siweParams);
 
-  // -- add recap object if needed
-  if (params?.type === CreateSiweType.CAPABILITY_DELEGATION) {
-    const recapObject = await createCapacityDelegationRecapObject(
-      params as unknown as CapacityCreditsFields
+  // -- create a message with capacity credits
+  if (
+    'uses' in params ||
+    'delegateeAddresses' in params ||
+    'capacityTokenId' in params
+  ) {
+    const ccParams = params as CapacityDelegationFields;
+
+    const capabilities = createCapacityCreditsResourceData(ccParams);
+
+    params.resources = [
+      {
+        resource: new LitRLIResource(ccParams.capacityTokenId ?? '*'),
+        ability: LitAbility.RateLimitIncreaseAuth,
+        data: capabilities,
+      },
+    ];
+  }
+
+  // -- add recap resources if needed
+  if (params.resources) {
+    siweMessage = await addRecapToSiweMessage({
+      siweMessage,
+      resources: params.resources,
+      litNodeClient: params.litNodeClient,
+    });
+  }
+
+  return siweMessage.prepareMessage();
+};
+
+export const createCapacityCreditsResourceData = (
+  params: CapacityDelegationFields
+): CapacityDelegationRequest => {
+  return {
+    ...(params.capacityTokenId ? { nft_id: [params.capacityTokenId] } : {}), // Conditionally include nft_id
+    ...(params.delegateeAddresses
+      ? {
+        delegate_to: params.delegateeAddresses.map((address) =>
+          address.startsWith('0x') ? address.slice(2) : address
+        ),
+      }
+      : {}),
+    uses: params.uses!.toString() || '1',
+  };
+};
+
+export const addRecapToSiweMessage = async ({
+  siweMessage,
+  resources,
+  litNodeClient,
+}: {
+  siweMessage: siwe.SiweMessage;
+  resources: LitResourceAbilityRequest[];
+  litNodeClient: ILitNodeClient;
+}) => {
+
+
+  if (!resources || resources.length < 1) {
+    throw new Error('resources is required');
+  }
+
+  if (!litNodeClient) {
+    throw new Error('litNodeClient is required');
+  }
+
+  for (const request of resources) {
+    const recapObject =
+      await litNodeClient.generateSessionCapabilityObjectWithWildcards([
+        request.resource,
+      ]);
+
+    recapObject.addCapabilityForResource(
+      request.resource,
+      request.ability,
+      request.data || null
     );
+
+    const verified = recapObject.verifyCapabilitiesForResource(
+      request.resource,
+      request.ability
+    );
+
+    if (!verified) {
+      throw new Error(
+        `Failed to verify capabilities for resource: "${request.resource}" and ability: "${request.ability}`
+      );
+    }
 
     siweMessage = recapObject.addToSiweMessage(siweMessage);
   }
 
-  if (params?.type === CreateSiweType.INCLUDE_RECAPS) {
-    // --- starts
-    const _params = params as unknown as WithRecapFields;
-    _params;
+  return siweMessage;
+};
 
-    for (const request of _params.resourceAbilityRequests) {
-      const recapObject =
-        await _params.litNodeClient.generateSessionCapabilityObjectWithWildcards(
-          [request.resource]
-        );
+export const createSiweMessageWithRecaps = async (
+  params: WithRecap
+): Promise<string> => {
+  return createSiweMessage({
+    ...params,
+  });
+};
 
-      recapObject.addCapabilityForResource(request.resource, request.ability);
-
-      // const verified = recapObject.verifyCapabilitiesForResource(
-      //   request.resource,
-      //   request.ability
-      // );
-
-      // if (!verified) {
-      //   throw new Error(
-      //     `Failed to verify capabilities for resource: "${request.resource}" and ability: "${request.ability}`
-      //   );
-      // }
-
-      siweMessage = recapObject.addToSiweMessage(siweMessage);
-      console.log('siweMessage:', siweMessage);
-    }
-
-    // siweMessage reousces array should always be 1 element, and that should be the last one
-    // element of the array
-    if (siweMessage.resources && siweMessage.resources.length > 1) {
-      const lastResource = siweMessage.resources?.pop();
-
-      if (!lastResource) {
-        throw new Error('lastResource is required');
-      }
-      siweMessage.resources = [lastResource as string];
-    }
-
-    // --- ends
+export const createSiweMessageWithCapacityDelegation = async (
+  params: WithCapacityDelegation
+) => {
+  if (!params.litNodeClient) {
+    throw new Error('litNodeClient is required');
   }
 
-  // return siweMessage;
-
-  return siweMessage.prepareMessage();
+  return createSiweMessage({
+    ...params,
+  });
 };

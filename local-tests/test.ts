@@ -5,17 +5,13 @@
 import {
   LitActionResource,
   LitPKPResource,
-  createSiweMessage,
   craftAuthSig,
-  AuthCallbackFields,
-  WithRecapFields,
-  CreateSiweType,
+  createSiweMessageWithRecaps,
 } from '@lit-protocol/auth-helpers';
 import { devEnv } from './setup/env-setup';
 import * as ethers from 'ethers';
 import { getNetworkFlag, showTests, runTests } from './setup/utils';
 import { AuthCallbackParams, LitAbility } from '@lit-protocol/types';
-import { AUTHSIG_ALGO } from '@lit-protocol/constants';
 
 const devEnvPromise = devEnv({
   env: getNetworkFlag(),
@@ -95,27 +91,27 @@ const tests = {
       authNeededCallback: async ({
         uri,
         expiration,
-        resources,
+        resourceAbilityRequests,
       }: AuthCallbackParams) => {
         if (!expiration) {
           throw new Error('expiration is required');
         }
 
-        if (!resources) {
-          throw new Error('resources is required');
+        if (!resourceAbilityRequests) {
+          throw new Error('resourceAbilityRequests is required');
         }
 
         if (!uri) {
           throw new Error('uri is required');
         }
 
-        const toSign = await createSiweMessage<AuthCallbackFields>({
-          uri: uri,
-          expiration: expiration,
-          resources: resources,
+        const toSign = await createSiweMessageWithRecaps({
+          uri,
+          expiration,
+          resources: resourceAbilityRequests,
           walletAddress: hotWallet.address,
           nonce: lastestBlockhash,
-          type: CreateSiweType.DEFAULT,
+          litNodeClient
         });
 
         const authSig = await craftAuthSig({
@@ -125,21 +121,18 @@ const tests = {
 
         return authSig;
       },
-      // NOT SURE ABOUT THIS
-      capacityDelegationAuthSig: capacityDelegationAuthSig,
+      capacityDelegationAuthSig,
     });
 
     console.log('sessionSigs:', sessionSigs);
-
-    return sessionSigs;
   },
 
   /**
    * Test Commands:
-   * ✅ yarn test:local --filter=testUseSessionSigsToExecuteJsConsoleLog --network=habanero --version=v0
-   * ✅ yarn test:local --filter=testUseSessionSigsToExecuteJsConsoleLog --network=localchain --version=v1
+   * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=habanero --version=v0
+   * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=localchain --version=v1
    */
-  testUseSessionSigsToExecuteJsConsoleLog: async () => {
+  testUseEoaSessionSigsToExecuteJsConsoleLog: async () => {
     const sessionSigs = await litNodeClient.getSessionSigs({
       chain: 'ethereum',
       resourceAbilityRequests: [
@@ -155,15 +148,10 @@ const tests = {
       authNeededCallback: async ({
         uri,
         expiration,
-        resources,
         resourceAbilityRequests,
       }: AuthCallbackParams) => {
         if (!expiration) {
           throw new Error('expiration is required');
-        }
-
-        if (!resources) {
-          throw new Error('resources is required');
         }
 
         if (!resourceAbilityRequests) {
@@ -174,15 +162,13 @@ const tests = {
           throw new Error('uri is required');
         }
 
-        const toSign = await createSiweMessage<WithRecapFields>({
+        const toSign = await createSiweMessageWithRecaps({
           uri: uri,
           expiration: expiration,
-          resources: resources,
+          resources: resourceAbilityRequests,
           walletAddress: hotWallet.address,
           nonce: lastestBlockhash,
-          resourceAbilityRequests,
-          type: CreateSiweType.INCLUDE_RECAPS,
-          litNodeClient: litNodeClient
+          litNodeClient: litNodeClient,
         });
 
         const authSig = await craftAuthSig({
@@ -192,8 +178,6 @@ const tests = {
 
         return authSig;
       },
-      // Create a new test with this field
-      // capacityDelegationAuthSig: capacityDelegationAuthSig,
     });
 
     const res = await litNodeClient.executeJs({
@@ -227,25 +211,11 @@ const tests = {
       authNeededCallback: async ({
         uri,
         expiration,
-        resources,
         resourceAbilityRequests,
       }: AuthCallbackParams) => {
         if (!expiration) {
           throw new Error('expiration is required');
         }
-
-        if (!resources) {
-          throw new Error('resources is required');
-        }
-
-        console.log(`
-  --------------------------------------
-  ❓ resources from auth needed callabck.
-  They are expected to be empty, because they will be injected by the Lit nodes.
-  raw: ${JSON.stringify(resources)}
-  base64: ${resources[0].split(':')[2]}
-  decoded: ${atob(resources[0].split(':')[2])}
-  --------------------------------------`);
 
         if (!resourceAbilityRequests) {
           throw new Error('resourceAbilityRequests is required');
@@ -255,15 +225,13 @@ const tests = {
           throw new Error('uri is required');
         }
 
-        const siweMessage = await createSiweMessage<WithRecapFields>({
+        const siweMessage = await createSiweMessageWithRecaps({
           uri: uri,
           expiration: expiration,
-          resources: resources,
+          resources: resourceAbilityRequests,
           walletAddress: hotWallet.address,
           nonce: lastestBlockhash,
-          litNodeClient: litNodeClient,
-          resourceAbilityRequests,
-          type: CreateSiweType.INCLUDE_RECAPS,
+          litNodeClient,
         });
 
         const authSig = await craftAuthSig({
@@ -271,12 +239,8 @@ const tests = {
           toSign: siweMessage,
         });
 
-        console.log('XXX authSig:', authSig);
-        // process.exit();
-
         return authSig;
       },
-      // capacityDelegationAuthSig,
     });
 
     const TO_SIGN = ethers.utils.arrayify(
@@ -284,7 +248,6 @@ const tests = {
     );
 
     console.log('sessionSigs:', sessionSigs);
-    // process.exit();
 
     let error: any = undefined;
 
@@ -315,6 +278,7 @@ const tests = {
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUsePkpSessionSigsToPkpSign: async () => {
+
     const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
       authMethods: [hotWalletAuthMethod],
@@ -328,19 +292,13 @@ const tests = {
 
     console.log('pkpSessionSigs:', pkpSessionSigs);
 
-    try {
-      const res = await litNodeClient.pkpSign({
-        toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
-        pubKey: hotWalletAuthMethodOwnedPkp.publicKey,
-        sessionSigs: pkpSessionSigs,
-      });
+    const res = await litNodeClient.pkpSign({
+      toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+      pubKey: hotWalletAuthMethodOwnedPkp.publicKey,
+      sessionSigs: pkpSessionSigs,
+    });
 
-      console.log('✅ res:', res);
-    } catch (e) {
-      console.log(e);
-    }
-
-    process.exit();
+    console.log('✅ res:', res);
   },
 
   /**
@@ -351,80 +309,39 @@ const tests = {
    * Habanero Error: There was an error getting the signing shares from the nodes
    */
   testUseValidLitActionCodeGeneratedSessionSigsToPkpSign: async () => {
-    const VALID_SESSION_SIG_LIT_ACTION_CODE = `
-// Works with an AuthSig AuthMethod
-if (Lit.Auth.authMethodContexts.some(e => e.authMethodType === 1)) {
-  LitActions.setResponse({ response: "true" });
-} else {
-  LitActions.setResponse({ response: "false" });
-}
-`;
 
-    const pkpSessionSigs = await litNodeClient.getSessionSigs({
+    const VALID_SESSION_SIG_LIT_ACTION_CODE = `
+      // Works with an AuthSig AuthMethod
+      if (Lit.Auth.authMethodContexts.some(e => e.authMethodType === 1)) {
+        LitActions.setResponse({ response: "true" });
+      } else {
+        LitActions.setResponse({ response: "false" });
+      }
+    `;
+
+    const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
-      expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
-      chain: 'ethereum',
+      authMethods: [hotWalletAuthMethod],
       resourceAbilityRequests: [
         {
           resource: new LitPKPResource('*'),
           ability: LitAbility.PKPSigning,
         },
       ],
-      authNeededCallback: async (params) => {
-        // -- validate
-        if (!params.expiration) {
-          throw new Error('expiration is required');
-        }
-
-        if (!params.resources) {
-          throw new Error('resources is required');
-        }
-
-        if (!params.resourceAbilityRequests) {
-          throw new Error('resourceAbilityRequests is required');
-        }
-
-        console.log('params:', params);
-
-        const response = await litNodeClient.signSessionKey({
-          statement: 'Some custom statement.',
-          authMethods: [hotWalletAuthMethod],
-          pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
-          expiration: params.expiration,
-          resources: params.resources,
-          chainId: 1,
-
-          // -- required fields
-          resourceAbilityRequests: params.resourceAbilityRequests,
-          litActionCode: Buffer.from(
-            VALID_SESSION_SIG_LIT_ACTION_CODE
-          ).toString('base64'),
-          jsParams: {
-            publicKey: hotWalletAuthMethodOwnedPkp.publicKey,
-            sigName: 'unified-auth-sig',
-          },
-        });
-
-        return response.authSig;
+      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString('base64'),
+      jsParams: {
+        publicKey: hotWalletAuthMethodOwnedPkp.publicKey,
+        sigName: 'unified-auth-sig',
       },
-      // capacityDelegationAuthSig,
     });
 
-    console.log('pkpSessionSigs:', pkpSessionSigs);
+    const res = await litNodeClient.pkpSign({
+      toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+      pubKey: hotWalletAuthMethodOwnedPkp.publicKey,
+      sessionSigs: pkpSessionSigs,
+    });
 
-    try {
-      const res = await litNodeClient.pkpSign({
-        toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
-        pubKey: hotWalletAuthMethodOwnedPkp.publicKey,
-        sessionSigs: pkpSessionSigs,
-      });
-
-      console.log('✅ res:', res);
-    } catch (e) {
-      console.log(e);
-    }
-
-    process.exit();
+    console.log('✅ res:', res);
   },
 };
 

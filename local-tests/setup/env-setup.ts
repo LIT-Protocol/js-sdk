@@ -10,7 +10,6 @@ import {
   BaseSiweMessage,
   createSiweMessage,
   craftAuthSig,
-  CreateSiweType,
 } from '@lit-protocol/auth-helpers';
 // import { LocalStorage } from 'node-localstorage';
 import { log } from '@lit-protocol/misc';
@@ -142,7 +141,6 @@ export const devEnv = async (
   const siweMessage = await createSiweMessage<BaseSiweMessage>({
     nonce,
     walletAddress: wallet.address,
-    type: CreateSiweType.DEFAULT,
   });
 
   log('🧪 [env-setup.ts] Crafting Auth Sig');

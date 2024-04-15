@@ -8,10 +8,10 @@ import {
   LitAccessControlConditionResource,
   decode,
   RecapSessionCapabilityObject,
-  createSiweMessage,
-  CapacityCreditsFields,
   craftAuthSig,
-  CreateSiweType,
+  createSiweMessageWithCapacityDelegation,
+  createSiweMessageWithRecaps,
+  createSiweMessage,
 } from '@lit-protocol/auth-helpers';
 
 import {
@@ -133,8 +133,7 @@ let sessionKeyCache: SessionKeyCache | null = null;
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
-{
+  implements LitClientSessionManager {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -214,11 +213,11 @@ export class LitNodeClientNodeJs
 
     const nonce = this.getLatestBlockhash();
 
-    const siweMessage = await createSiweMessage<CapacityCreditsFields>({
+    const siweMessage = await createSiweMessageWithCapacityDelegation({
+      uri: LIT_URI.CAPABILITY_DELEGATION,
       litNodeClient: this,
       walletAddress: dAppOwnerWalletAddress,
-      nonce: nonce?.toString(),
-
+      nonce: nonce,
       // -- default configuration for recap object capability
       expiration:
         expiration ?? new Date(Date.now() + 1000 * 60 * 7).toISOString(),
@@ -231,7 +230,6 @@ export class LitNodeClientNodeJs
       uses: uses ?? '1',
       delegateeAddresses: delegateeAddresses,
       capacityTokenId: capacityTokenId,
-      type: CreateSiweType.CAPABILITY_DELEGATION,
     });
 
     const authSig = await craftAuthSig({
@@ -2538,47 +2536,30 @@ export class LitNodeClientNodeJs
       log(`[signSessionKey] statement found in params: "${params.statement}"`);
     }
 
-    let siweMessage = new siwe.SiweMessage({
+    let siweMessage;
+
+    const siweParams = {
       domain: params?.domain || globalThis.location?.host || 'litprotocol.com',
-      address: pkpEthAddress,
+      walletAddress: pkpEthAddress,
       statement: siwe_statement,
       uri: sessionKeyUri,
       version: '1',
       chainId: params.chainId ?? 1,
-      expirationTime: _expiration,
-      resources: params.resources,
+      expiration: _expiration,
+      // resources: params.resources,
       nonce: this.latestBlockhash!,
-    });
+      resources: params.resourceAbilityRequests
+    };
 
-    // context: if resourceAbilityRequests is provided, we want to inject the capabilities to the siwe message
-    if (params?.resourceAbilityRequests) {
-      log(
-        `[signSessionKey] resourceAbilityRequests found in params:`,
-        params.resourceAbilityRequests
-      );
-      const resources = params.resourceAbilityRequests.map((r) => r.resource);
-
-      const recapObject =
-        await this.generateSessionCapabilityObjectWithWildcards(resources);
-
-      params.resourceAbilityRequests.forEach((r) => {
-        recapObject.addCapabilityForResource(r.resource, r.ability);
-
-        const verified = recapObject.verifyCapabilitiesForResource(
-          r.resource,
-          r.ability
-        );
-
-        if (!verified) {
-          throw new Error('Failed to verify capabilities for resource');
-        }
-      });
-      siweMessage = recapObject.addToSiweMessage(siweMessage);
+    if (params.resourceAbilityRequests) {
+      siweMessage = await createSiweMessageWithRecaps({
+        ...siweParams,
+        resources: params.resourceAbilityRequests,
+        litNodeClient: this,
+      })
+    } else {
+      siweMessage = await createSiweMessage(siweParams);
     }
-
-    const siweMessageStr: string = (
-      siweMessage as siwe.SiweMessage
-    ).prepareMessage();
 
     // ========== Get Node Promises ==========
     // -- fetch shares from nodes
@@ -2587,8 +2568,7 @@ export class LitNodeClientNodeJs
       authMethods: params.authMethods,
       ...(params?.pkpPublicKey && { pkpPublicKey: params.pkpPublicKey }),
       ...(params?.authSig && { authSig: params.authSig }),
-      // authSig: params.authSig,
-      siweMessage: siweMessageStr,
+      siweMessage: siweMessage,
       curveType: LIT_CURVE.BLS,
 
       // -- custom auths
@@ -2716,23 +2696,23 @@ export class LitNodeClientNodeJs
         let requiredFields =
           curveType === LIT_CURVE.BLS
             ? [
-                'signatureShare',
-                'curveType',
-                'shareIndex',
-                'siweMessage',
-                'dataSigned',
-                'blsRootPubkey',
-                'result',
-              ]
+              'signatureShare',
+              'curveType',
+              'shareIndex',
+              'siweMessage',
+              'dataSigned',
+              'blsRootPubkey',
+              'result',
+            ]
             : [
-                'sigType',
-                'dataSigned',
-                'signatureShare',
-                'bigr',
-                'publicKey',
-                'sigName',
-                'siweMessage',
-              ];
+              'sigType',
+              'dataSigned',
+              'signatureShare',
+              'bigr',
+              'publicKey',
+              'sigName',
+              'siweMessage',
+            ];
 
         // check if all required fields are present
         for (const field of requiredFields) {
@@ -2938,8 +2918,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-          params.resourceAbilityRequests.map((r) => r.resource)
-        );
+        params.resourceAbilityRequests.map((r) => r.resource)
+      );
 
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
@@ -3083,7 +3063,7 @@ export class LitNodeClientNodeJs
       ...params,
       chain,
       pkpPublicKey: params.pkpPublicKey,
-      authNeededCallback: async (props) => {
+      authNeededCallback: async (props: AuthCallbackParams) => {
         // -- validate
         if (!props.expiration) {
           throw new Error(
@@ -3101,6 +3081,13 @@ export class LitNodeClientNodeJs
           );
         }
 
+        // lit action code and ipfs id cannot exist at the same time
+        if (props.litActionCode && props.ipfsId) {
+          throw new Error(
+            '[getPkpSessionSigs/callback]litActionCode and ipfsId cannot exist at the same time'
+          );
+        }
+
         const response = await this.signSessionKey({
           statement: props.statement || 'Some custom statement.',
           authMethods: [...params.authMethods],
@@ -3111,6 +3098,11 @@ export class LitNodeClientNodeJs
 
           // -- required fields
           resourceAbilityRequests: props.resourceAbilityRequests,
+
+          // -- optional fields
+          ...(props.litActionCode && { litActionCode: props.litActionCode }),
+          ...(props.ipfsId && { ipfsId: props.ipfsId }),
+          ...(props.jsParams && { jsParams: props.jsParams }),
         });
 
         return response.authSig;

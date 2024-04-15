@@ -76,6 +76,10 @@ export interface AuthCallbackParams {
   walletConnectProjectId?: string;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
+
+  litActionCode?: string;
+  ipfsId?: string;
+  jsParams?: any,
 }
 
 /** ---------- Web3 ---------- */
@@ -519,17 +523,17 @@ export interface SignConditionECDSA {
 export interface ExecuteJsResponse {
   success?: boolean;
   signatures:
-    | {
-        sig: {
-          r: string;
-          s: string;
-          recid: number;
-          signature: string; // 0x...
-          publicKey: string; // pkp public key
-          dataSigned: string;
-        };
-      }
-    | any;
+  | {
+    sig: {
+      r: string;
+      s: string;
+      recid: number;
+      signature: string; // 0x...
+      publicKey: string; // pkp public key
+      dataSigned: string;
+    };
+  }
+  | any;
   decryptions: any[];
   response: string;
   logs: string;
@@ -541,7 +545,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise {}
+export interface LitNodePromise { }
 
 export interface SendNodeCommand {
   url: string;
@@ -990,6 +994,11 @@ export interface GetSignSessionKeySharesProp {
 export interface GetPkpSessionSigs extends GetSessionSigsProps {
   pkpPublicKey: string;
   authMethods: AuthMethod[];
+  litActionCode?: string;
+  jsParams?: {
+    publicKey?: string,
+    sigName?: string,
+  },
 }
 
 export interface GetSessionSigsProps {
@@ -1531,7 +1540,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions {}
+export interface BaseAuthenticateOptions { }
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
@@ -1611,8 +1620,8 @@ export interface MintCapacityCreditsPerKilosecond
 }
 export interface MintCapacityCreditsContext
   extends MintCapacityCreditsPerDay,
-    MintCapacityCreditsPerSecond,
-    MintCapacityCreditsPerKilosecond {}
+  MintCapacityCreditsPerSecond,
+  MintCapacityCreditsPerKilosecond { }
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
@@ -1696,4 +1705,32 @@ export interface EthersJsonRpcProviderLike {
   send: (method: string, params: any[]) => Promise<any>;
   prepareRequest(method: string, params: any[]): any;
   perform(request: any): Promise<any>;
+}
+
+export interface CapacityDelegationRequest {
+  nft_id?: string[]; // Optional array of strings
+  delegate_to?: string[]; // Optional array of modified address strings
+  uses: string; // Always present, default to '1' if undefined
+}
+
+export interface BaseSiweMessage {
+  walletAddress: string;
+  nonce: string;
+
+  // -- filled in by default
+  expiration?: string;
+  resources?: LitResourceAbilityRequest[];
+  uri?: string; // This is important in authNeededCallback params eg. (lit:session:xxx)
+  domain?: string;
+  statement?: string;
+  version?: string;
+  chainId?: number;
+  litNodeClient?: any;
+}
+
+export interface CapacityDelegationFields extends BaseSiweMessage {
+  litNodeClient: any;
+  capacityTokenId?: string;
+  delegateeAddresses?: string[];
+  uses?: string;
 }
