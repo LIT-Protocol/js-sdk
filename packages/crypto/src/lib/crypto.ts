@@ -20,6 +20,8 @@ import { nacl } from '@lit-protocol/nacl';
 import { SIGTYPE } from '@lit-protocol/constants';
 import { CombinedECDSASignature } from '@lit-protocol/types';
 
+const LIT_CORS_PROXY = `https://cors.litgateway.com`
+
 // if 'wasmExports' is not available, we need to initialize the BLS SDK
 if (!globalThis.wasmExports) {
   blsSdk.initWasmBlsSdk().then((exports) => {
@@ -27,8 +29,7 @@ if (!globalThis.wasmExports) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [BLS SDK] wasmExports loaded. ${
-          Object.keys(exports).length
+        `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
       );
     }
@@ -50,8 +51,7 @@ if (!globalThis.wasmECDSA) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-          Object.keys(wasmECDSA).length
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );
     }
@@ -64,8 +64,7 @@ if (!globalThis.wasmSevSnpUtils) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
-          Object.keys(exports).length
+        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
       );
     }
@@ -359,14 +358,44 @@ function base64ToBufferAsync(base64) {
     });
 }
 
-async function getAmdCert(url: string) {
-  // unfortunately, until AMD enables CORS, we have to use a proxy when in the browser
-  // This project is hosted on heroku and uses this codebase: https://github.com/LIT-Protocol/cors-proxy-amd
-  if (isBrowser()) {
-    // CORS proxy url
-    url = `https://cors.litgateway.com/${url}`;
+/**
+ * Asynchronously fetches an AMD certification from a specified URL using a CORS proxy.
+ * This approach is used to bypass CORS restrictions when accessing external APIs that do not support CORS.
+ * It attempts to fetch the AMD cert through a proxy and if the proxy fetch fails, it throws an error.
+ * 
+ * @param url The URL from which to fetch the AMD cert.
+ * @returns A Promise that resolves to a Uint8Array containing the AMD certification data.
+ * @throws An error detailing HTTP or network issues encountered during the fetch process.
+ */
+async function getAmdCert(url: string): Promise<Uint8Array> {
+
+  const proxyUrl = `${LIT_CORS_PROXY}/${url}`;
+
+  console.log(`Fetching AMD cert using proxy URL due to CORS restrictions.`);
+
+  let response;
+
+  try {
+    response = await fetch(proxyUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (e) {
+    console.error(`Failed to fetch AMD cert from proxy:`, e);
+  
+    // Try direct fetch only if proxy fails
+    console.log("Attempting to fetch directly without proxy.");
+    try {
+      response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (e) {
+      console.error('Direct fetch also failed:', e);
+      throw e; // Re-throw to signal that both methods failed
+    }
   }
-  const response = await fetch(url);
+
   const arrayBuffer = await response.arrayBuffer();
   return new Uint8Array(arrayBuffer);
 }
