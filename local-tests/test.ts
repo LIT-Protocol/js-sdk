@@ -137,12 +137,16 @@ const tests = {
   /**
    * Test Commands:
    * ✅ yarn test:local --filter=testUseSessionSigsToExecuteJsConsoleLog --network=habanero --version=v0
-   * ❌ yarn test:local --filter=testUseSessionSigsToExecuteJsConsoleLog --network=localchain --version=v1
+   * ✅ yarn test:local --filter=testUseSessionSigsToExecuteJsConsoleLog --network=localchain --version=v1
    */
   testUseSessionSigsToExecuteJsConsoleLog: async () => {
     const sessionSigs = await litNodeClient.getSessionSigs({
       chain: 'ethereum',
       resourceAbilityRequests: [
+        {
+          resource: new LitPKPResource('*'),
+          ability: LitAbility.PKPSigning,
+        },
         {
           resource: new LitActionResource('*'),
           ability: LitAbility.LitActionExecution,
@@ -152,6 +156,7 @@ const tests = {
         uri,
         expiration,
         resources,
+        resourceAbilityRequests,
       }: AuthCallbackParams) => {
         if (!expiration) {
           throw new Error('expiration is required');
@@ -161,17 +166,23 @@ const tests = {
           throw new Error('resources is required');
         }
 
+        if (!resourceAbilityRequests) {
+          throw new Error('resourceAbilityRequests is required');
+        }
+
         if (!uri) {
           throw new Error('uri is required');
         }
 
-        const toSign = await createSiweMessage<AuthCallbackFields>({
+        const toSign = await createSiweMessage<WithRecapFields>({
           uri: uri,
           expiration: expiration,
           resources: resources,
           walletAddress: hotWallet.address,
           nonce: lastestBlockhash,
-          type: CreateSiweType.DEFAULT,
+          resourceAbilityRequests,
+          type: CreateSiweType.INCLUDE_RECAPS,
+          litNodeClient: litNodeClient
         });
 
         const authSig = await craftAuthSig({
