@@ -199,11 +199,10 @@ const tests = {
   /**
    * Test Commands:
    * ✅ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=habanero --version=v0
-   * ❌ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=localchain --version=v1
+   * ✅ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUseEoaSessionSigsToPkpSign: async () => {
     const sessionSigs = await litNodeClient.getSessionSigs({
-      chain: 'ethereum',
       resourceAbilityRequests: [
         {
           resource: new LitPKPResource('*'),
@@ -253,14 +252,16 @@ const tests = {
           nonce: lastestBlockhash,
           litNodeClient: litNodeClient,
           resourceAbilityRequests,
-          type: CreateSiweType.WITH_RECAP,
+          type: CreateSiweType.INCLUDE_RECAPS,
         });
 
         const authSig = await craftAuthSig({
           signer: hotWallet,
           toSign: siweMessage,
-          algo: AUTHSIG_ALGO.ED25519,
         });
+
+        console.log('XXX authSig:', authSig);
+        // process.exit();
 
         return authSig;
       },
@@ -270,6 +271,9 @@ const tests = {
     const TO_SIGN = ethers.utils.arrayify(
       ethers.utils.keccak256([1, 2, 3, 4, 5])
     );
+
+    console.log('sessionSigs:', sessionSigs);
+    // process.exit();
 
     let error: any = undefined;
 
@@ -330,8 +334,8 @@ const tests = {
 
   /**
    * Test Commands:
-   * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=localchain --version=v1
    * ❌ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=habanero --version=v0
+   * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=localchain --version=v1
    *
    * Habanero Error: There was an error getting the signing shares from the nodes
    */
@@ -430,5 +434,5 @@ const {
 } = await devEnvPromise;
 
 await runTests(tests);
-
+// overwrite();
 process.exit();

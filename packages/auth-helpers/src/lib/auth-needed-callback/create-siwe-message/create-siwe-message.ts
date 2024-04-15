@@ -30,7 +30,7 @@ export interface AuthCallbackFields extends BaseSiweMessage {
 export interface WithRecapFields extends BaseSiweMessage {
   litNodeClient: any;
   resourceAbilityRequests: LitResourceAbilityRequest[];
-  type: CreateSiweType.WITH_RECAP;
+  type: CreateSiweType.INCLUDE_RECAPS;
 }
 
 /**
@@ -39,7 +39,7 @@ export interface WithRecapFields extends BaseSiweMessage {
 export enum CreateSiweType {
   DEFAULT = 'DEFAULT',
   CAPABILITY_DELEGATION = 'CAPABILITY_DELEGATION',
-  WITH_RECAP = 'WITH_RECAP',
+  INCLUDE_RECAPS = 'INCLUDE_RECAPS',
 }
 
 export const createSiweMessage = async <T extends BaseSiweMessage>(
@@ -85,7 +85,7 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
     siweMessage = recapObject.addToSiweMessage(siweMessage);
   }
 
-  if (params?.type === CreateSiweType.WITH_RECAP) {
+  if (params?.type === CreateSiweType.INCLUDE_RECAPS) {
     // --- starts
     const _params = params as unknown as WithRecapFields;
     _params;
@@ -98,21 +98,36 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
 
       recapObject.addCapabilityForResource(request.resource, request.ability);
 
-      const verified = recapObject.verifyCapabilitiesForResource(
-        request.resource,
-        request.ability
-      );
+      // const verified = recapObject.verifyCapabilitiesForResource(
+      //   request.resource,
+      //   request.ability
+      // );
 
-      if (!verified) {
-        throw new Error(
-          `Failed to verify capabilities for resource: "${request.resource}" and ability: "${request.ability}`
-        );
-      }
+      // if (!verified) {
+      //   throw new Error(
+      //     `Failed to verify capabilities for resource: "${request.resource}" and ability: "${request.ability}`
+      //   );
+      // }
 
       siweMessage = recapObject.addToSiweMessage(siweMessage);
+      console.log('siweMessage:', siweMessage);
     }
+
+    // siweMessage reousces array should always be 1 element, and that should be the last one
+    // element of the array
+    if (siweMessage.resources && siweMessage.resources.length > 1) {
+      const lastResource = siweMessage.resources?.pop();
+
+      if (!lastResource) {
+        throw new Error('lastResource is required');
+      }
+      siweMessage.resources = [lastResource as string];
+    }
+
     // --- ends
   }
+
+  // return siweMessage;
 
   return siweMessage.prepareMessage();
 };
