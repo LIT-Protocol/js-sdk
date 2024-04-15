@@ -373,7 +373,9 @@ function base64ToBufferAsync(base64) {
 async function getAmdCert(url: string): Promise<Uint8Array> {
   const proxyUrl = `${LIT_CORS_PROXY}/${url}`;
 
-  log(`[getAmdCert] Fetching AMD cert using proxy URL ${proxyUrl} due to CORS restrictions.`);
+  log(
+    `[getAmdCert] Fetching AMD cert using proxy URL ${proxyUrl} due to CORS restrictions.`
+  );
 
   let response;
 

@@ -43,12 +43,12 @@
   },
   "CACHE": {
     "network": "cayenne",
-    "debug": false,
+    "debug": true,
     "sevAttestation": false,
     "CONTROLLER_AUTHSIG": {
-      "sig": "0x3ebf0dc7e847b9108ae5d66f69e3ef94b1e8022085d19cca2431a2f3857722b1272edd1181e713707f90a5a89c27fdda51eb659ab962e79f790acab36a5b37ec1c",
+      "sig": "0x01d7f16d2e1c79846d235c45e506bd866b0c9b0af05736ed6d2cd9de4a08d5dc1156a8884550df267b1cafc9a81bb029ed3348d15d53a6ae421ec848472c2c341b",
       "derivedVia": "web3.eth.personal.sign",
-      "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nThis is a test statement.  You can put anything you want here.\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: 0x69d030761ca65a79b040360e92f50a3f4462fa412acf0740aaa52da75cb53aaa\nIssued At: 2024-04-15T17:12:43.836Z\nExpiration Time: 2024-04-15T18:12:43.829Z",
+      "signedMessage": "localhost wants you to sign in with your Ethereum account:\n0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37\n\nThis is a test statement.  You can put anything you want here.\n\nURI: https://localhost/login\nVersion: 1\nChain ID: 1\nNonce: 0x6a1c254dc3cad8dcdd02e02ba9d5c0c706ce4b1e040bdfc06e87fb360644d81c\nIssued At: 2024-04-15T17:19:38.839Z\nExpiration Time: 2024-04-15T18:19:38.837Z",
       "address": "0xeF71c2604f17Ec6Fc13409DF24EfdC440D240d37"
     },
     "CONTROLLER_WALLET": {
