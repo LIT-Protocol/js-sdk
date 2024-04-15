@@ -29,7 +29,8 @@ if (!globalThis.wasmExports) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
+        `✅ [BLS SDK] wasmExports loaded. ${
+          Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
       );
     }
@@ -51,7 +52,8 @@ if (!globalThis.wasmECDSA) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
+          Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );
     }
@@ -64,7 +66,8 @@ if (!globalThis.wasmSevSnpUtils) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${Object.keys(exports).length
+        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
+          Object.keys(exports).length
         } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
       );
     }
@@ -363,7 +366,7 @@ function base64ToBufferAsync(base64) {
  * The primary purpose of using a CORS proxy is to avoid being rate-limited by AMD.
  * The function attempts to fetch the AMD cert through a proxy, and if the proxy fetch fails,
  * it retries directly from the original URL.
- * 
+ *
  * Note: This project is hosted on heroku and uses this codebase: https://github.com/LIT-Protocol/cors-proxy-amd
  *
  * @param url The URL from which to fetch the AMD cert.
@@ -400,7 +403,6 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
     log('[getAmdCert] Direct fetch also failed:', e);
     throw e; // Re-throw to signal that both methods failed
   }
-
 
   const arrayBuffer = await response.arrayBuffer();
   return new Uint8Array(arrayBuffer);
