@@ -345,7 +345,7 @@ const tests = {
 
   /**
    * Test Commands:
-   * ❌ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=habanero --version=v0
+   * ❌ (expected, as it's not implemented) yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=habanero --version=v0
    * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=localchain --version=v1
    *
    * Habanero Error: There was an error getting the signing shares from the nodes
