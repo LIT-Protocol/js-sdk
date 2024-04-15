@@ -373,27 +373,27 @@ function base64ToBufferAsync(base64) {
 async function getAmdCert(url: string): Promise<Uint8Array> {
   const proxyUrl = `${LIT_CORS_PROXY}/${url}`;
 
-  console.log(`Fetching AMD cert using proxy URL due to CORS restrictions.`);
+  log(`[getAmdCert] Fetching AMD cert using proxy URL ${proxyUrl} due to CORS restrictions.`);
 
   let response;
 
   try {
     response = await fetch(proxyUrl);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`[getAmdCert] HTTP error! status: ${response.status}`);
     }
   } catch (e) {
-    console.error(`Failed to fetch AMD cert from proxy:`, e);
+    log(`[getAmdCert] Failed to fetch AMD cert from proxy:`, e);
 
     // Try direct fetch only if proxy fails
-    console.log('Attempting to fetch directly without proxy.');
+    log('[getAmdCert] Attempting to fetch directly without proxy.');
     try {
       response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (e) {
-      console.error('Direct fetch also failed:', e);
+      log('[getAmdCert] Direct fetch also failed:', e);
       throw e; // Re-throw to signal that both methods failed
     }
   }
