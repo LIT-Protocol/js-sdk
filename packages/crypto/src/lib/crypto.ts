@@ -377,7 +377,7 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
   const proxyUrl = `${LIT_CORS_PROXY}/${url}`;
 
   log(
-    `[getAmdCert] Fetching AMD cert using proxy URL ${proxyUrl} due to CORS restrictions.`
+    `[getAmdCert] Fetching AMD cert using proxy URL ${proxyUrl} to manage CORS restrictions and to avoid being rate limited by AMD.`
   );
 
   async function fetchAsUint8Array(targetUrl) {
@@ -397,15 +397,13 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
 
   // Try direct fetch only if proxy fails
   log('[getAmdCert] Attempting to fetch directly without proxy.');
+
   try {
     return await fetchAsUint8Array(url);
   } catch (e) {
     log('[getAmdCert] Direct fetch also failed:', e);
     throw e; // Re-throw to signal that both methods failed
   }
-
-  const arrayBuffer = await response.arrayBuffer();
-  return new Uint8Array(arrayBuffer);
 }
 
 /**
