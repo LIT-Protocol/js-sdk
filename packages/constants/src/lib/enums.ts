@@ -5,7 +5,6 @@ export enum VMTYPE {
   CVM = 'CVM',
 }
 
-
 // BREAKING: This enum has been from `SIGTYPE` to `LIT_CURVE`
 export enum LIT_CURVE {
   BLS = 'BLS',

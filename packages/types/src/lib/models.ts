@@ -49,7 +49,6 @@ export enum LitAbility {
    */
   LitActionExecution = 'lit-action-execution',
 }
-
 /**
  * Prefixes used for identifying various LIT resources.
  *

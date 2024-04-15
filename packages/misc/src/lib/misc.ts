@@ -270,11 +270,13 @@ export const log = (...args: any): void => {
         fs.mkdirSync('./logs');
       }
 
-      // check console args 
+      // check console args
       const processArgs = process.argv.slice(2);
 
       // for each process arg, split them with = and get the second part and link them all together with _
-      const processArgsString = processArgs.map((arg: string) => arg.split('=')[1]).join('_');
+      const processArgsString = processArgs
+        .map((arg: string) => arg.split('=')[1])
+        .join('_');
 
       const date = new Date();
       const currentDate = date.toISOString().split('T')[0].replaceAll('-', '_');
@@ -429,8 +431,9 @@ export const checkType = ({
       ' or '
     )} type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
-    )}" type instead. value: ${value instanceof Object ? JSON.stringify(value) : value
-      }`;
+    )}" type instead. value: ${
+      value instanceof Object ? JSON.stringify(value) : value
+    }`;
 
     if (throwOnError) {
       throwError({
@@ -472,8 +475,9 @@ export const checkSchema = (
 
   const validates = validate(value);
 
-  const message = `FAILED schema validation for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(). Value: ${value instanceof Object ? JSON.stringify(value) : value
-    }. Errors: ${JSON.stringify(validate.errors)}`;
+  const message = `FAILED schema validation for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(). Value: ${
+    value instanceof Object ? JSON.stringify(value) : value
+  }. Errors: ${JSON.stringify(validate.errors)}`;
 
   if (!validates) {
     if (throwOnError) {
@@ -580,8 +584,9 @@ export const is = (
   if (getVarType(value) !== type) {
     let message = `Expecting "${type}" type for parameter named ${paramName} in Lit-JS-SDK function ${functionName}(), but received "${getVarType(
       value
-    )}" type instead. value: ${value instanceof Object ? JSON.stringify(value) : value
-      }`;
+    )}" type instead. value: ${
+      value instanceof Object ? JSON.stringify(value) : value
+    }`;
 
     if (throwOnError) {
       throwError({
@@ -693,48 +698,48 @@ export const defaultMintClaimCallback: MintCallback<
   params: ClaimResult<RelayClaimProcessor>,
   network: string = 'cayenne'
 ): Promise<string> => {
-    try {
-      let relayUrl: string = '';
+  try {
+    let relayUrl: string = '';
 
-      switch (network) {
-        case LitNetwork.Cayenne:
-          relayUrl = RELAY_URL_CAYENNE + '/auth/claim';
-          break;
-        case LitNetwork.Habanero:
-          relayUrl = RELAY_URL_HABANERO + 'auth/claim';
-          break;
-        case LitNetwork.Manzano:
-          relayUrl = RELAY_URL_MANZANO + 'auth/claim';
-      }
-
-      const url = params.relayUrl ? params.relayUrl : relayUrl;
-      const response = await fetch(url, {
-        method: 'POST',
-        body: JSON.stringify(params),
-        headers: {
-          'api-key': params.relayApiKey
-            ? params.relayApiKey
-            : '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.status < 200 || response.status >= 400) {
-        let errResp = (await response.json()) ?? '';
-        let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
-          errResp
-        )}`;
-        console.warn(errStmt);
-        throw new Error(errStmt);
-      }
-
-      let body: any = await response.json();
-      return body.requestId;
-    } catch (e) {
-      console.error((e as Error).message);
-      throw e;
+    switch (network) {
+      case LitNetwork.Cayenne:
+        relayUrl = RELAY_URL_CAYENNE + '/auth/claim';
+        break;
+      case LitNetwork.Habanero:
+        relayUrl = RELAY_URL_HABANERO + 'auth/claim';
+        break;
+      case LitNetwork.Manzano:
+        relayUrl = RELAY_URL_MANZANO + 'auth/claim';
     }
-  };
+
+    const url = params.relayUrl ? params.relayUrl : relayUrl;
+    const response = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(params),
+      headers: {
+        'api-key': params.relayApiKey
+          ? params.relayApiKey
+          : '67e55044-10b1-426f-9247-bb680e5fe0c8_relayer',
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status < 200 || response.status >= 400) {
+      let errResp = (await response.json()) ?? '';
+      let errStmt = `An error occured requesting "/auth/claim" endpoint ${JSON.stringify(
+        errResp
+      )}`;
+      console.warn(errStmt);
+      throw new Error(errStmt);
+    }
+
+    let body: any = await response.json();
+    return body.requestId;
+  } catch (e) {
+    console.error((e as Error).message);
+    throw e;
+  }
+};
 
 export const hexPrefixed = (str: string) => {
   if (str.startsWith('0x')) {
@@ -808,9 +813,10 @@ export function sendRequest(
     .catch((error: NodeErrorV3) => {
       logErrorWithRequestId(
         requestId,
-        `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${error?.message || error?.details
-          ? `Error is ${error.message} - ${error.details}`
-          : ''
+        `Something went wrong, internal id for request: lit_${requestId}. Please provide this identifier with any support requests. ${
+          error?.message || error?.details
+            ? `Error is ${error.message} - ${error.details}`
+            : ''
         }`
       );
       return Promise.reject(error);

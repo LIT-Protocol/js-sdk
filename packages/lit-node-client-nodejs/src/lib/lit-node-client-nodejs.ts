@@ -133,7 +133,8 @@ let sessionKeyCache: SessionKeyCache | null = null;
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager {
+  implements LitClientSessionManager
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -2715,23 +2716,23 @@ export class LitNodeClientNodeJs
         let requiredFields =
           curveType === LIT_CURVE.BLS
             ? [
-              'signatureShare',
-              'curveType',
-              'shareIndex',
-              'siweMessage',
-              'dataSigned',
-              'blsRootPubkey',
-              'result',
-            ]
+                'signatureShare',
+                'curveType',
+                'shareIndex',
+                'siweMessage',
+                'dataSigned',
+                'blsRootPubkey',
+                'result',
+              ]
             : [
-              'sigType',
-              'dataSigned',
-              'signatureShare',
-              'bigr',
-              'publicKey',
-              'sigName',
-              'siweMessage',
-            ];
+                'sigType',
+                'dataSigned',
+                'signatureShare',
+                'bigr',
+                'publicKey',
+                'sigName',
+                'siweMessage',
+              ];
 
         // check if all required fields are present
         for (const field of requiredFields) {
@@ -2937,8 +2938,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
 
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 
@@ -3075,10 +3076,7 @@ export class LitNodeClientNodeJs
   /**
    * Get PKP session sigs
    */
-  getPkpSessionSigs = async (
-    params: GetPkpSessionSigs
-  ) => {
-
+  getPkpSessionSigs = async (params: GetPkpSessionSigs) => {
     const chain = params?.chain || 'ethereum';
 
     const pkpSessionSigs = this.getSessionSigs({
@@ -3088,7 +3086,9 @@ export class LitNodeClientNodeJs
       authNeededCallback: async (props) => {
         // -- validate
         if (!props.expiration) {
-          throw new Error('[getPkpSessionSigs/callback] expiration is required');
+          throw new Error(
+            '[getPkpSessionSigs/callback] expiration is required'
+          );
         }
 
         if (!props.resources) {
@@ -3096,7 +3096,9 @@ export class LitNodeClientNodeJs
         }
 
         if (!props.resourceAbilityRequests) {
-          throw new Error('[getPkpSessionSigs/callback]resourceAbilityRequests is required');
+          throw new Error(
+            '[getPkpSessionSigs/callback]resourceAbilityRequests is required'
+          );
         }
 
         const response = await this.signSessionKey({
