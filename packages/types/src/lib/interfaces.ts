@@ -987,6 +987,11 @@ export interface GetSignSessionKeySharesProp {
   body: SessionRequestBody;
 }
 
+export interface GetPkpSessionSigs extends GetSessionSigsProps {
+  pkpPublicKey: string;
+  authMethods: AuthMethod[];
+}
+
 export interface GetSessionSigsProps {
   pkpPublicKey?: string;
 
@@ -994,7 +999,7 @@ export interface GetSessionSigsProps {
   expiration?: any;
 
   //   The chain to use for the session signature.  This is the chain that will be used to sign the session key.  If you're using EVM then this probably doesn't matter at all.
-  chain: Chain;
+  chain?: Chain;
 
   /**
    * An array of resource abilities that you want to request for this session. These will be signed with the session key.
