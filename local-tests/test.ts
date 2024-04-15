@@ -1,6 +1,6 @@
 // This test requires using "bun" to run.
 // Installation: https://bun.sh/docs/installation
-// Test command: yarn test:integrate --filter={testName} --network={network | 'localhost' is default}
+// Test command: yarn test:local --filter={testName} --network={network | 'localhost' is default}
 
 import {
   LitActionResource,
@@ -25,8 +25,8 @@ const devEnvPromise = devEnv({
 const tests = {
   /**
    * Test Commands:
-   * ✅ yarn test:integrate --filter=testUseAuthSigToExecuteJsConsoleLog --network=habanero --version=v0
-   * ✅ yarn test:integrate --filter=testUseAuthSigToExecuteJsConsoleLog --network=localchain --version=v0
+   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsConsoleLog --network=habanero --version=v0
+   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsConsoleLog --network=localchain --version=v0
    */
   testUseAuthSigToExecuteJsConsoleLog: async () => {
     const res = await litNodeClient.executeJs({
@@ -44,8 +44,8 @@ const tests = {
 
   /**
    * Test Commands:
-   * ✅ yarn test:integrate --filter=testUseAuthSigToExecuteJsSigning --network=habanero --version=v0
-   * ✅ yarn test:integrate --filter=testUseAuthSigToExecuteJsSigning --network=localchain --version=v0
+   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsSigning --network=habanero --version=v0
+   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsSigning --network=localchain --version=v0
    */
   testUseAuthSigToExecuteJsSigning: async () => {
     const TO_SIGN = ethers.utils.arrayify(
@@ -80,8 +80,8 @@ const tests = {
 
   /**
    * Test Commands:
-   * ✅ yarn test:integrate --filter=testGetSessionSigs --network=habanero --version=v0
-   * ✅ yarn test:integrate --filter=testGetSessionSigs --network=localchain --version=v1
+   * ✅ yarn test:local --filter=testGetSessionSigs --network=habanero --version=v0
+   * ✅ yarn test:local --filter=testGetSessionSigs --network=localchain --version=v1
    */
   testGetSessionSigs: async () => {
     const sessionSigs = await litNodeClient.getSessionSigs({
@@ -136,8 +136,8 @@ const tests = {
 
   /**
    * Test Commands:
-   * ✅ yarn test:integrate --filter=testUseSessionSigsToExecuteJsConsoleLog --network=habanero --version=v0
-   * ❌ yarn test:integrate --filter=testUseSessionSigsToExecuteJsConsoleLog --network=localchain --version=v1
+   * ✅ yarn test:local --filter=testUseSessionSigsToExecuteJsConsoleLog --network=habanero --version=v0
+   * ❌ yarn test:local --filter=testUseSessionSigsToExecuteJsConsoleLog --network=localchain --version=v1
    */
   testUseSessionSigsToExecuteJsConsoleLog: async () => {
     const sessionSigs = await litNodeClient.getSessionSigs({
@@ -198,8 +198,8 @@ const tests = {
 
   /**
    * Test Commands:
-   * ✅ yarn test:integrate --filter=testUseEoaSessionSigsToPkpSign --network=habanero --version=v0
-   * ❌ yarn test:integrate --filter=testUseEoaSessionSigsToPkpSign --network=localchain --version=v1
+   * ✅ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=habanero --version=v0
+   * ❌ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUseEoaSessionSigsToPkpSign: async () => {
     const sessionSigs = await litNodeClient.getSessionSigs({
@@ -296,8 +296,8 @@ const tests = {
 
   /**
    * Test Commands:
-   * ✅ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=habanero --version=v0
-   * ✅ yarn test:integrate --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
+   * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=habanero --version=v0
+   * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUsePkpSessionSigsToPkpSign: async () => {
     const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
@@ -330,8 +330,8 @@ const tests = {
 
   /**
    * Test Commands:
-   * ✅ yarn test:integrate --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=localchain --version=v1
-   * ❌ yarn test:integrate --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=habanero --version=v0
+   * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=localchain --version=v1
+   * ❌ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=habanero --version=v0
    *
    * Habanero Error: There was an error getting the signing shares from the nodes
    */
