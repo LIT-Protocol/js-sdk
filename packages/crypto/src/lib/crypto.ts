@@ -29,8 +29,7 @@ if (!globalThis.wasmExports) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [BLS SDK] wasmExports loaded. ${
-          Object.keys(exports).length
+        `✅ [BLS SDK] wasmExports loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmExports' in the console to see them.`
       );
     }
@@ -52,8 +51,7 @@ if (!globalThis.wasmECDSA) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-          Object.keys(wasmECDSA).length
+        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${Object.keys(wasmECDSA).length
         } functions available. Run 'wasmECDSA' in the console to see them.`
       );
     }
@@ -66,8 +64,7 @@ if (!globalThis.wasmSevSnpUtils) {
 
     if (!globalThis.jestTesting) {
       log(
-        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
-          Object.keys(exports).length
+        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${Object.keys(exports).length
         } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
       );
     }
@@ -363,8 +360,11 @@ function base64ToBufferAsync(base64) {
 
 /**
  * Asynchronously fetches an AMD certification from a specified URL using a CORS proxy.
- * This approach is used to bypass CORS restrictions when accessing external APIs that do not support CORS.
- * It attempts to fetch the AMD cert through a proxy and if the proxy fetch fails, it throws an error.
+ * The primary purpose of using a CORS proxy is to avoid being rate-limited by AMD.
+ * The function attempts to fetch the AMD cert through a proxy, and if the proxy fetch fails,
+ * it retries directly from the original URL.
+ * 
+ * Note: This project is hosted on heroku and uses this codebase: https://github.com/LIT-Protocol/cors-proxy-amd
  *
  * @param url The URL from which to fetch the AMD cert.
  * @returns A Promise that resolves to a Uint8Array containing the AMD certification data.
@@ -386,12 +386,12 @@ async function getAmdCert(url: string): Promise<Uint8Array> {
     return new Uint8Array(arrayBuffer);
   }
 
-   try {
+  try {
     return await fetchAsUint8Array(proxyUrl);
   } catch (e) {
-      log(`[getAmdCert] Failed to fetch AMD cert from proxy:`, e);
+    log(`[getAmdCert] Failed to fetch AMD cert from proxy:`, e);
   }
-  
+
   // Try direct fetch only if proxy fails
   log('[getAmdCert] Attempting to fetch directly without proxy.');
   try {
