@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V4.1.1</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V4.2.0</h1>
 
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
@@ -122,9 +122,13 @@ yarn
 
 ## Building
 
-You can build the project with the following command:
+You can build the project with the following commands:
 
 ```
+// for local development - It stripped away operations that don't matter for local dev
+yarn build:dev
+
+// you should never need to use yarn build unless you want to test or publish it
 yarn build
 ```
 

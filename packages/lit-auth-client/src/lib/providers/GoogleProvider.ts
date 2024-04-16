@@ -157,7 +157,7 @@ export default class GoogleProvider extends BaseProvider {
           clearInterval(interval);
           popup.close();
           resolve({
-            authMethodType: AuthMethodType.Google,
+            authMethodType: AuthMethodType.GoogleJwt,
             accessToken: token,
           });
         }

@@ -1,0 +1,72 @@
+name: 🐞 Bug Report
+description: File a bug report or issue
+title: "[Team Name] <title-for-the-issue>"
+labels: [Bug, Integration Issue]
+body:
+- type: checkboxes
+  attributes:
+    label: Is there an existing issue for this?
+    description: Please search to see if an issue already exists for the bug you encountered.
+    options:
+    - label: I have searched the existing issues
+      required: true
+- type: textarea
+  attributes:
+    label: SDK version
+    description: Which version(s) of the SDK are you using?
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Lit Network
+    description: Which Lit network(s) are you using?
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Description of the bug/issue
+    description: A clear and concise description of what the bug or issue is along with error message.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Severity of the bug
+    description: What is the impact of this bug on your integration?
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Steps To Reproduce
+    description: Steps to reproduce the behavior.
+    placeholder: |
+      1. In this environment...
+      2. With this config...
+      3. Run '...'
+      4. See error...
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Link to code
+    description: If you have a public repository with the code, please provide a link.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Anything else?
+    description: |
+      Links? References? Screenshots? Anything that will give us more context about the issue you are encountering!
+      
+      Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
+  validations:
+    required: false
+# - type: dropdown
+#   id: browsers
+#   attributes:
+#     label: What browsers are you seeing the problem on?
+#     multiple: true
+#     options:
+#       - Firefox
+#       - Chrome
+#       - Safari
+#       - Microsoft Edge

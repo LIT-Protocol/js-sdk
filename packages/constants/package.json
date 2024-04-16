@@ -20,5 +20,7 @@
   "tags": [
     "universal"
   ],
-  "version": "4.1.1"
+  "version": "4.2.1",
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }
