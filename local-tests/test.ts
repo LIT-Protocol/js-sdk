@@ -10,11 +10,11 @@ import {
 } from '@lit-protocol/auth-helpers';
 import { devEnv } from './setup/env-setup';
 import * as ethers from 'ethers';
-import { getNetworkFlag, showTests, runTests } from './setup/utils';
+import { LitE2eManager, runTests } from './setup/utils';
 import { AuthCallbackParams, LitAbility } from '@lit-protocol/types';
 
 const devEnvPromise = devEnv({
-  env: getNetworkFlag(),
+  env: LitE2eManager.getNetworkFlag(),
   debug: true,
 });
 
@@ -224,6 +224,92 @@ const tests = {
   },
 
   /**
+ * Test Commands:
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToConcurrentExecuteJs --network=cayenne --version=v0
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToConcurrentExecuteJs --network=habanero --version=v0
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToConcurrentExecuteJs --network=localchain --version=v1
+ */
+  testUseEoaSessionSigsToConcurrentExecuteJs: async () => {
+    const sessionSigs = await litNodeClient.getSessionSigs({
+      resourceAbilityRequests: [
+        {
+          resource: new LitPKPResource('*'),
+          ability: LitAbility.PKPSigning,
+        },
+        {
+          resource: new LitActionResource('*'),
+          ability: LitAbility.LitActionExecution,
+        },
+      ],
+      authNeededCallback: async ({
+        uri,
+        expiration,
+        resourceAbilityRequests,
+      }: AuthCallbackParams) => {
+        if (!expiration) {
+          throw new Error('expiration is required');
+        }
+
+        if (!resourceAbilityRequests) {
+          throw new Error('resourceAbilityRequests is required');
+        }
+
+        if (!uri) {
+          throw new Error('uri is required');
+        }
+
+        const siweMessage = await createSiweMessageWithRecaps({
+          uri: uri,
+          expiration: expiration,
+          resources: resourceAbilityRequests,
+          walletAddress: hotWallet.address,
+          nonce: lastestBlockhash,
+          litNodeClient,
+        });
+
+        const authSig = await craftAuthSig({
+          signer: hotWallet,
+          toSign: siweMessage,
+        });
+
+        return authSig;
+      },
+    });
+
+    const TO_SIGN = ethers.utils.arrayify(
+      ethers.utils.keccak256([1, 2, 3, 4, 5])
+    );
+
+    const fn = (async (index: number) => {
+
+      console.log('🔥 Running index:', index);
+
+      return await litNodeClient.executeJs({
+        sessionSigs,
+        code: `(async () => {
+          const sigShare = await LitActions.signEcdsa({
+            toSign: dataToSign,
+            publicKey,
+            sigName: "sig",
+          });
+        })();`,
+        jsParams: {
+          dataToSign: TO_SIGN,
+          publicKey: hotWalletOwnedPkp.publicKey,
+        },
+      });
+    })
+
+    const result = await Promise.race([
+      fn(1),
+      fn(2),
+      fn(3),
+    ]);
+
+    console.log('✅ result:', result);
+  },
+
+  /**
    * Test Commands:
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigning --network=cayenne --version=v0
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigning --network=habanero --version=v0
@@ -300,11 +386,11 @@ const tests = {
    * Test Commands:
    * ❌ NOT AVAILABLE IN CAYENNE
    * ❌ NOT AVAILABLE IN HABANERO
-   * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=localchain --version=v1
+   * ✅ yarn test:local --filter=testUseLitActionSessionSigsToPkpSign --network=localchain --version=v1
    *
    * Habanero Error: There was an error getting the signing shares from the nodes
    */
-  testUseValidLitActionCodeGeneratedSessionSigsToPkpSign: async () => {
+  testUseLitActionSessionSigsToPkpSign: async () => {
 
     const VALID_SESSION_SIG_LIT_ACTION_CODE = `
       // Works with an AuthSig AuthMethod
@@ -344,9 +430,9 @@ const tests = {
    * Test Commands:
    * ❌ NOT AVAILABLE IN CAYENNE
    * ❌ NOT AVAILABLE IN HABANERO
-   * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning --network=localchain --version=v1
+   * ✅ yarn test:local --filter=testUseLitActionSessionSigsToExecuteJsSigning --network=localchain --version=v1
    */
-  testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning: async () => {
+  testUseLitActionSessionSigsToExecuteJsSigning: async () => {
 
     const VALID_SESSION_SIG_LIT_ACTION_CODE = `
         // Works with an AuthSig AuthMethod
@@ -396,10 +482,11 @@ const tests = {
 
     console.log('✅ res:', res);
 
-  }
+  },
+
 };
 
-showTests(tests);
+LitE2eManager.list(tests);
 
 const {
   litNodeClient,
@@ -416,5 +503,4 @@ const {
 } = await devEnvPromise;
 
 await runTests(tests);
-// overwrite();
 process.exit();
