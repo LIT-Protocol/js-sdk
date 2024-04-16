@@ -1,13 +1,12 @@
 // This file is a WIP test demo for auth unification. In this change, the only time we will create an authSig is to use it to generate session sigs
 // client side. Anything server side, we will no longer accpet authSig.
 
-import { AuthMethod, LitContractContext } from '@lit-protocol/types';
+import { AuthMethod, BaseSiweMessage, LitContractContext } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ethers } from 'ethers';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import {
-  BaseSiweMessage,
   createSiweMessage,
   craftAuthSig,
 } from '@lit-protocol/auth-helpers';
@@ -20,6 +19,7 @@ export enum ENV {
   LOCALCHAIN = 'localchain',
   HABANERO = 'habanero',
   MANZANO = 'manzano',
+  CAYENNE = 'cayenne',
 }
 export type PKPInfo = {
   tokenId: string;
@@ -36,9 +36,9 @@ export const devEnv = async (
     env?: ENV;
     debug?: boolean;
   } = {
-    env: ENV.LOCALCHAIN,
-    debug: true,
-  }
+      env: ENV.LOCALCHAIN,
+      debug: true,
+    }
 ): Promise<{
   litNodeClient: LitNodeClient;
   litContractsClient: LitContracts;
@@ -85,7 +85,7 @@ export const devEnv = async (
       //   provider: new LocalStorage('./storage.test.db'),
       // },
     });
-  } else {
+  } else if (env === ENV.HABANERO || env === ENV.MANZANO) {
     litNodeClient = new LitNodeClient({
       litNetwork: env, // 'habanero' or 'manzano'
       checkNodeAttestation: true,
@@ -96,6 +96,12 @@ export const devEnv = async (
       // storageProvider: {
       //   provider: new LocalStorage('./storage.test.db'),
       // },
+    });
+  } else {
+    litNodeClient = new LitNodeClient({
+      litNetwork: env,
+      checkNodeAttestation: false,
+      debug,
     });
   }
 

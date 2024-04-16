@@ -21,6 +21,7 @@ const devEnvPromise = devEnv({
 const tests = {
   /**
    * Test Commands:
+   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsConsoleLog --network=cayenne --version=v0
    * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsConsoleLog --network=habanero --version=v0
    * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsConsoleLog --network=localchain --version=v0
    */
@@ -40,6 +41,7 @@ const tests = {
 
   /**
    * Test Commands:
+   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsSigning --network=cayenne --version=v0
    * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsSigning --network=habanero --version=v0
    * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsSigning --network=localchain --version=v0
    */
@@ -76,6 +78,7 @@ const tests = {
 
   /**
    * Test Commands:
+   * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=cayenne --version=v0
    * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=habanero --version=v0
    * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=localchain --version=v1
    */
@@ -140,6 +143,7 @@ const tests = {
 
   /**
    * Test Commands:
+   * ✅ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=cayenne --version=v0
    * ✅ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=habanero --version=v0
    * ✅ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=localchain --version=v1
    */
@@ -221,6 +225,7 @@ const tests = {
 
   /**
    * Test Commands:
+   * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigning --network=cayenne --version=v0
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigning --network=habanero --version=v0
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigning --network=localchain --version=v1
    */
@@ -263,6 +268,7 @@ const tests = {
 
   /**
    * Test Commands:
+   * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=cayenne --version=v0
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=habanero --version=v0
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
    */
@@ -292,6 +298,7 @@ const tests = {
 
   /**
    * Test Commands:
+   * ❌ NOT AVAILABLE IN CAYENNE
    * ❌ NOT AVAILABLE IN HABANERO
    * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=localchain --version=v1
    *
@@ -335,6 +342,7 @@ const tests = {
 
   /**
    * Test Commands:
+   * ❌ NOT AVAILABLE IN CAYENNE
    * ❌ NOT AVAILABLE IN HABANERO
    * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning --network=localchain --version=v1
    */
