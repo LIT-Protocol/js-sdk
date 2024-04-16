@@ -92,6 +92,9 @@ export async function readFile(filename) {
 export async function writeJsonFile(filename, content) {
   const filePath = path.join(process.cwd(), filename);
   fs.writeFileSync(filePath, JSON.stringify(content, null, 2));
+
+  // append new line to the file
+  fs.appendFileSync(filePath, '\n');
 }
 
 export async function writeFile(filename, content) {
@@ -471,7 +474,6 @@ export const replaceFileContent = async (path, oldContent, newContent) => {
  * 2. prefixPathWithDir('src/index.js', 'components') => './components/src/index.js'
  */
 export const prefixPathWithDir = (path, dirName) => {
-
   if (path?.slice(0, 2) === './') {
     return `./${dirName}/${path.slice(2)}`;
   } else {
