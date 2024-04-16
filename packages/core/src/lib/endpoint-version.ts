@@ -4,7 +4,6 @@ import {
   LIT_ENDPOINT,
   LIT_ENDPOINT_VERSION,
   LIT_PROCESS_ENV,
-  LIT_PROCESS_FLAG,
 } from '@lit-protocol/constants';
 
 /**
@@ -21,7 +20,7 @@ export const getLitEndpointPath = () => {
 
   if (isNode()) {
     const versionArg = process.argv.find((arg) =>
-      arg.startsWith(LIT_PROCESS_FLAG.VERSION)
+      arg.startsWith('--version')
     );
     const version = versionArg ? versionArg.split('=')[1] : null;
 

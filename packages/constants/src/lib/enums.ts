@@ -112,13 +112,6 @@ export enum LIT_PROCESS_ENV {
   LOG_FILE = 'LOG_FILE',
 }
 
-export enum LIT_PROCESS_FLAG {
-  VERSION = '--version=',
-  FILTER = '--filter=',
-  SHOW = '--show',
-  NETWORK = '--network=',
-}
-
 export enum LIT_ENDPOINT_VERSION {
   LEGACY = '/',
   V1 = '/v1',
