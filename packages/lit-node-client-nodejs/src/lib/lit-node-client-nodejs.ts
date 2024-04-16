@@ -133,7 +133,8 @@ let sessionKeyCache: SessionKeyCache | null = null;
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager {
+  implements LitClientSessionManager
+{
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
   // ========== Constructor ==========
@@ -2548,7 +2549,7 @@ export class LitNodeClientNodeJs
       expiration: _expiration,
       // resources: params.resources,
       nonce: this.latestBlockhash!,
-      resources: params.resourceAbilityRequests
+      resources: params.resourceAbilityRequests,
     };
 
     if (params.resourceAbilityRequests) {
@@ -2556,7 +2557,7 @@ export class LitNodeClientNodeJs
         ...siweParams,
         resources: params.resourceAbilityRequests,
         litNodeClient: this,
-      })
+      });
     } else {
       siweMessage = await createSiweMessage(siweParams);
     }
@@ -2696,23 +2697,23 @@ export class LitNodeClientNodeJs
         let requiredFields =
           curveType === LIT_CURVE.BLS
             ? [
-              'signatureShare',
-              'curveType',
-              'shareIndex',
-              'siweMessage',
-              'dataSigned',
-              'blsRootPubkey',
-              'result',
-            ]
+                'signatureShare',
+                'curveType',
+                'shareIndex',
+                'siweMessage',
+                'dataSigned',
+                'blsRootPubkey',
+                'result',
+              ]
             : [
-              'sigType',
-              'dataSigned',
-              'signatureShare',
-              'bigr',
-              'publicKey',
-              'sigName',
-              'siweMessage',
-            ];
+                'sigType',
+                'dataSigned',
+                'signatureShare',
+                'bigr',
+                'publicKey',
+                'sigName',
+                'siweMessage',
+              ];
 
         // check if all required fields are present
         for (const field of requiredFields) {
@@ -2918,8 +2919,8 @@ export class LitNodeClientNodeJs
     const sessionCapabilityObject = params.sessionCapabilityObject
       ? params.sessionCapabilityObject
       : await this.generateSessionCapabilityObjectWithWildcards(
-        params.resourceAbilityRequests.map((r) => r.resource)
-      );
+          params.resourceAbilityRequests.map((r) => r.resource)
+        );
 
     const expiration = params.expiration || LitNodeClientNodeJs.getExpiration();
 

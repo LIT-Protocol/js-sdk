@@ -1,15 +1,16 @@
 // This file is a WIP test demo for auth unification. In this change, the only time we will create an authSig is to use it to generate session sigs
 // client side. Anything server side, we will no longer accpet authSig.
 
-import { AuthMethod, BaseSiweMessage, LitContractContext } from '@lit-protocol/types';
+import {
+  AuthMethod,
+  BaseSiweMessage,
+  LitContractContext,
+} from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ethers } from 'ethers';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import {
-  createSiweMessage,
-  craftAuthSig,
-} from '@lit-protocol/auth-helpers';
+import { createSiweMessage, craftAuthSig } from '@lit-protocol/auth-helpers';
 // import { LocalStorage } from 'node-localstorage';
 import { log } from '@lit-protocol/misc';
 import { AuthSig } from '@lit-protocol/types';
@@ -36,9 +37,9 @@ export const devEnv = async (
     env?: ENV;
     debug?: boolean;
   } = {
-      env: ENV.LOCALCHAIN,
-      debug: true,
-    }
+    env: ENV.LOCALCHAIN,
+    debug: true,
+  }
 ): Promise<{
   litNodeClient: LitNodeClient;
   litContractsClient: LitContracts;

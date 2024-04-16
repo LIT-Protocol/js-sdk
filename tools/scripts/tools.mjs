@@ -261,16 +261,11 @@ async function testFunc() {
   }
 
   if (TEST_TYPE === '--unit') {
-
     // Run the nx run-many command with the --projects flag set to the project names
-    const nx = spawn(
-      'nx',
-      ['run-many', '--target=test'],
-      {
-        stdio: 'inherit', // This maintains the log output color
-        shell: true,
-      }
-    );
+    const nx = spawn('nx', ['run-many', '--target=test'], {
+      stdio: 'inherit', // This maintains the log output color
+      shell: true,
+    });
 
     // Handle errors
     nx.on('error', (error) => {
@@ -1157,7 +1152,7 @@ async function setupLocalDevFunc() {
     const distPackageJson = await readJsonFile(distPackageJsonPath);
 
     packageJson.main = prefixPathWithDir(distPackageJson.main, 'dist');
-    packageJson.typings = "./dist/src/index.d.ts";
+    packageJson.typings = './dist/src/index.d.ts';
 
     greenLog(`Updating ${packageJsonPath}...`);
     greenLog(`packageJson.main: ${packageJson.main}`);

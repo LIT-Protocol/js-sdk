@@ -89,10 +89,10 @@ export const createCapacityCreditsResourceData = (
     ...(params.capacityTokenId ? { nft_id: [params.capacityTokenId] } : {}), // Conditionally include nft_id
     ...(params.delegateeAddresses
       ? {
-        delegate_to: params.delegateeAddresses.map((address) =>
-          address.startsWith('0x') ? address.slice(2) : address
-        ),
-      }
+          delegate_to: params.delegateeAddresses.map((address) =>
+            address.startsWith('0x') ? address.slice(2) : address
+          ),
+        }
       : {}),
     uses: params.uses!.toString() || '1',
   };
@@ -107,8 +107,6 @@ export const addRecapToSiweMessage = async ({
   resources: LitResourceAbilityRequest[];
   litNodeClient: ILitNodeClient;
 }) => {
-
-
   if (!resources || resources.length < 1) {
     throw new Error('resources is required');
   }

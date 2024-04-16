@@ -230,7 +230,6 @@ const tests = {
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigning --network=localchain --version=v1
    */
   testUsePkpSessionSigsToExecuteJsSigning: async () => {
-
     const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
       authMethods: [hotWalletAuthMethod],
@@ -242,7 +241,7 @@ const tests = {
         {
           resource: new LitActionResource('*'),
           ability: LitAbility.LitActionExecution,
-        }
+        },
       ],
     });
 
@@ -258,10 +257,12 @@ const tests = {
         });
       })();`,
       jsParams: {
-        dataToSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+        dataToSign: ethers.utils.arrayify(
+          ethers.utils.keccak256([1, 2, 3, 4, 5])
+        ),
         publicKey: hotWalletAuthMethodOwnedPkp.publicKey,
       },
-    })
+    });
 
     console.log('✅ res:', res);
   },
@@ -273,7 +274,6 @@ const tests = {
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUsePkpSessionSigsToPkpSign: async () => {
-
     const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
       authMethods: [hotWalletAuthMethod],
@@ -305,7 +305,6 @@ const tests = {
    * Habanero Error: There was an error getting the signing shares from the nodes
    */
   testUseValidLitActionCodeGeneratedSessionSigsToPkpSign: async () => {
-
     const VALID_SESSION_SIG_LIT_ACTION_CODE = `
       // Works with an AuthSig AuthMethod
       if (Lit.Auth.authMethodContexts.some(e => e.authMethodType === 1)) {
@@ -324,7 +323,9 @@ const tests = {
           ability: LitAbility.PKPSigning,
         },
       ],
-      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString('base64'),
+      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString(
+        'base64'
+      ),
       jsParams: {
         publicKey: hotWalletAuthMethodOwnedPkp.publicKey,
         sigName: 'unified-auth-sig',
@@ -347,7 +348,6 @@ const tests = {
    * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning --network=localchain --version=v1
    */
   testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning: async () => {
-
     const VALID_SESSION_SIG_LIT_ACTION_CODE = `
         // Works with an AuthSig AuthMethod
         if (Lit.Auth.authMethodContexts.some(e => e.authMethodType === 1)) {
@@ -368,9 +368,11 @@ const tests = {
         {
           resource: new LitActionResource('*'),
           ability: LitAbility.LitActionExecution,
-        }
+        },
       ],
-      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString('base64'),
+      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString(
+        'base64'
+      ),
       jsParams: {
         publicKey: hotWalletAuthMethodOwnedPkp.publicKey,
         sigName: 'unified-auth-sig',
@@ -395,8 +397,7 @@ const tests = {
     });
 
     console.log('✅ res:', res);
-
-  }
+  },
 };
 
 showTests(tests);

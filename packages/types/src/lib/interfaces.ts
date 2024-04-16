@@ -79,7 +79,7 @@ export interface AuthCallbackParams {
 
   litActionCode?: string;
   ipfsId?: string;
-  jsParams?: any,
+  jsParams?: any;
 }
 
 /** ---------- Web3 ---------- */
@@ -523,17 +523,17 @@ export interface SignConditionECDSA {
 export interface ExecuteJsResponse {
   success?: boolean;
   signatures:
-  | {
-    sig: {
-      r: string;
-      s: string;
-      recid: number;
-      signature: string; // 0x...
-      publicKey: string; // pkp public key
-      dataSigned: string;
-    };
-  }
-  | any;
+    | {
+        sig: {
+          r: string;
+          s: string;
+          recid: number;
+          signature: string; // 0x...
+          publicKey: string; // pkp public key
+          dataSigned: string;
+        };
+      }
+    | any;
   decryptions: any[];
   response: string;
   logs: string;
@@ -545,7 +545,7 @@ export interface ExecuteJsResponse {
   };
 }
 
-export interface LitNodePromise { }
+export interface LitNodePromise {}
 
 export interface SendNodeCommand {
   url: string;
@@ -996,9 +996,9 @@ export interface GetPkpSessionSigs extends GetSessionSigsProps {
   authMethods: AuthMethod[];
   litActionCode?: string;
   jsParams?: {
-    publicKey?: string,
-    sigName?: string,
-  },
+    publicKey?: string;
+    sigName?: string;
+  };
 }
 
 export interface GetSessionSigsProps {
@@ -1540,7 +1540,7 @@ export interface LoginUrlParams {
   error: string | null;
 }
 
-export interface BaseAuthenticateOptions { }
+export interface BaseAuthenticateOptions {}
 
 export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
   /**
@@ -1620,8 +1620,8 @@ export interface MintCapacityCreditsPerKilosecond
 }
 export interface MintCapacityCreditsContext
   extends MintCapacityCreditsPerDay,
-  MintCapacityCreditsPerSecond,
-  MintCapacityCreditsPerKilosecond { }
+    MintCapacityCreditsPerSecond,
+    MintCapacityCreditsPerKilosecond {}
 export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
