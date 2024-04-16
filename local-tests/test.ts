@@ -221,10 +221,10 @@ const tests = {
 
   /**
    * Test Commands:
-   * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJs --network=habanero --version=v0
-   * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJs --network=localchain --version=v1
+   * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigning --network=habanero --version=v0
+   * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigning --network=localchain --version=v1
    */
-  testUsePkpSessionSigsToExecuteJs: async () => {
+  testUsePkpSessionSigsToExecuteJsSigning: async () => {
 
     const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
@@ -245,10 +245,17 @@ const tests = {
 
     const res = await litNodeClient.executeJs({
       sessionSigs: pkpSessionSigs,
-      code: `(async() => {
-        console.log("Testing!");
-      })()`,
-      jsParams: {},
+      code: `(async () => {
+        const sigShare = await LitActions.signEcdsa({
+          toSign: dataToSign,
+          publicKey,
+          sigName: "sig",
+        });
+      })();`,
+      jsParams: {
+        dataToSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+        publicKey: hotWalletAuthMethodOwnedPkp.publicKey,
+      },
     })
 
     console.log('✅ res:', res);
@@ -285,7 +292,7 @@ const tests = {
 
   /**
    * Test Commands:
-   * ❌ (expected, as it's not implemented) yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=habanero --version=v0
+   * ❌ NOT AVAILABLE IN HABANERO
    * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=localchain --version=v1
    *
    * Habanero Error: There was an error getting the signing shares from the nodes
@@ -325,6 +332,63 @@ const tests = {
 
     console.log('✅ res:', res);
   },
+
+  /**
+   * Test Commands:
+   * ❌ NOT AVAILABLE IN HABANERO
+   * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning --network=localchain --version=v1
+   */
+  testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning: async () => {
+
+    const VALID_SESSION_SIG_LIT_ACTION_CODE = `
+        // Works with an AuthSig AuthMethod
+        if (Lit.Auth.authMethodContexts.some(e => e.authMethodType === 1)) {
+          LitActions.setResponse({ response: "true" });
+        } else {
+          LitActions.setResponse({ response: "false" });
+        }
+      `;
+
+    const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
+      pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
+      authMethods: [hotWalletAuthMethod],
+      resourceAbilityRequests: [
+        {
+          resource: new LitPKPResource('*'),
+          ability: LitAbility.PKPSigning,
+        },
+        {
+          resource: new LitActionResource('*'),
+          ability: LitAbility.LitActionExecution,
+        }
+      ],
+      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString('base64'),
+      jsParams: {
+        publicKey: hotWalletAuthMethodOwnedPkp.publicKey,
+        sigName: 'unified-auth-sig',
+      },
+    });
+
+    const res = await litNodeClient.executeJs({
+      sessionSigs: pkpSessionSigs,
+      code: `(async () => {
+        const sigShare = await LitActions.signEcdsa({
+          toSign: dataToSign,
+          publicKey,
+          sigName: "sig",
+        });
+      })();`,
+      jsParams: {
+        dataToSign: ethers.utils.arrayify(
+          ethers.utils.keccak256([1, 2, 3, 4, 5])
+        ),
+        publicKey: hotWalletAuthMethodOwnedPkp.publicKey,
+      },
+    });
+
+    console.log('✅ res:', res);
+
+  }
 };
 
 showTests(tests);
