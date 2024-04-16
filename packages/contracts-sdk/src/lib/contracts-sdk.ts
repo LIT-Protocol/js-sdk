@@ -405,11 +405,7 @@ export class LitContracts {
       {}
     );
 
-    console.log(
-      'resolved contract addresses for: ',
-      this.network,
-      logAddresses
-    );
+    this.log('resolved contract addresses for: ', this.network, logAddresses);
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
 
