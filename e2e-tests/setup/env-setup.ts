@@ -1,6 +1,6 @@
 import { log } from '@lit-protocol/misc';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import * as networkContextData from './networkContext.json';
+import * as networkContextData from './networkContext.example.json';
 
 let litNetwork = process.env.NETWORK as any;
 const debug = process.env.DEBUG === 'true' ? true : false;
