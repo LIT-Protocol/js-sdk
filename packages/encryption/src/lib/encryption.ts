@@ -152,7 +152,7 @@ export const decryptFromJson = async (
       },
       litNodeClient
     );
-  } else {
+  } else if (parsedJsonData.dataType === 'file') {
     return decryptToFile(
       {
         accessControlConditions: parsedJsonData.accessControlConditions,
@@ -168,6 +168,8 @@ export const decryptFromJson = async (
       },
       litNodeClient
     );
+  } else {
+    throw new Error(`Datatype "${parsedJsonData.dataType}" is not supported.`);
   }
 };
 
