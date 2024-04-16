@@ -19,9 +19,7 @@ export const getLitEndpointPath = () => {
   let endpointPath = LIT_ENDPOINT_VERSION.V1;
 
   if (isNode()) {
-    const versionArg = process.argv.find((arg) =>
-      arg.startsWith('--version')
-    );
+    const versionArg = process.argv.find((arg) => arg.startsWith('--version'));
     const version = versionArg ? versionArg.split('=')[1] : null;
 
     // Use environment variable if set; default to 'v1' otherwise

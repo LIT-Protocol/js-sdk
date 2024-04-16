@@ -1,29 +1,24 @@
+import { LIT_PROCESS_ENV } from '@lit-protocol/constants';
 import { ENV } from './env-setup';
 import { log } from '@lit-protocol/misc';
 
 export namespace LitE2eManager {
-
-  export enum FLAG {
-    VERSION = '--version=',
-    FILTER = '--filter=',
-    LIST = '--list',
-    NETWORK = '--network=',
-  }
+  const PROCESS_ENV = {
+    NETWORK: process.env[LIT_PROCESS_ENV.NETWORK],
+    FILTERS: process.env[LIT_PROCESS_ENV.FILTERS],
+    DEBUG: process.env[LIT_PROCESS_ENV.DEBUG],
+  };
 
   /**
    * Get the network flag from the command line arguments
-   * 
+   *
    * @example
-   * yarn test:local --network=localchain
+   * NETWORK=habanero yarn test:local
    */
-  export const getNetworkFlag = (): ENV => {
-    const networkArg = process.argv.find((arg) =>
-      arg.startsWith(FLAG.NETWORK)
-    );
+  export const getNetworkEnv = (): ENV => {
+    const networkArg = PROCESS_ENV.NETWORK;
 
-    const network: string = networkArg
-      ? networkArg.replace(FLAG.NETWORK, '')
-      : 'localchain';
+    const network: string = networkArg || ENV.LOCALCHAIN;
 
     if (
       network !== ENV.LOCALCHAIN &&
@@ -32,7 +27,7 @@ export namespace LitE2eManager {
       network !== ENV.CAYENNE
     ) {
       log(
-        '[getNetworkFlag] Invalid network argument. Please use --network=localchain, --network=habanero, --network=manzano, or --network=cayenne'
+        '[getNetworkEnv] Invalid network argument. Please use NETWORK=localchain, NETWORK=habanero, NETWORK=manzano, or NETWORK=cayenne'
       );
       process.exit();
     }
@@ -41,36 +36,39 @@ export namespace LitE2eManager {
   };
 
   /**
-   * Get the filters flag from the command line arguments
-   * 
+   * Get the filters from the environment variables
+   *
    * @example
-   * yarn test:local --filter=testName1,testName2
+   * FILTERS=testName1,testName2 yarn test:local
    */
-  export const getFiltersFlag = (): string[] => {
-    const filterArg = process.argv.find((arg) =>
-      arg.startsWith(FLAG.FILTER)
-    );
-    return filterArg
-      ? filterArg.replace(FLAG.FILTER, '').split(',')
-      : [];
+  export const getFiltersEnv = (): string[] => {
+    const filterArg = PROCESS_ENV.FILTERS;
+    return filterArg ? filterArg.split(',') : [];
   };
 
   /**
    * Get the version flag from the command line arguments
-   * 
+   *
    * @example
-   * yarn test:local --list
+   * yarn test:local --debug=true
+   */
+  export const getDebugEnv = (): boolean => {
+    const debugEnv = PROCESS_ENV.DEBUG;
+    return debugEnv === 'true'; // Explicitly check for the string 'true'
+  };
+
+  /**
+   * List available tests using an environment variable
+   *
+   * @example
+   * LIST=true yarn test:local
    */
   export const list = (tests): void => {
-    const arg = process.argv.find((arg) =>
-      arg.startsWith(FLAG.LIST)
-    );
-
-    const list = arg === undefined ? false : true;
+    const list = process.env.LIST === 'true';
 
     if (list) {
       log('[list] Available tests:');
-      log(`[list] Run with --filter=testName to run a specific test`);
+      log(`[list] Run with environment FILTER= to run a specific test`);
       log('[list] ----------------');
       Object.entries(tests).forEach(([testName, testFunction], i) => {
         log(`${i + 1}. ${testName}`);
@@ -83,12 +81,12 @@ export namespace LitE2eManager {
 
 /**
  * Run tests based on the command line arguments
- * 
+ *
  * @example
  * yarn test:local --network=localchain --filter=testName1,testName2
  */
 export const runTests = async (tests) => {
-  const filters = LitE2eManager.getFiltersFlag();
+  const filters = LitE2eManager.getFiltersEnv();
   const testsToRun = Object.entries(tests).filter(
     ([testName]) => filters.length === 0 || filters.includes(testName)
   );

@@ -14,7 +14,7 @@ import { LitE2eManager, runTests } from './setup/utils';
 import { AuthCallbackParams, LitAbility } from '@lit-protocol/types';
 
 const devEnvPromise = devEnv({
-  env: LitE2eManager.getNetworkFlag(),
+  env: LitE2eManager.getNetworkEnv(),
   debug: true,
 });
 
@@ -78,245 +78,11 @@ const tests = {
 
   /**
    * Test Commands:
-   * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=cayenne --version=v0
-   * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=habanero --version=v0
-   * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=localchain --version=v1
-   */
-  testUseEoaSessionSigsToExecuteJsConsoleLog: async () => {
-    const sessionSigs = await litNodeClient.getSessionSigs({
-      chain: 'ethereum',
-      resourceAbilityRequests: [
-        {
-          resource: new LitPKPResource('*'),
-          ability: LitAbility.PKPSigning,
-        },
-        {
-          resource: new LitActionResource('*'),
-          ability: LitAbility.LitActionExecution,
-        },
-      ],
-      authNeededCallback: async ({
-        uri,
-        expiration,
-        resourceAbilityRequests,
-      }: AuthCallbackParams) => {
-        if (!expiration) {
-          throw new Error('expiration is required');
-        }
-
-        if (!resourceAbilityRequests) {
-          throw new Error('resourceAbilityRequests is required');
-        }
-
-        if (!uri) {
-          throw new Error('uri is required');
-        }
-
-        const toSign = await createSiweMessageWithRecaps({
-          uri: uri,
-          expiration: expiration,
-          resources: resourceAbilityRequests,
-          walletAddress: hotWallet.address,
-          nonce: lastestBlockhash,
-          litNodeClient: litNodeClient,
-        });
-
-        const authSig = await craftAuthSig({
-          signer: hotWallet,
-          toSign,
-        });
-
-        return authSig;
-      },
-    });
-
-    const res = await litNodeClient.executeJs({
-      sessionSigs: sessionSigs,
-      code: `(async() => {
-        console.log("Testing!");
-      })()`,
-      jsParams: {},
-    });
-
-    console.log('res:', res);
-  },
-
-  /**
-   * Test Commands:
-   * ✅ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=cayenne --version=v0
-   * ✅ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=habanero --version=v0
-   * ✅ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=localchain --version=v1
-   */
-  testUseEoaSessionSigsToPkpSign: async () => {
-    const sessionSigs = await litNodeClient.getSessionSigs({
-      resourceAbilityRequests: [
-        {
-          resource: new LitPKPResource('*'),
-          ability: LitAbility.PKPSigning,
-        },
-        {
-          resource: new LitActionResource('*'),
-          ability: LitAbility.LitActionExecution,
-        },
-      ],
-      authNeededCallback: async ({
-        uri,
-        expiration,
-        resourceAbilityRequests,
-      }: AuthCallbackParams) => {
-        if (!expiration) {
-          throw new Error('expiration is required');
-        }
-
-        if (!resourceAbilityRequests) {
-          throw new Error('resourceAbilityRequests is required');
-        }
-
-        if (!uri) {
-          throw new Error('uri is required');
-        }
-
-        const siweMessage = await createSiweMessageWithRecaps({
-          uri: uri,
-          expiration: expiration,
-          resources: resourceAbilityRequests,
-          walletAddress: hotWallet.address,
-          nonce: lastestBlockhash,
-          litNodeClient,
-        });
-
-        const authSig = await craftAuthSig({
-          signer: hotWallet,
-          toSign: siweMessage,
-        });
-
-        return authSig;
-      },
-    });
-
-    const TO_SIGN = ethers.utils.arrayify(
-      ethers.utils.keccak256([1, 2, 3, 4, 5])
-    );
-
-    console.log('sessionSigs:', sessionSigs);
-
-    let error: any = undefined;
-
-    try {
-      const runWithSessionSigs = await litNodeClient.pkpSign({
-        toSign: TO_SIGN,
-        pubKey: hotWalletOwnedPkp.publicKey,
-        sessionSigs,
-      });
-
-      console.log('✅ runWithSessionSigs:', runWithSessionSigs);
-    } catch (e) {
-      error = e;
-    }
-
-    if (error) {
-      // check your session sig
-      const sessionSig = sessionSigs[litNodeClient.config.bootstrapUrls[0]];
-      console.log('This is the session sig you were using:');
-      console.log(sessionSig);
-      throw new Error(error.message);
-    }
-  },
-
-  /**
- * Test Commands:
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToConcurrentExecuteJs --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToConcurrentExecuteJs --network=habanero --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToConcurrentExecuteJs --network=localchain --version=v1
- */
-  testUseEoaSessionSigsToConcurrentExecuteJs: async () => {
-    const sessionSigs = await litNodeClient.getSessionSigs({
-      resourceAbilityRequests: [
-        {
-          resource: new LitPKPResource('*'),
-          ability: LitAbility.PKPSigning,
-        },
-        {
-          resource: new LitActionResource('*'),
-          ability: LitAbility.LitActionExecution,
-        },
-      ],
-      authNeededCallback: async ({
-        uri,
-        expiration,
-        resourceAbilityRequests,
-      }: AuthCallbackParams) => {
-        if (!expiration) {
-          throw new Error('expiration is required');
-        }
-
-        if (!resourceAbilityRequests) {
-          throw new Error('resourceAbilityRequests is required');
-        }
-
-        if (!uri) {
-          throw new Error('uri is required');
-        }
-
-        const siweMessage = await createSiweMessageWithRecaps({
-          uri: uri,
-          expiration: expiration,
-          resources: resourceAbilityRequests,
-          walletAddress: hotWallet.address,
-          nonce: lastestBlockhash,
-          litNodeClient,
-        });
-
-        const authSig = await craftAuthSig({
-          signer: hotWallet,
-          toSign: siweMessage,
-        });
-
-        return authSig;
-      },
-    });
-
-    const TO_SIGN = ethers.utils.arrayify(
-      ethers.utils.keccak256([1, 2, 3, 4, 5])
-    );
-
-    const fn = (async (index: number) => {
-
-      console.log('🔥 Running index:', index);
-
-      return await litNodeClient.executeJs({
-        sessionSigs,
-        code: `(async () => {
-          const sigShare = await LitActions.signEcdsa({
-            toSign: dataToSign,
-            publicKey,
-            sigName: "sig",
-          });
-        })();`,
-        jsParams: {
-          dataToSign: TO_SIGN,
-          publicKey: hotWalletOwnedPkp.publicKey,
-        },
-      });
-    })
-
-    const result = await Promise.race([
-      fn(1),
-      fn(2),
-      fn(3),
-    ]);
-
-    console.log('✅ result:', result);
-  },
-
-  /**
-   * Test Commands:
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigning --network=cayenne --version=v0
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigning --network=habanero --version=v0
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsSigning --network=localchain --version=v1
    */
   testUsePkpSessionSigsToExecuteJsSigning: async () => {
-
     const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
       authMethods: [hotWalletAuthMethod],
@@ -328,7 +94,7 @@ const tests = {
         {
           resource: new LitActionResource('*'),
           ability: LitAbility.LitActionExecution,
-        }
+        },
       ],
     });
 
@@ -344,10 +110,12 @@ const tests = {
         });
       })();`,
       jsParams: {
-        dataToSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+        dataToSign: ethers.utils.arrayify(
+          ethers.utils.keccak256([1, 2, 3, 4, 5])
+        ),
         publicKey: hotWalletAuthMethodOwnedPkp.publicKey,
       },
-    })
+    });
 
     console.log('✅ res:', res);
   },
@@ -359,7 +127,6 @@ const tests = {
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUsePkpSessionSigsToPkpSign: async () => {
-
     const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
       pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
       authMethods: [hotWalletAuthMethod],
@@ -391,7 +158,6 @@ const tests = {
    * Habanero Error: There was an error getting the signing shares from the nodes
    */
   testUseLitActionSessionSigsToPkpSign: async () => {
-
     const VALID_SESSION_SIG_LIT_ACTION_CODE = `
       // Works with an AuthSig AuthMethod
       if (Lit.Auth.authMethodContexts.some(e => e.authMethodType === 1)) {
@@ -410,7 +176,9 @@ const tests = {
           ability: LitAbility.PKPSigning,
         },
       ],
-      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString('base64'),
+      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString(
+        'base64'
+      ),
       jsParams: {
         publicKey: hotWalletAuthMethodOwnedPkp.publicKey,
         sigName: 'unified-auth-sig',
@@ -433,7 +201,6 @@ const tests = {
    * ✅ yarn test:local --filter=testUseLitActionSessionSigsToExecuteJsSigning --network=localchain --version=v1
    */
   testUseLitActionSessionSigsToExecuteJsSigning: async () => {
-
     const VALID_SESSION_SIG_LIT_ACTION_CODE = `
         // Works with an AuthSig AuthMethod
         if (Lit.Auth.authMethodContexts.some(e => e.authMethodType === 1)) {
@@ -454,9 +221,11 @@ const tests = {
         {
           resource: new LitActionResource('*'),
           ability: LitAbility.LitActionExecution,
-        }
+        },
       ],
-      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString('base64'),
+      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString(
+        'base64'
+      ),
       jsParams: {
         publicKey: hotWalletAuthMethodOwnedPkp.publicKey,
         sigName: 'unified-auth-sig',
@@ -481,9 +250,7 @@ const tests = {
     });
 
     console.log('✅ res:', res);
-
   },
-
 };
 
 LitE2eManager.list(tests);

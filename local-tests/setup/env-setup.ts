@@ -1,15 +1,16 @@
 // This file is a WIP test demo for auth unification. In this change, the only time we will create an authSig is to use it to generate session sigs
 // client side. Anything server side, we will no longer accpet authSig.
 
-import { AuthMethod, BaseSiweMessage, LitContractContext } from '@lit-protocol/types';
+import {
+  AuthMethod,
+  BaseSiweMessage,
+  LitContractContext,
+} from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ethers } from 'ethers';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import {
-  createSiweMessage,
-  craftAuthSig,
-} from '@lit-protocol/auth-helpers';
+import { createSiweMessage, craftAuthSig } from '@lit-protocol/auth-helpers';
 // import { LocalStorage } from 'node-localstorage';
 import { log } from '@lit-protocol/misc';
 import { AuthSig } from '@lit-protocol/types';
@@ -27,19 +28,7 @@ export type PKPInfo = {
   ethAddress: string;
 };
 
-// ----- Test Configuration -----
-export const devEnv = async (
-  {
-    env,
-    debug,
-  }: {
-    env?: ENV;
-    debug?: boolean;
-  } = {
-      env: ENV.LOCALCHAIN,
-      debug: true,
-    }
-): Promise<{
+export interface DevEnv {
   litNodeClient: LitNodeClient;
   litContractsClient: LitContracts;
   hotWallet: ethers.Wallet;
@@ -51,7 +40,21 @@ export const devEnv = async (
   capacityTokenId: string;
   capacityDelegationAuthSig: AuthSig;
   capacityDelegationAuthSigWithPkp: AuthSig;
-}> => {
+}
+
+// ----- Test Configuration -----
+export const devEnv = async (
+  {
+    env,
+    debug,
+  }: {
+    env?: ENV;
+    debug?: boolean;
+  } = {
+    env: ENV.LOCALCHAIN,
+    debug: true,
+  }
+): Promise<DevEnv> => {
   log('🧪 [env-setup.ts] Starting devEnv');
   const PRIVATE_KEY =
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
