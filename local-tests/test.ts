@@ -221,6 +221,41 @@ const tests = {
 
   /**
    * Test Commands:
+   * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJs --network=habanero --version=v0
+   * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJs --network=localchain --version=v1
+   */
+  testUsePkpSessionSigsToExecuteJs: async () => {
+
+    const pkpSessionSigs = await litNodeClient.getPkpSessionSigs({
+      pkpPublicKey: hotWalletAuthMethodOwnedPkp.publicKey,
+      authMethods: [hotWalletAuthMethod],
+      resourceAbilityRequests: [
+        {
+          resource: new LitPKPResource('*'),
+          ability: LitAbility.PKPSigning,
+        },
+        {
+          resource: new LitActionResource('*'),
+          ability: LitAbility.LitActionExecution,
+        }
+      ],
+    });
+
+    console.log('pkpSessionSigs:', pkpSessionSigs);
+
+    const res = await litNodeClient.executeJs({
+      sessionSigs: pkpSessionSigs,
+      code: `(async() => {
+        console.log("Testing!");
+      })()`,
+      jsParams: {},
+    })
+
+    console.log('✅ res:', res);
+  },
+
+  /**
+   * Test Commands:
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=habanero --version=v0
    * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
    */
