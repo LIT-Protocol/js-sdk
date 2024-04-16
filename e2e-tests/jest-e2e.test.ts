@@ -1,5 +1,5 @@
 // Test command
-// npx jest './e2e-tests/jest-e2e.test.ts' -c './e2e-tests/jest.config.ts' -t 'connections'                         
+// npx jest './e2e-tests/jest-e2e.test.ts' -c './e2e-tests/jest.config.ts' -t 'connections'
 
 import { DevEnv, TESTABLE_NETWORK_TYPE, devEnv } from './setup/env-setup';
 
