@@ -76,59 +76,6 @@ const tests = {
 
   /**
    * Test Commands:
-   * ✅ yarn test:local --filter=testGetSessionSigs --network=habanero --version=v0
-   * ✅ yarn test:local --filter=testGetSessionSigs --network=localchain --version=v1
-   */
-  testGetSessionSigs: async () => {
-    const sessionSigs = await litNodeClient.getSessionSigs({
-      chain: 'ethereum',
-      resourceAbilityRequests: [
-        {
-          resource: new LitActionResource('*'),
-          ability: LitAbility.LitActionExecution,
-        },
-      ],
-      authNeededCallback: async ({
-        uri,
-        expiration,
-        resourceAbilityRequests,
-      }: AuthCallbackParams) => {
-        if (!expiration) {
-          throw new Error('expiration is required');
-        }
-
-        if (!resourceAbilityRequests) {
-          throw new Error('resourceAbilityRequests is required');
-        }
-
-        if (!uri) {
-          throw new Error('uri is required');
-        }
-
-        const toSign = await createSiweMessageWithRecaps({
-          uri,
-          expiration,
-          resources: resourceAbilityRequests,
-          walletAddress: hotWallet.address,
-          nonce: lastestBlockhash,
-          litNodeClient
-        });
-
-        const authSig = await craftAuthSig({
-          signer: hotWallet,
-          toSign,
-        });
-
-        return authSig;
-      },
-      capacityDelegationAuthSig,
-    });
-
-    console.log('sessionSigs:', sessionSigs);
-  },
-
-  /**
-   * Test Commands:
    * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=habanero --version=v0
    * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=localchain --version=v1
    */
