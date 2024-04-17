@@ -1,25 +1,58 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+      - staging/**
+      - feat/**
+      - feature/**
 jobs:
-  bun-tests:
+  master:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-
-      - name: Install Bun
-        run: |
-          curl -fsSL https://bun.sh/install | bash
-          echo "$HOME/.bun/bin" >> $GITHUB_PATH
-
-      - name: Show Bun Version
-        run: bun --version
-
-      - name: Install dependencies with Bun
-        run: bun install
-
-      - name: Show directory contents
-        run: ls -la
-
-      - name: Run tests with Bun
-        env:
-          DEBUG: false
-        run: bun run ./local-tests/test.ts --network=manzano --version=v0 --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseEoaSessionSigsToExecuteJsSigningInParallel
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+      - name: Install project dependencies
+        run: yarn --frozen-lockfile
+      - uses: nrwl/nx-set-shas@v3
+        with:
+          main-branch-name: 'master'
+      - name: Build
+        run: yarn build
+      - name: Run Unit tests
+        run: yarn tools --test --unit
+  e2e-connection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NETWORK: cayenne
+      MINT_NEW: true
+      DEBUG: true
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install project dependencies
+        run: yarn install
+      - name: Build packages
+        id: build
+        run: yarn build
+      - name: Run End to End Tests
+        if: steps.build.outputs.exit_code == 0
+        run: yarn test:e2e:node --group=connection --group=lit-actions --group=pkp-auth-method --group=pkp-ethers --group=pkp-encryption-decryption --group=pkp-session-sigs
