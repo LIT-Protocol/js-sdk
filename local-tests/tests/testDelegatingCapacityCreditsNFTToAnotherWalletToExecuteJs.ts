@@ -1,11 +1,5 @@
-import {
-  LitActionResource,
-  LitPKPResource,
-  craftAuthSig,
-  createSiweMessageWithRecaps,
-} from '@lit-protocol/auth-helpers';
-import { AuthCallbackParams, LitAbility } from '@lit-protocol/types';
 import { DevEnv } from 'local-tests/setup/env-setup';
+import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/eoa-session-sigs';
 
 /**
  * ## Scenario:
@@ -18,9 +12,8 @@ import { DevEnv } from 'local-tests/setup/env-setup';
  *
  * ## Test Commands:
  * - 🚫 Not supported in Cayenne, but session sigs would still work
- * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs --network=cayenne --version=v0
  * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs --network=manzano --version=v0
- * - yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs --network=localchain --version=v1
+ * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs --network=localchain --version=v1
  */
 export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
   async (devEnv: DevEnv) => {
@@ -39,52 +32,11 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
       });
 
     // 4. Bob receives the capacity delegation authSig use it to generate session sigs
-    const bobsSessionSigs = await devEnv.litNodeClient.getSessionSigs({
-      resourceAbilityRequests: [
-        {
-          resource: new LitPKPResource('*'),
-          ability: LitAbility.PKPSigning,
-        },
-        {
-          resource: new LitActionResource('*'),
-          ability: LitAbility.LitActionExecution,
-        },
-      ],
-      authNeededCallback: async ({
-        uri,
-        expiration,
-        resourceAbilityRequests,
-      }: AuthCallbackParams) => {
-        if (!expiration) {
-          throw new Error('expiration is required');
-        }
-
-        if (!resourceAbilityRequests) {
-          throw new Error('resourceAbilityRequests is required');
-        }
-
-        if (!uri) {
-          throw new Error('uri is required');
-        }
-
-        const toSign = await createSiweMessageWithRecaps({
-          uri: uri,
-          expiration: expiration,
-          resources: resourceAbilityRequests,
-          walletAddress: bobsWallet.address,
-          nonce: devEnv.lastestBlockhash,
-          litNodeClient: devEnv.litNodeClient,
-        });
-
-        const authSig = await craftAuthSig({
-          signer: bobsWallet,
-          toSign,
-        });
-
-        return authSig;
-      },
-      capabilityAuthSigs: [appOwnersCapacityDelegationAuthSig],
-    });
+    const bobsSessionSigs = await getEoaSessionSigsWithCapacityDelegations(
+      devEnv,
+      bobsWallet,
+      appOwnersCapacityDelegationAuthSig
+    );
 
     // -- printing out the recaps from the session sigs
     const bobsSingleSessionSig =

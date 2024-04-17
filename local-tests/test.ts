@@ -3,7 +3,7 @@
 // Test command: yarn test:local --filter={testName} --network={network | 'localhost' is default}
 
 import { getDevEnv } from './setup/env-setup';
-import { getNetworkFlag, runTests } from './setup/utils';
+import { getNetworkFlag, runTests } from './setup/mini-test-framework';
 import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
 import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
@@ -12,40 +12,42 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
 import { testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs';
+import { testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign';
 
-const devEnv = await getDevEnv({
-  env: getNetworkFlag(),
-  debug: process.env.DEBUG === 'true',
-});
+(async () => {
+  const devEnv = await getDevEnv({
+    env: getNetworkFlag(),
+    debug: process.env.DEBUG === 'true',
+  });
 
-const eoaSessionSigsTests = {
-  testUseEoaSessionSigsToExecuteJsSigning,
-  testUseEoaSessionSigsToExecuteJsSigningInParallel,
-  testUseEoaSessionSigsToPkpSign,
-};
+  const eoaSessionSigsTests = {
+    testUseEoaSessionSigsToExecuteJsSigning,
+    testUseEoaSessionSigsToExecuteJsSigningInParallel,
+    testUseEoaSessionSigsToPkpSign,
+  };
 
-const pkpSessionSigsTests = {
-  testUsePkpSessionSigsToExecuteJsSigning,
-  testUsePkpSessionSigsToPkpSign,
-};
+  const pkpSessionSigsTests = {
+    testUsePkpSessionSigsToExecuteJsSigning,
+    testUsePkpSessionSigsToPkpSign,
+  };
 
-const litActionSessionSigsTests = {
-  testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,
-  testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,
-};
+  const litActionSessionSigsTests = {
+    testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,
+    testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,
+  };
 
-const capacityDelegationTests = {
-  testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,
-};
+  const capacityDelegationTests = {
+    testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,
+    testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign,
+  };
 
-await runTests({
-  tests: {
-    ...eoaSessionSigsTests,
-    ...pkpSessionSigsTests,
-    ...litActionSessionSigsTests,
-    ...capacityDelegationTests,
-  },
-  devEnv,
-});
-
-process.exit();
+  await runTests({
+    tests: {
+      ...eoaSessionSigsTests,
+      ...pkpSessionSigsTests,
+      ...litActionSessionSigsTests,
+      ...capacityDelegationTests,
+    },
+    devEnv,
+  });
+})();
