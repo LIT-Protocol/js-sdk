@@ -1043,6 +1043,11 @@ export interface GetSessionSigsProps extends LitCustomAuth {
   // on both manzano and habanero networks capacity credit proof is required.
   // see more here: https://developer.litprotocol.com/v3/sdk/capacity-credits
   capacityDelegationAuthSig?: AuthSig;
+
+  /**
+   * Not limited to capacityDelegationAuthSig, we want to be able to pass in any other authSigs for other purposes.
+   */
+  capabilityAuthSigs?: AuthSig[];
 }
 
 export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;

@@ -18,8 +18,8 @@ import { DevEnv } from 'local-tests/setup/env-setup';
  *
  * ## Test Commands:
  * - 🚫 Not supported in Cayenne, but session sigs would still work
- * - yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs --network=cayenne --version=v0
- * - yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs --network=manzano --version=v0
+ * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs --network=cayenne --version=v0
+ * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs --network=manzano --version=v0
  * - yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs --network=localchain --version=v1
  */
 export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =

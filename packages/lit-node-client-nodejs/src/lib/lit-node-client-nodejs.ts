@@ -3003,8 +3003,12 @@ export class LitNodeClientNodeJs
     const sessionExpiration = new Date(Date.now() + 1000 * 60 * 5);
 
     const capabilities = params.capacityDelegationAuthSig
-      ? [params.capacityDelegationAuthSig, authSig]
-      : [authSig];
+      ? [
+          ...(params.capabilityAuthSigs ?? []),
+          params.capacityDelegationAuthSig,
+          authSig,
+        ]
+      : [...(params.capabilityAuthSigs ?? []), authSig];
     // const capabilities = params.capacityDelegationAuthSig ? [authSig, params.capacityDelegationAuthSig] : [authSig];
 
     log('[getSessionSigs] capabilities:', capabilities);
