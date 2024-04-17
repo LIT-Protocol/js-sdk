@@ -11,6 +11,7 @@ import { testUsePkpSessionSigsToPkpSign } from './tests/testUsePkpSessionSigsToP
 import { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToPkpSign';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
+import { testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs';
 
 const devEnv = await getDevEnv({
   env: getNetworkFlag(),
@@ -33,11 +34,16 @@ const litActionSessionSigsTests = {
   testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,
 };
 
+const capacityDelegationTests = {
+  testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,
+};
+
 await runTests({
   tests: {
     ...eoaSessionSigsTests,
     ...pkpSessionSigsTests,
     ...litActionSessionSigsTests,
+    ...capacityDelegationTests,
   },
   devEnv,
 });

@@ -65,8 +65,8 @@ export const runTests = async ({
   devEnv: DevEnv;
   silent?: boolean; // Optional silent flag
 }) => {
-  const originalConsoleLog = console.log;
-  const originalConsoleWarn = console.warn;
+  // const originalConsoleLog = console.log;
+  // const originalConsoleWarn = console.warn;
 
   const filters = getFiltersFlag();
   const testsToRun = Object.entries(tests).filter(
@@ -83,8 +83,8 @@ export const runTests = async ({
 
     if (silent) {
       // Temporarily override console functions to suppress logs
-      console.log = () => {};
-      console.warn = () => {};
+      // console.log = () => {};
+      // console.warn = () => {};
     }
 
     try {
@@ -115,8 +115,8 @@ export const runTests = async ({
       failedTests.push(`${testName} (Failed in ${timeTaken} ms)`);
     } finally {
       // Restore the original console functions after each test
-      console.log = originalConsoleLog;
-      console.warn = originalConsoleWarn;
+      // console.log = originalConsoleLog;
+      // console.warn = originalConsoleWarn;
     }
 
     index++; // Increment test index

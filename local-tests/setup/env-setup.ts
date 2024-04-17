@@ -41,6 +41,8 @@ export interface DevEnv {
   capacityDelegationAuthSig: AuthSig;
   capacityDelegationAuthSigWithPkp: AuthSig;
   toSignBytes32: Uint8Array;
+  bobsWallet: ethers.Wallet;
+  bobsOwnedPkp: PKPInfo;
 }
 
 // ----- Test Configuration -----
@@ -266,6 +268,57 @@ export const getDevEnv = async (
       delegateeAddresses: [hotWalletAuthMethodOwnedPkp.ethAddress],
     });
 
+  /**
+   * ====================================
+   * A common toSign bytes32 for all signing tests
+   * ====================================
+   */
+  const toSignBytes32 = ethers.utils.arrayify(
+    ethers.utils.keccak256([1, 2, 3, 4, 5])
+  );
+
+  /**
+   * ====================================
+   * Bob's Wallet (Just another random wallet)
+   * Usually used for capacity credits delegation
+   * ====================================
+   */
+  const bobsPrivateKey =
+    '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d';
+  const bobsWallet = new ethers.Wallet(bobsPrivateKey, provider);
+
+  /**
+   * ====================================
+   * Bobs mints a PKP
+   * ====================================
+   */
+  log('🧪 [env-setup.ts] Bobs mints a PKP');
+  let bobsContractsClient: LitContracts;
+
+  if (env === ENV.LOCALCHAIN) {
+    bobsContractsClient = new LitContracts({
+      signer: bobsWallet,
+      debug,
+      rpc: LIT_RPC_URL, // anvil rpc
+      customContext: networkContext as unknown as LitContractContext,
+    });
+  } else {
+    bobsContractsClient = new LitContracts({
+      signer: bobsWallet,
+      debug: false,
+      network: env,
+    });
+  }
+
+  await bobsContractsClient.connect();
+
+  const bobsMintRes =
+    await bobsContractsClient.pkpNftContractUtils.write.mint();
+  const bobsOwnedPkp = bobsMintRes.pkp;
+
+  // Send some funds to Bob's PKP
+  log("🧪 [env-setup.ts] Send some funds to Bob's PKP");
+
   log(`\n----- Development Environment Configuration -----
 ✅ Chain RPC URL: ${LIT_RPC_URL}
 ✅ Bootstrap URLs: ${BOOTSTRAP_URLS}
@@ -281,7 +334,7 @@ export const getDevEnv = async (
 ✅ Capacity Delegation Auth Sig With PKP: ${JSON.stringify(
     capacityDelegationAuthSigWithPkp
   )}
-
+✅ Bob's Wallet Address: ${await bobsWallet.getAddress()}
 ----- Test Starts Below -----
 `);
   log('🧪 [env-setup.ts] End of devEnv');
@@ -297,8 +350,8 @@ export const getDevEnv = async (
     capacityTokenId: capacityTokenIdStr,
     capacityDelegationAuthSig,
     capacityDelegationAuthSigWithPkp,
-    toSignBytes32: ethers.utils.arrayify(
-      ethers.utils.keccak256([1, 2, 3, 4, 5])
-    ),
+    toSignBytes32,
+    bobsWallet,
+    bobsOwnedPkp,
   };
 };
