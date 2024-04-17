@@ -2,7 +2,7 @@ import { LitPKPResource } from '@lit-protocol/auth-helpers';
 import { log } from '@lit-protocol/misc';
 import { LitAbility } from '@lit-protocol/types';
 import { DevEnv } from 'local-tests/setup/env-setup';
-import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/lit-action-session-sigs';
+import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 
 /**
  * Test Commands:
@@ -10,8 +10,7 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/lit-acti
  * ❌ NOT AVAILABLE IN HABANERO
  * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign --network=localchain --version=v1
  *
- * Habanero Error: There was an error getting the signing shares from the nodes
- */
+ **/
 export const testUseValidLitActionCodeGeneratedSessionSigsToPkpSign = async (
   devEnv: DevEnv
 ) => {

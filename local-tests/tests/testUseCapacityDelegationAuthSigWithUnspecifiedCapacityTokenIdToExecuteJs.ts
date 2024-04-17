@@ -3,38 +3,30 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
 
 /**
  * ## Scenario:
- * Testing unrestricted access to execute JS code using a capacity delegation authSig without specific delegatee restrictions
+ * Testing unrestricted access to execute js code using a capacity delegation authSig without specific delegatee restrictions
  * - Given: A capacity delegation authSig is created by the dApp owner
  * - When: The authSig does not specifically restrict delegatees
- * - And: Any user attempts to execute JS code using the capacity from the capacity credits NFT
- * - Then: The user should be able to execute the JS code using the capacity without restrictions due to the absence of delegatee limits
+ * - And: Any user attempts to execute js code using the capacity from the capacity credits NFT
+ * - Then: The user should be able to sign with his/her PKP using the capacity without restrictions due to the absence of delegatee limits
  *
  *
  * ## Test Commands:
  * - 🚫 Not supported in Cayenne, but session sigs would still work
- * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnrestrictedAccessToExecuteJs --network=manzano --version=v0
- * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnrestrictedAccessToExecuteJs --network=localchain --version=v1
+ * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs --network=manzano --version=v0
+ * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs --network=localchain --version=v1
  */
-
-export const testUseCapacityDelegationAuthSigWithUnrestrictedAccessToExecuteJs =
+export const testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs =
   async (devEnv: DevEnv) => {
-    // 1. Getting the capacity credits NFT minted in the dev environment
-    const ccNft = devEnv.capacityTokenId;
-
-    // 2. Hey, I'm Bob
+    // 1. Hey, I'm Bob
     const bobsWallet = devEnv.bobsWallet;
 
-    // 3. As a dApp owner, I want to create a unrestricted capacity delegation authSig that could be used by any user
+    // 2. As a dApp owner, I want to create a unrestricted capacity delegation authSig that could be used by any user
     const { capacityDelegationAuthSig: appOwnersCapacityDelegationAuthSig } =
       await devEnv.litNodeClient.createCapacityDelegationAuthSig({
         dAppOwnerWallet: devEnv.hotWallet,
-        capacityTokenId: ccNft,
-
-        // No delegatee addresses provided. It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits and specific NFT IDs.
-        // delegateeAddresses: [bobsWallet.address],
       });
 
-    // 4. Bob gets the capacity delegation authSig from somewhere and uses it to get session sigs
+    // 3. Bob gets the capacity delegation authSig from somewhere and uses it to get session sigs
     const bobsSessionSigs = await getEoaSessionSigsWithCapacityDelegations(
       devEnv,
       bobsWallet,
@@ -57,6 +49,7 @@ export const testUseCapacityDelegationAuthSigWithUnrestrictedAccessToExecuteJs =
       console.log(decodedRecap);
     });
 
+    // 4. Bob can now execute JS code using the capacity credits NFT
     // 5. Bob can now execute JS code using the capacity credits NFT
     const res = await devEnv.litNodeClient.executeJs({
       sessionSigs: bobsSessionSigs,

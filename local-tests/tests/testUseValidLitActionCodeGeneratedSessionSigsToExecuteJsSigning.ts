@@ -1,6 +1,6 @@
 import { log } from '@lit-protocol/misc';
 import { DevEnv } from 'local-tests/setup/env-setup';
-import { getLitActionSessionSigsForExecuteJs } from 'local-tests/setup/session-sigs/lit-action-session-sigs';
+import { getLitActionSessionSigsForExecuteJs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 
 /**
  * Test Commands:

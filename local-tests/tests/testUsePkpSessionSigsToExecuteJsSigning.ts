@@ -1,6 +1,6 @@
 import { log } from '@lit-protocol/misc';
 import { DevEnv } from 'local-tests/setup/env-setup';
-import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/pkp-session-sigs';
+import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:

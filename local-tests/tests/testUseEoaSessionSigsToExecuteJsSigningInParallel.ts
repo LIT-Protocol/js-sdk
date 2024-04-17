@@ -1,6 +1,6 @@
 import { log } from '@lit-protocol/misc';
 import { DevEnv } from 'local-tests/setup/env-setup';
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/eoa-session-sigs';
+import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 
 /**
  * Test Commands:

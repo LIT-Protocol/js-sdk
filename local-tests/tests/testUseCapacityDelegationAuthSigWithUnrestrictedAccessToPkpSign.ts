@@ -1,5 +1,5 @@
 import { DevEnv } from 'local-tests/setup/env-setup';
-import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/eoa-session-sigs';
+import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 
 /**
  * ## Scenario:
@@ -7,7 +7,7 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
  * - Given: A capacity delegation authSig is created by the dApp owner
  * - When: The authSig does not specifically restrict delegatees
  * - And: Any user attempts to pkp sign code using the capacity from the capacity credits NFT
- * - Then: The user should be able to sign with his/her PKP using the capacity without restrictions due to the absence of delegatee limits
+ * - Then: The user should be able to execute the JS code using the capacity without restrictions due to the absence of delegatee limits
  *
  *
  * ## Test Commands:

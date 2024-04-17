@@ -1,5 +1,5 @@
 import { DevEnv } from 'local-tests/setup/env-setup';
-import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/eoa-session-sigs';
+import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 
 /**
  * ## Scenario:
