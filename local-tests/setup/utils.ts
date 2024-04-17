@@ -129,6 +129,6 @@ export const runTests = async ({
       console.log(`\x1b[31m- ${failedTest}\x1b[0m`);
     });
   } else {
-    console.log(`\x1b[32mTest Report: All tests passed successfully.\x1b[0m`);
+    console.log(`\x1b[32mTest Report: ${testsToRun.length} test(s) passed successfully.\x1b[0m`);
   }
 };
