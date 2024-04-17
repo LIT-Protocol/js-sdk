@@ -1,14 +1,3 @@
-name: CI
-
-on:
-  push:
-    branches:
-      - master
-      - feature/2614-better-commit-history
-  pull_request:
-    branches:
-      - feature/2614-better-commit-history
-
 jobs:
   bun-tests:
     runs-on: ubuntu-latest
@@ -21,8 +10,14 @@ jobs:
           curl -fsSL https://bun.sh/install | bash
           echo "$HOME/.bun/bin" >> $GITHUB_PATH
 
+      - name: Show Bun Version
+        run: bun --version
+
       - name: Install dependencies with Bun
         run: bun install
+
+      - name: Show directory contents
+        run: ls -la
 
       - name: Run tests with Bun
         env:
