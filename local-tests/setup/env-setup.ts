@@ -28,19 +28,7 @@ export type PKPInfo = {
   ethAddress: string;
 };
 
-// ----- Test Configuration -----
-export const devEnv = async (
-  {
-    env,
-    debug,
-  }: {
-    env?: ENV;
-    debug?: boolean;
-  } = {
-    env: ENV.LOCALCHAIN,
-    debug: true,
-  }
-): Promise<{
+export interface DevEnv {
   litNodeClient: LitNodeClient;
   litContractsClient: LitContracts;
   hotWallet: ethers.Wallet;
@@ -52,7 +40,22 @@ export const devEnv = async (
   capacityTokenId: string;
   capacityDelegationAuthSig: AuthSig;
   capacityDelegationAuthSigWithPkp: AuthSig;
-}> => {
+  toSignBytes32: Uint8Array;
+}
+
+// ----- Test Configuration -----
+export const getDevEnv = async (
+  {
+    env,
+    debug,
+  }: {
+    env?: ENV;
+    debug?: boolean;
+  } = {
+    env: ENV.LOCALCHAIN,
+    debug: true,
+  }
+): Promise<DevEnv> => {
   log('🧪 [env-setup.ts] Starting devEnv');
   const PRIVATE_KEY =
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
@@ -294,5 +297,8 @@ export const devEnv = async (
     capacityTokenId: capacityTokenIdStr,
     capacityDelegationAuthSig,
     capacityDelegationAuthSigWithPkp,
+    toSignBytes32: ethers.utils.arrayify(
+      ethers.utils.keccak256([1, 2, 3, 4, 5])
+    ),
   };
 };

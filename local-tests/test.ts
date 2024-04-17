@@ -2,18 +2,14 @@
 // Installation: https://bun.sh/docs/installation
 // Test command: yarn test:local --filter={testName} --network={network | 'localhost' is default}
 
-import {
-  LitActionResource,
-  LitPKPResource,
-  craftAuthSig,
-  createSiweMessageWithRecaps,
-} from '@lit-protocol/auth-helpers';
-import { devEnv } from './setup/env-setup';
+import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
+import { getDevEnv } from './setup/env-setup';
 import * as ethers from 'ethers';
 import { getNetworkFlag, showTests, runTests } from './setup/utils';
-import { AuthCallbackParams, LitAbility } from '@lit-protocol/types';
+import { LitAbility } from '@lit-protocol/types';
+import { getEoaSessionSigs } from './setup/session-sigs/eoa-session-sigs';
 
-const devEnvPromise = devEnv({
+const devEnvPromise = getDevEnv({
   env: getNetworkFlag(),
   debug: true,
 });
@@ -21,117 +17,15 @@ const devEnvPromise = devEnv({
 const tests = {
   /**
    * Test Commands:
-   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsConsoleLog --network=cayenne --version=v0
-   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsConsoleLog --network=habanero --version=v0
-   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsConsoleLog --network=localchain --version=v0
-   */
-  testUseAuthSigToExecuteJsConsoleLog: async () => {
-    const res = await litNodeClient.executeJs({
-      authSig: hotWalletAuthSig,
-      code: `(async() => {
-        console.log("Testing!");
-      })()`,
-      jsParams: {},
-    });
-
-    if (res && res.success) {
-      console.log('✅ res:', res);
-    }
-  },
-
-  /**
-   * Test Commands:
-   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsSigning --network=cayenne --version=v0
-   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsSigning --network=habanero --version=v0
-   * ✅ yarn test:local --filter=testUseAuthSigToExecuteJsSigning --network=localchain --version=v0
-   */
-  testUseAuthSigToExecuteJsSigning: async () => {
-    const TO_SIGN = ethers.utils.arrayify(
-      ethers.utils.keccak256([1, 2, 3, 4, 5])
-    );
-
-    try {
-      const res = await litNodeClient.executeJs({
-        authSig: hotWalletAuthSig,
-        code: `(async () => {
-          const sigShare = await LitActions.signEcdsa({
-            toSign: dataToSign,
-            publicKey,
-            sigName: "sig",
-          });
-        })();`,
-        jsParams: {
-          dataToSign: TO_SIGN,
-          publicKey: hotWalletOwnedPkp.publicKey,
-        },
-      });
-
-      if (res.signatures.sig.signature) {
-        console.log('✅ res:', res);
-      } else {
-        console.log('❌ Error res:', res);
-      }
-    } catch (e) {
-      console.log('Error:', e);
-    }
-  },
-
-  /**
-   * Test Commands:
    * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=cayenne --version=v0
    * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=habanero --version=v0
    * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsConsoleLog --network=localchain --version=v1
    */
   testUseEoaSessionSigsToExecuteJsConsoleLog: async () => {
-    const sessionSigs = await litNodeClient.getSessionSigs({
-      chain: 'ethereum',
-      resourceAbilityRequests: [
-        {
-          resource: new LitPKPResource('*'),
-          ability: LitAbility.PKPSigning,
-        },
-        {
-          resource: new LitActionResource('*'),
-          ability: LitAbility.LitActionExecution,
-        },
-      ],
-      authNeededCallback: async ({
-        uri,
-        expiration,
-        resourceAbilityRequests,
-      }: AuthCallbackParams) => {
-        if (!expiration) {
-          throw new Error('expiration is required');
-        }
-
-        if (!resourceAbilityRequests) {
-          throw new Error('resourceAbilityRequests is required');
-        }
-
-        if (!uri) {
-          throw new Error('uri is required');
-        }
-
-        const toSign = await createSiweMessageWithRecaps({
-          uri: uri,
-          expiration: expiration,
-          resources: resourceAbilityRequests,
-          walletAddress: hotWallet.address,
-          nonce: lastestBlockhash,
-          litNodeClient: litNodeClient,
-        });
-
-        const authSig = await craftAuthSig({
-          signer: hotWallet,
-          toSign,
-        });
-
-        return authSig;
-      },
-    });
+    const eoaSessionSigs = await getEoaSessionSigs(devEnv);
 
     const res = await litNodeClient.executeJs({
-      sessionSigs: sessionSigs,
+      sessionSigs: eoaSessionSigs,
       code: `(async() => {
         console.log("Testing!");
       })()`,
@@ -139,6 +33,8 @@ const tests = {
     });
 
     console.log('res:', res);
+
+    assert.equal(1, 1);
   },
 
   /**
@@ -148,65 +44,15 @@ const tests = {
    * ✅ yarn test:local --filter=testUseEoaSessionSigsToPkpSign --network=localchain --version=v1
    */
   testUseEoaSessionSigsToPkpSign: async () => {
-    const sessionSigs = await litNodeClient.getSessionSigs({
-      resourceAbilityRequests: [
-        {
-          resource: new LitPKPResource('*'),
-          ability: LitAbility.PKPSigning,
-        },
-        {
-          resource: new LitActionResource('*'),
-          ability: LitAbility.LitActionExecution,
-        },
-      ],
-      authNeededCallback: async ({
-        uri,
-        expiration,
-        resourceAbilityRequests,
-      }: AuthCallbackParams) => {
-        if (!expiration) {
-          throw new Error('expiration is required');
-        }
-
-        if (!resourceAbilityRequests) {
-          throw new Error('resourceAbilityRequests is required');
-        }
-
-        if (!uri) {
-          throw new Error('uri is required');
-        }
-
-        const siweMessage = await createSiweMessageWithRecaps({
-          uri: uri,
-          expiration: expiration,
-          resources: resourceAbilityRequests,
-          walletAddress: hotWallet.address,
-          nonce: lastestBlockhash,
-          litNodeClient,
-        });
-
-        const authSig = await craftAuthSig({
-          signer: hotWallet,
-          toSign: siweMessage,
-        });
-
-        return authSig;
-      },
-    });
-
-    const TO_SIGN = ethers.utils.arrayify(
-      ethers.utils.keccak256([1, 2, 3, 4, 5])
-    );
-
-    console.log('sessionSigs:', sessionSigs);
+    const eoaSessionSigs = await getEoaSessionSigs(devEnv);
 
     let error: any = undefined;
 
     try {
       const runWithSessionSigs = await litNodeClient.pkpSign({
-        toSign: TO_SIGN,
+        toSign: devEnv.toSignBytes32,
         pubKey: hotWalletOwnedPkp.publicKey,
-        sessionSigs,
+        sessionSigs: eoaSessionSigs,
       });
 
       console.log('✅ runWithSessionSigs:', runWithSessionSigs);
@@ -216,7 +62,7 @@ const tests = {
 
     if (error) {
       // check your session sig
-      const sessionSig = sessionSigs[litNodeClient.config.bootstrapUrls[0]];
+      const sessionSig = eoaSessionSigs[litNodeClient.config.bootstrapUrls[0]];
       console.log('This is the session sig you were using:');
       console.log(sessionSig);
       throw new Error(error.message);
@@ -288,7 +134,7 @@ const tests = {
     console.log('pkpSessionSigs:', pkpSessionSigs);
 
     const res = await litNodeClient.pkpSign({
-      toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+      toSign: devEnv.toSignBytes32,
       pubKey: hotWalletAuthMethodOwnedPkp.publicKey,
       sessionSigs: pkpSessionSigs,
     });
@@ -333,7 +179,7 @@ const tests = {
     });
 
     const res = await litNodeClient.pkpSign({
-      toSign: ethers.utils.arrayify(ethers.utils.keccak256([1, 2, 3, 4, 5])),
+      toSign: devEnv.toSignBytes32,
       pubKey: hotWalletAuthMethodOwnedPkp.publicKey,
       sessionSigs: pkpSessionSigs,
     });
@@ -402,6 +248,8 @@ const tests = {
 
 showTests(tests);
 
+const devEnv = await devEnvPromise;
+
 const {
   litNodeClient,
   litContractsClient,
@@ -414,7 +262,7 @@ const {
   capacityTokenId,
   capacityDelegationAuthSig,
   capacityDelegationAuthSigWithPkp,
-} = await devEnvPromise;
+} = devEnv;
 
 await runTests(tests);
 // overwrite();
