@@ -97,9 +97,9 @@ export const runTests = async ({
 
     index++; // Increment test index
 
-    // Wait for 1 second between tests if there are more than 1 test to run
+    // delay between tests if there are more than 1 test to run
     if (shouldWait) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
 };

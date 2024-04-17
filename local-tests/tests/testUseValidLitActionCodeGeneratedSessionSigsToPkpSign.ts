@@ -33,8 +33,6 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToPkpSign = async (
   //   dataSigned: "7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4",
   // }
 
-  console.log('res:', res);
-
   // -- assertions
   // r, s, dataSigned, and public key should be present
   if (!res.r) {

@@ -1001,7 +1001,7 @@ export interface GetPkpSessionSigs extends GetSessionSigsProps {
   };
 }
 
-export interface GetSessionSigsProps {
+export interface GetSessionSigsProps extends LitCustomAuth {
   pkpPublicKey?: string;
 
   // When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
@@ -1071,7 +1071,7 @@ export interface SessionRequestBody {
   siweMessage: string;
 }
 
-export interface GetWalletSigProps {
+export interface GetWalletSigProps extends LitCustomAuth {
   authNeededCallback?: AuthCallback;
   chain: string;
   sessionCapabilityObject: ISessionCapabilityObject;
@@ -1733,4 +1733,13 @@ export interface CapacityDelegationFields extends BaseSiweMessage {
   capacityTokenId?: string;
   delegateeAddresses?: string[];
   uses?: string;
+}
+
+export interface LitCustomAuth {
+  litActionCode?: string;
+  ipfsId?: string;
+  jsParams?: {
+    publicKey?: string;
+    sigName?: string;
+  };
 }
