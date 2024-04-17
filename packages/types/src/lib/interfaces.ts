@@ -1039,9 +1039,12 @@ export interface GetSessionSigsProps extends LitCustomAuth {
 
   // rateLimitAuthSig: AuthSig;
 
-  // Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
-  // on both manzano and habanero networks capacity credit proof is required.
-  // see more here: https://developer.litprotocol.com/v3/sdk/capacity-credits
+  /**
+   * @deprecated - use capabilityAuthSigs instead
+   *  Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
+   * on both manzano and habanero networks capacity credit proof is required.
+   * see more here: https://developer.litprotocol.com/v3/sdk/capacity-credits
+   */
   capacityDelegationAuthSig?: AuthSig;
 
   /**
