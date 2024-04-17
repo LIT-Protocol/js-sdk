@@ -194,6 +194,13 @@ export class LitNodeClientNodeJs
       statement,
     } = params;
 
+    // Useful information
+    if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
+      log(
+        `[createCapacityDelegationAuthSig] No delegatee addresses provided. It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits and specific NFT IDs.`
+      );
+    }
+
     // TODO: WARNING console when there are no delegatees, we need to warn the user
 
     // -- This is the owner address who holds the Capacity Credits NFT token and wants to delegate its

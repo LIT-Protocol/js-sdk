@@ -13,6 +13,8 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning } from 
 import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
 import { testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs';
 import { testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign';
+import { testUseCapacityDelegationAuthSigWithUnrestrictedAccessToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnrestrictedAccessToExecuteJs';
+import { testUseCapacityDelegationAuthSigWithUnrestrictedAccessToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnrestrictedAccessToPkpSign';
 
 (async () => {
   const devEnv = await getDevEnv({
@@ -39,6 +41,8 @@ import { testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign } from './test
   const capacityDelegationTests = {
     testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,
     testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign,
+    testUseCapacityDelegationAuthSigWithUnrestrictedAccessToExecuteJs,
+    testUseCapacityDelegationAuthSigWithUnrestrictedAccessToPkpSign,
   };
 
   await runTests({
