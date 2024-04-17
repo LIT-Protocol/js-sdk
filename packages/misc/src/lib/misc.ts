@@ -228,6 +228,11 @@ export const getLoggerbyId = (id: string) => {
  * @returns { void }
  */
 export const log = (...args: any): void => {
+  if (isNode()) {
+    if (process.env['DEBUG'] === 'false') {
+      return;
+    }
+  }
   if (!globalThis) {
     // there is no globalThis, just print the log
     console.log(...args);

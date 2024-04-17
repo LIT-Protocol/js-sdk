@@ -1,5 +1,5 @@
 import { LIT_PROCESS_FLAG } from '@lit-protocol/constants';
-import { ENV } from './env-setup';
+import { DevEnv, ENV } from './env-setup';
 import { log } from '@lit-protocol/misc';
 
 export const getNetworkFlag = (): ENV => {
@@ -55,17 +55,51 @@ export const showTests = (tests): void => {
     process.exit();
   }
 };
-
-export const runTests = async (tests) => {
+export const runTests = async ({
+  tests,
+  devEnv,
+}: {
+  tests: any;
+  devEnv: DevEnv;
+}) => {
   const filters = getFiltersFlag();
   const testsToRun = Object.entries(tests).filter(
     ([testName]) => filters.length === 0 || filters.includes(testName)
   );
 
-  for (const [testName, testFunction] of testsToRun) {
-    log(`Running ${testName}...`);
+  const shouldWait = testsToRun.length > 1;
+  let index = 1; // Start index from 1
 
-    // @ts-ignore
-    await testFunction();
+  for (const [testName, testFunction] of testsToRun) {
+    const startTime = performance.now(); // Start time of the test
+
+    try {
+      console.log(`\x1b[90m[runTests] Running ${index}. ${testName}...\x1b[0m`);
+      await (testFunction as any)(devEnv);
+
+      const endTime = performance.now(); // End time of the test
+      const timeTaken = (endTime - startTime).toFixed(2);
+
+      // Log success with a tick and gray color
+      console.log(
+        `\x1b[32m✔\x1b[90m ${index}. ${testName} - Passed (${timeTaken} ms)\x1b[0m`
+      );
+    } catch (error) {
+      const endTime = performance.now(); // End time of the test
+      const timeTaken = (endTime - startTime).toFixed(2);
+
+      // Log failure with a cross and gray color
+      console.error(
+        `\x1b[31m✖\x1b[90m ${index}. ${testName} - Failed (${timeTaken} ms)\x1b[0m`
+      );
+      console.error(`\x1b[31mError:\x1b[90m ${error.message}\x1b[0m`);
+    }
+
+    index++; // Increment test index
+
+    // Wait for 1 second between tests if there are more than 1 test to run
+    if (shouldWait) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
   }
 };

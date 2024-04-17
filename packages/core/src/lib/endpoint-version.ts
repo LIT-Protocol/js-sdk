@@ -1,5 +1,4 @@
-import { isNode } from '@lit-protocol/misc';
-import { log } from 'console';
+import { isNode, log } from '@lit-protocol/misc';
 import {
   LIT_ENDPOINT,
   LIT_ENDPOINT_VERSION,

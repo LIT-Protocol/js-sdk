@@ -6,6 +6,7 @@ import {
 } from '@lit-protocol/auth-helpers';
 import { DevEnv } from '../env-setup';
 import { AuthCallbackParams, LitAbility } from '@lit-protocol/types';
+import { log } from '@lit-protocol/misc';
 
 export const getEoaSessionSigs = async (devEnv: DevEnv) => {
   const sessionSigs = await devEnv.litNodeClient.getSessionSigs({
@@ -55,7 +56,7 @@ export const getEoaSessionSigs = async (devEnv: DevEnv) => {
     },
   });
 
-  console.log('[getEoaSessionSigs]: ', getEoaSessionSigs);
+  log('[getEoaSessionSigs]: ', getEoaSessionSigs);
 
   return sessionSigs;
 };
