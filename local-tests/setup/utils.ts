@@ -76,6 +76,7 @@ export const runTests = async ({
   const shouldWait = testsToRun.length > 1;
   let index = 1; // Start index from 1
   let failedTests = []; // Array to keep track of failed tests
+  let passedTests = []; // Array to keep track of passed tests and their times
 
   for (const [testName, testFunction] of testsToRun) {
     const startTime = performance.now(); // Start time of the test
@@ -97,6 +98,9 @@ export const runTests = async ({
       console.log(
         `\x1b[32m✔\x1b[90m ${index}. ${testName} - Passed (${timeTaken} ms)\x1b[0m`
       );
+
+      // Store passed test with its time taken
+      passedTests.push(`${testName} (Passed in ${timeTaken} ms)`);
     } catch (error) {
       const endTime = performance.now(); // End time of the test
       const timeTaken = (endTime - startTime).toFixed(2);
@@ -129,9 +133,17 @@ export const runTests = async ({
     failedTests.forEach((failedTest) => {
       console.log(`\x1b[31m- ${failedTest}\x1b[0m`);
     });
+    passedTests.forEach((passedTest) => {
+      console.log(`\x1b[32m- ${passedTest}\x1b[0m`);
+    });
+    process.exit(1);
   } else {
     console.log(
       `\x1b[32mTest Report: ${testsToRun.length} test(s) passed successfully.\x1b[0m`
     );
+    passedTests.forEach((passedTest) => {
+      console.log(`\x1b[32m- ${passedTest}\x1b[0m`);
+    });
+    process.exit(0);
   }
 };
