@@ -58,10 +58,15 @@ export const showTests = (tests): void => {
 export const runTests = async ({
   tests,
   devEnv,
+  silent = true, // Default silent to true if not provided
 }: {
   tests: any;
   devEnv: DevEnv;
+  silent?: boolean; // Optional silent flag
 }) => {
+  const originalConsoleLog = console.log;
+  const originalConsoleWarn = console.warn;
+
   const filters = getFiltersFlag();
   const testsToRun = Object.entries(tests).filter(
     ([testName]) => filters.length === 0 || filters.includes(testName)
@@ -69,9 +74,16 @@ export const runTests = async ({
 
   const shouldWait = testsToRun.length > 1;
   let index = 1; // Start index from 1
+  let failedTests = []; // Array to keep track of failed tests
 
   for (const [testName, testFunction] of testsToRun) {
     const startTime = performance.now(); // Start time of the test
+
+    if (silent) {
+      // Temporarily override console functions to suppress logs
+      console.log = () => {};
+      console.warn = () => {};
+    }
 
     try {
       console.log(`\x1b[90m[runTests] Running ${index}. ${testName}...\x1b[0m`);
@@ -93,13 +105,30 @@ export const runTests = async ({
         `\x1b[31m✖\x1b[90m ${index}. ${testName} - Failed (${timeTaken} ms)\x1b[0m`
       );
       console.error(`\x1b[31mError:\x1b[90m ${error.message}\x1b[0m`);
+
+      // Add failed test to the list
+      failedTests.push(`${testName} (Failed in ${timeTaken} ms)`);
+    } finally {
+      // Restore the original console functions after each test
+      console.log = originalConsoleLog;
+      console.warn = originalConsoleWarn;
     }
 
     index++; // Increment test index
 
-    // delay between tests if there are more than 1 test to run
+    // Wait for 2 seconds between tests if there are more than 1 test to run
     if (shouldWait) {
       await new Promise((resolve) => setTimeout(resolve, 2000));
     }
+  }
+
+  // Report on failed tests at the end of all tests
+  if (failedTests.length > 0) {
+    console.log(`\x1b[31mTest Report: Some tests failed.\x1b[0m`);
+    failedTests.forEach((failedTest) => {
+      console.log(`\x1b[31m- ${failedTest}\x1b[0m`);
+    });
+  } else {
+    console.log(`\x1b[32mTest Report: All tests passed successfully.\x1b[0m`);
   }
 };
