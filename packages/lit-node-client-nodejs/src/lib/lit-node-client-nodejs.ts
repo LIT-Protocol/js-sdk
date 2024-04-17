@@ -488,6 +488,9 @@ export class LitNodeClientNodeJs
     sessionKeyUri,
     nonce,
     resourceAbilityRequests,
+    litActionCode,
+    ipfsId,
+    jsParams,
   }: GetWalletSigProps): Promise<AuthSig> => {
     let walletSig: AuthSig;
 
@@ -531,6 +534,10 @@ export class LitNodeClientNodeJs
           uri: sessionKeyUri,
           nonce,
           ...(resourceAbilityRequests && { resourceAbilityRequests }),
+
+          ...(litActionCode && { litActionCode }),
+          ...(ipfsId && { ipfsId }),
+          ...(jsParams && { jsParams }),
         };
 
         log('[getWalletSig] callback body:', body);
@@ -2547,9 +2554,7 @@ export class LitNodeClientNodeJs
       version: '1',
       chainId: params.chainId ?? 1,
       expiration: _expiration,
-      // resources: params.resources,
       nonce: this.latestBlockhash!,
-      resources: params.resourceAbilityRequests,
     };
 
     if (params.resourceAbilityRequests) {
@@ -2944,6 +2949,11 @@ export class LitNodeClientNodeJs
       sessionKeyUri: sessionKeyUri,
       nonce,
       resourceAbilityRequests: params.resourceAbilityRequests,
+
+      // -- optional fields
+      ...(params.litActionCode && { litActionCode: params.litActionCode }),
+      ...(params.ipfsId && { ipfsId: params.ipfsId }),
+      ...(params.jsParams && { jsParams: params.jsParams }),
     });
 
     const needToResignSessionKey = await this.checkNeedToResignSessionKey({
@@ -3061,9 +3071,8 @@ export class LitNodeClientNodeJs
     const chain = params?.chain || 'ethereum';
 
     const pkpSessionSigs = this.getSessionSigs({
-      ...params,
       chain,
-      pkpPublicKey: params.pkpPublicKey,
+      ...params,
       authNeededCallback: async (props: AuthCallbackParams) => {
         // -- validate
         if (!props.expiration) {
