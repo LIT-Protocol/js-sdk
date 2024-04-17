@@ -175,7 +175,9 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
       litNodeClient
     );
   } else {
-    throw new Error(`Datatype "${parsedJsonData.dataType}" is not supported.`);
+    throw new Error(
+      `dataType of ${parsedJsonData.dataType} is not valid. Must be 'string' or 'file'.`
+    );
   }
 }
 
