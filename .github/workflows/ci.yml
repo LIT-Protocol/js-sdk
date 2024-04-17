@@ -34,4 +34,4 @@ jobs:
       - name: Run tests with Bun
         env:
           DEBUG: false
-        run: DEBUG=true yarn test:local --network=manzano --version=v0 --filter=testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToPkpSign
+        run: DEBUG=true yarn test:local --network=manzano --version=v0 --filter=testUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign
