@@ -2,7 +2,9 @@
     "liveServer.settings.port": 5502,
     "todo-tree.tree.scanMode": "workspace",
     "conventionalCommits.scopes": [
-        "contracts-sdk"
+        "contracts-sdk",
+        "lit-node-client-nodejs",
+        "core",
     ],
     // "restoreTerminals.terminals": [
     //     {

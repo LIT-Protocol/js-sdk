@@ -28,6 +28,7 @@ import {
 } from '@lit-protocol/constants';
 import { LitCore } from '@lit-protocol/core';
 import {
+  checkSevSnpAttestation,
   combineEcdsaShares,
   combineSignatureShares,
   encrypt,
@@ -80,6 +81,7 @@ import type {
   GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
   JsonExecutionRequest,
+  JsonHandshakeResponse,
   JsonPkpSignRequest,
   LitClientSessionManager,
   LitNodeClientConfig,
@@ -253,7 +255,7 @@ export class LitNodeClientNodeJs
       throw new Error('Failed to verify capabilities for resource');
     }
 
-    const nonce = this.getLatestBlockhash();
+    const nonce = await this.getLatestBlockhash();
 
     // -- get auth sig
     let siweMessage = new siwe.SiweMessage({
@@ -472,25 +474,6 @@ export class LitNodeClientNodeJs
   // backward compatibility
   getExpiration = () => {
     return LitNodeClientNodeJs.getExpiration();
-  };
-
-  /**
-   * returns the latest block hash.
-   * will call refresh if the block hash is expired
-   * @returns {Promise<string>} latest block hash from `handhsake` with the lit network.
-   */
-  getLatestBlockhash = (): string => {
-    if (!this.ready) {
-      logError('Client not connected, remember to call connect');
-      throwError({
-        message: 'Client not connected',
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
-      });
-    }
-
-    // we are confident in this value being non null so we return
-    return this.latestBlockhash!;
   };
 
   /**
