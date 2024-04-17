@@ -490,7 +490,13 @@ export class LitCore {
   getLatestBlockhash = async (): Promise<string> => {
     await this.connect();
 
-    return this.latestBlockhash as string;
+    if (!this.latestBlockhash) {
+      throw new Error(
+        `latestBlockhash is not available. Received: "${this.latestBlockhash}"`
+      );
+    }
+
+    return this.latestBlockhash;
   };
 
   /**
