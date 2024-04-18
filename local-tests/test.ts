@@ -20,6 +20,7 @@ import { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs } 
 import { testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs';
 import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimKeys';
 import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys';
+import { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
 
 (async () => {
   const devEnv = await getDevEnv({
@@ -33,7 +34,7 @@ import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testU
     testUseEoaSessionSigsToExecuteJsSigningInParallel,
     testUseEoaSessionSigsToExecuteJsClaimKeys,
     testUseEoaSessionSigsToExecuteJsClaimMultipleKeys,
-    // testUseEoaSessionSigsToExecuteJsJsonResponse,
+    testUseEoaSessionSigsToExecuteJsJsonResponse,
     // testUseEoaSessionSigsToExecuteJsConsoleLog,
     // testUseEoaSessionSigsToEncryptDecryptString
   };

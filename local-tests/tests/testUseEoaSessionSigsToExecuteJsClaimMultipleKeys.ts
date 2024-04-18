@@ -18,7 +18,7 @@ import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-sessio
  * Test Commands:
  * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimMultipleKeys --network=cayenne --version=v0
  * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimMultipleKeys --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimMultipleKeys --network=localchain --version=v0
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimMultipleKeys --network=localchain --version=v1
  */
 export const testUseEoaSessionSigsToExecuteJsClaimMultipleKeys = async (
   devEnv: DevEnv

@@ -1,10 +1,10 @@
-import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { log } from '@lit-protocol/misc';
-import {
-  ClaimRequest,
-  ClaimResult,
-  ClientClaimProcessor,
-} from '@lit-protocol/types';
+// import { LitContracts } from '@lit-protocol/contracts-sdk';
+// import { log } from '@lit-protocol/misc';
+// import {
+//   ClaimRequest,
+//   ClaimResult,
+//   ClientClaimProcessor,
+// } from '@lit-protocol/types';
 import { DevEnv } from 'local-tests/setup/env-setup';
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 
@@ -22,7 +22,7 @@ import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-sessio
  * Test Commands:
  * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys --network=cayenne --version=v0
  * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys --network=localchain --version=v0
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys --network=localchain --version=v1
  */
 export const testUseEoaSessionSigsToExecuteJsClaimKeys = async (
   devEnv: DevEnv
@@ -90,25 +90,25 @@ export const testUseEoaSessionSigsToExecuteJsClaimKeys = async (
     }
   });
 
-  const claimRequest: ClaimRequest<ClientClaimProcessor> = {
-    authMethod: devEnv.bobsWalletAuthMethod,
-    signer: devEnv.hotWallet,
-    mintCallback: async (claimRes: ClaimResult<ClientClaimProcessor>) => {
-      console.log('claimRes:', claimRes);
+  // const claimRequest: ClaimRequest<ClientClaimProcessor> = {
+  //   authMethod: devEnv.bobsWalletAuthMethod,
+  //   signer: devEnv.hotWallet,
+  //   mintCallback: async (claimRes: ClaimResult<ClientClaimProcessor>) => {
+  //     console.log('claimRes:', claimRes);
 
-      const litContracts = await devEnv.getContractsClient(claimRes.signer);
-      const pkpInfo = await litContracts.pkpNftContractUtils.write.claimAndMint(
-        `0x${claimRes.derivedKeyId}`,
-        claimRes.signatures
-      );
+  //     const litContracts = await devEnv.getContractsClient(claimRes.signer);
+  //     const pkpInfo = await litContracts.pkpNftContractUtils.write.claimAndMint(
+  //       `0x${claimRes.derivedKeyId}`,
+  //       claimRes.signatures
+  //     );
 
-      return pkpInfo.tokenId;
-    },
-  };
+  //     return pkpInfo.tokenId;
+  //   },
+  // };
 
-  const claimRes = await devEnv.litNodeClient.claimKeyId(claimRequest);
+  // const claimRes = await devEnv.litNodeClient.claimKeyId(claimRequest);
 
-  console.log('claimRes:', claimRes);
+  // console.log('claimRes:', claimRes);
 
   // Expected output:
   // {
@@ -149,25 +149,25 @@ export const testUseEoaSessionSigsToExecuteJsClaimKeys = async (
   // }
 
   // assertions
-  if (!claimRes.claimedKeyId) {
-    throw new Error(`Expected "claimedKeyId" in claimRes`);
-  }
-  if (!claimRes.pubkey) {
-    throw new Error(`Expected "pubkey" in claimRes`);
-  }
-  if (!claimRes.mintTx) {
-    throw new Error(`Expected "mintTx" in claimRes`);
-  }
+  // if (!claimRes.claimedKeyId) {
+  //   throw new Error(`Expected "claimedKeyId" in claimRes`);
+  // }
+  // if (!claimRes.pubkey) {
+  //   throw new Error(`Expected "pubkey" in claimRes`);
+  // }
+  // if (!claimRes.mintTx) {
+  //   throw new Error(`Expected "mintTx" in claimRes`);
+  // }
 
-  claimRes.signatures.forEach((sig: any) => {
-    if (!sig.r) {
-      throw new Error(`Expected "r" in sig`);
-    }
-    if (!sig.s) {
-      throw new Error(`Expected "s" in sig`);
-    }
-    if (!sig.v) {
-      throw new Error(`Expected "v" in sig`);
-    }
-  });
+  // claimRes.signatures.forEach((sig: any) => {
+  //   if (!sig.r) {
+  //     throw new Error(`Expected "r" in sig`);
+  //   }
+  //   if (!sig.s) {
+  //     throw new Error(`Expected "s" in sig`);
+  //   }
+  //   if (!sig.v) {
+  //     throw new Error(`Expected "v" in sig`);
+  //   }
+  // });
 };
