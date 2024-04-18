@@ -13,9 +13,11 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning } from 
 import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
 import { testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs';
 import { testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign';
-import { testUseCapacityDelegationAuthSigWithUnrestrictedAccessToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnrestrictedAccessToExecuteJs';
-import { testUseCapacityDelegationAuthSigWithUnrestrictedAccessToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnrestrictedAccessToPkpSign';
+import { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign';
 import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs';
+import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign';
+import { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs';
+import { testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs';
 
 (async () => {
   const devEnv = await getDevEnv({
@@ -42,9 +44,11 @@ import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecute
   const capacityDelegationTests = {
     testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,
     testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign,
-    testUseCapacityDelegationAuthSigWithUnrestrictedAccessToExecuteJs,
-    testUseCapacityDelegationAuthSigWithUnrestrictedAccessToPkpSign,
+    testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs,
+    testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs,
+    testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign,
     testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs,
+    testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign,
   };
 
   await runTests({

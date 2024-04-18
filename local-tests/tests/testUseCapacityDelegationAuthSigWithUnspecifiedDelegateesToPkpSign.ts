@@ -12,11 +12,11 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
  *
  * ## Test Commands:
  * - 🚫 Not supported in Cayenne, but session sigs would still work
- * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnrestrictedAccessToPkpSign --network=manzano --version=v0
- * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnrestrictedAccessToPkpSign --network=localchain --version=v1
+ * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign --network=manzano --version=v0
+ * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign --network=localchain --version=v1
  */
 
-export const testUseCapacityDelegationAuthSigWithUnrestrictedAccessToPkpSign =
+export const testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign =
   async (devEnv: DevEnv) => {
     // 1. Getting the capacity credits NFT minted in the dev environment
     const ccNft = devEnv.capacityTokenId;

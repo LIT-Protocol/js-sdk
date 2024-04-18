@@ -15,6 +15,7 @@ import { createSiweMessage, craftAuthSig } from '@lit-protocol/auth-helpers';
 import { log } from '@lit-protocol/misc';
 import { AuthSig } from '@lit-protocol/types';
 import networkContext from './networkContext.json';
+import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 
 export enum ENV {
   LOCALCHAIN = 'localchain',
@@ -41,8 +42,13 @@ export interface DevEnv {
   capacityDelegationAuthSig: AuthSig;
   capacityDelegationAuthSigWithPkp: AuthSig;
   toSignBytes32: Uint8Array;
+
+  // All about Bob
   bobsWallet: ethers.Wallet;
   bobsOwnedPkp: PKPInfo;
+  bobsContractsClient: LitContracts;
+  bobsWalletAuthMethod: AuthMethod;
+  bobsWalletAuthMethoedOwnedPkp: PKPInfo;
 }
 
 // ----- Test Configuration -----
@@ -289,6 +295,16 @@ export const getDevEnv = async (
 
   /**
    * ====================================
+   * Bob's Wallet Auth Method
+   * ====================================
+   */
+  const bobsWalletAuthMethod = await EthWalletProvider.authenticate({
+    signer: bobsWallet,
+    litNodeClient,
+  });
+
+  /**
+   * ====================================
    * Bobs mints a PKP
    * ====================================
    */
@@ -316,8 +332,18 @@ export const getDevEnv = async (
     await bobsContractsClient.pkpNftContractUtils.write.mint();
   const bobsOwnedPkp = bobsMintRes.pkp;
 
-  // Send some funds to Bob's PKP
-  log("🧪 [env-setup.ts] Send some funds to Bob's PKP");
+  /**
+   * ====================================
+   * Bob mints a PKP using the hot wallet auth method.
+   * ====================================
+   */
+  log('🧪 [env-setup.ts] Bob mints a PKP using the hot wallet auth method');
+  const bobsMintWithAuthRes = await bobsContractsClient.mintWithAuth({
+    authMethod: bobsWalletAuthMethod,
+    scopes: [AuthMethodScope.SignAnything],
+  });
+
+  const bobsWalletAuthMethoedOwnedPkp = bobsMintWithAuthRes.pkp;
 
   log(`\n----- Development Environment Configuration -----
 ✅ Chain RPC URL: ${LIT_RPC_URL}
@@ -351,7 +377,12 @@ export const getDevEnv = async (
     capacityDelegationAuthSig,
     capacityDelegationAuthSigWithPkp,
     toSignBytes32,
+
+    // All about Bob
     bobsWallet,
     bobsOwnedPkp,
+    bobsContractsClient,
+    bobsWalletAuthMethod,
+    bobsWalletAuthMethoedOwnedPkp,
   };
 };

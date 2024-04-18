@@ -1571,6 +1571,12 @@ export interface EthWalletAuthenticateOptions extends BaseAuthenticateOptions {
    * When the auth signature expires
    */
   expiration?: string;
+
+  /**
+   * Get the address of the wallet
+   * @returns {string} - Ethereum wallet address
+   */
+  getAddress?: () => string;
 }
 
 export interface OtpAuthenticateOptions extends BaseAuthenticateOptions {
