@@ -18,6 +18,7 @@ import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecute
 import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign';
 import { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs';
 import { testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs';
+import { testUseEoaSessionSigsToClaimKeys } from './tests/testUseEoaSessionSigsToClaimKeys';
 
 (async () => {
   const devEnv = await getDevEnv({
@@ -27,8 +28,9 @@ import { testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs } from './tests
 
   const eoaSessionSigsTests = {
     testUseEoaSessionSigsToExecuteJsSigning,
-    testUseEoaSessionSigsToExecuteJsSigningInParallel,
     testUseEoaSessionSigsToPkpSign,
+    testUseEoaSessionSigsToExecuteJsSigningInParallel,
+    testUseEoaSessionSigsToClaimKeys,
   };
 
   const pkpSessionSigsTests = {
