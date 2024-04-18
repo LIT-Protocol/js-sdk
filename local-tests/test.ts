@@ -21,6 +21,7 @@ import { testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs } from './tests
 import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimKeys';
 import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys';
 import { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
+import { testUseEoaSessionSigsToExecuteJsConsoleLog } from './tests/testUseEoaSessionSigsToExecuteJsConsoleLog';
 
 (async () => {
   const devEnv = await getDevEnv({
@@ -35,7 +36,7 @@ import { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoa
     testUseEoaSessionSigsToExecuteJsClaimKeys,
     testUseEoaSessionSigsToExecuteJsClaimMultipleKeys,
     testUseEoaSessionSigsToExecuteJsJsonResponse,
-    // testUseEoaSessionSigsToExecuteJsConsoleLog,
+    testUseEoaSessionSigsToExecuteJsConsoleLog,
     // testUseEoaSessionSigsToEncryptDecryptString
   };
 
