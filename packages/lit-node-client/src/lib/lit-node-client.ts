@@ -6,7 +6,7 @@ import { getStorageItem } from '@lit-protocol/misc-browser';
 import { CustomNetwork, LitNodeClientConfig } from '@lit-protocol/types';
 
 export class LitNodeClient extends LitNodeClientNodeJs {
-  constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
+  constructor(args: LitNodeClientConfig | CustomNetwork) {
     super({
       ...args,
       defaultAuthCallback: checkAndSignAuthMessage,
