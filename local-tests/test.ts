@@ -36,6 +36,7 @@ import { testUseEoaSessionSigsToEncryptDecryptString } from './tests/testUseEoaS
 import { testUsePkpSessionSigsToEncryptDecryptString } from './tests/testUsePkpSessionSigsToEncryptDecryptString';
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString';
 import { testUseInvalidLitActionCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionCodeToGenerateSessionSigs';
+import { testUseEoaSessionSigsToEncryptDecryptFile } from './tests/testUseEoaSessionSigsToEncryptDecryptFile';
 
 (async () => {
   const devEnv = await getDevEnv({
@@ -52,7 +53,7 @@ import { testUseInvalidLitActionCodeToGenerateSessionSigs } from './tests/testUs
     testUseEoaSessionSigsToExecuteJsJsonResponse,
     testUseEoaSessionSigsToExecuteJsConsoleLog,
     testUseEoaSessionSigsToEncryptDecryptString,
-    // testUseEoaSessionSigsToEncryptDecryptFile
+    testUseEoaSessionSigsToEncryptDecryptFile,
     // testUseEoaSessionSigsToEncryptDecryptZip
   };
 

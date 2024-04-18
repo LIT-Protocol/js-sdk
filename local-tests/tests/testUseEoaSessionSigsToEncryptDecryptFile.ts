@@ -4,17 +4,20 @@ import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
-import { hashAccessControlConditions } from '@lit-protocol/access-control-conditions';
 
 /**
  * Test Commands:
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString --network=localchain --version=v0
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile --network=cayenne --version=v0
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile --network=manzano --version=v0
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile --network=localchain --version=v0
  */
-export const testUseEoaSessionSigsToEncryptDecryptString = async (
+export const testUseEoaSessionSigsToEncryptDecryptFile = async (
   devEnv: DevEnv
 ) => {
+  const message = 'Hello world';
+  const blob = new Blob([message], { type: 'text/plain' });
+  const blobArray = new Uint8Array(await blob.arrayBuffer());
+
   // set access control conditions for encrypting and decrypting
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
     userAddress: devEnv.hotWallet.address,
@@ -65,7 +68,7 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
   ]);
 
   // -- Decrypt the encrypted string
-  const decryptRes = await LitJsSdk.decryptToString(
+  const decriptedFile = await LitJsSdk.decryptToFile(
     {
       accessControlConditions: accs,
       ciphertext: encryptRes.ciphertext,
@@ -76,9 +79,16 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  if (decryptRes !== 'Hello world') {
+  if (blobArray.length !== decriptedFile.length) {
     throw new Error(
-      `Expected decryptRes to be 'Hello world' but got ${decryptRes}`
+      `decrypted file should match the original file but received ${decriptedFile}`
     );
   }
+  for (let i = 0; i < blobArray.length; i++) {
+    if (blobArray[i] !== decriptedFile[i]) {
+      throw new Error(`decrypted file should match the original file`);
+    }
+  }
+
+  console.log('decriptedFile:', decriptedFile);
 };

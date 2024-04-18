@@ -229,7 +229,6 @@ export const decryptFromIpfs = async (
 };
 
 // ---------- Local Helpers ----------
-
 /**
  *
  * Encrypt a string.  This is used to encrypt any string that is to be locked via the Lit Protocol.
