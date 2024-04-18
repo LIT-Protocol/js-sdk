@@ -20,11 +20,13 @@ import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-sessio
  * - Note: The key claiming process involves multiple nodes within the Lit network verifying the sessionSigs and collaboratively signing the claim, which results in the generation of a new key pair if successful.
  *
  * Test Commands:
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToClaimKeys --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToClaimKeys --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToClaimKeys --network=localchain --version=v0
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys --network=cayenne --version=v0
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys --network=manzano --version=v0
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimKeys --network=localchain --version=v0
  */
-export const testUseEoaSessionSigsToClaimKeys = async (devEnv: DevEnv) => {
+export const testUseEoaSessionSigsToExecuteJsClaimKeys = async (
+  devEnv: DevEnv
+) => {
   const eoaSessionSigs = await getEoaSessionSigs(devEnv);
 
   const res = await devEnv.litNodeClient.executeJs({

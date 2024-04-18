@@ -18,7 +18,7 @@ import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecute
 import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign';
 import { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs';
 import { testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs';
-import { testUseEoaSessionSigsToClaimKeys } from './tests/testUseEoaSessionSigsToClaimKeys';
+import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimKeys';
 
 (async () => {
   const devEnv = await getDevEnv({
@@ -30,17 +30,33 @@ import { testUseEoaSessionSigsToClaimKeys } from './tests/testUseEoaSessionSigsT
     testUseEoaSessionSigsToExecuteJsSigning,
     testUseEoaSessionSigsToPkpSign,
     testUseEoaSessionSigsToExecuteJsSigningInParallel,
-    testUseEoaSessionSigsToClaimKeys,
+    testUseEoaSessionSigsToExecuteJsClaimKeys,
+    // testUseEoaSessionSigsToExecuteJsClaimMultipleKeys,
+    // testUseEoaSessionSigsToExecuteJsJsonResponse,
+    // testUseEoaSessionSigsToExecuteJsConsoleLog,
+    // testUseEoaSessionSigsToEncryptDecryptString
   };
 
   const pkpSessionSigsTests = {
     testUsePkpSessionSigsToExecuteJsSigning,
     testUsePkpSessionSigsToPkpSign,
+    // testUsePkpSessionSigsToExecuteJsSigningInParallel,
+    // testUsePkpSessionSigsToExecuteJsClaimKeys,
+    // testUsePkpSessionSigsToExecuteJsClaimMultipleKeys,
+    // testUsePkpSessionSigsToExecuteJsJsonResponse,
+    // testUsePkpSessionSigsToExecuteJsConsoleLog,
+    // testUsePkpSessionSigsToEncryptDecryptString
   };
 
   const litActionSessionSigsTests = {
     testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,
     testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,
+    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel,
+    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys,
+    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys,
+    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse,
+    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog,
+    // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
   };
 
   const capacityDelegationTests = {

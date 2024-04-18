@@ -996,6 +996,7 @@ export class LitNodeClientNodeJs
   };
 
   // ========== Promise Handlers ==========
+  // to be deprecated
   getIpfsId = async ({
     dataToHash,
     authSig,

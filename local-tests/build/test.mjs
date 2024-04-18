@@ -9430,7 +9430,7 @@ var require_bech32 = __commonJS({
       }
       return chk;
     }
-    function encode4(prefix, words2, LIMIT) {
+    function encode6(prefix, words2, LIMIT) {
       LIMIT = LIMIT || 90;
       if (prefix.length + 7 + words2.length > LIMIT)
         throw new TypeError("Exceeds length limit");
@@ -9499,7 +9499,7 @@ var require_bech32 = __commonJS({
       if (typeof res === "object")
         return res;
     }
-    function decode4(str) {
+    function decode6(str) {
       var res = __decode.apply(null, arguments);
       if (typeof res === "object")
         return res;
@@ -9554,8 +9554,8 @@ var require_bech32 = __commonJS({
     }
     module2.exports = {
       decodeUnsafe,
-      decode: decode4,
-      encode: encode4,
+      decode: decode6,
+      encode: encode6,
       toWordsUnsafe,
       toWords,
       fromWordsUnsafe,
@@ -12763,7 +12763,7 @@ var init_elliptic = __esm({
         return res;
       }
       utils.toHex = toHex2;
-      utils.encode = function encode4(arr, enc) {
+      utils.encode = function encode6(arr, enc) {
         if (enc === "hex")
           return toHex2(arr);
         else
@@ -17400,8 +17400,8 @@ var init_interface = __esm({
       //parseCallResult(data: BytesLike): ??
       // Given an event log, find the matching event fragment (if any) and
       // determine all its properties and values
-      parseLog(log2) {
-        let fragment = this.getEvent(log2.topics[0]);
+      parseLog(log3) {
+        let fragment = this.getEvent(log3.topics[0]);
         if (!fragment || fragment.anonymous) {
           return null;
         }
@@ -17410,7 +17410,7 @@ var init_interface = __esm({
           name: fragment.name,
           signature: fragment.format(),
           topic: this.getEventTopic(fragment),
-          args: this.decodeEventLog(fragment, log2.data, log2.topics)
+          args: this.decodeEventLog(fragment, log3.data, log3.topics)
         });
       }
       parseError(data) {
@@ -27411,13 +27411,13 @@ var BaseProvider = class extends Provider {
                 if (logs.length === 0) {
                   return;
                 }
-                logs.forEach((log2) => {
-                  if (log2.blockNumber > event._lastBlockNumber) {
-                    event._lastBlockNumber = log2.blockNumber;
+                logs.forEach((log3) => {
+                  if (log3.blockNumber > event._lastBlockNumber) {
+                    event._lastBlockNumber = log3.blockNumber;
                   }
-                  this._emitted["b:" + log2.blockHash] = log2.blockNumber;
-                  this._emitted["t:" + log2.transactionHash] = log2.blockNumber;
-                  this.emit(filter, log2);
+                  this._emitted["b:" + log3.blockHash] = log3.blockNumber;
+                  this._emitted["t:" + log3.transactionHash] = log3.blockNumber;
+                  this.emit(filter, log3);
                 });
               }).catch((error) => {
                 this.emit("error", error);
@@ -28167,9 +28167,9 @@ var BaseProvider = class extends Provider {
       yield this.getNetwork();
       const params = yield resolveProperties({ filter: this._getFilter(filter) });
       const logs = yield this.perform("getLogs", params);
-      logs.forEach((log2) => {
-        if (log2.removed == null) {
-          log2.removed = false;
+      logs.forEach((log3) => {
+        if (log3.removed == null) {
+          log3.removed = false;
         }
       });
       return Formatter.arrayOf(this.formatter.filterLog.bind(this.formatter))(logs);
@@ -30052,17 +30052,17 @@ var EtherscanProvider = class extends BaseProvider {
           const logs = yield this.fetch("logs", args);
           let blocks = {};
           for (let i2 = 0; i2 < logs.length; i2++) {
-            const log2 = logs[i2];
-            if (log2.blockHash != null) {
+            const log3 = logs[i2];
+            if (log3.blockHash != null) {
               continue;
             }
-            if (blocks[log2.blockNumber] == null) {
-              const block = yield this.getBlock(log2.blockNumber);
+            if (blocks[log3.blockNumber] == null) {
+              const block = yield this.getBlock(log3.blockNumber);
               if (block) {
-                blocks[log2.blockNumber] = block.hash;
+                blocks[log3.blockNumber] = block.hash;
               }
             }
-            log2.blockHash = blocks[log2.blockNumber];
+            log3.blockHash = blocks[log3.blockNumber];
           }
           return logs;
         }
@@ -31346,11 +31346,11 @@ function addContractWait(contract, tx) {
   const wait = tx.wait.bind(tx);
   tx.wait = (confirmations) => {
     return wait(confirmations).then((receipt) => {
-      receipt.events = receipt.logs.map((log2) => {
-        let event = deepCopy(log2);
+      receipt.events = receipt.logs.map((log3) => {
+        let event = deepCopy(log3);
         let parsed = null;
         try {
-          parsed = contract.interface.parseLog(log2);
+          parsed = contract.interface.parseLog(log3);
         } catch (e2) {
         }
         if (parsed) {
@@ -31806,8 +31806,8 @@ var BaseContract = class {
   }
   // Subclasses can override this to gracefully recover
   // from parse errors if they wish
-  _wrapEvent(runningEvent, log2, listener) {
-    const event = deepCopy(log2);
+  _wrapEvent(runningEvent, log3, listener) {
+    const event = deepCopy(log3);
     event.removeListener = () => {
       if (!listener) {
         return;
@@ -31816,13 +31816,13 @@ var BaseContract = class {
       this._checkRunningEvents(runningEvent);
     };
     event.getBlock = () => {
-      return this.provider.getBlock(log2.blockHash);
+      return this.provider.getBlock(log3.blockHash);
     };
     event.getTransaction = () => {
-      return this.provider.getTransaction(log2.transactionHash);
+      return this.provider.getTransaction(log3.transactionHash);
     };
     event.getTransactionReceipt = () => {
-      return this.provider.getTransactionReceipt(log2.transactionHash);
+      return this.provider.getTransactionReceipt(log3.transactionHash);
     };
     runningEvent.prepareEvent(event);
     return event;
@@ -31834,8 +31834,8 @@ var BaseContract = class {
     runningEvent.addListener(listener, once);
     this._runningEvents[runningEvent.tag] = runningEvent;
     if (!this._wrappedEmits[runningEvent.tag]) {
-      const wrappedEmit = (log2) => {
-        let event = this._wrapEvent(runningEvent, log2, listener);
+      const wrappedEmit = (log3) => {
+        let event = this._wrapEvent(runningEvent, log3, listener);
         if (event.decodeError == null) {
           try {
             const args = runningEvent.getEmit(event);
@@ -31870,7 +31870,7 @@ var BaseContract = class {
       filter.toBlock = toBlock != null ? toBlock : "latest";
     }
     return this.provider.getLogs(filter).then((logs) => {
-      return logs.map((log2) => this._wrapEvent(runningEvent, log2, null));
+      return logs.map((log3) => this._wrapEvent(runningEvent, log3, null));
     });
   }
   on(event, listener) {
@@ -32254,7 +32254,7 @@ var Logger2 = class _Logger {
     this._level < -1 /* OFF */ && this._log(6 /* TIMING_END */, message, ...args);
   }
   _log(level, message = "", ...args) {
-    const log2 = new Log(
+    const log3 = new Log(
       (/* @__PURE__ */ new Date()).toISOString(),
       message,
       args,
@@ -32262,19 +32262,19 @@ var Logger2 = class _Logger {
       this._category,
       level
     );
-    const arrayLog = log2.toArray();
-    if (this._config?.["condenseLogs"] && !this._checkHash(log2)) {
+    const arrayLog = log3.toArray();
+    if (this._config?.["condenseLogs"] && !this._checkHash(log3)) {
       (this._level >= level || level === 3 /* ERROR */) && this._consoleHandler(...arrayLog);
-      (this._level >= level || level === 3 /* ERROR */) && this._handler && this._handler(log2);
-      (this._level >= level || level === 3 /* ERROR */) && this._addLog(log2);
+      (this._level >= level || level === 3 /* ERROR */) && this._handler && this._handler(log3);
+      (this._level >= level || level === 3 /* ERROR */) && this._addLog(log3);
     } else if (!this._config?.["condenseLogs"]) {
       (this._level >= level || level === 3 /* ERROR */) && this._consoleHandler(...arrayLog);
-      (this._level >= level || level === 3 /* ERROR */) && this._handler && this._handler(log2);
-      (this._level >= level || level === 3 /* ERROR */) && this._addLog(log2);
+      (this._level >= level || level === 3 /* ERROR */) && this._handler && this._handler(log3);
+      (this._level >= level || level === 3 /* ERROR */) && this._addLog(log3);
     }
   }
-  _checkHash(log2) {
-    const digest = (0, import_utils3.hashMessage)(log2.message);
+  _checkHash(log3) {
+    const digest = (0, import_utils3.hashMessage)(log3.message);
     const hash3 = digest.toString();
     let item = this._logHashes.get(hash3);
     if (item) {
@@ -32284,23 +32284,23 @@ var Logger2 = class _Logger {
       return false;
     }
   }
-  _addLog(log2) {
-    this._logs.push(log2);
+  _addLog(log3) {
+    this._logs.push(log3);
   }
-  _addToLocalStorage(log2) {
+  _addToLocalStorage(log3) {
     if (globalThis.localStorage) {
-      let bucket = globalThis.localStorage.getItem(log2.category);
+      let bucket = globalThis.localStorage.getItem(log3.category);
       if (bucket) {
         bucket = JSON.parse(bucket);
-        if (!bucket[log2.id]) {
-          bucket[log2.id] = [];
+        if (!bucket[log3.id]) {
+          bucket[log3.id] = [];
         }
-        bucket[log2.id].push(log2.toString());
-        globalThis.localStorage.setItem(log2.category, _safeStringify(bucket));
+        bucket[log3.id].push(log3.toString());
+        globalThis.localStorage.setItem(log3.category, _safeStringify(bucket));
       } else {
         const bucket2 = {};
-        bucket2[log2.id] = [log2.toString()];
-        globalThis.localStorage.setItem(log2.category, _safeStringify(bucket2));
+        bucket2[log3.id] = [log3.toString()];
+        globalThis.localStorage.setItem(log3.category, _safeStringify(bucket2));
       }
     }
   }
@@ -32390,8 +32390,8 @@ var LogManager = class _LogManager {
       let logger47 = category[1].Children.get(id2);
       if (logger47) {
         let logStr = [];
-        for (const log2 of logger47.Logs) {
-          logStr.push(log2.toString());
+        for (const log3 of logger47.Logs) {
+          logStr.push(log3.toString());
         }
         logStrs = logStrs.concat(logStr);
       }
@@ -32408,7 +32408,7 @@ var LogManager = class _LogManager {
         );
         if (bucket && bucket[id2]) {
           const logsForId = bucket[id2].filter(
-            (log2) => log2.includes(id2)
+            (log3) => log3.includes(id2)
           );
           logsForRequest = logsForId.concat(logsForRequest);
         }
@@ -32505,6 +32505,9 @@ var bootstrapLogManager = (id2, level = 1 /* DEBUG */) => {
   }
   globalThis.logger = globalThis.logManager.get(id2);
 };
+var getLoggerbyId = (id2) => {
+  return globalThis.logManager.get(id2);
+};
 var log = (...args) => {
   if (isNode()) {
     if (process.env["DEBUG"] === "false") {
@@ -32523,8 +32526,8 @@ var log = (...args) => {
     return;
   }
   while (logBuffer.length > 0) {
-    const log2 = logBuffer.shift() ?? "";
-    globalThis?.logger && globalThis?.logger.debug(...log2);
+    const log3 = logBuffer.shift() ?? "";
+    globalThis?.logger && globalThis?.logger.debug(...log3);
   }
   globalThis?.logger && globalThis?.logger.debug(...args);
   if (isNode()) {
@@ -32564,8 +32567,8 @@ var logWithRequestId = (id2, ...args) => {
     return;
   }
   while (logBuffer.length > 0) {
-    const log2 = logBuffer.shift() ?? "";
-    globalThis?.logger && globalThis.logManager.get(globalThis.logger.category, id2).debug(...log2);
+    const log3 = logBuffer.shift() ?? "";
+    globalThis?.logger && globalThis.logManager.get(globalThis.logger.category, id2).debug(...log3);
   }
   globalThis?.logger && globalThis.logManager.get(globalThis.logger.category, id2).debug(...args);
 };
@@ -32582,8 +32585,8 @@ var logErrorWithRequestId = (id2, ...args) => {
     return;
   }
   while (logBuffer.length > 0) {
-    const log2 = logBuffer.shift() ?? "";
-    globalThis?.logger && globalThis.logManager.get(globalThis.logger.category, id2).error(...log2);
+    const log3 = logBuffer.shift() ?? "";
+    globalThis?.logger && globalThis.logManager.get(globalThis.logger.category, id2).error(...log3);
   }
   globalThis?.logger && globalThis.logManager.get(globalThis.logger.category, id2).error(...args);
 };
@@ -32600,8 +32603,8 @@ var logError = (...args) => {
     return;
   }
   while (logBuffer.length > 0) {
-    const log2 = logBuffer.shift() ?? "";
-    globalThis?.logger && globalThis.logManager.get(globalThis.logger.category).error(...log2);
+    const log3 = logBuffer.shift() ?? "";
+    globalThis?.logger && globalThis.logManager.get(globalThis.logger.category).error(...log3);
   }
   globalThis?.logger && globalThis.logManager.get(globalThis.logger.category).error(...args);
 };
@@ -58052,6 +58055,8 @@ var LitCore = class {
    *
    */
   async connect() {
+    console.log("testing!");
+    process.exit();
     if (this._connectingPromise) {
       return this._connectingPromise;
     }
@@ -58826,6 +58831,11 @@ var LitNodeClientNodeJs = class _LitNodeClientNodeJs extends LitCore {
         expiration,
         statement
       } = params;
+      if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
+        log(
+          `[createCapacityDelegationAuthSig] No delegatee addresses provided. It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits and specific NFT IDs.`
+        );
+      }
       const dAppOwnerWalletAddress = ethers_exports.utils.getAddress(
         await dAppOwnerWallet.getAddress()
       );
@@ -73575,6 +73585,1878 @@ var networkContext_default = {
   }
 };
 
+// packages/lit-auth-client/src/index.ts
+init_shim();
+
+// packages/lit-auth-client/src/lib/lit-auth-client.ts
+init_shim();
+
+// packages/lit-auth-client/src/lib/relay.ts
+init_shim();
+
+// packages/lit-auth-client/src/lib/utils.ts
+init_shim();
+import * as cbor from "cbor-web";
+var STATE_PARAM_KEY = "lit-state-param";
+var LIT_LOGIN_GATEWAY = "https://login.litgateway.com";
+async function prepareLoginUrl(provider, redirectUri, baseUrl = LIT_LOGIN_GATEWAY) {
+  const loginUrl = `${baseUrl}${getLoginRoute(provider)}`;
+  const state = encode5(await setStateParam());
+  const authParams = {
+    app_redirect: redirectUri
+  };
+  const queryAuthParams = createQueryParams(authParams);
+  return `${loginUrl}?${queryAuthParams}&state=${state}`;
+}
+function getLoginRoute(provider) {
+  switch (provider) {
+    case "google":
+      return "/auth/google";
+    case "discord":
+      return "/auth/discord";
+    default:
+      throw new Error(
+        `No login route available for the given provider "${provider}".`
+      );
+  }
+}
+function createQueryParams(params) {
+  const filteredParams = Object.keys(params).filter((k) => typeof params[k] !== "undefined").reduce((acc, key2) => ({ ...acc, [key2]: params[key2] }), {});
+  return new URLSearchParams(filteredParams).toString();
+}
+function parseLoginParams(search) {
+  const searchParams = new URLSearchParams(search);
+  const provider = searchParams.get("provider");
+  const accessToken = searchParams.get("access_token");
+  const idToken = searchParams.get("id_token");
+  const state = searchParams.get("state");
+  const error = searchParams.get("error");
+  return {
+    provider,
+    accessToken,
+    idToken,
+    state,
+    error
+  };
+}
+async function setStateParam() {
+  const { nanoid } = await import("nanoid");
+  const state = nanoid(15);
+  sessionStorage.setItem(STATE_PARAM_KEY, state);
+  return state;
+}
+function getStateParam() {
+  return sessionStorage.getItem(STATE_PARAM_KEY);
+}
+function encode5(value) {
+  return window.btoa(value);
+}
+function decode5(value) {
+  return window.atob(value);
+}
+function getRPIdFromOrigin(origin) {
+  const newOrigin = origin.replace(/(^\w+:|^)\/\//, "");
+  return newOrigin.replace(/:\d+$/, "");
+}
+function parseAuthenticatorData(authDataBuffer) {
+  try {
+    let authDataBufferDecoded = cbor.decode(authDataBuffer);
+    const authenticatorData = {};
+    let authData = authDataBufferDecoded.authData;
+    authenticatorData.rpIdHash = authData.slice(0, 32);
+    authenticatorData.flags = authData[32];
+    authenticatorData.signCount = authData[33] << 24 | authData[34] << 16 | authData[35] << 8 | authData[36];
+    if (authenticatorData.flags & 64) {
+      const attestedCredentialData = {};
+      attestedCredentialData["aaguid"] = unparse(authData.slice(37, 53));
+      attestedCredentialData["credentialIdLength"] = authData[53] << 8 | authData[54];
+      attestedCredentialData["credentialId"] = authData.slice(
+        55,
+        55 + attestedCredentialData["credentialIdLength"]
+      );
+      let publicKeyCoseBufferCbor = authData.slice(
+        55 + attestedCredentialData["credentialIdLength"],
+        authData.length
+      );
+      const publicKey = cbor.decode(publicKeyCoseBufferCbor);
+      publicKeyCoseBufferCbor = cbor.encode(publicKey);
+      attestedCredentialData["credentialPublicKey"] = publicKeyCoseBufferCbor;
+      authenticatorData.attestedCredentialData = attestedCredentialData;
+    }
+    if (authenticatorData.flags & 128) {
+      let extensionDataCbor;
+      if (authenticatorData.attestedCredentialData) {
+        extensionDataCbor = cbor.decode(
+          // decodeAllSync(
+          authData.slice(
+            55 + authenticatorData.attestedCredentialData.credentialIdLength,
+            authData.length
+          )
+        );
+        extensionDataCbor = extensionDataCbor[1];
+      } else {
+        extensionDataCbor = cbor.decode(authData.slice(37, authData.length));
+      }
+      authenticatorData.extensionData = cbor.encode(extensionDataCbor).toString("base64");
+    }
+    return authenticatorData;
+  } catch (e2) {
+    throw new Error("Authenticator Data could not be parsed");
+  }
+}
+function unparse(buf) {
+  var _byteToHex = [];
+  var _hexToByte = {};
+  for (var i2 = 0; i2 < 256; i2++) {
+    _byteToHex[i2] = (i2 + 256).toString(16).substr(1);
+    _hexToByte[_byteToHex[i2]] = i2;
+  }
+  var i2 = 0;
+  var bth = _byteToHex;
+  return bth[buf[i2++]] + bth[buf[i2++]] + bth[buf[i2++]] + bth[buf[i2++]] + "-" + bth[buf[i2++]] + bth[buf[i2++]] + "-" + bth[buf[i2++]] + bth[buf[i2++]] + "-" + bth[buf[i2++]] + bth[buf[i2++]] + "-" + bth[buf[i2++]] + bth[buf[i2++]] + bth[buf[i2++]] + bth[buf[i2++]] + bth[buf[i2++]] + bth[buf[i2++]];
+}
+function log2(...args) {
+  const logger47 = getLoggerbyId("auth-client");
+  logger47.debug(...args);
+}
+
+// packages/lit-auth-client/src/lib/relay.ts
+var LitRelay = class {
+  /**
+   * Create a Relay instance
+   *
+   * @param {LitRelayConfig} config
+   * @param {string} [config.relayApiKey] - API key for Lit's relay server
+   * @param {string} [config.relayUrl] - URL for Lit's relay server
+   */
+  constructor(config) {
+    /**
+     * Route for minting PKP
+     */
+    this.mintRoute = "/mint-next-and-add-auth-methods";
+    /**
+     * Route for fetching PKPs
+     */
+    this.fetchRoute = "/fetch-pkps-by-auth-method";
+    this.relayUrl = config.relayUrl || "https://relayer-server-staging-cayenne.getlit.dev";
+    this.relayApiKey = config.relayApiKey || "";
+    log2("Lit's relay server URL:", this.relayUrl);
+  }
+  /**
+   * Mint a new PKP for the given auth method
+   *
+   * @param {string} body - Body of the request
+   *
+   * @returns {Promise<IRelayMintResponse>} Response from the relay server
+   */
+  async mintPKP(body) {
+    const response = await fetch(`${this.relayUrl}${this.mintRoute}`, {
+      method: "POST",
+      headers: {
+        "api-key": this.relayApiKey,
+        "Content-Type": "application/json"
+      },
+      body
+    });
+    if (response.status < 200 || response.status >= 400) {
+      log2("Something wrong with the API call", await response.json());
+      const err = new Error("Unable to mint PKP through relay server");
+      throw err;
+    } else {
+      const resBody = await response.json();
+      log2("Successfully initiated minting PKP with relayer");
+      return resBody;
+    }
+  }
+  /**
+   * Poll the relay server for status of minting request
+   *
+   * @param {string} requestId - Request ID to poll, likely the minting transaction hash
+   * @param {number} [pollInterval] - Polling interval in milliseconds
+   * @param {number} [maxPollCount] - Maximum number of times to poll
+   *
+   * @returns {Promise<IRelayPollStatusResponse>} Response from the relay server
+   */
+  async pollRequestUntilTerminalState(requestId, pollInterval = 15e3, maxPollCount = 20) {
+    for (let i2 = 0; i2 < maxPollCount; i2++) {
+      const response = await fetch(
+        `${this.relayUrl}/auth/status/${requestId}`,
+        {
+          method: "GET",
+          headers: {
+            "api-key": this.relayApiKey
+          }
+        }
+      );
+      if (response.status < 200 || response.status >= 400) {
+        log2("Something wrong with the API call", await response.json());
+        const err2 = new Error(
+          `Unable to poll the status of this mint PKP transaction: ${requestId}`
+        );
+        throw err2;
+      }
+      const resBody = await response.json();
+      log2("Response OK", { body: resBody });
+      if (resBody.error) {
+        log2("Something wrong with the API call", {
+          error: resBody.error
+        });
+        const err2 = new Error(resBody.error);
+        throw err2;
+      } else if (resBody.status === "Succeeded") {
+        log2("Successfully authed", { ...resBody });
+        return resBody;
+      }
+      await new Promise((r3) => setTimeout(r3, pollInterval));
+    }
+    const err = new Error("Polling for mint PKP transaction status timed out");
+    throw err;
+  }
+  /**
+   * Fetch PKPs associated with the given auth method
+   *
+   * @param {string} body - Body of the request
+   *
+   * @returns {Promise<IRelayFetchResponse>} Response from the relay server
+   */
+  async fetchPKPs(body) {
+    const response = await fetch(`${this.relayUrl}${this.fetchRoute}`, {
+      method: "POST",
+      headers: {
+        "api-key": this.relayApiKey,
+        "Content-Type": "application/json"
+      },
+      body
+    });
+    if (response.status < 200 || response.status >= 400) {
+      console.warn("Something wrong with the API call", await response.json());
+      const err = new Error("Unable to fetch PKPs through relay server");
+      throw err;
+    } else {
+      const resBody = await response.json();
+      console.log("Successfully fetched PKPs with relayer");
+      return resBody;
+    }
+  }
+  /**
+   * Generate options for registering a new credential to pass to the authenticator
+   *
+   * @param {string} [username] - Optional username to associate with the credential
+   *
+   * @returns {Promise<any>} Registration options for the browser to pass to the authenticator
+   */
+  async generateRegistrationOptions(username) {
+    let url = `${this.relayUrl}/auth/webauthn/generate-registration-options`;
+    if (username && username !== "") {
+      url = `${url}?username=${encodeURIComponent(username)}`;
+    }
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "api-key": this.relayApiKey
+      }
+    });
+    if (response.status < 200 || response.status >= 400) {
+      const err = new Error(
+        `Unable to generate registration options: ${response}`
+      );
+      throw err;
+    }
+    const registrationOptions = await response.json();
+    return registrationOptions;
+  }
+};
+
+// packages/lit-auth-client/src/lib/providers/GoogleProvider.ts
+init_shim();
+
+// packages/lit-auth-client/src/lib/providers/BaseProvider.ts
+init_shim();
+
+// packages/lit-auth-client/src/lib/validators.ts
+init_shim();
+var validateMintRequestBody = (customArgs) => {
+  let isValid = true;
+  const validKeys = [
+    "keyType",
+    "permittedAuthMethodTypes",
+    "permittedAuthMethodIds",
+    "permittedAuthMethodPubkeys",
+    "permittedAuthMethodScopes",
+    "addPkpEthAddressAsPermittedAddress",
+    "sendPkpToItself"
+  ];
+  for (const key2 of Object.keys(customArgs)) {
+    if (!validKeys.includes(key2)) {
+      console.error(
+        `Invalid key found: ${key2}. This key is not allowed. Valid keys are: ${validKeys.join(
+          ", "
+        )}`
+      );
+      isValid = false;
+    }
+  }
+  if (customArgs.keyType !== void 0 && typeof customArgs.keyType !== "number") {
+    console.error("Invalid type for keyType: expected a number.");
+    isValid = false;
+  }
+  if (customArgs.permittedAuthMethodTypes !== void 0 && (!Array.isArray(customArgs.permittedAuthMethodTypes) || !customArgs.permittedAuthMethodTypes.every(
+    (type) => typeof type === "number"
+  ))) {
+    console.error(
+      "Invalid type for permittedAuthMethodTypes: expected an array of numbers."
+    );
+    isValid = false;
+  }
+  if (customArgs.permittedAuthMethodIds !== void 0 && (!Array.isArray(customArgs.permittedAuthMethodIds) || !customArgs.permittedAuthMethodIds.every((id2) => typeof id2 === "string"))) {
+    console.error(
+      "Invalid type for permittedAuthMethodIds: expected an array of strings."
+    );
+    isValid = false;
+  }
+  if (customArgs.permittedAuthMethodPubkeys !== void 0 && (!Array.isArray(customArgs.permittedAuthMethodPubkeys) || !customArgs.permittedAuthMethodPubkeys.every(
+    (pubkey) => typeof pubkey === "string"
+  ))) {
+    console.error(
+      "Invalid type for permittedAuthMethodPubkeys: expected an array of strings."
+    );
+    isValid = false;
+  }
+  if (customArgs.permittedAuthMethodScopes !== void 0 && (!Array.isArray(customArgs.permittedAuthMethodScopes) || !customArgs.permittedAuthMethodScopes.every(
+    (scope) => Array.isArray(scope) && scope.every((s2) => typeof s2 === "number")
+  ))) {
+    console.error(
+      "Invalid type for permittedAuthMethodScopes: expected an array of arrays of numberr."
+    );
+    isValid = false;
+  }
+  if (customArgs.addPkpEthAddressAsPermittedAddress !== void 0 && typeof customArgs.addPkpEthAddressAsPermittedAddress !== "boolean") {
+    console.error(
+      "Invalid type for addPkpEthAddressAsPermittedAddress: expected a boolean."
+    );
+    isValid = false;
+  }
+  if (customArgs.sendPkpToItself !== void 0 && typeof customArgs.sendPkpToItself !== "boolean") {
+    console.error("Invalid type for sendPkpToItself: expected a boolean.");
+    isValid = false;
+  }
+  return isValid;
+};
+
+// packages/lit-auth-client/src/lib/providers/BaseProvider.ts
+var BaseProvider2 = class {
+  constructor(options) {
+    /**
+     * Calculates a public key for a given `key identifier` which is an `Auth Method Identifier`
+     * the Auth Method Identifier is a hash of a user identifier and app idendtifer.
+     * These identifiers are specific to each auth method and will derive the public key protion of a pkp which will be persited
+     * when a key is claimed.
+     * | Auth Method | User ID | App ID |
+     * |:------------|:-------|:-------|
+     * | Google OAuth | token `sub` | token `aud` |
+     * | Discord OAuth | user id | client app identifier |
+     * | Stytch OTP |token `sub` | token `aud`|
+     * @param userId
+     * @param appId
+     * @returns
+     */
+    this.computePublicKeyFromAuthMethod = async (authMethod) => {
+      let authMethodId = await this.getAuthMethodId(authMethod);
+      authMethodId = authMethodId.slice(2);
+      if (!this.litNodeClient) {
+        throw new Error("Lit Node Client is configured");
+      }
+      return this.litNodeClient.computeHDPubKey(authMethodId);
+    };
+    this.rpcUrl = options.rpcUrl;
+    this.relay = options.relay;
+    this.litNodeClient = options.litNodeClient;
+  }
+  /**
+   * Mint a new PKP for the given auth method through the relay server
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
+   *
+   * @returns {Promise<string>} - Mint transaction hash
+   */
+  async mintPKPThroughRelayer(authMethod, customArgs) {
+    const data = await this.prepareRelayRequestData(authMethod);
+    if (customArgs && !validateMintRequestBody(customArgs)) {
+      throw new Error("Invalid mint request body");
+    }
+    const body = this.prepareMintBody(
+      data,
+      customArgs ?? {}
+    );
+    const mintRes = await this.relay.mintPKP(body);
+    if (!mintRes || !mintRes.requestId) {
+      throw new Error("Missing mint response or request ID from relay server");
+    }
+    return mintRes.requestId;
+  }
+  /**
+   * Fetch PKPs associated with given auth method from relay server
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<IRelayPKP[]>} - Array of PKPs
+   */
+  async fetchPKPsThroughRelayer(authMethod) {
+    const data = await this.prepareRelayRequestData(authMethod);
+    const body = this.prepareFetchBody(data);
+    const fetchRes = await this.relay.fetchPKPs(body);
+    if (!fetchRes || !fetchRes.pkps) {
+      throw new Error("Missing PKPs in fetch response from relay server");
+    }
+    return fetchRes.pkps;
+  }
+  /**
+   * Generate session sigs for given auth method and PKP
+   *
+   * @param {BaseProviderSessionSigsParams} params
+   * @param {string} params.pkpPublicKey - Public key of PKP to auth with
+   * @param {AuthMethod} params.authMethod - Auth method verifying ownership of PKP
+   * @param {GetSessionSigsProps} params.sessionSigsParams - Params for getSessionSigs function
+   * @param {LitNodeClient} [params.litNodeClient] - Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
+   *
+   * @returns {Promise<SessionSigs>} - Session sigs
+   */
+  async getSessionSigs(params) {
+    if (params.litNodeClient && params.litNodeClient instanceof LitNodeClient) {
+      this.litNodeClient = params.litNodeClient;
+    }
+    if (!this.litNodeClient.ready) {
+      await this.litNodeClient.connect();
+    }
+    let authNeededCallback = params.sessionSigsParams.authNeededCallback;
+    if (!authNeededCallback) {
+      const nodeClient = this.litNodeClient;
+      authNeededCallback = async (authCallbackParams) => {
+        let chainId = 1;
+        try {
+          const chainInfo = ALL_LIT_CHAINS[authCallbackParams.chain];
+          chainId = chainInfo.chainId;
+        } catch {
+        }
+        let response;
+        if (params.authMethod.authMethodType === 1 /* EthWallet */) {
+          const authSig = JSON.parse(params.authMethod.accessToken);
+          response = await nodeClient.signSessionKey({
+            statement: authCallbackParams.statement,
+            sessionKey: params.sessionSigsParams.sessionKey,
+            authMethods: [],
+            authSig,
+            pkpPublicKey: params.pkpPublicKey,
+            expiration: authCallbackParams.expiration,
+            resources: authCallbackParams.resources,
+            chainId,
+            // optional
+            ...params.resourceAbilityRequests && {
+              resourceAbilityRequests: params.resourceAbilityRequests
+            }
+          });
+        } else {
+          response = await nodeClient.signSessionKey({
+            sessionKey: params.sessionSigsParams.sessionKey,
+            statement: authCallbackParams.statement,
+            authMethods: [params.authMethod],
+            pkpPublicKey: params.pkpPublicKey,
+            expiration: authCallbackParams.expiration,
+            resources: authCallbackParams.resources,
+            chainId,
+            // optional
+            ...params.resourceAbilityRequests && {
+              resourceAbilityRequests: params.resourceAbilityRequests
+            }
+          });
+        }
+        return response.authSig;
+      };
+    }
+    const sessionSigs = await this.litNodeClient.getSessionSigs({
+      ...params.sessionSigsParams,
+      authNeededCallback
+    });
+    return sessionSigs;
+  }
+  /**
+   * Authenticates an auth Method for claiming a Programmable Key Pair (PKP).
+   * Uses the underyling {@link litNodeClient} instance to authenticate a given auth method
+   * @param claimRequest
+   * @returns {Promise<ClaimKeyResponse>} - Response from the network for the claim
+   */
+  async claimKeyId(claimRequest) {
+    if (!this.litNodeClient.ready) {
+      await this.litNodeClient.connect().catch((err) => {
+        throw err;
+      });
+    }
+    const res = await this.litNodeClient.claimKeyId(claimRequest);
+    return res;
+  }
+  /**
+   * Generate request data for minting and fetching PKPs via relay server
+   *
+   * @param {AuthMethod} authMethod - Auth method obejct
+   *
+   * @returns {Promise<IRelayRequestData>} - Relay request data
+   */
+  async prepareRelayRequestData(authMethod) {
+    const authMethodType = authMethod.authMethodType;
+    const authMethodId = await this.getAuthMethodId(authMethod);
+    const data = {
+      authMethodType,
+      authMethodId
+    };
+    return data;
+  }
+  /**
+   * Generate request body for minting PKP using auth methods via relay server
+   *
+   * @param {IRelayRequestData} data - Data for minting PKP
+   * @param {number} data.authMethodType - Type of auth method
+   * @param {string} data.authMethodId - ID of auth method
+   * @param {string} [data.authMethodPubKey] - Public key associated with the auth method (used only in WebAuthn)
+   * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
+   *
+   * @returns {string} - Relay request body for minting PKP
+   */
+  prepareMintBody(data, customArgs) {
+    const pubkey = data.authMethodPubKey || "0x";
+    const defaultArgs = {
+      // default params
+      keyType: 2,
+      permittedAuthMethodTypes: [data.authMethodType],
+      permittedAuthMethodIds: [data.authMethodId],
+      permittedAuthMethodPubkeys: [pubkey],
+      permittedAuthMethodScopes: [[ethers_exports.BigNumber.from("1")]],
+      addPkpEthAddressAsPermittedAddress: true,
+      sendPkpToItself: true
+    };
+    const args = {
+      ...defaultArgs,
+      ...customArgs
+    };
+    const body = JSON.stringify(args);
+    return body;
+  }
+  /**
+   * Generate request body to fetch PKPs using auth method info via relay server
+   *
+   * @param {IRelayRequestData} data - Data for fetching PKP
+   * @param {string} data.authMethodType - Type of auth method
+   * @param {string} data.authMethodId - ID of auth method
+   * @param {string} [data.authMethodPubKey] - Public key associated with the auth method (used only in WebAuthn)
+   *
+   * @returns {string} - Relay request body to fetch PKPs
+   */
+  prepareFetchBody(data) {
+    const args = {
+      authMethodId: data.authMethodId,
+      authMethodType: data.authMethodType,
+      authMethodPubKey: data.authMethodPubKey
+    };
+    const body = JSON.stringify(args);
+    return body;
+  }
+};
+
+// packages/lit-auth-client/src/lib/providers/GoogleProvider.ts
+import * as jose2 from "jose";
+var GoogleProvider = class _GoogleProvider extends BaseProvider2 {
+  constructor(options) {
+    super(options);
+    this.redirectUri = options.redirectUri || window.location.origin;
+  }
+  /**
+   * Redirect user to the Lit's Google login page
+   *
+   * @param {Function} [callback] - Optional callback to handle login URL
+   * @returns {Promise<void>} - Redirects user to Lit login page
+   */
+  async signIn(callback) {
+    const loginUrl = await prepareLoginUrl("google", this.redirectUri);
+    if (callback) {
+      callback(loginUrl);
+    } else {
+      window.location.assign(loginUrl);
+    }
+  }
+  /**
+   * Validate the URL parameters returned from Lit's login server and return the authentication data
+   *
+   * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
+   */
+  async authenticate(_, urlCheckCallback) {
+    const isUrlValid = urlCheckCallback ? urlCheckCallback(window.location.href, this.redirectUri) : window.location.href.startsWith(this.redirectUri);
+    if (!isUrlValid) {
+      throw new Error(
+        `Current url "${window.location.href}" does not match provided redirect uri "${this.redirectUri}"`
+      );
+    }
+    const { provider, idToken, state, error } = parseLoginParams(
+      window.location.search
+    );
+    if (error) {
+      throw new Error(error);
+    }
+    if (!provider || provider !== "google") {
+      throw new Error(
+        `OAuth provider "${provider}" passed in redirect callback URL does not match "google"`
+      );
+    }
+    if (!state || decode5(decodeURIComponent(state)) !== getStateParam()) {
+      throw new Error(
+        `Invalid state parameter "${state}" passed in redirect callback URL`
+      );
+    }
+    window.history.replaceState(
+      null,
+      window.document.title,
+      window.location.pathname
+    );
+    if (!idToken) {
+      throw new Error(
+        `Missing ID token in redirect callback URL for Google OAuth"`
+      );
+    }
+    const authMethod = {
+      authMethodType: 6 /* GoogleJwt */,
+      accessToken: idToken
+    };
+    return authMethod;
+  }
+  /**
+   * Sign in using popup window
+   *
+   * @param baseURL
+   */
+  async signInUsingPopup(baseURL) {
+    const width = 500;
+    const height = 600;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+    const url = await prepareLoginUrl("google", this.redirectUri, baseURL);
+    const popup = window.open(
+      `${url}&caller=${window.location.origin}`,
+      "popup",
+      `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, copyhistory=no, width=${width}, height=${height}, top=${top}, left=${left}`
+    );
+    if (!popup) {
+      throw new Error("Failed to open popup window");
+    }
+    return new Promise((resolve, reject) => {
+      const interval = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(interval);
+          reject(new Error("User closed popup window"));
+        }
+      }, 1e3);
+      window.addEventListener("message", (event) => {
+        if (event.origin !== (baseURL || LIT_LOGIN_GATEWAY)) {
+          return;
+        }
+        const { provider, token, error } = event.data;
+        if (error) {
+          clearInterval(interval);
+          reject(new Error(error));
+        }
+        if (provider === "google" && token) {
+          clearInterval(interval);
+          popup.close();
+          resolve({
+            authMethodType: 6 /* GoogleJwt */,
+            accessToken: token
+          });
+        }
+      });
+    });
+  }
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  async getAuthMethodId(authMethod) {
+    return _GoogleProvider.authMethodId(authMethod);
+  }
+  static async authMethodId(authMethod) {
+    const tokenPayload = jose2.decodeJwt(authMethod.accessToken);
+    const userId = tokenPayload["sub"];
+    const audience = tokenPayload["aud"];
+    const authMethodId = ethers_exports.utils.keccak256(
+      ethers_exports.utils.toUtf8Bytes(`${userId}:${audience}`)
+    );
+    return authMethodId;
+  }
+};
+
+// packages/lit-auth-client/src/lib/providers/DiscordProvider.ts
+init_shim();
+var DiscordProvider = class extends BaseProvider2 {
+  constructor(options) {
+    super(options);
+    this.redirectUri = options.redirectUri || window.location.origin;
+    this.clientId = options.clientId || "1052874239658692668";
+  }
+  /**
+   * Redirect user to the Lit's Discord login page
+   *
+   * @returns {Promise<void>} - Redirects user to Lit login page
+   */
+  async signIn() {
+    const loginUrl = await prepareLoginUrl("discord", this.redirectUri);
+    window.location.assign(loginUrl);
+  }
+  /**
+   * Validate the URL parameters returned from Lit's login server and return the authentication data
+   *
+   * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
+   */
+  async authenticate() {
+    if (!window.location.href.startsWith(this.redirectUri)) {
+      throw new Error(
+        `Current url "${window.location.href}" does not match provided redirect uri "${this.redirectUri}"`
+      );
+    }
+    const { provider, accessToken, state, error } = parseLoginParams(
+      window.location.search
+    );
+    if (error) {
+      throw new Error(error);
+    }
+    if (!provider || provider !== "discord") {
+      throw new Error(
+        `OAuth provider "${provider}" passed in redirect callback URL does not match "discord"`
+      );
+    }
+    if (!state || decode5(decodeURIComponent(state)) !== getStateParam()) {
+      throw new Error(
+        `Invalid state parameter "${state}" passed in redirect callback URL`
+      );
+    }
+    window.history.replaceState(
+      null,
+      window.document.title,
+      window.location.pathname
+    );
+    if (!accessToken) {
+      throw new Error(
+        `Missing access token in redirect callback URL for Discord OAuth"`
+      );
+    }
+    const authMethod = {
+      authMethodType: 4 /* Discord */,
+      accessToken
+    };
+    return authMethod;
+  }
+  /**
+   * Sign in using popup window
+   *
+   * @param baseURL
+   */
+  async signInUsingPopup(baseURL) {
+    const width = 500;
+    const height = 600;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+    const url = await prepareLoginUrl("discord", this.redirectUri, baseURL);
+    const popup = window.open(
+      `${url}&caller=${window.location.origin}`,
+      "popup",
+      `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, copyhistory=no, width=${width}, height=${height}, top=${top}, left=${left}`
+    );
+    if (!popup) {
+      throw new Error("Failed to open popup window");
+    }
+    return new Promise((resolve, reject) => {
+      const interval = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(interval);
+          reject(new Error("User closed popup window"));
+        }
+      }, 1e3);
+      window.addEventListener("message", (event) => {
+        if (event.origin !== (baseURL || LIT_LOGIN_GATEWAY)) {
+          return;
+        }
+        const { provider, token, error } = event.data;
+        if (error) {
+          clearInterval(interval);
+          reject(new Error(error));
+        }
+        if (provider === "discord" && token) {
+          clearInterval(interval);
+          popup.close();
+          resolve({
+            authMethodType: 4 /* Discord */,
+            accessToken: token
+          });
+        }
+      });
+    });
+  }
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  async getAuthMethodId(authMethod) {
+    const userId = await this.#fetchDiscordUser(authMethod.accessToken);
+    const authMethodId = ethers_exports.utils.keccak256(
+      ethers_exports.utils.toUtf8Bytes(`${userId}:${this.clientId}`)
+    );
+    return authMethodId;
+  }
+  static async authMethodId(authMethod, clientId) {
+    const _clientId = clientId || "1052874239658692668";
+    let userId;
+    const meResponse = await fetch("https://discord.com/api/users/@me", {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${authMethod.accessToken}`
+      }
+    });
+    if (meResponse.ok) {
+      const user = await meResponse.json();
+      userId = user.id;
+    } else {
+      throw new Error("Unable to verify Discord account");
+    }
+    const authMethodId = ethers_exports.utils.keccak256(
+      ethers_exports.utils.toUtf8Bytes(`${userId}:${_clientId}`)
+    );
+    return authMethodId;
+  }
+  /**
+   * Fetch Discord user ID
+   *
+   * @param {string} accessToken - Discord access token
+   *
+   * @returns {Promise<string>} - Discord user ID
+   */
+  async #fetchDiscordUser(accessToken) {
+    const meResponse = await fetch("https://discord.com/api/users/@me", {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${accessToken}`
+      }
+    });
+    if (meResponse.ok) {
+      const user = await meResponse.json();
+      return user.id;
+    } else {
+      throw new Error("Unable to verify Discord account");
+    }
+  }
+};
+
+// packages/lit-auth-client/src/lib/providers/EthWalletProvider.ts
+init_shim();
+import { SiweMessage as SiweMessage4 } from "siwe";
+var EthWalletProvider = class _EthWalletProvider extends BaseProvider2 {
+  constructor(options) {
+    super(options);
+    try {
+      this.domain = options.domain || window.location.hostname;
+      this.origin = options.origin || window.location.origin;
+    } catch (e2) {
+      log(
+        '\u26A0\uFE0F Error getting "domain" and "origin" from window object, defaulting to "localhost" and "http://localhost"'
+      );
+      this.domain = options.domain || "localhost";
+      this.origin = options.origin || "http://localhost";
+    }
+  }
+  /**
+   * Generate a wallet signature to use as an auth method
+   *
+   * @param {EthWalletAuthenticateOptions} options
+   * @param {string} [options.address] - Address to sign with
+   * @param {function} [options.signMessage] - Function to sign message with
+   * @param {string} [options.chain] - Name of chain to use for signature
+   * @param {number} [options.expiration] - When the auth signature expires
+   *
+   * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
+   */
+  async authenticate(options) {
+    if (!options) {
+      throw new Error(
+        "Options are required to authenticate with EthWalletProvider."
+      );
+    }
+    return _EthWalletProvider.authenticate({
+      signer: options,
+      address: options?.address,
+      chain: options?.chain,
+      litNodeClient: this.litNodeClient,
+      expiration: options?.expiration,
+      domain: this.domain,
+      origin: this.origin
+    });
+  }
+  /**
+   * Generate a wallet signature to use as an auth method
+   *
+   * @param {EthWalletAuthenticateOptions} options
+   * @param {string} [options.address] - Address to sign with
+   * @param {function} [options.signMessage] - Function to sign message with
+   * @param {string} [options.chain] - Name of chain to use for signature
+   * @param {number} [options.expiration] - When the auth signature expires
+   * @returns {Promise<AuthMethod>} - Auth method object containing the auth signature
+   * @static
+   * @memberof EthWalletProvider
+   *
+   * @example
+   * ```typescript
+   *   const authMethod = await EthWalletProvider.authenticate({
+   *      signer: wallet,
+   *      litNodeClient: client,
+   *   });
+   * ```
+   */
+  static async authenticate({
+    signer,
+    address,
+    chain,
+    litNodeClient,
+    expiration,
+    domain,
+    origin
+  }) {
+    if (!litNodeClient.latestBlockhash) {
+      throwError({
+        message: "Eth Blockhash is undefined. Try connecting to the Lit network again.",
+        errorKind: LIT_ERROR.INVALID_ETH_BLOCKHASH.kind,
+        errorCode: LIT_ERROR.INVALID_ETH_BLOCKHASH.name
+      });
+    }
+    chain = chain || "ethereum";
+    let authSig;
+    address = address || await signer?.getAddress() || signer?.address;
+    if (!address) {
+      throw new Error(
+        `Address is required to authenticate with EthWalletProvider. Cannot find it in signer or options.`
+      );
+    }
+    address = ethers_exports.utils.getAddress(address);
+    if (signer?.signMessage) {
+      const selectedChain = LIT_CHAINS[chain];
+      const chainId = selectedChain?.chainId ? selectedChain.chainId : 1;
+      expiration = expiration || new Date(Date.now() + 1e3 * 60 * 60 * 24).toISOString();
+      const preparedMessage = {
+        domain: domain || "localhost",
+        uri: origin || "http://localhost",
+        address,
+        version: "1",
+        chainId,
+        expirationTime: expiration,
+        nonce: litNodeClient.latestBlockhash
+      };
+      const message = new SiweMessage4(preparedMessage);
+      const toSign = message.prepareMessage();
+      const signature2 = await signer.signMessage(toSign);
+      authSig = {
+        sig: signature2,
+        derivedVia: "web3.eth.personal.sign",
+        signedMessage: toSign,
+        address
+      };
+    } else {
+      authSig = await checkAndSignAuthMessage({
+        chain,
+        nonce: litNodeClient.latestBlockhash
+      });
+    }
+    const authMethod = {
+      authMethodType: 1 /* EthWallet */,
+      accessToken: JSON.stringify(authSig)
+    };
+    return authMethod;
+  }
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  async getAuthMethodId(authMethod) {
+    return _EthWalletProvider.authMethodId(authMethod);
+  }
+  static async authMethodId(authMethod) {
+    let address;
+    try {
+      address = JSON.parse(authMethod.accessToken).address;
+    } catch (err) {
+      throw new Error(
+        `Error when parsing auth method to generate auth method ID for Eth wallet: ${err}`
+      );
+    }
+    return ethers_exports.utils.keccak256(ethers_exports.utils.toUtf8Bytes(`${address}:lit`));
+  }
+};
+
+// packages/lit-auth-client/src/lib/providers/WebAuthnProvider.ts
+init_shim();
+import base64url from "base64url";
+var WebAuthnProvider = class _WebAuthnProvider extends BaseProvider2 {
+  constructor(options) {
+    super(options);
+    this.rpName = options.rpName || "lit";
+  }
+  /**
+   * Generate registration options for the browser to pass to a supported authenticator
+   *
+   * @param {string} username - Username to register credential with
+   *
+   * @returns {Promise<PublicKeyCredentialCreationOptionsJSON>} - Options to pass to the authenticator
+   */
+  async register(username) {
+    return await this.relay.generateRegistrationOptions(username);
+  }
+  /**
+   * Mint PKP with verified registration data
+   *
+   * @param {PublicKeyCredentialCreationOptionsJSON} options - Registration options to pass to the authenticator
+   * @param {MintRequestBody} [customArgs] - Extra data to overwrite default params
+   *
+   * @returns {Promise<string>} - Mint transaction hash
+   */
+  async verifyAndMintPKPThroughRelayer(options, customArgs) {
+    const { startRegistration } = await import("@simplewebauthn/browser");
+    const attResp = await startRegistration(options);
+    const authMethodId = await this.getAuthMethodId({
+      authMethodType: 3 /* WebAuthn */,
+      accessToken: JSON.stringify(attResp)
+    });
+    const authMethodPubkey = _WebAuthnProvider.getPublicKeyFromRegistration(attResp);
+    const defaultArgs = {
+      keyType: 2,
+      permittedAuthMethodTypes: [3 /* WebAuthn */],
+      permittedAuthMethodIds: [authMethodId],
+      permittedAuthMethodPubkeys: [authMethodPubkey],
+      permittedAuthMethodScopes: [[ethers_exports.BigNumber.from("1")]],
+      addPkpEthAddressAsPermittedAddress: true,
+      sendPkpToItself: true
+    };
+    const args = {
+      ...defaultArgs,
+      ...customArgs
+    };
+    const body = JSON.stringify(args);
+    const mintRes = await this.relay.mintPKP(body);
+    if (!mintRes || !mintRes.requestId) {
+      throw new Error("Missing mint response or request ID from relay server");
+    }
+    return mintRes.requestId;
+  }
+  /**
+   * @override
+   * This method is not applicable for WebAuthnProvider and should not be used.
+   * Use verifyAndMintPKPThroughRelayer instead to mint a PKP for a WebAuthn credential.
+   *
+   * @throws {Error} - Throws an error when called for WebAuthnProvider.
+   */
+  async mintPKPThroughRelayer() {
+    throw new Error(
+      "Use verifyAndMintPKPThroughRelayer for WebAuthnProvider instead."
+    );
+  }
+  /**
+   * Authenticate with a WebAuthn credential and return the relevant authentication data
+   *
+   * @returns {Promise<AuthMethod>} - Auth method object containing WebAuthn authentication data
+   */
+  async authenticate() {
+    const provider = new ethers_exports.providers.JsonRpcProvider(this.rpcUrl);
+    const block = await provider.getBlock("latest");
+    const blockHash = block.hash;
+    const blockHashBytes = ethers_exports.utils.arrayify(blockHash);
+    const rpId = getRPIdFromOrigin(window.location.origin);
+    const authenticationOptions = {
+      challenge: base64url(Buffer.from(blockHashBytes)),
+      timeout: 6e4,
+      userVerification: "required",
+      rpId
+    };
+    const { startAuthentication } = await import("@simplewebauthn/browser");
+    const authenticationResponse = await startAuthentication(
+      authenticationOptions
+    );
+    const actualAuthenticationResponse = JSON.parse(
+      JSON.stringify(authenticationResponse)
+    );
+    const userHandle = authenticationResponse.response?.userHandle;
+    if (userHandle) {
+      actualAuthenticationResponse.response.userHandle = base64url.encode(userHandle);
+    }
+    const authMethod = {
+      authMethodType: 3 /* WebAuthn */,
+      accessToken: JSON.stringify(actualAuthenticationResponse)
+    };
+    return authMethod;
+  }
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  async getAuthMethodId(authMethod) {
+    return _WebAuthnProvider.authMethodId(authMethod, this.rpName);
+  }
+  static async authMethodId(authMethod, rpName) {
+    let credentialId;
+    const rpNameToUse = rpName || "lit";
+    try {
+      credentialId = JSON.parse(authMethod.accessToken).rawId;
+    } catch (err) {
+      throw new Error(
+        `Error when parsing auth method to generate auth method ID for WebAuthn: ${err}`
+      );
+    }
+    const authMethodId = ethers_exports.utils.keccak256(
+      ethers_exports.utils.toUtf8Bytes(`${credentialId}:${rpNameToUse}`)
+    );
+    return authMethodId;
+  }
+  /**
+   * Parse the WebAuthn registration response to get the WebAuthn credential public key
+   *
+   * @param {RegistrationResponseJSON} attResp - WebAuthn registration response
+   *
+   * @returns {string} - WebAuthn credential public key in hex format
+   */
+  static getPublicKeyFromRegistration(attResp) {
+    let publicKey;
+    try {
+      const attestationBuffer = Buffer.from(
+        attResp.response.attestationObject,
+        "base64"
+      );
+      const authenticationResponse = parseAuthenticatorData(attestationBuffer);
+      const publicKeyCoseBuffer = authenticationResponse.attestedCredentialData.credentialPublicKey;
+      publicKey = ethers_exports.utils.hexlify(
+        ethers_exports.utils.arrayify(publicKeyCoseBuffer)
+      );
+    } catch (e2) {
+      throw new Error(
+        `Error while decoding WebAuthn registration response for public key retrieval. Attestation response not encoded as expected: ${e2}`
+      );
+    }
+    return publicKey;
+  }
+};
+
+// packages/lit-auth-client/src/lib/providers/StytchOtpProvider.ts
+init_shim();
+var StytchOtpProvider = class _StytchOtpProvider extends BaseProvider2 {
+  constructor(params, config) {
+    super(params);
+    this._provider = "https://stytch.com/session";
+    this._params = config;
+  }
+  /**
+   * Validates claims within a stytch authenticated JSON Web Token
+   * @param options authentication option containing the authenticated token
+   * @returns {AuthMethod} Authentication Method for auth method type OTP
+   * */
+  authenticate(options) {
+    return new Promise((resolve, reject) => {
+      if (!options) {
+        reject(
+          new Error(
+            "No Authentication options provided, please supply an authenticated JWT"
+          )
+        );
+      }
+      const userId = this._params.userId ?? options.userId;
+      const accessToken = options?.accessToken;
+      if (!accessToken) {
+        reject(
+          new Error("No access token provided, please provide a stych auth jwt")
+        );
+      }
+      const parsedToken = _StytchOtpProvider._parseJWT(accessToken);
+      const audience = parsedToken["aud"][0];
+      if (audience != this._params.appId) {
+        reject(new Error("Parsed application id does not match parameters"));
+      }
+      if (!audience) {
+        reject(
+          new Error(
+            "could not find project id in token body, is this a stych token?"
+          )
+        );
+      }
+      const session = parsedToken[this._provider];
+      const authFactor = session["authentication_factors"][0];
+      if (!authFactor) {
+        reject(new Error("Could not find authentication info in session"));
+      }
+      if (userId && userId != parsedToken["sub"]) {
+        reject(
+          new Error(
+            "UserId does not match token contents. is this the right token for your application?"
+          )
+        );
+      }
+      resolve({
+        authMethodType: 9 /* StytchOtp */,
+        accessToken
+      });
+    });
+  }
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  async getAuthMethodId(authMethod) {
+    return _StytchOtpProvider.authMethodId(authMethod);
+  }
+  static async authMethodId(authMethod) {
+    const tokenBody = _StytchOtpProvider._parseJWT(authMethod.accessToken);
+    const userId = tokenBody["sub"];
+    const orgId = tokenBody["aud"][0];
+    const authMethodId = ethers_exports.utils.keccak256(
+      ethers_exports.utils.toUtf8Bytes(`${userId.toLowerCase()}:${orgId.toLowerCase()}`)
+    );
+    return authMethodId;
+  }
+  /**
+   *
+   * @param jwt token to parse
+   * @returns {string}- userId contained within the token message
+   */
+  static _parseJWT(jwt) {
+    const parts = jwt.split(".");
+    if (parts.length !== 3) {
+      throw new Error("Invalid token length");
+    }
+    const body = Buffer.from(parts[1], "base64");
+    const parsedBody = JSON.parse(body.toString("ascii"));
+    console.log("JWT body: ", parsedBody);
+    return parsedBody;
+  }
+};
+
+// packages/lit-auth-client/src/lib/providers/AppleProvider.ts
+init_shim();
+import * as jose3 from "jose";
+var AppleProvider = class _AppleProvider extends BaseProvider2 {
+  constructor(options) {
+    super(options);
+    this.redirectUri = options.redirectUri || window.location.origin;
+  }
+  /**
+   * Redirect user to the Lit's Apple login page
+   *
+   * @returns {Promise<void>} - Redirects user to Lit login page
+   */
+  async signIn() {
+    const loginUrl = await prepareLoginUrl("apple", this.redirectUri);
+    window.location.assign(loginUrl);
+  }
+  /**
+   * Validate the URL parameters returned from Lit's login server and return the authentication data
+   *
+   * @returns {Promise<AuthMethod>} - Auth method object that contains OAuth token
+   */
+  async authenticate() {
+    if (!window.location.href.startsWith(this.redirectUri)) {
+      throw new Error(
+        `Current url "${window.location.href}" does not match provided redirect uri "${this.redirectUri}"`
+      );
+    }
+    const { provider, idToken, state, error } = parseLoginParams(
+      window.location.search
+    );
+    if (error) {
+      throw new Error(error);
+    }
+    if (!provider || provider !== "apple") {
+      throw new Error(
+        `OAuth provider "${provider}" passed in redirect callback URL does not match "apple"`
+      );
+    }
+    if (!state || decode5(decodeURIComponent(state)) !== getStateParam()) {
+      throw new Error(
+        `Invalid state parameter "${state}" passed in redirect callback URL`
+      );
+    }
+    window.history.replaceState(
+      null,
+      window.document.title,
+      window.location.pathname
+    );
+    if (!idToken) {
+      throw new Error(
+        `Missing ID token in redirect callback URL for Apple OAuth"`
+      );
+    }
+    const authMethod = {
+      authMethodType: 8 /* AppleJwt */,
+      accessToken: idToken
+    };
+    return authMethod;
+  }
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  async getAuthMethodId(authMethod) {
+    return _AppleProvider.authMethodId(authMethod);
+  }
+  static async authMethodId(authMethod) {
+    const tokenPayload = jose3.decodeJwt(authMethod.accessToken);
+    const userId = tokenPayload["sub"];
+    const audience = tokenPayload["aud"];
+    const authMethodId = ethers_exports.utils.keccak256(
+      ethers_exports.utils.toUtf8Bytes(`${userId}:${audience}`)
+    );
+    return authMethodId;
+  }
+};
+
+// packages/lit-auth-client/src/lib/providers/StytchAuthFactorOtp.ts
+init_shim();
+
+// packages/lit-auth-client/src/lib/providers/StytchAuthFactors.ts
+init_shim();
+var emailOtpAuthFactorParser2 = (parsedToken, provider) => {
+  const session = parsedToken[provider];
+  const authFactors = session["authentication_factors"];
+  let authFactor = authFactors.find((value, _index, _obj) => {
+    if (value.email_factor)
+      return value;
+  });
+  if (!authFactor) {
+    throw new Error("Could not find email authentication info in session");
+  }
+  const audience = parsedToken["aud"][0];
+  if (!audience) {
+    throw new Error(
+      "Token does not contain an audience (project identifier), aborting"
+    );
+  }
+  const userId = authFactor.email_factor.email_address;
+  const authMethodId = ethers_exports.utils.keccak256(
+    ethers_exports.utils.toUtf8Bytes(
+      `${userId.toLowerCase()}:${audience.toLowerCase()}`
+    )
+  );
+  return authMethodId;
+};
+var smsOtpAuthFactorParser2 = (parsedToken, provider) => {
+  const session = parsedToken[provider];
+  const authFactors = session["authentication_factors"];
+  let authFactor = authFactors.find((value, _index, _obj) => {
+    if (value.phone_number_factor)
+      return value;
+  });
+  if (!authFactor) {
+    throw new Error("Could not find email authentication info in session");
+  }
+  const audience = parsedToken["aud"][0];
+  if (!audience) {
+    throw new Error(
+      "Token does not contain an audience (project identifier), aborting"
+    );
+  }
+  const userId = authFactor.phone_number_factor.phone_number;
+  const authMethodId = ethers_exports.utils.keccak256(
+    ethers_exports.utils.toUtf8Bytes(
+      `${userId.toLowerCase()}:${audience.toLowerCase()}`
+    )
+  );
+  return authMethodId;
+};
+var whatsAppOtpAuthFactorParser2 = (parsedToken, provider) => {
+  const session = parsedToken[provider];
+  const authFactors = session["authentication_factors"];
+  let authFactor = authFactors.find((value, _index, _obj) => {
+    if (value.phone_number_factor)
+      return value;
+  });
+  if (!authFactor) {
+    throw new Error("Could not find email authentication info in session");
+  }
+  const audience = parsedToken["aud"][0];
+  if (!audience) {
+    throw new Error(
+      "Token does not contain an audience (project identifier), aborting"
+    );
+  }
+  const userId = authFactor.phone_number_factor.phone_number;
+  const authMethodId = ethers_exports.utils.keccak256(
+    ethers_exports.utils.toUtf8Bytes(
+      `${userId.toLowerCase()}:${audience.toLowerCase()}`
+    )
+  );
+  return authMethodId;
+};
+var totpAuthFactorParser2 = (parsedToken, provider) => {
+  const session = parsedToken[provider];
+  const authFactors = session["authentication_factors"];
+  let authFactor = authFactors.find((value, _index, _obj) => {
+    if (value.phone_number_factor)
+      return value;
+  });
+  if (!authFactor) {
+    throw new Error("Could not find email authentication info in session");
+  }
+  const audience = parsedToken["aud"][0];
+  if (!audience) {
+    throw new Error(
+      "Token does not contain an audience (project identifier), aborting"
+    );
+  }
+  const userId = authFactor.authenticator_app_factor.totp_id;
+  const authMethodId = ethers_exports.utils.keccak256(
+    ethers_exports.utils.toUtf8Bytes(
+      `${userId.toLowerCase()}:${audience.toLowerCase()}`
+    )
+  );
+  return authMethodId;
+};
+
+// packages/lit-auth-client/src/lib/providers/StytchAuthFactorOtp.ts
+var StytchAuthFactorOtpProvider = class _StytchAuthFactorOtpProvider extends BaseProvider2 {
+  static {
+    this._provider = "https://stytch.com/session";
+  }
+  constructor(params, config, factor) {
+    super(params);
+    this._params = config;
+    this._factor = factor;
+  }
+  /**
+   * Validates claims within a stytch authenticated JSON Web Token
+   * Will parse out the given `authentication factor` and use the transport
+   * for the otp code as the `user identifier` for the given auth method.
+   * @param options authentication option containing the authenticated token
+   * @returns {AuthMethod} Authentication Method for auth method type OTP
+   *
+   */
+  async authenticate(options) {
+    return new Promise((resolve, reject) => {
+      if (!options) {
+        reject(
+          new Error(
+            "No Authentication options provided, please supply an authenticated JWT"
+          )
+        );
+      }
+      const accessToken = options?.accessToken;
+      if (!accessToken) {
+        reject(
+          new Error("No access token provided, please provide a stych auth jwt")
+        );
+      }
+      const parsedToken = _StytchAuthFactorOtpProvider._parseJWT(accessToken);
+      const factorParser = _StytchAuthFactorOtpProvider._resolveAuthFactor(
+        this._factor
+      );
+      try {
+        factorParser.parser(parsedToken, _StytchAuthFactorOtpProvider._provider);
+      } catch (e2) {
+        reject(e2);
+      }
+      resolve({
+        authMethodType: factorParser.authMethodType,
+        accessToken
+      });
+    });
+  }
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method
+   *
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  async getAuthMethodId(authMethod) {
+    return _StytchAuthFactorOtpProvider.authMethodId(authMethod);
+  }
+  /**
+   * Get auth method id that can be used to look up and interact with
+   * PKPs associated with the given auth method.
+   * Will parse out the given `authentication factor` and use the transport
+   * for the otp code as the `user identifier` for the given auth method.
+   * @param {AuthMethod} authMethod - Auth method object
+   *
+   * @returns {Promise<string>} - Auth method id
+   */
+  static async authMethodId(authMethod) {
+    return new Promise((resolve, reject) => {
+      const accessToken = authMethod.accessToken;
+      const parsedToken = _StytchAuthFactorOtpProvider._parseJWT(accessToken);
+      let factor = "email";
+      switch (authMethod.authMethodType) {
+        case 10 /* StytchEmailFactorOtp */:
+          factor = "email";
+          break;
+        case 11 /* StytchSmsFactorOtp */:
+          factor = "sms";
+          break;
+        case 12 /* StytchWhatsAppFactorOtp */:
+          factor = "whatsApp";
+          break;
+        case 13 /* StytchTotpFactorOtp */:
+          factor = "totp";
+          break;
+        default:
+          throw new Error("Unsupport stytch auth type");
+      }
+      const factorParser = this._resolveAuthFactor(factor).parser;
+      try {
+        resolve(factorParser(parsedToken, this._provider));
+      } catch (e2) {
+        reject(e2);
+      }
+    });
+  }
+  static _resolveAuthFactor(factor) {
+    switch (factor) {
+      case "email":
+        return {
+          parser: emailOtpAuthFactorParser2,
+          authMethodType: 10 /* StytchEmailFactorOtp */
+        };
+      case "sms":
+        return {
+          parser: smsOtpAuthFactorParser2,
+          authMethodType: 11 /* StytchSmsFactorOtp */
+        };
+      case "whatsApp":
+        return {
+          parser: whatsAppOtpAuthFactorParser2,
+          authMethodType: 12 /* StytchWhatsAppFactorOtp */
+        };
+      case "totp":
+        return {
+          parser: totpAuthFactorParser2,
+          authMethodType: 13 /* StytchTotpFactorOtp */
+        };
+    }
+  }
+  /**
+   *
+   * @param jwt token to parse
+   * @returns {string}- userId contained within the token message
+   */
+  static _parseJWT(jwt) {
+    const parts = jwt.split(".");
+    if (parts.length !== 3) {
+      throw new Error("Invalid token length");
+    }
+    const body = Buffer.from(parts[1], "base64");
+    const parsedBody = JSON.parse(body.toString("ascii"));
+    return parsedBody;
+  }
+};
+
+// packages/lit-auth-client/src/lib/lit-auth-client.ts
+var LitAuthClient = class _LitAuthClient {
+  /**
+   * Create a LitAuthClient instance
+   *
+   * @param {LitAuthClientOptions} options
+   * @param {string} [options.rpcUrl] - Endpoint to interact with a blockchain network
+   * @param {LitRelayConfig} [options.litRelayConfig] - Options for Lit's relay server
+   * @param {IRelay} [options.customRelay] - Custom relay server to subsidize minting of PKPs
+   * @param {LitNodeClient} [options.litNodeClient] - Client to connect to Lit nodes
+   */
+  constructor(options) {
+    this.providers = /* @__PURE__ */ new Map();
+    bootstrapLogManager("auth-client");
+    this.debug = options?.debug ?? false;
+    if (options?.customRelay) {
+      this.relay = options?.customRelay;
+    } else {
+      if (options?.litRelayConfig?.relayApiKey) {
+        this.relay = new LitRelay(options.litRelayConfig);
+      } else {
+        throw new Error(
+          "An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server."
+        );
+      }
+    }
+    if (options?.litNodeClient) {
+      this.litNodeClient = options?.litNodeClient;
+    } else {
+      this.litNodeClient = new LitNodeClient({
+        litNetwork: "cayenne",
+        debug: options.debug ?? false
+      });
+    }
+    if (!options?.litRelayConfig?.relayUrl) {
+      if (!options?.litRelayConfig?.relayApiKey) {
+        throw new Error(
+          "2 An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server."
+        );
+      }
+      const supportedNetworks = ["cayenne", "habanero", "manzano"];
+      if (!supportedNetworks.includes(this.litNodeClient.config.litNetwork)) {
+        throw new Error(
+          `Unsupported litNetwork: ${this.litNodeClient.config.litNetwork}. Supported networks are: ${supportedNetworks.join(", ")}`
+        );
+      }
+      let url;
+      switch (this.litNodeClient.config.litNetwork) {
+        case "cayenne":
+          url = RELAY_URL_CAYENNE;
+          break;
+        case "habanero":
+          url = RELAY_URL_HABANERO;
+          break;
+        case "manzano":
+          url = RELAY_URL_MANZANO;
+          break;
+      }
+      if (this.litNodeClient.config.litNetwork)
+        this.relay = new LitRelay({
+          relayUrl: url,
+          relayApiKey: options?.litRelayConfig?.relayApiKey
+        });
+    }
+    this.rpcUrl = options?.rpcUrl || "https://chain-rpc.litprotocol.com/http";
+    log("rpc url: ", this.rpcUrl);
+    log("relay config: ", options.litRelayConfig);
+    log("relay instance: ", this.relay);
+  }
+  /**
+   * Initialize a provider
+   *
+   * @param {ProviderType} type - Type of provider to initialize
+   * @param {ProviderOptions} options - Options for the provider
+   *
+   * @returns {T} - Provider
+   */
+  initProvider(type, options) {
+    const baseParams = {
+      rpcUrl: this.rpcUrl,
+      relay: this.relay,
+      litNodeClient: this.litNodeClient
+    };
+    let provider;
+    log("resolving provider of type: ", type);
+    switch (type) {
+      case "google":
+        provider = new GoogleProvider({
+          ...baseParams,
+          ...options
+        });
+        break;
+      case "apple":
+        provider = new AppleProvider({
+          ...baseParams,
+          ...options
+        });
+        break;
+      case "discord":
+        provider = new DiscordProvider({
+          ...baseParams,
+          ...options
+        });
+        break;
+      case "ethwallet":
+        provider = new EthWalletProvider({
+          ...baseParams,
+          ...options
+        });
+        break;
+      case "webauthn":
+        provider = new WebAuthnProvider({
+          ...baseParams,
+          ...options
+        });
+        break;
+      case "stytchOtp":
+        provider = new StytchOtpProvider(
+          {
+            ...baseParams
+          },
+          options
+        );
+        break;
+      case "stytchEmailFactorOtp":
+        provider = new StytchAuthFactorOtpProvider(
+          { ...baseParams },
+          options,
+          "email"
+        );
+        break;
+      case "stytchSmsFactorOtp":
+        provider = new StytchAuthFactorOtpProvider(
+          { ...baseParams },
+          options,
+          "sms"
+        );
+        break;
+      case "stytchWhatsAppFactorOtp":
+        provider = new StytchAuthFactorOtpProvider(
+          { ...baseParams },
+          options,
+          "whatsApp"
+        );
+        break;
+      case "stytchTotpFactor":
+        provider = new StytchAuthFactorOtpProvider(
+          { ...baseParams },
+          options,
+          "totp"
+        );
+        break;
+      default:
+        throw new Error(
+          "Invalid provider type provided. Only 'google', 'discord', 'ethereum', and 'webauthn', 'Stytch', and 'StytchFactor' are supported at the moment."
+        );
+    }
+    this.providers.set(type, provider);
+    return provider;
+  }
+  /**
+   * Returns an initialized provider by type
+   *
+   * @param {ProviderType} type - Type of provider to get
+   *
+   * @returns {BaseProvider | undefined} - Provider if found, undefined otherwise
+   */
+  getProvider(type) {
+    return this.providers.get(type);
+  }
+  /**
+   * Retrieves the authentication ID based on the provided authentication method.
+   *
+   * @param {AuthMethod} authMethod - The authentication method
+   * @returns {Promise<string>} - The authentication ID
+   */
+  static async getAuthIdByAuthMethod(authMethod) {
+    let authId;
+    switch (authMethod.authMethodType) {
+      case 1 /* EthWallet */:
+        authId = await EthWalletProvider.authMethodId(authMethod);
+        break;
+      case 4 /* Discord */:
+        authId = await DiscordProvider.authMethodId(authMethod);
+        break;
+      case 3 /* WebAuthn */:
+        authId = await WebAuthnProvider.authMethodId(authMethod);
+        break;
+      case 6 /* GoogleJwt */:
+        authId = await GoogleProvider.authMethodId(authMethod);
+        break;
+      case 9 /* StytchOtp */:
+        authId = await StytchOtpProvider.authMethodId(authMethod);
+        break;
+      case 10 /* StytchEmailFactorOtp */:
+      case 11 /* StytchSmsFactorOtp */:
+      case 13 /* StytchTotpFactorOtp */:
+      case 12 /* StytchWhatsAppFactorOtp */:
+        authId = await StytchAuthFactorOtpProvider.authMethodId(authMethod);
+        break;
+      default:
+        log(`unsupported AuthMethodType: ${authMethod.authMethodType}`);
+        throw new Error(
+          `Unsupported auth method type: ${authMethod.authMethodType}`
+        );
+    }
+    return authId;
+  }
+  /**
+   * Mints a new pkp with all AuthMethods provided. Allows for permissions and flags to be set seperately.
+   * If no permissions are provided then each auth method will be assigned `1` for sign anything
+   * If no flags are provided then `sendPkpToitself` will be false, and `addPkpEthAddressAsPermittedAddress` will be true
+   * It is then up to the implementor to transfer the pkp nft to the pkp address.
+   * **note** When adding permissions, each permission should be added in the same order the auth methods are ordered
+   * @throws {Error} - Throws an error if no AuthMethods are given
+   * @param {AuthMethod[]} - AuthMethods authentication methods to be added to the pkp
+   * @param {{ pkpPermissionScopes?: number[][]; sendPkpToitself?: boolean; addPkpEthAddressAsPermittedAddress?: boolean;}}
+   * @returns {Promise<{pkpTokenId?: string; pkpEthAddress?: string; pkpPublicKey?: string}>} pkp information
+   */
+  async mintPKPWithAuthMethods(authMethods, options) {
+    if (authMethods.length < 1) {
+      throw new Error("Must provide atleast one auth method");
+    }
+    if (!options.pkpPermissionScopes || options.pkpPermissionScopes.length < 1) {
+      options.pkpPermissionScopes = [];
+      for (let i2 = 0; i2 < authMethods.length; i2++) {
+        options.pkpPermissionScopes.push([
+          ethers_exports.BigNumber.from("1").toNumber()
+        ]);
+      }
+    }
+    const reqBody = {
+      keyType: 2,
+      permittedAuthMethodTypes: authMethods.map((value) => {
+        return value.authMethodType;
+      }),
+      permittedAuthMethodScopes: options.pkpPermissionScopes,
+      addPkpEthAddressAsPermittedAddress: options.addPkpEthAddressAsPermittedAddress ?? true,
+      sendPkpToItself: options.sendPkpToitself ?? false
+    };
+    const permittedAuthMethodIds = [];
+    const permittedAuthMethodPubkeys = [];
+    for (const authMethod of authMethods) {
+      const id2 = await _LitAuthClient.getAuthIdByAuthMethod(authMethod);
+      permittedAuthMethodIds.push(id2);
+      if (authMethod.authMethodType === 3 /* WebAuthn */) {
+        permittedAuthMethodPubkeys.push(
+          WebAuthnProvider.getPublicKeyFromRegistration(
+            JSON.parse(authMethod.accessToken)
+          )
+        );
+      } else {
+        permittedAuthMethodPubkeys.push("0x");
+      }
+    }
+    reqBody.permittedAuthMethodIds = permittedAuthMethodIds;
+    reqBody.permittedAuthMethodPubkeys = permittedAuthMethodPubkeys;
+    const mintRes = await this.relay.mintPKP(JSON.stringify(reqBody));
+    if (!mintRes || !mintRes.requestId) {
+      throw new Error(
+        `Missing mint response or request ID from mint response ${mintRes.error}`
+      );
+    }
+    const pollerResult = await this.relay.pollRequestUntilTerminalState(
+      mintRes.requestId
+    );
+    return {
+      pkpTokenId: pollerResult.pkpTokenId,
+      pkpPublicKey: pollerResult.pkpPublicKey,
+      pkpEthAddress: pollerResult.pkpEthAddress
+    };
+  }
+};
+
+// packages/lit-auth-client/src/index.ts
+var LitAuthClient2 = LitAuthClient;
+if (!globalThis.LitAuthClient) {
+  globalThis.LitAuthClient = LitAuthClient2;
+}
+
 // local-tests/setup/env-setup.ts
 var getDevEnv = async ({
   env,
@@ -73722,6 +75604,10 @@ var getDevEnv = async ({
   );
   const bobsPrivateKey = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
   const bobsWallet = new ethers_exports.Wallet(bobsPrivateKey, provider);
+  const bobsWalletAuthMethod = await EthWalletProvider.authenticate({
+    signer: bobsWallet,
+    litNodeClient
+  });
   log("\u{1F9EA} [env-setup.ts] Bobs mints a PKP");
   let bobsContractsClient;
   if (env === "localchain" /* LOCALCHAIN */) {
@@ -73739,10 +75625,35 @@ var getDevEnv = async ({
       network: env
     });
   }
+  const getContractsClient = async (signer) => {
+    let contractsClient;
+    if (env === "localchain" /* LOCALCHAIN */) {
+      contractsClient = new LitContracts({
+        signer,
+        debug,
+        rpc: LIT_RPC_URL,
+        // anvil rpc
+        customContext: networkContext_default
+      });
+    } else {
+      contractsClient = new LitContracts({
+        signer,
+        debug: false,
+        network: env
+      });
+    }
+    await contractsClient.connect();
+    return contractsClient;
+  };
   await bobsContractsClient.connect();
   const bobsMintRes = await bobsContractsClient.pkpNftContractUtils.write.mint();
   const bobsOwnedPkp = bobsMintRes.pkp;
-  log("\u{1F9EA} [env-setup.ts] Send some funds to Bob's PKP");
+  log("\u{1F9EA} [env-setup.ts] Bob mints a PKP using the hot wallet auth method");
+  const bobsMintWithAuthRes = await bobsContractsClient.mintWithAuth({
+    authMethod: bobsWalletAuthMethod,
+    scopes: [1 /* SignAnything */]
+  });
+  const bobsWalletAuthMethoedOwnedPkp = bobsMintWithAuthRes.pkp;
   log(`
 ----- Development Environment Configuration -----
 \u2705 Chain RPC URL: ${LIT_RPC_URL}
@@ -73776,8 +75687,14 @@ var getDevEnv = async ({
     capacityDelegationAuthSig,
     capacityDelegationAuthSigWithPkp,
     toSignBytes32,
+    // All about Bob
     bobsWallet,
-    bobsOwnedPkp
+    bobsOwnedPkp,
+    bobsContractsClient,
+    bobsWalletAuthMethod,
+    bobsWalletAuthMethoedOwnedPkp,
+    // Utility
+    getContractsClient
   };
 };
 
@@ -73867,7 +75784,7 @@ var runTests = async ({
 // local-tests/tests/testUseEoaSessionSigsToExecuteJsSigning.ts
 init_shim();
 
-// local-tests/setup/session-sigs/eoa-session-sigs.ts
+// local-tests/setup/session-sigs/get-eoa-session-sigs.ts
 init_shim();
 var getEoaSessionSigs = async (devEnv) => {
   const sessionSigs = await devEnv.litNodeClient.getSessionSigs({
@@ -74026,7 +75943,7 @@ var testUseEoaSessionSigsToPkpSign = async (devEnv) => {
 // local-tests/tests/testUsePkpSessionSigsToExecuteJsSigning.ts
 init_shim();
 
-// local-tests/setup/session-sigs/pkp-session-sigs.ts
+// local-tests/setup/session-sigs/get-pkp-session-sigs.ts
 init_shim();
 var getPkpSessionSigs = async (devEnv) => {
   const pkpSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
@@ -74118,7 +76035,7 @@ var testUsePkpSessionSigsToPkpSign = async (devEnv) => {
 // local-tests/tests/testUseValidLitActionCodeGeneratedSessionSigsToPkpSign.ts
 init_shim();
 
-// local-tests/setup/session-sigs/lit-action-session-sigs.ts
+// local-tests/setup/session-sigs/get-lit-action-session-sigs.ts
 init_shim();
 var VALID_SESSION_SIG_LIT_ACTION_CODE = `
 // Works with an AuthSig AuthMethod
@@ -74394,6 +76311,358 @@ var testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign = async (devEnv) =>
   console.log("\u2705 res:", res);
 };
 
+// local-tests/tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign.ts
+init_shim();
+var testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign = async (devEnv) => {
+  const ccNft = devEnv.capacityTokenId;
+  const bobsWallet = devEnv.bobsWallet;
+  const { capacityDelegationAuthSig: appOwnersCapacityDelegationAuthSig } = await devEnv.litNodeClient.createCapacityDelegationAuthSig({
+    dAppOwnerWallet: devEnv.hotWallet,
+    capacityTokenId: ccNft
+    // No delegatee addresses provided. It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits and specific NFT IDs.
+    // delegateeAddresses: [bobsWallet.address],
+  });
+  const bobsSessionSigs = await getEoaSessionSigsWithCapacityDelegations(
+    devEnv,
+    bobsWallet,
+    appOwnersCapacityDelegationAuthSig
+  );
+  const bobsSingleSessionSig = bobsSessionSigs[devEnv.litNodeClient.config.bootstrapUrls[0]];
+  console.log("bobsSingleSessionSig:", bobsSingleSessionSig);
+  const regex = /urn:recap:[\w+\/=]+/g;
+  const recaps = bobsSingleSessionSig.signedMessage.match(regex) || [];
+  recaps.forEach((r3) => {
+    const encodedRecap = r3.split(":")[2];
+    const decodedRecap = Buffer.from(encodedRecap, "base64").toString();
+    console.log(decodedRecap);
+  });
+  const runWithSessionSigs = await devEnv.litNodeClient.pkpSign({
+    toSign: devEnv.toSignBytes32,
+    pubKey: devEnv.bobsOwnedPkp.publicKey,
+    sessionSigs: bobsSessionSigs
+  });
+  if (!runWithSessionSigs.r) {
+    throw new Error(`Expected "r" in runWithSessionSigs`);
+  }
+  if (!runWithSessionSigs.s) {
+    throw new Error(`Expected "s" in runWithSessionSigs`);
+  }
+  if (!runWithSessionSigs.dataSigned) {
+    throw new Error(`Expected "dataSigned" in runWithSessionSigs`);
+  }
+  if (!runWithSessionSigs.publicKey) {
+    throw new Error(`Expected "publicKey" in runWithSessionSigs`);
+  }
+  if (!runWithSessionSigs.signature.startsWith("0x")) {
+    throw new Error(`Expected "signature" to start with 0x`);
+  }
+  if (isNaN(runWithSessionSigs.recid)) {
+    throw new Error(`Expected "recid" to be parseable as a number`);
+  }
+};
+
+// local-tests/tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs.ts
+init_shim();
+var testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs = async (devEnv) => {
+  const bobsWallet = devEnv.bobsWallet;
+  const { capacityDelegationAuthSig: appOwnersCapacityDelegationAuthSig } = await devEnv.litNodeClient.createCapacityDelegationAuthSig({
+    dAppOwnerWallet: devEnv.hotWallet
+  });
+  const bobsSessionSigs = await getEoaSessionSigsWithCapacityDelegations(
+    devEnv,
+    bobsWallet,
+    appOwnersCapacityDelegationAuthSig
+  );
+  const bobsSingleSessionSig = bobsSessionSigs[devEnv.litNodeClient.config.bootstrapUrls[0]];
+  console.log("bobsSingleSessionSig:", bobsSingleSessionSig);
+  const regex = /urn:recap:[\w+\/=]+/g;
+  const recaps = bobsSingleSessionSig.signedMessage.match(regex) || [];
+  recaps.forEach((r3) => {
+    const encodedRecap = r3.split(":")[2];
+    const decodedRecap = Buffer.from(encodedRecap, "base64").toString();
+    console.log(decodedRecap);
+  });
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: bobsSessionSigs,
+    code: `(async () => {
+        const sigShare = await LitActions.signEcdsa({
+          toSign: dataToSign,
+          publicKey,
+          sigName: "sig",
+        });
+      })();`,
+    jsParams: {
+      dataToSign: devEnv.toSignBytes32,
+      publicKey: devEnv.bobsOwnedPkp.publicKey
+    }
+  });
+  if (!res.signatures.sig.r) {
+    throw new Error(`Expected "r" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.s) {
+    throw new Error(`Expected "s" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.dataSigned) {
+    throw new Error(`Expected "dataSigned" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.publicKey) {
+    throw new Error(`Expected "publicKey" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.signature.startsWith("0x")) {
+    throw new Error(`Expected "signature" to start with 0x`);
+  }
+  if (isNaN(res.signatures.sig.recid)) {
+    throw new Error(`Expected "recid" to be parseable as a number`);
+  }
+  console.log(
+    "\u2705 testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs"
+  );
+};
+
+// local-tests/tests/testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign.ts
+init_shim();
+var testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign = async (devEnv) => {
+  const bobsWallet = devEnv.bobsWallet;
+  const { capacityDelegationAuthSig: appOwnersCapacityDelegationAuthSig } = await devEnv.litNodeClient.createCapacityDelegationAuthSig({
+    dAppOwnerWallet: devEnv.hotWallet
+  });
+  const bobsSessionSigs = await getEoaSessionSigsWithCapacityDelegations(
+    devEnv,
+    bobsWallet,
+    appOwnersCapacityDelegationAuthSig
+  );
+  const bobsSingleSessionSig = bobsSessionSigs[devEnv.litNodeClient.config.bootstrapUrls[0]];
+  console.log("bobsSingleSessionSig:", bobsSingleSessionSig);
+  const regex = /urn:recap:[\w+\/=]+/g;
+  const recaps = bobsSingleSessionSig.signedMessage.match(regex) || [];
+  recaps.forEach((r3) => {
+    const encodedRecap = r3.split(":")[2];
+    const decodedRecap = Buffer.from(encodedRecap, "base64").toString();
+    console.log(decodedRecap);
+  });
+  const res = await devEnv.litNodeClient.pkpSign({
+    sessionSigs: bobsSessionSigs,
+    toSign: devEnv.toSignBytes32,
+    pubKey: devEnv.bobsOwnedPkp.publicKey
+  });
+  if (!res.r) {
+    throw new Error(`Expected "r" in res`);
+  }
+  if (!res.s) {
+    throw new Error(`Expected "s" in res`);
+  }
+  if (!res.dataSigned) {
+    throw new Error(`Expected "dataSigned" in res`);
+  }
+  if (!res.publicKey) {
+    throw new Error(`Expected "publicKey" in res`);
+  }
+  if (!res.signature.startsWith("0x")) {
+    throw new Error(`Expected "signature" to start with 0x`);
+  }
+  if (isNaN(res.recid)) {
+    throw new Error(`Expected "recid" to be parseable as a number`);
+  }
+  console.log("\u2705 res:", res);
+};
+
+// local-tests/tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs.ts
+init_shim();
+var testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs = async (devEnv) => {
+  const ccNft = devEnv.capacityTokenId;
+  const bobsWallet = devEnv.bobsWallet;
+  const { capacityDelegationAuthSig: appOwnersCapacityDelegationAuthSig } = await devEnv.litNodeClient.createCapacityDelegationAuthSig({
+    dAppOwnerWallet: devEnv.hotWallet,
+    capacityTokenId: ccNft
+    // No delegatee addresses provided. It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits and specific NFT IDs.
+    // delegateeAddresses: [bobsWallet.address],
+  });
+  const bobsSessionSigs = await getEoaSessionSigsWithCapacityDelegations(
+    devEnv,
+    bobsWallet,
+    appOwnersCapacityDelegationAuthSig
+  );
+  const bobsSingleSessionSig = bobsSessionSigs[devEnv.litNodeClient.config.bootstrapUrls[0]];
+  console.log("bobsSingleSessionSig:", bobsSingleSessionSig);
+  const regex = /urn:recap:[\w+\/=]+/g;
+  const recaps = bobsSingleSessionSig.signedMessage.match(regex) || [];
+  recaps.forEach((r3) => {
+    const encodedRecap = r3.split(":")[2];
+    const decodedRecap = Buffer.from(encodedRecap, "base64").toString();
+    console.log(decodedRecap);
+  });
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: bobsSessionSigs,
+    code: `(async () => {
+        const sigShare = await LitActions.signEcdsa({
+          toSign: dataToSign,
+          publicKey,
+          sigName: "sig",
+        });
+      })();`,
+    jsParams: {
+      dataToSign: devEnv.toSignBytes32,
+      publicKey: devEnv.bobsOwnedPkp.publicKey
+    }
+  });
+  if (!res.signatures.sig.r) {
+    throw new Error(`Expected "r" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.s) {
+    throw new Error(`Expected "s" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.dataSigned) {
+    throw new Error(`Expected "dataSigned" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.publicKey) {
+    throw new Error(`Expected "publicKey" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.signature.startsWith("0x")) {
+    throw new Error(`Expected "signature" to start with 0x`);
+  }
+  if (isNaN(res.signatures.sig.recid)) {
+    throw new Error(`Expected "recid" to be parseable as a number`);
+  }
+  console.log(
+    "\u2705 testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs"
+  );
+};
+
+// local-tests/tests/testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs.ts
+init_shim();
+var testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (devEnv) => {
+  const bobsAuthMethodAuthId = await LitAuthClient.getAuthIdByAuthMethod(
+    devEnv.bobsWalletAuthMethod
+  );
+  const scopes = await devEnv.bobsContractsClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
+    devEnv.bobsWalletAuthMethoedOwnedPkp.tokenId,
+    1 /* EthWallet */,
+    bobsAuthMethodAuthId,
+    3
+  );
+  if (!scopes[1 /* SignAnything */]) {
+    throw new Error('Bob does not have the "SignAnything" scope on his PKP');
+  }
+  const { capacityDelegationAuthSig } = await devEnv.litNodeClient.createCapacityDelegationAuthSig({
+    dAppOwnerWallet: devEnv.hotWallet,
+    capacityTokenId: devEnv.capacityTokenId,
+    delegateeAddresses: [devEnv.bobsWalletAuthMethoedOwnedPkp.ethAddress]
+  });
+  const bobPkpSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
+    pkpPublicKey: devEnv.bobsWalletAuthMethoedOwnedPkp.publicKey,
+    authMethods: [devEnv.bobsWalletAuthMethod],
+    resourceAbilityRequests: [
+      {
+        resource: new LitPKPResource("*"),
+        ability: "pkp-signing" /* PKPSigning */
+      },
+      {
+        resource: new LitActionResource("*"),
+        ability: "lit-action-execution" /* LitActionExecution */
+      }
+    ],
+    capabilityAuthSigs: [capacityDelegationAuthSig]
+  });
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: bobPkpSessionSigs,
+    code: `(async () => {
+        const sigShare = await LitActions.signEcdsa({
+          toSign: dataToSign,
+          publicKey,
+          sigName: "sig",
+        });
+      })();`,
+    jsParams: {
+      dataToSign: devEnv.toSignBytes32,
+      publicKey: devEnv.bobsWalletAuthMethoedOwnedPkp.publicKey
+    }
+  });
+  console.log("\u2705 res:", res);
+  if (!res.signatures.sig.r) {
+    throw new Error(`Expected "r" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.s) {
+    throw new Error(`Expected "s" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.dataSigned) {
+    throw new Error(`Expected "dataSigned" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.publicKey) {
+    throw new Error(`Expected "publicKey" in res.signatures.sig`);
+  }
+  if (!res.signatures.sig.signature.startsWith("0x")) {
+    throw new Error(`Expected "signature" to start with 0x`);
+  }
+};
+
+// local-tests/tests/testUseEoaSessionSigsToExecuteJsClaimKeys.ts
+init_shim();
+var testUseEoaSessionSigsToExecuteJsClaimKeys = async (devEnv) => {
+  const eoaSessionSigs = await getEoaSessionSigs(devEnv);
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: eoaSessionSigs,
+    code: `(async () => {
+      Lit.Actions.claimKey({keyId: "foo"});
+    })();`
+  });
+  console.log("res:", res);
+  if (!res.claims.foo) {
+    throw new Error(`Expected "foo" in res.claims`);
+  }
+  if (!res.claims.foo.derivedKeyId) {
+    throw new Error(`Expected "derivedKeyId" in res.claims.foo`);
+  }
+  if (!res.claims.foo.signatures) {
+    throw new Error(`Expected "signatures" in res.claims.foo`);
+  }
+  res.claims.foo.signatures.forEach((sig) => {
+    if (!sig.r) {
+      throw new Error(`Expected "r" in sig`);
+    }
+    if (!sig.s) {
+      throw new Error(`Expected "s" in sig`);
+    }
+    if (!sig.v) {
+      throw new Error(`Expected "v" in sig`);
+    }
+  });
+  const claimRequest = {
+    authMethod: devEnv.bobsWalletAuthMethod,
+    signer: devEnv.hotWallet,
+    mintCallback: async (claimRes2) => {
+      console.log("claimRes:", claimRes2);
+      const litContracts = await devEnv.getContractsClient(claimRes2.signer);
+      const pkpInfo = await litContracts.pkpNftContractUtils.write.claimAndMint(
+        `0x${claimRes2.derivedKeyId}`,
+        claimRes2.signatures
+      );
+      return pkpInfo.tokenId;
+    }
+  };
+  const claimRes = await devEnv.litNodeClient.claimKeyId(claimRequest);
+  console.log("claimRes:", claimRes);
+  if (!claimRes.claimedKeyId) {
+    throw new Error(`Expected "claimedKeyId" in claimRes`);
+  }
+  if (!claimRes.pubkey) {
+    throw new Error(`Expected "pubkey" in claimRes`);
+  }
+  if (!claimRes.mintTx) {
+    throw new Error(`Expected "mintTx" in claimRes`);
+  }
+  claimRes.signatures.forEach((sig) => {
+    if (!sig.r) {
+      throw new Error(`Expected "r" in sig`);
+    }
+    if (!sig.s) {
+      throw new Error(`Expected "s" in sig`);
+    }
+    if (!sig.v) {
+      throw new Error(`Expected "v" in sig`);
+    }
+  });
+};
+
 // local-tests/test.ts
 (async () => {
   const devEnv = await getDevEnv({
@@ -74402,8 +76671,9 @@ var testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign = async (devEnv) =>
   });
   const eoaSessionSigsTests = {
     testUseEoaSessionSigsToExecuteJsSigning,
+    testUseEoaSessionSigsToPkpSign,
     testUseEoaSessionSigsToExecuteJsSigningInParallel,
-    testUseEoaSessionSigsToPkpSign
+    testUseEoaSessionSigsToExecuteJsClaimKeys
   };
   const pkpSessionSigsTests = {
     testUsePkpSessionSigsToExecuteJsSigning,
@@ -74415,7 +76685,12 @@ var testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign = async (devEnv) =>
   };
   const capacityDelegationTests = {
     testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,
-    testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign
+    testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign,
+    testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs,
+    testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs,
+    testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign,
+    testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs,
+    testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign
   };
   await runTests({
     tests: {
