@@ -1,8 +1,12 @@
 import {
+  AccessControlConditions,
+  AccsParams,
   ILitResource,
   LitAbility,
   LitResourcePrefix,
 } from '@lit-protocol/types';
+import { hashAccessControlConditions } from '@lit-protocol/access-control-conditions';
+import { uint8arrayToString } from '@lit-protocol/uint8arrays';
 
 abstract class LitResourceBase {
   abstract resourcePrefix: LitResourcePrefix;
@@ -41,6 +45,33 @@ export class LitAccessControlConditionResource
       litAbility === LitAbility.AccessControlConditionDecryption ||
       litAbility === LitAbility.AccessControlConditionSigning
     );
+  }
+  /**
+   * Composes a resource string by hashing access control conditions and appending a data hash.
+   *
+   * @param {AccessControlConditions} accs - The access control conditions to hash.
+   * @param {string} dataToEncryptHash - The hash of the data to encrypt.
+   * @returns {Promise<string>} The composed resource string in the format 'hashedAccs/dataToEncryptHash'.
+   */
+  public static async composeLitActionResourceString(
+    accs: AccessControlConditions,
+    dataToEncryptHash: string
+  ) {
+    if (!accs || !dataToEncryptHash) {
+      throw new Error(
+        'Invalid input: Access control conditions and data hash are required.'
+      );
+    }
+
+    const hashedAccs = await hashAccessControlConditions(accs);
+    const hashedAccsStr = uint8arrayToString(
+      new Uint8Array(hashedAccs),
+      'base16'
+    );
+
+    const resourceString = `${hashedAccsStr}/${dataToEncryptHash}`;
+
+    return resourceString;
   }
 }
 
