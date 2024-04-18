@@ -1,27 +1,40 @@
 import {
+  LitAccessControlConditionResource,
   LitActionResource,
   LitPKPResource,
   craftAuthSig,
   createSiweMessageWithRecaps,
 } from '@lit-protocol/auth-helpers';
 import { DevEnv } from '../env-setup';
-import { AuthCallbackParams, AuthSig, LitAbility } from '@lit-protocol/types';
+import {
+  AuthCallbackParams,
+  AuthSig,
+  LitAbility,
+  LitResourceAbilityRequest,
+} from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
+import { AUTHSIG_ALGO } from '@lit-protocol/constants';
 
-export const getEoaSessionSigs = async (devEnv: DevEnv) => {
+export const getEoaSessionSigs = async (
+  devEnv: DevEnv,
+  resourceAbilityRequests?: LitResourceAbilityRequest[]
+) => {
+  // Use default resourceAbilityRequests if not provided
+  const _resourceAbilityRequests = resourceAbilityRequests || [
+    {
+      resource: new LitPKPResource('*'),
+      ability: LitAbility.PKPSigning,
+    },
+    {
+      resource: new LitActionResource('*'),
+      ability: LitAbility.LitActionExecution,
+    },
+  ];
+
   const sessionSigs = await devEnv.litNodeClient.getSessionSigs({
     chain: 'ethereum',
-    resourceAbilityRequests: [
-      {
-        resource: new LitPKPResource('*'),
-        ability: LitAbility.PKPSigning,
-      },
-      {
-        resource: new LitActionResource('*'),
-        ability: LitAbility.LitActionExecution,
-      },
-    ],
+    resourceAbilityRequests: _resourceAbilityRequests,
     authNeededCallback: async ({
       uri,
       expiration,
@@ -51,6 +64,7 @@ export const getEoaSessionSigs = async (devEnv: DevEnv) => {
       const authSig = await craftAuthSig({
         signer: devEnv.hotWallet,
         toSign,
+        algo: AUTHSIG_ALGO.BLS
       });
 
       return authSig;

@@ -22,6 +22,7 @@ import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSes
 import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys';
 import { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
 import { testUseEoaSessionSigsToExecuteJsConsoleLog } from './tests/testUseEoaSessionSigsToExecuteJsConsoleLog';
+import { testUseEoaSessionSigsToEncryptDecryptString } from './tests/testUseEoaSessionSigsToEncryptDecryptString';
 
 (async () => {
   const devEnv = await getDevEnv({
@@ -37,7 +38,9 @@ import { testUseEoaSessionSigsToExecuteJsConsoleLog } from './tests/testUseEoaSe
     testUseEoaSessionSigsToExecuteJsClaimMultipleKeys,
     testUseEoaSessionSigsToExecuteJsJsonResponse,
     testUseEoaSessionSigsToExecuteJsConsoleLog,
-    // testUseEoaSessionSigsToEncryptDecryptString
+    testUseEoaSessionSigsToEncryptDecryptString,
+    // testUseEoaSessionSigsToEncryptDecryptFile
+    // testUseEoaSessionSigsToEncryptDecryptZip
   };
 
   const pkpSessionSigsTests = {
@@ -49,6 +52,8 @@ import { testUseEoaSessionSigsToExecuteJsConsoleLog } from './tests/testUseEoaSe
     // testUsePkpSessionSigsToExecuteJsJsonResponse,
     // testUsePkpSessionSigsToExecuteJsConsoleLog,
     // testUsePkpSessionSigsToEncryptDecryptString
+    // testUsePkpSessionSigsToEncryptDecryptFile
+    // testUsePkpSessionSigsToEncryptDecryptZip
   };
 
   const litActionSessionSigsTests = {
@@ -60,6 +65,8 @@ import { testUseEoaSessionSigsToExecuteJsConsoleLog } from './tests/testUseEoaSe
     // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse,
     // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog,
     // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
+    // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
+    // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip
   };
 
   const capacityDelegationTests = {

@@ -58055,8 +58055,6 @@ var LitCore = class {
    *
    */
   async connect() {
-    console.log("testing!");
-    process.exit();
     if (this._connectingPromise) {
       return this._connectingPromise;
     }
@@ -58769,6 +58767,36 @@ var AccessControlConditionsValidator = class {
 
 // packages/encryption/src/lib/encryption.ts
 import * as ipfsClient from "ipfs-http-client";
+var encryptString = async (params, litNodeClient) => {
+  const paramsIsSafe = safeParams({
+    functionName: "encryptString",
+    params
+  });
+  if (paramsIsSafe.type === "ERROR" /* ERROR */)
+    return throwError({
+      message: `Invalid params: ${paramsIsSafe.result.message}`,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name
+    });
+  return litNodeClient.encrypt({
+    ...params,
+    dataToEncrypt: uint8arrayFromString(params.dataToEncrypt, "utf8")
+  });
+};
+var decryptToString = async (params, litNodeClient) => {
+  const paramsIsSafe = safeParams({
+    functionName: "decrypt",
+    params
+  });
+  if (paramsIsSafe.type === "ERROR" /* ERROR */)
+    return throwError({
+      message: `Invalid params: ${paramsIsSafe.result.message}`,
+      errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+      errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name
+    });
+  const { decryptedData } = await litNodeClient.decrypt(params);
+  return uint8arrayToString(decryptedData, "utf8");
+};
 
 // packages/misc-browser/src/index.ts
 init_shim();
@@ -59371,6 +59399,7 @@ var LitNodeClientNodeJs = class _LitNodeClientNodeJs extends LitCore {
       );
     };
     // ========== Promise Handlers ==========
+    // to be deprecated
     this.getIpfsId = async ({
       dataToHash,
       authSig,
@@ -70131,19 +70160,43 @@ var networkContext_default = {
           {
             indexed: false,
             internalType: "uint256",
+            name: "reason",
+            type: "uint256"
+          },
+          {
+            components: [
+              {
+                internalType: "uint256",
+                name: "tolerance",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "intervalSecs",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "kickPenaltyPercent",
+                type: "uint256"
+              }
+            ],
+            indexed: false,
+            internalType: "struct LibStakingStorage.ComplaintConfig",
+            name: "config",
+            type: "tuple"
+          }
+        ],
+        name: "ComplaintConfigSet",
+        type: "event"
+      },
+      {
+        anonymous: false,
+        inputs: [
+          {
+            indexed: false,
+            internalType: "uint256",
             name: "newTokenRewardPerTokenPerEpoch",
-            type: "uint256"
-          },
-          {
-            indexed: false,
-            internalType: "uint256",
-            name: "newComplaintTolerance",
-            type: "uint256"
-          },
-          {
-            indexed: false,
-            internalType: "uint256",
-            name: "newComplaintIntervalSecs",
             type: "uint256"
           },
           {
@@ -70587,53 +70640,95 @@ var networkContext_default = {
         inputs: [
           {
             internalType: "uint256",
-            name: "newTokenRewardPerTokenPerEpoch",
+            name: "reason",
             type: "uint256"
           },
           {
-            internalType: "uint256",
-            name: "newComplaintTolerance",
-            type: "uint256"
-          },
+            components: [
+              {
+                internalType: "uint256",
+                name: "tolerance",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "intervalSecs",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "kickPenaltyPercent",
+                type: "uint256"
+              }
+            ],
+            internalType: "struct LibStakingStorage.ComplaintConfig",
+            name: "config",
+            type: "tuple"
+          }
+        ],
+        name: "setComplaintConfig",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
+      },
+      {
+        inputs: [
           {
-            internalType: "uint256",
-            name: "newComplaintIntervalSecs",
-            type: "uint256"
-          },
-          {
-            internalType: "uint256[]",
-            name: "newKeyTypes",
-            type: "uint256[]"
-          },
-          {
-            internalType: "uint256",
-            name: "newMinimumValidatorCount",
-            type: "uint256"
-          },
-          {
-            internalType: "uint256",
-            name: "newMaxConcurrentRequests",
-            type: "uint256"
-          },
-          {
-            internalType: "uint256",
-            name: "newMaxTripleCount",
-            type: "uint256"
-          },
-          {
-            internalType: "uint256",
-            name: "newMinTripleCount",
-            type: "uint256"
-          },
-          {
-            internalType: "uint256",
-            name: "newPeerCheckingIntervalSecs",
-            type: "uint256"
-          },
-          {
-            internalType: "uint256",
-            name: "newMaxTripleConcurrency",
-            type: "uint256"
+            components: [
+              {
+                internalType: "uint256",
+                name: "tokenRewardPerTokenPerEpoch",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "DEPRECATED_complaintTolerance",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "DEPRECATED_complaintIntervalSecs",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256[]",
+                name: "keyTypes",
+                type: "uint256[]"
+              },
+              {
+                internalType: "uint256",
+                name: "minimumValidatorCount",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "maxConcurrentRequests",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "maxTripleCount",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "minTripleCount",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "peerCheckingIntervalSecs",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "maxTripleConcurrency",
+                type: "uint256"
+              }
+            ],
+            internalType: "struct LibStakingStorage.Config",
+            name: "newConfig",
+            type: "tuple"
           }
         ],
         name: "setConfig",
@@ -71063,6 +71158,42 @@ var networkContext_default = {
         type: "function"
       },
       {
+        inputs: [
+          {
+            internalType: "uint256",
+            name: "reason",
+            type: "uint256"
+          }
+        ],
+        name: "complaintConfig",
+        outputs: [
+          {
+            components: [
+              {
+                internalType: "uint256",
+                name: "tolerance",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "intervalSecs",
+                type: "uint256"
+              },
+              {
+                internalType: "uint256",
+                name: "kickPenaltyPercent",
+                type: "uint256"
+              }
+            ],
+            internalType: "struct LibStakingStorage.ComplaintConfig",
+            name: "",
+            type: "tuple"
+          }
+        ],
+        stateMutability: "view",
+        type: "function"
+      },
+      {
         inputs: [],
         name: "config",
         outputs: [
@@ -71075,12 +71206,12 @@ var networkContext_default = {
               },
               {
                 internalType: "uint256",
-                name: "complaintTolerance",
+                name: "DEPRECATED_complaintTolerance",
                 type: "uint256"
               },
               {
                 internalType: "uint256",
-                name: "complaintIntervalSecs",
+                name: "DEPRECATED_complaintIntervalSecs",
                 type: "uint256"
               },
               {
@@ -75786,28 +75917,29 @@ init_shim();
 
 // local-tests/setup/session-sigs/get-eoa-session-sigs.ts
 init_shim();
-var getEoaSessionSigs = async (devEnv) => {
+var getEoaSessionSigs = async (devEnv, resourceAbilityRequests) => {
+  const _resourceAbilityRequests = resourceAbilityRequests || [
+    {
+      resource: new LitPKPResource("*"),
+      ability: "pkp-signing" /* PKPSigning */
+    },
+    {
+      resource: new LitActionResource("*"),
+      ability: "lit-action-execution" /* LitActionExecution */
+    }
+  ];
   const sessionSigs = await devEnv.litNodeClient.getSessionSigs({
     chain: "ethereum",
-    resourceAbilityRequests: [
-      {
-        resource: new LitPKPResource("*"),
-        ability: "pkp-signing" /* PKPSigning */
-      },
-      {
-        resource: new LitActionResource("*"),
-        ability: "lit-action-execution" /* LitActionExecution */
-      }
-    ],
+    resourceAbilityRequests: _resourceAbilityRequests,
     authNeededCallback: async ({
       uri,
       expiration,
-      resourceAbilityRequests
+      resourceAbilityRequests: resourceAbilityRequests2
     }) => {
       if (!expiration) {
         throw new Error("expiration is required");
       }
-      if (!resourceAbilityRequests) {
+      if (!resourceAbilityRequests2) {
         throw new Error("resourceAbilityRequests is required");
       }
       if (!uri) {
@@ -75816,7 +75948,7 @@ var getEoaSessionSigs = async (devEnv) => {
       const toSign = await createSiweMessageWithRecaps({
         uri,
         expiration,
-        resources: resourceAbilityRequests,
+        resources: resourceAbilityRequests2,
         walletAddress: devEnv.hotWallet.address,
         nonce: devEnv.lastestBlockhash,
         litNodeClient: devEnv.litNodeClient
@@ -76626,31 +76758,29 @@ var testUseEoaSessionSigsToExecuteJsClaimKeys = async (devEnv) => {
       throw new Error(`Expected "v" in sig`);
     }
   });
-  const claimRequest = {
-    authMethod: devEnv.bobsWalletAuthMethod,
-    signer: devEnv.hotWallet,
-    mintCallback: async (claimRes2) => {
-      console.log("claimRes:", claimRes2);
-      const litContracts = await devEnv.getContractsClient(claimRes2.signer);
-      const pkpInfo = await litContracts.pkpNftContractUtils.write.claimAndMint(
-        `0x${claimRes2.derivedKeyId}`,
-        claimRes2.signatures
-      );
-      return pkpInfo.tokenId;
-    }
-  };
-  const claimRes = await devEnv.litNodeClient.claimKeyId(claimRequest);
-  console.log("claimRes:", claimRes);
-  if (!claimRes.claimedKeyId) {
-    throw new Error(`Expected "claimedKeyId" in claimRes`);
+};
+
+// local-tests/tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys.ts
+init_shim();
+var testUseEoaSessionSigsToExecuteJsClaimMultipleKeys = async (devEnv) => {
+  const eoaSessionSigs = await getEoaSessionSigs(devEnv);
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: eoaSessionSigs,
+    code: `(async () => {
+      Lit.Actions.claimKey({keyId: "foo"});
+      Lit.Actions.claimKey({keyId: "bar"});
+    })();`
+  });
+  if (!res.claims.foo) {
+    throw new Error(`Expected "foo" in res.claims`);
   }
-  if (!claimRes.pubkey) {
-    throw new Error(`Expected "pubkey" in claimRes`);
+  if (!res.claims.foo.derivedKeyId) {
+    throw new Error(`Expected "derivedKeyId" in res.claims.foo`);
   }
-  if (!claimRes.mintTx) {
-    throw new Error(`Expected "mintTx" in claimRes`);
+  if (!res.claims.foo.signatures) {
+    throw new Error(`Expected "signatures" in res.claims.foo`);
   }
-  claimRes.signatures.forEach((sig) => {
+  res.claims.foo.signatures.forEach((sig) => {
     if (!sig.r) {
       throw new Error(`Expected "r" in sig`);
     }
@@ -76663,25 +76793,599 @@ var testUseEoaSessionSigsToExecuteJsClaimKeys = async (devEnv) => {
   });
 };
 
+// local-tests/tests/testUseEoaSessionSigsToExecuteJsJsonResponse.ts
+init_shim();
+var testUseEoaSessionSigsToExecuteJsJsonResponse = async (devEnv) => {
+  const eoaSessionSigs = await getEoaSessionSigs(devEnv);
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: eoaSessionSigs,
+    code: `(async () => {
+      console.log('hello world')
+
+      LitActions.setResponse({
+        response: JSON.stringify({hello: 'world'})
+      });
+
+    })();`
+  });
+  if (!res.response) {
+    throw new Error(`Expected "response" in res`);
+  }
+  if (!res.response.startsWith("{")) {
+    throw new Error(`Expected "response" to start with {`);
+  }
+  if (!res.response.endsWith("}")) {
+    throw new Error(`Expected "response" to end with }`);
+  }
+  if (!res.logs) {
+    throw new Error(`Expected "logs" in res`);
+  }
+  if (!res.logs.includes("hello world")) {
+    throw new Error(`Expected "logs" to include 'hello world'`);
+  }
+  if (!res.success) {
+    throw new Error(`Expected "success" in res`);
+  }
+  if (res.success !== true) {
+    throw new Error(`Expected "success" to be true`);
+  }
+};
+
+// local-tests/tests/testUseEoaSessionSigsToExecuteJsConsoleLog.ts
+init_shim();
+var testUseEoaSessionSigsToExecuteJsConsoleLog = async (devEnv) => {
+  const eoaSessionSigs = await getEoaSessionSigs(devEnv);
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: eoaSessionSigs,
+    code: `(async () => {
+      console.log('hello world')
+    })();`
+  });
+  console.log("res:", res);
+  if (res.response) {
+    throw new Error(`Expected "response" to be falsy`);
+  }
+  if (!res.logs) {
+    throw new Error(`Expected "logs" in res`);
+  }
+  if (!res.logs.includes("hello world")) {
+    throw new Error(`Expected "logs" to include 'hello world'`);
+  }
+  if (!res.success) {
+    throw new Error(`Expected "success" in res`);
+  }
+};
+
+// local-tests/tests/testUseEoaSessionSigsToEncryptDecryptString.ts
+init_shim();
+
+// local-tests/setup/accs/accs.ts
+init_shim();
+var AccessControlConditions;
+((AccessControlConditions2) => {
+  let Success;
+  ((Success2) => {
+    Success2.getEmvBasicAccessControlConditions = ({
+      userAddress
+    }) => {
+      return [
+        {
+          contractAddress: "",
+          standardContractType: "",
+          chain: "ethereum",
+          method: "",
+          parameters: [":userAddress"],
+          returnValueTest: {
+            comparator: "=",
+            value: userAddress
+          }
+        }
+      ];
+    };
+    Success2.evmBasicBooleanAccessControlConditions = [
+      {
+        contractAddress: "0x22C1f6050E56d2876009903609a2cC3fEf83B415",
+        standardContractType: "POAP",
+        chain: "xdai",
+        method: "eventId",
+        parameters: [],
+        returnValueTest: {
+          comparator: "=",
+          value: "37582"
+        }
+      },
+      {
+        operator: "or"
+      },
+      {
+        contractAddress: "0x22C1f6050E56d2876009903609a2cC3fEf83B415",
+        standardContractType: "POAP",
+        chain: "ethereum",
+        method: "eventId",
+        parameters: [],
+        returnValueTest: {
+          comparator: "=",
+          value: "37582"
+        }
+      }
+    ];
+    Success2.evmContractAccessControlConditions = [
+      {
+        contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
+        functionName: "balanceOf",
+        functionParams: [":userAddress", "8"],
+        functionAbi: {
+          type: "function",
+          stateMutability: "view",
+          outputs: [
+            {
+              type: "uint256",
+              name: "",
+              internalType: "uint256"
+            }
+          ],
+          name: "balanceOf",
+          inputs: [
+            {
+              type: "address",
+              name: "account",
+              internalType: "address"
+            },
+            {
+              type: "uint256",
+              name: "id",
+              internalType: "uint256"
+            }
+          ]
+        },
+        chain: "ethereum",
+        returnValueTest: {
+          key: "",
+          comparator: ">",
+          value: "0"
+        }
+      }
+    ];
+    Success2.solAccessControlConditions = [
+      {
+        method: "getBalance",
+        params: [":userAddress"],
+        pdaParams: [],
+        pdaInterface: { offset: 0, fields: {} },
+        pdaKey: "",
+        chain: "solanaTestnet",
+        returnValueTest: {
+          key: "",
+          comparator: ">=",
+          value: "100000000"
+          // equals 0.1 SOL
+        }
+      }
+    ];
+    Success2.cosmosAccessControlConditions = [
+      {
+        conditionType: "cosmos",
+        path: ":userAddress",
+        chain: "cosmos",
+        returnValueTest: {
+          key: "",
+          comparator: "=",
+          value: "cosmos1vn6zl0924yj86jrp330wcwjclzdharljq03a8h"
+        }
+      }
+    ];
+    Success2.unifiedAccessControlConditions = [
+      {
+        conditionType: "solRpc",
+        method: "getBalance",
+        params: [":userAddress"],
+        chain: "solana",
+        pdaParams: [],
+        pdaInterface: { offset: 0, fields: {} },
+        pdaKey: "",
+        returnValueTest: {
+          key: "",
+          comparator: ">=",
+          value: "100000000"
+          // equals 0.1 SOL
+        }
+      },
+      { operator: "or" },
+      {
+        conditionType: "evmBasic",
+        contractAddress: "",
+        standardContractType: "",
+        chain: "ethereum",
+        method: "eth_getBalance",
+        parameters: [":userAddress", "latest"],
+        returnValueTest: {
+          comparator: ">=",
+          value: "10000000000000"
+        }
+      },
+      { operator: "or" },
+      {
+        conditionType: "evmContract",
+        contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
+        functionName: "balanceOf",
+        functionParams: [":userAddress", "8"],
+        functionAbi: {
+          type: "function",
+          stateMutability: "view",
+          outputs: [
+            {
+              type: "uint256",
+              name: "",
+              internalType: "uint256"
+            }
+          ],
+          name: "balanceOf",
+          inputs: [
+            {
+              type: "address",
+              name: "account",
+              internalType: "address"
+            },
+            {
+              type: "uint256",
+              name: "id",
+              internalType: "uint256"
+            }
+          ]
+        },
+        chain: "polygon",
+        returnValueTest: {
+          key: "",
+          comparator: ">",
+          value: "0"
+        }
+      }
+    ];
+  })(Success = AccessControlConditions2.Success || (AccessControlConditions2.Success = {}));
+  let Failture;
+  ((Failture2) => {
+    Failture2.noConditions = [];
+    Failture2.evmBasicAccessControlConditionsWithMissingFields = [
+      {
+        contractAddress: "",
+        // standardContractType: '',
+        // chain,
+        // method: 'eth_getBalance',
+        // parameters: [':userAddress', 'latest'],
+        returnValueTest: {
+          comparator: ">=",
+          value: "0"
+        }
+      }
+    ];
+    Failture2.evmBasicNestedAccessControlConditionsWithMissingFields = [
+      {
+        contractAddress: "",
+        standardContractType: "",
+        chain: "etherum",
+        method: "eth_getBalance",
+        parameters: [":userAddress", "latest"],
+        returnValueTest: {
+          comparator: ">=",
+          value: "0"
+        }
+      },
+      {
+        operator: "and"
+      },
+      [
+        {
+          contractAddress: "",
+          standardContractType: "",
+          chain: "ethereum",
+          method: "eth_getBalance",
+          parameters: [":userAddress", "latest"],
+          returnValueTest: {
+            comparator: ">=",
+            value: "1"
+          }
+        },
+        {
+          operator: "and"
+        },
+        {
+          contractAddress: "",
+          // standardContractType: '',
+          // chain,
+          // method: 'eth_getBalance',
+          // parameters: [':userAddress', 'latest'],
+          returnValueTest: {
+            comparator: ">=",
+            value: "2"
+          }
+        }
+      ]
+    ];
+    Failture2.evmBasicAccessControlConditionsWithInvalidFields = [
+      {
+        contractAddress: 6973231634015965e32,
+        standardContractType: "AMM",
+        chain: "bitcoin",
+        method: "eth_getBalance",
+        parameters: [":userAddress", "latest"],
+        returnValueTest: {
+          comparator: ">=",
+          value: "0"
+        }
+      }
+    ];
+    Failture2.evmContractAccessControlConditionsWithMissingFields = [
+      {
+        // contractAddress: '0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88',
+        functionName: "balanceOf",
+        // functionParams: [':userAddress', '8'],
+        functionAbi: {
+          type: "function",
+          stateMutability: "view",
+          outputs: [
+            {
+              type: "uint256",
+              name: "",
+              internalType: "uint256"
+            }
+          ],
+          name: "balanceOf",
+          inputs: [
+            {
+              type: "address",
+              name: "account",
+              internalType: "address"
+            },
+            {
+              type: "uint256",
+              name: "id",
+              internalType: "uint256"
+            }
+          ]
+        },
+        // chain: 'polygon',
+        returnValueTest: {
+          key: "",
+          comparator: ">",
+          value: "0"
+        }
+      }
+    ];
+    Failture2.evmContractNestedAccessControlConditionsWithInvalidFields = [
+      {
+        contractAddress: 7105762806747812e32,
+        functionName: "balanceOf",
+        functionParams: [":userAddress", "8"],
+        functionAbi: {
+          type: "function",
+          stateMutability: "view",
+          outputs: [
+            {
+              type: "uint256",
+              name: "",
+              internalType: "uint256"
+            }
+          ],
+          name: "balanceOf",
+          inputs: [
+            {
+              type: "address",
+              name: "account",
+              internalType: "address"
+            },
+            {
+              type: "uint256",
+              name: "id",
+              internalType: "uint256"
+            }
+          ]
+        },
+        chain: "eth",
+        returnValueTest: {
+          key: "",
+          comparator: ">",
+          value: "0"
+        }
+      }
+    ];
+    Failture2.solAccessControlConditionsWithMissingFields = [
+      {
+        method: "getBalance",
+        params: [":userAddress"],
+        chain: "solana",
+        pdaParams: [],
+        // pdaInterface: { offset: 0, fields: {} },
+        // pdaKey: '',
+        returnValueTest: {
+          key: "",
+          comparator: ">=",
+          value: "100000000"
+          // equals 0.1 SOL
+        }
+      }
+    ];
+    Failture2.invalidUnifiedAccessControlConditions = [
+      {
+        conditionType: "solRpc",
+        method: "getBalance",
+        params: [":userAddress"],
+        // chain: 'solana',
+        pdaParams: [],
+        pdaInterface: { offset: 0, fields: {} },
+        pdaKey: "",
+        returnValueTest: {
+          key: "",
+          comparator: ">=",
+          value: "100000000"
+          // equals 0.1 SOL
+        }
+      },
+      { operator: "or" },
+      {
+        conditionType: "evmBasic",
+        contractAddress: "",
+        standardContractType: "",
+        chain: "ethereum",
+        // method: 'eth_getBalance',
+        parameters: [":userAddress", "latest"],
+        returnValueTest: {
+          comparator: ">=",
+          value: "10000000000000"
+        }
+      },
+      { operator: "or" },
+      {
+        conditionType: "evmContract",
+        contractAddress: "0x7C7757a9675f06F3BE4618bB68732c4aB25D2e88",
+        // functionName: 'balanceOf',
+        functionParams: [":userAddress", "8"],
+        functionAbi: {
+          type: "function",
+          stateMutability: "view",
+          outputs: [
+            {
+              type: "uint256",
+              name: "",
+              internalType: "uint256"
+            }
+          ],
+          name: "balanceOf",
+          inputs: [
+            {
+              type: "address",
+              name: "account",
+              internalType: "address"
+            },
+            {
+              type: "uint256",
+              name: "id",
+              internalType: "uint256"
+            }
+          ]
+        },
+        // chain: 'polygon',
+        returnValueTest: {
+          key: "",
+          comparator: ">",
+          value: "0"
+        }
+      }
+    ];
+    Failture2.invalidConditionUnifiedAccessControlConditions = [
+      {
+        conditionType: "zkSync",
+        // Does not exist
+        contractAddress: "",
+        standardContractType: "",
+        chain: "ethereum",
+        method: "eth_getBalance",
+        parameters: [":userAddress", "latest"],
+        returnValueTest: {
+          comparator: ">=",
+          value: "10000000000000"
+        }
+      }
+    ];
+    Failture2.noTypeUnifiedAccessControlConditions = [
+      {
+        // conditionType: 'evmBasic',
+        contractAddress: "",
+        standardContractType: "",
+        chain: "ethereum",
+        method: "eth_getBalance",
+        parameters: [":userAddress", "latest"],
+        returnValueTest: {
+          comparator: ">=",
+          value: "10000000000000"
+        }
+      }
+    ];
+  })(Failture = AccessControlConditions2.Failture || (AccessControlConditions2.Failture = {}));
+})(AccessControlConditions || (AccessControlConditions = {}));
+
+// local-tests/tests/testUseEoaSessionSigsToEncryptDecryptString.ts
+var testUseEoaSessionSigsToEncryptDecryptString = async (devEnv) => {
+  const eoaSessionSigs = await getEoaSessionSigs(devEnv);
+  const encryptRes = await encryptString(
+    {
+      accessControlConditions: AccessControlConditions.getEmvBasicAccessControlConditions({
+        userAddress: devEnv.hotWallet.address
+      }),
+      chain: "ethereum",
+      sessionSigs: eoaSessionSigs,
+      dataToEncrypt: "Hello world"
+    },
+    devEnv.litNodeClient
+  );
+  console.log("encryptRes:", encryptRes);
+  if (!encryptRes.ciphertext) {
+    throw new Error(`Expected "ciphertext" in encryptRes`);
+  }
+  if (!encryptRes.dataToEncryptHash) {
+    throw new Error(`Expected "dataToEncryptHash" to in encryptRes`);
+  }
+  const eoaSessionSigs2 = await getEoaSessionSigs(devEnv, [
+    {
+      resource: new LitAccessControlConditionResource(
+        encryptRes.dataToEncryptHash
+      ),
+      ability: "access-control-condition-decryption" /* AccessControlConditionDecryption */
+    }
+  ]);
+  const decryptRes = await decryptToString(
+    {
+      accessControlConditions: AccessControlConditions.getEmvBasicAccessControlConditions({
+        userAddress: devEnv.hotWallet.address
+      }),
+      ciphertext: encryptRes.ciphertext,
+      dataToEncryptHash: encryptRes.dataToEncryptHash,
+      sessionSigs: eoaSessionSigs2,
+      chain: "ethereum"
+    },
+    devEnv.litNodeClient
+  );
+  if (decryptRes !== "Hello world") {
+    throw new Error(
+      `Expected decryptRes to be 'Hello world' but got ${decryptRes}`
+    );
+  }
+};
+
 // local-tests/test.ts
 (async () => {
   const devEnv = await getDevEnv({
     env: getNetworkFlag(),
-    debug: process.env.DEBUG === "true"
+    debug: process.env.DEBUG === "true" || true
   });
   const eoaSessionSigsTests = {
     testUseEoaSessionSigsToExecuteJsSigning,
     testUseEoaSessionSigsToPkpSign,
     testUseEoaSessionSigsToExecuteJsSigningInParallel,
-    testUseEoaSessionSigsToExecuteJsClaimKeys
+    testUseEoaSessionSigsToExecuteJsClaimKeys,
+    testUseEoaSessionSigsToExecuteJsClaimMultipleKeys,
+    testUseEoaSessionSigsToExecuteJsJsonResponse,
+    testUseEoaSessionSigsToExecuteJsConsoleLog,
+    testUseEoaSessionSigsToEncryptDecryptString
   };
   const pkpSessionSigsTests = {
     testUsePkpSessionSigsToExecuteJsSigning,
     testUsePkpSessionSigsToPkpSign
+    // testUsePkpSessionSigsToExecuteJsSigningInParallel,
+    // testUsePkpSessionSigsToExecuteJsClaimKeys,
+    // testUsePkpSessionSigsToExecuteJsClaimMultipleKeys,
+    // testUsePkpSessionSigsToExecuteJsJsonResponse,
+    // testUsePkpSessionSigsToExecuteJsConsoleLog,
+    // testUsePkpSessionSigsToEncryptDecryptString
   };
   const litActionSessionSigsTests = {
     testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,
     testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
+    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel,
+    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys,
+    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys,
+    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse,
+    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog,
+    // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
   };
   const capacityDelegationTests = {
     testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,
