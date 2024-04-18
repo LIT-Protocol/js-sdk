@@ -5,6 +5,7 @@ import {
   AuthMethod,
   BaseSiweMessage,
   LitContractContext,
+  SignerLike,
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ethers } from 'ethers';
@@ -49,6 +50,11 @@ export interface DevEnv {
   bobsContractsClient: LitContracts;
   bobsWalletAuthMethod: AuthMethod;
   bobsWalletAuthMethoedOwnedPkp: PKPInfo;
+
+  // Utility
+  getContractsClient: (
+    signer: ethers.Wallet | SignerLike
+  ) => Promise<LitContracts>;
 }
 
 // ----- Test Configuration -----
@@ -326,6 +332,29 @@ export const getDevEnv = async (
     });
   }
 
+  const getContractsClient = async (signer: ethers.Wallet) => {
+    let contractsClient: LitContracts;
+
+    if (env === ENV.LOCALCHAIN) {
+      contractsClient = new LitContracts({
+        signer,
+        debug,
+        rpc: LIT_RPC_URL, // anvil rpc
+        customContext: networkContext as unknown as LitContractContext,
+      });
+    } else {
+      contractsClient = new LitContracts({
+        signer,
+        debug: false,
+        network: env,
+      });
+    }
+
+    await contractsClient.connect();
+
+    return contractsClient;
+  };
+
   await bobsContractsClient.connect();
 
   const bobsMintRes =
@@ -384,5 +413,8 @@ export const getDevEnv = async (
     bobsContractsClient,
     bobsWalletAuthMethod,
     bobsWalletAuthMethoedOwnedPkp,
+
+    // Utility
+    getContractsClient,
   };
 };
