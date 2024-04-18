@@ -165,18 +165,6 @@ class EncryptToJsonValidator implements ParamsValidator {
   }
 
   validate(): IEither<void> {
-    const validators = [
-      new FileValidator(this.fnName, this.params.file),
-      new StringValidator(this.fnName, this.params.string),
-    ];
-
-    for (const validator of validators) {
-      const validationResponse = validator.validate();
-      if (validationResponse.type === EITHER_TYPE.ERROR) {
-        return validationResponse;
-      }
-    }
-
     const { file, string } = this.params;
 
     if (string === undefined && file === undefined)
@@ -188,7 +176,8 @@ class EncryptToJsonValidator implements ParamsValidator {
 
     if (string !== undefined && file !== undefined)
       return ELeft({
-        message: 'Provide only either a string or file to encrypt',
+        message:
+          'Provide only a "string" or "file" to encrypt; you cannot provide both',
         errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
         errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
