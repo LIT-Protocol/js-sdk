@@ -1,40 +1,37 @@
 import { DevEnv } from 'local-tests/setup/env-setup';
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
-import { hashAccessControlConditions } from '@lit-protocol/access-control-conditions';
+import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * Test Commands:
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString --network=localchain --version=v0
+ * ❌ yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString --network=cayenne --version=v0
+ * ✅ yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString --network=manzano --version=v0
+ * ✅ yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString --network=localchain --version=v0
  */
-export const testUseEoaSessionSigsToEncryptDecryptString = async (
+export const testUsePkpSessionSigsToEncryptDecryptString = async (
   devEnv: DevEnv
 ) => {
   // set access control conditions for encrypting and decrypting
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
-    userAddress: devEnv.hotWallet.address,
+    userAddress: devEnv.hotWalletAuthMethodOwnedPkp.ethAddress,
   });
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv);
+  const pkpSessionSigs = await getPkpSessionSigs(devEnv);
 
   const encryptRes = await LitJsSdk.encryptString(
     {
       accessControlConditions: accs,
       chain: 'ethereum',
-      sessionSigs: eoaSessionSigs,
+      sessionSigs: pkpSessionSigs,
       dataToEncrypt: 'Hello world',
     },
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
   console.log('encryptRes:', encryptRes);
-
-  // await 5 seconds for the encryption to be mined
 
   // -- Expected output:
   // {
@@ -57,7 +54,7 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
       encryptRes.dataToEncryptHash
     );
 
-  const eoaSessionSigs2 = await getEoaSessionSigs(devEnv, [
+  const pkpSessionSigs2 = await getPkpSessionSigs(devEnv, [
     {
       resource: new LitAccessControlConditionResource(accsResourceString),
       ability: LitAbility.AccessControlConditionDecryption,
@@ -70,14 +67,11 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
       accessControlConditions: accs,
       ciphertext: encryptRes.ciphertext,
       dataToEncryptHash: encryptRes.dataToEncryptHash,
-      sessionSigs: eoaSessionSigs2,
+      sessionSigs: pkpSessionSigs2,
       chain: 'ethereum',
     },
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
-
-  console.log('decryptRes:', decryptRes);
-  process.exit(0);
 
   if (decryptRes !== 'Hello world') {
     throw new Error(

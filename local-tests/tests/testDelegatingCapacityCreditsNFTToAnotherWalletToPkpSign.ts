@@ -11,7 +11,7 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
  *
  *
  * ## Test Commands:
- * - 🚫 Not supported in Cayenne, but session sigs would still work
+ * - ❌ Not supported in Cayenne, but session sigs would still work
  * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign --network=manzano --version=v0
  * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign --network=localchain --version=v1
  */

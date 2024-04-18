@@ -1,6 +1,16 @@
-// This test requires using "bun" to run.
-// Installation: https://bun.sh/docs/installation
-// Test command: yarn test:local --filter={testName} --network={network | 'localhost' is default}
+/**
+ * Executes specified tests in the local development environment.
+ *
+ * Usage:
+ * DEBUG=true yarn test:local --filter={testName} --network={network | 'localchain' is default}
+ *
+ * Parameters:
+ * - `--filter={testName}`: Specify the test name to run.
+ * - `--network={network}`: Define the blockchain network (default: 'localchain').
+ *
+ * Example:
+ * DEBUG=true yarn test:local --filter=testUserAuthentication --network=testnet
+ */
 
 import { getDevEnv } from './setup/env-setup';
 import { getNetworkFlag, runTests } from './setup/mini-test-framework';
@@ -23,6 +33,9 @@ import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testU
 import { testUseEoaSessionSigsToExecuteJsJsonResponse } from './tests/testUseEoaSessionSigsToExecuteJsJsonResponse';
 import { testUseEoaSessionSigsToExecuteJsConsoleLog } from './tests/testUseEoaSessionSigsToExecuteJsConsoleLog';
 import { testUseEoaSessionSigsToEncryptDecryptString } from './tests/testUseEoaSessionSigsToEncryptDecryptString';
+import { testUsePkpSessionSigsToEncryptDecryptString } from './tests/testUsePkpSessionSigsToEncryptDecryptString';
+import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString';
+import { testUseInvalidLitActionCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionCodeToGenerateSessionSigs';
 
 (async () => {
   const devEnv = await getDevEnv({
@@ -51,7 +64,7 @@ import { testUseEoaSessionSigsToEncryptDecryptString } from './tests/testUseEoaS
     // testUsePkpSessionSigsToExecuteJsClaimMultipleKeys,
     // testUsePkpSessionSigsToExecuteJsJsonResponse,
     // testUsePkpSessionSigsToExecuteJsConsoleLog,
-    // testUsePkpSessionSigsToEncryptDecryptString
+    testUsePkpSessionSigsToEncryptDecryptString,
     // testUsePkpSessionSigsToEncryptDecryptFile
     // testUsePkpSessionSigsToEncryptDecryptZip
   };
@@ -64,9 +77,10 @@ import { testUseEoaSessionSigsToEncryptDecryptString } from './tests/testUseEoaS
     // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys,
     // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse,
     // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog,
-    // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
+    testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString,
     // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
     // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip
+    testUseInvalidLitActionCodeToGenerateSessionSigs,
   };
 
   const capacityDelegationTests = {

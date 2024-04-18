@@ -14,7 +14,6 @@ import {
 } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
-import { AUTHSIG_ALGO } from '@lit-protocol/constants';
 
 export const getEoaSessionSigs = async (
   devEnv: DevEnv,
@@ -64,7 +63,6 @@ export const getEoaSessionSigs = async (
       const authSig = await craftAuthSig({
         signer: devEnv.hotWallet,
         toSign,
-        algo: AUTHSIG_ALGO.BLS
       });
 
       return authSig;

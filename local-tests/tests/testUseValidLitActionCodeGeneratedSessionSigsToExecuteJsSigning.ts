@@ -1,6 +1,8 @@
+import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { log } from '@lit-protocol/misc';
+import { LitAbility } from '@lit-protocol/types';
 import { DevEnv } from 'local-tests/setup/env-setup';
-import { getLitActionSessionSigsForExecuteJs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 
 /**
  * Test Commands:
@@ -10,9 +12,16 @@ import { getLitActionSessionSigsForExecuteJs } from 'local-tests/setup/session-s
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning =
   async (devEnv: DevEnv) => {
-    const litActionSessionSigs = await getLitActionSessionSigsForExecuteJs(
-      devEnv
-    );
+    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, [
+      {
+        resource: new LitPKPResource('*'),
+        ability: LitAbility.PKPSigning,
+      },
+      {
+        resource: new LitActionResource('*'),
+        ability: LitAbility.LitActionExecution,
+      },
+    ]);
 
     const res = await devEnv.litNodeClient.executeJs({
       sessionSigs: litActionSessionSigs,

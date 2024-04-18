@@ -14,7 +14,7 @@ import { LitAbility } from '@lit-protocol/types';
  *
  *
  * ## Test Commands:
- * - 🚫 Not supported in Cayenne, but session sigs would still work
+ * - ❌ Not supported in Cayenne, but session sigs would still work
  * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs --network=manzano --version=v0
  * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs --network=localchain --version=v1
  */
