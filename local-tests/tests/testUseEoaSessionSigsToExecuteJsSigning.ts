@@ -5,7 +5,7 @@ import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-sessio
 /**
  * Test Commands:
  * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning --network=habanero --version=v0
+ * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning --network=manzano --version=v0
  * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning --network=localchain --version=v1
  */
 export const testUseEoaSessionSigsToExecuteJsSigning = async (

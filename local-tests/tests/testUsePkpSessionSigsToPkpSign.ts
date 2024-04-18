@@ -5,7 +5,7 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 /**
  * Test Commands:
  * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=habanero --version=v0
+ * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=manzano --version=v0
  * ✅ yarn test:local --filter=testUsePkpSessionSigsToPkpSign --network=localchain --version=v1
  */
 export const testUsePkpSessionSigsToPkpSign = async (devEnv: DevEnv) => {
