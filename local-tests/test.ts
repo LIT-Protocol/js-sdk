@@ -19,11 +19,12 @@ import { testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign
 import { testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs } from './tests/testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs';
 import { testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs';
 import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimKeys';
+import { testUseEoaSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseEoaSessionSigsToExecuteJsClaimMultipleKeys';
 
 (async () => {
   const devEnv = await getDevEnv({
     env: getNetworkFlag(),
-    debug: process.env.DEBUG === 'true',
+    debug: process.env.DEBUG === 'true' || true,
   });
 
   const eoaSessionSigsTests = {
@@ -31,7 +32,7 @@ import { testUseEoaSessionSigsToExecuteJsClaimKeys } from './tests/testUseEoaSes
     testUseEoaSessionSigsToPkpSign,
     testUseEoaSessionSigsToExecuteJsSigningInParallel,
     testUseEoaSessionSigsToExecuteJsClaimKeys,
-    // testUseEoaSessionSigsToExecuteJsClaimMultipleKeys,
+    testUseEoaSessionSigsToExecuteJsClaimMultipleKeys,
     // testUseEoaSessionSigsToExecuteJsJsonResponse,
     // testUseEoaSessionSigsToExecuteJsConsoleLog,
     // testUseEoaSessionSigsToEncryptDecryptString
