@@ -105,6 +105,7 @@ import type {
   SuccessNodePromises,
   ValidateAndSignECDSA,
   WebAuthnAuthenticationVerificationParams,
+  ILitNodeClient,
 } from '@lit-protocol/types';
 
 // TODO: move this to auth-helper for next patch
@@ -126,7 +127,7 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
+  implements LitClientSessionManager, ILitNodeClient
 {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
