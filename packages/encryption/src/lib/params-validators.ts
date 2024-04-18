@@ -3,6 +3,8 @@
  * returns a boolean value indicating whether the validation is passed or not.
  */
 
+import { isHexString } from 'ethers/lib/utils';
+
 import {
   EITHER_TYPE,
   ELeft,
@@ -10,20 +12,26 @@ import {
   IEither,
   LIT_ERROR,
 } from '@lit-protocol/constants';
-
+import {
+  checkIfAuthSigRequiresChainParam,
+  checkType,
+  is,
+  log,
+} from '@lit-protocol/misc';
 import {
   AcceptedFileType,
   AccessControlConditions,
+  AuthMethod,
   AuthSig,
-  DecryptFileProps,
-  DecryptFromIpfsProps,
+  DecryptFromJsonProps,
   DecryptRequest,
   DecryptZipFileWithMetadataProps,
   EncryptFileAndZipWithMetadataProps,
   EncryptFileRequest,
   EncryptRequest,
   EncryptStringRequest,
-  EncryptToIpfsProps,
+  EncryptToJsonPayload,
+  EncryptToJsonProps,
   EncryptZipRequest,
   EvmContractConditions,
   ExecuteJsProps,
@@ -33,13 +41,6 @@ import {
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
 
-import {
-  checkIfAuthSigRequiresChainParam,
-  checkType,
-  is,
-  log,
-} from '@lit-protocol/misc';
-import { isHexString } from 'ethers/lib/utils';
 import { isValidBooleanExpression } from './utils';
 
 export const safeParams = ({
@@ -66,9 +67,10 @@ export const safeParams = ({
   return ERight(undefined);
 };
 
-export const paramsValidators: {
-  [key: string]: (params: any) => ParamsValidator[];
-} = {
+export const paramsValidators: Record<
+  string,
+  (params: any) => ParamsValidator[]
+> = {
   executeJs: (params: ExecuteJsProps) => [
     new AuthMaterialValidator('executeJs', params),
     new ExecuteJsValidator('executeJs', params),
@@ -112,18 +114,15 @@ export const paramsValidators: {
     new FileValidator('decryptZipFileWithMetadata', params.file),
   ],
 
-  decryptToZip: (params: any) => [
-    new FileValidator('decryptToZip', params.encryptedZipBlob),
+  encryptToJson: (params: EncryptToJsonProps) => [
+    new AccessControlConditionsValidator('encryptToJson', params),
+    new AuthMaterialValidator('encryptToJson', params, true),
+    new EncryptToJsonValidator('encryptToJson', params),
   ],
 
-  encryptToIpfs: (params: EncryptToIpfsProps) => [
-    new AccessControlConditionsValidator('encryptToIpfs', params),
-    new AuthMaterialValidator('encryptToIpfs', params, true),
-    new IpfsValidator('encryptToIpfs', params),
-  ],
-
-  decryptFromIpfs: (params: DecryptFromIpfsProps) => [
-    new AuthMaterialValidator('decryptFromIpfs', params),
+  decryptFromJson: (params: DecryptFromJsonProps) => [
+    new AuthMaterialValidator('decryptFromJson', params),
+    new DecryptFromJsonValidator('decryptFromJson', params.parsedJsonData),
   ],
 
   encryptFileAndZipWithMetadata: (
@@ -156,29 +155,17 @@ interface ParamsValidator {
   validate: () => IEither<void>;
 }
 
-class IpfsValidator implements ParamsValidator {
+class EncryptToJsonValidator implements ParamsValidator {
   private fnName: string;
-  private params: EncryptToIpfsProps;
+  private params: EncryptToJsonProps;
 
-  constructor(fnName: string, params: EncryptToIpfsProps) {
+  constructor(fnName: string, params: EncryptToJsonProps) {
     this.fnName = fnName;
     this.params = params;
   }
 
   validate(): IEither<void> {
-    const validators = [
-      new FileValidator(this.fnName, this.params.file),
-      new StringValidator(this.fnName, this.params.string),
-    ];
-
-    for (const validator of validators) {
-      const validationResponse = validator.validate();
-      if (validationResponse.type === EITHER_TYPE.ERROR) {
-        return validationResponse;
-      }
-    }
-
-    const { file, string, infuraId, infuraSecretKey } = this.params;
+    const { file, string } = this.params;
 
     if (string === undefined && file === undefined)
       return ELeft({
@@ -187,19 +174,44 @@ class IpfsValidator implements ParamsValidator {
         errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
 
-    if (!infuraId || !infuraSecretKey)
+    if (string !== undefined && file !== undefined)
       return ELeft({
         message:
-          'Please provide your Infura Project Id and Infura API Key Secret to add the encrypted metadata on IPFS',
+          'Provide only a "string" or "file" to encrypt; you cannot provide both',
         errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
         errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
 
-    if (string !== undefined && file !== undefined)
+    return ERight(undefined);
+  }
+}
+
+class DecryptFromJsonValidator implements ParamsValidator {
+  private fnName: string;
+  private params: EncryptToJsonPayload;
+
+  constructor(fnName: string, params: EncryptToJsonPayload) {
+    this.fnName = fnName;
+    this.params = params;
+  }
+
+  validate(): IEither<void> {
+    const validators = [new StringValidator(this.fnName, this.params.dataType)];
+
+    for (const validator of validators) {
+      const validationResponse = validator.validate();
+      if (validationResponse.type === EITHER_TYPE.ERROR) {
+        return validationResponse;
+      }
+    }
+
+    const { dataType } = this.params;
+
+    if (dataType !== 'string' && dataType !== 'file')
       return ELeft({
-        message: 'Provide only either a string or file to encrypt',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+        message: `dataType of ${dataType} is not valid. Must be 'string' or 'file'.`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
 
     return ERight(undefined);
@@ -261,15 +273,15 @@ class StringValidator implements ParamsValidator {
 
 class AuthMethodValidator implements ParamsValidator {
   private fnName: string;
-  private authMethods?: Object[];
+  private authMethods?: AuthMethod[];
 
-  constructor(fnName: string, authMethods?: Object[]) {
+  constructor(fnName: string, authMethods?: AuthMethod[]) {
     this.fnName = fnName;
     this.authMethods = authMethods;
   }
 
   validate(): IEither<void> {
-    const { fnName, authMethods } = this;
+    const { authMethods } = this;
 
     if (
       authMethods &&

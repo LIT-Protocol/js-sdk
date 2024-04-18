@@ -1,3 +1,4 @@
+/* eslint-disable import/order */
 import { BigNumber, BigNumberish, BytesLike, ethers } from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
@@ -73,10 +74,7 @@ try {
 //                              - index: The index of the current item being processed in the array
 //                              - array: The array being iterated over
 // @return {Array<any>} The array of callback return values
-export const asyncForEachReturn = async (
-  array: Array<any>,
-  callback: Function
-) => {
+export const asyncForEachReturn = async (array: any[], callback: Function) => {
   const list = [];
 
   for (let index = 0; index < array.length; index++) {
@@ -319,7 +317,7 @@ export class LitContracts {
     ) {
       console.warn('THIS.SIGNER:', this.signer);
 
-      let STORAGE_KEY = 'lit-contracts-sdk-private-key';
+      const STORAGE_KEY = 'lit-contracts-sdk-private-key';
 
       this.log("Let's see if you have a private key in your local storage!");
 
@@ -373,7 +371,7 @@ export class LitContracts {
       if ('litNodeClient' in this.signer && 'rpcProvider' in this.signer) {
         this.log(`
   // ***********************************************************************************************
-  //          THIS IS A PKP WALLET, USING IT AS A SIGNER AND ITS RPC PROVIDER AS PROVIDER                                    
+  //          THIS IS A PKP WALLET, USING IT AS A SIGNER AND ITS RPC PROVIDER AS PROVIDER
   // ***********************************************************************************************
         `);
 
@@ -392,13 +390,22 @@ export class LitContracts {
       this.log('Your Provider(from signer):', this.provider);
     }
 
-    let addresses: any = await LitContracts.getContractAddresses(
+    const addresses: any = await LitContracts.getContractAddresses(
       this.network,
       this.customContext?.provider ?? this.provider,
       this.customContext
     );
 
-    this.log('resolved contract addresses for: ', this.network, addresses);
+    const logAddresses = Object.entries(addresses).reduce(
+      (output, [key, val]) => {
+        // @ts-expect-error since the object hash returned by `getContractAddresses` is `any`, we have no types here
+        output[key] = val.address;
+        return output;
+      },
+      {}
+    );
+
+    this.log('resolved contract addresses for: ', this.network, logAddresses);
     // ----- autogen:init:start  -----
     // Generated at 2023-11-07T01:50:52.460Z
 
@@ -574,7 +581,7 @@ export class LitContracts {
     }
 
     if (!context) {
-      let contractData = await LitContracts._resolveContractContext(
+      const contractData = await LitContracts._resolveContractContext(
         network,
         context
       );
@@ -594,7 +601,7 @@ export class LitContracts {
       // if we have contract context then we determine if there exists a `resolverAddres`
       // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
       if (!context.resolverAddress) {
-        let stakingContract = (context as LitContractContext).Staking;
+        const stakingContract = (context as LitContractContext).Staking;
 
         if (!stakingContract.address) {
           throw new Error(
@@ -607,7 +614,7 @@ export class LitContracts {
           provider
         );
       } else {
-        let contractContext = await LitContracts._getContractsFromResolver(
+        const contractContext = await LitContracts._getContractsFromResolver(
           context as LitContractResolverContext,
           provider,
           ['Staking']
@@ -629,16 +636,16 @@ export class LitContracts {
   private static async _getContractsFromResolver(
     context: LitContractResolverContext,
     provider: ethers.providers.JsonRpcProvider,
-    contractNames?: Array<keyof LitContractContext>
+    contractNames?: (keyof LitContractContext)[]
   ): Promise<LitContractContext> {
     const rpcUrl = DEFAULT_RPC;
-    let resolverContract = new ethers.Contract(
+    const resolverContract = new ethers.Contract(
       context.resolverAddress,
       context.abi,
       provider
     );
 
-    let getContract = async function (
+    const getContract = async function (
       contract: keyof LitContractContext,
       environment: number
     ): Promise<string> {
@@ -731,9 +738,9 @@ export class LitContracts {
       ];
     }
 
-    let addresses: LitContractContext = {} as LitContractContext;
+    const addresses: LitContractContext = {} as LitContractContext;
     for (const contract of contractNames) {
-      let contracts = context?.contractContext;
+      const contracts = context?.contractContext;
       addresses[contract] = {
         address: await getContract(contract, context.environment),
         abi: contracts?.[contract]?.abi ?? undefined,
@@ -759,8 +766,8 @@ export class LitContracts {
         );
       }
 
-      let flatten = [];
-      let keys = Object.keys(context);
+      const flatten = [];
+      const keys = Object.keys(context);
       for (const key of keys) {
         context[key].name = key;
         flatten.push(context[key]);
@@ -997,7 +1004,7 @@ export class LitContracts {
     if (scopes.length <= 0) {
       throw new Error(`❌ Permission scopes are required!
 [0] No Permissions
-[1] Sign Anything	
+[1] Sign Anything
 [2] Only Sign Messages
 Read more here:
 https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
@@ -1039,7 +1046,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     const receipt = await tx.wait();
 
-    let events = 'events' in receipt ? receipt.events : receipt.logs;
+    const events = 'events' in receipt ? receipt.events : receipt.logs;
 
     if (!events) {
       throw new Error('No events found in receipt');
@@ -1165,7 +1172,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       });
 
       const txHash = res.hash;
-      let tx = await res.wait();
+      const tx = await res.wait();
       this.log('Transaction:', tx);
 
       const tokenId = ethers.BigNumber.from(tx.logs[0].topics[3]);
@@ -1252,7 +1259,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       const size = cid.multihash.size;
       const digest = '0x' + Buffer.from(cid.multihash.digest).toString('hex');
 
-      let ipfsHash: IPFSHash = {
+      const ipfsHash: IPFSHash = {
         digest,
         hashFunction,
         size,
@@ -1267,7 +1274,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
       const format = 'YYYY/MM/DD HH:mm:ss';
 
-      let timestampFormatted: Date = new Date(parseInt(timestamp) * 1000);
+      const timestampFormatted: Date = new Date(parseInt(timestamp) * 1000);
 
       return date.format(timestampFormatted, format);
     },
@@ -1284,9 +1291,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        * @retu
        * */
 
-      getTokensByAddress: async (
-        ownerAddress: string
-      ): Promise<Array<string>> => {
+      getTokensByAddress: async (ownerAddress: string): Promise<string[]> => {
         if (!this.connected) {
           throw new Error(
             'Contracts are not connected. Please call connect() first'
@@ -1303,7 +1308,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
         }
 
-        let tokens = [];
+        const tokens = [];
 
         for (let i = 0; ; i++) {
           let token;
@@ -1336,9 +1341,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        * @returns { Array<string> } a list of PKP NFTs
        *
        */
-      getTokens: async (
-        latestNumberOfTokens: number
-      ): Promise<Array<string>> => {
+      getTokens: async (latestNumberOfTokens: number): Promise<string[]> => {
         if (!this.connected) {
           throw new Error(
             'Contracts are not connected. Please call connect() first'
@@ -1348,7 +1351,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           throw new Error('Contract is not available');
         }
 
-        let tokens = [];
+        const tokens = [];
 
         for (let i = 0; ; i++) {
           if (i >= latestNumberOfTokens) {
@@ -1377,7 +1380,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        */
       getTokensInfoByAddress: async (
         ownerAddress: string
-      ): Promise<Array<TokenInfo>> => {
+      ): Promise<TokenInfo[]> => {
         const tokenIds = await this.pkpNftContractUtils.read.getTokensByAddress(
           ownerAddress
         );
@@ -1427,14 +1430,14 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           );
 
           this.log('...populating tx');
-          let tx = await this.pkpNftContract.write.populateTransaction.mintNext(
-            2,
-            { value: mintCost }
-          );
+          const tx =
+            await this.pkpNftContract.write.populateTransaction.mintNext(2, {
+              value: mintCost,
+            });
           this.log('tx:', tx);
 
           this.log('...signing tx');
-          let signedTx = await this.signer.signTransaction(tx);
+          const signedTx = await this.signer.signTransaction(tx);
           this.log('signedTx:', signedTx);
 
           this.log('sending signed tx...');
@@ -1452,7 +1455,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         const res: any = await sentTx.wait();
         this.log('res:', res);
 
-        let events = 'events' in res ? res.events : res.logs;
+        const events = 'events' in res ? res.events : res.logs;
 
         let tokenIdFromEvent;
 
@@ -1488,16 +1491,16 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         signatures: IPubkeyRouter.SignatureStruct[],
         txOpts?: any
       ) => {
-        let cost = await this.pkpNftContract.read.mintCost();
+        const cost = await this.pkpNftContract.read.mintCost();
         const tx = await this.pkpNftContract.write.claimAndMint(
           2,
           derivedKeyId,
           signatures,
           txOpts ?? { value: cost }
         );
-        let txRec = await tx.wait();
-        let events: any = 'events' in txRec ? txRec.events : txRec.logs;
-        let tokenId = events[1].topics[1];
+        const txRec = await tx.wait();
+        const events: any = 'events' in txRec ? txRec.events : txRec.logs;
+        const tokenId = events[1].topics[1];
         return { tx, res: txRec, tokenId };
       },
     },
@@ -1538,9 +1541,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         return bool;
       },
 
-      getPermittedAddresses: async (
-        tokenId: string
-      ): Promise<Array<string>> => {
+      getPermittedAddresses: async (tokenId: string): Promise<string[]> => {
         if (!this.connected) {
           throw new Error(
             'Contracts are not connected. Please call connect() first'
@@ -1552,7 +1553,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         this.log('[getPermittedAddresses] input<tokenId>:', tokenId);
 
-        let addresses: Array<string> = [];
+        let addresses: string[] = [];
 
         const maxTries = 5;
         let tries = 0;
@@ -1591,7 +1592,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
        * @returns { Promise<Array<any>> }
        *
        */
-      getPermittedActions: async (tokenId: any): Promise<Array<any>> => {
+      getPermittedActions: async (tokenId: any): Promise<any[]> => {
         if (!this.connected) {
           throw new Error(
             'Contracts are not connected. Please call connect() first'
@@ -1602,7 +1603,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           throw new Error('Contract is not available');
         }
 
-        let actions: Array<any> = [];
+        let actions: any[] = [];
 
         const maxTries = 5;
         let tries = 0;

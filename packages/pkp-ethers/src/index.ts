@@ -1,9 +1,3 @@
-// ----- autogen:polyfills:start  -----
-//
-// ----- autogen:polyfills:end  -----
-
-import { PKPEthersWallet } from './lib/pkp-ethers';
-
 import {
   methodHandlers,
   ethRequestHandler,
@@ -19,7 +13,7 @@ import {
   sendRawTransactionHandler,
   isEthRequest,
 } from './lib/handler';
-
+import { PKPEthersWallet } from './lib/pkp-ethers';
 import { SupportedETHSigningMethods } from './lib/pkp-ethers-types';
 
 export {
