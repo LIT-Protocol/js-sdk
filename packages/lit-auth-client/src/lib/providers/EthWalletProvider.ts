@@ -13,7 +13,7 @@ import {
   LitNodeClient,
   checkAndSignAuthMessage,
 } from '@lit-protocol/lit-node-client';
-import { log, throwError } from '@lit-protocol/misc';
+import { log, throwError, isBrowser } from '@lit-protocol/misc';
 
 export default class EthWalletProvider extends BaseProvider {
   /**
@@ -168,9 +168,17 @@ export default class EthWalletProvider extends BaseProvider {
         address: address,
       };
     } else {
-      throw new Error(
-        "Could not find a 'signMessage' implementation on the provided signer instance"
-      );
+      // only allow calls if we are in a browser as it assumes browser extension wallets are used.
+      if (isBrowser()) {
+        authSig = await checkAndSignAuthMessage({
+          chain,
+          nonce: nonce,
+        });
+      } else {
+        throw new Error(
+          "Could not find a 'signMessage' implementation on the provided signer instance"
+        );
+      }
     }
 
     const authMethod = {
