@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/logger",
-  "version": "4.2.1",
+  "version": "5.0.0",
   "type": "commonjs",
   "tags": [
     "universal"
@@ -8,5 +8,7 @@
   "publishConfig": {
     "access": "public",
     "directory": "../../dist/packages/logger"
-  }
+  },
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }
