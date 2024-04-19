@@ -134,7 +134,7 @@ export default class EthWalletProvider extends BaseProvider {
     }
 
     address = ethers.utils.getAddress(address);
-
+    const nonce = await litNodeClient.getLatestBlockhash();
     if (signer?.signMessage) {
       // Get chain ID or default to Ethereum mainnet
       const selectedChain = LIT_CHAINS[chain];
@@ -152,7 +152,7 @@ export default class EthWalletProvider extends BaseProvider {
         version: '1',
         chainId,
         expirationTime: expiration,
-        nonce: litNodeClient.latestBlockhash!,
+        nonce: nonce,
       };
 
       const message: SiweMessage = new SiweMessage(preparedMessage);
@@ -168,10 +168,9 @@ export default class EthWalletProvider extends BaseProvider {
         address: address,
       };
     } else {
-      authSig = await checkAndSignAuthMessage({
-        chain,
-        nonce: litNodeClient.latestBlockhash!,
-      });
+      throw new Error(
+        "Could not find a 'signMessage' implementation on the provided signer instance"
+      );
     }
 
     const authMethod = {
