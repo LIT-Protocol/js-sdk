@@ -1,15 +1,20 @@
+import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 
 /**
  * Test Commands:
  * ❌ Not available in Cayenne
  * ❌ Not available in Habanero
- * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel --network=localchain --version=v1
+ * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel =
   async (devEnv: DevEnv) => {
+    devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+    devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+    devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
+
     const litActionSessionSigs = await getLitActionSessionSigs(devEnv);
 
     const fn = async (index: number) => {

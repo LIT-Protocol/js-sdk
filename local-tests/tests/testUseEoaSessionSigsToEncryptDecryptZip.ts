@@ -7,9 +7,9 @@ import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 
 /**
  * Test Commands:
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptZip --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptZip --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptZip --network=localchain --version=v0
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptZip
+ * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptZip
+ * ✅ NETWORK=localchain yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptZip
  */
 export const testUseEoaSessionSigsToEncryptDecryptZip = async (
   devEnv: DevEnv

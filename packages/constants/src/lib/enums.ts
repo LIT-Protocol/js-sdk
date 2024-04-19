@@ -83,17 +83,6 @@ export enum ProviderType {
   StytchTotpFactor = 'stytchTotpFactor',
 }
 
-export enum LIT_ENDPOINT {
-  HANDSHAKE = '/web/handshake',
-  SIGN_SESSION_KEY = '/web/sign_session_key',
-  EXECUTE_JS = '/web/execute',
-  PKP_SIGN = '/web/pkp/sign',
-  PKP_CLAIM = '/web/pkp/claim',
-  SIGN_ACCS = '/web/signing/access_control_condition',
-  ENCRYPTION_SIGN = '/web/encryption/sign',
-  SIGN_ECDSA = '/web/signing/signConditionEcdsa',
-}
-
 export enum LIT_URI {
   SESSION_KEY = 'lit:session:',
   CAPABILITY_DELEGATION = 'lit:capability:delegation',

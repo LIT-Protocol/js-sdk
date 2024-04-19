@@ -1,4 +1,4 @@
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
@@ -9,10 +9,13 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-
  * Test Commands:
  * ❌ NOT AVAILABLE IN CAYENNE
  * ❌ NOT AVAILABLE IN MANZANO
- * ✅ yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString --network=localchain --version=v0
+ * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
+ *
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString =
   async (devEnv: DevEnv) => {
+    devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+    devEnv.setUnavailable(LIT_TESTNET.MANZANO);
     // set access control conditions for encrypting and decrypting
     const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
       userAddress: devEnv.hotWalletAuthMethodOwnedPkp.ethAddress,

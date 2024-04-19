@@ -9,21 +9,40 @@ import {
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { ethers } from 'ethers';
-import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
+import {
+  AuthMethodScope,
+  AuthMethodType,
+  LIT_ENDPOINT,
+  LIT_ENDPOINT_VERSION,
+} from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { createSiweMessage, craftAuthSig } from '@lit-protocol/auth-helpers';
-// import { LocalStorage } from 'node-localstorage';
 import { log } from '@lit-protocol/misc';
 import { AuthSig } from '@lit-protocol/types';
 import networkContext from './networkContext.json';
 import { EthWalletProvider } from '@lit-protocol/lit-auth-client';
 
-export enum ENV {
+export enum LIT_TESTNET {
   LOCALCHAIN = 'localchain',
-  HABANERO = 'habanero',
   MANZANO = 'manzano',
   CAYENNE = 'cayenne',
 }
+
+export let processEnvs = {
+  DELAY_BETWEEN_TESTS: parseInt(process.env['DELAY_BETWEEN_TESTS']) || 1000,
+  NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
+  DEBUG: Boolean(process.env['DEBUG']) || false,
+  REQUEST_PER_DAY: parseInt(process.env['REQUEST_PER_DAY']) || 14400,
+};
+
+if (Object.values(LIT_TESTNET).indexOf(processEnvs.NETWORK) === -1) {
+  throw new Error(
+    `Invalid network environment. Please use one of ${Object.values(
+      LIT_TESTNET
+    )}`
+  );
+}
+
 export type PKPInfo = {
   tokenId: string;
   publicKey: string;
@@ -55,6 +74,15 @@ export interface DevEnv {
   getContractsClient: (
     signer: ethers.Wallet | SignerLike
   ) => Promise<LitContracts>;
+  setExecuteJsVersion: (
+    network: LIT_TESTNET,
+    version: LIT_ENDPOINT_VERSION
+  ) => void;
+  setPkpSignVersion: (
+    network: LIT_TESTNET,
+    version: LIT_ENDPOINT_VERSION
+  ) => void;
+  setUnavailable: (network: LIT_TESTNET) => void;
 }
 
 const PRIVATE_KEYS = [
@@ -68,10 +96,10 @@ export const getDevEnv = async (
     env,
     debug,
   }: {
-    env?: ENV;
+    env?: LIT_TESTNET;
     debug?: boolean;
   } = {
-    env: ENV.LOCALCHAIN,
+    env: LIT_TESTNET.LOCALCHAIN,
     debug: true,
   }
 ): Promise<DevEnv> => {
@@ -93,7 +121,7 @@ export const getDevEnv = async (
   log('🧪 [env-setup.ts] Setting up LitNodeClient');
   let litNodeClient: LitNodeClient;
 
-  if (env === ENV.LOCALCHAIN) {
+  if (env === LIT_TESTNET.LOCALCHAIN) {
     litNodeClient = new LitNodeClient({
       litNetwork: 'custom',
       bootstrapUrls: BOOTSTRAP_URLS,
@@ -107,7 +135,7 @@ export const getDevEnv = async (
       //   provider: new LocalStorage('./storage.test.db'),
       // },
     });
-  } else if (env === ENV.HABANERO || env === ENV.MANZANO) {
+  } else if (env === LIT_TESTNET.MANZANO) {
     litNodeClient = new LitNodeClient({
       litNetwork: env, // 'habanero' or 'manzano'
       checkNodeAttestation: true,
@@ -144,7 +172,7 @@ export const getDevEnv = async (
   );
   let rpc: string;
 
-  if (env === ENV.LOCALCHAIN) {
+  if (env === LIT_TESTNET.LOCALCHAIN) {
     rpc = LIT_RPC_URL;
   } else {
     rpc = 'https://chain-rpc.litprotocol.com/http';
@@ -199,7 +227,7 @@ export const getDevEnv = async (
   log('🧪 [env-setup.ts] Setting up contracts-sdk client');
   let litContractsClient: LitContracts;
 
-  if (env === ENV.LOCALCHAIN) {
+  if (env === LIT_TESTNET.LOCALCHAIN) {
     litContractsClient = new LitContracts({
       signer: wallet,
       debug,
@@ -232,7 +260,7 @@ export const getDevEnv = async (
   );
   const { capacityTokenIdStr } =
     await litContractsClient.mintCapacityCreditsNFT({
-      requestsPerDay: 144000, // 100 request per minute
+      requestsPerDay: processEnvs.REQUEST_PER_DAY, // 100 request per minute
       daysUntilUTCMidnightExpiration: 2,
     });
 
@@ -320,7 +348,7 @@ export const getDevEnv = async (
   log('🧪 [env-setup.ts] Bobs mints a PKP');
   let bobsContractsClient: LitContracts;
 
-  if (env === ENV.LOCALCHAIN) {
+  if (env === LIT_TESTNET.LOCALCHAIN) {
     bobsContractsClient = new LitContracts({
       signer: bobsWallet,
       debug,
@@ -338,7 +366,7 @@ export const getDevEnv = async (
   const getContractsClient = async (signer: ethers.Wallet) => {
     let contractsClient: LitContracts;
 
-    if (env === ENV.LOCALCHAIN) {
+    if (env === LIT_TESTNET.LOCALCHAIN) {
       contractsClient = new LitContracts({
         signer,
         debug,
@@ -356,6 +384,30 @@ export const getDevEnv = async (
     await contractsClient.connect();
 
     return contractsClient;
+  };
+
+  const setExecuteJsVersion = (
+    network: LIT_TESTNET,
+    version: LIT_ENDPOINT_VERSION
+  ) => {
+    if (processEnvs.NETWORK === network) {
+      process.env[LIT_ENDPOINT.EXECUTE_JS.envName] = version;
+    }
+  };
+
+  const setPkpSignVersion = (
+    network: LIT_TESTNET,
+    version: LIT_ENDPOINT_VERSION
+  ) => {
+    if (processEnvs.NETWORK === network) {
+      process.env[LIT_ENDPOINT.PKP_SIGN.envName] = version;
+    }
+  };
+
+  const setUnavailable = (network: LIT_TESTNET) => {
+    if (processEnvs.NETWORK === network) {
+      throw new Error('Unavailable');
+    }
   };
 
   await bobsContractsClient.connect();
@@ -419,5 +471,8 @@ export const getDevEnv = async (
 
     // Utility
     getContractsClient,
+    setExecuteJsVersion,
+    setPkpSignVersion,
+    setUnavailable,
   };
 };

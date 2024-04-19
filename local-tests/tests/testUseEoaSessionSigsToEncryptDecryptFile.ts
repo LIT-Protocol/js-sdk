@@ -7,13 +7,14 @@ import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 
 /**
  * Test Commands:
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile --network=localchain --version=v0
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile 
+ * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile 
+ * ✅ NETWORK=localchain yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile
  */
 export const testUseEoaSessionSigsToEncryptDecryptFile = async (
   devEnv: DevEnv
 ) => {
+  
   const message = 'Hello world';
   const blob = new Blob([message], { type: 'text/plain' });
   const blobArray = new Uint8Array(await blob.arrayBuffer());

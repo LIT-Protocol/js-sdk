@@ -30,9 +30,9 @@ import {
   LIT_ERROR,
   LIT_URI,
   LOCAL_STORAGE_KEYS,
-  LIT_ENDPOINT,
   LitNetwork,
   LIT_CURVE,
+  LIT_ENDPOINT,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {

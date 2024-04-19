@@ -1,4 +1,5 @@
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
@@ -11,13 +12,15 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
  * - Then: The claim operation should successfully return signatures, derived key IDs, and validate the existence and structure of claimed results.
  * *
  * Test Commands:
- * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys --network=localchain --version=v1
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
+ * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
+ * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
  */
 export const testUsePkpSessionSigsToExecuteJsClaimMultipleKeys = async (
   devEnv: DevEnv
 ) => {
+  devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
+
   const eoaSessionSigs = await getPkpSessionSigs(devEnv);
 
   const res = await devEnv.litNodeClient.executeJs({

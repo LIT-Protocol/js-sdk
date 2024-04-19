@@ -4,13 +4,12 @@ import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
-import { hashAccessControlConditions } from '@lit-protocol/access-control-conditions';
 
 /**
  * Test Commands:
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString --network=localchain --version=v0
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=localchain yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
  */
 export const testUseEoaSessionSigsToEncryptDecryptString = async (
   devEnv: DevEnv

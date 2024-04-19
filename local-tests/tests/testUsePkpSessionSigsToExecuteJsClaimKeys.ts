@@ -1,4 +1,5 @@
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
@@ -13,13 +14,15 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
  * - Note: The key claiming process involves multiple nodes within the Lit network verifying the sessionSigs and collaboratively signing the claim, which results in the generation of a new key pair if successful.
  *
  * Test Commands:
- * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimKeys --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimKeys --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimKeys --network=localchain --version=v1
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimKeys
+ * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimKeys
+ * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimKeys
  */
 export const testUsePkpSessionSigsToExecuteJsClaimKeys = async (
   devEnv: DevEnv
 ) => {
+  devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
+
   const pkpSessionSigs = await getPkpSessionSigs(devEnv);
 
   const res = await devEnv.litNodeClient.executeJs({

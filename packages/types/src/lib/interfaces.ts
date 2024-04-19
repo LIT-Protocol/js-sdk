@@ -1757,3 +1757,9 @@ export interface LitCustomAuth {
     sigName?: string;
   };
 }
+
+export interface LitEndpoint {
+  path: string;
+  version: string;
+  envName: string;
+}

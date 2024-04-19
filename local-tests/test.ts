@@ -12,8 +12,8 @@
  * DEBUG=true yarn test:local --filter=testUserAuthentication --network=testnet
  */
 
-import { getDevEnv } from './setup/env-setup';
-import { getNetworkFlag, runTests } from './setup/mini-test-framework';
+import { getDevEnv, processEnvs } from './setup/env-setup';
+import { runTests } from './setup/mini-test-framework';
 import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
 import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
@@ -45,8 +45,8 @@ import { testUsePkpSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testU
 
 (async () => {
   const devEnv = await getDevEnv({
-    env: getNetworkFlag(),
-    debug: process.env.DEBUG === 'true' || true,
+    env: processEnvs.NETWORK,
+    debug: processEnvs.DEBUG,
   });
 
   const eoaSessionSigsTests = {

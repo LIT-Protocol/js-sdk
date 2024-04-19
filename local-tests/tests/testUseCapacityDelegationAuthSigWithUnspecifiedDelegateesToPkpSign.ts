@@ -1,4 +1,5 @@
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 
 /**
@@ -12,12 +13,14 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
  *
  * ## Test Commands:
  * - ❌ Not supported in Cayenne, but session sigs would still work
- * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign --network=manzano --version=v0
- * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign --network=localchain --version=v1
+ * - ✅ NETWORK=manzano yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign
+ * - ✅ NETWORK=localchain yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign
  */
 
 export const testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign =
   async (devEnv: DevEnv) => {
+    devEnv.setPkpSignVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
+
     // 1. Getting the capacity credits NFT minted in the dev environment
     const ccNft = devEnv.capacityTokenId;
 
@@ -60,7 +63,7 @@ export const testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign 
     // 5. Bob can now pkp sign using the capacity credits NFT
     const runWithSessionSigs = await devEnv.litNodeClient.pkpSign({
       toSign: devEnv.toSignBytes32,
-      pubKey: devEnv.bobsOwnedPkp.publicKey,
+      pubKey: devEnv.bobsWalletOwnedPkp.publicKey,
       sessionSigs: bobsSessionSigs,
     });
 

@@ -1,4 +1,5 @@
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
+import { DevEnv, LIT_TESTNET, processEnvs } from 'local-tests/setup/env-setup';
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 
 /**
@@ -12,11 +13,13 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
  *
  * ## Test Commands:
  * - ❌ Not supported in Cayenne, but session sigs would still work
- * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs --network=manzano --version=v0
- * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs --network=localchain --version=v1
+ * - ✅ NETWORK=manzano yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs 
+ * - ✅ NETWORK=localchain yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs 
  */
 export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
   async (devEnv: DevEnv) => {
+    devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
+
     // 1. Getting the capacity credits NFT minted in the dev environment
     const ccNft = devEnv.capacityTokenId;
 
@@ -66,7 +69,7 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
       })();`,
       jsParams: {
         dataToSign: devEnv.toSignBytes32,
-        publicKey: devEnv.bobsOwnedPkp.publicKey,
+        publicKey: devEnv.bobsWalletOwnedPkp.publicKey,
       },
     });
 

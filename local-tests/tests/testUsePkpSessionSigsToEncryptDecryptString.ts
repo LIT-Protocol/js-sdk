@@ -7,9 +7,9 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 
 /**
  * Test Commands:
- * ❌ yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString --network=localchain --version=v0
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString
+ * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptString
  */
 export const testUsePkpSessionSigsToEncryptDecryptString = async (
   devEnv: DevEnv

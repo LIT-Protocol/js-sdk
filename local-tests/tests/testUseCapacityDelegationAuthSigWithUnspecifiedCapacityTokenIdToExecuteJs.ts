@@ -1,4 +1,5 @@
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 
 /**
@@ -12,11 +13,14 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
  *
  * ## Test Commands:
  * - ❌ Not supported in Cayenne, but session sigs would still work
- * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs --network=manzano --version=v0
- * - ✅ yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs --network=localchain --version=v1
+ * - ✅ NETWORK=manzano yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs
+ * - ✅ NETWORK=localchain yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs
  */
 export const testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs =
   async (devEnv: DevEnv) => {
+
+    devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
+    
     // 1. Hey, I'm Bob
     const bobsWallet = devEnv.bobsWallet;
 
@@ -62,7 +66,7 @@ export const testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExe
       })();`,
       jsParams: {
         dataToSign: devEnv.toSignBytes32,
-        publicKey: devEnv.bobsOwnedPkp.publicKey,
+        publicKey: devEnv.bobsWalletOwnedPkp.publicKey,
       },
     });
 

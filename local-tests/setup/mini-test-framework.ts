@@ -1,30 +1,6 @@
 import { LIT_PROCESS_FLAG } from '@lit-protocol/constants';
-import { DevEnv, ENV } from './env-setup';
+import { DevEnv, processEnvs } from './env-setup';
 import { log } from '@lit-protocol/misc';
-
-export const getNetworkFlag = (): ENV => {
-  const networkArg = process.argv.find((arg) =>
-    arg.startsWith(LIT_PROCESS_FLAG.NETWORK)
-  );
-
-  const network: string = networkArg
-    ? networkArg.replace(LIT_PROCESS_FLAG.NETWORK, '')
-    : 'localchain';
-
-  if (
-    network !== ENV.LOCALCHAIN &&
-    network !== ENV.HABANERO &&
-    network !== ENV.MANZANO &&
-    network !== ENV.CAYENNE
-  ) {
-    log(
-      '[getNetworkFlag] Invalid network argument. Please use --network=localchain, --network=habanero, --network=manzano, or --network=cayenne'
-    );
-    process.exit();
-  }
-
-  return network;
-};
 
 // Function to parse command line arguments for filters
 export const getFiltersFlag = (): string[] => {
@@ -102,17 +78,21 @@ export const runTests = async ({
       // Store passed test with its time taken
       passedTests.push(`${testName} (Passed in ${timeTaken} ms)`);
     } catch (error) {
-      const endTime = performance.now(); // End time of the test
-      const timeTaken = (endTime - startTime).toFixed(2);
+      if (error.message !== 'Unavailable') {
+        const endTime = performance.now(); // End time of the test
+        const timeTaken = (endTime - startTime).toFixed(2);
 
-      // Log failure with a cross and gray color
-      console.error(
-        `\x1b[31m✖\x1b[90m ${index}. ${testName} - Failed (${timeTaken} ms)\x1b[0m`
-      );
-      console.error(`\x1b[31mError:\x1b[90m ${error.message}\x1b[0m`);
+        // Log failure with a cross and gray color
+        console.error(
+          `\x1b[31m✖\x1b[90m ${index}. ${testName} - Failed (${timeTaken} ms)\x1b[0m`
+        );
+        console.error(`\x1b[31mError:\x1b[90m ${error.message}\x1b[0m`);
 
-      // Add failed test to the list
-      failedTests.push(`${testName} (Failed in ${timeTaken} ms)`);
+        // Add failed test to the list
+        failedTests.push(`${testName} (Failed in ${timeTaken} ms)`);
+      } else {
+        console.log(`\x1b[90m✖ ${index}. ${testName} - Skipped\x1b[0m`);
+      }
     } finally {
       // Restore the original console functions after each test
       // console.log = originalConsoleLog;
@@ -121,9 +101,11 @@ export const runTests = async ({
 
     index++; // Increment test index
 
-    // Wait for 2 seconds between tests if there are more than 1 test to run
+    // delay between tests if there are more than 1 test to run
     if (shouldWait) {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) =>
+        setTimeout(resolve, processEnvs.DELAY_BETWEEN_TESTS)
+      );
     }
   }
 

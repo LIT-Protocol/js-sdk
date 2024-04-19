@@ -1,10 +1,10 @@
 import { isNode, log } from '@lit-protocol/misc';
 import {
-  LIT_ENDPOINT,
   LIT_ENDPOINT_VERSION,
   LIT_PROCESS_ENV,
   LIT_PROCESS_FLAG,
 } from '@lit-protocol/constants';
+import { LitEndpoint } from '@lit-protocol/types';
 
 /**
  * Get the Lit endpoint path base on:
@@ -65,8 +65,7 @@ export const getLitEndpointPath = () => {
  */
 export const composeLitUrl = (params: {
   url: string;
-  endpoint: LIT_ENDPOINT;
-  version?: LIT_ENDPOINT_VERSION;
+  endpoint: LitEndpoint;
 }) => {
   // check if params.url is a valid URL
   try {
@@ -75,17 +74,15 @@ export const composeLitUrl = (params: {
     throw new Error(`[composeLitUrl] Invalid URL: "${params.url}"`);
   }
 
-  if (params.version) {
-    if (params.version === LIT_ENDPOINT_VERSION.LEGACY) {
-      log(
-        `[composeLitUrl] Using legacy Lit endpoint version: "${params.version}"`
-      );
-    }
+  let versionOverride: string | null = null;
 
-    return `${params.url}${params.endpoint}${params.version}`;
+  // Get the version override for a particular endpoint
+  if (isNode()) {
+    versionOverride = process.env[`${params.endpoint.envName}`] || null;
   }
 
-  const endpointVersion = getLitEndpointPath();
+  // Use the overridden version if it exists, otherwise use the default
+  const version = versionOverride || params.endpoint.version;
 
-  return `${params.url}${params.endpoint}${endpointVersion}`;
+  return `${params.url}${params.endpoint.path}${version}`;
 };

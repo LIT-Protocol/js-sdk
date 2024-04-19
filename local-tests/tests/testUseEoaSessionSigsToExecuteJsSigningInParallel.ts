@@ -1,16 +1,19 @@
+import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 
 /**
  * Test Commands:
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigningInParallel --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigningInParallel --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigningInParallel --network=localchain --version=v1
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigningInParallel
+ * ✅ NETWORK=manzano yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigningInParallel
+ * ✅ NETWORK=localchain yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigningInParallel
  */
 export const testUseEoaSessionSigsToExecuteJsSigningInParallel = async (
   devEnv: DevEnv
 ) => {
+  devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
+
   const eoaSessionSigs = await getEoaSessionSigs(devEnv);
 
   const fn = async (index: number) => {

@@ -1,5 +1,9 @@
-import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
-import { DevEnv } from 'local-tests/setup/env-setup';
+import {
+  AuthMethodScope,
+  AuthMethodType,
+  LIT_ENDPOINT_VERSION,
+} from '@lit-protocol/constants';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LitAbility } from '@lit-protocol/types';
@@ -14,13 +18,15 @@ import { LitAbility } from '@lit-protocol/types';
  *
  *
  * ## Test Commands:
- * - ❌ Not supported in Cayenne, but session sigs would still work
- * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs --network=manzano --version=v0
- * - ✅ yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs --network=localchain --version=v1
+ * - ❌ Not supported in Cayenne
+ * - ✅ NETWORK=manzano yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs
+ * - ✅ NETWORK=localchain yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs
  */
 export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
   devEnv: DevEnv
 ) => {
+  devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
+
   // Checking the scopes of the PKP owned by Bob
   const bobsAuthMethodAuthId = await LitAuthClient.getAuthIdByAuthMethod(
     devEnv.bobsWalletAuthMethod

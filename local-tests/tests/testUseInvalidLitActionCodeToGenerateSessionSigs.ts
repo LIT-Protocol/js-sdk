@@ -1,15 +1,18 @@
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
 import { getInvalidLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 
 /**
  * Test Commands:
  * ❌ NOT AVAILABLE IN CAYENNE
  * ❌ NOT AVAILABLE IN HABANERO
- * ✅ yarn test:local --filter=testUseInvalidLitActionCodeToGenerateSessionSigs --network=localchain --version=v1
+ * ✅ NETWORK=localchain yarn test:local --filter=testUseInvalidLitActionCodeToGenerateSessionSigs
  */
 export const testUseInvalidLitActionCodeToGenerateSessionSigs = async (
   devEnv: DevEnv
 ) => {
+  devEnv.setPkpSignVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
+
   try {
     await getInvalidLitActionSessionSigs(devEnv);
   } catch (e: any) {

@@ -3,10 +3,11 @@ import {
   LITCosmosChain,
   LITEVMChain,
   LITSVMChain,
+  LitEndpoint,
 } from '@lit-protocol/types';
 
 import { INTERNAL_DEV } from './autogen_internal';
-import { LitNetwork } from '../enums';
+import { LIT_ENDPOINT_VERSION, LitNetwork } from '../enums';
 
 /**
  * Lit Protocol Network Public Key
@@ -783,3 +784,49 @@ export const RELAY_URL_MANZANO = 'https://manzano-relayer.getlit.dev';
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
+
+export const LIT_ENDPOINT = {
+  HANDSHAKE: {
+    path: '/web/handshake',
+    version: LIT_ENDPOINT_VERSION.LEGACY,
+    envName: 'HANDSHAKE',
+  },
+  SIGN_SESSION_KEY: {
+    path: '/web/sign_session_key',
+    // version: LIT_ENDPOINT_VERSION.V1,
+    version: LIT_ENDPOINT_VERSION.LEGACY,
+    envName: 'SIGN_SESSION_KEY',
+  },
+  EXECUTE_JS: {
+    path: '/web/execute',
+    // version: LIT_ENDPOINT_VERSION.V1,
+    version: LIT_ENDPOINT_VERSION.LEGACY,
+    envName: 'EXECUTE_JS',
+  },
+  PKP_SIGN: {
+    path: '/web/pkp/sign',
+    // version: LIT_ENDPOINT_VERSION.V1,
+    version: LIT_ENDPOINT_VERSION.LEGACY,
+    envName: 'PKP_SIGN',
+  },
+  PKP_CLAIM: {
+    path: '/web/pkp/claim',
+    version: LIT_ENDPOINT_VERSION.LEGACY,
+    envName: 'PKP_CLAIM',
+  },
+  SIGN_ACCS: {
+    path: '/web/signing/access_control_condition',
+    version: LIT_ENDPOINT_VERSION.LEGACY,
+    envName: 'SIGN_ACCS',
+  },
+  ENCRYPTION_SIGN: {
+    path: '/web/encryption/sign',
+    version: LIT_ENDPOINT_VERSION.LEGACY,
+    envName: 'ENCRYPTION_SIGN',
+  },
+  SIGN_ECDSA: {
+    path: '/web/signing/signConditionEcdsa',
+    version: LIT_ENDPOINT_VERSION.LEGACY,
+    envName: 'SIGN_ECDSA',
+  },
+};

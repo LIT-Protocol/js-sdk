@@ -880,7 +880,6 @@ export class LitCore {
         const urlWithPath = composeLitUrl({
           url,
           endpoint: LIT_ENDPOINT.HANDSHAKE,
-          version: LIT_ENDPOINT_VERSION.LEGACY,
         });
 
         log(`handshakeWithNode ${urlWithPath}`);

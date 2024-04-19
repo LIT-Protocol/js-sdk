@@ -76367,7 +76367,7 @@ var testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs = async (devEnv) 
       })();`,
     jsParams: {
       dataToSign: devEnv.toSignBytes32,
-      publicKey: devEnv.bobsOwnedPkp.publicKey
+      publicKey: devEnv.bobsWalletOwnedPkp.publicKey
     }
   });
   if (!res.signatures.sig.r) {
@@ -76420,7 +76420,7 @@ var testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign = async (devEnv) =>
   const res = await devEnv.litNodeClient.pkpSign({
     sessionSigs: bobsSessionSigs,
     toSign: devEnv.toSignBytes32,
-    pubKey: devEnv.bobsOwnedPkp.publicKey
+    pubKey: devEnv.bobsWalletOwnedPkp.publicKey
   });
   if (!res.r) {
     throw new Error(`Expected "r" in res`);
@@ -76470,7 +76470,7 @@ var testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign = async (
   });
   const runWithSessionSigs = await devEnv.litNodeClient.pkpSign({
     toSign: devEnv.toSignBytes32,
-    pubKey: devEnv.bobsOwnedPkp.publicKey,
+    pubKey: devEnv.bobsWalletOwnedPkp.publicKey,
     sessionSigs: bobsSessionSigs
   });
   if (!runWithSessionSigs.r) {
@@ -76525,7 +76525,7 @@ var testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs = 
       })();`,
     jsParams: {
       dataToSign: devEnv.toSignBytes32,
-      publicKey: devEnv.bobsOwnedPkp.publicKey
+      publicKey: devEnv.bobsWalletOwnedPkp.publicKey
     }
   });
   if (!res.signatures.sig.r) {
@@ -76575,7 +76575,7 @@ var testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign = as
   const res = await devEnv.litNodeClient.pkpSign({
     sessionSigs: bobsSessionSigs,
     toSign: devEnv.toSignBytes32,
-    pubKey: devEnv.bobsOwnedPkp.publicKey
+    pubKey: devEnv.bobsWalletOwnedPkp.publicKey
   });
   if (!res.r) {
     throw new Error(`Expected "r" in res`);
@@ -76634,7 +76634,7 @@ var testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs = async
       })();`,
     jsParams: {
       dataToSign: devEnv.toSignBytes32,
-      publicKey: devEnv.bobsOwnedPkp.publicKey
+      publicKey: devEnv.bobsWalletOwnedPkp.publicKey
     }
   });
   if (!res.signatures.sig.r) {
