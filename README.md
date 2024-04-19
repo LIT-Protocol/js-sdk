@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V4.2.0</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V5.0.0</h1>
 
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
@@ -92,7 +92,7 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 
 ## API Doc
 
-- V3 (Current): https://v3.api-docs.getlit.dev/ <b4/>
+- V5 (Current): https://v3.api-docs.getlit.dev/ <b4/>
 
 ### Old APIs Doc(s)
 

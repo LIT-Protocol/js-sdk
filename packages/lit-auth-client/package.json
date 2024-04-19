@@ -1,6 +1,6 @@
 {
   "name": "@lit-protocol/lit-auth-client",
-  "version": "4.2.1",
+  "version": "5.0.0",
   "type": "commonjs",
   "license": "MIT",
   "homepage": "https://github.com/Lit-Protocol/js-sdk",
@@ -29,5 +29,7 @@
     "@simplewebauthn/browser": "^7.2.0",
     "@simplewebauthn/typescript-types": "^7.0.0",
     "nanoid": "3.3.4"
-  }
+  },
+  "main": "./dist/src/index.js",
+  "typings": "./dist/src/index.d.ts"
 }
