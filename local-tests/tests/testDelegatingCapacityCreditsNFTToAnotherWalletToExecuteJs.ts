@@ -1,5 +1,9 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { DevEnv, LIT_TESTNET, processEnvs } from 'local-tests/setup/tinny-setup';
+import {
+  DevEnv,
+  LIT_TESTNET,
+  processEnvs,
+} from 'local-tests/setup/tinny-setup';
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 
 /**
@@ -13,8 +17,8 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
  *
  * ## Test Commands:
  * - ❌ Not supported in Cayenne, but session sigs would still work
- * - ✅ NETWORK=manzano yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs 
- * - ✅ NETWORK=localchain yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs 
+ * - ✅ NETWORK=manzano yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs
+ * - ✅ NETWORK=localchain yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs
  */
 export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
   async (devEnv: DevEnv) => {

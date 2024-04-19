@@ -13,11 +13,18 @@ import {
 } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
+import { LitNetwork } from '@lit-protocol/constants';
 
 export const getEoaSessionSigs = async (
   devEnv: DevEnv,
   resourceAbilityRequests?: LitResourceAbilityRequest[]
 ) => {
+  if (devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano) {
+    console.warn(
+      'Manzano network detected. Adding capacityDelegationAuthSig to eoaSessionSigs'
+    );
+  }
+
   // Use default resourceAbilityRequests if not provided
   const _resourceAbilityRequests = resourceAbilityRequests || [
     {
@@ -66,6 +73,11 @@ export const getEoaSessionSigs = async (
 
       return authSig;
     },
+
+    // -- only add this for manzano network because of rate limiting
+    ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
+      ? { capabilityAuthSigs: [devEnv.capacityDelegationAuthSig] }
+      : {}),
   });
 
   log('[getEoaSessionSigs]: ', getEoaSessionSigs);

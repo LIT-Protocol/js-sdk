@@ -33,7 +33,7 @@ export const getPkpSessionSigs = async (
 
     // -- only add this for manzano network
     ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
-      ? { capacityDelegationAuthSig: devEnv.capacityDelegationAuthSigWithPkp }
+      ? { capacityDelegationAuthSig: devEnv.capacityDelegationAuthSig }
       : {}),
   });
 

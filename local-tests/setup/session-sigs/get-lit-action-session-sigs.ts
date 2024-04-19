@@ -1,6 +1,7 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { DevEnv } from '../tinny-setup';
 import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
+import { LitNetwork } from '@lit-protocol/constants';
 
 const VALID_SESSION_SIG_LIT_ACTION_CODE = `
 // Works with an AuthSig AuthMethod
@@ -23,6 +24,12 @@ export const getLitActionSessionSigs = async (
   devEnv: DevEnv,
   resourceAbilityRequests?: LitResourceAbilityRequest[]
 ) => {
+  if (devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano) {
+    console.warn(
+      'Manzano network detected. Adding capacityDelegationAuthSig to litActionSessionSigs'
+    );
+  }
+
   // Use default resourceAbilityRequests if not provided
   const _resourceAbilityRequests = resourceAbilityRequests || [
     {
@@ -46,6 +53,11 @@ export const getLitActionSessionSigs = async (
       publicKey: devEnv.hotWalletAuthMethodOwnedPkp.publicKey,
       sigName: 'unified-auth-sig',
     },
+
+    // -- only add this for manzano network
+    ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
+      ? { capacityDelegationAuthSig: devEnv.capacityDelegationAuthSig }
+      : {}),
   });
 
   return litActionSessionSigs;

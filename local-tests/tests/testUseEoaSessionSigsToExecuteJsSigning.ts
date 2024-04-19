@@ -12,6 +12,7 @@ import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-sessio
 export const testUseEoaSessionSigsToExecuteJsSigning = async (
   devEnv: DevEnv
 ) => {
+
   devEnv.useNewPrivateKey();
   devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 

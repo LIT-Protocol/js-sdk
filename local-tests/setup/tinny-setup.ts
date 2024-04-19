@@ -26,6 +26,7 @@ export enum LIT_TESTNET {
 }
 
 export let processEnvs = {
+  MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 3,
   RUN_IN_BAND: Boolean(process.env['RUN_IN_BAND']) || false,
   DELAY_BETWEEN_TESTS: parseInt(process.env['DELAY_BETWEEN_TESTS']) || 100,
   NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
@@ -127,7 +128,6 @@ export interface DevEnv {
   lastestBlockhash: string;
   capacityTokenId: string;
   capacityDelegationAuthSig: AuthSig;
-  capacityDelegationAuthSigWithPkp: AuthSig;
   toSignBytes32: Uint8Array;
 
   // All about Bob
@@ -166,7 +166,7 @@ export const getDevEnv = async (
     debug?: boolean;
   } = {
     env: LIT_TESTNET.LOCALCHAIN,
-    debug: true,
+    debug: processEnvs.DEBUG,
   }
 ): Promise<DevEnv> => {
   log('🧪 [tinny-setup.ts] Starting devEnv');
@@ -329,7 +329,7 @@ export const getDevEnv = async (
   );
   const { capacityTokenIdStr } =
     await litContractsClient.mintCapacityCreditsNFT({
-      requestsPerDay: processEnvs.REQUEST_PER_DAY, // 100 request per minute
+      requestsPerDay: processEnvs.REQUEST_PER_DAY,
       daysUntilUTCMidnightExpiration: 2,
     });
 
@@ -339,7 +339,7 @@ export const getDevEnv = async (
       uses: '1',
       dAppOwnerWallet: wallet,
       capacityTokenId: capacityTokenIdStr,
-      delegateeAddresses: [wallet.address],
+      // delegateeAddresses: [wallet.address], meaning anyone can use it
     });
 
   /**
@@ -366,23 +366,6 @@ export const getDevEnv = async (
 
   /**
    * ====================================
-   * Creates a Capacity Delegation AuthSig
-   * that has PKP as one of the delegatees
-   * ====================================
-   */
-  log(
-    '🧪 [tinny-setup.ts] Creates a Capacity Delegation AuthSig that has PKP as one of the delegatees'
-  );
-  const { capacityDelegationAuthSig: capacityDelegationAuthSigWithPkp } =
-    await litNodeClient.createCapacityDelegationAuthSig({
-      uses: '1',
-      dAppOwnerWallet: wallet,
-      capacityTokenId: capacityTokenIdStr,
-      delegateeAddresses: [hotWalletAuthMethodOwnedPkp.ethAddress],
-    });
-
-  /**
-   * ====================================
    * A common toSign bytes32 for all signing tests
    * ====================================
    */
@@ -393,7 +376,6 @@ export const getDevEnv = async (
   /**
    * ====================================
    * Bob's Wallet (Just another random wallet)
-   * Usually used for capacity credits delegation
    * ====================================
    */
   const bobsPrivateKey = bobsWalletKey.privateKey;
@@ -475,7 +457,7 @@ export const getDevEnv = async (
 
   const setUnavailable = (network: LIT_TESTNET) => {
     if (processEnvs.NETWORK === network) {
-      throw new Error('Unavailable');
+      throw new Error('LIT_IGNORE_TEST');
     }
   };
 
@@ -515,9 +497,7 @@ export const getDevEnv = async (
   )}
 ✅ Capacity Token ID: ${capacityTokenIdStr}
 ✅ Capacity Delegation Auth Sig: ${JSON.stringify(capacityDelegationAuthSig)}
-✅ Capacity Delegation Auth Sig With PKP: ${JSON.stringify(
-    capacityDelegationAuthSigWithPkp
-  )}
+
 ✅ Bob's Wallet Address: ${await bobsWallet.getAddress()}
 ----- Test Starts Below -----
 `);
@@ -538,7 +518,6 @@ export const getDevEnv = async (
     lastestBlockhash: nonce,
     capacityTokenId: capacityTokenIdStr,
     capacityDelegationAuthSig,
-    capacityDelegationAuthSigWithPkp,
     toSignBytes32,
 
     // All about Bob
