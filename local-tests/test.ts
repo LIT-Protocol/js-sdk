@@ -42,6 +42,16 @@ import { testUsePkpSessionSigsToExecuteJsSigningInParallel } from './tests/testU
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel';
 import { testUsePkpSessionSigsToExecuteJsClaimKeys } from './tests/testUsePkpSessionSigsToExecuteJsClaimKeys';
 import { testUsePkpSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUsePkpSessionSigsToExecuteJsClaimMultipleKeys';
+import { testUsePkpSessionSigsToExecuteJsJsonResponse } from './tests/testUsePkpSessionSigsToExecuteJsJsonResponse';
+import { testUsePkpSessionSigsToExecuteJsConsoleLog } from './tests/testUsePkpSessionSigsToExecuteJsConsoleLog';
+import { testUsePkpSessionSigsToEncryptDecryptFile } from './tests/testUsePkpSessionSigsToEncryptDecryptFile';
+import { testUsePkpSessionSigsToEncryptDecryptZip } from './tests/testUsePkpSessionSigsToEncryptDecryptZip';
+import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys';
+import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys';
+import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse';
+import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog';
+import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
+import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip';
 
 (async () => {
   const devEnv = await getDevEnv({
@@ -68,24 +78,24 @@ import { testUsePkpSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testU
     testUsePkpSessionSigsToExecuteJsSigningInParallel,
     testUsePkpSessionSigsToExecuteJsClaimKeys,
     testUsePkpSessionSigsToExecuteJsClaimMultipleKeys,
-    // testUsePkpSessionSigsToExecuteJsJsonResponse,
-    // testUsePkpSessionSigsToExecuteJsConsoleLog,
+    testUsePkpSessionSigsToExecuteJsJsonResponse,
+    testUsePkpSessionSigsToExecuteJsConsoleLog,
     testUsePkpSessionSigsToEncryptDecryptString,
-    // testUsePkpSessionSigsToEncryptDecryptFile
-    // testUsePkpSessionSigsToEncryptDecryptZip
+    testUsePkpSessionSigsToEncryptDecryptFile,
+    testUsePkpSessionSigsToEncryptDecryptZip,
   };
 
   const litActionSessionSigsTests = {
     testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,
     testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,
     testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel,
-    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys,
-    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys,
-    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse,
-    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog,
+    testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys,
+    testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys,
+    testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse,
+    testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog,
     testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString,
-    // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
-    // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip
+    testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile,
+    testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip,
     testUseInvalidLitActionCodeToGenerateSessionSigs,
   };
 

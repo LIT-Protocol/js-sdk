@@ -75710,7 +75710,11 @@ var processEnvs = {
   DELAY_BETWEEN_TESTS: parseInt(process.env["DELAY_BETWEEN_TESTS"]) || 1e3,
   NETWORK: process.env["NETWORK"] || "localchain" /* LOCALCHAIN */,
   DEBUG: Boolean(process.env["DEBUG"]) || false,
-  REQUEST_PER_DAY: parseInt(process.env["REQUEST_PER_DAY"]) || 14400
+  REQUEST_PER_DAY: parseInt(process.env["REQUEST_PER_DAY"]) || 14400,
+  PRIVATE_KEYS: process.env["PRIVATE_KEYS"]?.split(",") || [
+    "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+  ]
 };
 if (Object.values(LIT_TESTNET).indexOf(processEnvs.NETWORK) === -1) {
   throw new Error(
@@ -75719,10 +75723,6 @@ if (Object.values(LIT_TESTNET).indexOf(processEnvs.NETWORK) === -1) {
     )}`
   );
 }
-var PRIVATE_KEYS = [
-  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-  "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-];
 var getDevEnv = async ({
   env,
   debug
@@ -75788,7 +75788,7 @@ var getDevEnv = async ({
     rpc = "https://chain-rpc.litprotocol.com/http";
   }
   const provider = new ethers_exports.providers.JsonRpcProvider(rpc);
-  const wallet = new ethers_exports.Wallet(PRIVATE_KEYS[0], provider);
+  const wallet = new ethers_exports.Wallet(processEnvs.PRIVATE_KEYS[0], provider);
   log("\u{1F9EA} [env-setup.ts] Get nonce from lit node");
   const nonce = await litNodeClient.getLatestBlockhash();
   log("\u{1F9EA} [env-setup.ts] Get Hot Wallet Auth Sig");
@@ -75866,7 +75866,7 @@ var getDevEnv = async ({
   const toSignBytes32 = ethers_exports.utils.arrayify(
     ethers_exports.utils.keccak256([1, 2, 3, 4, 5])
   );
-  const bobsPrivateKey = PRIVATE_KEYS[1];
+  const bobsPrivateKey = processEnvs.PRIVATE_KEYS[1];
   const bobsWallet = new ethers_exports.Wallet(bobsPrivateKey, provider);
   const bobsWalletAuthMethod = await EthWalletProvider.authenticate({
     signer: bobsWallet,
@@ -77513,6 +77513,458 @@ var testUsePkpSessionSigsToExecuteJsClaimMultipleKeys = async (devEnv) => {
   });
 };
 
+// local-tests/tests/testUsePkpSessionSigsToExecuteJsJsonResponse.ts
+init_shim();
+var testUsePkpSessionSigsToExecuteJsJsonResponse = async (devEnv) => {
+  devEnv.setExecuteJsVersion("localchain" /* LOCALCHAIN */, "/v1" /* V1 */);
+  const pkpSessionSigs = await getPkpSessionSigs(devEnv);
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: pkpSessionSigs,
+    code: `(async () => {
+      console.log('hello world')
+
+      LitActions.setResponse({
+        response: JSON.stringify({hello: 'world'})
+      });
+
+    })();`
+  });
+  if (!res.response) {
+    throw new Error(`Expected "response" in res`);
+  }
+  if (!res.response.startsWith("{")) {
+    throw new Error(`Expected "response" to start with {`);
+  }
+  if (!res.response.endsWith("}")) {
+    throw new Error(`Expected "response" to end with }`);
+  }
+  if (!res.logs) {
+    throw new Error(`Expected "logs" in res`);
+  }
+  if (!res.logs.includes("hello world")) {
+    throw new Error(`Expected "logs" to include 'hello world'`);
+  }
+  if (!res.success) {
+    throw new Error(`Expected "success" in res`);
+  }
+  if (res.success !== true) {
+    throw new Error(`Expected "success" to be true`);
+  }
+};
+
+// local-tests/tests/testUsePkpSessionSigsToExecuteJsConsoleLog.ts
+init_shim();
+var testUsePkpSessionSigsToExecuteJsConsoleLog = async (devEnv) => {
+  devEnv.setExecuteJsVersion("localchain" /* LOCALCHAIN */, "/v1" /* V1 */);
+  const pkpSessionSigs = await getPkpSessionSigs(devEnv);
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: pkpSessionSigs,
+    code: `(async () => {
+      console.log('hello world')
+    })();`
+  });
+  console.log("res:", res);
+  if (res.response) {
+    throw new Error(`Expected "response" to be falsy`);
+  }
+  if (!res.logs) {
+    throw new Error(`Expected "logs" in res`);
+  }
+  if (!res.logs.includes("hello world")) {
+    throw new Error(`Expected "logs" to include 'hello world'`);
+  }
+  if (!res.success) {
+    throw new Error(`Expected "success" in res`);
+  }
+};
+
+// local-tests/tests/testUsePkpSessionSigsToEncryptDecryptFile.ts
+init_shim();
+var testUsePkpSessionSigsToEncryptDecryptFile = async (devEnv) => {
+  const message = "Hello world";
+  const blob = new Blob([message], { type: "text/plain" });
+  const blobArray = new Uint8Array(await blob.arrayBuffer());
+  const accs = AccessControlConditions2.getEmvBasicAccessControlConditions({
+    userAddress: devEnv.hotWalletAuthMethodOwnedPkp.ethAddress
+  });
+  const pkpSessionSigs = await getPkpSessionSigs(devEnv);
+  const encryptRes = await encryptString(
+    {
+      accessControlConditions: accs,
+      chain: "ethereum",
+      sessionSigs: pkpSessionSigs,
+      dataToEncrypt: "Hello world"
+    },
+    devEnv.litNodeClient
+  );
+  console.log("encryptRes:", encryptRes);
+  if (!encryptRes.ciphertext) {
+    throw new Error(`Expected "ciphertext" in encryptRes`);
+  }
+  if (!encryptRes.dataToEncryptHash) {
+    throw new Error(`Expected "dataToEncryptHash" to in encryptRes`);
+  }
+  const accsResourceString = await LitAccessControlConditionResource.composeLitActionResourceString(
+    accs,
+    encryptRes.dataToEncryptHash
+  );
+  const pkpSessionSigs2 = await getPkpSessionSigs(devEnv, [
+    {
+      resource: new LitAccessControlConditionResource(accsResourceString),
+      ability: "access-control-condition-decryption" /* AccessControlConditionDecryption */
+    }
+  ]);
+  const decriptedFile = await decryptToFile(
+    {
+      accessControlConditions: accs,
+      ciphertext: encryptRes.ciphertext,
+      dataToEncryptHash: encryptRes.dataToEncryptHash,
+      sessionSigs: pkpSessionSigs2,
+      chain: "ethereum"
+    },
+    devEnv.litNodeClient
+  );
+  if (blobArray.length !== decriptedFile.length) {
+    throw new Error(
+      `decrypted file should match the original file but received ${decriptedFile}`
+    );
+  }
+  for (let i2 = 0; i2 < blobArray.length; i2++) {
+    if (blobArray[i2] !== decriptedFile[i2]) {
+      throw new Error(`decrypted file should match the original file`);
+    }
+  }
+  console.log("decriptedFile:", decriptedFile);
+};
+
+// local-tests/tests/testUsePkpSessionSigsToEncryptDecryptZip.ts
+init_shim();
+var testUsePkpSessionSigsToEncryptDecryptZip = async (devEnv) => {
+  const message = "Hello world";
+  const accs = AccessControlConditions2.getEmvBasicAccessControlConditions({
+    userAddress: devEnv.hotWalletAuthMethodOwnedPkp.ethAddress
+  });
+  const pkpSessionSigs = await getPkpSessionSigs(devEnv);
+  const encryptRes = await zipAndEncryptString(
+    {
+      accessControlConditions: accs,
+      chain: "ethereum",
+      sessionSigs: pkpSessionSigs,
+      dataToEncrypt: message
+    },
+    devEnv.litNodeClient
+  );
+  console.log("encryptRes:", encryptRes);
+  if (!encryptRes.ciphertext) {
+    throw new Error(`Expected "ciphertext" in encryptRes`);
+  }
+  if (!encryptRes.dataToEncryptHash) {
+    throw new Error(`Expected "dataToEncryptHash" to in encryptRes`);
+  }
+  const accsResourceString = await LitAccessControlConditionResource.composeLitActionResourceString(
+    accs,
+    encryptRes.dataToEncryptHash
+  );
+  const pkpSessionSigs2 = await getPkpSessionSigs(devEnv, [
+    {
+      resource: new LitAccessControlConditionResource(accsResourceString),
+      ability: "access-control-condition-decryption" /* AccessControlConditionDecryption */
+    }
+  ]);
+  const decryptedZip = await decryptToZip(
+    {
+      accessControlConditions: accs,
+      ciphertext: encryptRes.ciphertext,
+      dataToEncryptHash: encryptRes.dataToEncryptHash,
+      sessionSigs: pkpSessionSigs2,
+      chain: "ethereum"
+    },
+    devEnv.litNodeClient
+  );
+  const decryptedMessage = await decryptedZip["string.txt"].async("string");
+  if (message !== decryptedMessage) {
+    throw new Error(
+      `decryptedMessage should be ${message} but received ${decryptedMessage}`
+    );
+  }
+  console.log("decryptedMessage:", decryptedMessage);
+};
+
+// local-tests/tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys.ts
+init_shim();
+var testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys = async (devEnv) => {
+  devEnv.setUnavailable("cayenne" /* CAYENNE */);
+  devEnv.setUnavailable("manzano" /* MANZANO */);
+  devEnv.setExecuteJsVersion("localchain" /* LOCALCHAIN */, "/v1" /* V1 */);
+  const litActionSessionSigs = await getLitActionSessionSigs(devEnv, [
+    {
+      resource: new LitPKPResource("*"),
+      ability: "pkp-signing" /* PKPSigning */
+    },
+    {
+      resource: new LitActionResource("*"),
+      ability: "lit-action-execution" /* LitActionExecution */
+    }
+  ]);
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: litActionSessionSigs,
+    code: `(async () => {
+      Lit.Actions.claimKey({keyId: "foo"});
+      Lit.Actions.claimKey({keyId: "bar"});
+    })();`
+  });
+  if (!res.claims.foo) {
+    throw new Error(`Expected "foo" in res.claims`);
+  }
+  if (!res.claims.foo.derivedKeyId) {
+    throw new Error(`Expected "derivedKeyId" in res.claims.foo`);
+  }
+  if (!res.claims.foo.signatures) {
+    throw new Error(`Expected "signatures" in res.claims.foo`);
+  }
+  res.claims.foo.signatures.forEach((sig) => {
+    if (!sig.r) {
+      throw new Error(`Expected "r" in sig`);
+    }
+    if (!sig.s) {
+      throw new Error(`Expected "s" in sig`);
+    }
+    if (!sig.v) {
+      throw new Error(`Expected "v" in sig`);
+    }
+  });
+};
+
+// local-tests/tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys.ts
+init_shim();
+var testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys = async (devEnv) => {
+  devEnv.setUnavailable("cayenne" /* CAYENNE */);
+  devEnv.setUnavailable("manzano" /* MANZANO */);
+  devEnv.setExecuteJsVersion("localchain" /* LOCALCHAIN */, "/v1" /* V1 */);
+  const litActionSessionSigs = await getLitActionSessionSigs(devEnv);
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: litActionSessionSigs,
+    code: `(async () => {
+      Lit.Actions.claimKey({keyId: "foo"});
+      Lit.Actions.claimKey({keyId: "bar"});
+    })();`
+  });
+  if (!res.claims.foo) {
+    throw new Error(`Expected "foo" in res.claims`);
+  }
+  if (!res.claims.foo.derivedKeyId) {
+    throw new Error(`Expected "derivedKeyId" in res.claims.foo`);
+  }
+  if (!res.claims.foo.signatures) {
+    throw new Error(`Expected "signatures" in res.claims.foo`);
+  }
+  res.claims.foo.signatures.forEach((sig) => {
+    if (!sig.r) {
+      throw new Error(`Expected "r" in sig`);
+    }
+    if (!sig.s) {
+      throw new Error(`Expected "s" in sig`);
+    }
+    if (!sig.v) {
+      throw new Error(`Expected "v" in sig`);
+    }
+  });
+};
+
+// local-tests/tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse.ts
+init_shim();
+var testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse = async (devEnv) => {
+  devEnv.setUnavailable("cayenne" /* CAYENNE */);
+  devEnv.setUnavailable("manzano" /* MANZANO */);
+  devEnv.setExecuteJsVersion("localchain" /* LOCALCHAIN */, "/v1" /* V1 */);
+  const litActionSessionSigs = await getLitActionSessionSigs(devEnv);
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: litActionSessionSigs,
+    code: `(async () => {
+      console.log('hello world')
+
+      LitActions.setResponse({
+        response: JSON.stringify({hello: 'world'})
+      });
+
+    })();`
+  });
+  if (!res.response) {
+    throw new Error(`Expected "response" in res`);
+  }
+  if (!res.response.startsWith("{")) {
+    throw new Error(`Expected "response" to start with {`);
+  }
+  if (!res.response.endsWith("}")) {
+    throw new Error(`Expected "response" to end with }`);
+  }
+  if (!res.logs) {
+    throw new Error(`Expected "logs" in res`);
+  }
+  if (!res.logs.includes("hello world")) {
+    throw new Error(`Expected "logs" to include 'hello world'`);
+  }
+  if (!res.success) {
+    throw new Error(`Expected "success" in res`);
+  }
+  if (res.success !== true) {
+    throw new Error(`Expected "success" to be true`);
+  }
+};
+
+// local-tests/tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog.ts
+init_shim();
+var testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog = async (devEnv) => {
+  devEnv.setUnavailable("cayenne" /* CAYENNE */);
+  devEnv.setUnavailable("manzano" /* MANZANO */);
+  devEnv.setExecuteJsVersion("localchain" /* LOCALCHAIN */, "/v1" /* V1 */);
+  const litActionSessionSigs = await getLitActionSessionSigs(devEnv, [
+    {
+      resource: new LitPKPResource("*"),
+      ability: "pkp-signing" /* PKPSigning */
+    },
+    {
+      resource: new LitActionResource("*"),
+      ability: "lit-action-execution" /* LitActionExecution */
+    }
+  ]);
+  const res = await devEnv.litNodeClient.executeJs({
+    sessionSigs: litActionSessionSigs,
+    code: `(async () => {
+      console.log('hello world')
+    })();`
+  });
+  console.log("res:", res);
+  if (res.response) {
+    throw new Error(`Expected "response" to be falsy`);
+  }
+  if (!res.logs) {
+    throw new Error(`Expected "logs" in res`);
+  }
+  if (!res.logs.includes("hello world")) {
+    throw new Error(`Expected "logs" to include 'hello world'`);
+  }
+  if (!res.success) {
+    throw new Error(`Expected "success" in res`);
+  }
+};
+
+// local-tests/tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile.ts
+init_shim();
+var testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile = async (devEnv) => {
+  devEnv.setUnavailable("cayenne" /* CAYENNE */);
+  devEnv.setUnavailable("manzano" /* MANZANO */);
+  const message = "Hello world";
+  const blob = new Blob([message], { type: "text/plain" });
+  const blobArray = new Uint8Array(await blob.arrayBuffer());
+  const accs = AccessControlConditions2.getEmvBasicAccessControlConditions({
+    userAddress: devEnv.hotWalletAuthMethodOwnedPkp.ethAddress
+  });
+  const pkpSessionSigs = await getPkpSessionSigs(devEnv);
+  const encryptRes = await encryptString(
+    {
+      accessControlConditions: accs,
+      chain: "ethereum",
+      sessionSigs: pkpSessionSigs,
+      dataToEncrypt: "Hello world"
+    },
+    devEnv.litNodeClient
+  );
+  console.log("encryptRes:", encryptRes);
+  if (!encryptRes.ciphertext) {
+    throw new Error(`Expected "ciphertext" in encryptRes`);
+  }
+  if (!encryptRes.dataToEncryptHash) {
+    throw new Error(`Expected "dataToEncryptHash" to in encryptRes`);
+  }
+  const accsResourceString = await LitAccessControlConditionResource.composeLitActionResourceString(
+    accs,
+    encryptRes.dataToEncryptHash
+  );
+  const pkpSessionSigs2 = await getPkpSessionSigs(devEnv, [
+    {
+      resource: new LitAccessControlConditionResource(accsResourceString),
+      ability: "access-control-condition-decryption" /* AccessControlConditionDecryption */
+    }
+  ]);
+  const decriptedFile = await decryptToFile(
+    {
+      accessControlConditions: accs,
+      ciphertext: encryptRes.ciphertext,
+      dataToEncryptHash: encryptRes.dataToEncryptHash,
+      sessionSigs: pkpSessionSigs2,
+      chain: "ethereum"
+    },
+    devEnv.litNodeClient
+  );
+  if (blobArray.length !== decriptedFile.length) {
+    throw new Error(
+      `decrypted file should match the original file but received ${decriptedFile}`
+    );
+  }
+  for (let i2 = 0; i2 < blobArray.length; i2++) {
+    if (blobArray[i2] !== decriptedFile[i2]) {
+      throw new Error(`decrypted file should match the original file`);
+    }
+  }
+  console.log("decriptedFile:", decriptedFile);
+};
+
+// local-tests/tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip.ts
+init_shim();
+var testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip = async (devEnv) => {
+  devEnv.setUnavailable("cayenne" /* CAYENNE */);
+  devEnv.setUnavailable("manzano" /* MANZANO */);
+  const message = "Hello world";
+  const accs = AccessControlConditions2.getEmvBasicAccessControlConditions({
+    userAddress: devEnv.hotWalletAuthMethodOwnedPkp.ethAddress
+  });
+  const litActionSessionSigs = await getLitActionSessionSigs(devEnv);
+  const encryptRes = await zipAndEncryptString(
+    {
+      accessControlConditions: accs,
+      chain: "ethereum",
+      sessionSigs: litActionSessionSigs,
+      dataToEncrypt: message
+    },
+    devEnv.litNodeClient
+  );
+  console.log("encryptRes:", encryptRes);
+  if (!encryptRes.ciphertext) {
+    throw new Error(`Expected "ciphertext" in encryptRes`);
+  }
+  if (!encryptRes.dataToEncryptHash) {
+    throw new Error(`Expected "dataToEncryptHash" to in encryptRes`);
+  }
+  const accsResourceString = await LitAccessControlConditionResource.composeLitActionResourceString(
+    accs,
+    encryptRes.dataToEncryptHash
+  );
+  const litActionSessionSigs2 = await getLitActionSessionSigs(devEnv, [
+    {
+      resource: new LitAccessControlConditionResource(accsResourceString),
+      ability: "access-control-condition-decryption" /* AccessControlConditionDecryption */
+    }
+  ]);
+  const decryptedZip = await decryptToZip(
+    {
+      accessControlConditions: accs,
+      ciphertext: encryptRes.ciphertext,
+      dataToEncryptHash: encryptRes.dataToEncryptHash,
+      sessionSigs: litActionSessionSigs2,
+      chain: "ethereum"
+    },
+    devEnv.litNodeClient
+  );
+  const decryptedMessage = await decryptedZip["string.txt"].async("string");
+  if (message !== decryptedMessage) {
+    throw new Error(
+      `decryptedMessage should be ${message} but received ${decryptedMessage}`
+    );
+  }
+  console.log("decryptedMessage:", decryptedMessage);
+};
+
 // local-tests/test.ts
 (async () => {
   const devEnv = await getDevEnv({
@@ -77537,23 +77989,23 @@ var testUsePkpSessionSigsToExecuteJsClaimMultipleKeys = async (devEnv) => {
     testUsePkpSessionSigsToExecuteJsSigningInParallel,
     testUsePkpSessionSigsToExecuteJsClaimKeys,
     testUsePkpSessionSigsToExecuteJsClaimMultipleKeys,
-    // testUsePkpSessionSigsToExecuteJsJsonResponse,
-    // testUsePkpSessionSigsToExecuteJsConsoleLog,
-    testUsePkpSessionSigsToEncryptDecryptString
-    // testUsePkpSessionSigsToEncryptDecryptFile
-    // testUsePkpSessionSigsToEncryptDecryptZip
+    testUsePkpSessionSigsToExecuteJsJsonResponse,
+    testUsePkpSessionSigsToExecuteJsConsoleLog,
+    testUsePkpSessionSigsToEncryptDecryptString,
+    testUsePkpSessionSigsToEncryptDecryptFile,
+    testUsePkpSessionSigsToEncryptDecryptZip
   };
   const litActionSessionSigsTests = {
     testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,
     testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,
     testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel,
-    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys,
-    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys,
-    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse,
-    // testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog,
+    testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys,
+    testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimMultipleKeys,
+    testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse,
+    testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog,
     testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString,
-    // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile
-    // testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip
+    testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile,
+    testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip,
     testUseInvalidLitActionCodeToGenerateSessionSigs
   };
   const capacityDelegationTests = {

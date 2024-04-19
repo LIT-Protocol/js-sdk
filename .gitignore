@@ -72,3 +72,5 @@ storage.test.db
 logs
 
 local-tests/setup/networkContext.json
+
+local-tests/build/test.mjs
