@@ -1,24 +1,24 @@
 import { DevEnv } from 'local-tests/setup/env-setup';
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
  * ## Scenario:
- * Testing the capability to claim keys using EOA (Externally Owned Account) session sigs. This test ensures that multiple keys can be claimed correctly.
+ * Testing the capability to claim keys using PKP session sigs. This test ensures that multiple keys can be claimed correctly.
  *
- * - Given: EOA sessionSigs are properly generated for the environment.
+ * - Given: PKP sessionSigs are properly generated for the environment.
  * - When: These sessionSigs are used to execute JS code within Lit Action.
  * - And: The Lit Action JS code attempts to claim a key using the provided sessionSigs.
  * - Then: The claim operation should successfully return signatures, derived key IDs, and validate the existence and structure of claimed results.
  * *
  * Test Commands:
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimMultipleKeys --network=cayenne --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimMultipleKeys --network=manzano --version=v0
- * ✅ yarn test:local --filter=testUseEoaSessionSigsToExecuteJsClaimMultipleKeys --network=localchain --version=v1
+ * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys --network=cayenne --version=v0
+ * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys --network=manzano --version=v0
+ * ✅ yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys --network=localchain --version=v1
  */
-export const testUseEoaSessionSigsToExecuteJsClaimMultipleKeys = async (
+export const testUsePkpSessionSigsToExecuteJsClaimMultipleKeys = async (
   devEnv: DevEnv
 ) => {
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv);
+  const eoaSessionSigs = await getPkpSessionSigs(devEnv);
 
   const res = await devEnv.litNodeClient.executeJs({
     sessionSigs: eoaSessionSigs,

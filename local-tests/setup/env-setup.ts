@@ -232,7 +232,7 @@ export const getDevEnv = async (
   );
   const { capacityTokenIdStr } =
     await litContractsClient.mintCapacityCreditsNFT({
-      requestsPerDay: 14400, // 10 request per minute
+      requestsPerDay: 144000, // 100 request per minute
       daysUntilUTCMidnightExpiration: 2,
     });
 

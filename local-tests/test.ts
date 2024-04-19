@@ -41,6 +41,7 @@ import { testUseEoaSessionSigsToEncryptDecryptZip } from './tests/testUseEoaSess
 import { testUsePkpSessionSigsToExecuteJsSigningInParallel } from './tests/testUsePkpSessionSigsToExecuteJsSigningInParallel';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel';
 import { testUsePkpSessionSigsToExecuteJsClaimKeys } from './tests/testUsePkpSessionSigsToExecuteJsClaimKeys';
+import { testUsePkpSessionSigsToExecuteJsClaimMultipleKeys } from './tests/testUsePkpSessionSigsToExecuteJsClaimMultipleKeys';
 
 (async () => {
   const devEnv = await getDevEnv({
@@ -66,7 +67,7 @@ import { testUsePkpSessionSigsToExecuteJsClaimKeys } from './tests/testUsePkpSes
     testUsePkpSessionSigsToPkpSign,
     testUsePkpSessionSigsToExecuteJsSigningInParallel,
     testUsePkpSessionSigsToExecuteJsClaimKeys,
-    // testUsePkpSessionSigsToExecuteJsClaimMultipleKeys,
+    testUsePkpSessionSigsToExecuteJsClaimMultipleKeys,
     // testUsePkpSessionSigsToExecuteJsJsonResponse,
     // testUsePkpSessionSigsToExecuteJsConsoleLog,
     testUsePkpSessionSigsToEncryptDecryptString,
