@@ -30,6 +30,7 @@ jobs:
 
       - name: Run tests
         env:
+          REQUEST_PER_DAY: 50000
           DEBUG: true
           DELAY_BETWEEN_TESTS: 5000
           NETWORK: manzano
