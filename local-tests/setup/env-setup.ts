@@ -46,7 +46,7 @@ export interface DevEnv {
 
   // All about Bob
   bobsWallet: ethers.Wallet;
-  bobsOwnedPkp: PKPInfo;
+  bobsWalletOwnedPkp: PKPInfo;
   bobsContractsClient: LitContracts;
   bobsWalletAuthMethod: AuthMethod;
   bobsWalletAuthMethoedOwnedPkp: PKPInfo;
@@ -362,7 +362,7 @@ export const getDevEnv = async (
 
   const bobsMintRes =
     await bobsContractsClient.pkpNftContractUtils.write.mint();
-  const bobsOwnedPkp = bobsMintRes.pkp;
+  const bobsWalletOwnedPkp = bobsMintRes.pkp;
 
   /**
    * ====================================
@@ -412,7 +412,7 @@ export const getDevEnv = async (
 
     // All about Bob
     bobsWallet,
-    bobsOwnedPkp,
+    bobsWalletOwnedPkp,
     bobsContractsClient,
     bobsWalletAuthMethod,
     bobsWalletAuthMethoedOwnedPkp,
