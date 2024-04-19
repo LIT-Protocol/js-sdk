@@ -33,6 +33,10 @@ export let processEnvs = {
   NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
   DEBUG: Boolean(process.env['DEBUG']) || false,
   REQUEST_PER_DAY: parseInt(process.env['REQUEST_PER_DAY']) || 14400,
+  PRIVATE_KEYS: process.env['PRIVATE_KEYS']?.split(',') || [
+    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
+    '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
+  ],
 };
 
 if (Object.values(LIT_TESTNET).indexOf(processEnvs.NETWORK) === -1) {
@@ -84,11 +88,6 @@ export interface DevEnv {
   ) => void;
   setUnavailable: (network: LIT_TESTNET) => void;
 }
-
-const PRIVATE_KEYS = [
-  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
-  '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
-];
 
 // ----- Test Configuration -----
 export const getDevEnv = async (
@@ -178,7 +177,7 @@ export const getDevEnv = async (
     rpc = 'https://chain-rpc.litprotocol.com/http';
   }
   const provider = new ethers.providers.JsonRpcProvider(rpc);
-  const wallet = new ethers.Wallet(PRIVATE_KEYS[0], provider);
+  const wallet = new ethers.Wallet(processEnvs.PRIVATE_KEYS[0], provider);
 
   /**
    * ====================================
@@ -327,7 +326,7 @@ export const getDevEnv = async (
    * Usually used for capacity credits delegation
    * ====================================
    */
-  const bobsPrivateKey = PRIVATE_KEYS[1];
+  const bobsPrivateKey = processEnvs.PRIVATE_KEYS[1];
   const bobsWallet = new ethers.Wallet(bobsPrivateKey, provider);
 
   /**

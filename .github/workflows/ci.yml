@@ -11,27 +11,26 @@ on:
       - feat/**
       - feature/**
 jobs:
-  bun-tests:
+  nodejs-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
 
-      - name: Install Bun
-        run: |
-          curl -fsSL https://bun.sh/install | bash
-          echo "$HOME/.bun/bin" >> $GITHUB_PATH
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'  # Specify the Node.js version you need for your project
 
-      - name: Show Bun Version
-        run: bun --version
-
-      - name: Install dependencies with Bun
-        run: bun install
+      - name: Install dependencies
+        run: yarn install
 
       - name: Show directory contents
         run: ls -la
 
-      - name: Run tests with Bun
+      - name: Run tests
         env:
-          DEBUG: false
-        run: DEBUG=true yarn test:local --network=manzano --version=v0
+          DEBUG: true
+          DELAY_BETWEEN_TESTS: 5000
+          NETWORK: manzano
+        run: yarn test:local
