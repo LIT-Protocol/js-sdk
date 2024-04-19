@@ -24964,7 +24964,7 @@ var require_pako = __commonJS({
 // local-tests/test.ts
 init_shim();
 
-// local-tests/setup/env-setup.ts
+// local-tests/setup/tinny-setup.ts
 init_shim();
 
 // packages/lit-node-client/src/index.ts
@@ -75699,7 +75699,7 @@ if (!globalThis.LitAuthClient) {
   globalThis.LitAuthClient = LitAuthClient2;
 }
 
-// local-tests/setup/env-setup.ts
+// local-tests/setup/tinny-setup.ts
 var LIT_TESTNET = /* @__PURE__ */ ((LIT_TESTNET2) => {
   LIT_TESTNET2["LOCALCHAIN"] = "localchain";
   LIT_TESTNET2["MANZANO"] = "manzano";
@@ -75707,15 +75707,58 @@ var LIT_TESTNET = /* @__PURE__ */ ((LIT_TESTNET2) => {
   return LIT_TESTNET2;
 })(LIT_TESTNET || {});
 var processEnvs = {
-  DELAY_BETWEEN_TESTS: parseInt(process.env["DELAY_BETWEEN_TESTS"]) || 1e3,
+  RUN_IN_BAND: Boolean(process.env["RUN_IN_BAND"]) || false,
+  DELAY_BETWEEN_TESTS: parseInt(process.env["DELAY_BETWEEN_TESTS"]) || 100,
   NETWORK: process.env["NETWORK"] || "localchain" /* LOCALCHAIN */,
   DEBUG: Boolean(process.env["DEBUG"]) || false,
   REQUEST_PER_DAY: parseInt(process.env["REQUEST_PER_DAY"]) || 14400,
+  // Available Accounts
+  // ==================
+  // (0) "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" (10000.000000000000000000 ETH)
+  // (1) "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" (10000.000000000000000000 ETH)
+  // (2) "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" (10000.000000000000000000 ETH)
+  // (3) "0x90F79bf6EB2c4f870365E785982E1f101E93b906" (10000.000000000000000000 ETH)
+  // (4) "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65" (10000.000000000000000000 ETH)
+  // (5) "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc" (10000.000000000000000000 ETH)
+  // (6) "0x976EA74026E726554dB657fA54763abd0C3a0aa9" (10000.000000000000000000 ETH)
+  // (7) "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955" (10000.000000000000000000 ETH)
+  // (8) "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f" (10000.000000000000000000 ETH)
+  // (9) "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720" (10000.000000000000000000 ETH)
   PRIVATE_KEYS: process.env["PRIVATE_KEYS"]?.split(",") || [
     "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-    "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-  ]
+    "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+    "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
+    "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
+    "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba",
+    "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e",
+    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356",
+    "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97",
+    "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6"
+  ],
+  KEY_IN_USE: new Array()
 };
+processEnvs.KEY_IN_USE = new Array(processEnvs.PRIVATE_KEYS.length).fill(false);
+async function selectAvailablePrivateKey() {
+  let index = -1;
+  while (index === -1) {
+    index = processEnvs.KEY_IN_USE.findIndex((used) => !used);
+    if (index === -1) {
+      await new Promise((resolve) => setTimeout(resolve, 1e3));
+    } else {
+      processEnvs.KEY_IN_USE[index] = true;
+      const selectedKey = {
+        privateKey: processEnvs.PRIVATE_KEYS[index],
+        index
+      };
+      log("Selected key:", selectedKey);
+      return selectedKey;
+    }
+  }
+}
+function releasePrivateKey(index) {
+  processEnvs.KEY_IN_USE[index] = false;
+}
 if (Object.values(LIT_TESTNET).indexOf(processEnvs.NETWORK) === -1) {
   throw new Error(
     `Invalid network environment. Please use one of ${Object.values(
@@ -75730,14 +75773,16 @@ var getDevEnv = async ({
   env: "localchain" /* LOCALCHAIN */,
   debug: true
 }) => {
-  log("\u{1F9EA} [env-setup.ts] Starting devEnv");
+  log("\u{1F9EA} [tinny-setup.ts] Starting devEnv");
   const LIT_RPC_URL = "http://127.0.0.1:8545";
   const BOOTSTRAP_URLS = [
     "http://127.0.0.1:7470",
     "http://127.0.0.1:7471",
     "http://127.0.0.1:7472"
   ];
-  log("\u{1F9EA} [env-setup.ts] Setting up LitNodeClient");
+  let hotWalletKey = await selectAvailablePrivateKey();
+  let bobsWalletKey = await selectAvailablePrivateKey();
+  log("\u{1F9EA} [tinny-setup.ts] Setting up LitNodeClient");
   let litNodeClient;
   if (env === "localchain" /* LOCALCHAIN */) {
     litNodeClient = new LitNodeClient({
@@ -75779,7 +75824,7 @@ var getDevEnv = async ({
     process.exit();
   }
   log(
-    "\u{1F9EA} [env-setup.ts] Setup EOA Wallet using private key, and connects to LIT RPC URL"
+    "\u{1F9EA} [tinny-setup.ts] Setup EOA Wallet using private key, and connects to LIT RPC URL"
   );
   let rpc;
   if (env === "localchain" /* LOCALCHAIN */) {
@@ -75788,27 +75833,27 @@ var getDevEnv = async ({
     rpc = "https://chain-rpc.litprotocol.com/http";
   }
   const provider = new ethers_exports.providers.JsonRpcProvider(rpc);
-  const wallet = new ethers_exports.Wallet(processEnvs.PRIVATE_KEYS[0], provider);
-  log("\u{1F9EA} [env-setup.ts] Get nonce from lit node");
+  const wallet = new ethers_exports.Wallet(hotWalletKey.privateKey, provider);
+  log("\u{1F9EA} [tinny-setup.ts] Get nonce from lit node");
   const nonce = await litNodeClient.getLatestBlockhash();
-  log("\u{1F9EA} [env-setup.ts] Get Hot Wallet Auth Sig");
+  log("\u{1F9EA} [tinny-setup.ts] Get Hot Wallet Auth Sig");
   const siweMessage = await createSiweMessage({
     nonce,
     walletAddress: wallet.address
   });
-  log("\u{1F9EA} [env-setup.ts] Crafting Auth Sig");
+  log("\u{1F9EA} [tinny-setup.ts] Crafting Auth Sig");
   const hotWalletAuthSig = await craftAuthSig({
     signer: wallet,
     toSign: siweMessage
   });
   log(
-    "\u{1F9EA} [env-setup.ts] Craft an authMethod from the authSig for the eth wallet auth method"
+    "\u{1F9EA} [tinny-setup.ts] Craft an authMethod from the authSig for the eth wallet auth method"
   );
   const hotWalletAuthMethod = {
     authMethodType: 1 /* EthWallet */,
     accessToken: JSON.stringify(hotWalletAuthSig)
   };
-  log("\u{1F9EA} [env-setup.ts] Setting up contracts-sdk client");
+  log("\u{1F9EA} [tinny-setup.ts] Setting up contracts-sdk client");
   let litContractsClient;
   if (env === "localchain" /* LOCALCHAIN */) {
     litContractsClient = new LitContracts({
@@ -75831,31 +75876,31 @@ var getDevEnv = async ({
     process.exit();
   }
   log(
-    "\u{1F9EA} [env-setup.ts] Mint a Capacity Credits NFT and get a capacity delegation authSig with it"
+    "\u{1F9EA} [tinny-setup.ts] Mint a Capacity Credits NFT and get a capacity delegation authSig with it"
   );
   const { capacityTokenIdStr } = await litContractsClient.mintCapacityCreditsNFT({
     requestsPerDay: processEnvs.REQUEST_PER_DAY,
     // 100 request per minute
     daysUntilUTCMidnightExpiration: 2
   });
-  log("\u{1F9EA} [env-setup.ts] Creating a delegation auth sig");
+  log("\u{1F9EA} [tinny-setup.ts] Creating a delegation auth sig");
   const { capacityDelegationAuthSig } = await litNodeClient.createCapacityDelegationAuthSig({
     uses: "1",
     dAppOwnerWallet: wallet,
     capacityTokenId: capacityTokenIdStr,
     delegateeAddresses: [wallet.address]
   });
-  log("\u{1F9EA} [env-setup.ts] Mint a PKP");
+  log("\u{1F9EA} [tinny-setup.ts] Mint a PKP");
   const mintRes = await litContractsClient.pkpNftContractUtils.write.mint();
   const hotWalletOwnedPkp = mintRes.pkp;
-  log("\u{1F9EA} [env-setup.ts] Mint a PKP using the hot wallet auth method");
+  log("\u{1F9EA} [tinny-setup.ts] Mint a PKP using the hot wallet auth method");
   const mintWithAuthRes = await litContractsClient.mintWithAuth({
     authMethod: hotWalletAuthMethod,
     scopes: [1 /* SignAnything */]
   });
   let { pkp: hotWalletAuthMethodOwnedPkp } = mintWithAuthRes;
   log(
-    "\u{1F9EA} [env-setup.ts] Creates a Capacity Delegation AuthSig that has PKP as one of the delegatees"
+    "\u{1F9EA} [tinny-setup.ts] Creates a Capacity Delegation AuthSig that has PKP as one of the delegatees"
   );
   const { capacityDelegationAuthSig: capacityDelegationAuthSigWithPkp } = await litNodeClient.createCapacityDelegationAuthSig({
     uses: "1",
@@ -75866,13 +75911,13 @@ var getDevEnv = async ({
   const toSignBytes32 = ethers_exports.utils.arrayify(
     ethers_exports.utils.keccak256([1, 2, 3, 4, 5])
   );
-  const bobsPrivateKey = processEnvs.PRIVATE_KEYS[1];
+  const bobsPrivateKey = bobsWalletKey.privateKey;
   const bobsWallet = new ethers_exports.Wallet(bobsPrivateKey, provider);
   const bobsWalletAuthMethod = await EthWalletProvider.authenticate({
     signer: bobsWallet,
     litNodeClient
   });
-  log("\u{1F9EA} [env-setup.ts] Bobs mints a PKP");
+  log("\u{1F9EA} [tinny-setup.ts] Bobs mints a PKP");
   let bobsContractsClient;
   if (env === "localchain" /* LOCALCHAIN */) {
     bobsContractsClient = new LitContracts({
@@ -75924,10 +75969,14 @@ var getDevEnv = async ({
       throw new Error("Unavailable");
     }
   };
+  const useNewPrivateKey = async () => {
+    hotWalletKey = await selectAvailablePrivateKey();
+    bobsWalletKey = await selectAvailablePrivateKey();
+  };
   await bobsContractsClient.connect();
   const bobsMintRes = await bobsContractsClient.pkpNftContractUtils.write.mint();
   const bobsWalletOwnedPkp = bobsMintRes.pkp;
-  log("\u{1F9EA} [env-setup.ts] Bob mints a PKP using the hot wallet auth method");
+  log("\u{1F9EA} [tinny-setup.ts] Bob mints a PKP using the hot wallet auth method");
   const bobsMintWithAuthRes = await bobsContractsClient.mintWithAuth({
     authMethod: bobsWalletAuthMethod,
     scopes: [1 /* SignAnything */]
@@ -75952,7 +76001,9 @@ var getDevEnv = async ({
 \u2705 Bob's Wallet Address: ${await bobsWallet.getAddress()}
 ----- Test Starts Below -----
 `);
-  log("\u{1F9EA} [env-setup.ts] End of devEnv");
+  log("\u{1F9EA} [tinny-setup.ts] End of devEnv");
+  releasePrivateKey(hotWalletKey.index);
+  releasePrivateKey(bobsWalletKey.index);
   return {
     litNodeClient,
     litContractsClient,
@@ -75976,11 +76027,12 @@ var getDevEnv = async ({
     getContractsClient,
     setExecuteJsVersion,
     setPkpSignVersion,
-    setUnavailable
+    setUnavailable,
+    useNewPrivateKey
   };
 };
 
-// local-tests/setup/mini-test-framework.ts
+// local-tests/setup/tinny-test.ts
 init_shim();
 var getFiltersFlag = () => {
   const filterArg = process.argv.find(
@@ -75990,9 +76042,7 @@ var getFiltersFlag = () => {
 };
 var runTests = async ({
   tests,
-  devEnv,
-  silent = true
-  // Default silent to true if not provided
+  devEnv
 }) => {
   const filters = getFiltersFlag();
   const testsToRun = Object.entries(tests).filter(
@@ -76004,8 +76054,6 @@ var runTests = async ({
   let passedTests = [];
   for (const [testName, testFunction] of testsToRun) {
     const startTime = performance.now();
-    if (silent) {
-    }
     try {
       console.log(`\x1B[90m[runTests] Running ${index}. ${testName}...\x1B[0m`);
       await testFunction(devEnv);
@@ -76027,7 +76075,6 @@ var runTests = async ({
       } else {
         console.log(`\x1B[90m\u2716 ${index}. ${testName} - Skipped\x1B[0m`);
       }
-    } finally {
     }
     index++;
     if (shouldWait) {
@@ -76052,6 +76099,62 @@ var runTests = async ({
     passedTests.forEach((passedTest) => {
       console.log(`\x1B[32m- ${passedTest}\x1B[0m`);
     });
+    process.exit(0);
+  }
+};
+var runTestsParallel = async ({
+  tests,
+  devEnv
+}) => {
+  const filters = getFiltersFlag();
+  const testsToRun = Object.entries(tests).filter(
+    ([testName]) => filters.length === 0 || filters.includes(testName)
+  );
+  const testPromises = testsToRun.map(
+    async ([testName, testFunction], index) => {
+      const startTime = performance.now();
+      try {
+        console.log(
+          `\x1B[90m[runTestsParallel] Running ${index + 1}. ${testName}...\x1B[0m`
+        );
+        await testFunction(devEnv);
+        const endTime = performance.now();
+        const timeTaken = (endTime - startTime).toFixed(2);
+        console.log(
+          `\x1B[32m\u2714\x1B[90m ${index + 1}. ${testName} - Passed (${timeTaken} ms)\x1B[0m`
+        );
+        return `${testName} (Passed in ${timeTaken} ms)`;
+      } catch (error) {
+        const endTime = performance.now();
+        const timeTaken = (endTime - startTime).toFixed(2);
+        console.error(
+          `\x1B[31m\u2716\x1B[90m ${index + 1}. ${testName} - Failed (${timeTaken} ms)\x1B[0m`
+        );
+        console.error(`\x1B[31mError:\x1B[90m ${error.message}\x1B[0m`);
+        return `${testName} (Failed in ${timeTaken} ms)`;
+      }
+    }
+  );
+  const results = await Promise.all(testPromises);
+  const failedTests = results.filter((result) => result.includes("Failed"));
+  const passedTests = results.filter((result) => result.includes("Passed"));
+  if (failedTests.length > 0) {
+    console.log(`\x1B[31mTest Report: Some tests failed.\x1B[0m`);
+    failedTests.forEach((failedTest) => {
+      console.log(`\x1B[31m- ${failedTest}\x1B[0m`);
+    });
+  }
+  if (passedTests.length > 0) {
+    console.log(
+      `\x1B[32mTest Report: ${passedTests.length} test(s) passed successfully.\x1B[0m`
+    );
+    passedTests.forEach((passedTest) => {
+      console.log(`\x1B[32m- ${passedTest}\x1B[0m`);
+    });
+  }
+  if (failedTests.length > 0) {
+    process.exit(1);
+  } else {
     process.exit(0);
   }
 };
@@ -78017,15 +78120,28 @@ var testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip = async (de
     testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToExecuteJs,
     testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign
   };
-  await runTests({
-    tests: {
-      ...eoaSessionSigsTests,
-      ...pkpSessionSigsTests,
-      ...litActionSessionSigsTests,
-      ...capacityDelegationTests
-    },
-    devEnv
-  });
+  if (processEnvs.RUN_IN_BAND) {
+    await runTests({
+      tests: {
+        ...eoaSessionSigsTests,
+        ...pkpSessionSigsTests,
+        ...litActionSessionSigsTests,
+        ...capacityDelegationTests
+      },
+      devEnv
+    });
+  } else {
+    const testsPromise = runTestsParallel({
+      tests: {
+        ...eoaSessionSigsTests,
+        ...pkpSessionSigsTests,
+        ...litActionSessionSigsTests,
+        ...capacityDelegationTests
+      },
+      devEnv
+    });
+    await testsPromise;
+  }
 })();
 /*! Bundled license information:
 

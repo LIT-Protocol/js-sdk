@@ -4,7 +4,7 @@ import {
   craftAuthSig,
   createSiweMessageWithRecaps,
 } from '@lit-protocol/auth-helpers';
-import { DevEnv } from '../env-setup';
+import { DevEnv } from '../tinny-setup';
 import {
   AuthCallbackParams,
   AuthSig,

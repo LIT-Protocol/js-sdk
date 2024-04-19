@@ -1,4 +1,4 @@
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { DevEnv } from 'local-tests/setup/tinny-setup';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
@@ -14,6 +14,7 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 export const testUsePkpSessionSigsToEncryptDecryptString = async (
   devEnv: DevEnv
 ) => {
+  devEnv.useNewPrivateKey();
   // set access control conditions for encrypting and decrypting
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
     userAddress: devEnv.hotWalletAuthMethodOwnedPkp.ethAddress,

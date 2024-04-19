@@ -2,7 +2,7 @@ import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
 import { LitAbility } from '@lit-protocol/types';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 
 /**
@@ -13,6 +13,7 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning =
   async (devEnv: DevEnv) => {
+    devEnv.useNewPrivateKey();
     devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
     devEnv.setUnavailable(LIT_TESTNET.MANZANO);
     devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);

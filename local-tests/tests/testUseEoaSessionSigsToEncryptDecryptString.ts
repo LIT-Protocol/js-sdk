@@ -1,4 +1,4 @@
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { DevEnv } from 'local-tests/setup/tinny-setup';
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
@@ -14,6 +14,7 @@ import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 export const testUseEoaSessionSigsToEncryptDecryptString = async (
   devEnv: DevEnv
 ) => {
+  devEnv.useNewPrivateKey();
   // set access control conditions for encrypting and decrypting
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
     userAddress: devEnv.hotWallet.address,

@@ -1,6 +1,6 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 
 /**

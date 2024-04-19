@@ -1,5 +1,5 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { DevEnv } from '../env-setup';
+import { DevEnv } from '../tinny-setup';
 import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
 import { LitNetwork } from '@lit-protocol/constants';

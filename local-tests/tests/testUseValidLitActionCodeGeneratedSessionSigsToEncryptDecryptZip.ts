@@ -1,4 +1,4 @@
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';

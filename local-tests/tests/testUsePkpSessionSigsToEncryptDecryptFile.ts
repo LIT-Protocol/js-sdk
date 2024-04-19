@@ -1,9 +1,10 @@
-import { DevEnv } from 'local-tests/setup/env-setup';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 
 /**
  * Test Commands:
@@ -14,6 +15,8 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 export const testUsePkpSessionSigsToEncryptDecryptFile = async (
   devEnv: DevEnv
 ) => {
+  devEnv.useNewPrivateKey();
+
   const message = 'Hello world';
   const blob = new Blob([message], { type: 'text/plain' });
   const blobArray = new Uint8Array(await blob.arrayBuffer());

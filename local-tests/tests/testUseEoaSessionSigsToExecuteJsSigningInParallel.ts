@@ -1,6 +1,6 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 
 /**
@@ -12,6 +12,7 @@ import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-sessio
 export const testUseEoaSessionSigsToExecuteJsSigningInParallel = async (
   devEnv: DevEnv
 ) => {
+  devEnv.useNewPrivateKey();
   devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
   const eoaSessionSigs = await getEoaSessionSigs(devEnv);

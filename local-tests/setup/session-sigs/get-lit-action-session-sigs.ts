@@ -1,5 +1,5 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { DevEnv } from '../env-setup';
+import { DevEnv } from '../tinny-setup';
 import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
 
 const VALID_SESSION_SIG_LIT_ACTION_CODE = `

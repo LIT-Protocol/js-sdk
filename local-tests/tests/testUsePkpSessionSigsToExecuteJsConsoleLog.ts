@@ -1,5 +1,5 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 
 /**
@@ -11,6 +11,7 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
 export const testUsePkpSessionSigsToExecuteJsConsoleLog = async (
   devEnv: DevEnv
 ) => {
+  devEnv.useNewPrivateKey();
   devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
   const pkpSessionSigs = await getPkpSessionSigs(devEnv);

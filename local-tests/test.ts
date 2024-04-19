@@ -12,8 +12,8 @@
  * DEBUG=true yarn test:local --filter=testUserAuthentication --network=testnet
  */
 
-import { getDevEnv, processEnvs } from './setup/env-setup';
-import { runTests } from './setup/mini-test-framework';
+import { getDevEnv, processEnvs } from './setup/tinny-setup';
+import { runTests, runTestsParallel } from './setup/tinny-test';
 import { testUseEoaSessionSigsToExecuteJsSigning } from './tests/testUseEoaSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToPkpSign } from './tests/testUseEoaSessionSigsToPkpSign';
 import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessionSigsToExecuteJsSigning';
@@ -109,13 +109,27 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from
     testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign,
   };
 
-  await runTests({
-    tests: {
-      ...eoaSessionSigsTests,
-      ...pkpSessionSigsTests,
-      ...litActionSessionSigsTests,
-      ...capacityDelegationTests,
-    },
-    devEnv,
-  });
+  if (processEnvs.RUN_IN_BAND) {
+    await runTests({
+      tests: {
+        ...eoaSessionSigsTests,
+        ...pkpSessionSigsTests,
+        ...litActionSessionSigsTests,
+        ...capacityDelegationTests,
+      },
+      devEnv,
+    });
+  } else {
+    const testsPromise = runTestsParallel({
+      tests: {
+        ...eoaSessionSigsTests,
+        ...pkpSessionSigsTests,
+        ...litActionSessionSigsTests,
+        ...capacityDelegationTests,
+      },
+      devEnv,
+    });
+
+    await testsPromise;
+  }
 })();

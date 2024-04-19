@@ -1,5 +1,5 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
 import { getInvalidLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 
 /**
@@ -11,6 +11,7 @@ import { getInvalidLitActionSessionSigs } from 'local-tests/setup/session-sigs/g
 export const testUseInvalidLitActionCodeToGenerateSessionSigs = async (
   devEnv: DevEnv
 ) => {
+  devEnv.useNewPrivateKey();
   devEnv.setPkpSignVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
   try {

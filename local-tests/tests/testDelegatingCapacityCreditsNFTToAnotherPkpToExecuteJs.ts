@@ -3,7 +3,7 @@ import {
   AuthMethodType,
   LIT_ENDPOINT_VERSION,
 } from '@lit-protocol/constants';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/env-setup';
+import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LitAbility } from '@lit-protocol/types';
@@ -25,6 +25,7 @@ import { LitAbility } from '@lit-protocol/types';
 export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
   devEnv: DevEnv
 ) => {
+  devEnv.useNewPrivateKey();
   devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
   // Checking the scopes of the PKP owned by Bob
