@@ -32,5 +32,5 @@ jobs:
         env:
           DEBUG: false
           DELAY_BETWEEN_TESTS: 3500
-          NETWORK: manzano
+          NETWORK: cayenne
         run: yarn test:local

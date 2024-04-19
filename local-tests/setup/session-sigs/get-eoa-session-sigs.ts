@@ -1,5 +1,4 @@
 import {
-  LitAccessControlConditionResource,
   LitActionResource,
   LitPKPResource,
   craftAuthSig,
