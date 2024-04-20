@@ -1,10 +1,9 @@
-import { DevEnv } from 'local-tests/setup/tinny-setup';
-import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * Test Commands:
@@ -13,17 +12,18 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
  * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToEncryptDecryptZip
  */
 export const testUsePkpSessionSigsToEncryptDecryptZip = async (
-  devEnv: DevEnv
+  devEnv: TinnyEnvironment
 ) => {
-  devEnv.useNewPrivateKey();
+  const alice = await devEnv.createRandomPerson();
+
   const message = 'Hello world';
 
   // set access control conditions for encrypting and decrypting
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
-    userAddress: devEnv.hotWalletAuthMethodOwnedPkp.ethAddress,
+    userAddress: alice.authMethodOwnedPkp.ethAddress,
   });
 
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv);
+  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
 
   const encryptRes = await LitJsSdk.zipAndEncryptString(
     {
@@ -60,7 +60,7 @@ export const testUsePkpSessionSigsToEncryptDecryptZip = async (
       encryptRes.dataToEncryptHash
     );
 
-  const pkpSessionSigs2 = await getPkpSessionSigs(devEnv, [
+  const pkpSessionSigs2 = await getPkpSessionSigs(devEnv, alice, [
     {
       resource: new LitAccessControlConditionResource(accsResourceString),
       ability: LitAbility.AccessControlConditionDecryption,

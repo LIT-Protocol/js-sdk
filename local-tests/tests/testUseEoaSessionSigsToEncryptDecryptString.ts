@@ -4,6 +4,7 @@ import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * Test Commands:
@@ -12,15 +13,15 @@ import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
  * ✅ NETWORK=localchain yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptString
  */
 export const testUseEoaSessionSigsToEncryptDecryptString = async (
-  devEnv: DevEnv
+  devEnv: TinnyEnvironment
 ) => {
-  devEnv.useNewPrivateKey();
+  const alice = await devEnv.createRandomPerson();
   // set access control conditions for encrypting and decrypting
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
-    userAddress: devEnv.hotWallet.address,
+    userAddress: alice.wallet.address,
   });
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv);
+  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
   const encryptRes = await LitJsSdk.encryptString(
     {
@@ -44,10 +45,12 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
 
   // -- assertions
   if (!encryptRes.ciphertext) {
+    
     throw new Error(`Expected "ciphertext" in encryptRes`);
   }
 
   if (!encryptRes.dataToEncryptHash) {
+    
     throw new Error(`Expected "dataToEncryptHash" to in encryptRes`);
   }
 
@@ -57,7 +60,7 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
       encryptRes.dataToEncryptHash
     );
 
-  const eoaSessionSigs2 = await getEoaSessionSigs(devEnv, [
+  const eoaSessionSigs2 = await getEoaSessionSigs(devEnv, alice, [
     {
       resource: new LitAccessControlConditionResource(accsResourceString),
       ability: LitAbility.AccessControlConditionDecryption,
@@ -77,8 +80,10 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
   );
 
   if (decryptRes !== 'Hello world') {
+    
     throw new Error(
       `Expected decryptRes to be 'Hello world' but got ${decryptRes}`
     );
   }
+  
 };

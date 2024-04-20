@@ -1,7 +1,8 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * Test Commands:
@@ -9,15 +10,15 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
  * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToPkpSign
  * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToPkpSign
  */
-export const testUsePkpSessionSigsToPkpSign = async (devEnv: DevEnv) => {
-  devEnv.useNewPrivateKey();
+export const testUsePkpSessionSigsToPkpSign = async (devEnv: TinnyEnvironment) => {
+  const alice = await devEnv.createRandomPerson();
   devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
-  const pkpSessionSigs = await getPkpSessionSigs(devEnv);
+  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
 
   const res = await devEnv.litNodeClient.pkpSign({
-    toSign: devEnv.toSignBytes32,
-    pubKey: devEnv.hotWalletAuthMethodOwnedPkp.publicKey,
+    toSign: alice.loveLetter,
+    pubKey: alice.authMethodOwnedPkp.publicKey,
     sessionSigs: pkpSessionSigs,
   });
 

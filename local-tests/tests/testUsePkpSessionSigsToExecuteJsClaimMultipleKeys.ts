@@ -1,6 +1,7 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * ## Scenario:
@@ -17,15 +18,15 @@ import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-sessio
  * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToExecuteJsClaimMultipleKeys
  */
 export const testUsePkpSessionSigsToExecuteJsClaimMultipleKeys = async (
-  devEnv: DevEnv
+  devEnv: TinnyEnvironment
 ) => {
-  devEnv.useNewPrivateKey();
+  const alice = await devEnv.createRandomPerson();
   devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
-  const eoaSessionSigs = await getPkpSessionSigs(devEnv);
+  const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
 
   const res = await devEnv.litNodeClient.executeJs({
-    sessionSigs: eoaSessionSigs,
+    sessionSigs: pkpSessionSigs,
     code: `(async () => {
       Lit.Actions.claimKey({keyId: "foo"});
       Lit.Actions.claimKey({keyId: "bar"});

@@ -2,8 +2,9 @@ import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
 import { LitAbility } from '@lit-protocol/types';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * Test Commands:
@@ -12,13 +13,13 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning =
-  async (devEnv: DevEnv) => {
-    devEnv.useNewPrivateKey();
+  async (devEnv: TinnyEnvironment) => {
     devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
     devEnv.setUnavailable(LIT_TESTNET.MANZANO);
     devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
-    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, [
+    const alice = await devEnv.createRandomPerson();
+    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice, [
       {
         resource: new LitPKPResource('*'),
         ability: LitAbility.PKPSigning,
@@ -39,8 +40,8 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning =
         });
       })();`,
       jsParams: {
-        dataToSign: devEnv.toSignBytes32,
-        publicKey: devEnv.hotWalletAuthMethodOwnedPkp.publicKey,
+        dataToSign: alice.loveLetter,
+        publicKey: alice.authMethodOwnedPkp.publicKey,
       },
     });
 

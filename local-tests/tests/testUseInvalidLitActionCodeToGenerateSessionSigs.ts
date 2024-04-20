@@ -1,21 +1,24 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import { getInvalidLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * Test Commands:
  * ❌ NOT AVAILABLE IN CAYENNE
- * ❌ NOT AVAILABLE IN HABANERO
+ * ❌ NOT AVAILABLE IN MANZANO
  * ✅ NETWORK=localchain yarn test:local --filter=testUseInvalidLitActionCodeToGenerateSessionSigs
  */
 export const testUseInvalidLitActionCodeToGenerateSessionSigs = async (
-  devEnv: DevEnv
+  devEnv: TinnyEnvironment
 ) => {
-  devEnv.useNewPrivateKey();
+  devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+  devEnv.setUnavailable(LIT_TESTNET.MANZANO);
   devEnv.setPkpSignVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
+  const alice = await devEnv.createRandomPerson();
 
   try {
-    await getInvalidLitActionSessionSigs(devEnv);
+    await getInvalidLitActionSessionSigs(devEnv, alice);
   } catch (e: any) {
     if (
       e.message ===

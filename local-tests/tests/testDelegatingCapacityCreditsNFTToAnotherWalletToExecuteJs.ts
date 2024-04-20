@@ -1,10 +1,7 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import {
-  DevEnv,
-  LIT_TESTNET,
-  processEnvs,
-} from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * ## Scenario:
@@ -21,28 +18,21 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
  * - ✅ NETWORK=localchain yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs
  */
 export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
-  async (devEnv: DevEnv) => {
-    devEnv.useNewPrivateKey();
+  async (devEnv: TinnyEnvironment) => {
+    devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+
+    const alice = await devEnv.createRandomPerson();
+    const bob = await devEnv.createRandomPerson();
+
     devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
-    // 1. Getting the capacity credits NFT minted in the dev environment
-    const ccNft = devEnv.capacityTokenId;
-
-    // 2. Hey, I'm Bob
-    const bobsWallet = devEnv.bobsWallet;
-
-    // 3. As a dApp owner, I want to delegate the capacity credits NFT to Bob
-    const { capacityDelegationAuthSig: appOwnersCapacityDelegationAuthSig } =
-      await devEnv.litNodeClient.createCapacityDelegationAuthSig({
-        dAppOwnerWallet: devEnv.hotWallet,
-        capacityTokenId: ccNft,
-        delegateeAddresses: [bobsWallet.address],
-      });
+    const appOwnersCapacityDelegationAuthSig =
+      await alice.createCapacityDelegationAuthSig([bob.wallet.address]);
 
     // 4. Bob receives the capacity delegation authSig use it to generate session sigs
     const bobsSessionSigs = await getEoaSessionSigsWithCapacityDelegations(
       devEnv,
-      bobsWallet,
+      bob.wallet,
       appOwnersCapacityDelegationAuthSig
     );
 
@@ -73,8 +63,8 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
         });
       })();`,
       jsParams: {
-        dataToSign: devEnv.toSignBytes32,
-        publicKey: devEnv.bobsWalletOwnedPkp.publicKey,
+        dataToSign: alice.loveLetter,
+        publicKey: bob.pkp.publicKey,
       },
     });
 

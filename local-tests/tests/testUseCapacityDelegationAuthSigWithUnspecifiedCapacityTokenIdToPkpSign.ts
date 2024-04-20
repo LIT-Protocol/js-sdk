@@ -1,6 +1,7 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * ## Scenario:
@@ -17,23 +18,24 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
  * - ✅ NETWORK=localchain yarn test:local --filter=testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign
  */
 export const testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign =
-  async (devEnv: DevEnv) => {
-    devEnv.useNewPrivateKey();
+  async (devEnv: TinnyEnvironment) => {
+    devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+
+    const alice = await devEnv.createRandomPerson();
+    const bob = await devEnv.createRandomPerson();
+
     devEnv.setPkpSignVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
-    // 1. Hey, I'm Bob
-    const bobsWallet = devEnv.bobsWallet;
-
-    // 2. As a dApp owner, I want to create a unrestricted capacity delegation authSig that could be used by any user
-    const { capacityDelegationAuthSig: appOwnersCapacityDelegationAuthSig } =
+    const appOwnersCapacityDelegationAuthSig = (
       await devEnv.litNodeClient.createCapacityDelegationAuthSig({
-        dAppOwnerWallet: devEnv.hotWallet,
-      });
+        dAppOwnerWallet: alice.wallet,
+      })
+    ).capacityDelegationAuthSig;
 
     // 3. Bob gets the capacity delegation authSig from somewhere and uses it to get session sigs
     const bobsSessionSigs = await getEoaSessionSigsWithCapacityDelegations(
       devEnv,
-      bobsWallet,
+      bob.wallet,
       appOwnersCapacityDelegationAuthSig
     );
 
@@ -56,8 +58,8 @@ export const testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkp
     // 4. Bob can now execute JS code using the capacity credits NFT
     const res = await devEnv.litNodeClient.pkpSign({
       sessionSigs: bobsSessionSigs,
-      toSign: devEnv.toSignBytes32,
-      pubKey: devEnv.bobsWalletOwnedPkp.publicKey,
+      toSign: alice.loveLetter,
+      pubKey: bob.pkp.publicKey,
     });
 
     // -- Expected output:

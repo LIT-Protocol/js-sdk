@@ -1,11 +1,12 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { DevEnv } from '../tinny-setup';
 import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
 import { log } from '@lit-protocol/misc';
 import { LitNetwork } from '@lit-protocol/constants';
+import { Person, TinnyEnvironment } from '../tinny';
 
 export const getPkpSessionSigs = async (
-  devEnv: DevEnv,
+  devEnv: TinnyEnvironment,
+  alice: Person,
   resourceAbilityRequests?: LitResourceAbilityRequest[]
 ) => {
   if (devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano) {
@@ -27,13 +28,13 @@ export const getPkpSessionSigs = async (
   ];
 
   const pkpSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
-    pkpPublicKey: devEnv.hotWalletAuthMethodOwnedPkp.publicKey,
-    authMethods: [devEnv.hotWalletAuthMethod],
+    pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
+    authMethods: [alice.authMethod],
     resourceAbilityRequests: _resourceAbilityRequests,
 
     // -- only add this for manzano network
     ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
-      ? { capacityDelegationAuthSig: devEnv.capacityDelegationAuthSig }
+      ? { capacityDelegationAuthSig: devEnv.superCapacityDelegationAuthSig }
       : {}),
   });
 

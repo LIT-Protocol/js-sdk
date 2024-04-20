@@ -1,6 +1,7 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * ## Scenario:
@@ -18,30 +19,22 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
  */
 
 export const testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJs =
-  async (devEnv: DevEnv) => {
-    devEnv.useNewPrivateKey();
+  async (devEnv: TinnyEnvironment) => {
+    devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+
+    const alice = await devEnv.createRandomPerson();
+    const bob = await devEnv.createRandomPerson();
+
     devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
-    // 1. Getting the capacity credits NFT minted in the dev environment
-    const ccNft = devEnv.capacityTokenId;
-
-    // 2. Hey, I'm Bob
-    const bobsWallet = devEnv.bobsWallet;
-
-    // 3. As a dApp owner, I want to create a unrestricted capacity delegation authSig that could be used by any user
-    const { capacityDelegationAuthSig: appOwnersCapacityDelegationAuthSig } =
-      await devEnv.litNodeClient.createCapacityDelegationAuthSig({
-        dAppOwnerWallet: devEnv.hotWallet,
-        capacityTokenId: ccNft,
-
-        // No delegatee addresses provided. It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits and specific NFT IDs.
-        // delegateeAddresses: [bobsWallet.address],
-      });
+    // No delegatee addresses provided. It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits and specific NFT IDs.
+    const appOwnersCapacityDelegationAuthSig =
+      await alice.createCapacityDelegationAuthSig();
 
     // 4. Bob gets the capacity delegation authSig from somewhere and uses it to get session sigs
     const bobsSessionSigs = await getEoaSessionSigsWithCapacityDelegations(
       devEnv,
-      bobsWallet,
+      bob.wallet,
       appOwnersCapacityDelegationAuthSig
     );
 
@@ -72,8 +65,8 @@ export const testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToExecuteJ
         });
       })();`,
       jsParams: {
-        dataToSign: devEnv.toSignBytes32,
-        publicKey: devEnv.bobsWalletOwnedPkp.publicKey,
+        dataToSign: alice.loveLetter,
+        publicKey: bob.pkp.publicKey,
       },
     });
 

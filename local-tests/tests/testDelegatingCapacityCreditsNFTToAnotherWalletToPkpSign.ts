@@ -1,6 +1,7 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * ## Scenario:
@@ -17,29 +18,22 @@ import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/sess
  * - ✅ NETWORK=localchain yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign
  */
 export const testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign = async (
-  devEnv: DevEnv
+  devEnv: TinnyEnvironment
 ) => {
-  devEnv.useNewPrivateKey();
+  devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+
+  const alice = await devEnv.createRandomPerson();
+  const bob = await devEnv.createRandomPerson();
+
   devEnv.setPkpSignVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
-  // 1. Getting the capacity credits NFT minted in the dev environment
-  const ccNft = devEnv.capacityTokenId;
-
-  // 2. Hey, I'm Bob
-  const bobsWallet = devEnv.bobsWallet;
-
-  // 3. As a dApp owner, I want to delegate the capacity credits NFT to Bob
-  const { capacityDelegationAuthSig: appOwnersCapacityDelegationAuthSig } =
-    await devEnv.litNodeClient.createCapacityDelegationAuthSig({
-      dAppOwnerWallet: devEnv.hotWallet,
-      capacityTokenId: ccNft,
-      delegateeAddresses: [bobsWallet.address],
-    });
+  const appOwnersCapacityDelegationAuthSig =
+    await alice.createCapacityDelegationAuthSig([bob.wallet.address]);
 
   // 4. Bob receives the capacity delegation authSig use it to generate session sigs
   const bobsSessionSigs = await getEoaSessionSigsWithCapacityDelegations(
     devEnv,
-    bobsWallet,
+    bob.wallet,
     appOwnersCapacityDelegationAuthSig
   );
 
@@ -62,8 +56,8 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign = async (
   // 5. Bob can now execute JS code using the capacity credits NFT
   const res = await devEnv.litNodeClient.pkpSign({
     sessionSigs: bobsSessionSigs,
-    toSign: devEnv.toSignBytes32,
-    pubKey: devEnv.bobsWalletOwnedPkp.publicKey,
+    toSign: alice.loveLetter,
+    pubKey: bob.pkp.publicKey,
   });
 
   // -- Expected output:

@@ -4,6 +4,7 @@ import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * Test Commands:
@@ -12,19 +13,19 @@ import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
  * ✅ NETWORK=localchain yarn test:local --filter=testUseEoaSessionSigsToEncryptDecryptFile
  */
 export const testUseEoaSessionSigsToEncryptDecryptFile = async (
-  devEnv: DevEnv
+  devEnv: TinnyEnvironment
 ) => {
-  devEnv.useNewPrivateKey();
+  const alice = await devEnv.createRandomPerson();
   const message = 'Hello world';
   const blob = new Blob([message], { type: 'text/plain' });
   const blobArray = new Uint8Array(await blob.arrayBuffer());
 
   // set access control conditions for encrypting and decrypting
   const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
-    userAddress: devEnv.hotWallet.address,
+    userAddress: alice.wallet.address,
   });
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv);
+  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
   const encryptRes = await LitJsSdk.encryptString(
     {
@@ -61,7 +62,7 @@ export const testUseEoaSessionSigsToEncryptDecryptFile = async (
       encryptRes.dataToEncryptHash
     );
 
-  const eoaSessionSigs2 = await getEoaSessionSigs(devEnv, [
+  const eoaSessionSigs2 = await getEoaSessionSigs(devEnv, alice, [
     {
       resource: new LitAccessControlConditionResource(accsResourceString),
       ability: LitAbility.AccessControlConditionDecryption,

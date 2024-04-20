@@ -30,8 +30,10 @@ jobs:
 
       - name: Run tests
         env:
-          DEBUG: false
-          REQUEST_PER_DAY: 30000
-          DELAY_BETWEEN_TESTS: 10000
+          DEBUG: true
+          RUN_IN_BAND: true
+          RUN_IN_BAND_INTERVAL: 10000
+          REQUEST_PER_KILOSECOND: 2000
+          TIME_TO_RELEASE_KEY: 30000
           NETWORK: manzano
         run: yarn test:local

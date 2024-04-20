@@ -1,8 +1,9 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { LitAbility } from '@lit-protocol/types';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * ## Scenario:
@@ -19,13 +20,13 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsClaimKeys =
-  async (devEnv: DevEnv) => {
+  async (devEnv: TinnyEnvironment) => {
     devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
     devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-
     devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
-    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, [
+    const alice = await devEnv.createRandomPerson();
+    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice, [
       {
         resource: new LitPKPResource('*'),
         ability: LitAbility.PKPSigning,

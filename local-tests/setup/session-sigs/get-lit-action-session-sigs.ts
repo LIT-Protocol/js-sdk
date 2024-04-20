@@ -1,7 +1,7 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { DevEnv } from '../tinny-setup';
 import { LitAbility, LitResourceAbilityRequest } from '@lit-protocol/types';
 import { LitNetwork } from '@lit-protocol/constants';
+import { Person, TinnyEnvironment } from '../tinny';
 
 const VALID_SESSION_SIG_LIT_ACTION_CODE = `
 // Works with an AuthSig AuthMethod
@@ -21,7 +21,8 @@ const INVALID_SESSION_SIG_LIT_ACTION_CODE = `
 `;
 
 export const getLitActionSessionSigs = async (
-  devEnv: DevEnv,
+  devEnv: TinnyEnvironment,
+  alice: Person,
   resourceAbilityRequests?: LitResourceAbilityRequest[]
 ) => {
   if (devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano) {
@@ -43,30 +44,33 @@ export const getLitActionSessionSigs = async (
   ];
 
   const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
-    pkpPublicKey: devEnv.hotWalletAuthMethodOwnedPkp.publicKey,
-    authMethods: [devEnv.hotWalletAuthMethod],
+    pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
+    authMethods: [alice.authMethod],
     resourceAbilityRequests: _resourceAbilityRequests,
     litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString(
       'base64'
     ),
     jsParams: {
-      publicKey: devEnv.hotWalletAuthMethodOwnedPkp.publicKey,
+      publicKey: alice.authMethodOwnedPkp.publicKey,
       sigName: 'unified-auth-sig',
     },
 
     // -- only add this for manzano network
     ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
-      ? { capacityDelegationAuthSig: devEnv.capacityDelegationAuthSig }
+      ? { capacityDelegationAuthSig: devEnv.superCapacityDelegationAuthSig }
       : {}),
   });
 
   return litActionSessionSigs;
 };
 
-export const getInvalidLitActionSessionSigs = async (devEnv: DevEnv) => {
+export const getInvalidLitActionSessionSigs = async (
+  devEnv: TinnyEnvironment,
+  alice: Person
+) => {
   const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
-    pkpPublicKey: devEnv.hotWalletAuthMethodOwnedPkp.publicKey,
-    authMethods: [devEnv.hotWalletAuthMethod],
+    pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
+    authMethods: [alice.authMethod],
     resourceAbilityRequests: [
       {
         resource: new LitPKPResource('*'),
@@ -77,7 +81,7 @@ export const getInvalidLitActionSessionSigs = async (devEnv: DevEnv) => {
       'base64'
     ),
     jsParams: {
-      publicKey: devEnv.hotWalletAuthMethodOwnedPkp.publicKey,
+      publicKey: alice.authMethodOwnedPkp.publicKey,
       sigName: 'unified-auth-sig',
     },
   });

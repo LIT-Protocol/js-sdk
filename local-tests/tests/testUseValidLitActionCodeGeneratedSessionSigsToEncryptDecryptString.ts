@@ -1,9 +1,10 @@
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * Test Commands:
@@ -13,16 +14,17 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-
  *
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString =
-  async (devEnv: DevEnv) => {
-    devEnv.useNewPrivateKey();
+  async (devEnv: TinnyEnvironment) => {
     devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
     devEnv.setUnavailable(LIT_TESTNET.MANZANO);
+
+    const alice = await devEnv.createRandomPerson();
     // set access control conditions for encrypting and decrypting
     const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
-      userAddress: devEnv.hotWalletAuthMethodOwnedPkp.ethAddress,
+      userAddress: alice.authMethodOwnedPkp.ethAddress,
     });
 
-    const litActionSessionSigs = await getLitActionSessionSigs(devEnv);
+    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 
     const encryptRes = await LitJsSdk.encryptString(
       {
@@ -57,7 +59,7 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
         encryptRes.dataToEncryptHash
       );
 
-    const litActionSessionSigs2 = await getLitActionSessionSigs(devEnv, [
+    const litActionSessionSigs2 = await getLitActionSessionSigs(devEnv, alice, [
       {
         resource: new LitAccessControlConditionResource(accsResourceString),
         ability: LitAbility.AccessControlConditionDecryption,

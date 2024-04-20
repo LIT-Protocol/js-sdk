@@ -3,10 +3,11 @@ import {
   AuthMethodType,
   LIT_ENDPOINT_VERSION,
 } from '@lit-protocol/constants';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import { LitAuthClient } from '@lit-protocol/lit-auth-client';
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { LitAbility } from '@lit-protocol/types';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * ## Scenario:
@@ -23,19 +24,23 @@ import { LitAbility } from '@lit-protocol/types';
  * - ✅ NETWORK=localchain yarn test:local --filter=testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs
  */
 export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
-  devEnv: DevEnv
+  devEnv: TinnyEnvironment
 ) => {
-  devEnv.useNewPrivateKey();
+  devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
+
+  const alice = await devEnv.createRandomPerson();
+  const bob = await devEnv.createRandomPerson();
+
   devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
 
   // Checking the scopes of the PKP owned by Bob
   const bobsAuthMethodAuthId = await LitAuthClient.getAuthIdByAuthMethod(
-    devEnv.bobsWalletAuthMethod
+    bob.authMethod
   );
 
   const scopes =
-    await devEnv.bobsContractsClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
-      devEnv.bobsWalletAuthMethoedOwnedPkp.tokenId,
+    await bob.contractsClient.pkpPermissionsContract.read.getPermittedAuthMethodScopes(
+      bob.authMethodOwnedPkp.tokenId,
       AuthMethodType.EthWallet,
       bobsAuthMethodAuthId,
       3
@@ -46,17 +51,14 @@ export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
   }
 
   // As a dApp owner, create a capacity delegation authSig for Bob's PKP wallet
-  const { capacityDelegationAuthSig } =
-    await devEnv.litNodeClient.createCapacityDelegationAuthSig({
-      dAppOwnerWallet: devEnv.hotWallet,
-      capacityTokenId: devEnv.capacityTokenId,
-      delegateeAddresses: [devEnv.bobsWalletAuthMethoedOwnedPkp.ethAddress],
-    });
+  const capacityDelegationAuthSig = await alice.createCapacityDelegationAuthSig(
+    [bob.pkp.ethAddress]
+  );
 
   // As a dApp owner, delegate the capacity credits NFT to Bob
   const bobPkpSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
-    pkpPublicKey: devEnv.bobsWalletAuthMethoedOwnedPkp.publicKey,
-    authMethods: [devEnv.bobsWalletAuthMethod],
+    pkpPublicKey: bob.authMethodOwnedPkp.publicKey,
+    authMethods: [bob.authMethod],
     resourceAbilityRequests: [
       {
         resource: new LitPKPResource('*'),
@@ -80,8 +82,8 @@ export const testDelegatingCapacityCreditsNFTToAnotherPkpToExecuteJs = async (
         });
       })();`,
     jsParams: {
-      dataToSign: devEnv.toSignBytes32,
-      publicKey: devEnv.bobsWalletAuthMethoedOwnedPkp.publicKey,
+      dataToSign: alice.loveLetter,
+      publicKey: bob.authMethodOwnedPkp.publicKey,
     },
   });
 

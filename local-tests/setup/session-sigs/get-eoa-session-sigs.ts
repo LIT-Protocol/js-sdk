@@ -14,9 +14,11 @@ import {
 import { log } from '@lit-protocol/misc';
 import { ethers } from 'ethers';
 import { LitNetwork } from '@lit-protocol/constants';
+import { Person, TinnyEnvironment } from '../tinny';
 
 export const getEoaSessionSigs = async (
-  devEnv: DevEnv,
+  devEnv: TinnyEnvironment,
+  person: Person,
   resourceAbilityRequests?: LitResourceAbilityRequest[]
 ) => {
   if (devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano) {
@@ -61,13 +63,13 @@ export const getEoaSessionSigs = async (
         uri: uri,
         expiration: expiration,
         resources: resourceAbilityRequests,
-        walletAddress: devEnv.hotWallet.address,
-        nonce: devEnv.lastestBlockhash,
+        walletAddress: person.wallet.address,
+        nonce: await devEnv.litNodeClient.getLatestBlockhash(),
         litNodeClient: devEnv.litNodeClient,
       });
 
       const authSig = await craftAuthSig({
-        signer: devEnv.hotWallet,
+        signer: person.wallet,
         toSign,
       });
 
@@ -76,7 +78,7 @@ export const getEoaSessionSigs = async (
 
     // -- only add this for manzano network because of rate limiting
     ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
-      ? { capabilityAuthSigs: [devEnv.capacityDelegationAuthSig] }
+      ? { capabilityAuthSigs: [devEnv.superCapacityDelegationAuthSig] }
       : {}),
   });
 
@@ -86,7 +88,7 @@ export const getEoaSessionSigs = async (
 };
 
 export const getEoaSessionSigsWithCapacityDelegations = async (
-  devEnv: DevEnv,
+  devEnv: TinnyEnvironment,
   fromWallet: ethers.Wallet,
   capacityDelegationAuthSig: AuthSig
 ) => {
@@ -124,7 +126,7 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
         expiration: expiration,
         resources: resourceAbilityRequests,
         walletAddress: fromWallet.address,
-        nonce: devEnv.lastestBlockhash,
+        nonce: await devEnv.litNodeClient.getLatestBlockhash(),
         litNodeClient: devEnv.litNodeClient,
       });
 

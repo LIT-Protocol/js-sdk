@@ -1,6 +1,7 @@
 import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { DevEnv, LIT_TESTNET } from 'local-tests/setup/tinny-setup';
+import { LIT_TESTNET } from 'local-tests/setup/tinny';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { TinnyEnvironment } from 'local-tests/setup/tinny';
 
 /**
  * Test Commands:
@@ -9,13 +10,13 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse =
-  async (devEnv: DevEnv) => {
+  async (devEnv: TinnyEnvironment) => {
     devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
     devEnv.setUnavailable(LIT_TESTNET.MANZANO);
 
     devEnv.setExecuteJsVersion(LIT_TESTNET.LOCALCHAIN, LIT_ENDPOINT_VERSION.V1);
-
-    const litActionSessionSigs = await getLitActionSessionSigs(devEnv);
+    const alice = await devEnv.createRandomPerson();
+    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 
     const res = await devEnv.litNodeClient.executeJs({
       sessionSigs: litActionSessionSigs,
