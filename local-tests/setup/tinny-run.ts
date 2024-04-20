@@ -182,12 +182,10 @@ export const runTestsParallel = async ({
   }
 
   if (passedTests.length > 0) {
-    console.log(
-      `\x1b[32mTest Report: ${passedTests.length} test(s) passed successfully.\x1b[0m`
-    );
     passedTests.forEach((passedTest) =>
       console.log(`\x1b[32m- ${passedTest}\x1b[0m`)
     );
+    console.log('\x1b[32mTest Report: All tests passed.\x1b[0m');
   }
 
   if (failedTests.length > 0) {

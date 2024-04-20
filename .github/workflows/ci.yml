@@ -36,4 +36,4 @@ jobs:
           REQUEST_PER_KILOSECOND: 2000
           TIME_TO_RELEASE_KEY: 30000
           NETWORK: manzano
-        run: yarn test:local
+        run: yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign

@@ -1,10 +1,10 @@
-import { DevEnv } from 'local-tests/setup/tinny-setup';
 import { getEoaSessionSigs } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
 import { ILitNodeClient, LitAbility } from '@lit-protocol/types';
 import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { TinnyEnvironment } from 'local-tests/setup/tinny';
+import { log } from '@lit-protocol/misc';
 
 /**
  * Test Commands:
@@ -37,7 +37,7 @@ export const testUseEoaSessionSigsToEncryptDecryptFile = async (
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
-  console.log('encryptRes:', encryptRes);
+  log('encryptRes:', encryptRes);
 
   // await 5 seconds for the encryption to be mined
 

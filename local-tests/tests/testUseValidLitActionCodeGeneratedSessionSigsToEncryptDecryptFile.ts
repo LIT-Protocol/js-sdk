@@ -5,6 +5,7 @@ import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny';
+import { log } from '@lit-protocol/misc';
 
 /**
  * Test Commands:
@@ -39,7 +40,7 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile =
       devEnv.litNodeClient as unknown as ILitNodeClient
     );
 
-    console.log('encryptRes:', encryptRes);
+    log('encryptRes:', encryptRes);
 
     // await 5 seconds for the encryption to be mined
 

@@ -5,6 +5,7 @@ import { AccessControlConditions } from 'local-tests/setup/accs/accs';
 import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny';
+import { log } from '@lit-protocol/misc';
 
 /**
  * Test Commands:
@@ -36,7 +37,7 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
       devEnv.litNodeClient as unknown as ILitNodeClient
     );
 
-    console.log('encryptRes:', encryptRes);
+    log('encryptRes:', encryptRes);
 
     // -- Expected output:
     // {
