@@ -15,7 +15,6 @@ export interface WithRecap extends BaseSiweMessage {
   expiration: string;
   resources: LitResourceAbilityRequest[];
 }
-
 export interface WithCapacityDelegation extends BaseSiweMessage {
   uri: LIT_URI.CAPABILITY_DELEGATION;
   litNodeClient: any;
@@ -23,7 +22,6 @@ export interface WithCapacityDelegation extends BaseSiweMessage {
   delegateeAddresses?: string[];
   uses?: string;
 }
-
 export const createSiweMessage = async <T extends BaseSiweMessage>(
   params: T
 ): Promise<string> => {
@@ -81,7 +79,24 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
 
   return siweMessage.prepareMessage();
 };
+export const createSiweMessageWithRecaps = async (
+  params: WithRecap
+): Promise<string> => {
+  return createSiweMessage({
+    ...params,
+  });
+};
+export const createSiweMessageWithCapacityDelegation = async (
+  params: WithCapacityDelegation
+) => {
+  if (!params.litNodeClient) {
+    throw new Error('litNodeClient is required');
+  }
 
+  return createSiweMessage({
+    ...params,
+  });
+};
 export const createCapacityCreditsResourceData = (
   params: CapacityDelegationFields
 ): CapacityDelegationRequest => {
@@ -97,7 +112,6 @@ export const createCapacityCreditsResourceData = (
     uses: params.uses!.toString() || '1',
   };
 };
-
 export const addRecapToSiweMessage = async ({
   siweMessage,
   resources,
@@ -142,24 +156,4 @@ export const addRecapToSiweMessage = async ({
   }
 
   return siweMessage;
-};
-
-export const createSiweMessageWithRecaps = async (
-  params: WithRecap
-): Promise<string> => {
-  return createSiweMessage({
-    ...params,
-  });
-};
-
-export const createSiweMessageWithCapacityDelegation = async (
-  params: WithCapacityDelegation
-) => {
-  if (!params.litNodeClient) {
-    throw new Error('litNodeClient is required');
-  }
-
-  return createSiweMessage({
-    ...params,
-  });
 };
