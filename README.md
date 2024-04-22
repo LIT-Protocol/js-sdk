@@ -104,7 +104,7 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 
 ## Prerequisite
 
-- node (v18.0.0)
+- node (v19.9.0)
 
 ## Recommended
 
@@ -245,7 +245,7 @@ Having done this setup, this is what the development cycle looks like moving for
 
 ## Publishing
 
-You must have at least nodejs v18 to do this.
+You must have at least nodejs v19 to do this.
 
 1. Install the latest packages with `yarn install`
 
@@ -426,6 +426,6 @@ Object.defineProperty(globalThis, 'crypto', {
 <details>
 <summary>error Command failed with exit code 13.</summary>
 
-Make sure your node version is above v18.0.0
+Make sure your node version is above v19.0.0
 
 </details>
