@@ -1,7 +1,7 @@
 import { computeAddress } from '@ethersproject/transactions';
 import { BigNumber, ethers } from 'ethers';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-import * as siwe from 'siwe';
+import { SiweMessage } from 'siwe';
 
 import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-control-conditions';
 import {
@@ -259,7 +259,7 @@ export class LitNodeClientNodeJs
     const nonce = await this.getLatestBlockhash();
 
     // -- get auth sig
-    let siweMessage = new siwe.SiweMessage({
+    let siweMessage = new SiweMessage({
       domain: _domain,
       address: dAppOwnerWalletAddress,
       statement: _statement,
@@ -649,7 +649,7 @@ export class LitNodeClientNodeJs
     sessionKeyUri: any;
     resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
-    const authSigSiweMessage = new siwe.SiweMessage(authSig.signedMessage);
+    const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
 
     try {
       await authSigSiweMessage.validate(authSig.sig);
@@ -2496,7 +2496,7 @@ export class LitNodeClientNodeJs
       });
 
       // regular siwe
-      siweMessage = new siwe.SiweMessage({
+      siweMessage = new SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
         address: pkpEthAddress,
@@ -2512,7 +2512,7 @@ export class LitNodeClientNodeJs
       siweMessage = recapObject.addToSiweMessage(siweMessage);
     } else {
       // lit-siwe (NOT regular siwe)
-      siweMessage = new siwe.SiweMessage({
+      siweMessage = new SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
         address: pkpEthAddress,
@@ -2527,7 +2527,7 @@ export class LitNodeClientNodeJs
     }
 
     const siweMessageStr: string = (
-      siweMessage as siwe.SiweMessage
+      siweMessage as SiweMessage
     ).prepareMessage();
 
     // ========== Get Node Promises ==========
