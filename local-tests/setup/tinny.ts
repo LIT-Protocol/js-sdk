@@ -50,7 +50,6 @@ export interface TinnyEnvConfig {
   rpc: string;
   litNodeClient: LitNodeClient;
   network: LIT_TESTNET;
-  debug: boolean;
   processEnvs: ProcessEnvs;
 }
 
@@ -164,6 +163,24 @@ export class Person {
     ).pkp;
 
     log('🤖 [tinny.ts] Person spawned:', this.wallet.address);
+  }
+
+  /**
+   * ====================================
+   * Mint a Capacity Credits NFT
+   * ====================================
+   */
+  async mintCapacityCreditsNFT() {
+    log('🧪 [tinny.ts] Mint a Capacity Credits NFT ');
+    const capacityTokenId = (
+      await this.contractsClient.mintCapacityCreditsNFT({
+        requestsPerKilosecond:
+          this.envConfig.processEnvs.REQUEST_PER_KILOSECOND,
+        daysUntilUTCMidnightExpiration: 2,
+      })
+    ).capacityTokenIdStr;
+
+    return capacityTokenId;
   }
 
   /**
@@ -290,9 +307,22 @@ export class TinnyEnvironment {
   world: Map<string, Person> = new Map();
 
   /**
-   * Asynchronously selects an available private key and marks it as in use.
-   * Waits indefinitely until a key becomes available, logging a message when waiting.
-   * @returns {Promise<{privateKey: string, index: number}>} A promise that resolves with the selected key and its index.
+   * Retrieves an available private key from a list, marking it as in use and scheduling
+   * its automatic release. If no unused keys are available, it waits for a set interval
+   * before rechecking.
+   *
+   * This function loops until it finds an unused key, marks it, and returns the key with
+   * its index. If all keys are in use, it logs a wait message and pauses before retrying.
+   *
+   * Outputs:
+   * - privateKey: The selected private key.
+   * - index: The index of the selected key.
+   *
+   * Environment variables required:
+   * - KEY_IN_USE: Boolean array indicating key usage.
+   * - PRIVATE_KEYS: Array of key strings.
+   * - TIME_TO_RELEASE_KEY: Milliseconds until a key is automatically released.
+   * - WAIT_FOR_KEY_INTERVAL: Wait time in milliseconds if no keys are free.
    */
   async getAvailablePrivateKey(): Promise<{
     privateKey: string;
@@ -337,10 +367,17 @@ export class TinnyEnvironment {
   }
 
   /**
-   * ====================================
-   * Setting up Lit Node Client
-   * ====================================
+   * Initializes the LitNodeClient based on the specified network configuration and environment variables.
+   * This setup differentiates between local and production environments, adjusts node attestation checks,
+   * and sets network-specific parameters. The function ensures the client is connected and ready before proceeding.
+   *
+   * The LitNodeClient is configured differently based on the network:
+   * - LOCALCHAIN: Uses custom settings for local testing, with node attestation disabled.
+   * - MANZANO (or other specified testnets): Configures for specific network environments with node attestation enabled.
+   *
+   * Logs the process and exits if the client is not ready after attempting to connect.
    */
+
   async setupLitNodeClient() {
     log('🧪 [tinny.ts] Setting up LitNodeClient');
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
@@ -379,7 +416,6 @@ export class TinnyEnvironment {
       rpc: this.rpc,
       litNodeClient: this.litNodeClient,
       network: this.network,
-      debug: this.processEnvs.DEBUG,
       processEnvs: this.processEnvs,
     };
   }
