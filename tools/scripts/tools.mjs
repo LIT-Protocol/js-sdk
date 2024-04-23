@@ -1329,8 +1329,8 @@ async function validateDependencyVersions() {
       `
     ❗️ Before publishing, make sure you have tested the build!
       - yarn test:unit     | run unit tests
-      - yarn test:e2e      | run e2e tests on browser
-      - yarn test:e2e:node | run e2e tests on nodejs
+      - yarn test:e2e:node | run e2e tests on nodejs (legacy)
+      - yarn test:local    | run e2e tests on nodejs 
       `,
       true
     );
