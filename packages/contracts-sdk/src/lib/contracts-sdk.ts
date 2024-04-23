@@ -570,10 +570,11 @@ export class LitContracts {
 
   public static async getStakingContract(
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
   ) {
     let provider: ethers.providers.JsonRpcProvider;
-    const rpcUrl = DEFAULT_RPC;
+    rpcUrl = rpcUrl ?? DEFAULT_RPC;
     if (context && 'provider' in context!) {
       provider = context.provider;
     } else {
@@ -581,7 +582,7 @@ export class LitContracts {
     }
 
     if (!context) {
-      const contractData = await LitContracts._resolveContractContext(
+      let contractData = await LitContracts._resolveContractContext(
         network,
         context
       );
@@ -601,7 +602,7 @@ export class LitContracts {
       // if we have contract context then we determine if there exists a `resolverAddres`
       // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
       if (!context.resolverAddress) {
-        const stakingContract = (context as LitContractContext).Staking;
+        let stakingContract = (context as LitContractContext).Staking;
 
         if (!stakingContract.address) {
           throw new Error(
@@ -614,7 +615,7 @@ export class LitContracts {
           provider
         );
       } else {
-        const contractContext = await LitContracts._getContractsFromResolver(
+        let contractContext = await LitContracts._getContractsFromResolver(
           context as LitContractResolverContext,
           provider,
           ['Staking']
@@ -651,7 +652,7 @@ export class LitContracts {
     ): Promise<string> {
       let address: string = '';
       switch (contract) {
-        case 'Allowlist':
+        case 'AllowList' || 'AllowList':
           address = await resolverContract['getContract'](
             await resolverContract['ALLOWLIST_CONTRACT'](),
             environment
@@ -850,9 +851,14 @@ export class LitContracts {
 
   public static getMinNodeCount = async (
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
   ) => {
-    const contract = await LitContracts.getStakingContract(network, context);
+    const contract = await LitContracts.getStakingContract(
+      network,
+      context,
+      rpcUrl
+    );
 
     const minNodeCount = await contract['currentValidatorCountForConsensus']();
 
@@ -864,9 +870,14 @@ export class LitContracts {
 
   public static getValidators = async (
     network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
-    context?: LitContractContext | LitContractResolverContext
+    context?: LitContractContext | LitContractResolverContext,
+    rpcUrl?: string
   ): Promise<string[]> => {
-    const contract = await LitContracts.getStakingContract(network, context);
+    const contract = await LitContracts.getStakingContract(
+      network,
+      context,
+      rpcUrl
+    );
 
     // Fetch contract data
     const [activeValidators, currentValidatorsCount, kickedValidators] =
@@ -1048,7 +1059,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     const events = 'events' in receipt ? receipt.events : receipt.logs;
 
-    if (!events) {
+    if (!events || events.length <= 0) {
       throw new Error('No events found in receipt');
     }
 
