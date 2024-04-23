@@ -22,6 +22,7 @@ import {
   SuccessNodePromises,
   ValidateAndSignECDSA,
 } from './interfaces';
+import { ILitResource, ISessionCapabilityObject } from './models';
 import { SupportedJsonRequests } from './types';
 
 export interface ILitNodeClient {
@@ -318,4 +319,14 @@ export interface ILitNodeClient {
    *
    */
   connect(): Promise<any>;
+
+  /**
+   * Generates a session capability object
+   *
+   * @param litResources An array of ILitResource to be processed.
+   * @returns A Promise resolving to an ISessionCapabilityObject.
+   */
+  generateSessionCapabilityObjectWithWildcards(
+    litResources: ILitResource[]
+  ): Promise<ISessionCapabilityObject>;
 }
