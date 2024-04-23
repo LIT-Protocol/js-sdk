@@ -735,12 +735,6 @@ export class LitNodeClientNodeJs
 
     let urlWithPath = `${url}/web/execute`;
 
-    // @ts-ignore: for testing only
-    if (params.version) {
-      // @ts-ignore: for testing only
-      urlWithPath = `${url}/web/execute/${params.version}`;
-    }
-
     if (!authSig) {
       throw new Error('authSig or sessionSig is required');
     }
