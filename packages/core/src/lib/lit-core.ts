@@ -19,7 +19,7 @@ import {
   LIT_ERROR_CODE,
   LIT_NETWORKS,
   LitNetwork,
-  SIGTYPE,
+  LIT_CURVE,
   StakingStates,
   version,
 } from '@lit-protocol/constants';
@@ -1327,12 +1327,12 @@ export class LitCore {
    * Calculates an HD public key from a given keyId
    * The curve type or signature type is assumed to be k256 unless provided
    * @param keyId
-   * @param {SIGTYPE} sigType
+   * @param {LIT_CURVE} sigType
    * @returns {string} public key
    */
   computeHDPubKey = (
     keyId: string,
-    sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith
+    sigType: LIT_CURVE = LIT_CURVE.EcdsaCaitSith
   ): string => {
     if (!this.hdRootPubkeys) {
       logError('root public keys not found, have you connected to the nodes?');
