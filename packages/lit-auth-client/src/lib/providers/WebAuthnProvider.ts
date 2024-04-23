@@ -52,7 +52,18 @@ export default class WebAuthnProvider extends BaseProvider {
     customArgs?: MintRequestBody
   ): Promise<string> {
     // Submit registration options to the authenticator
-    const { startRegistration } = await import('@simplewebauthn/browser');
+    const webauthnModule = await import('@simplewebauthn/browser').catch((e) => {
+      console.log("Error while loading simple webauthn module", e);
+      
+    }).then((module) => module);
+    let startRegistration;
+    if (webauthnModule !== void(0)) {
+      startRegistration = webauthnModule.startRegistration;
+
+    } else {
+      throw new Error('Could not find required imlpementations in webauthn module');
+    }
+    
     const attResp: RegistrationResponseJSON = await startRegistration(options);
 
     // Get auth method id
@@ -130,7 +141,17 @@ export default class WebAuthnProvider extends BaseProvider {
     };
 
     // Authenticate with WebAuthn
-    const { startAuthentication } = await import('@simplewebauthn/browser');
+    const webauthnModule = await import('@simplewebauthn/browser').catch((e) => {
+      console.log("Error while loading simple webauthn module", e);
+      
+    }).then((module) => module);
+    let startAuthentication;
+    if (webauthnModule !== void(0)) {
+      startAuthentication = webauthnModule.startRegistration;
+
+    } else {
+      throw new Error('Could not find required imlpementations in webauthn module');
+    }
     const authenticationResponse = await startAuthentication(
       authenticationOptions
     );
