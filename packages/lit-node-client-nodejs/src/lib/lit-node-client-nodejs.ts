@@ -106,6 +106,7 @@ import type {
   ValidateAndSignECDSA,
   WebAuthnAuthenticationVerificationParams,
   ILitNodeClient,
+  GetPkpSessionSigs,
 } from '@lit-protocol/types';
 
 // TODO: move this to auth-helper for next patch
@@ -490,6 +491,10 @@ export class LitNodeClientNodeJs
     expiration,
     sessionKeyUri,
     nonce,
+    resourceAbilityRequests,
+    litActionCode,
+    ipfsId,
+    jsParams,
   }: GetWalletSigProps): Promise<AuthSig> => {
     let walletSig: AuthSig;
 
@@ -517,6 +522,7 @@ export class LitNodeClientNodeJs
       );
       if (authNeededCallback) {
         log('getWalletSig - flow 1.1');
+
         const body = {
           chain,
           statement: sessionCapabilityObject?.statement,
@@ -527,6 +533,14 @@ export class LitNodeClientNodeJs
           expiration,
           uri: sessionKeyUri,
           nonce,
+
+          // for recap
+          ...(resourceAbilityRequests && { resourceAbilityRequests }),
+
+          // for lit action custom auth
+          ...(litActionCode && { litActionCode }),
+          ...(ipfsId && { ipfsId }),
+          ...(jsParams && { jsParams }),
         };
 
         log('callback body:', body);
@@ -718,7 +732,14 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, 'getJsExecutionShares');
 
     // -- execute
-    const urlWithPath = `${url}/web/execute`;
+
+    let urlWithPath = `${url}/web/execute`;
+
+    // @ts-ignore: for testing only
+    if (params.version) {
+      // @ts-ignore: for testing only
+      urlWithPath = `${url}/web/execute/${params.version}`;
+    }
 
     if (!authSig) {
       throw new Error('authSig or sessionSig is required');
@@ -1797,7 +1818,7 @@ export class LitNodeClientNodeJs
           pubkey: pubKey,
           ...(sigToPassToNode &&
             sigToPassToNode !== undefined && { authSig: sigToPassToNode }),
-          authMethods,
+          ...(authMethods && authMethods.length > 0 && { authMethods }),
         };
 
         logWithRequestId(id, 'reqBody:', reqBody);
@@ -2750,12 +2771,20 @@ export class LitNodeClientNodeJs
     // -- (TRY) to get the wallet signature
     let authSig = await this.getWalletSig({
       authNeededCallback: params.authNeededCallback,
-      chain: params.chain,
+      chain: params.chain || 'ethereum',
       sessionCapabilityObject,
       switchChain: params.switchChain,
       expiration: expiration,
       sessionKeyUri: sessionKeyUri,
       nonce,
+
+      // -- for recap
+      resourceAbilityRequests: params.resourceAbilityRequests,
+
+      // -- optional fields
+      ...(params.litActionCode && { litActionCode: params.litActionCode }),
+      ...(params.ipfsId && { ipfsId: params.ipfsId }),
+      ...(params.jsParams && { jsParams: params.jsParams }),
     });
 
     const needToResignSessionKey = await this.checkNeedToResignSessionKey({
@@ -2772,7 +2801,7 @@ export class LitNodeClientNodeJs
       authSig = await this.#authCallbackAndUpdateStorageItem({
         authCallback: params.authNeededCallback,
         authCallbackParams: {
-          chain: params.chain,
+          chain: params.chain || 'ethereum',
           statement: sessionCapabilityObject.statement,
           resources: [sessionCapabilityObject.encodeAsSiweResource()],
           switchChain: params.switchChain,
@@ -2856,6 +2885,61 @@ export class LitNodeClientNodeJs
     log('signatures:', signatures);
 
     return signatures;
+  };
+
+  getPkpSessionSigs = async (params: GetPkpSessionSigs) => {
+    const chain = params?.chain || 'ethereum';
+
+    const pkpSessionSigs = this.getSessionSigs({
+      chain,
+      ...params,
+      authNeededCallback: async (props: AuthCallbackParams) => {
+        // -- validate
+        if (!props.expiration) {
+          throw new Error(
+            '[getPkpSessionSigs/callback] expiration is required'
+          );
+        }
+
+        if (!props.resources) {
+          throw new Error('[getPkpSessionSigs/callback]resources is required');
+        }
+
+        if (!props.resourceAbilityRequests) {
+          throw new Error(
+            '[getPkpSessionSigs/callback]resourceAbilityRequests is required'
+          );
+        }
+
+        // lit action code and ipfs id cannot exist at the same time
+        if (props.litActionCode && props.ipfsId) {
+          throw new Error(
+            '[getPkpSessionSigs/callback]litActionCode and ipfsId cannot exist at the same time'
+          );
+        }
+
+        const response = await this.signSessionKey({
+          statement: props.statement || 'Some custom statement.',
+          authMethods: [...params.authMethods],
+          pkpPublicKey: params.pkpPublicKey,
+          expiration: props.expiration,
+          resources: props.resources,
+          chainId: 1,
+
+          // -- required fields
+          resourceAbilityRequests: props.resourceAbilityRequests,
+
+          // -- optional fields
+          ...(props.litActionCode && { litActionCode: props.litActionCode }),
+          ...(props.ipfsId && { ipfsId: props.ipfsId }),
+          ...(props.jsParams && { jsParams: props.jsParams }),
+        });
+
+        return response.authSig;
+      },
+    });
+
+    return pkpSessionSigs;
   };
 
   /**

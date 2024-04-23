@@ -2,11 +2,6 @@ import { Provider } from '@ethersproject/abstract-provider';
 // @ts-expect-error JSZip types are not properly resolved by TSC :(
 import * as JSZip from 'jszip/dist/jszip.js';
 
-import {
-  ISessionCapabilityObject,
-  LitResourceAbilityRequest,
-} from '@lit-protocol/auth-helpers';
-
 import { ILitNodeClient } from './ILitNodeClient';
 import {
   AcceptedFileType,
@@ -22,6 +17,7 @@ import {
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
+import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
 
 /** ---------- Access Control Conditions Interfaces ---------- */
 
@@ -79,6 +75,10 @@ export interface AuthCallbackParams {
   walletConnectProjectId?: string;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
+
+  litActionCode?: string;
+  ipfsId?: string;
+  jsParams?: any;
 }
 
 /** ---------- Web3 ---------- */
@@ -179,6 +179,7 @@ export interface LitNodeClientConfig {
   storageProvider?: StorageProvider;
   retryTolerance?: RetryTolerance;
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
+  rpcUrl?: string | null;
 }
 
 export type CustomNetwork = Pick<
@@ -888,25 +889,14 @@ export interface GetSignSessionKeySharesProp {
   body: SessionRequestBody;
 }
 
-export interface GetSessionSigsProps {
-  /**
-   * When this session signature will expire.
-   * The user will have to reauthenticate after this time using whatever auth method you set up.
-   * This means you will have to call this signSessionKey function again to get a new session signature.
-   * This is a RFC3339 timestamp.
-   * The default is 24 hours from now.
-   *
-   * Example value:
-   *     new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
-   */
+export interface GetSessionSigsProps extends LitCustomAuth {
+  pkpPublicKey?: string;
+
+  // When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
   expiration?: any;
 
-  /**
-   * The chain to use for the session signature.
-   * This is the chain that will be used to sign the session key.
-   * If you're using EVM then this probably doesn't matter at all.
-   **/
-  chain: Chain;
+  //   The chain to use for the session signature.  This is the chain that will be used to sign the session key.  If you're using EVM then this probably doesn't matter at all.
+  chain?: Chain;
 
   /**
    * An array of resource abilities that you want to request for this session. These will be signed with the session key.
@@ -926,38 +916,30 @@ export interface GetSessionSigsProps {
    */
   sessionCapabilityObject?: ISessionCapabilityObject;
 
-  /**
-   * If you want to ask Metamask to try and switch the user's chain, you may pass `true` here.
-   * This will only work if the user is using Metamask.
-   * If the user is not using Metamask, then this will be ignored.
-   **/
+  //   If you want to ask Metamask to try and switch the user's chain, you may pass true here.  This will only work if the user is using Metamask.  If the user is not using Metamask, then this will be ignored.
   switchChain?: boolean;
 
-  /**
-   * This is a callback that will be called if the user needs to authenticate using a PKP.
-   * For example, if the user has no wallet, but owns a Lit PKP though something like Google Oauth, then you can use this callback to prompt the user to authenticate with their PKP.
-   * This callback should use the `LitNodeClient.signSessionKey` function to get a session signature for the user from their PKP.
-   * If you don't pass this callback, then the user will be prompted to authenticate with their wallet, like metamask.
-   */
+  //   This is a callback that will be called if the user needs to authenticate using a PKP.  For example, if the user has no wallet, but owns a Lit PKP though something like Google Oauth, then you can use this callback to prompt the user to authenticate with their PKP.  This callback should use the LitNodeClient.signSessionKey function to get a session signature for the user from their PKP.  If you don't pass this callback, then the user will be prompted to authenticate with their wallet, like metamask.
   authNeededCallback?: AuthCallback;
 
-  /**
-   * The serialized session key pair to sign.
-   * If not provided, a session key pair will be fetched from localStorge or generated.
-   */
+  // The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
   sessionKey?: any;
 
   // rateLimitAuthSig: AuthSig;
 
   /**
-   * Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
-   * On both manzano and habanero networks capacity credit proof is required.
-   *
-   * See more here: https://developer.litprotocol.com/v3/sdk/capacity-credits
+   * @deprecated - use capabilityAuthSigs instead
+   *  Used for delegation of Capacity Credit. This signature will be checked for proof of capacity credit.
+   * on both manzano and habanero networks capacity credit proof is required.
+   * see more here: https://developer.litprotocol.com/v3/sdk/capacity-credits
    */
   capacityDelegationAuthSig?: AuthSig;
-}
 
+  /**
+   * Not limited to capacityDelegationAuthSig, we want to be able to pass in any other authSigs for other purposes.
+   */
+  capabilityAuthSigs?: AuthSig[];
+}
 export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
 
 /**
@@ -984,7 +966,7 @@ export interface SessionRequestBody {
   siweMessage: string;
 }
 
-export interface GetWalletSigProps {
+export interface GetWalletSigProps extends LitCustomAuth {
   authNeededCallback?: AuthCallback;
   chain: string;
   sessionCapabilityObject: ISessionCapabilityObject;
@@ -992,6 +974,7 @@ export interface GetWalletSigProps {
   expiration: string;
   sessionKeyUri: string;
   nonce: string;
+  resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
 
 export interface SessionSigningTemplate {
@@ -1544,4 +1527,85 @@ export interface MintCapacityCreditsRes {
   rliTxHash: string;
   capacityTokenId: any;
   capacityTokenIdStr: string;
+}
+
+/**
+ * ========== Siwe Messages ==========
+ */
+export interface BaseSiweMessage {
+  walletAddress: string;
+  nonce: string;
+
+  // -- filled in by default
+  expiration?: string;
+  resources?: LitResourceAbilityRequest[];
+  uri?: string; // This is important in authNeededCallback params eg. (lit:session:xxx)
+  domain?: string;
+  statement?: string;
+  version?: string;
+  chainId?: number;
+  litNodeClient?: any;
+}
+
+export interface WithRecap extends BaseSiweMessage {
+  uri: string;
+  expiration: string;
+  resources: LitResourceAbilityRequest[];
+}
+export interface WithCapacityDelegation extends BaseSiweMessage {
+  uri: 'lit:capability:delegation';
+  litNodeClient: any;
+  capacityTokenId?: string;
+  delegateeAddresses?: string[];
+  uses?: string;
+}
+
+export interface CapacityDelegationFields extends BaseSiweMessage {
+  litNodeClient: any;
+  capacityTokenId?: string;
+  delegateeAddresses?: string[];
+  uses?: string;
+}
+
+export interface CapacityDelegationRequest {
+  nft_id?: string[]; // Optional array of strings
+  delegate_to?: string[]; // Optional array of modified address strings
+  uses: string; // Always present, default to '1' if undefined
+}
+
+export interface LitCustomAuth {
+  litActionCode?: string;
+  ipfsId?: string;
+  jsParams?: {
+    publicKey?: string;
+    sigName?: string;
+  };
+}
+
+export interface LitEndpoint {
+  path: string;
+  version: string;
+  envName: string;
+}
+
+/**
+ * Signer that has the ability to sign messages
+ * eg. ethers.Wallet or ethers.Signer
+ *
+ * for context: This is a common interface so can keep this package clean without
+ * importing external libraries directly
+ */
+export interface SignerLike {
+  signMessage: (message: string | any) => Promise<string>;
+  getAddress: () => Promise<string>;
+}
+
+export interface GetPkpSessionSigs extends GetSessionSigsProps {
+  pkpPublicKey: string;
+  authMethods: AuthMethod[];
+  litActionCode?: string;
+  jsParams?: {
+    publicKey?: string;
+    sigName?: string;
+  };
 }
