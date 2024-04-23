@@ -10,8 +10,8 @@ const TEST_DIR = 'local-tests';
  */
 export const build = async () => {
   await esbuild.build({
-    entryPoints: [`${TEST_DIR}/test.ts`], // Use template literals to inject the variable
-    outfile: `./${TEST_DIR}/build/test.mjs`, // Modify paths to use the TEST_DIR variable
+    entryPoints: [`${TEST_DIR}/test.ts`],
+    outfile: `./${TEST_DIR}/build/test.mjs`,
     bundle: true,
     plugins: [
       nodeExternalsPlugin({
@@ -21,7 +21,7 @@ export const build = async () => {
     platform: 'node',
     target: 'esnext',
     format: 'esm',
-    inject: [`./${TEST_DIR}/shim.mjs`], // Update inject path to use TEST_DIR
+    inject: [`./${TEST_DIR}/shim.mjs`],
     mainFields: ['module', 'main'],
   });
 };
@@ -32,7 +32,7 @@ export const build = async () => {
  * @returns {void}
  */
 export const postBuildPolyfill = () => {
-  const file = fs.readFileSync(`./${TEST_DIR}/build/test.mjs`, 'utf8'); // Use the TEST_DIR variable in the file path
+  const file = fs.readFileSync(`./${TEST_DIR}/build/test.mjs`, 'utf8');
   const content = `import fetch from 'cross-fetch';
 try {
   if (!globalThis.fetch) {
@@ -43,7 +43,7 @@ try {
 }
 `;
   const newFile = content + file;
-  fs.writeFileSync(`./${TEST_DIR}/build/test.mjs`, newFile); // Use the TEST_DIR variable in the file path
+  fs.writeFileSync(`./${TEST_DIR}/build/test.mjs`, newFile);
 };
 
 // Go!
