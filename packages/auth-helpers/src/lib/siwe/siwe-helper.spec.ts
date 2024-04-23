@@ -1,4 +1,4 @@
-import { sanitizeSiweMessage } from './siwe';
+import { sanitizeSiweMessage } from './siwe-helper';
 
 describe('sanitizeSiweMessage', () => {
   it('should unescape double-escaped newlines', () => {

@@ -1,4 +1,8 @@
-import { ILitResource, LitAbility, LitResourcePrefix } from './models';
+import {
+  ILitResource,
+  LitAbility,
+  LitResourcePrefix,
+} from '@lit-protocol/types';
 
 abstract class LitResourceBase {
   abstract resourcePrefix: LitResourcePrefix;
