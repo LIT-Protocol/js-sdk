@@ -2881,6 +2881,13 @@ export class LitNodeClientNodeJs
     return signatures;
   };
 
+  /**
+   * Retrieves the PKP session signatures.
+   *
+   * @param params - The parameters for retrieving the PKP session signatures.
+   * @returns A promise that resolves to the PKP session signatures.
+   * @throws An error if any required parameter is missing or if both `litActionCode` and `ipfsId` are provided.
+   */
   getPkpSessionSigs = async (params: GetPkpSessionSigs) => {
     const chain = params?.chain || 'ethereum';
 
