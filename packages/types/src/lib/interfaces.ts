@@ -226,7 +226,7 @@ export interface BaseJsonExecutionRequest {
   // authSig?: AuthSig;
 
   // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
-  jsParams: any;
+  jsParams?: any;
 
   // JS code to run on the nodes
   code?: string;
@@ -530,7 +530,19 @@ export interface SignConditionECDSA {
  *
  */
 export interface ExecuteJsResponse {
-  signatures: any;
+  success?: boolean;
+  signatures:
+    | {
+        sig: {
+          r: string;
+          s: string;
+          recid: number;
+          signature: string; // 0x...
+          publicKey: string; // pkp public key
+          dataSigned: string;
+        };
+      }
+    | any;
   decryptions: any[];
   response: string;
   logs: string;
