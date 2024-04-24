@@ -41,9 +41,10 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
 
   // -- create a message with capacity credits
   if (
-    'uses' in params ||
-    'delegateeAddresses' in params ||
-    'capacityTokenId' in params
+    'dAppOwnerWallet' in params || // required param
+    'uses' in params || // optional
+    'delegateeAddresses' in params || // optional
+    'capacityTokenId' in params // optional
   ) {
     const ccParams = params as CapacityDelegationFields;
 
