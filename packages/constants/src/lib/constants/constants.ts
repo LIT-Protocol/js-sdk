@@ -789,4 +789,3 @@ export const RELAY_URL_MANZANO = 'https://manzano-relayer.getlit.dev';
 // ========== Lit Actions ==========
 export const LIT_ACTION_IPFS_HASH =
   'QmUjX8MW6StQ7NKNdaS6g4RMkvN5hcgtKmEi8Mca6oX4t3';
-
