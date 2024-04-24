@@ -1612,3 +1612,8 @@ export interface GetPkpSessionSigs extends GetSessionSigsProps {
     sigName?: string;
   };
 }
+
+export type SessionKeyCache = {
+  value: SessionKeyPair;
+  timestamp: number;
+};
