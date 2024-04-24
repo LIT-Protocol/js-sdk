@@ -2888,7 +2888,9 @@ export class LitNodeClientNodeJs
    * @returns A promise that resolves to the PKP session signatures.
    * @throws An error if any required parameter is missing or if both `litActionCode` and `ipfsId` are provided.
    */
-  getPkpSessionSigs = async (params: GetPkpSessionSigs) => {
+  getPkpSessionSigs = async (
+    params: GetPkpSessionSigs
+  ): Promise<SessionSigsMap> => {
     const chain = params?.chain || 'ethereum';
 
     const pkpSessionSigs = this.getSessionSigs({

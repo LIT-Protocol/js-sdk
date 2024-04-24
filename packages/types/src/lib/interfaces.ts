@@ -1014,6 +1014,7 @@ export interface LitClientSessionManager {
   //   authCallbackParams: AuthCallbackParams;
   //   authCallback?: AuthCallback;
   // }) => Promise<AuthSig>;
+  getPkpSessionSigs: (params: GetPkpSessionSigs) => Promise<SessionSigsMap>;
   checkNeedToResignSessionKey: (params: {
     authSig: AuthSig;
     sessionKeyUri: any;
