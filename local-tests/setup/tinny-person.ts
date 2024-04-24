@@ -1,6 +1,6 @@
 import {
   AuthSig,
-  craftAuthSig,
+  generateAuthSig,
   createSiweMessage,
 } from '@lit-protocol/auth-helpers';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
@@ -62,7 +62,7 @@ export class TinnyPerson {
       walletAddress: this.wallet.address,
     });
 
-    this.authSig = await craftAuthSig({
+    this.authSig = await generateAuthSig({
       signer: this.wallet,
       toSign: this.siweMessage,
     });

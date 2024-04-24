@@ -2,7 +2,7 @@ import { AuthSig, SignerLike } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 
 /**
- * Crafts an AuthSig object using the signer.
+ * Generate an AuthSig object using the signer.
  *
  * For more context:
  * We are only using authSig to generate session sigs. In a newer version, we will stop accepting
@@ -13,7 +13,7 @@ import { ethers } from 'ethers';
  * @param address - (optional) the address of the signer
  * @returns
  */
-export const craftAuthSig = async ({
+export const generateAuthSig = async ({
   signer,
   toSign,
   address,

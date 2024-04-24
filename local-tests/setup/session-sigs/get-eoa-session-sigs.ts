@@ -1,7 +1,7 @@
 import {
   LitActionResource,
   LitPKPResource,
-  craftAuthSig,
+  generateAuthSig,
   createSiweMessageWithRecaps,
 } from '@lit-protocol/auth-helpers';
 import {
@@ -78,7 +78,7 @@ export const getEoaSessionSigs = async (
         litNodeClient: devEnv.litNodeClient,
       });
 
-      const authSig = await craftAuthSig({
+      const authSig = await generateAuthSig({
         signer: person.wallet,
         toSign,
       });
@@ -140,7 +140,7 @@ export const getEoaSessionSigsWithCapacityDelegations = async (
         litNodeClient: devEnv.litNodeClient,
       });
 
-      const authSig = await craftAuthSig({
+      const authSig = await generateAuthSig({
         signer: fromWallet,
         toSign,
       });
