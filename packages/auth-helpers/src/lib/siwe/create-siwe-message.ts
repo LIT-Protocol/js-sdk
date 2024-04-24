@@ -12,6 +12,12 @@ import {
   addRecapToSiweMessage,
 } from './siwe-helper';
 
+/**
+ * Creates a SIWE
+ * @param params - The parameters for creating the SIWE message.
+ * @returns A promise that resolves to the created SIWE message as a string.
+ * @throws An error if the walletAddress parameter is missing.
+ */
 export const createSiweMessage = async <T extends BaseSiweMessage>(
   params: T
 ): Promise<string> => {
@@ -70,6 +76,13 @@ export const createSiweMessage = async <T extends BaseSiweMessage>(
 
   return siweMessage.prepareMessage();
 };
+
+/**
+ * Creates a SIWE message with recaps added to it.
+ *
+ * @param params - The parameters for creating the SIWE message with recaps.
+ * @returns A Promise that resolves to a string representing the SIWE message.
+ */
 export const createSiweMessageWithRecaps = async (
   params: WithRecap
 ): Promise<string> => {
@@ -77,6 +90,13 @@ export const createSiweMessageWithRecaps = async (
     ...params,
   });
 };
+
+/**
+ * Creates a SIWE message with capacity delegation.
+ * @param params - The parameters for creating the SIWE message.
+ * @returns A Promise that resolves to the created SIWE message.
+ * @throws An error if litNodeClient is not provided.
+ */
 export const createSiweMessageWithCapacityDelegation = async (
   params: WithCapacityDelegation
 ) => {

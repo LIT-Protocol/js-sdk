@@ -37,6 +37,7 @@ export interface AuthSig {
   derivedVia: string;
   signedMessage: string;
   address: string;
+  algo?: string;
 }
 
 export type CosmosWalletType = 'keplr' | 'leap';
@@ -255,6 +256,14 @@ export interface WithSessionSigs extends BaseJsonExecutionRequest {
 
 export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
 
+export interface JsExecutionRequestBody {
+  authSig?: AuthSig;
+  code?: string;
+  ipfsId?: string;
+  authMethods?: AuthMethod[];
+  jsParams?: any;
+}
+
 export interface BaseJsonPkpSignRequest {
   toSign: ArrayLike<number>;
   pubKey: string;
@@ -298,6 +307,31 @@ export interface JsonSignChainDataRequest {
   chain: Chain;
   iat: number;
   exp: number;
+}
+
+export interface JsonSignSessionKeyRequestV1 {
+  sessionKey: string;
+  authMethods: AuthMethod[];
+  pkpPublicKey?: string;
+  authSig?: AuthSig;
+  siweMessage: string;
+  curveType: 'BLS' | 'ECDSA';
+  code?: string;
+  litActionIpfsId?: string;
+  jsParams?: any;
+  epoch?: number;
+}
+
+export interface BlsResponseData {
+  result: boolean;
+  signatureShare: {
+    ProofOfPossession: string;
+  };
+  shareIndex: number;
+  curveType: string;
+  siweMessage: string;
+  dataSigned: string;
+  blsRootPubkey: string;
 }
 
 /**
@@ -878,6 +912,17 @@ export interface SignSessionKeyProp {
   domain?: string;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
+
+  // -- as part of auth unification
+  sessionKeyUri?: string;
+
+  litActionCode?: string;
+
+  jsParams?: {
+    [key: string]: any;
+    publicKey: string;
+    sigName: string;
+  };
 }
 
 export interface SignSessionKeyResponse {
@@ -1574,6 +1619,19 @@ export interface CapacityDelegationRequest {
   nft_id?: string[]; // Optional array of strings
   delegate_to?: string[]; // Optional array of modified address strings
   uses: string; // Always present, default to '1' if undefined
+}
+
+export interface CapacityCreditsReq {
+  dAppOwnerWallet: SignerLike;
+  capacityTokenId?: string;
+  delegateeAddresses?: string[];
+  uses?: string;
+  domain?: string;
+  expiration?: string;
+  statement?: string;
+}
+export interface CapacityCreditsRes {
+  capacityDelegationAuthSig: AuthSig;
 }
 
 export interface LitCustomAuth {
