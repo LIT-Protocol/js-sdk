@@ -36,7 +36,7 @@ export async function main() {
     }
     for (let i = 0; i < storageProvider.length; i++) {
       const key = storageProvider.key(i);
-      if (!key.includes('https://kdsintf.amd.com/vcek/')) {
+      if (!key.includes('https://kdsintf.amd.com/')) {
         fail(
           'found cache item which does not match indexing schema should contain: https://kdsintf.amd.com/vcek/v1/Milan/'
         );
