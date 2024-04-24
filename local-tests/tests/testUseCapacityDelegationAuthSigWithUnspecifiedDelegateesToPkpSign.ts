@@ -23,7 +23,7 @@ export const testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign 
     devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
     const alice = await devEnv.createRandomPerson();
     const bob = await devEnv.createRandomPerson();
-    
+
     const appOwnersCapacityDelegationAuthSig =
       await alice.createCapacityDelegationAuthSig();
 

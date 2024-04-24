@@ -45,12 +45,10 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
 
   // -- assertions
   if (!encryptRes.ciphertext) {
-
     throw new Error(`Expected "ciphertext" in encryptRes`);
   }
 
   if (!encryptRes.dataToEncryptHash) {
-
     throw new Error(`Expected "dataToEncryptHash" to in encryptRes`);
   }
 
@@ -80,10 +78,8 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
   );
 
   if (decryptRes !== 'Hello world') {
-
     throw new Error(
       `Expected decryptRes to be 'Hello world' but got ${decryptRes}`
     );
   }
-
 };

@@ -21,7 +21,6 @@ export const testUseEoaSessionSigsToExecuteJsClaimMultipleKeys = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
-  
 
   const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 

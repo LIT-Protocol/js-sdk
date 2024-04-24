@@ -14,7 +14,7 @@ export const testUseEoaSessionSigsToExecuteJsSigningInParallel = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
-  
+
   const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
   const fn = async (index: number) => {

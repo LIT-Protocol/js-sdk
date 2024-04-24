@@ -10,9 +10,11 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
  * ✅ NETWORK=manzano yarn test:local --filter=testUsePkpSessionSigsToPkpSign
  * ✅ NETWORK=localchain yarn test:local --filter=testUsePkpSessionSigsToPkpSign
  */
-export const testUsePkpSessionSigsToPkpSign = async (devEnv: TinnyEnvironment) => {
+export const testUsePkpSessionSigsToPkpSign = async (
+  devEnv: TinnyEnvironment
+) => {
   const alice = await devEnv.createRandomPerson();
-  
+
   const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
 
   const res = await devEnv.litNodeClient.pkpSign({

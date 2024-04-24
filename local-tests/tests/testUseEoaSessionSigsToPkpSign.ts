@@ -14,7 +14,7 @@ export const testUseEoaSessionSigsToPkpSign = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
-  
+
   const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
   const runWithSessionSigs = await devEnv.litNodeClient.pkpSign({

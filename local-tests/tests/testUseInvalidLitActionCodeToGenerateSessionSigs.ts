@@ -14,7 +14,7 @@ export const testUseInvalidLitActionCodeToGenerateSessionSigs = async (
 ) => {
   devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
   devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-  
+
   const alice = await devEnv.createRandomPerson();
 
   try {

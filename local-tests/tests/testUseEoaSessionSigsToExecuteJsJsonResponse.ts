@@ -13,7 +13,7 @@ export const testUseEoaSessionSigsToExecuteJsJsonResponse = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
-  
+
   const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
 
   const res = await devEnv.litNodeClient.executeJs({

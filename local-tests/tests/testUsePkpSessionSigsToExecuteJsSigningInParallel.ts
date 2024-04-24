@@ -14,7 +14,7 @@ export const testUsePkpSessionSigsToExecuteJsSigningInParallel = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
-  
+
   const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
 
   const fn = async (index: number) => {

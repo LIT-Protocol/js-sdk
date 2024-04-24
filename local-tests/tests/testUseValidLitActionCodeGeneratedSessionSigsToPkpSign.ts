@@ -18,7 +18,7 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToPkpSign = async (
 ) => {
   devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
   devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-  
+
   const alice = await devEnv.createRandomPerson();
   const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 
