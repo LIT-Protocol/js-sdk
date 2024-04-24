@@ -3,6 +3,10 @@ import { LitEndpoint } from '@lit-protocol/types';
 
 /**
  * Compose the Lit URL
+ *
+ * The schema of the routing can be found in the `constants` package in the `endpoints.ts` file, where you would be able to add new endpoint to the enum,
+ * and use that enum in the LIT_ENDPOINT map.
+ *
  * @param params
  * @returns the composed URL
  */
