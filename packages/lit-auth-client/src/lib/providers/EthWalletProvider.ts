@@ -204,6 +204,6 @@ export default class EthWalletProvider extends BaseProvider {
       );
     }
 
-    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`${address}:lit`));
+    return address;
   }
 }
