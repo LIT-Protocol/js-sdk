@@ -1,0 +1,45 @@
+{
+  "name": "e2e-tests",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/e2e-tests/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/e2e-tests",
+        "main": "packages/e2e-tests/src/index.ts",
+        "tsConfig": "packages/e2e-tests/tsconfig.lib.json",
+        "assets": ["packages/e2e-tests/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/e2e-tests/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/e2e-tests"],
+      "options": {
+        "jestConfig": "packages/e2e-tests/jest.config.ts",
+        "passWithNoTests": true,
+        "runInBand": true
+      }
+    },
+    "testWatch": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/e2e-tests"],
+      "options": {
+        "jestConfig": "packages/e2e-tests/jest.config.ts",
+        "passWithNoTests": true,
+        "watch": true
+      }
+    }
+  },
+  "tags": []
+}
