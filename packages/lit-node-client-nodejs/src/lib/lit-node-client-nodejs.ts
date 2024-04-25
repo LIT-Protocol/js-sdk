@@ -407,6 +407,12 @@ export class LitNodeClientNodeJs
         localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
       } catch (e) {
         console.warn(`Localstorage not available. Not a problem. Contiune...`);
+
+        // Store in cache
+        sessionKeyCache = {
+          value: newSessionKey,
+          timestamp: expirationInMs,
+        };
       }
 
       return newSessionKey;
