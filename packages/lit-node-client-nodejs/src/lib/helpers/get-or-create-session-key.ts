@@ -14,7 +14,7 @@ let sessionKeyCache: SessionKeyCache | undefined = undefined;
  * @param expiration - The expiration date of the session key.
  * @returns The session key pair.
  */
-export const getSessionKey = (expiration: string): SessionKeyPair => {
+export const getOrCreateSessionKey = (expiration: string): SessionKeyPair => {
   const siweExpiration = new Date(expiration).getTime();
 
   const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;

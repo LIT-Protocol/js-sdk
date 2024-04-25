@@ -108,7 +108,7 @@ import type {
   ILitNodeClient,
   SessionKeyCache,
 } from '@lit-protocol/types';
-import { getSessionKey } from './helpers/get-session-key';
+import { getOrCreateSessionKey } from './helpers/get-or-create-session-key';
 
 // TODO: move this to auth-helper for next patch
 interface CapacityCreditsReq {
@@ -374,7 +374,7 @@ export class LitNodeClientNodeJs
    * @return { SessionKeyPair } session key pair
    */
   getSessionKey = (expiration: string): SessionKeyPair => {
-    return getSessionKey(expiration);
+    return getOrCreateSessionKey(expiration);
   };
 
   /**

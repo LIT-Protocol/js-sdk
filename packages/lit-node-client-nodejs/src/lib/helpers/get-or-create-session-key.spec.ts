@@ -1,6 +1,9 @@
-import { clearSessionKeyCache, getSessionKey } from './get-session-key';
+import {
+  clearSessionKeyCache,
+  getOrCreateSessionKey,
+} from './get-or-create-session-key';
 
-describe('getSessionKey', () => {
+describe('getOrCreateSessionKey', () => {
   beforeEach(() => {
     clearSessionKeyCache();
     // Remove global.localStorage
@@ -21,14 +24,14 @@ describe('getSessionKey', () => {
       Date.now() + 24 * 60 * 60 * 1000 // equivalent to 1 day
     ).toISOString();
 
-    const sessionKeyFirstTime = getSessionKey(requestedExpiration);
+    const sessionKeyFirstTime = getOrCreateSessionKey(requestedExpiration);
     expect(sessionKeyFirstTime).toBeDefined();
 
     const newExpirationShouldBeIgnored = new Date(
       Date.now() + 24 * 60 * 60 * 10000 // equivalent to 10 days
     ).toISOString();
 
-    const sessionKeyShouldBeTheSame = getSessionKey(
+    const sessionKeyShouldBeTheSame = getOrCreateSessionKey(
       newExpirationShouldBeIgnored
     );
 
@@ -41,11 +44,11 @@ describe('getSessionKey', () => {
     ).toISOString();
 
     // This should set the cache
-    const sessionKeyFirstTime = getSessionKey(requestedExpiration);
+    const sessionKeyFirstTime = getOrCreateSessionKey(requestedExpiration);
 
     // Second time the cache should already be set, but if the cache is expired, we should
     // get a new one
-    const sessionKeySecondTime = getSessionKey(requestedExpiration);
+    const sessionKeySecondTime = getOrCreateSessionKey(requestedExpiration);
 
     expect(sessionKeyFirstTime).not.toStrictEqual(sessionKeySecondTime);
   });
