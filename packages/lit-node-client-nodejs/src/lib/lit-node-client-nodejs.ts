@@ -108,6 +108,7 @@ import type {
   ILitNodeClient,
   SessionKeyCache,
 } from '@lit-protocol/types';
+import { getSessionKey } from './helpers/get-session-key';
 
 // TODO: move this to auth-helper for next patch
 interface CapacityCreditsReq {
@@ -376,49 +377,7 @@ export class LitNodeClientNodeJs
    * @return { SessionKeyPair } session key pair
    */
   getSessionKey = (expiration: string): SessionKeyPair => {
-    const expirationInMs = new Date(expiration).getTime();
-
-    const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
-    const storedSessionKeyOrError = getStorageItem(storageKey);
-
-    if (
-      storedSessionKeyOrError.type === EITHER_TYPE.ERROR ||
-      !storedSessionKeyOrError.result ||
-      storedSessionKeyOrError.result === ''
-    ) {
-      console.warn(
-        `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
-      );
-
-      // Check if a valid session key exists in cache
-      if (
-        sessionKeyCache &&
-        Date.now() - sessionKeyCache.timestamp < expirationInMs
-      ) {
-        log(`[getSessionKey] Returning session key from cache.`);
-        return sessionKeyCache.value;
-      }
-
-      // Generate new one
-      const newSessionKey = generateSessionKeyPair();
-
-      // (TRY) to set to local storage
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(newSessionKey));
-      } catch (e) {
-        console.warn(`Localstorage not available. Not a problem. Contiune...`);
-
-        // Store in cache
-        sessionKeyCache = {
-          value: newSessionKey,
-          timestamp: expirationInMs,
-        };
-      }
-
-      return newSessionKey;
-    } else {
-      return JSON.parse(storedSessionKeyOrError.result as string);
-    }
+    return getSessionKey(expiration);
   };
 
   /**
