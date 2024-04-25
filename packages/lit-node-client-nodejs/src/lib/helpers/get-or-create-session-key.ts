@@ -11,17 +11,22 @@ let sessionKeyCache: SessionKeyCache | undefined = undefined;
 
 /**
  * Retrieves the session key from local storage or cache, or generates a new session key if none exists.
- * @param expiration - The expiration date of the session key.
+ * @param expiration - The ISO string of expiration date of the session key.
  * @returns The session key pair.
  */
 export const getOrCreateSessionKey = (expiration: string): SessionKeyPair => {
   if (!expiration) throw new Error('Expiration date is required');
 
+  // Check if the input expiration is a negative number
+  if (parseInt(expiration) < 0) {
+    throw new Error('Expiration date cannot be negative.');
+  }
+
   const siweExpiration = new Date(expiration).getTime();
 
-  // if it's not an instance of Date
-  if (!((siweExpiration as any) instanceof Date)) {
-    throw new Error('Invalid expiration date');
+  // Check if siweExpiration is not a number, meaning the date conversion failed
+  if (isNaN(siweExpiration)) {
+    throw new Error(`Invalid expiration date.`);
   }
 
   const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;

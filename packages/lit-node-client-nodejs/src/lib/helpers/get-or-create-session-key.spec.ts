@@ -30,7 +30,7 @@ describe('getOrCreateSessionKey', () => {
   it('should not be negative number', () => {
     const expiration = '-1';
     expect(() => getOrCreateSessionKey(expiration)).toThrowError(
-      'Invalid expiration date'
+      'Expiration date cannot be negative.'
     );
   });
 

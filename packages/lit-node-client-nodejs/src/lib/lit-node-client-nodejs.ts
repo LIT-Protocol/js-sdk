@@ -373,7 +373,11 @@ export class LitNodeClientNodeJs
    * if not, generates one.
    * @return { SessionKeyPair } session key pair
    */
-  getSessionKey = (expiration: string): SessionKeyPair => {
+  getSessionKey = (expiration?: string): SessionKeyPair => {
+    if (!expiration) {
+      expiration = LitNodeClientNodeJs.getExpiration();
+    }
+
     return getOrCreateSessionKey(expiration);
   };
 
@@ -2699,11 +2703,10 @@ export class LitNodeClientNodeJs
   getSessionSigs = async (
     params: GetSessionSigsProps
   ): Promise<SessionSigsMap> => {
-    const _expiration = params.expiration || this.getExpiration(); // 24 hours from now
-
     // -- prepare
     // Try to get it from local storage, if not generates one~
-    const sessionKey = params.sessionKey ?? this.getSessionKey(_expiration);
+    const sessionKey =
+      params.sessionKey ?? this.getSessionKey(params.expiration);
 
     const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
 
