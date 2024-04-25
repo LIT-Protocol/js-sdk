@@ -127,9 +127,6 @@ interface CapacityCreditsRes {
   capacityDelegationAuthSig: AuthSig;
 }
 
-// Global cache variable
-let sessionKeyCache: SessionKeyCache | null = null;
-
 export class LitNodeClientNodeJs
   extends LitCore
   implements LitClientSessionManager, ILitNodeClient

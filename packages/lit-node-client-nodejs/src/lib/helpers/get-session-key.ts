@@ -5,7 +5,7 @@ import { getStorageItem } from '@lit-protocol/misc-browser';
 import { SessionKeyCache, SessionKeyPair } from '@lit-protocol/types';
 
 // Global cache variable
-let sessionKeyCache: SessionKeyCache | null = null;
+let sessionKeyCache: SessionKeyCache | undefined = undefined;
 
 // const _expiration = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
@@ -60,5 +60,5 @@ export const getSessionKey = (expiration: string): SessionKeyPair => {
  * Clears the session key cache.
  */
 export const clearSessionKeyCache = (): void => {
-  sessionKeyCache = null;
+  sessionKeyCache = undefined;
 };
