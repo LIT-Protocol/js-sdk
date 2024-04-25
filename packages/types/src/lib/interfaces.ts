@@ -1023,7 +1023,7 @@ export declare type AuthenticatorAttachment = 'cross-platform' | 'platform';
  * ========== PKP ==========
  */
 export interface LitClientSessionManager {
-  getSessionKey: () => SessionKeyPair;
+  getSessionKey: (expiration: string) => SessionKeyPair;
   isSessionKeyPair(obj: any): boolean;
   getExpiration: () => string;
   getWalletSig: (getWalletSigProps: GetWalletSigProps) => Promise<AuthSig>;
@@ -1545,3 +1545,8 @@ export interface MintCapacityCreditsRes {
   capacityTokenId: any;
   capacityTokenIdStr: string;
 }
+
+export type SessionKeyCache = {
+  value: SessionKeyPair;
+  timestamp: number;
+};

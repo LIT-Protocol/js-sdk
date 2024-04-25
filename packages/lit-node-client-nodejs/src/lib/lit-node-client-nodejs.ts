@@ -106,6 +106,7 @@ import type {
   ValidateAndSignECDSA,
   WebAuthnAuthenticationVerificationParams,
   ILitNodeClient,
+  SessionKeyCache,
 } from '@lit-protocol/types';
 
 // TODO: move this to auth-helper for next patch
@@ -124,6 +125,9 @@ interface CapacityCreditsRes {
   litResource: LitRLIResource;
   capacityDelegationAuthSig: AuthSig;
 }
+
+// Global cache variable
+let sessionKeyCache: SessionKeyCache | null = null;
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -371,7 +375,9 @@ export class LitNodeClientNodeJs
    * if not, generates one.
    * @return { SessionKeyPair } session key pair
    */
-  getSessionKey = (): SessionKeyPair => {
+  getSessionKey = (expiration: string): SessionKeyPair => {
+    const expirationInMs = new Date(expiration).getTime();
+
     const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
     const storedSessionKeyOrError = getStorageItem(storageKey);
 
@@ -383,6 +389,15 @@ export class LitNodeClientNodeJs
       console.warn(
         `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
       );
+
+      // Check if a valid session key exists in cache
+      if (
+        sessionKeyCache &&
+        Date.now() - sessionKeyCache.timestamp < expirationInMs
+      ) {
+        log(`[getSessionKey] Returning session key from cache.`);
+        return sessionKeyCache.value;
+      }
 
       // Generate new one
       const newSessionKey = generateSessionKeyPair();
@@ -2453,7 +2468,7 @@ export class LitNodeClientNodeJs
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     // Try to get it from local storage, if not generates one~
-    const sessionKey = params.sessionKey ?? this.getSessionKey();
+    const sessionKey = params.sessionKey ?? this.getSessionKey(_expiration);
     const sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
@@ -2726,7 +2741,8 @@ export class LitNodeClientNodeJs
   ): Promise<SessionSigsMap> => {
     // -- prepare
     // Try to get it from local storage, if not generates one~
-    const sessionKey = params.sessionKey ?? this.getSessionKey();
+    const sessionKey =
+      params.sessionKey ?? this.getSessionKey(params.expiration);
 
     const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
 
