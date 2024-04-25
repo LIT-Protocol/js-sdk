@@ -15,7 +15,14 @@ let sessionKeyCache: SessionKeyCache | undefined = undefined;
  * @returns The session key pair.
  */
 export const getOrCreateSessionKey = (expiration: string): SessionKeyPair => {
+  if (!expiration) throw new Error('Expiration date is required');
+
   const siweExpiration = new Date(expiration).getTime();
+
+  // if it's not an instance of Date
+  if (!((siweExpiration as any) instanceof Date)) {
+    throw new Error('Invalid expiration date');
+  }
 
   const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
   const storedSessionKeyOrError = getStorageItem(storageKey);

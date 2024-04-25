@@ -2425,9 +2425,7 @@ export class LitNodeClientNodeJs
     }
 
     // -- construct SIWE message that will be signed by node to generate an authSig.
-    const _expiration =
-      params.expiration ||
-      new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const _expiration = params.expiration || this.getExpiration(); // 24 hours from now
 
     // Try to get it from local storage, if not generates one~
     const sessionKey = params.sessionKey ?? this.getSessionKey(_expiration);
@@ -2701,10 +2699,11 @@ export class LitNodeClientNodeJs
   getSessionSigs = async (
     params: GetSessionSigsProps
   ): Promise<SessionSigsMap> => {
+    const _expiration = params.expiration || this.getExpiration(); // 24 hours from now
+
     // -- prepare
     // Try to get it from local storage, if not generates one~
-    const sessionKey =
-      params.sessionKey ?? this.getSessionKey(params.expiration);
+    const sessionKey = params.sessionKey ?? this.getSessionKey(_expiration);
 
     const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
 

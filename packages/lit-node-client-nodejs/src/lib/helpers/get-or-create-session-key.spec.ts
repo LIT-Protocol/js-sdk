@@ -19,6 +19,21 @@ describe('getOrCreateSessionKey', () => {
       writable: true,
     });
   });
+
+  it('should not be fool', () => {
+    const expiration = 'foo';
+    expect(() => getOrCreateSessionKey(expiration)).toThrowError(
+      'Invalid expiration date'
+    );
+  });
+
+  it('should not be negative number', () => {
+    const expiration = '-1';
+    expect(() => getOrCreateSessionKey(expiration)).toThrowError(
+      'Invalid expiration date'
+    );
+  });
+
   it('should always use the session key that was initially set if it is not expired.', () => {
     const requestedExpiration = new Date(
       Date.now() + 24 * 60 * 60 * 1000 // equivalent to 1 day
