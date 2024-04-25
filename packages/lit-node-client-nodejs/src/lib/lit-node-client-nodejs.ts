@@ -127,8 +127,6 @@ interface CapacityCreditsRes {
   capacityDelegationAuthSig: AuthSig;
 }
 
-const TEMP_CACHE_PERIOD = 30000; // 30 seconds
-
 // Global cache variable
 let sessionKeyCache: SessionKeyCache | null = null;
 
@@ -378,7 +376,9 @@ export class LitNodeClientNodeJs
    * if not, generates one.
    * @return { SessionKeyPair } session key pair
    */
-  getSessionKey = (): SessionKeyPair => {
+  getSessionKey = (expiration: string): SessionKeyPair => {
+    const expirationInMs = new Date(expiration).getTime();
+
     const storageKey = LOCAL_STORAGE_KEYS.SESSION_KEY;
     const storedSessionKeyOrError = getStorageItem(storageKey);
 
@@ -394,7 +394,7 @@ export class LitNodeClientNodeJs
       // Check if a valid session key exists in cache
       if (
         sessionKeyCache &&
-        Date.now() - sessionKeyCache.timestamp < TEMP_CACHE_PERIOD
+        Date.now() - sessionKeyCache.timestamp < expirationInMs
       ) {
         log(`[getSessionKey] Returning session key from cache.`);
         return sessionKeyCache.value;
@@ -2493,7 +2493,7 @@ export class LitNodeClientNodeJs
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     // Try to get it from local storage, if not generates one~
-    const sessionKey = params.sessionKey ?? this.getSessionKey();
+    const sessionKey = params.sessionKey ?? this.getSessionKey(_expiration);
     const sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
@@ -2766,7 +2766,8 @@ export class LitNodeClientNodeJs
   ): Promise<SessionSigsMap> => {
     // -- prepare
     // Try to get it from local storage, if not generates one~
-    const sessionKey = params.sessionKey ?? this.getSessionKey();
+    const sessionKey =
+      params.sessionKey ?? this.getSessionKey(params.expiration);
 
     const sessionKeyUri = this.getSessionKeyUri(sessionKey.publicKey);
 
