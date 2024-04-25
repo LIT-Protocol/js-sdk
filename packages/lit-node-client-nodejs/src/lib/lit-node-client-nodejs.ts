@@ -118,6 +118,7 @@ import type {
   BlsResponseData,
 } from '@lit-protocol/types';
 import * as blsSdk from '@lit-protocol/bls-sdk';
+import { handleBlsResponseData } from './helpers/handle-bls-response';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -2557,19 +2558,7 @@ export class LitNodeClientNodeJs
     let signedDataList: any[] = [];
 
     if (curveType === LIT_CURVE.BLS) {
-      let _responseData: BlsResponseData[] = responseData;
-
-      const signatureShares = _responseData.map((s) => ({
-        ProofOfPossession: s.signatureShare.ProofOfPossession,
-      }));
-
-      log(`[signSessionKey] signatureShares:`, signatureShares);
-
-      signedDataList = _responseData.map((s) => {
-        return s.dataSigned;
-      });
-
-      signedDataList = _responseData;
+      signedDataList = handleBlsResponseData(responseData);
     } else {
       signedDataList = responseData.map(
         (r: any) => (r as SignedData).signedData
