@@ -582,7 +582,7 @@ export class LitContracts {
     }
 
     if (!context) {
-      let contractData = await LitContracts._resolveContractContext(
+      const contractData = await LitContracts._resolveContractContext(
         network,
         context
       );
@@ -602,7 +602,7 @@ export class LitContracts {
       // if we have contract context then we determine if there exists a `resolverAddres`
       // if there is a resolver address we assume we are using a contract resolver for bootstrapping of contracts
       if (!context.resolverAddress) {
-        let stakingContract = (context as LitContractContext).Staking;
+        const stakingContract = (context as LitContractContext).Staking;
 
         if (!stakingContract.address) {
           throw new Error(
@@ -615,7 +615,7 @@ export class LitContracts {
           provider
         );
       } else {
-        let contractContext = await LitContracts._getContractsFromResolver(
+        const contractContext = await LitContracts._getContractsFromResolver(
           context as LitContractResolverContext,
           provider,
           ['Staking']

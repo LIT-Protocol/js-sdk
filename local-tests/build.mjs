@@ -32,8 +32,9 @@ export const build = async () => {
  * @returns {void}
  */
 export const postBuildPolyfill = () => {
-  const file = fs.readFileSync(`./${TEST_DIR}/build/test.mjs`, 'utf8');
-  const content = `import fetch from 'cross-fetch';
+  try {
+    const file = fs.readFileSync(`./${TEST_DIR}/build/test.mjs`, 'utf8');
+    const content = `import fetch from 'cross-fetch';
 try {
   if (!globalThis.fetch) {
     globalThis.fetch = fetch;
@@ -42,8 +43,11 @@ try {
   console.error('❌ Error in polyfill', error);
 }
 `;
-  const newFile = content + file;
-  fs.writeFileSync(`./${TEST_DIR}/build/test.mjs`, newFile);
+    const newFile = content + file;
+    fs.writeFileSync(`./${TEST_DIR}/build/test.mjs`, newFile);
+  } catch (e) {
+    throw new Error(`Error in postBuildPolyfill: ${e}`);
+  }
 };
 
 // Go!

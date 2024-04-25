@@ -1,16 +1,11 @@
-import {
-  LIT_ENDPOINT,
-  LIT_ENDPOINT_VERSION,
-  LIT_TESTNET,
-  ProcessEnvs,
-  TinnyEnvConfig,
-} from './tinny-config';
+import { LIT_TESTNET, ProcessEnvs, TinnyEnvConfig } from './tinny-config';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { AuthSig, LitContractContext } from '@lit-protocol/types';
 import { TinnyPerson } from './tinny-person';
 import networkContext from './networkContext.json';
 import { ethers } from 'ethers';
+import { LIT_ENDPOINT, LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 
 export class TinnyEnvironment {
   public network: LIT_TESTNET;

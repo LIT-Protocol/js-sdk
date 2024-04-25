@@ -22,6 +22,7 @@ import {
   LIT_CURVE,
   StakingStates,
   version,
+  LIT_ENDPOINT,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
@@ -58,6 +59,7 @@ import type {
   SuccessNodePromises,
   SupportedJsonRequests,
 } from '@lit-protocol/types';
+import { composeLitUrl } from './endpoint-version';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -891,7 +893,10 @@ export class LitCore {
         const { url } = params;
 
         // -- create url with path
-        const urlWithPath = `${url}/web/handshake`;
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.HANDSHAKE,
+        });
 
         log(`handshakeWithNode ${urlWithPath}`);
 

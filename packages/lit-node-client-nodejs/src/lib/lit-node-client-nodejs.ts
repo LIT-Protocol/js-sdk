@@ -22,6 +22,7 @@ import {
   AuthMethodType,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
+  LIT_ENDPOINT,
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
@@ -29,7 +30,7 @@ import {
   LIT_CURVE,
   SIWE_DELEGATION_URI,
 } from '@lit-protocol/constants';
-import { LitCore } from '@lit-protocol/core';
+import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
   checkSevSnpAttestation,
   combineEcdsaShares,
@@ -668,8 +669,10 @@ export class LitNodeClientNodeJs
     logWithRequestId(requestId, 'getJsExecutionShares');
 
     // -- execute
-
-    let urlWithPath = `${url}/web/execute`;
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.EXECUTE_JS,
+    });
 
     if (!authSig) {
       throw new Error('authSig or sessionSig is required');
@@ -701,7 +704,10 @@ export class LitNodeClientNodeJs
     requestId: string
   ) => {
     logWithRequestId(requestId, 'getPkpSigningShares');
-    const urlWithPath = `${url}/web/pkp/sign`;
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.PKP_SIGN,
+    });
     if (!params.authSig) {
       throw new Error('authSig is required');
     }
@@ -719,7 +725,10 @@ export class LitNodeClientNodeJs
     requestId: string
   ) => {
     logWithRequestId(requestId, 'getPkpSigningShares');
-    const urlWithPath = `${url}/web/pkp/claim`;
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.PKP_CLAIM,
+    });
     if (!params.authMethod) {
       throw new Error('authMethod is required');
     }
@@ -746,7 +755,11 @@ export class LitNodeClientNodeJs
     requestId: string
   ): Promise<NodeCommandResponse> => {
     logWithRequestId(requestId, 'getSigningShareForToken');
-    const urlWithPath = `${url}/web/signing/access_control_condition`;
+
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.SIGN_ACCS,
+    });
 
     return this.sendCommandToNode({
       url: urlWithPath,
@@ -770,7 +783,11 @@ export class LitNodeClientNodeJs
     requestId: string
   ): Promise<NodeCommandResponse> => {
     log('getSigningShareForDecryption');
-    const urlWithPath = `${url}/web/encryption/sign`;
+
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
+    });
 
     return await this.sendCommandToNode({
       url: urlWithPath,
@@ -798,7 +815,11 @@ export class LitNodeClientNodeJs
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       log('signConditionEcdsa');
-      const urlWithPath = `${url}/web/signing/signConditionEcdsa`;
+
+      const urlWithPath = composeLitUrl({
+        url,
+        endpoint: LIT_ENDPOINT.SIGN_ECDSA,
+      });
 
       const data = {
         access_control_conditions: params.accessControlConditions,
@@ -2753,7 +2774,10 @@ export class LitNodeClientNodeJs
     requestId: string
   ) => {
     log('getSignSessionKeyShares');
-    const urlWithPath = `${url}/web/sign_session_key`;
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
+    });
     return await this.sendCommandToNode({
       url: urlWithPath,
       data: params.body,
@@ -2937,6 +2961,7 @@ export class LitNodeClientNodeJs
   };
 
   /**
+
    * Retrieves the PKP sessionSigs.
    *
    * @param params - The parameters for retrieving the PKP sessionSigs.
@@ -2944,6 +2969,7 @@ export class LitNodeClientNodeJs
    * @throws An error if any of the required parameters are missing or if `litActionCode` and `ipfsId` exist at the same time.
    */
   getPkpSessionSigs = async (params: GetPkpSessionSigs) => {
+
     const chain = params?.chain || 'ethereum';
 
     const pkpSessionSigs = this.getSessionSigs({
