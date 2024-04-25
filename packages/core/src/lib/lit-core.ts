@@ -1018,48 +1018,40 @@ export class LitCore {
   };
 
   /**
+   * Retrieves the session signature for a given URL from the sessionSigs map.
+   * Throws an error if sessionSigs is not provided or if the session signature for the URL is not found.
    *
-   * Get either auth sig or session auth sig
-   *
+   * @param sessionSigs - The session signatures map.
+   * @param url - The URL for which to retrieve the session signature.
+   * @returns The session signature for the given URL.
+   * @throws An error if sessionSigs is not provided or if the session signature for the URL is not found.
    */
-  getSessionOrAuthSig = ({
-    authSig,
+  getSessionSigByUrl = ({
     sessionSigs,
     url,
-    mustHave = true,
   }: {
-    authSig?: AuthSig;
-    sessionSigs?: SessionSigsMap;
+    sessionSigs: SessionSigsMap;
     url: string;
-    mustHave?: boolean;
-  }): AuthSig | SessionSig => {
-    if (!authSig && !sessionSigs) {
-      if (mustHave) {
-        throwError({
-          message: `You must pass either authSig, or sessionSigs`,
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
-      } else {
-        log(`authSig or sessionSigs not found. This may be using authMethod`);
-      }
+  }): AuthSig => {
+    if (!sessionSigs) {
+      return throwError({
+        message: `You must pass in sessionSigs`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
     }
 
-    if (sessionSigs) {
-      const sigToPassToNode = sessionSigs[url];
+    const sigToPassToNode = sessionSigs[url];
 
-      if (!sigToPassToNode) {
-        throwError({
-          message: `You passed sessionSigs but we could not find session sig for node ${url}`,
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
-      }
-
-      return sigToPassToNode;
+    if (!sessionSigs[url]) {
+      throwError({
+        message: `You passed sessionSigs but we could not find session sig for node ${url}`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
     }
 
-    return authSig!;
+    return sigToPassToNode;
   };
 
   validateAccessControlConditionsSchema = async (

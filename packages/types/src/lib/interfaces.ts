@@ -244,17 +244,7 @@ export interface BaseJsonExecutionRequest {
   authMethods?: AuthMethod[];
 }
 
-export interface WithAuthSig extends BaseJsonExecutionRequest {
-  authSig: AuthSig;
-  sessionSigs?: any;
-}
-
-export interface WithSessionSigs extends BaseJsonExecutionRequest {
-  sessionSigs: any;
-  authSig?: AuthSig;
-}
-
-export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
+export type JsonExecutionRequest = {} & BaseJsonExecutionRequest;
 
 export interface JsExecutionRequestBody {
   authSig?: AuthSig;
@@ -266,31 +256,25 @@ export interface JsExecutionRequestBody {
 
 export interface BaseJsonPkpSignRequest {
   toSign: ArrayLike<number>;
+  pubkey: string; // yes, pub"key" is lower case in the node.
+  authMethods?: AuthMethod[];
+}
+
+/**
+ * The 'pkpSign' function param. Please note that the structure
+ * is different than the payload sent to the node.
+ */
+export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
   pubKey: string;
+  sessionSigs: SessionSigsMap;
 }
 
-export interface WithAuthMethodSigning extends BaseJsonPkpSignRequest {
-  // auth methods to resolve
-  authMethods: AuthMethod[];
-  sessionSigs?: any;
-  authSig?: AuthSig;
-}
-export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
-  sessionSigs: any;
-  authSig?: AuthSig;
-  authMethods?: AuthMethod[];
-}
-
-export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
+/**
+ * The actual payload structure sent to the node /pkp/sign endpoint.
+ */
+export interface JsonPkpSignRequest extends BaseJsonPkpSignRequest {
   authSig: AuthSig;
-  sessionSigs?: any;
-  authMethods?: AuthMethod[];
 }
-
-export type JsonPkpSignRequest =
-  | WithSessionSigsSigning
-  | WithAuthSigSigning
-  | WithAuthMethodSigning;
 
 /**
  * Struct in rust
@@ -377,7 +361,7 @@ export interface JsonAccsRequest extends MultipleAccessControlConditions {
   // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
   authSig?: AuthSig;
 
-  sessionSigs?: SessionSig;
+  sessionSigs?: SessionSigsMap;
 }
 
 /**
@@ -412,7 +396,7 @@ export interface SigningAccessControlConditionRequest
   chain?: string;
 
   // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
-  authSig?: SessionSig;
+  authSig?: AuthSig;
 
   iat?: number;
   exp?: number;
@@ -1005,17 +989,9 @@ export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
  * A map of node addresses to the session signature payload
  * for that node specifically.
  */
-export type SessionSigsMap = Record<string, SessionSig>;
+export type SessionSigsMap = Record<string, AuthSig>;
 
-export interface SessionSig {
-  sig: string;
-  derivedVia: string;
-  signedMessage: string;
-  address: string;
-  algo?: string;
-}
-
-export type SessionSigs = Record<string, SessionSig>;
+export type SessionSigs = Record<string, AuthSig>;
 
 export interface SessionRequestBody {
   sessionKey: string;

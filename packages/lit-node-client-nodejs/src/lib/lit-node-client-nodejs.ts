@@ -118,8 +118,10 @@ import type {
   JsonSignSessionKeyRequestV1,
   BlsResponseData,
   SessionKeyCache,
+  JsonPkpSignSdkParams,
 } from '@lit-protocol/types';
 import * as blsSdk from '@lit-protocol/bls-sdk';
+import { normalizeArray } from './helpers/normalize-array';
 
 const TEMP_CACHE_PERIOD = 30000; // 30 seconds
 
@@ -1068,8 +1070,7 @@ export class LitNodeClientNodeJs
           this.getLitActionRequestBody(params);
 
         // -- choose the right signature
-        const sigToPassToNode = this.getSessionOrAuthSig({
-          authSig,
+        const sigToPassToNode = this.getSessionSigByUrl({
           sessionSigs,
           url,
         });
@@ -1577,7 +1578,7 @@ export class LitNodeClientNodeJs
       ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
         const nodePromises = this.getNodePromises((url: string) => {
           // -- choose the right signature
-          const sigToPassToNode = this.getSessionOrAuthSig({
+          const sigToPassToNode = this.getSessionSigByUrl({
             authSig,
             sessionSigs,
             url,
@@ -1741,13 +1742,19 @@ export class LitNodeClientNodeJs
     return returnVal;
   };
 
-  pkpSign = async (params: JsonPkpSignRequest) => {
-    let { authSig, sessionSigs, toSign, pubKey, authMethods } = params;
-
-    pubKey = hexPrefixed(pubKey);
-
+  /**
+   * Use PKP to sign
+   *
+   * @param { JsonPkpSignSdkParams } params
+   * @param params.toSign - The data to sign
+   * @param params.pubKey - The public key to sign with
+   * @param params.sessionSigs - The session signatures to use
+   * @param params.authMethods - (optional) The auth methods to use
+   */
+  pkpSign = async (params: JsonPkpSignSdkParams) => {
     // -- validate required params
-    (['toSign', 'pubKey'] as (keyof JsonPkpSignRequest)[]).forEach((key) => {
+    const requiredParamKeys = ['toSign', 'pubKey'];
+    (requiredParamKeys as (keyof JsonPkpSignSdkParams)[]).forEach((key) => {
       if (!params[key]) {
         throwError({
           message: `"${key}" cannot be undefined, empty, or null. Please provide a valid value.`,
@@ -1758,42 +1765,42 @@ export class LitNodeClientNodeJs
     });
 
     // -- validate present of accepted auth methods
-    if (!authSig && !sessionSigs && (!authMethods || authMethods.length <= 0)) {
+    if (
+      !params.sessionSigs &&
+      (!params.authMethods || params.authMethods.length <= 0)
+    ) {
       throwError({
-        message: `Either authSig, sessionSigs, or authMethods (length > 0) must be present.`,
+        message: `Either sessionSigs or authMethods (length > 0) must be present.`,
         errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
         errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
       });
     }
 
-    // the nodes will only accept a normal array type as a paramater due to serizalization issues with Uint8Array type.
-    // this loop below is to normalize the message to a basic array.
-    const arr = [];
-    for (let i = 0; i < toSign.length; i++) {
-      arr.push((toSign as Buffer)[i]);
-    }
-    toSign = arr;
+    // yes, 'key' is in lower case, because this is what the node expects
+    const pubkey = hexPrefixed(params.pubKey);
+
+    const normalizedToSignArray = normalizeArray(params.toSign);
 
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       const nodePromises = this.getNodePromises((url: string) => {
-        // -- choose the right signature
-        const sigToPassToNode = this.getSessionOrAuthSig({
-          authSig,
-          sessionSigs,
+        // -- get the session sig from the url key
+        const sessionSig = this.getSessionSigByUrl({
+          sessionSigs: params.sessionSigs,
           url,
-          mustHave: false,
         });
 
-        logWithRequestId(id, 'sigToPassToNode:', sigToPassToNode);
+        const hasAuthMethod =
+          params.authMethods && params.authMethods.length > 0;
 
-        const reqBody = {
-          toSign,
-          pubkey: pubKey,
-          ...(sigToPassToNode &&
-            sigToPassToNode !== undefined && { authSig: sigToPassToNode }),
-          ...(authMethods && authMethods.length > 0 && { authMethods }),
+        const reqBody: JsonPkpSignRequest = {
+          toSign: normalizedToSignArray,
+          pubkey: pubkey,
+          authSig: sessionSig,
+          ...(hasAuthMethod && {
+            authMethods: params.authMethods,
+          }),
         };
 
         logWithRequestId(id, 'reqBody:', reqBody);
