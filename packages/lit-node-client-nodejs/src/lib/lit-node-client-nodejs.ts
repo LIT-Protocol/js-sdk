@@ -2969,7 +2969,6 @@ export class LitNodeClientNodeJs
    * @throws An error if any of the required parameters are missing or if `litActionCode` and `ipfsId` exist at the same time.
    */
   getPkpSessionSigs = async (params: GetPkpSessionSigs) => {
-
     const chain = params?.chain || 'ethereum';
 
     const pkpSessionSigs = this.getSessionSigs({
