@@ -14,7 +14,7 @@ export class TinnyEnvironment {
    * Environment variables used in the process.
    */
   public processEnvs: ProcessEnvs = {
-    MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 3,
+    MAX_ATTEMPTS: parseInt(process.env['MAX_ATTEMPTS']) || 1,
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
     DEBUG: Boolean(process.env['DEBUG']) || false,
     REQUEST_PER_KILOSECOND:
