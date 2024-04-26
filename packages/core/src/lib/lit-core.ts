@@ -54,7 +54,6 @@ import type {
   NodeErrorV3,
   RejectedNodePromises,
   SendNodeCommand,
-  SessionSig,
   SessionSigsMap,
   SuccessNodePromises,
   SupportedJsonRequests,

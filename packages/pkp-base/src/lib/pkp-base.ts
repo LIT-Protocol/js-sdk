@@ -10,11 +10,10 @@
 
 import {
   AuthenticationProps,
-  ExecuteJsProps,
+  JsonExecutionSdkParams,
   PKPBaseProp,
   AuthSig,
   PKPBaseDefaultParams,
-  GetSessionSigsProps,
   SessionSigs,
   RPCUrls,
   AuthMethod,
@@ -22,7 +21,6 @@ import {
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
-import { toString as uint8arrayToString } from 'uint8arrays';
 import { executeWithRetry, logError } from '@lit-protocol/misc';
 
 /**
@@ -49,6 +47,8 @@ const compressPubKey = (pubKey: string): string => {
  */
 export class PKPBase<T = PKPBaseDefaultParams> {
   rpcs?: RPCUrls;
+
+  // @deprecated
   controllerAuthSig?: AuthSig;
   controllerAuthMethods?: AuthMethod[];
   controllerSessionSigs?: SessionSigs;
@@ -282,11 +282,10 @@ export class PKPBase<T = PKPBaseDefaultParams> {
         this.authContext.getSessionSigsProps
       )) || this.controllerSessionSigs;
 
-    const executeJsArgs: ExecuteJsProps = {
+    const executeJsArgs: JsonExecutionSdkParams = {
       ...(this.litActionCode && { code: this.litActionCode }),
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
       sessionSigs: controllerSessionSigs,
-      authSig: this.controllerAuthSig,
       authMethods: this.authContext?.authMethods,
       jsParams: {
         ...{
@@ -367,14 +366,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     try {
       let sig;
-      if (this.controllerAuthSig) {
-        sig = await this.litNodeClient.pkpSign({
-          toSign: toSign,
-          pubKey: this.uncompressedPubKey,
-          authSig: this.controllerAuthSig as AuthSig,
-          authMethods: [],
-        });
-      } else if (controllerSessionSigs) {
+      if (controllerSessionSigs) {
         sig = await this.litNodeClient.pkpSign({
           toSign,
           pubKey: this.uncompressedPubKey,
@@ -386,7 +378,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           toSign,
           pubKey: this.uncompressedPubKey,
           authMethods: this.authContext.authMethods,
+          sessionSigs: controllerSessionSigs!,
         });
+      }
+
+      if (!sig) {
+        throw new Error('No signature returned');
       }
 
       // pad sigs with 0 if length is odd

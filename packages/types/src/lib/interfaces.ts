@@ -214,50 +214,21 @@ export interface ClaimKeyResponse {
 /**
  * Struct in rust
  * -----
- pub struct JsonExecutionRequest {
-    pub code: Option<String>,
-    pub ipfs_id: Option<String>,
-    pub auth_sig: AuthSigItem,
-    pub js_params: Option<serde_json::Value>,
+pub struct JsonExecutionRequest {
+  pub auth_sig: AuthSigItem,
+  #[serde(default = "default_epoch")]
+  pub epoch: u64,
+  
+  pub ipfs_id: Option<String>,
+  pub code: Option<String>,
+    pub js_params: Option<Value>,
+    pub auth_methods: Option<Vec<AuthMethod>>,
 }
  */
-export interface BaseJsonExecutionRequest {
-  // // the authSig to use to authorize the user with the nodes
-  // authSig?: AuthSig;
-
-  // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
-  jsParams?: any;
-
-  // JS code to run on the nodes
-  code?: string;
-
-  // The IPFS ID of some JS code to run on the nodes
-  ipfsId?: string;
-
-  // // the session signatures to use to authorize the user with the nodes
-  // sessionSigs?: any;
-
-  // whether to run this on a single node or many
-  targetNodeRange?: number;
-
-  // auth methods to resolve
-  authMethods?: AuthMethod[];
-}
-
-export type JsonExecutionRequest = {} & BaseJsonExecutionRequest;
-
-export interface JsExecutionRequestBody {
-  authSig?: AuthSig;
-  code?: string;
-  ipfsId?: string;
-  authMethods?: AuthMethod[];
-  jsParams?: any;
-}
 
 export interface BaseJsonPkpSignRequest {
-  toSign: ArrayLike<number>;
-  pubkey: string; // yes, pub"key" is lower case in the node.
   authMethods?: AuthMethod[];
+  toSign: ArrayLike<number>;
 }
 
 /**
@@ -267,6 +238,7 @@ export interface BaseJsonPkpSignRequest {
 export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
   pubKey: string;
   sessionSigs: SessionSigsMap;
+  authMethods?: AuthMethod[];
 }
 
 /**
@@ -274,6 +246,11 @@ export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
  */
 export interface JsonPkpSignRequest extends BaseJsonPkpSignRequest {
   authSig: AuthSig;
+
+  /**
+   * note that 'key' is in lower case, because this is what the node expects
+   */
+  pubkey: string;
 }
 
 /**
@@ -297,7 +274,7 @@ export interface JsonSignSessionKeyRequestV1 {
   sessionKey: string;
   authMethods: AuthMethod[];
   pkpPublicKey?: string;
-  authSig?: AuthSig;
+  // authSig?: AuthSig;
   siweMessage: string;
   curveType: 'BLS' | 'ECDSA';
   code?: string;
@@ -441,10 +418,48 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
   toDecrypt: string;
 }
 
-export type ExecuteJsProps = JsonExecutionRequest & {
-  // A boolean that defines if debug info will be returned or not.
-  debug?: boolean;
-};
+export interface JsonExecutionSdkParamsTargetNode
+  extends JsonExecutionSdkParams {
+  targetNodeRange: number;
+}
+
+export interface JsonExecutionSdkParams {
+  // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
+  jsParams?: any;
+
+  // JS code to run on the nodes
+  code?: string;
+
+  // The IPFS ID of some JS code to run on the nodes
+  ipfsId?: string;
+
+  // the session signatures to use to authorize the user with the nodes
+  sessionSigs?: any;
+
+  // whether to run this on a single node or many
+  // targetNodeRange?: number;
+
+  // auth methods to resolve
+  authMethods?: AuthMethod[];
+}
+
+export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
+  targetNodeRange: number;
+}
+
+export interface JsonExecutionRequest {
+  authSig: AuthSig;
+
+  /**
+   * auto-filled before sending each command to the node, but
+   * in the rust struct, this type is required.
+   */
+  // epoch: number;
+  ipfsId?: string;
+  code?: string;
+  jsParams?: any;
+  authMethods?: AuthMethod[];
+}
 
 export interface EncryptRequestBase extends MultipleAccessControlConditions {
   // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
@@ -508,27 +523,34 @@ export interface SignConditionECDSA {
   exp: number;
 }
 
+export interface SigResponse {
+  r: string;
+  s: string;
+  recid: number;
+  signature: string; // 0x...
+  publicKey: string; // pkp public key
+  dataSigned: string;
+}
+
+export interface ExecuteJsResponseBase {
+  signatures:
+    | {
+        sig: SigResponse;
+      }
+    | any;
+}
+
 /**
  *
  * An object containing the resulting signatures.  Each signature comes with the public key and the data signed.
  *
  */
-export interface ExecuteJsResponse {
+export interface ExecuteJsResponse extends ExecuteJsResponseBase {
   success?: boolean;
-  signatures:
-    | {
-        sig: {
-          r: string;
-          s: string;
-          recid: number;
-          signature: string; // 0x...
-          publicKey: string; // pkp public key
-          dataSigned: string;
-        };
-      }
-    | any;
-  decryptions: any[];
-  response: string;
+
+  // FIXME: Fix if and when we enable decryptions from within a Lit Action.
+  // decryptions: any[];
+  response: string | object;
   logs: string;
   claims?: Record<string, { signatures: Signature[]; derivedKeyId: string }>;
   debug?: {
@@ -538,6 +560,13 @@ export interface ExecuteJsResponse {
   };
 }
 
+export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
+  claims: {};
+  decryptions: [];
+  response: any;
+  logs: string;
+}
+
 export interface LitNodePromise {}
 
 export interface SendNodeCommand {
@@ -545,16 +574,31 @@ export interface SendNodeCommand {
   data: any;
   requestId: string;
 }
+export interface SigShare {
+  sigType:
+    | 'BLS'
+    | 'K256'
+    | 'ECDSA_CAIT_SITH' // Legacy alias of K256
+    | 'EcdsaCaitSithP256';
 
+  signatureShare: string;
+  shareIndex?: number;
+  bigr?: string; // backward compatibility
+  bigR?: string;
+  publicKey: string;
+  dataSigned?: string;
+  siweMessage?: string;
+  sigName?: string;
+}
 export interface NodeShare {
   claimData: any;
   shareIndex: any;
   unsignedJwt: any;
-  signedData: any;
+  signedData: SigShare;
   decryptedData: any;
   response: any;
   logs: any;
-  success?: any;
+  success?: boolean | '';
 }
 
 export interface PKPSignShare {
@@ -638,18 +682,6 @@ export interface NodeClientErrorV1 {
   details?: string[];
   status?: number;
   requestId?: string;
-}
-
-export interface SigShare {
-  sigType: any;
-  signatureShare: any;
-  shareIndex: any;
-  bigr?: string;
-  bigR?: string;
-  publicKey: any;
-  dataSigned: any;
-  siweMessage?: string;
-  sigName?: string;
 }
 
 export interface SignedData {
@@ -1663,3 +1695,12 @@ export type SessionKeyCache = {
   value: SessionKeyPair;
   timestamp: number;
 };
+
+export interface SignatureData {
+  signature: string;
+  derivedKeyId: string;
+}
+
+export type ClaimsList = {
+  [key: string]: SignatureData;
+}[];

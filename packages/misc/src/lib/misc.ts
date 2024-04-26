@@ -67,6 +67,39 @@ export const mostCommonString = (arr: Array<any>): any => {
     .pop();
 };
 
+export const findMostCommonResponse = (responses: Array<object>): object => {
+  const result: { [key: string]: any } = {};
+
+  // Aggregate all values for each key across all responses
+  const keys = new Set(responses.flatMap(Object.keys));
+
+  for (const key of keys) {
+    const values = responses.map(
+      (response: { [key: string]: any }) => response[key]
+    );
+
+    // Filter out undefined values before processing
+    const filteredValues = values.filter(
+      (value) => value !== undefined && value !== ''
+    );
+
+    if (filteredValues.length === 0) {
+      result[key] = undefined; // or set a default value if needed
+    } else if (
+      typeof filteredValues[0] === 'object' &&
+      !Array.isArray(filteredValues[0])
+    ) {
+      // Recursive case for objects
+      result[key] = findMostCommonResponse(filteredValues);
+    } else {
+      // Most common element from filtered values
+      result[key] = mostCommonString(filteredValues);
+    }
+  }
+
+  return result;
+};
+
 export const throwError = (e: NodeClientErrorV0 | NodeClientErrorV1): never => {
   if (isNodeClientErrorV1(e)) {
     return throwErrorV1(e);
@@ -558,40 +591,6 @@ export const is = (
   }
 
   return true;
-};
-
-/**
- * Convert types before sending to Lit Actions as jsParams, some JS types don't serialize well, so we will convert them before sending to the nodes
- *
- * @param { object } params.jsParams The jsParams you are sending
- * @returns { object } The jsParams object, but with any incompatible types automatically converted
- */
-export const convertLitActionsParams = (jsParams: object): object => {
-  // -- property
-  const convertedParams: KV = {};
-
-  // -- execute
-  for (const [key, value] of Object.entries(jsParams)) {
-    const _key: string = key;
-    const _value: any = value;
-
-    // -- get value type
-    const varType = getVarType(_value);
-
-    // -- case: Unit8Array
-    if (varType === 'Uint8Array') {
-      convertedParams[_key] = Array.from(_value);
-      // -- case: Object, recurse over any objects
-    } else if (varType === 'Object') {
-      convertedParams[_key] = convertLitActionsParams(_value);
-    }
-    // -- default
-    else {
-      convertedParams[_key] = _value;
-    }
-  }
-
-  return convertedParams;
 };
 
 export const isNode = () => {
