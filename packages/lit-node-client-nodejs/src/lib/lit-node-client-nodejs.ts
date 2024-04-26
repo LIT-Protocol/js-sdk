@@ -1151,7 +1151,7 @@ export class LitNodeClientNodeJs
     // Format the params
     const formattedParams: JsonExecutionSdkParams = {
       ...params,
-      jsParams: normalizeJsParams(params.jsParams),
+      ...(params.jsParams && { jsParams: normalizeJsParams(params.jsParams) }),
       ...(params.code && { code: encodeCode(params.code) }),
     };
 
