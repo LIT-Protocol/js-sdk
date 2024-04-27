@@ -58,7 +58,7 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip =
     }
 
     const accsResourceString =
-      await LitAccessControlConditionResource.composeLitActionResourceString(
+      await LitAccessControlConditionResource.generateLitActionResourceString(
         accs,
         encryptRes.dataToEncryptHash
       );
