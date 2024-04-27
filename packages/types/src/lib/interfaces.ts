@@ -590,6 +590,16 @@ export interface SigShare {
   siweMessage?: string;
   sigName?: string;
 }
+
+export interface PkpSignedData {
+  digest: string;
+  shareIndex: number;
+  signatureShare: string;
+  bigR: string;
+  publicKey: string;
+  sigType: string;
+  dataSigned: string;
+}
 export interface NodeShare {
   claimData: any;
   shareIndex: any;

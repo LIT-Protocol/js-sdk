@@ -127,6 +127,7 @@ import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
 import { getFlattenShare, getSignatures } from './helpers/get-signatures';
 import { getClaimsList } from './helpers/get-claims-list';
 import { getClaims } from './helpers/get-claims';
+import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 
 const TEMP_CACHE_PERIOD = 30000; // 30 seconds
 
@@ -1423,46 +1424,9 @@ export class LitNodeClientNodeJs
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = responseData.map((r) => {
-      // add the signed data to the signature share
-      delete r.signatureShare.result;
+    const signedDataList = parsePkpSignResponse(responseData);
 
-      // nodes do not camel case the response from /web/pkp/sign.
-      const snakeToCamel = (s: string) =>
-        s.replace(/(_\w)/g, (k) => k[1].toUpperCase());
-      //@ts-ignore
-      const convertShare: any = (share: any) => {
-        const keys = Object.keys(share);
-        let convertedShare = {};
-        for (const key of keys) {
-          convertedShare = Object.defineProperty(
-            convertedShare,
-            snakeToCamel(key),
-            Object.getOwnPropertyDescriptor(share, key) as PropertyDecorator
-          );
-        }
-
-        return convertedShare;
-      };
-      const convertedShare: SigShare = convertShare(r.signatureShare);
-      const keys = Object.keys(convertedShare);
-      for (const key of keys) {
-        //@ts-ignore
-        if (typeof convertedShare[key] === 'string') {
-          //@ts-ignore
-          convertedShare[key] = convertedShare[key]
-            .replace('"', '')
-            .replace('"', '');
-        }
-      }
-      //@ts-ignore
-      convertedShare.dataSigned = convertedShare.digest;
-      return {
-        signature: convertedShare,
-      };
-    });
-
-    const signatures = getSignatures({
+    const signatures = getSignatures<{ signature: SigResponse }>({
       requestId,
       networkPubKeySet: this.networkPubKeySet,
       minNodeCount: this.config.minNodeCount,

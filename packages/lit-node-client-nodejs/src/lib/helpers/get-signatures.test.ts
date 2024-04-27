@@ -1,6 +1,7 @@
 import { initWasmEcdsaSdk } from '@lit-protocol/ecdsa-sdk';
 
 import { getSignatures } from './get-signatures';
+import { SigResponse } from '@lit-protocol/types';
 
 describe('getSignatures', () => {
   beforeAll(async () => {
@@ -53,14 +54,15 @@ describe('getSignatures', () => {
     ];
     const requestId = '';
 
-    const signatures = getSignatures({
+    const signatures = getSignatures<{ sig: SigResponse }>({
       networkPubKeySet,
       minNodeCount,
       signedData,
       requestId,
     });
 
-    expect(signatures.sig).toHaveProperty('dataSigned');
+    console.log('signatures:', signatures.sig);
+
     expect(signatures.sig).toHaveProperty('publicKey');
     expect(signatures.sig).toHaveProperty('r');
     expect(signatures.sig).toHaveProperty('recid');

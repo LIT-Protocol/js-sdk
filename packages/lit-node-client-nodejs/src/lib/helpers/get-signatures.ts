@@ -77,15 +77,21 @@ export const getFlattenShare = (share: any): SigShare => {
 };
 
 /**
+ * Retrieves and combines signature shares from multiple nodes to generate the final signatures.
  *
- * Get signatures from signed data
+ * @template T - The type of the final signatures. For `executeJs` endpoint, it returns as `signature`, and for `pkpSign` endpoint, it returns as `sig`.
+ * @param {any} params.networkPubKeySet - The public key set of the network.
+ * @param {number} params.minNodeCount - The threshold number of nodes
+ * @param {any[]} params.signedData - The array of signature shares from each node.
+ * @param {string} [params.requestId=''] - The optional request ID for logging purposes.
+ * @returns {T | { signature: SigResponse; sig: SigResponse }} - The final signatures or an object containing the final signatures.
  *
- * @param { Array<any> } signedData
+ * @example
  *
- * @returns { any }
- *
+ * executeJs: getSignatures<{ signature: SigResponse }>
+ * pkpSign: getSignatures<{ sig: SigResponse }>
  */
-export const getSignatures = ({
+export const getSignatures = <T>({
   networkPubKeySet,
   minNodeCount,
   signedData,
@@ -95,7 +101,7 @@ export const getSignatures = ({
   minNodeCount: number;
   signedData: any[];
   requestId: string;
-}): { signature: SigResponse } => {
+}): T | { signature: SigResponse; sig: SigResponse } => {
   const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
 
   // processing signature shares for failed or invalid contents.  mutates the signedData object.
@@ -222,8 +228,6 @@ export const getSignatures = ({
     }
 
     const signature = combineEcdsaShares(shares);
-
-    console.log('signature:', signature);
 
     if (!signature.r) {
       throwError({
