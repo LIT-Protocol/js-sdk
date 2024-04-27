@@ -1172,18 +1172,12 @@ export class LitNodeClientNodeJs
           authSig: sessionSig,
         };
 
-        const composedUrl = composeLitUrl({
+        const urlWithPath = composeLitUrl({
           url,
           endpoint: LIT_ENDPOINT.EXECUTE_JS,
         });
 
-        const sharePromise = await this.sendCommandToNode({
-          url: composedUrl,
-          data: reqBody,
-          requestId,
-        });
-
-        return sharePromise;
+        return this.generatePromise(urlWithPath, reqBody, requestId);
       });
 
       // -- resolve promises
@@ -1296,6 +1290,30 @@ export class LitNodeClientNodeJs
     return returnVal;
   };
 
+  sharePromise = async (func: any) => {
+    return await func();
+  };
+
+  /**
+   * Generates a promise by sending a command to the Lit node
+   *
+   * @param url - The URL to send the command to.
+   * @param params - The parameters to include in the command.
+   * @param requestId - The ID of the request.
+   * @returns A promise that resolves with the response from the server.
+   */
+  generatePromise = async (
+    url: string,
+    params: any,
+    requestId: string
+  ): Promise<any> => {
+    return await this.sendCommandToNode({
+      url,
+      data: params,
+      requestId,
+    });
+  };
+
   /**
    * Use PKP to sign
    *
@@ -1336,7 +1354,7 @@ export class LitNodeClientNodeJs
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this.getNodePromises(async (url: string) => {
+      const nodePromises = this.getNodePromises((url: string) => {
         // -- get the session sig from the url key
         const sessionSig = this.getSessionSigByUrl({
           sessionSigs: params.sessionSigs,
@@ -1362,13 +1380,7 @@ export class LitNodeClientNodeJs
           endpoint: LIT_ENDPOINT.PKP_SIGN,
         });
 
-        const sharePromise = await this.sendCommandToNode({
-          url: urlWithPath,
-          data: reqBody,
-          requestId,
-        });
-
-        return sharePromise;
+        return this.generatePromise(urlWithPath, reqBody, id);
       });
 
       const res = await this.handleNodePromises(
@@ -1459,7 +1471,7 @@ export class LitNodeClientNodeJs
 
     logWithRequestId(requestId, `signature combination`, signatures);
 
-    return signatures.sig; // only a single signature is ever present, so we just return it.
+    return signatures.signature; // only a single signature is ever present, so we just return it.
   };
 
   /**

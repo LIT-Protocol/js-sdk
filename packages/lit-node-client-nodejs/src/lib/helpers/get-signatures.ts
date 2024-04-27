@@ -95,7 +95,7 @@ export const getSignatures = ({
   minNodeCount: number;
   signedData: any[];
   requestId: string;
-}): { sig: SigResponse } => {
+}): { signature: SigResponse } => {
   const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
 
   // processing signature shares for failed or invalid contents.  mutates the signedData object.

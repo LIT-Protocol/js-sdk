@@ -528,7 +528,7 @@ export interface SigResponse {
   s: string;
   recid: number;
   signature: string; // 0x...
-  publicKey: string; // pkp public key
+  publicKey: string; // pkp public key (no 0x prefix)
   dataSigned: string;
 }
 
