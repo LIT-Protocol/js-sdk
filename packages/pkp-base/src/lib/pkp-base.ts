@@ -211,7 +211,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   private validateAuthContext() {
     const providedAuthentications = [
       this.controllerAuthSig,
-      this.controllerSessionSigs,
       this.authContext,
     ].filter(Boolean).length;
 
