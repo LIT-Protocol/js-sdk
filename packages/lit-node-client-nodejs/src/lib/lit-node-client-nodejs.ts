@@ -174,6 +174,11 @@ export class LitNodeClientNodeJs
   createCapacityDelegationAuthSig = async (
     params: CapacityCreditsReq
   ): Promise<CapacityCreditsRes> => {
+    // -- validate
+    if (!params.dAppOwnerWallet) {
+      throw new Error('dAppOwnerWallet must exist');
+    }
+
     // Useful log for debugging
     if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
       log(
@@ -190,11 +195,6 @@ export class LitNodeClientNodeJs
     // -- if it's not ready yet, then connect
     if (!this.ready) {
       await this.connect();
-    }
-
-    // -- validate
-    if (!params.dAppOwnerWallet) {
-      throw new Error('dAppOwnerWallet must exist');
     }
 
     const nonce = await this.getLatestBlockhash();
