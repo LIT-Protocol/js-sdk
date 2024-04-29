@@ -247,7 +247,7 @@ export interface BaseJsonExecutionRequest {
 /**
  * FIXME: We should create a separate interface for JsExecutionRequestBody
  * a body that the SDK accepts, and another one the node actually accepts.
- * 
+ *
  */
 export interface WithAuthSig extends BaseJsonExecutionRequest {
   authSig: AuthSig;

@@ -167,7 +167,7 @@ export abstract class BaseProvider {
 
         // common data for the signSessionKey function call
         const commonData = {
-          sessionKey: sessionKey,
+          sessionKey: params.sessionSigsParams.sessionKey,
           statement: authCallbackParams.statement,
           pkpPublicKey: params.pkpPublicKey,
           expiration: authCallbackParams.expiration,
