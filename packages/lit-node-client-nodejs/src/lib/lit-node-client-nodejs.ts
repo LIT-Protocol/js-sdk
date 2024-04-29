@@ -11,7 +11,7 @@ import {
   LitResourceAbilityRequest,
   decode,
   RecapSessionCapabilityObject,
-  craftAuthSig,
+  generateAuthSig,
   createSiweMessageWithCapacityDelegation,
   createSiweMessageWithRecaps,
   createSiweMessage,
@@ -219,7 +219,7 @@ export class LitNodeClientNodeJs
       capacityTokenId: params.capacityTokenId,
     });
 
-    const authSig = await craftAuthSig({
+    const authSig = await generateAuthSig({
       signer: params.dAppOwnerWallet,
       toSign: siweMessage,
     });
@@ -2685,9 +2685,7 @@ export class LitNodeClientNodeJs
       );
       log(`[signSessionKey] sigType:`, sigType);
 
-      const signatureShares = blsSignedData.map((s) => ({
-        ProofOfPossession: s.signatureShare.ProofOfPossession,
-      }));
+      const signatureShares = handleBlsResponseData(blsSignedData);
 
       log(`[signSessionKey] signatureShares:`, signatureShares);
 
