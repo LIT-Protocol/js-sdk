@@ -63,7 +63,7 @@ export async function main() {
   const pkpWallet = new PKPEthersWallet({
     pkpPubKey: globalThis.LitCI.AUTH_METHOD_PKP_INFO.publicKey,
     rpc: LITCONFIG.CHRONICLE_RPC,
-    litNetwork: globalThis.LitCI.network,
+    client: client,
     authContext: {
       client,
       getSessionSigsProps: {
