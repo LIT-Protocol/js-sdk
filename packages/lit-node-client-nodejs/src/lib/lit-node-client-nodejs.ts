@@ -204,17 +204,12 @@ export class LitNodeClientNodeJs
       litNodeClient: this,
       walletAddress: dAppOwnerWalletAddress,
       nonce: nonce,
-
-      // -- default configuration for recap object capability
-      expiration:
-        params.expiration ?? new Date(Date.now() + 1000 * 60 * 7).toISOString(),
-      domain: params.domain ?? 'example.com',
-      statement:
-        params.statement ??
-        'This is a test statement.  You can put anything you want here.',
+      expiration: params.expiration,
+      domain: params.domain,
+      statement: params.statement,
 
       // -- capacity delegation specific configuration
-      uses: params.uses ?? '1',
+      uses: params.uses,
       delegateeAddresses: params.delegateeAddresses,
       capacityTokenId: params.capacityTokenId,
     });
