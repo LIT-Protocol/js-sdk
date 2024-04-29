@@ -1,12 +1,12 @@
-import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs';
 import { checkAndSignAuthMessage } from '@lit-protocol/auth-browser';
-import { CustomNetwork, LitNodeClientConfig } from '@lit-protocol/types';
+import { EITHER_TYPE } from '@lit-protocol/constants';
+import { LitNodeClientNodeJs } from '@lit-protocol/lit-node-client-nodejs';
 import { isNode, log } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
-import { EITHER_TYPE } from '@lit-protocol/constants';
+import { CustomNetwork, LitNodeClientConfig } from '@lit-protocol/types';
 
 export class LitNodeClient extends LitNodeClientNodeJs {
-  constructor(args: any[LitNodeClientConfig | CustomNetwork | any]) {
+  constructor(args: LitNodeClientConfig | CustomNetwork) {
     super({
       ...args,
       defaultAuthCallback: checkAndSignAuthMessage,

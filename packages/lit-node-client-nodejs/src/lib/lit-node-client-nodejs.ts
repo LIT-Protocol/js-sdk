@@ -1,7 +1,7 @@
 import { computeAddress } from '@ethersproject/transactions';
 import { BigNumber, ethers } from 'ethers';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-import * as siwe from 'siwe';
+import { SiweMessage } from 'siwe';
 
 import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-control-conditions';
 import {
@@ -28,6 +28,7 @@ import {
 } from '@lit-protocol/constants';
 import { LitCore } from '@lit-protocol/core';
 import {
+  checkSevSnpAttestation,
   combineEcdsaShares,
   combineSignatureShares,
   encrypt,
@@ -80,6 +81,7 @@ import type {
   GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
   JsonExecutionRequest,
+  JsonHandshakeResponse,
   JsonPkpSignRequest,
   LitClientSessionManager,
   LitNodeClientConfig,
@@ -103,6 +105,7 @@ import type {
   SuccessNodePromises,
   ValidateAndSignECDSA,
   WebAuthnAuthenticationVerificationParams,
+  ILitNodeClient,
 } from '@lit-protocol/types';
 
 // TODO: move this to auth-helper for next patch
@@ -124,7 +127,7 @@ interface CapacityCreditsRes {
 
 export class LitNodeClientNodeJs
   extends LitCore
-  implements LitClientSessionManager
+  implements LitClientSessionManager, ILitNodeClient
 {
   defaultAuthCallback?: (authSigParams: AuthCallbackParams) => Promise<AuthSig>;
 
@@ -253,10 +256,10 @@ export class LitNodeClientNodeJs
       throw new Error('Failed to verify capabilities for resource');
     }
 
-    const nonce = this.getLatestBlockhash();
+    const nonce = await this.getLatestBlockhash();
 
     // -- get auth sig
-    let siweMessage = new siwe.SiweMessage({
+    let siweMessage = new SiweMessage({
       domain: _domain,
       address: dAppOwnerWalletAddress,
       statement: _statement,
@@ -475,25 +478,6 @@ export class LitNodeClientNodeJs
   };
 
   /**
-   * returns the latest block hash.
-   * will call refresh if the block hash is expired
-   * @returns {Promise<string>} latest block hash from `handhsake` with the lit network.
-   */
-  getLatestBlockhash = (): string => {
-    if (!this.ready) {
-      logError('Client not connected, remember to call connect');
-      throwError({
-        message: 'Client not connected',
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.code,
-      });
-    }
-
-    // we are confident in this value being non null so we return
-    return this.latestBlockhash!;
-  };
-
-  /**
    *
    * Get the signature from local storage, if not, generates one
    *
@@ -665,7 +649,7 @@ export class LitNodeClientNodeJs
     sessionKeyUri: any;
     resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
-    const authSigSiweMessage = new siwe.SiweMessage(authSig.signedMessage);
+    const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
 
     try {
       await authSigSiweMessage.validate(authSig.sig);
@@ -2474,7 +2458,12 @@ export class LitNodeClientNodeJs
 
     // Compute the address from the public key if it's provided. Otherwise, the node will compute it.
     const pkpEthAddress = (function () {
-      if (params.pkpPublicKey) return computeAddress(params.pkpPublicKey);
+      if (params.pkpPublicKey) {
+        // prefix '0x' if it's not already prefixed
+        const hexedPkpPublicKey = hexPrefixed(params.pkpPublicKey);
+
+        if (hexedPkpPublicKey) return computeAddress(hexedPkpPublicKey);
+      }
 
       // This will be populated by the node, using dummy value for now.
       return '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
@@ -2507,7 +2496,7 @@ export class LitNodeClientNodeJs
       });
 
       // regular siwe
-      siweMessage = new siwe.SiweMessage({
+      siweMessage = new SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
         address: pkpEthAddress,
@@ -2523,7 +2512,7 @@ export class LitNodeClientNodeJs
       siweMessage = recapObject.addToSiweMessage(siweMessage);
     } else {
       // lit-siwe (NOT regular siwe)
-      siweMessage = new siwe.SiweMessage({
+      siweMessage = new SiweMessage({
         domain:
           params?.domain || globalThis.location?.host || 'litprotocol.com',
         address: pkpEthAddress,
@@ -2538,7 +2527,7 @@ export class LitNodeClientNodeJs
     }
 
     const siweMessageStr: string = (
-      siweMessage as siwe.SiweMessage
+      siweMessage as SiweMessage
     ).prepareMessage();
 
     // ========== Get Node Promises ==========

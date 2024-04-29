@@ -9,13 +9,12 @@ import {
   GetSignedTokenRequest,
   HandshakeWithNode,
   JsonExecutionRequest,
-  KV,
+  JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
   NodeBlsSigningShare,
   NodeCommandResponse,
   NodeCommandServerKeysResponse,
-  NodeShare,
   RejectedNodePromises,
   SendNodeCommand,
   SignConditionECDSA,
@@ -27,8 +26,8 @@ import { SupportedJsonRequests } from './types';
 
 export interface ILitNodeClient {
   config: LitNodeClientConfig;
-  connectedNodes: SetConstructor | Set<any> | any;
-  serverKeys: KV | any;
+  connectedNodes: Set<string>;
+  serverKeys: Record<string, JsonHandshakeResponse>;
   ready: boolean;
   subnetPubKey: string | null;
   networkPubKey: string | null;
@@ -48,7 +47,7 @@ export interface ILitNodeClient {
    * @returns { void }
    *
    */
-  overrideConfigsFromLocalStorage(): void;
+  overrideConfigsFromLocalStorage?(): void;
 
   /**
    *
@@ -86,7 +85,7 @@ export interface ILitNodeClient {
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  combineSharesAndGetJWT(signatureShares: Array<NodeBlsSigningShare>): string;
+  combineSharesAndGetJWT(signatureShares: NodeBlsSigningShare[]): string;
 
   /**
    *
@@ -125,18 +124,22 @@ export interface ILitNodeClient {
    * @returns { Array<Promise<any>> }
    *
    */
-  getNodePromises(callback: Function): Array<Promise<any>>;
+  getNodePromises(callback: Function): Promise<any>[];
 
   /**
    * Handle node promises
    *
    * @param { Array<Promise<T>> } nodePromises
    *
+   * @param {string} requestId request Id used for logging
+   * @param {number} minNodeCount The minimum number of nodes we need a successful response from to continue
    * @returns { Promise<SuccessNodePromises<T> | RejectedNodePromises> }
    *
    */
   handleNodePromises<T>(
-    nodePromises: Array<Promise<T>>
+    nodePromises: Promise<T>[],
+    requestId: string,
+    minNodeCount: number
   ): Promise<SuccessNodePromises<T> | RejectedNodePromises>;
 
   /**
@@ -160,7 +163,7 @@ export interface ILitNodeClient {
    * @returns { any }
    *
    */
-  getSignatures(signedData: Array<any>, requestId: string): any;
+  getSignatures(signedData: any[], requestId: string): any;
 
   /**
    *
@@ -182,7 +185,7 @@ export interface ILitNodeClient {
    * @returns { string } signature
    *
    */
-  getSignature(shareData: Array<any>, requestId: string): Promise<any>;
+  getSignature(shareData: any[], requestId: string): Promise<any>;
 
   // ========== API Calls to Nodes ==========
   sendCommandToNode({ url, data, requestId }: SendNodeCommand): Promise<any>;

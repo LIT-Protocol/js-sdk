@@ -1,4 +1,4 @@
-import { isBrowser, throwError } from '@lit-protocol/misc';
+import { isBrowser, log, throwError } from '@lit-protocol/misc';
 
 import {
   uint8arrayFromString,
@@ -33,6 +33,8 @@ import { splitSignature } from 'ethers/lib/utils';
 export interface BlsSignatureShare {
   ProofOfPossession: string;
 }
+
+const LIT_CORS_PROXY = `https://cors.litgateway.com`;
 
 /**
  * Encrypt data with a BLS public key.
@@ -250,16 +252,49 @@ function doCombineSignatureShares(shares: BlsSignatureShare[]) {
   return signature;
 }
 
-async function getAmdCert(url: string) {
-  // unfortunately, until AMD enables CORS, we have to use a proxy when in the browser
-  // This project is hosted on heroku and uses this codebase: https://github.com/LIT-Protocol/cors-proxy-amd
-  if (isBrowser()) {
-    // CORS proxy url
-    url = `https://cors.litgateway.com/${url}`;
+/**
+ * Asynchronously fetches an AMD certification from a specified URL using a CORS proxy.
+ * The primary purpose of using a CORS proxy is to avoid being rate-limited by AMD.
+ * The function attempts to fetch the AMD cert through a proxy, and if the proxy fetch fails,
+ * it retries directly from the original URL.
+ *
+ * Note: This project is hosted on heroku and uses this codebase: https://github.com/LIT-Protocol/cors-proxy-amd
+ *
+ * @param url The URL from which to fetch the AMD cert.
+ * @returns A Promise that resolves to a Uint8Array containing the AMD certification data.
+ * @throws An error detailing HTTP or network issues encountered during the fetch process.
+ */
+async function getAmdCert(url: string): Promise<Uint8Array> {
+  const proxyUrl = `${LIT_CORS_PROXY}/${url}`;
+
+  log(
+    `[getAmdCert] Fetching AMD cert using proxy URL ${proxyUrl} to manage CORS restrictions and to avoid being rate limited by AMD.`
+  );
+
+  async function fetchAsUint8Array(targetUrl: string) {
+    const res = await fetch(targetUrl);
+    if (!res.ok) {
+      throw new Error(`[getAmdCert] HTTP error! status: ${res.status}`);
+    }
+    const arrayBuffer = await res.arrayBuffer();
+    return new Uint8Array(arrayBuffer);
   }
-  const response = await fetch(url);
-  const arrayBuffer = await response.arrayBuffer();
-  return new Uint8Array(arrayBuffer);
+
+  try {
+    return await fetchAsUint8Array(proxyUrl);
+  } catch (e) {
+    log(`[getAmdCert] Failed to fetch AMD cert from proxy:`, e);
+  }
+
+  // Try direct fetch only if proxy fails
+  log('[getAmdCert] Attempting to fetch directly without proxy.');
+
+  try {
+    return await fetchAsUint8Array(url);
+  } catch (e) {
+    log('[getAmdCert] Direct fetch also failed:', e);
+    throw e; // Re-throw to signal that both methods failed
+  }
 }
 
 /**
@@ -328,8 +363,9 @@ export const checkSevSnpAttestation = async (
   // get the VCEK certificate
   let vcekCert;
   const vcekUrl = sevSnpGetVcekUrl(report);
-  // if browser, use local storage
-  if (isBrowser()) {
+  // use local storage if we have one available
+  if (globalThis.localStorage) {
+    log('Using local storage for certificate caching');
     vcekCert = localStorage.getItem(vcekUrl);
     if (vcekCert) {
       vcekCert = uint8arrayFromString(vcekCert, 'base64');

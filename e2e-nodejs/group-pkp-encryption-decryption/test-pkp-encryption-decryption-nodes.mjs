@@ -58,7 +58,7 @@ export async function main() {
     uri: 'https://localhost/login',
     version: '1',
     chainId: 1,
-    nonce: litNodeClient.getLatestBlockhash(),
+    nonce: await litNodeClient.getLatestBlockhash(),
     expirationTime: new Date(Date.now() + 60_000 * 60).toISOString(),
   });
   const messageToSign = siweMessage.prepareMessage();

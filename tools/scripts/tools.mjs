@@ -42,7 +42,6 @@ const optionMaps = new Map([
   ['--switch', () => switchFunc()],
   ['--dev', () => devFunc()],
   ['--watch', () => watchFunc()],
-  ['--polyfills', () => polyfillsFunc()],
   ['--comment', () => commentFunc()],
   ['--remove-local-dev', () => removeLocalDevFunc()],
   ['--setup-local-dev', () => setupLocalDevFunc()],
@@ -52,7 +51,6 @@ const optionMaps = new Map([
   ['--version', () => versionFunc()],
   ['--verify', () => validateDependencyVersions()],
   ['--postBuild', () => postBuild()],
-  ['postBuildIndividual', () => postBuildIndividualFunc()],
   ['fixTsConfig', () => fixTsConfigFunc()],
   ['check', () => checkFunc()],
 ]);
@@ -86,7 +84,6 @@ function helpFunc() {
             --version: show version
             --verify: validate dependency versions
             --postBuild: post build
-            postBuildIndividual: post build individual
             fixTsConfig: fix tsconfig
     `,
     true
@@ -385,7 +382,7 @@ async function findFunc() {
     greenLog(
       `
         Usage: node tools/scripts/tools.mjs --find [option]
-            [option]: 
+            [option]:
                 --imports: find all imports from a directory
     `,
       true
@@ -463,15 +460,11 @@ async function buildFunc() {
     }
 
     await childRunCommand(`yarn nx run ${TARGET}:_buildTsc`);
-    await childRunCommand(
-      `yarn tools --postBuildIndividual --target ${TARGET}`
-    );
     await childRunCommand(`yarn postBuild:mapDistFolderNameToPackageJson`);
     await childRunCommand(`yarn postBuild:mapDepsToDist`);
     await childRunCommand(`yarn gen:html`);
     await childRunCommand(`yarn gen:react`);
     await childRunCommand(`yarn gen:nodejs`);
-    await childRunCommand(`yarn tools --polyfills ${TARGET}`);
   }
 
   if (BUILD_TYPE === '--packages') {
@@ -500,14 +493,7 @@ async function buildFunc() {
     spawnListener(command, {
       onDone: () => {
         console.log('Done!');
-
-        // spawnListener(command, {
-        //   onDone: async () => {
-        //     console.log("Done!");
-        //     await runCommand('yarn postBuild:mapDistFolderNameToPackageJson');
         exit();
-        //   }
-        // })
       },
     });
   }
@@ -1003,26 +989,8 @@ async function watchFunc() {
       childRunCommand(
         `nodemon --watch packages/${TARGET} --ext js,ts --exec "yarn tools --build --target ${TARGET}"`
       );
-      // spawnListener(`yarn tools --polyfills lit-node-client`);
     }
   }
-}
-
-async function postBuildIndividualFunc() {
-  const POSTBUILD_FILE = 'postbuild.mjs';
-
-  const TARGET = findArg(args, '--target');
-  const PROJECT_PATH = `packages/${TARGET}`;
-  const DIST_PATH = `dist/packages/${TARGET}`;
-  const POSTBUILD_PATH = `${PROJECT_PATH}/${POSTBUILD_FILE}`;
-
-  if (!fs.existsSync(POSTBUILD_PATH)) {
-    process.exit();
-  }
-
-  greenLog(`👷 ${POSTBUILD_PATH} file found! Running...`, true);
-  await childRunCommand(`node ${POSTBUILD_PATH}`);
-  process.exit();
 }
 
 async function fixTsConfigFunc() {
@@ -1059,45 +1027,6 @@ async function checkFunc() {
   process.exit(0);
 }
 
-async function polyfillsFunc() {
-  const PROJECT_NAME = args[1];
-
-  if (!PROJECT_NAME || PROJECT_NAME === '' || PROJECT_NAME === '--help') {
-    greenLog(
-      `
-        Usage: node tools/scripts/tools.mjs --polyfills [project]
-            [project]: the project to add polyfills to
-        `,
-      true
-    );
-
-    exit();
-  }
-
-  try {
-    const polyfill = await readFile(`packages/${PROJECT_NAME}/polyfills.js`);
-
-    const buildIndexJsPath = `dist/packages/${PROJECT_NAME}/src/index.js`;
-    const builtIndexJs = await readFile(buildIndexJsPath);
-
-    const newBuiltIndexJs = replaceAutogen({
-      oldContent: builtIndexJs,
-      startsWith: '// ----- autogen:polyfills:start  -----',
-      endsWith: '// ----- autogen:polyfills:end  -----',
-      newContent: polyfill,
-    });
-
-    await writeFile(buildIndexJsPath, newBuiltIndexJs);
-
-    greenLog('✅ Polyfills injected into index.js');
-  } catch (e) {
-    yellowLog(
-      `No packages/${PROJECT_NAME}/polyfills.js found for ` + PROJECT_NAME
-    );
-  }
-  exit();
-}
-
 async function commentFunc() {
   const C = args[1] ?? '=';
 
@@ -1130,7 +1059,7 @@ async function commentFunc() {
   console.log(
     `
 // ${line}${up.join('')}${line}
-//          ${MESSAGE}                                    
+//          ${MESSAGE}
 // ${line}${down.join('')}${line}
     `
   );

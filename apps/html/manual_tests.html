@@ -44,7 +44,7 @@
       var CheckAndSignAuthMessageWithBlockhash = async() => {
         // Currently this will be undefined but later we should replace it with the hardcoded blockhash
         const TEST_BLOCKHASH = "0xfe88c94d860f01a17f961bf4bdfb6e0c6cd10d3fda5cc861e805ca1240c58553";
-        const nonce = litNodeClient.getLatestBlockhash() || TEST_BLOCKHASH;
+        const nonce = await litNodeClient.getLatestBlockhash() || TEST_BLOCKHASH;
 
         const authSig = await LitJsSdk.checkAndSignAuthMessage({
             chain: "ethereum",

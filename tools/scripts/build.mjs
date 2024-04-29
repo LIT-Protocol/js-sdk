@@ -37,11 +37,6 @@ const build = async (name) => {
   greenLog('Building Tsc...');
   await runCommand(`yarn nx run ${name}:_buildTsc`);
 
-  greenLog('Polyfilling...');
-  await childRunCommand(`yarn tools --polyfills ${name}`);
-
-  await childRunCommand(`yarn tools postBuildIndividual --target=${name}`);
-
   // greenLog('Setting up local development tools...');
   // await childRunCommand(`yarn build:setupLocalDev ${name}`);
 
