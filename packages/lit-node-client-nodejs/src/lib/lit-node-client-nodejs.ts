@@ -182,7 +182,7 @@ export class LitNodeClientNodeJs
     // Useful log for debugging
     if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
       log(
-        `[createCapacityDelegationAuthSig] No delegatee addresses provided. It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits (uses) and specific NFT IDs (nft_id).`
+        `[createCapacityDelegationAuthSig] 'delegateeAddresses' is an empty array. It means that no body can use it. However, if the 'delegateeAddresses' field is omitted, It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits (uses) and specific NFT IDs (nft_id).`
       );
     }
 
