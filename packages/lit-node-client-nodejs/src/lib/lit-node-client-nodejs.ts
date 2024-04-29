@@ -1291,10 +1291,6 @@ export class LitNodeClientNodeJs
     return returnVal;
   };
 
-  sharePromise = async (func: any) => {
-    return await func();
-  };
-
   /**
    * Generates a promise by sending a command to the Lit node
    *
