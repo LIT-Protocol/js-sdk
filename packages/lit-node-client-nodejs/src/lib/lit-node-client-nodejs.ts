@@ -134,9 +134,9 @@ export class LitNodeClientNodeJs
 
   // ========== Constructor ==========
   constructor(args: LitNodeClientConfig | CustomNetwork) {
-    if(!args) {
+    if (!args) {
       throwError({
-        message: "must probvide LitNodeClient parameters",
+        message: 'must probvide LitNodeClient parameters',
         errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
         errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
       });
