@@ -1471,7 +1471,7 @@ export interface BaseProviderSessionSigsParams {
   /**
    * Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
    */
-  litNodeClient?: any;
+  litNodeClient?: ILitNodeClient;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 }

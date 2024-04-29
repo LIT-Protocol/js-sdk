@@ -142,6 +142,10 @@ export abstract class BaseProvider {
 
     let authNeededCallback = params.sessionSigsParams.authNeededCallback;
 
+    // If no session key is provided, generate a new session key from the LitNodeClient
+    const sessionKey =
+      params.sessionSigsParams.sessionKey || this.litNodeClient.getSessionKey();
+
     // If no authNeededCallback is provided, create one that uses the provided PKP and auth method
     // to sign a session key and return an auth sig
     if (!authNeededCallback) {
@@ -163,7 +167,7 @@ export abstract class BaseProvider {
 
         // common data for the signSessionKey function call
         const commonData = {
-          sessionKey: params.sessionSigsParams.sessionKey,
+          sessionKey: sessionKey,
           statement: authCallbackParams.statement,
           pkpPublicKey: params.pkpPublicKey,
           expiration: authCallbackParams.expiration,
