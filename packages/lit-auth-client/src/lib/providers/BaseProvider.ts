@@ -178,29 +178,20 @@ export abstract class BaseProvider {
           }),
         };
 
-        // prepare auth-specific data based on the authentication method
-        let authSpecificData = {};
-
         if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
-          authSpecificData = {
-            authSig: JSON.parse(params.authMethod.accessToken),
+          const authSig = JSON.parse(params.authMethod.accessToken);
+
+          response = await nodeClient.signSessionKey({
+            ...commonData,
+            authSig: authSig,
             authMethods: [],
-          };
+          });
         } else {
-          authSpecificData = {
+          response = await nodeClient.signSessionKey({
+            ...commonData,
             authMethods: [params.authMethod],
-          };
+          });
         }
-
-        // Merge the common and auth-specific data
-        response = await nodeClient.signSessionKey({
-          // default
-          authMethods: [],
-
-          // override
-          ...commonData,
-          ...authSpecificData,
-        });
 
         return response.authSig;
       };
