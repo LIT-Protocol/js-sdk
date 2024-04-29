@@ -75,11 +75,17 @@ export async function main() {
     },
   });
   await pkpWallet.init();
-
+  await pkpWallet.authenticate();
+  const sessionSigs = pkpWallet.controllerSessionSigs;
   const signature = await pkpWallet.signMessage(message);
 
   // ==================== Post-Validation ====================
 
+  if (!sessionSigs) {
+    return fail(
+      'session is not defined after calling authenticate on the instance'
+    );
+  }
   if (!signature) {
     return fail('Failed to sign data with sessionSigs generated previously');
   }
