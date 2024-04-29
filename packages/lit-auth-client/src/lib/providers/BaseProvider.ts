@@ -161,39 +161,42 @@ export abstract class BaseProvider {
 
         let response: SignSessionKeyResponse;
 
+        // common data for the signSessionKey function call
+        const commonData = {
+          sessionKey: params.sessionSigsParams.sessionKey,
+          statement: authCallbackParams.statement,
+          pkpPublicKey: params.pkpPublicKey,
+          expiration: authCallbackParams.expiration,
+          resources: authCallbackParams.resources,
+          chainId: chainId,
+          ...(params.resourceAbilityRequests && {
+            resourceAbilityRequests: params.resourceAbilityRequests,
+          }),
+        };
+
+        // prepare auth-specific data based on the authentication method
+        let authSpecificData = {};
+
         if (params.authMethod.authMethodType === AuthMethodType.EthWallet) {
-          const authSig = JSON.parse(params.authMethod.accessToken);
-          response = await nodeClient.signSessionKey({
-            statement: authCallbackParams.statement,
-            sessionKey: params.sessionSigsParams.sessionKey,
+          authSpecificData = {
+            authSig: JSON.parse(params.authMethod.accessToken),
             authMethods: [],
-            authSig: authSig,
-            pkpPublicKey: params.pkpPublicKey,
-            expiration: authCallbackParams.expiration,
-            resources: authCallbackParams.resources,
-            chainId,
-
-            // optional
-            ...(params.resourceAbilityRequests && {
-              resourceAbilityRequests: params.resourceAbilityRequests,
-            }),
-          });
+          };
         } else {
-          response = await nodeClient.signSessionKey({
-            sessionKey: params.sessionSigsParams.sessionKey,
-            statement: authCallbackParams.statement,
+          authSpecificData = {
             authMethods: [params.authMethod],
-            pkpPublicKey: params.pkpPublicKey,
-            expiration: authCallbackParams.expiration,
-            resources: authCallbackParams.resources,
-            chainId,
-
-            // optional
-            ...(params.resourceAbilityRequests && {
-              resourceAbilityRequests: params.resourceAbilityRequests,
-            }),
-          });
+          };
         }
+
+        // Merge the common and auth-specific data
+        response = await nodeClient.signSessionKey({
+          // default
+          authMethods: [],
+
+          // override
+          ...commonData,
+          ...authSpecificData,
+        });
 
         return response.authSig;
       };
