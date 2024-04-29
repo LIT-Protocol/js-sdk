@@ -47,6 +47,7 @@ import {
   logWithRequestId,
   mostCommonString,
   throwError,
+  throwErrorV1,
 } from '@lit-protocol/misc';
 import {
   getStorageItem,
@@ -133,9 +134,17 @@ export class LitNodeClientNodeJs
 
   // ========== Constructor ==========
   constructor(args: LitNodeClientConfig | CustomNetwork) {
+    if(!args) {
+      throwError({
+        message: "must probvide LitNodeClient parameters",
+        errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+        errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
+      });
+    }
+
     super(args);
 
-    if (args && 'defaultAuthCallback' in args) {
+    if ('defaultAuthCallback' in args) {
       this.defaultAuthCallback = args.defaultAuthCallback;
     }
   }
