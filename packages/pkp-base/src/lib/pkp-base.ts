@@ -212,6 +212,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     const providedAuthentications = [
       this.controllerAuthSig,
       this.authContext,
+      this.controllerSessionSigs,
     ].filter(Boolean).length;
 
     if (providedAuthentications !== 1) {
@@ -254,16 +255,73 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
   }
 
+  private validateAuthenticate() {
+    const providedAuthentications = [
+      this.controllerAuthSig,
+      this.authContext,
+      this.controllerSessionSigs,
+    ].filter(Boolean).length;
+
+    if (providedAuthentications !== 2) {
+      // log which authentications has the user provided
+      if (this.controllerAuthSig) {
+        logError(
+          'controllerAuthSig is provided, should not be defined if using authContext'
+        );
+      }
+
+      if (!this.controllerSessionSigs) {
+        logError('controllerSessionSigs is not defined');
+      }
+
+      if (!this.authContext) {
+        logError('authContext is not defined');
+      }
+
+      this.throwError(
+        'Authentication validation has failed, this might mean there was a problem with your authentication method'
+      );
+    }
+
+    // Check auth context if provided
+    if (this.authContext) {
+      // It must have a valid client and getSessionSigsProps
+      if (
+        !(this.authContext.client instanceof LitNodeClientNodeJs) ||
+        !this.authContext.getSessionSigsProps
+      ) {
+        this.throwError(
+          'authContext must be an object with a lit client and getSessionSigsProps'
+        );
+      }
+    }
+  }
+
+  /**
+   * Authenticates the user - generate sessionSigs from litNodeClient(authContext.client) is provided. Otherwise, use
+   * controllerSessionSigs.
+   *
+   * @returns A Promise that resolves to void.
+   * @throws An error if `controllerSessionSigs` is not found after session generation has resolved.
+   */
   public async authenticate(): Promise<void> {
-    this.validateAuthContext();
+    // If we dont have an authContext instance then we log that this is being depricated soon in favor of implicit session loading
+    if (this.authContext) {
+      const controllerSessionSigs =
+        await this.authContext?.client?.getSessionSigs(
+          this.authContext.getSessionSigsProps
+        );
 
-    const controllerSessionSigs =
-      (await this.authContext?.client?.getSessionSigs(
-        this.authContext.getSessionSigsProps
-      )) || this.controllerSessionSigs;
+      this.log('got session session from auth context client');
+      this.controllerSessionSigs = controllerSessionSigs;
 
-    this.log('got session: ', controllerSessionSigs);
-    this.controllerSessionSigs = controllerSessionSigs;
+      // validate the context is correct after resyncing session.
+      this.validateAuthenticate();
+    } else {
+      logError(
+        'Session context provided outisde of auth context, This feature will soon be removed'
+      );
+    }
   }
 
   /**
