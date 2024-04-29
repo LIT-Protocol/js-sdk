@@ -945,7 +945,7 @@ export interface GetSessionSigsProps {
    * The serialized session key pair to sign.
    * If not provided, a session key pair will be fetched from localStorge or generated.
    */
-  sessionKey?: any;
+  sessionKey?: SessionKeyPair;
 
   // rateLimitAuthSig: AuthSig;
 
@@ -1424,7 +1424,7 @@ export interface BaseProviderSessionSigsParams {
   /**
    * Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
    */
-  litNodeClient?: any;
+  litNodeClient?: ILitNodeClient;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
