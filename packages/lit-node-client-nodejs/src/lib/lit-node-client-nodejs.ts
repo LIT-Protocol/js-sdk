@@ -135,7 +135,7 @@ export class LitNodeClientNodeJs
   constructor(args: LitNodeClientConfig | CustomNetwork) {
     super(args);
 
-    if ('defaultAuthCallback' in args) {
+    if (args && 'defaultAuthCallback' in args) {
       this.defaultAuthCallback = args.defaultAuthCallback;
     }
   }
