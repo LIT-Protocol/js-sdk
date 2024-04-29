@@ -987,8 +987,11 @@ export interface GetSessionSigsProps extends LitCustomAuth {
    */
   authNeededCallback?: AuthCallback;
 
-  // The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
-  sessionKey?: any;
+  /**
+   * The serialized session key pair to sign.
+   * If not provided, a session key pair will be fetched from localStorge or generated.
+   */
+  sessionKey?: SessionKeyPair;
 
   /**
    * @deprecated - use capabilityAuthSigs instead

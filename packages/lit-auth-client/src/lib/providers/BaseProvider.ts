@@ -200,6 +200,7 @@ export abstract class BaseProvider {
     // Generate session sigs with the given session params
     const sessionSigs = await this.litNodeClient.getSessionSigs({
       ...params.sessionSigsParams,
+      sessionKey,
       authNeededCallback,
     });
 
