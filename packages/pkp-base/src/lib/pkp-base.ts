@@ -255,6 +255,18 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     }
   }
 
+  public async authenticate(): Promise<void> {
+    this.validateAuthContext();
+
+    const controllerSessionSigs =
+      (await this.authContext?.client?.getSessionSigs(
+        this.authContext.getSessionSigsProps
+      )) || this.controllerSessionSigs;
+
+    this.log('got session: ', controllerSessionSigs);
+    this.controllerSessionSigs = controllerSessionSigs;
+  }
+
   /**
    * Runs the specified Lit action with the given parameters.
    *
@@ -275,17 +287,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       this.throwError('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
-    this.validateAuthContext();
-
-    const controllerSessionSigs =
-      (await this.authContext?.client?.getSessionSigs(
-        this.authContext.getSessionSigsProps
-      )) || this.controllerSessionSigs;
+    await this.authenticate();
 
     const executeJsArgs: ExecuteJsProps = {
       ...(this.litActionCode && { code: this.litActionCode }),
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
-      sessionSigs: controllerSessionSigs,
+      sessionSigs: this.controllerSessionSigs,
       authSig: this.controllerAuthSig,
       authMethods: this.authContext?.authMethods,
       jsParams: {
@@ -358,12 +365,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       this.throwError('pkpPubKey (aka. uncompressPubKey) is required');
     }
 
-    this.validateAuthContext();
-
-    const controllerSessionSigs =
-      (await this.authContext?.client?.getSessionSigs(
-        this.authContext.getSessionSigsProps
-      )) || this.controllerSessionSigs;
+    await this.authenticate();
 
     try {
       let sig;
@@ -374,12 +376,12 @@ export class PKPBase<T = PKPBaseDefaultParams> {
           authSig: this.controllerAuthSig as AuthSig,
           authMethods: [],
         });
-      } else if (controllerSessionSigs) {
+      } else if (this.controllerSessionSigs) {
         sig = await this.litNodeClient.pkpSign({
           toSign,
           pubKey: this.uncompressedPubKey,
           authMethods: this.authContext?.authMethods ?? [],
-          sessionSigs: controllerSessionSigs,
+          sessionSigs: this.controllerSessionSigs,
         });
       } else if (this.authContext?.authMethods) {
         sig = await this.litNodeClient.pkpSign({
