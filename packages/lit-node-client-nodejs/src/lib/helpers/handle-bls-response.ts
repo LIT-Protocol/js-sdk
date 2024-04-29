@@ -19,6 +19,10 @@ export function handleBlsResponseData(
   }));
   log(`[handleBlsResponseData] signatureShares:`, signatureShares);
 
+  if (!signatureShares || signatureShares.length <= 0) {
+    throw new Error('[handleBlsResponseData] No signature shares provided');
+  }
+
   const signedDataList = responseData.map((s) => s.dataSigned);
   log(`[handleBlsResponseData] signedDataList:`, signedDataList);
 
