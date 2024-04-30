@@ -1224,18 +1224,17 @@ export class LitNodeClientNodeJs
       responseData
     ) as NodeShare;
 
-    const IS_SUCCESS = mostCommonResponse.success;
-    const HAS_SIGNED_DATA =
-      Object.keys(mostCommonResponse.signedData).length > 0;
-    const HAS_CLAIM_DATA = Object.keys(mostCommonResponse.claimData).length > 0;
+    const isSuccess = mostCommonResponse.success;
+    const hasSignedData = Object.keys(mostCommonResponse.signedData).length > 0;
+    const hasClaimData = Object.keys(mostCommonResponse.claimData).length > 0;
 
     // -- we must also check for claim responses as a user may have submitted for a claim and signatures must be aggregated before returning
-    if (IS_SUCCESS && !HAS_SIGNED_DATA && !HAS_CLAIM_DATA) {
+    if (isSuccess && !hasSignedData && !hasClaimData) {
       return mostCommonResponse as unknown as ExecuteJsResponse;
     }
 
     // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
-    if (!HAS_SIGNED_DATA && !HAS_CLAIM_DATA) {
+    if (!hasSignedData && !hasClaimData) {
       return {
         claims: {},
         signatures: null,
@@ -1666,8 +1665,7 @@ export class LitNodeClientNodeJs
    *
    */
   decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
-    const { authSig, sessionSigs, chain, ciphertext, dataToEncryptHash } =
-      params;
+    const { sessionSigs, chain, ciphertext, dataToEncryptHash } = params;
 
     // ========== Validate Params ==========
     // -- validate if it's ready
@@ -1753,7 +1751,7 @@ export class LitNodeClientNodeJs
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       const nodePromises = this.getNodePromises((url: string) => {
         // -- if session key is available, use it
-        const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+        const authSigToSend = sessionSigs[url];
 
         return this.getSigningShareForDecryption(
           url,
