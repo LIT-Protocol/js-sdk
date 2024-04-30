@@ -12,20 +12,15 @@ export const LIT_ENDPOINT = {
   SIGN_SESSION_KEY: {
     path: '/web/sign_session_key',
     version: LIT_ENDPOINT_VERSION.V1,
-
-    // FIXME: Change this to V1 once the new version is deployed to all public networks
-    // version: LIT_ENDPOINT_VERSION.V0,
     envName: 'SIGN_SESSION_KEY',
   },
   EXECUTE_JS: {
     path: '/web/execute',
-    // FIXME: Change this to V1 once the new version is deployed to all public networks
     version: LIT_ENDPOINT_VERSION.V1,
     envName: 'EXECUTE_JS',
   },
   PKP_SIGN: {
     path: '/web/pkp/sign',
-    // version: LIT_ENDPOINT_VERSION.V1,
     version: LIT_ENDPOINT_VERSION.V1,
     envName: 'PKP_SIGN',
   },
