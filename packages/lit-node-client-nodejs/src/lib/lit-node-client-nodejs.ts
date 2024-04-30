@@ -2520,7 +2520,6 @@ export class LitNodeClientNodeJs
       sessionKey: sessionKeyUri,
       authMethods: params.authMethods,
       ...(params?.pkpPublicKey && { pkpPublicKey: params.pkpPublicKey }),
-      ...(params?.authSig && { authSig: params.authSig }),
       siweMessage: siweMessage,
       curveType: LIT_CURVE.BLS,
 
