@@ -2427,23 +2427,15 @@ export class LitNodeClientNodeJs
       params.expiration ||
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    let sessionKeyUri: string;
+    // Try to get it from local storage, if not generates one~
+    const sessionKey: SessionKeyPair =
+      params.sessionKey ?? this.getSessionKey();
+    const sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
 
-    // This allow the user to provide a sessionKeyUri directly without using the session key pair
-    if (params?.sessionKeyUri) {
-      sessionKeyUri = params.sessionKeyUri;
-      log(`[signSessionKey] sessionKeyUri found in params:`, sessionKeyUri);
-    } else {
-      // Try to get it from local storage, if not generates one~
-      let sessionKey: SessionKeyPair =
-        params.sessionKey ?? this.getSessionKey();
-      sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
-
-      log(
-        `[signSessionKey] sessionKeyUri is not found in params, generating a new one`,
-        sessionKeyUri
-      );
-    }
+    log(
+      `[signSessionKey] sessionKeyUri is not found in params, generating a new one`,
+      sessionKeyUri
+    );
 
     if (!sessionKeyUri) {
       throw new Error(

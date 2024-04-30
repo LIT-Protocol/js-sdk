@@ -929,9 +929,6 @@ export interface SignSessionKeyProp {
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 
-  // -- as part of auth unification
-  sessionKeyUri?: string;
-
   litActionCode?: string;
 
   jsParams?: {
