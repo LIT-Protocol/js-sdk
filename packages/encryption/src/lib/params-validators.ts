@@ -380,7 +380,7 @@ class FileValidator implements ParamsValidator {
 }
 
 export interface AuthMaterialValidatorProps {
-  sessionSigs?: SessionSigsMap;
+  sessionSigs: SessionSigsMap;
   chain?: string;
 }
 

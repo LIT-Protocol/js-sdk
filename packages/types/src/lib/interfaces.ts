@@ -364,7 +364,7 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
 
 export interface GetSignedTokenRequest
   extends SigningAccessControlConditionRequest {
-  sessionSigs?: SessionSigsMap;
+  sessionSigs: SessionSigsMap;
 }
 
 export interface SigningAccessControlConditionRequest
@@ -434,7 +434,7 @@ export interface JsonExecutionSdkParams {
   ipfsId?: string;
 
   // the session signatures to use to authorize the user with the nodes
-  sessionSigs?: any;
+  sessionSigs: any;
 
   // whether to run this on a single node or many
   // targetNodeRange?: number;
@@ -465,11 +465,8 @@ export interface EncryptRequestBase extends MultipleAccessControlConditions {
   // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
   chain: Chain;
 
-  // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: AuthSig;
-
   // the session signatures to use to authorize the user with the nodes
-  sessionSigs?: SessionSigsMap;
+  sessionSigs: SessionSigsMap;
 }
 
 export interface EncryptRequest extends EncryptRequestBase {
@@ -820,11 +817,8 @@ export interface EncryptToJsonPayload extends EncryptRequestBase {
 }
 
 export interface DecryptFromJsonProps {
-  // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: AuthSig;
-
   // the session signatures to use to authorize the user with the nodes
-  sessionSigs?: SessionSigsMap;
+  sessionSigs: SessionSigsMap;
 
   // An instance of LitNodeClient that is already connected
   litNodeClient: ILitNodeClient;
@@ -834,11 +828,8 @@ export interface DecryptFromJsonProps {
 
 export interface EncryptFileAndZipWithMetadataProps
   extends MultipleAccessControlConditions {
-  // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: AuthSig;
-
   // the session signatures to use to authorize the user with the nodes
-  sessionSigs?: SessionSigsMap;
+  sessionSigs: SessionSigsMap;
 
   // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
   chain: string;
@@ -854,11 +845,8 @@ export interface EncryptFileAndZipWithMetadataProps
 }
 
 export interface DecryptZipFileWithMetadataProps {
-  // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: AuthSig;
-
   // the session signatures to use to authorize the user with the nodes
-  sessionSigs?: SessionSigsMap;
+  sessionSigs: SessionSigsMap;
 
   // The zip file blob with metadata inside it and the encrypted asset
   file: File | Blob;
