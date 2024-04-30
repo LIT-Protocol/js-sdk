@@ -315,7 +315,7 @@ export interface JsonSignSessionKeyRequestV1 {
   pkpPublicKey?: string;
   authSig?: AuthSig;
   siweMessage: string;
-  curveType: 'BLS' | 'ECDSA';
+  curveType: 'BLS';
   code?: string;
   litActionIpfsId?: string;
   jsParams?: any;
