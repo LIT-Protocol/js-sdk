@@ -8,8 +8,10 @@
  */
 export const normalizeArray = (toSign: ArrayLike<number>) => {
   const arr = [];
-  for (let i = 0; i < toSign.length; i++) {
-    arr.push((toSign as Buffer)[i]);
+  // Casting ArrayLike to Uint8Array for better compatibility and avoiding Node-specific types
+  const uint8Array = new Uint8Array(toSign);
+  for (let i = 0; i < uint8Array.length; i++) {
+    arr.push(uint8Array[i]);
   }
   return arr;
 };
