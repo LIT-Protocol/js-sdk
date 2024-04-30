@@ -244,6 +244,11 @@ export interface BaseJsonExecutionRequest {
   authMethods?: AuthMethod[];
 }
 
+/**
+ * FIXME: We should create a separate interface for JsExecutionRequestBody
+ * a body that the SDK accepts, and another one the node actually accepts.
+ * 
+ */
 export interface WithAuthSig extends BaseJsonExecutionRequest {
   authSig: AuthSig;
   sessionSigs?: any;
@@ -257,7 +262,7 @@ export interface WithSessionSigs extends BaseJsonExecutionRequest {
 export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
 
 export interface JsExecutionRequestBody {
-  authSig?: AuthSig;
+  authSig: AuthSig;
   code?: string;
   ipfsId?: string;
   authMethods?: AuthMethod[];
@@ -313,7 +318,6 @@ export interface JsonSignSessionKeyRequestV1 {
   sessionKey: string;
   authMethods: AuthMethod[];
   pkpPublicKey?: string;
-  authSig?: AuthSig;
   siweMessage: string;
   curveType: 'BLS';
   code?: string;
