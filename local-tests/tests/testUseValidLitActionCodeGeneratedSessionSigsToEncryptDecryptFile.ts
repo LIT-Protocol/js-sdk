@@ -6,6 +6,7 @@ import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { getPkpSessionSigs } from 'local-tests/setup/session-sigs/get-pkp-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 import { log } from '@lit-protocol/misc';
+import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 
 /**
  * Test Commands:
@@ -28,13 +29,13 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile =
       userAddress: alice.authMethodOwnedPkp.ethAddress,
     });
 
-    const pkpSessionSigs = await getPkpSessionSigs(devEnv, alice);
+    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
 
     const encryptRes = await LitJsSdk.encryptString(
       {
         accessControlConditions: accs,
         chain: 'ethereum',
-        sessionSigs: pkpSessionSigs,
+        sessionSigs: litActionSessionSigs,
         dataToEncrypt: 'Hello world',
       },
       devEnv.litNodeClient as unknown as ILitNodeClient
