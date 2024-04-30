@@ -702,7 +702,7 @@ export class LitNodeClientNodeJs
       throw new Error('authSig or sessionSig is required');
     }
     const data: JsExecutionRequestBody = {
-      ...(authSig ? { authSig } : {}),
+      authSig,
       ...(code ? { code } : {}),
       ...(ipfsId ? { ipfsId } : {}),
       ...(authMethods ? { authMethods } : {}),
