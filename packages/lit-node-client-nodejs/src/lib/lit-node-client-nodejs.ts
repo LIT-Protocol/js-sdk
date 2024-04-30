@@ -117,14 +117,8 @@ import type {
   JsExecutionRequestBody,
   JsonSignSessionKeyRequestV1,
   BlsResponseData,
-  SessionKeyCache,
 } from '@lit-protocol/types';
 import * as blsSdk from '@lit-protocol/bls-sdk';
-
-const TEMP_CACHE_PERIOD = 30000; // 30 seconds
-
-// Global cache variable
-let sessionKeyCache: SessionKeyCache | null = null;
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -327,15 +321,6 @@ export class LitNodeClientNodeJs
         `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
       );
 
-      // Check if a valid session key exists in cache
-      if (
-        sessionKeyCache &&
-        Date.now() - sessionKeyCache.timestamp < TEMP_CACHE_PERIOD
-      ) {
-        log(`[getSessionKey] Returning session key from cache.`);
-        return sessionKeyCache.value;
-      }
-
       // Generate new one
       const newSessionKey = generateSessionKeyPair();
 
@@ -346,14 +331,6 @@ export class LitNodeClientNodeJs
         log(
           `[getSessionKey] Localstorage not available.Not a problem.Contiune...`
         );
-
-        // Store in cache
-        sessionKeyCache = {
-          value: newSessionKey,
-          timestamp: Date.now(),
-        };
-
-        log(`[getSessionKey] newSessionKey set to cache: `, sessionKeyCache);
       }
 
       return newSessionKey;
