@@ -38,7 +38,7 @@ export const createCapacityCreditsResourceData = (
           ),
         }
       : {}),
-    uses: params.uses!.toString() || '1',
+    ...(params.uses ? { uses: params.uses.toString() } : { uses: '1' }),
   };
 };
 
