@@ -3,12 +3,12 @@ import {
   DecryptResponse,
   EncryptRequest,
   EncryptResponse,
-  ExecuteJsProps,
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetSignedTokenRequest,
   HandshakeWithNode,
   JsonExecutionRequest,
+  JsonExecutionSdkParams,
   JsonHandshakeResponse,
   LitNodeClientConfig,
   MultipleAccessControlConditions,
@@ -43,32 +43,12 @@ export interface ILitNodeClient {
 
   /**
    *
-   * (Browser Only) Get the config from browser local storage and override default config
-   *
-   * @returns { void }
-   *
-   */
-  overrideConfigsFromLocalStorage?(): void;
-
-  /**
-   *
    * Set bootstrapUrls to match the network litNetwork unless it's set to custom
    *
    * @returns { void }
    *
    */
   setCustomBootstrapUrls(): void;
-
-  /**
-   *
-   * Get the request body of the lit action
-   *
-   * @param { ExecuteJsProps } params
-   *
-   * @returns { JsonExecutionRequest }
-   *
-   */
-  getLitActionRequestBody(params: ExecuteJsProps): JsonExecutionRequest;
 
   /**
    *
@@ -155,27 +135,6 @@ export interface ILitNodeClient {
   _throwNodeError(res: RejectedNodePromises, requestId: string): void;
 
   // ========== Shares Resolvers ==========
-  /**
-   *
-   * Get signatures from signed data
-   *
-   * @param { Array<any> } signedData
-   *
-   * @returns { any }
-   *
-   */
-  getSignatures(signedData: any[], requestId: string): any;
-
-  /**
-   *
-   * Parse the response string to JSON
-   *
-   * @param { string } responseString
-   *
-   * @returns { any } JSON object
-   *
-   */
-  parseResponses(responseString: string): any;
 
   /**
    *
@@ -199,11 +158,6 @@ export interface ILitNodeClient {
    *
    * @returns { Promise<any> }
    */
-  getJsExecutionShares(
-    url: string,
-    params: JsonExecutionRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
 
   /**
    * Get Signing Shares for Token containing Access Control Condition
@@ -260,7 +214,9 @@ export interface ILitNodeClient {
    * @returns { ExecuteJsResponse }
    *
    */
-  executeJs(params: ExecuteJsProps): Promise<ExecuteJsResponse | undefined>;
+  executeJs(
+    params: JsonExecutionSdkParams
+  ): Promise<ExecuteJsResponse | undefined>;
 
   /**
    *

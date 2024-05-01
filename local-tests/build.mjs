@@ -34,7 +34,7 @@ export const build = async () => {
 export const postBuildPolyfill = () => {
   try {
     const file = fs.readFileSync(`./${TEST_DIR}/build/test.mjs`, 'utf8');
-    const content = `import fetch from 'cross-fetch';
+    const content = `import fetch from 'node-fetch';
 try {
   if (!globalThis.fetch) {
     globalThis.fetch = fetch;
