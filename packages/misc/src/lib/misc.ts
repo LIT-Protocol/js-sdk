@@ -699,12 +699,31 @@ export const defaultMintClaimCallback: MintCallback<
   }
 };
 
-export const hexPrefixed = (str: string) => {
+/**
+ * Adds a '0x' prefix to a string if it doesn't already have one.
+ * @param str - The input string.
+ * @returns The input string with a '0x' prefix.
+ */
+export const hexPrefixed = (str: string): `0x${string}` => {
   if (str.startsWith('0x')) {
-    return str;
+    return str as `0x${string}`;
   }
 
-  return '0x' + str;
+  return ('0x' + str) as `0x${string}`;
+};
+
+/**
+ * Removes the '0x' prefix from a hexadecimal string if it exists.
+ *
+ * @param str - The input string.
+ * @returns The input string with the '0x' prefix removed, if present.
+ */
+export const removeHexPrefix = (str: string) => {
+  if (str.startsWith('0x')) {
+    return str.slice(2);
+  }
+
+  return str;
 };
 
 /**

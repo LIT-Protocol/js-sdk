@@ -271,3 +271,20 @@ describe('double escaped JSON string', () => {
     );
   });
 });
+it('should remove hex prefix from a string', () => {
+  const input = '0xabcdef';
+  const expectedOutput = 'abcdef';
+
+  const result = utilsModule.removeHexPrefix(input);
+
+  expect(result).toBe(expectedOutput);
+});
+
+it('should not remove hex prefix if it is not present', () => {
+  const input = 'abcdef';
+  const expectedOutput = 'abcdef';
+
+  const result = utilsModule.removeHexPrefix(input);
+
+  expect(result).toBe(expectedOutput);
+});
