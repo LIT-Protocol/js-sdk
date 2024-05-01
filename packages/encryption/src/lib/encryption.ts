@@ -126,7 +126,7 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
     ? ReturnType<typeof decryptToString>
     : never
 > {
-  const { authSig, sessionSigs, parsedJsonData, litNodeClient } = params;
+  const { sessionSigs, parsedJsonData, litNodeClient } = params;
 
   // -- validate
   const paramsIsSafe = safeParams({
@@ -153,7 +153,6 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
         ciphertext: parsedJsonData.ciphertext,
         dataToEncryptHash: parsedJsonData.dataToEncryptHash,
         chain: parsedJsonData.chain,
-        authSig,
         sessionSigs,
       },
       litNodeClient
@@ -169,7 +168,6 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
         ciphertext: parsedJsonData.ciphertext,
         dataToEncryptHash: parsedJsonData.dataToEncryptHash,
         chain: parsedJsonData.chain,
-        authSig,
         sessionSigs,
       },
       litNodeClient
@@ -444,7 +442,6 @@ export const encryptFileAndZipWithMetadata = async (
   params: EncryptFileAndZipWithMetadataProps
 ): Promise<any> => {
   const {
-    authSig,
     sessionSigs,
     accessControlConditions,
     evmContractConditions,
@@ -460,7 +457,6 @@ export const encryptFileAndZipWithMetadata = async (
   const paramsIsSafe = safeParams({
     functionName: 'encryptFileAndZipWithMetadata',
     params: {
-      authSig,
       sessionSigs,
       accessControlConditions,
       evmContractConditions,
@@ -545,13 +541,12 @@ export const encryptFileAndZipWithMetadata = async (
 export const decryptZipFileWithMetadata = async (
   params: DecryptZipFileWithMetadataProps
 ): Promise<DecryptZipFileWithMetadata | undefined> => {
-  const { authSig, sessionSigs, file, litNodeClient } = params;
+  const { sessionSigs, file, litNodeClient } = params;
 
   // -- validate
   const paramsIsSafe = safeParams({
     functionName: 'decryptZipFileWithMetadata',
     params: {
-      authSig,
       sessionSigs,
       file,
       litNodeClient,
