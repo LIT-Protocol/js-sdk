@@ -239,251 +239,35 @@ describe('utils', () => {
     expect(res.requestId).toBeDefined();
   });
 });
-describe('find most common tings', () => {
-  it('should return the most common string in an array', () => {
-    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 8];
 
-    const mostOccured = utilsModule.mostCommonString(arr);
-
-    expect(mostOccured).toBe(8);
+describe('double escaped JSON string', () => {
+  test('A doubly escaped JSON string', () => {
+    const doublyEscapedJson = '{\\"key\\": \\"value\\"}';
+    expect(utilsModule.normalizeAndStringify(doublyEscapedJson)).toBe(
+      '{"key":"value"}'
+    );
   });
 
-  it('should return the last element of the array if every element only appears once', () => {
-    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
-
-    const mostOccured = utilsModule.mostCommonString(arr);
-
-    expect(mostOccured).toBe(0);
+  test('A triply escaped JSON string', () => {
+    const triplyEscapedJson = '{\\\\\\"key\\\\\\": \\\\\\"value\\\\\\"}';
+    expect(utilsModule.normalizeAndStringify(triplyEscapedJson)).toBe(
+      '{"key":"value"}'
+    );
   });
 
-  it('should test real world example of responseData', () => {
-    const responseData = [
-      {
-        success: true,
-        signedData: {
-          sig: {
-            sigType: 'ECDSA_CAIT_SITH',
-            dataSigned: 'fail',
-            signatureShare: '',
-            shareIndex: 0,
-            bigR: '',
-            publicKey: '',
-            sigName: 'sig',
-          },
-        },
-        decryptedData: {},
-        claimData: {},
-        response: '',
-        logs: '',
-      },
-      {
-        success: true,
-        signedData: {
-          sig: {
-            sigType: 'ECDSA_CAIT_SITH',
-            dataSigned: 'fail',
-            signatureShare: '',
-            shareIndex: 0,
-            bigR: '',
-            publicKey: '',
-            sigName: 'sig',
-          },
-        },
-        decryptedData: {},
-        claimData: {},
-        response: '',
-        logs: '',
-      },
-      {
-        success: true,
-        signedData: {
-          sig: {
-            sigType: 'ECDSA_CAIT_SITH',
-            dataSigned: 'fail',
-            signatureShare: '',
-            shareIndex: 0,
-            bigR: '',
-            publicKey: '',
-            sigName: 'sig',
-          },
-        },
-        decryptedData: {},
-        claimData: {},
-        response: '',
-        logs: '',
-      },
-      {
-        success: true,
-        signedData: {
-          sig: {
-            sigType: 'ECDSA_CAIT_SITH',
-            dataSigned:
-              '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
-            signatureShare:
-              '"A2022A52D6263F5AD61D1A4E29F2C2545FA6E711A30A35BF3456FD5297E4080A"',
-            shareIndex: 0,
-            bigR: '"035938946F745C3A6E8B8F0DF7849B0693AAB779695BA770F76906562F37DD005F"',
-            publicKey:
-              '"049C6E2DD71F553A29398FA0A93BBCB411EE442D97D253D9E82F41C8601B19BCD71F37F0A2A0A0F501593153C3FD2C9EC3A2BDFA8E43291B7B0E165A3E104BF0B2"',
-            sigName: 'sig',
-          },
-        },
-        decryptedData: {},
-        claimData: {},
-        response: '',
-        logs: '',
-      },
-      {
-        success: true,
-        signedData: {
-          sig: {
-            sigType: 'ECDSA_CAIT_SITH',
-            dataSigned:
-              '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
-            signatureShare:
-              '"35790072188D520CDAA61394BB822C4F9D95CC2FC21CBAF54EBB91FA8734F5FE"',
-            shareIndex: 0,
-            bigR: '"035938946F745C3A6E8B8F0DF7849B0693AAB779695BA770F76906562F37DD005F"',
-            publicKey:
-              '"049C6E2DD71F553A29398FA0A93BBCB411EE442D97D253D9E82F41C8601B19BCD71F37F0A2A0A0F501593153C3FD2C9EC3A2BDFA8E43291B7B0E165A3E104BF0B2"',
-            sigName: 'sig',
-          },
-        },
-        decryptedData: {},
-        claimData: {},
-        response: '',
-        logs: '',
-      },
-      {
-        success: true,
-        signedData: {
-          sig: {
-            sigType: 'ECDSA_CAIT_SITH',
-            dataSigned:
-              '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
-            signatureShare:
-              '"A1676E25812D6812BB24469943A15F68FAD4CC679E0376CE1EDD5E0D64236E7A"',
-            shareIndex: 0,
-            bigR: '"035938946F745C3A6E8B8F0DF7849B0693AAB779695BA770F76906562F37DD005F"',
-            publicKey:
-              '"049C6E2DD71F553A29398FA0A93BBCB411EE442D97D253D9E82F41C8601B19BCD71F37F0A2A0A0F501593153C3FD2C9EC3A2BDFA8E43291B7B0E165A3E104BF0B2"',
-            sigName: 'sig',
-          },
-        },
-        decryptedData: {},
-        claimData: {},
-        response: '',
-        logs: '',
-      },
-      {
-        success: true,
-        signedData: {
-          sig: {
-            sigType: 'ECDSA_CAIT_SITH',
-            dataSigned:
-              '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
-            signatureShare:
-              '"3E8184B2E3DC4725A711D4DBF8D32288A8AC4F31FD04B8ACB302B9BB3D209122"',
-            shareIndex: 0,
-            bigR: '"035938946F745C3A6E8B8F0DF7849B0693AAB779695BA770F76906562F37DD005F"',
-            publicKey:
-              '"049C6E2DD71F553A29398FA0A93BBCB411EE442D97D253D9E82F41C8601B19BCD71F37F0A2A0A0F501593153C3FD2C9EC3A2BDFA8E43291B7B0E165A3E104BF0B2"',
-            sigName: 'sig',
-          },
-        },
-        decryptedData: {},
-        claimData: {},
-        response: '',
-        logs: '',
-      },
-    ];
-
-    const mostCommonResponse = utilsModule.findMostCommonResponse(responseData);
-
-    expect(mostCommonResponse).toEqual({
-      success: true,
-      signedData: {
-        sig: {
-          sigType: 'ECDSA_CAIT_SITH',
-          dataSigned:
-            '"7D87C5EA75F7378BB701E404C50639161AF3EFF66293E9F375B5F17EB50476F4"',
-          signatureShare:
-            '"3E8184B2E3DC4725A711D4DBF8D32288A8AC4F31FD04B8ACB302B9BB3D209122"',
-          shareIndex: 0,
-          bigR: '"035938946F745C3A6E8B8F0DF7849B0693AAB779695BA770F76906562F37DD005F"',
-          publicKey:
-            '"049C6E2DD71F553A29398FA0A93BBCB411EE442D97D253D9E82F41C8601B19BCD71F37F0A2A0A0F501593153C3FD2C9EC3A2BDFA8E43291B7B0E165A3E104BF0B2"',
-          sigName: 'sig',
-        },
-      },
-      decryptedData: {},
-      claimData: {},
-      response: undefined,
-      logs: undefined,
-    });
+  test('A correctly escaped JSON string (for comparison)', () => {
+    const correctlyEscapedJson = '{"key":"value"}';
+    expect(utilsModule.normalizeAndStringify(correctlyEscapedJson)).toBe(
+      '{"key":"value"}'
+    );
   });
-  it('should return the most common response object', () => {
-    const responses = [
-      {
-        key1: 'value1',
-        key2: 'value2',
-        key3: 'value3',
-      },
-      {
-        key1: 'value1',
-        key2: 'value2',
-        key3: 'value3',
-      },
-      {
-        key1: 'value1',
-        key2: 'value2',
-        key3: 'value3',
-      },
-      {
-        key1: 'value1',
-        key2: 'value2',
-        key3: 'value3',
-      },
-      {
-        key1: 'value1',
-        key2: 'value2',
-        key3: 'value3',
-      },
-      {
-        key1: 'value1',
-        key2: 'value2',
-        key3: 'value3',
-      },
-      {
-        key1: 'value1',
-        key2: 'value2',
-        key3: 'value3',
-      },
-      {
-        key1: 'value1',
-        key2: 'value2',
-        key3: 'value3',
-      },
-      {
-        key1: 'value1',
-        key2: 'value2',
-        key3: 'value3',
-      },
-      {
-        key1: 'value1',
-        key2: 'value2',
-        key3: 'value3',
-      },
-    ];
 
-    const expectedResult = {
-      key1: 'value1',
-      key2: 'value2',
-      key3: 'value3',
-    };
+  test('regular siwe message', () => {
+    const regularString =
+      'litprotocol.com wants you to sign in with your Ethereum account:\\n0x3edB...';
 
-    const result = utilsModule.findMostCommonResponse(responses);
-
-    expect(result).toEqual(expectedResult);
+    expect(utilsModule.normalizeAndStringify(regularString)).toBe(
+      regularString
+    );
   });
 });

@@ -110,7 +110,6 @@ import type {
   CapacityCreditsRes,
   JsonSignSessionKeyRequestV1,
   BlsResponseData,
-  SessionKeyCache,
   JsonPkpSignSdkParams,
   JsonExecutionSdkParams,
   ExecuteJsNoSigningResponse,
@@ -119,20 +118,16 @@ import type {
   SigResponse,
 } from '@lit-protocol/types';
 import * as blsSdk from '@lit-protocol/bls-sdk';
-import { normalizeArray } from './helpers/normalize-array';
 import { normalizeJsParams } from './helpers/normalize-params';
 import { encodeCode } from './helpers/encode-code';
+import { getFlattenShare, getSignatures } from './helpers/get-signatures';
 import { removeDoubleQuotes } from './helpers/remove-double-quotes';
 import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
-import { getFlattenShare, getSignatures } from './helpers/get-signatures';
 import { getClaimsList } from './helpers/get-claims-list';
 import { getClaims } from './helpers/get-claims';
+import { normalizeArray } from './helpers/normalize-array';
 import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
-
-const TEMP_CACHE_PERIOD = 30000; // 30 seconds
-
-// Global cache variable
-let sessionKeyCache: SessionKeyCache | null = null;
+import { handleBlsResponseData } from './helpers/handle-bls-response';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -155,10 +150,15 @@ export class LitNodeClientNodeJs
   createCapacityDelegationAuthSig = async (
     params: CapacityCreditsReq
   ): Promise<CapacityCreditsRes> => {
+    // -- validate
+    if (!params.dAppOwnerWallet) {
+      throw new Error('dAppOwnerWallet must exist');
+    }
+
     // Useful log for debugging
     if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
       log(
-        `[createCapacityDelegationAuthSig] No delegatee addresses provided. It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits (uses) and specific NFT IDs (nft_id).`
+        `[createCapacityDelegationAuthSig] 'delegateeAddresses' is an empty array. It means that no body can use it. However, if the 'delegateeAddresses' field is omitted, It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits (uses) and specific NFT IDs (nft_id).`
       );
     }
 
@@ -173,11 +173,6 @@ export class LitNodeClientNodeJs
       await this.connect();
     }
 
-    // -- validate
-    if (!params.dAppOwnerWallet) {
-      throw new Error('dAppOwnerWallet must exist');
-    }
-
     const nonce = await this.getLatestBlockhash();
 
     const siweMessage = await createSiweMessageWithCapacityDelegation({
@@ -185,17 +180,12 @@ export class LitNodeClientNodeJs
       litNodeClient: this,
       walletAddress: dAppOwnerWalletAddress,
       nonce: nonce,
-
-      // -- default configuration for recap object capability
-      expiration:
-        params.expiration ?? new Date(Date.now() + 1000 * 60 * 7).toISOString(),
-      domain: params.domain ?? 'example.com',
-      statement:
-        params.statement ??
-        'This is a test statement.  You can put anything you want here.',
+      expiration: params.expiration,
+      domain: params.domain,
+      statement: params.statement,
 
       // -- capacity delegation specific configuration
-      uses: params.uses ?? '1',
+      uses: params.uses,
       delegateeAddresses: params.delegateeAddresses,
       capacityTokenId: params.capacityTokenId,
     });
@@ -242,15 +232,6 @@ export class LitNodeClientNodeJs
         `Storage key "${storageKey}" is missing. Not a problem. Contiune...`
       );
 
-      // Check if a valid session key exists in cache
-      if (
-        sessionKeyCache &&
-        Date.now() - sessionKeyCache.timestamp < TEMP_CACHE_PERIOD
-      ) {
-        log(`[getSessionKey] Returning session key from cache.`);
-        return sessionKeyCache.value;
-      }
-
       // Generate new one
       const newSessionKey = generateSessionKeyPair();
 
@@ -261,14 +242,6 @@ export class LitNodeClientNodeJs
         log(
           `[getSessionKey] Localstorage not available.Not a problem.Contiune...`
         );
-
-        // Store in cache
-        sessionKeyCache = {
-          value: newSessionKey,
-          timestamp: Date.now(),
-        };
-
-        log(`[getSessionKey] newSessionKey set to cache: `, sessionKeyCache);
       }
 
       return newSessionKey;
@@ -2154,19 +2127,7 @@ export class LitNodeClientNodeJs
     let signedDataList: any[] = [];
 
     if (curveType === LIT_CURVE.BLS) {
-      let _responseData: BlsResponseData[] = responseData;
-
-      const signatureShares = _responseData.map((s) => ({
-        ProofOfPossession: s.signatureShare.ProofOfPossession,
-      }));
-
-      log(`[signSessionKey] signatureShares:`, signatureShares);
-
-      signedDataList = _responseData.map((s) => {
-        return s.dataSigned;
-      });
-
-      signedDataList = _responseData;
+      signedDataList = handleBlsResponseData(responseData);
     } else {
       signedDataList = responseData.map(
         (r: any) => (r as SignedData).signedData
@@ -2272,9 +2233,7 @@ export class LitNodeClientNodeJs
       );
       log(`[signSessionKey] sigType:`, sigType);
 
-      const signatureShares = blsSignedData.map((s) => ({
-        ProofOfPossession: s.signatureShare.ProofOfPossession,
-      }));
+      const signatureShares = handleBlsResponseData(blsSignedData);
 
       log(`[signSessionKey] signatureShares:`, signatureShares);
 
@@ -2548,6 +2507,7 @@ export class LitNodeClientNodeJs
   };
 
   /**
+<<<<<<<<< Temporary merge branch 1
    * Retrieves the PKP sessionSigs.
    *
    * @param params - The parameters for retrieving the PKP sessionSigs.
