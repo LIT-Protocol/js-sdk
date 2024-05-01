@@ -1,7 +1,7 @@
 import { computeAddress } from '@ethersproject/transactions';
 import { BigNumber, ethers } from 'ethers';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
-import * as siwe from 'siwe';
+import { SiweMessage } from 'siwe';
 
 import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-control-conditions';
 import {
@@ -48,6 +48,7 @@ import {
   logWithRequestId,
   mostCommonString,
   normalizeAndStringify,
+  removeHexPrefix,
   throwError,
 } from '@lit-protocol/misc';
 import {
@@ -128,7 +129,7 @@ import { getClaimsList } from './helpers/get-claims-list';
 import { getClaims } from './helpers/get-claims';
 import { normalizeArray } from './helpers/normalize-array';
 import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
-import { handleBlsResponseData } from './helpers/handle-bls-response';
+import { getBlsSignatures } from './helpers/get-bls-signatures';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -345,6 +346,7 @@ export class LitNodeClientNodeJs
     litActionCode,
     ipfsId,
     jsParams,
+    sessionKey,
   }: GetWalletSigProps): Promise<AuthSig> => {
     let walletSig: AuthSig;
 
@@ -382,6 +384,7 @@ export class LitNodeClientNodeJs
           ...(switchChain && { switchChain }),
           expiration,
           uri: sessionKeyUri,
+          sessionKey: sessionKey,
           nonce,
 
           // for recap
@@ -513,7 +516,7 @@ export class LitNodeClientNodeJs
     sessionKeyUri: any;
     resourceAbilityRequests: LitResourceAbilityRequest[];
   }): Promise<boolean> => {
-    const authSigSiweMessage = new siwe.SiweMessage(authSig.signedMessage);
+    const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
 
     try {
       await authSigSiweMessage.validate(authSig.sig);
@@ -1276,7 +1279,7 @@ export class LitNodeClientNodeJs
     url: string,
     params: any,
     requestId: string
-  ): Promise<any> => {
+  ): Promise<NodeCommandResponse> => {
     return await this.sendCommandToNode({
       url,
       data: params,
@@ -2098,7 +2101,7 @@ export class LitNodeClientNodeJs
       return {} as SignSessionKeyResponse;
     }
 
-    const responseData = res.values;
+    const responseData: BlsResponseData[] = res.values;
     logWithRequestId(
       requestId,
       '[signSessionKey] responseData',
@@ -2116,15 +2119,7 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] curveType is "${curveType}"`);
 
-    let signedDataList: any[] = [];
-
-    if (curveType === LIT_CURVE.BLS) {
-      signedDataList = handleBlsResponseData(responseData);
-    } else {
-      signedDataList = responseData.map(
-        (r: any) => (r as SignedData).signedData
-      );
-    }
+    let signedDataList = responseData.map((s) => s.dataSigned);
 
     if (signedDataList.length <= 0) {
       const err = `[signSessionKey] signedDataList is empty.`;
@@ -2139,16 +2134,8 @@ export class LitNodeClientNodeJs
     );
 
     // -- checking if we have enough shares
-    const validatedSignedDataList = signedDataList
-      .map((signedData: any) => {
-        const sessionSig = signedData['sessionSig'] ?? signedData;
-
-        // add backwards compatibility for `sigType` field
-        // For more context: Previously, the field was called `sigType` but it was changed to `curveType` because we are now using BLS instead of ECDSA.
-        if (sessionSig['curveType'] && !sessionSig['sigType']) {
-          sessionSig['sigType'] = sessionSig['curveType'];
-        }
-
+    const validatedSignedDataList = responseData
+      .map((data: BlsResponseData) => {
         // each of this field cannot be empty
         let requiredFields = [
           'signatureShare',
@@ -2162,7 +2149,9 @@ export class LitNodeClientNodeJs
 
         // check if all required fields are present
         for (const field of requiredFields) {
-          if (!sessionSig[field] || sessionSig[field] === '') {
+          const key: keyof BlsResponseData = field as keyof BlsResponseData;
+
+          if (!data[key] || data[key] === '') {
             log(
               `[signSessionKey] Invalid signed data. "${field}" is missing. Not a problem, we only need ${this.config.minNodeCount} nodes to sign the session key.`
             );
@@ -2170,15 +2159,13 @@ export class LitNodeClientNodeJs
           }
         }
 
-        if (curveType === LIT_CURVE.BLS) {
-          if (!sessionSig.signatureShare.ProofOfPossession) {
-            const err = `[signSessionKey] Invalid signed data. "ProofOfPossession" is missing.`;
-            log(err);
-            throw new Error(err);
-          }
+        if (!data.signatureShare.ProofOfPossession) {
+          const err = `[signSessionKey] Invalid signed data. "ProofOfPossession" is missing.`;
+          log(err);
+          throw new Error(err);
         }
 
-        return signedData;
+        return data;
       })
       .filter((item) => item !== null);
 
@@ -2203,15 +2190,13 @@ export class LitNodeClientNodeJs
       );
     }
 
-    let signatures: any;
-
     const blsSignedData: BlsResponseData[] =
       validatedSignedDataList as BlsResponseData[];
 
-    const sigType = mostCommonString(blsSignedData.map((s: any) => s.sigType));
+    const sigType = mostCommonString(blsSignedData.map((s) => s.curveType));
     log(`[signSessionKey] sigType:`, sigType);
 
-    const signatureShares = handleBlsResponseData(blsSignedData);
+    const signatureShares = getBlsSignatures(blsSignedData);
 
     log(`[signSessionKey] signatureShares:`, signatureShares);
 
@@ -2221,58 +2206,38 @@ export class LitNodeClientNodeJs
 
     log(`[signSessionKey] blsCombinedSignature:`, blsCombinedSignature);
 
-    const publicKey = params.pkpPublicKey.startsWith('0x')
-      ? params.pkpPublicKey.slice(2)
-      : params.pkpPublicKey;
+    const publicKey = removeHexPrefix(params.pkpPublicKey);
+    log(`[signSessionKey] publicKey:`, publicKey);
 
     const dataSigned = mostCommonString(
       blsSignedData.map((s: any) => s.dataSigned)
     );
+    log(`[signSessionKey] dataSigned:`, dataSigned);
+
     const mostCommonSiweMessage = mostCommonString(
       blsSignedData.map((s: any) => s.siweMessage)
     );
 
-    signatures = {
-      sessionSig: {
-        signature: blsCombinedSignature,
-        publicKey,
-        dataSigned,
-        siweMessage: mostCommonSiweMessage,
-      },
-    };
+    log(`[signSessionKey] mostCommonSiweMessage:`, mostCommonSiweMessage);
 
-    log('[signSessionKey] signatures:', signatures);
-
-    const { sessionSig } = signatures;
-
-    const signedMessage = normalizeAndStringify(sessionSig.siweMessage);
+    const signedMessage = normalizeAndStringify(mostCommonSiweMessage);
 
     log(`[signSessionKey] signedMessage:`, signedMessage);
 
-    if (curveType === LIT_CURVE.BLS) {
-      return {
-        authSig: {
-          sig: JSON.stringify({
-            ProofOfPossession: sessionSig.signature,
-          }),
-          algo: 'LIT_BLS',
-          derivedVia: 'lit.bls',
-          signedMessage,
-          address: computeAddress('0x' + sessionSig.publicKey),
-        },
-        pkpPublicKey: sessionSig.publicKey,
-      };
-    }
-
-    return {
+    const signSessionKeyRes: SignSessionKeyResponse = {
       authSig: {
-        sig: sessionSig.signature,
-        derivedVia: 'web3.eth.personal.sign via Lit PKP',
+        sig: JSON.stringify({
+          ProofOfPossession: blsCombinedSignature,
+        }),
+        algo: 'LIT_BLS',
+        derivedVia: 'lit.bls',
         signedMessage,
-        address: computeAddress('0x' + sessionSig.publicKey),
+        address: computeAddress(hexPrefixed(publicKey)),
       },
-      pkpPublicKey: sessionSig.publicKey,
+      pkpPublicKey: publicKey,
     };
+
+    return signSessionKeyRes;
   };
 
   #isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
@@ -2364,6 +2329,7 @@ export class LitNodeClientNodeJs
       sessionCapabilityObject,
       switchChain: params.switchChain,
       expiration: expiration,
+      sessionKey: sessionKey,
       sessionKeyUri: sessionKeyUri,
       nonce,
 
@@ -2395,6 +2361,7 @@ export class LitNodeClientNodeJs
           resources: [sessionCapabilityObject.encodeAsSiweResource()],
           switchChain: params.switchChain,
           expiration,
+          sessionKey: sessionKey,
           uri: sessionKeyUri,
           nonce,
           resourceAbilityRequests: params.resourceAbilityRequests,
@@ -2511,6 +2478,7 @@ export class LitNodeClientNodeJs
         }
 
         const response = await this.signSessionKey({
+          sessionKey: props.sessionKey,
           statement: props.statement || 'Some custom statement.',
           authMethods: [...params.authMethods],
           pkpPublicKey: params.pkpPublicKey,

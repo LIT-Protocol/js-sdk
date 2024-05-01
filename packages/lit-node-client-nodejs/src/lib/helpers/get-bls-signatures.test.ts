@@ -1,6 +1,6 @@
-import { handleBlsResponseData } from './handle-bls-response';
+import { getBlsSignatures } from './get-bls-signatures';
 
-describe('handleBlsResponseData', () => {
+describe('getBlsSignatures', () => {
   it('should return an array of signed data', () => {
     const responseData = [
       {
@@ -50,12 +50,21 @@ describe('handleBlsResponseData', () => {
       },
     ] as any;
 
-    const result = handleBlsResponseData(responseData);
+    const result = getBlsSignatures(responseData);
 
     expect(result).toEqual([
-      'b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5',
-      'b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5',
-      'b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5',
+      {
+        ProofOfPossession:
+          '01b191b1d281857a95d2fd189683db366ab1088723338c1805daa4650459e9fcaebaa57b58108c284d233404dd5f2e58f208aafb87d981098aba3fe850980184a4b29643a21107b03f1d928646245b57af3745a81418989e0b6aad9bd1f192723c',
+      },
+      {
+        ProofOfPossession:
+          '038178034edcd5b48da4e2af6eb0891ece41389aa6119c80546d3fa00b5d2ba87eaec327b18d8013714b486246807498c8198e70cf8e917b1a5f1d8d0846787172521d41994de95bd641bdc1d9ccee9b459ceeb03f156cf357a4ff8faf5d2e167d',
+      },
+      {
+        ProofOfPossession:
+          '0292a026325a166398b85b53f3a7a34d147c5337e189d75c33c0f227f7926c839b408dfcc5d242a8685a81c68e0ccedc080c051219161dbc37f06627259b19d15120ab2f710075a44b1dcef18d511bb99b6625c8f575d2688c6b5b01ba6bf448c9',
+      },
     ]);
   });
 });

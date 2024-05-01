@@ -43,21 +43,34 @@ export interface AuthSig {
 export type CosmosWalletType = 'keplr' | 'leap';
 
 export interface AuthCallbackParams {
-  // The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
+  /**
+   * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
+   */
+  sessionKey?: SessionKeyPair;
+
+  /**
+   * The chain you want to use.  Find the supported list of chains here: https://developer.litprotocol.com/docs/supportedChains
+   */
   chain: Chain;
 
-  // The statement that describes what the user is signing. If the auth callback
-  // is for signing a SIWE message, you MUST add this statement to the end of the SIWE
-  // statement.
+  /**
+   *   The statement that describes what the user is signing. If the auth callback is for signing a SIWE message, you MUST add this statement to the end of the SIWE statement.
+   */
   statement?: string;
 
-  // The blockhash that the nodes return during the handshake
+  /**
+   * The blockhash that the nodes return during the handshake
+   */
   nonce: string;
 
-  // Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
+  /**
+   * Optional and only used with EVM chains.  A list of resources to be passed to Sign In with Ethereum.  These resources will be part of the Sign in with Ethereum signed message presented to the user.
+   */
   resources?: string[];
 
-  // Optional and only used with EVM chains right now.  Set to true by default.  Whether or not to ask Metamask or the user's wallet to switch chains before signing.  This may be desired if you're going to have the user send a txn on that chain.  On the other hand, if all you care about is the user's wallet signature, then you probably don't want to make them switch chains for no reason.  Pass false here to disable this chain switching behavior.
+  /**
+   * Optional and only used with EVM chains right now.  Set to true by default.  Whether or not to ask Metamask or the user's wallet to switch chains before signing.  This may be desired if you're going to have the user send a txn on that chain.  On the other hand, if all you care about is the user's wallet signature, then you probably don't want to make them switch chains for no reason.  Pass false here to disable this chain switching behavior.
+   */
   switchChain?: boolean;
 
   // --- Following for Session Auth ---
@@ -65,9 +78,11 @@ export interface AuthCallbackParams {
 
   uri?: string;
 
-  // Cosmos wallet type, to support mutliple popular cosmos wallets
-  // Keplr & Cypher -> window.keplr
-  // Leap -> window.leap
+  /**
+   * Cosmos wallet type, to support mutliple popular cosmos wallets
+   * Keplr & Cypher -> window.keplr
+   * Leap -> window.leap
+   */
   cosmosWalletType?: CosmosWalletType;
 
   /**
@@ -1072,6 +1087,7 @@ export interface GetWalletSigProps extends LitCustomAuth {
   sessionCapabilityObject: ISessionCapabilityObject;
   switchChain?: boolean;
   expiration: string;
+  sessionKey: SessionKeyPair;
   sessionKeyUri: string;
   nonce: string;
   resourceAbilityRequests?: LitResourceAbilityRequest[];
