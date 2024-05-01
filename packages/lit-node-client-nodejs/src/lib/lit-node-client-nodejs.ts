@@ -110,13 +110,14 @@ import type {
   CapacityCreditsRes,
   JsonSignSessionKeyRequestV1,
   BlsResponseData,
-  JsonPkpSignSdkParams,
-  JsonExecutionSdkParams,
-  ExecuteJsNoSigningResponse,
   JsonExecutionSdkParamsTargetNode,
   JsonExecutionRequestTargetNode,
+  JsonExecutionSdkParams,
+  ExecuteJsNoSigningResponse,
+  JsonPkpSignSdkParams,
   SigResponse,
 } from '@lit-protocol/types';
+
 import * as blsSdk from '@lit-protocol/bls-sdk';
 import { normalizeJsParams } from './helpers/normalize-params';
 import { encodeCode } from './helpers/encode-code';
@@ -1974,23 +1975,15 @@ export class LitNodeClientNodeJs
       params.expiration ||
       new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    let sessionKeyUri: string;
+    // Try to get it from local storage, if not generates one~
+    const sessionKey: SessionKeyPair =
+      params.sessionKey ?? this.getSessionKey();
+    const sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
 
-    // This allow the user to provide a sessionKeyUri directly without using the session key pair
-    if (params?.sessionKeyUri) {
-      sessionKeyUri = params.sessionKeyUri;
-      log(`[signSessionKey] sessionKeyUri found in params:`, sessionKeyUri);
-    } else {
-      // Try to get it from local storage, if not generates one~
-      let sessionKey: SessionKeyPair =
-        params.sessionKey ?? this.getSessionKey();
-      sessionKeyUri = LIT_SESSION_KEY_URI + sessionKey.publicKey;
-
-      log(
-        `[signSessionKey] sessionKeyUri is not found in params, generating a new one`,
-        sessionKeyUri
-      );
-    }
+    log(
+      `[signSessionKey] sessionKeyUri is not found in params, generating a new one`,
+      sessionKeyUri
+    );
 
     if (!sessionKeyUri) {
       throw new Error(
@@ -2044,7 +2037,6 @@ export class LitNodeClientNodeJs
       sessionKey: sessionKeyUri,
       authMethods: params.authMethods,
       ...(params?.pkpPublicKey && { pkpPublicKey: params.pkpPublicKey }),
-      ...(params?.authSig && { authSig: params.authSig }),
       siweMessage: siweMessage,
       curveType: LIT_CURVE.BLS,
 
@@ -2158,26 +2150,15 @@ export class LitNodeClientNodeJs
         }
 
         // each of this field cannot be empty
-        let requiredFields =
-          curveType === LIT_CURVE.BLS
-            ? [
-                'signatureShare',
-                'curveType',
-                'shareIndex',
-                'siweMessage',
-                'dataSigned',
-                'blsRootPubkey',
-                'result',
-              ]
-            : [
-                'sigType',
-                'dataSigned',
-                'signatureShare',
-                'bigr',
-                'publicKey',
-                'sigName',
-                'siweMessage',
-              ];
+        let requiredFields = [
+          'signatureShare',
+          'curveType',
+          'shareIndex',
+          'siweMessage',
+          'dataSigned',
+          'blsRootPubkey',
+          'result',
+        ];
 
         // check if all required fields are present
         for (const field of requiredFields) {
@@ -2224,57 +2205,41 @@ export class LitNodeClientNodeJs
 
     let signatures: any;
 
-    if (curveType === LIT_CURVE.BLS) {
-      const blsSignedData: BlsResponseData[] =
-        validatedSignedDataList as BlsResponseData[];
+    const blsSignedData: BlsResponseData[] =
+      validatedSignedDataList as BlsResponseData[];
 
-      const sigType = mostCommonString(
-        blsSignedData.map((s: any) => s.sigType)
-      );
-      log(`[signSessionKey] sigType:`, sigType);
+    const sigType = mostCommonString(blsSignedData.map((s: any) => s.sigType));
+    log(`[signSessionKey] sigType:`, sigType);
 
-      const signatureShares = handleBlsResponseData(blsSignedData);
+    const signatureShares = handleBlsResponseData(blsSignedData);
 
-      log(`[signSessionKey] signatureShares:`, signatureShares);
+    log(`[signSessionKey] signatureShares:`, signatureShares);
 
-      const blsCombinedSignature = blsSdk.combine_signature_shares(
-        signatureShares.map((s) => JSON.stringify(s))
-      );
+    const blsCombinedSignature = blsSdk.combine_signature_shares(
+      signatureShares.map((s) => JSON.stringify(s))
+    );
 
-      log(`[signSessionKey] blsCombinedSignature:`, blsCombinedSignature);
+    log(`[signSessionKey] blsCombinedSignature:`, blsCombinedSignature);
 
-      const publicKey = params.pkpPublicKey.startsWith('0x')
-        ? params.pkpPublicKey.slice(2)
-        : params.pkpPublicKey;
+    const publicKey = params.pkpPublicKey.startsWith('0x')
+      ? params.pkpPublicKey.slice(2)
+      : params.pkpPublicKey;
 
-      const dataSigned = mostCommonString(
-        blsSignedData.map((s: any) => s.dataSigned)
-      );
-      const siweMessage = mostCommonString(
-        blsSignedData.map((s: any) => s.siweMessage)
-      );
-      signatures = {
-        sessionSig: {
-          signature: blsCombinedSignature,
-          publicKey,
-          dataSigned,
-          siweMessage,
-        },
-      };
-    } else {
-      // Shape: [signSessionKey] signatures: {
-      //   sessionSig: {
-      //     r: "xx",
-      //     s: "yy",
-      //     recid: 1,
-      //     signature: "0x...",
-      //     publicKey: "04e...",
-      //     dataSigned: "7c1...",
-      //     siweMessage: "litprotocol.com wants you to sign in with your Ethereum account:\n0xd69969c6a2E56C928d63F12325fe1d9D47115C91\n\nLit Protocol PKP session signature Some custom statement. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Signing' for 'lit-pkp://*'.\n\nURI: lit:session:95ff87b5d2210c382ccfcba6bdb16ceb217da9726c91d0fdda5eb888f087488f\nVersion: 1\nChain ID: 1\nNonce: 0x337906a8c2a6da52d438495fc1b0145ed5632ec32ffa1dda1064f43775b3a802\nIssued At: 2024-04-09T17:58:47Z\nExpiration Time: 2024-04-10T17:59:13.420Z\nResources:\n- urn:recap:eyJhdHQiOnt9LCJwcmYiOltdfQ\n- urn:recap:eyJhdHQiOnsibGl0LXBrcDovLyoiOnsiVGhyZXNob2xkL1NpZ25pbmciOlt7fV19fSwicHJmIjpbXX0",
-      //   },
-      // }
-      signatures = this.getSessionSignatures(validatedSignedDataList);
-    }
+    const dataSigned = mostCommonString(
+      blsSignedData.map((s: any) => s.dataSigned)
+    );
+    const mostCommonSiweMessage = mostCommonString(
+      blsSignedData.map((s: any) => s.siweMessage)
+    );
+
+    signatures = {
+      sessionSig: {
+        signature: blsCombinedSignature,
+        publicKey,
+        dataSigned,
+        siweMessage: mostCommonSiweMessage,
+      },
+    };
 
     log('[signSessionKey] signatures:', signatures);
 

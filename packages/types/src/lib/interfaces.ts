@@ -276,7 +276,7 @@ export interface JsonSignSessionKeyRequestV1 {
   pkpPublicKey?: string;
   // authSig?: AuthSig;
   siweMessage: string;
-  curveType: 'BLS' | 'ECDSA';
+  curveType: 'BLS';
   code?: string;
   litActionIpfsId?: string;
   jsParams?: any;
@@ -974,9 +974,6 @@ export interface SignSessionKeyProp {
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 
-  // -- as part of auth unification
-  sessionKeyUri?: string;
-
   litActionCode?: string;
 
   jsParams?: {
@@ -1032,8 +1029,11 @@ export interface GetSessionSigsProps extends LitCustomAuth {
    */
   authNeededCallback?: AuthCallback;
 
-  // The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
-  sessionKey?: any;
+  /**
+   * The serialized session key pair to sign.
+   * If not provided, a session key pair will be fetched from localStorge or generated.
+   */
+  sessionKey?: SessionKeyPair;
 
   /**
    * @deprecated - use capabilityAuthSigs instead
@@ -1508,7 +1508,7 @@ export interface BaseProviderSessionSigsParams {
   /**
    * Lit Node Client to use. If not provided, will use an existing Lit Node Client or create a new one
    */
-  litNodeClient?: any;
+  litNodeClient?: ILitNodeClient;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 }
