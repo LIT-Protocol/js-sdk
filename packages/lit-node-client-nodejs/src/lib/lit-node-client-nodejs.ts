@@ -15,7 +15,6 @@ import {
   createSiweMessageWithCapacityDelegation,
   createSiweMessageWithRecaps,
   createSiweMessage,
-  LitRLIResource,
 } from '@lit-protocol/auth-helpers';
 import {
   AUTH_METHOD_TYPE_IDS,
@@ -28,11 +27,9 @@ import {
   LOCAL_STORAGE_KEYS,
   LitNetwork,
   LIT_CURVE,
-  SIWE_DELEGATION_URI,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
-  checkSevSnpAttestation,
   combineEcdsaShares,
   combineSignatureShares,
   encrypt,
@@ -41,9 +38,9 @@ import {
 } from '@lit-protocol/crypto';
 import { safeParams } from '@lit-protocol/encryption';
 import {
-  convertLitActionsParams,
   defaultMintClaimCallback,
   executeWithRetry,
+  findMostCommonResponse,
   hexPrefixed,
   log,
   logError,
@@ -77,7 +74,6 @@ import type {
   DecryptResponse,
   EncryptRequest,
   EncryptResponse,
-  ExecuteJsProps,
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetSessionSigsProps,
@@ -86,14 +82,12 @@ import type {
   GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
   JsonExecutionRequest,
-  JsonHandshakeResponse,
   JsonPkpSignRequest,
   LitClientSessionManager,
   LitNodeClientConfig,
   NodeBlsSigningShare,
   NodeCommandResponse,
   NodeLog,
-  NodeResponse,
   NodeShare,
   PKPSignShare,
   RejectedNodePromises,
@@ -114,11 +108,27 @@ import type {
   GetPkpSessionSigs,
   CapacityCreditsReq,
   CapacityCreditsRes,
-  JsExecutionRequestBody,
   JsonSignSessionKeyRequestV1,
   BlsResponseData,
+  JsonExecutionSdkParamsTargetNode,
+  JsonExecutionRequestTargetNode,
+  JsonExecutionSdkParams,
+  ExecuteJsNoSigningResponse,
+  JsonPkpSignSdkParams,
+  SigResponse,
 } from '@lit-protocol/types';
+
 import * as blsSdk from '@lit-protocol/bls-sdk';
+import { normalizeJsParams } from './helpers/normalize-params';
+import { encodeCode } from './helpers/encode-code';
+import { getFlattenShare, getSignatures } from './helpers/get-signatures';
+import { removeDoubleQuotes } from './helpers/remove-double-quotes';
+import { parseAsJsonOrString } from './helpers/parse-as-json-or-string';
+import { getClaimsList } from './helpers/get-claims-list';
+import { getClaims } from './helpers/get-claims';
+import { normalizeArray } from './helpers/normalize-array';
+import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
+import { handleBlsResponseData } from './helpers/handle-bls-response';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -135,38 +145,6 @@ export class LitNodeClientNodeJs
     }
   }
 
-  // ========== STATIC METHODS ==========
-  static getClaims = (
-    claims: any[]
-  ): Record<string, { signatures: Signature[]; derivedKeyId: string }> => {
-    const keys: string[] = Object.keys(claims[0]);
-    const signatures: Record<string, Signature[]> = {};
-    const claimRes: Record<
-      string,
-      { signatures: Signature[]; derivedKeyId: string }
-    > = {};
-    for (let i = 0; i < keys.length; i++) {
-      const claimSet: { signature: string; derivedKeyId: string }[] =
-        claims.map((c) => c[keys[i]]);
-      signatures[keys[i]] = [];
-      claimSet.map((c) => {
-        const sig = ethers.utils.splitSignature(`0x${c.signature}`);
-        const convertedSig = {
-          r: sig.r,
-          s: sig.s,
-          v: sig.v,
-        };
-        signatures[keys[i]].push(convertedSig);
-      });
-
-      claimRes[keys[i]] = {
-        signatures: signatures[keys[i]],
-        derivedKeyId: claimSet[0].derivedKeyId,
-      };
-    }
-    return claimRes;
-  };
-
   // ========== Rate Limit NFT ==========
 
   // TODO: Add support for browser feature/lit-2321-js-sdk-add-browser-support-for-createCapacityDelegationAuthSig
@@ -181,7 +159,7 @@ export class LitNodeClientNodeJs
     // Useful log for debugging
     if (!params.delegateeAddresses || params.delegateeAddresses.length === 0) {
       log(
-        `[createCapacityDelegationAuthSig] No delegatee addresses provided. It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits (uses) and specific NFT IDs (nft_id).`
+        `[createCapacityDelegationAuthSig] 'delegateeAddresses' is an empty array. It means that no body can use it. However, if the 'delegateeAddresses' field is omitted, It means that the capability will not restrict access based on delegatee list, but it may still enforce other restrictions such as usage limits (uses) and specific NFT IDs (nft_id).`
       );
     }
 
@@ -203,17 +181,12 @@ export class LitNodeClientNodeJs
       litNodeClient: this,
       walletAddress: dAppOwnerWalletAddress,
       nonce: nonce,
-
-      // -- default configuration for recap object capability
-      expiration:
-        params.expiration ?? new Date(Date.now() + 1000 * 60 * 7).toISOString(),
-      domain: params.domain ?? 'example.com',
-      statement:
-        params.statement ??
-        'This is a test statement.  You can put anything you want here.',
+      expiration: params.expiration,
+      domain: params.domain,
+      statement: params.statement,
 
       // -- capacity delegation specific configuration
-      uses: params.uses ?? '1',
+      uses: params.uses,
       delegateeAddresses: params.delegateeAddresses,
       capacityTokenId: params.capacityTokenId,
     });
@@ -230,43 +203,6 @@ export class LitNodeClientNodeJs
 
   /**
    *
-   * Get the request body of the lit action
-   *
-   * @param { ExecuteJsProps } params
-   *
-   * @returns { JsonExecutionRequest }
-   *
-   */
-  getLitActionRequestBody = (params: ExecuteJsProps): JsonExecutionRequest => {
-    const reqBody: JsonExecutionRequest = {
-      ...(params.authSig && { authSig: params.authSig }),
-      ...(params.sessionSigs && { sessionSigs: params.sessionSigs }),
-      ...(params.authMethods && { authMethods: params.authMethods }),
-      jsParams: convertLitActionsParams(params.jsParams),
-      // singleNode: params.singleNode ?? false,
-      targetNodeRange: params.targetNodeRange ?? 0,
-    };
-
-    if (params.code) {
-      const _uint8Array = uint8arrayFromString(params.code, 'utf8');
-      const encodedJs = uint8arrayToString(_uint8Array, 'base64');
-
-      reqBody.code = encodedJs;
-    }
-
-    if (params.ipfsId) {
-      reqBody.ipfsId = params.ipfsId;
-    }
-
-    if (params.authMethods && params.authMethods.length > 0) {
-      reqBody.authMethods = params.authMethods;
-    }
-
-    return reqBody;
-  };
-
-  /**
-   *
    * we need to send jwt params iat (issued at) and exp (expiration) because the nodes may have different wall clock times, the nodes will verify that these params are withing a grace period
    *
    */
@@ -276,30 +212,6 @@ export class LitNodeClientNodeJs
     const exp = iat + 12 * 60 * 60; // 12 hours in seconds
 
     return { iat, exp };
-  };
-
-  /**
-   *
-   * Parse the response string to JSON
-   *
-   * @param { string } responseString
-   *
-   * @returns { any } JSON object
-   *
-   */
-  parseResponses = (responseString: string): any => {
-    let response: any;
-
-    try {
-      response = JSON.parse(responseString);
-    } catch (e) {
-      log(
-        'Error parsing response as json.  Swallowing and returning as string.',
-        responseString
-      );
-    }
-
-    return response;
   };
 
   // ==================== SESSIONS ====================
@@ -652,74 +564,6 @@ export class LitNodeClientNodeJs
   };
 
   // ==================== API Calls to Nodes ====================
-  /**
-   *
-   * Get JS Execution Shares from Nodes
-   *
-   * @param { JsonExecutionRequest } params
-   *
-   * @returns { Promise<any> }
-   */
-  getJsExecutionShares = async (
-    url: string,
-    params: JsonExecutionRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    const { code, ipfsId, authSig, jsParams, authMethods } = params;
-
-    logWithRequestId(requestId, 'getJsExecutionShares');
-
-    // -- execute
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.EXECUTE_JS,
-    });
-
-    if (!authSig) {
-      throw new Error('authSig or sessionSig is required');
-    }
-    const data: JsExecutionRequestBody = {
-      authSig,
-      ...(code ? { code } : {}),
-      ...(ipfsId ? { ipfsId } : {}),
-      ...(authMethods ? { authMethods } : {}),
-      ...(jsParams ? { jsParams } : {}),
-    };
-
-    const res = await this.sendCommandToNode({
-      url: urlWithPath,
-      data,
-      requestId,
-    });
-    logWithRequestId(
-      requestId,
-      `response node with url: ${url} from endpoint ${urlWithPath}`,
-      res
-    );
-    return res;
-  };
-
-  getPkpSignExecutionShares = async (
-    url: string,
-    params: any,
-    requestId: string
-  ) => {
-    logWithRequestId(requestId, 'getPkpSigningShares');
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.PKP_SIGN,
-    });
-    if (!params.authSig) {
-      throw new Error('authSig is required');
-    }
-
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: params,
-      requestId,
-    });
-  };
-
   getClaimKeyExecutionShares = async (
     url: string,
     params: any,
@@ -921,27 +765,33 @@ export class LitNodeClientNodeJs
   // ========== Promise Handlers ==========
   getIpfsId = async ({
     dataToHash,
-    authSig,
-    debug = false,
+    sessionSigs,
   }: {
     dataToHash: string;
-    authSig: AuthSig;
+    sessionSigs: SessionSigsMap;
     debug?: boolean;
   }) => {
-    const laRes = await this.executeJs({
-      authSig,
+    const res = await this.executeJs({
       ipfsId: LIT_ACTION_IPFS_HASH,
+      sessionSigs,
       authMethods: [],
       jsParams: {
         dataToHash,
       },
-      debug,
     }).catch((e) => {
       logError('Error getting IPFS ID', e);
       throw e;
     });
 
-    const data = JSON.parse(laRes.response).res;
+    let data;
+
+    if (typeof res.response === 'string') {
+      try {
+        data = JSON.parse(res.response).res;
+      } catch (e) {
+        data = res.response;
+      }
+    }
 
     if (!data.success) {
       logError('Error getting IPFS ID', data.data);
@@ -962,23 +812,13 @@ export class LitNodeClientNodeJs
    *
    */
   runOnTargetedNodes = async (
-    params: ExecuteJsProps
+    params: JsonExecutionSdkParamsTargetNode
   ): Promise<
     SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises
   > => {
-    const {
-      code,
-      authMethods,
-      authSig,
-      jsParams,
-      debug,
-      sessionSigs,
-      targetNodeRange,
-    } = params;
+    log('running runOnTargetedNodes:', params.targetNodeRange);
 
-    log('running runOnTargetedNodes:', targetNodeRange);
-
-    if (!targetNodeRange) {
+    if (!params.targetNodeRange) {
       return throwError({
         message: 'targetNodeRange is required',
         errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
@@ -988,9 +828,8 @@ export class LitNodeClientNodeJs
 
     // determine which node to run on
     const ipfsId = await this.getIpfsId({
-      dataToHash: code!,
-      authSig: authSig!,
-      debug,
+      dataToHash: params.code!,
+      sessionSigs: params.sessionSigs,
     });
 
     // select targetNodeRange number of random index of the bootstrapUrls.length
@@ -998,7 +837,7 @@ export class LitNodeClientNodeJs
 
     let nodeCounter = 0;
 
-    while (randomSelectedNodeIndexes.length < targetNodeRange) {
+    while (randomSelectedNodeIndexes.length < params.targetNodeRange) {
       const str = `${nodeCounter}:${ipfsId.toString()}`;
       const cidBuffer = Buffer.from(str);
       const hash = sha256(cidBuffer);
@@ -1041,20 +880,25 @@ export class LitNodeClientNodeJs
 
         log(`running on node ${nodeIndex} at ${url}`);
 
-        const reqBody: JsonExecutionRequest =
-          this.getLitActionRequestBody(params);
-
         // -- choose the right signature
-        const sigToPassToNode = this.getSessionOrAuthSig({
-          authSig,
-          sessionSigs,
+        const sessionSig = this.getSessionSigByUrl({
+          sessionSigs: params.sessionSigs,
           url,
         });
 
-        reqBody.authSig = sigToPassToNode;
+        const reqBody: JsonExecutionRequestTargetNode = {
+          ...params,
+          targetNodeRange: params.targetNodeRange,
+          authSig: sessionSig,
+        };
 
         // this return { url: string, data: JsonRequest }
-        const singleNodePromise = this.getJsExecutionShares(url, reqBody, id);
+        // const singleNodePromise = this.getJsExecutionShares(url, reqBody, id);
+        const singleNodePromise = this.sendCommandToNode({
+          url: url,
+          data: params,
+          requestId: id,
+        });
 
         nodePromises.push(singleNodePromise);
       }
@@ -1062,7 +906,7 @@ export class LitNodeClientNodeJs
       const handledPromise = (await this.handleNodePromises(
         nodePromises,
         id,
-        targetNodeRange
+        params.targetNodeRange
       )) as SuccessNodePromises<NodeCommandResponse> | RejectedNodePromises;
 
       // -- handle response
@@ -1078,71 +922,6 @@ export class LitNodeClientNodeJs
       },
       this.config.retryTolerance
     );
-  };
-
-  // ========== Shares Resolvers ==========
-  _getFlattenShare = (share: any): SigShare => {
-    // flatten the signature object so that the properties of the signature are top level
-    const flattenObj = Object.entries(share).map(([key, item]) => {
-      if (item === null || item === undefined) {
-        return null;
-      }
-
-      const typedItem = item as SigShare;
-
-      const requiredShareProps = [
-        'sigType',
-        'dataSigned',
-        'signatureShare',
-        'shareIndex',
-        'bigR',
-        'publicKey',
-      ];
-
-      const requiredSessionSigsShareProps = [
-        ...requiredShareProps,
-        'siweMessage',
-      ] as const;
-
-      const requiredSignatureShareProps = [
-        ...requiredShareProps,
-        'sigName',
-      ] as const;
-
-      const hasProps = (props: any) => {
-        return [...props].every(
-          (prop) =>
-            typedItem[prop as keyof SigShare] !== undefined &&
-            typedItem[prop as keyof SigShare] !== null
-        );
-      };
-
-      if (
-        hasProps(requiredSessionSigsShareProps) ||
-        hasProps(requiredSignatureShareProps)
-      ) {
-        const bigR = typedItem.bigR ?? typedItem.bigr;
-
-        typedItem.signatureShare = typedItem.signatureShare.replaceAll('"', '');
-        typedItem.bigR = bigR?.replaceAll('"', '');
-        typedItem.publicKey = typedItem.publicKey.replaceAll('"', '');
-        typedItem.dataSigned = typedItem.dataSigned.replaceAll('"', '');
-
-        return typedItem;
-      }
-
-      return null;
-    });
-
-    // removed all null values and should only have one item
-    const flattenShare = flattenObj.filter(
-      (item) => item !== null
-    )[0] as SigShare;
-
-    if (flattenShare === null || flattenShare === undefined) {
-      return share;
-    }
-    return flattenShare;
   };
 
   /**
@@ -1187,7 +966,7 @@ export class LitNodeClientNodeJs
       const sigShares: SigShare[] = shares.map((s: any, index: number) => {
         log('Original Share Struct:', s);
 
-        const share = this._getFlattenShare(s);
+        const share = getFlattenShare(s);
 
         log('share:', share);
 
@@ -1275,169 +1054,6 @@ export class LitNodeClientNodeJs
 
   /**
    *
-   * Get signatures from signed data
-   *
-   * @param { Array<any> } signedData
-   *
-   * @returns { any }
-   *
-   */
-  getSignatures = (signedData: any[], requestId: string = ''): any => {
-    const initialKeys = [...new Set(signedData.flatMap((i) => Object.keys(i)))];
-
-    // processing signature shares for failed or invalid contents.  mutates the signedData object.
-    for (const signatureResponse of signedData) {
-      for (const sigName of Object.keys(signatureResponse)) {
-        const requiredFields = ['signatureShare'];
-
-        for (const field of requiredFields) {
-          if (!signatureResponse[sigName][field]) {
-            logWithRequestId(
-              requestId,
-              `invalid field ${field} in signature share: ${sigName}, continuing with share processing`
-            );
-            // destructive operation on the object to remove invalid shares inline, without a new collection.
-            delete signatureResponse[sigName];
-          } else {
-            let share = this._getFlattenShare(signatureResponse[sigName]);
-
-            share = {
-              sigType: share.sigType,
-              signatureShare: share.signatureShare,
-              shareIndex: share.shareIndex,
-              bigR: share.bigR,
-              publicKey: share.publicKey,
-              dataSigned: share.dataSigned,
-              sigName: share.sigName ? share.sigName : 'sig',
-            };
-            signatureResponse[sigName] = share;
-          }
-        }
-      }
-    }
-
-    const validatedSignedData = signedData;
-
-    // -- prepare
-    const signatures: any = {};
-
-    // get all signature shares names from all node responses.
-    // use a set to filter duplicates and copy into an array
-    const allKeys = [
-      ...new Set(validatedSignedData.flatMap((i) => Object.keys(i))),
-    ];
-
-    if (allKeys.length !== initialKeys.length) {
-      throwError({
-        message: 'total number of valid signatures does not match requested',
-        errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
-        errorCode: LIT_ERROR.NO_VALID_SHARES.code,
-      });
-    }
-
-    // -- combine
-    for (var i = 0; i < allKeys.length; i++) {
-      // here we use a map filter implementation to find common shares in each node response.
-      // we then filter out undefined object from the key access.
-      // currently we are unable to know the total signature count requested by the user.
-      // but this allows for incomplete sets of signature shares to be aggregated
-      // and then checked against threshold
-      const shares = validatedSignedData
-        .map((r: any) => r[allKeys[i]])
-        .filter((r: any) => r !== undefined);
-
-      shares.sort((a: any, b: any) => a.shareIndex - b.shareIndex);
-
-      const sigName = shares[0].sigName;
-      logWithRequestId(
-        requestId,
-        `starting signature combine for sig name: ${sigName}`,
-        shares
-      );
-      logWithRequestId(
-        requestId,
-        `number of shares for ${sigName}:`,
-        signedData.length
-      );
-      logWithRequestId(
-        requestId,
-        `validated length for signature: ${sigName}`,
-        shares.length
-      );
-      logWithRequestId(
-        requestId,
-        'minimum required shares for threshold:',
-        this.config.minNodeCount
-      );
-
-      if (shares.length < this.config.minNodeCount) {
-        logErrorWithRequestId(
-          requestId,
-          `not enough nodes to get the signatures.  Expected ${this.config.minNodeCount}, got ${shares.length}`
-        );
-
-        throwError({
-          message: `The total number of valid signatures shares ${shares.length} does not meet the threshold of ${this.config.minNodeCount}`,
-          errorKind: LIT_ERROR.NO_VALID_SHARES.kind,
-          errorCode: LIT_ERROR.NO_VALID_SHARES.code,
-          requestId,
-        });
-      }
-
-      const sigType = mostCommonString(shares.map((s: any) => s.sigType));
-
-      // -- validate if this.networkPubKeySet is null
-      if (this.networkPubKeySet === null) {
-        throwError({
-          message: 'networkPubKeySet cannot be null',
-          errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
-          errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
-        });
-        return;
-      }
-
-      // -- validate if signature type is ECDSA
-      if (
-        sigType !== LIT_CURVE.EcdsaCaitSith &&
-        sigType !== LIT_CURVE.EcdsaK256 &&
-        sigType !== LIT_CURVE.EcdsaCAITSITHP256
-      ) {
-        throwError({
-          message: `signature type is ${sigType} which is invalid`,
-          errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.kind,
-          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_TYPE.name,
-        });
-        return;
-      }
-
-      const signature = combineEcdsaShares(shares);
-      if (!signature.r) {
-        throwError({
-          message: 'siganture could not be combined',
-          errorKind: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.kind,
-          errorCode: LIT_ERROR.UNKNOWN_SIGNATURE_ERROR.name,
-        });
-      }
-
-      const encodedSig = joinSignature({
-        r: '0x' + signature.r,
-        s: '0x' + signature.s,
-        v: signature.recid,
-      });
-
-      signatures[allKeys[i]] = {
-        ...signature,
-        signature: encodedSig,
-        publicKey: mostCommonString(shares.map((s: any) => s.publicKey)),
-        dataSigned: mostCommonString(shares.map((s: any) => s.dataSigned)),
-      };
-    }
-
-    return signatures;
-  };
-
-  /**
-   *
    * Get a single signature
    *
    * @param { Array<any> } shareData from all node promises
@@ -1463,54 +1079,29 @@ export class LitNodeClientNodeJs
   // ========== Scoped Business Logics ==========
 
   // Normalize the data to a basic array
-  public static normalizeParams(params: ExecuteJsProps): ExecuteJsProps {
-    if (!params.jsParams) {
-      params.jsParams = {};
-      return params;
-    }
 
-    for (const key of Object.keys(params.jsParams)) {
-      if (
-        Array.isArray(params.jsParams[key]) ||
-        ArrayBuffer.isView(params.jsParams[key])
-      ) {
-        const arr = [];
-        for (let i = 0; i < params.jsParams[key].length; i++) {
-          arr.push((params.jsParams[key] as Buffer)[i]);
-        }
-        params.jsParams[key] = arr;
-      }
-    }
-    return params;
-  }
+  // TODO: executeJsWithTargettedNodes
+  // if (formattedParams.targetNodeRange) {
+  //   // FIXME: we should make this a separate function
+  //   res = await this.runOnTargetedNodes(formattedParams);
+  // }
 
   /**
    *
    * Execute JS on the nodes and combine and return any resulting signatures
    *
-   * @param { ExecuteJsRequest } params
+   * @param { JsonExecutionSdkParams } params
    *
    * @returns { ExecuteJsResponse }
    *
    */
-  executeJs = async (params: ExecuteJsProps): Promise<ExecuteJsResponse> => {
-    // ========== Prepare Params ==========
-    const {
-      authMethods,
-      code,
-      ipfsId,
-      authSig,
-      jsParams,
-      debug,
-      sessionSigs,
-      targetNodeRange,
-    } = params;
-
+  executeJs = async (
+    params: JsonExecutionSdkParams
+  ): Promise<ExecuteJsResponse> => {
     // ========== Validate Params ==========
-    // -- validate: If it's NOT ready
     if (!this.ready) {
       const message =
-        '1 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
+        '[executeJs] LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
 
       throwError({
         message,
@@ -1532,61 +1123,64 @@ export class LitNodeClientNodeJs
       });
     }
 
-    // Call the normalizeParams function to normalize the parameters
-    params = LitNodeClientNodeJs.normalizeParams(params);
+    // Format the params
+    const formattedParams: JsonExecutionSdkParams = {
+      ...params,
+      ...(params.jsParams && { jsParams: normalizeJsParams(params.jsParams) }),
+      ...(params.code && { code: encodeCode(params.code) }),
+    };
 
-    let res;
-    let requestId = '';
-    // -- only run on a single node
-    if (targetNodeRange) {
-      res = await this.runOnTargetedNodes(params);
-    } else {
-      // ========== Prepare Variables ==========
-      // -- prepare request body
-      const reqBody: JsonExecutionRequest =
-        this.getLitActionRequestBody(params);
-
-      // ========== Get Node Promises ==========
-
-      // -- fetch shares from nodes
-      const wrapper = async (
-        requestId: string
-      ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-        const nodePromises = this.getNodePromises((url: string) => {
-          // -- choose the right signature
-          const sigToPassToNode = this.getSessionOrAuthSig({
-            authSig,
-            sessionSigs,
-            url,
-          });
-
-          reqBody.authSig = sigToPassToNode;
-
-          const shares = this.getJsExecutionShares(url, reqBody, requestId);
-          return shares;
+    // ========== Get Node Promises ==========
+    // Handle promises for commands sent to Lit nodes
+    const wrapper = async (
+      requestId: string
+    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+      const nodePromises = this.getNodePromises(async (url: string) => {
+        // -- choose the right signature
+        const sessionSig = this.getSessionSigByUrl({
+          sessionSigs: formattedParams.sessionSigs,
+          url,
         });
-        // -- resolve promises
-        res = await this.handleNodePromises(
-          nodePromises,
-          requestId,
-          this.connectedNodes.size
-        );
-        return res;
-      };
-      res = await executeWithRetry<
-        RejectedNodePromises | SuccessNodePromises<any>
-      >(
-        wrapper,
-        (error: any, requestId: string, isFinal: boolean) => {
-          logError('an error occured, attempting to retry operation');
-        },
-        this.config.retryTolerance
+
+        const reqBody: JsonExecutionRequest = {
+          ...formattedParams,
+          authSig: sessionSig,
+        };
+
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.EXECUTE_JS,
+        });
+
+        return this.generatePromise(urlWithPath, reqBody, requestId);
+      });
+
+      // -- resolve promises
+      const res = await this.handleNodePromises(
+        nodePromises,
+        requestId,
+        this.connectedNodes.size
       );
 
-      requestId = res.requestId;
-    }
+      return res;
+    }; // wrapper end
+
+    // ========== Execute with Retry ==========
+    const res = await executeWithRetry<
+      RejectedNodePromises | SuccessNodePromises<any>
+    >(
+      wrapper,
+      (error: any, requestId: string, isFinal: boolean) => {
+        logError('an error occured, attempting to retry operation');
+      },
+      this.config.retryTolerance
+    );
+
+    // ========== Handle Response ==========
+    const requestId = res.requestId;
+
     // -- case: promises rejected
-    if (res.success === false) {
+    if (!res.success) {
       this._throwNodeError(res as RejectedNodePromises, requestId);
     }
 
@@ -1599,47 +1193,36 @@ export class LitNodeClientNodeJs
       JSON.stringify(responseData, null, 2)
     );
 
-    // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
-    // we must also check for claim responses as a user may have submitted for a claim and signatures must be aggregated before returning
-    if (
-      responseData[0].success &&
-      Object.keys(responseData[0].signedData).length <= 0 &&
-      Object.keys(responseData[0].claimData).length <= 0
-    ) {
-      return responseData[0] as any as ExecuteJsResponse;
+    // -- find the responseData that has the most common response
+    const mostCommonResponse = findMostCommonResponse(
+      responseData
+    ) as NodeShare;
+
+    const isSuccess = mostCommonResponse.success;
+    const hasSignedData = Object.keys(mostCommonResponse.signedData).length > 0;
+    const hasClaimData = Object.keys(mostCommonResponse.claimData).length > 0;
+
+    // -- we must also check for claim responses as a user may have submitted for a claim and signatures must be aggregated before returning
+    if (isSuccess && !hasSignedData && !hasClaimData) {
+      return mostCommonResponse as unknown as ExecuteJsResponse;
     }
 
     // -- in the case where we are not signing anything on Lit action and using it as purely serverless function
-    if (
-      Object.keys(responseData[0].signedData).length <= 0 &&
-      Object.keys(responseData[0].claimData).length <= 0
-    ) {
+    if (!hasSignedData && !hasClaimData) {
       return {
         claims: {},
         signatures: null,
         decryptions: [],
-        response: responseData[0].response,
-        logs: responseData[0].logs,
-      };
+        response: mostCommonResponse.response,
+        logs: mostCommonResponse.logs,
+      } as ExecuteJsNoSigningResponse;
     }
 
     // ========== Extract shares from response data ==========
+
     // -- 1. combine signed data as a list, and get the signatures from it
     const signedDataList = responseData.map((r) => {
-      const { signedData } = r;
-      for (const key of Object.keys(signedData)) {
-        for (const subkey of Object.keys(signedData[key])) {
-          //@ts-ignore
-          if (typeof signedData[key][subkey] === 'string') {
-            //@ts-ignore
-            signedData[key][subkey] = signedData[key][subkey].replaceAll(
-              '"',
-              ''
-            );
-          }
-        }
-      }
-      return signedData;
+      return removeDoubleQuotes(r.signedData);
     });
 
     logWithRequestId(
@@ -1647,14 +1230,16 @@ export class LitNodeClientNodeJs
       'signatures shares to combine: ',
       signedDataList
     );
-    const signatures = this.getSignatures(signedDataList, requestId);
 
-    // -- 2. combine responses as a string, and get parse it as JSON
-    let response: string = mostCommonString(
-      responseData.map((r: NodeResponse) => r.response)
-    );
+    const signatures = getSignatures({
+      requestId,
+      networkPubKeySet: this.networkPubKeySet,
+      minNodeCount: this.config.minNodeCount,
+      signedData: signedDataList,
+    });
 
-    response = this.parseResponses(response);
+    // -- 2. combine responses as a string, and parse it as JSON if possible
+    const parsedResponse = parseAsJsonOrString(mostCommonResponse.response);
 
     // -- 3. combine logs
     const mostCommonLogs: string = mostCommonString(
@@ -1662,69 +1247,57 @@ export class LitNodeClientNodeJs
     );
 
     // -- 4. combine claims
-    const claimsList = responseData
-      .map((r) => {
-        const { claimData } = r;
-        if (claimData) {
-          for (const key of Object.keys(claimData)) {
-            for (const subkey of Object.keys(claimData[key])) {
-              if (typeof claimData[key][subkey] == 'string') {
-                claimData[key][subkey] = claimData[key][subkey].replaceAll(
-                  '"',
-                  ''
-                );
-              }
-            }
-          }
-          return claimData;
-        }
-        return null;
-      })
-      .filter((item) => item !== null);
-
-    // logWithRequestId(requestId, 'claimList:', claimsList);
-
-    let claims = undefined;
-
-    if (claimsList.length > 0) {
-      claims = LitNodeClientNodeJs.getClaims(claimsList);
-    }
+    const claimsList = getClaimsList(responseData);
+    const claims = claimsList.length > 0 ? getClaims(claimsList) : undefined;
 
     // ========== Result ==========
     const returnVal: ExecuteJsResponse = {
       claims,
       signatures,
-      decryptions: [], // FIXME: Fix if and when we enable decryptions from within a Lit Action.
-      response,
+      // decryptions: [],
+      response: parsedResponse,
       logs: mostCommonLogs,
     };
 
     log('returnVal:', returnVal);
 
-    // -- case: debug mode
-    if (debug) {
-      const allNodeResponses = responseData.map(
-        (r: NodeResponse) => r.response
-      );
-      const allNodeLogs = responseData.map((r: NodeLog) => r.logs);
-
-      returnVal.debug = {
-        allNodeResponses,
-        allNodeLogs,
-        rawNodeHTTPResponses: responseData,
-      };
-    }
-
     return returnVal;
   };
 
-  pkpSign = async (params: JsonPkpSignRequest) => {
-    let { authSig, sessionSigs, toSign, pubKey, authMethods } = params;
+  /**
+   * Generates a promise by sending a command to the Lit node
+   *
+   * @param url - The URL to send the command to.
+   * @param params - The parameters to include in the command.
+   * @param requestId - The ID of the request.
+   * @returns A promise that resolves with the response from the server.
+   */
+  generatePromise = async (
+    url: string,
+    params: any,
+    requestId: string
+  ): Promise<any> => {
+    return await this.sendCommandToNode({
+      url,
+      data: params,
+      requestId,
+    });
+  };
 
-    pubKey = hexPrefixed(pubKey);
-
+  /**
+   * Use PKP to sign
+   *
+   * @param { JsonPkpSignSdkParams } params
+   * @param params.toSign - The data to sign
+   * @param params.pubKey - The public key to sign with
+   * @param params.sessionSigs - The session signatures to use
+   * @param params.authMethods - (optional) The auth methods to use
+   */
+  pkpSign = async (params: JsonPkpSignSdkParams): Promise<SigResponse> => {
     // -- validate required params
-    (['toSign', 'pubKey'] as (keyof JsonPkpSignRequest)[]).forEach((key) => {
+    const requiredParamKeys = ['toSign', 'pubKey'];
+
+    (requiredParamKeys as (keyof JsonPkpSignSdkParams)[]).forEach((key) => {
       if (!params[key]) {
         throwError({
           message: `"${key}" cannot be undefined, empty, or null. Please provide a valid value.`,
@@ -1735,47 +1308,49 @@ export class LitNodeClientNodeJs
     });
 
     // -- validate present of accepted auth methods
-    if (!authSig && !sessionSigs && (!authMethods || authMethods.length <= 0)) {
+    if (
+      !params.sessionSigs &&
+      (!params.authMethods || params.authMethods.length <= 0)
+    ) {
       throwError({
-        message: `Either authSig, sessionSigs, or authMethods (length > 0) must be present.`,
+        message: `Either sessionSigs or authMethods (length > 0) must be present.`,
         errorKind: LIT_ERROR.PARAM_NULL_ERROR.kind,
         errorCode: LIT_ERROR.PARAM_NULL_ERROR.name,
       });
     }
 
-    // the nodes will only accept a normal array type as a paramater due to serizalization issues with Uint8Array type.
-    // this loop below is to normalize the message to a basic array.
-    const arr = [];
-    for (let i = 0; i < toSign.length; i++) {
-      arr.push((toSign as Buffer)[i]);
-    }
-    toSign = arr;
-
+    // ========== Get Node Promises ==========
+    // Handle promises for commands sent to Lit nodes
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       const nodePromises = this.getNodePromises((url: string) => {
-        // -- choose the right signature
-        const sigToPassToNode = this.getSessionOrAuthSig({
-          authSig,
-          sessionSigs,
+        // -- get the session sig from the url key
+        const sessionSig = this.getSessionSigByUrl({
+          sessionSigs: params.sessionSigs,
           url,
-          mustHave: false,
         });
 
-        logWithRequestId(id, 'sigToPassToNode:', sigToPassToNode);
+        const reqBody: JsonPkpSignRequest = {
+          toSign: normalizeArray(params.toSign),
+          pubkey: hexPrefixed(params.pubKey),
+          authSig: sessionSig,
 
-        const reqBody = {
-          toSign,
-          pubkey: pubKey,
-          ...(sigToPassToNode &&
-            sigToPassToNode !== undefined && { authSig: sigToPassToNode }),
-          ...(authMethods && authMethods.length > 0 && { authMethods }),
+          // -- optional params
+          ...(params.authMethods &&
+            params.authMethods.length > 0 && {
+              authMethods: params.authMethods,
+            }),
         };
 
         logWithRequestId(id, 'reqBody:', reqBody);
 
-        return this.getPkpSignExecutionShares(url, reqBody, id);
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.PKP_SIGN,
+        });
+
+        return this.generatePromise(urlWithPath, reqBody, id);
       });
 
       const res = await this.handleNodePromises(
@@ -1784,7 +1359,9 @@ export class LitNodeClientNodeJs
         this.connectedNodes.size // ECDSA requires responses from all nodes, but only shares from minNodeCount.
       );
       return res;
-    };
+    }; // wrapper end
+
+    // ========== Execute with Retry ==========
     const res = await executeWithRetry<
       RejectedNodePromises | SuccessNodePromises<any>
     >(
@@ -1796,6 +1373,8 @@ export class LitNodeClientNodeJs
       },
       this.config.retryTolerance
     );
+
+    // ========== Handle Response ==========
     const requestId = res.requestId;
 
     // -- case: promises rejected
@@ -1805,6 +1384,7 @@ export class LitNodeClientNodeJs
 
     // -- case: promises success (TODO: check the keys of "values")
     const responseData = (res as SuccessNodePromises<PKPSignShare>).values;
+
     logWithRequestId(
       requestId,
       'responseData',
@@ -1813,46 +1393,15 @@ export class LitNodeClientNodeJs
 
     // ========== Extract shares from response data ==========
     // -- 1. combine signed data as a list, and get the signatures from it
-    const signedDataList = responseData.map((r) => {
-      // add the signed data to the signature share
-      delete r.signatureShare.result;
+    const signedDataList = parsePkpSignResponse(responseData);
 
-      // nodes do not camel case the response from /web/pkp/sign.
-      const snakeToCamel = (s: string) =>
-        s.replace(/(_\w)/g, (k) => k[1].toUpperCase());
-      //@ts-ignore
-      const convertShare: any = (share: any) => {
-        const keys = Object.keys(share);
-        let convertedShare = {};
-        for (const key of keys) {
-          convertedShare = Object.defineProperty(
-            convertedShare,
-            snakeToCamel(key),
-            Object.getOwnPropertyDescriptor(share, key) as PropertyDecorator
-          );
-        }
-
-        return convertedShare;
-      };
-      const convertedShare: SigShare = convertShare(r.signatureShare);
-      const keys = Object.keys(convertedShare);
-      for (const key of keys) {
-        //@ts-ignore
-        if (typeof convertedShare[key] === 'string') {
-          //@ts-ignore
-          convertedShare[key] = convertedShare[key]
-            .replace('"', '')
-            .replace('"', '');
-        }
-      }
-      //@ts-ignore
-      convertedShare.dataSigned = convertedShare.digest;
-      return {
-        signature: convertedShare,
-      };
+    const signatures = getSignatures<{ signature: SigResponse }>({
+      requestId,
+      networkPubKeySet: this.networkPubKeySet,
+      minNodeCount: this.config.minNodeCount,
+      signedData: signedDataList,
     });
 
-    const signatures = this.getSignatures(signedDataList, requestId);
     logWithRequestId(requestId, `signature combination`, signatures);
 
     return signatures.signature; // only a single signature is ever present, so we just return it.
@@ -2090,8 +1639,7 @@ export class LitNodeClientNodeJs
    *
    */
   decrypt = async (params: DecryptRequest): Promise<DecryptResponse> => {
-    const { authSig, sessionSigs, chain, ciphertext, dataToEncryptHash } =
-      params;
+    const { sessionSigs, chain, ciphertext, dataToEncryptHash } = params;
 
     // ========== Validate Params ==========
     // -- validate if it's ready
@@ -2177,7 +1725,7 @@ export class LitNodeClientNodeJs
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       const nodePromises = this.getNodePromises((url: string) => {
         // -- if session key is available, use it
-        const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
+        const authSigToSend = sessionSigs[url];
 
         return this.getSigningShareForDecryption(
           url,
@@ -2571,19 +2119,7 @@ export class LitNodeClientNodeJs
     let signedDataList: any[] = [];
 
     if (curveType === LIT_CURVE.BLS) {
-      let _responseData: BlsResponseData[] = responseData;
-
-      const signatureShares = _responseData.map((s) => ({
-        ProofOfPossession: s.signatureShare.ProofOfPossession,
-      }));
-
-      log(`[signSessionKey] signatureShares:`, signatureShares);
-
-      signedDataList = _responseData.map((s) => {
-        return s.dataSigned;
-      });
-
-      signedDataList = _responseData;
+      signedDataList = handleBlsResponseData(responseData);
     } else {
       signedDataList = responseData.map(
         (r: any) => (r as SignedData).signedData
@@ -2675,9 +2211,7 @@ export class LitNodeClientNodeJs
     const sigType = mostCommonString(blsSignedData.map((s: any) => s.sigType));
     log(`[signSessionKey] sigType:`, sigType);
 
-    const signatureShares = blsSignedData.map((s) => ({
-      ProofOfPossession: s.signatureShare.ProofOfPossession,
-    }));
+    const signatureShares = handleBlsResponseData(blsSignedData);
 
     log(`[signSessionKey] signatureShares:`, signatureShares);
 
@@ -2938,6 +2472,7 @@ export class LitNodeClientNodeJs
   };
 
   /**
+<<<<<<<<< Temporary merge branch 1
    * Retrieves the PKP sessionSigs.
    *
    * @param params - The parameters for retrieving the PKP sessionSigs.

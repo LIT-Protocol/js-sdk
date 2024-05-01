@@ -53,7 +53,7 @@ export class LitAccessControlConditionResource
    * @param {string} dataToEncryptHash - The hash of the data to encrypt.
    * @returns {Promise<string>} The composed resource string in the format 'hashedAccs/dataToEncryptHash'.
    */
-  public static async composeLitActionResourceString(
+  public static async generateResourceString(
     accs: AccessControlConditions,
     dataToEncryptHash: string
   ): Promise<string> {

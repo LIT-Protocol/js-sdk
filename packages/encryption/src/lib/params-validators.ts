@@ -34,9 +34,10 @@ import {
   EncryptToJsonProps,
   EncryptZipRequest,
   EvmContractConditions,
-  ExecuteJsProps,
   GetSignedTokenRequest,
+  JsonExecutionSdkParams,
   SessionSigs,
+  SessionSigsMap,
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
@@ -71,7 +72,7 @@ export const paramsValidators: Record<
   string,
   (params: any) => ParamsValidator[]
 > = {
-  executeJs: (params: ExecuteJsProps) => [
+  executeJs: (params: JsonExecutionSdkParams) => [
     new AuthMaterialValidator('executeJs', params),
     new ExecuteJsValidator('executeJs', params),
     new AuthMethodValidator('executeJs', params.authMethods),
@@ -379,8 +380,7 @@ class FileValidator implements ParamsValidator {
 }
 
 export interface AuthMaterialValidatorProps {
-  authSig?: AuthSig;
-  sessionSigs?: SessionSigs;
+  sessionSigs: SessionSigsMap;
   chain?: string;
 }
 
@@ -400,14 +400,7 @@ class AuthMaterialValidator implements ParamsValidator {
   }
 
   validate(): IEither<void> {
-    const { authSig, sessionSigs } = this.authMaterial;
-
-    if (authSig && !is(authSig, 'Object', 'authSig', this.fnName))
-      return ELeft({
-        message: 'authSig is not an object',
-        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
-      });
+    const { sessionSigs } = this.authMaterial;
 
     if (this.checkIfAuthSigRequiresChainParam) {
       if (!this.authMaterial.chain)
@@ -415,20 +408,6 @@ class AuthMaterialValidator implements ParamsValidator {
           message: 'You must pass chain param',
           errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
           errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
-
-      if (
-        authSig &&
-        !checkIfAuthSigRequiresChainParam(
-          authSig,
-          this.authMaterial.chain,
-          this.fnName
-        )
-      )
-        return ELeft({
-          message: 'authSig is not valid',
-          errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
-          errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
         });
     }
 
@@ -439,17 +418,9 @@ class AuthMaterialValidator implements ParamsValidator {
         errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
 
-    if (!sessionSigs && !authSig)
+    if (!sessionSigs)
       return ELeft({
-        message: 'You must pass either authSig or sessionSigs',
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-
-    // -- validate: if sessionSig and authSig exists
-    if (sessionSigs && authSig)
-      return ELeft({
-        message: 'You cannot have both authSig and sessionSigs',
+        message: 'You must pass in sessionSigs',
         errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });

@@ -214,88 +214,44 @@ export interface ClaimKeyResponse {
 /**
  * Struct in rust
  * -----
- pub struct JsonExecutionRequest {
-    pub code: Option<String>,
-    pub ipfs_id: Option<String>,
-    pub auth_sig: AuthSigItem,
-    pub js_params: Option<serde_json::Value>,
+pub struct JsonExecutionRequest {
+  pub auth_sig: AuthSigItem,
+  #[serde(default = "default_epoch")]
+  pub epoch: u64,
+  
+  pub ipfs_id: Option<String>,
+  pub code: Option<String>,
+    pub js_params: Option<Value>,
+    pub auth_methods: Option<Vec<AuthMethod>>,
 }
  */
-export interface BaseJsonExecutionRequest {
-  // // the authSig to use to authorize the user with the nodes
-  // authSig?: AuthSig;
 
-  // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
-  jsParams?: any;
+export interface BaseJsonPkpSignRequest {
+  authMethods?: AuthMethod[];
+  toSign: ArrayLike<number>;
+}
 
-  // JS code to run on the nodes
-  code?: string;
-
-  // The IPFS ID of some JS code to run on the nodes
-  ipfsId?: string;
-
-  // // the session signatures to use to authorize the user with the nodes
-  // sessionSigs?: any;
-
-  // whether to run this on a single node or many
-  targetNodeRange?: number;
-
-  // auth methods to resolve
+/**
+ * The 'pkpSign' function param. Please note that the structure
+ * is different than the payload sent to the node.
+ */
+export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
+  pubKey: string;
+  sessionSigs: SessionSigsMap;
   authMethods?: AuthMethod[];
 }
 
 /**
- * FIXME: We should create a separate interface for JsExecutionRequestBody
- * a body that the SDK accepts, and another one the node actually accepts.
- *
+ * The actual payload structure sent to the node /pkp/sign endpoint.
  */
-export interface WithAuthSig extends BaseJsonExecutionRequest {
+export interface JsonPkpSignRequest extends BaseJsonPkpSignRequest {
   authSig: AuthSig;
-  sessionSigs?: any;
-}
 
-export interface WithSessionSigs extends BaseJsonExecutionRequest {
-  sessionSigs: any;
-  authSig?: AuthSig;
+  /**
+   * note that 'key' is in lower case, because this is what the node expects
+   */
+  pubkey: string;
 }
-
-export type JsonExecutionRequest = WithAuthSig | WithSessionSigs;
-
-export interface JsExecutionRequestBody {
-  authSig: AuthSig;
-  code?: string;
-  ipfsId?: string;
-  authMethods?: AuthMethod[];
-  jsParams?: any;
-}
-
-export interface BaseJsonPkpSignRequest {
-  toSign: ArrayLike<number>;
-  pubKey: string;
-}
-
-export interface WithAuthMethodSigning extends BaseJsonPkpSignRequest {
-  // auth methods to resolve
-  authMethods: AuthMethod[];
-  sessionSigs?: any;
-  authSig?: AuthSig;
-}
-export interface WithSessionSigsSigning extends BaseJsonPkpSignRequest {
-  sessionSigs: any;
-  authSig?: AuthSig;
-  authMethods?: AuthMethod[];
-}
-
-export interface WithAuthSigSigning extends BaseJsonPkpSignRequest {
-  authSig: AuthSig;
-  sessionSigs?: any;
-  authMethods?: AuthMethod[];
-}
-
-export type JsonPkpSignRequest =
-  | WithSessionSigsSigning
-  | WithAuthSigSigning
-  | WithAuthMethodSigning;
 
 /**
  * Struct in rust
@@ -318,6 +274,7 @@ export interface JsonSignSessionKeyRequestV1 {
   sessionKey: string;
   authMethods: AuthMethod[];
   pkpPublicKey?: string;
+  // authSig?: AuthSig;
   siweMessage: string;
   curveType: 'BLS';
   code?: string;
@@ -326,8 +283,43 @@ export interface JsonSignSessionKeyRequestV1 {
   epoch?: number;
 }
 
+// [
+//   {
+//     "result": "success",
+//     "signatureShare": {
+//       "ProofOfPossession": "01b191b1d281857a95d2fd189683db366ab1088723338c1805daa4650459e9fcaebaa57b58108c284d233404dd5f2e58f208aafb87d981098aba3fe850980184a4b29643a21107b03f1d928646245b57af3745a81418989e0b6aad9bd1f192723c"
+//     },
+//     "shareIndex": 0,
+//     "curveType": "BLS",
+//     "siweMessage": "litprotocol.com wants you to sign in with your Ethereum account:\n0x7f2e96c99F9551915DA9e9F828F512330f130acB\n\nLit Protocol PKP session signature I further authorize the stated URI to perform the following actions on my behalf: I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. (3) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.\n\nURI: lit:session:73e09d1ad1faa329bef12ebaf9b982d2925746e3677cabd4b6b7196096a6ee02\nVersion: 1\nChain ID: 1\nNonce: 0xa5f18dbc0fa2080649042ab8cb6cef3b246c20c15b62482ba43fb4ca2a4642cb\nIssued At: 2024-04-25T02:09:35Z\nExpiration Time: 2024-04-26T02:09:50.822Z\nResources:\n- urn:recap:eyJhdHQiOnsibGl0LWxpdGFjdGlvbjovLyoiOnsiVGhyZXNob2xkL0V4ZWN1dGlvbiI6W3t9XX0sImxpdC1wa3A6Ly8qIjp7IlRocmVzaG9sZC9TaWduaW5nIjpbe31dfSwibGl0LXJlc29sdmVkYXV0aGNvbnRleHQ6Ly8qIjp7IkF1dGgvQXV0aCI6W3siYXV0aF9jb250ZXh0Ijp7ImFjdGlvbklwZnNJZHMiOlsiUW1ZM3F1bjlxWDNmVUJIVmZyQTlmM3Y5UnB5eVBvOFJIRXVFTjFYWVBxMVByQSJdLCJhdXRoTWV0aG9kQ29udGV4dHMiOlt7ImFwcElkIjoibGl0IiwiYXV0aE1ldGhvZFR5cGUiOjEsImV4cGlyYXRpb24iOjE3MTQwOTczODYsInVzZWRGb3JTaWduU2Vzc2lvbktleVJlcXVlc3QiOnRydWUsInVzZXJJZCI6IjB4NzA5OTc5NzBDNTE4MTJkYzNBMDEwQzdkMDFiNTBlMGQxN2RjNzlDOCJ9XSwiYXV0aFNpZ0FkZHJlc3MiOm51bGwsInJlc291cmNlcyI6W119fV19fSwicHJmIjpbXX0",
+//     "dataSigned": "b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5",
+//     "blsRootPubkey": "a6f7c284ac766db1b43f8c65d8ff15c7271a05b0863b5205d96459fd32aa353e9390ce0626560fb76720c1a5c8ca6902"
+//   },
+//   {
+//     "result": "success",
+//     "signatureShare": {
+//       "ProofOfPossession": "038178034edcd5b48da4e2af6eb0891ece41389aa6119c80546d3fa00b5d2ba87eaec327b18d8013714b486246807498c8198e70cf8e917b1a5f1d8d0846787172521d41994de95bd641bdc1d9ccee9b459ceeb03f156cf357a4ff8faf5d2e167d"
+//     },
+//     "shareIndex": 2,
+//     "curveType": "BLS",
+//     "siweMessage": "litprotocol.com wants you to sign in with your Ethereum account:\n0x7f2e96c99F9551915DA9e9F828F512330f130acB\n\nLit Protocol PKP session signature I further authorize the stated URI to perform the following actions on my behalf: I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. (3) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.\n\nURI: lit:session:73e09d1ad1faa329bef12ebaf9b982d2925746e3677cabd4b6b7196096a6ee02\nVersion: 1\nChain ID: 1\nNonce: 0xa5f18dbc0fa2080649042ab8cb6cef3b246c20c15b62482ba43fb4ca2a4642cb\nIssued At: 2024-04-25T02:09:35Z\nExpiration Time: 2024-04-26T02:09:50.822Z\nResources:\n- urn:recap:eyJhdHQiOnsibGl0LWxpdGFjdGlvbjovLyoiOnsiVGhyZXNob2xkL0V4ZWN1dGlvbiI6W3t9XX0sImxpdC1wa3A6Ly8qIjp7IlRocmVzaG9sZC9TaWduaW5nIjpbe31dfSwibGl0LXJlc29sdmVkYXV0aGNvbnRleHQ6Ly8qIjp7IkF1dGgvQXV0aCI6W3siYXV0aF9jb250ZXh0Ijp7ImFjdGlvbklwZnNJZHMiOlsiUW1ZM3F1bjlxWDNmVUJIVmZyQTlmM3Y5UnB5eVBvOFJIRXVFTjFYWVBxMVByQSJdLCJhdXRoTWV0aG9kQ29udGV4dHMiOlt7ImFwcElkIjoibGl0IiwiYXV0aE1ldGhvZFR5cGUiOjEsImV4cGlyYXRpb24iOjE3MTQwOTczODYsInVzZWRGb3JTaWduU2Vzc2lvbktleVJlcXVlc3QiOnRydWUsInVzZXJJZCI6IjB4NzA5OTc5NzBDNTE4MTJkYzNBMDEwQzdkMDFiNTBlMGQxN2RjNzlDOCJ9XSwiYXV0aFNpZ0FkZHJlc3MiOm51bGwsInJlc291cmNlcyI6W119fV19fSwicHJmIjpbXX0",
+//     "dataSigned": "b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5",
+//     "blsRootPubkey": "a6f7c284ac766db1b43f8c65d8ff15c7271a05b0863b5205d96459fd32aa353e9390ce0626560fb76720c1a5c8ca6902"
+//   },
+//   {
+//     "result": "success",
+//     "signatureShare": {
+//       "ProofOfPossession": "0292a026325a166398b85b53f3a7a34d147c5337e189d75c33c0f227f7926c839b408dfcc5d242a8685a81c68e0ccedc080c051219161dbc37f06627259b19d15120ab2f710075a44b1dcef18d511bb99b6625c8f575d2688c6b5b01ba6bf448c9"
+//     },
+//     "shareIndex": 1,
+//     "curveType": "BLS",
+//     "siweMessage": "litprotocol.com wants you to sign in with your Ethereum account:\n0x7f2e96c99F9551915DA9e9F828F512330f130acB\n\nLit Protocol PKP session signature I further authorize the stated URI to perform the following actions on my behalf: I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. I further authorize the stated URI to perform the following actions on my behalf: (1) 'Threshold': 'Execution' for 'lit-litaction://*'. (2) 'Threshold': 'Signing' for 'lit-pkp://*'. (3) 'Auth': 'Auth' for 'lit-resolvedauthcontext://*'.\n\nURI: lit:session:73e09d1ad1faa329bef12ebaf9b982d2925746e3677cabd4b6b7196096a6ee02\nVersion: 1\nChain ID: 1\nNonce: 0xa5f18dbc0fa2080649042ab8cb6cef3b246c20c15b62482ba43fb4ca2a4642cb\nIssued At: 2024-04-25T02:09:35Z\nExpiration Time: 2024-04-26T02:09:50.822Z\nResources:\n- urn:recap:eyJhdHQiOnsibGl0LWxpdGFjdGlvbjovLyoiOnsiVGhyZXNob2xkL0V4ZWN1dGlvbiI6W3t9XX0sImxpdC1wa3A6Ly8qIjp7IlRocmVzaG9sZC9TaWduaW5nIjpbe31dfSwibGl0LXJlc29sdmVkYXV0aGNvbnRleHQ6Ly8qIjp7IkF1dGgvQXV0aCI6W3siYXV0aF9jb250ZXh0Ijp7ImFjdGlvbklwZnNJZHMiOlsiUW1ZM3F1bjlxWDNmVUJIVmZyQTlmM3Y5UnB5eVBvOFJIRXVFTjFYWVBxMVByQSJdLCJhdXRoTWV0aG9kQ29udGV4dHMiOlt7ImFwcElkIjoibGl0IiwiYXV0aE1ldGhvZFR5cGUiOjEsImV4cGlyYXRpb24iOjE3MTQwOTczODYsInVzZWRGb3JTaWduU2Vzc2lvbktleVJlcXVlc3QiOnRydWUsInVzZXJJZCI6IjB4NzA5OTc5NzBDNTE4MTJkYzNBMDEwQzdkMDFiNTBlMGQxN2RjNzlDOCJ9XSwiYXV0aFNpZ0FkZHJlc3MiOm51bGwsInJlc291cmNlcyI6W119fV19fSwicHJmIjpbXX0",
+//     "dataSigned": "b2efe867176b9212fd6acd39a33004a17e03d5a931250c700e31af95e2e7e4d5",
+//     "blsRootPubkey": "a6f7c284ac766db1b43f8c65d8ff15c7271a05b0863b5205d96459fd32aa353e9390ce0626560fb76720c1a5c8ca6902"
+//   }
+// ]
 export interface BlsResponseData {
-  result: boolean;
+  result: boolean | 'success';
   signatureShare: {
     ProofOfPossession: string;
   };
@@ -381,7 +373,7 @@ export interface JsonAccsRequest extends MultipleAccessControlConditions {
   // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
   authSig?: AuthSig;
 
-  sessionSigs?: SessionSig;
+  sessionSigs?: SessionSigsMap;
 }
 
 /**
@@ -407,7 +399,7 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
 
 export interface GetSignedTokenRequest
   extends SigningAccessControlConditionRequest {
-  sessionSigs?: SessionSigsMap;
+  sessionSigs: SessionSigsMap;
 }
 
 export interface SigningAccessControlConditionRequest
@@ -416,7 +408,7 @@ export interface SigningAccessControlConditionRequest
   chain?: string;
 
   // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
-  authSig?: SessionSig;
+  authSig?: AuthSig;
 
   iat?: number;
   exp?: number;
@@ -461,20 +453,55 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
   toDecrypt: string;
 }
 
-export type ExecuteJsProps = JsonExecutionRequest & {
-  // A boolean that defines if debug info will be returned or not.
-  debug?: boolean;
-};
+export interface JsonExecutionSdkParamsTargetNode
+  extends JsonExecutionSdkParams {
+  targetNodeRange: number;
+}
+
+export interface JsonExecutionSdkParams {
+  // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
+  jsParams?: any;
+
+  // JS code to run on the nodes
+  code?: string;
+
+  // The IPFS ID of some JS code to run on the nodes
+  ipfsId?: string;
+
+  // the session signatures to use to authorize the user with the nodes
+  sessionSigs: any;
+
+  // whether to run this on a single node or many
+  // targetNodeRange?: number;
+
+  // auth methods to resolve
+  authMethods?: AuthMethod[];
+}
+
+export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
+  targetNodeRange: number;
+}
+
+export interface JsonExecutionRequest {
+  authSig: AuthSig;
+
+  /**
+   * auto-filled before sending each command to the node, but
+   * in the rust struct, this type is required.
+   */
+  // epoch: number;
+  ipfsId?: string;
+  code?: string;
+  jsParams?: any;
+  authMethods?: AuthMethod[];
+}
 
 export interface EncryptRequestBase extends MultipleAccessControlConditions {
   // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
   chain: Chain;
 
-  // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: AuthSig;
-
   // the session signatures to use to authorize the user with the nodes
-  sessionSigs?: SessionSigsMap;
+  sessionSigs: SessionSigsMap;
 }
 
 export interface EncryptRequest extends EncryptRequestBase {
@@ -528,27 +555,34 @@ export interface SignConditionECDSA {
   exp: number;
 }
 
+export interface SigResponse {
+  r: string;
+  s: string;
+  recid: number;
+  signature: string; // 0x...
+  publicKey: string; // pkp public key (no 0x prefix)
+  dataSigned: string;
+}
+
+export interface ExecuteJsResponseBase {
+  signatures:
+    | {
+        sig: SigResponse;
+      }
+    | any;
+}
+
 /**
  *
  * An object containing the resulting signatures.  Each signature comes with the public key and the data signed.
  *
  */
-export interface ExecuteJsResponse {
+export interface ExecuteJsResponse extends ExecuteJsResponseBase {
   success?: boolean;
-  signatures:
-    | {
-        sig: {
-          r: string;
-          s: string;
-          recid: number;
-          signature: string; // 0x...
-          publicKey: string; // pkp public key
-          dataSigned: string;
-        };
-      }
-    | any;
-  decryptions: any[];
-  response: string;
+
+  // FIXME: Fix if and when we enable decryptions from within a Lit Action.
+  // decryptions: any[];
+  response: string | object;
   logs: string;
   claims?: Record<string, { signatures: Signature[]; derivedKeyId: string }>;
   debug?: {
@@ -558,6 +592,13 @@ export interface ExecuteJsResponse {
   };
 }
 
+export interface ExecuteJsNoSigningResponse extends ExecuteJsResponseBase {
+  claims: {};
+  decryptions: [];
+  response: any;
+  logs: string;
+}
+
 export interface LitNodePromise {}
 
 export interface SendNodeCommand {
@@ -565,16 +606,41 @@ export interface SendNodeCommand {
   data: any;
   requestId: string;
 }
+export interface SigShare {
+  sigType:
+    | 'BLS'
+    | 'K256'
+    | 'ECDSA_CAIT_SITH' // Legacy alias of K256
+    | 'EcdsaCaitSithP256';
 
+  signatureShare: string;
+  shareIndex?: number;
+  bigr?: string; // backward compatibility
+  bigR?: string;
+  publicKey: string;
+  dataSigned?: string;
+  siweMessage?: string;
+  sigName?: string;
+}
+
+export interface PkpSignedData {
+  digest: string;
+  shareIndex: number;
+  signatureShare: string;
+  bigR: string;
+  publicKey: string;
+  sigType: string;
+  dataSigned: string;
+}
 export interface NodeShare {
   claimData: any;
   shareIndex: any;
   unsignedJwt: any;
-  signedData: any;
+  signedData: SigShare;
   decryptedData: any;
   response: any;
   logs: any;
-  success?: any;
+  success?: boolean | '';
 }
 
 export interface PKPSignShare {
@@ -658,18 +724,6 @@ export interface NodeClientErrorV1 {
   details?: string[];
   status?: number;
   requestId?: string;
-}
-
-export interface SigShare {
-  sigType: any;
-  signatureShare: any;
-  shareIndex: any;
-  bigr?: string;
-  bigR?: string;
-  publicKey: any;
-  dataSigned: any;
-  siweMessage?: string;
-  sigName?: string;
 }
 
 export interface SignedData {
@@ -798,11 +852,8 @@ export interface EncryptToJsonPayload extends EncryptRequestBase {
 }
 
 export interface DecryptFromJsonProps {
-  // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: AuthSig;
-
   // the session signatures to use to authorize the user with the nodes
-  sessionSigs?: SessionSigsMap;
+  sessionSigs: SessionSigsMap;
 
   // An instance of LitNodeClient that is already connected
   litNodeClient: ILitNodeClient;
@@ -812,11 +863,8 @@ export interface DecryptFromJsonProps {
 
 export interface EncryptFileAndZipWithMetadataProps
   extends MultipleAccessControlConditions {
-  // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: AuthSig;
-
   // the session signatures to use to authorize the user with the nodes
-  sessionSigs?: SessionSigsMap;
+  sessionSigs: SessionSigsMap;
 
   // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
   chain: string;
@@ -832,11 +880,8 @@ export interface EncryptFileAndZipWithMetadataProps
 }
 
 export interface DecryptZipFileWithMetadataProps {
-  // The authSig of the user.  Returned via the checkAndSignAuthMessage function
-  authSig?: AuthSig;
-
   // the session signatures to use to authorize the user with the nodes
-  sessionSigs?: SessionSigsMap;
+  sessionSigs: SessionSigsMap;
 
   // The zip file blob with metadata inside it and the encrypted asset
   file: File | Blob;
@@ -1009,17 +1054,9 @@ export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
  * A map of node addresses to the session signature payload
  * for that node specifically.
  */
-export type SessionSigsMap = Record<string, SessionSig>;
+export type SessionSigsMap = Record<string, AuthSig>;
 
-export interface SessionSig {
-  sig: string;
-  derivedVia: string;
-  signedMessage: string;
-  address: string;
-  algo?: string;
-}
-
-export type SessionSigs = Record<string, SessionSig>;
+export type SessionSigs = Record<string, AuthSig>;
 
 export interface SessionRequestBody {
   sessionKey: string;
@@ -1691,3 +1728,12 @@ export type SessionKeyCache = {
   value: SessionKeyPair;
   timestamp: number;
 };
+
+export interface SignatureData {
+  signature: string;
+  derivedKeyId: string;
+}
+
+export type ClaimsList = {
+  [key: string]: SignatureData;
+}[];

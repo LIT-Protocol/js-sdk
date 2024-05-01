@@ -53,7 +53,7 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
   }
 
   const accsResourceString =
-    await LitAccessControlConditionResource.composeLitActionResourceString(
+    await LitAccessControlConditionResource.generateResourceString(
       accs,
       encryptRes.dataToEncryptHash
     );
