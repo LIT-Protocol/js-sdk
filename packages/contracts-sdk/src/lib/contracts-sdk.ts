@@ -570,8 +570,7 @@ export class LitContracts {
   };
 
   /**
-   * Here are the Lit contracts for different networks, you can use whatever blockchain clients you want to interact with them.
-   * eg. ethers.js, web3.js, viem, etc. We don't care.
+   * Here are the Lit contracts for different networks; you can use whichever blockchain clients you want to interact with them, e.g., ethers.js, web3.js, viem, etc. We don't care.
    *
    * @returns {Promise<{
    *  manzano: LitContractContext,
