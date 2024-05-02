@@ -52,6 +52,7 @@ import {
   convertRequestsPerDayToPerSecond,
   requestsToKilosecond,
 } from './utils';
+import { LitNetwork } from '@lit-protocol/constants';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -566,6 +567,34 @@ export class LitContracts {
     // ----- autogen:init:end  -----
 
     this.connected = true;
+  };
+
+  /**
+   * Here are the Lit contracts for different networks, you can use whatever blockchain clients you want to interact with them.
+   * eg. ethers.js, web3.js, viem, etc. We don't care.
+   *
+   * @returns {Promise<{
+   *  manzano: LitContractContext,
+   *  habanero: LitContractContext,
+   *  cayenne: LitContractContext
+   * }>} Returns an object with the contracts for each network.
+   */
+  public static getContracts = async (): Promise<{
+    manzano: LitContractContext;
+    habanero: LitContractContext;
+    cayenne: LitContractContext;
+  }> => {
+    const [manzano, habanero, cayenne] = await Promise.all([
+      await LitContracts._resolveContractContext(LitNetwork.Manzano),
+      await LitContracts._resolveContractContext(LitNetwork.Habanero),
+      await LitContracts._resolveContractContext(LitNetwork.Cayenne),
+    ]);
+
+    return {
+      manzano,
+      habanero,
+      cayenne,
+    };
   };
 
   public static async getStakingContract(
