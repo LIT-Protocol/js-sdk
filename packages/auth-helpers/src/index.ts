@@ -3,3 +3,4 @@ export * from './lib/session-capability-object';
 export * from './lib/resources';
 export * from './lib/siwe';
 export * from './lib/recap/recap-session-capability-object';
+export * from './lib/recap/resource-builder'
