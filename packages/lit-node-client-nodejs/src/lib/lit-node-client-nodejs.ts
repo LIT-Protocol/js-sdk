@@ -100,7 +100,6 @@ import type {
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
-  SignedData,
   SigningAccessControlConditionRequest,
   SuccessNodePromises,
   ValidateAndSignECDSA,
@@ -301,15 +300,7 @@ export class LitNodeClientNodeJs
   // backward compatibility
   async generateSessionCapabilityObjectWithWildcards(
     litResources: ILitResource[]
-    // rateLimitAuthSig?: AuthSig
   ): Promise<ISessionCapabilityObject> {
-    // if (rateLimitAuthSig) {
-    //   return await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
-    //     litResources,
-    //     rateLimitAuthSig
-    //   );
-    // }
-
     return await LitNodeClientNodeJs.generateSessionCapabilityObjectWithWildcards(
       litResources
     );
@@ -2295,6 +2286,24 @@ export class LitNodeClientNodeJs
    * be sure to call disconnectWeb3 to clear auth signatures stored in local storage
    *
    * @param { GetSessionSigsProps } params
+   * 
+   * @example
+   * 
+   * ```ts
+   * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
+import { LitAbility } from "@lit-protocol/types";
+
+const resourceAbilityRequests = [
+    {
+      resource: new LitPKPResource("*"),
+      ability: LitAbility.PKPSigning,
+    },
+    {
+      resource: new LitActionResource("*"),
+      ability: LitAbility.LitActionExecution,
+    },
+  ];
+   * ```
    */
   getSessionSigs = async (
     params: GetSessionSigsProps

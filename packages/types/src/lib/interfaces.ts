@@ -474,22 +474,29 @@ export interface JsonExecutionSdkParamsTargetNode
 }
 
 export interface JsonExecutionSdkParams {
-  // An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
+  /**
+   * An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
+   */
   jsParams?: any;
 
-  // JS code to run on the nodes
+  /**
+   *  JS code to run on the nodes
+   */
   code?: string;
 
-  // The IPFS ID of some JS code to run on the nodes
+  /**
+   * The IPFS ID of some JS code to run on the nodes
+   */
   ipfsId?: string;
 
-  // the session signatures to use to authorize the user with the nodes
+  /**
+   * the session signatures to use to authorize the user with the nodes
+   */
   sessionSigs: any;
 
-  // whether to run this on a single node or many
-  // targetNodeRange?: number;
-
-  // auth methods to resolve
+  /**
+   * auth methods to resolve
+   */
   authMethods?: AuthMethod[];
 }
 
@@ -959,38 +966,57 @@ export interface AuthMethod {
 //     pub siwe_message: String,
 // }
 export interface SignSessionKeyProp {
-  // The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
+  /**
+   * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
+   */
   sessionKey?: SessionKeyPair;
 
-  // The statement text to place at the end of the SIWE statement field.
+  /**
+   * The statement text to place at the end of the SIWE statement field.
+   */
   statement?: string;
 
-  // The auth methods to use to sign the session key
+  /**
+   * The auth methods to use to sign the session key
+   */
   authMethods: AuthMethod[];
 
-  // The public key of the PKP
+  /**
+   * The public key of the PKP
+   */
   pkpPublicKey?: string;
 
-  // The auth sig of the user.  Returned via the checkAndSignAuthMessage function
+  /**
+   * The auth sig of the user.  Returned via the checkAndSignAuthMessage function
+   */
   authSig?: AuthSig;
 
-  // The siwe message
-  // siweMessage: string;
-
-  //   When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
+  /**
+   * When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now. */
   expiration?: string;
 
   resources: any;
 
   chainId?: number;
 
-  //domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
+  /**
+   * domain param is required, when calling from environment that doesn't have the 'location' object. i.e. NodeJs server.
+   */
   domain?: string;
 
+  /**
+   * A LIT resource ability is a combination of a LIT resource and a LIT ability.
+   */
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 
+  /**
+   * The js code to run on the nodes
+   */
   litActionCode?: string;
 
+  /**
+   * The params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
+   */
   jsParams?: {
     [key: string]: any;
     publicKey: string;
