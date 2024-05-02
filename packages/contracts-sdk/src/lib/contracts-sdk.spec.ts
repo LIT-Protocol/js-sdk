@@ -79,4 +79,17 @@ describe('contractsSdk', () => {
     expect(litContracts.rateLimitNftContract.write.address).toBeDefined();
     expect(litContracts.stakingContract.read.address).toBeDefined();
   });
+
+  it('should get all contracts', async () => {
+    // polyfill
+    const crossFetch = require('cross-fetch');
+    globalThis.fetch = crossFetch.fetch;
+
+    // test
+    const contracts = await LitContracts.getContracts();
+    expect(Object.entries(contracts).length).toBe(3);
+    expect(contracts.cayenne).toBeDefined();
+    expect(contracts.manzano).toBeDefined();
+    expect(contracts.habanero).toBeDefined();
+  });
 });
