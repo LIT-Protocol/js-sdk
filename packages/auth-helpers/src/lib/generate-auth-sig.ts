@@ -35,6 +35,9 @@ export const generateAuthSig = async ({
     address = await signer.getAddress();
   }
 
+  // checksum the address
+  address = ethers.utils.getAddress(address);
+
   // If address is still not available, throw an error
   if (!address) {
     throw new Error('address is required');
