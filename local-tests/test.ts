@@ -42,6 +42,7 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse } 
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog';
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip';
+import { testStuff } from './tests/test-stuff';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -114,6 +115,7 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from
 
   const testConfig = {
     tests: {
+      testStuff,
       // testExample,
       // testBundleSpeed,
       ...eoaSessionSigsTests,

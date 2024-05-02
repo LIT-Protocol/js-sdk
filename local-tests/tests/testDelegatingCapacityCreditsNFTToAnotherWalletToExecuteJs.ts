@@ -2,6 +2,9 @@ import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
 import { getEoaSessionSigsWithCapacityDelegations } from 'local-tests/setup/session-sigs/get-eoa-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
+import { AccessControlConditions } from 'local-tests/setup/accs/accs';
+import * as LitJsSdk from '@lit-protocol/lit-node-client-nodejs';
+import { ILitNodeClient } from '@lit-protocol/types';
 
 /**
  * ## Scenario:
@@ -38,8 +41,6 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
     const bobsSingleSessionSig =
       bobsSessionSigs[devEnv.litNodeClient.config.bootstrapUrls[0]];
 
-    console.log('bobsSingleSessionSig:', bobsSingleSessionSig);
-
     const regex = /urn:recap:[\w+\/=]+/g;
 
     const recaps = bobsSingleSessionSig.signedMessage.match(regex) || [];
@@ -49,23 +50,48 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
       const decodedRecap = Buffer.from(encodedRecap, 'base64').toString();
       console.log(decodedRecap);
     });
-
-    // 5. Bob can now execute JS code using the capacity credits NFT
-    const res = await devEnv.litNodeClient.executeJs({
-      sessionSigs: bobsSessionSigs,
-      code: `(async () => {
-        const sigShare = await LitActions.signEcdsa({
-          toSign: dataToSign,
-          publicKey,
-          sigName: "sig",
-        });
-      })();`,
-      jsParams: {
-        dataToSign: alice.loveLetter,
-        publicKey: bob.pkp.publicKey,
-      },
+    
+    const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
+      userAddress: bob.wallet.address,
     });
-
+    const encryptRes = await LitJsSdk.encryptString(
+      {
+        accessControlConditions: accs,
+        chain: 'ethereum',
+        sessionSigs: bobsSessionSigs,
+        dataToEncrypt: 'Hello world',
+      },
+      devEnv.litNodeClient as unknown as ILitNodeClient
+    );
+    console.log("encryption res: ", encryptRes);
+    // 5. Bob can now execute JS code using the capacity credits NFT
+    try{
+      const res = await devEnv.litNodeClient.executeJs({
+        sessionSigs: bobsSessionSigs,
+        code: `(async () => {
+          console.log(ciphertext, hash);
+          const sig = "hello";
+          Lit.Actions.setResponse({
+            response: JSON.stringify({
+              sig: sig,
+              cipher: ciphertext,
+              hash: hash,
+              auth: Lit.Auth
+            }),
+          });
+        })();`,
+        jsParams: {
+          acc: accs,
+          ciphertext: encryptRes.ciphertext,
+          hash: encryptRes.dataToEncryptHash,
+          dataToSign: alice.loveLetter,
+          publicKey: bob.pkp.publicKey,
+        },
+      });
+      console.log("execution res: ", res);
+    }catch(e) {
+      console.error(e);
+    }
     // Expected output:
     // {
     //   claims: {},

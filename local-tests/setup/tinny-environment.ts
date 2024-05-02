@@ -358,6 +358,7 @@ export class TinnyEnvironment {
 
     this.superCapacityDelegationAuthSig = (
       await this.litNodeClient.createCapacityDelegationAuthSig({
+        uses: "100",
         dAppOwnerWallet: wallet,
         capacityTokenId: capacityTokenId,
       })

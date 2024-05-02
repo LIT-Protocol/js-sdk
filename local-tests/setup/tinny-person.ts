@@ -173,6 +173,7 @@ export class TinnyPerson {
 
     return (
       await this.envConfig.litNodeClient.createCapacityDelegationAuthSig({
+        uses: "100",
         dAppOwnerWallet: this.wallet,
         capacityTokenId: capacityTokenId,
         ...(addresses.length && { delegateeAddresses: addresses }),
