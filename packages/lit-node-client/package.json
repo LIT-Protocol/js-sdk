@@ -21,6 +21,9 @@
   "tags": [
     "universal"
   ],
+  "peerDependencies": {
+    "tslib": "^2.3.0"
+  },
   "browser": {
     "crypto": false,
     "stream": false
