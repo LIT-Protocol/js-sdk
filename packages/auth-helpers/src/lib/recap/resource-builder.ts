@@ -8,6 +8,21 @@ import {
 
 /**
  * Lit resrouce ability request builder for creating resource ability requests.
+ * 
+ * @example
+ * import { ResourceAbilityRequestBuilder } from '@lit-protocol/auth-helpers';
+
+const builder = new ResourceAbilityRequestBuilder();
+
+builder
+  .addPKPSigningRequest('*') // PKP Signing
+  .addLitActionExecutionRequest('*') // Lit Action Execution
+  .addAccessControlConditionSigningRequest('*') // ACC Signing
+  .addAccessControlConditionDecryptionRequest('*') // ACC Decryption
+  .addRateLimitIncreaseAuthRequest('*'); // RLI Authentication
+
+const requests = builder.build();
+
  */
 export class ResourceAbilityRequestBuilder {
   private requests: Array<{ resource: ILitResource; ability: LitAbility }> = [];
