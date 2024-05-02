@@ -6,7 +6,8 @@ import { ethers } from 'ethers';
  *
  * For more context:
  * We are only using authSig to generate session sigs. In a newer version, we will stop accepting
- * authSig all together from the node and will only accept session sigs.
+ * authSig all together from the node and will only accept session sigs. The address being 
+ * used here will be checksummed.
  *
  * @param signer the signer must have a "signMessage" method
  * @param toSign - the message to sign
