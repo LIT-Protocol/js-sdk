@@ -30,7 +30,7 @@ export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign =
       sessionSigs: litActionSessionSigs,
     });
 
-    console.log("✅ res:", res);
+    console.log('✅ res:', res);
 
     // -- Expected output:
     // {

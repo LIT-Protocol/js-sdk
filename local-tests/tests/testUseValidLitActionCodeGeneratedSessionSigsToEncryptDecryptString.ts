@@ -16,7 +16,6 @@ import { log } from '@lit-protocol/misc';
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
     devEnv.setUnavailable(LIT_TESTNET.MANZANO);
 
     const alice = await devEnv.createRandomPerson();

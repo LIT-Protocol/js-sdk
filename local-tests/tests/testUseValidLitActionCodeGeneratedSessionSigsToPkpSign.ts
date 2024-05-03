@@ -16,7 +16,6 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 export const testUseValidLitActionCodeGeneratedSessionSigsToPkpSign = async (
   devEnv: TinnyEnvironment
 ) => {
-  devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
   devEnv.setUnavailable(LIT_TESTNET.MANZANO);
 
   const alice = await devEnv.createRandomPerson();
