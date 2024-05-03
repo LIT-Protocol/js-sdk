@@ -23,12 +23,14 @@ import {
   StakingStates,
   version,
   LIT_ENDPOINT,
+  CAYENNE_URL,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
   executeWithRetry,
+  getIpAddress,
   isBrowser,
   isNode,
   log,
@@ -259,13 +261,34 @@ export class LitCore {
         this.config.litNetwork
       );
 
+      const minNodeCount = (
+        await LitContracts.getMinNodeCount(this.config.litNetwork)
+      ).toNumber();
+
+      const bootstrapUrls = await LitContracts.getValidators(
+        this.config.litNetwork
+      );
+
+      /**
+       * FIXME: We need this reformatting because the Cayenne network is not able to handle the node address as a URL.
+       * from: https://cayenne.litgateway.com
+       * to: http://207.244.70.36:7474
+       */
+      const remappedBootstrapUrls = await Promise.all(
+        bootstrapUrls.map(async (url) => {
+          const rootDomain = CAYENNE_URL.replace('https://', '');
+          const ipAddress = await getIpAddress(rootDomain);
+          return `http://${ipAddress}:${new URL(url).port}`;
+        })
+      );
+
       // If the network is cayenne it is a centralized testnet, so we use a static config
       // This is due to staking contracts holding local ip / port contexts which are innacurate to the ip / port exposed to the world
-      this.config.bootstrapUrls = LIT_NETWORKS.cayenne;
+      this.config.bootstrapUrls = remappedBootstrapUrls;
       this.config.minNodeCount =
-        LIT_NETWORKS.cayenne.length == 2
+        remappedBootstrapUrls.length == 2
           ? 2
-          : (LIT_NETWORKS.cayenne.length * 2) / 3;
+          : (remappedBootstrapUrls.length * 2) / 3;
 
       /**
        * Here we are checking if a custom network defined with no node urls (bootstrap urls) defined

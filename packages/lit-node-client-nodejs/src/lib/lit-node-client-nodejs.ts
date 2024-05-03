@@ -2418,10 +2418,25 @@ const resourceAbilityRequests = [
     const signatures: SessionSigsMap = {};
 
     this.connectedNodes.forEach((nodeAddress: string) => {
-      const toSign: SessionSigningTemplate = {
-        ...signingTemplate,
-        nodeAddress,
-      };
+      let toSign: SessionSigningTemplate;
+
+      // FIXME: We need this reformatting because the Cayenne network is not able to handle the node address as a URL.
+      // We are converting back
+      // from: http://207.244.70.36:7474
+      // to: 127.0.0.1:7474
+      if (this.config.litNetwork === LitNetwork.Cayenne) {
+        const url = new URL(nodeAddress);
+        const newNodeAddress = `127.0.0.1:${url.port}`;
+        toSign = {
+          ...signingTemplate,
+          nodeAddress: newNodeAddress,
+        };
+      } else {
+        toSign = {
+          ...signingTemplate,
+          nodeAddress,
+        };
+      }
 
       const signedMessage = JSON.stringify(toSign);
 
