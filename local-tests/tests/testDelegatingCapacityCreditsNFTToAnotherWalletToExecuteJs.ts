@@ -54,6 +54,7 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
     const accs = AccessControlConditions.getEmvBasicAccessControlConditions({
       userAddress: bob.wallet.address,
     });
+
     const encryptRes = await LitJsSdk.encryptString(
       {
         accessControlConditions: accs,
@@ -65,33 +66,35 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
     );
     console.log("encryption res: ", encryptRes);
     // 5. Bob can now execute JS code using the capacity credits NFT
-    try{
-      const res = await devEnv.litNodeClient.executeJs({
-        sessionSigs: bobsSessionSigs,
-        code: `(async () => {
-          console.log(ciphertext, hash);
-          const sig = "hello";
-          Lit.Actions.setResponse({
-            response: JSON.stringify({
-              sig: sig,
-              cipher: ciphertext,
-              hash: hash,
-              auth: Lit.Auth
-            }),
-          });
-        })();`,
-        jsParams: {
-          acc: accs,
-          ciphertext: encryptRes.ciphertext,
-          hash: encryptRes.dataToEncryptHash,
-          dataToSign: alice.loveLetter,
-          publicKey: bob.pkp.publicKey,
-        },
-      });
-      console.log("execution res: ", res);
-    }catch(e) {
-      console.error(e);
-    }
+    const res = await devEnv.litNodeClient.executeJs({
+      sessionSigs: bobsSessionSigs,
+      code: `(async () => {
+        const toSign = await Lit.Actions.decryptAndCombine({
+          accessControlConditions: acc,
+          ciphertext,
+          hash,
+          authSig: session,
+          chain: "ethereum",
+        });
+        Lit.Actions.setResponse({
+          response: JSON.stringify({
+            sig: sig,
+            cipher: ciphertext,
+            hash: hash,
+            auth: Lit.Auth
+          }),
+        });
+      })();`,
+      jsParams: {
+        session: bobsSessionSigs,
+        acc: accs,
+        ciphertext: encryptRes.ciphertext,
+        hash: encryptRes.dataToEncryptHash,
+        dataToSign: alice.loveLetter,
+        publicKey: bob.pkp.publicKey,
+      },
+    });
+    console.log("execution res: ", res);
     // Expected output:
     // {
     //   claims: {},
