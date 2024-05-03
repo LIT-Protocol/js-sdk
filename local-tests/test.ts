@@ -51,20 +51,6 @@ import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/te
   const devEnv = new TinnyEnvironment();
   await devEnv.init();
 
-  if (LIT_TESTNET.LOCALCHAIN) {
-    // set global executeJs endpoint version for all tests.
-    devEnv.setGlobalExecuteJsVersion(
-      LIT_TESTNET.LOCALCHAIN,
-      LIT_ENDPOINT_VERSION.V1
-    );
-
-    // set global pkpSign endpoint version for all tests.
-    devEnv.setGlobalPkpSignVersion(
-      LIT_TESTNET.LOCALCHAIN,
-      LIT_ENDPOINT_VERSION.V1
-    );
-  }
-
   const eoaSessionSigsTests = {
     testUseEoaSessionSigsToExecuteJsSigning,
     testUseEoaSessionSigsToPkpSign,

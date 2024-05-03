@@ -27,9 +27,9 @@ const INVALID_SESSION_SIG_LIT_ACTION_CODE = `
 export const VALID_IPFS_ID = 'QmRf5K7PVi5TWXiJdw7YYtcgpgRY6ufXGr9yYnxBLvLjDp';
 
 /**
- * https://cloudflare-ipfs.com/ipfs/QmR6WDLHvPf6yQwLcCzqJJGXEuXoJGTjdEaF5unXuPSxK9
+ * https://cloudflare-ipfs.com/ipfs/QmeUByesskboEkLLcE9Hd3bWFZT5Xt53RSauMNTJSVhfqm
  */
-export const INVALID_IPFS_ID = 'QmR6WDLHvPf6yQwLcCzqJJGXEuXoJGTjdEaF5unXuPSxK9';
+export const INVALID_IPFS_ID = 'QmeUByesskboEkLLcE9Hd3bWFZT5Xt53RSauMNTJSVhfqm';
 
 export const getLitActionSessionSigs = async (
   devEnv: TinnyEnvironment,

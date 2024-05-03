@@ -19,10 +19,7 @@ export const testUseInvalidLitActionIpfsCodeToGenerateSessionSigs = async (
   } catch (e: any) {
     console.log('❌ THIS IS EXPECTED: ', e);
 
-    if (
-      e.message ===
-      'There was an error getting the signing shares from the nodes.'
-    ) {
+    if (e.message === 'An error related to validation has occured.') {
       console.log(
         '✅ testUseInvalidLitActionIpfsCodeToGenerateSessionSigs is expected to have an error'
       );
