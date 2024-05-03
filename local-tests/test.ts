@@ -44,6 +44,7 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } fr
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip';
 import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
+import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionIpfsCodeToGenerateSessionSigs';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -91,8 +92,6 @@ import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './te
   };
 
   const litActionSessionSigsTests = {
-    testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign,
-    testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning,
     testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,
     testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,
     testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel,
@@ -103,6 +102,16 @@ import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './te
     testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString,
     testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile,
     testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip,
+
+    // -- invalid cases
+    testUseInvalidLitActionIpfsCodeToGenerateSessionSigs,
+  };
+
+  const litActionIpfsIdSessionSigsTests = {
+    testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign,
+    testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning,
+
+    // -- invalid cases
     testUseInvalidLitActionCodeToGenerateSessionSigs,
   };
 
@@ -123,6 +132,7 @@ import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './te
       ...eoaSessionSigsTests,
       ...pkpSessionSigsTests,
       ...litActionSessionSigsTests,
+      ...litActionIpfsIdSessionSigsTests,
       ...capacityDelegationTests,
     },
     devEnv,

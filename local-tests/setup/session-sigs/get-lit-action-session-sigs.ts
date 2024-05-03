@@ -21,7 +21,15 @@ const INVALID_SESSION_SIG_LIT_ACTION_CODE = `
 })();
 `;
 
-export const VALID_IPFS_ID = 'QmNZQXmY2VijUPfNrkC6zWykBnEniDouAeUpFi9r6aaqNz';
+/**
+ * https://cloudflare-ipfs.com/ipfs/QmRf5K7PVi5TWXiJdw7YYtcgpgRY6ufXGr9yYnxBLvLjDp
+ */
+export const VALID_IPFS_ID = 'QmRf5K7PVi5TWXiJdw7YYtcgpgRY6ufXGr9yYnxBLvLjDp';
+
+/**
+ * https://cloudflare-ipfs.com/ipfs/QmR6WDLHvPf6yQwLcCzqJJGXEuXoJGTjdEaF5unXuPSxK9
+ */
+export const INVALID_IPFS_ID = 'QmR6WDLHvPf6yQwLcCzqJJGXEuXoJGTjdEaF5unXuPSxK9';
 
 export const getLitActionSessionSigs = async (
   devEnv: TinnyEnvironment,
@@ -125,6 +133,29 @@ export const getInvalidLitActionSessionSigs = async (
     litActionCode: Buffer.from(INVALID_SESSION_SIG_LIT_ACTION_CODE).toString(
       'base64'
     ),
+    jsParams: {
+      publicKey: alice.authMethodOwnedPkp.publicKey,
+      sigName: 'unified-auth-sig',
+    },
+  });
+
+  return litActionSessionSigs;
+};
+
+export const getInvalidLitActionIpfsSessionSigs = async (
+  devEnv: TinnyEnvironment,
+  alice: TinnyPerson
+) => {
+  const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
+    pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
+    authMethods: [alice.authMethod],
+    resourceAbilityRequests: [
+      {
+        resource: new LitPKPResource('*'),
+        ability: LitAbility.PKPSigning,
+      },
+    ],
+    litActionIpfsId: INVALID_IPFS_ID,
     jsParams: {
       publicKey: alice.authMethodOwnedPkp.publicKey,
       sigName: 'unified-auth-sig',

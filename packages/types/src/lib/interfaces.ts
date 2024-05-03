@@ -93,7 +93,7 @@ export interface AuthCallbackParams {
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 
   litActionCode?: string;
-  ipfsId?: string;
+  litActionIpfsId?: string;
   jsParams?: any;
 }
 
@@ -1754,7 +1754,7 @@ export interface CapacityCreditsRes {
 
 export interface LitCustomAuth {
   litActionCode?: string;
-  ipfsId?: string;
+  litActionIpfsId?: string;
   jsParams?: {
     publicKey?: string;
     sigName?: string;
@@ -1782,8 +1782,6 @@ export interface SignerLike {
 export interface GetPkpSessionSigs extends GetSessionSigsProps {
   pkpPublicKey: string;
   authMethods: AuthMethod[];
-  litActionIpfsId?: string;
-  litActionCode?: string;
   jsParams?: {
     publicKey?: string;
     sigName?: string;

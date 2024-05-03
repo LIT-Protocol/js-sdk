@@ -335,7 +335,7 @@ export class LitNodeClientNodeJs
     nonce,
     resourceAbilityRequests,
     litActionCode,
-    ipfsId,
+    litActionIpfsId,
     jsParams,
     sessionKey,
   }: GetWalletSigProps): Promise<AuthSig> => {
@@ -383,7 +383,7 @@ export class LitNodeClientNodeJs
 
           // for lit action custom auth
           ...(litActionCode && { litActionCode }),
-          ...(ipfsId && { ipfsId }),
+          ...(litActionIpfsId && { litActionIpfsId }),
           ...(jsParams && { jsParams }),
         };
 
@@ -2350,7 +2350,9 @@ const resourceAbilityRequests = [
 
       // -- optional fields
       ...(params.litActionCode && { litActionCode: params.litActionCode }),
-      ...(params.ipfsId && { ipfsId: params.ipfsId }),
+      ...(params.litActionIpfsId && {
+        litActionIpfsId: params.litActionIpfsId,
+      }),
       ...(params.jsParams && { jsParams: params.jsParams }),
     });
 
@@ -2498,9 +2500,9 @@ const resourceAbilityRequests = [
         }
 
         // lit action code and ipfs id cannot exist at the same time
-        if (props.litActionCode && props.ipfsId) {
+        if (props.litActionCode && props.litActionIpfsId) {
           throw new Error(
-            '[getPkpSessionSigs/callback]litActionCode and ipfsId cannot exist at the same time'
+            '[getPkpSessionSigs/callback]litActionCode and litActionIpfsId cannot exist at the same time'
           );
         }
 
@@ -2518,7 +2520,9 @@ const resourceAbilityRequests = [
 
           // -- optional fields
           ...(props.litActionCode && { litActionCode: props.litActionCode }),
-          ...(props.ipfsId && { ipfsId: props.ipfsId }),
+          ...(props.litActionIpfsId && {
+            litActionIpfsId: props.litActionIpfsId,
+          }),
           ...(props.jsParams && { jsParams: props.jsParams }),
         });
 

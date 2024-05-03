@@ -12,16 +12,25 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign =
   async (devEnv: TinnyEnvironment) => {
     const alice = await devEnv.createRandomPerson();
-    const litActionSessionSigs = await getLitActionSessionSigsUsingIpfsId(
-      devEnv,
-      alice
-    );
+    let litActionSessionSigs;
+
+    try {
+      litActionSessionSigs = await getLitActionSessionSigsUsingIpfsId(
+        devEnv,
+        alice
+      );
+    } catch (e: any) {
+      console.log('❌ This error is NOT expected:', e);
+      throw new Error(e);
+    }
 
     const res = await devEnv.litNodeClient.pkpSign({
       toSign: alice.loveLetter,
       pubKey: alice.authMethodOwnedPkp.publicKey,
       sessionSigs: litActionSessionSigs,
     });
+
+    console.log("✅ res:", res);
 
     // -- Expected output:
     // {

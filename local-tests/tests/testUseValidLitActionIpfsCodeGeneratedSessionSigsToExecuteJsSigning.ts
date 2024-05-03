@@ -42,6 +42,7 @@ export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
         publicKey: alice.authMethodOwnedPkp.publicKey,
       },
     });
+    console.log('✅ res:', res);
 
     // -- Expected output:
     // {
