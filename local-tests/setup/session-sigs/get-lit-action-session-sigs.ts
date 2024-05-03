@@ -21,6 +21,8 @@ const INVALID_SESSION_SIG_LIT_ACTION_CODE = `
 })();
 `;
 
+export const VALID_IPFS_ID = 'QmNZQXmY2VijUPfNrkC6zWykBnEniDouAeUpFi9r6aaqNz';
+
 export const getLitActionSessionSigs = async (
   devEnv: TinnyEnvironment,
   alice: TinnyPerson,
@@ -51,6 +53,48 @@ export const getLitActionSessionSigs = async (
     litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString(
       'base64'
     ),
+    jsParams: {
+      publicKey: alice.authMethodOwnedPkp.publicKey,
+      sigName: 'unified-auth-sig',
+    },
+
+    // -- only add this for manzano network
+    ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
+      ? { capacityDelegationAuthSig: devEnv.superCapacityDelegationAuthSig }
+      : {}),
+  });
+
+  return litActionSessionSigs;
+};
+
+export const getLitActionSessionSigsUsingIpfsId = async (
+  devEnv: TinnyEnvironment,
+  alice: TinnyPerson,
+  resourceAbilityRequests?: LitResourceAbilityRequest[]
+) => {
+  if (devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano) {
+    console.warn(
+      'Manzano network detected. Adding capacityDelegationAuthSig to litActionSessionSigs'
+    );
+  }
+
+  // Use default resourceAbilityRequests if not provided
+  const _resourceAbilityRequests = resourceAbilityRequests || [
+    {
+      resource: new LitPKPResource('*'),
+      ability: LitAbility.PKPSigning,
+    },
+    {
+      resource: new LitActionResource('*'),
+      ability: LitAbility.LitActionExecution,
+    },
+  ];
+
+  const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
+    pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
+    authMethods: [alice.authMethod],
+    resourceAbilityRequests: _resourceAbilityRequests,
+    litActionIpfsId: VALID_IPFS_ID,
     jsParams: {
       publicKey: alice.authMethodOwnedPkp.publicKey,
       sigName: 'unified-auth-sig',

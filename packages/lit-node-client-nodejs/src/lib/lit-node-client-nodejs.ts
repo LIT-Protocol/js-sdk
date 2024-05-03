@@ -2035,6 +2035,9 @@ export class LitNodeClientNodeJs
       curveType: LIT_CURVE.BLS,
 
       // -- custom auths
+      ...(params?.litActionIpfsId && {
+        litActionIpfsId: params.litActionIpfsId,
+      }),
       ...(params?.litActionCode && { code: params.litActionCode }),
       ...(params?.jsParams && { jsParams: params.jsParams }),
       ...(this.currentEpochNumber && { epoch: this.currentEpochNumber }),

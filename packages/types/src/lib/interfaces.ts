@@ -292,10 +292,12 @@ export interface JsonSignSessionKeyRequestV1 {
   // authSig?: AuthSig;
   siweMessage: string;
   curveType: 'BLS';
+  epoch?: number;
+
+  // custom auth params
   code?: string;
   litActionIpfsId?: string;
   jsParams?: any;
-  epoch?: number;
 }
 
 // [
@@ -1009,6 +1011,10 @@ export interface SignSessionKeyProp {
    */
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 
+  /**
+   * The js code on ipfs
+   */
+  litActionIpfsId?: string;
   /**
    * The js code to run on the nodes
    */
@@ -1776,6 +1782,7 @@ export interface SignerLike {
 export interface GetPkpSessionSigs extends GetSessionSigsProps {
   pkpPublicKey: string;
   authMethods: AuthMethod[];
+  litActionIpfsId?: string;
   litActionCode?: string;
   jsParams?: {
     publicKey?: string;

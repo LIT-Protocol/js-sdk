@@ -1,33 +1,32 @@
 import { LitActionResource, LitPKPResource } from '@lit-protocol/auth-helpers';
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
 import { log } from '@lit-protocol/misc';
 import { LitAbility } from '@lit-protocol/types';
-import { LIT_TESTNET } from 'local-tests/setup/tinny-config';
-import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
+import { getLitActionSessionSigsUsingIpfsId } from 'local-tests/setup/session-sigs/get-lit-action-session-sigs';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
  * ❌ NOT AVAILABLE IN HABANERO
- * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning
+ * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning
  */
-export const testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning =
+export const testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning =
   async (devEnv: TinnyEnvironment) => {
-    // devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
-    // devEnv.setUnavailable(LIT_TESTNET.MANZANO);
-
     const alice = await devEnv.createRandomPerson();
-    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice, [
-      {
-        resource: new LitPKPResource('*'),
-        ability: LitAbility.PKPSigning,
-      },
-      {
-        resource: new LitActionResource('*'),
-        ability: LitAbility.LitActionExecution,
-      },
-    ]);
+    const litActionSessionSigs = await getLitActionSessionSigsUsingIpfsId(
+      devEnv,
+      alice,
+      [
+        {
+          resource: new LitPKPResource('*'),
+          ability: LitAbility.PKPSigning,
+        },
+        {
+          resource: new LitActionResource('*'),
+          ability: LitAbility.LitActionExecution,
+        },
+      ]
+    );
 
     const res = await devEnv.litNodeClient.executeJs({
       sessionSigs: litActionSessionSigs,

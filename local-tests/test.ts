@@ -10,6 +10,7 @@ import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessi
 import { testUsePkpSessionSigsToPkpSign } from './tests/testUsePkpSessionSigsToPkpSign';
 import { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToPkpSign';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning';
+import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
 import { testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs';
 import { testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign';
@@ -42,6 +43,7 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse } 
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog';
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip';
+import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -89,6 +91,8 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from
   };
 
   const litActionSessionSigsTests = {
+    testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign,
+    testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning,
     testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,
     testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,
     testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigningInParallel,
