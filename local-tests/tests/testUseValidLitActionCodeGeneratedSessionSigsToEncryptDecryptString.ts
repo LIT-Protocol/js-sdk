@@ -9,7 +9,7 @@ import { log } from '@lit-protocol/misc';
 
 /**
  * Test Commands:
- * ❌ NOT AVAILABLE IN CAYENNE
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  * ❌ NOT AVAILABLE IN MANZANO
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  *

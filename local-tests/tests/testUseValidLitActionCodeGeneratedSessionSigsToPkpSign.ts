@@ -8,7 +8,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ❌ NOT AVAILABLE IN CAYENNE
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
  * ❌ NOT AVAILABLE IN HABANERO
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToPkpSign
  *

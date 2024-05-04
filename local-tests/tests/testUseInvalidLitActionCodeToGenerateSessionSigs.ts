@@ -4,7 +4,7 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ❌ NOT AVAILABLE IN CAYENNE
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseInvalidLitActionCodeToGenerateSessionSigs
  * ❌ NOT AVAILABLE IN MANZANO
  * ✅ NETWORK=localchain yarn test:local --filter=testUseInvalidLitActionCodeToGenerateSessionSigs
  */
