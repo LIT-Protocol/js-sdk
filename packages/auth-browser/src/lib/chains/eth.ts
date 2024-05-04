@@ -42,10 +42,6 @@ import {
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 
-if (global && typeof global.Buffer === 'undefined') {
-  global.Buffer = BufferPolyfill;
-}
-
 if (globalThis && typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = BufferPolyfill;
 }
