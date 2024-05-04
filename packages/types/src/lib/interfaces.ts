@@ -93,7 +93,7 @@ export interface AuthCallbackParams {
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 
   litActionCode?: string;
-  ipfsId?: string;
+  litActionIpfsId?: string;
   jsParams?: any;
 }
 
@@ -292,10 +292,12 @@ export interface JsonSignSessionKeyRequestV1 {
   // authSig?: AuthSig;
   siweMessage: string;
   curveType: 'BLS';
+  epoch?: number;
+
+  // custom auth params
   code?: string;
   litActionIpfsId?: string;
   jsParams?: any;
-  epoch?: number;
 }
 
 // [
@@ -1009,6 +1011,10 @@ export interface SignSessionKeyProp {
    */
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 
+  /**
+   * The js code on ipfs
+   */
+  litActionIpfsId?: string;
   /**
    * The js code to run on the nodes
    */
@@ -1748,7 +1754,7 @@ export interface CapacityCreditsRes {
 
 export interface LitCustomAuth {
   litActionCode?: string;
-  ipfsId?: string;
+  litActionIpfsId?: string;
   jsParams?: {
     publicKey?: string;
     sigName?: string;
@@ -1776,7 +1782,6 @@ export interface SignerLike {
 export interface GetPkpSessionSigs extends GetSessionSigsProps {
   pkpPublicKey: string;
   authMethods: AuthMethod[];
-  litActionCode?: string;
   jsParams?: {
     publicKey?: string;
     sigName?: string;

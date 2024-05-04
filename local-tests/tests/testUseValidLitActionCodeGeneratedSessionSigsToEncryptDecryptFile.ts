@@ -16,7 +16,6 @@ import { getLitActionSessionSigs } from 'local-tests/setup/session-sigs/get-lit-
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
     devEnv.setUnavailable(LIT_TESTNET.MANZANO);
     const alice = await devEnv.createRandomPerson();
 

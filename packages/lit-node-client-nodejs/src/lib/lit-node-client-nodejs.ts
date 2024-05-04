@@ -335,7 +335,7 @@ export class LitNodeClientNodeJs
     nonce,
     resourceAbilityRequests,
     litActionCode,
-    ipfsId,
+    litActionIpfsId,
     jsParams,
     sessionKey,
   }: GetWalletSigProps): Promise<AuthSig> => {
@@ -383,7 +383,7 @@ export class LitNodeClientNodeJs
 
           // for lit action custom auth
           ...(litActionCode && { litActionCode }),
-          ...(ipfsId && { ipfsId }),
+          ...(litActionIpfsId && { litActionIpfsId }),
           ...(jsParams && { jsParams }),
         };
 
@@ -2035,6 +2035,9 @@ export class LitNodeClientNodeJs
       curveType: LIT_CURVE.BLS,
 
       // -- custom auths
+      ...(params?.litActionIpfsId && {
+        litActionIpfsId: params.litActionIpfsId,
+      }),
       ...(params?.litActionCode && { code: params.litActionCode }),
       ...(params?.jsParams && { jsParams: params.jsParams }),
       ...(this.currentEpochNumber && { epoch: this.currentEpochNumber }),
@@ -2347,7 +2350,9 @@ const resourceAbilityRequests = [
 
       // -- optional fields
       ...(params.litActionCode && { litActionCode: params.litActionCode }),
-      ...(params.ipfsId && { ipfsId: params.ipfsId }),
+      ...(params.litActionIpfsId && {
+        litActionIpfsId: params.litActionIpfsId,
+      }),
       ...(params.jsParams && { jsParams: params.jsParams }),
     });
 
@@ -2418,10 +2423,25 @@ const resourceAbilityRequests = [
     const signatures: SessionSigsMap = {};
 
     this.connectedNodes.forEach((nodeAddress: string) => {
-      const toSign: SessionSigningTemplate = {
-        ...signingTemplate,
-        nodeAddress,
-      };
+      let toSign: SessionSigningTemplate;
+
+      // FIXME: We need this reformatting because the Cayenne network is not able to handle the node address as a URL.
+      // We are converting back
+      // from: http://207.244.70.36:7474
+      // to: 127.0.0.1:7474
+      if (this.config.litNetwork === LitNetwork.Cayenne) {
+        const url = new URL(nodeAddress);
+        const newNodeAddress = `127.0.0.1:${url.port}`;
+        toSign = {
+          ...signingTemplate,
+          nodeAddress: newNodeAddress,
+        };
+      } else {
+        toSign = {
+          ...signingTemplate,
+          nodeAddress,
+        };
+      }
 
       const signedMessage = JSON.stringify(toSign);
 
@@ -2480,9 +2500,9 @@ const resourceAbilityRequests = [
         }
 
         // lit action code and ipfs id cannot exist at the same time
-        if (props.litActionCode && props.ipfsId) {
+        if (props.litActionCode && props.litActionIpfsId) {
           throw new Error(
-            '[getPkpSessionSigs/callback]litActionCode and ipfsId cannot exist at the same time'
+            '[getPkpSessionSigs/callback]litActionCode and litActionIpfsId cannot exist at the same time'
           );
         }
 
@@ -2500,7 +2520,9 @@ const resourceAbilityRequests = [
 
           // -- optional fields
           ...(props.litActionCode && { litActionCode: props.litActionCode }),
-          ...(props.ipfsId && { ipfsId: props.ipfsId }),
+          ...(props.litActionIpfsId && {
+            litActionIpfsId: props.litActionIpfsId,
+          }),
           ...(props.jsParams && { jsParams: props.jsParams }),
         });
 

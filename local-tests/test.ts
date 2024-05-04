@@ -10,6 +10,7 @@ import { testUsePkpSessionSigsToExecuteJsSigning } from './tests/testUsePkpSessi
 import { testUsePkpSessionSigsToPkpSign } from './tests/testUsePkpSessionSigsToPkpSign';
 import { testUseValidLitActionCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToPkpSign';
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning';
+import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning';
 import { testUseEoaSessionSigsToExecuteJsSigningInParallel } from './tests/testUseEoaSessionSigsToExecuteJsSigningInParallel';
 import { testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs';
 import { testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign } from './tests/testDelegatingCapacityCreditsNFTToAnotherWalletToPkpSign';
@@ -42,25 +43,13 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsJsonResponse } 
 import { testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsConsoleLog';
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile';
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip';
+import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
+import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionIpfsCodeToGenerateSessionSigs';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
   const devEnv = new TinnyEnvironment();
   await devEnv.init();
-
-  if (LIT_TESTNET.LOCALCHAIN) {
-    // set global executeJs endpoint version for all tests.
-    devEnv.setGlobalExecuteJsVersion(
-      LIT_TESTNET.LOCALCHAIN,
-      LIT_ENDPOINT_VERSION.V1
-    );
-
-    // set global pkpSign endpoint version for all tests.
-    devEnv.setGlobalPkpSignVersion(
-      LIT_TESTNET.LOCALCHAIN,
-      LIT_ENDPOINT_VERSION.V1
-    );
-  }
 
   const eoaSessionSigsTests = {
     testUseEoaSessionSigsToExecuteJsSigning,
@@ -99,6 +88,16 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from
     testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString,
     testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile,
     testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip,
+
+    // -- invalid cases
+    testUseInvalidLitActionIpfsCodeToGenerateSessionSigs,
+  };
+
+  const litActionIpfsIdSessionSigsTests = {
+    testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign,
+    testUseValidLitActionIpfsCodeGeneratedSessionSigsToExecuteJsSigning,
+
+    // -- invalid cases
     testUseInvalidLitActionCodeToGenerateSessionSigs,
   };
 
@@ -119,6 +118,7 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from
       ...eoaSessionSigsTests,
       ...pkpSessionSigsTests,
       ...litActionSessionSigsTests,
+      ...litActionIpfsIdSessionSigsTests,
       ...capacityDelegationTests,
     },
     devEnv,

@@ -9,14 +9,13 @@ import { log } from '@lit-protocol/misc';
 
 /**
  * Test Commands:
- * ❌ NOT AVAILABLE IN CAYENNE
+ * ✅ NETWORK=cayenne yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  * ❌ NOT AVAILABLE IN MANZANO
  * ✅ NETWORK=localchain yarn test:local --filter=testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString
  *
  */
 export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptString =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
     devEnv.setUnavailable(LIT_TESTNET.MANZANO);
 
     const alice = await devEnv.createRandomPerson();

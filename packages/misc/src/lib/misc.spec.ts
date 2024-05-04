@@ -4,7 +4,7 @@ global.TextEncoder = TextEncoder;
 // @ts-ignore
 global.TextDecoder = TextDecoder;
 
-import { LitErrorKind, LIT_ERROR } from '@lit-protocol/constants';
+import { LitErrorKind, LIT_ERROR, CAYENNE_URL } from '@lit-protocol/constants';
 import * as utilsModule from './misc';
 
 describe('utils', () => {
@@ -287,4 +287,13 @@ it('should not remove hex prefix if it is not present', () => {
   const result = utilsModule.removeHexPrefix(input);
 
   expect(result).toBe(expectedOutput);
+});
+
+it('should get ip address', async () => {
+  // polyfill fetch
+  const fetch = require('node-fetch');
+  global.fetch = fetch;
+
+  const ipAddres = await utilsModule.getIpAddress('cayenne.litgateway.com');
+  expect(ipAddres).toBe('1');
 });

@@ -21,16 +21,7 @@ export const composeLitUrl = (params: {
     throw new Error(`[composeLitUrl] Invalid URL: "${params.url}"`);
   }
 
-  let versionOverride: string | undefined = undefined;
-
-  // Get the version override for a particular endpoint
-  // FIXME: We will remove this completly once v0.1 is deployed to all public networks
-  if (isNode()) {
-    versionOverride = process.env[`${params.endpoint.envName}`] || undefined;
-  }
-
-  // Use the overridden version if it exists, otherwise use the default
-  const version = versionOverride || params.endpoint.version;
+  const version = params.endpoint.version;
 
   return `${params.url}${params.endpoint.path}${version}`;
 };

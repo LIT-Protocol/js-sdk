@@ -730,6 +730,11 @@ export const SYMM_KEY_ALGO_PARAMS = {
 };
 
 /**
+ * Default node URL for Cayenne network
+ */
+export const CAYENNE_URL = 'https://cayenne.litgateway.com';
+
+/**
  * Default node URLs for each LIT network
  * Note: Dynamic networks such as Habanero have no default node URLS; they are always
  * loaded from the chain during initialization
@@ -738,10 +743,12 @@ export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
   localhost: string[];
   internalDev: string[];
 } = {
+
+  // FIXME: Reviewers! These are not used in this branch, scroll down to see remapping logic
   [LitNetwork.Cayenne]: [
-    'https://cayenne.litgateway.com:7370',
-    'https://cayenne.litgateway.com:7371',
-    'https://cayenne.litgateway.com:7372',
+    `${CAYENNE_URL}:7370'`,
+    `${CAYENNE_URL}:7371'`,
+    `${CAYENNE_URL}:7372'`,
   ],
   [LitNetwork.Manzano]: [],
   [LitNetwork.Habanero]: [],

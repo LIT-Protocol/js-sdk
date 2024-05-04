@@ -20,7 +20,6 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 export const testUseCapacityDelegationAuthSigWithUnspecifiedDelegateesToPkpSign =
   async (devEnv: TinnyEnvironment) => {
-    devEnv.setUnavailable(LIT_TESTNET.CAYENNE);
     const alice = await devEnv.createRandomPerson();
     const bob = await devEnv.createRandomPerson();
 
