@@ -1,3 +1,6 @@
+/**
+ * FIXME: SessionSigs are only supported for EVM chains at the moment.  This will be expanded to other chains in the future.
+ */
 import { ALL_LIT_CHAINS, LIT_ERROR, VMTYPE } from '@lit-protocol/constants';
 
 import { AuthCallbackParams, AuthSig } from '@lit-protocol/types';

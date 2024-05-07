@@ -1764,7 +1764,6 @@ export interface LitCustomAuth {
 export interface LitEndpoint {
   path: string;
   version: string;
-  envName: string;
 }
 
 /**

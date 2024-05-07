@@ -2468,7 +2468,6 @@ const resourceAbilityRequests = [
   };
 
   /**
-<<<<<<<<< Temporary merge branch 1
    * Retrieves the PKP sessionSigs.
    *
    * @param params - The parameters for retrieving the PKP sessionSigs.
