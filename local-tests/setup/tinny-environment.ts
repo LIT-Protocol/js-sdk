@@ -268,34 +268,6 @@ export class TinnyEnvironment {
     return await this.createNewPerson('Alice');
   }
 
-  /**
-   * Sets the global execute JS version for a specific network.
-   * @param network - The network for which to set the execute JS version.
-   * @param version - The execute JS version to set.
-   */
-  setGlobalExecuteJsVersion = (
-    network: LIT_TESTNET,
-    version: LIT_ENDPOINT_VERSION
-  ) => {
-    if (this.processEnvs.NETWORK === network) {
-      process.env[LIT_ENDPOINT.EXECUTE_JS.envName] = version;
-    }
-  };
-
-  /**
-   * Sets the global PKP sign version for the specified network.
-   * @param network - The network for which to set the PKP sign version.
-   * @param version - The PKP sign version to set.
-   */
-  setGlobalPkpSignVersion = (
-    network: LIT_TESTNET,
-    version: LIT_ENDPOINT_VERSION
-  ) => {
-    if (this.processEnvs.NETWORK === network) {
-      process.env[LIT_ENDPOINT.PKP_SIGN.envName] = version;
-    }
-  };
-
   setUnavailable = (network: LIT_TESTNET) => {
     if (this.processEnvs.NETWORK === network) {
       throw new Error('LIT_IGNORE_TEST');
