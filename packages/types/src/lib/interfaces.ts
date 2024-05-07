@@ -1038,8 +1038,7 @@ export interface SignSessionKeyResponse {
 export interface GetSignSessionKeySharesProp {
   body: SessionRequestBody;
 }
-
-export interface GetSessionSigsProps extends LitCustomAuth {
+export interface CommonGetSessionSigsProps {
   pkpPublicKey?: string;
 
   // When this session signature will expire.  The user will have to reauthenticate after this time using whatever auth method you set up.  This means you will have to call this signSessionKey function again to get a new session signature.  This is a RFC3339 timestamp.  The default is 24 hours from now.
@@ -1070,12 +1069,6 @@ export interface GetSessionSigsProps extends LitCustomAuth {
    * If you want to ask Metamask to try and switch the user's chain, you may pass true here.  This will only work if the user is using Metamask.  If the user is not using Metamask, then this will be ignored.
    */
   switchChain?: boolean;
-
-  /**
-   * This is a callback that will be called if the user needs to authenticate using a PKP.  For example, if the user has no wallet, but owns a Lit PKP though something like Google Oauth, then you can use this callback to prompt the user to authenticate with their PKP.  This callback should use the LitNodeClient.signSessionKey function to get a session signature for the user from their PKP.  If you don't pass this callback, then the user will be prompted to authenticate with their wallet, like metamask.
-   */
-  authNeededCallback?: AuthCallback;
-
   /**
    * The serialized session key pair to sign.
    * If not provided, a session key pair will be fetched from localStorge or generated.
@@ -1094,6 +1087,15 @@ export interface GetSessionSigsProps extends LitCustomAuth {
    * Not limited to capacityDelegationAuthSig, we want to be able to pass in any other authSigs for other purposes.
    */
   capabilityAuthSigs?: AuthSig[];
+}
+
+export interface GetSessionSigsProps
+  extends CommonGetSessionSigsProps,
+    LitCustomAuth {
+  /**
+   * This is a callback that will be called if the user needs to authenticate using a PKP.  For example, if the user has no wallet, but owns a Lit PKP though something like Google Oauth, then you can use this callback to prompt the user to authenticate with their PKP.  This callback should use the LitNodeClient.signSessionKey function to get a session signature for the user from their PKP.  If you don't pass this callback, then the user will be prompted to authenticate with their wallet, like metamask.
+   */
+  authNeededCallback: AuthCallback;
 }
 export type AuthCallback = (params: AuthCallbackParams) => Promise<AuthSig>;
 
@@ -1778,7 +1780,9 @@ export interface SignerLike {
   getAddress: () => Promise<string>;
 }
 
-export interface GetPkpSessionSigs extends GetSessionSigsProps {
+export interface GetPkpSessionSigs
+  extends CommonGetSessionSigsProps,
+    LitCustomAuth {
   pkpPublicKey: string;
   authMethods: AuthMethod[];
   jsParams?: {
