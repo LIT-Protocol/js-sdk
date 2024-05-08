@@ -520,45 +520,70 @@ export interface JsonExecutionRequest {
   authMethods?: AuthMethod[];
 }
 
-export interface EncryptRequestBase extends MultipleAccessControlConditions {
-  // The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
-  chain: Chain;
+/**
+ * This interface is mainly used for access control conditions & decrypt requests.
+ * For signing operations such as executeJs and pkpSign, only sessionSigs is used.
+ */
+export interface SessionSigsOrAuthSig {
+  /**
+   * the session signatures to use to authorize the user with the nodes
+   */
+  sessionSigs?: SessionSigsMap;
 
-  // the session signatures to use to authorize the user with the nodes
-  sessionSigs: SessionSigsMap;
+  /**
+   * This is a bare authSig generated client side by the user. It can only be used for access control conditions/encrypt/decrypt operations. It CANNOT be used for signing operation.
+   */
+  authSig?: AuthSig;
 }
 
-export interface EncryptRequest extends EncryptRequestBase {
+export interface DecryptRequestBase
+  extends SessionSigsOrAuthSig,
+    MultipleAccessControlConditions {
+  /**
+   * The chain name of the chain that this contract is deployed on.  See LIT_CHAINS for currently supported chains.
+   */
+  chain: Chain;
+}
+export interface EncryptSdkParams extends MultipleAccessControlConditions {
+  dataToEncrypt: Uint8Array;
+}
+
+export interface EncryptRequest extends DecryptRequestBase {
   // The data that you wish to encrypt as a Uint8Array
   dataToEncrypt: Uint8Array;
 }
 
 export interface EncryptResponse {
-  // The base64-encoded ciphertext
+  /**
+   * The base64-encoded ciphertext
+   */
   ciphertext: string;
-  // The hash of the data that was encrypted
+
+  /**
+   * The hash of the data that was encrypted
+   */
   dataToEncryptHash: string;
 }
 
-export interface EncryptStringRequest extends EncryptRequestBase {
-  // String that you wish to encrypt
+export interface EncryptStringRequest extends MultipleAccessControlConditions {
+  /**
+   * String that you wish to encrypt
+   */
   dataToEncrypt: string;
 }
 
-export interface EncryptZipRequest extends EncryptRequestBase {
+export interface EncryptZipRequest extends MultipleAccessControlConditions {
+  /**
+   * The zip that you wish to encrypt
+   */
   zip: JSZip;
 }
 
-export interface EncryptFileRequest extends EncryptRequestBase {
+export interface EncryptFileRequest extends DecryptRequestBase {
   file: AcceptedFileType;
 }
 
-export interface DecryptRequest extends EncryptRequestBase {
-  // The base64-encoded ciphertext
-  ciphertext: string;
-  // The hash of the data that was encrypted
-  dataToEncryptHash: string;
-}
+export interface DecryptRequest extends EncryptResponse, DecryptRequestBase {}
 
 export interface DecryptResponse {
   // The decrypted data as a Uint8Array
@@ -856,20 +881,31 @@ export interface JsonHandshakeResponse {
   latestBlockhash?: string;
 }
 
-export interface EncryptToJsonProps extends EncryptRequestBase {
-  // The string you wish to encrypt
+export interface EncryptToJsonProps extends MultipleAccessControlConditions {
+  /**
+   * The chain
+   */
+  chain: string;
+
+  /**
+   * The string you wish to encrypt
+   */
   string?: string;
 
-  // The file you wish to encrypt
+  /**
+   * The file you wish to encrypt
+   */
   file?: AcceptedFileType;
 
-  // An instance of LitNodeClient that is already connected
+  /**
+   * An instance of LitNodeClient that is already connected
+   */
   litNodeClient: ILitNodeClient;
 }
 
 export type EncryptToJsonDataType = 'string' | 'file';
 
-export interface EncryptToJsonPayload extends EncryptRequestBase {
+export interface EncryptToJsonPayload extends DecryptRequestBase {
   ciphertext: string;
   dataToEncryptHash: string;
   dataType: EncryptToJsonDataType;
@@ -903,14 +939,15 @@ export interface EncryptFileAndZipWithMetadataProps
   readme: string;
 }
 
-export interface DecryptZipFileWithMetadataProps {
-  // the session signatures to use to authorize the user with the nodes
-  sessionSigs: SessionSigsMap;
-
-  // The zip file blob with metadata inside it and the encrypted asset
+export interface DecryptZipFileWithMetadataProps extends SessionSigsOrAuthSig {
+  /**
+   * The zip file blob with metadata inside it and the encrypted asset
+   */
   file: File | Blob;
 
-  // An instance of LitNodeClient that is already connected
+  /**
+   * An instance of LitNodeClient that is already connected
+   */
   litNodeClient: ILitNodeClient;
 }
 

@@ -22,7 +22,6 @@ import {
   AcceptedFileType,
   AccessControlConditions,
   AuthMethod,
-  AuthSig,
   DecryptFromJsonProps,
   DecryptRequest,
   DecryptZipFileWithMetadataProps,
@@ -36,8 +35,7 @@ import {
   EvmContractConditions,
   GetSignedTokenRequest,
   JsonExecutionSdkParams,
-  SessionSigs,
-  SessionSigsMap,
+  SessionSigsOrAuthSig,
   SolRpcConditions,
   UnifiedAccessControlConditions,
 } from '@lit-protocol/types';
@@ -72,58 +70,32 @@ export const paramsValidators: Record<
   string,
   (params: any) => ParamsValidator[]
 > = {
-  executeJs: (params: JsonExecutionSdkParams) => [
-    new AuthMaterialValidator('executeJs', params),
-    new ExecuteJsValidator('executeJs', params),
-    new AuthMethodValidator('executeJs', params.authMethods),
-  ],
-
+  // ========== NO AUTH MATERIAL NEEDED FOR CLIENT SIDE ENCRYPTION ==========
   encrypt: (params: EncryptRequest) => [
     new AccessControlConditionsValidator('encrypt', params),
-    new AuthMaterialValidator('encrypt', params, true),
   ],
 
   encryptFile: (params: EncryptFileRequest) => [
     new AccessControlConditionsValidator('encryptFile', params),
-    new AuthMaterialValidator('encryptFile', params),
     new FileValidator('encryptFile', params.file),
   ],
 
   encryptString: (params: EncryptStringRequest) => [
     new AccessControlConditionsValidator('encryptString', params),
-    new AuthMaterialValidator('encryptString', params, true),
     new StringValidator('encryptString', params.dataToEncrypt, 'dataToEncrypt'),
   ],
 
   encryptZip: (params: EncryptZipRequest) => [
     new AccessControlConditionsValidator('encryptZip', params),
-    new AuthMaterialValidator('encryptZip', params),
   ],
 
   zipAndEncryptString: (params: EncryptStringRequest) => [
     new StringValidator('zipAndEncryptString', params.dataToEncrypt),
   ],
 
-  decrypt: (params: DecryptRequest) => [
-    new AccessControlConditionsValidator('decrypt', params),
-    new AuthMaterialValidator('decrypt', params, true),
-    new StringValidator('decrypt', params.ciphertext, 'ciphertext'),
-  ],
-
-  decryptZipFileWithMetadata: (params: DecryptZipFileWithMetadataProps) => [
-    new AuthMaterialValidator('decryptZipFileWithMetadata', params),
-    new FileValidator('decryptZipFileWithMetadata', params.file),
-  ],
-
   encryptToJson: (params: EncryptToJsonProps) => [
     new AccessControlConditionsValidator('encryptToJson', params),
-    new AuthMaterialValidator('encryptToJson', params, true),
     new EncryptToJsonValidator('encryptToJson', params),
-  ],
-
-  decryptFromJson: (params: DecryptFromJsonProps) => [
-    new AuthMaterialValidator('decryptFromJson', params),
-    new DecryptFromJsonValidator('decryptFromJson', params.parsedJsonData),
   ],
 
   encryptFileAndZipWithMetadata: (
@@ -140,6 +112,29 @@ export const paramsValidators: Record<
       params.readme,
       'readme'
     ),
+  ],
+
+  // ========== REQUIRED AUTH MATERIAL VALIDATORS ==========
+  executeJs: (params: JsonExecutionSdkParams) => [
+    new AuthMaterialValidator('executeJs', params),
+    new ExecuteJsValidator('executeJs', params),
+    new AuthMethodValidator('executeJs', params.authMethods),
+  ],
+
+  decrypt: (params: DecryptRequest) => [
+    new AccessControlConditionsValidator('decrypt', params),
+    new AuthMaterialValidator('decrypt', params, true),
+    new StringValidator('decrypt', params.ciphertext, 'ciphertext'),
+  ],
+
+  decryptZipFileWithMetadata: (params: DecryptZipFileWithMetadataProps) => [
+    new AuthMaterialValidator('decryptZipFileWithMetadata', params),
+    new FileValidator('decryptZipFileWithMetadata', params.file),
+  ],
+
+  decryptFromJson: (params: DecryptFromJsonProps) => [
+    new AuthMaterialValidator('decryptFromJson', params),
+    new DecryptFromJsonValidator('decryptFromJson', params.parsedJsonData),
   ],
 
   getSignedToken: (params: GetSignedTokenRequest) => [
@@ -379,8 +374,7 @@ class FileValidator implements ParamsValidator {
   }
 }
 
-export interface AuthMaterialValidatorProps {
-  sessionSigs: SessionSigsMap;
+export interface AuthMaterialValidatorProps extends SessionSigsOrAuthSig {
   chain?: string;
 }
 
@@ -400,7 +394,14 @@ class AuthMaterialValidator implements ParamsValidator {
   }
 
   validate(): IEither<void> {
-    const { sessionSigs } = this.authMaterial;
+    const { authSig, sessionSigs } = this.authMaterial;
+
+    if (authSig && !is(authSig, 'Object', 'authSig', this.fnName))
+      return ELeft({
+        message: 'authSig is not an object',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
+      });
 
     if (this.checkIfAuthSigRequiresChainParam) {
       if (!this.authMaterial.chain)
@@ -408,6 +409,20 @@ class AuthMaterialValidator implements ParamsValidator {
           message: 'You must pass chain param',
           errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
           errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+        });
+
+      if (
+        authSig &&
+        !checkIfAuthSigRequiresChainParam(
+          authSig,
+          this.authMaterial.chain,
+          this.fnName
+        )
+      )
+        return ELeft({
+          message: 'authSig is not valid',
+          errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+          errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
         });
     }
 
@@ -418,9 +433,17 @@ class AuthMaterialValidator implements ParamsValidator {
         errorCode: LIT_ERROR.INVALID_PARAM_TYPE.name,
       });
 
-    if (!sessionSigs)
+    if (!sessionSigs && !authSig)
       return ELeft({
-        message: 'You must pass in sessionSigs',
+        message: 'You must pass either authSig or sessionSigs',
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
+
+    // -- validate: if sessionSig and authSig exists
+    if (sessionSigs && authSig)
+      return ELeft({
+        message: 'You cannot have both authSig and sessionSigs',
         errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
         errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
       });
