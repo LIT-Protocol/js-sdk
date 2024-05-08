@@ -300,6 +300,7 @@ export const zipAndEncryptString = async (
 */
 export const zipAndEncryptFiles = async (
   files: File[],
+  params: DecryptRequest,
   litNodeClient: ILitNodeClient
 ): Promise<EncryptResponse> => {
   // let's zip em
@@ -342,7 +343,7 @@ export const zipAndEncryptFiles = async (
     folder.file(files[i].name, files[i]);
   }
 
-  return encryptZip({ zip }, litNodeClient);
+  return encryptZip({ zip, ...params }, litNodeClient);
 };
 
 /**
