@@ -101,7 +101,6 @@ export const paramsValidators: Record<
   encryptFileAndZipWithMetadata: (
     params: EncryptFileAndZipWithMetadataProps
   ) => [
-    new AuthMaterialValidator('encryptFileAndZipWithMetadata', params, true),
     new AccessControlConditionsValidator(
       'encryptFileAndZipWithMetadata',
       params
