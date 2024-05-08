@@ -122,21 +122,21 @@ export class TinnyEnvironment {
       if (index !== -1) {
         // If an available key is found
         this.processEnvs.KEY_IN_USE[index] = true; // Mark the key as in use
-        console.log('[𐬺🧪 Tinny Environment𐬺] 🔑 Selected key at index', index); // Log a message indicating that we have selected a key
+        // console.log('[𐬺🧪 Tinny Environment𐬺] 🔑 Selected key at index', index); // Log a message indicating that we have selected a key
 
         // Set a timer to automatically release the key after 10 seconds
         setTimeout(() => {
           this.releasePrivateKey(index);
-          console.log(
-            '[𐬺🧪 Tinny Environment𐬺] 🔓 Automatically released key at index',
-            index,
-            `after ${this.processEnvs.TIME_TO_RELEASE_KEY / 10000} seconds`
-          );
+          // console.log(
+          //   '[𐬺🧪 Tinny Environment𐬺] 🔓 Automatically released key at index',
+          //   index,
+          //   `after ${this.processEnvs.TIME_TO_RELEASE_KEY / 10000} seconds`
+          // );
         }, this.processEnvs.TIME_TO_RELEASE_KEY);
 
         return { privateKey: this.processEnvs.PRIVATE_KEYS[index], index }; // Return the key and its index
       } else {
-        console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
+        // console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
         // Wait for the specified interval before checking again
         await new Promise((resolve) =>
           setTimeout(resolve, this.processEnvs.WAIT_FOR_KEY_INTERVAL)
@@ -151,9 +151,9 @@ export class TinnyEnvironment {
    */
   releasePrivateKey(index: number) {
     this.processEnvs.KEY_IN_USE[index] = false;
-    console.log(
-      `[𐬺🧪 Tinny Environment𐬺] 🪽 Released key at index ${index}. Thank you for your service!`
-    );
+    // console.log(
+    //   `[𐬺🧪 Tinny Environment𐬺] 🪽 Released key at index ${index}. Thank you for your service!`
+    // );
   }
 
   /**
