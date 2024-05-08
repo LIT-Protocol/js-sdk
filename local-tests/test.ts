@@ -45,6 +45,9 @@ import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptFile } fro
 import { testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip } from './tests/testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip';
 import { testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign } from './tests/testUseValidLitActionIpfsCodeGeneratedSessionSigsToPkpSign';
 import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/testUseInvalidLitActionIpfsCodeToGenerateSessionSigs';
+import { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
+import { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
+import { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthSigToEncryptDecryptString';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -111,6 +114,17 @@ import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/te
     testUseCapacityDelegationAuthSigWithUnspecifiedCapacityTokenIdToPkpSign,
   };
 
+  const bareAuthSigTests = {
+    // -- eth auth sig
+    testEthAuthSigToEncryptDecryptString,
+
+    // -- solana auth sig
+    testSolAuthSigToEncryptDecryptString,
+
+    // -- cosmos auth sig
+    testCosmosAuthSigToEncryptDecryptString,
+  };
+
   const testConfig = {
     tests: {
       // testExample,
@@ -120,6 +134,7 @@ import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/te
       ...litActionSessionSigsTests,
       ...litActionIpfsIdSessionSigsTests,
       ...capacityDelegationTests,
+      ...bareAuthSigTests,
     },
     devEnv,
   };

@@ -1,11 +1,16 @@
 import { LIT_TESTNET, ProcessEnvs, TinnyEnvConfig } from './tinny-config';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { AuthSig, LitContractContext } from '@lit-protocol/types';
+import {
+  AuthSig,
+  CosmosAuthSig,
+  LitContractContext,
+  SolanaAuthSig,
+} from '@lit-protocol/types';
 import { TinnyPerson } from './tinny-person';
 import networkContext from './networkContext.json';
 import { ethers } from 'ethers';
-import { LIT_ENDPOINT, LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
+import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
@@ -66,6 +71,22 @@ export class TinnyEnvironment {
   public contractsClient: LitContracts;
   public rpc: string;
   public superCapacityDelegationAuthSig: AuthSig;
+  public bareEthAuthSig: AuthSig;
+  public bareSolAuthSig: SolanaAuthSig = {
+    sig: '706047fcab06ada3cbfeb6990617c1705d59bafb20f5f1c8103d764fb5eaec297328d164e2b891095866b28acc1ab2df288a8729cf026228ef3c4970238b190a',
+    derivedVia: 'solana.signMessage',
+    signedMessage:
+      'I am creating an account to use Lit Protocol at 2024-05-08T16:39:44.481Z',
+    address: 'F7r6ENi6dqH8SnMYZdK3YxWAQ4cwfSNXZyMzbea5fbS1',
+  };
+
+  public bareCosmosAuthSig: CosmosAuthSig = {
+    sig: 'dE7J8oaWa8zECuMpaI/IVfJXGpLAO1paGLho+/dmtaQkN7Sh1lmJLAdYqZchDyYhQcg+nqfaoEOzLig3CPlosg==',
+    derivedVia: 'cosmos.signArbitrary',
+    signedMessage:
+      '8c857343720203e3f52606409e6818284186a614e74026998f89e7417eed4d4b',
+    address: 'cosmos14wp2s5kv07lt220rzfae57k73yv9z2azrmulku',
+  };
 
   constructor(network?: LIT_TESTNET) {
     // -- setup networkj
@@ -280,6 +301,28 @@ export class TinnyEnvironment {
   async init() {
     await this.setupLitNodeClient();
     await this.setupSuperCapacityDelegationAuthSig();
+    await this.setupBareEthAuthSig();
+  }
+
+  /**
+   * Setup bare eth auth sig to test access control and decryption
+   */
+  async setupBareEthAuthSig() {
+    const privateKey = await this.getAvailablePrivateKey();
+    const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
+    const wallet = new ethers.Wallet(privateKey.privateKey, provider);
+
+    const toSign = await createSiweMessage({
+      walletAddress: wallet.address,
+      nonce: await this.litNodeClient.getLatestBlockhash(),
+      expiration: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString(),
+      litNodeClient: this.litNodeClient,
+    });
+
+    this.bareEthAuthSig = await generateAuthSig({
+      signer: wallet,
+      toSign,
+    });
   }
 
   /**

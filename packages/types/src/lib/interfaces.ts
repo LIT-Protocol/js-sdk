@@ -40,6 +40,14 @@ export interface AuthSig {
   algo?: string;
 }
 
+export interface SolanaAuthSig extends AuthSig {
+  derivedVia: 'solana.signMessage';
+}
+
+export interface CosmosAuthSig extends AuthSig {
+  derivedVia: 'cosmos.signArbitrary';
+}
+
 export type CosmosWalletType = 'keplr' | 'leap';
 
 export interface AuthCallbackParams {
@@ -1753,7 +1761,7 @@ export interface WithRecap extends BaseSiweMessage {
 }
 export interface WithCapacityDelegation extends BaseSiweMessage {
   uri: 'lit:capability:delegation';
-  litNodeClient: any;
+  litNodeClient: ILitNodeClient;
   capacityTokenId?: string;
   delegateeAddresses?: string[];
   uses?: string;
