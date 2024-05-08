@@ -21,13 +21,9 @@ export const testUseEoaSessionSigsToEncryptDecryptString = async (
     userAddress: alice.wallet.address,
   });
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
-
   const encryptRes = await LitJsSdk.encryptString(
     {
       accessControlConditions: accs,
-      chain: 'ethereum',
-      sessionSigs: eoaSessionSigs,
       dataToEncrypt: 'Hello world',
     },
     devEnv.litNodeClient as unknown as ILitNodeClient
