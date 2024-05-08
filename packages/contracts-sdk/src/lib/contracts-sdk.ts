@@ -652,7 +652,7 @@ export class LitContracts {
     ): Promise<string> {
       let address: string = '';
       switch (contract) {
-        case 'AllowList' || 'AllowList':
+        case 'Allowlist' || 'AllowList':
           address = await resolverContract['getContract'](
             await resolverContract['ALLOWLIST_CONTRACT'](),
             environment
