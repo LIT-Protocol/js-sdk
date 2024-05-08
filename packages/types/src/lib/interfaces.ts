@@ -92,8 +92,19 @@ export interface AuthCallbackParams {
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
 
+  /**
+   * The js code to run on the nodes
+   */
   litActionCode?: string;
+
+  /**
+   * The IPFS id of the lit action to run
+   */
   litActionIpfsId?: string;
+
+  /**
+   * The js params to run on the nodes
+   */
   jsParams?: any;
 }
 

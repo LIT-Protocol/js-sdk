@@ -1067,7 +1067,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     if (!events[0].topics || events[0].topics.length < 1) {
       throw new Error(
-        `No topics found in events, can not derive pkp information. Transaction hash: ${receipt.transactionHash} If you are using your own contracts please use ethers directly`
+        `No topics found in events, cannot derive pkp information. Transaction hash: ${receipt.transactionHash} If you are using your own contracts please use ethers directly`
       );
     }
 
