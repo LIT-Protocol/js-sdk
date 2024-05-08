@@ -769,7 +769,6 @@ export class LitNodeClientNodeJs
     const res = await this.executeJs({
       ipfsId: LIT_ACTION_IPFS_HASH,
       sessionSigs,
-      authMethods: [],
       jsParams: {
         dataToHash,
       },
