@@ -23,21 +23,15 @@ export const testUseEoaSessionSigsToEncryptDecryptZip = async (
     userAddress: alice.wallet.address,
   });
 
-  const eoaSessionSigs = await getEoaSessionSigs(devEnv, alice);
-
   const encryptRes = await LitJsSdk.zipAndEncryptString(
     {
       accessControlConditions: accs,
-      chain: 'ethereum',
-      sessionSigs: eoaSessionSigs,
       dataToEncrypt: message,
     },
     devEnv.litNodeClient as unknown as ILitNodeClient
   );
 
   log('encryptRes:', encryptRes);
-
-  // await 5 seconds for the encryption to be mined
 
   // -- Expected output:
   // {

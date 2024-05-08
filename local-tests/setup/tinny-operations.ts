@@ -121,7 +121,9 @@ export const runTestsParallel = async ({
 }): Promise<void> => {
   const filters = getFiltersFlag();
   const testsToRun = Object.entries(tests).filter(
-    ([testName]) => filters.length === 0 || filters.includes(testName)
+    ([testName]) =>
+      filters.length === 0 ||
+      filters.some((filter) => testName.includes(filter))
   );
 
   const testPromises = testsToRun.map(

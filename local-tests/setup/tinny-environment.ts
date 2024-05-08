@@ -1,11 +1,16 @@
 import { LIT_TESTNET, ProcessEnvs, TinnyEnvConfig } from './tinny-config';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
-import { AuthSig, LitContractContext } from '@lit-protocol/types';
+import {
+  AuthSig,
+  CosmosAuthSig,
+  LitContractContext,
+  SolanaAuthSig,
+} from '@lit-protocol/types';
 import { TinnyPerson } from './tinny-person';
 import networkContext from './networkContext.json';
 import { ethers } from 'ethers';
-import { LIT_ENDPOINT, LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
+import { createSiweMessage, generateAuthSig } from '@lit-protocol/auth-helpers';
 
 export class TinnyEnvironment {
   public network: LIT_TESTNET;
@@ -66,6 +71,22 @@ export class TinnyEnvironment {
   public contractsClient: LitContracts;
   public rpc: string;
   public superCapacityDelegationAuthSig: AuthSig;
+  public bareEthAuthSig: AuthSig;
+  public bareSolAuthSig: SolanaAuthSig = {
+    sig: '706047fcab06ada3cbfeb6990617c1705d59bafb20f5f1c8103d764fb5eaec297328d164e2b891095866b28acc1ab2df288a8729cf026228ef3c4970238b190a',
+    derivedVia: 'solana.signMessage',
+    signedMessage:
+      'I am creating an account to use Lit Protocol at 2024-05-08T16:39:44.481Z',
+    address: 'F7r6ENi6dqH8SnMYZdK3YxWAQ4cwfSNXZyMzbea5fbS1',
+  };
+
+  public bareCosmosAuthSig: CosmosAuthSig = {
+    sig: 'dE7J8oaWa8zECuMpaI/IVfJXGpLAO1paGLho+/dmtaQkN7Sh1lmJLAdYqZchDyYhQcg+nqfaoEOzLig3CPlosg==',
+    derivedVia: 'cosmos.signArbitrary',
+    signedMessage:
+      '8c857343720203e3f52606409e6818284186a614e74026998f89e7417eed4d4b',
+    address: 'cosmos14wp2s5kv07lt220rzfae57k73yv9z2azrmulku',
+  };
 
   constructor(network?: LIT_TESTNET) {
     // -- setup networkj
@@ -122,21 +143,21 @@ export class TinnyEnvironment {
       if (index !== -1) {
         // If an available key is found
         this.processEnvs.KEY_IN_USE[index] = true; // Mark the key as in use
-        console.log('[𐬺🧪 Tinny Environment𐬺] 🔑 Selected key at index', index); // Log a message indicating that we have selected a key
+        // console.log('[𐬺🧪 Tinny Environment𐬺] 🔑 Selected key at index', index); // Log a message indicating that we have selected a key
 
         // Set a timer to automatically release the key after 10 seconds
         setTimeout(() => {
           this.releasePrivateKey(index);
-          console.log(
-            '[𐬺🧪 Tinny Environment𐬺] 🔓 Automatically released key at index',
-            index,
-            `after ${this.processEnvs.TIME_TO_RELEASE_KEY / 10000} seconds`
-          );
+          // console.log(
+          //   '[𐬺🧪 Tinny Environment𐬺] 🔓 Automatically released key at index',
+          //   index,
+          //   `after ${this.processEnvs.TIME_TO_RELEASE_KEY / 10000} seconds`
+          // );
         }, this.processEnvs.TIME_TO_RELEASE_KEY);
 
         return { privateKey: this.processEnvs.PRIVATE_KEYS[index], index }; // Return the key and its index
       } else {
-        console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
+        // console.log('[𐬺🧪 Tinny Environment𐬺] No available keys. Waiting...'); // Log a message indicating that we are waiting
         // Wait for the specified interval before checking again
         await new Promise((resolve) =>
           setTimeout(resolve, this.processEnvs.WAIT_FOR_KEY_INTERVAL)
@@ -151,9 +172,9 @@ export class TinnyEnvironment {
    */
   releasePrivateKey(index: number) {
     this.processEnvs.KEY_IN_USE[index] = false;
-    console.log(
-      `[𐬺🧪 Tinny Environment𐬺] 🪽 Released key at index ${index}. Thank you for your service!`
-    );
+    // console.log(
+    //   `[𐬺🧪 Tinny Environment𐬺] 🪽 Released key at index ${index}. Thank you for your service!`
+    // );
   }
 
   /**
@@ -268,34 +289,6 @@ export class TinnyEnvironment {
     return await this.createNewPerson('Alice');
   }
 
-  /**
-   * Sets the global execute JS version for a specific network.
-   * @param network - The network for which to set the execute JS version.
-   * @param version - The execute JS version to set.
-   */
-  setGlobalExecuteJsVersion = (
-    network: LIT_TESTNET,
-    version: LIT_ENDPOINT_VERSION
-  ) => {
-    if (this.processEnvs.NETWORK === network) {
-      process.env[LIT_ENDPOINT.EXECUTE_JS.envName] = version;
-    }
-  };
-
-  /**
-   * Sets the global PKP sign version for the specified network.
-   * @param network - The network for which to set the PKP sign version.
-   * @param version - The PKP sign version to set.
-   */
-  setGlobalPkpSignVersion = (
-    network: LIT_TESTNET,
-    version: LIT_ENDPOINT_VERSION
-  ) => {
-    if (this.processEnvs.NETWORK === network) {
-      process.env[LIT_ENDPOINT.PKP_SIGN.envName] = version;
-    }
-  };
-
   setUnavailable = (network: LIT_TESTNET) => {
     if (this.processEnvs.NETWORK === network) {
       throw new Error('LIT_IGNORE_TEST');
@@ -308,6 +301,28 @@ export class TinnyEnvironment {
   async init() {
     await this.setupLitNodeClient();
     await this.setupSuperCapacityDelegationAuthSig();
+    await this.setupBareEthAuthSig();
+  }
+
+  /**
+   * Setup bare eth auth sig to test access control and decryption
+   */
+  async setupBareEthAuthSig() {
+    const privateKey = await this.getAvailablePrivateKey();
+    const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
+    const wallet = new ethers.Wallet(privateKey.privateKey, provider);
+
+    const toSign = await createSiweMessage({
+      walletAddress: wallet.address,
+      nonce: await this.litNodeClient.getLatestBlockhash(),
+      expiration: new Date(Date.now() + 29 * 24 * 60 * 60 * 1000).toISOString(),
+      litNodeClient: this.litNodeClient,
+    });
+
+    this.bareEthAuthSig = await generateAuthSig({
+      signer: wallet,
+      toSign,
+    });
   }
 
   /**

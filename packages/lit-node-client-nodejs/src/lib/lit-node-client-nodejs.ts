@@ -116,6 +116,7 @@ import type {
   ExecuteJsNoSigningResponse,
   JsonPkpSignSdkParams,
   SigResponse,
+  EncryptSdkParams,
 } from '@lit-protocol/types';
 
 import * as blsSdk from '@lit-protocol/bls-sdk';
@@ -1542,8 +1543,19 @@ export class LitNodeClientNodeJs
    *
    * Encrypt data using the LIT network public key.
    *
+   * @param { EncryptSdkParams } params
+   * @param params.dataToEncrypt - The data to encrypt
+   * @param params.accessControlConditions - (optional) The access control conditions for the data
+   * @param params.evmContractConditions - (optional) The EVM contract conditions for the data
+   * @param params.solRpcConditions - (optional) The Solidity RPC conditions for the data
+   * @param params.unifiedAccessControlConditions - (optional) The unified access control conditions for the data
+   *
+   * @return { Promise<EncryptResponse> } The encrypted ciphertext and the hash of the data
+   *
+   * @throws { Error } if the LIT node client is not ready
+   * @throws { Error } if the subnetPubKey is null
    */
-  encrypt = async (params: EncryptRequest): Promise<EncryptResponse> => {
+  encrypt = async (params: EncryptSdkParams): Promise<EncryptResponse> => {
     // ========== Validate Params ==========
     // -- validate if it's ready
     if (!this.ready) {
@@ -1719,7 +1731,7 @@ export class LitNodeClientNodeJs
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       const nodePromises = this.getNodePromises((url: string) => {
         // -- if session key is available, use it
-        const authSigToSend = sessionSigs[url];
+        const authSigToSend = sessionSigs ? sessionSigs[url] : params.authSig;
 
         return this.getSigningShareForDecryption(
           url,

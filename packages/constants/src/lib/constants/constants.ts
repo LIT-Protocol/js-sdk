@@ -589,6 +589,11 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   },
 };
 
+/**
+ * Lit Protocol Chain RPC URL
+ */
+export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
+
 export const LIT_EVM_CHAINS = LIT_CHAINS;
 
 /**
@@ -743,7 +748,6 @@ export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
   localhost: string[];
   internalDev: string[];
 } = {
-
   // FIXME: Reviewers! These are not used in this branch, scroll down to see remapping logic
   [LitNetwork.Cayenne]: [
     `${CAYENNE_URL}:7370'`,

@@ -412,7 +412,7 @@ export const connectWeb3 = async ({
   const accounts = await web3.listAccounts();
 
   log('accounts', accounts);
-  const account = accounts[0].toLowerCase();
+  const account = ethers.utils.getAddress(accounts[0]);
 
   return { web3, account };
 };
