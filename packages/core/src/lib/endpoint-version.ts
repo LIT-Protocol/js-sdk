@@ -1,4 +1,3 @@
-import { isNode } from '@lit-protocol/misc';
 import { LitEndpoint } from '@lit-protocol/types';
 
 /**
