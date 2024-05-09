@@ -35,15 +35,10 @@ import { Logger } from '@ethersproject/logger';
 import { version } from 'ethers';
 
 import { ethers, Wallet } from 'ethers';
-import {
-  LITChainRequiredProps,
-  PKPClientHelpers,
-  PKPEthersWalletProp,
-} from '@lit-protocol/types';
+import { PKPClientHelpers, PKPEthersWalletProp } from '@lit-protocol/types';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import { ethRequestHandler } from './handler';
 import {
-  ETHHandlerReq,
   ETHRequestSigningPayload,
   ETHSignature,
   ETHTxRes,

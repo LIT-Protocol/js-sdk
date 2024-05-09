@@ -1234,20 +1234,21 @@ export interface LitClientSessionManager {
 
 export interface AuthenticationProps {
   client: LitClientSessionManager;
+
+  /**
+   * This params is equivalent to the `getSessionSigs` params in the `litNodeClient`
+   */
   getSessionSigsProps: GetSessionSigsProps;
   authMethods: AuthMethod[];
 }
 
 export interface PKPBaseProp {
+  // -- required
   pkpPubKey: string;
+
+  // -- optional
   rpc?: string;
   rpcs?: RPCUrls;
-  controllerAuthSig?: AuthSig;
-  // @deprecated
-  controllerAuthMethods?: AuthMethod[];
-  // @deprecated
-  controllerSessionSigs?: SessionSigs;
-  // @deprecated
   sessionSigsExpiration?: string;
   authContext?: AuthenticationProps;
   litNetwork?: any;
@@ -1258,6 +1259,22 @@ export interface PKPBaseProp {
   litActionIPFS?: string;
   litActionJsParams?: any;
   provider?: Provider;
+
+  // -- soon to be deprecated
+  /**
+   * @deprecated - use authContext
+   */
+  controllerAuthMethods?: AuthMethod[];
+
+  /**
+   * @deprecated - use authContext
+   */
+  controllerSessionSigs?: SessionSigs;
+
+  /**
+   * @deprecated - use authContext
+   */
+  controllerAuthSig?: AuthSig;
 }
 
 export interface RPCUrls {
@@ -1266,7 +1283,10 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export type PKPEthersWalletProp = PKPBaseProp;
+export type PKPEthersWalletProp = Omit<
+  PKPBaseProp,
+  'controllerAuthSig' | 'controllerAuthMethods' | 'controllerSessionSigs'
+>;
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
