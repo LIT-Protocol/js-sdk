@@ -23,6 +23,9 @@ DEBUG=true NETWORK=localchain yarn test:local
 DEBUG=true NETWORK=manzano yarn test:local --filter=testExample
 DEBUG=true NETWORK=manzano yarn test:local --filter=testExample,testBundleSpeed
 
+// run filtered tests by keyword
+DEBUG=true NETWORK=manzano yarn test:local --filter=Encrypt
+
 // eg.
 yarn test:local --filter=testExample,testBundleSpeed
 
