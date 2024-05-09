@@ -11,14 +11,13 @@ import { log, logError } from '@lit-protocol/misc';
  * @returns an object which contains both the least and most occuring item in the array
  */
 const findFrequency = (responses: string[]): { min: any; max: any } => {
-  const sorted = responses
-    .sort(
-      (a: any, b: any) =>
-        responses.filter((v: any) => v === a).length -
-        responses.filter((v: any) => v === b).length
-    );
+  const sorted = responses.sort(
+    (a: any, b: any) =>
+      responses.filter((v: any) => v === a).length -
+      responses.filter((v: any) => v === b).length
+  );
 
-  return { min: sorted[0], max: sorted[sorted?.length -1] };
+  return { min: sorted[0], max: sorted[sorted?.length - 1] };
 };
 
 export const processLitActionResponseStrategy = (
@@ -30,7 +29,7 @@ export const processLitActionResponseStrategy = (
   });
 
   const copiedExecutionResponses = executionResponses.map((r) => {
-    return "" +r;
+    return '' + r;
   });
   log(
     'filtered responses with frequency dist: ',
@@ -54,18 +53,18 @@ export const processLitActionResponseStrategy = (
       );
     }
   }
-  
+
   let respFrequency = findFrequency(copiedExecutionResponses);
   if (strategy?.strategy === 'leastCommon') {
-      log(
-        'strategy found to be most common, taking most common response from execution results'
-      );
-      return respFrequency.min;
+    log(
+      'strategy found to be most common, taking most common response from execution results'
+    );
+    return respFrequency.min;
   } else if (strategy?.strategy === 'mostCommon') {
-      log(
-        'strategy found to be most common, taking most common response from execution results'
-      );
-      return respFrequency.max;
+    log(
+      'strategy found to be most common, taking most common response from execution results'
+    );
+    return respFrequency.max;
   } else {
     if (copiedExecutionResponses[i] === respFrequency.min) {
       log(

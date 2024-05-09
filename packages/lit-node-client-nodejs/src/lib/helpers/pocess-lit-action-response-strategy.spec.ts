@@ -144,7 +144,7 @@ describe('processLitActionResponseStrategy', () => {
       strategy: 'custom',
       customFilter: (responses) => {
         return responses[0];
-      }
+      },
     });
     expect(resp).toBeDefined();
     expect(resp).toBe('{"hello":"world","res": "71"}');
