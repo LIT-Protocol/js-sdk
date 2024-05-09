@@ -917,7 +917,7 @@ export class LitContracts {
       let proto = 'https://';
       /**
        * ports in range of 8470 - 8479 are configured for https on cayenne network
-       * we shouold resepct https on these ports as they are using OpenSSL
+       * we shouold resepct https on these ports as they are using trusted ZeroSSL certs
        */
       if (item.port !== 443 && item.port > 8480 && item.port < 8469) {
         proto = 'http://';
