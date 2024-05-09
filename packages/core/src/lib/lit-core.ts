@@ -159,6 +159,7 @@ export class LitCore {
           ...config,
         };
         break;
+      case LitNetwork.Mumbai:
       default:
         // Probably `custom` or `localhost`
         this.config = {
@@ -222,7 +223,8 @@ export class LitCore {
   setNewConfig = async (): Promise<void> => {
     if (
       this.config.litNetwork === LitNetwork.Manzano ||
-      this.config.litNetwork === LitNetwork.Habanero
+      this.config.litNetwork === LitNetwork.Habanero ||
+      this.config.litNetwork === LitNetwork.Mumbai
     ) {
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork

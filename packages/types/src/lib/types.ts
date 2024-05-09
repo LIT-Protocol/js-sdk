@@ -125,6 +125,7 @@ export type LIT_NETWORKS_KEYS =
   | 'cayenne'
   | 'localhost'
   | 'custom'
+  | 'mumbai'
   | 'habanero'
   | 'manzano';
 

@@ -746,6 +746,7 @@ export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
   [LitNetwork.Cayenne]: [],
   [LitNetwork.Manzano]: [],
   [LitNetwork.Habanero]: [],
+  [LitNetwork.Mumbai]: [],
   [LitNetwork.Custom]: [],
   // FIXME: Remove localhost and internalDev; replaced with 'custom' type networks
   localhost: [

@@ -929,7 +929,13 @@ export class LitContracts {
   };
 
   private static async _resolveContractContext(
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network:
+      | 'cayenne'
+      | 'manzano'
+      | 'habanero'
+      | 'custom'
+      | 'localhost'
+      | 'mumbai',
     context?: LitContractContext | LitContractResolverContext
   ) {
     let data;
@@ -940,10 +946,44 @@ export class LitContracts {
     const HABANERO_API =
       'https://lit-general-worker.getlit.dev/habanero-contract-addresses';
 
-    if (network === 'cayenne') {
+    const mumbaiDeployment = {
+      StakingBalances: '0x5FD776935aC4131cc7b86e1EC233574Aa5aEb55B',
+      Staking: '0x81a977477Dd044E9C93e774DE4b4b0b8b0F3DC16',
+      Multisender: '0xC15FdF248B3774030A737dD7e31BCFB5F255C580',
+      LITToken: '0x53695556f8a1a064EdFf91767f15652BbfaFaD04',
+      PubkeyRouter: '0x82a60A3cC148e3E44228AF773c3DD2F4FC60B3a6',
+      PKPNFT: '0x4DF1452ac9384097eB5646E338706a1b0e639c55',
+      RateLimitNFT: '0x1095f5D6bfADB5429596b499Cf49Cad69c9a9e62',
+      PKPHelper: '0x0bA829b962d16E89Ae57f1D407e27bC4B964ECA1',
+      PKPHelperV2: '0x737DF47917387F473C6563A2C2D40f3b8DE607a7',
+      PKPPermissions: '0xD49d865FC4719317E46ED50A3385A45dca00c975',
+      PKPNFTMetadata: '0xE7c0f8144AD7ECe46a581a724C52Ef7d21f46853',
+      Allowlist: '0x8Fbb31210641e8c69E4be68A4f950CA985A93730',
+      ContractResolver: '0x9EC99517c57aa17074040185E1e5548805e3bB1e',
+      DomainWalletRegistry: '0x0CB75d4c7fBfE80AaCB5B4F901c41D990F13e22b',
+      HDKeyDeriver: '0x1492a7b066A4DdeC505C002668367f119CE10f92',
+      PaymentDelegation: '0xc58D27e88629FCfFb94897580579C9Eb6e53DFC6',
+    };
+
+    if (network === 'cayenne' || network === 'mumbai') {
       try {
         // Fetch and parse the JSON data in one step
         data = await fetch(CAYENNE_API).then((res) => res.json());
+
+        // Adjust the addresses
+        // @ts-ignore
+        data = {
+          ...data,
+          data: data.data.map((c) => ({
+            ...c,
+            contracts: c.contracts.map((inner_c: object) => ({
+              // @ts-ignore
+              ...inner_c,
+              // @ts-ignore
+              address_hash: mumbaiDeployment[c.name],
+            })),
+          })),
+        };
       } catch (e: any) {
         throw new Error(
           `Error fetching data from ${CAYENNE_API}: ${e.toString()}`

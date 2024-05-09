@@ -4,6 +4,7 @@ export enum LIT_TESTNET {
   LOCALCHAIN = 'localchain',
   MANZANO = 'manzano',
   CAYENNE = 'cayenne',
+  MUMBAI = 'mumbai',
 }
 
 export interface ProcessEnvs {
