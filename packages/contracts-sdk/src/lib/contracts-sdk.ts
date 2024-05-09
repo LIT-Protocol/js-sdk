@@ -569,7 +569,13 @@ export class LitContracts {
   };
 
   public static async getStakingContract(
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network:
+      | 'cayenne'
+      | 'manzano'
+      | 'habanero'
+      | 'custom'
+      | 'localhost'
+      | 'mumbai',
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) {
@@ -850,7 +856,13 @@ export class LitContracts {
   }
 
   public static getMinNodeCount = async (
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network:
+      | 'cayenne'
+      | 'manzano'
+      | 'habanero'
+      | 'custom'
+      | 'localhost'
+      | 'mumbai',
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ) => {
@@ -869,7 +881,13 @@ export class LitContracts {
   };
 
   public static getValidators = async (
-    network: 'cayenne' | 'manzano' | 'habanero' | 'custom' | 'localhost',
+    network:
+      | 'cayenne'
+      | 'manzano'
+      | 'habanero'
+      | 'custom'
+      | 'localhost'
+      | 'mumbai',
     context?: LitContractContext | LitContractResolverContext,
     rpcUrl?: string
   ): Promise<string[]> => {
@@ -974,6 +992,7 @@ export class LitContracts {
         // @ts-ignore
         data = {
           ...data,
+          // @ts-ignore
           data: data.data.map((c) => ({
             ...c,
             contracts: c.contracts.map((inner_c: object) => ({
