@@ -66,11 +66,9 @@ export const processLitActionResponseStrategy = (
     );
     return respFrequency.max;
   } else {
-    if (copiedExecutionResponses[i] === respFrequency.min) {
       log(
         'no strategy found, using least common response object from execution results'
       );
       respFrequency.min;
-    }
   }
 };
