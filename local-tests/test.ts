@@ -48,6 +48,7 @@ import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/te
 import { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
 import { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
 import { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthSigToEncryptDecryptString';
+import { testPkpEthersOperations } from './tests/testPkpEthersOperations';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -125,6 +126,10 @@ import { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthS
     testCosmosAuthSigToEncryptDecryptString,
   };
 
+  const pkpEthersTest = {
+    testPkpEthersOperations,
+  };
+
   const testConfig = {
     tests: {
       // testExample,
@@ -135,6 +140,7 @@ import { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthS
       ...litActionIpfsIdSessionSigsTests,
       ...capacityDelegationTests,
       ...bareAuthSigTests,
+      ...pkpEthersTest,
     },
     devEnv,
   };
