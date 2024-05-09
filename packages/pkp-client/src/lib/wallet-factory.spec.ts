@@ -4,7 +4,12 @@ import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { WalletFactory } from './wallet-factory';
 
 import * as LITCONFIG from 'lit.config.json';
-import { PKPCosmosWalletProp, PKPEthersWalletProp } from '@lit-protocol/types';
+import {
+  AuthCallbackParams,
+  AuthSig,
+  PKPCosmosWalletProp,
+  PKPEthersWalletProp,
+} from '@lit-protocol/types';
 
 describe('WalletFactory', () => {
   it('should create an Ethereum wallet', () => {
@@ -32,6 +37,11 @@ describe('WalletFactory', () => {
         getSessionSigsProps: {
           chain: 'ethereum',
           resourceAbilityRequests: [],
+          authNeededCallback: function (
+            params: AuthCallbackParams
+          ): Promise<AuthSig> {
+            throw new Error('Function not implemented.');
+          },
         },
       },
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
@@ -57,6 +67,11 @@ describe('WalletFactory', () => {
         getSessionSigsProps: {
           chain: 'ethereum',
           resourceAbilityRequests: [],
+          authNeededCallback: function (
+            params: AuthCallbackParams
+          ): Promise<AuthSig> {
+            throw new Error('Function not implemented.');
+          },
         },
       },
       pkpPubKey: LITCONFIG.PKP_PUBKEY,
