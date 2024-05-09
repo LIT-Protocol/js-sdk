@@ -24,6 +24,7 @@ export const testPkpEthersWithEoaSessionSigsToSignWithAuthContext = async (
     pkpPubKey: alice.pkp.publicKey,
     litNodeClient: devEnv.litNodeClient,
     authContext: {
+      client: devEnv.litNodeClient,
       getSessionSigsProps: {
         authNeededCallback: async function (
           params: AuthCallbackParams
