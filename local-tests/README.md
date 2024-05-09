@@ -2,6 +2,11 @@
 
 Tinny is a mini test framework, serving as a temporary solution for running e2e tests in TypeScript until we can integrate `Jest`. It utilizes `esbuild` for its rapid compilation speed to bundle all the tests into a single `test.mjs` file, then runs the built `test.mjs` file immediately. See [Benchmark](#esbuild-benchmark)
 
+# Prerequisite
+
+- Node v20 or above
+- The generated file `networkContext.ts` after running `npm run deploy -- --network localchain` in the `lit-assets` repo
+
 # How to run
 
 In most cases, you will only need the following two environment variables, and a `--filter` flag. See [API](#api)
