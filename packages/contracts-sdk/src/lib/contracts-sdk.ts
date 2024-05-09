@@ -916,7 +916,7 @@ export class LitContracts {
     const networks = activeValidatorStructs.map((item: any) => {
       let proto = 'https://';
       /**
-       * ports in range of 8470 - 8479 are configured for https on cayenne network
+       * ports in range of 8470 - 8479 are configured for https on custom networks (eg. cayenne)
        * we shouold resepct https on these ports as they are using trusted ZeroSSL certs
        */
       if (item.port !== 443 && item.port > 8480 && item.port < 8469) {
