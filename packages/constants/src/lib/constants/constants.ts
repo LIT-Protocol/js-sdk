@@ -589,6 +589,11 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
   },
 };
 
+/**
+ * Lit Protocol Chain RPC URL
+ */
+export const LIT_CHAIN_RPC_URL = LIT_CHAINS['chronicleTestnet'].rpcUrls[0];
+
 export const LIT_EVM_CHAINS = LIT_CHAINS;
 
 /**

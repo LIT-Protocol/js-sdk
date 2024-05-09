@@ -1,7 +1,7 @@
 import {
   DecryptRequest,
   DecryptResponse,
-  EncryptRequest,
+  EncryptSdkParams,
   EncryptResponse,
   ExecuteJsResponse,
   FormattedMultipleAccs,
@@ -234,7 +234,7 @@ export interface ILitNodeClient {
    *
    * @param params
    */
-  encrypt(params: EncryptRequest): Promise<EncryptResponse>;
+  encrypt(params: EncryptSdkParams): Promise<EncryptResponse>;
 
   /**
    * Decrypt data with Lit identity-based Timelock Encryption.

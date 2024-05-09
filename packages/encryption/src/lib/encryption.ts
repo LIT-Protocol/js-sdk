@@ -10,7 +10,6 @@ import {
   DecryptZipFileWithMetadataProps,
   EncryptFileAndZipWithMetadataProps,
   EncryptFileRequest,
-  EncryptRequestBase,
   EncryptResponse,
   EncryptStringRequest,
   EncryptZipRequest,
@@ -186,6 +185,11 @@ export async function decryptFromJson<T extends DecryptFromJsonProps>(
  * Encrypt a string.  This is used to encrypt any string that is to be locked via the Lit Protocol.
  *
  * @param { EncryptStringRequest } params - The params required to encrypt a string
+ * @param params.dataToEncrypt - (optional) The string to encrypt
+ * @param params.accessControlConditions - (optional) The access control conditions
+ * @param params.evmContractConditions - (optional) The EVM contract conditions
+ * @param params.solRpcConditions - (optional) The Solana RPC conditions
+ * @param params.unifiedAccessControlConditions - The unified access control conditions
  * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
  * @returns { Promise<EncryptResponse> } - The encrypted string and the hash of the string
@@ -280,7 +284,7 @@ export const zipAndEncryptString = async (
 
   zip.file('string.txt', params.dataToEncrypt);
 
-  return encryptZip({ ...params, zip }, litNodeClient);
+  return encryptZip({ zip, ...params }, litNodeClient);
 };
 
 /**
@@ -288,7 +292,7 @@ export const zipAndEncryptString = async (
  * Zip and encrypt multiple files.
  *
  * @param { Array<File> } files - The files to encrypt
- * @param { EncryptRequestBase } paramsBase - The params required to encrypt a file
+ * @param { DecryptRequestBase } paramsBase - The params required to encrypt a file
  * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
  * @returns { Promise<EncryptResponse> } - The encrypted file and the hash of the file
@@ -296,7 +300,7 @@ export const zipAndEncryptString = async (
 */
 export const zipAndEncryptFiles = async (
   files: File[],
-  paramsBase: EncryptRequestBase,
+  params: DecryptRequest,
   litNodeClient: ILitNodeClient
 ): Promise<EncryptResponse> => {
   // let's zip em
@@ -339,7 +343,7 @@ export const zipAndEncryptFiles = async (
     folder.file(files[i].name, files[i]);
   }
 
-  return encryptZip({ ...paramsBase, zip }, litNodeClient);
+  return encryptZip({ zip, ...params }, litNodeClient);
 };
 
 /**
@@ -388,6 +392,7 @@ export const decryptToZip = async (
  * Encrypt a zip file created with JSZip.
  *
  * @param { EncryptZipRequest } params - The params required to encrypt a zip
+ * @param param.zip - The zip file to encrypt
  * @param { ILitNodeClient } litNodeClient - The Lit Node Client
  *
  * @returns { Promise<EncryptResponse> } - The encrypted zip file and the hash of the zip file
@@ -422,7 +427,6 @@ export const encryptZip = async (
 
   // to download the encrypted zip file for testing, uncomment this
   // saveAs(encryptedZipBlob, 'encrypted.bin')
-
   return litNodeClient.encrypt({
     ...params,
     dataToEncrypt: new Uint8Array(zipBlobArrayBuffer),

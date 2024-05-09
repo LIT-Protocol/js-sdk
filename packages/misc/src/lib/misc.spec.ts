@@ -295,5 +295,5 @@ it('should get ip address', async () => {
   global.fetch = fetch;
 
   const ipAddres = await utilsModule.getIpAddress('cayenne.litgateway.com');
-  expect(ipAddres).toBe('1');
+  expect(ipAddres).toBe('207.244.70.36');
 });

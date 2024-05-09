@@ -652,7 +652,7 @@ export class LitContracts {
     ): Promise<string> {
       let address: string = '';
       switch (contract) {
-        case 'AllowList' || 'AllowList':
+        case 'Allowlist' || 'AllowList':
           address = await resolverContract['getContract'](
             await resolverContract['ALLOWLIST_CONTRACT'](),
             environment
@@ -1068,6 +1068,12 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     }
 
     let tokenId;
+
+    if (!events[0].topics || events[0].topics.length < 1) {
+      throw new Error(
+        `No topics found in events, cannot derive pkp information. Transaction hash: ${receipt.transactionHash} If you are using your own contracts please use ethers directly`
+      );
+    }
 
     tokenId = events[0].topics[1];
     console.warn('tokenId:', tokenId);

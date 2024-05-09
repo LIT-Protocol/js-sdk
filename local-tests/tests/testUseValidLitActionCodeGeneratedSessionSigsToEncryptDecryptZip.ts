@@ -25,13 +25,9 @@ export const testUseValidLitActionCodeGeneratedSessionSigsToEncryptDecryptZip =
       userAddress: alice.authMethodOwnedPkp.ethAddress,
     });
 
-    const litActionSessionSigs = await getLitActionSessionSigs(devEnv, alice);
-
     const encryptRes = await LitJsSdk.zipAndEncryptString(
       {
         accessControlConditions: accs,
-        chain: 'ethereum',
-        sessionSigs: litActionSessionSigs,
         dataToEncrypt: message,
       },
       devEnv.litNodeClient as unknown as ILitNodeClient

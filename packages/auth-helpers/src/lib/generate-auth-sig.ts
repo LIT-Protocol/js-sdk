@@ -23,7 +23,7 @@ export const generateAuthSig = async ({
   signer: ethers.Wallet | ethers.Signer | SignerLike;
   toSign: string;
   address?: string;
-  algo?: 'LIT_BLS' | 'ed25519';
+  algo?: 'ed25519';
 }): Promise<AuthSig> => {
   if (!signer?.signMessage) {
     throw new Error('signer does not have a signMessage method');
