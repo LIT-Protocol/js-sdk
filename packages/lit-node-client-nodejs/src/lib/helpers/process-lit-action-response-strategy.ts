@@ -10,35 +10,27 @@ import { log, logError } from '@lit-protocol/misc';
  * @param responses any[]
  * @returns an object which contains both the least and most occuring item in the array
  */
-const findFrequency = (responses: any[]): { min: any; max: any } => {
-  var maxEl = responses[0],
-    minEl = responses[0],
-    maxCount = 1,
-    minCount = 1;
-  for (var i = 0; i < responses.length; i++) {
-    var el = responses[i];
-    if (responses[el] == null) responses[el] = 1;
-    else responses[el]++;
-    if (responses[el] > maxCount) {
-      maxEl = el;
-      maxCount = responses[el];
-    } else if (responses[el] <= minCount) {
-      minEl = el;
-      minCount = responses[el];
-    }
-  }
+const findFrequency = (responses: string[]): { min: any; max: any } => {
+  const sorted = responses
+    .sort(
+      (a: any, b: any) =>
+        responses.filter((v: any) => v === a).length -
+        responses.filter((v: any) => v === b).length
+    );
 
-  return { min: minEl, max: maxEl };
+  return { min: sorted[0], max: sorted[sorted?.length -1] };
 };
+
 export const processLitActionResponseStrategy = (
   responses: NodeShare[],
   strategy: LitActionResponseStrategy
 ): any => {
-  const executionResponses = responses.map((resp) => {
-    return JSON.parse(resp.response);
+  const executionResponses = responses.map((nodeResp) => {
+    return nodeResp.response;
   });
+
   const copiedExecutionResponses = executionResponses.map((r) => {
-    return { ...r };
+    return "" +r;
   });
   log(
     'filtered responses with frequency dist: ',
@@ -62,29 +54,24 @@ export const processLitActionResponseStrategy = (
       );
     }
   }
+  
   let respFrequency = findFrequency(copiedExecutionResponses);
-  for (let i = 0; i < executionResponses.length; i++) {
-    if (strategy?.strategy === 'leastCommon') {
-      if (copiedExecutionResponses[i] === respFrequency.min) {
-        log(
-          'strategy found to be most common, taking most common response from execution results'
-        );
-        return executionResponses[i];
-      }
-    } else if (strategy?.strategy === 'mostCommon') {
-      if (copiedExecutionResponses[i] === respFrequency.max) {
-        log(
-          'strategy found to be most common, taking most common response from execution results'
-        );
-        return executionResponses[i];
-      }
-    } else {
-      if (copiedExecutionResponses[i].leastPopular === respFrequency.min) {
-        log(
-          'no strategy found, using least common response object from execution results'
-        );
-        return executionResponses[i];
-      }
+  if (strategy?.strategy === 'leastCommon') {
+      log(
+        'strategy found to be most common, taking most common response from execution results'
+      );
+      return respFrequency.min;
+  } else if (strategy?.strategy === 'mostCommon') {
+      log(
+        'strategy found to be most common, taking most common response from execution results'
+      );
+      return respFrequency.max;
+  } else {
+    if (copiedExecutionResponses[i] === respFrequency.min) {
+      log(
+        'no strategy found, using least common response object from execution results'
+      );
+      respFrequency.min;
     }
   }
 };

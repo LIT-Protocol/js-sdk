@@ -129,14 +129,14 @@ describe('processLitActionResponseStrategy', () => {
     let resp = processLitActionResponseStrategy(litActionResponses, {
       strategy: 'leastCommon',
     });
-    expect(resp.res).toBe('71');
+    expect(resp).toBe('{"hello":"world","res": "71"}');
   });
 
   it('should find most common response', () => {
     let resp = processLitActionResponseStrategy(litActionResponses, {
       strategy: 'mostCommon',
     });
-    expect(resp.res).toBeDefined();
+    expect(resp).toBe('{"hello":"world","res":{}}');
   });
 
   it('should find most common response', () => {
@@ -147,7 +147,6 @@ describe('processLitActionResponseStrategy', () => {
       }
     });
     expect(resp).toBeDefined();
-    expect(resp.res).toBeDefined();
-    expect(resp.res).toBe('71');
+    expect(resp).toBe('{"hello":"world","res": "71"}');
   });
 });
