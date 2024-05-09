@@ -138,4 +138,16 @@ describe('processLitActionResponseStrategy', () => {
     });
     expect(resp.res).toBeDefined();
   });
+
+  it('should find most common response', () => {
+    let resp = processLitActionResponseStrategy(litActionResponses, {
+      strategy: 'custom',
+      customFilter: (responses) => {
+        return responses[0];
+      }
+    });
+    expect(resp).toBeDefined();
+    expect(resp.res).toBeDefined();
+    expect(resp.res).toBe('71');
+  });
 });
