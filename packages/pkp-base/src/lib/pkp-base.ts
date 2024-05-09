@@ -18,6 +18,7 @@ import {
   RPCUrls,
   AuthMethod,
   ExecuteJsResponse,
+  SessionSigsMap,
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
@@ -51,7 +52,7 @@ export class PKPBase<T = PKPBaseDefaultParams> {
   // @deprecated
   controllerAuthSig?: AuthSig;
   controllerAuthMethods?: AuthMethod[];
-  controllerSessionSigs?: SessionSigs;
+  controllerSessionSigs?: SessionSigsMap;
   sessionSigsExpiration?: string;
   authContext?: AuthenticationProps;
 
@@ -100,18 +101,22 @@ export class PKPBase<T = PKPBaseDefaultParams> {
     this.debug = prop.debug || false;
     this.setLitAction(prop);
     this.setLitActionJsParams(prop.litActionJsParams || {});
-    this.litNodeClient = new LitNodeClient({
-      litNetwork: prop.litNetwork ?? 'cayenne',
-      ...(prop.bootstrapUrls &&
-        prop.litNetwork === 'custom' && { bootstrapUrls: prop.bootstrapUrls }),
-      ...(prop.bootstrapUrls &&
-        prop.litNetwork == 'custom' && { minNodeCount: prop.minNodeCount }),
-      debug: this.debug,
-      // minNodeCount:
-      //   prop.bootstrapUrls && prop.litNetwork == 'custom'
-      //     ? prop.minNodeCount
-      //     : defaultLitnodeClientConfig.minNodeCount,
-    });
+    this.litNodeClient =
+      (prop.litNodeClient as LitNodeClient) ||
+      new LitNodeClient({
+        litNetwork: prop.litNetwork ?? 'cayenne',
+        ...(prop.bootstrapUrls &&
+          prop.litNetwork === 'custom' && {
+            bootstrapUrls: prop.bootstrapUrls,
+          }),
+        ...(prop.bootstrapUrls &&
+          prop.litNetwork == 'custom' && { minNodeCount: prop.minNodeCount }),
+        debug: this.debug,
+        // minNodeCount:
+        //   prop.bootstrapUrls && prop.litNetwork == 'custom'
+        //     ? prop.minNodeCount
+        //     : defaultLitnodeClientConfig.minNodeCount,
+      });
   }
 
   /**
@@ -234,16 +239,14 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       );
     }
 
-    // Print deprecation warning for controllerSessionSigs
-    if (this.controllerSessionSigs) {
-      logError(
-        'controllerSessionSigs is deprecated, please use authContext instead'
-      );
-    }
-
-    // Check auth context if provided
+    // Check if authContext is provided
     if (this.authContext) {
-      // It must have a valid client and getSessionSigsProps
+      // Try to assign litNodeClient to authContext.client if it's not already set and litNodeClient is available
+      if (!this.authContext.client && this.litNodeClient) {
+        this.authContext.client = this.litNodeClient;
+      }
+
+      // Ensure authContext has a valid client and getSessionSigsProps
       if (
         !(this.authContext.client instanceof LitNodeClientNodeJs) ||
         !this.authContext.getSessionSigsProps
@@ -266,6 +269,13 @@ export class PKPBase<T = PKPBaseDefaultParams> {
    * @throws {Error} - Throws an error if `pkpPubKey` is not provided, if `controllerAuthSig` or `controllerSessionSigs` is not provided, if `controllerSessionSigs` is not an object, if `executeJsArgs` does not have either `code` or `ipfsId`, or if an error occurs during the execution of the Lit action.
    */
   async runLitAction(toSign: Uint8Array, sigName: string): Promise<any> {
+    // -- validate executeJsArgs
+    if (this.litActionCode && this.litActionIPFS) {
+      return this.throwError(
+        'litActionCode and litActionIPFS cannot exist at the same time'
+      );
+    }
+
     if (!this.litNodeClientReady) {
       await this.init();
     }
@@ -286,7 +296,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       ...(this.litActionCode && { code: this.litActionCode }),
       ...(this.litActionIPFS && { ipfsId: this.litActionIPFS }),
       sessionSigs: controllerSessionSigs,
-      authMethods: this.authContext?.authMethods,
       jsParams: {
         ...{
           toSign,
@@ -359,28 +368,24 @@ export class PKPBase<T = PKPBaseDefaultParams> {
 
     this.validateAuthContext();
 
+    const sessionSigsFromAuthContext =
+      await this.authContext?.client?.getSessionSigs({
+        ...this.authContext.getSessionSigsProps,
+      });
+
     const controllerSessionSigs =
-      (await this.authContext?.client?.getSessionSigs(
-        this.authContext.getSessionSigsProps
-      )) || this.controllerSessionSigs;
+      sessionSigsFromAuthContext || this.controllerSessionSigs;
+
+    if (!controllerSessionSigs) {
+      this.throwError('controllerSessionSigs is required');
+    }
 
     try {
-      let sig;
-      if (controllerSessionSigs) {
-        sig = await this.litNodeClient.pkpSign({
-          toSign,
-          pubKey: this.uncompressedPubKey,
-          authMethods: this.authContext?.authMethods ?? [],
-          sessionSigs: controllerSessionSigs,
-        });
-      } else if (this.authContext?.authMethods) {
-        sig = await this.litNodeClient.pkpSign({
-          toSign,
-          pubKey: this.uncompressedPubKey,
-          authMethods: this.authContext.authMethods,
-          sessionSigs: controllerSessionSigs!,
-        });
-      }
+      const sig = await this.litNodeClient.pkpSign({
+        toSign,
+        pubKey: this.uncompressedPubKey,
+        sessionSigs: controllerSessionSigs as SessionSigsMap,
+      });
 
       if (!sig) {
         throw new Error('No signature returned');

@@ -41,7 +41,6 @@ export class TinnyEnvironment {
 
     // Available Accounts
     // ==================
-
     // (0) "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" (10000.000000000000000000 ETH)
     // (1) "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" (10000.000000000000000000 ETH)
     // (2) "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" (10000.000000000000000000 ETH)
@@ -65,6 +64,7 @@ export class TinnyEnvironment {
       '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
     ],
     KEY_IN_USE: new Array(),
+    NO_SETUP: Boolean(process.env['NO_SETUP']) || false,
   };
 
   public litNodeClient: LitNodeClient;
@@ -299,6 +299,10 @@ export class TinnyEnvironment {
    * Init
    */
   async init() {
+    if (this.processEnvs.NO_SETUP) {
+      console.log('[𐬺🧪 Tinny Environment𐬺] Skipping setup');
+      return;
+    }
     await this.setupLitNodeClient();
     await this.setupSuperCapacityDelegationAuthSig();
     await this.setupBareEthAuthSig();

@@ -1,5 +1,3 @@
-import { LIT_ENDPOINT_VERSION } from '@lit-protocol/constants';
-import { LIT_TESTNET } from './setup/tinny-config';
 import { TinnyEnvironment } from './setup/tinny-environment';
 import { runInBand, runTestsParallel } from './setup/tinny-operations';
 // import { testBundleSpeed } from './tests/test-bundle-speed';
@@ -48,7 +46,11 @@ import { testUseInvalidLitActionIpfsCodeToGenerateSessionSigs } from './tests/te
 import { testSolAuthSigToEncryptDecryptString } from './tests/testSolAuthSigToEncryptDecryptString';
 import { testEthAuthSigToEncryptDecryptString } from './tests/testEthAuthSigToEncryptDecryptString';
 import { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthSigToEncryptDecryptString';
-import { testPkpEthersOperations } from './tests/testPkpEthersOperations';
+import { testPkpEthersWithEoaSessionSigsToSignMessage } from './tests/testPkpEthersWithEoaSessionSigsToSignMessage';
+import { testPkpEthersWithEoaSessionSigsToSignWithAuthContext } from './tests/testPkpEthersWithEoaSessionSigsToSignWithAuthContext';
+import { testPkpEthersWithEoaSessionSigsToEthSign } from './tests/testPkpEthersWithEoaSessionSigsToEthSign';
+import { testPkpEthersWithEoaSessionSigsToPersonalSign } from './tests/testPkpEthersWithEoaSessionSigsToPersonalSign';
+import { testPkpEthersWithEoaSessionSigsToSendTx } from './tests/testPkpEthersWithEoaSessionSigsToSendTx';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -127,7 +129,11 @@ import { testPkpEthersOperations } from './tests/testPkpEthersOperations';
   };
 
   const pkpEthersTest = {
-    testPkpEthersOperations,
+    testPkpEthersWithEoaSessionSigsToSignWithAuthContext,
+    testPkpEthersWithEoaSessionSigsToSignMessage,
+    testPkpEthersWithEoaSessionSigsToEthSign,
+    testPkpEthersWithEoaSessionSigsToPersonalSign,
+    testPkpEthersWithEoaSessionSigsToSendTx,
   };
 
   const testConfig = {
