@@ -272,7 +272,6 @@ export interface BaseJsonPkpSignRequest {
 export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
   pubKey: string;
   sessionSigs: SessionSigsMap;
-  authMethods?: AuthMethod[];
 }
 
 /**
@@ -1245,21 +1244,19 @@ export interface LitClientSessionManager {
 }
 
 export interface AuthenticationProps {
-  client: LitClientSessionManager;
+  client?: LitClientSessionManager;
+
+  /**
+   * This params is equivalent to the `getSessionSigs` params in the `litNodeClient`
+   */
   getSessionSigsProps: GetSessionSigsProps;
-  authMethods: AuthMethod[];
 }
 
 export interface PKPBaseProp {
+  litNodeClient?: ILitNodeClient;
   pkpPubKey: string;
   rpc?: string;
   rpcs?: RPCUrls;
-  controllerAuthSig?: AuthSig;
-  // @deprecated
-  controllerAuthMethods?: AuthMethod[];
-  // @deprecated
-  controllerSessionSigs?: SessionSigs;
-  // @deprecated
   sessionSigsExpiration?: string;
   authContext?: AuthenticationProps;
   litNetwork?: any;
@@ -1270,6 +1267,18 @@ export interface PKPBaseProp {
   litActionIPFS?: string;
   litActionJsParams?: any;
   provider?: Provider;
+  controllerSessionSigs?: SessionSigs;
+
+  // -- soon to be deprecated
+  /**
+   * @deprecated - use authContext
+   */
+  controllerAuthMethods?: AuthMethod[];
+
+  /**
+   * @deprecated - use authContext
+   */
+  controllerAuthSig?: AuthSig;
 }
 
 export interface RPCUrls {
@@ -1278,7 +1287,12 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export type PKPEthersWalletProp = PKPBaseProp;
+export type PKPEthersWalletProp = Omit<
+  PKPBaseProp,
+  'controllerAuthSig' | 'controllerAuthMethods'
+> & {
+  litNodeClient: ILitNodeClient;
+};
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)

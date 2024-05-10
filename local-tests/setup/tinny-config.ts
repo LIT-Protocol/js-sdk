@@ -75,6 +75,11 @@ export interface ProcessEnvs {
    * The list of keys that are currently in use.
    */
   KEY_IN_USE: boolean[];
+
+  /**
+   * Ignore setup steps. Usually when you run to quickly run a single test.
+   */
+  NO_SETUP: boolean;
 }
 
 /**

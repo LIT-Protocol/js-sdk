@@ -50,6 +50,7 @@ import {
   normalizeAndStringify,
   removeHexPrefix,
   throwError,
+  throwErrorV1,
 } from '@lit-protocol/misc';
 import {
   getStorageItem,
@@ -140,9 +141,17 @@ export class LitNodeClientNodeJs
 
   // ========== Constructor ==========
   constructor(args: LitNodeClientConfig | CustomNetwork) {
+    if (!args) {
+      throwError({
+        message: 'must provide LitNodeClient parameters',
+        errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+        errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
+      });
+    }
+
     super(args);
 
-    if ('defaultAuthCallback' in args) {
+    if (args !== undefined && args !== null && 'defaultAuthCallback' in args) {
       this.defaultAuthCallback = args.defaultAuthCallback;
     }
   }
@@ -2441,25 +2450,10 @@ const resourceAbilityRequests = [
     const signatures: SessionSigsMap = {};
 
     this.connectedNodes.forEach((nodeAddress: string) => {
-      let toSign: SessionSigningTemplate;
-
-      // FIXME: We need this reformatting because the Cayenne network is not able to handle the node address as a URL.
-      // We are converting back
-      // from: http://207.244.70.36:7474
-      // to: 127.0.0.1:7474
-      if (this.config.litNetwork === LitNetwork.Cayenne) {
-        const url = new URL(nodeAddress);
-        const newNodeAddress = `127.0.0.1:${url.port}`;
-        toSign = {
-          ...signingTemplate,
-          nodeAddress: newNodeAddress,
-        };
-      } else {
-        toSign = {
-          ...signingTemplate,
-          nodeAddress,
-        };
-      }
+      const toSign: SessionSigningTemplate = {
+        ...signingTemplate,
+        nodeAddress,
+      };
 
       const signedMessage = JSON.stringify(toSign);
 

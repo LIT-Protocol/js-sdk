@@ -481,8 +481,9 @@ export const checkSevSnpAttestation = async (
   // get the VCEK certificate
   let vcekCert;
   const vcekUrl = sevSnpUtilsSdk.get_vcek_url(report);
-  // if browser, use local storage
-  if (isBrowser()) {
+  // use local storage if we have one available
+  if (globalThis.localStorage) {
+    log('Using local storage for certificate caching');
     vcekCert = localStorage.getItem(vcekUrl);
     if (vcekCert) {
       vcekCert = uint8arrayFromString(vcekCert, 'base64');
