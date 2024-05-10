@@ -51,6 +51,33 @@ import { testPkpEthersWithEoaSessionSigsToSignWithAuthContext } from './tests/te
 import { testPkpEthersWithEoaSessionSigsToEthSign } from './tests/testPkpEthersWithEoaSessionSigsToEthSign';
 import { testPkpEthersWithEoaSessionSigsToPersonalSign } from './tests/testPkpEthersWithEoaSessionSigsToPersonalSign';
 import { testPkpEthersWithEoaSessionSigsToSendTx } from './tests/testPkpEthersWithEoaSessionSigsToSendTx';
+import { testPkpEthersWithPkpSessionSigsToSignMessage } from './tests/testPkpEthersWithPkpSessionSigsToSignMessage';
+import { testPkpEthersWithPkpSessionSigsToEthSign } from './tests/testPkpEthersWithPkpSessionSigsToEthSign';
+import { testPkpEthersWithPkpSessionSigsToPersonalSign } from './tests/testPkpEthersWithPkpSessionSigsToPersonalSign';
+import { testPkpEthersWithPkpSessionSigsToSendTx } from './tests/testPkpEthersWithPkpSessionSigsToSendTx';
+import { testPkpEthersWithEoaSessionSigsToEthSignTransaction } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTransaction';
+
+import { testPkpEthersWithPkpSessionSigsToEthSignTransaction } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTransaction';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTransaction } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTransaction';
+import { testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1 } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1';
+import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1 } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1 } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1';
+import { testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3 } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3';
+import { testPkpEthersWithEoaSessionSigsToEthSignTypedDataV4 } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedDataV4';
+import { testPkpEthersWithEoaSessionSigsToEthSignTypedData } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedData';
+import { testPkpEthersWithEoaSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithEoaSessionSigsToEthSignTypedDataUtil';
+import { testPkpEthersWithLitActionSessionSigsToSignMessage } from './tests/testPkpEthersWithLitActionSessionSigsToSignMessage';
+import { testPkpEthersWithLitActionSessionSigsToEthSign } from './tests/testPkpEthersWithLitActionSessionSigsToEthSign';
+import { testPkpEthersWithLitActionSessionSigsToPersonalSign } from './tests/testPkpEthersWithLitActionSessionSigsToPersonalSign';
+import { testPkpEthersWithLitActionSessionSigsToSendTx } from './tests/testPkpEthersWithLitActionSessionSigsToSendTx';
+import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3 } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV3 } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV3';
+import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4 } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV4 } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV4';
+import { testPkpEthersWithPkpSessionSigsToEthSignTypedData } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedData';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedData';
+import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil';
+import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -129,11 +156,43 @@ import { testPkpEthersWithEoaSessionSigsToSendTx } from './tests/testPkpEthersWi
   };
 
   const pkpEthersTest = {
-    testPkpEthersWithEoaSessionSigsToSignWithAuthContext,
-    testPkpEthersWithEoaSessionSigsToSignMessage,
-    testPkpEthersWithEoaSessionSigsToEthSign,
-    testPkpEthersWithEoaSessionSigsToPersonalSign,
-    testPkpEthersWithEoaSessionSigsToSendTx,
+    eoaSessionSigs: {
+      testPkpEthersWithEoaSessionSigsToSignWithAuthContext,
+      testPkpEthersWithEoaSessionSigsToSignMessage,
+      testPkpEthersWithEoaSessionSigsToEthSign,
+      testPkpEthersWithEoaSessionSigsToPersonalSign,
+      testPkpEthersWithEoaSessionSigsToSendTx,
+      testPkpEthersWithEoaSessionSigsToEthSignTransaction,
+      testPkpEthersWithEoaSessionSigsToEthSignTypedDataV1,
+      testPkpEthersWithEoaSessionSigsToEthSignTypedDataV3,
+      testPkpEthersWithEoaSessionSigsToEthSignTypedDataV4,
+      testPkpEthersWithEoaSessionSigsToEthSignTypedData,
+      testPkpEthersWithEoaSessionSigsToEthSignTypedDataUtil,
+    },
+    pkpSessionSigs: {
+      testPkpEthersWithPkpSessionSigsToSignMessage,
+      testPkpEthersWithPkpSessionSigsToEthSign,
+      testPkpEthersWithPkpSessionSigsToPersonalSign,
+      testPkpEthersWithPkpSessionSigsToSendTx,
+      testPkpEthersWithPkpSessionSigsToEthSignTransaction,
+      testPkpEthersWithPkpSessionSigsToEthSignTypedDataV1,
+      testPkpEthersWithPkpSessionSigsToEthSignTypedDataV3,
+      testPkpEthersWithPkpSessionSigsToEthSignTypedDataV4,
+      testPkpEthersWithPkpSessionSigsToEthSignTypedData,
+      testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil,
+    },
+    litActionSessionSigs: {
+      testPkpEthersWithLitActionSessionSigsToSignMessage,
+      testPkpEthersWithLitActionSessionSigsToEthSign,
+      testPkpEthersWithLitActionSessionSigsToPersonalSign,
+      testPkpEthersWithLitActionSessionSigsToSendTx,
+      testPkpEthersWithLitActionSessionSigsToEthSignTransaction,
+      testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV1,
+      testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV3,
+      testPkpEthersWithLitActionSessionSigsToEthSignTypedDataV4,
+      testPkpEthersWithLitActionSessionSigsToEthSignTypedData,
+      testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil,
+    },
   };
 
   const testConfig = {
@@ -146,7 +205,10 @@ import { testPkpEthersWithEoaSessionSigsToSendTx } from './tests/testPkpEthersWi
       ...litActionIpfsIdSessionSigsTests,
       ...capacityDelegationTests,
       ...bareAuthSigTests,
-      ...pkpEthersTest,
+
+      ...pkpEthersTest.eoaSessionSigs,
+      ...pkpEthersTest.pkpSessionSigs,
+      ...pkpEthersTest.litActionSessionSigs,
     },
     devEnv,
   };
