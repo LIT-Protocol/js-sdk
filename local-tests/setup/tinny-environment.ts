@@ -65,6 +65,8 @@ export class TinnyEnvironment {
       '0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6',
     ],
     KEY_IN_USE: new Array(),
+
+    TESTNET_MANAGER_URL: 'http://0.0.0.0:8000',
   };
 
   public litNodeClient: LitNodeClient;
@@ -87,6 +89,9 @@ export class TinnyEnvironment {
       '8c857343720203e3f52606409e6818284186a614e74026998f89e7417eed4d4b',
     address: 'cosmos14wp2s5kv07lt220rzfae57k73yv9z2azrmulku',
   };
+
+  //=========== PRIVATE MEMBERS ===========
+  private _testnetId: string | undefined;
 
   constructor(network?: LIT_TESTNET) {
     // -- setup networkj
@@ -326,6 +331,60 @@ export class TinnyEnvironment {
   }
 
   /**
+   * Used to start an instanc of a lit network through the Lit Testnet Manager
+   * if an isntance exists, we will just take it as we optimistically assume it will not be shut down in the test life time.
+   * If an instance does not exist then we create one
+   */
+  async startTestnetManager() {
+    const existingTestnetResp = await fetch(
+      this.processEnvs.TESTNET_MANAGER_URL + '/test/get/testnets'
+    );
+    const existingTestnets: string[] = await existingTestnetResp.json();
+    if (existingTestnets.length > 0) {
+      this._testnetId = existingTestnets[0];
+    } else {
+      const createTestnetResp = await fetch(
+        this.processEnvs.TESTNET_MANAGER_URL + '/test/create/testnet',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nodeCount: 6,
+            pollingInterval: '5000',
+            epochLength: 300,
+          }),
+        }
+      );
+
+      const createTestnet = await createTestnetResp.json();
+      this._testnetId = createTestnet.id;
+    }
+  }
+
+  async pollTestnetForActive() {
+    let state = 'Busy';
+    while (state != 'Active') {
+      const pollRes = await fetch(
+        this.processEnvs.TESTNET_MANAGER_URL +
+          '/test/poll/testnet/' +
+          this._testnetId
+      );
+      const res = await pollRes.json();
+      state = res.id;
+      console.log('found state to be', state);
+      if (state != 'Active') {
+        await new Promise<void>((res, _) => {
+          setTimeout(() => {
+            res();
+          }, 5_000);
+        });
+      }
+    }
+  }
+
+  /**
    * Context: the reason this is created instead of individually is because we can't allocate capacity beyond the global
    * max capacity.
    */
@@ -375,6 +434,7 @@ export class TinnyEnvironment {
       await this.litNodeClient.createCapacityDelegationAuthSig({
         dAppOwnerWallet: wallet,
         capacityTokenId: capacityTokenId,
+        delegateeAddresses: [],
       })
     ).capacityDelegationAuthSig;
   };

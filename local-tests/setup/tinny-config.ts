@@ -75,6 +75,11 @@ export interface ProcessEnvs {
    * The list of keys that are currently in use.
    */
   KEY_IN_USE: boolean[];
+
+  /**
+   * url for Testnet manager intigration
+   */
+  TESTNET_MANAGER_URL: string;
 }
 
 /**

@@ -52,6 +52,12 @@ import { testCosmosAuthSigToEncryptDecryptString } from './tests/testCosmosAuthS
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
   const devEnv = new TinnyEnvironment();
+  if (devEnv.network === LIT_TESTNET.LOCALCHAIN) {
+    await devEnv.startTestnetManager();
+    // wait for the testnet to be active before we start the tests.
+    await devEnv.pollTestnetForActive();
+  }
+
   await devEnv.init();
 
   const eoaSessionSigsTests = {
