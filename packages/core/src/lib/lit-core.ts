@@ -222,7 +222,8 @@ export class LitCore {
   setNewConfig = async (): Promise<void> => {
     if (
       this.config.litNetwork === LitNetwork.Manzano ||
-      this.config.litNetwork === LitNetwork.Habanero
+      this.config.litNetwork === LitNetwork.Habanero ||
+      this.config.litNetwork === LitNetwork.Cayenne
     ) {
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork
