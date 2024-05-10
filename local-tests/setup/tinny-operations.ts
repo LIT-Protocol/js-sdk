@@ -126,6 +126,12 @@ export const runTestsParallel = async ({
       filters.some((filter) => testName.includes(filter))
   );
 
+  if (!testsToRun || testsToRun.length <= 0) {
+    throw new Error(
+      '❌ No tests to run. You might have provided an invalid filter or no tests are available.'
+    );
+  }
+
   const testPromises = testsToRun.map(
     async ([testName, testFunction], testIndex) => {
       const maxAttempts = devEnv.processEnvs.MAX_ATTEMPTS;
@@ -168,7 +174,7 @@ export const runTestsParallel = async ({
                 testIndex + 1
               }. ${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)\x1b[0m`
             );
-            console.error(`\x1b[31mError:\x1b[90m ${error}\x1b[0m`);
+            console.error(`\x1b[31m❌Error:\x1b[90m ${error}\x1b[0m`);
             return `${testName} (Failed in ${timeTaken} ms) - Error: ${error}`;
           }
         }
