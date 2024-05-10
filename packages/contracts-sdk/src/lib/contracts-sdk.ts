@@ -919,7 +919,7 @@ export class LitContracts {
        * ports in range of 8470 - 8479 are configured for https on custom networks (eg. cayenne)
        * we shouold resepct https on these ports as they are using trusted ZeroSSL certs
        */
-      if (item.port !== 443 && item.port > 8480 && item.port < 8469) {
+      if (item.port !== 443 || (item.port > 8480 && item.port < 8469)) {
         proto = 'http://';
       }
       return `${proto}${intToIP(item.ip)}:${item.port}`;
