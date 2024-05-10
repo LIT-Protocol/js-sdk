@@ -365,6 +365,13 @@ export class LitCore {
         this.config.contractContext,
         this.config.rpcUrl!
       );
+    } else {
+      return throwError({
+        message:
+          'Unsuported network has been provided please use a "litNetwork" option which is supported ("cayenne", "habanero", "manzano")',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.code,
+      });
     }
   };
 
