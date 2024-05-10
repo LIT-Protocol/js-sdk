@@ -19,15 +19,18 @@ import {
   LIT_ERROR_CODE,
   LIT_NETWORKS,
   LitNetwork,
-  SIGTYPE,
+  LIT_CURVE,
   StakingStates,
   version,
+  LIT_ENDPOINT,
+  CAYENNE_URL,
 } from '@lit-protocol/constants';
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
   executeWithRetry,
+  getIpAddress,
   isBrowser,
   isNode,
   log,
@@ -53,11 +56,11 @@ import type {
   NodeErrorV3,
   RejectedNodePromises,
   SendNodeCommand,
-  SessionSig,
   SessionSigsMap,
   SuccessNodePromises,
   SupportedJsonRequests,
 } from '@lit-protocol/types';
+import { composeLitUrl } from './endpoint-version';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Listener = (...args: any[]) => void;
@@ -87,6 +90,7 @@ export type LitNodeClientConfigWithDefaults = Required<
     | 'litNetwork'
     | 'minNodeCount'
     | 'retryTolerance'
+    | 'rpcUrl'
   >
 > &
   Partial<Pick<LitNodeClientConfig, 'storageProvider' | 'contractContext'>>;
@@ -110,6 +114,7 @@ export class LitCore {
       maxRetryCount: 3,
       interval: 100,
     },
+    rpcUrl: null,
   };
   connectedNodes = new Set<string>();
   serverKeys: Record<string, JsonHandshakeResponse> = {};
@@ -217,7 +222,8 @@ export class LitCore {
   setNewConfig = async (): Promise<void> => {
     if (
       this.config.litNetwork === LitNetwork.Manzano ||
-      this.config.litNetwork === LitNetwork.Habanero
+      this.config.litNetwork === LitNetwork.Habanero ||
+      this.config.litNetwork === LitNetwork.Cayenne
     ) {
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork
@@ -250,25 +256,6 @@ export class LitCore {
 
       this.config.minNodeCount = parseInt(minNodeCount, 10);
       this.config.bootstrapUrls = bootstrapUrls;
-    } else if (this.config.litNetwork === LitNetwork.Cayenne) {
-      // Handle on staking contract is used to monitor epoch changes
-      this._stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork
-      );
-
-      // If the network is cayenne it is a centralized testnet, so we use a static config
-      // This is due to staking contracts holding local ip / port contexts which are innacurate to the ip / port exposed to the world
-      this.config.bootstrapUrls = LIT_NETWORKS.cayenne;
-      this.config.minNodeCount =
-        LIT_NETWORKS.cayenne.length == 2
-          ? 2
-          : (LIT_NETWORKS.cayenne.length * 2) / 3;
-
-      /**
-       * Here we are checking if a custom network defined with no node urls (bootstrap urls) defined
-       * If this is the case we need to bootstrap the network state from the set of contracts given.
-       * So we call to the Staking contract with the address given by the caller to resolve the network state.
-       */
     } else if (
       this.config.litNetwork === LitNetwork.Custom &&
       this.config.bootstrapUrls.length < 1
@@ -310,6 +297,41 @@ export class LitCore {
 
       this.config.minNodeCount = parseInt(minNodeCount, 10);
       this.config.bootstrapUrls = bootstrapUrls;
+    } else if (
+      this.config.litNetwork === LitNetwork.Custom &&
+      this.config.bootstrapUrls.length >= 1 &&
+      this.config.rpcUrl
+    ) {
+      log('Using custom bootstrap urls:', this.config.bootstrapUrls);
+
+      // const provider = new ethers.providers.JsonRpcProvider(this.config.rpcUrl);
+
+      const minNodeCount = await LitContracts.getMinNodeCount(
+        this.config.litNetwork,
+        this.config.contractContext,
+        this.config.rpcUrl!
+      );
+      this.config.minNodeCount = parseInt(minNodeCount, 10);
+
+      const bootstrapUrls = await LitContracts.getValidators(
+        this.config.litNetwork,
+        this.config.contractContext,
+        this.config.rpcUrl!
+      );
+      this.config.bootstrapUrls = bootstrapUrls;
+
+      this._stakingContract = await LitContracts.getStakingContract(
+        this.config.litNetwork,
+        this.config.contractContext,
+        this.config.rpcUrl!
+      );
+    } else {
+      return throwError({
+        message:
+          'Unsuported network has been provided please use a "litNetwork" option which is supported ("cayenne", "habanero", "manzano")',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.code,
+      });
     }
   };
 
@@ -861,7 +883,10 @@ export class LitCore {
         const { url } = params;
 
         // -- create url with path
-        const urlWithPath = `${url}/web/handshake`;
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.HANDSHAKE,
+        });
 
         log(`handshakeWithNode ${urlWithPath}`);
 
@@ -983,48 +1008,40 @@ export class LitCore {
   };
 
   /**
+   * Retrieves the session signature for a given URL from the sessionSigs map.
+   * Throws an error if sessionSigs is not provided or if the session signature for the URL is not found.
    *
-   * Get either auth sig or session auth sig
-   *
+   * @param sessionSigs - The session signatures map.
+   * @param url - The URL for which to retrieve the session signature.
+   * @returns The session signature for the given URL.
+   * @throws An error if sessionSigs is not provided or if the session signature for the URL is not found.
    */
-  getSessionOrAuthSig = ({
-    authSig,
+  getSessionSigByUrl = ({
     sessionSigs,
     url,
-    mustHave = true,
   }: {
-    authSig?: AuthSig;
-    sessionSigs?: SessionSigsMap;
+    sessionSigs: SessionSigsMap;
     url: string;
-    mustHave?: boolean;
-  }): AuthSig | SessionSig => {
-    if (!authSig && !sessionSigs) {
-      if (mustHave) {
-        throwError({
-          message: `You must pass either authSig, or sessionSigs`,
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
-      } else {
-        log(`authSig or sessionSigs not found. This may be using authMethod`);
-      }
+  }): AuthSig => {
+    if (!sessionSigs) {
+      return throwError({
+        message: `You must pass in sessionSigs`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
     }
 
-    if (sessionSigs) {
-      const sigToPassToNode = sessionSigs[url];
+    const sigToPassToNode = sessionSigs[url];
 
-      if (!sigToPassToNode) {
-        throwError({
-          message: `You passed sessionSigs but we could not find session sig for node ${url}`,
-          errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-          errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-        });
-      }
-
-      return sigToPassToNode;
+    if (!sessionSigs[url]) {
+      throwError({
+        message: `You passed sessionSigs but we could not find session sig for node ${url}`,
+        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+      });
     }
 
-    return authSig!;
+    return sigToPassToNode;
   };
 
   validateAccessControlConditionsSchema = async (
@@ -1297,12 +1314,12 @@ export class LitCore {
    * Calculates an HD public key from a given keyId
    * The curve type or signature type is assumed to be k256 unless provided
    * @param keyId
-   * @param {SIGTYPE} sigType
+   * @param {LIT_CURVE} sigType
    * @returns {string} public key
    */
   computeHDPubKey = (
     keyId: string,
-    sigType: SIGTYPE = SIGTYPE.EcdsaCaitSith
+    sigType: LIT_CURVE = LIT_CURVE.EcdsaCaitSith
   ): string => {
     if (!this.hdRootPubkeys) {
       logError('root public keys not found, have you connected to the nodes?');

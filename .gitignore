@@ -68,3 +68,6 @@ storage.test.db
 .nx
 
 .yalc
+
+local-tests/build
+local-tests/setup/networkContext.json

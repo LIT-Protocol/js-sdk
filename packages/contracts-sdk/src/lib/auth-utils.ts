@@ -1,4 +1,4 @@
-import { SessionSig, StytchToken } from '@lit-protocol/types';
+import { StytchToken } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import * as jose from 'jose';
 /**

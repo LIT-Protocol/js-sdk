@@ -42,10 +42,6 @@ import {
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 
-if (global && typeof global.Buffer === 'undefined') {
-  global.Buffer = BufferPolyfill;
-}
-
 if (globalThis && typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = BufferPolyfill;
 }
@@ -416,7 +412,7 @@ export const connectWeb3 = async ({
   const accounts = await web3.listAccounts();
 
   log('accounts', accounts);
-  const account = accounts[0].toLowerCase();
+  const account = ethers.utils.getAddress(accounts[0]);
 
   return { web3, account };
 };

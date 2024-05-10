@@ -5,6 +5,19 @@ import { isNode, log } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
 import { CustomNetwork, LitNodeClientConfig } from '@lit-protocol/types';
 
+/**
+ * You can find all these available networks in the `constants` package
+ *
+ * @example
+ *
+ * ```
+ * import { LitNetwork } from '@lit-protocol/constants';
+ * 
+ * const litNodeClient = new LitNodeClient({
+    litNetwork: LitNetwork.Habanero,
+   });
+ * ```
+ */
 export class LitNodeClient extends LitNodeClientNodeJs {
   constructor(args: LitNodeClientConfig | CustomNetwork) {
     super({
