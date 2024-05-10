@@ -245,7 +245,6 @@ export class PKPBase<T = PKPBaseDefaultParams> {
       if (!this.authContext.client && this.litNodeClient) {
         this.authContext.client = this.litNodeClient;
       }
-
       // Ensure authContext has a valid client and getSessionSigsProps
       if (
         !(this.authContext.client instanceof LitNodeClientNodeJs) ||

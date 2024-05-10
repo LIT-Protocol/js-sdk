@@ -101,9 +101,7 @@ export const testPkpEthersWithEoaSessionSigsToEthSignTransaction = async (
         `🧪 PKPEthersWallet should be able to send tx (insufficient FPE funds ❗️)`
       );
     } else {
-      throw new Error(
-        `❌ Error: ${e.toString()}`
-      );
+      throw new Error(`❌ Error: ${e.toString()}`);
     }
   }
 };

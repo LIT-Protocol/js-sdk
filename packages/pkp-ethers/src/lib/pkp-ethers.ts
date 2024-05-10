@@ -237,7 +237,6 @@ export class PKPEthersWallet
     if (!this.litNodeClientReady) {
       await this.init();
     }
-
     const toSign = arrayify(hashMessage(message));
     let signature;
     if (this.useAction) {
