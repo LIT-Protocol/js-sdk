@@ -66,9 +66,9 @@ export const processLitActionResponseStrategy = (
     );
     return respFrequency.max;
   } else {
-      log(
-        'no strategy found, using least common response object from execution results'
-      );
-      respFrequency.min;
+    log(
+      'no strategy found, using least common response object from execution results'
+    );
+    respFrequency.min;
   }
 };
