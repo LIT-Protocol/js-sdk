@@ -85,6 +85,7 @@
     "@playwright/test": "^1.25.2",
     "@simplewebauthn/browser": "^7.2.0",
     "@simplewebauthn/typescript-types": "^7.0.0",
+    "@spruceid/siwe-parser": "2.0.0",
     "@synthetixio/js": "^2.41.0",
     "@testing-library/cypress": "^8.0.3",
     "@testing-library/react": "^13.4.0",

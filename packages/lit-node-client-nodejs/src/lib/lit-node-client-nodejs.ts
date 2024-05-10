@@ -50,6 +50,7 @@ import {
   normalizeAndStringify,
   removeHexPrefix,
   throwError,
+  throwErrorV1,
 } from '@lit-protocol/misc';
 import {
   getStorageItem,
@@ -139,6 +140,14 @@ export class LitNodeClientNodeJs
 
   // ========== Constructor ==========
   constructor(args: LitNodeClientConfig | CustomNetwork) {
+    if (!args) {
+      throwError({
+        message: 'must provide LitNodeClient parameters',
+        errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+        errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
+      });
+    }
+
     super(args);
 
     if (args !== undefined && args !== null && 'defaultAuthCallback' in args) {
