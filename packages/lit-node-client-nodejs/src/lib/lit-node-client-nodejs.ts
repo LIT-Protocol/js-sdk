@@ -2435,10 +2435,9 @@ const resourceAbilityRequests = [
 
     this.connectedNodes.forEach((nodeAddress: string) => {
       const toSign: SessionSigningTemplate = {
-          ...signingTemplate,
-          nodeAddress,
-        };
-      
+        ...signingTemplate,
+        nodeAddress,
+      };
 
       const signedMessage = JSON.stringify(toSign);
 
