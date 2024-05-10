@@ -222,7 +222,8 @@ export class LitCore {
   setNewConfig = async (): Promise<void> => {
     if (
       this.config.litNetwork === LitNetwork.Manzano ||
-      this.config.litNetwork === LitNetwork.Habanero
+      this.config.litNetwork === LitNetwork.Habanero ||
+      this.config.litNetwork === LitNetwork.Cayenne
     ) {
       const minNodeCount = await LitContracts.getMinNodeCount(
         this.config.litNetwork
@@ -255,46 +256,6 @@ export class LitCore {
 
       this.config.minNodeCount = parseInt(minNodeCount, 10);
       this.config.bootstrapUrls = bootstrapUrls;
-    } else if (this.config.litNetwork === LitNetwork.Cayenne) {
-      // Handle on staking contract is used to monitor epoch changes
-      this._stakingContract = await LitContracts.getStakingContract(
-        this.config.litNetwork
-      );
-
-      const minNodeCount = (
-        await LitContracts.getMinNodeCount(this.config.litNetwork)
-      ).toNumber();
-
-      const bootstrapUrls = await LitContracts.getValidators(
-        this.config.litNetwork
-      );
-
-      /**
-       * FIXME: We need this reformatting because the Cayenne network is not able to handle the node address as a URL.
-       * from: https://cayenne.litgateway.com
-       * to: http://207.244.70.36:7474
-       */
-      const remappedBootstrapUrls = await Promise.all(
-        bootstrapUrls.map(async (url) => {
-          const rootDomain = CAYENNE_URL.replace('https://', '');
-          const ipAddress = await getIpAddress(rootDomain);
-          return `http://${ipAddress}:${new URL(url).port}`;
-        })
-      );
-
-      // If the network is cayenne it is a centralized testnet, so we use a static config
-      // This is due to staking contracts holding local ip / port contexts which are innacurate to the ip / port exposed to the world
-      this.config.bootstrapUrls = remappedBootstrapUrls;
-      this.config.minNodeCount =
-        remappedBootstrapUrls.length == 2
-          ? 2
-          : (remappedBootstrapUrls.length * 2) / 3;
-
-      /**
-       * Here we are checking if a custom network defined with no node urls (bootstrap urls) defined
-       * If this is the case we need to bootstrap the network state from the set of contracts given.
-       * So we call to the Staking contract with the address given by the caller to resolve the network state.
-       */
     } else if (
       this.config.litNetwork === LitNetwork.Custom &&
       this.config.bootstrapUrls.length < 1
@@ -364,6 +325,13 @@ export class LitCore {
         this.config.contractContext,
         this.config.rpcUrl!
       );
+    } else {
+      return throwError({
+        message:
+          'Unsuported network has been provided please use a "litNetwork" option which is supported ("cayenne", "habanero", "manzano")',
+        errorKind: LIT_ERROR.INVALID_PARAM_TYPE.kind,
+        errorCode: LIT_ERROR.INVALID_PARAM_TYPE.code,
+      });
     }
   };
 
