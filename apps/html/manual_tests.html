@@ -877,6 +877,66 @@
         });
       };
 
+      var ETHOnAmoy = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'amoy',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnAmoy',
+        });
+      };
+
+      var ETHOnBlast = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'blast',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnBlast',
+        });
+      };
+
+      var ETHOnBlastSepolia = async () => {
+        const accessControlConditions = [
+          {
+            contractAddress: '',
+            standardContractType: '',
+            chain: 'blastSepolia',
+            method: 'eth_getBalance',
+            parameters: [':userAddress', 'latest'],
+            returnValueTest: {
+              comparator: '>=',
+              value: '0',
+            },
+          },
+        ];
+        await testProvisoningAndSigning({
+          accessControlConditions,
+          testName: 'ETHOnBlastSepolia',
+        });
+      };
+
       var ETHOnZora = async () => {
         const accessControlConditions = [
           {
@@ -1906,6 +1966,15 @@
     <br />
     <br />
     <button onclick="ETHOnVerifyTestnet()">ETHOnVerifyTestnet</button>
+    <br />
+    <br />
+    <button onclick="ETHOnAmoy()">ETHOnAmoy</button>
+    <br />
+    <br />
+    <button onclick="ETHOnBlast()">ETHOnBlast</button>
+    <br />
+    <br />
+    <button onclick="ETHOnBlastSepolia()">ETHOnBlastSepolia</button>
     <br />
     <br />
     <button onclick="ETHOnZora()">ETHOnZora</button>
