@@ -31,10 +31,6 @@ export const processLitActionResponseStrategy = (
   const copiedExecutionResponses = executionResponses.map((r) => {
     return '' + r;
   });
-  log(
-    'filtered responses with frequency dist: ',
-    JSON.stringify(copiedExecutionResponses)
-  );
   if (strategy.strategy === 'custom') {
     try {
       if (strategy.customFilter) {
