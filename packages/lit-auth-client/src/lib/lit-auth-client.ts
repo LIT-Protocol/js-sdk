@@ -129,14 +129,14 @@ export class LitAuthClient {
       }
       this.relay = new LitRelay(options.litRelayConfig);
     } else {
-      if(!options.litRelayConfig.relayApiKey) {
+      if (!options.litRelayConfig.relayApiKey) {
         throw new Error(
           '2 An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
         );
       }
       this.relay = new LitRelay(options.litRelayConfig);
     }
-    
+
     // Set RPC URL
     this.rpcUrl = options?.rpcUrl || 'https://chain-rpc.litprotocol.com/http';
     log('rpc url: ', this.rpcUrl);

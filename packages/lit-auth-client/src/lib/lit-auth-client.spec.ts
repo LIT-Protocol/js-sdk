@@ -35,7 +35,9 @@ describe('LitAuthClient', () => {
       litRelayConfig: { relayApiKey: 'test-api-key' },
     });
     expect(validClient).toBeDefined();
-    expect(validClient.relay.getUrl()).toBe('https://relayer-server-staging-cayenne.getlit.dev');
+    expect(validClient.relay.getUrl()).toBe(
+      'https://relayer-server-staging-cayenne.getlit.dev'
+    );
   });
 });
 
