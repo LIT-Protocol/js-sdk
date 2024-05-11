@@ -1201,6 +1201,11 @@ export interface IRelay {
    * @returns {Promise<any>} Registration options for the browser to pass to the authenticator
    */
   generateRegistrationOptions(username?: string): Promise<any>;
+
+  /**
+   * returns the relayUrl
+   */
+  getUrl(): string;
 }
 
 export interface LitRelayConfig {
