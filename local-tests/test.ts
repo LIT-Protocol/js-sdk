@@ -78,10 +78,18 @@ import { testPkpEthersWithPkpSessionSigsToEthSignTypedData } from './tests/testP
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedData';
 import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil';
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
+import { testExecuteJsSignAndCombineEcdsa } from './tests/testExecuteJsSignAndCombineEcdsa';
+import { testExecutJsDecryptAndCombine } from './tests/testExecuteJsDecryptAndCombine';
+import { testExecuteJsBroadcastAndCollect } from './tests/testExecuteJsBroadcastAndCollect';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
   const devEnv = new TinnyEnvironment();
+
+  await devEnv.startTestnetManager();
+  // wait for the testnet to be active before we start the tests.
+  await devEnv.pollTestnetForActive();
+
   await devEnv.init();
 
   const eoaSessionSigsTests = {
@@ -195,6 +203,11 @@ import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './t
     },
   };
 
+  const litActionCombiningTests = {
+    testExecuteJsSignAndCombineEcdsa,
+    testExecutJsDecryptAndCombine,
+    testExecuteJsBroadcastAndCollect,
+  };
   const testConfig = {
     tests: {
       // testExample,
@@ -209,6 +222,8 @@ import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './t
       ...pkpEthersTest.eoaSessionSigs,
       ...pkpEthersTest.pkpSessionSigs,
       ...pkpEthersTest.litActionSessionSigs,
+
+      ...litActionCombiningTests
     },
     devEnv,
   };
