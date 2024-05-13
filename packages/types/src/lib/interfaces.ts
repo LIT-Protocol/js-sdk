@@ -13,12 +13,12 @@ import {
   LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
+  ResponseStrategy,
   SolRpcConditions,
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
-
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 export interface ABIParams {
@@ -488,6 +488,12 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
   toDecrypt: string;
 }
 
+export interface LitActionResponseStrategy {
+  strategy: ResponseStrategy;
+  customFilter?: (
+    responses: Record<string, string>[]
+  ) => Record<string, string>;
+}
 export interface JsonExecutionSdkParamsTargetNode
   extends JsonExecutionSdkParams {
   targetNodeRange: number;
@@ -513,6 +519,17 @@ export interface JsonExecutionSdkParams {
    * the session signatures to use to authorize the user with the nodes
    */
   sessionSigs: any;
+
+  /**
+   * auth methods to resolve
+   */
+  authMethods?: AuthMethod[];
+
+  /**
+   * a strategy for proccessing `reponse` objects returned from the
+   * Lit Action execution context
+   */
+  responseStrategy?: LitActionResponseStrategy;
 }
 
 export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {

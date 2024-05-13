@@ -21,12 +21,12 @@ import {
   AuthMethodType,
   EITHER_TYPE,
   LIT_ACTION_IPFS_HASH,
+  LIT_CURVE,
   LIT_ENDPOINT,
   LIT_ERROR,
   LIT_SESSION_KEY_URI,
   LOCAL_STORAGE_KEYS,
   LitNetwork,
-  LIT_CURVE,
 } from '@lit-protocol/constants';
 import { LitCore, composeLitUrl } from '@lit-protocol/core';
 import {
@@ -131,6 +131,7 @@ import { getClaims } from './helpers/get-claims';
 import { normalizeArray } from './helpers/normalize-array';
 import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
+import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -185,7 +186,6 @@ export class LitNodeClientNodeJs
     }
 
     const nonce = await this.getLatestBlockhash();
-
     const siweMessage = await createSiweMessageWithCapacityDelegation({
       uri: 'lit:capability:delegation',
       litNodeClient: this,
@@ -1200,6 +1200,12 @@ export class LitNodeClientNodeJs
     const mostCommonResponse = findMostCommonResponse(
       responseData
     ) as NodeShare;
+
+    const responseFromStrategy: any = processLitActionResponseStrategy(
+      responseData,
+      params.responseStrategy ?? { strategy: 'leastCommon' }
+    );
+    mostCommonResponse.response = responseFromStrategy;
 
     const isSuccess = mostCommonResponse.success;
     const hasSignedData = Object.keys(mostCommonResponse.signedData).length > 0;
@@ -2315,6 +2321,7 @@ export class LitNodeClientNodeJs
    * ```ts
    * import { LitPKPResource, LitActionResource } from "@lit-protocol/auth-helpers";
 import { LitAbility } from "@lit-protocol/types";
+import { logWithRequestId } from '../../../misc/src/lib/misc';
 
 const resourceAbilityRequests = [
     {
