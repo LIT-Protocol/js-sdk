@@ -474,7 +474,7 @@ export class LitNodeClientNodeJs
 
   /**
    *
-   * Get expiration for session default time is 1 hour
+   * Get expiration for session default time is 1 day / 24 hours
    *
    */
   static getExpiration = () => {
