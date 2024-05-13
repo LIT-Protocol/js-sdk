@@ -2813,7 +2813,7 @@ export class LitNodeClientNodeJs
     // - 5 minutes is the default expiration for a session signature
     // - Because we can generate a new session sig every time the user wants to access a resource without prompting them to sign with their wallet
     const sessionExpiration =
-      params.expiration ?? new Date(Date.now() + 1000 * 60 * 5);
+      params.expiration ?? new Date(Date.now() + 1000 * 60 * 5).toISOString();
 
     const capabilities = params.capacityDelegationAuthSig
       ? [params.capacityDelegationAuthSig, authSig]
@@ -2827,7 +2827,7 @@ export class LitNodeClientNodeJs
       resourceAbilityRequests: params.resourceAbilityRequests,
       capabilities,
       issuedAt: new Date().toISOString(),
-      expiration: sessionExpiration.toISOString(),
+      expiration: sessionExpiration,
     };
 
     const signatures: SessionSigsMap = {};
