@@ -10,7 +10,7 @@ import { log, logError } from '@lit-protocol/misc';
  * @param responses any[]
  * @returns an object which contains both the least and most occuring item in the array
  */
-const findFrequency = (responses: string[]): { min: any; max: any } => {
+const _findFrequency = (responses: string[]): { min: any; max: any } => {
   const sorted = responses.sort(
     (a: any, b: any) =>
       responses.filter((v: any) => v === a).length -
@@ -50,7 +50,7 @@ export const processLitActionResponseStrategy = (
     }
   }
 
-  let respFrequency = findFrequency(copiedExecutionResponses);
+  let respFrequency = _findFrequency(copiedExecutionResponses);
   if (strategy?.strategy === 'leastCommon') {
     log(
       'strategy found to be most common, taking most common response from execution results'
