@@ -24,8 +24,10 @@ export interface CIDParser {
  * @example
  * const CID = require('multiformats/cid')
  * const ipfsId = 'QmZKLGf3vgYsboM7WVUS9X56cJSdLzQVacNp841wmEDRkW'
- * const bytes32 = getBytes32FromMultihash(ipfsId, CID)
- * console.log(bytes32)
+ * const {digest, hashFunction, size} = getBytes32FromMultihash(ipfsId, CID)
+ * console.log(digest) // string
+ * console.log(hashFunction) // number
+ * console.log(size) // number
  *
  * @returns {IPFSHash}
  */
