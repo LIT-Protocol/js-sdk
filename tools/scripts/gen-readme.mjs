@@ -7,7 +7,7 @@ import { join } from 'path';
 import { exit } from 'process';
 import { greenLog, listDirsRecursive, redLog } from './utils.mjs';
 
-const TAG = process.env.TAG || '';
+const TAG = process.env.TAG ? `/${process.env.TAG}` : '';
 
 const readmePath = join('README.md');
 const readme = readFileSync(readmePath, 'utf8');
@@ -39,7 +39,7 @@ const getSize = (lib) => {
 const getNpm = (lib) => {
   // return `<a target="_blank" href="https://www.npmjs.com/package/${lib}">npm</a>`;
   // return `<a href="https://www.npmjs.com/package/${lib}"><img src="https://img.shields.io/npm/dw/${lib}?label=NPM"/></a>`;
-  return `<a target="_blank" href="https://www.npmjs.com/package/${lib}"><img src="https://img.shields.io/npm/v/${lib}/${TAG}"/></a>`;
+  return `<a target="_blank" href="https://www.npmjs.com/package/${lib}"><img src="https://img.shields.io/npm/v/${lib}${TAG}"/></a>`;
 };
 
 const libs = (await listDirsRecursive('packages', false)).map((lib) =>
