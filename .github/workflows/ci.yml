@@ -54,4 +54,4 @@ jobs:
         run: yarn build
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:local --filtertestUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,testEthAuthSigToEncryptDecryptString
+        run: yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,testEthAuthSigToEncryptDecryptString
