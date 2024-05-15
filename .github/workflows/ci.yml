@@ -46,7 +46,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '19'
       - name: Install project dependencies
         run: yarn install
       - name: Build packages
@@ -54,4 +54,6 @@ jobs:
         run: yarn build
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
-        run: yarn test:e2e:node --group=connection --group=lit-actions --group=pkp-auth-method --group=pkp-ethers --group=pkp-encryption-decryption --group=pkp-session-sigs --group=lit-auth-client
+        run: NETWORK=cayenne yarn test:local --filtertestUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,
+        testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,
+        testEthAuthSigToEncryptDecryptString
