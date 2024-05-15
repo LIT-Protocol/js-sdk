@@ -16,14 +16,9 @@ The Lit JavaScript SDK provides developers with a framework for implementing Lit
 https://developer.litprotocol.com/SDK/Explanation/installation
 </a>
 
-<br /><br />
-This new V3 SDK is written in Typescript and is a complete rewrite of the old SDK. It is much more modular and easier to use, and has a much smaller bundle size.
-
 </div>
 
 <div align="left">
-
-[ChangeLog: All notable changes to this project will be documented in this file.](https://github.com/LIT-Protocol/js-sdk/blob/master/CHANGELOG.md)
 
 # Quick Start
 
@@ -92,11 +87,11 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 
 ## API Doc
 
-- V5 (Current): https://v3.api-docs.getlit.dev/ <b4/>
-
-### Old APIs Doc(s)
-
-- V2: http://docs.lit-js-sdk-v2.litprotocol.com/ <br/>
+| Version          | Link                                                     |
+| ---------------- | -------------------------------------------------------- |
+| V6 (Beta)        | [6.x.x docs](https://v6-api-doc-lit-js-sdk.vercel.app/)  |
+| V5 (**Current**) | [5.x.x docs](https://v3.api-docs.getlit.dev/)            |
+| V2               | [2.x.x docs](http://docs.lit-js-sdk-v2.litprotocol.com/) |
 
 </div>
 
@@ -104,7 +99,7 @@ If you're a tech-savvy user and wish to utilize only specific submodules that ou
 
 ## Prerequisite
 
-- node (v18.0.0)
+- node (v19.x or above)
 
 ## Recommended
 
