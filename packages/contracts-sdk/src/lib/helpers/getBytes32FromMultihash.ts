@@ -36,7 +36,9 @@ export const getBytes32FromMultihash = (
   CID: CIDParser
 ): IPFSHash => {
   if (!CID) {
-    throw new Error('CID is required');
+    throw new Error(
+      'CID is required. Please import from "multiformats/cid" package, and pass the CID object to the function.'
+    );
   }
 
   if (!ipfsId) {
