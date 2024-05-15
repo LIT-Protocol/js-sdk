@@ -29,7 +29,7 @@ jobs:
         with:
           main-branch-name: 'master'
       - name: Build
-        run: yarn build
+        run: yarn build:dev
       - name: Run Unit tests
         run: yarn tools --test --unit
   e2e-connection:
@@ -38,6 +38,7 @@ jobs:
     env:
       NETWORK: cayenne
       DEBUG: true
+      MAX_ATTEMPTS: 3
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -51,7 +52,7 @@ jobs:
         run: yarn install
       - name: Build packages
         id: build
-        run: yarn build
+        run: yarn build:dev
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
         run: yarn test:local --filter=testUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,testEthAuthSigToEncryptDecryptString --exclude=Parallel
