@@ -13,7 +13,7 @@
 <div class="tsd-page-title">
 <h2>@lit-protocol/js-sdk</h2></div>
 <div class="tsd-panel tsd-typography"><div align="center">
-<h1>Lit Protocol Javascript/Typescript SDK V4.2.0</h1>
+<h1>Lit Protocol Javascript/Typescript SDK V5.1.0</h1>
 
 <img src="https://i.ibb.co/p2xfzK1/Screenshot-2022-11-15-at-09-56-57.png">
 <br/>
@@ -29,13 +29,10 @@ The Lit JavaScript SDK provides developers with a framework for implementing Lit
 https://developer.litprotocol.com/SDK/Explanation/installation
 </a>
 
-<p><br /><br />
-This new V3 SDK is written in Typescript and is a complete rewrite of the old SDK. It is much more modular and easier to use, and has a much smaller bundle size.</p>
 </div>
 
 <div align="left">
 
-<p><a href="https://github.com/LIT-Protocol/js-sdk/blob/master/CHANGELOG.md">ChangeLog: All notable changes to this project will be documented in this file.</a></p>
 
 <a href="#quick-start" id="quick-start" style="color: inherit; text-decoration: none;">
   <h1>Quick Start</h1>
@@ -216,16 +213,26 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <a href="#api-doc" id="api-doc" style="color: inherit; text-decoration: none;">
   <h2>API Doc</h2>
 </a>
-<ul>
-<li>V3 (Current): <a href="https://v3.api-docs.getlit.dev/">https://v3.api-docs.getlit.dev/</a> <b4/></li>
-</ul>
-
-<a href="#old-apis-docs" id="old-apis-docs" style="color: inherit; text-decoration: none;">
-  <h3>Old APIs Doc(s)</h3>
-</a>
-<ul>
-<li>V2: <a href="http://docs.lit-js-sdk-v2.litprotocol.com/">http://docs.lit-js-sdk-v2.litprotocol.com/</a> <br/></li>
-</ul>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>V6 (Beta)</td>
+<td><a href="https://v6-api-doc-lit-js-sdk.vercel.app/">6.x.x docs</a></td>
+</tr>
+<tr>
+<td>V5 (<strong>Current</strong>)</td>
+<td><a href="https://v3.api-docs.getlit.dev/">5.x.x docs</a></td>
+</tr>
+<tr>
+<td>V2</td>
+<td><a href="http://docs.lit-js-sdk-v2.litprotocol.com/">2.x.x docs</a></td>
+</tr>
+</tbody></table>
 </div>
 
 
@@ -237,7 +244,7 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
   <h2>Prerequisite</h2>
 </a>
 <ul>
-<li>node (v18.0.0)</li>
+<li>node (v19.x or above)</li>
 </ul>
 
 <a href="#recommended" id="recommended" style="color: inherit; text-decoration: none;">
@@ -258,8 +265,8 @@ This new V3 SDK is written in Typescript and is a complete rewrite of the old SD
 <a href="#building" id="building" style="color: inherit; text-decoration: none;">
   <h2>Building</h2>
 </a>
-<p>You can build the project with the following command:</p>
-<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">build</span>
+<p>You can build the project with the following commands:</p>
+<pre><code><span class="hl-2">// for local development - It stripped away operations that don&#39;t matter for local dev</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-3">build</span><span class="hl-1">:</span><span class="hl-0">dev</span><br/><br/><span class="hl-2">// you should never need to use yarn build unless you want to test or publish it</span><br/><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">build</span>
 </code></pre>
 
 <a href="#running-test-apps" id="running-test-apps" style="color: inherit; text-decoration: none;">
