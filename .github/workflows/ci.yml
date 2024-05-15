@@ -37,7 +37,6 @@ jobs:
     timeout-minutes: 30
     env:
       NETWORK: cayenne
-      MINT_NEW: true
       DEBUG: true
     steps:
       - name: Checkout repo
@@ -47,7 +46,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '19'
+          node-version: '20'
       - name: Install project dependencies
         run: yarn install
       - name: Build packages
@@ -55,4 +54,4 @@ jobs:
         run: yarn build
       - name: Run End to End Tests
         if: steps.build.outputs.exit_code == 0
-        run: NETWORK=cayenne && yarn test:local --filtertestUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,testEthAuthSigToEncryptDecryptString
+        run: yarn test:local --filtertestUseEoaSessionSigsToExecuteJsSigning,testUseEoaSessionSigsToPkpSign,testUsePkpSessionSigsToExecuteJsSigning,testUsePkpSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToPkpSign,testUseValidLitActionCodeGeneratedSessionSigsToExecuteJsSigning,testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs,testEthAuthSigToEncryptDecryptString
