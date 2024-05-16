@@ -1,3 +1,8 @@
+import {
+  LitAbility,
+  LitActionResource,
+  LitPKPResource,
+} from '@lit-protocol/auth-helpers';
 import { AuthMethodScope } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
@@ -13,73 +18,67 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
   const alice = await devEnv.createRandomPerson();
 
   const customAuthMethod = {
-    authMethodType: 11111,
+    authMethodType: 89989,
     accessToken: 'xxx',
   };
 
-  // console.log('customAuthMethod:', customAuthMethod);
+  console.log('customAuthMethod:', customAuthMethod);
 
-  // const customAuthMethodOwnedPkp =
-  //   await devEnv.contractsClient.mintWithCustomAuth({
-  //     customAuthId: 'custom-app-user-id', // ipfs hash for the auth method
-  //     authMethod: customAuthMethod,
-  //     scopes: [AuthMethodScope.SignAnything],
-  //   });addPermittedAction
+  const customAuthMethodOwnedPkp =
+    await devEnv.contractsClient.mintWithCustomAuth({
+      customAuthId: 'custom-app-user-id', // ipfs hash for the auth method
+      authMethod: customAuthMethod,
+      scopes: [AuthMethodScope.SignAnything],
+    });
 
-  // console.log('customAuthMethodOwnedPkp:', customAuthMethodOwnedPkp);
-
-  // Grant an action permission to use a PKP
-  const addPermittedActionRes = await alice.contractsClient.addPermittedAction({
-    pkpTokenId: alice.pkp.tokenId,
-    ipfsId: 'QmRKW16pkeVA74pHqtyvM1iKnHqFLNDbueEnfD5AgHmXeL',
-  });
-
-  console.log('addPermittedActionRes:', addPermittedActionRes);
+  console.log('customAuthMethodOwnedPkp:', customAuthMethodOwnedPkp);
 
   const addPermittedAuthMethodRes =
     await alice.contractsClient.addPermittedAuthMethod({
       pkpTokenId: alice.pkp.tokenId,
-      authId: 'custom-app-user-id',
+      authId: 'app-id-xxx:user-id-yyy',
       authMethodType: customAuthMethod.authMethodType,
       authMethodScopes: [AuthMethodScope.SignAnything],
     });
 
   console.log('addPermittedAuthMethodRes:', addPermittedAuthMethodRes);
 
-  process.exit();
+  // `LitActions.setResponse({ response: "true" });`
+  const IPFSID = 'QmRKW16pkeVA74pHqtyvM1iKnHqFLNDbueEnfD5AgHmXeL';
 
-  // getPermittedAuthMethods (could be added before or after)
+  // Grant an action permission to use a PKP
+  const addPermittedActionRes = await alice.contractsClient.addPermittedAction({
+    pkpTokenId: alice.pkp.tokenId,
+    ipfsId: IPFSID,
+    authMethodScopes: [AuthMethodScope.SignAnything],
+  });
 
-  // const litActionSessionSigs2 = await devEnv.litNodeClient.getPkpSessionSigs({
-  //   pkpPublicKey: customAuthMethodOwnedPkp.pkp.publicKey,
-  //   authMethods: [customAuthMethod],
-  //   resourceAbilityRequests: [
-  //     {
-  //       resource: new LitPKPResource('*'),
-  //       ability: LitAbility.PKPSigning,
-  //     },
-  //     {
-  //       resource: new LitActionResource('*'),
-  //       ability: LitAbility.LitActionExecution,
-  //     },
-  //   ],
-  //   litActionCode: Buffer.from(
-  //     `
-  //   // Works with an AuthSig AuthMethod
-  //   if (Lit.Auth.authMethodContexts.some(e => e.authMethodType === 1)) {
-  //     LitActions.setResponse({ response: "true" });
-  //   } else {
-  //     LitActions.setResponse({ response: "false" });
-  //   }
-  //   `
-  //   ).toString('base64'),
-  //   jsParams: {
-  //     publicKey: customAuthMethodOwnedPkp.pkp.publicKey,
-  //     sigName: 'custom-auth-sig',
-  //   },
-  // });
+  console.log('addPermittedActionRes:', addPermittedActionRes);
 
-  // console.log('litActionSessionSigs2:', litActionSessionSigs2);
+  const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
+    pkpPublicKey: alice.pkp.publicKey,
+    // authMethods: [alice.authMethod], // <-- ????
+    resourceAbilityRequests: [
+      {
+        resource: new LitPKPResource('*'),
+        ability: LitAbility.PKPSigning,
+      },
+      {
+        resource: new LitActionResource('*'),
+        ability: LitAbility.LitActionExecution,
+      },
+    ],
+    litActionCode: Buffer.from(
+      `LitActions.setResponse({ response: "true" });`
+    ).toString('base64'),
+    jsParams: {
+      publicKey: `0x${alice.pkp.publicKey}`,
+      accessToken: customAuthMethod.accessToken,
+      sigName: 'custom-auth-sig',
+    },
+  });
+
+  console.log('litActionSessionSigs:', litActionSessionSigs);
 
   process.exit();
 };
