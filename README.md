@@ -154,15 +154,10 @@ yarn nx run nodejs:serve
 yarn test:unit
 ```
 
-## Run E2E tests
+## Run E2E tests in nodejs
 
 ```
-
-// -- web
-yarn test:e2e:web
-
-// -- node
-yarn test:e2e:node
+yarn test:local
 ```
 
 # Advanced
@@ -248,7 +243,7 @@ You must have at least nodejs v18 to do this.
 
 3. Build all the packages with `yarn build`
 
-4. Run the unit tests with `yarn test:unit` & e2e node tests `yarn test:e2e:nodejs` locally & ensure that they pass
+4. Run the unit tests with `yarn test:unit` & e2e node tests `yarn test:local` locally & ensure that they pass
 
 5. Update the docs with `yarn gen:docs --push`
 
@@ -272,9 +267,7 @@ yarn node ./tools/scripts/pub.mjs --tag serrano-jalapeno
 The following will serve the react testing app and launch the cypress e2e testing after
 
 ```sh
-yarn test:e2e:web
-or
-yarn test:e2e:node
+yarn test:local
 ```
 
 ### Environments
