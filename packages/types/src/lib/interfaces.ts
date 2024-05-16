@@ -1891,3 +1891,34 @@ export interface SignatureData {
 export type ClaimsList = {
   [key: string]: SignatureData;
 }[];
+
+export interface MintWithAuthParams {
+  /**
+   * auth method to use for minting
+   */
+  authMethod: AuthMethod;
+
+  /**
+   * Permission scopes:
+   * https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
+   */
+  scopes: string[] | number[];
+
+  /**
+   * only applies to webauthn auth method
+   */
+  pubkey?: string;
+
+  /**
+   * The Auth ID of the given auth method. If it's custom auth, then it could be
+   * anything.
+   */
+  authId?: Uint8Array;
+}
+
+export interface mintWithCustomAuthParams extends MintWithAuthParams {
+  /**
+   * For custom auth method, the authId could be anything.
+   */
+  customAuthId: string | Uint8Array;
+}

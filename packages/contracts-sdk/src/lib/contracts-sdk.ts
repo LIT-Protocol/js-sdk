@@ -4,12 +4,12 @@ import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import {
-  AuthMethod,
-  LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
   MintCapacityCreditsContext,
   MintCapacityCreditsRes,
+  MintWithAuthParams,
+  mintWithCustomAuthParams,
 } from '@lit-protocol/types';
 
 // ----- autogen:import-data:start  -----
@@ -45,7 +45,7 @@ import * as stakingBalancesContract from '../abis/StakingBalances.sol/StakingBal
 import { TokenInfo, derivedAddresses } from './addresses';
 import { IPubkeyRouter } from '../abis/PKPNFT.sol/PKPNFT';
 import { computeAddress } from 'ethers/lib/utils';
-import { getAuthIdByAuthMethod } from './auth-utils';
+import { getAuthIdByAuthMethod, stringToArrayify } from './auth-utils';
 import { Logger, LogManager } from '@lit-protocol/logger';
 import {
   calculateUTCMidnightExpiration,
@@ -984,11 +984,8 @@ export class LitContracts {
     authMethod,
     scopes,
     pubkey,
-  }: {
-    authMethod: AuthMethod;
-    scopes: string[] | number[] | BigNumberish[];
-    pubkey?: string; // only applies to webauthn auth method
-  }) => {
+    authId,
+  }: MintWithAuthParams) => {
     // -- validate
     if (!this.connected) {
       throw new Error(
@@ -1032,7 +1029,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       return scope;
     });
 
-    const authId = await getAuthIdByAuthMethod(authMethod);
+    const _authId = authId ?? (await getAuthIdByAuthMethod(authMethod));
 
     // -- go
     const mintCost = await this.pkpNftContract.read.mintCost();
@@ -1041,7 +1038,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const tx = await this.pkpHelperContract.write.mintNextAndAddAuthMethods(
       2, // key type
       [authMethod.authMethodType],
-      [authId],
+      [_authId],
       [_pubkey],
       [[...scopes]],
       true,
@@ -1088,6 +1085,21 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       },
       tx: receipt,
     };
+  };
+
+  /**
+   * Mint a PKP NFT with custom auth
+   * @param {mintWithCustomAuthParams} params
+   */
+  mintWithCustomAuth = async (params: mintWithCustomAuthParams) => {
+    if (typeof params.customAuthId === 'string') {
+      params.authId = stringToArrayify(params.customAuthId);
+    }
+
+    // const authId = stringToArrayify(params.customAuthId);
+    return this.mintWithAuth({
+      ...params,
+    });
   };
 
   // Mints a Capacity Credits NFT (RLI) token with the specified daily request rate and expiration period.
