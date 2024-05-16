@@ -57,6 +57,7 @@ import {
   IPFSHash,
   getBytes32FromMultihash,
 } from './helpers/getBytes32FromMultihash';
+import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -980,6 +981,16 @@ export class LitContracts {
     return data;
   }
 
+  /**
+   * Mints a new token with authentication.
+   *
+   * @param authMethod - The authentication method.
+   * @param scopes - The permission scopes.
+   * @param pubkey - The public key.
+   * @param authId - (optional) The authentication ID.
+   * @returns An object containing the PKP information and the transaction receipt.
+   * @throws Error if the contracts are not connected, the contract is not available, authMethodType or accessToken is missing, or permission scopes are required.
+   */
   mintWithAuth = async ({
     authMethod,
     scopes,
@@ -1088,22 +1099,113 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   };
 
   /**
-   * Mint a PKP NFT with custom auth
-   * @param {mintWithCustomAuthParams} params
+   * Mints a new token with customer authentication.
+   *
+   * @param authMethod - The authentication method.
+   * @param scopes - The permission scopes.
+   * @param customAuthId - The authentication ID.
+   * @returns An object containing the PKP information and the transaction receipt.
+   * @throws Error if the contracts are not connected, the contract is not available, authMethodType or accessToken is missing, or permission scopes are required.
    */
   mintWithCustomAuth = async (params: mintWithCustomAuthParams) => {
-    if (typeof params.customAuthId === 'string') {
-      params.authId = stringToArrayify(params.customAuthId);
-    }
+    params.authId =
+      typeof params.customAuthId === 'string'
+        ? stringToArrayify(params.customAuthId)
+        : params.customAuthId;
 
-    // const authId = stringToArrayify(params.customAuthId);
     return this.mintWithAuth({
       ...params,
     });
   };
 
-  // Mints a Capacity Credits NFT (RLI) token with the specified daily request rate and expiration period.
-  // The expiration date is calculated to be at midnight UTC, a specific number of days from now.
+  /**
+   * Adds a permitted authentication method for a given PKP token.
+   *
+   * @param {Object} params - The parameters for adding the permitted authentication method.
+   * @param {string} params.pkpTokenId - The ID of the PKP token.
+   * @param {AuthMethodType | number} params.authMethodType - The type of the authentication method.
+   * @param {string | Uint8Array} params.authId - The ID of the authentication method.
+   * @param {AuthMethodScope[]} params.authMethodScopes - The scopes of the authentication method.
+   * @param {string} [params.webAuthnPubkey] - The public key for WebAuthn.
+   * @returns {Promise<any>} - A promise that resolves with the result of adding the permitted authentication method.
+   * @throws {Error} - If an error occurs while adding the permitted authentication method.
+   */
+  addPermittedAuthMethod = async ({
+    pkpTokenId,
+    authMethodType,
+    authId,
+    authMethodScopes,
+    webAuthnPubkey,
+  }: {
+    pkpTokenId: string;
+    authMethodType: AuthMethodType | number;
+    authId: string | Uint8Array;
+    authMethodScopes: AuthMethodScope[];
+    webAuthnPubkey?: string;
+  }) => {
+    const _authId =
+      typeof authId === 'string' ? stringToArrayify(authId) : authId;
+
+    const _webAuthnPubkey = webAuthnPubkey ?? '0x';
+
+    try {
+      const res =
+        await this.pkpPermissionsContract.write.addPermittedAuthMethod(
+          pkpTokenId,
+          {
+            authMethodType: authMethodType,
+            id: _authId,
+            userPubkey: _webAuthnPubkey,
+          },
+          authMethodScopes
+        );
+
+      return res;
+    } catch (e: any) {
+      throw new Error(e);
+    }
+  };
+
+  /**
+   * Adds a permitted action to the PKP permissions contract.
+   *
+   * @param ipfsId - The IPFS ID of the action.
+   * @param pkpTokenId - The PKP token ID.
+   * @param authMethodScopes - Optional array of authentication method scopes.
+   * @returns A promise that resolves to the result of the write operation.
+   * @throws If an error occurs during the write operation.
+   */
+  addPermittedAction = async ({
+    ipfsId,
+    pkpTokenId,
+    authMethodScopes,
+  }: {
+    ipfsId: string;
+    pkpTokenId: string;
+    authMethodScopes?: AuthMethodScope[];
+  }) => {
+    const ipfsIdBytes = this.utils.getBytesFromMultihash(ipfsId);
+    const scopes = authMethodScopes ?? [];
+
+    try {
+      const res = await this.pkpPermissionsContract.write.addPermittedAction(
+        pkpTokenId,
+        ipfsIdBytes,
+        scopes
+      );
+      return res;
+    } catch (e: any) {
+      throw new Error(e);
+    }
+  };
+
+  /**
+   * Mint a Capacity Credits NFT (RLI) token with the specified daily request rate and expiration period. The expiration date is calculated to be at midnight UTC, a specific number of days from now.
+   *
+   * @param {MintCapacityCreditsContext} context - The minting context.
+   * @returns {Promise<MintCapacityCreditsRes>} - A promise that resolves to the minted capacity credits NFT response.
+   * @throws {Error} - If the input parameters are invalid or an error occurs during the minting process.
+   */
   mintCapacityCreditsNFT = async ({
     requestsPerDay,
     requestsPerSecond,

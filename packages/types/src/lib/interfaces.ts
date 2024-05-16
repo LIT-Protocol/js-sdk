@@ -1918,7 +1918,7 @@ export interface MintWithAuthParams {
 
 export interface mintWithCustomAuthParams extends MintWithAuthParams {
   /**
-   * For custom auth method, the authId could be anything.
+   * For custom auth method,the custom app user id
    */
   customAuthId: string | Uint8Array;
 }
