@@ -1106,7 +1106,15 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
    * @param customAuthId - The authentication ID.
    * @returns An object containing the PKP information and the transaction receipt.
    * @throws Error if the contracts are not connected, the contract is not available, authMethodType or accessToken is missing, or permission scopes are required.
-   */
+   * @example
+   * 
+  const customAuthMethodOwnedPkp =
+    await alice.contractsClient.mintWithCustomAuth({
+      customAuthId: 'custom-app-user-id',
+      authMethod: customAuthMethod,
+      scopes: [AuthMethodScope.SignAnything],
+    }); 
+  */
   mintWithCustomAuth = async (params: mintWithCustomAuthParams) => {
     params.authId =
       typeof params.customAuthId === 'string'
@@ -1160,6 +1168,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           authMethodScopes
         );
 
+      await res.wait();
+
       return res;
     } catch (e: any) {
       throw new Error(e);
@@ -1193,6 +1203,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
         ipfsIdBytes,
         scopes
       );
+
+      await res.wait();
+
       return res;
     } catch (e: any) {
       throw new Error(e);

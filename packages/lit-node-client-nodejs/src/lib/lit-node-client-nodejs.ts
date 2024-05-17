@@ -2490,27 +2490,16 @@ const resourceAbilityRequests = [
   getPkpSessionSigs = async (params: GetPkpSessionSigs) => {
     const chain = params?.chain || 'ethereum';
 
+    /**
+     * authMethods can be ommited from the SDK, but it is required for the node.
+     * So we need to create an empty array if it is not provided.
+     */
+    const authMethods = params.authMethods ?? [];
+
     const pkpSessionSigs = this.getSessionSigs({
       chain,
       ...params,
       authNeededCallback: async (props: AuthCallbackParams) => {
-        // -- validate
-        if (!props.expiration) {
-          throw new Error(
-            '[getPkpSessionSigs/callback] expiration is required'
-          );
-        }
-
-        if (!props.resources) {
-          throw new Error('[getPkpSessionSigs/callback]resources is required');
-        }
-
-        if (!props.resourceAbilityRequests) {
-          throw new Error(
-            '[getPkpSessionSigs/callback]resourceAbilityRequests is required'
-          );
-        }
-
         // lit action code and ipfs id cannot exist at the same time
         if (props.litActionCode && props.litActionIpfsId) {
           throw new Error(
@@ -2521,7 +2510,7 @@ const resourceAbilityRequests = [
         const response = await this.signSessionKey({
           sessionKey: props.sessionKey,
           statement: props.statement || 'Some custom statement.',
-          authMethods: [...params.authMethods],
+          authMethods: [...authMethods],
           pkpPublicKey: params.pkpPublicKey,
           expiration: props.expiration,
           resources: props.resources,
