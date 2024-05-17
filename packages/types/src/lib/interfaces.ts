@@ -1871,8 +1871,14 @@ export interface GetPkpSessionSigs
   extends CommonGetSessionSigsProps,
     LitCustomAuth {
   pkpPublicKey: string;
-  authMethods: AuthMethod[];
+
+  /**
+   * Can be omitted, but it needs to be an empty array [] set in the SDK before
+   * sending it to the node
+   */
+  authMethods?: AuthMethod[];
   jsParams?: {
+    [key: string]: any;
     publicKey?: string;
     sigName?: string;
   };
@@ -1918,7 +1924,7 @@ export interface MintWithAuthParams {
 
 export interface mintWithCustomAuthParams extends MintWithAuthParams {
   /**
-   * For custom auth method,the custom app user id
+   * For a custom authentication method, the custom auth ID should uniquely identify the user for that project. For example, for Google, we use appId:userId, so you should follow a similar format for Telegram, Twitter, or any other custom auth method.
    */
   customAuthId: string | Uint8Array;
 }
