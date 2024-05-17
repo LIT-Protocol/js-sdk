@@ -61,7 +61,7 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
     );
 
   console.log('permittedActions:', permittedActions);
-  process.exit();
+  // process.exit();
 
   const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
     pkpPublicKey: alice.pkp.publicKey,
