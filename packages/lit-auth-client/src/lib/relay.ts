@@ -185,4 +185,11 @@ export class LitRelay implements IRelay {
     const registrationOptions = await response.json();
     return registrationOptions;
   }
+
+  /**
+   * returns the relayUrl
+   */
+  public getUrl(): string {
+    return this.relayUrl;
+  }
 }

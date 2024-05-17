@@ -471,7 +471,6 @@ export const replaceFileContent = async (path, oldContent, newContent) => {
  * 2. prefixPathWithDir('src/index.js', 'components') => './components/src/index.js'
  */
 export const prefixPathWithDir = (path, dirName) => {
-
   if (path?.slice(0, 2) === './') {
     return `./${dirName}/${path.slice(2)}`;
   } else {
@@ -611,74 +610,6 @@ export const log = Object.assign(
     },
   }
 );
-/**
- * testThis - Runs a test and logs the result
- *
- * This test relies on the `success` and `fail` functions to either return
- * 200 or 500 status code. If neither is returned, the test it not correctly implemented.
- *
- * It DOES not process.exit() on failure, this event is handled by the caller, in this case
- * in the test runner script at ./e2e-nodejs/index.mjs
- *
- * if (errorCounter > 0) {
-    console.log(`❌ ${errorCounter} test(s) failed`);
-    process.exit(1);
-  }
-  process.exit(0);
- *
- * This ensures that all tests are run and the user is notified of all failures, and could be integrated
- * with a CI/CD pipeline.
- * @param {*} test
- * @returns
- */
-export const testThis = async (test) => {
-  // calculate the time it takes to run the test
-  const start = Date.now();
-
-  const { status, message } = await test.fn();
-
-  let errorIsThrown = false;
-
-  try {
-    const end = Date.now();
-
-    const time = end - start;
-
-    if (status === 200) {
-      log.green(`\t${message} (${time}ms)`);
-      return true;
-    } else {
-      const _errorMsg = `\t(FAILED 200) ${message} (${time}ms) | ${test.name}`;
-      errorIsThrown = true;
-      log.red(_errorMsg);
-      throw new Error(_errorMsg);
-    }
-  } catch (e) {
-    if (!errorIsThrown) {
-      const end = Date.now();
-      const time = end - start;
-      const _errorMsg = `\t(FAILED 500) ${message} (${time}ms) | ${test.name}`;
-      log.red(_errorMsg);
-      throw new Error(_errorMsg);
-    }
-  }
-};
-
-/**
- * testThese - Runs a list of tests using testThis
- * Check testThis for more details
- *
- * @param {*} tests
- *
- * @returns
- */
-export const testThese = async (tests) => {
-  console.log(`Running ${tests.length} tests...\n`);
-
-  for (const t of tests) {
-    await testThis(t);
-  }
-};
 
 export function findArg(args, flag) {
   const flagIndex = args.findIndex((arg) => arg.startsWith(flag));

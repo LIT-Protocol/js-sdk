@@ -72,15 +72,6 @@ export class LitAuthClient {
     // Check if custom relay object is provided
     if (options?.customRelay) {
       this.relay = options?.customRelay;
-    } else {
-      // Check if configuration options for Lit Relay are provided
-      if (options?.litRelayConfig?.relayApiKey) {
-        this.relay = new LitRelay(options.litRelayConfig);
-      } else {
-        throw new Error(
-          'An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
-        );
-      }
     }
 
     // Check if Lit node client is provided
@@ -89,7 +80,7 @@ export class LitAuthClient {
     } else {
       this.litNodeClient = new LitNodeClient({
         litNetwork: 'cayenne',
-        debug: options.debug ?? false,
+        debug: this.debug ?? false,
       });
     }
 
@@ -126,11 +117,24 @@ export class LitAuthClient {
           break;
       }
 
-      if (this.litNodeClient.config.litNetwork)
-        this.relay = new LitRelay({
-          relayUrl: url,
-          relayApiKey: options?.litRelayConfig?.relayApiKey,
-        });
+      this.relay = new LitRelay({
+        relayUrl: url,
+        relayApiKey: options?.litRelayConfig?.relayApiKey,
+      });
+    } else if (options?.litRelayConfig?.relayUrl) {
+      if (!options?.litRelayConfig?.relayApiKey) {
+        throw new Error(
+          '2 An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
+        );
+      }
+      this.relay = new LitRelay(options.litRelayConfig);
+    } else {
+      if (!options.litRelayConfig.relayApiKey) {
+        throw new Error(
+          '2 An API key is required to use the default Lit Relay server. Please provide either an API key or a custom relay server.'
+        );
+      }
+      this.relay = new LitRelay(options.litRelayConfig);
     }
 
     // Set RPC URL

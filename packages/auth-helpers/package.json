@@ -17,8 +17,8 @@
     "access": "public",
     "directory": "../../dist/packages/auth-helpers"
   },
-  "peerDependencies": {
-    "tslib": "^2.3.0"
+  "dependencies": {
+    "tslib": "2.6.0"
   },
   "gitHead": "0d7334c2c55f448e91fe32f29edc5db8f5e09e4b",
   "tags": [
@@ -28,7 +28,7 @@
     "crypto": false,
     "stream": false
   },
-  "version": "5.0.0",
+  "version": "6.0.0-beta.2",
   "main": "./dist/src/index.js",
   "typings": "./dist/src/index.d.ts"
 }

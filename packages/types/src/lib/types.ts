@@ -245,3 +245,5 @@ export type LitContractResolverContext = {
   contractContext?: LitContractContext;
   provider?: ethers.providers.JsonRpcProvider;
 };
+
+export type ResponseStrategy = 'leastCommon' | 'mostCommon' | 'custom';
