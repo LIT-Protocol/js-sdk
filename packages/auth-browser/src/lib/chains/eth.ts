@@ -1,3 +1,23 @@
+import { Buffer as BufferPolyfill } from 'buffer';
+
+import { hexlify } from '@ethersproject/bytes';
+import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
+import { toUtf8Bytes } from '@ethersproject/strings';
+
+
+
+// import WalletConnectProvider from '@walletconnect/ethereum-provider';
+import { verifyMessage } from '@ethersproject/wallet';
+import { EthereumProvider } from '@walletconnect/ethereum-provider';
+import { ethers } from 'ethers';
+import { getAddress } from 'ethers/lib/utils';
+import { SiweMessage } from 'siwe';
+
+// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
+import * as nacl from 'tweetnacl';
+import * as naclUtil from 'tweetnacl-util';
+
+// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
 import {
   ELeft,
   ERight,
@@ -7,32 +27,6 @@ import {
   LIT_ERROR,
   LOCAL_STORAGE_KEYS,
 } from '@lit-protocol/constants';
-
-import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
-
-import { ethers } from 'ethers';
-// import WalletConnectProvider from '@walletconnect/ethereum-provider';
-import { toUtf8Bytes } from '@ethersproject/strings';
-import { hexlify } from '@ethersproject/bytes';
-import { verifyMessage } from '@ethersproject/wallet';
-
-import { EthereumProvider } from '@walletconnect/ethereum-provider';
-
-import LitConnectModal from '../connect-modal/modal';
-
-import { Web3Provider, JsonRpcSigner } from '@ethersproject/providers';
-
-import { SiweMessage } from 'siwe';
-import { getAddress } from 'ethers/lib/utils';
-
-// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
-import * as naclUtil from 'tweetnacl-util';
-
-// @ts-ignore: If importing 'nacl' directly, the built files will use .default instead
-import * as nacl from 'tweetnacl';
-
-import { Buffer as BufferPolyfill } from 'buffer';
-
 import {
   isBrowser,
   isNode,
@@ -41,6 +35,9 @@ import {
   throwError,
 } from '@lit-protocol/misc';
 import { getStorageItem } from '@lit-protocol/misc-browser';
+import { AuthSig, AuthCallbackParams } from '@lit-protocol/types';
+
+// import LitConnectModal from '../connect-modal/modal';
 
 if (global && typeof global.Buffer === 'undefined') {
   global.Buffer = BufferPolyfill;
@@ -71,9 +68,7 @@ interface ConnectWeb3Result {
   account: string | any;
 }
 
-interface RPCUrls {
-  [chainId: string]: string;
-}
+type RPCUrls = Record<string, string>;
 
 interface Web3ProviderOptions {
   walletconnect: {
@@ -99,23 +94,23 @@ interface signAndSaveAuthParams {
 interface IABI {
   inputs: any[];
   name: string;
-  outputs: Array<{
+  outputs: {
     internalType: string;
     name: string;
     type: string;
-  }>;
+  }[];
   stateMutability: string;
   type: string;
 }
 
 interface IABIEncode {
-  abi: Array<IABI>;
+  abi: IABI[];
   functionName: string;
   functionParams: [];
 }
 
 interface IABIDecode {
-  abi: Array<IABI>;
+  abi: IABI[];
   functionName: string;
   data: any;
 }
@@ -279,7 +274,7 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
 };
 
 /**
- * 
+ *
  * Get RPC Urls in the correct format
  * need to make it look like this:
    ---
@@ -290,13 +285,13 @@ export const getMustResign = (authSig: AuthSig, resources: any): boolean => {
         // ...
     },
    ---
- * 
+ *
  * @returns
  */
 export const getRPCUrls = (): RPCUrls => {
   const rpcUrls: RPCUrls = {};
 
-  const keys: Array<string> = Object.keys(LIT_CHAINS);
+  const keys: string[] = Object.keys(LIT_CHAINS);
 
   for (let i = 0; i < keys.length; i++) {
     const chainName = keys[i];
@@ -352,74 +347,74 @@ export const decodeCallResult = ({
  *
  * @return { Promise<ConnectWeb3Result> } web3, account
  */
-export const connectWeb3 = async ({
-  chainId = 1,
-  walletConnectProjectId,
-}: ConnectWeb3): Promise<ConnectWeb3Result> => {
-  // -- check if it's nodejs
-  if (isNode()) {
-    log('connectWeb3 is not supported in nodejs.');
-    return { web3: null, account: null };
-  }
+// export const connectWeb3 = async ({
+//   chainId = 1,
+//   walletConnectProjectId,
+// }: ConnectWeb3): Promise<ConnectWeb3Result> => {
+//   // -- check if it's nodejs
+//   if (isNode()) {
+//     log('connectWeb3 is not supported in nodejs.');
+//     return { web3: null, account: null };
+//   }
 
-  const rpcUrls: RPCUrls = getRPCUrls();
+//   const rpcUrls: RPCUrls = getRPCUrls();
 
-  let providerOptions = {};
+//   let providerOptions = {};
 
-  if (walletConnectProjectId) {
-    const wcProvider = await EthereumProvider.init({
-      projectId: walletConnectProjectId,
-      chains: [chainId],
-      showQrModal: true,
-      optionalMethods: ['eth_sign'],
-      rpcMap: rpcUrls,
-    });
+//   if (walletConnectProjectId) {
+//     const wcProvider = await EthereumProvider.init({
+//       projectId: walletConnectProjectId,
+//       chains: [chainId],
+//       showQrModal: true,
+//       optionalMethods: ['eth_sign'],
+//       rpcMap: rpcUrls,
+//     });
 
-    providerOptions = {
-      walletconnect: {
-        provider: wcProvider,
-      },
-    };
+//     providerOptions = {
+//       walletconnect: {
+//         provider: wcProvider,
+//       },
+//     };
 
-    if (isBrowser()) {
-      // @ts-ignore
-      globalThis.litWCProvider = wcProvider;
-    }
-  }
+//     if (isBrowser()) {
+//       // @ts-ignore
+//       globalThis.litWCProvider = wcProvider;
+//     }
+//   }
 
-  log('getting provider via lit connect modal');
+//   log('getting provider via lit connect modal');
 
-  const dialog = new LitConnectModal({ providerOptions });
+//   const dialog = new LitConnectModal({ providerOptions });
 
-  const provider = await dialog.getWalletProvider();
+//   const provider = await dialog.getWalletProvider();
 
-  log('got provider');
+//   log('got provider');
 
-  // @ts-ignore
-  const web3 = new Web3Provider(provider);
+//   // @ts-ignore
+//   const web3 = new Web3Provider(provider);
 
-  // trigger metamask popup
-  try {
-    log(
-      '@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.'
-    );
-    // @ts-ignore
-    await provider.enable();
-  } catch (e) {
-    log(
-      "error enabling provider but swallowed it because it's not important.  most wallets use a different function now to enable the wallet so you can ignore this error, because those other methods will be tried.",
-      e
-    );
-  }
+//   // trigger metamask popup
+//   try {
+//     log(
+//       '@deprecated soon to be removed. - trying to enable provider.  this will trigger the metamask popup.'
+//     );
+//     // @ts-ignore
+//     await provider.enable();
+//   } catch (e) {
+//     log(
+//       "error enabling provider but swallowed it because it's not important.  most wallets use a different function now to enable the wallet so you can ignore this error, because those other methods will be tried.",
+//       e
+//     );
+//   }
 
-  log('listing accounts');
-  const accounts = await web3.listAccounts();
+//   log('listing accounts');
+//   const accounts = await web3.listAccounts();
 
-  log('accounts', accounts);
-  const account = accounts[0].toLowerCase();
+//   log('accounts', accounts);
+//   const account = accounts[0].toLowerCase();
 
-  return { web3, account };
-};
+//   return { web3, account };
+// };
 
 /**
  * @browserOnly
@@ -647,7 +642,7 @@ export const checkAndSignEVMAuthMessage = async ({
 
     // -- 8. case: we are on the right wallet, but need to check the resources of the sig and re-sign if they don't match
   } else {
-    let mustResign: boolean = getMustResign(authSig, resources);
+    const mustResign: boolean = getMustResign(authSig, resources);
 
     if (mustResign) {
       authSig = await _signAndGetAuth({
@@ -705,7 +700,7 @@ const _signAndGetAuth = async ({
     nonce,
   });
 
-  let authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
+  const authSigOrError = getStorageItem(LOCAL_STORAGE_KEYS.AUTH_SIGNATURE);
 
   if (authSigOrError.type === 'ERROR') {
     throwError({
@@ -715,7 +710,7 @@ const _signAndGetAuth = async ({
     });
   }
 
-  let authSig: AuthSig =
+  const authSig: AuthSig =
     typeof authSigOrError.result === 'string'
       ? JSON.parse(authSigOrError.result)
       : authSigOrError.result;
@@ -775,14 +770,14 @@ export const signAndSaveAuthMessage = async ({
   const body: string = message.prepareMessage();
   const formattedAccount = getAddress(account);
   // -- 2. sign the message
-  let signedResult: SignedMessage = await signMessage({
+  const signedResult: SignedMessage = await signMessage({
     body,
     web3,
     account: formattedAccount,
   });
 
   // -- 3. prepare auth message
-  let authSig: AuthSig = {
+  const authSig: AuthSig = {
     sig: signedResult.signature,
     derivedVia: 'web3.eth.personal.sign',
     signedMessage: body,
@@ -837,7 +832,7 @@ export const signMessage = async ({
   // -- validate
   if (!web3 || !account) {
     log(`web3: ${web3} OR ${account} not found. Connecting web3..`);
-    let res = await connectWeb3({ chainId: 1 });
+    const res = await connectWeb3({ chainId: 1 });
     web3 = res.web3;
     account = res.account;
   }
