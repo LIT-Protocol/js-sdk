@@ -23,8 +23,9 @@ const INVALID_SESSION_SIG_LIT_ACTION_CODE = `
 
 /**
  * https://cloudflare-ipfs.com/ipfs/QmRf5K7PVi5TWXiJdw7YYtcgpgRY6ufXGr9yYnxBLvLjDp
+ * https://cloudflare-ipfs.com/ipfs/QmSQDKRWEXZ9CGoucSTR11Mv6fhGqaytZ1MqrfHdkuS1Vg
  */
-export const VALID_IPFS_ID = 'QmRf5K7PVi5TWXiJdw7YYtcgpgRY6ufXGr9yYnxBLvLjDp';
+export const VALID_IPFS_ID = 'QmSQDKRWEXZ9CGoucSTR11Mv6fhGqaytZ1MqrfHdkuS1Vg';
 
 /**
  * https://cloudflare-ipfs.com/ipfs/QmeUByesskboEkLLcE9Hd3bWFZT5Xt53RSauMNTJSVhfqm
@@ -100,7 +101,7 @@ export const getLitActionSessionSigsUsingIpfsId = async (
 
   const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
     pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
-    authMethods: [alice.authMethod],
+    // authMethods: [alice.authMethod],
     resourceAbilityRequests: _resourceAbilityRequests,
     litActionIpfsId: VALID_IPFS_ID,
     jsParams: {

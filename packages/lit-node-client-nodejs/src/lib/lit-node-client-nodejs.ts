@@ -463,16 +463,22 @@ export class LitNodeClientNodeJs
     let authSig: AuthSig;
 
     if (authCallback) {
+      console.log('1 - authCallback');
       authSig = await authCallback(authCallbackParams);
+      console.log('2 - authCallback');
     } else {
+      console.log('3 - defaultAuthCallback');
       if (!this.defaultAuthCallback) {
+        console.log('4 - defaultAuthCallback');
         return throwError({
           message: 'No default auth callback provided',
           errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
           errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
         });
       }
+      console.log('5 - defaultAuthCallback');
       authSig = await this.defaultAuthCallback(authCallbackParams);
+      console.log('6 - defaultAuthCallback');
     }
 
     // (TRY) to set walletSig to local storage
@@ -522,7 +528,7 @@ export class LitNodeClientNodeJs
     try {
       await authSigSiweMessage.validate(authSig.sig);
     } catch (e) {
-      console.debug('Need retry because verify failed', e);
+      console.debug('xxx Need retry because verify failed', e);
       return true;
     }
 
@@ -2055,7 +2061,7 @@ export class LitNodeClientNodeJs
     // -- fetch shares from nodes
     const body: JsonSignSessionKeyRequestV1 = {
       sessionKey: sessionKeyUri,
-      authMethods: params.authMethods,
+      ...(params?.authMethods && { authMethods: params.authMethods }),
       ...(params?.pkpPublicKey && { pkpPublicKey: params.pkpPublicKey }),
       siweMessage: siweMessage,
       curveType: LIT_CURVE.BLS,
@@ -2270,6 +2276,7 @@ export class LitNodeClientNodeJs
     requestId: string
   ) => {
     log('getSignSessionKeyShares');
+
     const urlWithPath = composeLitUrl({
       url,
       endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
@@ -2389,10 +2396,11 @@ const resourceAbilityRequests = [
       resourceAbilityRequests: params.resourceAbilityRequests,
     });
 
-    // console.log('XXX needToResignSessionKey:', needToResignSessionKey);
+    console.log('xxx needToResignSessionKey:', needToResignSessionKey);
 
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
+      console.log('xxx needToResignSessionKey inner');
       log('need to re-sign session key.  Signing...');
       authSig = await this.#authCallbackAndUpdateStorageItem({
         authCallback: params.authNeededCallback,
@@ -2406,8 +2414,17 @@ const resourceAbilityRequests = [
           uri: sessionKeyUri,
           nonce,
           resourceAbilityRequests: params.resourceAbilityRequests,
+
+          // -- optional fields
+          ...(params.litActionCode && { litActionCode: params.litActionCode }),
+          ...(params.litActionIpfsId && {
+            litActionIpfsId: params.litActionIpfsId,
+          }),
+          ...(params.jsParams && { jsParams: params.jsParams }),
         },
       });
+
+      console.log('xxx authSig:', authSig);
     }
 
     if (
@@ -2456,15 +2473,23 @@ const resourceAbilityRequests = [
         nodeAddress,
       };
 
+      console.log('xxx toSign:', toSign);
+
       const signedMessage = JSON.stringify(toSign);
+
+      console.log('xxx signedMessage:', signedMessage);
 
       const uint8arrayKey = uint8arrayFromString(
         sessionKey.secretKey,
         'base16'
       );
 
+      console.log('xxx uint8arrayKey:', uint8arrayKey);
+
       const uint8arrayMessage = uint8arrayFromString(signedMessage, 'utf8');
+      console.log('xxx uint8arrayMessage:', uint8arrayMessage);
       const signature = nacl.sign.detached(uint8arrayMessage, uint8arrayKey);
+      console.log('xxx signature:', signature);
 
       signatures[nodeAddress] = {
         sig: uint8arrayToString(signature, 'base16'),
@@ -2473,6 +2498,8 @@ const resourceAbilityRequests = [
         address: sessionKey.publicKey,
         algo: 'ed25519',
       };
+
+      console.log('xxx signatures[nodeAddress]:', signatures[nodeAddress]);
     });
 
     log('signatures:', signatures);
@@ -2490,27 +2517,46 @@ const resourceAbilityRequests = [
   getPkpSessionSigs = async (params: GetPkpSessionSigs) => {
     const chain = params?.chain || 'ethereum';
 
-    /**
-     * authMethods can be ommited from the SDK, but it is required for the node.
-     * So we need to create an empty array if it is not provided.
-     */
-    const authMethods = params.authMethods ?? [];
+    // if authMethod is empty, it is custom auth, and we will use
+    // const pkpOwnerEoaWalletAuthMethod = params.pkpOwnerAuthSig
+    //   ? {
+    //       authMethodType: 1,
+    //       accessToken: JSON.stringify(params.pkpOwnerAuthSig),
+    //     }
+    //   : null;
+
+    // either params.pkpOwnerAuthSig or params.authMethods must exist
+    // if (!pkpOwnerEoaWalletAuthMethod && !params.authMethods) {
+    //   throw new Error(
+    //     '[getPkpSessionSigs] Either pkpOwnerAuthSig or authMethods must exist'
+    //   );
+    // }
+
+    const combinedAuthMethods = [
+      ...(params.authMethods ?? []),
+      // pkpOwnerEoaWalletAuthMethod,
+    ].filter((authMethod) => authMethod != null);
+
+    log(`[getPkpSessionSigs] combinedAuthMethods:`, combinedAuthMethods);
 
     const pkpSessionSigs = this.getSessionSigs({
       chain,
       ...params,
       authNeededCallback: async (props: AuthCallbackParams) => {
+        console.log('xx getPkpsessionSigs flow 1');
         // lit action code and ipfs id cannot exist at the same time
         if (props.litActionCode && props.litActionIpfsId) {
+          console.log('xx getPkpsessionSigs flow 2');
           throw new Error(
             '[getPkpSessionSigs/callback]litActionCode and litActionIpfsId cannot exist at the same time'
           );
         }
+        console.log('xx getPkpsessionSigs flow 3');
 
         const response = await this.signSessionKey({
           sessionKey: props.sessionKey,
           statement: props.statement || 'Some custom statement.',
-          authMethods: [...authMethods],
+          authMethods: [...combinedAuthMethods],
           pkpPublicKey: params.pkpPublicKey,
           expiration: props.expiration,
           resources: props.resources,
@@ -2526,6 +2572,9 @@ const resourceAbilityRequests = [
           }),
           ...(props.jsParams && { jsParams: props.jsParams }),
         });
+        console.log('xx getPkpsessionSigs flow 4');
+
+        console.log('xx getPkpsessionSigs response 5:', response);
 
         return response.authSig;
       },

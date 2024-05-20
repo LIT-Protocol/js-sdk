@@ -128,6 +128,14 @@ export class TinnyPerson {
       })
     ).pkp;
 
+    // const tx =
+    //   await this.contractsClient.pkpPermissionsContract.write.addPermittedAddress(
+    //     this.authMethodOwnedPkp.tokenId,
+    //     this.wallet.address,
+    //     [AuthMethodScope.SignAnything]
+    //   );
+    // await tx.wait();
+
     console.log(
       '[𐬺🧪 Tinny Person𐬺] 🐣 TinnyPerson spawned:',
       this.wallet.address

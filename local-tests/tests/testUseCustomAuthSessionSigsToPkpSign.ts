@@ -22,7 +22,18 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
     accessToken: 'xxx',
   };
 
-  const txToAddPermittedAuthMethod =
+  console.log('customAuthMethod:', customAuthMethod);
+
+  const customAuthMethodOwnedPkp =
+    await alice.contractsClient.mintWithCustomAuth({
+      customAuthId: 'custom-app-user-id', // ipfs hash for the auth method
+      authMethod: customAuthMethod,
+      scopes: [AuthMethodScope.SignAnything],
+    });
+
+  console.log('customAuthMethodOwnedPkp:', customAuthMethodOwnedPkp);
+
+  const addPermittedAuthMethodTx =
     await alice.contractsClient.addPermittedAuthMethod({
       pkpTokenId: alice.pkp.tokenId,
       authId: 'app-id-xxx:user-id-yyy',
@@ -30,38 +41,23 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
       authMethodScopes: [AuthMethodScope.SignAnything],
     });
 
-  console.log('txToAddPermittedAuthMethod:', txToAddPermittedAuthMethod);
+  await addPermittedAuthMethodTx.wait();
 
-  const permittedAuthMethods =
-    await alice.contractsClient.pkpPermissionsContract.read.getPermittedAuthMethods(
-      alice.pkp.tokenId
-    );
+  console.log('addPermittedAuthMethodTx:', addPermittedAuthMethodTx);
 
-  console.log('permittedAuthMethods:', permittedAuthMethods);
-
-  for (const authMethod of permittedAuthMethods) {
-    console.log('Added AuthMethod Type:', authMethod[0].toString());
-  }
-
-  const IPFSID = 'QmRXsQ59QnqXoUubnzFACQhXydoSgAnxNikG1sFQPEJGeG';
+  // `LitActions.setResponse({ response: "true" });`
+  const IPFSID = 'QmSAhLWr3U3SshJyXn9PXwSDnoXGBfRQb9Juw6PpN4eLff';
 
   // Grant an action permission to use a PKP
-  const txToAddPermittedAction = await alice.contractsClient.addPermittedAction(
-    {
-      pkpTokenId: alice.pkp.tokenId,
-      ipfsId: IPFSID,
-      authMethodScopes: [AuthMethodScope.SignAnything],
-    }
-  );
-  console.log('txToAddPermittedAction:', txToAddPermittedAction);
-
-  const permittedActions =
-    await alice.contractsClient.pkpPermissionsContract.read.getPermittedActions(
-      alice.pkp.tokenId
+  const addPermittedActionTx =
+    await alice.contractsClient.pkpPermissionsContractUtils.write.addPermittedAction(
+      alice.pkp.tokenId,
+      IPFSID
     );
+  const receipt = await addPermittedActionTx.wait();
 
-  console.log('permittedActions:', permittedActions);
-  // process.exit();
+  console.log('addPermittedActionTx:', addPermittedActionTx);
+  console.log('receipt:', receipt);
 
   const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
     pkpPublicKey: alice.pkp.publicKey,
@@ -76,28 +72,29 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
       },
     ],
     // litActionIpfsId: IPFSID,
-    // litActionCode: Buffer.from(
-    //   `(async () => {
-    //     const a = 1;
-    //     const b = 2;
-
-    //     if (a + b === 3 && customAuthMethod.authMethodType === 89989) {
-    //       LitActions.setResponse({response:"true"});
-    //     } else {
-    //       LitActions.setResponse({response:"false"});
-    //     }
-
-    //     console.log("16 Lit.Auth:", Lit.Auth);
-    //   })()`
-    // ).toString('base64'),
+    litActionCode: Buffer.from(
+      `const go = async () => {LitActions.setResponse({response:"true"});};go();`
+    ).toString('base64'),
     jsParams: {
       publicKey: `0x${alice.pkp.publicKey}`,
       customAuthMethod: customAuthMethod,
-      sigName: 'custom-auth-sig',
+      sigName: '3custom-auth-sig',
     },
   });
 
   console.log('litActionSessionSigs:', litActionSessionSigs);
+
+  try {
+    const res = await devEnv.litNodeClient.pkpSign({
+      toSign: alice.loveLetter,
+      pubKey: alice.pkp.publicKey,
+      sessionSigs: litActionSessionSigs,
+    });
+
+    console.log('res:', res);
+  } catch (e) {
+    throw new Error(e);
+  }
 
   process.exit();
 };
