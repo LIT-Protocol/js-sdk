@@ -215,6 +215,24 @@ export class TinnyEnvironment {
       });
     }
 
+    if (globalThis.wasmExports) {
+      console.warn(
+        'WASM modules already loaded. wil overide. when connect is called'
+      );
+    }
+
+    if (globalThis.wasmECDSA) {
+      console.warn(
+        'WASM modules already loaded. wil overide. when connect is called'
+      );
+    }
+
+    if (globalThis.wasmSevSnpUtils) {
+      console.warn(
+        'WASM modules already loaded. wil overide. when connect is called'
+      );
+    }
+
     await this.litNodeClient.connect();
 
     if (!this.litNodeClient.ready) {
