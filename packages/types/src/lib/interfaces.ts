@@ -1876,7 +1876,7 @@ export interface GetPkpSessionSigs
    * Lit Protocol supported auth methods: https://developer.litprotocol.com/v3/sdk/wallets/auth-methods
    * This CANNOT be used for custom auth methods. For custom auth methods, please pass the customAuth
    * object to jsParams, and handle the custom auth method in your Lit Action.
-   * 
+   *
    * Notes for internal dev: for the SDK, this value can be omitted, but it needs to be an empty array [] set in the SDK before
    * sending it to the node
    */
