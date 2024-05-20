@@ -15,7 +15,12 @@ export const build = async () => {
     bundle: true,
     plugins: [
       nodeExternalsPlugin({
-        allowList: ['ethers', '@lit-protocol/accs-schemas', 'crypto'],
+        allowList: [
+          'ethers',
+          '@lit-protocol/accs-schemas',
+          'crypto',
+          'secp256k1',
+        ],
       }),
     ],
     platform: 'node',

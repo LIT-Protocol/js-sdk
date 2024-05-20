@@ -52,16 +52,14 @@ import {
   convertRequestsPerDayToPerSecond,
   requestsToKilosecond,
 } from './utils';
+import {
+  CIDParser,
+  IPFSHash,
+  getBytes32FromMultihash,
+} from './helpers/getBytes32FromMultihash';
 
 const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
-
-let CID: any;
-try {
-  CID = require('multiformats/cid');
-} catch (e) {
-  console.log('CID not found');
-}
 
 // This function asynchronously executes a provided callback function for each item in the given array.
 // The callback function is awaited before continuing to the next iteration.
@@ -83,12 +81,6 @@ export const asyncForEachReturn = async (array: any[], callback: Function) => {
   }
   return list;
 };
-
-export interface IPFSHash {
-  digest: string;
-  hashFunction: number;
-  size: number;
-}
 
 declare global {
   interface Window {
@@ -915,7 +907,11 @@ export class LitContracts {
 
     const networks = activeValidatorStructs.map((item: any) => {
       let proto = 'https://';
-      if (item.port !== 443) {
+      /**
+       * ports in range of 8470 - 8479 are configured for https on custom networks (eg. cayenne)
+       * we shouold resepct https on these ports as they are using trusted ZeroSSL certs
+       */
+      if (item.port !== 443 && (item.port > 8480 || item.port < 8469)) {
         proto = 'http://';
       }
       return `${proto}${intToIP(item.ip)}:${item.port}`;
@@ -1265,24 +1261,23 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       return multihash;
     },
     /**
+     * NOTE: This function requires the "multiformats/cid" package in order to work
+     *
      * Partition multihash string into object representing multihash
      *
-     * @param {string} multihash A base58 encoded multihash string
-     * @returns {Multihash}
+     * @param {string} ipfsId A base58 encoded multihash string
+     * @param {CIDParser} CID The CID object from the "multiformats/cid" package
+     *
+     * @example
+     * const CID = require('multiformats/cid')
+     * const ipfsId = 'QmZKLGf3vgYsboM7WVUS9X56cJSdLzQVacNp841wmEDRkW'
+     * const bytes32 = getBytes32FromMultihash(ipfsId, CID)
+     * console.log(bytes32)
+     *
+     * @returns {IPFSHash}
      */
-    getBytes32FromMultihash: async (ipfsId: string) => {
-      const cid = CID.parse(ipfsId);
-      const hashFunction = cid.multihash.code;
-      const size = cid.multihash.size;
-      const digest = '0x' + Buffer.from(cid.multihash.digest).toString('hex');
-
-      const ipfsHash: IPFSHash = {
-        digest,
-        hashFunction,
-        size,
-      };
-
-      return ipfsHash;
+    getBytes32FromMultihash: (ipfsId: string, CID: CIDParser): IPFSHash => {
+      return getBytes32FromMultihash(ipfsId, CID);
     },
 
     // convert timestamp to YYYY/MM/DD format

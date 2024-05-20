@@ -477,6 +477,17 @@ export const LIT_CHAINS: LITChain<LITEVMChain> = {
     type: null,
     vmType: 'EVM',
   },
+  lit: {
+    contractAddress: null,
+    chainId: 175177,
+    name: 'Chronicle - Lit Protocol Testnet',
+    symbol: 'testLPX',
+    decimals: 18,
+    rpcUrls: ['https://chain-rpc.litprotocol.com/http'],
+    blockExplorerUrls: ['https://chain.litprotocol.com/'],
+    type: null,
+    vmType: 'EVM',
+  },
   chiado: {
     contractAddress: null,
     chainId: 10200,
@@ -748,12 +759,7 @@ export const LIT_NETWORKS: { [key in LitNetwork]: string[] } & {
   localhost: string[];
   internalDev: string[];
 } = {
-  // FIXME: Reviewers! These are not used in this branch, scroll down to see remapping logic
-  [LitNetwork.Cayenne]: [
-    `${CAYENNE_URL}:7370'`,
-    `${CAYENNE_URL}:7371'`,
-    `${CAYENNE_URL}:7372'`,
-  ],
+  [LitNetwork.Cayenne]: [],
   [LitNetwork.Manzano]: [],
   [LitNetwork.Habanero]: [],
   [LitNetwork.Custom]: [],

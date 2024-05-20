@@ -13,12 +13,12 @@ import {
   LIT_NETWORKS_KEYS,
   LitContractContext,
   LitContractResolverContext,
+  ResponseStrategy,
   SolRpcConditions,
   SymmetricKey,
   UnifiedAccessControlConditions,
 } from './types';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
-
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 export interface ABIParams {
@@ -272,7 +272,6 @@ export interface BaseJsonPkpSignRequest {
 export interface JsonPkpSignSdkParams extends BaseJsonPkpSignRequest {
   pubKey: string;
   sessionSigs: SessionSigsMap;
-  authMethods?: AuthMethod[];
 }
 
 /**
@@ -489,6 +488,12 @@ export interface JsonEncryptionRetrieveRequest extends JsonAccsRequest {
   toDecrypt: string;
 }
 
+export interface LitActionResponseStrategy {
+  strategy: ResponseStrategy;
+  customFilter?: (
+    responses: Record<string, string>[]
+  ) => Record<string, string>;
+}
 export interface JsonExecutionSdkParamsTargetNode
   extends JsonExecutionSdkParams {
   targetNodeRange: number;
@@ -519,6 +524,12 @@ export interface JsonExecutionSdkParams {
    * auth methods to resolve
    */
   authMethods?: AuthMethod[];
+
+  /**
+   * a strategy for proccessing `reponse` objects returned from the
+   * Lit Action execution context
+   */
+  responseStrategy?: LitActionResponseStrategy;
 }
 
 export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
@@ -1233,21 +1244,19 @@ export interface LitClientSessionManager {
 }
 
 export interface AuthenticationProps {
-  client: LitClientSessionManager;
+  client?: LitClientSessionManager;
+
+  /**
+   * This params is equivalent to the `getSessionSigs` params in the `litNodeClient`
+   */
   getSessionSigsProps: GetSessionSigsProps;
-  authMethods: AuthMethod[];
 }
 
 export interface PKPBaseProp {
+  litNodeClient?: ILitNodeClient;
   pkpPubKey: string;
   rpc?: string;
   rpcs?: RPCUrls;
-  controllerAuthSig?: AuthSig;
-  // @deprecated
-  controllerAuthMethods?: AuthMethod[];
-  // @deprecated
-  controllerSessionSigs?: SessionSigs;
-  // @deprecated
   sessionSigsExpiration?: string;
   authContext?: AuthenticationProps;
   litNetwork?: any;
@@ -1258,6 +1267,18 @@ export interface PKPBaseProp {
   litActionIPFS?: string;
   litActionJsParams?: any;
   provider?: Provider;
+  controllerSessionSigs?: SessionSigs;
+
+  // -- soon to be deprecated
+  /**
+   * @deprecated - use authContext
+   */
+  controllerAuthMethods?: AuthMethod[];
+
+  /**
+   * @deprecated - use authContext
+   */
+  controllerAuthSig?: AuthSig;
 }
 
 export interface RPCUrls {
@@ -1266,7 +1287,12 @@ export interface RPCUrls {
   btc?: string;
 }
 
-export type PKPEthersWalletProp = PKPBaseProp;
+export type PKPEthersWalletProp = Omit<
+  PKPBaseProp,
+  'controllerAuthSig' | 'controllerAuthMethods'
+> & {
+  litNodeClient: ILitNodeClient;
+};
 
 export interface PKPCosmosWalletProp extends PKPBaseProp {
   addressPrefix: string | 'cosmos'; // bech32 address prefix (human readable part) (default: cosmos)
@@ -1391,6 +1417,11 @@ export interface IRelay {
    * @returns {Promise<any>} Registration options for the browser to pass to the authenticator
    */
   generateRegistrationOptions(username?: string): Promise<any>;
+
+  /**
+   * returns the relayUrl
+   */
+  getUrl(): string;
 }
 
 export interface LitRelayConfig {

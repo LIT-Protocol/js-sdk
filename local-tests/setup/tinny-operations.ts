@@ -15,6 +15,15 @@ export const getFiltersFlag = (): string[] => {
 };
 
 /**
+ * Retrieves the exclude flags from the command line arguments.
+ * @returns An array of strings representing the exclude flags.
+ */
+export const getExcludeFlags = (): string[] => {
+  const filterArg = process.argv.find((arg) => arg.startsWith('--exclude='));
+  return filterArg ? filterArg.replace('--exclude=', '').split(',') : [];
+};
+
+/**
  * Runs the tests in the provided `tests` object in a synchronous manner.
  * Each test is executed in a loop with a maximum number of attempts specified by `devEnv.processEnvs.MAX_ATTEMPTS`.
  * Skipped, failed, and passed tests are tracked and logged.
@@ -120,11 +129,22 @@ export const runTestsParallel = async ({
   devEnv: TinnyEnvironment;
 }): Promise<void> => {
   const filters = getFiltersFlag();
+  const excludeFilters = getExcludeFlags();
+
+  // Filter the tests based on include and exclude filters
   const testsToRun = Object.entries(tests).filter(
     ([testName]) =>
-      filters.length === 0 ||
-      filters.some((filter) => testName.includes(filter))
+      (filters.length === 0 ||
+        filters.some((filter) => testName.includes(filter))) &&
+      (excludeFilters.length === 0 ||
+        !excludeFilters.some((exclude) => testName.includes(exclude)))
   );
+
+  if (!testsToRun || testsToRun.length <= 0) {
+    throw new Error(
+      '❌ No tests to run. You might have provided an invalid filter or no tests are available.'
+    );
+  }
 
   const testPromises = testsToRun.map(
     async ([testName, testFunction], testIndex) => {
@@ -168,7 +188,7 @@ export const runTestsParallel = async ({
                 testIndex + 1
               }. ${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)\x1b[0m`
             );
-            console.error(`\x1b[31mError:\x1b[90m ${error}\x1b[0m`);
+            console.error(`\x1b[31m❌Error:\x1b[90m ${error}\x1b[0m`);
             return `${testName} (Failed in ${timeTaken} ms) - Error: ${error}`;
           }
         }

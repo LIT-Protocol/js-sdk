@@ -35,15 +35,10 @@ import { Logger } from '@ethersproject/logger';
 import { version } from 'ethers';
 
 import { ethers, Wallet } from 'ethers';
-import {
-  LITChainRequiredProps,
-  PKPClientHelpers,
-  PKPEthersWalletProp,
-} from '@lit-protocol/types';
+import { PKPClientHelpers, PKPEthersWalletProp } from '@lit-protocol/types';
 import { PKPBase } from '@lit-protocol/pkp-base';
 import { ethRequestHandler } from './handler';
 import {
-  ETHHandlerReq,
   ETHRequestSigningPayload,
   ETHSignature,
   ETHTxRes,
@@ -242,7 +237,6 @@ export class PKPEthersWallet
     if (!this.litNodeClientReady) {
       await this.init();
     }
-
     const toSign = arrayify(hashMessage(message));
     let signature;
     if (this.useAction) {

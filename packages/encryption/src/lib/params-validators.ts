@@ -117,7 +117,6 @@ export const paramsValidators: Record<
   executeJs: (params: JsonExecutionSdkParams) => [
     new AuthMaterialValidator('executeJs', params),
     new ExecuteJsValidator('executeJs', params),
-    new AuthMethodValidator('executeJs', params.authMethods),
   ],
 
   decrypt: (params: DecryptRequest) => [
