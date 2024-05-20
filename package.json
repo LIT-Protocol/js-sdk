@@ -189,7 +189,6 @@
     "lerna": "^5.4.3",
     "live-server": "^1.2.2",
     "lokijs": "^1.5.12",
-    "node-fetch": "^2.6.1",
     "node-localstorage": "^3.0.5",
     "nodemon": "^2.0.20",
     "nx": "17.3.0",
