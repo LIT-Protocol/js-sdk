@@ -1871,8 +1871,18 @@ export interface GetPkpSessionSigs
   extends CommonGetSessionSigsProps,
     LitCustomAuth {
   pkpPublicKey: string;
-  authMethods: AuthMethod[];
+
+  /**
+   * Lit Protocol supported auth methods: https://developer.litprotocol.com/v3/sdk/wallets/auth-methods
+   * This CANNOT be used for custom auth methods. For custom auth methods, please pass the customAuth
+   * object to jsParams, and handle the custom auth method in your Lit Action.
+   * 
+   * Notes for internal dev: for the SDK, this value can be omitted, but it needs to be an empty array [] set in the SDK before
+   * sending it to the node
+   */
+  authMethods?: AuthMethod[];
   jsParams?: {
+    [key: string]: any;
     publicKey?: string;
     sigName?: string;
   };
@@ -1891,3 +1901,34 @@ export interface SignatureData {
 export type ClaimsList = {
   [key: string]: SignatureData;
 }[];
+
+export interface MintWithAuthParams {
+  /**
+   * auth method to use for minting
+   */
+  authMethod: AuthMethod;
+
+  /**
+   * Permission scopes:
+   * https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
+   */
+  scopes: string[] | number[];
+
+  /**
+   * only applies to webauthn auth method
+   */
+  pubkey?: string;
+
+  /**
+   * The Auth ID of the given auth method. If it's custom auth, then it could be
+   * anything.
+   */
+  authId?: Uint8Array;
+}
+
+export interface mintWithCustomAuthParams extends MintWithAuthParams {
+  /**
+   * For a custom authentication method, the custom auth ID should uniquely identify the user for that project. For example, for Google, we use appId:userId, so you should follow a similar format for Telegram, Twitter, or any other custom auth method.
+   */
+  customAuthId: string | Uint8Array;
+}
