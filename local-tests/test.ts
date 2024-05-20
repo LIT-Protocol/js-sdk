@@ -78,6 +78,7 @@ import { testPkpEthersWithPkpSessionSigsToEthSignTypedData } from './tests/testP
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedData';
 import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil';
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
+import { testUseCustomAuthSessionSigsToPkpSign } from './tests/testUseCustomAuthSessionSigsToPkpSign';
 
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
@@ -125,6 +126,9 @@ import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './t
 
     // -- invalid cases
     testUseInvalidLitActionIpfsCodeToGenerateSessionSigs,
+
+    // -- custom auth methods
+    testUseCustomAuthSessionSigsToPkpSign,
   };
 
   const litActionIpfsIdSessionSigsTests = {

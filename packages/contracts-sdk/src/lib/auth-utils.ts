@@ -338,3 +338,16 @@ function _resolveAuthFactor(factor: any): {
 
   throw new Error(`Error could not find auth with factor ${factor}`);
 }
+
+/**
+ * Converts a string into a byte array (arrayified value).
+ * @param str - The input string to be converted.
+ * @returns A Uint8Array representing the arrayified value of the string.
+ */
+export const stringToArrayify = (str: string) => {
+  try {
+    return ethers.utils.toUtf8Bytes(str);
+  } catch (e) {
+    throw new Error(`Error converting string to arrayify: ${e}`);
+  }
+};
