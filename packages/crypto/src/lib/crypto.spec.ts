@@ -6,6 +6,7 @@ import {
   combineSignatureShares,
   verifySignature,
   combineEcdsaShares,
+  loadModules,
 } from './crypto';
 import * as ethers from 'ethers';
 import { joinSignature } from 'ethers/lib/utils';
@@ -25,6 +26,7 @@ const identityParam = new Uint8Array([
 
 describe('crypto', () => {
   beforeAll(async () => {
+    await loadModules();
     await blsSdk.initWasmBlsSdk();
   });
 
