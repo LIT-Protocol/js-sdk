@@ -95,15 +95,12 @@ export const loadModules = (): Promise<void> => {
 */
 export const unloadModules = () => {
   log('running cleanup for global modules');
-  if (globalThis.wasmExports)
-      delete globalThis.wasmExports;
-  
-  if (globalThis.wasmECDSA)
-      delete globalThis.wasmECDSA;
-  
-  if(globalThis.wasmSevSnpUtilsSdk) 
-    delete globalThis.initWasmSevSnpUtilsSdk;
-}
+  if (globalThis.wasmExports) delete globalThis.wasmExports;
+
+  if (globalThis.wasmECDSA) delete globalThis.wasmECDSA;
+
+  if (globalThis.wasmSevSnpUtilsSdk) delete globalThis.initWasmSevSnpUtilsSdk;
+};
 
 /**
  * Encrypt data with a BLS public key.

@@ -470,8 +470,7 @@ export class LitCore {
 
     this._stopListeningForNewEpoch();
     this._stopNetworkPolling();
-    if (globalThis.litConfig)
-      delete globalThis.litConfig;
+    if (globalThis.litConfig) delete globalThis.litConfig;
   }
 
   _stopNetworkPolling() {
