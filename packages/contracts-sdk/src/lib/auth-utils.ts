@@ -340,6 +340,7 @@ function _resolveAuthFactor(factor: any): {
 }
 
 /**
+ * TODO: Replace ethers to something else, so we don't rely on ethers
  * Converts a string into a byte array (arrayified value).
  * @param str - The input string to be converted.
  * @returns A Uint8Array representing the arrayified value of the string.
