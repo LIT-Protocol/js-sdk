@@ -2406,6 +2406,13 @@ const resourceAbilityRequests = [
           uri: sessionKeyUri,
           nonce,
           resourceAbilityRequests: params.resourceAbilityRequests,
+
+          // -- optional fields
+          ...(params.litActionCode && { litActionCode: params.litActionCode }),
+          ...(params.litActionIpfsId && {
+            litActionIpfsId: params.litActionIpfsId,
+          }),
+          ...(params.jsParams && { jsParams: params.jsParams }),
         },
       });
     }
@@ -2518,10 +2525,16 @@ const resourceAbilityRequests = [
           );
         }
 
+        /**
+         * We must provide an empty array for authMethods even if we are not using any auth methods.
+         * So that the nodes can serialize the request correctly.
+         */
+        const authMethods = params.authMethods || [];
+
         const response = await this.signSessionKey({
           sessionKey: props.sessionKey,
           statement: props.statement || 'Some custom statement.',
-          authMethods: [...params.authMethods],
+          authMethods: [...authMethods],
           pkpPublicKey: params.pkpPublicKey,
           expiration: props.expiration,
           resources: props.resources,
