@@ -8,9 +8,9 @@ import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
 /**
  * Test Commands:
- * ❌ NETWORK=cayenne yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSign
- * ❌ NOT AVAILABLE IN HABANERO
- * ❌ NETWORK=localchain yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSign
+ * NETWORK=cayenne yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSign
+ * NOT AVAILABLE IN HABANERO
+ * NETWORK=localchain yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSign
  */
 export const testUseCustomAuthSessionSigsToPkpSign = async (
   devEnv: TinnyEnvironment
