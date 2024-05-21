@@ -8,16 +8,23 @@ import { Buffer } from 'buffer';
  * @throws An error if the generated hash does not start with 'Qm'.
  */
 export async function stringToIpfsHash(input: string): Promise<string> {
+  const blockput = {
+    put: async (block: any) => {
+      return block.cid;
+    },
+  };
+
   // Convert the input string to a Buffer
   const content = Buffer.from(input);
 
   // Import the content to create an IPFS file
-  const files = importer([{ content }], {} as any, { onlyHash: true });
+  const files = importer([{ content }], blockput as any);
 
   // Get the first (and only) file result
   const result = (await files.next()).value;
 
   const ipfsHash = (result as any).cid.toString();
+
   if (!ipfsHash.startsWith('Qm')) {
     throw new Error('Generated hash does not start with Qm');
   }
