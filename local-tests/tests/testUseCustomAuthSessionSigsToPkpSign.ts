@@ -5,28 +5,7 @@ import {
 } from '@lit-protocol/auth-helpers';
 import { AuthMethodScope } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
-
-import { importer } from 'ipfs-unixfs-importer';
-import { Buffer } from 'buffer';
-
-// Function to convert string to an IPFS hash
-async function stringToIpfsHash(input: string): Promise<string> {
-  // Convert the input string to a Buffer
-  const content = Buffer.from(input);
-
-  // Import the content to create an IPFS file
-  const files = importer([{ content }], {} as any, { onlyHash: true });
-
-  // Get the first (and only) file result
-  const result = (await files.next()).value;
-
-  const ipfsHash = (result as any).cid.toString();
-  if (!ipfsHash.startsWith('Qm')) {
-    throw new Error('Generated hash does not start with Qm');
-  }
-
-  return ipfsHash;
-}
+import { stringToIpfsHash } from 'local-tests/setup/tinny-utils';
 
 /**
  * Test Commands:
