@@ -9,11 +9,11 @@ import { stringToIpfsHash } from 'local-tests/setup/tinny-utils';
 
 /**
  * Test Commands:
- * NETWORK=cayenne yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSign
+ * NETWORK=cayenne yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSignExecuteJs
  * NOT AVAILABLE IN HABANERO
- * NETWORK=localchain yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSign
+ * NETWORK=localchain yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSignExecuteJs
  */
-export const testUseCustomAuthSessionSigsToPkpSign = async (
+export const testUseCustomAuthSessionSigsToPkpSignExecuteJs = async (
   devEnv: TinnyEnvironment
 ) => {
   const alice = await devEnv.createRandomPerson();
@@ -77,26 +77,27 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
 
   console.log('✅ addPermittedActionReceipt:', addPermittedActionReceipt);
 
-  const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
-    pkpPublicKey: alice.pkp.publicKey,
-    resourceAbilityRequests: [
-      {
-        resource: new LitPKPResource('*'),
-        ability: LitAbility.PKPSigning,
+  const litActionSessionSigs =
+    await devEnv.litNodeClient.getLitActionSessionSigs({
+      pkpPublicKey: alice.pkp.publicKey,
+      resourceAbilityRequests: [
+        {
+          resource: new LitPKPResource('*'),
+          ability: LitAbility.PKPSigning,
+        },
+        {
+          resource: new LitActionResource('*'),
+          ability: LitAbility.LitActionExecution,
+        },
+      ],
+      // litActionIpfsId: IPFSID,
+      litActionCode: Buffer.from(litActionCodeString).toString('base64'),
+      jsParams: {
+        publicKey: `0x${alice.pkp.publicKey}`,
+        customAuthMethod: customAuthMethod,
+        sigName: 'custom-auth-sig',
       },
-      {
-        resource: new LitActionResource('*'),
-        ability: LitAbility.LitActionExecution,
-      },
-    ],
-    // litActionIpfsId: IPFSID,
-    litActionCode: Buffer.from(litActionCodeString).toString('base64'),
-    jsParams: {
-      publicKey: `0x${alice.pkp.publicKey}`,
-      customAuthMethod: customAuthMethod,
-      sigName: 'custom-auth-sig',
-    },
-  });
+    });
 
   console.log('litActionSessionSigs:', litActionSessionSigs);
 

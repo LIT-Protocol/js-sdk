@@ -288,19 +288,18 @@ export interface JsonSignChainDataRequest {
   exp: number;
 }
 
-export interface JsonSignSessionKeyRequestV1 {
+export interface JsonSignSessionKeyRequestV1
+  extends Pick<LitActionSdkParams, 'jsParams'>,
+    Pick<LitActionSdkParams, 'litActionIpfsId'> {
   sessionKey: string;
   authMethods: AuthMethod[];
   pkpPublicKey?: string;
-  // authSig?: AuthSig;
   siweMessage: string;
   curveType: 'BLS';
   epoch?: number;
 
   // custom auth params
   code?: string;
-  litActionIpfsId?: string;
-  jsParams?: any;
 }
 
 // [
@@ -484,12 +483,8 @@ export interface JsonExecutionSdkParamsTargetNode
   targetNodeRange: number;
 }
 
-export interface JsonExecutionSdkParams {
-  /**
-   * An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
-   */
-  jsParams?: any;
-
+export interface JsonExecutionSdkParams
+  extends Pick<LitActionSdkParams, 'jsParams'> {
   /**
    *  JS code to run on the nodes
    */
@@ -521,7 +516,8 @@ export interface JsonExecutionRequestTargetNode extends JsonExecutionRequest {
   targetNodeRange: number;
 }
 
-export interface JsonExecutionRequest {
+export interface JsonExecutionRequest
+  extends Pick<LitActionSdkParams, 'jsParams'> {
   authSig: AuthSig;
 
   /**
@@ -531,7 +527,6 @@ export interface JsonExecutionRequest {
   // epoch: number;
   ipfsId?: string;
   code?: string;
-  jsParams?: any;
   authMethods?: AuthMethod[];
 }
 
@@ -1905,6 +1900,23 @@ export interface GetPkpSessionSigs
    */
   authMethods?: AuthMethod[];
 }
+
+/**
+ * Includes common session signature properties, parameters for a Lit Action,
+ * and either a required litActionCode or a required litActionIpfsId, but not both.
+ */
+export type GetLitActionSessionSigs = CommonGetSessionSigsProps &
+  Pick<GetPkpSessionSigs, 'pkpPublicKey'> &
+  Pick<GetPkpSessionSigs, 'authMethods'> &
+  Pick<Required<LitActionSdkParams>, 'jsParams'> &
+  (
+    | (Pick<Required<LitActionSdkParams>, 'litActionCode'> & {
+        litActionIpfsId?: never;
+      })
+    | (Pick<Required<LitActionSdkParams>, 'litActionIpfsId'> & {
+        litActionCode?: never;
+      })
+  );
 
 export type SessionKeyCache = {
   value: SessionKeyPair;
