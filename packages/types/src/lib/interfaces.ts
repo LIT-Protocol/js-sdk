@@ -50,7 +50,7 @@ export interface CosmosAuthSig extends AuthSig {
 
 export type CosmosWalletType = 'keplr' | 'leap';
 
-export interface AuthCallbackParams {
+export interface AuthCallbackParams extends LitActionSdkParams {
   /**
    * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
    */
@@ -99,21 +99,6 @@ export interface AuthCallbackParams {
   walletConnectProjectId?: string;
 
   resourceAbilityRequests?: LitResourceAbilityRequest[];
-
-  /**
-   * The js code to run on the nodes
-   */
-  litActionCode?: string;
-
-  /**
-   * The IPFS id of the lit action to run
-   */
-  litActionIpfsId?: string;
-
-  /**
-   * The js params to run on the nodes
-   */
-  jsParams?: any;
 }
 
 /** ---------- Web3 ---------- */
@@ -1027,6 +1012,21 @@ export interface AuthMethod {
   accessToken: string;
 }
 
+export interface CreateCustomAuthMethodRequest {
+  /**
+   * For a custom authentication method, the custom auth ID should uniquely identify the user for that project. For example, for Google, we use appId:userId, so you should follow a similar format for Telegram, Twitter, or any other custom auth method.
+   */
+  authMethodId: string | Uint8Array;
+
+  authMethodType: number;
+
+  /**
+   * Permission scopes:
+   * https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scopes
+   */
+  scopes: string[] | number[];
+}
+
 // pub struct JsonSignSessionKeyRequest {
 //     pub session_key: String,
 //     pub auth_methods: Vec<AuthMethod>,
@@ -1034,7 +1034,7 @@ export interface AuthMethod {
 //     pub auth_sig: Option<AuthSigItem>,
 //     pub siwe_message: String,
 // }
-export interface SignSessionKeyProp {
+export interface SignSessionKeyProp extends LitActionSdkParams {
   /**
    * The serialized session key pair to sign. If not provided, a session key pair will be fetched from localStorge or generated.
    */
@@ -1077,24 +1077,6 @@ export interface SignSessionKeyProp {
    * A LIT resource ability is a combination of a LIT resource and a LIT ability.
    */
   resourceAbilityRequests?: LitResourceAbilityRequest[];
-
-  /**
-   * The js code on ipfs
-   */
-  litActionIpfsId?: string;
-  /**
-   * The js code to run on the nodes
-   */
-  litActionCode?: string;
-
-  /**
-   * The params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
-   */
-  jsParams?: {
-    [key: string]: any;
-    publicKey: string;
-    sigName: string;
-  };
 }
 
 export interface SignSessionKeyResponse {
@@ -1158,7 +1140,7 @@ export interface CommonGetSessionSigsProps {
 
 export interface GetSessionSigsProps
   extends CommonGetSessionSigsProps,
-    LitCustomAuth {
+    LitActionSdkParams {
   /**
    * This is a callback that will be called if the user needs to authenticate using a PKP.  For example, if the user has no wallet, but owns a Lit PKP though something like Google Oauth, then you can use this callback to prompt the user to authenticate with their PKP.  This callback should use the LitNodeClient.signSessionKey function to get a session signature for the user from their PKP.  If you don't pass this callback, then the user will be prompted to authenticate with their wallet, like metamask.
    */
@@ -1182,7 +1164,7 @@ export interface SessionRequestBody {
   siweMessage: string;
 }
 
-export interface GetWalletSigProps extends LitCustomAuth {
+export interface GetWalletSigProps extends LitActionSdkParams {
   authNeededCallback?: AuthCallback;
   chain: string;
   sessionCapabilityObject: ISessionCapabilityObject;
@@ -1841,13 +1823,54 @@ export interface CapacityCreditsRes {
   capacityDelegationAuthSig: AuthSig;
 }
 
-export interface LitCustomAuth {
+export interface LitActionSdkParams {
+  /**
+   * The litActionCode is the JavaScript code that will run on the nodes.
+   * You will need to convert the string content to base64.
+   *
+   * @example
+   * Buffer.from(litActionCodeString).toString('base64');
+   */
   litActionCode?: string;
+
+  /**
+   * You can obtain the Lit Action IPFS CID by converting your JavaScript code using this tool:
+   * https://explorer.litprotocol.com/create-action
+   *
+   * Note: You do not need to pin your code to IPFS necessarily.
+   * You can convert a code string to an IPFS hash using the "ipfs-hash-only" or 'ipfs-unixfs-importer' library.
+   *
+   * @example
+   * async function stringToIpfsHash(input: string): Promise<string> {
+   *   // Convert the input string to a Buffer
+   *   const content = Buffer.from(input);
+   *
+   *   // Import the content to create an IPFS file
+   *   const files = importer([{ content }], {} as any, { onlyHash: true });
+   *
+   *   // Get the first (and only) file result
+   *   const result = (await files.next()).value;
+   *
+   *   const ipfsHash = (result as any).cid.toString();
+   *   if (!ipfsHash.startsWith('Qm')) {
+   *     throw new Error('Generated hash does not start with Qm');
+   *   }
+   *
+   *   return ipfsHash;
+   * }
+   */
   litActionIpfsId?: string;
-  jsParams?: {
-    publicKey?: string;
-    sigName?: string;
-  };
+
+  /**
+   * An object that contains params to expose to the Lit Action.  These will be injected to the JS runtime before your code runs, so you can use any of these as normal variables in your Lit Action.
+   */
+  jsParams?:
+    | {
+        [key: string]: any;
+        publicKey?: string;
+        sigName?: string;
+      }
+    | any;
 }
 
 export interface LitEndpoint {
@@ -1869,7 +1892,7 @@ export interface SignerLike {
 
 export interface GetPkpSessionSigs
   extends CommonGetSessionSigsProps,
-    LitCustomAuth {
+    LitActionSdkParams {
   pkpPublicKey: string;
 
   /**
@@ -1881,11 +1904,6 @@ export interface GetPkpSessionSigs
    * sending it to the node
    */
   authMethods?: AuthMethod[];
-  jsParams?: {
-    [key: string]: any;
-    publicKey?: string;
-    sigName?: string;
-  };
 }
 
 export type SessionKeyCache = {
@@ -1923,12 +1941,14 @@ export interface MintWithAuthParams {
    * The Auth ID of the given auth method. If it's custom auth, then it could be
    * anything.
    */
-  authId?: Uint8Array;
+  authMethodId?: Uint8Array;
 }
 
-export interface mintWithCustomAuthParams extends MintWithAuthParams {
-  /**
-   * For a custom authentication method, the custom auth ID should uniquely identify the user for that project. For example, for Google, we use appId:userId, so you should follow a similar format for Telegram, Twitter, or any other custom auth method.
-   */
-  customAuthId: string | Uint8Array;
+export interface MintWithAuthResponse<T> {
+  pkp: {
+    tokenId: string;
+    publicKey: string;
+    ethAddress: string;
+  };
+  tx: T;
 }

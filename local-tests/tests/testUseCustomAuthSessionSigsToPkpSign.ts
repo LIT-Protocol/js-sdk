@@ -6,6 +6,28 @@ import {
 import { AuthMethodScope } from '@lit-protocol/constants';
 import { TinnyEnvironment } from 'local-tests/setup/tinny-environment';
 
+import { importer } from 'ipfs-unixfs-importer';
+import { Buffer } from 'buffer';
+
+// Function to convert string to an IPFS hash
+async function stringToIpfsHash(input: string): Promise<string> {
+  // Convert the input string to a Buffer
+  const content = Buffer.from(input);
+
+  // Import the content to create an IPFS file
+  const files = importer([{ content }], {} as any, { onlyHash: true });
+
+  // Get the first (and only) file result
+  const result = (await files.next()).value;
+
+  const ipfsHash = (result as any).cid.toString();
+  if (!ipfsHash.startsWith('Qm')) {
+    throw new Error('Generated hash does not start with Qm');
+  }
+
+  return ipfsHash;
+}
+
 /**
  * Test Commands:
  * NETWORK=cayenne yarn test:local --filter=testUseCustomAuthSessionSigsToPkpSign
@@ -18,28 +40,31 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
   const alice = await devEnv.createRandomPerson();
 
   /**
-   * This is a custom auth method. It can be anything you want.
+   * This is a custom auth method. It can be anything you want. Even the shape of the object can be anything,
+   * because you are handling the logic in the Lit action code yourself.
    */
   const customAuthMethod = {
     authMethodType: 89989,
+    authMethodId: 'app-id-xxx:user-id-yyy',
     accessToken: 'xxx',
   };
 
   console.log('✅ customAuthMethod:', customAuthMethod);
 
-  const customAuthMethodOwnedPkp =
+  const customAuthMethodOwnedReceipt =
     await alice.contractsClient.mintWithCustomAuth({
-      customAuthId: 'custom-app-user-id', // ipfs hash for the auth method
-      authMethod: customAuthMethod,
+      authMethodId: customAuthMethod.authMethodId,
+      authMethodType: customAuthMethod.authMethodType,
       scopes: [AuthMethodScope.SignAnything],
     });
-  console.log('✅ customAuthMethodOwnedPkp:', customAuthMethodOwnedPkp);
+
+  console.log('✅ customAuthMethodOwnedReceipt:', customAuthMethodOwnedReceipt);
 
   const addPermittedAuthMethodReceipt =
     await alice.contractsClient.addPermittedAuthMethod({
       pkpTokenId: alice.pkp.tokenId,
-      authId: 'app-id-xxx:user-id-yyy',
       authMethodType: customAuthMethod.authMethodType,
+      authMethodId: customAuthMethod.authMethodId,
       authMethodScopes: [AuthMethodScope.SignAnything],
     });
 
@@ -67,7 +92,7 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
     console.log("16 Lit.Auth:", Lit.Auth);
   })()`;
 
-  const IPFSID = 'QmeG3spjJmqzFo4dpWte5Prv1xdUbPT3sYqo3n3ABQXgMF';
+  const IPFSID = await stringToIpfsHash(litActionCodeString);
 
   console.log('✅ IPFSID:', IPFSID.toString());
 

@@ -1,15 +1,22 @@
 /* eslint-disable import/order */
-import { BigNumber, BigNumberish, BytesLike, ethers } from 'ethers';
+import {
+  BigNumber,
+  BigNumberish,
+  BytesLike,
+  ContractReceipt,
+  ethers,
+} from 'ethers';
 import { hexToDec, decToHex, intToIP } from './hex2dec';
 import bs58 from 'bs58';
 import { isBrowser, isNode } from '@lit-protocol/misc';
 import {
+  CreateCustomAuthMethodRequest,
   LitContractContext,
   LitContractResolverContext,
   MintCapacityCreditsContext,
   MintCapacityCreditsRes,
   MintWithAuthParams,
-  mintWithCustomAuthParams,
+  MintWithAuthResponse,
 } from '@lit-protocol/types';
 
 // ----- autogen:import-data:start  -----
@@ -987,7 +994,7 @@ export class LitContracts {
    * @param authMethod - The authentication method.
    * @param scopes - The permission scopes.
    * @param pubkey - The public key.
-   * @param authId - (optional) The authentication ID.
+   * @param authMethodId - (optional) The authentication ID.
    * @returns An object containing the PKP information and the transaction receipt.
    * @throws Error if the contracts are not connected, the contract is not available, authMethodType or accessToken is missing, or permission scopes are required.
    */
@@ -995,8 +1002,8 @@ export class LitContracts {
     authMethod,
     scopes,
     pubkey,
-    authId,
-  }: MintWithAuthParams) => {
+    authMethodId,
+  }: MintWithAuthParams): Promise<MintWithAuthResponse<ContractReceipt>> => {
     // -- validate
     if (!this.connected) {
       throw new Error(
@@ -1012,7 +1019,11 @@ export class LitContracts {
       throw new Error('authMethodType is required');
     }
 
-    if (authMethod && !authMethod?.accessToken) {
+    if (
+      authMethod &&
+      !authMethod?.accessToken &&
+      authMethod?.accessToken !== 'custom-auth'
+    ) {
       throw new Error('accessToken is required');
     }
 
@@ -1040,7 +1051,8 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
       return scope;
     });
 
-    const _authId = authId ?? (await getAuthIdByAuthMethod(authMethod));
+    const _authMethodId =
+      authMethodId ?? (await getAuthIdByAuthMethod(authMethod));
 
     // -- go
     const mintCost = await this.pkpNftContract.read.mintCost();
@@ -1049,7 +1061,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
     const tx = await this.pkpHelperContract.write.mintNextAndAddAuthMethods(
       2, // key type
       [authMethod.authMethodType],
-      [_authId],
+      [_authMethodId],
       [_pubkey],
       [[...scopes]],
       true,
@@ -1103,26 +1115,33 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
    *
    * @param authMethod - The authentication method.
    * @param scopes - The permission scopes.
-   * @param customAuthId - The authentication ID.
+   * @param authMethodId - The authentication ID.
    * @returns An object containing the PKP information and the transaction receipt.
    * @throws Error if the contracts are not connected, the contract is not available, authMethodType or accessToken is missing, or permission scopes are required.
    * @example
    * 
   const customAuthMethodOwnedPkp =
     await alice.contractsClient.mintWithCustomAuth({
-      customAuthId: 'custom-app-user-id',
+      authMethodId: 'custom-app-user-id',
       authMethod: customAuthMethod,
       scopes: [AuthMethodScope.SignAnything],
-    }); 
+    });
   */
-  mintWithCustomAuth = async (params: mintWithCustomAuthParams) => {
-    params.authId =
-      typeof params.customAuthId === 'string'
-        ? stringToArrayify(params.customAuthId)
-        : params.customAuthId;
+  mintWithCustomAuth = async (
+    params: CreateCustomAuthMethodRequest
+  ): Promise<MintWithAuthResponse<ContractReceipt>> => {
+    const authMethodId =
+      typeof params.authMethodId === 'string'
+        ? stringToArrayify(params.authMethodId)
+        : params.authMethodId;
 
     return this.mintWithAuth({
       ...params,
+      authMethodId,
+      authMethod: {
+        authMethodType: params.authMethodType,
+        accessToken: 'custom-auth',
+      },
     });
   };
 
@@ -1132,7 +1151,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
    * @param {Object} params - The parameters for adding the permitted authentication method.
    * @param {string} params.pkpTokenId - The ID of the PKP token.
    * @param {AuthMethodType | number} params.authMethodType - The type of the authentication method.
-   * @param {string | Uint8Array} params.authId - The ID of the authentication method.
+   * @param {string | Uint8Array} params.authMethodId - The ID of the authentication method.
    * @param {AuthMethodScope[]} params.authMethodScopes - The scopes of the authentication method.
    * @param {string} [params.webAuthnPubkey] - The public key for WebAuthn.
    * @returns {Promise<any>} - A promise that resolves with the result of adding the permitted authentication method.
@@ -1141,18 +1160,20 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
   addPermittedAuthMethod = async ({
     pkpTokenId,
     authMethodType,
-    authId,
+    authMethodId,
     authMethodScopes,
     webAuthnPubkey,
   }: {
     pkpTokenId: string;
     authMethodType: AuthMethodType | number;
-    authId: string | Uint8Array;
+    authMethodId: string | Uint8Array;
     authMethodScopes: AuthMethodScope[];
     webAuthnPubkey?: string;
-  }) => {
-    const _authId =
-      typeof authId === 'string' ? stringToArrayify(authId) : authId;
+  }): Promise<ethers.ContractReceipt> => {
+    const _authMethodId =
+      typeof authMethodId === 'string'
+        ? stringToArrayify(authMethodId)
+        : authMethodId;
 
     const _webAuthnPubkey = webAuthnPubkey ?? '0x';
 
@@ -1162,7 +1183,7 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
           pkpTokenId,
           {
             authMethodType: authMethodType,
-            id: _authId,
+            id: _authMethodId,
             userPubkey: _webAuthnPubkey,
           },
           authMethodScopes
