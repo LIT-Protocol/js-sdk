@@ -20,7 +20,7 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
 
   /**
    * This is a custom auth method. It can be anything you want. Even the shape of the object can be anything,
-   * because you are handling the logic in the Lit action code yourself.
+   * because you will be handling the logic in the Lit action code yourself.
    */
   const customAuthMethod = {
     authMethodType: 89989,
@@ -28,17 +28,9 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
     accessToken: 'xxx',
   };
 
-  console.log('✅ customAuthMethod:', customAuthMethod);
-
-  const customAuthMethodOwnedReceipt =
-    await alice.contractsClient.mintWithCustomAuth({
-      authMethodId: customAuthMethod.authMethodId,
-      authMethodType: customAuthMethod.authMethodType,
-      scopes: [AuthMethodScope.SignAnything],
-    });
-
-  console.log('✅ customAuthMethodOwnedReceipt:', customAuthMethodOwnedReceipt);
-
+  /**
+   * Alice assigns the custom auth method to her PKP.
+   */
   const addPermittedAuthMethodReceipt =
     await alice.contractsClient.addPermittedAuthMethod({
       pkpTokenId: alice.pkp.tokenId,
@@ -68,7 +60,7 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
       LitActions.setResponse({response:"false"});
     }
 
-    console.log("16 Lit.Auth:", Lit.Auth);
+    console.log("Lit.Auth:", Lit.Auth);
   })()`;
 
   const IPFSID = await stringToIpfsHash(litActionCodeString);
@@ -116,7 +108,28 @@ export const testUseCustomAuthSessionSigsToPkpSign = async (
       sessionSigs: litActionSessionSigs,
     });
 
-    console.log('✅ res:', res);
+    console.log('✅ pkpSign res:', res);
+  } catch (e) {
+    throw new Error(e);
+  }
+
+  // -- execute js
+  try {
+    const res = await devEnv.litNodeClient.executeJs({
+      sessionSigs: litActionSessionSigs,
+      code: `(async () => {
+        const sigShare = await LitActions.signEcdsa({
+          toSign: dataToSign,
+          publicKey,
+          sigName: "sig",
+        });
+      })();`,
+      jsParams: {
+        dataToSign: alice.loveLetter,
+        publicKey: alice.pkp.publicKey,
+      },
+    });
+    console.log('✅ executeJs res:', res);
   } catch (e) {
     throw new Error(e);
   }
