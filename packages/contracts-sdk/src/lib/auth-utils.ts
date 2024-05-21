@@ -341,14 +341,15 @@ function _resolveAuthFactor(factor: any): {
 }
 
 /**
- * TODO: Replace ethers to something else, so we don't rely on ethers
- * Converts a string into a byte array (arrayified value).
+ * Converts a string into a byte array (arrayified value)
  * @param str - The input string to be converted.
  * @returns A Uint8Array representing the arrayified value of the string.
  */
 export const stringToArrayify = (str: string): Uint8Array => {
   try {
-    return ethers.utils.toUtf8Bytes(str);
+    // Convert the string to a UTF-8 encoded byte array
+    const encoder = new TextEncoder();
+    return encoder.encode(str);
   } catch (e) {
     throw new Error(`Error converting string to arrayify: ${e}`);
   }
