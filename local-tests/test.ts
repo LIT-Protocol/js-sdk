@@ -79,6 +79,8 @@ import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests
 import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil';
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
 
+import { testPeerKickedAboveThresholdShouldSign } from './tests/testPeerKickedAboveThresholdShouldSign'; 
+
 (async () => {
   console.log('[𐬺🧪 Tinny𐬺] Running tests...');
   const devEnv = new TinnyEnvironment();
@@ -196,6 +198,10 @@ import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './t
     },
   };
 
+  const networkPeers = {
+
+  };
+
   const testConfig = {
     tests: {
       // testExample,
@@ -210,13 +216,16 @@ import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './t
       ...pkpEthersTest.eoaSessionSigs,
       ...pkpEthersTest.pkpSessionSigs,
       ...pkpEthersTest.litActionSessionSigs,
+      testPeerKickedAboveThresholdShouldSign
     },
     devEnv,
   };
-
+  let res;
   if (devEnv.processEnvs.RUN_IN_BAND) {
-    await runInBand(testConfig);
+    res = await runInBand(testConfig);
   } else {
-    await runTestsParallel(testConfig);
+    res = await runTestsParallel(testConfig);
   }
+  await devEnv.stopTestnet();
+  process.exit(res);
 })();

@@ -80,6 +80,17 @@ export interface ProcessEnvs {
    * Ignore setup steps. Usually when you run to quickly run a single test.
    */
   NO_SETUP: boolean;
+
+  /**
+   * If runnnig no localchain this flag will stop the running testnet when the test
+   * run has finished. Which is when all pending task promises have settled.
+   */
+  STOP_TESTNET: boolean;
+
+  /**
+   * url for Testnet manager intigration
+   */
+  TESTNET_MANAGER_URL: string;
 }
 
 /**
