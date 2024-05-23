@@ -51,8 +51,8 @@ export class TinnyPerson {
   }
 
   async spawn() {
-    let fundingWallet = ethers.Wallet.createRandom();
-    fundingWallet = new ethers.Wallet(fundingWallet.privateKey, this.provider);
+    // Create a new funding wallet, funds it with small amount of ethers, and updates the current wallet to the new one.
+    const fundingWallet = ethers.Wallet.createRandom().connect(this.provider);
 
     const transferTx = await this.wallet.sendTransaction({
       to: fundingWallet.address,

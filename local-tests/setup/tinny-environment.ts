@@ -334,7 +334,7 @@ export class TinnyEnvironment {
     // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
     const capacityCreditWallet = ethers.Wallet.createRandom().connect(provider);
 
-    let transferTx = await wallet.sendTransaction({
+    const transferTx = await wallet.sendTransaction({
       to: capacityCreditWallet.address,
       value: ethers.utils.parseEther('0.001'),
     });
@@ -381,6 +381,7 @@ export class TinnyEnvironment {
       await this.litNodeClient.createCapacityDelegationAuthSig({
         dAppOwnerWallet: wallet,
         capacityTokenId: capacityTokenId,
+        // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
         uses: '200',
       })
     ).capacityDelegationAuthSig;
