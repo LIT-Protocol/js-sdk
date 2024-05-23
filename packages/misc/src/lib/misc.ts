@@ -815,7 +815,7 @@ export async function executeWithRetry<T>(
   (T & { requestId: string }) | (RejectedNodePromises & { requestId: string })
 > {
   let timer: any | null;
-  let counter = 0;
+  let counter = -1;
   let isTimeout = false;
   if (!opts) {
     opts = {};
@@ -828,11 +828,43 @@ export async function executeWithRetry<T>(
   while (!isTimeout) {
     requestId = Math.random().toString(16).slice(2);
     try {
+      let promiseReject: any;
+      const promise: Promise<any> = new Promise<any>((resolve, reject) => {
+        // move the reject handler out of the promise to invoke if we hit the timeout limit
+        promiseReject = reject;
+        let result;
+        execCallback(requestId)
+          .then((res) => {
+            result = res;
+          })
+          .catch((err) => {
+            reject(err);
+          });
+        // poll the promise every 1ms
+        // here we are putting a task on the event loop
+        // every millisecond to check if the callback has finished
+        // this could cause back pressure but we are simply checking if an object is defined
+        (function retryWrapper() {
+          if (!result) {
+            setTimeout(retryWrapper, 1);
+          } else {
+            resolve(result);
+          }
+        })();
+      });
       timer = setTimeout(() => {
         isTimeout = true;
-      }, opts.timeout);
-      const response: any = await execCallback(requestId);
 
+        // reject the promise wrapping the operation
+        // which will cause the catch in scope to be triggered
+        promiseReject({
+          errorKind: 'Timeout',
+          status: 500,
+          details: [`timeout limit reached timeout limit: ${opts.timeout}ms`],
+          message: 'Request timeout',
+        });
+      }, opts.timeout);
+      const response = await promise;
       clearTimeout(timer);
       response.requestId = requestId;
       // this will work for now as errors should all follow the
@@ -856,7 +888,7 @@ export async function executeWithRetry<T>(
     } catch (err: any) {
       errorCallback &&
         errorCallback(
-          `Error is ${err.message}-${err.details}`,
+          `Error message: ${err.message} details: ${err.details}`,
           requestId,
           counter >= opts.maxRetryCount ? true : false
         );
@@ -872,6 +904,7 @@ export async function executeWithRetry<T>(
     error: {
       errorKind: 'Timeout',
       status: 500,
+      message: 'Request timeout',
       details: [`timeout limit reached timeout limit: ${opts.timeout}ms`],
     },
     requestId,
