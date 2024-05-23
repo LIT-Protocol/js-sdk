@@ -330,7 +330,6 @@ export class TinnyEnvironment {
     const wallet = new ethers.Wallet(privateKey.privateKey, provider);
 
     // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
-```suggestion
     // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
     const capacityCreditWallet = ethers.Wallet.createRandom().connect(provider);
 
