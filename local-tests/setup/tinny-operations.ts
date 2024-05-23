@@ -188,8 +188,8 @@ export const runTestsParallel = async ({
                 testIndex + 1
               }. ${testName} - Failed after ${maxAttempts} attempts (${timeTaken} ms)\x1b[0m`
             );
-            console.error(`\x1b[31m❌Error:\x1b[90m ${error}\x1b[0m`);
-            return `${testName} (Failed in ${timeTaken} ms) - Error: ${error}`;
+            console.error(`\x1b[31m❌Error:\x1b[90m ${error.message}\x1b[0m`);
+            return `${testName} (Failed in ${timeTaken} ms) - Error: ${error.message}\n Stack Tace: ${error.stack}`;
           }
         }
       }
