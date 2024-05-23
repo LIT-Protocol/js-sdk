@@ -56,7 +56,7 @@ export class TinnyPerson {
  
     const transferTx = await this.wallet.sendTransaction({
       to: fundingWallet.address,
-      value: ethers.utils.parseEther("0.001")
+      value: ethers.utils.parseEther("0.00001")
     });
 
     const transferReciept = await transferTx.wait();
