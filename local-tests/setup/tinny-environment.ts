@@ -331,11 +331,14 @@ export class TinnyEnvironment {
 
     // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
     let capacityCreditWallet = ethers.Wallet.createRandom();
-    capacityCreditWallet = new ethers.Wallet(capacityCreditWallet.privateKey, provider);
+    capacityCreditWallet = new ethers.Wallet(
+      capacityCreditWallet.privateKey,
+      provider
+    );
 
     let transferTx = await wallet.sendTransaction({
       to: capacityCreditWallet.address,
-      value: ethers.utils.parseEther("0.001")
+      value: ethers.utils.parseEther('0.001'),
     });
     await transferTx.wait();
 
@@ -380,7 +383,7 @@ export class TinnyEnvironment {
       await this.litNodeClient.createCapacityDelegationAuthSig({
         dAppOwnerWallet: wallet,
         capacityTokenId: capacityTokenId,
-        uses: "200"
+        uses: '200',
       })
     ).capacityDelegationAuthSig;
   };
