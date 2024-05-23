@@ -116,7 +116,7 @@ export class LitCore {
     bootstrapUrls: [], // Default value, should be replaced
     retryTolerance: {
       timeout: 31_000,
-      maxRetryCount: 3,
+      maxRetryCount: 1,
       interval: 100,
     },
     rpcUrl: null,
