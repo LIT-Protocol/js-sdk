@@ -860,7 +860,7 @@ export async function executeWithRetry<T>(
         promiseReject({
           errorKind: 'Timeout',
           status: 500,
-          details: [`timeout limit reached timeout limit: ${opts.timeout}ms`],
+          details: [`timeout limit reached timeout limit: ${opts?.timeout}ms`],
           message: 'Request timeout',
         });
       }, opts.timeout);
@@ -905,7 +905,7 @@ export async function executeWithRetry<T>(
       errorKind: 'Timeout',
       status: 500,
       message: 'Request timeout',
-      details: [`timeout limit reached timeout limit: ${opts.timeout}ms`],
+      details: [`timeout limit reached timeout limit: ${opts?.timeout}ms`],
     },
     requestId,
   };
