@@ -217,7 +217,7 @@ export class TinnyEnvironment {
 
     if (globalThis.wasmExports) {
       console.warn(
-        'WASM modules already loaded. wil overide. when connect is called'
+        'WASM modules already loaded. Will overide when connect is called'
       );
     }
 
