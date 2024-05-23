@@ -6,6 +6,7 @@ global.TextDecoder = TextDecoder;
 
 import { LitErrorKind, LIT_ERROR, CAYENNE_URL } from '@lit-protocol/constants';
 import * as utilsModule from './misc';
+import { error } from 'console';
 
 describe('utils', () => {
   /**
@@ -238,6 +239,58 @@ describe('utils', () => {
     expect(cb.count).toBe(1);
     expect(res.requestId).toBeDefined();
   });
+});
+
+it('executeWithRetry should only run up to the configured tollerance if request returns fail', async () => {
+  let MAX_RETRY_COUNT = 3;
+  let cb = async (
+    _id: string
+  ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
+    cb.count = cb.count ? (cb.count += 1) : 1;
+    return {
+      success: false,
+      error: 'failed',
+    };
+  };
+
+  const res = await utilsModule.executeWithRetry(
+    cb,
+    (err: any, requestId: string, isFinal: boolean) => {
+      console.log('err', err);
+    },
+    {
+      timeout: 1,
+      interval: 1,
+      maxRetryCount: MAX_RETRY_COUNT,
+    }
+  );
+
+  expect(cb.count).toBe(MAX_RETRY_COUNT);
+  expect(res.requestId).toBeDefined();
+});
+
+it('executeWithRetry should timeout', async () => {
+  let cb = (_id: string): Promise<void> => {
+    return new Promise<void>((resolve, _reject) => {
+      setTimeout(() => {
+        resolve();
+      }, 10_000);
+    });
+  };
+
+  const res = await utilsModule.executeWithRetry(
+    cb,
+    (err: any, requestId: string, isFinal: boolean) => {
+      console.log('err', err);
+    },
+    {
+      timeout: 1,
+      interval: 1,
+      maxRetryCount: 1,
+    }
+  );
+
+  expect(res.requestId).toBeDefined();
 });
 
 describe('double escaped JSON string', () => {
