@@ -79,9 +79,7 @@ import type {
   ExecuteJsResponse,
   FormattedMultipleAccs,
   GetSessionSigsProps,
-  GetSignSessionKeySharesProp,
   GetSignedTokenRequest,
-  GetSigningShareForDecryptionRequest,
   GetWalletSigProps,
   JsonExecutionRequest,
   JsonPkpSignRequest,
@@ -1847,13 +1845,14 @@ export class LitNodeClientNodeJs
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       logWithRequestId(id, 'signSessionKey body', body);
       const nodePromises = this.getNodePromises((url: string) => {
-        return this.getSignSessionKeyShares(
+        const reqBody: JsonSignSessionKeyRequestV1 = body;
+
+        const urlWithPath = composeLitUrl({
           url,
-          {
-            body,
-          },
-          id
-        );
+          endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
+        });
+
+        return this.generatePromise(urlWithPath, reqBody, id);
       });
 
       // -- resolve promises
@@ -2033,23 +2032,6 @@ export class LitNodeClientNodeJs
 
   #isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
     return res.success === true;
-  };
-
-  getSignSessionKeyShares = async (
-    url: string,
-    params: GetSignSessionKeySharesProp,
-    requestId: string
-  ) => {
-    log('getSignSessionKeyShares');
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.SIGN_SESSION_KEY,
-    });
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: params.body,
-      requestId,
-    });
   };
 
   generateAuthMethodForWebAuthn = (
