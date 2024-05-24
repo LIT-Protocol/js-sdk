@@ -89,7 +89,6 @@ export type LitNodeClientConfigWithDefaults = Required<
     | 'checkNodeAttestation'
     | 'litNetwork'
     | 'minNodeCount'
-    | 'retryTolerance'
     | 'rpcUrl'
   >
 > &
@@ -109,11 +108,6 @@ export class LitCore {
     litNetwork: 'cayenne', // Default to cayenne network. will be replaced by custom config.
     minNodeCount: 2, // Default value, should be replaced
     bootstrapUrls: [], // Default value, should be replaced
-    retryTolerance: {
-      timeout: 31_000,
-      maxRetryCount: 1,
-      interval: 100,
-    },
     rpcUrl: null,
   };
   connectedNodes = new Set<string>();
