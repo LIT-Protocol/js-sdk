@@ -2281,13 +2281,6 @@ export class LitNodeClientNodeJs
     });
   };
 
-  generateAuthMethodForWebAuthn = (
-    params: WebAuthnAuthenticationVerificationParams
-  ): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.WEBAUTHN,
-    accessToken: JSON.stringify(params),
-  });
-
   generateAuthMethodForDiscord = (access_token: string): AuthMethod => ({
     authMethodType: AUTH_METHOD_TYPE_IDS.DISCORD,
     accessToken: access_token,
