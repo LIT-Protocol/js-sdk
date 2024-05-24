@@ -3,6 +3,7 @@ import {
   ILitError,
   LIT_AUTH_SIG_CHAIN_KEYS,
   LIT_CHAINS,
+  LIT_ENDPOINT,
   LIT_ERROR,
   LitNetwork,
   RELAY_URL_CAYENNE,
@@ -39,6 +40,7 @@ import fetchRetry from `fetch-retry`;
 const logBuffer: Array<Array<any>> = [];
 const ajv = new Ajv();
 const retryFetch = fetchRetry(globalThis.fetch);
+const RETRYABLE_STATUS_CODES = [408, 500, 502, 503, 504];
 
 /**
  *
@@ -780,9 +782,16 @@ export function sendRequest(
     retries: 3,
     retryDelay: 100,
     retryOn: function(attempt: number, error: Error, response: Response) {
-      // retry on any network error, or 4xx or 5xx status codes
-      if (error !== null || response.status >= 400) {
-        console.log(`retrying, attempt number ${attempt + 1}`);
+      let isRetryable = RETRYABLE_STATUS_CODES.find((value) => {
+        if (value === response.status) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      
+      if (url.includes(LIT_ENDPOINT.HANDSHAKE.path) && isRetryable) {
+        logErrorWithRequestId(requestId, `retrying request to url ${url}, attempt number ${attempt + 1}`);
         return true;
       } else {
         return false;
