@@ -23,7 +23,7 @@ export class TinnyEnvironment {
     NETWORK: (process.env['NETWORK'] as LIT_TESTNET) || LIT_TESTNET.LOCALCHAIN,
     DEBUG: Boolean(process.env['DEBUG']) || false,
     REQUEST_PER_KILOSECOND:
-      parseInt(process.env['REQUEST_PER_KILOSECOND']) || 200,
+      parseInt(process.env['REQUEST_PER_KILOSECOND']) || 2000,
     LIT_RPC_URL: process.env['LIT_RPC_URL'] || 'http://127.0.0.1:8545',
     WAIT_FOR_KEY_INTERVAL:
       parseInt(process.env['WAIT_FOR_KEY_INTERVAL']) || 3000,
@@ -398,7 +398,7 @@ export class TinnyEnvironment {
         dAppOwnerWallet: wallet,
         capacityTokenId: capacityTokenId,
         // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
-        uses: '200',
+        uses: '2000',
       })
     ).capacityDelegationAuthSig;
   };
