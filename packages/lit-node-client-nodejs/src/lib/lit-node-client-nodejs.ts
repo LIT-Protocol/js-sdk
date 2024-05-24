@@ -3,7 +3,6 @@ import { BigNumber, ethers } from 'ethers';
 import { joinSignature, sha256 } from 'ethers/lib/utils';
 import { SiweMessage } from 'siwe';
 
-import { canonicalAccessControlConditionFormatter } from '@lit-protocol/access-control-conditions';
 import {
   ILitResource,
   ISessionCapabilityObject,
@@ -50,7 +49,6 @@ import {
   normalizeAndStringify,
   removeHexPrefix,
   throwError,
-  throwErrorV1,
 } from '@lit-protocol/misc';
 import {
   getStorageItem,
