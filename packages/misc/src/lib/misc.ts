@@ -14,28 +14,19 @@ import {
 import {
   Chain,
   AuthSig,
-  KV,
   NodeClientErrorV0,
   NodeClientErrorV1,
-  NodeErrorV1,
   NodeErrorV3,
-  ClaimRequest,
-  ClaimKeyResponse,
   ClaimResult,
-  ClaimProcessor,
   MintCallback,
   RelayClaimProcessor,
-  SuccessNodePromises,
-  RejectedNodePromises,
-  RetryTolerance,
 } from '@lit-protocol/types';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Contract } from '@ethersproject/contracts';
 import { LogLevel, LogManager } from '@lit-protocol/logger';
-import { version } from '@lit-protocol/constants';
 import Ajv, { JSONSchemaType } from 'ajv';
 //@ts-ignore no tyoe df
-import fetchRetry from `fetch-retry`;
+import fetchRetry from 'fetch-retry';
 
 const logBuffer: Array<Array<any>> = [];
 const ajv = new Ajv();
@@ -774,14 +765,13 @@ export function getEnv({
 export function sendRequest(
   url: string,
   req: RequestInit,
-  requestId: string,
+  requestId: string
 ): Promise<Response> {
-
   const retryReq = {
     ...req,
     retries: 3,
     retryDelay: 100,
-    retryOn: function(attempt: number, error: Error, response: Response) {
+    retryOn: function (attempt: number, error: Error, response: Response) {
       let isRetryable = RETRYABLE_STATUS_CODES.find((value) => {
         if (value === response.status) {
           return true;
@@ -789,14 +779,17 @@ export function sendRequest(
           return false;
         }
       });
-      
+
       if (url.includes(LIT_ENDPOINT.HANDSHAKE.path) && isRetryable) {
-        logErrorWithRequestId(requestId, `retrying request to url ${url}, attempt number ${attempt + 1}`);
+        logErrorWithRequestId(
+          requestId,
+          `retrying request to url ${url}, attempt number ${attempt + 1}`
+        );
         return true;
       } else {
         return false;
       }
-    } 
+    },
   };
   const retryFetch = fetchRetry(globalThis.fetch);
   return retryFetch(url, req)
@@ -828,9 +821,8 @@ export function sendRequest(
     });
 }
 
-
 /**
- * 
+ *
  * @returns {string}
  */
 export const generateReqeustId = () => {
