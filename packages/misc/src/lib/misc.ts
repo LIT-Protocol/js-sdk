@@ -33,9 +33,12 @@ import { Contract } from '@ethersproject/contracts';
 import { LogLevel, LogManager } from '@lit-protocol/logger';
 import { version } from '@lit-protocol/constants';
 import Ajv, { JSONSchemaType } from 'ajv';
+//@ts-ignore no tyoe df
+import fetchRetry from `fetch-retry`;
 
 const logBuffer: Array<Array<any>> = [];
 const ajv = new Ajv();
+const retryFetch = fetchRetry(globalThis.fetch);
 
 /**
  *
@@ -769,10 +772,26 @@ export function getEnv({
 export function sendRequest(
   url: string,
   req: RequestInit,
-  requestId: string
+  requestId: string,
 ): Promise<Response> {
-  return fetch(url, req)
-    .then(async (response) => {
+
+  const retryReq = {
+    ...req,
+    retries: 3,
+    retryDelay: 100,
+    retryOn: function(attempt: number, error: Error, response: Response) {
+      // retry on any network error, or 4xx or 5xx status codes
+      if (error !== null || response.status >= 400) {
+        console.log(`retrying, attempt number ${attempt + 1}`);
+        return true;
+      } else {
+        return false;
+      }
+    } 
+  };
+  const retryFetch = fetchRetry(globalThis.fetch);
+  return retryFetch(url, req)
+    .then(async (response: Response) => {
       const isJson = response.headers
         .get('content-type')
         ?.includes('application/json');
@@ -800,116 +819,14 @@ export function sendRequest(
     });
 }
 
+
 /**
- * Allows for invoking a callback and re exucting while re generating a new request identifier
- * @param execCallback
- * @param errorCallback
- * @param opts
- * @returns {T}
+ * 
+ * @returns {string}
  */
-export async function executeWithRetry<T>(
-  execCallback: (requestId: string) => Promise<T>,
-  errorCallback?: (error: any, requestId: string, isFinal: boolean) => void,
-  opts?: RetryTolerance
-): Promise<
-  (T & { requestId: string }) | (RejectedNodePromises & { requestId: string })
-> {
-  let timer: any | null;
-  let counter = -1;
-  let isTimeout = false;
-  if (!opts) {
-    opts = {};
-  }
-  opts.timeout = opts.timeout ?? 31_000; // We wait for 31 seconds as the timeout period on the nodes is 30 seconds.
-  opts.interval = opts.interval ?? 100;
-  opts.maxRetryCount = opts.maxRetryCount ?? 3;
-  let requestId: string = '';
-
-  while (!isTimeout) {
-    requestId = Math.random().toString(16).slice(2);
-    try {
-      let promiseReject: any;
-      const promise: Promise<any> = new Promise<any>((resolve, reject) => {
-        // move the reject handler out of the promise to invoke if we hit the timeout limit
-        promiseReject = reject;
-        let result;
-        execCallback(requestId)
-          .then((res) => {
-            result = res;
-          })
-          .catch((err) => {
-            reject(err);
-          });
-        // poll the promise every 1ms
-        // here we are putting a task on the event loop
-        // every millisecond to check if the callback has finished
-        // this could cause back pressure but we are simply checking if an object is defined
-        (function retryWrapper() {
-          if (!result) {
-            setTimeout(retryWrapper, 1);
-          } else {
-            resolve(result);
-          }
-        })();
-      });
-      timer = setTimeout(() => {
-        isTimeout = true;
-
-        // reject the promise wrapping the operation
-        // which will cause the catch in scope to be triggered
-        promiseReject({
-          errorKind: 'Timeout',
-          status: 500,
-          details: [`timeout limit reached timeout limit: ${opts?.timeout}ms`],
-          message: 'Request timeout',
-        });
-      }, opts.timeout);
-      const response = await promise;
-      clearTimeout(timer);
-      response.requestId = requestId;
-      // this will work for now as errors should all follow the
-      // RejectedNodePromise type definition which contains an `error` property
-      if ('error' in response) {
-        counter += 1;
-        errorCallback &&
-          errorCallback(
-            response,
-            requestId,
-            counter >= opts.maxRetryCount ? true : false
-          );
-      } else {
-        clearTimeout(timer);
-        return response;
-      }
-
-      if (counter >= opts.maxRetryCount) {
-        return response;
-      }
-    } catch (err: any) {
-      errorCallback &&
-        errorCallback(
-          `Error message: ${err.message} details: ${err.details}`,
-          requestId,
-          counter >= opts.maxRetryCount ? true : false
-        );
-      counter += 1;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, opts?.interval));
-  }
-
-  // If we get here we broke out of the loop on event of a timeout being hit.
-  return {
-    success: false,
-    error: {
-      errorKind: 'Timeout',
-      status: 500,
-      message: 'Request timeout',
-      details: [`timeout limit reached timeout limit: ${opts?.timeout}ms`],
-    },
-    requestId,
-  };
-}
+export const generateReqeustId = () => {
+  return Math.random().toString(16).slice(2);
+};
 
 /**
  * Attempts to normalize a string by unescaping it until it can be parsed as a JSON object,

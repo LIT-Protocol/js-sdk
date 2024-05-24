@@ -22,7 +22,7 @@ import {
 } from '@lit-protocol/types';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import { publicKeyConvert } from 'secp256k1';
-import { executeWithRetry, logError } from '@lit-protocol/misc';
+import { logError } from '@lit-protocol/misc';
 
 /**
  * Compresses a given public key.

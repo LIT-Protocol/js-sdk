@@ -160,7 +160,7 @@ export class TinnyPerson {
       await this.contractsClient.mintCapacityCreditsNFT({
         requestsPerKilosecond:
           this.envConfig.processEnvs.REQUEST_PER_KILOSECOND,
-        daysUntilUTCMidnightExpiration: 2,
+        daysUntilUTCMidnightExpiration: 10,
       })
     ).capacityTokenIdStr;
 
@@ -193,6 +193,7 @@ export class TinnyPerson {
       await this.envConfig.litNodeClient.createCapacityDelegationAuthSig({
         dAppOwnerWallet: this.wallet,
         capacityTokenId: capacityTokenId,
+        uses: `2000`,
         ...(addresses.length && { delegateeAddresses: addresses }),
       })
     ).capacityDelegationAuthSig;

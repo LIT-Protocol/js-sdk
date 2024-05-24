@@ -29,7 +29,7 @@ import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { checkSevSnpAttestation, computeHDPubKey } from '@lit-protocol/crypto';
 import {
   bootstrapLogManager,
-  executeWithRetry,
+  generateReqeustId,
   getIpAddress,
   isBrowser,
   isNode,
@@ -877,40 +877,29 @@ export class LitCore {
     params: HandshakeWithNode,
     requestId: string
   ): Promise<NodeCommandServerKeysResponse> => {
-    const res = await executeWithRetry<NodeCommandServerKeysResponse>(
-      async () => {
-        // -- get properties from params
-        const { url } = params;
+    // -- get properties from params
+    const { url } = params;
 
-        // -- create url with path
-        const urlWithPath = composeLitUrl({
-          url,
-          endpoint: LIT_ENDPOINT.HANDSHAKE,
-        });
+    // -- create url with path
+    const urlWithPath = composeLitUrl({
+      url,
+      endpoint: LIT_ENDPOINT.HANDSHAKE,
+    });
 
-        log(`handshakeWithNode ${urlWithPath}`);
+    log(`handshakeWithNode ${urlWithPath}`);
 
-        const data = {
-          clientPublicKey: 'test',
-          challenge: params.challenge,
-        };
+    const data = {
+      clientPublicKey: 'test',
+      challenge: params.challenge,
+    };
 
-        return await this.sendCommandToNode({
-          url: urlWithPath,
-          data,
-          requestId,
-        }).catch((err: NodeErrorV3) => {
-          return err;
-        });
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (_error: any, _requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('an error occurred, attempting to retry');
-        }
-      },
-      this.config.retryTolerance
-    );
+    const res = await this.sendCommandToNode({
+      url: urlWithPath,
+      data,
+      requestId,
+    }).catch((err: NodeErrorV3) => {
+      return err;
+    });
 
     return res as NodeCommandServerKeysResponse;
   };
