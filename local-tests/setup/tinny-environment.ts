@@ -256,15 +256,6 @@ export class TinnyEnvironment {
     const privateKey = key.privateKey;
     const envConfig = this.getEnvConfig();
 
-    console.log(
-      '[𐬺🧪 Tinny Environment𐬺] Creating new person with private key:',
-      JSON.stringify(key)
-    );
-    console.log(
-      '[𐬺🧪 Tinny Environment𐬺] Creating new person with envConfig:',
-      envConfig
-    );
-
     const person = new TinnyPerson({
       privateKey,
       envConfig,
@@ -427,6 +418,16 @@ export class TinnyEnvironment {
     const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
     const wallet = new ethers.Wallet(privateKey.privateKey, provider);
 
+    // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
+    // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
+    const capacityCreditWallet = ethers.Wallet.createRandom().connect(provider);
+
+    const transferTx = await wallet.sendTransaction({
+      to: capacityCreditWallet.address,
+      value: ethers.utils.parseEther('0.001'),
+    });
+    await transferTx.wait();
+
     /**
      * ====================================
      * Setup contracts-sdk client
@@ -434,14 +435,14 @@ export class TinnyEnvironment {
      */
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
       this.contractsClient = new LitContracts({
-        signer: wallet,
+        signer: capacityCreditWallet,
         debug: this.processEnvs.DEBUG,
         rpc: this.processEnvs.LIT_RPC_URL, // anvil rpc
         customContext: networkContext as unknown as LitContractContext,
       });
     } else {
       this.contractsClient = new LitContracts({
-        signer: wallet,
+        signer: capacityCreditWallet,
         debug: this.processEnvs.DEBUG,
         network: this.network,
       });
@@ -468,6 +469,8 @@ export class TinnyEnvironment {
       await this.litNodeClient.createCapacityDelegationAuthSig({
         dAppOwnerWallet: wallet,
         capacityTokenId: capacityTokenId,
+        // Sets a maximum limit of 200 times that the delegation can be used and prevents usage beyond it
+        uses: '200',
       })
     ).capacityDelegationAuthSig;
   };
