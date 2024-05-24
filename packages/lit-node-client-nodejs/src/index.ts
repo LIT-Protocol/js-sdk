@@ -14,7 +14,6 @@ if (!globalThis.LitNodeClientNodeJs) {
   globalThis.LitNodeClientNodeJs = LitNodeClientNodeJs;
 }
 
-
 // ==================== Exports ====================
 export * from './lib/lit-node-client-nodejs';
 
