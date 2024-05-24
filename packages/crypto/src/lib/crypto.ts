@@ -27,7 +27,7 @@ export interface BlsSignatureShare {
 }
 
 /**
-  Loads all wasm modules into the glboal scope
+  Loads all wasm modules into the global scope
 
   - ECDSA utilities - wasmECDSA
   - BLS utilities - wasmExports
