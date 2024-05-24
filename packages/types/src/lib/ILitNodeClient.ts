@@ -160,21 +160,6 @@ export interface ILitNodeClient {
    */
 
   /**
-   * Get Signing Shares for Token containing Access Control Condition
-   *
-   * @param { string } url
-   * @param { SigningAccessControlConditionRequest } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  getSigningShareForToken(
-    url: string,
-    params: SigningAccessControlConditionRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
    *
    * Sign Condition ECDSA
    *

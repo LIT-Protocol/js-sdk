@@ -571,34 +571,6 @@ export class LitNodeClientNodeJs
   // ==================== API Calls to Nodes ====================
 
   /**
-   * Get Signing Shares for Token containing Access Control Condition
-   *
-   * @param { string } url
-   * @param { SigningAccessControlConditionRequest } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  getSigningShareForToken = async (
-    url: string,
-    params: SigningAccessControlConditionRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    logWithRequestId(requestId, 'getSigningShareForToken');
-
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.SIGN_ACCS,
-    });
-
-    return this.sendCommandToNode({
-      url: urlWithPath,
-      data: params,
-      requestId,
-    });
-  };
-
-  /**
    *
    * Get signature shares for decryption.
    *
@@ -1475,21 +1447,24 @@ export class LitNodeClientNodeJs
         // -- if session key is available, use it
         const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
-        return this.getSigningShareForToken(
+        const reqBody: SigningAccessControlConditionRequest = {
+          accessControlConditions: formattedAccessControlConditions,
+          evmContractConditions: formattedEVMContractConditions,
+          solRpcConditions: formattedSolRpcConditions,
+          unifiedAccessControlConditions:
+            formattedUnifiedAccessControlConditions,
+          chain,
+          authSig: authSigToSend,
+          iat,
+          exp,
+        };
+
+        const urlWithPath = composeLitUrl({
           url,
-          {
-            accessControlConditions: formattedAccessControlConditions,
-            evmContractConditions: formattedEVMContractConditions,
-            solRpcConditions: formattedSolRpcConditions,
-            unifiedAccessControlConditions:
-              formattedUnifiedAccessControlConditions,
-            chain,
-            authSig: authSigToSend,
-            iat,
-            exp,
-          },
-          id
-        );
+          endpoint: LIT_ENDPOINT.SIGN_ACCS,
+        });
+
+        return this.generatePromise(urlWithPath, reqBody, id);
       });
 
       // -- resolve promises
