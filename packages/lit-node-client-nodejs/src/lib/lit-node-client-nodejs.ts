@@ -97,13 +97,11 @@ import type {
   SessionSigningTemplate,
   SessionSigsMap,
   SigShare,
-  SignConditionECDSA,
   SignSessionKeyProp,
   SignSessionKeyResponse,
   Signature,
   SigningAccessControlConditionRequest,
   SuccessNodePromises,
-  ValidateAndSignECDSA,
   WebAuthnAuthenticationVerificationParams,
   ILitNodeClient,
   GetPkpSessionSigs,
@@ -570,61 +568,6 @@ export class LitNodeClientNodeJs
   };
 
   // ==================== API Calls to Nodes ====================
-
-  /**
-   *
-   * Sign Condition ECDSA
-   *
-   * @param { string } url
-   * @param { SignConditionECDSA } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  signConditionEcdsa = async (
-    url: string,
-    params: SignConditionECDSA,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    const wrapper = async (
-      id: string
-    ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      log('signConditionEcdsa');
-
-      const urlWithPath = composeLitUrl({
-        url,
-        endpoint: LIT_ENDPOINT.SIGN_ECDSA,
-      });
-
-      const data = {
-        access_control_conditions: params.accessControlConditions,
-        evmContractConditions: params.evmContractConditions,
-        solRpcConditions: params.solRpcConditions,
-        auth_sig: params.auth_sig,
-        chain: params.chain,
-        iat: params.iat,
-        exp: params.exp,
-      };
-
-      return await this.sendCommandToNode({
-        url: urlWithPath,
-        data,
-        requestId: id,
-      });
-    };
-
-    const res = await executeWithRetry<any>(
-      wrapper,
-      (_error: any, _requestid: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('An error occured. attempting to retry: ');
-        }
-      },
-      this.config.retryTolerance
-    );
-
-    return res as unknown as NodeCommandResponse;
-  };
 
   /**
    *
@@ -1791,119 +1734,6 @@ export class LitNodeClientNodeJs
     return new LitAccessControlConditionResource(
       `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
     ).getResourceKey();
-  };
-
-  /**
-   *
-   * Validates a condition, and then signs the condition if the validation returns true.
-   * Before calling this function, you must know the on chain conditions that you wish to validate.
-   *
-   * @param { ValidateAndSignECDSA } params
-   *
-   * @returns { Promise<string> }
-   */
-  validateAndSignEcdsa = async (
-    params: ValidateAndSignECDSA
-  ): Promise<string> => {
-    // ========== Validate Params ==========
-    // -- validate if it's ready
-    if (!this.ready) {
-      const message =
-        '7 LitNodeClient is not ready.  Please call await litNodeClient.connect() first.';
-      throwError({
-        message,
-        errorKind: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.kind,
-        errorCode: LIT_ERROR.LIT_NODE_CLIENT_NOT_READY_ERROR.name,
-      });
-    }
-
-    // ========== Prepare Params ==========
-    const { accessControlConditions, chain, auth_sig } = params;
-
-    // ========== Prepare JWT Params ==========
-    // we need to send jwt params iat (issued at) and exp (expiration)
-    // because the nodes may have different wall clock times
-    // the nodes will verify that these params are withing a grace period
-    const { iat, exp } = this.getJWTParams();
-
-    // -- validate
-    if (!accessControlConditions) {
-      return throwError({
-        message: `You must provide either accessControlConditions or evmContractConditions or solRpcConditions`,
-        errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
-        errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
-      });
-    }
-
-    // -- formatted access control conditions
-    let formattedAccessControlConditions: any;
-
-    formattedAccessControlConditions = accessControlConditions.map((c: any) =>
-      canonicalAccessControlConditionFormatter(c)
-    );
-    log(
-      'formattedAccessControlConditions',
-      JSON.stringify(formattedAccessControlConditions)
-    );
-
-    // ========== Node Promises ==========
-    const wrapper = async (
-      id: string
-    ): Promise<RejectedNodePromises | SuccessNodePromises<any>> => {
-      const nodePromises = this.getNodePromises((url: string) => {
-        return this.signConditionEcdsa(
-          url,
-          {
-            accessControlConditions: formattedAccessControlConditions,
-            evmContractConditions: undefined,
-            solRpcConditions: undefined,
-            auth_sig,
-            chain,
-            iat,
-            exp,
-          },
-          id
-        );
-      });
-
-      // ----- Resolve Promises -----
-      const responses = await this.handleNodePromises(
-        nodePromises,
-        id,
-        this.connectedNodes.size
-      );
-
-      return responses;
-    };
-
-    const res = await executeWithRetry<
-      RejectedNodePromises | SuccessNodePromises<any>
-    >(
-      wrapper,
-      (_error: any, _requestId: string, isFinal: boolean) => {
-        if (!isFinal) {
-          logError('an error has occured, attempting to retry ');
-        }
-      },
-      this.config.retryTolerance
-    );
-
-    const requestId = res.requestId;
-    // return the first value as this will be the signature data
-    try {
-      if (res.success === false) {
-        return 'Condition Failed';
-      }
-      const shareData = (res as SuccessNodePromises<any>).values;
-      const signature = this.getSignature(shareData, requestId);
-      return signature;
-    } catch (e) {
-      logErrorWithRequestId(requestId, 'Error - signed_ecdsa_messages - ', e);
-      const signed_ecdsa_message = res as RejectedNodePromises;
-      // have to cast to any to keep with above `string` return value
-      // this will be returned as `RejectedNodePromise`
-      return signed_ecdsa_message as any;
-    }
   };
 
   /** ============================== SESSION ============================== */

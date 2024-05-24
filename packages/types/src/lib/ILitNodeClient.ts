@@ -17,10 +17,7 @@ import {
   NodeCommandServerKeysResponse,
   RejectedNodePromises,
   SendNodeCommand,
-  SignConditionECDSA,
-  SigningAccessControlConditionRequest,
   SuccessNodePromises,
-  ValidateAndSignECDSA,
 } from './interfaces';
 import { ILitResource, ISessionCapabilityObject } from './models';
 import { SupportedJsonRequests } from './types';
@@ -161,22 +158,6 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Sign Condition ECDSA
-   *
-   * @param { string } url
-   * @param { SignConditionECDSA } params
-   *
-   * @returns { Promise<NodeCommandResponse> }
-   *
-   */
-  signConditionEcdsa(
-    url: string,
-    params: SignConditionECDSA,
-    requestId: string
-  ): Promise<NodeCommandResponse>;
-
-  /**
-   *
    * Handshake with SGX
    *
    * @param { HandshakeWithNode } params
@@ -227,30 +208,6 @@ export interface ILitNodeClient {
    * @param params
    */
   decrypt(params: DecryptRequest): Promise<DecryptResponse>;
-
-  /**
-   *
-   * Signs a message with Lit threshold ECDSA algorithms.
-   *
-   * @param { `SignWithECDSA } params
-   *
-   * @returns { Promise<string> }
-   *
-   */
-  // signWithEcdsa(params: SignWithECDSA): Promise<string>;
-
-  /**
-   *
-   * Validates a condition, and then signs the condition if the validation returns true.
-   * Before calling this function, you must know the on chain conditions that you wish to validate.
-   *
-   * @param { ValidateAndSignECDSA } params
-   *
-   * @returns { Promise<string> }
-   */
-  validateAndSignEcdsa(
-    params: ValidateAndSignECDSA
-  ): Promise<string | undefined>;
 
   /**
    *

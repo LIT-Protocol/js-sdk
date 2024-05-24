@@ -624,16 +624,6 @@ export interface GetSigningShareForDecryptionRequest extends JsonAccsRequest {
   dataToEncryptHash: string;
 }
 
-export interface SignConditionECDSA {
-  accessControlConditions: any;
-  evmContractConditions: undefined;
-  solRpcConditions: undefined;
-  auth_sig: AuthSig;
-  chain: Chain;
-  iat: number;
-  exp: number;
-}
-
 export interface SigResponse {
   r: string;
   s: string;
@@ -878,11 +868,6 @@ export interface CombinedECDSASignature {
   r: string;
   s: string;
   recid: number;
-}
-export interface ValidateAndSignECDSA {
-  accessControlConditions: AccessControlConditions;
-  chain: Chain;
-  auth_sig: AuthSig;
 }
 
 export interface HandshakeWithNode {
