@@ -48,36 +48,22 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
       console.log(decodedRecap);
     });
 
-    const timings = [];
-    for (let i = 0; i < 1; i++) {
-      const startTime = Date.now();
-      // 5. Bob can now execute JS code using the capacity credits NFT
-      const res = await devEnv.litNodeClient.executeJs({
-        sessionSigs: bobsSessionSigs,
-        code: `(async () => {
-          const sigShare = await LitActions.signEcdsa({
-            toSign: dataToSign,
-            publicKey,
-            sigName: "sig",
-          });
-        })();`,
-        jsParams: {
-          dataToSign: alice.loveLetter,
-          publicKey: bob.pkp.publicKey,
-        },
-      });
-      timings.push(Date.now() - startTime);
-      await new Promise<void>((res, _) => {
-        setTimeout(() => {
-          res();
-        }, 1_000);
-      });
-    }
-    let avg = 0;
-    for (const time of timings) {
-      avg += time;
-    }
-    console.log('average lit action signature time: ', avg / timings.length);
+    // 5. Bob can now execute JS code using the capacity credits NFT
+    const res = await devEnv.litNodeClient.executeJs({
+      sessionSigs: bobsSessionSigs,
+      code: `(async () => {
+        const sigShare = await LitActions.signEcdsa({
+          toSign: dataToSign,
+          publicKey,
+          sigName: "sig",
+        });
+      })();`,
+      jsParams: {
+        dataToSign: alice.loveLetter,
+        publicKey: bob.pkp.publicKey,
+      },
+    });
+
     // Expected output:
     // {
     //   claims: {},
@@ -97,6 +83,30 @@ export const testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs =
     // }
 
     // -- assertions
+    if (!res.signatures.sig.r) {
+      throw new Error(`Expected "r" in res.signatures.sig`);
+    }
+    if (!res.signatures.sig.s) {
+      throw new Error(`Expected "s" in res.signatures.sig`);
+    }
+
+    if (!res.signatures.sig.dataSigned) {
+      throw new Error(`Expected "dataSigned" in res.signatures.sig`);
+    }
+
+    if (!res.signatures.sig.publicKey) {
+      throw new Error(`Expected "publicKey" in res.signatures.sig`);
+    }
+
+    // -- signatures.sig.signature must start with 0x
+    if (!res.signatures.sig.signature.startsWith('0x')) {
+      throw new Error(`Expected "signature" to start with 0x`);
+    }
+
+    // -- signatures.sig.recid must be parseable as a number
+    if (isNaN(res.signatures.sig.recid)) {
+      throw new Error(`Expected "recid" to be parseable as a number`);
+    }
 
     console.log(
       '✅ testDelegatingCapacityCreditsNFTToAnotherWalletToExecuteJs'
