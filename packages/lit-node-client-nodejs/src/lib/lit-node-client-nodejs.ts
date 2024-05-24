@@ -2281,11 +2281,6 @@ export class LitNodeClientNodeJs
     });
   };
 
-  generateAuthMethodForDiscord = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.DISCORD,
-    accessToken: access_token,
-  });
-
   generateAuthMethodForGoogle = (access_token: string): AuthMethod => ({
     authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE,
     accessToken: access_token,
