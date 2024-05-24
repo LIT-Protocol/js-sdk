@@ -2281,28 +2281,6 @@ export class LitNodeClientNodeJs
     });
   };
 
-  generateAuthMethodForWebAuthn = (
-    params: WebAuthnAuthenticationVerificationParams
-  ): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.WEBAUTHN,
-    accessToken: JSON.stringify(params),
-  });
-
-  generateAuthMethodForDiscord = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.DISCORD,
-    accessToken: access_token,
-  });
-
-  generateAuthMethodForGoogle = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE,
-    accessToken: access_token,
-  });
-
-  generateAuthMethodForGoogleJWT = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE_JWT,
-    accessToken: access_token,
-  });
-
   /**
    * Get session signatures for a set of resources
    *
