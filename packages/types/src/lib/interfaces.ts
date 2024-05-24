@@ -19,6 +19,7 @@ import {
   UnifiedAccessControlConditions,
 } from './types';
 import { ISessionCapabilityObject, LitResourceAbilityRequest } from './models';
+import { SigningAccessControlConditionRequest } from './node-interfaces/node-interfaces';
 /** ---------- Access Control Conditions Interfaces ---------- */
 
 export interface ABIParams {
@@ -435,18 +436,6 @@ export interface JsonSigningRetrieveRequest extends JsonAccsRequest {
 export interface GetSignedTokenRequest
   extends SigningAccessControlConditionRequest {
   sessionSigs: SessionSigsMap;
-}
-
-export interface SigningAccessControlConditionRequest
-  extends MultipleAccessControlConditions {
-  // The chain name of the chain that you are querying.  See ALL_LIT_CHAINS for currently supported chains.
-  chain?: string;
-
-  // The authentication signature that proves that the user owns the crypto wallet address that meets the access control conditions
-  authSig?: AuthSig;
-
-  iat?: number;
-  exp?: number;
 }
 
 /**
