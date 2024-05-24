@@ -2281,11 +2281,6 @@ export class LitNodeClientNodeJs
     });
   };
 
-  generateAuthMethodForGoogle = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE,
-    accessToken: access_token,
-  });
-
   generateAuthMethodForGoogleJWT = (access_token: string): AuthMethod => ({
     authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE_JWT,
     accessToken: access_token,
