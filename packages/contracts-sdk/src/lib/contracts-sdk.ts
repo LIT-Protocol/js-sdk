@@ -239,8 +239,9 @@ export class LitContracts {
     // -------------------------------------------------
     let wallet;
     let SETUP_DONE = false;
-
-    if (isBrowser() && !this.signer) {
+    if (this.provider) {
+      this.log('Using provided provider');
+    } else if (isBrowser() && !this.signer) {
       this.log("----- We're in the browser! -----");
 
       const web3Provider = window.ethereum;
@@ -285,7 +286,7 @@ export class LitContracts {
     // ----------------------------------------------
     //          (Node) Setting up Provider
     // ----------------------------------------------
-    if (isNode()) {
+    else if (isNode()) {
       this.log("----- We're in node! -----");
       this.provider = new ethers.providers.JsonRpcProvider(this.rpc);
     }
