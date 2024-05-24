@@ -118,6 +118,7 @@ import type {
   JsonPkpSignSdkParams,
   SigResponse,
   EncryptSdkParams,
+  JsonPKPClaimKeyRequest,
 } from '@lit-protocol/types';
 
 import * as blsSdk from '@lit-protocol/bls-sdk';
@@ -568,26 +569,6 @@ export class LitNodeClientNodeJs
   };
 
   // ==================== API Calls to Nodes ====================
-  getClaimKeyExecutionShares = async (
-    url: string,
-    params: any,
-    requestId: string
-  ) => {
-    logWithRequestId(requestId, 'getPkpSigningShares');
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.PKP_CLAIM,
-    });
-    if (!params.authMethod) {
-      throw new Error('authMethod is required');
-    }
-
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: params,
-      requestId,
-    });
-  };
 
   /**
    * Get Signing Shares for Token containing Access Control Condition
@@ -2588,11 +2569,21 @@ const resourceAbilityRequests = [
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = await this.getNodePromises((url: string) => {
-        const nodeRequestParams = {
+      const nodePromises = this.getNodePromises((url: string) => {
+        if (!params.authMethod) {
+          throw new Error('authMethod is required');
+        }
+
+        const reqBody: JsonPKPClaimKeyRequest = {
           authMethod: params.authMethod,
         };
-        return this.getClaimKeyExecutionShares(url, nodeRequestParams, id);
+
+        const urlWithPath = composeLitUrl({
+          url,
+          endpoint: LIT_ENDPOINT.PKP_CLAIM,
+        });
+
+        return this.generatePromise(urlWithPath, reqBody, id);
       });
 
       const responseData = await this.handleNodePromises(
