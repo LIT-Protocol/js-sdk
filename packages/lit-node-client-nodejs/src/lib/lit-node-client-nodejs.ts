@@ -2281,11 +2281,6 @@ export class LitNodeClientNodeJs
     });
   };
 
-  generateAuthMethodForGoogleJWT = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE_JWT,
-    accessToken: access_token,
-  });
-
   /**
    * Get session signatures for a set of resources
    *
