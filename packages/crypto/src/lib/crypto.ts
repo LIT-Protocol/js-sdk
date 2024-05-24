@@ -22,63 +22,85 @@ import { CombinedECDSASignature } from '@lit-protocol/types';
 
 const LIT_CORS_PROXY = `https://cors.litgateway.com`;
 
-// if 'wasmExports' is not available, we need to initialize the BLS SDK
-if (!globalThis.wasmExports) {
-  blsSdk.initWasmBlsSdk().then((exports) => {
-    globalThis.wasmExports = exports;
-
-    if (!globalThis.jestTesting) {
-      log(
-        `✅ [BLS SDK] wasmExports loaded. ${
-          Object.keys(exports).length
-        } functions available. Run 'wasmExports' in the console to see them.`
-      );
-    }
-  });
-}
-
-if (!globalThis.wasmECDSA) {
-  let init = ecdsaSdk.initWasmEcdsaSdk;
-  let env;
-
-  if (isBrowser()) {
-    env = 'Browser';
-  } else {
-    env = 'NodeJS';
-  }
-
-  init().then((sdk: any) => {
-    globalThis.wasmECDSA = sdk;
-
-    if (!globalThis.jestTesting) {
-      log(
-        `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
-          Object.keys(wasmECDSA).length
-        } functions available. Run 'wasmECDSA' in the console to see them.`
-      );
-    }
-  });
-}
-
-if (!globalThis.wasmSevSnpUtils) {
-  sevSnpUtilsSdk.initWasmSevSnpUtilsSdk().then((exports) => {
-    globalThis.wasmSevSnpUtils = exports;
-
-    if (!globalThis.jestTesting) {
-      log(
-        `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
-          Object.keys(exports).length
-        } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
-      );
-    }
-  });
-}
-
-/** ---------- Exports ---------- */
-
 export interface BlsSignatureShare {
   ProofOfPossession: string;
 }
+
+/**
+  Loads all wasm modules into the global scope
+
+  - ECDSA utilities - wasmECDSA
+  - BLS utilities - wasmExports
+  - SEV-SNP utilities - wasmSevSnpUtilities
+
+  @returns {Promise<void>}
+*/
+export const loadModules = (): Promise<void> => {
+  // if 'wasmExports' is not available, we need to initialize the BLS SDK
+  if (!globalThis.wasmExports) {
+    blsSdk.initWasmBlsSdk().then((exports) => {
+      globalThis.wasmExports = exports;
+
+      if (!globalThis.jestTesting) {
+        log(
+          `✅ [BLS SDK] wasmExports loaded. ${
+            Object.keys(exports).length
+          } functions available. Run 'wasmExports' in the console to see them.`
+        );
+      }
+    });
+  }
+
+  if (!globalThis.wasmECDSA) {
+    let init = ecdsaSdk.initWasmEcdsaSdk;
+    let env;
+
+    if (isBrowser()) {
+      env = 'Browser';
+    } else {
+      env = 'NodeJS';
+    }
+
+    init().then((sdk: any) => {
+      globalThis.wasmECDSA = sdk;
+
+      if (!globalThis.jestTesting) {
+        log(
+          `✅ [ECDSA SDK ${env}] wasmECDSA loaded. ${
+            Object.keys(wasmECDSA).length
+          } functions available. Run 'wasmECDSA' in the console to see them.`
+        );
+      }
+    });
+  }
+
+  if (!globalThis.wasmSevSnpUtils) {
+    sevSnpUtilsSdk.initWasmSevSnpUtilsSdk().then((exports) => {
+      globalThis.wasmSevSnpUtils = exports;
+
+      if (!globalThis.jestTesting) {
+        log(
+          `✅ [SEV SNP Utils SDK] wasmSevSnpUtils loaded. ${
+            Object.keys(exports).length
+          } functions available. Run 'wasmSevSnpUtils' in the console to see them.`
+        );
+      }
+    });
+  }
+};
+
+/*
+  Removes wasm modules from global scope
+  if found to be defined. Can be called multiple times safely.
+*/
+export const unloadModules = () => {
+  log('running cleanup for global modules');
+  if (globalThis.wasmExports) delete globalThis.wasmExports;
+
+  if (globalThis.wasmECDSA) delete globalThis.wasmECDSA;
+
+  if (globalThis.wasmSevSnpUtilsSdk) delete globalThis.initWasmSevSnpUtilsSdk;
+};
 
 /**
  * Encrypt data with a BLS public key.
