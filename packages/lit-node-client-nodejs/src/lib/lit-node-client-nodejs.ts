@@ -119,6 +119,7 @@ import type {
   SigResponse,
   EncryptSdkParams,
   JsonPKPClaimKeyRequest,
+  EncryptionSignRequest,
 } from '@lit-protocol/types';
 
 import * as blsSdk from '@lit-protocol/bls-sdk';
@@ -569,34 +570,6 @@ export class LitNodeClientNodeJs
   };
 
   // ==================== API Calls to Nodes ====================
-
-  /**
-   *
-   * Get signature shares for decryption.
-   *
-   * @param url
-   * @param params
-   * @param requestId
-   * @returns
-   */
-  getSigningShareForDecryption = async (
-    url: string,
-    params: GetSigningShareForDecryptionRequest,
-    requestId: string
-  ): Promise<NodeCommandResponse> => {
-    log('getSigningShareForDecryption');
-
-    const urlWithPath = composeLitUrl({
-      url,
-      endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
-    });
-
-    return await this.sendCommandToNode({
-      url: urlWithPath,
-      data: params,
-      requestId,
-    });
-  };
 
   /**
    *
@@ -1703,20 +1676,32 @@ export class LitNodeClientNodeJs
         // -- if session key is available, use it
         const authSigToSend = sessionSigs ? sessionSigs[url] : params.authSig;
 
-        return this.getSigningShareForDecryption(
+        if (!authSigToSend) {
+          return throwError({
+            message: `authSig is required`,
+            errorKind: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.kind,
+            errorCode: LIT_ERROR.INVALID_ARGUMENT_EXCEPTION.name,
+          });
+        }
+
+        const reqBody: EncryptionSignRequest = {
+          accessControlConditions: formattedAccessControlConditions,
+          evmContractConditions: formattedEVMContractConditions,
+          solRpcConditions: formattedSolRpcConditions,
+          unifiedAccessControlConditions:
+            formattedUnifiedAccessControlConditions,
+          dataToEncryptHash,
+          chain,
+          authSig: authSigToSend,
+          epoch: this.currentEpochNumber!,
+        };
+
+        const urlWithParh = composeLitUrl({
           url,
-          {
-            accessControlConditions: formattedAccessControlConditions,
-            evmContractConditions: formattedEVMContractConditions,
-            solRpcConditions: formattedSolRpcConditions,
-            unifiedAccessControlConditions:
-              formattedUnifiedAccessControlConditions,
-            dataToEncryptHash,
-            chain,
-            authSig: authSigToSend,
-          },
-          id
-        );
+          endpoint: LIT_ENDPOINT.ENCRYPTION_SIGN,
+        });
+
+        return this.generatePromise(urlWithParh, reqBody, id);
       });
 
       // -- resolve promises
