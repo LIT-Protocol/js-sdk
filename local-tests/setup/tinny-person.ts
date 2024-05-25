@@ -58,7 +58,7 @@ export class TinnyPerson {
         to: fundingWallet.address,
         value: ethers.utils.parseEther('0.00001'),
       });
-  
+
       const transferReciept = await transferTx.wait();
       console.log(
         '[𐬺🧪 Tinny Person𐬺] Transfered Assets for person tx: ',
