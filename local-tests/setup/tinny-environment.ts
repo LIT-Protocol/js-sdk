@@ -347,16 +347,6 @@ export class TinnyEnvironment {
     const provider = new ethers.providers.JsonRpcBatchProvider(this.rpc);
     const wallet = new ethers.Wallet(privateKey.privateKey, provider);
 
-    // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
-    // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
-    const capacityCreditWallet = ethers.Wallet.createRandom().connect(provider);
-
-    const transferTx = await wallet.sendTransaction({
-      to: capacityCreditWallet.address,
-      value: ethers.utils.parseEther('0.001'),
-    });
-    await transferTx.wait();
-
     /**
      * ====================================
      * Setup contracts-sdk client
@@ -364,12 +354,21 @@ export class TinnyEnvironment {
      */
     if (this.network === LIT_TESTNET.LOCALCHAIN) {
       this.contractsClient = new LitContracts({
-        signer: capacityCreditWallet,
+        signer: wallet,
         debug: this.processEnvs.DEBUG,
         rpc: this.processEnvs.LIT_RPC_URL, // anvil rpc
         customContext: networkContext as unknown as LitContractContext,
       });
     } else {
+      // TODO: This wallet should be cached somehwere and reused to create delegation signatures.
+      // There is a correlation between the number of Capacity Credit NFTs in a wallet and the speed at which nodes can verify a given rate limit authorization. Creating a single wallet to hold all Capacity Credit NFTs improves network performance during tests.
+      const capacityCreditWallet = ethers.Wallet.createRandom().connect(provider);
+
+      const transferTx = await wallet.sendTransaction({
+        to: capacityCreditWallet.address,
+        value: ethers.utils.parseEther('0.001'),
+      });
+      await transferTx.wait();
       this.contractsClient = new LitContracts({
         signer: capacityCreditWallet,
         debug: this.processEnvs.DEBUG,
