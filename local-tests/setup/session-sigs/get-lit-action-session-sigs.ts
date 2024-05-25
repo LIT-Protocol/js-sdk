@@ -54,23 +54,24 @@ export const getLitActionSessionSigs = async (
     },
   ];
 
-  const litActionSessionSigs = await devEnv.litNodeClient.getPkpSessionSigs({
-    pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
-    authMethods: [alice.authMethod],
-    resourceAbilityRequests: _resourceAbilityRequests,
-    litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString(
-      'base64'
-    ),
-    jsParams: {
-      publicKey: alice.authMethodOwnedPkp.publicKey,
-      sigName: 'unified-auth-sig',
-    },
+  const litActionSessionSigs =
+    await devEnv.litNodeClient.getLitActionSessionSigs({
+      pkpPublicKey: alice.authMethodOwnedPkp.publicKey,
+      authMethods: [alice.authMethod],
+      resourceAbilityRequests: _resourceAbilityRequests,
+      litActionCode: Buffer.from(VALID_SESSION_SIG_LIT_ACTION_CODE).toString(
+        'base64'
+      ),
+      jsParams: {
+        publicKey: alice.authMethodOwnedPkp.publicKey,
+        sigName: 'unified-auth-sig',
+      },
 
-    // -- only add this for manzano network
-    ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
-      ? { capacityDelegationAuthSig: devEnv.superCapacityDelegationAuthSig }
-      : {}),
-  });
+      // -- only add this for manzano network
+      ...(devEnv.litNodeClient.config.litNetwork === LitNetwork.Manzano
+        ? { capacityDelegationAuthSig: devEnv.superCapacityDelegationAuthSig }
+        : {}),
+    });
 
   return litActionSessionSigs;
 };

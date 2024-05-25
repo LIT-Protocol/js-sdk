@@ -78,6 +78,7 @@ import { testPkpEthersWithPkpSessionSigsToEthSignTypedData } from './tests/testP
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedData } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedData';
 import { testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithPkpSessionSigsToEthSignTypedDataUtil';
 import { testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil } from './tests/testPkpEthersWithLitActionSessionSigsToEthSignTypedDataUtil';
+import { testUseCustomAuthSessionSigsToPkpSignExecuteJs } from './tests/testUseCustomAuthSessionSigsToPkpSignExecuteJs';
 
 import { testPeerKickedAboveThresholdShouldSign } from './tests/testPeerKickedAboveThresholdShouldSign'; 
 
@@ -127,6 +128,9 @@ import { testPeerKickedAboveThresholdShouldSign } from './tests/testPeerKickedAb
 
     // -- invalid cases
     testUseInvalidLitActionIpfsCodeToGenerateSessionSigs,
+
+    // -- custom auth methods
+    testUseCustomAuthSessionSigsToPkpSignExecuteJs,
   };
 
   const litActionIpfsIdSessionSigsTests = {

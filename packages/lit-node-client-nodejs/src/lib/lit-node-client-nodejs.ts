@@ -118,6 +118,7 @@ import type {
   JsonPkpSignSdkParams,
   SigResponse,
   EncryptSdkParams,
+  GetLitActionSessionSigs,
 } from '@lit-protocol/types';
 
 import * as blsSdk from '@lit-protocol/bls-sdk';
@@ -2281,28 +2282,6 @@ export class LitNodeClientNodeJs
     });
   };
 
-  generateAuthMethodForWebAuthn = (
-    params: WebAuthnAuthenticationVerificationParams
-  ): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.WEBAUTHN,
-    accessToken: JSON.stringify(params),
-  });
-
-  generateAuthMethodForDiscord = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.DISCORD,
-    accessToken: access_token,
-  });
-
-  generateAuthMethodForGoogle = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE,
-    accessToken: access_token,
-  });
-
-  generateAuthMethodForGoogleJWT = (access_token: string): AuthMethod => ({
-    authMethodType: AUTH_METHOD_TYPE_IDS.GOOGLE_JWT,
-    accessToken: access_token,
-  });
-
   /**
    * Get session signatures for a set of resources
    *
@@ -2406,6 +2385,13 @@ const resourceAbilityRequests = [
           uri: sessionKeyUri,
           nonce,
           resourceAbilityRequests: params.resourceAbilityRequests,
+
+          // -- optional fields
+          ...(params.litActionCode && { litActionCode: params.litActionCode }),
+          ...(params.litActionIpfsId && {
+            litActionIpfsId: params.litActionIpfsId,
+          }),
+          ...(params.jsParams && { jsParams: params.jsParams }),
         },
       });
     }
@@ -2518,10 +2504,16 @@ const resourceAbilityRequests = [
           );
         }
 
+        /**
+         * We must provide an empty array for authMethods even if we are not using any auth methods.
+         * So that the nodes can serialize the request correctly.
+         */
+        const authMethods = params.authMethods || [];
+
         const response = await this.signSessionKey({
           sessionKey: props.sessionKey,
           statement: props.statement || 'Some custom statement.',
-          authMethods: [...params.authMethods],
+          authMethods: [...authMethods],
           pkpPublicKey: params.pkpPublicKey,
           expiration: props.expiration,
           resources: props.resources,
@@ -2543,6 +2535,29 @@ const resourceAbilityRequests = [
     });
 
     return pkpSessionSigs;
+  };
+
+  /**
+   * Retrieves session signatures specifically for Lit Actions.
+   * Unlike `getPkpSessionSigs`, this function requires either `litActionCode` or `litActionIpfsId`, and `jsParams` must be provided.
+   *
+   * @param params - The parameters required for retrieving the session signatures.
+   * @returns A promise that resolves with the session signatures.
+   */
+  getLitActionSessionSigs = async (params: GetLitActionSessionSigs) => {
+    // Check if either litActionCode or litActionIpfsId is provided
+    if (!params.litActionCode && !params.litActionIpfsId) {
+      throw new Error(
+        "Either 'litActionCode' or 'litActionIpfsId' must be provided."
+      );
+    }
+
+    // Check if jsParams is provided
+    if (!params.jsParams) {
+      throw new Error("'jsParams' is required.");
+    }
+
+    return this.getPkpSessionSigs(params);
   };
 
   /**
