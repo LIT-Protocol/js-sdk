@@ -373,6 +373,7 @@ export class TinnyEnvironment {
             nodeCount: 6,
             pollingInterval: '5000',
             epochLength: 300,
+            customBuildPath: `/Users/joshlong/Documents/repos/lit-assets/rust/lit-node/target/debug/lit_node`
           }),
         }
       );
@@ -410,8 +411,13 @@ export class TinnyEnvironment {
         this._testnetId
     );
     
-    if (stopRandomPeerRes.status === 200)
-      await this.pollTestnetForActive(); 
+    if (stopRandomPeerRes.status === 200) {
+      let resp = await stopRandomPeerRes.json();
+      console.log(
+        "validator kick response: ", resp
+      )
+      await this.pollTestnetForActive();
+    } 
   }
 
   async stopTestnet() {
