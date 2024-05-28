@@ -91,6 +91,8 @@ export interface ProcessEnvs {
    * url for Testnet manager intigration
    */
   TESTNET_MANAGER_URL: string;
+
+  LIT_NODE_BINARY_PATH: string;
 }
 
 /**

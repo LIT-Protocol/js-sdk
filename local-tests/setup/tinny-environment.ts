@@ -67,6 +67,7 @@ export class TinnyEnvironment {
     NO_SETUP: Boolean(process.env['NO_SETUP']) || false,
     STOP_TESTNET: Boolean(process.env['STOP_TESTNET']) || false,
     TESTNET_MANAGER_URL: 'http://0.0.0.0:8000',
+    LIT_NODE_BINARY_PATH: process.env['LIT_NODE_BINARY_PATH'] || `./../../../lit-assets/rust/lit-node/target/debug/lit_node`
   };
 
   public litNodeClient: LitNodeClient;
@@ -321,6 +322,7 @@ export class TinnyEnvironment {
       await this.startTestnetManager();
       // wait for the testnet to be active before we start the tests.
       await this.pollTestnetForActive();
+      await this.getTestnetConfig();
     }
 
     await this.setupLitNodeClient();
@@ -362,6 +364,7 @@ export class TinnyEnvironment {
     if (existingTestnets.length > 0) {
       this._testnetId = existingTestnets[0];
     } else {
+      console.log("binary path: ", this.processEnvs.LIT_NODE_BINARY_PATH)
       const createTestnetResp = await fetch(
         this.processEnvs.TESTNET_MANAGER_URL + '/test/create/testnet',
         {
@@ -371,9 +374,9 @@ export class TinnyEnvironment {
           },
           body: JSON.stringify({
             nodeCount: 6,
-            pollingInterval: '5000',
-            epochLength: 300,
-            customBuildPath: `/Users/joshlong/Documents/repos/lit-assets/rust/lit-node/target/debug/lit_node`
+            pollingInterval: '2000',
+            epochLength: 100,
+            customBuildPath: this.processEnvs.LIT_NODE_BINARY_PATH
           }),
         }
       );
@@ -404,10 +407,32 @@ export class TinnyEnvironment {
     }
   }
 
+  async getTestnetConfig() {
+    let infoResponse = await fetch(this.processEnvs.TESTNET_MANAGER_URL +
+      '/test/get/info/testnet/' +
+      this._testnetId
+    );
+    const res = await infoResponse.json();
+    console.log('testnet info:', res);
+  }
+
+  async transitionAndEpochAndWait() {
+    const stopRandomPeerRes = await fetch(
+      this.processEnvs.TESTNET_MANAGER_URL +
+        '/test/action/transition/epoch/wait/' +
+        this._testnetId
+    );
+    
+    if (stopRandomPeerRes.status === 200) {
+      const resp = await stopRandomPeerRes.json();
+      console.log("transition res ", resp);
+    }
+  }
+
   async stopRandomNetworkPeer() {
     const stopRandomPeerRes = await fetch(
       this.processEnvs.TESTNET_MANAGER_URL +
-        '/test/action/stop/random/' +
+        '/test/action/stop/random/wait/' +
         this._testnetId
     );
     
