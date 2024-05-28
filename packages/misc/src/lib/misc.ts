@@ -31,7 +31,7 @@ import fetchRetry from 'fetch-retry';
 const logBuffer: Array<Array<any>> = [];
 const ajv = new Ajv();
 const retryFetch = fetchRetry(globalThis.fetch);
-const RETRYABLE_STATUS_CODES = [408, 500, 502, 503, 504];
+const RETRYABLE_STATUS_CODES = [408, 502, 503, 504];
 
 /**
  *
