@@ -1043,7 +1043,7 @@ export class LitNodeClientNodeJs
     const wrapper = async (
       requestId: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this.getNodePromises(async (url: string) => {
+      const nodePromises = this._getNodePromises(async (url: string) => {
         // -- choose the right signature
         const sessionSig = this.getSessionSigByUrl({
           sessionSigs: formattedParams.sessionSigs,
@@ -1238,7 +1238,7 @@ export class LitNodeClientNodeJs
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this.getNodePromises((url: string) => {
+      const nodePromises = this._getNodePromises((url: string) => {
         // -- get the session sig from the url key
         const sessionSig = this.getSessionSigByUrl({
           sessionSigs: params.sessionSigs,
@@ -1395,7 +1395,7 @@ export class LitNodeClientNodeJs
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this.getNodePromises((url: string) => {
+      const nodePromises = this._getNodePromises((url: string) => {
         // -- if session key is available, use it
         const authSigToSend = sessionSigs ? sessionSigs[url] : authSig;
 
@@ -1651,7 +1651,7 @@ export class LitNodeClientNodeJs
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this.getNodePromises((url: string) => {
+      const nodePromises = this._getNodePromises((url: string) => {
         // -- if session key is available, use it
         const authSigToSend = sessionSigs ? sessionSigs[url] : params.authSig;
 
@@ -1873,7 +1873,7 @@ export class LitNodeClientNodeJs
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
       logWithRequestId(id, 'signSessionKey body', body);
-      const nodePromises = this.getNodePromises((url: string) => {
+      const nodePromises = this._getNodePromises((url: string) => {
         const reqBody: JsonSignSessionKeyRequestV1 = body;
 
         const urlWithPath = composeLitUrl({
@@ -2395,7 +2395,7 @@ const resourceAbilityRequests = [
     const wrapper = async (
       id: string
     ): Promise<SuccessNodePromises<any> | RejectedNodePromises> => {
-      const nodePromises = this.getNodePromises((url: string) => {
+      const nodePromises = this._getNodePromises((url: string) => {
         if (!params.authMethod) {
           throw new Error('authMethod is required');
         }

@@ -65,17 +65,6 @@ export interface ILitNodeClient {
   // ========== Promise Handlers ==========
 
   /**
-   *
-   * Get and gather node promises
-   *
-   * @param { any } callback
-   *
-   * @returns { Array<Promise<any>> }
-   *
-   */
-  getNodePromises(callback: Function): Promise<any>[];
-
-  /**
    * Handle node promises
    *
    * @param { Array<Promise<T>> } nodePromises
