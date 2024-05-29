@@ -66,7 +66,7 @@ import {
 } from './helpers/getBytes32FromMultihash';
 import { AuthMethodScope, AuthMethodType } from '@lit-protocol/constants';
 
-const DEFAULT_RPC = 'https://chain-rpc.litprotocol.com/http';
+const DEFAULT_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 const DEFAULT_READ_RPC = 'https://lit-protocol.calderachain.xyz/replica-http';
 
 const BLOCK_EXPLORER = 'https://chain.litprotocol.com/';
@@ -1092,7 +1092,9 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     tokenId = events[0].topics[1];
     console.warn('tokenId:', tokenId);
-
+    await new Promise((resolve, _reject) => {
+      setTimeout(resolve, 10_000);
+    });
     let publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
 
     if (publicKey.startsWith('0x')) {
@@ -1624,11 +1626,13 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         tokenIdFromEvent = events[0].topics[1];
         console.warn('tokenIdFromEvent:', tokenIdFromEvent);
-
+        await new Promise((resolve, _reject) => {
+          setTimeout(resolve, 5_000);
+        });
         let publicKey = await this.pkpNftContract.read.getPubkey(
           tokenIdFromEvent
         );
-
+        console.warn("public key from token id", publicKey);
         if (publicKey.startsWith('0x')) {
           publicKey = publicKey.slice(2);
         }
