@@ -1092,10 +1092,21 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
     tokenId = events[0].topics[1];
     console.warn('tokenId:', tokenId);
-    await new Promise((resolve, _reject) => {
-      setTimeout(resolve, 10_000);
-    });
-    let publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
+    let tries = 0;
+    let maxAttempts = 10;
+    let publicKey = '';
+    while (tries < maxAttempts) {
+      publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
+      console.log("pkp pub key: ", publicKey)
+      if (publicKey !== "0x") {
+        break;
+      }
+      tries++;
+      await new Promise((resolve, _reject) => {
+        setTimeout(resolve, 10_000);
+      });
+    }
+
 
     if (publicKey.startsWith('0x')) {
       publicKey = publicKey.slice(2);
@@ -1626,12 +1637,21 @@ https://developer.litprotocol.com/v3/sdk/wallets/auth-methods/#auth-method-scope
 
         tokenIdFromEvent = events[0].topics[1];
         console.warn('tokenIdFromEvent:', tokenIdFromEvent);
-        await new Promise((resolve, _reject) => {
-          setTimeout(resolve, 5_000);
-        });
-        let publicKey = await this.pkpNftContract.read.getPubkey(
-          tokenIdFromEvent
-        );
+        let tries = 0;
+        let maxAttempts = 10;
+        let publicKey = '';
+        while (tries < maxAttempts) {
+          publicKey = await this.pkpNftContract.read.getPubkey(tokenId);
+          console.log("pkp pub key: ", publicKey)
+          if (publicKey !== "0x") {
+            break;
+          }
+          tries++;
+          await new Promise((resolve, _reject) => {
+            setTimeout(resolve, 10_000);
+          });
+        }
+
         console.warn("public key from token id", publicKey);
         if (publicKey.startsWith('0x')) {
           publicKey = publicKey.slice(2);
