@@ -697,7 +697,7 @@ export class LitCore {
     coreNodeConfig: CoreNodeConfig;
   }> {
     // -- handshake with each node
-    const requestId: string = this.getRequestId();
+    const requestId: string = this.#getRequestId();
 
     // track connectedNodes for the new handshake operation
     const connectedNodes = new Set<string>();
@@ -862,7 +862,7 @@ export class LitCore {
    * @returns { string }
    *
    */
-  getRequestId(): string {
+  #getRequestId(): string {
     return Math.random().toString(16).slice(2);
   }
 
@@ -1005,7 +1005,7 @@ export class LitCore {
    * @returns { Array<Promise<any>> }
    *
    */
-  getNodePromises = (
+  protected _getNodePromises = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     callback: (url: string) => Promise<any>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
