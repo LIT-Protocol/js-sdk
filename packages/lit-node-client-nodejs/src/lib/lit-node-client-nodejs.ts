@@ -124,6 +124,7 @@ import { normalizeArray } from './helpers/normalize-array';
 import { parsePkpSignResponse } from './helpers/parse-pkp-sign-response';
 import { getBlsSignatures } from './helpers/get-bls-signatures';
 import { processLitActionResponseStrategy } from './helpers/process-lit-action-response-strategy';
+import { getExpiration } from './helpers/get-expiration';
 
 export class LitNodeClientNodeJs
   extends LitCore
@@ -678,12 +679,12 @@ export class LitNodeClientNodeJs
    * Get expiration for session default time is 1 day / 24 hours
    */
   static getExpiration = () => {
-    return new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+    return getExpiration();
   };
 
   // backward compatibility
   getExpiration = () => {
-    return LitNodeClientNodeJs.getExpiration();
+    return getExpiration();
   };
 
   // ========== Promise Handlers ==========
