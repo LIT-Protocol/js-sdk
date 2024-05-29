@@ -156,6 +156,146 @@ export class LitNodeClientNodeJs
     }
   }
 
+  // ========== Private Methods ==========
+  #authCallbackAndUpdateStorageItem = async ({
+    authCallbackParams,
+    authCallback,
+  }: {
+    authCallbackParams: AuthCallbackParams;
+    authCallback?: AuthCallback;
+  }): Promise<AuthSig> => {
+    let authSig: AuthSig;
+
+    if (authCallback) {
+      authSig = await authCallback(authCallbackParams);
+    } else {
+      if (!this.defaultAuthCallback) {
+        return throwError({
+          message: 'No default auth callback provided',
+          errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
+          errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
+        });
+      }
+      authSig = await this.defaultAuthCallback(authCallbackParams);
+    }
+
+    // (TRY) to set walletSig to local storage
+    const storeNewWalletSigOrError = setStorageItem(
+      LOCAL_STORAGE_KEYS.WALLET_SIGNATURE,
+      JSON.stringify(authSig)
+    );
+    if (storeNewWalletSigOrError.type === EITHER_TYPE.SUCCESS) {
+      return authSig;
+    }
+
+    // Setting local storage failed, try to remove the item key.
+    console.warn(
+      `Unable to store walletSig in local storage. Not a problem. Continuing to remove item key...`
+    );
+    const removeWalletSigOrError = removeStorageItem(
+      LOCAL_STORAGE_KEYS.WALLET_SIGNATURE
+    );
+    if (removeWalletSigOrError.type === EITHER_TYPE.ERROR) {
+      console.warn(
+        `Unable to remove walletSig in local storage. Not a problem. Continuing...`
+      );
+    }
+
+    return authSig;
+  };
+  /**
+   *
+   * Check if a session key needs to be resigned. These are the scenarios where a session key needs to be resigned:
+   * 1. The authSig.sig does not verify successfully against the authSig.signedMessage
+   * 2. The authSig.signedMessage.uri does not match the sessionKeyUri
+   * 3. The authSig.signedMessage does not contain at least one session capability object
+   *
+   */
+  #checkNeedToResignSessionKey = async ({
+    authSig,
+    sessionKeyUri,
+    resourceAbilityRequests,
+  }: {
+    authSig: AuthSig;
+    sessionKeyUri: any;
+    resourceAbilityRequests: LitResourceAbilityRequest[];
+  }): Promise<boolean> => {
+    const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
+
+    try {
+      await authSigSiweMessage.validate(authSig.sig);
+    } catch (e) {
+      console.debug('Need retry because verify failed', e);
+      return true;
+    }
+
+    // make sure the sig is for the correct session key
+    if (authSigSiweMessage.uri !== sessionKeyUri) {
+      console.debug('Need retry because uri does not match');
+      return true;
+    }
+
+    // make sure the authSig contains at least one resource.
+    if (
+      !authSigSiweMessage.resources ||
+      authSigSiweMessage.resources.length === 0
+    ) {
+      console.debug('Need retry because empty resources');
+      return true;
+    }
+
+    // make sure the authSig contains session capabilities that can be parsed.
+    // TODO: we currently only support the first resource being a session capability object.
+    const authSigSessionCapabilityObject = decode(
+      authSigSiweMessage.resources[0]
+    );
+
+    // make sure the authSig session capability object describes capabilities that are equal or greater than
+    // the abilities requested against the resources in the resource ability requests.
+    for (const resourceAbilityRequest of resourceAbilityRequests) {
+      if (
+        !authSigSessionCapabilityObject.verifyCapabilitiesForResource(
+          resourceAbilityRequest.resource,
+          resourceAbilityRequest.ability
+        )
+      ) {
+        console.debug('Need retry because capabilities do not match', {
+          authSigSessionCapabilityObject,
+          resourceAbilityRequest,
+        });
+        return true;
+      }
+    }
+
+    return false;
+  };
+  #decryptWithSignatureShares = (
+    networkPubKey: string,
+    identityParam: Uint8Array,
+    ciphertext: string,
+    signatureShares: NodeBlsSigningShare[]
+  ): Uint8Array => {
+    const sigShares = signatureShares.map((s: any) => s.signatureShare);
+
+    return verifyAndDecryptWithSignatureShares(
+      networkPubKey,
+      identityParam,
+      ciphertext,
+      sigShares
+    );
+  };
+  #isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
+    return res.success === true;
+  };
+  #getIdentityParamForEncryption = (
+    hashOfConditionsStr: string,
+    hashOfPrivateDataStr: string
+  ): string => {
+    return new LitAccessControlConditionResource(
+      `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
+    ).getResourceKey();
+  };
+
   // ========== Rate Limit NFT ==========
 
   // TODO: Add support for browser feature/lit-2321-js-sdk-add-browser-support-for-createCapacityDelegationAuthSig
@@ -453,120 +593,6 @@ export class LitNodeClientNodeJs
     return walletSig!;
   };
 
-  #authCallbackAndUpdateStorageItem = async ({
-    authCallbackParams,
-    authCallback,
-  }: {
-    authCallbackParams: AuthCallbackParams;
-    authCallback?: AuthCallback;
-  }): Promise<AuthSig> => {
-    let authSig: AuthSig;
-
-    if (authCallback) {
-      authSig = await authCallback(authCallbackParams);
-    } else {
-      if (!this.defaultAuthCallback) {
-        return throwError({
-          message: 'No default auth callback provided',
-          errorKind: LIT_ERROR.PARAMS_MISSING_ERROR.kind,
-          errorCode: LIT_ERROR.PARAMS_MISSING_ERROR.name,
-        });
-      }
-      authSig = await this.defaultAuthCallback(authCallbackParams);
-    }
-
-    // (TRY) to set walletSig to local storage
-    const storeNewWalletSigOrError = setStorageItem(
-      LOCAL_STORAGE_KEYS.WALLET_SIGNATURE,
-      JSON.stringify(authSig)
-    );
-    if (storeNewWalletSigOrError.type === EITHER_TYPE.SUCCESS) {
-      return authSig;
-    }
-
-    // Setting local storage failed, try to remove the item key.
-    console.warn(
-      `Unable to store walletSig in local storage. Not a problem. Continuing to remove item key...`
-    );
-    const removeWalletSigOrError = removeStorageItem(
-      LOCAL_STORAGE_KEYS.WALLET_SIGNATURE
-    );
-    if (removeWalletSigOrError.type === EITHER_TYPE.ERROR) {
-      console.warn(
-        `Unable to remove walletSig in local storage. Not a problem. Continuing...`
-      );
-    }
-
-    return authSig;
-  };
-
-  /**
-   *
-   * Check if a session key needs to be resigned. These are the scenarios where a session key needs to be resigned:
-   * 1. The authSig.sig does not verify successfully against the authSig.signedMessage
-   * 2. The authSig.signedMessage.uri does not match the sessionKeyUri
-   * 3. The authSig.signedMessage does not contain at least one session capability object
-   *
-   */
-  #checkNeedToResignSessionKey = async ({
-    authSig,
-    sessionKeyUri,
-    resourceAbilityRequests,
-  }: {
-    authSig: AuthSig;
-    sessionKeyUri: any;
-    resourceAbilityRequests: LitResourceAbilityRequest[];
-  }): Promise<boolean> => {
-    const authSigSiweMessage = new SiweMessage(authSig.signedMessage);
-
-    try {
-      await authSigSiweMessage.validate(authSig.sig);
-    } catch (e) {
-      console.debug('Need retry because verify failed', e);
-      return true;
-    }
-
-    // make sure the sig is for the correct session key
-    if (authSigSiweMessage.uri !== sessionKeyUri) {
-      console.debug('Need retry because uri does not match');
-      return true;
-    }
-
-    // make sure the authSig contains at least one resource.
-    if (
-      !authSigSiweMessage.resources ||
-      authSigSiweMessage.resources.length === 0
-    ) {
-      console.debug('Need retry because empty resources');
-      return true;
-    }
-
-    // make sure the authSig contains session capabilities that can be parsed.
-    // TODO: we currently only support the first resource being a session capability object.
-    const authSigSessionCapabilityObject = decode(
-      authSigSiweMessage.resources[0]
-    );
-
-    // make sure the authSig session capability object describes capabilities that are equal or greater than
-    // the abilities requested against the resources in the resource ability requests.
-    for (const resourceAbilityRequest of resourceAbilityRequests) {
-      if (
-        !authSigSessionCapabilityObject.verifyCapabilitiesForResource(
-          resourceAbilityRequest.resource,
-          resourceAbilityRequest.ability
-        )
-      ) {
-        console.debug('Need retry because capabilities do not match', {
-          authSigSessionCapabilityObject,
-          resourceAbilityRequest,
-        });
-        return true;
-      }
-    }
-
-    return false;
-  };
-
   // ==================== API Calls to Nodes ====================
   getClaimKeyExecutionShares = async (
     url: string,
@@ -748,22 +774,6 @@ export class LitNodeClientNodeJs
     )}`;
 
     return finalJwt;
-  };
-
-  #decryptWithSignatureShares = (
-    networkPubKey: string,
-    identityParam: Uint8Array,
-    ciphertext: string,
-    signatureShares: NodeBlsSigningShare[]
-  ): Uint8Array => {
-    const sigShares = signatureShares.map((s: any) => s.signatureShare);
-
-    return verifyAndDecryptWithSignatureShares(
-      networkPubKey,
-      identityParam,
-      ciphertext,
-      sigShares
-    );
   };
 
   // ========== Promise Handlers ==========
@@ -1843,15 +1853,6 @@ export class LitNodeClientNodeJs
     );
   };
 
-  #getIdentityParamForEncryption = (
-    hashOfConditionsStr: string,
-    hashOfPrivateDataStr: string
-  ): string => {
-    return new LitAccessControlConditionResource(
-      `${hashOfConditionsStr}/${hashOfPrivateDataStr}`
-    ).getResourceKey();
-  };
-
   /**
    *
    * Validates a condition, and then signs the condition if the validation returns true.
@@ -2260,10 +2261,6 @@ export class LitNodeClientNodeJs
     return signSessionKeyRes;
   };
 
-  #isSuccessNodePromises = <T>(res: any): res is SuccessNodePromises<T> => {
-    return res.success === true;
-  };
-
   getSignSessionKeyShares = async (
     url: string,
     params: GetSignSessionKeySharesProp,
@@ -2388,8 +2385,6 @@ const resourceAbilityRequests = [
       sessionKeyUri,
       resourceAbilityRequests: params.resourceAbilityRequests,
     });
-
-    // console.log('XXX needToResignSessionKey:', needToResignSessionKey);
 
     // -- (CHECK) if we need to resign the session key
     if (needToResignSessionKey) {
