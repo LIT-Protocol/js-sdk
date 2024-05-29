@@ -628,7 +628,7 @@ export class LitNodeClientNodeJs
    * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
    *
    */
-  combineSharesAndGetJWT = (
+  #combineSharesAndGetJWT = (
     signatureShares: NodeBlsSigningShare[],
     requestId: string = ''
   ): string => {
@@ -1451,7 +1451,7 @@ export class LitNodeClientNodeJs
     log('signatureShares', signatureShares);
 
     // ========== Result ==========
-    const finalJwt: string = this.combineSharesAndGetJWT(
+    const finalJwt: string = this.#combineSharesAndGetJWT(
       signatureShares,
       requestId
     );

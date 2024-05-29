@@ -38,17 +38,6 @@ export interface ILitNodeClient {
 
   /**
    *
-   * Combine Shares from signature shares
-   *
-   * @param { NodeBlsSigningShare } signatureShares
-   *
-   * @returns { string } final JWT (convert the sig to base64 and append to the jwt)
-   *
-   */
-  combineSharesAndGetJWT(signatureShares: NodeBlsSigningShare[]): string;
-
-  /**
-   *
    * Get different formats of access control conditions, eg. evm, sol, unified etc.
    *
    * @param { SupportedJsonRequests } params
